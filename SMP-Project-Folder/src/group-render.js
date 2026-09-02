@@ -403,6 +403,39 @@ function compileCell(c){
   return noteSpan(c, note, c === "Latest" ? "cdefault" : "");
 }
 
+/* ── A REPORTED NOTE IS NAMED AS ONE (§255) ───────────────────────────────
+   Islam, from his own Performance page: *"the perofmrance is showing hte
+   notes under the tactic name. what is this issue?"* — and, correcting the
+   first reading, *"notes is not in the desciption, notes is something
+   relevant to the reporting and appears in performance as a separate
+   element."*
+
+   NEITHER PLACEMENT WAS A MISTAKE. §239.2 put the reporter's note under the
+   name ("costing no width") and §248 later put the plan's DESCRIPTION in the
+   same cell. Both were right on their own; what nobody asked is what they do
+   to each other. Both were drawn as `.why` — 12px, `--ink-3` — so a
+   permanent statement and a this-cycle statement rendered identically, one
+   under the other, with nothing saying which is which. §248's own comment
+   beside that line saw the risk ("two greys at one weight run together as a
+   single block") and answered it only for the NAME, by bolding it.
+
+   ONE BUILDER, ASKED BY BOTH TABLES ON THE PAGE (§53.5). A note labelled in
+   the tactics table and unlabelled in the key measures table directly above
+   it is the drift, and the measures cell stacks the same two greys the
+   moment a measure carries a horizon ("measured at Q4 2026") as well as a
+   note — nought in the demo today, so it is latent rather than absent.
+
+   THE RULE IS `--line`, NEVER THE ACCENT: this page already spends its gold
+   on Report and the scoring colours (§41's budget). And the key carries NO
+   opacity — the mockup's `.85` took `--ink-3` from 5.1:1 to about 4.4 at
+   10px, which is §38.5 walked into while quoting it. */
+function repNote(row){
+  return row && row.note
+    ? '<span class="repnote"><span class="repkey">Reported</span>' +
+      esc(row.note) + '</span>'
+    : '';
+}
+
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -422,14 +455,22 @@ function measureRows(ms, opts){
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
-               (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') +
-               /* §251: a yes/no row says so where its target goes, and says
+               /* THE MERGE NEEDED BOTH SIDES, and git could not know it: this
+                  branch names the reported note (§255) and main reads the
+                  target at its own scale (§254's `tgtShown`). Taking either
+                  alone loses a shipped feature silently — §56.7's rule, with
+                  the conflict marker doing its job for once. */
+               repNote(m) +
+               /* §257: a yes/no row says so where its TARGET goes, and says
                   nothing where its direction and compile rule would — both
-                  are meaningless without a number and printing them would
-                  invite somebody to read `≥` as part of the target. */
-               '</td><td class="num">' + (isYesNoRow(m) ? '<span class="nobody">—</span>' : dirCell(m.dir)) +
-               '</td><td class="num">' + targetShown(m.target) +
-               '</td><td class="cc">' + (isYesNoRow(m) ? '<span class="nobody">—</span>' : compileCell(m.compile)) + '</td>';
+                  are meaningless without a number, and printing `\u2265` beside
+                  "Yes / No" invites reading it as part of the target. */
+               '</td><td class="num">' +
+                 (isYesNoRow(m) ? '<span class="nobody">\u2014</span>' : dirCell(m.dir)) +
+               '</td><td class="num">' + tgtShown(m.target) +
+               '</td><td class="cc">' +
+                 (isYesNoRow(m) ? '<span class="nobody">\u2014</span>' : compileCell(m.compile)) +
+               '</td>';
     if (opts.unscored) return head + '</tr>';
     /* §239 + §243: main's benchmark rides inside the figure's cell, and this
        branch's figure is read at its target's scale. Both, or a long figure
@@ -513,17 +554,15 @@ function setOr(row, field, v){
    — right for a target, wrong here, where the office may pick what a thing is
    measured in before deciding how much of it. One field still (§53.5): with no
    number the whole string IS the unit, and typing one joins them. */
-function outUnitOf(t){
-  var v = String((t && t.outTarget) || "").trim();
-  if (!v) return "";
-  var parts = splitTarget(v);
-  /* NUMERIC, not merely non-empty. `targetParts` falls back to `{value: the
-     whole string, unit: ""}` when it cannot see a number, so a bare "#" comes
-     back with a truthy value and an empty unit — and a truthiness test then
-     throws the unit away on the next keystroke. Measured: the unit vanished
-     the moment a number was typed. */
-  return /^-?[\d.,]+$/.test(parts.value) ? parts.unit : v;
-}
+/* §251: ONE READER FOR BOTH. This was the first place the question was asked
+   and it answered it here; the measures column now asks the same question, so
+   the answer moved to `unitOfTarget` and this is the outcome's way in. The one
+   behaviour that narrows is deliberate: a value that is neither a number nor a
+   unit the platform offers is prose and is no longer read as this row's unit,
+   which stops it being appended to the next number typed (§251's own note).
+   Measured across the shipped plan before it moved: 208 non-blank target
+   fields, 0 of them non-numeric, so nothing in the demo reads differently. */
+function outUnitOf(t){ return unitOfTarget(t && t.outTarget); }
 /* §249: THE TARGET IS A COUNTED GAP, SO THE BLOCK IS DRAWN THROUGH `gapCell`
    AND THE WRITE COMES BACK THROUGH IT. `set` is the wrapped setter — the
    office's lifts the pending mark, the filler's stamps one — and it is handed
@@ -549,14 +588,14 @@ function outcomeEdit(t, set, pendCls, fillOnly){
      "Next gap" steps through (§177.2), and one gap wearing it twice would
      cost two presses to walk one blank. */
   var quiet = String(pendCls || "").replace(/\bgapwalk\b/g, "").trim();
-  /* §251: three of the four go dead on a yes/no outcome. The unit picker is
-     the one that stays live, because it is the only way back out — dimming
-     the control that SET this state would leave the row stuck in it (§61). */
+  /* §257: three of the four go dead on a yes/no outcome, SHOWING the values
+     they keep — picking Y/N stops a figure counting, it does not destroy it.
+     The unit picker is the one that stays live, because it is the only way
+     back out: dimming the control that SET this state would strand the row
+     in it (§61). */
   var yn = SMPRules.isYesNo(t.outTarget);
   return '<div class="tgrid">' +
-    /* §251.2: the figure it already held is SHOWN, greyed and dead — the
-       row is not counted by it any more, and nothing was thrown away. */
-    (yn ? offInput(splitTarget(t.outTarget || "").value)
+    (yn ? offInput(targetKeep(t.outTarget || ""))
         : inputOr("plan", splitTarget(t.outTarget || "").value, "mono " + (pendCls || ""),
             function(v){
       var n = String(v == null ? "" : v).trim();
@@ -573,14 +612,14 @@ function outcomeEdit(t, set, pendCls, fillOnly){
        unit can be chosen FIRST and is held on its own until a number arrives
        to join it: `outTarget` is "%" for as long as it takes to type 90. */
     selectOr("plan", unit, targetUnitOpts(unit), quiet,
-             /* §251: and the outcome's picker repaints for the same reason —
-                three of its four boxes change state on this one press. */
+             /* §257: and this picker repaints too — three of its four boxes
+                change state on the one press. */
              function(v){ put(nextTargetUnit(t, v)); paint(); }) +
     (yn
       /* A yes/no outcome's direction and compile rule are drawn dead in BOTH
-         modes — the filler already sees them as facts, and for the office
-         they have stopped being decisions. */
-      ? offSelect(t.outDir || "≥") + offSelect(t.outCompile || "—")
+         modes: to the filler they were already facts, and for the office they
+         have stopped being decisions. */
+      ? offSelect(t.outDir || "\u2265") + offSelect(t.outCompile || "\u2014")
       : fillOnly
       /* `.why` on BOTH, because `.tgrid > .why` is what centres a plain span
          inside a `--tw` column — without it the direction sits left of the box
@@ -607,8 +646,10 @@ function outcomeEdit(t, set, pendCls, fillOnly){
    `del` deletes the key (§50.6). */
 function nextTargetUnit(t, u){
   var want = String(u == null ? "" : u).trim();
-  var val  = splitTarget(t.outTarget || "").value;
-  if (!/^-?[\d.,]+$/.test(val)) val = "";
+  /* §251: `targetKeep` is the same question the measures column asks — what
+     survives in front of the unit — so prose an outcome holds is KEPT rather
+     than dropped, which is what the measures table has always done with it. */
+  var val  = targetKeep(t.outTarget || "");
   var cur  = { value: val, unit: outUnitOf(t) };
   if (want === cur.unit) return t.outTarget || "";
   /* With no number yet the unit is stored alone and joins the moment one is
@@ -650,9 +691,9 @@ function outcomeShown(t){
 /* The target as it is written on the plan — the whole year's number, unit and
    all. `tacticBenchmark` gives what it is measured against RIGHT NOW, which
    for a Sum row is a part of this. */
-/* §251: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
+/* §257: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
    answers with TEXT rather than html — its caller escapes — so it cannot use
-   `targetShown`, and the two are kept in step by both asking `isYesNo`. */
+   `tgtShown`; the two are kept in step by both asking `isYesNo`. */
 function outcomeTargetShown(t){
   if (!t || !t.outTarget) return null;
   return SMPRules.isYesNo(t.outTarget) ? "Yes / No" : String(t.outTarget);
@@ -668,8 +709,10 @@ function tacticRows(ts, unitKey){
     /* §248: an outcome answers with its own score and its own benchmark; a
        tactic without one is read exactly as it was. `tacticRatio` stays the
        reader for the second case so nothing about it moves. */
+    /* §252: the ternary that used to sit here is `tacticProgress()` now --
+       it was the only copy in the product and the deck needed it too. */
     var oc = onOutcome(t), bench = tacticBenchmark(t);
-    var r = oc ? tacticReads(t) : tacticRatio(t);
+    var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
     var status = t.status === "Done" ? '<span class="pill good">Done</span>'
                                      : '<span class="pill warn">' + esc(t.status) + '</span>';
@@ -688,8 +731,11 @@ function tacticRows(ts, unitKey){
         (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
+      /* §252: `tacticAnswered`, or a row answered through its outcome is
+         dimmed as though nobody had reported it -- while the two cells at the
+         end of that same row print the figure and its score. */
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
-        : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
+        : due && tacticAnswered(t) ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       /* §248: the NAME carries the weight now, because the description sits
          under it — two greys at one weight run together as a single block.
@@ -699,7 +745,10 @@ function tacticRows(ts, unitKey){
       '<span class="idx-n">' + (i+1) + '</span></td><td><b class="tacname">' +
       esc(t.name) + '</b>' + hidChip(t) +
       (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
-      (t.note ? '<span class="why">' + esc(t.note) + '</span>' : '') + '</td>' +
+      /* §255: the description stays a plain grey — it is the plan's, and the
+         name above it is what it belongs to. The NOTE is the one line in this
+         cell that was written this cycle, so it is the one that says so. */
+      repNote(t) + '</td>' +
       '<td>' + outcomeCell(t) + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
@@ -1375,7 +1424,7 @@ function unitCards(keys){
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + targetShown(m.target) + '</td><td class="num">' + figShown(m) +
+          '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
@@ -1513,7 +1562,7 @@ function renderGroupPerformance(){
   var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
     GROUP.keyObjectives.map(function(m){
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
-        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + targetShown(m.target) + '</td>' +
+        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
         '<td>' + compileCell(m.compile) + '</td><td class="num">' + figShown(m) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
@@ -1594,7 +1643,7 @@ function renderGroupPerformance(){
             c.keyObjectives.map(function(m, i){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
-                '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+                '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
@@ -1854,7 +1903,7 @@ function renderTemple(){
 
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
-           '<span class="ns-target">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</span>' +
+           '<span class="ns-target">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</span>' +
            /* A SENTENCE, NOT A COLUMN (§149, §99.8's rule). The hover words
               belong on the table cells somebody runs an eye down; this line
               already reads "≥ · latest" as prose, and half of it wearing a
@@ -2016,7 +2065,7 @@ function renderUnitPerformance(u){
         var w = ws ? Math.round(ws[i] * 10) / 10 : null;
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
-          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + targetShown(m.target) + '</td>' +
+          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
           '<td class="num">' + figShown(m) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
@@ -3093,74 +3142,55 @@ function koYearToggle(){
    the two disagree keeps both exactly as typed and shows the near one's,
    because inventing a single unit for a row that holds two would be the
    platform deciding something nobody said (§96.2). */
+/* ── THE UNIT IS THERE BEFORE THE NUMBER IS (§251) ─────────────────────
+   Islam, from his own plan with the pen open: *"In the edit I can't set the
+   unit for a measure."* Two of his four rows had no target yet, so the column
+   drew an em-dash and the hover *"Set a target first"* — the unit could only
+   ever be set AFTER the number, and setting it first is the obvious way round.
+
+   §199 could not do otherwise: there is no unit FIELD, the unit lives inside
+   the target string, and a row with no target had nowhere to keep one. So the
+   answer is not a second home for it — it is that the target holds the unit
+   ALONE until a number arrives to join it, which is exactly what §248 settled
+   for a tactic's outcome ("%", then "90%"). That section wrote down the
+   difference on purpose — *"the measures table hides it until a target
+   exists — right in a column of its own"* — and this reverses that half at
+   Islam's instruction, on all four surfaces at once (§53.5: one cell, drawn
+   by two shared builders, and fixing one is how the two drift apart).
+
+   `targetParts` READS A VALUE FOLLOWED BY A UNIT, so a bare "%" comes back as
+   a value of "%" with no unit — right for a target, wrong for this question.
+   `outUnitOf` already carried that correction for the outcome; it is one
+   function now, asked by both, or the two answer differently about one string.
+
+   A KNOWN UNIT, NOT MERELY A NON-NUMBER, and that guard is the whole of what
+   keeps prose safe. A target somebody typed as words is a real thing on a live
+   tenant, and reading "Maintain share" as this row's unit would append it to
+   the next bare number typed into the other horizon — "30 Maintain share",
+   silently. The list is the vocabulary the picker offers (§199.4), so it is
+   exactly the set of values this control can ever have written. */
+function knownUnit(s){ return TARGET_UNITS.indexOf(s) > 0; }
+function unitOfTarget(v){
+  var s = String(v == null ? "" : v).trim();
+  if (!s) return "";
+  var p = splitTarget(s);
+  if (/^-?[\d.,]+$/.test(p.value)) return p.unit;
+  return knownUnit(s) ? s : "";
+}
+/* What survives in FRONT of the unit when the unit is written. A number keeps
+   its number; a field holding nothing but a unit has no value half at all; and
+   anything else is KEPT EXACTLY AS TYPED (§96.2), which is what this table has
+   always done — "TBD" with "%" picked is "TBD %" today and stays so. */
+function targetKeep(v){
+  var s = String(v == null ? "" : v).trim();
+  if (!s) return "";
+  var p = splitTarget(s);
+  if (/^-?[\d.,]+$/.test(p.value)) return p.value;
+  return knownUnit(s) ? "" : s;
+}
 function targetUnitOf(m){
   if (!m) return "";
-  /* §251: `Y/N` is the unit whose value part is always empty, so it cannot be
-     read off `splitTarget` — that function looks for a number FOLLOWED BY a
-     unit and answers `{value:"Y/N", unit:""}` here, which would leave the
-     picker blank on a row that plainly has one. Either horizon saying it
-     makes the row a yes/no row; the two cannot disagree, because the pen
-     writes both together. */
-  if (SMPRules.isYesNo(m.target) || SMPRules.isYesNo(m.target3y)) return SMPRules.YN_UNIT;
-  var u = splitTarget(m.target).unit || splitTarget(m.target3y).unit || "";
-  if (u) return u;
-  /* ── A UNIT HELD ALONE, BEFORE A NUMBER JOINS IT (§251, §248's shape) ──
-     `splitTarget` looks for a number FOLLOWED BY a unit, so a target holding
-     nothing but `%` reads back as no unit at all — which did not matter
-     while nothing could write one, and does now: leaving Y/N for a
-     number-carrying unit leaves exactly that, and without this the picker
-     would come back blank on the row somebody had just set.
-
-     ONLY A UNIT THE PICKER ITSELF OFFERS. A target reading "TBD" is prose
-     and must not be read as a unit nobody chose (§96.2: never reinterpret
-     what somebody wrote), so the test is membership of the list rather than
-     "it has no number in it". Index > 0 skips the empty first entry. */
-  var near = String(m.target == null ? "" : m.target).trim();
-  var far  = String(m.target3y == null ? "" : m.target3y).trim();
-  if (TARGET_UNITS.indexOf(near) > 0) return near;
-  if (TARGET_UNITS.indexOf(far) > 0) return far;
-  return "";
-}
-/* Is this row judged by a yes or a no? Asked by every surface that has to
-   decide whether to draw a number, so none of them decides it separately
-   (§53.5). */
-function isYesNoRow(m){ return targetUnitOf(m) === SMPRules.YN_UNIT; }
-/* THE TARGET AS SOMEBODY READS IT. `Y/N` is how the platform stores it and
-   is not how a plan should say it — the row is asking a question, and
-   "Yes / No" is the answer somebody will be choosing between. Returns HTML,
-   escaped, because that is what every caller concatenates. */
-function targetShown(v){
-  return SMPRules.isYesNo(v) ? "Yes / No" : esc(v);
-}
-/* ── PICKING A UNIT REDRAWS THE ROW (§251) ─────────────────────────────
-   A bound field writes WITHOUT repainting, deliberately — a repaint under a
-   typing hand destroys the box being typed into (§71.2, §35). That is right
-   for every field whose value is the only thing that changes, and wrong for
-   this one: `Y/N` changes the SHAPE of the row, dimming three controls
-   beside it, so without a repaint the office picks it and nothing visibly
-   happens until some later paint catches up. Found by driving the real page,
-   not by reading it — every assertion short of pressing the control passes.
-
-   SAFE ON A SINGLE SELECT AND ONLY ON ONE: a searchable select is unhooked
-   BEFORE it fires `change` (§30.1), so the popup is already gone; a TICKING
-   list stays open and a paint there kills it under the pointer (§130.1). */
-function setTargetUnitAndRepaint(m, v){
-  setTargetUnit(m, v);
-  paint();
-}
-/* A control that is DRAWN AND DOES NOTHING, because the row's own unit has
-   made it meaningless (§251: with no number there is nothing for a direction
-   to point at, nothing for a compile rule to add up, and no figure to aim
-   for). Drawn rather than dropped, which is §248's ruling about the unit
-   picker applied to its neighbours: inside a block of equal boxes a hole
-   reads as a control that failed to render, not as one somebody else owns.
-   `disabled` and not merely dimmed — a look is not a lock, and the keyboard
-   walks straight past a control that is only faded (§220). */
-function offInput(txt){
-  return '<input class="fld mono off" disabled value="' + esc(txt) + '">';
-}
-function offSelect(txt){
-  return '<select class="fld off" disabled><option>' + esc(txt) + '</option></select>';
+  return unitOfTarget(m.target) || unitOfTarget(m.target3y) || "";
 }
 /* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
    Both horizons take it: a row whose 3-year target is measured in one thing
@@ -3192,46 +3222,31 @@ function setTargetUnit(m, u){
      feature rests on: joinTarget reads the separator back out of the stored
      string, so a value written here splits and rejoins to itself, and the
      check asserts that over everything the plan holds. */
-  /* ── §251.2: Y/N KEEPS THE NUMBER, IT JUST STOPS COUNTING IT ─────────
-     Islam, correcting the first build: *"even they are set before they need
-     to be dimmed even by keeping the values but as if they are not counted
-     anymore."* So this is NOT a special case at all — Y/N is written exactly
-     as every other unit is, beside whatever figure the row already held, and
-     the row stops being measured because of its UNIT rather than because
-     something was destroyed. `100 B EGP` becomes `100 Y/N` and back again,
-     and nobody has to retype a number to change their mind.
-
-     THE ONE THING IT DOES NEED is a row with nothing to attach it to: the
-     loop below skips an empty field (there is no figure to write a unit
-     beside), which would make a brand-new "did it happen" row impossible to
-     mark. Held alone, exactly as §248 holds an outcome's unit before a
-     number joins it. */
-  if (want === SMPRules.YN_UNIT &&
-      SMPRules.gapBlank(m.target) && SMPRules.gapBlank(m.target3y)) {
-    m.target = SMPRules.YN_UNIT;
-    return;
-  }
   var sep = want && !TIGHT_UNITS[want] ? " " : "";
+  var held = false;
   ["target", "target3y"].forEach(function(f){
     var v = m[f];
-    if (v == null || v === "") return;   /* nothing to attach it to */
-    /* THE VALUE IS TAKEN ONLY WHERE THERE IS A NUMBER TO TAKE. A bare unit —
-       `Y/N` on a row that never had a figure, or `%` held alone before one
-       is typed — answers `splitTarget` with a VALUE of the whole string
-       (there is no number for it to find), so without this the row would
-       read "Y/NB EGP": the unit picker writing nonsense into the field it is
-       meant to be a view of.
-       §251.2: and a row that DID have a figure gives it straight back —
-       `100 Y/N` returns to `100%`, which is the whole of why picking Y/N is
-       safe to change your mind about. */
-    var raw = splitTarget(v).value;
-    var val = /^-?[\d.,]+$/.test(raw) ? raw : "";
-    m[f] = val ? val + (want ? sep + want : "") : want;
+    if (v == null || v === "") return;
+    var keep = targetKeep(v);
+    /* Emptied on a field that held nothing but a unit, the KEY GOES (§50.6) —
+       a row put back to nothing must be byte-identical to one that never had
+       it, or every visit carries a phantom change into the next save. */
+    setOr(m, f, keep + (want ? (keep ? sep : "") + want : ""));
+    held = true;
   });
+  /* ── WITH NOTHING TO ATTACH IT TO, THE UNIT IS HELD ON ITS OWN (§251) ──
+     In THIS YEAR's target and never the 3-year one: a pillar's measures draw
+     no 3-year column at all (§51.16), so putting it there would write a value
+     into a field no screen shows — and the near horizon is the one every one
+     of these four tables carries. It stops being alone the moment a number is
+     typed, because `unitInherit` reads it back out and joins the two. */
+  if (!held && want) m.target = want;
 }
-/* A unit with no target to sit inside cannot be stored, so the field says so
-   rather than accepting a word and losing it on the next paint (§61: a control
-   that takes input and discards it is worse than one that is not there). */
+/* §251 TOOK THIS QUESTION OFF THE EDIT PATH. It used to decide whether the
+   picker was drawn at all — a unit with no target to sit inside could not be
+   stored, so the column said so rather than accepting a word and losing it on
+   the next paint. The unit is held alone now, so the office is never asked;
+   what still asks is FILL MODE, deliberately (§201.2 below). */
 /* ── A NUMBER TYPED INTO A ROW TAKES THAT ROW'S UNIT (§199.6) ──────────
    Islam, from a group objective reading `3-year 30` with no unit at all:
    *"the objectives need to inherit the unit automatically as they are entered
@@ -3256,13 +3271,43 @@ function unitInherit(m){
     var t = String(v == null ? "" : v).trim();
     if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
     var u = targetUnitOf(m);
-    /* §251: a yes/no row has no unit a number can inherit — joining them
-       would write "5Y/N", a target the platform cannot read and the score
-       would silently drop. The box is disabled on such a row, so this
-       guards the paths that do not go through it (fill mode, an upload). */
+    /* §257: a yes/no row has no unit a number can inherit — joining them
+       writes "5Y/N", which no reader can take apart and no score can use.
+       The box is disabled on such a row, so this guards the paths that do
+       not go through it (fill mode, an upload). */
     if (!u || u === SMPRules.YN_UNIT) return v;
     return t + (TIGHT_UNITS[u] ? "" : " ") + u;
   };
+}
+
+/* Is this row judged by a yes or a no? Asked by every surface that decides
+   whether to draw a number, so none of them decides it separately (§53.5).
+   It reads main's own `targetUnitOf`, which already answers with a unit held
+   alone — so a bare `Y/N` and a `100 Y/N` are one kind of row (§257). */
+function isYesNoRow(m){ return targetUnitOf(m) === SMPRules.YN_UNIT; }
+/* A control DRAWN AND DEAD, because the row's own unit made it meaningless:
+   with no number there is nothing for a direction to point at and nothing for
+   a compile rule to add up. Drawn rather than dropped — a hole among equal
+   boxes reads as a control that failed to render (§248) — and `disabled`
+   rather than merely dimmed, since a look is not a lock (§220). The value it
+   keeps is SHOWN: picking Y/N stops a figure counting, it does not destroy it. */
+function offInput(txt){
+  return '<input class="fld mono off" disabled value="' + esc(txt) + '">';
+}
+function offSelect(txt){
+  return '<select class="fld off" disabled><option>' + esc(txt) + '</option></select>';
+}
+/* PICKING A UNIT REDRAWS THE ROW (§257). A bound field writes WITHOUT
+   repainting, deliberately — a repaint under a typing hand destroys the box
+   being typed into (§71.2) — which is right for every field whose VALUE is
+   the only thing that changes, and wrong for this one: Y/N changes the row's
+   SHAPE, dimming three controls beside it. Without this the office picks it
+   and nothing visibly happens. Safe only on a SINGLE select, which is
+   unhooked before it fires `change` (§30.1); a ticking list dies under the
+   pointer (§130.1). */
+function setTargetUnitAndRepaint(m, v){
+  setTargetUnit(m, v);
+  paint();
 }
 
 function hasTargetToHoldAUnit(m){
@@ -3323,10 +3368,9 @@ function fillUnitCell(page, acKey, m, ctx){
    offered by the rule below and could never be CHOSEN for a new row. K and M
    only, which is what he asked for; `B USD` and `K EGP` are deliberately not
    invented alongside them. */
-/* §251: `Y/N` SITS WITH `#`, not with the currencies, because it belongs to
-   the same half of the list — what a row is counted in, rather than what it
-   is valued in. It is the one entry that says "this row carries no number at
-   all", which is why it is next to the most generic thing that does. */
+/* §257: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
+   half of the list that says what a row is COUNTED in rather than valued in,
+   and it is the one entry saying the row carries no number at all. */
 var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
                     "K USD", "M USD", "SQM", "d", "h"];
 /* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
@@ -3342,21 +3386,8 @@ var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
    join their Egyptian twins here and read `8M USD`, not `8 M USD` — the same
    convention the plan already uses for `6.2B EGP`. */
 var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1 };
-/* ── A ROW WITH NO TARGET IS OFFERED THE ONE UNIT THAT NEEDS NONE (§251) ──
-   Every unit but this one is written BESIDE a figure, so on a row that has
-   no target yet there is nothing to attach them to — which is why the pen
-   drew an em-dash and a hover saying "set a target first". That is right for
-   `B EGP` and it made `Y/N` unreachable exactly where it is most wanted: a
-   brand-new "did it happen" row has no number to type, so there was no way
-   in at all (§61 — a feature you can only reach by first pretending the row
-   is something else is a feature nobody finds).
-
-   THE LIST NARROWS RATHER THAN THE CONTROL VANISHING. What is on offer is
-   what can actually be stored, so nothing takes an answer and discards it,
-   and the em-dash's explanation is no longer needed because the control
-   itself now says what is possible. */
-function targetUnitOpts(cur, noTarget){
-  var opts = noTarget ? ["", SMPRules.YN_UNIT] : TARGET_UNITS.slice();
+function targetUnitOpts(cur){
+  var opts = TARGET_UNITS.slice();
   if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
   return opts;
 }
@@ -3401,8 +3432,8 @@ function koView(list, isGroup, acKey){
       return '<div class="orow' + (near ? '' : ' one') +
         (SMPRules.isHidden(m) ? ' hiddenrow' : '') + '"><span class="on">' + esc(m.name) +
         hidChip(m) + chips(m) + '</span>' +
-        '<span class="ot h">' + (m.target3y ? targetShown(m.target3y) : miss) + '</span>' +
-        (near ? '<span class="ot">' + (m.target ? targetShown(m.target) : miss) + '</span>' : '') + '</div>';
+        '<span class="ot h">' + (m.target3y ? tgtShown(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? tgtShown(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
 }
 /* The far column says WHICH year when the tenant has set one — "By 2028" reads
@@ -3489,12 +3520,11 @@ function koEdit(list, page, acKey, owner){
          setter lifting a pending mark, since correcting confirms); in fill
          mode only a blank or still-pending one opens. The NAME never does:
          a row that exists is named, and renaming is authoring. */
-      /* \u00a7251: a yes/no row has no number, so the direction, both targets and
-         the compile rule are drawn and dead \u2014 there is nothing for a `\u2265` to
-         point at and nothing for `Sum` to add up. Only while the pen is
-         open: read mode says "Yes / No" in the target columns, which is the
-         whole fact, and dimming a value somebody is only reading says
-         nothing. */
+      /* §257: a yes/no row has no number, so the direction, both targets and
+         the compile rule are drawn and dead — nothing for a `\u2265` to point at
+         and nothing for `Sum` to add up. Only while the pen is open: read
+         mode says "Yes / No" where the target goes, which is the whole fact,
+         and dimming something somebody is only reading says nothing. */
       var yn = isYesNoRow(m);
       return '<tr' + hidCls(m) + '><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
         (pg ? '' : hidChip(m)) + '</td>' +
@@ -3506,17 +3536,19 @@ function koEdit(list, page, acKey, owner){
            without one — so it does not go through gapCell and does not join
            the count. It is `inputOr` like the NAME beside it: a fact about
            how the objective is written, which is authoring. */
+        /* \u00a7250: DRAWN WHETHER OR NOT A TARGET EXISTS. The em-dash and its
+           "Set a target first" hover are gone: the unit is held on its own
+           until a number joins it. */
         '<td class="cc">' + (pg
-          ? selectOr(pg, targetUnitOf(m),
-              targetUnitOpts(targetUnitOf(m), !hasTargetToHoldAUnit(m)), "",
+          ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
           : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offInput(splitTarget(m.target3y || "").value)
+        '<td class="cc">' + (pg && yn ? offInput(targetKeep(m.target3y || ""))
           : gapCell(page, acKey, m, "target3y",
-          { kind:"input", cls:"mono", parse: unitInherit(m), read: targetShown })) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offInput(splitTarget(m.target || "").value)
+          { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
+        '<td class="cc">' + (pg && yn ? offInput(targetKeep(m.target || ""))
           : gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono", parse: unitInherit(m), read: targetShown })) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
         '<td class="cc">' + (pg && yn ? offSelect(m.compile || "\u2014")
           : gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] })) + '</td>' +
@@ -3869,22 +3901,27 @@ function renderReport(u){
        closed cycle and every archive hold. Same box, different field, and the
        tactic falls back to the old question until its outcome has a target. */
     var oc  = isT ? outcomeOf(x.obj) : null;
-    /* §251.2: READ FROM THE SHARED ANSWER, never decided again here — the
-       box and the counts disagreeing about where a figure lives is the
-       fault this replaces. */
-    var fld = reportField(x);
+    var fld = oc ? "outActual" : "actual";
     var unit = oc ? splitTarget(oc.target).unit : (isT ? "%" : splitTarget(x.obj.target).unit);
+    /* §254.1: THE BOX IS FILLED FROM THE HEALED VALUE. Islam chose to heal a
+       doubled unit "on reporting and save", so what the reporter sees is the
+       number without the repetition — and because the box holds the number
+       alone and the unit is rejoined on save, touching the row writes the
+       clean string back. A row nobody re-enters keeps its stored spelling,
+       which was stated and accepted. */
     var cur = x.obj[fld], has = cur != null && cur !== "";
-    /* §251: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
-       answer is one of two words, so a free box would invite "done", "y",
-       "TRUE" and a dozen spellings of the same fact — and `ynScore` would
-       score only some of them. One control, in the one cell shape every
-       reportable row already goes through (§53.5), so a measure, an
-       objective and a tactic's outcome are all asked the same way. */
+    var heal = has ? unitTight(cur) : cur;
+    /* §257: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
+       answer is one of two words, so a free box would invite "done", "y" and
+       "TRUE" — a dozen spellings of one fact, only some of which score. One
+       control, in the one cell shape every reportable row already goes
+       through (§53.5), so a measure, an objective and a tactic's outcome are
+       all asked the same way. The healing above is for a doubled UNIT and has
+       nothing to heal here. */
     var ynRow = SMPRules.isYesNo(oc ? oc.target : x.obj.target);
     var shown = !has ? ""
       : ynRow ? String(cur)
-      : ((isT && !oc) ? String(cur) : splitTarget(cur).value || String(cur));
+      : ((isT && !oc) ? String(cur) : splitTarget(heal).value || String(heal));
     /* Per ROW, not per page. A contributor is limited to the lines they are
        named on (spec 006 §7.2); a figure with a SOURCE is entered by that
        source and by nobody in the unit (§16.7). Both are refused by the
@@ -3892,12 +3929,12 @@ function renderReport(u){
     if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
-        (has ? esc(cur) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
+        (has ? esc(unitTight(cur)) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
     /* THE UNIT IS NOT SENT WITH A YES OR A NO. `data-unit` is what the save
        handler rejoins onto a typed figure, and joining here would store
-       "YesY/N" \u2014 so it is deliberately empty and the word is stored whole. */
+       "YesY/N" — so it is empty and the word is stored whole. */
     if (ynRow)
       return '<span class="entry' + (has ? " filled" : "") + '">' +
         '<select class="field ynfield" data-rep="' + x.id + '" data-fld="' + fld +
@@ -3920,13 +3957,9 @@ function renderReport(u){
         (want ? "Why, and what is being done" : "Note, if there is one") + '">'
       : (x.obj.note ? '<span class="why" style="margin:0">' + esc(x.obj.note) + '</span>' : '');
   };
-  /* §251.2: the per-section tally asks the same question the box asks and
-     the unit's own count asks — three tallies of one thing, one reader
-     (§53.5). This one read `actual` alone, so a tactic answered through its
-     OUTCOME was never counted here either. */
   var doneOf = function(list){
     var n = 0;
-    list.forEach(function(x){ if (reportedIn(x)) n++; });
+    list.forEach(function(x){ if (rowAnswered(x)) n++; });   /* §252 */
     return n;
   };
   var tally = function(done, total){
@@ -3942,7 +3975,7 @@ function renderReport(u){
         '<td class="idx">' + (i+1) + '</td>' +
         '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
         '<td class="num">' + esc(x.obj.dir) + '</td>' +
-        '<td class="num">' + (x.obj.target ? targetShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+        '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="cc">' + entry(x) + '</td>' +
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
@@ -3974,7 +4007,7 @@ function renderReport(u){
               '<td class="idx">' + (i+1) + '</td>' +
               '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
               '<td class="num">' + esc(x.obj.dir) + '</td>' +
-              '<td class="num">' + (x.obj.target ? targetShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+              '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
@@ -4036,26 +4069,16 @@ function renderReport(u){
 
   /* Entries given of asked, per pillar \u2014 what the rail rows and the pane pill
      both read, so they can never disagree. */
-  /* §251.4: THE THIRD COPY OF THE COUNT, and the one Islam was looking at —
-     the rail read 3/4 while the band above it read 4/4 for the same pillar,
-     because this walked the rows itself and asked `actual` while the pane
-     had been taught to ask the field the box actually writes.
-
-     The comment above said the rail and the pane "can never disagree", and
-     it had stopped being true: a sentence describing an intention the code
-     no longer carries out is worth less than nothing, because it is what
-     stops the next person checking (§104.8). It is true again by
-     construction now — both go through `reportedIn`, which is also what
-     `entry()` asks when it decides which field to draw. */
   var pillarTally = function(p){
     var done = 0, total = 0;
-    var count = function(x){ total++; if (reportedIn(x)) done++; };
     SMPRules.shown(p.measures).forEach(function(m){
-      count({ obj: m, kind: "measure" });
+      total++;
+      if (m.actual != null && m.actual !== "") done++;
     });
     SMPRules.shown(p.tactics).forEach(function(t){
       if (!tacticDue(t)) return;
-      count({ obj: t, kind: "tactic" });
+      total++;
+      if (tacticAnswered(t)) done++;   /* §252 */
     });
     return { done: done, total: total };
   };
@@ -4630,7 +4653,7 @@ function capKOTable(c){
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+          '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
@@ -5269,7 +5292,7 @@ function capReportBody(c){
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
-      '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
@@ -5534,9 +5557,8 @@ function unitPlanBody(it, u, railed){
          mode carries the chip and the office's tick. \u00a7114's prepend rule for
          an out-of-list stored value lives inside gapCell now, and \u00a7148's
          hover words come back through `read`. */
-      /* \u00a7251: the same three go dead on a yes/no measure as on a yes/no
-         objective \u2014 one decision, both tables, or the two would answer
-         differently about the same kind of row (\u00a753.5). */
+      /* §257: the same three go dead on a yes/no measure as on a yes/no
+         objective — one decision, both tables (§53.5). */
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.dir || "\u2265")
         : gapCell("plan", "u_plan", m, "dir",
         { ctx:pctx(m), kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell })) + '</td>' +
@@ -5550,12 +5572,15 @@ function unitPlanBody(it, u, railed){
 
          THE PEN ONLY, exactly as on a key objective: a unit is not a gap, so
          it does not go through gapCell and does not join the count. The
-         READING table (measureRows) is untouched — it prints `esc(m.target)`,
+         READING table (measureRows) is untouched — it prints `tgtShown(m.target)`,
          the whole string, which is where §199.4 put the unit back. */
+      /* \u00a7250: ALWAYS DRAWN. This is the table Islam was looking at \u2014 two of
+         his four measures had no target yet, so the only two rows that needed
+         a unit picking were the two that did not have one. */
       (ed
-        ? '<td class="cc">' + selectOr("plan", targetUnitOf(m),
-            targetUnitOpts(targetUnitOf(m), !hasTargetToHoldAUnit(m)), "",
-            function(v){ setTargetUnitAndRepaint(m, v); }) + '</td>'
+        ? '<td class="cc">' +
+            selectOr("plan", targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                function(v){ setTargetUnitAndRepaint(m, v); }) + '</td>'
         : unitCol
         /* §201.2: fill mode. The COLUMN is decided once for the whole table
            (unitCol, below) or the header and the rows stop agreeing about
@@ -5564,10 +5589,10 @@ function unitPlanBody(it, u, railed){
         ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
             || esc(targetUnitOf(m))) + '</td>'
         : '') +
-      '<td class="num">' + (ed && isYesNoRow(m) ? offInput(splitTarget(m.target || "").value)
+      '<td class="num">' + (ed && isYesNoRow(m) ? offInput(targetKeep(m.target || ""))
         : gapCell("plan", "u_plan", m, "target",
         { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m),
-          read: targetShown })) + '</td>' +
+          read: tgtShown })) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -5592,10 +5617,9 @@ function unitPlanBody(it, u, railed){
     var tgtOpen = false;
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
       ctx: pctx(t), del: true, fillKind: "tactic",
-      /* §251: read mode says "Yes / No", never the stored `Y/N` — the plan
-         is asking a question and that is the answer somebody will pick
-         between. One formatter for every surface (§53.5). */
-      read: targetShown,
+      /* §257: read mode says "Yes / No", never the stored `Y/N` — one
+         formatter for every surface (§53.5). */
+      read: tgtShown,
       control: function(set, pendCls){
         tgtOpen = true;
         return outcomeEdit(t, set, pendCls, !ed);
@@ -5653,9 +5677,9 @@ function unitPlanBody(it, u, railed){
         (!ed && !tgtOpen ? '<span class="subhd narrowtgt">' +
            (SMPRules.gapEmpty("outTarget", t)
              ? '<span class="missing">Missing</span>'
-             /* \u00a7251: no direction on a yes/no outcome \u2014 there is nothing for
+             /* §257: no direction on a yes/no outcome — there is nothing for
                 it to point at, and `\u2265 Yes / No` reads as a comparison. */
-             : SMPRules.isYesNo(t.outTarget) ? targetShown(t.outTarget)
+             : SMPRules.isYesNo(t.outTarget) ? tgtShown(t.outTarget)
              : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
         '</td>' +
       /* THE OUTCOME'S TARGET: reading says the target, writing gives each of
@@ -6080,8 +6104,106 @@ function renderFnFoundation(fnKey){
    a unit reported is ever out of reach — and the decision about WHETHER to
    shorten is made once, in `figureScaled()`, rather than at nine call sites
    that would drift (§53.5). */
+/* ── A SCALED CURRENCY IS ONE TOKEN WHEREVER IT IS DRAWN (§254) ────────
+   Islam, of the review deck: *"the number should be written 8M EGP the M is
+   besie the number and this applies to the financial numbers in general like
+   K EGP. or M USD etc."*
+
+   THE CONVENTION ALREADY EXISTS AND WAS ONLY EVER APPLIED ON THE WAY IN.
+   `TIGHT_UNITS` is what the unit picker writes with (§239.5: `6.2M USD`, like
+   `6.2B EGP`), so anything set through the platform is already tight. What was
+   never tightened is a value that ARRIVED with a space — typed, uploaded, or
+   written before the convention existed — because §96.2's rule is never to
+   rewrite what somebody wrote.
+
+   THAT RULE IS ABOUT WHAT IS STORED, AND IT STANDS. This is display only:
+   nothing is written back, the workbook still carries the spelling it was
+   given, and a value typed as `8 M EGP` is stored as `8 M EGP` for ever. What
+   changes is that a projector never shows two spellings of one unit in one
+   column.
+
+   THE TEST IS A MAGNITUDE LETTER, NOT A LIST (§53.5's other half: a list is
+   what somebody forgets to add to, and Islam has just named `K EGP`, which the
+   picker does not offer). `K`, `M` or `B` followed by a space and a currency is
+   a scaled currency whatever the currency is, so a tenant on rupees reads
+   right on the day it arrives.
+
+   AND A UNIT WRITTEN TWICE IS COLLAPSED IN THE SAME PASS (§254.1). Islam:
+   *"8MEGP is again is showing a gltich."* Nothing doubles it now — every
+   combination through `joinTarget` produces one unit — but a value stored
+   doubled before that fix stays so until it is re-entered, which §239.6
+   recorded at the time as the case it could not reach. The pair is collapsed
+   only where the two halves are IDENTICAL: `M EGP M EGP` is a repetition,
+   `M EGP B EGP` is somebody's typing and is left exactly as it is (§96.2). */
+function unitTight(v){
+  var s = String(v == null ? "" : v).trim();
+  if (!s) return s;
+  var sp = splitTarget(s);
+  if (!sp.unit) return s;
+  var u = sp.unit;
+  /* ── A UNIT WRITTEN TWICE, WITH OR WITHOUT A GAP (§254.7) ───────────
+     Islam, of a per-cent row: *"same error of duplicated unit despite being
+     reported correctly in the reporting."* His stored figure is `40 %%` — the
+     same residue as `8 M EGP M EGP`, and §254.1's collapse could not see it,
+     because it split the unit on WHITESPACE and `%%` is one word. A rule that
+     only catches the spaced spelling catches half the fault.
+
+     THE HALVES MUST BE A UNIT THE PLATFORM KNOWS, and that guard is the whole
+     safety of it: `^(.+?)\s*\1$` alone reads `mm` as a doubled `m` and would
+     silently turn five millimetres into five metres. Only a repetition of
+     something on the offered list — or of a scaled currency, which is the one
+     shape the list deliberately does not enumerate — collapses. */
+  var rep = u.match(/^(.+?)\s*\1$/);
+  if (rep && (TARGET_UNITS.indexOf(rep[1]) > -1 || /^[KMB]\s+\S+$/.test(rep[1])))
+    u = rep[1];
+  /* THE UNIT IS NEVER TOUCHED — only the gap between it and the number.
+     The first draft closed the space INSIDE the unit and produced `8MEGP`,
+     which is a fourth spelling rather than the one Islam asked for. The check
+     caught it, and the lesson is that "tight" is a fact about the SEPARATOR.
+
+     A recognised scaled form is `K`, `M` or `B` and exactly one more word, so
+     `K EGP` reads tight the day a tenant types it even though the picker does
+     not offer it — while `M EGP B EGP`, which is somebody's typing rather than
+     a unit, keeps its space and is left alone (§96.2). */
+  /* ── AND IT NEVER ADDS A SEPARATOR THAT WAS NOT THERE (§254.7) ──────
+     §254.1 rebuilt the string with a space for anything it did not recognise,
+     so `40%%` came out as `40 %%` — a value made WORSE by the function that
+     exists to tidy it. This reads a figure; it does not get to rewrite the
+     spelling of a unit it does not know. The gap it puts back is the gap it
+     found, and the only thing it ever does on its own is CLOSE one. */
+  var gap = /^-?[\d.,]+\s/.test(s) ? " " : "";
+  var scaled = TIGHT_UNITS[u] || /^[KMB]\s+\S+$/.test(u);
+  return sp.value + (scaled ? "" : gap) + u;
+}
+/* A target as it should be READ. Every read-only cell that prints a target
+   goes through this, or the deck and the page behind it spell one unit two
+   ways (§53.5). An editable field is untouched: what somebody is correcting
+   must be what they typed. */
+/* §257: and a yes/no target says so. `Y/N` is how it is STORED and is not
+   how a plan should read — the row asks a question, and "Yes / No" is what
+   somebody will be choosing between. Inside main's own reader rather than
+   beside it, or the deck and the page spell one target two ways. */
+function tgtShown(v){
+  return SMPRules.isYesNo(v) ? "Yes / No" : esc(unitTight(v));
+}
+
+/* ── WHAT A FIGURE IS MEASURED AGAINST, BESIDE IT (§254) ───────────────
+   Islam, of the deck's key measures: *"the actual should show the proration
+   like the performance"*, and of the objectives: *"key objectives actual
+   should show the proration as well."*
+
+   His row read `6#` against `4#` at 133% and nothing on the slide said why.
+   The missing number is the one Performance has shown since §239.2 and the
+   deck never did: what is due SO FAR. It is already computed — nothing new is
+   worked out here — and the shape is the one the tactics table has worn since
+   §252, so the deck gains no new vocabulary. */
+function figVsDue(m, share){
+  var due = measureDueLabel(m, share);
+  return figShown(m) + (due ? ' <i class="duehalf">/ ' + tgtShown(due) + '</i>' : '');
+}
+
 function figShown(m){
-  var s = figureScaled(m.target, m.actual), full = figureFull(m.target, m.actual);
+  var s = unitTight(figureScaled(m.target, m.actual)), full = figureFull(m.target, m.actual);
   return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
 }
 function koReadBlock(list, emptyLine){
@@ -6109,7 +6231,7 @@ function koReadBlock(list, emptyLine){
           (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
           '"><span class="on">' + esc(m.name) + hidChip(m) +
           '</span>' +
-        '<span class="ot">' + (m.target ? targetShown(m.target) : '&mdash;') +
+        '<span class="ot">' + (m.target ? tgtShown(m.target) : '&mdash;') +
           '</span>' +
         (wtd ? '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
           '</span>' : '') + '</div>';
@@ -6144,12 +6266,11 @@ function capKoEdit(c){
         (ed ? '' : hidChip(m)) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
+        /* §251: always drawn, on both function formats — this table and the
+           unit's are one cell asking one question (§53.5). */
         '<td class="cc">' + (ed
-          ? (hasTargetToHoldAUnit(m)
-              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
-                  function(v){ setTargetUnitAndRepaint(m, v); })
-              : '<span class="why" title="Set a target first — the unit is ' +
-                'written with it">—</span>')
+          ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+              function(v){ setTargetUnitAndRepaint(m, v); })
           : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "target",
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +

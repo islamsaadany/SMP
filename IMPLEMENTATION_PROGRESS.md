@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §232/§233 on `main` (removing a pillar or a project,
-and hiding an element from the presentation).
+**Latest version:** §256 on `main` (§253–§256: the deck round, a reported note,
+and a slide the office does not present — §255 and §256 from another session);
+§254.7–.12 on this branch, going to `main` with this merge.
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -78,6 +79,194 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §254.7–.12 — the deck round, finished (2026-09-02, same branch)
+
+Four more from the running deck, on top of the eight before them.
+
+- **§254.7** — a unit written twice *with or without a gap*. His `40 %%`
+  survived §254.1's collapse, which split the unit on whitespace. **And it
+  caught a regression of my own**: §254.1 added a space to any unit it did not
+  recognise, so `40%%` became `40 %%` — made worse by the tidier.
+- **§254.8 / §254.12** — the pillar cards size themselves AND fill the slide
+  rather than one row of it. Up to three in a row, above that `ceil(sqrt(n))`,
+  so *"4 can form a box"* is 2×2 and five goes 264px → 445px. Vertical sizes
+  follow the rows, horizontal ones the columns; swept 1 to 10, nothing
+  overflows.
+- **§254.9** — the aspiration runs the width, *This year* comes first, and the
+  objectives table grows. **10 of 10 aim slides were on the generic 19px floor;
+  none are now.**
+- **§254.10 / .11** — two numbers not four, with the reading put back before it
+  was obeyed; the sentence explaining Execution stays.
+
+**Verified:** `deck-figures` **11 red** on the build before; that check plus
+`deck-blank-slides`, `notes-slide`, `slide-move`, `deck-outcome`,
+`deck-and-weights`, `ytd-proration`, `tactic-proration`, `table-fit`,
+`submit-gate` green, **and main's own three new checks** (`hide-slide` 42/0,
+`reported-note` 0 failed, `hide-slide-mockup`) green on the merged build.
+
+### §254 — a figure is read against what it is measured by (2026-09-02, same branch)
+
+Eight things Islam sent from the live deck in one afternoon, all mocked up from
+the running deck first (`design-mockups/deck-review-round/`) and six built.
+
+- **The benchmark, and the column that names it** — *Annual target*, and what
+  is due so far beside every figure, on a unit's objectives, a pillar's
+  measures and a capability's objectives. Nothing new computed; one builder.
+- **§254.1** — a scaled currency reads as one token wherever it is drawn
+  (`8M EGP`), display only, and the doubled unit healed on reporting and save.
+- **§254.2** — one question decides the whole row, narrowing §248 at his
+  direction: a tactic whose outcome has a target says it is owed a figure.
+  0 of 78 demo tactics are in that state, so nothing in the demo moves.
+- **§254.3** — a not-due tactic is not dimmed.
+- **§254.4 / §254.5** — the pillars are named before they are scored, and the
+  deck ends on the score table then the three readings.
+
+**Verified:** `checks/deck-figures.py` **33 red** on the build before, green
+after; `deck-blank-slides`, `notes-slide`, `deck-outcome`, `deck-and-weights`,
+`ytd-proration`, `tactic-proration`, `slide-move`, `cycle-board`, `table-fit`,
+`project-tables`, `submit-gate`, `gap-fill`, `fn-pillars`, `fn-report-gate`,
+`hide-element` green. Three checks held literals these decisions moved and were
+rewritten rather than loosened. `report-saves` is the known-red-on-main stub
+fault (§250.2).
+
+**Waiting on Islam:** `K EGP` on the offered unit list; the deck marks (a
+supporting function can never have one, and there is no group mark to fall back
+on); whether the notes slide keeps the last word before Thank you.
+
+### §253 — a table with no rows is not a slide (2026-09-02, branch `claude/merchandizing-slides-blank-mxcjfj`)
+
+Islam: *"slides are showing blank pages for the merchandizing."* Measured
+before anything was proposed: **four** slides in the whole product draw a
+heading, a column strip and a whole empty page, and **all four are
+Merchandising** — its own deck's two objectives slides (a function judged by
+its pillars legitimately carries none, §214.2) and Retail's **RS04**, the
+pillar carried by that function, which printed **93% / 60% / 61%** over
+nothing at all.
+
+`deckSlidesFn` has guarded its objectives slide since it was written, which is
+why **Marketing** has always been right; the unit deck, which a pillars
+function goes through since §224, had no such guard (§53.5). Islam ruled it
+for **any** subject, reversing the narrower rule recommended to him.
+
+- **§253.1** — the headline slide drops the objectives cell for any subject
+  with none. No new CSS: `.headgrid` without `.three` is the shape it wore
+  before §243. Settled from a mockup made of the real deck, which earned its
+  place by exposing a footnote that would have gone on explaining a number no
+  longer on the slide.
+- **§253.2** — the Retail → Merchandising pointer is cut at his instruction.
+  The **feature** is untouched; the demo no longer *shows* a carried pillar, so
+  spec 010 is described and not visible. Measured across every unit: Retail
+  execution 102→104, planned 57→56, RS04's three figures to three dashes,
+  nothing else moves.
+- **§253.3** — *"the manage presentation show this"*: Manage slides on a
+  pillars function, bar drawn, rail and stage empty. §224's fault on two more
+  surfaces. `deckHtmlFor()` is the one reader now, asked by Present, Manage
+  slides and the anchors; `openDeckFn()` on a pillars function goes **2 → 13**,
+  and the capability deck is asserted unchanged. The editor's silent failure
+  was given a voice in the same change. **Not claimed**: the demo's pre-fix
+  editor draws two slides and his screenshot shows none, so whether the prefix
+  branch is exactly what emptied his rail cannot be proved from here.
+
+**Verified:** `checks/deck-blank-slides.py` **14 red** on the build before, all
+green after; `notes-slide`, `deck-outcome`, `deck-and-weights`,
+`ytd-proration`, `cycle-board`, `table-fit`, `project-tables`, `slide-move`,
+`gap-fill`, `submit-gate`, `fn-pillars` green; every unit's five scores read
+before and after. `report-saves` is the known-red-on-main stub fault (§250.2),
+reproduced on the pre-change build.
+
+**Open, and next:** three from the live deck, taken as their own piece — the
+deck's measures table shows no prorated benchmark where Performance does, a
+doubled unit (`8 M EGP M EGP`), and a not-due tactic row that is dimmed as
+well as labelled.
+
+### §252 — the presentation reads what was reported (2026-09-02, branch `claude/presentations-plan-performance-update-7a94p2`)
+
+Islam: *"presentations doesn't change when the plan performance is done"*, and
+then *"the presentation should update on either save draft or submit."* **The
+fix he proposed would have changed nothing** — `openDeck()` calls
+`deckSlides()` on the press, so a deck is assembled fresh every time it opens
+(§51.8) and there is nothing stale for a refresh to clear. **This closes
+§250.2**, which the branch beside this one recorded as not done.
+
+**The fault is five readers still looking in the old box.** §248 puts a
+tactic's outcome figure in `outActual`. Measured on Mobile before anything was
+written:
+
+| | Performance says | The slide said |
+|---|---|---|
+| a tactic reported through its outcome | `4# / 3 #` · `133%` | `— / 50%` · `—` |
+
+…under a heading on that same slide already reading **`Delivered 98%`** — a
+number that counts the row its own table was calling empty. Beside it:
+`reportedCount` went **41 of 41 → 40 of 41**, so **Submit refused a finished
+report** with *"1 figure still to enter"*; the note rule could not see an
+outcome at all; the cycle board's tactics column under-counted; and on
+Performance the row was dimmed as unreported next to its own printed figure.
+
+**One expression, named once.** `onOutcome(t) ? tacticReads(t) : tacticRatio(t)`
+existed inline in the Performance pane and nowhere else — it is
+`tacticProgress()` now, with `rowAnswered()` beside it answering *has this row
+been answered* for every kind of row (§53.5). The ternary it replaces in
+`reportedCount` had the same expression in both branches.
+
+**The slide's shape is Islam's**, picked from three drawn options shot out of
+the real deck (`design-mockups/tactic-outcome-slide/`, published as an artifact
+for sign-off): the **outcome takes a column of its own**, as on Performance.
+Cost measured before he chose: Mobile's deck **24 → 27 slides**, every extra one
+a continuation the deck already makes. Two headings take Performance's words
+(*YTD actual* · *Progress*, §239.2), a row owed a figure says **"Not reported ·
+due at …"** instead of the em-dash that means *nothing to report*, and a tactic
+with no outcome is byte-for-byte what it was.
+
+**Recorded, not done:** the `.pptx` plan download still has no outcome column
+(its own mockup), and a deck already open on a projector does not redraw
+mid-presentation — put to Islam and deliberately left.
+
+Green: `deck-outcome` (**19 red on the shipped file**, 0 after — and its own
+first run died rather than reported, §215), `tactic-proration` (33),
+`tactic-outcome` (47), `ytd-proration`, `submit-gate`, `cycle-board`,
+`notes-slide`, `project-tables`, `setup-overview`, `gap-fill`, the full `qa.py`
+sweep (ERRORS none), `test-authorize` 472/0, `test-graph-diff` 126/0.
+
+### §251 — the unit is there before the number is (2026-09-02, branch `claude/measure-unit-edit-7klw9y`)
+
+Islam, from his own plan with the pen open: *"In the edit I can't set the unit
+for a measure."* Two of his four Key measures had no target yet, and the unit
+has no field of its own — it lives inside the target string (§199) — so a row
+with no target had nowhere to keep one and the column drew an em-dash. The
+target holds the unit ALONE until a number joins it, which is §248's own answer
+for a tactic's outcome; that section's explicit carve-out for the measures
+column is reversed here at his instruction.
+
+**Mockup first (rule 1c), published as an artifact**, built from his own four
+rows in the platform's own tokens — never the demo tenant's names (§244) —
+because the question he asked was WHERE. He answered **"all 4 places"**: a
+pillar's Key measures, a unit's Overview objectives, the group's Foundation, and
+a supporting function's Overview on both formats.
+
+**The one cost was stated before it was built and he was told it is not
+optional:** a target holding only a unit is unusable, so `target`/`target3y`
+join `GAP_NUM` — screen and server through the shared module — and the row goes
+on saying **Missing**. Measured: 208 non-blank targets in the shipped plan, 0
+non-numeric, so nothing in the demo moves; with the rule removed the count falls
+46 → 45 the instant a unit is picked. **Fill mode is deliberately unchanged**
+(§201.2) and asserted, one line to open when he asks.
+
+Nothing stored that was not stored before, no migration, no score moves.
+`checks/unit-before-number.py` drives all four surfaces through the real
+controls and reads the plan back — proved able to fail twice (16 red with the
+em-dash put back, 6 red with the numeric rule removed). `objective-unit`,
+`tactic-outcome`, `gap-fill`, `submit-gate`, `fn-pillars`, `fn-ko-edit`,
+`table-fit`, `plan-fields`, `ytd-proration`, `project-tables`,
+`deck-and-weights` green; 472/0 authoriser, 126/0 differ, full `qa.py` sweep
+clean. One assertion in `fn-ko-edit.py` was REWRITTEN rather than deleted (§218).
+
+**Not done, and recorded:** the merge to `main` is Islam's word (rule 4) — the
+branch carries §251 only, and main has moved to §250 meanwhile, so the merge
+needs the fetch-and-look, a rebuild, `node --check sw.js` and a SHELL name
+confirmed against `origin/main` immediately before the push (§91, §94.16).
+
 
 ### §250 — a tactic's outcome is measured against its own window (2026-09-02, branch `claude/tactic-proration-calc-uyspmb`)
 

@@ -4091,7 +4091,7 @@ function renderFocusSetup(){
     return '<tr' + (on ? ' class="fon"' : '') + '>' +
       '<td class="fmeas">' + esc(m.name) + '</td>' +
       '<td class="cc ftar">' +
-        (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+        (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' +
         (editable
           ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + esc(m.id) + '" ' +
@@ -4611,7 +4611,7 @@ function renderUnitNaming(u){
       '<div class="pick ' + (m.src ? "on" : "off") + '">' +
         '<span>' + esc(m.name) + '</span>' +
         '<span class="num why" style="margin:0">' +
-          (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
+          (m.target ? tgtShown(m.target) : '<span class="missing">No target</span>') + '</span>' +
         '<span style="text-align:right">' + who + '</span>' +
       '</div>';
   }).join("");
@@ -5224,7 +5224,9 @@ function renderCycle(){
     askedItems(u).forEach(function(x){
       var slot = x.kind === "objective" ? "obj" : x.kind === "measure" ? "mea" : "tac";
       by[slot][1]++;
-      if (x.obj.actual != null && x.obj.actual !== "") by[slot][0]++;
+      /* §252: through `rowAnswered`, or the board's tactics column disagrees
+         with the progress bar beside it, which counts the same rows. */
+      if (rowAnswered(x)) by[slot][0]++;
     });
     return '<tr><td><b>' + esc(placeLabel(t)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
@@ -5291,9 +5293,7 @@ function renderCycle(){
       if (x.kind === "deliverable") deliv++;
       if (x.kind === "milestone") mile++;
       by[slot][1]++;
-      var got = (x.kind === "deliverable" || x.kind === "milestone")
-        ? statusGiven(x.obj) : (x.obj.actual != null && x.obj.actual !== "");
-      if (got) by[slot][0]++;
+      if (rowAnswered(x)) by[slot][0]++;   /* §252: one predicate, not a third copy */
     });
     var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
       ", asked this cycle";

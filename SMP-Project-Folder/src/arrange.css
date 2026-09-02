@@ -1815,6 +1815,31 @@
    into columns instead, so nothing there needs this. */
 .tacname { font-weight:650; display:block; }
 
+/* ── AND THE REPORTED NOTE SAYS SO (§255) ──────────────────────────────────
+   The comment above got as far as "two greys at one weight run together as a
+   single block" and answered it for the NAME alone. Bolding the name tells
+   you where the row starts; it says nothing about which of the two greys
+   BELOW it was written this cycle. This is that second half.
+
+   A RULE, NOT A SECOND SIZE OR COLOUR. Making the note smaller or paler
+   would rank it under the plan's description, and it is the newer and more
+   urgent of the two — so it keeps `.why`'s size and ink and is set apart
+   sideways instead, which costs no line and no width the row did not have.
+
+   `--line`, never the accent (§41's budget: this page spends its gold on
+   Report and the scoring colours), and the key carries NO opacity — `.85`
+   on `--ink-3` measures about 4.4:1 at 10px, which is §38.5's trap. */
+  td .repnote {
+    display:block; margin-top:6px; padding-left:10px;
+    border-left:2px solid var(--line);
+    font-size:12px; color:var(--ink-3);
+  }
+  td .repnote .repkey {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-3); margin-right:6px;
+    white-space:nowrap;
+  }
+
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should
    match the compile cell ... so we can give space for the other columns").

@@ -89,6 +89,12 @@ class Blank:
     def __eq__(self, other):
         return False
 
+    def __add__(self, other):
+        return self          # arithmetic on a failed probe stays a failure
+
+    def __radd__(self, other):
+        return self
+
     def __repr__(self):
         return "probe threw — " + self.why
 
@@ -404,9 +410,13 @@ with sync_playwright() as pw:
             const n = reportedCount(u).done;
             delete t.actual; t.outActual = 'Yes'; return n; })();
           return { withYes: withYes, without: without, alsoOld: alsoOld,
-                   field: reportField({kind:'tactic', obj:t}) }; }""")
-        ck("a tactic reports its outcome into outActual",
-           cnt.get("field") == "outActual", cnt)
+                   /* §257: main's §252 owns "is this row answered" —
+                      `rowAnswered`/`tacticAnswered`, five call sites. My own
+                      pair was a duplicate of it and is gone; this asks the
+                      surviving one. */
+                   answered: rowAnswered({kind:'tactic', obj:t}) }; }""")
+        ck("an answered yes/no outcome reads as answered",
+           cnt.get("answered") is True, cnt)
         ck("ANSWERING IT MOVES THE TALLY — the count reads the field the box writes",
            cnt.get("withYes") == cnt.get("without") + 1, cnt)
         # AND IT NEVER GETS STRICTER: a tactic carrying only the OLD field

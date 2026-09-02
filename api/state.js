@@ -210,7 +210,7 @@ module.exports = async function handler(req, res) {
          it — nobody is silently overwritten. */
       await client.query("BEGIN");
       let out = null;                    /* { code, obj } to send, or null on success */
-      let logWho = null, logList = null;
+      let logWho = null, logList = null, wrotePath = null;
       try {
         if (USE_SAVE_LOCK) await client.query("SELECT pg_advisory_xact_lock($1)", [SAVE_LOCK]);
         const stored = await readState(client);
@@ -259,6 +259,7 @@ module.exports = async function handler(req, res) {
                 wrote = await writeStateIncremental(client, state, changes);
               }
               if (!wrote) await writeState(client, state, { inTransaction: true });
+              wrotePath = wrote ? "incremental" : "full";
               logWho = me; logList = verdict.changes;
             }
           }
@@ -274,7 +275,11 @@ module.exports = async function handler(req, res) {
          log entry for a save that did not land is worse than a missing one,
          and it names who SIGNED IN, never the simulation. */
       await logChanges(client, logWho, logList);
-      return send(res, 200, { ok: true });
+      /* Diagnostic (§241): report which writer ran, so a save can be seen to
+         have gone bit-by-bit (incremental) or the full rewrite (full) — read in
+         the browser Network tab's Response, and in Vercel's runtime logs. */
+      console.log("[save]", wrotePath);
+      return send(res, 200, { ok: true, wrote: wrotePath });
     }
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { ok: false, error: "method not allowed" });

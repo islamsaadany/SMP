@@ -4536,7 +4536,13 @@ set the env var on a test deployment, watch a few saves, then decide. Fully
 revertible &mdash; flag-off is dormant, so a `git revert` (or leaving the flag
 off) is a no-op on live behaviour. Not handled yet (falls back, correct):
 capability reorder/add-remove, group-own fields, all settings/register tables
-&mdash; each a safe future extension.*
+&mdash; each a safe future extension. **ACTIVATED on production
+(`SMP_INCREMENTAL_WRITE=1`) at Islam's direction, after the full sweep proved
+nothing lost.** So a save can be SEEN to have taken the small path, `/api/state`
+now reports it: the success body carries `wrote: "incremental"` or `"full"`
+(read in the browser Network tab's Response), mirrored by one `[save]` line in
+the runtime log &mdash; a behaviour-neutral diagnostic, not a second decision
+(the writer is chosen exactly as before; we only report which one ran).*
 
 *Earlier: 2026-09-01 &mdash; **&sect;240: saves take turns, so two at
 once cannot lose data.** Islam, on the performance sweep: *"what if people

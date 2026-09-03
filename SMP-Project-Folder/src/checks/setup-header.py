@@ -470,17 +470,35 @@ with sync_playwright() as p:
     pg.evaluate("()=>scrollTo(0,0)")
     pg.set_viewport_size({"width": 1560, "height": 900})
 
-    # THE OFFSET IS PUBLISHED FROM THE REAL HEIGHT, asserted as the
-    # RELATIONSHIP (§53.5) so a header that legitimately changes height stays
-    # green and a literal creeping back does not.
+    # ── `--sethead-h` IS GONE, AND ITS ABSENCE IS THE ASSERTION (§261.1) ──
+    # This asserted the variable was published from the header's real height,
+    # so a table's head could pin under it (§135.10). §163.5, §130.2 and §174
+    # then took that page offset away from every table that had it — a Setup
+    # table sits in `.tblscroll` (`overflow:auto`), so a PAGE offset resolves
+    # inside the box and lands the head partway down its own body — and the
+    # variable was left being measured by a ResizeObserver with **zero readers
+    # in any stylesheet**. Deleted (§24), so the assertion is REWRITTEN rather
+    # than removed (§218): a mechanism with an elaborate justification beside
+    # it is one the next reader takes for load-bearing, and the way that stays
+    # true is for a check to say it is meant to be gone.
+    #
+    # THE HEADER'S OWN HEIGHT IS STILL ASSERTED, because that is what the rest
+    # of this file is about and it is what would break if the header changed
+    # shape again.
     for k in ("focusset", "units"):
         go(pg, k)
         m = pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
           return {h:Math.round(h.getBoundingClientRect().height),
                   v:getComputedStyle(document.documentElement)
-                      .getPropertyValue('--sethead-h').trim()};}""")
-        ck("%s: --sethead-h is the header's own height (%s vs %dpx)" % (k, m["v"], m["h"]),
-           m["v"] == str(m["h"]) + "px", m)
+                      .getPropertyValue('--sethead-h').trim(),
+                  readers:[...document.styleSheets].reduce((n,ss)=>{
+                    let r=[]; try { r=[...ss.cssRules]; } catch(e) { return n; }
+                    return n + r.filter(x=>(x.cssText||"").indexOf("--sethead-h")>-1).length;
+                  },0)};}""")
+        ck("%s: the header still has a real height (%dpx)" % (k, m["h"]),
+           40 <= m["h"] <= 90, m)
+        ck("%s: --sethead-h is not published any more" % k, m["v"] == "", m)
+        ck("%s: and no stylesheet reads it" % k, m["readers"] == 0, m)
 
     print("\n" + ("errors: " + str(errs[:4]) if errs else "no console errors"))
     if errs:

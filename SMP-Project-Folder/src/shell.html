@@ -2366,9 +2366,6 @@
        band stops being wholly inside it at exactly the moment it pins. */
     pinWatch();
     clipTitles();
-    /* The header this paint just drew is a different element from the last
-       one's, so the observer is re-pointed at it (§135.10). */
-    watchSetupHead();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
        then moved — that flash is the jump, only quicker. */
@@ -8107,47 +8104,20 @@
     document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
   }).observe(chromeEl);
 
-  /* ── AND A SETUP TABLE'S HEAD PINS UNDER THE PAGE'S (§135.10) ──────
-     Same pattern, one component in. `--sethead-h` was a literal 46px, and §135
-     changed the header's height by putting the page's own controls into it —
-     42px where they are small, 49px where a search box sits on the line. A
-     table head pinned 4px BELOW the page header leaves a slot between two
-     pinned things, and scrolling rows show through it: measured, a 4px leak on
-     Focus measures, and the thing Islam photographed.
+  /* ── `--sethead-h` IS GONE, AND SO IS WHAT MEASURED IT (§261.1) ────
+     §135.10 published the Setup header's measured height so a table's head
+     could pin UNDER it, and §163.5, §130.2 and §174 then took that page offset
+     away from every table that had it: a Setup table sits in `.tblscroll`,
+     which is `overflow:auto`, so a PAGE offset resolves inside the box and
+     lands the head partway down its own body — the fault §130.2 records at
+     141px and §121.4's own note at 293px. The three tables that do pin
+     (`.acgrid`, `.peoplecfg`, `.srctable`) pin at `top:0` INSIDE their own
+     boxes, which needs no measurement at all.
 
-     A CONSTANT COULD NOT HAVE BEEN RIGHT, which is why this is observed rather
-     than corrected to a better number: the header WRAPS on a narrow window, so
-     its height is a function of the window as well as of the page.
-
-     NOT §28.3's LOOP, and the difference is the whole reason this is safe: the
-     value feeds a sticky OFFSET and nothing else. An offset cannot change the
-     height it was measured from, so there is no path from the output back to
-     the input — unlike v2.8's max-height, which sized a box against a number
-     the box's own size decided.
-
-     Published on the ROOT rather than on the pane, because the pane is replaced
-     on every paint and an inline value would go with it. */
-  var SETHEAD_RO = new ResizeObserver(function(rs){
-    var el = rs[0] && rs[0].target;
-    if (!el) return;
-    document.documentElement.style.setProperty(
-      "--sethead-h", Math.round(el.getBoundingClientRect().height) + "px");
-  });
-  function watchSetupHead(){
-    /* GUARDED, BECAUSE paint() CAN RUN FIRST. `SETHEAD_RO` is a `var` assigned
-       here at the foot of the file, and the function declaration above it
-       hoists while the value does not — the same shape as §113.8's `undefined`
-       unshift. A boot that painted before this line would throw, and a throw
-       mid-paint keeps the previous page on screen with the only witness in a
-       console nobody has open (§118). */
-    if (!SETHEAD_RO) return;
-    SETHEAD_RO.disconnect();
-    var el = document.querySelector(".setuphead");
-    if (el) SETHEAD_RO.observe(el);
-    /* Removed rather than left holding the last Setup page's number: every
-       other page reads the fallback, and a stale value is worse than none. */
-    else document.documentElement.style.removeProperty("--sethead-h");
-  }
+     So the observer was measuring a value **nothing read** — grepped: zero
+     `var(--sethead-h)` in any stylesheet. Deleted rather than left running,
+     because a mechanism with an elaborate justification beside it is one the
+     next reader takes for load-bearing (§24). */
 
   /* NO CONDENSE-ON-SCROLL. The chrome is one height, always.
 

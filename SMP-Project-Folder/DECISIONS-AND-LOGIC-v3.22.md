@@ -29863,3 +29863,59 @@ back to the cycle's END DATE to work out how much of the year has passed
 (§239.3), so on such a tenant editing *to* moves what every running-total
 figure is measured against. Where a month is set, the dates are labels and
 change no score.
+
+
+---
+
+## §261.1 — THE RULE WAS GONE, ITS COMMENTS AND ITS MACHINERY WERE NOT (2026-09-03)
+
+Islam, of the three failures §261 recorded as not-mine: *"go ahead."*
+
+**IT WAS NOT A STALE OFFSET, WHICH IS WHAT THE FAILURE LOOKS LIKE.** §121.4 gave
+every Setup table's `thead th` the page's own offset so it pinned under the
+page header; §135.10 then published `--sethead-h` by ResizeObserver because a
+guessed 46px left a 4px slot between two pinned things (§130.10). §163.5,
+§130.2 and §174 then took that page offset away from every table that had it,
+one at a time and each for the same reason: **a Setup table sits in
+`.tblscroll`, which is `overflow:auto`, so a PAGE offset resolves inside the
+BOX** — 141px down the matrix's own body, 293px down the register's, both
+measured at the time.
+
+**SO THE GENERAL RULE IS GONE FROM EVERY STYLESHEET** — grepped: the only
+sticky heads left are `.acgrid`, `.peoplecfg` and `.srctable`, each pinned at
+`top:0` INSIDE its own box, which needs no measurement at all — **and three
+things were left behind**: a ResizeObserver still measuring `--sethead-h` with
+**zero readers**, two comment blocks in `config.css` describing the removed rule
+in the present tense (§104.8's family), and `setup-pages.py` §3 asserting the
+behaviour on the `units` page.
+
+**AND THE CHECK PASSED ON THREE PAGES OF FOUR BY LUCK.** Functions and
+Capabilities are too short to scroll 700px, so their heads never left the
+screen and *"still on screen"* was true of a page that had not moved — §113.8's
+shape, an assertion that cannot fail on most of what it walks. Only Business
+units is long enough to expose it, which is why the suite reported three
+failures rather than none or nine.
+
+**REWRITTEN, NOT DELETED** (§218), in two files: `setup-pages.py` §3 now
+asserts what is true and what matters — the page's name pins, **and the page is
+proved to have actually scrolled first**, or the old assertion's own failure
+mode comes straight back; `setup-header.py`'s `--sethead-h` assertion becomes
+its ABSENCE plus **no stylesheet reading it**, because a mechanism with an
+elaborate justification beside it is one the next reader takes for load-bearing
+(§24), and the way that stays true is for a check to say it is meant to be gone.
+
+**WHAT WAS DELIBERATELY NOT ASSERTED, AND IS WRITTEN DOWN INSTEAD.** Probing
+the three boxed tables raised a question this was not opened to answer:
+`.peoplecfg thead tr` is sticky, but the nearest scroll container above it is
+`.tblscroll` — so scrolling `.cfg.peoplebox`, which is the box the register
+actually scrolls in, moved the head straight out of view (top 0 → **−400** at
+`scrollTop` 400). Either the register's head does not pin the way §69.19 says
+it does, or the probe is measuring the wrong box, and asserting it either way
+before that is settled writes a guess into the suite (§94.5). **Recorded as
+open.**
+
+**AND THE DECISION NOBODY HAS TAKEN IS NAMED AS ONE**: an ordinary Setup table
+(Business units, Functions, Capabilities) has no pinned head at all now, and
+giving it one means the §174 treatment — the box gets a height and the TABLE
+scrolls instead of the page. That is a change to what scrolls, so it is a
+mockup and Islam's call, not a tidy-up.

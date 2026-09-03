@@ -931,25 +931,18 @@
      `background` on the CELL, never the row: a `<tr>` cannot carry a
      background that survives sticky positioning in every engine, and a
      transparent head lets the rows show through it. */
-  /* NOT EVERY TABLE HERE PINS TO THE PAGE. `.cfg.peoplebox` and
-     `.cfg.srctable` are their own scroll boxes with their own sticky heads
-     pinned at `top:0` INSIDE them, which is the right answer for a boxed
-     table — and applying a page offset there put the register's headings 293px
-     down, measured. So they are excluded rather than overridden: two rules
-     fighting over one thead is how a head ends up pinned to neither. */
-  /* ── AND THE OFFSET IS MEASURED, NOT GUESSED (§135.10) ────────────
-     `--sethead-h` was the literal 46px, and §135 changed the header's height by
-     putting the page's controls in it: it is 42px where the controls are small
-     and 49px where a search box sits on the line. So the table's head pinned
-     4px BELOW the page header on some pages and 3px under it on others — and
-     that 4px slot is a hole between two pinned things, which scrolling rows
-     show through. Exactly what Islam saw, made obvious by a band that happened
-     to be navy.
-
-     Published by a ResizeObserver in the shell, the way `--chrome-h` already
-     is. NOT §28.3's loop: this feeds a sticky OFFSET and nothing else, and an
-     offset cannot change the height it was measured from. The literal survives
-     as the fallback for the frame before the observer first fires. */
+  /* AND IN THE END NO TABLE HERE PINS TO THE PAGE (§261.1). `.cfg.peoplebox`
+     and `.cfg.srctable` are their own scroll boxes with sticky heads pinned at
+     `top:0` INSIDE them, which is the right answer for a boxed table — and
+     applying a page offset there put the register's headings 293px down,
+     measured. §163.5 and §174 then reached the same answer for `.acgrid`, and
+     the general page-offset rule the paragraph above describes is GONE with
+     the variable that fed it: an ordinary Setup table sits in `.tblscroll`,
+     which is `overflow:auto`, so a page offset could only ever land its head
+     partway down its own body. What is left is three boxed tables that pin
+     inside themselves, and every other table's head scrolling away with the
+     page — which is a decision nobody has taken and is recorded as open, not
+     as done. */
   /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§135.2).
      *"in roles and access … check the table as the design is damaged."*
 

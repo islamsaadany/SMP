@@ -29833,3 +29833,26 @@ SWOT line writes the whole line back; a reorder has no Restore. The band's
 line names the unit's last change while sitting on a pillar's band, which is
 where the pane's one band is; if it reads as the pillar's, it moves.
 
+## §261.1 — THE TABLE, CORRECTED FROM THE BUILT PAGE (2026-09-03)
+
+Islam, on the built History: *"make the who matching the name in the
+register not the full name, for the from to you need to wrap the change to
+appear in the cell and same for the row and when we need to split to date and
+time into 2 columns the last column of restore header is empty and what would
+restore button do does it show warning or just a direct restore?"*
+
+**WHO IS THE REGISTER'S NAME.** The log stores the full legal name; the page
+resolves the key against the register and draws `knownName()` — the same
+word the register and every picker show (§93.8, §130.7) — with the full name
+on the hover. The unit's line and the confirmation say the same word.
+**ROW AND FROM → TO WRAP**, reversing §88 for exactly those two columns at his
+instruction: a value is what this page exists to show, and a value clipped to
+an ellipsis is a value not shown. The seven short cells stay one line, or a
+name would set the row's height. **DATE AND TIME ARE TWO COLUMNS**, and the
+last column is headed **Restore** — a column with a control in it and no name
+over it read as a mistake. **AND RESTORE ASKS FIRST**: it never restores on
+the press; the confirmation names the row, the value going back and who set
+the current one, and only *Put it back* saves — answered to him and asserted.
+`checks/history-page.py` gains four assertions for the four; the modal's
+Restore column needed 10% to hold its button whole (§158), found by the check.
+

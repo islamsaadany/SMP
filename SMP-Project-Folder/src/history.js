@@ -56,7 +56,30 @@ var TRAIL = (function(){
     try { if (typeof placeLabel === "function") { var w = placeLabel(t); return t === "group" ? "The group" : w; } } catch (e) {}
     return String(t).replace(/^fn:/, "");
   }
+  /* WHO IS THE REGISTER'S NAME, NEVER THE FULL LEGAL ONE (§261.1, Islam:
+     "make the who matching the name in the register not the full name"):
+     the same word the register and every picker show (§93.8, §130.7),
+     resolved off the key; the full name the log stored goes on the hover. */
+  function whoWord(e){
+    try {
+      var dn = typeof displayNames === "function" ? displayNames() : null;
+      var p = (typeof PEOPLE !== "undefined" ? PEOPLE : []).filter(function(x){ return x.key === e.person_key; })[0];
+      if (p && typeof knownName === "function") { var k = knownName(p, dn); if (k) return k; }
+    } catch (x) {}
+    return e.person_name || e.person_key || "";
+  }
   function pad(n){ return (n < 10 ? "0" : "") + n; }
+  function dateWord(at){
+    var d = new Date(at); if (isNaN(d)) return "";
+    var now = new Date();
+    var sameDay = function(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
+    if (sameDay(d, now)) return "Today";
+    var y = new Date(now); y.setDate(now.getDate() - 1);
+    if (sameDay(d, y)) return "Yesterday";
+    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return d.getDate() + " " + M[d.getMonth()] + (d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() : "");
+  }
+  function timeWord(at){ var d = new Date(at); return isNaN(d) ? "" : pad(d.getHours()) + ":" + pad(d.getMinutes()); }
   function whenWord(at){
     var d = new Date(at); if (isNaN(d)) return "";
     var now = new Date(), t = pad(d.getHours()) + ":" + pad(d.getMinutes());
@@ -114,23 +137,30 @@ var TRAIL = (function(){
   function tableHtml(list, opts){
     opts = opts || {};
     if (!list.length) return '<p class="hist-empty">' + E(opts.empty || "No changes recorded for this.") + '</p>';
+    /* ROW AND FROM → TO WRAP; EVERYTHING ELSE IS ONE LINE (§261.1, reversing
+       §88 for exactly two columns at Islam's instruction: "you need to wrap
+       the change to appear in the cell and same for the row"). A value is
+       what this page exists to show, and a value clipped to an ellipsis is a
+       value not shown. The short cells stay one line, or the row's height
+       would be set by a name. */
     var h = '<table class="hist" data-hist-table><colgroup>' +
       (opts.noPlace
-        ? '<col style="width:12%"><col style="width:15%"><col style="width:11%"><col style="width:24%"><col style="width:11%"><col style="width:18%"><col style="width:9%">'
-        : '<col style="width:9%"><col style="width:13%"><col style="width:10%"><col style="width:11%"><col style="width:20%"><col style="width:10%"><col style="width:19%"><col style="width:8%">') +
+        ? '<col style="width:9%"><col style="width:6%"><col style="width:12%"><col style="width:10%"><col style="width:22%"><col style="width:11%"><col style="width:20%"><col style="width:10%">'
+        : '<col style="width:7%"><col style="width:6%"><col style="width:13%"><col style="width:9%"><col style="width:10%"><col style="width:17%"><col style="width:10%"><col style="width:20%"><col style="width:8%">') +
       '</colgroup><thead><tr>' +
-      '<th>When</th><th>Who</th>' + (opts.noPlace ? '' : '<th>Where</th>') + '<th>Kind</th><th>Row</th><th>Field</th><th>From → To</th><th></th></tr></thead><tbody>';
+      '<th>Date</th><th>Time</th><th>Who</th>' + (opts.noPlace ? '' : '<th>Where</th>') + '<th>Kind</th><th>Row</th><th>Field</th><th>From → To</th><th>Restore</th></tr></thead><tbody>';
     list.forEach(function(r, i){
       var e = r.e, m = r.m, why = noRestore(r);
       var rowName = m ? (m.name || m.id) : (e.what || kindWord(e.kind));
       h += '<tr data-hist-row="' + i + '">' +
-        '<td class="hist-t" title="' + E(new Date(e.at).toLocaleString()) + '">' + E(whenWord(e.at)) + '</td>' +
-        '<td>' + E(e.person_name || e.person_key) + '</td>' +
+        '<td class="hist-t" title="' + E(new Date(e.at).toLocaleString()) + '">' + E(dateWord(e.at)) + '</td>' +
+        '<td class="hist-t">' + E(timeWord(e.at)) + '</td>' +
+        '<td title="' + E(e.person_name || "") + '">' + E(whoWord(e)) + '</td>' +
         (opts.noPlace ? '' : '<td>' + E(placeWord(e.target)) + '</td>') +
         '<td><span class="hist-chip">' + E(kindWord(e.kind)) + '</span></td>' +
-        '<td class="hist-name" title="' + E(m ? m.id : "") + '">' + E(rowName) + '</td>' +
+        '<td class="hist-name hist-wrap" title="' + E(m ? m.id : "") + '">' + E(rowName) + '</td>' +
         '<td class="hist-fld">' + (m ? E(fieldWord(m.field)) : '') + '</td>' +
-        '<td class="hist-fromto" title="' + (m ? E(plain(m.from) + ' → ' + plain(m.to)) : '') + '">' + (m ? valHtml(m.from) + ' <span class="hist-arr">→</span> ' + valHtml(m.to) : '<span class="hist-none">—</span>') + '</td>' +
+        '<td class="hist-fromto hist-wrap" title="' + (m ? E(plain(m.from) + ' → ' + plain(m.to)) : '') + '">' + (m ? valHtml(m.from) + ' <span class="hist-arr">→</span> ' + valHtml(m.to) : '<span class="hist-none">—</span>') + '</td>' +
         '<td class="hist-act">' + (why
           ? '<button type="button" class="hist-rst" disabled aria-disabled="true" title="' + E(why) + '">Restore</button>'
           : '<button type="button" class="hist-rst" data-hist-restore="' + i + '">Restore</button>') + '</td>' +
@@ -243,7 +273,7 @@ var TRAIL = (function(){
     return typeof TARGET !== "undefined" ? TARGET : null;
   }
   function lineHtml(t, entry){
-    return '<span class="pband-hist">Last changed by <b>' + E(entry.person_name || entry.person_key) + '</b>, ' +
+    return '<span class="pband-hist">Last changed by <b>' + E(whoWord(entry)) + '</b>, ' +
       E(whenWord(entry.at).replace(/^Today /, "today ").replace(/^Yesterday /, "yesterday ")) +
       ' · <button type="button" class="linkbtn" data-hist-open="' + E(t) + '">See history</button></span>';
   }
@@ -318,7 +348,7 @@ var TRAIL = (function(){
     return '<div class="hist-confirm">' +
       '<p><strong>Put back the ' + E(fieldWord(m.field).toLowerCase()) + ' of ' + E(m.name || m.id) + ' on ' + E(placeWord(e.target)) + ' to ' +
       (m.from == null || m.from === "" ? 'nothing' : E(Array.isArray(m.from) ? m.from.join(", ") : String(m.from))) + '?</strong></p>' +
-      '<p>It reads <b>' + (m.to == null || m.to === "" ? 'nothing' : E(Array.isArray(m.to) ? m.to.join(", ") : String(m.to))) + '</b> now, set by ' + E(e.person_name || e.person_key) + ' ' + E(whenWord(e.at).toLowerCase()) + '. ' +
+      '<p>It reads <b>' + (m.to == null || m.to === "" ? 'nothing' : E(Array.isArray(m.to) ? m.to.join(", ") : String(m.to))) + '</b> now, set by ' + E(whoWord(e)) + ' ' + E(whenWord(e.at).toLowerCase()) + '. ' +
       'Putting it back is an ordinary change: it is saved, authorised and logged like any other, so it can itself be put back.</p>' +
       '<div class="hist-confirm-acts"><button type="button" class="btn ghost" data-hist-cancel>Cancel</button>' +
       '<button type="button" class="btn" data-hist-ok>Put it back</button></div></div>';

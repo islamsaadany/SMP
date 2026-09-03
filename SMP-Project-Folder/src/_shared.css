@@ -367,10 +367,10 @@
   table.hist { width:100%; min-width:0; table-layout:fixed; border-collapse:collapse; font-size:var(--fs-small); }
   table.hist th { text-align:left; white-space:nowrap; }
   table.hist td { white-space:nowrap; vertical-align:middle; max-width:150px; overflow:hidden; text-overflow:ellipsis; }
-  table.hist td.hist-name { max-width:280px; }
+  table.hist td.hist-wrap { white-space:normal; overflow-wrap:anywhere; max-width:none; }
   table.hist td.hist-t { color:var(--ink-3); font-variant-numeric:tabular-nums; }
   table.hist td.hist-fld { color:var(--ink-2); }
-  table.hist td.hist-fromto { font-family:var(--mono, ui-monospace, monospace); max-width:320px; }
+  table.hist td.hist-fromto { font-family:var(--mono, ui-monospace, monospace); }
   .hist-arr { color:var(--gold-deep); margin:0 5px; }
   .hist-none { color:var(--ink-3); }
   .hist-chip { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--ink-2); }

@@ -184,11 +184,15 @@ with sync_playwright() as p:
     ck("the quarters draw as four boxes", pg.evaluate("()=>document.querySelectorAll('[data-hist-page] i.hist-q').length===4 && document.querySelectorAll('[data-hist-page] i.hist-q.on').length===2"))
     # ONE ROW IS NOT ONE TOP (§122.4): a chip and a quarter box sit on the line
     # at different offsets, so tops are clustered — two lines are >8px apart.
-    twoLine = pg.evaluate("""()=>[...document.querySelectorAll('[data-hist-page] table.hist td')].filter(td=>{
+    # §261.1: Row and From → To WRAP by decision; every other cell stays one line.
+    twoLine = pg.evaluate("""()=>[...document.querySelectorAll('[data-hist-page] table.hist td:not(.hist-wrap)')].filter(td=>{
         const rg=document.createRange(); rg.selectNodeContents(td);
         const tops=[...rg.getClientRects()].filter(r=>r.width>0).map(r=>r.top).sort((a,b)=>a-b);
         return tops.length && tops[tops.length-1]-tops[0] > 8;}).map(td=>td.textContent.trim().slice(0,50))""")
-    ck("no cell's text is on two lines (§88)", not twoLine, twoLine)
+    ck("no short cell's text is on two lines (§88)", not twoLine, twoLine)
+    ck("a long value WRAPS rather than clips (§261.1)", pg.evaluate("()=>[...document.querySelectorAll('[data-hist-page] td.hist-wrap')].every(td=>td.scrollWidth<=td.clientWidth+1)"))
+    ck("Date and Time are two columns and the last is headed Restore", pg.evaluate("()=>{const h=[...document.querySelectorAll('[data-hist-page] table.hist th')].map(t=>t.textContent.trim());return h[0]==='Date'&&h[1]==='Time'&&h[h.length-1]==='Restore';}"))
+    ck("Who is the register's Name, the full name on the hover", pg.evaluate("()=>{const td=[...document.querySelectorAll('[data-hist-page] table.hist tbody tr')].map(tr=>tr.children[2]);return td.some(c=>c.textContent.trim()===knownName(PEOPLE.find(p=>p.key==='smo'), displayNames()) && c.title==='Mohamed Essam');}"))
     ck("the table fits the pane and every Restore sits whole inside its cell (§158)", pg.evaluate("()=>{const t=document.querySelector('[data-hist-page] table.hist');if(!t) return false;const p=t.closest('#panel')||document.body;return t.getBoundingClientRect().right<=p.getBoundingClientRect().right+0.5 && [...t.querySelectorAll('.hist-rst')].every(b=>{const c=b.closest('td').getBoundingClientRect(),r=b.getBoundingClientRect();return r.right<=c.right+0.5;});}"))
 
     # ── 3 · THE FILTERS ASK AGAIN; THE SEARCH DOES NOT ───────────────────

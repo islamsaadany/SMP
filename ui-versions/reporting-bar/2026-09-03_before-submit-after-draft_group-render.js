@@ -461,7 +461,7 @@ function measureRows(ms, opts){
                   alone loses a shipped feature silently — §56.7's rule, with
                   the conflict marker doing its job for once. */
                repNote(m) +
-               /* §264: a yes/no row says so where its TARGET goes, and says
+               /* §257: a yes/no row says so where its TARGET goes, and says
                   nothing where its direction and compile rule would — both
                   are meaningless without a number, and printing `\u2265` beside
                   "Yes / No" invites reading it as part of the target. */
@@ -588,7 +588,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
      "Next gap" steps through (§177.2), and one gap wearing it twice would
      cost two presses to walk one blank. */
   var quiet = String(pendCls || "").replace(/\bgapwalk\b/g, "").trim();
-  /* §264: three of the four go dead on a yes/no outcome, SHOWING the values
+  /* §257: three of the four go dead on a yes/no outcome, SHOWING the values
      they keep — picking Y/N stops a figure counting, it does not destroy it.
      The unit picker is the one that stays live, because it is the only way
      back out: dimming the control that SET this state would strand the row
@@ -612,7 +612,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
        unit can be chosen FIRST and is held on its own until a number arrives
        to join it: `outTarget` is "%" for as long as it takes to type 90. */
     selectOr("plan", unit, targetUnitOpts(unit), quiet,
-             /* §264: and this picker repaints too — three of its four boxes
+             /* §257: and this picker repaints too — three of its four boxes
                 change state on the one press. */
              function(v){ put(nextTargetUnit(t, v)); paint(); }) +
     (yn
@@ -691,7 +691,7 @@ function outcomeShown(t){
 /* The target as it is written on the plan — the whole year's number, unit and
    all. `tacticBenchmark` gives what it is measured against RIGHT NOW, which
    for a Sum row is a part of this. */
-/* §264: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
+/* §257: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
    answers with TEXT rather than html — its caller escapes — so it cannot use
    `tgtShown`; the two are kept in step by both asking `isYesNo`. */
 function outcomeTargetShown(t){
@@ -815,42 +815,6 @@ function pillarRow(it, i, u){
     '<span class="chev">&#9654;</span></button>' + pillarBody(it, u) + '</div>';
 }
 
-/* ── THE EXTREMES ARE THE EXTREMES OF WHAT THE HEADLINE AVERAGED (§264) ──
-   Islam, from his own Performance page: *"the key measure performance has a
-   highest and lowest that doesn't match the measure progress."* His row read a
-   headline of 90% and a Progress of 90% over a Highest and a Lowest of 60%,
-   and all three were arithmetically correct — of two DIFFERENT questions.
-
-   §239 made the score DERIVED: a `Sum` measure is judged against the share of
-   its target due by now, so 3M against 5M at six months of twelve is 3 ÷ 3.33
-   = 90%, not 3 ÷ 5 = 60%. That section moved every reader that AVERAGES —
-   `pillarPerf`, `koScore`, the Progress column, the deck — and left every
-   reader that SUMMARISES still holding `m.progress`, the stored raw ratio. The
-   two numbers agreed on every measure the demo had until a Sum row was
-   reported mid-year, which is why it shipped: 30 rows in the worked example
-   differ, and every one of them compiles by Sum.
-
-   THE STORED FIGURE IS NOT TOUCHED AND MUST NOT BE. `m.progress` goes on
-   holding the raw actual-against-the-ANNUAL-target ratio, so archives and
-   closed cycles read exactly as they did and nothing is migrated — and the
-   Focus board goes on reading it deliberately, because reward stays a year-end
-   judgement (§239). What changes is only which of the two a summary PRINTS.
-
-   ONE READER, so a card cannot name a row its own headline left out: the
-   spread is taken over the very list the average was taken over — a pillar's
-   `scorableMeasures()`, a list of objectives' `scorableKOs()` — rather than
-   over a second filter written beside it (§53.5). */
-function scoreSpread(rows){
-  /* WRAPPED, NEVER PASSED BY NAME (§250.1): `measureScore` takes an optional
-     share and `Array.map` hands its callback the INDEX, so a bare
-     `.map(measureScore)` would prorate the second row by the whole year and
-     the third by twice it. */
-  var v = rows.map(function(m){ return measureScore(m); });
-  return { n: v.length,
-           hi: v.length ? Math.max.apply(null, v) : null,
-           lo: v.length ? Math.min.apply(null, v) : null };
-}
-
 /* Compact score pair. Three figures laid across rather than stacked, so the
    card is a band rather than a column. Both headline and status word come from
    the same band function, so they can never contradict each other. */
@@ -880,13 +844,13 @@ function pillarBody(it, u){
   /* Highest and lowest read the scored measures only. Math.max over a list
      containing null treats null as zero, so an unscored measure was reporting
      a lowest of 0% \u2014 exactly the false failure the null rule exists to prevent. */
-  /* \u00a7257: and they read the SCORE, which is what the headline beside them and
-     the Progress column beneath them are made of. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
   return '<div class="pbody" hidden>' +
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length, scored.length,
+              scored.length ? Math.max.apply(null, scored) : null,
+              scored.length ? Math.min.apply(null, scored) : null) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
@@ -1051,28 +1015,6 @@ function draftBtns(){
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
 function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
-  /* §263: ONE SUBMIT BUTTON, BUILT ONCE, DRAWN IN TWO STATES. Islam: *"on
-     saving the draft keep the submit to smo button there as it's posible to
-     save the draft and if it's complete we can submit directly rather than
-     reopen to submit."* Save draft closed the report and took Submit away
-     with it, so the only route to sending a finished report was Reopen and
-     then Submit — a control removed at the one moment somebody is looking
-     for it.
-
-     WRITTEN OUT ONCE, because the thing that must not differ between the two
-     states is the GATE (§53.5): a second copy of this button is how a build
-     comes to offer an ungated Submit on a parked report while the open one
-     is correctly shut.
-
-     §221: NOT READY, SO THE CONTROL SAYS SO BEFORE IT IS PRESSED.
-     `aria-disabled` rather than `disabled`, because a disabled button takes
-     no focus and the reason would be unreachable without a mouse — the
-     bubble opens on hover AND on focus (§163). The click handler still
-     refuses, so the hover is the explanation and not the enforcement. */
-  var submit = submitWhy
-    ? '<button class="rc-submit hasnote" data-submit="' + esc(target) + '"' +
-        ' aria-disabled="true" data-tip="' + esc(submitWhy) + '">Submit to the SMO</button>'
-    : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>';
   return '<div class="repchrome">' +
     '<span title="' + esc(REVIEW.name + " · due " + REVIEW.due) + '">' +
       '<span class="rc-n">' + done + '</span> ' +
@@ -1080,27 +1022,21 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
     '<span class="rc-bar' + (pct < 100 ? " part" : "") + '">' +
       '<i style="width:' + pct + '%"></i></span>' +
     (mayAll
-      /* §220 IS UNTOUCHED AND THE ORDER OF THESE THREE SAYS SO: a submitted
-         report offers Reopen and nothing else — it has been sent, and the
-         way back is the only act left — while a PARKED one offers Submit
-         beside it, because a draft is a report somebody is still working on.
-         The report itself stays locked in both (`reportClosed()` is one
-         reading for the bar, the lock and the pen), so this puts the button
-         back and reopens nothing.
-
-         AND REOPEN DROPS ITS BOX WHERE SUBMIT IS BESIDE IT (§263, Islam's
-         pick from two drawn in the real bar): the pair then reads in the two
-         volumes this bar already has — the act that ends the report shouts,
-         the lesser act speaks, exactly as Submit and Save draft do while the
-         report is open. It keeps `rc-reopen`, so one handler and one selector
-         still answer for both states. */
-      ? (subd
-          ? '<span class="rc-state done">Submitted</span>' +
-            '<button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>'
-          : parked
-          ? '<span class="rc-state draft">Draft saved</span>' + submit +
-            '<button class="rc-reopen quiet" data-unsubmit="' + esc(target) + '">Reopen</button>'
-          : submit + '<button class="rc-draft" data-repsave="1">Save draft</button>')
+      ? (subd || parked
+          ? '<span class="rc-state ' + (subd ? 'done">Submitted' : 'draft">Draft saved') +
+            '</span><button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>'
+          : submitWhy
+          /* §221: NOT READY, SO THE CONTROL SAYS SO BEFORE IT IS PRESSED.
+             `aria-disabled` rather than `disabled`, because a disabled button
+             takes no focus and the reason would be unreachable without a
+             mouse — the bubble opens on hover AND on focus (§163). The click
+             handler still refuses, so the hover is the explanation and not
+             the enforcement. */
+          ? '<button class="rc-submit hasnote" data-submit="' + esc(target) + '"' +
+              ' aria-disabled="true" data-tip="' + esc(submitWhy) + '">Submit to the SMO</button>' +
+            '<button class="rc-draft" data-repsave="1">Save draft</button>'
+          : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>' +
+            '<button class="rc-draft" data-repsave="1">Save draft</button>')
       : '<span class="pill none">View only</span>') +
     /* §220: CLOSE, NOT CANCEL. The handler is `REPORTING = null; paint()` and
        nothing is discarded — figures are written as they are typed — so the
@@ -1509,10 +1445,9 @@ function unitCards(keys){
     var u = UNITS[k];
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
-        /* §264: the score, so the rows add up to the "Headline:" line below. */
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
-          '</td><td class="num">' + pct(measureScore(m)) + '</td></tr>';
+          '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
       u.weight + '%</b> weight to the group.</p>' +
@@ -1648,13 +1583,10 @@ function renderGroupPerformance(){
 
   var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
     GROUP.keyObjectives.map(function(m){
-      /* §264: the score, so the rows average to the "Mean of the N" below —
-         and this is the one table in the product that prints the Compile rule
-         beside the figure, which is what decides whether the row prorates. */
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
         '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
         '<td>' + compileCell(m.compile) + '</td><td class="num">' + figShown(m) + '</td>' +
-        '<td class="num">' + pct(measureScore(m)) + '</td></tr>';
+        '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
@@ -1731,14 +1663,11 @@ function renderGroupPerformance(){
         ? '<p class="sub">No key objectives of its own. This capability is judged by its projects.</p>'
         : miniTable(["#","Key objective","Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
-              /* §264: the score, so the rows agree with the "Weighted across N
-                 objectives" line below, which is capKO()'s own figure. */
-              var sc = measureScore(m);
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
                 '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + figShown(m) + '</td>' +
-                '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
+                '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
       miniTable(["#","Project","Deliverables","Outcomes","Performance"],
@@ -2136,12 +2065,10 @@ function focusStrip(u){
 function renderUnitPerformance(u){
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
-  /* §264: the same two questions the pillar card had. The membership comes from
-     `scorableKOs()` — koScore()'s own list — so the Highest can never name an
-     objective the headline above it left out, and the figure is the SCORE the
-     headline is made of rather than the stored raw ratio. */
-  var kosp = scoreSpread(scorableKOs(u.keyObjectives));
-  var koHi = kosp.hi, koLo = kosp.lo;
+  var kps = u.keyObjectives.filter(function(m){ return m.target && m.progress != null; })
+                           .map(function(m){ return m.progress; });
+  var koHi = kps.length ? Math.max.apply(null, kps) : null;
+  var koLo = kps.length ? Math.min.apply(null, kps) : null;
   /* §243: THE RESOLVED WEIGHTS, never the raw array. A row's own `weight`
      wins, a blank takes the average of the ones that were set, and a list
      nobody has weighted answers null — so this table shows the two extra
@@ -2158,20 +2085,13 @@ function renderUnitPerformance(u){
     miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "H1 actual", "Progress"].concat(ws ? ["Weight","Contribution"] : []),
       u.keyObjectives.map(function(m, i){
         var w = ws ? Math.round(ws[i] * 10) / 10 : null;
-        /* §264: THE BREAKDOWN IS MADE OF THE NUMBER IT BREAKS DOWN. This table
-           opens from the headline to explain it, and it was printing the stored
-           raw ratio under a headline built from the score — so on a Sum
-           objective the rows did not add up to the number above them. Its own
-           neighbour (§243, on the weights) says a breakdown that disagrees with
-           its headline is worse than none; that argument applies here too. */
-        var sc = measureScore(m);
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
           '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
           '<td class="num">' + figShown(m) + '</td>' +
-          '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
-                (Math.round(sc * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
+                (Math.round(m.progress * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
       }).join("")) +
     '<p class="sub">' + (ws
       ? 'Weighted mean across <b>' + u.keyObjectives.length + '</b> objectives: <b>' + ko + '%</b>. Weights are set on the unit\'s Foundation.'
@@ -3354,7 +3274,7 @@ function unitInherit(m){
     var t = String(v == null ? "" : v).trim();
     if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
     var u = targetUnitOf(m);
-    /* §264: a yes/no row has no unit a number can inherit — joining them
+    /* §257: a yes/no row has no unit a number can inherit — joining them
        writes "5Y/N", which no reader can take apart and no score can use.
        The box is disabled on such a row, so this guards the paths that do
        not go through it (fill mode, an upload). */
@@ -3366,7 +3286,7 @@ function unitInherit(m){
 /* Is this row judged by a yes or a no? Asked by every surface that decides
    whether to draw a number, so none of them decides it separately (§53.5).
    It reads main's own `targetUnitOf`, which already answers with a unit held
-   alone — so a bare `Y/N` and a `100 Y/N` are one kind of row (§264). */
+   alone — so a bare `Y/N` and a `100 Y/N` are one kind of row (§257). */
 function isYesNoRow(m){ return targetUnitOf(m) === SMPRules.YN_UNIT; }
 /* A control DRAWN AND DEAD, because the row's own unit made it meaningless:
    with no number there is nothing for a direction to point at and nothing for
@@ -3380,7 +3300,7 @@ function offInput(txt){
 function offSelect(txt){
   return '<select class="fld off" disabled><option>' + esc(txt) + '</option></select>';
 }
-/* PICKING A UNIT REDRAWS THE ROW (§264). A bound field writes WITHOUT
+/* PICKING A UNIT REDRAWS THE ROW (§257). A bound field writes WITHOUT
    repainting, deliberately — a repaint under a typing hand destroys the box
    being typed into (§71.2) — which is right for every field whose VALUE is
    the only thing that changes, and wrong for this one: Y/N changes the row's
@@ -3451,7 +3371,7 @@ function fillUnitCell(page, acKey, m, ctx){
    offered by the rule below and could never be CHOSEN for a new row. K and M
    only, which is what he asked for; `B USD` and `K EGP` are deliberately not
    invented alongside them. */
-/* §264: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
+/* §257: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
    half of the list that says what a row is COUNTED in rather than valued in,
    and it is the one entry saying the row carries no number at all. */
 var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
@@ -3603,7 +3523,7 @@ function koEdit(list, page, acKey, owner){
          setter lifting a pending mark, since correcting confirms); in fill
          mode only a blank or still-pending one opens. The NAME never does:
          a row that exists is named, and renaming is authoring. */
-      /* §264: a yes/no row has no number, so the direction, both targets and
+      /* §257: a yes/no row has no number, so the direction, both targets and
          the compile rule are drawn and dead — nothing for a `\u2265` to point at
          and nothing for `Sum` to add up. Only while the pen is open: read
          mode says "Yes / No" where the target goes, which is the whole fact,
@@ -3994,7 +3914,7 @@ function renderReport(u){
        which was stated and accepted. */
     var cur = x.obj[fld], has = cur != null && cur !== "";
     var heal = has ? unitTight(cur) : cur;
-    /* §264: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
+    /* §257: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
        answer is one of two words, so a free box would invite "done", "y" and
        "TRUE" — a dozen spellings of one fact, only some of which score. One
        control, in the one cell shape every reportable row already goes
@@ -4732,18 +4652,13 @@ function capKOTable(c){
   return '<h4 class="mini">Key objectives</h4>' +
     miniTable(["#","Objective","Weight","Dir.","Target","Reported","Score"],
       c.keyObjectives.map(function(m, i){
-        /* §264: the column is headed Score, and the score is the derived one —
-           the same number capKO() averages into the card above this table. The
-           Reported column beside it goes on showing what was actually entered,
-           which is the honest pair: what they said, and what it scores. */
-        var sc = measureScore(m);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
-          '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
 }
 
@@ -5645,7 +5560,7 @@ function unitPlanBody(it, u, railed){
          mode carries the chip and the office's tick. \u00a7114's prepend rule for
          an out-of-list stored value lives inside gapCell now, and \u00a7148's
          hover words come back through `read`. */
-      /* §264: the same three go dead on a yes/no measure as on a yes/no
+      /* §257: the same three go dead on a yes/no measure as on a yes/no
          objective — one decision, both tables (§53.5). */
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.dir || "\u2265")
         : gapCell("plan", "u_plan", m, "dir",
@@ -5705,7 +5620,7 @@ function unitPlanBody(it, u, railed){
     var tgtOpen = false;
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
       ctx: pctx(t), del: true, fillKind: "tactic",
-      /* §264: read mode says "Yes / No", never the stored `Y/N` — one
+      /* §257: read mode says "Yes / No", never the stored `Y/N` — one
          formatter for every surface (§53.5). */
       read: tgtShown,
       control: function(set, pendCls){
@@ -5765,7 +5680,7 @@ function unitPlanBody(it, u, railed){
         (!ed && !tgtOpen ? '<span class="subhd narrowtgt">' +
            (SMPRules.gapEmpty("outTarget", t)
              ? '<span class="missing">Missing</span>'
-             /* §264: no direction on a yes/no outcome — there is nothing for
+             /* §257: no direction on a yes/no outcome — there is nothing for
                 it to point at, and `\u2265 Yes / No` reads as a comparison. */
              : SMPRules.isYesNo(t.outTarget) ? tgtShown(t.outTarget)
              : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
@@ -6267,7 +6182,7 @@ function unitTight(v){
    goes through this, or the deck and the page behind it spell one unit two
    ways (§53.5). An editable field is untouched: what somebody is correcting
    must be what they typed. */
-/* §264: and a yes/no target says so. `Y/N` is how it is STORED and is not
+/* §257: and a yes/no target says so. `Y/N` is how it is STORED and is not
    how a plan should read — the row asks a question, and "Yes / No" is what
    somebody will be choosing between. Inside main's own reader rather than
    beside it, or the deck and the page spell one target two ways. */
@@ -6421,10 +6336,7 @@ function unitPerfRail(u){
    third telling. Nothing on this page is edited in it, so unlike the plan
    there is no edit case to keep it for — only the no-rail one. */
 function unitPerfPane(it, u, railed){
-  /* §264: the score, not the stored raw ratio — this is the pane Islam
-     reported, and its Highest and Lowest are the extremes of exactly the
-     measures `pillarPerf` averaged two lines below. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
   var meta = pillarMeta(it);
   /* The same band as the Plan page, for the same reason and by the same
@@ -6437,7 +6349,9 @@ function unitPerfPane(it, u, railed){
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length, scored.length,
+              scored.length ? Math.max.apply(null, scored) : null,
+              scored.length ? Math.min.apply(null, scored) : null) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +

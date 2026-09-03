@@ -77,8 +77,14 @@ with sync_playwright() as p:
     # ON AN INLINE-PEN TABLE, because the fix is shared and the register is
     # already covered by checks/role-picker.py §7. §53.5's rule: a fix built on
     # one side and not the other is how the two sides drift.
-    pg.click('.setuprail [data-setupgo="units"]'); pg.wait_for_timeout(700)
-    BOX2 = """() => { const t=document.querySelector('.unitcfg'); let b=t.parentElement;
+    #
+    # §261 MOVED THE TABLE THIS USED TO BE (§51.11, and this file caught it):
+    # Business units edits in a dialog now, so `[data-rowedit]` matched nothing
+    # there and the trial reported MISSING. It is Capabilities now — one of the
+    # three tables that still opens its rows in place — and Business units gets
+    # its own trial below, asking the same question of the door it has.
+    pg.click('.setuprail [data-setupgo="caps"]'); pg.wait_for_timeout(700)
+    BOX2 = """() => { const t=document.querySelector('.setuppane table'); let b=t.parentElement;
       while (b && b.scrollHeight<=b.clientHeight && b.scrollWidth<=b.clientWidth) b=b.parentElement;
       return b ? {top:b.scrollTop, left:b.scrollLeft} : {top:0, left:0}; }"""
     pens = pg.eval_on_selector_all("[data-rowedit]", "e=>e.map(x=>x.dataset.rowedit)")
@@ -110,6 +116,42 @@ with sync_playwright() as p:
                           "document.activeElement===document.querySelector('.tk-firstfield')")
         if not cur: bad += 1
         print(("  ok      " if cur else "  NO CURSOR ") + "...and the cursor is in the first field")
+
+    # ── AND THE SAME QUESTION OF A DOOR THAT IS A DIALOG (§261) ──────────
+    # A dialog covers the page, so the row's own top cannot be compared — what
+    # can, and what §110.7 was about, is that NOTHING BEHIND MOVED and that the
+    # cursor still landed. `focusNoScroll` is the shared answer to both, so a
+    # build that reached for a plain focus() fails here rather than on the page
+    # that happens to have kept an inline pen.
+    pg.click('.setuprail [data-setupgo="units"]'); pg.wait_for_timeout(700)
+    # THE DOOR IS BEHIND THE MENU, so the menu is opened first — `data-rowdlg`
+    # is only in the document while one is. Found by running this: the first
+    # version searched the closed page and reported MISSING on a build that
+    # has the feature (§94.5's mirror — a probe wrong towards "broken").
+    kebs = pg.eval_on_selector_all("[data-umenu]", "e=>e.map(x=>x.dataset.umenu)")
+    if kebs:
+        pg.evaluate("() => { const b=document.querySelector('.cfg'); if(b){b.scrollTop=0;} "
+                    "window.scrollTo(0, 240); }")
+        pg.wait_for_timeout(150)
+        pg.evaluate("(k)=>document.querySelector('[data-umenu=\"'+k+'\"]').click()", kebs[-1])
+        pg.wait_for_timeout(400)
+    dlgs = pg.eval_on_selector_all("[data-rowdlg]", "e=>e.map(x=>x.dataset.rowdlg)")
+    if not dlgs:
+        bad += 1
+        print("  MISSING  Business units has no row dialog to open")
+    else:
+        b0 = pg.evaluate(BOX2); y0 = pg.evaluate("window.pageYOffset")
+        pg.evaluate("(k)=>document.querySelector('[data-rowdlg=\"'+k+'\"]').click()", dlgs[-1])
+        pg.wait_for_timeout(600)
+        b1 = pg.evaluate(BOX2); y1 = pg.evaluate("window.pageYOffset")
+        ok = (b0 == b1 and y0 == y1)
+        if not ok: bad += 1
+        print(("  ok      " if ok else "  JUMPED  ") + "opening a row's dialog",
+              "| box", b0, "->", b1, "| page", y0, "->", y1)
+        cur = pg.evaluate("()=>{const f=document.querySelector('#modal-b .tk-firstfield');"
+                          "return !!f && document.activeElement===f;}")
+        if not cur: bad += 1
+        print(("  ok      " if cur else "  NO CURSOR ") + "...and the cursor is in its first field")
 
     print("errors:", errs or "none")
     print(("ALL STILL" if bad==0 else str(bad)+" JUMPED"))

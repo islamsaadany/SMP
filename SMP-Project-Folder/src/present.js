@@ -1005,7 +1005,7 @@ function closeDeck(){
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
      never fires that event, and `fs` left standing would give the NEXT deck a
-     hidden bar and a click that advances slides (§261) in a window. */
+     hidden bar and a click that advances slides (§265) in a window. */
   root.classList.remove("fs");
   document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
@@ -1085,7 +1085,7 @@ function deckShow(n){
   });
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
 }
-/* §261 DELETED `deckPeek()` AND ITS TIMER FROM HERE, reversing the second half
+/* §265 DELETED `deckPeek()` AND ITS TIMER FROM HERE, reversing the second half
    of §69.7. It brought the bar back for 2.2 seconds whenever the pointer moved,
    which was the right answer to "how does a presenter find Exit" and the wrong
    thing to put on a projector: `pointerdown` is a move, so every click during a
@@ -1127,7 +1127,7 @@ function wireDeck(){
     var box = ev.target.closest("[data-deckunote]");
     if (box) setCycleNote(box.dataset.deckunote, box.textContent);
   });
-  /* ── A CLICK ON THE SLIDE MOVES FORWARD, IN FULLSCREEN ONLY (§261) ──
+  /* ── A CLICK ON THE SLIDE MOVES FORWARD, IN FULLSCREEN ONLY (§265) ──
      Islam's choice, so a tablet or a borrowed mouse can still drive the deck
      with the bar gone. FORWARD ONLY: a click that went back on one half of the
      slide would need a visible boundary to be usable, and the whole point of
@@ -1164,7 +1164,7 @@ function wireDeck(){
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     if (ev.target.isContentEditable) { if (ev.key === "Escape") ev.target.blur(); return; }
-    /* ── FORWARD IS FOUR KEYS AND BACK IS THREE (§261) ────────────────
+    /* ── FORWARD IS FOUR KEYS AND BACK IS THREE (§265) ────────────────
        Islam: "down and rigth for moving the slides forward left and up takes
        me back". Down and Up are what a trackpad-less laptop reaches for and
        what a projector remote's second pair sends; PageDown and PageUp are
@@ -1181,7 +1181,7 @@ function wireDeck(){
     if (back[ev.key]) { ev.preventDefault(); deckShow(DECK.i - 1); }
     if (ev.key === "Home") { ev.preventDefault(); deckShow(0); }
     if (ev.key === "End") { ev.preventDefault(); deckShow(DECK.slides.length - 1); }
-    /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§261) ──────
+    /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§265) ──────
        It closed the deck outright, so the one key a presenter presses to get
        their laptop back also threw away the presentation and dropped them onto
        the page behind it, in front of the room. Two steps now: out of

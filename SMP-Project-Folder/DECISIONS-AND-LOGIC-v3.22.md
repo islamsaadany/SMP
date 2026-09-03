@@ -29743,7 +29743,533 @@ not touched by it.
 
 ---
 
-## §261 — FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (2026-09-03, reversing the second half of §69.7)
+## §261 — THE SETUP TABLES ARE ARRANGED, AND THEIR ROWS ACT FROM ONE MENU (2026-09-03)
+
+Islam: *"allow me in the setup to rearrange the business units table so they
+appear in the navigation as per this order and let's clean this table making a
+three dots option to actions like the registry file."*
+
+Settled from a mockup drawn out of the RUNNING platform before a source was
+touched (rule 1c, §41.9), published as an artifact and amended once on his
+word. Two halves, and each of them turned out to be smaller than it looked
+once it was measured.
+
+### §261.1 — THE ORDER WAS ALREADY STORED, AND ALREADY THE OFFICE'S
+
+Nothing new is stored, which is the whole reason this is a small change. The
+order **is** `UNIT_KEYS` / `FUNCTION_KEYS` — written to `units.idx` on every
+save, read back by `ORDER BY idx`, and drawn from by the navigation row, the
+group page and this table alike. `lib/authorize.js` has classified a change to
+that list as `setup` since it classified anything. So: **no migration, no
+schema change, no new rule, and nothing for the server to learn.** What was
+missing was a control.
+
+**AND IT COULD ALREADY BE DONE, JUST NOT WHERE ANYBODY WOULD LOOK.** The
+group's Performance page has arranged these same cards since §101 — and only
+in its CARD view: switch that section to its table and the handles are gone.
+Setup, the page named after setting things, had none. **Both stay**, at
+Islam's word: they are two views of one list, exactly as the group's themes
+and capabilities already are, and they commit through the same
+`applyOrder(UNIT_KEYS, …)`, so the two cannot end up with two orders.
+
+**A MODE, NOT A PERMANENT HANDLE.** An accidental drag here reorders the
+navigation for everybody in the tenant, so it takes a press to arm — the trade
+§101 made for a plan's rows, and the same word on the button.
+
+**THE FILTER AND THE SORT GO WITH THAT PRESS, AND THAT IS NOT TIDINESS.**
+`tkApply` HIDES the rows it filters out rather than removing them, so they keep
+their `data-oi` and sit invisibly between the ones you can see; `tkSort`
+REORDERS the rows in the DOM. Either one makes a drop land somewhere other than
+where it looks — and what it would commit is the order of the navigation. So
+while arranging the search box is not drawn and `tkHead(id, false)` turns the
+whole head unsortable, with the index still counting through the disabled
+columns or turning sorting back on would sort by the wrong one.
+
+### §261.2 — §93.14 WAS CARRIED OUT ON ONE OF TWO NEIGHBOURING PAGES
+
+The second half was not a new idea: §93.14 did exactly this to the FUNCTIONS
+page — *"Islam, on rows measuring 155px beside the register's 39: 'learn from
+what we have done in the people table'"* — and stopped there. So for two weeks
+the two tables either side of the same navigation row disagreed about what a
+row's last column is for.
+
+Measured before anything was written, at 1560px: **a units row is 130px** where
+a register row is 39 and a functions row is 37, and all of it is one cell
+holding a pen, Retire, Clear progress and Clear plan in a stack. With the
+actions in a menu and the fields in a dialog: **the table 1338 → 535px, the
+page 2265 → 646px**, still 1285px in a 1285px pane with no sideways scroll
+(§158).
+
+**THE MENU'S WORDING IS THE FUNCTIONS PAGE'S, COPIED RATHER THAN COMPOSED** —
+`Clear progress`, `Clear plan`, the destructive act below a rule. One
+difference, deliberate: **there is no Delete**, because a unit is retired and
+never deleted, so there is no entry whose refusal would have to be written
+(§62 has nothing to refuse).
+
+**AND COMPANIES HAD A REFUSAL DRESSED AS A FACT.** Its last column held a pen
+and a dotted chip reading *"holds 3 units"* — which is not a fact about the
+company at all but the reason there is no Retire button. A refusal belongs
+where the confirmation would be (§62), so *Retire this company* is a live menu
+entry now and pressing it names what is in the way. **No handle**: a company
+has no order in the navigation, and a grip reordering a list nobody sees would
+be a control with no outcome (§45.2).
+
+### §261.3 — THE MARK LEFT THE TABLE, AND THAT WAS ISLAM'S CORRECTION
+
+The first drawing offered a **Mark** column and paid for it by folding *Shown
+in the nav* into the unit's own cell. Islam: *"let the mark out of the table
+and only in the settings."*
+
+His answer is better than what was drawn, and measurably: with no Mark column
+the table is **1285px in a 1285px pane with 0 overflow** — the same totals —
+so *Shown in the nav* keeps its column and nothing had to be given up. The
+mark lives in the dialog, which is the only place with room for its preview,
+its two controls AND §52.9's sentence about PNG and transparency.
+
+**§52.9 IS REVERSED, AND ITS REASON EXPIRED RATHER THAN BEING WRONG.** That
+section gave the marks a section of their own instead of a twelfth column
+because *"a mark needs a preview and two controls, which a 7% column cannot
+hold"* — true, and it did not have a third place to put it. `renderUnitMarks()`
+is DELETED, not left uncalled (§24).
+
+**THE COST IS STATED RATHER THAN DISCOVERED**: that section was the only place
+answering *which units have no mark* at a glance, and that is now one dialog
+per unit. All ten in the worked example carry one.
+
+### §261.4 — ONE DIALOG, IN THE REGISTER'S OWN MARKUP
+
+`ROWDLG` is `PDLG` one table wider, and deliberately the same shape: `.pdlg`,
+`.pdsect`, `.pdf`, `.pdfl`, `.pdro`, `.pdfoot`. Those styles were never scoped
+to people; they only ever had one caller.
+
+**THE FIELDS ARE THE PAGE'S OWN, UNCHANGED** — `data-uname`, `data-ucomp`,
+`data-coflag` and the rest are the same attributes the row carried, bound by
+the same handlers writing to the same places. What had to change is WHERE they
+are looked for: `wireSetupFields(root)` and `wirePicker(root)`, the register's
+own arrangement, because the dialog's body is REPLACED after `wire()` has run
+and the bindings it just made would die with the nodes.
+
+**`ROWEDIT` STILL HOLDS THE ROW**, so Cancel still restores the snapshot — and
+**§110's role pointers now come with it on a unit and a function**, which they
+did not before: a head is not stored ON the unit, so restoring the unit alone
+left the grant standing. `ROLE_BEARING_ROWS` is a list rather than a test for
+one table (§65: a second table joining a behaviour by omission is how these
+drift); Companies is deliberately absent, holding no head and no custodian.
+
+**AND IT CLOSED A TRAP §93.14 WROTE DOWN ABOUT ITSELF.** That section recorded
+that *"a hidden column renders nothing at all, edit field included"*, which is
+why Nav name and Code had to stay visible on the Functions table. In a dialog
+every field is drawn whatever the Columns menu says — a fault closed, not a
+feature added.
+
+**SAVE CLOSES AND COMMITS NOTHING**, because every field has already written
+itself on blur (§35); a button pretending to be the moment of saving would be
+reassurance that lies (§63.2). Cancel is the one that acts.
+
+### §261.5 — WHAT DRIVING IT FOUND, AND WHAT THE CHECK FOUND
+
+Four faults, none of them visible by reading:
+
+- **"3 pillarss"** in the dialog's subtitle — §107.8's own trap, committed by
+  somebody quoting it. `plural()` returns a count followed by the word and
+  `L("pillar","bu")` is already *"Pillars"*. **A tenant's label is never
+  inflected**, and there is no singular anywhere to reach for.
+- **The menu stood beside the dialog it opened.** `openModalHtml` covers the
+  page, it does not rebuild it, so clearing `UMENU` changed nothing until
+  something painted. The page is repainted before the modal opens, and the
+  paint hook is guarded on the overlay being ON rather than on `#modal-b`
+  existing — that element is in the document at all times, emptied rather than
+  removed (§116.6).
+- **The three dots did not step aside while arranging**, which the approved
+  mockup says they do — found by the check, not by looking.
+- **"IT Dist.."** in the company refusal, a list of names ending in one that
+  already carries a stop. `endStop()`. `fnPanels` joins sentences the same way
+  and has the same latent fault; recorded, not fixed here, because it is not
+  this change's.
+
+**`checks/setup-arrange.py`: 37 red on the shipped pre-§261 build**, and it
+REPORTS rather than dying (§215). **Seven of its own assertions passed
+vacuously on that build** and were tightened (§113.8): an absence over an empty
+menu is not an absence; an undo is only evidence if something was done; an
+agreement between two lists nothing moved proves nothing. **And one of its
+probes reported a correct build broken** — §5 narrowed `ACCESS.super.c_units`
+and landed on the SMO, who holds a second role, because `grant()` answers with
+the most generous across every role somebody holds. It becomes each person in
+turn and asks the rule.
+
+**`checks/no-jump.py` HELD A SELECTOR THIS CHANGE MOVED** (§51.11, and that
+file caught it): its inline-pen trial searched `[data-rowedit]` on Business
+units and reported MISSING. **Rewritten, not deleted** (§218) — it is
+Capabilities now, one of the three tables that still opens its rows in place,
+and Business units gained a trial of its own asking the same question of the
+door it has: opening the dialog moves nothing behind it and the cursor still
+lands. Its first version searched the closed page and reported MISSING on a
+build that has the feature — the door is behind the menu.
+
+### §261.6 — WHAT WAS MEASURED
+
+`checks/setup-arrange.py` 0 failures (37 on the build before) · `no-jump.py`
+ALL STILL · full `qa.py` sweep ERRORS none · `test-authorize.js` **495/0**,
+with four new assertions at both ends (the office may reorder either list, a
+unit head may not, and the refusal names the list) · `test-graph-diff.js`
+126/0 · round trip, clean-slate and clean-parity PASS on virgin Postgres 16 ·
+two tabs 24/0 · ten neighbouring checks green (people-dialog, register-header,
+role-picker, setup-pages, setup-header, table-fit, fn-pillars, setup-overview,
+attention-dismiss, duplicates, gap-fill) · no sideways scroll on any of the
+three pages at 1920 / 1560 / 1280 / 1100 / 1000, arranging included · the new
+elements measured in both themes: band label 5.31 / 5.96, the lit Arrange
+button 5.32 / 9.82, the row number 5.31 / 5.96.
+
+**RECORDED, NOT DONE**: `fnPanels` joins sentences that can double a full stop
+(above); and the group's Performance page still arranges the unit cards in its
+card view only, which is where it was before this and is now the second of two
+doors onto one list — kept at Islam's word.
+## §262 — HISTORY: WHO CHANGED WHAT, AND A WAY BACK (2026-09-03, spec 028)
+
+Islam, after the reporting round in which people lost work: *"how about a
+history saving and recovery feature to track the changes per user and per unit
+and function to ensure nothing is lost?"* Then, on the mockup drawn from real
+log rows (`design-mockups/history/2026-09-03_history-page.html`), three
+questions and *"ok agreed let's build"*.
+
+**NOTHING NEW IS WRITTEN, AND THE FIRST ANSWER GIVEN WAS WRONG.** I told him
+the log kept only the old value and that storing the new one was a step to
+build. Driving the real save path as five demo people to produce rows for the
+mockup showed `change_log` has carried BOTH since §42 — who, when, which
+place, which row, which field, `from` AND `to` — so the correction was made in
+the same message as the mockup. *A claim about what a table holds is worth what
+reading a row of it is worth.* The feature is therefore a SCREEN over the log
+and a WAY BACK, and no migration.
+
+**THE PAGE IS THE OFFICE'S BY RULE (his 1)**, gated like the Platform Inbox
+(`c_history` is `area:"always"` with `inOffice()` on the def and
+`isOfficeRole` on the server, §97's shape): who reads every person's changes is
+not a tick somebody could set on a bad afternoon. It sits under *Running the
+cycle* beside the Inbox. **One line per changed FIELD**, never per envelope: an
+entry carrying two moved fields is two lines, and a submission is one line
+saying so. **The filters ask the server; the search does not** (§35): person,
+place, kind and window are a new ask each, the search hides rows in place and
+never repaints. Every cell is one line with the whole value on the hover
+(§88), the table is `table-layout:fixed` with a colgroup so it FITS the pane
+(§158) — the first build overflowed the pane and cut Restore off the right
+edge, found by shooting the page rather than reading it — and the day picker
+carries six windows so it wears the platform's own searchable dropdown like
+its three neighbours (§45.5's threshold is six).
+
+**RESTORE IS AN ORDINARY CHANGE, NEVER A ROLLBACK (his 2, and he asked the
+difference).** It locates the row by target and id — never by position (§48)
+— through the platform's own `findById` for a unit or a pillars function and a
+walk of the capabilities for a projects function, puts the OLD value into the
+field (or deletes the key when the field was absent before, §50.6), and calls
+`paint()`, which ends in the autosave: so it is authorised (§42), merged with
+everybody else's work (§210) and logged like any change — and a restore can
+itself be put back. A rollback would copy an earlier database over the current
+one and silently destroy what everybody did since. **A row that cannot be put
+back says why on a greyed control** (§61): a submission is reopened from its
+Reporting tab, a reorder is dragged back on the Plan, a setting is put back on
+its own page, and a row that was ADDED is removed from the plan. The
+confirmation names what goes back to what and who set the current value.
+
+**THE READ IS FILTERED, NEVER THE WHOLE LOG (his 3, and he asked the cost).**
+`GET /api/state?log=1` takes person, target, kind, a `from`/`to` window and a
+cap of 500, and answers from one indexed query on the log — never the graph
+(§98). The window is a pair of INSTANTS the browser works out from the reader's
+own day, so "today" is their today and the server keeps no notion of a date.
+**Everybody else may ask about ONE place they hold a role at**, read off the
+stored register and the world (`R.personRoles`, §42), or is refused — and the
+world holds no people, which the first build forgot and the Postgres test
+caught. The cost stated to him and true: a filter change fetches again, and the
+count is of what was fetched.
+
+**THE UNIT'S OWN LINE, AND A DOOR.** A unit's or function's pane band carries
+*"Last changed by X, today 05:16 · See history"* — one ask for one row per
+target, cached a minute, written into the band after paint (§35) — and the
+door opens the same table in the platform's own dialog scoped to that place,
+with no Where column because it is all one place. A custodian, who has no
+Setup, has the line and the door; the server's own gate is what lets them
+read it.
+
+**THE GLOBAL IS `TRAIL`, NOT `HISTORY`.** The first build was named `HISTORY`
+and every assertion about the rail failed for a reason no reading would find:
+`HISTORY` is the platform's own (the closed cycles, `config-data.js`),
+reassigned on every hydration, so the module was silently replaced the moment
+the server answered (§56.7 — a clean load and a collision in one global).
+
+**PROVED, AND PROVED ABLE TO FAIL.** `checks/history-page.py` over a stub
+whose rows were produced by the real save path: the rail over HTTP and not
+over `file://`, the ask recorded with its filters, seven lines from six
+entries, before-and-after in the row, the search in place with zero repaints,
+Restore greyed with its reason, the confirmation, Put it back read off the
+DATA and the POST that carried it, an absent field going back to absent, the
+unit's line and its door, the custodian's line, the table fitting the pane —
+**25 red** against `main`'s build, and its first two runs died rather than
+reported (§215), so every press and every pick degrades. `scripts/
+test-history-read.js` drives the real handler on a real Postgres 16: real
+saves by three people, every filter, the cap, the custodian's own place
+allowed and another refused, no session refused, the ordinary read untouched.
+`test-authorize` 491/0; `extract-kb --check` in step; full `qa.py` sweep
+ERRORS none. `setup-pages.py` is red 3 on `main`'s own build (the Business
+units table head), untouched by this.
+
+**RECORDED, NOT DONE.** The recipe says it: work that never reached the server
+leaves no line here — the banners (§258) stand in front of that. A restore of a
+SWOT line writes the whole line back; a reorder has no Restore. The band's
+line names the unit's last change while sitting on a pillar's band, which is
+where the pane's one band is; if it reads as the pillar's, it moves.
+
+## §262.1 — THE TABLE, CORRECTED FROM THE BUILT PAGE (2026-09-03)
+
+Islam, on the built History: *"make the who matching the name in the
+register not the full name, for the from to you need to wrap the change to
+appear in the cell and same for the row and when we need to split to date and
+time into 2 columns the last column of restore header is empty and what would
+restore button do does it show warning or just a direct restore?"*
+
+**WHO IS THE REGISTER'S NAME.** The log stores the full legal name; the page
+resolves the key against the register and draws `knownName()` — the same
+word the register and every picker show (§93.8, §130.7) — with the full name
+on the hover. The unit's line and the confirmation say the same word.
+**ROW AND FROM → TO WRAP**, reversing §88 for exactly those two columns at his
+instruction: a value is what this page exists to show, and a value clipped to
+an ellipsis is a value not shown. The seven short cells stay one line, or a
+name would set the row's height. **DATE AND TIME ARE TWO COLUMNS**, and the
+last column is headed **Restore** — a column with a control in it and no name
+over it read as a mistake. **AND RESTORE ASKS FIRST**: it never restores on
+the press; the confirmation names the row, the value going back and who set
+the current one, and only *Put it back* saves — answered to him and asserted.
+`checks/history-page.py` gains four assertions for the four; the modal's
+Restore column needed 10% to hold its button whole (§158), found by the check.
+
+## §262.2 — EVERY CELL WRAPS, NOTHING IS CUT (2026-09-03)
+
+Islam, from his own tenant's History at a laptop's width — *"date and time
+needs to wrap as well"* — with the time reading `10:…` and Restore `···`.
+§262.1 had wrapped two columns and left the other seven clipped, and a
+clipped cell is a cell not shown; so every cell wraps now and nothing is ever
+cut. **The short columns are pixels, the prose columns a share**: a chip and a
+button have a width of their own that a percentage of a narrow pane cannot
+honour (Restore and *REPORTING* cut at 1180, then *REPORTING* broken across
+two lines at 1440 — both found by the check and the shot, not by reading), so
+Date, Time, Kind, Field and Restore are sized in pixels and Who, Where, Row
+and From → To take what is left. A word longer than its column breaks rather
+than being cut; the chip itself never breaks. Asserted at 1440 AND 1180: no
+cell holds more than it shows, and a time is never split.
+
+
+## §263 — A SAVED DRAFT CAN BE SUBMITTED WHERE IT STANDS (2026-09-03)
+
+*(Built as §261 and renumbered on the merge: main took §261 and §262 from two
+other sessions while this was being built — the Setup tables' arrangement and
+History. Recorded rather than silently renumbered, because the commit message
+and the branch name still say §261.)*
+
+Islam, using the reporting page: *"in the reporting on saving the draft keep
+the submit to smo button there as it's posible to save the draft and if it's
+complete we can submit directly rather than reopen to submit."*
+
+**THE CONTROL WAS REMOVED AT THE ONE MOMENT SOMEBODY LOOKS FOR IT.** §220
+closed a report on Save draft — his own instruction, *"the save draft should
+dim the full report until he press reopen"* — and the bar was built as one
+either/or: `subd || parked` drew the state word and Reopen, everything else
+drew Submit and Save draft. So parking a FINISHED report and sending it took
+three presses through a state it had to be taken out of first, and the way out
+of *closed* was the only thing on offer.
+
+**§220 IS NOT REVERSED, AND THE DIFFERENCE IS THE WHOLE OF THIS SECTION.**
+That rule is about the REPORT — the figures and the note are locked until
+Reopen, `reportClosed()` still reads one answer for the bar, the lock and the
+pen, and every control inside `#panel` is still genuinely `disabled` rather
+than dimmed. What changes is which controls the BAR draws beside the state
+word. Measured on the built file: a parked report is `editable 0 of 25` before
+and after.
+
+**THREE STATES, IN THE ORDER OF WHAT IS LEFT TO DO.** A submitted report
+offers Reopen and nothing else — it has been sent, and undoing that is the
+only act remaining. A PARKED one offers Submit beside it, because a draft is a
+report somebody is still working on. An open one is unchanged.
+
+**ONE SUBMIT BUTTON, WRITTEN OUT ONCE** (§53.5). The thing that must not
+differ between the open bar and the parked one is the GATE: §221 shuts Submit
+while figures are owed or the plan holds a gap, and a second copy of that
+markup is exactly how a build comes to offer an ungated Submit on a parked
+report while the open one is correctly shut. So `submitWhy` is resolved once
+into a `submit` string both branches use, and the check asserts the pair —
+the button is back AND it is still shut — because a build that satisfied only
+the first is the dangerous one.
+
+**AND THE REFUSAL IS STILL THE HANDLER'S, NOT THE DIMMING'S** (§221, §163):
+`aria-disabled` keeps it focusable so the reason is reachable without a mouse,
+and the click handler asks `submitRefusal()` again at press time. Driven on
+the built file: pressing a shut Submit from inside a saved draft writes
+nothing and leaves the draft exactly where it was.
+
+**REOPEN DROPS ITS BOX WHERE SUBMIT IS BESIDE IT** — Islam's pick from two
+drawn in the real bar (`design-mockups/draft-submit/`, rule 1c, §41.9). With
+Submit added, option A left two bordered controls side by side and made Reopen
+the loudest thing on the bar whenever the draft was incomplete; C gives Reopen
+the same quiet orange type Save draft wears while the report is open, so the
+pair reads in the two volumes this bar already has — the act that ends the
+report shouts, the lesser act speaks. **ONE DECLARATION, TWO SELECTORS**, never
+a second block saying the same thing, and it keeps the class `rc-reopen` with
+`quiet` as a modifier so one handler and one selector still answer for both
+states. Scoped to `.repchrome`, because `quiet` is a word half the product
+uses (§65.9).
+
+**THE COST WAS MEASURED BEFORE HE CHOSE, AND IT IS THE ROW.** The bar rides
+the tab row (§150), so a wider bar meets the window sooner — 494px today,
+**659px** with Submit on it, against **577px** for the open bar. Nothing moves
+at 1440 or 1280. Below about **1000px** the draft bar becomes the widest state
+of the page where today it is the narrowest, so a small laptop meets a
+sideways scroll after saving a draft that it does not meet while reporting
+(§27.2, §158). Option A would have cost another 30px of window. Stated, not
+discovered: the fit at 1500 and 1280 is asserted rather than remembered.
+
+**MEASURED ON BOTH SIDES OF THE SWITCH, AND ON BOTH FUNCTION SHAPES** (A15,
+§53.5): `repChrome` is one builder, so a business unit, a capability function
+and a function that plans in pillars were driven to a parked report and their
+bars compared — *"Draft saved &middot; Submit to the SMO &middot; Reopen &middot;
+Close"* on all three, Submit shut on all three (the demo plan owes gaps), Reopen
+at `0px` of border on all three, `editable 0` on all three, no console error
+anywhere. Walking three pages proves they render; what is asserted here is that
+they AGREE.
+
+**Proved able to fail: 11 red** on the shipped pre-§263 build — and **the
+first falsification run DIED rather than reporting** (§215, again): with no
+Submit on a parked bar `querySelector('.rc-submit').click()` threw, the run
+ended, and `grep -c FAIL` read four where the truth is eleven. Every press in
+the new section degrades now, and whether it landed is itself asserted.
+**One assertion was REVERSED AND REWRITTEN, never deleted** (§218) —
+*"with no Submit left lying there"* is now the pair above it. `perf-line` and
+`table-fit` green; `test-authorize` 491/0 and `test-graph-diff` 126/0 (nothing
+server-side moved — a park still classifies exactly as it did);
+`report-saves.py` is red on the untouched build for the stub-without-a-worker
+fault §250.2 records, reproduced before this change and not touched by it.
+
+## §264 — A SUMMARY IS MADE OF THE NUMBER IT SUMMARISES (2026-09-02)
+
+*Renumbered from §257 on the merge back: main took §257&ndash;§263 while
+this was being built, exactly as main's own §257 was renumbered from §251.
+The sub-sections keep their own numbering (§264.1, §264.2) so the order in
+which the corrections arrived is still readable.*
+
+Islam, from his own Performance page, of the CON02 pane: *"the key measure
+performance has a highest and lowest that doesn't match the measure
+progress."*
+
+**HIS SCREEN, MEASURED.** One measure — *After Sales Revenue*, `≥ 5M`,
+compiled by `Sum`, 3M reported. The card's headline read **90%**, the Progress
+column beneath it read **90%**, and Highest and Lowest both read **60%**. Every
+one of those three numbers is arithmetically correct. They are the answers to
+**two different questions**, printed six centimetres apart with nothing saying
+so.
+
+**§239 MADE THE SCORE DERIVED, AND MOVED HALF THE READERS.** That section is
+explicit about what it did: a `Sum` measure is judged against the share of its
+target due by now, so at six months of twelve, 3M against 5M is 3 ÷ 3.33 =
+**90%**, not 3 ÷ 5 = 60%; and `progress` **goes on holding the raw
+actual-against-the-annual-target ratio**, deliberately, so archives and closed
+cycles read as they did and nothing is migrated. It moved every reader that
+**AVERAGES** — `pillarPerf`, `koScore`, the Progress column, the deck — and
+left every reader that **SUMMARISES** exactly where it was.
+
+Seven cells, and the split runs cleanly along that line:
+
+| Where | The stale cell |
+| --- | --- |
+| `unitPerfPane` — a pillar's pane on Performance | Highest · Lowest ← **his screen** |
+| `pillarBody` — the same pillar's row on the Plan side | Highest · Lowest |
+| `renderUnitPerformance` — the unit's Key objectives card | Highest · Lowest |
+| the unit's *See the key objectives* breakdown | Progress **and** Contribution |
+| the group's Key Objectives breakdown | Progress |
+| a unit's card on the group and company pages | Progress |
+| a capability's breakdown, and `capKOTable`'s **Score** | Progress · Score |
+
+**THE FOUR BREAKDOWNS ARE THE WORSE HALF, AND THE PRODUCT HAD ALREADY WRITTEN
+DOWN WHY.** Each of them opens *from* a headline in order to explain it, and
+each was printing a column of numbers that do not make the number above them.
+§243, three lines from the cell this changes, states the rule for the weights:
+*"a breakdown that disagrees with the headline it sits under is worse than
+none"*. The same argument was never carried the two inches across to the figure
+in the next column.
+
+**IT SHIPPED BECAUSE THE TWO AGREE ON EVERY ROW THAT DOES NOT PRORATE.** Only
+`Sum` prorates (§239: *Latest* is a rate at a point in time, *Average* is
+normalised, and prorating either would invent a glide path). So on the whole of
+a plan compiled by `Latest` the two figures are byte-identical and the fault is
+invisible; it appears the first time a `Sum` row is reported mid-year. Measured
+across the worked example: **30 rows** where the two part — 17 pillar measures,
+10 unit objectives, 1 group objective, 2 capability objectives — and every
+single one compiles by `Sum`.
+
+**NOTHING STORED MOVES, AND THAT IS THE SAFETY ARGUMENT.** The fix is which of
+the two figures a summary **prints**. `m.progress` is not written, not
+recomputed and not migrated; every archive, every closed cycle and the
+`.xlsx` round trip are untouched. **The Focus board goes on reading the raw
+figure on purpose** — §239 settled that reward stays a year-end judgement — so
+that is asserted at both ends, or a build that swept every reader onto the
+score would satisfy everything else here and quietly change what earns.
+
+**ONE READER, SO A CARD CANNOT NAME A ROW ITS OWN HEADLINE LEFT OUT.**
+`scoreSpread(rows)` is the Highest/Lowest pair, and it is handed **the very
+list the average was taken over** — `scorableMeasures()` for a pillar,
+`scorableKOs()` for a list of objectives — rather than a second filter written
+beside it (§53.5). `scorableKOs()` is new only in the sense of being *named*:
+the test lived inside `koScore()`, which is exactly how the objectives card came
+to keep a membership rule of its own (`m.target && m.progress != null`), one
+that admits a hidden row and a milestone the headline excludes. It is lifted,
+not rewritten, and `koScore()` reads it.
+
+**AND `measureScore` IS WRAPPED, NEVER PASSED BY NAME.** §250.1's trap, and
+`scoreSpread` is precisely the shape that falls into it: `measureScore` takes an
+optional share and `Array.map` hands its callback the **index**, so a bare
+`.map(measureScore)` would prorate the first row by 0 (unscorable), the second
+by the whole year and the third by twice it — silent, and wrong only on the
+`Sum` rows, which is the half nobody would think to check.
+
+**AND ONE THING BESIDE THE NUMBER CHANGES, ON TWO TABLES.** The group's and the
+unit-card's breakdowns wrote the figure as `m.progress + '%'`, which prints
+**`null%`** for a row with nothing scored; going through `pct()` prints the
+em-dash the rest of the product uses for *nothing to report* (§35: absent is not
+nought). No row in the worked example is in that state, so nothing visibly
+moves — it is a latent case closed on the way past, and it is recorded rather
+than left to be discovered.
+
+**THE COST, STATED.** Thirty figures in the worked example change on screen, all
+upward and all of them the ones that were already being printed correctly one
+column to the left. A tenant's own numbers move the same way — the Highest on a
+mid-year `Sum` plan will now read higher than it did, because it has stopped
+being measured against a target that is not due yet.
+
+### §264.1 — AND THE CHECK'S FIRST RED RUN WAS THE CHECK
+
+`checks/measure-score-spread.py` was written red-first and its first run against
+the pre-fix build **died on the missing shared reader**: five failures, none of
+them about a cell, and not one of the seven surfaces ever measured. §215's fault
+committed inside the file written to guard against it. It carries its own
+membership test now — used **only** where the product's is absent, and asserted
+to agree with the product's wherever that exists — so it reports **11 failures**
+against the build before, each one naming a stale cell and the figure it should
+have held, and **33 green** after.
+
+Two of its assertions exist for §113.8's reason rather than for the fix: the
+demo must genuinely hold a pillar and a unit whose **extremes move**, not merely
+one holding a row that differs, because a pillar whose outlier happens to be
+unchanged passes every assertion above on the broken build. And the pillar and
+the unit are **found at runtime** rather than named, so the check survives a
+change to the worked example.
+
+### §264.2 — RECORDED, NOT DONE
+
+Two readers of `m.progress` are left exactly as they are, and both deliberately:
+the **Focus board** (above), and the **project outcomes** side of a capability's
+panes, which is a different model entirely — an outcome's reported figure, not a
+measure scored against a prorated target. Whether a project outcome should
+prorate at all is a decision about how projects are measured, not a
+disagreement between two cells, and it has not been put to Islam.
+
+---
+
+## §265 — FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (2026-09-03, reversing the second half of §69.7)
 
 Islam, from a live presentation: *"on the presntation in full screen with every
 click the bottom banner appear then hide. it shouldn't appear full screen

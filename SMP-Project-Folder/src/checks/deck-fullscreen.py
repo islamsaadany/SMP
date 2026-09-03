@@ -1,4 +1,4 @@
-"""FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (§261).
+"""FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (§265).
 
 Islam, from a live presentation: *"on the presntation in full screen with every
 click the bottom banner appear then hide. it shouldn't appear full screen
@@ -36,7 +36,7 @@ WHAT IS ASSERTED, AND WHY EACH ONE IS HERE:
       bar is on screen and a click on the stage does not advance, because the
       bar's own Next button is six inches below it.
 
-Run it against the shipped pre-§261 file to watch it fail:
+Run it against the shipped pre-§265 file to watch it fail:
   python3 qa-run.py checks/deck-fullscreen.py ../strategy-management-platform-v3.22.html
 """
 import os, sys
@@ -81,7 +81,7 @@ BAR = """() => {
            opacity: +cs.opacity, events: cs.pointerEvents,
            /* HEIGHT IS PART OF "ON SCREEN". Without it a CLOSED deck reports
               top 0, height 0, opacity 1 and satisfies every assertion that the
-              bar came back — which it did on the pre-§261 build, where Escape
+              bar came back — which it did on the pre-§265 build, where Escape
               had closed the deck (§94.5). */
            onScreen: b.height > 1 && b.top < innerHeight - 1 && +cs.opacity > .05,
            reachable: !!(at && (at === bar || bar.contains(at))),
@@ -149,7 +149,7 @@ with sync_playwright() as p:
         b.close(); sys.exit(1)
 
     # ── 1 · the reported fault ──────────────────────────────────────────────
-    print("\n── 1 · the bar does not come back (§261 — this is what was reported)")
+    print("\n── 1 · the bar does not come back (§265 — this is what was reported)")
     bar_hidden(pg, "on entering fullscreen")
 
     js(pg, "() => deckShow(2)")
@@ -194,7 +194,7 @@ with sync_playwright() as p:
        guard.get("before") == guard.get("after"), guard)
 
     # ── 3 · the keys ────────────────────────────────────────────────────────
-    print("\n── 3 · forward is four keys and back is three (§261)")
+    print("\n── 3 · forward is four keys and back is three (§265)")
 
     def key(k, want, label):
         js(pg, "() => deckShow(4)")

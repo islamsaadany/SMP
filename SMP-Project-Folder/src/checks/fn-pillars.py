@@ -378,9 +378,20 @@ with sync_playwright() as p:
        "Who we are" in uh and any("spiration" in h for h in uh), uh)
     pg.evaluate("()=>{ EDIT_PAGE.foundation=true; paint(); }")
     pg.wait_for_timeout(450)
-    ub = pg.query_selector_all("#panel .hoverpen textarea, #panel .hoverpen input")
+    # §268: `hoverpen` was the marker for the pen sitting in the CARD's corner,
+    # and a unit's Foundation pen is on the section line now — so keying on it
+    # asked whether the pen is still there rather than whether the PAGE still
+    # opens, which is what this assertion means (§51.11, on my own change).
+    ub = pg.query_selector_all("#panel .card textarea, #panel .card input")
     ok("...and still opens for editing", len(ub) >= 2, len(ub))
-    if ub:
+    # AND THE WRITE GOES TO THE FIELD IT NAMES. `.hoverpen` used to scope this
+    # to the aspiration CARD, so `[0]` was the aspiration; widened to `.card`
+    # it became the first clause of Who we are, and the assertion below then
+    # read the aspiration it had never written. Named outright now, which is
+    # what it should always have been (§94.8: assert the thing, not a position).
+    asp = pg.query_selector_all("#panel p.statement textarea, #panel p.statement input")
+    if asp:
+        ub = asp
         ub[0].click(); ub[0].fill("UNIT PROBE")
         pg.evaluate("()=>document.activeElement.blur()"); pg.wait_for_timeout(350)
         ok("...writing to the UNIT",

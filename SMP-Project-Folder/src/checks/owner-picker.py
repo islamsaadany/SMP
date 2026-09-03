@@ -63,7 +63,7 @@ def open_plan(pg):
 
 
 def pen(pg):
-    b = pg.query_selector(".pane .paneact .penbtn")
+    b = pg.query_selector("#secrow-in .secpen")
     assert b, "no pen on the pane"
     b.click(); pg.wait_for_timeout(500)
 

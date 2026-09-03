@@ -73,7 +73,7 @@ with sync_playwright() as p:
         if on and on[0] == "Functions": break
         pg.click("#units .navswitch"); pg.wait_for_timeout(150)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(500)
+    pg.click('#secrow-in .secpen[data-page="plan"]'); pg.wait_for_timeout(500)
     # §196: THE MARK IS A COUNT OF MONTHS. What is asserted is that every
     # option the control OFFERS writes the value its label names — never a
     # list of literals here, or the check and the product each hold their own

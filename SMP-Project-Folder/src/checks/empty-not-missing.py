@@ -1,4 +1,4 @@
-"""EMPTY IS NOT MISSING (§261) — the bar with nothing owed says where, and
+"""EMPTY IS NOT MISSING (§272) — the bar with nothing owed says where, and
 the office is not shown it at all.
 
 Islam, on Mobile and then Care: *"mobile keeps showing filling what's missing
@@ -37,7 +37,7 @@ THE CHECK MAKES ITS STATE (§94.2). The shipped plan owes 44 on Mobile, so
 every assertion here is unreachable until every counted gap is filled and the
 collaborators are left alone — which is Islam's tenant, reproduced.
 
-PROVED ABLE TO FAIL (§94.5): against the pre-§261 build, §1 fails (the office
+PROVED ABLE TO FAIL (§94.5): against the pre-§272 build, §1 fails (the office
 is shown the bar), §2 fails on the count, the chips and the rail marks, §3
 fails on the walk, and §5 fails on the refresh.
 """
@@ -148,9 +148,17 @@ with sync_playwright() as p:
     ck("the state is made: nothing owed", made["total"] == 0, made)
     ck("...and something still empty", made["openable"] > 0, made)
 
+    # THE PEN IS ASKED FOR BY THE QUESTION, NOT BY ONE CLASS (§51.11, and
+    # §268 moved it while this branch waited: the office's pen left the pane
+    # corner for the section line, so `.penbtn[data-page]` alone reported the
+    # office as having no way to edit at all). Every control that opens this
+    # page for editing counts, and the RULE is asked beside the screen — a
+    # check that only knows today's markup fails the next time it moves.
     office = pg.evaluate("""() => ({
       band: !!document.querySelector('[data-gapband]'),
-      pens: document.querySelectorAll('.penbtn[data-page]').length,
+      pens: document.querySelectorAll(
+        '.penbtn[data-page], .secpen[data-page], .editbtn[data-page]').length,
+      mayAuthor: SMPRules.mayAuthorPage(world(), viewer(), "u_plan", TARGET),
       cta:  document.querySelectorAll('[data-fillcta]').length,
       rail: document.querySelectorAll('.ritem .rgap').length
     })""")
@@ -159,6 +167,8 @@ with sync_playwright() as p:
     ck("...no rail mark either", office["rail"] == 0, office)
     ck("...and STILL HOLDS THE PEN, which is the reason (§94.15)",
        office["pens"] > 0, office)
+    ck("...which the rule says too, not just the screen",
+       office["mayAuthor"] is True, office)
 
     # ── 2 · THE FILLER IS SHOWN IT, AND IT SAYS WHERE ──────────────────
     print("\n2 · the filler's bar carries the count, the chips and the rail marks")
@@ -187,7 +197,9 @@ with sync_playwright() as p:
         cta: (band.querySelector('.eqcta') || {}).textContent || "",
         railText: rail.map(r => r.textContent.trim()),
         railQuiet: document.querySelectorAll('.ritem .rgap.req').length,
-        pens: document.querySelectorAll('.penbtn[data-page]').length };
+        pens: document.querySelectorAll(
+          '.penbtn[data-page], .secpen[data-page], .editbtn[data-page]').length,
+        mayAuthor: SMPRules.mayAuthorPage(world(), viewer(), "u_plan", TARGET) };
     }""")
     ck("the filler IS shown the bar", fil.get("drawn"), fil)
     ck("...in the quiet register", fil.get("mode") == "empty", fil.get("mode"))
@@ -209,7 +221,7 @@ with sync_playwright() as p:
        sum(int(t.split()[0]) for t in fil.get("railText", []))
        <= fil.get("openable", 0), fil.get("railText"))
     ck("the filler has no pen — which is why the door is theirs",
-       fil.get("pens") == 0, fil.get("pens"))
+       fil.get("pens") == 0 and fil.get("mayAuthor") is False, fil)
 
     # §145.14 DRAWS THE DOOR TWICE — the section row's bar and the pane's
     # corner — so every copy is asked, not the one this section happened to

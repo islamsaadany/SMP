@@ -1015,28 +1015,6 @@ function draftBtns(){
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
 function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
-  /* §261: ONE SUBMIT BUTTON, BUILT ONCE, DRAWN IN TWO STATES. Islam: *"on
-     saving the draft keep the submit to smo button there as it's posible to
-     save the draft and if it's complete we can submit directly rather than
-     reopen to submit."* Save draft closed the report and took Submit away
-     with it, so the only route to sending a finished report was Reopen and
-     then Submit — a control removed at the one moment somebody is looking
-     for it.
-
-     WRITTEN OUT ONCE, because the thing that must not differ between the two
-     states is the GATE (§53.5): a second copy of this button is how a build
-     comes to offer an ungated Submit on a parked report while the open one
-     is correctly shut.
-
-     §221: NOT READY, SO THE CONTROL SAYS SO BEFORE IT IS PRESSED.
-     `aria-disabled` rather than `disabled`, because a disabled button takes
-     no focus and the reason would be unreachable without a mouse — the
-     bubble opens on hover AND on focus (§163). The click handler still
-     refuses, so the hover is the explanation and not the enforcement. */
-  var submit = submitWhy
-    ? '<button class="rc-submit hasnote" data-submit="' + esc(target) + '"' +
-        ' aria-disabled="true" data-tip="' + esc(submitWhy) + '">Submit to the SMO</button>'
-    : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>';
   return '<div class="repchrome">' +
     '<span title="' + esc(REVIEW.name + " · due " + REVIEW.due) + '">' +
       '<span class="rc-n">' + done + '</span> ' +
@@ -1044,27 +1022,21 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
     '<span class="rc-bar' + (pct < 100 ? " part" : "") + '">' +
       '<i style="width:' + pct + '%"></i></span>' +
     (mayAll
-      /* §220 IS UNTOUCHED AND THE ORDER OF THESE THREE SAYS SO: a submitted
-         report offers Reopen and nothing else — it has been sent, and the
-         way back is the only act left — while a PARKED one offers Submit
-         beside it, because a draft is a report somebody is still working on.
-         The report itself stays locked in both (`reportClosed()` is one
-         reading for the bar, the lock and the pen), so this puts the button
-         back and reopens nothing.
-
-         AND REOPEN DROPS ITS BOX WHERE SUBMIT IS BESIDE IT (§261, Islam's
-         pick from two drawn in the real bar): the pair then reads in the two
-         volumes this bar already has — the act that ends the report shouts,
-         the lesser act speaks, exactly as Submit and Save draft do while the
-         report is open. It keeps `rc-reopen`, so one handler and one selector
-         still answer for both states. */
-      ? (subd
-          ? '<span class="rc-state done">Submitted</span>' +
-            '<button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>'
-          : parked
-          ? '<span class="rc-state draft">Draft saved</span>' + submit +
-            '<button class="rc-reopen quiet" data-unsubmit="' + esc(target) + '">Reopen</button>'
-          : submit + '<button class="rc-draft" data-repsave="1">Save draft</button>')
+      ? (subd || parked
+          ? '<span class="rc-state ' + (subd ? 'done">Submitted' : 'draft">Draft saved') +
+            '</span><button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>'
+          : submitWhy
+          /* §221: NOT READY, SO THE CONTROL SAYS SO BEFORE IT IS PRESSED.
+             `aria-disabled` rather than `disabled`, because a disabled button
+             takes no focus and the reason would be unreachable without a
+             mouse — the bubble opens on hover AND on focus (§163). The click
+             handler still refuses, so the hover is the explanation and not
+             the enforcement. */
+          ? '<button class="rc-submit hasnote" data-submit="' + esc(target) + '"' +
+              ' aria-disabled="true" data-tip="' + esc(submitWhy) + '">Submit to the SMO</button>' +
+            '<button class="rc-draft" data-repsave="1">Save draft</button>'
+          : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>' +
+            '<button class="rc-draft" data-repsave="1">Save draft</button>')
       : '<span class="pill none">View only</span>') +
     /* §220: CLOSE, NOT CANCEL. The handler is `REPORTING = null; paint()` and
        nothing is discarded — figures are written as they are typed — so the

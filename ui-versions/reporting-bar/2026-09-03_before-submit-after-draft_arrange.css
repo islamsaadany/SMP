@@ -1534,21 +1534,11 @@
      family in two volumes: the act that ends the report shouts, the act that
      parks it speaks. `--cta` as TYPE, never the fill's own colour: §38.4 cuts
      both ways, and `--cta` is the deep half of the pair for exactly this. */
-  /* AND REOPEN JOINS IT WHEREVER SUBMIT IS BESIDE IT (§261). One
-     declaration and two selectors, never a second block that says the same
-     thing: the quiet half of this pair has to be one look, or the bar reads
-     in two volumes on one page and three on another (§53.5). The parked
-     Reopen keeps `rc-reopen` and takes `quiet` as a modifier, so the handler
-     and every check still find it by the one class it has always had. */
-  .repchrome .rc-draft,
-  .repchrome .rc-reopen.quiet { background:none; border:0; color:var(--cta);
+  .repchrome .rc-draft { background:none; border:0; color:var(--cta);
     font:inherit; font-size:12px; font-weight:500; letter-spacing:.04em;
     text-transform:uppercase; cursor:pointer; padding:6px 4px; }
-  .repchrome .rc-draft:hover,
-  .repchrome .rc-reopen.quiet:hover { text-decoration:underline; background:none;
-    color:var(--cta); }
-  .repchrome .rc-draft:focus-visible,
-  .repchrome .rc-reopen.quiet:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .repchrome .rc-draft:hover { text-decoration:underline; }
+  .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
   /* ── A CLOSED REPORT, AND THE WAY BACK (§220) ──────────────────────────
      Submitted or parked as a draft: the report is read-only and says so by

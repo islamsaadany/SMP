@@ -76,7 +76,15 @@ def bar_state(pg):
         submit:   !!sub,
         dim:      sub ? sub.getAttribute('aria-disabled') : null,
         tip:      sub ? (sub.getAttribute('data-tip') || "") : "",
-        draft:    !!document.querySelector('[data-repsave]')
+        draft:    !!document.querySelector('[data-repsave]'),
+        /* §261: the parked Reopen drops its box and speaks in the volume
+           Save draft used to. Read off the COMPUTED style, never off the
+           class, because the class is what was asked for and the border is
+           what a reader actually meets (§93.11). */
+        roQuiet:  (() => { const b = document.querySelector('.rc-reopen');
+                           return b ? getComputedStyle(b).borderTopWidth : null; })(),
+        parked:   !!(REVIEW.parked || {})[REPORTING],
+        subd:     !!(REVIEW.submitted || {})[REPORTING]
       };
     }""")
 
@@ -247,12 +255,102 @@ with sync_playwright() as p:
     ck("...the report is still readable", r["rows"] == before["rows"], (before, r))
     ck("the bar says Draft saved", "Draft saved" in r["state"], r)
     ck("...and offers Reopen", r["reopen"] is True, r)
-    ck("...with no Submit left lying there", r["submit"] is False, r)
+    # §218: REVERSED AND REWRITTEN, NEVER DELETED. This read "with no Submit
+    # left lying there" until §261 — Islam: *"on saving the draft keep the
+    # submit to smo button there."* What made the old assertion safe survives
+    # as the pair below: the button is back, and it is still SHUT, because the
+    # plan gap section 3 made is still standing. A build that put an ungated
+    # Submit on a parked report satisfies the first line and fails the second.
+    ck("Submit is back on the bar (§261)", r["submit"] is True, r)
+    ck("...and still shut, because the plan gap stands", r["dim"] == "true", r)
+    ck("...and Reopen drops its box beside it", r["roQuiet"] == "0px", r)
     pg.evaluate("() => { const b = document.querySelector('.rc-reopen'); if (b) b.click(); }")
     pg.wait_for_timeout(600)
     r = bar_state(pg)
     ck("Reopen gives the boxes back", r["editable"] == before["editable"], r)
     ck("...and Submit with them", r["submit"] is True, r)
+
+    # 4b - AND A FINISHED DRAFT IS SENT WITHOUT REOPENING IT (§261)
+    #
+    # Islam: *"it's posible to save the draft and if it's complete we can
+    # submit directly rather than reopen to submit."* So the act is PRESSED
+    # from inside the parked state and the DATA is read afterwards — a bar
+    # that draws the button and a bar whose button sends the report are two
+    # different builds, and only one of them is the ask (§70, §96).
+    print("\n4b · a finished draft is submitted where it stands (§261)")
+    pg.evaluate("""() => {
+      const t = UNITS[current].items[0].tactics[0];
+      t.q1 = t.q2 = t.q3 = t.q4 = true;          /* the §3 gap, repaired */
+      REVIEW.parked = REVIEW.parked || {}; REVIEW.parked[current] = true;
+      paint();
+    }""")
+    pg.wait_for_timeout(500)
+    r = bar_state(pg)
+    ck("a complete draft offers a live Submit", r["submit"] is True and r["dim"] is None, r)
+    ck("...and the report is still locked behind it", r["editable"] == 0, r)
+    ck("...and Save draft is gone, the report being saved already",
+       r["draft"] is False, r)
+    hit = pg.evaluate("""() => {
+      const b = document.querySelector('.rc-submit'); if (!b) return false;
+      b.click(); return true; }""")
+    pg.wait_for_timeout(600)
+    ck("there is a Submit to press at all", hit is True)
+    r = bar_state(pg)
+    ck("pressing it submits, with no Reopen in between", r["subd"] is True, r)
+    ck("...and the park is cleared, so Reopen means one thing", r["parked"] is False, r)
+    ck("...and the bar now says Submitted", "Submitted" in r["state"], r)
+    ck("...where Reopen takes its box back, being the only act left",
+       r["roQuiet"] == "1px", r)
+
+    # AND A DRAFT THAT IS NOT FINISHED CANNOT BE SENT BY THE SAME PRESS. The
+    # refusal is the click handler's, not the dimming's (§221) — so the button
+    # is actually PRESSED here, and what is asserted is the data it did not
+    # write. Both ends (§94.2): a build that refused every submission would
+    # pass this half and fail the half above.
+    pg.on("dialog", lambda d: d.dismiss())
+    pg.evaluate("""() => {
+      delete REVIEW.submitted[current];
+      const t = UNITS[current].items[0].tactics[0];
+      t.actual = ""; t.outActual = "";
+      REVIEW.parked = REVIEW.parked || {}; REVIEW.parked[current] = true;
+      paint();
+    }""")
+    pg.wait_for_timeout(500)
+    r = bar_state(pg)
+    ck("an unfinished draft draws Submit shut", r["dim"] == "true", r)
+    ck("...carrying the reason", "Cannot submit yet" in r["tip"], r["tip"])
+    hit = pg.evaluate("""() => {
+      const b = document.querySelector('.rc-submit'); if (!b) return false;
+      b.click(); return true; }""")
+    pg.wait_for_timeout(400)
+    ck("there is a shut Submit to press", hit is True)
+    r = bar_state(pg)
+    ck("...and pressing it sends nothing", r["subd"] is False, r)
+    ck("...leaving the draft exactly where it was", r["parked"] is True, r)
+
+    # AND IT STILL FITS THE ROW IT RIDES. The bar is wider with Submit on it
+    # (494px → 659px measured), and it shares the tab row — so what was
+    # promised is asserted rather than remembered: on an ordinary laptop the
+    # row is one line and the page does not scroll sideways (§27.2, §158).
+    for w in (1500, 1280):
+        pg.set_viewport_size({"width": w, "height": 900})
+        pg.wait_for_timeout(250)
+        fit = pg.evaluate("""() => {
+          const bar = document.querySelector('.repchrome');
+          const row = document.querySelector('.tabs-in');
+          if (!bar || !row) return null;
+          return { over: Math.round(bar.getBoundingClientRect().right -
+                                    row.getBoundingClientRect().right),
+                   scroll: document.documentElement.scrollWidth >
+                           document.documentElement.clientWidth };
+        }""")
+        ck("the draft bar fits the tab row at %d" % w, fit and fit["over"] <= 0, fit)
+        ck("...with no sideways page scroll", fit and fit["scroll"] is False, fit)
+    pg.set_viewport_size({"width": 1500, "height": 900})
+    pg.wait_for_timeout(250)
+    pg.evaluate("""() => { const t = UNITS[current].items[0].tactics[0];
+                           t.actual = 1; t.outActual = t.outTarget; paint(); }""")
+    pg.wait_for_timeout(300)
 
     # 5 - SUBMITTING CLOSES IT THE SAME WAY
     print("\n5 · submitting closes it, and Reopen is the same control")

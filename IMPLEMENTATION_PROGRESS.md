@@ -82,6 +82,45 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
+
+Islam, using the reporting page: *"in the reporting on saving the draft keep
+the submit to smo button there as it's posible to save the draft and if it's
+complete we can submit directly rather than reopen to submit."* Drawn in the
+real bar first and published as an artifact (rule 1c); he picked **C**, the
+variation that also gives Reopen back its quiet voice.
+
+**Built:**
+
+- **Submit stays on the bar while a draft is saved.** §220 built it as one
+  either/or — `subd || parked` drew the state word and Reopen, everything else
+  drew Submit — so the control disappeared at the moment somebody looks for it
+  and sending a finished draft took three presses.
+- **The report itself is unchanged and still locked** until Reopen. Measured
+  on the built file: `editable 0 of 25` before and after.
+- **One Submit button, written out once** (§53.5): §221's gate cannot differ
+  between the open bar and the parked one, and the check asserts the pair —
+  the button is back AND it is still shut while figures or plan items are owed.
+- **Reopen drops its box** where Submit is beside it, taking the quiet orange
+  type Save draft wears while the report is open. One declaration, two
+  selectors; the class stays `rc-reopen` so one handler answers for both states.
+
+**Cost, stated before he chose:** the bar rides the tab row, so it goes
+494 → 659px (against 577px for the open bar). Nothing moves at 1440 or 1280;
+below about 1000px the draft bar becomes the widest state of the page where
+today it is the narrowest. Asserted at 1500 and 1280 rather than remembered.
+
+**Checked:** `submit-gate.py` all green and **11 red** on the shipped
+pre-§263 build — its first falsification run *died rather than reporting*
+(§215), so every press in the new section degrades now. One assertion reversed
+and rewritten rather than deleted (§218). `perf-line`, `table-fit` green;
+`test-authorize` 491/0, `test-graph-diff` 126/0 (nothing server-side moved).
+`report-saves.py` is red on the untouched build for the stub-without-a-worker
+fault §250.2 records — reproduced before this change and not touched by it.
+
+**Merged to `main`** on Islam's word, 2026-09-03.
+
+
 ### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
 
 Islam, in one message: *"where can I upload the raya trade mark so it can be

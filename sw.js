@@ -308,7 +308,7 @@
    was serving "smp-shell-v4.37-blue-dividers" when this merge was made, so the
    name goes past it rather than beside it (§94.12), confirmed again
    immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.42-history";
+const SHELL = "smp-shell-v4.46-history-values";
 const ASSETS = [
   "/",
   "/index.html",

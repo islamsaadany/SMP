@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §250 on `main` (a tactic's outcome measured against its
-own window); §254 on this branch (a figure is read against what it is measured by).
+**Latest version:** §256 on `main` (§253–§256: the deck round, a reported note,
+and a slide the office does not present — §255 and §256 from another session);
+§254.7–.12 on this branch, going to `main` with this merge.
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -78,6 +79,53 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §252.2 — the plan download, in the menu and the office's (2026-09-02, same branch)
+
+Islam, in the same breath as the merge: *"the ppt download leave it as an
+option in the drop down for the smo only."*
+
+§145.9 hid the pane-corner button for everyone in August and kept the machinery,
+saying giving it back was one line. It comes back **somewhere else**: an entry
+in the **Presentation** menu, beside *Present* and *Manage slides* — three
+deck-shaped things in one place, rather than a fourth control in a pane corner
+that already holds the pen, the arrows and the fill button.
+
+**For the office alone**, which reverses §117's audience (the office plus a
+unit's owner and custodian and a function's head) at his instruction, and is
+recorded as a reversal rather than written over. Reordering is untouched — still
+the custodian's and the owner's (§101). The corner button, its page map and the
+`editBar` term are **deleted rather than left returning ""** (§24).
+
+Green: `strategy-split` ALL OK (rewritten around the new placement, both ends
+per person), `test-authorize` 474/0 with the three reversed assertions
+**rewritten, not deleted** (§218), `deck-outcome` 0 failed, `plan-fields`,
+`perf-line`, and the full `qa.py` sweep.
+
+### §254.7–.12 — the deck round, finished (2026-09-02, same branch)
+
+Four more from the running deck, on top of the eight before them.
+
+- **§254.7** — a unit written twice *with or without a gap*. His `40 %%`
+  survived §254.1's collapse, which split the unit on whitespace. **And it
+  caught a regression of my own**: §254.1 added a space to any unit it did not
+  recognise, so `40%%` became `40 %%` — made worse by the tidier.
+- **§254.8 / §254.12** — the pillar cards size themselves AND fill the slide
+  rather than one row of it. Up to three in a row, above that `ceil(sqrt(n))`,
+  so *"4 can form a box"* is 2×2 and five goes 264px → 445px. Vertical sizes
+  follow the rows, horizontal ones the columns; swept 1 to 10, nothing
+  overflows.
+- **§254.9** — the aspiration runs the width, *This year* comes first, and the
+  objectives table grows. **10 of 10 aim slides were on the generic 19px floor;
+  none are now.**
+- **§254.10 / .11** — two numbers not four, with the reading put back before it
+  was obeyed; the sentence explaining Execution stays.
+
+**Verified:** `deck-figures` **11 red** on the build before; that check plus
+`deck-blank-slides`, `notes-slide`, `slide-move`, `deck-outcome`,
+`deck-and-weights`, `ytd-proration`, `tactic-proration`, `table-fit`,
+`submit-gate` green, **and main's own three new checks** (`hide-slide` 42/0,
+`reported-note` 0 failed, `hide-slide-mockup`) green on the merged build.
 
 ### §254 — a figure is read against what it is measured by (2026-09-02, same branch)
 

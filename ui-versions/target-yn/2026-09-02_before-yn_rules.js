@@ -1113,102 +1113,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      PRODUCT's own definition of "is there a number in here" is what is
      asked (`outcomeOf` calls this too), or the count and the score would
      disagree about the same string — the drift §42 exists to prevent. */
-  /* §251: AND `target` AND `target3y` JOIN IT, for the same reason one field
-     over. The office may now pick a measure's or an objective's unit before
-     its number (Islam: *"In the edit I can't set the unit for a measure"*), so
-     `target` holds "%" for as long as it takes to type 90 — non-blank, and
-     holding nothing anybody can be measured against. Without this line the red
-     Missing would vanish the instant a unit was picked, the gap count would
-     drop, the Next-gap walk would step past the row and Submit would stop
-     refusing on a plan with no target in it — §249.2's fault exactly, and the
-     one cost of §251, stated to Islam before it was built.
-
-     KEYED ON THE FIELD NAME, so it reaches a project OUTCOME's target too,
-     which carries no picker. That is the rule being consistent rather than an
-     accident: a target holding no number is unscorable there as well, and
-     `measureDue` — which every one of these rows is scored through — has
-     always returned null for one. Measured on the shipped plan before adding
-     it: **208 non-blank target fields across objectives, measures, capability
-     objectives and project outcomes, 0 of them non-numeric**, so not one row
-     in the demo changes what it counts. On a tenant that has typed a target
-     as words, that row starts saying Missing, which is the thing to watch. */
-  var GAP_NUM = ["outTarget", "target", "target3y"];
+  var GAP_NUM = ["outTarget"];
   function gapNumField(f) { return GAP_NUM.indexOf(f) > -1; }
   function targetHasNumber(v) {
     return !isNaN(parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, "")));
-  }
-
-  /* ── A TARGET THAT IS A YES OR A NO (§251) ─────────────────────────
-     Islam: *"for the target we need to add a Y/N in the units which dims the
-     target itself."* Some rows are not measured, they either happened or
-     they did not — a certification achieved, an agreement signed, a
-     warehouse open. Until now the plan had no way to write one: every
-     target box wants a number, so such a row was left blank and read as a
-     gap for ever.
-
-     IT IS A UNIT, NOT A SECOND FIELD, and that is the whole of why it
-     costs no migration. §199 put the unit ON the target string ("6.2B EGP"
-     is one field), so `Y/N` is simply the unit whose value part is always
-     empty: the target reads exactly `Y/N`, `target`/`outTarget` go on
-     holding the whole string, and every one of the places that read them
-     keeps working. A second field would have been a second source of truth
-     and the two would have drifted the first time anything wrote one of
-     them (§53.5).
-
-     AND IT IS A COMPLETE ANSWER, NEVER A GAP. §249 made a target holding
-     only a unit read as Missing, which is exactly right for `%` on its way
-     to `90%` and exactly wrong here: `Y/N` is not a target half-typed, it
-     is the finished target of a row that has no number. Without this line
-     every Y/N row would wear the red word for ever and refuse Submit
-     (§221) — a hole nobody could close, because there is nothing to fill.
-
-     THE COMPARISON IS CASE-INSENSITIVE AND TRIMMED, because this string
-     also arrives from an uploaded workbook (§22), where somebody has typed
-     it into a cell. What the PEN writes is always the canonical `Y/N`. */
-  var YN_UNIT = "Y/N";
-  /* ── §251.2: THE UNIT SAYS IT, AND THE VALUE IS SIMPLY NOT COUNTED ──
-     The first build read the WHOLE STRING, so a row became yes/no only by
-     having its number destroyed — and Islam, from the running page with a
-     target reading `100  Y/N` and nothing dimmed: *"even they are set
-     before they need to be dimmed even by keeping the values but as if they
-     are not counted anymore."*
-
-     He is right, and it is the better model twice over. Picking a unit has
-     never destroyed a figure anywhere else in this product, and destroying
-     one here would make changing your mind cost somebody the number they
-     had typed — with no undo, because the old value is gone. So `Y/N` is
-     read exactly as every other unit is: off the END of the target string.
-     `100 Y/N` is a yes/no row that still remembers 100, and picking `B EGP`
-     again gives `100B EGP` back.
-
-     READ THE SAME WAY `outUnitOf` READS ONE (§248): `targetParts` looks for
-     a number FOLLOWED BY a unit, so with no number the whole string IS the
-     unit — which is what makes a bare `Y/N` (a row that never had a figure)
-     and `100 Y/N` (one that did) the same kind of row. */
-  function ynUnitOf(v) {
-    var s = String(v == null ? "" : v).trim();
-    if (!s) return "";
-    var p = targetParts(s);
-    return /^-?[\d.,]+$/.test(p.value) ? p.unit : s;
-  }
-  function isYesNo(v) {
-    return ynUnitOf(v).trim().toUpperCase() === YN_UNIT;
-  }
-  /* WHAT A YES OR A NO SCORES: 100 or 0, Islam's own choice, so the row
-     counts in the pillar's and the unit's averages exactly as a measured
-     row does. Anything else — blank, or a value from before this existed —
-     is NOT SCORED rather than nought (§35: absent is not zero, and §104.10
-     in the same shape). One reader for the screen and the score alike, or
-     the page and the average would disagree about one word. */
-  function ynAnswer(v) {
-    var s = String(v == null ? "" : v).trim().toLowerCase();
-    if (s === "yes" || s === "y") return true;
-    if (s === "no" || s === "n") return false;
-    return null;
-  }
-  function ynScore(v) {
-    var a = ynAnswer(v);
-    return a == null ? null : (a ? 100 : 0);
   }
   /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
      the server all ask. A gap is a place holding nothing the platform can
@@ -1220,10 +1128,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      and a filler who tried had the whole save refused. */
   function gapEmptyValue(field, v) {
     if (gapBlank(v)) return true;
-    /* §251: a Y/N target is a finished answer with no number in it, so it
-       is answered BEFORE the numeric test — which would otherwise call
-       every yes/no row a gap and block Submit with nothing to fill. */
-    if (gapNumField(field)) return !isYesNo(v) && !targetHasNumber(v);
+    if (gapNumField(field)) return !targetHasNumber(v);
     return gapWhenField(field) && !whenReadable(v);
   }
   function gapEmpty(field, row) {
@@ -1419,26 +1324,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      has nothing to refuse that the state read has not already gated. The
      strategy page must still be visible: a none grant hides the pane the
      button sits on, and the rule says so too rather than trusting the layout
-     (§42, on the screen).
-
-     ── §252.2: THE OFFICE'S ALONE NOW, REVERSING §117'S AUDIENCE ──────
-     Islam, giving the feature back after §145.9 hid it from everyone: *"the
-     ppt download leave it as an option in the drop down for the smo only."*
-
-     So the two lines that let a role reach it by HOLDING the thing go. The
-     grant test above stays, because it is a different question — a page this
-     person cannot open is not one they may take away — and it now narrows the
-     office rather than a wider list. Recorded as a reversal rather than
-     rewritten over (Principle II): §117's reasoning was sound when the button
-     sat in the pane a custodian works in, and it is his call that the file
-     leaving the platform is the office's act.
-
-     `ARRANGE_ROLES` is untouched: reordering is still the custodian's and the
-     owner's (§101). The two questions merely stopped sharing an answer. */
+     (§42, on the screen). */
   function mayDownloadPlan(w, person, target) {
     if (!person || !target || target === "group") return false;
     if (grantAtPage(w, person, planPageOf(target), target) === "none") return false;
-    return isOffice(w, person);
+    if (isOffice(w, person)) return true;
+    return rolesOrFloor(w, person).some(function (r) {
+      return ARRANGE_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, target);
+    });
   }
 
   /* ── 5 · Figure sets (§16.7, spec 008) ───────────────────────────
@@ -2081,50 +1974,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return (list || []).filter(function (r) { return !isHidden(r); });
   }
 
-  /* ── A WHOLE SLIDE THE OFFICE DOES NOT PRESENT (§256) ─────────────────
-     Islam: *"allow the smo to hide presentation slides of any unit or
-     function."* §246 recorded this as the feature it had not built and named
-     the question inside it — which slides may be hidden, and whether hiding
-     one hides what it counts. Both answers are his, taken before anything was
-     drawn.
-
-     AND THE ANSWER IS THE OPPOSITE OF §233's, WHICH IS WHY THEY SIT
-     TOGETHER. That one hides a ROW and takes it out of every score, on every
-     surface; this hides a generated SLIDE and takes it out of NOTHING. The
-     figures on a hidden slide are still reported, still asked for, still
-     scored and still on the page — it is a decision about a projector.
-     Two switches, two clearly different jobs: one that did both would mean
-     tidying a deck before a board meeting silently moved a unit's figures.
-
-     A SLIDE IS NAMED BY ITS ANCHOR, NEVER BY ITS POSITION (§48, §236.3).
-     Every generated slide already carries one — it is what the picture
-     placer is built from — so the list of nameable slides IS the deck and
-     the two cannot drift. A stored number would hide a different slide the
-     day a pillar is added upstream.
-
-     IT LASTS, so it does not live in `REVIEW`, which is cleared with the
-     cycle (§50, §115): the shape of a subject's deck is not this quarter's
-     evidence. It rides `units[k].extra` / `functions[k].extra`, which both
-     already carry (§52, §213) — so no migration — and is stored as an
-     ABSENCE (§50.6): never hidden and hidden-then-shown-again are the same
-     bytes rather than two states nothing distinguishes.
-
-     THE FIELD IS NAMED ONCE. `lib/authorize.js` classifies it by this
-     constant rather than by a literal of its own, because a field spelled in
-     one place and not the other is §234's fault waiting to be reborn. */
-  var HIDE_SLIDES = "hideSlides";
-  /* Frozen and SHARED: every subject with nothing hidden is handed this same
-     array, so one careless push would hide a slide on all of them. Reading
-     never creates the field (§42) — the writer does, and deletes it again. */
-  var NO_SLIDES = Object.freeze([]);
-  function hiddenSlides(subject) {
-    var v = subject && subject[HIDE_SLIDES];
-    return Array.isArray(v) ? v : NO_SLIDES;
-  }
-  function slideHidden(subject, anchor) {
-    return !!anchor && hiddenSlides(subject).indexOf(anchor) >= 0;
-  }
-
   function namedOn(row, person) {
     if (!row || !person) return false;
     /* THE NAME THE REGISTER SHOWS COUNTS TOO (§130.7). The plan's owner and
@@ -2371,8 +2220,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
     GAP_NUM: GAP_NUM, gapNumField: gapNumField,
     targetHasNumber: targetHasNumber,
-    YN_UNIT: YN_UNIT, isYesNo: isYesNo, ynUnitOf: ynUnitOf,
-    ynAnswer: ynAnswer, ynScore: ynScore,
     actingFor: actingFor,
     gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, mayFillPage: mayFillPage,
@@ -2385,7 +2232,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     GREET_OPEN: GREET_OPEN, GREET_CLOSE: GREET_CLOSE, GREET_NAME: GREET_NAME,
     webUrl: webUrl, webUrlFixed: webUrlFixed,
     isHidden: isHidden, shown: shown,
-    HIDE_SLIDES: HIDE_SLIDES, hiddenSlides: hiddenSlides, slideHidden: slideHidden,
     greetFill: greetFill,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,

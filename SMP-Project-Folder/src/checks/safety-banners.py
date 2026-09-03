@@ -1,4 +1,4 @@
-"""THE PAGE WARNS BEFORE A SAVE CAN BE LOST (§256).
+"""THE PAGE WARNS BEFORE A SAVE CAN BE LOST (§258).
 
 Islam, after a reporting round in which people lost work twice over: *"can we
 have some sort of mid page warning like the error and network issue in case
@@ -39,7 +39,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 # SMP_HTML points the check at another build — how it is proved able to fail
-# against the file shipped before §256 (§94.5).
+# against the file shipped before §258 (§94.5).
 HTML_PATH = pathlib.Path(os.environ.get("SMP_HTML") or
                          (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"))
 HTML = HTML_PATH.read_bytes()

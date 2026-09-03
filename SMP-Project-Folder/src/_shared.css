@@ -324,7 +324,7 @@
   .refused-keep:hover { background:color-mix(in srgb, currentColor 10%, transparent); }
   .refused-keep:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
-  /* ── THE SAVE-SAFETY CAUTIONS (§256) ──────────────────────────────────
+  /* ── THE SAVE-SAFETY CAUTIONS (§258) ──────────────────────────────────
      Same slot and shape as the refusal above, on the ATTENTION ground rather
      than the alarm red (§168, §190): nothing has gone wrong yet, and the
      person is being told what to do to keep it that way. Tint + text twin,

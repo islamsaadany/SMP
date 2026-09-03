@@ -1,4 +1,4 @@
-/* THE PAGE ASKS WHO ELSE LANDED A CHANGE ON IT (§256) — the server half.
+/* THE PAGE ASKS WHO ELSE LANDED A CHANGE ON IT (§258) — the server half.
 
    GET /api/state?since=<iso>&target=<unit key | fn:key> answers from change_log
    (the log every save already writes, §42): who else, and when, oldest first,

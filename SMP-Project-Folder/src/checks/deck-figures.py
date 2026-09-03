@@ -87,7 +87,12 @@ with sync_playwright() as p:
     tight = js(pg, """() => {
       const cases = ["8 M EGP", "8M EGP", "6 M EGP", "3.59B EGP", "8 M EGP M EGP",
                      "8 M EGP B EGP", "28 EGP", "243 days", "4#", "30%", "12 K USD",
-                     "5 SQM", "", "TBD"];
+                     "5 SQM", "", "TBD",
+                     /* §254.7: a unit written twice with NO gap — Islam's own
+                        `40 %%` — and the two that must survive it: a unit the
+                        platform does not know keeps the spelling it was given,
+                        and `mm` is not a doubled `m`. */
+                     "40 %%", "40%%", "5 ##", "8 M EGPM EGP", "5 mm", "12 mm"];
       const out = {};
       cases.forEach(c => { out[c] = unitTight(c); });
       return out;
@@ -96,7 +101,9 @@ with sync_playwright() as p:
             "3.59B EGP": "3.59B EGP", "8 M EGP M EGP": "8M EGP",
             "8 M EGP B EGP": "8 M EGP B EGP", "28 EGP": "28 EGP",
             "243 days": "243 days", "4#": "4#", "30%": "30%",
-            "12 K USD": "12K USD", "5 SQM": "5 SQM", "": "", "TBD": "TBD"}
+            "12 K USD": "12K USD", "5 SQM": "5 SQM", "": "", "TBD": "TBD",
+            "40 %%": "40%", "40%%": "40%", "5 ##": "5#",
+            "8 M EGPM EGP": "8M EGP", "5 mm": "5 mm", "12 mm": "12 mm"}
     for k, v in want.items():
         ok("unitTight(%r) is %r" % (k, v), tight.get(k) == v, tight.get(k))
 
@@ -265,6 +272,126 @@ with sync_playwright() as p:
            order["unit"][:12])
     else:
         ok("the order fixture ran", False, order)
+
+    print("\n── 7 · §254.8-.10 · the pillars size themselves, the aim slide, two numbers")
+    late = js(pg, """() => {
+      const u = UNITS[activeKeys()[0]], keep = JSON.stringify(u.items);
+      const proto = JSON.parse(JSON.stringify(u.items[0]));
+      const sizes = {};
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(n => {
+        u.items.length = 0;
+        for (let i = 0; i < n; i++) { const c = JSON.parse(JSON.stringify(proto));
+          c.name = "Pillar " + (i+1); c.sub = ""; u.items.push(c); }
+        if (typeof renumberUnit === "function") renumberUnit(u);
+        try { closeDeck(); } catch (e) {}
+        openDeck(unitLike(u.ukey));
+        const s = [...document.querySelectorAll("#deckroot .dslide")]
+          .filter(x => x.querySelector(".pcards"))[0];
+        if (s) { s.classList.add("on");
+          const c = s.querySelector(".pcard-n"), box = s.querySelector(".pcard");
+          sizes[n] = { name: parseFloat(getComputedStyle(c).fontSize),
+                       cards: s.querySelectorAll(".pcard").length,
+                       rows: new Set([...s.querySelectorAll(".pcard")]
+                         .map(x => Math.round(x.getBoundingClientRect().top))).size,
+                       cols: parseInt(getComputedStyle(s.querySelector(".pcards"))
+                         .getPropertyValue("--c"), 10),
+                       over: s.scrollHeight - s.clientHeight };
+          s.classList.remove("on"); }
+        try { closeDeck(); } catch (e) {}
+      });
+      u.items = JSON.parse(keep);
+      if (typeof renumberUnit === "function") renumberUnit(u);
+      /* the aim slide, and the two heads that must now carry two numbers */
+      const d = document.createElement("div"); d.innerHTML = deckSlides(unitLike(u.ukey));
+      const aim = [...d.querySelectorAll("section.dslide")].filter(s =>
+        /aiming at/.test((s.querySelector("h2")||{}).textContent||""))[0];
+      const heads = aim ? [...aim.querySelectorAll("thead th")].map(x => x.textContent.trim()) : [];
+      const cover = [...d.querySelectorAll("section.dslide .leadstats")]
+        .map(x => [...x.querySelectorAll(".dlab")].map(y => y.textContent.trim()));
+      const stats = [...d.querySelectorAll("section.dslide .dstats")]
+        .map(x => [...x.querySelectorAll("i")].map(y => y.textContent.trim()));
+      d.remove();
+      /* MEASURED ON THE REAL DECK, NOT THE DETACHED ONE. `getComputedStyle` on
+         a detached element does not resolve the stylesheet, so the first
+         version of this assertion reported a correct build as broken —
+         §50.3's detached-render trick used for the one job it cannot do
+         (§69.5's own note, in a check rather than in the fit pass). */
+      try { closeDeck(); } catch (e) {}
+      openDeck(unitLike(u.ukey));
+      const live = [...document.querySelectorAll("#deckroot .dslide")].filter(s =>
+        /aiming at/.test((s.querySelector("h2")||{}).textContent||""))[0];
+      let oneCol = false, aspFull = false, tdPx = 0;
+      if (live) {
+        live.classList.add("on");
+        const top = live.querySelector(".aimtop");
+        oneCol = !!top && getComputedStyle(top).display === "block";
+        const asp = live.querySelector(".asp2"), td = live.querySelector(".aimbottom td");
+        aspFull = !!asp && asp.getBoundingClientRect().width
+          > live.getBoundingClientRect().width * 0.8;
+        tdPx = td ? parseFloat(getComputedStyle(td).fontSize) : 0;
+        live.classList.remove("on");
+      }
+      try { closeDeck(); } catch (e) {}
+      /* every unit, because whether a slide tightens depends on its own prose */
+      const sizesByUnit = {}, over = [];
+      let worst = 999;
+      activeKeys().forEach(k => {
+        try { closeDeck(); } catch (e) {}
+        openDeck(unitLike(k));
+        const s = [...document.querySelectorAll("#deckroot .dslide")].filter(x =>
+          /aiming at/.test((x.querySelector("h2")||{}).textContent||""))[0];
+        if (s) { s.classList.add("on");
+          const td = s.querySelector(".aimbottom td");
+          const px = td ? parseFloat(getComputedStyle(td).fontSize) : 0;
+          sizesByUnit[k] = px; if (px < worst) worst = px;
+          if (s.scrollHeight > s.clientHeight + 1) over.push(k);
+          s.classList.remove("on"); }
+        try { closeDeck(); } catch (e) {}
+      });
+      return { sizes, heads, cover, stats, oneCol, aspFull, tdPx, sizesByUnit, worst, over };
+    }""")
+    if isinstance(late, dict) and late.get("sizes"):
+        s = late["sizes"]
+        # §254.12 REVERSED "ONE ROW, WHATEVER THE COUNT" — Islam, seeing five
+        # across: "the 5 pillars beside each other are very small can we
+        # arrange them in the slide to fill better?" The assertion is
+        # REWRITTEN rather than deleted (§218), because what it exists to
+        # prove is that the layout is a function of the count and that
+        # nothing runs off the slide — not that the shape is a row.
+        ok("the pillar name grows as the card widens (§254.8)",
+           s.get("2", {}).get("name", 0) > s.get("5", {}).get("name", 0)
+           > s.get("10", {}).get("name", 0), s)
+        ok("...every card is drawn, at every count from 1 to 10",
+           all(v["cards"] == int(k) for k, v in s.items()), s)
+        ok("...the shape is square-ish rather than one long row (§254.12)",
+           s.get("4", {}).get("cols") == 2 and s.get("4", {}).get("rows") == 2
+           and s.get("5", {}).get("cols") == 3 and s.get("5", {}).get("rows") == 2
+           and s.get("3", {}).get("rows") == 1, s)
+        ok("...and NOTHING overflows the slide, at any count",
+           all(v["over"] <= 0 for v in s.values()),
+           {k: v["over"] for k, v in s.items() if v["over"] > 0})
+        ok("the aim slide reads This year before the horizon (§254.9)",
+           len(late["heads"]) >= 4 and late["heads"][2] == "This year", late["heads"])
+        ok("...and the aspiration runs the width of the slide",
+           late["oneCol"] is True and late["aspFull"] is True, late)
+        # ASSERTED ACROSS EVERY UNIT, never on one. The size a given unit
+        # gets depends on whether its aspiration tips the slide into `.tight`,
+        # so a single-subject assertion is true or false by accident. What is
+        # asserted is the PROPERTY: no aim slide is left on the generic 19px
+        # floor any more, and none of them overflows.
+        ok("no unit's aim table is left on the generic floor (§254.9)",
+           late.get("worst", 0) >= 24, late.get("sizesByUnit"))
+        ok("...and no aim slide overflows at that size",
+           late.get("over") == [], late.get("over"))
+        ok("no pillar cover carries Delivered / planned (§254.10)",
+           all("Delivered / planned" not in c for cov in late["cover"] for c in cov),
+           late["cover"][:3])
+        ok("...and every pillar head reads Measures and Execution, and nothing else",
+           len(late["stats"]) > 0
+           and all(x == ["Measures", "Execution"] for x in late["stats"]),
+           late["stats"][:3])
+    else:
+        ok("the §254.8-.10 fixture ran", False, late)
 
     ok("no page error anywhere in the run", errs == [], errs[:3])
     b.close()

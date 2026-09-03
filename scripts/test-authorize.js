@@ -1209,14 +1209,26 @@ console.log("\n15 · the strategy | reporting split (§117)");
   /* The download is a pure rule with no server half — asserted here so the
      one definition is proven where every other rule is (§117). */
   const wSeed = R.worldOf(SEED);
-  check("download: the unit's custodian may", R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === true);
-  check("download: the unit's owner may", R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === true);
+  /* §252.2 REVERSES §117's AUDIENCE at Islam's instruction — "for the smo
+     only" — so these three assertions are REWRITTEN rather than deleted
+     (§218): a build that quietly handed the file back to the roles that HOLD
+     the thing would otherwise pass through a gap where a test used to be. */
   check("download: the office may", R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), UNIT) === true);
+  check("download: the unit's custodian may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === false);
+  check("download: the unit's owner may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === false);
   if (fnCust) {
     const fnHead = (SEED.functions[FN] || {}).head;
-    check("download: a function's head may, for their function",
-          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === true);
+    check("download: a function's head may NOT, for their own function (§252.2)",
+          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === false);
+    check("download: the office may, for that same function",
+          R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), "fn:" + FN) === true);
   }
+  /* And arranging is untouched by the narrowing — the two questions stopped
+     sharing an answer, so the one that stayed open is asserted beside it. */
+  check("arrange: the unit's custodian still may (§101, unchanged)",
+        R.mayArrange(wSeed, personOf(SEED, custKey), UNIT) === true);
   const nobody = { key: "smp_test_nobody", unit: UNIT };
   check("download: somebody holding nothing may not",
         R.mayDownloadPlan(wSeed, nobody, UNIT) === false);
@@ -2720,6 +2732,91 @@ console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)"
     t.outDir = "\u2264"; t.outCompile = "Average";
   });
   check("\u00a7249: the office writes all four with no mark at all",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n27 · which slides a review shows is the office's (§256)");
+(function () {
+  /* Islam: *"allow the smo to hide presentation slides of any unit or
+     function."* The screen draws the eye for the office alone; this is the
+     other end of that one question (§42) — a screen that hides a control the
+     server would have accepted, or offers one it refuses, is the drift
+     `lib/rules.js` exists to prevent.
+
+     BOTH SIDES OF EVERY ASSERTION. A test that only proves the custodian is
+     refused passes just as happily on a build that refuses EVERYBODY, which
+     would be a feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FNK = Object.keys(SEED.functions || {})[0];
+  check("§256: the seed holds a unit, a custodian and a function to test with",
+        !!(UK && CUST && FNK), [UK, CUST, FNK].join(" / "));
+  if (!(UK && CUST && FNK)) return;
+
+  /* — a business unit — */
+  let r = fromStored(SEED, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: the office hides a slide on a unit", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256 REFUSED: the unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§256: and the refusal names Manage slides, never Setup",
+        !r.ok && /Manage slides/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* SHOWING ONE AGAIN IS THE SAME ACT, and the emptied key is DELETED (§50.6)
+     — a build that classified the write and not the removal would let anybody
+     un-hide what only the office could hide. */
+  const hidden = clone(SEED); hidden.units[UK].hideSlides = ["swot"];
+  r = fromStored(hidden, CUST, function (i) { delete i.units[UK].hideSlides; });
+  check("§256 REFUSED: nor can they show it again", !r.ok, "was ALLOWED");
+  r = fromStored(hidden, "smo", function (i) { delete i.units[UK].hideSlides; });
+  check("§256: the office shows it again", r.ok, (r.refusals || []).join(" / "));
+
+  /* — a supporting function, BOTH FORMATS —
+     `asUnit()` builds a fresh object from named fields, so a function's list
+     never reaches the unit pass at all. If this were classified there and not
+     in collectFunction(), a pillars function's hidden slides would be seen by
+     nothing and therefore allowed to everybody (§191). */
+  ["pillars", "projects"].forEach(function (fmt) {
+    const s = clone(SEED); s.functions[FNK].format = fmt;
+    let x = fromStored(s, "smo", function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§256: the office hides a slide on a " + fmt + " function",
+          x.ok, (x.refusals || []).join(" / "));
+    x = fromStored(s, CUST, function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§256 REFUSED: a unit custodian cannot, on a " + fmt + " function",
+          !x.ok, "was ALLOWED");
+  });
+
+  /* IT PRODUCES EXACTLY ONE SENTENCE. The field sits in UNIT_KNOWN and in no
+     other list, and in FN_SEEN and not FN_KNOWN, precisely so a press does not
+     also report "the unit's settings" or "a supporting function" — two
+     sentences for one act is how somebody is sent to the wrong screen. */
+  /* ASKED OF `collect` BY NAME, never behind a guard. The first draft of this
+     assertion read `A.classify ? … : null` — and `classify` is not an export,
+     so it never ran at all while the suite printed it as passed (§54.5, and
+     §94.5 one file over: a check that asks whether it can run is a check that
+     passes). */
+  const kindsOf = function (mutate) {
+    const inc = clone(SEED); mutate(inc);
+    return A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+            .map(function (c) { return c.kind; });
+  };
+  let kinds = kindsOf(function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: a hidden slide classifies as deckHide and nothing else",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+  kinds = kindsOf(function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+  check("§256: and on a function, the same one sentence",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately (§256): a locked cycle has
+     stopped taking FIGURES, and the deck is presented after it locks. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: a locked cycle does not stop the office pruning the deck",
         r.ok, (r.refusals || []).join(" / "));
 })();
 

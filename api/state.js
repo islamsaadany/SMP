@@ -152,7 +152,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "GET") {
-      /* §256: A LIGHT LOOK AT change_log, for the save-safety banner. While a
+      /* §258: A LIGHT LOOK AT change_log, for the save-safety banner. While a
          tab is open on a page the platform asks whether anybody ELSE landed a
          change on that page since it loaded — never the whole graph (§98: a
          poll is paid for in database round trips). Answered from the log the

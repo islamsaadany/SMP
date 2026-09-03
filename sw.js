@@ -288,11 +288,33 @@
    "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
    push.
 
-   §253: the reporting note is a growing textarea and a typed break survives
-   being read — the built file's bytes changed, so the name does too. Checked
-   against origin/main serving "smp-shell-v4.27-outcome-on-the-deck"; confirm
-   again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.28-note-wrap";
+   §252.2: the plan download comes back as an entry in the Presentation menu
+   and the corner button is deleted, so the built file's bytes changed again.
+   Main moved 26 commits under this branch while it waited for a word — the
+   whole deck round, §251.2 to §257 — and was serving
+   "smp-shell-v4.34-yn-target" when this was merged in; confirm once more
+   immediately before the push (§94.16).
+
+   §259: the group's mark and the deck's four blue section dividers. Main had
+   moved again while this branch waited — §257's Y/N target and §258's
+   save-safety banners — and was serving "smp-shell-v4.36-save-safety-banners"
+   when this merge was made, so the name goes past it rather than beside it.
+   Confirmed against origin/main immediately before the push.
+
+   §260: a title is one line — the growing prose boxes on a plan draw and store
+   one line, and a one-off heal cleans what a tenant already holds. Main moved
+   28 commits under this branch while it waited for a word — the deck round,
+   §257's Y/N target, §258's save-safety banners and §259's blue dividers — and
+   was serving "smp-shell-v4.37-blue-dividers" when this merge was made, so the
+   name goes past it rather than beside it (§94.12), confirmed again
+   immediately before the push (§94.16).
+
+   §271: the reporting note is a growing textarea and a typed break survives
+   being read. Main moved a long way under this branch while it waited for a
+   word — §251 to §270 — and was serving "smp-shell-v4.49-edit-on-section-line"
+   when this merge was made, so the name goes PAST it rather than beside it
+   (§94.12); confirmed once more immediately before the push (§94.16). */
+const SHELL = "smp-shell-v4.50-note-wrap";
 const ASSETS = [
   "/",
   "/index.html",

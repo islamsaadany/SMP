@@ -198,6 +198,35 @@ var PMENU = null;
    the two tables are never on screen together and sharing one would make
    "which table" a third thing to check. */
 var FNMENU = null;
+/* THE SAME STATE AGAIN, FOR THE BUSINESS UNITS TABLE (§261). Its own key for
+   the reason FNMENU has its own: the three tables are never on screen together,
+   and one shared key would make "which table" a third thing every reader of it
+   has to check. */
+var UMENU = null;
+/* AND FOR COMPANIES (§261). */
+var COMENU = null;
+
+/* ── WHICH SETUP TABLE IS BEING ARRANGED (§261) ─────────────────────
+   Islam: *"allow me in the setup to rearrange the business units table so they
+   appear in the navigation as per this order."*
+
+   NOT `ARRANGE`, which is the group Performance page's boolean and is scoped to
+   that page — §65.9's lesson about a one-word name in a shared namespace, in
+   JavaScript rather than in CSS. This holds the TABLE's id (`"units"`,
+   `"fns"`), so a page cannot be arranging while another page's band is drawn,
+   and one press cannot turn two tables into handles at once.
+
+   SCREEN STATE, NEVER SAVED (§25.2): what is saved is the ORDER, which is the
+   list itself and was already stored. */
+var SETARRANGE = null;
+
+/* ── WHICH ROW IS OPEN IN THE SETUP DIALOG (§261) ───────────────────
+   `{ table, key }`, the register's `PDLG` one table wider. Editing left the row
+   for the same reason it left the register (§116): every collision these tables
+   have had was a control clicked inside a 150px cell, and none of them survives
+   the move. `ROWEDIT` still holds the row and still carries the snapshot Cancel
+   restores — what changed is only where the fields are DRAWN. */
+var ROWDLG = null;
 /* Which person the delete confirmation is open for (§69). Its own key rather
    than a mode on PMENU: the confirmation REPLACES the menu in the same place,
    so the second press lands where the first one did — the same shape the
@@ -498,6 +527,32 @@ var LOGO_MAX_EDGE = 900;    /* the deck's cover mark on a 4K projector */
 var LOGO_MAX_BYTES = 220000; /* the data URI, carried in every save */
 
 function unitLogo(u){ return (u && u.logo) || ""; }
+
+/* ── THE GROUP HAS A MARK OF ITS OWN (§259) ───────────────────────────
+   Islam: *"where can I upload the raya trade mark so it can be used?"*
+   Nowhere, until now. §52.9 gave every UNIT a mark and stopped there, so
+   a unit that has none showed its name and a supporting function showed
+   nothing at all — and Raya Trade, which is the group, had no home.
+
+   ONE UPLOAD, ON BRANDING. It sits with the accent and the bar rather
+   than on Business units, because it is not a unit's fact: it is what
+   the organisation looks like, which is the question that page answers.
+
+   THE SAME RULES AS A UNIT'S, through the same `logoIntake()` — PNG
+   only, transparent, capped — because a second intake would be a second
+   answer to "what may be uploaded" (§53.5).
+
+   `org` carries an `extra` JSONB and lib/state-io.js files every key it
+   does not recognise there, so this needs NO migration, exactly as a
+   unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
+   a group that has set none, never the key. */
+function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
+
+/* WHICH MARK A SUBJECT'S DECK WEARS, asked in one place. A unit's own
+   if it has one, the group's otherwise — so a tenant that uploads one
+   mark has a marked deck everywhere, and a supporting function, which
+   can never have a mark of its own, has one for the first time. */
+function deckMark(u){ return unitLogo(u) || groupLogo(); }
 
 function logoIntake(file){
   return new Promise(function(resolve, reject){
@@ -942,10 +997,23 @@ function restoreRolePointers(was){
     f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
   });
 }
+/* WHICH TABLES CAN MOVE A ROLE (§110, widened in §261). A person's roles are
+   not ON the person and a unit's head is not ON the unit either: `UNIT_ROLES[k]
+   .head` and `FUNCTIONS[k].custodian` are pointers, and `ROWWAS` is a copy of
+   the ROW. So Cancel on a unit whose head had just been changed restored the
+   unit and left the grant standing — §110's fault exactly, on two tables it had
+   not been asked about, and reachable the moment the picker moved into a dialog
+   with a Cancel on it.
+
+   A LIST, not a test for one table: §65's rule that a second table joining a
+   behaviour by omission is how these drift. Companies is deliberately absent —
+   it holds no head and no custodian, and capturing two maps to restore nothing
+   would be a cost with no reader. */
+var ROLE_BEARING_ROWS = { people:1, units:1, fns:1 };
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
-  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
+  ROWHELD = (ROLE_BEARING_ROWS[table] && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
@@ -5252,9 +5320,35 @@ function reaches(unitKey){
    case of a general one and this function is that one asked about the plan.
    `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
    answer is the shared file's so the screen and the server cannot drift. */
+/* ── ASK THE COLUMN THE SAVE ASKS (§270, closing §217's other half) ──
+   §217 fixed the SERVER: `lib/authorize.js` resolves every strategy question
+   through `strategyPageOf()`, so a supporting function's plan is judged by the
+   FUNCTION's Strategy column. The SCREEN never caught up — it passed the raw
+   `u_found` / `u_anal` / `u_plan` at some twenty call sites, which on an `fn:`
+   target reads the BUSINESS UNIT's column instead. Two different questions
+   about one act, which is the drift `lib/rules.js` exists to prevent (§42).
+
+   MEASURED BEFORE AND AFTER, and today it costs nobody anything: every role's
+   two Strategy columns hold the same value on this tenant, so there are zero
+   disagreements and editing is the office's in any case. Set them differently
+   — which is the whole point of §117's split — and six people are handed an
+   Edit pen the save refuses, or refused one it would have accepted. This
+   closes the trap before it is armed.
+
+   IN THE WRAPPERS, NOT AT THE CALL SITES. The server resolves at each of its
+   six; the browser has twenty and would acquire a twenty-first the day
+   somebody adds a `gapCell`. One place, so a call site cannot forget (§104.7).
+   `strategyPageOf()` passes an unmapped key through untouched (§270), which is
+   what makes it safe to ask of every key rather than of a list somebody keeps.
+
+   NOTHING WIDENS: it can only ever move the screen onto the answer the save
+   was already giving. */
+function strategyAc(acKey, target){
+  return SMPRules.strategyPageOf(target === undefined ? TARGET : target, acKey);
+}
 function mayAuthor(acKey, target){
-  return SMPRules.mayAuthorPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
 /* MAY THIS PERSON FILL THIS PAGE'S GAPS (§145)? A wrapper, never a second
@@ -5262,15 +5356,19 @@ function mayEditPlan(){ return mayAuthor("u_plan"); }
    fill field the screen draws and the save the server accepts cannot
    disagree (§42). */
 function mayFill(acKey, target){
-  return SMPRules.mayFillPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+  /* §270: the same resolution, because `lib/authorize.js` judges a fill on a
+     function through `planPageOf()` (its own `strategyPageOf`) — fixing one
+     half and leaving the other is how the two came to disagree in the first
+     place (§53.5). */
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
    {project} or {pillarOwner} -- so a project owner fills their own project
    and a pillar owner their own pillar, and nobody fills a neighbour's. */
 function mayFillRow(acKey, ctx, target){
-  return SMPRules.mayFillRow(world(), viewer(), acKey,
-    target === undefined ? TARGET : target, ctx);
+  var t = target === undefined ? TARGET : target;   /* §270, as mayFill */
+  return SMPRules.mayFillRow(world(), viewer(), strategyAc(acKey, t), t, ctx);
 }
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
@@ -5415,6 +5513,17 @@ function koWeights(list, legacy){
    Weight column nobody has filled in (§243, Islam: *"if there is no weights
    submitted the table shouldn't show weights"*). */
 function koWeighted(list, legacy){ return !!koWeights(list, legacy); }
+/* ── WHICH OBJECTIVES THE HEADLINE IS MADE OF, NAMED ONCE (§264) ──────
+   The card above a list of objectives prints a Highest and a Lowest, and those
+   have to be the extremes of EXACTLY the rows koScore() averaged. This test
+   lived inside koScore, so the card kept a second one of its own — and a second
+   membership test beside a headline is how a "highest" comes to name a row the
+   headline never counted (§53.5). `scorableMeasures()` is the same reader for a
+   pillar's measures; this is its twin for a list of key objectives. */
+function koCounts(m){
+  return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null;
+}
+function scorableKOs(list){ return (list || []).filter(koCounts); }
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
@@ -5426,10 +5535,7 @@ function koScore(list, weights){
      to have fixed here: a blank weight counted at NOTHING, so where every
      reported row was blank the total came to nought and the headline returned
      null. The merged version keeps main's reader and this branch's rule. */
-  var counts = function(m){
-    return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null;
-  };
-  var vals = (list || []).filter(counts);
+  var vals = scorableKOs(list);
   if (!vals.length) return null;
   var flat = function(){
     return Math.round(vals.reduce(function(a, m){ return a + measureScore(m); }, 0) / vals.length);
@@ -5438,7 +5544,7 @@ function koScore(list, weights){
   if (!ws) return flat();
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (!counts(m)) return;
+    if (!koCounts(m)) return;
     acc += measureScore(m) * ws[i]; tot += ws[i];
   });
   /* Every weight that was set is a literal zero — an answer, but not one a
@@ -5705,6 +5811,12 @@ function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum
    empty the column for a plan whose timelines were never filled in. */
 function measureDue(m, share){
   if (!m || !m.target) return null;
+  /* §264: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
+     figure — picking Y/N keeps whatever number was there and stops counting
+     it — so the digits are in the string and `parseFloat` would pull them
+     out, printing "due at 100 Y/N" beside a control offering Yes and No.
+     The unit decides, not whether a number can be found. */
+  if (SMPRules.isYesNo(m.target)) return null;
   /* §251: THE COUNT AND THE SCORE ASK ONE FUNCTION. A target may now hold its
      unit before its number ("%"), so "is there a number in here" decides both
      whether the row is a counted gap and whether it can be scored at all —
@@ -5726,6 +5838,19 @@ function measureDue(m, share){
    stays a year-end judgement); everything else reads this. */
 function measureScore(m, share){
   if (!m) return null;
+  /* ── A YES OR A NO SCORES 100 OR 0 (§264) ──────────────────────────
+     BEFORE the arithmetic, and that ordering is the whole of it: a Y/N
+     target carries no number, so `measureDue` answers null and the row
+     would fall out of every score unscored. Islam chose 100/0 over "shown
+     but never scored", so it lands in the pillar's and the unit's averages
+     like any other row.
+
+     NOTHING SAID IS NOT A NO. An unanswered row scores null and leaves every
+     average, exactly as an empty number box does — reading silence as a
+     failure marks a unit down for a question nobody has been asked yet (§35,
+     §104.10). The share is not consulted: there is no partial yes to prorate
+     (§250 prorates a TARGET, and this row has no number to prorate). */
+  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
@@ -5774,7 +5899,15 @@ function outcomeOf(t){
      row comes to be counted as missing while quietly being scored (§53.5,
      §42). The test is unchanged; only its home moved. */
   if (!t || !t.outTarget) return null;
-  if (!SMPRules.targetHasNumber(t.outTarget)) return null;
+  /* §264: a Y/N outcome is a real target with no number in it, so it is
+     admitted here or the tactic goes on being read the old way and the
+     answer somebody gave is scored by nothing. `measureScore` takes it from
+     here — one arithmetic for every scored row, as §248 settled. And it is
+     what makes main's own `tacticAnswered` right for a yes/no row: an
+     outcome with no figure scores null, so the row is NOT answered, which
+     is Islam's "a dash is not an entry" falling out of a rule already
+     there rather than needing a second one. */
+  if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual };
 }
@@ -5823,7 +5956,15 @@ function onOutcome(t){ return tacticOutcomeScore(t) != null; }
    An outcome answers with its own score against the target due so far; a
    tactic without one answers with the share of its plan it has delivered,
    byte for byte as before. */
-function tacticProgress(t){ return onOutcome(t) ? tacticReads(t) : tacticRatio(t); }
+/* §254.2: ASKED OF THE OUTCOME'S EXISTENCE, NOT OF ITS SCORE. `onOutcome`
+   answers "can this be scored on its outcome", which is the right question for
+   the score itself and the wrong one for "which measure is this row on" — and
+   the two being different is what put a per cent beside a count. A row that is
+   ON its outcome and has not reported one is NOT SCORED, which is what
+   `tacticOutcomeScore` already returns. */
+function tacticProgress(t){
+  return outcomeOf(t) ? tacticOutcomeScore(t) : tacticRatio(t);
+}
 
 /* What a prorated row is measured against, written the way the target is --
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
@@ -6405,7 +6546,39 @@ function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
    figure is in, whichever box it came from. Written as one predicate so the
    three panes, the score and the note rule cannot disagree about whether a
    row has been answered (§53.5). */
-function tacticAnswered(t){ return t && (t.actual != null || tacticOutcomeScore(t) != null); }
+/* ── ONE QUESTION DECIDES THE WHOLE ROW (§254.2, narrowing §248) ───────
+   Islam, of a tactic reading `2% / 2#` on the deck: *"the ytd is showing 2% /
+   2# .. it's not 2% in the performance it's just 2 with a unit of #"*, and
+   then, of the cause: *"the reported number is already 2# I don't know why
+   it's not reported correctly."*
+
+   NINE STATES WERE PUT THROUGH THE SCORER AND EVERY ONE WITH A FIGURE IN THE
+   OUTCOME SCORES. So the figure the deck could see was not in the outcome, and
+   there is one path that produces exactly his row: the reporting box asks for
+   the OUTCOME's figure only once the outcome has a target, and asks the old
+   question — per cent delivered — before that. A figure reported before the
+   target was added therefore sits in `actual` for ever, and the moment the
+   target appears `tacticBenchmark` starts answering with the outcome's target
+   while the figure is still coming from the old field. Two measures in one
+   cell, and nobody did anything wrong.
+
+   §248 SWITCHED ON TARGET **AND** FIGURE, deliberately, so that adding an
+   outcome mid-round changed nothing until somebody typed. That rule is
+   narrowed here at Islam's direction — he was offered three behaviours with
+   what each costs and chose this one: **the target alone decides**, and a row
+   whose outcome has a target but no figure SAYS IT IS OWED ONE rather than
+   quietly reading its old per cent.
+
+   THE COST IS REAL AND WAS STATED BEFORE HE CHOSE: such a row leaves every
+   average, stops counting as reported, and refuses Submit until the figure is
+   entered — which is one number on the reporting page. It is the only one of
+   the three that never states a figure nobody reported (§35), and the two
+   alternatives were an invented figure (carrying the old per cent across) and
+   an ignored target. */
+function tacticAnswered(t){
+  if (!t) return false;
+  return outcomeOf(t) ? tacticOutcomeScore(t) != null : t.actual != null;
+}
 function reportedTactics(p){ return dueTactics(p).filter(tacticAnswered); }
 /* THE TWO SCORES PASS UP SEPARATELY AND STAY APART (Islam, asked). The child's
    measure performance becomes the pillar's performance and its execution

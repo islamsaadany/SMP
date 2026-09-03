@@ -107,7 +107,7 @@ with sync_playwright() as pw:
             pg.evaluate("()=>{VIEWER=PEOPLE.filter(x=>SMPRules.mayEditAccess(world(),x))[0].key;}")
             pg.evaluate(go); pg.wait_for_timeout(400)
             pg.evaluate(mk)
-            pg.evaluate("()=>{const b=document.querySelector('#panel .penbtn[data-page]');"
+            pg.evaluate("()=>{const b=document.querySelector('#secrow-in .secpen');"
                         " if(b) b.click();}")
             pg.wait_for_timeout(700)
 

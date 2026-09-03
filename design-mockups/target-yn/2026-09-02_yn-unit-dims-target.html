@@ -1,0 +1,358 @@
+<title>Y/N Targets</title>
+<style>
+/* ── MOCKUP ONLY ──────────────────────────────────────────────────────
+   Drawn with the platform's own forefront palette, type scale and the real
+   component rules (.fld, .tgrid, .missing, table) copied from _shared.css and
+   arrange.css so what is on this page is what the product would draw.
+   Nothing here is a source file. §41.9: a mockup drawn from the STYLESHEET
+   draws what the product could look like — these tables were read out of
+   group-render.js first, so they are what it does look like. */
+
+:root{
+  --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+  --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px; --fs-body:14px;
+  --fs-lead:17px; --fs-title:20px; --track:.12em;
+  --r-sm:6px; --r:8px; --r-md:12px; --r-lg:16px;
+
+  /* forefront · light — _shared.css:183–198 */
+  --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
+  --good-tx:#1F6248; --attn-tx:#7A5D1C; --bad-tx:#8C3327;
+  --panel:#16325C; --panel-ink:#FFFFFF; --on-fill:#FFFFFF;
+  --zebra:#F5F7FA;
+  --tw:96px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    /* forefront · dark — _shared.css:205–218 */
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --on-fill:#14161A;
+    --zebra:#212630;
+  }
+}
+:root[data-theme="dark"]{
+  --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+  --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --on-fill:#14161A;
+  --zebra:#212630;
+}
+
+body{ margin:0; background:var(--ground); color:var(--ink);
+      font-family:var(--sans); font-size:var(--fs-body); line-height:1.5; }
+.wrap{ max-width:1080px; margin:0 auto; padding:28px 24px 80px; }
+
+/* the mockup's own chrome — deliberately unlike the product's, so nothing
+   here is mistaken for a proposed screen */
+.mkhead{ border-bottom:2px solid var(--gold); padding-bottom:14px; margin-bottom:26px; }
+.mkkick{ font-size:var(--fs-micro); letter-spacing:var(--track); text-transform:uppercase;
+         color:var(--gold-deep); font-weight:700; }
+h1{ font-size:var(--fs-title); margin:6px 0 6px; font-weight:700; letter-spacing:-.01em; }
+.mklede{ color:var(--ink-2); font-size:var(--fs-note); margin:0; max-width:66ch; }
+h2{ font-size:var(--fs-lead); margin:34px 0 4px; font-weight:700; }
+.note{ color:var(--ink-3); font-size:var(--fs-small); margin:0 0 12px; max-width:70ch; }
+.ask{ border-left:3px solid var(--attn); background:var(--surface); padding:11px 14px;
+      border-radius:0 var(--r) var(--r) 0; margin:14px 0; font-size:var(--fs-note); color:var(--ink-2); }
+.ask b{ color:var(--ink); }
+
+/* the product's own pane + table */
+.pane{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+       overflow:hidden; }
+.scrollbox{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; font-size:var(--fs-note); }
+th,td{ text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+th+th, td+td{ border-left:1px solid var(--line-soft); }
+thead th{ font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2);
+          font-weight:700; background:var(--surface-2); white-space:nowrap;
+          border-bottom:1px solid var(--line); }
+tbody tr:last-child td{ border-bottom:0; }
+td.num{ font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+td.idx{ color:var(--ink-3); font-family:var(--mono); width:1px; }
+.tacname{ font-weight:650; display:block; }
+td .why,.why{ display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
+.missing{ color:var(--bad); font-style:italic; font-family:var(--sans);
+          font-size:12.5px; font-weight:400; }
+.subhd{ display:block; font-size:.82em; font-weight:400; color:var(--ink-3);
+        line-height:1.35; margin-top:1px; letter-spacing:0; text-transform:none; }
+
+.fld{ font:inherit; font-size:14px; width:100%; padding:6px 9px;
+      border:1px solid var(--line); border-radius:var(--r);
+      background:var(--surface); color:var(--ink); font-family:var(--sans);
+      box-sizing:border-box; }
+.fld.mono{ font-family:var(--mono); text-align:center; }
+select.fld{ padding:5px 8px; }
+
+/* THE PROPOSED STATE. Not a new look — the platform's own disabled treatment:
+   the surface-2 ground it already uses for anything inert, quiet ink, and no
+   caret. It stays DRAWN rather than removed (§248: inside a block of equal
+   boxes a hole reads as a control that failed to render). */
+.fld.off{ background:var(--surface-2); color:var(--ink-3); border-color:var(--line);
+          cursor:not-allowed; }
+
+.tgrid{ display:grid; grid-template-columns:var(--tw) var(--tw); gap:5px; }
+.tgrid > *{ width:var(--tw); min-width:0; box-sizing:border-box; }
+.tgrid > .why{ display:flex; align-items:center; justify-content:center; margin-top:0; }
+
+/* the unit picker, opened, so the new entry can be seen in its place */
+.picker{ display:inline-block; border:1px solid var(--line); border-radius:var(--r);
+         background:var(--surface); padding:4px 0; min-width:132px;
+         box-shadow:0 4px 6px -1px rgb(15 23 42/.10); }
+.picker div{ padding:4px 12px; font-size:var(--fs-note); font-family:var(--mono); color:var(--ink-2); }
+.picker div.new{ background:var(--surface-2); color:var(--ink); font-weight:700;
+                 border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.picker div.new::after{ content:" \2190 new"; font-family:var(--sans); font-size:var(--fs-micro);
+                        letter-spacing:var(--track); text-transform:uppercase; color:var(--gold-deep); }
+
+/* the reporting control: the platform's segmented pair */
+.yn{ display:inline-flex; border:1px solid var(--line); border-radius:var(--r); overflow:hidden; }
+.yn span{ padding:5px 14px; font-size:var(--fs-note); color:var(--ink-2); background:var(--surface); }
+.yn span+span{ border-left:1px solid var(--line); }
+.yn span.on{ background:var(--gold); color:var(--on-fill); font-weight:700; }
+
+.pct{ font-family:var(--mono); font-weight:700; }
+.pct.good{ color:var(--good-tx); }
+.pct.bad{ color:var(--bad-tx); }
+
+.pair{ display:grid; grid-template-columns:1fr; gap:18px; }
+@media (min-width:900px){ .pair.two{ grid-template-columns:1fr 1fr; } }
+.cap{ font-size:var(--fs-micro); letter-spacing:var(--track); text-transform:uppercase;
+      font-weight:700; color:var(--ink-3); margin:0 0 7px; }
+.cap.now{ color:var(--ink-3); }
+.cap.next{ color:var(--gold-deep); }
+mark{ background:none; color:var(--gold-deep); font-weight:700; }
+</style>
+
+<div class="wrap">
+
+  <div class="mkhead">
+    <div class="mkkick">Mockup for sign-off &middot; 2 September 2026</div>
+    <h1>Y/N targets &mdash; the unit that dims the target</h1>
+    <p class="mklede">A yes/no measure joins the unit list. Picking it says the row is
+      <em>did this happen</em> rather than <em>how much</em>, so the boxes that only make
+      sense against a number go quiet. Nothing on this page is built yet.</p>
+  </div>
+
+  <h2>The unit list gains one entry</h2>
+  <p class="note">Same picker, same place, one more line in it. Everything already on the
+    list is untouched.</p>
+  <div class="picker">
+    <div>&nbsp;</div>
+    <div>%</div>
+    <div>#</div>
+    <div class="new">Y/N</div>
+    <div>EGP</div>
+    <div>M EGP</div>
+    <div>B EGP</div>
+    <div>K USD</div>
+    <div>M USD</div>
+  </div>
+
+  <h2>1 &middot; A unit's key objectives</h2>
+  <p class="note">The pen, on the Foundation page. Row 2 has Y/N picked.</p>
+  <div class="pane scrollbox">
+    <table>
+      <thead><tr>
+        <th style="width:34%">Objective</th><th>Dir.</th><th>3-year</th>
+        <th>This year</th><th>Unit</th><th>Compile</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><input class="fld" value="Distribution revenue"></td>
+          <td><select class="fld mono"><option>&ge;</option></select></td>
+          <td><input class="fld mono" value="9.0"></td>
+          <td><input class="fld mono" value="6.2"></td>
+          <td><select class="fld"><option>B EGP</option></select></td>
+          <td><select class="fld"><option>Sum</option></select></td>
+        </tr>
+        <tr>
+          <td><input class="fld" value="ISO 27001 certification achieved"></td>
+          <td><select class="fld mono off" disabled><option>&ge;</option></select></td>
+          <td><input class="fld mono off" value="&mdash;" disabled></td>
+          <td><input class="fld mono off" value="&mdash;" disabled></td>
+          <td><select class="fld"><option>Y/N</option></select></td>
+          <td><select class="fld off" disabled><option>&mdash;</option></select></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>2 &middot; A pillar's key measures</h2>
+  <p class="note">The pen, on the Plan pane. Same three boxes go quiet.</p>
+  <div class="pane scrollbox">
+    <table>
+      <thead><tr>
+        <th style="width:40%">Measure</th><th>Dir.</th><th>Target</th><th>Unit</th><th>Compile</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><input class="fld" value="Non-Samsung revenue"></td>
+          <td><select class="fld mono"><option>&ge;</option></select></td>
+          <td><input class="fld mono" value="4"></td>
+          <td><select class="fld"><option>B EGP</option></select></td>
+          <td><select class="fld"><option>Sum</option></select></td>
+        </tr>
+        <tr>
+          <td><input class="fld" value="New warehouse live in Alexandria"></td>
+          <td><select class="fld mono off" disabled><option>&ge;</option></select></td>
+          <td><input class="fld mono off" value="&mdash;" disabled></td>
+          <td><select class="fld"><option>Y/N</option></select></td>
+          <td><select class="fld off" disabled><option>&mdash;</option></select></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>3 &middot; A tactic's outcome</h2>
+  <p class="note">The four equal boxes you settled last week. Three of the four go quiet and
+    all four stay drawn &mdash; a hole here reads as a control that failed to load.</p>
+  <div class="pane scrollbox">
+    <table>
+      <thead><tr>
+        <th class="idx">#</th><th style="width:32%">Tactic</th>
+        <th style="width:24%">Outcome</th><th>Target</th><th>Owner</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="idx">1</td>
+          <td><span class="tacname">Open three hub stores</span>
+              <span class="why">Cairo, Giza and Alexandria, staffed and trading.</span></td>
+          <td><b>Stores trading by year end</b></td>
+          <td>
+            <div class="tgrid">
+              <input class="fld mono" value="3">
+              <select class="fld"><option>#</option></select>
+              <select class="fld mono"><option>&ge;</option></select>
+              <select class="fld"><option>Sum</option></select>
+            </div>
+          </td>
+          <td>Nadia Fahmy</td>
+        </tr>
+        <tr>
+          <td class="idx">2</td>
+          <td><span class="tacname">Sign the regional distribution agreement</span>
+              <span class="why">One agreement, signed or not signed.</span></td>
+          <td><b>Agreement signed</b></td>
+          <td>
+            <div class="tgrid">
+              <input class="fld mono off" value="&mdash;" disabled>
+              <select class="fld"><option>Y/N</option></select>
+              <select class="fld mono off" disabled><option>&ge;</option></select>
+              <select class="fld off" disabled><option>&mdash;</option></select>
+            </div>
+          </td>
+          <td>Hussein Khaled</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ask">
+    <b>One thing to confirm.</b> You asked for the target to dim. I have also dimmed the
+    <b>direction</b> (&ge; / &le;) and the <b>compile rule</b> (Sum / Latest / Average) on a Y/N
+    row, because neither means anything once there is no number &mdash; a live control that
+    changes nothing is worse than one that is not there. Say the word if you want only the
+    target dimmed and those two left live.
+  </div>
+
+  <h2>Reading it</h2>
+  <p class="note">Pen closed. The target column says what the row is, in place of a figure.</p>
+  <div class="pair two">
+    <div>
+      <p class="cap now">Today &mdash; there is no way to write this row</p>
+      <div class="pane scrollbox"><table>
+        <thead><tr><th style="width:60%">Measure</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Non-Samsung revenue</td><td class="num">&ge; 4B EGP</td></tr>
+          <tr><td>New warehouse live in Alexandria</td>
+              <td class="num"><span class="missing">Missing</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div>
+      <p class="cap next">Proposed</p>
+      <div class="pane scrollbox"><table>
+        <thead><tr><th style="width:60%">Measure</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Non-Samsung revenue</td><td class="num">&ge; 4B EGP</td></tr>
+          <tr><td>New warehouse live in Alexandria</td>
+              <td class="num"><mark>Yes / No</mark></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <h2>Reporting it</h2>
+  <p class="note">The figure box is replaced by the two answers. Nothing to type, nothing to
+    get wrong.</p>
+  <div class="pane scrollbox">
+    <table>
+      <thead><tr>
+        <th style="width:44%">Measure</th><th>Annual target</th>
+        <th>YTD actual</th><th>YTD delivery</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>Non-Samsung revenue</td>
+          <td class="num">4B EGP</td>
+          <td><input class="fld mono" value="1.6" style="width:90px">
+              <span class="subhd">due at 2.7B EGP</span></td>
+          <td class="num"><span class="pct bad">59%</span></td>
+        </tr>
+        <tr>
+          <td>New warehouse live in Alexandria</td>
+          <td class="num">Yes / No</td>
+          <td><span class="yn"><span class="on">Yes</span><span>No</span></span></td>
+          <td class="num"><span class="pct good">100%</span></td>
+        </tr>
+        <tr>
+          <td>Regional distribution agreement signed</td>
+          <td class="num">Yes / No</td>
+          <td><span class="yn"><span>Yes</span><span class="on">No</span></span></td>
+          <td class="num"><span class="pct bad">0%</span></td>
+        </tr>
+        <tr>
+          <td>ISO 27001 certification achieved</td>
+          <td class="num">Yes / No</td>
+          <td><span class="yn"><span>Yes</span><span>No</span></span>
+              <span class="subhd">nothing said yet</span></td>
+          <td class="num"><span style="color:var(--ink-3)">&mdash;</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note" style="margin-top:12px">Yes scores <b>100</b>, No scores <b>0</b>, and a row
+    nobody has answered is not scored at all &mdash; it stays out of the average and still owes
+    a figure, exactly like an empty number box does today.</p>
+
+  <h2>What it does to the counts</h2>
+  <p class="note">Three consequences worth saying out loud before it is built.</p>
+  <div class="pane" style="padding:4px 0">
+    <table>
+      <tbody>
+        <tr><td style="width:34%"><b>It is not Missing</b></td>
+            <td>A Y/N target has no number on purpose, so it counts as a complete answer.
+                Without this every Y/N row would show a red <span class="missing">Missing</span>
+                for ever and block Submit.</td></tr>
+        <tr><td><b>It counts in the average</b></td>
+            <td>100 or 0 lands in the pillar's and the unit's figures like any other row, which
+                is what you chose.</td></tr>
+        <tr><td><b>Nothing already written moves</b></td>
+            <td>The unit lives on the target itself, so no plan, figure or archive changes.
+                Y/N only exists on rows somebody picks it for.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

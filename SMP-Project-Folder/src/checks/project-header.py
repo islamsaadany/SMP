@@ -119,7 +119,7 @@ with sync_playwright() as pw:
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.goto(URL); pg.wait_for_timeout(1300)
     open_project(pg, "light", 1500)
-    pen = pg.query_selector('.pane .paneact .penbtn[data-page="plan"]')
+    pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
     ck("the plan pen is there", bool(pen))
     if pen:
         pen.click(); pg.wait_for_timeout(500)

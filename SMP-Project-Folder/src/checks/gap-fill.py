@@ -126,8 +126,11 @@ with sync_playwright() as p:
     be(pg, who["cust"], who["unit"], "strategy", "plan")
     # §145.14: the fill control is a WORDED RED BUTTON beside the arrows,
     # not a pen glyph — drawn only while something is missing.
-    pen = pg.query_selector('.pane .paneact .fillcta[data-fillcta="plan"]')
-    ck("the custodian's red button appears beside the arrows", pen is not None)
+    # §268: the fill grant's control is the BAR's, in the section row. The
+    # corner copy is gone — one control, one place — so this presses the one
+    # that is actually there.
+    pen = pg.query_selector('#secrow-in .missbar .fillcta[data-fillcta="plan"]')
+    ck("the custodian's red button appears on the section line", pen is not None)
     ck("...and it says what it does",
        pen is not None and pen.text_content().strip() == "Fill in missing elements",
        pen and pen.text_content())
@@ -193,7 +196,7 @@ with sync_playwright() as p:
 
     # ── 4 · §218: THE APPROVAL IS GONE, AND IT IS ASSERTED AS AN ABSENCE ──
     print("\n4 · a filled value is live at once (§218)")
-    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""() => ({
       chips: document.querySelectorAll('.pane .pchip').length,
       ticks: document.querySelectorAll('.pane .gapok').length,
@@ -272,7 +275,7 @@ with sync_playwright() as p:
     # ── 8 · COLLABORATORS FILL, AND THE RIGHT WAITS (§145.10) ───────────
     print("\n8 · collaborators fill, and the reporting right waits")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    pg.click('.pane .paneact .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
+    pg.click('#secrow-in .missbar .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
     # §130.1 MET §145 AT THE MERGE: collaborators are TICKED from the
     # register-fed list, never typed — so the fill control is the same
     # multi-select the office's pen uses, and the check picks two REAL
@@ -306,7 +309,7 @@ with sync_playwright() as p:
       return SMPRules.namedOn(t, { key: "nh", name: name });
     }""", who)
     ck("...and counts the moment the mark lifts", r is True)
-    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
     # ── 8b · THE OUTCOME AND ITS TARGET FILL, AND ONLY THOSE TWO (§249) ─
     print("\n8b · a tactic's outcome and its target fill; the two beside them do not")
@@ -330,7 +333,7 @@ with sync_playwright() as p:
       "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
     ck("an empty outcome and target are owed to start with",
        "outcome" in owed and "outTarget" in owed, owed)
-    pg.click('.pane .paneact .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
+    pg.click('#secrow-in .missbar .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""(w) => {
       const row = document.querySelector('.pane tbody tr');
       const grid = document.querySelector('.pane td.tgtcell .tgrid');
@@ -405,7 +408,7 @@ with sync_playwright() as p:
       paint();
     }""", who)
     pg.wait_for_timeout(300)
-    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
     # ── 9 · THE COUNTS THAT FIND YOU (§145.14) ──────────────────────────
     print("\n9 · the missing bar beside the sections, the rail words, the walker")
@@ -431,22 +434,29 @@ with sync_playwright() as p:
     # the PAINT is asserted: the bar's button wears the same ground as the
     # corner's (the relationship, §53.5), and that ground is a real colour —
     # both vanishing together must still fail. The chip keeps a real border.
+    # §268 REMOVED THE CORNER COPY, so this can no longer compare the bar's
+    # button with it — and a comparison to something that is gone is satisfied
+    # by both sides vanishing (§113.8). It asserts the PROBLEM instead, which
+    # is what §145.14 was ever about: inside `nav.tabs` a bare class is
+    # outranked and the control renders as a plain word, so the button must
+    # carry a solid ground of its own and ink that is not the tab row's.
     pr = pg.evaluate("""() => {
       const barBtn = document.querySelector('#secrow-in .missbar .fillcta');
-      const corner = document.querySelector('.pane .paneact .fillcta');
+      const tab = document.querySelector('#secrow-in [data-sub2]');
       const chip = document.querySelector('#secrow-in .missbar .mchip');
       const bs = barBtn ? getComputedStyle(barBtn) : null;
-      const cs = corner ? getComputedStyle(corner) : null;
+      const ts = tab ? getComputedStyle(tab) : null;
       const ch = chip ? getComputedStyle(chip) : null;
-      return { barBg: bs && bs.backgroundColor, cornerBg: cs && cs.backgroundColor,
-               barInk: bs && bs.color, cornerInk: cs && cs.color,
+      return { barBg: bs && bs.backgroundColor, barInk: bs && bs.color,
+               tabInk: ts && ts.color,
+               barBorder: bs && parseFloat(bs.borderTopWidth) > 0,
                chipBorder: ch && parseFloat(ch.borderTopWidth) > 0 &&
                            ch.borderTopColor !== ch.color };
     }""")
-    ck("...and the bar's button is PAINTED like the corner's — solid, not a tab",
-       pr["barBg"] is not None and pr["barBg"] == pr["cornerBg"] and
+    ck("...and the bar's button is PAINTED — solid, bordered, not a bare tab word",
+       pr["barBg"] is not None and
        "rgba(0, 0, 0, 0)" not in (pr["barBg"] or "rgba(0, 0, 0, 0)") and
-       pr["barInk"] == pr["cornerInk"], pr)
+       pr["barBorder"] is True and pr["barInk"] != pr["tabInk"], pr)
     ck("...and the chip keeps its border inside the tab row", pr["chipBorder"] is True, pr)
     ck("...and nothing of it in the page body", r["inPage"] is False, r)
     ck("the rail speaks the same words — 'N Missing'",

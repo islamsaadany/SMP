@@ -58,6 +58,50 @@
          border:1px solid var(--line); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
+     A yes/no target carries no number, so the direction, the figure and the
+     compile rule beside it have nothing to act on. They stay DRAWN — a hole
+     among equal boxes reads as a control that failed to render (§248) — and
+     the `disabled` attribute is what actually stops them, so this rule only
+     has to make that visible. The ground is the platform's own inert
+     surface; no new token, and nothing that could be mistaken for an alarm
+     (§168: outstanding is not broken, and this is neither). */
+  .fld.off { background:var(--surface-2); color:var(--ink-3);
+             border-color:var(--line); cursor:not-allowed; }
+  /* The reporting page's yes/no picker. It sits where a number box sits, so
+     it takes that box's width rather than a select's natural one — a control
+     that jumps a column wider on one row makes the column impossible to run
+     an eye down (§88's argument, one table over). */
+  /* Islam, from the running page: *"the yes or no is smaller in size than the
+     other reporting input cells."* It was — `.entry .field` is 78px because a
+     number leaves room for the unit beside it, and this control has none, so
+     it rendered 26px short in a column an eye runs down. */
+  /* THE BOX ITSELF, because `input.field` above is ELEMENT-SCOPED and a
+     <select> receives none of it — no padding, no size, no ground. That is
+     what "small input space" was: measured, the picker stood 19px tall
+     beside a number entry's 34px, which is a far louder difference than the
+     width I first went after. Every box property is mirrored here rather
+     than the input rule being widened to `.field`, which would reach the
+     note fields and the plan's own boxes too. */
+  select.field.ynfield { font-family:var(--sans); text-align:left;
+    font-size:13px; padding:6px 10px; background:var(--surface);
+    color:var(--ink);
+    /* AND THE HEIGHT IS STATED, NOT INFERRED. Matching the padding still
+       left it 3px short, because a <select> lays a shorter line box than a
+       13px mono input and — measured — does not take `line-height` for its
+       own box at all: the declaration computed to `normal`. So the height
+       is a named property of a reporting box, exactly as the width is, and
+       both controls read the same token instead of arriving at the same
+       number by two different routes (§53.5). Asserted as EQUAL HEIGHT in
+       checks/yn-target.py §9, so a later change to the box moves both or
+       goes red. */
+    height:var(--rep-h); }
+  /* §251.6: THE SAME WIDTH AS A NUMBER BOX, which is `--rep-w`. §251.4 set
+     this to the width of an entry carrying a WIDE unit chip ("M EGP"), and
+     the rows beside it in a real plan carry "%" — so it came out too big.
+     A `%` entry is 78px of field plus its chip, which comes to exactly the
+     width a bare number box already has, so one token answers both. */
+  .entry .field.ynfield { width:var(--rep-w); }
   .big-field { font-family:var(--serif); font-size:15px; }
   .swot .fld { font-size:13px; }
   td.horizon { color:var(--ink-3); }
@@ -304,10 +348,10 @@
   .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
   /* The card head has to leave room for it, or a long label runs underneath. */
   .hoverpen .cardhead { padding-right:34px; }
-  /* The plan's title row is a flex header, not a card head; the pen sits in the
-     same corner and the row leaves it room. */
-  .ptitle.hoverpen { padding-right:34px; }
-  .ptitle.hoverpen .penbtn { top:0; right:0; }
+  /* §268: THE PLAN'S TITLE ROW HELD 34px OPEN FOR A PEN THAT HAS MOVED to the
+     section line, so the room goes with it (§24) — a gap kept for a control
+     that is not there is the next reader's puzzle. `.ptitle` keeps its own
+     flex rules below; only the pen's two lines are gone. */
 
   /* HALF THE HEIGHT. 47px -> 26px, and it is the CONTENT that had to shrink:
      the padding was 8px a side and the controls 31px, so squeezing the padding
@@ -798,7 +842,14 @@
     overflow:hidden;flex:1;min-width:120px;max-width:260px}
   .repbar i{display:block;height:100%;background:var(--good)}
   .repbar.part i{background:var(--attn)}
-  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:104px;
+  /* §251.2: THE REPORTING BOX'S WIDTH IS NAMED ONCE. A number entry is this
+     wide; inside `.entry` it gives 26px back to the unit suffix beside it, so
+     the two shapes come out level in the column. The Y/N picker carries no
+     suffix and takes the whole box — read off the same token rather than a
+     second 104 somebody has to remember to keep in step (§122.5: a guessed
+     constant goes stale silently). */
+  :root{--rep-w:104px; --rep-h:32px}
+  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);height:var(--rep-h);
     border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
     color:var(--ink)}
   input.field.filled{border-color:var(--good);background:var(--good-bg)}
@@ -1285,8 +1336,28 @@
      border, deliberately: an × drawn inside an input is the search box's
      clear-the-text idiom, and this one removes the ROW. Keyed on the PAIR so
      it reaches every table using the pattern and nothing else. */
-  td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
-  td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
+  /* §270: AND THE TWO HOMES IT NEVER REACHED. §114.4 was written on a plan
+     table and scoped to `td`; the SWOT's lines are `<li>` and Who we are's are
+     `<dd>`, so on those two pages the × went on dropping to a line of its own
+     — measured with the pen open: 6 of 6 on Foundation and 23 of 23 on the
+     SWOT, 14px each, about 400px of empty height across the two. Invisible
+     until §269 made one press open all three sections, which is why it
+     surfaced now. Same rule, same pair, three seats. */
+  td:has(> .fld + .xbtn) > .fld,
+  dd:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
+  td:has(> .fld + .xbtn) > .xbtn,
+  dd:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
+  /* THE SWOT'S LINE IS A GRID, SO THE × NEEDS A COLUMN AND NOT A WIDTH.
+     `.swotlist li` is `22px 1fr` — the number and the line — so a third child
+     is placed on a second ROW whatever width the field is given, which is why
+     the calc above fixed Who we are and left all 23 of these where they were.
+     Measured, not reasoned: the first build of §270 gave it the width rule and
+     the check still read 23 of 23 wrapped. A column of its own, and `start`
+     rather than the read line's `baseline`, because a growing box and a 22px
+     button have no shared baseline worth aligning to. */
+  .swotlist li:has(> .fld + .xbtn) { grid-template-columns: 22px 1fr auto;
+    align-items: start; }
+  .swotlist li:has(> .fld + .xbtn) > .swot-n { padding-top: 7px; }
   /* ── HIDDEN FROM THE PRESENTATION (§233) ────────────────────────────
      The eye sits between the field and the × (the mockup's order), which
      the seat rule above cannot see — its `.fld + .xbtn` adjacency breaks —
@@ -1356,6 +1427,35 @@
      the section tabs: the total, one red chip per owing place, the red
      button. Nothing in the page body, no number on the Strategy tab. */
   .sectionrow .tabs-in { flex-wrap:wrap; align-items:center; }
+  /* ── ONE TAIL AT THE END OF THE SECTION LINE (§268) ────────────────
+     The missing bar and the section's own pen, grouped. `.secttail` carries
+     the `margin-left:auto` and `.missbar` gives its up, or the two right-align
+     independently and the red button is stranded mid-row with the pen at the
+     end (drawn, looked at, thrown away — §41.9). */
+  .secttail { margin-left:auto; display:flex; gap:10px; align-items:center;
+    flex-wrap:wrap; }
+  .secttail .missbar { margin-left:0; }
+  .sectsep { width:1px; height:18px; background:var(--line); flex:none; }
+  /* THE SECOND SELECTOR IS NOT A DUPLICATE — §145.14 wrote that three times in
+     one rule block and this is the fourth: inside `nav.tabs`, `.tabs button`
+     (0,1,1) outranks a bare class (0,1,0) and strips the control to a plain
+     word. That is precisely what `Done filling` has been wearing on this line
+     all along, measured: background `rgba(0,0,0,0)`, `border: 0px`, the quiet
+     ink — an unselected tab. */
+  .secpen, .tabs .secttail button.secpen {
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; font-size:12px; font-weight:700; padding:4px 13px;
+    cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .tabs .secttail button.secpen:hover { border-color:var(--gold);
+    color:var(--gold-deep); background:var(--surface); }
+  /* Lit while the mode is open — the pen's own pair (`--gold` under
+     `--panel`), which is a measured 5.28:1 light and 9.75:1 dark. The GROUND
+     is `--surface` at rest and not `--surface-2`, because `--gold-deep` on
+     `--surface-2` is 4.45 and §38.5 has been paid for five times. */
+  .secpen.on, .tabs .secttail button.secpen.on {
+    border-color:var(--gold); background:var(--gold); color:var(--panel); }
+  .tabs .secttail button.secpen:focus-visible {
+    outline:2px solid var(--gold); outline-offset:2px; }
   .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
     flex-wrap:wrap; }
   .missbar .secmiss { color:var(--bad-tx); font-weight:800; font-size:12.5px;
@@ -1495,11 +1595,21 @@
      family in two volumes: the act that ends the report shouts, the act that
      parks it speaks. `--cta` as TYPE, never the fill's own colour: §38.4 cuts
      both ways, and `--cta` is the deep half of the pair for exactly this. */
-  .repchrome .rc-draft { background:none; border:0; color:var(--cta);
+  /* AND REOPEN JOINS IT WHEREVER SUBMIT IS BESIDE IT (§263). One
+     declaration and two selectors, never a second block that says the same
+     thing: the quiet half of this pair has to be one look, or the bar reads
+     in two volumes on one page and three on another (§53.5). The parked
+     Reopen keeps `rc-reopen` and takes `quiet` as a modifier, so the handler
+     and every check still find it by the one class it has always had. */
+  .repchrome .rc-draft,
+  .repchrome .rc-reopen.quiet { background:none; border:0; color:var(--cta);
     font:inherit; font-size:12px; font-weight:500; letter-spacing:.04em;
     text-transform:uppercase; cursor:pointer; padding:6px 4px; }
-  .repchrome .rc-draft:hover { text-decoration:underline; }
-  .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .repchrome .rc-draft:hover,
+  .repchrome .rc-reopen.quiet:hover { text-decoration:underline; background:none;
+    color:var(--cta); }
+  .repchrome .rc-draft:focus-visible,
+  .repchrome .rc-reopen.quiet:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
   /* ── A CLOSED REPORT, AND THE WAY BACK (§220) ──────────────────────────
      Submitted or parked as a draft: the report is read-only and says so by
@@ -1576,6 +1686,33 @@
   /* The seam, so the frozen pair reads as a held edge rather than as text
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
+
+  /* ── AND THE SAME SEAM ON HOVER (§267.1) ────────────────────────────────
+     §73.2 (the block above) gave the frozen pair `background:inherit` so a
+     striped row is striped all the way across — and it answered the STRIPE
+     only. `tbody tr:hover > td` paints every cell of a hovered row, and
+     `.tblscroll td.idx` outranks it on specificity, so the two frozen cells
+     alone keep the row's own white: measured, cells 3 to 7 at #EFF2F6 and
+     cells 1 and 2 at #FFFFFF. The row reads as split down the middle, and
+     the step lands exactly on the left edge of the cell after the name —
+     which is what Islam reported, of the Outcome cell: *"on squeezing the
+     outcome cell left outline is damged"*.
+
+     IT IS OLDER THAN THE FOLD AND MEASURES IDENTICALLY ON THE BUILD BEFORE
+     IT (§267). What §267 changed is how big the untinted block is: the name
+     column goes from 74–269px to 431 and its cell is now two rows tall, so a
+     sliver became a slab. Conspicuous, not caused.
+
+     THE FIX FOLLOWS WHAT THE NEIGHBOURS ALREADY DO rather than deciding
+     anything new: on an unstriped row the pair takes the hover tint, and on
+     a STRIPED one it keeps the stripe — because there the zebra's own `> td`
+     rule wins over the hover's at equal specificity and later source order,
+     so a hovered striped row does not change colour at all today. Painting
+     the pair grey there would invert the seam rather than close it. */
+  .tblscroll tbody tr:hover > td.idx,
+  .tblscroll tbody tr:hover > td.idx + td { background:var(--surface-2); }
+  .tblscroll tbody tr:nth-child(even):hover > td.idx,
+  .tblscroll tbody tr:nth-child(even):hover > td.idx + td { background:var(--zebra); }
 
   /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
@@ -1776,6 +1913,31 @@
    into columns instead, so nothing there needs this. */
 .tacname { font-weight:650; display:block; }
 
+/* ── AND THE REPORTED NOTE SAYS SO (§255) ──────────────────────────────────
+   The comment above got as far as "two greys at one weight run together as a
+   single block" and answered it for the NAME alone. Bolding the name tells
+   you where the row starts; it says nothing about which of the two greys
+   BELOW it was written this cycle. This is that second half.
+
+   A RULE, NOT A SECOND SIZE OR COLOUR. Making the note smaller or paler
+   would rank it under the plan's description, and it is the newer and more
+   urgent of the two — so it keeps `.why`'s size and ink and is set apart
+   sideways instead, which costs no line and no width the row did not have.
+
+   `--line`, never the accent (§41's budget: this page spends its gold on
+   Report and the scoring colours), and the key carries NO opacity — `.85`
+   on `--ink-3` measures about 4.4:1 at 10px, which is §38.5's trap. */
+  td .repnote {
+    display:block; margin-top:6px; padding-left:10px;
+    border-left:2px solid var(--line);
+    font-size:12px; color:var(--ink-3);
+  }
+  td .repnote .repkey {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-3); margin-right:6px;
+    white-space:nowrap;
+  }
+
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should
    match the compile cell ... so we can give space for the other columns").
@@ -1828,4 +1990,41 @@ th .subhd { font-weight:400; }
 @media (max-width: 880px) {
   td.tgtcol:not(.tgtcell), th.tgtcol { display:none; }
   .narrowtgt { display:block; }
+}
+
+/* ══ THE PLAN TABLE AT A NARROWER WINDOW (§267) ═════════════════════════
+   Two rungs, and only the first of them is structural. Below 1400 the tail —
+   Collabs and Quarters — leaves its two columns for a strip under the tactic's
+   name, which is `tailFolds()`'s decision in group-render.js because moving a
+   CONTROL is not something a media query can do. This is what that strip
+   looks like once it is there.
+
+   A row, wrapping, so a long list of collaborators takes a second line rather
+   than pushing the quarter marks off the end — and `min-width:0` on the select
+   or a flex item refuses to shrink below its own content and does the pushing
+   anyway (§100.5's rule, one box in). */
+.tacfold { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px;
+           margin-top:8px; }
+.tacfold > * { min-width:0; }
+/* A NAMELESS CONTROL MUST AT LEAST LOOK LIKE ONE. With its column heading gone
+   (Islam) the collaborators picker on a tactic nobody supports is the platform's
+   em-dash and a caret — 55px, measured — which beside four numbered marks reads
+   as a stray character rather than a field. A floor, so it keeps the shape of
+   the box above it; it still grows with the names it holds. */
+.tacfold .collabs { flex:0 1 auto; }
+.tacfold .collabs .ssbtn, .tacfold .collabs select { min-width:118px; }
+/* The cell is `white-space:nowrap` for the table's sake (§88), and this strip
+   is the one thing in it that must be allowed to wrap. */
+.tacfold, .tacfold * { white-space:normal; }
+.tacfold .qs { white-space:nowrap; }
+
+/* RUNG TWO, AND IT IS PURE CSS BECAUSE NOTHING MOVES: below 1200 the outcome's
+   four boxes stack into ONE column instead of two. That hands the row back
+   ~100px — measured at 1200 as Tactic 283 → 365px — and costs height on the
+   one cell that has it to spare, which is §248's own argument for the two-wide
+   grid read in the other direction. Never below `--tw`: the width of the
+   widest word a select has to show is what made that token (§248), and it does
+   not get narrower because the window did. */
+@media (max-width: 1200px) {
+  .tgrid { grid-template-columns: var(--tw); }
 }

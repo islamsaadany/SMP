@@ -40,8 +40,8 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 HTML = pathlib.Path(os.environ.get("SMP_REPORT_HTML") or
                     (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html")).read_bytes()
-BASE = json.loads((ROOT / "db/seed-state.json").read_text())
 SW = (ROOT / "sw.js").read_bytes()
+BASE = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 POSTS = []
 bad = 0
@@ -65,16 +65,17 @@ class H(http.server.BaseHTTPRequestHandler):
             self._s(json.dumps({"ok": True, "state": BASE, "person": PERSON}).encode()); return
         if self.path.startswith("/api/auth"):
             self._s(json.dumps({"ok": True, "person": PERSON}).encode()); return
+        # §231.5: THE WORKER IS A REAL FILE, SERVED AS THE GATE SERVES IT.
+        # The platform registers `sw.js` itself now, so a stub that answers the
+        # catch-all `text/html` makes `register()` reject on the content type —
+        # a console error this file's own listener then counts as the product
+        # throwing while reporting. It had been red for exactly that, on a
+        # build that reports perfectly. `checks/office-chat.py` already carries
+        # these three lines; this is that fix, in the file that needed it too.
+        if self.path.startswith("/sw.js"):
+            self._s(SW, "application/javascript"); return
         if self.path.startswith("/raya-trade"):
             self._s(HTML, "text/html; charset=utf-8"); return
-        # THE STUB SERVES THE WORKER (§253, closing §250.2's recorded red). The
-        # platform registers `sw.js` itself since §231.5, and this stub answered
-        # it as html — so `register()` rejected on a content type and all three
-        # shapes failed "nothing threw while reporting" on `main` and on the
-        # shipped file alike. §100.3: a stub that does not model the server is
-        # testing something the product does not do.
-        if self.path.startswith("/sw.js"):
-            self._s(SW, "text/javascript; charset=utf-8"); return
         self._s(b"<!doctype html><title>gate</title>", "text/html; charset=utf-8")
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)

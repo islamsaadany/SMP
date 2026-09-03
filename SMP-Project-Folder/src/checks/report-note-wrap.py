@@ -1,4 +1,4 @@
-"""THE REPORTING NOTE IS PROSE, AND IT HAD ONE LINE TO SAY IT IN (§253).
+"""THE REPORTING NOTE IS PROSE, AND IT HAD ONE LINE TO SAY IT IN (§271).
 
 Islam: *"in the reporting the notes table needs to wrap around the text and
 enable multiple lines."*
@@ -32,7 +32,7 @@ WHAT IS ASSERTED, AND WHY IT IS NOT "THERE IS A TEXTAREA":
     that widened either rule to the other is caught here rather than by somebody
     losing a paragraph into a workbook.
 
-PROVE IT CAN FAIL (§94.5): run it against the shipped pre-§253 file —
+PROVE IT CAN FAIL (§94.5): run it against the shipped pre-§271 file —
 `SMP_NOTE_HTML=../strategy-management-platform-v3.22.html` — where the clipping,
 the newline and the pre-line assertions all go red.
 

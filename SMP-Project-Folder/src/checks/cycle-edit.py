@@ -374,40 +374,60 @@ with sync_playwright() as p:
        shut.get("opennew") is True and shut.get("edit") is True, shut)
 
     # ── 9 · reopening a closed cycle ─────────────────────────────────
-    print("\n── 9 · a closed cycle is reopened from the pen (§261.2) ──")
-    # The cycle is closed from §5b above. Nothing on the strip may reopen it.
+    print("\n── 9 · a closed cycle is reopened from the platform's dialog (§261.3) ──")
+    # REWRITTEN, NOT DELETED (§218). §261.2 drew the record as a band under the
+    # strip and this asserted its five values; Islam saw that on his own tenant
+    # — "the design is very poor" — and the fault was the SHAPE: a band of facts
+    # under a band of the same facts, every one of them already on the line
+    # above. He picked the dialog from three drawn shapes. What is asserted is
+    # unchanged in substance: the strip carries no Reopen, the act is behind the
+    # pen, and pressing it reaches the CYCLE.
     shut2 = strip_state(pg)
     ok("the strip carries no Reopen",
-       js(pg, "()=>!document.querySelector('.fstrip-head [data-reopencycle]')") is True, shut2)
+       js(pg, "()=>!document.querySelector('.fstrip-head [data-reopenyes]')") is True, shut2)
     ok("...and it still offers Edit and Open a new cycle",
        shut2.get("edit") is True and shut2.get("opennew") is True, shut2)
     hist0 = js(pg, "()=>({n:HISTORY.length, last:(HISTORY[HISTORY.length-1]||{}).name})")
     press(pg, "[data-editcycle]", "Edit")
-    closedpen = js(pg, """() => {
-      const p = document.querySelector(".newcycle");
-      if (!p) return {none:true};
+    dlg = js(pg, """() => {
+      const ov = document.querySelector(".overlay.on, #overlay.on");
+      const b = document.getElementById("modal-b");
+      if (!b || !b.querySelector(".sendconfirm")) return {none:true};
       return {
-        head: (p.querySelector(".nc-h") || {}).textContent || "",
-        labels: [...p.querySelectorAll(".nc-grid label > span:first-child")]
-                  .map(s => s.textContent.trim()),
-        vals: [...p.querySelectorAll(".nc-grid .nc-val")].map(s => s.textContent.trim()),
-        inputs: p.querySelectorAll(".nc-grid input").length,
-        reopen: !!p.querySelector("[data-reopencycle]"),
-        close: !!p.querySelector("[data-closecycle]")
+        title: (document.getElementById("modal-t") || {}).textContent || "",
+        keys: [...b.querySelectorAll(".kv .k")].map(k => k.textContent.trim()),
+        vals: [...b.querySelectorAll(".kv span:not(.k)")].map(k => k.textContent.trim()),
+        yes: !!b.querySelector("[data-reopenyes]"),
+        no: !!b.querySelector("[data-reopenno]"),
+        band: !!document.querySelector(".fstrip .newcycle"),
+        inert: !!(ov || document.querySelector('[aria-hidden="true"].wrap, .wrap[inert]'))
       };
     }""")
-    ok("the pen opens on a record", closedpen.get("head", "").lower() == "this cycle",
-       closedpen.get("head"))
-    ok("it shows all five facts", len(closedpen.get("vals") or []) == 5, closedpen)
-    ok("...as values, with nothing editable", closedpen.get("inputs") == 0, closedpen)
-    ok("Reopen is INSIDE the pen", closedpen.get("reopen") is True, closedpen)
-    ok("...and Close the cycle is not there at all", closedpen.get("close") is False, closedpen)
-    accepting["on"] = True
-    press(pg, ".newcycle [data-reopencycle]", "Reopen")
+    ok("the pen opens the platform's dialog", dlg.get("none") is not True, dlg)
+    # `A and B or A` collapses to `A` — written that way first, so the cycle's
+    # name was never actually asserted. Both halves, and the name read off the
+    # DATA rather than hardcoded (§94.8).
+    _t = (dlg.get("title") or "").lower()
+    ok("...titled with the act and the cycle by name",
+       "reopen" in _t and (review(pg).get("name") or "").lower() in _t, dlg.get("title"))
+    ok("...and NO band is drawn on the page (§261.3)", dlg.get("band") is False, dlg)
+    # THE ONE FACT THAT IS NOT ON THE STRIP is why the dialog carries a record
+    # at all — asserted by name, or a dialog that only repeated the strip would
+    # pass every "there is a dialog" assertion.
+    ok("it leads on what the cycle closed at",
+       "Closed at" in (dlg.get("keys") or []), dlg.get("keys"))
+    ok("...and says what reopening does",
+       any("become live again" in v for v in (dlg.get("vals") or [])), dlg.get("vals"))
+    ok("it offers both a way on and a way out",
+       dlg.get("yes") is True and dlg.get("no") is True, dlg)
+    # CANCEL CHANGES NOTHING, asserted before the press that does.
+    press(pg, "[data-reopenno]", "Cancel")
+    ok("Cancel closes it and reopens nothing", review(pg).get("state") == "closed", review(pg))
+    press(pg, "[data-editcycle]", "Edit")
+    press(pg, "[data-reopenyes]", "Reopen")
     pg.wait_for_timeout(500)
     back = review(pg)
     ok("the cycle is open again", back.get("state") == "open", back)
-    ok("the pen shut", pen_state(pg).get("none") is True)
     hist1 = js(pg, "()=>({n:HISTORY.length, last:(HISTORY[HISTORY.length-1]||{}).name})")
     ok("the closing record was taken back",
        hist1.get("n") == hist0.get("n", 0) - 1, (hist0, hist1))

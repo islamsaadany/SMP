@@ -30000,3 +30000,70 @@ REVERSED and REWRITTEN, not deleted** (§218): §261 asserted a closed cycle
 offers *Open a new cycle* and NOT Edit, true until this section gave the closed
 cycle the pen — both are asserted now, or a build that dropped either would
 satisfy a test for the other on its own.
+
+
+---
+
+## §261.3 — THE CLOSED CYCLE'S PANEL BECOMES THE PLATFORM'S DIALOG (2026-09-03, reshaping §261.2)
+
+Islam, with a screenshot of the live deployment: *"The design is very poor use
+front end desing or any other skill to refine this"* — then, of a first
+refinement: *"your refinement is very poor create another options through other
+skills as you did"* — and then, of three shapes drawn on his own tenant:
+**"C"**.
+
+**THE FAULT WAS THE SHAPE, AND MY FIRST TWO ANSWERS CHANGED THE PAINT.**
+§261.2's record was a full-width band of facts sitting directly under a
+full-width band of the same facts: **measured, ZERO of the five were not
+already on the strip** — the name, the dates, the review point and the state
+are all on the line above. No amount of alignment fixes two stacked bands
+saying one thing.
+
+**AND THE ALIGNMENT FAULT WAS INVISIBLE ON THE WORKED EXAMPLE.** `.nc-grid` is
+a flex row whose label/value pairs each size to their own content, so a wide
+label over a one-character value leaves the column ragged. Every demo value is
+long; **on his tenant three of the five are empty**, so what was left was a row
+of floating em-dashes. **This is §245's rule unpaid**: I drew and signed off on
+the prototype's data, and the one state in which the layout works is the state
+I drew it in.
+
+**A PANEL IS THE RIGHT SHAPE FOR FIVE FIELDS YOU ARE EDITING AND THE WRONG
+SHAPE FOR ONE QUESTION YOU ARE ANSWERING.** So the open cycle keeps §261's
+panel, unchanged, and the closed one loses its band entirely: the pen opens the
+platform's own dialog, which states what the cycle closed at, what it covers,
+and what reopening does — then asks. The closed branch is **DELETED, not left
+unreachable** (§24), and `.nc-val` with it.
+
+**IT REMOVES A STEP RATHER THAN RESTYLING ONE**, and that is why it was
+recommended: §261.2 was a panel AND THEN a browser `confirm()`. This is one
+dialog — **and it takes a `confirm()` out of the product**, which §95 already
+ruled against for the most irreversible act here, because a browser dialog can
+be silenced permanently on some other site and never appear again.
+
+**`.sendconfirm` AND `.cbtns`, NEVER A FOURTH COPY** (§53.5, and `.cbtns`' own
+note that the third copy is the one that gets extracted): a title, a stack of
+label/value rows, two buttons is what every confirmation in this product
+already wears. **The one scoped override is measured, not guessed** — *Reported
+as of* and *What happens* both wrapped in the shared 92px label column, so this
+dialog alone takes 118px; widening the shared rule would have reflowed every
+other confirmation to fix one.
+
+**THE ONE FACT THAT IS NOT ON THE STRIP LEADS** — what the cycle closed at,
+which is what somebody deciding whether to reopen actually wants and is the
+whole reason the dialog carries a record at all. **Absent rather than invented**
+when the last closing record is not this cycle's (§35), and the HISTORY pop is
+**re-read at press time** rather than trusted from what the dialog was drawn
+from (§48.2).
+
+**THE COST IS NAMED AND IS MINE TO HAVE FLAGGED**: Edit no longer means the
+same thing in both states — a panel while the cycle runs, a dialog once it has
+closed.
+
+`checks/cycle-edit.py` §9 **REWRITTEN, not deleted** (§218) — what it asserts is
+unchanged in substance (the strip carries no Reopen, the act is behind the pen,
+the press reaches the CYCLE) and it now also asserts **that NO band is drawn**,
+because a build that merely restyled the band would satisfy every other
+assertion. **12 red** on the §261.2 build. **And one of its own assertions could
+not fail as written**: `A and B or A` collapses to `A`, so the cycle's name was
+never actually being checked in the title — both halves now, with the name read
+off the DATA rather than hardcoded (§94.8).

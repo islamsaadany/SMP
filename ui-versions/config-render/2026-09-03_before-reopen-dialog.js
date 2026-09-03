@@ -5455,20 +5455,38 @@ function renderCycle(){
        press time rather than trusting this render (§48.2). */
     (CYCLEEDIT
       ? (function(){
-          /* §261.3: THE CLOSED CYCLE'S PANEL IS GONE, AND THE PEN OPENS THE
-             PLATFORM'S OWN DIALOG INSTEAD. Islam, of three shapes drawn on his
-             own tenant: "C". §261.2 drew the record as a band under the strip,
-             and a band of facts sitting directly under a band of the SAME facts
-             is the fault — every one of them (the name, the dates, the review
-             point, the state) is already on the line above, and on a tenant
-             where three of five are empty what is left is a row of dashes.
-
-             A panel is the right shape for five fields you are EDITING, which
-             is what an open cycle has, and the wrong shape for one question you
-             are ANSWERING. So `CYCLEEDIT` is only ever the open cycle's now,
-             and the closed branch is DELETED rather than left unreachable
-             (§24). The dialog is wired in the shell, beside the other
-             confirmations it is built from. */
+          /* ── A CLOSED CYCLE IS A RECORD (§261.2) ──────────────────
+             The same panel, and deliberately NOT the same contents: §261 gated
+             the fields on the cycle being open because a closed one's figures
+             are filed under the name it closed with, so editing that name
+             would leave this page and HISTORY saying different things. They
+             are drawn as VALUES rather than dropped, because what somebody
+             opens a closed cycle to ask is exactly what its dates and its
+             review point were -- and the sentence says why they cannot be
+             touched, or read-only values with no explanation read as a form
+             that failed to load (§45.2). */
+          if (!open) {
+            var facts = [["Name", REVIEW.name], ["Covers from", REVIEW.from],
+                         ["to", REVIEW.to], ["Reports due", REVIEW.due],
+                         ["Reporting as of", REVIEW.asOfMonth || reviewAsOfLabel()]];
+            return '<div class="cfg newcycle"><div class="nc-h">This cycle</div>' +
+              '<div class="nc-grid">' +
+                facts.map(function(f){
+                  return '<label><span>' + esc(f[0]) + '</span>' +
+                    '<b class="nc-val">' + esc(String(f[1] || "").trim() || "\u2014") +
+                    '</b></label>';
+                }).join("") +
+              '</div>' +
+              '<div class="nc-why"><b>A closed cycle is a record.</b> Its figures are ' +
+                'filed under the name above, and nothing here can be changed while it ' +
+                'stays closed \u2014 reopening is what puts it back in your hands.</div>' +
+              '<div class="nc-act">' +
+                '<button class="linkbu" data-ce-cancel="1">Done</button>' +
+                '<span class="nc-gap"></span>' +
+                '<button class="editbtn danger" data-reopencycle="1">Reopen ' +
+                  esc(REVIEW.name) + '</button>' +
+              '</div></div>';
+          }
           var held = cycleEditDirty();
           return '<div class="cfg newcycle"><div class="nc-h">Edit this cycle</div>' +
             '<div class="nc-grid">' +

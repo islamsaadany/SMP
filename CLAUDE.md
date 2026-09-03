@@ -365,6 +365,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A PANEL EDITS, A DIALOG ASKS (§261.3, reshaping §261.2):** Islam, of the
+  shipped closed-cycle panel on his own tenant — *"The design is very poor"* —
+  and, of three shapes drawn for him, **"C"**. **MY FIRST TWO ANSWERS CHANGED
+  THE PAINT AND THE FAULT WAS THE SHAPE**: a full-width band of facts under a
+  full-width band of the SAME facts — measured, **zero of the five were not
+  already on the strip**. **AND IT WAS INVISIBLE ON THE WORKED EXAMPLE**:
+  `.nc-grid` sizes each label/value pair to its own content, so a wide label
+  over a one-character value goes ragged — every demo value is long, and on his
+  tenant three of five are empty, leaving a row of floating em-dashes. **§245's
+  rule unpaid**: drawn and signed off on the prototype's data, which is the one
+  state the layout survives. **A PANEL IS RIGHT FOR FIVE FIELDS YOU EDIT AND
+  WRONG FOR ONE QUESTION YOU ANSWER** — the open cycle keeps §261's panel
+  unchanged; the closed one loses its band and the pen opens the platform's own
+  dialog. **IT REMOVES A STEP RATHER THAN RESTYLING ONE** (it was a panel AND
+  THEN a `confirm()`) and **takes a `confirm()` out of the product**, which §95
+  ruled against for the most irreversible act here. **`.sendconfirm`/`.cbtns`,
+  never a fourth copy** (§53.5), with the ONE scoped override measured rather
+  than guessed (two labels wrapped in the shared 92px column). **The fact that
+  is not on the strip leads** — what it closed at — absent rather than invented
+  (§35), and the HISTORY pop re-read at press time (§48.2). **The cost is
+  named**: Edit means a panel while the cycle runs and a dialog once it has
+  closed. 12 red; the closed branch DELETED not left unreachable (§24); and one
+  of the check's own assertions could not fail — `A and B or A` collapses to
+  `A`, so the name was never checked.
 - **REOPENING A CLOSED CYCLE (§261.2):** Islam, of two placements drawn on the
   strip §261 leaves behind — **"A"**. **NOTHING REOPENED A CYCLE AND THE PAGE
   SAID THE SMO COULD**: `canReport()`/`canReportFn()` open with

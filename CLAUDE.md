@@ -365,6 +365,57 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE SETUP TABLES ARE ARRANGED, AND THEIR ROWS ACT FROM ONE MENU (§261):**
+  Islam — *"allow me in the setup to rearrange the business units table so they
+  appear in the navigation as per this order and let's clean this table making
+  a three dots option to actions like the registry file."* **NOTHING NEW IS
+  STORED, WHICH IS WHY IT IS SMALL**: the order IS `UNIT_KEYS`/`FUNCTION_KEYS`,
+  written to `units.idx` and read back by `ORDER BY idx`, and `lib/authorize.js`
+  has always classified a change to it as `setup` — so no migration, no schema
+  change, no new rule. **IT COULD ALREADY BE DONE AND NOT WHERE ANYBODY WOULD
+  LOOK**: the group's Performance page has arranged these cards since §101, in
+  its CARD view only; both stay, committing through one `applyOrder`.
+  **A MODE, NOT A PERMANENT HANDLE** — a stray drag here reorders the
+  navigation for the whole tenant. **THE FILTER AND THE SORT GO WITH THE
+  PRESS, AND THAT IS NOT TIDINESS**: `tkApply` HIDES rows rather than removing
+  them (they keep their `data-oi` and sit between the visible ones) and
+  `tkSort` REORDERS the DOM, so either makes a drop land somewhere other than
+  where it looks. **§93.14 WAS CARRIED OUT ON ONE OF TWO NEIGHBOURING PAGES**:
+  it did exactly this to Functions — *"learn from what we have done in the
+  people table"* — and stopped, so a units row is **130px** where a register
+  row is 39 and a functions row 37, all of it one cell stacking four controls;
+  now 1338 → 535px table, 2265 → 646px page, still 1285 in a 1285 pane (§158).
+  **THE MENU'S WORDING IS THE FUNCTIONS PAGE'S, COPIED NOT COMPOSED**, less
+  Delete — a unit is retired and never deleted, so §62 has nothing to refuse.
+  **COMPANIES HAD A REFUSAL DRESSED AS A FACT** (a chip reading *"holds 3
+  units"*, which is why there was no Retire button): the entry is live and the
+  press names what is in the way (§62); **no handle**, a company has no order
+  in the navigation. **THE MARK LEFT THE TABLE AT ISLAM'S CORRECTION** — *"let
+  the mark out of the table and only in the settings"* — and his answer is
+  better than the drawing: with no Mark column the table is still 1285 of 1285,
+  so *Shown in the nav* keeps the column the mockup had proposed spending.
+  §52.9's section is DELETED, not left uncalled (§24), and the cost is stated:
+  it was the only place answering *which units have no mark* at a glance.
+  **ONE DIALOG, IN THE REGISTER'S OWN MARKUP** — `ROWDLG` is `PDLG` one table
+  wider; the fields are the page's own attributes bound by the page's own
+  handlers, made root-scoped (`wireSetupFields(root)`, `wirePicker(root)`)
+  because the body is replaced after `wire()` has run. **`ROLE_BEARING_ROWS`
+  widens §110**: a head is not stored ON the unit, so Cancel restoring the row
+  alone left the grant standing. **And it closed a trap §93.14 wrote about
+  itself** — *"a hidden column renders nothing at all, edit field included"* —
+  because a dialog draws every field whatever the Columns menu says.
+  **FOUR FAULTS FOUND BY DRIVING IT**: *"3 pillarss"* (§107.8's own trap, by
+  somebody quoting it — a tenant's label is never inflected); the menu standing
+  beside the dialog it opened (`openModalHtml` covers the page, it does not
+  rebuild it); the three dots not stepping aside while arranging; and *"IT
+  Dist.."*, a list ending in a name that already carries a stop. **37 red** on
+  the build before — and **seven of the check's own assertions passed
+  vacuously there** (§113.8: an absence over an empty menu is not an absence;
+  an undo is only evidence if something was done; an agreement between two
+  lists nothing moved proves nothing), while one probe **reported a correct
+  build broken** by narrowing one matrix cell for somebody who holds two roles.
+  **`checks/no-jump.py` held a selector this moved** and was REWRITTEN, not
+  deleted (§218, §51.11).
 - **THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (§259):** Islam, in one
   message — *"where can I upload the raya trade mark so it can be used? then
   work on separators let's make teh serparators blue background like the client
@@ -4639,6 +4690,18 @@ python3 checks/reported-note.py # a reported note is NAMED as one (§255): the n
                                 # asserted to use the same word. It MAKES the state: 0 of
                                 # 84 demo tactics carry a note, so every assertion here
                                 # passes on a build that lost the feature. 16 red before
+python3 checks/setup-arrange.py # the Setup tables are arranged and their rows act from
+                                # one menu (§261): a REAL pointer drag, then the navigation
+                                # read off the chrome and compared with UNIT_KEYS — an
+                                # AGREEMENT, never a list of keys, and not satisfiable
+                                # without a drag; the menu's wording asserted to be the
+                                # Functions page's; the dialog's writes read back from the
+                                # DATA and Cancel asked about a ROLE as well as a field
+                                # (§110); both ends for a viewer who may not edit, found by
+                                # asking the rule person by person rather than doctoring a
+                                # matrix cell. 37 red on the build before, and seven of its
+                                # own assertions passed vacuously there before they were
+                                # tightened (§113.8)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4874,7 +4937,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: the Setup tables are arranged,
+and their rows act from one menu.** Islam: *"allow me in the setup to rearrange
+the business units table so they appear in the navigation as per this order and
+let's clean this table making a three dots option to actions like the registry
+file."* Settled from a mockup drawn out of the RUNNING platform, published as an
+artifact and amended once on his word. **NOTHING NEW IS STORED, WHICH IS THE
+WHOLE REASON IT IS SMALL**: the order IS `UNIT_KEYS`/`FUNCTION_KEYS`, already
+written to `units.idx`, already classified `setup` by the server &mdash; no
+migration, no schema change, no new rule. **AND IT COULD ALREADY BE DONE, JUST
+NOT WHERE ANYBODY WOULD LOOK**: the group's Performance page has arranged these
+same cards since &sect;101, in its CARD view only. **THE SECOND HALF WAS NOT A
+NEW IDEA EITHER** &mdash; &sect;93.14 did exactly this to the FUNCTIONS page
+(*"learn from what we have done in the people table"*) and stopped there, so for
+two weeks the two tables either side of one navigation row disagreed about what
+a row's last column is for: a units row measured **130px** against a register's
+39 and a functions row's 37, all of it four controls in one cell. Table
+**1338 &rarr; 535px**, page **2265 &rarr; 646px**, still 1285 in a 1285 pane
+(&sect;158). **THE MARK LEFT THE TABLE AT ISLAM'S CORRECTION** &mdash; *"let the
+mark out of the table and only in the settings"* &mdash; and his answer beat the
+drawing: with no Mark column the totals are identical, so *Shown in the nav*
+keeps the column the mockup had proposed spending for it. **FOUR FAULTS FOUND BY
+DRIVING IT AND NONE BY READING**: *"3 pillarss"* (&sect;107.8's own trap,
+committed while quoting it), the menu left standing beside the dialog it opened,
+the three dots not stepping aside while arranging, and *"IT Dist.."*.
+`checks/setup-arrange.py` **37 red** on the build before &mdash; and **seven of
+its own assertions passed vacuously there** before they were tightened
+(&sect;113.8), while one probe reported a correct build BROKEN by narrowing one
+matrix cell for somebody who holds two roles. `checks/no-jump.py` held a
+selector this moved and was REWRITTEN, not deleted (&sect;218). 495/0 authoriser
+with four new assertions at both ends &middot; 126/0 differ &middot; full
+`qa.py` ERRORS none &middot; round trip, clean slate, clean parity and two tabs
+green on virgin Postgres 16 &middot; ten neighbouring checks green &middot; no
+sideways scroll at five widths on all three pages, arranging included. **On the
+branch, not merged.***
+
+*Earlier: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

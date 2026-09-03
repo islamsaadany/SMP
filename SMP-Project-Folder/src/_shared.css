@@ -366,14 +366,18 @@
   .hist-err { color:var(--bad-tx); }
   table.hist { width:100%; min-width:0; table-layout:fixed; border-collapse:collapse; font-size:var(--fs-small); }
   table.hist th { text-align:left; white-space:nowrap; }
-  table.hist td { white-space:nowrap; vertical-align:middle; max-width:150px; overflow:hidden; text-overflow:ellipsis; }
-  table.hist td.hist-wrap { white-space:normal; overflow-wrap:anywhere; max-width:none; }
+  /* EVERY CELL WRAPS, NOTHING IS CUT (§261.2, Islam: "date and time needs to
+     wrap as well"). §88's clip was the register's answer to a row that must
+     stay one line; this page exists to SHOW values, so a cell takes the
+     height it needs; a word longer than its column breaks rather than being
+     cut, and the short columns are sized in pixels so a time never is. */
+  table.hist td { white-space:normal; overflow-wrap:anywhere; vertical-align:middle; }
   table.hist td.hist-t { color:var(--ink-3); font-variant-numeric:tabular-nums; }
   table.hist td.hist-fld { color:var(--ink-2); }
   table.hist td.hist-fromto { font-family:var(--mono, ui-monospace, monospace); }
   .hist-arr { color:var(--gold-deep); margin:0 5px; }
   .hist-none { color:var(--ink-3); }
-  .hist-chip { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--ink-2); }
+  .hist-chip { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--ink-2); white-space:nowrap; }
   i.hist-q { display:inline-block; width:9px; height:9px; border:1px solid var(--ink-3); border-radius:2px; margin-right:2px; vertical-align:-1px; }
   i.hist-q.on { background:var(--gold-deep); border-color:var(--gold-deep); }
   table.hist td.hist-act { text-align:right; }

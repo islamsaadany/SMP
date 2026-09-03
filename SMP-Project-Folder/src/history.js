@@ -144,9 +144,13 @@ var TRAIL = (function(){
        value not shown. The short cells stay one line, or the row's height
        would be set by a name. */
     var h = '<table class="hist" data-hist-table><colgroup>' +
+      /* THE SHORT COLUMNS ARE PIXELS, THE PROSE COLUMNS A SHARE: a chip and a
+         button have a width of their own that a percentage of a narrow pane
+         cannot honour (measured at 1180: Restore and REPORTING cut), and the
+         prose columns take whatever is left. */
       (opts.noPlace
-        ? '<col style="width:9%"><col style="width:6%"><col style="width:12%"><col style="width:10%"><col style="width:22%"><col style="width:11%"><col style="width:20%"><col style="width:10%">'
-        : '<col style="width:7%"><col style="width:6%"><col style="width:13%"><col style="width:9%"><col style="width:10%"><col style="width:17%"><col style="width:10%"><col style="width:20%"><col style="width:8%">') +
+        ? '<col style="width:88px"><col style="width:62px"><col style="width:15%"><col style="width:128px"><col style="width:26%"><col style="width:108px"><col style="width:28%"><col style="width:92px">'
+        : '<col style="width:88px"><col style="width:62px"><col style="width:14%"><col style="width:10%"><col style="width:128px"><col style="width:21%"><col style="width:108px"><col style="width:22%"><col style="width:92px">') +
       '</colgroup><thead><tr>' +
       '<th>Date</th><th>Time</th><th>Who</th>' + (opts.noPlace ? '' : '<th>Where</th>') + '<th>Kind</th><th>Row</th><th>Field</th><th>From → To</th><th>Restore</th></tr></thead><tbody>';
     list.forEach(function(r, i){

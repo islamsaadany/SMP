@@ -29856,3 +29856,18 @@ the current one, and only *Put it back* saves — answered to him and asserted.
 `checks/history-page.py` gains four assertions for the four; the modal's
 Restore column needed 10% to hold its button whole (§158), found by the check.
 
+## §261.2 — EVERY CELL WRAPS, NOTHING IS CUT (2026-09-03)
+
+Islam, from his own tenant's History at a laptop's width — *"date and time
+needs to wrap as well"* — with the time reading `10:…` and Restore `···`.
+§261.1 had wrapped two columns and left the other seven clipped, and a
+clipped cell is a cell not shown; so every cell wraps now and nothing is ever
+cut. **The short columns are pixels, the prose columns a share**: a chip and a
+button have a width of their own that a percentage of a narrow pane cannot
+honour (Restore and *REPORTING* cut at 1180, then *REPORTING* broken across
+two lines at 1440 — both found by the check and the shot, not by reading), so
+Date, Time, Kind, Field and Restore are sized in pixels and Who, Where, Row
+and From → To take what is left. A word longer than its column breaks rather
+than being cut; the chip itself never breaks. Asserted at 1440 AND 1180: no
+cell holds more than it shows, and a time is never split.
+

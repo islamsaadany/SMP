@@ -392,29 +392,6 @@ var SYNC = (function () {
   var FAIL = (function () {
     var kind = null, detail = "", dismissed = false, returnTo = null,
         inerted = false;
-    /* ── AND THE CORNER SAYS IT THE MOMENT THE CONNECTION GOES (§253.2) ──
-       Islam, testing §253 on the deployment: *"I became offline and I opened
-       and closed a plan but the message didn't appear."*
-
-       NOTHING WAS WRONG AND NOTHING HAD BEEN SAVED. Measured before answering:
-       opening a plan's pen and closing it again attempts **0 saves**, because
-       the pen is a screen mode and the graph is byte-identical either side of
-       it — `save()` answers "clean" and never posts. So there was no failure
-       to report, and the dialog was right to stay shut.
-
-       What he actually asked for in the first place, though, was *"telling me
-       that I'm offline once I get offline"* — and as built the platform waited
-       until work was at risk. Put to him as three options with the cost of
-       each; he took the middle one: **the corner says you are offline as soon
-       as you are, and the dialog in the middle of the page is still kept for
-       the moment something you changed has not saved.** So somebody reading is
-       told without being interrupted, and somebody working is interrupted.
-
-       IT IS A DIFFERENT SENTENCE AND A DIFFERENT COLOUR, because it is a
-       different fact: nothing is wrong yet. Amber, not red (§168, §190 —
-       outstanding is not broken), and it must never claim work is unsaved,
-       because at this point there may be none. */
-    var off = false;
 
     /* One place, so the dialog and the card can never disagree about what
        happened (\u00a753.5). The card is the short form of the same sentence, not
@@ -480,7 +457,7 @@ var SYNC = (function () {
       returnTo = null;
     }
 
-    function dismiss() { dismissed = true; shut(); paintCard(); }
+    function dismiss() { dismissed = true; shut(); drawCard(words(kind, detail)); }
 
     function open(w) {
       var d = document.getElementById("savealert"), fresh = false;
@@ -527,64 +504,24 @@ var SYNC = (function () {
       if (fresh) { try { d.querySelector("[data-savealert-ok]").focus(); } catch (e) {} }
     }
 
-    /* WHAT THE CORNER SAYS IS DECIDED IN ONE PLACE, from the two facts that
-       can put it there — a failure, and simply being offline. A failure wins,
-       because "your change has not saved" is the more serious of the two and
-       saying both at once would be two cards for one connection (§231: one
-       box, one source). */
-    function cardNow() {
-      if (kind) return { html: words(kind, detail).card, note: false };
-      if (off) return {
-        note: true,
-        html: "<b>You are offline.</b>" +
-              "<p>Anything you change now will save by itself when you are " +
-              "back online.</p>"
-      };
-      return null;
-    }
-
-    function paintCard() {
-      var w = cardNow(), c = document.getElementById("savecard");
-      if (!w) { if (c) c.remove(); return; }
+    function drawCard(w) {
+      var c = document.getElementById("savecard");
       if (!c) {
         c = document.createElement("div");
         c.id = "savecard";
-        /* Polite, not assertive: this is either what the dialog LEFT behind
-           or a statement of fact, and neither should talk over somebody. */
+        c.className = "savecard";
+        /* Polite, not assertive: the dialog has already interrupted once and
+           this is what is LEFT of it. */
         c.setAttribute("role", "status");
         document.body.appendChild(c);
       }
-      c.className = w.note ? "savecard offline" : "savecard";
-      c.innerHTML = w.html;
+      c.innerHTML = w.card;
     }
 
     function dropCard() {
       var c = document.getElementById("savecard");
       if (c) c.remove();
     }
-
-    /* THE BROWSER SAYS WHEN, AND THE PLATFORM DECIDES WHETHER TO SPEAK.
-       Only where a save was ever going to happen: opened from a file there is
-       no server and nothing was expected to save (§171's own silence, and
-       §94.11's condition from the other side), and demo data never saves and
-       says so at the moment of the change already (§67). Neither should be
-       told the wifi is down. */
-    function speakable() {
-      return live && !isDemoMode() &&
-             !document.body.classList.contains("presenting");
-    }
-    window.addEventListener("offline", function () {
-      off = true;
-      if (speakable()) paintCard();
-    });
-    window.addEventListener("online", function () {
-      off = false;
-      /* A FAILURE STANDING IS NOT CLEARED BY THE WIFI COMING BACK. The work
-         is still unsaved until the retry lands and the server says so — that
-         is what clears it (§35: the warning goes with its cause, and the
-         cause here is the save, not the connection). */
-      paintCard();
-    });
 
     return {
       show: function (k, d) {
@@ -611,10 +548,10 @@ var SYNC = (function () {
         if (document.body.classList.contains("presenting")) {
           dismissed = true;
           shut();
-          paintCard();
+          drawCard(w);
           return;
         }
-        if (dismissed) { paintCard(); return; }
+        if (dismissed) { drawCard(w); return; }
         /* ONE BOX, ONE SOURCE (\u00a7231): the card is what the dialog leaves
            behind, never what stands beside it. */
         dropCard();
@@ -625,10 +562,7 @@ var SYNC = (function () {
             !document.getElementById("savecard")) return;
         kind = null; detail = ""; dismissed = false;
         shut();
-        /* NOT `dropCard()` — a save that lands takes the FAILURE away, and
-           whether anything is left in the corner after that is the same
-           question as ever: it is drawn again from what is still true. */
-        paintCard();
+        dropCard();
       },
       /* For the check, and for anybody debugging a deployment from the
          console: what the platform currently believes about the last save. */

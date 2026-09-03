@@ -262,6 +262,68 @@ with sync_playwright() as p:
     ck("...and the work reached the server", POST["n"] > landed,
        (POST["n"], landed))
 
+    # ── 4f · GOING OFFLINE SAYS SO, WITH NOTHING CHANGED (§253.2) ────────
+    # Islam: "I became offline and I opened and closed a plan but the message
+    # didn't appear." Nothing had been saved — a pen is a screen mode, so the
+    # graph is byte-identical either side of it and `save()` never posts. That
+    # was right, and what he asked for in the first place was to be told when
+    # he is offline. The corner says it; the dialog still waits for work to be
+    # at risk.
+    print("\n4f · offline with nothing changed")
+    pg.context.set_offline(True)
+    pg.wait_for_timeout(600)
+    ck("the corner says we are offline", "offline" in card(pg).lower(),
+       card(pg) or "(nothing)")
+    ck("...without interrupting anybody", dialog(pg) == "", dialog(pg))
+    # IT MUST NOT CLAIM WORK IS UNSAVED, because at this point there may be
+    # none — that sentence belongs to the failure, and this is a fact.
+    ck("...and it does not claim anything is unsaved",
+       "not saved" not in card(pg).lower(), card(pg))
+    # MEASURED, NEVER THE CLASS NAME. The first build wore `.savecard.note`,
+    # and `.note` is already a component in this platform (§65.9) — so the card
+    # quietly took that component's grey ground, its 3px gold edge and its
+    # padding while every assertion about the class passed. What is asked for
+    # here is the PAINT: the platform's own card ground, and the attention
+    # colour on the edge rather than the alarm one.
+    seen = pg.evaluate("""() => {
+      const c = document.getElementById('savecard'), s = getComputedStyle(c);
+      const b = c.querySelector('b');
+      return {bg: s.backgroundColor, edge: s.borderLeftColor,
+              head: b ? getComputedStyle(b).color : null,
+              want: getComputedStyle(document.documentElement)
+                      .getPropertyValue('--surface').trim(),
+              attn: getComputedStyle(document.documentElement)
+                      .getPropertyValue('--attn').trim(),
+              bad: getComputedStyle(document.documentElement)
+                      .getPropertyValue('--bad').trim()};}""")
+    def rgb(hexish):
+        h = hexish.lstrip('#')
+        return "rgb(%d, %d, %d)" % (int(h[0:2],16), int(h[2:4],16), int(h[4:6],16))
+    ck("...on the platform's own card ground, not another component's",
+       seen["bg"] == rgb(seen["want"]), seen)
+    ck("...in the attention colour, not the alarm one",
+       seen["edge"] == rgb(seen["attn"]) and seen["edge"] != rgb(seen["bad"]),
+       seen)
+    # AND THE PEN IS THE THING HE ACTUALLY DID: opening and closing it posts
+    # nothing, so the dialog stays shut and only the corner speaks.
+    landed2 = POST["n"]
+    pg.evaluate("""()=>{const b=document.querySelector('.penbtn');
+                        if(b){b.click();setTimeout(()=>b.click(),50);}}""")
+    pg.wait_for_timeout(2200)
+    ck("...opening and closing a plan attempts no save", POST["n"] == landed2,
+       (POST["n"], landed2))
+    ck("...so it is still only the corner", dialog(pg) == "", dialog(pg))
+    print("\n4g · and then a real change escalates")
+    change(pg, "off-3")
+    pg.wait_for_timeout(1200)
+    ck("changing something raises the dialog", "offline" in dialog(pg).lower(),
+       dialog(pg) or "(nothing)")
+    ck("...and the corner now says the work is not saved",
+       "not saved" in card(pg).lower() or dialog(pg) != "", card(pg))
+    pg.context.set_offline(False)
+    pg.wait_for_timeout(7000)
+    ck("coming back online clears both", said(pg) == "", said(pg))
+
     # ── 4e · A PROJECTOR NEVER GETS THE DIALOG (§253) ────────────────────
     # The CSS drops it while presenting, the way the chat corner already
     # leaves — and hiding it is NOT enough, which is the whole point of this

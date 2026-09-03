@@ -28153,3 +28153,95 @@ the projector guard removed → **3 red**.
 assertion — *"nothing threw"*, an unsupported MIME type for `sw.js` — and it
 **reproduces identically on the untouched build**, so it is §250.2's recorded
 stub fault and not this change (§100.3).
+
+---
+
+## §253.2 — THE CORNER SAYS IT THE MOMENT THE CONNECTION GOES (2026-09-03)
+
+Islam, testing §253 on the branch's deployment:
+
+> *"I became offline and I opened and closed a plan but the message didn't
+> appear."*
+
+### NOTHING WAS WRONG, AND MEASURING SAID SO BEFORE I ANSWERED
+
+Two candidates, and I checked both rather than picking the flattering one.
+
+**The build.** Production (`smp-orpin-tau`) serves 3,395,762 bytes with **zero**
+occurrences of the dialog — correct, because §253 was never merged. He was on a
+preview link and told me so; my first reply spent three paragraphs on `main`
+and was beside his point. *He was testing the right thing and I explained the
+wrong one.*
+
+**The act.** Driven on our own build, genuinely offline: **opening a plan's pen
+and closing it again attempts 0 saves.** The pen is a screen mode — the graph
+is byte-identical either side of it, so `save()` answers "clean" and never
+posts. There was no failure, so there was nothing to report, and the dialog was
+right to stay shut.
+
+### BUT THE FIRST ASK WAS WIDER THAN WHAT WAS BUILT
+
+§253 opens its own account with his words: *"telling me that I'm offline **once
+I get offline**"* — and what shipped waited until work was at risk. That is a
+narrower promise than the sentence, and the gap only showed when he stood in
+it.
+
+Three options were put to him with the cost of each, and he took the middle:
+
+* **A — leave it.** Never interrupts somebody with nothing pending; says
+  nothing for ten minutes of being offline.
+* **B — the dialog the moment the connection drops.** Most literal; throws a
+  page-blocking dialog at somebody who is only reading.
+* **C — the corner says it at once, the dialog still waits for work at risk.**
+  Chosen. Somebody reading is told; somebody working is interrupted.
+
+### TWO FACTS, TWO COLOURS, ONE CORNER
+
+Being offline is **not** a failure — nothing is wrong and there may be nothing
+pending — so it wears the **attention** colour, and the red stays for the one
+sentence that means work has not been stored (§190's separation between
+outstanding and broken). It says *"Anything you change now will save by itself
+when you are back online"* and **never claims anything is unsaved**, asserted,
+because at that moment there may be nothing to save at all.
+
+**ONE BOX, ONE SOURCE** (§231): `cardNow()` decides from the two facts that can
+put a card there, and a failure wins — two cards for one connection is the
+fault that rule exists to stop.
+
+**IT SPEAKS ONLY WHERE A SAVE WAS EVER GOING TO HAPPEN**: not from `file://`,
+where nothing was expected to save (§171's deliberate silence), not on demo
+data, which never saves and says so at the moment of the change (§67), and not
+on a projector.
+
+**AND THE WIFI COMING BACK DOES NOT CLEAR A FAILURE.** The work is unsaved
+until the retry lands and the server says so — the warning goes with its cause,
+and the cause is the save, not the connection (§35). `clear()` therefore
+repaints the corner from what is still true rather than emptying it.
+
+### AND THE FIRST BUILD WORE SOMEBODY ELSE'S CLOTHES (§65.9, again)
+
+The modifier was `.savecard.note` — and **`.note` is already a component in
+this platform**: a bordered explanatory block with a gold edge and a
+`--surface-2` ground. Both selectors are (0,1,0) and `.note` is declared later,
+so the card silently took that component's **ground, its 3px gold edge and its
+padding**, and the amber it was given reached only the heading.
+
+**Every assertion about it passed.** The card was drawn, the words were right,
+the class was exactly the one asked for. It was found by MEASURING the computed
+background — grey where the platform's own card is white — and reproduced by
+putting the name back: ground `rgb(239,242,246)`, edge `--gold`, heading
+`--ink`. §65.9's rule, which this project wrote down after the lit eye sat 11px
+low for wearing the bare word `view`: **a one-word modifier in a namespace that
+has one-word components is a collision waiting for a later reader.**
+
+So the check asks for the PAINT and never the class name — the platform's own
+card ground, and the attention colour on the edge rather than the alarm one.
+
+### PROVED
+
+`checks/save-said.py` §4f drives **his exact sequence** — offline, then the pen
+opened and closed — and asserts the save count does not move, the dialog stays
+shut and the corner speaks; §4g then makes a real change and watches it
+escalate. The offline listener removed: **1 red**; the colliding class name put back:
+**2 red**, printing the borrowed grey and the borrowed gold. Full `qa.py` sweep
+clean.

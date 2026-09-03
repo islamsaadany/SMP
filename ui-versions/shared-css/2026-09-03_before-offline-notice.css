@@ -396,23 +396,6 @@
                 font-weight:700; line-height:1.3; }
   .savecard p { margin:5px 0 0; color:var(--ink-2); font-size:var(--fs-small);
                 line-height:1.5; }
-  /* SIMPLY BEING OFFLINE IS NOT A FAILURE (§253.2). Nothing is wrong yet and
-     nothing may even be pending, so it wears the attention colour rather than
-     the bad one — the same separation §190 makes between a thing that is
-     outstanding and a thing that is broken. Two facts, two colours, and the
-     red is kept for the one that means work has not been stored.
-
-     `offline` AND NEVER `note`, WHICH IS §65.9 EXACTLY. `.note` is already a
-     component in this platform — a bordered explanatory block with a gold
-     edge and a `--surface-2` ground — so `.savecard.note` inherited that
-     ground (both selectors are (0,1,0) and `.note` is declared later), plus
-     its 3px edge and its padding. Every assertion passed: the card was drawn,
-     the words were right and the edge was the colour asked for, and only
-     MEASURING the computed background found it grey. A one-word modifier in
-     a namespace that has one-word components is a collision waiting for a
-     later reader. */
-  .savecard.offline { border-left-color:var(--attn); }
-  .savecard.offline b { color:var(--attn-tx); }
   /* A DECK IS NOT A PLACE FOR EITHER OF THESE. Presentation puts the platform
      on a projector in front of the board; the chat corner already leaves for
      exactly this reason, off the class present.js sets, so there is no second

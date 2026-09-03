@@ -399,6 +399,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   screen saying why, and no check does both at once. `body.presenting` is asked
   in JS too, and the failure is treated as already dismissed so the card is
   there the moment the deck closes. Proved able to fail 4 / 1 / 2 / 3.
+- **AND THE CORNER SAYS IT THE MOMENT THE CONNECTION GOES (§253.2):** Islam,
+  testing it — *"I became offline and I opened and closed a plan but the
+  message didn't appear."* **NOTHING WAS WRONG AND MEASURING SAID SO**: opening
+  a plan's pen and closing it again attempts **0 saves** (the pen is a screen
+  mode, the graph is byte-identical either side, `save()` answers "clean"), so
+  there was no failure to report — and production had no such build anyway,
+  which he already knew and I explained at length anyway, at his cost. **THE
+  FIRST ASK WAS WIDER THAN WHAT SHIPPED** (*"once I get offline"*), so three
+  options were put with the cost of each and he took the middle: **the corner
+  says it at once, the dialog still waits for work at risk.** Reading is not
+  interrupted; working is. **TWO FACTS, TWO COLOURS**: being offline wears the
+  ATTENTION colour and never claims anything is unsaved (asserted — there may
+  be nothing pending), the red stays for work that has not been stored (§190).
+  **One box, one source** (§231): one renderer decides from both facts and the
+  failure wins. Silent from `file://`, on demo data and on a projector. **The
+  wifi returning does not clear a failure** — the retry landing does (§35).
+  **AND THE FIRST BUILD WORE SOMEBODY ELSE'S CLOTHES (§65.9 again)**: the
+  modifier was `.savecard.note`, and `.note` is an existing component — a
+  bordered block with a gold edge and a `--surface-2` ground — so the card took
+  that ground, its 3px gold edge and its padding, with every assertion about
+  the class passing. Found by MEASURING the computed background, not by reading
+  the cascade; the check asks for the PAINT now. `checks/save-said.py` §4f
+  drives HIS EXACT SEQUENCE; 1 red without the listener, 2 red with the
+  colliding name put back.
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4447,7 +4471,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;253: offline, said in the middle of
+*Last Updated: 2026-09-03 &mdash; **&sect;253.2: and the corner says it the
+moment the connection goes.** Islam, testing &sect;253 on the branch:
+*"I became offline and I opened and closed a plan but the message didn't
+appear."* **NOTHING WAS WRONG, AND MEASURING SAID SO BEFORE I ANSWERED**:
+opening a plan's pen and closing it again attempts **0 saves** &mdash; the pen
+is a screen mode, so the graph is byte-identical either side of it and `save()`
+answers *clean* without posting. No failure, nothing to report, dialog rightly
+shut. (Production also had no such build, which he already knew and I explained
+at length anyway; *he was testing the right thing and I explained the wrong
+one*.) **THE FIRST ASK WAS WIDER THAN WHAT SHIPPED** &mdash; &sect;253's own
+opening quote is *"telling me that I'm offline once I get offline"* and the
+build waited until work was at risk &mdash; so three options were put with the
+cost of each and he took the middle: **the corner says it at once, the dialog
+still waits for work at risk.** Somebody reading is told; somebody working is
+interrupted. **TWO FACTS, TWO COLOURS**: being offline is not a failure, so it
+wears the ATTENTION colour and **never claims anything is unsaved** (asserted
+&mdash; at that moment there may be nothing pending), while the red stays for
+the one sentence that means work has not been stored (&sect;190's separation).
+**One box, one source** (&sect;231): one renderer decides from both facts and a
+failure wins. Silent from `file://` (&sect;171's deliberate silence), on demo
+data (&sect;67) and on a projector. **And the wifi returning does not clear a
+failure** &mdash; the retry landing does, because the warning goes with its
+cause and the cause is the save (&sect;35). `checks/save-said.py` &sect;4f
+drives HIS EXACT SEQUENCE and asserts the save count does not move; the
+listener removed, 1 red. **AND THE FIRST BUILD WORE SOMEBODY ELSE'S CLOTHES**
+(&sect;65.9 again): the modifier was `.savecard.note` and `.note` is an
+existing component, so the card silently took its grey ground, its 3px gold
+edge and its padding while every assertion about the class passed &mdash; found
+by MEASURING the computed background, and the check asks for the paint now
+(2 red with the name put back).*
+
+*Earlier: 2026-09-02 &mdash; **&sect;253: offline, said in the middle of
 the page.** Islam, quoting the banner back: *"this comes when I get offline,
 the error should be honest telling me that I'm offline once I get offline to
 make sure that the error is clear"*, then ***"make it a pop up not a top page

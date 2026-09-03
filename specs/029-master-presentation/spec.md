@@ -1,6 +1,6 @@
-# 028 · One flow, several decks, back to back
+# 029 · One flow, several decks, back to back
 
-**Version:** v3.22 · **Decisions:** §261, §261.8 (reversal), §261.9 · **Status:** answered; built
+**Version:** v3.22 · **Decisions:** §266, §266.8 (reversal), §266.9 · **Status:** answered; built
 
 Islam:
 
@@ -42,14 +42,14 @@ strip at the bottom of the deck was drawn twice.
 | # | question | answer |
 |---|---|---|
 | 1 | who may open it | **the SMO** |
-| 2 | the picker's shape | **A — one list** &rarr; **reversed to B, two columns** (§261.8) |
+| 2 | the picker's shape | **A — one list** &rarr; **reversed to B, two columns** (§266.8) |
 | 3 | is the flow remembered | **yes** |
 | 4 | the Thank you between subjects | **every deck whole — "evey deck for transition"** |
 | 5 | what the strip says | **the subject you are standing in, and its place in the order** |
 | 6 | the row of dots | **one dot per subject** |
 
 **Decision 2 was reversed after use** — *"i changed my opinion the 2 columns
-option was better"* — and §261.4's reasoning is kept rather than overwritten.
+option was better"* — and §266.4's reasoning is kept rather than overwritten.
 What changed is where the rows are drawn and nothing else: `MFLOW.pick` was
 always the running order, so the list, the writes, the saving, the deck and
 every server rule are untouched. **A column is a way of showing a list, and the
@@ -151,7 +151,7 @@ The dot strip is one dot per slide today, and at **71** slides it already wraps
 onto three rows and spills past the strip — measured, and true of the product
 before this feature; a flow is what exposes it.
 
-**Each pill carries the subject's own code** (§261.9) — *MB · RS · BE · … · FIN
+**Each pill carries the subject's own code** (§266.9) — *MB · RS · BE · … · FIN
 · MKT · MRC* — Islam's ask from a real 308-slide flow: *"in the pills to write
 the inittials of the unit for better navigation."* The letters are the tenant's
 `codePrefix`, already printed on every pillar and project code (MB01, FIN01),
@@ -169,8 +169,8 @@ sit on one row at 1600 and at 1280.
 
 ## 5 · Proof
 
-`checks/master-presentation.py` — **31 red** on the pre-§261 build, **43 green**
-after (the shape assertions rewritten rather than deleted when §261.8 reversed
+`checks/master-presentation.py` — **31 red** on the pre-§266 build, **43 green**
+after (the shape assertions rewritten rather than deleted when §266.8 reversed
 the picker — §218). It asserts **agreement, never a number** (§94.8): a flow's slide count
 against the sum of the decks its subjects present alone, the picker's names
 against `placeLabel`, the footer marks against `deckMark`, and who sees the

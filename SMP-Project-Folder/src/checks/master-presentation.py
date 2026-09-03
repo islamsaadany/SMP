@@ -1,4 +1,4 @@
-"""ONE FLOW, SEVERAL DECKS, BACK TO BACK (§261).
+"""ONE FLOW, SEVERAL DECKS, BACK TO BACK (§266).
 
 Islam: *"give an option for the smo from the presentation list to do master
 presentation which is a flow of presentations in a flow and he is just asked the
@@ -22,14 +22,14 @@ whose Presentation menu failed to render at all, so the viewer who may not open
 a flow is asserted to still see Present (§113.8).
 
 A SINGLE SUBJECT'S DECK IS ASSERTED UNCHANGED, at both ends: one dot per slide,
-no running order in the title, and `DECK.flow` null. Everything in §261 rides on
+no running order in the title, and `DECK.flow` null. Everything in §266 rides on
 one opener now, so "we did not touch the ordinary deck" is a claim and not a
 measurement until it is measured.
 
 EVERY PROBE DEGRADES (§215). On a build without this feature there is no
 `masterOpen`, no `deckBuild` and no `DECK.stops`, so the first probe throws —
 and a check that dies reports nothing, which `grep -c FAIL` reads as zero. That
-is a falsification that looks like a pass, and the pre-§261 build is the one
+is a falsification that looks like a pass, and the pre-§266 build is the one
 this file most has to be able to see.
 
 Run: python3 checks/master-presentation.py   (or via qa-run.py for the bundled
@@ -98,7 +98,7 @@ def at(v, i, default=""):
     """The i-th of a list a probe returned, or a default. §215: a check that
     DIES on an empty list reports nothing, and `grep -c FAIL` reads nothing as
     zero — on precisely the build this file exists to see. The first run of
-    this file against the pre-§261 build ended in an IndexError with three
+    this file against the pre-§266 build ended in an IndexError with three
     assertions still unmade."""
     return v[i] if isinstance(v, list) and len(v) > i else default
 
@@ -234,7 +234,7 @@ with sync_playwright() as p:
     except Exception as e:
         check("the entry can be pressed", False, str(e).split("\n")[0])
 
-    # §261.8: TWO COLUMNS, and each row is in exactly one of them. Scoped to the
+    # §266.8: TWO COLUMNS, and each row is in exactly one of them. Scoped to the
     # column rather than to the dialog, or a build that drew every subject twice
     # would satisfy "every subject has a row" perfectly.
     listed = ev(pg, """() => {
@@ -254,7 +254,7 @@ with sync_playwright() as p:
         empty: [...document.querySelectorAll('#modal-b .mfempty')].map(e => e.textContent)
       };
     }""", None, THREW)
-    check("the picker is two columns (§261.8)", get(listed, "cols") == 2, listed)
+    check("the picker is two columns (§266.8)", get(listed, "cols") == 2, listed)
     check("every subject that reports is in the flow, in the board's own order",
           get(listed, "flow") == get(listed, "want") and get(listed, "flow"), listed)
     check("nothing stored yet means everybody presents",
@@ -368,7 +368,7 @@ with sync_playwright() as p:
           get(built, "total") >= sum(get(built, "alone") or [0]), built)
     check("...in the order they were put in",
           get(built, "order") == flow, built)
-    check("every deck travels whole, Thank you included (Islam, §261)",
+    check("every deck travels whole, Thank you included (Islam, §266)",
           get(built, "thanks") == len(flow), built)
     check("each subject keeps its OWN mark in the footer",
           get(built, "marks") == get(built, "want") and get(built, "marks"), built)
@@ -392,7 +392,7 @@ with sync_playwright() as p:
         first: first, mid: mid, inside: inside
       };
     }""", flow, THREW)
-    # ── §261.9 · the pills carry the subject's own code ───────────────
+    # ── §266.9 · the pills carry the subject's own code ───────────────
     pills = ev(pg, """() => {
       const root = document.getElementById('deckroot');
       const dots = [...root.querySelectorAll('.ddot')];
@@ -435,7 +435,7 @@ with sync_playwright() as p:
     else:
         check("both a lit and an unlit pill exist to measure", False, pills)
 
-    check("one dot per subject, not one per slide (§261)",
+    check("one dot per subject, not one per slide (§266)",
           get(strip, "dots") == len(flow) and get(strip, "slides") != len(flow), strip)
     check("the dots name the subjects, in order",
           [s["name"] for s in (get(strip, "stops") or [])] == get(strip, "want"), strip)

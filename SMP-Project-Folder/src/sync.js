@@ -442,6 +442,16 @@ var SYNC = (function () {
       var roots = refusedRoots(ch.target);
       (ch.rows || []).forEach(function (r) {
         var row = null;
+        /* §262.3: the SUBJECT is a row too — its own words, its SWOT. */
+        if (r.id === ch.target || (ch.target === "group" && r.id === "group")) {
+          row = ch.target === "group" ? GROUP
+              : (typeof unitLikeWritable === "function" ? unitLikeWritable(ch.target) : null);
+          if (row && String(r.field).indexOf("swot.") === 0) {
+            row.swot = row.swot || {};
+            row.swot[r.field.slice(5)] = r.from == null ? [] : JSON.parse(JSON.stringify(r.from));
+            return;
+          }
+        }
         roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
         if (!row) { missed.push(r); return; }
         /* ABSENT IS NOT NULL. A field the stored row did not have is DELETED,

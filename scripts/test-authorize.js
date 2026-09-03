@@ -2843,7 +2843,45 @@ console.log("\n27 · which slides a review shows is the office's (§256)");
         r.ok, (r.refusals || []).join(" / "));
 })();
 
-console.log("\n28 · the master presentation's running order is the office's (§261)");
+console.log("\n28 · the order of the navigation is the office's (§261)");
+/* ── 28 · THE ORDER OF THE NAVIGATION IS THE OFFICE'S (§261) ──────────
+   Setup gained a way to drag the units and the functions into the order they
+   appear in. NOTHING NEW IS STORED — the order IS `unitKeys` / `functionKeys`,
+   which the server has classified as `setup` since it classified anything —
+   so this asserts that what was already true is still true, at BOTH ENDS
+   (§94.2): a build that let anybody reorder them would rewrite the navigation
+   for the whole tenant from a page they can open. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const swap = function (arr) {
+    const a = arr.slice(); const x = a.shift(); a.push(x); return a;
+  };
+  let r = fromStored(SEED, "smo", function (i) { i.unitKeys = swap(i.unitKeys); });
+  check("§261: the office may reorder the business units", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, "smo", function (i) { i.functionKeys = swap(i.functionKeys); });
+  check("§261: and the supporting functions", r.ok, (r.refusals || []).join(" / "));
+
+  /* THE OTHER END, and it is the one that matters: a unit head holds a page
+     of their own and none of Setup. */
+  const headKey = (SEED.unitRoles[UNIT] || {}).head;
+  if (!headKey) {
+    check("§261: the seed has a unit head to ask", false, "none");
+  } else {
+    r = fromStored(SEED, headKey, function (i) { i.unitKeys = swap(i.unitKeys); });
+    check("§261: a unit head may NOT reorder them", !r.ok,
+          r.ok ? "accepted" : "refused");
+    /* AND THE REFUSAL NAMES THE LIST, not "something changed" — §16.7's rule
+       that a refusal has to send somebody to a screen. */
+    check("§261: ...and the refusal names the list",
+          !r.ok && (r.refusals || []).join(" ").indexOf("business units") > -1,
+          (r.refusals || []).join(" / "));
+  }
+})();
+
+console.log("\n29 · the master presentation's running order is the office's (§266)");
 (function () {
   /* Islam, asked before it was built: the SMO. The menu draws the entry for
      the office alone; this is the other end of that one question (§42), and
@@ -2857,16 +2895,16 @@ console.log("\n28 · the master presentation's running order is the office's (§
   const UK = Object.keys(SEED.units)[0];
   const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
   const FLOW = [UK, "fn:" + Object.keys(SEED.functions || {})[0]];
-  check("§261: the seed holds a unit and a custodian to test with",
+  check("§266: the seed holds a unit and a custodian to test with",
         !!(UK && CUST), [UK, CUST].join(" / "));
   if (!(UK && CUST)) return;
 
   let r = fromStored(SEED, "smo", function (i) { i.group.masterFlow = FLOW; });
-  check("§261: the office sets a running order", r.ok, (r.refusals || []).join(" / "));
+  check("§266: the office sets a running order", r.ok, (r.refusals || []).join(" / "));
 
   r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
-  check("§261 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
-  check("§261: and the refusal names the Presentation menu, never Setup",
+  check("§266 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§266: and the refusal names the Presentation menu, never Setup",
         !r.ok && /Presentation menu/.test((r.refusals || []).join(" ")),
         (r.refusals || []).join(" / "));
 
@@ -2875,23 +2913,23 @@ console.log("\n28 · the master presentation's running order is the office's (§
      anybody throw away an order only the office could set. */
   const set = clone(SEED); set.group.masterFlow = FLOW;
   r = fromStored(set, CUST, function (i) { delete i.group.masterFlow; });
-  check("§261 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  check("§266 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
   r = fromStored(set, "smo", function (i) { delete i.group.masterFlow; });
-  check("§261: the office clears it", r.ok, (r.refusals || []).join(" / "));
+  check("§266: the office clears it", r.ok, (r.refusals || []).join(" / "));
 
   /* ONE SENTENCE, AND IT IS ITS OWN KIND. Left to the unknown sweep this
      would land on the SMO too — and would report "the group's masterFlow",
      which sends nobody anywhere (§16.7). */
   r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
   const kinds = (r.changes || []).map(function (c) { return c.kind; });
-  check("§261: a change to it is classified `masterFlow` and nothing else",
+  check("§266: a change to it is classified `masterFlow` and nothing else",
         kinds.length === 1 && kinds[0] === "masterFlow", kinds.join(",") || "(nothing)");
 
   /* A LOCKED CYCLE STILL TAKES IT, deliberately: the flow is arranged the
      morning of the meeting, which is after the lock and not before it. */
   const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
   r = fromStored(lock, "smo", function (i) { i.group.masterFlow = FLOW; });
-  check("§261: a locked cycle does not stop the office arranging the flow",
+  check("§266: a locked cycle does not stop the office arranging the flow",
         r.ok, (r.refusals || []).join(" / "));
 })();
 

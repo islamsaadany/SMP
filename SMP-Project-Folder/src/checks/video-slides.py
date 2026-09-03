@@ -314,41 +314,72 @@ with sync_playwright() as pw:
           said == "no server here", said)
 
     # ── 8. Setup › Video storage ───────────────────────────────────────────
-    print("8. the page the office clears from")
-    ev(pg, "() => { slidesClose(); current='setup'; currentSub='videos'; paint(); }")
+    print("8. the section the office clears from")
+    # §261.9 MOVED IT: Video storage is the third section of Import & storage,
+    # not a rail entry of its own. A check left pointing at the old key would
+    # pass quietly having measured nothing (§51.11) — so it walks the section
+    # row the way somebody walks it.
+    ev(pg, "() => { slidesClose(); current='setup'; currentSub='import'; paint(); }")
+    pg.wait_for_timeout(400)
+    tabs = pg.eval_on_selector_all(".setuppane .secrow button",
+                                   "e => e.map(x => x.textContent.trim())") or []
+    check("Import & storage carries three sections",
+          ["Import a plan", "Archived plans", "Video storage"] == tabs, tabs)
+    vid = [b for b in pg.query_selector_all(".setuppane .secrow button")
+           if (b.text_content() or "").strip() == "Video storage"]
+    check("...and Video storage is one of them", len(vid) == 1, len(vid))
+    if vid:
+        vid[0].click()
     pg.wait_for_timeout(500)
-    rail = pg.eval_on_selector("#panel", "e => e.innerText") or ""
+    rail = pg.eval_on_selector(".setuprail", "e => e.innerText") if \
+           pg.query_selector(".setuprail") else ""
     pane = pg.eval_on_selector(".setuppane", "e => e.innerText") if \
            pg.query_selector(".setuppane") else ""
-    check("the office reaches Video storage", "Video storage" in rail, rail[:120])
+    check("the rail says Import & storage", "Import & storage" in rail, rail[:140])
+    # §24: the old entry is DELETED, not left standing beside its new home —
+    # two doors to one page is how a rename becomes a duplicate.
+    check("...and there is no second Video storage entry in the rail",
+          rail.count("Video storage") == 0, rail[:200])
     check("...and from a file it says there is nothing to ask, rather than asking for ever",
           "opened from a file" in (pane or "").lower(), (pane or "(no pane)")[:200])
 
-    seen = ev(pg, """() => {
+    # BOTH ENDS, DRIVEN RATHER THAN READ. The page defs are a closure, not a
+    # global, so an earlier draft of this reached for them, threw, and skipped
+    # the assertion in silence — twice. Switching the viewer and repainting
+    # asks the question the way somebody standing there asks it.
+    def sections_now():
+        return pg.eval_on_selector_all(".setuppane .secrow button",
+                                       "e => e.map(x => x.textContent.trim())") or []
+
+    other = ev(pg, """() => {
       const was = VIEWER;
-      /* ANYBODY THE OFFICE IS NOT. Asked of inOffice() rather than by naming a
-         role key, because the roles a demo register happens to carry are not
-         the question — 29 of these 33 people hold no role at all, which is
-         exactly the reader this page must not open for. */
-      const who = (PEOPLE.filter(p => { const w = VIEWER; VIEWER = p.key;
-                     const off = inOffice(); VIEWER = w; return !off; })[0] || {}).key;
-      const out = { other: who || null };
-      out.office = inOffice();
-      if (who) { VIEWER = who; out.head = inOffice(); VIEWER = was; }
-      return out;
+      const who = (PEOPLE.filter(p => { VIEWER = p.key; const off = inOffice();
+                     VIEWER = was; return !off; })[0] || {}).key;
+      return who || null;
     }""")
-    if seen is None:
-        # SETUP_DEFS is not a global on every build; the page gate is still
-        # asserted above, so this is reported rather than silently skipped.
-        print("  (could not reach the page list to check both ends)")
+    check("the office sees the Video storage section",
+          "Video storage" in sections_now(), sections_now())
+    if other:
+        ev(pg, "(k) => { VIEWER = k; paint(); }", other)
+        pg.wait_for_timeout(400)
+        # ASSERTED ON THE PANE, not on the tab row: `c_import` is "view" for the
+        # WHOLE register, so a unit head reaches this page — they simply lose
+        # two of its three sections (Import a plan wants edit, Video storage
+        # wants the office), and one section draws no tab row at all. That is
+        # also what makes the gate load-bearing rather than belt-and-braces:
+        # without it every unit head would see every unit's clips and sizes.
+        pane_them = pg.eval_on_selector(".setuppane", "e => e.innerText") if \
+                    pg.query_selector(".setuppane") else ""
+        check("...and somebody outside the office does not get Video storage",
+              "Video storage" not in pane_them, pane_them[:160])
+        # Both ends (§113.8): "it is gone" is true of a build that lost the
+        # page, so what they DO keep is asserted in the same breath.
+        check("...while the archives they may see are untouched",
+              "rchive" in pane_them, pane_them[:160])
+        ev(pg, "() => { VIEWER = PEOPLE.filter(p => p.role === 'super')[0].key; paint(); }")
+        pg.wait_for_timeout(300)
     else:
-        check("the page is the office's", get(seen, "office") is True, seen)
-        # Both ends, or "it is gated" passes on a build that shows it to nobody.
-        if get(seen, "other"):
-            check("...and somebody outside the office does not get it",
-                  get(seen, "head") is False, seen)
-        else:
-            print("  (no non-office person on this register to check the other end)")
+        print("  (no non-office person on this register to check the other end)")
 
     check("no page error anywhere in this run", not errs, errs[:2])
     b.close()

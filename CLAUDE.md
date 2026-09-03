@@ -468,9 +468,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   family, found by driving the refusal rather than reading it, fixed as
   `mayWatch()`, both ends asserted, 2 red with the bug put back. **AND THE
   GUARDS BEHIND THE STORE CHECK WERE UNTESTED UNTIL THE TEST SET A FAKE TOKEN**
-  — with none the endpoint answers "no video store here" first. **SETUP › VIDEO
-  STORAGE** is his #3, its own rail entry under *Running the cycle* (Import &
-  archives is about PLANS), the total on the page, **no Delete on a clip in the
+  — with none the endpoint answers "no video store here" first. **SETUP › IMPORT &
+  STORAGE, THIRD SECTION** is his #3 (§261.9, reversing §261.6's own
+  placement): it first took a rail entry under *Running the cycle*, and Islam
+  questioned it — the group's own note says *"What you do while a cycle is
+  open"* and clearing storage is what you do when one is NOT, so my placement
+  failed the group's stated test. An archived plan and a stored clip are the
+  same errand, so the page is **Import & storage** — one way in, two things
+  held — and the rail loses a line. **Each section keeps its own gate** (§130.4)
+  and here that is LOAD-BEARING: `c_import` is "view" for all 33 people
+  (measured), so without `when: inOffice()` every unit head would see every
+  unit's clips and sizes. **A rename leaves stale strings** — two live ones
+  still named the old page, one of them a promise about where the way back is
+  (§16.7, §51.11) — and the old entry is DELETED, not left beside its new home
+  (§24). **The fetch gate had to follow the SECTION, and `CURSEC` is a MAP
+  keyed by page**, so `CURSEC === "vids"` is false always and the section would
+  have said *"Asking…"* for ever (§93, caught before it shipped). The total on
+  the page, **no Delete on a clip in the
   open review** (§61), **deleting is the Super user's** and asked twice (§89,
   §146), **a cleared clip keeps its slide and says what happened** (§15.1) and
   **does not count against the ceiling**, because clearing is what makes room.

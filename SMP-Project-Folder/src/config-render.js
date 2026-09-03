@@ -4978,7 +4978,7 @@ function renderImport(){
       '</div></div>';
   }
 
-  return cfgHead("Import & archives",
+  return cfgHead("Import & storage",
       ['<span class="pill kind">' + (isPlan
         ? "One generic template &middot; one unit per file"
         : "One file per unit or capability") + '</span>'],

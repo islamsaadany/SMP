@@ -29929,3 +29929,62 @@ column, and a deck already open on a projector still does not redraw. And the
 mockup that was signed off did not show the cleared state or the ceiling
 message — both were built from the decisions rather than from a drawing, and
 are the two screens to look at first.
+
+
+### §261.9 — Video storage is a section of Import & storage, not a page of its own (2026-09-03)
+
+Islam, looking at what §261 shipped: *"the import and archive has 2 subtabs
+now. I'm not sure that this is the right place to store the videos. challenge
+this if you want."*
+
+**HE IS RIGHT, AND THE REASON IS SHARPER THAN THE ONE I HAD.** §261.6 put Video
+storage under *Running the cycle* because that is where Import & archives sits —
+which is proximity, not an argument. The group's own note says **"What you do
+while a cycle is open"**, and clearing storage is exactly what you do when one
+is NOT. My own placement failed the group's stated test.
+
+**WHAT THE THREE SHARE IS THE PAGE'S NAME.** An archived plan and a stored clip
+are the same errand — *what has piled up, and how do I clear it* — so the page
+becomes **Import & storage**: one way in, two things held. §108.4's argument for
+joining import and archives (an upload IS an archiving act) is untouched; this
+adds a third thing held, not a third meaning. Two placements were put to Islam
+with the cost of each and he chose this one; the rail loses a line with it.
+
+**EACH SECTION KEEPS ITS OWN GATE** (§130.4), and here that is load-bearing
+rather than belt-and-braces: **`c_import` is "view" for all 33 people on the
+register** — measured, not assumed — so without `when: inOffice()` every unit
+head would see every unit's clips and their sizes. Proved able to fail: with the
+gate removed the check goes red naming exactly that.
+
+**AND A RENAME LEAVES STALE STRINGS.** Two live ones still said the old name —
+the section's own `cfgHead` (which `setup-pages.py` compares against the rail's
+word, §51.11) and the removal dialog's sentence promising *"Setup › Import &
+archives holds the way back"*, which is §16.7's fault: a promise naming a page
+nobody can find. Both moved. The old rail entry is **DELETED, not left standing
+beside its new home** (§24) and the check asserts that absence, or a rename
+quietly becomes a duplicate.
+
+**THE FETCH GATE MOVED WITH IT, AND ITS FIRST DRAFT WAS THE SILENT KIND.** It
+had to follow the SECTION rather than the page key — and `CURSEC` is a MAP keyed
+by page, not a string, so `CURSEC === "vids"` is false always: the store would
+never have been asked and the section would have said *"Asking…"* for ever.
+§93's gate-that-stopped-matching, caught before it shipped by reading the
+variable rather than assuming it.
+
+**TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK**, both the same family: it
+read `#panel` for the rail, which holds the pane TOO, so counting the old name
+counted the new section tab — an assertion measuring its own subject; and it
+reached for a `SETUP_DEFS` global that does not exist (the defs are a closure on
+`SUBS.setup`), threw, and **skipped the both-ends assertion in silence, twice**.
+It drives the viewer switch and reads the real pane now.
+
+**AND THE THIRD FAILURE WAS A CORRECT BUILD.** Asserting the non-office viewer
+still sees a tab row is wrong: with one section left the row is not drawn at
+all, so the assertion moved to the PANE. 56/0.
+
+**RECORDED, NOT CHANGED**: all three sections print their own name as an `<h2>`
+directly under the tab that already says it — *Archived plans* has always done
+this, so the new one is consistent rather than odd, and fixing it is a decision
+about the whole page. And `checks/setup-pages.py` has **3 failures about a
+sticky table head that reproduce on `origin/main`** — measured on main, on
+§261's commit, and on this one; pre-existing and untouched by any of it.

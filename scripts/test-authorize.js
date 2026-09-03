@@ -2843,5 +2843,57 @@ console.log("\n27 · which slides a review shows is the office's (§256)");
         r.ok, (r.refusals || []).join(" / "));
 })();
 
+console.log("\n28 · the master presentation's running order is the office's (§261)");
+(function () {
+  /* Islam, asked before it was built: the SMO. The menu draws the entry for
+     the office alone; this is the other end of that one question (§42), and
+     BOTH sides of it — a test that only proves the custodian is refused passes
+     just as happily on a build that refuses everybody, which would be a
+     feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FLOW = [UK, "fn:" + Object.keys(SEED.functions || {})[0]];
+  check("§261: the seed holds a unit and a custodian to test with",
+        !!(UK && CUST), [UK, CUST].join(" / "));
+  if (!(UK && CUST)) return;
+
+  let r = fromStored(SEED, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§261: the office sets a running order", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  check("§261 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§261: and the refusal names the Presentation menu, never Setup",
+        !r.ok && /Presentation menu/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* CLEARING IT IS THE SAME ACT, and the key is DELETED rather than emptied
+     (§50.6) — a build that classified the write and not the removal would let
+     anybody throw away an order only the office could set. */
+  const set = clone(SEED); set.group.masterFlow = FLOW;
+  r = fromStored(set, CUST, function (i) { delete i.group.masterFlow; });
+  check("§261 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group.masterFlow; });
+  check("§261: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, AND IT IS ITS OWN KIND. Left to the unknown sweep this
+     would land on the SMO too — and would report "the group's masterFlow",
+     which sends nobody anywhere (§16.7). */
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§261: a change to it is classified `masterFlow` and nothing else",
+        kinds.length === 1 && kinds[0] === "masterFlow", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately: the flow is arranged the
+     morning of the meeting, which is after the lock and not before it. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§261: a locked cycle does not stop the office arranging the flow",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

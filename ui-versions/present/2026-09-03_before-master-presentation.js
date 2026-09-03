@@ -7,7 +7,7 @@
    disappears, and Exit returns the presenter to exactly where they were.
    ──────────────────────────────────────────────────────────────────────── */
 
-var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"" };
+var DECK = { i:0, slides:[], root:null };
 
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
@@ -954,60 +954,16 @@ function deckFootMarks(deck, u){
   });
 }
 
-/* ── ONE SUBJECT'S FINISHED DECK (§261) ───────────────────────────────
-   `deckHtmlFor()` answers which slides a subject gets; this answers what its
-   deck actually IS — those slides with the custodian's pictures inserted, the
-   office's hidden ones removed and the subject's own mark footed on. Every
-   one of those passes was already run by `openDeckWith()` and none of them
-   measures anything, so they run identically on a detached element (the one
-   pass that DOES measure, `deckFitPass()`, still runs on the deck in the
-   document, once, at the end — §69.5's note explains why it cannot move).
-
-   IT EXISTS BECAUSE A FLOW IS SEVERAL OF THESE. Concatenating first and
-   passing afterwards would hide one subject's slides behind another's marks:
-   `deckFootMarks()` foots the whole deck with ONE mark and `deckHidePass()`
-   reads ONE subject's hidden list, so both have to run per subject or a flow
-   would wear the first unit's lockup throughout and hide the wrong slides.
-
-   AND EVERY SLIDE IS STAMPED WITH WHOSE IT IS, on a single deck as well as in
-   a flow (§53.5: one builder, one behaviour). It costs a single-subject deck
-   two attributes nothing reads, and it is what lets the strip at the bottom
-   name the subject you are standing in without keeping a second list beside
-   the deck that could disagree with it. */
-function deckBuild(target){
-  var frag = document.createElement("div");
-  frag.innerHTML = deckHtmlFor(target);
-  insertPictureSlides(frag, target);
-  deckHidePass(frag, target);
+function openDeckWith(titleHtml, slides, target){
+  var root = document.getElementById("deckroot");
+  root.querySelector(".deck").innerHTML = slides;
+  if (target) insertPictureSlides(root.querySelector(".deck"), target);
+  if (target) deckHidePass(root.querySelector(".deck"), target);
   /* EVERY deck, not only a unit's (§259). `deckMark()` answers with the
      subject's own mark or the group's, and a supporting function is not in
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */
-  deckFootMarks(frag, UNITS[target] || null);
-  var name = placeLabel(target);
-  [].forEach.call(frag.querySelectorAll(".dslide"), function(sl){
-    sl.dataset.subject = target;
-    sl.dataset.subjectName = name;
-  });
-  return frag.innerHTML;
-}
-
-/* ── THE ONE OPENER (§261) ────────────────────────────────────────────
-   A unit's Present, a function's Present and the office's master flow are
-   three doors onto one act, and they differ only in HOW MANY subjects go in —
-   so there is one opener taking a list, rather than a second one for flows
-   that would have to be kept in step with this one (§53.5, and §253.3's own
-   lesson about a deck assembled two ways).
-
-   `DECK.flow` is the LIST OF SUBJECTS, held only while a flow is open. It is
-   read by the strip at the bottom and by nothing else; a single subject sets
-   it to null, so every existing behaviour is untouched by construction. */
-function openDeckWith(titleHtml, targets){
-  var root = document.getElementById("deckroot");
-  var list = [].concat(targets).filter(Boolean);
-  root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
-  DECK.flow = list.length > 1 ? list : null;
-  DECK.title = titleHtml;
+  deckFootMarks(root.querySelector(".deck"), UNITS[target] || null);
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -1022,170 +978,12 @@ function openDeckWith(titleHtml, targets){
    and `deckHtmlFor()` is what decides which deck each gets, so a pillars
    function opened through either lands on the same slides. */
 function openDeck(u){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey]);
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name),
+    deckHtmlFor(u.ukey), u.ukey);
 }
 function openDeckFn(fk){
   openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
-    ["fn:" + fk]);
-}
-
-/* ══ THE MASTER PRESENTATION (§261) ═══════════════════════════════════
-   Islam: *"give an option for the SMO from the presentation list to do master
-   presentation which is a flow of presentations in a flow and he is just asked
-   the flow of the units and functions who will present he make the flow and
-   all the slides are put back to back to be presented in one flow."*
-
-   NOTHING IS ASSEMBLED THAT WAS NOT ASSEMBLED BEFORE. A flow is the decks the
-   Present button already opens, one after another, through `deckBuild()` — so
-   a picture the custodian placed, a slide the office hid and the subject's own
-   mark all travel with it, and none of them needed a line of their own here.
-
-   EVERY DECK TRAVELS WHOLE, INCLUDING ITS THANK YOU — Islam's decision,
-   reversing the recommendation put to him: *"evey deck for transition."* The
-   argument is the room's rather than the screen's: that slide is what marks
-   the end of one subject's turn before the next cover arrives. It is also the
-   cheaper build and it removes a rule — a deck inside the flow is byte for
-   byte the deck that subject presents alone, so there is no second version of
-   anybody's deck and nothing to explain about which slides a flow drops. */
-
-/* Every subject that can be asked for a report, in the register's own order —
-   the SAME pair of lists the cycle board is built from (§245), so the picker
-   and the page the office watches can never disagree about who reports. */
-function masterSubjects(){
-  return boardUnitTargets().concat(boardFunctionTargets());
-}
-/* The running order to open the picker on: the stored one, filtered to
-   subjects that still report, and the whole list in board order when nothing
-   is stored. A subject added to the tenant AFTER an order was agreed arrives
-   NOT presenting rather than being appended — walking a new unit into a board
-   meeting because somebody created it is the office's decision, not ours. */
-function masterOrder(){
-  var all = masterSubjects();
-  var kept = SMPRules.masterFlow(GROUP).filter(function(t){ return all.indexOf(t) >= 0; });
-  return kept.length ? kept : all.slice();
-}
-/* Stored as an ABSENCE (§50.6): an order that is simply everybody in the
-   board's own order is what an untouched tenant already has, so it deletes the
-   key rather than writing a copy of the default — which also means a unit
-   added tomorrow joins the flow of a tenant that never chose one, and does not
-   join one that did. */
-function masterWrite(list){
-  var all = masterSubjects();
-  if (list.length && !(list.length === all.length && list.every(function(t, i){ return t === all[i]; })))
-    GROUP[SMPRules.MASTER_FLOW] = list.slice();
-  else delete GROUP[SMPRules.MASTER_FLOW];
-  masterMark();
-}
-/* Schedule the save without a repaint, exactly as Manage slides does (§170's
-   rule from the one place that cannot end in `paint()`): this dialog draws its
-   own body, and a `paint()` here would rebuild the page behind an inert
-   overlay for no reason (§90.4). */
-function masterMark(){ if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint(); }
-
-var MFLOW = null;
-
-function masterOpen(){
-  /* ASKED AGAIN AT THE PRESS, never trusted from the render that drew the
-     entry (§48.2): the menu is drawn once and a viewer switch is one click. */
-  if (!SMPRules.mayMasterPresent(world(), viewer())) return;
-  MFLOW = { pick: masterOrder(), n: {}, note: "" };
-  openModalHtml("Master presentation", "Pick who presents, and in what order.", "");
-  masterPaint();
-}
-
-/* How many slides a subject brings. Counted once per opening and remembered,
-   because every tick redraws this dialog and eighteen decks assembled on each
-   press is eighteen decks nobody asked for. It is the deck's own count BEFORE
-   the fit pass, which splits a long table across slides at present time — so
-   the total is stated as "about", rather than as a number the counter in the
-   deck will then disagree with (§35). */
-function masterCount(t){
-  if (MFLOW.n[t] == null) {
-    var box = document.createElement("div");
-    box.innerHTML = deckBuild(t);
-    MFLOW.n[t] = box.querySelectorAll(".dslide").length;
-  }
-  return MFLOW.n[t];
-}
-
-function masterPaint(){
-  var box = document.getElementById("modal-b");
-  if (!box || !MFLOW) return;
-  var all = masterSubjects();
-  var rest = all.filter(function(t){ return MFLOW.pick.indexOf(t) < 0; });
-  var total = MFLOW.pick.reduce(function(a, t){ return a + masterCount(t); }, 0);
-  var row = function(t, i){
-    var fk = String(t).indexOf("fn:") === 0;
-    return '<div class="mfrow' + (i ? " on" : "") + '">' +
-      '<span class="mfn">' + (i || "") + '</span>' +
-      '<button class="mftick" data-mftick="' + esc(t) + '" aria-pressed="' + (i ? "true" : "false") +
-        '" aria-label="' + (i ? "Take out of" : "Put into") + ' the flow">\u2713</button>' +
-      '<span class="mflab"><b>' + esc(placeLabel(t)) + '</b><em>' +
-        (fk ? "supporting function" : "business unit") + ' &middot; ' +
-        plural(masterCount(t), "slide") + '</em></span>' +
-      (i ? '<span class="mfmv">' +
-        '<button data-mfmove="' + esc(t) + '|-1" title="Earlier" aria-label="Move earlier">\u2191</button>' +
-        '<button data-mfmove="' + esc(t) + '|1" title="Later" aria-label="Move later">\u2193</button>' +
-        '</span>' : '') +
-      '</div>';
-  };
-  box.innerHTML = '<div class="mflow">' +
-    '<div class="mfhead"><b>The flow</b><span>' + MFLOW.pick.length + ' of ' + all.length +
-      ' presenting &middot; about ' + plural(total, "slide") + '</span></div>' +
-    '<div class="mflist">' +
-      MFLOW.pick.map(function(t, k){ return row(t, k + 1); }).join("") +
-      (rest.length ? '<div class="mfband">Not presenting</div>' : '') +
-      rest.map(function(t){ return row(t, 0); }).join("") +
-    '</div>' +
-    (MFLOW.note ? '<p class="mfnote" role="status">' + esc(MFLOW.note) + '</p>' : '') +
-    '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
-    '<button class="mfgo" data-mfgo="1"' +
-      (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
-      '>Start the flow</button></div></div>';
-  masterWire();
-}
-
-/* Whoever rewrites the DOM re-wires it, in the same function (§29.5, §116) —
-   and scoped to the dialog's own body, or a second handler is bound to the
-   page behind it on every tick (§24, §47.2). */
-function masterWire(){
-  var box = document.getElementById("modal-b");
-  if (!box) return;
-  [].forEach.call(box.querySelectorAll("[data-mftick]"), function(b){
-    b.addEventListener("click", function(){
-      var t = this.dataset.mftick, at = MFLOW.pick.indexOf(t);
-      if (at >= 0) MFLOW.pick.splice(at, 1);
-      else MFLOW.pick.push(t);
-      MFLOW.note = "";
-      masterWrite(MFLOW.pick);
-      masterPaint();
-    });
-  });
-  [].forEach.call(box.querySelectorAll("[data-mfmove]"), function(b){
-    b.addEventListener("click", function(){
-      var bits = this.dataset.mfmove.split("|");
-      var at = MFLOW.pick.indexOf(bits[0]), to = at + (+bits[1]);
-      if (at < 0 || to < 0 || to >= MFLOW.pick.length) return;
-      MFLOW.pick.splice(to, 0, MFLOW.pick.splice(at, 1)[0]);
-      masterWrite(MFLOW.pick);
-      masterPaint();
-    });
-  });
-  var no = box.querySelector("[data-mfno]");
-  if (no) no.addEventListener("click", function(){ closeModal(); });
-  var go = box.querySelector("[data-mfgo]");
-  /* SAID, NEVER DISABLED (§221, §163): a disabled button takes no focus, so
-     the one sentence explaining why it will not go could not be reached. */
-  if (go) go.addEventListener("click", function(){
-    if (!MFLOW.pick.length) {
-      MFLOW.note = "Tick at least one unit or function to present.";
-      masterPaint();
-      return;
-    }
-    var list = MFLOW.pick.slice();
-    closeModal();
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
-  });
+    deckHtmlFor("fn:" + fk), "fn:" + fk);
 }
 
 /* §256.2 WAS HERE, AND IT IS §253.3's NOW. Two sessions found the same fault
@@ -1267,77 +1065,25 @@ function deckFitPass(deck){
   [].forEach.call(deck.querySelectorAll(".dslide"), function(s){ s.classList.remove("on"); });
 }
 
-/* Where each subject's deck starts, in the order the slides are in. Read off
-   the SLIDES rather than off `DECK.flow`, so a subject whose deck came out
-   empty cannot leave a dot pointing at somebody else's cover (§61), and the
-   answer is the deck's own rather than a description of it (§50.3). */
-function deckStops(){
-  var out = [];
-  DECK.slides.forEach(function(sl, k){
-    var t = sl.dataset.subject;
-    if (!t || (out.length && out[out.length - 1].t === t)) return;
-    out.push({ t:t, name: sl.dataset.subjectName || t, at:k });
-  });
-  return out;
-}
-/* ── ONE DOT PER SLIDE, OR ONE PER SUBJECT (§261) ─────────────────────
-   Islam, of the strip on a flow: *"ok"* to both. The dots are one per slide
-   and pressing one jumps to it, which is right for a deck of twenty-eight and
-   measured as broken well before a flow needs them: at 71 slides they already
-   wrap onto THREE ROWS and spill past the strip, and eighteen subjects is 335.
-
-   So in a flow they become one per SUBJECT — eighteen at most — each jumping
-   to that subject's cover, while the counter goes on counting slides, because
-   "32 / 71" is the question a presenter actually asks of it. A single
-   subject's deck is untouched: `DECK.flow` is null there and this is the
-   branch it has always taken. */
 function deckIndex(){
   var root = document.getElementById("deckroot");
   DECK.slides = [].slice.call(root.querySelectorAll(".dslide"));
   root.querySelector(".dcount-t").textContent = DECK.slides.length;
   var dots = root.querySelector(".ddots");
-  DECK.stops = DECK.flow ? deckStops() : null;
-  dots.classList.toggle("bysub", !!DECK.stops);
-  dots.innerHTML = DECK.stops
-    ? DECK.stops.map(function(st){
-        return '<button class="ddot" data-dgo="' + st.at + '" title="' + esc(st.name) +
-          '" aria-label="' + esc(st.name) + '"></button>';
-      }).join("")
-    : DECK.slides.map(function(_, k){
-        return '<button class="ddot" data-dgo="' + k + '" aria-label="Slide ' + (k+1) + '"></button>';
-      }).join("");
+  dots.innerHTML = DECK.slides.map(function(_, k){
+    return '<button class="ddot" data-dgo="' + k + '" aria-label="Slide ' + (k+1) + '"></button>';
+  }).join("");
   [].forEach.call(dots.querySelectorAll(".ddot"), function(b){
     b.addEventListener("click", function(){ deckShow(+b.dataset.dgo); });
   });
-}
-/* Which subject's stretch of the deck slide `i` falls in — the LAST stop at
-   or before it, never the one whose `at` matches, or every slide but a cover
-   would belong to nobody. */
-function deckStopAt(i){
-  var stops = DECK.stops || [], k = -1;
-  stops.forEach(function(st, j){ if (st.at <= i) k = j; });
-  return k;
 }
 function deckShow(n){
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
-  var here = DECK.stops ? deckStopAt(DECK.i) : -1;
   [].forEach.call(root.querySelectorAll(".ddot"), function(b, k){
-    b.classList.toggle("on", DECK.stops ? k === here : k === DECK.i);
+    b.classList.toggle("on", k === DECK.i);
   });
-  /* THE STRIP NAMES THE SUBJECT YOU ARE STANDING IN (§261). On one subject's
-     deck the title named it and that was enough; in a flow it read "Master
-     presentation" on slide 1 and on slide 71 alike, which names nothing. The
-     running order is stated with it, because "which unit is this" and "how
-     much is left" are the two questions a room asks. Written into the node,
-     never repainted (§63): this runs on every arrow press. */
-  if (DECK.stops && here >= 0) {
-    var st = DECK.stops[here];
-    root.querySelector(".dtitle").innerHTML =
-      "<b>" + esc(st.name) + "</b> &middot; " + (here + 1) + " of " + DECK.stops.length +
-      " &middot; " + esc(REVIEW.name);
-  }
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
 }
 /* Scale the fixed stage into whatever room there is. */

@@ -419,6 +419,55 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the sources and `db/seed-state.json` was never regenerated — *a seed that
   disagrees with the sources it is generated from is a fault nothing else would
   have found.*
+- **ONE FLOW, SEVERAL DECKS, BACK TO BACK (&sect;261):** Islam &mdash; *"give an
+  option for the smo from the presentation list to do master presentation which
+  is a flow of presentations in a flow and he is just asked the flow of the
+  units and functions who will present."* **THE PRODUCT WAS ALREADY MOST OF THE
+  WAY THERE, AND MEASURING SAID SO**: a deck is assembled fresh on the press
+  (&sect;253.3), so a flow is not a new kind of deck &mdash; three of them
+  concatenated in the running platform opened first time, before a line was
+  written (68 slides, 71 after the fit pass; the tenant is **18 subjects, 335
+  slides**). **SIX DECISIONS, ALL HIS, ALL DRAWN FIRST** &mdash; and two of them
+  only after the strip at the bottom was shot twice out of the real deck,
+  because he could not read the questions as written (*"what is that?"*): **a
+  question the reader cannot parse is answered by drawing it, not by rephrasing
+  it.** **EVERY DECK TRAVELS WHOLE, THANK YOU INCLUDED** (*"evey deck for
+  transition"*), reversing my recommendation and recorded as his: that slide
+  marks the end of one subject's turn, it is the cheaper build, and it REMOVES a
+  rule &mdash; a deck inside the flow is byte for byte the deck that subject
+  presents alone. **A SUBJECT'S OWN COVER IS ALREADY THE SEPARATOR**, which is
+  why the passes run PER SUBJECT and never over the concatenation:
+  `deckFootMarks()` foots a whole deck with ONE mark and `deckHidePass()` reads
+  ONE subject's list, so a flow passed as a lump would wear the first unit's
+  lockup throughout. `deckBuild()` is one subject's finished deck and
+  `openDeckWith()` is now the ONE opener taking a list (&sect;53.5). **THE ENTRY
+  IS IN THE MENU THAT ALREADY HOLDS THE DECKS** (&sect;252.2's reason) and is the
+  one entry there NOT about the subject whose menu it is, so it names none; the
+  narrowing is in `mayMasterPresent()`, never in the menu (&sect;42, &sect;48.2).
+  **THE PICKER IS ONE LIST** (his A), built from the CYCLE BOARD'S OWN two lists
+  (&sect;245) with `placeLabel()` names (&sect;244), its total saying **"about"**
+  because the fit pass adds slides at present time (&sect;35), Start refused
+  rather than disabled (&sect;221) and every press writing at once through
+  `masterWrite()` (&sect;170). **THE ORDER LASTS AND IS STORED AS AN ABSENCE**:
+  `GROUP.masterFlow` rides the group's `extra` &mdash; **no migration**, proved
+  on a real Postgres 16 rather than claimed (&sect;177) &mdash; not `REVIEW`,
+  which the cycle clears (&sect;50), and the default DELETES the key (&sect;50.6),
+  which is what makes it self-healing: a unit created tomorrow joins the flow of
+  a tenant that never chose one and never silently joins one that did. **THE
+  STRIP NAMES THE SUBJECT** and the dots become one per SUBJECT &mdash; measured,
+  the per-slide dots wrap onto three rows and spill past the strip at 71 &mdash;
+  **both inside a flow only**, with a single subject's deck asserted untouched at
+  both ends. **AND THE TWO SERVER EDITS GO TOGETHER**: `MASTER_FLOW` is in
+  `gExtra`, so removing only the classification makes the change INVISIBLE and
+  therefore allowed to everybody (&sect;191) &mdash; proved by doing it, 4 red.
+  `checks/master-presentation.py`: **31 red** on the build before, and its first
+  run there DIED on an empty list with three assertions unmade (&sect;215, in a
+  file promising every probe degrades). **Two of its own first failures were the
+  CHECK** &mdash; a function reached by assigning `current` rather than through
+  the navigation's switch, and `switchViewer` handed a register INDEX where it
+  wants a person key, which reported the office's own entry as a leak.
+  **RECORDED, NOT DONE**: a single deck still draws one dot per slide, nothing
+  says the order is saved without presenting it, and a flow cannot be downloaded.
 - **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
   (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
   an option in the drop down for the smo only."* §145.9 hid the pane-corner
@@ -4589,6 +4638,19 @@ python3 checks/deck-figures.py   # a figure is read against what it is measured 
                                 # MADE and the row put back, and the slide order with
                                 # the two pillar headings asserted different — 33 red
                                 # on the build before
+python3 checks/master-presentation.py # one flow, several decks, back to back
+                                # (§261): agreement and never a number — the flow's
+                                # slide count against the sum of the decks its
+                                # subjects present ALONE, the picker's names against
+                                # placeLabel, the footer marks against deckMark, and
+                                # who sees the entry against the shared rule, at both
+                                # ends; every deck whole with its Thank you (Islam's
+                                # decision, asserted so a later build cannot tidy them
+                                # away); the strip naming the subject and one dot per
+                                # subject; and a SINGLE subject's deck measured
+                                # unchanged, because everything rides one opener now.
+                                # 31 red on the build before — and its first run there
+                                # DIED on an empty list rather than reporting (§215)
 python3 checks/deck-dividers.py # the group's mark and the deck's four blue
                                 # section dividers (§259): the blue asserted as AGREEMENT
                                 # with `--panel` and never as a hex — it REBRANDS the
@@ -4874,7 +4936,40 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: one flow, several decks, back to
+back.** Islam: *"give an option for the smo from the presentation list to do
+master presentation which is a flow of presentations in a flow and he is just
+asked the flow of the units and functions who will present he make the flow and
+all the slides are put back to back to be presented in one flow."*
+**MEASURING CAME FIRST AND IT CHANGED THE SHAPE OF THE WORK**: a deck is
+assembled fresh on the press (&sect;253.3), so three of them concatenated in the
+running platform opened first time with no error before a line of the feature
+existed &mdash; which turned the job from *build a deck builder* into *pick who
+presents, and in what order*. Six decisions, all his, all drawn in the real
+platform first (rule 1c), and two of them only after the strip at the bottom of
+the deck was shot twice out of the running deck, because he could not read the
+questions as written (*"what is that?"*, *"what do you mean?"*): **a question the
+reader cannot parse is answered by drawing it, not by rephrasing it.** **EVERY
+DECK TRAVELS WHOLE, THANK YOU INCLUDED** &mdash; *"evey deck for transition"*,
+reversing my own recommendation and recorded as his, with the argument that it
+is the room's seam rather than the screen's; it is also the cheaper build and it
+REMOVES a rule, because a deck inside the flow is byte for byte the deck that
+subject presents alone. **A SUBJECT'S OWN COVER IS ALREADY THE SEPARATOR**,
+which is why the three passes run PER SUBJECT and never over the concatenation.
+**THE ORDER RIDES `org.extra`** &mdash; no migration, and proved on a real
+Postgres 16 rather than claimed (&sect;177) &mdash; stored as an ABSENCE, which
+is what makes it self-healing. **AND THE TWO SERVER EDITS GO TOGETHER**:
+`MASTER_FLOW` is in `gExtra`, so removing only its classification makes the
+change invisible and therefore allowed to everybody (&sect;191), proved by doing
+it &mdash; 4 red, the custodian accepted. `checks/master-presentation.py` is
+**31 red** on the build before and 34 green after; **its first run there died on
+an empty list with three assertions unmade** (&sect;215, in a file whose own
+docstring promises every probe degrades), and **two of its own first failures
+were the CHECK**. 499/0 authoriser &middot; 126/0 differ &middot; round trip,
+clean parity and two tabs green on virgin Postgres 16 &middot; full `qa.py`
+sweep clean &middot; six neighbouring deck checks green.*
+
+*Earlier: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

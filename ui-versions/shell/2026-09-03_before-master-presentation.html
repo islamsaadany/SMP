@@ -3108,15 +3108,6 @@
         else openDeck(unitLike(t));
       });
     });
-    /* The master presentation (§261) — beside Present, because a flow is
-       several of those decks. `this`, and the picker asks the rule again for
-       itself, so a stale menu cannot open one (§48.2). */
-    document.querySelectorAll("[data-master]").forEach(function(b){
-      b.addEventListener("click", function(){
-        closeDlMenu(this);
-        masterOpen();
-      });
-    });
     /* Picture slides — beside Present, because it is the deck they go into
        (§50.4). Wired here with the rest of the page's actions, in the function
        that rewrote the DOM they sit in (§29's rule: whoever rewrites the DOM

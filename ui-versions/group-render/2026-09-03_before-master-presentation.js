@@ -1086,26 +1086,6 @@ function presentMenu(kind, key){
      SMO ONLY, and the narrowing is in `mayDownloadPlan` rather than here, so
      the entry and `sendPlanPptx`'s own press-time check cannot answer
      differently (\u00a742, \u00a748.2). */
-  /* \u2500\u2500 THE MASTER PRESENTATION (\u00a7261) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-     Islam: *"give an option for the SMO from the presentation list to do
-     master presentation."* THIS MENU, in his words and for \u00a7252.2's reason:
-     it is where the decks already are, so a flow of them costs no new control
-     on any page \u2014 Present opens one review, Manage slides arranges it, the
-     download takes the plan away, and this runs several reviews end to end.
-
-     THE ONE ENTRY THAT IS NOT ABOUT THE SUBJECT WHOSE MENU IT IS, which is
-     why it names none: the flow spans the tenant, and the menu is drawn on
-     every unit and function, so wording it "for this unit" would be false in
-     eighteen places. It is the same act wherever it is opened.
-
-     SMO ONLY, and the narrowing is in `mayMasterPresent` rather than here, so
-     the entry and `masterOpen()`'s own press-time check cannot answer
-     differently (\u00a742, \u00a748.2). */
-  var master = SMPRules.mayMasterPresent(world(), viewer())
-    ? '<button role="menuitem" data-master="1">Master presentation' +
-      '<span class="dlsub">One flow &mdash; several units and functions, ' +
-      'back to back</span></button>'
-    : "";
   var dl = SMPRules.mayDownloadPlan(world(), viewer(), target)
     ? '<button role="menuitem" data-dlpptx="' + esc(target) + '">Download the plan' +
       '<span class="dlsub">The plan as editable slides (.pptx) &mdash; ' +
@@ -1113,7 +1093,7 @@ function presentMenu(kind, key){
     : "";
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + present + slides + dl + master + '</div></details>';
+    '<div class="menu" role="menu">' + present + slides + dl + '</div></details>';
 }
 
 /* ── Cards or a table (§16.6) ────────────────────────────────────────

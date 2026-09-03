@@ -29740,3 +29740,129 @@ green. `refusal-keeps-work.py` is red on `main`'s own build for the
 stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
+
+---
+
+## §261 — ONE FLOW, SEVERAL DECKS, BACK TO BACK (2026-09-03)
+
+Islam:
+
+> for the presentation give an option for the smo from the presentation list to
+> do master presentation which is a flow of presentations in a flow and he is
+> just asked the flow of the units and functions who will present he make the
+> flow and all the slides are put back to back to be presented in one flow
+
+**THE PRODUCT WAS ALREADY MOST OF THE WAY THERE, AND MEASURING IS WHAT SAID
+SO.** A subject's deck is assembled fresh every time it opens by one reader
+(§253.3), so a flow is not a new kind of deck — it is the decks the Present
+button already opens, one after another. Three of them concatenated in the
+running platform opened first time with no error, before a line of the feature
+was written: **68 slides, 71 after the fit pass continues the long tables**.
+The whole tenant is **18 subjects and 335 slides**.
+
+**SIX DECISIONS, ALL HIS, ALL DRAWN FIRST** (rule 1c;
+`design-mockups/master-presentation/`). Four came back in his words — the SMO
+alone; one list rather than two columns; the flow is remembered; every deck
+whole — and two only after the strip at the bottom of the deck was shot twice
+out of the running deck, because he could not read the questions as written
+(*"what is that?"*, *"what do you mean?"*). **A QUESTION THE READER CANNOT PARSE
+IS ANSWERED BY DRAWING IT, NOT BY REPHRASING IT.**
+
+**§261.1 — EVERY DECK TRAVELS WHOLE, THANK YOU INCLUDED**, and it reverses the
+recommendation put to him: *"evey deck for transition."* The case against was
+that seventeen Thank yous in the middle of a review read as the meeting ending,
+seventeen times; his case is the room's rather than the screen's — that slide is
+what marks the end of one subject's turn before the next cover arrives. **It is
+also the cheaper build and it REMOVES a rule**: a deck inside the flow is byte
+for byte the deck that subject presents alone, so there is no second version of
+anybody's deck and nothing to explain about which slides a flow drops. Asserted
+rather than assumed, so a later build that decides to tidy them away has to come
+past the check.
+
+**§261.2 — A SUBJECT'S OWN COVER IS ALREADY THE SEPARATOR.** Nothing was drawn
+to divide one subject from the next: each deck opens on its cover wearing its
+own mark (§52.9), which is why the passes run **per subject and never over the
+concatenation** — `deckFootMarks()` foots a whole deck with ONE mark and
+`deckHidePass()` reads ONE subject's list, so a flow passed as a lump would wear
+the first unit's lockup throughout and hide the wrong slides. `deckBuild()` is
+that one subject's finished deck, and `openDeckWith()` is now the ONE opener
+taking a list: a unit's Present, a function's Present and a master flow are
+three doors onto one act and differ only in how many subjects go in (§53.5,
+§253.3's own lesson about a deck assembled two ways).
+
+**§261.3 — THE ENTRY IS IN THE MENU THAT ALREADY HOLDS THE DECKS** (his words,
+and §252.2's reason): Present opens one review, Manage slides arranges it, the
+download takes the plan away as a file, and this runs several reviews end to
+end — so it costs no new control on any page. **It is the one entry in that menu
+that is NOT about the subject whose menu it is**, which is why it names none:
+the flow spans the tenant and the menu is drawn in eighteen places. The
+narrowing is in `mayMasterPresent()` and never in the menu, so the entry and the
+press cannot answer differently (§42, §48.2).
+
+**§261.4 — THE PICKER IS ONE LIST** (his A, over two columns): whoever presents
+sits at the top, numbered, with the arrows that move them; everybody else waits
+under a band. It is the shape Manage slides already uses for a deck and its
+hidden slides. The rows come from `boardUnitTargets()` + `boardFunctionTargets()`
+— **the same pair of lists the cycle board is built from** (§245), so the picker
+and the page the office watches can never disagree about who reports — and the
+names from `placeLabel()`, which is what tells a unit called *Care* from a
+function called *Care* (§244). **THE TOTAL SAYS "ABOUT"**, because the count is
+the deck's own and the fit pass adds a slide when a long table continues at
+present time: a stated approximation beats a number the deck's own counter then
+contradicts (§35). **Start is refused, never disabled** (§221, §163), and every
+press writes at once through `masterWrite()`, which schedules the save without a
+repaint exactly as Manage slides does (§170).
+
+**§261.5 — THE ORDER LASTS, AND IS STORED AS AN ABSENCE.** `GROUP.masterFlow`
+rides the group's `extra` beside `sets`, `naming` and `focusOff`, so **no
+migration** — claimed, then proved against a real Postgres 16 (written, read
+back identical, cleared, key gone, nothing else in the graph moved: §177's rule
+that a field needing no migration is a claim until something writes one). It
+does not ride `REVIEW`, which the cycle clears (§50, §115): the order a board
+meeting runs in is agreed once and used every quarter. **The default deletes the
+key** (§50.6) — everybody in the board's own order is what an untouched tenant
+already has — and that is what makes it self-healing: a unit created tomorrow
+joins the flow of a tenant that never chose one and does NOT silently join one
+that did. A subject added after an order was agreed arrives *Not presenting*,
+because walking a new unit into a board meeting is the office's decision.
+
+**§261.6 — THE STRIP NAMES THE SUBJECT, AND THE DOTS BECOME THE SUBJECTS.** In a
+flow the title read *"Master presentation"* on slide 1 and on slide 71 alike,
+which names nothing; it reads *Retail Stores · 2 of 3 · H1 2026* now, written
+into the node on every arrow press rather than repainted (§63). And the dots are
+one per slide: **measured at 71 they already wrap onto three rows and spill past
+the strip**, and eighteen subjects is 335 — so in a flow they are one per
+subject, each jumping to that subject's cover, with the counter still counting
+slides. **Both are inside a flow only**, and a single subject's deck is asserted
+untouched at both ends, because everything now rides one opener and *"we did not
+touch the ordinary deck"* is a claim until it is measured.
+
+**§261.7 — THE SERVER'S OWN LINE, AND THE TWO EDITS GO TOGETHER.** A change to
+the running order classifies as `masterFlow` — its own kind rather than `setup`,
+for §256's reason: both land on the office, so it changes no permission and
+changes the REFUSAL, which must not send somebody to Setup for a control in the
+Presentation menu (§16.7). **`MASTER_FLOW` is in `gExtra`**, so removing only the
+classification line does not make the change unknown, it makes it **invisible —
+and therefore allowed to everybody** (§191). Proved by doing exactly that: 4
+red, among them the custodian being accepted. `test-authorize.js` §28 asserts
+both ends and that a locked cycle does not stop it (the flow is arranged the
+morning of the meeting, which is after the lock).
+
+**Proof.** `checks/master-presentation.py`: **31 red** on the shipped pre-§261
+build, 34 green after — and its FIRST run against that build **died on an empty
+list with three assertions unmade** (§215, in a file whose own docstring
+promises every probe degrades), so it does now. **Two of its own first failures
+were the CHECK**: a supporting function was reached by assigning `current`
+rather than through the navigation's own switch, and `switchViewer` was handed a
+register INDEX where it wants a person key — which left VIEWER on the office and
+reported the office's own entry as a leak. 499/0 on the authoriser, 126/0 on the
+differ, round trip · clean parity · two tabs green on a virgin Postgres 16, the
+full `qa.py` sweep clean, and `hide-slide`, `slide-move`, `notes-slide`,
+`deck-blank-slides`, `deck-outcome` and `strategy-split` all still green.
+
+**RECORDED, NOT DONE.** A single subject's deck still draws one dot per slide,
+which is fine at 28 and has never been measured as broken; there is no control
+that says the order is saved without presenting it (every press writes, so it
+is saved — what is missing is the sentence); and a flow cannot be DOWNLOADED,
+because `sendPlanPptx` is one subject's plan and what a master `.pptx` holds is
+its own decision.

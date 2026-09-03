@@ -12,6 +12,20 @@ other sessions. **§259 (the group's mark and the deck's four blue section
 dividers) is merging from `claude/deck-separators-brand`,** renumbered from
 §257 because main took that number while it was being built.
 
+**§261 — the master presentation — is BUILT and ON ITS BRANCH**
+(`claude/master-presentation-flow-f91mrl`), **not merged**: `main` is
+production and every merge is Islam's word on the day (rule 4). The SMO picks
+who presents and in what order from the Presentation menu, and the decks are
+run end to end as one flow. Six decisions were drawn in the running platform
+and answered before a line was written; the review page is
+`design-mockups/master-presentation/2026-09-03_master-presentation.html`, the
+reasoning is §261 and the spec is `specs/028-master-presentation/`.
+`checks/master-presentation.py` is 31 red on the build before and 34 green
+after; 499/0 on the authoriser, the full `qa.py` sweep clean, and the round
+trip, clean parity and two tabs green on a virgin Postgres 16.
+**At merge time:** bump `SHELL` in `sw.js` to a name `origin/main` does not
+hold (§91, §94.12, §94.16) — the built file's bytes have changed.
+
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
 

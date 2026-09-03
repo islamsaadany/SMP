@@ -46,6 +46,14 @@
 
   /* ── the head ─────────────────────────────────────────────────────── */
   header { padding:56px 0 34px; border-bottom:1px solid var(--line); margin-bottom:14px; }
+  .built {
+    display:flex; flex-wrap:wrap; gap:6px 16px; align-items:baseline;
+    border:1px solid var(--good); border-radius:8px; padding:12px 16px;
+    margin:0 0 26px; background:var(--surface);
+  }
+  .built b { color:var(--good); font-size:12px; letter-spacing:.1em;
+    text-transform:uppercase; }
+  .built span { color:var(--ink-2); font-size:14px; }
   .kicker {
     font-size:var(--fs-micro); letter-spacing:.16em; text-transform:uppercase;
     font-weight:600; color:var(--gold-deep); margin:0 0 14px;
@@ -164,6 +172,13 @@
     alone, one list, the flow is remembered, every deck whole); the two left are
     both about the strip at the bottom of the screen, and are drawn in
     &sect;04.</p>
+  <div class="built">
+    <b>Built &middot; 3 September</b>
+    <span>All six answered and built on
+      <code style="font-family:'IBM Plex Mono',monospace;font-size:12.5px">claude/master-presentation-flow-f91mrl</code>.
+      Not merged &mdash; <code style="font-family:'IBM Plex Mono',monospace;font-size:12.5px">main</code>
+      is production and that is your word on the day.</span>
+  </div>
   <div class="drawn">
     <span>drawn in <b>strategy-management-platform-v3.22.html</b></span>
     <span>Raya Trade, H1 2026</span>
@@ -398,10 +413,14 @@
 </section>
 
 <footer>
-  <p><b>Nothing has been built.</b> Four decisions are settled; on a yes to the
-    two in &sect;04 this becomes one entry, one dialog, one opener that walks the
-    chosen subjects through the deck builder that already exists, and the two
-    changes to the strip. The mockup is kept at
+  <p><b>Built, and on its branch.</b> All six were answered, and what shipped is
+    one entry, one dialog, one opener that walks the chosen subjects through the
+    deck builder that already existed, and the two changes to the strip.
+    <b>31 assertions go red on the build before this one</b> and 34 green after;
+    the authoriser is 499/0 and the full sweep is clean. The reasoning is
+    &sect;261 in the decisions log, the specification is
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">specs/028-master-presentation/</span>,
+    and this page is kept at
     <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">design-mockups/master-presentation/2026-09-03_master-presentation.html</span>.</p>
 </footer>
 

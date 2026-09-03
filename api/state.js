@@ -152,6 +152,25 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "GET") {
+      /* §258: A LIGHT LOOK AT change_log, for the save-safety banner. While a
+         tab is open on a page the platform asks whether anybody ELSE landed a
+         change on that page since it loaded — never the whole graph (§98: a
+         poll is paid for in database round trips). Answered from the log the
+         save already writes (§42), the asker excluded, oldest first so the
+         client can remember the newest it has seen. The target is compared
+         exactly as the log stores it ("mobile", "fn:cf"). An unparseable
+         `since` falls through to the ordinary read rather than to a 500. */
+      let q = null;
+      try { q = new URL(req.url, "http://x").searchParams; } catch (e) {}
+      const since = q && q.get("since"), target = q && q.get("target");
+      if (since && target && !isNaN(Date.parse(since))) {
+        const r = await client.query(
+          "SELECT person_key AS by_key, person_name AS by, at FROM change_log " +
+          "WHERE target = $1 AND at > $2::timestamptz AND person_key <> $3 " +
+          "ORDER BY at ASC LIMIT 50", [target, since, person.key]);
+        return send(res, 200, { ok: true, changed: r.rows.map(function (x) {
+          return { by: x.by || x.by_key, at: x.at }; }) });
+      }
       const state = await readState(client);
       return send(res, 200, { ok: true, seeded: ready.seeded, person: person, state: state });
     }

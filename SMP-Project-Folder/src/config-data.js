@@ -499,6 +499,32 @@ var LOGO_MAX_BYTES = 220000; /* the data URI, carried in every save */
 
 function unitLogo(u){ return (u && u.logo) || ""; }
 
+/* ── THE GROUP HAS A MARK OF ITS OWN (§259) ───────────────────────────
+   Islam: *"where can I upload the raya trade mark so it can be used?"*
+   Nowhere, until now. §52.9 gave every UNIT a mark and stopped there, so
+   a unit that has none showed its name and a supporting function showed
+   nothing at all — and Raya Trade, which is the group, had no home.
+
+   ONE UPLOAD, ON BRANDING. It sits with the accent and the bar rather
+   than on Business units, because it is not a unit's fact: it is what
+   the organisation looks like, which is the question that page answers.
+
+   THE SAME RULES AS A UNIT'S, through the same `logoIntake()` — PNG
+   only, transparent, capped — because a second intake would be a second
+   answer to "what may be uploaded" (§53.5).
+
+   `org` carries an `extra` JSONB and lib/state-io.js files every key it
+   does not recognise there, so this needs NO migration, exactly as a
+   unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
+   a group that has set none, never the key. */
+function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
+
+/* WHICH MARK A SUBJECT'S DECK WEARS, asked in one place. A unit's own
+   if it has one, the group's otherwise — so a tenant that uploads one
+   mark has a marked deck everywhere, and a supporting function, which
+   can never have a mark of its own, has one for the first time. */
+function deckMark(u){ return unitLogo(u) || groupLogo(); }
+
 function logoIntake(file){
   return new Promise(function(resolve, reject){
     if (!file || file.type !== "image/png") {
@@ -5705,6 +5731,12 @@ function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum
    empty the column for a plan whose timelines were never filled in. */
 function measureDue(m, share){
   if (!m || !m.target) return null;
+  /* §257: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
+     figure — picking Y/N keeps whatever number was there and stops counting
+     it — so the digits are in the string and `parseFloat` would pull them
+     out, printing "due at 100 Y/N" beside a control offering Yes and No.
+     The unit decides, not whether a number can be found. */
+  if (SMPRules.isYesNo(m.target)) return null;
   /* §251: THE COUNT AND THE SCORE ASK ONE FUNCTION. A target may now hold its
      unit before its number ("%"), so "is there a number in here" decides both
      whether the row is a counted gap and whether it can be scored at all —
@@ -5726,6 +5758,19 @@ function measureDue(m, share){
    stays a year-end judgement); everything else reads this. */
 function measureScore(m, share){
   if (!m) return null;
+  /* ── A YES OR A NO SCORES 100 OR 0 (§257) ──────────────────────────
+     BEFORE the arithmetic, and that ordering is the whole of it: a Y/N
+     target carries no number, so `measureDue` answers null and the row
+     would fall out of every score unscored. Islam chose 100/0 over "shown
+     but never scored", so it lands in the pillar's and the unit's averages
+     like any other row.
+
+     NOTHING SAID IS NOT A NO. An unanswered row scores null and leaves every
+     average, exactly as an empty number box does — reading silence as a
+     failure marks a unit down for a question nobody has been asked yet (§35,
+     §104.10). The share is not consulted: there is no partial yes to prorate
+     (§250 prorates a TARGET, and this row has no number to prorate). */
+  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
@@ -5774,7 +5819,15 @@ function outcomeOf(t){
      row comes to be counted as missing while quietly being scored (§53.5,
      §42). The test is unchanged; only its home moved. */
   if (!t || !t.outTarget) return null;
-  if (!SMPRules.targetHasNumber(t.outTarget)) return null;
+  /* §257: a Y/N outcome is a real target with no number in it, so it is
+     admitted here or the tactic goes on being read the old way and the
+     answer somebody gave is scored by nothing. `measureScore` takes it from
+     here — one arithmetic for every scored row, as §248 settled. And it is
+     what makes main's own `tacticAnswered` right for a yes/no row: an
+     outcome with no figure scores null, so the row is NOT answered, which
+     is Islam's "a dash is not an entry" falling out of a rule already
+     there rather than needing a second one. */
+  if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual };
 }

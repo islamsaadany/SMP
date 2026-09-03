@@ -58,6 +58,50 @@
          border:1px solid var(--line); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
+     A yes/no target carries no number, so the direction, the figure and the
+     compile rule beside it have nothing to act on. They stay DRAWN — a hole
+     among equal boxes reads as a control that failed to render (§248) — and
+     the `disabled` attribute is what actually stops them, so this rule only
+     has to make that visible. The ground is the platform's own inert
+     surface; no new token, and nothing that could be mistaken for an alarm
+     (§168: outstanding is not broken, and this is neither). */
+  .fld.off { background:var(--surface-2); color:var(--ink-3);
+             border-color:var(--line); cursor:not-allowed; }
+  /* The reporting page's yes/no picker. It sits where a number box sits, so
+     it takes that box's width rather than a select's natural one — a control
+     that jumps a column wider on one row makes the column impossible to run
+     an eye down (§88's argument, one table over). */
+  /* Islam, from the running page: *"the yes or no is smaller in size than the
+     other reporting input cells."* It was — `.entry .field` is 78px because a
+     number leaves room for the unit beside it, and this control has none, so
+     it rendered 26px short in a column an eye runs down. */
+  /* THE BOX ITSELF, because `input.field` above is ELEMENT-SCOPED and a
+     <select> receives none of it — no padding, no size, no ground. That is
+     what "small input space" was: measured, the picker stood 19px tall
+     beside a number entry's 34px, which is a far louder difference than the
+     width I first went after. Every box property is mirrored here rather
+     than the input rule being widened to `.field`, which would reach the
+     note fields and the plan's own boxes too. */
+  select.field.ynfield { font-family:var(--sans); text-align:left;
+    font-size:13px; padding:6px 10px; background:var(--surface);
+    color:var(--ink);
+    /* AND THE HEIGHT IS STATED, NOT INFERRED. Matching the padding still
+       left it 3px short, because a <select> lays a shorter line box than a
+       13px mono input and — measured — does not take `line-height` for its
+       own box at all: the declaration computed to `normal`. So the height
+       is a named property of a reporting box, exactly as the width is, and
+       both controls read the same token instead of arriving at the same
+       number by two different routes (§53.5). Asserted as EQUAL HEIGHT in
+       checks/yn-target.py §9, so a later change to the box moves both or
+       goes red. */
+    height:var(--rep-h); }
+  /* §251.6: THE SAME WIDTH AS A NUMBER BOX, which is `--rep-w`. §251.4 set
+     this to the width of an entry carrying a WIDE unit chip ("M EGP"), and
+     the rows beside it in a real plan carry "%" — so it came out too big.
+     A `%` entry is 78px of field plus its chip, which comes to exactly the
+     width a bare number box already has, so one token answers both. */
+  .entry .field.ynfield { width:var(--rep-w); }
   .big-field { font-family:var(--serif); font-size:15px; }
   .swot .fld { font-size:13px; }
   td.horizon { color:var(--ink-3); }
@@ -798,7 +842,14 @@
     overflow:hidden;flex:1;min-width:120px;max-width:260px}
   .repbar i{display:block;height:100%;background:var(--good)}
   .repbar.part i{background:var(--attn)}
-  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:104px;
+  /* §251.2: THE REPORTING BOX'S WIDTH IS NAMED ONCE. A number entry is this
+     wide; inside `.entry` it gives 26px back to the unit suffix beside it, so
+     the two shapes come out level in the column. The Y/N picker carries no
+     suffix and takes the whole box — read off the same token rather than a
+     second 104 somebody has to remember to keep in step (§122.5: a guessed
+     constant goes stale silently). */
+  :root{--rep-w:104px; --rep-h:32px}
+  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);height:var(--rep-h);
     border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
     color:var(--ink)}
   input.field.filled{border-color:var(--good);background:var(--good-bg)}
@@ -1763,6 +1814,31 @@
    together as a single block, which is what Islam saw. The Plan splits them
    into columns instead, so nothing there needs this. */
 .tacname { font-weight:650; display:block; }
+
+/* ── AND THE REPORTED NOTE SAYS SO (§255) ──────────────────────────────────
+   The comment above got as far as "two greys at one weight run together as a
+   single block" and answered it for the NAME alone. Bolding the name tells
+   you where the row starts; it says nothing about which of the two greys
+   BELOW it was written this cycle. This is that second half.
+
+   A RULE, NOT A SECOND SIZE OR COLOUR. Making the note smaller or paler
+   would rank it under the plan's description, and it is the newer and more
+   urgent of the two — so it keeps `.why`'s size and ink and is set apart
+   sideways instead, which costs no line and no width the row did not have.
+
+   `--line`, never the accent (§41's budget: this page spends its gold on
+   Report and the scoring colours), and the key carries NO opacity — `.85`
+   on `--ink-3` measures about 4.4:1 at 10px, which is §38.5's trap. */
+  td .repnote {
+    display:block; margin-top:6px; padding-left:10px;
+    border-left:2px solid var(--line);
+    font-size:12px; color:var(--ink-3);
+  }
+  td .repnote .repkey {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-3); margin-right:6px;
+    white-space:nowrap;
+  }
 
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should

@@ -1846,6 +1846,17 @@
   .umarkimg { display:block; max-width:190px; max-height:34px; width:auto; height:auto; }
   .umarkpick { cursor:pointer; }
   .logonote { color:var(--bad); margin:10px 0 0; }
+  /* The GROUP's mark (§259) — one row, not a table. The preview is allowed
+     to be bigger than a unit's: there is one of them and nothing beside it
+     to line up with, and this is the mark that stands in for every deck
+     that has none. */
+  .gmarkrow { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+  .gmarkrow .umarkbox { padding:10px 14px; }
+  .gmarkrow .umarkimg { max-width:280px; max-height:52px; }
+  /* Side by side, not stacked. `.rowacts` is a column in the units table,
+     which is right in a 22% cell and wrong on a row with the width of the
+     page. */
+  .gmarkrow .rowacts { flex-direction:row; gap:18px; }
 
   /* ══ THE EMAIL PREVIEW (§72) ═══════════════════════════════════════
      The host for a shadow root, not a box with rules of its own — the email's

@@ -1,4 +1,4 @@
-/* THE BLANK LINES ALREADY IN A TENANT'S PLAN (§255) — the server half.
+/* THE BLANK LINES ALREADY IN A TENANT'S PLAN (§260) — the server half.
    ═══════════════════════════════════════════════════════════════════════
 
    Islam, from a client's plan with the pen open: a tactic's name box 643px

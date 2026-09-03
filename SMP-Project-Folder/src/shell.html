@@ -210,6 +210,7 @@
 <script src="CHAT"></script>
 <script src="TOUR"></script>
 <script src="WELCOME"></script>
+<script src="SAFETY"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -3048,6 +3049,28 @@
         paint();
       });
     });
+    /* The GROUP's mark (§259), on Setup › Branding. The same intake, the
+       same page-level refusal and the same delete-don't-blank as a unit's
+       directly above — a second answer to "what may be uploaded" is how the
+       two would come to disagree (§53.5). */
+    document.querySelectorAll("input[data-glogo]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var f = inp.files && inp.files[0];
+        inp.value = "";
+        if (!f) return;
+        LOGO_NOTE = "";
+        logoIntake(f).then(function(uri){
+          GROUP.logo = uri; LOGO_NOTE = ""; paint();
+        }, function(err){
+          LOGO_NOTE = GROUP.org + ": " + err.message; paint();
+        });
+      });
+    });
+    document.querySelectorAll("[data-glogoclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        delete GROUP.logo; LOGO_NOTE = ""; paint();
+      });
+    });
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
@@ -3903,7 +3926,7 @@
            the rest — silently, which is the shape §96 exists to stop. Asked of
            the element rather than of the setter: `multiple` is undefined on an
            input and on a textarea, so every other field is untouched. */
-        /* AND A ONE-LINE BOX STORES ONE LINE (§255). §229 stopped Enter from
+        /* AND A ONE-LINE BOX STORES ONE LINE (§260). §229 stopped Enter from
            putting a break in here; nothing stopped a PASTE, and a paste of
            four lines was measured storing them verbatim — after which the box
            is as tall as what was pasted and every other surface goes on
@@ -3936,7 +3959,7 @@
          `input` where a repaint would destroy the field being typed into
          (§35). Height is cleared first, or the box can only ever grow. */
       if (el.tagName === "TEXTAREA") {
-        /* §255: through `fitGrow`, the one sizer the paint also uses — the
+        /* §260: through `fitGrow`, the one sizer the paint also uses — the
            three lines were written twice and had to stay in step by hand. */
         var fit = function(){ fitGrow(el); };
         el.addEventListener("input", fit);

@@ -23,6 +23,45 @@ function dBand(v){ return band(v); }
    `where` is "after" unless it says otherwise. The Thank-you slide is the one
    that says otherwise: "the end" means the last thing anybody looks at, and
    that is not after the thanks. */
+/* ── A SECTION DIVIDER WEARS THE TENANT'S OWN BLUE (§259.1) ───────────
+   Islam: *"let's make the separators blue background like the client brand
+   colors"*, naming four sections — the foundation, the SWOT that already had
+   a divider, the strategic pillars, and a final overall performance before
+   the closing readings.
+
+   `--panel` IS THE BLUE, AND IT IS NOT A CHOICE OF MINE. It is the token
+   Setup › Branding's *Navigation bar* control sets, so a divider wears
+   whatever blue the tenant picked for their own bar and changes the day they
+   change it (§41.10: a surface on `--panel` wears the tenant's brand). No new
+   token, no literal (§25).
+
+   THE THREE INKS ALREADY EXISTED for exactly this ground, because §38.5 says
+   a surface with its own background needs its own ink: `--panel-ink` for the
+   title, `--panel-quiet` for the sub-line and labels, `--panel-accent` for the
+   rule and the SECTION key. Measured on the shipped blue: 12.77 / 7.24 /
+   7.66:1.
+
+   NO FOOTER MARK ON A DIVIDER, at Islam's word (*"remove the logo footer from
+   the blue pages"*), and it takes a real problem with it: the white plate that
+   makes a navy lockup readable on a dark slide is switched on by the PAGE
+   being dark (§52), which a blue divider on a light page is not — so the mark
+   would have vanished into its own ground. `deckFootMarks()` skips `.d-sect`,
+   which is one test rather than an unconditional plate and a white rectangle
+   in the corner of every divider. */
+function sectSlide(key, label, title, sub, cells){
+  return '<section class="dslide d-cover d-sect"' + anch(key, label) + '>' +
+    '<span class="seclab">Section</span>' +
+    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">' + esc(sub) + '</p>' +
+    (cells && cells.length
+      ? '<div class="secgrid c' + cells.length + '">' + cells.map(function(c){
+          return '<div class="seccell"><b>' + esc(c[0]) + '</b><span>' +
+            esc(c[1]) + '</span></div>';
+        }).join("") + '</div>'
+      : '') +
+    '</section>';
+}
+
 function anch(key, label, where){
   return ' data-anchor="' + esc(key) + '" data-anchor-label="' + esc(label) + '"' +
     (where ? ' data-anchor-where="' + esc(where) + '"' : '');
@@ -117,8 +156,8 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
-    (unitLogo(u)
-        ? '<img class="dcovermark" src="' + esc(unitLogo(u)) + '" alt="' + esc(u.name) + '">'
+    (deckMark(u)
+        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
@@ -159,15 +198,35 @@ function deckSlides(u){
      asserted, because a unit authors both. */
   var fnAim = !!u.fnKey;
   var aimNear = fnAim || SHOW_KO_THIS_YEAR;
+  /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
+     so the this year column to come after the obcejtives."* The eye meets the
+     number being worked towards this cycle before the horizon it heads for —
+     and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
+     shifts and the slide still renders perfectly (§243's own note). */
   var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-      (fnAim ? '' : '<td class="num big3">' +
-        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') +
       (aimNear
         ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
-        : '') + '</tr>';
+        : '') +
+      (fnAim ? '' : '<td class="num big3">' +
+        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') + '</tr>';
   }).join("");
+  /* THE DIVIDER IS DRAWN ONLY IF THE SECTION IS (§253). It opens the aim
+     slide and the objectives reading, so its test is the aim slide's own —
+     a divider standing over nothing is the blank page that section removed,
+     with a heading on it.
+
+     THE HORIZON CELL IS A UNIT'S. A supporting function's objectives carry a
+     weight and no 3-year target (§243), so on a function the divider names
+     one thing rather than printing a horizon that appears nowhere after it. */
+  var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
+  if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
+  if (aimRows || !fnAim)
+    S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
+      "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
+      foundCells));
+
   if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
     (fnAim ? '' :
@@ -180,8 +239,8 @@ function deckSlides(u){
       ? '<div class="aimbottom">' +
           (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
           '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
           (aimNear ? '<th class="num">This year</th>' : '') +
+          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
           '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
         '</div>'
       : '') +
@@ -300,14 +359,19 @@ function deckSlides(u){
   if (!u.fnKey) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
-    S.push('<section class="dslide d-cover"' + anch("swothead", "After the SWOT title page") +
-      '><span class="seclab">Section</span>' +
-      '<h1 class="cover">SWOT</h1><div class="coverrule"></div>' +
-      '<p class="coversub">Where this unit is strong, exposed, and what the market is offering it.</p>' +
-      '<div class="secgrid">' + sw.map(function(x){
-        return '<div class="seccell t-' + x[2] + '"><b>' + (u.swot[x[0]] || []).length + '</b>' +
-          '<span>' + x[1] + '</span></div>';
-      }).join("") + '</div></section>');
+    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
+       measurement rather than taste. On the blue the four scoring colours
+       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
+       Opportunities, which was drawn in `--panel` itself and would be
+       invisible against its own ground. Keeping them would mean inventing
+       four colours for one slide; the words under the counts already say
+       which is which, and the four category slides that follow keep their
+       own hues untouched. `.seccell.t-*` had no other user and is deleted
+       with them (§24). It is also what §254.5 settled for the pillar cards:
+       one accent across a row, never one per card (§41's budget). */
+    S.push(sectSlide("swothead", "After the SWOT title page", "SWOT",
+      "Where this unit is strong, exposed, and what the market is offering it.",
+      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
         return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
@@ -347,10 +411,25 @@ function deckSlides(u){
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
       (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') + '</div>';
   }).join("");
+  /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
+     B, chosen from two drawn in the real deck: *"the pillars page stay the
+     same white background as is just the divider with the strategic pillars
+     title."* The cost he took with it is one slide per deck; what it buys is
+     that all four sections are announced the same way, and that the roll-call
+     goes on reading as the content slide it is. */
+  if (u.items.length)
+    S.push(sectSlide("spillars", "After the Strategic pillars divider",
+      "Strategic " + L("pillar","bu").toLowerCase(),
+      "The " + u.items.length + " " + L("pillar","bu").toLowerCase() +
+        " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
+
   if (u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu").toLowerCase() + " names") +
     '><h2>' + L("pillar","bu") + '</h2>' +
-    '<div class="pcards" style="--n:' + u.items.length + '">' + pNames + '</div></section>');
+    '<div class="pcards" style="--n:' + u.items.length +
+      ';--c:' + pillarCols(u.items.length) +
+      ';--r:' + Math.ceil(u.items.length / pillarCols(u.items.length)) + '">' +
+    pNames + '</div></section>');
 
   /* The score table, built here and pushed at the END (§254.4). */
   var pRows = u.items.map(function(p, i){
@@ -386,8 +465,6 @@ function deckSlides(u){
         '<div><span class="dlab">Key measures</span><b class="' + dBand(pillarPerf(p)) + '">' +
           dPct(pillarPerf(p)) + '</b></div>' +
         '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
-        '<div><span class="dlab">Delivered / planned</span><b class="plain">' +
-          dPct(pillarExec(p)) + ' / ' + dPct(pillarPlan(p)) + '</b></div>' +
       '</div></section>');
 
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
@@ -455,7 +532,7 @@ function deckSlides(u){
           '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
       /* What this row is measured against RIGHT NOW: an outcome answers with
          its own target, prorated where it compiles by Sum; everything else
-         with the share of its plan that is due (\u00a7239). One function, so the
+         with the share of its plan that is due (§239). One function, so the
          slide and the page cannot differ about it. */
       var bench = tacticBenchmark(t);
       if (!tacticAnswered(t))
@@ -520,6 +597,18 @@ function deckSlides(u){
      sits against *"where the units stands to be the last slide"*: both cannot
      be true at once, and this is the one he answered most recently and most
      specifically. Swapping the two is one line if he wants it back. */
+  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§259.1), and it carries
+     NO NUMBERS — Islam's B, from two drawn in the real deck. A prints the
+     three headline readings two slides before the slide whose whole job is
+     those three readings, and prints them without their bands or the change
+     on last cycle: the room reads them once flat and once properly and
+     cannot tell which is the real one (§87's twins, in figures). The stand
+     slide always draws, so there is always something behind this. */
+  S.push(sectSlide("sperf", "After the Overall performance divider",
+    "Overall performance",
+    "Where the " + L("pillar","bu").toLowerCase() + " stand, where " +
+      (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
+    null));
   if (u.items.length) S.push(pillarScoreSlide);
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
@@ -532,14 +621,51 @@ function deckSlides(u){
   return S.join("");
 }
 
+/* ── HOW MANY ACROSS (§254.12) ─────────────────────────────────────────
+   Islam, looking at five in a row: *"the 5 pillars beside each other are very
+   small can we arrange them in the slide to fill better?"*
+
+   ONE ROW USES HALF A SLIDE. Five cards across a 1600px stage are 264px wide
+   and the name lands at 27.6px, with the whole lower half of the slide empty —
+   the layout was spending width it did not have and leaving height it did.
+
+   AND HIS OWN FIRST INSTRUCTION READS DIFFERENTLY NOW: *"4 can form a box"* is
+   two by two, which is what he meant and what a square arrangement of four
+   gives. Up to three stay in a row, because two rows for three is a shape
+   nobody would draw on purpose; above that it is the square-ish grid
+   `ceil(sqrt(n))` gives — 4 as 2x2, 5 and 6 as three across, 8 as three across
+   in three rows, ten as four.
+
+   A RAGGED LAST ROW IS CENTRED, which is why the cards lay out with flex-wrap
+   rather than a grid: five in three columns leaves two on the second row, and
+   a grid would push them left. */
+function pillarCols(n){
+  return n <= 3 ? Math.max(1, n) : Math.ceil(Math.sqrt(n));
+}
+
 function deckPillarHead(u, p, pi, which){
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
     esc(p.name) + '<span class="dwhich">' + which + '</span></h2>' +
+    /* ── TWO NUMBERS, NOT FOUR (§254.10) ──────────────────────────────
+       Islam: *"remove the deliverd /planned from the slides maintain just the
+       2 numbers of measurs and execution"*, and of the reading put back to
+       him, *"yes drop for both keep the 2 measures only across."*
+
+       DELIVERED AND PLANNED APPEARED IN TWO PLACES, SPELLED DIFFERENTLY, which
+       is why the instruction was read back before it was obeyed: the pillar's
+       title slide carried Key measures · Execution · Delivered / planned, so
+       dropping the third leaves the two he named — while THIS head carried
+       Measures · Delivered · Planned and had no Execution on it at all.
+       Dropping two here would have left one number, so Execution takes their
+       place and both surfaces end up saying the same two things.
+
+       The figures are unchanged: `pillarExec` and `pillarPlan` are still what
+       Execution is computed from, and are still explained in words on "Where
+       the unit stands", which he looked at and kept. */
     '<div class="dstats"><span><i>Measures</i><b class="' + dBand(pillarPerf(p)) + '">' +
       dPct(pillarPerf(p)) + '</b></span>' +
-    '<span><i>Delivered</i><b>' + dPct(pillarExec(p)) + '</b></span>' +
-    '<span><i>Planned</i><b>' + dPct(pillarPlan(p)) + '</b></span></div></div>';
+    '<span><i>Execution</i><b class="' + dBand(r) + '">' + dPct(r) + '</b></span></div></div>';
 }
 
 /* ── A supporting function's review (§15.12) ──────────────────────────────
@@ -552,7 +678,9 @@ function deckSlidesFn(fk){
   var S = [];
 
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
-    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
+    (groupLogo()
+        ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Capability review &middot; ' + esc(REVIEW.name) +
     ' &middot; ' + caps.length + (caps.length === 1 ? ' capability' : ' capabilities') + '</p></section>');
@@ -759,6 +887,41 @@ function insertPictureSlides(deck, target, blank){
   });
 }
 
+/* ── THE SLIDES THE OFFICE DOES NOT PRESENT (§256) ────────────────────────
+   The stored subject behind a deck target. Deliberately NOT `unitLike()`:
+   that returns a fresh reading view for a pillars function (§61's frozen
+   empties), and what is wanted here is the object the office's press writes
+   to. One resolver, asked by the projector, the editor and the writer, so
+   the three cannot disagree about whose list they are reading (§53.5). */
+function deckSubject(target){
+  if (!target) return null;
+  return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
+}
+
+/* AFTER THE PICTURES ARE PLACED, AND BEFORE THE FIT PASS. Both halves of
+   that order are load-bearing.
+
+   After, because a picture anchored to a hidden slide is still the
+   custodian's evidence: hiding the neighbour it was placed against must not
+   swallow it. `insertPictureSlides()` has already run, so the picture is in
+   the deck on its own account and only the anchor slide leaves.
+
+   Before, because `deckFitPass()` CLONES a long table to continue it and the
+   clone carries its parent's anchor (§236.3). Removing the parent first means
+   no continuation is ever made, so a hidden table goes whole rather than
+   leaving its second half standing — which is what removing afterwards would
+   have to remember to do.
+
+   Picture slides carry no `data-anchor` at all, so they cannot be reached by
+   this pass. Removing one is `Remove slide`, which already exists. */
+function deckHidePass(deck, target){
+  var hid = SMPRules.hiddenSlides(deckSubject(target));
+  if (!hid.length) return;
+  [].forEach.call(deck.querySelectorAll(".dslide[data-anchor]"), function(s){
+    if (hid.indexOf(s.dataset.anchor) >= 0) s.remove();
+  });
+}
+
 /* ── The unit's own mark on the deck (§52.9) ──────────────────────────
    Large on the cover in place of the group's name, small in the footer of
    every other slide. A unit with no mark keeps the eyebrow and gets no
@@ -770,7 +933,7 @@ function insertPictureSlides(deck, target, blank){
    and BEFORE deckFitPass(), so a slide it splits carries the footer into
    every continuation. */
 function deckFootMarks(deck, u){
-  var src = unitLogo(u);
+  var src = deckMark(u);
   if (!src) return;
   [].forEach.call(deck.querySelectorAll(".dslide"), function(s){
     s.classList.add("hasmark");
@@ -780,6 +943,12 @@ function deckFootMarks(deck, u){
        too, and so does Thank you. Asking whether the mark is already on
        the slide cannot make that mistake. */
     if (s.querySelector(".dcovermark")) return;
+    /* AND NOT ON A SECTION DIVIDER (§259.1). Islam: *"remove the logo footer
+       from the blue pages."* It also removes a fault rather than dressing
+       one: the plate that keeps a navy lockup readable on a dark slide is
+       switched on by the PAGE being dark, which a blue divider on a light
+       page is not — so the mark would have sat navy on navy. */
+    if (s.classList.contains("d-sect")) return;
     s.insertAdjacentHTML("beforeend",
       '<div class="dfoot"><img class="dfootmark" src="' + esc(src) + '" alt=""></div>');
   });
@@ -789,9 +958,12 @@ function openDeckWith(titleHtml, slides, target){
   var root = document.getElementById("deckroot");
   root.querySelector(".deck").innerHTML = slides;
   if (target) insertPictureSlides(root.querySelector(".deck"), target);
-  if (target && target.indexOf("fn:") !== 0 && UNITS[target]) {
-    deckFootMarks(root.querySelector(".deck"), UNITS[target]);
-  }
+  if (target) deckHidePass(root.querySelector(".deck"), target);
+  /* EVERY deck, not only a unit's (§259). `deckMark()` answers with the
+     subject's own mark or the group's, and a supporting function is not in
+     UNITS — so passing null here is not a miss, it is the case that used to
+     go unmarked and now wears the group's. */
+  deckFootMarks(root.querySelector(".deck"), UNITS[target] || null);
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -813,6 +985,20 @@ function openDeckFn(fk){
   openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
     deckHtmlFor("fn:" + fk), "fn:" + fk);
 }
+
+/* §256.2 WAS HERE, AND IT IS §253.3's NOW. Two sessions found the same fault
+   on the same day and fixed it independently: Manage slides asked
+   `kind === "fn"` while the Present button asked the FORMAT, so a pillars
+   function's editor assembled a deck nobody would ever project (measured on
+   the demo: the editor 2 slides, the projector 15).
+
+   `deckHtmlFor()` at the top of this file is the survivor, and it is the
+   better of the two — it also routes `deckAnchors()`, which this one did not,
+   so the anchors offered to a picture come from the same deck as well. What
+   stood here was a second declaration of that same function, and git merged
+   the two with NO CONFLICT: the later one wins by hoisting, so the product
+   would have run this copy and main's would have been dead (§146.2, §56.7).
+   Removed rather than reconciled, because one question may have one answer. */
 function closeDeck(){
   var root = document.getElementById("deckroot");
   root.classList.remove("on");

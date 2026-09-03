@@ -4688,6 +4688,17 @@ python3 checks/access-header.py # the matrix header: two lines at four widths, c
                                 # offered to a role that could never hold it (§174)
 python3 checks/stay-put.py      # a refresh stays where you are, and a NEW session still
                                 # opens where §94.6 says (§173)
+python3 checks/history-page.py  # History (§261): the page in the rail for the office over
+                                # HTTP and not over file://, the ask recorded with its
+                                # filters, one line per changed FIELD with before and
+                                # after, the search in place with zero repaints, Restore
+                                # greyed with its reason or opening a confirmation, Put it
+                                # back read off the DATA and the POST that carried it, the
+                                # unit's line and door, a custodian's line — 25 red on the
+                                # build before, and every press degrades (§215)
+node scripts/test-history-read.js # ...and the server half on a real Postgres: real saves
+                                # by three people, every filter, the cap, a custodian's own
+                                # place allowed and another refused, no session refused
 python3 checks/safety-banners.py # the page warns BEFORE a save can be lost (§258):
                                 # the tab asks the server about its own page since it
                                 # loaded (the stub records the ask), a landing by
@@ -4874,7 +4885,31 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: History &mdash; who changed
+what, and a way back** (spec 028). Islam: *"how about a history saving and
+recovery feature to track the changes per user and per unit and function to
+ensure nothing is lost?"* &mdash; agreed from a mockup drawn out of REAL log
+rows, with his three questions answered first. **Nothing new is written**:
+`change_log` has carried who, when, where, row, field, `from` AND `to` since
+&sect;42 &mdash; the first answer given said only the old value was kept, and
+producing rows for the mockup through the real save path corrected it. **The
+page is the office's by rule** (`c_history`, &sect;97's shape), under Running
+the cycle: one line per changed field, filters that ask the server, a search
+that filters in place and never repaints (&sect;35), every cell one line
+(&sect;88), the table fitting the pane (&sect;158). **Restore is an ordinary
+change, never a rollback**: the old value goes back into the row by id
+(&sect;48) and `paint()` saves it &mdash; authorised, merged, logged, and
+itself restorable; what cannot be put back says why on a greyed control
+(&sect;61). **The read is filtered** (`?log=1`, person/place/kind/window, cap
+500, one indexed query, never the graph &mdash; &sect;98); everybody else may
+read ONE place they hold a role at, off the stored register. **A line and a
+door on the unit's own band** for the people who hold it. **The global is
+`TRAIL`**, because `HISTORY` is the platform's closed cycles and hydration
+silently replaced the module (&sect;56.7). `checks/history-page.py` **25
+red** on `main`'s build; `test-history-read.js` on a real Postgres; 491/0;
+KB corpus in step; full sweep ERRORS none. **On the branch, not merged.***
+
+*Earlier: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

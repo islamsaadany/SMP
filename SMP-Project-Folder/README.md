@@ -108,6 +108,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/pillar-project-remove/2026-09-01_remove-controls.html` | Removing a whole pillar or project: the worded quiet-red control in the pinned editing head beside Done, and the confirmation naming what the thing holds, what has been reported this cycle, and the archive-first way back. Signed off by Islam 2026-09-01. **Built** (&sect;232) |
 | `../../design-mockups/hide-from-presentation/2026-09-01_hide-element.html` | Hiding an element from the presentation: a per-row eye in the plan pen &mdash; the row kept, left out of the deck, and NOT counted in any score (Islam's decision); rows only, never a pillar, capability or project; the workbook carries the mark. Signed off by Islam 2026-09-01. **Built** (&sect;233) |
 | `../../design-mockups/data-loss-warnings/2026-09-02_save-safety-banners.html` | The two save-safety cautions in the refusal's own slot: *a newer version is ready* (Reload) and *somebody else updated this page* (Reload &amp; keep mine / Dismiss). Islam: *"BOTH"*. **Built on the branch** (&sect;258) |
+| `../../design-mockups/history/2026-09-03_history-page.html` | Setup › History: who changed what, where, from what to what, with Restore &mdash; drawn from real change-log rows produced through the real save path. Islam: *"ok agreed let's build"*, with his three questions (office-only, restore vs rollback, filtered read) answered first. **Built on the branch** (&sect;261, spec 028) |
 
 ### Drawn, awaiting a decision
 

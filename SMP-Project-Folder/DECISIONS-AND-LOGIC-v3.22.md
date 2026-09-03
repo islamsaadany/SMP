@@ -29740,3 +29740,96 @@ green. `refusal-keeps-work.py` is red on `main`'s own build for the
 stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
+## §261 — HISTORY: WHO CHANGED WHAT, AND A WAY BACK (2026-09-03, spec 028)
+
+Islam, after the reporting round in which people lost work: *"how about a
+history saving and recovery feature to track the changes per user and per unit
+and function to ensure nothing is lost?"* Then, on the mockup drawn from real
+log rows (`design-mockups/history/2026-09-03_history-page.html`), three
+questions and *"ok agreed let's build"*.
+
+**NOTHING NEW IS WRITTEN, AND THE FIRST ANSWER GIVEN WAS WRONG.** I told him
+the log kept only the old value and that storing the new one was a step to
+build. Driving the real save path as five demo people to produce rows for the
+mockup showed `change_log` has carried BOTH since §42 — who, when, which
+place, which row, which field, `from` AND `to` — so the correction was made in
+the same message as the mockup. *A claim about what a table holds is worth what
+reading a row of it is worth.* The feature is therefore a SCREEN over the log
+and a WAY BACK, and no migration.
+
+**THE PAGE IS THE OFFICE'S BY RULE (his 1)**, gated like the Platform Inbox
+(`c_history` is `area:"always"` with `inOffice()` on the def and
+`isOfficeRole` on the server, §97's shape): who reads every person's changes is
+not a tick somebody could set on a bad afternoon. It sits under *Running the
+cycle* beside the Inbox. **One line per changed FIELD**, never per envelope: an
+entry carrying two moved fields is two lines, and a submission is one line
+saying so. **The filters ask the server; the search does not** (§35): person,
+place, kind and window are a new ask each, the search hides rows in place and
+never repaints. Every cell is one line with the whole value on the hover
+(§88), the table is `table-layout:fixed` with a colgroup so it FITS the pane
+(§158) — the first build overflowed the pane and cut Restore off the right
+edge, found by shooting the page rather than reading it — and the day picker
+carries six windows so it wears the platform's own searchable dropdown like
+its three neighbours (§45.5's threshold is six).
+
+**RESTORE IS AN ORDINARY CHANGE, NEVER A ROLLBACK (his 2, and he asked the
+difference).** It locates the row by target and id — never by position (§48)
+— through the platform's own `findById` for a unit or a pillars function and a
+walk of the capabilities for a projects function, puts the OLD value into the
+field (or deletes the key when the field was absent before, §50.6), and calls
+`paint()`, which ends in the autosave: so it is authorised (§42), merged with
+everybody else's work (§210) and logged like any change — and a restore can
+itself be put back. A rollback would copy an earlier database over the current
+one and silently destroy what everybody did since. **A row that cannot be put
+back says why on a greyed control** (§61): a submission is reopened from its
+Reporting tab, a reorder is dragged back on the Plan, a setting is put back on
+its own page, and a row that was ADDED is removed from the plan. The
+confirmation names what goes back to what and who set the current value.
+
+**THE READ IS FILTERED, NEVER THE WHOLE LOG (his 3, and he asked the cost).**
+`GET /api/state?log=1` takes person, target, kind, a `from`/`to` window and a
+cap of 500, and answers from one indexed query on the log — never the graph
+(§98). The window is a pair of INSTANTS the browser works out from the reader's
+own day, so "today" is their today and the server keeps no notion of a date.
+**Everybody else may ask about ONE place they hold a role at**, read off the
+stored register and the world (`R.personRoles`, §42), or is refused — and the
+world holds no people, which the first build forgot and the Postgres test
+caught. The cost stated to him and true: a filter change fetches again, and the
+count is of what was fetched.
+
+**THE UNIT'S OWN LINE, AND A DOOR.** A unit's or function's pane band carries
+*"Last changed by X, today 05:16 · See history"* — one ask for one row per
+target, cached a minute, written into the band after paint (§35) — and the
+door opens the same table in the platform's own dialog scoped to that place,
+with no Where column because it is all one place. A custodian, who has no
+Setup, has the line and the door; the server's own gate is what lets them
+read it.
+
+**THE GLOBAL IS `TRAIL`, NOT `HISTORY`.** The first build was named `HISTORY`
+and every assertion about the rail failed for a reason no reading would find:
+`HISTORY` is the platform's own (the closed cycles, `config-data.js`),
+reassigned on every hydration, so the module was silently replaced the moment
+the server answered (§56.7 — a clean load and a collision in one global).
+
+**PROVED, AND PROVED ABLE TO FAIL.** `checks/history-page.py` over a stub
+whose rows were produced by the real save path: the rail over HTTP and not
+over `file://`, the ask recorded with its filters, seven lines from six
+entries, before-and-after in the row, the search in place with zero repaints,
+Restore greyed with its reason, the confirmation, Put it back read off the
+DATA and the POST that carried it, an absent field going back to absent, the
+unit's line and its door, the custodian's line, the table fitting the pane —
+**25 red** against `main`'s build, and its first two runs died rather than
+reported (§215), so every press and every pick degrades. `scripts/
+test-history-read.js` drives the real handler on a real Postgres 16: real
+saves by three people, every filter, the cap, the custodian's own place
+allowed and another refused, no session refused, the ordinary read untouched.
+`test-authorize` 491/0; `extract-kb --check` in step; full `qa.py` sweep
+ERRORS none. `setup-pages.py` is red 3 on `main`'s own build (the Business
+units table head), untouched by this.
+
+**RECORDED, NOT DONE.** The recipe says it: work that never reached the server
+leaves no line here — the banners (§258) stand in front of that. A restore of a
+SWOT line writes the whole line back; a reorder has no Restore. The band's
+line names the unit's last change while sitting on a pillar's band, which is
+where the pane's one band is; if it reads as the pillar's, it moves.
+

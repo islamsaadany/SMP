@@ -210,7 +210,6 @@
 <script src="CHAT"></script>
 <script src="TOUR"></script>
 <script src="WELCOME"></script>
-<script src="HISTORY"></script>
 <script src="SAFETY"></script>
 <script src="SYNC"></script>
 <script>
@@ -538,12 +537,6 @@
       { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
-      /* HISTORY (§261): who changed what, where, from what to what — and a
-         way back. The office's by rule, like the inbox above it; never drawn
-         where there is no server to hold a log. */
-      { k:"history",  ac:"c_history", grp:"cycle", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
-        when: function(){ return inOffice() && TRAIL.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
-        render:function(){ return TRAIL.renderPage(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
@@ -2351,7 +2344,6 @@
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
     if (typeof SAFETY !== "undefined") SAFETY.onPaint();
-    if (typeof TRAIL !== "undefined") TRAIL.onPaint();
     /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
        The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
        corners with the page's ground so nothing shows through them while it

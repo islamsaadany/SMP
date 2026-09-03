@@ -82,6 +82,48 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §261 — a target with a shape of its own (2026-09-03, branch `claude/seasonal-targets-monthly-proration-5clvu3`)
+
+Islam: *"targets proration is always flat acorss the year but some targets have
+seasonality so the proration is not valid so some targets needs a monthly plan
+input so the calculation becomes more accurate."*
+
+Aligned first, then drawn first: the mockup
+(`design-mockups/monthly-plan/2026-09-03_monthly-plan-entry.html`) was shot from
+the running plan pane and signed off before a source was touched. **The argument
+is one row of his own plan** — Accessory revenue, 300M EGP, 96M reported at
+June, reads 64% behind flat and 100% on plan against its own shape.
+
+**What was built.** Twelve numbers on a row, in the target's own unit, compiled
+by the row's own compile rule (Sum adds the elapsed months, Average takes their
+mean, Latest takes the month being stood in). It answers at `measureDue()`, the
+one seam every score, YTD column and deck benchmark already goes through, so no
+surface had to be taught anything. On all four surfaces he asked for: a pillar's
+key measures, a unit's and the group's key objectives, a supporting function's,
+and a tactic's outcome.
+
+**His three decisions, taken before it was built.** (a) The monthly plan becomes
+the target once complete — the annual box shows the sum, read-only. (a′) His own
+correction: a typed 0 is a real month and a blank box is not. (b) All four
+surfaces. (c) Reporting unchanged — one YTD figure per cycle.
+
+**Verified.** `checks/monthly-plan.py` 47/47 and **36 red** on the shipped
+pre-§261 build; `test-authorize.js` 497/0 (six new, both directions);
+`test-graph-diff.js` 131/0 (five new); round trip, clean parity and two tabs
+green on a virgin Postgres 16, with the monthly plan written and read back on
+all three shapes and its nulls intact; full `qa.py` sweep ERRORS none; twelve
+neighbouring checks green.
+
+**Two faults found by driving it rather than reading it.** The drawer's boxes
+named the `plan` page for all four callers, so on Foundation they rendered as
+read-only spans that looked exactly like boxes (§96). And the check's own first
+falsification run died on a missing control and reported 9 failures where the
+build has 36 (§215).
+
+**On the branch, not merged.** Recorded, not done: the deck prints the seasonal
+benchmark with no word saying why it is not half the year, and a monthly plan is
+deliberately not a counted gap.
+
 ### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
 
 Islam, in one message: *"where can I upload the raya trade mark so it can be

@@ -467,13 +467,7 @@ function measureRows(ms, opts){
                   "Yes / No" invites reading it as part of the target. */
                '</td><td class="num">' +
                  (isYesNoRow(m) ? '<span class="nobody">\u2014</span>' : dirCell(m.dir)) +
-               /* §261: and one word saying the benchmark beside it is not
-                  half the year. It goes in the ANNUAL TARGET cell, whose
-                  meaning is what changed — under the row's name it would
-                  stack beneath a reporter's own note (§255). Drawn only where
-                  a monthly plan is actually in force, so a row without one is
-                  byte-identical to what it was. */
-               '</td><td class="num">' + tgtShown(m.target) + monthlyMark(m) +
+               '</td><td class="num">' + tgtShown(m.target) +
                '</td><td class="cc">' +
                  (isYesNoRow(m) ? '<span class="nobody">\u2014</span>' : compileCell(m.compile)) +
                '</td>';
@@ -3289,219 +3283,6 @@ function unitInherit(m){
   };
 }
 
-/* ── A TARGET WITH A SHAPE OF ITS OWN (§261) ──────────────────────────
-   Islam: *"targets proration is always flat across the year but some targets
-   have seasonality so the proration is not valid .. so some targets needs a
-   monthly plan input so the calculation becomes more accurate."*
-
-   The arithmetic is `SMPRules.monthlyDue()` and lives with the other rules
-   about a stored value; this is where the twelve get TYPED. Four surfaces
-   ask for it — a pillar's key measures, a unit's and the group's key
-   objectives, a supporting function's, and a tactic's outcome — so it is one
-   builder called four times rather than four tables each growing their own
-   idea of what a month is (§53.5, and Islam's "all four").
-
-   A DRAWER, NOT A PANEL, from the mockup Islam signed off: twelve boxes on a
-   full-width row under the measure, which is the shape `tr.dxband` already
-   uses (§99), so nothing is covered while it is open and the sum lands
-   directly under the target it replaces. Measured on the real table: the chip
-   costs the Target box nothing (303px before, 306px after — the column had
-   the slack) and the row 1px; the open drawer adds 147px to the one row being
-   worked on, and the twelve boxes wrap to two rows of six at 1280 and below
-   rather than pushing the table into a sideways scroll (§158).
-
-   THE DRAWER ROW CARRIES NO `data-oi`, and that is not a detail: it sits
-   inside a sortable tbody, and the "+ Add" row being counted in one of those
-   is what silently pushed `undefined` into a plan and took a page down in
-   §118. It is not draggable and it must not be countable. */
-var MONTHOPEN = null;
-/* WHERE CLEAR WRITES. Registered during the render that drew it and emptied
-   on every repaint beside `FIELDS` and `KOLISTS` (§96), because a button
-   carrying an index from the last paint acts on the paint before it. */
-var MONTHREG = [];
-function monthlyKey(row, fld){ return String(row && row.id) + "|" + fld; }
-/* WHAT THE RULES READ. A measure and a key objective ARE that shape already;
-   a tactic's outcome is five fields on the tactic (§248). `outcomeOf` does
-   this same mapping and is deliberately NOT asked here: it refuses an outcome
-   whose target holds no number, which is exactly the state a row is in while
-   its twelve months are being typed and its annual target does not exist
-   yet. */
-function monthlyShape(row, fld){
-  return fld === "outMonthly"
-    ? { compile: row.outCompile, monthly: row.outMonthly }
-    : row;
-}
-/* THE WAY IN, on every row that could have one — a plan with no monthly
-   shape must still be able to grow its first (§61). Lit once anything has
-   been typed, so a plan somebody is halfway through is findable again. */
-function monthlyChip(row, fld){
-  var n = SMPRules.monthlySet(monthlyShape(row, fld)),
-      k = monthlyKey(row, fld), open = MONTHOPEN === k;
-  return '<button class="mpopen' + (n ? ' on' : '') + '" data-mpopen="' + esc(k) +
-    '" aria-expanded="' + (open ? 'true' : 'false') + '" title="' +
-    (n ? esc(n + ' of 12 months set') : 'Give this target a shape month by month') +
-    '">Monthly' + (open ? ' ▾' : '') + '</button>';
-}
-/* The sentence under the boxes. Its own builder because it is rewritten IN
-   PLACE as somebody types — a repaint under a typing hand destroys the box
-   being typed into (§71.2), which is why §145's counts refresh this way too. */
-function monthlyMsg(row, fld, tfld){
-  var sh = monthlyShape(row, fld), n = SMPRules.monthlySet(sh);
-  if (n < 12)
-    return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
-      '<span>Until all twelve are filled, this target is still spread evenly ' +
-      'across the year.</span>';
-  var c = SMPRules.monthlyCompile(sh);
-  if (!c)
-    return '<span class="part">Twelve months set — not in force yet</span>' +
-      '<span>This row has no compile rule, so the platform cannot tell what ' +
-      'the twelve add up to. Set Sum, Latest or Average.</span>';
-  var ann = SMPRules.monthlyAnnual(sh);
-  var word = c === "sum" ? "Adds up to" : c === "average" ? "Averages" : "Ends at";
-  return '<b>12 of 12 months set</b><span>' + word + ' <b>' +
-    esc(monthlyAnnualText(row, fld, tfld)) + '</b> — the annual target</span>';
-}
-/* The derived year, written the way the target is written — through the
-   platform's own joiner, so `300M EGP` keeps its spelling rather than coming
-   back as `300 M EGP` (§254.1). */
-function monthlyAnnualText(row, fld, tfld){
-  var ann = SMPRules.monthlyAnnual(monthlyShape(row, fld));
-  if (ann == null) return "";
-  return targetFromPair(row[tfld], String(Math.round(ann * 100) / 100),
-                        unitOfTarget(row[tfld]));
-}
-/* TYPING A MONTH. Stored as a NUMBER where it is one and as what was typed
-   where it is not (§96.2) — a value the platform cannot read leaves the plan
-   out of force rather than being silently corrected. A month cleared is
-   stored as null, and the LAST one cleared deletes the key (§50.6): a row
-   that never had a monthly plan and one whose plan was cleared must be
-   byte-identical, or every save carries a change nobody made. */
-function monthlyWrite(row, fld, tfld, i, v){
-  var a = Array.isArray(row[fld]) ? row[fld].slice() : [];
-  while (a.length < 12) a.push(null);
-  a.length = 12;
-  var s = String(v == null ? "" : v).trim();
-  a[i] = !s ? null : (SMPRules.monthSet(s) ? Number(s.replace(/,/g, "")) : s);
-  var any = false;
-  for (var k = 0; k < 12; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
-  if (any) row[fld] = a; else delete row[fld];
-  /* THE ANNUAL TARGET IS DERIVED THE MOMENT THE TWELFTH LANDS, and written
-     into the target field itself rather than left to be worked out by every
-     reader. That is what makes the deck, the workbook, the archive and the
-     Focus board right without one of them being taught anything: they all
-     read `target`, and `target` is now the number the twelve months say
-     (Islam's (a), agreed before this was built). Nothing is destroyed that
-     cannot be got back — the twelve stay stored, and clearing one leaves the
-     last derived total as the authored target, which is the number the office
-     last agreed to rather than a hole. */
-  var ann = monthlyAnnualText(row, fld, tfld);
-  if (ann) {
-    row[tfld] = ann;
-    /* CORRECTING CONFIRMS (§145). Every other write to a target goes through
-       gapCell, whose office setter lifts a pending mark; the drawer is drawn
-       in the pen only, so the hand on it is always the office's — and a mark
-       left standing on a value the office has just derived would ask them to
-       confirm their own figure. */
-    gapLift(row, tfld);
-  }
-  monthlyRefresh(row, fld, tfld);
-}
-/* WHAT A LOCKED TARGET LOOKS LIKE, applied to the CELL rather than baked into
-   the input. The box is always the real bound field — never a drawn-and-dead
-   copy — because the twelfth month landing has to be able to lock it in place,
-   and swapping a bound input for an unbound one mid-session is how a box comes
-   to accept typing that goes nowhere (§96). Disabled, not merely dimmed
-   (§220). */
-function monthlyLock(td){
-  if (!td) return;
-  var i = td.querySelector("input.fld");
-  if (!i) return;
-  var on = td.getAttribute("data-mplock") === "1";
-  i.disabled = on;
-  if (on) i.classList.add("off"); else i.classList.remove("off");
-}
-function monthlyLocks(){
-  var l = document.querySelectorAll("td[data-mptgt]");
-  for (var i = 0; i < l.length; i++) monthlyLock(l[i]);
-}
-/* Everything a typed month changes, rewritten where it stands: the sentence,
-   the Clear button, and the target box the twelve now derive. */
-function monthlyRefresh(row, fld, tfld){
-  var k = monthlyKey(row, fld), sel = '[data-mpkey="' + k.replace(/"/g, '\\"') + '"]';
-  var msg = document.querySelector('.mpmsg' + sel);
-  if (msg) msg.innerHTML = monthlyMsg(row, fld, tfld);
-  var clr = document.querySelector('.mpbtn' + sel);
-  if (clr) clr.hidden = !SMPRules.monthlySet(monthlyShape(row, fld));
-  var td = document.querySelector('td[data-mptgt="' + k.replace(/"/g, '\\"') + '"]');
-  if (td) {
-    var inForce = SMPRules.monthlyInForce(monthlyShape(row, fld));
-    td.setAttribute("data-mplock", inForce ? "1" : "0");
-    var i = td.querySelector("input.fld");
-    if (i && inForce) i.value = td.getAttribute("data-mppart") === "1"
-      ? targetKeep(row[tfld] || "") : (row[tfld] == null ? "" : row[tfld]);
-    monthlyLock(td);
-  }
-}
-/* The cell attributes a target box needs to be lockable. Added by each of the
-   four tables to the `<td>` it already builds, so the box inside it goes on
-   being whatever that table draws (a gapCell, with its pending lifecycle
-   intact). */
-function monthlyTgtAttrs(row, fld, partOnly){
-  /* WHICH SHAPE THE BOX HOLDS. A measure's and an objective's target box holds
-     the WHOLE string ("300M EGP"); a tactic outcome's holds the value alone
-     with the unit in the picker beside it (§248). Writing the whole string
-     into the second would put the unit in the box AND in the picker, so the
-     cell says which it is rather than the refresh guessing. */
-  return ' data-mptgt="' + esc(monthlyKey(row, fld)) + '" data-mplock="' +
-    (SMPRules.monthlyInForce(monthlyShape(row, fld)) ? "1" : "0") + '"' +
-    (partOnly ? ' data-mppart="1"' : '');
-}
-/* THE DRAWER. `cols` is the table's own column count — a full-width row has
-   to be told, and guessing it with a large colspan would push every table it
-   is drawn in wider than its head. */
-/* THE PAGE IS PASSED IN, and this is not a detail: `inputOr` returns a plain
-   SPAN when the named page's pen is shut, so a drawer that assumed "plan"
-   drew twelve read-only labels on Foundation — twelve boxes that looked like
-   boxes and stored nothing (§96, found by driving it rather than by reading
-   it). The four tables sit on three different pages; each says which. */
-function monthlyDrawer(row, fld, tfld, cols, title, page){
-  var k = monthlyKey(row, fld), unit = unitOfTarget(row[tfld]),
-      a = Array.isArray(row[fld]) ? row[fld] : [], boxes = "";
-  for (var i = 0; i < 12; i++) {
-    boxes += '<label class="mpm"><span>' + SMPRules.MONTH_NAMES[i] + '</span>' +
-      inputOr(page || "plan", a[i] == null ? "" : String(a[i]), "mono",
-              (function(j){ return function(v){ monthlyWrite(row, fld, tfld, j, v); }; })(i)) +
-      '</label>';
-  }
-  return '<tr class="mprow"><td class="idx"></td><td colspan="' + Math.max(1, cols - 1) + '">' +
-    '<div class="mpwrap"><div class="mphead">Monthly plan' +
-    (title ? " — " + esc(title) : "") +
-    (unit ? '<em>in ' + esc(unit) + ', the target’s own unit</em>'
-          : '<em>in the target’s own unit</em>') +
-    '</div><div class="mpgrid">' + boxes + '</div>' +
-    '<div class="mpfoot"><span class="mpmsg" data-mpkey="' + esc(k) + '">' +
-    monthlyMsg(row, fld, tfld) + '</span>' +
-    '<button class="mpbtn" data-mpkey="' + esc(k) + '" data-mpclear="' +
-    (MONTHREG.push({ row: row, fld: fld, tfld: tfld }) - 1) + '"' +
-    (SMPRules.monthlySet(monthlyShape(row, fld)) ? "" : " hidden") +
-    '>Clear the monthly plan</button></div></div></td></tr>';
-}
-/* Drawn under the row only while its own chip is open. One at a time, because
-   the drawer is 147px and two of them push the row being compared off the
-   screen — and because the chip that opens it says which one is open. */
-function monthlyRowFor(row, fld, tfld, cols, title, page){
-  return MONTHOPEN === monthlyKey(row, fld)
-    ? monthlyDrawer(row, fld, tfld, cols, title, page) : "";
-}
-/* THE READING SIDE: one word under the annual target, wherever a monthly plan
-   is in force. It explains a benchmark that no longer follows the obvious
-   arithmetic — half a year's target at the half year — and it goes in the
-   cell whose meaning changed rather than under the row's name, where it would
-   stack under a reporter's own note (§255). */
-function monthlyMark(row){
-  return SMPRules.monthlyInForce(row) ? '<span class="subhd">by month</span>' : '';
-}
-
 /* Is this row judged by a yes or a no? Asked by every surface that decides
    whether to draw a number, so none of them decides it separately (§53.5).
    It reads main's own `targetUnitOf`, which already answers with a unit held
@@ -3768,15 +3549,9 @@ function koEdit(list, page, acKey, owner){
         '<td class="cc">' + (pg && yn ? offInput(targetKeep(m.target3y || ""))
           : gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
-        /* §261: THIS YEAR'S TARGET, and never the 3-year one. Twelve months
-           shape a YEAR; a three-year horizon has no months to be given, and
-           §251 already puts the unit in this year's target for the same
-           reason. */
-        '<td class="cc"' + (pg && !yn ? monthlyTgtAttrs(m, "monthly") : "") + '>' +
-          (pg && yn ? offInput(targetKeep(m.target || ""))
+        '<td class="cc">' + (pg && yn ? offInput(targetKeep(m.target || ""))
           : gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) +
-          (pg && !yn ? monthlyChip(m, "monthly") : "") + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
         '<td class="cc">' + (pg && yn ? offSelect(m.compile || "\u2014")
           : gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] })) + '</td>' +
@@ -3789,8 +3564,7 @@ function koEdit(list, page, acKey, owner){
         '<td class="cc">' + (editing
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
-        '</td></tr>' +
-        (pg && !yn ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
+        '</td></tr>';
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
       '">+ Add an objective</button></div>' : '');
@@ -5818,16 +5592,10 @@ function unitPlanBody(it, u, railed){
         ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
             || esc(targetUnitOf(m))) + '</td>'
         : '') +
-      /* §261: the way in to a monthly plan sits in the TARGET cell, because
-         the monthly plan IS the target — under Compiled it read as a second
-         compile rule (mockup, signed off). Never on a yes/no row: there is no
-         number for twelve months to shape. */
-      '<td class="num"' + (ed && !isYesNoRow(m) ? monthlyTgtAttrs(m, "monthly") : "") +
-        '>' + (ed && isYesNoRow(m) ? offInput(targetKeep(m.target || ""))
+      '<td class="num">' + (ed && isYesNoRow(m) ? offInput(targetKeep(m.target || ""))
         : gapCell("plan", "u_plan", m, "target",
         { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m),
-          read: tgtShown })) +
-        (ed && !isYesNoRow(m) ? monthlyChip(m, "monthly") : "") + '</td>' +
+          read: tgtShown })) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -5838,8 +5606,7 @@ function unitPlanBody(it, u, railed){
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.compile || "\u2014")
         : gapCell("plan", "u_plan", m, "compile",
         { ctx:pctx(m), kind:"select", opts:["Sum","Latest","Average"],
-          readEmpty:"\u2014", read:compileCell })) + '</td></tr>' +
-      (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 6, m.name) : "");
+          readEmpty:"\u2014", read:compileCell })) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
@@ -5922,15 +5689,7 @@ function unitPlanBody(it, u, railed){
          its four facts a control of its own in one cell (Islam). §249 draws
          it through gapCell, above, so the same cell serves the office's pen,
          the filler's two boxes and the red word. */
-      /* §261: and the chip, BELOW the four boxes rather than inside them —
-         `.tgrid` is two columns of `--tw` (§248) and a fifth control would
-         start a third row half the cell wide, which is exactly the "hole
-         among equal boxes" that section refused. Only in the pen, and never
-         on a yes/no outcome. */
-      '<td class="' + (tgtOpen ? 'tgtcell' : 'tgtcol num') + '"' +
-        (ed && !SMPRules.isYesNo(t.outTarget) ? monthlyTgtAttrs(t, "outMonthly", true) : "") +
-        '>' + tgtCell +
-        (ed && !SMPRules.isYesNo(t.outTarget) ? monthlyChip(t, "outMonthly") : "") + '</td>' +
+      '<td class="' + (tgtOpen ? 'tgtcell' : 'tgtcol num') + '">' + tgtCell + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
          fed picker — an owner is PICKED, not typed, in the pen and in fill
@@ -5979,9 +5738,7 @@ function unitPlanBody(it, u, railed){
         : (filling("plan", "u_plan", pctx(t)) &&
            (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
           ? qsFill(t)
-          : qs(t)) + '</td></tr>' +
-      (ed && !SMPRules.isYesNo(t.outTarget)
-        ? monthlyRowFor(t, "outMonthly", "outTarget", 7, t.outcome || t.name) : "");
+          : qs(t)) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it, ed);
   /* ── EDITING KEEPS ITS HEAD, AND THE NAME GETS THE LINE (§194) ──────
@@ -6518,21 +6275,15 @@ function capKoEdit(c){
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
           : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
-        /* §261: a supporting function's objectives get the same drawer as a
-           unit's, because they are the same cell asking the same question —
-           Islam's "all four". */
-        '<td class="cc"' + (ed && !isYesNoRow(m) ? monthlyTgtAttrs(m, "monthly") : "") +
-          '>' + gapCell(pg, "k_found", m, "target",
-          { kind:"input", cls:"mono", parse: unitInherit(m) }) +
-          (ed && !isYesNoRow(m) ? monthlyChip(m, "monthly") : "") + '</td>' +
+        '<td class="cc">' + gapCell(pg, "k_found", m, "target",
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
         '<td class="cc">' + (ed ? eyeBtn(m, pg, "k_found") +
           ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
-          '">Remove</button>' : '') + '</td></tr>' +
-        (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 7, m.name, pg) : "");
+          '">Remove</button>' : '') + '</td></tr>';
     }).join("") + '</tbody></table></div>' +
     (ed ? '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
       '">+ Add an objective</button></div>' : '');

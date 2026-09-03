@@ -231,6 +231,48 @@ console.log("\n§215 · row-level changes");
           got.ok && same(got.state, want), got.error || "the plan differs");
   });
 
+  /* — TWELVE MONTHS TRAVEL AS ONE FIELD ON ONE ROW (§261) —
+     `monthly` is an ARRAY on a plan row, which the differ has carried before
+     (`collaborators`, §227) and which is worth asserting here rather than
+     assuming: an array compared by identity rather than by value would send
+     the row on every save, and one compared too loosely would never send it at
+     all — and the second failure is silent (§210's whole reason). */
+  (function () {
+    const TWELVE = [15, 14, 16, 16, 17, 18, 24, 28, 32, 36, 40, 44];
+    const set = land(n => { n.units.mobile.items[0].measures[0].monthly = TWELVE.slice(); });
+    check("§261: a monthly plan travels as ONE row edit",
+          !!set.changes.rows && !set.changes.set["units.mobile"],
+          JSON.stringify(set.changes).slice(0, 120));
+    check("§261: ...and what lands is exactly what the screen has",
+          set.ok && same(set.state, edit(n => {
+            n.units.mobile.items[0].measures[0].monthly = TWELVE.slice(); })),
+          set.error || "the plan differs");
+    /* A BLANK MONTH IS A NULL INSIDE THE ARRAY and has to survive the trip —
+       a differ that dropped it would put a half-filled plan in force on the
+       server's copy (§261). */
+    const half = TWELVE.slice(); half[2] = null;
+    const h = land(n => { n.units.mobile.items[0].measures[0].monthly = half.slice(); });
+    check("§261: a null month survives the change list",
+          h.ok && h.state.units.mobile.items[0].measures[0].monthly[2] === null,
+          JSON.stringify((h.state.units.mobile.items[0].measures[0] || {}).monthly));
+    /* AND CLEARING IT IS A CHANGE, not a no-op. Written and then removed, the
+       row must come back without the key (§50.6). */
+    const withIt = clone(SEED);
+    withIt.units.mobile.items[0].measures[0].monthly = TWELVE.slice();
+    const gone = clone(withIt);
+    delete gone.units.mobile.items[0].measures[0].monthly;
+    const g = D.applyChanges(clone(withIt), D.graphChanges(withIt, gone));
+    check("§261: clearing it removes the key on the server's copy",
+          g.ok && !("monthly" in g.state.units.mobile.items[0].measures[0]),
+          g.error || JSON.stringify(g.state.units.mobile.items[0].measures[0]).slice(0, 90));
+    /* NOTHING MOVES WHEN NOTHING CHANGED: the same twelve sent twice must
+       produce no change at all, or every save carries one nobody made. */
+    const still = D.graphChanges(withIt, clone(withIt));
+    check("§261: an unchanged monthly plan sends nothing",
+          !Object.keys(still.set).length && !still.del.length && !still.rows,
+          JSON.stringify(still).slice(0, 120));
+  })();
+
   /* — A ROW WITHOUT AN ID IS NOT ADDRESSABLE (§191) — */
   (function () {
     const b = plan(); delete b.units.mobile.items[0].measures[0].id;

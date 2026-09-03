@@ -439,6 +439,51 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted in the same breath. 474/0; and one of the check's own first failures
   was the CHECK — a function's Performance tab is keyed `fnperf`.
 
+- **A TARGET WITH A SHAPE OF ITS OWN (§261):** Islam — *"targets proration is
+  always flat acorss the year but some targets have seasonality so the proration
+  is not valid ... so some targets needs a monthly plan input."* **THE ARGUMENT
+  IS ONE ROW OF HIS OWN PLAN**: Accessory revenue, 300M EGP, 96M reported at
+  June, reads **64% behind** flat and **100% on plan** against its own shape.
+  **THE COMPILE RULE ALREADY SAYS HOW TO READ TWELVE NUMBERS** — Sum adds the
+  months that have passed, Average takes their mean, Latest takes the month
+  being stood in — so nothing new is invented (§53.5) and §239's refusal to
+  prorate Latest and Average expires: a monthly plan IS the glide path it said
+  was not stored. **No compile rule, not in force**, or the year would be a
+  number nobody chose. **ONE SEAM**: `measureDue(m, share)` has taken an
+  optional share since §250, so every surface picks it up — and the plan
+  supersedes the supplied share too, or a tactic's window would count the same
+  season twice. **A TYPED 0 IS A REAL MONTH AND A BLANK IS NOT** — Islam's own
+  correction, and the whole of the arithmetic: `Number("")` is 0 and finite
+  (§104.10), so a truthiness test reads seven empty boxes as seven planned
+  noughts and cuts the year by more than half. **IN FORCE ONLY WHEN ALL TWELVE
+  ARE SET**; a half-filled plan is stored, says so in the warning ink, and
+  leaves the annual box authored and LIVE (§61). **The monthly plan BECOMES the
+  target** (his (a)), so `target` holds what the twelve say and the deck, the
+  workbook, the archive and the Focus board are right without being taught
+  anything — the normalised-shape alternative was drawn and refused, because
+  months adding to 1.05B under a 1.0B target stop matching what was typed.
+  **ALL FOUR SURFACES** (his (b)) and **reporting unchanged** (his (c)).
+  **A DRAWER, NOT A PANEL**, from the signed-off mockup: `tr.dxband`'s own
+  full-width shape (§99), the chip INLINE so the Target box goes 303 → 306px
+  and the row 56 → 57 (the column had the slack), twelve boxes needing 970px and
+  wrapping to two rows of six at 1280 (§158). **NO `data-oi` ON THE DRAWER ROW**
+  — §118's `undefined` came from a row counted inside a sortable tbody. **THE
+  BOX IS ALWAYS THE REAL BOUND FIELD**, locked after the paint rather than
+  swapped for an unbound copy (§96, §220). **Nothing repaints under a typing
+  hand** (§71.2). **NO MIGRATION, MEASURED**: it rides `extra`, and §172 is why
+  that is not left as a claim — the round trip now writes one on all three
+  shapes against a real Postgres, nulls intact, key DELETED on clear. **The
+  server needed nothing and it is asserted anyway** (497/0, 131/0): the office
+  writes and clears, the custodian does neither, it classifies as `unitPlan`
+  alone. **The workbook gains twelve columns, APPENDED** (§22, §65 — Q1–Q4 and
+  Hidden asserted not to have moved). **36 red** before — and the check's own
+  first falsification run DIED rather than reporting (§215) and two of its
+  assertions could not fail (§94.5). **AND THE FIRST BUILD DREW TWELVE BOXES
+  THAT STORED NOTHING**: `inputOr` returns a SPAN when the named page's pen is
+  shut and the drawer named `"plan"` for all four callers, so on Foundation it
+  drew read-only labels (§96, found by driving it). **RECORDED, NOT DONE**: the
+  deck prints the seasonal benchmark and no word saying why, and a monthly plan
+  is deliberately not a counted gap.
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -4563,6 +4608,22 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/monthly-plan.py  # a target with a shape of its own (§261): the
+                                # arithmetic asked of the rule, the drawer PRESSED
+                                # on all four surfaces and the stored plan read
+                                # back, a blank month asserted from BOTH sides
+                                # against a typed 0, a row without one measured
+                                # byte-identical, the workbook round trip a fixed
+                                # point with Q1–Q4 asserted NOT to have moved, and
+                                # the twelve boxes wrapping rather than scrolling
+                                # at four widths. It MAKES the state — no row in
+                                # the demo carries a monthly plan and no tactic
+                                # carries an outcome at all, so every assertion
+                                # here passes on a build that lost the feature.
+                                # 36 red on the shipped build before; its own
+                                # first falsification run DIED and reported 9
+                                # (§215), and two of its assertions could not
+                                # fail as written (§94.5)
 python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its own
                                 # window, not the year (§250): the share asserted as
                                 # AGREEMENT with a month count the check works out for
@@ -4874,7 +4935,47 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: a target with a shape of its
+own.** Islam: *"targets proration is always flat acorss the year but some
+targets have seasonality so the proration is not valid so some targets needs a
+monthly plan input so the calculation becomes more accurate."* **THE ARGUMENT IS
+ONE ROW OF HIS OWN PLAN**, and it was measured before anything was proposed:
+Mobile's Accessory revenue, 300M EGP for the year, 96M reported at June, reads
+**64% &mdash; behind** against a flat half-year and **100% &mdash; on plan**
+against its own shape. Same plan, same figure, same day. **ALIGNED FIRST** (rule
+1b) and drawn first (rule 1c): the mockup was shot from the running plan pane,
+and his three answers &mdash; the monthly plan becomes the target once complete,
+all four surfaces, reporting unchanged &mdash; are what was built. **HIS
+CORRECTION IS THE WHOLE OF THE ARITHMETIC**: *"a month target might be entered 0
+and it's fine."* A typed 0 is a real month and an empty box is not, and
+`Number("")` is 0 and finite (&sect;104.10) &mdash; so a truthiness test would
+read seven blank boxes as seven planned noughts and cut the year by more than
+half, a target nobody typed arrived at by arithmetic nobody could see. **THE
+COMPILE RULE ALREADY SAYS HOW TO READ TWELVE NUMBERS** (Sum adds the months that
+have passed, Average takes their mean, Latest takes the month being stood in),
+which is what keeps this one arithmetic at one seam rather than a second scoring
+model &mdash; and it retires &sect;239's refusal to prorate Latest and Average,
+because a monthly plan IS the glide path that section said was not stored.
+**A HALF-FILLED PLAN IS STORED AND NOT USED**, saying so in the warning ink with
+the annual box still authored and still live (&sect;61). **NO MIGRATION AND NO
+SCHEMA CHANGE, MEASURED RATHER THAN CLAIMED** (&sect;172's lesson: the seed
+offers no monthly plan either, so the round trip now writes one on all three
+shapes against a real Postgres 16 &mdash; nulls intact, key DELETED on clear).
+**The workbook gains twelve columns, appended**, or a download and an untouched
+upload would strip every monthly plan in the tenant (&sect;22, &sect;65).
+**Proved able to fail: 36 red** on the shipped build &mdash; and the check's own
+first falsification run **DIED rather than reporting** and read 9 (&sect;215, in
+the file written to quote it), while two of its assertions **could not fail as
+written** (&sect;94.5). **AND THE FIRST BUILD DREW TWELVE BOXES THAT STORED
+NOTHING**: `inputOr` returns a plain SPAN when the named page's pen is shut and
+the drawer named `"plan"` for all four callers, so on Foundation it drew twelve
+read-only labels that looked exactly like boxes (&sect;96, found by driving it
+rather than by reading it). Full `qa.py` sweep ERRORS none &middot; 497/0
+authoriser &middot; 131/0 differ &middot; round trip, clean parity and two tabs
+green on virgin Postgres 16 &middot; twelve neighbouring checks green. **On the
+branch, not merged.***
+
+*Earlier the same day: **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

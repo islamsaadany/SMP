@@ -250,6 +250,62 @@ function firstDiff(a, b, at) {
       (!cPr.outcomes[0].pend && !cPr.milestones[0].pend) ? "PASS" : "FAIL");
   }
 
+  /* ── A MONTHLY PLAN SURVIVES THE DATABASE (§261) ────────────────────
+     "No migration and no schema change" is a claim about `extra` JSONB, and
+     §172 is the reason it is not left as one: that section's fourth grant
+     value was agreed by four layers and REFUSED by a CHECK constraint nobody
+     had asked, because the seed never offered one. The seed carries no
+     monthly plan either, so the round trip above proves nothing about it —
+     one is written and read back here, on all three shapes that can hold one.
+
+     THE NULLS ARE THE POINT. A half-filled plan is stored, and a blank month
+     must come back as null rather than as 0 — through `JSON.stringify` into
+     jsonb and out again, where a lost null would silently put the row IN
+     FORCE against a target nobody typed (§261, §104.10). */
+  const mState = await io.readState(client);
+  const mUnit = Object.keys(mState.units)[0];
+  const mPil = (mState.units[mUnit].items || [])[0];
+  const mMeas = mPil && (mPil.measures || [])[0];
+  const mTac = mPil && (mPil.tactics || [])[0];
+  const mKo = (mState.units[mUnit].keyObjectives || [])[0];
+  if (mMeas && mTac && mKo) {
+    const FULL = [15, 14, 16, 16, 17, 18, 24, 28, 32, 36, 40, 44];
+    const PART = [0, 1, null, null, null, null, null, null, null, null, null, null];
+    mMeas.monthly = FULL.slice();
+    mKo.monthly = PART.slice();
+    mTac.outMonthly = FULL.slice();
+    await io.writeState(client, mState);
+    const mBack = await io.readState(client);
+    const bPil = (mBack.units[mUnit].items || []).filter(function (p) { return p.id === mPil.id; })[0];
+    const bMeas = bPil && (bPil.measures || []).filter(function (x) { return x.id === mMeas.id; })[0];
+    const bTac = bPil && (bPil.tactics || []).filter(function (x) { return x.id === mTac.id; })[0];
+    const bKo = (mBack.units[mUnit].keyObjectives || []).filter(function (x) { return x.id === mKo.id; })[0];
+    const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+    const mOk = bMeas && bTac && bKo &&
+      same(bMeas.monthly, FULL) && same(bTac.outMonthly, FULL) && same(bKo.monthly, PART);
+    console.log("monthly plan round trip:", mOk ? "PASS" : "FAIL",
+      mOk ? "[measure, tactic outcome, key objective — nulls kept]"
+          : JSON.stringify({ meas: bMeas && bMeas.monthly, tac: bTac && bTac.outMonthly,
+                             ko: bKo && bKo.monthly }));
+    if (!mOk) process.exitCode = 1;
+    /* AND THE KEY LEAVES AGAIN (§50.6). A row that never had one and one
+       whose plan was cleared must be byte-identical, or every save after a
+       clear carries a change nobody made. */
+    delete bMeas.monthly; delete bTac.outMonthly; delete bKo.monthly;
+    await io.writeState(client, mBack);
+    const mClean = await io.readState(client);
+    const cPil = (mClean.units[mUnit].items || []).filter(function (p) { return p.id === mPil.id; })[0];
+    const cMeas = cPil && (cPil.measures || []).filter(function (x) { return x.id === mMeas.id; })[0];
+    const cTac = cPil && (cPil.tactics || []).filter(function (x) { return x.id === mTac.id; })[0];
+    const cKo = (mClean.units[mUnit].keyObjectives || []).filter(function (x) { return x.id === mKo.id; })[0];
+    const cOk = cMeas && !("monthly" in cMeas) && !("outMonthly" in cTac) && !("monthly" in cKo);
+    console.log("  ...and clears again, key DELETED:", cOk ? "PASS" : "FAIL");
+    if (!cOk) process.exitCode = 1;
+  } else {
+    console.log("monthly plan round trip: SKIPPED — no measure/tactic/objective in the seed");
+    process.exitCode = 1;
+  }
+
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 

@@ -29740,3 +29740,166 @@ green. `refusal-keeps-work.py` is red on `main`'s own build for the
 stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
+
+## §261 — A TARGET WITH A SHAPE OF ITS OWN (2026-09-03)
+
+Islam: *"targets proration is always flat acorss the year but some targets have
+seasonality so the proration is not valid so some targets needs a monthly plan
+input so the calculation becomes more accurate nor flatly proration how can we
+make this feature?"*
+
+**THE ARGUMENT IS ONE ROW OF HIS OWN PLAN.** Mobile's *Accessory revenue*: a
+300M EGP year, 96M reported, read at June. Flat, it is measured against 150M
+and reads **64% — behind**. Against a monthly plan that adds to the same 300M
+it is measured against 96M and reads **100% — on plan**. Same plan, same
+figure, same day, and only one of the two is a fact about the business. §239
+has spread an annual target evenly since it was written, which is right for a
+business that trades evenly, and nothing in a plan could say otherwise.
+
+**THE COMPILE RULE ALREADY SAYS HOW TO READ TWELVE NUMBERS**, and that is what
+keeps this one arithmetic rather than a second scoring model: `Sum` adds up the
+months that have passed, `Average` takes their mean, `Latest` takes the month
+being stood in — the same three words the plan already uses to compile what is
+REPORTED (§53.5). It also retires §239's reason for refusing to prorate Latest
+and Average at all — *"with no baseline stored, prorating them would be
+inventing a glide path"* — because a monthly plan **is** that glide path,
+supplied by the tenant rather than invented here. **A row with no compile rule
+is not in force**: without one the platform cannot say whether the year is the
+sum of the twelve or the last of them, and guessing would put a number nobody
+chose on the page.
+
+**ONE SEAM.** `measureDue(m, share)` is the single place every score, every YTD
+column and the deck's benchmark already go through, and it has taken an
+optional share since §250 — so the monthly plan answers there and every surface
+picks it up with no second copy. It supersedes the SUPPLIED share as well as
+the flat one: a tactic's outcome is handed the share of its own window (§250),
+and a monthly plan already states what every month carries, including the
+noughts for months the thing does not run in, so prorating it again by the
+window would count the same season twice.
+
+**ISLAM'S THREE ANSWERS, TAKEN BEFORE ANYTHING WAS BUILT** (the mockup,
+`design-mockups/monthly-plan/`, shot from the running plan pane and signed off):
+
+- **(a) The monthly plan becomes the target once it is complete** — the annual
+  box then shows the sum and is read-only, so there is one authored place and
+  the two can never disagree. The alternative (the twelve as a normalised
+  *shape* under an authored annual figure) was drawn and refused: type months
+  adding to 1.05B against a 1.0B target and the year-to-date number stops
+  matching what you typed.
+- **(a′) HIS OWN CORRECTION, AND IT IS THE WHOLE OF THE ARITHMETIC:** *"a month
+  target might be entered 0 and it's fine."* A typed 0 is a real month and an
+  empty box is not. `Number("")` and `Number(null)` are both 0 and both finite
+  (§104.10), so a truthiness test or a bare `Number()` would read seven empty
+  boxes as seven planned noughts and cut the year by more than half — a target
+  nobody typed, arrived at by arithmetic nobody could see. The blank test comes
+  first and the number second, in ONE function, so there is one definition of
+  *this month is set*.
+- **(b) All four surfaces** — a pillar's key measures, a unit's and the group's
+  key objectives, a supporting function's, and a tactic's outcome. They run
+  through one arithmetic, so they get one control; half of them having it is
+  the drift §53.5 exists to stop.
+- **(c) Reporting is unchanged.** One YTD figure per cycle, compared against a
+  benchmark that is finally accurate. Monthly actuals were offered and refused.
+
+**A HALF-FILLED PLAN IS STORED AND NOT USED.** Twelve boxes are filled over
+more than one sitting, so what has been typed is kept; what it must not do is
+quietly become the target. Until the twelfth is set the row is prorated flat
+exactly as before, the annual box stays authored and stays LIVE (§61: never a
+box nobody can type in for a state nobody chose), and the drawer says *"5 of 12
+months set — not in force yet"* in the warning ink rather than the alarm one
+(§168: outstanding is not broken).
+
+**THE DRAWER, NOT A PANEL** — Islam's A, from two treatments drawn in the real
+table. Twelve boxes on a full-width row under the measure, which is
+`tr.dxband`'s own shape (§99), so nothing is covered while it is open and the
+sum lands directly under the target it replaces; the panel was drawn and it
+covers four rows including the target it is deriving. **Measured, not asserted:**
+the chip is INLINE with the target box, so the Target box is **303px before and
+306px after** and the row **56px against 57px** — the column had the slack, and
+a button under the box would have added ~24px to every measure in the table
+whether or not it ever gets a monthly plan. Twelve boxes need 970px and **wrap
+to two rows of six at 1280 and below**, so the table never gains a sideways
+scroll (§158: fit, never "and it scrolls").
+
+**THE DRAWER ROW CARRIES NO `data-oi`**, and that is not a detail: it sits
+inside a sortable tbody, and the "+ Add" row being counted in one of those is
+what pushed `undefined` into a plan and took a page down in §118.
+
+**THE BOX IS ALWAYS THE REAL BOUND FIELD.** A target the twelve now derive is
+locked in place after the paint (`monthlyLocks()`, beside `growFields()`) rather
+than drawn as a second, unbound copy — the twelfth month landing has to be able
+to lock it mid-session, and swapping a bound input for an unbound one is how a
+box comes to accept typing that goes nowhere (§96). Disabled, not merely dimmed
+(§220).
+
+**NOTHING REPAINTS UNDER A TYPING HAND.** The sentence, the Clear button and the
+locked target box are rewritten in place as each month commits (§71.2, §145's
+`gapBandRefresh` shape); only pressing the chip or Clear repaints.
+
+**THE READING SIDE IS ONE WORD**, *by month*, under the annual target on
+Performance — the one screen table that prints a benchmark. It goes in the cell
+whose meaning changed rather than under the row's name, where it would stack
+under a reporter's own note (§255).
+
+**NO MIGRATION AND NO SCHEMA CHANGE, MEASURED RATHER THAN CLAIMED.** It rides
+`extra` JSONB (§177's road) on measures, objectives and tactics — and §172 is
+why that is not left as a claim: that section's fourth grant value was agreed by
+four layers and refused by a CHECK constraint nobody had asked, because the seed
+never offered one. The seed carries no monthly plan either, so
+`test-roundtrip.js` now writes one on all three shapes against a real Postgres
+16 and reads it back, **with the nulls of a half-filled plan intact** and the key
+DELETED again on clear (§50.6).
+
+**THE SERVER NEEDED NOTHING, AND THAT IS ASSERTED TOO.** `monthly` falls through
+to the same classification as every other plan field — the safe direction (§42:
+an unrecognised change is the SMO's) — but *it should fall through* and *it does
+fall through* are two different statements and only one is a measurement: six
+new cases in `test-authorize.js` (497/0) prove the office may write and clear
+one, the unit's own custodian may do neither, and it classifies as `unitPlan`
+and nothing else, so a refusal names the plan rather than sending somebody to
+Setup (§16.7). Five in `test-graph-diff.js` (131/0) prove the twelve travel as
+ONE row edit, that a null month survives, that clearing removes the key, and
+that an unchanged plan sends nothing.
+
+**THE WORKBOOK CARRIES TWELVE COLUMNS, APPENDED** (§22, §65). An upload AUTHORS,
+so a column the file does not carry is a column the plan loses: without these,
+a download and an untouched upload would strip every monthly plan in the tenant
+and put every row back on flat proration. Appended after the last existing
+column on each sheet, because a validation range is a POSITION — Q1–Q4, Hidden
+and the ID column do not move, asserted by index. Twelve columns rather than one
+delimited cell, because a plan by month is what a spreadsheet is for; they
+collapse to one pipe-joined field in the reader, so the pipeline behind carries
+one column and not twelve.
+
+**PROVED ABLE TO FAIL: 36 red** on the shipped pre-§261 build —
+**and the first falsification run of `checks/monthly-plan.py` DIED rather than
+reporting**, on a control that does not exist there, so `grep -c FAIL` read 9
+where the build has thirty-six (§215, in the file written to quote it). Every
+press degrades now. **Two of its own assertions could not fail when written**
+(§94.5): *"a blank month leaves the plan out of force"* passed on a build with
+none of this in it, because the probe threw and `is None` was true of the
+error — it is asked beside a case that must answer; and *"a yes/no row gets no
+chip"* passed on a build drawing no chips anywhere — the row beside it is now
+asserted to have one.
+
+**AND THE FIRST BUILD DREW TWELVE BOXES THAT STORED NOTHING** (§96, found by
+driving it rather than by reading it). `inputOr` returns a plain SPAN when the
+named page's pen is shut, and the drawer named `"plan"` for all four callers —
+so on Foundation, where a unit's key objectives live, it drew twelve read-only
+labels that looked exactly like boxes. The page is passed in now, and the check
+asserts BOXES and not spans.
+
+### §261.1 — RECORDED, NOT DONE
+
+- **The deck prints the benchmark and not the word.** `figVsDue` (§254) shows
+  what a figure is measured against on every slide, so a seasonal benchmark
+  reaches the projector correctly and nothing on the slide says why it is not
+  half the year. Adding a line to a slide is a decision about what a slide
+  shows, not a tidy-up (§252.2's shape) — it wants a mockup.
+- **A monthly plan is not a counted gap**, deliberately: a row without one is a
+  complete way to write a plan, so it never joins the red Missing count or
+  blocks Submit. The cost is that the feature is quiet — the chip, the recipe
+  and the *by month* mark are the only things that mention it.
+- **The unit's and the capability's objective tables print `progress`**, the
+  stored raw ratio, rather than `measureScore` — so a monthly plan does not move
+  what those two tables show. That predates this and is unchanged by it.

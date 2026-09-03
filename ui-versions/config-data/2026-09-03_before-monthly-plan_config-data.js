@@ -5745,25 +5745,6 @@ function measureDue(m, share){
      test is unchanged; what changes is that this asks for it rather than
      carrying its own copy of the same expression. */
   if (!SMPRules.targetHasNumber(m.target)) return null;
-  /* ── §261: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
-     Twelve numbers in the target's own unit, compiled by the row's own
-     compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
-     supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
-     its own window, and a monthly plan already states what every month is
-     expected to carry — including the noughts for the months the thing does
-     not run in — so it is the more specific answer and prorating it again by
-     the window would count the same season twice.
-
-     THE MONTH COMES FROM THE REVIEW POINT, which is the one place the
-     product answers "how far through the year are we" (§239.1). With no
-     readable review point there is no month to compile to, so the row falls
-     through to the flat path and reads exactly as it does today: a plan
-     nobody can date must not become a plan nobody can score. */
-  var mp = elapsedMonths();
-  if (mp != null) {
-    var md = SMPRules.monthlyDue(m, mp);
-    if (md != null) return md;
-  }
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;
@@ -5791,14 +5772,6 @@ function measureScore(m, share){
      (§250 prorates a TARGET, and this row has no number to prorate). */
   if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
-  /* §261: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
-     Before a monthly plan existed this guard only ever caught a target of
-     nought, which is meaningless; a monthly plan makes it reachable on
-     purpose — a row planning nothing until July is owed nothing in June.
-     Not scored is what the product already says about work that has not
-     started (§250's not-due branch, tacticDue), and scoring it 100 would
-     credit a row that has done nothing while scoring it 0 would mark down a
-     unit for a month its own plan left empty. */
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
   if (isNaN(a)) return null;
@@ -5855,14 +5828,8 @@ function outcomeOf(t){
      is Islam's "a dash is not an entry" falling out of a rule already
      there rather than needing a second one. */
   if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
-  /* §261: AND ITS OWN MONTHLY PLAN. The outcome is normalised into a
-     measure here precisely so one arithmetic serves every scored row
-     (§248), so the twelve months ride across under the name the rules
-     module reads — `outMonthly` on the tactic, `monthly` on the shape.
-     Without this line the drawer would write a plan that nothing reads. */
   return { dir: t.outDir || "\u2265", target: t.outTarget,
-           compile: t.outCompile, actual: t.outActual,
-           monthly: t.outMonthly };
+           compile: t.outCompile, actual: t.outActual };
 }
 /* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
    open cycle: a tactic is read the OLD way until its outcome has both a target

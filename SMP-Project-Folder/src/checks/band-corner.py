@@ -209,15 +209,35 @@ with sync_playwright() as p:
         # REST, because `.paneact` is absolute inside the pane and scrolls away
         # with it — asking at a scroll where the pen is off screen measures
         # nothing and reports it as a failure (§68's three checks, in reverse).
+        # §268 TOOK THE SMO's PEN OUT OF THIS CORNER, and the guard above was
+        # `if (the control is there)`, so this assertion ran twice on the build
+        # before and ZERO times after while the check went on printing "all
+        # passed" — §51.11 in its silent direction, inside a check written to
+        # catch a silent fault. What the corner still holds is §268's ARRANGE
+        # arrows, which go to somebody who may reorder and NOT author, so the
+        # subject has to be SWITCHED TO rather than waited for: as the SMO the
+        # corner is legitimately empty, and "empty" is not "clear".
         pg.evaluate("window.scrollTo(0,0)"); pg.wait_for_timeout(300)
-        if pg.query_selector(".pane .paneact .penbtn"):
+        who = pg.evaluate("""()=>{ const keep=VIEWER, out=[];
+          PEOPLE.filter(p=>p.active!==false).forEach(p=>{ VIEWER=p.key;
+            try{ if(!mayEditPlan() && mayArrangeHere()) out.push(p.key); }catch(e){} });
+          VIEWER=keep; return out; }""")
+        # NEVER a quiet skip: nobody at all means the corner control has gone,
+        # which is the change worth being told about (§113.8).
+        ck("[%s] somebody still gets the corner's control" % theme, bool(who), who)
+        if who:
+            pg.evaluate("(k)=>{VIEWER=k; paint();}", who[0]); pg.wait_for_timeout(600)
+            pg.evaluate("window.scrollTo(0,0)"); pg.wait_for_timeout(300)
             hit = pg.evaluate("""()=>{const b=document.querySelector('.pane .paneact .penbtn');
+              if (!b) return "not drawn";
               const r=b.getBoundingClientRect();
               if (r.bottom<0||r.top>innerHeight) return "off screen";
               const at=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
               return !at ? "nothing there" : (at===b||b.contains(at)||at.contains(b));}""")
-            ck("[%s] the pen beside it is still what a click reaches" % theme,
+            ck("[%s] the control beside it is still what a click reaches" % theme,
                hit is True, hit)
+            pg.evaluate("()=>{VIEWER=PEOPLE.filter(x=>SMPRules.mayEditAccess(world(),x))[0].key;"
+                        " paint();}"); pg.wait_for_timeout(400)
         ck("[%s] no console errors, and paint() did not throw" % theme, not errs, errs[:3])
         pg.close()
     b.close()

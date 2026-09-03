@@ -1002,11 +1002,12 @@ function openDeckFn(fk){
 function closeDeck(){
   var root = document.getElementById("deckroot");
   root.classList.remove("on");
-  /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
-     but only if the deck was in fullscreen — a deck closed from windowed mode
-     never fires that event, and `fs` left standing would give the NEXT deck a
-     hidden bar and a click that advances slides (§261) in a window. */
-  root.classList.remove("fs");
+  /* Both fullscreen classes go with it. `fullscreenchange` would clear them
+     too, but only if the deck was in fullscreen — leaving `peek` set on a deck
+     closed from windowed mode means the NEXT fullscreen opens with the bar
+     already showing and no move to explain it. */
+  root.classList.remove("fs", "peek");
+  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
   document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
 }
@@ -1085,21 +1086,29 @@ function deckShow(n){
   });
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
 }
-/* §261 DELETED `deckPeek()` AND ITS TIMER FROM HERE, reversing the second half
-   of §69.7. It brought the bar back for 2.2 seconds whenever the pointer moved,
-   which was the right answer to "how does a presenter find Exit" and the wrong
-   thing to put on a projector: `pointerdown` is a move, so every click during a
-   review flashed a navy strip across the bottom of the slide and took it away
-   again — Islam, from a live presentation, "with every click the bottom banner
-   appear then hide."
-
-   Removed rather than switched off (§24): the two pointer listeners, the timer,
-   the `peek` class and the CSS rule that read it are all gone, so nothing is
-   left for a later reader to take as load-bearing. What replaces it is the
-   keyboard, which the room cannot see — and Escape, which leaves fullscreen
-   rather than closing the deck, so the bar comes back whole. */
-
 /* Scale the fixed stage into whatever room there is. */
+/* Show the bar, then take it away again after a pause. Only in fullscreen —
+   everywhere else it is simply always there, and a timer running against a
+   class that does nothing is a timer somebody will one day wonder about.
+
+   The timer is cleared before it is set, or a mouse moving continuously leaves
+   one pending timeout per event and the bar hides on the first of them. */
+var DECKPEEK = null;
+function deckPeek(hideNow){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("fs")) return;
+  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
+  if (hideNow) { root.classList.remove("peek"); return; }
+  root.classList.add("peek");
+  DECKPEEK = setTimeout(function(){
+    DECKPEEK = null;
+    var r = document.getElementById("deckroot");
+    /* Never pull it out from under the pointer: a bar that vanishes as you
+       reach for Exit is worse than one that never appeared. */
+    if (r && !r.querySelector(".deckbar:hover")) r.classList.remove("peek");
+  }, 2200);
+}
+
 function deckScale(){
   var root = document.getElementById("deckroot");
   var deck = root.querySelector(".deck");
@@ -1127,24 +1136,12 @@ function wireDeck(){
     var box = ev.target.closest("[data-deckunote]");
     if (box) setCycleNote(box.dataset.deckunote, box.textContent);
   });
-  /* ── A CLICK ON THE SLIDE MOVES FORWARD, IN FULLSCREEN ONLY (§261) ──
-     Islam's choice, so a tablet or a borrowed mouse can still drive the deck
-     with the bar gone. FORWARD ONLY: a click that went back on one half of the
-     slide would need a visible boundary to be usable, and the whole point of
-     fullscreen is that there is nothing drawn over the slide.
-
-     `.fs` alone, because windowed mode has the bar's own Next button six
-     inches below and a click-to-advance stage as well would be two answers to
-     one act (§53.5) — and the cycle note is edited on that same stage.
-
-     THE INTERACTIVE TARGETS ARE EXCLUDED, or clicking into the note box to
-     type would advance the slide out from under the cursor: a `click` that
-     lands on a control is that control's, never the stage's. */
-  root.addEventListener("click", function(ev){
-    if (!root.classList.contains("fs")) return;
-    if (ev.target.closest(".deckbar, button, a, input, textarea, select, [contenteditable]")) return;
-    deckShow(DECK.i + 1);
-  });
+  /* Any of the three ways somebody reaches for the controls. `pointermove`
+     covers mouse and pen; a touch is a `pointerdown` that never moves; and the
+     keyboard has to be able to summon it too, or a presenter driving the deck
+     by arrow keys can never see where they are. */
+  root.addEventListener("pointermove", function(){ deckPeek(false); });
+  root.addEventListener("pointerdown", function(){ deckPeek(false); });
   addEventListener("resize", deckScale);
   /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
      The class is set from the EVENT rather than from the button, because
@@ -1159,43 +1156,22 @@ function wireDeck(){
   addEventListener("fullscreenchange", function(){
     var root = document.getElementById("deckroot");
     root.classList.toggle("fs", document.fullscreenElement === root);
+    root.classList.remove("peek");
+    deckPeek(true);
     deckScale();
   });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     if (ev.target.isContentEditable) { if (ev.key === "Escape") ev.target.blur(); return; }
-    /* ── FORWARD IS FOUR KEYS AND BACK IS THREE (§261) ────────────────
-       Islam: "down and rigth for moving the slides forward left and up takes
-       me back". Down and Up are what a trackpad-less laptop reaches for and
-       what a projector remote's second pair sends; PageDown and PageUp are
-       what most presentation clickers send, and a clicker that does nothing is
-       indistinguishable from a flat battery.
-
-       EVERY NAVIGATION KEY STOPS THE PAGE BEHIND (`preventDefault`), which
-       only ArrowRight and Space used to do — Down and PageDown scroll the
-       platform underneath the deck, so the slide changes and the page you
-       return to has moved. */
-    var fwd = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, " ": 1 };
-    var back = { ArrowLeft: 1, ArrowUp: 1, PageUp: 1 };
-    if (fwd[ev.key]) { ev.preventDefault(); deckShow(DECK.i + 1); }
-    if (back[ev.key]) { ev.preventDefault(); deckShow(DECK.i - 1); }
-    if (ev.key === "Home") { ev.preventDefault(); deckShow(0); }
-    if (ev.key === "End") { ev.preventDefault(); deckShow(DECK.slides.length - 1); }
-    /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§261) ──────
-       It closed the deck outright, so the one key a presenter presses to get
-       their laptop back also threw away the presentation and dropped them onto
-       the page behind it, in front of the room. Two steps now: out of
-       fullscreen (where the bar, the counter and Exit are all waiting), then
-       out of the deck.
-
-       Asked of `document.fullscreenElement`, not of the class, because the
-       browser can leave fullscreen on its own and the class follows the event
-       (§69.7) — and a browser that suppresses this keydown to exit fullscreen
-       itself lands on exactly the same state. */
-    if (ev.key === "Escape") {
-      if (document.fullscreenElement === root) document.exitFullscreen();
-      else closeDeck();
-    }
+    /* Driving the deck from the keyboard shows the bar too — otherwise a
+       presenter using the arrows in fullscreen has no way to see which slide
+       they are on, and the counter is the one thing the bar is FOR. */
+    deckPeek(false);
+    if (ev.key === "ArrowRight" || ev.key === " ") { ev.preventDefault(); deckShow(DECK.i + 1); }
+    if (ev.key === "ArrowLeft") deckShow(DECK.i - 1);
+    if (ev.key === "Home") deckShow(0);
+    if (ev.key === "End") deckShow(DECK.slides.length - 1);
+    if (ev.key === "Escape") closeDeck();
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });

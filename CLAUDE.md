@@ -419,6 +419,51 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the sources and `db/seed-state.json` was never regenerated — *a seed that
   disagrees with the sources it is generated from is a fault nothing else would
   have found.*
+- **FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (§261, reversing the
+  second half of §69.7):** Islam, from a live presentation — *"on the
+  presntation in full screen with every click the bottom banner appear then
+  hide. it shouldn't appear full screen accepts only the arros. down and rigth
+  for moving the slides forward left and up takes me back and the escape button
+  to exit the full screen."* **§69.7 IS RIGHT AND ITS SECOND HALF ANSWERED A
+  DIFFERENT QUESTION**: it hid the 62px strip (*"7% of the projected image spent
+  on controls the room can see and the presenter does not need"*) and then
+  brought it back for 2.2s on a pointer move so Exit could always be found —
+  and **a click is a pointer event**, so every click during a review slid a navy
+  strip across the bottom of the slide and took it away again, in front of the
+  room. *A control that appears and disappears under an audience's eyes costs
+  more attention than it saves the presenter.* **THE WAY OUT MOVES TO THE
+  KEYBOARD, WHICH THE ROOM CANNOT SEE** — that is the whole trade, and it is why
+  **Escape stopped doing two things at once**: it called `closeDeck()`, so the
+  one key a presenter presses to get their laptop back **threw away the
+  presentation and dropped them onto the page behind it**. Out of fullscreen
+  first, then out of the deck — asked of `document.fullscreenElement`, never of
+  the `fs` class (§69.7's own reason for setting that class from the event), so
+  a browser that swallows the keydown to exit fullscreen itself lands on the
+  same state. **DELETED, NOT SWITCHED OFF** (§24): `DECKPEEK`, `deckPeek()`, the
+  two pointer listeners, the `peek` class and its CSS rule all go, comment and
+  all. **A CLICK ON THE SLIDE ADVANCES IT, IN FULLSCREEN ONLY** (Islam's, from
+  two he was given) — **forward only**, because a click that went back on one
+  half needs a visible boundary and the point of fullscreen is that nothing is
+  drawn over the slide; **windowed mode does not get it** (the bar's Next button
+  is six inches below — §53.5) and it is asserted; **the interactive targets keep
+  their own clicks**, or clicking into the note box to type advances the slide
+  out from under the cursor. **FORWARD IS FOUR KEYS AND BACK IS THREE** — his
+  Down/Up, plus **PageDown/PageUp** (his second answer: most clickers send those,
+  and a clicker that does nothing is indistinguishable from a flat battery) —
+  and **every one now stops the page behind**, where only ArrowRight and Space
+  did, so Down and PageDown scrolled the platform under the deck. **THE COST IS
+  STATED, AND WAS STATED BEFORE HE CHOSE**: a touch screen with no keyboard has
+  no on-screen way out of fullscreen, only the browser's own gesture — the
+  click-to-advance is what keeps such a device able to present at all.
+  `checks/deck-fullscreen.py`: **19 red** on the shipped build, driving REAL
+  fullscreen (headless Chromium grants it) and measuring the bar as a **box and
+  a hit-test, never as a class** (§94.8), **immediately** after the click and
+  again half a second later — a 2.2s flash is invisible to a probe that looks
+  once the dust has settled. Windowed mode is measured FIRST, or every
+  fullscreen assertion passes on a build that lost the bar entirely (§113.8).
+  **AND ONE OF ITS OWN ASSERTIONS PASSED FOR THE WRONG REASON** (§94.5): a
+  CLOSED deck's bar reports top 0, height 0, opacity 1 — *a bar that is not
+  there at all is not a bar that came back.*
 - **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
   (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
   an option in the drop down for the smo only."* §145.9 hid the pane-corner
@@ -4761,6 +4806,14 @@ python3 checks/hide-slide.py    # the office hides a slide and the projector ski
                                 # seeing the marks and getting no control — and the editor
                                 # and the projector proved to build ONE deck (§256.2).
                                 # 33 red on the build before; every probe degrades (§215)
+python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and nothing else
+                                # (§261): REAL fullscreen, the bar measured as a BOX and a
+                                # hit-test rather than a class, immediately after the click
+                                # AND half a second later (a 2.2s flash is invisible to a
+                                # probe that looks once), windowed mode measured FIRST so a
+                                # build that lost the bar entirely cannot pass, both
+                                # directions of every key, and Escape leaving fullscreen
+                                # with the deck still open — 19 red on the shipped build
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
 python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
@@ -4874,7 +4927,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: fullscreen is the slide, the
+arrows and nothing else.** Islam, from a live presentation: *"with every click
+the bottom banner appear then hide. it shouldn't appear full screen accepts only
+the arros."* **&sect;69.7 IS RIGHT AND ITS SECOND HALF WAS ANSWERING A DIFFERENT
+QUESTION** &mdash; it hid the 62px strip on a projector and then brought it back
+for 2.2 seconds on a pointer move, so a presenter could always find Exit; **a
+click is a pointer event**, so every click during a review slid a navy strip
+across the bottom of the slide and took it away again, in front of the room. *A
+control that appears and disappears under an audience's eyes costs more
+attention than it saves the presenter.* The way out moves to the KEYBOARD, which
+the room cannot see &mdash; which is also why **Escape stopped doing two things
+at once**: it called `closeDeck()`, so the one key a presenter presses to get
+their laptop back threw away the presentation and dropped them onto the page
+behind it. Out of fullscreen first, then out of the deck, asked of
+`document.fullscreenElement` so a browser that swallows the keydown lands on the
+same state. **Deleted, not switched off** (&sect;24): the timer, the function,
+both pointer listeners, the class and its CSS rule. **A click on the slide
+advances it, in fullscreen only** (his choice from two, forward only, windowed
+mode asserted untouched, the interactive targets keeping their own clicks or
+typing in the note box would move the slide). **Forward is four keys and back is
+three** &mdash; his Down/Up plus PageDown/PageUp, since most clickers send those
+&mdash; and every one now stops the page behind, where only two did. **The cost
+was stated before he chose**: a touch screen with no keyboard has no on-screen
+way out, which is what the click-to-advance is for.
+`checks/deck-fullscreen.py` drives REAL fullscreen and is **19 red** on the
+shipped build, its first failures naming both halves of what he reported
+&mdash; and **one of its own assertions passed for the wrong reason**, because a
+CLOSED deck's bar reports top 0, height 0, opacity 1 and satisfies every "the
+bar came back" test (&sect;94.5). Neighbours and the full `qa.py` sweep green.*
+
+*Earlier the same day: **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

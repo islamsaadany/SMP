@@ -232,22 +232,19 @@
      stage — about 7% of the projected image spent on controls the room can see
      and the presenter does not need.
 
-     HIDDEN, NEVER REMOVED, AND IT NO LONGER COMES BACK (§261, reversing the
-     second half of §69.7). That section brought the bar back for a few seconds
-     on a mouse move, so a presenter could always find Exit — and `pointerdown`
-     counts as a move, so on a projector EVERY CLICK flashed a navy strip
-     across the bottom of the slide and took it away again. A control that
-     appears and disappears under the room's eyes costs more attention than the
-     one it saves the presenter. Escape leaves fullscreen and the bar is there
-     again, whole; the cost is stated in §261 and is a touch screen with no
-     keyboard.
+     HIDDEN, NEVER REMOVED. It carries Exit, and a presenter who cannot find
+     the way out of fullscreen on somebody else's laptop is stranded — so
+     moving the mouse brings it back for a few seconds, which is what every
+     projector tool does and what people already expect. Escape and the arrows
+     work throughout either way.
 
      `transform`, not `display`, so the stage's height does not change when it
      comes and goes: `deckScale()` reads clientHeight, and a bar that resized
-     the stage would rescale the whole deck every time it appeared. The stage
-     takes the full inset in fullscreen and keeps it. */
+     the stage would rescale the whole deck every time the mouse moved. The
+     stage takes the full inset in fullscreen and keeps it. */
   .deckroot.fs .deckstage { inset:0; }
   .deckroot.fs .deckbar { transform:translateY(100%); opacity:0; pointer-events:none; }
+  .deckroot.fs.peek .deckbar { transform:none; opacity:1; pointer-events:auto; }
   @media (prefers-reduced-motion: reduce) { .deckbar { transition:none; } }
   .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;
                     font:inherit; font-size:15px; line-height:1; padding:8px 13px;

@@ -4705,6 +4705,9 @@ python3 checks/safety-banners.py # the page warns BEFORE a save can be lost (§2
                                 # only on the server's word: a field mid-typing, a slow
                                 # server, the POST carrying the value, the reload after
                                 # the answer, and a 500 keeping the page
+                                # — and since §258.3 the red bar in the USER's words,
+                                # the status on the hover, the true advice (keep the
+                                # tab open — it retries), asserted in save-said.py
 node scripts/test-safety-peek.js # ...and the server half against a real Postgres: who
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to

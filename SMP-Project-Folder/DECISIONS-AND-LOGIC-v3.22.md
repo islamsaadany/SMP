@@ -29704,3 +29704,39 @@ last-write-wins (§215's residue, unchanged); and a tab from before this
 morning's first deploy carries no banner code at all, so it is not told — it
 keeps saving correctly and an ordinary refresh brings it up to date.
 
+## §258.3 — THE RED BAR SPEAKS THE USER'S LANGUAGE (2026-09-03, reversing §171's visible status)
+
+Islam, on the §258.2 mockup's failure state: *"if saving failed the red bar
+should say something useful the http 500 is too technical for a user."*
+
+§171 put the status in the sentence on purpose — *"a number is not jargon to
+the one person who can act on it, and without it every failure reads the
+same"* — and that argument is about the OPERATOR. The bar is read by a
+custodian at a reporting deadline, and *"The server answered HTTP 500"* tells
+them nothing they can do. §230.2 settled the same question for the boot wall
+(*"too technical for the users … make a very simple user message"*); this is
+that rule one banner over.
+
+**TWO ERRANDS STAY TWO SENTENCES** (§123): *"The server could not take your
+change just now"* and *"The platform cannot reach the server — check your
+internet connection"*. **THE STATUS MOVES TO THE HOVER** of the bold word
+(§127: information belongs on a hover, never in a paragraph), so whoever
+chases it still reads *HTTP 500* or the fetch's own message. **THE ADVICE IS
+THE TRUE ONE**: this tab retries by itself every five seconds (§160.4), so the
+instruction is *keep this tab open — it tries again by itself, and this bar
+clears the moment your change goes through; if it stays for more than a
+minute, tell the Strategy Office*. §171's *"reload before typing anything
+else"* is DROPPED: a reload while the server is down is exactly what would
+lose the change on screen, and §258.2 has just made Reload wait for a save.
+
+**AND A SPACE WAS LOAD-BEARING**: the bar's two spans are inline and ran
+together — *"just now.Keep"* — and reading the earlier shot back, §171's own
+had read *"500.Your"* since it was written. Found by shooting the real thing
+for the mockup, not by reading the code.
+
+`checks/save-said.py` rewritten rather than deleted (§218): no status in the
+sentence, the instruction in it, the status on the hover. `safety-banners.py`
+green. `refusal-keeps-work.py` is red on `main`'s own build for the
+stub-without-a-worker fault §231.5 records, reproduced before this change and
+not touched by it.
+

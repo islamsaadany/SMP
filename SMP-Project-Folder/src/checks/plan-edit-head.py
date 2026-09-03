@@ -126,7 +126,7 @@ def run(pg):
     pg.wait_for_timeout(400)
     scrolled = pg.evaluate("()=>Math.round(window.scrollY)")
     ck("the page really scrolled (%dpx)" % scrolled, scrolled > 200, scrolled)
-    # §248: THE WAY TO SAVE MOVED AND THE REQUIREMENT DID NOT. Islam's ask
+    # §268: THE WAY TO SAVE MOVED AND THE REQUIREMENT DID NOT. Islam's ask
     # was *"so on scrolling down I can still see that save button"* — the
     # button is `Done editing` on the section line now, which pins HIGHER than
     # this head and does not move when the section changes. So the assertion

@@ -108,6 +108,16 @@ with sync_playwright() as p:
       x.items[0].tactics.slice(1).forEach(tt => {
         if (!(tt.collaborators || []).length) tt.collaborators = ["Somebody"];
       });
+      /* §249 made a tactic's outcome and its target counted gaps, and the
+         shipped plan has neither on any row — so every tactic on this pillar
+         is given both, exactly as the line above gives them a collaborator,
+         and the fixture goes on holding the gaps it MEANT to hold. The
+         outcome's own fill is proved on its own below, where the state is
+         made deliberately rather than inherited. */
+      x.items[0].tactics.forEach(tt => {
+        if (!tt.outcome)   tt.outcome   = "Something measurable";
+        if (!tt.outTarget) tt.outTarget = "6 #";
+      });
       x.keyObjectives[0].target = "";
       paint();
     }""", who["unit"])
@@ -116,7 +126,7 @@ with sync_playwright() as p:
     be(pg, who["cust"], who["unit"], "strategy", "plan")
     # §145.14: the fill control is a WORDED RED BUTTON beside the arrows,
     # not a pen glyph — drawn only while something is missing.
-    # §248: the fill grant's control is the BAR's, in the section row. The
+    # §268: the fill grant's control is the BAR's, in the section row. The
     # corner copy is gone — one control, one place — so this presses the one
     # that is actually there.
     pen = pg.query_selector('#secrow-in .missbar .fillcta[data-fillcta="plan"]')
@@ -301,6 +311,105 @@ with sync_playwright() as p:
     ck("...and counts the moment the mark lifts", r is True)
     pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
+    # ── 8b · THE OUTCOME AND ITS TARGET FILL, AND ONLY THOSE TWO (§249) ─
+    print("\n8b · a tactic's outcome and its target fill; the two beside them do not")
+    # §205's PAIRING, ASSERTED FROM THE SCREEN'S SIDE. The server half is in
+    # test-authorize.js §26; this is the half that opens the box. A build that
+    # counted these and never drew a control is §223 exactly — the server
+    # accepts a save the screen has no way of producing — and one that drew
+    # the direction and the compile rule beside them would offer a filler an
+    # edit the save refuses, costing the fills in the same post (§184).
+    pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      delete t.outcome; delete t.outTarget; delete t.outDir; delete t.outCompile;
+      if (t.pend) { delete t.pend.outcome; delete t.pend.outTarget; }
+      paint();
+    }""", who)
+    be(pg, who["cust"], who["unit"], "strategy", "plan")
+    # THE STATE IS ASSERTED BEFORE IT IS CLEARED, or every assertion below is
+    # satisfied by a build that never counted these at all: emptied, they must
+    # be OWED, and the point of the section is that filling them settles it.
+    owed = pg.evaluate("""(w) => SMPRules.gapMissing(
+      "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
+    ck("an empty outcome and target are owed to start with",
+       "outcome" in owed and "outTarget" in owed, owed)
+    pg.click('#secrow-in .missbar .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
+    r = pg.evaluate("""(w) => {
+      const row = document.querySelector('.pane tbody tr');
+      const grid = document.querySelector('.pane td.tgtcell .tgrid');
+      if (!grid) return { nogrid: true };
+      const out = { boxes: [...grid.children].filter(c => !c.classList.contains('ss-native')).length,
+                    opens: grid.querySelectorAll('.fld').length,
+                    folds: !!document.querySelector('.pane td.tgtcell') };
+      const area = [...document.querySelectorAll('.pane textarea.fld.gapfld')]
+        .filter(a => a.closest('td') && a.closest('td').cellIndex === 2)[0];
+      if (area) { area.value = "Stores opened";
+                  area.dispatchEvent(new Event('change', { bubbles: true })); }
+      const num = grid.querySelector('input.fld');
+      if (num) { num.value = "6"; num.dispatchEvent(new Event('change', { bubbles: true })); }
+      const t = UNITS[w.unit].items[0].tactics[0];
+      out.outcome = t.outcome; out.target = t.outTarget;
+      out.marks = Object.keys(t.pend || {});
+      return out;
+    }""", who)
+    ck("the four boxes are still four in fill mode", r.get("boxes") == 4, r)
+    # TWO OF THE FOUR OPEN AND TWO READ. The direction and the compile rule
+    # carry working defaults, so they are not gaps — drawn read-only rather
+    # than dropped, because inside a block of four equal boxes a hole reads as
+    # a control that failed to render (§248's own ruling about the unit).
+    ck("...and exactly two of them open", r.get("opens") == 2, r)
+    # §61: the cell keeps `.tgtcell` while it holds controls, or below 880 the
+    # Target column folds away and takes the only way to set one with it.
+    ck("...in a cell the narrow layout cannot fold away", r.get("folds"), r)
+    ck("the outcome written by a filler reaches the plan",
+       r.get("outcome") == "Stores opened", r)
+    ck("...and so does the target", str(r.get("target", "")).startswith("6"), r)
+    ck("...both stamped with the fill mark",
+       "outcome" in (r.get("marks") or []) and "outTarget" in (r.get("marks") or []), r)
+    # AND THE ROW STOPS BEING COUNTED, or the page would go on asking for what
+    # it has just been given (§116.2: the count and the field are one list).
+    left = pg.evaluate("""(w) => SMPRules.gapMissing(
+      "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
+    ck("...so neither is still owed", "outcome" not in left and "outTarget" not in left, left)
+
+    # §249.2: THE UNIT MAY BE PICKED BEFORE THE NUMBER, AND THAT IS NOT A FILL.
+    # §248 lets what a thing is measured in be chosen first, so `outTarget`
+    # holds "%" on the way to "90%" — non-blank, and still a gap. Two things
+    # must be true of that half-answer, and the first build of §249 got both
+    # wrong: the mark must NOT be stamped (a marked field reads as answered, so
+    # the row would leave the count, the walk and Submit's refusal with its
+    # target unusable), and the save must still be the filler's (it was
+    # refused, which is the CX refusal's shape — one unclassified row costs
+    # every fill posted with it, §184).
+    half = pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      delete t.outTarget; if (t.pend) delete t.pend.outTarget;
+      paint();
+      const grid = document.querySelector('.pane td.tgtcell .tgrid');
+      const uni = [...grid.querySelectorAll('select')].filter(
+        s => [...s.options].some(o => o.text === 'M EGP'))[0];
+      if (!uni) return { nouni: true };
+      uni.value = '%'; uni.dispatchEvent(new Event('change', { bubbles: true }));
+      return { stored: t.outTarget, marked: !!(t.pend && t.pend.outTarget),
+               missing: SMPRules.gapMissing('tactic', t).indexOf('outTarget') > -1 };
+    }""", who)
+    ck("a unit picked before the number is kept", half.get("stored") == "%", half)
+    ck("...and is NOT stamped as a fill", half.get("marked") is False, half)
+    ck("...and the row still says the target is missing", half.get("missing"), half)
+    # PUT THE STATE BACK (§94.2's neighbour). This section deliberately leaves
+    # the row holding a half-answer, and the sections below were written
+    # against a row that owes nothing here — a check that changes the world
+    # and walks away makes the NEXT one measure something nobody chose.
+    pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      t.outcome = "Something measurable"; t.outTarget = "6 #";
+      if (t.pend) { delete t.pend.outcome; delete t.pend.outTarget;
+                    if (!Object.keys(t.pend).length) delete t.pend; }
+      paint();
+    }""", who)
+    pg.wait_for_timeout(300)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
+
     # ── 9 · THE COUNTS THAT FIND YOU (§145.14) ──────────────────────────
     print("\n9 · the missing bar beside the sections, the rail words, the walker")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
@@ -325,7 +434,7 @@ with sync_playwright() as p:
     # the PAINT is asserted: the bar's button wears the same ground as the
     # corner's (the relationship, §53.5), and that ground is a real colour —
     # both vanishing together must still fail. The chip keeps a real border.
-    # §248 REMOVED THE CORNER COPY, so this can no longer compare the bar's
+    # §268 REMOVED THE CORNER COPY, so this can no longer compare the bar's
     # button with it — and a comparison to something that is gone is satisfied
     # by both sides vanishing (§113.8). It asserts the PROBLEM instead, which
     # is what §145.14 was ever about: inside `nav.tabs` a bare class is
@@ -395,7 +504,15 @@ with sync_playwright() as p:
       if (inp.tagName === "SELECT") {
         const o = [...inp.options].filter(o => o.value)[0];
         if (inp.multiple) o.selected = true; else inp.value = o.value;
-      } else inp.value = "Somebody Named";
+      /* §249: A TARGET IS ANSWERED WITH A NUMBER. The outcome's target is four
+         controls in one cell and the number is one of them, so a trial that
+         types a NAME into it writes a value the platform cannot read — the
+         field stays a gap, the count rightly does not move, and the check
+         reports a working build as broken. The lesson is the one this trial's
+         own comment already records for a picker: answer the control you
+         landed on. */
+      } else if (inp.closest(".tgrid")) inp.value = "6";
+      else inp.value = "Somebody Named";
       inp.dispatchEvent(new Event('change', { bubbles: true }));
       const after = chip.textContent.trim();
       const totalWord = document.querySelector('[data-gapband] .secmiss').textContent;

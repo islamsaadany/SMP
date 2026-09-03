@@ -277,7 +277,12 @@ function unitSuggestions(){
     if (!x || seen[x] || x.indexOf(",") > -1) return;
     seen[x] = 1; out.push(x);
   }
-  ["%", "EGP", "M EGP", "B EGP", "days", "#"].forEach(add);
+  /* §251: `Y/N` is offered here too, or a plan authored on the platform and
+     downloaded would come back with every yes/no target unrecognised — the
+     upload AUTHORS the plan (§22), so a unit the template cannot say is a
+     unit the round trip destroys. It is written into the Target cell whole,
+     exactly as `6.2B EGP` is; there is no separate column for a unit. */
+  ["%", "EGP", "M EGP", "B EGP", "days", "#", "Y/N"].forEach(add);
   UNIT_KEYS.forEach(function(k){
     var u = UNITS[k];
     (u.keyObjectives || []).forEach(function(m){ add(splitTarget(m.target).unit); });
@@ -518,17 +523,30 @@ function planWorkbook(u){
         return acc;
       }, []) },
 
-    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7, 9],
-      head:["Pillar", "Tactic", "Description", "Outcome", "Owner", "Collaborators",
-            "Q1", "Q2", "Q3", "Q4", "Hidden"],
+    /* §248: THE OUTCOME'S THREE FACTS TRAVEL WITH IT, or downloading a plan
+       and uploading it back would silently drop every target the office had
+       set — §22's contract is that an upload AUTHORS the plan, so a column the
+       file does not carry is a column the plan loses.
+
+       A VALIDATION RANGE IS A POSITION (§65), so the three new columns push
+       Q1–Q4 from G:J to J:M and Hidden from K to N. Getting that wrong
+       validates the wrong cells in silence, which is why the ranges move in
+       the same edit as the head. */
+    { name:"Tactics", widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9],
+      head:["Pillar", "Tactic", "Description", "Outcome",
+            "Outcome direction", "Outcome target", "Outcome compiled",
+            "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"],
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
-                   { range:"G2:J400", list:YESNO },
-                   { range:"K2:K400", list:YESNO, soft:true }],
+                   { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
+                   { range:"G2:G400", list:["Sum", "Latest", "Average"], soft:true },
+                   { range:"J2:M400", list:YESNO },
+                   { range:"N2:N400", list:YESNO, soft:true }],
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
-          acc.push([p.name, t.name, t.description || "", t.outcome || "", t.owner,
-            (t.collaborators || []).join(", "),
+          acc.push([p.name, t.name, t.description || "", t.outcome || "",
+            t.outDir || "", t.outTarget || "", t.outCompile || "",
+            t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
             SMPRules.isHidden(t) ? "Yes" : ""]);
         });
@@ -816,7 +834,13 @@ function planFromWorkbook(u, sheets){
     tN[pid] = (tN[pid] || 0) + 1;
     rows.push({ id:pid ? pid + "-T" + tN[pid] : "", type:"TACTIC",
       parent_id:pid, name:r["Tactic"],
-      description:r["Description"], outcome:r["Outcome"], owner:r["Owner"],
+      description:r["Description"], outcome:r["Outcome"],
+      /* Blank says nothing, exactly as every other optional column does — a
+         file written before this existed carries none of the three and its
+         tactics arrive measured the way they always were. */
+      outDir:r["Outcome direction"] || "", outTarget:r["Outcome target"] || "",
+      outCompile:r["Outcome compiled"] || "",
+      owner:r["Owner"],
       collaborators:(r["Collaborators"] || "").split(/[,|]/).map(function(x){ return x.trim(); })
         .filter(Boolean).join("|"),
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",

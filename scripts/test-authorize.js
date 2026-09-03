@@ -100,6 +100,29 @@ refuses(headKey, function (s) { s.group.branding = { accent: "#123456" }; },
   "a unit head cannot change the tenant's branding");
 allows("smo", function (s) { s.group.branding = { accent: "#123456" }; },
   "the SMO can");
+/* The group's mark (§259). Named rather than left to the unknown bucket for
+   the same reason `comms` is — it is refused for everybody but the SMO either
+   way, and what this pins is that the refusal says Setup, so somebody sent
+   back by it knows to open Branding (§16.7). */
+refuses(headKey, function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "a unit head cannot set the group's mark");
+allows("smo", function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "the SMO can");
+(function () {
+  /* THE SEED CARRIES NO MARK, so `delete incoming.group.logo` is a no-op and
+     an assertion built that way passes on every build (§94.5, its own
+     example). Both graphs are built: the STORED one holds a mark and the
+     incoming one does not, which is the clear somebody presses. */
+  const st = clone(SEED); st.group.logo = "data:image/png;base64,AAAA";
+  const inc = clone(st); delete inc.group.logo;
+  const v = A.authorize(st, inc, personOf(SEED, "smo"));
+  check("the SMO can CLEAR the mark — a removal is the same act as a set",
+        v.ok && v.changes.some(function (c) { return c.kind === "setup"; }),
+        v.refusals.join(" / ") + " / changes: " +
+        JSON.stringify(v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  const v2 = A.authorize(st, inc, personOf(SEED, headKey));
+  check("and a unit head cannot", !v2.ok);
+})();
 /* Communication (§72). The same shape as branding, and asserted rather than
    left to the unknown bucket: an unclassified change IS refused for everybody
    but the SMO, so this passes either way — what it pins is that the refusal
@@ -1209,14 +1232,26 @@ console.log("\n15 · the strategy | reporting split (§117)");
   /* The download is a pure rule with no server half — asserted here so the
      one definition is proven where every other rule is (§117). */
   const wSeed = R.worldOf(SEED);
-  check("download: the unit's custodian may", R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === true);
-  check("download: the unit's owner may", R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === true);
+  /* §252.2 REVERSES §117's AUDIENCE at Islam's instruction — "for the smo
+     only" — so these three assertions are REWRITTEN rather than deleted
+     (§218): a build that quietly handed the file back to the roles that HOLD
+     the thing would otherwise pass through a gap where a test used to be. */
   check("download: the office may", R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), UNIT) === true);
+  check("download: the unit's custodian may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === false);
+  check("download: the unit's owner may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === false);
   if (fnCust) {
     const fnHead = (SEED.functions[FN] || {}).head;
-    check("download: a function's head may, for their function",
-          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === true);
+    check("download: a function's head may NOT, for their own function (§252.2)",
+          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === false);
+    check("download: the office may, for that same function",
+          R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), "fn:" + FN) === true);
   }
+  /* And arranging is untouched by the narrowing — the two questions stopped
+     sharing an answer, so the one that stayed open is asserted beside it. */
+  check("arrange: the unit's custodian still may (§101, unchanged)",
+        R.mayArrange(wSeed, personOf(SEED, custKey), UNIT) === true);
   const nobody = { key: "smp_test_nobody", unit: UNIT };
   check("download: somebody holding nothing may not",
         R.mayDownloadPlan(wSeed, nobody, UNIT) === false);
@@ -1402,8 +1437,19 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
         (v.refusals || []).join(" / "));
   check("...and is still NOT counted as missing",
         R.GAP_FIELDS.tactic.indexOf("collaborators") < 0, R.GAP_FIELDS.tactic);
-  check("...so a tactic owing nothing else counts 0",
-        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [] }).length === 0,
+  /* §249 MOVED THE TOTAL AND NOT THE POINT. This asserted that a tactic
+     owning nothing else counts ZERO, which was a fair vehicle for "an empty
+     collaborators list is not owed" while owner and quarters were the whole
+     list — and §249 added the outcome and its target, so the literal now
+     reports a deliberate decision as a regression (§214.3, the fourth time
+     this file has recorded a number outliving the decision behind it). What
+     it exists to say is that the EMPTY LIST adds nothing, so it asks exactly
+     that: the same row with and without the field counts the same. */
+  check("...so an empty collaborators list adds nothing to the count",
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [],
+                                 outcome: "O", outTarget: "6 #" }).length ===
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1,
+                                 outcome: "O", outTarget: "6 #" }).length,
         R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [] }));
   /* AND THE THING §187 ACTUALLY GUARDED IS UNTOUCHED: a list that already
      has somebody in it is not a gap and never opens to the filler. */
@@ -1423,9 +1469,11 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
   check("...and collaborators is off the tactic's gap list",
         R.GAP_FIELDS.tactic.indexOf("collaborators") === -1,
         JSON.stringify(R.GAP_FIELDS.tactic));
-  check("...while a tactic owning nobody still owes nothing for it",
-        R.gapMissing("tactic", { owner: "A", q1: 1 }).length === 0,
-        JSON.stringify(R.gapMissing("tactic", { owner: "A", q1: 1 })));
+  check("...while a tactic owning nobody is not asked for one",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O", outTarget: "6 #" })
+          .indexOf("collaborators") === -1,
+        JSON.stringify(R.gapMissing("tactic", { owner: "A", q1: 1,
+                                                outcome: "O", outTarget: "6 #" })));
   /* THE OTHER END: the owner is still fillable, and is the reason it stayed —
      a line nobody owns is a line nobody can report. */
   s = gappy();
@@ -2524,6 +2572,365 @@ console.log("\n24 · the Overview is mandatory; its definition is the office's (
     r = fromStored(sf3, "smo", function (i) { i.functions[FNP].def = "The office's wording."; });
     check("§214: the office rewrites it freely", r.ok, r.refusals.join(" / "));
   }
+})();
+
+console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)");
+(function () {
+  /* Islam: *"the tactics outcome and target are not counting missing in the
+     units plans. they should count as missing."* \u00a7248 built both fields and
+     deliberately left them out of the counted list; this is that reversal,
+     and what has to be true on the SERVER for it is that the fill grant can
+     now write them \u2014 counted and fillable are one list's floor (\u00a7205), so a
+     build that counted them here and refused the save would be \u00a7184 exactly:
+     a red chip, a control that opens, and a save that costs the fills beside
+     it. */
+  const MARK3 = { by: "own_it", at: "2026-09-02T00:00:00.000Z" };
+  /* The two helpers every fill section builds for itself \u2014 each IIFE in this
+     file keeps its own rather than hoisting them into a shared scope nothing
+     else expects. */
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  check("\u00a7249: the seed holds a unit custodian to test with", !!CUST, UK);
+  if (!CUST) return;
+  const base = function (patch) {
+    const s = withAccess("custodian", patch || { a_unit_own_strat: "fill" });
+    s.unitRoles = Object.assign({}, s.unitRoles,
+      { [UK]: Object.assign({}, (s.unitRoles || {})[UK], { custodian: CUST }) });
+    const t = s.units[UK].items[0].tactics[0];
+    delete t.outcome; delete t.outTarget; delete t.outDir; delete t.outCompile;
+    return s;
+  };
+  const T = function (i) { return i.units[UK].items[0].tactics[0]; };
+
+  /* BOTH FIELDS, SEPARATELY, because one of them passing says nothing about
+     the other \u2014 they take different paths on the screen (a growing text box
+     and a four-control block) and it is one list that has to carry both. */
+  let r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outcome = "Share of wallet up"; t.pend = { outcome: MARK3 };
+  });
+  check("\u00a7249 FILL: an empty outcome is the custodian's to write",
+        r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outTarget = "6 #"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 FILL: ...and so is an empty target", r.ok, (r.refusals || []).join(" / "));
+
+  /* A UNIT ON ITS OWN IS NOT A TARGET (\u00a7249's numeric rule), so typing the
+     number that completes it is still a FILL and not an amend \u2014 which is what
+     lets the office pick the unit first without closing the box behind them. */
+  let s2 = base(); T(s2).outTarget = "%";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outTarget = "90%"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 FILL: a target holding only a unit is still empty", r.ok,
+        (r.refusals || []).join(" / "));
+
+  /* AND THE OTHER END, or the assertions above are satisfied by a build that
+     accepts anything a filler sends. */
+  s2 = base(); T(s2).outcome = "Already written.";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outcome = "Rewritten."; t.pend = { outcome: MARK3 };
+  });
+  check("\u00a7249 REFUSED: an outcome already written is the office's", !r.ok, "was ALLOWED");
+  s2 = base(); T(s2).outTarget = "6 #";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outTarget = "9 #"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 REFUSED: ...and so is a target already set", !r.ok, "was ALLOWED");
+
+  /* THE TWO NEIGHBOURS ARE NOT GAPS, and this is why the screen draws them
+     read-only in fill mode: both carry a working default, so a filler writing
+     one is authoring \u2014 and a save is all or nothing, so it would cost the
+     fills beside it (\u00a7184). */
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outDir = "\u2264"; t.pend = { outDir: MARK3 };
+  });
+  check("\u00a7249 REFUSED: the direction is not a gap", !r.ok, "was ALLOWED");
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outCompile = "Sum"; t.pend = { outCompile: MARK3 };
+  });
+  check("\u00a7249 REFUSED: nor is the compile rule", !r.ok, "was ALLOWED");
+
+  /* \u00a7249.2: THE UNIT-FIRST WALK, END TO END. \u00a7248 lets what a thing is
+     measured in be chosen before how much of it, so `outTarget` legitimately
+     holds "%" on the way to "90%" \u2014 a value that is non-blank and STILL a gap.
+     The first build of \u00a7249 refused exactly that save, which is the CX
+     refusal's shape (\u00a7184): one unclassified row costs every fill posted with
+     it. Each step is asserted, because the walk is only usable if all of them
+     land. */
+  let w = base(); T(w).outTarget = "%";
+  r = fromStored(base(), CUST, function (i) { T(i).outTarget = "%"; });
+  check("\u00a7249.2 FILL: the unit may be picked before the number", r.ok,
+        (r.refusals || []).join(" / "));
+  r = fromStored(w, CUST, function (i) {
+    const t = T(i); t.outTarget = "90%"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249.2 FILL: ...and the number then joins it", r.ok,
+        (r.refusals || []).join(" / "));
+  w = base(); T(w).outTarget = "90%"; T(w).pend = { outTarget: MARK3 };
+  r = fromStored(w, CUST, function (i) {
+    const t = T(i); t.outTarget = "%"; delete t.pend;
+  });
+  check("\u00a7249.2 FILL: ...and taking the number back off is theirs too", r.ok,
+        (r.refusals || []).join(" / "));
+  /* AND IT REACHES ONLY WHAT IS ALREADY A GAP. The widening is "a gap moved to
+     another gap"; a value the platform CAN use is settled and stays the
+     office's, or this would be a hole in \u00a794 rather than a fill. */
+  w = base(); T(w).owner = "Somebody Accountable";
+  r = fromStored(w, CUST, function (i) { T(i).owner = "Somebody Else"; });
+  check("\u00a7249.2 REFUSED: a settled value is not 'still a gap'", !r.ok, "was ALLOWED");
+
+  /* AND THE COUNT IS NOT QUIETENED BY THE MARK. `gapMissing` treats a pending
+     field as answered; a mark sitting on a value that is still empty must not
+     buy that, or a row leaves the count, the walk and Submit's refusal with
+     its target unusable. */
+  check("\u00a7249.2: an unusable target is counted even when marked",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "%", pend: { outTarget: MARK3 } })
+          .indexOf("outTarget") > -1,
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "%", pend: { outTarget: MARK3 } }));
+  check("\u00a7249.2: ...and a usable one marked is not",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "90%", pend: { outTarget: MARK3 } })
+          .indexOf("outTarget") === -1);
+
+  /* \u00a7249.3: TWO FILLS IN ONE POST, WHERE NEITHER KEY EXISTS YET. The gap
+     pass clears what it classifies by ASSIGNING onto the stored clone, which
+     APPENDS a key the stored row did not have \u2014 and `same()` is
+     stringify-based, so two appends in a different order from the incoming
+     row's leave the clone spelling the same row differently. The residual diff
+     then sees a change it cannot attribute, calls it `unitPlan`, and refuses
+     the whole save with every fill in it (\u00a7184).
+
+     IT PREDATES \u00a7249 and is asserted here because \u00a7249 makes it the COMMON
+     case: \u00a7248's five fields are absent on every tactic written before them,
+     and two of them are now what a filler is asked for. Measured on the build
+     before \u00a7249: the same two fills are REFUSED with both keys absent and
+     ACCEPTED with both present-but-empty. */
+  w = base();
+  const T2 = function (i) { return i.units[UK].items[0].tactics[0]; };
+  delete T2(w).outcome; delete T2(w).outTarget; delete T2(w).pend;
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 FILL: the outcome and its target in ONE post", r.ok,
+        (r.refusals || []).join(" / "));
+  /* AND THE SAME POST WITH ONE FIELD THE FILLER MAY NOT TOUCH IS STILL
+     REFUSED \u2014 the re-spelling only ever runs on rows whose CONTENT is already
+     identical, so it can never mask a real change. Asserted, because a fix
+     that made every save pass would satisfy the line above. */
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #"; t.name = "Renamed by a filler";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 REFUSED: ...but not with a rename smuggled in beside them",
+        !r.ok, "was ALLOWED");
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #"; t.outDir = "\u2264";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 REFUSED: ...nor with the direction changed beside them",
+        !r.ok, "was ALLOWED");
+
+  /* AND THE OFFICE AUTHORS ALL FOUR FREELY \u2014 locking something down proves
+     nothing unless the right person stayed open (\u00a7102). */
+  r = fromStored(base(), "smo", function (i) {
+    const t = T(i);
+    t.outcome = "The office's wording."; t.outTarget = "12 #";
+    t.outDir = "\u2264"; t.outCompile = "Average";
+  });
+  check("\u00a7249: the office writes all four with no mark at all",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n27 · which slides a review shows is the office's (§256)");
+(function () {
+  /* Islam: *"allow the smo to hide presentation slides of any unit or
+     function."* The screen draws the eye for the office alone; this is the
+     other end of that one question (§42) — a screen that hides a control the
+     server would have accepted, or offers one it refuses, is the drift
+     `lib/rules.js` exists to prevent.
+
+     BOTH SIDES OF EVERY ASSERTION. A test that only proves the custodian is
+     refused passes just as happily on a build that refuses EVERYBODY, which
+     would be a feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FNK = Object.keys(SEED.functions || {})[0];
+  check("§256: the seed holds a unit, a custodian and a function to test with",
+        !!(UK && CUST && FNK), [UK, CUST, FNK].join(" / "));
+  if (!(UK && CUST && FNK)) return;
+
+  /* — a business unit — */
+  let r = fromStored(SEED, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: the office hides a slide on a unit", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256 REFUSED: the unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§256: and the refusal names Manage slides, never Setup",
+        !r.ok && /Manage slides/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* SHOWING ONE AGAIN IS THE SAME ACT, and the emptied key is DELETED (§50.6)
+     — a build that classified the write and not the removal would let anybody
+     un-hide what only the office could hide. */
+  const hidden = clone(SEED); hidden.units[UK].hideSlides = ["swot"];
+  r = fromStored(hidden, CUST, function (i) { delete i.units[UK].hideSlides; });
+  check("§256 REFUSED: nor can they show it again", !r.ok, "was ALLOWED");
+  r = fromStored(hidden, "smo", function (i) { delete i.units[UK].hideSlides; });
+  check("§256: the office shows it again", r.ok, (r.refusals || []).join(" / "));
+
+  /* — a supporting function, BOTH FORMATS —
+     `asUnit()` builds a fresh object from named fields, so a function's list
+     never reaches the unit pass at all. If this were classified there and not
+     in collectFunction(), a pillars function's hidden slides would be seen by
+     nothing and therefore allowed to everybody (§191). */
+  ["pillars", "projects"].forEach(function (fmt) {
+    const s = clone(SEED); s.functions[FNK].format = fmt;
+    let x = fromStored(s, "smo", function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§256: the office hides a slide on a " + fmt + " function",
+          x.ok, (x.refusals || []).join(" / "));
+    x = fromStored(s, CUST, function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§256 REFUSED: a unit custodian cannot, on a " + fmt + " function",
+          !x.ok, "was ALLOWED");
+  });
+
+  /* IT PRODUCES EXACTLY ONE SENTENCE. The field sits in UNIT_KNOWN and in no
+     other list, and in FN_SEEN and not FN_KNOWN, precisely so a press does not
+     also report "the unit's settings" or "a supporting function" — two
+     sentences for one act is how somebody is sent to the wrong screen. */
+  /* ASKED OF `collect` BY NAME, never behind a guard. The first draft of this
+     assertion read `A.classify ? … : null` — and `classify` is not an export,
+     so it never ran at all while the suite printed it as passed (§54.5, and
+     §94.5 one file over: a check that asks whether it can run is a check that
+     passes). */
+  const kindsOf = function (mutate) {
+    const inc = clone(SEED); mutate(inc);
+    return A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+            .map(function (c) { return c.kind; });
+  };
+  let kinds = kindsOf(function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: a hidden slide classifies as deckHide and nothing else",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+  kinds = kindsOf(function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+  check("§256: and on a function, the same one sentence",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately (§256): a locked cycle has
+     stopped taking FIGURES, and the deck is presented after it locks. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: a locked cycle does not stop the office pruning the deck",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n28 · the order of the navigation is the office's (§261)");
+/* ── 28 · THE ORDER OF THE NAVIGATION IS THE OFFICE'S (§261) ──────────
+   Setup gained a way to drag the units and the functions into the order they
+   appear in. NOTHING NEW IS STORED — the order IS `unitKeys` / `functionKeys`,
+   which the server has classified as `setup` since it classified anything —
+   so this asserts that what was already true is still true, at BOTH ENDS
+   (§94.2): a build that let anybody reorder them would rewrite the navigation
+   for the whole tenant from a page they can open. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const swap = function (arr) {
+    const a = arr.slice(); const x = a.shift(); a.push(x); return a;
+  };
+  let r = fromStored(SEED, "smo", function (i) { i.unitKeys = swap(i.unitKeys); });
+  check("§261: the office may reorder the business units", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, "smo", function (i) { i.functionKeys = swap(i.functionKeys); });
+  check("§261: and the supporting functions", r.ok, (r.refusals || []).join(" / "));
+
+  /* THE OTHER END, and it is the one that matters: a unit head holds a page
+     of their own and none of Setup. */
+  const headKey = (SEED.unitRoles[UNIT] || {}).head;
+  if (!headKey) {
+    check("§261: the seed has a unit head to ask", false, "none");
+  } else {
+    r = fromStored(SEED, headKey, function (i) { i.unitKeys = swap(i.unitKeys); });
+    check("§261: a unit head may NOT reorder them", !r.ok,
+          r.ok ? "accepted" : "refused");
+    /* AND THE REFUSAL NAMES THE LIST, not "something changed" — §16.7's rule
+       that a refusal has to send somebody to a screen. */
+    check("§261: ...and the refusal names the list",
+          !r.ok && (r.refusals || []).join(" ").indexOf("business units") > -1,
+          (r.refusals || []).join(" / "));
+  }
+})();
+
+console.log("\n29 · the master presentation's running order is the office's (§266)");
+(function () {
+  /* Islam, asked before it was built: the SMO. The menu draws the entry for
+     the office alone; this is the other end of that one question (§42), and
+     BOTH sides of it — a test that only proves the custodian is refused passes
+     just as happily on a build that refuses everybody, which would be a
+     feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FLOW = [UK, "fn:" + Object.keys(SEED.functions || {})[0]];
+  check("§266: the seed holds a unit and a custodian to test with",
+        !!(UK && CUST), [UK, CUST].join(" / "));
+  if (!(UK && CUST)) return;
+
+  let r = fromStored(SEED, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§266: the office sets a running order", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  check("§266 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§266: and the refusal names the Presentation menu, never Setup",
+        !r.ok && /Presentation menu/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* CLEARING IT IS THE SAME ACT, and the key is DELETED rather than emptied
+     (§50.6) — a build that classified the write and not the removal would let
+     anybody throw away an order only the office could set. */
+  const set = clone(SEED); set.group.masterFlow = FLOW;
+  r = fromStored(set, CUST, function (i) { delete i.group.masterFlow; });
+  check("§266 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group.masterFlow; });
+  check("§266: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, AND IT IS ITS OWN KIND. Left to the unknown sweep this
+     would land on the SMO too — and would report "the group's masterFlow",
+     which sends nobody anywhere (§16.7). */
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§266: a change to it is classified `masterFlow` and nothing else",
+        kinds.length === 1 && kinds[0] === "masterFlow", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately: the flow is arranged the
+     morning of the meeting, which is after the lock and not before it. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§266: a locked cycle does not stop the office arranging the flow",
+        r.ok, (r.refusals || []).join(" / "));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

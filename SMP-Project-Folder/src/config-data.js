@@ -198,6 +198,35 @@ var PMENU = null;
    the two tables are never on screen together and sharing one would make
    "which table" a third thing to check. */
 var FNMENU = null;
+/* THE SAME STATE AGAIN, FOR THE BUSINESS UNITS TABLE (§261). Its own key for
+   the reason FNMENU has its own: the three tables are never on screen together,
+   and one shared key would make "which table" a third thing every reader of it
+   has to check. */
+var UMENU = null;
+/* AND FOR COMPANIES (§261). */
+var COMENU = null;
+
+/* ── WHICH SETUP TABLE IS BEING ARRANGED (§261) ─────────────────────
+   Islam: *"allow me in the setup to rearrange the business units table so they
+   appear in the navigation as per this order."*
+
+   NOT `ARRANGE`, which is the group Performance page's boolean and is scoped to
+   that page — §65.9's lesson about a one-word name in a shared namespace, in
+   JavaScript rather than in CSS. This holds the TABLE's id (`"units"`,
+   `"fns"`), so a page cannot be arranging while another page's band is drawn,
+   and one press cannot turn two tables into handles at once.
+
+   SCREEN STATE, NEVER SAVED (§25.2): what is saved is the ORDER, which is the
+   list itself and was already stored. */
+var SETARRANGE = null;
+
+/* ── WHICH ROW IS OPEN IN THE SETUP DIALOG (§261) ───────────────────
+   `{ table, key }`, the register's `PDLG` one table wider. Editing left the row
+   for the same reason it left the register (§116): every collision these tables
+   have had was a control clicked inside a 150px cell, and none of them survives
+   the move. `ROWEDIT` still holds the row and still carries the snapshot Cancel
+   restores — what changed is only where the fields are DRAWN. */
+var ROWDLG = null;
 /* Which person the delete confirmation is open for (§69). Its own key rather
    than a mode on PMENU: the confirmation REPLACES the menu in the same place,
    so the second press lands where the first one did — the same shape the
@@ -498,6 +527,32 @@ var LOGO_MAX_EDGE = 900;    /* the deck's cover mark on a 4K projector */
 var LOGO_MAX_BYTES = 220000; /* the data URI, carried in every save */
 
 function unitLogo(u){ return (u && u.logo) || ""; }
+
+/* ── THE GROUP HAS A MARK OF ITS OWN (§259) ───────────────────────────
+   Islam: *"where can I upload the raya trade mark so it can be used?"*
+   Nowhere, until now. §52.9 gave every UNIT a mark and stopped there, so
+   a unit that has none showed its name and a supporting function showed
+   nothing at all — and Raya Trade, which is the group, had no home.
+
+   ONE UPLOAD, ON BRANDING. It sits with the accent and the bar rather
+   than on Business units, because it is not a unit's fact: it is what
+   the organisation looks like, which is the question that page answers.
+
+   THE SAME RULES AS A UNIT'S, through the same `logoIntake()` — PNG
+   only, transparent, capped — because a second intake would be a second
+   answer to "what may be uploaded" (§53.5).
+
+   `org` carries an `extra` JSONB and lib/state-io.js files every key it
+   does not recognise there, so this needs NO migration, exactly as a
+   unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
+   a group that has set none, never the key. */
+function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
+
+/* WHICH MARK A SUBJECT'S DECK WEARS, asked in one place. A unit's own
+   if it has one, the group's otherwise — so a tenant that uploads one
+   mark has a marked deck everywhere, and a supporting function, which
+   can never have a mark of its own, has one for the first time. */
+function deckMark(u){ return unitLogo(u) || groupLogo(); }
 
 function logoIntake(file){
   return new Promise(function(resolve, reject){
@@ -942,10 +997,23 @@ function restoreRolePointers(was){
     f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
   });
 }
+/* WHICH TABLES CAN MOVE A ROLE (§110, widened in §261). A person's roles are
+   not ON the person and a unit's head is not ON the unit either: `UNIT_ROLES[k]
+   .head` and `FUNCTIONS[k].custodian` are pointers, and `ROWWAS` is a copy of
+   the ROW. So Cancel on a unit whose head had just been changed restored the
+   unit and left the grant standing — §110's fault exactly, on two tables it had
+   not been asked about, and reachable the moment the picker moved into a dialog
+   with a Cancel on it.
+
+   A LIST, not a test for one table: §65's rule that a second table joining a
+   behaviour by omission is how these drift. Companies is deliberately absent —
+   it holds no head and no custodian, and capturing two maps to restore nothing
+   would be a cost with no reader. */
+var ROLE_BEARING_ROWS = { people:1, units:1, fns:1 };
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
-  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
+  ROWHELD = (ROLE_BEARING_ROWS[table] && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
@@ -4313,7 +4381,10 @@ function fnEverReported(fk){
   if (f) {
     var reported = fnItems(f).some(function(p){
       return (p.measures || []).some(function(m){ return m.actual !== "" && m.actual != null; }) ||
-             (p.tactics  || []).some(function(x){ return x.actual != null; });
+             /* §252: `tacticAnswered`, or a function whose tactics all report
+                through their outcomes reads as never having reported -- and
+                this is what stands between it and being deleted (§62). */
+             (p.tactics  || []).some(tacticAnswered);
     });
     if (reported) return true;
   }
@@ -4739,12 +4810,30 @@ function reportItems(u){
 function askedItems(u){
   return reportItems(u).filter(function(x){ return x.kind !== "tactic" || x.asked; });
 }
+/* ── HAS THIS ROW BEEN ANSWERED? (§252) ────────────────────────────
+   One predicate, because six places were asking it and five of them were
+   asking `x.obj.actual` -- which is the wrong box for a tactic measured by
+   its outcome (§248). Measured on Mobile: entering the outcome's figure took
+   the report from 41 of 41 to 40 of 41, so the reporting page, the SMO's
+   cycle board and the welcome screen all said a unit still owed a figure it
+   had just entered, and Submit refused it with "1 figure still to enter".
+
+   The ternary this replaces had the SAME expression in both branches -- the
+   tactic branch had been written and then never filled in, which is as close
+   to a note saying "this is the one that differs" as code gets. */
+function rowAnswered(x){
+  var o = x && (x.obj || x);
+  if (!o) return false;
+  if (x.kind === "tactic") return tacticAnswered(o);
+  /* A deliverable and a milestone say how far they have got rather than
+     carrying a figure (§104.10) -- unchanged, and gathered here so the
+     question has one answer rather than three. */
+  if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
+  return o.actual != null && o.actual !== "";
+}
 function reportedCount(u){
   var a = askedItems(u), n = 0;
-  a.forEach(function(x){
-    var v = x.kind === "tactic" ? x.obj.actual : x.obj.actual;
-    if (v != null && v !== "") n++;
-  });
+  a.forEach(function(x){ if (rowAnswered(x)) n++; });
   return { done:n, total:a.length };
 }
 /* A note is required where a figure lands in the bottom two bands. A red
@@ -4754,7 +4843,10 @@ function reportedCount(u){
    everything else carries `progress`. One reader, because the note rule and
    the board both ask and two copies would disagree about a deliverable. */
 function rowReads(x){
-  if (x.kind === "tactic") return tacticRatio(x.obj);
+  /* §252: through `tacticProgress`, or the note rule cannot see an outcome at
+     all -- a tactic reporting 2 of a target of 10 read null, so nobody was
+     ever asked to explain it and Submit let it through unexplained. */
+  if (x.kind === "tactic") return tacticProgress(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
   /* §239: the prorated score, so a unit is asked to explain a figure that is
      actually behind rather than one that only looks behind against a whole
@@ -4814,10 +4906,9 @@ function fnAskedItems(fk){
 }
 function fnReportedCount(fk){
   var a = fnAskedItems(fk), n = 0;
-  a.forEach(function(x){
-    if (x.kind === "deliverable" || x.kind === "milestone") { if (statusGiven(x.obj)) n++; }
-    else if (x.obj.actual != null && x.obj.actual !== "") n++;
-  });
+  /* §252: the same predicate the unit's count asks. A function has no
+     tactics, so nothing here moves -- what goes is the second copy. */
+  a.forEach(function(x){ if (rowAnswered(x)) n++; });
   return { done:n, total:a.length };
 }
 function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
@@ -5229,7 +5320,7 @@ function reaches(unitKey){
    case of a general one and this function is that one asked about the plan.
    `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
    answer is the shared file's so the screen and the server cannot drift. */
-/* ── ASK THE COLUMN THE SAVE ASKS (§250, closing §217's other half) ──
+/* ── ASK THE COLUMN THE SAVE ASKS (§270, closing §217's other half) ──
    §217 fixed the SERVER: `lib/authorize.js` resolves every strategy question
    through `strategyPageOf()`, so a supporting function's plan is judged by the
    FUNCTION's Strategy column. The SCREEN never caught up — it passed the raw
@@ -5247,7 +5338,7 @@ function reaches(unitKey){
    IN THE WRAPPERS, NOT AT THE CALL SITES. The server resolves at each of its
    six; the browser has twenty and would acquire a twenty-first the day
    somebody adds a `gapCell`. One place, so a call site cannot forget (§104.7).
-   `strategyPageOf()` passes an unmapped key through untouched (§250), which is
+   `strategyPageOf()` passes an unmapped key through untouched (§270), which is
    what makes it safe to ask of every key rather than of a list somebody keeps.
 
    NOTHING WIDENS: it can only ever move the screen onto the answer the save
@@ -5265,7 +5356,7 @@ function mayEditPlan(){ return mayAuthor("u_plan"); }
    fill field the screen draws and the save the server accepts cannot
    disagree (§42). */
 function mayFill(acKey, target){
-  /* §250: the same resolution, because `lib/authorize.js` judges a fill on a
+  /* §270: the same resolution, because `lib/authorize.js` judges a fill on a
      function through `planPageOf()` (its own `strategyPageOf`) — fixing one
      half and leaving the other is how the two came to disagree in the first
      place (§53.5). */
@@ -5276,7 +5367,7 @@ function mayFill(acKey, target){
    {project} or {pillarOwner} -- so a project owner fills their own project
    and a pillar owner their own pillar, and nobody fills a neighbour's. */
 function mayFillRow(acKey, ctx, target){
-  var t = target === undefined ? TARGET : target;   /* §250, as mayFill */
+  var t = target === undefined ? TARGET : target;   /* §270, as mayFill */
   return SMPRules.mayFillRow(world(), viewer(), strategyAc(acKey, t), t, ctx);
 }
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
@@ -5422,6 +5513,17 @@ function koWeights(list, legacy){
    Weight column nobody has filled in (§243, Islam: *"if there is no weights
    submitted the table shouldn't show weights"*). */
 function koWeighted(list, legacy){ return !!koWeights(list, legacy); }
+/* ── WHICH OBJECTIVES THE HEADLINE IS MADE OF, NAMED ONCE (§264) ──────
+   The card above a list of objectives prints a Highest and a Lowest, and those
+   have to be the extremes of EXACTLY the rows koScore() averaged. This test
+   lived inside koScore, so the card kept a second one of its own — and a second
+   membership test beside a headline is how a "highest" comes to name a row the
+   headline never counted (§53.5). `scorableMeasures()` is the same reader for a
+   pillar's measures; this is its twin for a list of key objectives. */
+function koCounts(m){
+  return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null;
+}
+function scorableKOs(list){ return (list || []).filter(koCounts); }
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
@@ -5433,10 +5535,7 @@ function koScore(list, weights){
      to have fixed here: a blank weight counted at NOTHING, so where every
      reported row was blank the total came to nought and the headline returned
      null. The merged version keeps main's reader and this branch's rule. */
-  var counts = function(m){
-    return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null;
-  };
-  var vals = (list || []).filter(counts);
+  var vals = scorableKOs(list);
   if (!vals.length) return null;
   var flat = function(){
     return Math.round(vals.reduce(function(a, m){ return a + measureScore(m); }, 0) / vals.length);
@@ -5445,7 +5544,7 @@ function koScore(list, weights){
   if (!ws) return flat();
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (!counts(m)) return;
+    if (!koCounts(m)) return;
     acc += measureScore(m) * ws[i]; tot += ws[i];
   });
   /* Every weight that was set is a literal zero — an answer, but not one a
@@ -5697,13 +5796,39 @@ function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum
    PRORATE THE TARGET, THEN COMPARE -- never the ratio. Dividing a score by the
    elapsed share is right for "more is better" and exactly backwards for "less
    is better", so the share goes on the target and one expression serves both
-   directions. */
-function measureDue(m){
+   directions.
+
+   §250: THE SHARE MAY BE SUPPLIED, and that is the whole of this change.
+   A key objective and a pillar measure are the YEAR's, so they pass nothing and
+   read `elapsedShare()` exactly as they always have. A TACTIC'S OUTCOME belongs
+   to the tactic's own window -- April to September is six months, not twelve --
+   so it passes `tacticShare()`. One arithmetic, told which period it is
+   measuring; a second `outcomeDue()` would be two definitions of proration
+   drifting apart the first time either is corrected (§53.5).
+
+   ABSENT AND NULL BOTH MEAN "THE YEAR". A tactic with no quarters at all has no
+   window to prorate by, and answering null there rather than falling back would
+   empty the column for a plan whose timelines were never filled in. */
+function measureDue(m, share){
   if (!m || !m.target) return null;
+  /* §264: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
+     figure — picking Y/N keeps whatever number was there and stops counting
+     it — so the digits are in the string and `parseFloat` would pull them
+     out, printing "due at 100 Y/N" beside a control offering Yes and No.
+     The unit decides, not whether a number can be found. */
+  if (SMPRules.isYesNo(m.target)) return null;
+  /* §251: THE COUNT AND THE SCORE ASK ONE FUNCTION. A target may now hold its
+     unit before its number ("%"), so "is there a number in here" decides both
+     whether the row is a counted gap and whether it can be scored at all —
+     and two definitions of it is how a row comes to be counted as missing
+     while quietly being scored (§249's own rule, on the field it named). The
+     test is unchanged; what changes is that this asks for it rather than
+     carrying its own copy of the same expression. */
+  if (!SMPRules.targetHasNumber(m.target)) return null;
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;
-  var s = elapsedShare();
+  var s = share == null ? elapsedShare() : share;
   return s == null ? t : t * s;
 }
 /* WHAT THE ROW SCORES. Derived, never stored -- `m.progress` goes on holding
@@ -5711,9 +5836,22 @@ function measureDue(m){
    every archive and every closed cycle still reads as it did and nothing is
    migrated. The Focus board reads that raw figure on purpose (§239: reward
    stays a year-end judgement); everything else reads this. */
-function measureScore(m){
+function measureScore(m, share){
   if (!m) return null;
-  var due = measureDue(m);
+  /* ── A YES OR A NO SCORES 100 OR 0 (§264) ──────────────────────────
+     BEFORE the arithmetic, and that ordering is the whole of it: a Y/N
+     target carries no number, so `measureDue` answers null and the row
+     would fall out of every score unscored. Islam chose 100/0 over "shown
+     but never scored", so it lands in the pillar's and the unit's averages
+     like any other row.
+
+     NOTHING SAID IS NOT A NO. An unanswered row scores null and leaves every
+     average, exactly as an empty number box does — reading silence as a
+     failure marks a unit down for a question nobody has been asked yet (§35,
+     §104.10). The share is not consulted: there is no partial yes to prorate
+     (§250 prorates a TARGET, and this row has no number to prorate). */
+  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
+  var due = measureDue(m, share);
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
   if (isNaN(a)) return null;
@@ -5727,11 +5865,112 @@ function measureScore(m){
   if (m.dir === "\u2264" && !a) return 150;
   return Math.max(0, Math.min(150, Math.round((m.dir === "\u2264" ? due / a : a / due) * 100)));
 }
+/* ── A TACTIC'S OUTCOME (§248) ─────────────────────────────────────
+   Islam: a tactic's outcome carries its own direction, target with its unit
+   and compile rule, "so it can be reported in the reporting and measured in
+   the performance accordingly."
+
+   IT IS SHAPED AS A MEASURE ON PURPOSE, so `measureDue`, `measureScore` and
+   `measureDueLabel` serve it unchanged -- one arithmetic for every scored row
+   in the product (§53.5). Sum prorates, Latest and Average do not, and the
+   direction decides which way the division runs: §239's rule, not a second
+   copy of it.
+
+   THE FIGURE IS ITS OWN FIELD, AND THAT IS THE WHOLE MIGRATION STORY.
+   `t.actual` has always meant "% delivered" and is what every closed cycle,
+   every archive and `figuresSnapshot` hold. Putting an outcome's number in
+   that same box would silently reinterpret it: a tactic sitting at 45 that
+   gains an outcome of "≥ 6 #" reads 750% against its target the moment the
+   target is set, and `pillarExec` would average 45 (a per cent) beside 7 (a
+   count). So the outcome reports into `outActual` and nothing stored moves --
+   no migration, and last cycle reads exactly as it did.
+
+   These five ride in the tactic's `extra` (§177's road), so there is no
+   schema change either. */
+function outcomeOf(t){
+  /* A NUMBER, not merely a non-empty string. The unit is stored on its own
+     while the office is still choosing one — `outTarget` holds "%" before it
+     holds "90%" — so a truthiness test would call that a target and start
+     scoring a row against nothing.
+
+     §249: ASKED OF THE SHARED RULE, because the same string now decides two
+     things — whether this row scores, and whether the plan still owes a
+     target — and two definitions of "is there a number in here" is how a
+     row comes to be counted as missing while quietly being scored (§53.5,
+     §42). The test is unchanged; only its home moved. */
+  if (!t || !t.outTarget) return null;
+  /* §264: a Y/N outcome is a real target with no number in it, so it is
+     admitted here or the tactic goes on being read the old way and the
+     answer somebody gave is scored by nothing. `measureScore` takes it from
+     here — one arithmetic for every scored row, as §248 settled. And it is
+     what makes main's own `tacticAnswered` right for a yes/no row: an
+     outcome with no figure scores null, so the row is NOT answered, which
+     is Islam's "a dash is not an entry" falling out of a rule already
+     there rather than needing a second one. */
+  if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
+  return { dir: t.outDir || "\u2265", target: t.outTarget,
+           compile: t.outCompile, actual: t.outActual };
+}
+/* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
+   open cycle: a tactic is read the OLD way until its outcome has both a target
+   AND a reported figure. So the office adding an outcome mid-round changes
+   nothing -- not the question on the reporting page, not the unit's execution
+   -- until somebody actually enters the new number. The switch happens per
+   tactic, when a human types, never as a side effect of an edit. */
+function tacticOutcomeScore(t){
+  var o = outcomeOf(t);
+  if (!o || o.actual == null || o.actual === "") return null;
+  return measureScore(o, tacticShare(t));
+}
+function tacticReads(t){
+  var s = tacticOutcomeScore(t);
+  return s != null ? s : (t && t.actual != null ? t.actual : null);
+}
+/* What this tactic's figure is compared against, for the quiet half of the
+   YTD cell. An outcome answers with its own (prorated) target; everything
+   else answers with the share of its plan that is due, exactly as before.
+   §250: BOTH HALVES NOW SPEAK OF THE SAME PERIOD -- the share on the left is
+   the tactic's own window and so is the one on the right, where before a row
+   could read "83% delivered" beside a target prorated across the year. */
+function tacticBenchmark(t){
+  var o = outcomeOf(t);
+  return o ? measureDueLabel(o, tacticShare(t))
+           : (tacticPlanned(t) == null ? null : tacticPlanned(t) + "%");
+}
+/* Is this tactic being measured by its outcome rather than by an estimate?
+   Asked by the three panes so none of them decides it separately. */
+function onOutcome(t){ return tacticOutcomeScore(t) != null; }
+
+/* ── WHAT A TACTIC READS, AS A PER CENT (§252) ─────────────────────
+   Islam, of the review deck: *"presentations doesn't change when the plan
+   performance is done."*
+
+   §248 gave a tactic a SECOND box for its figure, and every surface that had
+   to be taught about it was taught one at a time. This expression --
+   `onOutcome(t) ? tacticReads(t) : tacticRatio(t)` -- was written out in the
+   Performance pane and NOWHERE else, so the deck went on asking `tacticRatio`
+   alone and printed an em-dash for a row it had already counted in the
+   heading three inches above it (§53.5: one product, two surfaces, and they
+   must not disagree about one number).
+
+   An outcome answers with its own score against the target due so far; a
+   tactic without one answers with the share of its plan it has delivered,
+   byte for byte as before. */
+/* §254.2: ASKED OF THE OUTCOME'S EXISTENCE, NOT OF ITS SCORE. `onOutcome`
+   answers "can this be scored on its outcome", which is the right question for
+   the score itself and the wrong one for "which measure is this row on" — and
+   the two being different is what put a per cent beside a count. A row that is
+   ON its outcome and has not reported one is NOT SCORED, which is what
+   `tacticOutcomeScore` already returns. */
+function tacticProgress(t){
+  return outcomeOf(t) ? tacticOutcomeScore(t) : tacticRatio(t);
+}
+
 /* What a prorated row is measured against, written the way the target is --
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
-function measureDueLabel(m){
-  var due = measureDue(m);
+function measureDueLabel(m, share){
+  var due = measureDue(m, share);
   if (due == null) return null;
   /* JOINED THE PLATFORM'S OWN WAY, never by hand: `18B EGP` keeps its spelling,
      so the benchmark reads `9B EGP` beside it rather than `9 B EGP`. One
@@ -5740,22 +5979,37 @@ function measureDueLabel(m){
   return joinTarget(String(m.target), String(Math.round(due * 100) / 100),
                     splitTarget(String(m.target)).unit || "");
 }
-function tacticPlanned(t){
-  /* §218: A FILLED QUARTER COUNTS AT ONCE -- this used to return null while
-     the quarters waited on the office, so a tactic whose timeline had just
-     been filled in read as NOT DUE, vanished from the report under "Not asked
-     -- outside this cycle", and could never be reported on.
+/* HOW FAR THROUGH THIS TACTIC'S OWN WINDOW WE ARE, as an exact fraction.
+   `elapsedShare()` answers the same question of the YEAR; this answers it of
+   the months the tactic actually runs, which is a different period and, for
+   64 of the 78 tactics in the worked example, a different number.
 
-     §239: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a
-     month, so a tactic standing in a half-finished quarter gets credit for the
-     part that has actually happened (Islam, asked outright). A tactic running
-     Q2-Q4 reviewed at August has had 5 of its 9 months. Whole quarters would
-     say a tactic planned for the quarter we are standing in has not started.
+   §218: A FILLED QUARTER COUNTS AT ONCE -- this used to return null while the
+   quarters waited on the office, so a tactic whose timeline had just been
+   filled in read as NOT DUE, vanished from the report under "Not asked --
+   outside this cycle", and could never be reported on.
 
-     The quarter arithmetic is kept as the fallback for a cycle whose year
-     cannot be read: returning null there would make every tactic "not asked"
-     and empty the reporting page, which is a far worse failure than a coarse
-     answer. */
+   §239: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a month,
+   so a tactic standing in a half-finished quarter gets credit for the part that
+   has actually happened (Islam, asked outright). A tactic running Q2-Q4
+   reviewed at August has had 5 of its 9 months. Whole quarters would say a
+   tactic planned for the quarter we are standing in has not started.
+
+   §250: IT IS A FRACTION, AND `tacticPlanned()` IS IT ROUNDED -- never the
+   other way round. Islam: a tactic in Q2 and Q3 "is a 6 months project from
+   april till september .. now we are reporting till august", so five of its six
+   months have passed. The first build of §250 read the share back OUT of the
+   rounded per cent, and 83/100 is not 5/6: a target of 12 read `9.96` instead
+   of `10`, and a WHOLE-YEAR tactic -- which must be untouched by this change --
+   moved from 88% to 87%. One value, computed once, with the per cent derived
+   from it (§53.5).
+
+   The quarter arithmetic is kept as the fallback for a cycle whose year cannot
+   be read: returning null there would make every tactic "not asked" and empty
+   the reporting page, which is a far worse failure than a coarse answer.
+   NULL MEANS "this tactic names no quarters" -- it has no window, so callers
+   fall back to the year rather than refusing to score it. */
+function tacticShare(t){
   var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   if (y == null || a == null) {
     var tot = 0, el = 0;
@@ -5764,7 +6018,7 @@ function tacticPlanned(t){
       tot++;
       if (j + 1 <= REVIEW.endsQuarter) el++;
     }
-    return tot ? Math.round(el / tot * 100) : null;
+    return tot ? el / tot : null;
   }
   var total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
@@ -5774,8 +6028,13 @@ function tacticPlanned(t){
       if (y * 12 + i * 3 + k <= a) elapsed++;
     }
   }
-  if (!total) return null;
-  return Math.round(elapsed / total * 100);
+  return total ? elapsed / total : null;
+}
+/* The share of its plan a tactic is expected to have delivered by now, as the
+   per cent every surface prints. */
+function tacticPlanned(t){
+  var s = tacticShare(t);
+  return s == null ? null : Math.round(s * 100);
 }
 /* A tactic whose quarters have not begun is not behind — it is not yet due,
    and averaging a zero into execution would say otherwise. */
@@ -6271,27 +6530,83 @@ function viaCarrier(p, own, roll){
 function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && measureScore(m) != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
-    function(){ return avg(scorableMeasures(p).map(measureScore)); },
+    /* §250: WRAPPED, NEVER PASSED BY NAME. `measureScore` takes an optional
+       share now, and `Array.map` hands its callback the INDEX as a second
+       argument -- so a bare `.map(measureScore)` would prorate the first
+       measure of every pillar by 0 (unscorable), the second by the whole year,
+       the third by TWICE the year. Silent, and wrong only for the `Sum` rows,
+       which is the half nobody would think to check. */
+    function(){ return avg(scorableMeasures(p).map(function(m){ return measureScore(m); })); },
     function(f){ return avg(fnItems(f).map(pillarPerf)); });
 }
 function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
 /* A tactic that is due but has nothing reported is not delivering zero \u2014 it is
    unreported, and averaging a zero would say the plan is failing. */
-function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
+/* §248: a tactic measured by its OUTCOME has answered when the outcome's
+   figure is in, whichever box it came from. Written as one predicate so the
+   three panes, the score and the note rule cannot disagree about whether a
+   row has been answered (§53.5). */
+/* ── ONE QUESTION DECIDES THE WHOLE ROW (§254.2, narrowing §248) ───────
+   Islam, of a tactic reading `2% / 2#` on the deck: *"the ytd is showing 2% /
+   2# .. it's not 2% in the performance it's just 2 with a unit of #"*, and
+   then, of the cause: *"the reported number is already 2# I don't know why
+   it's not reported correctly."*
+
+   NINE STATES WERE PUT THROUGH THE SCORER AND EVERY ONE WITH A FIGURE IN THE
+   OUTCOME SCORES. So the figure the deck could see was not in the outcome, and
+   there is one path that produces exactly his row: the reporting box asks for
+   the OUTCOME's figure only once the outcome has a target, and asks the old
+   question — per cent delivered — before that. A figure reported before the
+   target was added therefore sits in `actual` for ever, and the moment the
+   target appears `tacticBenchmark` starts answering with the outcome's target
+   while the figure is still coming from the old field. Two measures in one
+   cell, and nobody did anything wrong.
+
+   §248 SWITCHED ON TARGET **AND** FIGURE, deliberately, so that adding an
+   outcome mid-round changed nothing until somebody typed. That rule is
+   narrowed here at Islam's direction — he was offered three behaviours with
+   what each costs and chose this one: **the target alone decides**, and a row
+   whose outcome has a target but no figure SAYS IT IS OWED ONE rather than
+   quietly reading its old per cent.
+
+   THE COST IS REAL AND WAS STATED BEFORE HE CHOSE: such a row leaves every
+   average, stops counting as reported, and refuses Submit until the figure is
+   entered — which is one number on the reporting page. It is the only one of
+   the three that never states a figure nobody reported (§35), and the two
+   alternatives were an invented figure (carrying the old per cent across) and
+   an ignored target. */
+function tacticAnswered(t){
+  if (!t) return false;
+  return outcomeOf(t) ? tacticOutcomeScore(t) != null : t.actual != null;
+}
+function reportedTactics(p){ return dueTactics(p).filter(tacticAnswered); }
 /* THE TWO SCORES PASS UP SEPARATELY AND STAY APART (Islam, asked). The child's
    measure performance becomes the pillar's performance and its execution
    becomes the pillar's execution — nothing is blended, so the parent's two
    headline numbers stay comparable across all of its pillars, the handed-over
    one included. `plan` travels with `exec` because the ratio between them is
    what "of plan" means; averaging a ratio of ratios would say something else. */
+/* §248: THE AVERAGE READS THE SCORE, NOT THE RAW NUMBER. It averaged
+   `t.actual` directly, which is only sound while every tactic reports the same
+   0–100 "% delivered" — the moment one is measured in stores or in EGP, an
+   average of 45 and 7 means nothing. `tacticReads` returns the outcome's score
+   where there is one and the delivery figure where there is not, so on a plan
+   with no outcomes this is byte-identical to what it computed before and no
+   unit's number moves. */
 function pillarExec(p){
   return viaCarrier(p,
-    function(){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); },
+    function(){ return avg(reportedTactics(p).map(tacticReads)); },
     function(f){ return avg(fnItems(f).map(pillarExec)); });
 }
+/* And its partner: `exec / plan` is what "of plan" means, so the two halves
+   must be in the same currency. An outcome's score is ALREADY a ratio against
+   the target due at this point in the year, so its plan is 100 — not the
+   share of its quarters, which would divide a ratio by a ratio and report a
+   tactic delivering exactly its target as 138% of plan. */
+function tacticPlanShare(t){ return onOutcome(t) ? 100 : tacticPlanned(t); }
 function pillarPlan(p){
   return viaCarrier(p,
-    function(){ return avg(reportedTactics(p).map(tacticPlanned)); },
+    function(){ return avg(reportedTactics(p).map(tacticPlanShare)); },
     function(f){ return avg(fnItems(f).map(pillarPlan)); });
 }
 function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }
@@ -6606,7 +6921,9 @@ function unitSnapshotCounts(s){
   (s.items || []).forEach(function(p){
     m += (p.measures || []).length; t += (p.tactics || []).length;
     (p.measures || []).forEach(function(x){ if (x.progress != null) rep++; });
-    (p.tactics  || []).forEach(function(x){ if (x.actual != null) rep++; });
+    /* §252: an archived tactic answered by its outcome was reported, and a
+       snapshot that says otherwise is a count of the wrong box. */
+    (p.tactics  || []).forEach(function(x){ if (tacticAnswered(x)) rep++; });
   });
   (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
   return { pillars:(s.items || []).length, measures:m, tactics:t,

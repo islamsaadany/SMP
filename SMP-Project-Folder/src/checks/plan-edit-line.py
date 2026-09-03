@@ -1,4 +1,4 @@
-"""THE STRATEGY PEN LIVES ON THE SECTION LINE (§248).
+"""THE STRATEGY PEN LIVES ON THE SECTION LINE (§268).
 
 Islam: *"the edit button of the plans can you make it in the same line of the
 foundation sowt and plan? as it's a better placement for opening and savng?
@@ -22,10 +22,10 @@ WHAT THIS ASSERTS — the problem, not the layout (§94.8):
      they are. Asserting only the absence would pass on a build that had taken
      the group's pens away too.
   5. ONE WAY OUT. With the mode open the row does not carry both *Done editing*
-     and *Done filling* (§248's own duplication, and the wrong word for the
+     and *Done filling* (§268's own duplication, and the wrong word for the
      office).
   6. THE MAP IS ONE MAP. A pillars function's Overview: the row's fill button
-     names the page that section actually reads. Before §248 it named
+     names the page that section actually reads. Before §268 it named
      `foundation` while the page has read `capfoundation` since §213, so it set
      a flag nothing acts on and opened ZERO fields — rendering perfectly.
   7. IT IS DRESSED. Inside `nav.tabs`, `.tabs button` (0,1,1) outranks a bare
@@ -74,20 +74,25 @@ FIT = """() => {
   if (!row) return null;
   const pen = row.querySelector('.secpen');
   if (!pen) return {noPen: true};
-  const tabs = [...row.querySelectorAll('[data-sub2]')];
-  const mid = r => Math.round(r.top + r.height / 2);
-  const p = pen.getBoundingClientRect();
-  /* ONE ROW IS NOT ONE `top` (§122.4): controls of different heights on one
-     line have different tops, so the middles are what cluster. */
-  return { lines: new Set(tabs.map(t => mid(t.getBoundingClientRect()))
-                              .concat([mid(p)])).size,
+  const mid = e => { const q = e.getBoundingClientRect();
+                     return Math.round(q.top + q.height / 2); };
+  const kids = [...row.children];
+  const pm = mid(pen);
+  return { lines: new Set(kids.map(mid)).size,
            inRow: row.contains(pen),
+           /* §268: NEVER ALONE ON A LINE OF ITS OWN. With a long missing bar
+              the row legitimately wraps (§145.14 set `flex-wrap` on it), so
+              "one line" is a claim about the ROW and this is the claim about
+              the CONTROL — that it still keeps company with the tabs or the
+              bar rather than being pushed onto a row by itself. */
+           withSomething: kids.filter(k => k !== pen && mid(k) === pm).length > 0,
+           bar: !!row.querySelector('.missbar'),
            overflow: Math.round(row.scrollWidth - row.clientWidth) };
 }"""
 
 
 def has249(pg):
-    """§215: a build without §249 must FAIL these, not kill the run — a suite
+    """§215: a build without §269 must FAIL these, not kill the run — a suite
     that throws at the first trial reports zero failures for everything after
     it, which is a falsification that looks like a pass."""
     return pg.evaluate("()=>typeof secPagesOpen === 'function'")
@@ -172,19 +177,19 @@ with sync_playwright() as pw:
             if not press(pg):
                 ck("%s/%s · it can be pressed" % (key, s), False); continue
             o = pg.evaluate(STATE)
-            # §249: the press opens the whole tab, so this asks only that the
+            # §269: the press opens the whole tab, so this asks only that the
             # mode THIS page reads is among what opened — §1b asserts the set.
             ck("%s/%s · pressing it opens the mode the page reads" % (key, s),
                a["rowPage"] in o["edit"], (a["rowPage"], o["edit"]))
             ck("%s/%s · ...and the page gains editable fields" % (key, s),
                o["flds"] > 0, o["flds"])
-            ck("%s/%s · one way out, not two (§248)" % (key, s), o["fdone"] == 0, o)
+            ck("%s/%s · one way out, not two (§268)" % (key, s), o["fdone"] == 0, o)
             press(pg)
             c = pg.evaluate(STATE)
             ck("%s/%s · pressing it again closes the mode" % (key, s),
                c["edit"] == [], c["edit"])
 
-    # ── 1b · ONE EDIT, ONE DONE (§249) ───────────────────────────────
+    # ── 1b · ONE EDIT, ONE DONE (§269) ───────────────────────────────
     print("\n1b · one press opens the whole tab, one press closes it")
     for kind, key, tb, secs in (("unit", "mobile", "strategy", ["found", "swot", "plan"]),
                                 ("fn", "finance", "fnstrat", ["found", "proj"])):
@@ -201,7 +206,7 @@ with sync_playwright() as pw:
         got = pg.evaluate("()=>Object.keys(EDIT_PAGE).filter(k=>EDIT_PAGE[k]).sort()")
         ck("%s · one press opens every section this person may author" % key,
            got == want and len(want) > 1, {"want": want, "got": got})
-        # THE WORD MUST AGREE WHEREVER YOU STAND — the fault §249 removes is a
+        # THE WORD MUST AGREE WHEREVER YOU STAND — the fault §269 removes is a
         # control reading `Done editing` on one section and `Edit` on the one
         # beside it, which is what per-section flags gave.
         words, flds = [], []
@@ -226,7 +231,7 @@ with sync_playwright() as pw:
     # disagree — checked over every person against every unit, not one pair
     # differs. The filter earns its place on a FUNCTION, whose Overview asks
     # `k_found` (`fn_strat`) and whose Plan asks `u_plan` (`unit_strat`, the
-    # pairing §248 kept so no rights would move): two different columns.
+    # pairing §268 kept so no rights would move): two different columns.
     #
     # So this asserts the AGREEMENT rather than a made-up split (§94.8): every
     # page one press opens is a page `mayAuthorPage` allows, and every page it
@@ -258,11 +263,11 @@ with sync_playwright() as pw:
         drop = pg.evaluate("""() => {
           const real = SMPRules.mayAuthorPage;
           const pair = secPagePair(Object.keys(SEC_PENS).filter(k => secPagePair(k))[0]);
-          /* §250: THE RESOLVED KEY, not the raw one. `secPagesOpen()` goes
+          /* §270: THE RESOLVED KEY, not the raw one. `secPagesOpen()` goes
              through `mayAuthor()`, which maps a unit-side strategy key onto the
              function's column before asking — so a stub keyed on `u_found`
              blocks nothing on a function and reports a working build as broken.
-             It did, on the first run after §250, which is the resolution being
+             It did, on the first run after §270, which is the resolution being
              proved rather than a fault. */
           const blocked = SMPRules.strategyPageOf(TARGET, pair[1]);
           SMPRules.mayAuthorPage = function(w, p, k, t){
@@ -274,7 +279,7 @@ with sync_playwright() as pw:
         ck("%s · ...and a page the rule refuses drops out of it" % key,
            drop["blocked"] not in drop["got"], drop)
 
-    # ── 1c2 · THE SCREEN ASKS THE COLUMN THE SAVE ASKS (§250) ────────
+    # ── 1c2 · THE SCREEN ASKS THE COLUMN THE SAVE ASKS (§270) ────────
     # §217 fixed the SERVER: a supporting function's plan is judged by the
     # FUNCTION's Strategy column. The screen went on passing the raw unit-side
     # key, so on an `fn:` target it read the BUSINESS UNIT's column instead —
@@ -285,7 +290,7 @@ with sync_playwright() as pw:
     # same value for every role, so a build with the fix reverted passes any
     # test that only walks the shipped data (§94.2, and Islam's own point that
     # editing is the office's for now anyway).
-    print("\n1c2 · the screen and the save ask the same column (§250)")
+    print("\n1c2 · the screen and the save ask the same column (§270)")
     for label, cfg in (
         ("as shipped", None),
         ("unit Strategy open, function's shut",
@@ -319,7 +324,7 @@ with sync_playwright() as pw:
     pg.reload(); pg.wait_for_timeout(900); viewer(pg, "smo")
 
     # ── 1d · A FILL-GRANT HOLDER STILL HAS A WAY OUT (§61) ───────────
-    # §248 removed the corner control a filler used to close fill mode with,
+    # §268 removed the corner control a filler used to close fill mode with,
     # and the bar draws `Next gap` instead of `Done filling` while anything is
     # still missing — so for one build a custodian with gaps left was in a mode
     # with no way to leave it. Caught by gap-fill.py timing out on a control
@@ -359,7 +364,7 @@ with sync_playwright() as pw:
     viewer(pg, "smo")
     pg.reload(); pg.wait_for_timeout(900); viewer(pg, "smo")
 
-    # ── 1e · THE REMOVE × SITS BESIDE ITS FIELD (§250) ───────────────
+    # ── 1e · THE REMOVE × SITS BESIDE ITS FIELD (§270) ───────────────
     # §114.4 seated it on a plan TABLE and was scoped to `td`; the SWOT's lines
     # are `<li>` and Who we are's are `<dd>`, so on those two pages it went on
     # dropping to a line of its own — 6 of 6 and 23 of 23, 14px each. Measured
@@ -404,7 +409,7 @@ with sync_playwright() as pw:
         ck("...and they carry no pen between them", d["pens"] == 0, d)
         ck("...while the line carries exactly one", d["line"] == 1, d)
 
-    # ── 3 · THE MAP IS ONE MAP (§213, and what §248 corrected) ────────
+    # ── 3 · THE MAP IS ONE MAP (§213, and what §268 corrected) ────────
     print("\n3 · a pillars function's Overview names the page it actually reads")
     fns(pg)
     if dest(pg, "fn:merchandising"):
@@ -472,21 +477,48 @@ with sync_playwright() as pw:
     press(pg)
     pg.close()
 
+    # ── 7 · IT FITS, AND ON WHAT (§268) ─────────────────────────────
+    # THE ONE-LINE CLAIM IS MEASURED WHERE IT MEANS SOMETHING. It was written
+    # when Mobile's plan owed nothing, so the row's tail was this control and
+    # 55px of it. Main's §249 made a tactic's outcome and target counted gaps,
+    # so that plan now owes 44 and the missing bar alone is 611px — and the row
+    # wraps at 900 and 820 WITH THE CONTROL REMOVED, measured, so the wrap is
+    # §145.14's own `flex-wrap` on main's data and not this change (§94.2: the
+    # assertion was resting on data that has since moved).
+    #
+    # So it is asked twice. On a subject whose tail is SHORT (a capability
+    # function owes nothing on this seed, so its bar is §223's bare door) the
+    # row is tabs + control and ONE LINE is the real claim. On a unit carrying
+    # a full bar, what still has teeth is that the control keeps company —
+    # never pushed onto a line by itself — and that the row never scrolls
+    # sideways.
     for w in (1500, 1280, 1100, 1000, 900, 820):
         pg = br.new_page(viewport={"width": w, "height": 850})
         pg.on("pageerror", lambda e: errs.append(str(e)[:160]))
         pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
                            "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
         pg.goto(URL); pg.wait_for_timeout(900)
-        viewer(pg, "smo"); units(pg)
-        if dest(pg, "mobile"):
-            tab(pg, "strategy"); sec(pg, "plan")
+        viewer(pg, "smo")
+        for label, goSide, key, tb, sc in (
+                ("a short tail", fns, "fn:finance", "fnstrat", "proj"),
+                ("with the bar", units, "mobile", "strategy", "plan")):
+            goSide(pg)
+            if not dest(pg, key):
+                continue
+            tab(pg, tb); sec(pg, sc)
             f = pg.evaluate(FIT)
-            ck("@%d · the control is inside the section row" % w,
+            ck("@%d · %s · the control is inside the section row" % (w, label),
                bool(f) and f.get("inRow") is True, f)
-            ck("@%d · tabs and control share one line" % w,
-               bool(f) and f.get("lines") == 1, f)
-            ck("@%d · and the row does not scroll sideways" % w,
+            ck("@%d · %s · it is never on a line of its own" % (w, label),
+               bool(f) and f.get("withSomething") is True, f)
+            if label == "a short tail":
+                # NOT `bar is False`: §223 draws a short bar (no count, no
+                # chips, just the door) wherever anything is merely FILLABLE,
+                # and a capability function has that. What is asserted is the
+                # ROW — one line — which is the claim §268 is about.
+                ck("@%d · %s · tabs and control share one line" % (w, label),
+                   bool(f) and f.get("lines") == 1, f)
+            ck("@%d · %s · and the row does not scroll sideways" % (w, label),
                bool(f) and f.get("overflow", 1) <= 0, f)
         pg.close()
 

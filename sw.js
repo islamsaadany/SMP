@@ -260,7 +260,55 @@
    saved work, and a refusal can only name what actually travelled. Name checked
    against origin/main serving "smp-shell-v3.96-home-is-never-blocked"; confirm
    again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.21-office-starts-a-conversation";
+/* v4.22-tactic-outcome — §248: a tactic is judged by what it produced. The
+   outcome carries a direction, a target, a unit and a compile rule, reported
+   into its own field (outActual) so nothing already stored moves. THE NAME
+   COLLIDED (§94.12, again): this branch and main both independently wrote
+   v4.21, which git merges without a word while the bytes differ — so v4.22.
+   Name checked against origin/main serving
+   "smp-shell-v4.21-office-starts-a-conversation"; confirm again immediately
+   before the push (§94.16).
+
+   §250: a tactic's outcome is measured against its own window rather than the
+   year, so the built file's bytes changed and the name must too — a returning
+   browser caches by NAME and would go on serving itself the old platform out of
+   its own disk (§91). Checked against origin/main serving
+   "smp-shell-v4.24-outcome-missing-audit"; confirmed again immediately before
+   the push (§94.16).
+
+   §251 (another session, on main): the unit picker is drawn before the number
+   is — "smp-shell-v4.26-unit-before-number".
+
+   §252: the review deck's tactics slide reads the outcome's figure, and five
+   counters stopped looking in the old box — the built file's bytes changed, so
+   the name does too. AND THE NAME COLLIDED AGAIN (§94.12): this branch and main
+   both independently wrote v4.26, which git merges without a word while the
+   bytes behind the name differ — caught by §94.16's confirmation immediately
+   before the push, never by the merge. Checked against origin/main serving
+   "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
+   push.
+
+   §252.2: the plan download comes back as an entry in the Presentation menu
+   and the corner button is deleted, so the built file's bytes changed again.
+   Main moved 26 commits under this branch while it waited for a word — the
+   whole deck round, §251.2 to §257 — and was serving
+   "smp-shell-v4.34-yn-target" when this was merged in; confirm once more
+   immediately before the push (§94.16).
+
+   §259: the group's mark and the deck's four blue section dividers. Main had
+   moved again while this branch waited — §257's Y/N target and §258's
+   save-safety banners — and was serving "smp-shell-v4.36-save-safety-banners"
+   when this merge was made, so the name goes past it rather than beside it.
+   Confirmed against origin/main immediately before the push.
+
+   §260: a title is one line — the growing prose boxes on a plan draw and store
+   one line, and a one-off heal cleans what a tenant already holds. Main moved
+   28 commits under this branch while it waited for a word — the deck round,
+   §257's Y/N target, §258's save-safety banners and §259's blue dividers — and
+   was serving "smp-shell-v4.37-blue-dividers" when this merge was made, so the
+   name goes past it rather than beside it (§94.12), confirmed again
+   immediately before the push (§94.16). */
+const SHELL = "smp-shell-v4.49-edit-on-section-line";
 const ASSETS = [
   "/",
   "/index.html",

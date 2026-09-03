@@ -124,7 +124,7 @@ with sync_playwright() as p:
     def pens(pg, key, dest, tab, sec):
         be(pg, key, dest, tab, sec)
         return pg.evaluate("""() => ({
-          /* §248: the strategy pen is `#secrow-in .secpen` now; the old
+          /* §268: the strategy pen is `#secrow-in .secpen` now; the old
              homes stay in the list so a build that put one back is seen. */
           pens: document.querySelectorAll("#secrow-in .secpen, .pane .penbtn, "
                                           + ".hoverpen > .penbtn, .paneact .penbtn, "

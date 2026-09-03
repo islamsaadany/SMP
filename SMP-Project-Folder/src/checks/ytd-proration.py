@@ -126,7 +126,12 @@ def main():
           var tabs=[...document.querySelectorAll('table')];
           var hdr=x=>x?[...x.querySelectorAll('thead th')].map(h=>h.textContent.trim()):null;
           var mt=tabs.find(x=>/Annual target/.test(x.textContent));
-          var tt=tabs.find(x=>/YTD delivery/.test(x.textContent));
+          /* §248 RENAMED "YTD delivery" TO "YTD actual", and both tables on
+             this page now end in it -- so a search for a status word finds the
+             wrong table or none at all (§51.11). The tactics table is the one
+             whose head says Tactic: what it IS, rather than what one of its
+             columns currently happens to be called. */
+          var tt=tabs.find(x=>hdr(x) && hdr(x).indexOf('Tactic')>-1);
           return {m:hdr(mt), t:hdr(tt),
                   mCells:[...mt.querySelectorAll('tbody tr')].map(r=>r.querySelectorAll('td').length),
                   pairs:[...document.querySelectorAll('.pair i')].length};
@@ -134,8 +139,13 @@ def main():
         ck("the measures table names the annual target and the YTD actual",
            t["m"] == ["#","Measure","Dir.","Annual target","Compile","YTD actual","Progress"], t["m"])
         ck("...and every row still fills it", set(t["mCells"]) == {7}, t["mCells"])
+        # §248 gave this table an Outcome column and renamed its figure to match
+        # the measures table above it -- "delivery" is wrong for a row measured
+        # in stores. §239's own point survives: no Variance, and it ends in
+        # Progress.
         ck("the tactics table drops Variance and ends in Progress",
-           t["t"] == ["#","Tactic","Owner","Collabs.","Quarters","Status","YTD delivery","Progress"], t["t"])
+           t["t"] == ["#","Tactic","Outcome","Owner","Collabs.","Quarters",
+                      "Status","YTD actual","Progress"], t["t"])
         ck("the benchmark is drawn beside the figure, not in a column of its own",
            t["pairs"] > 0, t["pairs"])
 

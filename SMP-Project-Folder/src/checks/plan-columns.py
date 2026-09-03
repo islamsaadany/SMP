@@ -135,7 +135,7 @@ with sync_playwright() as p:
     ck("no note wraps or is clipped", not lines, lines[:3])
 
     # ── the pen still edits these cells
-    # §248: the strategy pen is on the section line, outside #panel.
+    # §268: the strategy pen is on the section line, outside #panel.
     pen = pg.query_selector("#secrow-in .secpen, #panel [data-edit], #panel .penbtn")
     if pen:
         pen.click()

@@ -382,7 +382,7 @@ with sync_playwright() as p:
         pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
         el = pg.query_selector('#secrow-in [data-sub2="%s"]' % sec)
         if el: el.click(); pg.wait_for_timeout(250)
-        # §248: no hover — the strategy pen is a worded button on the
+        # §268: no hover — the strategy pen is a worded button on the
         # section line, drawn at rest for whoever may author the page.
         pen = pg.query_selector("#secrow-in .secpen")
         if not pen:

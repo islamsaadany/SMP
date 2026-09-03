@@ -156,7 +156,7 @@ with sync_playwright() as p:
     #
     # SO IT ASSERTS WHAT MATTERS instead: a pen is on the page and a click at
     # its own centre reaches it, whichever of the two it is.
-    # §248: no hover of any kind — the pen is a worded button on the section
+    # §268: no hover of any kind — the pen is a worded button on the section
     # line, always drawn. The assertion is unchanged in what it means: the
     # control is on the page and a click at its own centre reaches it.
     ck("the closed pen is reachable where it sits", pg.evaluate("""()=>{

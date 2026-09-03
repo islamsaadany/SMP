@@ -32,12 +32,15 @@ printed on its pillars and projects (§261.9), asked for from a real 308-slide
 flow.
 **At merge time:** bump `SHELL` in `sw.js` to a name `origin/main` does not
 hold (§91, §94.12, §94.16) — the built file's bytes have changed.
-**Latest version:** §232/§233 on `main` (removing a pillar or a project, and
-hiding an element from the presentation). **§268, §269 and §270 — the strategy pen on the
-section line, one edit for the whole tab, and three loose ends — are built and
-pushed on
-`claude/plans-edit-button-placement-jxw8or`, not merged: `main` is Islam's call
-every time.**
+**Latest version:** **§268, §269 and §270 are ON `main`** — the strategy pen on
+the section line, one edit for the whole tab, and three loose ends closed —
+merged 2026-09-02 on Islam's word, verified live (production serves the merged
+bytes; gate 200, api 401). **§271 is the audit of that merge**, asked for
+straight afterwards: nothing in the product was damaged, and the merge did leave
+three of main's own checks reading a control that had moved — two failing
+loudly, one (`band-corner`) falling silent while still printing "all passed".
+All three fixed; the rule earned is *grep the checks on BOTH sides of a merge,
+not only before it.*
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -108,6 +111,43 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §271 — the audit of the §268–§270 merge (2026-09-03, branch `claude/plans-edit-button-placement-jxw8or`)
+
+Islam, straight after the merge: *"did we change or damage something on this
+merge from the previous changes?"*
+
+**Nothing in the product.** Every source line the merge removed is one this
+branch removed deliberately (`editBar()`, `dlPlanBtn()` and its call, the pen's
+old positions, three wrapper lines, two CSS rules); **no documentation was
+lost**; of 34 page keys only three remap and only on a function target;
+production serves the merged bytes (gate 200, api 401).
+
+**Three of main's own checks were reading a control that had moved**, and the
+split between them is the finding:
+
+- `plan-tail-fold.py` (19 failed) and `one-line-titles.py` (rc=1) pressed
+  `#panel .penbtn[data-page]`. They failed **loudly**. Both were **added on
+  main** (§253, §267) *after* the §268 sweep ran against this branch — so the
+  sweep was early rather than careless, and the rule gains a clause: **grep for
+  a moved control on both sides of a merge.** Green after: 0 failed / all good.
+- `band-corner.py` guarded its last assertion with *if the control is there*,
+  so it ran **twice on main and none here** while printing *"all band-corner
+  checks passed"*. The property was **measured, not assumed** — the corner still
+  holds §268's Arrange arrows, and a click reaches them for `mobhead` and
+  `own_mob` in both themes at scroll 0/300/700. The check switches to that
+  viewer now and says out loud that somebody still gets the control, so it can
+  never fall silent again (§113.8). Falsified: stubbed to nobody it fails twice.
+
+**Attributed, not mine:** nine checks were already red on main (verified against
+a worktree at `5cdcd1a`; `tactic-outcome` diffs line-for-line identical), and
+eight more fail on both with §167.2's *`welcomeover` intercepts pointer events*.
+`office-chat` was never red — it takes over four minutes and had been cut off by
+the runner's 240s cap.
+
+**Recorded and deliberately not fixed:** `tactic-outcome.py` skips its own pen
+the same silent way, but fails identically on main, so it belongs to its own
+pass rather than to this audit.
 
 ### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
 

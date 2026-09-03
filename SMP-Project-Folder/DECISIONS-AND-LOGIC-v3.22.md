@@ -31190,3 +31190,98 @@ grant filter by stubbing `mayAuthorPage` to refuse one page — keyed on the raw
 blocked nothing on a function and reported a working build as broken. The stub
 resolves the same way now. *A check that stubs a rule has to stub it where the
 product actually asks it.*
+
+
+## §271 — THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (2026-09-03)
+
+Islam, after the §268–§270 merge landed on main: *"did we change or damage
+something on this merge from the previous changes?"*
+
+The honest answer is **one thing, and it was in the checks rather than in the
+product** — but it is worth writing down, because it is a hole in a rule this
+file has recorded seven times and thought it had closed.
+
+### WHAT THE AUDIT ACTUALLY FOUND
+
+Every line the merge removed from main's sources is one this branch removed on
+purpose: `editBar()`, `dlPlanBtn()` and its call, the pen's old positions, three
+wrapper lines and two CSS rules. **Not one line of main's documentation was
+lost.** Of the 34 page keys, only three remap and only on a function target
+(`u_found`→`k_found`, `u_plan`→`k_proj`, `u_anal`→`k_found`); a unit target
+remaps none. Production serves byte-identical output; the gate answers 200 and
+the API 401.
+
+Of the sixteen checks that were red after the merge, **nine were already red on
+main** (`tactic-outcome`, `row-edit`, `report-chrome`, `smo-team`,
+`strategy-split`, `refusal-keeps-work`, `save-fidelity`, `identity-merge`,
+`tour`) — attributed by running each against a worktree of main at `5cdcd1a`
+and diffing the output, which for `tactic-outcome` came back identical line for
+line. `office-chat` was not red at all; it takes over four minutes and had been
+cut off by a 240s cap in the parallel runner. Eight more — `email-greeting`,
+`send-message`, `setup-overview-live` and the mockup shots — fail on main and on
+this build with the same sentence, *"`welcomeover` intercepts pointer events"*,
+which is §167.2 still uncovered on those files.
+
+### THE TWO THAT WERE MINE, AND WHY THE SWEEP MISSED THEM
+
+`plan-tail-fold.py` (19 failed) and `one-line-titles.py` (rc=1) both opened edit
+mode with `#panel .penbtn[data-page]` — the control §268 moved out of the pane
+and onto the section line as `#secrow-in .secpen`.
+
+**The §268 sweep was not careless; it was early.** Both files were **added on
+main** — `one-line-titles.py` by §253 on 2026-09-02, `plan-tail-fold.py` by §267
+on 2026-09-03 — and arrived here with the merge, hours after the sweep had run
+against the branch it was sweeping. So §51.11 gains a clause it did not have:
+
+> **Grep the checks for a moved control on BOTH sides of a merge, not only
+> before it.** A merge brings in checks written against the world as it was on
+> the other side, and they are as stale as any check the branch itself holds.
+
+Both of those failed **loudly**, because a `query_selector` that finds nothing
+returns `None` and the check falls over. Green after the selector moved:
+`plan-tail-fold` 0 failed, `one-line-titles` all good.
+
+### THE ONE WORTH THE SECTION NUMBER
+
+`band-corner.py` guarded its last assertion with
+
+```python
+if pg.query_selector(".pane .paneact .penbtn"):
+```
+
+and §268 took the SMO's pen out of that corner. So the guard went false, the
+assertion **ran twice on main and zero times here**, and the check went on
+printing *"all band-corner checks passed"*. A green that had quietly stopped
+measuring anything — §51.11's silent direction, inside a check written to catch
+a silent fault (§53.7: *a DOM probe calls the broken build clean*).
+
+**THE PROPERTY WAS MEASURED, NOT ASSUMED.** What that assertion protects — the
+pinned band's corner fill must not become a lid over the control beside it
+(§93.4, §70) — is still real, because §268 deliberately kept Arrange in the
+pane: `arrangePaneBtn()` draws for somebody who may reorder and **not** author,
+which on Mobile's plan is `mobhead` and `own_mob`. A click at the centre of that
+button reaches it in **both themes at scroll 0, 300 and 700**. What had gone was
+the check's SUBJECT, not the product's behaviour.
+
+**AS THE SMO THAT CORNER IS NOW LEGITIMATELY EMPTY, AND EMPTY IS NOT CLEAR.**
+So the subject is switched to rather than waited for, and the check asserts out
+loud that somebody still gets that control, so it can never again fall silent by
+finding nothing (§113.8: an assertion preserved by both sides vanishing). Proved
+able to fail (§94.5): with the viewer search stubbed to nobody it fails twice
+rather than passing quietly.
+
+### RECORDED AND DELIBERATELY NOT FIXED
+
+`tactic-outcome.py` skips its own pen the same way — `if pen: pen.click()` — so
+eleven of its assertions run against a READ-mode page and throw. It fails
+**identically on main**, so it is not this merge's doing and repairing it would
+change what a pre-existing red check reports; flagged for its own pass rather
+than folded into an audit. The eight `welcomeover` failures are the same shape:
+main's, and §167.2's fix (suppressing the welcome screen in an
+`add_init_script`) has never been applied to those files.
+
+### AND THE HONEST PART
+
+Main was pushed with two of its own checks red, and the audit is what found
+them. That is the argument for the audit, not against the merge — but the merge
+would have been better with the sweep run twice.

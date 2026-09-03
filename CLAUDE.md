@@ -1141,6 +1141,22 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   first; two assertions changed MEANING rather than selector; and my own widened
   selector in `fn-pillars` then wrote to the wrong field while asserting the
   right one (§94.8).
+  **AND THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (§271):** it ran against
+  the BRANCH, correctly, and main then handed over two more checks written
+  against the pen where it used to be — `one-line-titles.py` (§253) and
+  `plan-tail-fold.py` (§267), both added on main after the sweep. *A merge
+  brings in checks written against the world as it was on the other side*, so
+  grep for a moved control on BOTH sides of a merge, not only before it. Those
+  two failed LOUDLY (a `query_selector` that finds nothing returns None); the
+  one worth the rule is `band-corner.py`, which guarded its last assertion with
+  `if (the control is there)` — so it ran **twice on main and none after**
+  while still printing *"all band-corner checks passed"*. **The property was
+  measured, not assumed**: the corner still holds §268's Arrange arrows, and a
+  click reaches them for both holders in both themes at three scroll positions
+  — what had gone was the check's SUBJECT. As the SMO that corner is now
+  legitimately empty, and **empty is not clear**, so the subject is switched to
+  rather than waited for and the check says out loud that somebody still gets
+  that control (§113.8).
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description

@@ -251,6 +251,49 @@ with sync_playwright() as p:
            not m.get("none") and m["cols"] == 7 and "Quarters" in m["heads"], m.get("heads"))
         pg.close()
 
+    # ── A HOVERED ROW IS ONE COLOUR ALL THE WAY ACROSS (§261.2) ───────────
+    # Islam, of the folded table: *"on squeezing the outcome cell left outline
+    # is damged"*. `tbody tr:hover > td` paints every cell, and the frozen
+    # pair's `background:inherit` outranks it — so the two cells before the
+    # Outcome kept the row's own white and the row read as split down the
+    # middle. OLDER THAN THE FOLD and measured identically on the build before
+    # it; what the fold changed is that the untinted block went from a sliver
+    # to a slab. Both parities, because a striped row's cells and an unstriped
+    # row's take DIFFERENT colours and a fix that painted one over the other
+    # would only move the seam.
+    print("\n== a hovered row is one colour ==")
+    for w, where in ((1500, "unfolded"), (1200, "folded")):
+        pg = b.new_page(viewport={"width": w, "height": 1000})
+        pg.goto(url); pg.wait_for_timeout(750)
+        who = pg.eval_on_selector_all("#asWho option", "els=>els.map(e=>e.value)")
+        pg.select_option("#asWho", who[0]); pg.wait_for_timeout(320)
+        if not open_plan(pg, "unit", "mobile"):
+            ck("%s · the plan opens with the pen" % where, False)
+            pg.close(); continue
+        for n, parity in ((0, "unstriped"), (1, "striped")):
+            spot = pg.evaluate("""(n) => {
+              var t = [].slice.call(document.querySelectorAll('#panel table'))
+                .filter(function(x){ var h = x.querySelector('thead');
+                                     return h && /tactic/i.test(h.textContent || ''); })[0];
+              var r = t && t.querySelectorAll('tbody tr')[n];
+              if (!r) return null;
+              var q = r.getBoundingClientRect();
+              return {x: q.x + q.width * 0.5, y: q.y + q.height * 0.5}; }""", n)
+            if not spot:
+                ck("%s · %s · a row to hover" % (where, parity), False)
+                continue
+            pg.mouse.move(spot["x"], spot["y"]); pg.wait_for_timeout(260)
+            grounds = pg.evaluate("""(n) => {
+              var t = [].slice.call(document.querySelectorAll('#panel table'))
+                .filter(function(x){ var h = x.querySelector('thead');
+                                     return h && /tactic/i.test(h.textContent || ''); })[0];
+              var r = t && t.querySelectorAll('tbody tr')[n];
+              return r ? [].map.call(r.children, function(td){
+                return getComputedStyle(td).backgroundColor; }) : []; }""", n)
+            ck("%s · a hovered %s row has ONE ground across every cell" % (where, parity),
+               len(set(grounds)) == 1, grounds)
+        pg.close()
+
     # ── AND A ZOOM REACHES IT (§261) ──────────────────────────────────────
     # The reported case. `tailFolds()` is read while the table is built, so
     # without the watcher the person who resizes — or zooms — goes on looking

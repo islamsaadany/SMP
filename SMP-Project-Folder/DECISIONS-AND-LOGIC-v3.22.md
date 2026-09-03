@@ -29752,3 +29752,33 @@ Two of its own first-run failures were the CHECK: the pillars function is keyed
 `merchandising` and Islam spells it *merchandizing*, and the write probes were
 scoped to `#panel tbody tr[data-oi]`, which is the KEY MEASURES table — the
 first such row on the page, not the one under test.
+
+### §261.2 — A hovered row is one colour all the way across
+
+Islam, on the folded table: *"on squeezing the outcome cell left outline is
+damged"* — and the outcome cell's border was fine. What he was looking at is a
+row **split down the middle**: `tbody tr:hover > td` paints every cell of a
+hovered row, and §73.2's `.tblscroll td.idx { background:inherit }` — which
+exists so the two FROZEN columns stay striped with their row rather than
+showing a hard-coded white beside it — outranks it on specificity. So the
+frozen pair alone kept the row's own white. Measured: cells 3–7 at `#EFF2F6`,
+cells 1 and 2 at `#FFFFFF`, and the step lands exactly on the left edge of the
+cell after the name.
+
+**IT IS OLDER THAN THE FOLD AND MEASURES IDENTICALLY ON THE BUILD BEFORE IT** —
+`checks/plan-tail-fold.py` reports it at 1500 on the shipped pre-§261 file,
+where nothing folds. What §261 changed is how much of it there is to see: the
+name column goes from 74–269px to 431 and its cell is two rows tall, so a
+sliver became a slab. *Conspicuous, not caused* — and mine to close, because it
+is the same screen and the same complaint.
+
+**THE FIX FOLLOWS WHAT THE NEIGHBOURS ALREADY DO** and decides nothing new. On
+an unstriped row the frozen pair takes the hover tint; on a striped one it
+keeps the stripe — because there the zebra's own `> td` rule beats the hover's
+at equal specificity and later source order, so a hovered striped row does not
+change colour at all today. Painting the pair grey there would have inverted
+the seam rather than closed it, and giving every striped row in the product a
+hover response it has never had is a change nobody asked for (§2b). Both
+parities are asserted, at a folded width and an unfolded one, as **one ground
+across every cell** rather than as a colour — so a later palette change stays
+green and a build that re-splits the row does not.

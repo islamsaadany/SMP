@@ -6142,6 +6142,33 @@
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
 
+  /* ── AND THE SAME SEAM ON HOVER (§261.2) ────────────────────────────────
+     §73.2 (the block above) gave the frozen pair `background:inherit` so a
+     striped row is striped all the way across — and it answered the STRIPE
+     only. `tbody tr:hover > td` paints every cell of a hovered row, and
+     `.tblscroll td.idx` outranks it on specificity, so the two frozen cells
+     alone keep the row's own white: measured, cells 3 to 7 at #EFF2F6 and
+     cells 1 and 2 at #FFFFFF. The row reads as split down the middle, and
+     the step lands exactly on the left edge of the cell after the name —
+     which is what Islam reported, of the Outcome cell: *"on squeezing the
+     outcome cell left outline is damged"*.
+
+     IT IS OLDER THAN THE FOLD AND MEASURES IDENTICALLY ON THE BUILD BEFORE
+     IT (§261). What §261 changed is how big the untinted block is: the name
+     column goes from 74–269px to 431 and its cell is now two rows tall, so a
+     sliver became a slab. Conspicuous, not caused.
+
+     THE FIX FOLLOWS WHAT THE NEIGHBOURS ALREADY DO rather than deciding
+     anything new: on an unstriped row the pair takes the hover tint, and on
+     a STRIPED one it keeps the stripe — because there the zebra's own `> td`
+     rule wins over the hover's at equal specificity and later source order,
+     so a hovered striped row does not change colour at all today. Painting
+     the pair grey there would invert the seam rather than close it. */
+  .tblscroll tbody tr:hover > td.idx,
+  .tblscroll tbody tr:hover > td.idx + td { background:var(--surface-2); }
+  .tblscroll tbody tr:nth-child(even):hover > td.idx,
+  .tblscroll tbody tr:nth-child(even):hover > td.idx + td { background:var(--zebra); }
+
   /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
      row on purpose: the cards above are the reading, this is the index to it,

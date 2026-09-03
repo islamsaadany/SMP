@@ -50,6 +50,8 @@ GATE = b"<!doctype html><title>Sign in</title><h1 id='gate'>Sign in</h1>"
 # What the stub answers a peek with, and what it saw. Changed mid-run.
 PEEK = {"changed": []}
 SEEN = {"peeks": [], "loads": 0, "posts": 0, "post_status": 200}
+# The server's clock, deliberately unlike the browser's (§258.1).
+STUB_NOW = "2026-09-02T09:00:00.000Z"
 bad = 0
 
 
@@ -75,7 +77,12 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/state"):
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             if "since" in q:
-                SEEN["peeks"].append({"since": q["since"][0], "target": q.get("target", [""])[0]})
+                SEEN["peeks"].append({"since": q["since"][0], "target": q.get("target", [""])[0],
+                                      "sync": "sync" in q})
+                if "sync" in q:
+                    self._s(200, json.dumps({"ok": True, "changed": [], "now": STUB_NOW}).encode(),
+                            "application/json")
+                    return
                 self._s(200, json.dumps({"ok": True, "changed": PEEK["changed"]}).encode(),
                         "application/json")
                 return
@@ -159,15 +166,21 @@ with sync_playwright() as p:
 
     # ── 1 · THE TAB ASKS ABOUT ITS OWN PAGE ──────────────────────────────
     print("\n1 · the tab asks the server about the page it is on")
+    # THE FIRST ASK IS THE CLOCK SYNC (§258.1): it fires by itself after
+    # hydration, and the tab adopts the SERVER's now, never its own.
+    syncs = [p for p in SEEN["peeks"] if p.get("sync")]
+    ck("the tab synced its clock to the server by itself", len(syncs) == 1, len(syncs))
+    ck("...and is synced", pg.evaluate("()=>typeof SAFETY!=='undefined'&&(SAFETY.synced?SAFETY.synced():null)") is True)
     n0 = len(SEEN["peeks"])
     peek(pg)
     ck("a peek reached the server", len(SEEN["peeks"]) == n0 + 1, len(SEEN["peeks"]) - n0)
     q = SEEN["peeks"][-1] if SEEN["peeks"] else {}
     here = pg.evaluate("()=>TARGET")
     ck("...scoped to the page's own target", q.get("target") == here, (q.get("target"), here))
-    # SINCE THE TAB LOADED, never since the dawn of time: a peek that asks
-    # about everything would announce last week's work as news.
-    ck("...and since the tab loaded", bool(q.get("since")) and q["since"].endswith("Z"), q.get("since"))
+    # SINCE THE TAB LOADED BY THE SERVER'S CLOCK: a laptop clock running
+    # behind would otherwise announce older saves as news.
+    ck("...and since the server's own now, not the browser's", q.get("since") == STUB_NOW, q.get("since"))
+    ck("...not as a sync", not q.get("sync"))
     ck("nothing drawn when nobody landed anything", banner(pg) == "", banner(pg))
 
     # ── 2 · SOMEBODY ELSE LANDED A CHANGE ────────────────────────────────
@@ -177,6 +190,8 @@ with sync_playwright() as p:
     said = banner(pg)
     ck("the caution is drawn", said != "", "(nothing)")
     ck("...and NAMES who", "Hala Ibrahim" in said, said)
+    page = pg.evaluate("()=>placeLabel(TARGET)")
+    ck("...and NAMES the page (%s)" % page, page in said and "this page" not in said, said)
     ck("...with the two ways out",
        pg.evaluate("()=>!!document.querySelector('#safety [data-safety-keep]')"
                    " && !!document.querySelector('#safety [data-safety-dismiss]')"))
@@ -196,6 +211,34 @@ with sync_playwright() as p:
     PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T10:05:00.000Z"}]
     peek(pg)
     ck("a NEWER landing by somebody else is", "Karim Fahmy" in banner(pg), banner(pg) or "(nothing)")
+
+    # ── 3b · THE CAUTION GOES WITH THE PAGE IT WAS ABOUT (§258.1) ────────
+    print("\n3b · moving to another tab clears it; Setup never asks")
+    ck("it is up before the move", "Karim Fahmy" in banner(pg), banner(pg) or "(nothing)")
+    was = pg.evaluate("()=>TARGET")
+    press(pg, "button[data-u='mobile']")
+    pg.wait_for_timeout(600)
+    ck("the page moved", pg.evaluate("()=>TARGET") == "mobile" and was != "mobile", pg.evaluate("()=>TARGET"))
+    ck("...and the caution went with the page it was about", banner(pg) == "", banner(pg))
+    PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T10:06:00.000Z"}]
+    peek(pg)
+    ck("a landing on the NEW page is announced there", "Karim Fahmy" in banner(pg) and "Mobile" in banner(pg), banner(pg) or "(nothing)")
+    ck("...remembered as that page's", pg.evaluate("()=>typeof SAFETY!=='undefined'&&(SAFETY.shownFor?SAFETY.shownFor():null)") == "mobile")
+    press(pg, "button[data-u='group']") or pg.evaluate("()=>{const b=document.querySelector('[data-u=\"group\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(600)
+    n0 = len(SEEN["peeks"])
+    pg.evaluate("()=>{const g=document.querySelector('[data-s=\"setup\"],[data-setup],button[title=\"Setup\"]'); if(g) g.click();}")
+    pg.wait_for_timeout(600)
+    on_setup = pg.evaluate("()=>typeof current!=='undefined' && current==='setup'")
+    ck("Setup opened", on_setup)
+    ck("...and the caution is not up on Setup", banner(pg) == "", banner(pg))
+    peek(pg)
+    ck("...and Setup asks the server nothing", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
+    pg.evaluate("()=>{const b=document.querySelector('button[data-u=\"mobile\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(600)
+    PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T10:07:00.000Z"}]
+    peek(pg)
+    ck("back on a page, it asks again", "Karim Fahmy" in banner(pg), banner(pg) or "(nothing)")
 
     # ── 4 · RELOAD & KEEP MINE FLUSHES FIRST ─────────────────────────────
     print("\n4 · Reload & keep mine sends this tab's change before reloading")
@@ -290,7 +333,7 @@ with sync_playwright() as p:
     ck("no slot is mounted", pg2.evaluate("()=>!document.getElementById('safety')"))
     ck("nothing is drawn even when asked", pg2.evaluate("()=>!document.getElementById('safety')"))
     ck("the worker listener is not armed", pg2.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.isArmed()") is False)
-    ck("no peek was sent", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
+    ck("no peek was sent, the sync included", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
     pg2.close()
     b.close()
 

@@ -47,7 +47,7 @@ var SAFETY = (function(){
   var PEEK_EVERY   = 20000;   /* ask change_log about this page   */
 
   var el = null, shown = null, since = null, armed = false, peekTimer = null,
-      updTimer = null, lastAt = null;
+      updTimer = null, lastAt = null, shownFor = null;
 
   function servable(){ return location.protocol !== "file:"; }
   function live(){ return typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive(); }
@@ -66,7 +66,7 @@ var SAFETY = (function(){
     else document.body.insertBefore(el, document.body.firstChild);
   }
 
-  function hide(){ if (el) { el.hidden = true; el.innerHTML = ""; } shown = null; }
+  function hide(){ if (el) { el.hidden = true; el.innerHTML = ""; } shown = null; shownFor = null; }
 
   function draw(kind, html){
     mount(); if (!el) return;
@@ -123,47 +123,86 @@ var SAFETY = (function(){
   }
 
   /* ── 2 · SOMEBODY ELSE UPDATED THIS PAGE ─────────────────────────────── */
+  /* THE PAGE, OR NOTHING. The shell maps a Setup page onto the group's key
+     (`TARGET = "group"` while `current` is setup), so asking by TARGET alone
+     had a Setup screen told about group-level saves it had nothing to do
+     with (§258.1). Setup is asked about nothing: its own changes are logged
+     against no target, and nobody edits it alongside somebody else. */
   function target(){
+    var c = typeof current !== "undefined" ? current : null;
+    if (!c || c === "setup" || c === "manage") return null;
     var t = typeof TARGET !== "undefined" ? TARGET : null;
     return t && t !== "setup" && t !== "manage" ? t : null;
   }
+  function pageName(t){
+    try { if (typeof placeLabel === "function") return placeLabel(t); } catch (e) {}
+    return t === "group" ? "the group" : String(t || "").replace(/^fn:/, "");
+  }
 
-  function edited(by, when){
+  function edited(by, when, t){
     if (shown === "version") return;          /* the reload already covers it */
-    if (shown === "edited") return;
+    t = t || target();
+    if (shown === "edited" && shownFor === t) return;
     var who = by ? E(by) : "Somebody";
+    shownFor = t;
+    /* Said to the console as well: the first live report of this caution was
+       one nobody could trace afterwards (§258.1). */
+    try { console.info("[safety] " + (by || "somebody") + " landed a change on " + t + " at " + when); } catch (e) {}
     draw("edited", ICON_PEOPLE +
-      '<div class="safety-msg"><strong>' + who + ' updated this page while you were working</strong>' +
+      '<div class="safety-msg"><strong>' + who + ' updated ' + E(pageName(t)) + ' while you were working</strong>' +
       '<span>Your changes are safe. Reload brings in their update and keeps yours on top.</span></div>' +
       '<div class="safety-acts"><button type="button" class="safety-btn" data-safety-keep>Reload &amp; keep mine</button>' +
       '<button type="button" class="safety-btn ghost" data-safety-dismiss>Dismiss</button></div>');
   }
 
+  /* THE CLOCK IS THE SERVER'S. `since` began as the browser's own time at
+     load, and a laptop clock running a few minutes behind would have every
+     save from those minutes announced as news. So the first ask carries
+     `sync=1`, ignores whatever it is told about changes, and adopts the
+     server's `now` as the moment this tab loaded; only from then on are
+     landings compared (§258.1). A tab that never syncs never asks. */
+  var synced = false;
   function peek(){
     if (!servable() || !live() || document.visibilityState !== "visible") return;
-    var t = target(); if (!t || !since) return;
+    var t = target(); if (!t) return;
+    if (!synced && !since) since = new Date().toISOString();
     var ctl = ("AbortController" in window) ? new AbortController() : null;
     var late = setTimeout(function(){ if (ctl) ctl.abort(); }, 8000);
-    fetch("/api/state?since=" + encodeURIComponent(since) + "&target=" + encodeURIComponent(t),
+    var first = !synced;
+    fetch("/api/state?since=" + encodeURIComponent(since) + "&target=" + encodeURIComponent(t) +
+          (first ? "&sync=1" : ""),
           { cache: "no-store", signal: ctl ? ctl.signal : undefined })
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(j){
         clearTimeout(late);
-        if (!j || !j.ok || !j.changed || !j.changed.length) return;
+        if (!j || !j.ok) return;
+        if (first) { if (j.now) { since = j.now; synced = true; } return; }
+        if (!j.changed || !j.changed.length) return;
         var last = j.changed[j.changed.length - 1];
         /* Remember the newest we have SEEN so the same landing is not
            announced twice, and the next peek only asks about what is newer. */
-        if (last.at && last.at !== lastAt) { lastAt = last.at; since = last.at; edited(last.by, last.at); }
+        if (last.at && last.at !== lastAt) { lastAt = last.at; since = last.at; edited(last.by, last.at, t); }
       })
       .catch(function(){ clearTimeout(late); });
+  }
+
+  /* CALLED AT THE END OF EVERY paint(): the edit caution is about ONE page,
+     and a person who has moved to another tab is no longer on it. It goes
+     with the page it was about (§258.1 — Islam met it on Units, about a save
+     on Marketing, with nothing on it saying so). The version caution stays:
+     a stale build is stale on every page. */
+  function onPaint(){
+    if (shown === "edited" && shownFor !== target()) hide();
   }
 
   function start(){
     if (!servable()) return;
     mount();
     armWorker();
-    since = new Date().toISOString();
+    /* The first ask is the clock sync; it waits for hydration (`live()`),
+       which is why it is retried on the clock rather than fired once. */
     if (!peekTimer) peekTimer = setInterval(peek, PEEK_EVERY);
+    setTimeout(peek, 1500);
     document.addEventListener("visibilitychange", function(){
       if (document.visibilityState === "visible") peek();
     });
@@ -178,7 +217,10 @@ var SAFETY = (function(){
     newVersion: newVersion,
     edited: edited,
     peek: peek,
+    onPaint: onPaint,
     hide: hide,
+    shownFor: function(){ return shownFor; },
+    synced: function(){ return synced; },
     isArmed: function(){ return armed; },
     shown: function(){ return shown; }
   };

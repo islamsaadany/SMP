@@ -29269,3 +29269,53 @@ sources, shell `v4.36-save-safety-banners`. This note is the commit `main`
 holds and the branch does not (§91, §108.17) — the merge commit reached the
 branch first because the session's permission gate refused the push to `main`
 twice and then let the branch through, so production needs a SHA of its own.
+
+## §258.1 — THE CAUTION NAMES ITS PAGE AND GOES WITH IT (2026-09-03)
+
+Islam, within the hour of §258 going live, from the Units row of the group
+page: *"why am I getting this message wile I'm not in the marketing tab and
+I'm not changing the marketing tab. this might confuse others who are not on
+this tab"* — the banner reading *"Ahmed Farag Mohamed Elghoul updated this
+page while you were working"*. Then: *"I wasn't on the marketing page when I
+got this so just make sure"*, and *"if I'm already on another tab I shouldn't
+get this message?"*
+
+**THREE GAPS IN §258, EACH ITS OWN LINE.** The caution was drawn for the page
+the tab was on and then **stayed until Dismiss whatever page came next** — a
+sentence about one place, carried onto another, with nothing on it saying
+which. The shell maps a Setup page onto the group's key (`TARGET = "group"`
+while `current` is setup), so §258's guard on TARGET never fired and **a Setup
+screen was asked about group-level saves** it had nothing to do with. And
+`since` was the browser's own clock at load: **a laptop running a few minutes
+behind would have every save from those minutes announced as news** the
+moment the tab opened.
+
+**WHICH OF THE THREE HE MET CANNOT BE SETTLED FROM HERE**, and that is said
+rather than guessed: the production log is not readable from this session,
+the demo tenant has no Ahmed, and the first two gaps produce the same screen.
+What is certain is that all three are real, each reproduced in the check
+against the §258 build, and that the caution now says enough to be traced next
+time — the page is in the sentence and the landing is written to the console.
+
+**THE SENTENCE NAMES THE PAGE** — *"… updated Marketing while you were
+working"* — through `placeLabel()`, the navigation's own word (§65, §93.12),
+never a second vocabulary. **THE CAUTION GOES WITH ITS PAGE**: `SAFETY.onPaint()`
+runs at the end of every `paint()` beside `TOUR.onPaint()` (§107's hook for
+§107's reason — the shell owns navigation and this file must never copy it),
+and hides an edit caution whose page is no longer the one on screen. The
+VERSION caution stays, because a stale build is stale on every page. **SETUP
+ASKS NOTHING**: `target()` reads `current` before TARGET, and a Setup or
+Manage page has no target at all. **THE CLOCK IS THE SERVER'S**: the first ask
+carries `sync=1`, ignores whatever it is told about changes, and adopts the
+database's `now` as the moment the tab loaded — one `SELECT now()` on that
+call only (§98); a tab that never syncs never asks. **AND IT IS NOT A ROLE**:
+the caution is drawn for anybody on the page a colleague saved on, the SMO
+included, which answers his second question — it appeared for him because he
+was (or had been) on that page, not because he is the SMO.
+
+**PROVED ABLE TO FAIL: 9 red** against the §258 build — the sync, the server's
+clock, the page in the sentence, the caution clearing on a tab change, the new
+page announced on its own, Setup drawing nothing and asking nothing.
+`test-safety-peek.js` gains the sync's three assertions against a real
+Postgres 16. Full `qa.py` sweep on the build.
+

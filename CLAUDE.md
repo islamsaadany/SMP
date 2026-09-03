@@ -4583,6 +4583,10 @@ python3 checks/safety-banners.py # the page warns BEFORE a save can be lost (§2
                                 # the page and §171's banner), the version caution
                                 # outranks it, both themes measured, and file:// draws
                                 # nothing and asks nothing — 20 red on the build before
+                                # — and since §258.1 the page in the sentence, the
+                                # caution clearing on a tab change, Setup asking
+                                # nothing, and the clock taken from the server (9 red
+                                # on the §258 build)
 node scripts/test-safety-peek.js # ...and the server half against a real Postgres: who
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to

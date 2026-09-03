@@ -2343,6 +2343,7 @@
        around — so it re-resolves them and puts the shade and the card back.
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
+    if (typeof SAFETY !== "undefined") SAFETY.onPaint();
     /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
        The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
        corners with the page's ground so nothing shows through them while it

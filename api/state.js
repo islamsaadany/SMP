@@ -164,6 +164,11 @@ module.exports = async function handler(req, res) {
       try { q = new URL(req.url, "http://x").searchParams; } catch (e) {}
       const since = q && q.get("since"), target = q && q.get("target");
       if (since && target && !isNaN(Date.parse(since))) {
+        /* §258.1: the tab's first ask syncs its clock to the database's. */
+        if (q.get("sync")) {
+          const n = await client.query("SELECT now() AS now");
+          return send(res, 200, { ok: true, changed: [], now: n.rows[0].now });
+        }
         const r = await client.query(
           "SELECT person_key AS by_key, person_name AS by, at FROM change_log " +
           "WHERE target = $1 AND at > $2::timestamptz AND person_key <> $3 " +

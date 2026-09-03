@@ -365,6 +365,60 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (§259):** Islam, in one
+  message — *"where can I upload the raya trade mark so it can be used? then
+  work on separators let's make teh serparators blue background like the client
+  brand colors"* — then four sections by number. **`--panel` IS THE BLUE AND IT
+  IS NOT A COLOUR OF THE DECK'S OWN**: it is the token Setup › Branding's
+  *Navigation bar* control sets, so a divider wears whatever blue the tenant
+  picked and moves the day they move it (§41.10 on a projector); no new token,
+  no literal (§25), and **the check proves it by REBRANDING the tenant mid-run
+  and asserting the dividers followed** — an assertion naming `#16325C` passes
+  on exactly the build that rules out (§94.8). The three inks already existed
+  (§38.5): `--panel-ink` · `--panel-quiet` · `--panel-accent`, 12.77 / 7.24 /
+  7.66:1 light and 16.63 / 7.73 / 11.42 dark. **THE FOUR SWOT HUES COULD NOT
+  SURVIVE THE MOVE, MEASURED NOT PREFERRED** — 2.55 / 2.26 / 3.49, and
+  *Opportunities* was drawn in `--panel` itself, **1.00:1 against its own
+  ground**; one rule across the row instead (§254.5's own answer for the pillar
+  cards), **the four category slides keeping their hues** and `.seccell.t-*`
+  DELETED with the classes it styled (§24), asserted at both ends. **NO FOOTER
+  MARK ON A DIVIDER** (his word), which removes a fault as well as a
+  decoration: the white plate that makes a navy lockup readable is switched on
+  by the PAGE being dark (§52), which a blue divider on a light page is not.
+  **A DIVIDER IS ONLY DRAWN IF ITS SECTION IS** (§253) — a unit 28 → 31 slides
+  with four, a pillars function two, **a capability function byte-for-byte what
+  it was**. **The roll-call stays WHITE and the Overall performance divider
+  carries NO NUMBERS**, both Islam's from two treatments drawn in the real deck,
+  the first reversing my recommendation with its cost named (one extra slide per
+  deck) and the second agreeing with it (§87's twins, in figures).
+  **§259.2 — THE GROUP'S MARK**: §52.9 gave every UNIT one and stopped, so a
+  supporting function showed nothing at all and the group had nowhere to go.
+  One upload on **Setup › Branding**, FIRST on the page (the three colour
+  sections under it are one argument read in order), through the **same
+  `logoIntake()`** as a unit's or there would be two answers to *what may be
+  uploaded* (§53.5). **`deckMark(u)`** is the one reader — the subject's own,
+  the group's otherwise. **No migration** (`org.extra`), reads without writing,
+  Remove DELETES the key (§50.6). **Classified `setup` and NAMED** so a refusal
+  says Branding (§16.7) — **and the two edits go together**: with only the
+  `add()` line removed and `"logo"` still in `gExtra` the field is neither
+  classified nor swept and **a unit head may set the group's mark**, 3 of 489
+  red. **The demo seed carries NO group mark, deliberately** (§54's rule: a
+  client must never inherit Raya's); the PNG is rendered from the vector the
+  repo already holds and handed over to upload. **And the knowledge base had
+  been wrong since the page was written** — it promised Branding set "the
+  colours and the logo" and that page set colours only (§104.8's family); it
+  became true today. `checks/deck-dividers.py`: **22 red** before, and **its
+  first two runs against that build DIED rather than reporting** (§215, twice
+  in one file) — an empty list index, then a 30s timeout on a control that does
+  not exist there. **Two of its own first failures were the CHECK** (a rebrand
+  through a function name the platform does not have; a data URI sliced one
+  character long), and one assertion was **unfalsifiable as written** — the
+  seed has no mark, so deleting it from the incoming graph is a no-op that
+  passes on every build (§94.5, its own example).
+  **AND THE SEED WAS STALE ON `main`**: §253.2 cut Retail's `by:"merchandising"`
+  in the sources and `db/seed-state.json` was never regenerated — *a seed that
+  disagrees with the sources it is generated from is a fault nothing else would
+  have found.*
 - **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
   (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
   an option in the drop down for the smo only."* §145.9 hid the pane-corner
@@ -552,6 +606,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   exactly what emptied HIS rail cannot be proved from here — which is why the
   failure was given a voice in the same change (§171: a diagnostic is not a
   fix, and which it is has to be said).
+- **A TITLE IS ONE LINE, AND THE BOX WAS THE ONLY PLACE THAT SAID OTHERWISE
+  (§255):** Islam, with a screenshot of a client's plan and the pen open — a
+  tactic's name box **643px tall holding one sentence**. **NOTHING WAS WRONG
+  WITH THE BOX**: §189 sizes a growing box to what is IN it, and what was in it
+  was **blank lines** — thirty of them reproduce his screenshot to the pixel
+  (643px box, 962px row). **INVISIBLE EVERYWHERE ELSE**, which is why it reads
+  as a sudden layout fault: the same row is **42px** in reading mode because
+  HTML collapses a break, and the deck and both workbooks print these on one
+  line — so a value carries them for weeks and only the pen shows it. **TWO
+  ROUTES, BOTH MEASURED**: Enter added one per press until §229 stopped it
+  (*"nothing stored is scrubbed"* — this is that bill), and a **paste**, which
+  §229 does not reach and which stored `"Line one\nLine two\n\n\n"` verbatim.
+  **THE RULE IS ABOUT THE VALUE, SO IT IS `SMPRules.oneLine()`** (§42): a run of
+  whitespace containing a break becomes ONE SPACE, ends trimmed, **every word
+  kept** and ordinary spacing untouched (§96.2). **`.grow` IS THE DECISION** —
+  §229 drew that line for Enter and this uses the same one, so a rows-2
+  paragraph box (an aspiration, a definition, a note) is untouched and there is
+  no second list to forget (§104.7). **THREE TOUCHES, THREE REASONS**:
+  `textOr()` DRAWS one line whatever is stored (which closes it for good — it
+  does not care how the breaks got there) and stores nothing; the **commit**
+  stores one line at the one `data-fld` door, **written back into the box**
+  because seeing the lines close up is the explanation (§124); and a **one-off
+  heal** (`041-a-title-is-one-line.js`) of what a tenant already holds, or the
+  workbook, the archive and every export go on carrying them. **IT COULD NOT BE
+  A `.sql` FILE** (§43.1's reason, different shape): a pillars function's plan
+  is one JSON blob (§118) and a tactic's description and outcome ride in
+  `extra` (§248), so the fields sit at four depths in three shapes — and a
+  blanket replace over the blob would flatten the paragraphs. **THE WALK IS
+  STRUCTURAL, never "any key called `name`"** (the graph is full of names that
+  are not plan prose), and a unit and a pillars function go through ONE walk
+  (§59, A15). **ARCHIVES ARE DELIBERATELY NOT TOUCHED** (§22, §49.2: a record
+  somebody tidied is no longer the record). Proved able to fail both ways —
+  heal stubbed **14 red**, heal made over-eager **3 red and all three are the
+  paragraphs**, which is the worse failure and the one a one-sided check would
+  have applauded — and `checks/one-line-titles.py` is **5 red** on the shipped
+  build, asserting AGREEMENT with a break-free clone of each box rather than a
+  pixel count (§94.8). **RECORDED, NOT DONE**: an alt-enter INSIDE a workbook
+  cell still arrives (the reader trims the ends, so the thirty trailing lines
+  cannot), draws as one line and is cleaned on the next commit; cleaning it at
+  the upload door would name the prose fields a third time in a reader that
+  must not flatten a SWOT item.
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4494,6 +4589,18 @@ python3 checks/deck-figures.py   # a figure is read against what it is measured 
                                 # MADE and the row put back, and the slide order with
                                 # the two pillar headings asserted different — 33 red
                                 # on the build before
+python3 checks/deck-dividers.py # the group's mark and the deck's four blue
+                                # section dividers (§259): the blue asserted as AGREEMENT
+                                # with `--panel` and never as a hex — it REBRANDS the
+                                # tenant mid-run and asserts the dividers followed — the
+                                # SWOT hues stripped on the divider AND kept on the
+                                # category slides, no footer mark on a divider AND one on
+                                # every content slide, a pillars function's two AND a
+                                # capability function's none, the state MADE for the
+                                # guards the demo cannot reach, and the upload driven with
+                                # a real PNG and read back. 22 red on the build before;
+                                # every probe degrades, because its first two runs there
+                                # DIED and reported six failures of twenty-two (§215)
 python3 checks/deck-blank-slides.py # a table with no rows is not a slide (§253):
                                 # every deck swept through the builder its own Present
                                 # button would call, the state MADE on a business unit
@@ -4505,6 +4612,13 @@ python3 checks/deck-blank-slides.py # a table with no rows is not a slide (§253
                                 # slides Islam reported — and §6 covers §253.3, the one
                                 # reader Present, Manage slides and the anchors all ask,
                                 # with the CAPABILITY deck asserted unchanged beside it
+python3 checks/one-line-titles.py # a title is one line and the box says so (§255):
+                                # a stored value carrying blank lines drawn as ONE
+                                # line on a unit AND a function, asserted as
+                                # agreement with a break-free clone of each box and
+                                # never as a pixel count; a pasted value read back
+                                # from the DATA; and both ends — a rows-2 paragraph
+                                # box keeps its breaks (5 red on the shipped build)
 python3 checks/deck-outcome.py  # the presentation reads what was reported (§252): the
                                 # tactics slide's nine columns, its figures asserted as
                                 # AGREEMENT with the Performance page rather than as
@@ -4716,6 +4830,10 @@ it must go red):
 The mail half needs a database and a password (it spawns its own dev-server):
 `DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
 `DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§146).
+The one-off heal of a tenant's stored titles needs a database (it runs through
+the real `ensureReady` on the worked example, and asserts BOTH ends — the
+titles healed, the paragraphs untouched):
+`DATABASE_URL=… node scripts/test-one-line-heal.js` (§253).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -4749,7 +4867,79 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;258: the page warns before a save
+*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+was the only place that said otherwise.** Islam, with a screenshot of a client's
+plan and the pen open: a tactic's name box **643px tall holding one sentence**,
+the description and the outcome the same, the eye and the &times; floating in
+the middle of the empty space. **NOTHING WAS WRONG WITH THE BOX** &mdash;
+&sect;189 sizes a growing box to what is IN it, and what was in it was **blank
+lines**: thirty of them reproduce his screenshot to the pixel (643px box, 962px
+row), which disproved every layout cause in one measurement. **THEY ARE
+INVISIBLE EVERYWHERE ELSE**, which is why it reads as a sudden fault: the same
+row is **42px** in reading mode because HTML collapses a break, and the deck and
+both workbooks print these fields on one line &mdash; so a value can carry them
+for weeks and only the pen will ever show it. **TWO ROUTES, BOTH MEASURED**:
+Enter added one per press until &sect;229 stopped it three days ago (whose own
+text says *"nothing stored is scrubbed"* &mdash; this is that bill), and a
+**paste**, which &sect;229 does not reach and which was measured storing
+`"Line one\nLine two\n\n\n"` verbatim. **THE RULE IS ABOUT THE VALUE**, so it
+lives in `lib/rules.js` where the three places that need it can ask one function
+(&sect;42), it **keeps every word**, and **`.grow` is the decision** &mdash;
+&sect;229 drew that line for Enter and this uses the same one, so a paragraph
+box is untouched and there is no second list to forget. **THREE TOUCHES**:
+`textOr()` draws one line whatever is stored (which is what closes it for good,
+because it does not care how the breaks got there) and stores nothing; the
+commit stores one line and **writes it back into the box**, because seeing the
+lines close up is the explanation (&sect;124); and a one-off **heal** of what a
+tenant already holds, which could not be a `.sql` file because a pillars
+function's plan is one JSON blob (&sect;118) and a blanket replace would flatten
+the paragraphs. **Proved able to fail both ways**: the heal stubbed **14 red**,
+the heal made over-eager **3 red and all three are the paragraphs** &mdash; the
+worse failure, and the one a check that only looked for one-line titles would
+have applauded. `checks/one-line-titles.py` is **5 red** on the shipped build,
+asserting agreement with a break-free clone of each box rather than a pixel
+count (&sect;94.8). Full `qa.py` ERRORS none &middot; 472/0 &middot; 126/0
+&middot; round trip, clean parity and two tabs green on virgin Postgres 16.
+`plan-wrap.py`'s one failure reproduces on the untouched build (&sect;249.2).*
+
+*Earlier the same day: **&sect;259: the group has a mark, and the
+deck has separators.** Islam in one message &mdash; *"where can I upload the
+raya trade mark so it can be used? then work on separators let's make teh
+serparators blue background like the client brand colors"* &mdash; then four
+sections by number. Both halves drawn in the REAL deck first and published as
+one artifact (rule 1c, &sect;41.9); two of his four answers are choices between
+treatments that only existed because they were drawn. **`--panel` IS THE BLUE
+AND IT IS NOT THE DECK'S OWN COLOUR**: it is what Setup &rsaquo; Branding's
+*Navigation bar* control sets, so a divider follows a tenant who rebrands
+&mdash; proved by rebranding one mid-run rather than by naming a hex
+(&sect;94.8). **THE FOUR SWOT HUES COULD NOT SURVIVE THE MOVE, AND THAT IS A
+MEASUREMENT**: 2.55 / 2.26 / 3.49 against the blue, and *Opportunities* was
+drawn in `--panel` itself &mdash; **1.00:1 against its own ground**. One rule
+across the row, the four category slides keeping their colours, and
+`.seccell.t-*` deleted with the classes it styled. **NO FOOTER MARK ON A
+DIVIDER**, his word, and it removes a fault as well as a decoration: the plate
+that keeps a navy lockup readable is switched on by the PAGE being dark, which
+a blue divider on a light page is not. **The roll-call stays white** (his,
+reversing my recommendation, one extra slide per deck named as its cost) and
+**the closing divider carries no numbers** (his, agreeing with it &mdash; the
+other printed the three headline readings two slides early and without their
+bands). **&sect;259.2**: the group's mark, one upload on Branding through the
+SAME intake as a unit's, `deckMark()` the one reader, no migration, the key
+DELETED on Remove, classified `setup` and NAMED so a refusal says Branding
+&mdash; **and the two server edits go together**, because with only the
+classification removed a unit head may set it (3 of 489 red). The demo seed
+carries none, deliberately. **The knowledge base had promised this page set
+"the colours and the logo" since it was written**, and that page set colours
+only; it became true today. `checks/deck-dividers.py` **22 red** before &mdash;
+and **its first two runs against that build DIED rather than reporting**
+(&sect;215, twice in one file), **two of its own first failures were the
+CHECK**, and one assertion was unfalsifiable as written (&sect;94.5, its own
+example). 489/0 authoriser, full `qa.py` sweep ERRORS none, nine neighbouring
+deck checks green. **And the seed was stale on `main`** &mdash; &sect;253.2's
+cut pointer had never been regenerated into `db/seed-state.json`.*
+
+
+*Earlier: 2026-09-03 &mdash; **&sect;258: the page warns before a save
 can be lost.** Islam, after a reporting round in which people lost work twice
 over: *"can we have some sort of mid page warning like the error and network
 issue in case the person is saving with someone opening the same thing … with
@@ -4853,6 +5043,7 @@ reported** (&sect;215), printing four failures where there are sixteen.
 **RECORDED, NOT DONE**: four other surfaces draw a note as a plain grey, none
 of them stacks a second one, and `capKOTable` already has a column headed
 *Reported*.*
+
 *Earlier the same day: **&sect;254: a figure is read against what it
 is measured by.** Eight things Islam sent from the live deck in one afternoon,
 every one mocked up from the running deck before anything was built. **The

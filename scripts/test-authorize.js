@@ -100,6 +100,29 @@ refuses(headKey, function (s) { s.group.branding = { accent: "#123456" }; },
   "a unit head cannot change the tenant's branding");
 allows("smo", function (s) { s.group.branding = { accent: "#123456" }; },
   "the SMO can");
+/* The group's mark (§259). Named rather than left to the unknown bucket for
+   the same reason `comms` is — it is refused for everybody but the SMO either
+   way, and what this pins is that the refusal says Setup, so somebody sent
+   back by it knows to open Branding (§16.7). */
+refuses(headKey, function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "a unit head cannot set the group's mark");
+allows("smo", function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "the SMO can");
+(function () {
+  /* THE SEED CARRIES NO MARK, so `delete incoming.group.logo` is a no-op and
+     an assertion built that way passes on every build (§94.5, its own
+     example). Both graphs are built: the STORED one holds a mark and the
+     incoming one does not, which is the clear somebody presses. */
+  const st = clone(SEED); st.group.logo = "data:image/png;base64,AAAA";
+  const inc = clone(st); delete inc.group.logo;
+  const v = A.authorize(st, inc, personOf(SEED, "smo"));
+  check("the SMO can CLEAR the mark — a removal is the same act as a set",
+        v.ok && v.changes.some(function (c) { return c.kind === "setup"; }),
+        v.refusals.join(" / ") + " / changes: " +
+        JSON.stringify(v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  const v2 = A.authorize(st, inc, personOf(SEED, headKey));
+  check("and a unit head cannot", !v2.ok);
+})();
 /* Communication (§72). The same shape as branding, and asserted rather than
    left to the unknown bucket: an unclassified change IS refused for everybody
    but the SMO, so this passes either way — what it pins is that the refusal

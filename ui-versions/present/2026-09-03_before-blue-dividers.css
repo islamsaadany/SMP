@@ -148,31 +148,10 @@
   .seccell { border-top:5px solid var(--line); padding-top:20px; }
   .seccell b { display:block; font:400 64px/1 var(--serif); }
   .seccell span { display:block; font-size:19px; color:var(--ink-3); margin-top:8px; }
-  /* A section divider takes the tenant's own bar colour and the three inks
-     that already exist for that ground (§259.1). Every value is a token the
-     Branding page sets or derives — nothing here is a literal, so the deck
-     follows a tenant who rebrands (§25). */
-  .d-sect { background:var(--panel); }
-  .d-sect .seclab { color:var(--panel-accent); }
-  .d-sect h1, .d-sect h2, .d-sect h1.cover { color:var(--panel-ink); }
-  .d-sect .coverrule { background:var(--panel-accent); }
-  .d-sect .coversub { color:var(--panel-quiet); }
-  .d-sect .seccell { border-top-color:var(--panel-accent); }
-  .d-sect .seccell b { color:var(--panel-ink); }
-  .d-sect .seccell span { color:var(--panel-quiet); }
-  /* A divider names one thing or two, never always four: the grid says how
-     many it holds rather than assuming SWOT's shape. Capped so two counts do
-     not stretch across 1500px with a screenful of air between them. */
-  .secgrid.c1 { grid-template-columns:1fr; max-width:400px; }
-  .secgrid.c2 { grid-template-columns:repeat(2,1fr); max-width:780px; }
-  .secgrid.c3 { grid-template-columns:repeat(3,1fr); max-width:1160px; }
-  /* `.seccell.t-good` and its three siblings are GONE with the classes they
-     styled (§24, §259.1): the SWOT divider is on the blue now and its four
-     rules could not survive the move — measured against `--panel`, green
-     2.55:1, red 2.26:1, orange 3.49:1, and `t-stone` was `--panel` itself,
-     so 1.00:1 against its own ground. `.d-swot.t-good` and its siblings are
-     a different selector and are untouched: the four category slides keep
-     their colours, which is where the colour actually carries meaning. */
+  .seccell.t-good { border-top-color:var(--good); }
+  .seccell.t-bad { border-top-color:var(--bad); }
+  .seccell.t-stone { border-top-color:var(--panel); }
+  .seccell.t-warn { border-top-color:var(--warn); }
   .pillarname { font:400 68px/1.12 var(--serif); margin:0 0 14px; }
   .dcode.huge { font-size:.5em; }
   .leadstats { display:flex; gap:80px; margin-top:44px; }

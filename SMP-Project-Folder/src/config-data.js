@@ -499,6 +499,32 @@ var LOGO_MAX_BYTES = 220000; /* the data URI, carried in every save */
 
 function unitLogo(u){ return (u && u.logo) || ""; }
 
+/* ── THE GROUP HAS A MARK OF ITS OWN (§259) ───────────────────────────
+   Islam: *"where can I upload the raya trade mark so it can be used?"*
+   Nowhere, until now. §52.9 gave every UNIT a mark and stopped there, so
+   a unit that has none showed its name and a supporting function showed
+   nothing at all — and Raya Trade, which is the group, had no home.
+
+   ONE UPLOAD, ON BRANDING. It sits with the accent and the bar rather
+   than on Business units, because it is not a unit's fact: it is what
+   the organisation looks like, which is the question that page answers.
+
+   THE SAME RULES AS A UNIT'S, through the same `logoIntake()` — PNG
+   only, transparent, capped — because a second intake would be a second
+   answer to "what may be uploaded" (§53.5).
+
+   `org` carries an `extra` JSONB and lib/state-io.js files every key it
+   does not recognise there, so this needs NO migration, exactly as a
+   unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
+   a group that has set none, never the key. */
+function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
+
+/* WHICH MARK A SUBJECT'S DECK WEARS, asked in one place. A unit's own
+   if it has one, the group's otherwise — so a tenant that uploads one
+   mark has a marked deck everywhere, and a supporting function, which
+   can never have a mark of its own, has one for the first time. */
+function deckMark(u){ return unitLogo(u) || groupLogo(); }
+
 function logoIntake(file){
   return new Promise(function(resolve, reject){
     if (!file || file.type !== "image/png") {

@@ -384,6 +384,19 @@ var RECIPES = [
 ]},
 
 { g: "Strategy Office questions", items: [
+  { id: "history-put-back", q: "Who changed this, and can I put it back?", who: "office",
+    a: "Open Setup and select History. Every change that reached the server is " +
+       "listed: who made it, when, on which unit or function, which row and field, " +
+       "and the value before and after. Filter by person, place, kind or day, or " +
+       "type a name or a row into the search. Select Restore on a line to put the " +
+       "old value back \u2014 it is saved as an ordinary change, so it is authorised, " +
+       "merged with everyone else's work and logged like any other, and can itself " +
+       "be put back. A submitted report is reopened from its Reporting tab and a " +
+       "removed row from the plan archive, so those lines show Restore greyed with " +
+       "the reason. A unit head sees their own unit's history through the line " +
+       "under the plan's heading. Work that never reached the server leaves no line " +
+       "here \u2014 the amber and red bars at the top of the page are what stand in " +
+       "front of that." },
   { id: "add-person", q: "How do I add somebody to the register?", who: "office",
     a: "Go to Setup › People and add them to the register. Make sure to include an " +
        "employee number or email as a unique identifier, since more than one " +

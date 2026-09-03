@@ -77,7 +77,7 @@ def bar_state(pg):
         dim:      sub ? sub.getAttribute('aria-disabled') : null,
         tip:      sub ? (sub.getAttribute('data-tip') || "") : "",
         draft:    !!document.querySelector('[data-repsave]'),
-        /* §261: the parked Reopen drops its box and speaks in the volume
+        /* §263: the parked Reopen drops its box and speaks in the volume
            Save draft used to. Read off the COMPUTED style, never off the
            class, because the class is what was asked for and the border is
            what a reader actually meets (§93.11). */
@@ -256,12 +256,12 @@ with sync_playwright() as p:
     ck("the bar says Draft saved", "Draft saved" in r["state"], r)
     ck("...and offers Reopen", r["reopen"] is True, r)
     # §218: REVERSED AND REWRITTEN, NEVER DELETED. This read "with no Submit
-    # left lying there" until §261 — Islam: *"on saving the draft keep the
+    # left lying there" until §263 — Islam: *"on saving the draft keep the
     # submit to smo button there."* What made the old assertion safe survives
     # as the pair below: the button is back, and it is still SHUT, because the
     # plan gap section 3 made is still standing. A build that put an ungated
     # Submit on a parked report satisfies the first line and fails the second.
-    ck("Submit is back on the bar (§261)", r["submit"] is True, r)
+    ck("Submit is back on the bar (§263)", r["submit"] is True, r)
     ck("...and still shut, because the plan gap stands", r["dim"] == "true", r)
     ck("...and Reopen drops its box beside it", r["roQuiet"] == "0px", r)
     pg.evaluate("() => { const b = document.querySelector('.rc-reopen'); if (b) b.click(); }")
@@ -270,14 +270,14 @@ with sync_playwright() as p:
     ck("Reopen gives the boxes back", r["editable"] == before["editable"], r)
     ck("...and Submit with them", r["submit"] is True, r)
 
-    # 4b - AND A FINISHED DRAFT IS SENT WITHOUT REOPENING IT (§261)
+    # 4b - AND A FINISHED DRAFT IS SENT WITHOUT REOPENING IT (§263)
     #
     # Islam: *"it's posible to save the draft and if it's complete we can
     # submit directly rather than reopen to submit."* So the act is PRESSED
     # from inside the parked state and the DATA is read afterwards — a bar
     # that draws the button and a bar whose button sends the report are two
     # different builds, and only one of them is the ask (§70, §96).
-    print("\n4b · a finished draft is submitted where it stands (§261)")
+    print("\n4b · a finished draft is submitted where it stands (§263)")
     pg.evaluate("""() => {
       const t = UNITS[current].items[0].tactics[0];
       t.q1 = t.q2 = t.q3 = t.q4 = true;          /* the §3 gap, repaired */

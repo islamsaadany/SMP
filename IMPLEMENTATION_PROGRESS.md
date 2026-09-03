@@ -82,7 +82,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §261 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
+### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
 
 Islam, using the reporting page: *"in the reporting on saving the draft keep
 the submit to smo button there as it's posible to save the draft and if it's
@@ -111,14 +111,14 @@ below about 1000px the draft bar becomes the widest state of the page where
 today it is the narrowest. Asserted at 1500 and 1280 rather than remembered.
 
 **Checked:** `submit-gate.py` all green and **11 red** on the shipped
-pre-§261 build — its first falsification run *died rather than reporting*
+pre-§263 build — its first falsification run *died rather than reporting*
 (§215), so every press in the new section degrades now. One assertion reversed
 and rewritten rather than deleted (§218). `perf-line`, `table-fit` green;
 `test-authorize` 491/0, `test-graph-diff` 126/0 (nothing server-side moved).
 `report-saves.py` is red on the untouched build for the stub-without-a-worker
 fault §250.2 records — reproduced before this change and not touched by it.
 
-**Not merged.** On the branch, waiting on the word for `main`.
+**Merged to `main`** on Islam's word, 2026-09-03.
 
 
 ### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)

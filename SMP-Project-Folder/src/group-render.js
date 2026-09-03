@@ -1015,7 +1015,7 @@ function draftBtns(){
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
 function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
-  /* §261: ONE SUBMIT BUTTON, BUILT ONCE, DRAWN IN TWO STATES. Islam: *"on
+  /* §263: ONE SUBMIT BUTTON, BUILT ONCE, DRAWN IN TWO STATES. Islam: *"on
      saving the draft keep the submit to smo button there as it's posible to
      save the draft and if it's complete we can submit directly rather than
      reopen to submit."* Save draft closed the report and took Submit away
@@ -1052,7 +1052,7 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
          reading for the bar, the lock and the pen), so this puts the button
          back and reopens nothing.
 
-         AND REOPEN DROPS ITS BOX WHERE SUBMIT IS BESIDE IT (§261, Islam's
+         AND REOPEN DROPS ITS BOX WHERE SUBMIT IS BESIDE IT (§263, Islam's
          pick from two drawn in the real bar): the pair then reads in the two
          volumes this bar already has — the act that ends the report shouts,
          the lesser act speaks, exactly as Submit and Save draft do while the

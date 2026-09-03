@@ -90,18 +90,21 @@ class H(http.server.BaseHTTPRequestHandler):
                     "application/json")
             return
         if self.path.startswith("/raya-trade"):
-            SEEN["loads"] += 1
+            import time; SEEN["loads"] += 1; SEEN["load_at"] = time.time()
             self._s(200, HTML, "text/html; charset=utf-8")
             return
         self._s(200, GATE, "text/html; charset=utf-8")
 
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
-        self.rfile.read(n)
+        SEEN.setdefault("bodies", []).append(self.rfile.read(n).decode("utf-8", "replace"))
         if not self.path.startswith("/api/state"):
             self._s(200, b'{"ok":true}', "application/json")
             return
         SEEN["posts"] += 1
+        # A slow answer, so a reload that does not wait lands mid-flight (§258.2).
+        import time; time.sleep(SEEN.get("post_delay", 0))
+        SEEN["post_answered"] = time.time()
         if SEEN["post_status"] != 200:
             self._s(SEEN["post_status"], b'{"ok":false,"error":"boom"}', "application/json")
             return
@@ -281,18 +284,55 @@ with sync_playwright() as p:
     pg.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.newVersion()")
     said = banner(pg)
     ck("the version caution replaces the edit one", "newer version" in said.lower(), said)
-    ck("...and says the work is safe", "safe" in said.lower(), said)
+    ck("...and tells them to finish what they are typing and that Reload saves first",
+       "finish what you are typing" in said.lower() and "saves your work first" in said.lower(), said)
     ck("...with one way out: Reload",
        pg.evaluate("()=>!!document.querySelector('#safety [data-safety-reload]')"
                    " && !document.querySelector('#safety [data-safety-keep]')"))
     PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T12:00:00.000Z"}]
     peek(pg)
     ck("an edit landing does not displace it", "newer version" in banner(pg).lower(), banner(pg))
-    loads0 = SEEN["loads"]
+    # ── 6b · RELOAD SAVES THE FIELD UNDER THE CURSOR FIRST (§258.2) ──────
+    # Setup › Terminology has plain bound inputs; the version caution is drawn
+    # on Setup too, since a stale build is stale everywhere.
+    import time as _time
+    press(pg, 'button[title="Setup"]'); pg.wait_for_timeout(500)
+    press(pg, "text=Terminology"); pg.wait_for_timeout(600)
+    mark = "TYPED-%d" % int(_time.time())
+    box = pg.locator("input.lbl").first
+    ck("a field to type in", box.count() > 0)
+    box.click(); box.fill(""); box.type(mark)
+    ck("...and it still has the cursor (never blurred)",
+       pg.evaluate("()=>document.activeElement && document.activeElement.classList.contains('lbl')"))
+    ck("the version caution is still up on Setup", "newer version" in banner(pg).lower(), banner(pg))
+    SEEN["post_delay"] = 0.9; SEEN["post_answered"] = None
+    loads0, posts0 = SEEN["loads"], SEEN["posts"]
+    t_press = _time.time()
     press(pg, "#safety [data-safety-reload]")
+    pg.wait_for_timeout(300)
+    ck("the button says it is saving", "Saving" in pg.evaluate("()=>{const b=document.querySelector('#safety [data-safety-reload]');return b?b.textContent:''}"),
+       pg.evaluate("()=>{const b=document.querySelector('#safety [data-safety-reload]');return b?b.textContent:''}"))
     pg.wait_for_load_state("networkidle")
-    pg.wait_for_timeout(1200)
+    pg.wait_for_timeout(1500)
+    carried = [b for b in SEEN.get("bodies", [])[posts0:] if mark in b]
+    ck("the typed value was POSTed", len(carried) >= 1,
+       "%d posts, none carrying it: %s" % (SEEN["posts"] - posts0, [b[:160] for b in SEEN.get("bodies", [])[posts0:]]))
     ck("Reload reloads", SEEN["loads"] == loads0 + 1, SEEN["loads"] - loads0)
+    ck("...only AFTER the server answered the save",
+       SEEN["post_answered"] is not None and SEEN["load_at"] > SEEN["post_answered"] > t_press,
+       (SEEN.get("post_answered"), SEEN.get("load_at")))
+    SEEN["post_delay"] = 0
+    # a failed save keeps the page
+    pg.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.newVersion()")
+    SEEN["post_status"] = 500; loads0 = SEEN["loads"]
+    box = pg.locator("input.lbl").first
+    box.click(); box.fill(""); box.type(mark + "-b")
+    press(pg, "#safety [data-safety-reload]")
+    pg.wait_for_timeout(2000)
+    ck("a save that fails does NOT reload", SEEN["loads"] == loads0, SEEN["loads"] - loads0)
+    ck("...the failure is said (§171)", "Not saved" in refused(pg), refused(pg) or "(nothing)")
+    ck("...and Reload is live again", pg.evaluate("()=>{const b=document.querySelector('#safety [data-safety-reload]');return !!b && !b.disabled && b.textContent==='Reload';}"))
+    SEEN["post_status"] = 200
 
     # ── 7 · CONTRAST, THE SWEEP'S OWN ARITHMETIC (§95) ───────────────────
     print("\n7 · the caution is readable in both themes")

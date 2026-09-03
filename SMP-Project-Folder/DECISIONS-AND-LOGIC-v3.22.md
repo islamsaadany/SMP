@@ -29652,3 +29652,55 @@ page announced on its own, Setup drawing nothing and asking nothing.
 `test-safety-peek.js` gains the sync's three assertions against a real
 Postgres 16. Full `qa.py` sweep on the build.
 
+## §258.2 — RELOAD SAVES FIRST, AND SAYS SO (2026-09-03)
+
+Islam, on §258.1's answer that a field commits when the cursor leaves it:
+*"Then the message of the reload should instruct them to save their work
+before pressing reload, and I want you to check and double check and triple
+check on the loss of data and if anyone's save may impact others — others were
+in a very critical moment."*
+
+**MEASURED BEFORE ANYTHING WAS CHANGED.** A field still being typed in when
+Reload is pressed: the press blurs it, `change` writes the value, the
+leading-edge autosave (§170) posts at once — and the stub recorded the POST
+carrying the typed value **0.11s after the press, with the reload already
+under way**. So the value DID reach the server on that build, and the tab
+navigated away before the answer came back: the response was written to a
+closed socket. `flushLeave()` cannot cover this case either — it steps aside
+while a save is in flight, by design (§138). *A press that navigates away from
+a save in flight is a promise nobody checked.* It happened to hold on a stub;
+on a serverless function a request whose body has fully arrived normally runs
+to its commit, and "normally" is not the word for a reporting deadline.
+
+**BOTH BUTTONS SAVE FIRST NOW, AND RELOAD ONLY ON THE SERVER'S WORD.**
+`saveThenReload()` is the one path behind Reload and Reload &amp; keep mine
+(§53.5): commit the field under the cursor, `SYNC.saveNow`, reload on `saved`
+(or `clean` — nothing to send). The button reads *Saving…* while it waits and
+*Saved — reloading…* for the instant after. **A refusal or a failure keeps
+the page**: §171's banner is already saying why, and reloading over it would
+throw away the explanation and, for a failure, the work. A press that lands
+while an autosave is already in flight is parked by `save()` and answered by a
+real re-run (§183), never by the in-flight one's answer.
+
+**THE WORDING IS HIS**: *"Finish what you are typing, then press Reload — it
+saves your work first and then opens the new version."* Both sentences say
+the same two things — finish the box, the button saves first — because a
+sentence that promised safety without saying what to do was the gap he named.
+
+**THE TRIPLE CHECK, AS MEASUREMENT**: eight genuinely concurrent saves on
+eight units, none lost, and with the lock switched off four of eight lost —
+so the lock is proved to be what prevents it, not the absence of load
+(`test-concurrent-saves.js`, §240); two stale tabs on one tenant, 24/0
+(`test-two-tabs.js`, §210/§215); the peek 17/0; the authoriser 491/0. And the
+new section of `checks/safety-banners.py` types into a real field, presses
+Reload against a server that answers slowly, and asserts the POST carried the
+value, that the reload happened only AFTER the server answered, and that a
+500 keeps the page with Reload live again — proved able to fail against the
+§258.1 build.
+
+**WHAT STILL CANNOT BE PROMISED**, and is said rather than glossed: two people
+typing into the SAME box inside the same twenty seconds still resolve
+last-write-wins (§215's residue, unchanged); and a tab from before this
+morning's first deploy carries no banner code at all, so it is not told — it
+keeps saving correctly and an ordinary refresh brings it up to date.
+

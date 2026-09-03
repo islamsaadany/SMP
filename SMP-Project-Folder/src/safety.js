@@ -74,20 +74,36 @@ var SAFETY = (function(){
     el.innerHTML = html;
     el.hidden = false;
     var r = el.querySelector("[data-safety-reload]");
-    if (r) r.addEventListener("click", function(){ location.reload(); });
+    if (r) r.addEventListener("click", function(){ saveThenReload(r, "Reload"); });
     var k = el.querySelector("[data-safety-keep]");
-    if (k) k.addEventListener("click", function(){
-      k.disabled = true; k.textContent = "Saving…";
-      var done = function(how){
-        if (how === "saved" || how === "clean") { location.reload(); return; }
-        /* Refused or failed: sync.js has already said so in its own banner;
-           this one steps aside rather than reloading over the explanation. */
-        k.disabled = false; k.textContent = "Reload & keep mine";
-      };
-      if (typeof SYNC !== "undefined" && SYNC.saveNow) SYNC.saveNow(done); else done("clean");
-    });
+    if (k) k.addEventListener("click", function(){ saveThenReload(k, "Reload & keep mine"); });
     var d = el.querySelector("[data-safety-dismiss]");
     if (d) d.addEventListener("click", hide);
+  }
+
+  /* BOTH BUTTONS SAVE FIRST AND RELOAD ONLY ON THE SERVER'S WORD (§258.2).
+     Islam: *"the message of the reload should instruct them to save their
+     work before pressing reload"* — and measured first: on the §258.1 build a
+     field still being typed in DID reach the server when Reload was pressed
+     (the click blurs it, the change writes, the leading-edge save posts), but
+     the tab reloaded before the answer came back, so nothing on the page ever
+     knew whether it landed. A press that navigates away from a save in flight
+     is a promise nobody checked. So: commit the field under the cursor, ask
+     sync.js to save now, and reload on `saved` (or `clean` — nothing to send).
+     A refusal or a failure keeps the page: §171's banner is already saying
+     why, and reloading over it would throw the explanation away — and, for a
+     failure, the work. The button says what it is doing while it waits. */
+  function saveThenReload(btn, label){
+    try {
+      var a = document.activeElement;
+      if (a && a !== document.body && typeof a.blur === "function") a.blur();
+    } catch (e) {}
+    btn.disabled = true; btn.textContent = "Saving…";
+    var done = function(how){
+      if (how === "saved" || how === "clean") { btn.textContent = "Saved — reloading…"; location.reload(); return; }
+      btn.disabled = false; btn.textContent = label;
+    };
+    if (typeof SYNC !== "undefined" && SYNC.saveNow) SYNC.saveNow(done); else done("clean");
   }
 
   var ICON_RELOAD = '<svg class="safety-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
@@ -98,7 +114,7 @@ var SAFETY = (function(){
     if (shown === "version") return;
     draw("version", ICON_RELOAD +
       '<div class="safety-msg"><strong>A newer version of the platform is ready</strong>' +
-      '<span>Reload to get it — your work is safe and already saved.</span></div>' +
+      '<span>Finish what you are typing, then press Reload — it saves your work first and then opens the new version.</span></div>' +
       '<div class="safety-acts"><button type="button" class="safety-btn" data-safety-reload>Reload</button></div>');
   }
 
@@ -150,7 +166,7 @@ var SAFETY = (function(){
     try { console.info("[safety] " + (by || "somebody") + " landed a change on " + t + " at " + when); } catch (e) {}
     draw("edited", ICON_PEOPLE +
       '<div class="safety-msg"><strong>' + who + ' updated ' + E(pageName(t)) + ' while you were working</strong>' +
-      '<span>Your changes are safe. Reload brings in their update and keeps yours on top.</span></div>' +
+      '<span>Finish what you are typing, then press Reload &amp; keep mine — it saves your work first, then brings in their update with yours on top.</span></div>' +
       '<div class="safety-acts"><button type="button" class="safety-btn" data-safety-keep>Reload &amp; keep mine</button>' +
       '<button type="button" class="safety-btn ghost" data-safety-dismiss>Dismiss</button></div>');
   }

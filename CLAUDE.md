@@ -4701,6 +4701,10 @@ python3 checks/safety-banners.py # the page warns BEFORE a save can be lost (§2
                                 # caution clearing on a tab change, Setup asking
                                 # nothing, and the clock taken from the server (9 red
                                 # on the §258 build)
+                                # — and since §258.2 both buttons SAVE FIRST and reload
+                                # only on the server's word: a field mid-typing, a slow
+                                # server, the POST carrying the value, the reload after
+                                # the answer, and a 500 keeping the page
 node scripts/test-safety-peek.js # ...and the server half against a real Postgres: who
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to

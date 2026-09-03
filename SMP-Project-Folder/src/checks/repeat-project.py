@@ -196,7 +196,12 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(80)
     pg.evaluate("""()=>{const b=[...document.querySelectorAll('.setuprail [data-setupgo]')]
         .find(x=>/cycle/i.test(x.textContent)); if(b)b.click()}"""); pg.wait_for_timeout(500)
-    pg.click("[data-closecycle]"); pg.wait_for_timeout(600)
+    # §261: CLOSE THE CYCLE IS BEHIND THE PEN NOW (Islam: "keep the close cycle
+    # inside the edit ... it's a critical button to click"), so the turn of the
+    # cycle this check drives starts one press earlier. §51.11: a check keyed on
+    # markup that moved does not fail, it passes quietly.
+    pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
+    pg.click(".newcycle [data-closecycle]"); pg.wait_for_timeout(600)
     pg.click("[data-opencycle]"); pg.wait_for_timeout(400)
     pg.fill("#nc-name", "H2 2026")
     pg.fill("#nc-from", "Jul 2026"); pg.fill("#nc-to", "Dec 2026")

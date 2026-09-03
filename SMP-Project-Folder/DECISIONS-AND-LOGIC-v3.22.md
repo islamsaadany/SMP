@@ -29740,3 +29740,126 @@ green. `refusal-keeps-work.py` is red on `main`'s own build for the
 stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
+
+---
+
+## §261 — EDITING THE CYCLE THAT IS RUNNING (2026-09-03)
+
+Islam: *"allow me to edit the cycle name. give me an edit button the cycle to
+edit the date as you already built and the cycel name edit as well"* — and
+then, of the two shapes drawn for him in the real page (rule 1c,
+`design-mockups/cycle-name-date-edit/`): *"keep the close cycle inside the
+edit. as it's a critical button to click, the pen should hold everything
+editable so it's kept secured. closer to B option."*
+
+**NOTHING ON THAT STRIP COULD BE CORRECTED BUT THE MONTH.** A cycle's name and
+its three dates are written ONCE, when it is opened (§47.8), and were plain
+text ever after — so a typo in *H1 2026*, or a due date that moved, could only
+be put right by CLOSING the cycle and opening another, which archives and
+clears every figure in the tenant (§49.1). The review point was the one thing
+that could change while the cycle ran (§239.1), and it changed in place on the
+strip. The cost of that state was never a design decision; it is simply where
+§47.8 stopped.
+
+**THE SECOND INSTRUCTION IS THE DESIGN, AND IT GOES FURTHER THAN WHAT WAS
+DRAWN.** Option B put the month picker inside the pen beside the name and the
+dates; Islam's reply moved **Close the cycle** in there too, and with it the
+strip stops carrying any control at all while a cycle runs. That is a security
+argument rather than a tidiness one — the most destructive act in the product
+sat one stray click away, on a line people open to READ how many units have
+reported — and it is why the pen is worth having at all: *a door is only a
+guard if everything dangerous is behind it.*
+
+**IT IS THE `NEWCYCLE` PANEL, NOT A SECOND SHAPE** (§53.5). The same five
+fields in the same order, the same sentence about what the month decides. What
+differs is the act row: Save and Cancel at the near end, Close the cycle at the
+far end of it. `CYCLEEDIT` is a **draft** exactly as `NEWCYCLE` is — nothing
+reaches `REVIEW` until Save — so Cancel writes nothing and there is no
+half-applied state to undo; asserted by typing into two fields, cancelling, and
+reading the cycle back.
+
+**AND THE GUARD IS WHAT MAKES CLOSE SAFE TO PUT THERE.** Closing files this
+cycle's figures under its NAME (`HISTORY` keeps the name, §49.1), so a press
+over an unsaved rename must not quietly save it and must not quietly throw it
+away. While `cycleEditDirty()` is true, Close is **held and says why** —
+`aria-disabled`, never `disabled`, or the sentence beside it cannot be reached
+by keyboard (§221, §163) — and the handler **asks again at press time** rather
+than trusting the render (§48.2), because the fields write on `input` and the
+drawn state can be one keystroke behind. The guard is rewritten IN PLACE
+(§71.2, §145's `gapBandRefresh()`): a repaint here would rebuild the box under
+the hand that is typing in it.
+
+**TRIMMED, AND THAT IS NOT TIDINESS EITHER.** `cycleEditDirty()` compares
+trimmed, so Save stores trimmed — without it a stray space is *no change* to
+the guard and a real change to the database, and the two halves of one feature
+disagree about whether anything happened.
+
+**EDIT IS IDEMPOTENT**, because it stays on the strip while the pen is open: a
+second press must not hand back a fresh draft over what somebody is typing.
+Cancel is how you leave, and it says so.
+
+**DRAWN WHILE THE CYCLE IS OPEN ONLY**, which is the gate the review point
+already had. A closed cycle's figures are filed under the name it closed with,
+so renaming it afterwards would leave this page and the history saying
+different things; with it closed the strip carries *Open a new cycle…* exactly
+as before, asserted. And the pen is **cleared when the cycle closes**, or an
+"Edit this cycle" panel would sit under a strip that has just started offering
+its successor, with a Close button in it for a cycle already closed.
+
+**THE SERVER NEEDED NOTHING, AND THAT IS ASSERTED RATHER THAN ASSUMED.**
+`review.name/from/to/due/asOfMonth` sit outside `REVIEW_PER_TARGET` (§234), so
+they have always classified as `cycle` — the office's. What is new is that
+**nothing in the product could send one until today**: they were written once
+and never again, so the path was reachable only by a hand-built payload.
+`test-authorize.js` §8b asserts it both ways, which is §172's lesson (four
+layers agreeing about a value the database has never been offered is not the
+same as it working). Nothing new is stored and nothing is migrated.
+
+**WHAT THE CHECK COST, AND ALL FOUR OF ITS OWN FIRST FAILURES WERE THE CHECK.**
+`checks/cycle-edit.py` — **46 red** on the build before, 47 green on this one
+(§94.5, and it was re-falsified after every correction). Its first run against
+that build **DIED rather than reporting** (§215, again) on a missing Edit
+button, printing 3 failures of the 46 it holds; every press degrades now. Then:
+a label query that swept up the month button's own value span; **Playwright
+treating `aria-disabled` as disabled**, so the one press this file exists to
+make — the refused one — hung for 30 seconds on a build that is behaving
+(§222, already learned once, and the fix is `force`); two dialog handlers, so
+§6's *dismiss* answered the confirm §5b was about to accept; and §8 asking the
+navigation when the honest answer is the RULE — a custodian cannot reach the
+Reporting cycle page at all, so the gate is asserted through `grant("c_cycle")`
+and the renderer's own output rather than by failing to find a button (§94.8).
+**And §11 could not have worked over `file://` at all** (§94.11, §183): `SYNC`
+is not live there, so every other assertion proves the cycle changed IN THE TAB
+and none proves it left it — §219's fault exactly. It serves the built file
+with a stub and reads what is POSTED; the welcome screen had to be suppressed
+as a returning viewer has it (§167.2), **and `go_cycle`'s viewer switch had to
+go with it**, because §237 deliberately re-opens that screen on a switch and
+the overlay then eats every click.
+
+**THE PEN'S TWO NEW INKS ARE MEASURED WITH THE SWEEP'S OWN FUNCTION** (§67,
+§41.4): the pen is a state nobody arrives at by navigating, so the contrast
+sweep has never seen it — 5.31 light / 5.96 dark on both the held Close and the
+sentence beside it, and the probe was **proved able to see them** by wrecking
+both colours and watching it report 1.12 and 1.11. Held rather than faded: an
+`opacity` would have dragged `--bad-tx` under the floor (§38.5, seventh time),
+so it takes the page's own quiet ink and line instead.
+
+**TWO CHECKS HELD A LITERAL THIS DECISION MOVED** (§214.3, sixth time), both
+REWRITTEN rather than deleted (§218): `ytd-proration.py` asserted the review
+point's picker was ON THE STRIP — the promise it is really about, that the
+office can move the month and every figure follows, is asserted exactly as
+before through the door it now has, **with one assertion gained** (the pick has
+not reached the cycle before Save, which is what proves the draft is real); and
+`repeat-project.py` pressed `[data-closecycle]` on the page, which is §51.11's
+own fault waiting to happen — a check keyed on markup that moved does not fail,
+it passes quietly.
+
+**RECORDED, NOT DONE**: `setup-pages.py` is red on three assertions about a
+Setup table's head staying on screen — **reproduced identically on the build
+before this one**, so it is not this change's, and it is a sticky-offset
+question of its own (§163.5's family). And the one consequence of the feature
+worth stating: where no reporting month has been picked, `cycleYear()` falls
+back to the cycle's END DATE to work out how much of the year has passed
+(§239.3), so on such a tenant editing *to* moves what every running-total
+figure is measured against. Where a month is set, the dates are labels and
+change no score.

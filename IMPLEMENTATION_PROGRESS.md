@@ -82,6 +82,44 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §261 — editing the cycle that is running (2026-09-03, branch `claude/cycle-name-date-edit-ze49d0`)
+
+Islam: *"allow me to edit the cycle name. give me an edit button the cycle to
+edit the date as you already built and the cycel name edit as well"* — then, of
+two shapes drawn in the real page: *"keep the close cycle inside the edit. as
+it's a critical button to click, the pen should hold everything editable so
+it's kept secured."*
+
+**What was wrong.** A cycle's name and its three dates are written once, when
+it is opened (§47.8), and were plain text ever after — so a typo in *H1 2026*,
+or a due date that moved, could only be corrected by CLOSING the cycle and
+opening another, which archives and clears every figure in the tenant (§49.1).
+
+**What is there now.** One **Edit** on the cycle strip, and nothing else: Close
+the cycle moved inside it and the review-point picker went with it, so while a
+cycle runs that line carries no control that can be pressed by accident. The
+pen is the *Open a new cycle* panel's own shape — Name · Covers from · to ·
+Reports due · Reporting as of — with Save and Cancel at one end of its act row
+and Close the cycle at the other. Nothing reaches the cycle until Save; Cancel
+writes nothing. While anything is unsaved **Close is held and says why**, asked
+again at press time rather than trusted from the render.
+
+**What it does not touch.** No figure, no score, no report state. Nothing new
+is stored and nothing is migrated: those five values were already there, and
+the server has always treated them as the office's (§234) — what is new is that
+until today nothing in the product could send one.
+
+**Verified.** `checks/cycle-edit.py` **46 red** on the build before and 47
+green after, re-falsified after every correction; full `qa.py` sweep ERRORS
+none; 496/0 authoriser (five new, both ways); 126/0 differ; `ytd-proration`,
+`repeat-project`, `cycle-board`, `setup-overview`, `setup-header`, `table-fit`,
+`safety-banners`, `submit-gate` and `gap-fill` green; the pen's two new inks
+measured with the sweep's own function (5.31 light / 5.96 dark) and the probe
+proved able to see them. Mockup:
+`design-mockups/cycle-name-date-edit/2026-09-03_edit-the-cycle.html`.
+
+**On the branch, not merged.**
+
 ### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
 
 Islam, in one message: *"where can I upload the raya trade mark so it can be

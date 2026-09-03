@@ -671,6 +671,35 @@ console.log("\n8a · the review point (§239)");
   refuses(custKey, setAsOf, "nor can a strategy custodian");
 })();
 
+/* ── §261: AND SO ARE THE CYCLE'S NAME AND ITS DATES ─────────────────────
+   The server has always classified these as `cycle` -- they are review fields
+   outside `REVIEW_PER_TARGET` (§234) -- and until now NOTHING IN THE PRODUCT
+   COULD SEND ONE: they were written once, when the cycle was opened, and were
+   plain text ever after. §261's pen makes that path reachable by a person for
+   the first time, which is exactly the moment to assert what the server does
+   with it (§172: four layers agreeing about a value the database has never
+   been offered is not the same as it working).
+
+   Both ways, or a rule that refuses everybody protects nothing (§94.2). And
+   the name matters more than it looks: it is what a closed cycle's figures are
+   filed under, so somebody able to rewrite it could re-label another team's
+   history. */
+console.log("\n8b · the cycle's name and dates (§261)");
+(function () {
+  const rename = function (s) {
+    s.review = Object.assign({}, s.review, { name: "H2 2026" });
+  };
+  const redate = function (s) {
+    s.review = Object.assign({}, s.review,
+      { from: "Feb 2026", to: "Jul 2026", due: "20 Aug 2026" });
+  };
+  allows("smo", rename, "the SMO renames the cycle");
+  allows("smo", redate, "the SMO moves its dates");
+  refuses(headKey, rename, "a unit's head cannot rename it");
+  refuses(custKey, rename, "nor can a strategy custodian");
+  refuses(headKey, redate, "a unit's head cannot move its dates");
+})();
+
 console.log("\n8 · the review's picture slides");
 (function () {
   const slide = { id: "psTEST", title: "Site visit", at: "cover", layout: 1,

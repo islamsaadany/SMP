@@ -229,12 +229,6 @@ var PROLES = null;
    presses Open, or a half-filled form would already have closed the cycle it
    was going to succeed. */
 var NEWCYCLE = null;
-/* The OPEN cycle being edited (§261). Null when the pen is shut. A draft for
-   the same reason NEWCYCLE is one -- nothing reaches REVIEW until Save, so
-   Cancel writes nothing -- and it is a SECOND variable rather than a reused
-   one because the two panels answer different questions and could otherwise
-   only be told apart by which state the cycle happens to be in. */
-var CYCLEEDIT = null;
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
@@ -5089,48 +5083,6 @@ function boardPlansLikeUnit(target){
    that a page must be able to say NOTHING is here rather than draw an empty
    shape. The quarter is always known (it is a number, not a date), so it is
    always said. */
-/* ── EDITING THE CYCLE THAT IS RUNNING (§261) ─────────────────────────
-   Islam: "allow me to edit the cycle name. give me an edit button the cycle to
-   edit the date as you already built and the cycel name edit as well" — and
-   then, of the two shapes drawn for him: "keep the close cycle inside the
-   edit. as it's a critical button to click, the pen should hold everything
-   editable so it's kept secured."
-
-   Until now a cycle's name and its three dates were written ONCE, when it was
-   opened (§47.8), and were plain text ever after — so a typo in the name, or a
-   due date that moved, could only be corrected by CLOSING the cycle and
-   opening another, which archives and clears every figure in the tenant
-   (§49.1). The review point was the one thing that could be changed while the
-   cycle ran (§239), and it was changed in place on the strip.
-
-   THE DRAFT IS A DRAFT, exactly as `NEWCYCLE` is: nothing touches REVIEW until
-   Save, so Cancel writes nothing and there is no half-applied state to undo.
-   `asOfMonth` is carried only when it is SET, or opening the pen on a cycle
-   that never picked one would put an empty key into the draft and saving it
-   would write a phantom change into every later save (§50.6, §42's
-   `branding()` fault).
-
-   AND THE SECOND HALF IS WHY THE FIRST IS SAFE. With Close now inside the pen
-   it sits beside four fields somebody may have typed into, and closing files
-   this cycle's figures under its NAME — so `cycleEditDirty()` is what stops a
-   press from either quietly saving a rename or quietly throwing one away.
-   Compared TRIMMED against the stored cycle, so re-typing the same value with
-   a stray space is not a change to hold anybody up over (§96.2 is about what
-   is STORED; this is about whether anything moved). */
-function cycleDraft(){
-  var d = { name:String(REVIEW.name || ""), from:String(REVIEW.from || ""),
-            to:String(REVIEW.to || ""), due:String(REVIEW.due || "") };
-  if (REVIEW.asOfMonth) d.asOfMonth = REVIEW.asOfMonth;
-  return d;
-}
-function cycleEditDirty(){
-  if (!CYCLEEDIT) return false;
-  var same = ["name", "from", "to", "due"].every(function(k){
-    return String(CYCLEEDIT[k] || "").trim() === String(REVIEW[k] || "").trim();
-  });
-  return !same || String(CYCLEEDIT.asOfMonth || "") !== String(REVIEW.asOfMonth || "");
-}
-
 function cycleMeta(){
   var bits = [];
   var from = String(REVIEW.from || "").trim();

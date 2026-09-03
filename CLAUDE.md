@@ -365,6 +365,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **EDITING THE CYCLE THAT IS RUNNING (§261):** Islam — *"allow me to edit the
+  cycle name. give me an edit button the cycle to edit the date as you already
+  built and the cycel name edit as well"*, and then, of two shapes drawn in the
+  real page: *"keep the close cycle inside the edit. as it's a critical button
+  to click, the pen should hold everything editable so it's kept secured."*
+  **A CYCLE'S NAME AND DATES WERE WRITTEN ONCE** (§47.8) and were plain text
+  ever after, so a typo could only be corrected by CLOSING the cycle — which
+  archives and clears every figure in the tenant (§49.1). **HIS SECOND
+  INSTRUCTION IS THE DESIGN**: with Close the cycle moved inside the pen the
+  strip carries NO control at all while a cycle runs, which is a security
+  argument and not a tidy one — *a door is only a guard if everything dangerous
+  is behind it.* **IT IS THE `NEWCYCLE` PANEL, NOT A SECOND SHAPE** (§53.5),
+  and `CYCLEEDIT` is a DRAFT exactly as `NEWCYCLE` is, so Cancel writes
+  nothing. **THE GUARD IS WHAT MAKES CLOSE SAFE TO PUT THERE**: closing files
+  this cycle's figures under its NAME, so while the draft differs Close is
+  **held and says why** — `aria-disabled`, never `disabled` (§221, §163) — and
+  the handler asks again at press time (§48.2) because the fields write on
+  `input` and the drawn state can be a keystroke behind; the guard is rewritten
+  IN PLACE, never painted (§71.2). **Trimmed**, or a stray space is no change
+  to the guard and a real change to the database. **Edit is idempotent**, since
+  it stays on the strip while the pen is open. **Open cycles only** — a closed
+  one's figures are filed under the name it closed with — and the pen is
+  cleared when the cycle closes. **THE SERVER NEEDED NOTHING AND IT IS
+  ASSERTED**: those fields have always classified as `cycle` (§234), and what
+  is new is that **nothing in the product could send one until today** (§172's
+  lesson). `checks/cycle-edit.py`: **46 red** before, and **four of its own
+  first failures were the CHECK** — it died rather than reporting (§215), swept
+  up the month button's value span as a label, hung 30s because Playwright
+  treats `aria-disabled` as disabled (§222, already learned once), and asked
+  the navigation where the honest answer is the RULE. **Two checks held a
+  literal this moved** (§214.3), both REWRITTEN not deleted (§218).
 - **THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (§259):** Islam, in one
   message — *"where can I upload the raya trade mark so it can be used? then
   work on separators let's make teh serparators blue background like the client
@@ -4520,6 +4551,20 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the strip
+                                # carries ONE control and neither Close the cycle nor the
+                                # month picker — asserted as absences beside the presence,
+                                # or a build that merely added a button passes; the pen
+                                # holds all five facts with Close INSIDE it; every field
+                                # driven and read back off REVIEW, never off the screen;
+                                # Cancel writing nothing; Close REFUSED over an unsaved
+                                # change (forced, because Playwright treats aria-disabled
+                                # as disabled — §222) and then proved to WORK with nothing
+                                # unsaved; a cleared month DELETING the key; the office's,
+                                # asked of the RULE rather than of the navigation; the
+                                # pen's inks measured with the sweep's own function; and
+                                # §11 over HTTP, because a save cannot be seen over
+                                # file:// at all — 46 red on the build before
 python3 checks/attention-dismiss.py # every attention item can be ANSWERED, on the box it
                                 # is about: one item per kind (five of six made, §94.2),
                                 # the ring measured as PAINT not as a class, one press
@@ -4874,7 +4919,30 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: editing the cycle that is
+running.** Islam: *"allow me to edit the cycle name. give me an edit button the
+cycle to edit the date as you already built and the cycel name edit as well"* —
+then, of the two shapes drawn for him in the real page: *"keep the close cycle
+inside the edit. as it's a critical button to click, the pen should hold
+everything editable so it's kept secured."* A cycle's name and its three dates
+were written ONCE, when it was opened, and were plain text ever after — so a
+typo could only be put right by CLOSING the cycle, which archives and clears
+every figure in the tenant. **His second instruction is the design**: with Close
+moved inside the pen the strip carries no control at all while a cycle runs,
+which is a security argument rather than a tidy one. The panel is `NEWCYCLE`'s
+own, the draft reaches nothing until Save, and **the guard is what makes Close
+safe to put there** — held with its reason while anything is unsaved, asked
+again at press time, rewritten in place rather than painted. The server needed
+nothing and it is asserted both ways, because until today nothing in the product
+could send those fields at all. `checks/cycle-edit.py`: **46 red** on the build
+before, 47 green after — and four of its own first failures were the check.
+Full `qa.py` ERRORS none &middot; 501/0 authoriser &middot; 126/0 differ
+&middot; `ytd-proration`, `repeat-project`, `cycle-board`, `setup-overview`,
+`setup-header`, `table-fit`, `safety-banners`, `submit-gate` and `gap-fill`
+green. **Recorded, not done**: `setup-pages.py`'s three sticky-head failures
+reproduce identically on the build before this one.*
+
+*Earlier the same day: **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

@@ -5388,20 +5388,17 @@ function renderCycle(){
          reason: with no box there is nothing to mistype and the picker can
          only produce a shape `monthsOf()` already reads. */
       '<span class="fstrip-meta asof">reported as of ' +
-        /* IT SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With no month
-           picked the platform still has an answer -- the cycle's own quarter
-           end -- so showing the picker's "Missing" would print an alarm over
-           something that is not owed (§177, §214.4) while the note beside it
-           reported a real number. The note says whether it was chosen or
-           inherited.
-
-           §261: AND IT IS A VALUE HERE, NEVER A CONTROL. The picker moved
-           inside the pen with everything else the office can change, so this
-           line reads the same for everybody and the strip carries nothing that
-           can be pressed by accident. One control for one fact (§53.5): a
-           picker here AND a picker in the panel is two, and they would have to
-           be kept in step. */
-        '<b>' + esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b>' +
+        /* THE BUTTON SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With
+           no month picked the platform still has an answer -- the cycle's own
+           quarter end -- so showing the picker's "Missing" would print an
+           alarm over something that is not owed (§177, §214.4) while the note
+           beside it reported a real number. The note says whether it was
+           chosen or inherited. */
+        (can && open
+          ? monthBtnHtml(REVIEW.asOfMonth || reviewAsOfLabel(), "asofbtn", function(v){
+              if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
+            })
+          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) +
         /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
            whether the month he picked had taken -- "can you check if the cycle
            adjustment is saved" -- because the strip showed the value and
@@ -5416,70 +5413,12 @@ function renderCycle(){
           : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
             'figure is measured against a whole one</span>') + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
-      /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§261) ───────────────────
-         Islam: "keep the close cycle inside the edit. as it's a critical
-         button to click, the pen should hold everything editable so it's kept
-         secured." So the strip's only control while a cycle runs is Edit, and
-         Close the cycle is drawn INSIDE the panel it opens -- the strip is a
-         line you read, not a line you press.
-
-         Edit is drawn while the cycle is OPEN only, which is the gate the
-         review point already had: a closed cycle's figures are filed under the
-         name it closed with (HISTORY keeps the name, §49.1), so renaming it
-         afterwards would leave this page and the history saying different
-         things. With it closed the strip carries "Open a new cycle..." exactly
-         as it did before. */
       (can
         ? (open
-            ? '<button class="editbtn" data-editcycle="1">Edit</button>'
+            ? '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>'
             : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
         : '') +
     '</div>' +
-    /* ── THE PEN ITSELF ────────────────────────────────────────────
-       The panel `NEWCYCLE` already uses, because this asks for the same five
-       things and two shapes for one form is how the two drift (§53.5). What
-       differs is the act row: Save and Cancel at the near end, Close the cycle
-       at the far end of the same row -- inside the pen, apart from them, and
-       still the last thing the eye reaches.
-
-       CLOSE IS SAID, NOT HIDDEN, while something is unsaved (§221, §163): a
-       control that vanishes reads as broken, one that says why it is waiting
-       teaches the rule once. `aria-disabled`, never `disabled`, or the reason
-       beside it cannot be reached by keyboard -- and the handler asks again at
-       press time rather than trusting this render (§48.2). */
-    (CYCLEEDIT
-      ? (function(){
-          var held = cycleEditDirty();
-          return '<div class="cfg newcycle"><div class="nc-h">Edit this cycle</div>' +
-            '<div class="nc-grid">' +
-              '<label><span>Name</span><input class="fld" id="ce-name" value="' +
-                esc(CYCLEEDIT.name) + '" placeholder="H1 2027"></label>' +
-              '<label><span>Covers from</span><input class="fld" id="ce-from" value="' +
-                esc(CYCLEEDIT.from) + '" placeholder="Jan 2027"></label>' +
-              '<label><span>to</span><input class="fld" id="ce-to" value="' +
-                esc(CYCLEEDIT.to) + '" placeholder="Jun 2027"></label>' +
-              '<label><span>Reports due</span><input class="fld" id="ce-due" value="' +
-                esc(CYCLEEDIT.due) + '" placeholder="15 Jul 2027"></label>' +
-              '<label><span>Reporting as of</span>' +
-                monthBtnHtml(CYCLEEDIT.asOfMonth || "", "asofbtn", function(v){
-                  if (v) CYCLEEDIT.asOfMonth = v; else delete CYCLEEDIT.asOfMonth;
-                }) + '</label>' +
-            '</div>' +
-            '<div class="nc-why"><b>The month decides what every figure is measured ' +
-              'against.</b> A target that adds up across the year is compared with the ' +
-              'share of it due by then, and a tactic whose span has not started yet is ' +
-              'not asked for.</div>' +
-            '<div class="nc-act">' +
-              '<button class="editbtn" data-ce-save="1">Save</button>' +
-              '<button class="linkbu" data-ce-cancel="1">Cancel</button>' +
-              '<span class="nc-gap"></span>' +
-              '<span class="why nc-hold" data-ce-hold="1"' + (held ? '' : ' hidden') +
-                '>Save or cancel your changes first</span>' +
-              '<button class="editbtn danger" data-closecycle="1"' +
-                (held ? ' aria-disabled="true"' : '') + '>Close the cycle</button>' +
-            '</div></div>';
-        })()
-      : '') +
     /* ── OPENING A CYCLE ASKS WHAT IT IS (§47.8) ────────────────────
        Islam: "on opening the cycle it didn't ask me any questions … we should
        set the name of the cycle and the duration it covers."

@@ -29262,3 +29262,10 @@ from a stub and is asserted as *armed*; its first proof is the next production
 deploy, watched from an open tab. Built on the branch and **not merged**: `main`
 is Islam's call (rule 4), and the incremental writer stays off until its own
 staged rollout.
+
+**MERGED 2026-09-03** on Islam's word (*"merge"*), after main had taken
+§256–§257 underneath it: renumbered from §256, rebuilt from the merged
+sources, shell `v4.36-save-safety-banners`. This note is the commit `main`
+holds and the branch does not (§91, §108.17) — the merge commit reached the
+branch first because the session's permission gate refused the push to `main`
+twice and then let the branch through, so production needs a SHA of its own.

@@ -5429,16 +5429,10 @@ function renderCycle(){
          afterwards would leave this page and the history saying different
          things. With it closed the strip carries "Open a new cycle..." exactly
          as it did before. */
-      /* §261.2: AND A CLOSED CYCLE GETS THE PEN TOO. Islam picked it over a
-         Reopen button on the strip: the pen's far end holds the cycle's one
-         dangerous state change, whichever direction it goes -- Close while it
-         runs, Reopen once it has stopped -- so the strip goes on carrying
-         nothing that changes anything. `Open a new cycle...` stays beside it
-         because it is a different act with its own panel and its own
-         confirmation, and it is the only way to start one. */
       (can
-        ? '<button class="editbtn" data-editcycle="1">Edit</button>' +
-          (open ? '' : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
+        ? (open
+            ? '<button class="editbtn" data-editcycle="1">Edit</button>'
+            : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
         : '') +
     '</div>' +
     /* ── THE PEN ITSELF ────────────────────────────────────────────
@@ -5455,38 +5449,6 @@ function renderCycle(){
        press time rather than trusting this render (§48.2). */
     (CYCLEEDIT
       ? (function(){
-          /* ── A CLOSED CYCLE IS A RECORD (§261.2) ──────────────────
-             The same panel, and deliberately NOT the same contents: §261 gated
-             the fields on the cycle being open because a closed one's figures
-             are filed under the name it closed with, so editing that name
-             would leave this page and HISTORY saying different things. They
-             are drawn as VALUES rather than dropped, because what somebody
-             opens a closed cycle to ask is exactly what its dates and its
-             review point were -- and the sentence says why they cannot be
-             touched, or read-only values with no explanation read as a form
-             that failed to load (§45.2). */
-          if (!open) {
-            var facts = [["Name", REVIEW.name], ["Covers from", REVIEW.from],
-                         ["to", REVIEW.to], ["Reports due", REVIEW.due],
-                         ["Reporting as of", REVIEW.asOfMonth || reviewAsOfLabel()]];
-            return '<div class="cfg newcycle"><div class="nc-h">This cycle</div>' +
-              '<div class="nc-grid">' +
-                facts.map(function(f){
-                  return '<label><span>' + esc(f[0]) + '</span>' +
-                    '<b class="nc-val">' + esc(String(f[1] || "").trim() || "\u2014") +
-                    '</b></label>';
-                }).join("") +
-              '</div>' +
-              '<div class="nc-why"><b>A closed cycle is a record.</b> Its figures are ' +
-                'filed under the name above, and nothing here can be changed while it ' +
-                'stays closed \u2014 reopening is what puts it back in your hands.</div>' +
-              '<div class="nc-act">' +
-                '<button class="linkbu" data-ce-cancel="1">Done</button>' +
-                '<span class="nc-gap"></span>' +
-                '<button class="editbtn danger" data-reopencycle="1">Reopen ' +
-                  esc(REVIEW.name) + '</button>' +
-              '</div></div>';
-          }
           var held = cycleEditDirty();
           return '<div class="cfg newcycle"><div class="nc-h">Edit this cycle</div>' +
             '<div class="nc-grid">' +
@@ -5517,6 +5479,42 @@ function renderCycle(){
                 (held ? ' aria-disabled="true"' : '') + '>Close the cycle</button>' +
             '</div></div>';
         })()
+      : '') +
+    /* ── OPENING A CYCLE ASKS WHAT IT IS (§47.8) ────────────────────
+       Islam: "on opening the cycle it didn't ask me any questions … we should
+       set the name of the cycle and the duration it covers."
+
+       It used to mint `{ name:"Cycle 3", from:<last cycle's end>, to:"",
+       due:"", endsQuarter:4 }` and open it — a name nobody chose, a period
+       half filled from a guess, and a hard-coded end quarter. That last one is
+       not cosmetic: `endsQuarter` decides which tactics count as DUE, so a
+       wrong guess silently changes every unit's execution score.
+
+       An inline panel rather than a modal, because the fields want the page's
+       own controls and because what you are about to replace — the cycle
+       above — should stay on screen while you describe its successor. */
+    (NEWCYCLE
+      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
+        '<div class="nc-grid">' +
+          '<label><span>Name</span><input class="fld" id="nc-name" value="' +
+            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
+          '<label><span>Covers from</span><input class="fld" id="nc-from" value="' +
+            esc(NEWCYCLE.from) + '" placeholder="Jan 2027"></label>' +
+          '<label><span>to</span><input class="fld" id="nc-to" value="' +
+            esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
+          '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
+            esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
+          '<label><span>Reporting as of</span>' +
+            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
+              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
+            }) + '</label>' +
+        '</div>' +
+        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
+          'A target that adds up across the year is compared with the share of it due by then, ' +
+          'and a tactic whose span has not started yet is not asked for.</div>' +
+        '<div class="nc-act">' +
+          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
+          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
       : '') +
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +

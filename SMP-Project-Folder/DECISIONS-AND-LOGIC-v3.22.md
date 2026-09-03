@@ -29919,3 +29919,84 @@ open.**
 giving it one means the §174 treatment — the box gets a height and the TABLE
 scrolls instead of the page. That is a change to what scrolls, so it is a
 mockup and Islam's call, not a tidy-up.
+
+
+---
+
+## §261.2 — REOPENING A CLOSED CYCLE (2026-09-03)
+
+Islam, having asked whether closing loses data and whether the office can still
+adjust anything afterwards, and then of two placements drawn on the strip
+§261 leaves behind: **"A"**.
+
+**THE WORK CAME FROM ANOTHER BRANCH AND ITS PLACEMENTS HAD EXPIRED.** Islam:
+*"check this branch `claude/cycle-close-data-loss-xrc0xs` and take what it's
+working on to embed in this branch"*, and then *"the mockup is built on the old
+style we are having a new one here so let's remake the mockup to embed in our
+current approach."* That branch had measured the fault correctly and drawn
+three placements, **all three on the strip §261 had just cleared** — so the
+mockup was cherry-picked for the record and REDRAWN, with its findings
+re-measured on this build rather than taken on trust.
+
+**BOTH OF ITS FINDINGS HOLD HERE.** Closing loses nothing: it files a score
+snapshot in `HISTORY` and marks the cycle closed, and touches no figure, note,
+status, submission mark or picture slide — the clearing happens when the NEXT
+cycle opens, and that path archives everything first with a Restore. And
+nothing reopens a cycle: `canReport()` and `canReportFn()` both open with
+`REVIEW.state !== "open"` **before any role test**, so a closed cycle took no
+figures from anyone including the office, while the reporting page said *"The
+SMO reopens a cycle if something has to be corrected"* — a promise nothing
+carried out (§104.8's family). Grepped: exactly one place wrote `state:"open"`
+and it was the mint of a brand-new cycle.
+
+**ISLAM PICKED THE PEN OVER A BUTTON ON THE STRIP, AND IT MAKES ONE RULE OUT OF
+TWO ACTS**: the pen's far end holds the cycle's one dangerous state change
+whichever direction it goes — **Close the cycle while it runs, Reopen once it
+has stopped** — so §261's clearing of the strip survives instead of being
+reversed for the closed case one section later. `Open a new cycle…` stays
+beside Edit, because it is a different act with its own panel and its own
+confirmation, and it is the only way to start one.
+
+**THE CLOSED PEN SHOWS THE FACTS AS VALUES, AND THAT IS NOT A COMPROMISE.**
+§261 gated the fields on the cycle being open because a closed one's figures
+are filed under the name it closed with. Dropping them would have made the
+panel a single button in an empty box; drawing them read-only answers what
+somebody actually opens a closed cycle to ask — what its dates and its review
+point were — and **the sentence says why they cannot be touched**, or
+read-only values with no explanation read as a form that failed to load
+(§45.2).
+
+**THE CLOSING RECORD COMES BACK, AND IT IS MATCHED BY NAME RATHER THAN POPPED
+BLIND.** This page lists `HISTORY` and `lastClose()` compares against it, so a
+close/reopen/close that left the first record standing would list the same
+cycle twice and compare against the stale, uncorrected numbers. Guarded on the
+name, because a record that is not the one this close pushed is not ours to
+remove — better a stale entry than somebody else's record destroyed (§49.2's
+instinct).
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED, AGAIN FOR §172'S REASON.**
+`review.state` and `history` have always classified as `cycle` — `history` is
+in `TOP_CYCLE` — and until today **nothing in the product could send either on
+an existing cycle**. `test-authorize.js` §8c asserts both halves separately,
+because a rule guarding only the flag would let anybody rewrite the record of
+what a closed cycle scored.
+
+**AND THE TEST'S FIRST BUILD PASSED ITS REFUSALS AS ALLOWED, `changes: []`** —
+the seed's cycle is already open, so "reopen it" set a value to what it already
+was and the differ found no change at all. **§94.5's own example, committed
+while writing a test for it.** It builds a genuinely closed stored side now,
+and asserts the two acts are changes the differ actually SEES before asserting
+anybody is refused them.
+
+**`checks/cycle-edit.py` §9: 12 red on the §261 build, 59 green after** — and
+its own first run measured `{none:true}` on every probe, because §8 reloads the
+page to switch viewer and §9 had been written after it: a custodian cannot
+reach that page at all, so it was measuring a page that was not there (§50.6).
+Order is load-bearing, and it is commented as such. **The press is driven for
+real and the CYCLE is read back** — state open, the record gone, and
+`canReport()` true again, which is what *"its figures become live again"*
+actually means and what a state flag alone does not prove. **One assertion was
+REVERSED and REWRITTEN, not deleted** (§218): §261 asserted a closed cycle
+offers *Open a new cycle* and NOT Edit, true until this section gave the closed
+cycle the pen — both are asserted now, or a build that dropped either would
+satisfy a test for the other on its own.

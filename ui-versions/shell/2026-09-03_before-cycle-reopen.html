@@ -3414,40 +3414,6 @@
         ceHoldPaint();
       });
     });
-    /* ── REOPENING A CLOSED CYCLE (§261.2) ──────────────────────────
-       Before this, NOTHING in the product reopened a cycle: `canReport()` and
-       `canReportFn()` both open with `REVIEW.state !== "open"` BEFORE any role
-       test, so a closed cycle took no figures from anyone, the office
-       included — and the reporting page said "The SMO reopens a cycle if
-       something has to be corrected", which nothing carried out (§104.8's
-       family). There was exactly one place `state:"open"` was written and it
-       was the mint of a brand-new cycle, which archives and clears the tenant.
-
-       CLOSING LOSES NOTHING, measured: it files a score snapshot and marks the
-       cycle closed, and touches no figure, note, status, submission mark or
-       picture slide. So reopening needs to undo exactly two things. */
-    var rc = document.querySelector("[data-reopencycle]");
-    if (rc) rc.addEventListener("click", function(){
-      if (!confirm("Reopen " + REVIEW.name + "?\n\n" +
-          "Its figures become live again and the people who report can change them.\n\n" +
-          "The closing record for " + REVIEW.name + " is taken back, so when you close " +
-          "it again the corrected figures are what is kept.")) return;
-      /* THE CLOSING RECORD COMES BACK, and it is matched by NAME rather than
-         popped blind: this page lists HISTORY and `lastClose()` compares
-         against it, so a close/reopen/close that left the first record
-         standing would list the same cycle twice and compare against the
-         stale, uncorrected numbers. Guarded, because a record that is not the
-         one this close pushed is not ours to remove — better to leave a stale
-         entry than to destroy somebody else's (§49.2's instinct: a record
-         somebody tidied is no longer the record). */
-      var last = HISTORY.length ? HISTORY[HISTORY.length - 1] : null;
-      if (last && last.name === REVIEW.name) HISTORY.pop();
-      REVIEW.state = "open";
-      /* The pen goes, because what it was showing has stopped being true: a
-         closed cycle's panel is a record and this one is running again. */
-      CYCLEEDIT = null;
-      paint();
-    });
     var cec = document.querySelector("[data-ce-cancel]");
     if (cec) cec.addEventListener("click", function(){ CYCLEEDIT = null; paint(); });
     var ces = document.querySelector("[data-ce-save]");

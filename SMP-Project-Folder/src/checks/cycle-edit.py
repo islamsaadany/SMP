@@ -40,7 +40,17 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       instead — the strip a non-office viewer reads is asserted to carry no
       control at all.
 
-  9 · AND NOTHING ELSE ON THE STRIP MOVED: the name, the dates and the
+  9 · REOPENING A CLOSED CYCLE (§261.2). Islam picked the pen over a button on
+      the strip, so the closed cycle's pen is asserted to hold the five facts
+      as VALUES and Reopen at its far end — with the strip asserted to carry NO
+      Reopen, or a build that put one there passes every "you can reopen"
+      assertion while reversing the decision. The press is driven for real and
+      the CYCLE is read back: state open, and a figure enterable again, which
+      is the whole point of the feature and the thing a state flag alone does
+      not prove. The closing record is asserted TAKEN BACK, because a
+      close/reopen/close that left it would list the cycle twice.
+
+ 10 · AND NOTHING ELSE ON THE STRIP MOVED: the name, the dates and the
       "N of 12 months" line still read what they read before.
 """
 import json, os, pathlib, re, threading, http.server, socketserver
@@ -355,9 +365,66 @@ with sync_playwright() as p:
     ok("the cycle closes", review(pg).get("state") == "closed", review(pg))
     shut = strip_state(pg)
     ok("the pen goes with it", pen_state(pg).get("none") is True)
-    ok("and a closed cycle offers Open a new cycle, not Edit",
-       shut.get("opennew") is True and shut.get("edit") is False, shut)
+    # REWRITTEN, NOT DELETED (§218). §261 asserted a closed cycle offers Open a
+    # new cycle and NOT Edit, which was true until §261.2 gave the closed cycle
+    # the pen as well — Islam's pick over a Reopen button on the strip. Both are
+    # asserted, because a build that dropped either would satisfy a test for the
+    # other on its own.
+    ok("and a closed cycle offers BOTH Open a new cycle and the pen (§261.2)",
+       shut.get("opennew") is True and shut.get("edit") is True, shut)
 
+    # ── 9 · reopening a closed cycle ─────────────────────────────────
+    print("\n── 9 · a closed cycle is reopened from the pen (§261.2) ──")
+    # The cycle is closed from §5b above. Nothing on the strip may reopen it.
+    shut2 = strip_state(pg)
+    ok("the strip carries no Reopen",
+       js(pg, "()=>!document.querySelector('.fstrip-head [data-reopencycle]')") is True, shut2)
+    ok("...and it still offers Edit and Open a new cycle",
+       shut2.get("edit") is True and shut2.get("opennew") is True, shut2)
+    hist0 = js(pg, "()=>({n:HISTORY.length, last:(HISTORY[HISTORY.length-1]||{}).name})")
+    press(pg, "[data-editcycle]", "Edit")
+    closedpen = js(pg, """() => {
+      const p = document.querySelector(".newcycle");
+      if (!p) return {none:true};
+      return {
+        head: (p.querySelector(".nc-h") || {}).textContent || "",
+        labels: [...p.querySelectorAll(".nc-grid label > span:first-child")]
+                  .map(s => s.textContent.trim()),
+        vals: [...p.querySelectorAll(".nc-grid .nc-val")].map(s => s.textContent.trim()),
+        inputs: p.querySelectorAll(".nc-grid input").length,
+        reopen: !!p.querySelector("[data-reopencycle]"),
+        close: !!p.querySelector("[data-closecycle]")
+      };
+    }""")
+    ok("the pen opens on a record", closedpen.get("head", "").lower() == "this cycle",
+       closedpen.get("head"))
+    ok("it shows all five facts", len(closedpen.get("vals") or []) == 5, closedpen)
+    ok("...as values, with nothing editable", closedpen.get("inputs") == 0, closedpen)
+    ok("Reopen is INSIDE the pen", closedpen.get("reopen") is True, closedpen)
+    ok("...and Close the cycle is not there at all", closedpen.get("close") is False, closedpen)
+    accepting["on"] = True
+    press(pg, ".newcycle [data-reopencycle]", "Reopen")
+    pg.wait_for_timeout(500)
+    back = review(pg)
+    ok("the cycle is open again", back.get("state") == "open", back)
+    ok("the pen shut", pen_state(pg).get("none") is True)
+    hist1 = js(pg, "()=>({n:HISTORY.length, last:(HISTORY[HISTORY.length-1]||{}).name})")
+    ok("the closing record was taken back",
+       hist1.get("n") == hist0.get("n", 0) - 1, (hist0, hist1))
+    # THE POINT OF THE FEATURE, and a state flag alone does not prove it: the
+    # reporting gates open with `state !== "open"` before any role test, so
+    # this is what "its figures become live again" actually means.
+    ok("...and figures can be entered again",
+       js(pg, "()=>canReport('mobile')") is True,
+       js(pg, "()=>({s:REVIEW.state, can:canReport('mobile')})"))
+    ok("and the strip is back to one control",
+       strip_state(pg).get("opennew") is False and strip_state(pg).get("edit") is True,
+       strip_state(pg))
+
+    # ORDER IS LOAD-BEARING: §8 reloads the page to switch viewer, so anything
+    # measuring the closed cycle has to run BEFORE it. Written after §8 first,
+    # and every probe answered `{none:true}` — a custodian cannot reach this
+    # page at all, so it was measuring a page that was not there (§50.6).
     # ── 8 · it is the office's ───────────────────────────────────────
     print("\n── 8 · a custodian gets no control on that strip at all ──")
     pg.goto(URL); pg.wait_for_timeout(900)

@@ -365,6 +365,33 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **REOPENING A CLOSED CYCLE (§261.2):** Islam, of two placements drawn on the
+  strip §261 leaves behind — **"A"**. **NOTHING REOPENED A CYCLE AND THE PAGE
+  SAID THE SMO COULD**: `canReport()`/`canReportFn()` open with
+  `REVIEW.state !== "open"` BEFORE any role test, so a closed cycle took no
+  figures from anyone including the office, while the reporting page promised
+  *"The SMO reopens a cycle if something has to be corrected"* (§104.8's
+  family); exactly one place wrote `state:"open"` and it was the mint of a
+  brand-new cycle. **CLOSING LOSES NOTHING** — it files a score snapshot and
+  marks the cycle closed; the clearing happens when the NEXT cycle opens, and
+  that path archives first with a Restore. **THE PEN, NOT A BUTTON ON THE
+  STRIP** (his pick), which makes ONE rule of two acts: the pen's far end holds
+  the cycle's one dangerous state change whichever way it goes — Close while it
+  runs, Reopen once it has stopped — so §261's clearing of the strip is not
+  reversed one section later. **The closed pen shows the five facts as VALUES**
+  with the sentence saying why they cannot be touched (§45.2), because dropping
+  them would leave a button in an empty box. **The closing record comes back,
+  matched by NAME rather than popped blind** — this page lists HISTORY and
+  `lastClose()` compares against it, so close/reopen/close would otherwise list
+  the cycle twice and compare stale numbers. **The server needed nothing and it
+  is asserted** (`history` is in `TOP_CYCLE`), both halves separately, because
+  a rule guarding only the flag would let anybody rewrite what a closed cycle
+  scored. **AND THE TEST'S FIRST BUILD PASSED ITS REFUSALS AS ALLOWED** with
+  `changes: []` — the seed's cycle is already open, so "reopen it" set a value
+  to what it already was (§94.5's own example, committed while writing a test
+  for it). 12 red on the §261 build; the check's own first run measured
+  `{none:true}` everywhere because §8 reloads the page and §9 sat after it
+  (§50.6). One assertion REVERSED and REWRITTEN, not deleted (§218).
 - **EDITING THE CYCLE THAT IS RUNNING (§261):** Islam — *"allow me to edit the
   cycle name. give me an edit button the cycle to edit the date as you already
   built and the cycel name edit as well"*, and then, of two shapes drawn in the

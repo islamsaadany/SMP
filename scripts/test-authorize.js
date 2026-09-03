@@ -700,6 +700,54 @@ console.log("\n8b · the cycle's name and dates (§261)");
   refuses(headKey, redate, "a unit's head cannot move its dates");
 })();
 
+/* ── §261.2: AND REOPENING A CLOSED CYCLE IS THE OFFICE'S TOO ────────────
+   Same argument one act further on. `review.state` and `history` have always
+   classified as `cycle`, and until §261.2 NOTHING IN THE PRODUCT COULD SEND
+   EITHER on an existing cycle: the only place `state:"open"` was written was
+   the mint of a brand-new one, and no screen removed a HISTORY entry. So the
+   path is reachable by a person for the first time, and this is what the
+   server does with it (§172).
+
+   THE TWO HALVES ARE ASSERTED SEPARATELY, because reopening does both and a
+   rule that guarded only the flag would let anybody rewrite the record of what
+   a closed cycle scored. */
+console.log("\n8c · reopening a closed cycle (§261.2)");
+(function () {
+  /* NOT `allows`/`refuses`, AND THAT IS THE POINT. Those compare against the
+     SEED, whose cycle is already OPEN — so "reopen it" set a value to what it
+     already was, the differ found no change at all, and both refusals passed
+     as ALLOWED with `changes: []`. §94.5's own example, committed while
+     writing a test for it. The stored side has to be a CLOSED cycle. */
+  const shut = clone(SEED);
+  shut.review = Object.assign({}, shut.review, { state: "closed" });
+  shut.history = (shut.history || []).concat([{ name: shut.review.name, group: 71, units: {} }]);
+
+  const reopen = function (s) {
+    s.review = Object.assign({}, s.review, { state: "open" });
+  };
+  const unfile = function (s) { s.history = (s.history || []).slice(0, -1); };
+
+  const tryIt = function (who, mutate) {
+    const inc = clone(shut); mutate(inc);
+    return A.authorize(shut, inc, personOf(shut, who));
+  };
+  let v = tryIt("smo", reopen);
+  check("the SMO reopens a closed cycle", v.ok, v.refusals.join(" / "));
+  v = tryIt("smo", unfile);
+  check("...and takes its closing record back", v.ok, v.refusals.join(" / "));
+  /* PROVED TO BE A REAL CHANGE FIRST, or a refusal below is a refusal of
+     nothing (§94.5 again, from the other side). */
+  check("...and both are changes the differ actually sees",
+    tryIt("smo", reopen).changes.length > 0 && tryIt("smo", unfile).changes.length > 0,
+    JSON.stringify(tryIt("smo", reopen).changes.map(function (c) { return c.kind; })));
+  v = tryIt(headKey, reopen);
+  check("a unit's head cannot reopen one", !v.ok, "was ALLOWED");
+  v = tryIt(custKey, reopen);
+  check("nor can a strategy custodian", !v.ok, "was ALLOWED");
+  v = tryIt(headKey, unfile);
+  check("and nobody else rewrites the record of what closed", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n8 · the review's picture slides");
 (function () {
   const slide = { id: "psTEST", title: "Site visit", at: "cover", layout: 1,

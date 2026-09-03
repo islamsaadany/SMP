@@ -1837,10 +1837,6 @@
      same row -- and it collapses on a narrow window, where the row wraps and
      Close lands on a line of its own, which separates them just as well. */
   .nc-act .nc-gap { flex:1 1 auto; min-width:0; }
-  /* §261.2: a closed cycle's facts are VALUES, on the line a field would have
-     sat on — same row height, so the panel does not change shape between a
-     cycle you can edit and one you can only read. */
-  .nc-grid .nc-val { font:600 13px/28px var(--sans); color:var(--ink-2); }
   .nc-act .nc-hold { margin:0; text-align:right; }
   /* Held rather than gone (§221). It stays READABLE -- the point is to say
      what is waiting, and a control faded to a whisper says only that something

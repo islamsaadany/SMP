@@ -82,6 +82,26 @@ var CHAT = (function(){
 
   var open = false, mounted = false, timer = null;
   var state = { messages: [], unread: 0, thread: null, office: false };
+  /* ── THE OFFICE'S CORNER IS TWO THINGS (§251) ────────────────────────
+     Islam: "the chat bubble of the SMO team shouldn't be something to be sent
+     to the smo, that is redundancy — it should be the chats of the other
+     people sending the smo the messages … and he can with a switch go
+     directly to the SMO."
+
+     He is right, and it was redundancy of an odd kind: the corner is "your
+     conversation with the office", and for the office that is a conversation
+     with themselves. So the corner splits — a queue down one side, their own
+     thread down the other — and the second half is kept, not dropped,
+     because it is where the assistant is tested and where a member of the
+     office writes to the office (§247's own reason inverted).
+
+     KEPT IN ONE OBJECT, NOT FOUR FLAGS. `side` is which half; `person` is the
+     conversation open INSIDE the queue half, and null means the list. Every
+     other field is what the server last said, never a second copy of it. */
+  var cq = { side: "wait", person: null, name: "", msgs: [], q: "",
+             hits: null, searching: false, rows: null, err: "" };
+  /* The office's own thread is fetched on the same poll as everybody's, so
+     switching to "My messages" costs nothing and shows what is already here. */
   /* HOW MANY WERE WAITING LAST TIME WE ASKED — the office's half of §225.
      `null` until the first answer, so the very first poll of a session can
      never announce a queue that was already there when they signed in. */
@@ -350,6 +370,11 @@ var CHAT = (function(){
               'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
           "</div>" +
         "</div>" +
+        /* THE SPLIT AND THE SEARCH (§251), between the head and the body so
+           they stay put while the list scrolls. Empty and hidden for
+           everybody but the office — a control that changes nothing is not a
+           choice (§61). */
+        '<div class="cqbar" id="cqbar" hidden></div>' +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
           '<div class="chcomp">' +
@@ -378,8 +403,103 @@ var CHAT = (function(){
 
   /* Only the BODY and the badge, never the composer — see the rule at the top
      of this file. Called on every poll, so it must be safe mid-typing. */
+  /* ── THE OFFICE'S HALF OF THE CORNER (§251) ──────────────────────────
+     Drawn into the SAME body as everybody else's conversation, because it is
+     the same box and a second panel would be a second set of every rule this
+     file already keeps — the poll, the scroll, the composer that must not be
+     rebuilt under a typing hand (§71.2). */
+
+  /* WAITING ONLY, AND THE BADGE IS ITS LENGTH. His decision on both, and they
+     are one decision: a count that is not the length of the list under it gets
+     reported as a bug (§108.1). */
+  function cqRows(){ return cq.rows || []; }
+
+  function cqSeg(){
+    var n = cqRows().length;
+    return '<div class="cqseg" role="tablist">' +
+      '<button type="button" role="tab" data-cqside="wait"' +
+        (cq.side === "wait" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
+        '>Waiting' + (n ? ' <span class="cqn">' + n + "</span>" : "") + "</button>" +
+      '<button type="button" role="tab" data-cqside="mine"' +
+        (cq.side === "mine" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
+        ">My messages</button></div>";
+  }
+
+  function cqFind(){
+    return '<div class="cqfind"><input type="search" id="cqfind" ' +
+      'placeholder="Search a name or a word\u2026" value="' + esc2(cq.q) + '" ' +
+      'aria-label="Search the conversations"></div>';
+  }
+
+  /* ONE ROW BUILDER FOR BOTH LISTS, so a search result and a waiting row
+     cannot drift apart (§53.5). `hit` carries the line that MATCHED and why
+     it is here; a plain row carries the last line. */
+  function cqRow(key, name, at, line, hit){
+    return '<button class="cqrow" type="button" data-cqopen="' + esc2(key) + '">' +
+      '<div class="cqr1"><b>' + esc2(name || key) + "</b>" +
+        '<span class="cqw">' + esc2(when(at)) + "</span></div>" +
+      '<div class="cqln">' + esc2(oneLine(line || "")) + "</div>" +
+      (hit ? '<div class="cqhit">' + esc2(hit) + "</div>" : "") + "</button>";
+  }
+
+  function cqListHtml(){
+    /* A FAILED ASK IS NOT AN EMPTY QUEUE (§93, §231.4). */
+    if (cq.err) {
+      return '<div class="cqfail"><b>We could not load the conversations.</b>' +
+        "<p>" + esc2(cq.err) + " Nothing has been lost.</p>" +
+        '<button class="chbtn" type="button" data-cqretry="1">Try again</button></div>';
+    }
+    if (cq.q && cq.q.length >= 2) {
+      if (cq.searching && !cq.hits) return '<div class="cqzero">Looking\u2026</div>';
+      var hits = cq.hits || [];
+      if (!hits.length) return '<div class="cqzero">Nothing found for \u201c' +
+        esc2(cq.q) + "\u201d.</div>";
+      /* SAID OUT LOUD, because the results reach conversations that are NOT
+         waiting while the Waiting half is the one lit — a screen must not
+         imply a scope it is not using (§35, §124). */
+      return '<div class="cqfound">' + hits.length + " found in all conversations, " +
+        "waiting or not</div>" +
+        hits.map(function(h){
+          return cqRow(h.person_key, h.person_name, h.line_at, h.line,
+            h.is_last ? "" : ("found in an earlier message" +
+                              (h.waiting ? "" : " \u00b7 answered")));
+        }).join("");
+    }
+    if (cq.rows === null) return '<div class="cqzero">One moment\u2026</div>';
+    if (!cqRows().length) return '<div class="cqzero">Nobody is waiting on the office.</div>';
+    return cqRows().map(function(r){
+      return cqRow(r.person_key, r.person_name, r.last_at, r.last_body, "");
+    }).join("");
+  }
+
+  function drawCorner(){
+    var body = el("chatbody"); if (!body) return;
+    /* THE CONVERSATION OPEN INSIDE THE QUEUE reads exactly as everybody
+       else's does — the same builder, so a reply looks the same wherever it
+       is read (§53.5). */
+    if (cq.side === "wait" && cq.person) {
+      var atEnd2 = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
+      body.className = "chatbody";
+      body.innerHTML = cq.msgs.length
+        ? threadHtml(cq.msgs, true, false)
+        : '<div class="chempty"><p>One moment\u2026</p></div>';
+      if (atEnd2) body.scrollTop = body.scrollHeight;
+      return;
+    }
+    body.className = "chatbody cqbody";
+    body.innerHTML = cqListHtml() +
+      '<div class="cqfoot"><button class="cqinbox" type="button" data-cqinbox="1">' +
+      "Open the Platform Inbox \u203a</button></div>";
+  }
+
   function drawPanel(){
     var body = el("chatbody"); if (!body) return;
+    /* THE OFFICE'S QUEUE IS A DIFFERENT SCREEN IN THE SAME BOX (§251) — and
+       only ever for the office, and only on the Waiting half. Everything
+       below is unchanged for everybody else, and for the office reading
+       their own thread. */
+    if (state.office && cq.side === "wait") { drawCorner(); drawPanelChrome(); return; }
+    body.className = "chatbody";
     /* KEEP THE PLACE UNLESS THEY WERE AT THE BOTTOM. Somebody reading back
        through a conversation must not be dragged to the end because an answer
        arrived — but somebody at the end wants to follow it. */
@@ -400,9 +520,53 @@ var CHAT = (function(){
           ? '<div class="chsys chwait">Asking the assistant\u2026</div>' : "");
     }
     if (atEnd) body.scrollTop = body.scrollHeight;
+    drawPanelChrome();
+  }
+
+  /* THE HEAD, THE BELL, THE BADGE AND THE FOOT — everything in the panel that
+     is NOT the body, extracted so the office's queue and everybody's
+     conversation cannot draw them differently (§53.5, §251). */
+  function drawPanelChrome(){
+    /* NO `var cfg` HERE. The module holds one, filled from the SERVER's answer
+       on every poll, and this function reads `cfg.promise` and `cfg.shots`
+       below — a local one shadows it and silently answers from the local
+       graph instead, so the panel wore the shipped promise while the office
+       had set its own. §56.7's `var` collision for the second time in one
+       change, and found the same way: the check went red. */
+    /* THE TITLE IS THE PERSON while a conversation is open inside the queue,
+       with a way back — a header that still said "Strategy Office" over
+       somebody else's messages would name the wrong side of the conversation. */
+    var t = document.querySelector("#chatpanel .cht");
+    if (t) {
+      t.innerHTML = (state.office && cq.side === "wait" && cq.person)
+        ? '<button class="cqback" type="button" data-cqback="1" ' +
+            'aria-label="Back to the conversations">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+              'stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" ' +
+              'aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>' +
+            "<span>" + esc2(cq.name || cq.person) + "</span></button>"
+        : "Strategy Office";
+    }
+    /* THE SPLIT AND THE SEARCH live between the head and the body, drawn only
+       for the office and only on the list — a conversation open in the corner
+       is a conversation, and a search box over it would filter nothing. */
+    var slot = el("cqbar");
+    if (slot) {
+      slot.hidden = !state.office;
+      slot.innerHTML = state.office
+        ? cqSeg() + ((cq.side === "wait" && !cq.person) ? cqFind() : "")
+        : "";
+    }
 
     var sub = el("chatsub");
-    if (sub) {
+    if (sub && state.office && cq.side === "wait") {
+      /* Inside a conversation the sub-line says whose it is; on the list it
+         says nothing, because the segment above it already has. */
+      sub.innerHTML = cq.person
+        ? '<span class="chatdot" style="background:var(--attn)"></span> ' +
+          esc2("Waiting on the office")
+        : "";
+    } else if (sub) {
       /* THE DOT CARRIES THE STATUS AND THE WORDS CARRY THE PROMISE. It used
          to be either/or — "With the office" while something was outstanding,
          the promise otherwise — which hid the promise at the one moment
@@ -419,7 +583,18 @@ var CHAT = (function(){
 
     var n = el("chatn");
     if (n) {
-      if (state.unread > 0 && !open) { n.hidden = false; n.textContent = String(state.unread); }
+      /* ── THE BADGE COUNTS PEOPLE WAITING, FOR THE OFFICE (§251) ─────
+         His decision, and it is the LENGTH OF THE LIST rather than a second
+         count of the same thing — a badge saying seven over four rows is
+         what gets reported as a bug (§108.1). Everybody else's badge is
+         unchanged: a reply for you.
+
+         AND IT IS SHOWN WHILE THE PANEL IS OPEN for the office, because the
+         panel may be on "My messages" with people waiting on the other half
+         — the one case where the number is news you cannot already see. */
+      var num = state.office ? cqRows().length : state.unread;
+      var hide = state.office ? !num : (!(state.unread > 0) || open);
+      if (!hide) { n.hidden = false; n.textContent = String(num); }
       else n.hidden = true;
     }
     var pic = el("chatpic");
@@ -465,6 +640,15 @@ var CHAT = (function(){
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
         state.office = !!j.office;
+        /* ── THE QUEUE ARRIVES WITH THE POLL (§251) ────────────────────
+           ABSENT IS NOT EMPTY (§93, §231.4). `queue` is undefined for
+           everybody but the office and null when the server could not read
+           it — neither is "nobody is waiting", so the list keeps saying
+           "one moment" rather than reporting an all-clear it never read. */
+        if (state.office) {
+          if (Array.isArray(j.queue)) { cq.rows = j.queue; cq.err = ""; }
+          else if (j.queue === null) { cq.err = "The list could not be read."; }
+        }
         /* THE FIRST ANSWER ENDS THE SHORT BEAT (§197). The interval was set
            before it arrived, so the clock is re-struck here — the same thing
            the cadence change below does, for the same reason. */
@@ -1028,10 +1212,163 @@ var CHAT = (function(){
      get back is what they typed, and a chat that eats it because the network
      blinked is a chat nobody uses twice (that rule survives from the version
      this replaces; it now restores rather than merely not-clearing). */
+  /* ── WHAT A REPLY POSTS, BUILT ONCE (§53.5, §251) ────────────────────
+     THE HTML IS BUILT HERE, BY THE ONE BUILDER (§72.3), and the server decides
+     whether to actually send it and to WHOM — the browser sends content, never
+     a recipient (§74.2).
+
+     EXTRACTED BECAUSE THERE ARE TWO PLACES A REPLY IS NOW WRITTEN: the
+     Platform Inbox and the corner's queue. A reply is a reply, so the email it
+     chases with must be the same email — the moment the corner built a lesser
+     one, somebody would be emailed differently depending on which screen the
+     office happened to be looking at. */
+  function replyPost(who, text){
+    var body = { action: "reply", person: who, body: text };
+    try {
+      var sh = commsShape(), c = comms();
+      body.fromName = c.fromName || sh.org;
+      body.replyTo = c.replyTo || "";
+      body.subject = "A reply from the Strategy Office";
+      body.html = MAIL.html({
+        org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer, eyebrow: sh.eyebrow,
+        title: "The Strategy Office replied",
+        preheader: text.slice(0, 140),
+        body: text + "\n\nOpen the platform to answer.",
+        /* THE SAME ANSWER THE TEST EMAIL USES (spec 027). This line was the
+           second copy of "where is the platform" and the two had drifted:
+           commsShape() said the gate, this said the platform. One asker now,
+           and an empty answer draws no button rather than a broken one. */
+        cta: { label: "Open the platform", href: sh.href || "" }
+      });
+    } catch (e) { /* No mail builder here is not a reason to refuse the reply. */ }
+    return body;
+  }
+
+  /* ── OPENING, REPLYING AND SEARCHING FROM THE CORNER (§251) ──────────
+     Every one of these goes through an action the Platform Inbox already
+     uses. Nothing new is authorised, nothing new is stored, and a rule the
+     Inbox keeps is a rule the corner keeps by construction. */
+
+  function cqOpen(key, name){
+    cq.person = key; cq.name = name || key; cq.msgs = [];
+    drawPanel();
+    var box = el("chatsay");
+    if (box) box.placeholder = "Reply to " + (firstWord(cq.name) || "them") + "\u2026";
+    post({ action: "thread", person: key }, function(err, j){
+      if (cq.person !== key) return;          /* they moved on while it loaded */
+      if (err || !j) { cq.msgs = []; drawPanel(); return; }
+      cq.name = j.name || cq.name;
+      cq.msgs = j.messages || [];
+      drawPanel();
+    });
+  }
+
+  function cqBack(){
+    cq.person = null; cq.msgs = []; cq.name = "";
+    var box = el("chatsay");
+    if (box) box.placeholder = "Write to the office\u2026";
+    drawPanel();
+  }
+
+  /* THE REPLY, WITH THE ECHO AND THE ROLL-BACK the ordinary send already has
+     — what nobody can get back is what they typed (§139). */
+  function cqSend(text){
+    var who = cq.person, box = el("chatsay");
+    sending = true; lastErr = "";
+    var btn = el("chatsend"); if (btn) btn.disabled = true;
+    var was = cq.msgs;
+    cq.msgs = cq.msgs.concat([{ id: "echo", at: new Date().toISOString(),
+      from_office: true, by_key: "", by_name: "", body: text, flag: null, echo: true }]);
+    if (box) { box.value = ""; box.style.height = ""; }
+    drawPanel();
+    /* THE EMAIL IS BUILT HERE, with the one builder every message uses
+       (§72.3) — content, never a recipient, which the server resolves from
+       the stored register (§74.2). Without it a reply from the corner could
+       never chase anybody, and the same reply from the Inbox could. */
+    post(replyPost(who, text), function(err, j){
+      sending = false;
+      if (btn) btn.disabled = false;
+      if (err || !j || !j.ok) {
+        cq.msgs = was;
+        if (box && !box.value) box.value = text;
+        lastErr = err === NO_ANSWER
+          ? "No answer from the server. The reply may still have gone."
+          : ((j && j.error) || "That did not send.");
+        drawPanel();
+        return;
+      }
+      lastErr = "";
+      /* THE CONVERSATION YOU ARE IN NEVER LEAVES THE LIST UNDER YOU (§113,
+         and his own decision). Replying stops it waiting, so the next poll
+         drops it from `cq.rows` — and it stays on screen because you are
+         standing in it, and goes when you press back. */
+      poll();
+      cqOpenRefresh(who);
+    });
+  }
+
+  function cqOpenRefresh(key){
+    post({ action: "thread", person: key }, function(err, j){
+      if (cq.person !== key || err || !j) return;
+      cq.msgs = j.messages || cq.msgs;
+      drawPanel();
+    });
+  }
+
+  /* SEARCHING WAITS FOR A PAUSE, because every keystroke would otherwise be a
+     question to the database — and it NEVER repaints from the box's own input
+     handler beyond the list, or the field being typed into is replaced under
+     the cursor (§35). */
+  var cqFindTimer = null;
+  function cqSearch(q){
+    cq.q = q;
+    if (cqFindTimer) clearTimeout(cqFindTimer);
+    if (q.trim().length < 2) { cq.hits = null; cq.searching = false; cqBodyOnly(); return; }
+    cq.searching = true; cqBodyOnly();
+    cqFindTimer = setTimeout(function(){
+      var asked = q;
+      post({ action: "chatSearch", q: q }, function(err, j){
+        if (cq.q !== asked) return;           /* they have typed on since */
+        cq.searching = false;
+        cq.hits = (err || !j) ? [] : (j.hits || []);
+        cqBodyOnly();
+      });
+    }, 300);
+  }
+
+  /* THE LIST ALONE, never the chrome — redrawing the bar would replace the
+     search box mid-word (§71.2, §29.5). */
+  function cqBodyOnly(){
+    var body = el("chatbody");
+    if (!body || !state.office || cq.side !== "wait" || cq.person) return;
+    body.innerHTML = cqListHtml() +
+      '<div class="cqfoot"><button class="cqinbox" type="button" data-cqinbox="1">' +
+      "Open the Platform Inbox \u203a</button></div>";
+  }
+
+  function firstWord(n){ return String(n || "").trim().split(/\s+/)[0] || ""; }
+  /* THE FIRST LINE OF A MESSAGE, for a row that has one line to give it.
+     `firstLine` is api/chat.js's — a SERVER helper — and using its name here
+     threw inside `cqListHtml()`, which left the body's class set and its
+     contents empty: a corner that rendered as a blank box with no error on
+     the page, because the throw was inside the poll's own callback. Found by
+     driving it (§96, §231.5's family). */
+  function oneLine(v){
+    var t = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+    return t.length > 160 ? t.slice(0, 160) + "\u2026" : t;
+  }
+
   function send(){
     var t = el("chatsay"); if (!t || sending) return;
     var text = t.value.trim();
     if (!text && !shot) return;
+    /* ── THE SAME BOX ANSWERS SOMEBODY ELSE (§251) ────────────────────
+       With a conversation open inside the queue, this composer is a REPLY —
+       to them, from the office — so it goes through `reply` and not `say`.
+       One composer, because a second would be a second set of every rule
+       around it: the echo, the roll-back, the attach button, the growing
+       box (§53.5). */
+    if (state.office && cq.side === "wait" && cq.person) { cqSend(text); return; }
     sending = true; lastErr = "";
     var btn = el("chatsend"); if (btn) btn.disabled = true;
     var hadShot = shot;
@@ -1121,6 +1458,52 @@ var CHAT = (function(){
        handler bound to the button itself would be destroyed four seconds after
        it appeared (§24: whoever rewrites the DOM re-wires it, and the cheapest
        way to obey that is not to bind to the thing being rewritten). */
+    /* ── THE CORNER'S QUEUE, WIRED ONCE (§251) ───────────────────────
+       On the panel, never on each row: the list is rewritten on every poll,
+       so a handler per row would be re-bound every few seconds and leak
+       (§24, §47.2). Delegation costs nothing and cannot drift. */
+    el("chatpanel").addEventListener("click", function(e){
+      var t = e.target;
+      if (!t || !t.closest) return;
+      var seg = t.closest("[data-cqside]");
+      if (seg) {
+        cq.side = seg.dataset.cqside;
+        /* LEAVING THE QUEUE LEAVES THE CONVERSATION, or coming back would
+           land in somebody else's thread with "My messages" lit. */
+        if (cq.side !== "wait") { cq.person = null; cq.msgs = []; }
+        var box0 = el("chatsay");
+        if (box0) box0.placeholder = (cq.side === "wait" && cq.person)
+          ? box0.placeholder : "Write to the office\u2026";
+        drawPanel();
+        return;
+      }
+      var row = t.closest("[data-cqopen]");
+      if (row) {
+        var nm = row.querySelector("b");
+        cqOpen(row.dataset.cqopen, nm ? nm.textContent : "");
+        return;
+      }
+      if (t.closest("[data-cqback]")) { cqBack(); return; }
+      if (t.closest("[data-cqretry]")) { cq.err = ""; cq.rows = null; cqBodyOnly(); poll(); return; }
+      if (t.closest("[data-cqinbox]")) {
+        /* THE PLATFORM'S OWN CONTROL IS PRESSED, never a second navigation
+           (§107: the tour navigates by pressing what is already there). */
+        setOpen(false);
+        var gear = document.querySelector('[data-md="setup"]');
+        if (gear) gear.click();
+        setTimeout(function(){
+          var go = document.querySelector('[data-setupgo="chat"]');
+          if (go) go.click();
+        }, 0);
+        return;
+      }
+    });
+    /* Typing NEVER repaints past the list (§35). */
+    el("cqbar").addEventListener("input", function(e){
+      var f = e.target.closest && e.target.closest("#cqfind");
+      if (f) cqSearch(f.value);
+    });
+
     el("chatbody").addEventListener("click", function(e){
       var b = e.target.closest && e.target.closest("[data-chhuman]");
       if (!b) return;
@@ -1154,27 +1537,30 @@ var CHAT = (function(){
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
        for (§98.1). */
-    /* ── CLICKING AWAY MINIMISES IT (§100.4) ────────────────────────
-       Islam: "if I click outside the box minimize it please." Nothing is lost
-       by it — the panel is hidden rather than rebuilt, so a half-typed message
-       is still in the box when it comes back, which is what makes dismissing
-       it this cheaply safe.
+    /* ── AND IT STAYS OPEN WHILE YOU MOVE ABOUT (§250, REVERSING §100.4)
+       Islam: "we need the chat to sustain the navigation so it's open while
+       me navigating across the different pages in the platform."
 
-       CAPTURE PHASE, so a control that stops propagation cannot leave the
-       panel open behind whatever it just did; `pointerdown` rather than
-       `click`, so it goes away as the press lands rather than on release.
+       §100.4 minimised the panel on any press outside the dock — his own
+       earlier instruction, *"if I click outside the box minimise it please"* —
+       and the two cannot both be true, because THE PLATFORM IS ONE PAGE.
+       Measured rather than argued: with the corner open, one press on a page
+       tab closed it. Every destination, tab, section, rail row and unit card
+       is a press outside the dock, so "outside" was very nearly the whole
+       product, and a rule that exempted navigation would be exempting
+       everything except the empty margins.
 
-       TWO THINGS ARE NOT "OUTSIDE": the dock itself, and an open modal — a
-       screenshot opened FROM the panel renders into the platform's own overlay,
-       and closing the panel behind it would be dismissing the thing you are
-       standing in. */
-    document.addEventListener("pointerdown", function(e){
-      if (!open) return;
-      var t = e.target;
-      if (t && t.closest && t.closest("#chatdock")) return;
-      if (document.querySelector(".overlay.on")) return;
-      setOpen(false);
-    }, true);
+       So it goes, and this is recorded as a REVERSAL rather than overwritten
+       (Principle II): §100.4's reasoning was sound for a panel you dip into
+       and leave, and it stopped being sound the moment the panel became
+       somewhere you WORK — the office's queue (§251) is read while walking
+       around the plan it is about.
+
+       WHAT REPLACES IT IS WHAT WAS ALWAYS THERE: the minus, which says
+       Minimise and does, and Escape below. Both are an act; neither can
+       happen by accident. Nothing is ever lost either way — the panel is
+       hidden rather than rebuilt, so a half-typed message survives (§100.4's
+       own observation, still true and now doing more work). */
     /* Escape, from anywhere — it was only wired inside the composer, so it did
        nothing once the focus had moved to the attach button or a message. */
     document.addEventListener("keydown", function(e){
@@ -2089,24 +2475,7 @@ var CHAT = (function(){
     /* THE HTML IS BUILT HERE, BY THE ONE BUILDER (§72.3), and the server
        decides whether to actually send it and to WHOM — the browser sends
        content, never a recipient (§74.2). */
-    var body = { action:"reply", person:who, body:text };
-    try {
-      var sh = commsShape(), c = comms();
-      body.fromName = c.fromName || sh.org;
-      body.replyTo = c.replyTo || "";
-      body.subject = "A reply from the Strategy Office";
-      body.html = MAIL.html({
-        org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer, eyebrow: sh.eyebrow,
-        title: "The Strategy Office replied",
-        preheader: text.slice(0, 140),
-        body: text + "\n\nOpen the platform to answer.",
-        /* THE SAME ANSWER THE TEST EMAIL USES (spec 027). This line was the
-           second copy of "where is the platform" and the two had drifted:
-           commsShape() said the gate, this said the platform. One asker now,
-           and an empty answer draws no button rather than a broken one. */
-        cta: { label: "Open the platform", href: sh.href || "" }
-      });
-    } catch (e) { /* No mail builder here is not a reason to refuse the reply. */ }
+    var body = replyPost(who, text);
 
     post(body, function(err, j){
       if (btn) btn.disabled = false;

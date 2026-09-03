@@ -487,6 +487,32 @@ module.exports = async function handler(req, res) {
         out.waiting = w.n | 0;
         out.waitingWho = w.who || null;
         out.waitingBody = w.body || null;
+
+        /* ── AND THE QUEUE ITSELF, FOR THE CORNER (§251) ────────────────
+           Islam: the office's bubble should carry the conversations waiting
+           on them rather than a conversation with themselves.
+
+           ON THIS POLL AND NOT A SECOND ONE. The corner already asks every
+           few seconds and this is the request that keeps it alive; a
+           dedicated endpoint would be a second clock over the same rows
+           (§98's whole concern, and §53.5's).
+
+           WAITING ONLY, AND NO CAP — his decision, both of them. The list is
+           exactly the set of people owed an answer, so the badge above it can
+           be its LENGTH and the two can never disagree (§108.1: a count and
+           the thing it counts must have one membership).
+
+           IT NEVER TOUCHES THE REGISTER (§248). The stored `person_name` is
+           what the row draws; the office's Inbox page is where a live name,
+           a title and a place are worth waiting for. */
+        try {
+          out.queue = (await client.query(
+            "SELECT t.person_key, t.person_name, t.last_at, " +
+            "       (SELECT m.body FROM chat_messages m WHERE m.person_key = t.person_key " +
+            "         ORDER BY m.at DESC, m.id DESC LIMIT 1) AS last_body " +
+            "  FROM chat_threads t WHERE t.waiting " +
+            " ORDER BY t.last_at DESC")).rows;
+        } catch (e) { out.queue = null; }   /* absent is not empty (§93) */
         if (w.who_key) {
           try {
             const live = (await client.query(
@@ -1070,6 +1096,46 @@ module.exports = async function handler(req, res) {
            that was never going to happen. */
         mail: mailer.configured()
       });
+    }
+
+    /* ── SEARCHING THE WHOLE HISTORY (§251) ──────────────────────────
+       Islam: "the search should search all history." The corner's list and
+       the Inbox's both filtered what was already loaded — names, and the LAST
+       line of each conversation — so anything said a week ago was unfindable.
+
+       IT REACHES EVERY CONVERSATION, WAITING OR NOT, which is his decision and
+       the reason the screen says so out loud above the results: somebody
+       searching is looking for a specific thing, not browsing a filter, and a
+       result from an answered conversation appearing under a heading that
+       says "Waiting" would otherwise read as a fault.
+
+       ONE ROW PER CONVERSATION, carrying the line that MATCHED rather than the
+       last line — a result with no visible reason for being a result is a
+       result nobody trusts. The newest match wins where a conversation has
+       several.
+
+       THE REGISTER IS NOT JOINED (§248), and the search is the office's alone:
+       every other person has exactly one conversation and it is already in
+       front of them. */
+    if (action === "chatSearch") {
+      if (!office) return send(res, 403, { ok: false, error: "The Strategy Office answers these." });
+      const q = str(body.q, 120).trim();
+      if (q.length < 2) return send(res, 200, { ok: true, q: q, hits: [] });
+      const like = "%" + q.replace(/([%_\\])/g, "\\$1") + "%";
+      const hits = (await client.query(
+        "SELECT DISTINCT ON (t.person_key) " +
+        "       t.person_key, t.person_name, t.waiting, " +
+        "       m.body AS line, m.at AS line_at, m.from_office, " +
+        "       (m.id = (SELECT m2.id FROM chat_messages m2 WHERE m2.person_key = t.person_key " +
+        "                 ORDER BY m2.at DESC, m2.id DESC LIMIT 1)) AS is_last " +
+        "  FROM chat_threads t JOIN chat_messages m ON m.person_key = t.person_key " +
+        " WHERE m.body ILIKE $1 ESCAPE '\\' OR t.person_name ILIKE $1 ESCAPE '\\' " +
+        " ORDER BY t.person_key, m.at DESC, m.id DESC", [like])).rows;
+      /* Ordered for reading AFTER the DISTINCT has picked one line each —
+         Postgres needs the DISTINCT ON key first, which is not the order
+         anybody wants to read. */
+      hits.sort(function (a, b) { return new Date(b.line_at) - new Date(a.line_at); });
+      return send(res, 200, { ok: true, q: q, hits: hits.slice(0, 60) });
     }
 
     if (action === "thread") {

@@ -204,7 +204,15 @@ class H(http.server.BaseHTTPRequestHandler):
         # that polls on every page, so the only thing that can tell the office
         # a question arrived while they were somewhere else (§225).
         self._send(200, json.dumps({
-            "ok": True, "office": True, "messages": CHAT["messages"],
+            # WHO IS SIGNED IN DECIDES (§251). This answered `office: True` for
+            # every viewer, which was harmless while the corner drew the same
+            # thing for everybody and stopped being harmless the moment the
+            # office's corner became a queue: the person-facing sections below
+            # are about somebody WRITING IN, and a stub that calls them the
+            # office tests the wrong half of the panel. Most people are not
+            # the office, so that is the default here too.
+            "ok": True, "office": CHAT.get("office", False),
+            "messages": CHAT["messages"],
             "unread": CHAT["unread"], "thread": CHAT["thread"],
             "waiting": CHAT.get("owaiting", 0),
             "waitingWho": CHAT.get("owho"), "waitingBody": CHAT.get("obody"),
@@ -330,15 +338,25 @@ with sync_playwright() as p:
     ck("and the bubble comes back", pg.eval_on_selector("#chatbtn", "e => e.getClientRects().length > 0"))
     ck("and the conversation is still there afterwards", len(CHAT["messages"]) > 0)
 
-    # CLICKING AWAY MINIMISES IT, AND LOSES NOTHING.
+    # CLICKING AWAY NO LONGER MINIMISES IT (§250, REVERSING §100.4).
+    # Islam: "we need the chat to sustain the navigation so it's open while me
+    # navigating across the different pages in the platform." The platform is
+    # ONE PAGE, so every destination, tab, section and card was a press
+    # "outside" — measured, one press on a page tab closed the corner.
+    #
+    # THE ASSERTION IS REWRITTEN AND NOT DELETED (§218): a check that simply
+    # dropped it would let a later build put click-outside back without anybody
+    # noticing, which is the whole reason a reversal is recorded rather than
+    # erased. What survives unchanged is the half that was always the point —
+    # nothing typed is ever lost — because the panel is hidden rather than
+    # rebuilt, and that is now true across a walk as well as a dismissal.
     pg.click("#chatbtn")
     pg.wait_for_selector("#chatpanel:not([hidden])")
     pg.fill("#chatsay", "half written, and I clicked away")
     pg.mouse.click(200, 300)
     pg.wait_for_timeout(300)
-    ck("clicking outside minimises it", pg.eval_on_selector("#chatpanel", "e => e.hidden"))
-    pg.click("#chatbtn")
-    pg.wait_for_timeout(300)
+    ck("clicking outside leaves it open", not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    pg.wait_for_timeout(200)
     ck("and the half-typed message survived it",
        pg.input_value("#chatsay") == "half written, and I clicked away",
        pg.input_value("#chatsay"))
@@ -1157,6 +1175,8 @@ with sync_playwright() as p:
     # and the office's assertions read the wrong one. (The stub's `seen` does
     # not clear it the way the real endpoint does — §100.3, in the small.)
     CHAT["messages"] = []; CHAT["unread"] = 0
+    # THIS SECTION IS ABOUT THE OFFICE, so the stub says so (§251).
+    CHAT["office"] = True
     CHAT["owaiting"] = 2
     CHAT["owho"] = "Hend Farouk"
     CHAT["obody"] = "The Q3 target on Active Base still reads 4.2M."
@@ -1213,11 +1233,19 @@ with sync_playwright() as p:
     # line already, which is the same argument as `!open` one page out.
     pg.click('[data-md="setup"]'); pg.wait_for_timeout(700)
     pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(900)
-    # AND THE CORNER IS OPENED AFTER ARRIVING, not before: a pointerdown outside
-    # the dock minimises it (§100.4), so opening it first and then navigating
-    # puts it back on the 180s beat — and the assertion below would then pass
-    # because no poll ever happened rather than because nothing was shown.
-    pg.click("#chatbtn"); pg.wait_for_timeout(500)
+    # AND THE CORNER IS OPENED ONLY IF IT IS NOT ALREADY (§250). This used to
+    # press the bubble unconditionally, on §100.4's rule that navigating
+    # minimised the panel — which stopped being true when Islam asked for the
+    # corner to survive the walk. It now arrives still open, and the bubble is
+    # not drawn while it is (§100.4's sibling), so the press timed out against
+    # an invisible control. What the section is actually about is unchanged:
+    # the corner must be OPEN and polling here, or the assertion below passes
+    # because nothing ever happened rather than because nothing was shown.
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_timeout(500)
+    ck("  (the corner is open on the Inbox)",
+       not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
     fake_browser("granted")
     CHAT["owaiting"] = 4
     CHAT["owho"] = "Hala Nabil"
@@ -1226,6 +1254,11 @@ with sync_playwright() as p:
     ck("  (the office's browser asked while on that page)", got, "no poll inside 30s")
     ck("no box while the office is reading the queue itself", len(pops()) == 0, pops())
     CHAT["owaiting"] = 0; CHAT.pop("owho", None); CHAT.pop("obody", None)
+    # AND BACK TO AN ORDINARY PERSON (§251). Left set, the office's corner
+    # opens on the QUEUE and every section below would be measuring the wrong
+    # half of the panel — which is exactly what happened when this flag was
+    # first added and three later sections went red.
+    CHAT["office"] = False
     # Back off the Inbox, or everything below measures a page it is not about.
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)

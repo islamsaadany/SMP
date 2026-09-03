@@ -27544,3 +27544,134 @@ disk, once reporting it broken when the good one was. *A fix tested against the
 wrong bytes looks exactly like a fix that does not work, and the way out is to
 compare the file's mtime with the server's start time rather than to trust the
 order the commands were typed in.*
+
+---
+
+## §250 — THE CORNER STAYS OPEN WHILE YOU MOVE ABOUT (2026-09-02, reversing §100.4)
+
+Islam: *"we need the chat to sustain the navigation so it's open while me
+navigating across the different pages in the platform."*
+
+**MEASURED, NOT READ.** With the corner open, one press on a page tab closed
+it. The cause is §100.4, built on his own earlier instruction — *"if I click
+outside the box minimise it please"* — which minimises the panel on any
+`pointerdown` outside the dock.
+
+**THE TWO CANNOT BOTH BE TRUE, BECAUSE THE PLATFORM IS ONE PAGE.** Every
+destination, tab, section, rail row and unit card is a press outside the dock,
+so "outside" was very nearly the whole product. A rule that exempted the
+navigation would be exempting everything except the empty margins, and the
+honest move is to remove it rather than to carve it up.
+
+**RECORDED AS A REVERSAL, NOT OVERWRITTEN** (Principle II). §100.4's reasoning
+was sound for a panel you dip into and leave; it stopped being sound the moment
+the panel became somewhere you WORK — the office's queue (§251) is read while
+walking around the plan it is about.
+
+What replaces it is what was always there: the minus, which says Minimise and
+does, and Escape. **Both are an act; neither happens by accident.** And nothing
+is ever lost either way — the panel is hidden rather than rebuilt, so a
+half-typed message survives, which was §100.4's own observation and now does
+more work than it did.
+
+**THE ASSERTION IS REWRITTEN AND NOT DELETED** (§218): `checks/office-chat.py`
+now asserts that a click outside LEAVES IT OPEN, so a later build cannot put
+click-outside back unnoticed. And one of that file's own comments had to go with
+it — a section pressed the bubble after navigating *because* navigation used to
+minimise the panel, and with the panel arriving open the bubble is not drawn
+(§100.4's sibling rule) and the press timed out against an invisible control.
+
+---
+
+## §251 — THE OFFICE'S CORNER CARRIES THE QUEUE (2026-09-02)
+
+Islam: *"the chat bubble of the SMO team shouldn't be something to be sent to
+the smo, that is redundancy — the chat bubble for the smo team should be the
+chats of the other people sending the smo the messages, so the smo opens the
+bubble to see who sent what and opens the chat to reply and clicks back to see
+all pending chats … and he can with a switch go directly to the SMO for testing
+or for the agent replies."*
+
+**HE IS RIGHT, AND IT WAS REDUNDANCY OF AN ODD KIND.** The corner is *your*
+conversation with the office; for the office that is a conversation with
+themselves. Settled from a mockup drawn inside the real panel
+(`design-mockups/office-corner-queue/`), signed off screen by screen.
+
+### THE DECISIONS, ALL HIS
+
+| | |
+|---|---|
+| what the list shows | **only conversations waiting on the office** |
+| how many | **no cap** — every waiting one; it scrolls |
+| the badge | **counts people**, so it is the LENGTH of the list |
+| who gets it | **all of the office**, not the Super user alone |
+| replying | the one you have open **never vanishes under you** |
+| search | **all history**, every conversation, waiting or not |
+| a match | shows **the line that matched**, not the last line |
+| per-item status | **dropped** — not needed |
+
+**THE BADGE IS THE LIST'S LENGTH AND NOT A SECOND COUNT.** He first asked for
+messages waiting; put to him that a badge reading seven over four rows is what
+gets reported as a bug (§108.1: a count and the thing it counts must have one
+membership), he took the list's length. Recorded as his choice, with the
+reasoning, rather than as a preference of mine.
+
+### WHAT WAS BUILT, AND WHAT WAS NOT
+
+**NOTHING NEW IS AUTHORISED AND NOTHING NEW IS STORED.** Opening a conversation
+is the Inbox's own `thread`; replying is its `reply`. A rule the Inbox keeps is
+a rule the corner keeps by construction — including §249's chase, §231's box
+and §71's answered-by-the-act.
+
+**THE QUEUE RIDES THE POLL THAT ALREADY EXISTS** (§98, §225). The corner is the
+only thing that asks on every page; a dedicated endpoint would be a second
+clock over the same rows. It never touches the register (§248), so the list
+cannot freeze behind a save.
+
+**ONE COMPOSER, FORKED AT THE TOP.** With a conversation open, the box replies;
+otherwise it writes to the office. A second composer would be a second copy of
+the echo, the roll-back, the attach button and the growing box (§53.5).
+
+**AND THE REPLY EMAIL IS THE INBOX'S, EXTRACTED.** `replyPost()` is now the one
+builder both screens call. The corner's first draft built a smaller email of its
+own, which would have meant somebody being emailed differently depending on
+which screen the office happened to be looking at — §53.5 caught in the act.
+
+**THE SEARCH SAYS ITS OWN SCOPE OUT LOUD.** Results reach conversations that are
+not waiting, which is the decision — so the screen prints *"N found in all
+conversations, waiting or not"* rather than letting a result appear under a lit
+"Waiting" segment with no explanation (§35, §124). A wildcard typed into the box
+is a literal, not everything.
+
+**ABSENT IS NOT EMPTY** (§93, §231.4): `queue` is undefined for everybody but
+the office and null when the server could not read it, and neither is *nobody is
+waiting*.
+
+**PREFIXED `cq`, NEVER `ch`** — the Platform Inbox owns `.chq`, `.chqtop` and
+`.chqrow`, and a one-word collision between two surfaces of the same feature is
+§65.9 waiting to happen.
+
+### TWO `var` COLLISIONS IN ONE CHANGE, BOTH FOUND BY DRIVING IT
+
+**`firstLine` IS A SERVER HELPER.** Used in the row builder, it threw inside
+`cqListHtml()` — which left the body's class set and its contents EMPTY, so the
+corner rendered as a blank box **with nothing on the console**, because the throw
+was inside the poll's own callback. A DOM probe asking "is the panel there"
+would have called it clean.
+
+**AND `var cfg` SHADOWED THE MODULE'S.** `drawPanelChrome()` declared its own
+from `chatCfg()` — the local graph — while the module's is filled from the
+SERVER's answer on every poll. The panel then wore the shipped promise while the
+office had set its own. §56.7 for the second time in one change, and §248.3's
+`var want` for the third time in two days. **Both were found by a check going
+red, not by reading the diff.**
+
+### PROVED
+
+`checks/corner-queue.py` — 29 assertions over HTTP against a stub (the corner
+does not exist over `file://`, §94.11), listening for page errors because the
+first fault produced none. It asserts the AGREEMENT rather than the numbers
+(§94.8): the badge is the length of the list, and the email a reply carries is
+the one the Inbox builds. Plus `checks/office-chat.py` **ALL CLEAR, 202
+assertions** · `test-chat` 103/0 · `test-chase` 14/0 · `during-save` 8/0 ·
+`push` 33/0 · `authorize` 454/0 · `graph-diff` 126/0 · `qa.py` ERRORS: none.

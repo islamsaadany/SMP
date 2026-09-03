@@ -384,6 +384,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **THE OFFICE'S CORNER CARRIES THE QUEUE (§251):** Islam — *"the chat bubble
+  of the SMO team shouldn't be something to be sent to the smo, that is
+  redundancy … it should be the chats of the other people sending the smo the
+  messages"*, with a switch to reach their own thread. **REDUNDANCY OF AN ODD
+  KIND**: the corner is *your* conversation with the office, and for the office
+  that is a conversation with themselves. His decisions, all recorded: waiting
+  only · no cap · all of the office · **the badge is the LENGTH of the list**
+  (he first said messages; a badge reading 7 over 4 rows is what gets reported
+  as a bug, §108.1) · the one you have open never vanishes under you (§113) ·
+  search reaches **all history** and shows **the line that matched**.
+  **NOTHING NEW IS AUTHORISED OR STORED** — opening is the Inbox's `thread`,
+  replying its `reply`, so §249's chase, §231's box and §71's answered-by-the-act
+  come free. **THE QUEUE RIDES THE POLL THAT ALREADY EXISTS** (§98) and never
+  touches the register (§248). **ONE COMPOSER, FORKED AT THE TOP** (§53.5), and
+  **`replyPost()` is the one email builder both screens call** — the corner's
+  first draft built a smaller one, which would have emailed somebody differently
+  depending on which screen the office was looking at. **The search says its own
+  scope out loud** (§35, §124), because results reach conversations that are not
+  waiting while the Waiting segment is lit. **Prefixed `cq`, never `ch`** — the
+  Inbox owns `.chq*` (§65.9). **TWO `var` COLLISIONS IN ONE CHANGE, BOTH FOUND
+  BY THE CHECK GOING RED**: `firstLine` is a SERVER helper and threw inside the
+  list builder, leaving the body's class set and its contents empty — a blank
+  corner with nothing on the console, because the throw was in the poll's own
+  callback; and `var cfg` in `drawPanelChrome()` shadowed the module's, which is
+  filled from the SERVER, so the panel wore the shipped promise over the
+  office's own.
+- **THE CORNER SURVIVES THE WALK (§250, REVERSING §100.4):** *"we need the chat
+  to sustain the navigation so it's open while me navigating across the
+  different pages."* Measured: one press on a page tab closed it. §100.4
+  minimised on any `pointerdown` outside the dock — his own earlier instruction
+  — and **the two cannot both be true, because the platform is ONE PAGE**: every
+  destination, tab, section and card is a press "outside", so a rule exempting
+  navigation would exempt everything but the empty margins. **Recorded as a
+  reversal, not overwritten**: §100.4 was right for a panel you dip into and
+  leave, and stopped being right when the panel became somewhere you WORK. The
+  minus and Escape remain, and **both are an act**; nothing typed is lost either
+  way, because the panel is hidden rather than rebuilt. **The assertion is
+  REWRITTEN, never deleted** (§218) — it now asserts the panel STAYS — and one
+  of the check's own comments went with it: a section pressed the bubble after
+  navigating *because* navigating used to close the panel, and with it arriving
+  open the bubble is not drawn and the press timed out on an invisible control.
 - **A REPLY NOBODY WAS EVER TOLD ABOUT (§249):** the platform decided whether to
   email AT THE INSTANT the office replied — *has this person had a page open in
   the last few minutes?* — and a **yes** is a prediction, wrong in one
@@ -4063,6 +4104,12 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
+python3 checks/corner-queue.py    # the office's corner carries the queue (§251) and
+                                # survives the walk (§250): the badge is the LENGTH of
+                                # the list, a reply carries the SAME email the Inbox
+                                # builds, and it listens for page errors — the fault
+                                # found while writing it was a throw in the poll's own
+                                # callback that left a blank box and a clean console
 DATABASE_URL=… node scripts/test-chase.js
                                 # a reply nobody was ever told about (§249): the
                                 # wait is obeyed at BOTH ends (a build using a

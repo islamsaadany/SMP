@@ -1460,8 +1460,15 @@ var CHAT = (function(){
           /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
              prose while the server read a constant, so the two were one edit
              from disagreeing — and the edit is now a box on this very row. */
+          /* AND THE SECOND HALF, WHICH IS THE ONE THAT WAS MISSING (§249):
+             somebody PRESENT used to get nothing at all, for ever, if they
+             then shut their laptop — the platform decided at the instant of
+             replying and never looked again. The two numbers do different
+             jobs and the sentence says both, in order. */
           "A reply is emailed when they have not had the platform open for " +
-          plural(c.away, "minute") + ". Off keeps every conversation inside " +
+          plural(c.away, "minute") + ". Somebody who WAS here is chased " +
+          plural(c.chase, "minute") + " later if they still have not read it — " +
+          "and not at all if they have. Off keeps every conversation inside " +
           "the platform. A shut chat checks in every three minutes, so anything " +
           "below four can call somebody away while they are at their desk.",
           segHtml("mail", "Off", "On", c.mail, true),
@@ -1474,6 +1481,18 @@ var CHAT = (function(){
                   'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
                   'value="' + c.away + '" aria-label="Minutes away before a reply is emailed">' +
                 '<span class="chset-unit">' + plural(c.away, "minute") + ' away</span>' +
+              '</div>' +
+              /* THE CHASE, ON THE SAME ROW AND NEVER ITS OWN (§127): it is
+                 the same decision — whether and when a reply leaves the
+                 platform — and a row of its own would read as a second
+                 feature. Drawn only while the email is on, for the reason
+                 above it. */
+              '<div class="chset-ctl chset-away">' +
+                '<input class="chset-num" type="number" data-chchase="1" ' +
+                  'min="' + SMPRules.CHAT_CHASE_MIN + '" max="' + SMPRules.CHAT_CHASE_MAX + '" ' +
+                  'value="' + c.chase + '" ' +
+                  'aria-label="Minutes before an unread reply is chased">' +
+                '<span class="chset-unit">' + plural(c.chase, "minute") + ' unread</span>' +
               '</div>'
             : "")) +
 
@@ -2335,6 +2354,14 @@ var CHAT = (function(){
       var away = e.target.closest("[data-chaway]");
       if (away) {
         chatSet("away", away.value);
+        saved();
+        setMenuPaint();
+        return;
+      }
+      /* THE CHASE (§249), read the same way for the same reason. */
+      var chase = e.target.closest("[data-chchase]");
+      if (chase) {
+        chatSet("chase", chase.value);
         saved();
         setMenuPaint();
         return;

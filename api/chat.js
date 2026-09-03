@@ -267,6 +267,103 @@ async function tellTheOffice(client, me, text, cfg) {
   } catch (e) { /* a mail failure never costs the handoff */ }
 }
 
+/* ── THE CHASE, RUN ON THE WAY PAST (§249) ─────────────────────────────
+   A reply the office sent to somebody who looked present, still unread when
+   their chosen time has passed, is emailed now. Only that case: somebody who
+   was away was mailed at once, and somebody who has read it is excluded by
+   the query itself rather than by a flag somebody has to remember to clear.
+
+   THERE IS NO SCHEDULER HERE — no cron in `vercel.json` — so this rides
+   ordinary requests, which is exactly what the platform already does with
+   expired sign-in attempts (§43: "pruned on every sign-in", for the same
+   reason). The honest limitation is stated rather than hidden: IF NOBODY
+   TOUCHES THE PLATFORM, NOTHING GOES OUT UNTIL SOMEBODY DOES. In practice
+   somebody polls during working hours, and a scheduled job can be added later
+   without changing one line of the rule — it would simply call this.
+
+   ONCE A MINUTE PER PROCESS, NOT ONCE A REQUEST. The chat polls every four
+   seconds; §98 took one poll from 14 database round trips to 5 and this must
+   not give that back. The gate is memoised the same way `ensureReady` is.
+
+   AND IT NEVER COSTS THE REQUEST IT RODE IN ON. Every failure here is
+   swallowed: a chase that does not go out is a chase that goes out on the
+   next request, and a person reading their conversation must never be shown
+   an error about somebody else's email. */
+let CHASED_AT = 0;
+const CHASE_EVERY = 60000;
+
+async function chaseDue(client, cfg) {
+  if (!cfg.on || !cfg.mail) return;              /* the switch decides (§98.2) */
+  if (!mailer.configured()) return;              /* nothing to send with */
+  const now = Date.now();
+  if (now - CHASED_AT < CHASE_EVERY) return;
+  CHASED_AT = now;
+
+  let due = [];
+  try {
+    due = (await client.query(
+      "SELECT m.id, m.person_key, m.chase_html " +
+      "  FROM chat_messages m JOIN chat_threads t ON t.person_key = m.person_key " +
+      /* FROM THE OFFICE, SAID RATHER THAN ASSUMED. Nothing else can carry a
+         kept message today — only `reply` ever writes one — so this changes
+         no behaviour, and a query that relies on what cannot happen yet is
+         one that breaks silently the day it can. The check found it. */
+      " WHERE m.from_office AND m.chase_html IS NOT NULL AND m.emailed_to IS NULL " +
+      "   AND m.at < now() - ($1 || ' minutes')::interval " +
+      /* THE ONE CONDITION THAT MATTERS: still unread. A person who came back
+         and read it is not chased, and that is decided by the fact rather
+         than by anybody remembering to cancel anything (§50.6's shape). */
+      "   AND (t.seen_by_them IS NULL OR m.at > t.seen_by_them) " +
+      " ORDER BY m.at LIMIT 25", [String(cfg.chase)])).rows;
+  } catch (e) { return; }                        /* no column yet, or busy */
+
+  for (const m of due) {
+    let plan = null;
+    try { plan = JSON.parse(m.chase_html); } catch (e) { plan = null; }
+    if (!plan || !plan.html) {
+      try { await client.query("UPDATE chat_messages SET chase_html = NULL WHERE id = $1",
+                               [m.id]); } catch (e) {}
+      continue;
+    }
+    /* THE ADDRESS IS RESOLVED NOW, FROM THE STORED REGISTER (§74.2) — never
+       kept from half an hour ago, because somebody's address may have been
+       corrected in between, and somebody RETIRED must not be written to. */
+    let addr = "";
+    try {
+      const p = (await client.query(
+        "SELECT extra FROM people WHERE key = $1 " +
+        "  AND COALESCE(extra->>'active','true') <> 'false'", [m.person_key])).rows[0];
+      addr = p ? Audience.addressOf(p.extra || {}) : "";
+    } catch (e) { continue; }                    /* the register is busy; next time */
+
+    if (!addr) {
+      /* NOBODY TO WRITE TO, AND THAT IS SETTLED RATHER THAN RETRIED FOR EVER.
+         `emailed_to` stays null, which is the truth — no email went — and the
+         kept message is dropped so the sweep does not carry it daily. */
+      try { await client.query("UPDATE chat_messages SET chase_html = NULL WHERE id = $1",
+                               [m.id]); } catch (e) {}
+      continue;
+    }
+    try {
+      const id = await mailer.sendOne({
+        to: addr, fromName: plan.fromName, replyTo: plan.replyTo,
+        subject: plan.subject || "A reply from the Strategy Office",
+        html: String(plan.html)
+      });
+      /* CLEARED WHATEVER HAPPENED, and `emailed_to` written ONLY when it
+         actually went (§188): a tag on a message that never left is worse
+         than no tag. A failure is not retried for ever — one chase is a
+         chase; a loop is a mailing list. */
+      await client.query(
+        "UPDATE chat_messages SET chase_html = NULL, emailed_to = $2 WHERE id = $1",
+        [m.id, id ? addr : null]);
+    } catch (e) {
+      try { await client.query("UPDATE chat_messages SET chase_html = NULL WHERE id = $1",
+                               [m.id]); } catch (e2) {}
+    }
+  }
+}
+
 module.exports = async function handler(req, res) {
   let client;
   try {
@@ -321,6 +418,12 @@ module.exports = async function handler(req, res) {
     if (me.mustChange) return send(res, 403, { ok: false, error: "choose a password first" });
     const office = Rules.isOfficeRole(me.role);
     const cfg = await chatSettings(client);
+
+    /* ── AND ANY REPLY NOW OWED AN EMAIL GOES OUT (§249) ──────────────
+       Rides this request because there is no scheduler here; gated to once a
+       minute per process so the four-second poll does not pay for it, and
+       unable to fail the request it rode in on. */
+    chaseDue(client, cfg).catch(function () {});
 
     /* ── WHAT THE PERSON'S OWN PANEL ASKS FOR ─────────────────────────
        And the one thing it writes without being told to: `here_at`, which is
@@ -400,8 +503,18 @@ module.exports = async function handler(req, res) {
        up in the endpoint rather than being enforced by it. */
     if (action === "seen") {
       await client.query(
+        /* READING IT IS WHAT CANCELS THE CHASE (§249). The sweep's own query
+           would already skip a read reply; this drops the kept message in the
+           same breath, so nothing lingers in the table for a chase that can
+           never happen. */
         "UPDATE chat_threads SET seen_by_them = now(), here_at = now() WHERE person_key = $1",
         [me.key]);
+      /* Nothing left to chase on this conversation (§249). */
+      try {
+        await client.query(
+          "UPDATE chat_messages SET chase_html = NULL " +
+          " WHERE person_key = $1 AND chase_html IS NOT NULL", [me.key]);
+      } catch (e) { /* no column yet; the sweep skips a read reply anyway */ }
       return send(res, 200, { ok: true });
     }
 
@@ -1119,7 +1232,37 @@ module.exports = async function handler(req, res) {
 
       const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       let mailed = null;
-      if (!here && !cfg.mail) {
+
+      /* ── PRESENT IS NOT THE SAME AS "WILL READ IT" (§249) ─────────────
+         This used to be the end of the matter: present, so no email, ever.
+         And it is a GUESS ABOUT THE FUTURE — somebody who was on a page two
+         minutes ago and has since shut their laptop counts as here, gets no
+         email, and is never told at all. §97.5 wrote that edge down when it
+         built the rule and called a proper sweep a later decision.
+
+         So the guess becomes a wait: the message it WOULD have sent is kept,
+         and `chaseDue()` sends it if the reply is still unread when the
+         office's chosen time has passed. Nothing about the away path changes
+         — somebody genuinely away is still emailed at once, below. */
+      if (here && cfg.mail && body.html && said && said.id) {
+        try {
+          await client.query(
+            "UPDATE chat_messages SET chase_html = $2 WHERE id = $1",
+            [said.id, JSON.stringify({
+              html: String(body.html),
+              subject: str(body.subject, 200) || "A reply from the Strategy Office",
+              fromName: str(body.fromName, 120),
+              replyTo: str(body.replyTo, 200)
+            })]);
+          mailed = { sent: false, why: "they are here — chased in " + cfg.chase +
+                                       " minutes if they have not read it" };
+        } catch (e) {
+          /* KEEPING IT IS NOT THE REPLY. A tenant whose migration has not run
+             yet has no column, and that must cost the chase and nothing
+             else — the message is already in the conversation. */
+          mailed = { sent: false, why: "they are here" };
+        }
+      } else if (!here && !cfg.mail) {
         /* SAID, NOT SILENT. The office is shown the same sentence before it
            presses Send; if the two ever disagree, this one is the truth. */
         mailed = { sent: false, why: "chasing by email is turned off" };

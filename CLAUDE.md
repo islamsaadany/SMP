@@ -384,6 +384,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A REPLY NOBODY WAS EVER TOLD ABOUT (§249):** the platform decided whether to
+  email AT THE INSTANT the office replied — *has this person had a page open in
+  the last few minutes?* — and a **yes** is a prediction, wrong in one
+  direction: somebody reading two minutes ago who then shuts their laptop
+  counts as present, gets no email, and is **never told at all**. §97.5 wrote
+  the edge down when it built the rule and called a sweep a later decision;
+  this is that decision. **STOP PREDICTING, START LOOKING**: a reply still
+  UNREAD after the office's wait (30 minutes, Islam's number) is chased then.
+  One row of the table moves — away is still mailed at once, a read reply is
+  still never mailed, and **present-and-never-came-back stops being silence**.
+  **THE MESSAGE IS KEPT, NOT REBUILT** (§72.3: the browser builds the email and
+  the server resolves the recipient, so a chase half an hour later has no
+  browser to ask) — the SAME email merely later, never a second kind that would
+  drift (§53.5); written only when the send is deferred and cleared the moment
+  it goes or they read it. **`chaseDue()` RIDES ORDINARY REQUESTS**, which is
+  what §43 already does with expired sign-in attempts, **once a minute per
+  process** so §98's 14→5 is not given back, and it can never fail the request
+  it rode in on. The limitation is stated: **nobody touching the platform means
+  nothing goes out until somebody does.** The address is resolved AT SEND TIME
+  from the stored register (§74.2) — never kept, so a retired person is not
+  written to. **`chatSet()` needed nothing**: §104.7 takes the type from the
+  DEFAULT, so a third number setting worked the day it was added. **AND THE
+  CHECK FOUND A HOLE IN MY OWN QUERY** — it read the SQL out of `api/chat.js`
+  rather than keeping a copy, and went red because the sweep did not say
+  `from_office`: harmless today, since only `reply` writes a kept message, and
+  *a query that relies on what cannot happen yet breaks silently the day it
+  can*. **AND §105.6 BIT TWICE IN AN HOUR**: two runs were measured against a
+  dev-server started BEFORE the file under test was written — once calling the
+  fix working with the falsified build on disk, once calling it broken with the
+  good one. **Compare the file's mtime with the server's start time; never
+  trust the order the commands were typed in.**
 - **THE CHAT MUST NOT WAIT ON A SAVE (§248):** Islam, twice in two days —
   *"all conversations are gone!!"*, then *"before the fix all the chats
   disappeared"*, with §231.4's card reading *"The server did not answer (no
@@ -4032,6 +4063,12 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
+DATABASE_URL=… node scripts/test-chase.js
+                                # a reply nobody was ever told about (§249): the
+                                # wait is obeyed at BOTH ends (a build using a
+                                # constant fails), reading cancels it, an emailed
+                                # reply is never chased twice, and the sweep's SQL
+                                # is READ OUT OF api/chat.js rather than copied
 DATABASE_URL=… node scripts/test-chat-during-save.js
                                 # the chat does not wait on a save (§248): holds a
                                 # save open against a real Postgres and asks the chat

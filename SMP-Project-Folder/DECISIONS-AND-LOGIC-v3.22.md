@@ -27410,3 +27410,137 @@ saying which it is matters.*
 
 **That the save path is safe to change.** It probably is, and it was measured,
 and it is still not done here. See above.
+
+---
+
+## §249 — A REPLY NOBODY WAS EVER TOLD ABOUT (2026-09-02)
+
+Islam, going through what the chat still owes: *"for the email rule let's think
+of the solution."* We did, and the number is his — **30 minutes**.
+
+### THE FAULT IS A GUESS ABOUT THE FUTURE
+
+The office presses Send. The platform asks, at that instant, one question:
+*has this person had the platform open in the last few minutes?*
+
+- **No** → they are away, email them.
+- **Yes** → they are here, they will see it, do not email.
+
+**The second answer is a prediction, and it is wrong in exactly one
+direction.** Somebody who was reading a page two minutes ago, then shut their
+laptop and went to a meeting, counts as present. No email goes out. They come
+back next week and there is **nothing at all** — no email, no notification, no
+trace. Nothing visibly fails, which is why it has never been reported.
+
+**§97.5 WROTE THIS DOWN WHEN IT BUILT THE RULE** — *"somebody who shut their
+laptop thirty seconds ago gets no email … a proper sweep needs a cron entry and
+is a later decision"* — and spec 015 repeats it. This is that decision, taken.
+
+### THE FIX IS TO STOP PREDICTING AND START LOOKING
+
+Do not ask whether they WILL read it. Wait, and see whether they DID.
+
+| | before | after |
+|---|---|---|
+| away when the office replied | emailed at once | emailed at once — unchanged |
+| present, and read it | never emailed | never emailed — unchanged |
+| **present, and never came back** | **nothing, ever** | **emailed after the wait** |
+
+**One row moves.** Nothing gets noisier: somebody reading the reply still gets
+no email, and that is decided by the fact rather than by anybody remembering to
+cancel anything (§50.6's shape — the sweep's own query excludes a read reply,
+so there is no flag to forget).
+
+### WHY THE MESSAGE IS KEPT RATHER THAN REBUILT
+
+The email's content is built by the BROWSER, with the one builder every message
+in the product uses (§72.3); the server is handed content and resolves the
+recipient itself from the stored register (§74.2). **A chase half an hour later
+has no browser to ask.** So the message that would have been sent is kept on the
+row until it is sent or no longer needed.
+
+The alternative — a second, simpler email composed on the server — was
+considered and refused: it would be a **different email from the same event**,
+and the two would drift the first time either was improved (§53.5). This way it
+is the SAME email, merely later.
+
+**AND IT IS SHORT-LIVED BY CONSTRUCTION.** Written only when the send is
+deferred (somebody away is mailed at once and keeps nothing), and cleared the
+moment it goes out OR the moment they read the reply. A partial index covers
+only the handful actually pending.
+
+### WHERE IT RUNS, AND THE LIMITATION SAID OUT LOUD
+
+There is no scheduler here — no cron in `vercel.json` — so `chaseDue()` rides
+ordinary requests. **That is not a workaround invented for this; it is what the
+platform already does with expired sign-in attempts** (§43: *"pruned on every
+sign-in"*, for the same reason).
+
+**IF NOBODY TOUCHES THE PLATFORM, NOTHING GOES OUT UNTIL SOMEBODY DOES.**
+Stated rather than hidden. In practice somebody polls during working hours, and
+a scheduled job added later would simply call this function — the rule does not
+change.
+
+**ONCE A MINUTE PER PROCESS, NOT ONCE A REQUEST.** The chat polls every four
+seconds and §98 took one poll from 14 database round trips to 5; a sweep on
+every request would give that back. Memoised the way `ensureReady` is.
+
+**AND IT NEVER COSTS THE REQUEST IT RODE IN ON.** Every failure is swallowed: a
+chase that does not go out goes out on the next request, and somebody reading
+their own conversation must never be shown an error about somebody else's
+email. A tenant whose migration has not run yet has no column, and that costs
+the chase and nothing else.
+
+**THE ADDRESS IS RESOLVED AT SEND TIME, NEVER KEPT** — an address may have been
+corrected in the intervening half hour, and somebody RETIRED must not be
+written to (§74.2). A person with no address settles rather than being retried
+daily: the kept message is dropped and `emailed_to` stays null, which is the
+truth.
+
+### THE SETTING IS THE OFFICE'S, AND IT IS NOT THE OTHER ONE
+
+`chase` sits on the **Away email row**, beside `away`, because it is the same
+decision — whether and when a reply leaves the platform — and a row of its own
+would read as a second feature (§127). Two numbers, two jobs, and the row's
+sentence now says both in order: `away` asks *is this person at their desk*,
+`chase` asks *have they come back and read it*.
+
+**Read like every other number setting** (§169): absent is not nought, because
+`Number(null)` and `Number("")` are both 0 and both finite — a clamp alone would
+answer five minutes for every tenant that has never set it. **And `chatSet()`
+needed nothing at all**: §104.7 took the type from the DEFAULT rather than from
+a list of key names, so a third number setting was handled the day it was added.
+*That is the rule paying for itself.*
+
+### THE CHECK FOUND A HOLE IN MY OWN QUERY
+
+`checks`/`scripts/test-chase.js` reads the sweep's SQL **out of `api/chat.js`**
+rather than keeping a copy, so a second definition cannot pass while the real
+one is broken (§53.5) — and its first run went red on *"a message FROM the
+person is never chased"*. The query did not say `from_office`. Nothing but
+`reply` can write a kept message today, so it changed no behaviour; **a query
+that relies on what cannot happen yet is one that breaks silently the day it
+can.** Said now.
+
+### PROVED ABLE TO FAIL, THEN PROVED
+
+- `scripts/test-chase.js` — 14/14. The wait is obeyed at both ends (a
+  20-minute-old reply is left alone by a 30-minute wait and chased by a
+  15-minute one, so a build ignoring the setting and using a constant fails),
+  reading cancels it, an already-emailed reply is never chased twice, and the
+  shipped 30 is **not written into the tenant's settings** (§50.6).
+- **End to end through the real endpoint against a real Postgres**: with the
+  deferral disabled the reply comes back `mailed: null` and keeps **nothing** —
+  the fault reproduced exactly — and with it in place, `"they are here — chased
+  in 30 minutes if they have not read it"` with the message kept.
+- `test-chat` 103/0 · `test-chat-during-save` 8/0 · `test-push` 33/0 ·
+  `test-authorize` 454/0 · `test-graph-diff` 126/0 · round trip PASS ·
+  `checks/office-chat.py` ALL CLEAR · `qa.py` ERRORS: none.
+
+**AND §105.6 BIT TWICE IN ONE HOUR.** Two of the runs above were measured
+against a dev-server started BEFORE the file it was meant to be testing had
+been written — once reporting the fix working when the falsified build was on
+disk, once reporting it broken when the good one was. *A fix tested against the
+wrong bytes looks exactly like a fix that does not work, and the way out is to
+compare the file's mtime with the server's start time rather than to trust the
+order the commands were typed in.*

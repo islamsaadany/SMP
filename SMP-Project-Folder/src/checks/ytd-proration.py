@@ -207,14 +207,14 @@ def main():
         print("\n── 8 · the office sets the review point, and every score follows ──")
         pg.evaluate("()=>{current='setup'; currentSub='cycle'; paint();}")
         pg.wait_for_timeout(500)
-        # §261 MOVED THE CONTROL AND NOT THE PROMISE. Islam: "keep the close
+        # §273 MOVED THE CONTROL AND NOT THE PROMISE. Islam: "keep the close
         # cycle inside the edit ... the pen should hold everything editable so
         # it's kept secured" — so the strip is a line you read and the picker
         # lives inside the pen with the name and the dates. These assertions
         # are REWRITTEN rather than deleted (§218): what §239 is about is that
         # the office can move the review point and every figure follows, and
         # that is asserted here exactly as before, through the door it now has.
-        ck("the strip carries no control of its own any more (§261)",
+        ck("the strip carries no control of its own any more (§273)",
            pg.evaluate("!document.querySelector('.fstrip-meta.asof .monthbtn')"))
         ck("...it carries the pen that holds one",
            pg.evaluate("!!document.querySelector('[data-editcycle]')"))
@@ -226,7 +226,7 @@ def main():
         pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
             .find(x=>x.textContent.trim()==='Aug'); if(b)b.click();}""")
         pg.wait_for_timeout(400)
-        # AND A DRAFT IS A DRAFT (§261): the pick is not the cycle's until Save,
+        # AND A DRAFT IS A DRAFT (§273): the pick is not the cycle's until Save,
         # which is what makes Cancel cost nothing — so the score cannot have
         # moved yet, and asserting that is what proves the draft is real.
         ck("the pick has not reached the cycle before Save",

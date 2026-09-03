@@ -73,7 +73,7 @@ with sync_playwright() as p:
         if on and on[0] == "Functions": break
         pg.click("#units .navswitch"); pg.wait_for_timeout(150)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(500)
+    pg.click('#secrow-in .secpen[data-page="plan"]'); pg.wait_for_timeout(500)
     # §196: THE MARK IS A COUNT OF MONTHS. What is asserted is that every
     # option the control OFFERS writes the value its label names — never a
     # list of literals here, or the check and the product each hold their own
@@ -196,7 +196,7 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(80)
     pg.evaluate("""()=>{const b=[...document.querySelectorAll('.setuprail [data-setupgo]')]
         .find(x=>/cycle/i.test(x.textContent)); if(b)b.click()}"""); pg.wait_for_timeout(500)
-    # §261: CLOSE THE CYCLE IS BEHIND THE PEN NOW (Islam: "keep the close cycle
+    # §273: CLOSE THE CYCLE IS BEHIND THE PEN NOW (Islam: "keep the close cycle
     # inside the edit ... it's a critical button to click"), so the turn of the
     # cycle this check drives starts one press earlier. §51.11: a check keyed on
     # markup that moved does not fail, it passes quietly.

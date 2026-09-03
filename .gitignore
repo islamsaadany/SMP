@@ -7,3 +7,4 @@ graphify-out/
 # (the checks under SMP-Project-Folder/src, and the skills under .claude/skills).
 __pycache__/
 *.pyc
+.claude/settings.local.json

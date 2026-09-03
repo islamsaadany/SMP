@@ -470,7 +470,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>scrollTo(0,0)")
     pg.set_viewport_size({"width": 1560, "height": 900})
 
-    # ── `--sethead-h` IS GONE, AND ITS ABSENCE IS THE ASSERTION (§261.1) ──
+    # ── `--sethead-h` IS GONE, AND ITS ABSENCE IS THE ASSERTION (§273.1) ──
     # This asserted the variable was published from the header's real height,
     # so a table's head could pin under it (§135.10). §163.5, §130.2 and §174
     # then took that page offset away from every table that had it — a Setup

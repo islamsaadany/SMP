@@ -1,0 +1,1895 @@
+  /* ── Drag handle ────────────────────────────────────────────────────
+     The handle is the only drag target, so opening a pillar and moving it are
+     never confused with one another. */
+  .grip { display:inline-flex; flex-direction:column; justify-content:center; gap:3px;
+          width:20px; height:26px; padding:0 5px; cursor:grab; touch-action:none;
+          border-radius:2px; opacity:.55; transition:opacity .12s ease; }
+  .grip i { display:block; height:2px; background:var(--ink-3); border-radius:1px; }
+  .prow:hover .grip, tr:hover .grip, .grip:focus-visible { opacity:1; }
+  .grip:hover { background:var(--surface-2); }
+  .grip:active { cursor:grabbing; }
+  .grip:focus-visible { outline:2px solid var(--gold); outline-offset:1px; opacity:1; }
+  .grip-off { display:inline-block; width:20px; }
+
+  .prow.arrangeable { align-items:center; }
+  .prow.static { display:grid; gap:12px; padding:14px 16px;
+                 border-bottom:1px solid var(--line-soft); background:var(--surface); }
+  .prow.static:last-child { border-bottom:0; }
+  .prow-wrap { display:block; }
+
+  .dragging { opacity:.9; background:var(--attn-bg) !important;
+              box-shadow:0 6px 18px rgba(0,0,0,.14); position:relative; z-index:3; }
+  tr.dragging td { background:var(--attn-bg); }
+  .sorting { cursor:grabbing; }
+  .sorting .prow, .sorting tr { transition:transform .12s ease; }
+
+  /* The number doubles as the handle's home, so reordering costs no column. */
+  td.idx { white-space:nowrap; }
+  td.idx .grip { vertical-align:middle; margin-right:2px; height:18px; }
+  td.idx .idx-n { display:inline-block; min-width:14px; }
+
+  /* Arrange mode reads as a distinct state, so nobody drags a row believing
+     they are in the normal view. */
+  .plist.arranging { border-color:var(--gold); }
+  .plist.arranging .phead { background:var(--attn-bg); }
+  .editbtn[data-arrange] { white-space:nowrap; }
+
+  /* The drill sits on the headline row, so it costs no height. It replaces the
+     hover note: a modal explains and shows the breakdown in one place, and
+     works on touch, which a hover note never did. */
+  .drill { font:inherit; font-size:12px; background:none; border:0; padding:0;
+           margin-left:auto; color:var(--stone); cursor:pointer;
+           text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
+  .drill:hover { color:var(--gold-deep); }
+  .drill:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  nav.tabs.sectionrow { background:var(--surface-2); border-bottom:1px solid var(--line); }
+  nav.tabs.sectionrow button[aria-selected="true"] { border-bottom-color:var(--stone-soft); }
+  .gwrap { display:block; }
+  .gwrap .card-head { position:relative; }
+  .gwrap .card-head .grip { position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:.75; }
+  .gwrap .card-head .grip i { background:var(--panel-ink); }
+  .gauges.sorting .gwrap { transition:transform .12s ease; }
+  .gwrap.dragging { opacity:.92; box-shadow:0 8px 22px rgba(0,0,0,.2); }
+
+  /* Foundation and analysis in edit: the field replaces the text in place, so
+     the page keeps its shape and nothing moves when the mode changes. */
+  .fld { font:inherit; font-size:14px; width:100%; padding:6px 9px; resize:vertical;
+         border:1px solid var(--line); border-radius:var(--r);
+         background:var(--surface); color:var(--ink); font-family:var(--sans); }
+  .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
+     A yes/no target carries no number, so the direction, the figure and the
+     compile rule beside it have nothing to act on. They stay DRAWN — a hole
+     among equal boxes reads as a control that failed to render (§248) — and
+     the `disabled` attribute is what actually stops them, so this rule only
+     has to make that visible. The ground is the platform's own inert
+     surface; no new token, and nothing that could be mistaken for an alarm
+     (§168: outstanding is not broken, and this is neither). */
+  .fld.off { background:var(--surface-2); color:var(--ink-3);
+             border-color:var(--line); cursor:not-allowed; }
+  /* The reporting page's yes/no picker. It sits where a number box sits, so
+     it takes that box's width rather than a select's natural one — a control
+     that jumps a column wider on one row makes the column impossible to run
+     an eye down (§88's argument, one table over). */
+  /* Islam, from the running page: *"the yes or no is smaller in size than the
+     other reporting input cells."* It was — `.entry .field` is 78px because a
+     number leaves room for the unit beside it, and this control has none, so
+     it rendered 26px short in a column an eye runs down. */
+  /* THE BOX ITSELF, because `input.field` above is ELEMENT-SCOPED and a
+     <select> receives none of it — no padding, no size, no ground. That is
+     what "small input space" was: measured, the picker stood 19px tall
+     beside a number entry's 34px, which is a far louder difference than the
+     width I first went after. Every box property is mirrored here rather
+     than the input rule being widened to `.field`, which would reach the
+     note fields and the plan's own boxes too. */
+  select.field.ynfield { font-family:var(--sans); text-align:left;
+    font-size:13px; padding:6px 10px; background:var(--surface);
+    color:var(--ink);
+    /* AND THE HEIGHT IS STATED, NOT INFERRED. Matching the padding still
+       left it 3px short, because a <select> lays a shorter line box than a
+       13px mono input and — measured — does not take `line-height` for its
+       own box at all: the declaration computed to `normal`. So the height
+       is a named property of a reporting box, exactly as the width is, and
+       both controls read the same token instead of arriving at the same
+       number by two different routes (§53.5). Asserted as EQUAL HEIGHT in
+       checks/yn-target.py §9, so a later change to the box moves both or
+       goes red. */
+    height:var(--rep-h); }
+  /* §251.6: THE SAME WIDTH AS A NUMBER BOX, which is `--rep-w`. §251.4 set
+     this to the width of an entry carrying a WIDE unit chip ("M EGP"), and
+     the rows beside it in a real plan carry "%" — so it came out too big.
+     A `%` entry is 78px of field plus its chip, which comes to exactly the
+     width a bare number box already has, so one token answers both. */
+  .entry .field.ynfield { width:var(--rep-w); }
+  .big-field { font-family:var(--serif); font-size:15px; }
+  .swot .fld { font-size:13px; }
+  td.horizon { color:var(--ink-3); }
+  td.annual  { font-weight:700; }
+  th.cc + th.cc { white-space:nowrap; }
+
+  /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136) ──────────────────────────
+     REVERSAL, quoted so it stays recorded: this block used to say "Wrapping
+     keeps every unit reachable; a horizontal scroll hides the last one behind
+     a gesture nobody is told about" — and the wrap it chose was fighting
+     `.units-in{height:46px}` in _shared.css, so below ~1280px the second line
+     painted OUTSIDE the 46px box, over the tab row, and on some pages ate its
+     clicks (§118.7, measured live at 1024). Islam chose the scroll (Decision
+     1: B, 2026-08-27), and the old objection is answered in kind: the fades
+     SAY there is more, each side only while it is true; the lit destination
+     is scrolled into view on every paint; and the controls — the Group menu,
+     the Units|Functions switch, the gear — sit OUTSIDE the scroll region,
+     pinned, so they can never leave the screen. */
+  .units-in { flex-wrap:nowrap; overflow:visible; }
+  .units-in > details, .units-in > .navswitch, .units-in > .sep { flex:0 0 auto; }
+  .navclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; }
+  .navscroll { display:flex; gap:2px; align-items:stretch; height:100%;
+               overflow-x:auto; scrollbar-width:none; }
+  .navscroll::-webkit-scrollbar { display:none; }
+  .navscroll > * { flex:0 0 auto; }
+  .navfade { position:absolute; top:0; bottom:0; width:40px;
+             pointer-events:none; z-index:2; }
+  .navfade.l { left:0;  background:linear-gradient(to right, var(--panel), transparent); }
+  .navfade.r { right:0; background:linear-gradient(to left,  var(--panel), transparent); }
+  .units button { padding:11px 14px; }
+  .units .sep { margin:8px 8px; }
+
+  /* The card was designed three-up and its execution box needs that width —
+     at four across the labels truncate. Ten units become four rows rather than
+     three, which the section tabs have already paid for. */
+  .gauges.g3 { grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); }
+
+  .arrangebar { display:flex; justify-content:flex-end; margin:-10px 0 20px; }
+
+  /* ── Narrow cards ──────────────────────────────────────────────────
+     Both grids now auto-fit, so a card can be 255px wide in either. The
+     compact sizing that capabilities were given when they were designed
+     four-across has to apply to any narrow card, not to one grid class. */
+  .gauges .box-obj .gauge { width:112px; height:112px; }
+  .gauges .box-obj .gauge::before { inset:12px; }
+  .gauges .box-obj .gauge-in b { font-size:25px; }
+  .gauges .ratio { font-size:24px; }
+  .box-obj { padding-left:8px; padding-right:8px; }
+  .box-exec { padding-left:8px; padding-right:8px; }
+  dl.led { grid-template-columns:minmax(0,1fr) auto; gap:3px 10px; font-size:11.5px; }
+  dl.led dt { white-space:nowrap; }
+  dl.led dd { font-size:12.5px; }
+  .gcard .card-head .gsub { font-size:11px; }
+
+  /* Grid tracks default to min-width:auto, so a track never shrinks below its
+     content and the card is pushed open from the inside. Clamping with
+     minmax(0,·) is what actually stops the overflow — the font sizes above
+     only delayed it. */
+  .two { grid-template-columns:minmax(0,2fr) minmax(0,1fr); }
+  .box-obj, .box-exec { min-width:0; }
+  .gcard, .gwrap { min-width:0; }
+  .gauges { min-width:0; }
+
+  /* The label row reserves a mirrored gutter so the word stays centred whether
+     or not the button is showing. At 73px those fixed 19px gutters no longer
+     fit, so they become flexible and the button overlays the right gutter
+     instead of demanding its own track. */
+  .boxlabel { grid-template-columns:minmax(0,19px) minmax(0,1fr) minmax(0,19px); }
+  .boxlabel .plusbtn { justify-self:end; }
+  .box-exec .boxlabel > span { font-size:9px; letter-spacing:.08em; }
+
+  /* Capabilities were four-up from the start and truncated their labels there
+     too — it simply never showed until the units grid made it obvious. Same
+     minimum, so a card is the same card wherever it appears. */
+  .gauges.g4 { grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); }
+  .gauges.g4 .box-obj .gauge { width:112px; height:112px; }
+  .gauges.g4 .box-obj .gauge::before { inset:12px; }
+  .gauges.g4 .box-obj .gauge-in b { font-size:25px; }
+  .gauges.g4 .ratio { font-size:24px; }
+
+  /* ── Foundation: the aspiration card holds the objectives box ────── */
+  .fgrid { grid-template-columns:1.05fr 1fr; }
+  .fcol { display:flex; flex-direction:column; gap:20px; }
+  .cardhead { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:2px; }
+  .cardhead h2.sec { margin:0; }
+  .pill.horizon { color:var(--gold-deep); border:1px solid var(--gold); background:none; }
+  .horizon-f { font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+               color:var(--ink-3); display:inline-flex; align-items:center; gap:8px; }
+  .horizon-f input.yr { width:78px; text-align:center; }
+  .divide { border-top:1px solid var(--line-soft); margin:18px 0 14px; }
+  .boxhead { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .boxlab { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; }
+  /* ONE STATE, SHOWN LIT OR NOT (§66). The layout switch beside it is two
+     choices and is drawn as a segmented pair; this is one thing that is on or
+     off, and a two-button control for that would put a permanently-lit half
+     next to a permanently-dark one. `margin-left:auto` here and NOT on the
+     .minisw after it: the first auto margin in the row eats the free space, so
+     both carrying one would separate them across the whole header. */
+  .minitog { margin-left:auto; font:inherit; font-size:11px; line-height:1;
+             padding:5px 10px; cursor:pointer; border:1px solid var(--line);
+             border-radius:var(--r); background:var(--surface); color:var(--ink-3); }
+  .minitog:hover { border-color:var(--stone); color:var(--ink-2); }
+  .minitog.on { background:var(--stone-soft); border-color:var(--stone-soft);
+                color:var(--on-fill); }
+  .minitog:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .minitog + .minisw { margin-left:0; }
+
+  .minisw { display:inline-flex; margin-left:auto; border:1px solid var(--line);
+            border-radius:var(--r); overflow:hidden; }
+  .minisw button { font:inherit; font-size:11px; line-height:1; padding:5px 9px; border:0;
+                   cursor:pointer; background:var(--surface); color:var(--ink-3);
+                   border-right:1px solid var(--line); }
+  .minisw button:last-child { border-right:0; }
+  .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:var(--on-fill); }
+  .minisw button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+
+  /* One column fewer when the near horizon is hidden (§51.16) — the grid has
+     to lose the track, not just its content, or the row keeps a 96px hole. */
+  .ohead.one, .orow.one { grid-template-columns:minmax(0,1fr) 96px; }
+  .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
+           padding-bottom:8px; border-bottom:1px solid var(--line); font-size:10px;
+           letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .ohead span:not(:first-child) { text-align:right; }
+  .orow { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
+          align-items:baseline; padding:10px 0; border-bottom:1px solid var(--line-soft); }
+  .orow:last-child { border-bottom:0; }
+  .orow .on { font-size:14.5px; }
+  .orow .ot { font-family:var(--mono); font-variant-numeric:tabular-nums;
+              text-align:right; font-size:14px; }
+  .orow .ot.h { color:var(--ink-3); font-size:13px; }
+
+
+  .fld.mono { font-family:var(--mono); text-align:center; }
+  select.fld { padding:5px 8px; }
+
+  /* Info sits in the chrome, apart from anything that changes data. */
+  .infobtn { font:inherit; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+             font-weight:700; color:var(--ink-3); background:none;
+             border:1px solid var(--line); border-radius:99px; padding:5px 14px; cursor:pointer; }
+  .infobtn:hover { border-color:var(--stone-soft); color:var(--ink); }
+  .infobtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* A bare action above the columns, replacing the labelled bar. */
+  .pageact { display:flex; justify-content:flex-end; margin:0 0 16px; }
+
+  /* Arrange rides in the legend row rather than a row of its own. */
+  .bands { justify-content:flex-start; }
+  /* TWO CONTROLS NOW, NOT ONE (§94.9). Report and Presentation share this
+     slot on a unit's Performance page, so it needs a gap of its own — without
+     one they touch, and a solid button touching an outlined one reads as a
+     single split control. */
+  .bands-act { margin-left:auto; display:inline-flex; gap:8px; align-items:center; }
+  .bands-act .editbtn { padding:5px 14px; }
+
+  /* The two buttons that leave hold the far right of the first line, grouped
+     so nothing can wrap between them. */
+  /* The brand is a ROW now, not a column: the product name and the client's
+     name are one statement read left to right, not two stacked labels. Baseline
+     alignment, not centre, so the serif h1 and the smaller sans name sit on the
+     same line rather than floating against each other's box. */
+  .brand { flex-direction:row; align-items:baseline; gap:9px; flex-wrap:nowrap;
+           min-width:0; }
+  .brand h1 { white-space:nowrap; }
+  .orgname { font-size:14px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
+             min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+
+  /* THE FIRST LINE IS ONE LINE, AND IT IS SMALL.
+
+     Three attempts got here, so the reasoning is worth keeping. 2.9 asked for
+     one line and measured 1164px of content against a 1132px column, so the
+     buttons wrapped for everyone signed in. 3.0 shrank the pieces enough to
+     fit at 1180 and called it done - which was true only at 1180 and above,
+     and Islam's laptop is a ~1000px CSS viewport, so it still arrived as two
+     lines. Fitting at one width is not fitting.
+
+     So the row no longer WRAPS at all: flex-wrap is `nowrap` and every item
+     that can lose characters without losing meaning is allowed to. The
+     buttons never shrink - they are the controls, and a truncated "SIGN OU"
+     is worse than no header at all. Everything left of them shrinks and
+     ellipses in this order, because that is the order they are least missed:
+     the person note, the product name, the tenant name, the picker.
+
+     `nowrap` is what makes it unconditional. There is no width at which this
+     becomes two rows, which is the whole point - a header that reflows is a
+     header that moves the page under you every time the viewport changes. */
+  /* ── Knowledge base ──────────────────────────────────────────────
+     Reading width, not table width. This is the one page in the platform meant
+     to be read as prose rather than scanned, so the measure is capped where a
+     line stops being comfortable rather than stretched to the column.
+     scroll-margin so a jump from the contents does not land a heading
+     underneath the sticky chrome. */
+  .kb-lede { font-size:15px; color:var(--ink-2); max-width:62ch; margin:0 0 18px; }
+  .kb-toc { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 22px; }
+  .kb-toc a { font-size:11px; letter-spacing:.07em; text-transform:uppercase; font-weight:700;
+              color:var(--ink-3); text-decoration:none; border:1px solid var(--line);
+              border-radius:99px; padding:5px 12px; }
+  .kb-toc a:hover { border-color:var(--gold); color:var(--gold-deep); }
+  .kb-sec { border-top:1px solid var(--line-soft); padding:22px 0 4px;
+            scroll-margin-top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px)); }
+  .kb-sec:first-child { border-top:0; padding-top:0; }
+  .kb-sec h3 { font:400 21px/1.25 var(--serif); margin:0 0 4px; }
+  .kb-sec h4.mini { margin:16px 0 4px; }
+  .kb-p { font-size:14.5px; line-height:1.62; color:var(--ink-2); max-width:74ch; margin:0 0 10px; }
+  /* ── The task recipes (§103) ────────────────────────────────────
+     A recipe is a question and its answer, and the ONLY thing separating one
+     from the next was the boldness of the heading — so two answers ran
+     together and the boundary had to be inferred from weight alone. A gap
+     above each, and the question set on the same `.mini` key the sections
+     already use, so a how-to reads as a heading in the page's own voice
+     rather than as a new kind of type. */
+  .kb-rec + .kb-rec { margin-top:18px; }
+  .kb-q { font-size:14.5px; font-weight:600; color:var(--ink); margin:0 0 6px;
+          display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+          max-width:74ch; }
+  /* The audience mark is quiet: it says who an answer is useful to, never who
+     may read it — the knowledge base is everyone's (§37). */
+  .kb-q .pill { flex:0 0 auto; }
+  .kb-how h3 { margin-bottom:14px; }
+
+  /* ── The pen, in the corner of the box it edits ──────────────────
+     visibility rather than display, so the button always holds its box and a
+     card never reflows when you hover it. It stays visible while editing: a
+     control that disappears while you are using it is worse than one that was
+     never subtle. :focus-within keeps it reachable by keyboard, which a
+     hover-only control otherwise is not. */
+  .hoverpen { position:relative; }
+  .penbtn { position:absolute; top:10px; right:10px; z-index:3;
+            width:28px; height:28px; padding:0; border-radius:50%;
+            display:inline-flex; align-items:center; justify-content:center;
+            background:var(--surface); border:1px solid var(--line);
+            color:var(--ink-3); cursor:pointer;
+            visibility:hidden; opacity:0; transition:opacity .12s ease; }
+  .penbtn svg { width:15px; height:15px; display:block; }
+  /* Descendant, not child: the pen sits inside the card's head, beside the
+     heading, not as a direct child of the card. */
+  .hoverpen:hover .penbtn,
+  .hoverpen:focus-within .penbtn,
+  .penbtn:focus-visible,
+  .penbtn.on { visibility:visible; opacity:1; }
+  .penbtn:hover { border-color:var(--gold); color:var(--gold-deep); }
+  .penbtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
+  /* The card head has to leave room for it, or a long label runs underneath. */
+  .hoverpen .cardhead { padding-right:34px; }
+  /* The plan's title row is a flex header, not a card head; the pen sits in the
+     same corner and the row leaves it room. */
+  .ptitle.hoverpen { padding-right:34px; }
+  .ptitle.hoverpen .penbtn { top:0; right:0; }
+
+  /* HALF THE HEIGHT. 47px -> 26px, and it is the CONTENT that had to shrink:
+     the padding was 8px a side and the controls 31px, so squeezing the padding
+     alone could never have got below 31. The tallest thing in the row sets the
+     row, and it was the theme button at 30px. Everything is sized off ~20px
+     now - the select, the two pills, the mark - with 3px of padding around it. */
+  .top-in { flex-wrap:nowrap; gap:10px; padding:3px 24px; }
+
+  /* The backstop, for a tooltip that is genuinely open near the right edge.
+     `clip`, deliberately, and never `hidden`: overflow:hidden makes the
+     element a scroll container, which would break every position:sticky
+     inside it - the rail among them, and this project has spent two versions
+     on that already. `clip` clips without scrolling and lets the other axis
+     stay visible, so a tooltip can still open upwards past the top of a card.
+     Horizontal only: nothing in this product should ever scroll sideways. */
+  .wrap { overflow-x:clip; }
+
+  /* Small, because the product name is not the thing you came to read. It was
+     a 26px serif h1 - the largest text in the entire product, restating the
+     name of the tab you are already in, above a page whose own heading is
+     smaller than it was. 13px, and the tenant name beside it at 12px carries
+     more weight than the product does. */
+  .brand h1 { font-family:var(--serif); font-size:12px; letter-spacing:0; line-height:1.1;
+              white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+              flex-shrink:2; min-width:34px; }
+  .orgname { font-size:11px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
+             line-height:1.1; min-width:0; overflow:hidden; text-overflow:ellipsis;
+             white-space:nowrap; flex-shrink:3; }
+  .viewer { min-width:0; flex-wrap:nowrap; gap:6px; flex-shrink:1; }
+  .viewer label { font-size:8.5px; letter-spacing:.1em; white-space:nowrap; flex-shrink:0; }
+  .viewer select { flex:0 1 auto; min-width:70px; }
+  /* Shrinks first and hardest: the level and the reach are both said again on
+     the page itself, so this is the one line of the header nobody loses
+     anything by having clipped. */
+  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                 font-size:8.5px; flex-shrink:9; }
+  .topacts { flex-shrink:0; gap:5px; }
+  .infobtn { font-size:8.5px; padding:3px 9px; letter-spacing:.08em; line-height:1.3; }
+  /* The theme control. Round rather than a pill because it carries a mark and
+     no word - a pill with a glyph floating in it reads as a button whose label
+     failed to load. Everything else it inherits from .infobtn, including the
+     colour the glyph draws itself in.
+
+     ONE RULE. There were two: a 20px one written for the half-height line and
+     a 30px one left from 3.0, and the later of the two won, so the row stayed
+     31px tall no matter what the new number said. It is the tallest item in
+     the row, so it alone was setting the height of the whole first line. */
+  .themebtn { padding:0; width:20px; height:20px; border-radius:50%;
+              display:inline-flex; align-items:center; justify-content:center;
+              flex-shrink:0; }
+  .themesvg { width:12px; height:12px; display:block; }
+
+  /* 5. The rule above a section heading and the gap it sat in. A section is
+     already announced by its heading; the line was doing the job twice. */
+  .section { margin-top:26px; padding-top:0; border-top:0; }
+  .section:first-of-type { margin-top:14px; }
+  /* The single gap between the chrome and the page. The rail's sticky offset
+     is calc(--chrome-h + this), so the rail's flow position and its pin
+     position are the same number by construction and it cannot slide. */
+  .view { padding-top:var(--rail-gap, 22px); }
+
+  /* Retired units stay listed and stay legible — greyed, not hidden, so the
+     record of what once existed is still readable. */
+  tr.retired td { opacity:.5; }
+  tr.retired td.idx { opacity:.35; }
+  .rmbtn.on { color:var(--good); border-color:var(--good); }
+  .cfg td .why.mono { font-size:10.5px; letter-spacing:.02em; }
+  th.wcol { line-height:1.25; }
+  .why-f { margin-top:6px; font-size:12px; }
+
+  /* The units table is edited, not scanned, so its fields need room to show
+     what they hold. Fixed column widths stop the name box collapsing when a
+     dropdown beside it grows. */
+  .cfg table.unitcfg { table-layout:fixed; }
+  .cfg .unitcfg input.fld { text-align:left; font-family:var(--sans); }
+  .cfg .unitcfg select.fld { min-width:100%; max-width:none; }
+  /* THE EXCEPTION BELONGS BESIDE THE RULE (§69). The register shares
+     `.unitcfg` and does NOT share its premise: it has no fixed layout (see
+     .peoplecfg in config.css — Islam asked for the name column to fit the
+     name), so `min-width:100%` there means "as wide as the cell", the cell is
+     as wide as its content, and a select claiming both is a feedback loop that
+     took the two name columns down to nothing. Written in config.css first and
+     it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
+     later in build.py's concatenation, so it won twice over. */
+  .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
+  /* `select.rolewhere` was here and went with the control (§110, §24): the Unit
+     cell answers where, so there is no second select to bound. */
+  /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
+     and exactly the same 920px: the role picker's pair were bounded and the
+     pair that appear when a ROW is opened for editing were not, because they
+     are plain `select.fld` and nothing named them. Opening any row therefore
+     blew the table to 1516px inside a 920px box and pushed Email, Roles and
+     Status past the edge — a row you cannot finish editing.
+
+     Converting some members of a family and leaving the others is how the
+     second one gets forgotten (§40); this is that, a version later, in the
+     file that records the rule. Named by their data attributes so the next
+     select added to this row is bounded by being given one. */
+  .cfg .peoplecfg select[data-pmainbu]:not(.ss-native),
+  .cfg .peoplecfg select[data-pat]:not(.ss-native) { min-width:0; width:auto; max-width:164px; }
+  /* THE OPEN ROW'S TEXT FIELDS WERE CAPPED HERE AND THE RULE WAS REMOVED
+     (§93.10). It computed — `max-width` read back as the value written — and
+     the field still measured 170px, at every value tried. Whatever the browser
+     is resolving it against under this auto layout, it is not the cap, so the
+     rule changed nothing and a rule that changes nothing is worse than no rule
+     (§37). The 12px of overlap it was aimed at is cosmetic and recorded rather
+     than papered over; what actually closed the gap was capping the CELLS
+     (config.css, §93.10), which took the open table from 1608px to 1452px. */
+  .cfg .unitcfg td { vertical-align:middle; }
+  .cfg .unitcfg input.fld { max-width:none; width:100%; }
+  /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
+     an input NO intrinsic minimum, so under the auto layout the register uses
+     (no table-layout:fixed — the name column fits the name, §46.6) the browser
+     hands those columns their minimum content width, which is nothing. Person
+     measured 216px reading and 86px editing, and 71px with a role picker open
+     beside it: the two columns you edit the page FOR were the two that
+     collapsed, and they collapsed further the more there was to do.
+
+     Beside the rule for the same reason the selects are (§69): this selector
+     is (0,3,1) and later in the concatenation than anything config.css can
+     say. The floors are the READ widths, so turning the pen on stops moving
+     the page. */
+  .cfg .peoplecfg input[data-pname] { min-width:170px; }
+  .cfg .peoplecfg input[data-ptitle] { min-width:150px; }
+  .cfg .peoplecfg input[data-pemail], .cfg .peoplecfg input[data-pphone] { min-width:160px; }
+
+  /* A tooltip inherits white-space from its cell. Inside a table header, where
+     nowrap keeps column titles on one line, the tooltip inherited it too and
+     ran off the edge as a single line. It sets its own wrapping. */
+  .tip::after { white-space:normal; text-transform:none; letter-spacing:0;
+                font-weight:400; width:min(320px,70vw); }
+
+  /* A tooltip on the last column would open past the right edge, so tips near
+     an edge anchor to it instead of centring on the icon. */
+  th:last-child .tip::after, td:last-child .tip::after {
+    left:auto; right:0; transform:none;
+  }
+
+  /* ── Import ─────────────────────────────────────────────────────── */
+  .imp { display:flex; flex-direction:column; gap:0; }
+  .imp-step { display:grid; grid-template-columns:34px 1fr; gap:16px;
+              padding:20px 0; border-bottom:1px solid var(--line-soft); }
+  .imp-step:last-child { border-bottom:0; }
+  /* A numbered step is a mark, and marks take the accent in this language. */
+  .imp-n { width:28px; height:28px; border-radius:50%; background:var(--gold);
+           /* --on-accent, NOT --panel-ink: the ink that can be read on the
+              accent is not the ink that can be read on the bar (§38.4). */
+           color:var(--on-accent); font-family:var(--mono); font-size:13px;
+           display:flex; align-items:center; justify-content:center; }
+  .imp-b h4 { margin:0 0 4px; font-family:var(--serif); font-size:18px; }
+  .imp-b .sub { margin:0; max-width:74ch; }
+  .imp-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
+  /* The filled example (§69.12). A ruled-off block inside step 1 rather than a
+     step of its own: it is an alternative way of doing the same step, not a
+     fourth thing to do, and numbering it 2 would have renumbered Upload. */
+  .imp-sub { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
+  .imp-sub .imp-row { margin-top:0; }
+  .imp-row select.fld { width:auto; min-width:190px; max-width:none; }
+  /* Save draft / Cancel and the word the button says back (§63.2). Pushed to
+     the far end of the reporting bar so Submit keeps the emphasis: submitting
+     is the act that ends the cycle for this unit, and saving a draft is
+     housekeeping the platform is already doing. */
+  .repdraft { display:flex; align-items:center; gap:10px; margin-left:auto; }
+  .savesay { font-size:12px; color:var(--ink-2); min-width:0; white-space:nowrap; }
+  .savesay.ok { color:var(--good-tx); font-weight:600; }
+  .savesay.bad { color:var(--bad-tx); font-weight:600; }
+
+  .imp-row input[type=file] { font:inherit; font-size:13px; }
+
+  /* ONE BUTTON WITH TWO ENTRIES (§61). A <details>, so the open state is the
+     browser's and closing it from inside its own click cannot unmount the
+     button the click is still in (§47.2). The popup is absolute inside a
+     relative wrapper; .imp-row is not an overflow container, so unlike the
+     searchable select (§45.5) it does not need to be fixed. */
+  details.dlmenu { position:relative; flex:0 0 auto; }
+  details.dlmenu > summary { list-style:none; display:inline-flex; align-items:center;
+                             gap:7px; white-space:nowrap; }
+  details.dlmenu > summary::-webkit-details-marker { display:none; }
+  details.dlmenu > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .dlcar { font-size:10px; line-height:1; transform:translateY(1px); }
+  details.dlmenu[open] > summary .dlcar { transform:translateY(1px) rotate(180deg); }
+  /* A menu opens from the edge its button is anchored to. The template button
+     sits at the left of its row and opens rightward; the Performance page's
+     sits at the RIGHT end of the legend, and opening rightward there pushed
+     290px of popup past the content column — which `.wrap` clips rather than
+     scrolls (§27), so it would have been silently cut off. */
+  details.dlmenu.right > .menu { left:auto; right:0; }
+  /* The first thing in the navigation row (§68). Its summary wears the row's
+     own tab styling rather than the pill the other menus use, because it IS a
+     tab — it says where you are and it is lit when you are there. Sized and
+     coloured by the row's `#units button` rules, which reach a <summary> only
+     if it is told to look like one. */
+  /* The summary wears the row's own tab rules, restated here because
+     `.units button` cannot reach a <summary>. Same font, same padding, same
+     3px underline reserved transparent so lighting it cannot move the row
+     (§41's rule, and the reason the row does not jump when you switch). */
+  details.dlmenu.topsel { position:relative; display:flex; }
+  details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
+      align-items:center; gap:7px; cursor:pointer; white-space:nowrap;
+      font:inherit; font-size:var(--fs-small); font-weight:500; padding:0 13px;
+      border-bottom:3px solid transparent; color:var(--panel-quiet);
+      transition:color .15s, border-color .15s; }
+  details.dlmenu.topsel > summary::-webkit-details-marker { display:none; }
+  details.dlmenu.topsel > summary:hover { color:var(--panel-ink); }
+  details.dlmenu.topsel > summary[aria-selected="true"] { color:var(--panel-ink);
+      font-weight:700; border-bottom-color:var(--gold); }
+  details.dlmenu.topsel > summary:focus-visible { outline:2px solid var(--gold);
+      outline-offset:-4px; }
+  /* Open reads as open even when you are not on one of its destinations —
+     otherwise pressing it on a page it does not own looks like nothing
+     happened until the popup is noticed. */
+  details.dlmenu.topsel[open] > summary { color:var(--panel-ink); }
+  details.dlmenu.topsel > .menu { min-width:230px; top:calc(100% + 2px); }
+  details.dlmenu.topsel > .menu button[aria-current="true"] { font-weight:700; }
+  details.dlmenu > .menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0;
+                           min-width:290px; background:var(--surface);
+                           border:1px solid var(--line); border-radius:var(--r);
+                           box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
+  details.dlmenu > .menu button { display:block; width:100%; text-align:left; font:inherit;
+                                  font-size:13.5px; color:var(--ink); background:none;
+                                  border:0; padding:9px 14px; cursor:pointer; }
+  details.dlmenu > .menu button:hover { background:var(--surface-2); }
+  details.dlmenu > .menu button:focus-visible { outline:2px solid var(--gold);
+                                                outline-offset:-2px; }
+  /* The line under each entry says which subjects keep that plan, because
+     "pillars" and "projects" are the platform's words and the person choosing
+     is holding a file for a named unit. */
+  .dlsub { display:block; font-size:11.5px; color:var(--ink-2); margin-top:2px;
+           text-transform:none; letter-spacing:0; font-weight:400; }
+  .imp-tally { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 14px; }
+  .csvbox { width:100%; height:340px; font-family:var(--mono); font-size:12px;
+            line-height:1.5; padding:12px; border:1px solid var(--line);
+            border-radius:var(--r); background:var(--surface-2); color:var(--ink);
+            white-space:pre; overflow:auto; }
+  td.was { color:var(--ink-3); text-decoration:line-through; }
+  td.now { color:var(--ink); font-weight:600; }
+  /* --good IS A FILL, --good-tx IS THE WORD (§38.4/§38.5, seventh time).
+     `.editbtn.danger` two rules down already takes `--bad-tx` and this took the
+     raw `--good`: half a family converted, which is worse than none. Measured
+     at 3.77:1 on slate/light — found by the sweep the day a page put this
+     button somewhere the sweep could actually reach it, having sat unread on
+     Import's Apply buttons, which only appear once a file has been chosen. The
+     BORDER keeps `--good`: a border has no ratio to meet. */
+  .editbtn.apply { border-color:var(--good); color:var(--good-tx); }
+  .editbtn.apply:hover { background:var(--good-bg); }
+
+  /* Three states, and the first two were too close to tell apart: a quarter
+     the tactic runs in but which has not arrived looked almost identical to a
+     quarter it does not run in at all. A marked quarter is now tinted and
+     bordered whether or not it has passed; only the fill separates past from
+     ahead. */
+  .qs i { border-style:dashed; border-color:var(--line); color:var(--none);
+          background:none; font-weight:400; }
+  .qs i.on { background:var(--attn-bg); border:1px solid var(--stone-soft);
+             color:var(--stone); font-weight:700; }
+  /* A quarter already passed is the accent at a tint, not the navigation bar's
+     colour — the bar's colour belongs to the bar. */
+  .qs i.on.past { background:var(--over-bg); border-color:var(--over-line);
+                  color:var(--gold-deep); font-weight:700; }
+  tr.notdue td { opacity:.62; }
+
+  /* ── ONE ROW SHAPE (§104, unchipped in §179) ─────────────────────
+     The Type column takes a fixed box: "Deliverable" and "Outcome" are seven
+     characters apart, and left to themselves the column reads as two
+     different marks rather than one question answered two ways -- and a
+     column that resizes with its rows moves every column beside it.
+
+     It was a `.pill.tk` until §179 and is plain text now (Islam: "don't make
+     them chips let's make them normal text"). The MEASURE is what was doing
+     the work and it stays; the border was boxing the only thing in the cell.
+     `--ink-2` because a classification is not the row's subject -- the name
+     beside it is -- and the chip it replaces read in that same ink. */
+  td .dxtype { display:inline-block; min-width:92px; text-align:center;
+               color:var(--ink-2); }
+  /* A value the plan writes rather than asks for. Quiet, because a field
+     nobody can change should not look like a field. */
+  .fixedval { color:var(--ink-3); }
+  /* Three readings of a due date, and they must not look alike. Overdue is
+     the bad-news colour -- past its date, unfinished, and being asked for.
+     Not due is quiet -- its cycle has not come, so nothing is asked and
+     nothing is scored. On time is just a date. */
+  .lateval { color:var(--bad); font-weight:650; }
+  .lateval .latenote { display:block; font-size:11px; font-weight:400; margin-top:2px; }
+  .soonval { color:var(--ink-3); }
+
+  /* ── ONE TABLE, TWO HALVES (§99) ─────────────────────────────────
+     The band that splits a project's deliverables from its outcomes. It
+     wears `--panel`, which is what Setup › Branding sets for the navigation
+     bar and what every table header in the product wears (§41.10), so each
+     half OPENS the way a table opens rather than looking like a row somebody
+     shaded. The quiet strip under it declares that half's columns.
+
+     Both rows are `th` inside the tbody — a table has exactly one `<thead>` —
+     which is why `thead th`'s !important navy (below in this file) does not
+     reach them and these rules do not have to fight it. The hover and
+     last-row rules are written against `td`, so neither touches these.
+
+     IN arrange.css AND NOT config.css, deliberately: that file has now held
+     the same rule block twice on four separate occasions (§29.2, §51.5,
+     §53.6, §88), and this is concatenated last of the four stylesheets. */
+  /* §105.2: NOT nowrap. It spans the whole table, so it is the one row with
+     room for a sentence -- and at 1000px that sentence pushed the table 8px
+     wider than its box rather than taking a second line, which is the opposite
+     of what a full-width band is for. Line-height goes from 1 to 1.35 so two
+     lines do not touch. */
+  tr.dxband th { background:var(--panel); color:var(--panel-ink); text-align:left;
+                 font:700 10.5px/1.35 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+                 padding:10px 13px; }
+  /* --panel-quiet, never --ink-3: a surface with its own ground needs its own
+     ink, and --ink-3 on the panel is 2.5:1 (§38.5). */
+  tr.dxband th em { font-style:normal; text-transform:none; letter-spacing:0; font-weight:500;
+                    font-size:11px; color:var(--panel-quiet); margin-left:10px; }
+  /* The gap before the second half, painted in the card's own ground so it
+     reads as a break rather than as a rule. Never on the first, which opens
+     the table. */
+  tr.dxband:not(:first-child) th { border-top:14px solid var(--surface); }
+  /* §105: the column strip WRAPS, and the nowrap it used to carry is why.
+     Its columns are sized by the table's own <thead> -- a unit's vocabulary --
+     and a function's words are longer, so "Deliverables & outcomes" ran
+     straight over "Milestones" with nothing to stop it. §88's one-line rule is
+     about DATA rows, whose height should not depend on how long somebody's
+     email is; a column label is a heading, and a heading on two lines is a
+     heading. */
+  tr.dxhead th { background:var(--surface-2); color:var(--ink-2); font-weight:700;
+                 font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+                 padding:7px 13px; border-bottom:1px solid var(--line);
+                 line-height:1.3; vertical-align:bottom; }
+  .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
+  .endin .boxlab { display:block; margin-bottom:6px; }
+  .endin .statement { font-size:15px; }
+  .minirow .sub-n { font-size:9.5px; color:var(--ink-3); letter-spacing:.06em;
+                    text-transform:uppercase; font-weight:700; margin-top:2px; }
+
+  .imp-checks { display:flex; flex-direction:column; gap:6px; margin:0 0 14px; }
+  .chk { display:grid; grid-template-columns:88px 1fr; gap:10px; align-items:baseline;
+         padding:8px 12px; border-radius:var(--r); font-size:13px; }
+  .chk.bad { background:var(--bad-bg); }
+  .chk.note-c { background:var(--attn-bg); }
+  .chk b { font-weight:600; }
+  .chk span:last-child { grid-column:2; color:var(--ink-2); font-size:12.5px; }
+  .chk b + span { display:block; }
+  .rowacts { display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .confirm { display:flex; flex-direction:column; gap:5px; align-items:center;
+             background:var(--bad-bg); border-radius:var(--r); padding:8px 10px; }
+  /* --bad-tx, not --bad: §38.5's rule, which is that a colour that works as a
+     FILL usually fails as TYPE. --bad on --bad-bg measures 4.41 in slate light
+     — a heading in the scoring red on the scoring red's own ground. Changed
+     for every confirmation rather than only the wide one, because converting
+     SOME members of a family is worse than converting none (§40). */
+  .confirm b { font-size:11.5px; color:var(--bad-tx); }
+  /* A REFUSAL IS LONGER THAN A CONFIRMATION (§62). "Clear the plan?" is four
+     words and fits the 83px actions column; "cannot be deleted, and here is
+     each thing in the way and where to clear it" is three sentences, and in
+     that column it rendered as a 12-line ribbon of centred text. So this one
+     breaks out of the cell — anchored to the row's actions, opening leftward
+     so it cannot leave the table, and left-aligned because centred prose is
+     for one line, not for a paragraph. */
+  .rowacts { position:relative; }
+  .confirm.wide { position:absolute; z-index:30; top:0; right:0; width:330px;
+                  align-items:flex-start; text-align:left; padding:11px 13px;
+                  border:1px solid var(--bad); box-shadow:0 8px 24px rgba(0,0,0,.16); }
+  /* The reason is a paragraph on a tinted ground, so it takes the page's ink
+     rather than the quiet grey that clears on white and not on this. */
+  .confirm.wide .why { text-align:left; color:var(--ink); }
+  .big .nodata { color:var(--none); font-family:var(--sans); font-size:19px; font-style:italic; }
+
+  /* The code is a reference, not part of the name it sits beside. */
+  .pcode { color:var(--ink-3); font-weight:400; font-family:var(--mono);
+           font-size:12.5px; letter-spacing:.02em; margin-right:2px; }
+
+  /* A target nobody set is worth noticing \u2014 it silently removes a measure
+     from the score. */
+  .missing { color:var(--bad); font-style:italic; font-family:var(--sans);
+             font-size:12.5px; font-weight:400; }
+  /* The value behind a Missing the platform could not read (§197.3). QUIET,
+     never red: red on a value means "off track" everywhere else in this
+     product, and the row already carries the red word that says what is
+     wrong. This is the evidence beside it, not a second alarm. */
+  .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
+
+  /* SWOT points are numbered so they can be referred to in a review; the
+     numbers stay quiet so they never compete with the text. */
+  .swotlist { list-style:none; margin:0; padding:0; }
+  .swotlist li { display:grid; grid-template-columns:22px 1fr; gap:8px;
+                 align-items:baseline; padding:5px 0; font-size:13.5px; }
+  .swot-n { font-family:var(--mono); font-size:11.5px; color:var(--none);
+            font-variant-numeric:tabular-nums; }
+
+  /* Temple editing: tables, with the statements in labelled rows above them. */
+  .templeedit h4.mini:first-child { margin-top:0; }
+  .tcard { background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r); padding:14px 16px; }
+  .trow { display:grid; grid-template-columns:120px 1fr; gap:14px;
+          align-items:start; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+  .trow:last-child { border-bottom:0; }
+  .trow > label { font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+                  color:var(--ink-3); font-weight:700; padding-top:7px; }
+  .trow .fld { width:100%; max-width:none; }
+  .trow input.yr { max-width:90px; }
+  .cfg .fld { width:100%; max-width:none; text-align:left; }
+  .cfg .fld.mono { text-align:center; }
+
+  .masterbar { display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+               border:1px solid var(--line); border-radius:var(--r);
+               background:var(--surface); padding:12px 16px; margin:0 0 18px; }
+  .masterbar .cfg-lab { flex:1; }
+  .editbtn.danger { color:var(--bad-tx); border-color:var(--bad); }
+  .editbtn.danger:hover { background:var(--bad-bg); }
+  .confirm.row { flex-direction:row; align-items:center; flex-wrap:wrap; gap:10px; }
+  .confirm.row .why { max-width:46ch; }
+
+  .applied { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+             background:var(--good-bg); border:1px solid var(--good);
+             border-radius:var(--r); padding:12px 16px; margin:0 0 16px;
+             font-size:13.5px; }
+
+  /* ── Focus measures ─────────────────────────────────────────────── */
+  .fmark{display:inline-block;width:7px;height:7px;background:var(--gold);
+    transform:rotate(45deg);margin-left:8px;vertical-align:middle;flex:none}
+  .fmark-btn{width:11px;height:11px;padding:0;margin-left:8px;background:none;
+    border:1.5px solid var(--line);transform:rotate(45deg);cursor:pointer;
+    vertical-align:middle;border-radius:1px}
+  .fmark-btn.on{background:var(--gold);border-color:var(--gold-deep)}
+  .fmark-btn:hover{border-color:var(--gold-deep)}
+  .fmark-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  tr.focusrow td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+
+  .fstrip{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    margin:0 0 22px;overflow:hidden}
+  .fstrip-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:var(--surface-2);border-bottom:1px solid var(--line);padding:12px 18px}
+  .fstrip-t{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+    font-weight:700;color:var(--ink-2)}
+  .fstrip-meta{color:var(--ink-3);font-size:12px;margin-right:auto}
+  .fstrip-body{display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding:16px 18px 14px}
+  .fcount{display:flex;align-items:baseline;gap:6px;font-family:var(--serif)}
+  .fcount b{font-size:30px;font-weight:400;color:var(--good)}
+  .fcount span{font-size:19px;color:var(--ink-3)}
+  .fcount em{font-style:normal;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--ink-3);font-family:var(--sans);font-weight:700;margin-left:8px}
+  .fchips{display:flex;gap:7px;flex-wrap:wrap}
+  .fmean{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+  .fstrip-empty{padding:16px 18px;color:var(--ink-3);font-size:13px}
+  .fstrip .cfg{border-top:1px solid var(--line-soft)}
+  .fstrip .cfg table{border:0}
+
+  .badge{display:inline-block;font:700 10px/1 var(--sans);letter-spacing:.06em;
+    text-transform:uppercase;padding:5px 9px;border-radius:20px;white-space:nowrap}
+  .b-over{background:var(--over-bg);color:var(--gold-deep);border:1px solid var(--over-line)}
+  .b-met{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+  .b-short{background:var(--bad-bg);color:var(--bad-tx)}
+  .b-none{background:var(--surface-2);color:var(--none)}
+  .board tbody tr.alt td{background:var(--surface-2)}
+  .board tbody tr.unitstart td{border-top:1px solid var(--line)}
+  .board tbody tr:first-child td{border-top:0}
+  .board td.unitcell{vertical-align:top;padding-top:14px}
+
+  /* The focus panel is closed until asked for: it is a lens on a few measures,
+     not the unit's headline. */
+  details.fstrip > summary{list-style:none;cursor:pointer}
+  details.fstrip > summary::-webkit-details-marker{display:none}
+  .fstrip-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .fstrip-head::after{content:"▸";margin-left:4px;color:var(--ink-3);font-size:11px;
+    transition:transform .15s ease}
+  details.fstrip[open] > summary .fstrip-head::after,
+  details.fstrip[open] > summary::after{transform:rotate(90deg)}
+  .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
+  /* The count is TYPE, so it takes the good family's text twin rather than
+     its fill (§38.4, §154): on `--surface-2` the fill measures 4.45 and the
+     twin 6.45. The strip's own ground is what makes the difference — the same
+     colour clears comfortably on white, which is why this survived until the
+     state sweep measured it (§153). */
+  .fstrip-sum b{color:var(--good-tx);font-size:15px}
+  .fstrip-meta{margin-left:auto}
+  .fstrip .fstrip-body{padding:12px 18px 10px}
+  .fstrip .fmean{margin:0;font-size:12px}
+  .cfg .pick{display:grid;grid-template-columns:26px 1fr auto 90px;gap:14px;align-items:center;
+    padding:10px 16px;border-bottom:1px solid var(--line-soft)}
+  .cfg .pick .src{font-size:11px;color:var(--ink-3)}
+
+  /* ── Reporting ──────────────────────────────────────────────────── */
+  .kpi{display:flex;align-items:baseline;gap:8px}
+  .kpi b{font:400 26px/1 var(--serif)}
+  .kpi span{color:var(--ink-3);font-size:12.5px}
+  /* Named repbar, not bar: .bar is already a three-column grid component in
+     group-extra.css, and reusing it turned this fill into a grid track. */
+  .repbar{display:block;height:6px;background:var(--surface-2);border-radius:20px;
+    overflow:hidden;flex:1;min-width:120px;max-width:260px}
+  .repbar i{display:block;height:100%;background:var(--good)}
+  .repbar.part i{background:var(--attn)}
+  /* §251.2: THE REPORTING BOX'S WIDTH IS NAMED ONCE. A number entry is this
+     wide; inside `.entry` it gives 26px back to the unit suffix beside it, so
+     the two shapes come out level in the column. The Y/N picker carries no
+     suffix and takes the whole box — read off the same token rather than a
+     second 104 somebody has to remember to keep in step (§122.5: a guessed
+     constant goes stale silently). */
+  :root{--rep-w:104px; --rep-h:32px}
+  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);height:var(--rep-h);
+    border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
+    color:var(--ink)}
+  input.field.filled{border-color:var(--good);background:var(--good-bg)}
+  input.field:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+  .notefld{width:100%;max-width:none;text-align:left;font-size:13px}
+  .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
+  tr.wantnote td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+  .bad-note{border-left:3px solid var(--bad);background:var(--bad-bg)}
+  .repcell{display:flex;align-items:center;gap:10px}
+  .repcell .repbar{max-width:none}
+  .delta{font-family:var(--mono);font-size:12px;margin-left:10px;font-weight:600;
+    vertical-align:middle;letter-spacing:.02em}
+  .delta.up{color:var(--good-tx)} .delta.down{color:var(--bad-tx)}
+  .headline .delta{align-self:center}
+  /* Inside the group card's big figure (§156): the number is 34px and the
+     delta rides its baseline rather than the line box's top. */
+  .big .delta{vertical-align:0.35em;font-size:12.5px}
+
+  /* Reporting reuses the pillar accordion so the two pages read as one product,
+     but its row carries how much is done rather than a score \u2014 that is what
+     the person filling it in wants to know at a glance. */
+  .prow.rprow{grid-template-columns:1fr 90px 26px}
+  .rtally{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+  .rtally.full{color:var(--good);background:var(--good-bg);border-color:var(--good)}
+  .prow.rprow .chev{color:var(--ink-3);font-size:11px;transition:transform .15s ease}
+  .prow.rprow[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .notecol{width:30%}
+  .notecol .notefld{width:100%}
+
+  /* The reported box states its unit rather than asking for it to be typed. */
+  .entry{display:inline-flex;align-items:stretch;border:1px solid var(--line);
+    border-radius:var(--r);overflow:hidden;background:var(--surface)}
+  .entry.filled{border-color:var(--good)}
+  .entry.filled .field{background:var(--good-bg)}
+  .entry .field{border:0;width:78px;border-radius:0}
+  .entry .field:focus-visible{outline:none}
+  .entry:focus-within{outline:2px solid var(--gold);outline-offset:1px}
+  .unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
+    border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;
+    color:var(--ink-3);white-space:nowrap}
+  .phead.rphead,.prow.rprow{grid-template-columns:1fr 110px 84px 84px 78px 20px;gap:14px}
+  .phead.rphead .num{text-align:right}
+  .phead.rphead .cc{text-align:center}
+
+  /* ── Table headers: THE TENANT'S BAR COLOUR ───────────────────────
+     They went light in 3.11 with the rest of the ported design language, and
+     back in 3.13 at Islam's direction: *"all five, and it's not a navy/gold
+     thing — it follows the brand colours set in the platform."*
+
+     That is the argument, and it is a product argument rather than a taste
+     one: `--panel` is the colour Setup › Branding sets for the navigation bar,
+     so a header on `--panel` WEARS THE TENANT'S BRAND. A header on
+     `--surface-2` wears nothing. The light header was the reference product's
+     answer to a question SMP answers differently, because SMP is branded per
+     tenant and the reference was not.
+
+     The rule underneath is unchanged and is the one that matters: EVERY table
+     and every grid header that behaves like one is styled here, so no screen
+     ends up with two different ideas of what a header looks like — §40's
+     lesson, that converting SOME members of a family is worse than converting
+     none. The !important stays for the same reason it was written: several
+     stylesheets set a background on th, and this is the one that must win. */
+  thead th, table thead th, .cfg table thead th, .scroll table thead th{
+    background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0 !important}
+  /* A surface with its own ground needs its own ink (§38.5): --ink-3 on the
+     panel is 2.5:1. These are the panel's own quiet inks. */
+  thead th .tip{color:var(--panel-quiet);border-color:rgba(255,255,255,.45)}
+  thead th .tip:hover{color:var(--panel-ink);border-color:var(--panel-ink)}
+  .phead, .plist .phead{background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0}
+  .phead span, .phead > *{color:var(--panel-ink)}
+  .phead .tip{color:var(--panel-quiet);border-color:rgba(255,255,255,.45)}
+  /* A grid header that behaves like a table header, so it looks like one. */
+  .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0}
+  /* THE NOTE INSIDE A HEADER. Several headers carry a second line explaining
+     the column — "Performance, Foundation, Temple…", "Their key is their
+     username" — written in the page's quiet ink, which is quiet against a PALE
+     ground and 2.4:1 against this one. §38.5 again, and the sweep caught all 36
+     of them: a surface with its own ground needs its own ink. */
+  thead th .why, thead th small, thead th span:not([class]),
+  .phead .why, .grouphead .why, .grouphead span{color:var(--panel-quiet)}
+  /* Arrange mode still has to be visible against the dark band. */
+  .plist.arranging .phead{background:var(--gold-deep);color:var(--on-fill)}
+
+
+
+  /* Expand or collapse every panel, beside the first column header. */
+  .phead .hfirst{display:inline-flex;align-items:center;gap:9px}
+  .foldall{background:none;border:0;padding:0;cursor:pointer;line-height:0;
+    color:rgba(255,255,255,.7);display:inline-flex;align-items:center}
+  .foldall:hover{color:#fff}
+  .foldall:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:2px}
+  .foldall svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.6;fill:none;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  /* Alternating rows across the platform's tables, matching the deck. A very
+     light tint only: it has to help the eye track a wide row without competing
+     with the marks that carry meaning \u2014 the red edge on a figure needing a
+     note, the gold edge on a focus measure, a dimmed not-yet-due row. */
+  tbody tr:nth-child(even) > td { background:var(--zebra); }
+  tbody tr:nth-child(even) > td.was { background:var(--zebra); }
+  /* Rows that already say something keep saying it. */
+  .board tbody tr.alt td { background:var(--surface-2); }
+  tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
+  tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
+
+  /* Each obligation announces whose it is: a unit's plan counts toward that
+     unit, a group capability never does. */
+  .oblband{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 18px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;
+    margin:22px 0 0}
+  .oblband.cap{background:var(--gold);color:var(--on-accent);border-color:var(--gold)}
+  .obl-lab{font-size:10px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--ink-3)}
+  .oblband.cap .obl-lab{color:var(--gold)}
+  .obl-nm{font-size:16px;font-weight:600}
+  .obl-meta{font-size:12.5px;color:var(--ink-3)}
+  .oblband.cap .obl-meta{color:#C3CEE0}
+  /* THE SECOND .capbody LIVED HERE. Two rules, same selector, 105 lines
+     apart, and the later one won on source order — the identical fault §51.5
+     found in this file for `.capline` and §29.2 recorded before that. Editing
+     the padding here did nothing at all. One rule now, below. */
+  .whoami{font:400 19px/1.2 var(--serif)}
+
+  /* A build should be identifiable from a screenshot. */
+  .vstamp{color:var(--gold-deep);font-family:var(--mono);letter-spacing:0;
+    text-transform:none;font-weight:700;margin-left:6px}
+  .cfg td.nowrapcell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+
+  /* ── The navigation fold ──────────────────────────────────────────
+     One row that folds rather than two that wrap. Short labels are what buy
+     the single line: with the words spelled out the row needed 1377px and
+     wrapped at every width tested; folded with short labels it needs 1223. */
+  /* A navigation control has to be legible before it is subtle. The closed
+     state was #8FA3C0 on navy and the open state a 14% gold wash \u2014 both too
+     faint to read as buttons at all. */
+  /* Scoped inside .units, or `.units button {background:none}` wins on
+     specificity and the fold renders with no fill at all \u2014 and its opacity is
+     reset, since a control must not inherit the dimming meant for plain tabs. */
+  /* ONE SHARED CONTAINER (§41.8, treatment 4). The two folds were an 11px
+     uppercase letterspaced label in a bordered capsule EACH — a different
+     typographic species from the 13.5px sentence-case tabs beside them, and
+     two boxes on a bar that has no other box. They are now one segmented
+     control divided by a hairline: half the boxes, the row's own type, and a
+     shared container that says outright that Units and Functions are the same
+     kind of thing.
+     `align-self:center` because the group is shorter than the 47px row and
+     must not be stretched to it. */
+  /* ONE CONTROL, and now one ELEMENT (§51.9). The `.foldgroup` rules below
+     dressed two buttons to look like a single segmented box; the box is the
+     button itself now and the two words are spans inside it. Same shape on
+     screen, different thing under the pointer — which is the whole point:
+     pressing it switches, rather than pressing one half of it selecting. */
+  /* gap:0 EXPLICITLY. `.units button` sets `gap:7px` for the icon-and-word
+     buttons in this row, and the switch IS a button in this row — so it
+     inherited a 7px dead strip between its two halves where the container's
+     own darker ground showed through. That is what "the shade is not filling
+     its box" was: the lit half stopping 7px short of the divider. Every other
+     property that rule sets is overridden here; this one was not, because
+     nothing about the markup suggested a gap existed. */
+  .units .navswitch{display:inline-flex;align-items:center;align-self:center;
+    background:rgba(255,255,255,.08);border:0;border-radius:7px;overflow:hidden;
+    padding:0;gap:0;margin:0 6px;cursor:pointer;font:inherit}
+  .units .navswitch:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .units .navswitch .nsw{display:block;padding:7px 13px;font-size:13.5px;
+    font-weight:700;color:rgba(255,255,255,.62);letter-spacing:-.005em;
+    transition:background .12s,color .12s}
+  .units .navswitch .nsw + .nsw{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+  .units .navswitch .nsw.on{color:#fff;background:rgba(255,255,255,.2)}
+  /* HOVER LIFTS THE CONTROL, NOT THE OTHER HALF. Lighting the unselected word
+     on hover was right while these were two buttons — you were pointing at the
+     side you meant. With one button it made both halves look lit and the state
+     unreadable exactly when somebody was looking at it. */
+  .units .navswitch:hover{background:rgba(255,255,255,.15)}
+  .units .navswitch:hover .nsw:not(.on){color:rgba(255,255,255,.8)}
+  .units-in.folded .navswitch{margin:0 3px}
+  .units-in.folded .navswitch .nsw{padding:7px 11px;font-size:12.5px}
+
+  /* `.foldgroup` and `.navfold` went with the two-button fold (§51.7) — §24:
+     delete an element and delete its CSS with it, or the next person drawing
+     from the stylesheet draws a control the product does not have (§41.9). */
+  /* OPEN is the SEGMENT lit, not the word coloured. Inside a shared container
+     the accent-words treatment (§41.4) had nowhere to sit — a coloured word on
+     a filled ground reads as a disabled segment rather than the open one — and
+     lighting the segment is what a segmented control already means. The accent
+     budget is untouched by it: this spends a lighter wash, not the accent.
+     .open beats :hover on source order alone, so the open hover is stated or
+     the segment stops answering the mouse. */
+  /* .foldtw went with the disclosure arrow (§47.6) — §24: delete an element
+     and delete its CSS with it, or the next person drawing from the stylesheet
+     draws a control the product does not have (§41.9). */
+
+  /* THE FIRST .capline BLOCK IS GONE (§51.5). There were TWO of them in this
+     file — one on `--surface-2`, one on `--panel` — and the second silently
+     won on source order. Editing the first did nothing, which is §29.2's
+     lesson exactly: a duplicated CSS rule does not fail loudly, it quietly
+     ignores you. It also carried `.capmeta`, whose element the product no
+     longer has (§24). */
+
+  /* The folded row carries more entries than the flat one ever did, so its
+     spacing tightens. Only when the folds are present; everyone else keeps the
+     roomier row.
+
+     `max-width:none` WAS HERE AND IS GONE (\u00a794.13). It let this row past the
+     1180 content column \u2014 "a navigation bar is chrome, not content" \u2014 and that
+     is the line that made the narrow page look BROKEN rather than merely
+     narrow: the row ran edge to edge while the page under it sat centred with
+     238px of nothing down each side. Nothing is capped now, so the override
+     has nothing to override, and a rule that no longer does anything is a rule
+     somebody will one day read as load-bearing (\u00a724). */
+  .units-in.folded{padding-left:16px;padding-right:16px}
+  .units-in.folded button[data-u]{padding-left:9px;padding-right:9px;font-size:13.5px}
+
+  .units-in.folded .sep{margin:0 3px}
+
+  /* A SURFACE WITH ITS OWN GROUND NEEDS ITS OWN INK — §38.5, §41.10, and this
+     is the SIXTH header, missed when the other five were converted. The band
+     moved to `--panel` and kept the PAGE's ink, so the capability's own name
+     measured 1.72:1 in slate and 1.43:1 in forefront — the worst reading in the
+     product, on the one word the band exists to say. It takes what
+     `.grouphead` and `.rail .rhead` already take. */
+  .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
+    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r);
+    /* The bottom margin is the SPLIT'S CLEARANCE (§53.7), not a spacing
+       preference: when the split below is the capbody's first child there is
+       no sibling gap for `* + .split` to widen, so the band leaves the room
+       itself — or the ground filler above the pinned rail paints over the
+       band's own bottom nine pixels. */
+    margin:16px 0 var(--pin-clear, 24px);
+    border:1px solid var(--line)}
+  .capline:first-child{margin-top:0}
+  .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
+  .capnm{font-size:15.5px;font-weight:600;color:var(--panel-ink)}
+  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--panel-quiet);
+    background:rgba(255,255,255,.14);border-radius:20px;padding:3px 10px}
+  /* A CAPABILITY IS A BAND, NOT A CARD (§53.3). Its body used to be a bordered
+     white box, so the rail and the pane inside it — which draw their own
+     borders — sat 16px in on each side and 34px narrower than the identical
+     rail and pane on a unit's page. A card inside a card, and the sizing
+     Islam asked to match was the outer one's padding. The band stays, because
+     a function can carry several capabilities and something has to separate
+     them; the box around the rest is gone, so everything under it lines up
+     with a unit's exactly. */
+  .capbody{padding:0 0 6px}
+  .capbody h4.mini:first-child{margin-top:0}
+  /* THE STICKY BAND NEEDS THE PAGE BEHIND IT. `.pane > .pband`'s ::before
+     paints `--ground` over whatever scrolls up into the gap above it; while
+     the capbody was white, it painted the page's grey onto a white card and
+     left a seam down both sides. With no card there is nothing to disagree
+     with. */
+  .caphdr{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;padding:16px 18px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:0 0 18px}
+  .capname{font:400 21px/1.2 var(--serif)}
+  .capkpi{margin-left:auto;display:flex;gap:24px;text-align:right}
+  .capkpi i{display:block;font-style:normal;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  .capkpi b{font:400 22px/1.2 var(--serif)}
+
+  /* ── Manage: one worded button, one menu ───────────────────────
+     It replaced a gear and a stacked-list glyph. Ten destinations behind two
+     icons asked people to remember which mark held which page; behind one
+     word they are simply listed. Nothing about the pages changed — each entry
+     opens exactly the page its icon used to, with its own tab row underneath.
+
+     The panel is absolutely positioned, so however long the list grows it
+     never widens the row or shoves the unit tabs along. `.units-in` is
+     `overflow-x:visible` here (it is `auto` in the base sheet), which is what
+     lets the panel hang below the row instead of being clipped by it. */
+  .units .sep.pinsep{margin-left:auto}
+  .navmenu{position:relative;display:inline-flex;align-items:center}
+  .units .navmenu-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+    opacity:1;border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;
+    align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
+  .units .navmenu-btn:hover{color:#fff;background:rgba(255,255,255,.18);
+    border-color:rgba(255,255,255,.65)}
+  .units .navmenu-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  /* `here` is where you ARE, `open` is the menu showing. They are different
+     states and both can be true, so they do not share a style. */
+  .units .navmenu-btn.here{color:var(--on-accent);background:var(--gold);border-color:var(--gold)}
+  .navmenu-btn:not(.here):hover{color:#fff;background:rgba(255,255,255,.22);
+    border-color:rgba(255,255,255,.7)}
+  /* The face is a mark now, not a word. Tighter padding because a 15px glyph
+     in a pill sized for 11px uppercase text floats; the caret stays, because
+     it is what says this opens a list rather than going somewhere. */
+  .units .navmenu-btn.navmenu-ico{padding:5px 9px;gap:4px}
+  /* ── THE HOME MARK (§194.3) ─────────────────────────────────────────
+     Islam picked F from six drawn in the real bar: square, gold. The round
+     faint-filled shape it had was `navmenu-ico`'s, which belongs to the gear
+     at the other end — on the left, leading the row, it reads as a place you
+     go rather than a control borrowed from somewhere else.
+
+     ITS OWN CLASS, NEVER `.here`. Gold on this row already means "the
+     destination you are on", and this is gold for a different reason; keeping
+     them apart is what lets either change without the other (§87's twins, in
+     CSS). The hover LIFTS rather than repaints, so it cannot be mistaken for
+     a selection changing. */
+  /* THE ROW IS `align-items:stretch`, SO A FIXED HEIGHT TOP-ALIGNS (§197.2).
+     Every sibling on this row is the row's full 46px; the mark asks for 34
+     and therefore sat at the top edge with 12px of nothing beneath it, which
+     is what read as damaged. `align-self:center` is the whole fix — measured,
+     not reasoned: box y=29 h=30 inside a row y=29 h=46. */
+  /* §200.2: THE HOUSE DOES NOT SQUEEZE. The row is flex and nothing said this
+     box may not shrink, so at ~1000px it was a 24×34 gold RECTANGLE — "still
+     damaged", measured: w 34 → 28 → 24 → 23 as the window narrows, on the old
+     build and the new alike. `flex:none` is the whole fix: a mark is a fixed
+     thing, and the row's slack belongs to the destinations that scroll. */
+  /* AND CENTRED ACROSS, NOT ONLY DOWN (§200.3). `.navmenu-btn` is an
+     inline-flex WORDED pill — `align-items:center` with the text starting at
+     the left, which is right for a word and wrong for a single mark in a
+     square. Measured: 1px of gold to the left of the house and 12px to the
+     right, at every width, in both states. `justify-content` was `normal`
+     and had simply never been asked. */
+  .units .navmenu-btn.homemark{ background:none; border-color:transparent;
+    color:rgba(255,255,255,.86); border-radius:5px; padding:0;
+    width:34px; height:34px; flex:none; align-self:center;
+    justify-content:center; }
+  .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
+  .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
+    border-color:transparent; color:#fff; }
+  /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so
+     the row does not move when the state changes — only the fill arrives. */
+  .units .navmenu-btn.homemark.homemark-on{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); }
+  .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
+  .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .navmenusvg{width:15px;height:15px;display:block}
+  /* The panel, its group bands, its buttons and the caret are all gone with
+     the two-door split (§47.7): the gear is one destination now, so there is
+     nothing to drop down. §24 — delete an element and delete its CSS with it,
+     or the next mockup drawn from this stylesheet shows a menu the product
+     does not have (§41.9). */
+  .navmenu-solo{cursor:pointer}
+
+  /* ── One header for the configuration tables ─────────────────────── */
+  .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
+  /* BOLD (§122.5). Islam, of the People register's: "the title needs to be
+     bold." ALL TWELVE Setup titles, not that one — `cfgHead()` is one function
+     and one page's title in a different weight from eleven others reads as a
+     mistake rather than as emphasis. */
+  .phead2 .secttl{font:700 24px/1.2 var(--serif);margin:0}
+  /* IT WRAPS, or a chip added later pushes the buttons off the page (§93.4).
+     `.phead2` has always wrapped; `.hright` did not, so it stayed one row and
+     simply overflowed its pane — and the register's Register file button went
+     out of reach the moment the units-with-no-custodian count joined five other
+     chips. §90's fault a third time: the control was in the document, styled,
+     enabled and unclickable, and only a screenshot showed it. `min-width:0` is
+     what lets the row shrink at all inside a flex parent. */
+  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px;
+                  flex-wrap:wrap;justify-content:flex-end;min-width:0}
+  .phead2 .chip{font-size:11.5px;color:var(--ink-3);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap}
+  .iconwrap{position:relative;display:flex;gap:6px;margin-left:6px}
+  .ico{background:var(--surface);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);padding:0}
+  .ico:hover{border-color:var(--gold);color:var(--gold-deep)}
+  .ico.on{background:var(--gold);border-color:var(--gold);color:var(--panel)}
+  .ico:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;
+    stroke-linecap:round;stroke-linejoin:round}
+  .ico.sm{width:26px;height:26px}
+  .ico.sm svg{width:13px;height:13px}
+  .iconwrap .menu{position:absolute;top:40px;right:0;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 22px rgba(16,32,60,.16);
+    min-width:190px;z-index:12;overflow:hidden}
+  .iconwrap .menu button{display:block;width:100%;text-align:left;background:none;border:0;
+    font:inherit;font-size:13.5px;padding:10px 14px;cursor:pointer;color:var(--ink-2)}
+  .iconwrap .menu button:hover{background:var(--surface-2);color:var(--bad)}
+
+  /* Setup and Manage sit at the right edge and stay there. */
+  .units .sep.pin{margin-left:auto}
+  .iconwrap .menu.confirmwrap{min-width:250px;padding:4px 0}
+  .iconwrap .menu .cq{padding:11px 14px 8px;border-bottom:1px solid var(--line-soft)}
+  .iconwrap .menu .cq b{font-size:13.5px}
+  .iconwrap .menu button.danger{color:var(--bad);font-weight:600}
+
+  /* ── THE ACCESS MATRIX'S HEADERS WRAP (§93.11) ────────────────────
+     Islam: "roles and access headers needs to be wrapped."
+
+     Seven of the eight headers are a phrase that says what the column covers —
+     "Other supporting functions", "Own business unit" — and §88's one-line
+     standard (`.cfg table thead th { white-space:nowrap }`) turned every one of
+     them into a line running straight across its neighbour. config.css had
+     said `white-space:normal` for this table since the table existed; §88 was
+     written later in the same file, broader, and won.
+
+     IT IS HERE BECAUSE THIS FILE IS CONCATENATED LAST. A more specific rule
+     placed beside the standard in config.css did not take effect — and not
+     because of the cascade: `matches()` confirmed the selector hit the
+     element, `!important` changed nothing, and the browser's own stylesheet
+     did not contain the rule at all. Whatever swallowed it, arrange.css is
+     where this table's exceptions already live for the same reason (§69), and
+     putting it here is a two-line fix rather than an afternoon.
+
+     `.cfg.acgrid`, not `.cfg .acgrid`: both classes sit on the same element. */
+  .cfg.acgrid table thead th { white-space:normal; overflow-wrap:break-word;
+                               max-width:none; overflow:visible;
+                               text-overflow:clip; vertical-align:bottom; }
+
+  /* ── §104.10: THE MARK SITS UNDER THE BOX IT IS ABOUT ──────────────────
+     Beside it there is no room -- the per-cent cell is a box and little else --
+     and a mark on its own line is what makes it read as a state of the row
+     rather than a label on the field. Its own class, not `td .missing`, so the
+     "Missing" a plan puts against an unset target keeps behaving as it does. */
+  .pctneed { display:block; margin-top:3px; font-size:11.5px; line-height:1.25;
+             white-space:nowrap; }
+
+  /* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────
+     One box, one ground, one hairline down the middle: who and when on the
+     left, what and with whom on the right. In arrange.css because that file is
+     concatenated LAST of the four and config.css has now held the same rule
+     block twice on four separate occasions (§29.2, §51.5, §53.6, §88). */
+  .pfront { display:grid; grid-template-columns:300px minmax(0,1fr);
+            border:1px solid var(--line); border-radius:var(--r-md);
+            background:var(--surface-2); overflow:hidden; margin:18px 0 4px; }
+  .pfcol { min-width:0; }
+  .pfright { border-left:1px solid var(--line); background:var(--surface); }
+  .pfrow { display:grid; grid-template-columns:64px minmax(0,1fr); gap:14px;
+           padding:11px 14px; align-items:baseline; }
+  .pfrow + .pfrow { border-top:1px solid var(--line); }
+  .pfrow em { font:700 9.5px/1.6 var(--sans); letter-spacing:.1em; font-style:normal;
+              text-transform:uppercase; color:var(--ink-3); }
+  .pfval { font:600 13px/1.5 var(--sans); color:var(--ink); min-width:0; }
+  .pfval p { margin:0; font-weight:400; font-size:13.5px; line-height:1.55;
+             color:var(--ink-2); }
+  /* THE RIGHT COLUMN'S LABEL TRACK IS SIZED TO ITS OWN LONGEST WORD, so the
+     brief's first letter and the first stakeholder chip start at one x. A
+     single width for both columns would either clip "Stakeholders" or waste
+     40px beside "Owner". */
+  .pfright .pfrow { grid-template-columns:96px minmax(0,1fr); gap:18px;
+                    padding:13px 16px; }
+  /* A pill is written to sit INSIDE a sentence, so it carries a leading margin
+     that would push the chips right of the brief above them. Pulled back here
+     only -- the pill itself is used in thirty other places. */
+  .pfval > .pill.kind:first-child { margin-left:0; }
+  .pfval .pill.kind { margin-top:0; margin-bottom:0; }
+  .pfront .fld, .pfront input, .pfront textarea { width:100%; max-width:none; }
+  /* ── ONE FACT WIDE (§130.1) ──────────────────────────────────────────
+     A pillar has an owner and nothing else that belongs in front matter, so
+     the box keeps its ground, its hairline and its label track and loses the
+     second column — the same component, not a second one that looks like it
+     (§53.5). The `.ssbtn` the owner list becomes is a button rather than a
+     field, so it needs the same full width by name. */
+  .pfront.one { grid-template-columns:minmax(0,1fr); }
+  .pfront .ssbtn { width:100%; }
+  @media (max-width: 1180px) {
+    .pfront { grid-template-columns:1fr; }
+    .pfright { border-left:0; border-top:1px solid var(--line); }
+  }
+
+  /* ── THE QUARTERS, PRESSABLE (§114) ──────────────────────────────────
+     The same four marks qs() draws, as buttons. The lit state borrows the
+     read-mode mark's own colours so the row reads the same with the pen on
+     and off; only the border says "pressable". */
+  .qs-edit .qtog { width:22px; height:22px; padding:0; margin:0 2px 0 0;
+    font:600 11px/1 var(--mono); color:var(--ink-3);
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:5px; cursor:pointer; }
+  .qs-edit .qtog.on { background:var(--gold-deep); color:var(--on-accent);
+    border-color:var(--gold-deep); }
+  .qs-edit .qtog:hover { border-color:var(--gold-deep); }
+
+  /* ── THE REMOVE BUTTON'S SEAT (§114.4, Islam's pick A) ────────────────
+     The × that removes a row rides in the name cell (a column of its own
+     would cost every row its width) — but .fld is width:100%, so it wrapped
+     and every editable row grew 56px → 76px for a 14px glyph. The field
+     yields the button's width instead, and the × sits BESIDE it, outside the
+     border, deliberately: an × drawn inside an input is the search box's
+     clear-the-text idiom, and this one removes the ROW. Keyed on the PAIR so
+     it reaches every table using the pattern and nothing else. */
+  td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
+  td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
+  /* ── HIDDEN FROM THE PRESENTATION (§233) ────────────────────────────
+     The eye sits between the field and the × (the mockup's order), which
+     the seat rule above cannot see — its `.fld + .xbtn` adjacency breaks —
+     so the trio gets its own seat: the field gives up the width of BOTH
+     buttons, and all three share the line (§114.4's rule, one control
+     wider). */
+  td:has(> .fld + .eyebtn) > .fld { width: calc(100% - 62px); vertical-align: middle; }
+  td:has(> .fld + .eyebtn) > .eyebtn,
+  td:has(> .fld + .eyebtn) > .xbtn { vertical-align: middle; margin-left: 4px; }
+  .eyebtn { width: 24px; height: 22px; border: 1px solid transparent; border-radius: 6px;
+    background: none; color: var(--ink-3); cursor: pointer; padding: 2px 3px;
+    display: inline-block; }
+  .eyebtn:hover { background: var(--surface-2); color: var(--ink); }
+  /* Lit on the attention ground while hidden — a decision, not a warning
+     (§168): the warn family is for something owed, and nothing is. */
+  .eyebtn.on { background: var(--attn-bg); border-color: var(--attn-bg); color: var(--attn-tx); }
+  .eyebtn svg { width: 16px; height: 14px; display: block; }
+  .hidchip { display: inline-block; font: 600 10px/1 var(--sans); letter-spacing: .07em;
+    text-transform: uppercase; color: var(--attn-tx); background: var(--attn-bg);
+    border-radius: 99px; padding: 4px 8px; margin-left: 8px; white-space: nowrap;
+    vertical-align: middle; }
+  /* The row reads quiet — kept, not gone. Ink only, never display:none:
+     hiding the row from the PAGE is exactly what this feature is not. */
+  tr.hiddenrow > td, .orow.hiddenrow { color: var(--ink-3); }
+
+  /* ── FILL THE GAPS (§145, spec 023) ──────────────────────────────────
+     Three states, one colour family: a GAP is the product's own red (the
+     word Missing already owns it), a PENDING fill is amber everywhere it
+     shows — the field, the chip, the count, the quarters — and a settled
+     value wears nothing. The amber pair is the platform's attn family, so
+     the contrast is the pill family's own, already measured. */
+  .fld.gapfld { border:1px dashed var(--bad); }
+  .fld.gapfld::placeholder { color:var(--bad); font-weight:600; opacity:.75; }
+  .fld.pendfld { border-color:var(--attn); background:var(--attn-bg); }
+  .pchip { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
+    border:1px solid var(--attn); border-radius:20px; font-size:10px;
+    font-weight:600; line-height:1.5; padding:0 7px; margin-left:6px;
+    vertical-align:1px; text-transform:uppercase; letter-spacing:.04em; }
+  /* The office's tick, beside the chip it clears. */
+  .gapok { width:22px; height:20px; padding:0; margin-left:4px; cursor:pointer;
+    border:1px solid var(--good); background:var(--good-bg); color:var(--good-tx);
+    border-radius:5px; font-size:11px; font-weight:700; line-height:1;
+    vertical-align:1px; }
+  .gapok:hover { border-color:var(--good-tx); }
+  .gapok:focus-visible { outline:2px solid var(--good); outline-offset:1px; }
+  /* The subject-wide count. §192 moved it OFF the pillar band and onto the
+     totals row, where the subject's other counts already are — on the band it
+     was the whole unit's number wearing one pillar's clothes, and it printed
+     under the fill grant's worded button (160px of overlap, measured). */
+  .pendcount { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
+    border:1px solid var(--attn); border-radius:20px; font-size:10.5px;
+    font-weight:600; padding:1px 9px; letter-spacing:0; text-transform:none; }
+  /* The contract, said where the person is working (§32's rule). */
+  .fillbar { background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:8px 12px; margin:10px 0 0; font-size:12.5px;
+    color:var(--ink-2); }
+  .fillbar b { color:var(--ink); }
+  .pendwait { color:var(--attn-tx); }
+  /* The fill grant's quarter buttons: lit is amber, because their fill is
+     pending by construction — gold-deep is the author's lit state. */
+  .qs-fill .qtog.on { background:var(--attn-bg); color:var(--attn-tx);
+    border-color:var(--attn); }
+
+  /* ── FINDING THE GAPS (§145.14, reshaping §145.12 from Islam's mockup) ──
+     RED MEANS MISSING, AMBER MEANS PENDING CONFIRMATION — two colours, two
+     meanings, never mixed. The whole signal lives in the section row beside
+     the section tabs: the total, one red chip per owing place, the red
+     button. Nothing in the page body, no number on the Strategy tab. */
+  .sectionrow .tabs-in { flex-wrap:wrap; align-items:center; }
+  .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
+    flex-wrap:wrap; }
+  .missbar .secmiss { color:var(--bad-tx); font-weight:800; font-size:12.5px;
+    white-space:nowrap; padding-left:12px; }
+  /* THE BAR LIVES INSIDE THE TAB ROW, SO ITS CONTROLS MUST OUTRANK THE TAB
+     ROW'S OWN DRESS. `.tabs button` (border:0, no ground, the quiet ink)
+     covers every button in the row — right for a tab, and it stripped the
+     chips and the red button down to plain words while the corner copy,
+     outside the row, wore the design. ONE declaration serves both homes:
+     the second selector in each list only outranks `.tabs button` inside
+     the bar, so the two copies cannot drift (§53.5). The hovers restate the
+     ground and ink because `.tabs button:hover` paints its own. */
+  .mchip, .missbar button.mchip { border:1px solid var(--bad); background:var(--surface);
+    color:var(--bad-tx); border-radius:18px; font-size:11.5px; padding:2px 10px;
+    cursor:pointer; font-weight:600; font-family:inherit; white-space:nowrap; }
+  .mchip b { color:var(--bad-tx); font-weight:800; }
+  .mchip:hover, .missbar button.mchip:hover {
+    background:var(--bad-bg); color:var(--bad-tx); }
+  .mchip.done, .missbar button.mchip.done {
+    border-color:var(--good); color:var(--good-tx); }
+  .mchip:focus-visible, .fillcta:focus-visible, .pendcta:focus-visible,
+  .missbar button.mchip:focus-visible, .missbar button.fillcta:focus-visible {
+    outline:2px solid var(--bad); outline-offset:2px; }
+  /* The action: a solid red worded button. The ink is --surface — white in
+     light, the dark ground in dark — so it reads on --bad in both themes. */
+  .fillcta, .missbar button.fillcta { border:1px solid var(--bad); background:var(--bad);
+    color:var(--surface); border-radius:8px; font-size:12px; font-weight:700;
+    padding:4px 13px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .fillcta:hover, .missbar button.fillcta:hover { filter:brightness(1.08);
+    background:var(--bad); color:var(--surface); }
+  /* Quiet amber: only pending remains — the office's move, still correctable.
+     THE SECOND SELECTOR IS NOT A DUPLICATE (§145.14, written four rules up and
+     paid for again here): inside the bar this sits in `nav.tabs`, where
+     `.tabs button` (0,1,1) outranks a bare class (0,1,0) and would strip it to
+     plain words while the identical control outside the row wore the design.
+     One declaration, two selectors, so the two homes cannot drift. */
+  .pendcta, .missbar button.pendcta { border:1px solid var(--attn);
+    background:var(--attn-bg);
+    color:var(--attn-tx); border-radius:8px; font-size:12px; font-weight:600;
+    padding:4px 12px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .pendcta:hover, .missbar button.pendcta:hover { background:var(--attn-bg);
+    color:var(--attn-tx); filter:brightness(1.06); }
+  /* §192: THE PENDING PAIR SITS AFTER THE RED CHIPS AND BEFORE THE RED
+     BUTTON — red means missing, amber means pending, and keeping them in two
+     groups is what stops the row reading as one long list of alarms (§145.14:
+     never mixed). The count and its walk are one group, so the walk can never
+     land under anything the way it did on the band. */
+  .missbar .pendtail { display:inline-flex; align-items:center; gap:6px;
+    flex-wrap:wrap; padding-left:4px; }
+  /* The walk's own cursor, on a tick rather than a field. `.gaplit` already
+     rings whatever the gap walk has landed on; a tick is a 22px square, so it
+     takes the ring and nothing else. */
+  .pendwalk.gaplit { outline:2px solid var(--attn); outline-offset:2px; }
+  .gapdone { color:var(--good-tx); font-size:12px; font-weight:600; }
+  /* The corner pair: the worded button takes the second slot beside §101's
+     arrows (right:0 when it stands alone). */
+  .pane .paneact .cornerbtn { position:absolute; top:0; right:36px;
+    white-space:nowrap; }
+  .pane .paneact .cornerbtn:last-child { right:0; }
+  .editbtn.fdone { white-space:nowrap; }
+  /* The rail's own word, red italic — green tick once its place is clear. */
+  .ritem .rgap { display:inline-block; margin-left:7px; color:var(--bad-tx);
+    font-size:11px; font-weight:700; font-style:italic; white-space:nowrap; }
+  .ritem .rgap.ok { color:var(--good-tx); font-style:normal; }
+  /* A page with nothing missing says so and points away (§145.14). */
+  .emptynote { background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:10px 14px; margin:0 0 12px; font-size:13px;
+    color:var(--ink-2); }
+  .emptynote b { color:var(--good-tx); }
+  /* The walker's landing ring. */
+  .gaplit { outline:2px solid var(--bad); outline-offset:2px;
+    animation:gapring 1s ease-out; }
+  @keyframes gapring { 0% { outline-offset:6px; outline-width:3px; }
+                       100% { outline-offset:2px; outline-width:2px; } }
+  @media (prefers-reduced-motion: reduce){ .gaplit { animation:none; } }
+  /* ── A FAILED RENDER SAYS SO (§137) ────────────────────────────────────
+     The card paint() leaves where a page that threw would have been. Quiet on
+     purpose: no red kicker, no shouting — the first sentence answers the fear
+     and the error sits folded behind "Technical details". Drawn from tokens
+     only, so it holds in both themes. */
+  .failcard { max-width:560px; margin:64px auto; background:var(--surface);
+    border:1px solid var(--line); border-radius:10px; padding:30px 34px;
+    text-align:center; }
+  .failcard .fc-t { font-size:17px; font-weight:700; margin-bottom:10px; }
+  .failcard .fc-b { font-size:14px; color:var(--ink-2); margin-bottom:18px; }
+  .failcard details { margin-top:18px; text-align:left; }
+  .failcard summary { font-size:12px; color:var(--ink-3); cursor:pointer; }
+  .failcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
+    background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
+
+  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§149) ─────
+     A dotted underline is the one mark that says "there is more here" without
+     spending colour — the accent budget (§41) is already committed, and a
+     coloured glyph in a scoring table would read as a score. `help` rather
+     than `pointer`: nothing happens on a click. */
+  td .hasnote { border-bottom:1px dotted var(--ink-3); cursor:help; }
+  /* The value almost every row repeats, quiet so the exceptions carry the
+     column. Never hidden — it is still read straight down. */
+  td .cdefault { color:var(--ink-3); }
+  /* AND THE QUIET ONE WEARS NO DOTS (§149). Seen built: a dotted underline
+     under every "Latest" made the column busier than it was before the note
+     existed — the mark meant to say "there is more here" was shouting on the
+     one value that never needs reading. The note is still there on hover
+     (`cursor:help` says so once the pointer arrives); what goes is the
+     standing mark on the repeated default. */
+  td .cdefault.hasnote { border-bottom:0; }
+
+  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§150) ─────────────────────
+     Islam's own placement, chosen over a pinned bar: the tab row is already
+     pinned chrome, so the controls stay on screen for the whole report with
+     no new sticky element and none of the arithmetic one needs (§122.5).
+     `margin-left:auto` puts the box at the far end of a row whose tabs read
+     from the left. */
+  .repchrome { display:flex; align-items:center; gap:12px; margin-left:auto;
+    align-self:center; background:var(--surface); border:1px solid var(--line);
+    border-radius:8px; padding:5px 12px; }
+  .repchrome .rc-n { font-weight:700; font-size:15px; }
+  .repchrome .rc-of { font-size:11.5px; color:var(--ink-3); }
+  .repchrome .rc-bar { width:110px; height:6px; background:var(--surface-2);
+    border-radius:20px; overflow:hidden; }
+  .repchrome .rc-bar i { display:block; height:100%; background:var(--good); }
+  .repchrome .rc-bar.part i { background:var(--attn); }
+  /* SUBMIT WEARS THE REPORT ORANGE (Islam: "the same button with orange
+     colour of reporting to be clear as well"). `--cta` is the pair §94.8
+     declared together — the fill and the ink that survives on it — so the
+     one solid fill in the room stays inside the accent budget: it is drawn
+     only while a cycle is open, for somebody who may report. */
+  .repchrome .rc-submit { background:var(--cta); color:var(--cta-ink);
+    border:1px solid var(--cta); border-radius:6px; padding:6px 14px;
+    font:inherit; font-size:12px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; cursor:pointer; }
+  .repchrome .rc-submit:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+  .repchrome .rc-submit:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  /* SAVE DRAFT IS THE SAME COLOUR AND NOTHING ELSE (Islam: "the same colour
+     but without box and lighter font weight") — the pair below reads as one
+     family in two volumes: the act that ends the report shouts, the act that
+     parks it speaks. `--cta` as TYPE, never the fill's own colour: §38.4 cuts
+     both ways, and `--cta` is the deep half of the pair for exactly this. */
+  .repchrome .rc-draft { background:none; border:0; color:var(--cta);
+    font:inherit; font-size:12px; font-weight:500; letter-spacing:.04em;
+    text-transform:uppercase; cursor:pointer; padding:6px 4px; }
+  .repchrome .rc-draft:hover { text-decoration:underline; }
+  .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* ── A CLOSED REPORT, AND THE WAY BACK (§220) ──────────────────────────
+     Submitted or parked as a draft: the report is read-only and says so by
+     going quiet. Readable, because reviewing a closed report is most of why
+     anybody reopens it — so the table keeps more of its ink than the
+     controls do. The controls are genuinely `disabled`; this is what makes
+     that visible. */
+  .replocked input, .replocked textarea, .replocked select,
+  .replocked .fld { opacity:.45; }
+  .replocked table { opacity:.72; }
+  .repchrome .rc-state { font-size:11.5px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; }
+  .repchrome .rc-state.draft { color:var(--ink-3); }
+  .repchrome .rc-state.done  { color:var(--good-tx); }
+  .repchrome .rc-reopen { background:transparent; color:var(--cta);
+    border:1px solid var(--cta); border-radius:6px; padding:6px 14px;
+    font:inherit; font-size:12px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; cursor:pointer; }
+  .repchrome .rc-reopen:hover { background:var(--cta); color:var(--cta-ink); }
+  .repchrome .rc-reopen:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* ── NOT READY TO SUBMIT (§221) ────────────────────────────────────────
+     The same button in the same place at the same size, so nothing moves
+     when it becomes live — what changes is that it stops shouting. It keeps
+     its focus ring: `aria-disabled` leaves it reachable on purpose, because
+     the reason opens on focus as well as on hover and a `disabled` button
+     would put that explanation out of reach of the keyboard. */
+  .repchrome .rc-submit[aria-disabled="true"] { background:transparent;
+    color:var(--ink-3); border-color:var(--line); cursor:not-allowed; }
+  .repchrome .rc-submit[aria-disabled="true"]:hover { background:transparent;
+    border-color:var(--line); }
+  /* The bubble opens DOWNWARD and hard right: this button sits at the end of
+     the tab row, so a centred note would hang off the page and an upward one
+     would cover the navigation (§165's rule, at the other edge). */
+  .repchrome .hasnote::after { white-space:pre-line; left:auto; right:0;
+    transform:none; bottom:auto; top:calc(100% + 8px);
+    width:max-content; max-width:min(300px, 60vw); }
+
+  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
+     Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
+     and I can't scroll horizontally."* The page deliberately never scrolls
+     sideways — §27.2, because a sideways page drags every sticky element with
+     it — so a plan wider than its pane was simply CUT, with no way to reach
+     the columns past the edge. The audit's item 08 in the flesh.
+
+     The box scrolls, the page never does. `min-width:0` on the grid child and
+     the pane is what lets the box be narrower than the table inside it: a
+     grid item's automatic minimum size is its content, so without this the
+     pane grows instead and the cut comes straight back (§100.5's rule, a
+     different tree). */
+  .split, .pane { min-width:0; }
+  .tblscroll { overflow-x:auto; }
+  /* THE NAME COLUMN STAYS PUT (Islam: the register's own pattern, §69.19).
+     Scrolling numbers away from the row they belong to is how a scoring table
+     becomes unreadable mid-scroll — so the `#` and the name freeze and the
+     figures move beside them.
+
+     `background:inherit` with the ROW carrying the ground, exactly as the
+     register learned it (§73.2): a hard-coded white here would leave the two
+     frozen cells unstriped beside a striped row, which is the seam freezing
+     was meant to remove. */
+  .tblscroll table tr { background:var(--surface); }
+  .tblscroll table tbody tr:nth-child(even) { background:var(--zebra); }
+  .tblscroll td.idx, .tblscroll th.idx { position:sticky; left:0; z-index:2;
+    background:inherit; }
+  .tblscroll thead th.idx { z-index:4; background:var(--panel); }
+  /* The name is the SECOND cell of these tables and has no class of its own,
+     so it is named by position — the one place that is safe, because every
+     table this wraps is built by the same row renderers (#, name, then
+     figures). It parks against the `#` column's own width. */
+  .tblscroll td.idx + td, .tblscroll th.idx + th { position:sticky;
+    left:var(--frozen-1, 38px); z-index:2; background:inherit; }
+  .tblscroll thead th.idx + th { z-index:4; background:var(--panel); }
+  /* The seam, so the frozen pair reads as a held edge rather than as text
+     sliding under text. */
+  .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
+
+  /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
+     One entry per unit under the group's three cards, worst first. A quiet
+     row on purpose: the cards above are the reading, this is the index to it,
+     and an index that competes with what it indexes has stopped being one. */
+  .ustrip-h { font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-3); font-weight:700; margin:24px 0 8px; }
+  .ustrip { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 8px; }
+  .ustrip button { display:flex; align-items:center; gap:9px; font:inherit;
+    border:1px solid var(--line); border-radius:8px; padding:7px 12px;
+    background:var(--surface); cursor:pointer; }
+  .ustrip button:hover { border-color:var(--gold); }
+  .ustrip button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .ustrip .un { font-size:13px; color:var(--ink); }
+  .ustrip .uv { font-family:var(--mono); font-size:13px; font-weight:700;
+    font-variant-numeric:tabular-nums; }
+/* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
+   In arrange.css, concatenated last, because config.css has eaten three
+   silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
+   (§93.11). The look is the approved mockup's: quiet cards, the platform's
+   own tokens throughout, nothing brandable. */
+.kbed { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+        margin:10px 0; background:var(--surface); }
+.kbed.on { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line);
+          border-radius:6px; padding:7px 10px; margin-bottom:8px;
+          background:var(--surface); color:var(--ink); }
+.kbed-a { width:100%; font:inherit; font-size:var(--fs-note); line-height:1.55;
+          border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+          min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
+.kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px;
+  flex-wrap:wrap; }
+/* WHO AN ANSWER IS FOR (§161). The picker sits FIRST in the foot, before the
+   "Edited" mark and its way back, because it is a property of the answer
+   while those two are a property of this tenant's change to it. */
+.kbed-aud { display:flex; align-items:center; gap:7px; font-size:12.5px;
+  color:var(--ink-3); }
+.kbed-aud select { font:inherit; color:var(--ink); background:var(--surface);
+  border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
+/* The chip in read mode. `everyone` is never drawn — it is the default on 57
+   of 64 questions and a mark on nearly every card is furniture (§41). The two
+   that ARE drawn read apart at a glance rather than by their words alone:
+   the office's takes the accent, everybody-else's the quiet surface. */
+.pill.kind.kbaud-office { border-color:var(--gold); color:var(--gold-deep);
+  background:var(--attn-bg); }
+.pill.kind.kbaud-others { border-color:var(--line); color:var(--ink-2);
+  background:var(--surface-2); }
+.kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
+             font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
+             border-radius:99px; padding:2px 9px; }
+.kbed-mark.quiet { color:var(--ink-3); border-color:var(--line); }
+.kbed-reset { font:inherit; font-size:var(--fs-small); background:none; border:none;
+              color:var(--ink-3); text-decoration:underline; cursor:pointer; padding:0; }
+.kbed-reset:hover { color:var(--ink); }
+.kbed-x { margin-left:auto; font:inherit; font-size:var(--fs-small); color:var(--bad);
+          background:none; border:none; text-decoration:underline; cursor:pointer; }
+.kbadd { display:block; width:100%; text-align:left; font:inherit; font-size:var(--fs-small);
+         font-weight:600; color:var(--gold-deep); background:none;
+         border:1px dashed var(--line); border-radius:8px; padding:11px 16px;
+         margin:6px 0 4px; cursor:pointer; }
+.kbadd:hover { border-color:var(--gold); }
+.kbed-lede b { color:var(--ink); }
+
+/* ── THE KNOWLEDGE BASE'S TWO TABS (§141) ─────────────────────────────
+   The approved mockup's segmented pair: the active half wears the tenant's
+   panel colour, the way the navigation's own segments do — nothing here is a
+   new colour. */
+.kbtabs { display:flex; margin:2px 0 18px; border:1px solid var(--line);
+          border-radius:9px; overflow:hidden; width:max-content;
+          background:var(--surface); }
+.kbtabs button { font:inherit; font-size:var(--fs-small); font-weight:600;
+                 padding:8px 18px; border:0; background:none; color:var(--ink-2);
+                 cursor:pointer; }
+.kbtabs button + button { box-shadow:inset 1px 0 0 var(--line); }
+.kbtabs button.on { background:var(--panel); color:var(--panel-ink); }
+.kbtabs button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.kbcount { font-size:var(--fs-micro); font-weight:700; opacity:.75; margin-left:6px; }
+
+
+  /* ── THE BANDS BUTTON AND ITS PANEL (§163) ──────────────────────────
+     In arrange.css, concatenated last, and with `#subtabs` in the selector —
+     BOTH deliberate. §145.14 is the scar: the tab row styles its own buttons
+     with `.tabs button` (0,1,1), which outranks any bare class, so a control
+     placed in that row ships UNDRESSED — the mockup reproduced it within a
+     minute of the button being added. Every rule below that has to beat it
+     names the row. */
+  #subtabs .tabacts, .tabs .tabacts { margin-left:auto; display:inline-flex;
+    align-items:center; gap:8px; flex:0 0 auto; }
+  #subtabs { display:flex; align-items:center; }
+  #subtabs .bandsmenu > summary,
+  .tabs .bandsmenu > summary { border:1px solid var(--line); border-radius:99px;
+    padding:6px 13px; background:var(--surface); color:var(--ink-2);
+    font:700 var(--fs-label)/1 var(--sans); letter-spacing:var(--track);
+    text-transform:uppercase; cursor:pointer; display:inline-flex;
+    align-items:center; gap:5px; list-style:none; }
+  #subtabs .bandsmenu > summary:hover,
+  .tabs .bandsmenu > summary:hover { color:var(--ink); border-color:var(--ink-3); }
+  .bandsmenu > summary::-webkit-details-marker { display:none; }
+  /* The panel hangs BELOW the row, so the row may not clip it. The tab row has
+     no reason to hide anything horizontally and this is the only thing that
+     ever escapes it. */
+  #subtabs, nav.tabs { overflow:visible; }
+  .bandsmenu { position:relative; }
+  .bandsmenu > .bandslist { min-width:250px; padding:6px; }
+  .bandslist div { display:flex; align-items:center; gap:10px; padding:7px 10px;
+    font-size:var(--fs-note); color:var(--ink); white-space:nowrap; }
+  .bandslist div + div { border-top:1px solid var(--line-soft); }
+  .bandslist i { width:12px; height:12px; border-radius:3px; flex:0 0 auto; display:block; }
+  .bandslist b { font-weight:700; }
+  /* The number is the thing being looked up, so it ends the line and lines up
+     down the list. */
+  .bandslist span { margin-left:auto; color:var(--ink-2);
+    font-variant-numeric:tabular-nums; }
+  /* ── THE TIE OVER THE PINNED PANE TITLE (§163.2) ────────────────────
+     Islam, on a squeezed window: "on scrolling down things are damaged", with
+     a table header lying across the pinned pane title. The trigger was never
+     reproduced — ten widths from 1000 to 768, every scroll offset, opened
+     narrow AND squeezed from wide, on a unit and a function — and two
+     hypotheses were tested and both were wrong: the plan tables' header cells
+     carry no `idx` class, and no `thead th` in a pane is sticky at all.
+
+     WHAT IS FIXED IS THE ONE THING THAT IS DEMONSTRABLY UNDECIDED. §151 gave
+     the frozen HEADER cells `z-index:4` — the SAME as the pinned title — so
+     which of the two paints on top is settled by document order alone, and the
+     table comes later. A tie decided by source order is not a decision. They
+     drop to 3.
+
+     AND THE FIRST ATTEMPT DID IT FROM ABOVE AND BROKE SOMETHING REAL: raising
+     `.pband` to 8 made the title win against everything, and
+     `checks/gap-fill.py` went red immediately — a fill field scrolled level
+     with the title became unclickable, the title intercepting the press. A
+     guard that costs a working interaction is a second fault, not a guard.
+     `.pband` is left exactly as it was; only the tie is broken. */
+  .tblscroll thead th.idx, .tblscroll thead th.idx + th { z-index:3; }
+
+/* ── THE MONTH PICKER (§177) ─────────────────────────────────────────────
+   A due date is a month and a year, chosen — no box, so nothing to mistype
+   and nothing to validate (Islam: "remove the entry and just keep it a
+   calendar selection"). The button wears the same three states every gap
+   field wears: red dashed while missing, amber while pending, plain once
+   settled. THE PANEL IS position:fixed, placed by the shell off the
+   button's rect, because a project's tables sit inside `.tblscroll` and an
+   absolute panel is clipped to a strip of it (§45.5, the same reason
+   searchsel's popup is fixed). */
+.monthbtn { display:inline-flex; align-items:center; gap:7px; padding:4px 9px;
+            border:1px solid var(--line); border-radius:6px; background:var(--surface);
+            color:var(--ink); font:inherit; font-size:var(--fs-small); cursor:pointer;
+            min-width:104px; justify-content:space-between; }
+.monthbtn:hover, .monthbtn.open { border-color:var(--gold-deep); color:var(--gold-deep); }
+.monthbtn:focus-visible { outline:2px solid var(--gold-deep); outline-offset:1px; }
+.monthbtn svg { width:14px; height:14px; flex:none; opacity:.75; }
+.monthbtn.gapfld { border-style:dashed; border-color:var(--bad); }
+.monthbtn.pendfld { border-color:var(--attn); background:var(--attn-bg); }
+.mnone { color:var(--bad-tx); font-weight:600; font-style:italic; }
+.monthpop { position:fixed; z-index:60; width:196px; padding:8px;
+            border:1px solid var(--line); border-radius:8px; background:var(--surface);
+            box-shadow:0 10px 28px rgba(0,0,0,.16); text-align:left; }
+.mp-yr { display:flex; align-items:center; justify-content:space-between; padding:2px 4px 8px; }
+.mp-yr b { font-size:var(--fs-note); font-variant-numeric:tabular-nums; }
+.mp-nav { width:22px; height:22px; padding:0; line-height:1; cursor:pointer;
+          border:1px solid var(--line); border-radius:5px;
+          background:var(--surface); color:var(--ink-2); }
+.mp-nav:hover { border-color:var(--gold-deep); color:var(--gold-deep); }
+.mp-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
+.mp-m { padding:6px 0; border:1px solid transparent; border-radius:5px; background:none;
+        color:var(--ink); font:inherit; font-size:var(--fs-small); cursor:pointer; }
+.mp-m:hover { background:var(--surface-2); border-color:var(--line); }
+.mp-m.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel);
+           font-weight:600; }
+.mp-foot { display:flex; justify-content:flex-end; padding-top:8px; margin-top:6px;
+           border-top:1px solid var(--line); }
+
+  /* ── THE SERVER DID NOT ANSWER (§201) ─────────────────────────────────
+     Over everything, deliberately: the page behind it is the worked example
+     pretending to be nobody's tenant, and the one thing this must never be
+     is missable. Plain tokens only — the tenant's branding never arrived,
+     which is the whole situation. */
+  #noserver { position:fixed; inset:0; z-index:9000; display:flex;
+    align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--ground) 72%, transparent);
+    backdrop-filter: blur(2px); }
+  .nosrv-card { background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:26px 30px; max-width:440px; width:calc(100% - 48px);
+    box-shadow:0 18px 50px rgba(0,0,0,.25); text-align:left; }
+  .nosrv-card h2 { margin:0 0 8px; font:700 19px/1.25 var(--sans); color:var(--ink); }
+  .nosrv-card p { margin:0 0 12px; font-size:13.5px; color:var(--ink-2); }
+  .nosrv-try { color:var(--ink-3); font-size:12px; }
+  .nosrv-btn { display:block; width:100%; background:var(--panel); color:var(--panel-ink);
+    border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
+    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 0; }
+  .nosrv-btn:hover { filter:brightness(1.12); }
+
+/* ── A TACTIC'S OUTCOME (§248) ──────────────────────────────────────────────
+   THE NAME CARRIES THE WEIGHT, because the description now sits under it in
+   the same cell on Reporting and Performance — two greys at one weight run
+   together as a single block, which is what Islam saw. The Plan splits them
+   into columns instead, so nothing there needs this. */
+.tacname { font-weight:650; display:block; }
+
+/* ── AND THE REPORTED NOTE SAYS SO (§255) ──────────────────────────────────
+   The comment above got as far as "two greys at one weight run together as a
+   single block" and answered it for the NAME alone. Bolding the name tells
+   you where the row starts; it says nothing about which of the two greys
+   BELOW it was written this cycle. This is that second half.
+
+   A RULE, NOT A SECOND SIZE OR COLOUR. Making the note smaller or paler
+   would rank it under the plan's description, and it is the newer and more
+   urgent of the two — so it keeps `.why`'s size and ink and is set apart
+   sideways instead, which costs no line and no width the row did not have.
+
+   `--line`, never the accent (§41's budget: this page spends its gold on
+   Report and the scoring colours), and the key carries NO opacity — `.85`
+   on `--ink-3` measures about 4.4:1 at 10px, which is §38.5's trap. */
+  td .repnote {
+    display:block; margin-top:6px; padding-left:10px;
+    border-left:2px solid var(--line);
+    font-size:12px; color:var(--ink-3);
+  }
+  td .repnote .repkey {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-3); margin-right:6px;
+    white-space:nowrap;
+  }
+
+/* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
+   boxes should be the same size and squeeze them where their hz size should
+   match the compile cell ... so we can give space for the other columns").
+   The height is already spent on the stacked name and description, so the
+   second line is free — and the width it hands back goes to the prose columns,
+   which is what makes the rows SHORTER rather than taller: measured, Target
+   275px to 220 and Tactic 324 to 380, rows 149 to 131.
+
+   `--tw` is what a select needs to show its longest word ("Average"), measured
+   rather than chosen. It is a token so one number moves all four boxes and the
+   cell that holds them; a per-box width would be four places to keep in step. */
+:root { --tw: 96px; }
+td.tgtcell { width:1px; white-space:nowrap; }
+.tgrid { display:grid; grid-template-columns:var(--tw) var(--tw); gap:5px; }
+/* `.fld` is width:100% in this stylesheet, so without this the first control
+   on a row asks for the whole line and takes it — measured at 224px with its
+   neighbour squeezed to 18. Every box says its own width instead. */
+/* `:not(.ss-native)` because a searchable select leaves its NATIVE element in
+   place, absolutely positioned and clipped to a pixel (§45.5) — and a blanket
+   width would blow it back up to 96px inside a grid it is not part of. */
+.tgrid > *:not(.ss-native) { width:var(--tw) !important; min-width:0 !important;
+                             box-sizing:border-box; }
+/* And the native one keeps the pixel it is meant to be: `.fld` is width:100%
+   at the same specificity and wins on source order, so without this it grows
+   to the pane's width — out of flow and invisible, and still a box that big
+   sitting in a table cell. */
+.tgrid > .ss-native { width:1px !important; }
+.tgrid > .why { display:flex; align-items:center; justify-content:center; }
+
+/* A second fact under a headline one inside a data cell — the whole-year
+   target under what is due now. Its own class rather than a reuse of `.why`,
+   which is scoped to a row's NAME cell and is left-aligned; this one has to
+   inherit the cell's alignment so a `.num` cell stays right-aligned on both
+   lines (§53.5: the question here is "a second line in a data cell", not "a
+   note under a name"). */
+.subhd { display:block; font-size:.82em; font-weight:400; color:var(--ink-3);
+         line-height:1.35; margin-top:1px; white-space:nowrap;
+         letter-spacing:0; text-transform:none; }
+th .subhd { font-weight:400; }
+
+/* THE DESCRIPTION IS NOT A COLUMN — it sits under the tactic's name on all
+   three surfaces (§248, Islam's choice). What still folds is the TARGET,
+   below 880, where seven columns run 44px past a 515px pane and §158 does not
+   bend. */
+.narrowtgt { display:none; }
+/* And one step further down: below 880 the Target column goes too and its
+   value rides under the outcome it belongs to. Never in edit mode — the four
+   controls are the only way to set it, so hiding them would leave a field
+   nobody can reach (§61). */
+@media (max-width: 880px) {
+  td.tgtcol:not(.tgtcell), th.tgtcol { display:none; }
+  .narrowtgt { display:block; }
+}

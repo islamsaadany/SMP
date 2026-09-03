@@ -1,4 +1,4 @@
-"""EDITING THE CYCLE THAT IS RUNNING (§261).
+"""EDITING THE CYCLE THAT IS RUNNING (§273).
 
 Islam: *"allow me to edit the cycle name. give me an edit button the cycle to
 edit the date as you already built and the cycel name edit as well"* — and then,
@@ -40,7 +40,7 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       instead — the strip a non-office viewer reads is asserted to carry no
       control at all.
 
-  9 · REOPENING A CLOSED CYCLE (§261.2). Islam picked the pen over a button on
+  9 · REOPENING A CLOSED CYCLE (§273.2). Islam picked the pen over a button on
       the strip, so the closed cycle's pen is asserted to hold the five facts
       as VALUES and Reopen at its far end — with the strip asserted to carry NO
       Reopen, or a build that put one there passes every "you can reopen"
@@ -365,17 +365,17 @@ with sync_playwright() as p:
     ok("the cycle closes", review(pg).get("state") == "closed", review(pg))
     shut = strip_state(pg)
     ok("the pen goes with it", pen_state(pg).get("none") is True)
-    # REWRITTEN, NOT DELETED (§218). §261 asserted a closed cycle offers Open a
-    # new cycle and NOT Edit, which was true until §261.2 gave the closed cycle
+    # REWRITTEN, NOT DELETED (§218). §273 asserted a closed cycle offers Open a
+    # new cycle and NOT Edit, which was true until §273.2 gave the closed cycle
     # the pen as well — Islam's pick over a Reopen button on the strip. Both are
     # asserted, because a build that dropped either would satisfy a test for the
     # other on its own.
-    ok("and a closed cycle offers BOTH Open a new cycle and the pen (§261.2)",
+    ok("and a closed cycle offers BOTH Open a new cycle and the pen (§273.2)",
        shut.get("opennew") is True and shut.get("edit") is True, shut)
 
     # ── 9 · reopening a closed cycle ─────────────────────────────────
-    print("\n── 9 · a closed cycle is reopened from the platform's dialog (§261.3) ──")
-    # REWRITTEN, NOT DELETED (§218). §261.2 drew the record as a band under the
+    print("\n── 9 · a closed cycle is reopened from the platform's dialog (§273.3) ──")
+    # REWRITTEN, NOT DELETED (§218). §273.2 drew the record as a band under the
     # strip and this asserted its five values; Islam saw that on his own tenant
     # — "the design is very poor" — and the fault was the SHAPE: a band of facts
     # under a band of the same facts, every one of them already on the line
@@ -410,7 +410,7 @@ with sync_playwright() as p:
     _t = (dlg.get("title") or "").lower()
     ok("...titled with the act and the cycle by name",
        "reopen" in _t and (review(pg).get("name") or "").lower() in _t, dlg.get("title"))
-    ok("...and NO band is drawn on the page (§261.3)", dlg.get("band") is False, dlg)
+    ok("...and NO band is drawn on the page (§273.3)", dlg.get("band") is False, dlg)
     # THE ONE FACT THAT IS NOT ON THE STRIP is why the dialog carries a record
     # at all — asserted by name, or a dialog that only repeated the strip would
     # pass every "there is a dialog" assertion.

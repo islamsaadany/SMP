@@ -86,7 +86,7 @@ with sync_playwright() as p:
     h2 = pg.eval_on_selector_all("#panel h2", "e=>e.map(x=>x.textContent.trim())")
     ck("Reporting cycle keeps 'Who has reported'", "Who has reported" in h2, h2)
 
-    print("\n── 3 · the name stays put, and a BOXED table's head pins (§261.1) ──")
+    print("\n── 3 · the name stays put, and a BOXED table's head pins (§273.1) ──")
     # REWRITTEN, NOT DELETED (§218). This asserted §121.4's general rule — every
     # Setup table's `thead th` pinned under the page's own header — and that
     # rule is GONE: §163.5, §130.2 and §174 took the page offset away from every
@@ -104,17 +104,33 @@ with sync_playwright() as p:
     #
     # What is asserted now is what is TRUE and what matters: the page's name
     # pins on every page, and the tables that DO pin pin inside their own box.
-    pg.evaluate("()=>{currentSub='units';paint();window.scrollTo(0,0);}")
-    pg.wait_for_timeout(400)
+    # THE PAGE IS CHOSEN BY MEASURING, NEVER NAMED (§94.8, §214.3). This was
+    # pinned to `units`, and main's own §261 — the Setup tables arranged, their
+    # rows acting from one menu — made that page 33px tall, so the guard added
+    # one commit earlier ("the page really scrolled") went red on a build that
+    # is behaving. Only four Setup pages scroll at all now. Picking the longest
+    # keeps this true whichever page that is tomorrow.
+    longest, most = None, 0
+    for k, _label in entries:
+        pg.evaluate("(k)=>{currentSub=k;paint();window.scrollTo(0,0);}", k)
+        pg.wait_for_timeout(140)
+        h = pg.evaluate("()=>Math.round(document.documentElement.scrollHeight"
+                        " - window.innerHeight)")
+        if h > most:
+            longest, most = k, h
+    ck("some Setup page scrolls, so the pinning can be measured at all",
+       most > 300, (longest, most))
+    pg.evaluate("(k)=>{currentSub=k;paint();window.scrollTo(0,0);}", longest)
+    pg.wait_for_timeout(300)
     top = pg.evaluate("()=>Math.round(document.querySelector('.setupttl').getBoundingClientRect().top)")
-    pg.evaluate("()=>window.scrollTo(0,700)")
-    pg.wait_for_timeout(450)
+    pg.evaluate("(n)=>window.scrollTo(0, n)", min(most, 700))
+    pg.wait_for_timeout(400)
     low = pg.evaluate("""()=>({t:Math.round(document.querySelector('.setupttl').getBoundingClientRect().top),
       scrolled:Math.round(window.scrollY)})""")
     # PROVED TO HAVE SCROLLED FIRST, or "it is still on screen" is true of a
     # page that never moved — which is exactly how this section used to pass.
-    ck("the page really scrolled", low["scrolled"] > 400, low)
-    ck("the page's name is still on screen after scrolling 700px",
+    ck("the page really scrolled (%s)" % longest, low["scrolled"] > 300, (longest, low))
+    ck("the page's name is still on screen after scrolling",
        0 < low["t"] < 300, (top, low))
     ck("...and it did not travel with the page", (top - low["t"]) < 100, (top, low))
 
@@ -140,6 +156,13 @@ with sync_playwright() as p:
        strip["bg"] not in ("rgba(0, 0, 0, 0)", "transparent") and strip["h"] != "0px", strip)
 
     print("\n── 5 · the headings are separated (§121.4) ──")
+    # PUT THE PAGE BACK FIRST (§94.2, §50.6). §3 now walks every Setup page to
+    # find the one that scrolls and leaves the run on it — which is the
+    # Knowledge base, a page with no table at all, so this measured an empty
+    # list and reported a correct build as broken. A check that moves the state
+    # puts it back.
+    pg.evaluate("()=>{currentSub='units';paint();window.scrollTo(0,0);}")
+    pg.wait_for_timeout(300)
     sep = pg.eval_on_selector_all("#panel table thead th + th",
         "e=>e.map(x=>getComputedStyle(x).borderLeftWidth)")
     ck("every heading after the first has a divider",

@@ -307,8 +307,29 @@
    §257's Y/N target, §258's save-safety banners and §259's blue dividers — and
    was serving "smp-shell-v4.37-blue-dividers" when this merge was made, so the
    name goes past it rather than beside it (§94.12), confirmed again
-   immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.44-reopen-dialog";
+   immediately before the push (§94.16).
+
+   §271: the reporting note is a growing textarea and a typed break survives
+   being read. Main moved a long way under this branch while it waited for a
+   word — §251 to §270 — and was serving "smp-shell-v4.49-edit-on-section-line"
+   when this merge was made, so the name goes PAST it rather than beside it
+   (§94.12); confirmed once more immediately before the push (§94.16).
+
+   §272: empty is not missing, and the bar now says which. Main moved 39
+   commits under this branch while it waited for a word — §261 through §271,
+   with FOUR different sessions each having claimed §261 and each renumbered
+   on merge, which is why this one is §272 — and was serving
+   "smp-shell-v4.50-note-wrap" when this merge was made, so the name goes PAST
+   it rather than beside it (§94.12); confirmed once more immediately before
+   the push (§94.16).
+   §273: editing the cycle that is running, and reopening one that has closed.
+   Main moved 42 commits under this branch while it waited for a word — and
+   FOUR sessions had each claimed §261 before this one, which is why this work
+   is §273 and not the §261 it was built as. Main was serving
+   "smp-shell-v4.51-empty-not-missing" when this merge was made, so the name
+   goes PAST it rather than beside it (§94.12); confirmed once more immediately
+   before the push (§94.16). */
+const SHELL = "smp-shell-v4.52-cycle-edit-and-reopen";
 const ASSETS = [
   "/",
   "/index.html",

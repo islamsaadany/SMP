@@ -439,6 +439,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted in the same breath. 474/0; and one of the check's own first failures
   was the CHECK — a function's Performance tab is keyed `fnperf`.
 
+- **ONE CHASE PER CONVERSATION, NOT ONE PER MESSAGE (§261):** Islam, of the
+  emails the platform sends him — *"when someone send to me when I don't reply
+  it send an email for each message ... it needs to compile some messages
+  rather than an emaile for each message."* **THERE IS NO SCHEDULER AND THAT
+  DECIDES THE SHAPE** (§97.5, still): nothing can hold five messages back and
+  send one summary at the end of the hour, so what is knowable at the moment a
+  message arrives — whether an email about this conversation has already gone
+  out and been left unanswered — is the whole rule. **BOTH HALVES OF THE SAME
+  FEATURE** (§53.5): the office was chased per message and a person was chased
+  per reply, and fixing one is how the two drift. **WHAT DOES GO OUT COMPILES**
+  — the first email names the message that started the spell, the one after an
+  hour of silence names ALL of them — and **the boundary excludes the
+  assistant's handoff line**, which is `from_office` and is inserted BEFORE the
+  chase, so a naive "since the last office message" sends an email with nothing
+  in it. **CLEARED BY THE ANSWER, NEVER BY A CLOCK**: `chased_at` is wiped when
+  the office replies and `chased_them_at` when the person's browser polls, in
+  the writes that already say so. **ONE RULE, THREE ASKERS** (§42) —
+  `SMPRules.chatChaseDue()` is asked by both chases and by the line that tells
+  the office what Send will do (§97.5), and **it fails towards SENDING**,
+  because one email too many is a nuisance and a question nobody hears about is
+  the feature not working (§35). **A SEND THAT FAILED BUYS NO SILENCE** (§188's
+  rule, on the thread): both stamps are written only when the provider accepted
+  it. **NO BACKFILL** — NULL is "nothing has gone out about this spell", which
+  is what an upgrading tenant should mean. Proved able to fail: **14 red** on
+  the shipped build, the first failure printing his report verbatim — and **the
+  check found a defect in the change itself**, the reply path reading
+  `chased_them_at` off a row selected as `here_at` alone. **RECORDED, NOT
+  DONE**: the quiet period is a stored setting with **no control drawn yet**
+  (rule 1c is mockup-first; the mockup is
+  `design-mockups/chat-quiet-row/`), and two people in the office replying at
+  once still both chase.
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -4639,6 +4670,14 @@ python3 checks/reported-note.py # a reported note is NAMED as one (§255): the n
                                 # asserted to use the same word. It MAKES the state: 0 of
                                 # 84 demo tactics carry a note, so every assertion here
                                 # passes on a build that lost the feature. 16 red before
+node scripts/test-chat-chase.js # one chase per conversation, not one per message
+                                # (§261): five messages and one email, the second
+                                # chase compiling the whole waiting spell, replying
+                                # ending it, the away chase the same both ways, and a
+                                # failed send buying no silence — through the REAL
+                                # handler against a real Postgres with a stand-in mail
+                                # service reading what left off the wire (needs a
+                                # database; 14 red on the build before)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4874,7 +4913,43 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: one chase per conversation, not
+one per message.** Islam, of the emails the platform sends him: *"when someone
+send to me when I don't reply it send an email for each message ... it needs to
+compile some messages rather than an emaile for each message."* Measured before
+anything was proposed: the office is chased on every message that leaves a
+conversation waiting, and **the same fault sits on the other half of the same
+feature** &mdash; a person is chased on every reply while they are away. He was
+shown both and chose to fix both. **THERE IS NO SCHEDULER AND THAT DECIDES THE
+SHAPE** (&sect;97.5, still true): nothing can hold five messages back and send
+one summary at the end of the hour, so the rule is what IS knowable at the
+moment a message arrives &mdash; whether an email about this conversation has
+already gone out and been left unanswered. Three shapes were put to him with
+the cost of each; he took the middle one, **one email, and a fresh one only
+after a long silence**, so a message written the next morning is not swallowed
+by an email sent yesterday. **WHAT DOES GO OUT COMPILES**: the second email
+carries every unanswered message, not just the newest. **THE BOUNDARY EXCLUDES
+THE ASSISTANT'S HANDOFF LINE** &mdash; it is `from_office` and is inserted
+BEFORE the chase runs, so a naive "since the last office message" would have
+sent an email with nothing in it at the one moment it matters most. **CLEARED
+BY THE ANSWER, NEVER BY A CLOCK**, in the writes that already say so.
+**ONE RULE, THREE ASKERS** (&sect;42), and **it fails towards SENDING** &mdash;
+one email too many is a nuisance, a question nobody is told about is the whole
+feature not working. **A SEND THAT FAILED BUYS NO SILENCE**, and **nothing is
+backfilled**. Proved able to fail: **14 red** on the build he is using, the
+first failure printing his report verbatim (*"five messages, one email &mdash;
+5 emails"*) &mdash; and **the check found a defect in this change itself**, the
+reply path reading the new column off a row selected as `here_at` alone, so the
+away half was still emailing per reply while the office half was fixed. Full
+`qa.py` sweep ERRORS none &middot; 491/0 authoriser &middot; 126/0 differ
+&middot; 94/0 on the existing chat suite &middot; `office-chat.py` ALL CLEAR
+with a new section for the sixth presence state &middot; round trip PASS on a
+virgin Postgres 16. **Recorded, not done**: the quiet period is a stored
+setting with no control drawn yet &mdash; a settings row is a UI change and
+rule 1c is mockup-first, so it is drawn out of the running panel in
+`design-mockups/chat-quiet-row/` and awaits a word.*
+
+*Earlier the same day: **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

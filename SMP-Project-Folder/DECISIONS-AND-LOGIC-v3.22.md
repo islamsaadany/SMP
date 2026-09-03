@@ -29740,3 +29740,120 @@ green. `refusal-keeps-work.py` is red on `main`'s own build for the
 stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
+
+---
+
+## §261 — ONE CHASE PER CONVERSATION, NOT ONE PER MESSAGE (2026-09-03)
+
+Islam, of the emails the platform sends him: *"THE MESSAGES emailed to me from
+the platform when someone send to me when I don't reply it send an email for
+each message I beleive it needs to compile some messages rather than an emaile
+for each message."*
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED.** `tellTheOffice` fires on every `say`
+that leaves a conversation waiting, so five messages from one person are five
+emails, each pointing at the same page and each saying about as much as the
+last. **AND THE SAME FAULT SITS ON THE OTHER HALF OF THE SAME FEATURE**
+(§53.5): §97.5's away chase fires on every reply to somebody who is not here,
+so three replies to a colleague with the platform shut are three emails.
+He was shown both and chose to fix both.
+
+**THERE IS NO SCHEDULER, AND THAT DECIDES THE SHAPE.** §97.5 settled that
+(nothing on Vercel wakes this platform up on a timer, which is why presence is
+the person's own polling and why the away decision is made at the moment of
+replying) and it still holds — so nothing can hold five messages back and send
+one summary at the end of the hour. **What CAN be known at the moment a message
+arrives is whether an email about this conversation has already gone out and
+been left unanswered**, and that is the whole rule.
+
+Three shapes were put to him with the cost of each stated:
+
+- **A — one email per conversation, full stop.** Cheapest. Cost: somebody
+  writing again the next morning emails nobody at all.
+- **B — one email, and a fresh one only after a long silence.** Chosen.
+- **C — a real timed digest**, every 30–60 minutes. Cost: a scheduler this
+  deployment has never had, and the first question of the day waiting an hour.
+
+**AND WHAT DOES GO OUT COMPILES.** The first email names the one message that
+started the spell; the one after an hour of silence names **all** of them —
+subject *"6 messages waiting: Asking Person"*, every unanswered message in the
+body, oldest trimmed from the front with a line saying how many are in the
+platform. So nothing anybody wrote is only ever mentioned in an email that has
+already been read and forgotten.
+
+**THE BOUNDARY EXCLUDES THE ASSISTANT'S HANDOFF LINE, and getting that wrong
+would have emptied the email at the one moment it matters most.** The handoff
+is `from_office` (§104 — the assistant answers on the office's behalf) and it
+is inserted BEFORE the chase runs, so a naive "everything since the last office
+message" finds nothing and sends a chase with no words in it. An assistant
+ANSWER is a different thing and correctly ends the spell: it marks the
+conversation answered and nothing chases at all.
+
+**THE MEMORY IS CLEARED BY THE ANSWER, NEVER BY A CLOCK.** `chased_at` is wiped
+when the office replies and `chased_them_at` when the person's own browser
+polls — in the writes that already say those things, so there is no second
+place to keep true and no cost. A fresh spell always chases; the quiet period
+only ever silences a repeat.
+
+**ONE RULE, THREE ASKERS** (§42): `SMPRules.chatChaseDue()` is asked by the
+office's chase, by the away chase, and by the line above the reply box that
+tells the office what pressing Send will do — because a screen that predicts
+and a server that decides separately is the drift `lib/rules.js` exists to
+prevent (§97.5). **IT FAILS TOWARDS SENDING**: nothing stored, a value that
+will not read as a time, a clock that disagrees — all answer yes, because one
+email too many is a nuisance and a question nobody is told about is the whole
+feature not working (§35).
+
+**AND THE REPLY THAT DOES NOT CHASE SAYS SO, AT BOTH ENDS.** The presence line
+gains a sixth state (*"…was already emailed about this conversation — this
+reply waits in the platform rather than sending a second email"*) and the
+answer carries the reason back, or a reply that quietly did not chase would
+read exactly like one that did and the office would learn the rule by being
+surprised by it (§124).
+
+**A SEND THAT FAILED BUYS NO SILENCE.** Both stamps are written only when the
+provider actually accepted the message — §188's rule on the message tag, for
+the same reason: a quiet period bought by an email nobody received is silence
+with nothing behind it.
+
+**NO BACKFILL, DELIBERATELY.** Migration 042 adds two nullable columns and
+fills nothing: NULL means "no email has gone out about this spell", which is
+exactly right for a tenant upgrading — the next message chases once and every
+one after it is quiet. Backfilling `now()` would silence conversations that are
+waiting today.
+
+**THE PAGE'S NAME WAS STALE IN THE EMAIL AND IS FIXED IN PASSING**: it read
+*"Setup › Running the cycle › Messages"*, and that page has been the **Platform
+Inbox** since §108.3/§135.11. The same sentence being made true, not a widening.
+
+**PROVED ABLE TO FAIL — 14 RED** on the build he is using, the first failure
+printing his report verbatim (*"five messages, one email — 5 emails"*).
+`scripts/test-chat-chase.js` drives the REAL handler with a mock req/res
+against a real Postgres, with a **stand-in mail service** in front of it
+(§142.6, §100.3 — `SMP_RESEND_ENDPOINT` is a deployment variable, not a branch
+in `lib/mailer.js`), so what actually left the platform is read off the wire.
+27 assertions; time is moved in the database rather than waited for, because a
+check that slept through an hour would never be run.
+
+**AND THE CHECK CAUGHT A DEFECT IN THIS CHANGE ITSELF**: the reply path selects
+`here_at` and I read `chased_them_at` off that same row, which is `undefined`
+for a column nobody asked for — so the away half was still emailing per reply
+while the office half was fixed. Three assertions red, and no amount of reading
+the diff would have said so.
+
+**AND IT CAUGHT §105.6 A SECOND TIME**: the parity run (build from stashed
+sources, compare, restore) leaves `src/strategy-management-platform.html`
+holding the PREVIOUS build, and the new client assertion duly failed against
+bytes that never carried the change. *A fix tested against the wrong bytes
+looks exactly like a fix that does not work.*
+
+**RECORDED, NOT DONE.** The quiet period is a stored setting (`chatCfg().quiet`,
+clamped 5–1440, default 60) and **no control draws it yet** — a settings row is
+a UI change, and rule 1c is mockup-first. The mockup is
+`design-mockups/chat-quiet-row/2026-09-03_email-again-after.html`, drawn out of
+the running panel with one row added under *Away email* (the two rows it
+governs) and above *Reply checks*; `chatSet()` already takes a number's type
+from its default (§104.7), so the row is wiring and nothing else the day it is
+approved. **And a same-conversation collision is unchanged**: two people in the
+office replying at once still both chase, because the memory is per
+conversation and not per sender.

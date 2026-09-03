@@ -307,8 +307,16 @@
    §257's Y/N target, §258's save-safety banners and §259's blue dividers — and
    was serving "smp-shell-v4.37-blue-dividers" when this merge was made, so the
    name goes past it rather than beside it (§94.12), confirmed again
-   immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.40-reload-saves-first";
+   immediately before the push (§94.16).
+
+   §261: one chase per conversation, not one per message — the platform stops
+   emailing per message about a conversation already waiting, and what does go
+   out carries the whole of what is unanswered. The built file's bytes changed
+   (the presence line above the reply box gained a state, and lib/rules.js is
+   inlined), which is the whole trigger (§91). Name read off origin/main when
+   this was written and to be confirmed again immediately before the push
+   (§94.12, §94.16). */
+const SHELL = "smp-shell-v4.41-one-chase-per-conversation";
 const ASSETS = [
   "/",
   "/index.html",

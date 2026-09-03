@@ -84,6 +84,10 @@ BOXQUEUE = [{"person_key": "hend", "person_name": "Hend Farouk", "live_name": "H
              "unread": 1, "last_body": BOXMSGS[-1]["body"],
              "last_from_office": BOXMSGS[-1]["from_office"],
              "last_by": BOXMSGS[-1]["by_name"], "flagged": 0}]
+# WHAT THE THREAD ANSWER SAYS BEYOND THE DEFAULTS ABOVE (§261). Set by the
+# check between drives, so the line above the reply box can be measured in each
+# of the states the server can actually put it in.
+THREAD = {}
 errs, bad = [], 0
 
 
@@ -190,12 +194,18 @@ class H(http.server.BaseHTTPRequestHandler):
                 "application/json")
             return
         if body.get("action") == "thread":
-            self._send(200, json.dumps({
+            # §261: THE PRESENCE LINE'S OWN STATES ARE SET FROM HERE. What the
+            # office is told before pressing Send depends on facts only the
+            # server has (an address, whether mail is on, when they were last
+            # chased), so the stub has to be able to hold each of them — a
+            # stand-in that models less than the thing it stands in for
+            # reports a working build as broken (§231.5, §100.3).
+            self._send(200, json.dumps(dict({
                 "ok": True, "person": "hend", "name": "Hend Farouk", "gone": False,
                 "unit": "mobile", "fn": None, "title": "Head of Mobile",
                 "address": None, "waiting": True, "here": False, "hereAt": None,
                 "mail": False, "chatOn": CHAT["cfg"].get("on", True),
-                "messages": BOXMSGS}).encode(), "application/json")
+                "messages": BOXMSGS}, **THREAD)).encode(), "application/json")
             return
         if body.get("action") == "mine":
             CHAT["polls"] += 1
@@ -1621,6 +1631,59 @@ with sync_playwright() as p:
         row1.click(); pg.wait_for_timeout(900)
         ck("...and so does opening a conversation",
            pg.query_selector("#chnewwho") is None)
+
+    # ── 20 · ONE CHASE PER CONVERSATION, SAID BEFORE SEND (§261) ─────────
+    # Islam: "when I don't reply it send an email for each message ... it needs
+    # to compile some messages rather than an email for each message." The
+    # server half is scripts/test-chat-chase.js, against a real Postgres; what
+    # is measured HERE is the one thing the server cannot say — that the office
+    # is shown the rule before pressing Send, rather than discovering it
+    # afterwards from a reply that quietly did not chase (§97.5, §124).
+    #
+    # BOTH ENDS, OR NEITHER MEANS ANYTHING (§113.8). A build that always says
+    # "this will also go to …" and a build that always says "already emailed"
+    # each pass one of these two and fail the other; the pair is the assertion.
+    print("\n20 · one chase per conversation")
+
+    def presence(over):
+        THREAD.clear(); THREAD.update(over)
+        pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+        pg.goto(URL, wait_until="networkidle"); pg.wait_for_timeout(1000)
+        pg.click('[data-md="setup"]'); pg.wait_for_timeout(700)
+        pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(1500)
+        row = pg.query_selector("[data-chpick]")
+        if row:
+            row.click(); pg.wait_for_timeout(1200)
+        el = pg.query_selector(".chpres")
+        return (el.inner_text() if el else "")
+
+    away = {"address": "hend@example.com", "mail": True, "here": False,
+            "hereAt": "2026-08-25T07:00:00Z", "chasedThemAt": None}
+    said = presence(away)
+    ck("away and not yet chased — the office is told it will email",
+       "hend@example.com" in said and "already emailed" not in said, said)
+
+    # CHASED A MOMENT AGO. The time is made here rather than taken from the
+    # demo, because no conversation in the worked example has ever been chased
+    # — the state this exists for cannot occur by walking the product (§94.2).
+    import datetime
+    recent = (datetime.datetime.now(datetime.timezone.utc)
+              - datetime.timedelta(minutes=5)).isoformat()
+    said = presence(dict(away, chasedThemAt=recent))
+    ck("...and once chased, that a second email is not sent",
+       "already emailed" in said, said)
+    ck("...without claiming the reply itself goes nowhere",
+       "waits in the platform" in said, said)
+
+    # AND THE QUIET PERIOD IS THE SETTING, NOT A NUMBER IN THE PAGE: the same
+    # chase, long enough ago, chases again. Asked of the shared rule by the
+    # page — so this fails on a build that hard-codes an hour anywhere.
+    old = (datetime.datetime.now(datetime.timezone.utc)
+           - datetime.timedelta(hours=3)).isoformat()
+    said = presence(dict(away, chasedThemAt=old))
+    ck("...and a chase old enough to have expired emails again",
+       "hend@example.com" in said and "already emailed" not in said, said)
+    THREAD.clear()
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

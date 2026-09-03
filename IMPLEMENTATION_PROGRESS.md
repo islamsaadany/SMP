@@ -6,6 +6,12 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
+**On the branch, not merged:** **§261 — one chase per conversation, not one per
+message.** The platform stops emailing per message about a conversation already
+waiting on you, and what does go out carries everything still unanswered; the
+same rule runs the away chase going the other way. Migration 042, no backfill.
+Awaiting a word before it goes to `main`.
+
 **Latest version:** §258 on `main` and live (the save-safety banners), on top
 of §257 (a target that is a yes or a no) and the whole deck round — all from
 other sessions. **§259 (the group's mark and the deck's four blue section
@@ -29,6 +35,8 @@ Nothing proceeds past this line without an answer.
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
+
+| **D10** | **The *Email again after* row on chat settings** (mockup: `design-mockups/chat-quiet-row/2026-09-03_email-again-after.html`). | §261's behaviour ships either way, fixed at 60 minutes. The row is only what makes the number yours; rule 1c is mockup-first, so nothing is drawn until the word. | §261 |
 
 **Answered:**
 

@@ -1651,20 +1651,6 @@ var CHAT = (function(){
       return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
         " is away, and no mail is configured on this deployment — this waits in the platform.</div>";
     }
-    /* THE SIXTH STATE (§261). They are away, there is an address and mail is
-       on — and an email about this conversation has already gone out and has
-       not been answered by them opening the platform, so this reply adds
-       nothing a second email would carry. Said here rather than discovered
-       afterwards: the server applies this same rule when Send lands, and a
-       reply that quietly did not chase reads exactly like one that did.
-
-       ASKED OF THE SHARED RULE, never re-derived from the timestamp — the
-       whole point of the line is that it says what the server will do. */
-    if (!SMPRules.chatChaseDue(d.chasedThemAt, Date.now(), chatCfg().quiet)) {
-      return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
-        " is away and was already emailed about this conversation — this reply waits " +
-        "in the platform rather than sending a second email.</div>";
-    }
     return '<div class="chpres away">' + ICON_CLOCK + " " + esc2(name) + " was last here " +
       esc2(d.hereAt ? ago(d.hereAt) : "a while ago") +
       " — this will also go to " + esc2(d.address) + ".</div>";

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""§257 — A SUMMARY IS MADE OF THE NUMBER IT SUMMARISES.
+"""§264 — A SUMMARY IS MADE OF THE NUMBER IT SUMMARISES.
 
 Islam, from his own Performance page: *"the key measure performance has a
 highest and lowest that doesn't match the measure progress."* His row read a

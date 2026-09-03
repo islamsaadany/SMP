@@ -6,9 +6,11 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §256 on `main` (§253–§256: the deck round, a reported note,
-and a slide the office does not present — §255 and §256 from another session);
-§254.7–.12 on this branch, going to `main` with this merge.
+**Latest version:** §258 on `main` and live (the save-safety banners), on top
+of §257 (a target that is a yes or a no) and the whole deck round — all from
+other sessions. **§259 (the group's mark and the deck's four blue section
+dividers) is merging from `claude/deck-separators-brand`,** renumbered from
+§257 because main took that number while it was being built.
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -79,6 +81,106 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
+
+Islam, using the reporting page: *"in the reporting on saving the draft keep
+the submit to smo button there as it's posible to save the draft and if it's
+complete we can submit directly rather than reopen to submit."* Drawn in the
+real bar first and published as an artifact (rule 1c); he picked **C**, the
+variation that also gives Reopen back its quiet voice.
+
+**Built:**
+
+- **Submit stays on the bar while a draft is saved.** §220 built it as one
+  either/or — `subd || parked` drew the state word and Reopen, everything else
+  drew Submit — so the control disappeared at the moment somebody looks for it
+  and sending a finished draft took three presses.
+- **The report itself is unchanged and still locked** until Reopen. Measured
+  on the built file: `editable 0 of 25` before and after.
+- **One Submit button, written out once** (§53.5): §221's gate cannot differ
+  between the open bar and the parked one, and the check asserts the pair —
+  the button is back AND it is still shut while figures or plan items are owed.
+- **Reopen drops its box** where Submit is beside it, taking the quiet orange
+  type Save draft wears while the report is open. One declaration, two
+  selectors; the class stays `rc-reopen` so one handler answers for both states.
+
+**Cost, stated before he chose:** the bar rides the tab row, so it goes
+494 → 659px (against 577px for the open bar). Nothing moves at 1440 or 1280;
+below about 1000px the draft bar becomes the widest state of the page where
+today it is the narrowest. Asserted at 1500 and 1280 rather than remembered.
+
+**Checked:** `submit-gate.py` all green and **11 red** on the shipped
+pre-§263 build — its first falsification run *died rather than reporting*
+(§215), so every press in the new section degrades now. One assertion reversed
+and rewritten rather than deleted (§218). `perf-line`, `table-fit` green;
+`test-authorize` 491/0, `test-graph-diff` 126/0 (nothing server-side moved).
+`report-saves.py` is red on the untouched build for the stub-without-a-worker
+fault §250.2 records — reproduced before this change and not touched by it.
+
+**Merged to `main`** on Islam's word, 2026-09-03.
+
+
+### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
+
+Islam, in one message: *"where can I upload the raya trade mark so it can be
+used? then work on separators let's make teh serparators blue background like
+the client brand colors"* — then four sections by number. Both halves were
+drawn in the real deck and published as one artifact before a source was
+touched (rule 1c); two of his four answers are choices between treatments that
+only existed because they were drawn.
+
+**Built:**
+
+- **Four dividers on `--panel`** — Foundation (new), SWOT (recoloured),
+  Strategic pillars (new), Overall performance (new). The blue is the token
+  Setup › Branding's *Navigation bar* control sets, so a divider follows a
+  tenant who rebrands; the check proves it by rebranding one mid-run rather
+  than by naming a hex.
+- **The SWOT divider's four hues become one rule** — measured, not preferred:
+  2.55 / 2.26 / 3.49 against the blue, and *Opportunities* was `--panel` on
+  `--panel`. The four category slides keep their colours.
+- **No footer mark on a divider**, his word — and it removes a real fault, the
+  plate that keeps a navy lockup readable being switched on by the page being
+  dark, which a blue divider on a light page is not.
+- **The pillars roll-call stays white** (his, reversing my recommendation) and
+  **the closing divider carries no numbers** (his, agreeing with it).
+- **A group mark on Setup › Branding** — one upload, the same intake as a
+  unit's, `deckMark()` the one reader, no migration, the key deleted on Remove,
+  classified `setup` and named so a refusal says Branding. A supporting
+  function's deck wears a mark for the first time.
+- The knowledge base's branding answer, wrong since the page was written.
+
+**Verified:** `checks/deck-dividers.py` 22 red on the previous build and green
+after (every probe degrades — its first two runs there died rather than
+reporting); `test-authorize.js` 489/0 with the new rule falsified; full `qa.py`
+sweep ERRORS none; nine neighbouring deck checks green.
+
+**Waiting on Islam:** the Raya Trade PNG is rendered and in the repo at
+`clients/raya-trade/brand/raya-trade-group-mark.png` — he uploads it on
+Setup › Branding once this is merged. Whether the deck cover, Thank you and the
+four per-pillar covers should also go blue is asked and deliberately not done.
+### §252.2 — the plan download, in the menu and the office's (2026-09-02, same branch)
+
+Islam, in the same breath as the merge: *"the ppt download leave it as an
+option in the drop down for the smo only."*
+
+§145.9 hid the pane-corner button for everyone in August and kept the machinery,
+saying giving it back was one line. It comes back **somewhere else**: an entry
+in the **Presentation** menu, beside *Present* and *Manage slides* — three
+deck-shaped things in one place, rather than a fourth control in a pane corner
+that already holds the pen, the arrows and the fill button.
+
+**For the office alone**, which reverses §117's audience (the office plus a
+unit's owner and custodian and a function's head) at his instruction, and is
+recorded as a reversal rather than written over. Reordering is untouched — still
+the custodian's and the owner's (§101). The corner button, its page map and the
+`editBar` term are **deleted rather than left returning ""** (§24).
+
+Green: `strategy-split` ALL OK (rewritten around the new placement, both ends
+per person), `test-authorize` 474/0 with the three reversed assertions
+**rewritten, not deleted** (§218), `deck-outcome` 0 failed, `plan-fields`,
+`perf-line`, and the full `qa.py` sweep.
 
 ### §254.7–.12 — the deck round, finished (2026-09-02, same branch)
 

@@ -345,14 +345,26 @@ var SYNC = (function () {
     el.hidden = false;
   }
 
-  /* WHY IT DID NOT GO, in the words that name where to look. The status is
-     shown deliberately: a number is not jargon to the one person who can act
-     on it, and without it every failure reads the same. */
-  function showFailed(why) {
-    notSaved("<span><strong>Not saved.</strong> " + esc(why) + "</span>" +
-      "<span>Your change is still on screen and the platform keeps trying. " +
-      "If it does not clear, reload before typing anything else \u2014 what is " +
-      "on screen has not reached the database.</span>");
+  /* WHY IT DID NOT GO, IN THE USER'S WORDS (§258.3, reversing §171's
+     visible status). Islam, on the mockup: *"the http 500 is too technical
+     for a user."* §230.2's rule, one banner over. The two errands §123 named
+     are still two sentences — the SERVER could not take it, or the tab cannot
+     REACH the server — and the number that sends an operator somewhere is
+     kept on the hover of the bold word rather than in the sentence (§127:
+     information belongs on a hover, never as a paragraph). The advice is the
+     TRUE one: this tab retries by itself every five seconds (§160.4), so the
+     useful instruction is to keep it open, never to reload — a reload while
+     the server is down is what would lose the change on screen. */
+  function showFailed(kind, detail) {
+    var first = kind === "network"
+      ? "The platform cannot reach the server \u2014 check your internet connection."
+      : "The server could not take your change just now.";
+    /* The trailing space is load-bearing: the two spans are inline and ran
+       together as "just now.Keep" without it — §171's own bar had "500.Your". */
+    notSaved("<span><strong title=\"" + esc(detail || "") + "\">Not saved.</strong> " + first + " </span>" +
+      "<span>Keep this tab open \u2014 it tries again by itself every few seconds, and " +
+      "this bar clears the moment your change goes through. If it stays for more " +
+      "than a minute, tell the Strategy Office.</span>");
   }
 
   function showDemoBlocked() {
@@ -652,7 +664,7 @@ var SYNC = (function () {
       }
       else {
         say("failed");
-        showFailed("The server answered HTTP " + r.status + ".");
+        showFailed("server", "The server answered HTTP " + r.status + ".");
         console.warn("SMP: save failed (HTTP " + r.status + ")");
       }
     }).catch(function (e) {
@@ -660,7 +672,7 @@ var SYNC = (function () {
       say("failed");
       /* A fetch that rejects is the network, not the server — a different
          errand, so a different sentence. */
-      showFailed("The platform could not reach the server (" +
+      showFailed("network", "The platform could not reach the server (" +
                  (e && e.message ? e.message : "no answer") + ").");
       console.warn("SMP: save failed (" + (e && e.message) + ")");
     });

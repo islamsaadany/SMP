@@ -277,7 +277,12 @@ function unitSuggestions(){
     if (!x || seen[x] || x.indexOf(",") > -1) return;
     seen[x] = 1; out.push(x);
   }
-  ["%", "EGP", "M EGP", "B EGP", "days", "#"].forEach(add);
+  /* §251: `Y/N` is offered here too, or a plan authored on the platform and
+     downloaded would come back with every yes/no target unrecognised — the
+     upload AUTHORS the plan (§22), so a unit the template cannot say is a
+     unit the round trip destroys. It is written into the Target cell whole,
+     exactly as `6.2B EGP` is; there is no separate column for a unit. */
+  ["%", "EGP", "M EGP", "B EGP", "days", "#", "Y/N"].forEach(add);
   UNIT_KEYS.forEach(function(k){
     var u = UNITS[k];
     (u.keyObjectives || []).forEach(function(m){ add(splitTarget(m.target).unit); });

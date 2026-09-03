@@ -384,6 +384,19 @@ var RECIPES = [
 ]},
 
 { g: "Strategy Office questions", items: [
+  { id: "history-put-back", q: "Who changed this, and can I put it back?", who: "office",
+    a: "Open Setup and select History. Every change that reached the server is " +
+       "listed: who made it, when, on which unit or function, which row and field, " +
+       "and the value before and after. Filter by person, place, kind or day, or " +
+       "type a name or a row into the search. Select Restore on a line to put the " +
+       "old value back \u2014 it is saved as an ordinary change, so it is authorised, " +
+       "merged with everyone else's work and logged like any other, and can itself " +
+       "be put back. A submitted report is reopened from its Reporting tab and a " +
+       "removed row from the plan archive, so those lines show Restore greyed with " +
+       "the reason. A unit head sees their own unit's history through the line " +
+       "under the plan's heading. Work that never reached the server leaves no line " +
+       "here \u2014 the amber and red bars at the top of the page are what stand in " +
+       "front of that." },
   { id: "add-person", q: "How do I add somebody to the register?", who: "office",
     a: "Go to Setup › People and add them to the register. Make sure to include an " +
        "employee number or email as a unique identifier, since more than one " +
@@ -399,9 +412,14 @@ var RECIPES = [
        "figures and clears the reporting fields, so each unit is asked again " +
        "rather than inheriting the last set of answers." },
   { id: "branding", q: "How do I set the colours and the logo?", who: "office",
-    a: "Go to Setup › Branding to set the platform colours and logo. Logos should " +
-       "be uploaded in PNG format; SVG files aren't supported for security " +
-       "reasons." },
+    a: "Go to Setup › Branding for both. The two colours are the accent and the " +
+       "navigation bar, and everything else is worked out from them.|The group's " +
+       "mark sits above them: it is shown on any review deck whose subject has no " +
+       "mark of its own — a business unit that has not uploaded one, and every " +
+       "supporting function, which never has one.|A business unit's own mark is " +
+       "uploaded separately, on Setup › Business units.|Marks must be PNG with a " +
+       "transparent background. SVG is not accepted, for security reasons, and a " +
+       "mark with white behind it paints a box around itself on a dark slide." },
   { id: "focus-switch", q: "How do I turn focus measures off?", who: "office",
     a: "Go to Setup › Focus measures and use the control in the page header to " +
        "turn them off. This hides focus measures across the platform without " +

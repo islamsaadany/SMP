@@ -23,6 +23,45 @@ function dBand(v){ return band(v); }
    `where` is "after" unless it says otherwise. The Thank-you slide is the one
    that says otherwise: "the end" means the last thing anybody looks at, and
    that is not after the thanks. */
+/* ── A SECTION DIVIDER WEARS THE TENANT'S OWN BLUE (§259.1) ───────────
+   Islam: *"let's make the separators blue background like the client brand
+   colors"*, naming four sections — the foundation, the SWOT that already had
+   a divider, the strategic pillars, and a final overall performance before
+   the closing readings.
+
+   `--panel` IS THE BLUE, AND IT IS NOT A CHOICE OF MINE. It is the token
+   Setup › Branding's *Navigation bar* control sets, so a divider wears
+   whatever blue the tenant picked for their own bar and changes the day they
+   change it (§41.10: a surface on `--panel` wears the tenant's brand). No new
+   token, no literal (§25).
+
+   THE THREE INKS ALREADY EXISTED for exactly this ground, because §38.5 says
+   a surface with its own background needs its own ink: `--panel-ink` for the
+   title, `--panel-quiet` for the sub-line and labels, `--panel-accent` for the
+   rule and the SECTION key. Measured on the shipped blue: 12.77 / 7.24 /
+   7.66:1.
+
+   NO FOOTER MARK ON A DIVIDER, at Islam's word (*"remove the logo footer from
+   the blue pages"*), and it takes a real problem with it: the white plate that
+   makes a navy lockup readable on a dark slide is switched on by the PAGE
+   being dark (§52), which a blue divider on a light page is not — so the mark
+   would have vanished into its own ground. `deckFootMarks()` skips `.d-sect`,
+   which is one test rather than an unconditional plate and a white rectangle
+   in the corner of every divider. */
+function sectSlide(key, label, title, sub, cells){
+  return '<section class="dslide d-cover d-sect"' + anch(key, label) + '>' +
+    '<span class="seclab">Section</span>' +
+    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">' + esc(sub) + '</p>' +
+    (cells && cells.length
+      ? '<div class="secgrid c' + cells.length + '">' + cells.map(function(c){
+          return '<div class="seccell"><b>' + esc(c[0]) + '</b><span>' +
+            esc(c[1]) + '</span></div>';
+        }).join("") + '</div>'
+      : '') +
+    '</section>';
+}
+
 function anch(key, label, where){
   return ' data-anchor="' + esc(key) + '" data-anchor-label="' + esc(label) + '"' +
     (where ? ' data-anchor-where="' + esc(where) + '"' : '');
@@ -117,8 +156,8 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
-    (unitLogo(u)
-        ? '<img class="dcovermark" src="' + esc(unitLogo(u)) + '" alt="' + esc(u.name) + '">'
+    (deckMark(u)
+        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
@@ -173,6 +212,21 @@ function deckSlides(u){
       (fnAim ? '' : '<td class="num big3">' +
         (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') + '</tr>';
   }).join("");
+  /* THE DIVIDER IS DRAWN ONLY IF THE SECTION IS (§253). It opens the aim
+     slide and the objectives reading, so its test is the aim slide's own —
+     a divider standing over nothing is the blank page that section removed,
+     with a heading on it.
+
+     THE HORIZON CELL IS A UNIT'S. A supporting function's objectives carry a
+     weight and no 3-year target (§243), so on a function the divider names
+     one thing rather than printing a horizon that appears nowhere after it. */
+  var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
+  if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
+  if (aimRows || !fnAim)
+    S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
+      "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
+      foundCells));
+
   if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
     (fnAim ? '' :
@@ -305,14 +359,19 @@ function deckSlides(u){
   if (!u.fnKey) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
-    S.push('<section class="dslide d-cover"' + anch("swothead", "After the SWOT title page") +
-      '><span class="seclab">Section</span>' +
-      '<h1 class="cover">SWOT</h1><div class="coverrule"></div>' +
-      '<p class="coversub">Where this unit is strong, exposed, and what the market is offering it.</p>' +
-      '<div class="secgrid">' + sw.map(function(x){
-        return '<div class="seccell t-' + x[2] + '"><b>' + (u.swot[x[0]] || []).length + '</b>' +
-          '<span>' + x[1] + '</span></div>';
-      }).join("") + '</div></section>');
+    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
+       measurement rather than taste. On the blue the four scoring colours
+       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
+       Opportunities, which was drawn in `--panel` itself and would be
+       invisible against its own ground. Keeping them would mean inventing
+       four colours for one slide; the words under the counts already say
+       which is which, and the four category slides that follow keep their
+       own hues untouched. `.seccell.t-*` had no other user and is deleted
+       with them (§24). It is also what §254.5 settled for the pillar cards:
+       one accent across a row, never one per card (§41's budget). */
+    S.push(sectSlide("swothead", "After the SWOT title page", "SWOT",
+      "Where this unit is strong, exposed, and what the market is offering it.",
+      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
         return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
@@ -352,6 +411,18 @@ function deckSlides(u){
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
       (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') + '</div>';
   }).join("");
+  /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
+     B, chosen from two drawn in the real deck: *"the pillars page stay the
+     same white background as is just the divider with the strategic pillars
+     title."* The cost he took with it is one slide per deck; what it buys is
+     that all four sections are announced the same way, and that the roll-call
+     goes on reading as the content slide it is. */
+  if (u.items.length)
+    S.push(sectSlide("spillars", "After the Strategic pillars divider",
+      "Strategic " + L("pillar","bu").toLowerCase(),
+      "The " + u.items.length + " " + L("pillar","bu").toLowerCase() +
+        " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
+
   if (u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu").toLowerCase() + " names") +
     '><h2>' + L("pillar","bu") + '</h2>' +
@@ -461,7 +532,7 @@ function deckSlides(u){
           '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
       /* What this row is measured against RIGHT NOW: an outcome answers with
          its own target, prorated where it compiles by Sum; everything else
-         with the share of its plan that is due (\u00a7239). One function, so the
+         with the share of its plan that is due (§239). One function, so the
          slide and the page cannot differ about it. */
       var bench = tacticBenchmark(t);
       if (!tacticAnswered(t))
@@ -526,6 +597,18 @@ function deckSlides(u){
      sits against *"where the units stands to be the last slide"*: both cannot
      be true at once, and this is the one he answered most recently and most
      specifically. Swapping the two is one line if he wants it back. */
+  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§259.1), and it carries
+     NO NUMBERS — Islam's B, from two drawn in the real deck. A prints the
+     three headline readings two slides before the slide whose whole job is
+     those three readings, and prints them without their bands or the change
+     on last cycle: the room reads them once flat and once properly and
+     cannot tell which is the real one (§87's twins, in figures). The stand
+     slide always draws, so there is always something behind this. */
+  S.push(sectSlide("sperf", "After the Overall performance divider",
+    "Overall performance",
+    "Where the " + L("pillar","bu").toLowerCase() + " stand, where " +
+      (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
+    null));
   if (u.items.length) S.push(pillarScoreSlide);
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
@@ -595,7 +678,9 @@ function deckSlidesFn(fk){
   var S = [];
 
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
-    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
+    (groupLogo()
+        ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Capability review &middot; ' + esc(REVIEW.name) +
     ' &middot; ' + caps.length + (caps.length === 1 ? ' capability' : ' capabilities') + '</p></section>');
@@ -848,7 +933,7 @@ function deckHidePass(deck, target){
    and BEFORE deckFitPass(), so a slide it splits carries the footer into
    every continuation. */
 function deckFootMarks(deck, u){
-  var src = unitLogo(u);
+  var src = deckMark(u);
   if (!src) return;
   [].forEach.call(deck.querySelectorAll(".dslide"), function(s){
     s.classList.add("hasmark");
@@ -858,6 +943,12 @@ function deckFootMarks(deck, u){
        too, and so does Thank you. Asking whether the mark is already on
        the slide cannot make that mistake. */
     if (s.querySelector(".dcovermark")) return;
+    /* AND NOT ON A SECTION DIVIDER (§259.1). Islam: *"remove the logo footer
+       from the blue pages."* It also removes a fault rather than dressing
+       one: the plate that keeps a navy lockup readable on a dark slide is
+       switched on by the PAGE being dark, which a blue divider on a light
+       page is not — so the mark would have sat navy on navy. */
+    if (s.classList.contains("d-sect")) return;
     s.insertAdjacentHTML("beforeend",
       '<div class="dfoot"><img class="dfootmark" src="' + esc(src) + '" alt=""></div>');
   });
@@ -868,9 +959,11 @@ function openDeckWith(titleHtml, slides, target){
   root.querySelector(".deck").innerHTML = slides;
   if (target) insertPictureSlides(root.querySelector(".deck"), target);
   if (target) deckHidePass(root.querySelector(".deck"), target);
-  if (target && target.indexOf("fn:") !== 0 && UNITS[target]) {
-    deckFootMarks(root.querySelector(".deck"), UNITS[target]);
-  }
+  /* EVERY deck, not only a unit's (§259). `deckMark()` answers with the
+     subject's own mark or the group's, and a supporting function is not in
+     UNITS — so passing null here is not a miss, it is the case that used to
+     go unmarked and now wears the group's. */
+  deckFootMarks(root.querySelector(".deck"), UNITS[target] || null);
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");

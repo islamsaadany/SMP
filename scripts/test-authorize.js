@@ -100,6 +100,29 @@ refuses(headKey, function (s) { s.group.branding = { accent: "#123456" }; },
   "a unit head cannot change the tenant's branding");
 allows("smo", function (s) { s.group.branding = { accent: "#123456" }; },
   "the SMO can");
+/* The group's mark (§259). Named rather than left to the unknown bucket for
+   the same reason `comms` is — it is refused for everybody but the SMO either
+   way, and what this pins is that the refusal says Setup, so somebody sent
+   back by it knows to open Branding (§16.7). */
+refuses(headKey, function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "a unit head cannot set the group's mark");
+allows("smo", function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "the SMO can");
+(function () {
+  /* THE SEED CARRIES NO MARK, so `delete incoming.group.logo` is a no-op and
+     an assertion built that way passes on every build (§94.5, its own
+     example). Both graphs are built: the STORED one holds a mark and the
+     incoming one does not, which is the clear somebody presses. */
+  const st = clone(SEED); st.group.logo = "data:image/png;base64,AAAA";
+  const inc = clone(st); delete inc.group.logo;
+  const v = A.authorize(st, inc, personOf(SEED, "smo"));
+  check("the SMO can CLEAR the mark — a removal is the same act as a set",
+        v.ok && v.changes.some(function (c) { return c.kind === "setup"; }),
+        v.refusals.join(" / ") + " / changes: " +
+        JSON.stringify(v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  const v2 = A.authorize(st, inc, personOf(SEED, headKey));
+  check("and a unit head cannot", !v2.ok);
+})();
 /* Communication (§72). The same shape as branding, and asserted rather than
    left to the unknown bucket: an unclassified change IS refused for everybody
    but the SMO, so this passes either way — what it pins is that the refusal
@@ -1209,14 +1232,26 @@ console.log("\n15 · the strategy | reporting split (§117)");
   /* The download is a pure rule with no server half — asserted here so the
      one definition is proven where every other rule is (§117). */
   const wSeed = R.worldOf(SEED);
-  check("download: the unit's custodian may", R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === true);
-  check("download: the unit's owner may", R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === true);
+  /* §252.2 REVERSES §117's AUDIENCE at Islam's instruction — "for the smo
+     only" — so these three assertions are REWRITTEN rather than deleted
+     (§218): a build that quietly handed the file back to the roles that HOLD
+     the thing would otherwise pass through a gap where a test used to be. */
   check("download: the office may", R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), UNIT) === true);
+  check("download: the unit's custodian may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === false);
+  check("download: the unit's owner may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === false);
   if (fnCust) {
     const fnHead = (SEED.functions[FN] || {}).head;
-    check("download: a function's head may, for their function",
-          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === true);
+    check("download: a function's head may NOT, for their own function (§252.2)",
+          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === false);
+    check("download: the office may, for that same function",
+          R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), "fn:" + FN) === true);
   }
+  /* And arranging is untouched by the narrowing — the two questions stopped
+     sharing an answer, so the one that stayed open is asserted beside it. */
+  check("arrange: the unit's custodian still may (§101, unchanged)",
+        R.mayArrange(wSeed, personOf(SEED, custKey), UNIT) === true);
   const nobody = { key: "smp_test_nobody", unit: UNIT };
   check("download: somebody holding nothing may not",
         R.mayDownloadPlan(wSeed, nobody, UNIT) === false);
@@ -2806,6 +2841,43 @@ console.log("\n27 · which slides a review shows is the office's (§256)");
   r = fromStored(lock, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
   check("§256: a locked cycle does not stop the office pruning the deck",
         r.ok, (r.refusals || []).join(" / "));
+})();
+
+/* ── 28 · THE ORDER OF THE NAVIGATION IS THE OFFICE'S (§261) ──────────
+   Setup gained a way to drag the units and the functions into the order they
+   appear in. NOTHING NEW IS STORED — the order IS `unitKeys` / `functionKeys`,
+   which the server has classified as `setup` since it classified anything —
+   so this asserts that what was already true is still true, at BOTH ENDS
+   (§94.2): a build that let anybody reorder them would rewrite the navigation
+   for the whole tenant from a page they can open. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const swap = function (arr) {
+    const a = arr.slice(); const x = a.shift(); a.push(x); return a;
+  };
+  let r = fromStored(SEED, "smo", function (i) { i.unitKeys = swap(i.unitKeys); });
+  check("§261: the office may reorder the business units", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, "smo", function (i) { i.functionKeys = swap(i.functionKeys); });
+  check("§261: and the supporting functions", r.ok, (r.refusals || []).join(" / "));
+
+  /* THE OTHER END, and it is the one that matters: a unit head holds a page
+     of their own and none of Setup. */
+  const headKey = (SEED.unitRoles[UNIT] || {}).head;
+  if (!headKey) {
+    check("§261: the seed has a unit head to ask", false, "none");
+  } else {
+    r = fromStored(SEED, headKey, function (i) { i.unitKeys = swap(i.unitKeys); });
+    check("§261: a unit head may NOT reorder them", !r.ok,
+          r.ok ? "accepted" : "refused");
+    /* AND THE REFUSAL NAMES THE LIST, not "something changed" — §16.7's rule
+       that a refusal has to send somebody to a screen. */
+    check("§261: ...and the refusal names the list",
+          !r.ok && (r.refusals || []).join(" ").indexOf("business units") > -1,
+          (r.refusals || []).join(" / "));
+  }
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

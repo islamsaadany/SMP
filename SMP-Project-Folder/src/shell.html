@@ -503,6 +503,15 @@
       { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", glyph:"⌂", find:"waiting attention outstanding needs me summary home todo", primary:true,
         when: inOffice,                                                 render:renderOverview },
       { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
+      /* §261, Islam's #3: *"keep but we need a way to clear the storage not to
+         be overwhelmed by uploaded videos."* Its own entry rather than a third
+         section of Import & archives, which is about PLANS — and in *Running
+         the cycle* because clearing clips is cycle hygiene, done between
+         reviews. `when: inOffice()` rather than a matrix key of its own (§97's
+         shape): who may look at what every unit uploaded is not a tick
+         somebody could set on a bad afternoon, and DELETING is narrower still
+         (mayDestroy, asked again on the server). */
+      { k:"videos",   ac:"c_cycle", grp:"cycle",  label:"Video storage", glyph:"▷", find:"video clips storage space delete clear presentation upload mb size", when:function(){ return inOffice(); }, render:renderVideoStore },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -6136,6 +6145,21 @@
         paint();
       });
     }
+    /* THE STORE IS ASKED ONLY ON THE PAGE THAT SHOWS IT (§261), and only over
+       a server. Gated on the page KEY rather than on markup the page happens
+       to carry — §93 and §137's fault, where a gate keyed on a selector that
+       later moved stopped matching in silence and in the safe-looking
+       direction. */
+    if (VIDSTORE === null && current === "setup" && currentSub === "videos" &&
+        typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
+      VIDSTORE = { asking:true };   /* asked, and not yet answered — which is
+                                      not the same as "there is no store" (§93) */
+      SYNC.videoList(function(err, j){
+        VIDSTORE = err ? { __error:String(err.message || err) }
+                       : { ready:!!j.ready, clips:j.clips || [] };
+        paint();
+      });
+    }
     /* The same shape and the same moment as the password states: asked once
        per visit to the page, and absent rather than empty from file:// (§56). */
     /* The same selector, and it had gone the same way (§93.2). */
@@ -7167,6 +7191,37 @@
       b.addEventListener("click", function(){
         if (restoreArchive(b.dataset.restore)) paint();
       });
+    });
+    /* ── Video storage (§261) ─────────────────────────────────────────────
+       DELETING BYTES IS THE ONE THING HERE THAT CANNOT BE UNDONE, so it is
+       asked out loud and the ask NAMES what goes (§186's rule: a confirmation
+       that does not say which line catches none of the mistakes it exists
+       for). The server asks again — `mayDestroy` draws the button, and
+       `isSuperRole` decides on the way in (§146). */
+    document.querySelectorAll("[data-viddel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var path = b.dataset.viddel;
+        var row = vidStoreRows().filter(function(r){ return r.path === path; })[0];
+        if (!row) return;
+        if (!confirm("Delete this clip for good?\n\n" +
+              (row.name || path) + " — " + vidSize(row.bytes) + ", from " + row.where +
+              "\n\nThe slide stays where it is and will say the clip was removed. " +
+              "The bytes cannot be brought back.")) return;
+        vidStoreDrop([path]);
+      });
+    });
+    document.querySelectorAll("[data-viddelold]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var old = vidStoreRows().filter(function(r){ return !r.open; });
+        if (!old.length) return;
+        if (!confirm("Delete " + plural(old.length, "clip") + " for good, freeing " +
+              vidSize(vidStoreBytes(old)) + "?\n\nNothing on the review that is open " +
+              "now is touched. The bytes cannot be brought back.")) return;
+        vidStoreDrop(old.map(function(r){ return r.path; }));
+      });
+    });
+    document.querySelectorAll("[data-vidrefresh]").forEach(function(b){
+      b.addEventListener("click", function(){ VIDSTORE = null; paint(); });
     });
     document.querySelectorAll("[data-forget]").forEach(function(b){
       b.addEventListener("click", function(){

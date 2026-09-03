@@ -107,6 +107,7 @@ function picStyle(p){
    the thing you just made is a rail that swallowed it. So the deck asks
    without the flag and the editor asks with it. */
 function pslideHtml(sl, blank){
+  if (slideIsVideo(sl)) return vslideHtml(sl, blank);
   var pics = (sl.pics || []).filter(function(p){ return p && p.src; })
                             .slice(0, PIC_PER_SLIDE);
   if (!pics.length) {
@@ -126,6 +127,65 @@ function pslideHtml(sl, blank){
   return '<section class="dslide d-pics" data-ps="' + esc(sl.id) + '">' +
     (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
     '<div class="pgrid pg' + Math.min(across, pics.length) + '">' + cells + '</div></section>';
+}
+
+/* A video slide, drawn (§261). One clip, filling the slide under the title,
+   with the caption where a picture's already sits.
+
+   IT DOES NOT AUTOPLAY, deliberately. A clip that starts the moment the deck
+   reaches the slide takes the room away from whoever is presenting, and there
+   is no way to give it back except to find the pause button in front of the
+   board. `controls` and nothing else.
+
+   A LINK WE CANNOT PLAY IS NOT DRAWN AS A BROKEN PLAYER. It gets the poster
+   and a way out to the browser — §15.1's rule, which is the whole reason the
+   paste box says so at the desk instead. */
+function vslideHtml(sl, blank){
+  var vid = vidOf(sl), how = videoPlay(vid);
+  /* A CLIP THE OFFICE CLEARED IS SAID, NEVER DRAWN AS A DEAD PLAYER (§15.1,
+     §261). The poster and the caption stay, so an archived review still shows
+     what was presented — and the slide keeps its place in the deck rather
+     than vanishing out of a record somebody may be reading. */
+  if (!how && vid && vid.cleared) {
+    return '<section class="dslide d-video" data-ps="' + esc(sl.id) + '">' +
+      (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
+      '<div class="vwrap">' +
+        (vid.poster ? '<img src="' + esc(vid.poster) + '" alt="">' : '') +
+        '<span class="vaway"><b>This video was removed to free storage</b>' +
+        '<span>' + esc(vid.cleared) + '</span></span>' +
+      '</div>' +
+      (sl.vcap ? '<figcaption>' + esc(sl.vcap) + '</figcaption>' : '') +
+      '</section>';
+  }
+  if (!how) {
+    if (!blank) return "";
+    return '<section class="dslide d-video d-blank" data-ps="' + esc(sl.id) + '">' +
+      (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
+      '<div class="blankslide"><span>This slide is empty</span>' +
+      '<em>It will not appear in the review until it has a video.</em></div></section>';
+  }
+  var body;
+  if (how.kind === "embed") {
+    /* `allowfullscreen` and nothing else: no autoplay, no camera, no
+       microphone, no payment. A frame gets the narrowest hand we can give it
+       (§43.6's argument, one element in). */
+    body = '<iframe src="' + esc(how.play) + '" title="' + esc(sl.title || "Video") +
+      '" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer" ' +
+      'sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>';
+  } else if (how.kind === "file") {
+    body = '<video src="' + esc(how.play) + '" controls preload="metadata"' +
+      (vid.poster ? ' poster="' + esc(vid.poster) + '"' : "") + '></video>';
+  } else {
+    body = (vid.poster ? '<img src="' + esc(vid.poster) + '" alt="">' : "") +
+      '<span class="vaway"><b>This video opens in a new tab</b>' +
+      '<a href="' + esc(how.url) + '" target="_blank" rel="noopener noreferrer">' +
+      'Open the video</a></span>';
+  }
+  return '<section class="dslide d-video" data-ps="' + esc(sl.id) + '">' +
+    (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
+    '<div class="vwrap">' + body + '</div>' +
+    (sl.vcap ? '<figcaption>' + esc(sl.vcap) + '</figcaption>' : '') +
+    '</section>';
 }
 
 /* ── Taking a picture in ─────────────────────────────────────────────────
@@ -184,6 +244,137 @@ function imgToCanvas(file, maxEdge, ground){
       img.src = fr.result;
     };
     fr.readAsDataURL(file);
+  });
+}
+
+/* ── A VIDEO ON A SLIDE (§261) ────────────────────────────────────────────
+   The clip is NOT in the state graph and never will be: the graph is 297KB
+   and travels to every person on every sign-in, while a two-minute clip is
+   20–40MB. What the slide keeps is a pointer, a poster frame and two numbers.
+   §50's model is otherwise untouched — same list, same anchor, same place in
+   the deck, same cycle, same permission.
+
+   `kind` DECIDES WHAT IS DRAWN, AND NOTHING IS THROWN AWAY. Switching a slide
+   to Video keeps its pictures exactly as narrowing the arrangement keeps them
+   (§50.6): changing your mind must never cost what somebody already put
+   there. Absent means pictures, so every slide already stored reads as it did
+   and nothing is migrated. */
+function slideIsVideo(sl){ return !!sl && sl.kind === "video"; }
+function vidOf(sl){ return slideIsVideo(sl) && sl.vid ? sl.vid : null; }
+
+/* The office's own hosts, from Setup › Video storage. Read through one
+   function because the deck, the paste box and the storage page must agree
+   about which links play (§53.5) — and reading NEVER creates the field
+   (§42): a reader that writes puts a phantom change into every save. */
+function videoHosts(){
+  var v = GROUP && GROUP.videoHosts;
+  return Array.isArray(v) ? v : VID_NO_HOSTS;
+}
+var VID_NO_HOSTS = Object.freeze([]);
+
+/* WHERE A CLIP IS PLAYED FROM. One of ours goes through the platform's own
+   address, which checks the session and sends the browser on to the store —
+   so no address that outlives a sign-in is ever written into a slide, and a
+   deck opened by somebody who may not see it plays nothing.
+
+   A link is resolved at the moment of drawing rather than at the moment of
+   pasting, so adding a host on the storage page makes every link already
+   pasted for that host start playing (§42). */
+function videoPlay(vid){
+  if (!vid) return null;
+  if (vid.path) return { kind:"file", play:"/api/blob?play=" + encodeURIComponent(vid.path) };
+  var r = SMPRules.videoLink(vid.url, videoHosts());
+  return r.kind ? r : null;
+}
+
+/* ── Taking a clip in ─────────────────────────────────────────────────────
+   MEASURED, NEVER TRUSTED. The ceiling is 50MB and two minutes (Islam), and
+   both are read off the file itself — the length from the browser's own
+   decoder, because a name and a size say nothing about how long something
+   runs. Refused ABOVE the ceiling with the reason said, never silently
+   re-encoded: what somebody exported on purpose is what the room sees, and
+   there is no `canvas.toDataURL` for video to re-encode it with anyway. */
+function videoMeta(file){
+  return new Promise(function(resolve, reject){
+    var url = URL.createObjectURL(file);
+    var v = document.createElement("video");
+    var done = false;
+    var give = function(err, out){
+      if (done) return;
+      done = true;
+      URL.revokeObjectURL(url);
+      err ? reject(err) : resolve(out);
+    };
+    /* A file the browser cannot decode never fires either event, and a promise
+       that never settles is a spinner nobody can explain (§231.5's hang). */
+    setTimeout(function(){ give(new Error("it could not be read")); }, 20000);
+    v.onerror = function(){ give(new Error("that is not a video this browser can play")); };
+    v.onloadeddata = function(){
+      var secs = Math.round(v.duration || 0);
+      if (!(secs > 0)) return give(new Error("its length could not be read"));
+      if (secs > SMPRules.VIDEO_MAX_SECS) {
+        return give(new Error("it runs " + vidTime(secs) + " and the limit is " +
+          vidTime(SMPRules.VIDEO_MAX_SECS)));
+      }
+      /* THE POSTER IS WHAT MAKES THE DECK SURVIVE A CLIP IT CANNOT REACH
+         (§15.1, §45.2). Grabbed here rather than asked for, and small — it is
+         the one part of a clip that DOES ride in the graph, so it is sized
+         like a thumbnail and not like a picture slide. */
+        var w = v.videoWidth || 16, h = v.videoHeight || 9;
+        var k = Math.min(1, 640 / Math.max(w, h));
+        var cv = document.createElement("canvas");
+        cv.width = Math.max(1, Math.round(w * k));
+        cv.height = Math.max(1, Math.round(h * k));
+        var cx = cv.getContext("2d");
+        cx.fillStyle = "#0D1520";
+        cx.fillRect(0, 0, cv.width, cv.height);
+        try { cx.drawImage(v, 0, 0, cv.width, cv.height); } catch (e) { /* a frame we cannot draw is not a failure — the slide has its title */ }
+        give(null, { secs:secs, bytes:file.size, name:file.name,
+                     poster:cv.toDataURL("image/jpeg", 0.7) });
+    };
+    /* A tenth of a second in: the first frame of a clip is very often black. */
+    v.onloadedmetadata = function(){ try { v.currentTime = Math.min(0.1, (v.duration || 1) / 2); } catch (e) { /* some decoders refuse to seek; loadeddata still fires */ } };
+    v.preload = "auto";
+    v.muted = true;
+    v.src = url;
+  });
+}
+
+function vidTime(secs){
+  secs = Math.max(0, Math.round(secs || 0));
+  return Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
+}
+function vidSize(bytes){
+  var mb = (bytes || 0) / 1048576;
+  return (mb >= 10 ? Math.round(mb) : Math.round(mb * 10) / 10) + "MB";
+}
+
+/* THE FILE GOES STRAIGHT PAST US. Our own endpoint checks who is asking and
+   hands back a one-shot address; the browser sends the bytes to the store
+   itself. That is not a nicety — a serverless function refuses a body over
+   4.5MB, so a 50MB clip could not reach the store by any other road. */
+function videoUpload(file, target, onProgress){
+  return videoMeta(file).then(function(meta){
+    if (file.size > SMPRules.VIDEO_MAX_BYTES) {
+      throw new Error("it is " + vidSize(file.size) + " and the limit is " +
+        vidSize(SMPRules.VIDEO_MAX_BYTES));
+    }
+    return new Promise(function(resolve, reject){
+      SYNC.videoSign({ target:target, name:file.name, bytes:file.size,
+                       type:file.type }, function(err, j){
+        if (err || !j || !j.path) {
+          return reject(new Error(err === "no server here"
+            ? "there is nowhere to put it from this copy of the platform"
+            : (err || "the store would not take it")));
+        }
+        SYNC.videoPut({ file:file, path:j.path, key:j.key, uploadId:j.uploadId,
+                        onPart:onProgress },
+          function(err2){
+            if (err2) return reject(new Error(err2));
+            resolve(Object.assign({ path:j.path }, meta));
+          });
+      });
+    });
   });
 }
 
@@ -511,7 +702,12 @@ function slidesSetHidden(anchor, on){
 }
 
 function slidesPaneHtml(cur, sl){
-  var head = SLED.err ? '<p class="picerr" role="alert">' + esc(SLED.err) + '</p>' : '';
+  /* A 50MB clip takes real seconds to leave the building, and silence while it
+     does is indistinguishable from a control that did nothing (§193). `busy`
+     survives the repaint that shows it — `slidesPaint()` clears only `err` —
+     and is cleared by whichever way the upload ends. */
+  var head = (SLED.err ? '<p class="picerr" role="alert">' + esc(SLED.err) + '</p>' : '') +
+             (SLED.busy ? '<p class="picbusy" role="status">' + esc(SLED.busy) + '</p>' : '');
   if (!sl) {
     var hid = !!(cur && cur.dataset.off);
     /* WHAT HIDING COSTS IS SAID WHERE IT IS DONE, and it is the sentence that
@@ -535,6 +731,7 @@ function slidesPaneHtml(cur, sl){
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
+  var vid = slideIsVideo(sl);
   var slots = [];
   for (var i = 0; i < across; i++) slots.push(slidesSlot(sl, pics[i], i));
   return head +
@@ -543,23 +740,114 @@ function slidesPaneHtml(cur, sl){
       '<div class="slctl-h">' +
         '<input class="fld picttl" data-picttl="' + esc(sl.id) + '" value="' + esc(sl.title || "") +
           '" placeholder="Slide title — optional" aria-label="Slide title">' +
+        /* WHAT IS ON THE SLIDE, before how much of it. The arrangement is a
+           question about pictures, so it is not asked at all on a video. */
+        '<span class="minisw" role="group" aria-label="What is on this slide">' +
+          '<button data-slkind="' + esc(sl.id) + '" data-v="pics" aria-pressed="' + (!vid) +
+            '" title="Pictures on this slide">Pictures</button>' +
+          '<button data-slkind="' + esc(sl.id) + '" data-v="video" aria-pressed="' + vid +
+            '" title="A video on this slide">Video</button>' +
+        '</span>' +
+        (vid ? '' :
         '<span class="minisw" role="group" aria-label="Pictures on the slide">' +
           [1,2,3,4].map(function(n){
             return '<button data-piclay="' + esc(sl.id) + '" data-n="' + n + '" aria-pressed="' +
               (across === n) + '" title="' + n + ' on the slide">' + n + '</button>';
-          }).join("") + '</span>' +
+          }).join("") + '</span>') +
         '<span class="slmove"><button data-slmove="-1" aria-label="Move this slide up" ' +
           'title="Move up">&#9650;</button>' +
           '<button data-slmove="1" aria-label="Move this slide down" ' +
           'title="Move down">&#9660;</button></span>' +
         '<button class="editbtn" data-picdel="' + esc(sl.id) + '">Remove slide</button>' +
       '</div>' +
+      (vid ? vslideCtl(sl) :
       '<div class="picslots">' + slots.join("") + '</div>' +
       (pics.length > across
         ? '<p class="picsub picover">' + (pics.length - across) + ' more ' +
           (pics.length - across === 1 ? "picture is" : "pictures are") +
-          ' kept but not shown at this arrangement.</p>' : '') +
+          ' kept but not shown at this arrangement.</p>' : '')) +
     '</div>';
+}
+
+/* ── The video half of the pane (§261) ───────────────────────────────────
+   TWO WAYS IN, SIDE BY SIDE AND EQUAL — Islam asked for both, and neither is
+   the fallback: a unit whose clip already sits on the company's own storage
+   should not have to download it in order to upload it again.
+
+   THE PASTE BOX ANSWERS AT THE DESK. Whether a link will play on the slide or
+   only open in a new tab is decided by where the video lives, and the one
+   moment that fact is worth anything is while somebody is still holding the
+   link — never in the meeting room (§32, §171). So the line under the box is
+   the verdict, not a description. */
+/* THE TWO WAYS IN, in ONE builder — a slide that never had a clip and one
+   whose clip the office cleared are the same question (§53.5), and writing
+   them twice is how the ceiling comes to be checked on one of them.
+
+   The ceiling counts the slide being edited OUT: a slide already holding a
+   clip that is being replaced is not a fourth video. */
+function vslideSrc(sl){
+  var others = pslidesOf(SLED.target).filter(function(s){ return s.id !== sl.id; });
+  if (!SMPRules.videoRoom(others)) {
+    return '<p class="picsub vfull">This ' + esc(deckSubjectWord(SLED.target)) +
+      ' already has ' + plural(SMPRules.VIDEO_PER_SUBJECT, "video") +
+      ' in this review, which is the limit. Remove one to add another.</p>';
+  }
+  return '<div class="vsrc">' +
+    '<label class="picdrop"><input type="file" accept="video/*" data-vidfile="' +
+      esc(sl.id) + '">' +
+      '<span class="picplus" aria-hidden="true">+</span><b>Upload a clip</b>' +
+      '<span class="picsub">Up to ' + vidSize(SMPRules.VIDEO_MAX_BYTES) + ' and ' +
+      vidTime(SMPRules.VIDEO_MAX_SECS) + '.</span></label>' +
+    '<div class="vlink"><b>Or paste a link</b>' +
+      '<input class="fld" data-vidlink="' + esc(sl.id) +
+        '" placeholder="YouTube, Vimeo, SharePoint or Google Drive address" ' +
+        'aria-label="Video address">' +
+      '<span class="picsub" data-vidsay="1">The clip stays where it is; the review ' +
+        'points at it.</span>' +
+    '</div></div>';
+}
+
+function vslideCtl(sl){
+  var vid = vidOf(sl);
+  /* Cleared: the two ways in come BACK, because putting another clip on the
+     slide is the only thing left to do here — but the fact is stated first,
+     or it reads as a slide that lost its video for no reason (§61, §124). */
+  if (vid && vid.cleared && !vid.path && !vid.url) {
+    return '<p class="picsub vwarn">This clip was removed to free storage on ' +
+      esc(vid.cleared) + '. The slide kept its title and caption.</p>' +
+      vslideSrc(sl);
+  }
+  if (!vid) return vslideSrc(sl);
+  var how = videoPlay(vid);
+  var what = vid.path
+    ? esc(vid.name || "Your clip") : esc(vid.url);
+  var facts = vid.path
+    ? [vidTime(vid.secs), vidSize(vid.bytes),
+       "uploaded by " + esc(vid.by || "—") + (vid.at ? ", " + esc(vid.at) : "")].join(" · ")
+    : (how && how.kind === "embed"
+        ? "Plays on the slide" + (how.service ? " · " + esc(how.service) : "")
+        : how && how.kind === "file" ? "Plays on the slide"
+        : "Opens in a new tab — upload the file to play it on the slide")
+      + (vid.at ? " · added " + esc(vid.at) : "");
+  return '<div class="vhas">' +
+      '<span class="vthumb">' +
+        (vid.poster ? '<img src="' + esc(vid.poster) + '" alt="">' : '') +
+        '<span class="vbadge" aria-hidden="true"></span></span>' +
+      '<span class="vmeta"><b>' + what + '</b>' +
+        '<span class="picsub">' + facts + '</span></span>' +
+      '<span class="vacts">' +
+        '<button class="editbtn" data-vidswap="' + esc(sl.id) + '">Replace</button>' +
+        '<button class="editbtn" data-viddrop="' + esc(sl.id) + '">Remove</button>' +
+      '</span>' +
+    '</div>' +
+    '<input class="fld vcap" data-vidcap="' + esc(sl.id) + '" value="' + esc(sl.vcap || "") +
+      '" placeholder="Caption — optional" aria-label="Caption">';
+}
+
+/* The subject's own word, so the ceiling reads "This business unit already
+   has…" rather than naming a key nobody uses (§93.12's vocabulary). */
+function deckSubjectWord(target){
+  return String(target || "").indexOf("fn:") === 0 ? "supporting function" : "business unit";
 }
 
 function slidesSlot(sl, p, i){
@@ -848,6 +1136,147 @@ function slidesWire(){
          one and back must return what was there (§50.6). */
       sl.layout = +b.dataset.n;
       slidesMark(); slidesPaint();
+    });
+  });
+
+  /* ── The video controls (§261) ─────────────────────────────────────────
+     THE SWITCH KEEPS BOTH SIDES. Turning a slide to Video leaves its pictures
+     where they are and turning it back gives them straight back — the same
+     rule the arrangement buttons already obey, and the reason §257.2 was
+     corrected: making somebody pay for changing their mind is a defect. */
+  root.querySelectorAll("[data-slkind]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var sl = slideOf(b, "slkind"); if (!sl) return;
+      if (b.dataset.v === "video") {
+        /* The ceiling is asked HERE rather than at the upload, so nobody
+           fills a clip in and is refused after choosing it (§221's shape:
+           say it before the press, not after). A slide that is ALREADY a
+           video is not a fourth. */
+        if (!slideIsVideo(sl) && !SMPRules.videoRoom(pslidesOf(SLED.target))) {
+          SLED.err = "This " + deckSubjectWord(SLED.target) + " already has " +
+            plural(SMPRules.VIDEO_PER_SUBJECT, "video") + " in this review, " +
+            "which is the limit. Remove one to add another.";
+          slidesPaint();
+          return;
+        }
+        sl.kind = "video";
+      } else {
+        /* Absent, never "pics" — a slide that has never been a video and one
+           switched back must be the same bytes (§50.6). */
+        delete sl.kind;
+      }
+      slidesMark(); slidesPaint();
+    });
+  });
+
+  root.querySelectorAll("[data-vidfile]").forEach(function(f){
+    f.addEventListener("change", function(){
+      var sl = slideOf(f, "vidfile"), file = f.files && f.files[0];
+      if (!sl || !file) return;
+      SLED.err = "";
+      SLED.busy = "Reading " + file.name + "…";
+      slidesPaint();
+      /* THE COUNT IS WRITTEN INTO THE NODE, never repainted (§63, §193). A
+         paint here would replace the pane mid-upload — and a 50MB clip is a
+         dozen pieces, so that is a dozen chances to throw the page away
+         under somebody who is watching it. */
+      var say = function(txt){
+        SLED.busy = txt;
+        var el = document.querySelector("#slidepane .picbusy");
+        if (el) el.textContent = txt;
+      };
+      videoUpload(file, SLED.target, function(n, total){
+        say("Sending " + file.name + " — piece " + n + " of " + total + "…");
+      }).then(function(vid){
+        SLED.busy = "";
+        sl.vid = Object.assign(vid, { by: actingName(), at: todayLabel() });
+        delete sl.vcapPending;
+        slidesMark(); slidesPaint();
+      }).catch(function(e){
+        SLED.busy = "";
+        SLED.err = "That clip could not be added — " + e.message + ".";
+        slidesPaint();
+      });
+    });
+  });
+
+  /* THE VERDICT IS SAID WHILE THEY TYPE and stored only on the way out
+     (§35: a field commits on change, which for a text box is on blur). The
+     line is written into the node rather than repainted, or the box being
+     typed into is replaced under the cursor (§71.2). */
+  root.querySelectorAll("[data-vidlink]").forEach(function(f){
+    var say = function(){
+      var note = f.parentNode.querySelector("[data-vidsay]");
+      if (!note) return;
+      var raw = f.value.trim();
+      if (!raw) {
+        note.className = "picsub";
+        note.textContent = "The clip stays where it is; the review points at it.";
+        return;
+      }
+      var r = SMPRules.videoLink(raw, videoHosts());
+      if (!r.kind) {
+        note.className = "picsub vno";
+        note.textContent = "That does not look like a web address.";
+      } else if (r.kind === "away") {
+        note.className = "picsub vwarn";
+        note.textContent = "This one will not play on the slide — it opens in a new " +
+          "tab. Upload the file instead to play it in the review.";
+      } else {
+        note.className = "picsub vyes";
+        note.textContent = "This will play on the slide" +
+          (r.service ? " (" + r.service + ")." : ".");
+      }
+    };
+    f.addEventListener("input", say);
+    f.addEventListener("change", function(){
+      var sl = slideOf(f, "vidlink"); if (!sl) return;
+      var raw = f.value.trim();
+      if (!raw) return;
+      var r = SMPRules.videoLink(raw, videoHosts());
+      if (!r.kind) {
+        SLED.err = "That does not look like a web address, so there is nothing to point at.";
+        slidesPaint();
+        return;
+      }
+      if (!SMPRules.videoRoom(pslidesOf(SLED.target))) {
+        SLED.err = "This " + deckSubjectWord(SLED.target) + " already has " +
+          plural(SMPRules.VIDEO_PER_SUBJECT, "video") + " in this review, which is the limit.";
+        slidesPaint();
+        return;
+      }
+      /* The COMPLETED address is stored and written back into the box, because
+         seeing `https://` appear is the explanation (§176, §124). */
+      sl.vid = { url: r.url, by: actingName(), at: todayLabel() };
+      f.value = r.url;
+      slidesMark(); slidesPaint();
+    });
+  });
+
+  root.querySelectorAll("[data-viddrop]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var sl = slideOf(b, "viddrop"); if (!sl) return;
+      /* THE SLIDE STAYS AND THE CLIP GOES, so the way back is the box that
+         was there before (§61). The bytes in our store are NOT deleted here:
+         a clip is cleared from Setup › Video storage, deliberately, because
+         an archived review still points at it (§49.2). */
+      delete sl.vid;
+      slidesMark(); slidesPaint();
+    });
+  });
+  root.querySelectorAll("[data-vidswap]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var sl = slideOf(b, "vidswap"); if (!sl) return;
+      delete sl.vid;
+      slidesMark(); slidesPaint();
+    });
+  });
+  root.querySelectorAll("[data-vidcap]").forEach(function(f){
+    f.addEventListener("input", function(){
+      var sl = slideOf(f, "vidcap"); if (!sl) return;
+      sl.vcap = f.value;
+      slidesRestage();
+      slidesMark();
     });
   });
 

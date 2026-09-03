@@ -916,6 +916,23 @@ var SYNC = (function () {
       .catch(function (e) { done(String(e.message || e), null); });
   }
 
+  /* One shape for every /api/blob call, and ONE guard in front of all of them
+     (§97.9's rule, learned when `qa.py` walked the platform over file://):
+     opened from a file there is no server to ask, and demo data writes nothing
+     at all (§67), so a clip must not be able to reach the store from either.
+     Refused HERE rather than at each call site, because a call site added
+     later would be the one that forgot. */
+  function blobLive() { return enabled && !isDemoMode(); }
+  function blobPost(body, done) {
+    if (!blobLive()) return done("no server here", null);
+    fetch("/api/blob", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
+      .catch(function (e) { done(String(e.message || e), null); });
+  }
+
   function mailPost(body, done) {
     fetch("/api/mail", { method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1129,6 +1146,48 @@ var SYNC = (function () {
                  greet: o.greet,
                  fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
+    },
+    /* ── A CLIP GOES UP IN PIECES (§261) ────────────────────────────────
+       A serverless function refuses a body over 4.5MB, so a 50MB clip cannot
+       be posted in one go. The store's own multipart upload is the documented
+       way round it: begin, then a piece at a time under the cap, then finish.
+       Every piece is authorised on the way through, so this is not one address
+       minted and then trusted for several minutes.
+
+       SEQUENTIAL, NOT PARALLEL. Six pieces at once would be quicker on a good
+       connection and is exactly what saturates a bad one, and the office is
+       often uploading from an office. */
+    videoSign: function (o, done) { blobPost({ action: "begin", target: o.target,
+                 name: o.name, bytes: o.bytes, type: o.type }, done); },
+    videoStatus: function (done) { blobPost({ action: "status" }, done); },
+    videoList: function (done) { blobPost({ action: "list" }, done); },
+    videoDrop: function (paths, done) { blobPost({ action: "drop", paths: paths }, done); },
+    videoPut: function (o, done) {
+      if (!blobLive()) return done("no server here", null);
+      var PIECE = 4 * 1024 * 1024;
+      var total = Math.max(1, Math.ceil(o.file.size / PIECE));
+      var parts = [];
+      var step = function (n) {
+        if (n > total) {
+          return blobPost({ action: "finish", path: o.path, key: o.key,
+                            uploadId: o.uploadId, parts: parts }, done);
+        }
+        var slice = o.file.slice((n - 1) * PIECE, n * PIECE);
+        fetch("/api/blob?action=part&path=" + encodeURIComponent(o.path) +
+              "&key=" + encodeURIComponent(o.key) +
+              "&uploadId=" + encodeURIComponent(o.uploadId) + "&n=" + n,
+              { method: "POST", headers: { "Content-Type": "application/octet-stream" },
+                body: slice })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (!j || !j.ok) throw new Error((j && j.error) || "a piece did not arrive");
+            parts.push({ partNumber: n, etag: j.etag });
+            if (o.onPart) o.onPart(n, total);
+            step(n + 1);
+          })
+          .catch(function (e) { done(String(e.message || e), null); });
+      };
+      step(1);
     },
     mailDraftSave: function (o, done) {
       mailPost({ action: "draftSave", id: o.id, subject: o.subject, body: o.body,

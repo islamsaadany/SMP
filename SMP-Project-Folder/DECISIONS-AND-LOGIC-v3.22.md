@@ -29740,3 +29740,192 @@ green. `refusal-keeps-work.py` is red on `main`'s own build for the
 stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
+
+---
+
+## §261 — A VIDEO IN THE REVIEW, AND THE BYTES ARE NOT IN THE DATABASE (2026-09-03)
+
+Islam: *"add to the presentation to be able to add a video to play inside the
+presentation how do you think we can do it without overloading the data base
+with videos? is it by squeezing the video quality or by uploading it temp with
+the normal quality and then squeeze after the cycle. how canw e do this?"*
+
+**THE QUESTION WAS ABOUT QUALITY AND THE ANSWER IS ABOUT PLACE**, and that is
+the whole of §261. Both routes he weighed keep the clip in the state graph.
+Measured before anything was proposed: the whole tenant's data is **297KB**,
+`GET /api/state` hands all of it to every person on every sign-in, and a
+picture slide already rides inside it (`review.extra`, one JSONB column in one
+row) at 150–300KB. A two-minute clip at 720p is **20–40MB — about a hundred
+times the entire platform, per clip**; squeezed to 480p and thirty seconds it
+is still ~2MB, seven times everything else. *Compression moves the number and
+not the order of magnitude.*
+
+**AND NEITHER ROUTE WAS REACHABLE ANYWAY.** A Vercel function refuses a request
+body over 4.5MB, so a save carrying a clip fails outright — at a reporting
+deadline, when saves are busiest. And `vercel.json` set no `media-src`, so it
+fell through to `default-src 'self'` and a `data:` video would not have played
+at all, while `frame-src 'none'` blocked every embed. The feature could not
+have worked in either shape he described.
+
+**SQUEEZE-AFTER-THE-CYCLE IS REFUSED WITH ITS REASONS NAMED**: it makes the
+busiest week the heaviest one; there is no scheduler on Vercel to run it
+(§97.5 already records that, which is why the away-email decision is made at
+the moment of sending); and re-encoding stored evidence after the fact cuts
+against §49.2 — *a record somebody tidied is no longer the record.*
+
+### §261.1 — What is stored is a pointer, a frame and two numbers
+
+`review.slides` is untouched in shape (§50): same list, same anchor, same place
+in the deck, same cycle, same permission. A slide gains `kind:"video"` and a
+`vid` holding **either** `path` (a file in our own store) **or** `url` (an
+address the office pasted), plus a poster frame, a length and a size.
+
+**NOTHING STORES WHAT KIND OF LINK IT IS.** That is derived at the moment of
+drawing, so the day the office adds their own host on the storage page, every
+link already pasted for that host starts playing on the slide (§42: one reader,
+asked when the answer is needed).
+
+**THE POSTER IS THE ONE PART THAT DOES RIDE IN THE GRAPH**, sized like a
+thumbnail (640px, JPEG 0.7) rather than like a picture slide — and it is what
+makes the deck survive a clip it cannot reach (§15.1).
+
+**NO MIGRATION, AND IT IS PROVED RATHER THAN CLAIMED.**
+`scripts/test-video-roundtrip.js` writes all three shapes — uploaded, linked,
+cleared — beside a picture slide, reads them back off a real Postgres 16,
+asserts `write(read())` is a fixed point with a **canonical** compare (§249.3:
+jsonb reorders keys, and a stringify compare calls that a difference), and
+asserts the `review` table gained no column. 13/13.
+
+### §261.2 — `kind` decides what is drawn, and nothing is thrown away
+
+Switching a slide to Video keeps its pictures, exactly as narrowing the
+arrangement keeps them — §257.2's correction, which is that making somebody pay
+for changing their mind is a defect. Switching back **DELETES** the mark rather
+than writing `"pics"` (§50.6), so a slide that has never been a video and one
+switched back are the same bytes; both ends asserted.
+
+### §261.3 — Two ways in, and the verdict is said at the desk
+
+Islam asked for **both** upload and a pasted link, and neither is the fallback:
+a unit whose clip already sits on the company's storage should not have to
+download it in order to upload it again.
+
+**"WOULDN'T ANY LINK APPLY?"** — his question, and the honest answer is that a
+link being *accepted* and a video *playing* are two things. A share page is not
+a video: `youtube.com/watch?v=…` in a player shows nothing, so each service
+needs its own player address built. Every link is accepted; the ones we can
+play, play; the rest open in a new tab. **And the box says which while they
+type**, because the one moment that fact is worth anything is while somebody is
+still holding the link — never in the meeting room (§32, §171).
+
+**THE HOSTS ARE NAMED, AND THAT IS ISLAM'S CHOICE** between two put to him with
+the cost of each: naming them means a clip on a fifth service opens in a new tab
+until the office adds it; not naming them means admitting media and frames from
+anywhere, which is an open door for an injected script to frame a false sign-in
+inside the platform's own chrome. He took the narrower one. `VIDEO_EMBED_HOSTS`
+is the list, and `checks/video-slides.py` asserts the policy and the rule name
+**exactly** the same hosts in both directions — a list spelled twice is §234's
+fault, and here the second spelling decides whether anything plays at all.
+
+**AND THE CHECK'S FIRST DRAFT OF THAT ASSERTION COULD NOT FAIL**: it tested
+`"frame-src https:" not in csp`, which is false of every correct policy,
+because a named host *starts with* that string. Asserted over the tokens now.
+
+### §261.4 — The file goes up in pieces, and every piece is authorised
+
+A function refuses a body over 4.5MB, so a 50MB clip cannot be posted in one
+go. The documented way round it is the store's own multipart upload: the
+browser slices, each piece comes through `/api/blob` under the cap, the store
+reassembles. It costs a dozen round trips and buys two things — **the browser
+needs no SDK of its own** (the platform is one self-contained HTML file with no
+bundler, so a browser package is not available to it), and **every piece is
+authorised**, rather than one address being minted and then trusted for the
+next several minutes.
+
+**WHAT COULD AND COULD NOT BE PROVED FROM HERE, STATED PLAINLY (§3a).** There
+is no blob store on this machine and none can be conjured. What IS proved:
+`@vercel/blob` 2.8.0 carries every call used, `access:"private"` is a value it
+accepts (it answers *"This store does not exist"* rather than an argument
+error, so the shape is right), and `getDownloadUrl` exists. What is NOT proved:
+that 50MB of bytes actually traverse the multipart path. That is the first
+thing to drive the day the store is created.
+
+### §261.5 — The finding: `grantIn` answers with a word, and one word is "none"
+
+Writing `scripts/test-video-endpoint.js` found a real hole. The playback gate
+read `if (!R.grantIn(...))` — and `grantIn` returns the **string** `"none"` for
+a unit somebody cannot see, which is **truthy**. So **anybody signed in could
+play any unit's clip.** §104.10's family (`Number("")` is 0 and finite; `""` is
+a real answer), and invisible to every assertion short of driving the refusal
+with somebody who ought to be refused.
+
+`mayWatch()` tests the value now. Both ends asserted: a unit head is refused on
+another unit's clip and gets past the gate on their own, and the office gets
+past it everywhere. Proved able to fail — with the bug put back the test reads
+**2 red**, and the refusal becomes a 404 from the store instead of a 403 at the
+door.
+
+**AND THE GUARDS BEHIND THE STORE CHECK WERE UNTESTED UNTIL THE TEST SET A FAKE
+TOKEN**: with no token the endpoint answers *"no video store here"* first and
+the size and path guards never run. The token is nonsense, so nothing leaves
+the machine — the guards run and the call fails at the store afterwards.
+
+### §261.6 — Setup › Video storage, and what clearing costs
+
+Islam's #3: *"keep but we need a way to clear the storage not to be overwhelmed
+by uploaded videos."* No automatic expiry. Its own rail entry under *Running
+the cycle*, beside Import & archives rather than inside it, because that page is
+about **plans**. The total is on the page, because *am I being overwhelmed* is
+the question somebody opens it to answer.
+
+**A CLIP IN THE OPEN REVIEW OFFERS NO DELETE** — removing what a unit is about
+to present is not storage hygiene, and the control that does that belongs on
+the slide (§61). **DELETING IS THE SUPER USER'S, not merely the office's**
+(§89, §146): two questions with the same answer today, and §94's drift the day
+the first is widened; asked on the screen by `mayDestroy()` and again on the
+server by `isSuperRole`.
+
+**A CLEARED CLIP KEEPS ITS SLIDE AND SAYS WHAT HAPPENED** (§15.1) — poster and
+caption stay, so an archived review still shows what was presented and when it
+was cleared; it is never drawn as a player that failed to load. **The cost is
+stated rather than discovered**: a past review can no longer be played in full,
+which is the trade Islam accepted by choosing *keep, with a way to clear*.
+
+**AND A CLEARED CLIP DOES NOT COUNT AGAINST THE CEILING** — clearing is what
+makes room. That assertion was written the other way round first and the
+product was right; it is kept as the thing that pins the behaviour.
+
+### §261.7 — The ceiling, and where it is enforced
+
+Three clips per subject — **per business unit AND per supporting function**,
+per cycle, keyed exactly as `review.slides` already keys them. 50MB and two
+minutes each, **measured off the file** rather than trusted: the length comes
+from the browser's own decoder, because a name and a size say nothing about how
+long something runs. Refused above the ceiling with the reason said, **never
+silently re-encoded** — what somebody exported on purpose is what the room
+sees, and there is no `canvas.toDataURL` for video to re-encode with anyway.
+
+**AND THE CEILING IS COUNTED ON THE SERVER FROM THE STORED SLIDES**, or a limit
+the screen alone enforces is decoration (§42, §44, §98.2) — two tabs each
+carrying two clips would both pass a check made against their own copy.
+
+**IT DOES NOT AUTOPLAY**, deliberately: a clip that starts the moment the deck
+reaches the slide takes the room away from whoever is presenting.
+
+### §261.8 — What was proved
+
+`checks/video-slides.py` **52 ok, 0 failed**, and proved able to fail four ways
+against builds with the host matching broken (1 red), the embed rewrite dropped
+(2), the cleared slide and the switch destroying pictures (4), and the policy
+opened wide (3). `scripts/test-video-roundtrip.js` 13/13 and
+`scripts/test-video-endpoint.js` 15/15 against a virgin Postgres 16.
+`test-authorize` 491/0, `test-graph-diff` 126/0, round trip PASS,
+`hide-slide` 42/0, `notes-slide`, `deck-blank-slides`, `deck-outcome` green,
+full `qa.py` sweep **ERRORS: none**.
+
+**RECORDED, NOT DONE.** The bytes' journey through the multipart path is
+unproven until a store exists (§261.4). The `.pptx` plan download has no video
+column, and a deck already open on a projector still does not redraw. And the
+mockup that was signed off did not show the cleared state or the ceiling
+message — both were built from the decisions rather than from a drawing, and
+are the two screens to look at first.

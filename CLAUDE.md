@@ -419,6 +419,70 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the sources and `db/seed-state.json` was never regenerated — *a seed that
   disagrees with the sources it is generated from is a fault nothing else would
   have found.*
+- **A VIDEO IN THE REVIEW, AND THE BYTES ARE NOT IN THE DATABASE (§261):**
+  Islam — *"add to the presentation to be able to add a video to play inside the
+  presentation how do you think we can do it without overloading the data base
+  with videos? is it by squeezing the video quality or by uploading it temp with
+  the normal quality and then squeeze after the cycle."* **THE QUESTION WAS
+  ABOUT QUALITY AND THE ANSWER IS ABOUT PLACE.** Measured before anything was
+  proposed: the tenant's whole graph is **297KB** and every person downloads all
+  of it on every sign-in; a picture already rides in it (`review.extra`, one
+  JSONB column, one row) at 150–300KB; a two-minute clip at 720p is **20–40MB,
+  about a hundred times the entire platform**, and squeezed to 480p/30s it is
+  still ~2MB — *compression moves the number and not the order of magnitude.*
+  **AND NEITHER ROUTE WAS REACHABLE ANYWAY**: a function refuses a body over
+  4.5MB, and the CSP set no `media-src` (so a `data:` video fell through to
+  `default-src 'self'`) with `frame-src 'none'` blocking every embed.
+  **Squeeze-after-the-cycle is REFUSED with its reasons named** — it makes the
+  busiest week the heaviest, there is no scheduler on Vercel (§97.5), and
+  re-encoding stored evidence cuts against §49.2. **WHAT IS STORED IS A POINTER,
+  A FRAME AND TWO NUMBERS**, on §50's untouched model: `kind:"video"` plus a
+  `vid` holding EITHER `path` (our store) OR `url` (a pasted address), and
+  **nothing stores what KIND of link it is** — derived at drawing time, so
+  adding a host makes every link already pasted for it start playing (§42). The
+  poster is the one part that rides in the graph, thumbnail-sized, and it is
+  what makes the deck survive a clip it cannot reach (§15.1). **NO MIGRATION,
+  PROVED NOT CLAIMED** — `scripts/test-video-roundtrip.js` writes all three
+  shapes beside a picture slide on a real Postgres, asserts `write(read())` is a
+  fixed point with a CANONICAL compare (§249.3: jsonb reorders keys) and that
+  the table gained no column. **`kind` DECIDES WHAT IS DRAWN AND NOTHING IS
+  THROWN AWAY** (§257.2's correction): switching keeps the pictures, switching
+  back DELETES the mark rather than writing `"pics"` (§50.6), both ends
+  asserted. **TWO WAYS IN, AND THE VERDICT IS SAID AT THE DESK**: every link is
+  accepted, the ones we can play play, the rest open in a new tab — and the box
+  says which WHILE THEY TYPE, because a share page is not a video and the one
+  moment that matters is while somebody still holds the link (§32, §171).
+  **THE HOSTS ARE NAMED, AND THAT IS ISLAM'S CHOICE** between two put to him
+  with the cost of each (a fifth service opens in a tab, against admitting
+  frames from anywhere and with them a false sign-in inside our own chrome);
+  the check asserts the policy and `VIDEO_EMBED_HOSTS` name EXACTLY the same
+  hosts in both directions (§234) — **and that assertion's first draft could not
+  fail**, testing `"frame-src https:" not in csp`, which is false of every
+  correct policy because a named host starts with it. **THE FILE GOES UP IN
+  PIECES**: a function refuses 4.5MB, so the store's own multipart upload is
+  used — the browser needs no SDK of its own (one self-contained HTML file, no
+  bundler) and EVERY PIECE IS AUTHORISED rather than one address minted and then
+  trusted. **THE FINDING (§261.5): `grantIn` ANSWERS WITH A WORD, AND ONE OF THE
+  WORDS IS `"none"` — WHICH IS TRUTHY**, so the playback gate's `if (!grantIn(…))`
+  never fired and **anybody signed in could play any unit's clip**; §104.10's
+  family, found by driving the refusal rather than reading it, fixed as
+  `mayWatch()`, both ends asserted, 2 red with the bug put back. **AND THE
+  GUARDS BEHIND THE STORE CHECK WERE UNTESTED UNTIL THE TEST SET A FAKE TOKEN**
+  — with none the endpoint answers "no video store here" first. **SETUP › VIDEO
+  STORAGE** is his #3, its own rail entry under *Running the cycle* (Import &
+  archives is about PLANS), the total on the page, **no Delete on a clip in the
+  open review** (§61), **deleting is the Super user's** and asked twice (§89,
+  §146), **a cleared clip keeps its slide and says what happened** (§15.1) and
+  **does not count against the ceiling**, because clearing is what makes room.
+  **THREE PER UNIT AND PER FUNCTION**, 50MB and two minutes, **measured off the
+  file** and **counted on the SERVER from the stored slides** or the limit is
+  decoration (§42, §44); refused with the reason, never silently re-encoded; and
+  **it does not autoplay**, or the clip takes the room from the presenter.
+  52/0 on `checks/video-slides.py`, proved able to fail four ways (1/2/4/3 red);
+  13/13 and 15/15 on a virgin Postgres 16. **RECORDED, NOT DONE**: the bytes'
+  journey through the multipart path is unproven until a store exists; the
+  `.pptx` download has no video column; and the signed-off mockup did not show
+  the cleared state or the ceiling message.
 - **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
   (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
   an option in the drop down for the smo only."* §145.9 hid the pane-corner
@@ -4619,6 +4683,18 @@ python3 checks/one-line-titles.py # a title is one line and the box says so (§2
                                 # never as a pixel count; a pasted value read back
                                 # from the DATA; and both ends — a rows-2 paragraph
                                 # box keeps its breaks (5 red on the shipped build)
+python3 checks/video-slides.py  # a video in the review (§261): which links play and
+                                # which are honestly refused, the policy and the rule
+                                # naming the SAME hosts in both directions, the
+                                # Pictures|Video switch at both ends (the pictures come
+                                # back, and the mark is DELETED not set to "pics"), the
+                                # paste box's verdict while they type, each kind drawn
+                                # its own way and never autoplaying, a cleared clip
+                                # saying so rather than drawing an empty slide, the
+                                # ceiling refused with its reason, and no server
+                                # answering rather than hanging. It MAKES the state —
+                                # the demo has no videos, so every assertion here would
+                                # pass on a build that lost the feature
 python3 checks/deck-outcome.py  # the presentation reads what was reported (§252): the
                                 # tactics slide's nine columns, its figures asserted as
                                 # AGREEMENT with the Performance page rather than as
@@ -4829,6 +4905,14 @@ node scripts/test-kb-audience.js # who sees which answer (§160): an office answ
                                 # a two-answer question leaving each side exactly one.
                                 # No database, no network — officeOnly() is pure.
 ```
+A video slide needs no migration, and the clip endpoint's refusals — both
+against a throwaway Postgres (the second starts its own dev-server, and sets a
+NONSENSE store token on purpose, or every guard behind the store check goes
+unexercised):
+`DATABASE_URL=… node scripts/test-video-roundtrip.js` (§261.1)
+`DATABASE_URL=… node scripts/test-video-endpoint.js` (§261.5 — the file that found
+the truthy `"none"`)
+
 Two people, one database — the scenario that was destroying work before §210
 (needs a throwaway Postgres; `SMP_WHOLE_GRAPH=1` restores the old behaviour and
 it must go red):
@@ -4874,7 +4958,39 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: a video in the review, and the
+bytes are not in the database.** Islam asked whether to squeeze the quality on
+upload or squeeze after the cycle. **The question was about quality and the
+answer is about place**: both routes keep the clip in the state graph, which is
+**297KB** and travels to every person on every sign-in, while a two-minute clip
+at 720p is **20&ndash;40MB &mdash; about a hundred times the entire platform**;
+squeezed to 480p/30s it is still seven times everything else. *Compression moves
+the number and not the order of magnitude.* And neither route was reachable
+anyway &mdash; a function refuses a body over 4.5MB, and the policy set no
+`media-src` while `frame-src 'none'` blocked every embed. So the bytes go to a
+blob store and the slide keeps a pointer, a poster frame and two numbers, on
+&sect;50's untouched model &mdash; **no migration, proved on a real Postgres
+with a canonical compare** (&sect;249.3). **Two ways in, both his**: every link
+is accepted, the ones we can play play, the rest open in a new tab, **and the
+box says which while they type** &mdash; because a share page is not a video and
+the one moment that fact is worth anything is while somebody still holds the
+link. **The hosts are named, and that is his choice** between two put to him
+with the cost of each. **The file goes up in pieces**, because a function
+refuses 4.5MB and the browser has no bundler to give it an SDK &mdash; and
+every piece is authorised rather than one address minted and then trusted.
+**THE FINDING: `grantIn` answers with a WORD, and one of the words is `"none"`,
+which is truthy** &mdash; so the playback gate never fired and **anybody signed
+in could play any unit's clip**; &sect;104.10's family, found by driving the
+refusal rather than reading it, and 2 red with the bug put back. Setup &rsaquo;
+Video storage is his #3: the total on the page, no Delete on a clip in the open
+review, deleting the Super user's and asked twice, **a cleared clip keeping its
+slide and saying what happened** &mdash; and not counting against the ceiling,
+because clearing is what makes room. 52/0 proved able to fail four ways;
+13/13 and 15/15 on a virgin Postgres 16; 491/0, 126/0, full sweep ERRORS none.
+**On the branch, not merged**, and the bytes' journey through the multipart
+path is unproven until the store exists.*
+
+*Earlier: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

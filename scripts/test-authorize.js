@@ -100,7 +100,7 @@ refuses(headKey, function (s) { s.group.branding = { accent: "#123456" }; },
   "a unit head cannot change the tenant's branding");
 allows("smo", function (s) { s.group.branding = { accent: "#123456" }; },
   "the SMO can");
-/* The group's mark (§257). Named rather than left to the unknown bucket for
+/* The group's mark (§259). Named rather than left to the unknown bucket for
    the same reason `comms` is — it is refused for everybody but the SMO either
    way, and what this pins is that the refusal says Setup, so somebody sent
    back by it knows to open Branding (§16.7). */
@@ -1232,14 +1232,26 @@ console.log("\n15 · the strategy | reporting split (§117)");
   /* The download is a pure rule with no server half — asserted here so the
      one definition is proven where every other rule is (§117). */
   const wSeed = R.worldOf(SEED);
-  check("download: the unit's custodian may", R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === true);
-  check("download: the unit's owner may", R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === true);
+  /* §252.2 REVERSES §117's AUDIENCE at Islam's instruction — "for the smo
+     only" — so these three assertions are REWRITTEN rather than deleted
+     (§218): a build that quietly handed the file back to the roles that HOLD
+     the thing would otherwise pass through a gap where a test used to be. */
   check("download: the office may", R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), UNIT) === true);
+  check("download: the unit's custodian may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === false);
+  check("download: the unit's owner may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === false);
   if (fnCust) {
     const fnHead = (SEED.functions[FN] || {}).head;
-    check("download: a function's head may, for their function",
-          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === true);
+    check("download: a function's head may NOT, for their own function (§252.2)",
+          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === false);
+    check("download: the office may, for that same function",
+          R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), "fn:" + FN) === true);
   }
+  /* And arranging is untouched by the narrowing — the two questions stopped
+     sharing an answer, so the one that stayed open is asserted beside it. */
+  check("arrange: the unit's custodian still may (§101, unchanged)",
+        R.mayArrange(wSeed, personOf(SEED, custKey), UNIT) === true);
   const nobody = { key: "smp_test_nobody", unit: UNIT };
   check("download: somebody holding nothing may not",
         R.mayDownloadPlan(wSeed, nobody, UNIT) === false);

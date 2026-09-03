@@ -27984,6 +27984,87 @@ mid-sentence is worse than a deck that is right as of when it opened.
 
 ---
 
+---
+
+## §252.2 — THE PLAN DOWNLOAD COMES BACK, IN THE MENU AND FOR THE OFFICE (2026-09-02)
+
+Islam, in the same breath as the merge: *"the ppt download leave it as an
+option in the drop down for the smo only."*
+
+**§145.9 HID IT FOR EVERYONE AND KEPT THE MACHINERY**, saying in as many words
+that giving it back was one line. This is that line, spent somewhere else: the
+pane-corner icon does not come back, and the plan leaves as an entry in the
+**Presentation** menu, beside *Present* and *Manage slides*.
+
+**THAT MENU, BECAUSE IT IS WHERE THE DECKS ALREADY ARE.** Present opens the
+review on screen, Manage slides arranges it, and this takes the plan away as a
+file — three things of one kind, in one place. A second control in a pane
+corner would have been a third place to look for a deck (§32's rule about a
+door behind a door, applied to a control rather than a page), and the corner is
+also the busiest slot in the product: the pen, the arrows and §145's fill button
+already share it, and §145's own note records the arrows and the pen colliding
+there.
+
+**THE CORNER BUTTON IS DELETED, NOT LEFT HIDDEN** (§24, §94.15). With the entry
+in the menu it has no audience of its own, and a builder returning `""` above
+its own gate is exactly what the next reader takes for load-bearing.
+`dlPlanBtn()`, `DL_PAGES` and the `dl` term in `editBar()` all go — and the
+comment block that described it went with it, which is §214's lesson paid
+rather than repeated: the first deletion sliced a RANGE and left that comment
+stranded above `arrangePaneBtn()`, describing a function that no longer existed.
+
+**"FOR THE SMO ONLY" IS A REVERSAL OF §117'S AUDIENCE, AND IT IS RECORDED AS
+ONE.** That section gave the download to the office AND to the roles that HOLD
+the thing — a unit's owner and custodian, a function's head — and its reasoning
+was sound while the button sat in the pane those people work in. Islam has
+decided that a file leaving the platform is the office's act. So the two lines
+that read `ARRANGE_ROLES` come out of `mayDownloadPlan()` and nothing else
+moves: **`ARRANGE_ROLES` itself is untouched**, because reordering a plan is
+still the custodian's and the owner's (§101) — the two questions merely stopped
+sharing an answer.
+
+**THE NARROWING IS IN THE RULE, NEVER IN THE MENU** (§42, §48.2): the entry is
+drawn from `SMPRules.mayDownloadPlan()` and `sendPlanPptx()` asks the same
+function again at press time, so the screen and the press cannot answer
+differently — the drift §94 spent three findings on.
+
+**THE STRATEGY TAB LOSES ITS TWO BUTTONS AND GAINS NOTHING TO KEEP IN STEP.**
+§119.9 had to put the download on BOTH halves of a capability function's
+strategy tab, because only one of them had a pane to hang a button on. With one
+entry in the menu that whole problem is gone, and the check asserts it from the
+overview — the half that needed its own button before.
+
+**PROVED AT BOTH ENDS, AND THE THREE REVERSED ASSERTIONS WERE REWRITTEN RATHER
+THAN DELETED** (§218). `test-authorize.js` said *"the unit's custodian may"*,
+*"the unit's owner may"* and *"a function's head may"*; it says **may NOT** now,
+with the office's own yes beside each, so a build that quietly widened this
+again fails rather than passing through a gap where a test used to be — and
+`mayArrange` is asserted in the same breath, or the narrowing could take
+reordering with it unnoticed. 474 passed, 0 failed.
+`checks/strategy-split.py` §3 drives it: the office's menu carries the entry and
+a click at its centre reaches it (§93.4), the plan pane draws none, and the
+custodian, the owner, a function's head and a bystander are refused on the
+screen AND by the rule. **One of its own first-run failures was the check** — a
+function's Performance tab is keyed `fnperf`, not `performance`, so the
+assertion navigated nowhere and reported a correct build as broken (§51.11's
+family).
+
+**AND THE DELETION BROKE A PAGE, WHICH IS §214's LESSON TWICE IN ONE
+SECTION.** Removing `dlPlanBtn()` left `editBar()` still USING the `dl` it no
+longer computed, so every supporting function's **Overview** threw inside
+`paint()` and left §137's failcard in its place — measured, 45 page errors
+across the sweep. Two things about how it was found are worth keeping:
+
+  · **the targeted checks all passed.** `strategy-split`, `plan-fields`,
+    `perf-line` and `deck-outcome` were green while that page was a failcard,
+    because the assertions on that surface are ABSENCES — *no download here* —
+    and a page that did not render satisfies every one of them (§113.8's blind
+    spot, met for real rather than in principle). `drew()` is asked beside each
+    absence now: the failcard's absence, before the control's.
+  · **the full sweep is what caught it**, which is the argument for running it
+    rather than the file just edited (§214 said exactly this, about a deletion
+    that took a live function with it).
+
 ## §253 — A TABLE WITH NO ROWS IS NOT A SLIDE (2026-09-02)
 
 Islam: *"slides are showing blank pages for the merchandizing."*
@@ -28755,9 +28836,451 @@ the build it was written against, and **no longer true**. §253.3 gave it a
 caller in the same hours, routing it through `deckHtmlFor()` so a picture's
 landing places come from the deck that is actually shown.
 
+## §257 — A TARGET THAT IS A YES OR A NO (2026-09-02)
+
+*Renumbered from §251 on the merge back: main took §251&ndash;§256 while this
+was being built, exactly as §248 was renumbered around main's §250. The
+sections below keep their own internal numbering (§257.2 &hellip; §257.6) so the
+order in which the corrections arrived is still readable.*
+
+**AND THE MERGE FOUND THAT MAIN HAD BUILT THE SAME MACHINERY, TWICE OVER.**
+Main's own §251 (*the unit is there before the number is*) generalised, for
+every unit, the two repairs this branch made for `Y/N` alone: `unitOfTarget`
+reads a unit held with no number beside it, `knownUnit` narrows that to units
+the picker actually offers, and `targetKeep` takes the value only where there
+is a number to take. **Its version is the better one and is what survives** —
+this branch's `targetUnitOf` fallback, its `noTarget` narrowing of the option
+list, and its numeric guard in `setTargetUnit` are all DELETED rather than
+kept beside main's (§53.5: two answers to one question is how they drift).
+
+**AND MAIN'S §252 OWNS "IS THIS ROW ANSWERED".** `rowAnswered` /
+`tacticAnswered` — five call sites, the cycle board included — is the same
+predicate this branch wrote as `reportField` / `reportedIn`, and Islam had
+already chosen its rule there: *the target alone decides*, so an outcome with
+a target and no figure is owed rather than quietly reading its old per cent.
+**That is §257.6's "a dash is not an entry", arriving from the other side** —
+so this branch's pair is deleted and the Y/N rows fall out of main's rule
+correctly, because a Y/N outcome with no answer scores null. One predicate,
+not a seventh copy.
+
+
+Islam: *"for the target we need to add a Y/N in the units which dims the
+target itself."*
+
+**SOME ROWS ARE NOT MEASURED, THEY EITHER HAPPENED OR THEY DID NOT** — a
+certification achieved, an agreement signed, a warehouse open — and the plan
+had no way to write one. Every target box wants a number, so such a row was
+left blank, and since §249 a blank target is a counted gap: it wore the red
+word for ever and refused Submit with nothing anybody could fill.
+
+**BOTH DECISIONS ARE HIS AND WERE TAKEN BEFORE ANYTHING WAS BUILT**, which is
+why the build is small. Asked what a Y/N row does when it is reported, he
+chose **100 or 0** over "shown but never scored", so the row lands in the
+pillar's and the unit's averages like any other; and asked where it applies,
+**all three** places the unit picker appears — a unit's key objectives, a
+pillar's key measures, and a tactic's outcome.
+
+**IT IS A UNIT, NOT A SECOND FIELD, AND THAT IS THE WHOLE OF WHY IT COSTS NO
+MIGRATION.** §199 put the unit ON the target string (`6.2B EGP` is one
+field), so `Y/N` is simply the unit whose value part is always empty: the
+target reads exactly `Y/N`, `target`/`target3y`/`outTarget` go on holding the
+whole string, and all 103 places that read them keep working. A second field
+would have been a second source of truth and the two would have drifted the
+first time anything wrote one of them (§53.5). Nothing stored moves, and it
+is asserted of the whole worked example rather than of one row: **no row in
+the demo tenant is silently read as yes/no.**
+
+**AND IT IS A COMPLETE ANSWER, NEVER A GAP.** §249 made a target holding only
+a unit read as Missing, which is exactly right for `%` on its way to `90%`
+and exactly wrong here — `Y/N` is not a target half-typed, it is the finished
+target of a row that has no number. One line in `gapEmptyValue` before the
+numeric test; without it the feature would ship every Y/N row wearing the red
+word and blocking Submit (§221), a hole nobody could close.
+
+**NOTHING SAID IS NOT A NO.** An unanswered Y/N row scores null and leaves
+every average, exactly as an empty number box does. Reading silence as a
+failure would mark a unit down for a question nobody has been asked yet
+(§35's rule, and §104.10's in the same shape).
+
+**THE DIRECTION AND THE COMPILE RULE ARE DIMMED ALONGSIDE THE TARGET**, and
+that is mine rather than his — put to him with the reasoning and confirmed.
+With no number there is nothing for a `≥` to point at and nothing for `Sum`
+to add up, and a live control that changes nothing is worse than one that is
+not there (§61). **All four boxes stay DRAWN**: a hole among equal boxes
+reads as a control that failed to render, which is §248's own ruling about
+the unit picker applied to its neighbours. **`disabled`, never merely
+dimmed** — a look is not a lock and the keyboard walks straight past
+something only faded (§220).
+
+**THE UNIT PICKER IS THE ONE THAT STAYS LIVE**, because it is the only way
+back out: dimming the control that SET this state would leave the row stuck
+in it (§61 from the other side).
+
+**AND IT HAD TO BE REACHABLE ON A BLANK ROW.** The pen drew an em-dash and a
+hover saying *"set a target first"* until a target existed — right for
+`B EGP`, and it made `Y/N` unreachable exactly where it is most wanted, since
+a brand-new "did it happen" row has no number to type. The list NARROWS on
+such a row (blank and `Y/N` only) rather than the control vanishing, so what
+is on offer is what can actually be stored and nothing takes an answer and
+discards it.
+
+**§257.2 — THE VALUES ARE KEPT, AND THE UNIT IS WHAT STOPS THEM COUNTING
+(REVERSING §257's OWN FIRST BUILD).** Islam, from the running page, with a
+tactic outcome reading `100` · `Y/N` · `≥` · `Latest` and not one of them
+dimmed: *"Y/N didn't dim the surrounding as you can see even they are set
+before they need to be dimmed even by keeping the values but as if they are
+not counted anymore."*
+
+**TWO THINGS WERE WRONG AND THE SECOND IS THE DESIGN.** The defect: the
+outcome's picker goes through `nextTargetUnit`, which KEEPS the figure — so
+`outTarget` became `100 Y/N` — while the dimming test asked whether the WHOLE
+STRING was `Y/N`, which that fails. Every surface therefore stayed live on
+exactly the rows a person would actually convert, and the measures and
+objectives tables (which went through `setTargetUnit`, and destroyed the
+number) behaved differently from the outcome beside them — §53.5 inside one
+feature.
+
+**And his correction is the better model, so it is taken rather than
+patched.** The first build made a row yes/no by DESTROYING its number, which
+is unlike every other unit in the product and made changing your mind cost
+somebody the figure they had typed, with no undo. Now `Y/N` is written
+exactly as `B EGP` is — beside whatever the row already held — and the row
+stops being measured because of its UNIT. `100 B EGP` becomes `100 Y/N` and
+back to `100 B EGP`; the dimmed boxes SHOW the values they are keeping;
+nothing is thrown away. `isYesNo` reads the unit off the end of the string
+through `targetParts`, which is `outUnitOf`'s own §248 rule, so a bare `Y/N`
+(a row that never had a figure) and `100 Y/N` (one that did) are the same
+kind of row.
+
+**AND THE CORRECTED CHECK IMMEDIATELY FOUND TWO MORE** — both real, both
+invisible under the old model because the number was gone. Leaving Y/N
+blanked the value rather than handing it back (the guard was written for a
+string that WAS "Y/N", and now reads a number out of "100 Y/N"); and
+`measureDue` happily parsed the kept 100 out of `100 Y/N`, so the reporting
+page printed *"due at 100 Y/N"* beside a control offering Yes and No. **6 red
+on the build he was looking at.** Two assertions in `checks/objective-unit.py`
+and four in `checks/yn-target.py` were REWRITTEN rather than deleted (§218),
+with the reversal recorded in them.
+
+**THE DEFECT FOUND BY DRIVING IT, NOT BY READING IT (§257.2a).** A bound field
+writes WITHOUT repainting, deliberately — a repaint under a typing hand
+destroys the box being typed into (§71.2, §35) — and that is right for every
+field whose value is the only thing that changes and wrong for this one:
+`Y/N` changes the SHAPE of the row. So the office picked it and **nothing
+visibly happened** until some later paint caught up. Every assertion short of
+pressing the control passed. `setTargetUnitAndRepaint` is the fix, and it is
+safe only because these are SINGLE selects, which are unhooked before they
+fire `change` (§30.1); a ticking list repainted this way dies under the
+pointer (§130.1).
+
+**AND LEAVING Y/N EXPOSED A HOLE §248 HAD ALREADY FILLED ON ITS OWN SIDE
+(§257.3).** `splitTarget` looks for a number FOLLOWED BY a unit, so a target
+holding nothing but `%` reads back as no unit at all — which did not matter
+while nothing could write one, and does now, because leaving Y/N for a
+number-carrying unit leaves exactly that. `targetUnitOf` learned the rule
+`outUnitOf` has had since §248, **narrowed to units the picker itself
+offers**: a target reading `TBD` is prose and must not be read as a unit
+nobody chose (§96.2).
+
+**THE WORKBOOK CARRIES IT** or a plan authored on the platform and downloaded
+would come back with every yes/no target unrecognised — an upload AUTHORS the
+plan (§22), so a unit the template cannot say is a unit the round trip
+destroys.
+
+**PROVED ABLE TO FAIL: 18 red** on the shipped build, green on this one —
+and its first falsification run **died rather than reported** (§215, exactly
+as §248's did), so every probe degrades to a shape the assertions can still
+read and the red count is honest. `checks/objective-unit.py` §2c held a rule
+this decision deliberately reverses (every unit must survive
+`splitTarget`/`joinTarget`, which `Y/N` cannot by design) and was **REWRITTEN
+rather than deleted** (§218, §214.3), with Y/N's own round trip asserted
+beside the exemption so it is a rule and not a hole.
+
+Green after: `objective-unit`, `tactic-outcome`, `tactic-proration`,
+`ytd-proration`, `gap-fill`, `submit-gate`, `fn-pillars`, `fn-ko-edit`,
+`table-fit`, `plan-fields`, `project-tables`, `deck-and-weights`,
+`hide-element`; `test-authorize` 472/0, `test-graph-diff` 126/0, and the full
+`qa.py` sweep ERRORS none.
+
+**RECORDED, NOT DONE.** Three, each stated rather than quietly absorbed:
+
+1. **A Y/N measure stores no `progress`.** The figure is derived by
+   `measureScore`, and `progress` is the raw actual-against-annual ratio,
+   which a word cannot produce — so the **Focus board**, which reads that raw
+   figure on purpose (§239: reward stays a year-end judgement), shows nothing
+   for a yes/no row. Whether a yes on the Focus board should read as 100 is a
+   reward decision, not a reporting one.
+
+2. **A tactic reporting into `outActual` is not counted as done.**
+   `reportedCount` reads `x.obj.actual` for every kind, and §248 sends an
+   outcome's figure to `outActual` — so such a tactic can never satisfy the
+   tally or the Submit gate. **This predates §257 and is not made worse by
+   it** (measured: it is true of every §248 outcome, whatever its unit), and
+   fixing it changes what Submit demands of every existing tactic, which is
+   Islam's call and not a detail to slip in beside this.
+
+3. **The review deck still ignores an outcome entirely** — §250.2's own
+   recorded omission, unchanged here.
+
+
+## §257.4 — THE SAME SIZE AS A NUMBER, AND IT COUNTS (2026-09-02)
+
+Islam, from the running page: *"the yes or no is smaller in size than the
+other reporting input cells. and it's not counted in the reporting on the card
+of the pillars."* Two faults, and the second is much the larger.
+
+**THE SIZE.** `.entry .field` is 78px because a number entry gives the rest of
+its box to the unit chip beside it; the Y/N picker carries no unit, so it took
+the field's width alone and rendered ~30px short in a column an eye runs down.
+The reporting box's width is now named once (`--rep-w`, `--rep-w-full`) and the
+picker takes the whole box. **The honest limit is stated rather than
+pretended**: a number entry's width follows its unit, so `M EGP` is wider than
+`%`; this matches the common case, and the check asserts the two stay level
+rather than asserting a number (§94.8).
+
+**THE COUNT, WHICH PREDATES Y/N.** §248 sends a tactic measured by its OUTCOME
+to `outActual`, and the counts were never told — `reportedCount` and `doneOf`
+both read `actual` and nothing else, so an answer given through the box the
+page itself drew could never satisfy the tally. The line replaced read
+`x.kind === "tactic" ? x.obj.actual : x.obj.actual`: the same expression on
+both sides of the question, which is what a half-made change looks like. Every
+§248 outcome tactic was uncounted, whatever its unit; it surfaces now because a
+yes/no row has no other way to be answered. One reader (`reportField` /
+`reportedIn`) is asked by the box AND by both tallies, or they drift again
+(§53.5).
+
+**AND THE FIRST FIX WAS A REGRESSION, CAUGHT BY A CHECK AND NOT BY REASONING.**
+Reading only the field a row is asked in TODAY is *stricter* than what came
+before: a tactic carrying `actual` from long before outcomes existed reads as
+unreported the moment somebody gives it an outcome — **18 rows in the worked
+example**, with Submit refusing for every one. That is precisely the "changes
+what Submit demands of every existing tactic" §257 recorded as Islam's call,
+arriving by the back door. A row is answered if EITHER field carries a figure,
+which mirrors §248's own "read the old way until the outcome has a figure" and
+can only ever be MORE generous than the count that came before — the property
+that makes it safe to ship into an open cycle. `checks/submit-gate.py` went red
+on the strict version and is what found it.
+
+**AND THE CHECK'S OWN TRIAL WAS THEN MEASURING NOTHING** (§94.2): with the
+generous rule, the demo tactic it picked already carried an `actual`, so the
+tally read the same with and without the new answer. It clears both fields to
+establish a baseline now, and asserts BOTH directions — an outcome answer moves
+the tally, and a row answered only the old way still counts.
+
+`checks/report-saves.py`'s 3 failures were verified to reproduce on the previous
+build (the `sw.js` MIME stub, already recorded at §250.2) — not caused here.
+
+
+## §257.5 — THE RAIL, AND THE HALF OF THE BOX I MEASURED (2026-09-02)
+
+Islam, twice: *"same issues small input space and not counted in the card."*
+Both were still true after §257.4, and both because I had fixed the neighbour
+of the thing he was pointing at.
+
+**THE RAIL IS A THIRD COPY OF THE COUNT.** His own screenshot settles it: the
+band reads **4/4** and the rail beside it reads **3/4**, for one pillar. §257.4
+taught `reportedCount` (the unit) and `doneOf` (the pane), and `pillarTally` —
+which draws the RAIL, and which is what "the card of the pillars" means — walked
+the rows itself asking `actual`. Its own comment said the rail and the pane
+"can never disagree"; that had stopped being true, and **a sentence describing
+an intention the code no longer carries out is worth less than nothing, because
+it is what stops the next person checking** (§104.8 again). All three go through
+`reportedIn` now, which is also what `entry()` asks when it decides which field
+to draw, so the claim is true by construction rather than by assertion.
+
+**AND "SMALL INPUT SPACE" WAS THE HEIGHT, NOT THE WIDTH.** §257.4 measured one
+dimension, found 106 against 135, fixed it, and called the control level. It was
+not: measured properly, the picker stood **19px tall against a number entry's
+34**. The cause is that `input.field` is **element-scoped**, so a `<select>`
+carrying the same class receives none of its box — no padding, no size, no
+ground. *Measuring one dimension and declaring a control level is how a fix goes
+to the wrong axis.*
+
+**THE HEIGHT IS STATED, NOT INFERRED.** Mirroring the padding still left 3px,
+and `line-height` computed to `normal` — a `<select>` does not take it for its
+own box. So the height joins the width as a named property of a reporting box
+(`--rep-h`), read by both controls, rather than the two arriving at one number
+by different routes (§53.5). `checks/yn-target.py` §9 asserts **width, height
+AND the rail-against-band agreement**, all as equality rather than as numbers
+(§94.8), so a later change to the box moves both or goes red.
+
+**AND THE DEPLOYMENT IS WHY THE FIRST TWO ROUNDS LOOKED UNCHANGED.** Production
+was on another session's shell throughout (`v4.27-outcome-on-the-deck`, then
+`v4.29-annual-target`), and the branch preview lags each push — so "same issues"
+was partly true and partly bytes. The one-step check is
+`curl <url>/sw.js | grep SHELL` (§91.5: read the live site, never the dashboard).
+
+
+## §257.6 — A DASH IS NOT AN ENTRY, AND THE BOX IS A NUMBER BOX (2026-09-02)
+
+Islam, on the shipped §257.5: *"too big .. make it the same width like the
+other boxes please"*, and *"when I turned it to dash the card board stayed at
+4/4 this is a bug a - is not an entry so the card should turn to 3/4."*
+
+**THE WIDTH WAS MEASURED AGAINST THE WRONG NEIGHBOUR.** §257.4 sized the picker
+to `--rep-w-full` (135px), which is what an entry carrying a WIDE unit chip
+comes to — `B EGP`. The rows beside it in a real plan carry `%`, and a `%`
+entry is **106px**, which is what a bare number box already is. So the control
+that had been too small became too big. It reads `--rep-w` now and measures
+106 against 106, exactly; the `B EGP` row is legitimately wider and is
+supposed to be. **The check compares against a `%` entry deliberately** rather
+than whichever entry comes first — comparing against an arbitrary peer is what
+produced the wrong number twice.
+
+**AND A DASH IS NOT AN ENTRY — HIS RULE, AND IT REVERSES §257.4's OWN
+GENEROSITY.** That section counted a row answered if EITHER field carried a
+figure, deliberately, to avoid making Submit stricter for tactics carrying an
+`actual` from before outcomes existed. **Measured, that is exactly what kept
+his row counted**: it holds a legacy per cent, so emptying the outcome's answer
+changed nothing — 8/8 with a legacy figure, 7/8 without one, which is how the
+cause was identified rather than guessed.
+
+**A ROW IS ANSWERED IN THE FIELD IT IS ASKED IN, AND NOWHERE ELSE.** A tactic
+given an outcome is asked what that outcome produced; a per cent typed before
+the question existed is not an answer to it.
+
+**THE COST IS REAL, IS STATED, AND IS HIS**: a tactic that gains an outcome
+reads as owing a figure until somebody enters one, even where it carries an old
+per cent — so Submit refuses until they do. It is opt-in per row (only rows the
+office actually gives an outcome), and it is the behaviour the sentence above
+asks for. **§248's fallback for SCORING is untouched** — `tacticReads` still
+reads the old way until the outcome has a figure, so no score moves. This
+decides only what counts as ENTERED.
+
+**AND THE CHECK'S FIXTURE WAS HOLDING THE STALE METHOD** (§51.11, with the
+check keeping an out-of-date way of FILLING rather than an out-of-date
+selector): `submit-gate.py` handed every tactic an outcome and then filled only
+`actual`, so it stopped answering the question it was asking, and read a
+deliberate decision as a regression. It fills the asked field now — which is
+what a person does when they use the page.
+
+## §258 — THE PAGE WARNS BEFORE A SAVE CAN BE LOST (2026-09-02)
+
+Islam, after a reporting round in which people lost work twice over — a CF
+custodian refused for a function they never opened, the Marketing plan reverted
+under the hands that had just filled it, a compile cell that would not take
+three times running: *"can we have some sort of mid page warning like the error
+and network issue in case the person is saving with someone opening the same
+thing as an example or any other case that might impact the loss of data with
+clear action so we can know what to do? think of it."* Then, of the two
+cautions drawn (`design-mockups/data-loss-warnings/
+2026-09-02_save-safety-banners.html`): *"BOTH"*, and *"for the safety banner
+let's build them on the branch."*
+
+**THE TWO WAYS WORK WAS ACTUALLY LOST WERE MEASURED FIRST, AND NEITHER WAS THE
+WRITER.** Every one of the day's losses reproduced as a **stale tab**: a browser
+still running the build from before §234 shipped posted the whole `review` map
+and was refused naming a function nobody had opened — and a refusal is all or
+nothing (§184), so every field in that post reverted. Migration 040 signed the
+fleet out once to end that round; what nothing did was tell the NEXT stale tab
+before it posted. The second way is two people on one number: different fields
+already merge (§210 lays each change over the stored graph), the same field is
+last-write-wins, and the person about to lose is the one who cannot see it
+coming.
+
+**SO THERE ARE TWO CAUTIONS AND THEY ARE ONE FAMILY.** Both ride the slot the
+refusal already keeps above the chrome (`#refused`, §32/§171) — a sibling
+`#safety`, so "something about saving" is said in one place — and both wear the
+**attention** ground, never the alarm red: nothing has gone wrong yet, and
+telling somebody to act is not telling them they failed (§168, §190).
+
+**1 · A NEWER VERSION IS READY.** The service worker is the one thing that
+changes on every content deploy (§91: `SHELL` is bumped whenever the built
+bytes change), and `sw.js` claims its clients on activate — so an OPEN tab can
+hear of a deploy through `controllerchange`. `safety.js` asks the registration
+to look for a newer worker on a clock (60s) and on coming back to the tab, and
+when one takes over it says *"A newer version of the platform is ready — Reload
+to get it; your work is safe and already saved"* with one control, Reload.
+**Only when there was a controller before**: `controllerchange` also fires on
+the very first install, when nobody is stale, and warning then would greet
+every new browser with "reload" (§61's empty hand, reversed). A stale tab is
+told BEFORE it can lose a save, which is the whole point.
+
+**2 · SOMEBODY ELSE UPDATED THIS PAGE.** The server already writes every landed
+change to `change_log` with who and when (§42), so the tab asks — lightly, only
+while visible, every 20s and on coming back — *"did anyone else land a change
+on the page I am on since I loaded it?"* `GET /api/state?since=&target=` answers
+from that log: the asker excluded, oldest first, **never the graph** (§98: a
+poll is paid for in database round trips; this one is a single indexed query
+and carries no state). The target is the page's own `TARGET` (`mobile`,
+`fn:cf`), compared exactly as the log stores it; Setup is not a page anybody
+edits alongside somebody else and is not asked about. An unparseable `since`
+falls through to the ordinary read rather than to a 500. The caution NAMES them
+— *"Hala Ibrahim updated this page while you were working"* — and the same
+landing is never announced twice: the newest `at` seen becomes the next
+`since`.
+
+**"RELOAD & KEEP MINE" IS §210 DOING THE WORK.** The one useful act is to bring
+their update in without losing yours, and the platform can already do that: the
+button flushes this tab's own pending change FIRST (`SYNC.saveNow`), the server
+lays it over theirs, and the page reloads only when the flush landed — `saved`,
+or `clean` when there was nothing to send. **A flush that fails does not
+reload**: §171's banner is already on the page saying why, and reloading over it
+would throw away the one explanation; the control comes back live. Dismiss is
+the other way out, for somebody who knows the two edits do not touch. Chosen
+over the alternative drawn (a plain "reload and lose unsaved" with a warning),
+and stated as an assumption rather than as his pick: he said *"BOTH"* of the
+two cautions and did not choose between the two wordings of this button.
+
+**THE FILL IS THE TYPE-GRADE AMBER, AND THE CHECK IS WHAT SAID SO.** The first
+build painted the button `--attn` with `--surface` ink — 3.25:1 in the light
+palette, §38.4 for the seventh time (*a colour that works as a fill fails as
+type*). It is `--attn-tx` now, the same hue at the weight white can sit on
+(5.0 light; dark is dark-on-yellow), the pair §94.8 built for the orange
+Report button. The mockup's ghost button carried `.85` opacity and the build
+does not, for §255's reason.
+
+**NEVER `paint()`, NEVER OVER `file://`, AND EVERY BROWSER CALL IS GUARDED.**
+Nothing here repaints (§35, §71.2); over `file://` no slot is mounted, no
+listener armed and no peek sent (§94.11 — there is no server to be stale
+against); a missing service worker or a failed registration is not this
+feature's to complain about (§231.5). It is loaded before `sync.js` so the slot
+exists before the first paint could need it, and `build.py`'s hashed CSP takes
+it up like every other block (§238).
+
+**PROVED, AND PROVED ABLE TO FAIL.** `checks/safety-banners.py` over an HTTP
+stub that RECORDS every peek — so *"it asked, about this page, since it
+loaded"* is a measurement — draws, dismisses, re-draws on a newer landing,
+presses Reload & keep mine and counts the POST landing before the reload,
+presses it again against a 500 and counts NO reload, calls the version caution
+by name (a stub cannot install a worker) and asserts it outranks the edit one,
+measures every word in both themes with the sweep's arithmetic, and asks
+`file://` for the four absences. **20 red** against the file shipped before
+this — and its first run **died rather than reported** at the second assertion
+(§215), so every evaluate degrades and every press has a two-second patience.
+`scripts/test-safety-peek.js` drives the real handler against a real Postgres
+16: told, told who, told when, the asker excluded, another page silent, a
+function's page told under `fn:<key>`, and three malformed asks falling through
+to the full read. Full `qa.py` sweep ERRORS none; `test-authorize` 472/0;
+`test-graph-diff` 126/0; round trip PASS.
+
+**RECORDED, NOT DONE.** The edit caution can only ever be as fresh as its last
+peek (20s), so two people saving the same field inside the same twenty seconds
+still resolve last-write-wins with nobody warned — the residue §215 already
+records, narrowed rather than closed. The service-worker half cannot be driven
+from a stub and is asserted as *armed*; its first proof is the next production
+deploy, watched from an open tab. Built on the branch and **not merged**: `main`
+is Islam's call (rule 4), and the incremental writer stays off until its own
+staged rollout.
+
+**MERGED 2026-09-03** on Islam's word (*"merge"*), after main had taken
+§256–§257 underneath it: renumbered from §256, rebuilt from the merged
+sources, shell `v4.36-save-safety-banners`. This note is the commit `main`
+holds and the branch does not (§91, §108.17) — the merge commit reached the
+branch first because the session's permission gate refused the push to `main`
+twice and then let the branch through, so production needs a SHA of its own.
+
 ---
 
-## §257 — THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (2026-09-03)
+---
+
+## §259 — THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (2026-09-03)
+
+*Renumbered from §257 on the merge back: main took §257 (a target that is a
+yes or a no) and §258 (the save-safety banners) while this was being built —
+the same thing that happened to §248 around main's §250, and to that Y/N
+section itself. The sub-sections keep their own numbering (§259.1 … §259.4)
+so the order in which the decisions arrived is still readable.*
 
 Islam, in one message: *"where can I upload the raya trade mark so it can be
 used? then work on separators let's make teh serparators blue background like
@@ -28772,7 +29295,7 @@ every slide in it shot out of the running platform with Mobile's own plan in
 it, never drawn (§41.9). Two of his four answers are choices between treatments
 that only existed because they were drawn.
 
-### §257.1 — A section divider wears the tenant's own blue
+### §259.1 — A section divider wears the tenant's own blue
 
 **`--panel` IS THE BLUE, AND IT IS NOT A COLOUR OF THE DECK'S OWN.** It is the
 token Setup › Branding's *Navigation bar* control sets, so a divider wears
@@ -28834,7 +29357,7 @@ carry a weight and no 3-year target (§243), so printing a horizon there would
 name something that appears nowhere after it. `.secgrid` gained `c1`/`c2`/`c3`
 so a divider says how many cells it holds rather than assuming SWOT's four.
 
-**§257.1a — THE PILLARS ROLL-CALL STAYS WHITE.** Two treatments were drawn: the
+**§259.1a — THE PILLARS ROLL-CALL STAYS WHITE.** Two treatments were drawn: the
 roll-call itself turning blue and doing both jobs, or a divider in front of it
 with the roll-call unchanged. I recommended the first; **Islam chose the
 second** — *"the pillars page stay the same white backgoround as is just the
@@ -28843,7 +29366,7 @@ cost named: one extra slide in every deck. What it buys is that all four
 sections are announced the same way, and that the roll-call goes on reading as
 the content slide it is.
 
-**§257.1b — THE OVERALL PERFORMANCE DIVIDER CARRIES NO NUMBERS.** Two were
+**§259.1b — THE OVERALL PERFORMANCE DIVIDER CARRIES NO NUMBERS.** Two were
 drawn, and this is the one place my recommendation and his answer agreed:
 *"overall perfomrance title only."* The other printed 78% / 67% / 107% **two
 slides before the slide whose whole job is those three readings**, and printed
@@ -28851,7 +29374,7 @@ them without their bands or the change on last cycle — the room reads them onc
 flat and once properly and cannot tell which is the real one (§87's twins, in
 figures).
 
-### §257.2 — The group has a mark
+### §259.2 — The group has a mark
 
 §52.9 gave every **unit** a mark and stopped there, so a unit that had not
 uploaded one showed its name, **every supporting function showed nothing at
@@ -28902,7 +29425,7 @@ compares with the code. It became true today, and it now also says **where** a
 mark is used and that a unit's own is uploaded elsewhere, which is the question
 somebody asks next.
 
-### §257.3 — Proof
+### §259.3 — Proof
 
 `checks/deck-dividers.py`, **22 red** against the previous build and all green
 after. **Its first two runs against that build DIED rather than reporting**
@@ -28932,7 +29455,7 @@ deleted line and is not part of this feature; it is recorded because a seed that
 disagrees with the sources it is generated from is a fault nothing else would
 have found.
 
-### §257.4 — Recorded, not done
+### §259.4 — Recorded, not done
 
 - **Three headings in one deck now carry the tenant's pillar word**: the
   divider (*Strategic pillars*), the roll-call (*Pillars*) and the score table

@@ -1032,7 +1032,7 @@ function renderBranding(){
       }).join("") + '</tbody></table></div>'
     : '';
 
-  /* ── THE GROUP'S MARK (§257) ─────────────────────────────
+  /* ── THE GROUP'S MARK (§259) ─────────────────────────────
      FIRST on the page, deliberately. A mark is the most concrete thing a
      tenant has, and the three colour sections under it are one argument
      read in order (the two colours, what follows from them, whether it is

@@ -107,6 +107,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/welcome-screen/2026-08-28_welcome-final.html` | The welcome screen after sign-in: the greeting leads, the tenant signs on the separator's edge, and every count lives inside its own sentence. Final of three rounds &mdash; the two earlier files in the same folder are the band variations (round 2) and the numbers variations (round 3), each with Islam's pick recorded. **Built in 3.58** (&sect;148, spec 025) |
 | `../../design-mockups/pillar-project-remove/2026-09-01_remove-controls.html` | Removing a whole pillar or project: the worded quiet-red control in the pinned editing head beside Done, and the confirmation naming what the thing holds, what has been reported this cycle, and the archive-first way back. Signed off by Islam 2026-09-01. **Built** (&sect;232) |
 | `../../design-mockups/hide-from-presentation/2026-09-01_hide-element.html` | Hiding an element from the presentation: a per-row eye in the plan pen &mdash; the row kept, left out of the deck, and NOT counted in any score (Islam's decision); rows only, never a pillar, capability or project; the workbook carries the mark. Signed off by Islam 2026-09-01. **Built** (&sect;233) |
+| `../../design-mockups/data-loss-warnings/2026-09-02_save-safety-banners.html` | The two save-safety cautions in the refusal's own slot: *a newer version is ready* (Reload) and *somebody else updated this page* (Reload &amp; keep mine / Dismiss). Islam: *"BOTH"*. **Built on the branch** (&sect;258) |
 
 ### Drawn, awaiting a decision
 

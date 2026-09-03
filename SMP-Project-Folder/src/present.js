@@ -23,7 +23,7 @@ function dBand(v){ return band(v); }
    `where` is "after" unless it says otherwise. The Thank-you slide is the one
    that says otherwise: "the end" means the last thing anybody looks at, and
    that is not after the thanks. */
-/* ── A SECTION DIVIDER WEARS THE TENANT'S OWN BLUE (§257.1) ───────────
+/* ── A SECTION DIVIDER WEARS THE TENANT'S OWN BLUE (§259.1) ───────────
    Islam: *"let's make the separators blue background like the client brand
    colors"*, naming four sections — the foundation, the SWOT that already had
    a divider, the strategic pillars, and a final overall performance before
@@ -359,7 +359,7 @@ function deckSlides(u){
   if (!u.fnKey) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
-    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§257.1), and it is a
+    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
        measurement rather than taste. On the blue the four scoring colours
        read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
        Opportunities, which was drawn in `--panel` itself and would be
@@ -532,7 +532,7 @@ function deckSlides(u){
           '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
       /* What this row is measured against RIGHT NOW: an outcome answers with
          its own target, prorated where it compiles by Sum; everything else
-         with the share of its plan that is due (\u00a7239). One function, so the
+         with the share of its plan that is due (§239). One function, so the
          slide and the page cannot differ about it. */
       var bench = tacticBenchmark(t);
       if (!tacticAnswered(t))
@@ -597,7 +597,7 @@ function deckSlides(u){
      sits against *"where the units stands to be the last slide"*: both cannot
      be true at once, and this is the one he answered most recently and most
      specifically. Swapping the two is one line if he wants it back. */
-  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§257.1), and it carries
+  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§259.1), and it carries
      NO NUMBERS — Islam's B, from two drawn in the real deck. A prints the
      three headline readings two slides before the slide whose whole job is
      those three readings, and prints them without their bands or the change
@@ -943,7 +943,7 @@ function deckFootMarks(deck, u){
        too, and so does Thank you. Asking whether the mark is already on
        the slide cannot make that mistake. */
     if (s.querySelector(".dcovermark")) return;
-    /* AND NOT ON A SECTION DIVIDER (§257.1). Islam: *"remove the logo footer
+    /* AND NOT ON A SECTION DIVIDER (§259.1). Islam: *"remove the logo footer
        from the blue pages."* It also removes a fault rather than dressing
        one: the plate that keeps a navy lockup readable on a dark slide is
        switched on by the PAGE being dark, which a blue divider on a light
@@ -959,7 +959,7 @@ function openDeckWith(titleHtml, slides, target){
   root.querySelector(".deck").innerHTML = slides;
   if (target) insertPictureSlides(root.querySelector(".deck"), target);
   if (target) deckHidePass(root.querySelector(".deck"), target);
-  /* EVERY deck, not only a unit's (§257). `deckMark()` answers with the
+  /* EVERY deck, not only a unit's (§259). `deckMark()` answers with the
      subject's own mark or the group's, and a supporting function is not in
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */

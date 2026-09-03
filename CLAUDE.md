@@ -365,7 +365,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (§257):** Islam, in one
+- **THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (§259):** Islam, in one
   message — *"where can I upload the raya trade mark so it can be used? then
   work on separators let's make teh serparators blue background like the client
   brand colors"* — then four sections by number. **`--panel` IS THE BLUE AND IT
@@ -391,7 +391,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   carries NO NUMBERS**, both Islam's from two treatments drawn in the real deck,
   the first reversing my recommendation with its cost named (one extra slide per
   deck) and the second agreeing with it (§87's twins, in figures).
-  **§257.2 — THE GROUP'S MARK**: §52.9 gave every UNIT one and stopped, so a
+  **§259.2 — THE GROUP'S MARK**: §52.9 gave every UNIT one and stopped, so a
   supporting function showed nothing at all and the group had nowhere to go.
   One upload on **Setup › Branding**, FIRST on the page (the three colour
   sections under it are one argument read in order), through the **same
@@ -419,6 +419,26 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the sources and `db/seed-state.json` was never regenerated — *a seed that
   disagrees with the sources it is generated from is a fault nothing else would
   have found.*
+- **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
+  (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
+  an option in the drop down for the smo only."* §145.9 hid the pane-corner
+  button for everyone and kept the machinery; this is that machinery given back
+  **somewhere else** — beside *Present* and *Manage slides*, because that menu
+  is where the decks already are and the pane corner already holds the pen, the
+  arrows and §145's fill button. **THE CORNER BUTTON IS DELETED, NOT LEFT
+  HIDDEN** (§24, §94.15) — `dlPlanBtn()`, `DL_PAGES` and `editBar()`'s `dl`
+  term go with it, and **the first deletion sliced a RANGE** and left that
+  function's comment stranded above `arrangePaneBtn()` (§214's own lesson,
+  again). **THE NARROWING IS IN THE RULE, NEVER IN THE MENU** (§42, §48.2): the
+  entry is drawn from `mayDownloadPlan()` and `sendPlanPptx()` asks it again at
+  press time. **`ARRANGE_ROLES` IS UNTOUCHED** — reordering is still the
+  custodian's and the owner's (§101); the two questions merely stopped sharing
+  an answer. §119.9's two-buttons-per-tab problem disappears with the move.
+  **Three assertions REVERSED and REWRITTEN, never deleted** (§218): *the
+  custodian may* → *may NOT*, with the office's yes beside each and `mayArrange`
+  asserted in the same breath. 474/0; and one of the check's own first failures
+  was the CHECK — a function's Performance tab is keyed `fnperf`.
+
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -680,6 +700,48 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   this branch had named `deckAnchors()` as callerless dead code, true of the
   build it was written against and **no longer true** — §253.3 gave it a caller
   in the same hours.
+
+- **A TARGET THAT IS A YES OR A NO (§257):** Islam — *"for the target we need
+  to add a Y/N in the units which dims the target itself."* **IT IS A UNIT, NOT
+  A SECOND FIELD**, and that is why it costs no migration: §199 put the unit ON
+  the target string, so `Y/N` is the unit whose value part is always empty and
+  `target`/`target3y`/`outTarget` go on holding the whole string. **A COMPLETE
+  ANSWER, NEVER A GAP** — one line before §249's numeric test, or every yes/no
+  row wears the red word for ever and refuses Submit (§221) with nothing to
+  fill. **100 or 0, and silence is NOT SCORED** (§35: absent is not zero), both
+  his calls, taken before anything was built, across all three places the picker
+  appears. The direction and the compile rule are dimmed with the target —
+  **drawn and `disabled`, never merely dimmed** (§220), all four boxes kept
+  because a hole among equal boxes reads as a control that failed to render
+  (§248) — while **the unit picker stays live, being the only way back out**
+  (§61). **THE LIST NARROWS ON A BLANK ROW** to blank and `Y/N`, because a
+  brand-new "did it happen" row has no number to type and the em-dash made the
+  one unit needing none the one unit unreachable. **§257.2, HIS CORRECTION AND THE
+  BETTER MODEL**: the first build made a row yes/no by DESTROYING its number,
+  caught on a row reading `100 · Y/N · ≥ · Latest` with nothing dimmed — *"even
+  they are set before they need to be dimmed even by keeping the values but as
+  if they are not counted anymore."* The outcome's picker KEEPS the figure (so
+  `outTarget` was `100 Y/N`) while the dimming test asked whether the WHOLE
+  STRING was `Y/N`, so the tables disagreed with the outcome beside them
+  (§53.5 inside one feature); and destroying a figure is unlike every other
+  unit and makes changing your mind cost what somebody typed. `Y/N` is written
+  BESIDE the value now, `isYesNo` reads the unit off the end through
+  `targetParts` (`outUnitOf`'s §248 rule), the dimmed boxes SHOW what they
+  keep, and `100 B EGP` → `100 Y/N` → `100 B EGP` round trips. **The corrected
+  check then found two more**: leaving Y/N blanked the value instead of handing
+  it back, and `measureDue` parsed the kept 100 out of `100 Y/N` and printed
+  *"due at 100 Y/N"* beside a Yes/No control. **6 red** on the build he was
+  looking at; six assertions REWRITTEN, not deleted (§218). **§257.2a, found by
+  driving it**: a bound field writes WITHOUT repainting (§71.2 — right for
+  typing, wrong for a control that changes the row's SHAPE), so picking Y/N
+  changed the plan and nothing visibly happened; safe to repaint only because
+  these are SINGLE selects (§30.1, and §130.1 for why a ticking list is not).
+  **§257.3**: leaving Y/N writes a bare unit `splitTarget` cannot read back, so
+  `targetUnitOf` learned `outUnitOf`'s §248 rule — **narrowed to units the
+  picker offers**, or a target reading `TBD` becomes a unit nobody chose
+  (§96.2). The workbook carries it or a round trip drops every yes/no target
+  (§22). **18 red** on the shipped build; one check held a rule this reverses
+  and was REWRITTEN, not deleted (§218, §214.3).
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description
@@ -4487,7 +4549,7 @@ python3 checks/deck-figures.py   # a figure is read against what it is measured 
                                 # the two pillar headings asserted different — 33 red
                                 # on the build before
 python3 checks/deck-dividers.py # the group's mark and the deck's four blue
-                                # section dividers (§257): the blue asserted as AGREEMENT
+                                # section dividers (§259): the blue asserted as AGREEMENT
                                 # with `--panel` and never as a hex — it REBRANDS the
                                 # tenant mid-run and asserts the dividers followed — the
                                 # SWOT hues stripped on the divider AND kept on the
@@ -4578,6 +4640,19 @@ python3 checks/access-header.py # the matrix header: two lines at four widths, c
                                 # offered to a role that could never hold it (§174)
 python3 checks/stay-put.py      # a refresh stays where you are, and a NEW session still
                                 # opens where §94.6 says (§173)
+python3 checks/safety-banners.py # the page warns BEFORE a save can be lost (§258):
+                                # the tab asks the server about its own page since it
+                                # loaded (the stub records the ask), a landing by
+                                # somebody else is drawn and NAMED, never twice, Dismiss
+                                # hides it, Reload & keep mine POSTs this tab's change
+                                # first and reloads only when it landed (a 500 keeps
+                                # the page and §171's banner), the version caution
+                                # outranks it, both themes measured, and file:// draws
+                                # nothing and asks nothing — 20 red on the build before
+node scripts/test-safety-peek.js # ...and the server half against a real Postgres: who
+                                # else, when, the asker excluded, a function under
+                                # fn:<key>, and every malformed ask falling through to
+                                # the ordinary read
 python3 checks/save-said.py     # a save that FAILS says so on the page: a server
                                 # error naming its status, an unreachable server, a
                                 # remembered refusal, and demo data — seven states
@@ -4736,7 +4811,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;257: the group has a mark, and the
+*Last Updated: 2026-09-03 &mdash; **&sect;259: the group has a mark, and the
 deck has separators.** Islam in one message &mdash; *"where can I upload the
 raya trade mark so it can be used? then work on separators let's make teh
 serparators blue background like the client brand colors"* &mdash; then four
@@ -4757,7 +4832,7 @@ a blue divider on a light page is not. **The roll-call stays white** (his,
 reversing my recommendation, one extra slide per deck named as its cost) and
 **the closing divider carries no numbers** (his, agreeing with it &mdash; the
 other printed the three headline readings two slides early and without their
-bands). **&sect;257.2**: the group's mark, one upload on Branding through the
+bands). **&sect;259.2**: the group's mark, one upload on Branding through the
 SAME intake as a unit's, `deckMark()` the one reader, no migration, the key
 DELETED on Remove, classified `setup` and NAMED so a refusal says Branding
 &mdash; **and the two server edits go together**, because with only the
@@ -4772,7 +4847,53 @@ example). 489/0 authoriser, full `qa.py` sweep ERRORS none, nine neighbouring
 deck checks green. **And the seed was stale on `main`** &mdash; &sect;253.2's
 cut pointer had never been regenerated into `db/seed-state.json`.*
 
-*Earlier: 2026-09-02 &mdash; **&sect;254.7&ndash;.12: the deck round,
+
+*Earlier: 2026-09-03 &mdash; **&sect;258: the page warns before a save
+can be lost.** Islam, after a reporting round in which people lost work twice
+over: *"can we have some sort of mid page warning like the error and network
+issue in case the person is saving with someone opening the same thing … with
+clear action so we can know what to do?"* &mdash; then *"BOTH"* of the two
+cautions drawn, and *"for the safety banner let's build them on the branch."*
+**THE TWO WAYS WORK WAS LOST WERE MEASURED FIRST AND NEITHER WAS THE WRITER**:
+every loss reproduced as a STALE TAB posting the pre-&sect;234 shape and being
+refused all-or-nothing (&sect;184), which migration 040 ended once and nothing
+prevented next time; and two people on ONE number, where &sect;210 merges
+different fields and the same field is last-write-wins. **Two cautions, one
+family**, in the refusal's own slot on the ATTENTION ground &mdash; nothing has
+gone wrong yet (&sect;168). **A newer version is ready**: `sw.js` claims its
+clients on activate, so an open tab hears of a deploy through
+`controllerchange`; the registration is asked for a newer worker on a clock and
+on coming back, and only when there was a controller BEFORE (first install is
+nobody stale). **Somebody else updated this page**: `change_log` already holds
+who and when (&sect;42), so `GET /api/state?since=&target=` answers from it
+&mdash; one indexed query, never the graph (&sect;98), the asker excluded &mdash;
+and the caution NAMES them. **"Reload &amp; keep mine" is &sect;210 doing the
+work**: flush this tab's change first, reload only when it landed; a flush that
+fails keeps the page and &sect;171's banner. **The check said the button failed
+contrast** (`--attn` under white, 3.25:1 &mdash; &sect;38.4 for the seventh
+time), so it wears `--attn-tx`, &sect;94.8's own pair. Never `paint()`, never
+over `file://`, every browser call guarded. `checks/safety-banners.py` **20 red**
+on the build before (and its first run died rather than reported, &sect;215);
+`scripts/test-safety-peek.js` against a real Postgres; full sweep, 472/0,
+126/0, round trip PASS. **On the branch, not merged.** Recorded, not done: a
+same-field collision inside one 20s peek is still last-write-wins, and the
+worker half's first real proof is the next production deploy.*
+
+*Earlier: 2026-09-02 &mdash; **&sect;252.2: the plan download comes back,
+in the menu and for the office.** Islam, in the same breath as the merge:
+*"the ppt download leave it as an option in the drop down for the smo only."*
+&sect;145.9 hid the pane-corner button for everyone and kept the machinery;
+this is that machinery given back **somewhere else** &mdash; an entry beside
+*Present* and *Manage slides*, because that menu is where the decks already
+are. The corner button is **deleted, not left hidden** (&sect;24), and the
+narrowing lives in `mayDownloadPlan()` rather than in the menu, so the entry
+and the press cannot answer differently (&sect;42, &sect;48.2). It **reverses
+&sect;117's audience** at his instruction and is recorded as a reversal:
+`ARRANGE_ROLES` is untouched, because reordering is still the custodian's and
+the owner's (&sect;101). Three assertions rewritten rather than deleted
+(&sect;218), 474/0, and one of the check's own first failures was the check.*
+
+*Earlier the same day: **&sect;254.7&ndash;.12: the deck round,
 finished.** Islam's four from the running deck, on top of the eight before them.
 **&sect;254.7** &mdash; a unit written twice *with or without a gap*: his stored
 `40 %%` survived &sect;254.1's collapse, which split the unit on WHITESPACE, and
@@ -4947,6 +5068,59 @@ CHECK, and one assertion in `fn-ko-edit.py` was rewritten rather than deleted
 (&sect;218).*
 
 *Earlier the same day: **&sect;250: a tactic's outcome is measured
+
+*Earlier the same day: **&sect;257: a target that is a yes or a
+no.** Islam: *"for the target we need to add a Y/N in the units which dims the
+target itself."* Some rows are not measured &mdash; a certification achieved, an
+agreement signed, a warehouse open &mdash; and the plan had no way to write one:
+every target box wants a number, so such a row was left blank and, since
+&sect;249, wore the red word for ever and refused Submit with nothing anybody
+could fill. **BOTH DECISIONS ARE HIS AND WERE TAKEN BEFORE ANYTHING WAS BUILT**:
+a Y/N row scores **100 or 0** (so it counts in every average), and it applies in
+**all three** places the unit picker appears. **IT IS A UNIT, NOT A SECOND
+FIELD**, which is the whole of why it costs no migration &mdash; &sect;199 put
+the unit ON the target string, so `Y/N` is simply the unit whose value part is
+always empty. **AND IT IS A COMPLETE ANSWER, NEVER A GAP**: one line before
+&sect;249's numeric test, or the feature ships every yes/no row blocking Submit.
+**Nothing said is not a no** (unanswered scores null and leaves the average).
+The direction and the compile rule are dimmed alongside the target &mdash; mine,
+put to him with the reasoning and confirmed &mdash; **drawn and `disabled`,
+never merely dimmed** (&sect;220), with the unit picker left live because it is
+the only way back out (&sect;61). **&sect;257.2 IS HIS CORRECTION, AND THE
+BETTER MODEL**: the first build made a row yes/no by DESTROYING its number, and
+he caught it on a row reading `100 &middot; Y/N &middot; &ge; &middot; Latest`
+with nothing dimmed &mdash; *"even they are set before they need to be dimmed
+even by keeping the values but as if they are not counted anymore."* The
+outcome's picker KEEPS the figure, so `outTarget` was `100 Y/N` while the
+dimming test asked whether the WHOLE STRING was `Y/N` &mdash; so the tables
+disagreed with the outcome beside them (&sect;53.5 inside one feature) &mdash;
+and destroying a figure is unlike every other unit and makes changing your mind
+cost what somebody typed. `Y/N` is written BESIDE the value now, `isYesNo`
+reads the unit off the end through `targetParts` (`outUnitOf`'s &sect;248
+rule), the dimmed boxes SHOW what they keep, and `100 B EGP` &rarr; `100 Y/N`
+&rarr; `100 B EGP` round trips. **The corrected check then found two more**:
+leaving Y/N blanked the value instead of handing it back, and `measureDue`
+parsed the kept 100 out of `100 Y/N` and printed *"due at 100 Y/N"* beside a
+Yes/No control. **6 red** on the build he was looking at; six assertions
+REWRITTEN, not deleted (&sect;218). **&sect;257.2a, found by driving it**: a
+bound field writes WITHOUT repainting (&sect;71.2, right for typing), so
+picking Y/N changed the plan and **nothing visibly happened** &mdash; every
+assertion short of pressing the control passed. **&sect;257.3**: leaving Y/N writes a bare unit,
+which `splitTarget` cannot read back, so `targetUnitOf` learned the rule
+`outUnitOf` has had since &sect;248 &mdash; narrowed to units the picker itself
+offers, or a target reading `TBD` would be read as a unit nobody chose.
+**Proved able to fail: 18 red** on the shipped build; its first falsification
+run DIED rather than reported (&sect;215), so every probe degrades now. One
+check held a rule this reverses and was REWRITTEN, not deleted (&sect;218).
+472/0 authoriser &middot; 126/0 differ &middot; thirteen neighbouring checks
+&middot; full `qa.py` sweep ERRORS none. **RECORDED, NOT DONE**: a Y/N measure
+stores no `progress`, so the Focus board shows nothing for one (a reward
+decision, &sect;239); and `reportedCount` reads `actual` for every kind, so a
+tactic reporting into `outActual` is never counted done &mdash; that predates
+this and is measured as no worse for it, and fixing it changes what Submit
+demands of every existing tactic, which is Islam's call.*
+
+*Earlier: 2026-09-02 &mdash; **&sect;250: a tactic's outcome is measured
 against its own window.** Islam, of a tactic marked Q2 and Q3: *"that's a 6
 months project from april till september .. now we are reporting till august so
 the proration how should it be calauclated? because it's different than the

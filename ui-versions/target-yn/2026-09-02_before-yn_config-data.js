@@ -499,32 +499,6 @@ var LOGO_MAX_BYTES = 220000; /* the data URI, carried in every save */
 
 function unitLogo(u){ return (u && u.logo) || ""; }
 
-/* ── THE GROUP HAS A MARK OF ITS OWN (§259) ───────────────────────────
-   Islam: *"where can I upload the raya trade mark so it can be used?"*
-   Nowhere, until now. §52.9 gave every UNIT a mark and stopped there, so
-   a unit that has none showed its name and a supporting function showed
-   nothing at all — and Raya Trade, which is the group, had no home.
-
-   ONE UPLOAD, ON BRANDING. It sits with the accent and the bar rather
-   than on Business units, because it is not a unit's fact: it is what
-   the organisation looks like, which is the question that page answers.
-
-   THE SAME RULES AS A UNIT'S, through the same `logoIntake()` — PNG
-   only, transparent, capped — because a second intake would be a second
-   answer to "what may be uploaded" (§53.5).
-
-   `org` carries an `extra` JSONB and lib/state-io.js files every key it
-   does not recognise there, so this needs NO migration, exactly as a
-   unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
-   a group that has set none, never the key. */
-function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
-
-/* WHICH MARK A SUBJECT'S DECK WEARS, asked in one place. A unit's own
-   if it has one, the group's otherwise — so a tenant that uploads one
-   mark has a marked deck everywhere, and a supporting function, which
-   can never have a mark of its own, has one for the first time. */
-function deckMark(u){ return unitLogo(u) || groupLogo(); }
-
 function logoIntake(file){
   return new Promise(function(resolve, reject){
     if (!file || file.type !== "image/png") {
@@ -4339,10 +4313,7 @@ function fnEverReported(fk){
   if (f) {
     var reported = fnItems(f).some(function(p){
       return (p.measures || []).some(function(m){ return m.actual !== "" && m.actual != null; }) ||
-             /* §252: `tacticAnswered`, or a function whose tactics all report
-                through their outcomes reads as never having reported -- and
-                this is what stands between it and being deleted (§62). */
-             (p.tactics  || []).some(tacticAnswered);
+             (p.tactics  || []).some(function(x){ return x.actual != null; });
     });
     if (reported) return true;
   }
@@ -4768,30 +4739,12 @@ function reportItems(u){
 function askedItems(u){
   return reportItems(u).filter(function(x){ return x.kind !== "tactic" || x.asked; });
 }
-/* ── HAS THIS ROW BEEN ANSWERED? (§252) ────────────────────────────
-   One predicate, because six places were asking it and five of them were
-   asking `x.obj.actual` -- which is the wrong box for a tactic measured by
-   its outcome (§248). Measured on Mobile: entering the outcome's figure took
-   the report from 41 of 41 to 40 of 41, so the reporting page, the SMO's
-   cycle board and the welcome screen all said a unit still owed a figure it
-   had just entered, and Submit refused it with "1 figure still to enter".
-
-   The ternary this replaces had the SAME expression in both branches -- the
-   tactic branch had been written and then never filled in, which is as close
-   to a note saying "this is the one that differs" as code gets. */
-function rowAnswered(x){
-  var o = x && (x.obj || x);
-  if (!o) return false;
-  if (x.kind === "tactic") return tacticAnswered(o);
-  /* A deliverable and a milestone say how far they have got rather than
-     carrying a figure (§104.10) -- unchanged, and gathered here so the
-     question has one answer rather than three. */
-  if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
-  return o.actual != null && o.actual !== "";
-}
 function reportedCount(u){
   var a = askedItems(u), n = 0;
-  a.forEach(function(x){ if (rowAnswered(x)) n++; });
+  a.forEach(function(x){
+    var v = x.kind === "tactic" ? x.obj.actual : x.obj.actual;
+    if (v != null && v !== "") n++;
+  });
   return { done:n, total:a.length };
 }
 /* A note is required where a figure lands in the bottom two bands. A red
@@ -4801,10 +4754,7 @@ function reportedCount(u){
    everything else carries `progress`. One reader, because the note rule and
    the board both ask and two copies would disagree about a deliverable. */
 function rowReads(x){
-  /* §252: through `tacticProgress`, or the note rule cannot see an outcome at
-     all -- a tactic reporting 2 of a target of 10 read null, so nobody was
-     ever asked to explain it and Submit let it through unexplained. */
-  if (x.kind === "tactic") return tacticProgress(x.obj);
+  if (x.kind === "tactic") return tacticRatio(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
   /* §239: the prorated score, so a unit is asked to explain a figure that is
      actually behind rather than one that only looks behind against a whole
@@ -4864,9 +4814,10 @@ function fnAskedItems(fk){
 }
 function fnReportedCount(fk){
   var a = fnAskedItems(fk), n = 0;
-  /* §252: the same predicate the unit's count asks. A function has no
-     tactics, so nothing here moves -- what goes is the second copy. */
-  a.forEach(function(x){ if (rowAnswered(x)) n++; });
+  a.forEach(function(x){
+    if (x.kind === "deliverable" || x.kind === "milestone") { if (statusGiven(x.obj)) n++; }
+    else if (x.obj.actual != null && x.obj.actual !== "") n++;
+  });
   return { done:n, total:a.length };
 }
 function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
@@ -5731,20 +5682,6 @@ function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum
    empty the column for a plan whose timelines were never filled in. */
 function measureDue(m, share){
   if (!m || !m.target) return null;
-  /* §257: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
-     figure — picking Y/N keeps whatever number was there and stops counting
-     it — so the digits are in the string and `parseFloat` would pull them
-     out, printing "due at 100 Y/N" beside a control offering Yes and No.
-     The unit decides, not whether a number can be found. */
-  if (SMPRules.isYesNo(m.target)) return null;
-  /* §251: THE COUNT AND THE SCORE ASK ONE FUNCTION. A target may now hold its
-     unit before its number ("%"), so "is there a number in here" decides both
-     whether the row is a counted gap and whether it can be scored at all —
-     and two definitions of it is how a row comes to be counted as missing
-     while quietly being scored (§249's own rule, on the field it named). The
-     test is unchanged; what changes is that this asks for it rather than
-     carrying its own copy of the same expression. */
-  if (!SMPRules.targetHasNumber(m.target)) return null;
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;
@@ -5758,19 +5695,6 @@ function measureDue(m, share){
    stays a year-end judgement); everything else reads this. */
 function measureScore(m, share){
   if (!m) return null;
-  /* ── A YES OR A NO SCORES 100 OR 0 (§257) ──────────────────────────
-     BEFORE the arithmetic, and that ordering is the whole of it: a Y/N
-     target carries no number, so `measureDue` answers null and the row
-     would fall out of every score unscored. Islam chose 100/0 over "shown
-     but never scored", so it lands in the pillar's and the unit's averages
-     like any other row.
-
-     NOTHING SAID IS NOT A NO. An unanswered row scores null and leaves every
-     average, exactly as an empty number box does — reading silence as a
-     failure marks a unit down for a question nobody has been asked yet (§35,
-     §104.10). The share is not consulted: there is no partial yes to prorate
-     (§250 prorates a TARGET, and this row has no number to prorate). */
-  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
@@ -5819,15 +5743,7 @@ function outcomeOf(t){
      row comes to be counted as missing while quietly being scored (§53.5,
      §42). The test is unchanged; only its home moved. */
   if (!t || !t.outTarget) return null;
-  /* §257: a Y/N outcome is a real target with no number in it, so it is
-     admitted here or the tactic goes on being read the old way and the
-     answer somebody gave is scored by nothing. `measureScore` takes it from
-     here — one arithmetic for every scored row, as §248 settled. And it is
-     what makes main's own `tacticAnswered` right for a yes/no row: an
-     outcome with no figure scores null, so the row is NOT answered, which
-     is Islam's "a dash is not an entry" falling out of a rule already
-     there rather than needing a second one. */
-  if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
+  if (!SMPRules.targetHasNumber(t.outTarget)) return null;
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual };
 }
@@ -5860,31 +5776,6 @@ function tacticBenchmark(t){
 /* Is this tactic being measured by its outcome rather than by an estimate?
    Asked by the three panes so none of them decides it separately. */
 function onOutcome(t){ return tacticOutcomeScore(t) != null; }
-
-/* ── WHAT A TACTIC READS, AS A PER CENT (§252) ─────────────────────
-   Islam, of the review deck: *"presentations doesn't change when the plan
-   performance is done."*
-
-   §248 gave a tactic a SECOND box for its figure, and every surface that had
-   to be taught about it was taught one at a time. This expression --
-   `onOutcome(t) ? tacticReads(t) : tacticRatio(t)` -- was written out in the
-   Performance pane and NOWHERE else, so the deck went on asking `tacticRatio`
-   alone and printed an em-dash for a row it had already counted in the
-   heading three inches above it (§53.5: one product, two surfaces, and they
-   must not disagree about one number).
-
-   An outcome answers with its own score against the target due so far; a
-   tactic without one answers with the share of its plan it has delivered,
-   byte for byte as before. */
-/* §254.2: ASKED OF THE OUTCOME'S EXISTENCE, NOT OF ITS SCORE. `onOutcome`
-   answers "can this be scored on its outcome", which is the right question for
-   the score itself and the wrong one for "which measure is this row on" — and
-   the two being different is what put a per cent beside a count. A row that is
-   ON its outcome and has not reported one is NOT SCORED, which is what
-   `tacticOutcomeScore` already returns. */
-function tacticProgress(t){
-  return outcomeOf(t) ? tacticOutcomeScore(t) : tacticRatio(t);
-}
 
 /* What a prorated row is measured against, written the way the target is --
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
@@ -6466,39 +6357,7 @@ function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
    figure is in, whichever box it came from. Written as one predicate so the
    three panes, the score and the note rule cannot disagree about whether a
    row has been answered (§53.5). */
-/* ── ONE QUESTION DECIDES THE WHOLE ROW (§254.2, narrowing §248) ───────
-   Islam, of a tactic reading `2% / 2#` on the deck: *"the ytd is showing 2% /
-   2# .. it's not 2% in the performance it's just 2 with a unit of #"*, and
-   then, of the cause: *"the reported number is already 2# I don't know why
-   it's not reported correctly."*
-
-   NINE STATES WERE PUT THROUGH THE SCORER AND EVERY ONE WITH A FIGURE IN THE
-   OUTCOME SCORES. So the figure the deck could see was not in the outcome, and
-   there is one path that produces exactly his row: the reporting box asks for
-   the OUTCOME's figure only once the outcome has a target, and asks the old
-   question — per cent delivered — before that. A figure reported before the
-   target was added therefore sits in `actual` for ever, and the moment the
-   target appears `tacticBenchmark` starts answering with the outcome's target
-   while the figure is still coming from the old field. Two measures in one
-   cell, and nobody did anything wrong.
-
-   §248 SWITCHED ON TARGET **AND** FIGURE, deliberately, so that adding an
-   outcome mid-round changed nothing until somebody typed. That rule is
-   narrowed here at Islam's direction — he was offered three behaviours with
-   what each costs and chose this one: **the target alone decides**, and a row
-   whose outcome has a target but no figure SAYS IT IS OWED ONE rather than
-   quietly reading its old per cent.
-
-   THE COST IS REAL AND WAS STATED BEFORE HE CHOSE: such a row leaves every
-   average, stops counting as reported, and refuses Submit until the figure is
-   entered — which is one number on the reporting page. It is the only one of
-   the three that never states a figure nobody reported (§35), and the two
-   alternatives were an invented figure (carrying the old per cent across) and
-   an ignored target. */
-function tacticAnswered(t){
-  if (!t) return false;
-  return outcomeOf(t) ? tacticOutcomeScore(t) != null : t.actual != null;
-}
+function tacticAnswered(t){ return t && (t.actual != null || tacticOutcomeScore(t) != null); }
 function reportedTactics(p){ return dueTactics(p).filter(tacticAnswered); }
 /* THE TWO SCORES PASS UP SEPARATELY AND STAY APART (Islam, asked). The child's
    measure performance becomes the pillar's performance and its execution
@@ -6841,9 +6700,7 @@ function unitSnapshotCounts(s){
   (s.items || []).forEach(function(p){
     m += (p.measures || []).length; t += (p.tactics || []).length;
     (p.measures || []).forEach(function(x){ if (x.progress != null) rep++; });
-    /* §252: an archived tactic answered by its outcome was reported, and a
-       snapshot that says otherwise is a count of the wrong box. */
-    (p.tactics  || []).forEach(function(x){ if (tacticAnswered(x)) rep++; });
+    (p.tactics  || []).forEach(function(x){ if (x.actual != null) rep++; });
   });
   (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
   return { pillars:(s.items || []).length, measures:m, tactics:t,

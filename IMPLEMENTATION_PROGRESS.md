@@ -6,9 +6,11 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §254.7–.12 merged to `main` 2026-09-02 and live
-(`smp-shell-v4.32-deck-round`), together with §255 and §256 from another
-session. **§257 is on `claude/deck-separators-brand`, built and not merged.**
+**Latest version:** §258 on `main` and live (the save-safety banners), on top
+of §257 (a target that is a yes or a no) and the whole deck round — all from
+other sessions. **§259 (the group's mark and the deck's four blue section
+dividers) is merging from `claude/deck-separators-brand`,** renumbered from
+§257 because main took that number while it was being built.
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -80,7 +82,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §257 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
+### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
 
 Islam, in one message: *"where can I upload the raya trade mark so it can be
 used? then work on separators let's make teh serparators blue background like
@@ -119,6 +121,27 @@ sweep ERRORS none; nine neighbouring deck checks green.
 `clients/raya-trade/brand/raya-trade-group-mark.png` — he uploads it on
 Setup › Branding once this is merged. Whether the deck cover, Thank you and the
 four per-pillar covers should also go blue is asked and deliberately not done.
+### §252.2 — the plan download, in the menu and the office's (2026-09-02, same branch)
+
+Islam, in the same breath as the merge: *"the ppt download leave it as an
+option in the drop down for the smo only."*
+
+§145.9 hid the pane-corner button for everyone in August and kept the machinery,
+saying giving it back was one line. It comes back **somewhere else**: an entry
+in the **Presentation** menu, beside *Present* and *Manage slides* — three
+deck-shaped things in one place, rather than a fourth control in a pane corner
+that already holds the pen, the arrows and the fill button.
+
+**For the office alone**, which reverses §117's audience (the office plus a
+unit's owner and custodian and a function's head) at his instruction, and is
+recorded as a reversal rather than written over. Reordering is untouched — still
+the custodian's and the owner's (§101). The corner button, its page map and the
+`editBar` term are **deleted rather than left returning ""** (§24).
+
+Green: `strategy-split` ALL OK (rewritten around the new placement, both ends
+per person), `test-authorize` 474/0 with the three reversed assertions
+**rewritten, not deleted** (§218), `deck-outcome` 0 failed, `plan-fields`,
+`perf-line`, and the full `qa.py` sweep.
 
 ### §254.7–.12 — the deck round, finished (2026-09-02, same branch)
 

@@ -286,8 +286,21 @@
    bytes behind the name differ — caught by §94.16's confirmation immediately
    before the push, never by the merge. Checked against origin/main serving
    "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
-   push. */
-const SHELL = "smp-shell-v4.33-blue-dividers";
+   push.
+
+   §252.2: the plan download comes back as an entry in the Presentation menu
+   and the corner button is deleted, so the built file's bytes changed again.
+   Main moved 26 commits under this branch while it waited for a word — the
+   whole deck round, §251.2 to §257 — and was serving
+   "smp-shell-v4.34-yn-target" when this was merged in; confirm once more
+   immediately before the push (§94.16).
+
+   §259: the group's mark and the deck's four blue section dividers. Main had
+   moved again while this branch waited — §257's Y/N target and §258's
+   save-safety banners — and was serving "smp-shell-v4.36-save-safety-banners"
+   when this merge was made, so the name goes past it rather than beside it.
+   Confirmed against origin/main immediately before the push. */
+const SHELL = "smp-shell-v4.37-blue-dividers";
 const ASSETS = [
   "/",
   "/index.html",

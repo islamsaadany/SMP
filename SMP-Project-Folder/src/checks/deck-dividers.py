@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""§257 — the group's mark, and the deck's four blue section dividers.
+"""§259 — the group's mark, and the deck's four blue section dividers.
 
 Islam: *"where can I upload the raya trade mark so it can be used? then work
 on separators let's make the separators blue background like the client brand
@@ -259,7 +259,7 @@ with sync_playwright() as p:
     for t in r:
         ok(r[t]["cover"], "%s — the cover wears the group's mark" % t)
         ok(r[t]["feet"] > 0, "%s — its content slides are footed" % t)
-        ok(r[t]["sectFeet"] == 0, "%s — and no divider is (§257.1)" % t)
+        ok(r[t]["sectFeet"] == 0, "%s — and no divider is (§259.1)" % t)
 
     print("\n10 · Remove puts it back")
     pg.evaluate("() => { current='setup'; currentSub='brand'; paint(); }")

@@ -1,4 +1,4 @@
-"""HISTORY: WHO CHANGED WHAT, AND A WAY BACK (§261).
+"""HISTORY: WHO CHANGED WHAT, AND A WAY BACK (§262).
 
 Islam: *"how about a history saving and recovery feature to track the changes
 per user and per unit and function to ensure nothing is lost?"* — agreed from
@@ -184,9 +184,9 @@ with sync_playwright() as p:
     ck("the quarters draw as four boxes", pg.evaluate("()=>document.querySelectorAll('[data-hist-page] i.hist-q').length===4 && document.querySelectorAll('[data-hist-page] i.hist-q.on').length===2"))
     # ONE ROW IS NOT ONE TOP (§122.4): a chip and a quarter box sit on the line
     # at different offsets, so tops are clustered — two lines are >8px apart.
-    # §261.2: EVERY cell wraps and nothing is cut — asserted as "no cell holds
+    # §262.2: EVERY cell wraps and nothing is cut — asserted as "no cell holds
     # more than it shows", at the page's width and at a laptop's.
-    ck("no cell is cut: every cell shows all it holds (§261.2)", pg.evaluate("()=>[...document.querySelectorAll('[data-hist-page] table.hist td')].every(td=>td.scrollWidth<=td.clientWidth+1)"))
+    ck("no cell is cut: every cell shows all it holds (§262.2)", pg.evaluate("()=>[...document.querySelectorAll('[data-hist-page] table.hist td')].every(td=>td.scrollWidth<=td.clientWidth+1)"))
     pg.set_viewport_size({"width": 1180, "height": 800}); pg.wait_for_timeout(300)
     cut = pg.evaluate("()=>[...document.querySelectorAll('[data-hist-page] table.hist td')].filter(td=>td.scrollWidth>td.clientWidth+1).map(td=>td.textContent.trim().slice(0,30))")
     ck("...and at a laptop's width too (1180)", not cut, cut)

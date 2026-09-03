@@ -1,4 +1,4 @@
-/* ══ TRAIL (§261) ═════════════════════════════════════════════════════════
+/* ══ TRAIL (§262) ═════════════════════════════════════════════════════════
    Islam, after a reporting round in which people lost work: *"how about a
    history saving and recovery feature to track the changes per user and per
    unit and function to ensure nothing is lost?"* — and, from the mockup drawn
@@ -56,7 +56,7 @@ var TRAIL = (function(){
     try { if (typeof placeLabel === "function") { var w = placeLabel(t); return t === "group" ? "The group" : w; } } catch (e) {}
     return String(t).replace(/^fn:/, "");
   }
-  /* WHO IS THE REGISTER'S NAME, NEVER THE FULL LEGAL ONE (§261.1, Islam:
+  /* WHO IS THE REGISTER'S NAME, NEVER THE FULL LEGAL ONE (§262.1, Islam:
      "make the who matching the name in the register not the full name"):
      the same word the register and every picker show (§93.8, §130.7),
      resolved off the key; the full name the log stored goes on the hover. */
@@ -137,7 +137,7 @@ var TRAIL = (function(){
   function tableHtml(list, opts){
     opts = opts || {};
     if (!list.length) return '<p class="hist-empty">' + E(opts.empty || "No changes recorded for this.") + '</p>';
-    /* ROW AND FROM → TO WRAP; EVERYTHING ELSE IS ONE LINE (§261.1, reversing
+    /* ROW AND FROM → TO WRAP; EVERYTHING ELSE IS ONE LINE (§262.1, reversing
        §88 for exactly two columns at Islam's instruction: "you need to wrap
        the change to appear in the cell and same for the row"). A value is
        what this page exists to show, and a value clipped to an ellipsis is a

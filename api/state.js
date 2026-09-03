@@ -162,7 +162,7 @@ module.exports = async function handler(req, res) {
          `since` falls through to the ordinary read rather than to a 500. */
       let q = null;
       try { q = new URL(req.url, "http://x").searchParams; } catch (e) {}
-      /* ── HISTORY (§261): A FILTERED READ OF THE LOG, NEVER THE WHOLE ──
+      /* ── HISTORY (§262): A FILTERED READ OF THE LOG, NEVER THE WHOLE ──
          The log grows for ever, so the page asks for a slice — a person, a
          place, a kind, a window, a cap — and the office may ask for any
          slice. Anybody else may ask about ONE place, and only a place they

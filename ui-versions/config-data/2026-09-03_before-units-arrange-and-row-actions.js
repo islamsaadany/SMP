@@ -198,35 +198,6 @@ var PMENU = null;
    the two tables are never on screen together and sharing one would make
    "which table" a third thing to check. */
 var FNMENU = null;
-/* THE SAME STATE AGAIN, FOR THE BUSINESS UNITS TABLE (§261). Its own key for
-   the reason FNMENU has its own: the three tables are never on screen together,
-   and one shared key would make "which table" a third thing every reader of it
-   has to check. */
-var UMENU = null;
-/* AND FOR COMPANIES (§261). */
-var COMENU = null;
-
-/* ── WHICH SETUP TABLE IS BEING ARRANGED (§261) ─────────────────────
-   Islam: *"allow me in the setup to rearrange the business units table so they
-   appear in the navigation as per this order."*
-
-   NOT `ARRANGE`, which is the group Performance page's boolean and is scoped to
-   that page — §65.9's lesson about a one-word name in a shared namespace, in
-   JavaScript rather than in CSS. This holds the TABLE's id (`"units"`,
-   `"fns"`), so a page cannot be arranging while another page's band is drawn,
-   and one press cannot turn two tables into handles at once.
-
-   SCREEN STATE, NEVER SAVED (§25.2): what is saved is the ORDER, which is the
-   list itself and was already stored. */
-var SETARRANGE = null;
-
-/* ── WHICH ROW IS OPEN IN THE SETUP DIALOG (§261) ───────────────────
-   `{ table, key }`, the register's `PDLG` one table wider. Editing left the row
-   for the same reason it left the register (§116): every collision these tables
-   have had was a control clicked inside a 150px cell, and none of them survives
-   the move. `ROWEDIT` still holds the row and still carries the snapshot Cancel
-   restores — what changed is only where the fields are DRAWN. */
-var ROWDLG = null;
 /* Which person the delete confirmation is open for (§69). Its own key rather
    than a mode on PMENU: the confirmation REPLACES the menu in the same place,
    so the second press lands where the first one did — the same shape the
@@ -997,23 +968,10 @@ function restoreRolePointers(was){
     f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
   });
 }
-/* WHICH TABLES CAN MOVE A ROLE (§110, widened in §261). A person's roles are
-   not ON the person and a unit's head is not ON the unit either: `UNIT_ROLES[k]
-   .head` and `FUNCTIONS[k].custodian` are pointers, and `ROWWAS` is a copy of
-   the ROW. So Cancel on a unit whose head had just been changed restored the
-   unit and left the grant standing — §110's fault exactly, on two tables it had
-   not been asked about, and reachable the moment the picker moved into a dialog
-   with a Cancel on it.
-
-   A LIST, not a test for one table: §65's rule that a second table joining a
-   behaviour by omission is how these drift. Companies is deliberately absent —
-   it holds no head and no custodian, and capturing two maps to restore nothing
-   would be a cost with no reader. */
-var ROLE_BEARING_ROWS = { people:1, units:1, fns:1 };
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
-  ROWHELD = (ROLE_BEARING_ROWS[table] && obj) ? rolePointers() : null;
+  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open

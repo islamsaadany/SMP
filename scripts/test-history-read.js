@@ -1,4 +1,4 @@
-/* HISTORY IS READ FILTERED, AND ONLY BY WHO MAY (§261) — the server half.
+/* HISTORY IS READ FILTERED, AND ONLY BY WHO MAY (§262) — the server half.
 
    GET /api/state?log=1 answers a slice of change_log: the office any slice;
    anybody else one place they hold a role at, or a 403. Driven through the

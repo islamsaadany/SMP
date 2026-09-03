@@ -1,6 +1,6 @@
 # 028 — History: who changed what, and a way back
 
-**Status:** built on `claude/platform-performance-audit-z91vi4` (§261), 2026-09-03.
+**Status:** built on `claude/platform-performance-audit-z91vi4` (§262), 2026-09-03.
 **Asked by:** Islam — *"how about a history saving and recovery feature to track the changes per user and per unit and function to ensure nothing is lost?"*
 **Mockup:** `design-mockups/history/2026-09-03_history-page.html`, drawn from real change-log rows; signed off with three questions answered (below).
 

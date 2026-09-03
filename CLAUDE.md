@@ -439,6 +439,64 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted in the same breath. 474/0; and one of the check's own first failures
   was the CHECK — a function's Performance tab is keyed `fnperf`.
 
+- **EMPTY IS NOT MISSING, AND THE BAR NOW SAYS WHICH (§261):** Islam, on
+  Mobile and then Care — *"mobile keeps showing filling what's missing while we
+  can't find something missing and there is no the side badges that identify
+  where the missing part is."* **REPRODUCED BY MAKING THE STATE**: with every
+  counted gap on Mobile filled and the collaborators left alone, `gapTotal` is
+  **0** and `gapOpenable` is **22** — §223's door drawn with no count, no chips
+  and no rail marks, because all three read `GAP_FIELDS` and there is nothing in
+  it; his Care screenshot named the cause without my guessing it (the
+  **COLLABS.** column, an em-dash on both tactics). **BOTH HALVES WERE BEHAVING
+  AS DECIDED AND NOTHING JOINED THEM UP** — §187 ruled a tactic nobody supports
+  is not missing, §205 kept the box fillable, §223 drew a door from that second
+  list and stopped at the door (§113's shape, one feature over). **THE OFFICE IS
+  NOT SHOWN IT AT ALL**, which is the half that answers what he was looking at:
+  `mayFillPage` refuses the office outright (their write settles, so they hold
+  the pen), and with nothing owed the door is a second way into a page they can
+  already edit wearing a word that does not apply to them (§94.15) —
+  **`seesEmpty()` beside `seesGaps()`, asked BEFORE the count is taken** so the
+  office does not pay for a walk of the subject to be told about a bar they will
+  not see. **THE FILLER'S BAR IS THE SAME BAR IN A QUIETER VOICE** — a count, a
+  chip per place, a mark per rail row — through `missBarCta(n, empty)` and ONE
+  `missBar()`, never a second builder (§53.5). **GREY, NEVER RED AND NEVER
+  AMBER**: §145.14's rule is kept rather than bent, because a tactic nobody
+  supports is a fact on a healthy plan (§187's own reasoning for the register's
+  seat count, §41's budget). **NOTHING ABOUT COUNTING MOVES** — no score, no
+  average, nothing Submit refuses, nothing the deck marks — which is why §187
+  and §214.2 stand untouched underneath it. **THE WALK FOLLOWS WHATEVER THE BAR
+  IS COUNTING** (§192.4's rule kept, not weakened: the question stops being *is
+  this field counted* and becomes *is this one of the fields the bar in front of
+  me is counting*), worked out ONCE per paint in `GAP_MODE`, reset beside
+  `FIELDS`. **AND THE BOX IS NOT RUNG IN RED EITHER** (`eqfld` overrides the
+  colour and not the dash) — one screen cannot say Missing and empty about one
+  box. **AND THE SECOND COPY OF THE BUTTON WAS STILL RED** (§261.7), found by
+  LOOKING at the built page with every assertion green: §145.14 draws the door
+  in two places — the bar and the pane's corner — and the quiet register had
+  reached one; the check asks EVERY element carrying `data-fillcta` now, same
+  words, same class, same painted ground, because a count of doors is what
+  survives a third one being added. **AND §93.11 WAS EARNED TWICE IN ONE CSS
+  COMMENT** (§261.8, fifth time in this file): the `eqfld` rule provably matched
+  and provably did nothing — first because a paragraph sat AFTER the comment's
+  closing marker, then because the sentence recording that quoted the closing
+  marker literally, **which ends a CSS comment wherever it appears**, so the
+  same rule was eaten by the note explaining why it had been eaten. Both times
+  `document.styleSheets` named it in one run (*1 present, 2 of 3 missing*) where
+  reading the cascade would not have; and the assertion that caught it measures
+  the PAINTED border rather than the class, which is the only reason it could. **THE REFRESH READS THE MODE OFF THE BAND**, never re-derives it: on a
+  quiet bar `gapTotal` is 0, which is what a quiet bar MEANS, so re-asking it
+  would flip every chip to the green tick over a page still full of empty boxes
+  (§63). `SMPRules.gapEmptyFields()` is `gapMissing`'s twin one list over,
+  written once for three readers. **Proved able to fail: 26 red** on the shipped
+  build — **and its own first falsification run DIED rather than reporting**
+  (§215, fourth time in this file), computing a style from an element the old
+  build does not have and printing 11 of 26. **RECORDED, NOT DONE, AND
+  MEASURED**: a supporting function's Projects pane gets the bar and the chips
+  (Finance: 0 owed, 12 empty, FIN01 5 · FIN02 4 · FIN03 3) and no rail mark,
+  because **the two rails already disagree about scope** — a unit's counts what
+  its chip counts, a function's counts the project's front matter where its chip
+  counts the project plus its outcomes and milestones — and straightening that
+  changes a number already on screen.
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -4639,6 +4697,22 @@ python3 checks/reported-note.py # a reported note is NAMED as one (§255): the n
                                 # asserted to use the same word. It MAKES the state: 0 of
                                 # 84 demo tactics carry a note, so every assertion here
                                 # passes on a build that lost the feature. 16 red before
+python3 checks/empty-not-missing.py # empty is not missing (§261): the office shown
+                                # no bar with nothing owed AND still holding the pen
+                                # (both ends, or a build that dropped it for everybody
+                                # passes), the filler's count, chips and rail marks
+                                # asserted as AGREEMENT with gapOpenable and gapMap's
+                                # own fillable answer, the quiet dress measured as PAINT
+                                # against the palette's tokens (a bare class loses to
+                                # `.tabs button` inside the bar), the walk PRESSED and
+                                # the row read back, the missing register asserted
+                                # untouched in the same run, and the in-place refresh
+                                # proved not to flip every chip to a green tick. It
+                                # MAKES its state — the shipped plan owes 44 on Mobile,
+                                # so every assertion is unreachable until Islam's tenant
+                                # is reproduced. 26 red on the build before; every probe
+                                # degrades, because its own first run there DIED and
+                                # reported 11 (§215)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4874,7 +4948,47 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: empty is not missing, and the bar
+now says which.** Islam, on Mobile and minutes later on Care: *"mobile keeps
+showing filling what's missing while we can't find something missing and there
+is no the side badges that identify where the missing part is."* **REPRODUCED BY
+MAKING THE STATE, NOT BY READING THE CODE** &mdash; the demo owes 44 on Mobile,
+so none of this is visible there; with every counted gap filled and the
+collaborators left alone, `gapTotal` is **0** and `gapOpenable` is **22**, and
+the band renders his screenshot to the pixel: a solid red *Fill in what is
+empty*, no count, no chips, no rail marks, with the pen sitting beside it. His
+Care screenshot then named the cause without my having to guess it &mdash; the
+**COLLABS.** column, an em-dash on both tactics. **BOTH HALVES WERE BEHAVING AS
+DECIDED AND NOTHING JOINED THEM UP**: &sect;187 ruled a tactic nobody supports is
+not missing (a tactic one person owns is a complete line), &sect;205 kept the box
+FILLABLE because emptying the list the server reads refuses a save the screen has
+offered, and &sect;223 drew a door from that second list for the best of reasons
+&mdash; and stopped at the door. *Two correct decisions meeting, and what was
+never asked is what they do to each other* (&sect;113's shape, one feature over).
+**THE OFFICE IS NOT SHOWN IT AT ALL**, which is the half that answers what he was
+looking at, and it is one line: `mayFillPage` refuses the office outright, so
+with nothing owed the door is a second way into a page they already hold the pen
+for, wearing a word that does not apply to them (&sect;94.15). **THE FILLER'S BAR
+IS THE SAME BAR IN A QUIETER VOICE** &mdash; a count, a chip per place, a mark
+per rail row, one builder. **GREY, NEVER RED AND NEVER AMBER**: &sect;145.14's
+rule kept rather than bent, because a tactic nobody supports is a fact on a
+healthy plan. **NOTHING ABOUT COUNTING MOVES** &mdash; no score, no average,
+nothing Submit refuses, nothing the deck marks &mdash; this finds boxes, it does
+not create obligations. **THE WALK FOLLOWS WHATEVER THE BAR IS COUNTING**
+(&sect;192.4's rule kept: the question stops being *is this field counted*),
+**the box is not rung in red either**, and **the in-place refresh reads its
+register off the band** rather than re-deriving it, or one fill would flip every
+chip to a green tick over a page still full of empty boxes. Both costs were
+stated on the mockup before he chose. **Proved able to fail: 26 red** on the
+shipped build &mdash; **and its own first falsification run DIED rather than
+reporting** (&sect;215, fourth time), printing 11 of 26. Neighbours green:
+`gap-fill`, `gap-walk`, `milestone-fill`, `fn-pillars`, `unit-before-number`,
+`submit-gate`, 491/0 authoriser, 126/0 differ, full `qa.py` sweep. **RECORDED,
+NOT DONE, AND MEASURED**: a function's Projects pane gets the bar and the chips
+(Finance: 0 owed, 12 empty) and no rail mark, because the two rails already
+disagree about scope and straightening that changes a number on screen.*
+
+*Earlier the same day: **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

@@ -2294,14 +2294,8 @@ function editBar(page, acKey){
          met a Definition she could edit and no control to edit it with. */
       else if (gapTotal(TARGET))
         inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
-      /* §261: AND THE QUIET REGISTER REACHES THE SECOND COPY OF THIS BUTTON.
-         §145.14 deliberately draws the door in two places — the section row's
-         bar and the pane's corner — so a build that dressed one of them and
-         not the other would put a red button and a grey one on one screen
-         saying the same four words (§53.5, found by LOOKING at the built page
-         rather than by any assertion here). */
       else if (gapOpenable(TARGET))
-        inner = '<button class="eqcta" data-fillcta="' + page + '">Fill in what is empty</button>';
+        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in what is empty</button>';
       else inner = '';
       return inner ? '<div class="pageact">' + inner + '</div>' : '';
     }
@@ -2380,11 +2374,8 @@ function penBtn(page, acKey){
       'Fill in missing elements</button>';
     /* §223: nothing COUNTED, but something fillable — same door, quieter
        words, because nothing here is owed. */
-    /* §261: quiet here too, for the reason written on editBar's copy above —
-       the corner and the bar are one control drawn twice, and a screen
-       carrying both in two voices says nothing consistent about either. */
     var open = gapOpenable(TARGET);
-    if (open) return '<button class="eqcta cornerbtn" data-fillcta="' + page +
+    if (open) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
       '" title="' + plural(open, "empty field") + ' you can fill in">' +
       'Fill in what is empty</button>';
     return '';
@@ -2405,38 +2396,6 @@ function penBtn(page, acKey){
    the foundation rendered inputs that were bound to nothing, so every edit
    looked accepted and was silently discarded on the next repaint. */
 var FIELDS = [];
-/* ── WHICH REGISTER THIS PAGE IS IN (§261) ───────────────────────────
-   The bar counts what is MISSING, or — when nothing is owed and the viewer
-   is a filler — what is merely EMPTY. Three things read that answer (the
-   band, the rail's marks and the walk's marker), and every cell asks the
-   walk's, so it is worked out ONCE per paint and reset beside `FIELDS`.
-   Asking per cell would walk the whole subject for each of the hundred-odd
-   controls a plan draws. */
-var GAP_MODE = null;
-function gapEmptyMode(){
-  if (GAP_MODE === null)
-    GAP_MODE = !gapTotal(TARGET) &&
-      typeof seesEmpty === "function" && seesEmpty();
-  return GAP_MODE;
-}
-/* §192.4 SAID THE COUNT AND THE WALK ARE ONE LIST, and marked the counted
-   one because that was the only list the bar ever counted: it had found the
-   walk stepping through five collaborator pickers in a pillar the band said
-   owed one thing. That rule is kept and not weakened — what changed is that
-   the bar now has two registers, so the question is not *is this field
-   counted* but *is this one of the fields the bar in front of me is
-   counting*, and the two answers are the two lists. In the missing register
-   this is byte-for-byte §192.4's behaviour.
-
-   A CELL THAT NAMES NO KIND KEEPS THE DEFAULT ITS `fillable` GATE ALREADY
-   HAS (§228.2, twelve lines down): fillable unless the shared list says
-   otherwise. Two answers to *may this be written* on one cell is the drift
-   §205 exists to stop. */
-function gapWalkable(field, kind){
-  if (SMPRules.isGapField(field)) return true;
-  if (!gapEmptyMode()) return false;
-  return !kind || (SMPRules.GAP_FILLABLE[kind] || []).indexOf(field) > -1;
-}
 /* A PARAGRAPH TYPED AS TWO PARAGRAPHS MUST READ AS TWO PARAGRAPHS (§51.1).
    The editing control is a <textarea>, which keeps every line break the person
    typed; the READING control was a bare <span>, and HTML collapses newlines to
@@ -2868,29 +2827,19 @@ function fillPageForSec(sec){
   if (sec === "plan" || sec === "proj") return "plan";
   return "";
 }
-/* §261: THE QUIET REGISTER IS THE SAME BAR IN A DIFFERENT VOICE. `n` is
-   whatever the bar is counting and `empty` says which register that is —
-   never two builders, or the two states of one control start explaining
-   themselves differently (§53.5). Red is the platform's word for MISSING
-   and amber was its word for pending; a tactic nobody supports is a fact on
-   a healthy plan, not a warning, so the empty register is grey throughout
-   (§187's own reasoning for the register's seat count, §41's budget). */
-function missBarCta(n, empty){
+function missBarCta(total){
   var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
-  var cta = empty ? "eqcta" : "fillcta";
-  /* §223: WITH NOTHING TO WALK the door stays a door and does not offer to
-     take you to a next gap that is not there — true of either register, and
-     §261 gave the empty one something to walk (gapWalkable). */
-  if (inFill && n) return '<button type="button" class="' + cta + '" data-nextgap="1">' +
-    (empty ? 'Next empty' : 'Next gap') +
-    ' &rarr;&nbsp;<span class="ngleft">' + n + ' left</span></button>';
+  /* §223: WITH NOTHING OWED THE WALK HAS NOTHING TO WALK, so the door stays
+     a door and does not offer to take you to a next gap that is not there. */
+  if (inFill && total) return '<button type="button" class="fillcta" data-nextgap="1">' +
+    'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
   if (inFill) return '<button class="editbtn fdone" data-page="' +
     esc(fillPageForSec((typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "")) +
     '">Done filling</button>';
   var sec = (typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "";
-  return '<button type="button" class="' + cta + '" data-fillcta="' +
+  return '<button type="button" class="fillcta" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">' +
-    (empty ? 'Fill in what is empty' : 'Fill in missing elements') + '</button>';
+    (total ? 'Fill in missing elements' : 'Fill in what is empty') + '</button>';
 }
 /* §218: THE PENDING HALF OF THIS BAR IS GONE. §192 put a count and a walk
    here for values waiting on the office; with the approval removed there is
@@ -2903,35 +2852,18 @@ function missBar(){
   /* §218: nothing is awaiting confirmation any more, so the bar is drawn
      for what is MISSING and nothing else — which is what it was before
      §192 added the pending half. */
-  /* §223: DRAWN FOR EITHER — what is owed, or what is merely fillable.
-     §261: AND THE SECOND ONE SAYS WHERE. §223 drew the door and stopped, so
-     a page owing nothing carried a lone red button with no count, no chips
-     and no rail marks — the way in drawn and the destination not (Islam, on
-     Mobile and Care). The empty register is the same bar in the quiet voice:
-     a count, one chip per place, and a mark on each rail row.
-
-     IT IS THE FILLER'S, NEVER THE OFFICE'S (`seesEmpty`, §261): with nothing
-     owed and a pen in the pane corner the door is a duplicate. Ask BEFORE
-     counting, or the office pays for a walk of the whole subject to be told
-     about a bar they will not be shown. */
-  var openable = (typeof seesEmpty === "function" && seesEmpty() &&
-                  typeof gapOpenable === "function") ? gapOpenable(TARGET) : 0;
+  /* §223: DRAWN FOR EITHER — what is owed, or what is merely fillable. With
+     nothing owed the bar carries no red count and no chips; it is the way in
+     and nothing else. */
+  var openable = typeof gapOpenable === "function" ? gapOpenable(TARGET) : 0;
   if (!total && !openable) return '';
-  /* WHICH REGISTER, decided ONCE and written onto the band, because
-     gapBandRefresh rewrites these counts in place after a fill and would
-     otherwise re-read the counted map over the quiet chips — flipping every
-     one of them to the green tick on a page that is still full of empty
-     boxes (§63's write-into-the-node, which must know what it is rewriting). */
-  var empty = !total;
-  if (empty) map = gapMap(TARGET, false, true);
-  var word = empty ? "empty field" : "missing element";
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
-    return '<button type="button" class="mchip' + (empty ? " eqchip" : "") + '"' +
+    return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +
       ' data-gpage="' + esc(e.go.page) + '" data-gsec="' + esc(e.go.sec) + '"' +
       (e.go.rail ? ' data-grail="' + esc(e.go.rail) + '" data-gcode="' +
         esc(String(e.go.code == null ? "" : e.go.code)) + '"' : '') +
-      ' title="' + plural(e.count, word) + ' — press to go">' +
+      ' title="' + plural(e.count, "missing element") + ' — press to go">' +
       missChipInner(e) + '</button>';
   }).join("");
   /* THE WALK IS ONLY OFFERED TO SOMEBODY WHO CAN CONFIRM. A filler sees the
@@ -2939,12 +2871,10 @@ function missBar(){
      office's alone (§145), so a Next-pending button drawn for them would walk
      to a tick that is not there (§61, and §177's own rule that a count is a
      promise the press opens something). */
-  var n = empty ? openable : total;
-  return '<div class="missbar" data-gapband="1"' +
-    (empty ? ' data-gapmode="empty"' : '') + '>' +
-    '<span class="' + (empty ? "eqcount" : "secmiss") + '" data-gapcount="1">' +
-      n + (empty ? ' empty' : ' Missing') + '</span>' + chips +
-    '<span class="gaptail">' + missBarCta(n, empty) + '</span></div>';
+  return '<div class="missbar" data-gapband="1">' +
+    (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
+    '<span class="gaptail">' +
+    (total || openable ? missBarCta(total) : '') + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
    because a repaint here would destroy the field being typed into (§71.2).
@@ -2952,18 +2882,11 @@ function missBar(){
    their words move: a place reaching zero flips its chip to the green tick
    until the next paint drops it. The rail rows follow the same list. */
 function gapBandRefresh(){
-  /* §261: THE MODE IS READ OFF THE BAND, never re-derived. A fill lands and
-     this rewrites the counts where they stand; asking `gapTotal` again would
-     answer 0 for a quiet bar (which is what a quiet bar MEANS) and repaint it
-     as a finished missing bar — every chip a green tick over a page still
-     full of empty boxes. What the band is showing is the band's own fact. */
+  var map = gapMap(TARGET), total = gapTotal(TARGET);
   var band = document.querySelector('[data-gapband]');
-  var empty = !!(band && band.dataset.gapmode === "empty");
-  var map = gapMap(TARGET, false, empty), total = gapTotal(TARGET);
-  var n = empty ? gapOpenable(TARGET) : total;
   if (band){
-    var tot = band.querySelector("[data-gapcount]");
-    if (tot) tot.textContent = n + (empty ? " empty" : " Missing");
+    var tot = band.querySelector(".secmiss");
+    if (tot) tot.textContent = total + " Missing";
     map.forEach(function(e){
       var chip = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
       if (!chip) return;
@@ -2971,17 +2894,15 @@ function gapBandRefresh(){
       chip.innerHTML = missChipInner(e);
     });
     var tail = band.querySelector(".gaptail");
-    if (tail) tail.innerHTML = n
-      ? missBarCta(n, empty)
-      : '<span class="gapdone">&#10003; Nothing ' +
-        (empty ? "empty" : "missing") + '</span>';
+    if (tail) tail.innerHTML = total
+      ? missBarCta(total)
+      : '<span class="gapdone">&#10003; Nothing missing</span>';
   }
   document.querySelectorAll('[data-rgap]').forEach(function(el){
     var e = map.filter(function(x){ return x.key === el.dataset.rgap; })[0];
     if (!e) return;
     el.classList.toggle("ok", !e.count);
-    el.innerHTML = e.count
-      ? e.count + (empty ? " empty" : " Missing") : "&#10003;";
+    el.innerHTML = e.count ? e.count + " Missing" : "&#10003;";
   });
 }
 
@@ -3095,8 +3016,7 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, open && !SMPRules.isHidden(row) &&
-       gapWalkable(field, opts.fillKind) ? "gapwalk" : "");
+    }, open && !SMPRules.isHidden(row) && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
   /* ── A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER ────
      (§228.2, found by the §227 merge.) §224.2 took `def` out of
@@ -3142,15 +3062,8 @@ function gapCell(page, acKey, row, field, opts){
          collaborators out of GAP_FIELDS, so the band stopped counting them and
          this class went on marking them. `gapfld` is untouched — whether the
          cell is FILLABLE is a separate decision and §187 did not change it. */
-      /* §261: AND THE BOX IS NOT RUNG IN RED WHEN NOTHING IS OWED. `gapfld`
-         is a dashed `--bad` border, which is right for a field the bar has
-         just called Missing and wrong for one it has just called empty — the
-         chip that walked you here is grey, and one screen cannot say both.
-         `eqfld` overrides the colour and nothing else, so fill mode still
-         shows which boxes are open. */
     }, mark ? "pendfld"
-            : "gapfld" + (gapEmptyMode() ? " eqfld" : "") +
-              (gapWalkable(field, opts.fillKind) ? " gapwalk" : ""));
+            : (SMPRules.isGapField(field) ? "gapfld gapwalk" : "gapfld"));
   }
   /* Read — and fill mode on a settled value reads too.
      `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
@@ -5491,26 +5404,13 @@ function unitRailFor(u, sel){
       (it.measures || []).forEach(function(m){ gaps += SMPRules.gapMissing("measure", m).length; });
       (it.tactics  || []).forEach(function(x){ gaps += SMPRules.gapMissing("tactic", x).length; });
     }
-    /* §261: AND THE SAME MARK IN THE QUIET REGISTER. The rail is where "which
-       pillar" is answered, so a bar counting what is empty and a rail saying
-       nothing would leave the chip as the only pointer on the page. Read
-       through gapEmptyMode(), so the rail and the band can never be in two
-       different registers at once (§53.5). */
-    var empt = 0;
-    if (!gaps && gapEmptyMode()) {
-      (it.measures || []).forEach(function(m){ empt += SMPRules.gapEmptyFields("measure", m).length; });
-      (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
-    }
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
         (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
           '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
-          gaps + ' Missing</span>'
-        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.code || String(i)) +
-          '" title="' + plural(empt, "empty field") + ' you can fill in">' +
-          empt + ' empty</span>' : '') +
+          gaps + ' Missing</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying

@@ -1918,6 +1918,10 @@
     /* §177.2: and what each rail drew LAST time is not what it will draw this
        time — the same reason FIELDS is emptied here. */
     for (var rk in RAIL_SHOWN) delete RAIL_SHOWN[rk];
+    /* §261: and which register the bar is in — a fill can empty the counted
+       list mid-paint-cycle, so the answer is worked out once per paint and
+       never carried over (memoised in gapEmptyMode, reset here). */
+    GAP_MODE = null;
     /* Same reason, same line (§96): the objectives editor registers the array
        its Add and Remove act on, and an index from the last paint would act on
        the paint before it. */

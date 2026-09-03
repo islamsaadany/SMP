@@ -6017,9 +6017,7 @@ function gapMap(target, all, fillable){
        §205's lesson from the other side: that one recorded a cell the screen
        OPENED and the server refused; this is a cell the server ACCEPTS and
        the screen never opens. */
-    if (fillable)
-      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
-        return SMPRules.gapEmpty(f, row); }).length;
+    if (fillable) return SMPRules.gapEmptyFields(kind, row).length;
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -6163,6 +6161,34 @@ function seesGaps(target){
   return SMPRules.FILL_PAGES.some(function(pg){
     return mayFill(pg, t) || mayAuthor(pg, t);
   });
+}
+/* ── AND WHO IS SHOWN WHAT IS MERELY EMPTY (§261) ────────────────────
+   Islam, on Mobile and then Care: *"mobile keeps showing filling what's
+   missing while we can't find something missing and there is no the side
+   badges that identify where the missing part is."*
+
+   Reproduced by MAKING the state rather than by reading it: with every
+   counted gap on Mobile filled and the collaborators left alone, `gapTotal`
+   is 0 and `gapOpenable` is 22 — §223's door drawn with no count, no chips
+   and no rail marks, because those three read the COUNTED list and there is
+   nothing in it. Both halves were behaving as decided (§187 ruled a tactic
+   nobody supports is not missing; §205 kept the box fillable); nothing
+   joined them up, so the way in was drawn and the destination was not.
+
+   THE OFFICE IS NOT SHOWN IT AT ALL, which is the half that answers what he
+   was looking at. `mayFillPage` refuses the office outright — their write
+   settles, so they hold the pen — and with nothing owed the door is a second
+   way into a page they can already edit, wearing a word that does not apply
+   to them (§94.15's argument: a control with no audience of its own is a
+   duplicate, not a choice). The moment anything is genuinely MISSING the red
+   count, the chips and the button come back for everybody exactly as before:
+   this narrows one register and touches neither the other nor any count.
+
+   ASKED HERE AND NOWHERE ELSE, so the bar, the rail and the walk cannot
+   answer it three ways (§53.5). */
+function seesEmpty(target){
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.FILL_PAGES.some(function(pg){ return mayFill(pg, t); });
 }
 function tacticRatio(t){
   var p = tacticPlanned(t);

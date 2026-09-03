@@ -29740,3 +29740,213 @@ green. `refusal-keeps-work.py` is red on `main`'s own build for the
 stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
+
+## §261 — EMPTY IS NOT MISSING, AND THE BAR NOW SAYS WHICH (2026-09-03)
+
+Islam, on Mobile: *"mobile keeps showing filling what's missing while we can't
+find something missing and there is no the side badges that identify where the
+missing part is."* Then, minutes later, a second screenshot: *"same in care"*.
+
+**REPRODUCED BY MAKING THE STATE, NOT BY READING THE CODE.** The demo's Mobile
+owes 44 things, so it draws the loud bar and none of this is visible there. With
+every counted gap on Mobile filled and the collaborators left alone, `gapTotal`
+is **0** and `gapOpenable` is **22**, and the band renders exactly his
+screenshot: a solid red *Fill in what is empty*, no count, no chips, no rail
+marks — with the pen sitting in the pane corner beside it. His Care screenshot
+then named the cause without my having to guess it: the **COLLABS.** column, an
+em-dash on both tactics of CA01.
+
+**BOTH HALVES WERE BEHAVING AS DECIDED, AND NOTHING JOINED THEM UP.** §187 ruled
+that a tactic with nobody supporting it is NOT missing — a tactic one person owns
+is an ordinary and complete way to write a line — so the red count, the chips,
+the rail marks and the walk, which all read `GAP_FIELDS`, correctly showed
+nothing. §205 then kept the box FILLABLE, because emptying the one list the
+server also reads is what refuses a save the screen has offered. §223 drew a door
+from that second list, for the best of reasons (Hala met a Definition she could
+edit and no control to edit it with) — **and stopped at the door.** The way in
+was drawn and the destination was not.
+
+*Two correct decisions meeting, and what was never asked is what they do to each
+other* — §113's shape exactly, one feature over.
+
+### §261.1 — THE OFFICE IS NOT SHOWN IT AT ALL
+
+The half that answers what he was looking at, and it is one line. `mayFillPage`
+refuses the office outright: their write settles, so they hold the pen. With
+nothing owed, the door is a **second way into a page they can already edit**,
+wearing a word that does not apply to them — §94.15's argument, which is what
+removed the last Arrange button: *a control with no audience of its own is a
+duplicate, not a choice.*
+
+`seesEmpty()` sits beside `seesGaps()` and is asked **before** the count is
+taken, so the office does not pay for a walk of the whole subject to be told
+about a bar they will not be shown.
+
+**THE MOMENT ANYTHING IS GENUINELY MISSING, EVERYTHING COMES BACK EXACTLY AS IT
+WAS** — for the office and for everybody else. This narrows one register and
+touches neither the other nor any count, and both ends are asserted in one run
+(§113.8: a check that only measured the quiet half would pass on a build that had
+lost the loud one).
+
+### §261.2 — AND THE FILLER'S BAR SAYS WHERE
+
+The same bar in a quieter voice: a count (**"22 empty"**), one chip per place
+(`MB01 5 · MB02 4 · MB03 7 · MB04 6`), a mark on each rail row, and a button.
+Four things, and all four are what the loud bar already does — so it is
+`missBarCta(n, empty)` and one `missBar()`, never a second builder, or the two
+states of one control start explaining themselves differently (§53.5).
+
+**GREY, NEVER RED AND NEVER AMBER.** §145.14's rule — *red always means missing,
+amber always means pending confirmation, never mixed* — is kept rather than
+bent: a tactic nobody supports is a fact on a healthy plan, not a warning, and
+that is §187's own reasoning for why the register's seat count is quiet while the
+custodian chip beside it is amber. Alarm colours spent on facts are how a product
+teaches people to stop reading them (§41's budget).
+
+**THE WORD IS "EMPTY".** The button already said it; the count, the chips'
+hovers and the rail marks say it too, so one screen carries one word for one
+thing (§87's twins).
+
+**NOTHING ABOUT COUNTING MOVES.** No score, no average, nothing Submit refuses,
+nothing the deck marks `Missing`, nothing in the workbook. This is a way of
+FINDING boxes, not a new obligation — which is the whole of why §187 and §214.2
+can stand untouched underneath it.
+
+### §261.3 — THE WALK FOLLOWS WHATEVER THE BAR IS COUNTING
+
+§192.4 found *"Next gap"* stepping through five collaborator pickers in a pillar
+the band said owed one thing, and fixed it with a rule worth keeping: **the count
+and the walk are one list** (§116.2). It marked the COUNTED list, because that
+was the only list the bar had ever counted.
+
+That rule is not weakened here — what changed is that the bar now has two
+registers, so the question stops being *is this field counted* and becomes **is
+this one of the fields the bar in front of me is counting**, and the two answers
+are the two lists. In the missing register `gapWalkable()` is byte-for-byte
+§192.4's behaviour. Marking the counted list in the quiet register would leave
+*Next empty* stepping through nothing, which is §192.4's own fault reborn.
+
+**WORKED OUT ONCE PER PAINT** (`GAP_MODE`, reset beside `FIELDS` and
+`RAIL_SHOWN`), because every one of the hundred-odd controls a plan draws asks
+it, and asking `gapTotal` per cell walks the whole subject each time.
+
+### §261.4 — AND THE BOX IS NOT RUNG IN RED EITHER
+
+Not in the mockup, and the approved rule decides it: `.fld.gapfld` is a dashed
+`--bad` border, which is right for a box behind *Fill in missing elements* and
+wrong for one a grey chip has just walked you to. **One screen cannot say both
+about one box.** `eqfld` overrides the COLOUR and nothing else — the dash stays,
+so fill mode still shows at a glance which boxes are open.
+
+### §261.5 — THE IN-PLACE REFRESH HAD TO KNOW ITS REGISTER
+
+`gapBandRefresh()` rewrites these counts where they stand after a fill (§63's
+write-into-the-node, because a repaint would destroy the field being typed into,
+§71.2). It re-read `gapMap(TARGET)` — the counted map — which on a quiet bar
+answers **0 for every place**, so a single fill would have flipped every chip to
+the green tick over a page still full of empty boxes. The mode is read off the
+band (`data-gapmode`) rather than re-derived: *what the band is showing is the
+band's own fact*, and `gapTotal` being 0 is what a quiet bar MEANS.
+
+### §261.6 — ONE PREDICATE, WRITTEN ONCE
+
+`SMPRules.gapEmptyFields(kind, row)` is `gapMissing`'s twin one list over. It was
+written out inline in `gapMap`'s fillable branch and was needed by a second and a
+third reader the moment the quiet register gained a count and a rail mark —
+**three copies of one predicate is how a band and a rail come to disagree about
+one pillar.** No pending clause, and that is deliberate rather than an omission:
+a mark is only ever written for a value the platform can use (§249.2), so a
+marked field is never empty and the clause could not fire.
+
+### §261.7 — AND THE SECOND COPY OF THE BUTTON WAS STILL RED
+
+Found by LOOKING at the built page, which is the whole reason rule 3a asks for
+it: every assertion in the new check was green and the screen carried **a grey
+bar and a red button four words apart, saying the same four words**. §145.14
+deliberately draws the door in two places — the section row's bar and the pane's
+corner — and the quiet register had reached one of them.
+
+The check now asks every element carrying `data-fillcta`, wherever it is drawn:
+same words, same class, **same painted background**. Asking the one this section
+happened to measure is how the two copies drift apart again (§53.5), and a
+count of doors is what makes the assertion survive a third one being added.
+
+### §261.8 — AND §93.11 WAS EARNED TWICE IN ONE CSS COMMENT
+
+`.fld.gapfld.eqfld { border-color: … }` provably matched, provably did nothing,
+and the check said the border was still `--bad` with the class plainly on the
+element. Twice, for two spellings of one fault. First a paragraph was written
+**after** the comment's closing marker, so the parser met prose where a selector
+belongs and discarded the rule under it. Then the sentence recording that quoted
+the closing marker **literally**, which ends a CSS comment wherever it appears —
+so the same rule was eaten a second time, by the note explaining the first.
+
+§93.11's own instruction is what named it in one run, both times: **when a
+declaration that provably matches provably does nothing, ask
+`document.styleSheets` what the browser is actually holding rather than reading
+the cascade.** It answered *1 rule present, 2 of 3 missing*, and the missing one
+was the one under the prose. This file has now recorded that fault five times.
+
+The assertion that caught it measures the PAINTED border rather than the class,
+which is why it could catch it at all (§145.14).
+
+### THE COSTS, STATED BEFORE HE CHOSE
+
+Both were on the mockup and neither was discovered afterwards. **A filler gets
+one more mark per rail row**, which pushes a long pillar name onto an extra line
+— the same thing the red count already does whenever something is missing.
+**The office loses a door it was not using**: with nothing owed, the way in is
+the pen, which is where they edit everything else on that page.
+
+### PROVED
+
+`checks/empty-not-missing.py`: **26 red** against the shipped pre-§261 build,
+0 after. Every number is asserted as AGREEMENT with the rule behind it rather
+than as a literal (§94.8) — the chips are compared against `gapMap`'s own
+fillable answer, the count against `gapOpenable`, the colours against the
+palette's tokens resolved at runtime — so a deliberate change to the fixture
+stays green and a build that miscounts does not. The quiet dress is measured as
+**PAINT**, not as a class, because the bar sits inside `nav.tabs` where
+`.tabs button` outranks a bare class and would strip these to plain words while
+the same control outside the row wore the design (§145.14, paid for a third
+time). It MAKES its state (§94.2): the shipped plan owes 44 on Mobile, so every
+assertion here is unreachable until Islam's tenant is reproduced.
+
+**AND ITS OWN FIRST FALSIFICATION RUN DIED RATHER THAN REPORTING** (§215, and
+this file has now recorded that four times): §2b computed a style from an element
+a pre-§261 build does not have, so the run stopped and `grep -c FAIL` read
+**11** against a build that fails **26**. Every probe degrades now, and the two
+clicks ask whether the control is there before pressing it — a Playwright click
+on what is not there hangs for thirty seconds and then throws, which is the same
+fault wearing the harness's clothes.
+
+Neighbours green in the same run: `gap-fill`, `gap-walk`, `milestone-fill`,
+`fn-pillars`, `unit-before-number`, `submit-gate`, 491/0 on the authoriser and
+126/0 on the differ.
+
+### RECORDED, NOT DONE — AND MEASURED RATHER THAN ASSUMED
+
+**A supporting function's Projects pane gets the bar and the chips and no rail
+mark.** Measured rather than guessed, on Finance with every counted gap filled
+and the milestone collaborators left alone: `gapTotal` **0**, `gapOpenable`
+**12**, chips **FIN01 5 · FIN02 4 · FIN03 3**. So a filler there is not left
+hunting — the chips name the project, which is what the rail row would have
+named — and the office is not shown the bar, because `seesEmpty` is scoped to
+the target like everything else here. What is missing is the third pointer.
+
+It is deliberately not added in the same edit, because it cannot be added
+faithfully without answering a question this section was not asked. **The two
+rails already disagree about scope**: a unit's rail counts its pillar's measures
+and tactics, which is exactly what its chip counts, while a function's counts
+`gapMissing("project", p)` — the project's own front matter — where its chip
+counts the project **plus** its outcomes and its milestones. Mirroring `gapOf`
+exactly would draw a mark that is always nought (a project has no optional
+field, so its fillable list and its counted list are the same list); mirroring
+the CHIP would leave the loud mark and the quiet mark on one rail row counting
+two different things. Straightening that is a change to a number already on
+screen, which is Islam's to take, not mine to slip in beside this (rule 1b).
+
+**AND THE OTHER FOUR SURFACES ARE UNTOUCHED BY DESIGN.** The group's own pages,
+a unit's Foundation and its Objectives already draw their chips from the same
+`missBar`, so they gained the quiet register with the unit's Plan; nothing else
+in the product reads either list.

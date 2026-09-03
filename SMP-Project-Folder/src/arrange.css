@@ -1534,11 +1534,21 @@
      family in two volumes: the act that ends the report shouts, the act that
      parks it speaks. `--cta` as TYPE, never the fill's own colour: §38.4 cuts
      both ways, and `--cta` is the deep half of the pair for exactly this. */
-  .repchrome .rc-draft { background:none; border:0; color:var(--cta);
+  /* AND REOPEN JOINS IT WHEREVER SUBMIT IS BESIDE IT (§263). One
+     declaration and two selectors, never a second block that says the same
+     thing: the quiet half of this pair has to be one look, or the bar reads
+     in two volumes on one page and three on another (§53.5). The parked
+     Reopen keeps `rc-reopen` and takes `quiet` as a modifier, so the handler
+     and every check still find it by the one class it has always had. */
+  .repchrome .rc-draft,
+  .repchrome .rc-reopen.quiet { background:none; border:0; color:var(--cta);
     font:inherit; font-size:12px; font-weight:500; letter-spacing:.04em;
     text-transform:uppercase; cursor:pointer; padding:6px 4px; }
-  .repchrome .rc-draft:hover { text-decoration:underline; }
-  .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .repchrome .rc-draft:hover,
+  .repchrome .rc-reopen.quiet:hover { text-decoration:underline; background:none;
+    color:var(--cta); }
+  .repchrome .rc-draft:focus-visible,
+  .repchrome .rc-reopen.quiet:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
   /* ── A CLOSED REPORT, AND THE WAY BACK (§220) ──────────────────────────
      Submitted or parked as a draft: the report is read-only and says so by
@@ -1616,7 +1626,7 @@
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
 
-  /* ── AND THE SAME SEAM ON HOVER (§261.2) ────────────────────────────────
+  /* ── AND THE SAME SEAM ON HOVER (§267.1) ────────────────────────────────
      §73.2 (the block above) gave the frozen pair `background:inherit` so a
      striped row is striped all the way across — and it answered the STRIPE
      only. `tbody tr:hover > td` paints every cell of a hovered row, and
@@ -1628,7 +1638,7 @@
      outcome cell left outline is damged"*.
 
      IT IS OLDER THAN THE FOLD AND MEASURES IDENTICALLY ON THE BUILD BEFORE
-     IT (§261). What §261 changed is how big the untinted block is: the name
+     IT (§267). What §267 changed is how big the untinted block is: the name
      column goes from 74–269px to 431 and its cell is now two rows tall, so a
      sliver became a slab. Conspicuous, not caused.
 
@@ -1921,7 +1931,7 @@ th .subhd { font-weight:400; }
   .narrowtgt { display:block; }
 }
 
-/* ══ THE PLAN TABLE AT A NARROWER WINDOW (§261) ═════════════════════════
+/* ══ THE PLAN TABLE AT A NARROWER WINDOW (§267) ═════════════════════════
    Two rungs, and only the first of them is structural. Below 1400 the tail —
    Collabs and Quarters — leaves its two columns for a strip under the tactic's
    name, which is `tailFolds()`'s decision in group-render.js because moving a

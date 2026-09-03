@@ -1,4 +1,4 @@
-"""THE PLAN TABLE AT A NARROWER WINDOW (§261).
+"""THE PLAN TABLE AT A NARROWER WINDOW (§267).
 
 THE FAULT, in Islam's words: *"are you sure of your fix? this is a zoomed
 page"* — the TACTIC column reading one character per line. §260 fixed blank
@@ -251,7 +251,7 @@ with sync_playwright() as p:
            not m.get("none") and m["cols"] == 7 and "Quarters" in m["heads"], m.get("heads"))
         pg.close()
 
-    # ── A HOVERED ROW IS ONE COLOUR ALL THE WAY ACROSS (§261.2) ───────────
+    # ── A HOVERED ROW IS ONE COLOUR ALL THE WAY ACROSS (§267.1) ───────────
     # Islam, of the folded table: *"on squeezing the outcome cell left outline
     # is damged"*. `tbody tr:hover > td` paints every cell, and the frozen
     # pair's `background:inherit` outranks it — so the two cells before the
@@ -294,7 +294,7 @@ with sync_playwright() as p:
                len(set(grounds)) == 1, grounds)
         pg.close()
 
-    # ── AND A ZOOM REACHES IT (§261) ──────────────────────────────────────
+    # ── AND A ZOOM REACHES IT (§267) ──────────────────────────────────────
     # The reported case. `tailFolds()` is read while the table is built, so
     # without the watcher the person who resizes — or zooms — goes on looking
     # at the layout chosen for the width before.

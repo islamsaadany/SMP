@@ -1,6 +1,6 @@
 # 028 · One flow, several decks, back to back
 
-**Version:** v3.22 · **Decisions:** §261 · **Status:** answered; built
+**Version:** v3.22 · **Decisions:** §261, §261.8 (reversal), §261.9 · **Status:** answered; built
 
 Islam:
 
@@ -42,11 +42,18 @@ strip at the bottom of the deck was drawn twice.
 | # | question | answer |
 |---|---|---|
 | 1 | who may open it | **the SMO** |
-| 2 | the picker's shape | **A — one list**, the flow at the top, everybody else under a band |
+| 2 | the picker's shape | **A — one list** &rarr; **reversed to B, two columns** (§261.8) |
 | 3 | is the flow remembered | **yes** |
 | 4 | the Thank you between subjects | **every deck whole — "evey deck for transition"** |
 | 5 | what the strip says | **the subject you are standing in, and its place in the order** |
 | 6 | the row of dots | **one dot per subject** |
+
+**Decision 2 was reversed after use** — *"i changed my opinion the 2 columns
+option was better"* — and §261.4's reasoning is kept rather than overwritten.
+What changed is where the rows are drawn and nothing else: `MFLOW.pick` was
+always the running order, so the list, the writes, the saving, the deck and
+every server rule are untouched. **A column is a way of showing a list, and the
+list was never the column's.**
 
 **Decision 4 reverses the recommendation put to him**, and is recorded as his.
 The case against seventeen Thank yous mid-review was that they read as the
@@ -80,12 +87,18 @@ cycle board is built from (§245), so the picker and the page the office watches
 can never disagree about who reports. Names come from `placeLabel()`, which is
 what tells a unit called *Care* from a function called *Care* (§244).
 
-- a **tick** puts a subject into the flow or takes it out
+Two columns: **waiting on the left, the running order on the right**, a subject
+in exactly one of them.
+
+- a **tick** on the left puts a subject into the flow; the **×** on the right
+  takes it out — the same `data-mftick`, because it is the same act
 - **↑ ↓** move it, and the number beside it is its place in the running order
-- the header states *N of M presenting · about N slides* — **about**, because
-  the count is the deck's own and `deckFitPass()` adds a slide when a long
-  table continues at present time (§35: better a stated approximation than a
-  number the deck's own counter then contradicts)
+- each column **says when it is empty** (§45.2) — *Everybody is in the flow*,
+  *Nobody yet — tick a unit or function on the left*
+- the flow's own heading carries the total — *The flow · about 83 slides* —
+  and **about** is load-bearing: the count is the deck's own and `deckFitPass()`
+  adds a slide when a long table continues at present time (§35: better a
+  stated approximation than a number the deck's own counter then contradicts)
 - **Start the flow** is refused, never disabled, when nothing is ticked
   (§221, §163)
 
@@ -138,6 +151,14 @@ The dot strip is one dot per slide today, and at **71** slides it already wraps
 onto three rows and spills past the strip — measured, and true of the product
 before this feature; a flow is what exposes it.
 
+**Each pill carries the subject's own code** (§261.9) — *MB · RS · BE · … · FIN
+· MKT · MRC* — Islam's ask from a real 308-slide flow: *"in the pills to write
+the inittials of the unit for better navigation."* The letters are the tenant's
+`codePrefix`, already printed on every pillar and project code (MB01, FIN01),
+never initials invented here; the full name stays on the hover. Lit is the gold
+fill with dark ink (7.57), unlit is white on the bar (17.36), and all eighteen
+sit on one row at 1600 and at 1280.
+
 ## 4 · What it does not touch
 
 - **Present** and **Manage slides**, for every subject
@@ -148,8 +169,9 @@ before this feature; a flow is what exposes it.
 
 ## 5 · Proof
 
-`checks/master-presentation.py` — **31 red** on the pre-§261 build, 34 green
-after. It asserts **agreement, never a number** (§94.8): a flow's slide count
+`checks/master-presentation.py` — **31 red** on the pre-§261 build, **43 green**
+after (the shape assertions rewritten rather than deleted when §261.8 reversed
+the picker — §218). It asserts **agreement, never a number** (§94.8): a flow's slide count
 against the sum of the decks its subjects present alone, the picker's names
 against `placeLabel`, the footer marks against `deckMark`, and who sees the
 entry against `SMPRules.mayMasterPresent` — at both ends, with the viewer who
@@ -168,10 +190,10 @@ the full `qa.py` sweep reports no page errors.
 
 ## 6 · Recorded, not done
 
-- The dot strip still draws one dot per slide on a **single** subject's deck,
-  where a 28-slide deck is fine and nothing has been measured as broken. The
-  flow's own strip is fixed; the general case is a decision about a deck nobody
-  has complained about.
+- The dot strip still draws one **unlabelled** dot per slide on a single
+  subject's deck, where a 28-slide deck is fine and nothing has been measured as
+  broken. The flow's own strip is fixed; the general case is a decision about a
+  deck nobody has complained about.
 - There is no way to **save an order without presenting it** other than to
   arrange it and close the dialog — which does save, because every press
   writes. What is missing is a control that says so.

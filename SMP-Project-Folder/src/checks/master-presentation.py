@@ -66,6 +66,29 @@ def ev(pg, expr, arg=None, default=None):
         return default
 
 
+def _rgb(v):
+    return [float(x) for x in str(v)[str(v).index("(") + 1:str(v).index(")")].split(",")[:3]]
+
+
+def _lum(c):
+    def f(v):
+        v = v / 255.0
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2])
+
+
+def ratio(fg, bg):
+    """WCAG contrast, the sweep's own arithmetic (§95) — an alpha on the ink is
+    read as opaque, which is the pessimistic direction and therefore the safe
+    one for an assertion."""
+    try:
+        a, b = _lum(_rgb(fg)), _lum(_rgb(bg))
+    except Exception:
+        return 0
+    hi, lo = max(a, b), min(a, b)
+    return round((hi + 0.05) / (lo + 0.05), 2)
+
+
 def get(d, k):
     """A probe that threw answers None for every key rather than raising."""
     return d.get(k) if isinstance(d, dict) else None
@@ -211,24 +234,36 @@ with sync_playwright() as p:
     except Exception as e:
         check("the entry can be pressed", False, str(e).split("\n")[0])
 
+    # §261.8: TWO COLUMNS, and each row is in exactly one of them. Scoped to the
+    # column rather than to the dialog, or a build that drew every subject twice
+    # would satisfy "every subject has a row" perfectly.
     listed = ev(pg, """() => {
       const want = boardUnitTargets().concat(boardFunctionTargets());
-      const rows = [...document.querySelectorAll('#modal-b .mfrow')];
+      const col = (i) => [...document.querySelectorAll(
+        '#modal-b .mfcol:nth-of-type(' + i + ') .mfrow')];
+      const name = r => r.querySelector('.mflab b').textContent;
       return {
         want: want.map(t => placeLabel(t)),
-        rows: rows.map(r => r.querySelector('.mflab b').textContent),
+        waiting: col(1).map(name),
+        flow: col(2).map(name),
+        cols: document.querySelectorAll('#modal-b .mfcol').length,
         picked: (typeof MFLOW === 'undefined' || !MFLOW) ? null : MFLOW.pick.slice(),
-        lit: rows.filter(r => r.classList.contains('on')).length,
-        head: (document.querySelector('.mfhead span') || {}).textContent || ''
+        lit: [...document.querySelectorAll('#modal-b .mfrow')]
+               .filter(r => r.classList.contains('on')).length,
+        heads: [...document.querySelectorAll('#modal-b .mfcol h4')].map(h => h.textContent),
+        empty: [...document.querySelectorAll('#modal-b .mfempty')].map(e => e.textContent)
       };
     }""", None, THREW)
-    check("every subject that reports has a row, in the board's own order",
-          get(listed, "rows") == get(listed, "want") and get(listed, "rows"), listed)
+    check("the picker is two columns (§261.8)", get(listed, "cols") == 2, listed)
+    check("every subject that reports is in the flow, in the board's own order",
+          get(listed, "flow") == get(listed, "want") and get(listed, "flow"), listed)
     check("nothing stored yet means everybody presents",
           get(listed, "lit") == len(get(listed, "want") or []) and get(listed, "lit"), listed)
-    check("and the header says so",
-          ("%d of %d" % (get(listed, "lit") or 0, len(get(listed, "want") or [])))
-          in (get(listed, "head") or ""), get(listed, "head"))
+    check("...so the waiting column is empty AND says why (§45.2)",
+          get(listed, "waiting") == [] and len(get(listed, "empty") or []) == 1,
+          listed)
+    check("and the flow's heading carries the total",
+          "about" in at(get(listed, "heads"), 1), get(listed, "heads"))
 
     # ── 3 · the picks are written, and the default is stored as an absence ─
     keep = ["mobile", "retailstores"] + (ev(pg, "() => boardFunctionTargets()", None, []) or [])[:1]
@@ -242,6 +277,18 @@ with sync_playwright() as p:
     }""", keep, THREW)
     check("unticking writes the flow to the group",
           get(wrote, "stored") == keep and get(wrote, "pick") == keep, wrote)
+    split = ev(pg, """() => {
+      const col = (i) => [...document.querySelectorAll(
+        '#modal-b .mfcol:nth-of-type(' + i + ') .mfrow')].map(
+          r => r.querySelector('.mflab b').textContent);
+      return { waiting: col(1), flow: col(2),
+               want: MFLOW.pick.map(t => placeLabel(t)),
+               out: boardUnitTargets().concat(boardFunctionTargets())
+                      .filter(t => MFLOW.pick.indexOf(t) < 0).map(t => placeLabel(t)) };
+    }""", None, THREW)
+    check("a subject taken out moves to the waiting column, and only there",
+          get(split, "flow") == get(split, "want") and
+          get(split, "waiting") == get(split, "out") and get(split, "waiting"), split)
     check("...and the shared reader answers the same",
           get(wrote, "rule") == keep, wrote)
 
@@ -345,6 +392,49 @@ with sync_playwright() as p:
         first: first, mid: mid, inside: inside
       };
     }""", flow, THREW)
+    # ── §261.9 · the pills carry the subject's own code ───────────────
+    pills = ev(pg, """() => {
+      const root = document.getElementById('deckroot');
+      const dots = [...root.querySelectorAll('.ddot')];
+      const want = DECK.stops.map(st => {
+        const t = st.t;
+        const o = t.indexOf('fn:') === 0 ? FUNCTIONS[t.slice(3)] : UNITS[t];
+        return (o && o.codePrefix || '').toUpperCase();
+      });
+      const rows = new Set(dots.map(d => Math.round(d.getBoundingClientRect().top)));
+      const bar = root.querySelector('.deckbar').getBoundingClientRect();
+      const strip = root.querySelector('.ddots').getBoundingClientRect();
+      const off = dots.find(d => !d.classList.contains('on'));
+      const on = dots.find(d => d.classList.contains('on'));
+      const cs = (el) => { const c = getComputedStyle(el);
+        return { fg: c.color, bg: c.backgroundColor }; };
+      return { drawn: dots.map(d => d.textContent.trim()), want: want,
+               titles: dots.map(d => d.getAttribute('title')),
+               names: DECK.stops.map(st => st.name),
+               rows: rows.size,
+               inside: strip.top >= bar.top - 1 && strip.bottom <= bar.bottom + 1,
+               off: off ? cs(off) : null,
+               on: on ? { fg: getComputedStyle(on).color,
+                          bg: getComputedStyle(on).backgroundColor } : null,
+               barbg: getComputedStyle(root.querySelector('.deckbar')).backgroundColor };
+    }""", None, THREW)
+    check("each pill carries its subject's own code, and never an invented one",
+          get(pills, "drawn") == get(pills, "want") and
+          all(get(pills, "want") or [""]), pills)
+    check("...with the full name still on the hover",
+          get(pills, "titles") == get(pills, "names"), pills)
+    check("...on ONE row, inside the bar (§158: fit, never wrap)",
+          get(pills, "rows") == 1 and get(pills, "inside") is True, pills)
+    lit, unlit = get(pills, "on"), get(pills, "off")
+    if lit and unlit:
+        check("the lit pill's letters are readable on the accent (§38.4)",
+              ratio(lit["fg"], lit["bg"]) >= 4.5, ratio(lit["fg"], lit["bg"]))
+        check("...and an unlit one's on the bar",
+              ratio(unlit["fg"], get(pills, "barbg")) >= 4.5,
+              ratio(unlit["fg"], get(pills, "barbg")))
+    else:
+        check("both a lit and an unlit pill exist to measure", False, pills)
+
     check("one dot per subject, not one per slide (§261)",
           get(strip, "dots") == len(flow) and get(strip, "slides") != len(flow), strip)
     check("the dots name the subjects, in order",
@@ -376,6 +466,10 @@ with sync_playwright() as p:
         flow: DECK.flow, stops: DECK.stops
       };
     }""", None, THREW)
+    check("...and its dots carry no code, because there is one subject",
+          all(t.strip() == "" for t in (ev(pg, """() => [...document.querySelectorAll(
+            '#deckroot .ddot')].map(d => d.textContent)""", None, ["x"]) or ["x"])),
+          "a single deck's dots are labelled")
     check("a single subject still gets one dot per slide",
           get(one, "dots") == get(one, "slides") and get(one, "dots"), one)
     check("...and its title is the subject and the cycle, with no running order",

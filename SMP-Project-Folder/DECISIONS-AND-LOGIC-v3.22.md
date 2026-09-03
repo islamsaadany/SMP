@@ -29866,3 +29866,93 @@ that says the order is saved without presenting it (every press writes, so it
 is saved — what is missing is the sentence); and a flow cannot be DOWNLOADED,
 because `sendPlanPptx` is one subject's plan and what a master `.pptx` holds is
 its own decision.
+
+## §261.8 — TWO COLUMNS, AND IT IS A REVERSAL (2026-09-03, reversing §261.4)
+
+Islam, having used what shipped: *"i changed my opinion the 2 columns option
+was better."*
+
+**BOTH SHAPES WERE DRAWN IN THE REAL DIALOG BEFORE ANYTHING WAS BUILT** and he
+picked the single list then, with the cost of each stated. This is the other
+one, and §261.4 is recorded rather than overwritten (Principle II): the
+argument for one list — one list of subjects, one order to put them in, and no
+dragging between boxes — was sound and lost to using the thing.
+
+**WHAT CHANGES IS WHERE THE ROWS ARE DRAWN AND NOTHING ELSE.** `MFLOW.pick` was
+always the running order; the list of subjects, what a press writes, when it is
+saved, the deck it opens and every server rule are untouched. That is the whole
+reason a reversal here costs an afternoon rather than a rebuild — **a column is
+a way of showing a list, and the list was never the column's.**
+
+**WAITING ON THE LEFT, THE RUNNING ORDER ON THE RIGHT.** A subject is in
+exactly one column, so there is no state where a row is in both and nothing to
+explain about which one is true. The left carries a tick that puts somebody in;
+the right carries the number, the arrows and a × that takes them out — **and
+the × is the same `data-mftick` the tick is**, because it is the same act, so
+the two columns cannot answer differently (§53.5).
+
+**EACH COLUMN SAYS WHEN IT IS EMPTY** (§45.2), and this shape has two states
+that legitimately empty one: *Everybody is in the flow* and *Nobody yet — tick a
+unit or function on the left*. An empty half of a split reads as a pane that
+failed to render, which is exactly what the one-list shape never had to answer.
+
+**The grid is `1fr 1fr` and never `auto`**, or the longer list would take the
+room the flow needs for three controls a row (§109); below 760 they stack,
+because two 300px columns in a dialog are two clipped columns.
+
+`checks/master-presentation.py` — the shape assertions were **rewritten, not
+deleted** (§218): the rows are now scoped to their own column, so a build that
+drew every subject twice cannot satisfy *"every subject has a row"*; the waiting
+column is asserted empty AND to say why; and a subject taken out is asserted to
+appear on the left and **only** there. 37 green.
+
+## §261.9 — THE PILL SAYS WHICH SUBJECT (2026-09-03)
+
+Islam, from a real flow of **308 slides**, with a screenshot of thirteen
+identical dots: *"in the pills to write the inittials of the unit for better
+navigation."* A row you can count and cannot read.
+
+**THE LETTERS EXIST ALREADY AND ARE NOT INVENTED HERE.** Every unit and every
+supporting function carries a `codePrefix` — MB, RS, BE, CE, OS, CO, CA, IT, LG,
+NG for the units; FIN, HR, TRS, MKT, ITF, CAF, SMO, MRC for the functions — and
+it is what the tenant reads on every pillar and project code in the product
+(MB01, FIN01). Deriving initials of our own would be a **second abbreviation for
+one thing** (§53.5, §25), drifting from the first the day somebody edits it on
+Setup — and it would put CA on both Cares, which the prefixes already tell apart
+(CA and CAF). The fallback is two letters, and only for a subject that has no
+prefix at all: a unit added this morning.
+
+**THE CODE IS DRAWN AND THE NAME IS ON THE HOVER.** A pill wide enough to hold
+*Strategy Management Office* is not a pill (§88's rule, on the projector's own
+chrome).
+
+**LIT IS THE GOLD FILL WITH DARK INK, NEVER GOLD TYPE** (§38.4, seventh time):
+measured **7.57** on the accent and **17.36** for an unlit pill on the bar, with
+the check asserting both from the sweep's own arithmetic (§95). The `scale(1.35)`
+the old dot wore is dropped with it — scaling a pill blurs the letters it exists
+to show.
+
+**AND THE WRAP WAS TWO FAULTS, BOTH FOUND BY MEASURING RATHER THAN LOOKING.**
+Eighteen labelled pills wrapped to a second row at 1280:
+
+1. **The media query sat ABOVE the rule it narrows.** `.ddots.bysub .ddot` and
+   the query's own rule carry the same specificity, so source order decides —
+   the tighter padding lost silently while the query plainly matched. §29.2 and
+   §93.11's family, the fourth time this project has recorded it.
+2. **The strip was being SQUEEZED, not capped.** With that fixed it still
+   wrapped: 592px of pills in a 568px box, against a `max-width` of 793 that was
+   never the binding constraint — the bar is a flex row and the strip's default
+   `flex-shrink:1` was giving the space away. `flex-shrink:0` is what actually
+   stops it, and the cap still holds on a genuinely narrow window where wrapping
+   inside it is the graceful answer.
+
+Measured after: **one row at 1600 and at 1280**, inside the bar, 338 slides
+across 18 subjects. **A single subject's deck is untouched** — unlabelled dots,
+one per slide — and that is asserted at both ends, because "we did not touch the
+ordinary deck" is a claim until it is measured.
+
+**AND THE FIRST BUILD OF THIS NEVER RAN AT ALL.** The patch was chained behind a
+`cd` that failed, so `&&` swallowed it while the CSS beside it landed — and the
+probe read `codes: [null × 18]` on a build that looked complete. *A command that
+prints something is not a command that did the thing; the measurement is what
+said so.*

@@ -1108,35 +1108,64 @@ function masterCount(t){
   return MFLOW.n[t];
 }
 
+/* ── TWO COLUMNS, AND IT IS A REVERSAL (§261.8) ───────────────────────
+   Islam, having used what §261.4 shipped: *"i changed my opinion the 2 columns
+   option was better."* Both shapes were drawn in the real dialog before
+   anything was built and he picked the single list then; this is the other one,
+   and the earlier choice is recorded rather than overwritten (Principle II).
+
+   WHAT CHANGES IS WHERE THE ROWS ARE DRAWN AND NOTHING ELSE. The list of
+   subjects, the order, what a press writes and when it is saved are all
+   §261.4's and are untouched — which is the whole reason a reversal here costs
+   an afternoon rather than a rebuild: `MFLOW.pick` was always the running
+   order, and a column is a way of showing it.
+
+   AND EACH COLUMN SAYS WHEN IT IS EMPTY (§45.2). An empty half of a split
+   reads as a pane that failed to render, and this one has two states that
+   legitimately empty it: nobody picked yet, and everybody picked. */
 function masterPaint(){
   var box = document.getElementById("modal-b");
   if (!box || !MFLOW) return;
   var all = masterSubjects();
   var rest = all.filter(function(t){ return MFLOW.pick.indexOf(t) < 0; });
   var total = MFLOW.pick.reduce(function(a, t){ return a + masterCount(t); }, 0);
-  var row = function(t, i){
-    var fk = String(t).indexOf("fn:") === 0;
-    return '<div class="mfrow' + (i ? " on" : "") + '">' +
-      '<span class="mfn">' + (i || "") + '</span>' +
-      '<button class="mftick" data-mftick="' + esc(t) + '" aria-pressed="' + (i ? "true" : "false") +
-        '" aria-label="' + (i ? "Take out of" : "Put into") + ' the flow">\u2713</button>' +
+  /* Waiting to be picked: the tick puts them into the flow, and the count is
+     the bare number — the column's own heading says what they are, and the
+     word "slides" eighteen times down a half-width column is furniture. */
+  var off = function(t){
+    return '<div class="mfrow">' +
+      '<button class="mftick" data-mftick="' + esc(t) + '" aria-pressed="false"' +
+        ' aria-label="Put ' + esc(placeLabel(t)) + ' into the flow">\u2713</button>' +
       '<span class="mflab"><b>' + esc(placeLabel(t)) + '</b><em>' +
-        (fk ? "supporting function" : "business unit") + ' &middot; ' +
+        masterCount(t) + '</em></span></div>';
+  };
+  /* In the flow: numbered, moved by the arrows, taken out by the ×. The × is
+     the SAME `data-mftick` the left column uses, because it is the same act —
+     one handler, so the two columns cannot answer differently (§53.5). */
+  var on = function(t, i){
+    return '<div class="mfrow on">' +
+      '<span class="mfn">' + i + '</span>' +
+      '<span class="mflab"><b>' + esc(placeLabel(t)) + '</b><em>' +
         plural(masterCount(t), "slide") + '</em></span>' +
-      (i ? '<span class="mfmv">' +
+      '<span class="mfmv">' +
         '<button data-mfmove="' + esc(t) + '|-1" title="Earlier" aria-label="Move earlier">\u2191</button>' +
         '<button data-mfmove="' + esc(t) + '|1" title="Later" aria-label="Move later">\u2193</button>' +
-        '</span>' : '') +
-      '</div>';
+        '<button data-mftick="' + esc(t) + '" title="Take out"' +
+          ' aria-label="Take ' + esc(placeLabel(t)) + ' out of the flow">\u00d7</button>' +
+      '</span></div>';
   };
-  box.innerHTML = '<div class="mflow">' +
-    '<div class="mfhead"><b>The flow</b><span>' + MFLOW.pick.length + ' of ' + all.length +
-      ' presenting &middot; about ' + plural(total, "slide") + '</span></div>' +
-    '<div class="mflist">' +
-      MFLOW.pick.map(function(t, k){ return row(t, k + 1); }).join("") +
-      (rest.length ? '<div class="mfband">Not presenting</div>' : '') +
-      rest.map(function(t){ return row(t, 0); }).join("") +
-    '</div>' +
+  var empty = function(say){ return '<p class="mfempty">' + say + '</p>'; };
+  box.innerHTML = '<div class="mflow"><div class="mfcols">' +
+    '<div class="mfcol"><h4>Everyone who reports</h4><div class="mflist">' +
+      (rest.length ? rest.map(off).join("")
+                   : empty("Everybody is in the flow.")) +
+    '</div></div>' +
+    '<div class="mfcol"><h4>The flow' +
+      (MFLOW.pick.length ? ' &middot; about ' + plural(total, "slide") : '') +
+      '</h4><div class="mflist">' +
+      (MFLOW.pick.length ? MFLOW.pick.map(function(t, k){ return on(t, k + 1); }).join("")
+                         : empty("Nobody yet \u2014 tick a unit or function on the left.")) +
+    '</div></div></div>' +
     (MFLOW.note ? '<p class="mfnote" role="status">' + esc(MFLOW.note) + '</p>' : '') +
     '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
     '<button class="mfgo" data-mfgo="1"' +
@@ -1271,12 +1300,39 @@ function deckFitPass(deck){
    the SLIDES rather than off `DECK.flow`, so a subject whose deck came out
    empty cannot leave a dot pointing at somebody else's cover (§61), and the
    answer is the deck's own rather than a description of it (§50.3). */
+/* ── THE PILL SAYS WHICH SUBJECT (§261.9) ─────────────────────────────
+   Islam, running a real flow of 308 slides: *"in the pills to write the
+   inittials of the unit for better navigation."* Thirteen identical dots is a
+   row you can count but cannot read.
+
+   THE LETTERS EXIST ALREADY AND ARE NOT INVENTED HERE. Every unit and every
+   supporting function carries a `codePrefix` — MB, RS, FIN, MRC — and it is
+   what the tenant reads on every pillar and project code in the product
+   (MB01, FIN01). Deriving initials of our own would be a second abbreviation
+   for one thing, drifting from the first the day somebody edits it in Setup
+   (§53.5, §25) — and it would put CA on both Cares, which the prefixes
+   already tell apart (CA and CAF).
+
+   THE FALLBACK IS ONLY FOR A SUBJECT THAT HAS NONE: a unit added this morning
+   and not yet given a prefix. Two letters, because one is not a name and three
+   from an unknown word is a guess. */
+function deckCode(target, name){
+  var o = String(target).indexOf("fn:") === 0
+    ? FUNCTIONS[String(target).slice(3)] : UNITS[target];
+  var pre = o && o.codePrefix;
+  if (pre) return String(pre).toUpperCase();
+  var words = String(name || target).trim().split(/\s+/).filter(Boolean);
+  return (words.length > 1
+    ? words[0].charAt(0) + words[1].charAt(0)
+    : String(words[0] || "").slice(0, 2)).toUpperCase();
+}
 function deckStops(){
   var out = [];
   DECK.slides.forEach(function(sl, k){
     var t = sl.dataset.subject;
     if (!t || (out.length && out[out.length - 1].t === t)) return;
-    out.push({ t:t, name: sl.dataset.subjectName || t, at:k });
+    var name = sl.dataset.subjectName || t;
+    out.push({ t:t, name:name, code:deckCode(t, name), at:k });
   });
   return out;
 }
@@ -1300,8 +1356,11 @@ function deckIndex(){
   dots.classList.toggle("bysub", !!DECK.stops);
   dots.innerHTML = DECK.stops
     ? DECK.stops.map(function(st){
+        /* The code is DRAWN and the name is on the hover: a pill wide enough to
+           hold "Strategy Management Office" is not a pill (§88's rule, on the
+           projector's own chrome). */
         return '<button class="ddot" data-dgo="' + st.at + '" title="' + esc(st.name) +
-          '" aria-label="' + esc(st.name) + '"></button>';
+          '" aria-label="' + esc(st.name) + '">' + esc(st.code) + '</button>';
       }).join("")
     : DECK.slides.map(function(_, k){
         return '<button class="ddot" data-dgo="' + k + '" aria-label="Slide ' + (k+1) + '"></button>';

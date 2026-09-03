@@ -466,8 +466,35 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   CHECK** &mdash; a function reached by assigning `current` rather than through
   the navigation's switch, and `switchViewer` handed a register INDEX where it
   wants a person key, which reported the office's own entry as a leak.
-  **RECORDED, NOT DONE**: a single deck still draws one dot per slide, nothing
-  says the order is saved without presenting it, and a flow cannot be downloaded.
+  **&sect;261.8 &mdash; TWO COLUMNS, A REVERSAL** (*"i changed my opinion the 2
+  columns option was better"*): both shapes were drawn before anything was built
+  and &sect;261.4 is kept rather than overwritten (Principle II). **What changed
+  is where the rows are drawn and nothing else** &mdash; `MFLOW.pick` was always
+  the running order, so the list, the writes, the saving, the deck and every
+  server rule are untouched: *a column is a way of showing a list, and the list
+  was never the column's.* Waiting on the left, the order on the right, a subject
+  in exactly ONE of them; the &times; is the same `data-mftick` the tick is
+  (&sect;53.5); **each column says when it is empty** (&sect;45.2), which the
+  one-list shape never had to answer. Assertions REWRITTEN, not deleted
+  (&sect;218), and scoped to their column, or a build drawing every subject twice
+  would satisfy them. **&sect;261.9 &mdash; THE PILL SAYS WHICH SUBJECT**, from a
+  real 308-slide flow: **the letters exist already** (`codePrefix` &mdash; MB, RS,
+  FIN, MRC, printed on every pillar and project code), so deriving initials would
+  be a second abbreviation for one thing and would put CA on both Cares, which
+  the prefixes already tell apart. Code drawn, name on the hover (&sect;88); gold
+  as a FILL with dark ink, never gold type (&sect;38.4 &mdash; 7.57 and 17.36,
+  asserted with the sweep's own arithmetic). **The wrap at 1280 was TWO faults,
+  both found by measuring**: a media query written ABOVE the rule it narrows lost
+  on source order at equal specificity (&sect;29.2, &sect;93.11, fourth time), and
+  under it the strip was being SQUEEZED rather than capped &mdash; 592px of pills
+  in a 568px box against a max-width of 793 that never bound, so `flex-shrink:0`
+  is the fix. **AND THE FIRST BUILD OF THE PILLS NEVER RAN**: the patch was
+  chained behind a `cd` that failed, `&&` swallowed it, the CSS beside it landed,
+  and the probe read `codes: [null &times; 18]` on a build that looked complete
+  &mdash; *a command that prints something is not a command that did the thing.*
+  **RECORDED, NOT DONE**: a single deck still draws one unlabelled dot per slide,
+  nothing says the order is saved without presenting it, and a flow cannot be
+  downloaded.
 - **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
   (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
   an option in the drop down for the smo only."* §145.9 hid the pane-corner

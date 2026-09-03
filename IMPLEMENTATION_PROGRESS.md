@@ -20,9 +20,16 @@ run end to end as one flow. Six decisions were drawn in the running platform
 and answered before a line was written; the review page is
 `design-mockups/master-presentation/2026-09-03_master-presentation.html`, the
 reasoning is §261 and the spec is `specs/028-master-presentation/`.
-`checks/master-presentation.py` is 31 red on the build before and 34 green
+`checks/master-presentation.py` is 31 red on the build before and **43 green**
 after; 499/0 on the authoriser, the full `qa.py` sweep clean, and the round
 trip, clean parity and two tabs green on a virgin Postgres 16.
+
+**Two changes after he used it, both on the same branch:** the picker is
+**two columns** (§261.8 — he reversed his own choice of the single list, and
+§261.4's reasoning is kept rather than overwritten), and the strip's pills now
+carry each subject's **own code** — MB, RS, FIN, MRC — the letters already
+printed on its pillars and projects (§261.9), asked for from a real 308-slide
+flow.
 **At merge time:** bump `SHELL` in `sw.js` to a name `origin/main` does not
 hold (§91, §94.12, §94.16) — the built file's bytes have changed.
 

@@ -4759,6 +4759,9 @@ python3 checks/history-page.py  # History (§262): the page in the rail for the 
                                 # back read off the DATA and the POST that carried it, the
                                 # unit's line and door, a custodian's line — 25 red on the
                                 # build before, and every press degrades (§215)
+                                # — and since §262.3 the unit's own words, its SWOT, the
+                                # group's fields and a capability's definition carry
+                                # before and after and go back
 node scripts/test-history-read.js # ...and the server half on a real Postgres: real saves
                                 # by three people, every filter, the cap, a custodian's own
                                 # place allowed and another refused, no session refused

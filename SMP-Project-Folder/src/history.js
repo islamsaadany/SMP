@@ -48,7 +48,10 @@ var TRAIL = (function(){
                 owner:"Owner", collaborators:"Collaborators", name:"Name", description:"Description",
                 weight:"Weight", finish:"Due date", start:"Start", end:"End", def:"Definition",
                 aspiration:"Aspiration", progress:"Progress", measureAt:"Measure date",
-                horizon:"Horizon", kind:"Measured as", hide:"Hidden" };
+                horizon:"Horizon", kind:"Measured as", hide:"Hidden", endInMind:"End in mind",
+                clauses:"Who we are", mission:"Mission", values:"Values", org:"Organisation",
+                asOfQuarter:"Review quarter", "swot.s":"Strengths", "swot.w":"Weaknesses",
+                "swot.o":"Opportunities", "swot.t":"Threats" };
   function kindWord(k){ return KIND[k] || k; }
   function fieldWord(f){ return FIELD[f] || String(f || ""); }
   function placeWord(t){
@@ -102,7 +105,7 @@ var TRAIL = (function(){
     if (v === null || v === undefined || v === "") return '<span class="hist-none" title="nothing">—</span>';
     if (Array.isArray(v) && v.length === 4 && v.every(function(x){ return typeof x === "boolean"; }))
       return v.map(function(b, i){ return '<i class="hist-q' + (b ? ' on' : '') + '" title="Q' + (i+1) + (b ? ' on' : ' off') + '"></i>'; }).join("");
-    if (Array.isArray(v)) return E(v.join(", "));
+    if (Array.isArray(v)) return E(v.map(function(x){ return Array.isArray(x) ? x.join(" ") : x; }).join(" · "));
     if (typeof v === "object") return E(JSON.stringify(v));
     return E(String(v));
   }
@@ -128,7 +131,7 @@ var TRAIL = (function(){
     if (k === "arrange") return "The order of a plan is put back by dragging it on the Plan page.";
     if (!r.m) return "This change has no single value to put back.";
     if (k === "setup" || k === "access" || k === "cycle" || k === "destroy" || k === "focus" ||
-        k === "claim" || k === "claimRequest" || k === "deckHide")
+        k === "claim" || k === "claimRequest" || k === "deckHide" || (k === "group" && !r.m))
       return "This is a setting, put back on its own page.";
     if (r.m.field === "name" && r.m.from == null) return "A row that was added is removed from the Plan page.";
     return null;
@@ -323,6 +326,9 @@ var TRAIL = (function(){
   function locate(t, id){
     var hit = null;
     try {
+      /* §262.3: the subject is its own row — its words, its SWOT. */
+      if (id === t || (t === "group" && id === "group"))
+        return t === "group" ? GROUP : (typeof unitLikeWritable === "function" ? unitLikeWritable(t) : null);
       if (t === "group") {
         (GROUP.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = m; });
         return hit;
@@ -362,6 +368,10 @@ var TRAIL = (function(){
     var obj = locate(e.target, m.id);
     if (!obj) return "That row is no longer in the plan, so there is nothing to put the value back into.";
     if (obj.__swot) { obj.__swot.arr[obj.__swot.idx] = m.from == null ? "" : m.from; }
+    else if (String(m.field).indexOf("swot.") === 0) {
+      obj.swot = obj.swot || {};
+      obj.swot[m.field.slice(5)] = m.from == null ? [] : JSON.parse(JSON.stringify(m.from));
+    }
     else if (m.had === false || m.from === undefined) { delete obj[m.field]; }
     else obj[m.field] = m.from;
     return null;

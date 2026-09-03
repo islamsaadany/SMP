@@ -30055,3 +30055,27 @@ and From → To take what is left. A word longer than its column breaks rather
 than being cut; the chip itself never breaks. Asserted at 1440 AND 1180: no
 cell holds more than it shows, and a time is never split.
 
+## §262.3 — THE UNIT'S OWN WORDS ARE A ROW WITH A BEFORE AND AN AFTER (2026-09-03)
+
+Found by checking the live writer as the test person Islam made: the one
+reversible change chosen was Mobile's aspiration, and History drew the line —
+*Test User · Plan · Mobile · the unit's own words* — with no field, no before,
+no after, and Restore greyed. Islam: *"yes we need to build it in history."*
+
+**FOUR SITES LOGGED A SENTENCE AND NO ROWS**: the unit's own words
+(`UNIT_FOUNDATION`), its SWOT, the group's own fields, and a capability's
+definition — every one a change the authoriser judged whole and named without
+saying what moved. `fieldRows()` is the one builder: **the subject is its own
+row** (id the unit key, `"group"`, or the capability's id; name the subject's
+name) and the field is named — a SWOT quadrant as `swot.s`, so one reader tells
+a list from a row field. The group's lists (its objectives, themes, weighting)
+are judged by their own rows and carry none here; only a field that IS a value
+does. **The refusal put-back learned the same address** (§184's `undoable`
+becomes true the moment a change has rows, so the banner would otherwise offer
+a put-back that finds no row): the subject itself, and a quadrant written whole.
+`TRAIL.locate` and `restore` answer the same two shapes, so Restore on the
+aspiration line writes the old words into the unit and paints. Arrays draw as
+lines separated by a middle dot. `test-history-read.js` proves both shapes on a
+real Postgres, `history-page.py` puts an aspiration back and reads the DATA,
+495/0 authoriser.
+

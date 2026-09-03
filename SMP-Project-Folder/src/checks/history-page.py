@@ -38,6 +38,8 @@ GATE = b"<!doctype html><title>Sign in</title><h1 id='gate'>Sign in</h1>"
 
 # Rows in the exact shape the real save path writes (see scripts/test-history-read.js).
 LOG = [
+  {"id": 7, "at": "2026-09-03T05:16:07.000Z", "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitFoundation", "target": "mobile", "what": "the unit's own words",
+   "rows_": {"count": 1, "moved": [{"id": "mobile", "to": "The words the plan holds today", "had": True, "from": "The words before the edit", "name": "Mobile", "field": "aspiration"}]}},
   {"id": 6, "at": "2026-09-03T05:16:06.000Z", "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan",
    "rows_": {"count": 1, "moved": [{"id": "mobile-P1-T2", "to": [False, True, True, False], "had": False, "from": None, "name": "End-to-end order-to-cash digitization", "field": "quarters"}]}},
   {"id": 5, "at": "2026-09-03T05:16:06.000Z", "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "retailstores", "what": "the unit's plan",
@@ -177,7 +179,7 @@ with sync_playwright() as p:
     ck("the page asked the server", len(asks) >= 1, SEEN["asks"])
     ck("...for today, with a cap, never the graph", asks and asks[-1].get("from") and asks[-1].get("limit"), asks[-1] if asks else None)
     r = rows(pg)
-    ck("one line per changed field: 7 lines from 6 entries", len(r) == 7, len(r))
+    ck("one line per changed field: 8 lines from 7 entries", len(r) == 8, len(r))
     ck("...each naming who and where", all(("Mohamed Essam" in x["text"] or "Mennah Farouk" in x["text"] or "Yara Kamal" in x["text"] or "Ashraf Laithy" in x["text"]) and ("Mobile" in x["text"] or "Retail" in x["text"] or "Marketing" in x["text"]) for x in r), [x["text"][:60] for x in r])
     ck("...the target's before and after", any("0.8%" in x["text"] and "1%" in x["text"] for x in r), [x["text"] for x in r][-1:])
     ck("...and the field in words, never a key", any("Compile rule" in x["text"] for x in r) and not any("compile " in x["text"] for x in r))
@@ -202,7 +204,7 @@ with sync_playwright() as p:
     n0 = len(SEEN["asks"])
     pick(pg, "[data-hist-f='target']", "mobile"); pg.wait_for_timeout(700)
     ck("picking a place asks the server for that place", len(SEEN["asks"]) == n0 + 1 and (SEEN["asks"][-1].get("target") if SEEN["asks"] else None) == "mobile", SEEN["asks"][-1:])
-    ck("...and the table is that place's (5 lines)", len(rows(pg)) == 5, len(rows(pg)))
+    ck("...and the table is that place's (6 lines)", len(rows(pg)) == 6, len(rows(pg)))
     pick(pg, "[data-hist-f='person']", "own_mob"); pg.wait_for_timeout(700)
     ck("picking a person narrows further (2 lines)", len(rows(pg)) == 2 and (SEEN["asks"][-1].get("person") if SEEN["asks"] else None) == "own_mob", (len(rows(pg)), SEEN["asks"][-1:]))
     pick(pg, "[data-hist-f='person']", ""); pick(pg, "[data-hist-f='target']", ""); pg.wait_for_timeout(700)
@@ -241,6 +243,14 @@ with sync_playwright() as p:
     ck("Put it back writes the OLD value into the plan", pg.evaluate("()=>UNITS.mobile.items[0].measures[0].target") == "0.8%", pg.evaluate("()=>UNITS.mobile.items[0].measures[0].target"))
     ck("...and a save went to the server carrying it", any("0.8%" in x for x in SEEN["posts"][posts0:]), len(SEEN["posts"]) - posts0)
     ck("...and the confirmation closed", not pg.evaluate("()=>!!document.querySelector('.hist-confirm')"))
+    # §262.3: the unit's own words are a row too, and go back
+    pg.wait_for_timeout(2200)
+    r = rows(pg)
+    ai = [i for i, x in enumerate(r) if "Aspiration" in x["text"] and "words before" in x["text"]]
+    ck("the aspiration line names the field and carries before and after", bool(ai) and r[ai[0]]["rst"] and not r[ai[0]]["rst"]["disabled"], [x["text"][:60] for x in r if "Aspiration" in x["text"]])
+    pg.evaluate("i=>{const tr=document.querySelectorAll('[data-hist-page] table.hist tbody tr')[i];const b=tr&&tr.querySelector('[data-hist-restore]');if(b)b.click()}", ai[0] if ai else -1); pg.wait_for_timeout(300)
+    press(pg, "[data-hist-ok]"); pg.wait_for_timeout(1200)
+    ck("Put it back writes the old aspiration into the unit", pg.evaluate("()=>UNITS.mobile.aspiration") == "The words before the edit", pg.evaluate("()=>UNITS.mobile.aspiration"))
     # a value that was ABSENT before goes back to absent
     pg.wait_for_timeout(2200)
     r = rows(pg)
@@ -258,7 +268,7 @@ with sync_playwright() as p:
     ck("...and the band is still one line", pg.evaluate("()=>{const b=document.querySelector('.pane .pband');return b && b.getBoundingClientRect().height<56;}"))
     press(pg, "[data-hist-open]"); pg.wait_for_timeout(900)
     mrows = pg.evaluate("()=>document.querySelectorAll('[data-hist-modal] table.hist tbody tr').length")
-    ck("the door opens the unit's history in a dialog (5 lines)", mrows == 5, mrows)
+    ck("the door opens the unit's history in a dialog (6 lines)", mrows == 6, mrows)
     ck("...with no Where column, it is all one place", pg.evaluate("()=>![...document.querySelectorAll('[data-hist-modal] th')].some(t=>t.textContent.trim()==='Where')"))
     ck("...and every Restore sits whole inside its cell (§158: fit, never cut)", pg.evaluate("()=>[...document.querySelectorAll('[data-hist-modal] .hist-rst')].every(b=>{const c=b.closest('td').getBoundingClientRect(),r=b.getBoundingClientRect();return r.right<=c.right+0.5 && r.left>=c.left-0.5;})"))
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)

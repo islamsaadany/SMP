@@ -465,11 +465,18 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   is what an upgrading tenant should mean. Proved able to fail: **14 red** on
   the shipped build, the first failure printing his report verbatim — and **the
   check found a defect in the change itself**, the reply path reading
-  `chased_them_at` off a row selected as `here_at` alone. **RECORDED, NOT
-  DONE**: the quiet period is a stored setting with **no control drawn yet**
-  (rule 1c is mockup-first; the mockup is
-  `design-mockups/chat-quiet-row/`), and two people in the office replying at
-  once still both chase.
+  `chased_them_at` off a row selected as `here_at` alone. **§261.1 — THE
+  SETTINGS ROW WAS DRAWN AND REFUSED**: Islam, of the mockup — *"I'm confused
+  between the send email after 3 min and the send after 60 min is that a
+  duplication?"* It is not (one decides whether an email goes at all, the other
+  whether a SECOND one does) and **the away number is never read on the
+  office's own chase**, so only one was ever in play on the half he was reading
+  — but two boxes reading *minutes* on one panel is a control that needs
+  explaining, and §127 spent a section making that panel readable without
+  prose. The quiet period ships **fixed at 60 minutes**; `chatCfg().quiet`
+  stays as a default with no control (never a control that opens nothing,
+  §61's other shape), and the mockup stays as the record of a rejected design.
+  Two people in the office replying at once still both chase.
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -4944,10 +4951,14 @@ away half was still emailing per reply while the office half was fixed. Full
 `qa.py` sweep ERRORS none &middot; 491/0 authoriser &middot; 126/0 differ
 &middot; 94/0 on the existing chat suite &middot; `office-chat.py` ALL CLEAR
 with a new section for the sixth presence state &middot; round trip PASS on a
-virgin Postgres 16. **Recorded, not done**: the quiet period is a stored
-setting with no control drawn yet &mdash; a settings row is a UI change and
-rule 1c is mockup-first, so it is drawn out of the running panel in
-`design-mockups/chat-quiet-row/` and awaits a word.*
+virgin Postgres 16. **&sect;261.1 &mdash; and the row was drawn and
+REFUSED**: shown the mockup, Islam asked *"I'm confused between the send email
+after 3 min and the send after 60 min is that a duplication?"* It is not, and
+the away number is not even consulted on the office's own chase &mdash; but two
+boxes reading *minutes* on one panel is a control that needs explaining, so the
+quiet period ships fixed at 60 minutes and the mockup stays as the record of a
+rejected design. **The whole cost of finding that out was a mockup**, which is
+rule 1c paying for itself.*
 
 *Earlier the same day: **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's

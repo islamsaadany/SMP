@@ -29857,3 +29857,38 @@ from its default (§104.7), so the row is wiring and nothing else the day it is
 approved. **And a same-conversation collision is unchanged**: two people in the
 office replying at once still both chase, because the memory is per
 conversation and not per sender.
+
+
+### §261.1 — AND THE SETTINGS ROW WAS REFUSED (2026-09-03)
+
+The mockup went to Islam and he asked the question it should have been drawn to
+answer: *"I'm confused between the send email after 3 min and the send after 60
+min is that a duplication?"*
+
+**IT IS NOT A DUPLICATION, AND THAT IS NOT THE POINT.** The two answer
+different questions — *is this person at their desk* (§169's `away`, which
+decides whether an email is sent at all) and *have we already emailed about
+this conversation* (§261's `quiet`, which decides whether a SECOND one goes).
+**And measured: the away number is never consulted for the office's own chase
+at all** — `tellTheOffice` does not read `here_at`, because the office is
+emailed whether or not they are looking. So on the half he was reading, only
+one number was ever in play.
+
+**HIS CONFUSION IS THE MEASUREMENT.** Two boxes both ending in *"minutes"* on
+one panel, one of which is inert for the reader of that panel, is a control
+that needs explaining before it can be used — and §127 spent a whole section
+making that panel readable without prose. He chose to **drop the row**, from
+three options with the cost of each stated.
+
+**THE BEHAVIOUR IS UNAFFECTED**: the quiet period ships at 60 minutes, which is
+what the panel would have defaulted to. `chatCfg().quiet` stays exactly as
+built — one clamped number, named once, asked by both chases and by the line
+above the reply box — so it is a default with no control, never a control that
+opens nothing (§61's trap is the other shape). A tenant that ever needs it
+changed is one line of wiring away, and the mockup stays in
+`design-mockups/chat-quiet-row/` as the record of a rejected design (README's
+own settled / pending / rejected rule), so it is not proposed again by somebody
+who has not read this.
+
+**AND THE ROW WAS NEVER BUILT**, which is rule 1c paying for itself: the whole
+cost of finding this out was a mockup.

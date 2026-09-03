@@ -10,7 +10,9 @@ serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 message.** The platform stops emailing per message about a conversation already
 waiting on you, and what does go out carries everything still unanswered; the
 same rule runs the away chase going the other way. Migration 042, no backfill.
-Awaiting a word before it goes to `main`.
+**No new control** — the settings row was drawn, put to Islam and refused
+(§261.1); the quiet period ships fixed at 60 minutes. Awaiting a word before it
+goes to `main`.
 
 **Latest version:** §258 on `main` and live (the save-safety banners), on top
 of §257 (a target that is a yes or a no) and the whole deck round — all from
@@ -36,9 +38,16 @@ Nothing proceeds past this line without an answer.
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
 
-| **D10** | **The *Email again after* row on chat settings** (mockup: `design-mockups/chat-quiet-row/2026-09-03_email-again-after.html`). | §261's behaviour ships either way, fixed at 60 minutes. The row is only what makes the number yours; rule 1c is mockup-first, so nothing is drawn until the word. | §261 |
 
 **Answered:**
+
+- **D10 · The *Email again after* row on chat settings — ANSWERED 2026-09-03:
+  refused.** Islam: *"I'm confused between the send email after 3 min and the
+  send after 60 min is that a duplication?"* They are two different questions
+  and the away number is not even read on the office's own chase — but two
+  boxes reading "minutes" on one panel is a control that needs explaining, so
+  the row is dropped and the quiet period ships fixed at 60 minutes. The mockup
+  stays as the record of a rejected design (§261.1).
 
 - **D9 · The hide-from-presentation mockup — ANSWERED 2026-09-01: approved**,
   and built the same day as §233.

@@ -365,6 +365,42 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A COUNT IS OWED IN WHOLE ONES (§260):** Islam — *"we need a compilation
+  type that prorate to integrs only .. a target of 2 shops to open in the year
+  so in the 8th month that proration asks for 1.3 stores which is not
+  feasible ... maybe of the lowest."* Aligned first; **Count** as the name and
+  **rounded down** are both his. `Count` is Sum for things finished one at a
+  time: it prorates the target like Sum and rounds the due figure DOWN to a
+  whole one — 2 shops owe nothing until June, one from June, two in December,
+  so at August his row reads **1 due, 100%** where Sum read 1.33 and 75%.
+  **A FOURTH RULE, NOT A CHANGE TO SUM**: rounding Sum whenever the target
+  looks whole would move stored scores on every integer Sum target already
+  planned (the demo has *Systems consolidated 6*); 0 of 122 demo rows carry
+  Count and every existing row prorates exactly as before, asserted. **THE
+  EPSILON IS NOT DECORATION** — `7 * (3/12)` is `1.7499999999999998`, so a raw
+  floor owes one fewer on precisely the month a whole unit falls due;
+  `Math.floor(due + 1e-9)`, swept across four targets and twelve months against
+  a floor the check works out itself. **DUE CAN BE NOUGHT WHILE THE TARGET IS
+  NOT, and it is not "Not scored"** (§35): the row leaves every average, no
+  `/ 0 #` benchmark is printed, and the Performance page says **"Nothing due
+  yet"** in the tactics' own not-yet-due pill through `nothingDueYet()`, the
+  one reader. **ONE LIST WHERE THERE WERE SEVEN**: `SMPRules.COMPILES` (Sum ·
+  Count · Latest · Average) with `prorates()`/`wholeUnits()` beside it, read by
+  the four pen pickers, the plan builder, the workbook's validation ranges and
+  the upload's refusal — adding a fourth value to seven copies is how one gets
+  missed. No server change, nothing migrated. `checks/count-compile.py`:
+  **three of its own first failures were the CHECK** (Plan is a SECTION, not a
+  tab; the Strategy tab must be pressed from script at that viewport; a viewer
+  switch made AFTER navigating re-lands on the remembered page, §173/§237).
+  **AND FALSIFYING BY EDITING THE BUILT FILE IS IMPOSSIBLE NOW** — §238's hashed
+  CSP silences a script block whose bytes changed, so every function vanished
+  and the check said *cannot continue* instead of failing; broken builds are
+  made from the SOURCES through `build.py`, and the check takes `SMP_BUILT` to
+  be pointed at a copy while the sweep reads the real file — **13 red** with
+  the floor out, **2 red** with one picker of nine left on the old list. `plan-builder.py`
+  held a literal of the old three rules — REWRITTEN as agreement (§214.3,
+  §218). **Recorded, not done**: the deck keeps its dash where the page says
+  the words.
 - **THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (§259):** Islam, in one
   message — *"where can I upload the raya trade mark so it can be used? then
   work on separators let's make teh serparators blue background like the client
@@ -4530,6 +4566,20 @@ python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its 
                                 # asserted UNCHANGED, only Sum prorating, both panes
                                 # driven, and §2b guarding the index-leak that
                                 # `.map(measureScore)` would reintroduce
+python3 checks/count-compile.py # a count is owed in whole ones (§260): the ONE compile
+                                # list and what on it prorates (both ends), Islam's own
+                                # 2-shops-at-August example MADE (Count owes 1 and reads
+                                # 100%, Sum on the same row still 1.33 and 75%), the floor
+                                # swept across four targets and twelve months as agreement
+                                # with the check's own arithmetic (epsilon months included),
+                                # "Nothing due yet" at both ends on the page, the demo
+                                # asserted unmoved, nine pickers each offering exactly the
+                                # shared list with a pick proved to WRITE, and the workbook
+                                # accepting Count and refusing a made-up rule by naming all
+                                # four. 13 red with the floor out, 2 red with one picker
+                                # left on the old list — from REBUILT sources, because an
+                                # edited built file is silenced by §238's hashed CSP.
+                                # SMP_BUILT points it at another build.
 python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
                                 # PASSED (§239): the review point is a month and the
                                 # office picks it; Sum prorates and Latest must not; the
@@ -4811,7 +4861,30 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;259: the group has a mark, and the
+*Last Updated: 2026-09-03 &mdash; **&sect;260: a count is owed in whole
+ones.** Islam: *"we need a compilation type that prorate to integrs only .. if
+we have a target of 2 shops to open in the year so in the 8th month that
+proration asks for 1.3 stores which is not feasible ... maybe of the lowest."*
+Aligned before anything was built; **Count** as the name and **rounded down**
+are both his. A fourth compile rule beside Sum, Latest and Average: it prorates
+like Sum and rounds the due figure DOWN to a whole one, so 2 shops owe nothing
+until June, one from June, two in December &mdash; his row reads 1 due and
+100% at August where Sum read 1.33 and 75%. **Not a change to Sum**, because
+that would move stored scores on every integer Sum target already planned;
+0 of 122 demo rows carry Count and every existing row prorates exactly as
+before, asserted. A count with nothing owed yet leaves every average and the
+Performance page says **"Nothing due yet"** rather than *Not scored*. **One
+list where there were seven** &mdash; the pen's four pickers, the plan builder,
+the workbook's validation and the upload's refusal all read
+`SMPRules.COMPILES`. No server change, nothing migrated. `checks/count-compile.py`
+proved able to fail from rebuilt sources &mdash; **editing the built file
+instead silenced the whole script block under &sect;238's hashed CSP**, which is
+its own lesson &mdash; and three of its own first failures were the check.
+`plan-builder.py` rewritten from a literal to agreement. 491/0 authoriser,
+eight neighbouring checks and the full `qa.py` sweep green. **On the branch,
+not merged.***
+
+*Earlier: 2026-09-03 &mdash; **&sect;259: the group has a mark, and the
 deck has separators.** Islam in one message &mdash; *"where can I upload the
 raya trade mark so it can be used? then work on separators let's make teh
 serparators blue background like the client brand colors"* &mdash; then four

@@ -6,7 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §258 on `main` and live (the save-safety banners), on top
+**Latest version:** **§260 (the `Count` compile rule — a count is owed in
+whole ones) is on `claude/integer-prorating-compilation-6dq77s`, not merged.**
+§258 on `main` and live (the save-safety banners), on top
 of §257 (a target that is a yes or a no) and the whole deck round — all from
 other sessions. **§259 (the group's mark and the deck's four blue section
 dividers) is merging from `claude/deck-separators-brand`,** renumbered from
@@ -81,6 +83,36 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §260 — a count is owed in whole ones (2026-09-03, branch `claude/integer-prorating-compilation-6dq77s`)
+
+Islam: *"we need a compilation type that prorate to integrs only .. if we have
+a target of 2 shops to open in the year so in the 8th month that proration asks
+for 1.3 stores which is not feasible."* Aligned first; **Count** as the name
+and **rounded down** are both his.
+
+**Built:**
+
+- **A fourth compile rule, `Count`** — Sum for things finished one at a time.
+  It prorates the target like Sum and rounds the due figure DOWN to a whole
+  one: 2 shops owe nothing until June, one from June, two in December. At
+  August his row reads **1 due, 100%** where Sum read 1.33 and 75%.
+- **Not a change to Sum**, because that would move stored scores on every
+  integer Sum target already planned; 0 of 122 demo rows carry Count and every
+  existing row prorates exactly as before, asserted.
+- **"Nothing due yet"** on the Performance page for a count with nothing owed,
+  in the tactics' own not-yet-due pill; the row leaves every average and no
+  `/ 0 #` benchmark is printed.
+- **One list (`SMPRules.COMPILES`) where there were seven** — four pen pickers,
+  the plan builder, the workbook's validation ranges and the upload's refusal
+  all read it. No server change, nothing migrated.
+
+**Verified:** `checks/count-compile.py` (new; **13 red** with the floor
+taken out, **2 red** with one picker left on the old list, both from rebuilt
+sources — editing the built file instead silenced the whole script block under
+§238's hashed CSP); `plan-builder.py` rewritten from a literal to
+agreement; `test-authorize` 491/0; eight neighbouring checks and the full
+`qa.py` sweep green. **On the branch, not merged.**
 
 ### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
 

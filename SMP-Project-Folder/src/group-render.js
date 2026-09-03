@@ -353,6 +353,7 @@ var DIR_WORDS = { "≥": "More is better", "≤": "Less is better" };
 var COMPILE_WORDS = {
   Latest:  "Takes the last measure reported",
   Sum:     "Adds up across the period",
+  Count:   "Adds up whole things, one at a time — due in whole ones, rounded down",
   Average: "Averages across the period"
 };
 /* The mark is drawn as it always was; the note rides on it. `title` alone —
@@ -482,6 +483,11 @@ function measureRows(ms, opts){
     return head + '<td class="num">' + actCell + '</td>' +
            (scored
              ? '<td class="num final" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
+             /* §260: a count with nothing owed yet has not been asked, which is
+                a different thing from a row that cannot be scored, and it wears
+                the tactics' own "not yet due" pill rather than the alarm one. */
+             : nothingDueYet(m)
+             ? '<td class="cc"><span class="pill kind">Nothing due yet</span></td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
   }).join("");
 }
@@ -630,7 +636,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
         '<span class="why">' + esc(t.outCompile || "\u2014") + '</span>'
       : selectOr("plan", t.outDir || "\u2265", ["\u2265", "\u2264"], "mono",
                  function(v){ setOr(t, "outDir", v); }) +
-        selectOr("plan", t.outCompile || "", ["", "Sum", "Latest", "Average"], "",
+        selectOr("plan", t.outCompile || "", [""].concat(SMPRules.COMPILES), "",
                  function(v){ setOr(t, "outCompile", v); })) +
     '</div>';
 }
@@ -3540,7 +3546,7 @@ function koEdit(list, page, acKey, owner){
           { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
         '<td class="cc">' + (pg && yn ? offSelect(m.compile || "\u2014")
           : gapCell(page, acKey, m, "compile",
-          { kind:"select", opts:["Sum", "Latest", "Average"] })) + '</td>' +
+          { kind:"select", opts:SMPRules.COMPILES })) + '</td>' +
         /* §243: the same cell the capability's table already draws — one
            column, one field, one answer on all three surfaces (§53.5). Left
            blank it is not nought: koWeights() gives it the average of the
@@ -5591,7 +5597,7 @@ function unitPlanBody(it, u, railed){
          so nothing a plan already carries is lost. */
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.compile || "\u2014")
         : gapCell("plan", "u_plan", m, "compile",
-        { ctx:pctx(m), kind:"select", opts:["Sum","Latest","Average"],
+        { ctx:pctx(m), kind:"select", opts:SMPRules.COMPILES,
           readEmpty:"\u2014", read:compileCell })) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
@@ -6264,7 +6270,7 @@ function capKoEdit(c){
         '<td class="cc">' + gapCell(pg, "k_found", m, "target",
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
-          { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
+          { kind:"select", opts:SMPRules.COMPILES }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
         '<td class="cc">' + (ed ? eyeBtn(m, pg, "k_found") +

@@ -29474,3 +29474,147 @@ have found.
   decided.
 - **A group mark is not offered to a COMPANY.** A company has a page (§68) and
   no deck, so there is nothing yet for a company's own mark to appear on.
+
+## §260 — A COUNT IS OWED IN WHOLE ONES (2026-09-03)
+
+Islam: *"we need a compilation type that prorate to integrs only .. if we have
+a target of 2 shops to open in the year so in the 8th month that proration asks
+for 1.3 stores which is not feasible but it should prorate for the closest
+integer maybe of the lowest we need to think of it where it measures the actual
+maybe to 1 store only."* Aligned before anything was built; both decisions are
+his: **Count** as the name, and **rounded down** with nothing owed in the early
+months.
+
+### §260.1 — What was true, measured
+
+§239 prorates a `Sum` target by the share of the year that has passed, and
+compares the actual against that. For a target of 2 shops at a review point of
+August the arithmetic is exactly the fault he describes:
+
+| Target 2, review month 8 | Due so far | Actual 1 reads |
+|---|---|---|
+| `Sum` | 1.33 | 75% |
+| `Count` | 1 | 100% |
+
+A shop is not 1.33 of a shop, and a unit that has opened the one shop it could
+have opened by August was reading 75% against a number nothing could satisfy.
+
+### §260.2 — A fourth compile rule, not a change to Sum
+
+The tempting fix is for `Sum` to round whenever the target looks whole. It was
+refused because it **moves stored scores**: the demo alone has *Systems
+consolidated 6* and *Cycles reviewed on time 4* compiling by Sum, and every
+tenant with an integer Sum target would have watched its scores change on a
+morning nobody had touched a plan. A fourth value means nothing anybody has
+already planned moves, and choosing it is a plan decision (§99.8: *how a thing
+is measured is a plan decision, not a reporting one*). **0 of 122 demo rows
+carry Count**, and for every one of them the new "does this prorate" answers
+exactly what the old Sum-only test did — asserted, not assumed.
+
+**`Count` is Sum for things finished one at a time** — shops opened, systems
+consolidated, agreements signed. It prorates the target like Sum and then
+rounds the due figure DOWN to a whole one. The name fits the box the pen
+already draws for the compile rule, which §248 sized for *Average*.
+
+### §260.3 — Rounded down, and the early months owe nothing
+
+**Round down, his call** ("maybe of the lowest"): a shop is not owed until its
+whole share of the year has passed. Target 2: months 1–5 owe nothing, months
+6–11 owe one, month 12 owes two. Nearest rounding would owe the second shop
+from September, which is 1.5 read from the other side. Ceiling was never a
+candidate: it owes a shop in January.
+
+**The epsilon is not decoration.** `3 * (4/12)` is exactly 1 in JavaScript and
+`7 * (3/12)` is `1.7499999999999998`, so a floor taken on the raw product can
+owe one fewer than the arithmetic means on precisely the month a whole unit
+falls due. `Math.floor(due + 1e-9)` rounds only what is genuinely there, and
+the check sweeps four targets across all twelve months against a floor it
+works out for itself.
+
+**Due can now be nought while the target is not, and that is a real state.**
+It is *not* "Not scored" (§35: absent is not nought, and a row nobody has
+asked yet is not a row that cannot answer):
+
+- `measureScore` leaves the row out of every average, the way a not-started
+  tactic is left out. The alternative, scoring it 100 while nothing is owed,
+  rewards silence and was put to him and not taken.
+- `measureDueLabel` says nothing rather than printing `/ 0 #` beside a figure
+  — a benchmark of nought is not a benchmark.
+- The Performance page reads **"Nothing due yet"** in the tactics' own
+  not-yet-due pill, never the alarm one; `nothingDueYet()` is the one reader.
+  The deck prints its usual dash for an unscored row and is deliberately not
+  given a second word for this (§35's dash is what the deck already says for
+  *nothing to say*).
+- **A "less is better" count** gets a rounded-down allowance too, which is
+  strict early in the year (at most 2 closures allows none until June). Rare,
+  stated rather than special-cased.
+
+### §260.4 — One list, where there were seven
+
+The compile rule's vocabulary was spelled **seven times** — four pickers in the
+pen (a measure's, a key objective's, a capability objective's, a tactic's
+outcome's), the plan builder's segmented control, the workbook's validation
+ranges and the upload's refusal message. Adding a fourth value to seven copies
+is how one gets missed, and the missed one is then a picker offering a rule the
+scorer does not know, or a workbook refusing a rule the pen wrote (§53.5).
+`SMPRules.COMPILES` is the list now, in the pen's own order (the two that add
+up side by side, then the two that do not), with `prorates()` and
+`wholeUnits()` beside it; `config-data.js`'s `prorates(m)` asks the shared
+rule, the workbook's `COMPILES` is an alias of it, and the upload's refusal
+names the list rather than a copy of it.
+
+The server needed nothing: `compile` is already a plan field the authoriser
+classifies, and no value list is validated there. Nothing is stored that was
+not stored before and nothing is migrated.
+
+### §260.5 — Proof
+
+`checks/count-compile.py` — the shared list and what on it prorates (both ends);
+Islam's own example MADE at August (Count owes 1 and reads 100%, Sum on the
+identical row still owes 1.33 and reads 75%); the floor swept across four
+targets and twelve months as agreement with the check's own arithmetic, the
+epsilon months included; "nothing due yet" at both ends on the Performance page
+(the count wears the not-yet-due pill, an unscored Latest row beside it still
+reads Not scored, both rows put back); the demo asserted unmoved; nine compile
+pickers on an open plan every one offering exactly the shared list, a pick
+proved to WRITE and put back; the builder's control; and the workbook accepting
+`Count` and refusing a made-up rule by naming all four.
+
+**Three of the check's own first failures were the CHECK** (§51.11, §94.5):
+Plan is a SECTION of Strategy and not a tab, so `[data-s="plan"]` waited
+thirty seconds on nothing; a real pointer press on the Strategy tab at that
+viewport lands on the band pinned over it, so the tab is pressed from script;
+and a viewer switch made AFTER navigating re-lands on the remembered page
+(§173, §237), so the check switched to the SMO, then walked to the plan, and
+found no pen — the switch comes first now.
+
+**And the falsification found the build's own defence**: editing the BUILT file
+to take the floor out silenced the whole script block, because §238's hashed
+CSP refuses a block whose bytes no longer match its hash — every function in
+`config-data.js` vanished and the check reported *cannot continue* rather than
+the failures it exists to see. The broken builds were made from the SOURCES
+through `build.py`, which is the only honest way to make one, and the check
+takes `SMP_BUILT` so it can be pointed at a copy while the sweep reads the real
+file. **13 red** with the floor taken out (Count reading 1.33 due and 75%,
+`/ 0.67 #` printed, 150% for a shop opened before any was owed); **2 red** with
+one picker of nine left on the old list.
+
+`checks/plan-builder.py` held a literal of the old three rules and went red on
+a correct build — REWRITTEN as agreement with the shared list, not deleted
+(§214.3, §218). `test-authorize.js` 491/0. `ytd-proration`,
+`tactic-proration`, `deck-figures`, `deck-outcome`, `plan-fields`,
+`plan-builder`, `unit-before-number`, `fn-ko-edit` green.
+
+### §260.6 — Recorded, not done
+
+- **The deck says a dash where the page says "Nothing due yet."** One word on
+  one surface; the projector keeps §35's dash for anything unscored. Whether
+  the slide should say the words is a decision about what a review says.
+- **The knowledge base does not list the four rules anywhere** — the compile
+  cell's hover is where each rule is explained, and `Count` has its line
+  there. A recipe *"which compile rule do I pick"* would be the place if one is
+  wanted.
+- **`Count` on a tactic's OUTCOME** rounds against the tactic's own window
+  (§250's share), so a 2-shop outcome on a Q2–Q3 tactic owes one from the
+  fourth of its six months. Correct by construction through the one
+  arithmetic; not separately driven.

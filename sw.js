@@ -300,7 +300,7 @@
    save-safety banners — and was serving "smp-shell-v4.36-save-safety-banners"
    when this merge was made, so the name goes past it rather than beside it.
    Confirmed against origin/main immediately before the push. */
-const SHELL = "smp-shell-v4.37-blue-dividers";
+const SHELL = "smp-shell-v4.38-count-compile";
 const ASSETS = [
   "/",
   "/index.html",

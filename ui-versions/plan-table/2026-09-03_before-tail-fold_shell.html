@@ -2364,7 +2364,6 @@
        happen to agree. Shrink the root by that offset plus a pixel and the
        band stops being wholly inside it at exactly the moment it pins. */
     pinWatch();
-    watchTailFold();
     clipTitles();
     /* The header this paint just drew is a different element from the last
        one's, so the observer is re-pointed at it (§135.10). */
@@ -2435,44 +2434,6 @@
       });
     }, { threshold: [1], rootMargin: "-" + (top + 1) + "px 0px 0px 0px" });
     Array.prototype.forEach.call(bands, function(b){ PINSEE.observe(b); });
-  }
-  /* ── AND A WINDOW THAT CHANGES SIZE HAS TO REACH THE FOLD (§261) ─────
-     `tailFolds()` is read while the plan table is being BUILT, because what
-     folds is a control and a media query cannot move one. The cost of
-     deciding at render time is that a window resized afterwards is looking at
-     a layout chosen for the width before — and Islam's own report is a ZOOMED
-     page, which is a resize. So the answer is re-asked when the window
-     changes and the page is repainted only when it actually FLIPS: dragging a
-     window edge fires this on every pixel, and repainting on every pixel would
-     throw away the box somebody is typing in forty times a second (§35).
-
-     ARMED ONCE, LIKE THE OBSERVER ABOVE (§24, §47.2) — a listener added per
-     paint is a listener added a hundred times. `TAIL_WAS` is refreshed on
-     every paint, so it always holds what was actually DRAWN rather than what
-     was true when the listener was made.
-
-     AND NEVER UNDER A TYPING HAND: a bound field writes on `change`, which is
-     on blur (§35), so repainting while one has the cursor destroys the box
-     mid-word and the value with it. The paint waits for the blur that was
-     going to commit it anyway. */
-  var TAIL_WATCHED = false, TAIL_WAS = false;
-  function watchTailFold(){
-    TAIL_WAS = typeof tailFolds === "function" && tailFolds();
-    if (TAIL_WATCHED || typeof window === "undefined") return;
-    TAIL_WATCHED = true;
-    window.addEventListener("resize", function(){
-      if (typeof tailFolds !== "function") return;
-      var now = tailFolds();
-      if (now === TAIL_WAS) return;
-      TAIL_WAS = now;
-      var a = document.activeElement, pane = document.getElementById("panel");
-      if (a && a.tagName && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) &&
-          pane && pane.contains(a)) {
-        a.addEventListener("blur", function(){ paint(); }, { once: true });
-        return;
-      }
-      paint();
-    });
   }
   function clipTitles(){
     document.querySelectorAll(".cfg table td").forEach(function(td){

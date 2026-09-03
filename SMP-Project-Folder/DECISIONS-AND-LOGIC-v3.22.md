@@ -29603,3 +29603,152 @@ draws as one line and is cleaned the moment anybody commits it, so it is
 invisible; cleaning it at the upload door instead would mean naming the prose
 fields a third time, in a reader that must not flatten a SWOT item or an
 aspiration — its own change, with its own check.
+
+---
+
+## §261 — THE PLAN TABLE AT A NARROWER WINDOW (2026-09-03)
+
+Islam, on the build §260 had just merged, with a screenshot of a **zoomed**
+page: *"are you sure of your fix? this is a zoomed page"* — the TACTIC column
+reading one character per line, the boxes tall and thin.
+
+**MY FIRST DIAGNOSIS WAS WRONG FOR HIS CASE AND THAT IS THE FIRST THING WORTH
+RECORDING.** §260 is a real fault and its fix is live: a title that has blank
+lines pasted into it makes a 643px box. His console said `boxes: 0 · clipped: 0
+· still holding blank lines: 0` — nothing in his tenant carried them — and I
+had already built and merged. *A measurement that comes back empty is an
+answer, and I read past it.* What his screenshot shows is a second fault in the
+same box, with a completely different cause, and the only way to tell them
+apart was to reproduce it with clean values.
+
+**FIVE OF A TACTIC'S SEVEN COLUMNS HOLD CONTROLS, AND A CONTROL DOES NOT
+SHRINK.** With the pen open the four target boxes (§248), the owner select, the
+collabs select and the four quarter marks come to **666px whatever the window
+is**, so every pixel the window loses comes off the two PROSE columns — they
+are the only elastic thing in the row. Measured on the shipped build, edit
+mode, Mobile's first pillar:
+
+| window | Tactic | Outcome | tallest row | fits its pane |
+|---|---|---|---|---|
+| 1920 | 547 | 257 | 91 | yes |
+| 1500 | 347 | 173 | 131 | yes |
+| 1400 | 269 | 150 | 191 | yes |
+| 1300 | 192 | 127 | 313 | yes |
+| 1200 | 115 | 105 | **1957** | yes |
+| 1100 | 74 | 92 | 1979 | **no — 9px over** |
+| 1000 | 64 | 82 | 1979 | **no — 39px over** |
+
+At 1200 a tactic's name box is 115px wide and its row is nearly two thousand
+pixels tall; at 1100 the table has stopped fitting its pane at all, which is
+§158 broken outright. **READ MODE HAS NONE OF THIS**, measured in the same run:
+its seven columns are all text, so they shrink together and the Tactic column
+still holds 192px at 1100 with rows of 140. *The fault belongs to the pen*, and
+that is why four versions of sweeps at 1440 walked past it — the tables are
+walked, and they are walked closed.
+
+### What was decided, and by whom
+
+Settled from a mockup made of the running platform (rule 1c, §41.9) and
+published as an artifact, with three width treatments and a height one drawn
+against real prose at six widths. Two of the decisions are Islam's, in one
+message: *"1. on squeezing I'd say the collab and the quarters to lose their
+haeders 2. ok with your recomendation of width switching."*
+
+**THE LADDER, AND NOTHING ABOVE IT.** Above 1400 the table is byte-identical to
+what it was — his instruction, and it is asserted, because a build that folded
+everywhere would satisfy every other assertion in the new check. Below 1400 the
+**tail folds**: Collabs and Quarters leave their two columns for a strip under
+the tactic's own name. Below 1200 the outcome's **four target boxes stack into
+one column**. The sequence was measured before it was proposed and is the
+cheaper rung first: the tail is worth ~224px and the stack ~100, and stacking
+alone still overflows the pane at 1100.
+
+| window | Tactic before | after | tallest row before | after |
+|---|---|---|---|---|
+| 1500 | 347 | 347 | 131 | 131 |
+| 1400 | 269 | **431** | 191 | **170** |
+| 1300 | 192 | **367** | 313 | **170** |
+| 1200 | 115 | **368** | 1957 | **170** |
+| 1100 | 74 | **294** | 1979 | **210** |
+| 1000 | 64 | **247** | 1979 | **278** |
+
+Nothing overflows its pane at any width from 1500 down to 768 — §158 restored
+where it had quietly gone.
+
+**THE HEADINGS GO WITH THE COLUMNS** (his 1). A column heading is a table's
+label for every cell under it, so dropping it leaves the control anonymous —
+visibly to anybody meeting an empty picker, and completely to a screen reader.
+**The word moves onto the control rather than back onto the page**: the
+collaborators select carries an `aria-label`, and the four quarter marks are
+wrapped in a named `role="group"`. That is the cost of his instruction, paid
+where it does not put furniture back on the screen (1b-ii).
+
+### Why this is a render decision and not a media query
+
+**WHAT FOLDS IS A CONTROL.** A media query can hide a column; it cannot move
+one. The alternative — draw the tail twice and let CSS pick a copy — would put
+two things in the document writing one field, which is §53.5 with §96's failure
+mode: a control that renders perfectly and is connected to nothing. So the row
+is BUILT with the tail in one place or the other, exactly as `ed` already
+decides which head is drawn (§248's own fold), and `tailFolds()` is the one
+answer the head, every row and the Add row's span all read — or they disagree
+about how many columns the table has.
+
+**ITS COST IS THAT A WINDOW RESIZED AFTER THE PAINT IS SHOWING A LAYOUT CHOSEN
+FOR THE OLD WIDTH — AND THE REPORTED CASE IS A ZOOM, WHICH IS A RESIZE.** So
+`watchTailFold()` re-asks on resize and repaints only when the answer actually
+**flips**: dragging a window edge fires that listener on every pixel, and
+repainting on every pixel would throw away the box somebody is typing in forty
+times a second. Armed once, never per paint (§24, §47.2), and **never under a
+typing hand** — a bound field writes on `change`, which is on blur (§35), so a
+paint while one has the cursor destroys the box and the value with it; the
+paint waits for the blur that was going to commit it anyway. `TAIL_WAS` is
+refreshed at the end of every paint, so the flag always holds what was actually
+DRAWN rather than what was true when the listener was made.
+
+**1400 IS MEASURED, NOT CHOSEN**: it is the width at which the two prose
+columns stop being able to hold a sentence between them (269 + 150 for three
+tactics whose names average 44 characters). 1200 is where the tail alone stops
+being enough.
+
+### What is deliberately not in it
+
+**FILL MODE IS LEFT WHERE §249.2 RECORDED IT.** A filler's table carries the
+same rigid controls and the same overflow below 1000px, and that section wrote
+it down as wanting a mockup rather than a quiet widening. This treatment would
+almost certainly fix it — and it was signed off against the PEN, which is what
+was drawn and what was reported. Extending it is one line and its own mockup.
+
+**THE CAPPED DESCRIPTION IS NOT BUILT.** The height lever — the description
+showing one line until the cursor is in it — was drawn beside the width ones
+and is not part of what he approved. Its price is that at 1400 with short
+prose the strip costs a row 37px (92 → 129), which is the one number in the
+table above that moves the wrong way.
+
+**AND THE PROSE FLOOR WAS DROPPED AS UNEARNED.** The mockup carried a
+`min-width` on the two prose columns; with the fold and the stack in place the
+Tactic column is 247px at 1000px of window on its own, so the floor never bites
+and would only be a thing to explain later (§2b).
+
+### The measuring
+
+`checks/plan-tail-fold.py` asserts the problem rather than the layout (§94.8),
+on **a unit and a pillars function** (A15, §53.5), and was watched to fail
+first: **55 red** against the shipped pre-§261 build, the tactic column
+reporting 269 → 192 → 115 → 74 and the resize case reporting seven columns
+after a narrowing. It asserts nothing above 1400 changes; that below it the two
+headings are gone AND **both controls are still there, inside the name cell**
+(a fold that dropped them would pass every assertion about width and headings
+and would be the worst build available, §61); that both are **PRESSED and the
+stored plan read back** (§96 — a control rendered into a new place is a control
+that may have been rendered where nothing is listening); that the Add row still
+reaches the end of whatever table it is in; that reordering keeps its handles;
+that nothing scrolls sideways; that **read mode is byte-for-byte what it was**,
+measured rather than claimed (§213); and that **narrowing the window folds the
+tail with no reload**, which is the only assertion that speaks to what he
+actually reported.
+
+Two of its own first-run failures were the CHECK: the pillars function is keyed
+`merchandising` and Islam spells it *merchandizing*, and the write probes were
+scoped to `#panel tbody tr[data-oi]`, which is the KEY MEASURES table — the
+first such row on the page, not the one under test.

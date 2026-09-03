@@ -251,45 +251,12 @@ function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ct
    column that hides on a narrow window has to hide its HEAD with its cells
    (§248), and `:nth-child` would silently point at the wrong column the day
    somebody inserts one. */
-function miniTable(head, rows, sort, cls){
-  return '<div class="scroll"><table' + (cls ? ' class="' + cls + '"' : '') + '><thead><tr>' +
+function miniTable(head, rows, sort){
+  return '<div class="scroll"><table><thead><tr>' +
     head.map(function(h){
       return typeof h === "string" ? '<th>' + h + '</th>'
                                    : '<th class="' + (h.cls || '') + '">' + h.h + '</th>'; }).join("") +
     '</tr></thead><tbody' + (sort || "") + '>' + rows + '</tbody></table></div>';
-}
-
-/* ── THE TAIL FOLDS UNDER THE NAME (§261) ────────────────────────────────
-   Islam, on a zoomed page: the TACTIC column reading one character per line.
-   §260 was a different fault in the same box (blank lines somebody had
-   pasted) and this one is the table: with the pen open, five of a tactic's
-   seven columns hold CONTROLS and a control does not shrink — the four target
-   boxes, the owner select, the collabs select and the four quarter marks come
-   to 666px whatever the window is, so every pixel the window loses comes off
-   the two PROSE columns. Measured at 1400/1300/1200/1100: the Tactic column
-   269 → 192 → 115 → 74px, and the tallest row 191 → 313 → 1957px.
-
-   WHAT FOLDS IS A CONTROL, WHICH IS WHY THIS IS A RENDER DECISION AND NOT A
-   MEDIA QUERY. A query can hide a column; it cannot move one, and drawing the
-   control twice so CSS can pick a copy would put two things in the document
-   writing one field (§53.5) — the fault §96 records from the other side. So
-   the row is BUILT with the tail either in two columns of its own or in a
-   strip under the name, exactly as `ed` already decides which head is drawn.
-
-   Its cost is that a window that changes size after the paint is showing a
-   layout chosen for the old one — and Islam's own case is a ZOOM, which is a
-   resize. `watchTailFold()` in the shell answers that, and only when the
-   answer here actually flips.
-
-   1400 is measured, not chosen: it is the width at which the two prose
-   columns stop being able to hold a sentence between them. Above it nothing
-   changes at all (his instruction), and the whole ladder is the PEN's — read
-   mode's columns are all text and shrink together (192px of Tactic at 1100,
-   rows 140), and fill mode is deliberately left where §249.2 recorded it. */
-var TAIL_FOLD_W = 1400;
-function tailFolds(){
-  return typeof window !== "undefined" && !!window.innerWidth &&
-         window.innerWidth <= TAIL_FOLD_W;
 }
 
 function barRow(main, sub, perf, exec, planned, opts){
@@ -2656,18 +2623,14 @@ function optionsHtml(opts, chosen){
    NO BLANK OPTION. On a single select the blank is how you say "nobody"; on a
    multiple one you say it by ticking nothing, and an em-dash sitting in the
    list as a thing you could tick is a second way to say it. */
-/* `label` names the control where the table's own heading no longer does
-   (§261): a column head is the accessible name of every cell under it, so a
-   control that has left its column has to carry the word itself. */
-function selectManyOr(page, values, opts, cls, setter, label){
+function selectManyOr(page, values, opts, cls, setter){
   var list = (values || []).map(function(v){ return String(v); });
   if (!EDIT_PAGE[page] || !setter)
     return '<span class="' + (cls || '') + '">' + esc(list.join(", ")) + '</span>';
   var i = FIELDS.push(setter) - 1;
   var has = {};
   list.forEach(function(v){ has[v] = 1; });
-  return '<select class="fld ' + (cls || '') + '" multiple data-fld="' + i + '"' +
-    (label ? ' aria-label="' + esc(label) + '" title="' + esc(label) + '"' : '') + '>' +
+  return '<select class="fld ' + (cls || '') + '" multiple data-fld="' + i + '">' +
     optionsHtml((opts || []).filter(function(o){ return o !== ""; }),
       function(v){ return has[v] === 1; }) + '</select>';
 }
@@ -5645,9 +5608,6 @@ function unitPlanBody(it, u, railed){
         { ctx:pctx(m), kind:"select", opts:["Sum","Latest","Average"],
           readEmpty:"\u2014", read:compileCell })) + '</td></tr>';
   }).join("");
-  /* §261: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
-     row's span and every row have to agree about how many columns there are. */
-  var fold = ed && tailFolds();
   var tRows = it.tactics.map(function(t, i){
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
        predicting it. `.tgtcell` is what stops the Target column folding below
@@ -5658,53 +5618,6 @@ function unitPlanBody(it, u, railed){
        time either moved (§53.5); the control hook runs when and only when a
        control is drawn, so it can simply say so. */
     var tgtOpen = false;
-    /* §261: BUILT ONCE, PLACED TWICE — never rendered twice. Which of the two
-       places it lands in is `fold`'s to say; what it IS is decided here, so a
-       change to either control reaches both layouts by construction. */
-    var collabsHtml = gapCell("plan", "u_plan", t, "collaborators",
-      /* THE ONE PLACE COLLABORATORS CAN BE TYPED (§50.2). Before this they
-         could only arrive with the upload, so a name that changed after the
-         plan landed meant re-uploading the unit to fix it. It sits under the
-         SAME pen that corrects the rest of the plan, and behind the same gate
-         (§31): who is named on a tactic decides who may report it, so it is
-         not a field the people being measured hold. */
-      /* §145.10 MERGED WITH §130.1: collaborators are FILLABLE (Islam:
-         "it's optional anyway") — an EMPTY list is a gap, an existing one
-         never opens to the filler, and a pending name confers no reporting
-         right until the office confirms (namedOn skips marked fields) —
-         AND they are TICKED FROM THE SAME LIST THE OWNER IS PICKED FROM,
-         never typed: the control hook renders §130.1's multi-select in the
-         pen and in fill mode alike, while gapCell keeps the lifecycle.
-         Emptied, the key is DELETED rather than left as an empty array
-         (`del`, §50.6): a tactic nobody supports and one never asked must
-         be byte-identical, or every save carries a change nobody made.
-         Read mode keeps §15.1's em-dash: nobody supporting is an ordinary
-         answer. */
-      { ctx:pctx(t), text: collabText,
-        parse: function(v){ return Array.isArray(v)
-          ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
-          : collabParse(v); },
-        del: true,
-        readEmpty: '<span class="nobody">&mdash;</span>',
-        control: function(set, pendCls){
-          return selectManyOr("plan", collabNames(t),
-            ownerChoices(collabNames(t), false),
-            "collabsel " + (pendCls || ""), set,
-            /* THE HEADER IS WHAT NAMED THIS CONTROL, AND IT IS GONE (§261,
-               Islam: *"the collab and the quarters to lose their haeders"*).
-               A column heading is a table's label for every cell under it, so
-               dropping it leaves the control anonymous — visibly to anybody
-               meeting an empty picker, and completely to a screen reader. The
-               word moves onto the control rather than back onto the page. */
-            "Collaborators on this tactic"); } });
-    /* Quarters (§145): only a tactic naming NO quarter is a gap, and while
-       its fill is pending the four stay the filler's — read mode carries
-       the same chip and tick every other pending value wears. */
-    var quartersHtml = ed ? qsEdit(t)
-      : (filling("plan", "u_plan", pctx(t)) &&
-         (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
-        ? qsFill(t)
-        : qs(t);
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
       ctx: pctx(t), del: true, fillKind: "tactic",
       /* §257: read mode says "Yes / No", never the stored `Y/N` — one
@@ -5734,16 +5647,6 @@ function unitPlanBody(it, u, railed){
         (ed ? textOr("plan", t.description || "", "tacdesc",
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
-        /* §261: AND THE TAIL, when the window is too narrow for it to be two
-           columns. The same two controls, in a strip on their own line — the
-           width that buys goes straight to the two prose columns above it,
-           measured at 1400 as Tactic 269 → 431px and the tallest row 191 →
-           170. Their headings are gone with their columns (Islam), so each
-           control carries its own name (`aria-label`, above and in qsEdit). */
-        (fold ? '<div class="tacfold">' +
-                  '<span class="collabs">' + collabsHtml + '</span>' +
-                  '<span role="group" aria-label="Quarters this tactic runs in">' +
-                  quartersHtml + '</span></div>' : '') +
         '</td>' +
       /* WHAT IT SHOULD PRODUCE (§248), AND IT IS OWED (§249, reversing that
          section's own exclusion at Islam's direction: *"the tactics outcome
@@ -5798,10 +5701,44 @@ function unitPlanBody(it, u, railed){
           return selectOr("plan", t.owner == null ? "" : t.owner,
             ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);
         } }) + '</td>' +
-      /* §261: and the tail's own two columns, wherever the window still has
-         room for them. Folded, they are already drawn above. */
-      (fold ? '' : '<td class="collabs">' + collabsHtml + '</td>' +
-                   '<td>' + quartersHtml + '</td>') + '</tr>';
+      /* THE ONE PLACE COLLABORATORS CAN BE TYPED (§50.2). Before this they
+         could only arrive with the upload, so a name that changed after the
+         plan landed meant re-uploading the unit to fix it. It sits under the
+         SAME pen that corrects the rest of the plan, and behind the same gate
+         (§31): who is named on a tactic decides who may report it, so it is
+         not a field the people being measured hold. */
+      /* §145.10 MERGED WITH §130.1: collaborators are FILLABLE (Islam:
+         "it's optional anyway") — an EMPTY list is a gap, an existing one
+         never opens to the filler, and a pending name confers no reporting
+         right until the office confirms (namedOn skips marked fields) —
+         AND they are TICKED FROM THE SAME LIST THE OWNER IS PICKED FROM,
+         never typed: the control hook renders §130.1's multi-select in the
+         pen and in fill mode alike, while gapCell keeps the lifecycle.
+         Emptied, the key is DELETED rather than left as an empty array
+         (`del`, §50.6): a tactic nobody supports and one never asked must
+         be byte-identical, or every save carries a change nobody made.
+         Read mode keeps §15.1's em-dash: nobody supporting is an ordinary
+         answer. */
+      '<td class="collabs">' + gapCell("plan", "u_plan", t, "collaborators",
+        { ctx:pctx(t), text: collabText,
+          parse: function(v){ return Array.isArray(v)
+            ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
+            : collabParse(v); },
+          del: true,
+          readEmpty: '<span class="nobody">&mdash;</span>',
+          control: function(set, pendCls){
+            return selectManyOr("plan", collabNames(t),
+              ownerChoices(collabNames(t), false),
+              "collabsel " + (pendCls || ""), set);
+          } }) + '</td>' +
+      /* Quarters (§145): only a tactic naming NO quarter is a gap, and while
+         its fill is pending the four stay the filler's — read mode carries
+         the same chip and tick every other pending value wears. */
+      '<td>' + (ed ? qsEdit(t)
+        : (filling("plan", "u_plan", pctx(t)) &&
+           (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
+          ? qsFill(t)
+          : qs(t)) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it, ed);
   /* ── EDITING KEEPS ITS HEAD, AND THE NAME GETS THE LINE (§194) ──────
@@ -5917,15 +5854,9 @@ function unitPlanBody(it, u, railed){
        here, where `ed` is known, rather than guessed at with `:nth-child`.
        Never while the pen is open: the four controls are the only way to set
        the target, so hiding them leaves a field nobody can reach (§61). */
-    /* §261: AND THE TAIL'S TWO HEADINGS GO WITH ITS TWO COLUMNS — Islam:
-       *"on squeezing I'd say the collab and the quarters to lose their
-       haeders"*. `fold` is read here, where the row builder read it, so the
-       head, the rows and the Add row's span can never disagree about how wide
-       the table is. */
-    miniTable(["#","Tactic","Outcome",{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
-                .concat(fold ? [] : ["Collabs.","Quarters"]),
-      tRows + addRow(fold ? 4 : 6, "tactic", "Add a tactic"),
-      sortAttr("tactics"), "tactable");
+    miniTable(["#","Tactic","Outcome",{h:"Target", cls: ed ? "" : "tgtcol"},
+               "Owner","Collabs.","Quarters"],
+      tRows + addRow(6, "tactic", "Add a tactic"), sortAttr("tactics"));
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);

@@ -142,6 +142,36 @@ A drift between specs and code is a documentation bug — report it before silen
 - **`.pane` INCLUDES SETUP** — `<div class="pane setuppane">` — so scope any
   pane rule with `:not(.setuppane)` or it reaches the register.
 
+#### A CONTROL DOES NOT SHRINK, SO THE PROSE PAYS FOR THE WINDOW (§261)
+- With the plan's pen open, **five of a tactic's seven columns hold controls**
+  and their 666px is the same at 1920 and at 1100 — so every pixel the window
+  loses comes off the two PROSE columns, which are the only elastic thing in
+  the row. Measured: the Tactic column **269 → 192 → 115 → 74px** at 1400 /
+  1300 / 1200 / 1100, the tallest row **191 → 1957**, and at 1100 the table
+  stopped fitting its pane at all (§158, silently). **Read mode has none of
+  it** — its seven columns are all text, so they shrink together — which is
+  why four versions of sweeps at 1440 walked past it: the tables are walked,
+  and they are walked CLOSED.
+- **WHAT FOLDS IS A CONTROL, SO IT CANNOT BE A MEDIA QUERY.** A query hides a
+  column; it cannot move one. Drawing the tail twice so CSS can pick a copy
+  puts two things in the document writing one field (§53.5, with §96's failure
+  mode). `tailFolds()` is read while the row is BUILT and is **one answer for
+  the whole table** — the head, every row and the Add row's span, or they
+  disagree about how many columns there are.
+- **A RENDER DECISION HAS TO HEAR THE WINDOW CHANGE, AND A ZOOM IS A RESIZE**
+  — which is exactly what was reported. Repaint only when the answer FLIPS
+  (a dragged window edge fires on every pixel), **armed once** (§24, §47.2),
+  and **never under a typing hand**: a bound field writes on `change`, i.e. on
+  blur (§35), so the paint waits for the blur that was going to commit it.
+- **A HEADING IS A CONTROL'S NAME.** Islam: *"the collab and the quarters to
+  lose their haeders"* — right for the width, and a column head is the
+  accessible name of every cell under it, so the word moves ONTO the control
+  (`aria-label`, `role="group"`) rather than back onto the page (1b-ii).
+- **DROP A FLOOR THAT NEVER BITES.** The mockup carried a `min-width` on the
+  prose columns; with the fold and the stack in place the Tactic column is
+  247px at a 1000px window on its own, so the floor would only be a thing to
+  explain later (§2b).
+
 #### A pinned header's ground filler paints when it is NOT pinned too (§53.7)
 - `.pane > .pband::before` and `.split .rail::before` fill the gap between the
   chrome and the pinned pair with `--ground`. **CSS cannot ask whether a sticky
@@ -4720,6 +4750,17 @@ python3 checks/squeezed-rail.py # below 820 the rail reads ACROSS on both sides,
 python3 checks/table-fit.py     # the plan tables FIT the pane at every width — never
                                 # "and it scrolls" — on a unit AND a function, with the
                                 # 620 floor still in force on a wide window (§158)
+python3 checks/plan-tail-fold.py # the plan table at a narrower window (§261): above
+                                # 1400 byte-for-byte what it was — a build that folded
+                                # everywhere passes every other assertion here — below
+                                # it five columns, neither heading, and BOTH controls
+                                # still there INSIDE the name cell and PRESSED with the
+                                # stored plan read back (§96); the Add row still
+                                # reaching the end, reordering keeping its handles,
+                                # nothing scrolling sideways, read mode measured
+                                # unchanged, and narrowing the window folding the tail
+                                # with NO reload — the reported case is a zoom. 55 red
+                                # on the build before, on a unit AND a pillars function
 python3 checks/email-link.py    # the link that LEAVES, read out of the html posted to
                                 # /api/mail — never the value in the box, which looked
                                 # right the whole time; both send buttons, both ends of
@@ -4863,7 +4904,51 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a title is one line, and the box
+*Last Updated: 2026-09-03 &mdash; **&sect;261: the plan table at a narrower
+window.** Islam, on the build &sect;260 had just merged, with a screenshot of a
+**zoomed** page: *"are you sure of your fix? this is a zoomed page"* &mdash; the
+TACTIC column reading one character per line. **MY FIRST DIAGNOSIS WAS WRONG FOR
+HIS CASE AND THAT IS THE FIRST THING WORTH RECORDING**: &sect;260 is a real
+fault and its fix is live, and his own console said *"still holding blank lines:
+0"* &mdash; nothing in his tenant carried them, and I had already built and
+merged. *A measurement that comes back empty is an answer, and I read past it.*
+**FIVE OF A TACTIC'S SEVEN COLUMNS HOLD CONTROLS, AND A CONTROL DOES NOT
+SHRINK**: with the pen open the four target boxes, the owner select, the collabs
+select and the four quarter marks come to **666px whatever the window is**, so
+every pixel the window loses comes off the two PROSE columns &mdash; the Tactic
+column **269 &rarr; 192 &rarr; 115 &rarr; 74px** at 1400/1300/1200/1100, the
+tallest row **191 &rarr; 1957**, and at 1100 the table had silently stopped
+fitting its pane (&sect;158). **READ MODE HAS NONE OF IT** (its columns are all
+text and shrink together, 192px at 1100), which is why sweeps at 1440 walked
+past it for four versions: the tables are walked, and they are walked CLOSED.
+Settled from a mockup made of the running platform (rule 1c) with three width
+treatments measured at six widths, and **two of the decisions are his, in one
+message**: *"1. on squeezing I'd say the collab and the quarters to lose their
+haeders 2. ok with your recomendation of width switching."* Above 1400 the table
+is byte-identical to what it was; below it the **tail folds** (Collabs and
+Quarters leave their columns for a strip under the tactic's own name); below
+1200 the four target boxes **stack into one column**. Tactic 431/367/368/294 at
+1400/1300/1200/1100 and the tallest row 170/170/170/210, with nothing
+overflowing its pane from 1500 down to 768. **WHAT FOLDS IS A CONTROL, SO IT
+CANNOT BE A MEDIA QUERY** &mdash; a query hides a column, it cannot move one, and
+drawing the tail twice would put two things in the document writing one field
+(&sect;53.5, &sect;96) &mdash; so `tailFolds()` is read while the row is BUILT
+and is ONE answer for the head, every row and the Add row's span. Its cost is
+that a window resized afterwards shows a layout chosen for the old width **and
+the reported case is a zoom**, so `watchTailFold()` repaints only when the answer
+FLIPS, armed once (&sect;24), and never under a typing hand (&sect;35). **THE
+HEADINGS GO AND THE WORD MOVES ONTO THE CONTROL** (`aria-label`, `role="group"`):
+a column head is the accessible name of every cell under it. Deliberately NOT in
+it, each recorded rather than slipped in: fill mode stays where &sect;249.2 left
+it, the capped description is not built, and the mockup's prose floor was dropped
+as unearned. `checks/plan-tail-fold.py`: **55 red** on the build before, on a
+unit AND a pillars function &mdash; and two of its own first failures were the
+CHECK. Full `qa.py` sweep ERRORS none; `test-authorize` 491/0, `test-graph-diff`
+126/0; `table-fit`, `owner-picker`, `plan-fields`, `gap-fill`, `gap-walk`,
+`submit-gate`, `hide-element`, `tactic-outcome`, `unit-before-number`,
+`one-line-titles` and `plan-edit-head` all green. **On the branch, not merged.***
+
+*Earlier the same day: **&sect;260: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

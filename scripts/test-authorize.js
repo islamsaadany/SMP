@@ -2843,5 +2843,42 @@ console.log("\n27 · which slides a review shows is the office's (§256)");
         r.ok, (r.refusals || []).join(" / "));
 })();
 
+/* ── 28 · THE ORDER OF THE NAVIGATION IS THE OFFICE'S (§261) ──────────
+   Setup gained a way to drag the units and the functions into the order they
+   appear in. NOTHING NEW IS STORED — the order IS `unitKeys` / `functionKeys`,
+   which the server has classified as `setup` since it classified anything —
+   so this asserts that what was already true is still true, at BOTH ENDS
+   (§94.2): a build that let anybody reorder them would rewrite the navigation
+   for the whole tenant from a page they can open. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const swap = function (arr) {
+    const a = arr.slice(); const x = a.shift(); a.push(x); return a;
+  };
+  let r = fromStored(SEED, "smo", function (i) { i.unitKeys = swap(i.unitKeys); });
+  check("§261: the office may reorder the business units", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, "smo", function (i) { i.functionKeys = swap(i.functionKeys); });
+  check("§261: and the supporting functions", r.ok, (r.refusals || []).join(" / "));
+
+  /* THE OTHER END, and it is the one that matters: a unit head holds a page
+     of their own and none of Setup. */
+  const headKey = (SEED.unitRoles[UNIT] || {}).head;
+  if (!headKey) {
+    check("§261: the seed has a unit head to ask", false, "none");
+  } else {
+    r = fromStored(SEED, headKey, function (i) { i.unitKeys = swap(i.unitKeys); });
+    check("§261: a unit head may NOT reorder them", !r.ok,
+          r.ok ? "accepted" : "refused");
+    /* AND THE REFUSAL NAMES THE LIST, not "something changed" — §16.7's rule
+       that a refusal has to send somebody to a screen. */
+    check("§261: ...and the refusal names the list",
+          !r.ok && (r.refusals || []).join(" ").indexOf("business units") > -1,
+          (r.refusals || []).join(" / "));
+  }
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

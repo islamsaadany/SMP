@@ -261,6 +261,17 @@ A drift between specs and code is a documentation bug — report it before silen
   service worker caches by URL: every returning browser would have been served
   the old platform out of its own disk whatever production served. The trigger
   is "the built file's bytes changed", which is every merge.
+- **A MERGE THAT CHANGES HOW A SAVE IS JUDGED SHIPS WITH THE FORCED SIGN-OUT
+  (2026-09-03, spec 029).** Islam: *"if I'm on the old shape how saving what I'm
+  doing now and reload save me? wouldn't what I save get lost as well?"* — and he
+  is right for exactly one kind of deploy. The save-safety banner (§258) tells a
+  stale tab to reload and saves first, which is enough when a deploy only
+  changes pages; when it changes the authoriser, the change-list diff, the
+  review map or what a save touches, an old tab's save can be refused and the
+  banner's save-first has nothing to save into. So such a merge carries a
+  one-shot `DELETE FROM sessions;` migration (precedent 040) and no tab can
+  stay on the old rules. **Say which kind every merge is** in the what-to-check
+  note.
 - **END EVERY MERGE WITH WHAT TO GO AND CHECK** (Islam, 2026-08-24; CLAUDE-RULES
   A16). The last thing said after a merge to `main` is a short list of screens:
   what to open, what to do there, and what should happen — one line each, in the

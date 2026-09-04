@@ -88,9 +88,9 @@ __STYLE__
       stripe alone separates the rows. Recorded with its cost: on these wide
       tables there is now nothing that follows one row across the
       columns.</span></li>
-    <li><span class="k">The pair</span><span class="v">Centred. Measured, the
-      handle sat <b>5px</b> above the number's middle; it is <b>0</b>
-      now.</span></li>
+    <li><span class="k">The pair</span><span class="v">Centred <b>by their
+      marks</b>, which is not the same thing as centring their boxes &mdash; see
+      below.</span></li>
     <li><span class="k">The cell</span><span class="v">The target cell is an
       ordinary table cell again, with the box and the mark seated inside it
       &mdash; so it fills its row and the white block is gone.</span></li>
@@ -98,17 +98,28 @@ __STYLE__
 </section>
 
 <section>
-  <h2>The pair, close up</h2>
+  <h2>The pair, close up &mdash; and you were right</h2>
+  <p class="measure">My last round measured the two <b>boxes</b>, and they agree
+    to <b>0.00px</b>. That is not what the eye sees. A digit&rsquo;s box carries
+    descender space the glyph never uses, so the ink sits <b>1.62px above</b> the
+    middle of its own box &mdash; and no amount of box alignment moves it,
+    measured across four different ways of centring them.</p>
   <div class="pair">
-    <figure class="crop">__SHOT_GRIP_TODAY__<figcaption>As it aligns today
-      &mdash; the handle 5px high of the number.</figcaption></figure>
-    <figure class="crop">__SHOT_GRIP_CENTRED__<figcaption>Centred to each
-      other, and centred in the cell.</figcaption></figure>
+    <figure class="crop">__SHOT_GRIP_TODAY__<figcaption>Boxes centred. The digit
+      reads <b>1.62px high</b> &mdash; what you spotted.</figcaption></figure>
+    <figure class="crop">__SHOT_GRIP_CENTRED__<figcaption>Marks centred:
+      <b>0.38px</b>, which is the device pixel grid.</figcaption></figure>
   </div>
-  <p class="measure quiet">The handle is the platform&rsquo;s own three-bar grip
-    &mdash; the same one the key measures table uses. The first round drew an
-    invented dotted mark, which is a picture of what the product could look like
-    rather than of what it does.</p>
+  <p class="measure">The fix is not a nudge I picked. <code>text-box: trim-both
+    cap alphabetic</code> trims the number&rsquo;s box to the cap height and the
+    baseline, so the box <em>is</em> the ink and centring it centres the mark
+    &mdash; taken from the font&rsquo;s own metrics rather than from a number I
+    measured once and would have to re-measure the day the typeface changes. A
+    browser too old to understand the line ignores it and gets exactly
+    today&rsquo;s look.</p>
+  <p class="measure quiet">Both numbers above are read off the painted pixels at
+    eight times scale, not off the element boxes &mdash; measuring the boxes is
+    what produced the round you rejected.</p>
 </section>
 
 <section>

@@ -35,6 +35,7 @@ Both shapes are shot, because a unit's objectives table has the same drawer.
 Writes PNGs into design-mockups/objectives-table/shots/ and prints the pixels.
 """
 import pathlib, json
+from PIL import Image
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -42,6 +43,9 @@ FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 OUT = ROOT / "design-mockups/objectives-table/shots"
 OUT.mkdir(parents=True, exist_ok=True)
 CHROME = "/opt/pw-browsers/chromium"
+# The two close-ups are read pixel by pixel, so they are shot at a scale where
+# a third of a pixel is still a whole sample.
+SCALE = 8
 
 # The proposal, injected over the live page. Three separable changes.
 FIX_CSS = """
@@ -56,15 +60,20 @@ td[data-mptgt] > .mpcell > .mpopen { flex:0 0 auto; }
 /* (3) the # column, the measures table's own */
 th.mpidx, td.mpidx { width:38px; text-align:center; font-family:var(--mono);
   font-size:11px; color:var(--ink-3); white-space:nowrap; }
-/* CENTRED TO EACH OTHER. `vertical-align:middle` on the grip alone aligns its
-   box to the text baseline plus half an x-height, which is not the middle of
-   the number beside it — so both take it, and the pair is centred in the cell
-   rather than merely near one another. Never `display:flex` on the td (§278.3
-   is that exact mistake one column over). */
+/* CENTRED BY THEIR MARKS, NOT BY THEIR BOXES (§185's rule, in type).
+   Centring the two BOXES is exact — measured 0.00px — and still leaves the
+   digit reading high, because a digit's line box carries descender space the
+   glyph never uses: the ink sits 1.62px above the box's own middle at 11px, and
+   no amount of box alignment moves it. `text-box: trim-both cap alphabetic`
+   trims the box to the cap height and the baseline, so the box IS the ink and
+   centring it centres the mark: -1.62px -> +0.38px, which is the device pixel
+   grid and as close as sub-pixel rendering allows. A browser without it ignores
+   the line and gets exactly today's look. */
 td.mpidx { vertical-align:middle; }
-td.mpidx .grip, td.mpidx .idx-n { vertical-align:middle; }
-td.mpidx .grip { margin-right:2px; height:18px; }
-td.mpidx .idx-n { display:inline-block; min-width:14px; }
+td.mpidx .idxpair { display:inline-flex; align-items:center; gap:2px; }
+td.mpidx .grip { height:18px; }
+td.mpidx .idx-n { display:inline-block; min-width:14px; text-align:center;
+  text-box: trim-both cap alphabetic; }
 /* THE ACTIONS COLUMN KEEPS ITS LINE. The # column takes 63px, and on a unit's
    nine-column table that is enough to break the eye and Remove onto two lines
    — 57px row -> 74px, for a column holding two controls. Measured, not
@@ -124,9 +133,10 @@ APPLY = """(what)=>{
       n++;
       if (!r.querySelector('td.mpidx'))
         r.insertAdjacentHTML('afterbegin',
-          '<td class="mpidx"><span class="grip" role="button" tabindex="0"' +
-          ' title="Drag to reorder"><i></i><i></i><i></i></span>' +
-          '<span class="idx-n">' + n + '</span></td>');
+          '<td class="mpidx"><span class="idxpair">' +
+          '<span class="grip" role="button" tabindex="0" title="Drag to reorder">' +
+          '<i></i><i></i><i></i></span>' +
+          '<span class="idx-n">' + n + '</span></span></td>');
     });
   }
   if (what.span) {
@@ -208,6 +218,33 @@ def hover_first(pg):
     pg.mouse.move(pos["x"], pos["y"]); pg.wait_for_timeout(280)
 
 
+def inkOffset(path, scale=8):
+    """WHERE THE MARKS ARE, NOT WHERE THEIR BOXES ARE (§185).
+
+    The two boxes centre to 0.00px and the digit still reads high, so the only
+    honest measurement is of the painted pixels: find the two columns of ink —
+    the grip's three bars, then the digit — and compare the middle of each.
+    """
+    im = Image.open(path).convert("RGB"); px = im.load(); W, H = im.size
+    # The cell's own 1px border is ink too, so step two whole CSS pixels in
+    # before looking — at 8x that is 16 samples, and without it the border
+    # bridges the bars and the digit into one run and the probe reports nothing.
+    M = 2 * scale
+    dark = lambda x, y: px[x, y][0] < 150 and px[x, y][1] < 150 and px[x, y][2] < 160
+    runs = []; cur = None
+    for x in range(M, W - M):
+        hit = any(dark(x, y) for y in range(M, H - M))
+        if hit and cur is None: cur = x
+        elif not hit and cur is not None: runs.append((cur, x)); cur = None
+    if cur is not None: runs.append((cur, W - M))
+    runs = [r for r in runs if r[1] - r[0] > 3]
+    if len(runs) < 2: return None
+    def mid(a, b):
+        ys = [y for y in range(M, H - M) if any(dark(x, y) for x in range(a, b))]
+        return (ys[0] + ys[-1]) / 2
+    return round((mid(*runs[1]) - mid(*runs[0])) / scale, 2)
+
+
 def shot(pg, name):
     h = pg.evaluate_handle("""()=>[...document.querySelectorAll('#panel table')]
         .find(x=>/Objective/i.test((x.querySelector('thead')||{textContent:''}).textContent))
@@ -246,23 +283,22 @@ with sync_playwright() as pw:
         print(where, "PROPOSED:", json.dumps(pg.evaluate(MEAS)))
         shot(pg, where + "-proposed")
 
-        if where == "fn":
+        if False:
             # THE PAIR, CLOSE UP: the grip and the number as they align today
             # and as they align centred. Same cell, same build.
             for tag, css in (("grip-today",
-                              "td.mpidx .grip, td.mpidx .idx-n { vertical-align:baseline !important; }"),
-                             ("grip-centred", "")):
-                if css: pg.add_style_tag(content=css)
-                else: pg.add_style_tag(content="td.mpidx .grip, td.mpidx .idx-n { vertical-align:middle !important; }")
+                              "td.mpidx .idx-n { text-box:normal !important; }"),
+                             ("grip-centred",
+                              "td.mpidx .idx-n { text-box:trim-both cap alphabetic !important; }")):
+                pg.add_style_tag(content=css)
                 pg.wait_for_timeout(200)
                 h = pg.evaluate_handle("""()=>[...document.querySelectorAll('#panel td.mpidx')].find(td=>td.querySelector('.grip'))""")
                 el = h.as_element()
                 if el:
-                    el.screenshot(path=str(OUT / (tag + ".png")))
-                    print("  shot", tag, pg.evaluate("""()=>{const td=[...document.querySelectorAll('#panel td.mpidx')].find(t=>t.querySelector('.grip'));
-                      const g=td.querySelector('.grip').getBoundingClientRect(), n=td.querySelector('.idx-n').getBoundingClientRect();
-                      return {gripMid:Math.round(g.y+g.height/2), numMid:Math.round(n.y+n.height/2),
-                              off:Math.round((g.y+g.height/2)-(n.y+n.height/2))};}"""))
+                    f = OUT / (tag + ".png")
+                    el.screenshot(path=str(f))
+                    print("  shot %-13s digit minus bars: %s px (painted)"
+                          % (tag, inkOffset(f, SCALE)))
         if False:
             for tag, css in (("hoverB", HOVER_B), ("hoverC", HOVER_C)):
                 pg.add_style_tag(content=css)
@@ -281,4 +317,31 @@ with sync_playwright() as pw:
                 shot(pg, where + "-" + tag)
         print(where, "errors:", errs or "none")
         pg.close()
+
+    # THE PAIR, CLOSE UP, on a page of its own — read pixel by pixel, so it is
+    # shot at a scale where a third of a pixel is still a whole sample. The
+    # table shots stay at 2x: a mockup nobody can open is not a mockup.
+    pg = b.new_page(viewport={"width": 1500, "height": 1000}, device_scale_factor=SCALE)
+    land(pg, "fn")
+    pg.add_style_tag(content=FIX_CSS)
+    pg.add_style_tag(content=HOVER_C)
+    pg.evaluate(APPLY, {"cell": True, "idx": True, "span": True})
+    pg.evaluate("()=>{ if (typeof growFields === 'function') growFields(); }")
+    # The handle is drawn at .55 opacity until the row is under the pointer, and
+    # a faded bar is not a fair thing to measure a digit's ink against — this is
+    # the state you see when you reach for it.
+    pg.add_style_tag(content="td.mpidx .grip { opacity:1; }")
+    pg.wait_for_timeout(300)
+    for tag, css in (("grip-today", "td.mpidx .idx-n { text-box:normal !important; }"),
+                     ("grip-centred", "td.mpidx .idx-n { text-box:trim-both cap alphabetic !important; }")):
+        pg.add_style_tag(content=css)
+        pg.wait_for_timeout(200)
+        h = pg.evaluate_handle("""()=>[...document.querySelectorAll('#panel td.mpidx')].find(td=>td.querySelector('.grip'))""")
+        el = h.as_element()
+        if not el:
+            print("  MISSING", tag); continue
+        f = OUT / (tag + ".png")
+        el.screenshot(path=str(f))
+        print("  shot %-13s digit minus bars: %s px (painted)" % (tag, inkOffset(f, SCALE)))
+    pg.close()
     b.close()

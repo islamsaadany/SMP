@@ -565,8 +565,28 @@ body.presenting .chatdock { display:none; }
 .cqfail b { display: block; font-size: var(--fs-note); color: var(--ink); }
 .cqfail p { margin: 5px 0 9px; font-size: var(--fs-note); color: var(--ink-2); }
 
+/* ── THE WAY OUT DOES NOT SCROLL AWAY (§289) ──────────────────────────
+   Islam: "I cant see the button open the platform inbox which should be
+   always there." It lives INSIDE the scrolling list, so any search with a
+   few results carried the corner's one permanent way out off the bottom —
+   §61, and true before today's search ever existed.
+
+   STICKY RATHER THAN MOVED OUT of `#chatbody`: two places draw this foot
+   and both are covered by one rule, where restructuring the markup would
+   have to be done twice and kept in step (§53.5). It needs an opaque ground
+   of its own, or the rows read through it as they pass under.
+
+   THE COST IS STATED: one row of list height, always spent. */
 .cqfoot { margin-top: auto; border-top: 1px solid var(--line); padding: 9px 10px 4px;
-          flex: none; }
+          flex: none; position: sticky; bottom: 0; z-index: 2;
+          background: var(--ground); }
+
+/* HOW MANY MORE MATCHED THAN FIT, at the FOOT and never in a heading: the
+   top is where nobody has run out of anything yet, and this line only means
+   something once somebody has read to the bottom without finding the person
+   they wanted. It says what to do, not only what is missing. */
+.cqmore { padding: 10px 10px 14px; font-size: var(--fs-micro);
+          color: var(--ink-3); font-style: italic; }
 .cqinbox { border: 0; background: transparent; padding: 0; cursor: pointer;
            font: inherit; font-size: var(--fs-note); font-weight: 600;
            color: var(--gold-deep); }

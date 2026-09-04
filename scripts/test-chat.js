@@ -617,6 +617,51 @@ async function signIn(who, password) {
        "no email went out, and the reason is the setting: " + JSON.stringify(r.body.mailed));
     await setChat({});
 
+    /* ── THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (§289) ──
+       Islam: "in the serach I need to be able to send to a new person as
+       well". The conversations half is §285's and is untouched; what is
+       asserted here is the half that is new, and the ONE INVARIANT that makes
+       two halves safe — nobody is ever in both. */
+    console.log("\nAND THE SEARCH REACHES PEOPLE WITH NO CONVERSATION (§289).");
+    r = await call(smo.cookie, { action: "chatSearch", q: "ha" });
+    const folk = (r.body && r.body.people) || [];
+    ok(r.status === 200 && Array.isArray(folk),
+       "the search carries people with no conversation", folk.length + " found");
+    ok(folk.length <= 10, "capped at ten, Islam's number", folk.length);
+    ok(typeof (r.body && r.body.more) === "number",
+       "and the rest are COUNTED rather than dropped", r.body && r.body.more);
+    ok(!folk.some(function (p) { return p.key === "smo"; }),
+       "the asker is not offered a conversation with themselves");
+    ok(folk.every(function (p) { return !!p.name; }), "every one carries a name to draw");
+    /* NOBODY IN BOTH HALVES — what the NOT EXISTS clause is for, and the one
+       thing a mixed list would get wrong in a way nobody would notice. */
+    const hitKeys = ((r.body && r.body.hits) || []).map(function (h) { return h.person_key; });
+    ok(!folk.some(function (p) { return hitKeys.indexOf(p.key) > -1; }),
+       "nobody is in both halves at once");
+
+    /* AND THE MOMENT THEY HAVE A CONVERSATION THEY LEAVE — made, then put
+       back, because this is a state the seed does not hold (§94.2). */
+    const first = folk[0] && folk[0].key;
+    if (first) {
+      await call(smo.cookie, { action: "reply", person: first,
+                               body: "A first word from the office.", start: true });
+      const r2 = await call(smo.cookie, { action: "chatSearch", q: "ha" });
+      const keys2 = ((r2.body && r2.body.people) || []).map(function (p) { return p.key; });
+      const hits2 = ((r2.body && r2.body.hits) || []).map(function (h) { return h.person_key; });
+      ok(keys2.indexOf(first) === -1, "once they have one they leave the people half", first);
+      ok(hits2.indexOf(first) > -1, "...and appear as a conversation instead");
+      await client.query("DELETE FROM chat_threads WHERE person_key = $1", [first]);
+    } else {
+      ok(false, "a person with no conversation was found to test with", "none");
+    }
+
+    /* THE ACTIVE TEST IS §247'S OWN, read out of the file rather than
+       restated here — the first draft of it guessed a status column and would
+       have offered every retired person on the register (§42). */
+    ok(require("fs").readFileSync(require("path").join(__dirname, "..", "api", "chat.js"), "utf8")
+         .indexOf("COALESCE(p.extra->>'active','true') <> 'false'") > -1,
+       "a retired person is excluded by the register's own test");
+
     console.log("\nAND DROPPING ONE IS THE SUPER USER'S ALONE (§89).");
     r = await call(smo.cookie, { action: "drop", person: OTHER.key });
     ok(r.status === 200 && r.body.ok, "the Super user drops a conversation");

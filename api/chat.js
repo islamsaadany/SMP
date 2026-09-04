@@ -1135,7 +1135,53 @@ module.exports = async function handler(req, res) {
          Postgres needs the DISTINCT ON key first, which is not the order
          anybody wants to read. */
       hits.sort(function (a, b) { return new Date(b.line_at) - new Date(a.line_at); });
-      return send(res, 200, { ok: true, q: q, hits: hits.slice(0, 60) });
+
+      /* ── AND THE PEOPLE WHO HAVE NEVER WRITTEN IN (§289) ──────────────
+         Islam: "in the serach I need to be able to send to a new person as
+         well". Until now this searched conversations only, so a colleague who
+         had never written was answered with "Nothing found" — a dead end on
+         the one side of the platform that is allowed to start a conversation
+         (§247).
+
+         IT IS THE SERVER'S ANSWER AND NOT THE BROWSER'S, though the browser
+         holds the register, because the test is "has no conversation AT ALL"
+         and only this side knows every thread — the browser sees the waiting
+         queue and whatever this search matched, never the rest.
+
+         THE SAME RULES §247 SETTLED, and the active test is COPIED FROM ITS
+         OWN QUERY rather than composed afresh — `extra->>'active' <> 'false'`
+         and not a status column, which is what the first draft guessed and
+         would have offered every retired person on the register (§42: one
+         question, one answer). The person must be on the STORED register
+         (§74.2) and active, because somebody retired cannot sign in to read
+         it (§35). Anybody who already
+         has a conversation is excluded, so nobody is in both halves (§108.1).
+         The asker is left out too — the office starting a conversation with
+         themselves is what §285 removed.
+
+         CAPPED AT TEN, Islam's number, with the rest COUNTED rather than
+         dropped: search for "a" and half the company matches, and a list that
+         silently stops is one somebody scrolls looking for a name that is not
+         coming. The count is the whole remainder, taken before the slice.
+
+         ALLOWED TO FAIL ON ITS OWN. If the register cannot be read the
+         conversations half still answers — this is the addition, not the
+         feature (§93: absent, never reported as none). */
+      let people = [], more = 0;
+      try {
+        const rows = (await client.query(
+          "SELECT p.key, p.name, p.unit_key, p.fn_key, p.title FROM people p " +
+          " WHERE p.name ILIKE $1 ESCAPE '\\' " +
+          "   AND COALESCE(p.extra->>'active','true') <> 'false' " +
+          "   AND p.key <> $2 " +
+          "   AND NOT EXISTS (SELECT 1 FROM chat_threads t WHERE t.person_key = p.key) " +
+          " ORDER BY p.name", [like, me.key])).rows;
+        more = Math.max(0, rows.length - 10);
+        people = rows.slice(0, 10);
+      } catch (e) { people = []; more = 0; }
+
+      return send(res, 200, { ok: true, q: q, hits: hits.slice(0, 60),
+                              people: people, more: more });
     }
 
     if (action === "thread") {

@@ -34310,3 +34310,133 @@ away, not a build away. And `chat.js` keeps its own `esc2()`, which escapes
 `& < > "` and not `'` where §235's escaper does all five — inert today, since
 every attribute it writes is double-quoted, and a drift from the one-escaper
 rule all the same.
+
+---
+
+## §289 — THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (2026-09-04)
+
+Two from Islam in one message, using the shipped build: *"a lag happened where
+the chat icon didn't apperar on the reload of the branch. and then appeard
+after"*, and *"the erach for new peopele isn't working"*.
+
+**THE SECOND WAS NOT A FAULT AND SAYING SO CAME FIRST**: that feature was the
+mockup awaiting his two lines of wording, so *"Nothing found"* was the search
+behaving exactly as built. He then gave the go-ahead for both, so both are here.
+
+### The corner arrives with the page
+
+**§197 CREATED THE BUBBLE HIDDEN FOR A REASON IT STATED**, and the reason is
+good: *an optimistic bubble that vanishes on the next beat is a control that
+lied*. So the corner appeared only once `/api/chat` had answered — milliseconds
+on a warm server, and **seconds after a new build**, when every browser reloads
+at once onto a cold function with a sleeping database. That is precisely the
+window Islam was in.
+
+**IT IS NOT A GUESS, WHICH IS THE WHOLE OF WHY §197'S RULE DOES NOT APPLY.** The
+chat's on/off switch lives in `org.extra.chat`; the browser holds it as
+`GROUP.chat` by the time the page draws; and `chatSettings()` on the server
+reads that same value from that same row. **Measured both ways on a real
+Postgres** rather than reasoned about: switched off, the browser reads
+`{on:false}` and the server reads `{on:false}`.
+
+**ASKED ONLY WHEN THE PLATFORM HYDRATED FROM THE SERVER** (`SYNC.isLive()`),
+which is what makes it the tenant's answer and not the baked example's — over
+`file://` `mount()` never runs at all, and behind §201's wall the state is the
+demo's, so the corner stays hidden and waits exactly as before. **And nobody the
+chat would refuse can see it**: `/api/state` refuses a session that has not
+chosen a password (§43.2), so a page that hydrated belongs to somebody
+`/api/chat` will answer; a 401 or 403 still takes the corner away on the first
+beat. **The poll remains the authority** — this decides only what is drawn in
+the seconds before the first answer.
+
+### The search reaches somebody who has never written in
+
+Until now it searched conversations only, so a colleague who had never written
+was answered *"Nothing found"* — a dead end on the one side of the platform that
+is allowed to start a conversation (§247).
+
+**IT IS THE SERVER'S ANSWER AND NOT THE BROWSER'S**, though the browser holds
+the register, because the test is *has no conversation AT ALL* and only the
+server knows every thread: the browser sees the waiting queue and whatever the
+search matched, never the rest.
+
+**THE SAME RULES §247 SETTLED, ASKED RATHER THAN RESTATED** — and the active
+test is **copied from §247's own query**, `extra->>'active' <> 'false'` and not
+a status column, **which is what the first draft guessed** and would have
+offered every retired person on the register (§42: one question, one answer).
+Anybody who already has a conversation is excluded, so **nobody is in both
+halves** (§108.1), and the asker is left out, which is what §285 removed.
+
+**NOTHING NEW IS AUTHORISED OR STORED.** Pressing a name opens §247's own empty
+conversation and the first message carries its `start` flag, so the chase
+(§283), the box on their screen (§231) and leaving the waiting list by the act
+(§71) all come free, and there is only ever one way to begin one (§53.5).
+**Nothing is asked of the server for a conversation that does not exist** — it
+would answer 404, correctly, and a 404 drawn as a failure says something is
+wrong when nothing is (§93).
+
+**CAPPED AT TEN, ISLAM'S NUMBER, WITH THE REST COUNTED** rather than dropped:
+search for *a* and half the company matches, and a list that silently stops is
+one somebody scrolls looking for a name that is not coming.
+
+### §289.1 — Every heading goes, and the way out stops scrolling away
+
+Both from Islam looking at the drawings, and both are better than what I drew.
+
+**THE GROUP HEADINGS**: *"who we have a conversation with will apear with the
+conversation and who is not will appear without the converstaion th header is
+taking unneede space."* He is right, and it is rule 1b-ii's own argument — a
+heading that restates what the rows already show is furniture, and in a body
+this small each cost a whole row of the list. **The ROW SHAPE carries it** (a
+conversation has a last message and a time; somebody who has never written has
+neither) and **the ORDER carries the grouping**, so the two must never be
+interleaved.
+
+**THEN THE SCOPE LINE, WHICH I HAD DEFENDED**: *"i still can see a header."* It
+was one. It said two things — how many, and where the search looked. The count
+was never needed (the list is the count), and **where it looked moved into the
+box's own placeholder**, read at the moment somebody decides to type and costing
+no row — while still being said, because the *Waiting* half is the one lit and
+the results reach conversations that are answered (§35, §124).
+
+**AND THE CAP SPEAKS AT THE FOOT**, never in a heading: the top is where nobody
+has run out of anything yet, and the line only means something once somebody has
+read to the bottom without finding their person. It says what to do rather than
+only what is missing.
+
+**THE WAY OUT WAS A REAL FAULT AND PREDATES ALL OF THIS**: *"I cant see the
+button open the platform inbox which should be always there."* *Open the
+Platform Inbox* lives INSIDE the scrolling list, so any search with a few
+results carried the corner's one permanent way out off the bottom — §61, true
+since the corner was built. **Sticky rather than moved out of `#chatbody`**:
+two places draw that foot and one rule covers both, where restructuring the
+markup would have to be done twice and kept in step (§53.5). The cost is stated:
+one row of list height, always spent.
+
+### §289.2 — What the checks taught
+
+**PROVED ABLE TO FAIL, FROM THE SOURCES** (§276: an edited built file is
+silenced by the hashed CSP): **11 red** with the people half removed, **1 red**
+with the sticky rule taken out. **The people half's server side is driven
+through the real endpoint against a real Postgres** — the both-halves invariant
+asserted directly, and the state MADE and put back, because the seed holds no
+such case (§94.2).
+
+**AND THE STICKY ASSERTION HAS A HALF THAT CANNOT FAIL** (§113.8): with the list
+scrolled to its end the foot is at the end whether pinned or not. It is kept as
+the CONTROL — it proves the foot is drawn at all — and **said to be so in the
+check**, so nobody later mistakes it for the load-bearing one, which is the
+assertion at the TOP of a long list.
+
+**THREE OF THE CHECK'S OWN FAILURES WERE THE CHECK.** It **died rather than
+reporting** on the falsified build (§215, in the section that quotes it),
+stopping at six of eleven; it held a row handle across a poll that rebuilds the
+list, so the click hit a detached element (addressed by its key now, re-queried
+at press time); and it left the search box holding a different term, failing its
+NEIGHBOUR rather than itself (§94.2 — put the state back).
+
+**AND ONE ASSERTION WAS REVERSED AND REWRITTEN, NEVER DELETED** (§218): under
+§285 the scope was a grey line and asserting it was right; the claim is
+unchanged and the place moved, so it asks the placeholder now, with the line's
+ABSENCE asserted beside it or a build that dropped the scope entirely would pass
+the half that remained.

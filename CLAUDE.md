@@ -1979,6 +1979,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   fix working with the falsified build on disk, once calling it broken with the
   good one. **Compare the file's mtime with the server's start time; never
   trust the order the commands were typed in.**
+- **THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS
+  NEVER WRITTEN IN (§289):** Islam — *"a lag happened where the chat icon didn't
+  apperar on the reload of the branch"*, and *"the erach for new peopele isn't
+  working"*. **THE SECOND WAS NOT A FAULT AND SAYING SO CAME FIRST** (that
+  feature was the mockup awaiting his wording), and he then asked for both.
+  **§197 HID THE BUBBLE UNTIL THE CHAT ANSWERED, FOR A GOOD REASON THAT DOES NOT
+  APPLY HERE**: *an optimistic bubble that vanishes is a control that lied* —
+  and this is not a guess, because the switch lives in `org.extra.chat`, the
+  browser holds it as `GROUP.chat` before the page draws, and `chatSettings()`
+  reads that same value from that same row (measured both ways on a real
+  Postgres: off reads `{on:false}` on both sides). Asked ONLY when the platform
+  hydrated (`SYNC.isLive()`), so `file://` and §201's wall are unchanged; and
+  nobody the chat would refuse can see it, since `/api/state` refuses a session
+  that has not chosen a password (§43.2). **The poll stays the authority** — this
+  decides only the seconds before the first answer, which after a new build is
+  the whole tenant at once. **THE PEOPLE HALF IS THE SERVER'S ANSWER** though the
+  browser holds the register, because the test is *has no conversation AT ALL*
+  and only the server knows every thread; the active test is **copied from
+  §247's own query** (`extra->>'active' <> 'false'`), which the first draft
+  guessed as a status column and would have offered every retired person (§42).
+  **Nobody is in both halves** (§108.1), nothing new is authorised or stored, and
+  the first message carries §247's own `start` — so the chase, the box and
+  leaving the waiting list come free (§53.5). **Capped at ten** with the rest
+  COUNTED. **§289.1 — EVERY HEADING GOES**: Islam, of the group headings, *"the
+  header is taking unneede space"*, then of the scope line, *"i still can see a
+  header"*. Both right (1b-ii): the ROW SHAPE says which is which and the ORDER
+  does the grouping, and the scope moved into the search box's placeholder, read
+  when somebody decides to type and costing no row — still SAID, because the
+  Waiting half is lit while results reach answered conversations (§35, §124). The
+  cap speaks at the FOOT, where the list runs out, never in a heading. **AND THE
+  WAY OUT WAS A REAL FAULT, OLDER THAN ALL OF IT**: *Open the Platform Inbox*
+  sits inside the scrolling list, so any search carried the corner's one
+  permanent way out off the bottom (§61) — sticky rather than moved, because two
+  places draw that foot and one rule covers both (§53.5); the cost is one row of
+  list height, always. **§289.2 — 11 red** with the people half out and **1 red**
+  with the sticky rule out, from the SOURCES (§276); **three of the check's own
+  failures were the CHECK** (it died rather than reporting, §215; it held a row
+  handle across a poll that rebuilds the list; and it left the search box holding
+  another term, failing its NEIGHBOUR, §94.2), and one assertion was REVERSED and
+  REWRITTEN, never deleted (§218). **One half of the sticky assertion cannot
+  fail** and is kept as the control, said so in the check (§113.8).
 - **A SAVE MUST NOT SHUT EVERYBODY ELSE OUT (§288, finishing §282):** that
   section fixed one reader and left **three doors** in front of it — the schema
   check, `chatSettings()` (one row of `org`), and **`auth.getSession()`, which
@@ -6403,7 +6444,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;288: a save stops shutting everybody
+*Last Updated: 2026-09-04 &mdash; **&sect;289: the corner arrives with the page,
+and the search reaches somebody who has never written in.** Islam, on the shipped
+build &mdash; *"a lag happened where the chat icon didn't apperar on the reload of
+the branch"*, and *"the erach for new peopele isn't working"*. **THE SECOND WAS
+NOT A FAULT AND SAYING SO CAME FIRST**: it was the mockup awaiting his wording,
+so *"Nothing found"* was the search behaving as built. He asked for both.
+**&sect;197 HID THE BUBBLE FOR A REASON THAT DOES NOT APPLY HERE** &mdash; *an
+optimistic bubble that vanishes is a control that lied* &mdash; because this is
+not a guess: the switch lives in `org.extra.chat`, the browser holds it as
+`GROUP.chat` before the page draws, and the server reads that same value from
+that same row (measured both ways: off is `{on:false}` on both sides). Asked only
+when the platform hydrated, so `file://` and &sect;201's wall are unchanged, and
+`/api/state` already refuses anybody `/api/chat` would. **THE PEOPLE HALF IS THE
+SERVER'S ANSWER** &mdash; the test is *has no conversation AT ALL* and only the
+server knows every thread &mdash; with &sect;247's own active test COPIED rather
+than composed (the first draft guessed a status column and would have offered
+every retired person), nobody in both halves, nothing new stored, and the first
+message carrying &sect;247's `start`. **&sect;289.1 &mdash; every heading goes**,
+both at Islam's word: the row shape says which is which, the order does the
+grouping, the scope moved into the box's placeholder, and the cap speaks at the
+foot. **And the way out was a real fault older than the feature** &mdash; the
+Inbox link scrolled away with the list (&sect;61); pinned now, one row of height,
+stated. **11 red** with the people half out, **1 red** with the pin out, from the
+sources; **three of the check's own failures were the CHECK** (&sect;215,
+&sect;94.2) and one assertion was REWRITTEN not deleted (&sect;218). 112/0
+test-chat &middot; 55/0 corner-queue &middot; 523/0 &middot; 131/0 &middot; 11/0
+during-save &middot; 14/0 chase &middot; 33/0 push &middot; 24/0 two-tabs
+&middot; 8/8 concurrent &middot; incremental byte-identical &middot; office-chat,
+paste-picture, csp-net and the full `qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;288: a save stops shutting everybody
 else out, and a row says the register's name.** Islam, on the shipped build:
 *"this error always comes and manytimes the chat disappears before coming back
 and disappear again"*, with the corner on *Looking&hellip;* and the Inbox drawing

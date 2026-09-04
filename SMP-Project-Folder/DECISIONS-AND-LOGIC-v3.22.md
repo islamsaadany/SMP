@@ -33139,6 +33139,96 @@ Neighbours green: `notes-slide`, `hide-slide` 42/0, `deck-blank-slides`,
 
 ---
 
+## §281 — THE FAULT WAS NOT THE DUPLICATION, IT WAS THAT CORRECTNESS DEPENDED ON ORDER (2026-09-04)
+
+Islam: *"let's tidy things."* Three functions were each declared TWICE in the
+platform sources, all three already on `main` and none of them from §279 — found
+by grepping the merged result for its own declarations, which is what §147.4
+prescribes after any merge touching a file both sides changed.
+
+**TWO WERE HARMLESS AND ONE WAS NOT, AND THE DIFFERENCE IS THE WHOLE POINT.**
+`fnKeyOf()` and `capHead()` in `group-render.js` were byte-identical twins
+twelve lines apart — clutter, and no more. `capsReachable()` in
+`config-data.js` had **two different bodies**:
+
+    function capsReachable(){                                    // line 4197
+      return GROUP.capabilities.filter(function(c){ return reachesCap(c.id); });
+    }
+    function capsReachable(){ return GROUP.capabilities.filter(reachesCap); }
+                                                                 // line 4456
+
+and `reachesCap(cap)`, declared one line above the second, reads `cap.fn` — so
+it wants the OBJECT. The later declaration wins by hoisting, so the product was
+correct. **Measured in the running platform before a line was deleted**: the
+body in force returns **8 capabilities**; the dead body, run by hand against
+the same data, returns **0**. So the surviving behaviour was right and the
+margin was one edit: move the earlier declaration below the later one, or
+delete the "wrong" copy without checking which is which, and **every capability
+becomes unreachable for every viewer** — a function's capabilities gone from
+the navigation and from every page that lists them, silently, with nothing
+thrown.
+
+*That is why this is worth a section rather than a tidy-up commit.* §56.7
+recorded this shape once (two `var pf` declarations six hundred lines apart,
+merged with no textual conflict) and the lesson there was that a clean merge is
+not a working one. This is the same shape with a longer fuse: not broken today,
+and one refactor away from being broken in the least visible way the product
+has.
+
+**DELETED BY NAMED FUNCTION AND MATCHED TEXT, NEVER BY LINE RANGE** (§214,
+which records a deletion-by-range that took a live neighbouring function with
+it and broke every clause Add and Remove in the product). Of the twins, the
+SECOND was removed: the first sits directly under the comment that explains it,
+and a comment left pointing at nothing is how the next reader comes to believe
+the survivor is the accidental one.
+
+**THE SCAN IS THE DELIVERABLE, NOT THE THREE NAMES.** The three were what one
+grep happened to surface; the check is that the whole source tree has no
+duplicated top-level declaration at all:
+
+    cat SMP-Project-Folder/src/*.js SMP-Project-Folder/src/shell.html |
+      grep -oE "^function [A-Za-z_$][A-Za-z0-9_$]*" | sort | uniq -d
+
+It prints nothing now.
+
+### §281.1 — AND THE WIDER SCAN FOUND A BLOCK, NOT A LINE
+
+The same scan over `var`/`const`/`let` finds **six** duplicated top-level names
+in `config-render.js` — `CLEARING`, `CLEARMENU`, `ICO_ATTN`, `ICO_CLEAR`,
+`ICO_DONE`, `ICO_EDIT` — and they are not six accidents but ONE 26-line block
+copied once, at a constant offset of 351 lines (474–499 mirroring 825–850).
+Every value is identical; only the comment prose above them differs (one copy
+escapes its em-dashes, the other does not), which is what says it was pasted
+rather than edited.
+
+**RECORDED AND DELIBERATELY NOT REMOVED HERE.** It is a different file, a
+different shape, and behaviour-neutral either way — and rule 1b's line is that
+a fix which reaches something the user did not mention is flagged rather than
+folded in. It is safe to remove and worth doing; it is not this section's to do.
+
+### §281.2 — AND A CHECK WAS RED ON `main` FOR A DECISION SOMEBODY ELSE TOOK
+
+`checks/fn-pillars.py` asserted a unit's Objectives sheet was *"exactly what it
+was, plus §233's Hidden"* — and §278 **appended Jan–Dec** to that sheet for the
+monthly plan, so the check had been failing on `main` since that landed, for a
+build behaving exactly as decided. §214.3 for the second time **on this one
+line**, which is its own argument: a check written against the last shape has
+to move every time the shape is chosen again.
+
+**REWRITTEN, NEVER LOOSENED** (§218). The twelve months are asserted in ORDER
+and at the END, because §65's rule is that a column's POSITION is what the
+workbook's validation ranges are built from — a check relaxed to "contains
+these columns somewhere" would go green on a build that had inserted them in
+the middle and silently moved every range.
+
+**Proved**: `capsReachable()` returns 8 before and after; no page error; full
+`qa.py` sweep ERRORS none; `fn-pillars`, `rail-standard` and `report-blockers`
+green; `test-authorize` 520/0 and `test-graph-diff` 131/0. No product behaviour
+changes — this section removes dead code and one stale assertion, and nothing
+else.
+
+---
+
 ## §280.1 — A CHECK THAT COULD NO LONGER GO GREEN (2026-09-04)
 
 Found while running the neighbours after §280's merge: `checks/report-chrome.py`

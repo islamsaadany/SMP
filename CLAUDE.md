@@ -496,6 +496,35 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   held a literal of the old three rules — REWRITTEN as agreement (§214.3,
   §218). **Recorded, not done**: the deck keeps its dash where the page says
   the words.
+- **THE FAULT WAS NOT THE DUPLICATION, IT WAS THAT CORRECTNESS DEPENDED ON
+  ORDER (§281):** Islam — *"let's tidy things."* Three functions were declared
+  TWICE in the sources, all three already on `main` and none from §279, found by
+  grepping the merged result for its own declarations (§147.4). **TWO WERE
+  HARMLESS AND ONE WAS NOT**: `fnKeyOf` and `capHead` were byte-identical twins;
+  `capsReachable()` had **two different bodies** — one passing `reachesCap` the
+  capability's **id**, one passing the **object** — and `reachesCap(cap)` reads
+  `cap.fn`, so it wants the object. The later declaration wins by hoisting, so
+  the product was right; **measured before anything was deleted, the live body
+  returns 8 capabilities and the dead one returns 0**. One edit — a reorder, or
+  deleting the "wrong" copy without checking which is which — and **every
+  capability is unreachable for every viewer**, gone from the navigation and
+  every page that lists them, silently. §56.7's shape with a longer fuse.
+  **DELETED BY NAMED FUNCTION AND MATCHED TEXT, NEVER BY LINE RANGE** (§214),
+  and of the twins the SECOND went, because the first sits under the comment
+  that explains it. **THE SCAN IS THE DELIVERABLE, NOT THE THREE NAMES** — the
+  whole tree now has no duplicated top-level declaration.
+  **§281.1 — AND THE WIDER SCAN FOUND A BLOCK, NOT A LINE**: six duplicated
+  top-level `var`s in `config-render.js` are ONE 26-line block copied at a
+  constant offset of 351 lines, values identical and only the comment prose
+  differing. **Recorded and deliberately not removed** — different file,
+  different shape, behaviour-neutral, and rule 1b flags rather than folds in.
+  **§281.2 — AND A CHECK WAS RED ON `main` FOR SOMEBODY ELSE'S DECISION**:
+  `fn-pillars.py` asserted a unit's Objectives sheet was *"exactly what it was,
+  plus §233's Hidden"* and §278 had **appended Jan–Dec** to it, so it had been
+  failing on a build behaving exactly as decided — §214.3 for the second time
+  **on that one line**. REWRITTEN, never loosened (§218): the months asserted in
+  ORDER and at the END, because §65 makes a column's POSITION what the
+  workbook's validation ranges are built from.
 - **THE REPORTING PAGE SAYS WHERE SUBMIT IS HELD (§279):** Islam, from his own
   tenant — *"the reporting is not submitting to the SMO as there is someting
   requires a note but I can't find it."* **REPRODUCED BEFORE ANYTHING WAS

@@ -4194,9 +4194,6 @@ function capReported(c){
   return { done: n, total: total };
 }
 
-function capsReachable(){
-  return GROUP.capabilities.filter(function(c){ return reachesCap(c.id); });
-}
 function capsOfFunction(key){
   return GROUP.capabilities.filter(function(c){ return c.fn === key; });
 }

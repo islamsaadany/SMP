@@ -77,6 +77,75 @@ function scenarios(base) {
   }
   if (fnKey) add("function: head", true, s => { s.functions[fnKey].head = "someone" + Date.now(); });
 
+  /* ── FUNCTION PLAN REPORTS — the "Marketing" shape (§241 Fix A) ──────────
+     A supporting function that plans in pillars. Its whole plan rides in the
+     `functions` row's `extra`, so rewriteFunction must preserve every reported
+     figure. This is the exact shape the live incident feared and never tested. */
+  const pillFn = base.functionKeys.filter(function (k) {
+    return (base.functions[k].items || []).some(function (p) { return (p.tactics || []).length; });
+  })[0];
+  if (pillFn) {
+    const fp = base.functions[pillFn].items.findIndex(function (p) { return (p.tactics || []).length; });
+    add("function: a tactic report (actual + status)", true, s => {
+      const t = s.functions[pillFn].items[fp].tactics[0]; t.actual = "83"; t.status = "done"; t.note = "fn report";
+    });
+    add("function: a tactic outcome (outActual §248)", true, s => {
+      s.functions[pillFn].items[fp].tactics[0].outActual = "6";
+    });
+    const fm = base.functions[pillFn].items.findIndex(function (p) { return (p.measures || []).length; });
+    if (fm >= 0) add("function: a measure actual", true, s => { s.functions[pillFn].items[fm].measures[0].actual = "71%"; });
+    if ((base.functions[pillFn].keyObjectives || []).length)
+      add("function: a key-objective target", true, s => { s.functions[pillFn].keyObjectives[0].target = "40%"; });
+  }
+
+  /* ── FULLER CAPABILITY REPORTS — a project's outcome / deliverable / milestone ── */
+  const caps = base.group.capabilities || [];
+  let cI = -1, pI = -1;
+  for (let i = 0; i < caps.length && cI < 0; i++) {
+    const ps = caps[i].projects || [];
+    for (let jx = 0; jx < ps.length; jx++) {
+      if ((ps[jx].outcomes || []).length || (ps[jx].deliverables || []).length || (ps[jx].milestones || []).length) { cI = i; pI = jx; break; }
+    }
+  }
+  if (cI >= 0) {
+    const proj = () => caps[cI].projects[pI];
+    if ((proj().outcomes || []).length) add("capability: an outcome actual", true, s => { s.group.capabilities[cI].projects[pI].outcomes[0].actual = "55%"; });
+    if ((proj().deliverables || []).length) add("capability: a deliverable status", true, s => {
+      const d = s.group.capabilities[cI].projects[pI].deliverables[0];
+      d.status = d.status === "done" ? "wip" : "done";   /* toggle → always a real change */
+    });
+    if ((proj().milestones || []).length) add("capability: a milestone pct", true, s => { s.group.capabilities[cI].projects[pI].milestones[0].pct = "60"; });
+  }
+
+  /* ── A TACTIC OUTCOME ON A UNIT (§248) ── */
+  add("unit: a tactic outcome (outActual §248)", true, s => {
+    const p = s.units[firstUnit].items[0]; if (p && p.tactics[0]) p.tactics[0].outActual = "7";
+  });
+
+  /* ── REPORT STATE lives in `review` — these MUST fall back (planSubjects
+     does not address `review`), and MUST still be byte-identical to full.
+     A save that dropped the submit/note would be exactly the silent loss. */
+  add("review: submit a unit (fallback)", false, s => {
+    s.review = clone(s.review || {}); s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[firstUnit] = true;
+  });
+  add("review: a cycle note (fallback)", false, s => {
+    s.review = clone(s.review || {}); s.review.note = Object.assign({}, s.review.note); s.review.note[firstUnit] = "repro note " + Date.now();
+  });
+  add("review: park a unit (fallback)", false, s => {
+    s.review = clone(s.review || {}); s.review.parked = Object.assign({}, s.review.parked); s.review.parked[firstUnit] = true;
+  });
+
+  /* ── MIXED SAVES — a figure AND report state in one post. Because `review`
+     is present, the whole save must fall back to the full writer. */
+  add("mixed: a unit figure + a review note (fallback)", false, s => {
+    const p = s.units[firstUnit].items[0]; if (p && p.measures[0]) p.measures[0].actual = "66%";
+    s.review = clone(s.review || {}); s.review.note = Object.assign({}, s.review.note); s.review.note[firstUnit] = "mixed " + Date.now();
+  });
+  add("mixed: a unit figure + a submit (fallback)", false, s => {
+    const p = s.units[firstUnit].items[0]; if (p && p.tactics[0]) p.tactics[0].actual = "44";
+    s.review = clone(s.review || {}); s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[firstUnit] = true;
+  });
+
   /* These MUST fall back — the writer does not handle them yet. */
   add("cycle change (fallback)", false, s => { s.cycle = clone(s.cycle); s.cycle.name = "New cycle"; });
   add("an access grant (fallback)", false, s => {

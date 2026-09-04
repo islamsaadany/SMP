@@ -126,7 +126,12 @@ def main():
           var tabs=[...document.querySelectorAll('table')];
           var hdr=x=>x?[...x.querySelectorAll('thead th')].map(h=>h.textContent.trim()):null;
           var mt=tabs.find(x=>/Annual target/.test(x.textContent));
-          var tt=tabs.find(x=>/YTD delivery/.test(x.textContent));
+          /* §248 RENAMED "YTD delivery" TO "YTD actual", and both tables on
+             this page now end in it -- so a search for a status word finds the
+             wrong table or none at all (§51.11). The tactics table is the one
+             whose head says Tactic: what it IS, rather than what one of its
+             columns currently happens to be called. */
+          var tt=tabs.find(x=>hdr(x) && hdr(x).indexOf('Tactic')>-1);
           return {m:hdr(mt), t:hdr(tt),
                   mCells:[...mt.querySelectorAll('tbody tr')].map(r=>r.querySelectorAll('td').length),
                   pairs:[...document.querySelectorAll('.pair i')].length};
@@ -134,8 +139,13 @@ def main():
         ck("the measures table names the annual target and the YTD actual",
            t["m"] == ["#","Measure","Dir.","Annual target","Compile","YTD actual","Progress"], t["m"])
         ck("...and every row still fills it", set(t["mCells"]) == {7}, t["mCells"])
+        # §248 gave this table an Outcome column and renamed its figure to match
+        # the measures table above it -- "delivery" is wrong for a row measured
+        # in stores. §239's own point survives: no Variance, and it ends in
+        # Progress.
         ck("the tactics table drops Variance and ends in Progress",
-           t["t"] == ["#","Tactic","Owner","Collabs.","Quarters","Status","YTD delivery","Progress"], t["t"])
+           t["t"] == ["#","Tactic","Outcome","Owner","Collabs.","Quarters",
+                      "Status","YTD actual","Progress"], t["t"])
         ck("the benchmark is drawn beside the figure, not in a column of its own",
            t["pairs"] > 0, t["pairs"])
 
@@ -197,15 +207,34 @@ def main():
         print("\n── 8 · the office sets the review point, and every score follows ──")
         pg.evaluate("()=>{current='setup'; currentSub='cycle'; paint();}")
         pg.wait_for_timeout(500)
-        ck("the cycle strip carries the control",
-           pg.evaluate("!!document.querySelector('.fstrip-meta.asof .monthbtn')"))
+        # §273 MOVED THE CONTROL AND NOT THE PROMISE. Islam: "keep the close
+        # cycle inside the edit ... the pen should hold everything editable so
+        # it's kept secured" — so the strip is a line you read and the picker
+        # lives inside the pen with the name and the dates. These assertions
+        # are REWRITTEN rather than deleted (§218): what §239 is about is that
+        # the office can move the review point and every figure follows, and
+        # that is asserted here exactly as before, through the door it now has.
+        ck("the strip carries no control of its own any more (§273)",
+           pg.evaluate("!document.querySelector('.fstrip-meta.asof .monthbtn')"))
+        ck("...it carries the pen that holds one",
+           pg.evaluate("!!document.querySelector('[data-editcycle]')"))
         before = pg.evaluate("()=>measureScore(GROUP.keyObjectives[0])")
-        pg.click(".fstrip-meta.asof .monthbtn"); pg.wait_for_timeout(300)
+        pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
+        pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(300)
         ck("...which opens the platform's own month picker",
            pg.evaluate("!!document.querySelector('.monthpop [data-mpick]')"))
         pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
             .find(x=>x.textContent.trim()==='Aug'); if(b)b.click();}""")
-        pg.wait_for_timeout(500)
+        pg.wait_for_timeout(400)
+        # REWRITTEN, NOT DELETED (§218). This asserted the opposite until
+        # §273.4: §273 held the pick in a DRAFT until Save, and Islam took the
+        # draft away — every field in the pen is bound and writes where every
+        # other field in SMP writes, so the pick IS the cycle's on the press.
+        # Asserted rather than dropped, because a build that quietly went back
+        # to holding it would otherwise pass everything below.
+        ck("the pick reaches the cycle on the press, with no Save to make",
+           pg.evaluate("()=>REVIEW.asOfMonth === 'Aug 26'"),
+           pg.evaluate("()=>REVIEW.asOfMonth"))
         after = pg.evaluate("""()=>({stored:REVIEW.asOfMonth||null, months:elapsedMonths(),
                                      rev:measureScore(GROUP.keyObjectives[0])})""")
         ck("the pick reaches the stored cycle", after["stored"] == "Aug 26", after)
@@ -214,7 +243,11 @@ def main():
            before == 87 and after["rev"] == 65, (before, after["rev"]))
         # A CLEARED VALUE IS A DELETED KEY (§50.6), or an untouched cycle and one
         # set and cleared would differ and put a phantom change into every save.
-        pg.click(".fstrip-meta.asof .monthbtn"); pg.wait_for_timeout(300)
+        # EDIT IS A TOGGLE (§273.4), so it is pressed only if the pen is shut —
+        # pressing it blind here closed the pen this section is standing in.
+        if not pg.query_selector(".newcycle"):
+            pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
+        pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(300)
         pg.evaluate("""()=>{var b=document.querySelector('.monthpop [data-mclear]'); if(b)b.click();}""")
         pg.wait_for_timeout(400)
         ck("clearing it deletes the key rather than storing an empty one",

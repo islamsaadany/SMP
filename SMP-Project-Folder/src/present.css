@@ -44,6 +44,33 @@
   .dslide td { padding:20px 18px; font-size:23px; vertical-align:middle;
                border-bottom:1px solid var(--line-soft); }
   .dslide table.dbig td { font-size:26px; padding:24px 18px; }
+  /* ── THE OBJECTIVES TABLE FILLS THE ROOM THE ASPIRATION GAVE BACK (§254.9)
+     Islam: *"we have space so grow the font of the key objectives table to
+     fill the slide more."*
+
+     THE CEILING IS NOT TASTE, IT IS THE FIT PASS. `.tight` is applied to any
+     slide that overflows, and it shrinks the ASPIRATION to 31px along with
+     everything else — so a table set one step too large tips the slide over
+     and costs the very thing he wanted prominent. Measured rather than
+     guessed: 30px with 24px cells and the block's own bottom padding trimmed
+     to 16 keeps `tight` off and the aspiration at 40px, with 102px still in
+     hand for a unit whose sentence runs a line longer. 31px tips it.
+
+     Scoped to THIS slide, so the objectives table on its own slide is
+     untouched; and `.tight` still overrides it, so a plan with many
+     objectives shrinks exactly as it did (§69.5). */
+  .dslide .aimtop { padding-bottom:16px; }
+  .dslide .aimbottom table.dbig td { font-size:30px; padding:24px 18px; }
+  .dslide .aimbottom table.dbig th { font-size:15px; }
+  /* AND THE TIGHTENED SLIDE GETS ITS OWN FLOOR, which is the half that
+     mattered most: measured across all ten demo units, EVERY aim slide was
+     tight before this section and read at 19px — the generic floor, set for a
+     slide packed with figures, applied to one holding four objectives and two
+     numbers. Seven clear it now; the three whose aspiration runs longer land
+     here instead of on 19px, and none of the ten overflows even at 26px, so
+     24px is taken with room in hand for a plan carrying more objectives than
+     the demo's four. */
+  .dslide.tight .aimbottom table.dbig td { font-size:24px; padding:15px 18px; }
   .dslide tbody tr:last-child td { border-bottom:0; }
   .dslide table.zebra tbody tr:nth-child(even) td { background:var(--zebra); }
   .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -60,7 +87,11 @@
   .dslide tr.dim td { opacity:.5; }
   .dslide .lead { font-weight:500; }
   .dsub { display:block; color:var(--ink-3); font-size:17px; margin-top:5px; font-weight:400; }
-  .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch; }
+  /* §271: a note may be several lines now, and a projector shows them the way
+     the person who wrote them typed them — the deck reads the same stored
+     field the reporting page writes, so it keeps the same breaks. */
+  .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch;
+                               white-space:pre-line; }
   .dslide .withnote td.dnote.empty { color:var(--none); }
   /* The same relationship the note column has to the figures beside it: a
      supporting fact, set below the row's own size (§50). */
@@ -94,9 +125,18 @@
   .d-swot.t-stone h2 { border-left:5px solid var(--panel); }
   .d-swot.t-warn h2 { border-left:5px solid var(--warn); }
 
-  .aimtop { display:grid; grid-template-columns:1.25fr 1fr; gap:60px; padding-bottom:34px;
+/* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────
+   Islam: *"make the wining aspiration filing the width of the presentaion
+   rather than being stuck in a box on the left."*
+
+   It sat in the left column of a two-column grid whose right column holds
+   "End in mind" — so on every unit that has not written one, half the slide
+   was empty and the sentence broke across four short lines for no reason. A
+   block, with End in mind beneath it where there is one. */
+  .aimtop { display:block; padding-bottom:34px;
             border-bottom:1px solid var(--line); }
-  .asp2 { font:400 38px/1.35 var(--serif); color:var(--ink); margin:0; }
+  .aimtop > div + div { margin-top:22px; }
+  .asp2 { font:400 40px/1.32 var(--serif); color:var(--ink); margin:0; }
   .asp3 { font:400 27px/1.4 var(--serif); color:var(--ink-2); margin:0; }
   .aimbottom { margin-top:34px; }
   .big3 { color:var(--gold-deep); }
@@ -112,10 +152,31 @@
   .seccell { border-top:5px solid var(--line); padding-top:20px; }
   .seccell b { display:block; font:400 64px/1 var(--serif); }
   .seccell span { display:block; font-size:19px; color:var(--ink-3); margin-top:8px; }
-  .seccell.t-good { border-top-color:var(--good); }
-  .seccell.t-bad { border-top-color:var(--bad); }
-  .seccell.t-stone { border-top-color:var(--panel); }
-  .seccell.t-warn { border-top-color:var(--warn); }
+  /* A section divider takes the tenant's own bar colour and the three inks
+     that already exist for that ground (§259.1). Every value is a token the
+     Branding page sets or derives — nothing here is a literal, so the deck
+     follows a tenant who rebrands (§25). */
+  .d-sect { background:var(--panel); }
+  .d-sect .seclab { color:var(--panel-accent); }
+  .d-sect h1, .d-sect h2, .d-sect h1.cover { color:var(--panel-ink); }
+  .d-sect .coverrule { background:var(--panel-accent); }
+  .d-sect .coversub { color:var(--panel-quiet); }
+  .d-sect .seccell { border-top-color:var(--panel-accent); }
+  .d-sect .seccell b { color:var(--panel-ink); }
+  .d-sect .seccell span { color:var(--panel-quiet); }
+  /* A divider names one thing or two, never always four: the grid says how
+     many it holds rather than assuming SWOT's shape. Capped so two counts do
+     not stretch across 1500px with a screenful of air between them. */
+  .secgrid.c1 { grid-template-columns:1fr; max-width:400px; }
+  .secgrid.c2 { grid-template-columns:repeat(2,1fr); max-width:780px; }
+  .secgrid.c3 { grid-template-columns:repeat(3,1fr); max-width:1160px; }
+  /* `.seccell.t-good` and its three siblings are GONE with the classes they
+     styled (§24, §259.1): the SWOT divider is on the blue now and its four
+     rules could not survive the move — measured against `--panel`, green
+     2.55:1, red 2.26:1, orange 3.49:1, and `t-stone` was `--panel` itself,
+     so 1.00:1 against its own ground. `.d-swot.t-good` and its siblings are
+     a different selector and are untouched: the four category slides keep
+     their colours, which is where the colour actually carries meaning. */
   .pillarname { font:400 68px/1.12 var(--serif); margin:0 0 14px; }
   .dcode.huge { font-size:.5em; }
   .leadstats { display:flex; gap:80px; margin-top:44px; }
@@ -175,19 +236,31 @@
      stage — about 7% of the projected image spent on controls the room can see
      and the presenter does not need.
 
-     HIDDEN, NEVER REMOVED. It carries Exit, and a presenter who cannot find
-     the way out of fullscreen on somebody else's laptop is stranded — so
-     moving the mouse brings it back for a few seconds, which is what every
-     projector tool does and what people already expect. Escape and the arrows
-     work throughout either way.
+     HIDDEN, NEVER REMOVED, AND IT NO LONGER COMES BACK (§265, reversing the
+     second half of §69.7). That section brought the bar back for a few seconds
+     on a mouse move, so a presenter could always find Exit — and `pointerdown`
+     counts as a move, so on a projector EVERY CLICK flashed a navy strip
+     across the bottom of the slide and took it away again. A control that
+     appears and disappears under the room's eyes costs more attention than the
+     one it saves the presenter. Escape leaves fullscreen and the bar is there
+     again, whole; the cost is stated in §265 and is a touch screen with no
+     keyboard.
 
      `transform`, not `display`, so the stage's height does not change when it
      comes and goes: `deckScale()` reads clientHeight, and a bar that resized
-     the stage would rescale the whole deck every time the mouse moved. The
-     stage takes the full inset in fullscreen and keeps it. */
-  .deckroot.fs .deckstage { inset:0; }
+     the stage would rescale the whole deck every time it appeared. The stage
+     takes the full inset in fullscreen and keeps it. */
+  /* ── THE HORIZONTAL GESTURE IS THE DECK'S (§280) ──────────────────
+     Without this the browser claims a horizontal drag for its own back/forward
+     navigation or an overscroll, so the swipe is stolen before `pointerup`
+     ever reaches us — and it is stolen SILENTLY, which reads as a swipe that
+     does nothing. `pan-y` gives the vertical away deliberately, so a long
+     cycle note can still be scrolled with a finger; the cost is that
+     pinch-zoom is off inside the stage, which on a slide scaled to fit is a
+     gesture with nothing to do. Fullscreen only, so a windowed deck on a
+     tablet behaves exactly as it always has. */
+  .deckroot.fs .deckstage { inset:0; touch-action:pan-y; }
   .deckroot.fs .deckbar { transform:translateY(100%); opacity:0; pointer-events:none; }
-  .deckroot.fs.peek .deckbar { transform:none; opacity:1; pointer-events:auto; }
   @media (prefers-reduced-motion: reduce) { .deckbar { transition:none; } }
   .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;
                     font:inherit; font-size:15px; line-height:1; padding:8px 13px;
@@ -301,6 +374,50 @@
   .sthumb-in { display:block; position:relative; width:1600px; height:900px;
                transform:scale(.105); transform-origin:0 0; pointer-events:none; }
   .slrow.mine .sthumb { border-color:var(--gold); }
+
+  /* ── HIDDEN FROM THE REVIEW (§256) ─────────────────────────────────────
+     Treatment A of the two drawn in the real rail
+     (design-mockups/hide-slides/), Islam's pick. The thumbnail carries the
+     state and the word confirms it; B struck the label through and lost,
+     because a slide's name wraps to two lines and the rule then runs through
+     the gap between them.
+
+     THE TAG SITS OUTSIDE `.sl-lab`, which is `-webkit-line-clamp:2` — a tag
+     written inside it is EATEN on exactly the rows whose names are longest,
+     which is where the state matters most. (The `em` above has that fault
+     and keeps it: fixing "your pictures" is not this change.) */
+  .slrow { position:relative; }
+  .slhide { position:absolute; top:4px; right:4px; width:24px; height:24px;
+            display:none; align-items:center; justify-content:center; padding:0;
+            border:1px solid var(--line); border-radius:var(--r-sm);
+            background:var(--surface); color:var(--ink-3); cursor:pointer; }
+  /* Shown on the row being pointed at or selected, and ALWAYS on a hidden one:
+     the control that undoes a state must not itself be hidden (§61). */
+  .slrow:hover .slhide, .slrow.on .slhide, .slrow.off .slhide { display:flex; }
+  .slhide:hover { border-color:var(--ink-3); color:var(--ink-2); }
+  .slhide[aria-disabled="true"] { opacity:.45; cursor:default; }
+  .slrow.off .sthumb { opacity:.3; filter:grayscale(1); }
+  .slrow.off .sl-lab { color:var(--ink-3); }
+  .slrow.off .slhide { color:var(--ink-2); border-color:var(--ink-3); }
+  .sl-off { grid-column:2; font-size:var(--fs-micro); font-weight:700;
+            letter-spacing:var(--track); text-transform:uppercase;
+            color:var(--ink-2); margin-top:2px; }
+  /* Quiet, never an alarm ground (§187): a fact about the deck, not a warning
+     about it. The way back is a text button and not a second gold pill beside
+     Add slide after (§41's accent budget). */
+  .sl-hidden { display:flex; align-items:center; justify-content:space-between;
+               gap:6px; margin:0 0 6px; padding:5px 6px; border-radius:var(--r-sm);
+               background:var(--surface-2); font-size:var(--fs-micro);
+               color:var(--ink-2); }
+  .sl-hidden .lnk { background:none; border:0; padding:0; cursor:pointer;
+                    font:inherit; color:var(--ink-2); text-decoration:underline; }
+  .sl-hidden .lnk:hover { color:var(--ink); }
+  /* The stage says it too, or the pane's words sit under a slide that looks
+     exactly like every other slide. */
+  .sstage-off .sstage-in { opacity:.4; filter:grayscale(1); }
+  .slctl-off { margin-bottom:0; }
+  .slctl-off b { font-size:var(--fs-small); color:var(--ink); }
+  .slctl-off .editbtn { margin-left:auto; }
   /* Pinned, and above the list rather than below it: it is the first thing
      you came here to do. */
   .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
@@ -436,3 +553,319 @@
            display:flex; align-items:center; padding-top:20px;
            border-top:1px solid var(--line-soft); }
   .dfootmark { display:block; width:150px; height:auto; opacity:.75; }
+
+/* ── THE PILLARS, NAMED BEFORE THEY ARE SCORED (§254.5) ────────────────
+   Islam's own concept from the Raya deck, in the platform's language: a row of
+   cards, one per pillar, the name given room and nothing measured yet.
+
+   ONE ACCENT ACROSS THE ROW, not one per card. His reference gives each card
+   its own hue, which spends three accents on a distinction that carries no
+   meaning — the pillars are peers, and colouring them apart says they are not
+   (§41's budget).
+
+   THE ROW DIVIDES BY HOW MANY THERE ARE (`--n`, set from the list), so two
+   pillars and eight both fill the line. `align-items:stretch` keeps the cards
+   one height however long a name runs, and the sub-line is pushed to the foot
+   so every one of them sits on the same baseline. */
+/* ── AND IT SIZES ITSELF TO HOW MANY THERE ARE (§254.8) ────────────────
+   Islam, seeing it with two pillars: *"the pillars size are great and it will
+   adjust to fit if we reach more pillars in 1 page so this needs to be dynamic
+   so 4 can form a box and 5 shall be 5 boxes centered in the page beside each
+   others."*
+
+   THE FIRST BUILD SIZED THE TYPE FOR FOUR AND NEVER RE-SIZED IT. 26px is right
+   in a card a quarter of the slide wide and lost in one half the slide wide —
+   so with two pillars the name sat small at the top of a large empty box, which
+   is what he was looking at.
+
+   THE COUNT IS ALREADY IN THE CSS, so the arithmetic can use it: `--n` is set
+   from the list on the element itself, and every size here is a function of it.
+   `calc()` inside `clamp()` gives a curve rather than a table of breakpoints —
+   two pillars land at the ceiling, eight at the floor, and every count between
+   is proportionate without anybody choosing a number for it.
+
+   THEY STAY IN ONE ROW, which is what "beside each others" asks for and what
+   the grid already did; what changes is that the type, the padding and the
+   card's own height now follow the width each card actually gets. */
+  /* CENTRED IN WHAT IS LEFT OF THE SLIDE. `.dslide` is a flex column, so the
+     row takes the space under the heading and centres itself in it — which is
+     what "centered in the page" asks for, and it is also why the cards do not
+     hang at the top on a unit with two of them. */
+/* §254.12: THE CARDS FILL THE SLIDE, NOT JUST ITS WIDTH. `--c` is how many
+   across and `--r` how many down, both worked out once in `pillarCols()` — the
+   layout decision lives in one place and the CSS only carries it out.
+
+   FLEX-WRAP RATHER THAN A GRID, because a ragged last row has to be CENTRED:
+   five in three columns leaves two underneath, and a grid would push them to
+   the left edge. The basis is the column share of the row, so the cards are
+   equal whatever the count.
+
+   EVERY SIZE IS A FUNCTION OF THE COLUMN COUNT, not of the total: what decides
+   how big a name can be is how wide its card is, and that is `--c`. The height
+   follows `--r`, so three rows of cards do not each demand the height one row
+   could have. */
+  .pcards{ display:flex; flex-wrap:wrap; justify-content:center; align-items:stretch;
+    align-content:center; flex:1;
+    gap:clamp(14px, calc(64px / var(--c,3)), 32px);
+    margin-top:clamp(24px, calc(120px / var(--c,3)), 56px); }
+  .pcard{ display:flex; flex-direction:column; justify-content:center;
+    flex:0 1 calc((100% - (var(--c,3) - 1) * clamp(14px, calc(64px / var(--c,3)), 32px))
+                  / var(--c,3));
+    gap:clamp(10px, calc(48px / var(--c,3)), 22px);
+    /* THE VERTICAL SIZES FOLLOW THE ROWS, THE HORIZONTAL ONES THE COLUMNS,
+       and getting that wrong is what made three rows overrun the slide by
+       84px: the first version sized the padding by `--c` alone, so nine cards
+       in three rows each demanded the height one row could afford. Swept from
+       one pillar to ten, and none overflows (§69.5's fit pass is a net, not a
+       layout). */
+    padding:clamp(10px, calc(48px / var(--r,1)), 36px) clamp(16px, calc(76px / var(--c,3)), 38px);
+    min-height:clamp(80px, calc(520px / var(--r,1)), 290px);
+    background:var(--surface-2); border-top:5px solid var(--gold); border-radius:2px; }
+  .pcard-c{ font-family:var(--mono); letter-spacing:.1em; font-weight:600;
+    font-size:clamp(13px, calc(40px / var(--c,3)), 19px); color:var(--gold-deep); }
+  .pcard-n{ font-weight:700; line-height:1.14; color:var(--ink); text-wrap:balance;
+    font-size:clamp(20px, calc(8px + 80px / var(--c,3)), 52px); }
+  .pcard-s{ color:var(--ink-3); line-height:1.45;
+    font-size:clamp(14px, calc(6px + 26px / var(--c,3)), 19px); }
+
+/* The quiet half of a figure cell — what it is measured against so far
+   (§254). The same weight the tactics table has used since §252, so one
+   number does not read louder on one table than on another. */
+  .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; }
+
+  /* ══ THE MASTER PRESENTATION'S PICKER (§266) ═══════════════════════
+     The dialog the office makes a running order in. It lives in the deck's
+     own stylesheet because it is a control ABOUT decks, and its classes are
+     `mf*` rather than `mp*` — `data-mpick` is already the month picker's
+     (§177), and a one-word modifier meeting a one-word component in a single
+     global namespace is §65.9's silent collision. */
+  /* ── THE PILLS CARRY THE SUBJECT'S CODE (§266.9) ──────────────────
+     Islam, on a real 308-slide flow: thirteen identical dots is a row you can
+     count and cannot read. Only in a flow — `bysub` is set by `deckIndex()`
+     and a single subject's deck keeps the dots it has always had. The strip is
+     allowed more of the bar than the dots need, because a labelled pill is
+     five times the width of a 7px one and eighteen of them wrapping onto three
+     rows is the fault this feature exposed in the first place. */
+  /* `flex-shrink:0` is what actually stops the wrap, and the measurement is
+     what said so: the strip was being SQUEEZED by the bar's flex row to 568px
+     with 592 of pills in it, not capped by its own max-width (793). The cap
+     still holds on a genuinely narrow window, where wrapping inside it is the
+     graceful answer. */
+  .ddots.bysub { max-width:62vw; gap:3px; flex-shrink:0; }
+  /* Tighter below 1400, where eighteen three-letter codes wrap to a second row
+     inside the bar. Measured, not guessed: 1 row at 1600 and at 1280 either
+     way is what the check asserts (§158 — fit, never "and it wraps"). */
+  .ddots.bysub .ddot {
+    width:auto; height:19px; border-radius:10px; padding:0 8px;
+    font-size:9.5px; font-weight:600; letter-spacing:.09em;
+    font-family:inherit; line-height:19px;
+    background:transparent; border:1px solid rgba(255,255,255,.34);
+    color:rgba(255,255,255,.82); transform:none;
+  }
+  .ddots.bysub .ddot:hover { border-color:rgba(255,255,255,.7); color:#fff; }
+  /* Lit is the gold FILL with dark ink on it, never gold type (§38.4): the
+     accent carries a mark and cannot carry words. `transform` is dropped with
+     it — scaling a pill blurs the letters it exists to show. */
+  .ddots.bysub .ddot.on {
+    background:var(--gold); border-color:var(--gold); color:#12161C;
+    transform:none;
+  }
+  /* AFTER the rules it narrows, never before them: `.ddots.bysub .ddot` and
+     this carry the same specificity, so source order is the whole of what
+     decides — written above, the tighter padding lost silently and the strip
+     went on wrapping at 1280 with the media query plainly matching (§29.2,
+     §93.11, and the fourth time this file has recorded it). */
+  @media (max-width: 1400px) {
+    .ddots.bysub { gap:2px; }
+    .ddots.bysub .ddot { padding:0 5px; letter-spacing:.05em; }
+  }
+
+  .mflow { font-size:13.5px; }
+  /* §266.8: two columns — waiting on the left, the running order on the right.
+     One track each and never `auto`, or the wider list would take the room the
+     flow needs to hold three controls per row (§109). Below 760 they stack,
+     because two 300px columns in a dialog are two clipped columns. */
+  .mflow .mfcols { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  /* THEY STACK AT 960, NOT 820 — measured: two columns in a 900px window give
+     each about 380px and two of the tenant's own names clip, where stacked they
+     have the whole dialog. A clipped name in a picker is a name somebody cannot
+     tell from its neighbour (§88's reason, on a control rather than a table). */
+  @media (max-width: 960px) { .mflow .mfcols { grid-template-columns:1fr; } }
+  /* §266.10: wider than the 940px every other dialog gets, because two tables
+     of four and five columns in 440px each clip a name before the Kind column
+     is reached. Marked on the OVERLAY (§122's rule) so `.modal` — which every
+     dialog shares — is never loosened, and removed again in `closeModal()`. */
+  .overlay.mflow-on .modal { width:min(1160px, 100%); }
+  .mflow .mfcol { min-width:0; }
+  .mflow .mfcol h4 {
+    margin:0; flex:none; font-size:var(--fs-micro); letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); font-weight:600;
+  }
+  /* §266.10: the column's name, its search and its count share one line, and
+     the search is the flexible one — the two labels are fixed words. */
+  .mflow .mfhead {
+    display:flex; align-items:center; gap:10px; margin:0 0 6px;
+    padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .mflow .mffind {
+    flex:1 1 auto; min-width:0; height:27px; font:inherit; font-size:12.5px;
+    padding:0 9px; border:1px solid var(--line); border-radius:6px;
+    background:var(--surface); color:var(--ink);
+  }
+  .mflow .mffind:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .mflow .mfcount {
+    flex:none; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums;
+  }
+  /* A column that has legitimately emptied says so, or it reads as a pane that
+     failed to render (§45.2). Quiet, because neither state is a fault. */
+  .mflow .mfempty {
+    margin:0; padding:14px 8px; font-size:12.5px; color:var(--ink-3);
+  }
+  /* Capped so the two buttons are always on screen: eighteen subjects is
+     taller than a laptop, and a control below the fold is a control that does
+     nothing (§90). */
+  .mflow .mflist { max-height:min(52vh, 420px); overflow:auto; }
+
+  /* THE 620px FLOOR IS A FLOOR (§158), and inside a ~540px dialog column it
+     would cut the last column off rather than shrink the table — so these two
+     are exempted by name, and only these two. */
+  .mflow .mftbl {
+    width:100%; min-width:0; border-collapse:collapse; font-size:13.5px;
+    table-layout:fixed;
+  }
+  .mflow .mftbl thead th {
+    background:var(--panel); color:var(--panel-ink); font-size:var(--fs-micro);
+    letter-spacing:.1em; text-transform:uppercase; font-weight:600;
+    text-align:left; padding:6px 8px; position:sticky; top:0; z-index:2;
+  }
+  .mflow .mftbl tbody td {
+    padding:5px 8px; border-bottom:1px solid var(--line-soft);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .mflow .mftbl tbody tr:nth-child(even) td { background:var(--zebra); }
+  .mflow .mftbl .c-nm { width:auto; }
+  /* 70, measured rather than guessed: at 58 the cell's 16px of padding left 42
+     for a chip that renders 44, and the td's own ellipsis clipped it to
+     `FU…` — a column that abbreviates the word it exists to show. */
+  .mflow .mftbl .c-k { width:70px; }
+  /* 58, because SLIDES is 54 at 10.5px with the header's letter-spacing and
+     this is the LAST column of the waiting table — where two pixels of
+     overflow become two pixels of sideways scroll rather than being clipped by
+     the column after it. Measured (§158). */
+  .mflow .mftbl .c-n {
+    width:58px; text-align:right; color:var(--ink-3);
+    font-variant-numeric:tabular-nums;
+  }
+  /* 40px, not 36: the cell's own padding is 16 and the button is 22, so a
+     narrower column overflowed the list by exactly 2px at every width —
+     measured, and §158's rule is fit, never "and it scrolls". */
+  .mflow .mftbl .c-t { width:40px; }
+  .mflow .mftbl .c-x { width:40px; text-align:right; }
+  /* THE WIDTH IS SET ON THE HEADER CELL, because `table-layout:fixed` takes
+     every column's width from the first row and ignores the body's (§37, the
+     same trap in the access matrix) — the handle column was 198px until this
+     was moved off `td.mfh`. */
+  .mflow .mftbl .c-h, .mflow .mftbl .mfh { width:38px; }
+  /* BU or FUNC, in the two vocabularies the picker's own lists come from
+     (§245) — the function outlined in the accent, because a supporting
+     function is the exception on a list most of which is business units. */
+  .mflow .mfkind {
+    font-size:9.5px; font-weight:600; letter-spacing:.07em;
+    border:1px solid var(--line); border-radius:4px; padding:1px 5px;
+    color:var(--ink-3);
+  }
+  /* THE ACCENT IS THE BORDER AND NEVER THE TYPE (§38.4, §38.5 for the seventh
+     time): `--gold-deep` on `--surface-2` measures 4.45:1 as words and passes
+     comfortably as a 1px mark, where 3:1 is the bar. So a supporting function
+     is still told apart at a glance and the word is still readable. */
+  .mflow .mfkind.fn { border-color:var(--gold-deep); color:var(--ink-2); }
+
+  /* The tick is drawn in the tenant's own navigation colour, never a literal
+     navy (§25) — and `--panel-ink` with it, or a light bar leaves the mark
+     invisible on its own ground (§38.4). Drawn quietly at rest rather than
+     transparent-until-hovered: a tablet has no hover, and a button showing
+     nothing is a control nobody finds (§61). */
+  .mflow .mftick, .mflow .mfx {
+    width:22px; height:22px; flex:none; padding:0; line-height:1; cursor:pointer;
+    border:1px solid var(--line); border-radius:5px; background:var(--surface);
+    color:var(--ink-3); font:inherit; font-size:13px;
+  }
+  .mflow .mftick:hover, .mflow .mfx:hover {
+    background:var(--surface-2); color:var(--ink);
+  }
+  .mflow .mftick:focus-visible, .mflow .mfx:focus-visible {
+    outline:2px solid var(--gold); outline-offset:1px;
+  }
+
+  /* ── THE NUMBER IS THE HANDLE (§266.10) ─────────────────────────────
+     Islam: *"do you think the handle can be the same as the number?"* The
+     digit sits there at rest and becomes the platform's own three bars the
+     moment the cell is pointed at or the grip is focused — so reordering costs
+     no column, which is what `td.idx` already does elsewhere by drawing both
+     at once. The CELL is the target, never the glyph: a digit is 8px wide and
+     nobody aims at that. */
+  .mflow .mftbl td.mfh {
+    position:relative; padding:0; text-align:center; height:32px;
+  }
+  .mflow td.mfh .idx-n {
+    display:inline-block; min-width:14px; font-size:12px; color:var(--ink-3);
+    font-variant-numeric:tabular-nums; line-height:32px;
+  }
+  /* OPACITY, NEVER `display:none` OR `visibility:hidden` — both of those take
+     an element out of the tab order, and the grip IS the focusable control
+     (`handle()` gives it the role and the tabindex), so hiding it that way
+     would mean the keyboard route to reordering does not exist at all (§61).
+     Found by driving it: `.focus()` on the grip landed on the dialog's close
+     button instead. Invisible and still there also means the whole cell is the
+     drag target, which is the point — a digit is 8px wide and nobody aims at
+     that. */
+  .mflow td.mfh .grip {
+    display:inline-flex; position:absolute; left:50%; top:50%;
+    transform:translate(-50%, -50%); opacity:0; height:20px;
+  }
+  .mflow td.mfh:hover .grip, .mflow td.mfh:focus-within .grip { opacity:1; }
+  .mflow td.mfh:hover .idx-n, .mflow td.mfh:focus-within .idx-n { visibility:hidden; }
+  /* A TABLET HAS NO HOVER, and that is the device where dragging is most
+     natural — so the bars are simply always there rather than the treatment
+     degrading to a bare digit nobody can drag. */
+  @media (hover: none) {
+    .mflow td.mfh .idx-n { visibility:hidden; }
+    .mflow td.mfh .grip { opacity:1; }
+  }
+  /* AND THE SWAP IS HELD WHILE A DRAG IS ON. Measured on the drawing: with
+     `:hover` alone, a four-row drag swapped the bars six times and half of
+     those put them on a row the pointer was PASSING — the row moves in
+     whole-row steps while the pointer moves continuously, so for about half of
+     every row crossed the pointer is not over the dragged handle at all. The
+     suppression is scoped `tr:not(.dragging)`, because `tbody.sorting
+     td.mfh:hover` outranks `tr.dragging td.mfh` and the first attempt hid the
+     bars on exactly the row being dragged. */
+  .mflow tr.dragging td.mfh .idx-n { visibility:hidden; }
+  .mflow tr.dragging td.mfh .grip { opacity:1; }
+  .mflow tbody.sorting tr:not(.dragging) td.mfh:hover .idx-n { visibility:visible; }
+  .mflow tbody.sorting tr:not(.dragging) td.mfh:hover .grip { opacity:0; }
+
+  .mflow .mfband {
+    background:var(--surface-2); font-size:var(--fs-micro); letter-spacing:.12em;
+    text-transform:uppercase; font-weight:600; color:var(--ink-3);
+    padding:5px 8px; margin-top:6px;
+  }
+  /* Why the press did nothing, on the attention ground: nothing has gone
+     wrong, the flow is simply empty (§168, §221). */
+  .mflow .mfnote {
+    margin:10px 0 0; padding:7px 10px; border-radius:6px;
+    background:var(--attn-bg); color:var(--attn-tx); font-size:12.5px;
+  }
+  .mflow .cbtns {
+    display:flex; gap:8px; justify-content:flex-end; padding-top:12px;
+  }
+  .mflow .cbtns button {
+    display:inline-block; width:auto; white-space:nowrap; padding:6px 14px;
+    border:1px solid var(--line); border-radius:7px; background:var(--surface);
+    color:var(--ink-2); font-size:13px; cursor:pointer;
+  }
+  .mflow .cbtns button:hover { background:var(--surface-2); color:var(--ink); }
+  .mflow .cbtns button.mfgo {
+    border-color:var(--panel); background:var(--panel); color:var(--panel-ink);
+  }
+  .mflow .cbtns button.mfgo[aria-disabled="true"] { opacity:.55; }

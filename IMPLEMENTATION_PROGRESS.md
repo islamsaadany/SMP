@@ -145,7 +145,69 @@ measured with the sweep's own function (5.31 light / 5.96 dark) and the probe
 proved able to see them. Mockup:
 `design-mockups/cycle-name-date-edit/2026-09-03_edit-the-cycle.html`.
 
-**On the branch, not merged.**
+**Merged to `main` and live** (§273 · §273.1 · §273.2 · §273.3).
+
+### §273.4 — the pen closes itself, and the banner is two columns (2026-09-04, same branch)
+
+Islam, using what §273 shipped: *"when I'm editing why is the edit button still
+there it should turn into done editing so I clik it and thebox collapse saving
+what I did rather tahn having a save and candel buttons inside the box itself
+rearrange th e buttons and think of different structures of this banner"* —
+then, having asked to see **both states** of each, *"C"*.
+
+**What was wrong.** He is describing the platform's own editing model, and §273
+had invented a second one. Every pen in SMP is `penBtn()` — Edit ⇄ **Done
+editing** — over fields bound through `FIELDS` that write on blur (§35); there
+is no Save and no Cancel anywhere else in the product, because there is nothing
+for them to do. §273 built a DRAFT, and a draft is what forces a Save (to commit
+it), a Cancel (to throw it away) and a guard on Close (because the draft and the
+cycle can disagree).
+
+**What is there now.** The draft is gone and the three controls with it. Edit is
+a toggle that reads **Done editing** and lights up while the pen is open. The pen
+is two columns: the five facts on the left under *This cycle*, **Close the cycle**
+alone on the right behind a rule under *Ending it*, with one line saying what it
+does — so the destructive act never shares a reading column with the boxes you
+type in, which keeps §273's security argument and sharpens it. It stacks below
+1100px. An empty name is still refused, and the refusal is now **the stored name
+coming back into the box** (§124), because there is no press left to refuse at;
+a name with space around it is trimmed rather than refused.
+
+**What it does not touch.** Nothing server-side moves — these five fields already
+classified as `cycle` — and it is asserted (514/0).
+
+**Verified.** `checks/cycle-edit.py` **37 red** on the build before, **69 green**
+after; §2, §4 and §5 rewritten rather than deleted (§218). Three of the check's
+own first failures were one fault: Edit is a TOGGLE now, so a section pressing it
+blind shuts the pen a previous section left open. Mockup:
+`design-mockups/cycle-name-date-edit/2026-09-03_editing-strip-structures.html`.
+
+### §273.5 — "Open a new cycle" drew nothing, on `main` (2026-09-04, same branch)
+
+Found while re-running the neighbours: `checks/repeat-project.py` hung for
+thirty seconds on `#nc-name`, and the fault **reproduced on the shipped build
+before a line was written**. §261.2 replaced `renderCycle()`'s
+`NEWCYCLE ? … : CYCLEEDIT ? …` chain with a `CYCLEEDIT`-only branch and took the
+NEWCYCLE arm with it — so pressing *Open a new cycle…* sets the draft and
+**renders nothing at all**, on the only way to start a cycle. §96 in the worst
+place: the state it writes is correct, so every assertion short of asking whether
+a PANEL was DRAWN passes.
+
+Put back **verbatim**, not rebuilt on §273.4's `cycleField()` — this panel is
+wired by ID in the shell and writes on `input` rather than `change` for a stated
+reason, so re-expressing it would be a second change riding a restoration.
+`cycle-edit.py` gains §5c, asserting the draft and the panel separately.
+
+**Recorded, not done (§273.6).** Found by looking at the built pen: with no
+review point picked — the demo's state, and a legitimate one — the strip reads
+*"taken from the cycle's end"* and the month control inside the pen reads a red
+**MISSING**. §239.3 settled that a working fallback must not cry Missing and
+settled it for the STRIP only; the pen calls `monthBtnHtml()` directly, where
+*Missing* is correct for the OTHER panel (opening a cycle refuses without a
+month). The fix is a per-caller word, which is a wording decision. It predates
+§273.4 and is left alone rather than changed on the way past.
+
+**On the branch, not merged** — §273.4, §273.5 and §273.6 together.
 ### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
 
 Islam, using the reporting page: *"in the reporting on saving the draft keep

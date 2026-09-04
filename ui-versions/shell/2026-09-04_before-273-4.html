@@ -3372,13 +3372,14 @@
     });
     var cc = document.querySelector("[data-closecycle]");
     if (cc) cc.addEventListener("click", function(){
-      /* §273.4: THE GUARD WENT WITH THE DRAFT. §273 held this button back while
-         a field had been changed and not saved, because closing files the
-         cycle's figures under its NAME and a press over an unsaved rename must
-         neither quietly save it nor quietly throw it away. With the fields
-         writing as they are left there is no unsaved state to protect, so
-         there is nothing to hold: the button is live, behind the pen, which is
-         where Islam asked for it. */
+      /* ASKED AGAIN AT PRESS TIME, never trusted from the render (§48.2, and
+         §273's own reason): the fields write on `input` without repainting, so
+         the drawn state can be one keystroke behind. Closing files this
+         cycle's figures under its NAME, so a press over an unsaved rename must
+         not quietly save it and must not quietly throw it away -- it refuses,
+         and `ceHoldPaint()` makes the sentence saying so visible if typing had
+         left it hidden. */
+      if (cycleEditDirty()) { ceHoldPaint(); return; }
       var gaps = 0;
       activeKeys().forEach(function(k){ var c = reportedCount(UNITS[k]); gaps += c.total - c.done; });
       if (!confirm("Close " + REVIEW.name + "?" +
@@ -3398,35 +3399,51 @@
       paint();
     });
 
-    /* ── EDITING THE OPEN CYCLE (§273, restructured by §273.4) ──────
-       ONE CONTROL, AND IT SAYS WHICH WAY IT GOES. Islam: "why is the edit
-       button still there it should turn into done editing so I click it and
-       the box collapse saving what I did rather than having a save and cancel
-       buttons inside the box itself."
-
-       So `CYCLEEDIT` is a MODE, not a draft: the fields write straight through
-       `FIELDS` on `change` like every other field in the platform, and this
-       button only opens and closes the pen. `cycleDraft()`, `cycleEditDirty()`,
-       `ceHoldPaint()`, the two `data-ce-*` handlers and the four `input`
-       handlers are DELETED rather than left unreachable (§24). */
+    /* ── EDITING THE OPEN CYCLE (§273) ──────────────────────────────
+       Islam: "keep the close cycle inside the edit ... the pen should hold
+       everything editable so it's kept secured." The strip's one control opens
+       a draft of the cycle; nothing reaches REVIEW until Save. */
     var ec = document.querySelector("[data-editcycle]");
     if (ec) ec.addEventListener("click", function(){
+      /* TWO SHAPES, ONE BUTTON, AND THAT IS THE STATED COST (§273.3). A
+         running cycle has five fields to edit, which is a panel; a closed one
+         has one question to answer, which is a dialog. Islam picked the dialog
+         over a band and over a popover, from three drawn on his own tenant. */
       if (REVIEW.state !== "open") return reopenDialog();
-      /* COMMIT THE BOX BEFORE LEAVING IT (§219). A field writes on `change`,
-         which is on blur — a mouse press blurs on the way past, which is the
-         almost-always that hides this, and a keyboard press does not. `blur()`
-         rather than a synthesised event, because it is what the browser does
-         when focus moves, and a field already committed fires nothing. */
-      var a = document.activeElement;
-      if (CYCLEEDIT && a && a.blur) a.blur();
-      CYCLEEDIT = CYCLEEDIT ? null : true;
+      /* IDEMPOTENT, because Edit stays on the strip while the pen is open: a
+         second press must not quietly throw away what somebody has typed and
+         hand them a fresh draft. Cancel is how you leave, and it says so. */
+      if (!CYCLEEDIT) CYCLEEDIT = cycleDraft();
       paint();
-      if (CYCLEEDIT) {
-        var f = document.querySelector(".newcycle input.fld");
-        if (f) f.focus();
-      }
+      var f = document.getElementById("ce-name");
+      if (f) f.focus();
     });
-
+    /* THE GUARD IS REWRITTEN IN PLACE, NEVER PAINTED (§71.2, §145's
+       `gapBandRefresh()`): these fields write on `input`, so a repaint here
+       would rebuild the box under the hand that is typing in it. Without this
+       the drawn state is only as fresh as the last paint, and Close would go
+       on LOOKING live for as long as somebody keeps typing. */
+    function ceHoldPaint(){
+      var held = cycleEditDirty();
+      var note = document.querySelector("[data-ce-hold]");
+      var btn  = document.querySelector("[data-closecycle]");
+      if (note) note.hidden = !held;
+      if (btn) {
+        if (held) btn.setAttribute("aria-disabled", "true");
+        else btn.removeAttribute("aria-disabled");
+      }
+    }
+    ["ce-name","ce-from","ce-to","ce-due"].forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) return;
+      /* `input`, not `change`, for the reason the Open panel gives one screen
+         up: a change event does not fire until blur, so pressing Save straight
+         from a field would read the value before the last one typed. */
+      el.addEventListener("input", function(){
+        CYCLEEDIT[id.slice(3)] = el.value;
+        ceHoldPaint();
+      });
+    });
     /* ── REOPENING A CLOSED CYCLE (§273.2, reshaped by §273.3) ──────
        Before this, NOTHING in the product reopened a cycle: `canReport()` and
        `canReportFn()` both open with `REVIEW.state !== "open"` BEFORE any role
@@ -3496,6 +3513,38 @@
         paint();
       });
     }
+    var cec = document.querySelector("[data-ce-cancel]");
+    if (cec) cec.addEventListener("click", function(){ CYCLEEDIT = null; paint(); });
+    var ces = document.querySelector("[data-ce-save]");
+    if (ces) ces.addEventListener("click", function(){
+      var d = CYCLEEDIT || {};
+      /* The same refusal, in the same words, as opening a cycle: a name is the
+         one thing nothing can be derived from, and it is what every snapshot
+         and archived plan is filed under. */
+      if (!String(d.name || "").trim()) {
+        alert("Give the cycle a name \u2014 it is what its figures are filed under " +
+              "once it closes, and what the next cycle compares against.");
+        var f = document.getElementById("ce-name"); if (f) f.focus();
+        return;
+      }
+      /* TRIMMED, because `cycleEditDirty()` compares trimmed: without this a
+         stray space would be "no change" to the guard and a real change to the
+         database, and the two halves of one feature would disagree about
+         whether anything had happened (§53.5). */
+      REVIEW.name = String(d.name).trim();
+      REVIEW.from = String(d.from || "").trim();
+      REVIEW.to   = String(d.to   || "").trim();
+      REVIEW.due  = String(d.due  || "").trim();
+      /* Stored as an ABSENCE when it was cleared (§50.6), exactly as opening a
+         cycle stores it, or a cycle whose month was taken away would carry an
+         empty key into every later save. */
+      if (d.asOfMonth) REVIEW.asOfMonth = d.asOfMonth;
+      else delete REVIEW.asOfMonth;
+      CYCLEEDIT = null;
+      /* No explicit save call: every writer ends in `paint()` and `paint()`
+         ends in `afterPaint()`, which is what schedules it (§170). */
+      paint();
+    });
     /* Opening a cycle now DESCRIBES it first (§47.8). The button fills a draft
        from what can honestly be guessed — the new period starts where the last
        one ended — and asks for the rest. Nothing touches REVIEW until Open. */

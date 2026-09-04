@@ -456,6 +456,53 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   for it). 12 red on the §273 build; the check's own first run measured
   `{none:true}` everywhere because §8 reloads the page and §9 sat after it
   (§50.6). One assertion REVERSED and REWRITTEN, not deleted (§218).
+- **"OPEN A NEW CYCLE" DREW NOTHING, ON `main` (§273.5):** found while
+  re-running the neighbours — `checks/repeat-project.py` hung on `#nc-name`, and
+  the fault **reproduced on the shipped build before a line was written**.
+  §261.2 replaced `renderCycle()`'s `NEWCYCLE ? … : CYCLEEDIT ? …` chain with a
+  `CYCLEEDIT`-only branch and took the NEWCYCLE arm with it, so the button set
+  the draft and **rendered nothing at all** — §96 in the worst place, because
+  the state it writes is CORRECT, so every assertion short of asking whether a
+  PANEL was DRAWN passes, and there is no other way to start a cycle. **Put back
+  VERBATIM, not rebuilt on §273.4's `cycleField()`**: this panel is wired by ID
+  in the shell and writes on `input` rather than `change` for a stated reason
+  (Open can be pressed from inside a field), so re-expressing it would be a
+  second change riding a restoration — and its Open/Cancel pair is NOT the Save
+  and Cancel §273.4 removed, because it describes a cycle that does not exist
+  yet. **The check was right and had been red for as long as the panel had been
+  gone** (§51.11 from the other side); `cycle-edit.py` §5c asserts the draft and
+  the panel SEPARATELY.
+- **THE PEN CLOSES ITSELF, AND THE BANNER IS TWO COLUMNS (§273.4, reshaping
+  §273):** Islam, using what §273 shipped — *"when I'm editing why is the edit
+  button still there it should turn into done editing so I clik it and thebox
+  collapse saving what I did rather tahn having a save and candel buttons inside
+  the box itself"*, and then, of three structures drawn in BOTH states: **"C"**.
+  **HE IS DESCRIBING THE PLATFORM'S OWN EDITING MODEL AND §273 INVENTED A SECOND
+  ONE**: every pen in SMP is `penBtn()` (Edit ⇄ **Done editing**) over fields
+  bound through `FIELDS` that write on `change`, i.e. on blur (§35) — **there is
+  no Save and no Cancel anywhere else in the product**, because there is nothing
+  for them to do. §273 built a DRAFT, and a draft is what forces a Save, a Cancel
+  AND a guard on Close. **THE DRAFT GOES AND THE THREE CONTROLS GO WITH IT** —
+  `cycleDraft()` and `cycleEditDirty()` DELETED, not left uncalled (§24), and
+  `CYCLEEDIT` becomes what its name says, a MODE. **THE GUARD IS NOT RELAXED, IT
+  IS UNREACHABLE**: §273 held Close while the draft differed from the cycle, and
+  with no draft the name is in `REVIEW` before the cursor has left the box.
+  **THE REFUSAL NEEDED SOMEWHERE TO HAPPEN** — an empty name is still refused (it
+  is what every snapshot is filed under) and there is no press to refuse at, so
+  it became **the stored name coming back into the box** (§124), wrapped in
+  `cycleField()` rather than at the call site: a box showing what was NOT stored
+  is §96 with the sign reversed. Trimmed rather than refused where anything is
+  left (§96.2). **BOTH STATES ARE WHAT DECIDED IT** (his ask): A, B and C differ
+  only with the pen OPEN, so a mockup of the closed strip would have shown three
+  identical pictures. **C puts the destructive act in its own column** behind a
+  rule under *Ending it*, so nobody arrives at it by tabbing down the form —
+  §273's security argument kept whole and sharpened; stacks below 1100px.
+  **Nothing server-side moves and it is asserted** (501/0). **37 red** on the
+  build before — **and three of the check's own first failures were one fault**:
+  Edit is a TOGGLE now, so a section pressing it blind SHUTS the pen a previous
+  section left open (`open_pen()` asks first), and it **died rather than
+  reporting** on the previous build (§215, third time in this file) because
+  Playwright waits 30s on an `aria-disabled` control.
 - **EDITING THE CYCLE THAT IS RUNNING (§273):** Islam — *"allow me to edit the
   cycle name. give me an edit button the cycle to edit the date as you already
   built and the cycel name edit as well"*, and then, of two shapes drawn in the
@@ -5564,31 +5611,52 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;273: editing the cycle that is
-running.** Islam: *"allow me to edit the cycle name. give me an edit button the
-cycle to edit the date as you already built and the cycel name edit as well"* —
-then, of the two shapes drawn for him in the real page: *"keep the close cycle
-inside the edit. as it's a critical button to click, the pen should hold
-everything editable so it's kept secured."* A cycle's name and its three dates
-were written ONCE, when it was opened, and were plain text ever after — so a
-typo could only be put right by CLOSING the cycle, which archives and clears
-every figure in the tenant. **His second instruction is the design**: with Close
-moved inside the pen the strip carries no control at all while a cycle runs,
-which is a security argument rather than a tidy one. The panel is `NEWCYCLE`'s
-own, the draft reaches nothing until Save, and **the guard is what makes Close
-safe to put there** — held with its reason while anything is unsaved, asked
-again at press time, rewritten in place rather than painted. The server needed
-nothing and it is asserted both ways, because until today nothing in the product
-could send those fields at all. `checks/cycle-edit.py`: **46 red** on the build
-before, 47 green after — and four of its own first failures were the check.
-Full `qa.py` ERRORS none &middot; 501/0 authoriser &middot; 126/0 differ
-&middot; `ytd-proration`, `repeat-project`, `cycle-board`, `setup-overview`,
-`setup-header`, `table-fit`, `safety-banners`, `submit-gate` and `gap-fill`
-green. **Recorded, not done**: `setup-pages.py`'s three sticky-head failures
-reproduce identically on the build before this one.*
+*Last Updated: 2026-09-04 &mdash; **&sect;273.4: the pen closes itself, and the
+banner is two columns &mdash; and &sect;273.5: "Open a new cycle" drew nothing.**
+Islam, using what &sect;273 shipped: *"when I'm editing why is the edit button
+still there it should turn into done editing so I clik it and thebox collapse
+saving what I did rather tahn having a save and candel buttons inside the box
+itself rearrange th e buttons and think of different structures of this banner"*
+&mdash; then, of three structures each drawn in BOTH states, **"C"**. **HE IS
+DESCRIBING THE PLATFORM'S OWN EDITING MODEL AND &sect;273 INVENTED A SECOND
+ONE**: every pen in SMP is `penBtn()` (Edit &rlarr; Done editing) over fields
+bound through `FIELDS` that write on blur, and there is no Save and no Cancel
+anywhere else in the product because there is nothing for them to do. &sect;273
+built a DRAFT, and a draft is what forces a Save, a Cancel and a guard on Close.
+The draft goes and the three controls go with it; the guard is not relaxed but
+**unreachable**; and the refusal of an empty name became the stored name coming
+back into the box (&sect;124). **Asking for BOTH states is what decided the
+structure** &mdash; A, B and C differ only with the pen open. **37 red** on the
+build before, 69 green after; three of the check's own first failures were one
+fault (Edit is a TOGGLE now, so a section pressing it blind shuts the pen a
+previous section left open) and it **died rather than reporting** on the previous
+build (&sect;215, third time in this file). **&sect;273.5 is the larger find**:
+re-running the neighbours, `repeat-project.py` hung on `#nc-name`, and the fault
+**reproduced on the shipped build** &mdash; &sect;261.2 had deleted the NEWCYCLE
+panel, so pressing *Open a new cycle&hellip;* set the draft and drew nothing, on
+the only way to start a cycle at all, since that merge. Put back verbatim, with
+the check asserting the draft and the panel separately. 514/0 authoriser &middot;
+126/0 differ &middot; `cycle-edit`, `repeat-project`, `ytd-proration`,
+`cycle-board`, `setup-overview`, `setup-header`, `setup-pages`, `table-fit`,
+`submit-gate`, `gap-fill` and `safety-banners` all green.*
 
+*Earlier: 2026-09-03 &mdash; **&sect;273: editing the cycle that is running.**
+Islam: *"allow me to edit the cycle name. give me an edit button the cycle to
+edit the date as you already built and the cycel name edit as well"* &mdash;
+then, of two shapes drawn in the real page: *"keep the close cycle inside the
+edit. as it's a critical button to click, the pen should hold everything
+editable so it's kept secured."* A cycle's name and its three dates were written
+ONCE, when it was opened, so a typo could only be put right by CLOSING the cycle,
+which archives and clears every figure. **His second instruction is the design**:
+with Close moved inside the pen the strip carries no control at all while a cycle
+runs. **&sect;273.2** gave the closed cycle the pen as well (Reopen where Close
+sits, his pick over a button on the strip), and **&sect;273.3** replaced its
+panel with the platform's own dialog after he saw the band on his own tenant
+&mdash; *"The design is very poor"* &mdash; where three of five values are empty
+and the band repeated the strip above it (&sect;245's rule unpaid: drawn on the
+one data the layout survives).*
 
-*Earlier the same day: **&sect;272: empty is not missing, and the bar
+*Earlier: 2026-09-03 &mdash; **&sect;272: empty is not missing, and the bar
 now says which.** Islam, on Mobile and minutes later on Care: *"mobile keeps
 showing filling what's missing while we can't find something missing and there
 is no the side badges that identify where the missing part is."* **REPRODUCED BY

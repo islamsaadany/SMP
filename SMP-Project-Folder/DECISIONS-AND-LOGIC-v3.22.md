@@ -31876,3 +31876,135 @@ assertion. **12 red** on the §273.2 build. **And one of its own assertions coul
 not fail as written**: `A and B or A` collapses to `A`, so the cycle's name was
 never actually being checked in the title — both halves now, with the name read
 off the DATA rather than hardcoded (§94.8).
+
+## §273.4 — THE PEN CLOSES ITSELF, AND THE BANNER IS TWO COLUMNS (2026-09-04, reshaping §273)
+
+Islam, using what §273 shipped: *"when I'm editing why is the edit button still
+there it should turn into done editing so I clik it and thebox collapse saving
+what I did rather tahn having a save and candel buttons inside the box itself
+rearrange th e buttons and think of different structures of this banner for
+better use and giveme mockups"* — then, of three structures each drawn in BOTH
+states: **"C"**.
+
+**HE IS DESCRIBING THE PLATFORM'S OWN EDITING MODEL, AND §273 INVENTED A SECOND
+ONE.** Every pen in this product is `penBtn()`, which returns **Edit** or **Done
+editing**, and every field under it is bound through `FIELDS` and writes on
+`change` — that is, on blur (§35). **There is no Save and no Cancel anywhere else
+in SMP**, because there is nothing for them to do: the value is in the graph the
+moment the cursor leaves the box, and `SYNC` posts it. §273 built a DRAFT
+instead, and a draft is what forces a Save (to commit it), a Cancel (to throw it
+away), and a guard on Close (because the draft and the cycle can disagree).
+*Three controls, all of them there to manage a copy nothing else in the product
+makes.*
+
+**SO THE DRAFT GOES, AND THE THREE CONTROLS GO WITH IT.** `cycleDraft()` and
+`cycleEditDirty()` are **DELETED, not left uncalled** (§24); `CYCLEEDIT` stops
+being a draft and becomes what its name says, a MODE — `true` or `null`. Edit
+becomes a toggle reading **Done editing** and lit while the pen is open, in the
+platform's own wording and the platform's own `.penon` treatment, so a person
+who has edited anything else in SMP already knows what it does.
+
+**THE GUARD ON CLOSE DISAPPEARS BECAUSE ITS REASON DOES.** §273 held Close back
+while the draft differed, and the argument was good: closing files this cycle's
+figures under its NAME, so closing with an uncommitted rename would file them
+under the wrong one. With no draft there is nothing uncommitted — the name is in
+`REVIEW` before the cursor has left the box — so the hold is not relaxed, it is
+**unreachable**. §273's own assertion is **REWRITTEN, not deleted** (§218): what
+is asserted now is the thing that replaced it, that typing reaches the cycle
+with nothing pressed, and that Close carries no held state at all.
+
+**AND A REFUSAL NEEDED SOMEWHERE TO HAPPEN.** An empty name is still refused —
+it is what every snapshot and archived plan is filed under — and §273 refused it
+at the Save press, with an alert. There is no press now, so the refusal became
+**the stored name coming back into the box** (§124: the value returning is the
+explanation). The wrapper lives in `cycleField()` and not at the call site: a
+setter that declines returns `false` and the field is restored, because a box
+left showing what was NOT stored is §96 with the sign reversed — the screen and
+the graph saying different things, and the screen being the one somebody
+believes. **A name with space around it is TRIMMED rather than refused**
+(§96.2), asserted separately.
+
+**THE STRUCTURE IS ISLAM'S, PICKED FROM THREE DRAWN IN BOTH STATES.** He asked
+for both states — *"to decide for each option show me the 2 states of the banner
+open and closed"* — and that is what decided it: A and B differ from C only when
+the pen is OPEN, so a mockup of the closed strip alone would have shown three
+identical pictures. **C is two columns**: the five facts on the left under *This
+cycle*, and Close the cycle alone on the right behind a rule under *Ending it*,
+with one line saying what it does. It keeps §273's security argument whole — the
+strip carries no dangerous control while a cycle runs, everything is behind the
+pen — and adds the thing a single stack could not: **the destructive act is not
+in the same reading column as the fields**, so nobody arrives at it by tabbing
+down the form. It stacks below 1100px, where a 300px column beside the fields
+stops being affordable.
+
+**NOTHING SERVER-SIDE MOVES, AND THAT IS ASSERTED** — §273 already established
+these five fields classify as `cycle`, and this changes which controls write
+them, not what is written. 501/0.
+
+`checks/cycle-edit.py` **REWRITTEN, not replaced** (§218): §2 now asserts the
+word AND the lit state AND the absence of Save AND the absence of Cancel AND
+that every field is bound — because a build that merely hid the two buttons
+while keeping the draft behind them would pass a test for either half alone
+(§94.2). §4 and §5 are §273's Cancel and held-Close assertions rewritten to the
+behaviour that replaced them. **37 red** on the build before.
+
+**AND THREE OF ITS OWN FIRST FAILURES WERE THE CHECK**, all one fault: **Edit is
+a TOGGLE now**, so a section that presses it blind SHUTS the pen a previous
+section left open — §7 lost its second half and §5b lost its Close, on a build
+doing exactly what was asked. `open_pen()` asks before it presses. **And it DIED
+rather than reporting on the previous build** (§215, third time in this file):
+Playwright waits 30s for an `aria-disabled` control, so the one press aimed at a
+build that still HOLDS Close hung with a third of the assertions unmade.
+
+## §273.5 — "OPEN A NEW CYCLE" DREW NOTHING, ON `main` (2026-09-04)
+
+Found while re-running the neighbours after §273.4: `checks/repeat-project.py`
+hung for thirty seconds waiting for `#nc-name`. **REPRODUCED ON THE SHIPPED
+BUILD BEFORE ANYTHING WAS WRITTEN**, so it is not §273.4's doing — pressing
+*Open a new cycle…* as the office on a closed cycle sets `NEWCYCLE` to a draft
+and **renders nothing at all**: no panel, no fields, no way on.
+
+**§261.2 DID IT, AND IT WAS INVISIBLE BECAUSE THE DRAFT STILL APPEARS.** That
+section replaced `renderCycle()`'s `NEWCYCLE ? … : CYCLEEDIT ? …` chain with a
+`CYCLEEDIT`-only branch and took the `NEWCYCLE` arm with it. §96 exactly, and in
+the worst place: the button is present, enabled, hit-testable, and the state it
+writes is correct — so every assertion short of asking whether a PANEL was
+DRAWN passes, and the one function nobody can work around (there is no other way
+to start a cycle) has been dead on production since that merge.
+
+**PUT BACK VERBATIM, not rebuilt on §273.4's `cycleField()`.** The temptation is
+§53.5 — one builder for both panels — and it is the wrong call here: this panel
+is wired by ID in the shell and writes on `input` rather than `change` for a
+stated reason (Open can be pressed from inside a field, and `change` waits for
+blur), so re-expressing it would be a second change riding a restoration. The
+one thing that is NOT the Save and Cancel §273.4 removed is this panel's
+Open/Cancel pair: it describes a cycle that does not exist yet, so it really is
+a draft and nothing reaches `REVIEW` until Open is pressed.
+
+**AND THE CHECK WAS RIGHT AND HAD BEEN RED FOR AS LONG AS THE PANEL HAD BEEN
+GONE** — §51.11 from the other side. `checks/cycle-edit.py` gains §5c, which
+asserts the DRAFT and the PANEL separately, because the draft going up in
+`NEWCYCLE` is what made every state assertion pass over a screen with nothing on
+it.
+
+## §273.6 — RECORDED, NOT DONE: THE PEN CRIES MISSING OVER A WORKING FALLBACK (2026-09-04)
+
+Found by LOOKING at the built pen rather than by any assertion. With no review
+point picked — which is the demo's state and a legitimate one — the strip reads
+**"reported as of Jun 26 · 6 of 12 months, taken from the cycle's end"** and the
+month control six inches below it, inside the pen, reads a red **MISSING**.
+
+**§239.3 SETTLED THIS ONCE AND SETTLED IT FOR THE STRIP ONLY.** Its rule is
+exact: a working fallback must show the value IN USE rather than cry *Missing*
+over it (§177's shape with the sign reversed, §214.4's own argument). The strip
+was fixed; `monthBtnHtml()` was not, and the pen calls it directly. So one panel
+now says two things about one fact.
+
+**IT IS RIGHT IN THE OTHER PANEL, WHICH IS WHY IT CANNOT SIMPLY BE CHANGED IN
+`monthBtnHtml()`.** *Open a new cycle* refuses to open without a month (§239),
+so there *Missing* is true and load-bearing. The fix is a per-caller word, and
+what that word should be — *"taken from the cycle's end"*, the strip's own
+phrase, or something shorter — is a wording decision, not a bug fix.
+
+**It predates §273.4** (§273's pen called the same builder) and is left as it
+was rather than changed on the way past, per rule 1b.

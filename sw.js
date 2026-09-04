@@ -329,7 +329,7 @@
    "smp-shell-v4.51-empty-not-missing" when this merge was made, so the name
    goes PAST it rather than beside it (§94.12); confirmed once more immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v4.52-cycle-edit-and-reopen";
+const SHELL = "smp-shell-v4.54-cycle-pen-two-columns";
 const ASSETS = [
   "/",
   "/index.html",

@@ -104,7 +104,7 @@ def main():
         print("\n── 2 · the office switches the unit to #, through the pen's own pickers ──")
         pg.evaluate("()=>document.querySelector('[data-s=\"strategy\"]').click()"); pg.wait_for_timeout(400)
         pg.evaluate("()=>{var b=document.querySelector('[data-sub2=\"plan\"]'); if(b) b.click();}"); pg.wait_for_timeout(400)
-        pen = pg.query_selector('.pane .paneact .penbtn[data-page="plan"]')
+        pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
         ck("the plan pen is there", bool(pen))
         if pen:
             pen.click(); pg.wait_for_timeout(500)

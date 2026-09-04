@@ -50,6 +50,8 @@ GATE = b"<!doctype html><title>Sign in</title><h1 id='gate'>Sign in</h1>"
 # What the stub answers a peek with, and what it saw. Changed mid-run.
 PEEK = {"changed": []}
 SEEN = {"peeks": [], "loads": 0, "posts": 0, "post_status": 200}
+# The server's clock, deliberately unlike the browser's (§258.1).
+STUB_NOW = "2026-09-02T09:00:00.000Z"
 bad = 0
 
 
@@ -75,7 +77,12 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/state"):
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             if "since" in q:
-                SEEN["peeks"].append({"since": q["since"][0], "target": q.get("target", [""])[0]})
+                SEEN["peeks"].append({"since": q["since"][0], "target": q.get("target", [""])[0],
+                                      "sync": "sync" in q})
+                if "sync" in q:
+                    self._s(200, json.dumps({"ok": True, "changed": [], "now": STUB_NOW}).encode(),
+                            "application/json")
+                    return
                 self._s(200, json.dumps({"ok": True, "changed": PEEK["changed"]}).encode(),
                         "application/json")
                 return
@@ -83,18 +90,21 @@ class H(http.server.BaseHTTPRequestHandler):
                     "application/json")
             return
         if self.path.startswith("/raya-trade"):
-            SEEN["loads"] += 1
+            import time; SEEN["loads"] += 1; SEEN["load_at"] = time.time()
             self._s(200, HTML, "text/html; charset=utf-8")
             return
         self._s(200, GATE, "text/html; charset=utf-8")
 
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
-        self.rfile.read(n)
+        SEEN.setdefault("bodies", []).append(self.rfile.read(n).decode("utf-8", "replace"))
         if not self.path.startswith("/api/state"):
             self._s(200, b'{"ok":true}', "application/json")
             return
         SEEN["posts"] += 1
+        # A slow answer, so a reload that does not wait lands mid-flight (§258.2).
+        import time; time.sleep(SEEN.get("post_delay", 0))
+        SEEN["post_answered"] = time.time()
         if SEEN["post_status"] != 200:
             self._s(SEEN["post_status"], b'{"ok":false,"error":"boom"}', "application/json")
             return
@@ -159,15 +169,21 @@ with sync_playwright() as p:
 
     # ── 1 · THE TAB ASKS ABOUT ITS OWN PAGE ──────────────────────────────
     print("\n1 · the tab asks the server about the page it is on")
+    # THE FIRST ASK IS THE CLOCK SYNC (§258.1): it fires by itself after
+    # hydration, and the tab adopts the SERVER's now, never its own.
+    syncs = [p for p in SEEN["peeks"] if p.get("sync")]
+    ck("the tab synced its clock to the server by itself", len(syncs) == 1, len(syncs))
+    ck("...and is synced", pg.evaluate("()=>typeof SAFETY!=='undefined'&&(SAFETY.synced?SAFETY.synced():null)") is True)
     n0 = len(SEEN["peeks"])
     peek(pg)
     ck("a peek reached the server", len(SEEN["peeks"]) == n0 + 1, len(SEEN["peeks"]) - n0)
     q = SEEN["peeks"][-1] if SEEN["peeks"] else {}
     here = pg.evaluate("()=>TARGET")
     ck("...scoped to the page's own target", q.get("target") == here, (q.get("target"), here))
-    # SINCE THE TAB LOADED, never since the dawn of time: a peek that asks
-    # about everything would announce last week's work as news.
-    ck("...and since the tab loaded", bool(q.get("since")) and q["since"].endswith("Z"), q.get("since"))
+    # SINCE THE TAB LOADED BY THE SERVER'S CLOCK: a laptop clock running
+    # behind would otherwise announce older saves as news.
+    ck("...and since the server's own now, not the browser's", q.get("since") == STUB_NOW, q.get("since"))
+    ck("...not as a sync", not q.get("sync"))
     ck("nothing drawn when nobody landed anything", banner(pg) == "", banner(pg))
 
     # ── 2 · SOMEBODY ELSE LANDED A CHANGE ────────────────────────────────
@@ -177,6 +193,8 @@ with sync_playwright() as p:
     said = banner(pg)
     ck("the caution is drawn", said != "", "(nothing)")
     ck("...and NAMES who", "Hala Ibrahim" in said, said)
+    page = pg.evaluate("()=>placeLabel(TARGET)")
+    ck("...and NAMES the page (%s)" % page, page in said and "this page" not in said, said)
     ck("...with the two ways out",
        pg.evaluate("()=>!!document.querySelector('#safety [data-safety-keep]')"
                    " && !!document.querySelector('#safety [data-safety-dismiss]')"))
@@ -196,6 +214,34 @@ with sync_playwright() as p:
     PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T10:05:00.000Z"}]
     peek(pg)
     ck("a NEWER landing by somebody else is", "Karim Fahmy" in banner(pg), banner(pg) or "(nothing)")
+
+    # ── 3b · THE CAUTION GOES WITH THE PAGE IT WAS ABOUT (§258.1) ────────
+    print("\n3b · moving to another tab clears it; Setup never asks")
+    ck("it is up before the move", "Karim Fahmy" in banner(pg), banner(pg) or "(nothing)")
+    was = pg.evaluate("()=>TARGET")
+    press(pg, "button[data-u='mobile']")
+    pg.wait_for_timeout(600)
+    ck("the page moved", pg.evaluate("()=>TARGET") == "mobile" and was != "mobile", pg.evaluate("()=>TARGET"))
+    ck("...and the caution went with the page it was about", banner(pg) == "", banner(pg))
+    PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T10:06:00.000Z"}]
+    peek(pg)
+    ck("a landing on the NEW page is announced there", "Karim Fahmy" in banner(pg) and "Mobile" in banner(pg), banner(pg) or "(nothing)")
+    ck("...remembered as that page's", pg.evaluate("()=>typeof SAFETY!=='undefined'&&(SAFETY.shownFor?SAFETY.shownFor():null)") == "mobile")
+    press(pg, "button[data-u='group']") or pg.evaluate("()=>{const b=document.querySelector('[data-u=\"group\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(600)
+    n0 = len(SEEN["peeks"])
+    pg.evaluate("()=>{const g=document.querySelector('[data-s=\"setup\"],[data-setup],button[title=\"Setup\"]'); if(g) g.click();}")
+    pg.wait_for_timeout(600)
+    on_setup = pg.evaluate("()=>typeof current!=='undefined' && current==='setup'")
+    ck("Setup opened", on_setup)
+    ck("...and the caution is not up on Setup", banner(pg) == "", banner(pg))
+    peek(pg)
+    ck("...and Setup asks the server nothing", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
+    pg.evaluate("()=>{const b=document.querySelector('button[data-u=\"mobile\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(600)
+    PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T10:07:00.000Z"}]
+    peek(pg)
+    ck("back on a page, it asks again", "Karim Fahmy" in banner(pg), banner(pg) or "(nothing)")
 
     # ── 4 · RELOAD & KEEP MINE FLUSHES FIRST ─────────────────────────────
     print("\n4 · Reload & keep mine sends this tab's change before reloading")
@@ -238,18 +284,55 @@ with sync_playwright() as p:
     pg.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.newVersion()")
     said = banner(pg)
     ck("the version caution replaces the edit one", "newer version" in said.lower(), said)
-    ck("...and says the work is safe", "safe" in said.lower(), said)
+    ck("...and tells them to finish what they are typing and that Reload saves first",
+       "finish what you are typing" in said.lower() and "saves your work first" in said.lower(), said)
     ck("...with one way out: Reload",
        pg.evaluate("()=>!!document.querySelector('#safety [data-safety-reload]')"
                    " && !document.querySelector('#safety [data-safety-keep]')"))
     PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T12:00:00.000Z"}]
     peek(pg)
     ck("an edit landing does not displace it", "newer version" in banner(pg).lower(), banner(pg))
-    loads0 = SEEN["loads"]
+    # ── 6b · RELOAD SAVES THE FIELD UNDER THE CURSOR FIRST (§258.2) ──────
+    # Setup › Terminology has plain bound inputs; the version caution is drawn
+    # on Setup too, since a stale build is stale everywhere.
+    import time as _time
+    press(pg, 'button[title="Setup"]'); pg.wait_for_timeout(500)
+    press(pg, "text=Terminology"); pg.wait_for_timeout(600)
+    mark = "TYPED-%d" % int(_time.time())
+    box = pg.locator("input.lbl").first
+    ck("a field to type in", box.count() > 0)
+    box.click(); box.fill(""); box.type(mark)
+    ck("...and it still has the cursor (never blurred)",
+       pg.evaluate("()=>document.activeElement && document.activeElement.classList.contains('lbl')"))
+    ck("the version caution is still up on Setup", "newer version" in banner(pg).lower(), banner(pg))
+    SEEN["post_delay"] = 0.9; SEEN["post_answered"] = None
+    loads0, posts0 = SEEN["loads"], SEEN["posts"]
+    t_press = _time.time()
     press(pg, "#safety [data-safety-reload]")
+    pg.wait_for_timeout(300)
+    ck("the button says it is saving", "Saving" in pg.evaluate("()=>{const b=document.querySelector('#safety [data-safety-reload]');return b?b.textContent:''}"),
+       pg.evaluate("()=>{const b=document.querySelector('#safety [data-safety-reload]');return b?b.textContent:''}"))
     pg.wait_for_load_state("networkidle")
-    pg.wait_for_timeout(1200)
+    pg.wait_for_timeout(1500)
+    carried = [b for b in SEEN.get("bodies", [])[posts0:] if mark in b]
+    ck("the typed value was POSTed", len(carried) >= 1,
+       "%d posts, none carrying it: %s" % (SEEN["posts"] - posts0, [b[:160] for b in SEEN.get("bodies", [])[posts0:]]))
     ck("Reload reloads", SEEN["loads"] == loads0 + 1, SEEN["loads"] - loads0)
+    ck("...only AFTER the server answered the save",
+       SEEN["post_answered"] is not None and SEEN["load_at"] > SEEN["post_answered"] > t_press,
+       (SEEN.get("post_answered"), SEEN.get("load_at")))
+    SEEN["post_delay"] = 0
+    # a failed save keeps the page
+    pg.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.newVersion()")
+    SEEN["post_status"] = 500; loads0 = SEEN["loads"]
+    box = pg.locator("input.lbl").first
+    box.click(); box.fill(""); box.type(mark + "-b")
+    press(pg, "#safety [data-safety-reload]")
+    pg.wait_for_timeout(2000)
+    ck("a save that fails does NOT reload", SEEN["loads"] == loads0, SEEN["loads"] - loads0)
+    ck("...the failure is said (§171)", "Not saved" in refused(pg), refused(pg) or "(nothing)")
+    ck("...and Reload is live again", pg.evaluate("()=>{const b=document.querySelector('#safety [data-safety-reload]');return !!b && !b.disabled && b.textContent==='Reload';}"))
+    SEEN["post_status"] = 200
 
     # ── 7 · CONTRAST, THE SWEEP'S OWN ARITHMETIC (§95) ───────────────────
     print("\n7 · the caution is readable in both themes")
@@ -290,7 +373,7 @@ with sync_playwright() as p:
     ck("no slot is mounted", pg2.evaluate("()=>!document.getElementById('safety')"))
     ck("nothing is drawn even when asked", pg2.evaluate("()=>!document.getElementById('safety')"))
     ck("the worker listener is not armed", pg2.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.isArmed()") is False)
-    ck("no peek was sent", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
+    ck("no peek was sent, the sync included", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
     pg2.close()
     b.close()
 

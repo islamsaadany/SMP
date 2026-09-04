@@ -146,7 +146,7 @@ with sync_playwright() as p:
        and ms[1]["t"] == "60", ms)
     # the mark lives in READ mode: close the pen, look, reopen (§48.2 — press
     # the real control, never poke EDIT_PAGE)
-    pg.query_selector('#panel [data-page="plan"]').click(); pg.wait_for_timeout(300)
+    pg.query_selector('#secrow-in .secpen[data-page="plan"]').click(); pg.wait_for_timeout(300)
     ck("the target left empty reads as missing ON THE PAGE",
        pg.evaluate("document.querySelector('#panel').textContent.includes('Missing')"))
     # THE PEN A ONE-PILLAR UNIT CARRIES CHANGED SHAPE (§130.2). This hovered
@@ -160,16 +160,16 @@ with sync_playwright() as p:
     #
     # SO IT ASSERTS WHAT MATTERS instead: a pen is on the page and a click at
     # its own centre reaches it, whichever of the two it is.
-    hp = pg.query_selector('#panel .hoverpen')
-    if hp:
-        hp.hover(); pg.wait_for_timeout(100)
+    # §268: no hover of any kind — the pen is a worded button on the section
+    # line, always drawn. The assertion is unchanged in what it means: the
+    # control is on the page and a click at its own centre reaches it.
     ck("the closed pen is reachable where it sits", pg.evaluate("""()=>{
-      const p=document.querySelector('#panel [data-page="plan"]');
+      const p=document.querySelector('#secrow-in .secpen[data-page="plan"]');
       if (!p) return false;
       const r=p.getBoundingClientRect();
       const at=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
       return !!at && (at===p||p.contains(at)||at.contains(p));}"""))
-    pg.query_selector('#panel [data-page="plan"]').click(); pg.wait_for_timeout(300)
+    pg.query_selector('#secrow-in .secpen[data-page="plan"]').click(); pg.wait_for_timeout(300)
 
     print("\n── 6 · the surfaces that could never start (§129's audit) ──")
     pg.query_selector('#buildband [data-bnav="found"]').click(); pg.wait_for_timeout(400)

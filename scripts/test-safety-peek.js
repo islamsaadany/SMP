@@ -82,6 +82,13 @@ async function call(req) { const res = mockRes(); handler(req, res); const r = a
       check("a peek on the function's page is told", r.j && r.j.changed && r.j.changed.length >= 1, JSON.stringify(r.j && r.j.changed));
     }
 
+    console.log("3b · the first ask syncs the tab's clock to the database's (§258.1)");
+    r = await get(other, "?since=" + encodeURIComponent(t0) + "&target=" + unit + "&sync=1");
+    check("a sync answers the server's now and no changes", r.status === 200 && r.j && r.j.now && !isNaN(Date.parse(r.j.now)) && Array.isArray(r.j.changed) && r.j.changed.length === 0, JSON.stringify(r.j));
+    const dbNow = (await c.query("SELECT now() AS t")).rows[0].t.getTime();
+    check("...and it is the DATABASE's clock, within 5s", r.j && Math.abs(Date.parse(r.j.now) - dbNow) < 5000, r.j && r.j.now);
+    check("...carrying no state graph", r.j && !r.j.state);
+
     console.log("4 · the ordinary read is untouched");
     r = await get(other, "?since=garbage&target=" + unit);
     check("an unreadable since falls through to the full read", r.status === 200 && r.j && r.j.state && !r.j.changed, r.status);

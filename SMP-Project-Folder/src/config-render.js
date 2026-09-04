@@ -568,20 +568,33 @@ function pageLineHTML(){
    `alerts` IS WHAT SURVIVES, and it is not the same thing wearing a shorter
    name: "10 names" is the list, and "3 names on people and not on this list" is
    something outstanding. A page keeps the second and loses the first. */
+/* ── AND A PAGE MAY HAVE NO PEN AT ALL (§261) ────────────────────────
+   `editKey` null means the page has nothing for a page-level pen to open —
+   which is true of every table that edits a ROW in a dialog. The eraser is not
+   a pen and does not go with it: Clear all progress and Clear all plans are
+   decisions about the page's contents, not a mode you enter to correct a field
+   (§62), so it keeps its own control and its own gate.
+
+   THE CLEAR MENU IS KEYED ON WHICHEVER OF THE TWO THE PAGE HAS. It used to be
+   keyed on `editKey` alone, so a page that lost its pen would have opened a
+   menu under the key `null` — one open menu on any such page opening the menu
+   on all of them (§46.4's own reason for one key rather than a flag per row). */
 function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
-  var editing = EDITING[editKey];
-  var open = CLEARMENU === editKey;
+  var editing = editKey ? EDITING[editKey] : false;
+  var menuKey = editKey || clearScope;
+  var open = CLEARMENU === menuKey;
   var dup = PAGE_TITLE != null &&
             String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
   var acts =
       (alerts || []).map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
       (extra || "") +
-      (mayEdit
+      (mayEdit && (editKey || clearScope)
         ? '<span class="iconwrap">' +
+            (!editKey ? '' :
             '<button class="ico' + (editing ? " on" : "") + '" data-edit="' + editKey +
               '" title="' + (editing ? "Done" : "Edit") + '" aria-label="' +
               (editing ? "Done editing" : "Edit this page") + '">' +
-              (editing ? ICO_DONE : ICO_EDIT) + '</button>' +
+              (editing ? ICO_DONE : ICO_EDIT) + '</button>') +
             /* No clear scope, no clear button. Companies and People have
                nothing to clear — a page's rows are retired one at a time — and
                Companies was rendering the control anyway: it shares the
@@ -589,7 +602,7 @@ function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
                an argument nobody had passed and threw. A control that cannot
                work should not be drawn. */
             (!clearScope ? '' :
-            '<button class="ico' + (open ? " on" : "") + '" data-clearmenu="' + editKey +
+            '<button class="ico' + (open ? " on" : "") + '" data-clearmenu="' + menuKey +
               '" title="Clear" aria-label="Clear plans or progress" aria-expanded="' + open + '">' +
               ICO_CLEAR + '</button>' +
             /* The confirmation replaces the menu in the same place, so the
@@ -708,167 +721,466 @@ function assignPicker(where, roleKey, current, editable){
     '</div></div>';
 }
 
+/* ══ ARRANGING A SETUP TABLE, AND IT IS THE NAVIGATION'S ORDER (§261) ══
+   Islam: *"allow me in the setup to rearrange the business units table so they
+   appear in the navigation as per this order."*
+
+   NOTHING NEW IS STORED, which is the whole reason this is small: the order
+   already IS `UNIT_KEYS` / `FUNCTION_KEYS`, written to `units.idx` on every
+   save and read back by `ORDER BY idx`; the navigation row, the group page and
+   this table have always drawn from the same list. `lib/authorize.js` already
+   classifies a change to it as `setup` — the office's — so there is no
+   migration, no schema change and no new rule.
+
+   IT COULD ALREADY BE DONE, JUST NOT WHERE ANYBODY WOULD LOOK: the group's
+   Performance page has arranged these cards since §101, and only in its CARD
+   view — switch that section to its table and the handles are gone. Setup, the
+   page named after setting things, had none. Both stay: they are two views of
+   one list, exactly as the group's themes and capabilities already are.
+
+   A MODE, NOT A PERMANENT HANDLE. An accidental drag here reorders the
+   navigation for everybody in the tenant, so it takes a press to arm — the
+   same trade §101 made for a plan's rows, and the same word on the button. */
+function setArrangeOn(table){ return SETARRANGE === table; }
+
+/* The button goes in the header line's own actions slot (§135), beside the
+   eraser, where every other page-level control on a Setup page already sits. */
+function setArrangeBtn(table, may){
+  if (!may) return "";
+  var on = setArrangeOn(table);
+  return '<button class="editbtn' + (on ? ' on' : '') + '" data-setarrange="' + esc(table) + '" ' +
+    'title="' + (on ? "Finish arranging" : "Change the order these appear in") + '">' +
+    (on ? "Done" : "Arrange") + '</button>';
+}
+
+/* THE BAND IS THE PLATFORM'S OWN, word for word (§53.5): `cfg-bar plain` with a
+   `cfg-lab` inside it is what the group's cards say while they are being
+   arranged, and a second sentence for the same act on a second page is how one
+   product comes to describe one gesture two ways. What is added is the sentence
+   that makes it worth pressing — the order here is the order in the navigation
+   — because that is the fact somebody is acting on and it is stated nowhere. */
+function setArrangeBand(table, n, noun, extra){
+  if (!setArrangeOn(table)) return "";
+  return '<div class="cfg-bar plain"><span class="cfg-lab">' +
+    plural(n, noun) + ' · drag by the handle to reorder · ' +
+    'the order here is the order in the navigation' + (extra ? ' · ' + extra : '') +
+    '</span></div>';
+}
+
+/* THE NUMBER IS `.idx-n` AND NOT A BARE NUMBER, because `makeSortable` renumbers
+   the rows as one is dragged past another and finds them by that class
+   (arrange.js). A row drawn without it drags perfectly and shows the wrong
+   number until the paint that follows the drop.
+
+   `data-oi` IS THE POSITION IN THE LIST BEING ORDERED, and every row carries
+   one — including a retired unit, which is still in `UNIT_KEYS` and still holds
+   a place in it. A row without one is furniture to the sorter (§118), which is
+   right for an add row and would silently drop a real row from the commit. */
+function setArrangeIdx(table, i, label){
+  var on = setArrangeOn(table);
+  return '<td class="idx">' + (on ? handle(label) : '') +
+    '<span class="idx-n">' + (i + 1) + '</span></td>';
+}
+/* The tbody is what `makeSortable` binds to, and it says what it holds (§63.5):
+   the selector comes from `data-item`, never guessed from the kind. */
+function setArrangeBody(table, kind){
+  return setArrangeOn(table)
+    ? '<tbody class="sortable" data-kind="' + esc(kind) + '" data-item="tr">'
+    : '<tbody>';
+}
+
+/* ── Business units ─────────────────────────────────────────────────
+   The one place a unit's name and code prefix are set. Everything else in the
+   platform references the unit's KEY, so a rename here propagates and can
+   never detach a unit from its weight, its pillars or its people.
+
+   Units are marked inactive rather than deleted. A unit carries pillars,
+   measures, tactics and reported progress; retiring it must not destroy a
+   cycle's record. ── */
+/* ── AND THE ROW STOPPED BEING A FORM (§261) ─────────────────────────
+   Islam: *"let's clean this table making a three dots option to actions like
+   the registry file."*
+
+   §93.14 did this to the FUNCTIONS page — "learn from what we have done in the
+   people table" — and stopped there, so for two weeks the two neighbouring
+   pages have disagreed about what a row's last column is for. Measured before
+   anything was written: a units row is **130px** where a register row is 39 and
+   a functions row is 37, and all of it is one cell holding a pen, Retire,
+   Clear progress and Clear plan in a stack. Every collision this table has ever
+   had was a control clicked inside a 150px cell.
+
+   SO THE FIELDS GO WHERE THE REGISTER'S WENT (§116) — a dialog — and what is
+   left on the row is a status and a menu. The table is 535px where it was 1338,
+   and it can never widen when a pen is pressed, because there is no longer a
+   pen on it to press.
+
+   THE MENU'S WORDING IS THE FUNCTIONS PAGE'S, copied rather than composed:
+   `Clear progress`, `Clear plan`, the destructive act below a rule. Two
+   differences, both deliberate — there is no Delete, because a unit is retired
+   and never deleted (§62's refusal has nothing to refuse), and Edit details
+   carries the mark, which is where the Unit marks table went. */
+var CLEARING = null;
+
+/* ── ONE HEADER FOR BOTH CONFIGURATION TABLES ───────────────────────
+   The title anchors the left; the facts about the page and its two controls sit
+   far right on the same line. Before this, Business units used four elements
+   for the same job — a chip row, a bar with the count and Edit, the table, then
+   master clear buttons at the very bottom of the page.
+
+   Edit is a pencil on a square: it edits THIS PAGE, not one thing. Clear is an
+   eraser, the only common mark meaning "rub out the contents and leave the
+   thing" — a bin would say the row is going away, which is the opposite. */
+var ICO_EDIT = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+  '<path d="M16 10.5V16a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 16V6a1.5 1.5 0 011.5-1.5H10"/>' +
+  '<path d="M14 2.8l3.2 3.2L10 13.2l-3.6.4.4-3.6z"/></svg>';
+/* THE ATTENTION MARK IS A RING, NOT A WARNING TRIANGLE (§116). A triangle
+   says something is broken; what this counts is a list of things WAITING —
+   somebody's declaration to accept, a password never issued. A ring around a
+   dot is the mark this product already uses for "look here" and it carries no
+   alarm of its own; the button's fill is what makes it loud (§94.8's budget:
+   one solid fill on the page, and this is it while there is a queue). */
+var ICO_ATTN = '<svg viewBox="0 0 20 20" aria-hidden="true" class="attnico">' +
+  '<circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2.4" fill="currentColor"/></svg>';
+var ICO_DONE = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>';
+var ICO_CLEAR = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+  '<path d="M8.5 16.5H16"/>' +
+  '<path d="M11.8 3.9l4.3 4.3a1.2 1.2 0 010 1.7l-6 6a1.2 1.2 0 01-1.7 0L4.1 11.6a1.2 1.2 0 010-1.7' +
+  'l6-6a1.2 1.2 0 011.7 0z"/><path d="M7 7l5.5 5.5"/></svg>';
+
+var CLEARMENU = null;
+
+/* THE THREE DOTS, ON A ROW OF ANY OF THE THREE TABLES (§261) ─────────
+   `fnKebab`'s shape, lifted so a fourth table gets it without a fourth copy of
+   the same twelve lines and the same stacking-context comment. What differs
+   between the three is only the LIST, which is the argument; the button, the
+   panel and the lift are identical and were already written twice.
+
+   THE LIFT IS NOT DECORATION (§69.22): this column is frozen, so every actions
+   cell is `position:sticky` with a z-index and therefore its own stacking
+   context — a menu's z-index cannot escape a context its parent created, so the
+   open cell is raised instead of the menu. */
+function kebabCell(open, acts, panels, label, attr, lifted){
+  if (!acts.length) return '<td class="cc kebcell">' + (panels || '') + '</td>';
+  return '<td class="cc kebcell' + (open || lifted ? " lifted" : "") + '">' +
+    '<button class="kebab' + (open ? " open" : "") + '" ' + attr + ' ' +
+    'aria-haspopup="true" aria-expanded="' + !!open + '" ' +
+    'title="Actions" aria-label="Actions for ' + esc(label) + '">' +
+    '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">' +
+    '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
+    '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
+    (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') + (panels || '') + '</td>';
+}
+
+/* The two clear questions, each replacing the menu in the same corner so the
+   second press lands where the first one did (§46.2). They were inline in the
+   actions cell, which is what a 130px row is made of. */
+function unitPanels(k, u){
+  if (CLEARING === k + "|plan")
+    return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>Clear ' + esc(u.name) + '’s whole plan?</b> ' +
+      'Pillars, measures, tactics, objectives, SWOT and the foundation text. ' +
+      'Kept as an archive dated today and restorable from <b>Import &amp; archives</b>.' +
+      '</div><div class="cbtns">' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Yes, clear the plan</button>' +
+        '<button data-clearno="1">Cancel</button></div></div>';
+  if (CLEARING === k + "|nums")
+    return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>Clear ' + esc(u.name) + '’s reported progress?</b> ' +
+      'Actuals and progress only. The plan stands.' +
+      '</div><div class="cbtns">' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Yes, clear the progress</button>' +
+        '<button data-clearno="1">Cancel</button></div></div>';
+  return "";
+}
+
+function unitKebab(k, u, mayEdit){
+  var panels = unitPanels(k, u);
+  if (!mayEdit) return '<td class="cc kebcell"></td>';
+  var acts = [];
+  acts.push('<button data-rowdlg="units|' + esc(k) + '">Edit details</button>');
+  acts.push('<button data-clear="' + esc(k) + '|nums">Clear progress</button>');
+  /* Clearing a plan destroys authored work and stays the Super user's (§89).
+     Absent rather than disabled, for §62's reason: the refusal would be about
+     who is reading it, not about this row. */
+  if (mayDestroy())
+    acts.push('<button data-clear="' + esc(k) + '|plan">Clear plan</button>');
+  acts.push('<hr>');
+  /* NO DELETE. A unit carries pillars, figures and a cycle's record, and the
+     product has never offered to destroy one — so there is no entry here whose
+     refusal would have to be written (§62). Retire is reversible and keeps
+     every attribution true. */
+  acts.push('<button class="danger" data-uact="' + esc(k) + '">' +
+    (u.active ? "Retire this unit" : "Restore this unit") + '</button>');
+  return kebabCell(UMENU === k, acts, panels, u.name, 'data-umenu="' + esc(k) + '"',
+                   String(CLEARING || "").indexOf(k + "|") === 0);
+}
+
 function renderUnits(){
-  /* ── EDITED ON THE ROW (§85, spec 012 §2.1) ────────────────────────
-     `EDITING.units` turned every field on ten rows at once — 110 inputs to
-     rename one unit. `mayEdit` is now whether the pen is DRAWN, and `editable`
-     inside a row is whether THAT row is open. Retiring and clearing keep their
-     own controls, because they are not edits to the row's fields (§62): a
-     retire is a decision about the unit, not a correction to it. */
+  /* `mayEdit` is whether this viewer may change anything on the page at all.
+     There is no longer a second question — a row is opened from its own menu
+     and edited in a dialog, so `rowEditIs("units", k)` no longer decides what
+     the ROW draws (§261). */
   var mayEdit = grant("c_units") === "edit";
-  var live = activeUnits().length;
+  var arranging = setArrangeOn("units");
 
   var rows = UNIT_KEYS.map(function(k, i){
     var u = UNITS[k];
-    var editable = mayEdit && rowEditIs("units", k);
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
-    /* Was a <select> limited to people already attached to this unit, which
-       meant a new unit could never be given its first head. It is the shared
-       picker now — search, the unit's own people first, and Add new (§35). */
-    var pick = function(role, sel){ return assignPicker(k, role === "head" ? "owner" : "custodian", sel, editable); };
-    return '<tr data-tkrow="' + (u.active ? "active" : "retired") + '"' +
-      (editable ? ' class="tk-open"' : (u.active ? '' : ' class="retired"')) + '>' +
-      '<td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + (editable
-        ? '<input class="fld tk-firstfield" value="' + esc(u.name) + '" data-uname="' + k + '">'
-        : '<b>' + esc(u.name) + '</b>') +
-        '<span class="why mono">key ' + k + '</span></td>' +
-      /* Short name for the navigation only \u2014 everywhere else keeps the full
+    return '<tr data-oi="' + i + '" data-tkrow="' + (u.active ? "active" : "retired") + '"' +
+      (u.active ? '' : ' class="retired"') + '>' +
+      setArrangeIdx("units", i, u.name) +
+      '<td><b>' + esc(u.name) + '</b>' +
+        '<span class="why mono">key ' + esc(k) + '</span></td>' +
+      /* Short name for the navigation only — everywhere else keeps the full
          one. Empty means "use the full name", so nothing has to be filled in. */
-      '<td>' + (editable
-        ? '<input class="fld" value="' + esc(u.navName || "") + '" data-unav="' + k +
-          '" placeholder="' + esc(u.name) + '">'
-        : (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
-                     : '<span class="why" style="margin:0">' + esc(u.name) + '</span>')) + '</td>' +
-      '<td class="cc">' + (editable
-        ? '<input class="fld mono" value="' + esc(u.codePrefix) + '" data-upx="' + k + '">'
-        : '<span class="mono">' + esc(u.codePrefix) + '</span>') + '</td>' +
+      '<td>' + (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
+                          : '<span class="why" style="margin:0">' + esc(u.name) + '</span>') + '</td>' +
+      '<td class="cc"><span class="mono">' + esc(u.codePrefix) + '</span></td>' +
       '<td class="cc"><span class="mono">' + u.items.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
-      '<td>' + (editable
-        ? '<select class="fld" data-ucomp="' + k + '">' +
-            /* A retired company is nowhere a unit can be MOVED to, but a unit
-               already in one still shows it — hiding it would silently read
-               as "its own company" (§49.3). */
-            COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
-              .map(function(ck){
-              return '<option value="' + ck + '"' + (u.company === ck ? " selected" : "") + '>' +
-                esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
-            }).join("") +
-            '<option value=""' + (u.company ? "" : " selected") + '>\u2014 its own company \u2014</option>' +
-          '</select>'
-        : (u.company ? '<span class="val">' + esc(COMPANIES[u.company].name) + '</span>'
-                     : '<span class="why" style="margin:0">its own company</span>')) + '</td>' +
-      '<td class="cc">' + pick("head", roles.head) + '</td>' +
-      '<td class="cc">' + pick("custodian", roles.custodian) + '</td>' +
-      '<td class="cc">' + (mayEdit
-        ? '<div class="rowacts">' +
-            (editable
-              ? '<button class="linkbu tk-save" data-rowsave="units|' + k + '">Save</button>' +
-                '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>'
-              : '<button class="ico tk-pen" data-rowedit="units|' + k + '" ' +
-                  'title="Edit this row" aria-label="Edit this row">' + ICO_EDIT + '</button>') +
-            '<button class="rmbtn' + (u.active ? '' : ' on') + '" data-uact="' + k + '">' +
-              (u.active ? "Retire" : "Restore") + '</button>' +
-            (CLEARING === k + "|plan"
-              ? '<span class="confirm"><b>Clear the whole plan?</b>' +
-                  '<span class="why" style="margin:0">Pillars, measures, tactics, objectives, SWOT and the foundation text. ' +
-                    'Kept as an archive dated today and restorable from <b>Archived plans</b>.</span>' +
-                  '<button class="rmbtn" data-clearyes="' + k + '|plan">Yes, clear the plan</button>' +
-                  '<button class="linkbu" data-clearno="1">Cancel</button></span>'
-              : CLEARING === k + "|nums"
-              ? '<span class="confirm"><b>Clear the reported progress?</b>' +
-                  '<span class="why" style="margin:0">Actuals and progress only. The plan stands.</span>' +
-                  '<button class="rmbtn" data-clearyes="' + k + '|nums">Yes, clear the progress</button>' +
-                  '<button class="linkbu" data-clearno="1">Cancel</button></span>'
-              : '<button class="linkbu" data-clear="' + k + '|nums">Clear progress</button>' +
-                (mayDestroy()
-                  ? '<button class="linkbu" data-clear="' + k + '|plan">Clear plan</button>' : '')) +
-          '</div>'
-        : '<span class="pill ' + (u.active ? "good" : "none") + '">' + (u.active ? "Active" : "Retired") + '</span>') +
-      '</td></tr>';
+      '<td>' + (u.company && COMPANIES[u.company]
+        ? '<span class="val">' + esc(COMPANIES[u.company].name) + '</span>'
+        : '<span class="why" style="margin:0">its own company</span>') + '</td>' +
+      '<td class="cc">' + assignPicker(k, "owner", roles.head, false) + '</td>' +
+      '<td class="cc">' + assignPicker(k, "custodian", roles.custodian, false) + '</td>' +
+      /* STATUS HOLDS A STATUS (§93.14's rule, reaching the page it was written
+         about). This column was headed Status and showed four controls. */
+      '<td class="cc"><span class="pill ' + (u.active ? "good" : "none") + '">' +
+        (u.active ? "Active" : "Retired") + '</span></td>' +
+      /* THE MENU STEPS ASIDE WHILE ARRANGING (§261). One act at a time: a
+         row wearing a handle and a menu offers a drag and a Retire in the same
+         28px, and the press that opens the menu is the press that starts the
+         drag. `mayEdit && !arranging` rather than a second branch, so the
+         read-only cell is the one that was already written. */
+      unitKebab(k, u, mayEdit && !arranging) + '</tr>';
   }).join("");
 
-  return cfgHead("Business units", [], "units", grant("c_units") === "edit", "all",
-      ["Clear all progress", "Clear all plans"]) +
+  return cfgHead("Business units", [], null, mayEdit, "all",
+      ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody
        ARRANGED it — so a sort would be indistinguishable from a rearrangement
        the moment a row is dragged, and no label fixes that. Ten rows: search
-       narrows it better than sorting would anyway. */
+       narrows it better than sorting would anyway.
+
+       AND THE SEARCH GOES WHILE IT IS BEING ARRANGED (§261). `tkApply` HIDES
+       the rows it filters out rather than removing them, so they stay in the
+       tbody, keep their `data-oi` and sit between the ones you can see — a drop
+       between two visible rows would land somewhere else entirely. You cannot
+       arrange a filtered list, so while arranging there is no filter to have. */
     section("", "Business units", null,
-      tkBar("units", { placeholder:"Search the units\u2026" }) +
-      '<div class="cfg"><table class="unitcfg" data-tktable="units"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:18%">Unit</th>' +
+      (arranging ? "" : tkBar("units", { placeholder:"Search the units…" })) +
+      setArrangeBand("units", UNIT_KEYS.length, "business unit") +
+      '<div class="cfg' + (arranging ? ' arranging' : '') + '">' +
+      '<table class="unitcfg" data-tktable="units"><thead><tr>' +
+        '<th class="idx" style="width:' + (arranging ? 54 : 38) + 'px">#</th>' +
+        '<th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
         '<th style="width:12%">Company</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
-        '<th class="cc" style="width:9%">Status</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      /* ADD IS THE PAGE'S, NOT A ROW'S — `mayEdit`, so it stays reachable while
-         a row happens to be open, and does not vanish the moment the last pen
-         is pressed. */
-      (mayEdit ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : '')) +
-
-    /* The marks section keeps the page-level gate it always had: a mark is
-       uploaded, not typed into a row, so it has no row to open. */
-    renderUnitMarks(mayEdit);
+        '<th class="cc" style="width:7%">Status</th>' +
+        '<th class="cc kebcell" style="width:44px"></th>' +
+      '</tr></thead>' + setArrangeBody("units", "units") + rows + '</tbody></table></div>' +
+      /* ADD IS THE PAGE'S, NOT A ROW'S — and it is not drawn while arranging,
+         because a row minted mid-drag lands at the end of a list somebody is in
+         the middle of ordering. */
+      (mayEdit && !arranging
+        ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>'
+        : ''));
 }
 
-/* ── The units' own marks (§52.9) ────────────────────────────────────
-   Its OWN SECTION rather than a twelfth column. The units table already
-   carries eleven, its widths are declared on the header row and sum to
-   the whole, and a mark needs a preview and two controls in one cell —
-   three things a 7% column cannot hold. A section on the same page keeps
-   one question in one place, which is what §46 settled Setup pages are
-   for.
+/* ── The units' own marks: THE SECTION IS GONE (§261) ─────────────────
+   §52.9 gave the marks a section of its own rather than a twelfth column, for
+   a reason that was true at the time: a mark needs a preview and two controls,
+   which a 7% column cannot hold. What that argument did not have was a third
+   place to put it.
 
-   Shown to everyone who can reach the page and editable only by the SMO,
-   the same gate as the table above: `logo` is in UNIT_CONFIG, so the
-   server classifies a change to it as the unit's settings and refuses it
-   from anybody else. A control that changes nothing is worse than no
-   control (§42), so it is not drawn when it cannot be used. */
-function renderUnitMarks(editable){
-  var rows = UNIT_KEYS.map(function(k, i){
-    var u = UNITS[k], src = unitLogo(u);
-    return '<tr' + (u.active ? '' : ' class="retired"') + '>' +
-      '<td class="idx">' + (i + 1) + '</td>' +
-      '<td><b>' + esc(u.name) + '</b>' +
-        (u.company ? '<span class="why">' + esc(COMPANIES[u.company].name) + '</span>' : '') + '</td>' +
-      '<td>' + (src
-        ? '<span class="umarkbox"><img class="umarkimg" src="' + esc(src) + '" alt="' + esc(u.name) + '"></span>'
-        : '<span class="why" style="margin:0">no mark &mdash; the unit\u2019s name is used</span>') + '</td>' +
-      '<td class="cc">' + (editable
-        ? '<div class="rowacts">' +
+   Islam, on the first drawing of this change — which offered a Mark column:
+   *"let the mark out of the table and only in the settings."* So it is in the
+   dialog, where there is room for the preview, both controls AND the sentence
+   about PNG and transparency that this section was carrying, and the second
+   table repeating all ten unit names — 705px of it — goes.
+
+   THE COST IS STATED RATHER THAN DISCOVERED: this section was the only place
+   that answered "which units have no mark" at a glance, and that answer is now
+   one dialog per unit. All ten in the worked example carry one.
+
+   `renderUnitMarks()` is DELETED, not left uncalled (§24) — a builder nobody
+   calls is one the next reader has to prove is dead before touching anything
+   near it. `LOGO_NOTE` and the `data-ulogo` handlers stay: they are the
+   upload's, and the upload moved rather than went. */
+
+/* ══ THE SETUP DIALOG (§261) ═══════════════════════════════════════════
+   One dialog for Business units, Functions and Companies, in the REGISTER'S
+   OWN markup and classes — `.pdlg`, `.pdsect`, `.pdf`, `.pdfl`, `.pdro`,
+   `.pdfoot` — because the platform has one dialog and a second vocabulary for
+   the same shape is how two pages come to look like two products (§53.5).
+   Those styles were never scoped to people; they only ever had one caller.
+
+   THE FIELDS ARE THE PAGE'S OWN, unchanged. `data-uname`, `data-ucomp`,
+   `data-coflag` and the rest are the same attributes the row carried, so they
+   are bound by the same handlers writing to the same places — moving a form
+   into a dialog changed WHERE it is drawn and nothing about what it does. That
+   is §116's own finding on the register, and it is why this needed no second
+   set of handlers either.
+
+   `ROWEDIT` STILL HOLDS THE ROW, so Cancel still restores the snapshot it
+   always did — and §110's role pointers now come with it on a unit and a
+   function, which they did not before (see `ROLE_BEARING_ROWS`): a head is not
+   ON the unit, so restoring the unit alone left a grant standing.
+
+   THE SUBTITLE CARRIES WHAT CANNOT BE EDITED HERE — a unit's code, its pillars,
+   its objectives, its weight — rather than four dead fields for facts derived
+   elsewhere (§45.2: a control that changes nothing is worse than no control). */
+function pdField(label, ctrl, wide){
+  return '<div class="pdf' + (wide ? ' wide' : '') + '">' +
+    (label ? '<div class="pdfl">' + label + '</div>' : '') + ctrl + '</div>';
+}
+function pdSect(t){ return '<div class="pdsect">' + t + '</div>'; }
+
+/* WHAT THE DIALOG IS, FOR EACH TABLE, IN ONE PLACE. Deliberately not `ROWFIND`
+   widened: that map answers "where does this row live" for six tables, and this
+   one answers "what does its dialog hold" for three. A table absent from here
+   simply has no dialog, which is the safe way round — the alternative is a menu
+   entry that opens an empty box (§61). */
+var ROWDLG_SPECS = {
+  units: {
+    find:  function(k){ return UNITS[k]; },
+    title: function(u){ return u.name; },
+    sub:   function(u, k){
+      return [esc("Code " + (u.codePrefix || "—")),
+              /* THE LABEL IS TAKEN EXACTLY AS IT COMES (§107.8). `plural()` returns
+                 a COUNT followed by the word, and `L("pillar","bu")` is already
+                 "Pillars" — so this read "3 pillarss" in the first build, which
+                 is the fault §107.8 wrote down, committed by somebody quoting
+                 it. There is no singular anywhere to reach for. */
+              esc(u.items.length + " " + String(L("pillar","bu")).toLowerCase()),
+              plural(u.keyObjectives.length, "key objective"),
+              (u.weight != null ? u.weight + "% of the group" : "no weight set")].join(" · ");
+    },
+    body:  function(u, k){
+      var roles = UNIT_ROLES[k] || {}, src = unitLogo(u);
+      return pdSect("What it is") +
+        pdField("Name", '<input class="fld tk-firstfield" value="' + esc(u.name) +
+                        '" data-uname="' + esc(k) + '">') +
+        pdField("Shown in the nav", '<input class="fld" value="' + esc(u.navName || "") +
+                        '" data-unav="' + esc(k) + '" placeholder="' + esc(u.name) + '">') +
+        pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
+                        '" data-upx="' + esc(k) + '">') +
+        pdSect("Where it sits, and who runs it") +
+        pdField("Company",
+          '<select class="fld" data-ucomp="' + esc(k) + '">' +
+            /* A retired company is nowhere a unit can be MOVED to, but a unit
+               already in one still shows it — hiding it would silently read as
+               "its own company" (§49.3). */
+            COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
+              .map(function(ck){
+                return '<option value="' + esc(ck) + '"' + (u.company === ck ? " selected" : "") +
+                  '>' + esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
+              }).join("") +
+            '<option value=""' + (u.company ? "" : " selected") + '>— its own company —</option>' +
+          '</select>') +
+        pdField("BU head", assignPicker(k, "owner", roles.head, true)) +
+        pdField("Strategy custodian", assignPicker(k, "custodian", roles.custodian, true)) +
+        pdSect("The unit’s mark") +
+        pdField("Mark", src
+          ? '<span class="umarkbox"><img class="umarkimg" src="' + esc(src) +
+            '" alt="' + esc(u.name) + '"></span>'
+          : '<span class="pdro">no mark — the unit’s name is used</span>') +
+        pdField("", '<span class="rowacts markacts">' +
             '<label class="linkbu umarkpick">' + (src ? "Replace" : "Upload") +
-              '<input type="file" accept="image/png" data-ulogo="' + k + '" hidden></label>' +
-            (src ? '<button class="linkbu" data-ulogoclear="' + k + '">Remove</button>' : '') +
-          '</div>'
-        : '<span class="why" style="margin:0">SMO</span>') + '</td></tr>';
-  }).join("");
+              '<input type="file" accept="image/png" data-ulogo="' + esc(k) + '" hidden></label>' +
+            (src ? '<button class="linkbu" data-ulogoclear="' + esc(k) + '">Remove</button>' : '') +
+          '</span>') +
+        /* §52.9's own sentence, carried across rather than rewritten: it is the
+           only place in the product the PNG rule is stated. */
+        pdField("", '<p class="why" style="margin:0">Shown on the unit’s review deck — large on ' +
+          'the cover, small in the footer of every other slide. A unit with no mark shows its name, ' +
+          'so a missing one costs nothing. <b>PNG only</b>, and keep the background transparent: a ' +
+          'mark with white behind it paints a box around itself on a dark slide.</p>', true) +
+        (LOGO_NOTE ? pdField("", '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>', true) : '');
+    }
+  },
+  fns: {
+    find:  function(k){ return FUNCTIONS[k]; },
+    title: function(f){ return f.name; },
+    sub:   function(f, k){
+      return [esc("Code " + (f.codePrefix || "—")),
+              plural(capsOfFunction(k).length, "capability", "capabilities"),
+              esc("key " + k)].join(" · ");
+    },
+    body:  function(f, k){
+      return pdSect("What it is") +
+        pdField("Name", '<input class="fld tk-firstfield" value="' + esc(f.name) +
+                        '" data-fname="' + esc(k) + '">') +
+        pdField("Nav name", '<input class="fld" value="' + esc(f.navName || "") +
+                        '" data-fnav="' + esc(k) + '" placeholder="' + esc(f.name) + '">') +
+        pdField("Code prefix", '<input class="fld mono" value="' + esc(f.codePrefix || "") +
+                        '" data-fpx="' + esc(k) + '">') +
+        pdSect("How it plans") +
+        /* THE ONE FIELD THE ROW COULD HIDE. §93.14 wrote the trap down where it
+           made it — "a hidden column renders nothing at all, edit field
+           included" — so with the Columns menu turned down, Plans in and Under
+           could not be reached at all. In a dialog every field is drawn
+           whatever that menu says: a fault closed, not a feature added. */
+        pdField("Plans in", planCell(k, f, true), true) +
+        pdSect("Who runs it") +
+        pdField("Head", assignPicker("fn:" + k, "fnhead", f.head, true)) +
+        pdField("Custodian", assignPicker("fn:" + k, "custodian", f.custodian, true));
+    }
+  },
+  companies: {
+    find:  function(k){ return COMPANIES[k]; },
+    title: function(c){ return c.name; },
+    sub:   function(c, k){
+      return [plural(unitsOfCompany(k).length, "business unit"), esc("key " + k)].join(" · ");
+    },
+    body:  function(c, k){
+      var flag = function(field, val){
+        return '<select class="fld" data-coflag="' + esc(k + "|" + field) + '">' +
+          '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
+          '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
+      };
+      return pdSect("What it is") +
+        pdField("Name", '<input class="fld tk-firstfield" value="' + esc(c.name) +
+                        '" data-coname="' + esc(k) + '">') +
+        pdSect("What its CEO sees") +
+        pdField("Sees other companies", flag("seeOthers", c.seeOthers)) +
+        pdField("Sees the group", flag("seeGroup", c.seeGroup));
+    }
+  }
+};
 
-  return section("", "Unit marks", null,
-    '<p class="why" style="margin:0 0 12px">Shown on the unit\u2019s review deck &mdash; large on the cover, ' +
-      'small in the footer of every other slide. A unit with no mark shows its name, which is what every ' +
-      'slide does today, so a missing one costs nothing. ' +
-      '<b>PNG only</b>, and keep the background transparent: a mark with white behind it paints a box ' +
-      'around itself on a dark slide.</p>' +
-    '<div class="cfg"><table><thead><tr>' +
-      '<th class="idx" style="width:38px">#</th><th style="width:26%">Unit</th>' +
-      '<th style="width:44%">Mark</th><th class="cc" style="width:22%"></th>' +
-    '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
+function rowDlgSpec(){ return ROWDLG ? ROWDLG_SPECS[ROWDLG.table] : null; }
+function rowDlgRow(){ var sp = rowDlgSpec(); return sp ? sp.find(ROWDLG.key) : null; }
+function rowDialogTitle(){
+  var sp = rowDlgSpec(), r = rowDlgRow();
+  if (!sp || !r) return { t:"", s:"" };
+  return { t: sp.title(r, ROWDLG.key), s: sp.sub(r, ROWDLG.key) };
 }
-
+/* Cancel and Save, in the register's own foot. SAVE CLOSES AND COMMITS NOTHING,
+   because every field has already written itself on blur (§35) — a button that
+   pretended to be the moment of saving would be reassurance that lies (§63.2).
+   Cancel is the one that acts: it puts back the snapshot `rowEditOpen` took,
+   the row's pointers included. */
+function rowDialogHtml(){
+  var sp = rowDlgSpec(), r = rowDlgRow();
+  if (!sp || !r) return "";
+  return '<div class="pdlg">' + sp.body(r, ROWDLG.key) + '</div>' +
+    '<div class="pdfoot"><span class="pdrt">' +
+      '<button class="linkbu" data-rowdlg-cancel="1">Cancel</button>' +
+      '<button class="linkbu tk-save" data-rowdlg-close="1">Save</button>' +
+    '</span></div>';
+}
 
 /* ── Setup · Focus measures ─────────────────────────────────────────
    Marking is a configuration act, not something to be done while reading a
@@ -3276,12 +3588,65 @@ function renderMainbus(){
       'confirm it on <b>People</b>.</div>');
 }
 
+/* ── A company's own three dots (§261) ───────────────────────────────
+   Two entries and no handle. A company has no order in the navigation — it is
+   reached from a dropdown, not from the row of destinations — so there is
+   nothing here to arrange, and a grip that reordered a list nobody sees would
+   be a control with no outcome (§45.2). */
+/* A FULL STOP THAT IS NOT ALREADY THERE (§261). A unit can be called
+   "IT Dist.", and a sentence ending in a list of names is where that shows. */
+function endStop(t){
+  return /[.!?]\s*$/.test(t) ? t : t + ".";
+}
+function coPanels(ck, co, on){
+  if (CLEARING !== "co|" + ck) return "";
+  var blockers = companyRetireBlockers(ck);
+  /* §62's shape: the entry is always live and the press either asks the
+     question or names what is in the way. The chip that used to sit in the row
+     said "holds 3 units" and nothing else — a refusal with no way to ask for
+     the reason, which is what a disabled control always is. */
+  if (on && blockers.length)
+    return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>' + esc(co.name) + ' cannot be retired yet.</b> ' +
+      /* THE LIST GOES LAST, and the stop after it is conditional: a unit may be
+         called "IT Dist." and the sentence read "IT Dist.." — found by opening
+         the refusal and reading it, not by reading the code. `fnPanels` joins
+         sentences the same way and has the same latent fault; it is recorded
+         rather than fixed here, because that one is not this change's. */
+      'Move its ' + plural(blockers.length, "business unit") + ' to another ' +
+      'company, or make each of them its own, and this becomes possible. ' +
+      'Nothing is lost meanwhile' + endStop(" — " + esc(blockers.join(", "))) +
+      '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
+  return '<div class="kmenu kconfirm"><div class="cq">' +
+    '<b>' + (on ? "Retire " : "Restore ") + esc(co.name) + '?</b> ' +
+    (on ? 'It leaves the group dropdown. Its key is written into every role held over it, ' +
+          'so nothing is deleted and restoring puts it back exactly as it was.'
+        : 'It returns to the group dropdown and every role held over it reads again.') +
+    '</div><div class="cbtns">' +
+      '<button class="danger" data-coact="' + esc(ck) + '">Yes, ' +
+        (on ? "retire" : "restore") + '</button>' +
+      '<button data-clearno="1">Cancel</button></div></div>';
+}
+function coKebab(ck, co, on, mayEdit){
+  if (!mayEdit) return '<td class="cc kebcell"></td>';
+  var acts = [
+    '<button data-rowdlg="companies|' + esc(ck) + '">Edit details</button>',
+    '<hr>',
+    '<button class="danger" data-coclear="' + esc(ck) + '">' +
+      (on ? "Retire this company" : "Restore this company") + '</button>'
+  ];
+  return kebabCell(COMENU === ck, acts, coPanels(ck, co, on), co.name,
+    'data-comenu="' + esc(ck) + '"', CLEARING === "co|" + ck);
+}
+
 function renderCompanies(){
-  /* §85: the page-wide pen becomes a pen per row. `mayEdit` draws it; a row's
-     own `editable` is whether that row is open. */
+  /* §85's pen per row became a dialog per row (§261): what a company is called
+     and what its CEO sees are three fields, and they are opened from the row's
+     own menu. `mayEdit` is the one remaining question — may this viewer change
+     anything on this page at all. */
   var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
-  return cfgHead("Companies", [], "units", grant("c_units") === "edit") +
+  return cfgHead("Companies", [], null, mayEdit) +
     section("", "Companies", null,
       /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
          nothing and costs a header — the threshold is in the spec (§2.2) and
@@ -3293,49 +3658,32 @@ function renderCompanies(){
         (function(){ var h = tkHead("companies");
           return h("#", "idx", false) + h("Company") + h("Units", "cc") +
                  h("Sees other companies", "cc") + h("Sees the group", "cc") +
-                 h("Status", "cc"); })() +
+                 h("Status", "cc") + h("", "cc kebcell", false); })() +
       '</tr></thead><tbody>' +
       COMPANY_KEYS.map(function(ck, i){
-        var co = COMPANIES[ck], on = companyActive(ck), blockers = companyRetireBlockers(ck);
-        var flag = function(field, val){
-          if (!editable) return '<span class="pill ' + (val ? "good" : "none") + '">' +
+        var co = COMPANIES[ck], on = companyActive(ck);
+        var flag = function(val){
+          return '<span class="pill ' + (val ? "good" : "none") + '">' +
             (val ? "Yes" : "No") + '</span>';
-          return '<select class="fld" data-coflag="' + ck + '|' + field + '">' +
-            '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
-            '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
         };
-        var editable = mayEdit && rowEditIs("companies", ck);
         return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
-          (editable ? ' class="tk-open"' : (on ? '' : ' class="retired"')) +
+          (on ? '' : ' class="retired"') +
           '><td class="idx">' + (i+1) + '</td>' +
-          '<td>' + (editable
-            ? '<input class="fld tk-firstfield" value="' + esc(co.name) + '" data-coname="' + ck + '">'
-            : '<b>' + esc(co.name) + '</b>') +
-            '<span class="why mono">key ' + ck + '</span></td>' +
+          '<td><b>' + esc(co.name) + '</b>' +
+            '<span class="why mono">key ' + esc(ck) + '</span></td>' +
           '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
-          '<td class="cc">' + flag("seeOthers", co.seeOthers) + '</td>' +
-          '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td>' +
-          /* Retiring is REFUSED while units still belong here, and the cell says
-             how many rather than going quiet about why there is no button. */
-          '<td class="cc">' + (mayEdit
-            ? '<div class="rowacts">' +
-                (editable
-                  ? '<button class="linkbu tk-save" data-rowsave="companies|' + ck + '">Save</button>' +
-                    '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>'
-                  : '<button class="ico tk-pen" data-rowedit="companies|' + ck + '" ' +
-                      'title="Edit this row" aria-label="Edit this row">' + ICO_EDIT + '</button>' +
-                    /* Retire keeps its own control and its own refusal (§48.2):
-                       a company holding units is refused with the count, and
-                       that is a decision about the company rather than a
-                       correction to its fields. */
-                    (on && blockers.length
-                      ? '<span class="pill none" title="' + esc(blockers.join(", ")) + '">holds ' +
-                          plural(blockers.length, "unit") + '</span>'
-                      : '<button class="rmbtn' + (on ? '' : ' on') + '" data-coact="' + ck + '">' +
-                          (on ? "Retire" : "Restore") + '</button>')) +
-              '</div>'
-            : '<span class="pill ' + (on ? "good" : "none") + '">' +
-                (on ? "Active" : "Retired") + '</span>') + '</td></tr>';
+          '<td class="cc">' + flag(co.seeOthers) + '</td>' +
+          '<td class="cc">' + flag(co.seeGroup) + '</td>' +
+          /* STATUS HOLDS A STATUS HERE TOO (§261). It held a pen and, beside
+             it, a dotted chip reading "holds 3 units" — which is not a fact
+             about the company at all but the REFUSAL that stands in for the
+             Retire button. A refusal belongs where the confirmation would be
+             (§62), so it is a panel under the menu now, and the entry stays
+             LIVE rather than being replaced by a chip: pressing it either asks
+             the question or names what is in the way. */
+          '<td class="cc"><span class="pill ' + (on ? "good" : "none") + '">' +
+            (on ? "Active" : "Retired") + '</span></td>' +
+          coKebab(ck, co, on, mayEdit) + '</tr>';
       }).join("") + '</tbody></table></div>' +
       (mayEdit ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
       '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
@@ -5388,17 +5736,20 @@ function renderCycle(){
          reason: with no box there is nothing to mistype and the picker can
          only produce a shape `monthsOf()` already reads. */
       '<span class="fstrip-meta asof">reported as of ' +
-        /* THE BUTTON SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With
-           no month picked the platform still has an answer -- the cycle's own
-           quarter end -- so showing the picker's "Missing" would print an
-           alarm over something that is not owed (§177, §214.4) while the note
-           beside it reported a real number. The note says whether it was
-           chosen or inherited. */
-        (can && open
-          ? monthBtnHtml(REVIEW.asOfMonth || reviewAsOfLabel(), "asofbtn", function(v){
-              if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
-            })
-          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) +
+        /* IT SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With no month
+           picked the platform still has an answer -- the cycle's own quarter
+           end -- so showing the picker's "Missing" would print an alarm over
+           something that is not owed (§177, §214.4) while the note beside it
+           reported a real number. The note says whether it was chosen or
+           inherited.
+
+           §273: AND IT IS A VALUE HERE, NEVER A CONTROL. The picker moved
+           inside the pen with everything else the office can change, so this
+           line reads the same for everybody and the strip carries nothing that
+           can be pressed by accident. One control for one fact (§53.5): a
+           picker here AND a picker in the panel is two, and they would have to
+           be kept in step. */
+        '<b>' + esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b>' +
         /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
            whether the month he picked had taken -- "can you check if the cycle
            adjustment is saved" -- because the strip showed the value and
@@ -5413,47 +5764,89 @@ function renderCycle(){
           : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
             'figure is measured against a whole one</span>') + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
+      /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
+         Islam: "keep the close cycle inside the edit. as it's a critical
+         button to click, the pen should hold everything editable so it's kept
+         secured." So the strip's only control while a cycle runs is Edit, and
+         Close the cycle is drawn INSIDE the panel it opens -- the strip is a
+         line you read, not a line you press.
+
+         Edit is drawn while the cycle is OPEN only, which is the gate the
+         review point already had: a closed cycle's figures are filed under the
+         name it closed with (HISTORY keeps the name, §49.1), so renaming it
+         afterwards would leave this page and the history saying different
+         things. With it closed the strip carries "Open a new cycle..." exactly
+         as it did before. */
+      /* §273.2: AND A CLOSED CYCLE GETS THE PEN TOO. Islam picked it over a
+         Reopen button on the strip: the pen's far end holds the cycle's one
+         dangerous state change, whichever direction it goes -- Close while it
+         runs, Reopen once it has stopped -- so the strip goes on carrying
+         nothing that changes anything. `Open a new cycle...` stays beside it
+         because it is a different act with its own panel and its own
+         confirmation, and it is the only way to start one. */
       (can
-        ? (open
-            ? '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>'
-            : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
+        ? '<button class="editbtn" data-editcycle="1">Edit</button>' +
+          (open ? '' : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
         : '') +
     '</div>' +
-    /* ── OPENING A CYCLE ASKS WHAT IT IS (§47.8) ────────────────────
-       Islam: "on opening the cycle it didn't ask me any questions … we should
-       set the name of the cycle and the duration it covers."
+    /* ── THE PEN ITSELF ────────────────────────────────────────────
+       The panel `NEWCYCLE` already uses, because this asks for the same five
+       things and two shapes for one form is how the two drift (§53.5). What
+       differs is the act row: Save and Cancel at the near end, Close the cycle
+       at the far end of the same row -- inside the pen, apart from them, and
+       still the last thing the eye reaches.
 
-       It used to mint `{ name:"Cycle 3", from:<last cycle's end>, to:"",
-       due:"", endsQuarter:4 }` and open it — a name nobody chose, a period
-       half filled from a guess, and a hard-coded end quarter. That last one is
-       not cosmetic: `endsQuarter` decides which tactics count as DUE, so a
-       wrong guess silently changes every unit's execution score.
+       CLOSE IS SAID, NOT HIDDEN, while something is unsaved (§221, §163): a
+       control that vanishes reads as broken, one that says why it is waiting
+       teaches the rule once. `aria-disabled`, never `disabled`, or the reason
+       beside it cannot be reached by keyboard -- and the handler asks again at
+       press time rather than trusting this render (§48.2). */
+    (CYCLEEDIT
+      ? (function(){
+          /* §273.3: THE CLOSED CYCLE'S PANEL IS GONE, AND THE PEN OPENS THE
+             PLATFORM'S OWN DIALOG INSTEAD. Islam, of three shapes drawn on his
+             own tenant: "C". §273.2 drew the record as a band under the strip,
+             and a band of facts sitting directly under a band of the SAME facts
+             is the fault — every one of them (the name, the dates, the review
+             point, the state) is already on the line above, and on a tenant
+             where three of five are empty what is left is a row of dashes.
 
-       An inline panel rather than a modal, because the fields want the page's
-       own controls and because what you are about to replace — the cycle
-       above — should stay on screen while you describe its successor. */
-    (NEWCYCLE
-      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        '<div class="nc-grid">' +
-          '<label><span>Name</span><input class="fld" id="nc-name" value="' +
-            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          '<label><span>Covers from</span><input class="fld" id="nc-from" value="' +
-            esc(NEWCYCLE.from) + '" placeholder="Jan 2027"></label>' +
-          '<label><span>to</span><input class="fld" id="nc-to" value="' +
-            esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
-          '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
-            esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
-          '<label><span>Reporting as of</span>' +
-            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
-              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
-            }) + '</label>' +
-        '</div>' +
-        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
-          'A target that adds up across the year is compared with the share of it due by then, ' +
-          'and a tactic whose span has not started yet is not asked for.</div>' +
-        '<div class="nc-act">' +
-          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
-          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
+             A panel is the right shape for five fields you are EDITING, which
+             is what an open cycle has, and the wrong shape for one question you
+             are ANSWERING. So `CYCLEEDIT` is only ever the open cycle's now,
+             and the closed branch is DELETED rather than left unreachable
+             (§24). The dialog is wired in the shell, beside the other
+             confirmations it is built from. */
+          var held = cycleEditDirty();
+          return '<div class="cfg newcycle"><div class="nc-h">Edit this cycle</div>' +
+            '<div class="nc-grid">' +
+              '<label><span>Name</span><input class="fld" id="ce-name" value="' +
+                esc(CYCLEEDIT.name) + '" placeholder="H1 2027"></label>' +
+              '<label><span>Covers from</span><input class="fld" id="ce-from" value="' +
+                esc(CYCLEEDIT.from) + '" placeholder="Jan 2027"></label>' +
+              '<label><span>to</span><input class="fld" id="ce-to" value="' +
+                esc(CYCLEEDIT.to) + '" placeholder="Jun 2027"></label>' +
+              '<label><span>Reports due</span><input class="fld" id="ce-due" value="' +
+                esc(CYCLEEDIT.due) + '" placeholder="15 Jul 2027"></label>' +
+              '<label><span>Reporting as of</span>' +
+                monthBtnHtml(CYCLEEDIT.asOfMonth || "", "asofbtn", function(v){
+                  if (v) CYCLEEDIT.asOfMonth = v; else delete CYCLEEDIT.asOfMonth;
+                }) + '</label>' +
+            '</div>' +
+            '<div class="nc-why"><b>The month decides what every figure is measured ' +
+              'against.</b> A target that adds up across the year is compared with the ' +
+              'share of it due by then, and a tactic whose span has not started yet is ' +
+              'not asked for.</div>' +
+            '<div class="nc-act">' +
+              '<button class="editbtn" data-ce-save="1">Save</button>' +
+              '<button class="linkbu" data-ce-cancel="1">Cancel</button>' +
+              '<span class="nc-gap"></span>' +
+              '<span class="why nc-hold" data-ce-hold="1"' + (held ? '' : ' hidden') +
+                '>Save or cancel your changes first</span>' +
+              '<button class="editbtn danger" data-closecycle="1"' +
+                (held ? ' aria-disabled="true"' : '') + '>Close the cycle</button>' +
+            '</div></div>';
+        })()
       : '') +
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
@@ -5630,21 +6023,16 @@ function fnShowCol(k){ return fnCols()[k] !== false; }
    always LIVE rather than disabled, and pressing it either asks the question
    or names what is holding the function and where to go and clear it. A
    disabled item has nowhere to put a reason that is a sentence. */
-function fnKebab(fk, f, ed, mayEdit){
-  /* THE OPEN ROW SHOWS SAVE AND CANCEL, NOT A MENU (spec 012 §2.1, §92.1).
-     While the row is open the only two acts are finishing and abandoning;
-     leaving the ⋮ there would offer Retire and Delete on a row with unsaved
-     edits in it. */
-  if (ed) {
-    return '<td class="cc kebcell tk-editcell">' +
-      '<button class="linkbu tk-save" data-rowsave="fns|' + esc(fk) + '">Save</button>' +
-      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
-  }
+function fnKebab(fk, f, mayEdit){
+  /* THE SAVE/CANCEL BRANCH IS GONE WITH THE INLINE FIELDS (§261). It existed
+     because the row itself opened; those two acts live at the foot of the
+     dialog now, where the fields are — which is what §116 found on the
+     register, and what leaves one shape for every row of this table. */
   if (!mayEdit) return '<td class="cc kebcell"></td>';
 
   var open = FNMENU === fk;
   var acts = [];
-  acts.push('<button data-rowedit="fns|' + esc(fk) + '">Edit this row</button>');
+  acts.push('<button data-rowdlg="fns|' + esc(fk) + '">Edit details</button>');
   acts.push('<button data-clear="fn|' + esc(fk) + '|nums">Clear progress</button>');
   if (mayDestroy())
     acts.push('<button data-clear="fn|' + esc(fk) + '|plan">Clear plan</button>');
@@ -5654,21 +6042,15 @@ function fnKebab(fk, f, ed, mayEdit){
   if (mayDestroy())
     acts.push('<button class="danger" data-fndel="' + esc(fk) + '">Delete permanently</button>');
 
-  /* The cell with a panel open has to outrank the cells below it (§69.22):
-     this column is frozen, so every actions cell is sticky with a z-index and
-     therefore its own stacking context — a panel's z-index cannot escape a
-     context its parent created. */
-  var lifted = open || String(CLEARING || "").indexOf("|" + fk) > -1 ||
-               CLEARING === "fndel|" + fk;
-  return '<td class="cc kebcell' + (lifted ? " lifted" : "") + '">' +
-    '<button class="kebab' + (open ? " open" : "") + '" data-fnmenu="' + esc(fk) + '" ' +
-    'aria-haspopup="true" aria-expanded="' + open + '" ' +
-    'title="Actions" aria-label="Actions for ' + esc(f.name) + '">' +
-    '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">' +
-    '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
-    '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
-    (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
-    fnPanels(fk, f) + '</td>';
+  /* THE BUTTON, THE PANEL AND THE LIFT ARE `kebabCell`'s NOW (§261). They were
+     written here and again on the register, and a third and fourth table were
+     about to copy them — the lift in particular, which is not decoration but
+     §69.22's answer to a frozen column's stacking context and would be the
+     first thing a copy got wrong. What stays here is the LIST, which is the
+     only part that is this table's. */
+  return kebabCell(open, acts, fnPanels(fk, f), f.name,
+    'data-fnmenu="' + esc(fk) + '"',
+    String(CLEARING || "").indexOf("|" + fk) > -1 || CLEARING === "fndel|" + fk);
 }
 
 /* The three questions, each replacing the menu in the same corner so the
@@ -5737,31 +6119,36 @@ function renderFunctions(){
     return assignPicker("fn:" + fk, role === "head" ? "fnhead" : "custodian", current, ed);
   };
 
+  var arranging = setArrangeOn("fns");
   var rows = FUNCTION_KEYS.map(function(fk, i){
-    var editable = mayEdit && rowEditIs("fns", fk);
+    /* THE ROW NO LONGER EDITS ANYTHING (§261). "Edit this row" opened the
+       fields in place and "Edit details" opens the same fields in the dialog
+       Business units now uses — one word for one act across the two pages that
+       sit either side of the same navigation row (§53.5). It also closes the
+       trap §93.14 wrote down about itself: a column hidden by the Columns menu
+       "renders nothing at all, edit field included", so Plans in and Under
+       could not be reached with that column turned off. */
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
-    return '<tr data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
-      (editable ? ' class="tk-open"' : (f.active === false ? ' class="retired"' : '')) + '>' +
-      '<td class="idx">' + (i + 1) + '</td>' +
+    return '<tr data-oi="' + i + '" data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
+      (f.active === false ? ' class="retired"' : '') + '>' +
+      setArrangeIdx("fns", i, f.name) +
       /* THE KEY LINE IS A COLUMN NOW (§93.14). It sat under every name as a
          second line; the register moved exactly this to an off-by-default
          column (§69.11), because a function key is a DIAGNOSTIC — wanted when
          something is wrong and never when you are reading who runs Marketing.
-         It is the ONLY column hidden by default here. Nav name and Code stay
-         visible: they are SET on this page, and a hidden column renders
-         nothing at all, edit field included. */
-      '<td class="fnamecell">' + (editable
-        ? '<input class="fld tk-firstfield" value="' + esc(f.name) + '" data-fname="' + fk + '">'
-        : '<b>' + esc(f.name) + '</b>') + '</td>' +
+         It is the ONLY column hidden by default here.
+
+         AND THE WARNING THAT USED TO END THIS NOTE IS SPENT (§261): "a hidden
+         column renders nothing at all, edit field included" was true while the
+         fields were on the row, and it is why Nav name and Code had to stay
+         visible. They are drawn in the dialog now, whatever this menu says. */
+      '<td class="fnamecell"><b>' + esc(f.name) + '</b></td>' +
       (fnShowCol("key") ? '<td><span class="mono">' + esc(fk) + '</span></td>' : '') +
-      (fnShowCol("nav") ? '<td>' + (editable
-        ? '<input class="fld" value="' + esc(f.navName || "") + '" data-fnav="' + fk +
-          '" placeholder="' + esc(f.name) + '">'
-        : (f.navName ? '<span class="val">' + esc(f.navName) + '</span>'
-                     : '<span class="why" style="margin:0">' + esc(f.name) + '</span>')) + '</td>' : '') +
-      (fnShowCol("code") ? '<td class="cc">' + (editable
-        ? '<input class="fld mono" value="' + esc(f.codePrefix || "") + '" data-fpx="' + fk + '">'
-        : '<span class="mono">' + esc(f.codePrefix || "\u2014") + '</span>') + '</td>' : '') +
+      (fnShowCol("nav") ? '<td>' + (f.navName
+        ? '<span class="val">' + esc(f.navName) + '</span>'
+        : '<span class="why" style="margin:0">' + esc(f.name) + '</span>') + '</td>' : '') +
+      (fnShowCol("code") ? '<td class="cc"><span class="mono">' +
+        esc(f.codePrefix || "\u2014") + '</span></td>' : '') +
       /* ── PLANS IN, AND UNDER (§59) ─────────────────────────────────
          Spec 010 built both and gave neither a control: `format` and `under`
          could only be set by editing the source, so a second Merchandising was
@@ -5769,11 +6156,12 @@ function renderFunctions(){
 
          SWITCHING IS REFUSED WHILE THE OTHER SIDE HOLDS SOMETHING, and it says
          what is in the way rather than hiding a plan that still exists — the
-         same contract as retiring a company that still holds units (§49.3). */
-      (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, editable) + '</td>' : '') +
+         same contract as retiring a company that still holds units (§49.3).
+         The control is in the dialog; this cell reads it. */
+      (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
-      (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, editable) + '</td>' : '') +
-      (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, editable) + '</td>' : '') +
+      (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
+      (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
       /* ── STATUS HOLDS A STATUS, AND THE ACTS HOLD A MENU (§93.14) ────
          Islam, on rows measuring 155px beside the register's 39: "learn from
          what we have done in the people table."
@@ -5788,7 +6176,7 @@ function renderFunctions(){
          promised, and the acts move into the row's kebab. */
       '<td class="cc"><span class="pill ' + (f.active === false ? "none" : "good") + '">' +
         (f.active === false ? "Retired" : "Active") + '</span></td>' +
-      fnKebab(fk, f, editable, mayEdit) + '</tr>';
+      fnKebab(fk, f, mayEdit && !arranging) + '</tr>';
   }).join("");
 
   /* "Functions" in the rail and on the page (Islam, 2026-08-23). The page has
@@ -5821,12 +6209,19 @@ function renderFunctions(){
         : '') +
     '</span>';
 
-  return cfgHead("Functions", [], "fns", grant("c_fns") === "edit", "fnall",
-      ["Clear all progress", "Clear all plans"], fnColMenu) +
+  return cfgHead("Functions", [], null, mayEdit, "fnall",
+      ["Clear all progress", "Clear all plans"], setArrangeBtn("fns", mayEdit) + fnColMenu) +
     section("", "", null,
-      /* §84. Eight rows and nine columns — over the search threshold, and its
-         order is a plain list rather than something arranged, so it sorts. */
-      tkBar("fns", { placeholder:"Search the functions\u2026" }) +
+      /* §84. Eight rows and nine columns — over the search threshold, so it
+         sorts. Its order is NOT "a plain list" any more, which is what this
+         comment used to say: the functions sit in the same navigation row as
+         the units and are arranged the same way (§261). Both go while
+         arranging, for the reason `tkHead`'s own note gives — a filter hides
+         rows without removing them and a sort reorders them, and either one
+         makes a drop land somewhere other than where it looks. */
+      (arranging ? "" : tkBar("fns", { placeholder:"Search the functions\u2026" })) +
+      setArrangeBand("fns", FUNCTION_KEYS.length, "supporting function",
+                     "sorting and search are off while you arrange") +
       /* SHORTENED, BECAUSE THEY NO LONGER FIT. Measured rather than judged:
          at 920px "Shown in the nav" wanted 119px in a 94px cell, "Strategy
          custodian" 129 in 119 and "Capabilities" 86 in 68 — three headers
@@ -5837,8 +6232,9 @@ function renderFunctions(){
          The widths went with the conversion to sortable heads (§84): they were
          declared as percentages summing to the whole, which auto layout treats
          as a suggestion anyway, and wrapping (§87) is what decides these now. */
-      '<div class="cfg fnsbox"><table class="unitcfg fnscfg" data-tktable="fns"><thead><tr>' +
-        (function(){ var h = tkHead("fns");
+      '<div class="cfg fnsbox' + (arranging ? ' arranging' : '') + '">' +
+      '<table class="unitcfg fnscfg" data-tktable="fns"><thead><tr>' +
+        (function(){ var h = tkHead("fns", !arranging);
           return h("#", "idx", false) + h("Function", "fnamecell") +
                  (fnShowCol("key")     ? h("Key")               : '') +
                  (fnShowCol("nav")     ? h("Nav name")          : '') +
@@ -5852,12 +6248,14 @@ function renderFunctions(){
                     rule, which the register applies to Roles and Password). */
                  h("", "cc kebcell", false); })() +
         '</tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div>' +
+        setArrangeBody("fns", "fns") + rows + '</tbody></table></div>' +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
          configuration screen stops being scannable. */
-      (mayEdit ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a supporting function</button></div>' : ''));
+      (mayEdit && !arranging
+        ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a supporting function</button></div>'
+        : ''));
 }
 
 /* ── Setup · Capabilities ───────────────────────────────────────────
@@ -7127,10 +7525,16 @@ function rowActions(table, key, ed, extra){
    The column INDEX is counted here rather than passed, because a caller
    counting its own columns gets it wrong the first time a column becomes
    conditional — which every one of these tables has. */
-function tkHead(id){
+/* `allow:false` TURNS THE WHOLE HEAD OFF (§261). A sorted table cannot be
+   arranged: `tkSort` REORDERS the rows in the DOM, so a drop between two rows
+   you can see would commit whatever order the sort had put them in — silently,
+   into the navigation. The index still counts through the disabled columns, or
+   turning sorting back on would sort by the wrong one. */
+function tkHead(id, allow){
   var n = 0;
   return function(label, cls, sortable){
     var i = n++;
+    if (allow === false) sortable = false;
     if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
     if (sortable === false)
       return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';

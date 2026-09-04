@@ -207,15 +207,31 @@ def main():
         print("\n── 8 · the office sets the review point, and every score follows ──")
         pg.evaluate("()=>{current='setup'; currentSub='cycle'; paint();}")
         pg.wait_for_timeout(500)
-        ck("the cycle strip carries the control",
-           pg.evaluate("!!document.querySelector('.fstrip-meta.asof .monthbtn')"))
+        # §273 MOVED THE CONTROL AND NOT THE PROMISE. Islam: "keep the close
+        # cycle inside the edit ... the pen should hold everything editable so
+        # it's kept secured" — so the strip is a line you read and the picker
+        # lives inside the pen with the name and the dates. These assertions
+        # are REWRITTEN rather than deleted (§218): what §239 is about is that
+        # the office can move the review point and every figure follows, and
+        # that is asserted here exactly as before, through the door it now has.
+        ck("the strip carries no control of its own any more (§273)",
+           pg.evaluate("!document.querySelector('.fstrip-meta.asof .monthbtn')"))
+        ck("...it carries the pen that holds one",
+           pg.evaluate("!!document.querySelector('[data-editcycle]')"))
         before = pg.evaluate("()=>measureScore(GROUP.keyObjectives[0])")
-        pg.click(".fstrip-meta.asof .monthbtn"); pg.wait_for_timeout(300)
+        pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
+        pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(300)
         ck("...which opens the platform's own month picker",
            pg.evaluate("!!document.querySelector('.monthpop [data-mpick]')"))
         pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
             .find(x=>x.textContent.trim()==='Aug'); if(b)b.click();}""")
-        pg.wait_for_timeout(500)
+        pg.wait_for_timeout(400)
+        # AND A DRAFT IS A DRAFT (§273): the pick is not the cycle's until Save,
+        # which is what makes Cancel cost nothing — so the score cannot have
+        # moved yet, and asserting that is what proves the draft is real.
+        ck("the pick has not reached the cycle before Save",
+           pg.evaluate("()=>!REVIEW.asOfMonth"), pg.evaluate("()=>REVIEW.asOfMonth"))
+        pg.click("[data-ce-save]"); pg.wait_for_timeout(500)
         after = pg.evaluate("""()=>({stored:REVIEW.asOfMonth||null, months:elapsedMonths(),
                                      rev:measureScore(GROUP.keyObjectives[0])})""")
         ck("the pick reaches the stored cycle", after["stored"] == "Aug 26", after)
@@ -224,9 +240,11 @@ def main():
            before == 87 and after["rev"] == 65, (before, after["rev"]))
         # A CLEARED VALUE IS A DELETED KEY (§50.6), or an untouched cycle and one
         # set and cleared would differ and put a phantom change into every save.
-        pg.click(".fstrip-meta.asof .monthbtn"); pg.wait_for_timeout(300)
+        pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
+        pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(300)
         pg.evaluate("""()=>{var b=document.querySelector('.monthpop [data-mclear]'); if(b)b.click();}""")
-        pg.wait_for_timeout(400)
+        pg.wait_for_timeout(300)
+        pg.click("[data-ce-save]"); pg.wait_for_timeout(400)
         ck("clearing it deletes the key rather than storing an empty one",
            pg.evaluate("()=>!('asOfMonth' in REVIEW)"),
            pg.evaluate("()=>REVIEW.asOfMonth"))

@@ -344,15 +344,11 @@
    §278 and not the §261 it was built as. Main was serving
    "smp-shell-v4.55-count-and-unit-follow" when this merge was made, so the name
    goes PAST it rather than beside it (§94.12); confirmed once more immediately
-   before the push (§94.16). */
-/* §282–§286 (the chat round): the corner survives the walk and carries the
-   office's queue, a picture pastes into it, and the notifications say where
-   they stop — the built file's bytes changed, so the name must too, or a
-   returning browser goes on serving itself the old platform out of its own
-   disk (§91). Checked against origin/main serving
-   "smp-shell-v4.61-no-duplicate-declarations", and confirmed again
-   immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.62-office-corner-queue";
+   before the push (§94.16).
+
+   §278.3 merged with main at v4.63-picker-height and went to v4.64 rather than
+   beside it, same rule. */
+const SHELL = "smp-shell-v4.64-objectives-table";
 const ASSETS = [
   "/",
   "/index.html",

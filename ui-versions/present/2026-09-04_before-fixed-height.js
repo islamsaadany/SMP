@@ -1088,7 +1088,7 @@ function masterOpen(){
   /* ASKED AGAIN AT THE PRESS, never trusted from the render that drew the
      entry (§48.2): the menu is drawn once and a viewer switch is one click. */
   if (!SMPRules.mayMasterPresent(world(), viewer())) return;
-  MFLOW = { pick: masterOrder(), n: {}, note: "", q: "", focusAt: null, h: null };
+  MFLOW = { pick: masterOrder(), n: {}, note: "", q: "", focusAt: null };
   openModalHtml("Master presentation", "Pick who presents, and in what order.", "");
   /* WIDER, AND MARKED ON THE OVERLAY (§122, §266.10). Islam: *"make the popup
      a bit bigger to see more of the units and functions."* Two tables of four
@@ -1233,40 +1233,6 @@ function masterPaint(){
       (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
       '>Start the flow</button></div></div>';
   masterWire();
-  /* AFTER the wiring, and from HERE rather than from inside it: the count is
-     the whole list's, which `masterWire()` does not hold — the first build
-     passed it `all.length` from a scope that function cannot see, and every
-     paint threw with the dialog still on screen (§130.3's fault, found by
-     opening it). */
-  masterFix(box, all.length);
-}
-
-/* ── ONE HEIGHT, WHATEVER THE SPLIT (§266.11) ─────────────────────────
-   The two lists take the height the WHOLE list would need — both columns
-   together — so ticking a subject moves a row from one box to the other and
-   moves nothing else. It is measured, never a constant: a row and a header are
-   read off the page, because a number written here goes stale the day the type
-   scale or the padding changes and nothing compares the two (§122.5).
-
-   Measured ONCE per opening and remembered, because the count it is derived
-   from cannot change while the dialog is open — and written as
-   `min(Npx, 52vh, 420px)` rather than as a flat pixel height, so a short window
-   still keeps the buttons on screen (§90) and a resize while it is open is
-   still followed. */
-function masterFix(box, rows){
-  if (!box || !rows) return;
-  if (MFLOW.h == null) {
-    var tr = box.querySelector(".mftbl tbody tr");
-    var th = box.querySelector(".mftbl thead tr");
-    if (!tr || !th) return;
-    var rh = tr.getBoundingClientRect().height;
-    var hh = th.getBoundingClientRect().height;
-    if (!rh || !hh) return;
-    MFLOW.h = Math.ceil(hh + rows * rh + 2);
-  }
-  [].forEach.call(box.querySelectorAll(".mflist"), function(l){
-    l.style.height = "min(" + MFLOW.h + "px, 52vh, 420px)";
-  });
 }
 
 /* The search, in place. Both counts are rewritten INTO their nodes rather than
@@ -1599,38 +1565,6 @@ function deckScale(){
   deck.style.transform = "scale(" + k + ")";
 }
 
-/* ── DRIVING THE DECK WITH A FINGER (§280) ──────────────────────────────
-   Three small pieces of state, and each is here rather than inside a handler
-   because the tap and the swipe are two readings of ONE gesture and have to
-   agree about it.
-
-   `DECKPOINTER` is what produced the gesture. A `click` is not reliably a
-   PointerEvent, so the kind is remembered from the pointerdown that came
-   before it (§280). It starts as "mouse", so a click arriving with no
-   pointerdown at all — a keyboard-driven one — takes the mouse branch and
-   moves forward, which is §265's behaviour unchanged.
-
-   `DECKSWIPED` is how the two readings agree: a swipe ends in a click, so
-   without it one gesture would move two slides.
-
-   `DECKFROM` is where a swipe began, and is null whenever a swipe could not
-   legitimately start — outside fullscreen, on a control, or under a mouse. */
-var DECKPOINTER = "mouse", DECKSWIPED = false, DECKFROM = null;
-
-/* A finger travels while it presses, so a tap is never exactly still: this is
-   the line between "they meant to tap" and "they meant to swipe". 45px is
-   about 6mm on a tablet — further than a tap wanders and shorter than any
-   deliberate swipe. */
-var DECKSWIPE_MIN = 45;
-
-/* The one answer to "is this the stage, or something ON the stage" — asked by
-   the tap and by the swipe, or a gesture that starts in the note box is
-   refused by one and obeyed by the other (§53.5). */
-function deckOwnControl(t){
-  return !!(t && t.closest &&
-    t.closest(".deckbar, button, a, input, textarea, select, [contenteditable]"));
-}
-
 function wireDeck(){
   var root = document.getElementById("deckroot");
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
@@ -1651,7 +1585,9 @@ function wireDeck(){
   });
   /* ── A CLICK ON THE SLIDE MOVES FORWARD, IN FULLSCREEN ONLY (§265) ──
      Islam's choice, so a tablet or a borrowed mouse can still drive the deck
-     with the bar gone.
+     with the bar gone. FORWARD ONLY: a click that went back on one half of the
+     slide would need a visible boundary to be usable, and the whole point of
+     fullscreen is that there is nothing drawn over the slide.
 
      `.fs` alone, because windowed mode has the bar's own Next button six
      inches below and a click-to-advance stage as well would be two answers to
@@ -1659,71 +1595,11 @@ function wireDeck(){
 
      THE INTERACTIVE TARGETS ARE EXCLUDED, or clicking into the note box to
      type would advance the slide out from under the cursor: a `click` that
-     lands on a control is that control's, never the stage's.
-
-     ── AND A FINGER GETS A WAY BACK (§280, reversing §265's forward-only for
-     TOUCH and not for a mouse) ──────────────────────────────────────────
-     Islam, presenting from a tablet: *"it doesn't go left or right."* §265
-     kept the click forward-only for a stated reason — *a click that went back
-     on one half needs a visible boundary, and the point of fullscreen is that
-     nothing is drawn over the slide* — and that reason is about a ROOM
-     watching a projector. A tablet in your hands has no arrows at all, so
-     forward-only is not a conservative choice there, it is the only direction
-     the device can go.
-
-     THE BOUNDARY IS AT A THIRD, NOT THE MIDDLE (his, from three offered).
-     Forward is the act of a talk and back is the exception, so forward keeps
-     the big target and back is deliberate rather than a slip — and two thirds
-     of the slide can still be pointed at without moving the deck.
-
-     A MOUSE IS UNCHANGED AND THAT IS ALSO HIS CALL, with its cost stated: the
-     product now answers one act two ways depending on the device (§53.5), in
-     exchange for nothing a laptop presenter has already learned changing
-     under them. The KIND is remembered from the pointerdown rather than read
-     off the click, because `click` is not reliably a PointerEvent in every
-     browser — read it off the event and Safari quietly takes the mouse
-     branch on a tablet, which is the fault this section exists to fix. */
+     lands on a control is that control's, never the stage's. */
   root.addEventListener("click", function(ev){
     if (!root.classList.contains("fs")) return;
-    /* A swipe ends in a click. Without this the gesture moves the deck and
-       then the click moves it again — one press, two slides. */
-    if (DECKSWIPED) { DECKSWIPED = false; return; }
-    if (deckOwnControl(ev.target)) return;
-    var back = DECKPOINTER !== "mouse" && ev.clientX < innerWidth / 3;
-    deckShow(DECK.i + (back ? -1 : 1));
-  });
-
-  /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§280, Islam's) ────────────
-     The direction people already have from every photo album: the slide
-     follows the finger, so pushing the current slide off to the left brings
-     the next one on. It is the same two acts as the tap zones, offered the
-     way a tablet offers them — nobody has to be told which third they are in.
-
-     TOUCH AND PEN ONLY, for §280's own reason: a mouse keeps §265 exactly,
-     and a drag with a mouse is how somebody selects text rather than how they
-     turn a page.
-
-     THE HORIZONTAL HAS TO WIN. A swipe that is mostly vertical is somebody
-     scrolling or steadying the tablet, and reading it as a page turn is worse
-     than reading it as nothing. */
-  root.addEventListener("pointerdown", function(ev){
-    DECKPOINTER = ev.pointerType || "mouse";
-    DECKSWIPED = false;
-    DECKFROM = (root.classList.contains("fs") && DECKPOINTER !== "mouse" &&
-                !deckOwnControl(ev.target))
-      ? { x: ev.clientX, y: ev.clientY } : null;
-  });
-  /* The browser took the gesture over (a system edge-swipe, a second finger).
-     Whatever it became, it is not ours to read. */
-  root.addEventListener("pointercancel", function(){ DECKFROM = null; });
-  root.addEventListener("pointerup", function(ev){
-    var from = DECKFROM;
-    DECKFROM = null;
-    if (!from) return;
-    var dx = ev.clientX - from.x, dy = ev.clientY - from.y;
-    if (Math.abs(dx) < DECKSWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
-    DECKSWIPED = true;
-    deckShow(DECK.i + (dx < 0 ? 1 : -1));
+    if (ev.target.closest(".deckbar, button, a, input, textarea, select, [contenteditable]")) return;
+    deckShow(DECK.i + 1);
   });
   addEventListener("resize", deckScale);
   /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──

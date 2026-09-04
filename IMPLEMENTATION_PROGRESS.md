@@ -6,11 +6,39 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§279 — the reporting page says where Submit is held —
-merged to `main` 2026-09-04 on Islam's word**, from
-`claude/smo-reporting-submission-m6gbwa`, on top of §274–§278.2 from five other
-sessions; built as §274 and renumbered at the merge because main had taken
-§274 through §278.2 while it was in flight.
+**Latest version:** **§278.3 — the objectives table — merged to `main`
+2026-09-04 on Islam's word**, from
+`claude/seasonal-targets-monthly-proration-5clvu3`, on top of §279–§287 from
+other sessions.
+
+**What §278.3 is.** Four reports from the live product, two causes. The monthly
+drawer spanned every column except the first, and a table shares a spanning
+cell's width across the columns it covers — so on the objectives tables, whose
+first column was the prose one, Objective went 242px → 97px the instant the
+drawer opened and the row 57px → 136px. Islam's own proposal is the fix: the
+drawer starts at the second column, under a new `#` column, and no column moves
+at all. And `display:flex` on the target `<td>` had stopped it being a
+table-cell, which cost two more things nobody had connected — the cell no longer
+filled its row (his *"the target cell turned white"*) and, through the sibling
+`display:block` rule, a tactic's four target boxes laid out **on top of the
+Owner column** at every width (his *"the table is damged"*, measured on the
+shipped build with the grid reporting a width of zero). The flex box moved
+inside the cell and all three ended together. The row hover is gone at his
+instruction — measured, on a striped row the stripe outranked it and it changed
+nothing on every second row — and the objectives tables gained the `#` and the
+drag handle a pillar's key measures have always had, with the pair centred **by
+their marks** rather than by their boxes. Review page:
+`design-mockups/objectives-table/2026-09-04_the-objectives-table.html`; the
+reasoning is §278.3. `checks/objectives-table.py` is **24 red** on the build
+before and green after, 523/0 on the authoriser, 131/0 on the differ, the full
+`qa.py` sweep ERRORS none. Three checks held literals these decisions moved and
+were **rewritten, not deleted** (§218) — one of which had been red on `main`
+since §278 landed and was missed at that merge.
+
+**Before it: §279 — the reporting page says where Submit is held — merged to
+`main` 2026-09-04**, from `claude/smo-reporting-submission-m6gbwa`, on top of
+§274–§278.2 from five other sessions; built as §274 and renumbered at the merge
+because main had taken §274 through §278.2 while it was in flight.
 
 **What §279 is.** Islam, from his own tenant: *"the reporting is not submitting
 to the SMO as there is someting requires a note but I can't find it."* Every
@@ -52,6 +80,14 @@ was built**: with the swap driven by `:hover` alone a four-row drag swapped the
 bars six times, half of them onto a row the pointer was passing, so the CSS now
 holds the swap for the row in your hand. `checks/master-picker.py` is 37 red on
 the build before and **51 green** after.
+
+**§266.11 — and the dialog stopped changing size as rows move**, from his first
+minutes with it: each list was sized by its own content under a cap, so a tick
+made one column shorter and the other taller and the whole dialog stepped under
+the pointer (measured on that build: 571, 604 and 634px across twelve moves). It
+takes the height the whole list would need — both columns together, which cannot
+change while it is open — measured rather than written as a constant, and capped
+so *Start the flow* stays on screen.
 
 **Still open on it, and said rather than discovered:** a drag cannot
 auto-scroll — with all eighteen in the flow the list is 654px in a 420px box, so
@@ -400,6 +436,41 @@ after; §2, §4 and §5 rewritten rather than deleted (§218). Three of the chec
 own first failures were one fault: Edit is a TOGGLE now, so a section pressing it
 blind shuts the pen a previous section left open. Mockup:
 `design-mockups/cycle-name-date-edit/2026-09-03_editing-strip-structures.html`.
+
+### §287 — the caret belongs to the disclosure, not to the class (2026-09-04)
+
+Islam, of the closed Reporting cycle strip: *"what is the arrow function here
+beside the open new cycle?"*
+
+**It has none.** The little `▸` was styled by a rule written for a panel
+elsewhere that folds open and shut. That rule was not scoped, so the arrow was
+drawn on every strip sharing the class — including two that are not foldable at
+all: Setup › Reporting cycle and the group's Focus board strip. Both showed a
+fold marker for a fold that does not exist; pressing it did nothing.
+
+**Scoped to the thing that folds.** The focus panel keeps its arrow and its
+turn; the two plain strips lose one that was never theirs. A duplicate copy of
+the same styling rule, thirty lines above, went with it.
+
+**The first attempt was wrong and the check caught it** — it took the arrow off
+the panel too, because the panel's head *is* its own summary rather than sitting
+inside one. Fixed and re-measured.
+
+**Verified.** `checks/fold-caret.py` proved able to fail **both ways**: 3 red
+against the shipped build with the stray arrow, 3 red against the first attempt
+with the arrow gone from the panel. `cycle-edit`, `perf-line` and `setup-header`
+green; full `qa.py` sweep clean.
+
+**Merged to `main`** on Islam's word, after merging main's §279–§281 into the
+branch. Mine was renumbered §279 → §287 — main took the number while this was
+being built, and §287 rather than §282 deliberately: §282–§286 came off main
+with the chat-round revert but still live on their own branch, so a gap here is
+harmless where a collision would not be. The caret rule was asserted to have
+SURVIVED the merge (main still carried the unscoped selector, so a silent revert
+would have looked identical to a clean merge), the sources were grep'd for
+duplicate declarations — none, main's own §281 having swept them — the built
+file was rebuilt rather than merged, and `sw.js` bumped past a name main had
+already served.
 
 ### §273.5 — "Open a new cycle" drew nothing, on `main` (2026-09-04, same branch)
 

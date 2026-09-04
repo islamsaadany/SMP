@@ -631,6 +631,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   for it). 12 red on the §273 build; the check's own first run measured
   `{none:true}` everywhere because §8 reloads the page and §9 sat after it
   (§50.6). One assertion REVERSED and REWRITTEN, not deleted (§218).
+- **THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§287):** Islam, of
+  the closed cycle strip — *"what is the arrow function here beside the open new
+  cycle?"* **It has none.** `.fstrip-head::after` drew a `▸` as a BARE CLASS
+  selector, beside a rotate rule scoped to `details.fstrip` — so the mark saying
+  *this folds* was painted on every `.fstrip-head` and the mark saying *it is
+  open* on only the one that does. **Three surfaces wear that class and two are a
+  plain `<div>`** (Setup › Reporting cycle, the Focus board's strip): both drew a
+  triangle for a disclosure that does not exist — §96's family, §94.15's
+  furniture. **AND THE FIRST BUILD OF THE FIX TOOK IT OFF THE ONE PLACE IT
+  BELONGS**: `summary .fstrip-head` is a DESCENDANT selector and the panel's head
+  IS the summary, so it matched nothing — caught only because the check asserts
+  BOTH ENDS (§94.2). **The rotate rule carried the same mistake and had been dead
+  since it was written**, with `details.fstrip[open] > summary::after` beside it
+  doing the work, which is why nobody noticed; deleted (§24). **And
+  `.fstrip-head` was declared TWICE in one file** (§29.2, §51.5, §53.6, §88 —
+  fifth time). Measured as PAINT, never as a selector, and proved able to fail
+  both ways: 3 red on the bug, 3 red on my own first attempt. **Merged with main's
+  §279–§281**, mine renumbered §279 → §287 (main took the number while this was
+  being built; §287 rather than §282 on purpose — §282–§286 left main with the
+  chat-round revert and still live on their own branch, so a gap is harmless
+  where a collision is not). **The caret rule was asserted to have SURVIVED the
+  merge**: main still carried the unscoped selector, so a silent revert would
+  have looked identical to a clean merge.
 - **"OPEN A NEW CYCLE" DREW NOTHING, ON `main` (§273.5):** found while
   re-running the neighbours — `checks/repeat-project.py` hung on `#nc-name`, and
   the fault **reproduced on the shipped build before a line was written**.
@@ -1005,6 +1028,26 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **RECORDED, NOT DONE**: a single deck still draws one unlabelled dot per slide,
   nothing says the order is saved without presenting it, and a flow cannot be
   downloaded.
+- **THE DIALOG DOES NOT CHANGE SIZE AS ROWS MOVE (&sect;266.11):** Islam, of
+  what &sect;266.10 shipped &mdash; *"the window height keeps changing on the
+  movement of the choices keep the size fixed."* **REPRODUCED FIRST**: twelve
+  moves between the two columns on that build measured **571, 604 and 634px**,
+  because each list was sized by its own content under a cap &mdash; worst in
+  the middle of the work, where the columns are of comparable length and neither
+  has reached the cap. **IT IS A HEIGHT NOW, AND THE HEIGHT IS WHAT THE WHOLE
+  LIST WOULD NEED** &mdash; both columns together, which cannot change while the
+  dialog is open, so it is fixed by construction rather than pinned.
+  **MEASURED, NEVER A CONSTANT** (&sect;122.5): a row and a header are read off
+  the page, once per opening. **AND WRITTEN AS `min(Npx, 52vh, 420px)`**, not as
+  a flat pixel height, or it stops following the window and the cap that keeps
+  *Start the flow* on screen goes with it (&sect;90) &mdash; eighteen subjects
+  want 615 and get 420, **a tenant with four gets 160**, which is why it is
+  derived rather than flattened. **THE FIRST BUILD THREW ON EVERY PAINT**, the
+  call put inside `masterWire()`, which does not hold the count (&sect;130.3's
+  fault, found by opening it). **2 red** on the build before, and the check
+  makes the state at the worst point AND puts it back (&sect;94.2) &mdash; its
+  first run left four subjects out and reported five real failures in a section
+  measuring something else.
 - **THE PICKER IS TWO TABLES, SEARCHED, AND DRAGGED BY ITS OWN NUMBERS
   (&sect;266.10):** Islam, from his own tenant &mdash; *"make the everyone who
   reports searchable and make it a simple table wiht a nother oclumn of a BU or
@@ -1109,6 +1152,61 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted in the same breath. 474/0; and one of the check's own first failures
   was the CHECK — a function's Performance tab is keyed `fnperf`.
 
+- **THE OBJECTIVES TABLE, AND A CELL THAT STOPPED BEING ONE (§278.3):** four
+  reports from the live product, two causes. **THE DRAWER SPANNED EVERY COLUMN
+  BUT THE FIRST** — right on the key measures table, whose first column is `#`,
+  and wrong on the objectives tables, whose first column is the PROSE one: a
+  table shares a spanning cell's width across the columns it covers, so the
+  twelve month boxes pushed those wider and the one column outside the span
+  paid for all of it (**Objective 242 → 97px**, the table's own width
+  unchanged; on a supporting function, whose name WRAPS, the row then went
+  **57 → 136px**). Islam's own proposal is the fix and, once a `#` column
+  exists, it is the shape the drawer already had. **`display:flex` ON A `<td>`
+  IS NOT A TABLE-CELL**, and that one line cost two more things nobody had
+  connected: the cell stopped stretching to its row, so a tall row showed the
+  bare table under it (*"the target cell turned white"* — nothing to do with
+  hover), and the sibling `display:block` rule made a tactic's four target
+  boxes lay out **on top of the Owner column** with the `.tgrid` reporting a
+  width of **zero** at every width (*"the table is damged"*). The flex box
+  moves inside (`.mpcell`) and all three end together; **one builder**
+  (`monthlyTgtCell`) writes that cell for all four tables, where the shape was
+  written out four times. **THE ROW HOVER IS GONE** (his C): measured, the
+  zebra outranks it, so a white row hovered went `#FFFFFF → #EFF2F6` and a
+  striped row **did not change at all** — a highlight that speaks on half the
+  rows reads as unreliable; §267.1's two patches go with it (they existed only
+  to make the frozen pair follow it), the stale `_shared.css` comment claiming
+  rows separate "on HOVER rather than on a zebra stripe" is corrected in the
+  same edit (§104.8), and the cost is stated — nothing now follows one row
+  across a wide table. **THE `#` AND THE HANDLE ARE THE KEY MEASURES TABLE'S
+  OWN**, copied not redesigned, and it is the SAME question (`mayArrange`, per
+  subject), so nobody gains a right they do not already hold. Two things had to
+  move for the screen and the server to agree: `arranging()` **names its page**
+  (these tables are not on Plan, and the named-page branch does not repeat
+  `mayEditPlan()` — the pen is already an authorisation test), and
+  `lib/authorize.js` **classifies a capability's objectives reorder as
+  `arrange`**, which it never did (a custodian would have watched a row move
+  and the save come back refused, §94.3 exactly). The reorder commits through
+  `KOLISTS`, the registry Add and Remove already use. **THE PAIR IS CENTRED BY
+  ITS MARKS, NOT ITS BOXES** — Islam: *"these are not centered to each other"*,
+  and the measurement was mine: the boxes centre to **0.00px** and the digit
+  still reads **1.62px high**, because its line box carries descender space the
+  glyph never uses; four ways of centring the boxes all read −1.62, because no
+  box-level alignment can move a glyph inside its box. `text-box: trim-both cap
+  alphabetic` makes the box the ink (−1.62 → **0.06px** shipped), taken from
+  the font's own metrics rather than a nudge that would be a guessed constant
+  (§122.5), degrading to today's look where unsupported — and read off the
+  PAINTED PIXELS at eight times scale (§185, in type). **Costs stated**: the
+  `#` column is 63px, which on a unit's nine-column table broke the eye and
+  Remove onto a second line (57 → 74px), so that cell is held to one line and
+  both tables come out at 56. **24 red** on the build before; **three checks
+  held literals these decisions moved and were REWRITTEN, not deleted**
+  (§218) — `plan-tail-fold` asserted a HOVERED row's ground, `fn-ko-edit` and
+  `objective-unit` held four position-keyed cell selectors between them (a
+  position-keyed probe does not fail honestly, it measures the neighbour), and
+  `fn-pillars` held the workbook's column list and **had been red since §278
+  landed, missed at that merge**. **Recorded, not done**: the objectives'
+  READING view still draws no `#`, where a pillar's key measures number their
+  rows in both modes.
 - **A TARGET WITH A SHAPE OF ITS OWN (§278):** Islam — *"targets proration is
   always flat acorss the year but some targets have seasonality so the proration
   is not valid ... so some targets needs a monthly plan input."* **THE ARGUMENT
@@ -5733,6 +5831,14 @@ python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the
                                 # pen's inks measured with the sweep's own function; and
                                 # §11 over HTTP, because a save cannot be seen over
                                 # file:// at all — 46 red on the build before
+python3 checks/fold-caret.py      # the caret belongs to the disclosure (§287): the two
+                                # strips that do NOT fold draw none, open and closed,
+                                # and the panel that DOES keeps its caret AND its
+                                # rotate — both ends, or a build that deleted the rule
+                                # outright passes the absence half (which is what the
+                                # first attempt did). Measured as PAINT, never as a
+                                # selector; the unit is FOUND at runtime, because the
+                                # panel is drawn only where focus marks exist
 python3 checks/attention-dismiss.py # every attention item can be ANSWERED, on the box it
                                 # is about: one item per kind (five of six made, §94.2),
                                 # the ring measured as PAINT not as a class, one press
@@ -5784,6 +5890,24 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/objectives-table.py # the objectives table with the monthly drawer
+                                # in it (§278.3): opening the drawer moves NO column
+                                # (the squeeze was the column left outside the span,
+                                # not the indent), every cell fills its row on a row
+                                # made TALL on purpose, hovering changes nothing on
+                                # BOTH parities, a tactic's four target boxes stay
+                                # inside their cell at six widths, a REAL pointer
+                                # drag reorders the STORED list, the handle's gate
+                                # falsified by making the rule say no and watching
+                                # the same table draw (since §94 no viewer can open
+                                # this table and not reorder it, so an absence over
+                                # an empty table would prove nothing — §113.8), and
+                                # the number and the handle centred by their MARKS,
+                                # read off the painted pixels at 8x. It MAKES its
+                                # state: the demo's objective names are short, so
+                                # the tall row is built rather than waited for.
+                                # 24 red on the build before; SMP_BUILT points it
+                                # at another build
 python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # arithmetic asked of the rule, the drawer PRESSED
                                 # on all four surfaces and the stored plan read
@@ -6125,31 +6249,6 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
-python3 checks/paste-picture.py   # a picture PASTED into the composer (§286): a real
-                                # ClipboardEvent with a real PNG, because a probe that
-                                # calls takePicture() passes on a build where the
-                                # listener was never wired; text still pastes as text,
-                                # the picture TRAVELS with the message, and with
-                                # pictures off it is refused in words
-python3 checks/corner-queue.py    # the office's corner carries the queue (§285) and
-                                # survives the walk (§284): the badge is the LENGTH of
-                                # the list, a reply carries the SAME email the Inbox
-                                # builds, and it listens for page errors — the fault
-                                # found while writing it was a throw in the poll's own
-                                # callback that left a blank box and a clean console
-DATABASE_URL=… node scripts/test-chase.js
-                                # a reply nobody was ever told about (§283): the
-                                # wait is obeyed at BOTH ends (a build using a
-                                # constant fails), reading cancels it, an emailed
-                                # reply is never chased twice, and the sweep's SQL
-                                # is READ OUT OF api/chat.js rather than copied
-DATABASE_URL=… node scripts/test-chat-during-save.js
-                                # the chat does not wait on a save (§282): holds a
-                                # save open against a real Postgres and asks the chat
-                                # its three questions — a lock cannot be modelled by a
-                                # stub, and SMP_CHAT_JOIN_PEOPLE=1 makes the FILE ask
-                                # the pre-§282 question so the red run is the shape
-                                # the product actually had
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
@@ -6383,7 +6482,63 @@ both screens call. **&sect;286: a picture is pasted, not only attached**, feedin
 is attached, from a mockup Islam picked (A), and **&sect;285.2** unifying the two
 corners' panel size, which had differed by 138px.*
 
-*Earlier: 2026-09-04 &mdash; **&sect;280.1: a check that could no longer
+*Earlier: 2026-09-04 &mdash; **&sect;278.3: the objectives table, and a
+cell that stopped being one.** Four reports from the live product in two
+messages, and they come down to two causes. **The drawer spanned every column
+but the first**, which is right on the key measures table (first column `#`,
+narrow) and wrong on the objectives tables (first column the PROSE one): a table
+shares a spanning cell's width across the columns it covers, so the twelve month
+boxes pushed those wider and the one column outside the span paid for all of it
+&mdash; **Objective 242 &rarr; 97px**, the table's own width unchanged, and on a
+supporting function, whose name wraps, the row then went **57 &rarr; 136px**.
+Islam's own proposal (*"shall it go below the whole objective columns"*) is the
+fix, and once a `#` column exists it is the shape the drawer already had.
+**`display:flex` on a `<td>` is not a table-cell**, and that one line cost two
+more things nobody had connected: the cell stopped stretching to its row, so a
+tall row showed the bare table underneath (*"the target cell turned white"*),
+and the sibling `display:block` rule made a tactic's four target boxes lay out
+**on top of the Owner column** with their grid reporting a width of **zero**
+(*"the table is damged"*, measured on the shipped build at every width). The
+flex box moves inside the cell and all three end together, through **one
+builder** where the shape was written out four times. **The row hover is gone**
+at his instruction, and the measurement is why: the zebra outranks it, so a
+white row hovered changed and **a striped row did not change at all**. **The
+`#` and the drag handle** are the key measures table's own, asking the same
+`mayArrange` question &mdash; which needed `arranging()` to name its page and
+the server to classify a capability's objectives reorder as `arrange`, which it
+never did. **And the pair is centred by its MARKS**: Islam sent back a round
+whose boxes centred to 0.00px, because a digit's ink sits 1.62px above the
+middle of its own box and no box-level alignment can move it; `text-box:
+trim-both` makes the box the ink, **0.06px** shipped, read off the painted
+pixels at eight times scale. `checks/objectives-table.py` **24 red** on the
+build before; 523/0 authoriser (two new, both ends, proved able to fail), 131/0
+differ, full `qa.py` ERRORS none, round trip and clean parity green on a virgin
+Postgres 16, and **three checks held literals these decisions moved &mdash;
+rewritten, not deleted**, one of which had been red since &sect;278 landed and
+was missed at that merge. **Merged to `main`.***
+
+
+
+*Earlier: 2026-09-04 &mdash; **&sect;266.11: the dialog does not change
+size as rows move.** Islam, of what &sect;266.10 had just put on production:
+*"the window height keeps changing on the movement of the choices keep the size
+fixed."* **REPRODUCED BEFORE IT WAS EXPLAINED** &mdash; twelve moves between the
+two columns, measuring after each: **571, 604 and 634px**. Each list was sized
+by its own content under a cap, so a tick made one column shorter and the other
+taller and the dialog stepped under the pointer, worst in the middle of the work
+where the two are of comparable length. **IT IS A HEIGHT NOW, AND THE HEIGHT IS
+WHAT THE WHOLE LIST WOULD NEED** &mdash; both columns together, which cannot
+change while the dialog is open, so it is fixed by construction. **Measured,
+never a constant** (&sect;122.5) and written as **`min(Npx, 52vh, 420px)`**, so a
+small tenant still gets a box its own list's size (160px for four subjects
+against 420 for eighteen) and a short window still keeps *Start the flow* on
+screen (&sect;90). **The first build threw on every paint**, the call put in a
+function that does not hold the count &mdash; found by opening it (&sect;130.3).
+`checks/master-picker.py` §1b: **2 red** on the build before, its first failure
+printing his report as three numbers; it makes the state at the worst point and
+**puts it back** (&sect;94.2). 57/0 &middot; full sweep clean.*
+
+*Earlier the same day: **&sect;280.1: a check that could no longer
 go green.** Found running the neighbours after &sect;280's merge:
 `checks/report-chrome.py` failed *"Submit is filled"* &mdash; **reproduced on
 `main`'s OWN build before anything was concluded**, so it was established as not
@@ -6648,7 +6803,7 @@ a figure typed with its own unit is left as typed, the first unit is not a
 change, and Y/N is neither side. One function, both surfaces, no server change.
 **Cost stated and accepted**: a row already stored stays `2%` until re-entered
 once. `checks/unit-follows.py` **5 red** on the build before; nine neighbouring
-checks, 491/0 and the full sweep green. **On the branch, not merged.***
+checks, 491/0 and the full sweep green. **Merged to `main`.***
 
 *Earlier: 2026-09-03 &mdash; **&sect;276: a count is owed in whole
 ones.** Islam: *"we need a compilation type that prorate to integrs only .. if
@@ -7016,7 +7171,7 @@ door on the unit's own band** for the people who hold it. **The global is
 `TRAIL`**, because `HISTORY` is the platform's closed cycles and hydration
 silently replaced the module (&sect;56.7). `checks/history-page.py` **25
 red** on `main`'s build; `test-history-read.js` on a real Postgres; 491/0;
-KB corpus in step; full sweep ERRORS none. **On the branch, not merged.***
+KB corpus in step; full sweep ERRORS none. **Merged to `main`.***
 *Earlier: 2026-09-03 &mdash; **&sect;261: the Setup tables are arranged,
 and their rows act from one menu.** Islam: *"allow me in the setup to rearrange
 the business units table so they appear in the navigation as per this order and
@@ -7585,7 +7740,6 @@ restored and asserted. `checks/plan-edit-line.py`: 48 red on the build before
 454/0 and 126/0 on the server. **Both sweeps were most of the work** &mdash;
 &sect;248 grep'd `.penbtn` and the filler's control is a `.fillcta` (&sect;51.11:
 grep for the CONTROL, not one of its classes).*
-
 
 *Earlier: 2026-09-01 &mdash; **&sect;245: the functions are on the
 function half, in one list; &sect;246: the cycle note is a line somebody

@@ -30734,6 +30734,52 @@ everywhere.
 
 ---
 
+## §266.11 — THE DIALOG DOES NOT CHANGE SIZE AS ROWS MOVE (2026-09-04)
+
+Islam, with a screenshot of the picker he had just been given: *"the window
+height keeps changing on the movement of the choices keep the size fixed."*
+
+**REPRODUCED BEFORE IT WAS EXPLAINED.** Twelve moves between the two columns on
+the shipped build, measuring the dialog after each: **571, 604 and 634px** —
+three heights, stepping up and down under the pointer. Each list was sized by
+its own content under a cap, so a tick made one column shorter and the other
+taller and the whole dialog followed; it is worst in the middle of the work,
+where the two columns are of comparable length and neither has reached the cap.
+
+**IT IS A HEIGHT NOW, NOT A max-height** — and the height is the one thing in
+that dialog that cannot change while it is open: **what the whole list would
+need, both columns together.** The subjects that report do not change between
+one tick and the next, so a height derived from their number is fixed by
+construction rather than by being pinned.
+
+**MEASURED, NEVER A CONSTANT** (§122.5, which is this file's own scar): a row
+and a header are read off the page, because a pixel number written here goes
+stale the day the type scale or a padding changes and nothing compares the two.
+It is taken **once per opening** and remembered on `MFLOW`.
+
+**AND IT IS WRITTEN AS `min(Npx, 52vh, 420px)`, NOT AS A FLAT PIXEL HEIGHT.**
+A stored pixel height would stop following the window, and the cap is what keeps
+*Start the flow* on screen (§90) — so the natural height, the viewport and the
+ceiling are all still in the answer. Measured: the tenant's eighteen subjects
+want 615px and get 420 at a 950px window and 364 at a 700px one; **a tenant with
+four gets 160px**, which is the point of deriving it rather than flattening it —
+fixed without being the same size for everybody.
+
+**THE FIRST BUILD THREW ON EVERY PAINT.** The call was put inside
+`masterWire()`, which does not hold the subject count — `all` is a local of
+`masterPaint()` — so every paint ended in a `ReferenceError` **with the dialog
+still on screen**, which is §130.3's fault exactly and reads as a control that
+does nothing. Found by opening it.
+
+`checks/master-picker.py` gains §1b and is **2 red** on the build before, its
+first failure printing Islam's report as three numbers. It **makes the state at
+the worst point** — twelve moves, so the columns pass through comparable lengths
+— and **puts it back afterwards** (§94.2): the first run left four subjects out
+of the flow and reported five real failures in a later section that was
+measuring something else entirely.
+
+---
+
 ## §267 — THE PLAN TABLE AT A NARROWER WINDOW (2026-09-03)
 
 Islam, on the build §260 had just merged, with a screenshot of a **zoomed**
@@ -32887,6 +32933,189 @@ keeps the class). **The lit assertion's first run reported a correct build as
 broken** — it read `getComputedStyle` after `paint()` had detached the node,
 which computes to an empty string (§222's own lesson, §68.10's family).
 
+---
+
+## §278.3 — THE OBJECTIVES TABLE, AND A CELL THAT STOPPED BEING ONE
+
+Islam, from the live product, in one message about a supporting function's
+objectives with the monthly drawer open:
+
+> *"trying t in the objectives the obecjtive part got damaged. shall it go
+> below the whole objective columns to keep the table tidy?"*
+>
+> *"not sure why on the approaching of hte first row all turnd grey but the
+> target cell turned white, and do you think the color change on hovering is
+> helpful here given that the other row is already grey? or shall we cancel it
+> for good"*
+>
+> *"the objectives needs a number column as well like the key measures of
+> direction with a handle to move them as well"*
+
+and then, of the shipped build a round later: *"the table is damged fix this on
+the way as well."*
+
+**FOUR REPORTS, TWO CAUSES, AND THE SECOND CAUSE IS ONE LINE OF CSS.**
+
+### The squeeze — and his own proposal is the fix
+
+`monthlyRowFor` draws the drawer as a blank first cell plus a cell spanning the
+rest. That is what the key measures table has always done, and it was right
+there: its first column is `#`, narrow and fixed. On the objectives tables there
+was no `#` column, so the blank cell landed under **Objective** and the drawer
+spanned columns 2..n.
+
+**A TABLE SHARES A SPANNING CELL'S PREFERRED WIDTH ACROSS THE COLUMNS IT
+COVERS.** So the twelve month boxes pushed those columns wider, the table's own
+width did not change, and the one column outside the span paid for all of it.
+Measured on a supporting function at 1500px: **Objective 242px → 97px** the
+instant the drawer opens, table 1493px before and after. On his screen, where
+that table's name **wraps** (§226), the name then went to four lines and the row
+went **57px → 136px** — which is what "damaged" looks like.
+
+His question — *"shall it go below the whole objective columns"* — is the fix,
+and after the `#` column exists it is also the shape the drawer already had:
+the blank cell sits under `#`, the span covers everything after it, and **no
+column moves at all**, measured on both tables. *The squeeze was never the
+drawer's indent; it was that the one column left outside the span was the prose
+one.*
+
+### The white cell, the spilled boxes, and the same line
+
+`td[data-mptgt] { display:flex }` seated the box and the mark on one line.
+**A `display:flex` td is no longer a table-cell.** Two consequences, reported
+weeks apart and never connected:
+
+* **It stops stretching to its row's height.** On his tall row every cell
+  measured 136px and the target cell measured **57** — and the 79px underneath
+  it was not the cell at all, it was the bare table showing through. Nothing to
+  do with hover; hover only made it visible.
+* **`td[data-mptgt]:has(> .tgrid) { display:block }`** did the same thing to a
+  tactic's four boxes. A `display:block` td makes the table generate an
+  anonymous cell around it, and the block then computes its width against
+  nothing: measured on the shipped build, the `.tgrid` reports a width of
+  **zero** and its four fixed boxes lay out **on top of the Owner column**, at
+  every width from 1920 down. That is *"the table is damged"*, and it is the
+  same line.
+
+The flex box moves inside: **`.mpcell`** seats the box and the mark, the `<td>`
+goes on being a cell, and all three symptoms end together. **ONE BUILDER**
+(`monthlyTgtCell`) writes that cell for all four tables — the shape was written
+out four times, and this would have been four edits to get right instead of one
+(§53.5).
+
+### The hover — and it did nothing on every second row
+
+Islam: *"do you think the color change on hovering is helpful here given that
+the other row is already grey? or shall we cancel it for good"*, then **C**.
+
+**MEASURED, THE ANSWER IS WORSE THAN THE QUESTION.** `_shared.css` sets
+`tbody tr:hover > td { background:var(--surface-2) }` and `arrange.css` later
+sets a zebra on the same tables at equal specificity — so the stripe wins:
+a white row hovered goes `#FFFFFF → #EFF2F6`, **a striped row hovered stays
+`#F5F7FA`**. The highlight spoke on half the rows and was silent on the other
+half, which is why it read as unreliable rather than helpful.
+
+Removed, and **§267.1's two patches go with it** — they existed only to make
+the frozen pair follow the hover, and with nothing to follow they would paint a
+tint no other cell has. **The comment in `_shared.css` was corrected in the same
+edit**: it had said the design separates rows *"on HOVER rather than on a zebra
+stripe"* since before a zebra was added to these tables, which is §104.8's
+family — a recorded intention nothing compares with the code.
+
+**THE COST IS STATED RATHER THAN ARGUED**: these tables are wide and scroll
+sideways, and nothing now follows one row across the columns. The register's own
+hover on Setup is untouched — there the hover sets the ROW where the zebra also
+sets the row, so the later rule wins and it works.
+
+### The number column, and who may drag it
+
+The `#` and the grip are the key measures table's own, **copied rather than
+designed again**. The number is always drawn; the handle only while arranging.
+
+**IT IS THE SAME QUESTION, NOT A NEW RULE.** `mayArrange` is answered per
+SUBJECT (§101), so nobody gains a right they do not already hold over the rows
+beneath. Two things had to move for the screen and the server to agree:
+
+* **`arranging()` names its page.** It asked `EDIT_PAGE.plan`, and these tables
+  are not on the Plan page — a unit's are on Foundation, the group's on the
+  Temple, a function's on its Overview. The named-page branch deliberately does
+  **not** repeat `mayEditPlan()`: `EDIT_PAGE[page]` is only true for somebody
+  who may author that page, and `canArrange()` has already asked the separate
+  reorder question. Asking the PLAN's grant of a Foundation table would be a
+  third question nobody meant.
+* **`lib/authorize.js` classifies a capability's objectives reorder as
+  `arrange`.** That walk had no reorder callback at all, so moving a row there
+  fell through to `capPlan` — the office's — while the identical act on a
+  UNIT's objectives has classified as `arrange` since §101. One question, two
+  answers; and with a handle now drawn on both, a custodian would have watched
+  a row move and the save come back refused, which is §94.3's exact fault.
+
+**THE LIST IS THE TABLE'S OWN.** The reorder commits through `KOLISTS`, the
+registry Add and Remove already act through, because the four callers hand in
+four different arrays and a second way of finding it is how two of them come to
+disagree. `capKoTarget()` answers which subject a capability's objectives belong
+to and **returns null for a shape nobody anticipated**, so such a table draws
+the number and no handle rather than a handle the save would refuse.
+
+**RECORDED, NOT DONE**: the reading view of the objectives (`koView`) still
+draws no `#`, where the key measures table numbers its rows in both modes. The
+mockup showed the editing table and that is what was signed off; whether the
+read view should be numbered too is a decision, not an omission to slip in.
+
+### §278.3a — The pair, and the measurement that was of the wrong thing
+
+Islam, of the first drawing: *"the number and the handle are a bit misalignment
+they both needs to be centered vertically."* Centred their boxes. Then, of that:
+**"the centering these are not centered to each other."**
+
+**HE WAS RIGHT AND THE MEASUREMENT WAS MINE.** The two boxes centre to
+**0.00px** and the digit still reads high, because a digit's line box carries
+descender space the glyph never uses: the ink sits **1.62px above the middle of
+its own box** at 11px. Four ways of centring the boxes were built and measured —
+`vertical-align:middle` on both, a flex pair, a flex pair matching the grip's
+line-height, and the grip's box shrunk to hug its own bars — and **every one
+reads −1.62**. No box-level alignment can move a glyph inside its box.
+
+`text-box: trim-both cap alphabetic` trims the number's box to the cap height
+and the baseline, so **the box IS the ink** and centring it centres the mark:
+**−1.62px → +0.38px** in the mockup and **0.06px** in the shipped markup, which
+is the device pixel grid. Taken from the font's own metrics rather than from a
+nudge measured once, which would be a guessed constant to re-measure the day the
+typeface changes (§122.5); a browser without `text-box` ignores the line and
+gets exactly what this looked like before, which is stated rather than assumed.
+
+**AND IT IS READ OFF THE PAINTED PIXELS** at eight times scale, never off the
+element boxes — §185's rule, in type. Measuring the boxes is what produced the
+round Islam sent back.
+
+### What it costs, and the check
+
+The `#` column takes **63px**, which the Objective column absorbs and then some:
+234px on a function's table and 215px on a unit's, against 97px with the drawer
+open today. On a unit's nine-column table those 63px were enough to break the
+eye and **Remove** onto a second line and take the row to 74px, so that cell is
+held to one line (§88) and both tables come out at **56px**.
+
+`checks/objectives-table.py`: **24 red** on the shipped build, and its first
+failures print Islam's own symptoms verbatim — *"not in force yetUntil"* and
+*"Set Sum, Latest or Average"*, the second written before §276 added Count and
+compared with nothing (§214.3); it reads `SMPRules.COMPILES` now, so a fifth
+rule is named the day it is added. The check makes the state it measures — the
+demo's objective names are short, so the tall row that shows the cell fault is
+built rather than waited for — asserts the hover on **both parities**, and
+falsifies the handle's gate by making the rule say no and watching the same
+table draw, because since §94 there is no viewer who can open this table and may
+not reorder it (asking one who cannot open it at all would be an absence over an
+empty table, §113.8).
+
+**AND ONE CHECK HELD A RULE THIS REVERSES.** `checks/plan-tail-fold.py` asserted
+that a HOVERED row has one ground — §267.1's fix, written against a hover that
+no longer exists. **REWRITTEN, NOT DELETED** (§218): the property Islam reported
+is that a row does not read as split down the middle, which is still worth
+guarding and is no longer a fact about hover — and it is measured as PAINT now,
+walking up to whatever actually lays down a colour, because the frozen pair
+carries an explicit white where the rest of the row is transparent and on a
+white ground those are the same pixels.
 ## §273.7 — THE MERGE THAT CARRIED §273.4 TO MAIN (2026-09-04)
 
 Islam: **"MERGE"**. `main` had moved **twenty-one commits** under this branch
@@ -33280,7 +33509,52 @@ byte-identical to the merged state, confirmed by diff. `report-chrome`,
 `submit-gate`, `report-saves`, `report-blockers`, `perf-line` and
 `deck-fullscreen` green; full `qa.py` sweep ERRORS none.
 
----
+
+## §287 — THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (2026-09-04)
+
+Islam, of the closed Reporting cycle strip: *"what is the arrow function here
+beside the open new cycle?"*
+
+**IT HAS NONE.** `.fstrip-head::after` drew a `▸` and was written as a **bare
+class selector**, sitting directly beside a rotate rule that IS scoped to
+`details.fstrip` — so the mark that says *this folds* was painted on every
+`.fstrip-head` in the product while the mark that says *it is open* was painted
+on only the one that folds. **Three surfaces wear that class and two of them are
+a plain `<div>`**: Setup › Reporting cycle, and the group's Focus board strip.
+Both drew a disclosure triangle for a disclosure that does not exist — pointing
+at nothing, never rotating, doing nothing when pressed. §96's family (renders
+perfectly, means nothing) and §94.15's (a control with no audience is
+furniture).
+
+**IT WAS ONLY EVER RIGHT ON ONE SURFACE**, the focus-measures panel, which is a
+real `<details>` with a `<summary>` and where the caret is load-bearing.
+
+**AND THE FIRST BUILD OF THE FIX TOOK IT OFF THAT ONE.** Written
+`details.fstrip > summary .fstrip-head::after`, which is a DESCENDANT selector —
+and the panel's head IS the summary, so it matched nothing at all. Measured, not
+read: the caret went from `"▸"` to `none` on the one place it belongs, and the
+check caught it because it asserts BOTH ENDS (§94.2). `summary.fstrip-head`,
+never `summary .fstrip-head`.
+
+**THE ROTATE RULE CARRIED THE SAME MISTAKE AND HAD BEEN DEAD SINCE IT WAS
+WRITTEN** — `details.fstrip[open] > summary .fstrip-head::after` never matched
+either, and `details.fstrip[open] > summary::after` beside it was doing the work,
+which is exactly why nobody ever noticed. The dead half is **DELETED, not left
+standing** (§24).
+
+**AND `.fstrip-head` WAS DECLARED TWICE IN ONE FILE** — the second block
+re-stating the four flex properties the first already sets, thirty lines up. The
+redundant copy goes with it: a rule written twice is why editing one of them
+appears to do nothing (§29.2, §51.5, §53.6, §88 — **fifth time in this
+project**).
+
+`checks/fold-caret.py` measures the **PAINT** rather than the selector (§94.8,
+§145.14 — a build that keeps the class and loses the rule reads `none`), and is
+proved able to fail **both ways**: **3 red** against the shipped build with the
+stray caret, and **3 red** against my own first attempt with the caret gone from
+the panel. The panel is drawn only for a unit carrying focus marks, so the unit
+is FOUND at runtime rather than named — and the sub-page key is `performance`,
+not `perf`, which cost the first run its panel entirely (§50.6).
 
 ## §282 — THE CHAT DOES NOT WAIT ON A SAVE, AND THE NOTIFICATIONS SAY WHERE THEY STOP (2026-09-02)
 

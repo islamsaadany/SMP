@@ -169,7 +169,8 @@ def open_plan(pg, kind, key):
     sec = pg.query_selector('[data-sub2="plan"]') or pg.query_selector('[data-sub2="proj"]')
     if sec and sec.is_visible():
         sec.click(); pg.wait_for_timeout(320)
-    pen = pg.query_selector('#panel .penbtn[data-page]')
+    # §268: the strategy pen is on the section line now, outside #panel
+    pen = pg.query_selector('#secrow-in .secpen')
     if not (pen and pen.is_visible()):
         return False
     pen.click(); pg.wait_for_timeout(650)          # a REAL press (§70)

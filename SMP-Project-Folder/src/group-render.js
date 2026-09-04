@@ -468,8 +468,13 @@ function compileCell(c){
    opacity — the mockup's `.85` took `--ink-3` from 5.1:1 to about 4.4 at
    10px, which is §38.5 walked into while quoting it. */
 function repNote(row){
+  /* `notetext` is the break rule and nothing else (§271): a note may be
+     several lines now, and this shape prints one under a row's name while
+     `noteRead` prints one in a Note column — two presentations of the same
+     stored field, so the rule that keeps a typed newline is declared once and
+     both ask for it. */
   return row && row.note
-    ? '<span class="repnote"><span class="repkey">Reported</span>' +
+    ? '<span class="repnote notetext"><span class="repkey">Reported</span>' +
       esc(row.note) + '</span>'
     : '';
 }
@@ -2408,41 +2413,12 @@ function filling(page, acKey, ctx){
   return ctx ? mayFillRow(acKey, ctx) : mayFill(acKey);
 }
 
-/* mayAuthor(), NOT the raw grant (§94). Every "Edit" bar and every pen in
-   the platform asks this one question, so a strategy page cannot acquire a
-   pen that is open to somebody the rule closes it to — the gate is on the
-   control, not on each of the eleven call sites that draw one. */
-function editBar(page, acKey){
-  /* §252.2: the download left this bar for the Presentation menu, so the
-     bar is the pen's again — `dl` and `dlPlanBtn()` are deleted rather than
-     left answering "" (§24). §119.9's argument (a custodian who cannot author
-     may still take the plan away) expired with §252.2's own narrowing: the
-     file is the office's now. */
-  /* §145.14: the worded bar takes the corner button's three states — red
-     while something is missing, quiet amber while only pending remains,
-     nothing after; Done while the mode is open. */
-  if (!mayAuthor(acKey || "u_found")) {
-    if (mayFill(acKey || "u_found")) {
-      var inner;
-      if (EDIT_PAGE[page])
-        inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
-      /* §223: THE DOOR ASKS WHAT IS FILLABLE, THE WORDS ASK WHAT IS COUNTED.
-         A page whose only blanks are optional (§214.2, §214.4) counts nought
-         and still has something to fill in — offering no way in was how Hala
-         met a Definition she could edit and no control to edit it with. */
-      else if (gapTotal(TARGET))
-        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
-      else if (gapOpenable(TARGET))
-        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in what is empty</button>';
-      else inner = '';
-      return inner ? '<div class="pageact">' + inner + '</div>' : '';
-    }
-    return '';
-  }
-  return '<div class="pageact"><button class="editbtn" data-page="' + page + '">' +
-    (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
-}
-
+/* §268: `editBar()` IS GONE, NOT LEFT UNCALLED (§24). It drew the worded Edit
+   bar on a supporting function's Overview, and that control is `secActs()`'s
+   now — on the section line, beside Foundation · SWOT · Plan. A builder with
+   no caller is one the next reader takes for load-bearing; §214 paid for that
+   twice in a day, once by deleting a RANGE and taking a live function with it,
+   which is why this went by name and by brace depth. */
 /* The pen, in the corner of the box it edits.
 
    A bare "Edit" bar floating above a page says a page is editable; a pen in
@@ -2473,10 +2449,164 @@ function editBar(page, acKey){
    had the same line written twice; a third would have been written the day
    somebody added a pane, and §53.5's whole rule is that a unit and a function
    must not drift apart in silence. */
+/* ── THE PEN LEFT THIS SLOT FOR THE SECTION LINE (§268) ─────────────
+   Islam: *"the edit button of the plans can you make it in the same line of
+   the foundation sowt and plan? as it's a better placement for opening and
+   savng?"* — and the measuring said more than the ask did: the pen landed at
+   four different heights depending on which section was open (234 Foundation,
+   233 SWOT, 236 a unit's Plan, 308 a function's Projects), and a function with
+   two projects drew TWO of them — one below the fold — both throwing the same
+   `EDIT_PAGE.plan`. §94.15's rule: a control with no audience of its own is not
+   a choice, it is a duplicate. `secActs()` draws the one control now.
+
+   WHAT STAYS HERE IS ARRANGE, and that is not an oversight. §101 gave the
+   arrows to somebody who may reorder and may NOT author — so they are never
+   the same person as the pen's holder, the slot is never shared, and the
+   arrows belong beside the rail they reorder rather than on a line that names
+   the page. The plan download is NOT here at all any more: §252.2 moved it
+   into the Presentation menu and deleted `dlPlanBtn()`, which this branch was
+   still calling — a clean merge that would have thrown on every plan pane
+   (§56.7). Where the download lives, and who gets it, is written once in
+   `presentMenu()` and once in `SMPRules.mayDownloadPlan()`. */
 function paneActs(page, acKey){
-  var inner = penBtn(page, acKey) + arrangePaneBtn();
+  var inner = arrangePaneBtn();
   return inner ? '<div class="paneact">' + inner + '</div>' : '';
 }
+
+/* ── WHICH PEN THE OPEN SECTION HAS (§268) ──────────────────────────
+   ONE MAP, and it is read by the pen AND by the fill bar's button, because
+   two answers to "which page is this section" is exactly how the two came to
+   disagree: `fillPageForSec()` answered `foundation` for a PILLARS function's
+   Overview while the page has read `EDIT_PAGE.capfoundation` since §213 made
+   the two formats one page — so its red button set a flag nothing reads and
+   opened **0 editable fields**, rendering perfectly the whole time (§96's
+   family). Fixed by there being one map rather than by correcting a second.
+
+   THE PAIRS ARE THE ONES THE CONTROLS ALREADY ASKED, to the letter, so
+   nobody's rights move: a unit's Foundation `u_found`, its SWOT `u_anal`,
+   its Plan `u_plan`; a function's Overview `k_found`, and its Projects
+   `u_plan` — which reads odd and is deliberate, because `projEditing()` has
+   asked `mayEditPlan()` since spec 010 and giving a function's plan a looser
+   gate than a unit's would be inventing a decision here, on the quiet.
+
+   `who` (Strategy › Who enters) answers null: it has no edit mode at all, it
+   has `canName()`, so the slot is empty there rather than holding a control
+   that opens nothing (§61). */
+/* A TABLE, SO THE KEYS AND THE PAIRS ARE ONE THING. `secPagesOpen()` below
+   walks it to answer "every section of this tab", and a section listed in one
+   place and not the other is how the pen and the mode come to disagree — the
+   very drift §268 removed between this map and `fillPageForSec()`. A unit has
+   no `proj` section and a function no `plan`, so carrying both under both
+   costs nothing and means the table need not know which side spells it which
+   way (§59's `unitLike()` argument, one surface out). */
+/* §270: THE ACCESS KEY IS NAMED ONCE, ON THE UNIT SIDE, and resolved for a
+   function through the shared rule — never spelled twice. The first build of
+   this wrote `k_found` for a function's Overview and `u_plan` for its Plan,
+   which is what the old controls asked (§268 kept the pairs to the letter so
+   no rights would move) and what §217 had already corrected on the SERVER. A
+   table that spells the pairing itself is a second answer to a question
+   `strategyPageOf()` exists to answer (§53.5). What varies per side and is
+   NOT an access question is the render page: a unit's Foundation is
+   `foundation`, a function's Overview is `capfoundation` (§213). */
+var SEC_PENS = {
+  found: { unit: "foundation", fn: "capfoundation", ac: "u_found" },
+  swot:  { unit: "analysis",                        ac: "u_anal"  },
+  plan:  { unit: "plan",       fn: "plan",          ac: "u_plan"  },
+  proj:  { unit: "plan",       fn: "plan",          ac: "u_plan"  }
+};
+function secPagePair(sec){
+  var e = SEC_PENS[sec];
+  if (!e) return null;
+  var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
+  return page ? [page, e.ac] : null;
+}
+
+/* ── ONE EDIT, ONE DONE (§269) ──────────────────────────────────────
+   Islam: *"the edit opens all so I don't need to edit each tab and then save
+   for each — it's one edit and one save?"*
+
+   AND WHAT WAS THERE WAS WORSE THAN THREE PRESSES. `EDIT_PAGE` held a flag per
+   SECTION and `leaveModes()` clears it on a TAB or DESTINATION change and not
+   on a section one — so opening Foundation and walking to SWOT left Foundation
+   OPEN with the line reading `Edit`, and opening the Plan as well gave two open
+   modes whose one shared control could only ever close the one you were
+   standing on. Measured: `open: ["foundation","plan"]`, the button saying
+   *Done editing* on those two and *Edit* on the SWOT beside them. A control
+   whose word is true of one section and false of its neighbour is not a
+   control anybody can trust.
+
+   THE MODE IS THE TAB'S, NOT THE PAGE'S — which is what a plan is. One press
+   opens every section of it, one press closes them all, and the word reads the
+   same wherever you stand.
+
+   ONLY WHAT THIS PERSON MAY AUTHOR, and the reason is measured rather than
+   assumed. A UNIT's three pages (`u_found`, `u_anal`, `u_plan`) all resolve to
+   the area `unit_strat`, so they can NEVER disagree — over every person against
+   every unit in the tenant, not one pair differs. On a unit, then, opening all
+   three is opening exactly what the one Strategy grant says, and never a page
+   more. A FUNCTION is where the filter earns its place: its Overview asks
+   `k_found` (`fn_strat`) and its Plan asks `u_plan` (`unit_strat`, the pairing
+   §268 kept to the letter so nobody's rights would move), which are two
+   different columns of the matrix — so a tenant that opens one and not the
+   other must get one section and not the other. Asked of `mayAuthor()` per
+   page, which is the shared rule (§42): the screen can never open a page the
+   save would refuse. Nothing here grants anything; it draws fields.
+
+   RECORDED AND NOT FIXED: that `u_plan` is also §217's remaining drift on the
+   SCREEN. §217 made the SERVER judge a supporting function's plan by
+   `strategyPageOf()` — `k_proj` — while `projEditing()` still asks
+   `mayEditPlan()`, i.e. `u_plan`. Measured across every person and every
+   function on this tenant the two never disagree, so nothing is broken today;
+   correcting it would MOVE who may author a function's plan, which is a
+   decision and not a tidy-up (§268 deliberately moved no rights).
+
+   DEDUPED, because `plan` and `proj` name one page and a unit's list would
+   otherwise open it twice. */
+function secPagesOpen(){
+  var seen = {}, out = [];
+  Object.keys(SEC_PENS).forEach(function(k){
+    var p = secPagePair(k);
+    if (!p || seen[p[0]] || !mayAuthor(p[1])) return;
+    seen[p[0]] = 1;
+    out.push(p[0]);
+  });
+  return out;
+}
+function curSec(){
+  return (typeof CURSEC !== "undefined" && typeof currentSub !== "undefined")
+    ? (CURSEC[currentSub] || "") : "";
+}
+/* The pair, only where this person may AUTHOR it. A fill-grant holder's
+   control is the missing bar's, in the same tail, and has been since §145.14 —
+   drawing a second copy of it here is the duplication this section removes,
+   not a second instance of it. */
+function secPenPair(){
+  var p = secPagePair(curSec());
+  return (p && mayAuthor(p[1])) ? p : null;
+}
+/* WORDED, NEVER THE PEN GLYPH. The 28px hollow circle is built for the corner
+   of a card, where the card frames it; in a wide tab row there is nothing to
+   frame it and it all but disappears — drawn into the real row and looked at,
+   which is what settled it. And a glyph cannot read *Done editing*, which is
+   the half of the ask that was about saving.
+
+   NOT `Save` (put to Islam, 2026-09-02): the platform writes as you type, so a
+   button promising to save says the work is lost until it is pressed — §124's
+   fault, a word claiming more than the state — and *Save draft* already means
+   something else on Reporting (§87's twins). */
+function secActs(){
+  var p = secPenPair();
+  if (!p) return '';
+  var on = !!EDIT_PAGE[p[0]];
+  /* §269: `data-page` still names THIS section's page — it is what the word
+     is read from and what every check presses — and `data-pageset` is what the
+     press acts on. Two attributes because they answer two things: which page
+     this control belongs to, and which pages one press moves. */
+  return '<button class="secpen' + (on ? ' on' : '') + '" data-page="' +
+    esc(p[0]) + '" data-pageset="' + esc(secPagesOpen().join("|")) + '">' +
+    (on ? 'Done editing' : 'Edit') + '</button>';
+}
+
 
 /* §252.2: the block that stood here described `dlPlanBtn()` and went with it.
    Where the plan download lives, and who gets it, is written once in
@@ -2512,8 +2642,17 @@ function penBtn(page, acKey){
       'Fill in missing elements</button>';
     /* §223: nothing COUNTED, but something fillable — same door, quieter
        words, because nothing here is owed. */
+    /* §272: quiet here too. §272.7 found the door drawn in TWO places and
+       dressed in two voices — the section row's bar and this corner — and
+       §268 has since removed the second copy for a unit and a function
+       outright (`paneActs` calls this for the GROUP alone now, and
+       `secPenPair`'s own note says a fill-grant holder's control IS the
+       bar's). This branch is therefore the group's only, and it stays in the
+       same voice as the bar rather than being left as the one red survivor:
+       a screen carrying one control in two dresses says nothing consistent
+       about either. */
     var open = gapOpenable(TARGET);
-    if (open) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
+    if (open) return '<button class="eqcta cornerbtn" data-fillcta="' + page +
       '" title="' + plural(open, "empty field") + ' you can fill in">' +
       'Fill in what is empty</button>';
     return '';
@@ -2534,6 +2673,38 @@ function penBtn(page, acKey){
    the foundation rendered inputs that were bound to nothing, so every edit
    looked accepted and was silently discarded on the next repaint. */
 var FIELDS = [];
+/* ── WHICH REGISTER THIS PAGE IS IN (§272) ───────────────────────────
+   The bar counts what is MISSING, or — when nothing is owed and the viewer
+   is a filler — what is merely EMPTY. Three things read that answer (the
+   band, the rail's marks and the walk's marker), and every cell asks the
+   walk's, so it is worked out ONCE per paint and reset beside `FIELDS`.
+   Asking per cell would walk the whole subject for each of the hundred-odd
+   controls a plan draws. */
+var GAP_MODE = null;
+function gapEmptyMode(){
+  if (GAP_MODE === null)
+    GAP_MODE = !gapTotal(TARGET) &&
+      typeof seesEmpty === "function" && seesEmpty();
+  return GAP_MODE;
+}
+/* §192.4 SAID THE COUNT AND THE WALK ARE ONE LIST, and marked the counted
+   one because that was the only list the bar ever counted: it had found the
+   walk stepping through five collaborator pickers in a pillar the band said
+   owed one thing. That rule is kept and not weakened — what changed is that
+   the bar now has two registers, so the question is not *is this field
+   counted* but *is this one of the fields the bar in front of me is
+   counting*, and the two answers are the two lists. In the missing register
+   this is byte-for-byte §192.4's behaviour.
+
+   A CELL THAT NAMES NO KIND KEEPS THE DEFAULT ITS `fillable` GATE ALREADY
+   HAS (§228.2, twelve lines down): fillable unless the shared list says
+   otherwise. Two answers to *may this be written* on one cell is the drift
+   §205 exists to stop. */
+function gapWalkable(field, kind){
+  if (SMPRules.isGapField(field)) return true;
+  if (!gapEmptyMode()) return false;
+  return !kind || (SMPRules.GAP_FILLABLE[kind] || []).indexOf(field) > -1;
+}
 /* A PARAGRAPH TYPED AS TWO PARAGRAPHS MUST READ AS TWO PARAGRAPHS (§51.1).
    The editing control is a <textarea>, which keeps every line break the person
    typed; the READING control was a bare <span>, and HTML collapses newlines to
@@ -2593,6 +2764,17 @@ function fitGrow(t){
 function growFields(root){
   (root || document).querySelectorAll("textarea.fld.grow").forEach(fitGrow);
 }
+/* AND ONE WIRER BESIDE IT (§271). `growFields` sizes what a paint has just
+   drawn; this is the listener for the keystrokes in between, and it exists
+   because the reporting note is NOT a `[data-fld]` field — it has no branch to
+   inherit the shell's own `input` handler from, and a third copy of these two
+   lines is what §260 had just finished removing. Growing is not a repaint: it
+   sets the element's own height and touches nothing else, so it is safe on
+   `input`, where a repaint would destroy the field being typed into (§35). */
+function growBox(el){
+  el.addEventListener("input", function(){ fitGrow(el); });
+  fitGrow(el);
+}
 function textOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter)
     return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
@@ -2608,6 +2790,52 @@ function textOr(page, value, cls, setter){
      this box; the heal in `state-io.js` is what corrects the tenant's copy. */
   return '<textarea class="fld grow ' + (cls || '') + '" data-fld="' + i +
     '" rows="1">' + esc(SMPRules.oneLine(value)) + '</textarea>';
+}
+/* THE REPORTING NOTE IS PROSE AND HAD ONE LINE TO SAY IT IN (§271). Islam:
+   *"in the reporting the notes table needs to wrap around the text and enable
+   multiple lines."* This was an `<input>`, which is ONE LINE by definition, so
+   a real explanation ran off the end and you scrolled sideways inside it —
+   §189's fault on the plan's titles, on the one field the platform REQUIRES
+   somebody to write (§105: a figure at risk cannot be submitted without it).
+   Measured on the shipped build with a three-clause sentence in it: 404px
+   shown of 1334 needed at 1500, and 209 of 1334 on a supporting function at
+   1100.
+
+   IT IS ITS OWN BUILDER RATHER THAN `textOr`, because these two fields are not
+   bound through `FIELDS` at all: a note is written by a REPORTER against a row
+   id (`data-note` on a unit, `data-cnote` on a capability function), and the
+   two handlers do more than set a value. What is shared with §189 is the SHAPE
+   — `textarea.fld.grow`, sized to what is in it — so the two kinds of prose box
+   in the product read as one control.
+
+   AND ENTER IS A NEWLINE HERE, WHICH REVERSES §229 FOR THIS FIELD ALONE and is
+   the second half of what was asked ("enable multiple lines"). §229's rule is
+   about TITLES — a plan row's name is one line however long, and the tables,
+   the deck and both workbooks print it as one — and a note is a paragraph
+   somebody is explaining themselves in. Nothing is needed to get it: that key
+   handler is wired in the `[data-fld]` branch, which these fields do not pass
+   through, so `grow` here means "size yourself to your content" and nothing
+   about the key. */
+function noteBox(hook, id, value, want){
+  return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
+    '="' + esc(id) + '" rows="1" placeholder="' +
+    (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
+    esc(value || "") + '</textarea>';
+}
+/* AND THE OTHER HALF: A LINE BREAK SOMEBODY TYPED HAS TO SURVIVE BEING READ
+   (§271, §161.3's fault one field over). HTML collapses a newline to a space,
+   so a note written as two paragraphs would run together everywhere it is
+   READ — the reporting pane to somebody without the grant, the Performance
+   page, a capability's tables — and the box would be promising a break it
+   never makes. `pre-line` keeps the breaks and wraps the rest.
+
+   ONE BUILDER, because there are six places that print a stored note and a
+   class added at five of them is the drift this exists to stop (§53.5,
+   §104.7). `tight` is the margin the cell wants, not a second kind of note. */
+function noteRead(note, tight){
+  if (!note) return "";
+  return '<span class="why notetext"' + (tight ? ' style="margin:0"' : '') + '>' +
+    esc(note) + '</span>';
 }
 function inputOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
@@ -2963,28 +3191,60 @@ function missChipInner(e){
   return e.count ? esc(e.label) + ' <b>' + e.count + '</b>'
                  : '&#10003; ' + esc(e.label);
 }
-/* Which page a section's fill pen is (the bar's button opens it). */
+/* Which page a section's fill pen is (the bar's button opens it) — asked of
+   the ONE map (§268), which is what corrects the pillars function's Overview:
+   this used to answer `foundation` there, and the page reads `capfoundation`.
+
+   AND WHETHER THAT PAGE IS FILLABLE IS A SECOND QUESTION, asked of the shared
+   rule rather than of a second list. The first build of this collapsed the two
+   and handed the bar `analysis` for the SWOT section, which is a page no fill
+   grant reaches (`u_anal` is not in FILL_PAGES) — so the red button would have
+   thrown a flag nothing acts on. §223's distinction, one surface out: which
+   pen a section HAS and which gaps it can be asked to fill are not the same
+   question. Found by driving it, not by reading it. */
 function fillPageForSec(sec){
-  var t = String(TARGET || "");
-  if (sec === "found")
-    return t.indexOf("fn:") === 0 && !fnPlansInPillars(FUNCTIONS[t.slice(3)])
-      ? "capfoundation" : "foundation";
-  if (sec === "plan" || sec === "proj") return "plan";
-  return "";
+  var p = secPagePair(sec);
+  return (p && SMPRules.FILL_PAGES.indexOf(p[1]) > -1) ? p[0] : "";
 }
-function missBarCta(total){
+/* §272: THE QUIET REGISTER IS THE SAME BAR IN A DIFFERENT VOICE. `n` is
+   whatever the bar is counting and `empty` says which register that is —
+   never two builders, or the two states of one control start explaining
+   themselves differently (§53.5). Red is the platform's word for MISSING
+   and amber was its word for pending; a tactic nobody supports is a fact on
+   a healthy plan, not a warning, so the empty register is grey throughout
+   (§187's own reasoning for the register's seat count, §41's budget). */
+function missBarCta(n, empty){
   var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
-  /* §223: WITH NOTHING OWED THE WALK HAS NOTHING TO WALK, so the door stays
-     a door and does not offer to take you to a next gap that is not there. */
-  if (inFill && total) return '<button type="button" class="fillcta" data-nextgap="1">' +
-    'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
-  if (inFill) return '<button class="editbtn fdone" data-page="' +
-    esc(fillPageForSec((typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "")) +
-    '">Done filling</button>';
-  var sec = (typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "";
-  return '<button type="button" class="fillcta" data-fillcta="' +
+  var cta = empty ? "eqcta" : "fillcta";
+  /* §223: WITH NOTHING TO WALK the door stays a door and does not offer to
+     take you to a next gap that is not there — true of either register, and
+     §272 gave the empty one something to walk (gapWalkable). */
+  /* §268: NOT A SECOND WAY OUT, AND NOT NO WAY OUT EITHER. The section line
+     carries *Done editing* for whoever may author this page, so drawing
+     *Done filling* beside it would be two close controls on one line — and the
+     wrong word for the office, who are editing rather than filling. A
+     fill-grant holder authors nothing, so `secPenPair()` is null for them and
+     this is their only way out.
+
+     IT IS DRAWN WHILE GAPS REMAIN TOO, which the first build of §268 got
+     wrong: the way out used to be the corner button `penBtn()` drew for a
+     filler at all times, and with that gone the bar offered *Next gap* alone —
+     so a custodian with anything still missing was in a mode with no way to
+     leave it but changing tab (§61, introduced by the section that was
+     removing a duplicate). Found by `gap-fill.py` timing out on a control that
+     was no longer drawn, not by reading. */
+  var done = (inFill && !secPenPair())
+    ? '<button class="editbtn fdone" data-page="' +
+      esc(fillPageForSec(curSec())) + '">Done filling</button>'
+    : '';
+  if (inFill && n) return '<button type="button" class="' + cta + '" data-nextgap="1">' +
+    (empty ? 'Next empty' : 'Next gap') +
+    ' &rarr;&nbsp;<span class="ngleft">' + n + ' left</span></button>' + done;
+  if (inFill) return done;
+  var sec = curSec();
+  return '<button type="button" class="' + cta + '" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">' +
-    (total ? 'Fill in missing elements' : 'Fill in what is empty') + '</button>';
+    (empty ? 'Fill in what is empty' : 'Fill in missing elements') + '</button>';
 }
 /* §218: THE PENDING HALF OF THIS BAR IS GONE. §192 put a count and a walk
    here for values waiting on the office; with the approval removed there is
@@ -2997,18 +3257,35 @@ function missBar(){
   /* §218: nothing is awaiting confirmation any more, so the bar is drawn
      for what is MISSING and nothing else — which is what it was before
      §192 added the pending half. */
-  /* §223: DRAWN FOR EITHER — what is owed, or what is merely fillable. With
-     nothing owed the bar carries no red count and no chips; it is the way in
-     and nothing else. */
-  var openable = typeof gapOpenable === "function" ? gapOpenable(TARGET) : 0;
+  /* §223: DRAWN FOR EITHER — what is owed, or what is merely fillable.
+     §272: AND THE SECOND ONE SAYS WHERE. §223 drew the door and stopped, so
+     a page owing nothing carried a lone red button with no count, no chips
+     and no rail marks — the way in drawn and the destination not (Islam, on
+     Mobile and Care). The empty register is the same bar in the quiet voice:
+     a count, one chip per place, and a mark on each rail row.
+
+     IT IS THE FILLER'S, NEVER THE OFFICE'S (`seesEmpty`, §272): with nothing
+     owed and a pen in the pane corner the door is a duplicate. Ask BEFORE
+     counting, or the office pays for a walk of the whole subject to be told
+     about a bar they will not be shown. */
+  var openable = (typeof seesEmpty === "function" && seesEmpty() &&
+                  typeof gapOpenable === "function") ? gapOpenable(TARGET) : 0;
   if (!total && !openable) return '';
+  /* WHICH REGISTER, decided ONCE and written onto the band, because
+     gapBandRefresh rewrites these counts in place after a fill and would
+     otherwise re-read the counted map over the quiet chips — flipping every
+     one of them to the green tick on a page that is still full of empty
+     boxes (§63's write-into-the-node, which must know what it is rewriting). */
+  var empty = !total;
+  if (empty) map = gapMap(TARGET, false, true);
+  var word = empty ? "empty field" : "missing element";
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
-    return '<button type="button" class="mchip"' +
+    return '<button type="button" class="mchip' + (empty ? " eqchip" : "") + '"' +
       ' data-gkey="' + esc(e.key) + '"' +
       ' data-gpage="' + esc(e.go.page) + '" data-gsec="' + esc(e.go.sec) + '"' +
       (e.go.rail ? ' data-grail="' + esc(e.go.rail) + '" data-gcode="' +
         esc(String(e.go.code == null ? "" : e.go.code)) + '"' : '') +
-      ' title="' + plural(e.count, "missing element") + ' — press to go">' +
+      ' title="' + plural(e.count, word) + ' — press to go">' +
       missChipInner(e) + '</button>';
   }).join("");
   /* THE WALK IS ONLY OFFERED TO SOMEBODY WHO CAN CONFIRM. A filler sees the
@@ -3016,10 +3293,12 @@ function missBar(){
      office's alone (§145), so a Next-pending button drawn for them would walk
      to a tick that is not there (§61, and §177's own rule that a count is a
      promise the press opens something). */
-  return '<div class="missbar" data-gapband="1">' +
-    (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
-    '<span class="gaptail">' +
-    (total || openable ? missBarCta(total) : '') + '</span></div>';
+  var n = empty ? openable : total;
+  return '<div class="missbar" data-gapband="1"' +
+    (empty ? ' data-gapmode="empty"' : '') + '>' +
+    '<span class="' + (empty ? "eqcount" : "secmiss") + '" data-gapcount="1">' +
+      n + (empty ? ' empty' : ' Missing') + '</span>' + chips +
+    '<span class="gaptail">' + missBarCta(n, empty) + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
    because a repaint here would destroy the field being typed into (§71.2).
@@ -3027,11 +3306,18 @@ function missBar(){
    their words move: a place reaching zero flips its chip to the green tick
    until the next paint drops it. The rail rows follow the same list. */
 function gapBandRefresh(){
-  var map = gapMap(TARGET), total = gapTotal(TARGET);
+  /* §272: THE MODE IS READ OFF THE BAND, never re-derived. A fill lands and
+     this rewrites the counts where they stand; asking `gapTotal` again would
+     answer 0 for a quiet bar (which is what a quiet bar MEANS) and repaint it
+     as a finished missing bar — every chip a green tick over a page still
+     full of empty boxes. What the band is showing is the band's own fact. */
   var band = document.querySelector('[data-gapband]');
+  var empty = !!(band && band.dataset.gapmode === "empty");
+  var map = gapMap(TARGET, false, empty), total = gapTotal(TARGET);
+  var n = empty ? gapOpenable(TARGET) : total;
   if (band){
-    var tot = band.querySelector(".secmiss");
-    if (tot) tot.textContent = total + " Missing";
+    var tot = band.querySelector("[data-gapcount]");
+    if (tot) tot.textContent = n + (empty ? " empty" : " Missing");
     map.forEach(function(e){
       var chip = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
       if (!chip) return;
@@ -3039,15 +3325,17 @@ function gapBandRefresh(){
       chip.innerHTML = missChipInner(e);
     });
     var tail = band.querySelector(".gaptail");
-    if (tail) tail.innerHTML = total
-      ? missBarCta(total)
-      : '<span class="gapdone">&#10003; Nothing missing</span>';
+    if (tail) tail.innerHTML = n
+      ? missBarCta(n, empty)
+      : '<span class="gapdone">&#10003; Nothing ' +
+        (empty ? "empty" : "missing") + '</span>';
   }
   document.querySelectorAll('[data-rgap]').forEach(function(el){
     var e = map.filter(function(x){ return x.key === el.dataset.rgap; })[0];
     if (!e) return;
     el.classList.toggle("ok", !e.count);
-    el.innerHTML = e.count ? e.count + " Missing" : "&#10003;";
+    el.innerHTML = e.count
+      ? e.count + (empty ? " empty" : " Missing") : "&#10003;";
   });
 }
 
@@ -3161,7 +3449,8 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, open && !SMPRules.isHidden(row) && SMPRules.isGapField(field) ? "gapwalk" : "");
+    }, open && !SMPRules.isHidden(row) &&
+       gapWalkable(field, opts.fillKind) ? "gapwalk" : "");
   }
   /* ── A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER ────
      (§228.2, found by the §227 merge.) §224.2 took `def` out of
@@ -3207,8 +3496,15 @@ function gapCell(page, acKey, row, field, opts){
          collaborators out of GAP_FIELDS, so the band stopped counting them and
          this class went on marking them. `gapfld` is untouched — whether the
          cell is FILLABLE is a separate decision and §187 did not change it. */
+      /* §272: AND THE BOX IS NOT RUNG IN RED WHEN NOTHING IS OWED. `gapfld`
+         is a dashed `--bad` border, which is right for a field the bar has
+         just called Missing and wrong for one it has just called empty — the
+         chip that walked you here is grey, and one screen cannot say both.
+         `eqfld` overrides the colour and nothing else, so fill mode still
+         shows which boxes are open. */
     }, mark ? "pendfld"
-            : (SMPRules.isGapField(field) ? "gapfld gapwalk" : "gapfld"));
+            : "gapfld" + (gapEmptyMode() ? " eqfld" : "") +
+              (gapWalkable(field, opts.fillKind) ? " gapwalk" : ""));
   }
   /* Read — and fill mode on a settled value reads too.
      `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
@@ -3790,8 +4086,16 @@ function koSettle(entry){
    (§96). */
 function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
-  return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
-    penBtn(page, acKey) +
+  /* §268: THE PEN STAYS FOR THE GROUP AND GOES FOR A UNIT, and `isGroup` says
+     exactly why rather than merely which: the group's Foundation is a TAB of
+     its own with no section line to move onto, and a unit's is a SECTION of
+     Strategy, where the line now carries the control. The `hoverpen` class
+     goes with it — it is `position:relative` plus 34px of right padding held
+     open for a pen, and holding that gap for a control that is not there is
+     what §24 is about. */
+  return '<div class="card' + (isGroup ? ' hoverpen' : '') +
+    '"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
+    (isGroup ? penBtn(page, acKey) : '') +
       (editing && isGroup
         ? '<label class="horizon-f">Horizon ' +
           inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
@@ -3915,7 +4219,11 @@ function renderUnitAnalysis(u){
       (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
         '">+ Add</button></div>' : '') + '</section>';
   };
-  return '<div class="swot hoverpen">' + penBtn("analysis", "u_anal") +
+  /* §268: the pen is on the section line. It was hover-only here, which on a
+     tablet meant `visibility:hidden` until the box itself happened to be
+     tapped — §70's own finding, fixed for the plan PANE in August and left on
+     the cards. */
+  return '<div class="swot">' +
     box("s","s","Strengths") + box("w","w","Weaknesses") +
     box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
 }
@@ -4098,12 +4406,9 @@ function renderReport(u){
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
   var noteCell = function(x){
-    var want = needsNote(x);
     return canEnterNote(u.ukey, x)
-      ? '<input class="fld notefld' + (want ? " needed" : "") + '" data-note="' + x.id + '" value="' +
-        esc(x.obj.note || "") + '" placeholder="' +
-        (want ? "Why, and what is being done" : "Note, if there is one") + '">'
-      : (x.obj.note ? '<span class="why" style="margin:0">' + esc(x.obj.note) + '</span>' : '');
+      ? noteBox("note", x.id, x.obj.note, needsNote(x))
+      : noteRead(x.obj.note, true);
   };
   var doneOf = function(list){
     var n = 0;
@@ -4270,7 +4575,12 @@ function renderReport(u){
       ? '<textarea class="fld" data-unote="' + u.ukey + '" rows="3" style="width:100%;max-width:none" ' +
         'placeholder="What the numbers do not say \u2014 what happened, what is being done, what to expect next.">' +
         esc(cycleNote(u.ukey)) + '</textarea>'
-      : '<span class="why" style="margin:0">' + (cycleNote(u.ukey) ? esc(cycleNote(u.ukey)) : "None.") + '</span>') +
+      /* The same reader as the row notes above it (§271): this box is a
+         `rows="3"` area and has always taken a paragraph key, so a break typed
+         into it must not close up the moment somebody else reads the page.
+         "None." is a status rather than a note, so it keeps the plain span. */
+      : (cycleNote(u.ukey) ? noteRead(cycleNote(u.ukey), true)
+                           : '<span class="why" style="margin:0">None.</span>')) +
     '</div>';
 
   /* A blocked Submit with no explanation is hostile. If the unit is waiting on
@@ -4803,7 +5113,7 @@ function capKOTable(c){
            which is the honest pair: what they said, and what it scores. */
         var sc = measureScore(m);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
-          (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
+          noteRead(m.note) + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -4829,7 +5139,7 @@ function projPerformanceBody(p, fk){
     var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
     return '<tr' + (notDue && !has ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + lateNote(when, done) +
-        (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
+        noteRead(o.note) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + got + '</td>' +
@@ -4900,9 +5210,36 @@ function renderFnPerformance(fnKey){
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPerformance(fnAsUnit(fk));
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
-     platform holds at that moment. */
+     platform holds at that moment.
+
+     ── AND IN THE SAME PLACE AS A UNIT'S (§275) ──────────────────────────
+     Islam: *"can you move the presntation button for the functions to be in
+     the same place like what we did in the units while having the bands
+     button as well?"*
+
+     THIS WAS THE ONLY PERFORMANCE PAGE IN THE PRODUCT DRAWING ITS CONTROLS IN
+     THE PAGE BODY, and measuring is what said so rather than taste: a unit's,
+     the group's and a company's all go through `perfActs()`, and so does a
+     function that plans in PILLARS — because the branch six lines above sends
+     it to the unit's own page (spec 010). So the two halves of "supporting
+     function" have disagreed on this one screen since that routing was built,
+     and only the capability half was ever odd (§53.5, A15: a unit and a
+     function are the same product, and where they differ we say which and
+     why).
+
+     THE BANDS MENU COMES FREE, AND THAT IS WORTH SAYING OUT LOUD RATHER THAN
+     LETTING IT LOOK LIKE A RESTORATION: `perfActs()` appends `bandsMenu()`
+     itself, so the second half of the ask is one call rather than a second
+     control — and this page has NEVER had a bands legend, so somebody reading
+     "Off track" here has had nowhere to find out what it means.
+
+     ONE ROW COMES BACK. The `.pageact` div was a line of the page spent on a
+     single button: measured, the capability band moves y 300 -> 237 and
+     everything under it with it, while the two controls land on x 1206 and
+     1372 — a unit's pixels exactly, which is the assertion the check makes
+     (AGREEMENT, never a coordinate — §94.8, §53.5). */
   if (!caps.length) return fnNothingBehind(fk);
-  return '<div class="pageact">' + presentMenu("fn", fk) + '</div>' +
+  return perfActs(presentMenu("fn", fk)) +
     caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
@@ -5343,11 +5680,15 @@ function capPctBox(x, may, label){
     '" placeholder="\u2014" aria-label="Per cent complete for ' + esc(label) + '">' +
     '<span class="unitsuf">%</span></span>';
 }
+/* THROUGH `noteBox` (§271), or the two halves of one product's reporting go on
+   being fine differently (§53.5, A15): the fault this fixes was on both pages
+   and a fix to one of them is how they drift. This side asks for no note, so
+   `want` is false and the placeholder is the quiet one — which is a difference
+   in what is OWED, not in the control. */
 function capNoteBox(x, may){
   return may
-    ? '<input class="fld notefld" data-cnote="' + x.id + '" value="' + esc(x.note || "") +
-      '" placeholder="Note, if there is one">'
-    : (x.note ? '<span class="why" style="margin:0">' + esc(x.note) + '</span>' : '');
+    ? noteBox("cnote", x.id, x.note, false)
+    : noteRead(x.note, true);
 }
 function capPickBox(x, may, opts, val){
   if (!may) return '<span class="mono">' + (val ? esc(val) : "\u2014") + '</span>';
@@ -5554,13 +5895,26 @@ function unitRailFor(u, sel){
       (it.measures || []).forEach(function(m){ gaps += SMPRules.gapMissing("measure", m).length; });
       (it.tactics  || []).forEach(function(x){ gaps += SMPRules.gapMissing("tactic", x).length; });
     }
+    /* §272: AND THE SAME MARK IN THE QUIET REGISTER. The rail is where "which
+       pillar" is answered, so a bar counting what is empty and a rail saying
+       nothing would leave the chip as the only pointer on the page. Read
+       through gapEmptyMode(), so the rail and the band can never be in two
+       different registers at once (§53.5). */
+    var empt = 0;
+    if (!gaps && gapEmptyMode()) {
+      (it.measures || []).forEach(function(m){ empt += SMPRules.gapEmptyFields("measure", m).length; });
+      (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
+    }
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
         (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
           '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
-          gaps + ' Missing</span>' : '') +
+          gaps + ' Missing</span>'
+        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.code || String(i)) +
+          '" title="' + plural(empt, "empty field") + ' you can fill in">' +
+          empt + ' empty</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
@@ -5937,7 +6291,7 @@ function unitPlanBody(it, u, railed){
      `flex:1` so the growing box (§189) fills the line instead of taking a
      slice of it. */
   var head = showHead
-    ? '<div class="ptitle hoverpen' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
+    ? '<div class="ptitle' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
         '<span class="ptcode">' + code + '</span>' +
         (ed ? textOr("plan", it.name, "ptname", function(v){ it.name = v; })
             : '&nbsp; ' + esc(it.name)) + '</h3>' +
@@ -5955,7 +6309,12 @@ function unitPlanBody(it, u, railed){
               '|' + esc(it.id) + '">Remove this ' +
               esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
               '</button>' : '') +
-        (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
+        /* §268: THE PEN IS ON THE SECTION LINE, WHICH PINS HIGHER THAN THIS
+           HEAD DOES. §194 put it here so the way to save survived scrolling;
+           the line answers that better, because it does not move when the
+           section changes and there is only ever one of it. The head keeps
+           what is the PILLAR'S — its code, its name field and Remove. */
+        '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
@@ -6159,8 +6518,11 @@ function fnPillarsOverview(fk){
         : koReadBlock(list,
             "None. This function is judged by its " +
             esc(L("pillar","bu").toLowerCase()) + "."));
-  return editBar("capfoundation", "k_found") +
-    fillBarOr("capfoundation", "k_found",
+  /* §268: THE EDIT BAR IS ON THE SECTION LINE. It was the only WORDED edit
+     control in the product's strategy pages while a unit's three were pen
+     glyphs, so the two sides of the navigation switch said the same thing two
+     ways (§53.5); one slot answers for both now. */
+  return fillBarOr("capfoundation", "k_found",
       list.reduce(function(a, m){
         return a + SMPRules.gapMissing("capko", m).length; }, 0),
       "the overview") +
@@ -6231,8 +6593,11 @@ function renderFnFoundation(fnKey){
   /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
   var fl = filling("capfoundation", "k_found");
-  return editBar("capfoundation", "k_found") +
-    fillBarOr("capfoundation", "k_found",
+  /* §268: THE EDIT BAR IS ON THE SECTION LINE. It was the only WORDED edit
+     control in the product's strategy pages while a unit's three were pen
+     glyphs, so the two sides of the navigation switch said the same thing two
+     ways (§53.5); one slot answers for both now. */
+  return fillBarOr("capfoundation", "k_found",
       caps.reduce(function(a, c){
         return a + (c.keyObjectives || []).reduce(function(b, m){
           return b + SMPRules.gapMissing("capko", m).length; }, 0); }, 0),

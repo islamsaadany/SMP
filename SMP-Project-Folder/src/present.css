@@ -87,7 +87,11 @@
   .dslide tr.dim td { opacity:.5; }
   .dslide .lead { font-weight:500; }
   .dsub { display:block; color:var(--ink-3); font-size:17px; margin-top:5px; font-weight:400; }
-  .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch; }
+  /* §271: a note may be several lines now, and a projector shows them the way
+     the person who wrote them typed them — the deck reads the same stored
+     field the reporting page writes, so it keeps the same breaks. */
+  .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch;
+                               white-space:pre-line; }
   .dslide .withnote td.dnote.empty { color:var(--none); }
   /* The same relationship the note column has to the figures beside it: a
      supporting fact, set below the row's own size (§50). */

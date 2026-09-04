@@ -5736,17 +5736,20 @@ function renderCycle(){
          reason: with no box there is nothing to mistype and the picker can
          only produce a shape `monthsOf()` already reads. */
       '<span class="fstrip-meta asof">reported as of ' +
-        /* THE BUTTON SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With
-           no month picked the platform still has an answer -- the cycle's own
-           quarter end -- so showing the picker's "Missing" would print an
-           alarm over something that is not owed (§177, §214.4) while the note
-           beside it reported a real number. The note says whether it was
-           chosen or inherited. */
-        (can && open
-          ? monthBtnHtml(REVIEW.asOfMonth || reviewAsOfLabel(), "asofbtn", function(v){
-              if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
-            })
-          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) +
+        /* IT SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With no month
+           picked the platform still has an answer -- the cycle's own quarter
+           end -- so showing the picker's "Missing" would print an alarm over
+           something that is not owed (§177, §214.4) while the note beside it
+           reported a real number. The note says whether it was chosen or
+           inherited.
+
+           §273: AND IT IS A VALUE HERE, NEVER A CONTROL. The picker moved
+           inside the pen with everything else the office can change, so this
+           line reads the same for everybody and the strip carries nothing that
+           can be pressed by accident. One control for one fact (§53.5): a
+           picker here AND a picker in the panel is two, and they would have to
+           be kept in step. */
+        '<b>' + esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b>' +
         /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
            whether the month he picked had taken -- "can you check if the cycle
            adjustment is saved" -- because the strip showed the value and
@@ -5761,47 +5764,89 @@ function renderCycle(){
           : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
             'figure is measured against a whole one</span>') + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
+      /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
+         Islam: "keep the close cycle inside the edit. as it's a critical
+         button to click, the pen should hold everything editable so it's kept
+         secured." So the strip's only control while a cycle runs is Edit, and
+         Close the cycle is drawn INSIDE the panel it opens -- the strip is a
+         line you read, not a line you press.
+
+         Edit is drawn while the cycle is OPEN only, which is the gate the
+         review point already had: a closed cycle's figures are filed under the
+         name it closed with (HISTORY keeps the name, §49.1), so renaming it
+         afterwards would leave this page and the history saying different
+         things. With it closed the strip carries "Open a new cycle..." exactly
+         as it did before. */
+      /* §273.2: AND A CLOSED CYCLE GETS THE PEN TOO. Islam picked it over a
+         Reopen button on the strip: the pen's far end holds the cycle's one
+         dangerous state change, whichever direction it goes -- Close while it
+         runs, Reopen once it has stopped -- so the strip goes on carrying
+         nothing that changes anything. `Open a new cycle...` stays beside it
+         because it is a different act with its own panel and its own
+         confirmation, and it is the only way to start one. */
       (can
-        ? (open
-            ? '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>'
-            : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
+        ? '<button class="editbtn" data-editcycle="1">Edit</button>' +
+          (open ? '' : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
         : '') +
     '</div>' +
-    /* ── OPENING A CYCLE ASKS WHAT IT IS (§47.8) ────────────────────
-       Islam: "on opening the cycle it didn't ask me any questions … we should
-       set the name of the cycle and the duration it covers."
+    /* ── THE PEN ITSELF ────────────────────────────────────────────
+       The panel `NEWCYCLE` already uses, because this asks for the same five
+       things and two shapes for one form is how the two drift (§53.5). What
+       differs is the act row: Save and Cancel at the near end, Close the cycle
+       at the far end of the same row -- inside the pen, apart from them, and
+       still the last thing the eye reaches.
 
-       It used to mint `{ name:"Cycle 3", from:<last cycle's end>, to:"",
-       due:"", endsQuarter:4 }` and open it — a name nobody chose, a period
-       half filled from a guess, and a hard-coded end quarter. That last one is
-       not cosmetic: `endsQuarter` decides which tactics count as DUE, so a
-       wrong guess silently changes every unit's execution score.
+       CLOSE IS SAID, NOT HIDDEN, while something is unsaved (§221, §163): a
+       control that vanishes reads as broken, one that says why it is waiting
+       teaches the rule once. `aria-disabled`, never `disabled`, or the reason
+       beside it cannot be reached by keyboard -- and the handler asks again at
+       press time rather than trusting this render (§48.2). */
+    (CYCLEEDIT
+      ? (function(){
+          /* §273.3: THE CLOSED CYCLE'S PANEL IS GONE, AND THE PEN OPENS THE
+             PLATFORM'S OWN DIALOG INSTEAD. Islam, of three shapes drawn on his
+             own tenant: "C". §273.2 drew the record as a band under the strip,
+             and a band of facts sitting directly under a band of the SAME facts
+             is the fault — every one of them (the name, the dates, the review
+             point, the state) is already on the line above, and on a tenant
+             where three of five are empty what is left is a row of dashes.
 
-       An inline panel rather than a modal, because the fields want the page's
-       own controls and because what you are about to replace — the cycle
-       above — should stay on screen while you describe its successor. */
-    (NEWCYCLE
-      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        '<div class="nc-grid">' +
-          '<label><span>Name</span><input class="fld" id="nc-name" value="' +
-            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          '<label><span>Covers from</span><input class="fld" id="nc-from" value="' +
-            esc(NEWCYCLE.from) + '" placeholder="Jan 2027"></label>' +
-          '<label><span>to</span><input class="fld" id="nc-to" value="' +
-            esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
-          '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
-            esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
-          '<label><span>Reporting as of</span>' +
-            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
-              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
-            }) + '</label>' +
-        '</div>' +
-        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
-          'A target that adds up across the year is compared with the share of it due by then, ' +
-          'and a tactic whose span has not started yet is not asked for.</div>' +
-        '<div class="nc-act">' +
-          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
-          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
+             A panel is the right shape for five fields you are EDITING, which
+             is what an open cycle has, and the wrong shape for one question you
+             are ANSWERING. So `CYCLEEDIT` is only ever the open cycle's now,
+             and the closed branch is DELETED rather than left unreachable
+             (§24). The dialog is wired in the shell, beside the other
+             confirmations it is built from. */
+          var held = cycleEditDirty();
+          return '<div class="cfg newcycle"><div class="nc-h">Edit this cycle</div>' +
+            '<div class="nc-grid">' +
+              '<label><span>Name</span><input class="fld" id="ce-name" value="' +
+                esc(CYCLEEDIT.name) + '" placeholder="H1 2027"></label>' +
+              '<label><span>Covers from</span><input class="fld" id="ce-from" value="' +
+                esc(CYCLEEDIT.from) + '" placeholder="Jan 2027"></label>' +
+              '<label><span>to</span><input class="fld" id="ce-to" value="' +
+                esc(CYCLEEDIT.to) + '" placeholder="Jun 2027"></label>' +
+              '<label><span>Reports due</span><input class="fld" id="ce-due" value="' +
+                esc(CYCLEEDIT.due) + '" placeholder="15 Jul 2027"></label>' +
+              '<label><span>Reporting as of</span>' +
+                monthBtnHtml(CYCLEEDIT.asOfMonth || "", "asofbtn", function(v){
+                  if (v) CYCLEEDIT.asOfMonth = v; else delete CYCLEEDIT.asOfMonth;
+                }) + '</label>' +
+            '</div>' +
+            '<div class="nc-why"><b>The month decides what every figure is measured ' +
+              'against.</b> A target that adds up across the year is compared with the ' +
+              'share of it due by then, and a tactic whose span has not started yet is ' +
+              'not asked for.</div>' +
+            '<div class="nc-act">' +
+              '<button class="editbtn" data-ce-save="1">Save</button>' +
+              '<button class="linkbu" data-ce-cancel="1">Cancel</button>' +
+              '<span class="nc-gap"></span>' +
+              '<span class="why nc-hold" data-ce-hold="1"' + (held ? '' : ' hidden') +
+                '>Save or cancel your changes first</span>' +
+              '<button class="editbtn danger" data-closecycle="1"' +
+                (held ? ' aria-disabled="true"' : '') + '>Close the cycle</button>' +
+            '</div></div>';
+        })()
       : '') +
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +

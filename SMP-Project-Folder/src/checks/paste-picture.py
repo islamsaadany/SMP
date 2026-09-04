@@ -80,8 +80,32 @@ with sync_playwright() as p:
     print("\nA PICTURE PASTED INTO THE BOX")
     prevented = pg.evaluate(PASTE, b64); pg.wait_for_timeout(1200)
     ck("the paste is taken over", prevented)
+    # ── AND IT IS SHOWN, NOT DESCRIBED (§252.2) ──────────────────────
+    # Islam: "the message is very subtle I didn't notice that something was
+    # attached." The confirmation used to be one line of the page's quietest
+    # grey. It is the picture itself now, so what is asserted is that the
+    # PICTURE is on screen — and that the sentence it replaced has gone,
+    # because two of them saying the same thing is the product repeating
+    # itself in the register he has already told us he does not read.
+    ck("the picture is shown, not described",
+       not pg.eval_on_selector("#chatprev","e=>e.hidden"))
+    ck("...and the thumbnail is the picture that will be SENT",
+       pg.eval_on_selector("#chatprev img","e=>e.getAttribute('src')").startswith("data:image/"),
+       pg.eval_on_selector("#chatprev img","e=>e.getAttribute('src').slice(0,22)"))
+    ck("...it is drawn ABOVE the box, which must not move",
+       pg.evaluate("""() => {
+         const p=document.getElementById('chatprev').getBoundingClientRect();
+         const s=document.getElementById('chatsay').getBoundingClientRect();
+         return p.bottom <= s.top + 1; }"""))
+    ck("...and there is a way to take it back off",
+       pg.query_selector("[data-chdrop]") is not None)
+    ck("...reachable by a click at its centre",
+       pg.evaluate("""() => { const b=document.querySelector('[data-chdrop]');
+         const r=b.getBoundingClientRect();
+         const e=document.elementFromPoint(r.x+r.width/2, r.y+r.height/2);
+         return !!(e && e.closest('[data-chdrop]')); }"""))
     note = pg.eval_on_selector("#chatnote","e=>e.textContent")
-    ck("...and the box says a picture is attached", "screenshot is attached" in note, note)
+    ck("the grey sentence it replaced is gone", note.strip()=="", repr(note))
 
     print("\nAND IT TRAVELS WITH THE MESSAGE")
     SAID.clear()
@@ -90,6 +114,21 @@ with sync_playwright() as p:
     ck("...carrying the pasted picture",
        bool(SAID and (SAID[0].get("shot") or "").startswith("data:image/")),
        (SAID[0].get("shot") or "")[:24] if SAID else "-")
+
+    print("\nAND IT CAN BE TAKEN BACK OFF")
+    # A FRESH ONE FIRST: the send above cleared the picture, which is correct
+    # and is why this needs its own.
+    pg.evaluate(PASTE, b64); pg.wait_for_timeout(1000)
+    ck("  (a picture is attached again)",
+       not pg.eval_on_selector("#chatprev","e=>e.hidden"))
+    pg.click("[data-chdrop]"); pg.wait_for_timeout(500)
+    ck("removing it hides the strip", pg.eval_on_selector("#chatprev","e=>e.hidden"))
+    SAID.clear()
+    pg.fill("#chatsay","Never mind."); pg.click("#chatsend"); pg.wait_for_timeout(1200)
+    ck("...and the message then carries no picture",
+       len(SAID)==1 and not SAID[0].get("shot"), SAID[0].get("shot") if SAID else "-")
+    # PUT ONE BACK, so the text-paste trial below runs in the same state as before.
+    pg.evaluate(PASTE, b64); pg.wait_for_timeout(1000)
 
     print("\nORDINARY TEXT IS UNTOUCHED")
     prev2 = pg.evaluate(PASTE_TEXT); pg.wait_for_timeout(400)

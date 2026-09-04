@@ -384,6 +384,34 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (§252.2):** Islam, having pasted one
+  — *"the message is very subtle I didn't notice that something was attached."*
+  The whole confirmation was one line of `.chnote`, the page's quietest grey,
+  below the box, at the weight of an empty space. Four drawn in the REAL
+  composer; he picked the strip above it — **the picture, a line naming it, and
+  a way to take it off**. The picture is the part a sentence cannot replace
+  (*which* screenshot is about to go), and it sits ABOVE the box so the thing
+  under the cursor never moves. **The thumbnail is the already-shrunk data**
+  (§50): what is previewed is what SENDS, never a second rendering. **The grey
+  sentence goes with it** (1b-ii), while an error still speaks there because
+  that is not a description of state (§124). **The remove is wired on the FOOT,
+  not the button** — the strip is rewritten every paint (§24, §47.2) — and it
+  clears the file input or the same file cannot be picked twice.
+- **ONE PANEL, WHATEVER IS IN IT (§251.2):** *"the 2 options have different panel
+  sizes let's unify things."* Measured: **531 against 498, with the top edge at
+  351 against 384** — the panel is anchored at the BOTTOM, so what moved was the
+  top, 33px every time you switched. Two causes, both from §251: the search box
+  is drawn on the list and not in a conversation, and the line under the title
+  was made to say nothing on the queue side — **an empty line is a shorter
+  header**. `.chatbody` held a flat `height:340px` and the panel was the sum of
+  its parts; **it is the other way round now** — the panel holds the height, the
+  body flexes with `min-height:0` (§100.5), and anything added to the chrome
+  costs a row rather than moving the panel. Capped to the window for
+  `.chinbox`'s reason (a fixed height puts the composer off a short screen);
+  checked at 900 / 760 / 640. **And the title's line never falls empty** —
+  reserving its space with a number would be a guessed constant going stale
+  (§122.5); §251 was right that the words were redundant and wrong about what
+  removing them costs.
 - **A PICTURE IS PASTED, NOT ONLY ATTACHED (§252):** Islam — *"allow in the chat
   to copy paste a picture rather than only attaching it."* Somebody reporting a
   wrong number has just pressed the screen-grab key; making them save the file

@@ -90,8 +90,26 @@ body.presenting .chatdock { display:none; }
 .chathead .chbell.belloff:hover { opacity:1; }
 .chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
 
+/* ── ONE PANEL, WHATEVER IS IN IT (§251.2) ────────────────────────────
+   The body used to carry the height (a flat 340px) and the panel was
+   whatever the head, the bar and the foot added up to — so drawing the
+   search box on one half and not the other, or a sub-line on one and not
+   the other, changed the panel's size. It is anchored at the BOTTOM, so
+   what moved was the top: 531px against 498px, jumping 33px as you switched
+   halves. Islam: "the 2 options have different panel sizes."
+
+   THE PANEL HOLDS THE HEIGHT AND THE BODY ABSORBS THE DIFFERENCE. Anything
+   added to or taken from the chrome now costs the list a row rather than
+   moving the whole panel — and `min-height:0` is what lets a flex child
+   shrink below its content at all (§100.5, §122.5).
+
+   CAPPED TO THE WINDOW for the reason `.chinbox` is: a fixed height on a
+   short laptop puts the composer off the bottom of the screen, which is the
+   one control somebody opened the panel to use. */
+.chatpanel { height:531px; max-height:calc(100dvh - 96px); }
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
-            background:var(--ground); height:340px; overflow-y:auto; }
+            background:var(--ground); flex:1 1 auto; min-height:0;
+            overflow-y:auto; }
 .chatday { text-align:center; font-size:var(--fs-micro); color:var(--ink-3);
            letter-spacing:.09em; text-transform:uppercase; font-weight:700; }
 
@@ -554,3 +572,33 @@ body.presenting .chatdock { display:none; }
           font-weight: inherit; font-size: inherit; }
 .cqback svg { width: 15px; height: 15px; flex: none; }
 .cqback:hover { opacity: .85; }
+
+/* ══ WHAT IS ATTACHED, SHOWN (§252.2) ══════════════════════════════════
+   Islam, having pasted a screenshot: "the message is very subtle I didn't
+   notice that something was attached." The whole confirmation was one line of
+   `.chnote` — the page's quietest grey, below the box, at the weight of an
+   empty space. He chose this from four drawn in the real composer.
+
+   ABOVE THE COMPOSER, NEVER INSIDE IT: the box being typed into is the one
+   thing that has always been steady, and a picture arriving must not move it.
+   The panel holds its own height (§251.2), so this costs the conversation a
+   row rather than growing the panel. */
+.chprev { display:flex; align-items:center; gap:10px; padding:8px 10px;
+          margin:0 0 9px; border:1px solid var(--line); border-radius:10px;
+          background:var(--surface-2); }
+.chprev[hidden] { display:none; }
+.chprev img { width:44px; height:34px; object-fit:cover; border-radius:6px;
+              flex:none; border:1px solid var(--line); background:var(--surface); }
+.chprev-t { display:flex; flex-direction:column; min-width:0; }
+.chprev-t b { font-size:var(--fs-note); font-weight:640; color:var(--ink);
+              line-height:1.25; }
+.chprev-t span { font-size:var(--fs-micro); color:var(--ink-3); }
+/* THE REMOVE IS QUIET UNTIL IT IS REACHED FOR, and it is `--bad-tx` and never
+   `--bad`: that one is a FILL and measures 4.4:1 as type (§38.5, and this file
+   has recorded it six times). */
+.chprev-x { margin-left:auto; flex:none; border:0; background:transparent;
+            cursor:pointer; color:var(--ink-3); padding:5px; border-radius:7px;
+            display:inline-flex; align-items:center; justify-content:center; }
+.chprev-x svg { width:14px; height:14px; }
+.chprev-x:hover { background:var(--surface); color:var(--bad-tx); }
+.chprev-x:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }

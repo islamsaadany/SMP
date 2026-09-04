@@ -27731,3 +27731,105 @@ the box says a picture is attached, the picture actually TRAVELS with the
 message rather than merely appearing to attach, ordinary text is left alone, and
 with pictures off it is refused in words. `checks/office-chat.py` ALL CLEAR
 (202) · `checks/corner-queue.py` 29/0 · `qa.py` ERRORS: none.
+
+---
+
+## §251.2 — ONE PANEL, WHATEVER IS IN IT (2026-09-03)
+
+Islam, looking at the split corner: *"the 2 options have different panel sizes
+let's unify things as well."*
+
+**HE IS RIGHT, AND IT WAS TWO FAULTS OF MINE FROM §251.** Measured:
+
+| | Waiting | My messages |
+|---|---|---|
+| panel | **531** | **498** |
+| header | 46 | 57 |
+| bar | 86 | 42 |
+| body | 340 | 340 |
+| **top edge** | **351** | **384** |
+
+Two independent causes. The search box is drawn on the list and not inside a
+conversation (correct, and it changes the bar's height); and §251 made the line
+under the title say nothing on the queue side, on the reasoning that the segment
+above had already named it — **and an empty line is a shorter header.**
+
+**AND THE PANEL IS ANCHORED AT THE BOTTOM**, so what moved was the TOP: a 33px
+jump every time you switched halves.
+
+### THE BODY HELD THE HEIGHT AND THE PANEL WAS THE SUM OF ITS PARTS
+
+`.chatbody` was a flat `height:340px`, so the panel was whatever the head, the
+bar, the body and the foot added up to. **It is the other way round now**: the
+panel holds the height and the body flexes into what is left, with
+`min-height:0`, which is what lets a flex child shrink below its content at all
+(§100.5, §122.5). Anything added to or taken from the chrome costs the list a
+row instead of moving the whole panel.
+
+**CAPPED TO THE WINDOW** for `.chinbox`'s own reason: a fixed height on a short
+laptop puts the composer off the bottom of the screen, which is the one control
+somebody opened the panel to use. Verified at 900, 760 and 640px tall — one
+size on both halves, composer on screen at every one.
+
+### AND THE LINE UNDER THE TITLE ALWAYS SAYS SOMETHING
+
+Reserving its space with a number would be a guessed constant that goes stale
+the first time the type scale moves (§122.5, three times recorded). So the line
+simply never falls empty: whose conversation it is while one is open, and the
+office's promise otherwise — which is what every other viewer's panel has
+always shown. **§251's decision was right about the words being redundant and
+wrong about what removing them costs.**
+
+---
+
+## §252.2 — WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (2026-09-03)
+
+Islam, having pasted a screenshot with §252: *"the message is very subtle I
+didn't notice that something was attached."*
+
+**HE IS RIGHT, AND THE MEASUREMENT IS IN THE SCREENSHOT HE SENT.** The entire
+confirmation was one line of `.chnote` — the page's quietest grey, below the
+box, at the same weight as an empty space. §50 built the intake and never asked
+what it looks like to the person who just used it.
+
+### FOUR DRAWN, IN THE REAL COMPOSER, AND HE PICKED A
+
+- **A** — a strip above the box: the picture, a line naming it, a way to remove it
+- **B** — the picture alone, large: no words, ~100px of panel
+- **C** — the attach button becomes the thumbnail: adds nothing, easiest to miss
+- **D** — inside the box, above what you type: grows the box as you type
+
+**THE PICTURE IS THE PART A SENTENCE CANNOT REPLACE** — *which* screenshot is
+about to go, which matters the moment somebody has taken three. And A sits
+ABOVE the composer, so the box under the cursor never moves when a picture
+arrives; §251.2 having given the panel its own height, the strip costs the
+conversation a row rather than growing the panel.
+
+**THE THUMBNAIL IS THE ALREADY-SHRUNK DATA** (§50): `shot` is exactly what will
+be sent, so what is previewed is what goes — never a second rendering of the
+original file that could differ from it.
+
+**AND THE SENTENCE GOES WITH IT** (1b-ii): the strip says the same thing and
+shows the picture besides, so the line would be the product repeating itself in
+the register he has just told us he does not read. An ERROR still speaks there,
+because that is not a description of state (§124).
+
+**THE REMOVE IS WIRED ON THE FOOT, NOT THE BUTTON**, because the strip is
+rewritten on every paint and a handler bound inside it would be re-bound every
+few seconds (§24, §47.2) — and it clears the file input as well, or the same
+file cannot be chosen twice running.
+
+### PROVED
+
+`checks/paste-picture.py` grew from 7 to 15: the picture is SHOWN rather than
+described, the thumbnail is the data that will be sent, it is drawn ABOVE the
+box, the remove is reachable by a click at its centre, the grey sentence it
+replaced is gone, and removing it means the message then carries no picture.
+`checks/corner-queue.py` 29/0 · `checks/office-chat.py` ALL CLEAR (202) ·
+`qa.py` ERRORS: none.
+
+**AND THE FIRST LOOK AT IT SHOWED A BLANK THUMBNAIL** — which was the picture,
+not the code: the sample pasted was a screenshot of a white region of the
+platform. Re-shot against a region with the navy header in it. *§185's rule
+from the other side: a correct build can look broken, and the way to tell is to
+change the input rather than the code.*

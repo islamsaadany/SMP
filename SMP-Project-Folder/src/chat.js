@@ -377,6 +377,10 @@ var CHAT = (function(){
         '<div class="cqbar" id="cqbar" hidden></div>' +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
+          /* WHAT IS ATTACHED, SHOWN (§252.2) — above the composer, so the box
+             under the cursor never moves. Empty and absent until there is a
+             picture. */
+          '<div class="chprev" id="chatprev" hidden></div>' +
           '<div class="chcomp">' +
             '<button class="chicon" id="chatpic" type="button" title="Attach a screenshot — or paste one straight into the box" ' +
               'aria-label="Attach a screenshot">' +
@@ -559,13 +563,22 @@ var CHAT = (function(){
     }
 
     var sub = el("chatsub");
-    if (sub && state.office && cq.side === "wait") {
-      /* Inside a conversation the sub-line says whose it is; on the list it
-         says nothing, because the segment above it already has. */
-      sub.innerHTML = cq.person
-        ? '<span class="chatdot" style="background:var(--attn)"></span> ' +
-          esc2("Waiting on the office")
-        : "";
+    if (sub && state.office && cq.side === "wait" && cq.person) {
+      /* ── THE LINE IS NEVER EMPTY (§251.2) ─────────────────────────
+         This said nothing on the queue's list, on the reasoning that the
+         segment above had already named it — and an EMPTY line is a shorter
+         header, so the panel changed height as you switched halves. Islam:
+         "the 2 options have different panel sizes let's unify things."
+         Measured: head 46 against 57, and the panel is anchored at the
+         BOTTOM, so its top jumped as you moved between them.
+
+         Reserving the space with a number would be a guessed constant that
+         goes stale the first time the type scale moves (§122.5). The line
+         simply always says something instead: whose conversation this is
+         while one is open, and the office's own promise otherwise — which
+         is what every other viewer's panel has always shown. */
+      sub.innerHTML = '<span class="chatdot" style="background:var(--attn)"></span> ' +
+        esc2("Waiting on the office");
     } else if (sub) {
       /* THE DOT CARRIES THE STATUS AND THE WORDS CARRY THE PROMISE. It used
          to be either/or — "With the office" while something was outstanding,
@@ -599,6 +612,36 @@ var CHAT = (function(){
     }
     var pic = el("chatpic");
     if (pic) pic.hidden = !cfg.shots;
+    /* ── THE PICTURE ITSELF, NOT A SENTENCE ABOUT IT (§252.2) ────────
+       Islam, having pasted one: "the message is very subtle I didn't notice
+       that something was attached." He was right — the whole confirmation was
+       one line in the page's quietest grey, below the box, at the same weight
+       as an empty space.
+
+       He chose this from four drawn in the real composer. It shows the
+       picture, because that is the part a sentence cannot replace: WHICH
+       screenshot is about to go, which matters the moment somebody has taken
+       three. And it sits ABOVE the composer, so the box being typed into does
+       not move when a picture arrives.
+
+       THE THUMBNAIL IS THE ALREADY-SHRUNK DATA (§50) — `shot` is what will be
+       sent, so what is previewed is what goes, never a second rendering of the
+       original file that could differ from it. */
+    var prev = el("chatprev");
+    if (prev) {
+      prev.hidden = !shot;
+      prev.innerHTML = shot
+        ? '<img src="' + esc2(shot) + '" alt="">' +
+          '<div class="chprev-t"><b>Screenshot attached</b>' +
+          "<span>Sent with your next message</span></div>" +
+          '<button class="chprev-x" type="button" data-chdrop="1" ' +
+            'title="Remove this picture" aria-label="Remove this picture">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+              'stroke-width="2.4" stroke-linecap="round" aria-hidden="true">' +
+              '<path d="M6 6l12 12M18 6L6 18"/></svg></button>'
+        : "";
+    }
+
     var note = el("chatnote");
     if (note) {
       note.className = "chnote" + (lastErr ? " bad" : "");
@@ -606,9 +649,12 @@ var CHAT = (function(){
          on is sent with your message", which stopped being true the moment
          that stopped happening — and a sentence that is merely stale is worse
          than no sentence, because somebody believes it. */
-      note.textContent = lastErr ? lastErr
-        : shot ? "A screenshot is attached. It is sent with your next message."
-        : "";
+      /* AND THE SENTENCE GOES WITH IT (§252.2, 1b-ii): the strip above says
+         the same thing and shows the picture besides, so the line would be
+         the product saying it twice — quietly, in the register somebody has
+         already told us they do not read. An ERROR still speaks here, because
+         that is not a description of state (§124). */
+      note.textContent = lastErr ? lastErr : "";
     }
   }
 
@@ -1521,6 +1567,15 @@ var CHAT = (function(){
         state.thread = j.thread || state.thread;
         drawPanel();
       });
+    });
+    /* TAKING IT BACK OFF (§252.2). Wired on the foot rather than the button,
+       because the strip is rewritten on every paint and a handler bound to the
+       button inside it would be re-bound every few seconds (§24, §47.2). */
+    document.querySelector("#chatpanel .chatfoot").addEventListener("click", function(e){
+      if (!e.target.closest || !e.target.closest("[data-chdrop]")) return;
+      shot = null; lastErr = "";
+      var f = el("chatfile"); if (f) f.value = "";   /* or the same file cannot be picked again */
+      drawPanel();
     });
     el("chatpic").addEventListener("click", function(){ el("chatfile").click(); });
     el("chatfile").addEventListener("change", function(){ takePicture(this.files && this.files[0]); });

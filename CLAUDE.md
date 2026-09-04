@@ -1903,6 +1903,243 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (§286.2):** Islam, having pasted one
+  — *"the message is very subtle I didn't notice that something was attached."*
+  The whole confirmation was one line of `.chnote`, the page's quietest grey,
+  below the box, at the weight of an empty space. Four drawn in the REAL
+  composer; he picked the strip above it — **the picture, a line naming it, and
+  a way to take it off**. The picture is the part a sentence cannot replace
+  (*which* screenshot is about to go), and it sits ABOVE the box so the thing
+  under the cursor never moves. **The thumbnail is the already-shrunk data**
+  (§50): what is previewed is what SENDS, never a second rendering. **The grey
+  sentence goes with it** (1b-ii), while an error still speaks there because
+  that is not a description of state (§124). **The remove is wired on the FOOT,
+  not the button** — the strip is rewritten every paint (§24, §47.2) — and it
+  clears the file input or the same file cannot be picked twice.
+- **ONE PANEL, WHATEVER IS IN IT (§285.2):** *"the 2 options have different panel
+  sizes let's unify things."* Measured: **531 against 498, with the top edge at
+  351 against 384** — the panel is anchored at the BOTTOM, so what moved was the
+  top, 33px every time you switched. Two causes, both from §285: the search box
+  is drawn on the list and not in a conversation, and the line under the title
+  was made to say nothing on the queue side — **an empty line is a shorter
+  header**. `.chatbody` held a flat `height:340px` and the panel was the sum of
+  its parts; **it is the other way round now** — the panel holds the height, the
+  body flexes with `min-height:0` (§100.5), and anything added to the chrome
+  costs a row rather than moving the panel. Capped to the window for
+  `.chinbox`'s reason (a fixed height puts the composer off a short screen);
+  checked at 900 / 760 / 640. **And the title's line never falls empty** —
+  reserving its space with a number would be a guessed constant going stale
+  (§122.5); §285 was right that the words were redundant and wrong about what
+  removing them costs.
+- **A PICTURE IS PASTED, NOT ONLY ATTACHED (§286):** Islam — *"allow in the chat
+  to copy paste a picture rather than only attaching it."* Somebody reporting a
+  wrong number has just pressed the screen-grab key; making them save the file
+  and find it again is asking them to do the computer's job. **IT FEEDS
+  `takePicture()` AND ADDS NOTHING** — §50's whole intake (1600px, both formats
+  with the smaller kept, the failure said in words) holds because it is the same
+  door, and the office's reply box being the same box means §285's queue gained
+  it with no second listener. **TEXT STILL PASTES AS TEXT**: only an image item
+  is taken and `preventDefault` fires only when one is found, so a paste
+  carrying both keeps its words. **`items` FIRST, THEN `files`** — a screenshot
+  lands on `items` in every desktop browser and on `files` in Safari. **AND WITH
+  PICTURES OFF IT IS REFUSED IN WORDS** (§98.2): a paste that appears to work and
+  then vanishes is worse than one that says no. **The hover says the capability
+  exists**, because it has no control of its own to be discovered by (§61).
+  Proved by dispatching a REAL ClipboardEvent with a real PNG — a probe calling
+  `takePicture()` directly passes on a build where the listener was never wired
+  (§96).
+- **THE OFFICE'S CORNER CARRIES THE QUEUE (§285):** Islam — *"the chat bubble
+  of the SMO team shouldn't be something to be sent to the smo, that is
+  redundancy … it should be the chats of the other people sending the smo the
+  messages"*, with a switch to reach their own thread. **REDUNDANCY OF AN ODD
+  KIND**: the corner is *your* conversation with the office, and for the office
+  that is a conversation with themselves. His decisions, all recorded: waiting
+  only · no cap · all of the office · **the badge is the LENGTH of the list**
+  (he first said messages; a badge reading 7 over 4 rows is what gets reported
+  as a bug, §108.1) · the one you have open never vanishes under you (§113) ·
+  search reaches **all history** and shows **the line that matched**.
+  **NOTHING NEW IS AUTHORISED OR STORED** — opening is the Inbox's `thread`,
+  replying its `reply`, so §283's chase, §231's box and §71's answered-by-the-act
+  come free. **THE QUEUE RIDES THE POLL THAT ALREADY EXISTS** (§98) and never
+  touches the register (§282). **ONE COMPOSER, FORKED AT THE TOP** (§53.5), and
+  **`replyPost()` is the one email builder both screens call** — the corner's
+  first draft built a smaller one, which would have emailed somebody differently
+  depending on which screen the office was looking at. **The search says its own
+  scope out loud** (§35, §124), because results reach conversations that are not
+  waiting while the Waiting segment is lit. **Prefixed `cq`, never `ch`** — the
+  Inbox owns `.chq*` (§65.9). **TWO `var` COLLISIONS IN ONE CHANGE, BOTH FOUND
+  BY THE CHECK GOING RED**: `firstLine` is a SERVER helper and threw inside the
+  list builder, leaving the body's class set and its contents empty — a blank
+  corner with nothing on the console, because the throw was in the poll's own
+  callback; and `var cfg` in `drawPanelChrome()` shadowed the module's, which is
+  filled from the SERVER, so the panel wore the shipped promise over the
+  office's own.
+- **THE CORNER SURVIVES THE WALK (§284, REVERSING §100.4):** *"we need the chat
+  to sustain the navigation so it's open while me navigating across the
+  different pages."* Measured: one press on a page tab closed it. §100.4
+  minimised on any `pointerdown` outside the dock — his own earlier instruction
+  — and **the two cannot both be true, because the platform is ONE PAGE**: every
+  destination, tab, section and card is a press "outside", so a rule exempting
+  navigation would exempt everything but the empty margins. **Recorded as a
+  reversal, not overwritten**: §100.4 was right for a panel you dip into and
+  leave, and stopped being right when the panel became somewhere you WORK. The
+  minus and Escape remain, and **both are an act**; nothing typed is lost either
+  way, because the panel is hidden rather than rebuilt. **The assertion is
+  REWRITTEN, never deleted** (§218) — it now asserts the panel STAYS — and one
+  of the check's own comments went with it: a section pressed the bubble after
+  navigating *because* navigating used to close the panel, and with it arriving
+  open the bubble is not drawn and the press timed out on an invisible control.
+- **A REPLY NOBODY WAS EVER TOLD ABOUT (§283):** the platform decided whether to
+  email AT THE INSTANT the office replied — *has this person had a page open in
+  the last few minutes?* — and a **yes** is a prediction, wrong in one
+  direction: somebody reading two minutes ago who then shuts their laptop
+  counts as present, gets no email, and is **never told at all**. §97.5 wrote
+  the edge down when it built the rule and called a sweep a later decision;
+  this is that decision. **STOP PREDICTING, START LOOKING**: a reply still
+  UNREAD after the office's wait (30 minutes, Islam's number) is chased then.
+  One row of the table moves — away is still mailed at once, a read reply is
+  still never mailed, and **present-and-never-came-back stops being silence**.
+  **THE MESSAGE IS KEPT, NOT REBUILT** (§72.3: the browser builds the email and
+  the server resolves the recipient, so a chase half an hour later has no
+  browser to ask) — the SAME email merely later, never a second kind that would
+  drift (§53.5); written only when the send is deferred and cleared the moment
+  it goes or they read it. **`chaseDue()` RIDES ORDINARY REQUESTS**, which is
+  what §43 already does with expired sign-in attempts, **once a minute per
+  process** so §98's 14→5 is not given back, and it can never fail the request
+  it rode in on. The limitation is stated: **nobody touching the platform means
+  nothing goes out until somebody does.** The address is resolved AT SEND TIME
+  from the stored register (§74.2) — never kept, so a retired person is not
+  written to. **`chatSet()` needed nothing**: §104.7 takes the type from the
+  DEFAULT, so a third number setting worked the day it was added. **AND THE
+  CHECK FOUND A HOLE IN MY OWN QUERY** — it read the SQL out of `api/chat.js`
+  rather than keeping a copy, and went red because the sweep did not say
+  `from_office`: harmless today, since only `reply` writes a kept message, and
+  *a query that relies on what cannot happen yet breaks silently the day it
+  can*. **AND §105.6 BIT TWICE IN AN HOUR**: two runs were measured against a
+  dev-server started BEFORE the file under test was written — once calling the
+  fix working with the falsified build on disk, once calling it broken with the
+  good one. **Compare the file's mtime with the server's start time; never
+  trust the order the commands were typed in.**
+- **THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS
+  NEVER WRITTEN IN (§290):** Islam — *"a lag happened where the chat icon didn't
+  apperar on the reload of the branch"*, and *"the erach for new peopele isn't
+  working"*. **THE SECOND WAS NOT A FAULT AND SAYING SO CAME FIRST** (that
+  feature was the mockup awaiting his wording), and he then asked for both.
+  **§197 HID THE BUBBLE UNTIL THE CHAT ANSWERED, FOR A GOOD REASON THAT DOES NOT
+  APPLY HERE**: *an optimistic bubble that vanishes is a control that lied* —
+  and this is not a guess, because the switch lives in `org.extra.chat`, the
+  browser holds it as `GROUP.chat` before the page draws, and `chatSettings()`
+  reads that same value from that same row (measured both ways on a real
+  Postgres: off reads `{on:false}` on both sides). Asked ONLY when the platform
+  hydrated (`SYNC.isLive()`), so `file://` and §201's wall are unchanged; and
+  nobody the chat would refuse can see it, since `/api/state` refuses a session
+  that has not chosen a password (§43.2). **The poll stays the authority** — this
+  decides only the seconds before the first answer, which after a new build is
+  the whole tenant at once. **THE PEOPLE HALF IS THE SERVER'S ANSWER** though the
+  browser holds the register, because the test is *has no conversation AT ALL*
+  and only the server knows every thread; the active test is **copied from
+  §247's own query** (`extra->>'active' <> 'false'`), which the first draft
+  guessed as a status column and would have offered every retired person (§42).
+  **Nobody is in both halves** (§108.1), nothing new is authorised or stored, and
+  the first message carries §247's own `start` — so the chase, the box and
+  leaving the waiting list come free (§53.5). **Capped at ten** with the rest
+  COUNTED. **§290.1 — EVERY HEADING GOES**: Islam, of the group headings, *"the
+  header is taking unneede space"*, then of the scope line, *"i still can see a
+  header"*. Both right (1b-ii): the ROW SHAPE says which is which and the ORDER
+  does the grouping, and the scope moved into the search box's placeholder, read
+  when somebody decides to type and costing no row — still SAID, because the
+  Waiting half is lit while results reach answered conversations (§35, §124). The
+  cap speaks at the FOOT, where the list runs out, never in a heading. **AND THE
+  WAY OUT WAS A REAL FAULT, OLDER THAN ALL OF IT**: *Open the Platform Inbox*
+  sits inside the scrolling list, so any search carried the corner's one
+  permanent way out off the bottom (§61) — sticky rather than moved, because two
+  places draw that foot and one rule covers both (§53.5); the cost is one row of
+  list height, always. **§290.2 — 11 red** with the people half out and **1 red**
+  with the sticky rule out, from the SOURCES (§276); **three of the check's own
+  failures were the CHECK** (it died rather than reporting, §215; it held a row
+  handle across a poll that rebuilds the list; and it left the search box holding
+  another term, failing its NEIGHBOUR, §94.2), and one assertion was REVERSED and
+  REWRITTEN, never deleted (§218). **One half of the sticky assertion cannot
+  fail** and is kept as the control, said so in the check (§113.8).
+- **A SAVE MUST NOT SHUT EVERYBODY ELSE OUT (§288, finishing §282):** that
+  section fixed one reader and left **three doors** in front of it — the schema
+  check, `chatSettings()` (one row of `org`), and **`auth.getSession()`, which
+  JOINs `people` and therefore sits in front of every authenticated request in
+  the product**. All three are inside the graph a save wipes; all three blocked
+  while the list §282 fixed answered in 1ms. *A measurement that only covers
+  the thing you changed proves the thing you changed.* **AND THE TEST PASSED ON
+  IT** — it held a save open with `TRUNCATE people`, one table where a save
+  truncates 33 (§100.3 from the inside); the list is READ OUT OF
+  `lib/state-io.js` now, never copied (§283). **THE CLEAR STOPS BEING A
+  `TRUNCATE`**: patching readers one at a time is §282 a third time, because
+  every door is a read of the graph and there are more of them than can be
+  counted. `DELETE` takes ROW EXCLUSIVE, which does not conflict with a reader
+  — every door 1–2ms where all four were blocked, for 72ms on the clear.
+  **CHECKED, NOT ASSUMED**: all 14 FKs cascade, nothing outside the list
+  references anything inside it (so the chat and the message record stay
+  outside the clear, §97/§146), no user triggers, no sequences.
+  **THE CHURN IS BOUNDED AND MEASURED** — 160 full saves: 5.5 → 15.4 → 15.5 →
+  15.5 → 15.5 MB, a step then flat, because the space a DELETE frees is reused.
+  **AND IT IS THE FALLBACK PATH, NOT EVERY SAVE**: §241's incremental writer is
+  LIVE on production (since 2026-09-03) and its per-subject deletes take ROW
+  EXCLUSIVE, so a plain field edit never reaches this clear and never blocked a
+  reader. What falls back is every settings, register, reorder and add/remove
+  change, and **every whole-graph post from a tab on an older build** — which
+  narrows the claim and fits the report, since a new build reloads every browser
+  at once and each posts the whole graph. **§288.1 — A CHAT ROW SAYS
+  THE REGISTER'S SHORT NAME AND WHERE THEY SIT**: §187 did this for the INBOX's
+  list and the corner is the THIRD builder onto the same rows, MATCHING on the
+  short name (§93.8) and drawing the long one. It needs nothing from the server
+  — the browser holds the register — and `chatPlaceOf()` is ONE answer both
+  lists ask, ending at `placeLabel()` (§93.12); somebody the register no longer
+  holds keeps their stored name and is given NO place (§35). The demo cannot
+  show it (all 33 names are two words), so the check MAKES the state (§255).
+- **THE CHAT MUST NOT WAIT ON A SAVE (§282):** Islam, twice in two days —
+  *"all conversations are gone!!"*, then *"before the fix all the chats
+  disappeared"*, with §231.4's card reading *"The server did not answer (no
+  answer)"*. **NOTHING WAS LOST AND THE CARD WAS TRUE**: the chat's tables sit
+  outside the state graph, so a save cannot reach them (asserted). *"No answer"*
+  is `post()`'s 25-second clock, so the endpoint was neither down nor erroring —
+  it was **waiting**. A save clears the graph with `TRUNCATE … CASCADE`, which
+  takes ACCESS EXCLUSIVE on `people` for the whole of §240's (correctly) long
+  transaction, and the queue `LEFT JOIN`ed `people` for a live name: **frozen at
+  8s, against 2ms reading its own stored `person_name` and 1ms for the
+  messages** — only the join was ever blocked. **Worst exactly when somebody is
+  looking**: a new build reloads every browser, the platform autosaves, Neon has
+  slept, so the slowest save of the day lands as the corner opens. **THE READER
+  IS FIXED AND THE WRITER DELIBERATELY IS NOT** — `DELETE` was measured and is
+  better on every axis (3ms against 72ms, all 14 FKs already cascade, readers
+  never block), and it is still not done, because it was verified HERE and not
+  against production, where drift would make a save FAIL rather than merely be
+  slower (§238 already records the write path as its own staged pass, and §241
+  removes the TRUNCATE from the other side when its flag is switched on). The
+  register is asked **separately and allowed to fail**, with a 2s `lock_timeout`
+  under it — safe because a chat WRITE can never collide with a save, so it can
+  only fire on the read that must not hang; **and the backstop alone is not
+  enough, which the red run shows** (the old query still fails, just faster).
+  Cost stated: for a second or two a RENAMED person shows their previous name,
+  and **`gone` reads NULL, never true** — an unread register is not somebody
+  leaving it (§93), and the page already treats null as *say nothing*.
+- **A REFUSAL WITHOUT ITS CAUSE IS WHY NOTHING CONVERGES (§282.2–4):** measured
+  against a stand-in push service, a mismatched key (403), a dead registration
+  (400) and an oversized payload (413) all returned `failed: 1` and printed one
+  sentence — *"The push service would not take it."* **Four rounds of fixes
+  converged on nothing because nothing ever named one thing** (§124 at the far
+  end of the chain). The service's words are carried back, the service is NAMED
+  from the endpoint's host alone (Apple will not deliver until the platform is
+  on the home screen — a different errand from Chrome), and the diagnostic asks
+  **this browser** as well as the server, because a browser registered at one
+  address while the server sends to another read as perfect health at both ends.
+  **AND A REGISTRATION IS BOUND TO THE KEY IT WAS MADE WITH**: accepting an
+  existing one without looking at it means that once the key changes the browser
+  hands the old one back FOR EVER — bell on, device counted, every send refused,
+  and nothing able to notice. Compared and re-made now; **a browser that will
+  not report its key is left alone**, because churning on a guess is worse.
+  **AND THE FIRST BUILD OF THAT STOPPED SUBSCRIBING ENTIRELY** — `pushSync`
+  already had a `want`, a second `var want` in the same callback HOISTED over
+  it, `if (!want)` read `undefined` and took the unsubscribe branch every time:
+  §56.7's collision, valid on both sides, past `node --check`, **found by the
+  check going red and not by reading it**.
 - **THE OFFICE STARTS A CONVERSATION (§247):** Islam — *"from the platform
   inbox allow the smo to initiate a message with someone."* Until now the office
   could only ever ANSWER: with nobody having written in there was no way to
@@ -6069,6 +6306,15 @@ node scripts/test-safety-peek.js # ...and the server half against a real Postgre
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to
                                 # the ordinary read
+node scripts/test-cold-starts.js # two cold starts, one new migration, a POOLED
+                                # connection (§289): the pooler is modelled — session
+                                # state lost after every statement outside a
+                                # transaction — and both bootstraps must succeed with
+                                # the migration recorded once; a migration that cannot
+                                # run fails loudly, records nothing, and the next boot
+                                # applies it. 1 red on the module before (23505 on
+                                # _sql_migrations_pkey — the sign-in page's "Something
+                                # went wrong", twice in a day, once per deploy)
 python3 checks/save-said.py     # a save that FAILS says so on the page: a server
                                 # error naming its status, an unreachable server, a
                                 # remembered refusal, and demo data — seven states
@@ -6264,7 +6510,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;290: a row's type is a picker, and its
+*Last Updated: 2026-09-04 &mdash; **&sect;292: a row's type is a picker, and its
 direction opens.** Islam, from the live product: *"on a creation of a project I
 couldn't set the direction and we need to make the add deliverable or outcome
 more of an options in the type rather than 2 buttons of add deliverable or
@@ -6292,8 +6538,149 @@ would hold Submit every press), with build mode keeping both for a stated reason
 to fail twice &mdash; no migration, full `qa.py` sweep ERRORS none, ten
 neighbouring checks green, and `checks/project-row-type.py` **13 red** on the
 build before. **Two of that check's own first failures were the check**, and
-`qa.py` held a literal this moved and was rewritten rather than deleted. **On the
-branch, not merged.***
+`qa.py` held a literal this moved and was rewritten rather than deleted. **Merged to `main`**, with main's
+&sect;282&ndash;&sect;290 from the chat round brought in first, the built file
+REBUILT rather than merged (&sect;91) and the whole suite re-run after.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;290: the corner arrives with the page,
+and the search reaches somebody who has never written in.** Islam, on the shipped
+build &mdash; *"a lag happened where the chat icon didn't apperar on the reload of
+the branch"*, and *"the erach for new peopele isn't working"*. **THE SECOND WAS
+NOT A FAULT AND SAYING SO CAME FIRST**: it was the mockup awaiting his wording,
+so *"Nothing found"* was the search behaving as built. He asked for both.
+**&sect;197 HID THE BUBBLE FOR A REASON THAT DOES NOT APPLY HERE** &mdash; *an
+optimistic bubble that vanishes is a control that lied* &mdash; because this is
+not a guess: the switch lives in `org.extra.chat`, the browser holds it as
+`GROUP.chat` before the page draws, and the server reads that same value from
+that same row (measured both ways: off is `{on:false}` on both sides). Asked only
+when the platform hydrated, so `file://` and &sect;201's wall are unchanged, and
+`/api/state` already refuses anybody `/api/chat` would. **THE PEOPLE HALF IS THE
+SERVER'S ANSWER** &mdash; the test is *has no conversation AT ALL* and only the
+server knows every thread &mdash; with &sect;247's own active test COPIED rather
+than composed (the first draft guessed a status column and would have offered
+every retired person), nobody in both halves, nothing new stored, and the first
+message carrying &sect;247's `start`. **&sect;290.1 &mdash; every heading goes**,
+both at Islam's word: the row shape says which is which, the order does the
+grouping, the scope moved into the box's placeholder, and the cap speaks at the
+foot. **And the way out was a real fault older than the feature** &mdash; the
+Inbox link scrolled away with the list (&sect;61); pinned now, one row of height,
+stated. **11 red** with the people half out, **1 red** with the pin out, from the
+sources; **three of the check's own failures were the CHECK** (&sect;215,
+&sect;94.2) and one assertion was REWRITTEN not deleted (&sect;218). 112/0
+test-chat &middot; 55/0 corner-queue &middot; 523/0 &middot; 131/0 &middot; 11/0
+during-save &middot; 14/0 chase &middot; 33/0 push &middot; 24/0 two-tabs
+&middot; 8/8 concurrent &middot; incremental byte-identical &middot; office-chat,
+paste-picture, csp-net and the full `qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;289: the bootstrap's lock lives
+inside one transaction.** Islam, with the sign-in page under his own `smo`:
+*"Something went wrong. Try again, and tell the SMO if it keeps happening"*
+&mdash; *"this happened twice now I want you to trace this issue."* **THAT
+SENTENCE COMES FROM ONE PLACE**, the catch-all in `api/auth.js`, so the
+handler THREW &mdash; and what threw was the bootstrap every function runs on
+a cold start. It took a SESSION advisory lock and then ran the migrations as
+separate statements; behind Neon's transaction pooler a session lock sits on a
+backend the next statement never sees (&sect;240 wrote that down for the
+SAVE), so it protected nothing exactly when it was for: a deploy carrying a
+new migration file, which also reloads every open tab through &sect;258's
+banner and starts several instances cold in the same second. Two of them
+both applied it and the second's registry INSERT hit the primary key
+(`23505`). **Today's `main` carried a migration new to production twice, at
+09:45 and 11:55 &mdash; one failure per deploy.** **REPRODUCED BEFORE IT WAS
+EXPLAINED**: one migration forgotten in the registry, two bootstraps at once,
+his sentence printed verbatim beside the runtime log's `23505`. The whole
+bootstrap is ONE transaction now under `pg_advisory_xact_lock`, the seed
+written with `{ inTransaction: true }`, the heal outside after the COMMIT;
+a migration is atomic and a failed one records nothing (asserted). **The
+pooler is modelled in the test, never assumed** (&sect;100.3): 1 red on the
+module before. **Nothing in the data moved** &mdash; the migration ran
+correctly the first time both times, and the retry worked because a failed
+bootstrap is not remembered. Server only: no `src/` change, built file
+byte-identical, no shell bump, nobody signed out. Round trip, clean parity,
+concurrent saves, incremental write, one-line heal, two tabs, 523/0 and 131/0
+all green on fresh databases.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;288: a save stops shutting everybody
+else out, and a row says the register's name.** Islam, on the shipped build:
+*"this error always comes and manytimes the chat disappears before coming back
+and disappear again"*, with the corner on *Looking&hellip;* and the Inbox drawing
+*"The server did not answer"*. **&sect;282 FIXED ONE READER AND LEFT THREE DOORS
+STANDING**: every chat request reads the settings (one row of `org`) and, cold,
+the schema check, and `auth.getSession()` JOINs `people` in front of EVERY
+authenticated request in the product &mdash; all three inside the graph a save
+wipes, all three blocked, while the conversation list &sect;282 fixed answers in
+1ms. *A measurement that only covers the thing you changed proves the thing you
+changed.* **AND MY OWN TEST PASSED ON IT** &mdash; it held a save open with
+`TRUNCATE people`, one table where a save truncates 33 (&sect;100.3 from the
+inside); the list is read out of `lib/state-io.js` now rather than copied.
+**THE READERS ARE NOT PATCHED ONE AT A TIME, BECAUSE THERE ARE MORE OF THEM THAN
+CAN BE COUNTED**: the clear stops being a `TRUNCATE`, which &sect;282 named as
+the eventual fix and deferred &mdash; rightly then, and expired the moment the
+readers turned out to be uncountable. DELETE takes ROW EXCLUSIVE, which does not
+conflict with a reader at all: every door 1&ndash;2ms where all four were
+blocked, for 72ms on the clear. **CHECKED RATHER THAN ASSUMED** &mdash; all 14
+FKs cascade, no table outside the list references one inside it (so the chat and
+the message record stay outside the clear exactly as before), no user triggers,
+no sequences. **THE ONE COST THAT NEEDED WATCHING IS BOUNDED AND MEASURED**: 160
+full saves, 5.5 &rarr; 15.4 &rarr; 15.5 &rarr; 15.5 &rarr; 15.5 MB &mdash; it
+steps up once and flattens, because the space a DELETE frees is reused. Proved
+able to fail two ways, neither a switch in the product: **4 red** with the clear
+put back, **5 red** with &sect;282's old query beside it &mdash; the original
+fault whole. One assertion REVERSED and REWRITTEN, never deleted (&sect;218).
+**&sect;288.1 &mdash; the corner's rows say the register's short name and where
+they sit**, Islam's own correction and my drift one section old: &sect;187 did
+this for the INBOX's list and this corner is the THIRD builder onto the same
+rows, matching on the short name (&sect;93.8) and drawing the long one. It needs
+nothing from the server, since the browser holds the register; `chatPlaceOf()`
+is ONE answer read by both lists; somebody the register no longer holds keeps
+their stored name and is given no place (&sect;35). The demo cannot show it (all
+33 people have two-word names), so the check MAKES the state &mdash; **6 red**,
+printing his symptom verbatim. 11/0 during-save &middot; 103/0 test-chat
+&middot; 24/0 two-tabs &middot; 8/8 concurrent &middot; incremental
+byte-identical &middot; round trip and clean parity PASS on virgin databases
+&middot; 36/0 corner-queue &middot; office-chat, paste-picture and the full
+`qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;282&ndash;&sect;286: the chat does not
+wait on a save, the notifications say where they stop, a reply nobody was told
+about is chased, the corner survives the walk and carries the office's queue,
+and a picture is pasted.** &mdash; **&sect;282:** Islam, twice in two days
+&mdash; *"all conversations are gone!!"* and *"before the fix all the chats
+disappeared"* &mdash; and, separately, *"the notification system is still not
+working &hellip; we tried many things."* **NOTHING WAS EVER LOST**, established
+first: the chat's tables sit outside the state graph. *"No answer"* was the
+corner's own 25-second clock, so the endpoint was neither down nor erroring
+&mdash; it was WAITING on the ACCESS EXCLUSIVE lock a save's `TRUNCATE` takes on
+`people`, which the queue joined for a live name (**frozen at 8s against 2ms
+without the join**). Worst exactly when somebody is looking, because a new build
+reloads every browser and the platform autosaves onto a sleeping database.
+**The reader is fixed and the writer deliberately is not** &mdash; `DELETE` was
+measured and is better on every axis, and it is the one file where a mistake
+costs real data, so it stays a staged piece (&sect;238; and &sect;241 removes
+the TRUNCATE from the other side when its flag is turned on). **And the
+notifications stopped shrugging**: a mismatched key, a dead registration and an
+oversized payload all reported as `failed: 1` under one sentence, which is why
+four rounds converged on nothing; the service's own words are carried back, the
+service is named, the diagnostic asks this browser as well as the server, and a
+registration made with a superseded key &mdash; which could never heal &mdash;
+is caught and re-made. **The first build of that stopped subscribing entirely**
+on a `var` collision valid on both sides, found by the check going red.
+`test-chat-during-save` RED on the old query and 8/8 green; `test-chat` 103/0
+(falsified 102/1); `office-chat` all clear (falsified, 6 red); sweep clean.
+**&sect;283: a reply nobody was ever told about** &mdash; the platform decided
+whether to email AT THE INSTANT the office replied, and a *yes* is a prediction
+wrong in one direction; a reply still unread after the office's wait (30 minutes,
+Islam's number) is chased then, with the SAME email kept rather than rebuilt.
+**&sect;284: the corner survives the walk**, reversing &sect;100.4 &mdash;
+*"we need the chat to sustain the navigation"*, and the two cannot both be true
+because the platform is ONE PAGE. **&sect;285: the office's corner carries the
+queue** &mdash; *"the chat bubble of the SMO team shouldn't be something to be
+sent to the smo, that is redundancy"*; nothing new is authorised or stored, it
+rides the poll that already exists, and `replyPost()` is the one email builder
+both screens call. **&sect;286: a picture is pasted, not only attached**, feeding
+&sect;50's own intake and adding nothing &mdash; with **&sect;286.2** showing what
+is attached, from a mockup Islam picked (A), and **&sect;285.2** unifying the two
+corners' panel size, which had differed by 138px.*
 
 *Earlier: 2026-09-04 &mdash; **&sect;278.3: the objectives table, and a
 cell that stopped being one.** Four reports from the live product in two
@@ -6329,6 +6716,7 @@ differ, full `qa.py` ERRORS none, round trip and clean parity green on a virgin
 Postgres 16, and **three checks held literals these decisions moved &mdash;
 rewritten, not deleted**, one of which had been red since &sect;278 landed and
 was missed at that merge. **Merged to `main`.***
+
 
 
 *Earlier: 2026-09-04 &mdash; **&sect;266.11: the dialog does not change

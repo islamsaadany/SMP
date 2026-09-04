@@ -1565,14 +1565,14 @@ function deckScale(){
   deck.style.transform = "scale(" + k + ")";
 }
 
-/* ── DRIVING THE DECK WITH A FINGER (§279) ──────────────────────────────
+/* ── DRIVING THE DECK WITH A FINGER (§280) ──────────────────────────────
    Three small pieces of state, and each is here rather than inside a handler
    because the tap and the swipe are two readings of ONE gesture and have to
    agree about it.
 
    `DECKPOINTER` is what produced the gesture. A `click` is not reliably a
    PointerEvent, so the kind is remembered from the pointerdown that came
-   before it (§279). It starts as "mouse", so a click arriving with no
+   before it (§280). It starts as "mouse", so a click arriving with no
    pointerdown at all — a keyboard-driven one — takes the mouse branch and
    moves forward, which is §265's behaviour unchanged.
 
@@ -1627,7 +1627,7 @@ function wireDeck(){
      type would advance the slide out from under the cursor: a `click` that
      lands on a control is that control's, never the stage's.
 
-     ── AND A FINGER GETS A WAY BACK (§279, reversing §265's forward-only for
+     ── AND A FINGER GETS A WAY BACK (§280, reversing §265's forward-only for
      TOUCH and not for a mouse) ──────────────────────────────────────────
      Islam, presenting from a tablet: *"it doesn't go left or right."* §265
      kept the click forward-only for a stated reason — *a click that went back
@@ -1659,13 +1659,13 @@ function wireDeck(){
     deckShow(DECK.i + (back ? -1 : 1));
   });
 
-  /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§279, Islam's) ────────────
+  /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§280, Islam's) ────────────
      The direction people already have from every photo album: the slide
      follows the finger, so pushing the current slide off to the left brings
      the next one on. It is the same two acts as the tap zones, offered the
      way a tablet offers them — nobody has to be told which third they are in.
 
-     TOUCH AND PEN ONLY, for §279's own reason: a mouse keeps §265 exactly,
+     TOUCH AND PEN ONLY, for §280's own reason: a mouse keeps §265 exactly,
      and a drag with a mouse is how somebody selects text rather than how they
      turn a page.
 

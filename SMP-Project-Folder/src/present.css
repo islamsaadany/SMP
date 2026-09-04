@@ -250,7 +250,7 @@
      comes and goes: `deckScale()` reads clientHeight, and a bar that resized
      the stage would rescale the whole deck every time it appeared. The stage
      takes the full inset in fullscreen and keeps it. */
-  /* ── THE HORIZONTAL GESTURE IS THE DECK'S (§279) ──────────────────
+  /* ── THE HORIZONTAL GESTURE IS THE DECK'S (§280) ──────────────────
      Without this the browser claims a horizontal drag for its own back/forward
      navigation or an overscroll, so the swipe is stolen before `pointerup`
      ever reaches us — and it is stolen SILENTLY, which reads as a swipe that

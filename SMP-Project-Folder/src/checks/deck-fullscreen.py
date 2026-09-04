@@ -241,9 +241,9 @@ with sync_playwright() as p:
     s = js(pg, STATE)
     ok("Escape again closes the deck", s.get("deckOpen") is False, s)
 
-    # ── 6 · a tablet: tap zones and swipes (§279) ───────────────────────────
+    # ── 6 · a tablet: tap zones and swipes (§280) ───────────────────────────
     # Back into fullscreen — §4 left it windowed on purpose.
-    print("\n── 6 · a finger: the left third goes back, and swipes turn pages (§279)")
+    print("\n── 6 · a finger: the left third goes back, and swipes turn pages (§280)")
     js(pg, "() => { const r=document.getElementById('deckroot');"
            "  if (!r.classList.contains('on')) openDeck(unitLike(activeKeys()[0]));"
            "  return 1; }")
@@ -304,7 +304,7 @@ with sync_playwright() as p:
 
     # THE RIGHTWARD SWIPE IS THE ONE THE BROWSER WANTS FOR ITSELF. Without
     # `touch-action` on the stage it fires the platform's own back-navigation
-    # and the page LEAVES — measured on the pre-§279 build, which lands on
+    # and the page LEAVES — measured on the pre-§280 build, which lands on
     # about:blank and takes the presenter out of the deck mid-presentation.
     # Asserted before the direction, because a page that is gone answers every
     # later question with nothing (§215): three assertions here came back None

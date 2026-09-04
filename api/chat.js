@@ -91,6 +91,28 @@ function readBody(req) {
     req.on("error", reject);
   });
 }
+/* ── A TIMEOUT THAT LEAVES WITH THE REQUEST (§289.2) ─────────────────────
+   `SET LOCAL` lives and dies with the transaction it is sent in, and a
+   transaction pins one backend behind the pooler — so the two-second lock
+   timeout the register read wants applies to that read and to nothing else,
+   and is gone before the backend is handed to anybody. A plain `SET` here
+   would stay on the backend for its life (§289). The read is the only thing
+   inside, so a timeout, a rollback and a thrown error all leave the caller
+   exactly where the old form left it: with no register this second, which the
+   caller already survives. */
+async function readUnderLockTimeout(client, sql, params) {
+  await client.query("BEGIN");
+  try {
+    await client.query("SET LOCAL lock_timeout = '2s'");
+    const r = await client.query(sql, params);
+    await client.query("COMMIT");
+    return r;
+  } catch (e) {
+    try { await client.query("ROLLBACK"); } catch (e2) {}
+    throw e;
+  }
+}
+
 function send(res, code, obj) {
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -398,15 +420,16 @@ module.exports = async function handler(req, res) {
        work, not something done while chasing a chat symptom. Nothing below
        touches the save path.
 
-       This is the backstop under that: a lock this endpoint cannot get is an
-       error in two seconds rather than a hang until the browser gives up.
-       SAFE BECAUSE THE CHAT'S OWN TABLES ARE OUTSIDE THE STATE GRAPH (§97,
-       §56) — `chat_threads`, `chat_messages` and `push_*` are never truncated
-       and carry no foreign key into it, so a chat WRITE cannot collide with a
-       save and cannot be failed by this. It can only ever fire on a read of
-       `people`, which is precisely the read that must not hang. */
-    try { await client.query("SET lock_timeout = '2s'"); }
-    catch (e) { /* an old server without it is no worse off than before */ }
+       The backstop under that is a two-second lock timeout on the register
+       read — and it is scoped to THAT READ, in `readUnderLockTimeout()` below,
+       since §289.2. It was one `SET lock_timeout` here, at the top of every
+       request, outside any transaction: on the pooled connection a session
+       setting stays on whichever backend took it and is handed to the next
+       request (§289's fault, one word over) — and this endpoint is asked every
+       few seconds by every open tab, so within minutes most backends would
+       carry it, and a SAVE queued behind another save (§240) or a cold start
+       waiting at the bootstrap's lock (§289) would be cancelled after two
+       seconds and read as the red save bar or the sign-in sentence. */
 
     await ensureReady(client);
     const body = req.method === "POST" ? await readBody(req) : {};
@@ -1060,7 +1083,7 @@ module.exports = async function handler(req, res) {
          answer. */
       let reg = null;
       try {
-        reg = (await client.query(
+        reg = (await readUnderLockTimeout(client,
           "SELECT key, name, unit_key, fn_key, title FROM people")).rows;
       } catch (e) { reg = null; }          /* locked, and that is survivable */
       if (reg) {

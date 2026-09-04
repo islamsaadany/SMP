@@ -34425,3 +34425,33 @@ names the Postgres error; a `23505` on `_sql_migrations_pkey` is §289, a
 grep `api/` and `lib/` for the five session-level words outside a
 transaction. A guard that fails the suite on their presence is proposed and
 not yet built.
+
+### §289.2 — THE CHAT'S TIMEOUT LEAVES WITH THE REQUEST, AND THE RULE IS A CHECK
+
+Islam: *"build"*, of §289.1's two open items.
+
+**THE CHAT'S `SET lock_timeout` IS SCOPED TO THE ONE READ IT PROTECTS.** It was
+sent at the top of every chat request, outside any transaction; it is
+`SET LOCAL` inside a transaction around the register read now
+(`readUnderLockTimeout()` in `api/chat.js`), so it applies to that read and is
+gone before the backend is handed to anybody. Nothing about what the chat
+DOES changes: the read still fails softly and the list still draws from its
+stored names when the register cannot be read this second (§282). Proved by
+the chat's own suites on fresh databases — `test-chat` 103/0 through a real
+dev-server, `test-chat-during-save` 11/0, `test-chase` 14/0.
+
+**THE RULE IS EXECUTABLE.** `scripts/test-session-state.js` reads every file
+under `api/` and `lib/`, drops the comments, joins each run of concatenated
+string literals back into the SQL it becomes, and fails on any statement that
+starts with a session-level word: `pg_advisory_lock`, `pg_advisory_unlock`,
+a bare `SET name = …`, `LISTEN`, `PREPARE`, a temp table. `SET LOCAL` and
+`pg_advisory_xact_lock` pass. **Its first run found two things that were not
+SQL** — a JavaScript string reading `"set"` and a sentence reading *"Set in
+the environment."* — so the `SET` pattern asks for the shape of a statement
+(`SET name = value` or `SET name TO value`) rather than the word. **Red on the
+chat's line before the fix, green after**; no database, no network.
+
+**THE COST IS SAID**: a guard that reads source can be fooled by a statement
+built from pieces it does not recognise as one string, so it catches the
+shape every server file uses today and a new shape is a new pattern to add. It
+is a floor under the rule, not the rule.

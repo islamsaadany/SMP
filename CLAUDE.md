@@ -414,8 +414,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   a 500 that only happens under a burst, right after a deploy, or a hang
   nobody can reproduce alone — read the runtime log line the endpoint writes
   (`api/auth:`, `api/state:`, `api/chat:`) and grep `api/` and `lib/` for the
-  five words above outside a transaction. `scripts/test-cold-starts.js` models
-  the pooler and is the shape a check for this class takes.
+  five words above outside a transaction — or run
+  `node scripts/test-session-state.js`, which does that grep for you and is
+  red on any of them (§289.2). `scripts/test-cold-starts.js` models the pooler
+  and is the shape a behavioural check for this class takes.
 - **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
   (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
   a session AND a password that is no longer temporary; a signed-in person sees
@@ -6225,6 +6227,13 @@ node scripts/test-safety-peek.js # ...and the server half against a real Postgre
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to
                                 # the ordinary read
+node scripts/test-session-state.js # nothing session-level on the pooled connection
+                                # (§289.2): every server file read, comments dropped,
+                                # concatenated literals rejoined, and any statement
+                                # starting with pg_advisory_lock, a bare SET, LISTEN,
+                                # PREPARE or a temp table is a failure; SET LOCAL and
+                                # the xact lock pass. Red on the chat's SET before
+                                # §289.2, green after. No database, no network
 node scripts/test-cold-starts.js # two cold starts, one new migration, a POOLED
                                 # connection (§289): the pooler is modelled — session
                                 # state lost after every statement outside a
@@ -6455,7 +6464,12 @@ correctly the first time both times, and the retry worked because a failed
 bootstrap is not remembered. Server only: no `src/` change, built file
 byte-identical, no shell bump, nobody signed out. Round trip, clean parity,
 concurrent saves, incremental write, one-line heal, two tabs, 523/0 and 131/0
-all green on fresh databases.*
+all green on fresh databases. **&sect;289.1&ndash;.2**: the rule written down
+beside the database facts; the chat's own `SET lock_timeout` &mdash; the same
+class, found by searching for it &mdash; scoped to the one read it protects
+with `SET LOCAL` inside a transaction (chat suites 103/0, 11/0, 14/0); and
+`scripts/test-session-state.js` makes the rule a check, red on that line
+before and green after.*
 
 *Earlier: 2026-09-04 &mdash; **&sect;288: a save stops shutting everybody
 else out, and a row says the register's name.** Islam, on the shipped build:

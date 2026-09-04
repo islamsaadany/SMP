@@ -1922,7 +1922,7 @@
        its Add and Remove act on, and an index from the last paint would act on
        the paint before it. */
     if (typeof KOLISTS !== "undefined") KOLISTS.length = 0;
-    /* §261: and the open monthly drawer registers the row it writes into,
+    /* §278: and the open monthly drawer registers the row it writes into,
        for exactly the same reason — an index from the last paint would clear
        a different row's twelve months. */
     if (typeof MONTHREG !== "undefined") MONTHREG.length = 0;
@@ -2331,7 +2331,7 @@
        paint, and a height measured before the row is laid out is a height
        measured against nothing. */
     if (typeof growFields === "function") growFields();
-    /* §261: and a target the twelve months now derive is locked where it
+    /* §278: and a target the twelve months now derive is locked where it
        stands. Here, beside growFields, for the same reason: the box is the
        real bound field on every paint, and what changes is only whether it
        accepts typing — so the state is applied to what the paint just drew
@@ -3898,7 +3898,7 @@
         paint();
       });
     });
-    /* ── THE MONTHLY DRAWER (§261) ─────────────────────────────────────
+    /* ── THE MONTHLY DRAWER (§278) ─────────────────────────────────────
        Opening one closes any other: the drawer is 147px, and two of them push
        the rows being compared off the screen. Toggling is a repaint, which is
        safe here because it is a PRESS — the boxes inside refresh themselves in
@@ -3912,7 +3912,7 @@
     });
     /* CLEARING IS A DELETION AND IS ASKED FOR ONCE. It throws away twelve
        numbers somebody typed, and the target it derived stays behind as the
-       authored one — which is the honest carry-over (§261) and worth saying,
+       authored one — which is the honest carry-over (§278) and worth saying,
        because the row does not visibly change until you look at the benchmark. */
     document.querySelectorAll("[data-mpclear]").forEach(function(b){
       b.addEventListener("click", function(){

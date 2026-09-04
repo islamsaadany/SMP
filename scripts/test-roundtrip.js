@@ -250,7 +250,7 @@ function firstDiff(a, b, at) {
       (!cPr.outcomes[0].pend && !cPr.milestones[0].pend) ? "PASS" : "FAIL");
   }
 
-  /* ── A MONTHLY PLAN SURVIVES THE DATABASE (§261) ────────────────────
+  /* ── A MONTHLY PLAN SURVIVES THE DATABASE (§278) ────────────────────
      "No migration and no schema change" is a claim about `extra` JSONB, and
      §172 is the reason it is not left as one: that section's fourth grant
      value was agreed by four layers and REFUSED by a CHECK constraint nobody
@@ -261,7 +261,7 @@ function firstDiff(a, b, at) {
      THE NULLS ARE THE POINT. A half-filled plan is stored, and a blank month
      must come back as null rather than as 0 — through `JSON.stringify` into
      jsonb and out again, where a lost null would silently put the row IN
-     FORCE against a target nobody typed (§261, §104.10). */
+     FORCE against a target nobody typed (§278, §104.10). */
   const mState = await io.readState(client);
   const mUnit = Object.keys(mState.units)[0];
   const mPil = (mState.units[mUnit].items || [])[0];

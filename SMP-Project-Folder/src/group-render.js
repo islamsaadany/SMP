@@ -467,7 +467,7 @@ function measureRows(ms, opts){
                   "Yes / No" invites reading it as part of the target. */
                '</td><td class="num">' +
                  (isYesNoRow(m) ? '<span class="nobody">\u2014</span>' : dirCell(m.dir)) +
-               /* §261: and one word saying the benchmark beside it is not
+               /* §278: and one word saying the benchmark beside it is not
                   half the year. It goes in the ANNUAL TARGET cell, whose
                   meaning is what changed — under the row's name it would
                   stack beneath a reporter's own note (§255). Drawn only where
@@ -3289,7 +3289,7 @@ function unitInherit(m){
   };
 }
 
-/* ── A TARGET WITH A SHAPE OF ITS OWN (§261) ──────────────────────────
+/* ── A TARGET WITH A SHAPE OF ITS OWN (§278) ──────────────────────────
    Islam: *"targets proration is always flat across the year but some targets
    have seasonality so the proration is not valid .. so some targets needs a
    monthly plan input so the calculation becomes more accurate."*
@@ -3331,7 +3331,7 @@ function monthlyShape(row, fld){
     ? { compile: row.outCompile, monthly: row.outMonthly }
     : row;
 }
-/* ── TWELVE CELLS, FOUR ACROSS AND THREE DOWN (§261.2) ─────────────
+/* ── TWELVE CELLS, FOUR ACROSS AND THREE DOWN (§278.2) ─────────────
    A year by month, without a word. DRAWN rather than a font character, for
    §52's reason: a glyph can be MAPPED and not DRAWN, and ships as a blank box
    — this project has been bitten by that twice, and once it reached the seed.
@@ -3348,7 +3348,7 @@ function monthlySvg(){
    shape must still be able to grow its first (§61). Lit once anything has
    been typed, so a plan somebody is halfway through is findable again.
 
-   A MARK AND NOT A WORD (§261.2), Islam's choice from four drawn in the real
+   A MARK AND NOT A WORD (§278.2), Islam's choice from four drawn in the real
    table: *"the button montthly is big"*, and it was — bordered, uppercase and
    bold, on eight rows that mostly will not use one. The mark is 24px against
    72, it is the same control the eye beside it already is, and it is the only
@@ -3798,7 +3798,7 @@ function koEdit(list, page, acKey, owner){
         '<td class="cc">' + (pg && yn ? offInput(targetKeep(m.target3y || ""))
           : gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
-        /* §261: THIS YEAR'S TARGET, and never the 3-year one. Twelve months
+        /* §278: THIS YEAR'S TARGET, and never the 3-year one. Twelve months
            shape a YEAR; a three-year horizon has no months to be given, and
            §251 already puts the unit in this year's target for the same
            reason. */
@@ -5848,7 +5848,7 @@ function unitPlanBody(it, u, railed){
         ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
             || esc(targetUnitOf(m))) + '</td>'
         : '') +
-      /* §261: the way in to a monthly plan sits in the TARGET cell, because
+      /* §278: the way in to a monthly plan sits in the TARGET cell, because
          the monthly plan IS the target — under Compiled it read as a second
          compile rule (mockup, signed off). Never on a yes/no row: there is no
          number for twelve months to shape. */
@@ -5952,7 +5952,7 @@ function unitPlanBody(it, u, railed){
          its four facts a control of its own in one cell (Islam). §249 draws
          it through gapCell, above, so the same cell serves the office's pen,
          the filler's two boxes and the red word. */
-      /* §261: and the chip, BELOW the four boxes rather than inside them —
+      /* §278: and the chip, BELOW the four boxes rather than inside them —
          `.tgrid` is two columns of `--tw` (§248) and a fifth control would
          start a third row half the cell wide, which is exactly the "hole
          among equal boxes" that section refused. Only in the pen, and never
@@ -6548,7 +6548,7 @@ function capKoEdit(c){
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
           : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
-        /* §261: a supporting function's objectives get the same drawer as a
+        /* §278: a supporting function's objectives get the same drawer as a
            unit's, because they are the same cell asking the same question —
            Islam's "all four". */
         '<td class="cc"' + (ed && !isYesNoRow(m) ? monthlyTgtAttrs(m, "monthly") : "") +

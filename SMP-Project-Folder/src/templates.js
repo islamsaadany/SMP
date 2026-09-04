@@ -31,13 +31,13 @@ var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","ou
                  "owner","collaborators","direction","value","value_3y","unit","horizon",
                  "compile","q1","q2","q3","q4","theme","kind","notes","monthly"];
 
-/* ── THE TWELVE, ON THE WAY IN (§261) ──────────────────────────────────
+/* ── THE TWELVE, ON THE WAY IN (§278) ──────────────────────────────────
    The workbook writes twelve columns and the reader joins them into one
    pipe-separated field, exactly as `collaborators` travels — so the plan
    pipeline carries one column rather than twelve, and this is where it
    becomes the array a row stores.
 
-   A BLANK CELL IS NULL AND NEVER NOUGHT (§261, §104.10). Twelve cells of
+   A BLANK CELL IS NULL AND NEVER NOUGHT (§278, §104.10). Twelve cells of
    which five were filled must arrive as five months set, not as five plus
    seven planned zeros — that would be a target nobody typed, arrived at by
    arithmetic nobody could see, and it would put the row IN FORCE on a plan
@@ -540,7 +540,7 @@ function createFromPlan(u, d){
       var mRow = { id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
         compile:x.compile || "Latest", actual:"", progress:null,
         slide:x.source_slide, horizon:x.horizon, notes:x.notes };
-      /* §261: set only where the file carried months, for §233's own reason —
+      /* §278: set only where the file carried months, for §233's own reason —
          a row that never had a monthly plan and one whose file said nothing
          must be byte-identical. */
       var mMon = monthsFromText(x.monthly);
@@ -564,7 +564,7 @@ function createFromPlan(u, d){
            would read as started-and-delivered-nothing, which is a false
            failure on the day a plan arrives \u2014 the same trap as clearing. */
         status:"Not started", actual:null, slide:x.source_slide, notes:x.notes };
-      /* §261: a tactic's twelve belong to its OUTCOME, and are stored under
+      /* §278: a tactic's twelve belong to its OUTCOME, and are stored under
          the name the outcome's other four fields already use (§248). */
       var tMon = monthsFromText(x.monthly);
       if (tMon) tRow.outMonthly = tMon;

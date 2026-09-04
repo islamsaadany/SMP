@@ -1,4 +1,4 @@
-"""A TARGET WITH A SHAPE OF ITS OWN (§261).
+"""A TARGET WITH A SHAPE OF ITS OWN (§278).
 
 Islam: *"targets proration is always flat across the year but some targets have
 seasonality so the proration is not valid .. so some targets needs a monthly
@@ -179,7 +179,7 @@ with sync_playwright() as p:
     ck("every measure carries the way in — the first one has to be makeable (§61)",
        chips.get("rows") and chips.get("rows") == chips.get("withChip"), chips)
 
-    # ── 3b · THE MARK IS DRAWN, AND IT SAYS WHAT IT IS (§261.2) ─────────
+    # ── 3b · THE MARK IS DRAWN, AND IT SAYS WHAT IT IS (§278.2) ─────────
     # Islam picked a 24px mark over the worded chip. With the word gone the
     # hover is the only thing that says what the control does, and the SVG is
     # the only thing on the button at all — so both are asserted, and the ink

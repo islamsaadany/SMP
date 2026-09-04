@@ -29741,7 +29741,7 @@ stub-without-a-worker fault §231.5 records, reproduced before this change and
 not touched by it.
 
 
-## §261 — A TARGET WITH A SHAPE OF ITS OWN (2026-09-03)
+## §278 — A TARGET WITH A SHAPE OF ITS OWN (2026-09-03)
 
 Islam: *"targets proration is always flat acorss the year but some targets have
 seasonality so the proration is not valid so some targets needs a monthly plan
@@ -29871,7 +29871,7 @@ delimited cell, because a plan by month is what a spreadsheet is for; they
 collapse to one pipe-joined field in the reader, so the pipeline behind carries
 one column and not twelve.
 
-**PROVED ABLE TO FAIL: 36 red** on the shipped pre-§261 build —
+**PROVED ABLE TO FAIL: 36 red** on the shipped pre-§278 build —
 **and the first falsification run of `checks/monthly-plan.py` DIED rather than
 reporting**, on a control that does not exist there, so `grep -c FAIL` read 9
 where the build has thirty-six (§215, in the file written to quote it). Every
@@ -29889,7 +29889,7 @@ so on Foundation, where a unit's key objectives live, it drew twelve read-only
 labels that looked exactly like boxes. The page is passed in now, and the check
 asserts BOXES and not spans.
 
-### §261.1 — RECORDED, NOT DONE
+### §278.1 — RECORDED, NOT DONE
 
 - **The deck prints the benchmark and not the word.** `figVsDue` (§254) shows
   what a figure is measured against on every slide, so a seasonal benchmark
@@ -29904,9 +29904,9 @@ asserts BOXES and not spans.
   stored raw ratio, rather than `measureScore` — so a monthly plan does not move
   what those two tables show. That predates this and is unchanged by it.
 
-## §261.2 — A MARK, NOT A WORD (2026-09-04)
+## §278.2 — A MARK, NOT A WORD (2026-09-04)
 
-Islam, of what §261 shipped: *"the button montthly is big. do you suggest other
+Islam, of what §278 shipped: *"the button montthly is big. do you suggest other
 options for it's setting or placement? think of it"*
 
 **MEASURING IT REFRAMED THE COMPLAINT, AND THAT IS THE PART WORTH KEEPING.**

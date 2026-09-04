@@ -1,6 +1,6 @@
-"""HOW BIG SHOULD THE WAY IN BE (§261.2, rule 1c).
+"""HOW BIG SHOULD THE WAY IN BE (§278.2, rule 1c).
 
-Islam, of what §261 shipped: *"the button montthly is big. do you suggest other
+Islam, of what §278 shipped: *"the button montthly is big. do you suggest other
 options for it's setting or placement?"*
 
 Four treatments injected into the LIVE Key measures table with the pen open —
@@ -124,7 +124,7 @@ with sync_playwright() as pw:
         .find(x => x.querySelector('thead') &&
                    x.querySelector('thead').textContent.indexOf('Measure') >= 0);
       t.setAttribute('data-mptbl', '1');
-      // strip what §261 shipped, so each option is drawn into the same clean row
+      // strip what §278 shipped, so each option is drawn into the same clean row
       t.querySelectorAll('.mpopen').forEach(b => b.remove());
       t.querySelectorAll('td[data-mptgt]').forEach(td => {
         td.removeAttribute('data-mptgt'); td.removeAttribute('data-mplock');

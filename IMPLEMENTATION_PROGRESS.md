@@ -82,9 +82,9 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §261.2 — a mark, not a word (2026-09-04, same branch)
+### §278.2 — a mark, not a word (2026-09-04, same branch)
 
-Islam, of what §261 shipped: *"the button montthly is big. do you suggest other
+Islam, of what §278 shipped: *"the button montthly is big. do you suggest other
 options for it's setting or placement?"*
 
 **Measuring it reframed the complaint.** Four treatments drawn into the live
@@ -104,7 +104,7 @@ it says it in full and on `aria-label` too.
 `checks/monthly-plan.py` 51/51 · 497/0 · 131/0 · full sweep ERRORS none · six
 neighbouring checks green. **On the branch, not merged.**
 
-### §261 — a target with a shape of its own (2026-09-03, branch `claude/seasonal-targets-monthly-proration-5clvu3`)
+### §278 — a target with a shape of its own (2026-09-03, branch `claude/seasonal-targets-monthly-proration-5clvu3`)
 
 Islam: *"targets proration is always flat acorss the year but some targets have
 seasonality so the proration is not valid so some targets needs a monthly plan
@@ -130,7 +130,7 @@ correction: a typed 0 is a real month and a blank box is not. (b) All four
 surfaces. (c) Reporting unchanged — one YTD figure per cycle.
 
 **Verified.** `checks/monthly-plan.py` 47/47 and **36 red** on the shipped
-pre-§261 build; `test-authorize.js` 497/0 (six new, both directions);
+pre-§278 build; `test-authorize.js` 497/0 (six new, both directions);
 `test-graph-diff.js` 131/0 (five new); round trip, clean parity and two tabs
 green on a virgin Postgres 16, with the monthly plan written and read back on
 all three shapes and its nulls intact; full `qa.py` sweep ERRORS none; twelve

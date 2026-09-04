@@ -5745,7 +5745,7 @@ function measureDue(m, share){
      test is unchanged; what changes is that this asks for it rather than
      carrying its own copy of the same expression. */
   if (!SMPRules.targetHasNumber(m.target)) return null;
-  /* ── §261: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
+  /* ── §278: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
      Twelve numbers in the target's own unit, compiled by the row's own
      compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
      supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
@@ -5791,7 +5791,7 @@ function measureScore(m, share){
      (§250 prorates a TARGET, and this row has no number to prorate). */
   if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
-  /* §261: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
+  /* §278: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
      Before a monthly plan existed this guard only ever caught a target of
      nought, which is meaningless; a monthly plan makes it reachable on
      purpose — a row planning nothing until July is owed nothing in June.
@@ -5855,7 +5855,7 @@ function outcomeOf(t){
      is Islam's "a dash is not an entry" falling out of a rule already
      there rather than needing a second one. */
   if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
-  /* §261: AND ITS OWN MONTHLY PLAN. The outcome is normalised into a
+  /* §278: AND ITS OWN MONTHLY PLAN. The outcome is normalised into a
      measure here precisely so one arithmetic serves every scored row
      (§248), so the twelve months ride across under the name the rules
      module reads — `outMonthly` on the tactic, `monthly` on the shape.

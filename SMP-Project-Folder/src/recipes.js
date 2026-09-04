@@ -286,7 +286,7 @@ var RECIPES = [
   { id: "add-project-ask", q: "How do I add a project to a capability?",
     a: "The Strategy Office can add a project to a capability for you. Let them " +
        "know which capability it belongs to and what the project should be called." },
-  /* §261: TWO ANSWERS TO ONE QUESTION, because the office does it and
+  /* §278: TWO ANSWERS TO ONE QUESTION, because the office does it and
      everybody else meets the result. A single "office" entry would leave a
      unit head reading a benchmark that is not half the year with nothing
      anywhere explaining it. */

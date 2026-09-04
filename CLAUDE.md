@@ -439,7 +439,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted in the same breath. 474/0; and one of the check's own first failures
   was the CHECK — a function's Performance tab is keyed `fnperf`.
 
-- **A TARGET WITH A SHAPE OF ITS OWN (§261):** Islam — *"targets proration is
+- **A TARGET WITH A SHAPE OF ITS OWN (§278):** Islam — *"targets proration is
   always flat acorss the year but some targets have seasonality so the proration
   is not valid ... so some targets needs a monthly plan input."* **THE ARGUMENT
   IS ONE ROW OF HIS OWN PLAN**: Accessory revenue, 300M EGP, 96M reported at
@@ -463,7 +463,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   anything — the normalised-shape alternative was drawn and refused, because
   months adding to 1.05B under a 1.0B target stop matching what was typed.
   **ALL FOUR SURFACES** (his (b)) and **reporting unchanged** (his (c)).
-  **§261.2 — A MARK, NOT A WORD**: Islam, of what shipped — *"the button
+  **§278.2 — A MARK, NOT A WORD**: Islam, of what shipped — *"the button
   montthly is big."* **MEASURING IT REFRAMED THE COMPLAINT**: four treatments
   drawn in the live table all leave the Target box between 334 and 343px and the
   row at 57px, so the column had the slack and this was never about room — it
@@ -4627,7 +4627,7 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
-python3 checks/monthly-plan.py  # a target with a shape of its own (§261): the
+python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # arithmetic asked of the rule, the drawer PRESSED
                                 # on all four surfaces and the stored plan read
                                 # back, a blank month asserted from BOTH sides
@@ -4642,7 +4642,7 @@ python3 checks/monthly-plan.py  # a target with a shape of its own (§261): the
                                 # 36 red on the shipped build before; its own
                                 # first falsification run DIED and reported 9
                                 # (§215), and two of its assertions could not
-                                # fail as written (§94.5). §261.2 adds the mark:
+                                # fail as written (§94.5). §278.2 adds the mark:
                                 # 24x22, TWELVE CELLS and not merely "an svg",
                                 # no text with the meaning on the hover AND the
                                 # aria-label, and exactly the row with a plan

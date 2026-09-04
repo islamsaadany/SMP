@@ -5407,7 +5407,7 @@ function renderCycle(){
            that is not working says so on the page rather than being inferred
            from a table reading 100%.
 
-           §261: it is the number every figure is prorated by BY DEFAULT — a row
+           §278: it is the number every figure is prorated by BY DEFAULT — a row
            carrying a monthly plan is measured against the months that have
            actually run instead. The sentence is unchanged because it is still
            true of the review point, which is what this strip is about; the

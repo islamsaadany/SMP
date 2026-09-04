@@ -239,7 +239,7 @@ function buildXlsx(sheets){
    update a plan rather than duplicate it.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* ── A TARGET WITH A SHAPE OF ITS OWN, IN THE WORKBOOK (§261) ──────────
+/* ── A TARGET WITH A SHAPE OF ITS OWN, IN THE WORKBOOK (§278) ──────────
    Twelve columns per row-kind that can carry one, APPENDED after the last
    existing column on every sheet. Appended rather than inserted because a
    validation range is a POSITION (§65): putting them in the middle would move
@@ -258,7 +258,7 @@ function monthHead(prefix){
   return MONTH_COLS.map(function(m){ return (prefix || "") + m; });
 }
 /* Twelve cells out of a stored plan. A month nobody set is an EMPTY CELL and
-   never a nought (§261, §104.10) — writing 0 for a blank would hand the file
+   never a nought (§278, §104.10) — writing 0 for a blank would hand the file
    back saying the office had planned nothing for that month. */
 function monthCells(row, fld){
   var a = Array.isArray(row && row[fld]) ? row[fld] : [], out = [];

@@ -1162,8 +1162,16 @@ with sync_playwright() as p:
     # querySelector check would have passed every day the control could not be
     # reached, which is how it shipped.
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    # §290 MOVED ONE OF THESE AND THE LINE IS REWRITTEN, NOT DELETED (§218).
+    # An outcome had an Add button of its own until Islam said the two ran
+    # together and confused him; the way to one is now the Type picker on the
+    # row. So the button list loses `outcome` — and the property this line was
+    # protecting, that every kind of row can still be CREATED, is asserted
+    # below instead (§61: a kind you can read and never write). Left as it was,
+    # it would have gone red on a build behaving exactly as decided; deleted,
+    # nothing would notice the day the picker goes.
     for dest, sec, tag, wants in [("fn:finance", "Projects", "capability",
-                                   ["project", "deliverable", "outcome", "milestone"]),
+                                   ["project", "deliverable", "milestone"]),
                                   ("mobile", "Plan", "unit",
                                    ["pillar", "measure", "tactic"])]:
         if dest.startswith("fn:"):
@@ -1195,6 +1203,15 @@ with sync_playwright() as p:
         missing = [w for w in wants if w not in got["adds"]]
         if missing:
             errs.append("PLAN EDIT (%s): no Add for %s" % (tag, ", ".join(missing)))
+        if tag == "capability":
+            # §290: and an OUTCOME is still creatable — through the Type picker
+            # on a row rather than through a button of its own.
+            kinds = pg.evaluate("""() => [...document.querySelectorAll('.pane tbody select')]
+              .map(s => [...s.options].map(o => o.textContent.trim()).join('/'))
+              .filter(v => v === 'Deliverable/Outcome').length""")
+            if not kinds:
+                errs.append("PLAN EDIT (%s): no way to make an outcome \u2014 the "
+                            "Type picker is not drawn on any row" % tag)
         if not got["grips"]:
             errs.append("PLAN EDIT (%s): editing gives no drag handles" % tag)
         if not got["fields"]:

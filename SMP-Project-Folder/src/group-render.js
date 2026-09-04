@@ -5343,7 +5343,7 @@ var DX_HEADING = "Deliverables and outcomes";
 var DX_PCT = "Performance";
 var MS_PCT = "Progress";
 function dxIsDeliv(row){ return row.kind === "d"; }
-function dxType(row){
+function dxType(row, p){
   /* PLAIN TEXT, NEVER A CHIP (§179). Islam: "for the types deliverable and
      Outcome don't make them chips let's make them normal text."
 
@@ -5361,12 +5361,103 @@ function dxType(row){
      else, which is why it is its own class rather than a stripped `.pill`:
      "this column has a fixed measure" and "paint a box round it" are two
      different facts, and merging them is what made removing one remove both. */
-  return '<span class="dxtype">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
+  var word = dxIsDeliv(row) ? "Deliverable" : "Outcome";
+  /* §290: AND ON THE PLAN PANE IT IS THE CONTROL THAT SETS IT. Islam:
+     *"we need to make the add deliverable or outcome more of an options in
+     the type rather than 2 buttons"* — so the question is answered in the
+     column whose heading already asks it, and a row added as the wrong kind
+     is corrected in place rather than removed and added again.
+
+     `p` IS WHAT SAYS WHICH PANE THIS IS. Three tables print this word and only
+     the plan pane may write it; the other two pass nothing and get the text
+     they have always had — one builder, never a second one that drifts
+     (§53.5) — and the mode is asked of `projEditing()` here rather than
+     threaded in, exactly as `selectOr` asks it.
+
+     A REPORTED ROW IS NOT A PICKER, and that is the whole of C over A (the
+     mockup, signed off 2026-09-04): the conversion drops what the other kind
+     cannot hold, so on a row that has been reported against it would throw a
+     figure away on a `change` event, with no press and no confirmation.
+     `reportedAny` is the product's own answer to *has this row been answered*
+     — the same one both panes and the note rule ask (§104.8) — so the lock
+     and the score can never disagree about what has been reported, and there
+     is no second definition of "reported" to drift (§53.5).
+
+     THE COST IS STATED RATHER THAN DISCOVERED, and it is what he chose C for
+     over A: a deliverable reads as answered the moment somebody picks even
+     *Not started*, so on a tenant part-way through a cycle most rows are
+     locked — measured, 37 of the demo's 42 deliverables. The × is still
+     there, which is the point: a deliberate press with a row's whole content
+     in front of you may throw a figure away; a `change` event on a dropdown
+     may not.
+
+     THE REASON IS ON THE HOVER, NOT ON THE PAGE (§88, 1b-ii). Drawn under the
+     word it is a second line in a one-line cell, which is §116.4's fault and
+     measured: it takes the Type column 251 → 406px and the name column pays
+     for all of it. `noteSpan` is the platform's own bubble, so it opens on
+     focus as well as hover (§163) and reads to a screen reader. */
+  if (!p || !projEditing()) return '<span class="dxtype">' + word + '</span>';
+  var o = row.obj, d = dxIsDeliv(row);
+  if (reportedAny(o, d))
+    return noteSpan(word, "This row has been reported against, so changing its type " +
+      "would throw that away. Remove the row and add it again if the type is wrong.",
+      "dxtype");
+  /* NO CLASS OF ITS OWN. `.dxtype`'s 92px measure exists so the column does
+     not resize with its rows; a select is wider than that by construction, so
+     a second rule here would be a leftover from the day it was needed (§24).
+     The check finds the control by the two options it offers, never by a
+     class (§94.8). */
+  return selectOr("plan", d ? "d" : "o", DX_KINDS, "", function(v){
+    /* §257.2a: A CONTROL THAT CHANGES THE ROW'S SHAPE REPAINTS. A bound field
+       writes WITHOUT repainting (§71.2) — right while somebody is typing, and
+       wrong here, where the press moves the row into another list and changes
+       which cells beside it are controls at all. Safe because this is a
+       SINGLE select, which closes before its `change` fires (§30.1); a ticking
+       list may not do this (§130.1). */
+    dxSwitchKind(p, o.id, v);
+    paint();
+  });
 }
+/* The two kinds as the picker offers them. The VALUE is the letter `dxRows`
+   already keys on and the LABEL is the word the column has always printed —
+   never the word as the value, or the control's vocabulary and the plan's
+   become two things to keep in step (§65's rule about a stored identifier). */
+var DX_KINDS = [{ v:"d", label:"Deliverable" }, { v:"o", label:"Outcome" }];
 /* A deliverable's direction and target are written FOR it rather than asked
    OF it, and shown quietly, because a value nobody can change should not look
    like a field. */
-function dxDir(row){ return dxIsDeliv(row) ? '<span class="fixedval">=</span>' : esc(row.obj.dir || ""); }
+/* §290: AN OUTCOME'S DIRECTION OPENS WITH THE PEN. Islam, creating a project:
+   *"I couldn't set the direction."* It had never been editable — on any
+   project, in any mode — because this cell printed the sign and stopped: not
+   a fault of creating a project, but of every outcome the table has ever
+   held. §114 opened exactly this control on a pillar's key measures, on the
+   argument that §31 closed them while the pen could fall to the person being
+   measured and §94 gave the pen to the office; nobody carried it the two
+   inches across to a project's outcomes (§53.5, on two tables asking one
+   question).
+
+   A DELIVERABLE'S `=` STAYS PRINTED. It is written FOR the row rather than
+   asked OF it (§104) — with a target of Y/N there is nothing to be greater
+   than — so there is no decision here for a control to carry.
+
+   IT IS NOT A GAP, so it does not go through `gapCell` and joins no count:
+   the direction carries a working default, which makes writing one AUTHORING
+   and the office's, and a filler who wrote one would have the whole save
+   refused (§249.4, taken on exactly this question one table over). The cost
+   that ruling states holds here too and is stated rather than discovered: an
+   outcome where less is better scores backwards until the office corrects
+   it — which, until today, it could not.
+
+   THE VOCABULARY IS THE ONE EVERY OTHER DIRECTION USES, never a second list
+   (§53.5) — and read mode is byte-for-byte what it was, because `selectOr`
+   is only reached under the pen. */
+function dxDir(row, ed){
+  if (dxIsDeliv(row)) return '<span class="fixedval">=</span>';
+  var o = row.obj;
+  if (!ed) return esc(o.dir || "");
+  return selectOr("plan", o.dir || "\u2265", ["\u2265", "\u2264"], "mono",
+    function(v){ o.dir = v; });
+}
 function dxTarget(row){
   return dxIsDeliv(row) ? '<span class="fixedval">Y/N</span>'
                         : (row.obj.target ? esc(row.obj.target) : '<span class="missing">Missing</span>');
@@ -5891,8 +5982,8 @@ function projPlanBody(p, fk){
       '<td>' + (ed ? textOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
         (ed ? eyeBtn(o, "plan", "k_proj") : hidChip(o)) +
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
-      '<td class="cc">' + dxType(row) + '</td>' +
-      '<td class="cc">' + dxDir(row) + '</td>' +
+      '<td class="cc">' + dxType(row, p) + '</td>' +
+      '<td class="cc">' + dxDir(row, ed) + '</td>' +
       /* §177: AN OUTCOME'S TARGET IS FILLABLE, A DELIVERABLE'S IS NOT.
          `dxTarget` prints a deliverable's fixed "Y/N" -- written for it, not
          asked of it (§104) -- so there is nothing there to fill; the outcome
@@ -5901,12 +5992,37 @@ function projPlanBody(p, fk){
         : gapCell("plan", "k_proj", o, "target", { ctx: { project: p, row: o } })) +
       '</td></tr>';
   }).join("") +
-  /* TWO ADD BUTTONS UNDER ONE TABLE, as §53.4 had them: one table of two
-     kinds, and a single "add a row" would have to ask which -- a question
-     the two buttons answer by existing. */
+  /* ── ONE WAY IN (§290, reversing §53.4's two buttons) ───────────────
+     §53.4 put two buttons here on the reasoning that "a single add a row
+     would have to ask which — a question the two buttons answer by existing".
+     True, and what it did not ask is WHERE that question gets answered:
+     Islam, from the live product, *"I get confused between them"*. The Type
+     column answers it now, on the row, which is also the only way a row added
+     as the wrong kind was ever going to be correctable (§290's own finding —
+     until today it could only be removed and added again).
+
+     AND THEY RENDERED AS ONE RUN OF TEXT. Measured on the shipped build and
+     visible in his screenshot: `Add a deliverableAdd an outcome`, two link
+     buttons with nothing between them, so part of the confusion was that they
+     did not read as two controls at all.
+
+     NO LEADING "+", because the idx cell draws one and the milestone button
+     directly beneath carries none — two plus signs on one pane read as two
+     different kinds of control (§87's twins, in punctuation).
+
+     BUILD MODE KEEPS BOTH, and that is a difference with a reason rather than
+     an exception (§53.5 cuts the other way here). There a row is added WHOLE
+     through a titled form (§129), and the two forms ask different questions —
+     a deliverable how it is measured, an outcome its direction, target and
+     measure date, which is the one place `measureAt` can still be set at all
+     (§104.8 took the date off these panes). So the kind has to be answered
+     before the form opens, and the forms are titled dialogs rather than the
+     run-together pair. */
   (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
-      '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
-      '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
+      (builderHere() ?
+        '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
+        '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>'
+      : '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a row</button>') +
     '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"' + hidCls(m) + '><td class="idx">' +

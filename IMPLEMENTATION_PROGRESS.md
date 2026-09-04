@@ -174,6 +174,53 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §290 — a row's type is a picker, and its direction opens (2026-09-04, branch `claude/project-creation-direction-options-shcyal`)
+
+Islam, from the live product: *"on a creation of a project I couldn't set the
+direction and we need to make the add deliverable or outcome more of an options
+in the type rather than 2 buttons of add deliverable or outcome that I get
+confused between them."*
+
+**Two different kinds of fault, and measuring found a third.** The direction had
+**never been editable on any project in any mode** — §114 opened this exact
+control on a pillar's key measures and nobody carried it across. The two buttons
+rendered as **one run of underlined text** (`Add a deliverableAdd an outcome`),
+so the confusion was never only *which one do I press*. And a row added as the
+wrong kind could not be corrected at all — the thing a picker on the Type column
+closes.
+
+**The type is not a label**, which is what decides how far a picker can go: it is
+which of two lists the row is in, and the two are reported and scored
+differently. So the picker performs a conversion — minted by the minter an added
+row uses, carrying the name and the hidden mark and nothing else, under a new id,
+appended.
+
+**Islam picked C** from three drawn in the running platform and published as an
+artifact (`design-mockups/project-row-type/`): the picker locks once
+`reportedAny` says the row has been reported, because A throws a figure away on a
+`change` event with no press and no confirmation. Its cost was measured before he
+chose — **37 of the demo's 42 deliverables** are locked, because a deliverable
+reads as answered the moment somebody picks *Not started* — and the × is still
+there, which is the point.
+
+**One way in, reversing §53.4**, minting a **deliverable** by arithmetic rather
+than taste: an outcome's blank target is a counted gap (§249), so the other kind
+would add a missing item and hold Submit every press. Build mode keeps both, for
+a stated reason (a row is added whole through a titled form, and the outcome's is
+the only place `measureAt` can still be set).
+
+**The server needed nothing and it is asserted anyway** — `splitRows` already
+reads the move as `capPlan` — both ends, proved able to fail twice (2 red, 4 red).
+No migration: a converted row is byte-shaped like an added one.
+
+`checks/project-row-type.py` 30/30, **13 red** on the build before · 527/0 · 131/0
+· full `qa.py` sweep ERRORS none · ten neighbouring checks green. **Two of the new
+check's own first failures were the check**, and `qa.py` held a literal this moved
+and was rewritten rather than deleted (§218). **Recorded, not done:** a locked
+word is centred and a picker is not, so that column reads ragged — one line, and
+it is a change to the drawing he signed off, so it is his to ask for.
+**On the branch, not merged.**
+
 ### §278.2 — a mark, not a word (2026-09-04, same branch)
 
 Islam, of what §278 shipped: *"the button montthly is big. do you suggest other

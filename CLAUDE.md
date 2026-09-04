@@ -437,6 +437,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§290):** Islam — *"on a
+  creation of a project I couldn't set the direction and we need to make the add
+  deliverable or outcome more of an options in the type rather than 2 buttons of
+  add deliverable or outcome that I get confused between them."* **TWO DIFFERENT
+  KINDS OF FAULT.** The direction had **never been editable on any project in any
+  mode** — §114 opened exactly this control on a pillar's key measures and nobody
+  carried it across to a project's outcomes (§53.5); a deliverable's `=` stays
+  printed (§104), and it is **not a gap**, so the direction stays the office's and
+  joins no count (§249.4, with that section's cost — an outcome where less is
+  better scores backwards until corrected — holding here too). **AND THE TWO
+  BUTTONS RENDERED AS ONE RUN OF TEXT**: measured, `Add a deliverableAdd an
+  outcome`, so the fault was never only *which one* but *is that one control or
+  two*. **THE TYPE IS NOT A LABEL** — it is WHICH OF TWO LISTS the row is in, and
+  the two are reported and scored differently — so the picker performs a
+  CONVERSION: minted by the minter an ADDED row uses, carrying the **name** and
+  the **hidden mark** (§233) and nothing else, under a **new id**, appended
+  (§99's one list). **ISLAM PICKED C** from three drawn in the running platform
+  (rule 1c): the picker locks once `reportedAny` says the row has been reported,
+  because A can throw a figure away on a `change` event with no press and no
+  confirmation. **`reportedAny` IS THE TEST, NEVER A SECOND ONE** (§104.8) — and
+  its cost is stated rather than discovered and is what C was chosen for: a
+  deliverable reads as answered the moment somebody picks *Not started*, so
+  **37 of the demo's 42** are locked; the × is still there, because a deliberate
+  press may throw a figure away and a dropdown may not. **THE REASON IS ON THE
+  HOVER** (§88, 1b-ii — drawn under the word it takes the column 251 → 406px).
+  **ONE WAY IN, REVERSING §53.4**, and **the new row is a DELIVERABLE** by
+  arithmetic rather than taste: an outcome with a blank target is a counted gap
+  (§249), so a button minting one would add a missing item and hold Submit every
+  press. **BUILD MODE KEEPS BOTH**, with a reason — there a row is added WHOLE
+  through a titled form (§129), and the outcome's is the only place `measureAt`
+  can still be set (§104.8). **The server needed nothing and it is asserted
+  anyway** (§172): `splitRows` already reads the move as `capPlan`, both ends,
+  every part of it one kind — proved able to fail twice (2 red, 4 red), 527/0.
+  No migration; a converted row is byte-shaped like an added one.
+  `checks/project-row-type.py` **13 red** on the build before — **and two of its
+  own first failures were the CHECK** (a blanket where the demo legitimately
+  holds locked rows, and four Reporting selects that are how a deliverable is
+  reported), while **`qa.py` held a literal this moved and was REWRITTEN, not
+  deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
+  a picker is not, so that column reads ragged, and six places still spell
+  `builderHere()` out inline.
 - **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
@@ -5609,6 +5650,22 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/project-row-type.py # a project row's type is a picker and its
+                                # direction opens (§290): ONE way to add a row and
+                                # pressing it adds a DELIVERABLE (an outcome's blank
+                                # target is a counted gap, so the other kind would add
+                                # a missing item every press); the picker MOVING the
+                                # row read back off the STORED plan (§96) with its new
+                                # id, its name and its hidden mark; a row that is a
+                                # picker EXACTLY when it has not been reported against,
+                                # asserted as an AGREEMENT with the demo proved to hold
+                                # an example of each (§113.8); the direction writing and
+                                # a deliverable's `=` still printed; read mode and both
+                                # other panes byte-for-byte what they were; and the
+                                # table fitting its pane at 1600/1280/1100 (§158).
+                                # 13 red on the build before, and every probe degrades
+                                # rather than dying (§215). SMP_BUILT points it at
+                                # another build
 python3 checks/report-blockers.py # the reporting page says WHERE Submit is held
                                 # (§279): the bar's chips asserted as AGREEMENT with
                                 # reportPlaces() and never as a list, both ends every
@@ -6207,7 +6264,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;278.3: the objectives table, and a
+*Last Updated: 2026-09-04 &mdash; **&sect;290: a row's type is a picker, and its
+direction opens.** Islam, from the live product: *"on a creation of a project I
+couldn't set the direction and we need to make the add deliverable or outcome
+more of an options in the type rather than 2 buttons of add deliverable or
+outcome that I get confused between them."* **TWO DIFFERENT KINDS OF FAULT, AND
+SAYING WHICH IS HALF THE WORK.** The direction had **never been editable on any
+project in any mode** &mdash; not a fault of creating a project, but of every
+outcome the table has ever held; &sect;114 opened exactly this control on a
+pillar's key measures and nobody carried it the two inches across. **And the two
+buttons rendered as one run of text** &mdash; measured, `Add a deliverableAdd an
+outcome` &mdash; so the confusion was never only *which one do I press*. **A
+third nobody reported**: a row added as the wrong kind could not be corrected at
+all. **The type is not a label**, which is what decides how far a picker can go:
+it is which of two lists the row is in, and the two are reported and scored
+differently, so the switch is a CONVERSION &mdash; minted by the minter an added
+row uses, carrying the name and the hidden mark and nothing else, under a new id.
+**Islam picked C** from three drawn in the running platform and published as an
+artifact (rule 1c): the picker locks once the row has been reported against,
+because A throws a figure away on a `change` event with no press and no
+confirmation. Its cost was measured before he chose and is what C was chosen for
+&mdash; **37 of the demo's 42 deliverables** are locked, and the &times; is still
+there. **One way in, reversing &sect;53.4**, minting a DELIVERABLE by arithmetic
+rather than taste (an outcome's blank target is a counted gap, so the other kind
+would hold Submit every press), with build mode keeping both for a stated reason.
+**The server needed nothing and it is asserted anyway** &mdash; 527/0, proved able
+to fail twice &mdash; no migration, full `qa.py` sweep ERRORS none, ten
+neighbouring checks green, and `checks/project-row-type.py` **13 red** on the
+build before. **Two of that check's own first failures were the check**, and
+`qa.py` held a literal this moved and was rewritten rather than deleted. **On the
+branch, not merged.***
+
+*Earlier: 2026-09-04 &mdash; **&sect;278.3: the objectives table, and a
 cell that stopped being one.** Four reports from the live product in two
 messages, and they come down to two causes. **The drawer spanned every column
 but the first**, which is right on the key measures table (first column `#`,

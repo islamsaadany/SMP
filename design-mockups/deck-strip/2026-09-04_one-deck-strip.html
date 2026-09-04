@@ -78,17 +78,33 @@
 
   /* the master flow's own pill, unchanged — options A and B borrow it */
   .ddots.bysub { max-width:62vw; gap:3px; flex-wrap:nowrap; flex-shrink:0; }
-  .ddots.bysub .ddot {
+  .ddots.bysub .ddot, .ddots.bygrp .ddot {
     width:auto; height:19px; border-radius:10px; padding:0 8px;
     font-size:9.5px; font-weight:600; letter-spacing:.09em;
     font-family:inherit; line-height:19px;
     background:transparent; border:1px solid rgba(255,255,255,.34);
     color:rgba(255,255,255,.82); transform:none;
   }
-  .ddots.bysub .ddot:hover { border-color:rgba(255,255,255,.7); color:#fff; }
-  .ddots.bysub .ddot.on {
+  .ddots.bysub .ddot:hover, .ddots.bygrp .ddot:hover { border-color:rgba(255,255,255,.7); color:#fff; }
+  .ddots.bysub .ddot.on, .ddots.bygrp .ddot.on {
     background:var(--gold); border-color:var(--gold); color:#12161C; transform:none;
   }
+
+  /* B1 / B2: the same pills, gathered into the deck's OWN parts — the four
+     blue dividers — with a hairline between them. The separator is a border on
+     the group, never a character: a bar typed between two pills is a thing that
+     can be selected and read aloud. */
+  .ddots.bygrp { max-width:66vw; gap:0; flex-wrap:nowrap; flex-shrink:0; }
+  .ddots.bygrp .grp { display:flex; gap:3px; align-items:center;
+                      padding-right:9px; margin-right:9px;
+                      border-right:1px solid rgba(255,255,255,.18); }
+  .ddots.bygrp .grp:last-child { border-right:0; margin-right:0; padding-right:0; }
+  /* B2 only: the section you are standing in also shows its own slides, so the
+     strip says WHERE in the pillar you are without a second row. */
+  .ddots.bygrp .sdot { width:5px; height:5px; border-radius:50%; border:0; padding:0;
+                       background:rgba(255,255,255,.28); cursor:pointer; }
+  .ddots.bygrp .sdot.on { background:var(--gold); }
+  .ddots.bygrp .sdots { display:flex; gap:4px; align-items:center; margin-left:5px; }
 
   /* option C: the slide dots, grouped, with the section under the pointer */
   .ddots.grouped { gap:0; max-width:52vw; flex-wrap:nowrap; }
@@ -127,7 +143,9 @@
   <p class="lede">A master flow labels the strip by <b>subject</b> — MB, RS, FIN — so
     you can see where you are and jump. One unit's deck still draws <b>one blank dot
     per slide</b>: 28 of them for Mobile, which you can count and cannot read.
-    Three ways to give it the same strip. Press the pills — they move the slide.</p>
+    <b>B</b> gives it the same strip; <b>B1</b> then gathers those pills into the
+    deck's own parts, which is what you asked for. Press the pills — they move
+    the slide, and every option is still on the switch.</p>
 </header>
 
 <div class="pickrow">
@@ -139,9 +157,11 @@
   </span>
   <span>Strip:</span>
   <span class="seg" id="opt">
-    <button data-opt="now" aria-pressed="true">Today</button>
+    <button data-opt="now" aria-pressed="false">Today</button>
     <button data-opt="a" aria-pressed="false">A · sections</button>
     <button data-opt="b" aria-pressed="false">B · sections + codes</button>
+    <button data-opt="b1" aria-pressed="true">B1 · B, grouped</button>
+    <button data-opt="b2" aria-pressed="false">B2 · B, grouped + slides</button>
     <button data-opt="c" aria-pressed="false">C · grouped dots</button>
   </span>
 </div>
@@ -159,32 +179,31 @@
 <div class="facts" id="facts"></div>
 
 <div class="cols">
-  <div class="card">
-    <h3>A · sections</h3>
-    <p>One pill per part of the deck, in words: <b>Cover · Foundation · SWOT ·
-      Pillars · Performance</b>. Five pills for a 28-slide deck.</p>
-    <p class="cost">The cost, measured: the four pillars are one pill, so there is
-      no way to jump to MB03 — the jump a review actually makes. And a function
-      that plans in <b>projects</b> has no dividers at all, so Marketing's whole
-      strip is two pills: <b>COVER · END</b>.</p>
-  </div>
   <div class="card rec">
-    <h3>B · sections + codes</h3>
-    <p>The same, with each pillar getting <b>its own code</b> — the letters already
-      printed on every one of its slides, and exactly what the master flow does with
-      a subject's code.</p>
-    <p class="cost">The cost: ten pills instead of five. Measured on Mobile they
-      are <b>573px</b> and sit on one row at every width from 1920 down to 1024;
-      Merchandising is seven, Marketing four.</p>
+    <h3>B1 · B, grouped</h3>
+    <p>B's pills, gathered into <b>the deck's own four blue dividers</b> with a
+      hairline between them — so the four pillars read as one stretch of the
+      review rather than as four things among ten.</p>
+    <p class="cost">Measured on Mobile: <b>637px</b>, one row, nothing past the
+      edge at 1920, 1400, 1280 and 1024. That is 64px more than ungrouped B, all
+      of it hairline and air. Merchandising 455px, Marketing 180px.</p>
   </div>
   <div class="card">
-    <h3>C · grouped dots</h3>
-    <p>Keep one dot per slide and <b>group them</b>, with a hairline between
-      sections and the section you are in drawn brighter.</p>
-    <p class="cost">The cost: it is still 28 dots and still says nothing — you can
-      see that a section changed, not which one you are going to. And it does not
-      fit: <b>998px of dots</b> on Mobile, wrapping to a second row at every width
-      measured, 1920 included.</p>
+    <h3>B2 · B1, and the slides inside</h3>
+    <p>The same, and the section <b>you are standing in</b> also shows its own
+      slides as small dots — so the strip says how far through MB02 you are
+      without a second row.</p>
+    <p class="cost">The cost: <b>677px</b>, and at 1024 it runs past the edge. It
+      also moves as you present — the row re-flows every time you cross into a
+      new section, which is the thing the last round of this asked us to stop.</p>
+  </div>
+  <div class="card">
+    <h3>Where this came from</h3>
+    <p><b>Today</b> is 28 blank dots. <b>A</b> was five words and left a projects
+      function with a two-pill strip. <b>C</b> kept the dots and wrapped to a
+      second row at every width, 1920 included.</p>
+    <p class="cost">All three are still on the switch above, so the comparison is
+      one press away rather than a memory.</p>
   </div>
 </div>
 
@@ -272,7 +291,22 @@ function stops(deck, withCodes){
   return out;
 }
 
-var who = "mobile", opt = "now", at = 0;
+/* THE GROUPS ARE THE DECK'S OWN FOUR BLUE DIVIDERS (§259) plus the cover —
+   nothing invented, and the same anchors option A reads. A pill belongs to the
+   last divider at or before it, which is exactly how the flow decides which
+   subject a slide belongs to (§266's `deckStopAt`). */
+var HEADS = { cover:1, sfound:1, swothead:1, spillars:1, sperf:1 };
+function grouped(deck, withSlides){
+  var st = stops(deck, true), gs = [];
+  st.forEach(function(s, j){
+    var a = deck.slides[s.at][0];
+    if (!gs.length || HEADS[a]) gs.push([]);
+    gs[gs.length - 1].push(s);
+  });
+  return gs;
+}
+
+var who = "mobile", opt = "b1", at = 0;
 
 function seg(id, key, val){
   [].forEach.call(document.getElementById(id).children, function(b){
@@ -286,11 +320,32 @@ function paint(){
   var dots = document.getElementById("dots");
   dots.className = "ddots" + (opt === "a" || opt === "b" ? " bysub" :
                               opt === "c" ? " grouped" : "");
-  var st = (opt === "a" || opt === "b") ? stops(deck, opt === "b") : null;
+  if (opt === "b1" || opt === "b2") dots.className = "ddots bygrp";
+  var st = (opt === "a" || opt === "b" || opt === "b1" || opt === "b2")
+    ? stops(deck, opt !== "a") : null;
   var here = -1;
   if (st) st.forEach(function(s, j){ if (s.at <= at) here = j; });
 
-  if (st) {
+  if (opt === "b1" || opt === "b2") {
+    var gs = grouped(deck), lit = st[here];
+    dots.innerHTML = gs.map(function(g){
+      return '<div class="grp">' + g.map(function(s){
+        var on = lit && s.at === lit.at;
+        var run = "";
+        if (opt === "b2" && on) {
+          /* the slides this pill stands for: from it to the next stop */
+          var next = st[here + 1] ? st[here + 1].at : n;
+          run = '<span class="sdots">' + deck.slides.slice(s.at, next).map(function(_, k){
+            var i = s.at + k;
+            return '<button class="sdot' + (i === at ? ' on' : '') + '" data-at="' + i +
+              '" title="' + deck.slides[i][1] + '"></button>';
+          }).join("") + '</span>';
+        }
+        return '<button class="ddot' + (on ? ' on' : '') + '" data-at="' + s.at +
+          '" title="' + s.name + '">' + s.code + '</button>' + run;
+      }).join("") + '</div>';
+    }).join("");
+  } else if (st) {
     dots.innerHTML = st.map(function(s, j){
       return '<button class="ddot' + (j === here ? ' on' : '') + '" data-at="' + s.at +
         '" title="' + s.name + '">' + s.code + '</button>';
@@ -318,7 +373,7 @@ function paint(){
         '" title="' + deck.slides[i][1] + '"></button>';
     }).join("");
   }
-  [].forEach.call(dots.querySelectorAll(".ddot"), function(b){
+  [].forEach.call(dots.querySelectorAll(".ddot, .sdot"), function(b){
     b.addEventListener("click", function(){ at = +b.dataset.at; paint(); });
   });
 
@@ -328,11 +383,12 @@ function paint(){
   document.getElementById("hint").innerHTML =
     "<b>" + deck.slides[at][1] + "</b><span>slide " + (at + 1) + " of " + n + "</span>";
 
-  var pills = st ? st.length : (opt === "c" ? n : n);
+  var groups = (opt === "b1" || opt === "b2") ? grouped(deck).length : 0;
   document.getElementById("facts").innerHTML =
     ['<span class="f">' + deck.kind + '</span>',
      '<span class="f"><b>' + n + '</b> slides</span>',
-     '<span class="f">strip: <b>' + (st ? st.length + " pills" : n + " dots") + '</b></span>',
+     '<span class="f">strip: <b>' + (st ? st.length + " pills" : n + " dots") +
+       (groups ? " in " + groups + " groups" : "") + '</b></span>',
      '<span class="f">strip width <b>' + Math.round(dots.getBoundingClientRect().width) +
        'px</b></span>'].join("");
   seg("who", "who", who);

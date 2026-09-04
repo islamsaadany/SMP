@@ -33619,7 +33619,7 @@ it: **2 red**, printing `pane: 'ITF01 … ' , controls: 0` — his complaint
 verbatim — while the custodian assertion stays green, which is what says the
 change did not reach past the bounded roles.
 
-### Asked and NOT built: hiding the other projects
+### Asked, put back, and CLOSED: hiding the other projects
 
 Islam, in the same message: *"no need to see another projects can we set that
 in the roles and accses table?"* It could be, and it is a different shape from
@@ -33628,4 +33628,13 @@ small (§37), and this would be per-ROW visibility. It also has a cost worth
 seeing before it is chosen — a capability's headline numbers (*Project
 performance 100%*, *Execution 53% of 12 milestones*) are computed across every
 project in it, so a person shown one project would read totals describing
-projects they cannot see. Put to him with options rather than guessed at.
+projects they cannot see. Three answers were put to him with that cost stated.
+
+**HE CLOSED IT: *"no need to hide other projects. that's a stretch."*** So
+nothing is built and nothing is planned — the rail goes on listing every
+project in the capability, and what answers the complaint underneath it is
+§287.4 alone: theirs opens first, so the others are context rather than an
+obstacle. Recorded as his decision so it is not re-opened by the next reader
+who meets the same screen; the cost that made it a real question (headline
+numbers spanning projects a reader could not see) is exactly why it was worth
+declining rather than building.

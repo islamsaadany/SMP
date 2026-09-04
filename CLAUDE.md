@@ -2015,10 +2015,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   outside the clear, §97/§146), no user triggers, no sequences.
   **THE CHURN IS BOUNDED AND MEASURED** — 160 full saves: 5.5 → 15.4 → 15.5 →
   15.5 → 15.5 MB, a step then flat, because the space a DELETE frees is reused.
-  §241's incremental writer keeps most saves off this path; what comes through
-  it is every settings, register, reorder and add/remove change, and **every
-  whole-graph post from a tab on an older build** — the exact moment reported,
-  since a new build reloads every browser at once. **§288.1 — A CHAT ROW SAYS
+  **AND IT IS THE FALLBACK PATH, NOT EVERY SAVE**: §241's incremental writer is
+  LIVE on production (since 2026-09-03) and its per-subject deletes take ROW
+  EXCLUSIVE, so a plain field edit never reaches this clear and never blocked a
+  reader. What falls back is every settings, register, reorder and add/remove
+  change, and **every whole-graph post from a tab on an older build** — which
+  narrows the claim and fits the report, since a new build reloads every browser
+  at once and each posts the whole graph. **§288.1 — A CHAT ROW SAYS
   THE REGISTER'S SHORT NAME AND WHERE THEY SIT**: §187 did this for the INBOX's
   list and the corner is the THIRD builder onto the same rows, MATCHING on the
   short name (§93.8) and drawing the long one. It needs nothing from the server

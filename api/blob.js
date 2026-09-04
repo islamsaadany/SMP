@@ -298,21 +298,38 @@ async function putPart(req, res, url, world, person) {
   return send(res, 200, { ok: true, partNumber: n, etag: part.etag });
 }
 
-/* THE ONE PLACE A READ ADDRESS IS MINTED. Private Blob went generally
-   available in June 2026 and the call that mints a signed read has moved once
-   already in that SDK's life, so it is asked for by name here and nowhere
-   else — and a version that does not carry it answers null, which the caller
-   reports as "no longer here" rather than throwing. */
+/* THE ONE PLACE A READ ADDRESS IS MINTED, and it is TWO steps, not one.
+   A private blob has no fetchable address of its own: the store issues a
+   short-lived delegation scoped to ONE pathname and ONE operation, and that
+   is what signs a concrete URL.
+
+   `getDownloadUrl` IS NOT THIS, and reaching for it is the mistake this
+   comment exists to stop somebody repeating. It takes a full blob URL, is
+   synchronous, and only appends a download flag — handed a pathname it throws
+   `Invalid URL`, which the catch below would have swallowed, so every clip
+   would have reported "no longer here" and NOTHING would ever have played.
+   Found by calling the real SDK with the real arguments (§3a), not by reading.
+
+   The delegation is scoped as tightly as the call allows: this pathname, this
+   operation, and an hour — long enough for a review meeting, short enough
+   that an address copied out of a page stops working. */
+const READ_MINUTES = 60;
 async function signedRead(path) {
   const b = blob();
-  if (!b) return "";
-  const opts = { token: token(), expiresIn: 60 * 60 };
+  if (!b || typeof b.issueSignedToken !== "function" ||
+      typeof b.presignUrl !== "function") return "";
   try {
-    if (typeof b.getDownloadUrl === "function") return await b.getDownloadUrl(path, opts);
-    if (typeof b.generateSignedUrl === "function") return await b.generateSignedUrl(path, opts);
-    const h = await b.head(path, { token: token() });
-    return (h && (h.downloadUrl || h.url)) || "";
+    const until = Date.now() + READ_MINUTES * 60 * 1000;
+    const t = await b.issueSignedToken({
+      pathname: path, operations: ["get"], validUntil: until, token: token()
+    });
+    const out = await b.presignUrl(t, {
+      operation: "get", access: "private", pathname: path, validUntil: until
+    });
+    return (out && out.presignedUrl) || "";
   } catch (e) {
+    /* A clip the store no longer holds and a store that refused are both
+       "you cannot watch this now"; the caller says so rather than throwing. */
     return "";
   }
 }

@@ -29988,3 +29988,47 @@ this, so the new one is consistent rather than odd, and fixing it is a decision
 about the whole page. And `checks/setup-pages.py` has **3 failures about a
 sticky table head that reproduce on `origin/main`** — measured on main, on
 §261's commit, and on this one; pre-existing and untouched by any of it.
+
+
+### §261.10 — The read address is TWO steps, and the one-step call was a different function (2026-09-03)
+
+Islam created the Blob store, and the first thing to do with it was the thing
+§261.4 recorded as unproven. The store's token is not in this session and must
+not be pasted into one, so what could be proved from here was proved instead:
+**every call in `api/blob.js` was made against the real SDK with the real
+arguments.** Five reached the store and failed only with *"This store does not
+exist"* — which is the answer that means the arguments are right.
+
+**THE SIXTH DID NOT, AND IT WAS THE ONE THAT MATTERS.** `getDownloadUrl` threw
+`Invalid URL`. Reading its type settles why: it is `(blobUrl: string): string`
+— a **full blob URL**, **synchronous**, and it only appends a download flag. It
+is not a signing function at all. Handed a pathname it throws, the catch in
+`signedRead()` swallowed it, and **every clip would have reported "no longer
+here": nothing would ever have played.**
+
+A private blob has no fetchable address of its own. The real flow is two steps —
+`issueSignedToken({pathname, operations:['get'], validUntil})` for a delegation
+scoped to ONE path and ONE operation, then `presignUrl(token, {operation:'get',
+access:'private', pathname})` for the concrete signed URL. Both were then
+validated the same way: `issueSignedToken` reaches the store, and `presignUrl`
+rejects only the *fake* delegation token it was handed, which is exactly right.
+
+**IT WAS INVISIBLE TO EVERY TEST THAT EXISTED, AND THAT IS THE LESSON.** With no
+token the endpoint answers *"no video store here"* before reaching it; with a
+fake token the store refuses first; with a real store there is nothing here to
+run against. So the SDK is **stubbed** and the handler driven in-process
+(`test-video-endpoint.js` §0): a permitted viewer must get a **302** to the
+address the store signed, scoped to that pathname, `get` only, `private`, with
+an expiry. **5 red** with `getDownloadUrl` put back.
+
+**AND THE GUARD'S OWN FIRST DRAFT HUNG RATHER THAN FAILING.** It wrote the
+session row by hand as `sessions(id, …)` — the table keys on `token_hash`,
+because a session is stored by the SHA-256 of its token and never the token
+(§43) — so the insert threw, and it had also closed the SHARED pool the rest of
+the file still needed. A throw with nothing left to close is a test that never
+reports. It uses `auth.createSession()` now, which is the platform's own door.
+
+**STILL NOT PROVED, AND ONLY ONE THING REMAINS**: that 50MB of bytes actually
+traverse the multipart path into a real store. Every argument shape on that path
+is now validated against the real SDK, and the last step needs a signed-in
+person on the deployment — which is Islam, in two minutes, not this session.

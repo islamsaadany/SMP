@@ -60,6 +60,76 @@ async function login(user) {
     .filter(Boolean).map(function (c) { return String(c).split(";")[0]; }).join("; ");
 }
 
+/* ── 0 · THE READ ADDRESS, AGAINST A STUBBED STORE ────────────────────────
+ * The fault this section exists for shipped once and was invisible to every
+ * other assertion here: `signedRead` reached for `getDownloadUrl`, which takes
+ * a full blob URL and is synchronous — handed a pathname it throws
+ * `Invalid URL`, the catch swallowed it, and EVERY clip would have reported
+ * "no longer here". Nothing would ever have played.
+ *
+ * It cannot be caught with a fake token (the store refuses first) or with a
+ * real one (there is no store here), so the SDK is stubbed and the handler is
+ * driven in-process: what must be true is that a viewer who may watch gets a
+ * 302 to the address the two-step minted, and that the pathname reaches the
+ * store scoped to a `get`.
+ */
+async function readAddressTest() {
+  const seen = { issued: null, presigned: null };
+  /* Injected BEFORE api/blob.js is required, so its one-time load picks this
+     up instead of the real package. */
+  require.resolve("@vercel/blob");
+  require.cache[require.resolve("@vercel/blob")] = {
+    id: require.resolve("@vercel/blob"), filename: require.resolve("@vercel/blob"),
+    loaded: true, exports: {
+      issueSignedToken: async function (o) { seen.issued = o; return {
+        delegationToken: "d", clientSigningToken: "c", validUntil: o.validUntil }; },
+      presignUrl: async function (t, o) { seen.presigned = o;
+        return { presignedUrl: "https://store.example/" + o.pathname + "?sig=abc" }; },
+      list: async function () { return { blobs: [] }; },
+      del: async function () {}, head: async function () { return {}; },
+      createMultipartUpload: async function () { return { key: "k", uploadId: "u" }; },
+      uploadPart: async function () { return { etag: "e" }; },
+      completeMultipartUpload: async function () { return {}; }
+    }
+  };
+  process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_FAKE_forguards";
+  const handler = require("../api/blob.js");
+
+  /* The office, straight from the stored graph — the handler reads the person
+     off the session, so the session module is asked for a real one. */
+  const pool = io.getPool(pg);
+  const client = await pool.connect();
+  await io.ensureReady(client);
+  const sid = await auth.createSession(client, "smo");
+  client.release();
+
+  const res = { statusCode: 0, headers: {}, body: "",
+    setHeader: function (k, v) { this.headers[k.toLowerCase()] = v; },
+    end: function (b) { this.body = b || ""; } };
+  await handler({ method: "GET", url: "/api/blob?play=videos/mobile/v1.mp4",
+                  headers: { cookie: "smp_session=" + sid } }, res);
+
+  check("a permitted viewer is redirected to the clip", res.statusCode === 302,
+        { code: res.statusCode, body: String(res.body).slice(0, 90) });
+  check("...to the address the store signed",
+        String(res.headers.location || "").indexOf("sig=abc") > 0, res.headers.location);
+  check("...scoped to THIS clip and to reading only",
+        seen.issued && seen.issued.pathname === "videos/mobile/v1.mp4" &&
+        JSON.stringify(seen.issued.operations) === '["get"]', seen.issued);
+  check("...and presigned as private, never public",
+        seen.presigned && seen.presigned.access === "private" &&
+        seen.presigned.operation === "get", seen.presigned);
+  /* The delegation must expire: an address that outlives the session is the
+     public URL this design exists to avoid. */
+  check("...with an expiry set", !!(seen.issued && seen.issued.validUntil > Date.now()),
+        seen.issued && seen.issued.validUntil);
+
+  delete require.cache[require.resolve("@vercel/blob")];
+  delete require.cache[require.resolve("../api/blob.js")];
+  /* The pool is SHARED and the rest of this file still needs it — closing it
+     here is what turned the first draft's throw into a hang. */
+}
+
 (async function () {
   const pool = io.getPool(pg);
   const client = await pool.connect();
@@ -83,6 +153,9 @@ async function login(user) {
   await new Promise(function (r) { setTimeout(r, 2500); });
 
   try {
+    console.log("0 \u00b7 the read address, against a stubbed store");
+    await readAddressTest();
+
     const smo = await login("smo");
     const head = await login("mobhead");
 

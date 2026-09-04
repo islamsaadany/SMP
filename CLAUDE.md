@@ -492,7 +492,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   file** and **counted on the SERVER from the stored slides** or the limit is
   decoration (§42, §44); refused with the reason, never silently re-encoded; and
   **it does not autoplay**, or the clip takes the room from the presenter.
-  52/0 on `checks/video-slides.py`, proved able to fail four ways (1/2/4/3 red);
+  **AND THE READ ADDRESS IS TWO STEPS (§261.10, found the moment the store
+  existed)**: `getDownloadUrl` takes a full blob URL and is SYNCHRONOUS — it
+  only appends a download flag — so handed a pathname it threw `Invalid URL`,
+  the catch swallowed it, and **nothing would ever have played**. A private
+  blob has no address of its own: `issueSignedToken` (one path, `get` only, an
+  expiry) then `presignUrl`. Invisible to every existing test — no token
+  answers "no store" first, a fake token is refused by the store — so the SDK
+  is STUBBED and the handler driven in-process for a 302 to the signed address
+  (5 red with the bug back), and every other call was validated against the
+  real SDK by reaching *"This store does not exist"*.
+  56/0 on `checks/video-slides.py`, proved able to fail four ways (1/2/4/3 red);
   13/13 and 15/15 on a virgin Postgres 16. **RECORDED, NOT DONE**: the bytes'
   journey through the multipart path is unproven until a store exists; the
   `.pptx` download has no video column; and the signed-off mockup did not show

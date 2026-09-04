@@ -1,4 +1,4 @@
--- 042 · THE COLLECTION'S MEMORY (§261, reshaped by §262)
+-- 042 · THE COLLECTION'S MEMORY (§293, reshaped by §293)
 --
 -- Islam: "when someone sends to me and I don't reply it sends an email for
 -- each message ... it needs to compile some messages", and then: "if the smo
@@ -15,7 +15,7 @@
 -- office replies, because that ends the conversation's wait. `chased_them_at`
 -- is NOT wiped when the person comes back — the sweep reads the LATER of it
 -- and `here_at`, so a visit silences what arrived before it and nothing that
--- arrived after (§262; clearing it would make messages they were already sent
+-- arrived after (§293; clearing it would make messages they were already sent
 -- eligible all over again).
 --
 -- NOTHING IS BACKFILLED, deliberately. NULL is "nothing has gone out about

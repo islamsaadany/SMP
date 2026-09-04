@@ -86,6 +86,14 @@ def box_state(pg):
       return {there: true, inTabRow: !!sub,
               onScreen: r.top >= 0 && r.bottom <= innerHeight && r.width > 0,
               submitHit: hit(sb), submit: st(sb), draft: st(dr),
+              /* §221 gave Submit a HELD state that is deliberately not filled,
+                 so the fill can only be asked about once it is known whether
+                 the gate is open (§280.1). */
+              submitHeld: !!(sb && sb.getAttribute('aria-disabled') === 'true'),
+              /* The reason rides `data-tip` — the platform's own bubble, which
+                 opens on hover AND focus (§163) — never a native `title`, so
+                 asking for one would be an assertion that cannot pass. */
+              submitWhy: sb ? (sb.getAttribute('data-tip') || '').trim() : '',
               oldBar: !!document.querySelector('.rep-bar')};
     }""")
 
@@ -120,13 +128,59 @@ with sync_playwright() as p:
 
     # Islam's colours, as relationships.
     sub, dr = s.get("submit") or {}, s.get("draft") or {}
-    ck("Submit is filled", rgb(sub.get("bg", "")) not in (None, (0, 0, 0)) and
-       "rgba(0, 0, 0, 0)" not in sub.get("bg", ""), sub)
+
+    # ── SUBMIT IS FILLED WHEN IT CAN BE PRESSED (§222) AND QUIET WHILE IT IS
+    #    HELD (§221) — REWRITTEN, NOT DELETED (§280.1, §218) ─────────────────
+    # This asked for the fill unconditionally. It was written under §222, when
+    # Submit was always solid; §221 then gave it a held state that is
+    # deliberately NOT filled, and nobody came back here (§51.11). It has been
+    # red on main ever since, and it could never go green again: every one of
+    # the ten demo units is blocked by something, so the state it was asserting
+    # is unreachable on the shipped data.
+    #
+    # Both ends, or a build that lost the fill entirely still passes the half
+    # it can reach (§94.2, §113.8). The state is MADE, because the demo has no
+    # complete report to borrow.
+    held = s.get("submitHeld")
+    ck("Submit is HELD while the report is incomplete (§221)", held is True, s)
+    ck("...and it says why, on the platform's own bubble",
+       len(s.get("submitWhy") or "") > 0, s.get("submitWhy"))
+    ck("...and a held Submit is deliberately NOT filled",
+       "rgba(0, 0, 0, 0)" in sub.get("bg", ""), sub)
+
+    open_gate = pg.evaluate("""() => {
+      window.__realBlockers = window.submitBlockers;
+      window.submitBlockers = () => ({notes: [], pending: [], owed: 0, gaps: 0});
+      paint();
+      var sb = document.querySelector('.rc-submit');
+      var c = sb ? getComputedStyle(sb) : null;
+      var out = sb ? {held: sb.getAttribute('aria-disabled') === 'true',
+                      bg: c.backgroundColor, colour: c.color} : null;
+      window.submitBlockers = window.__realBlockers;
+      delete window.__realBlockers;
+      paint();
+      return out;
+    }""")
+    pg.wait_for_timeout(300)
+    og = open_gate or {}
+    ck("with the gate open Submit is no longer held", og.get("held") is False, og)
+    ck("...and THEN it is filled (§222)",
+       rgb(og.get("bg", "")) not in (None, (0, 0, 0)) and
+       "rgba(0, 0, 0, 0)" not in og.get("bg", ""), og)
+    ck("...and the fill carries light ink, never the page's own (§38.4)",
+       (rgb(og.get("colour", "")) or (0, 0, 0))[0] > 200, og)
+    s = box_state(pg)                       # the gate is shut again; re-read
+    sub, dr = s.get("submit") or {}, s.get("draft") or {}
     ck("Save draft has no fill", "rgba(0, 0, 0, 0)" in dr.get("bg", ""), dr)
     ck("Save draft has no border", dr.get("border") in ("0px", "0"), dr)
+    # Compared against the fill Submit ACTUALLY wears when it is filled, not
+    # against the held button's transparency — `rgb("rgba(0,0,0,0)")` parses to
+    # (0,0,0) rather than None, so the old comparison was passing over a value
+    # that means "no colour at all" (§94.5).
     ck("Save draft's ink is the same hue family as Submit's fill",
-       rgb(dr.get("colour", "")) is not None and rgb(sub.get("bg", "")) is not None and
-       rgb(dr.get("colour", ""))[0] > rgb(dr.get("colour", ""))[2], (sub, dr))
+       rgb(dr.get("colour", "")) is not None and rgb(og.get("bg", "")) is not None and
+       rgb(dr.get("colour", ""))[0] > rgb(dr.get("colour", ""))[2] and
+       rgb(og.get("bg", ""))[0] > rgb(og.get("bg", ""))[2], (og, dr))
     ck("Save draft is lighter than Submit",
        int(dr.get("weight", 400)) < int(sub.get("weight", 700)), (sub.get("weight"), dr.get("weight")))
 

@@ -7,7 +7,7 @@
    disappears, and Exit returns the presenter to exactly where they were.
    ──────────────────────────────────────────────────────────────────────── */
 
-var DECK = { i:0, slides:[], root:null };
+var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"" };
 
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
@@ -531,7 +531,7 @@ function deckSlides(u){
         return '<tr>' + lead +
           '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
       /* What this row is measured against RIGHT NOW: an outcome answers with
-         its own target, prorated where it compiles by Sum; everything else
+         its own target, prorated where it compiles by Sum or Count (§276); everything else
          with the share of its plan that is due (§239). One function, so the
          slide and the page cannot differ about it. */
       var bench = tacticBenchmark(t);
@@ -954,16 +954,60 @@ function deckFootMarks(deck, u){
   });
 }
 
-function openDeckWith(titleHtml, slides, target){
-  var root = document.getElementById("deckroot");
-  root.querySelector(".deck").innerHTML = slides;
-  if (target) insertPictureSlides(root.querySelector(".deck"), target);
-  if (target) deckHidePass(root.querySelector(".deck"), target);
+/* ── ONE SUBJECT'S FINISHED DECK (§266) ───────────────────────────────
+   `deckHtmlFor()` answers which slides a subject gets; this answers what its
+   deck actually IS — those slides with the custodian's pictures inserted, the
+   office's hidden ones removed and the subject's own mark footed on. Every
+   one of those passes was already run by `openDeckWith()` and none of them
+   measures anything, so they run identically on a detached element (the one
+   pass that DOES measure, `deckFitPass()`, still runs on the deck in the
+   document, once, at the end — §69.5's note explains why it cannot move).
+
+   IT EXISTS BECAUSE A FLOW IS SEVERAL OF THESE. Concatenating first and
+   passing afterwards would hide one subject's slides behind another's marks:
+   `deckFootMarks()` foots the whole deck with ONE mark and `deckHidePass()`
+   reads ONE subject's hidden list, so both have to run per subject or a flow
+   would wear the first unit's lockup throughout and hide the wrong slides.
+
+   AND EVERY SLIDE IS STAMPED WITH WHOSE IT IS, on a single deck as well as in
+   a flow (§53.5: one builder, one behaviour). It costs a single-subject deck
+   two attributes nothing reads, and it is what lets the strip at the bottom
+   name the subject you are standing in without keeping a second list beside
+   the deck that could disagree with it. */
+function deckBuild(target){
+  var frag = document.createElement("div");
+  frag.innerHTML = deckHtmlFor(target);
+  insertPictureSlides(frag, target);
+  deckHidePass(frag, target);
   /* EVERY deck, not only a unit's (§259). `deckMark()` answers with the
      subject's own mark or the group's, and a supporting function is not in
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */
-  deckFootMarks(root.querySelector(".deck"), UNITS[target] || null);
+  deckFootMarks(frag, UNITS[target] || null);
+  var name = placeLabel(target);
+  [].forEach.call(frag.querySelectorAll(".dslide"), function(sl){
+    sl.dataset.subject = target;
+    sl.dataset.subjectName = name;
+  });
+  return frag.innerHTML;
+}
+
+/* ── THE ONE OPENER (§266) ────────────────────────────────────────────
+   A unit's Present, a function's Present and the office's master flow are
+   three doors onto one act, and they differ only in HOW MANY subjects go in —
+   so there is one opener taking a list, rather than a second one for flows
+   that would have to be kept in step with this one (§53.5, and §253.3's own
+   lesson about a deck assembled two ways).
+
+   `DECK.flow` is the LIST OF SUBJECTS, held only while a flow is open. It is
+   read by the strip at the bottom and by nothing else; a single subject sets
+   it to null, so every existing behaviour is untouched by construction. */
+function openDeckWith(titleHtml, targets){
+  var root = document.getElementById("deckroot");
+  var list = [].concat(targets).filter(Boolean);
+  root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  DECK.flow = list.length > 1 ? list : null;
+  DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -978,12 +1022,376 @@ function openDeckWith(titleHtml, slides, target){
    and `deckHtmlFor()` is what decides which deck each gets, so a pillars
    function opened through either lands on the same slides. */
 function openDeck(u){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name),
-    deckHtmlFor(u.ukey), u.ukey);
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey]);
 }
 function openDeckFn(fk){
   openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
-    deckHtmlFor("fn:" + fk), "fn:" + fk);
+    ["fn:" + fk]);
+}
+
+/* ══ THE MASTER PRESENTATION (§266) ═══════════════════════════════════
+   Islam: *"give an option for the SMO from the presentation list to do master
+   presentation which is a flow of presentations in a flow and he is just asked
+   the flow of the units and functions who will present he make the flow and
+   all the slides are put back to back to be presented in one flow."*
+
+   NOTHING IS ASSEMBLED THAT WAS NOT ASSEMBLED BEFORE. A flow is the decks the
+   Present button already opens, one after another, through `deckBuild()` — so
+   a picture the custodian placed, a slide the office hid and the subject's own
+   mark all travel with it, and none of them needed a line of their own here.
+
+   EVERY DECK TRAVELS WHOLE, INCLUDING ITS THANK YOU — Islam's decision,
+   reversing the recommendation put to him: *"evey deck for transition."* The
+   argument is the room's rather than the screen's: that slide is what marks
+   the end of one subject's turn before the next cover arrives. It is also the
+   cheaper build and it removes a rule — a deck inside the flow is byte for
+   byte the deck that subject presents alone, so there is no second version of
+   anybody's deck and nothing to explain about which slides a flow drops. */
+
+/* Every subject that can be asked for a report, in the register's own order —
+   the SAME pair of lists the cycle board is built from (§245), so the picker
+   and the page the office watches can never disagree about who reports. */
+function masterSubjects(){
+  return boardUnitTargets().concat(boardFunctionTargets());
+}
+/* The running order to open the picker on: the stored one, filtered to
+   subjects that still report, and the whole list in board order when nothing
+   is stored. A subject added to the tenant AFTER an order was agreed arrives
+   NOT presenting rather than being appended — walking a new unit into a board
+   meeting because somebody created it is the office's decision, not ours. */
+function masterOrder(){
+  var all = masterSubjects();
+  var kept = SMPRules.masterFlow(GROUP).filter(function(t){ return all.indexOf(t) >= 0; });
+  return kept.length ? kept : all.slice();
+}
+/* Stored as an ABSENCE (§50.6): an order that is simply everybody in the
+   board's own order is what an untouched tenant already has, so it deletes the
+   key rather than writing a copy of the default — which also means a unit
+   added tomorrow joins the flow of a tenant that never chose one, and does not
+   join one that did. */
+function masterWrite(list){
+  var all = masterSubjects();
+  if (list.length && !(list.length === all.length && list.every(function(t, i){ return t === all[i]; })))
+    GROUP[SMPRules.MASTER_FLOW] = list.slice();
+  else delete GROUP[SMPRules.MASTER_FLOW];
+  masterMark();
+}
+/* Schedule the save without a repaint, exactly as Manage slides does (§170's
+   rule from the one place that cannot end in `paint()`): this dialog draws its
+   own body, and a `paint()` here would rebuild the page behind an inert
+   overlay for no reason (§90.4). */
+function masterMark(){ if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint(); }
+
+var MFLOW = null;
+
+function masterOpen(){
+  /* ASKED AGAIN AT THE PRESS, never trusted from the render that drew the
+     entry (§48.2): the menu is drawn once and a viewer switch is one click. */
+  if (!SMPRules.mayMasterPresent(world(), viewer())) return;
+  MFLOW = { pick: masterOrder(), n: {}, note: "", q: "", focusAt: null, h: null };
+  openModalHtml("Master presentation", "Pick who presents, and in what order.", "");
+  /* WIDER, AND MARKED ON THE OVERLAY (§122, §266.10). Islam: *"make the popup
+     a bit bigger to see more of the units and functions."* Two tables of four
+     and five columns in a 940px dialog leaves each about 440px, which clips a
+     name before the Kind column is reached — never loosened on `.modal`, which
+     every dialog in the product shares, and taken off again in `closeModal()`
+     rather than left standing on the next thing that opens. */
+  var ov = document.getElementById("overlay");
+  if (ov) ov.classList.add("mflow-on");
+  masterPaint();
+}
+
+/* How many slides a subject brings. Counted once per opening and remembered,
+   because every tick redraws this dialog and eighteen decks assembled on each
+   press is eighteen decks nobody asked for. It is the deck's own count BEFORE
+   the fit pass, which splits a long table across slides at present time — so
+   the total is stated as "about", rather than as a number the counter in the
+   deck will then disagree with (§35). */
+function masterCount(t){
+  if (MFLOW.n[t] == null) {
+    var box = document.createElement("div");
+    box.innerHTML = deckBuild(t);
+    MFLOW.n[t] = box.querySelectorAll(".dslide").length;
+  }
+  return MFLOW.n[t];
+}
+
+/* ── TWO COLUMNS, AND IT IS A REVERSAL (§266.8) ───────────────────────
+   Islam, having used what §266.4 shipped: *"i changed my opinion the 2 columns
+   option was better."* Both shapes were drawn in the real dialog before
+   anything was built and he picked the single list then; this is the other one,
+   and the earlier choice is recorded rather than overwritten (Principle II).
+
+   WHAT CHANGES IS WHERE THE ROWS ARE DRAWN AND NOTHING ELSE. The list of
+   subjects, the order, what a press writes and when it is saved are all
+   §266.4's and are untouched — which is the whole reason a reversal here costs
+   an afternoon rather than a rebuild: `MFLOW.pick` was always the running
+   order, and a column is a way of showing it.
+
+   AND EACH COLUMN SAYS WHEN IT IS EMPTY (§45.2). An empty half of a split
+   reads as a pane that failed to render, and this one has two states that
+   legitimately empty it: nobody picked yet, and everybody picked. */
+
+/* ── AND THE COLUMNS BECOME TABLES, SEARCHED AND DRAGGED (§266.10) ────
+   Islam, from his own tenant's picker: *"make the everyone who reports
+   searchable and make it a simple table wiht a nother oclumn of a BU or a FUNC
+   and make the popup a bit bigger to see more of the units and functions"*,
+   and then of the running order: *"make the right hand side without the up and
+   down arrows just the x to remove and make the list can be dragged by a
+   handle to rearrange if needed"*, and *"do you think the handle can be the
+   same as the number?"*
+
+   THE ROWS ARE THE SAME ROWS. `masterSubjects()`, `masterOrder()`,
+   `masterWrite()` and every server rule are untouched again — this is the
+   third time this dialog has been redrawn without the list underneath it
+   moving, and it stays cheap for the same reason: `MFLOW.pick` is the running
+   order and a table is a way of showing it.
+
+   THE DRAG IS `makeSortable`, NEVER A SECOND ONE. The number is drawn as
+   `.idx-n` and the bars come from `handle()`, so the platform's own sortable
+   renumbers, refuses a commit that is not a permutation (§118) and moves a row
+   from the keyboard — all of it already written, and a second copy of a drag
+   is a second set of those bugs (§53.5).
+
+   AND THE SWAP IS HELD WHILE A DRAG IS ON — measured on the drawing before
+   this was built. With the digit-to-bars swap driven by `:hover` alone, a
+   four-row drag swapped the bars SIX times, and half of those put them on a
+   row the pointer was PASSING rather than on the row in hand: the row moves in
+   whole-row steps while the pointer moves continuously, so for about half of
+   every row crossed the pointer is not over the dragged handle at all. That is
+   the whole of "the handle feels glitchy", and it belongs to the treatment
+   rather than to any drawing — the CSS holds the swap on `tr.dragging` and
+   takes it away from every other row while `tbody` is `.sorting`.
+
+   TYPING NEVER REPAINTS (§35, §108.13). The search hides rows in place and
+   rewrites two counts; a repaint would replace the box being typed into. And
+   a repaint KEEPS the filter, or ticking somebody quietly shows the whole list
+   again to a person who believes they are reading their results. */
+function masterKind(t){
+  return String(t).indexOf("fn:") === 0
+    ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
+}
+function masterPaint(){
+  var box = document.getElementById("modal-b");
+  if (!box || !MFLOW) return;
+  var all = masterSubjects();
+  var rest = all.filter(function(t){ return MFLOW.pick.indexOf(t) < 0; });
+  var total = MFLOW.pick.reduce(function(a, t){ return a + masterCount(t); }, 0);
+  /* Waiting to be picked. The row carries the name AND the code the deck's own
+     pills show while presenting (§266.9), because both are what somebody would
+     type — and lower-cased once here rather than on every keystroke. */
+  var off = function(t){
+    var name = placeLabel(t);
+    return '<tr data-mfrest="1" data-mffind="' +
+        esc((name + " " + deckCode(t, name)).toLowerCase()) + '">' +
+      '<td class="c-t"><button class="mftick" data-mftick="' + esc(t) + '"' +
+        ' aria-label="Put ' + esc(name) + ' into the flow">✓</button></td>' +
+      '<td class="c-nm">' + esc(name) + '</td>' +
+      '<td class="c-k">' + masterKind(t) + '</td>' +
+      '<td class="c-n">' + masterCount(t) + '</td></tr>';
+  };
+  /* In the flow: the number IS the handle, and the × is the SAME `data-mftick`
+     the left column uses, because it is the same act — one handler, so the two
+     columns cannot answer differently (§53.5). */
+  var on = function(t, i){
+    var name = placeLabel(t);
+    return '<tr data-oi="' + i + '">' +
+      '<td class="mfh"><span class="idx-n">' + (i + 1) + '</span>' +
+        handle("Drag to reorder " + name) + '</td>' +
+      '<td class="c-nm"><b>' + esc(name) + '</b></td>' +
+      '<td class="c-k">' + masterKind(t) + '</td>' +
+      '<td class="c-n">' + masterCount(t) + '</td>' +
+      '<td class="c-x"><button class="mfx" data-mftick="' + esc(t) + '" title="Take out"' +
+        ' aria-label="Take ' + esc(name) + ' out of the flow">×</button></td></tr>';
+  };
+  box.innerHTML = '<div class="mflow"><div class="mfcols">' +
+    '<div class="mfcol"><div class="mfhead">' +
+      '<h4>Everyone who reports</h4>' +
+      '<input class="mffind" data-mffind-box="1" autocomplete="off"' +
+        ' placeholder="Search a unit or function…"' +
+        ' aria-label="Search a unit or function" value="' + esc(MFLOW.q || "") + '">' +
+      '<span class="mfcount" data-mfrestcount></span></div>' +
+      '<div class="mflist"><table class="mftbl"><thead><tr>' +
+        '<th class="c-t"></th><th>Name</th><th class="c-k">Kind</th>' +
+        '<th class="c-n">Slides</th></tr></thead><tbody>' +
+        rest.map(off).join("") + '</tbody></table>' +
+      '<p class="mfempty" data-mfrestempty' + (rest.length ? ' hidden' : '') + '>' +
+        'Everybody is in the flow.</p></div></div>' +
+    '<div class="mfcol"><div class="mfhead"><h4>The flow</h4>' +
+      '<span class="mfcount">' +
+        (MFLOW.pick.length ? 'about ' + plural(total, "slide") : '') + '</span></div>' +
+      '<div class="mflist"><table class="mftbl"><thead><tr>' +
+        '<th class="c-h"></th><th>Name</th><th class="c-k">Kind</th>' +
+        '<th class="c-n">Slides</th><th class="c-x"></th></tr></thead>' +
+        '<tbody data-mfflow>' + MFLOW.pick.map(on).join("") + '</tbody></table>' +
+      '<p class="mfempty"' + (MFLOW.pick.length ? ' hidden' : '') + '>' +
+        'Nobody yet — tick a unit or function on the left.</p></div></div>' +
+    '</div>' +
+    (MFLOW.note ? '<p class="mfnote" role="status">' + esc(MFLOW.note) + '</p>' : '') +
+    '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
+    '<button class="mfgo" data-mfgo="1"' +
+      (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
+      '>Start the flow</button></div></div>';
+  masterWire();
+  /* AFTER the wiring, and from HERE rather than from inside it: the count is
+     the whole list's, which `masterWire()` does not hold — the first build
+     passed it `all.length` from a scope that function cannot see, and every
+     paint threw with the dialog still on screen (§130.3's fault, found by
+     opening it). */
+  masterFix(box, all.length);
+}
+
+/* ── ONE HEIGHT, WHATEVER THE SPLIT (§266.11) ─────────────────────────
+   The two lists take the height the WHOLE list would need — both columns
+   together — so ticking a subject moves a row from one box to the other and
+   moves nothing else. It is measured, never a constant: a row and a header are
+   read off the page, because a number written here goes stale the day the type
+   scale or the padding changes and nothing compares the two (§122.5).
+
+   Measured ONCE per opening and remembered, because the count it is derived
+   from cannot change while the dialog is open — and written as
+   `min(Npx, 52vh, 420px)` rather than as a flat pixel height, so a short window
+   still keeps the buttons on screen (§90) and a resize while it is open is
+   still followed. */
+function masterFix(box, rows){
+  if (!box || !rows) return;
+  if (MFLOW.h == null) {
+    var tr = box.querySelector(".mftbl tbody tr");
+    var th = box.querySelector(".mftbl thead tr");
+    if (!tr || !th) return;
+    var rh = tr.getBoundingClientRect().height;
+    var hh = th.getBoundingClientRect().height;
+    if (!rh || !hh) return;
+    MFLOW.h = Math.ceil(hh + rows * rh + 2);
+  }
+  [].forEach.call(box.querySelectorAll(".mflist"), function(l){
+    l.style.height = "min(" + MFLOW.h + "px, 52vh, 420px)";
+  });
+}
+
+/* The search, in place. Both counts are rewritten INTO their nodes rather than
+   by repainting, and the empty line says which of the two silences this is —
+   nobody left to pick, or nothing matching what was typed (§105). */
+function masterFilter(){
+  var box = document.getElementById("modal-b");
+  if (!box) return;
+  var q = (MFLOW.q || "").toLowerCase();
+  var rows = box.querySelectorAll("tr[data-mfrest]");
+  var shown = 0;
+  [].forEach.call(rows, function(tr){
+    var hit = !q || tr.dataset.mffind.indexOf(q) >= 0;
+    tr.hidden = !hit;
+    if (hit) shown++;
+  });
+  var c = box.querySelector("[data-mfrestcount]");
+  if (c) c.textContent = rows.length ? (q ? shown + " of " + rows.length : String(rows.length)) : "";
+  var e = box.querySelector("[data-mfrestempty]");
+  if (e) {
+    e.hidden = shown > 0;
+    e.textContent = rows.length === 0 ? "Everybody is in the flow."
+                                      : "Nothing matches “" + MFLOW.q + "”.";
+  }
+}
+
+/* Whoever rewrites the DOM re-wires it, in the same function (§29.5, §116) —
+   and scoped to the dialog's own body, or a second handler is bound to the
+   page behind it on every tick (§24, §47.2). */
+function masterWire(){
+  var box = document.getElementById("modal-b");
+  if (!box) return;
+  var find = box.querySelector("[data-mffind-box]");
+  [].forEach.call(box.querySelectorAll("[data-mftick]"), function(b){
+    b.addEventListener("click", function(){
+      /* The search keeps the cursor when a tick was made from the search: the
+         next name is usually typed straight after, and the repaint that moves
+         the row between the columns would otherwise take the box away. */
+      var had = find && document.activeElement === find;
+      var t = this.dataset.mftick, at = MFLOW.pick.indexOf(t);
+      if (at >= 0) MFLOW.pick.splice(at, 1);
+      else MFLOW.pick.push(t);
+      MFLOW.note = "";
+      masterWrite(MFLOW.pick);
+      masterPaint();
+      if (had) {
+        var f = box.querySelector("[data-mffind-box]");
+        if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); }
+      }
+    });
+  });
+  if (find) find.addEventListener("input", function(){
+    MFLOW.q = this.value.trim();
+    masterFilter();
+  });
+  /* THE PLATFORM'S OWN SORTABLE (§101, arrange.js), never a second one: it
+     renumbers `.idx-n`, moves a row from the keyboard, and refuses a commit
+     that is not a permutation of the list it is applied to (§118). */
+  var tb = box.querySelector("[data-mfflow]");
+  if (tb && MFLOW.pick.length > 1) {
+    /* WHERE A KEYBOARD MOVE IS GOING, CAPTURED BEFORE IT HAPPENS. Moving a
+       row with `insertBefore` blurs whatever inside it had the focus, so by
+       the time the commit runs `document.activeElement` is the body and there
+       is nothing left to say which row was moved — measured, not assumed. In
+       the capture phase, so this runs before `makeSortable`'s own handler on
+       the grip; a press at either end of the list moves nothing and is
+       recorded as nothing, or the next DRAG would inherit a stale row. */
+    tb.addEventListener("keydown", function(e){
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) < 0) return;
+      var row = e.target.closest ? e.target.closest("tr[data-oi]") : null;
+      var rows = tb.querySelectorAll("tr[data-oi]");
+      var at = row ? [].indexOf.call(rows, row) : -1;
+      var to = at + (e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 1);
+      MFLOW.focusAt = (at < 0 || to < 0 || to >= rows.length) ? null : to;
+    }, true);
+    makeSortable(tb, "tr", masterMoved);
+  }
+  masterFilter();
+  /* A NAME TOO LONG FOR ITS COLUMN IS ONE HOVER AWAY (§88's rule, on a control
+     rather than a setup table) — and it is MEASURED rather than guessed, so a
+     name that fits gets no title and does not steal the hover from anything
+     else (§93.6). At a 1000px window the longest of the tenant's own names is
+     the one that needs it. */
+  [].forEach.call(box.querySelectorAll(".mftbl .c-nm"), function(td){
+    var full = td.textContent.trim();
+    td.title = td.scrollWidth > td.clientWidth ? full : "";
+  });
+  /* A row moved by the keyboard keeps the focus and comes into view — the drag
+     cannot scroll the list and the keyboard can. */
+  if (MFLOW.focusAt != null) {
+    var rows = box.querySelectorAll("[data-mfflow] tr[data-oi]");
+    var row = rows[MFLOW.focusAt];
+    MFLOW.focusAt = null;
+    if (row) {
+      var g = row.querySelector(".grip");
+      if (g) g.focus();
+      row.scrollIntoView({ block: "nearest" });
+    }
+  }
+  var no = box.querySelector("[data-mfno]");
+  if (no) no.addEventListener("click", function(){ closeModal(); });
+  var go = box.querySelector("[data-mfgo]");
+  /* SAID, NEVER DISABLED (§221, §163): a disabled button takes no focus, so
+     the one sentence explaining why it will not go could not be reached. */
+  if (go) go.addEventListener("click", function(){
+    if (!MFLOW.pick.length) {
+      MFLOW.note = "Tick at least one unit or function to present.";
+      masterPaint();
+      return;
+    }
+    var list = MFLOW.pick.slice();
+    closeModal();
+    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+  });
+}
+
+/* A committed order, applied to the running order through `applyOrder` — which
+   leaves the list UNTOUCHED rather than half-applying anything that is not a
+   permutation (§118). Where the focus goes afterwards is decided before the
+   move, above: a pointer drag never focuses the grip, so `focusAt` is null and
+   a mouse never gets a focus ring it did not ask for. */
+function masterMoved(order){
+  applyOrder(MFLOW.pick, order);
+  masterWrite(MFLOW.pick);
+  masterPaint();
 }
 
 /* §256.2 WAS HERE, AND IT IS §253.3's NOW. Two sessions found the same fault
@@ -1002,12 +1410,11 @@ function openDeckFn(fk){
 function closeDeck(){
   var root = document.getElementById("deckroot");
   root.classList.remove("on");
-  /* Both fullscreen classes go with it. `fullscreenchange` would clear them
-     too, but only if the deck was in fullscreen — leaving `peek` set on a deck
-     closed from windowed mode means the NEXT fullscreen opens with the bar
-     already showing and no move to explain it. */
-  root.classList.remove("fs", "peek");
-  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
+  /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
+     but only if the deck was in fullscreen — a deck closed from windowed mode
+     never fires that event, and `fs` left standing would give the NEXT deck a
+     hidden bar and a click that advances slides (§265) in a window. */
+  root.classList.remove("fs");
   document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
 }
@@ -1065,50 +1472,124 @@ function deckFitPass(deck){
   [].forEach.call(deck.querySelectorAll(".dslide"), function(s){ s.classList.remove("on"); });
 }
 
+/* Where each subject's deck starts, in the order the slides are in. Read off
+   the SLIDES rather than off `DECK.flow`, so a subject whose deck came out
+   empty cannot leave a dot pointing at somebody else's cover (§61), and the
+   answer is the deck's own rather than a description of it (§50.3). */
+/* ── THE PILL SAYS WHICH SUBJECT (§266.9) ─────────────────────────────
+   Islam, running a real flow of 308 slides: *"in the pills to write the
+   inittials of the unit for better navigation."* Thirteen identical dots is a
+   row you can count but cannot read.
+
+   THE LETTERS EXIST ALREADY AND ARE NOT INVENTED HERE. Every unit and every
+   supporting function carries a `codePrefix` — MB, RS, FIN, MRC — and it is
+   what the tenant reads on every pillar and project code in the product
+   (MB01, FIN01). Deriving initials of our own would be a second abbreviation
+   for one thing, drifting from the first the day somebody edits it in Setup
+   (§53.5, §25) — and it would put CA on both Cares, which the prefixes
+   already tell apart (CA and CAF).
+
+   THE FALLBACK IS ONLY FOR A SUBJECT THAT HAS NONE: a unit added this morning
+   and not yet given a prefix. Two letters, because one is not a name and three
+   from an unknown word is a guess. */
+function deckCode(target, name){
+  var o = String(target).indexOf("fn:") === 0
+    ? FUNCTIONS[String(target).slice(3)] : UNITS[target];
+  var pre = o && o.codePrefix;
+  if (pre) return String(pre).toUpperCase();
+  var words = String(name || target).trim().split(/\s+/).filter(Boolean);
+  return (words.length > 1
+    ? words[0].charAt(0) + words[1].charAt(0)
+    : String(words[0] || "").slice(0, 2)).toUpperCase();
+}
+function deckStops(){
+  var out = [];
+  DECK.slides.forEach(function(sl, k){
+    var t = sl.dataset.subject;
+    if (!t || (out.length && out[out.length - 1].t === t)) return;
+    var name = sl.dataset.subjectName || t;
+    out.push({ t:t, name:name, code:deckCode(t, name), at:k });
+  });
+  return out;
+}
+/* ── ONE DOT PER SLIDE, OR ONE PER SUBJECT (§266) ─────────────────────
+   Islam, of the strip on a flow: *"ok"* to both. The dots are one per slide
+   and pressing one jumps to it, which is right for a deck of twenty-eight and
+   measured as broken well before a flow needs them: at 71 slides they already
+   wrap onto THREE ROWS and spill past the strip, and eighteen subjects is 335.
+
+   So in a flow they become one per SUBJECT — eighteen at most — each jumping
+   to that subject's cover, while the counter goes on counting slides, because
+   "32 / 71" is the question a presenter actually asks of it. A single
+   subject's deck is untouched: `DECK.flow` is null there and this is the
+   branch it has always taken. */
 function deckIndex(){
   var root = document.getElementById("deckroot");
   DECK.slides = [].slice.call(root.querySelectorAll(".dslide"));
   root.querySelector(".dcount-t").textContent = DECK.slides.length;
   var dots = root.querySelector(".ddots");
-  dots.innerHTML = DECK.slides.map(function(_, k){
-    return '<button class="ddot" data-dgo="' + k + '" aria-label="Slide ' + (k+1) + '"></button>';
-  }).join("");
+  DECK.stops = DECK.flow ? deckStops() : null;
+  dots.classList.toggle("bysub", !!DECK.stops);
+  dots.innerHTML = DECK.stops
+    ? DECK.stops.map(function(st){
+        /* The code is DRAWN and the name is on the hover: a pill wide enough to
+           hold "Strategy Management Office" is not a pill (§88's rule, on the
+           projector's own chrome). */
+        return '<button class="ddot" data-dgo="' + st.at + '" title="' + esc(st.name) +
+          '" aria-label="' + esc(st.name) + '">' + esc(st.code) + '</button>';
+      }).join("")
+    : DECK.slides.map(function(_, k){
+        return '<button class="ddot" data-dgo="' + k + '" aria-label="Slide ' + (k+1) + '"></button>';
+      }).join("");
   [].forEach.call(dots.querySelectorAll(".ddot"), function(b){
     b.addEventListener("click", function(){ deckShow(+b.dataset.dgo); });
   });
+}
+/* Which subject's stretch of the deck slide `i` falls in — the LAST stop at
+   or before it, never the one whose `at` matches, or every slide but a cover
+   would belong to nobody. */
+function deckStopAt(i){
+  var stops = DECK.stops || [], k = -1;
+  stops.forEach(function(st, j){ if (st.at <= i) k = j; });
+  return k;
 }
 function deckShow(n){
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
+  var here = DECK.stops ? deckStopAt(DECK.i) : -1;
   [].forEach.call(root.querySelectorAll(".ddot"), function(b, k){
-    b.classList.toggle("on", k === DECK.i);
+    b.classList.toggle("on", DECK.stops ? k === here : k === DECK.i);
   });
+  /* THE STRIP NAMES THE SUBJECT YOU ARE STANDING IN (§266). On one subject's
+     deck the title named it and that was enough; in a flow it read "Master
+     presentation" on slide 1 and on slide 71 alike, which names nothing. The
+     running order is stated with it, because "which unit is this" and "how
+     much is left" are the two questions a room asks. Written into the node,
+     never repainted (§63): this runs on every arrow press. */
+  if (DECK.stops && here >= 0) {
+    var st = DECK.stops[here];
+    root.querySelector(".dtitle").innerHTML =
+      "<b>" + esc(st.name) + "</b> &middot; " + (here + 1) + " of " + DECK.stops.length +
+      " &middot; " + esc(REVIEW.name);
+  }
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
 }
+/* §265 DELETED `deckPeek()` AND ITS TIMER FROM HERE, reversing the second half
+   of §69.7. It brought the bar back for 2.2 seconds whenever the pointer moved,
+   which was the right answer to "how does a presenter find Exit" and the wrong
+   thing to put on a projector: `pointerdown` is a move, so every click during a
+   review flashed a navy strip across the bottom of the slide and took it away
+   again — Islam, from a live presentation, "with every click the bottom banner
+   appear then hide."
+
+   Removed rather than switched off (§24): the two pointer listeners, the timer,
+   the `peek` class and the CSS rule that read it are all gone, so nothing is
+   left for a later reader to take as load-bearing. What replaces it is the
+   keyboard, which the room cannot see — and Escape, which leaves fullscreen
+   rather than closing the deck, so the bar comes back whole. */
+
 /* Scale the fixed stage into whatever room there is. */
-/* Show the bar, then take it away again after a pause. Only in fullscreen —
-   everywhere else it is simply always there, and a timer running against a
-   class that does nothing is a timer somebody will one day wonder about.
-
-   The timer is cleared before it is set, or a mouse moving continuously leaves
-   one pending timeout per event and the bar hides on the first of them. */
-var DECKPEEK = null;
-function deckPeek(hideNow){
-  var root = document.getElementById("deckroot");
-  if (!root || !root.classList.contains("fs")) return;
-  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
-  if (hideNow) { root.classList.remove("peek"); return; }
-  root.classList.add("peek");
-  DECKPEEK = setTimeout(function(){
-    DECKPEEK = null;
-    var r = document.getElementById("deckroot");
-    /* Never pull it out from under the pointer: a bar that vanishes as you
-       reach for Exit is worse than one that never appeared. */
-    if (r && !r.querySelector(".deckbar:hover")) r.classList.remove("peek");
-  }, 2200);
-}
-
 function deckScale(){
   var root = document.getElementById("deckroot");
   var deck = root.querySelector(".deck");
@@ -1116,6 +1597,38 @@ function deckScale(){
   var st = root.querySelector(".deckstage");
   var k = Math.min(st.clientWidth / 1600, st.clientHeight / 900);
   deck.style.transform = "scale(" + k + ")";
+}
+
+/* ── DRIVING THE DECK WITH A FINGER (§280) ──────────────────────────────
+   Three small pieces of state, and each is here rather than inside a handler
+   because the tap and the swipe are two readings of ONE gesture and have to
+   agree about it.
+
+   `DECKPOINTER` is what produced the gesture. A `click` is not reliably a
+   PointerEvent, so the kind is remembered from the pointerdown that came
+   before it (§280). It starts as "mouse", so a click arriving with no
+   pointerdown at all — a keyboard-driven one — takes the mouse branch and
+   moves forward, which is §265's behaviour unchanged.
+
+   `DECKSWIPED` is how the two readings agree: a swipe ends in a click, so
+   without it one gesture would move two slides.
+
+   `DECKFROM` is where a swipe began, and is null whenever a swipe could not
+   legitimately start — outside fullscreen, on a control, or under a mouse. */
+var DECKPOINTER = "mouse", DECKSWIPED = false, DECKFROM = null;
+
+/* A finger travels while it presses, so a tap is never exactly still: this is
+   the line between "they meant to tap" and "they meant to swipe". 45px is
+   about 6mm on a tablet — further than a tap wanders and shorter than any
+   deliberate swipe. */
+var DECKSWIPE_MIN = 45;
+
+/* The one answer to "is this the stage, or something ON the stage" — asked by
+   the tap and by the swipe, or a gesture that starts in the note box is
+   refused by one and obeyed by the other (§53.5). */
+function deckOwnControl(t){
+  return !!(t && t.closest &&
+    t.closest(".deckbar, button, a, input, textarea, select, [contenteditable]"));
 }
 
 function wireDeck(){
@@ -1136,12 +1649,82 @@ function wireDeck(){
     var box = ev.target.closest("[data-deckunote]");
     if (box) setCycleNote(box.dataset.deckunote, box.textContent);
   });
-  /* Any of the three ways somebody reaches for the controls. `pointermove`
-     covers mouse and pen; a touch is a `pointerdown` that never moves; and the
-     keyboard has to be able to summon it too, or a presenter driving the deck
-     by arrow keys can never see where they are. */
-  root.addEventListener("pointermove", function(){ deckPeek(false); });
-  root.addEventListener("pointerdown", function(){ deckPeek(false); });
+  /* ── A CLICK ON THE SLIDE MOVES FORWARD, IN FULLSCREEN ONLY (§265) ──
+     Islam's choice, so a tablet or a borrowed mouse can still drive the deck
+     with the bar gone.
+
+     `.fs` alone, because windowed mode has the bar's own Next button six
+     inches below and a click-to-advance stage as well would be two answers to
+     one act (§53.5) — and the cycle note is edited on that same stage.
+
+     THE INTERACTIVE TARGETS ARE EXCLUDED, or clicking into the note box to
+     type would advance the slide out from under the cursor: a `click` that
+     lands on a control is that control's, never the stage's.
+
+     ── AND A FINGER GETS A WAY BACK (§280, reversing §265's forward-only for
+     TOUCH and not for a mouse) ──────────────────────────────────────────
+     Islam, presenting from a tablet: *"it doesn't go left or right."* §265
+     kept the click forward-only for a stated reason — *a click that went back
+     on one half needs a visible boundary, and the point of fullscreen is that
+     nothing is drawn over the slide* — and that reason is about a ROOM
+     watching a projector. A tablet in your hands has no arrows at all, so
+     forward-only is not a conservative choice there, it is the only direction
+     the device can go.
+
+     THE BOUNDARY IS AT A THIRD, NOT THE MIDDLE (his, from three offered).
+     Forward is the act of a talk and back is the exception, so forward keeps
+     the big target and back is deliberate rather than a slip — and two thirds
+     of the slide can still be pointed at without moving the deck.
+
+     A MOUSE IS UNCHANGED AND THAT IS ALSO HIS CALL, with its cost stated: the
+     product now answers one act two ways depending on the device (§53.5), in
+     exchange for nothing a laptop presenter has already learned changing
+     under them. The KIND is remembered from the pointerdown rather than read
+     off the click, because `click` is not reliably a PointerEvent in every
+     browser — read it off the event and Safari quietly takes the mouse
+     branch on a tablet, which is the fault this section exists to fix. */
+  root.addEventListener("click", function(ev){
+    if (!root.classList.contains("fs")) return;
+    /* A swipe ends in a click. Without this the gesture moves the deck and
+       then the click moves it again — one press, two slides. */
+    if (DECKSWIPED) { DECKSWIPED = false; return; }
+    if (deckOwnControl(ev.target)) return;
+    var back = DECKPOINTER !== "mouse" && ev.clientX < innerWidth / 3;
+    deckShow(DECK.i + (back ? -1 : 1));
+  });
+
+  /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§280, Islam's) ────────────
+     The direction people already have from every photo album: the slide
+     follows the finger, so pushing the current slide off to the left brings
+     the next one on. It is the same two acts as the tap zones, offered the
+     way a tablet offers them — nobody has to be told which third they are in.
+
+     TOUCH AND PEN ONLY, for §280's own reason: a mouse keeps §265 exactly,
+     and a drag with a mouse is how somebody selects text rather than how they
+     turn a page.
+
+     THE HORIZONTAL HAS TO WIN. A swipe that is mostly vertical is somebody
+     scrolling or steadying the tablet, and reading it as a page turn is worse
+     than reading it as nothing. */
+  root.addEventListener("pointerdown", function(ev){
+    DECKPOINTER = ev.pointerType || "mouse";
+    DECKSWIPED = false;
+    DECKFROM = (root.classList.contains("fs") && DECKPOINTER !== "mouse" &&
+                !deckOwnControl(ev.target))
+      ? { x: ev.clientX, y: ev.clientY } : null;
+  });
+  /* The browser took the gesture over (a system edge-swipe, a second finger).
+     Whatever it became, it is not ours to read. */
+  root.addEventListener("pointercancel", function(){ DECKFROM = null; });
+  root.addEventListener("pointerup", function(ev){
+    var from = DECKFROM;
+    DECKFROM = null;
+    if (!from) return;
+    var dx = ev.clientX - from.x, dy = ev.clientY - from.y;
+    if (Math.abs(dx) < DECKSWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
+    DECKSWIPED = true;
+    deckShow(DECK.i + (dx < 0 ? 1 : -1));
+  });
   addEventListener("resize", deckScale);
   /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
      The class is set from the EVENT rather than from the button, because
@@ -1156,22 +1739,43 @@ function wireDeck(){
   addEventListener("fullscreenchange", function(){
     var root = document.getElementById("deckroot");
     root.classList.toggle("fs", document.fullscreenElement === root);
-    root.classList.remove("peek");
-    deckPeek(true);
     deckScale();
   });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     if (ev.target.isContentEditable) { if (ev.key === "Escape") ev.target.blur(); return; }
-    /* Driving the deck from the keyboard shows the bar too — otherwise a
-       presenter using the arrows in fullscreen has no way to see which slide
-       they are on, and the counter is the one thing the bar is FOR. */
-    deckPeek(false);
-    if (ev.key === "ArrowRight" || ev.key === " ") { ev.preventDefault(); deckShow(DECK.i + 1); }
-    if (ev.key === "ArrowLeft") deckShow(DECK.i - 1);
-    if (ev.key === "Home") deckShow(0);
-    if (ev.key === "End") deckShow(DECK.slides.length - 1);
-    if (ev.key === "Escape") closeDeck();
+    /* ── FORWARD IS FOUR KEYS AND BACK IS THREE (§265) ────────────────
+       Islam: "down and rigth for moving the slides forward left and up takes
+       me back". Down and Up are what a trackpad-less laptop reaches for and
+       what a projector remote's second pair sends; PageDown and PageUp are
+       what most presentation clickers send, and a clicker that does nothing is
+       indistinguishable from a flat battery.
+
+       EVERY NAVIGATION KEY STOPS THE PAGE BEHIND (`preventDefault`), which
+       only ArrowRight and Space used to do — Down and PageDown scroll the
+       platform underneath the deck, so the slide changes and the page you
+       return to has moved. */
+    var fwd = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, " ": 1 };
+    var back = { ArrowLeft: 1, ArrowUp: 1, PageUp: 1 };
+    if (fwd[ev.key]) { ev.preventDefault(); deckShow(DECK.i + 1); }
+    if (back[ev.key]) { ev.preventDefault(); deckShow(DECK.i - 1); }
+    if (ev.key === "Home") { ev.preventDefault(); deckShow(0); }
+    if (ev.key === "End") { ev.preventDefault(); deckShow(DECK.slides.length - 1); }
+    /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§265) ──────
+       It closed the deck outright, so the one key a presenter presses to get
+       their laptop back also threw away the presentation and dropped them onto
+       the page behind it, in front of the room. Two steps now: out of
+       fullscreen (where the bar, the counter and Exit are all waiting), then
+       out of the deck.
+
+       Asked of `document.fullscreenElement`, not of the class, because the
+       browser can leave fullscreen on its own and the class follows the event
+       (§69.7) — and a browser that suppresses this keydown to exit fullscreen
+       itself lands on exactly the same state. */
+    if (ev.key === "Escape") {
+      if (document.fullscreenElement === root) document.exitFullscreen();
+      else closeDeck();
+    }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });

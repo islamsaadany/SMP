@@ -20,7 +20,7 @@ for tag, f in [("RULES","../../lib/rules.js"), ("DIFF","../../lib/graph-diff.js"
                ("PPTX","pptx.js"),
                ("MAIL","../../lib/mail-html.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
-               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("SAFETY","safety.js"), ("SYNC","sync.js")]:
+               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("HISTORY","history.js"), ("SAFETY","safety.js"), ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')
 # The icon travels INSIDE the built file, as a data URI, because the file has
 # to carry everything it needs — opened from a memory stick it still shows its

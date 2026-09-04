@@ -1,5 +1,5 @@
-/* ── THE TEN-MINUTE COLLECTION (§262) ─────────────────────────────────────
-   Islam, having settled §261's per-conversation chase: *"if the smo don't
+/* ── THE TEN-MINUTE COLLECTION (§293) ─────────────────────────────────────
+   Islam, having reported one email per message: *"if the smo don't
    reply in 10 min the email should come and same for them ... sometimes
    people might be at their desk but not focusing"*, and *"the email is sent
    with all the pending conversations, not 1 for each person."*
@@ -202,7 +202,7 @@ const srv = http.createServer(function (req, res) {
     check("...carrying the whole waiting spell, the earlier ones included",
           ["First one", "Fourth one, next morning"].every(w => (mail(1).html || "").indexOf(w) >= 0));
 
-    console.log("\n5 · being at your desk suppresses nothing (§262, his own case)");
+    console.log("\n5 · being at your desk suppresses nothing (§293, his own case)");
     await reset();
     await say("Fifth one, while the office sits there");
     await passes(MINS + 1);

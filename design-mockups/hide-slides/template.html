@@ -1,0 +1,302 @@
+<title>Hiding Slides from a Review</title>
+<style>
+  /* The product's own tokens, lifted from src/_shared.css verbatim (forefront,
+     light and dark). Nothing here is a colour invented for a mockup: what is
+     signed off is what the platform already paints (§25). */
+  :root {
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --zebra:#F5F7FA;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --track:.12em; --r-sm:6px; --r:8px; --r-md:12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --panel:#1A2030; --panel-ink:#E9ECF1; --panel-quiet:#9AA6B8;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#0F2A20;
+      --bad-tx:#E79A93; --bad-bg:#2E1616;
+      --attn-tx:#E8CA6A; --attn-bg:#2E2510;
+      --zebra:#20242C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --panel:#1A2030; --panel-ink:#E9ECF1; --panel-quiet:#9AA6B8;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#0F2A20;
+    --bad-tx:#E79A93; --bad-bg:#2E1616;
+    --attn-tx:#E8CA6A; --attn-bg:#2E2510;
+    --zebra:#20242C;
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+         font-family:var(--sans); font-size:14px; line-height:1.55;
+         -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1140px; margin:0 auto; padding:0 24px 72px; }
+
+  /* ── The bar, the platform's own navy ─────────────────────────────── */
+  header.top { background:var(--panel); color:var(--panel-ink); padding:22px 0 20px;
+               border-bottom:3px solid var(--gold); }
+  header.top .wrap { padding-bottom:0; display:flex; flex-wrap:wrap;
+                     align-items:baseline; gap:8px 18px; }
+  .kick { font-size:10px; letter-spacing:var(--track); text-transform:uppercase;
+          color:var(--panel-quiet); font-weight:700; }
+  h1 { font-size:24px; line-height:1.2; margin:0; font-weight:650;
+       text-wrap:balance; width:100%; }
+  .topmeta { color:var(--panel-quiet); font-size:12px; }
+
+  h2 { font-size:17px; margin:0 0 4px; font-weight:650; text-wrap:balance; }
+  h3 { font-size:13px; margin:0 0 6px; font-weight:700; }
+  p { margin:0 0 12px; max-width:68ch; }
+  section { margin-top:40px; }
+  .lede { color:var(--ink-2); }
+  b.q { font-weight:650; color:var(--ink); }
+  em.said { font-style:italic; color:var(--ink-2); }
+  code { font-family:var(--mono); font-size:.9em; background:var(--surface-2);
+         padding:1px 5px; border-radius:4px; }
+
+  .rule { height:1px; background:var(--line); border:0; margin:34px 0 0; }
+
+  /* ── Settled decisions: a list of answers, not cards ───────────────── */
+  .settled { border-left:3px solid var(--good); background:var(--good-bg);
+             border-radius:0 var(--r) var(--r) 0; padding:14px 18px;
+             display:grid; gap:10px; margin-top:26px; }
+  .settled dl { margin:0; display:grid; grid-template-columns:auto 1fr;
+                gap:2px 14px; align-items:baseline; }
+  .settled dt { font-size:10px; letter-spacing:var(--track); text-transform:uppercase;
+                font-weight:700; color:var(--good-tx); white-space:nowrap; }
+  .settled dd { margin:0; color:var(--ink); }
+  .settled dd span { color:var(--ink-2); }
+
+  /* ── Shots, at their real pixel size ──────────────────────────────── */
+  .shots { display:flex; flex-wrap:wrap; gap:28px; margin-top:18px; }
+  figure { margin:0; }
+  figure img { display:block; border:1px solid var(--line); border-radius:var(--r-sm);
+               background:var(--surface); max-width:100%; height:auto; }
+  figcaption { font-size:10px; letter-spacing:var(--track); text-transform:uppercase;
+               font-weight:700; color:var(--ink-3); margin-bottom:7px; }
+  figcaption b { color:var(--gold-deep); }
+  .wide img { width:100%; }
+  .note { font-size:12px; color:var(--ink-2); margin-top:8px; max-width:34ch; }
+
+  /* ── A against B ──────────────────────────────────────────────────── */
+  .ab { display:flex; flex-wrap:wrap; gap:28px; margin-top:18px; align-items:flex-start; }
+  .pick { border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
+          background:var(--surface); }
+  .pick > .verdict { padding:8px 12px; font-size:11px; font-weight:700;
+                     letter-spacing:.04em; display:flex; gap:8px; align-items:baseline; }
+  .pick.yes > .verdict { background:var(--good-bg); color:var(--good-tx); }
+  .pick.no  > .verdict { background:var(--bad-bg);  color:var(--bad-tx); }
+  .pick .body { padding:12px; }
+  .pick .body img { border:0; border-radius:0; }
+  .pick p { font-size:12px; margin:10px 0 0; max-width:26ch; color:var(--ink-2); }
+
+  /* ── The plain tables: what is stored, what it costs ───────────────── */
+  table { border-collapse:collapse; width:100%; margin-top:14px;
+          font-size:13px; }
+  caption { text-align:left; font-size:10px; letter-spacing:var(--track);
+            text-transform:uppercase; font-weight:700; color:var(--ink-3);
+            padding-bottom:7px; }
+  th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line-soft);
+           vertical-align:top; }
+  thead th { font-size:10px; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--panel-ink); background:var(--panel); font-weight:700;
+             border-bottom:0; }
+  tbody tr:nth-child(even) { background:var(--zebra); }
+  td.k { font-family:var(--mono); font-size:12px; white-space:nowrap; color:var(--ink-2); }
+  .scroller { overflow-x:auto; }
+
+  /* ── Untouched: the point of the whole scoring answer ──────────────── */
+  ul.plain { margin:10px 0 0; padding:0; list-style:none; display:grid; gap:7px;
+             max-width:68ch; }
+  ul.plain li { padding-left:22px; position:relative; color:var(--ink-2); }
+  ul.plain li::before { content:""; position:absolute; left:4px; top:.55em;
+                        width:7px; height:7px; border-radius:50%;
+                        background:var(--good); }
+  ul.plain li b { color:var(--ink); font-weight:650; }
+  ul.cost li::before { background:var(--gold); }
+
+  .ask { margin-top:40px; border:1px solid var(--gold); background:var(--surface);
+         border-radius:var(--r); padding:16px 20px; }
+  .ask h2 { margin-bottom:8px; }
+  .ask p { margin-bottom:0; }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <span class="kick">SMP &middot; design sign-off &middot; 2 September 2026</span>
+    <h1>Hiding slides from a review</h1>
+    <span class="topmeta">Manage slides &middot; drawn in the built platform, v3.22</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <p class="lede" style="margin-top:26px">
+    <em class="said">&ldquo;Allow the SMO to hide presentation slides of any unit or
+    function.&rdquo;</em> &mdash; the feature &sect;246 named and did not build:
+    &sect;233 hides <b class="q">rows</b> from the presentation and nothing hides a
+    generated <b class="q">slide</b>.
+  </p>
+
+  <div class="settled">
+    <dl>
+      <dt>Scoring</dt>
+      <dd>Presentation only. <span>The projector skips it; nothing is re-counted.</span></dd>
+      <dt>Lifespan</dt>
+      <dd>It lasts. <span>Hidden until somebody shows it again.</span></dd>
+      <dt>Who</dt>
+      <dd>The SMO. <span>Custodians and owners see the state and cannot change it.</span></dd>
+    </dl>
+  </div>
+
+  <hr class="rule">
+
+  <section>
+    <h2>The rail</h2>
+    <p class="lede">Every row gains an eye. A hidden slide keeps its place in the
+      list, greys out, and says so &mdash; a slide you cannot find is a slide you
+      cannot bring back (&sect;61). Both shots are the same build, standing on the
+      same slide.</p>
+    <div class="shots">
+      <figure>
+        <figcaption>Today</figcaption>
+        <img src="{{today-rail}}" alt="The Manage slides rail today: numbered rows, each a real slide at one tenth.">
+      </figure>
+      <figure>
+        <figcaption><b>Proposed</b></figcaption>
+        <img src="{{rail-a-dimmed}}" alt="The same rail with slide 4 hidden: greyed thumbnail, HIDDEN under the label, an eye in the corner, and a count above the list.">
+        <p class="note">The count sits under Add slide after and carries the way
+          back for all of them at once.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>The slide itself</h2>
+    <p class="lede">The pane already explains a generated slide and offers nothing
+      to do with it. Hidden, it says what hiding costs &mdash; which is the sentence
+      that keeps this apart from &sect;233.</p>
+    <figure class="wide" style="margin-top:18px">
+      <figcaption><b>Proposed</b> &middot; a hidden slide, selected</figcaption>
+      <img src="{{proposed-pane}}" alt="The pane showing a greyed Key Objectives slide, with 'Hidden from the review', a Show this slide button, and the line explaining that nothing else changes.">
+    </figure>
+  </section>
+
+  <section>
+    <h2>Struck through, or only dimmed</h2>
+    <div class="ab">
+      <div class="pick yes">
+        <div class="verdict"><span>A &mdash; dimmed</span><span>recommended</span></div>
+        <div class="body">
+          <img src="{{rail-a-dimmed}}" alt="Treatment A: the hidden row is dimmed and tagged HIDDEN, its label unstruck.">
+          <p>The thumbnail carries the state; the word confirms it.</p>
+        </div>
+      </div>
+      <div class="pick no">
+        <div class="verdict"><span>B &mdash; struck through</span><span>not recommended</span></div>
+        <div class="body">
+          <img src="{{rail-b-struck}}" alt="Treatment B: the same row with its label struck through, the line running across the gap between two wrapped lines.">
+          <p>Slide names wrap to two lines, and the rule then runs through the
+            gap between them.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2>What it stores</h2>
+    <p class="lede">A slide is named by its <b class="q">anchor</b> &mdash; the named
+      point &sect;236.3 already writes on every generated slide, and what the picture
+      picker is built from. Never its position: a pillar added upstream renumbers
+      the deck, and a stored number would then hide a different slide (&sect;48).</p>
+    <div class="scroller">
+      <table>
+        <caption>The model</caption>
+        <thead>
+          <tr><th>Question</th><th>Answer</th><th>Because</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="k">where</td>
+            <td><code>units[k].extra</code> / <code>functions[k].extra</code></td>
+            <td>Both already carry an <code>extra</code>, so <b>no migration</b>. Not
+              <code>REVIEW</code>, which is cleared every cycle.</td>
+          </tr>
+          <tr>
+            <td class="k">what</td>
+            <td>a list of anchor keys</td>
+            <td>Absent when nothing is hidden, deleted when the last one is shown
+              again (&sect;50.6).</td>
+          </tr>
+          <tr>
+            <td class="k">who</td>
+            <td>the office</td>
+            <td>A unit setting the authoriser does not classify falls through to the
+              SMO by design (&sect;42) &mdash; the server refuses everybody else without
+              a new rule.</td>
+          </tr>
+          <tr>
+            <td class="k">when</td>
+            <td>after the pictures are placed</td>
+            <td>A picture anchored to a hidden slide still appears. Continuations
+              carry their parent's anchor, so a long table goes whole.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>What it does not touch</h2>
+    <p class="lede">This is the answer to the scoring question, written out. Hiding a
+      slide is a decision about a projector and nothing else.</p>
+    <ul class="plain">
+      <li><b>Every score stays where it is</b> &mdash; objectives, pillars, execution,
+        the group roll-up.</li>
+      <li><b>Every figure is still asked for</b> &mdash; the reporting page, the counts,
+        and what Submit refuses over.</li>
+      <li><b>Every page reads as it does today</b> &mdash; Plan, Performance and the
+        workbook are untouched.</li>
+      <li><b>&sect;233 is unchanged</b> &mdash; hiding a <i>row</i> still takes it out
+        of the count; that switch stays the only one that moves a number.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What it costs</h2>
+    <ul class="plain cost">
+      <li><b>A hidden slide outlives the cycle.</b> It is hidden in September because
+        somebody hid it in March. The count above the list is the guard: the rail
+        says how many, on every visit, with one press to show them all.</li>
+      <li><b>A custodian cannot prune their own deck.</b> They open Manage slides for
+        their pictures, see what the office has hidden, and ask.</li>
+      <li><b>Nothing is carved out.</b> The cover and Thank you can be hidden too
+        &mdash; a deck emptied to nothing is refused, and that is the only floor.</li>
+    </ul>
+  </section>
+
+  <div class="ask">
+    <h2>Sign off on A, and I build it</h2>
+    <p>Manage slides is where the whole deck is already shown as real slides at one
+      tenth, so nothing new is drawn. If you would rather the control sat somewhere
+      else, or B reads better to you, say so before I touch the sources.</p>
+  </div>
+
+</div>

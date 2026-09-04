@@ -170,14 +170,18 @@ with sync_playwright() as p:
     change(pg, "boom-1")
     said = banner(pg)
     ck("the page says it did not save", "Not saved" in said, said or "(nothing)")
-    # THE STATUS IS THE HALF THAT SENDS SOMEBODY SOMEWHERE (§123) — behind
-    # the press since §231, because the sentence somebody needs FIRST is "your
-    # work is still here". Pressed, not read off the markup: a detail nobody
-    # can reach is the same as one that was never written.
-    ck("...and the work is not claimed to be lost", "still on this page" in said, said)
-    pg.evaluate("()=>{const b=document.querySelector('[data-toast-why]'); if(b) b.click();}")
-    pg.wait_for_timeout(300)
-    ck("...and pressing it names the status", "500" in banner(pg), banner(pg))
+    # §258.3's assertions, with §291's placement: the sentence is the user's,
+    # the status is on the hover for whoever can act on it — and the hover now
+    # hangs off the toast's own bold word rather than the banner's `strong`,
+    # because the message moved corner (§51.11: when a control changes shape,
+    # the check follows it rather than being loosened).
+    ck("...in plain words, with no status in the sentence",
+       "500" not in said and "HTTP" not in said, said)
+    ck("...telling them to keep the tab open", "keep this tab open" in said.lower(), said)
+    ck("...with the status on the hover for whoever can act on it",
+       "500" in (pg.evaluate("""()=>{const t=document.querySelector('#savetoast b');
+           const s=document.querySelector('#refused strong');
+           return (t && t.title) || (s && s.title) || '';}""") or ""))
 
     # ── 3 · IT CLEARS WHEN A SAVE LANDS ──────────────────────────────────
     # A WARNING THAT OUTLIVES ITS CAUSE IS WORSE THAN NONE (§35).
@@ -197,7 +201,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     said = banner(pg)
     ck("...and it is not reported as a server answer",
-       "reach" in said.lower() and "HTTP" not in said, said)
+       "reach" in said.lower() and "connection" in said.lower() and "HTTP" not in said, said)
 
     # ── 5 · A REFUSAL IS UNCHANGED (§32) ─────────────────────────────────
     print("\n5 · a refusal keeps its own shape")

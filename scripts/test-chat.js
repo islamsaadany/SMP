@@ -1,8 +1,17 @@
 /* ── WHAT THE CHAT ENDPOINT REFUSES (§97) ─────────────────────────────────
    Run against a dev-server with a database behind it:
 
-     DATABASE_URL=postgres://… node scripts/dev-server.js 3999 &
+     DATABASE_URL=postgres://… NODE_TLS_REJECT_UNAUTHORIZED=0 \
+       node scripts/dev-server.js 3999 &
      DATABASE_URL=postgres://… node scripts/test-chat.js <smo-password>
+
+   THE TLS VARIABLE IS FOR §231 AND FOR NOTHING ELSE. The push section below
+   stands a throwaway HTTPS server in front of the real push service — an
+   endpoint is just a URL a browser hands over, so a test can hand over one of
+   its own (§100.3) — and it carries a self-signed certificate the dev-server
+   would otherwise refuse. Without the variable that section fails loudly
+   rather than skipping: a check that asks whether it can run is a check that
+   passes (§54.5).
 
    THE REFUSALS ARE THE POINT, and they are what a browser drive cannot reach:
    driving the product as the SMO proves the office's own path and proves
@@ -21,6 +30,53 @@ const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
 
 const BASE = process.env.SMP_BASE || "http://127.0.0.1:3999";
+
+/* ── A STAND-IN PUSH SERVICE (§231, §100.3) ───────────────────────────
+   An endpoint is only a URL a browser hands over, so a test can hand over one
+   of its own — which means what leaves the platform is read off the wire by
+   the real `web-push` doing the real thing, and nothing in `lib/push.js`
+   branches for a test. HTTPS because the endpoint guard requires it, and the
+   guard requires it because our own server fetches the address. */
+const https = require("https");
+const crypto = require("crypto");
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+const PUSH_GOT = [];
+let PUSH_PORT = 0;
+let PUSH_SRV = null;
+const PUSH_EP = function (n) { return "https://127.0.0.1:" + PUSH_PORT + "/dev/" + n; };
+/* A browser's own public values, which is exactly what a subscription
+   carries — so they are safe to make here and safe to write down. */
+const PUSH_ECDH = crypto.createECDH("prime256v1"); PUSH_ECDH.generateKeys();
+const PUSH_P256 = PUSH_ECDH.getPublicKey().toString("base64url");
+const PUSH_AUTH = crypto.randomBytes(16).toString("base64url");
+
+function pushStandIn() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "smp-push-"));
+  const key = path.join(dir, "k.pem"), crt = path.join(dir, "c.pem");
+  execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes",
+    "-keyout", key, "-out", crt, "-days", "1", "-subj", "/CN=127.0.0.1",
+    "-addext", "subjectAltName=IP:127.0.0.1"], { stdio: "ignore" });
+  PUSH_SRV = https.createServer(
+    { key: fs.readFileSync(key), cert: fs.readFileSync(crt) },
+    function (req, res) {
+      let n = 0;
+      req.on("data", function (c) { n += c.length; });
+      req.on("end", function () {
+        PUSH_GOT.push({ path: req.url, bytes: n,
+                        auth: req.headers.authorization || "" });
+        res.writeHead(201); res.end();
+      });
+    });
+  return new Promise(function (r) {
+    PUSH_SRV.listen(0, "127.0.0.1", function () {
+      PUSH_PORT = PUSH_SRV.address().port; r();
+    });
+  });
+}
 const SMO_PW = process.argv[2];
 if (!SMO_PW) { console.error("usage: node scripts/test-chat.js <smo-password>"); process.exit(2); }
 
@@ -55,6 +111,7 @@ async function signIn(who, password) {
   let hadSmo = false, hadChat = null;
   try {
     await io.ensureReady(client);
+    await pushStandIn();
 
     /* ── a second person, with a password and no role at all ───────────── */
     await client.query("DELETE FROM chat_threads WHERE person_key = $1", [OTHER.key]);
@@ -223,6 +280,258 @@ async function signIn(who, password) {
        Postgres, because it is a query and a query nothing has run is a guess
        (§172, §100.3), and asked at BOTH ENDS: everybody else's poll must carry
        none of it. */
+    /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ─────────────────
+       The MODULE is proved end to end in scripts/test-push.js; what is proved
+       here is the endpoint around it — who may subscribe, whose device a row
+       is written against, and that the two write paths actually SEND, which
+       is the half §71 built and never wired up. */
+    console.log("\nA DEVICE SUBSCRIBES, AND ONLY EVER ITS OWNER'S (§231).");
+    await setChat({ popup: true });
+    r = await call(her.cookie, { action: "mine" });
+    ok(!!(r.body.chat && r.body.chat.vapid), "the public key travels with the poll",
+       r.body.chat && (r.body.chat.vapid || "").slice(0, 12));
+    await setChat({});                        /* popup off is the shipped default */
+    r = await call(her.cookie, { action: "mine" });
+    ok(r.body.chat.vapid === "", "...and not while notifications are off for the company",
+       r.body.chat.vapid);
+
+    const SUB = function (n) {
+      return { endpoint: "https://push.example.test/dev/" + n,
+               keys: { p256dh: PUSH_P256, auth: PUSH_AUTH } };
+    };
+    /* WITH THE COMPANY SWITCH OFF, THE SERVER REFUSES — the browser is not
+       the thing being guarded against (§42, §98.2). */
+    r = await call(her.cookie, { action: "pushOn", sub: SUB("a") });
+    ok(r.status === 403, "with notifications off for the company, subscribing is refused", r.status);
+
+    await setChat({ popup: true });
+    r = await call(her.cookie, { action: "pushOn", sub: SUB("a") });
+    ok(r.status === 200 && r.body.ok, "with it on, a device subscribes", r.status);
+    let row = (await client.query(
+      "SELECT person_key FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/a"])).rows[0];
+    ok(row && row.person_key === OTHER.key,
+       "...against the signed-in person, never a key from the body", row);
+
+    /* AND A KEY IN THE BODY CHANGES NOTHING. Taking `person` from the browser
+       would let anybody subscribe their own phone to somebody else's
+       conversation and read every reply that person is sent (§185). */
+    r = await call(her.cookie, { action: "pushOn", sub: SUB("b"), person: "smo" });
+    row = (await client.query(
+      "SELECT person_key FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/b"])).rows[0];
+    ok(row && row.person_key === OTHER.key,
+       "a person named in the body is ignored", row);
+
+    /* THE SAME DEVICE AGAIN REPLACES ITS ROW, never adds a second: a browser
+       re-issues its endpoint, and two rows for one device is two boxes. */
+    await call(her.cookie, { action: "pushOn", sub: SUB("a") });
+    let n = (await client.query(
+      "SELECT count(*)::int n FROM push_subscriptions WHERE person_key = $1",
+      [OTHER.key])).rows[0].n;
+    ok(n === 2, "re-subscribing the same device replaces its row", n);
+
+    /* AN ENDPOINT THAT IS NOT AN HTTPS URL IS REFUSED — our own server
+       fetches it, so anything else is somebody choosing the host (§71). */
+    for (const bad of ["http://push.example.test/x", "file:///etc/passwd", "not a url"]) {
+      r = await call(her.cookie, { action: "pushOn",
+        sub: { endpoint: bad, keys: { p256dh: PUSH_P256, auth: PUSH_AUTH } } });
+      ok(r.status === 400, "refused: " + bad, r.status);
+    }
+
+    /* TURNING THE BELL OFF FORGETS THE DEVICE, and only her own. */
+    await client.query(
+      "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4) " +
+      "ON CONFLICT (endpoint) DO NOTHING",
+      ["https://push.example.test/dev/smo", "smo", PUSH_P256, PUSH_AUTH]);
+    r = await call(her.cookie, { action: "pushOff", endpoint: "https://push.example.test/dev/a" });
+    ok(r.status === 200, "a device unsubscribes", r.status);
+    n = (await client.query("SELECT count(*)::int n FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/a"])).rows[0].n;
+    ok(n === 0, "...and its row is gone", n);
+    /* SCOPED TO THE SIGNED-IN PERSON, so a guessed endpoint silences nobody. */
+    r = await call(her.cookie, { action: "pushOff", endpoint: "https://push.example.test/dev/smo" });
+    n = (await client.query("SELECT count(*)::int n FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/smo"])).rows[0].n;
+    ok(n === 1, "somebody else's device cannot be unsubscribed", n);
+
+    /* ── AND THE TWO WRITE PATHS ACTUALLY SEND ──────────────────────
+       §71's fault is the one to guard against here: the back half built and
+       the control never wired to it. A stand-in HTTPS server in front of the
+       real push service is the only place that claim is true or false. */
+    console.log("\nAND A MESSAGE ACTUALLY SENDS ONE (§231).");
+    await client.query("DELETE FROM push_subscriptions");
+    await client.query(
+      "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4)",
+      [PUSH_EP("smo"), "smo", PUSH_P256, PUSH_AUTH]);
+    await client.query(
+      "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4)",
+      [PUSH_EP("her"), OTHER.key, PUSH_P256, PUSH_AUTH]);
+
+    PUSH_GOT.length = 0;
+    await call(her.cookie, { action: "say", body: "My plan will not open." });
+    await new Promise(function (r2) { setTimeout(r2, 400); });
+    ok(PUSH_GOT.length === 1,
+       "a question sends one box, to the office", PUSH_GOT.map(function (g) { return g.path; }));
+    ok(PUSH_GOT.length === 1 && PUSH_GOT[0].path.indexOf("/smo") > 0,
+       "...to the office's device and not the sender's own",
+       PUSH_GOT.map(function (g) { return g.path; }));
+
+    PUSH_GOT.length = 0;
+    await call(smo.cookie, { action: "reply", person: OTHER.key, body: "Looking now." });
+    await new Promise(function (r2) { setTimeout(r2, 400); });
+    ok(PUSH_GOT.length === 1,
+       "a reply sends one box, to the person", PUSH_GOT.map(function (g) { return g.path; }));
+    ok(PUSH_GOT.length === 1 && PUSH_GOT[0].path.indexOf("/her") > 0,
+       "...to their device and not the office's",
+       PUSH_GOT.map(function (g) { return g.path; }));
+
+    /* BOTH ENDS (§94.2): with the company switch off, nothing is sent at all. */
+    await setChat({});
+    PUSH_GOT.length = 0;
+    await call(smo.cookie, { action: "reply", person: OTHER.key, body: "And again." });
+    await new Promise(function (r2) { setTimeout(r2, 400); });
+    ok(PUSH_GOT.length === 0, "with notifications off, nothing is sent", PUSH_GOT.length);
+    await client.query("DELETE FROM push_subscriptions");
+    await setChat({});
+
+    /* ── THE TEST NAMES WHERE THE CHAIN STOPS (§282.4) ──────────────
+       "Test on this device" only ever asked the SERVER, and the server can
+       only report what it HOLDS — so a browser registered at one address
+       while the server sends to another read as perfect health at both ends
+       with nothing arriving. Both halves are compared now, and each way of
+       being wrong has to produce its own sentence: a diagnostic whose
+       failures all read alike is the fault it exists to cure (§124). */
+    console.log("\nTHE TEST SAYS WHERE THE CHAIN STOPS (§282.4).");
+    await setChat({ popup: true });
+
+    const stepNamed = function (rr, name) {
+      return ((rr.body && rr.body.steps) || []).filter(function (x) { return x.name === name; })[0];
+    };
+    const lastStep = function (rr) {
+      const st = (rr.body && rr.body.steps) || []; return st[st.length - 1] || {};
+    };
+
+    r = await call(her.cookie, { action: "pushTest", here: { permission: "denied" } });
+    let st = stepNamed(r, "This browser");
+    ok(!!st && st.state === "fail" && /block/i.test(st.detail || ""),
+       "a browser set to block says so, and stops there", st && st.detail);
+
+    r = await call(her.cookie, { action: "pushTest", here: { permission: "granted" } });
+    st = stepNamed(r, "This browser");
+    ok(!!st && st.state === "fail" && /not registered/i.test(st.detail || ""),
+       "a browser that is not registered says so", st && st.detail);
+
+    /* REGISTERED HERE, AND THE SERVER HAS NEVER HEARD OF IT. */
+    r = await call(her.cookie, { action: "pushTest",
+      here: { permission: "granted", endpoint: "https://fcm.googleapis.com/x/never-sent" } });
+    st = stepNamed(r, "This browser");
+    ok(!!st && st.state === "ok", "a registered browser passes its own step", st && st.word);
+    ok(/Google/.test((st && st.detail) || ""),
+       "...and the service is named, because Apple and Google are different errands",
+       st && st.detail);
+    st = stepNamed(r, "Your devices");
+    ok(!!st && st.state === "fail" && /never reached the server/i.test(st.detail || ""),
+       "a registration the server never received is named as that",
+       st && st.detail);
+
+    /* THE MISMATCH — the one that read as health at both ends. */
+    await call(her.cookie, { action: "pushOn", sub: SUB("hers") });
+    r = await call(her.cookie, { action: "pushTest",
+      here: { permission: "granted", endpoint: "https://fcm.googleapis.com/x/a-different-one" } });
+    st = stepNamed(r, "Your devices");
+    ok(!!st && st.state === "fail" && /none of them is this browser/i.test(st.detail || ""),
+       "a device registered that is NOT this browser is named as that",
+       st && st.detail);
+
+    /* AND THE OTHER END (§94.2): the matching endpoint gets past that step. */
+    r = await call(her.cookie, { action: "pushTest",
+      here: { permission: "granted", endpoint: SUB("hers").endpoint } });
+    st = stepNamed(r, "Your devices");
+    ok(!!st && st.state === "ok" && /this one among them/i.test(st.detail || ""),
+       "...and this browser among them passes", st && st.detail);
+    ok(lastStep(r).name === "A box on your screen",
+       "...so the walk reaches the send itself", lastStep(r).name);
+
+    /* AN OLDER TAB SENDS NOTHING ABOUT ITSELF, and must still get a report
+       rather than a refusal — the diagnostic is most needed by whoever has
+       not reloaded (§231.5). */
+    r = await call(her.cookie, { action: "pushTest" });
+    ok(((r.body && r.body.steps) || []).length > 0,
+       "a tab that sends no browser half still gets a report",
+       ((r.body && r.body.steps) || []).length + " steps");
+
+    await client.query("DELETE FROM push_subscriptions");
+    await setChat({});
+
+    /* ── THE OFFICE STARTS A CONVERSATION (§247) ────────────────────
+       Islam: "from the platform inbox allow the smo to initiate a message
+       with someone." It is a FLAG on the reply, not an action of its own —
+       everything a message from the office does is written once, here — so
+       what is proved is the one thing starting adds. */
+    console.log("\nTHE OFFICE STARTS A CONVERSATION (§247).");
+    await setChat({});
+    /* A conversation that does not exist yet. */
+    await client.query("DELETE FROM chat_messages WHERE person_key = $1", [OTHER.key]);
+    await client.query("DELETE FROM chat_threads WHERE person_key = $1", [OTHER.key]);
+    /* WITHOUT THE FLAG IT IS STILL REFUSED, which is what keeps that refusal
+       meaningful for a plain reply to a bad key (§94.2: both ends). */
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "hello" });
+    ok(r.status === 404, "a reply into no conversation is still refused", r.status);
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "First word.",
+                                 start: true });
+    ok(r.status === 200 && r.body.ok, "...and with `start` it goes", r.status);
+    let msgs = (await client.query(
+      "SELECT from_office, body FROM chat_messages WHERE person_key = $1 ORDER BY id",
+      [OTHER.key])).rows;
+    ok(msgs.length === 1 && msgs[0].from_office === true && msgs[0].body === "First word.",
+       "the conversation exists with the office's message in it", msgs);
+    /* IT IS NOT WAITING ON THE OFFICE — they just wrote it (§71: answered by
+       the act, never by remembering to set it). */
+    let th = (await client.query(
+      "SELECT waiting FROM chat_threads WHERE person_key = $1", [OTHER.key])).rows[0];
+    ok(th && th.waiting === false, "...and it is not waiting on the office", th);
+
+    /* ONE CONVERSATION PER PERSON SURVIVES (§97). Starting one with somebody
+       who already has a thread carries on into it — this can never make a
+       second, because person_key is the primary key. */
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "Second word.",
+                                 start: true });
+    ok(r.status === 200, "starting again with the same person is accepted", r.status);
+    const threads = (await client.query(
+      "SELECT count(*)::int n FROM chat_threads WHERE person_key = $1", [OTHER.key])).rows[0].n;
+    ok(threads === 1, "...and there is still exactly one conversation", threads);
+    msgs = (await client.query(
+      "SELECT count(*)::int n FROM chat_messages WHERE person_key = $1", [OTHER.key])).rows[0];
+    ok(msgs.n === 2, "...with both messages in it", msgs.n);
+
+    /* A TYPO MUST NOT MAKE A CONVERSATION WITH NOBODY. `ensureThread` will
+       mint a row for any string, so this is checked against the STORED
+       register (§74.2) — and a row nobody can open would sit in the queue for
+       ever, answerable by no one. */
+    r = await call(smo.cookie, { action: "reply", person: "nobodyatall",
+                                 body: "hello?", start: true });
+    ok(r.status === 404, "a person who is not on the register is refused", r.status);
+    ok(((await client.query(
+      "SELECT count(*)::int n FROM chat_threads WHERE person_key = $1",
+      ["nobodyatall"])).rows[0]).n === 0, "...and no conversation is left behind");
+
+    /* AND A RETIRED PERSON CANNOT SIGN IN TO READ IT. */
+    await client.query(
+      "UPDATE people SET extra = COALESCE(extra,'{}'::jsonb) || '{\"active\":\"false\"}'::jsonb " +
+      "WHERE key = $1", [OTHER.key]);
+    await client.query("DELETE FROM chat_threads WHERE person_key = $1", [OTHER.key]);
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "hello?",
+                                 start: true });
+    ok(r.status === 404, "a retired person is refused", r.status);
+    await client.query("UPDATE people SET extra = extra - 'active' WHERE key = $1", [OTHER.key]);
+
+    /* AND IT IS THE OFFICE'S ALONE — the endpoint already refuses everybody
+       else every action below `reply`, and this rides on that rather than
+       adding a gate of its own. */
+    r = await call(her.cookie, { action: "reply", person: "smo", body: "hi", start: true });
+    ok(r.status === 403, "and somebody who is not the office cannot start one", r.status);
+
     console.log("\nAND THE OFFICE'S POLL CARRIES WHAT IS WAITING (§225).");
     await setChat({});
     r = await call(smo.cookie, { action: "mine" });
@@ -308,6 +617,51 @@ async function signIn(who, password) {
        "no email went out, and the reason is the setting: " + JSON.stringify(r.body.mailed));
     await setChat({});
 
+    /* ── THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (§290) ──
+       Islam: "in the serach I need to be able to send to a new person as
+       well". The conversations half is §285's and is untouched; what is
+       asserted here is the half that is new, and the ONE INVARIANT that makes
+       two halves safe — nobody is ever in both. */
+    console.log("\nAND THE SEARCH REACHES PEOPLE WITH NO CONVERSATION (§290).");
+    r = await call(smo.cookie, { action: "chatSearch", q: "ha" });
+    const folk = (r.body && r.body.people) || [];
+    ok(r.status === 200 && Array.isArray(folk),
+       "the search carries people with no conversation", folk.length + " found");
+    ok(folk.length <= 10, "capped at ten, Islam's number", folk.length);
+    ok(typeof (r.body && r.body.more) === "number",
+       "and the rest are COUNTED rather than dropped", r.body && r.body.more);
+    ok(!folk.some(function (p) { return p.key === "smo"; }),
+       "the asker is not offered a conversation with themselves");
+    ok(folk.every(function (p) { return !!p.name; }), "every one carries a name to draw");
+    /* NOBODY IN BOTH HALVES — what the NOT EXISTS clause is for, and the one
+       thing a mixed list would get wrong in a way nobody would notice. */
+    const hitKeys = ((r.body && r.body.hits) || []).map(function (h) { return h.person_key; });
+    ok(!folk.some(function (p) { return hitKeys.indexOf(p.key) > -1; }),
+       "nobody is in both halves at once");
+
+    /* AND THE MOMENT THEY HAVE A CONVERSATION THEY LEAVE — made, then put
+       back, because this is a state the seed does not hold (§94.2). */
+    const first = folk[0] && folk[0].key;
+    if (first) {
+      await call(smo.cookie, { action: "reply", person: first,
+                               body: "A first word from the office.", start: true });
+      const r2 = await call(smo.cookie, { action: "chatSearch", q: "ha" });
+      const keys2 = ((r2.body && r2.body.people) || []).map(function (p) { return p.key; });
+      const hits2 = ((r2.body && r2.body.hits) || []).map(function (h) { return h.person_key; });
+      ok(keys2.indexOf(first) === -1, "once they have one they leave the people half", first);
+      ok(hits2.indexOf(first) > -1, "...and appear as a conversation instead");
+      await client.query("DELETE FROM chat_threads WHERE person_key = $1", [first]);
+    } else {
+      ok(false, "a person with no conversation was found to test with", "none");
+    }
+
+    /* THE ACTIVE TEST IS §247'S OWN, read out of the file rather than
+       restated here — the first draft of it guessed a status column and would
+       have offered every retired person on the register (§42). */
+    ok(require("fs").readFileSync(require("path").join(__dirname, "..", "api", "chat.js"), "utf8")
+         .indexOf("COALESCE(p.extra->>'active','true') <> 'false'") > -1,
+       "a retired person is excluded by the register's own test");
+
     console.log("\nAND DROPPING ONE IS THE SUPER USER'S ALONE (§89).");
     r = await call(smo.cookie, { action: "drop", person: OTHER.key });
     ok(r.status === 200 && r.body.ok, "the Super user drops a conversation");
@@ -323,6 +677,7 @@ async function signIn(who, password) {
         "DELETE FROM chat_messages WHERE person_key = 'smo' AND body = $1",
         ["A note the office wrote to itself."]).catch(function(){});
     }
+    if (PUSH_SRV) { try { PUSH_SRV.close(); } catch (e) {} }
     await client.query("DELETE FROM credentials WHERE person_key = $1", [OTHER.key]).catch(function(){});
     await client.query("DELETE FROM people WHERE key = $1", [OTHER.key]).catch(function(){});
     await client.query("DELETE FROM login_attempts").catch(function(){});

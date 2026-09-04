@@ -13,7 +13,7 @@
 
 const pg = require("pg");
 const io = require("../lib/state-io.js");
-const { writeState, readState, ensureReady } = io;
+const { writeState, writeStateIncremental, readState, ensureReady } = io;
 const auth = require("../lib/auth.js");
 const { authorize } = require("../lib/authorize.js");
 const R = require("../lib/rules.js");
@@ -60,6 +60,48 @@ function send(res, code, obj) {
    of figures at once, and a log entry nobody can read is not a record — the
    count stays exact, the itemised before-and-after stops at the cap. */
 const LOG_ROW_CAP = 200;
+
+/* ── SAVES TAKE TURNS (2026-09-01 concurrency safety) ────────────────────────
+   A save is a read-modify-write: read the stored graph, lay this client's
+   changes over it (§210), write the result. There was no lock around those
+   three steps, so two saves that OVERLAP both read the same starting state
+   before either writes — and the second write silently overwrote the first's
+   change (a lost update). §210's diff shrank the envelope and made refusals
+   accurate; it did NOT close this, because the server still writes the whole
+   applied graph, so the later writer clobbers the earlier one's row. The window
+   is milliseconds, but it opens exactly when many people save at once — a
+   reporting deadline — and the loss is silent.
+
+   A TRANSACTION-SCOPED advisory lock serialises the read-modify-write: the
+   whole thing runs in one transaction (below), the lock is taken at the top of
+   it, and the second save blocks until the first COMMITs — then reads the
+   first's result and merges onto it. Nobody is lost.
+
+   IT MUST BE TRANSACTION-SCOPED, not session-scoped: production is Neon behind
+   PgBouncer transaction pooling, where a session lock can sit on a backend the
+   next statement never sees. `pg_advisory_xact_lock` lives and dies with the
+   transaction, on the one backend the transaction is pinned to, so it is the
+   only kind that holds up there.
+
+   THE KEY IS ITS OWN, distinct from ensureReady's schema lock, so the two
+   never contend. Only the POST path takes it — a GET read needs no lock
+   (writeState's transaction makes a concurrent read see all-old or all-new,
+   never a torn half). The cost is that concurrent saves queue for well under a
+   second each; they were already partly serialised by writeState's TRUNCATE.
+
+   SMP_NO_SAVE_LOCK=1 disables it, so the test can show the loss it prevents. */
+const SAVE_LOCK = 420043;
+const USE_SAVE_LOCK = process.env.SMP_NO_SAVE_LOCK !== "1";
+
+/* ── WRITE ONLY WHAT CHANGED — OFF BY DEFAULT (2026-09-01, dark) ──────────────
+   When SMP_INCREMENTAL_WRITE=1, a save that arrives as a change list is written
+   by rewriting only the subjects that changed (lib/state-io.js), instead of
+   rewriting all 31 tables. It falls back to the full rewrite for any shape it
+   does not handle, so turning it on can never write a wrong result — only a
+   faster one. Proved byte-identical to the full rewrite by
+   scripts/test-incremental-write.js. Left OFF so the deploy changes nothing;
+   flip the env var to test on a real deployment, after a cycle closes. */
+const USE_INCREMENTAL = process.env.SMP_INCREMENTAL_WRITE === "1";
 
 async function logChanges(client, person, changes) {
   if (!changes || !changes.length) return;
@@ -110,6 +152,68 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "GET") {
+      /* §258: A LIGHT LOOK AT change_log, for the save-safety banner. While a
+         tab is open on a page the platform asks whether anybody ELSE landed a
+         change on that page since it loaded — never the whole graph (§98: a
+         poll is paid for in database round trips). Answered from the log the
+         save already writes (§42), the asker excluded, oldest first so the
+         client can remember the newest it has seen. The target is compared
+         exactly as the log stores it ("mobile", "fn:cf"). An unparseable
+         `since` falls through to the ordinary read rather than to a 500. */
+      let q = null;
+      try { q = new URL(req.url, "http://x").searchParams; } catch (e) {}
+      /* ── HISTORY (§262): A FILTERED READ OF THE LOG, NEVER THE WHOLE ──
+         The log grows for ever, so the page asks for a slice — a person, a
+         place, a kind, a window, a cap — and the office may ask for any
+         slice. Anybody else may ask about ONE place, and only a place they
+         hold a role at (read off the STORED world, §42): a unit head sees
+         their own unit's rows through the door on their page and nothing
+         else. The window is a pair of instants the client works out from its
+         own day, so "today" means the reader's today and not the server's. */
+      if (q && q.get("log")) {
+        const office = R.isOfficeRole(String(person.role || ""));
+        const t = q.get("target") || null, who = q.get("person") || null;
+        const kind = q.get("kind") || null, from = q.get("from") || null, to = q.get("to") || null;
+        const limit = Math.min(500, Math.max(1, parseInt(q.get("limit") || "200", 10) || 200));
+        if (!office) {
+          if (!t) return send(res, 403, { ok: false, error: "History is the Strategy Office's; ask about one unit or function by name." });
+          /* The world holds no people (rules.js answers from the world, the
+             authoriser keeps the register beside it — §42's own shape), so
+             the person is looked up on the STORED register. */
+          const stored = await readState(client);
+          const w = R.worldOf(stored);
+          const me = (stored.people || []).filter(function (p) { return p && p.key === person.key; })[0];
+          const places = R.personRoles(w, me).map(function (r) { return r.at; });
+          if (places.indexOf(t) < 0) return send(res, 403, { ok: false, error: "You hold no role there, so its history is not yours to read." });
+        }
+        const conds = [], params = [];
+        const add = function (sql, v) { params.push(v); conds.push(sql.replace("?", "$" + params.length)); };
+        if (t) add("target = ?", t);
+        if (who) add("person_key = ?", who);
+        if (kind) add("kind = ?", kind);
+        if (from && !isNaN(Date.parse(from))) add("at >= ?::timestamptz", from);
+        if (to && !isNaN(Date.parse(to))) add("at < ?::timestamptz", to);
+        params.push(limit);
+        const r = await client.query(
+          "SELECT id, at, person_key, person_name, kind, target, what, rows_ FROM change_log" +
+          (conds.length ? " WHERE " + conds.join(" AND ") : "") +
+          " ORDER BY at DESC, id DESC LIMIT $" + params.length, params);
+        return send(res, 200, { ok: true, office: office, log: r.rows });
+      }
+      const since = q && q.get("since"), target = q && q.get("target");
+      if (since && target && !isNaN(Date.parse(since))) {
+        /* §258.1: the tab's first ask syncs its clock to the database's. */
+        if (q.get("sync")) {
+          const n = await client.query("SELECT now() AS now");
+          return send(res, 200, { ok: true, changed: [], now: n.rows[0].now });
+        }
+        const r = await client.query(
+          "SELECT person_key AS by_key, person_name AS by, at FROM change_log " +
+          "WHERE target = $1 AND at > $2::timestamptz AND person_key <> $3 " +
+          "ORDER BY at ASC LIMIT 50", [target, since, person.key]);
+        return send(res, 200, { ok: true, changed: r.rows.map(function (x) {
+          return { by: x.by || x.by_key, at: x.at }; }) });
+      }
       const state = await readState(client);
       return send(res, 200, { ok: true, seeded: ready.seeded, person: person, state: state });
     }
@@ -156,75 +260,88 @@ module.exports = async function handler(req, res) {
          only the seat role, and the incoming state is exactly what must not
          be trusted. Somebody the graph does not know holds no roles, so their
          save is refused rather than waved through. */
-      const stored = await readState(client);
-      const me = (stored.people || []).filter(function (p) { return p.key === person.key; })[0]
-              || { key: person.key, name: person.name };
+      /* ── THE READ-MODIFY-WRITE IS ONE TRANSACTION, UNDER ONE LOCK ────
+         Read the stored graph, lay this client's changes over it (§210),
+         authorise, write — all inside a single transaction, with a
+         transaction-scoped advisory lock taken at the top of it. The lock is
+         held for the life of the transaction and released automatically on
+         COMMIT or ROLLBACK: the only kind that is reliable behind PgBouncer/
+         Neon transaction pooling, where a session lock could sit on a backend
+         the next statement never sees. So a second concurrent save blocks here
+         until the first COMMITs, then reads the first's result and merges onto
+         it — nobody is silently overwritten. */
+      await client.query("BEGIN");
+      let out = null;                    /* { code, obj } to send, or null on success */
+      let logWho = null, logList = null, wrotePath = null;
+      try {
+        if (USE_SAVE_LOCK) await client.query("SELECT pg_advisory_xact_lock($1)", [SAVE_LOCK]);
+        const stored = await readState(client);
+        const me = (stored.people || []).filter(function (p) { return p.key === person.key; })[0]
+                || { key: person.key, name: person.name };
 
-      /* ── VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY (§185) ────────────
-         Islam: *"Hala got this error, when I view as her I didn't get it."*
-         The screen drew her view and the save was checked against the SMO's
-         rights, so no refusal she meets could ever be reproduced — and the
-         office could write through her view what she could never write.
-
-         THE RULE IS IN `lib/rules.js`, not here (§42): who may act as whom is
-         exactly the kind of question that must have one answer and be
-         testable without a database. It can only narrow — the gate is the
-         SEAT ROLE ON THE SESSION, the same fact that draws the switcher, so a
-         session that cannot simulate is judged as itself exactly as before
-         and a forged `viewAs` buys nothing. The simulated person is looked up
-         in the STORED people, never taken from the incoming state. */
-      const act = R.actingFor(me, body && body.viewAs, person.role, stored.people);
-      if (act.refuse) {
-        return send(res, 403, { ok: false, refused: true, error: act.refuse,
-                                refusals: [act.refuse], refusedChanges: [],
-                                undoable: false });
+        /* WHO IT IS JUDGED AS (§185): the SEAT role on the session may act as a
+           colleague (view-as), never wider; the simulated person is looked up
+           in the STORED people, never trusted from the incoming state. */
+        const act = R.actingFor(me, body && body.viewAs, person.role, stored.people);
+        if (act.refuse) {
+          out = { code: 403, obj: { ok: false, refused: true, error: act.refuse,
+                                    refusals: [act.refuse], refusedChanges: [], undoable: false } };
+        } else {
+          const acting = act.person;
+          /* §210: the incoming graph is the STORED one with this client's
+             changes laid over it — anything they did not touch is what the
+             database holds RIGHT NOW (this read is under the lock), not what
+             their tab was showing. */
+          if (changes) {
+            const applied = D.applyChanges(JSON.parse(JSON.stringify(stored)), changes);
+            if (!applied.ok) out = { code: 400, obj: { ok: false, error: applied.error } };
+            else state = applied.state;
+          }
+          if (!out) {
+            const verdict = authorize(stored, state, acting);
+            if (!verdict.ok) {
+              /* §184: say WHICH rows, not only why, so the banner can put back
+                 exactly those and save the rest; §185: and who it was judged
+                 as, when that is not you. */
+              const undoable = verdict.refused.length > 0 &&
+                verdict.refused.every(function (r) { return r.rows && r.rows.length; });
+              out = { code: 403, obj: { ok: false, refused: true,
+                        error: verdict.refusals.join(" "), refusals: verdict.refusals,
+                        refusedChanges: verdict.refused, undoable: undoable,
+                        judgedAs: acting.key === me.key ? null
+                          : { key: acting.key, name: acting.name || acting.key } } };
+            } else {
+              /* In OUR transaction — writeState must not open or close its own
+                 (see lib/state-io.js), or the lock would release mid-write.
+                 When the incremental writer is on and handles this change shape
+                 it writes only the changed subjects; otherwise (or when off) the
+                 full rewrite runs, exactly as before. */
+              let wrote = false;
+              if (USE_INCREMENTAL && changes) {
+                wrote = await writeStateIncremental(client, state, changes);
+              }
+              if (!wrote) await writeState(client, state, { inTransaction: true });
+              wrotePath = wrote ? "incremental" : "full";
+              logWho = me; logList = verdict.changes;
+            }
+          }
+        }
+        if (out) await client.query("ROLLBACK");
+        else await client.query("COMMIT");
+      } catch (e) {
+        try { await client.query("ROLLBACK"); } catch (e2) {}
+        throw e;
       }
-      const acting = act.person;
-
-      /* §210: the incoming graph is the STORED one with this client's changes
-         laid over it. Anything they did not touch is what the database holds
-         at this moment, not what their tab happened to be showing. */
-      if (changes) {
-        const applied = D.applyChanges(JSON.parse(JSON.stringify(stored)), changes);
-        if (!applied.ok) return send(res, 400, { ok: false, error: applied.error });
-        state = applied.state;
-      }
-
-      const verdict = authorize(stored, state, acting);
-      if (!verdict.ok) {
-        /* §184: SAY WHICH ROWS, NOT ONLY WHY. `refusals` is unchanged and
-           still carries the sentences §171's banner reads. `refusedChanges`
-           is the address of every field the verdict would not take, with the
-           value it HELD — so the platform can put back exactly those and
-           save the rest, instead of offering nothing but "discard
-           everything". `undoable` is the server's own answer to "is every
-           refusal addressable", because a client that worked it out for
-           itself would be a second copy of that rule (§42). */
-        const undoable = verdict.refused.length > 0 &&
-          verdict.refused.every(function (r) { return r.rows && r.rows.length; });
-        return send(res, 403, { ok: false, refused: true,
-                                error: verdict.refusals.join(" "),
-                                refusals: verdict.refusals,
-                                refusedChanges: verdict.refused,
-                                undoable: undoable,
-                                /* §185: AND WHO IT WAS JUDGED AS, when that is
-                                   not you. "Setup is the SMO's" is a baffling
-                                   thing to read when you ARE the SMO; the
-                                   banner needs the missing half of the
-                                   sentence, and only the server knows it. */
-                                judgedAs: acting.key === me.key ? null
-                                  : { key: acting.key, name: acting.name || acting.key } });
-      }
-
-      await writeState(client, state);
-      /* Logged AFTER the write and outside its transaction on purpose: a log
-         entry for a save that did not land is worse than a missing one. */
-      /* THE LOG NAMES WHO SIGNED IN, NEVER THE SIMULATION (§185). The save
-         was AUTHORISED as the person being viewed — that is the fix — but it
-         was MADE by whoever is at the keyboard, and a change log that named
-         the simulation would be a log that cannot answer "who moved this". */
-      await logChanges(client, me, verdict.changes);
-      return send(res, 200, { ok: true });
+      if (out) return send(res, out.code, out.obj);
+      /* Logged AFTER the commit, outside the transaction on purpose (§185): a
+         log entry for a save that did not land is worse than a missing one,
+         and it names who SIGNED IN, never the simulation. */
+      await logChanges(client, logWho, logList);
+      /* Diagnostic (§241): report which writer ran, so a save can be seen to
+         have gone bit-by-bit (incremental) or the full rewrite (full) — read in
+         the browser Network tab's Response, and in Vercel's runtime logs. */
+      console.log("[save]", wrotePath);
+      return send(res, 200, { ok: true, wrote: wrotePath });
     }
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { ok: false, error: "method not allowed" });

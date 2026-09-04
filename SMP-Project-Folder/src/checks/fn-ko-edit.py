@@ -19,8 +19,10 @@
         and its box does not scroll sideways.
      2. The Dir. select can show its value (the broken build measured 34px).
      3. The Unit column exists and is §199's: picking writes the stored
-        target, a bare number typed after it INHERITS it, a row with no
-        target says why there is nothing to pick.
+        target, and a bare number typed after it INHERITS it. §251 reversed
+        the third clause — a row with no target used to say why there was
+        nothing to pick, and now gets the picker like every other row, with
+        the unit held alone until a number joins it.
      4. The Objective name is prose: a long name WRAPS and typing writes the
         DATA (§96: a control wired to nothing renders identically).
      5. Led by opens for the OFFICE with the pen — Setup's own picker writing
@@ -94,14 +96,22 @@ with sync_playwright() as p:
       const grid = document.querySelector('#panel .fgrid');
       const tbl = band && band.querySelector('table');
       const scroll = band && band.querySelector('.scroll');
-      const dir = tbl && tbl.querySelector('tbody tr td:nth-child(2) select');
+      /* §278.3 PUT A `#` COLUMN IN FRONT, so `td:nth-child(2)` is the Objective
+         now and this measured nothing. Found by the column's own name rather
+         than by its position, which is what should have been asked in the
+         first place (§51.11: a check keyed on markup that moved does not fail,
+         it measures the wrong thing). */
+      const heads = tbl ? [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()) : [];
+      const di = heads.indexOf('Dir.');
+      const dir = tbl && di > -1
+        ? tbl.querySelector('tbody tr td:nth-child(' + (di + 1) + ') select') : null;
       return band && {
         inGrid: !!band.closest('.fgrid'),
         bandW: band.getBoundingClientRect().width,
         gridW: grid.getBoundingClientRect().width,
         sideways: scroll.scrollWidth > scroll.clientWidth + 1,
         dirW: dir ? dir.getBoundingClientRect().width : null,
-        heads: [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()) };
+        heads: heads };
     }""")
     ck("the editing table sits in a band, not in the half-width card",
        bool(m) and not m["inGrid"], m)
@@ -110,20 +120,53 @@ with sync_playwright() as p:
     # The broken build measured the Dir. select at 34px — two characters of
     # chrome and no value. 44 is between the two measurements, not a design.
     ck("the Dir. select can show its value", bool(m) and m["dirW"] and m["dirW"] > 44, m)
+    # §278.3 added a leading `#` column, a deliberate change — so the literal
+    # is REWRITTEN rather than deleted (§218), and it asserts what §199 and
+    # §226 actually promise: the Unit sits between the direction and the
+    # target, and the settled run is unbroken wherever the table starts.
     ck("the Unit column is there, in §199's position",
-       bool(m) and m["heads"] == ["Objective", "Dir.", "Unit", "This year", "Compile", "Weight %", ""],
+       bool(m) and " ".join(m["heads"]).find(
+           "Objective Dir. Unit This year Compile Weight %") > -1,
        m and m["heads"])
+    ck("...and the # column leads it (§278.3)",
+       bool(m) and m["heads"] and m["heads"][0] == "#", m and m["heads"])
 
     print("\n-- 3 · the Unit column IS §199's: view of the target, nothing stored")
+    # ── A COLUMN IS FOUND BY ITS NAME (§51.11) ──────────────────────────────
+    # Every probe below reached for `td:nth-child(3)` and `td:nth-child(4)`,
+    # and §278.3's leading `#` column moved both — which is not a failure a
+    # position-keyed probe reports honestly: one of them threw and the rest
+    # would have measured the neighbouring column and called it green. One
+    # resolver, asked of the table's own head, so the next column added to this
+    # table costs nothing here.
+    pg.evaluate("""() => {
+      window.__cell = function (name, inner) {
+        var tbl = document.querySelector('.koband table');
+        if (!tbl) return null;
+        var heads = [].map.call(tbl.querySelectorAll('thead th'),
+                                function (t) { return t.textContent.trim(); });
+        var i = heads.indexOf(name);
+        if (i < 0) return null;
+        var td = tbl.querySelector('tbody tr td:nth-child(' + (i + 1) + ')');
+        return td ? (inner ? td.querySelector(inner) : td) : null;
+      };
+    }""")
     why = pg.evaluate("""() => {
-      const td = document.querySelector('.koband tbody tr td:nth-child(3)');
+      const td = window.__cell('Unit');
+      if (!td) return { noCell: true, sel: false, why: false };
       return { sel: !!td.querySelector('select'), why: !!td.querySelector('.why') };
     }""")
-    ck("a row with no target has nothing to pick, and says why",
-       not why["sel"] and why["why"], why)
+    # §251 REVERSED THIS ONE, so it is REWRITTEN rather than deleted (§218):
+    # a row with no target used to have nothing to pick and a `.why` span
+    # saying so, and Islam asked for the picker to be there whether or not a
+    # target is — the unit is held alone until a number joins it. Left as it
+    # was, this would have gone on demanding the dead end it was written for.
+    ck("a row with no target STILL gets the picker — the unit is held alone",
+       why["sel"] and not why["why"], why)
     typed = pg.evaluate("""(k) => {
       const m = FUNCTIONS[k].keyObjectives[0];
-      const i = document.querySelector('.koband tbody tr td:nth-child(4) input');
+      const i = window.__cell('This year', 'input');
+      if (!i) return '__no cell__';
       i.value = '1.6'; i.dispatchEvent(new Event('change',{bubbles:true}));
       return m.target;
     }""", w["fk"])
@@ -131,7 +174,7 @@ with sync_playwright() as p:
     pg.evaluate("() => paint()"); pg.wait_for_timeout(500)
     picked = pg.evaluate("""(k) => {
       const m = FUNCTIONS[k].keyObjectives[0];
-      const s = document.querySelector('.koband tbody tr td:nth-child(3) select');
+      const s = window.__cell('Unit', 'select');
       if (!s) return { noSel: true };
       s.value = 'B EGP'; s.dispatchEvent(new Event('change',{bubbles:true}));
       return m.target;
@@ -140,7 +183,8 @@ with sync_playwright() as p:
     ck("...picking B EGP writes it ONTO the target", picked == "1.6B EGP", picked)
     inh = pg.evaluate("""(k) => {
       const m = FUNCTIONS[k].keyObjectives[0];
-      const i = document.querySelector('.koband tbody tr td:nth-child(4) input');
+      const i = window.__cell('This year', 'input');
+      if (!i) return '__no cell__';
       i.value = '2.4'; i.dispatchEvent(new Event('change',{bubbles:true}));
       return m.target;
     }""", w["fk"])
@@ -149,8 +193,8 @@ with sync_playwright() as p:
     print("\n-- 4 · the name is prose: it wraps, and it writes")
     pg.evaluate("() => paint()"); pg.wait_for_timeout(500)
     name = pg.evaluate("""() => {
-      const t = document.querySelector('.koband tbody tr td:first-child textarea.fld.grow');
-      if (!t) return { kind: (document.querySelector('.koband tbody tr td:first-child .fld')||{}).tagName };
+      const t = window.__cell('Objective', 'textarea.fld.grow');
+      if (!t) return { kind: ((window.__cell('Objective', '.fld'))||{}).tagName };
       const line = parseFloat(getComputedStyle(t).lineHeight) || 18;
       return { grow: true, h: t.getBoundingClientRect().height, line,
                fits: t.scrollHeight <= t.clientHeight + 3 };
@@ -162,7 +206,8 @@ with sync_playwright() as p:
        name.get("grow") and name["fits"], name)
     wrote = pg.evaluate("""(k) => {
       const m = FUNCTIONS[k].keyObjectives[0];
-      const t = document.querySelector('.koband tbody tr td:first-child textarea');
+      const t = window.__cell('Objective', 'textarea');
+      if (!t) return '__no cell__';
       t.value = 'A renamed objective'; t.dispatchEvent(new Event('change',{bubbles:true}));
       return m.name;
     }""", w["fk"])
@@ -250,7 +295,14 @@ with sync_playwright() as p:
         ck("no band and two cards while reading (" + fk + ")",
            not r["band"] and r["cards"] >= 2, r)
 
-    print("\n-- 8 · the unit side is untouched (Islam: 'don't touch the unit side')")
+    # §243 REVERSES HALF OF THIS, AT ISLAM'S OWN INSTRUCTION: *"there is no
+    # weighting on the objectives in units it needs to be added."* The
+    # assertion is REWRITTEN rather than deleted (§218's rule), because what it
+    # was protecting is still worth protecting — a unit authors a 3-year target
+    # and a function does not, and the two tables must not quietly converge.
+    # So: the unit keeps the columns a function has never had, gains the one
+    # Islam asked for, and keeps its one-line name box.
+    print("\n-- 8 · the unit keeps what is its own, and gains the weight column (§243)")
     pg.evaluate("""(smo) => { VIEWER=smo; leaveModes(); current='mobile';
       currentSub='strategy'; CURSEC.strategy='found';
       EDIT_PAGE.foundation=true; paint(); }""", w["smo"])
@@ -260,11 +312,21 @@ with sync_playwright() as p:
       const tbl = band && band.querySelector('table');
       return tbl && {
         heads: [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()),
-        name: (tbl.querySelector('tbody tr td:first-child .fld')||{}).tagName };
+        /* §278.3: `td:first-child` is the `#` cell now, so the name is asked
+           for by its column's own name (§51.11). */
+        name: ((window.__cell && window.__cell('Objective', '.fld'))||{}).tagName };
     }""")
-    ck("koEdit keeps its 3-year column",
-       bool(um) and um["heads"] == ["Objective", "Dir.", "Unit", "3-year", "This year", "Compile", ""],
+    # §278.3 added a leading `#` column here too. REWRITTEN, not deleted
+    # (§218): what this guards is that a UNIT keeps the 3-year target a
+    # function has no equivalent of, and that the settled run is unbroken.
+    ck("koEdit keeps its 3-year column, which a function has no equivalent of",
+       bool(um) and " ".join(um["heads"]).find(
+           "Objective Dir. Unit 3-year This year Compile Weight %") > -1,
        um)
+    ck("...and the # column leads it here too (§278.3)",
+       bool(um) and um["heads"] and um["heads"][0] == "#", um)
+    ck("...and the weight column Islam asked for is on it (§243)",
+       bool(um) and "Weight %" in um["heads"], um)
     ck("...and its one-line name box", bool(um) and um["name"] == "INPUT", um)
 
     ck("no console errors anywhere in the run", not errs, errs)

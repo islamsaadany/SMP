@@ -47,7 +47,10 @@
 var WELCOME = (function(){
   var box = null;
 
-  function wesc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  /* Escapes >, " and ' as well, matching esc() — inert for the text this
+     currently renders, and safe the moment any of it moves into an attribute
+     (2026-09-01 security sweep). */
+  function wesc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 
   function seenThisSession(){
     try { return sessionStorage.getItem("smp.welcome.done") === "1"; }
@@ -171,8 +174,11 @@ var WELCOME = (function(){
       if (!pending) return;
       var parts = [], c, b;
       try {
-        c = String(t).indexOf("fn:") === 0
-          ? fnReportedCount(String(t).slice(3)) : reportedCount(UNITS[t]);
+        /* §242: asked by SHAPE, not by prefix — the same one reader the
+           submit gate two lines below already uses. Asking differently here
+           is what let this row say "every figure is entered" over a pillars
+           function that had entered none. */
+        c = subjectReported(t);
         var open = Math.max(0, (c.total | 0) - (c.done | 0));
         if (open) parts.push("<i>" + wesc(plural(open, "figure")) + "</i> still open");
         else parts.push("Every figure is entered");

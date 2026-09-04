@@ -144,6 +144,12 @@ class H(http.server.BaseHTTPRequestHandler):
             self._s(json.dumps({"ok": True, "state": STORED, "person": FILLER}).encode()); return
         if self.path.startswith("/api/auth"):
             self._s(json.dumps({"ok": True, "person": FILLER}).encode()); return
+        # §231.5 (main): THE PLATFORM REGISTERS ITS OWN WORKER, so a stub
+        # that answers /sw.js with the gate's html makes `register()` reject on
+        # the content type — and a perfectly good build then reports as a page
+        # that threw (§100.3: a stub must model the server).
+        if self.path.startswith("/sw.js"):
+            self._s((ROOT / "sw.js").read_bytes(), 200, "application/javascript"); return
         if self.path.startswith("/raya-trade"):
             self._s(HTML, 200, "text/html; charset=utf-8"); return
         self._s(b"<!doctype html><title>gate</title>", 200, "text/html; charset=utf-8")
@@ -219,7 +225,7 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(2600)
     ck("the save went and was refused", POSTS and POSTS[0] == 403, POSTS)
 
-    # ── §231: THE REFUSAL IS A DIALOG NOW, NOT A BANNER.
+    # ── §291: THE REFUSAL IS A DIALOG NOW, NOT A BANNER.
     # The sentences, the per-line list and both buttons are unchanged and keep
     # their ids — only the box moved, because a banner at the top of a page
     # somebody has scrolled is a control that does nothing (§90). So this reads

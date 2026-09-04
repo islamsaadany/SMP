@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""§231 — the save says so in the corner, a refusal is a dialog with two doors,
+"""§291 — the save says so in the corner, a refusal is a dialog with two doors,
 and the group's card says how the units spread.
 
 WHAT IS ASSERTED, AND WHY IT IS NOT A LIST OF PIXELS (§94.8):
@@ -11,7 +11,7 @@ WHAT IS ASSERTED, AND WHY IT IS NOT A LIST OF PIXELS (§94.8):
     away would be exactly that with a longer fuse. Both halves are measured,
     or a build that showed nothing at all would satisfy "it does not linger".
 
-  · THE STRIP IS NOT DRAWN (§231.2). Islam: *"for the performance view
+  · THE STRIP IS NOT DRAWN (§291.2). Islam: *"for the performance view
     remove it for now"*. §145.9's keep-the-machinery shape was tried and does
     not apply — `group-render.js` is not reachable from the page, so a dormant
     builder could never be exercised and would be dead code nothing proves
@@ -30,7 +30,7 @@ WHAT IS ASSERTED, AND WHY IT IS NOT A LIST OF PIXELS (§94.8):
     the one that catches a popup clipped by an overflow ancestor or covered by
     the card above it.
 
-PROVED ABLE TO FAIL (§94.5): against the pre-§231 build sections 1 and 2 go
+PROVED ABLE TO FAIL (§94.5): against the pre-§291 build sections 1 and 2 go
 red — no `#savetoast` at all, and the refusal drawn in the banner rather than
 the dialog. Section 3 fails from the other side if the strip is put back on the
 card without anybody deciding to, or if the dormant builder stops agreeing with
@@ -83,6 +83,15 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path.startswith("/api/chat"):
             return self._json(200, {"ok": True, "messages": [], "unread": 0,
                                     "state": "open", "cfg": {"on": True}})
+        # §231.5 (main): the platform registers its own worker. This server
+        # already serves the repo from disk, so /sw.js resolves — but the
+        # default handler gives it text/plain, which `register()` rejects.
+        if self.path.startswith("/sw.js"):
+            b = (ROOT / "sw.js").read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/javascript")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers(); self.wfile.write(b); return
         if self.path == "/raya-trade":
             self.path = "/" + str(PLATFORM.relative_to(ROOT))
         return super().do_GET()
@@ -143,12 +152,21 @@ with sync_playwright() as p:
     touch(pg, "spread-bad-1")
     said = toast(pg)
     ck("a save that fails says so", "Not saved" in said and "bad" in said, said or "(nothing)")
-    ck("...and says the work is still here", "still on this page" in said, said)
+    # §258.3's wording (another session, on main: the HTTP status was too
+    # technical for a user), in §291's corner. The check follows the product
+    # rather than the product being held to the check (§51.11).
+    ck("...and tells them to keep the tab open",
+       "keep this tab open" in said.lower(), said)
     pg.wait_for_timeout(3200)
     ck("...and does NOT take itself away", "Not saved" in toast(pg), toast(pg))
-    pg.evaluate("()=>{const b=document.querySelector('[data-toast-why]'); if(b) b.click();}")
-    pg.wait_for_timeout(300)
-    ck("...and the status is one press away", "500" in toast(pg), toast(pg))
+    # THE STATUS IS ON THE HOVER, NOT BEHIND A PRESS (§258.3 + §127): the
+    # sentence stays plain, and the number that sends an operator somewhere is
+    # still there for whoever can act on it.
+    ck("...with no status in the sentence itself",
+       "500" not in said and "HTTP" not in said, said)
+    ck("...and the status on the hover",
+       "500" in (pg.evaluate("""()=>{const b=document.querySelector('#savetoast b');
+           return b ? (b.title || '') : '';}""") or ""))
 
     # ── 2 · THE REFUSAL IS A DIALOG WITH TWO DOORS ───────────────────────
     print("\n2 · a refusal stops the work and offers a way on")
@@ -190,7 +208,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>{location.hash='';}")
     pg.goto(URL); pg.wait_for_timeout(2600)
     pg.evaluate("()=>{try{WELCOME.dismiss()}catch(e){}}"); pg.wait_for_timeout(400)
-    # ── ISLAM TOOK IT OFF THE CARD (§231.2) ──────────────────────────────
+    # ── ISLAM TOOK IT OFF THE CARD (§291.2) ──────────────────────────────
     # An absence, asserted where the card actually is rather than as a text
     # search of the page: the strip carried real colours and real counts, and
     # a build that half-removed it would leave the markup with nothing in it.

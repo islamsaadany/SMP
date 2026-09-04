@@ -169,6 +169,18 @@ var SYNC = (function () {
     if (typeof fnPruneNulls === "function") {
       (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
     }
+    /* §242: A KEY OBJECTIVE STORED WITH NO ID IS **NOT** HEALED HERE, AND THE
+       REASON IS WORTH THE LINES. The obvious fix — mint the missing ones on
+       arrival, as fnPruneNulls heals above — is a trap: `lastSaved` is taken
+       after this, so a minted id joins the BASELINE and never travels, while
+       every later row edit is addressed AT that id. `applyChanges()` resolves
+       a row edit against the STORED graph by id and refuses one it cannot
+       find ("a row edit names a row that is not here") — and a refused path
+       fails the WHOLE save, taking unrelated work with it (§215).
+
+       So the heal is a MIGRATION (039), where the id lands in the database
+       and both sides agree about it. §191's own answer to the same fault on
+       the group's six objectives, for the same reason. */
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];
@@ -353,7 +365,7 @@ var SYNC = (function () {
      detail button inside it is bound on every draw, so a hidden copy would
      collect a second handler on the next failure. */
   var toastEl = null, toastTimer = null;
-  function saveToast(kind, html, detail) {
+  function saveToast(kind, html) {
     if (toastEl === null) toastEl = document.getElementById("savetoast") || false;
     if (!toastEl) return;
     if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
@@ -362,21 +374,6 @@ var SYNC = (function () {
     toastEl.className = "savetoast " + kind;
     toastEl.innerHTML = html;
     toastEl.hidden = false;
-    /* WHAT HAPPENED, on the press and not before: the status is the one thing
-       here worth calling technical, and it is what the person who can act on
-       it needs (\u00a7123). Written into the node rather than repainted \u2014 the
-       toast is outside the page and a paint would replace the button
-       mid-press (\u00a763). */
-    if (detail) {
-      var btn = toastEl.querySelector("[data-toast-why]");
-      if (btn) btn.onclick = function () {
-        btn.remove();
-        var d = document.createElement("div");
-        d.className = "savetoast-detail";
-        d.textContent = detail;
-        toastEl.appendChild(d);
-      };
-    }
     if (kind === "ok") {
       toastTimer = setTimeout(function () {
         toastEl.classList.add("leaving");
@@ -385,17 +382,26 @@ var SYNC = (function () {
     }
   }
 
-  /* WHY IT DID NOT GO, in the words that name where to look. The status is
-     shown deliberately: a number is not jargon to the one person who can act
-     on it, and without it every failure reads the same \u2014 but it is behind the
-     press now (\u00a7231), because the sentence somebody needs first is *your work
-     is still here*, not an HTTP code. */
-  function showFailed(why) {
+  /* ── WHY IT DID NOT GO, IN THE USER'S WORDS AND IN THE CORNER ─────────
+     §258.3's sentences (another session, on main: Islam — *"the http 500 is
+     too technical for a user"*) drawn in §291's corner toast rather than the
+     top banner (Islam — *"a small message in the bottom left"*). BOTH
+     DECISIONS SURVIVE, and neither was re-argued: the wording is theirs, the
+     placement is his, and the number that sends an operator somewhere stays on
+     the HOVER of the bold word (§127: information belongs on a hover, never as
+     a paragraph) rather than behind a second control.
+
+     THE TOAST DOES NOT DISMISS THIS ONE (§291): the advice is to keep the tab
+     open because it retries by itself every five seconds (§160.4), and a
+     message carrying that instruction cannot be the one that slides away. */
+  function showFailed(kind, detail) {
+    var first = kind === "network"
+      ? "The platform cannot reach the server \u2014 check your internet connection."
+      : "The server could not take your change just now.";
     saveToast("bad",
-      "<b>Not saved</b>Your work is still on this page \u2014 keep it open, " +
-      "the platform is trying again." +
-      "<button type=\"button\" class=\"savetoast-why\" data-toast-why>" +
-      "What happened?</button>", why);
+      "<b title=\"" + esc(detail || "") + "\">Not saved</b>" + first +
+      " Keep this tab open \u2014 it tries again by itself, and this clears the " +
+      "moment your change goes through.");
   }
 
   function showDemoBlocked() {
@@ -473,6 +479,16 @@ var SYNC = (function () {
       var roots = refusedRoots(ch.target);
       (ch.rows || []).forEach(function (r) {
         var row = null;
+        /* §262.3: the SUBJECT is a row too — its own words, its SWOT. */
+        if (r.id === ch.target || (ch.target === "group" && r.id === "group")) {
+          row = ch.target === "group" ? GROUP
+              : (typeof unitLikeWritable === "function" ? unitLikeWritable(ch.target) : null);
+          if (row && String(r.field).indexOf("swot.") === 0) {
+            row.swot = row.swot || {};
+            row.swot[r.field.slice(5)] = r.from == null ? [] : JSON.parse(JSON.stringify(r.from));
+            return;
+          }
+        }
         roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
         if (!row) { missed.push(r); return; }
         /* ABSENT IS NOT NULL. A field the stored row did not have is DELETED,
@@ -485,7 +501,7 @@ var SYNC = (function () {
     return missed;
   }
 
-  /* ── A REFUSAL STOPS THE WORK, AND CARRIES TWO DOORS (§231) ───────────
+  /* ── A REFUSAL STOPS THE WORK, AND CARRIES TWO DOORS (§291) ───────────
      Islam: *"can it be a modal pop up and it has a button to send to the
      office … under technical issues tag? similar to … ask the strategy office
      to add it under the normal messages?"*
@@ -547,7 +563,12 @@ var SYNC = (function () {
     if (!CHAT.compose(text)) {
       /* Said, never swallowed: the corner refusing to open is the one case
          where this button does nothing, and silence there is §96 exactly. */
-      showFailed("The message could not be opened — the chat is not available here.");
+      /* NOT `showFailed`: since §258.3 that function says a SAVE did not go,
+         in two fixed sentences, and this is neither of them — the save was
+         already refused and what failed is opening the corner. Its own words,
+         through the same toast (§53.5: one place says these things). */
+      saveToast("bad", "<b>Could not open the message</b>The chat is not " +
+        "available here. The refusal is unchanged \u2014 nothing was sent.");
     }
   }
 
@@ -559,7 +580,7 @@ var SYNC = (function () {
     return (d.textContent || "").trim();
   }
 
-  /* ── WHAT THE BROWSER RECORDED (§231) ─────────────────────────────────
+  /* ── WHAT THE BROWSER RECORDED (§291) ─────────────────────────────────
      Islam: *"the chat grabs the console error as well from the user
      browser."* The LAST one only, and only its message — a console is a
      stream and a report is a sentence, and shipping the whole stream would
@@ -654,7 +675,7 @@ var SYNC = (function () {
         ? '<span class="refused-doors">' +
           '<button type="button" class="refused-ask" id="refused-ask">' +
           "Ask the Strategy Office to change it</button> " +
-          /* THE PROMISE IS A HOVER, NOT A PARAGRAPH (§231.2, 1b-ii). Islam:
+          /* THE PROMISE IS A HOVER, NOT A PARAGRAPH (§291.2, 1b-ii). Islam:
              *"remove the description in the bottom"* — and it WAS one: two
              buttons that already say what they do, described underneath. The
              one clause that was not a description is what travels with a
@@ -666,7 +687,7 @@ var SYNC = (function () {
           'from your plan travel with it.">' +
           "Report a problem</button></span>"
         : "");
-    /* THE DIALOG, NOT THE BANNER (§231). The element is still filled, because
+    /* THE DIALOG, NOT THE BANNER (§291). The element is still filled, because
        the put-back's own fallback writes into it (`notSaved`) and because a
        build with no dialog function must still say something — the honest
        degradation, not a second design. */
@@ -716,7 +737,7 @@ var SYNC = (function () {
                    "that was not saved will be lost.")) return;
       location.reload();
     });
-    /* ── THE TWO DOORS (§231) ────────────────────────────────────────────
+    /* ── THE TWO DOORS (§291) ────────────────────────────────────────────
        Both close the dialog first: the corner opens over the page, and a
        panel behind an inert overlay is a composer nobody can type in
        (§116.6's own trap, from the other side). */
@@ -846,7 +867,7 @@ var SYNC = (function () {
            paint ask again, which is the first moment the answer can be right.
            Guarded on the symbol existing so sync.js stays independent of which
            pages happen to be built into the file. */
-        /* AND IT SAYS SO (§231). Here and nowhere else: this is the one place
+        /* AND IT SAYS SO (§291). Here and nowhere else: this is the one place
            the server has confirmed the write, so a word drawn anywhere
            earlier would be a promise the platform has not yet been given. */
         saveToast("ok", "<i></i>Saved");
@@ -862,7 +883,7 @@ var SYNC = (function () {
       }
       else {
         say("failed");
-        showFailed("The server answered HTTP " + r.status + ".");
+        showFailed("server", "The server answered HTTP " + r.status + ".");
         console.warn("SMP: save failed (HTTP " + r.status + ")");
       }
     }).catch(function (e) {
@@ -870,7 +891,7 @@ var SYNC = (function () {
       say("failed");
       /* A fetch that rejects is the network, not the server — a different
          errand, so a different sentence. */
-      showFailed("The platform could not reach the server (" +
+      showFailed("network", "The platform could not reach the server (" +
                  (e && e.message ? e.message : "no answer") + ").");
       console.warn("SMP: save failed (" + (e && e.message) + ")");
     });
@@ -1194,11 +1215,53 @@ var SYNC = (function () {
   });
   window.addEventListener("pagehide", flushLeave);
 
+  /* ── A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§237) ──
+     Islam: *"viewing as needs to have the same server connection and
+     relation and not inherit my SMO abilities … so I get the errors."*
+     The JUDGING half has been the viewed person's since §185, and §234.2
+     records what stayed the SMO's: the TAB — its baseline, its history,
+     its leftovers flushed as the SMO by the switch's own §204 flush. So a
+     switch now re-fetches the server's graph and rebases the tab on it,
+     which is exactly what happens when that person signs in: nothing of
+     the SMO tab's past can ride into a save judged as them, and what the
+     simulated session sees is what the server holds at that moment.
+
+     REUSES THE BOOT'S OWN `hydrate` — a second way of applying a fetched
+     graph is §53.5's drift. `LIVE` is refreshed too, or leaving demo data
+     after a rebase would put the boot-time snapshot back on screen.
+
+     ONLY WHERE THERE IS A SERVER AND ONLY IN LIVE MODE: `file://` has
+     nothing to fetch and demo data is deliberately not the server's. A
+     fetch that fails leaves the tab exactly as it was and answers false —
+     the switch still happens, judged correctly (§185), on the old
+     baseline: the honest fallback, never a blocked way home (§209). */
+  function rebase(done) {
+    done = done || function () {};
+    if (!live || isDemoMode() || saving) return done(false);
+    fetch("/api/state", { cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+        hydrate(data.state);
+        LIVE = clone(data.state);
+        lastSaved = serialize();
+        done(true);
+      })
+      .catch(function () { done(false); });
+  }
+
   return {
     isLive: function () { return live; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
+    /* Take the server's current graph as the tab's new truth (§237). The
+       caller is the viewer switch and nothing else schedules it. */
+    rebase: function (done) { rebase(done); },
     isDemo: function () { return isDemoMode(); },
     /* Which of the two, for anything that needs to tell them apart. */
     demoMode: function () { return isDemoMode() ? mode : null; },

@@ -307,7 +307,7 @@ function pptxUnitSlides(u, kicker){
     { x:PPTX_MX, y:2705100, cx:PPTX_CW, cy:2971800 }, found));
   slides.push(pptxSlideXml(fShapes));
 
-  var kos = u.keyObjectives || [];
+  var kos = SMPRules.shown(u.keyObjectives);
   if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
@@ -344,13 +344,13 @@ function pptxUnitSlides(u, kicker){
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Key measures",
       [5303520, 914400, 2346960, 2346960],
       ["Measure", "Dir.", "Target", "Compiles"],
-      (p.measures || []).map(function(m){
+      SMPRules.shown(p.measures).map(function(m){
         return [m.name, orPend(m, "dir"), orPend(m, "target"), orPend(m, "compile")];
       })));
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
       [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
       ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
-      (p.tactics || []).map(function(t){
+      SMPRules.shown(p.tactics).map(function(t){
         return [t.name, orPend(t, "owner"),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
@@ -377,7 +377,7 @@ function pptxFnSlides(fk){
          ? pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })
          : pptxPara(pptxRun("Missing", { sz:1300, b:true, color:C.bad }), { before:600 })],
       { fill:C.zebra }));
-    var kos = c.keyObjectives || [];
+    var kos = SMPRules.shown(c.keyObjectives);
     if (kos.length) shapes.push(pptxTable(7,
       { x:PPTX_MX, y:2529840, cx:PPTX_CW },
       [5760720, 914400, 2118360, 2118360],
@@ -394,9 +394,9 @@ function pptxFnSlides(fk){
       ["Project", "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
         return [p.name, orPend(p, "owner"), orPend(p, "start"), orPend(p, "end"),
-          plural((p.deliverables || []).length, "deliverable") + " · " +
-          plural((p.outcomes || []).length, "outcome") + " · " +
-          plural((p.milestones || []).length, "milestone")];
+          plural(SMPRules.shown(p.deliverables).length, "deliverable") + " · " +
+          plural(SMPRules.shown(p.outcomes).length, "outcome") + " · " +
+          plural(SMPRules.shown(p.milestones).length, "milestone")];
       })));
   });
   slides.push(pptxThanks(f.name, (GROUP.org || "") + " \u00b7 Strategy plan"));

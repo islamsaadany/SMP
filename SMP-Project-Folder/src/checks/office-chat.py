@@ -23,6 +23,7 @@ half — who may read whose conversation, and what a reply does — is
 `scripts/test-chat.js`, against a real Postgres, because that is where those
 questions are actually answered.
 """
+import base64
 import json, pathlib, threading, http.server, socketserver, time
 from playwright.sync_api import sync_playwright
 
@@ -46,10 +47,21 @@ def _no_tour(pg):
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_bytes()
+SW = (ROOT / "sw.js").read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 
+# A real-shaped VAPID public key: 65 raw bytes, url-safe base64 — the browser
+# decodes it before subscribing, so a wrong shape fails there rather than here.
+VAPID = base64.urlsafe_b64encode(b"\x04" + bytes(range(64))).decode().rstrip("=")
+
 # What the stub /api/chat answers with, and whether it answers at all.
+# What the browser has told the server about this device (§231).
+PUSH = {"subs": [], "off": []}
+# What the diagnostic answers with (§231.6). A list, so the check can set it
+# per trial the way the assistant's own test does.
+PUSHSTEPS = []
+
 CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
         "test": None,
         "cfg": {"on": True, "shots": True, "promise": "Usually answers the same day",
@@ -101,6 +113,12 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(200, json.dumps({"ok": True, "state": SEED, "person": PERSON}).encode(),
                        "application/json")
             return
+        # §231.5: THE WORKER IS A REAL FILE. Served as the gate would serve
+        # it, or `register()` rejects on the content type and a working build
+        # reports as a browser that refused (§100.3).
+        if self.path.startswith("/sw.js"):
+            self._send(200, SW, "application/javascript")
+            return
         if self.path.startswith("/raya-trade"):
             self._send(200, HTML, "text/html; charset=utf-8")
             return
@@ -140,6 +158,31 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(200, json.dumps({"ok": True, "steps": CHAT.get("test") or []}).encode(),
                        "application/json")
             return
+        # §231: THE STUB MODELS THE SERVER. A device says yes and the row is
+        # kept here, so the check can read back what the browser actually
+        # posted rather than trusting that it meant to.
+        # §247: the office's own message. Recorded so the check can read what
+        # the page actually POSTED — `start` is the whole of what this feature
+        # adds to the server, and a build that dropped it would look identical
+        # on screen (§135's `greet`, found the same way).
+        if body.get("action") == "reply":
+            CHAT["said"].append(body)
+            self._send(200, json.dumps({"ok": True, "here": False,
+                "mailed": {"sent": True, "to": "someone@example.com"}}).encode(),
+                "application/json")
+            return
+        if body.get("action") == "pushTest":
+            self._send(200, json.dumps({"ok": True, "steps": PUSHSTEPS}).encode(),
+                       "application/json")
+            return
+        if body.get("action") == "pushOn":
+            PUSH["subs"].append(body.get("sub") or {})
+            self._send(200, b'{"ok":true}', "application/json")
+            return
+        if body.get("action") == "pushOff":
+            PUSH["off"].append(body.get("endpoint") or "")
+            self._send(200, b'{"ok":true}', "application/json")
+            return
         if body.get("action") == "queue":
             self._send(200, json.dumps({
                 "ok": True, "office": True, "threads": BOXQUEUE, "chat": CHAT["cfg"],
@@ -161,11 +204,21 @@ class H(http.server.BaseHTTPRequestHandler):
         # that polls on every page, so the only thing that can tell the office
         # a question arrived while they were somewhere else (§225).
         self._send(200, json.dumps({
-            "ok": True, "office": True, "messages": CHAT["messages"],
+            # WHO IS SIGNED IN DECIDES (§285). This answered `office: True` for
+            # every viewer, which was harmless while the corner drew the same
+            # thing for everybody and stopped being harmless the moment the
+            # office's corner became a queue: the person-facing sections below
+            # are about somebody WRITING IN, and a stub that calls them the
+            # office tests the wrong half of the panel. Most people are not
+            # the office, so that is the default here too.
+            "ok": True, "office": CHAT.get("office", False),
+            "messages": CHAT["messages"],
             "unread": CHAT["unread"], "thread": CHAT["thread"],
             "waiting": CHAT.get("owaiting", 0),
             "waitingWho": CHAT.get("owho"), "waitingBody": CHAT.get("obody"),
-            "chat": CHAT["cfg"]}).encode(), "application/json")
+            "chat": dict(CHAT["cfg"],
+                         vapid=(VAPID if CHAT["cfg"].get("popup") else ""))}).encode(),
+            "application/json")
 
 
 srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), H)
@@ -285,15 +338,25 @@ with sync_playwright() as p:
     ck("and the bubble comes back", pg.eval_on_selector("#chatbtn", "e => e.getClientRects().length > 0"))
     ck("and the conversation is still there afterwards", len(CHAT["messages"]) > 0)
 
-    # CLICKING AWAY MINIMISES IT, AND LOSES NOTHING.
+    # CLICKING AWAY NO LONGER MINIMISES IT (§284, REVERSING §100.4).
+    # Islam: "we need the chat to sustain the navigation so it's open while me
+    # navigating across the different pages in the platform." The platform is
+    # ONE PAGE, so every destination, tab, section and card was a press
+    # "outside" — measured, one press on a page tab closed the corner.
+    #
+    # THE ASSERTION IS REWRITTEN AND NOT DELETED (§218): a check that simply
+    # dropped it would let a later build put click-outside back without anybody
+    # noticing, which is the whole reason a reversal is recorded rather than
+    # erased. What survives unchanged is the half that was always the point —
+    # nothing typed is ever lost — because the panel is hidden rather than
+    # rebuilt, and that is now true across a walk as well as a dismissal.
     pg.click("#chatbtn")
     pg.wait_for_selector("#chatpanel:not([hidden])")
     pg.fill("#chatsay", "half written, and I clicked away")
     pg.mouse.click(200, 300)
     pg.wait_for_timeout(300)
-    ck("clicking outside minimises it", pg.eval_on_selector("#chatpanel", "e => e.hidden"))
-    pg.click("#chatbtn")
-    pg.wait_for_timeout(300)
+    ck("clicking outside leaves it open", not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    pg.wait_for_timeout(200)
     ck("and the half-typed message survived it",
        pg.input_value("#chatsay") == "half written, and I clicked away",
        pg.input_value("#chatsay"))
@@ -779,10 +842,24 @@ with sync_playwright() as p:
     # tooltip cannot say "nobody is chosen" to somebody who never hovers.
     left = pg.eval_on_selector_all(".chset .chset-hint, .chset .chset-cost",
                                    "n=>n.map(x=>x.innerText)")
-    ck("the prose is gone from the page", len(left) <= 1, left)
+    # ASSERT THE PROBLEM, NOT THE NUMBER (§94.8). This read `len(left) <= 1`,
+    # which was a literal standing in for "the prose is gone" and true only
+    # while exactly one row had a live status. §231 gave Notifications one too
+    # — a fact about what THIS browser will do — and the count went red on a
+    # deliberate addition. What §127 actually settled is that an EXPLANATION
+    # goes behind a mark and a STATUS stays on the page, and the difference
+    # between them is length: a status is a statement of fact, not a paragraph
+    # about how a setting works.
+    longest = max([len(x) for x in left] + [0])
+    ck("the prose is gone from the page (longest line %d chars)" % longest,
+       longest <= 110, left)
+    # ...AND THE STATUSES ARE STILL THERE. A tooltip cannot say "nobody is
+    # chosen" to somebody who never hovers, so this is the half that must not
+    # be lost while tidying the half above.
+    joined = " ".join(left).lower()
     ck("but the live status is not",
-       len(left) == 1 and ("wait" in left[0].lower() or "emailed" in left[0].lower()
-                           or "no one is set" in left[0].lower()), left)
+       len(left) >= 1 and ("wait" in joined or "emailed" in joined
+                           or "no one is set" in joined or "notified" in joined), left)
 
     # A TAP OPENS IT. Hover does not exist on a tablet, and every explanation
     # now lives behind one of these — so a mark that answers only a mouse is
@@ -1002,8 +1079,15 @@ with sync_playwright() as p:
     # ── BACK ON, AND THE BOX SAYS WHO AND THE FIRST LINE (wording B) ─────
     pg.click("#chatbtn"); pg.wait_for_timeout(250)
     pg.click("#chatbell"); pg.wait_for_timeout(200)
-    ck("pressing it again turns them back on",
-       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-pressed')") == "true")
+    # THE SWITCH AND THE DEVICE ARE TWO FACTS NOW (§231.5). This asserted the
+    # bell read `aria-pressed=true`, which conflated "they turned it back on"
+    # with "this device is registered" — and in this harness there is no route
+    # to a push service, so the second is legitimately false and the bell
+    # correctly says so. What belongs here is the PERSON'S switch.
+    ck("pressing it again turns their own switch back on",
+       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-label')")
+         != "Notify me on this device",
+       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-label')"))
     ck("...and the key is removed rather than set to something (§50.6)",
        pg.evaluate("() => localStorage.getItem('smp.chat.popup')") is None)
     pg.click("#chatclose")
@@ -1091,6 +1175,8 @@ with sync_playwright() as p:
     # and the office's assertions read the wrong one. (The stub's `seen` does
     # not clear it the way the real endpoint does — §100.3, in the small.)
     CHAT["messages"] = []; CHAT["unread"] = 0
+    # THIS SECTION IS ABOUT THE OFFICE, so the stub says so (§285).
+    CHAT["office"] = True
     CHAT["owaiting"] = 2
     CHAT["owho"] = "Hend Farouk"
     CHAT["obody"] = "The Q3 target on Active Base still reads 4.2M."
@@ -1147,11 +1233,19 @@ with sync_playwright() as p:
     # line already, which is the same argument as `!open` one page out.
     pg.click('[data-md="setup"]'); pg.wait_for_timeout(700)
     pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(900)
-    # AND THE CORNER IS OPENED AFTER ARRIVING, not before: a pointerdown outside
-    # the dock minimises it (§100.4), so opening it first and then navigating
-    # puts it back on the 180s beat — and the assertion below would then pass
-    # because no poll ever happened rather than because nothing was shown.
-    pg.click("#chatbtn"); pg.wait_for_timeout(500)
+    # AND THE CORNER IS OPENED ONLY IF IT IS NOT ALREADY (§284). This used to
+    # press the bubble unconditionally, on §100.4's rule that navigating
+    # minimised the panel — which stopped being true when Islam asked for the
+    # corner to survive the walk. It now arrives still open, and the bubble is
+    # not drawn while it is (§100.4's sibling), so the press timed out against
+    # an invisible control. What the section is actually about is unchanged:
+    # the corner must be OPEN and polling here, or the assertion below passes
+    # because nothing ever happened rather than because nothing was shown.
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_timeout(500)
+    ck("  (the corner is open on the Inbox)",
+       not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
     fake_browser("granted")
     CHAT["owaiting"] = 4
     CHAT["owho"] = "Hala Nabil"
@@ -1160,6 +1254,11 @@ with sync_playwright() as p:
     ck("  (the office's browser asked while on that page)", got, "no poll inside 30s")
     ck("no box while the office is reading the queue itself", len(pops()) == 0, pops())
     CHAT["owaiting"] = 0; CHAT.pop("owho", None); CHAT.pop("obody", None)
+    # AND BACK TO AN ORDINARY PERSON (§285). Left set, the office's corner
+    # opens on the QUEUE and every section below would be measuring the wrong
+    # half of the panel — which is exactly what happened when this flag was
+    # first added and three later sections went red.
+    CHAT["office"] = False
     # Back off the Inbox, or everything below measures a page it is not about.
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
@@ -1180,6 +1279,477 @@ with sync_playwright() as p:
     CHAT["cfg"].pop("popup", None)
     CHAT["messages"] = []; CHAT["unread"] = 0
     poll_once(25000)
+
+    # ── 15 · A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ──────────────────
+    # §225 drew the box from the page, and measured across 45 seconds with the
+    # tab in the background it drew NOTHING — the poll stops dead while
+    # `document.hidden` (§98.1). The server sends now and the service worker
+    # receives, so what is measured here is the browser's half of that: when
+    # this device subscribes, when it stops, and that the page then stands its
+    # own box down so nobody ever gets two.
+    #
+    # THE PUSH MANAGER IS STOOD IN FOR, not the whole service worker: a real
+    # `subscribe()` reaches Google's or Apple's service, which nothing here can
+    # do — and the real thing is proved end to end against a real library and a
+    # real TLS endpoint in `scripts/test-push.js`. What is left is our own
+    # logic, and that is exactly what a stand-in can measure.
+    print("\n15 · a box that arrives with no tab open")
+
+    def fake_worker():
+        pg.evaluate("""() => {
+            window.__subs = [];
+            let held = null;
+            const mgr = {
+              getSubscription: () => Promise.resolve(held),
+              subscribe: (opts) => {
+                window.__subs.push({ userVisibleOnly: opts.userVisibleOnly,
+                                     keyLen: (opts.applicationServerKey || []).length });
+                held = {
+                  endpoint: "https://push.example.test/dev/one",
+                  toJSON: () => ({ endpoint: "https://push.example.test/dev/one",
+                                   keys: { p256dh: "P", auth: "A" } }),
+                  unsubscribe: () => { held = null; return Promise.resolve(true); }
+                };
+                return Promise.resolve(held);
+              }
+            };
+            // §231.5: the platform registers the worker itself now, so the
+            // stand-in has to answer `getRegistration` and `register` as well
+            // as `ready` — a stand-in that models less than the thing it
+            // stands in for reports a working build as broken (§100.3).
+            const reg = { pushManager: mgr };
+            Object.defineProperty(navigator, "serviceWorker", {
+              configurable: true,
+              get: () => ({ ready: Promise.resolve(reg),
+                            getRegistration: () => Promise.resolve(reg),
+                            register: () => Promise.resolve(reg) })
+            });
+            window.__held = () => held; }""")
+
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    CHAT["owaiting"] = 0; CHAT.pop("owho", None); CHAT.pop("obody", None)
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000)
+    CHAT["cfg"].pop("popup", None)
+    del PUSH["subs"][:]; del PUSH["off"][:]
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.add_init_script("(" + FAKE_JS + ")('granted');")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+    fake_worker()
+
+    # ── WITH THE OFFICE'S SWITCH OFF, NOTHING IS SUBSCRIBED ──────────────
+    pg.click("#chatbtn"); pg.wait_for_timeout(700)
+    # (An assertion that cannot fail is not an assertion, §94.5 — so what is
+    # measured is the EFFECT: with the company switch off nothing subscribes.)
+    ck("with notifications off for the company, this device subscribes to nothing",
+       len(PUSH["subs"]) == 0, PUSH["subs"])
+    ck("...and nothing was posted about it either",
+       len(PUSH["off"]) == 0, PUSH["off"])
+    pg.click("#chatclose")
+
+    # ── THE OFFICE TURNS IT ON: THE DEVICE SUBSCRIBES ────────────────────
+    CHAT["cfg"] = dict(CHAT["cfg"], popup=True)
+    got = poll_once(30000); pg.wait_for_timeout(900)
+    ck("  (the switch reached the browser)", got, "no poll inside 30s")
+    ck("with it on, this device subscribes", len(PUSH["subs"]) == 1, PUSH["subs"])
+    if PUSH["subs"]:
+        ck("...sending the endpoint the browser was given",
+           PUSH["subs"][0].get("endpoint", "").startswith("https://"),
+           PUSH["subs"][0].get("endpoint"))
+        ck("...and its two keys",
+           bool((PUSH["subs"][0].get("keys") or {}).get("p256dh")) and
+           bool((PUSH["subs"][0].get("keys") or {}).get("auth")), PUSH["subs"][0])
+    # `userVisibleOnly` IS NOT A PREFERENCE: every browser that supports push
+    # requires a visible notification per delivery and refuses to subscribe
+    # without it — a build that dropped it would fail on a real browser and
+    # pass every assertion that only looks at the row.
+    opts = pg.evaluate("() => window.__subs || []")
+    ck("...with userVisibleOnly, which no browser makes optional",
+       len(opts) == 1 and opts[0]["userVisibleOnly"] is True, opts)
+    ck("...and the key decoded to 65 bytes",
+       len(opts) == 1 and opts[0]["keyLen"] == 65, opts)
+
+    # ── AND THE PAGE STANDS ITS OWN BOX DOWN ─────────────────────────────
+    # One box, one source (§53.5). On a subscribed device the worker draws it;
+    # the page drawing one too is two boxes for one message.
+    pg.wait_for_timeout(200)
+    fake_browser("granted")
+    reply("The March import is what carried it.", "2026-09-01T09:00:00Z")
+    ck("a reply draws no box from the page while the worker has it",
+       len(pops()) == 0, pops())
+    # BOTH ENDS (§94.2): with this device NOT subscribed the page still draws
+    # it, or the assertion above would pass on a build that shows nothing.
+    pg.evaluate("() => { window.__subs = []; }")
+    pg.click("#chatbtn"); pg.wait_for_timeout(300)
+    pg.click("#chatbell"); pg.wait_for_timeout(700)          # bell off
+    ck("turning the bell off tells the server to forget this device",
+       len(PUSH["off"]) == 1, PUSH["off"])
+    ck("...and the browser forgets it too",
+       pg.evaluate("() => window.__held() === null"))
+    was = len(PUSH["subs"])
+    pg.click("#chatbell"); pg.wait_for_timeout(900)          # and back on
+    # ASSERT THE STATE, NOT A COUNT OF POSTS. `pushSync` runs wherever any of
+    # the three switches might have moved and re-posting the same endpoint is
+    # deliberate and free (the server replaces the row rather than adding one),
+    # so counting requests measures how many places call it — which is a
+    # number that changes for good reasons (§94.8).
+    ck("turning it back on subscribes again",
+       len(PUSH["subs"]) > was and pg.evaluate("() => window.__held() !== null"),
+       {"before": was, "after": len(PUSH["subs"])})
+    pg.click("#chatclose")
+
+    # ── THE BELL SAYS WHAT WILL ACTUALLY HAPPEN (§231.2) ─────────────────
+    # The first build read the person's own switch alone, so a browser that had
+    # never been asked showed the bell ON with a hover promising a box that
+    # could never appear (§124: presence reported as proof) — and the only
+    # control on the screen switched OFF the thing that was not on yet (§61).
+    fake_browser("default")
+    pg.click("#chatbtn"); pg.wait_for_timeout(600)
+    st = pg.evaluate("""() => { const b = document.getElementById('chatbell');
+        return { pressed: b.getAttribute('aria-pressed'), tip: b.title,
+                 dis: b.getAttribute('aria-disabled') }; }""")
+    ck("a browser that has not been asked does not read as on",
+       st["pressed"] == "false", st)
+    ck("...and says so", "not been asked" in (st["tip"] or "").lower(), st["tip"])
+    ck("...and is still pressable, so the reason can be reached",
+       st["dis"] is None, st)
+    asked = pg.evaluate("() => window.__asked")
+    pg.click("#chatbell"); pg.wait_for_timeout(400)
+    ck("pressing it ASKS rather than switching off what is not on",
+       pg.evaluate("() => window.__asked") > asked and
+       pg.evaluate("() => localStorage.getItem('smp.chat.popup')") is None,
+       {"asked": pg.evaluate("() => window.__asked"),
+        "stored": pg.evaluate("() => localStorage.getItem('smp.chat.popup')")})
+    pg.click("#chatclose")
+
+    CHAT["cfg"].pop("popup", None)
+    del PUSH["subs"][:]; del PUSH["off"][:]
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    poll_once(30000)
+
+    # ── 16 · A FAILED ASK IS NOT AN ANSWER (§231.4) ──────────────────────
+    # Islam, on the Platform Inbox: "all conversations are gone!! what
+    # happened?" Nothing had. The endpoint was down (§231.3), `boxLoadQueue`
+    # returned in silence, `box.threads` stayed as it started — empty — and the
+    # page printed "No conversations yet": a statement about somebody's DATA,
+    # made when nothing was ever read. §93's fault on the surface where being
+    # wrong is most frightening.
+    #
+    # THE DATABASE IS NOT TOUCHED HERE. Only the endpoint fails, so whatever
+    # the page prints is about the FETCH.
+    print("\n16 · a failed ask is not an answer")
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+    CHAT["status"] = 500
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(800)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(2200)
+    pg.click('[data-chtab="all"]'); pg.wait_for_timeout(600)
+    said = pg.inner_text(".chnothing").strip() if pg.query_selector(".chnothing") else ""
+    ck("the page does not report an empty inbox it never read",
+       "no conversations yet" not in said.lower(), said)
+    ck("...it says the ask failed", "could not" in said.lower(), said)
+    ck("...and that nothing has been lost", "lost" in said.lower(), said)
+    ck("...and offers a way to try again",
+       pg.query_selector("[data-chretry]") is not None)
+    # ABSENT IS NOT ZERO (§35). A count of 0 beside a list nobody could fetch
+    # is the same lie in a smaller space.
+    counts = pg.eval_on_selector_all("[data-chn]", "n => n.map(x => x.textContent)")
+    ck("the counts read as unknown, never as nought",
+       all(c.strip() not in ("0", "") for c in counts), counts)
+    # AND IT IS PRESSABLE, not merely present (§70, §93.4).
+    hit = pg.evaluate("""() => { const b = document.querySelector('[data-chretry]');
+        if (!b) return 'missing'; const r = b.getBoundingClientRect();
+        const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return e && e.closest('[data-chretry]') ? 'retry' : (e ? e.tagName : 'nothing'); }""")
+    ck("a click at its centre reaches Try again", hit == "retry", hit)
+
+    # ── AND THE GOOD PATH IS UNCHANGED (§94.2) ───────────────────────────
+    # An assertion that a failure is reported passes on a build that reports a
+    # failure always. The server comes back and the queue must draw normally.
+    CHAT["status"] = 200
+    pg.click("[data-chretry]"); pg.wait_for_timeout(1500)
+    ck("Try again loads the conversations",
+       pg.eval_on_selector_all(".chqrow", "n => n.length") > 0,
+       pg.eval_on_selector_all(".chqrow", "n => n.length"))
+    ck("...and the failure line is gone",
+       pg.query_selector(".chqfail") is None)
+    counts = pg.eval_on_selector_all("[data-chn]", "n => n.map(x => x.textContent)")
+    ck("...and the counts are numbers again",
+       all(c.strip().isdigit() for c in counts), counts)
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+
+    # ── 17 · THE PLATFORM SETS ITSELF UP, AND SAYS WHEN IT CANNOT (§231.5)
+    # `sw.js` was registered from the GATE only (§26), and §226 built the whole
+    # feature on `navigator.serviceWorker.ready` — which on a browser that has
+    # never completed a gate load NEVER RESOLVES. Not a rejection, so no catch
+    # runs and nothing anywhere says so. Islam, on a test account: the promise
+    # came back pending and stayed pending, while the bell read ON.
+    print("\n17 · the platform sets itself up, and says when it cannot")
+    fresh = b.new_context(viewport={"width": 1200, "height": 800})
+    fp = fresh.new_page()
+    _no_tour(fp)
+    fp.add_init_script("(" + FAKE_JS + ")('granted');")
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, popup=True, beat=4000)
+    # STRAIGHT TO THE PLATFORM, never through the gate — which is what a
+    # returning session gets (§32) and what a fresh profile gets.
+    fp.goto(URL, wait_until="networkidle")
+    fp.wait_for_selector("#chatdock:not([hidden])", timeout=15000)
+    fp.click("#chatbtn"); fp.wait_for_timeout(2500)
+    regs = fp.evaluate("() => navigator.serviceWorker.getRegistrations().then(r => r.length)")
+    ck("a browser that never saw the gate still registers the worker", regs >= 1, regs)
+    settled = fp.evaluate("""() => Promise.race([
+        navigator.serviceWorker.ready.then(() => 'resolved'),
+        new Promise(r => setTimeout(() => r('pending'), 3000))])""")
+    ck("...so the wait for it actually finishes", settled == "resolved", settled)
+
+    # AND NOTHING READS AS ON WHILE IT IS NOT. Registering with the push
+    # service itself cannot succeed here (there is no route to one), so this is
+    # the honest place to measure what the bell says when a step fails.
+    fp.wait_for_timeout(11000)                       # past the 8s clock
+    st = fp.evaluate("""() => { const b = document.getElementById('chatbell');
+        return { pressed: b.getAttribute('aria-pressed'), tip: b.title }; }""")
+    ck("a device that could not be registered does not read as on",
+       st["pressed"] == "false", st)
+    ck("...and the hover says so rather than promising a box",
+       "could not" in (st["tip"] or "").lower() or
+       "not finished" in (st["tip"] or "").lower(), st["tip"])
+    ck("...and offers to try again", "try again" in (st["tip"] or "").lower(), st["tip"])
+    fresh.close()
+
+    # ── 18 · IS IT WORKING? (§231.6) ─────────────────────────────────────
+    # §123's shape, for the other feature whose every link fails invisibly.
+    # The stub answers as the real endpoint does, so what is measured is the
+    # button, its wiring and its rendering — the server's own walk is proved
+    # against a real database and a real push service in scripts/test-push.js.
+    print("\n18 · is it working?")
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(800)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(1600)
+    pg.click("[data-chsetmenu]"); pg.wait_for_timeout(500)
+    # THE ROW READS THE TENANT'S OWN SETTING, not the poll's copy of it — this
+    # panel is where the office CHANGES it — so the switch is pressed the way
+    # the office presses it rather than fed in through the stub.
+    pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="popup"]')]
+        .find(x=>x.dataset.chval==='1'); if(b) b.click();}""")
+    pg.wait_for_timeout(800)
+    ck("the test button is on the Notifications row",
+       pg.evaluate("""() => { const t = document.querySelector('[data-chpoptest]');
+           const r = t && t.closest('.chset-row');
+           return !!r && r.querySelector('[data-chset="popup"]') !== null; }"""))
+    # PRESSABLE, NOT MERELY PRESENT (§70, §93.4) — and the assistant's own test
+    # button was once written into a `change` listener a <button> can never
+    # reach, so it rendered perfectly and did nothing (§123.4).
+    hit = pg.evaluate("""() => { const b = document.querySelector('[data-chpoptest]');
+        const r = b.getBoundingClientRect();
+        const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return e && e.closest('[data-chpoptest]') ? 'test' : (e ? e.tagName : 'nothing'); }""")
+    ck("a click at its centre reaches it", hit == "test", hit)
+    PUSHSTEPS[:] = [
+        {"name": "The chat", "state": "ok", "word": "on", "detail": None},
+        {"name": "Your devices", "state": "fail", "word": None,
+         "detail": "None of your devices is registered here."}]
+    pg.click("[data-chpoptest]"); pg.wait_for_timeout(2600)
+    said = pg.inner_text(".chtest").strip() if pg.query_selector(".chtest") else ""
+    ck("pressing it reports where the chain stops", "Your devices" in said, said[:120])
+    ck("...naming the failure rather than a general 'not working'",
+       "not working" in said.lower() and "your devices" in said.lower(), said[:160])
+    # AND THE GOOD END (§94.2): a check that only sees a failure reported
+    # passes on a build that reports one always.
+    PUSHSTEPS[:] = [
+        {"name": "The chat", "state": "ok", "word": "on", "detail": None},
+        {"name": "Your devices", "state": "ok", "word": "1", "detail": "1 device is registered."},
+        {"name": "A box on your screen", "state": "ok", "word": "sent",
+         "detail": "Sent to 1 device."}]
+    pg.click("[data-chpoptest]"); pg.wait_for_timeout(2600)
+    said = pg.inner_text(".chtest").strip() if pg.query_selector(".chtest") else ""
+    ck("and a working chain says it is working", said.lower().startswith("it is working"), said[:80])
+    ck("...naming the device it reached", "sent to 1 device" in said.lower(), said[:160])
+    pg.click("[data-chsetmenu]"); pg.wait_for_timeout(300)
+
+    # ── 19 · THE OFFICE STARTS A CONVERSATION (§247) ─────────────────────
+    # Until now the office could only ever ANSWER: with nobody having written
+    # in there was no way to reach them from the Inbox at all. Islam picked
+    # placement A — the control in the column it acts on — from two drawn in
+    # this very page.
+    print("\n19 · the office starts a conversation")
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(800)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(1800)
+    ck("there is a way to start one", pg.query_selector("#chqnew") is not None)
+    # PRESSABLE, NOT MERELY PRESENT (§70, §93.4).
+    hit = pg.evaluate("""() => { const b = document.getElementById('chqnew');
+        if (!b) return 'missing'; const r = b.getBoundingClientRect();
+        const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return e && e.closest('#chqnew') ? 'new' : (e ? e.tagName : 'nothing'); }""")
+    ck("a click at its centre reaches it", hit == "new", hit)
+    # AND IT DID NOT PUSH THE SEARCH ONTO A SECOND LINE. One row is not one
+    # `top` (§122.4) — two controls of two heights have two tops — so the
+    # MIDDLES are what agree.
+    row = pg.evaluate("""() => { const t = document.querySelector('.chqtop');
+        const m = [...t.children].map(c => { const r = c.getBoundingClientRect();
+          return Math.round(r.top + r.height / 2); });
+        return { mids: m, spread: Math.max(...m) - Math.min(...m) }; }""")
+    ck("the search keeps its line", row["spread"] <= 2, row)
+
+    pg.click("#chqnew"); pg.wait_for_timeout(700)
+    ck("pressing it opens the form", pg.query_selector("#chnewwho") is not None)
+    n = pg.eval_on_selector_all("#chnewwho option", "o => o.length")
+    ck("...offering the register to write to (%d)" % n, n > 5, n)
+    # A RETIRED PERSON CANNOT SIGN IN, so a conversation with them is one
+    # nobody can read — they are left out, and it is asserted rather than
+    # assumed (§94.2: both ends).
+    live = pg.evaluate("""() => {
+        const keys = [...document.querySelectorAll('#chnewwho option')]
+          .map(o => o.value).filter(Boolean);
+        const dead = (window.PEOPLE || []).filter(p => p.active === false).map(p => p.key);
+        return { offered: keys.length, deadOffered: dead.filter(k => keys.includes(k)),
+                 deadOnRegister: dead.length }; }""")
+    ck("...and never somebody who has been retired",
+       len(live["deadOffered"]) == 0, live)
+
+    # SAID, NOT DISABLED (§221): a Send that is dead for an unstated reason is
+    # a control nobody can act on.
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(400)
+    said = pg.inner_text("#chnewnote").strip()
+    ck("sending with nobody chosen says which half is missing",
+       "who" in said.lower(), said)
+    pg.select_option("#chnewwho", index=2); pg.wait_for_timeout(300)
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(400)
+    said = pg.inner_text("#chnewnote").strip()
+    ck("...and with nothing written, the other half", "write" in said.lower(), said)
+
+    # AND WHAT IT ACTUALLY POSTS. `start` is the whole of what this feature
+    # adds to the server — everything else a message from the office does is
+    # already written once, in the reply path (§53.5).
+    del CHAT["said"][:]
+    pg.fill("#chnewsay", "Could you look at the CX definition when you have a moment?")
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(1800)
+    sent = [x for x in CHAT["said"] if x.get("action") == "reply"]
+    ck("sending posts a reply that may start the conversation", len(sent) == 1, sent)
+    if sent:
+        ck("...naming the person and carrying start",
+           bool(sent[0].get("person")) and sent[0].get("start") is True, sent[0])
+        ck("...with the words that were typed",
+           "CX definition" in (sent[0].get("body") or ""), sent[0].get("body"))
+    # A SEND LANDS ON THE RECORD (§144's rule): the form is gone and the
+    # conversation it just made is open, which is the only way to see it went.
+    ck("and it lands in the conversation it made",
+       pg.query_selector("#chnewwho") is None)
+
+    # CANCEL LEAVES IT, and opening a conversation leaves it too — the two are
+    # one pane, and a form left standing behind an open thread is a second
+    # thing on screen claiming to be the thread.
+    pg.click("#chqnew"); pg.wait_for_timeout(500)
+    pg.click("[data-chnewcancel]"); pg.wait_for_timeout(400)
+    ck("Cancel puts the form away", pg.query_selector("#chnewwho") is None)
+    pg.click("#chqnew"); pg.wait_for_timeout(500)
+    row1 = pg.query_selector("[data-chpick]")
+    if row1:
+        row1.click(); pg.wait_for_timeout(900)
+        ck("...and so does opening a conversation",
+           pg.query_selector("#chnewwho") is None)
+
+    # ── 20 · A REGISTRATION MADE WITH A DIFFERENT KEY (§282.3) ───────────
+    # THE STICKY ONE. A registration is bound to the key it was made with, and
+    # this branch used to accept any existing registration without looking at
+    # it — so once the platform's key changed, the browser handed back the old
+    # registration for ever, the bell read on, the server counted the device,
+    # and every send was refused. Healthy at both ends, nothing arriving, and
+    # nothing that could ever heal it.
+    #
+    # The stand-in reports `options.applicationServerKey`, which the earlier
+    # one did not — a stand-in that models less than the thing it stands in
+    # for reports a working build as broken (§100.3), and here it would have
+    # reported a BROKEN build as working, which is worse.
+    print("\n20 · a registration made with a different key")
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000, popup=True)
+    del PUSH["subs"][:]; del PUSH["off"][:]
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+
+    # A DEVICE ALREADY REGISTERED, AND WITH SOMEBODY ELSE'S KEY — the state a
+    # deployment lands in the moment its key changes.
+    pg.evaluate("""(good) => {
+        window.__subs = []; window.__unsub = [];
+        const OTHER = new Uint8Array(65); OTHER[0] = 4;
+        for (let i = 1; i < 65; i++) OTHER[i] = 200;          // NOT the platform's
+        const mk = (key, ep) => ({
+          endpoint: ep, options: { applicationServerKey: key.buffer || key },
+          toJSON: () => ({ endpoint: ep, keys: { p256dh: "P", auth: "A" } }),
+          unsubscribe: function () { window.__unsub.push(ep); held = null;
+                                     return Promise.resolve(true); } });
+        let held = mk(OTHER, "https://push.example.test/dev/stale");
+        const mgr = {
+          getSubscription: () => Promise.resolve(held),
+          subscribe: (opts) => {
+            const raw = new Uint8Array(opts.applicationServerKey);
+            window.__subs.push({ keyLen: raw.length,
+                                 matches: btoa(String.fromCharCode.apply(null, raw))
+                                            .replace(/\+/g,"-").replace(/\//g,"_")
+                                            .replace(/=+$/,"") === good });
+            held = mk(opts.applicationServerKey, "https://push.example.test/dev/fresh");
+            return Promise.resolve(held); } };
+        const reg = { pushManager: mgr };
+        Object.defineProperty(navigator, "serviceWorker", { configurable: true,
+          get: () => ({ ready: Promise.resolve(reg),
+                        getRegistration: () => Promise.resolve(reg),
+                        register: () => Promise.resolve(reg) }) });
+        window.__held = () => held; }""", VAPID)
+
+    pg.click("#chatbtn"); pg.wait_for_timeout(2500)
+
+    unsub = pg.evaluate("() => window.__unsub || []")
+    ck("a registration made with another key is thrown away",
+       unsub == ["https://push.example.test/dev/stale"], unsub)
+    ck("...and the server is told to forget it, or it is sent to for ever",
+       any((o.get("endpoint") if isinstance(o, dict) else o)
+           == "https://push.example.test/dev/stale"
+           for o in PUSH["off"]), PUSH["off"])
+    subs = pg.evaluate("() => window.__subs || []")
+    ck("...and it registers again straight away", len(subs) == 1, subs)
+    ck("...with the key the platform is actually sending with",
+       len(subs) == 1 and subs[0]["matches"] is True, subs)
+    ck("...and the new one reaches the server",
+       any((s0.get("endpoint") if isinstance(s0, dict) else s0)
+           == "https://push.example.test/dev/fresh"
+           for s0 in PUSH["subs"]), PUSH["subs"])
+    # BOTH ENDS (§94.2): a registration made with the RIGHT key is left alone.
+    # Without this, a build that threw every registration away every poll —
+    # churning the device on every beat — would pass all five above.
+    del PUSH["off"][:]
+    pg.evaluate("() => { window.__unsub = []; window.__subs = []; }")
+    pg.wait_for_timeout(5000)
+    ck("a registration made with the right key is left alone",
+       pg.evaluate("() => (window.__unsub || []).length") == 0 and
+       pg.evaluate("() => (window.__subs || []).length") == 0,
+       pg.evaluate("() => ({ un: window.__unsub, sub: window.__subs })"))
+    # AND A BROWSER THAT WILL NOT SAY which key it used is left alone too —
+    # churning on a guess is worse than keeping one that is probably right.
+    pg.evaluate("""() => {
+        window.__unsub = []; window.__subs = [];
+        const ep = "https://push.example.test/dev/silent";
+        let held = { endpoint: ep,
+          toJSON: () => ({ endpoint: ep, keys: { p256dh: "P", auth: "A" } }),
+          unsubscribe: () => { window.__unsub.push(ep); return Promise.resolve(true); } };
+        const mgr = { getSubscription: () => Promise.resolve(held),
+                      subscribe: () => { window.__subs.push(1); return Promise.resolve(held); } };
+        const reg = { pushManager: mgr };
+        Object.defineProperty(navigator, "serviceWorker", { configurable: true,
+          get: () => ({ ready: Promise.resolve(reg),
+                        getRegistration: () => Promise.resolve(reg),
+                        register: () => Promise.resolve(reg) }) }); }""")
+    pg.wait_for_timeout(5000)
+    ck("a browser that does not report its key is not churned",
+       pg.evaluate("() => (window.__unsub || []).length") == 0,
+       pg.evaluate("() => window.__unsub"))
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

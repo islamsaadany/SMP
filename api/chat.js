@@ -35,6 +35,7 @@ const Rules = require("../lib/rules.js");
 const Audience = require("../lib/audience.js");
 const mailer = require("../lib/mailer.js");
 const assistant = require("../lib/assistant.js");
+const push = require("../lib/push.js");
 
 /* THE CORPUS IS READ ONCE PER PROCESS. It is a 70KB file that never changes
    between deploys, and §98.1's lesson was that per-request work nobody thinks
@@ -96,6 +97,15 @@ function send(res, code, obj) {
   res.setHeader("Cache-Control", "no-store");
   res.end(JSON.stringify(obj));
 }
+/* THE FIRST LINE, for a notification (§225's wording B). One place, so the
+   box the office gets and the box a person gets are trimmed identically
+   (§53.5) — and it collapses whitespace, because a message typed with a
+   blank line in it would otherwise arrive as a title with a gap under it. */
+const firstLine = function (v) {
+  const t = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+  return t.length > 120 ? t.slice(0, 119) + "\u2026" : t;
+};
+
 const str = function (v, max) {
   return String(v == null ? "" : v).trim().slice(0, max || MAX_TEXT);
 };
@@ -257,10 +267,147 @@ async function tellTheOffice(client, me, text, cfg) {
   } catch (e) { /* a mail failure never costs the handoff */ }
 }
 
+/* ── THE CHASE, RUN ON THE WAY PAST (§283) ─────────────────────────────
+   A reply the office sent to somebody who looked present, still unread when
+   their chosen time has passed, is emailed now. Only that case: somebody who
+   was away was mailed at once, and somebody who has read it is excluded by
+   the query itself rather than by a flag somebody has to remember to clear.
+
+   THERE IS NO SCHEDULER HERE — no cron in `vercel.json` — so this rides
+   ordinary requests, which is exactly what the platform already does with
+   expired sign-in attempts (§43: "pruned on every sign-in", for the same
+   reason). The honest limitation is stated rather than hidden: IF NOBODY
+   TOUCHES THE PLATFORM, NOTHING GOES OUT UNTIL SOMEBODY DOES. In practice
+   somebody polls during working hours, and a scheduled job can be added later
+   without changing one line of the rule — it would simply call this.
+
+   ONCE A MINUTE PER PROCESS, NOT ONCE A REQUEST. The chat polls every four
+   seconds; §98 took one poll from 14 database round trips to 5 and this must
+   not give that back. The gate is memoised the same way `ensureReady` is.
+
+   AND IT NEVER COSTS THE REQUEST IT RODE IN ON. Every failure here is
+   swallowed: a chase that does not go out is a chase that goes out on the
+   next request, and a person reading their conversation must never be shown
+   an error about somebody else's email. */
+let CHASED_AT = 0;
+const CHASE_EVERY = 60000;
+
+async function chaseDue(client, cfg) {
+  if (!cfg.on || !cfg.mail) return;              /* the switch decides (§98.2) */
+  if (!mailer.configured()) return;              /* nothing to send with */
+  const now = Date.now();
+  if (now - CHASED_AT < CHASE_EVERY) return;
+  CHASED_AT = now;
+
+  let due = [];
+  try {
+    due = (await client.query(
+      "SELECT m.id, m.person_key, m.chase_html " +
+      "  FROM chat_messages m JOIN chat_threads t ON t.person_key = m.person_key " +
+      /* FROM THE OFFICE, SAID RATHER THAN ASSUMED. Nothing else can carry a
+         kept message today — only `reply` ever writes one — so this changes
+         no behaviour, and a query that relies on what cannot happen yet is
+         one that breaks silently the day it can. The check found it. */
+      " WHERE m.from_office AND m.chase_html IS NOT NULL AND m.emailed_to IS NULL " +
+      "   AND m.at < now() - ($1 || ' minutes')::interval " +
+      /* THE ONE CONDITION THAT MATTERS: still unread. A person who came back
+         and read it is not chased, and that is decided by the fact rather
+         than by anybody remembering to cancel anything (§50.6's shape). */
+      "   AND (t.seen_by_them IS NULL OR m.at > t.seen_by_them) " +
+      " ORDER BY m.at LIMIT 25", [String(cfg.chase)])).rows;
+  } catch (e) { return; }                        /* no column yet, or busy */
+
+  for (const m of due) {
+    let plan = null;
+    try { plan = JSON.parse(m.chase_html); } catch (e) { plan = null; }
+    if (!plan || !plan.html) {
+      try { await client.query("UPDATE chat_messages SET chase_html = NULL WHERE id = $1",
+                               [m.id]); } catch (e) {}
+      continue;
+    }
+    /* THE ADDRESS IS RESOLVED NOW, FROM THE STORED REGISTER (§74.2) — never
+       kept from half an hour ago, because somebody's address may have been
+       corrected in between, and somebody RETIRED must not be written to. */
+    let addr = "";
+    try {
+      const p = (await client.query(
+        "SELECT extra FROM people WHERE key = $1 " +
+        "  AND COALESCE(extra->>'active','true') <> 'false'", [m.person_key])).rows[0];
+      addr = p ? Audience.addressOf(p.extra || {}) : "";
+    } catch (e) { continue; }                    /* the register is busy; next time */
+
+    if (!addr) {
+      /* NOBODY TO WRITE TO, AND THAT IS SETTLED RATHER THAN RETRIED FOR EVER.
+         `emailed_to` stays null, which is the truth — no email went — and the
+         kept message is dropped so the sweep does not carry it daily. */
+      try { await client.query("UPDATE chat_messages SET chase_html = NULL WHERE id = $1",
+                               [m.id]); } catch (e) {}
+      continue;
+    }
+    try {
+      const id = await mailer.sendOne({
+        to: addr, fromName: plan.fromName, replyTo: plan.replyTo,
+        subject: plan.subject || "A reply from the Strategy Office",
+        html: String(plan.html)
+      });
+      /* CLEARED WHATEVER HAPPENED, and `emailed_to` written ONLY when it
+         actually went (§188): a tag on a message that never left is worse
+         than no tag. A failure is not retried for ever — one chase is a
+         chase; a loop is a mailing list. */
+      await client.query(
+        "UPDATE chat_messages SET chase_html = NULL, emailed_to = $2 WHERE id = $1",
+        [m.id, id ? addr : null]);
+    } catch (e) {
+      try { await client.query("UPDATE chat_messages SET chase_html = NULL WHERE id = $1",
+                               [m.id]); } catch (e2) {}
+    }
+  }
+}
+
 module.exports = async function handler(req, res) {
   let client;
   try {
     client = await getPool().connect();
+
+    /* ── NOTHING IN THE CHAT MAY WAIT ON A SAVE (§282) ─────────────────
+       Islam, twice in two days: "all conversations are gone!!", and then
+       "before the fix all the chats disappeared", with §231.4's card reading
+       "The server did not answer (no answer)" — which is this file's own
+       25-second clock giving up, not a crash and not a 500.
+
+       MEASURED RATHER THAN GUESSED, on a real Postgres. A save clears and
+       rewrites the state graph's 33 tables with `TRUNCATE ... CASCADE`, and
+       TRUNCATE takes an ACCESS EXCLUSIVE lock on `people` for the whole of
+       §240's transaction. The queue LEFT JOINs `people` for a live name. So
+       while ANY save is running, anywhere in the tenant, the conversation
+       list is not slow — it is FROZEN, indefinitely:
+
+         a save in flight, the queue as it was  : still frozen after 8s
+         the same queue reading its stored name : 2ms
+         the messages in a conversation         : 1ms
+
+       Only the join was ever blocked. And it is worst exactly when somebody
+       is looking: a new build reloads every browser, the platform hydrates
+       and autosaves, and Neon has usually gone to sleep — so the slowest save
+       of the day lands the moment the person opens the corner. That is why
+       this reads as "every new build loses the chats".
+
+       THE READER IS FIXED, NOT THE WRITER. Changing how a save clears its
+       tables is the right eventual fix and it is the one file in the product
+       where a mistake costs real data — so it is its own staged piece of
+       work, not something done while chasing a chat symptom. Nothing below
+       touches the save path.
+
+       This is the backstop under that: a lock this endpoint cannot get is an
+       error in two seconds rather than a hang until the browser gives up.
+       SAFE BECAUSE THE CHAT'S OWN TABLES ARE OUTSIDE THE STATE GRAPH (§97,
+       §56) — `chat_threads`, `chat_messages` and `push_*` are never truncated
+       and carry no foreign key into it, so a chat WRITE cannot collide with a
+       save and cannot be failed by this. It can only ever fire on a read of
+       `people`, which is precisely the read that must not hang. */
+    try { await client.query("SET lock_timeout = '2s'"); }
+    catch (e) { /* an old server without it is no worse off than before */ }
+
     await ensureReady(client);
     const body = req.method === "POST" ? await readBody(req) : {};
     const action = body.action || (req.method === "GET" ? "mine" : "");
@@ -271,6 +418,12 @@ module.exports = async function handler(req, res) {
     if (me.mustChange) return send(res, 403, { ok: false, error: "choose a password first" });
     const office = Rules.isOfficeRole(me.role);
     const cfg = await chatSettings(client);
+
+    /* ── AND ANY REPLY NOW OWED AN EMAIL GOES OUT (§283) ──────────────
+       Rides this request because there is no scheduler here; gated to once a
+       minute per process so the four-second poll does not pay for it, and
+       unable to fail the request it rode in on. */
+    chaseDue(client, cfg).catch(function () {});
 
     /* ── WHAT THE PERSON'S OWN PANEL ASKS FOR ─────────────────────────
        And the one thing it writes without being told to: `here_at`, which is
@@ -295,6 +448,13 @@ module.exports = async function handler(req, res) {
                       missing from the posted body and every stored row would
                       have said no message ever greeted anybody. */
                    popup: cfg.popup,
+                   /* §231: THE PUBLIC HALF OF THE KEY TRAVELS WITH THE POLL,
+                      like every other setting — the browser needs it to
+                      subscribe and it is public by construction (it is handed
+                      to every push service). Empty where none could be made,
+                      which is what the corner reads to know push is not
+                      available here rather than guessing. */
+                   vapid: cfg.popup ? await push.publicKey(client) : "",
                    beat: Rules.chatBeat({ fast: cfg.fast }) };
       /* AND THE OFFICE IS TOLD HOW MANY ARE WAITING (§225). Their corner is
          the only thing that polls on EVERY page — the Platform Inbox's own
@@ -308,11 +468,17 @@ module.exports = async function handler(req, res) {
            line (Islam's wording B) — so the office is not served a bare
            number where a person is served a sentence (§53.5). The newest
            waiting conversation is the one that just arrived. */
+        /* THE COUNT NEVER TOUCHES THE REGISTER, AND THE NAME NO LONGER
+           WAITS ON IT (§282). This is the office's own poll — the one that
+           keeps their corner alive — so a locked `people` must not be able
+           to fail it. The stored `person_name` answers on its own, and the
+           live name is asked for separately and allowed not to arrive. */
         const w = (await client.query(
           "SELECT count(*)::int AS n, " +
-          "  (SELECT coalesce(p.name, t2.person_name, t2.person_key) " +
-          "     FROM chat_threads t2 LEFT JOIN people p ON p.key = t2.person_key " +
+          "  (SELECT coalesce(t2.person_name, t2.person_key) FROM chat_threads t2 " +
           "    WHERE t2.waiting ORDER BY t2.last_at DESC LIMIT 1) AS who, " +
+          "  (SELECT t4.person_key FROM chat_threads t4 " +
+          "    WHERE t4.waiting ORDER BY t4.last_at DESC LIMIT 1) AS who_key, " +
           "  (SELECT m.body FROM chat_threads t3 " +
           "     JOIN chat_messages m ON m.person_key = t3.person_key " +
           "    WHERE t3.waiting ORDER BY t3.last_at DESC, m.at DESC, m.id DESC " +
@@ -321,6 +487,39 @@ module.exports = async function handler(req, res) {
         out.waiting = w.n | 0;
         out.waitingWho = w.who || null;
         out.waitingBody = w.body || null;
+
+        /* ── AND THE QUEUE ITSELF, FOR THE CORNER (§285) ────────────────
+           Islam: the office's bubble should carry the conversations waiting
+           on them rather than a conversation with themselves.
+
+           ON THIS POLL AND NOT A SECOND ONE. The corner already asks every
+           few seconds and this is the request that keeps it alive; a
+           dedicated endpoint would be a second clock over the same rows
+           (§98's whole concern, and §53.5's).
+
+           WAITING ONLY, AND NO CAP — his decision, both of them. The list is
+           exactly the set of people owed an answer, so the badge above it can
+           be its LENGTH and the two can never disagree (§108.1: a count and
+           the thing it counts must have one membership).
+
+           IT NEVER TOUCHES THE REGISTER (§282). The stored `person_name` is
+           what the row draws; the office's Inbox page is where a live name,
+           a title and a place are worth waiting for. */
+        try {
+          out.queue = (await client.query(
+            "SELECT t.person_key, t.person_name, t.last_at, " +
+            "       (SELECT m.body FROM chat_messages m WHERE m.person_key = t.person_key " +
+            "         ORDER BY m.at DESC, m.id DESC LIMIT 1) AS last_body " +
+            "  FROM chat_threads t WHERE t.waiting " +
+            " ORDER BY t.last_at DESC")).rows;
+        } catch (e) { out.queue = null; }   /* absent is not empty (§93) */
+        if (w.who_key) {
+          try {
+            const live = (await client.query(
+              "SELECT name FROM people WHERE key = $1", [w.who_key])).rows[0];
+            if (live && live.name) out.waitingWho = live.name;
+          } catch (e) { /* the register is busy; the stored name stands */ }
+        }
       }
       return send(res, 200, out);
     }
@@ -330,8 +529,220 @@ module.exports = async function handler(req, res) {
        up in the endpoint rather than being enforced by it. */
     if (action === "seen") {
       await client.query(
+        /* READING IT IS WHAT CANCELS THE CHASE (§283). The sweep's own query
+           would already skip a read reply; this drops the kept message in the
+           same breath, so nothing lingers in the table for a chase that can
+           never happen. */
         "UPDATE chat_threads SET seen_by_them = now(), here_at = now() WHERE person_key = $1",
         [me.key]);
+      /* Nothing left to chase on this conversation (§283). */
+      try {
+        await client.query(
+          "UPDATE chat_messages SET chase_html = NULL " +
+          " WHERE person_key = $1 AND chase_html IS NOT NULL", [me.key]);
+      } catch (e) { /* no column yet; the sweep skips a read reply anyway */ }
+      return send(res, 200, { ok: true });
+    }
+
+    /* ── THIS DEVICE SAYS YES, OR STOPS (§231) ───────────────────────
+       THE ROW IS THE SWITCH. There is no `on` column beside it to disagree
+       with: a device that has said yes has a row, one that has not does not,
+       and turning the bell off deletes it (§104.7, §50.6). That is also what
+       makes the person's switch genuinely per device without anything having
+       to remember which device is which.
+
+       AND IT IS THE SIGNED-IN PERSON'S, never a key from the body. Taking
+       `person` from the browser would let anybody subscribe their own phone
+       to somebody else's conversation and read every reply that person is
+       sent — the same rule that makes `/api/state` read the person off the
+       session and never off the payload (§185). */
+    /* ── IS IT WORKING? (§231.6) ──────────────────────────────────────
+       §123 built exactly this for the assistant and gave the reason: "it is
+       not working" sends somebody to look at everything, and naming the step
+       sends them to one page. Notifications are the same shape and worse —
+       four links, every one of them failing invisibly by design.
+
+       IT MAKES A REAL SEND, because a chain that is only inspected is a chain
+       nobody has walked: a key can be present and refused, a device
+       registered and long gone. And it STORES NOTHING — it answers about this
+       moment, and a stored answer goes stale where nobody can see it (§35). */
+    if (action === "pushTest") {
+      const steps = [];
+      /* THE WORD IS THE STEP'S TO CHOOSE (§124): "present" is not "working",
+         and a row that says the second about the first is the fault that
+         section exists to record. */
+      const step = function (name, state, detail, word) {
+        steps.push({ name: name, state: state, detail: detail || null, word: word || null });
+      };
+
+      if (!cfg.on) {
+        step("The chat", "off", "The whole chat is switched off, so nothing is sent.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The chat", "ok", null, "on");
+
+      if (!cfg.popup) {
+        step("Notifications", "off",
+             "Switched off for the company on this page. Nobody is notified.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Notifications", "ok", "Switched on for the company.", "on");
+
+      const h = await push.health(client, me.key);
+
+      /* THE LIBRARY. It is loaded lazily precisely so its absence cannot take
+         the chat down (§231.3) — which means its absence is now silent, and
+         this is where it stops being silent. */
+      if (!h.library) {
+        step("The sending library", "fail",
+             (h.libraryWhy || "It did not load.") +
+             " Notifications cannot be sent until the deployment carries it.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The sending library", "ok", null, "loaded");
+
+      if (!h.key) {
+        step("This platform's key", "fail",
+             h.keyWhy || "No key pair could be made or read.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("This platform's key", "ok",
+           (h.keyFrom === "env" ? "Set in the environment." : "Made by the platform itself.") +
+           " Sending as " + h.subject + ".", "present");
+
+      /* THIS DEVICE. A browser can allow notifications and still never have
+         registered — a hang rather than a refusal, which is what §231.5 was
+         about — so what is counted is what the SERVER holds, not what the
+         browser believes. */
+      /* ── WHAT THIS BROWSER HOLDS, BESIDE WHAT WE HOLD (§282.4) ──────
+         The browser sends its own half; anything it does not send is simply
+         absent, so an older tab still gets the old report rather than a
+         diagnostic that refuses to run. */
+      const here = (body.here && typeof body.here === "object") ? body.here : {};
+      const hereEp = str(here.endpoint, 500);
+      const hereKey = str(here.key, 200);
+
+      if (here.permission === "denied") {
+        step("This browser", "fail",
+             "It is set to block notifications for this site. That is a browser " +
+             "setting, not a platform one — allow them for this site and press again.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      if (here.why) {
+        step("This browser", "fail", String(here.why).slice(0, 300));
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      if (!hereEp) {
+        step("This browser", "fail",
+             "It is not registered for notifications. Open the conversation in " +
+             "the corner, turn the bell on, and press this again.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("This browser", "ok", "Registered with " + push.serviceOf(hereEp) + ".",
+           "registered");
+
+      if (!h.devices) {
+        step("Your devices", "fail",
+             (h.devicesWhy ? h.devicesWhy + " " : "") +
+             "This browser is registered but the platform has no record of it — " +
+             "the registration never reached the server. Turn the bell off and " +
+             "on again in the corner, then press this.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+
+      /* THE MISMATCH THAT READ AS PERFECT HEALTH. The browser is registered,
+         the server holds a device, and they are NOT THE SAME DEVICE — so
+         every send goes somewhere this browser will never hear from. Nothing
+         before §282.4 could see this, because each end only ever reported
+         itself. */
+      const mine = (await push.subsOf(client, me.key)).map(function (r) { return r.endpoint; });
+      if (mine.indexOf(hereEp) < 0) {
+        step("Your devices", "fail",
+             h.devices + (h.devices === 1 ? " device is" : " devices are") +
+             " registered to you, but none of them is this browser — so " +
+             "notifications are being sent somewhere you will never see them. " +
+             "Turn the bell off and on again in the corner to register this one.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      if (hereKey && h.key && hereKey !== String(h.key).replace(/=+$/, "")) {
+        step("Your devices", "fail",
+             "This browser registered with a different key from the one the " +
+             "platform sends with, so every notification to it is refused. " +
+             "Turn the bell off and on again in the corner to register it afresh.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Your devices", "ok",
+           h.devices + (h.devices === 1 ? " device is registered" : " devices are registered") +
+           ", this one among them.", String(h.devices));
+
+      /* AND THE SEND ITSELF, to this person and nobody else — a diagnostic
+         that could reach somebody else's screen is a diagnostic nobody should
+         press. */
+      const out = await push.sendTo(client, await push.subsOf(client, me.key), {
+        title: "Strategy Office",
+        body: "This is a test. Notifications are working on this device.",
+        tag: "reply"
+      });
+      if (out.sent) {
+        step("A box on your screen", "ok",
+             "Sent to " + out.sent + (out.sent === 1 ? " device" : " devices") +
+             (out.dropped ? ", and " + out.dropped + " that no longer exists was forgotten." : ".") +
+             " If nothing appeared, the last step is your operating system: " +
+             "check that this browser is allowed to show notifications there.",
+             "sent");
+      } else {
+        /* THE SERVICE'S OWN WORDS (§282.2). This said "The push service would
+           not take it" for a mismatched key, a dead registration and an
+           oversized payload alike — three errands, one shrug, and the reason
+           nothing we tried ever converged. */
+        step("A box on your screen", "fail",
+             (out.dropped && !out.failed
+                ? "Every registered device turned out to be gone and has been " +
+                  "forgotten — turn the bell on again in the corner. "
+                : (out.why ? out.why + " " : "The push service would not take it. ")) +
+             "Nothing reached you.");
+      }
+      return send(res, 200, { ok: true, steps: steps });
+    }
+
+    if (action === "pushOn") {
+      if (!cfg.on || !cfg.popup) {
+        return send(res, 403, { ok: false, error: "Notifications are off for this platform." });
+      }
+      const sub = body.sub || {};
+      const endpoint = str(sub.endpoint, 2000);
+      const p256dh = str((sub.keys || {}).p256dh, 300);
+      const auth2 = str((sub.keys || {}).auth, 300);
+      if (!endpoint || !p256dh || !auth2) {
+        return send(res, 400, { ok: false, error: "That is not a subscription this can store." });
+      }
+      /* A subscription must be a URL, and an https one: the endpoint is
+         fetched by our own server, so anything else is somebody pointing it
+         at a host of their choosing (§71's argument about a screenshot URL,
+         one endpoint out). */
+      if (!/^https:\/\//i.test(endpoint)) {
+        return send(res, 400, { ok: false, error: "That is not a subscription this can store." });
+      }
+      /* THE SAME DEVICE RE-SUBSCRIBING REPLACES ITS ROW rather than adding a
+         second — a browser re-issues the endpoint after clearing site data or
+         a long absence, and two rows for one device is two boxes. */
+      await client.query(
+        "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4) " +
+        "ON CONFLICT (endpoint) DO UPDATE SET person_key = EXCLUDED.person_key, " +
+        "  p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, seen_at = now()",
+        [endpoint, me.key, p256dh, auth2]);
+      return send(res, 200, { ok: true });
+    }
+
+    if (action === "pushOff") {
+      const endpoint = str((body.sub || {}).endpoint || body.endpoint, 2000);
+      /* SCOPED TO THE SIGNED-IN PERSON, so a stale or guessed endpoint can
+         only ever silence a device of their own. */
+      if (endpoint) {
+        await client.query(
+          "DELETE FROM push_subscriptions WHERE endpoint = $1 AND person_key = $2",
+          [endpoint, me.key]);
+      }
       return send(res, 200, { ok: true });
     }
 
@@ -449,6 +860,26 @@ module.exports = async function handler(req, res) {
       const stillWaiting = (await client.query(
         "SELECT waiting FROM chat_threads WHERE person_key = $1", [me.key])).rows[0];
       if (stillWaiting && stillWaiting.waiting) await tellTheOffice(client, me, text, cfg);
+
+      /* AND A BOX ON THE OFFICE'S OWN SCREENS, WITH NO TAB OPEN (§231).
+         Only while the conversation is still waiting — the same condition the
+         email chase already uses, so an assistant answer that settled it does
+         not also go and interrupt somebody. Never back to the sender's own
+         devices: they are the one person who knows this message exists.
+
+         IT NEVER COSTS THE MESSAGE. The message is stored and the thread is
+         already waiting before this runs (§104's ordering); a push service
+         that is slow, unreachable or refusing leaves all of that exactly as
+         it is, which is the correct state. */
+      if (cfg.popup && stillWaiting && stillWaiting.waiting) {
+        try {
+          await push.sendTo(client, await push.officeSubs(client, me.key), {
+            title: me.name || me.key,
+            body: firstLine(text || "(a screenshot)"),
+            tag: "office"
+          });
+        } catch (e) { /* a notification never costs the message it is about */ }
+      }
 
       return send(res, 200, await mine(client, me));
     }
@@ -588,8 +1019,6 @@ module.exports = async function handler(req, res) {
     if (action === "queue") {
       const rows = (await client.query(
         "SELECT t.person_key, t.person_name, t.waiting, t.last_at, t.here_at, " +
-        "       p.name AS live_name, p.unit_key, p.fn_key, p.title, " +
-        "       (p.key IS NULL) AS gone, " +
         "       (SELECT count(*) FROM chat_messages m " +
         "         WHERE m.person_key = t.person_key AND NOT m.from_office " +
         "           AND (t.seen_by_us IS NULL OR m.at > t.seen_by_us)) AS unread, " +
@@ -605,8 +1034,55 @@ module.exports = async function handler(req, res) {
            person, which is the shape the office already works in. */
         "       (SELECT count(*) FROM chat_messages m " +
         "         WHERE m.person_key = t.person_key AND m.flag IS NOT NULL) AS flagged " +
-        "FROM chat_threads t LEFT JOIN people p ON p.key = t.person_key " +
+        /* THE REGISTER IS ASKED SEPARATELY, NOT JOINED (§282). This one line
+           was the whole outage: `people` is the table a save locks, and a
+           join makes the conversations wait on it. `chat_threads` already
+           carries `person_name`, written when the conversation was made, so
+           the list can always be drawn. */
+        "FROM chat_threads t " +
         "ORDER BY t.waiting DESC, t.last_at DESC LIMIT 300")).rows;
+
+      /* AND THE LIVE NAMES ON TOP OF IT, WHERE THEY CAN BE HAD.
+         §74.2's rule is unchanged — a name is resolved against the STORED
+         register, never against whatever the conversation was opened under —
+         and what changes is only what happens when the register cannot be
+         read this second: the conversations are drawn from the names they
+         already hold instead of not being drawn at all.
+
+         THE COST, SAID RATHER THAN GLOSSED: for the second or two that a save
+         is in flight, somebody who has been RENAMED since they last wrote
+         shows their previous name in this list, and their title, unit and the
+         "no longer on the register" mark are absent. It corrects itself on the
+         very next poll. Set against a list that does not appear at all, that
+         is the trade, and it is the reason `gone` is left NULL rather than
+         guessed: saying somebody has left the register because the register
+         could not be read is §93's fault exactly — an error reported as an
+         answer. */
+      let reg = null;
+      try {
+        reg = (await client.query(
+          "SELECT key, name, unit_key, fn_key, title FROM people")).rows;
+      } catch (e) { reg = null; }          /* locked, and that is survivable */
+      if (reg) {
+        const by = {};
+        for (const r of reg) by[r.key] = r;
+        for (const t of rows) {
+          const p = by[t.person_key];
+          t.live_name = p ? p.name : null;
+          t.unit_key  = p ? p.unit_key : null;
+          t.fn_key    = p ? p.fn_key : null;
+          t.title     = p ? p.title : null;
+          t.gone      = !p;
+        }
+      } else {
+        /* NOT KNOWN IS NOT NOUGHT AND NOT "GONE" (§35, §93). Every field the
+           register would have answered is left absent, so the page falls back
+           to the stored name and says nothing it cannot stand behind. */
+        for (const t of rows) {
+          t.live_name = null; t.unit_key = null; t.fn_key = null;
+          t.title = null; t.gone = null;
+        }
+      }
       return send(res, 200, {
         ok: true, office: true, threads: rows,
         /* The settings, so the page draws the menu from the same answer the
@@ -622,14 +1098,122 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    /* ── SEARCHING THE WHOLE HISTORY (§285) ──────────────────────────
+       Islam: "the search should search all history." The corner's list and
+       the Inbox's both filtered what was already loaded — names, and the LAST
+       line of each conversation — so anything said a week ago was unfindable.
+
+       IT REACHES EVERY CONVERSATION, WAITING OR NOT, which is his decision and
+       the reason the screen says so out loud above the results: somebody
+       searching is looking for a specific thing, not browsing a filter, and a
+       result from an answered conversation appearing under a heading that
+       says "Waiting" would otherwise read as a fault.
+
+       ONE ROW PER CONVERSATION, carrying the line that MATCHED rather than the
+       last line — a result with no visible reason for being a result is a
+       result nobody trusts. The newest match wins where a conversation has
+       several.
+
+       THE REGISTER IS NOT JOINED (§282), and the search is the office's alone:
+       every other person has exactly one conversation and it is already in
+       front of them. */
+    if (action === "chatSearch") {
+      if (!office) return send(res, 403, { ok: false, error: "The Strategy Office answers these." });
+      const q = str(body.q, 120).trim();
+      if (q.length < 2) return send(res, 200, { ok: true, q: q, hits: [] });
+      const like = "%" + q.replace(/([%_\\])/g, "\\$1") + "%";
+      const hits = (await client.query(
+        "SELECT DISTINCT ON (t.person_key) " +
+        "       t.person_key, t.person_name, t.waiting, " +
+        "       m.body AS line, m.at AS line_at, m.from_office, " +
+        "       (m.id = (SELECT m2.id FROM chat_messages m2 WHERE m2.person_key = t.person_key " +
+        "                 ORDER BY m2.at DESC, m2.id DESC LIMIT 1)) AS is_last " +
+        "  FROM chat_threads t JOIN chat_messages m ON m.person_key = t.person_key " +
+        " WHERE m.body ILIKE $1 ESCAPE '\\' OR t.person_name ILIKE $1 ESCAPE '\\' " +
+        " ORDER BY t.person_key, m.at DESC, m.id DESC", [like])).rows;
+      /* Ordered for reading AFTER the DISTINCT has picked one line each —
+         Postgres needs the DISTINCT ON key first, which is not the order
+         anybody wants to read. */
+      hits.sort(function (a, b) { return new Date(b.line_at) - new Date(a.line_at); });
+
+      /* ── AND THE PEOPLE WHO HAVE NEVER WRITTEN IN (§290) ──────────────
+         Islam: "in the serach I need to be able to send to a new person as
+         well". Until now this searched conversations only, so a colleague who
+         had never written was answered with "Nothing found" — a dead end on
+         the one side of the platform that is allowed to start a conversation
+         (§247).
+
+         IT IS THE SERVER'S ANSWER AND NOT THE BROWSER'S, though the browser
+         holds the register, because the test is "has no conversation AT ALL"
+         and only this side knows every thread — the browser sees the waiting
+         queue and whatever this search matched, never the rest.
+
+         THE SAME RULES §247 SETTLED, and the active test is COPIED FROM ITS
+         OWN QUERY rather than composed afresh — `extra->>'active' <> 'false'`
+         and not a status column, which is what the first draft guessed and
+         would have offered every retired person on the register (§42: one
+         question, one answer). The person must be on the STORED register
+         (§74.2) and active, because somebody retired cannot sign in to read
+         it (§35). Anybody who already
+         has a conversation is excluded, so nobody is in both halves (§108.1).
+         The asker is left out too — the office starting a conversation with
+         themselves is what §285 removed.
+
+         CAPPED AT TEN, Islam's number, with the rest COUNTED rather than
+         dropped: search for "a" and half the company matches, and a list that
+         silently stops is one somebody scrolls looking for a name that is not
+         coming. The count is the whole remainder, taken before the slice.
+
+         ALLOWED TO FAIL ON ITS OWN. If the register cannot be read the
+         conversations half still answers — this is the addition, not the
+         feature (§93: absent, never reported as none). */
+      let people = [], more = 0;
+      try {
+        const rows = (await client.query(
+          "SELECT p.key, p.name, p.unit_key, p.fn_key, p.title FROM people p " +
+          " WHERE p.name ILIKE $1 ESCAPE '\\' " +
+          "   AND COALESCE(p.extra->>'active','true') <> 'false' " +
+          "   AND p.key <> $2 " +
+          "   AND NOT EXISTS (SELECT 1 FROM chat_threads t WHERE t.person_key = p.key) " +
+          " ORDER BY p.name", [like, me.key])).rows;
+        more = Math.max(0, rows.length - 10);
+        people = rows.slice(0, 10);
+      } catch (e) { people = []; more = 0; }
+
+      return send(res, 200, { ok: true, q: q, hits: hits.slice(0, 60),
+                              people: people, more: more });
+    }
+
     if (action === "thread") {
       const who = str(body.person, 120);
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
+      /* THE CONVERSATION FIRST, THE REGISTER SECOND (§282) — so opening one
+         cannot wait on a save either. Everything the office needs to READ a
+         conversation lives in the chat's own tables; the register only adds
+         who the person is TODAY. */
       const t = (await client.query(
-        "SELECT t.*, p.name AS live_name, p.extra AS extra, p.unit_key, p.fn_key, p.title " +
-        "FROM chat_threads t LEFT JOIN people p ON p.key = t.person_key " +
-        "WHERE t.person_key = $1", [who])).rows[0];
+        "SELECT * FROM chat_threads WHERE person_key = $1", [who])).rows[0];
       if (!t) return send(res, 404, { ok: false, error: "No conversation with that person." });
+      let known = true;
+      try {
+        const p = (await client.query(
+          "SELECT name, extra, unit_key, fn_key, title FROM people WHERE key = $1",
+          [who])).rows[0];
+        t.live_name = p ? p.name : null;
+        t.extra     = p ? p.extra : null;
+        t.unit_key  = p ? p.unit_key : null;
+        t.fn_key    = p ? p.fn_key : null;
+        t.title     = p ? p.title : null;
+      } catch (e) {
+        /* THE REGISTER IS BUSY, WHICH IS NOT THE SAME AS THE PERSON BEING
+           GONE (§93). The thread reads under the name it already holds and
+           claims nothing else — an address that cannot be read means the
+           email line simply does not offer to chase, rather than offering to
+           chase nobody. */
+        known = false;
+        t.live_name = null; t.extra = null;
+        t.unit_key = null; t.fn_key = null; t.title = null;
+      }
       const msgs = (await client.query(
         "SELECT " + MSG_COLS + " FROM chat_messages WHERE person_key = $1 ORDER BY at, id",
         [who])).rows;
@@ -638,7 +1222,10 @@ module.exports = async function handler(req, res) {
       const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       return send(res, 200, {
         ok: true, person: who, name: t.live_name || t.person_name,
-        gone: !t.live_name, unit: t.unit_key, fn: t.fn_key, title: t.title,
+        /* NOT READ IS NOT "GONE" (§93, §35): only an answered register may
+           say somebody has left it. */
+        gone: known ? !t.live_name : null,
+        unit: t.unit_key, fn: t.fn_key, title: t.title,
         address: Audience.addressOf(t.extra || {}),
         waiting: t.waiting, here: !!here, hereAt: t.here_at,
         /* `mail` is BOTH questions at once: can this deployment send at all,
@@ -671,8 +1258,46 @@ module.exports = async function handler(req, res) {
       const text = str(body.body);
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
       if (!text) return send(res, 400, { ok: false, error: "Nothing to send." });
-      const t = (await client.query(
+      let t = (await client.query(
         "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+
+      /* ── THE OFFICE STARTS ONE (§247) ─────────────────────────────
+         Islam: "from the platform inbox allow the smo to initiate a message
+         with someone." Until now the office could only ever ANSWER: with
+         nobody having written in there was no way to reach them from here at
+         all.
+
+         IT IS A FLAG ON THE REPLY, NOT AN ACTION OF ITS OWN. Everything a
+         message from the office does — marking the conversation answered
+         (§71), chasing by email when they are away (§97.5), the box on their
+         screen (§231) — is already written once, here. A second endpoint
+         would be a second copy of all of it, and the two would drift (§53.5).
+         What starting adds is exactly one thing: the conversation may not
+         exist yet.
+
+         AND THE PERSON MUST BE ONE. `ensureThread` will happily mint a row
+         for any string, so a typo would create a conversation with nobody,
+         visible in the queue for ever and answerable by no one — checked
+         against the STORED register, never against what the browser sent
+         (§74.2), and against the ACTIVE register, because a retired person
+         cannot sign in to read it (§35's rule about writing somewhere nobody
+         can reach).
+
+         ONE CONVERSATION PER PERSON SURVIVES UNTOUCHED (§97): starting one
+         with somebody who has already written in finds their thread on the
+         line above and simply carries on into it. This can never make a
+         second — `chat_threads.person_key` is the primary key. */
+      if (!t && body.start === true) {
+        const p = (await client.query(
+          "SELECT key, name FROM people WHERE key = $1 " +
+          "  AND COALESCE(extra->>'active','true') <> 'false'", [who])).rows[0];
+        if (!p) {
+          return send(res, 404, { ok: false, error: "There is no such person on the register." });
+        }
+        await ensureThread(client, p.key, p.name);
+        t = (await client.query(
+          "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+      }
       if (!t) return send(res, 404, { ok: false, error: "No conversation with that person." });
 
       /* THE ID COMES BACK, because §188 marks THIS message once the email
@@ -698,9 +1323,58 @@ module.exports = async function handler(req, res) {
          never taken from the browser (§74.2). The browser sends the HTML it
          built with the one builder every other message uses (§72.3) — content,
          never a recipient. */
+      /* AND A BOX ON THEIR OWN DEVICES, WITH NO TAB OPEN (§231). Sent
+         WHATEVER the email decides below: the two answer different questions —
+         a notification reaches the phone in their pocket now, an email reaches
+         them tomorrow — and gating one on the other would mean somebody
+         sitting in the platform with the panel shut is told nothing at all,
+         which is §225's whole fault by another road.
+
+         The page suppresses its own box on any device that is subscribed, so
+         nobody ever gets two (§53.5, and it is asserted). */
+      if (cfg.popup) {
+        try {
+          await push.sendTo(client, await push.subsOf(client, who), {
+            title: me.name || "Strategy Office",
+            body: firstLine(text),
+            tag: "reply"
+          });
+        } catch (e) { /* a notification never costs the reply it is about */ }
+      }
+
       const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       let mailed = null;
-      if (!here && !cfg.mail) {
+
+      /* ── PRESENT IS NOT THE SAME AS "WILL READ IT" (§283) ─────────────
+         This used to be the end of the matter: present, so no email, ever.
+         And it is a GUESS ABOUT THE FUTURE — somebody who was on a page two
+         minutes ago and has since shut their laptop counts as here, gets no
+         email, and is never told at all. §97.5 wrote that edge down when it
+         built the rule and called a proper sweep a later decision.
+
+         So the guess becomes a wait: the message it WOULD have sent is kept,
+         and `chaseDue()` sends it if the reply is still unread when the
+         office's chosen time has passed. Nothing about the away path changes
+         — somebody genuinely away is still emailed at once, below. */
+      if (here && cfg.mail && body.html && said && said.id) {
+        try {
+          await client.query(
+            "UPDATE chat_messages SET chase_html = $2 WHERE id = $1",
+            [said.id, JSON.stringify({
+              html: String(body.html),
+              subject: str(body.subject, 200) || "A reply from the Strategy Office",
+              fromName: str(body.fromName, 120),
+              replyTo: str(body.replyTo, 200)
+            })]);
+          mailed = { sent: false, why: "they are here — chased in " + cfg.chase +
+                                       " minutes if they have not read it" };
+        } catch (e) {
+          /* KEEPING IT IS NOT THE REPLY. A tenant whose migration has not run
+             yet has no column, and that must cost the chase and nothing
+             else — the message is already in the conversation. */
+          mailed = { sent: false, why: "they are here" };
+        }
+      } else if (!here && !cfg.mail) {
         /* SAID, NOT SILENT. The office is shown the same sentence before it
            presses Send; if the two ever disagree, this one is the truth. */
         mailed = { sent: false, why: "chasing by email is turned off" };

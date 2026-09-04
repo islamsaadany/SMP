@@ -94,21 +94,47 @@ Nothing proceeds past this line without an answer.
 
 ## Known red, on purpose
 
-- **`checks/report-saves.py` — 3 × "nothing threw while reporting".** Not a
-  product defect and **red on `main` before this branch**, reproduced there with
-  §250's changes removed: the failure is
-  *"The script has an unsupported MIME type ('text/html')"* — the check's own
-  stub does not serve `sw.js`, so the platform's §231.5 registration rejects and
-  the page-error listener reports it. §100.3 exactly: *a stand-in that models
-  less than the thing it stands in for reports a working build as broken.* Every
-  other assertion in the file passes. Fix belongs in that check's stub.
+*Last measured 2026-09-04, on the build `main` is serving. **Both entries that
+stood here are now GREEN and have been removed** — recorded rather than silently
+dropped: `checks/report-saves.py` passes (its stub serves `sw.js` now), and
+`checks/no-jump.py` passes because §116 moved editing off the table into a
+dialog, so "sorting with a row open for editing" is a state the register no
+longer has. A register of known reds that is not re-measured becomes a list
+people stop reading.*
 
-- **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,
-  diagnosed 2026-08-26 (§109.5): with a register row open for editing, sorting
-  collapses the page 1457px → 913px (the open row keeps its class, loses its
-  height) and the scroll clamps up. Pre-dates the §109 merge; needs its own
-  fix in the register's sort, not a merge-widening patch. Until then this red
-  is a true signal — do not silence it.
+**The three checks §274 repaired are FIXED and need no follow-up** —
+`plan-tail-fold.py`, `one-line-titles.py` and `band-corner.py` all pass. What
+follows is what that audit found and deliberately did **not** fix, because each
+is somebody else's pass rather than a merge-widening patch.
+
+- **`checks/tactic-outcome.py` — eleven assertions run against the wrong page.**
+  It opens edit mode with `if pen: pen.click()` and the pen it looks for
+  (`.pane .penbtn`) is not what §268 draws, so the press is silently skipped and
+  eleven assertions then throw against a READ-mode page. **Fails identically on
+  `main` before §272**, verified line for line, so it is not that merge's doing.
+  The repair is the one `band-corner.py` got in §274: name the control §268
+  actually draws, and assert out loud that a subject was found, so it can never
+  skip in silence again.
+
+- **Eight checks are blinded by the welcome screen.** `email-greeting`,
+  `greeting-mockup`, `send-button-mockup`, `send-dashboard-mockup`,
+  `send-message`, `sendsaid-fullshot`, `sendsaid-mockup` and
+  `setup-overview-live` all fail with *"`welcomeover` intercepts pointer
+  events"*. §167.2 wrote the fix down — suppress the screen in an
+  `add_init_script`, because setting the flag after `goto` is too late — and it
+  was never applied to these files. Fails on `main` too.
+
+- **`capHead` and `fnKeyOf` are each declared TWICE in `group-render.js`.**
+  Pre-existing on both sides of the §275 merge (grepped before and after), so
+  not that merge's doing — and two declarations of one name means the later wins
+  by hoisting while the earlier sits dead under comments still describing it as
+  live. §56.7 and §256.2 are both about exactly this, and both were found the
+  hard way. `node --check` passes, so nothing will report it.
+
+- **Two specs are numbered 029** — `029-master-presentation` and
+  `029-save-safety-banners`, written by two sessions on the same day. Neither is
+  wrong; the number is. Flagged rather than renamed, because renaming somebody
+  else's spec directory is their call.
 
 ## Built and verified
 

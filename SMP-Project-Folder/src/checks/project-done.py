@@ -26,7 +26,12 @@ WHAT THIS ASSERTS, both ends each time (S94.2, S42):
   * both sides of the switch: a unit's pillar owner meets the same bar and the
     same control (S53.5), and the two are asserted to AGREE rather than to
     match a literal (S94.8);
-  * the shared rule answers the same way the screen renders.
+  * the shared rule answers the same way the screen renders;
+  * a CLOSED report says so to them too (S250.2) -- asserted with the lock, or
+    a build saying "Submitted" over live boxes would pass;
+  * and NO fill door on a plan that owes nothing (S250.3, reversing S223) --
+    both ends, because a build that simply deleted the bar would pass the
+    first half.
 
 THE STATE IS MADE, not found: no demo person is named as a project's Owner
 while attached to nothing else, so waiting for one means shipping this
@@ -265,6 +270,50 @@ with sync_playwright() as pw:
        "Closed" not in (st["text"] or ""), st["text"])
     ck("the pane really is locked, mark included",
        shut["locked"] and shut["liveLeft"] == 0, shut)
+
+    # ── 7 · NO DOOR WHEN NOTHING IS OWED (§250.3, reversing §223) ────────
+    # Islam: "it requires him to fill something empty and there is nothing
+    # empty." Measured in his shape: 0 counted, 0 red Missing on the page,
+    # and a red "Fill in what is empty" button — opened by milestone
+    # COLLABORATORS, the one field he ruled must never count (§187, §227).
+    #
+    # BOTH ENDS, or a build that simply deleted the bar would pass: with a
+    # real gap made, the door must still be there.
+    print("-- the fill door, on a plan that owes nothing")
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    pg.evaluate("""()=>{
+      ACCESS.powner = Object.assign({}, ACCESS.powner, { a_fn_own_strat:"fill" });
+      REVIEW.submitted = {};              /* §6 closed it; reopen for this */
+      paint(); }""")
+    pg.select_option("#asWho", "t250p"); pg.wait_for_timeout(400)
+    for _ in range(3):
+        if not pg.query_selector("#units .navswitch"): break
+        on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
+        if on and on[0] == "Functions": break
+        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    dd = pg.query_selector('#units button[data-u="%s"]' % FDEST)
+    if dd: dd.click(); pg.wait_for_timeout(400)
+    DOOR = """()=>({
+      counted: gapTotal('%s'),
+      redOnPage: document.querySelectorAll('#panel .missing').length,
+      bar: !!document.querySelector('.missbar'),
+      cta: (document.querySelector('.fillcta')||{}).textContent || null,
+      blanks: (capsOfFunction('%s')[0].projects[0].milestones||[])
+                .filter(m => SMPRules.gapEmpty('collaborators', m)).length
+    })""" % (FDEST, FN)
+    d1 = pg.evaluate(DOOR)
+    ck("his shape is reproduced: optional blanks, nothing counted",
+       d1["counted"] == 0 and d1["blanks"] > 0, d1)
+    ck("nothing on the page reads Missing", d1["redOnPage"] == 0, d1)
+    ck("...so there is no bar and no button asking him to fill anything",
+       not d1["bar"] and d1["cta"] is None, d1)
+    # AND THE OTHER END: a real gap, and the door comes back.
+    pg.evaluate("""()=>{ var m = capsOfFunction('%s')[0].projects[0].milestones[0];
+        delete m.finish; paint(); }""" % FN)
+    pg.wait_for_timeout(350)
+    d2 = pg.evaluate(DOOR)
+    ck("a real gap brings the door back", d2["counted"] > 0 and d2["bar"] and
+       "missing" in (d2["cta"] or "").lower(), d2)
 
     ck("no console errors", not errs, "; ".join(errs[:3]))
     b.close()

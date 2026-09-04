@@ -546,6 +546,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   putting `done` back in the whole-review path, where the first owner's mark is
   **destroyed**. **RECORDED, NOT DONE**: the rail does not show the mark — a
   second surface for one fact wants a mockup, not a quiet widening.
+- **NO DOOR WHEN NOTHING IS OWED (§250.3, reversing §223):** Islam, testing
+  §250 — *"it requires him to fill something empty and there is nothing
+  empty."* **MEASURED IN HIS SHAPE AND HE IS EXACTLY RIGHT**: 0 counted, 0 red
+  *Missing* on the page, and a red **Fill in what is empty** button whose only
+  cause is **milestone collaborators** — the one field he ruled must never
+  count (§187, carried to milestones by §227). **IT PREDATES §250** and was
+  proved to: the same probe on the previous build returns the same four fields
+  and the same button. §223 drew the door from what is FILLABLE rather than
+  from what is COUNTED, for Hala's sake; §227 then made an optional field
+  fillable and the door started demanding it. Three answers were put to him
+  with the cost of each; he chose **no button when nothing is owed** over the
+  recommendation. **THE COST IS HIS DECISION, RECORDED NOT RE-ARGUED**: a
+  bounded role holds FILL and not EDIT, so this was their only way into the
+  plan — an optional field is now beyond them until somebody with the pen
+  writes it, and §223's own case returns for everything in `GAP_OPTIONAL`
+  (§214 made the Definition COUNTED, so Hala's exact field still has a door).
+  **`gapOpenable()` is DELETED, not left callerless** (§24), and `gapMap()`'s
+  `fillable` argument with it — a parameter nothing passes still changes what
+  the function counts; `GAP_FILLABLE` is untouched and still decides which
+  cells open and what the server accepts. **AND §223 HAD NO CHECK AT ALL** —
+  no file ever asserted its words, which is why nothing went red — so
+  `project-done.py` §7 asserts BOTH ENDS: his shape reproduced then no bar and
+  no button, and a real gap bringing the door back. 1 red on the build before,
+  printing his symptom verbatim.
 - **A CLOSED REPORT SAYS SO TO THEM TOO (§250.2):** Islam, testing §250 —
   *"reporting is closed for him and showing a button of mark done only."*
   Measured: with the custodian's submission in, §220 disables all 8 figure

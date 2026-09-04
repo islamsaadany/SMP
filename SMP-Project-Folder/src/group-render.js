@@ -2195,14 +2195,24 @@ function editBar(page, acKey){
       var inner;
       if (EDIT_PAGE[page])
         inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
-      /* §223: THE DOOR ASKS WHAT IS FILLABLE, THE WORDS ASK WHAT IS COUNTED.
-         A page whose only blanks are optional (§214.2, §214.4) counts nought
-         and still has something to fill in — offering no way in was how Hala
-         met a Definition she could edit and no control to edit it with. */
+      /* §250.3 REVERSES §223 AT ISLAM'S DIRECTION. That section drew the door
+         from what is FILLABLE rather than from what is COUNTED, so a page
+         whose only blanks are optional still offered a way in — built for
+         Hala, who met a Definition she could edit with no control to edit it
+         with. The cost nobody had measured is what he hit: §227 made a
+         milestone's collaborators fillable-and-never-counted, so on his own
+         project the page owed NOTHING, printed no red word anywhere, and
+         carried a red button telling him to go and fill something in. Islam,
+         with the cost of the reversal stated in front of him: no button when
+         nothing is owed.
+
+         THE COST IS REAL AND WAS ACCEPTED: a bounded role holds FILL and not
+         EDIT, so this button is their only way into the plan — an optional
+         field (a collaborator, a capability's objectives) is now beyond them
+         until somebody with the pen writes it. §223's own case returns with
+         it, and it is recorded rather than glossed. */
       else if (gapTotal(TARGET))
         inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
-      else if (gapOpenable(TARGET))
-        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in what is empty</button>';
       else inner = '';
       return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
     }
@@ -2313,12 +2323,9 @@ function penBtn(page, acKey){
     if (miss) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
       '" title="' + plural(miss, "missing element") + ' in this plan">' +
       'Fill in missing elements</button>';
-    /* §223: nothing COUNTED, but something fillable — same door, quieter
-       words, because nothing here is owed. */
-    var open = gapOpenable(TARGET);
-    if (open) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
-      '" title="' + plural(open, "empty field") + ' you can fill in">' +
-      'Fill in what is empty</button>';
+    /* §250.3: nothing COUNTED, no door — the corner says what the bar says
+       (§53.5), and neither offers a way in to something the plan does not
+       ask for. See editBar above for the reversal and its stated cost. */
     return '';
   }
   var on = EDIT_PAGE[page];
@@ -2779,11 +2786,11 @@ function missBar(){
   /* §218: nothing is awaiting confirmation any more, so the bar is drawn
      for what is MISSING and nothing else — which is what it was before
      §192 added the pending half. */
-  /* §223: DRAWN FOR EITHER — what is owed, or what is merely fillable. With
-     nothing owed the bar carries no red count and no chips; it is the way in
-     and nothing else. */
-  var openable = typeof gapOpenable === "function" ? gapOpenable(TARGET) : 0;
-  if (!total && !openable) return '';
+  /* §250.3, reversing §223: DRAWN FOR WHAT IS OWED AND NOTHING ELSE. A page
+     holding only optional blanks says nothing at all — a bar that appears
+     with no count, no chips and a red button is a demand for something the
+     plan never asked for. */
+  if (!total) return '';
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
     return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +

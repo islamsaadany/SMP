@@ -27831,3 +27831,74 @@ read the box-drawing line as their output. **A check that cannot launch a
 browser exits successfully**, and `tail -1` on it looks like a result — §51.11's
 family, in the harness rather than in a selector: *a check that did not run is
 not a check that passed.*
+
+---
+
+## §250.3 — NO DOOR WHEN NOTHING IS OWED (2026-09-02, reversing §223)
+
+Islam, testing §250: *"I opened as abdel azim who owns the cost increase
+protection and … it requires him to fill something empty and there is nothing
+empty."*
+
+**MEASURED IN HIS SHAPE, AND HE IS EXACTLY RIGHT.** A project owner holding
+*Fill gaps* on his own function's Strategy:
+
+| | |
+|---|---|
+| counted gaps | **0** |
+| red *Missing* anywhere on the page | **0** |
+| the fill door's own count | **4** |
+| what opens it | **milestone collaborators, and nothing else** |
+
+Every milestone on his project has an owner and a due date. The only blanks are
+**collaborators** — the one field he ruled must never count as missing (§187:
+*"remove the missing collaborators as missing items"*, §227 carrying that
+ruling onto milestones). So the plan asks for nothing, and a **red button**
+tells him to go and fill something in.
+
+**IT PREDATES §250 AND WAS PROVED TO**: the same probe against the pre-§250
+build returns the same four fields and the same red button, byte for byte. It
+arrived when §227 made a milestone's collaborators fillable-and-never-counted
+and met §223's door, which is drawn from what is FILLABLE rather than from what
+is COUNTED.
+
+### The reversal, and its cost, which he took
+
+Three answers were put to him with the cost of each stated. He chose **no
+button when nothing is owed**, over the recommendation (keep the door, make it
+quiet).
+
+**THE COST IS REAL AND IS HIS DECISION, RECORDED RATHER THAN RE-ARGUED**: a
+bounded role holds FILL and not EDIT, so that button is their only way into the
+plan. An optional field — a collaborator, a capability's key objectives (§214.2)
+— is now beyond them until somebody with the pen writes it. **§223's own case
+returns with it**: Hala, on CX, met a Definition she could edit with no control
+to edit it with, and that is the state this reversal restores for optional
+fields. §214 made the Definition itself COUNTED, so her exact field still has a
+door; what loses one is everything in `GAP_OPTIONAL`.
+
+### What went, and why it went rather than being left
+
+`gapOpenable()` is **DELETED**, not left callerless — a builder nobody calls is
+one the next reader takes for load-bearing (§24) — and `gapMap()`'s `fillable`
+argument went with it, because a parameter nothing passes still changes what
+the function counts. `GAP_FILLABLE` is untouched: it still decides which CELLS
+open once fill mode is on and what the server accepts. What it no longer
+decides is whether there is a way in. Giving §223 back is one function and
+three call sites, and this section is the record of what they were.
+
+### Proved able to fail — and §223 never had a check at all
+
+No file in `checks/` had ever asserted the words *"Fill in what is empty"*: §223
+shipped with no check of its own, which is why nothing went red when this
+reversal removed it. `checks/project-done.py` §7 asserts **both ends**, or a
+build that simply deleted the bar would pass:
+
+- his shape reproduced (optional blanks present, nothing counted, nothing red),
+  then **no bar and no button**;
+- a real gap made by blanking one milestone's due date, and **the door comes
+  back**.
+
+Against the build before this reversal it fails on exactly one line, printing
+his symptom verbatim — `cta: 'Fill in what is empty'` — while the other-end
+assertion stays green, which is what says the deletion did not go too far.

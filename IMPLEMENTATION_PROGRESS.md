@@ -72,6 +72,43 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §250.2 / §250.3 — what testing §250 found (2026-09-02, same branch)
+
+Islam, on the built branch, two things.
+
+**§250.2 — a closed report says so to him too.** *"reporting is closed for him
+and showing a button of mark done only."* Measured: with the custodian's
+submission in, §220 correctly disables all 8 figure boxes, the note and the new
+Mark done — and **nothing said why**, because the word `Submitted` lives in the
+half of the bar a bounded role never reaches. Not a §250 regression (that slot
+read *View only* before, which explains no better), but a hole §250 now owns.
+The bar says `Submitted`, with who can reopen it on the hover; the way back is
+deliberately not offered, because reopening speaks for the whole subject and
+the server would refuse it. The first build put a `Closed` pill beside the
+`Close` link — one letter apart, meaning different things — and that is gone.
+
+**§250.3 — no fill door when nothing is owed, reversing §223.** *"it requires
+him to fill something empty and there is nothing empty."* Measured in his
+shape: **0 counted, 0 red *Missing* on the page, and a red button** — opened by
+**milestone collaborators alone**, the field he ruled must never count (§187,
+§227). **Proved to predate §250**: identical on the previous build. Three
+answers were put to him with the cost of each; he chose *no button when nothing
+is owed* over the recommendation, and **the cost is recorded as his**: a
+bounded role holds Fill and not Edit, so an optional field is now beyond them
+until somebody with the pen writes it. `gapOpenable()` and `gapMap()`'s
+`fillable` argument are DELETED rather than left callerless.
+
+**And a correction to the previous handover:** `report-chrome` and
+`report-saves` were reported green and **had not run** — neither reads this
+container's browser variable, so Playwright printed an error box and exited 0,
+and `tail -1` on that box looked like a result. Run properly they fail 1 and 3,
+and **both reproduce identically on the pre-§250 build**, so neither is this
+work; recorded, not fixed in passing.
+
+`checks/project-done.py` now carries both, each proved able to fail on the
+build before it.
+
+
 ### §250 — a project owner reports, and the bar said View only (2026-09-02, branch `claude/project-owner-reporting-access-uzze9s`)
 
 Islam, from the running platform: *"a project owner is not able to report,

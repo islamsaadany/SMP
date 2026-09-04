@@ -5909,7 +5909,7 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    whose words is already answered here; a `pendMap()` written alongside would
    be a second copy of the navigation and would drift the first time a page
    moved (§53.5). `pend` swaps only what is COUNTED on each row. */
-function gapMap(target, all, fillable){
+function gapMap(target, all){
   var t = String(target || ""), out = [];
   /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
@@ -5935,22 +5935,13 @@ function gapMap(target, all, fillable){
        the count and the walk stay one list (§192.4). */
     if (SMPRules.isHidden(row)) return 0;
     if (!reach(acKey, ctx)) return 0;
-    /* §223: COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE
-       SECOND. §214.2 and §214.4 took a function's key objectives and its
-       definition OUT of the counted list at Islam's direction — *"should not
-       count as missing"* — and left them fillable, which was the right half
-       to answer. The half nobody asked was how anybody would then REACH
-       them: fill mode is entered from the "Fill in missing elements" button,
-       and that button is drawn from the COUNTED total, so a page whose only
-       blanks are optional offered no way in at all. Hala, on CX: the
-       Definition read as an em-dash with no control anywhere.
-
-       §205's lesson from the other side: that one recorded a cell the screen
-       OPENED and the server refused; this is a cell the server ACCEPTS and
-       the screen never opens. */
-    if (fillable)
-      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
-        return SMPRules.gapEmpty(f, row); }).length;
+    /* §250.3: COUNTED IS THE ONLY QUESTION THIS ASKS NOW. §223 added a
+       second one — what is merely FILLABLE — so the door into fill mode
+       could open on a page that owed nothing; Islam reversed it, with the
+       cost stated, after §227's optional collaborators made a red button
+       appear over a plan with no red word on it. `GAP_FILLABLE` still
+       decides which CELLS open once fill mode is on (gapCell) and what the
+       server accepts; it no longer decides whether there is a way in. */
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -6081,12 +6072,14 @@ function gapTotal(target){
 function gapTotalAll(target){
   return gapMap(target, true).reduce(function(a, e){ return a + e.count; }, 0);
 }
-/* What this viewer could fill in, counted or not (§223) — what decides
-   whether the door into fill mode is drawn at all. Always at least the
-   counted total, because everything counted is also fillable. */
-function gapOpenable(target){
-  return gapMap(target, false, true).reduce(function(a, e){ return a + e.count; }, 0);
-}
+/* §250.3 DELETED `gapOpenable()` WITH THE DOOR IT DREW, rather than leaving
+   it callerless — a builder nobody calls is one the next reader takes for
+   load-bearing (§24). It answered "what could this viewer fill in, counted or
+   not", which is the question §223 asked and §250.3 stopped asking; giving it
+   back is one function and three call sites, and the reversal is recorded in
+   full in the decisions log rather than left as dead code to be rediscovered.
+   `gapMap`'s `fillable` argument went with it, for the same reason: a
+   parameter nothing passes still changes what the function counts. */
 /* Who the counts are FOR: somebody who can act on them — the fill grant or
    the office. A plain reader never sees a nag they cannot clear (§69). */
 function seesGaps(target){

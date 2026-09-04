@@ -345,7 +345,7 @@
    "smp-shell-v4.55-count-and-unit-follow" when this merge was made, so the name
    goes PAST it rather than beside it (§94.12); confirmed once more immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v4.65-unit-rows-carry-owner";
+const SHELL = "smp-shell-v4.66-owner-reopens-a-draft";
 const ASSETS = [
   "/",
   "/index.html",

@@ -3177,5 +3177,64 @@ console.log("\n31 · a project owner marks their own project finished (§287)");
   not("a locked cycle takes no mark either",
       run(locked, "t287_own", mark(MINE, MARK)));})();
 
+console.log("\n32 · a saved draft is the owner's to reopen (§287.6)");
+(function () {
+  const FN = "it", T = "fn:" + FN;
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner, { a_fn_own: "edit" });
+  base.people.push({ key: "t287u", name: "Unpark Owner", active: true });
+  const cap = base.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  cap.projects[0].owner = "Unpark Owner";
+
+  const parked = clone(base);
+  parked.review = Object.assign({}, parked.review);
+  parked.review.parked = {}; parked.review.parked[T] = true;
+
+  const subd = clone(base);
+  subd.review = Object.assign({}, subd.review);
+  subd.review.submitted = {}; subd.review.submitted[T] = true;
+
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)), moved: !same(stored, inc) };
+  };
+  const ok = function (n, r) {
+    check(n + " — the fixture actually changed something", r.moved);
+    check(n, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (n, r) {
+    check(n + " — the fixture actually changed something", r.moved);
+    check(n, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+  const unpark = function (s) { delete s.review.parked[T]; };
+
+  ok("the project owner takes a saved draft's lock off",
+     run(parked, "t287u", unpark));
+  /* THE ONE PART HELD BACK, asserted so a later widening is a decision and
+     not an accident: retracting a SUBMISSION would let one project's owner
+     pull back a report the office already has, on behalf of every other
+     project in it. */
+  not("...and may NOT retract a submission",
+      run(subd, "t287u", function (s) { delete s.review.submitted[T]; }));
+  /* PARKING is still speaking for the subject — only UNparking moved. */
+  not("...nor park it in the first place",
+      run(base, "t287u", function (s) {
+        s.review.parked = Object.assign({}, s.review.parked); s.review.parked[T] = true; }));
+  not("...nor write the subject's note",
+      run(parked, "t287u", function (s) {
+        s.review.note = Object.assign({}, s.review.note); s.review.note[T] = "mine"; }));
+  /* And the unbounded roles are unchanged (§102). */
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  if (fnCust && personOf(parked, fnCust))
+    ok("the custodian still reopens a draft", run(parked, fnCust, unpark));
+  ok("the office still reopens a draft", run(parked, "smo", unpark));
+  /* A LOCKED CYCLE takes no unpark either — it rides the reporting gates. */
+  const lk = clone(parked);
+  lk.cycle = Object.assign({}, lk.cycle, { locked: true });
+  not("a locked cycle takes no reopen from them", run(lk, "t287u", unpark));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

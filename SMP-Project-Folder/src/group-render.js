@@ -6538,9 +6538,24 @@ function ownStateChip(target, list, word){
      The word says the state, the hover says who can undo it. */
   if (reportClosed(target)) {
     var subd = !!(REVIEW.submitted || {})[String(target)];
-    return '<span class="rc-state ' + (subd ? 'done' : 'draft') + '" title="' +
-      esc('The report is closed — the ' + submits + ' custodian reopens it.') +
-      '">' + (subd ? 'Submitted' : 'Draft saved') + '</span>';
+    /* ── AND A SAVED DRAFT IS THEIRS TO REOPEN (§287.6) ──────────────
+       Islam: *"project owner can reopen eventually he can only report or
+       fill missing for his own project."* A park froze every bounded owner
+       under the subject with no way out but the custodian; nothing was sent,
+       so taking the lock off retracts nothing and the custodian may park it
+       again. Same button, same handler, same selector as the office's
+       (§53.5) — the server allows exactly this transition and no other.
+
+       A SUBMISSION IS NOT OFFERED, and that is the one part held back: it
+       would let one project's owner pull back a report the office has
+       already received on behalf of every other project in it. The word
+       still says what happened, and the hover says who can undo it. */
+    if (!subd)
+      return '<span class="rc-state draft">Draft saved</span>' +
+        '<button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>';
+    return '<span class="rc-state done" title="' +
+      esc('Submitted — the ' + submits + ' custodian reopens it.') +
+      '">Submitted</span>';
   }
   if (!mine.length)
     return '<span class="pill none" title="' + esc(tip) + '">Your rows only</span>';

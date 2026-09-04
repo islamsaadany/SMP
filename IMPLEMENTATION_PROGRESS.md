@@ -142,6 +142,23 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §287.6 — a saved draft is the owner's to reopen (2026-09-02, same branch)
+
+Islam: *"project owner can reopen eventually he can only report or fill missing
+for his own project."* A saved draft closes the whole report (§220, his own
+instruction), and the bounded owner roles added since hold no Reopen — so one
+press froze every project owner under the subject until the custodian came
+back. Unparking is now its own kind, gated on the grant and a locked cycle and
+not on the own-lines refusal. Nothing was sent, so nothing is retracted.
+
+**Held back and stated:** retracting a SUBMISSION is not offered to them — one
+project's owner would be pulling back a report the office already has on behalf
+of every other project in it. Asserted as a refusal, so widening it later is a
+decision rather than an accident.
+
+560/0 on the server, falsified twice; 2 red on the screen.
+
+
 ### §287.5 — the unit reports too, and now matches (2026-09-02, same branch)
 
 Islam: *"check the behavior of the units. to match."* Measured both sides with

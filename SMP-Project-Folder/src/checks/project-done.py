@@ -382,6 +382,53 @@ with sync_playwright() as pw:
     ck("the pillar beside theirs still offers nothing — the reach is per row",
        other is None or other["boxes"] == 0, other)
 
+    # ── 10 · A SAVED DRAFT IS THEIRS TO REOPEN (§287.6) ──────────────────
+    # Islam: "project owner can reopen eventually he can only report or fill
+    # missing for his own project." A park froze every bounded owner with no
+    # way out but the custodian. Nothing was sent, so nothing is retracted.
+    # BOTH ENDS: a submission is deliberately NOT offered to them.
+    print("-- a saved draft, and the way out of it")
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    pg.evaluate("""()=>{ REVIEW.submitted = {};
+        REVIEW.parked = Object.assign({}, REVIEW.parked); REVIEW.parked["%s"] = true;
+        paint(); }""" % FDEST)
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
+    to_fn_reporting(pg)
+    shut = pg.evaluate("""()=>({
+      bar: (document.querySelector('.repchrome')||{}).innerText.replace(/\\n/g,' | '),
+      reopen: !!document.querySelector('[data-unsubmit]'),
+      locked: !!document.querySelector('#panel.replocked'),
+      live: [...document.querySelectorAll('#panel [data-cpick],#panel [data-crep]')]
+              .filter(e=>!e.disabled).length })""")
+    # innerText is the RENDERED text and .rc-state is uppercased by CSS, so
+    # the comparison is case-insensitive or it asserts the stylesheet.
+    ck("the bar says a draft was saved, and offers the way out",
+       "draft saved" in (shut["bar"] or "").lower() and shut["reopen"], shut)
+    ck("...and until it is pressed the pane really is shut",
+       shut["locked"] and shut["live"] == 0, shut)
+    if shut["reopen"]:
+        pg.click("[data-unsubmit]"); pg.wait_for_timeout(400)
+    opened = pg.evaluate("""()=>({
+      parked: reportParked("%s"),
+      locked: !!document.querySelector('#panel.replocked'),
+      live: [...document.querySelectorAll('#panel [data-cpick],#panel [data-crep]')]
+              .filter(e=>!e.disabled).length })""" % FDEST)
+    ck("pressing it takes the lock off and his figures come back",
+       shut["reopen"] and not opened["parked"] and not opened["locked"] and
+       opened["live"] > 0, opened)
+    # THE OTHER END: a SUBMITTED report offers them no way back.
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    pg.evaluate("""()=>{ REVIEW.parked = {};
+        REVIEW.submitted = Object.assign({}, REVIEW.submitted); REVIEW.submitted["%s"] = true;
+        paint(); }""" % FDEST)
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
+    to_fn_reporting(pg)
+    sent = pg.evaluate("""()=>({
+      bar: (document.querySelector('.repchrome')||{}).innerText.replace(/\\n/g,' | '),
+      reopen: !!document.querySelector('[data-unsubmit]') })""")
+    ck("a SUBMITTED report says so and offers them no way back",
+       "submitted" in (sent["bar"] or "").lower() and not sent["reopen"], sent)
+
     ck("no console errors", not errs, "; ".join(errs[:3]))
     b.close()
 

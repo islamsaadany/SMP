@@ -1879,6 +1879,27 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **A SAVED DRAFT IS THE OWNER'S TO REOPEN (§287.6):** Islam — *"project owner
+  can reopen eventually he can only report or fill missing for his own
+  project."* §220 made a saved draft close the WHOLE report at his own
+  instruction, when everybody who could park also held Reopen; §147.7 and §287
+  then added roles affected by a park and holding none, so one press froze
+  every bounded owner under the subject until the custodian came back
+  (measured: **12 boxes drawn, 0 enabled**, the mark disabled with them).
+  **UNPARKING IS ITS OWN KIND AND ONLY UNPARKING** — `reportUnpark`, gated on
+  the grant and a locked cycle and deliberately NOT on the own-lines refusal,
+  because the people it exists for are the ones that refusal names; parking,
+  submitting, the note and the slides stay `reportState`. Nothing was sent, so
+  nothing is retracted and the custodian may park it again. **THE PART HELD
+  BACK IS STATED, NOT ASSUMED**: a SUBMISSION is not offered to them, because
+  one project's owner would be pulling back a report the office already has on
+  behalf of every other project in it — his sentence rests on the owner being
+  limited to their own project, which is true of reporting and filling and is
+  NOT true of a submission. Falsified twice on the server (the kind removed →
+  the reopen is refused; its gate removed → a locked cycle stops refusing) and
+  **2 red** on the screen; and one of the check's own failures was the CHECK —
+  `innerText` is the RENDERED text and `.rc-state` is uppercased by CSS, so a
+  case-sensitive compare asserts the stylesheet (§51.11's family).
 - **THE ROW CARRIES WHO IT BELONGS TO (§287.5):** Islam, of a project owner who
   could not report on a function — *"check the behavior of the units. to
   match."* **MEASURED ON BOTH SIDES, AND THEY DID NOT MATCH**: with the cycle

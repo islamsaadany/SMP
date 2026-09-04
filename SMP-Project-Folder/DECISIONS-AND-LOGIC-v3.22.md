@@ -33696,3 +33696,57 @@ freezes every project owner under that subject until the custodian reopens it.
 That is §220's stated cost meeting a register that did not exist when §220 was
 decided, and it is a decision rather than a defect: put to him with three
 answers, and his reply was to make the two sides match first.
+
+---
+
+## §287.6 — A SAVED DRAFT IS THE OWNER'S TO REOPEN (2026-09-02)
+
+Islam, of a project owner frozen by somebody else's Save draft: *"project owner
+can reopen eventually he can only report or fill missing for his own project."*
+
+**§220 MADE A SAVED DRAFT CLOSE THE WHOLE REPORT**, at his own instruction, and
+at the time everybody who could park also held Reopen. §147.7 and §287 then
+added roles that are AFFECTED by a park and hold no Reopen — so one press of
+Save draft froze every project owner and pillar owner under that subject until
+the custodian came back. Measured in his shape: **12 entry boxes drawn, 0
+enabled**, the mark disabled with them, no Reopen and no Save draft anywhere.
+
+### Unparking is its own kind, and only unparking
+
+`reportUnpark` is classified apart from `reportState`, which keeps parking,
+submitting, the note and the picture slides exactly where they were. Its gates
+are the two every reporting change has — the grant here, and a locked cycle —
+and deliberately NOT the own-lines refusal, because the people it exists for
+are the ones that refusal names.
+
+Nothing was sent, so nothing is retracted: the lock comes off and the custodian
+may park it again. Same button, same handler, same selector as the office's
+(§53.5), and the server allows exactly that transition and no other.
+
+### The part held back, and why it is stated rather than assumed
+
+**A SUBMISSION IS NOT OFFERED TO THEM.** `submitted` leaving still classifies
+as `reportState`, so one project's owner cannot pull back a report the office
+has already received on behalf of every other project in it — including
+projects that are finished and were submitted on purpose.
+
+His sentence rests on the owner being limited to their own project. That is
+true of reporting and of filling, and it is **not** true of a submission, which
+speaks for the whole subject however narrow the person's other rights are. So
+the half that matches his premise is built and the half that does not is
+recorded here for him to take or leave, rather than quietly included.
+
+### Proved able to fail, both halves and both ends
+
+- `test-authorize.js` §32 — 560/0, and falsified twice: with the `reportUnpark`
+  kind removed the owner's reopen is refused; with its gate removed a locked
+  cycle stops refusing. It also asserts what did NOT move — they may still not
+  park, may not write the note, and **may not retract a submission** — so a
+  later widening is a decision rather than an accident.
+- `checks/project-done.py` §10 — the bar says *Draft saved* and offers the way
+  out, the pane is genuinely shut until it is pressed, pressing it brings the
+  figures back, and a SUBMITTED report says so and offers them nothing. **2
+  red** on the build before.
+- One of its own first failures was the CHECK: `innerText` returns the RENDERED
+  text and `.rc-state` is uppercased by CSS, so a case-sensitive compare
+  asserts the stylesheet rather than the words (§51.11's family).

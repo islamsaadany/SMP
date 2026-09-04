@@ -1,4 +1,4 @@
-/* ══ A REPLY NOBODY WAS EVER TOLD ABOUT (§249) ═════════════════════════
+/* ══ A REPLY NOBODY WAS EVER TOLD ABOUT (§283) ═════════════════════════
 
    The office replies. The platform asked, at that instant, "has this person
    been on a page in the last few minutes?" — and if yes, sent no email at all.
@@ -67,7 +67,7 @@ const DUE_SQL = M[0]
     return (await c.query(DUE_SQL, [String(mins)])).rows;
   }
 
-  console.log("\nTHE WAIT IS WHAT DECIDES, NOT A GUESS AT SEND TIME (§249).");
+  console.log("\nTHE WAIT IS WHAT DECIDES, NOT A GUESS AT SEND TIME (§283).");
 
   await reset();
   const early = await reply(5, true);

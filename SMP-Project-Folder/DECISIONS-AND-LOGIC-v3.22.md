@@ -27218,7 +27218,7 @@ middles are what agree, and the check asserts those.
 
 ---
 
-## §248 — THE CHAT DOES NOT WAIT ON A SAVE, AND THE NOTIFICATIONS SAY WHERE THEY STOP (2026-09-02)
+## §282 — THE CHAT DOES NOT WAIT ON A SAVE, AND THE NOTIFICATIONS SAY WHERE THEY STOP (2026-09-02)
 
 Two reports on one morning, and they are two different faults. Islam, twice in
 two days: *"all conversations are gone!!"*, and then *"before the fix all the
@@ -27228,9 +27228,9 @@ working. that needs a deep dig as we tried many things and still it's still not
 functioning."*
 
 He was right on both counts, and about the second he was right that we had been
-guessing. The whole of §248 is the consequence of stopping guessing.
+guessing. The whole of §282 is the consequence of stopping guessing.
 
-### §248.1 — NOTHING WAS LOST, AND ESTABLISHING THAT CAME FIRST
+### §282.1 — NOTHING WAS LOST, AND ESTABLISHING THAT CAME FIRST
 
 `chat_threads`, `chat_messages`, `credentials`, `messages` and `push_*` all sit
 OUTSIDE the state graph, so the `TRUNCATE … CASCADE` a save runs across 33
@@ -27311,7 +27311,7 @@ register could not be READ is §93's fault exactly, and the page already treats
 null as *say nothing*, so no page change was needed. *That is the design
 working rather than a happy accident.*
 
-### §248.2 — THE PUSH SERVICE'S REFUSAL NAMES ITSELF
+### §282.2 — THE PUSH SERVICE'S REFUSAL NAMES ITSELF
 
 Measured against a stand-in push service, three completely different causes:
 
@@ -27337,7 +27337,7 @@ silence on a laptop are different errands (Apple will not deliver at all until
 the platform is on the home screen) and the rest of an endpoint IS the address
 of somebody's device.
 
-### §248.3 — A REGISTRATION MADE WITH A DIFFERENT KEY
+### §282.3 — A REGISTRATION MADE WITH A DIFFERENT KEY
 
 **THE STICKY ONE, AND IT COULD NEVER HEAL.** `pushSync` accepted any existing
 registration without looking at it. A registration is bound to the key it was
@@ -27364,7 +27364,7 @@ it was found by `checks/office-chat.py` going red — not by reading the diff,
 and not by any amount of care while writing it.** The variable is `keyWanted`
 now and the comment says why.
 
-### §248.4 — THE TEST ASKS THIS BROWSER TOO
+### §282.4 — THE TEST ASKS THIS BROWSER TOO
 
 It only ever asked the SERVER, and the server can only report what it HOLDS —
 so a browser registered at one address while the server sends to another read
@@ -27382,7 +27382,7 @@ because the diagnostic is most needed by whoever has not reloaded (§231.5).
   a stub (§100.3), so this drives real connections. **RED on the old query**
   (the conversation list refused), **8/8 green** on this one.
   `SMP_CHAT_JOIN_PEOPLE=1` is **not a branch in the product** — there is no
-  such switch in `api/chat.js`; it makes the FILE ask the pre-§248 question, so
+  such switch in `api/chat.js`; it makes the FILE ask the pre-§282 question, so
   the red run is the shape the product actually had rather than a fiction
   about it.
 - **`scripts/test-chat.js`** 103/0, nine new on the diagnostic. Falsified:
@@ -27401,7 +27401,7 @@ because the diagnostic is most needed by whoever has not reloaded (§231.5).
 
 ### WHAT IS NOT CLAIMED
 
-**That the notifications now work in production.** §248.2–4 make the chain
+**That the notifications now work in production.** §282.2–4 make the chain
 SAY where it stops; they do not assert where it stops. §231's own open item
 stands — why `web-push` was once missing from the deployment was never
 established — and the first step is now one press of *Test on this device*,
@@ -27413,7 +27413,7 @@ and it is still not done here. See above.
 
 ---
 
-## §249 — A REPLY NOBODY WAS EVER TOLD ABOUT (2026-09-02)
+## §283 — A REPLY NOBODY WAS EVER TOLD ABOUT (2026-09-02)
 
 Islam, going through what the chat still owes: *"for the email rule let's think
 of the solution."* We did, and the number is his — **30 minutes**.
@@ -27547,7 +27547,7 @@ order the commands were typed in.*
 
 ---
 
-## §250 — THE CORNER STAYS OPEN WHILE YOU MOVE ABOUT (2026-09-02, reversing §100.4)
+## §284 — THE CORNER STAYS OPEN WHILE YOU MOVE ABOUT (2026-09-02, reversing §100.4)
 
 Islam: *"we need the chat to sustain the navigation so it's open while me
 navigating across the different pages in the platform."*
@@ -27565,7 +27565,7 @@ honest move is to remove it rather than to carve it up.
 
 **RECORDED AS A REVERSAL, NOT OVERWRITTEN** (Principle II). §100.4's reasoning
 was sound for a panel you dip into and leave; it stopped being sound the moment
-the panel became somewhere you WORK — the office's queue (§251) is read while
+the panel became somewhere you WORK — the office's queue (§285) is read while
 walking around the plan it is about.
 
 What replaces it is what was always there: the minus, which says Minimise and
@@ -27583,7 +27583,7 @@ minimise the panel, and with the panel arriving open the bubble is not drawn
 
 ---
 
-## §251 — THE OFFICE'S CORNER CARRIES THE QUEUE (2026-09-02)
+## §285 — THE OFFICE'S CORNER CARRIES THE QUEUE (2026-09-02)
 
 Islam: *"the chat bubble of the SMO team shouldn't be something to be sent to
 the smo, that is redundancy — the chat bubble for the smo team should be the
@@ -27620,12 +27620,12 @@ reasoning, rather than as a preference of mine.
 
 **NOTHING NEW IS AUTHORISED AND NOTHING NEW IS STORED.** Opening a conversation
 is the Inbox's own `thread`; replying is its `reply`. A rule the Inbox keeps is
-a rule the corner keeps by construction — including §249's chase, §231's box
+a rule the corner keeps by construction — including §283's chase, §231's box
 and §71's answered-by-the-act.
 
 **THE QUEUE RIDES THE POLL THAT ALREADY EXISTS** (§98, §225). The corner is the
 only thing that asks on every page; a dedicated endpoint would be a second
-clock over the same rows. It never touches the register (§248), so the list
+clock over the same rows. It never touches the register (§282), so the list
 cannot freeze behind a save.
 
 **ONE COMPOSER, FORKED AT THE TOP.** With a conversation open, the box replies;
@@ -27662,7 +27662,7 @@ would have called it clean.
 **AND `var cfg` SHADOWED THE MODULE'S.** `drawPanelChrome()` declared its own
 from `chatCfg()` — the local graph — while the module's is filled from the
 SERVER's answer on every poll. The panel then wore the shipped promise while the
-office had set its own. §56.7 for the second time in one change, and §248.3's
+office had set its own. §56.7 for the second time in one change, and §282.3's
 `var want` for the third time in two days. **Both were found by a check going
 red, not by reading the diff.**
 
@@ -27678,7 +27678,7 @@ assertions** · `test-chat` 103/0 · `test-chase` 14/0 · `during-save` 8/0 ·
 
 ---
 
-## §252 — A PICTURE IS PASTED, NOT ONLY ATTACHED (2026-09-03)
+## §286 — A PICTURE IS PASTED, NOT ONLY ATTACHED (2026-09-03)
 
 Islam: *"allow in the chat to copy paste a picture rather than only attaching
 it."*
@@ -27696,7 +27696,7 @@ formats and the file's own type predicts neither), the failure said in words —
 holds here because this is the same door. A second path would have been a
 second copy of all of it (§53.5), and the copy is what drifts.
 
-**AND THE OFFICE'S REPLY BOX IS THE SAME BOX** (§251), so the corner's queue
+**AND THE OFFICE'S REPLY BOX IS THE SAME BOX** (§285), so the corner's queue
 side gained this without a second listener.
 
 ### THREE THINGS THAT COULD HAVE GONE WRONG QUIETLY
@@ -27734,12 +27734,12 @@ with pictures off it is refused in words. `checks/office-chat.py` ALL CLEAR
 
 ---
 
-## §251.2 — ONE PANEL, WHATEVER IS IN IT (2026-09-03)
+## §285.2 — ONE PANEL, WHATEVER IS IN IT (2026-09-03)
 
 Islam, looking at the split corner: *"the 2 options have different panel sizes
 let's unify things as well."*
 
-**HE IS RIGHT, AND IT WAS TWO FAULTS OF MINE FROM §251.** Measured:
+**HE IS RIGHT, AND IT WAS TWO FAULTS OF MINE FROM §285.** Measured:
 
 | | Waiting | My messages |
 |---|---|---|
@@ -27750,7 +27750,7 @@ let's unify things as well."*
 | **top edge** | **351** | **384** |
 
 Two independent causes. The search box is drawn on the list and not inside a
-conversation (correct, and it changes the bar's height); and §251 made the line
+conversation (correct, and it changes the bar's height); and §285 made the line
 under the title say nothing on the queue side, on the reasoning that the segment
 above had already named it — **and an empty line is a shorter header.**
 
@@ -27777,14 +27777,14 @@ Reserving its space with a number would be a guessed constant that goes stale
 the first time the type scale moves (§122.5, three times recorded). So the line
 simply never falls empty: whose conversation it is while one is open, and the
 office's promise otherwise — which is what every other viewer's panel has
-always shown. **§251's decision was right about the words being redundant and
+always shown. **§285's decision was right about the words being redundant and
 wrong about what removing them costs.**
 
 ---
 
-## §252.2 — WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (2026-09-03)
+## §286.2 — WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (2026-09-03)
 
-Islam, having pasted a screenshot with §252: *"the message is very subtle I
+Islam, having pasted a screenshot with §286: *"the message is very subtle I
 didn't notice that something was attached."*
 
 **HE IS RIGHT, AND THE MEASUREMENT IS IN THE SCREENSHOT HE SENT.** The entire
@@ -27802,7 +27802,7 @@ what it looks like to the person who just used it.
 **THE PICTURE IS THE PART A SENTENCE CANNOT REPLACE** — *which* screenshot is
 about to go, which matters the moment somebody has taken three. And A sits
 ABOVE the composer, so the box under the cursor never moves when a picture
-arrives; §251.2 having given the panel its own height, the strip costs the
+arrives; §285.2 having given the panel its own height, the strip costs the
 conversation a row rather than growing the panel.
 
 **THE THUMBNAIL IS THE ALREADY-SHRUNK DATA** (§50): `shot` is exactly what will

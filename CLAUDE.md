@@ -384,7 +384,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
-- **WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (§252.2):** Islam, having pasted one
+- **WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (§286.2):** Islam, having pasted one
   — *"the message is very subtle I didn't notice that something was attached."*
   The whole confirmation was one line of `.chnote`, the page's quietest grey,
   below the box, at the weight of an empty space. Four drawn in the REAL
@@ -397,10 +397,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   that is not a description of state (§124). **The remove is wired on the FOOT,
   not the button** — the strip is rewritten every paint (§24, §47.2) — and it
   clears the file input or the same file cannot be picked twice.
-- **ONE PANEL, WHATEVER IS IN IT (§251.2):** *"the 2 options have different panel
+- **ONE PANEL, WHATEVER IS IN IT (§285.2):** *"the 2 options have different panel
   sizes let's unify things."* Measured: **531 against 498, with the top edge at
   351 against 384** — the panel is anchored at the BOTTOM, so what moved was the
-  top, 33px every time you switched. Two causes, both from §251: the search box
+  top, 33px every time you switched. Two causes, both from §285: the search box
   is drawn on the list and not in a conversation, and the line under the title
   was made to say nothing on the queue side — **an empty line is a shorter
   header**. `.chatbody` held a flat `height:340px` and the panel was the sum of
@@ -410,15 +410,15 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `.chinbox`'s reason (a fixed height puts the composer off a short screen);
   checked at 900 / 760 / 640. **And the title's line never falls empty** —
   reserving its space with a number would be a guessed constant going stale
-  (§122.5); §251 was right that the words were redundant and wrong about what
+  (§122.5); §285 was right that the words were redundant and wrong about what
   removing them costs.
-- **A PICTURE IS PASTED, NOT ONLY ATTACHED (§252):** Islam — *"allow in the chat
+- **A PICTURE IS PASTED, NOT ONLY ATTACHED (§286):** Islam — *"allow in the chat
   to copy paste a picture rather than only attaching it."* Somebody reporting a
   wrong number has just pressed the screen-grab key; making them save the file
   and find it again is asking them to do the computer's job. **IT FEEDS
   `takePicture()` AND ADDS NOTHING** — §50's whole intake (1600px, both formats
   with the smaller kept, the failure said in words) holds because it is the same
-  door, and the office's reply box being the same box means §251's queue gained
+  door, and the office's reply box being the same box means §285's queue gained
   it with no second listener. **TEXT STILL PASTES AS TEXT**: only an image item
   is taken and `preventDefault` fires only when one is found, so a paste
   carrying both keeps its words. **`items` FIRST, THEN `files`** — a screenshot
@@ -429,7 +429,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by dispatching a REAL ClipboardEvent with a real PNG — a probe calling
   `takePicture()` directly passes on a build where the listener was never wired
   (§96).
-- **THE OFFICE'S CORNER CARRIES THE QUEUE (§251):** Islam — *"the chat bubble
+- **THE OFFICE'S CORNER CARRIES THE QUEUE (§285):** Islam — *"the chat bubble
   of the SMO team shouldn't be something to be sent to the smo, that is
   redundancy … it should be the chats of the other people sending the smo the
   messages"*, with a switch to reach their own thread. **REDUNDANCY OF AN ODD
@@ -440,9 +440,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   as a bug, §108.1) · the one you have open never vanishes under you (§113) ·
   search reaches **all history** and shows **the line that matched**.
   **NOTHING NEW IS AUTHORISED OR STORED** — opening is the Inbox's `thread`,
-  replying its `reply`, so §249's chase, §231's box and §71's answered-by-the-act
+  replying its `reply`, so §283's chase, §231's box and §71's answered-by-the-act
   come free. **THE QUEUE RIDES THE POLL THAT ALREADY EXISTS** (§98) and never
-  touches the register (§248). **ONE COMPOSER, FORKED AT THE TOP** (§53.5), and
+  touches the register (§282). **ONE COMPOSER, FORKED AT THE TOP** (§53.5), and
   **`replyPost()` is the one email builder both screens call** — the corner's
   first draft built a smaller one, which would have emailed somebody differently
   depending on which screen the office was looking at. **The search says its own
@@ -455,7 +455,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   callback; and `var cfg` in `drawPanelChrome()` shadowed the module's, which is
   filled from the SERVER, so the panel wore the shipped promise over the
   office's own.
-- **THE CORNER SURVIVES THE WALK (§250, REVERSING §100.4):** *"we need the chat
+- **THE CORNER SURVIVES THE WALK (§284, REVERSING §100.4):** *"we need the chat
   to sustain the navigation so it's open while me navigating across the
   different pages."* Measured: one press on a page tab closed it. §100.4
   minimised on any `pointerdown` outside the dock — his own earlier instruction
@@ -470,7 +470,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   of the check's own comments went with it: a section pressed the bubble after
   navigating *because* navigating used to close the panel, and with it arriving
   open the bubble is not drawn and the press timed out on an invisible control.
-- **A REPLY NOBODY WAS EVER TOLD ABOUT (§249):** the platform decided whether to
+- **A REPLY NOBODY WAS EVER TOLD ABOUT (§283):** the platform decided whether to
   email AT THE INSTANT the office replied — *has this person had a page open in
   the last few minutes?* — and a **yes** is a prediction, wrong in one
   direction: somebody reading two minutes ago who then shuts their laptop
@@ -501,7 +501,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   fix working with the falsified build on disk, once calling it broken with the
   good one. **Compare the file's mtime with the server's start time; never
   trust the order the commands were typed in.**
-- **THE CHAT MUST NOT WAIT ON A SAVE (§248):** Islam, twice in two days —
+- **THE CHAT MUST NOT WAIT ON A SAVE (§282):** Islam, twice in two days —
   *"all conversations are gone!!"*, then *"before the fix all the chats
   disappeared"*, with §231.4's card reading *"The server did not answer (no
   answer)"*. **NOTHING WAS LOST AND THE CARD WAS TRUE**: the chat's tables sit
@@ -527,7 +527,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Cost stated: for a second or two a RENAMED person shows their previous name,
   and **`gone` reads NULL, never true** — an unread register is not somebody
   leaving it (§93), and the page already treats null as *say nothing*.
-- **A REFUSAL WITHOUT ITS CAUSE IS WHY NOTHING CONVERGES (§248.2–4):** measured
+- **A REFUSAL WITHOUT ITS CAUSE IS WHY NOTHING CONVERGES (§282.2–4):** measured
   against a stand-in push service, a mismatched key (403), a dead registration
   (400) and an oversized payload (413) all returned `failed: 1` and printed one
   sentence — *"The push service would not take it."* **Four rounds of fixes
@@ -4149,30 +4149,30 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
-python3 checks/paste-picture.py   # a picture PASTED into the composer (§252): a real
+python3 checks/paste-picture.py   # a picture PASTED into the composer (§286): a real
                                 # ClipboardEvent with a real PNG, because a probe that
                                 # calls takePicture() passes on a build where the
                                 # listener was never wired; text still pastes as text,
                                 # the picture TRAVELS with the message, and with
                                 # pictures off it is refused in words
-python3 checks/corner-queue.py    # the office's corner carries the queue (§251) and
-                                # survives the walk (§250): the badge is the LENGTH of
+python3 checks/corner-queue.py    # the office's corner carries the queue (§285) and
+                                # survives the walk (§284): the badge is the LENGTH of
                                 # the list, a reply carries the SAME email the Inbox
                                 # builds, and it listens for page errors — the fault
                                 # found while writing it was a throw in the poll's own
                                 # callback that left a blank box and a clean console
 DATABASE_URL=… node scripts/test-chase.js
-                                # a reply nobody was ever told about (§249): the
+                                # a reply nobody was ever told about (§283): the
                                 # wait is obeyed at BOTH ends (a build using a
                                 # constant fails), reading cancels it, an emailed
                                 # reply is never chased twice, and the sweep's SQL
                                 # is READ OUT OF api/chat.js rather than copied
 DATABASE_URL=… node scripts/test-chat-during-save.js
-                                # the chat does not wait on a save (§248): holds a
+                                # the chat does not wait on a save (§282): holds a
                                 # save open against a real Postgres and asks the chat
                                 # its three questions — a lock cannot be modelled by a
                                 # stub, and SMP_CHAT_JOIN_PEOPLE=1 makes the FILE ask
-                                # the pre-§248 question so the red run is the shape
+                                # the pre-§282 question so the red run is the shape
                                 # the product actually had
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)

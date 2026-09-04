@@ -1,4 +1,4 @@
--- ── A REPLY NOBODY WAS EVER TOLD ABOUT (§249) ──────────────────────────
+-- ── A REPLY NOBODY WAS EVER TOLD ABOUT (§283) ──────────────────────────
 -- The office replies. The platform asks, at that instant, "has this person
 -- been on a page in the last few minutes?" — and if the answer is yes, it
 -- sends no email, because they are here and they will see it.

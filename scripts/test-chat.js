@@ -395,14 +395,14 @@ async function signIn(who, password) {
     await client.query("DELETE FROM push_subscriptions");
     await setChat({});
 
-    /* ── THE TEST NAMES WHERE THE CHAIN STOPS (§248.4) ──────────────
+    /* ── THE TEST NAMES WHERE THE CHAIN STOPS (§282.4) ──────────────
        "Test on this device" only ever asked the SERVER, and the server can
        only report what it HOLDS — so a browser registered at one address
        while the server sends to another read as perfect health at both ends
        with nothing arriving. Both halves are compared now, and each way of
        being wrong has to produce its own sentence: a diagnostic whose
        failures all read alike is the fault it exists to cure (§124). */
-    console.log("\nTHE TEST SAYS WHERE THE CHAIN STOPS (§248.4).");
+    console.log("\nTHE TEST SAYS WHERE THE CHAIN STOPS (§282.4).");
     await setChat({ popup: true });
 
     const stepNamed = function (rr, name) {

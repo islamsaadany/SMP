@@ -204,7 +204,7 @@ class H(http.server.BaseHTTPRequestHandler):
         # that polls on every page, so the only thing that can tell the office
         # a question arrived while they were somewhere else (§225).
         self._send(200, json.dumps({
-            # WHO IS SIGNED IN DECIDES (§251). This answered `office: True` for
+            # WHO IS SIGNED IN DECIDES (§285). This answered `office: True` for
             # every viewer, which was harmless while the corner drew the same
             # thing for everybody and stopped being harmless the moment the
             # office's corner became a queue: the person-facing sections below
@@ -338,7 +338,7 @@ with sync_playwright() as p:
     ck("and the bubble comes back", pg.eval_on_selector("#chatbtn", "e => e.getClientRects().length > 0"))
     ck("and the conversation is still there afterwards", len(CHAT["messages"]) > 0)
 
-    # CLICKING AWAY NO LONGER MINIMISES IT (§250, REVERSING §100.4).
+    # CLICKING AWAY NO LONGER MINIMISES IT (§284, REVERSING §100.4).
     # Islam: "we need the chat to sustain the navigation so it's open while me
     # navigating across the different pages in the platform." The platform is
     # ONE PAGE, so every destination, tab, section and card was a press
@@ -1175,7 +1175,7 @@ with sync_playwright() as p:
     # and the office's assertions read the wrong one. (The stub's `seen` does
     # not clear it the way the real endpoint does — §100.3, in the small.)
     CHAT["messages"] = []; CHAT["unread"] = 0
-    # THIS SECTION IS ABOUT THE OFFICE, so the stub says so (§251).
+    # THIS SECTION IS ABOUT THE OFFICE, so the stub says so (§285).
     CHAT["office"] = True
     CHAT["owaiting"] = 2
     CHAT["owho"] = "Hend Farouk"
@@ -1233,7 +1233,7 @@ with sync_playwright() as p:
     # line already, which is the same argument as `!open` one page out.
     pg.click('[data-md="setup"]'); pg.wait_for_timeout(700)
     pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(900)
-    # AND THE CORNER IS OPENED ONLY IF IT IS NOT ALREADY (§250). This used to
+    # AND THE CORNER IS OPENED ONLY IF IT IS NOT ALREADY (§284). This used to
     # press the bubble unconditionally, on §100.4's rule that navigating
     # minimised the panel — which stopped being true when Islam asked for the
     # corner to survive the walk. It now arrives still open, and the bubble is
@@ -1254,7 +1254,7 @@ with sync_playwright() as p:
     ck("  (the office's browser asked while on that page)", got, "no poll inside 30s")
     ck("no box while the office is reading the queue itself", len(pops()) == 0, pops())
     CHAT["owaiting"] = 0; CHAT.pop("owho", None); CHAT.pop("obody", None)
-    # AND BACK TO AN ORDINARY PERSON (§251). Left set, the office's corner
+    # AND BACK TO AN ORDINARY PERSON (§285). Left set, the office's corner
     # opens on the QUEUE and every section below would be measuring the wrong
     # half of the panel — which is exactly what happened when this flag was
     # first added and three later sections went red.
@@ -1655,7 +1655,7 @@ with sync_playwright() as p:
         ck("...and so does opening a conversation",
            pg.query_selector("#chnewwho") is None)
 
-    # ── 20 · A REGISTRATION MADE WITH A DIFFERENT KEY (§248.3) ───────────
+    # ── 20 · A REGISTRATION MADE WITH A DIFFERENT KEY (§282.3) ───────────
     # THE STICKY ONE. A registration is bound to the key it was made with, and
     # this branch used to accept any existing registration without looking at
     # it — so once the platform's key changed, the browser handed back the old

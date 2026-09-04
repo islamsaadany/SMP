@@ -1,4 +1,4 @@
-"""THE OFFICE'S CORNER CARRIES THE QUEUE (§251), AND SURVIVES THE WALK (§250).
+"""THE OFFICE'S CORNER CARRIES THE QUEUE (§285), AND SURVIVES THE WALK (§284).
 
 Islam: "the chat bubble of the SMO team shouldn't be something to be sent to
 the smo, that is redundancy" — for the office it was a conversation with
@@ -168,7 +168,7 @@ with sync_playwright() as p:
        pg.eval_on_selector("#cqfind","e=>e.value")=="target",
        pg.eval_on_selector("#cqfind","e=>e.value"))
 
-    print("\nAND IT SURVIVES MOVING ABOUT (§250)")
+    print("\nAND IT SURVIVES MOVING ABOUT (§284)")
     tabs=[e for e in pg.query_selector_all("[data-s]") if e.is_visible()]
     if tabs:
         tabs[-1].click(); pg.wait_for_timeout(800)

@@ -90,7 +90,7 @@ body.presenting .chatdock { display:none; }
 .chathead .chbell.belloff:hover { opacity:1; }
 .chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
 
-/* ── ONE PANEL, WHATEVER IS IN IT (§251.2) ────────────────────────────
+/* ── ONE PANEL, WHATEVER IS IN IT (§285.2) ────────────────────────────
    The body used to carry the height (a flat 340px) and the panel was
    whatever the head, the bar and the foot added up to — so drawing the
    search box on one half and not the other, or a sub-line on one and not
@@ -488,7 +488,7 @@ body.presenting .chatdock { display:none; }
                                              an invisible dot on the one row that
                                              says the feature is off. */
 
-/* ══ THE OFFICE'S CORNER, SPLIT (§251) ═════════════════════════════════
+/* ══ THE OFFICE'S CORNER, SPLIT (§285) ═════════════════════════════════
    Islam: the office's bubble should carry the conversations waiting on them
    rather than a conversation with themselves. Drawn into the same panel, so
    everything around it — the head, the composer, the palette — is what the
@@ -573,7 +573,7 @@ body.presenting .chatdock { display:none; }
 .cqback svg { width: 15px; height: 15px; flex: none; }
 .cqback:hover { opacity: .85; }
 
-/* ══ WHAT IS ATTACHED, SHOWN (§252.2) ══════════════════════════════════
+/* ══ WHAT IS ATTACHED, SHOWN (§286.2) ══════════════════════════════════
    Islam, having pasted a screenshot: "the message is very subtle I didn't
    notice that something was attached." The whole confirmation was one line of
    `.chnote` — the page's quietest grey, below the box, at the weight of an
@@ -581,7 +581,7 @@ body.presenting .chatdock { display:none; }
 
    ABOVE THE COMPOSER, NEVER INSIDE IT: the box being typed into is the one
    thing that has always been steady, and a picture arriving must not move it.
-   The panel holds its own height (§251.2), so this costs the conversation a
+   The panel holds its own height (§285.2), so this costs the conversation a
    row rather than growing the panel. */
 .chprev { display:flex; align-items:center; gap:10px; padding:8px 10px;
           margin:0 0 9px; border:1px solid var(--line); border-radius:10px;

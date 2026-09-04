@@ -267,7 +267,7 @@ async function tellTheOffice(client, me, text, cfg) {
   } catch (e) { /* a mail failure never costs the handoff */ }
 }
 
-/* ── THE CHASE, RUN ON THE WAY PAST (§249) ─────────────────────────────
+/* ── THE CHASE, RUN ON THE WAY PAST (§283) ─────────────────────────────
    A reply the office sent to somebody who looked present, still unread when
    their chosen time has passed, is emailed now. Only that case: somebody who
    was away was mailed at once, and somebody who has read it is excluded by
@@ -369,7 +369,7 @@ module.exports = async function handler(req, res) {
   try {
     client = await getPool().connect();
 
-    /* ── NOTHING IN THE CHAT MAY WAIT ON A SAVE (§248) ─────────────────
+    /* ── NOTHING IN THE CHAT MAY WAIT ON A SAVE (§282) ─────────────────
        Islam, twice in two days: "all conversations are gone!!", and then
        "before the fix all the chats disappeared", with §231.4's card reading
        "The server did not answer (no answer)" — which is this file's own
@@ -419,7 +419,7 @@ module.exports = async function handler(req, res) {
     const office = Rules.isOfficeRole(me.role);
     const cfg = await chatSettings(client);
 
-    /* ── AND ANY REPLY NOW OWED AN EMAIL GOES OUT (§249) ──────────────
+    /* ── AND ANY REPLY NOW OWED AN EMAIL GOES OUT (§283) ──────────────
        Rides this request because there is no scheduler here; gated to once a
        minute per process so the four-second poll does not pay for it, and
        unable to fail the request it rode in on. */
@@ -469,7 +469,7 @@ module.exports = async function handler(req, res) {
            number where a person is served a sentence (§53.5). The newest
            waiting conversation is the one that just arrived. */
         /* THE COUNT NEVER TOUCHES THE REGISTER, AND THE NAME NO LONGER
-           WAITS ON IT (§248). This is the office's own poll — the one that
+           WAITS ON IT (§282). This is the office's own poll — the one that
            keeps their corner alive — so a locked `people` must not be able
            to fail it. The stored `person_name` answers on its own, and the
            live name is asked for separately and allowed not to arrive. */
@@ -488,7 +488,7 @@ module.exports = async function handler(req, res) {
         out.waitingWho = w.who || null;
         out.waitingBody = w.body || null;
 
-        /* ── AND THE QUEUE ITSELF, FOR THE CORNER (§251) ────────────────
+        /* ── AND THE QUEUE ITSELF, FOR THE CORNER (§285) ────────────────
            Islam: the office's bubble should carry the conversations waiting
            on them rather than a conversation with themselves.
 
@@ -502,7 +502,7 @@ module.exports = async function handler(req, res) {
            be its LENGTH and the two can never disagree (§108.1: a count and
            the thing it counts must have one membership).
 
-           IT NEVER TOUCHES THE REGISTER (§248). The stored `person_name` is
+           IT NEVER TOUCHES THE REGISTER (§282). The stored `person_name` is
            what the row draws; the office's Inbox page is where a live name,
            a title and a place are worth waiting for. */
         try {
@@ -529,13 +529,13 @@ module.exports = async function handler(req, res) {
        up in the endpoint rather than being enforced by it. */
     if (action === "seen") {
       await client.query(
-        /* READING IT IS WHAT CANCELS THE CHASE (§249). The sweep's own query
+        /* READING IT IS WHAT CANCELS THE CHASE (§283). The sweep's own query
            would already skip a read reply; this drops the kept message in the
            same breath, so nothing lingers in the table for a chase that can
            never happen. */
         "UPDATE chat_threads SET seen_by_them = now(), here_at = now() WHERE person_key = $1",
         [me.key]);
-      /* Nothing left to chase on this conversation (§249). */
+      /* Nothing left to chase on this conversation (§283). */
       try {
         await client.query(
           "UPDATE chat_messages SET chase_html = NULL " +
@@ -614,7 +614,7 @@ module.exports = async function handler(req, res) {
          registered — a hang rather than a refusal, which is what §231.5 was
          about — so what is counted is what the SERVER holds, not what the
          browser believes. */
-      /* ── WHAT THIS BROWSER HOLDS, BESIDE WHAT WE HOLD (§248.4) ──────
+      /* ── WHAT THIS BROWSER HOLDS, BESIDE WHAT WE HOLD (§282.4) ──────
          The browser sends its own half; anything it does not send is simply
          absent, so an older tab still gets the old report rather than a
          diagnostic that refuses to run. */
@@ -653,7 +653,7 @@ module.exports = async function handler(req, res) {
       /* THE MISMATCH THAT READ AS PERFECT HEALTH. The browser is registered,
          the server holds a device, and they are NOT THE SAME DEVICE — so
          every send goes somewhere this browser will never hear from. Nothing
-         before §248.4 could see this, because each end only ever reported
+         before §282.4 could see this, because each end only ever reported
          itself. */
       const mine = (await push.subsOf(client, me.key)).map(function (r) { return r.endpoint; });
       if (mine.indexOf(hereEp) < 0) {
@@ -691,7 +691,7 @@ module.exports = async function handler(req, res) {
              "check that this browser is allowed to show notifications there.",
              "sent");
       } else {
-        /* THE SERVICE'S OWN WORDS (§248.2). This said "The push service would
+        /* THE SERVICE'S OWN WORDS (§282.2). This said "The push service would
            not take it" for a mismatched key, a dead registration and an
            oversized payload alike — three errands, one shrug, and the reason
            nothing we tried ever converged. */
@@ -1034,7 +1034,7 @@ module.exports = async function handler(req, res) {
            person, which is the shape the office already works in. */
         "       (SELECT count(*) FROM chat_messages m " +
         "         WHERE m.person_key = t.person_key AND m.flag IS NOT NULL) AS flagged " +
-        /* THE REGISTER IS ASKED SEPARATELY, NOT JOINED (§248). This one line
+        /* THE REGISTER IS ASKED SEPARATELY, NOT JOINED (§282). This one line
            was the whole outage: `people` is the table a save locks, and a
            join makes the conversations wait on it. `chat_threads` already
            carries `person_name`, written when the conversation was made, so
@@ -1098,7 +1098,7 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    /* ── SEARCHING THE WHOLE HISTORY (§251) ──────────────────────────
+    /* ── SEARCHING THE WHOLE HISTORY (§285) ──────────────────────────
        Islam: "the search should search all history." The corner's list and
        the Inbox's both filtered what was already loaded — names, and the LAST
        line of each conversation — so anything said a week ago was unfindable.
@@ -1114,7 +1114,7 @@ module.exports = async function handler(req, res) {
        result nobody trusts. The newest match wins where a conversation has
        several.
 
-       THE REGISTER IS NOT JOINED (§248), and the search is the office's alone:
+       THE REGISTER IS NOT JOINED (§282), and the search is the office's alone:
        every other person has exactly one conversation and it is already in
        front of them. */
     if (action === "chatSearch") {
@@ -1141,7 +1141,7 @@ module.exports = async function handler(req, res) {
     if (action === "thread") {
       const who = str(body.person, 120);
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
-      /* THE CONVERSATION FIRST, THE REGISTER SECOND (§248) — so opening one
+      /* THE CONVERSATION FIRST, THE REGISTER SECOND (§282) — so opening one
          cannot wait on a save either. Everything the office needs to READ a
          conversation lives in the chat's own tables; the register only adds
          who the person is TODAY. */
@@ -1299,7 +1299,7 @@ module.exports = async function handler(req, res) {
       const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       let mailed = null;
 
-      /* ── PRESENT IS NOT THE SAME AS "WILL READ IT" (§249) ─────────────
+      /* ── PRESENT IS NOT THE SAME AS "WILL READ IT" (§283) ─────────────
          This used to be the end of the matter: present, so no email, ever.
          And it is a GUESS ABOUT THE FUTURE — somebody who was on a page two
          minutes ago and has since shut their laptop counts as here, gets no

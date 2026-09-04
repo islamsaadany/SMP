@@ -1,4 +1,4 @@
-"""A PICTURE PASTED INTO THE COMPOSER (§252).
+"""A PICTURE PASTED INTO THE COMPOSER (§286).
 
 Islam: "allow in the chat to copy paste a picture rather than only attaching
 it." Somebody reporting a number that looks wrong has just pressed the
@@ -80,7 +80,7 @@ with sync_playwright() as p:
     print("\nA PICTURE PASTED INTO THE BOX")
     prevented = pg.evaluate(PASTE, b64); pg.wait_for_timeout(1200)
     ck("the paste is taken over", prevented)
-    # ── AND IT IS SHOWN, NOT DESCRIBED (§252.2) ──────────────────────
+    # ── AND IT IS SHOWN, NOT DESCRIBED (§286.2) ──────────────────────
     # Islam: "the message is very subtle I didn't notice that something was
     # attached." The confirmation used to be one line of the page's quietest
     # grey. It is the picture itself now, so what is asserted is that the

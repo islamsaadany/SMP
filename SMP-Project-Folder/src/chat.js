@@ -82,7 +82,7 @@ var CHAT = (function(){
 
   var open = false, mounted = false, timer = null;
   var state = { messages: [], unread: 0, thread: null, office: false };
-  /* ── THE OFFICE'S CORNER IS TWO THINGS (§251) ────────────────────────
+  /* ── THE OFFICE'S CORNER IS TWO THINGS (§285) ────────────────────────
      Islam: "the chat bubble of the SMO team shouldn't be something to be sent
      to the smo, that is redundancy — it should be the chats of the other
      people sending the smo the messages … and he can with a switch go
@@ -370,14 +370,14 @@ var CHAT = (function(){
               'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
           "</div>" +
         "</div>" +
-        /* THE SPLIT AND THE SEARCH (§251), between the head and the body so
+        /* THE SPLIT AND THE SEARCH (§285), between the head and the body so
            they stay put while the list scrolls. Empty and hidden for
            everybody but the office — a control that changes nothing is not a
            choice (§61). */
         '<div class="cqbar" id="cqbar" hidden></div>' +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
-          /* WHAT IS ATTACHED, SHOWN (§252.2) — above the composer, so the box
+          /* WHAT IS ATTACHED, SHOWN (§286.2) — above the composer, so the box
              under the cursor never moves. Empty and absent until there is a
              picture. */
           '<div class="chprev" id="chatprev" hidden></div>' +
@@ -407,7 +407,7 @@ var CHAT = (function(){
 
   /* Only the BODY and the badge, never the composer — see the rule at the top
      of this file. Called on every poll, so it must be safe mid-typing. */
-  /* ── THE OFFICE'S HALF OF THE CORNER (§251) ──────────────────────────
+  /* ── THE OFFICE'S HALF OF THE CORNER (§285) ──────────────────────────
      Drawn into the SAME body as everybody else's conversation, because it is
      the same box and a second panel would be a second set of every rule this
      file already keeps — the poll, the scroll, the composer that must not be
@@ -498,7 +498,7 @@ var CHAT = (function(){
 
   function drawPanel(){
     var body = el("chatbody"); if (!body) return;
-    /* THE OFFICE'S QUEUE IS A DIFFERENT SCREEN IN THE SAME BOX (§251) — and
+    /* THE OFFICE'S QUEUE IS A DIFFERENT SCREEN IN THE SAME BOX (§285) — and
        only ever for the office, and only on the Waiting half. Everything
        below is unchanged for everybody else, and for the office reading
        their own thread. */
@@ -529,7 +529,7 @@ var CHAT = (function(){
 
   /* THE HEAD, THE BELL, THE BADGE AND THE FOOT — everything in the panel that
      is NOT the body, extracted so the office's queue and everybody's
-     conversation cannot draw them differently (§53.5, §251). */
+     conversation cannot draw them differently (§53.5, §285). */
   function drawPanelChrome(){
     /* NO `var cfg` HERE. The module holds one, filled from the SERVER's answer
        on every poll, and this function reads `cfg.promise` and `cfg.shots`
@@ -564,7 +564,7 @@ var CHAT = (function(){
 
     var sub = el("chatsub");
     if (sub && state.office && cq.side === "wait" && cq.person) {
-      /* ── THE LINE IS NEVER EMPTY (§251.2) ─────────────────────────
+      /* ── THE LINE IS NEVER EMPTY (§285.2) ─────────────────────────
          This said nothing on the queue's list, on the reasoning that the
          segment above had already named it — and an EMPTY line is a shorter
          header, so the panel changed height as you switched halves. Islam:
@@ -596,7 +596,7 @@ var CHAT = (function(){
 
     var n = el("chatn");
     if (n) {
-      /* ── THE BADGE COUNTS PEOPLE WAITING, FOR THE OFFICE (§251) ─────
+      /* ── THE BADGE COUNTS PEOPLE WAITING, FOR THE OFFICE (§285) ─────
          His decision, and it is the LENGTH OF THE LIST rather than a second
          count of the same thing — a badge saying seven over four rows is
          what gets reported as a bug (§108.1). Everybody else's badge is
@@ -612,7 +612,7 @@ var CHAT = (function(){
     }
     var pic = el("chatpic");
     if (pic) pic.hidden = !cfg.shots;
-    /* ── THE PICTURE ITSELF, NOT A SENTENCE ABOUT IT (§252.2) ────────
+    /* ── THE PICTURE ITSELF, NOT A SENTENCE ABOUT IT (§286.2) ────────
        Islam, having pasted one: "the message is very subtle I didn't notice
        that something was attached." He was right — the whole confirmation was
        one line in the page's quietest grey, below the box, at the same weight
@@ -649,7 +649,7 @@ var CHAT = (function(){
          on is sent with your message", which stopped being true the moment
          that stopped happening — and a sentence that is merely stale is worse
          than no sentence, because somebody believes it. */
-      /* AND THE SENTENCE GOES WITH IT (§252.2, 1b-ii): the strip above says
+      /* AND THE SENTENCE GOES WITH IT (§286.2, 1b-ii): the strip above says
          the same thing and shows the picture besides, so the line would be
          the product saying it twice — quietly, in the register somebody has
          already told us they do not read. An ERROR still speaks here, because
@@ -686,7 +686,7 @@ var CHAT = (function(){
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
         state.office = !!j.office;
-        /* ── THE QUEUE ARRIVES WITH THE POLL (§251) ────────────────────
+        /* ── THE QUEUE ARRIVES WITH THE POLL (§285) ────────────────────
            ABSENT IS NOT EMPTY (§93, §231.4). `queue` is undefined for
            everybody but the office and null when the server could not read
            it — neither is "nobody is waiting", so the list keeps saying
@@ -938,7 +938,7 @@ var CHAT = (function(){
     });
   }
 
-  /* WHICH KEY A REGISTRATION WAS MADE WITH (§248.3), in the spelling the
+  /* WHICH KEY A REGISTRATION WAS MADE WITH (§282.3), in the spelling the
      server hands out — base64url, no padding — so the two can be compared as
      strings. Absent on a browser that does not report it, which is a
      different answer from "a different key" and is treated as one. */
@@ -971,7 +971,7 @@ var CHAT = (function(){
           });
         }
         if (sub) {
-          /* ── AND IT MUST BE THE KEY WE ARE SENDING WITH (§248.3) ──────
+          /* ── AND IT MUST BE THE KEY WE ARE SENDING WITH (§282.3) ──────
              THIS BRANCH ACCEPTED ANY EXISTING REGISTRATION WITHOUT LOOKING
              AT IT, and that is a fault that can never heal on its own. A
              registration is bound to the key it was made with; if the
@@ -1258,7 +1258,7 @@ var CHAT = (function(){
      get back is what they typed, and a chat that eats it because the network
      blinked is a chat nobody uses twice (that rule survives from the version
      this replaces; it now restores rather than merely not-clearing). */
-  /* ── WHAT A REPLY POSTS, BUILT ONCE (§53.5, §251) ────────────────────
+  /* ── WHAT A REPLY POSTS, BUILT ONCE (§53.5, §285) ────────────────────
      THE HTML IS BUILT HERE, BY THE ONE BUILDER (§72.3), and the server decides
      whether to actually send it and to WHOM — the browser sends content, never
      a recipient (§74.2).
@@ -1290,7 +1290,7 @@ var CHAT = (function(){
     return body;
   }
 
-  /* ── OPENING, REPLYING AND SEARCHING FROM THE CORNER (§251) ──────────
+  /* ── OPENING, REPLYING AND SEARCHING FROM THE CORNER (§285) ──────────
      Every one of these goes through an action the Platform Inbox already
      uses. Nothing new is authorised, nothing new is stored, and a rule the
      Inbox keeps is a rule the corner keeps by construction. */
@@ -1408,7 +1408,7 @@ var CHAT = (function(){
     var t = el("chatsay"); if (!t || sending) return;
     var text = t.value.trim();
     if (!text && !shot) return;
-    /* ── THE SAME BOX ANSWERS SOMEBODY ELSE (§251) ────────────────────
+    /* ── THE SAME BOX ANSWERS SOMEBODY ELSE (§285) ────────────────────
        With a conversation open inside the queue, this composer is a REPLY —
        to them, from the office — so it goes through `reply` and not `say`.
        One composer, because a second would be a second set of every rule
@@ -1504,7 +1504,7 @@ var CHAT = (function(){
        handler bound to the button itself would be destroyed four seconds after
        it appeared (§24: whoever rewrites the DOM re-wires it, and the cheapest
        way to obey that is not to bind to the thing being rewritten). */
-    /* ── THE CORNER'S QUEUE, WIRED ONCE (§251) ───────────────────────
+    /* ── THE CORNER'S QUEUE, WIRED ONCE (§285) ───────────────────────
        On the panel, never on each row: the list is rewritten on every poll,
        so a handler per row would be re-bound every few seconds and leak
        (§24, §47.2). Delegation costs nothing and cannot drift. */
@@ -1568,7 +1568,7 @@ var CHAT = (function(){
         drawPanel();
       });
     });
-    /* TAKING IT BACK OFF (§252.2). Wired on the foot rather than the button,
+    /* TAKING IT BACK OFF (§286.2). Wired on the foot rather than the button,
        because the strip is rewritten on every paint and a handler bound to the
        button inside it would be re-bound every few seconds (§24, §47.2). */
     document.querySelector("#chatpanel .chatfoot").addEventListener("click", function(e){
@@ -1579,7 +1579,7 @@ var CHAT = (function(){
     });
     el("chatpic").addEventListener("click", function(){ el("chatfile").click(); });
     el("chatfile").addEventListener("change", function(){ takePicture(this.files && this.files[0]); });
-    /* ── AND A PICTURE CAN SIMPLY BE PASTED (§252) ────────────────────
+    /* ── AND A PICTURE CAN SIMPLY BE PASTED (§286) ────────────────────
        Islam: "allow in the chat to copy paste a picture rather than only
        attaching it." Somebody reporting a number that looks wrong has just
        pressed the screen-grab key; making them save the file and then find it
@@ -1591,7 +1591,7 @@ var CHAT = (function(){
        same intake the attach button uses. A second path would be a second set
        of all of it.
 
-       THE OFFICE'S REPLY BOX IS THE SAME BOX (§251), so this reaches the
+       THE OFFICE'S REPLY BOX IS THE SAME BOX (§285), so this reaches the
        corner's queue side without a second listener.
 
        TEXT STILL PASTES AS TEXT: only an image item is taken, and
@@ -1639,7 +1639,7 @@ var CHAT = (function(){
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
        for (§98.1). */
-    /* ── AND IT STAYS OPEN WHILE YOU MOVE ABOUT (§250, REVERSING §100.4)
+    /* ── AND IT STAYS OPEN WHILE YOU MOVE ABOUT (§284, REVERSING §100.4)
        Islam: "we need the chat to sustain the navigation so it's open while
        me navigating across the different pages in the platform."
 
@@ -1655,7 +1655,7 @@ var CHAT = (function(){
        So it goes, and this is recorded as a REVERSAL rather than overwritten
        (Principle II): §100.4's reasoning was sound for a panel you dip into
        and leave, and it stopped being sound the moment the panel became
-       somewhere you WORK — the office's queue (§251) is read while walking
+       somewhere you WORK — the office's queue (§285) is read while walking
        around the plan it is about.
 
        WHAT REPLACES IT IS WHAT WAS ALWAYS THERE: the minus, which says
@@ -1948,7 +1948,7 @@ var CHAT = (function(){
           /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
              prose while the server read a constant, so the two were one edit
              from disagreeing — and the edit is now a box on this very row. */
-          /* AND THE SECOND HALF, WHICH IS THE ONE THAT WAS MISSING (§249):
+          /* AND THE SECOND HALF, WHICH IS THE ONE THAT WAS MISSING (§283):
              somebody PRESENT used to get nothing at all, for ever, if they
              then shut their laptop — the platform decided at the instant of
              replying and never looked again. The two numbers do different
@@ -2717,7 +2717,7 @@ var CHAT = (function(){
            the ask goes after it. */
         pushSync();
         setTimeout(function(){
-          /* ── AND THIS BROWSER SAYS WHAT IT HOLDS (§248.4) ─────────────
+          /* ── AND THIS BROWSER SAYS WHAT IT HOLDS (§282.4) ─────────────
              THE TEST ONLY EVER ASKED THE SERVER, and the server can only
              report what it HOLDS — so a browser subscribed to one address
              while the server sends to another read as perfect health at both
@@ -2829,7 +2829,7 @@ var CHAT = (function(){
         setMenuPaint();
         return;
       }
-      /* THE CHASE (§249), read the same way for the same reason. */
+      /* THE CHASE (§283), read the same way for the same reason. */
       var chase = e.target.closest("[data-chchase]");
       if (chase) {
         chatSet("chase", chase.value);

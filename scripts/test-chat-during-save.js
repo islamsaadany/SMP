@@ -1,4 +1,4 @@
-/* ══ THE CHAT DOES NOT WAIT ON A SAVE (§248) ═══════════════════════════
+/* ══ THE CHAT DOES NOT WAIT ON A SAVE (§282) ═══════════════════════════
 
    Islam, twice in two days: "all conversations are gone!!", and then "before
    the fix all the chats disappeared", with §231.4's card reading "The server
@@ -18,7 +18,7 @@
 
    PROVED ABLE TO FAIL (§94.5): `SMP_CHAT_JOIN_PEOPLE=1` is not a switch in
    the product — there is no such branch in `api/chat.js` — it makes THIS FILE
-   ask the pre-§248 question directly, so the red run is the shape the
+   ask the pre-§282 question directly, so the red run is the shape the
    product actually had rather than a fiction about it.
 
      DATABASE_URL=postgres://… node scripts/test-chat-during-save.js

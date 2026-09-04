@@ -348,7 +348,14 @@
 
    §278.3 merged with main at v4.63-picker-height and went to v4.64 rather than
    beside it, same rule. */
-const SHELL = "smp-shell-v4.64-objectives-table";
+/* §282–§286 and §288 (the chat round): the office's corner carries the queue
+   and survives the walk, a picture pastes into it, a reply nobody was told
+   about is chased, and a save stops shutting every reader out — the built
+   file's bytes changed, so the name must too, or a returning browser goes on
+   serving itself the old platform out of its own disk (§91). Checked against
+   origin/main serving "smp-shell-v4.64-objectives-table" (aac6c32), and
+   confirmed again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v4.65-office-corner-queue";
 const ASSETS = [
   "/",
   "/index.html",

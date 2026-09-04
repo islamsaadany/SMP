@@ -48,11 +48,8 @@ function dBand(v){ return band(v); }
    would have vanished into its own ground. `deckFootMarks()` skips `.d-sect`,
    which is one test rather than an unconditional plate and a white rectangle
    in the corner of every divider. */
-var SEC_WORD = { sfound:"FOUND", swothead:"SWOT", spillars:"PILLARS",
-                 sperf:"SCORE" };
 function sectSlide(key, label, title, sub, cells){
-  return '<section class="dslide d-cover d-sect"' + anch(key, label) +
-    sec(SEC_WORD[key] || secTwo(title), title, true) + '>' +
+  return '<section class="dslide d-cover d-sect"' + anch(key, label) + '>' +
     '<span class="seclab">Section</span>' +
     '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">' + esc(sub) + '</p>' +
@@ -63,35 +60,6 @@ function sectSlide(key, label, title, sub, cells){
         }).join("") + '</div>'
       : '') +
     '</section>';
-}
-
-/* ── A SLIDE THAT STARTS A SECTION SAYS SO (§266.12) ───────────────────
-   Islam, of the flow's own labelled strip: *"for the presentations in general
-   of the units not the master how can we use the bullets in the bottom like we
-   did in the master one?"*, and of the four treatments drawn for him,
-   *"B is good but we can make them grouped like C as well."*
-
-   The strip is drawn from what the deck DECLARES, never from what it looks
-   like: the builder knows the pillar's code and the capability's name, and a
-   strip that read them back out of a heading would be guessing at prose it does
-   not own (§96, and `deckStops()`'s own reason for reading `data-subject`).
-
-   `head` marks the ones the deck's four blue dividers already are (§259) — the
-   groups are the parts of the review, not a decoration invented for the bar. */
-function sec(code, name, head){
-  return ' data-sec="' + esc(code) + '" data-sec-name="' + esc(name) + '"' +
-         (head ? ' data-sec-head="1"' : '');
-}
-
-/* Two letters, for a section with no code of its own — a capability. The rule
-   is §266.9's own fallback for a subject with no prefix, and it is a fallback
-   rather than a scheme: a pillar HAS a code, printed on every one of its
-   slides, and inventing a second abbreviation beside it is what that section
-   refused. */
-function secTwo(name){
-  var w = String(name || "").trim().split(/\s+/).filter(Boolean);
-  return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0)
-                       : String(w[0] || "?").slice(0, 2)).toUpperCase();
 }
 
 function anch(key, label, where){
@@ -187,8 +155,7 @@ function deckSlides(u){
     (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", u.name, true) + '>' +
+  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
     (deckMark(u)
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
@@ -489,7 +456,6 @@ function deckSlides(u){
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     S.push('<section class="dslide d-cover"' +
       anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
-      sec(pillarCode(u, pi), p.name) +
       '><span class="seclab">' + esc(p.kind) +
       ' &middot; theme ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
       '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
@@ -648,7 +614,6 @@ function deckSlides(u){
   if (noteSlide) S.push(noteSlide);
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    sec("END", "Thank you") +
     '><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(u.name) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
@@ -712,8 +677,7 @@ function deckSlidesFn(fk){
   var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
   var S = [];
 
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", f.name, true) + '>' +
+  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
     (groupLogo()
         ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
@@ -730,7 +694,6 @@ function deckSlidesFn(fk){
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
     S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
-      sec(secTwo(c.name), c.name) +
       '><span class="seclab">Capability &middot; ' +
         esc(f.name) + '</span>' +
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
@@ -871,7 +834,6 @@ function deckSlidesFn(fk){
     'platform, not in a deck that is already wrong.</p></section>');
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    sec("END", "Thank you") +
     '><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(f.name) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
@@ -1561,58 +1523,21 @@ function deckStops(){
    "32 / 71" is the question a presenter actually asks of it. A single
    subject's deck is untouched: `DECK.flow` is null there and this is the
    branch it has always taken. */
-/* The sections of ONE subject's deck, read off the slides themselves (§266.12).
-   A `data-sec` is written by the builder that knows the code and the name, so
-   this reads a declaration rather than parsing a heading. */
-function deckSections(){
-  var out = [];
-  DECK.slides.forEach(function(sl, k){
-    if (!sl.dataset.sec) return;
-    out.push({ at: k, code: sl.dataset.sec, name: sl.dataset.secName || sl.dataset.sec,
-               head: sl.dataset.secHead === "1" });
-  });
-  return out;
-}
-/* One pill per stop, and the pills gathered into the parts of the review
-   (§266.12). Islam, of the four treatments drawn: *"B is good but we can make
-   them grouped like C as well."*
-
-   THE GROUPS ARE THE DECK'S OWN FOUR BLUE DIVIDERS (§259) — nothing invented
-   for the bar, and the four pillars read as one stretch of the review rather
-   than as four things among ten. A flow's strip is untouched: there the stops
-   are subjects and every one is its own group. */
-function deckPills(stops, grouped){
-  var pill = function(st){
-    /* The code is DRAWN and the name is on the hover: a pill wide enough to
-       hold "Strategy Management Office" is not a pill (§88's rule, on the
-       projector's own chrome). */
-    return '<button class="ddot" data-dgo="' + st.at + '" title="' + esc(st.name) +
-      '" aria-label="' + esc(st.name) + '">' + esc(st.code) + '</button>';
-  };
-  if (!grouped) return stops.map(pill).join("");
-  var out = "", open = false;
-  stops.forEach(function(st, k){
-    if (!k || st.head) { if (open) out += "</div>"; out += '<div class="dgrp">'; open = true; }
-    out += pill(st);
-  });
-  return out + (open ? "</div>" : "");
-}
 function deckIndex(){
   var root = document.getElementById("deckroot");
   DECK.slides = [].slice.call(root.querySelectorAll(".dslide"));
   root.querySelector(".dcount-t").textContent = DECK.slides.length;
   var dots = root.querySelector(".ddots");
-  /* ONE LIST FOR BOTH (§53.5): a flow's stops are its subjects and one deck's
-     are its sections, and everything downstream — which pill is lit, which one
-     a slide belongs to — asks `DECK.stops` without caring which it got. A deck
-     that declares fewer than two sections falls back to a dot per slide, so a
-     shape nobody has thought of still gets a strip (§61). */
-  var secs = DECK.flow ? null : deckSections();
-  DECK.stops = DECK.flow ? deckStops() : (secs && secs.length > 1 ? secs : null);
+  DECK.stops = DECK.flow ? deckStops() : null;
   dots.classList.toggle("bysub", !!DECK.stops);
-  dots.classList.toggle("bygrp", !!DECK.stops && !DECK.flow);
   dots.innerHTML = DECK.stops
-    ? deckPills(DECK.stops, !DECK.flow)
+    ? DECK.stops.map(function(st){
+        /* The code is DRAWN and the name is on the hover: a pill wide enough to
+           hold "Strategy Management Office" is not a pill (§88's rule, on the
+           projector's own chrome). */
+        return '<button class="ddot" data-dgo="' + st.at + '" title="' + esc(st.name) +
+          '" aria-label="' + esc(st.name) + '">' + esc(st.code) + '</button>';
+      }).join("")
     : DECK.slides.map(function(_, k){
         return '<button class="ddot" data-dgo="' + k + '" aria-label="Slide ' + (k+1) + '"></button>';
       }).join("");
@@ -1642,11 +1567,7 @@ function deckShow(n){
      running order is stated with it, because "which unit is this" and "how
      much is left" are the two questions a room asks. Written into the node,
      never repainted (§63): this runs on every arrow press. */
-  /* THE FLOW'S, NEVER ONE DECK'S. §266.12 gives a single deck stops of its own,
-     and `DECK.stops` is now set for both — so this had to start asking
-     `DECK.flow`, or a unit's deck would rename its own title bar "Foundation ·
-     2 of 10" and lose the unit (§266's whole reason for writing it). */
-  if (DECK.flow && DECK.stops && here >= 0) {
+  if (DECK.stops && here >= 0) {
     var st = DECK.stops[here];
     root.querySelector(".dtitle").innerHTML =
       "<b>" + esc(st.name) + "</b> &middot; " + (here + 1) + " of " + DECK.stops.length +

@@ -405,6 +405,61 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE REPORTING PAGE SAYS WHERE SUBMIT IS HELD (§274):** Islam, from his own
+  tenant — *"the reporting is not submitting to the SMO as there is someting
+  requires a note but I can't find it."* **REPRODUCED BEFORE ANYTHING WAS
+  PROPOSED**: 17 of 17 entered, the plan owing nothing, the gate held by one
+  row (`notes:1, pending:0, owed:0, gaps:0`). **The row IS marked** (§105's red
+  edge and rung note box) and **a unit's page draws ONE pillar at a time**, so
+  it was not on the screen — and the banner above counted it and named no
+  place. **THE RAIL WAS WORSE THAN SILENT**: the pillar holding the report up
+  wore a **green 4/4**, because that tally counts figures ENTERED, and the line
+  that would have said *Complete* is not drawn at all (the rail ships
+  collapsed, §119) — so the one thing on the page that lists the places was
+  saying *nothing left here* in the platform's own colour for it. **AND ONE
+  SIDE OF THE SWITCH HAD NOTHING AT ALL**: a capability function's page has
+  never drawn a note banner and `capNoteBox()` passes `want:false` always, so
+  its Submit was refused with the reason on a hover and not one mark on the
+  page (§53.5, A15). Islam chose **C** from three drawn in the running platform
+  (rule 1c, §41.9): **it is §272's bar, class for class** — a count, one chip
+  per place, a walk — because a custodian already meets that control when a
+  plan is short; what is NOT shared is the code (that one walks a PLAN in fill
+  mode keyed on `EDIT_PAGE` and `.gapwalk`), so the shape is shared through the
+  CSS and the CURSOR through `gapLight()`, where §177.2's lessons live, with
+  the two field lists disjoint. **ONE ROW IS ONE THING TO FIX, SO THE BAR
+  COUNTS ROWS AND THE HOVER COUNTS REASONS**: a row that said In progress with
+  no per-cent is BOTH unanswered and pending, so the gate names it twice —
+  correctly, in two sentences — and a bar adding those up would say "4 to
+  finish" over three boxes; `rowBlock()` tests `pend` first, because the
+  per-cent is the control to land on. **THE PLAN'S GAPS ARE COUNTED HERE AND
+  FILLED THERE** — leaving them out would read *nothing to finish* over a shut
+  Submit — so that chip is a door to the Strategy tab and no walk is offered
+  when it is all that is left (§223). **THE MARKS ARE PUT ON IN ONE PLACE**
+  (`repMarkControls()`, driven from the CONTROLS so no id is escaped into a
+  selector and no builder needs a flag threaded through it, §104.7). **Drawn
+  for whoever may submit** (`canSpeakFor`, the gate that button asks) and never
+  over a closed report (§220). **§274.1 — THE CHIP WAS ADDRESSED BY THE WORD ON
+  THE PAGE**: `pillarCode()` renders **BE03** and the rail matches `p.code`
+  (**M03**), so the press set the rail to a code no pillar has and looked
+  exactly like a dead button — §48, and invisible on any tenant where the two
+  coincide, which is why the check asserts they DIFFER here (§94.5). Found by
+  pressing it. **§274.2 — A RED WORD ON A RAIL IS TYPE**: `--bad` measures
+  **4.49:1** on the rail row's ground in dark (§38.5, eighth time), and it was
+  already there — §106.2's *"N rows to check"* is the same class in the same
+  place — so one scoped rule repairs a reading nobody had measured; 8.02 light,
+  7.35 dark. **§274.3 — AND TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK**:
+  its first falsification run **died rather than reported** (§215, in the file
+  promising it does not), printing three of forty-three, and its §9 asked
+  `canSpeakFor()` of whoever was signed in while filtering for somebody it
+  refuses (§94.5). **AND A CHECK THAT CANNOT LAUNCH REPORTS NO FAILURES**:
+  three neighbours were run without the container's Chromium wrapper, printed
+  Playwright's own install banner, and were read here as *0 failures* — a
+  clean-looking result from a run that never happened (§54.5, §100.3). **43
+  red** on the build before, 51 green after; the bar holds one row 1500 → 900px
+  and the 4px overrun below 1000 is byte-identical to the build before (§158's
+  recorded residue). **RECORDED, NOT DONE**: a capability function's note boxes
+  are still drawn with `want:false`, so the box the bar sends you to is not
+  itself rung on that side.
 - **A PANEL EDITS, A DIALOG ASKS (§273.3, reshaping §273.2):** Islam, of the
   shipped closed-cycle panel on his own tenant — *"The design is very poor"* —
   and, of three shapes drawn for him, **"C"**. **MY FIRST TWO ANSWERS CHANGED
@@ -5091,6 +5146,21 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/report-blockers.py # the reporting page says WHERE Submit is held
+                                # (§274): the bar's chips asserted as AGREEMENT with
+                                # reportPlaces() and never as a list, both ends every
+                                # time (nothing owed → no bar; owed → a bar; a viewer
+                                # who cannot submit → no bar, the office → one), the
+                                # chip addressed by the STORED pillar code and asserted
+                                # to DIFFER from the drawn one (§48, §274.1), Next
+                                # PRESSED and the lit control read back by its row id,
+                                # answering it clearing the bar AND opening Submit as a
+                                # PAIR, the plan-gap chip counted and proved a door
+                                # rather than a walk stop, a capability function shown
+                                # the same bar (it had no banner at all), and the paint
+                                # measured in both themes. 43 red on the build before —
+                                # and its own first run there DIED rather than
+                                # reporting (§215), printing three of forty-three
 python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the strip
                                 # carries ONE control and neither Close the cycle nor the
                                 # month picker — asserted as absences beside the presence,
@@ -5564,7 +5634,51 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;273: editing the cycle that is
+*Last Updated: 2026-09-04 &mdash; **&sect;274: the reporting page says where
+Submit is held.** Islam, from his own tenant: *"the reporting is not submitting
+to the SMO as there is someting requires a note but I can't find it. based on
+the current features we have what is the best way to identify the missing areas
+easliy?"* **REPRODUCED BEFORE ANYTHING WAS PROPOSED**, which is why the answer
+is not *make the mark bigger*: every figure entered (17 of 17), the plan owing
+nothing, and the gate held by one row and nothing else. **The row IS marked** —
+&sect;105 puts a red edge down its first cell and rings its note box — and **a
+unit's Reporting page draws ONE pillar at a time**, so a row owing a note in
+another pillar is not on the screen at all, while the banner above it counted
+that row and named no place. **THE RAIL WAS WORSE THAN SILENT**: it is the one
+thing on the page that lists the places, and the pillar holding the report up
+wore a **green 4/4**, because that tally counts figures ENTERED — a different
+question — with the line that would have said *Complete* not drawn at all,
+since the rail ships collapsed (&sect;119). **AND ONE SIDE OF THE SWITCH HAD
+NOTHING**: a capability function's page has never drawn a note banner and
+`capNoteBox()` passes `want:false` always, so its Submit was refused with the
+reason on a hover and not one mark on the page (&sect;53.5, A15). Three options
+were drawn out of the running platform (rule 1c, &sect;41.9) and Islam chose
+**C**: **&sect;272's bar, class for class** — a count, one chip per place, and
+a walk — because a custodian already meets that control when a plan is short.
+The shape and the CURSOR are shared (`gapLight()`, where &sect;177.2's lessons
+live); the LIST is not, because that walk is a plan's in fill mode and this is
+a cycle's. **The bar counts ROWS and the hover counts REASONS** (a row that
+said In progress with no per-cent is both unanswered and pending, so the gate
+names it twice and a sum would say 4 over three boxes), **the plan's gaps are
+counted here and filled there** (a door, never a walk stop), and **the marks
+are put on in ONE place** rather than threaded through eight builders.
+**&sect;274.1**: the chip was addressed by the word on the page — `pillarCode()`
+renders BE03 and the rail matches `p.code` (M03), so Next set the rail to a
+code no pillar has and looked exactly like a dead button (&sect;48), found by
+pressing it. **&sect;274.2**: a red word on a rail is TYPE, and `--bad` measures
+4.49:1 in dark (&sect;38.5, eighth time) — already true of &sect;106.2's mark on
+the neighbouring rail, so one scoped rule repairs a reading nobody had measured.
+**&sect;274.3**: two of the check's own failures were the CHECK (it died rather
+than reported, &sect;215; and it asked one person's rights of everybody,
+&sect;94.5) — **and a check that cannot launch reports no failures**, which is
+how three neighbours were read here as clean from runs that never happened.
+**43 red** on the build before, 51 green after. Full `qa.py` ERRORS none
+&middot; 514/0 authoriser &middot; 126/0 differ &middot; eleven neighbouring
+checks green &middot; the bar holds one row 1500 &rarr; 900px, with the 4px
+overrun below 1000 measured byte-identical to the build before. **Recorded, not
+done**: a capability function's note boxes are still drawn with `want:false`.*
+
+*Earlier: 2026-09-03 &mdash; **&sect;273: editing the cycle that is
 running.** Islam: *"allow me to edit the cycle name. give me an edit button the
 cycle to edit the date as you already built and the cycel name edit as well"* —
 then, of the two shapes drawn for him in the real page: *"keep the close cycle

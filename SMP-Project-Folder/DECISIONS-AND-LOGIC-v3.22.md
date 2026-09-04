@@ -31876,3 +31876,137 @@ assertion. **12 red** on the §273.2 build. **And one of its own assertions coul
 not fail as written**: `A and B or A` collapses to `A`, so the cycle's name was
 never actually being checked in the title — both halves now, with the name read
 off the DATA rather than hardcoded (§94.8).
+
+---
+
+## §274 — THE REPORTING PAGE SAYS WHERE SUBMIT IS HELD (2026-09-04)
+
+Islam, from his own tenant: *"the reporting is not submitting to the SMO as
+there is someting requires a note but I can't find it. based on the current
+features we have what is the best way to identify the missing areas easliy?"*
+Three options were drawn out of the running platform (rule 1c, §41.9,
+`design-mockups/report-find-the-blocker/`) and he chose **C** — the bar names
+everything Submit is waiting for, not only the notes.
+
+**THE STATE WAS REPRODUCED BEFORE ANYTHING WAS PROPOSED, AND IT IS WHY THE
+ANSWER IS NOT "MAKE THE MARK BIGGER".** Every figure entered (17 of 17), the
+plan owing nothing, and `submitBlockers()` returning `notes:1, pending:0,
+owed:0, gaps:0` — the gate held by one row and by nothing else. The row IS
+marked: §105's `wantnote` puts a red edge down its first cell and rings its
+note box. **A unit's Reporting page draws ONE pillar at a time**, so a row
+owing a note in another pillar is not on the screen at all, and the banner
+above counted it and named no place.
+
+**THE RAIL WAS WORSE THAN SILENT.** It is the one thing on that page that
+lists the places, and the pillar holding the report up wore a **green 4/4** —
+because that tally counts figures ENTERED, which is a different question from
+*is anything owed here*. Worse, the small line that would have said *Complete*
+is not drawn at all: the rail ships collapsed (§119), so the state people
+actually meet had the tally and nothing else. A reader scanning for where to
+look was being told, in the platform's own colour for "nothing left here", to
+look anywhere but there.
+
+**AND ONE SIDE OF THE SWITCH HAD NOTHING AT ALL** (§53.5, A15). A capability
+function's Reporting page has never drawn a note banner, and `capNoteBox()`
+passes `want:false` always, so its note boxes are not rung either — a function
+head was refused by Submit with the reason on a hover and **not one mark on
+the page**. The unit's half was poor; the function's half was blind.
+
+**IT IS §272's BAR, CLASS FOR CLASS, AND THAT IS THE POINT.** A custodian
+already meets this control on the Strategy tab when a plan is short: a count,
+one chip per place, a walk. Bringing the same control to Reporting asks nothing
+new of anybody. What is NOT shared is the code: that bar walks a PLAN's
+fillable blanks in fill mode, keyed on `EDIT_PAGE` and `.gapwalk`; this walks a
+CYCLE's reporting controls, which have no mode and are not the same controls.
+So the SHAPE is shared through the CSS, and the CURSOR is shared through
+`gapLight()` — where §177.2's hard-won lessons live (the ring goes on the
+walkable element; a §130.1 picker's ring belongs to its `.ssbtn` sibling; focus
+without scrolling) — and the two field lists are disjoint, so a cursor left by
+the other walk reads as "nowhere" and this one starts at the top.
+
+**ONE ROW IS ONE THING TO FIX, WHICH IS WHY THE BAR COUNTS ROWS AND THE HOVER
+COUNTS REASONS.** A row that said *In progress* and gave no per-cent is BOTH
+unanswered and pending — `statusGiven()` is false without the number — so the
+gate's own arithmetic names it twice, correctly, in two sentences about two
+rules. A bar that added those up would say "4 to finish" over three boxes.
+`rowBlock()` tests `pend` before `owed` for the same reason the walk exists:
+what that row is owed is the per-cent, so that is the control to land on.
+
+**THE PLAN'S OWN GAPS ARE COUNTED HERE AND FILLED THERE.** They hold Submit
+(§221), so leaving them out would let this bar read *nothing to finish* over a
+Submit that is still shut — the exact fault it exists to remove. They are not
+walkable, because they are not fixed from this page: that chip is a door to the
+Strategy tab, where §272's bar already names and walks them, and with nothing
+else outstanding no walk button is drawn at all (§223 — a control that could
+only ever wrap on itself has nothing behind it).
+
+**THE MARKS ARE PUT ON IN ONE PLACE, NOT AT EIGHT CALL SITES.** Which control
+answers a row's blocker is a fact about the row, so `repMarkControls()` reads
+the same map the bar counts (§272's rule: the walk follows whatever the bar is
+counting) and applies it to the DOM the paint just produced — driven from the
+CONTROLS rather than from the ids, so no id is ever escaped into a selector,
+and a box builder added tomorrow needs no flag threaded through it (§104.7).
+
+**DRAWN FOR WHOEVER MAY SUBMIT, AND FOR NOBODY ELSE.** It explains the Submit
+button and nothing else, so it asks `canSpeakFor()` — the gate that button
+already asks — and a contributor limited to their own lines is not shown a
+count they cannot clear (§61, §177). A closed report is not chased: §220 locks
+it and Reopen is what that state offers.
+
+### §274.1 — THE CHIP WAS ADDRESSED BY THE WORD ON THE PAGE
+
+Found by pressing Next and watching the rail not move. `pillarCode()` renders
+the tenant's prefix (**BE03**) and the rail's own button and `unitRailPick()`
+match `p.code` (**M03**) — so a chip keyed on the label set the rail to a code
+no pillar has, the press repainted the same pane, and it looked exactly like a
+dead button. §48's rule: **address by the identifier, label with the word.**
+It would have passed unnoticed on any tenant where a pillar's code and its
+displayed code coincide, which is every tenant that has not set a prefix — so
+the check asserts the two DIFFER on this one, or the assertion proves nothing
+(§94.5).
+
+### §274.2 — A RED WORD ON A RAIL IS TYPE, SO IT TAKES THE TYPE RED
+
+`--bad` is a FILL colour and measures **4.49:1** against the rail row's ground
+in the dark palette — §38.5 for the eighth time. It was already there before
+this section: §106.2's *"N rows to check"* on a project's rail is the same
+class in the same place, so the one scoped rule repairs a reading nobody had
+measured as well as the mark added beside it. Scoped to the rail's small line
+and never to `.missing` at large, which on a plan's white cell is measured and
+fine — widening it would be restyling pages nobody asked about. **8.02 light,
+7.35 dark** after.
+
+### §274.3 — AND TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK
+
+Its first run against the previous build **died rather than reporting**
+(§215, in the file whose own docstring promises it does not): `reportPlaces`
+does not exist there, the probe came back `{__err:…}`, and the sum below it
+walked a string — three failures printed where there are forty-three, and
+`grep -c FAIL` read a crash as a nearly-clean build. Every list-shaped probe
+degrades to `[]` now. And its own §9 asked `canSpeakFor()` of whoever was
+already signed in while filtering the register for somebody it refuses — one
+person's rights asked of everybody (§94.5) — so it reported *"no such person"*
+on a register full of them; it switches viewer per candidate now.
+
+**AND A CHECK THAT CANNOT LAUNCH REPORTS NO FAILURES** (§54.5, §100.3's
+family). Three neighbouring checks were run without the container's Chromium
+wrapper, printed Playwright's own *"please run playwright install"* banner, and
+were read here as *0 failures* — a clean-looking result from a run that never
+happened. They are green through `qa-run.py`, and this file's own check now
+launches the way every other one does so the wrapper supplies the browser.
+
+**PROVED ABLE TO FAIL: 43 red** on the shipped build, the first of them the
+reported symptom itself. 51 green after. Full `qa.py` sweep ERRORS none;
+`test-authorize` 514/0 and `test-graph-diff` 126/0 (nothing server-side moved,
+and it is asserted rather than assumed); `submit-gate`, `fn-report-gate`,
+`gap-fill`, `gap-walk`, `empty-not-missing`, `milestone-fill`, `report-saves`,
+`table-fit`, `perf-line`, `cycle-board` and `setup-overview` all green. The
+bar holds one row from 1500 down to 900px; the 4px overrun at 900 and 768 is
+measured **byte-identical on the build before** (§158's recorded residue,
+§249.2).
+
+**RECORDED, NOT DONE.** A capability function's note boxes are still drawn with
+`want:false`, so the box the bar sends you to is not itself rung red on that
+side — the bar and the rail name the row, and ringing the box is one line in
+`capNoteBox()` that needs the row's KIND threaded to it, which is a change to
+four call sites and was not what was asked for.

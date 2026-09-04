@@ -4311,59 +4311,6 @@ function renderFocusBoard(){
         : ''));
 }
 
-/* ── THE BAR THAT SAYS WHERE SUBMIT IS HELD (§274) ─────────────────────
-   Islam, choosing between three drawn options: *"C"* — the bar names
-   EVERYTHING Submit is waiting for, not only the notes.
-
-   IT IS §272's BAR, CLASS FOR CLASS, and that is the point rather than a
-   saving: a custodian already meets this control on the Strategy tab when a
-   plan is short — a count, one chip per place, a walk — so the reporting page
-   asks nothing new of anybody. What it is NOT is §272's code: that bar walks
-   the fillable blanks of a PLAN in fill mode, keyed on `EDIT_PAGE` and
-   `.gapwalk`; this walks the reporting controls of a CYCLE, which has no fill
-   mode and different controls. Same shape, different list — so the shape is
-   shared through the CSS and the cursor (`gapLight`, where the subtle work
-   is), and the list is not.
-
-   DRAWN FOR WHOEVER MAY SUBMIT, because it explains the Submit button and
-   nothing else: `canSpeakFor()` is the gate that button already asks, so a
-   contributor limited to their own lines is not shown a count they cannot
-   clear (§61, §177). A CLOSED report is not chased — §220 locks it, and
-   Reopen is the control that state offers.
-
-   THE COUNT IS ROWS, THE HOVER IS REASONS (see rowBlock). The walk's own
-   number is smaller wherever the plan is short, and deliberately: a plan gap
-   is not fixed from this page, so the chip is a door to where it is (§16.7 —
-   a count that cannot take you to what it counts makes work; a door that
-   admits what it cannot do is not the same fault). */
-function reportBar(target){
-  var t = String(target || "");
-  if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
-  if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
-  var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
-  if (!places.length) return "";
-  var total = 0, walk = 0;
-  places.forEach(function(e){ total += e.count; if (!e.plan) walk += e.count; });
-  var chips = places.map(function(e){
-    return '<button type="button" class="mchip" data-rkey="' + esc(e.key) + '"' +
-      (e.plan ? ' data-rplan="1"' : '') +
-      (e.rail ? ' data-rrail="' + esc(e.rail) + '" data-rcode="' +
-                esc(String(e.code == null ? "" : e.code)) + '"' : '') +
-      ' title="' + esc(blockWords(e)) +
-      (e.plan ? ' — press to open the plan' : ' — press to go') + '">' +
-      esc(e.label) + ' <b>' + e.count + '</b></button>';
-  }).join("");
-  /* NO NEXT WITH NOTHING TO WALK (§223): with the plan short and every figure
-     in, the only thing left is on another tab, and a walk button that could
-     only ever wrap on itself is a control with nothing behind it. */
-  var next = walk
-    ? '<button type="button" class="fillcta" data-repnext="1">Next &rarr;&nbsp;' +
-      '<span class="ngleft">' + walk + ' left</span></button>'
-    : "";
-  return '<div class="missbar" data-repband="1">' +
-    '<span class="secmiss">' + total + ' to finish</span>' + chips +
-    (next ? '<span class="gaptail">' + next + '</span>' : '') + '</div>';
-}
 /* ── UNIT · Reporting ────────────────────────────────────────────
    The screen the platform did not have. Without it the only way a number
    reaches the product is an SMO uploading a sheet, which makes this a
@@ -4379,6 +4326,7 @@ function renderReport(u){
   var mayAll = canSpeakFor(u.ukey);
   var c = reportedCount(u);
   var subd = !!REVIEW.submitted[u.ukey];
+  var miss = missingNotes(u);
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
 
   if (REVIEW.state !== "open") {
@@ -4586,35 +4534,17 @@ function renderReport(u){
     pillars = '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() +
       ' yet, so there is nothing to report against.</div>';
   } else {
-    /* §274: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
-       rail's tally counts figures ENTERED, which is a different question — so
-       the pillar holding the report up wore a green 4/4 and the rail, which is
-       the one thing on the page that lists the places, pointed nowhere. The
-       mark is `railSub`'s ALARM, which is the half of that line built to
-       survive a collapsed rail (§119.3) — and the rail ships collapsed, so an
-       ordinary sub-line would have said nothing in the state people meet. */
-    var owedAt = {};
-    reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
     var railRows = u.items.map(function(p, pi){
-      var t = pillarTally(p), code = pillarCode(u, pi);
-      /* Keyed on the STORED code, exactly as the place is (§48) — the
-         displayed one is a label and belongs nowhere in an address. */
-      var e = owedAt["p:" + (p.code || pi)], owes = e && e.count > 0;
+      var t = pillarTally(p);
       var sub = t.total === 0 ? 'Not asked this cycle'
               : t.done >= t.total ? 'Complete'
               : (t.total - t.done) + ' still to enter';
       return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
           esc(u.ukey) + '|' + esc(p.code) + '">' +
-        railName(code, p.name) +
-        /* AND THE TALLY STOPS READING AS FINISHED. Green is the platform's
-           word for "nothing left here", and on a pillar owing a note it was
-           saying it over the one row holding the whole report up. */
-        '<span class="rnum"><span class="rtally' +
-          (t.total && t.done >= t.total && !owes ? " full" : "") + '">' +
+        railName(pillarCode(u, pi), p.name) +
+        '<span class="rnum"><span class="rtally' + (t.total && t.done >= t.total ? " full" : "") + '">' +
           t.done + '/' + t.total + '</span></span>' +
-        railSub(owes ? "" : sub,
-                owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>' : "") +
-        '</button>';
+        railSub(sub) + '</button>';
     }).join("");
     var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
@@ -4665,11 +4595,11 @@ function renderReport(u){
       'be the only one chasing.</div>'
     : '';
 
-  /* §274: THE BANNER BECOMES THE BAR. It counted the notes and named no
-     place, and it was the only one of Submit's four blockers that said
-     anything at all — a report short of three figures said nothing here.
-     reportBar() counts all four and says where each one is. */
-  return waitingNote + reportBar(u.ukey) +
+  return waitingNote + (miss.length && may
+      ? '<div class="note bad-note"><b>' + miss.length + ' figure' + (miss.length > 1 ? 's need' : ' needs') +
+        ' a note.</b> Anything at risk or off track carries an explanation before it can be ' +
+        'submitted.</div>'
+      : '') +
     bar +
     section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) +
     section("", L("pillar","bu") + " &mdash; measures and tactics", null, pillars) +
@@ -5831,28 +5761,15 @@ function capReportBody(c){
       miniTable(["#","Objective","Dir.","Target","Reported","Note"], kRows)
     : '';
   if (!sel) return koBlock + '<div class="note">No projects to report on.</div>';
-  /* §274: the same mark the unit's rail carries, off the same map — this
-     side's rail had exactly the unit's fault and no banner above it either. */
-  var owedAt = {};
-  reportPlaces("fn:" + c.fn).forEach(function(e){ owedAt[e.key] = e; });
-  var owesPr = function(p){
-    var e = owedAt["pr:" + p.id];
-    return e && e.count > 0 ? e : null;
-  };
   var rail = railFor(c.projects, sel,
     function(p){ var r = projReported(p);
-      return '<span class="rtally' +
-        (r.total && r.done >= r.total && !owesPr(p) ? " full" : "") + '">' +
+      return '<span class="rtally' + (r.total && r.done >= r.total ? " full" : "") + '">' +
         r.done + '/' + r.total + '</span>'; },
     function(p){ var r = projReported(p);
-      if (owesPr(p)) return "";
       return r.total === 0 ? 'Not asked this cycle'
         : (r.done >= r.total ? 'Complete' : (r.total - r.done) + ' still to enter'); },
     null, 'Tally is entries given of asked',
-    function(p){ return projCode(c.fn, p); },
-    { alarmOf: function(p){
-        var e = owesPr(p);
-        return e ? '<span class="missing">' + esc(blockWords(e)) + '</span>' : ""; } });
+    function(p){ return projCode(c.fn, p); });
   return koBlock +
     splitOrPane(c.projects, sel, rail, projReportBody(sel, c.fn));
 }
@@ -5887,13 +5804,7 @@ function renderFnReport(fnKey){
      the two sides cannot explain the same state differently. */
   REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd,
                             reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget));
-  /* §274: AND THIS SIDE HAD NOTHING AT ALL. A unit's page has carried a red
-     banner for a missing note since the note rule existed; a capability
-     function's never did — and `capNoteBox()` passes `want:false` always, so
-     its note boxes are not rung either. So a function head was refused by
-     Submit with the reason on a hover and NOTHING on the page. One bar, both
-     sides (§53.5, A15). */
-  var bar = reportBar(fnKeyTarget);
+  var bar = "";
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");

@@ -34455,3 +34455,288 @@ chat's line before the fix, green after**; no database, no network.
 built from pieces it does not recognise as one string, so it catches the
 shape every server file uses today and a new shape is a new pattern to add. It
 is a floor under the rule, not the rule.
+---
+
+## §290 — THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (2026-09-04)
+
+Two from Islam in one message, using the shipped build: *"a lag happened where
+the chat icon didn't apperar on the reload of the branch. and then appeard
+after"*, and *"the erach for new peopele isn't working"*.
+
+**THE SECOND WAS NOT A FAULT AND SAYING SO CAME FIRST**: that feature was the
+mockup awaiting his two lines of wording, so *"Nothing found"* was the search
+behaving exactly as built. He then gave the go-ahead for both, so both are here.
+
+### The corner arrives with the page
+
+**§197 CREATED THE BUBBLE HIDDEN FOR A REASON IT STATED**, and the reason is
+good: *an optimistic bubble that vanishes on the next beat is a control that
+lied*. So the corner appeared only once `/api/chat` had answered — milliseconds
+on a warm server, and **seconds after a new build**, when every browser reloads
+at once onto a cold function with a sleeping database. That is precisely the
+window Islam was in.
+
+**IT IS NOT A GUESS, WHICH IS THE WHOLE OF WHY §197'S RULE DOES NOT APPLY.** The
+chat's on/off switch lives in `org.extra.chat`; the browser holds it as
+`GROUP.chat` by the time the page draws; and `chatSettings()` on the server
+reads that same value from that same row. **Measured both ways on a real
+Postgres** rather than reasoned about: switched off, the browser reads
+`{on:false}` and the server reads `{on:false}`.
+
+**ASKED ONLY WHEN THE PLATFORM HYDRATED FROM THE SERVER** (`SYNC.isLive()`),
+which is what makes it the tenant's answer and not the baked example's — over
+`file://` `mount()` never runs at all, and behind §201's wall the state is the
+demo's, so the corner stays hidden and waits exactly as before. **And nobody the
+chat would refuse can see it**: `/api/state` refuses a session that has not
+chosen a password (§43.2), so a page that hydrated belongs to somebody
+`/api/chat` will answer; a 401 or 403 still takes the corner away on the first
+beat. **The poll remains the authority** — this decides only what is drawn in
+the seconds before the first answer.
+
+### The search reaches somebody who has never written in
+
+Until now it searched conversations only, so a colleague who had never written
+was answered *"Nothing found"* — a dead end on the one side of the platform that
+is allowed to start a conversation (§247).
+
+**IT IS THE SERVER'S ANSWER AND NOT THE BROWSER'S**, though the browser holds
+the register, because the test is *has no conversation AT ALL* and only the
+server knows every thread: the browser sees the waiting queue and whatever the
+search matched, never the rest.
+
+**THE SAME RULES §247 SETTLED, ASKED RATHER THAN RESTATED** — and the active
+test is **copied from §247's own query**, `extra->>'active' <> 'false'` and not
+a status column, **which is what the first draft guessed** and would have
+offered every retired person on the register (§42: one question, one answer).
+Anybody who already has a conversation is excluded, so **nobody is in both
+halves** (§108.1), and the asker is left out, which is what §285 removed.
+
+**NOTHING NEW IS AUTHORISED OR STORED.** Pressing a name opens §247's own empty
+conversation and the first message carries its `start` flag, so the chase
+(§283), the box on their screen (§231) and leaving the waiting list by the act
+(§71) all come free, and there is only ever one way to begin one (§53.5).
+**Nothing is asked of the server for a conversation that does not exist** — it
+would answer 404, correctly, and a 404 drawn as a failure says something is
+wrong when nothing is (§93).
+
+**CAPPED AT TEN, ISLAM'S NUMBER, WITH THE REST COUNTED** rather than dropped:
+search for *a* and half the company matches, and a list that silently stops is
+one somebody scrolls looking for a name that is not coming.
+
+### §290.1 — Every heading goes, and the way out stops scrolling away
+
+Both from Islam looking at the drawings, and both are better than what I drew.
+
+**THE GROUP HEADINGS**: *"who we have a conversation with will apear with the
+conversation and who is not will appear without the converstaion th header is
+taking unneede space."* He is right, and it is rule 1b-ii's own argument — a
+heading that restates what the rows already show is furniture, and in a body
+this small each cost a whole row of the list. **The ROW SHAPE carries it** (a
+conversation has a last message and a time; somebody who has never written has
+neither) and **the ORDER carries the grouping**, so the two must never be
+interleaved.
+
+**THEN THE SCOPE LINE, WHICH I HAD DEFENDED**: *"i still can see a header."* It
+was one. It said two things — how many, and where the search looked. The count
+was never needed (the list is the count), and **where it looked moved into the
+box's own placeholder**, read at the moment somebody decides to type and costing
+no row — while still being said, because the *Waiting* half is the one lit and
+the results reach conversations that are answered (§35, §124).
+
+**AND THE CAP SPEAKS AT THE FOOT**, never in a heading: the top is where nobody
+has run out of anything yet, and the line only means something once somebody has
+read to the bottom without finding their person. It says what to do rather than
+only what is missing.
+
+**THE WAY OUT WAS A REAL FAULT AND PREDATES ALL OF THIS**: *"I cant see the
+button open the platform inbox which should be always there."* *Open the
+Platform Inbox* lives INSIDE the scrolling list, so any search with a few
+results carried the corner's one permanent way out off the bottom — §61, true
+since the corner was built. **Sticky rather than moved out of `#chatbody`**:
+two places draw that foot and one rule covers both, where restructuring the
+markup would have to be done twice and kept in step (§53.5). The cost is stated:
+one row of list height, always spent.
+
+### §290.2 — What the checks taught
+
+**PROVED ABLE TO FAIL, FROM THE SOURCES** (§276: an edited built file is
+silenced by the hashed CSP): **11 red** with the people half removed, **1 red**
+with the sticky rule taken out. **The people half's server side is driven
+through the real endpoint against a real Postgres** — the both-halves invariant
+asserted directly, and the state MADE and put back, because the seed holds no
+such case (§94.2).
+
+**AND THE STICKY ASSERTION HAS A HALF THAT CANNOT FAIL** (§113.8): with the list
+scrolled to its end the foot is at the end whether pinned or not. It is kept as
+the CONTROL — it proves the foot is drawn at all — and **said to be so in the
+check**, so nobody later mistakes it for the load-bearing one, which is the
+assertion at the TOP of a long list.
+
+**THREE OF THE CHECK'S OWN FAILURES WERE THE CHECK.** It **died rather than
+reporting** on the falsified build (§215, in the section that quotes it),
+stopping at six of eleven; it held a row handle across a poll that rebuilds the
+list, so the click hit a detached element (addressed by its key now, re-queried
+at press time); and it left the search box holding a different term, failing its
+NEIGHBOUR rather than itself (§94.2 — put the state back).
+
+**AND ONE ASSERTION WAS REVERSED AND REWRITTEN, NEVER DELETED** (§218): under
+§285 the scope was a grey line and asserting it was right; the claim is
+unchanged and the place moved, so it asks the placeholder now, with the line's
+ABSENCE asserted beside it or a build that dropped the scope entirely would pass
+the half that remained.
+
+## §292 — A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (2026-09-04)
+
+*(Renumbered twice while it was being built: **§288 → §290 → §292**. Main took
+§288 and then §290 from two other sessions in the same afternoon — §94.12's
+collision in section numbers, and both were caught by FETCHING before writing,
+not by the merge, which would have taken two sections onto one number without a
+word. §291 is left clear on purpose: a gap is harmless where a collision is not
+(§287's own reasoning).)*
+
+Islam, from the live product, in one message: *"on a creation of a project I
+couldn't set the direction and we need to make the add deliverable or outcome
+more of an options in the type rather than 2 buttons of add deliverable or
+outcome that I get confused between them."*
+
+**TWO DIFFERENT KINDS OF FAULT, AND SAYING WHICH IS HALF THE SECTION.** The
+direction is a straight omission; the two buttons are a decision that stopped
+working. Both were measured before anything was drawn (rule 1b), and the
+measuring found a third nobody had reported.
+
+**THE DIRECTION HAD NEVER BEEN EDITABLE — ON ANY PROJECT, IN ANY MODE.** `dxDir`
+printed the sign as plain text and stopped, so this is not a fault of *creating*
+a project: it is true of every outcome that table has ever held. §114 opened
+exactly this control on a pillar's key measures, on the argument that §31 closed
+it while the pen could still fall to the person being measured and §94 gave the
+pen to the office — and nobody carried it the two inches across to a project's
+outcomes (§53.5, two tables asking one question and answering it once).
+**A deliverable's `=` stays printed**, because it is written FOR the row rather
+than asked OF it (§104): with a target of `Y/N` there is nothing to be greater
+than, so there is no decision for a control to carry. **It is not a gap**, so it
+does not go through `gapCell` and joins no count — the direction carries a
+working default, which makes writing one AUTHORING and the office's, and a
+filler who wrote one would have the whole save refused (§249.4, taken on this
+exact question one table over). The cost that ruling states holds here and is
+stated rather than discovered: an outcome where less is better scores backwards
+until the office corrects it — which, until today, it could not.
+
+**AND THE TWO BUTTONS RENDERED AS ONE RUN OF TEXT.** Measured on the shipped
+build and visible in his own screenshot: `Add a deliverableAdd an outcome`, two
+link buttons with nothing between them. So part of the confusion was that they
+did not read as two controls at all — the fault was never only *which one do I
+press*, it was *is that one control or two*.
+
+**AND A ROW ADDED AS THE WRONG KIND COULD NOT BE CORRECTED**, only removed and
+added again. Not reported, and it is what settles where the picker belongs.
+
+**THE TYPE IS NOT A LABEL, WHICH IS WHAT DECIDES HOW FAR THE PICKER CAN GO.** It
+is WHICH OF TWO LISTS the row is in, and the two are reported and scored
+differently: a deliverable is answered Not started / In progress / Delivered with
+a per-cent, an outcome with a figure read against a target and a direction. So
+switching one is a CONVERSION — the row moves between lists, is minted by the
+minter an ADDED row uses, and carries across exactly two facts: the **name**,
+which is the row, and the **hidden mark** (§233), which is a decision *about* the
+row rather than a figure against it. Everything else is dropped, because
+everything else belongs to the kind being left; a target on a row that no longer
+has one, or a note explaining a figure that has gone, is worse than an empty cell
+(§35). Building it out of the minter is what stops the two shapes drifting: a
+field added to `addOutcome` tomorrow is on a converted row that day.
+
+**THE NEW ID IS THE POINT OF MINTING ONE.** A row's id encodes its kind
+(`…-D5`, `…-O2`), so carrying the old one across would leave a row named as a
+deliverable sitting in the outcomes. A snapshot already filed keeps the id it was
+filed under, which is correct: it is a record of what was (§48.1).
+
+**IT APPENDS, AND THAT IS VISIBLE RATHER THAN HIDDEN.** The table draws every
+deliverable and then every outcome (§99's one list, §104's one row shape), so a
+converted row necessarily leaves its place in the order — it goes to the end of
+the list it has joined, which is where an added row goes.
+
+**ISLAM PICKED C FROM THREE DRAWN IN THE RUNNING PLATFORM** (rule 1c;
+`design-mockups/project-row-type/2026-09-04_type-picker-and-direction.html`,
+published as an artifact, each treatment injected into the live pane with the pen
+open and shot at 1600). **A** put the picker on every row — and can throw a
+reported figure away on a `change` event, with no press and no confirmation.
+**B** left the Type column alone and asked the kind on the Add row — costs
+nothing, destroys nothing, and fixes no mis-typed row. **C is A with the type
+locked once the row has been reported against**, which is the only one of the
+three that answers the ask without putting data loss behind a dropdown.
+
+**`reportedAny` IS THE LOCK'S TEST, NEVER A SECOND ONE.** It is the product's own
+answer to *has this row been answered* — the same one both panes and the note
+rule ask (§104.8) — so the lock and the score can never disagree about what has
+been reported. **The cost is stated rather than discovered, and it is what C was
+chosen for**: a deliverable reads as answered the moment somebody picks even
+*Not started*, so on a tenant part-way through a cycle most rows are locked —
+measured, **37 of the demo's 42 deliverables**. The × is still there, which is
+the point: a deliberate press with the row's whole content in front of you may
+throw a figure away; a `change` event on a dropdown may not.
+
+**THE REASON IS ON THE HOVER, NOT ON THE PAGE** (§88, 1b-ii). Drawn under the
+word it is a second line in a one-line cell — §116.4's fault — and it was
+measured on the mockup before it was ruled out: it takes the Type column
+**251 → 406px** and the name column pays for all of it. `noteSpan` is the
+platform's own bubble, so it opens on focus as well as hover (§163) and reads to
+a screen reader.
+
+**ONE WAY IN, REVERSING §53.4's TWO BUTTONS.** That section put two here on the
+reasoning that *"a single add a row would have to ask which — a question the two
+buttons answer by existing"*. True, and what it did not ask is WHERE that
+question gets answered. **The new row is a DELIVERABLE**, and that is arithmetic
+rather than taste: an outcome with a blank target is a counted gap (§249), so a
+button that minted one would add a missing item and hold Submit every time
+somebody pressed it. **No leading `+`**, because the idx cell draws one and the
+milestone button directly beneath carries none (§87's twins, in punctuation) —
+a one-character deviation from the approved drawing, recorded rather than
+slipped in. **BUILD MODE KEEPS BOTH**, and that is a difference with a reason
+rather than an exception: there a row is added WHOLE through a titled form
+(§129), the two forms ask different questions, and the outcome's is the one
+place `measureAt` can still be set at all (§104.8 took the date off these panes).
+So the kind has to be answered before the form opens, and those are titled
+dialogs rather than the run-together pair.
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY** (§172's lesson: four
+layers agreed about a fourth value the database had never been offered).
+`splitRows` already reads a row leaving one of these lists and appearing in the
+other as `capPlan` — the office's — so `test-authorize.js` §31 drives the
+conversion and asserts **both ends** (the office switches it, the function's
+custodian may not) and that **every part of it classifies as capPlan**, or a
+build reading the removal and the arrival as two different things would refuse
+half of a save the screen makes in one press (§184). Proved able to fail twice:
+the fixture neutered → **2 red** (§94.5's own trap), the deliverable-plan
+classification removed → **4 red**. 527 passed / 0; the differ untouched at
+131/0. Nothing is stored that was not stored before and there is no migration —
+a converted row is byte-shaped like an added one, which round-trips today.
+
+`checks/project-row-type.py` asserts the BEHAVIOUR and never the layout (§94.8):
+one way in and that pressing it adds a deliverable; the picker MOVING the row,
+read back off the stored plan rather than off the screen (§96), with the new id,
+the name and the hidden mark; the direction writing; read mode and both other
+panes byte-for-byte what they were; and the table still fitting its pane at
+1600 / 1280 / 1100 (§158). **13 red** against the shipped build before it, and it
+REPORTS them rather than dying on the third (§215).
+
+**§292.1 — AND TWO OF ITS OWN FIRST FAILURES WERE THE CHECK.** It asserted that
+*every* row's Type is a picker, which is false on a demo part-way through a cycle
+and would have been a blanket passing only on an unreported plan — it asserts the
+AGREEMENT now (a row is a picker exactly when it has not been reported against),
+**with a line asserting the demo holds an example of each**, or the agreement
+proves nothing (§113.8). And it counted every `<select>` in the Reporting pane's
+table and called four of them a leak: those are how a deliverable is REPORTED
+(§104.8), and the count is scoped to the Type column.
+
+**§292.2 — AND `qa.py` HELD A LITERAL THIS DECISION MOVED** (§214.3, sixth time),
+**REWRITTEN AND NOT DELETED** (§218): its plan-edit sweep asserted an Add button
+for `outcome` and would have gone red on a build behaving exactly as decided.
+The property it was protecting — that every kind of row can still be CREATED
+(§61) — is asserted beside it instead, by finding the Type picker on the page.
+
+**§292.3 — RECORDED, NOT DONE.** A locked row's word is centred (`.dxtype` takes
+`text-align:center` so the column does not read as two different marks) and a
+picker's is left-aligned, so a table holding both reads ragged down that column.
+Centring the select is one line and it is a change to the drawing Islam signed
+off, so it is his to ask for (rule 1c). And `builderHere()` is named once in
+`builder.js` while **six places still spell `BUILDER && BUILDER.target ===
+current` out inline** — folding them in is a sweep nobody asked for (§2b), and it
+is written down so the next reader knows where a seventh belongs.

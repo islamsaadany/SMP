@@ -99,7 +99,12 @@ var CHAT = (function(){
      conversation open INSIDE the queue half, and null means the list. Every
      other field is what the server last said, never a second copy of it. */
   var cq = { side: "wait", person: null, name: "", msgs: [], q: "",
-             hits: null, searching: false, rows: null, err: "" };
+             hits: null, searching: false, rows: null, err: "",
+             /* §290: the people who match and have NO conversation yet, and
+                how many more matched than the ten shown. `fresh` marks the
+                conversation open in the queue as one that does not exist on
+                the server yet, so the first message carries `start`. */
+             people: null, more: 0, fresh: false };
   /* The office's own thread is fetched on the same poll as everybody's, so
      switching to "My messages" costs nothing and shows what is already here. */
   /* HOW MANY WERE WAITING LAST TIME WE ASKED — the office's half of §225.
@@ -128,6 +133,19 @@ var CHAT = (function(){
               new: false, newWho: "" };
 
   function servable(){ return location.protocol !== "file:"; }
+
+  /* Is the chat switched on, according to the state this page hydrated with?
+     Absent means the tenant never touched the setting, which `chatCfg` reads
+     as ON — the same default the server applies (§104, §98). Anything at all
+     going wrong here answers NO, because a corner that fails to appear for a
+     second is a smaller fault than one that appears and is taken away. */
+  function chatOnFromState(){
+    try {
+      if (typeof SYNC === "undefined" || !SYNC.isLive || !SYNC.isLive()) return false;
+      if (typeof GROUP === "undefined" || !GROUP) return false;
+      return !!SMPRules.chatCfg(GROUP.chat).on;
+    } catch (e) { return false; }
+  }
   function el(id){ return document.getElementById(id); }
   function esc2(s){
     return String(s == null ? "" : s)
@@ -431,8 +449,12 @@ var CHAT = (function(){
 
   function cqFind(){
     return '<div class="cqfind"><input type="search" id="cqfind" ' +
-      'placeholder="Search a name or a word\u2026" value="' + esc2(cq.q) + '" ' +
-      'aria-label="Search the conversations"></div>';
+      /* THE BOX SAYS ITS OWN SCOPE (§290), which is where the grey line above
+         the rows used to say it. Read at the moment somebody decides to type,
+         and it costs no row of the list. */
+      'placeholder="Search all conversations and the register\u2026" ' +
+      'value="' + esc2(cq.q) + '" ' +
+      'aria-label="Search all conversations and the register"></div>';
   }
 
   /* ONE ROW BUILDER FOR BOTH LISTS, so a search result and a waiting row
@@ -463,9 +485,14 @@ var CHAT = (function(){
 
   function cqRow(row, at, line, hit){
     var who = cqWho(row);
-    return '<button class="cqrow" type="button" data-cqopen="' + esc2(row.person_key) + '">' +
+    /* NO TIME FOR SOMEBODY WHO HAS NEVER WRITTEN, because they have none —
+       and the span goes rather than rendering empty (§35). The guard is not
+       decoration: `new Date(null)` is the EPOCH and not an invalid date, so
+       `when(null)` would print "1 Jan 00:00" against every such row. */
+    return '<button class="cqrow" type="button" data-cqopen="' + esc2(row.person_key) + '"' +
+      (row.fresh ? ' data-cqfresh="1"' : '') + '>' +
       '<div class="cqr1"><b>' + esc2(who.name) + "</b>" +
-        '<span class="cqw">' + esc2(when(at)) + "</span></div>" +
+        (at ? '<span class="cqw">' + esc2(when(at)) + "</span>" : "") + "</div>" +
       (who.place ? '<div class="cqpl">' + esc2(who.place) + "</div>" : "") +
       '<div class="cqln">' + esc2(oneLine(line || "")) + "</div>" +
       (hit ? '<div class="cqhit">' + esc2(hit) + "</div>" : "") + "</button>";
@@ -480,19 +507,48 @@ var CHAT = (function(){
     }
     if (cq.q && cq.q.length >= 2) {
       if (cq.searching && !cq.hits) return '<div class="cqzero">Looking\u2026</div>';
-      var hits = cq.hits || [];
-      if (!hits.length) return '<div class="cqzero">Nothing found for \u201c' +
+      var hits = cq.hits || [], folk = cq.people || [];
+      if (!hits.length && !folk.length) return '<div class="cqzero">Nothing found for \u201c' +
         esc2(cq.q) + "\u201d.</div>";
-      /* SAID OUT LOUD, because the results reach conversations that are NOT
-         waiting while the Waiting half is the one lit — a screen must not
-         imply a scope it is not using (§35, §124). */
-      return '<div class="cqfound">' + hits.length + " found in all conversations, " +
-        "waiting or not</div>" +
-        hits.map(function(h){
+      /* ── ONE LIST, NO HEADINGS (§290) ─────────────────────────────────
+         Islam, of the two group headings drawn first: "who we have a
+         conversation with will apear with the conversation and who is not
+         will appear without the converstaion th header is taking unneede
+         space." He is right and it is rule 1b-ii's own argument — a heading
+         that restates what the rows already show is furniture, and in a body
+         this small each one cost a whole row of the list.
+
+         THE ROW SHAPE CARRIES IT: a conversation has a last message and a
+         time, somebody who has never written has neither, and that is the
+         difference somebody reads. THE ORDER CARRIES THE GROUPING —
+         conversations by recency, then people by name — so it must never be
+         interleaved.
+
+         AND THE SCOPE LINE WENT WITH THEM. It said two things: how many, and
+         where the search looked. The count was never needed (the list is the
+         count), and where it looked moved into the box's own placeholder,
+         which is read at the moment somebody decides to type and costs no
+         row — while still saying it, because the Waiting half is the one lit
+         and the results reach conversations that are answered (§35, §124). */
+      return hits.map(function(h){
           return cqRow(h, h.line_at, h.line,
             h.is_last ? "" : ("found in an earlier message" +
                               (h.waiting ? "" : " \u00b7 answered")));
-        }).join("");
+        }).join("") +
+        folk.map(function(f){
+          return cqRow({ person_key: f.key, person_name: f.name, live_name: f.name,
+                         unit_key: f.unit_key, fn_key: f.fn_key, title: f.title,
+                         fresh: true },
+                       null, "", "");
+        }).join("") +
+        /* THE CAP SPEAKS AT THE FOOT, never in a heading: the top is where
+           nobody has run out of anything yet, and this line only means
+           something once somebody has read to the bottom without finding the
+           person they wanted. It says what to do, not only what is missing. */
+        (cq.more > 0
+          ? '<div class="cqmore">' + cq.more + " more on the register \u2014 " +
+            "narrow the search</div>"
+          : "");
     }
     if (cq.rows === null) return '<div class="cqzero">One moment\u2026</div>';
     if (!cqRows().length) return '<div class="cqzero">Nobody is waiting on the office.</div>';
@@ -1320,11 +1376,18 @@ var CHAT = (function(){
      uses. Nothing new is authorised, nothing new is stored, and a rule the
      Inbox keeps is a rule the corner keeps by construction. */
 
-  function cqOpen(key, name){
-    cq.person = key; cq.name = name || key; cq.msgs = [];
+  function cqOpen(key, name, fresh){
+    cq.person = key; cq.name = name || key; cq.msgs = []; cq.fresh = !!fresh;
     drawPanel();
     var box = el("chatsay");
-    if (box) box.placeholder = "Reply to " + (firstWord(cq.name) || "them") + "\u2026";
+    /* WRITE, NOT REPLY, when there is nothing to reply to (§290, §124). */
+    if (box) box.placeholder = (fresh ? "Write to " : "Reply to ") +
+      (firstWord(cq.name) || "them") + "\u2026";
+    /* AND NOTHING IS ASKED FOR A CONVERSATION THAT DOES NOT EXIST — the
+       server would answer 404, correctly, and a 404 drawn as a failure would
+       say something is wrong when nothing is (§93). The empty pane IS the
+       state; the conversation is minted by the first message (§247). */
+    if (fresh) return;
     post({ action: "thread", person: key }, function(err, j){
       if (cq.person !== key) return;          /* they moved on while it loaded */
       if (err || !j) { cq.msgs = []; drawPanel(); return; }
@@ -1335,7 +1398,7 @@ var CHAT = (function(){
   }
 
   function cqBack(){
-    cq.person = null; cq.msgs = []; cq.name = "";
+    cq.person = null; cq.msgs = []; cq.name = ""; cq.fresh = false;
     var box = el("chatsay");
     if (box) box.placeholder = "Write to the office\u2026";
     drawPanel();
@@ -1356,9 +1419,18 @@ var CHAT = (function(){
        (§72.3) — content, never a recipient, which the server resolves from
        the stored register (§74.2). Without it a reply from the corner could
        never chase anybody, and the same reply from the Inbox could. */
-    post(replyPost(who, text), function(err, j){
+    /* AND `start` IS WHAT MINTS THE CONVERSATION (§247's own flag, not a
+       second endpoint) — so the chase, the box on their screen and leaving
+       the waiting list all come free, and there is only ever one way to
+       begin one (§53.5). The server checks the person is real and active;
+       this only says which kind of send it is. */
+    var payload = replyPost(who, text);
+    if (cq.fresh) payload.start = true;
+    post(payload, function(err, j){
       sending = false;
       if (btn) btn.disabled = false;
+      /* IT EXISTS NOW, so a second message is an ordinary reply. */
+      if (j && j.ok) cq.fresh = false;
       if (err || !j || !j.ok) {
         cq.msgs = was;
         if (box && !box.value) box.value = text;
@@ -1394,7 +1466,10 @@ var CHAT = (function(){
   function cqSearch(q){
     cq.q = q;
     if (cqFindTimer) clearTimeout(cqFindTimer);
-    if (q.trim().length < 2) { cq.hits = null; cq.searching = false; cqBodyOnly(); return; }
+    if (q.trim().length < 2) {
+      cq.hits = null; cq.people = null; cq.more = 0;
+      cq.searching = false; cqBodyOnly(); return;
+    }
     cq.searching = true; cqBodyOnly();
     cqFindTimer = setTimeout(function(){
       var asked = q;
@@ -1402,6 +1477,8 @@ var CHAT = (function(){
         if (cq.q !== asked) return;           /* they have typed on since */
         cq.searching = false;
         cq.hits = (err || !j) ? [] : (j.hits || []);
+        cq.people = (err || !j) ? [] : (j.people || []);
+        cq.more = (err || !j) ? 0 : (j.more || 0);
         cqBodyOnly();
       });
     }, 300);
@@ -1494,7 +1571,34 @@ var CHAT = (function(){
     var dock = document.createElement("div");
     dock.className = "chatdock";
     dock.id = "chatdock";
-    dock.hidden = true;           /* until the server says there is somebody here */
+    /* ── THE CORNER ARRIVES WITH THE PAGE (§290) ──────────────────────
+       Islam: "a lag happened where the chat icon didn't apperar on the reload
+       of the branch. and then appeard after."
+
+       §197 created this hidden and revealed it only on a successful answer,
+       for a good reason it stated: an optimistic bubble that vanishes on the
+       next beat is a control that lied. That reason does not apply here,
+       because THIS IS NOT A GUESS — the chat's on/off switch lives in
+       `org.extra.chat`, the browser holds it as `GROUP.chat` by the time the
+       page draws, and `chatSettings()` on the server reads that same value
+       from that same row. Measured both ways on a real database: switched
+       off, the browser reads {on:false} and the server reads {on:false}.
+
+       SO IT IS ONLY EVER ASKED WHEN THE PLATFORM HYDRATED FROM THE SERVER
+       (`SYNC.isLive()`), which is what makes it the tenant's answer rather
+       than the baked example's — on file:// mount() never runs at all, and
+       behind §201's wall the state is the demo's and this stays hidden and
+       waits, exactly as before.
+
+       AND NOBODY THE CHAT WOULD REFUSE CAN SEE IT: /api/state refuses a
+       session that has not chosen a password (§43.2), so a page that
+       hydrated is a person /api/chat will answer. A 401 or 403 still hides
+       the corner on the first beat.
+
+       THE POLL REMAINS THE AUTHORITY. This decides only what is drawn in the
+       seconds before the first answer, which after a new build is the whole
+       tenant at once on a cold server — the moment Islam was reporting. */
+    dock.hidden = !chatOnFromState();
     dock.innerHTML = dockHtml();
     document.body.appendChild(dock);
 
@@ -1551,7 +1655,8 @@ var CHAT = (function(){
       var row = t.closest("[data-cqopen]");
       if (row) {
         var nm = row.querySelector("b");
-        cqOpen(row.dataset.cqopen, nm ? nm.textContent : "");
+        cqOpen(row.dataset.cqopen, nm ? nm.textContent : "",
+               row.dataset.cqfresh === "1");
         return;
       }
       if (t.closest("[data-cqback]")) { cqBack(); return; }

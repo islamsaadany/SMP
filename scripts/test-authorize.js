@@ -3100,5 +3100,69 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 })();
 
+/* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§292) ══
+   §292 gives a project's Deliverables and outcomes table a Type picker: the
+   press moves the row out of one list and into the other, with a new id. The
+   claim made in that section's comment is that the SERVER needed nothing —
+   `splitRows` already reads a row leaving one of these lists and appearing in
+   the other as `capPlan`, the office's — and a claim like that is either
+   measured or it is a hope (§172's lesson: four layers agreed about a fourth
+   value the database had never been offered).
+
+   BOTH ENDS, or a build that allowed everything would pass the first half
+   (§94.2). And the row is REBUILT rather than moved by reference, because
+   that is what the browser does: a converted row is minted by the minter and
+   carries the name across (§292), so an id that travelled with it would be a
+   different fixture from the one the product produces. */
+console.log("\n31 · a row's type is the office's to change (§292)");
+(function () {
+  const cap = (SEED.group.capabilities || [])[0];
+  const proj = cap && (cap.projects || [])[0];
+  check("§292: the seed holds a project with a deliverable", !!(proj && (proj.deliverables || [])[0]),
+        proj && proj.id);
+  if (!proj || !(proj.deliverables || [])[0]) return;
+
+  /* The conversion, exactly as `dxSwitchKind` performs it. */
+  const convert = function (st) {
+    const c = (st.group.capabilities || [])[0];
+    const p = (c.projects || [])[0];
+    const old = p.deliverables.shift();
+    p.outcomes.push({ id: p.id + "-Oz", name: old.name, dir: "\u2265",
+                      target: "", measureAt: "", actual: "" });
+  };
+  const who = function (st, key) { return personOf(st, key); };
+  const run = function (key) {
+    const inc = clone(SEED); convert(inc);
+    return A.authorize(SEED, inc, who(SEED, key));
+  };
+
+  let v = run("smo");
+  check("§292: the office switches a row's type", v.ok, (v.refusals || []).join(" / "));
+
+  /* Whoever holds the function and is not the office. A custodian may report
+     a deliverable (§147.3) and may not author the plan — which is exactly the
+     line this switch sits on. */
+  const fkey = Object.keys(SEED.functions || {}).filter(function (k) {
+    return (SEED.functions[k] || {}).custodian; })[0];
+  const cust = fkey && SEED.functions[fkey].custodian;
+  if (cust && who(SEED, cust)) {
+    v = run(cust);
+    check("§292 REFUSED: the function's custodian may not", !v.ok, "was ALLOWED");
+  } else {
+    check("§292: a custodian to refuse", false, "none in the seed");
+  }
+
+  /* AND IT IS ONE KIND OF CHANGE, NOT TWO. A build that read the removal and
+     the arrival as different things would refuse half of a save the screen
+     makes in one press (§184: a refusal costs the row it names and nothing
+     else). */
+  const inc = clone(SEED); convert(inc);
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§292: every part of it classifies as capPlan",
+        kinds.length > 0 && kinds.every(function (k) { return k === "capPlan"; }),
+        kinds.join(",") || "(nothing)");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

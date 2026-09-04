@@ -456,6 +456,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§292):** Islam — *"on a
+  creation of a project I couldn't set the direction and we need to make the add
+  deliverable or outcome more of an options in the type rather than 2 buttons of
+  add deliverable or outcome that I get confused between them."* **TWO DIFFERENT
+  KINDS OF FAULT.** The direction had **never been editable on any project in any
+  mode** — §114 opened exactly this control on a pillar's key measures and nobody
+  carried it across to a project's outcomes (§53.5); a deliverable's `=` stays
+  printed (§104), and it is **not a gap**, so the direction stays the office's and
+  joins no count (§249.4, with that section's cost — an outcome where less is
+  better scores backwards until corrected — holding here too). **AND THE TWO
+  BUTTONS RENDERED AS ONE RUN OF TEXT**: measured, `Add a deliverableAdd an
+  outcome`, so the fault was never only *which one* but *is that one control or
+  two*. **THE TYPE IS NOT A LABEL** — it is WHICH OF TWO LISTS the row is in, and
+  the two are reported and scored differently — so the picker performs a
+  CONVERSION: minted by the minter an ADDED row uses, carrying the **name** and
+  the **hidden mark** (§233) and nothing else, under a **new id**, appended
+  (§99's one list). **ISLAM PICKED C** from three drawn in the running platform
+  (rule 1c): the picker locks once `reportedAny` says the row has been reported,
+  because A can throw a figure away on a `change` event with no press and no
+  confirmation. **`reportedAny` IS THE TEST, NEVER A SECOND ONE** (§104.8) — and
+  its cost is stated rather than discovered and is what C was chosen for: a
+  deliverable reads as answered the moment somebody picks *Not started*, so
+  **37 of the demo's 42** are locked; the × is still there, because a deliberate
+  press may throw a figure away and a dropdown may not. **THE REASON IS ON THE
+  HOVER** (§88, 1b-ii — drawn under the word it takes the column 251 → 406px).
+  **ONE WAY IN, REVERSING §53.4**, and **the new row is a DELIVERABLE** by
+  arithmetic rather than taste: an outcome with a blank target is a counted gap
+  (§249), so a button minting one would add a missing item and hold Submit every
+  press. **BUILD MODE KEEPS BOTH**, with a reason — there a row is added WHOLE
+  through a titled form (§129), and the outcome's is the only place `measureAt`
+  can still be set (§104.8). **The server needed nothing and it is asserted
+  anyway** (§172): `splitRows` already reads the move as `capPlan`, both ends,
+  every part of it one kind — proved able to fail twice (2 red, 4 red), 527/0.
+  No migration; a converted row is byte-shaped like an added one.
+  `checks/project-row-type.py` **13 red** on the build before — **and two of its
+  own first failures were the CHECK** (a blanket where the demo legitimately
+  holds locked rows, and four Reporting selects that are how a deliverable is
+  reported), while **`qa.py` held a literal this moved and was REWRITTEN, not
+  deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
+  a picker is not, so that column reads ragged, and six places still spell
+  `builderHere()` out inline.
 - **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
@@ -1998,6 +2039,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   fix working with the falsified build on disk, once calling it broken with the
   good one. **Compare the file's mtime with the server's start time; never
   trust the order the commands were typed in.**
+- **THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS
+  NEVER WRITTEN IN (§290):** Islam — *"a lag happened where the chat icon didn't
+  apperar on the reload of the branch"*, and *"the erach for new peopele isn't
+  working"*. **THE SECOND WAS NOT A FAULT AND SAYING SO CAME FIRST** (that
+  feature was the mockup awaiting his wording), and he then asked for both.
+  **§197 HID THE BUBBLE UNTIL THE CHAT ANSWERED, FOR A GOOD REASON THAT DOES NOT
+  APPLY HERE**: *an optimistic bubble that vanishes is a control that lied* —
+  and this is not a guess, because the switch lives in `org.extra.chat`, the
+  browser holds it as `GROUP.chat` before the page draws, and `chatSettings()`
+  reads that same value from that same row (measured both ways on a real
+  Postgres: off reads `{on:false}` on both sides). Asked ONLY when the platform
+  hydrated (`SYNC.isLive()`), so `file://` and §201's wall are unchanged; and
+  nobody the chat would refuse can see it, since `/api/state` refuses a session
+  that has not chosen a password (§43.2). **The poll stays the authority** — this
+  decides only the seconds before the first answer, which after a new build is
+  the whole tenant at once. **THE PEOPLE HALF IS THE SERVER'S ANSWER** though the
+  browser holds the register, because the test is *has no conversation AT ALL*
+  and only the server knows every thread; the active test is **copied from
+  §247's own query** (`extra->>'active' <> 'false'`), which the first draft
+  guessed as a status column and would have offered every retired person (§42).
+  **Nobody is in both halves** (§108.1), nothing new is authorised or stored, and
+  the first message carries §247's own `start` — so the chase, the box and
+  leaving the waiting list come free (§53.5). **Capped at ten** with the rest
+  COUNTED. **§290.1 — EVERY HEADING GOES**: Islam, of the group headings, *"the
+  header is taking unneede space"*, then of the scope line, *"i still can see a
+  header"*. Both right (1b-ii): the ROW SHAPE says which is which and the ORDER
+  does the grouping, and the scope moved into the search box's placeholder, read
+  when somebody decides to type and costing no row — still SAID, because the
+  Waiting half is lit while results reach answered conversations (§35, §124). The
+  cap speaks at the FOOT, where the list runs out, never in a heading. **AND THE
+  WAY OUT WAS A REAL FAULT, OLDER THAN ALL OF IT**: *Open the Platform Inbox*
+  sits inside the scrolling list, so any search carried the corner's one
+  permanent way out off the bottom (§61) — sticky rather than moved, because two
+  places draw that foot and one rule covers both (§53.5); the cost is one row of
+  list height, always. **§290.2 — 11 red** with the people half out and **1 red**
+  with the sticky rule out, from the SOURCES (§276); **three of the check's own
+  failures were the CHECK** (it died rather than reporting, §215; it held a row
+  handle across a poll that rebuilds the list; and it left the search box holding
+  another term, failing its NEIGHBOUR, §94.2), and one assertion was REVERSED and
+  REWRITTEN, never deleted (§218). **One half of the sticky assertion cannot
+  fail** and is kept as the control, said so in the check (§113.8).
 - **A SAVE MUST NOT SHUT EVERYBODY ELSE OUT (§288, finishing §282):** that
   section fixed one reader and left **three doors** in front of it — the schema
   check, `chatSettings()` (one row of `org`), and **`auth.getSession()`, which
@@ -5824,6 +5906,22 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/project-row-type.py # a project row's type is a picker and its
+                                # direction opens (§292): ONE way to add a row and
+                                # pressing it adds a DELIVERABLE (an outcome's blank
+                                # target is a counted gap, so the other kind would add
+                                # a missing item every press); the picker MOVING the
+                                # row read back off the STORED plan (§96) with its new
+                                # id, its name and its hidden mark; a row that is a
+                                # picker EXACTLY when it has not been reported against,
+                                # asserted as an AGREEMENT with the demo proved to hold
+                                # an example of each (§113.8); the direction writing and
+                                # a deliverable's `=` still printed; read mode and both
+                                # other panes byte-for-byte what they were; and the
+                                # table fitting its pane at 1600/1280/1100 (§158).
+                                # 13 red on the build before, and every probe degrades
+                                # rather than dying (§215). SMP_BUILT points it at
+                                # another build
 python3 checks/report-blockers.py # the reporting page says WHERE Submit is held
                                 # (§279): the bar's chips asserted as AGREEMENT with
                                 # reportPlaces() and never as a list, both ends every
@@ -6438,7 +6536,69 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;289: the bootstrap's lock lives
+*Last Updated: 2026-09-04 &mdash; **&sect;292: a row's type is a picker, and its
+direction opens.** Islam, from the live product: *"on a creation of a project I
+couldn't set the direction and we need to make the add deliverable or outcome
+more of an options in the type rather than 2 buttons of add deliverable or
+outcome that I get confused between them."* **TWO DIFFERENT KINDS OF FAULT, AND
+SAYING WHICH IS HALF THE WORK.** The direction had **never been editable on any
+project in any mode** &mdash; not a fault of creating a project, but of every
+outcome the table has ever held; &sect;114 opened exactly this control on a
+pillar's key measures and nobody carried it the two inches across. **And the two
+buttons rendered as one run of text** &mdash; measured, `Add a deliverableAdd an
+outcome` &mdash; so the confusion was never only *which one do I press*. **A
+third nobody reported**: a row added as the wrong kind could not be corrected at
+all. **The type is not a label**, which is what decides how far a picker can go:
+it is which of two lists the row is in, and the two are reported and scored
+differently, so the switch is a CONVERSION &mdash; minted by the minter an added
+row uses, carrying the name and the hidden mark and nothing else, under a new id.
+**Islam picked C** from three drawn in the running platform and published as an
+artifact (rule 1c): the picker locks once the row has been reported against,
+because A throws a figure away on a `change` event with no press and no
+confirmation. Its cost was measured before he chose and is what C was chosen for
+&mdash; **37 of the demo's 42 deliverables** are locked, and the &times; is still
+there. **One way in, reversing &sect;53.4**, minting a DELIVERABLE by arithmetic
+rather than taste (an outcome's blank target is a counted gap, so the other kind
+would hold Submit every press), with build mode keeping both for a stated reason.
+**The server needed nothing and it is asserted anyway** &mdash; 527/0, proved able
+to fail twice &mdash; no migration, full `qa.py` sweep ERRORS none, ten
+neighbouring checks green, and `checks/project-row-type.py` **13 red** on the
+build before. **Two of that check's own first failures were the check**, and
+`qa.py` held a literal this moved and was rewritten rather than deleted. **Merged to `main`**, with main's
+&sect;282&ndash;&sect;290 from the chat round brought in first, the built file
+REBUILT rather than merged (&sect;91) and the whole suite re-run after.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;290: the corner arrives with the page,
+and the search reaches somebody who has never written in.** Islam, on the shipped
+build &mdash; *"a lag happened where the chat icon didn't apperar on the reload of
+the branch"*, and *"the erach for new peopele isn't working"*. **THE SECOND WAS
+NOT A FAULT AND SAYING SO CAME FIRST**: it was the mockup awaiting his wording,
+so *"Nothing found"* was the search behaving as built. He asked for both.
+**&sect;197 HID THE BUBBLE FOR A REASON THAT DOES NOT APPLY HERE** &mdash; *an
+optimistic bubble that vanishes is a control that lied* &mdash; because this is
+not a guess: the switch lives in `org.extra.chat`, the browser holds it as
+`GROUP.chat` before the page draws, and the server reads that same value from
+that same row (measured both ways: off is `{on:false}` on both sides). Asked only
+when the platform hydrated, so `file://` and &sect;201's wall are unchanged, and
+`/api/state` already refuses anybody `/api/chat` would. **THE PEOPLE HALF IS THE
+SERVER'S ANSWER** &mdash; the test is *has no conversation AT ALL* and only the
+server knows every thread &mdash; with &sect;247's own active test COPIED rather
+than composed (the first draft guessed a status column and would have offered
+every retired person), nobody in both halves, nothing new stored, and the first
+message carrying &sect;247's `start`. **&sect;290.1 &mdash; every heading goes**,
+both at Islam's word: the row shape says which is which, the order does the
+grouping, the scope moved into the box's placeholder, and the cap speaks at the
+foot. **And the way out was a real fault older than the feature** &mdash; the
+Inbox link scrolled away with the list (&sect;61); pinned now, one row of height,
+stated. **11 red** with the people half out, **1 red** with the pin out, from the
+sources; **three of the check's own failures were the CHECK** (&sect;215,
+&sect;94.2) and one assertion was REWRITTEN not deleted (&sect;218). 112/0
+test-chat &middot; 55/0 corner-queue &middot; 523/0 &middot; 131/0 &middot; 11/0
+during-save &middot; 14/0 chase &middot; 33/0 push &middot; 24/0 two-tabs
+&middot; 8/8 concurrent &middot; incremental byte-identical &middot; office-chat,
+paste-picture, csp-net and the full `qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;289: the bootstrap's lock lives
 inside one transaction.** Islam, with the sign-in page under his own `smo`:
 *"Something went wrong. Try again, and tell the SMO if it keeps happening"*
 &mdash; *"this happened twice now I want you to trace this issue."* **THAT

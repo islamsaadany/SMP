@@ -41,7 +41,17 @@ var TRAIL = (function(){
                reportState:"Report", capPlan:"Plan", capReporting:"Reporting", gapFill:"Fill",
                gapConfirm:"Fill", arrange:"Order", setup:"Setup", access:"Access", cycle:"Cycle",
                group:"Group", focus:"Focus", claim:"Figure set", claimRequest:"Figure set",
-               sourceReporting:"Reporting", deckHide:"Slides", destroy:"Register", unknown:"Other" };
+               sourceReporting:"Reporting", deckHide:"Slides", destroy:"Register",
+               /* §266 joins this the day its kind was added, not later: the
+                  authoriser's kinds and this map are two lists that must agree,
+                  and `kindWord()` falls back to the RAW KEY — so a kind missing
+                  here does not throw, it prints `masterFlow` as a chip in front
+                  of the office (§234's fault, in the one place it degrades
+                  quietly). The word is "Slides" beside `deckHide`, because both
+                  are decisions about what a review shows rather than about what
+                  it measures; the Kind FILTER above is a deliberately curated
+                  short list and neither of them is in it. */
+               masterFlow:"Slides", unknown:"Other" };
   var FIELD = { target:"Target", target3y:"3-year target", actual:"Actual", outActual:"Outcome actual",
                 outTarget:"Outcome target", outcome:"Outcome", note:"Note", pct:"% complete",
                 status:"Status", compile:"Compile rule", dir:"Direction", quarters:"Quarters",

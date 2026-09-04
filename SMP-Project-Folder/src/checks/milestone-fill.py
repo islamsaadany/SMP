@@ -309,7 +309,7 @@ with sync_playwright() as p:
       return true;
     }""", setup)
     pg.wait_for_timeout(400)
-    pen = pg.query_selector(".penbtn[data-page='plan']")
+    pen = pg.query_selector("#secrow-in .secpen[data-page='plan']")
     if pen:
         pen.click(); pg.wait_for_timeout(600)
         parts = pg.evaluate("""() => [].map.call(

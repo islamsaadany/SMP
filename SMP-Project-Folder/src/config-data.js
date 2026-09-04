@@ -198,15 +198,15 @@ var PMENU = null;
    the two tables are never on screen together and sharing one would make
    "which table" a third thing to check. */
 var FNMENU = null;
-/* THE SAME STATE AGAIN, FOR THE BUSINESS UNITS TABLE (§261). Its own key for
+/* THE SAME STATE AGAIN, FOR THE BUSINESS UNITS TABLE (§272). Its own key for
    the reason FNMENU has its own: the three tables are never on screen together,
    and one shared key would make "which table" a third thing every reader of it
    has to check. */
 var UMENU = null;
-/* AND FOR COMPANIES (§261). */
+/* AND FOR COMPANIES (§272). */
 var COMENU = null;
 
-/* ── WHICH SETUP TABLE IS BEING ARRANGED (§261) ─────────────────────
+/* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────
    Islam: *"allow me in the setup to rearrange the business units table so they
    appear in the navigation as per this order."*
 
@@ -220,7 +220,7 @@ var COMENU = null;
    list itself and was already stored. */
 var SETARRANGE = null;
 
-/* ── WHICH ROW IS OPEN IN THE SETUP DIALOG (§261) ───────────────────
+/* ── WHICH ROW IS OPEN IN THE SETUP DIALOG (§272) ───────────────────
    `{ table, key }`, the register's `PDLG` one table wider. Editing left the row
    for the same reason it left the register (§116): every collision these tables
    have had was a control clicked inside a 150px cell, and none of them survives
@@ -258,6 +258,12 @@ var PROLES = null;
    presses Open, or a half-filled form would already have closed the cycle it
    was going to succeed. */
 var NEWCYCLE = null;
+/* The OPEN cycle being edited (§273). Null when the pen is shut. A draft for
+   the same reason NEWCYCLE is one -- nothing reaches REVIEW until Save, so
+   Cancel writes nothing -- and it is a SECOND variable rather than a reused
+   one because the two panels answer different questions and could otherwise
+   only be told apart by which state the cycle happens to be in. */
+var CYCLEEDIT = null;
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
@@ -997,7 +1003,7 @@ function restoreRolePointers(was){
     f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
   });
 }
-/* WHICH TABLES CAN MOVE A ROLE (§110, widened in §261). A person's roles are
+/* WHICH TABLES CAN MOVE A ROLE (§110, widened in §272). A person's roles are
    not ON the person and a unit's head is not ON the unit either: `UNIT_ROLES[k]
    .head` and `FUNCTIONS[k].custodian` are pointers, and `ROWWAS` is a copy of
    the ROW. So Cancel on a unit whose head had just been changed restored the
@@ -5125,6 +5131,48 @@ function boardPlansLikeUnit(target){
    that a page must be able to say NOTHING is here rather than draw an empty
    shape. The quarter is always known (it is a number, not a date), so it is
    always said. */
+/* ── EDITING THE CYCLE THAT IS RUNNING (§273) ─────────────────────────
+   Islam: "allow me to edit the cycle name. give me an edit button the cycle to
+   edit the date as you already built and the cycel name edit as well" — and
+   then, of the two shapes drawn for him: "keep the close cycle inside the
+   edit. as it's a critical button to click, the pen should hold everything
+   editable so it's kept secured."
+
+   Until now a cycle's name and its three dates were written ONCE, when it was
+   opened (§47.8), and were plain text ever after — so a typo in the name, or a
+   due date that moved, could only be corrected by CLOSING the cycle and
+   opening another, which archives and clears every figure in the tenant
+   (§49.1). The review point was the one thing that could be changed while the
+   cycle ran (§239), and it was changed in place on the strip.
+
+   THE DRAFT IS A DRAFT, exactly as `NEWCYCLE` is: nothing touches REVIEW until
+   Save, so Cancel writes nothing and there is no half-applied state to undo.
+   `asOfMonth` is carried only when it is SET, or opening the pen on a cycle
+   that never picked one would put an empty key into the draft and saving it
+   would write a phantom change into every later save (§50.6, §42's
+   `branding()` fault).
+
+   AND THE SECOND HALF IS WHY THE FIRST IS SAFE. With Close now inside the pen
+   it sits beside four fields somebody may have typed into, and closing files
+   this cycle's figures under its NAME — so `cycleEditDirty()` is what stops a
+   press from either quietly saving a rename or quietly throwing one away.
+   Compared TRIMMED against the stored cycle, so re-typing the same value with
+   a stray space is not a change to hold anybody up over (§96.2 is about what
+   is STORED; this is about whether anything moved). */
+function cycleDraft(){
+  var d = { name:String(REVIEW.name || ""), from:String(REVIEW.from || ""),
+            to:String(REVIEW.to || ""), due:String(REVIEW.due || "") };
+  if (REVIEW.asOfMonth) d.asOfMonth = REVIEW.asOfMonth;
+  return d;
+}
+function cycleEditDirty(){
+  if (!CYCLEEDIT) return false;
+  var same = ["name", "from", "to", "due"].every(function(k){
+    return String(CYCLEEDIT[k] || "").trim() === String(REVIEW[k] || "").trim();
+  });
+  return !same || String(CYCLEEDIT.asOfMonth || "") !== String(REVIEW.asOfMonth || "");
+}
+
 function cycleMeta(){
   var bits = [];
   var from = String(REVIEW.from || "").trim();
@@ -5320,9 +5368,35 @@ function reaches(unitKey){
    case of a general one and this function is that one asked about the plan.
    `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
    answer is the shared file's so the screen and the server cannot drift. */
+/* ── ASK THE COLUMN THE SAVE ASKS (§270, closing §217's other half) ──
+   §217 fixed the SERVER: `lib/authorize.js` resolves every strategy question
+   through `strategyPageOf()`, so a supporting function's plan is judged by the
+   FUNCTION's Strategy column. The SCREEN never caught up — it passed the raw
+   `u_found` / `u_anal` / `u_plan` at some twenty call sites, which on an `fn:`
+   target reads the BUSINESS UNIT's column instead. Two different questions
+   about one act, which is the drift `lib/rules.js` exists to prevent (§42).
+
+   MEASURED BEFORE AND AFTER, and today it costs nobody anything: every role's
+   two Strategy columns hold the same value on this tenant, so there are zero
+   disagreements and editing is the office's in any case. Set them differently
+   — which is the whole point of §117's split — and six people are handed an
+   Edit pen the save refuses, or refused one it would have accepted. This
+   closes the trap before it is armed.
+
+   IN THE WRAPPERS, NOT AT THE CALL SITES. The server resolves at each of its
+   six; the browser has twenty and would acquire a twenty-first the day
+   somebody adds a `gapCell`. One place, so a call site cannot forget (§104.7).
+   `strategyPageOf()` passes an unmapped key through untouched (§270), which is
+   what makes it safe to ask of every key rather than of a list somebody keeps.
+
+   NOTHING WIDENS: it can only ever move the screen onto the answer the save
+   was already giving. */
+function strategyAc(acKey, target){
+  return SMPRules.strategyPageOf(target === undefined ? TARGET : target, acKey);
+}
 function mayAuthor(acKey, target){
-  return SMPRules.mayAuthorPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
 /* MAY THIS PERSON FILL THIS PAGE'S GAPS (§145)? A wrapper, never a second
@@ -5330,15 +5404,19 @@ function mayEditPlan(){ return mayAuthor("u_plan"); }
    fill field the screen draws and the save the server accepts cannot
    disagree (§42). */
 function mayFill(acKey, target){
-  return SMPRules.mayFillPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+  /* §270: the same resolution, because `lib/authorize.js` judges a fill on a
+     function through `planPageOf()` (its own `strategyPageOf`) — fixing one
+     half and leaving the other is how the two came to disagree in the first
+     place (§53.5). */
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
    {project} or {pillarOwner} -- so a project owner fills their own project
    and a pillar owner their own pillar, and nobody fills a neighbour's. */
 function mayFillRow(acKey, ctx, target){
-  return SMPRules.mayFillRow(world(), viewer(), acKey,
-    target === undefined ? TARGET : target, ctx);
+  var t = target === undefined ? TARGET : target;   /* §270, as mayFill */
+  return SMPRules.mayFillRow(world(), viewer(), strategyAc(acKey, t), t, ctx);
 }
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
@@ -6067,9 +6145,7 @@ function gapMap(target, all, fillable){
        §205's lesson from the other side: that one recorded a cell the screen
        OPENED and the server refused; this is a cell the server ACCEPTS and
        the screen never opens. */
-    if (fillable)
-      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
-        return SMPRules.gapEmpty(f, row); }).length;
+    if (fillable) return SMPRules.gapEmptyFields(kind, row).length;
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -6213,6 +6289,34 @@ function seesGaps(target){
   return SMPRules.FILL_PAGES.some(function(pg){
     return mayFill(pg, t) || mayAuthor(pg, t);
   });
+}
+/* ── AND WHO IS SHOWN WHAT IS MERELY EMPTY (§272) ────────────────────
+   Islam, on Mobile and then Care: *"mobile keeps showing filling what's
+   missing while we can't find something missing and there is no the side
+   badges that identify where the missing part is."*
+
+   Reproduced by MAKING the state rather than by reading it: with every
+   counted gap on Mobile filled and the collaborators left alone, `gapTotal`
+   is 0 and `gapOpenable` is 22 — §223's door drawn with no count, no chips
+   and no rail marks, because those three read the COUNTED list and there is
+   nothing in it. Both halves were behaving as decided (§187 ruled a tactic
+   nobody supports is not missing; §205 kept the box fillable); nothing
+   joined them up, so the way in was drawn and the destination was not.
+
+   THE OFFICE IS NOT SHOWN IT AT ALL, which is the half that answers what he
+   was looking at. `mayFillPage` refuses the office outright — their write
+   settles, so they hold the pen — and with nothing owed the door is a second
+   way into a page they can already edit, wearing a word that does not apply
+   to them (§94.15's argument: a control with no audience of its own is a
+   duplicate, not a choice). The moment anything is genuinely MISSING the red
+   count, the chips and the button come back for everybody exactly as before:
+   this narrows one register and touches neither the other nor any count.
+
+   ASKED HERE AND NOWHERE ELSE, so the bar, the rail and the walk cannot
+   answer it three ways (§53.5). */
+function seesEmpty(target){
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.FILL_PAGES.some(function(pg){ return mayFill(pg, t); });
 }
 function tacticRatio(t){
   var p = tacticPlanned(t);

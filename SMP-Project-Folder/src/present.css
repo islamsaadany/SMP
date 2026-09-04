@@ -87,7 +87,11 @@
   .dslide tr.dim td { opacity:.5; }
   .dslide .lead { font-weight:500; }
   .dsub { display:block; color:var(--ink-3); font-size:17px; margin-top:5px; font-weight:400; }
-  .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch; }
+  /* §271: a note may be several lines now, and a projector shows them the way
+     the person who wrote them typed them — the deck reads the same stored
+     field the reporting page writes, so it keeps the same breaks. */
+  .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch;
+                               white-space:pre-line; }
   .dslide .withnote td.dnote.empty { color:var(--none); }
   /* The same relationship the note column has to the figures beside it: a
      supporting fact, set below the row's own size (§50). */
@@ -619,3 +623,129 @@
    (§254). The same weight the tactics table has used since §252, so one
    number does not read louder on one table than on another. */
   .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; }
+
+  /* ══ THE MASTER PRESENTATION'S PICKER (§266) ═══════════════════════
+     The dialog the office makes a running order in. It lives in the deck's
+     own stylesheet because it is a control ABOUT decks, and its classes are
+     `mf*` rather than `mp*` — `data-mpick` is already the month picker's
+     (§177), and a one-word modifier meeting a one-word component in a single
+     global namespace is §65.9's silent collision. */
+  /* ── THE PILLS CARRY THE SUBJECT'S CODE (§266.9) ──────────────────
+     Islam, on a real 308-slide flow: thirteen identical dots is a row you can
+     count and cannot read. Only in a flow — `bysub` is set by `deckIndex()`
+     and a single subject's deck keeps the dots it has always had. The strip is
+     allowed more of the bar than the dots need, because a labelled pill is
+     five times the width of a 7px one and eighteen of them wrapping onto three
+     rows is the fault this feature exposed in the first place. */
+  /* `flex-shrink:0` is what actually stops the wrap, and the measurement is
+     what said so: the strip was being SQUEEZED by the bar's flex row to 568px
+     with 592 of pills in it, not capped by its own max-width (793). The cap
+     still holds on a genuinely narrow window, where wrapping inside it is the
+     graceful answer. */
+  .ddots.bysub { max-width:62vw; gap:3px; flex-shrink:0; }
+  /* Tighter below 1400, where eighteen three-letter codes wrap to a second row
+     inside the bar. Measured, not guessed: 1 row at 1600 and at 1280 either
+     way is what the check asserts (§158 — fit, never "and it wraps"). */
+  .ddots.bysub .ddot {
+    width:auto; height:19px; border-radius:10px; padding:0 8px;
+    font-size:9.5px; font-weight:600; letter-spacing:.09em;
+    font-family:inherit; line-height:19px;
+    background:transparent; border:1px solid rgba(255,255,255,.34);
+    color:rgba(255,255,255,.82); transform:none;
+  }
+  .ddots.bysub .ddot:hover { border-color:rgba(255,255,255,.7); color:#fff; }
+  /* Lit is the gold FILL with dark ink on it, never gold type (§38.4): the
+     accent carries a mark and cannot carry words. `transform` is dropped with
+     it — scaling a pill blurs the letters it exists to show. */
+  .ddots.bysub .ddot.on {
+    background:var(--gold); border-color:var(--gold); color:#12161C;
+    transform:none;
+  }
+  /* AFTER the rules it narrows, never before them: `.ddots.bysub .ddot` and
+     this carry the same specificity, so source order is the whole of what
+     decides — written above, the tighter padding lost silently and the strip
+     went on wrapping at 1280 with the media query plainly matching (§29.2,
+     §93.11, and the fourth time this file has recorded it). */
+  @media (max-width: 1400px) {
+    .ddots.bysub { gap:2px; }
+    .ddots.bysub .ddot { padding:0 5px; letter-spacing:.05em; }
+  }
+
+  .mflow { font-size:13.5px; }
+  /* §266.8: two columns — waiting on the left, the running order on the right.
+     One track each and never `auto`, or the wider list would take the room the
+     flow needs to hold three controls per row (§109). Below 760 they stack,
+     because two 300px columns in a dialog are two clipped columns. */
+  .mflow .mfcols { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width: 760px) { .mflow .mfcols { grid-template-columns:1fr; } }
+  .mflow .mfcol { min-width:0; }
+  .mflow .mfcol h4 {
+    margin:0 0 6px; font-size:var(--fs-micro); letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); font-weight:600;
+    padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  /* A column that has legitimately emptied says so, or it reads as a pane that
+     failed to render (§45.2). Quiet, because neither state is a fault. */
+  .mflow .mfempty {
+    margin:0; padding:14px 8px; font-size:12.5px; color:var(--ink-3);
+  }
+  /* Capped so the two buttons are always on screen: eighteen subjects is
+     taller than a laptop, and a control below the fold is a control that does
+     nothing (§90). */
+  .mflow .mflist { max-height:min(46vh, 340px); overflow:auto; }
+  .mfrow {
+    display:flex; align-items:center; gap:10px; padding:7px 8px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .mfrow .mfn {
+    width:20px; text-align:right; font-variant-numeric:tabular-nums;
+    font-size:12px; color:var(--ink-3);
+  }
+  .mfrow.on .mfn { color:var(--ink); font-weight:600; }
+  /* The tick is drawn in the tenant's own navigation colour, never a literal
+     navy (§25) — and `--panel-ink` with it, or a light bar leaves the mark
+     invisible on its own ground (§38.4). */
+  .mfrow .mftick {
+    width:22px; height:22px; flex:none; border:1px solid var(--line);
+    border-radius:5px; background:var(--surface); color:transparent;
+    line-height:1; cursor:pointer;
+  }
+  .mfrow.on .mftick {
+    background:var(--panel); border-color:var(--panel); color:var(--panel-ink);
+  }
+  .mfrow .mflab { flex:1 1 auto; min-width:0; }
+  .mfrow .mflab b { font-weight:600; }
+  .mfrow .mflab em {
+    font-style:normal; color:var(--ink-3); font-size:11.5px; margin-left:8px;
+  }
+  .mfrow:not(.on) .mflab b { color:var(--ink-3); font-weight:400; }
+  .mfrow .mfmv { display:flex; gap:4px; flex:none; }
+  .mfrow .mfmv button {
+    width:24px; height:22px; border:1px solid var(--line); background:var(--surface);
+    border-radius:5px; color:var(--ink-2); cursor:pointer;
+  }
+  .mfrow .mfmv button:hover { background:var(--surface-2); color:var(--ink); }
+  .mflow .mfband {
+    background:var(--surface-2); font-size:var(--fs-micro); letter-spacing:.12em;
+    text-transform:uppercase; font-weight:600; color:var(--ink-3);
+    padding:5px 8px; margin-top:6px;
+  }
+  /* Why the press did nothing, on the attention ground: nothing has gone
+     wrong, the flow is simply empty (§168, §221). */
+  .mflow .mfnote {
+    margin:10px 0 0; padding:7px 10px; border-radius:6px;
+    background:var(--attn-bg); color:var(--attn-tx); font-size:12.5px;
+  }
+  .mflow .cbtns {
+    display:flex; gap:8px; justify-content:flex-end; padding-top:12px;
+  }
+  .mflow .cbtns button {
+    display:inline-block; width:auto; white-space:nowrap; padding:6px 14px;
+    border:1px solid var(--line); border-radius:7px; background:var(--surface);
+    color:var(--ink-2); font-size:13px; cursor:pointer;
+  }
+  .mflow .cbtns button:hover { background:var(--surface-2); color:var(--ink); }
+  .mflow .cbtns button.mfgo {
+    border-color:var(--panel); background:var(--panel); color:var(--panel-ink);
+  }
+  .mflow .cbtns button.mfgo[aria-disabled="true"] { opacity:.55; }

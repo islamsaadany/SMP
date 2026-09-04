@@ -5051,9 +5051,36 @@ function renderFnPerformance(fnKey){
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPerformance(fnAsUnit(fk));
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
-     platform holds at that moment. */
+     platform holds at that moment.
+
+     ── AND IN THE SAME PLACE AS A UNIT'S (§272) ──────────────────────────
+     Islam: *"can you move the presntation button for the functions to be in
+     the same place like what we did in the units while having the bands
+     button as well?"*
+
+     THIS WAS THE ONLY PERFORMANCE PAGE IN THE PRODUCT DRAWING ITS CONTROLS IN
+     THE PAGE BODY, and measuring is what said so rather than taste: a unit's,
+     the group's and a company's all go through `perfActs()`, and so does a
+     function that plans in PILLARS — because the branch six lines above sends
+     it to the unit's own page (spec 010). So the two halves of "supporting
+     function" have disagreed on this one screen since that routing was built,
+     and only the capability half was ever odd (§53.5, A15: a unit and a
+     function are the same product, and where they differ we say which and
+     why).
+
+     THE BANDS MENU COMES FREE, AND THAT IS WORTH SAYING OUT LOUD RATHER THAN
+     LETTING IT LOOK LIKE A RESTORATION: `perfActs()` appends `bandsMenu()`
+     itself, so the second half of the ask is one call rather than a second
+     control — and this page has NEVER had a bands legend, so somebody reading
+     "Off track" here has had nowhere to find out what it means.
+
+     ONE ROW COMES BACK. The `.pageact` div was a line of the page spent on a
+     single button: measured, the capability band moves y 300 -> 237 and
+     everything under it with it, while the two controls land on x 1206 and
+     1372 — a unit's pixels exactly, which is the assertion the check makes
+     (AGREEMENT, never a coordinate — §94.8, §53.5). */
   if (!caps.length) return fnNothingBehind(fk);
-  return '<div class="pageact">' + presentMenu("fn", fk) + '</div>' +
+  return perfActs(presentMenu("fn", fk)) +
     caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +

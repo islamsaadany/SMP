@@ -631,6 +631,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **RECORDED, NOT DONE**: a single deck still draws one unlabelled dot per slide,
   nothing says the order is saved without presenting it, and a flow cannot be
   downloaded.
+- **A FUNCTION'S PRESENTATION BUTTON SITS WHERE A UNIT'S DOES (§272):** Islam —
+  *"can you move the presntation button for the functions to be in the same place
+  like what we did in the units while having the bands button as well?"*
+  **MEASURING NARROWED THE ASK BEFORE ANYTHING WAS PROPOSED**: this was the ONLY
+  Performance page in the product drawing its controls in the page body — a
+  unit's, the group's, a company's and a **pillars** function's all call
+  `perfActs()`, which hangs them on the tab row and appends `bandsMenu()` itself.
+  **THE TWO HALVES OF "SUPPORTING FUNCTION" HAD DISAGREED SINCE SPEC 010**,
+  because the pillars format is drawn by `renderUnitPerformance(fnAsUnit(fk))`
+  six lines above the line this changes — A15 with no *why* behind the
+  difference. **THE BANDS HALF COMES FREE AND IS NEW, NOT RESTORED**: that screen
+  has printed *Off track* pills since it was built with nowhere to learn what
+  they mean, and saying so is what stops it reading as a repair. **ONE ROW COMES
+  BACK** (capability band y 300 → 237) and the controls land on **x 1206 / 1372,
+  a unit's pixels exactly**, which is what the check asserts — AGREEMENT, never a
+  coordinate (§94.8), with both ends named FIRST or two empty rows agree
+  perfectly (§94.2), the page body asserted EMPTY (a wrapper left behind draws
+  the menu twice and satisfies every "it is on the tab row" assertion), and the
+  pillars half asserted unchanged as the control case. **NOBODY'S RIGHTS MOVE** —
+  the menu is asked of `SMPRules.mayDownloadPlan()` rather than of a list of
+  entries, of somebody it refuses as well as somebody it allows (§42, §252.2) —
+  and **the group and a company still carry no Presentation button at all**,
+  outside the ask, asserted as an absence. Screen only: no `api/`, `lib/` or
+  `db/` file touched, read off the diff. **THE FIT WAS MEASURED** (§158: *fit,
+  never "and it scrolls"*) — one line at 1920 down to 768, 151px still clear at
+  the narrowest. **16 red** on the build before. **§272.1 — AND ONE OF ITS OWN
+  ASSERTIONS COULD NOT FAIL**: it measured the content's start off
+  `panel.firstElementChild`, and **before the change the `.pageact` div WAS that
+  child**, so it went green on the reverted build (§113.8, found by falsifying
+  rather than reading, in the one assertion whose whole job is the row that came
+  back); it measures the capability band now and fails at **(224, 181)**.
 - **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
   (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
   an option in the drop down for the smo only."* §145.9 hid the pane-corner
@@ -5079,6 +5110,17 @@ python3 checks/setup-arrange.py # the Setup tables are arranged and their rows a
                                 # matrix cell. 37 red on the build before, and seven of its
                                 # own assertions passed vacuously there before they were
                                 # tightened (§113.8)
+python3 checks/fn-perf-controls.py # a supporting function's Performance controls sit
+                                # where a unit's do (§272): both pages asserted to DRAW
+                                # both controls before the two are compared (two empty
+                                # rows agree perfectly), the page body asserted EMPTY of
+                                # them, the position asserted as AGREEMENT and never as a
+                                # coordinate, the menu asked of the RULE rather than a
+                                # list — of somebody it refuses as well as somebody it
+                                # allows — the pillars half and the group asserted
+                                # UNCHANGED, and the row one line from 1920 to 768.
+                                # 16 red on the build before, and one of its own
+                                # assertions could not fail as first written (§113.8)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)

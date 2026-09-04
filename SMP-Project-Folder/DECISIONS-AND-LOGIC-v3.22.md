@@ -31285,3 +31285,119 @@ main's, and §167.2's fix (suppressing the welcome screen in an
 Main was pushed with two of its own checks red, and the audit is what found
 them. That is the argument for the audit, not against the merge — but the merge
 would have been better with the sweep run twice.
+
+
+## §272 — A FUNCTION'S PRESENTATION BUTTON SITS WHERE A UNIT'S DOES (2026-09-04)
+
+Islam: *"can you move the presntation button for the functions to be in the same
+place like what we did in the units while having the bands button as well?"*
+Then, on the mockup: *"yes"*.
+
+### MEASURING NARROWED THE ASK BEFORE ANYTHING WAS PROPOSED
+
+The ask reads as a preference about placement. It is not: **this was the only
+Performance page in the product drawing its controls in the page body.**
+
+| Performance page | how its controls are drawn | Presentation | Bands |
+|---|---|---|---|
+| Business unit | `perfActs(presentMenu(…))` | tab row | yes |
+| The group | `perfActs(arrangeBtn(…))` | — | yes |
+| A company | `perfActs("")` | — | yes |
+| Function · plans in **pillars** | → the unit's own page | tab row | yes |
+| Function · plans in **capabilities** | `<div class="pageact">…</div>` | **page body** | **none** |
+
+`perfActs()` is what hangs a page's controls on the tab row, and it appends
+`bandsMenu()` itself. Four of the five Performance pages call it. The fifth built
+its own wrapper.
+
+**AND THE TWO HALVES OF "SUPPORTING FUNCTION" HAVE DISAGREED SINCE SPEC 010**: a
+function that plans in pillars is drawn by `renderUnitPerformance(fnAsUnit(fk))`
+— the branch six lines above the one this changes — so it has had the right shape
+all along and only the capability half was ever odd. A15 exactly: *a unit and a
+function are the same product, and where they differ we say which and why*, and
+here there was no why.
+
+### THE BANDS HALF COMES FREE, AND THAT IS WORTH SAYING OUT LOUD
+
+`perfActs()` adds the legend itself, so the second half of the ask is one call
+rather than a second control. **It is NEW on this page, not restored** — that
+screen has printed *Off track* and *Needs attention* pills since it was built
+with nowhere to find out what they mean. Named as new in the mockup rather than
+allowed to look like a repair.
+
+### ONE ROW COMES BACK
+
+The `.pageact` div was a line of the page spent on one button. Measured: the
+capability band moves **y 300 → 237** and everything under it with it. The two
+controls land on **x 1206 and 1372, y 114 and 117** — a unit's pixels exactly.
+
+### THE CHANGE
+
+```js
+- return '<div class="pageact">' + presentMenu("fn", fk) + '</div>' +
++ return perfActs(presentMenu("fn", fk)) +
+```
+
+One line, in `renderFnPerformance()`. **Screen only** — no `api/`, `lib/` or
+`db/` file is touched, asserted from the diff and not from memory.
+
+### WHAT DID NOT MOVE
+
+**Nobody's rights.** The same menu with the same entries behind the same gates:
+*Download the plan* is still `SMPRules.mayDownloadPlan()`'s (§252.2), and
+reordering is untouched (§101). The check asks the RULE rather than a list of
+entries, and asks it of somebody it refuses as well as somebody it allows
+(§94.2) — a list of four strings would go stale the next time an entry is added
+and would never have proved the gate.
+
+**The group and a company still carry no Presentation button at all.** Outside
+the ask, deliberately untouched, and asserted as an ABSENCE so a build that
+widened this change fails. Put to Islam separately rather than slipped in.
+
+**A function with no capabilities** still returns `fnNothingBehind(fk)` before
+reaching this line, so it draws no controls — unchanged, and unchanged on
+purpose: there is nothing to present.
+
+### DRAWN FIRST, AS THE RULE REQUIRES (1c)
+
+`design-mockups/fn-performance-controls/2026-09-04_presentation-on-the-tab-row.html`,
+published as an artifact and signed off before a source was touched. Both
+pictures are the **running platform** with the control moved in the live DOM
+(§41.9) — this build with one thing in a different place, never a drawing beside
+a page.
+
+### THE FIT WAS MEASURED, NOT ASSUMED
+
+A function's tab names are longer than a unit's and the row now carries two more
+controls, so §158's rule applies: *fit, never "and it scrolls"*. Swept 1920 /
+1500 / 1280 / 1100 / 1000 / 900 / 820 / 768 — **one line at every width**, no
+overflow, no sideways page scroll, and **151px still clear** between the last tab
+and the controls at the narrowest.
+
+### THE CHECK ASSERTS THE AGREEMENT, NEVER A COORDINATE
+
+`checks/fn-perf-controls.py`. The point of the change is that one page stopped
+being odd, so what is asserted is that the two pages land on the same pixels
+(§94.8, §53.5) — true still if somebody later moves both deliberately, red the
+moment one moves alone. **Both ends first**, or a build drawing nothing on either
+page agrees perfectly with itself (§94.2): the controls are asserted present and
+named on both pages before they are compared, and the page body is asserted EMPTY
+of them, because leaving the old wrapper behind while adding the new one draws
+the menu twice and satisfies every "it is on the tab row" assertion. The pillars
+half is asserted unchanged in the same breath — it is the control case, and a
+build that routed everything through the unit's renderer would pass every
+assertion about the capability half while having broken the product.
+
+**Proved able to fail: 16 red** on the build before, the first failures printing
+the reported fault verbatim (`x: 1303, y: 175` in the page body, no Bands).
+
+### §272.1 — AND ONE OF ITS OWN ASSERTIONS COULD NOT FAIL
+
+The first draft measured *"the content starts about where a unit's does"* off
+`panel.firstElementChild` — and **before this change the `.pageact` div WAS that
+child**, so the measurement returned nearly the same y either way and the
+assertion went green on the reverted build. §113.8's shape, found by falsifying
+rather than by reading, in the one assertion whose whole job is the row that came
+back. It measures the first real CONTENT now — the capability band on a function,
+the score cards on a unit — and fails on the reverted build with **(224, 181)**,
+the 43px the row is worth.

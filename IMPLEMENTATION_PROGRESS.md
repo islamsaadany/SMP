@@ -112,6 +112,47 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §272 — a function's Presentation button sits where a unit's does (2026-09-04, branch `claude/plans-edit-button-placement-jxw8or`)
+
+Islam: *"can you move the presntation button for the functions to be in the same
+place like what we did in the units while having the bands button as well?"* —
+then **"yes"** to the mockup.
+
+**Measuring narrowed the ask.** This was the **only** Performance page in the
+product drawing its controls in the page body: a unit's, the group's, a
+company's and a **pillars**-format function's all call `perfActs()`, which hangs
+them on the tab row and appends the Bands menu itself. So the two halves of
+"supporting function" had disagreed on this one screen since spec 010 routed the
+pillars format through the unit's own page — A15 with no *why* behind it.
+
+**The change is one line** in `renderFnPerformance()`. Screen only: no `api/`,
+`lib/` or `db/` file touched, read off the diff rather than remembered.
+
+- **The Bands half comes free and is NEW, not restored** — that page has printed
+  *Off track* pills since it was built with nowhere to learn what they mean.
+- **One row comes back**: capability band y 300 → 237.
+- **The controls land on x 1206 / 1372 — a unit's pixels exactly.**
+- **Nobody's rights move**: the menu is asked of `SMPRules.mayDownloadPlan()`,
+  of somebody it refuses as well as somebody it allows.
+- **The group and a company still carry no Presentation button**, outside the
+  ask, untouched and asserted as an absence.
+
+**Fit measured, not assumed** (§158): one line at 1920 / 1500 / 1280 / 1100 /
+1000 / 900 / 820 / 768, no overflow, no sideways scroll, 151px still clear at
+the narrowest.
+
+Green: `fn-perf-controls` (new, **16 red** on the build before), `perf-line`,
+`fn-pillars`, `scoring-bands`, `hide-slide`, `setup-header`, and the full
+`qa.py` sweep. `report-chrome`'s one failure reproduces byte-for-byte on main
+(§271's list) and is not this change's.
+
+**§272.1 — one of the new check's own assertions could not fail as written**: it
+measured the content's start off `panel.firstElementChild`, and before the change
+the `.pageact` div WAS that child, so it went green on the reverted build
+(§113.8). It measures the capability band now and fails at (224, 181).
+
+Mockup: `design-mockups/fn-performance-controls/2026-09-04_presentation-on-the-tab-row.html`
+
 ### §271 — the audit of the §268–§270 merge (2026-09-03, branch `claude/plans-edit-button-placement-jxw8or`)
 
 Islam, straight after the merge: *"did we change or damage something on this

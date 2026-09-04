@@ -1764,169 +1764,6 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
-- **WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (§286.2):** Islam, having pasted one
-  — *"the message is very subtle I didn't notice that something was attached."*
-  The whole confirmation was one line of `.chnote`, the page's quietest grey,
-  below the box, at the weight of an empty space. Four drawn in the REAL
-  composer; he picked the strip above it — **the picture, a line naming it, and
-  a way to take it off**. The picture is the part a sentence cannot replace
-  (*which* screenshot is about to go), and it sits ABOVE the box so the thing
-  under the cursor never moves. **The thumbnail is the already-shrunk data**
-  (§50): what is previewed is what SENDS, never a second rendering. **The grey
-  sentence goes with it** (1b-ii), while an error still speaks there because
-  that is not a description of state (§124). **The remove is wired on the FOOT,
-  not the button** — the strip is rewritten every paint (§24, §47.2) — and it
-  clears the file input or the same file cannot be picked twice.
-- **ONE PANEL, WHATEVER IS IN IT (§285.2):** *"the 2 options have different panel
-  sizes let's unify things."* Measured: **531 against 498, with the top edge at
-  351 against 384** — the panel is anchored at the BOTTOM, so what moved was the
-  top, 33px every time you switched. Two causes, both from §285: the search box
-  is drawn on the list and not in a conversation, and the line under the title
-  was made to say nothing on the queue side — **an empty line is a shorter
-  header**. `.chatbody` held a flat `height:340px` and the panel was the sum of
-  its parts; **it is the other way round now** — the panel holds the height, the
-  body flexes with `min-height:0` (§100.5), and anything added to the chrome
-  costs a row rather than moving the panel. Capped to the window for
-  `.chinbox`'s reason (a fixed height puts the composer off a short screen);
-  checked at 900 / 760 / 640. **And the title's line never falls empty** —
-  reserving its space with a number would be a guessed constant going stale
-  (§122.5); §285 was right that the words were redundant and wrong about what
-  removing them costs.
-- **A PICTURE IS PASTED, NOT ONLY ATTACHED (§286):** Islam — *"allow in the chat
-  to copy paste a picture rather than only attaching it."* Somebody reporting a
-  wrong number has just pressed the screen-grab key; making them save the file
-  and find it again is asking them to do the computer's job. **IT FEEDS
-  `takePicture()` AND ADDS NOTHING** — §50's whole intake (1600px, both formats
-  with the smaller kept, the failure said in words) holds because it is the same
-  door, and the office's reply box being the same box means §285's queue gained
-  it with no second listener. **TEXT STILL PASTES AS TEXT**: only an image item
-  is taken and `preventDefault` fires only when one is found, so a paste
-  carrying both keeps its words. **`items` FIRST, THEN `files`** — a screenshot
-  lands on `items` in every desktop browser and on `files` in Safari. **AND WITH
-  PICTURES OFF IT IS REFUSED IN WORDS** (§98.2): a paste that appears to work and
-  then vanishes is worse than one that says no. **The hover says the capability
-  exists**, because it has no control of its own to be discovered by (§61).
-  Proved by dispatching a REAL ClipboardEvent with a real PNG — a probe calling
-  `takePicture()` directly passes on a build where the listener was never wired
-  (§96).
-- **THE OFFICE'S CORNER CARRIES THE QUEUE (§285):** Islam — *"the chat bubble
-  of the SMO team shouldn't be something to be sent to the smo, that is
-  redundancy … it should be the chats of the other people sending the smo the
-  messages"*, with a switch to reach their own thread. **REDUNDANCY OF AN ODD
-  KIND**: the corner is *your* conversation with the office, and for the office
-  that is a conversation with themselves. His decisions, all recorded: waiting
-  only · no cap · all of the office · **the badge is the LENGTH of the list**
-  (he first said messages; a badge reading 7 over 4 rows is what gets reported
-  as a bug, §108.1) · the one you have open never vanishes under you (§113) ·
-  search reaches **all history** and shows **the line that matched**.
-  **NOTHING NEW IS AUTHORISED OR STORED** — opening is the Inbox's `thread`,
-  replying its `reply`, so §283's chase, §231's box and §71's answered-by-the-act
-  come free. **THE QUEUE RIDES THE POLL THAT ALREADY EXISTS** (§98) and never
-  touches the register (§282). **ONE COMPOSER, FORKED AT THE TOP** (§53.5), and
-  **`replyPost()` is the one email builder both screens call** — the corner's
-  first draft built a smaller one, which would have emailed somebody differently
-  depending on which screen the office was looking at. **The search says its own
-  scope out loud** (§35, §124), because results reach conversations that are not
-  waiting while the Waiting segment is lit. **Prefixed `cq`, never `ch`** — the
-  Inbox owns `.chq*` (§65.9). **TWO `var` COLLISIONS IN ONE CHANGE, BOTH FOUND
-  BY THE CHECK GOING RED**: `firstLine` is a SERVER helper and threw inside the
-  list builder, leaving the body's class set and its contents empty — a blank
-  corner with nothing on the console, because the throw was in the poll's own
-  callback; and `var cfg` in `drawPanelChrome()` shadowed the module's, which is
-  filled from the SERVER, so the panel wore the shipped promise over the
-  office's own.
-- **THE CORNER SURVIVES THE WALK (§284, REVERSING §100.4):** *"we need the chat
-  to sustain the navigation so it's open while me navigating across the
-  different pages."* Measured: one press on a page tab closed it. §100.4
-  minimised on any `pointerdown` outside the dock — his own earlier instruction
-  — and **the two cannot both be true, because the platform is ONE PAGE**: every
-  destination, tab, section and card is a press "outside", so a rule exempting
-  navigation would exempt everything but the empty margins. **Recorded as a
-  reversal, not overwritten**: §100.4 was right for a panel you dip into and
-  leave, and stopped being right when the panel became somewhere you WORK. The
-  minus and Escape remain, and **both are an act**; nothing typed is lost either
-  way, because the panel is hidden rather than rebuilt. **The assertion is
-  REWRITTEN, never deleted** (§218) — it now asserts the panel STAYS — and one
-  of the check's own comments went with it: a section pressed the bubble after
-  navigating *because* navigating used to close the panel, and with it arriving
-  open the bubble is not drawn and the press timed out on an invisible control.
-- **A REPLY NOBODY WAS EVER TOLD ABOUT (§283):** the platform decided whether to
-  email AT THE INSTANT the office replied — *has this person had a page open in
-  the last few minutes?* — and a **yes** is a prediction, wrong in one
-  direction: somebody reading two minutes ago who then shuts their laptop
-  counts as present, gets no email, and is **never told at all**. §97.5 wrote
-  the edge down when it built the rule and called a sweep a later decision;
-  this is that decision. **STOP PREDICTING, START LOOKING**: a reply still
-  UNREAD after the office's wait (30 minutes, Islam's number) is chased then.
-  One row of the table moves — away is still mailed at once, a read reply is
-  still never mailed, and **present-and-never-came-back stops being silence**.
-  **THE MESSAGE IS KEPT, NOT REBUILT** (§72.3: the browser builds the email and
-  the server resolves the recipient, so a chase half an hour later has no
-  browser to ask) — the SAME email merely later, never a second kind that would
-  drift (§53.5); written only when the send is deferred and cleared the moment
-  it goes or they read it. **`chaseDue()` RIDES ORDINARY REQUESTS**, which is
-  what §43 already does with expired sign-in attempts, **once a minute per
-  process** so §98's 14→5 is not given back, and it can never fail the request
-  it rode in on. The limitation is stated: **nobody touching the platform means
-  nothing goes out until somebody does.** The address is resolved AT SEND TIME
-  from the stored register (§74.2) — never kept, so a retired person is not
-  written to. **`chatSet()` needed nothing**: §104.7 takes the type from the
-  DEFAULT, so a third number setting worked the day it was added. **AND THE
-  CHECK FOUND A HOLE IN MY OWN QUERY** — it read the SQL out of `api/chat.js`
-  rather than keeping a copy, and went red because the sweep did not say
-  `from_office`: harmless today, since only `reply` writes a kept message, and
-  *a query that relies on what cannot happen yet breaks silently the day it
-  can*. **AND §105.6 BIT TWICE IN AN HOUR**: two runs were measured against a
-  dev-server started BEFORE the file under test was written — once calling the
-  fix working with the falsified build on disk, once calling it broken with the
-  good one. **Compare the file's mtime with the server's start time; never
-  trust the order the commands were typed in.**
-- **THE CHAT MUST NOT WAIT ON A SAVE (§282):** Islam, twice in two days —
-  *"all conversations are gone!!"*, then *"before the fix all the chats
-  disappeared"*, with §231.4's card reading *"The server did not answer (no
-  answer)"*. **NOTHING WAS LOST AND THE CARD WAS TRUE**: the chat's tables sit
-  outside the state graph, so a save cannot reach them (asserted). *"No answer"*
-  is `post()`'s 25-second clock, so the endpoint was neither down nor erroring —
-  it was **waiting**. A save clears the graph with `TRUNCATE … CASCADE`, which
-  takes ACCESS EXCLUSIVE on `people` for the whole of §240's (correctly) long
-  transaction, and the queue `LEFT JOIN`ed `people` for a live name: **frozen at
-  8s, against 2ms reading its own stored `person_name` and 1ms for the
-  messages** — only the join was ever blocked. **Worst exactly when somebody is
-  looking**: a new build reloads every browser, the platform autosaves, Neon has
-  slept, so the slowest save of the day lands as the corner opens. **THE READER
-  IS FIXED AND THE WRITER DELIBERATELY IS NOT** — `DELETE` was measured and is
-  better on every axis (3ms against 72ms, all 14 FKs already cascade, readers
-  never block), and it is still not done, because it was verified HERE and not
-  against production, where drift would make a save FAIL rather than merely be
-  slower (§238 already records the write path as its own staged pass, and §241
-  removes the TRUNCATE from the other side when its flag is switched on). The
-  register is asked **separately and allowed to fail**, with a 2s `lock_timeout`
-  under it — safe because a chat WRITE can never collide with a save, so it can
-  only fire on the read that must not hang; **and the backstop alone is not
-  enough, which the red run shows** (the old query still fails, just faster).
-  Cost stated: for a second or two a RENAMED person shows their previous name,
-  and **`gone` reads NULL, never true** — an unread register is not somebody
-  leaving it (§93), and the page already treats null as *say nothing*.
-- **A REFUSAL WITHOUT ITS CAUSE IS WHY NOTHING CONVERGES (§282.2–4):** measured
-  against a stand-in push service, a mismatched key (403), a dead registration
-  (400) and an oversized payload (413) all returned `failed: 1` and printed one
-  sentence — *"The push service would not take it."* **Four rounds of fixes
-  converged on nothing because nothing ever named one thing** (§124 at the far
-  end of the chain). The service's words are carried back, the service is NAMED
-  from the endpoint's host alone (Apple will not deliver until the platform is
-  on the home screen — a different errand from Chrome), and the diagnostic asks
-  **this browser** as well as the server, because a browser registered at one
-  address while the server sends to another read as perfect health at both ends.
-  **AND A REGISTRATION IS BOUND TO THE KEY IT WAS MADE WITH**: accepting an
-  existing one without looking at it means that once the key changes the browser
-  hands the old one back FOR EVER — bell on, device counted, every send refused,
-  and nothing able to notice. Compared and re-made now; **a browser that will
-  not report its key is left alone**, because churning on a guess is worse.
-  **AND THE FIRST BUILD OF THAT STOPPED SUBSCRIBING ENTIRELY** — `pushSync`
-  already had a `want`, a second `var want` in the same callback HOISTED over
-  it, `if (!want)` read `undefined` and took the unsubscribe branch every time:
-  §56.7's collision, valid on both sides, past `node --check`, **found by the
-  check going red and not by reading it**.
 - **THE OFFICE STARTS A CONVERSATION (§247):** Islam — *"from the platform
   inbox allow the smo to initiate a message with someone."* Until now the office
   could only ever ANSWER: with nobody having written in there was no way to
@@ -6095,31 +5932,6 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
-python3 checks/paste-picture.py   # a picture PASTED into the composer (§286): a real
-                                # ClipboardEvent with a real PNG, because a probe that
-                                # calls takePicture() passes on a build where the
-                                # listener was never wired; text still pastes as text,
-                                # the picture TRAVELS with the message, and with
-                                # pictures off it is refused in words
-python3 checks/corner-queue.py    # the office's corner carries the queue (§285) and
-                                # survives the walk (§284): the badge is the LENGTH of
-                                # the list, a reply carries the SAME email the Inbox
-                                # builds, and it listens for page errors — the fault
-                                # found while writing it was a throw in the poll's own
-                                # callback that left a blank box and a clean console
-DATABASE_URL=… node scripts/test-chase.js
-                                # a reply nobody was ever told about (§283): the
-                                # wait is obeyed at BOTH ends (a build using a
-                                # constant fails), reading cancels it, an emailed
-                                # reply is never chased twice, and the sweep's SQL
-                                # is READ OUT OF api/chat.js rather than copied
-DATABASE_URL=… node scripts/test-chat-during-save.js
-                                # the chat does not wait on a save (§282): holds a
-                                # save open against a real Postgres and asks the chat
-                                # its three questions — a lock cannot be modelled by a
-                                # stub, and SMP_CHAT_JOIN_PEOPLE=1 makes the FILE ask
-                                # the pre-§282 question so the red run is the shape
-                                # the product actually had
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
@@ -6271,48 +6083,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;282&ndash;&sect;286: the chat does not
-wait on a save, the notifications say where they stop, a reply nobody was told
-about is chased, the corner survives the walk and carries the office's queue,
-and a picture is pasted.** &mdash; **&sect;282:** Islam, twice in two days
-&mdash; *"all conversations are gone!!"* and *"before the fix all the chats
-disappeared"* &mdash; and, separately, *"the notification system is still not
-working &hellip; we tried many things."* **NOTHING WAS EVER LOST**, established
-first: the chat's tables sit outside the state graph. *"No answer"* was the
-corner's own 25-second clock, so the endpoint was neither down nor erroring
-&mdash; it was WAITING on the ACCESS EXCLUSIVE lock a save's `TRUNCATE` takes on
-`people`, which the queue joined for a live name (**frozen at 8s against 2ms
-without the join**). Worst exactly when somebody is looking, because a new build
-reloads every browser and the platform autosaves onto a sleeping database.
-**The reader is fixed and the writer deliberately is not** &mdash; `DELETE` was
-measured and is better on every axis, and it is the one file where a mistake
-costs real data, so it stays a staged piece (&sect;238; and &sect;241 removes
-the TRUNCATE from the other side when its flag is turned on). **And the
-notifications stopped shrugging**: a mismatched key, a dead registration and an
-oversized payload all reported as `failed: 1` under one sentence, which is why
-four rounds converged on nothing; the service's own words are carried back, the
-service is named, the diagnostic asks this browser as well as the server, and a
-registration made with a superseded key &mdash; which could never heal &mdash;
-is caught and re-made. **The first build of that stopped subscribing entirely**
-on a `var` collision valid on both sides, found by the check going red.
-`test-chat-during-save` RED on the old query and 8/8 green; `test-chat` 103/0
-(falsified 102/1); `office-chat` all clear (falsified, 6 red); sweep clean.
-**&sect;283: a reply nobody was ever told about** &mdash; the platform decided
-whether to email AT THE INSTANT the office replied, and a *yes* is a prediction
-wrong in one direction; a reply still unread after the office's wait (30 minutes,
-Islam's number) is chased then, with the SAME email kept rather than rebuilt.
-**&sect;284: the corner survives the walk**, reversing &sect;100.4 &mdash;
-*"we need the chat to sustain the navigation"*, and the two cannot both be true
-because the platform is ONE PAGE. **&sect;285: the office's corner carries the
-queue** &mdash; *"the chat bubble of the SMO team shouldn't be something to be
-sent to the smo, that is redundancy"*; nothing new is authorised or stored, it
-rides the poll that already exists, and `replyPost()` is the one email builder
-both screens call. **&sect;286: a picture is pasted, not only attached**, feeding
-&sect;50's own intake and adding nothing &mdash; with **&sect;286.2** showing what
-is attached, from a mockup Islam picked (A), and **&sect;285.2** unifying the two
-corners' panel size, which had differed by 138px.*
-
-*Earlier: 2026-09-04 &mdash; **&sect;280.1: a check that could no longer
+*Last Updated: 2026-09-04 &mdash; **&sect;280.1: a check that could no longer
 go green.** Found running the neighbours after &sect;280's merge:
 `checks/report-chrome.py` failed *"Submit is filled"* &mdash; **reproduced on
 `main`'s OWN build before anything was concluded**, so it was established as not
@@ -7514,7 +7285,6 @@ restored and asserted. `checks/plan-edit-line.py`: 48 red on the build before
 454/0 and 126/0 on the server. **Both sweeps were most of the work** &mdash;
 &sect;248 grep'd `.penbtn` and the filler's control is a `.fillcta` (&sect;51.11:
 grep for the CONTROL, not one of its classes).*
-
 
 *Earlier: 2026-09-01 &mdash; **&sect;245: the functions are on the
 function half, in one list; &sect;246: the cycle note is a line somebody

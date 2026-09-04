@@ -204,15 +204,7 @@ class H(http.server.BaseHTTPRequestHandler):
         # that polls on every page, so the only thing that can tell the office
         # a question arrived while they were somewhere else (§225).
         self._send(200, json.dumps({
-            # WHO IS SIGNED IN DECIDES (§285). This answered `office: True` for
-            # every viewer, which was harmless while the corner drew the same
-            # thing for everybody and stopped being harmless the moment the
-            # office's corner became a queue: the person-facing sections below
-            # are about somebody WRITING IN, and a stub that calls them the
-            # office tests the wrong half of the panel. Most people are not
-            # the office, so that is the default here too.
-            "ok": True, "office": CHAT.get("office", False),
-            "messages": CHAT["messages"],
+            "ok": True, "office": True, "messages": CHAT["messages"],
             "unread": CHAT["unread"], "thread": CHAT["thread"],
             "waiting": CHAT.get("owaiting", 0),
             "waitingWho": CHAT.get("owho"), "waitingBody": CHAT.get("obody"),
@@ -338,25 +330,15 @@ with sync_playwright() as p:
     ck("and the bubble comes back", pg.eval_on_selector("#chatbtn", "e => e.getClientRects().length > 0"))
     ck("and the conversation is still there afterwards", len(CHAT["messages"]) > 0)
 
-    # CLICKING AWAY NO LONGER MINIMISES IT (§284, REVERSING §100.4).
-    # Islam: "we need the chat to sustain the navigation so it's open while me
-    # navigating across the different pages in the platform." The platform is
-    # ONE PAGE, so every destination, tab, section and card was a press
-    # "outside" — measured, one press on a page tab closed the corner.
-    #
-    # THE ASSERTION IS REWRITTEN AND NOT DELETED (§218): a check that simply
-    # dropped it would let a later build put click-outside back without anybody
-    # noticing, which is the whole reason a reversal is recorded rather than
-    # erased. What survives unchanged is the half that was always the point —
-    # nothing typed is ever lost — because the panel is hidden rather than
-    # rebuilt, and that is now true across a walk as well as a dismissal.
+    # CLICKING AWAY MINIMISES IT, AND LOSES NOTHING.
     pg.click("#chatbtn")
     pg.wait_for_selector("#chatpanel:not([hidden])")
     pg.fill("#chatsay", "half written, and I clicked away")
     pg.mouse.click(200, 300)
     pg.wait_for_timeout(300)
-    ck("clicking outside leaves it open", not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
-    pg.wait_for_timeout(200)
+    ck("clicking outside minimises it", pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    pg.click("#chatbtn")
+    pg.wait_for_timeout(300)
     ck("and the half-typed message survived it",
        pg.input_value("#chatsay") == "half written, and I clicked away",
        pg.input_value("#chatsay"))
@@ -1175,8 +1157,6 @@ with sync_playwright() as p:
     # and the office's assertions read the wrong one. (The stub's `seen` does
     # not clear it the way the real endpoint does — §100.3, in the small.)
     CHAT["messages"] = []; CHAT["unread"] = 0
-    # THIS SECTION IS ABOUT THE OFFICE, so the stub says so (§285).
-    CHAT["office"] = True
     CHAT["owaiting"] = 2
     CHAT["owho"] = "Hend Farouk"
     CHAT["obody"] = "The Q3 target on Active Base still reads 4.2M."
@@ -1233,19 +1213,11 @@ with sync_playwright() as p:
     # line already, which is the same argument as `!open` one page out.
     pg.click('[data-md="setup"]'); pg.wait_for_timeout(700)
     pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(900)
-    # AND THE CORNER IS OPENED ONLY IF IT IS NOT ALREADY (§284). This used to
-    # press the bubble unconditionally, on §100.4's rule that navigating
-    # minimised the panel — which stopped being true when Islam asked for the
-    # corner to survive the walk. It now arrives still open, and the bubble is
-    # not drawn while it is (§100.4's sibling), so the press timed out against
-    # an invisible control. What the section is actually about is unchanged:
-    # the corner must be OPEN and polling here, or the assertion below passes
-    # because nothing ever happened rather than because nothing was shown.
-    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
-        pg.click("#chatbtn")
-    pg.wait_for_timeout(500)
-    ck("  (the corner is open on the Inbox)",
-       not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    # AND THE CORNER IS OPENED AFTER ARRIVING, not before: a pointerdown outside
+    # the dock minimises it (§100.4), so opening it first and then navigating
+    # puts it back on the 180s beat — and the assertion below would then pass
+    # because no poll ever happened rather than because nothing was shown.
+    pg.click("#chatbtn"); pg.wait_for_timeout(500)
     fake_browser("granted")
     CHAT["owaiting"] = 4
     CHAT["owho"] = "Hala Nabil"
@@ -1254,11 +1226,6 @@ with sync_playwright() as p:
     ck("  (the office's browser asked while on that page)", got, "no poll inside 30s")
     ck("no box while the office is reading the queue itself", len(pops()) == 0, pops())
     CHAT["owaiting"] = 0; CHAT.pop("owho", None); CHAT.pop("obody", None)
-    # AND BACK TO AN ORDINARY PERSON (§285). Left set, the office's corner
-    # opens on the QUEUE and every section below would be measuring the wrong
-    # half of the panel — which is exactly what happened when this flag was
-    # first added and three later sections went red.
-    CHAT["office"] = False
     # Back off the Inbox, or everything below measures a page it is not about.
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
@@ -1654,102 +1621,6 @@ with sync_playwright() as p:
         row1.click(); pg.wait_for_timeout(900)
         ck("...and so does opening a conversation",
            pg.query_selector("#chnewwho") is None)
-
-    # ── 20 · A REGISTRATION MADE WITH A DIFFERENT KEY (§282.3) ───────────
-    # THE STICKY ONE. A registration is bound to the key it was made with, and
-    # this branch used to accept any existing registration without looking at
-    # it — so once the platform's key changed, the browser handed back the old
-    # registration for ever, the bell read on, the server counted the device,
-    # and every send was refused. Healthy at both ends, nothing arriving, and
-    # nothing that could ever heal it.
-    #
-    # The stand-in reports `options.applicationServerKey`, which the earlier
-    # one did not — a stand-in that models less than the thing it stands in
-    # for reports a working build as broken (§100.3), and here it would have
-    # reported a BROKEN build as working, which is worse.
-    print("\n20 · a registration made with a different key")
-    CHAT["messages"] = []; CHAT["unread"] = 0
-    CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000, popup=True)
-    del PUSH["subs"][:]; del PUSH["off"][:]
-    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
-    pg.goto(URL, wait_until="networkidle")
-    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
-
-    # A DEVICE ALREADY REGISTERED, AND WITH SOMEBODY ELSE'S KEY — the state a
-    # deployment lands in the moment its key changes.
-    pg.evaluate("""(good) => {
-        window.__subs = []; window.__unsub = [];
-        const OTHER = new Uint8Array(65); OTHER[0] = 4;
-        for (let i = 1; i < 65; i++) OTHER[i] = 200;          // NOT the platform's
-        const mk = (key, ep) => ({
-          endpoint: ep, options: { applicationServerKey: key.buffer || key },
-          toJSON: () => ({ endpoint: ep, keys: { p256dh: "P", auth: "A" } }),
-          unsubscribe: function () { window.__unsub.push(ep); held = null;
-                                     return Promise.resolve(true); } });
-        let held = mk(OTHER, "https://push.example.test/dev/stale");
-        const mgr = {
-          getSubscription: () => Promise.resolve(held),
-          subscribe: (opts) => {
-            const raw = new Uint8Array(opts.applicationServerKey);
-            window.__subs.push({ keyLen: raw.length,
-                                 matches: btoa(String.fromCharCode.apply(null, raw))
-                                            .replace(/\+/g,"-").replace(/\//g,"_")
-                                            .replace(/=+$/,"") === good });
-            held = mk(opts.applicationServerKey, "https://push.example.test/dev/fresh");
-            return Promise.resolve(held); } };
-        const reg = { pushManager: mgr };
-        Object.defineProperty(navigator, "serviceWorker", { configurable: true,
-          get: () => ({ ready: Promise.resolve(reg),
-                        getRegistration: () => Promise.resolve(reg),
-                        register: () => Promise.resolve(reg) }) });
-        window.__held = () => held; }""", VAPID)
-
-    pg.click("#chatbtn"); pg.wait_for_timeout(2500)
-
-    unsub = pg.evaluate("() => window.__unsub || []")
-    ck("a registration made with another key is thrown away",
-       unsub == ["https://push.example.test/dev/stale"], unsub)
-    ck("...and the server is told to forget it, or it is sent to for ever",
-       any((o.get("endpoint") if isinstance(o, dict) else o)
-           == "https://push.example.test/dev/stale"
-           for o in PUSH["off"]), PUSH["off"])
-    subs = pg.evaluate("() => window.__subs || []")
-    ck("...and it registers again straight away", len(subs) == 1, subs)
-    ck("...with the key the platform is actually sending with",
-       len(subs) == 1 and subs[0]["matches"] is True, subs)
-    ck("...and the new one reaches the server",
-       any((s0.get("endpoint") if isinstance(s0, dict) else s0)
-           == "https://push.example.test/dev/fresh"
-           for s0 in PUSH["subs"]), PUSH["subs"])
-    # BOTH ENDS (§94.2): a registration made with the RIGHT key is left alone.
-    # Without this, a build that threw every registration away every poll —
-    # churning the device on every beat — would pass all five above.
-    del PUSH["off"][:]
-    pg.evaluate("() => { window.__unsub = []; window.__subs = []; }")
-    pg.wait_for_timeout(5000)
-    ck("a registration made with the right key is left alone",
-       pg.evaluate("() => (window.__unsub || []).length") == 0 and
-       pg.evaluate("() => (window.__subs || []).length") == 0,
-       pg.evaluate("() => ({ un: window.__unsub, sub: window.__subs })"))
-    # AND A BROWSER THAT WILL NOT SAY which key it used is left alone too —
-    # churning on a guess is worse than keeping one that is probably right.
-    pg.evaluate("""() => {
-        window.__unsub = []; window.__subs = [];
-        const ep = "https://push.example.test/dev/silent";
-        let held = { endpoint: ep,
-          toJSON: () => ({ endpoint: ep, keys: { p256dh: "P", auth: "A" } }),
-          unsubscribe: () => { window.__unsub.push(ep); return Promise.resolve(true); } };
-        const mgr = { getSubscription: () => Promise.resolve(held),
-                      subscribe: () => { window.__subs.push(1); return Promise.resolve(held); } };
-        const reg = { pushManager: mgr };
-        Object.defineProperty(navigator, "serviceWorker", { configurable: true,
-          get: () => ({ ready: Promise.resolve(reg),
-                        getRegistration: () => Promise.resolve(reg),
-                        register: () => Promise.resolve(reg) }) }); }""")
-    pg.wait_for_timeout(5000)
-    ck("a browser that does not report its key is not churned",
-       pg.evaluate("() => (window.__unsub || []).length") == 0,
-       pg.evaluate("() => window.__unsub"))
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

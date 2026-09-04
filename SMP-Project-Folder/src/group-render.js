@@ -4350,7 +4350,7 @@ function reportBar(target){
       (e.rail ? ' data-rrail="' + esc(e.rail) + '" data-rcode="' +
                 esc(String(e.code == null ? "" : e.code)) + '"' : '') +
       ' title="' + esc(blockWords(e)) +
-      (e.plan ? ' — press to open the plan' : ' — press to go') + '">' +
+      (e.plan ? ' — press to open Strategy' : ' — press to go') + '">' +
       esc(e.label) + ' <b>' + e.count + '</b></button>';
   }).join("");
   /* NO NEXT WITH NOTHING TO WALK (§223): with the plan short and every figure

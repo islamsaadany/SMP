@@ -1881,7 +1881,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   fix working with the falsified build on disk, once calling it broken with the
   good one. **Compare the file's mtime with the server's start time; never
   trust the order the commands were typed in.**
-- **A SAVE MUST NOT SHUT EVERYBODY ELSE OUT (§287, finishing §282):** that
+- **A SAVE MUST NOT SHUT EVERYBODY ELSE OUT (§288, finishing §282):** that
   section fixed one reader and left **three doors** in front of it — the schema
   check, `chatSettings()` (one row of `org`), and **`auth.getSession()`, which
   JOINs `people` and therefore sits in front of every authenticated request in
@@ -1903,7 +1903,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   §241's incremental writer keeps most saves off this path; what comes through
   it is every settings, register, reorder and add/remove change, and **every
   whole-graph post from a tab on an older build** — the exact moment reported,
-  since a new build reloads every browser at once. **§287.1 — A CHAT ROW SAYS
+  since a new build reloads every browser at once. **§288.1 — A CHAT ROW SAYS
   THE REGISTER'S SHORT NAME AND WHERE THEY SIT**: §187 did this for the INBOX's
   list and the corner is the THIRD builder onto the same rows, MATCHING on the
   short name (§93.8) and drawing the long one. It needs nothing from the server
@@ -6301,7 +6301,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;287: a save stops shutting everybody
+*Last Updated: 2026-09-04 &mdash; **&sect;288: a save stops shutting everybody
 else out, and a row says the register's name.** Islam, on the shipped build:
 *"this error always comes and manytimes the chat disappears before coming back
 and disappear again"*, with the corner on *Looking&hellip;* and the Inbox drawing
@@ -6328,7 +6328,7 @@ steps up once and flattens, because the space a DELETE frees is reused. Proved
 able to fail two ways, neither a switch in the product: **4 red** with the clear
 put back, **5 red** with &sect;282's old query beside it &mdash; the original
 fault whole. One assertion REVERSED and REWRITTEN, never deleted (&sect;218).
-**&sect;287.1 &mdash; the corner's rows say the register's short name and where
+**&sect;288.1 &mdash; the corner's rows say the register's short name and where
 they sit**, Islam's own correction and my drift one section old: &sect;187 did
 this for the INBOX's list and this corner is the THIRD builder onto the same
 rows, matching on the short name (&sect;93.8) and drawing the long one. It needs

@@ -33900,7 +33900,7 @@ change the input rather than the code.*
 
 ---
 
-## §287 — A SAVE STOPS SHUTTING EVERYBODY ELSE OUT, AND A ROW SAYS THE REGISTER'S NAME (2026-09-04)
+## §288 — A SAVE STOPS SHUTTING EVERYBODY ELSE OUT, AND A ROW SAYS THE REGISTER'S NAME (2026-09-04)
 
 Islam, on the shipped build: *"this error always comes and manytimes the chat
 disappears before coming back and disappear again"*, with the corner sitting on
@@ -33987,7 +33987,7 @@ claim under §282, because a truncate made it genuinely unreadable and a fast
 refusal was the most that could be asked. It reads throughout now, so the
 assertion says so.
 
-### §287.1 — A ROW SAYS THE REGISTER'S NAME, AND WHERE THEY SIT
+### §288.1 — A ROW SAYS THE REGISTER'S NAME, AND WHERE THEY SIT
 
 Islam is right and it is my own drift one section old. **§187 shortened the name
 in the INBOX's list and put the place beside it, and this corner is the THIRD

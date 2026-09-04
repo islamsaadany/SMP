@@ -438,7 +438,7 @@ var CHAT = (function(){
   /* ONE ROW BUILDER FOR BOTH LISTS, so a search result and a waiting row
      cannot drift apart (§53.5). `hit` carries the line that MATCHED and why
      it is here; a plain row carries the last line. */
-  /* ── A ROW SAYS THE REGISTER'S NAME, AND WHERE THEY SIT (§287) ──────
+  /* ── A ROW SAYS THE REGISTER'S NAME, AND WHERE THEY SIT (§288) ──────
      Islam, of the search: "the serach is bringing the full name and we
      agreed across the platform we use the short name from the registry and
      beside it the unit of the function for distinction."
@@ -2114,7 +2114,7 @@ var CHAT = (function(){
     return (box.threads || []).length - boxRows().length;
   }
 
-  /* WHERE SOMEBODY SITS, ANSWERED ONCE FOR BOTH LISTS (§287, §53.5). The
+  /* WHERE SOMEBODY SITS, ANSWERED ONCE FOR BOTH LISTS (§288, §53.5). The
      REGISTER first, because the browser holds it and a search hit carries
      nothing else; the row's own fields second, for a person the register no
      longer holds. Both ends arrive at `placeLabel()`, the navigation's own

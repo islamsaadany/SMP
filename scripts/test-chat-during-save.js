@@ -17,7 +17,7 @@
    lock and a lock cannot be modelled by a stub (§100.3).
 
    AND ITS FIRST VERSION LOCKED `people` AND NOTHING ELSE, WHICH IS WHY IT
-   PASSED ON THE FAULT IT EXISTS TO CATCH (§287). A save does not truncate
+   PASSED ON THE FAULT IT EXISTS TO CATCH (§288). A save does not truncate
    one table, it truncates ALL 33 — `org` among them — and `chatSettings()`
    reads `org` on EVERY request before it reaches any action at all. So the
    conversation list was fixed and the door in front of it was left open, and
@@ -33,7 +33,7 @@
    PRODUCT — both make THIS FILE behave as the product used to, so a red run
    is the shape it actually had rather than a fiction about it:
 
-     SMP_SAVE_TRUNCATE=1     clear the way a save cleared before §287, with
+     SMP_SAVE_TRUNCATE=1     clear the way a save cleared before §288, with
                              TRUNCATE. Every door below goes red.
      SMP_CHAT_JOIN_PEOPLE=1  ask the pre-§282 queue question, which joined
                              the register for a live name.
@@ -41,7 +41,7 @@
    THE SECOND NO LONGER GOES RED ON ITS OWN, and that is the point rather
    than a gap: with the clear taking ROW EXCLUSIVE instead of ACCESS
    EXCLUSIVE, even the old joined query answers. §282's reader fix is right
-   and is now belt to §287's braces — so the two levers are used TOGETHER to
+   and is now belt to §288's braces — so the two levers are used TOGETHER to
    show the original fault whole.
 
      DATABASE_URL=postgres://… node scripts/test-chat-during-save.js
@@ -116,7 +116,7 @@ async function ask(label, sql, args) {
   await saver.connect();
   await saver.query("BEGIN");
   await saver.query("SELECT pg_advisory_xact_lock(918273645)");
-  /* THE WHOLE LIST, exactly as writeState() clears it (§287). Locking
+  /* THE WHOLE LIST, exactly as writeState() clears it (§288). Locking
      `people` alone is what let this file go green over a frozen endpoint. */
   if (process.env.SMP_SAVE_TRUNCATE === "1") {
     await saver.query("TRUNCATE " + ALL_TABLES.join(", ") + " CASCADE");
@@ -149,7 +149,7 @@ async function ask(label, sql, args) {
   ok("opening a conversation answers", t.answered,
      t.frozen ? "frozen for " + t.ms + "ms" : t.ms + "ms");
 
-  /* ── AND THE THREE DOORS IN FRONT OF EVERY ACTION (§287) ───────────
+  /* ── AND THE THREE DOORS IN FRONT OF EVERY ACTION (§288) ───────────
      §282 fixed the conversation list and these were left standing, which is
      why Islam went on seeing "Looking…" and "the server did not answer"
      after it shipped. None of them belongs to the chat: `getSession` sits in

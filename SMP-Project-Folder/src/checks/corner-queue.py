@@ -28,7 +28,7 @@ GATE = (ROOT/"index.html").read_bytes(); SW = (ROOT/"sw.js").read_bytes()
 SEED = json.loads((ROOT/"db/seed-state.json").read_text())
 PERSON = {"key":"smo","name":"Mohamed Essam","role":"super"}
 # THE STORED NAME IS THE LONG ONE, WHICH IS WHAT THE SERVER ACTUALLY HOLDS
-# (§287). Islam's own report: "the serach is bringing the full name and we
+# (§288). Islam's own report: "the serach is bringing the full name and we
 # agreed across the platform we use the short name from the registry". The
 # demo register cannot show this on its own — every one of its 33 people has
 # a two-word name, so short and long coincide and a build that lost the
@@ -126,7 +126,7 @@ with sync_playwright() as p:
     ck("one row per waiting conversation", len(rows)==len(QUEUE), len(rows))
     first = rows[0].inner_text() if rows else ""
     ck("the first row names the person", "Ashraf Laithy" in first, first[:60])
-    # THE REGISTER'S NAME, NOT THE SERVER'S (§287) — asserted at BOTH ends, or
+    # THE REGISTER'S NAME, NOT THE SERVER'S (§288) — asserted at BOTH ends, or
     # a build that simply printed a shorter substring would satisfy the first.
     ck("...the register's short name, not the stored long one",
        "Ashraf Laithy" in first and "Ashraf Mohamed Laithy El Sayed" not in first, first[:60])
@@ -199,7 +199,7 @@ with sync_playwright() as p:
        any("earlier message" in (h.inner_text() or "") for h in pg.query_selector_all(".cqrow")))
     ck("...and an answered conversation is reachable",
        any("Hossam" in (h.inner_text() or "") for h in pg.query_selector_all(".cqrow")))
-    # THE CASE ISLAM REPORTED (§287). A search hit carries only a key and the
+    # THE CASE ISLAM REPORTED (§288). A search hit carries only a key and the
     # stored name, so if the row reads the browser's own register it shortens
     # here too — and if it does not, this is the one place the long name shows.
     hitrows = pg.query_selector_all(".cqrow")

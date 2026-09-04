@@ -344,8 +344,11 @@
    §278 and not the §261 it was built as. Main was serving
    "smp-shell-v4.55-count-and-unit-follow" when this merge was made, so the name
    goes PAST it rather than beside it (§94.12); confirmed once more immediately
-   before the push (§94.16). */
-const SHELL = "smp-shell-v4.63-picker-height";
+   before the push (§94.16).
+
+   §278.3 merged with main at v4.63-picker-height and went to v4.64 rather than
+   beside it, same rule. */
+const SHELL = "smp-shell-v4.64-objectives-table";
 const ASSETS = [
   "/",
   "/index.html",

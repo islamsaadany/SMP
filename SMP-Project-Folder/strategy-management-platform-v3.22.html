@@ -5461,10 +5461,30 @@
      not the unit's headline. */
   details.fstrip > summary{list-style:none;cursor:pointer}
   details.fstrip > summary::-webkit-details-marker{display:none}
-  .fstrip-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .fstrip-head::after{content:"▸";margin-left:4px;color:var(--ink-3);font-size:11px;
-    transition:transform .15s ease}
-  details.fstrip[open] > summary .fstrip-head::after,
+  /* THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§279). It was
+     written as a bare `.fstrip-head::after` beside the rotate rule, which IS
+     scoped to `details.fstrip` — so the mark that says "this folds" was drawn
+     on every `.fstrip-head` in the product and the mark that says "it is open"
+     on only the one that folds. Three surfaces wear that class and two of them
+     are a plain `<div>`: Setup › Reporting cycle and the Focus board's cycle
+     strip both drew a disclosure triangle for a disclosure that does not
+     exist — pointing at nothing, never rotating, doing nothing when pressed
+     (§96's family, and §94.15: a control with no audience is furniture).
+
+     The redundant re-declaration of `.fstrip-head`'s flex line went with it:
+     the block 30 lines above already sets all four properties, and a rule
+     written twice in one file is why editing one of them appears to do
+     nothing (§29.2, §51.5, §53.6, §88 — fifth time).
+
+     `summary.fstrip-head`, NEVER `summary .fstrip-head` — the panel's head IS
+     the summary, so a descendant selector matches nothing, and the first build
+     of this fix took the caret off the one place it belongs. Measured, not
+     read. The rotate rule beside it carried the same mistake and had been dead
+     since it was written; `details.fstrip[open] > summary::after` was doing the
+     work all along, which is why nobody ever noticed. That dead half is
+     DELETED rather than left standing (§24). */
+  details.fstrip > summary.fstrip-head::after{content:"▸";margin-left:4px;
+    color:var(--ink-3);font-size:11px;transition:transform .15s ease}
   details.fstrip[open] > summary::after{transform:rotate(90deg)}
   .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
   /* The count is TYPE, so it takes the good family's text twin rather than

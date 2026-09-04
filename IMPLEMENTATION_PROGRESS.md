@@ -382,6 +382,30 @@ own first failures were one fault: Edit is a TOGGLE now, so a section pressing i
 blind shuts the pen a previous section left open. Mockup:
 `design-mockups/cycle-name-date-edit/2026-09-03_editing-strip-structures.html`.
 
+### §279 — the caret belongs to the disclosure, not to the class (2026-09-04)
+
+Islam, of the closed Reporting cycle strip: *"what is the arrow function here
+beside the open new cycle?"*
+
+**It has none.** The little `▸` was styled by a rule written for a panel
+elsewhere that folds open and shut. That rule was not scoped, so the arrow was
+drawn on every strip sharing the class — including two that are not foldable at
+all: Setup › Reporting cycle and the group's Focus board strip. Both showed a
+fold marker for a fold that does not exist; pressing it did nothing.
+
+**Scoped to the thing that folds.** The focus panel keeps its arrow and its
+turn; the two plain strips lose one that was never theirs. A duplicate copy of
+the same styling rule, thirty lines above, went with it.
+
+**The first attempt was wrong and the check caught it** — it took the arrow off
+the panel too, because the panel's head *is* its own summary rather than sitting
+inside one. Fixed and re-measured.
+
+**Verified.** `checks/fold-caret.py` proved able to fail **both ways**: 3 red
+against the shipped build with the stray arrow, 3 red against the first attempt
+with the arrow gone from the panel. `cycle-edit`, `perf-line` and `setup-header`
+green; full `qa.py` sweep clean.
+
 ### §273.5 — "Open a new cycle" drew nothing, on `main` (2026-09-04, same branch)
 
 Found while re-running the neighbours: `checks/repeat-project.py` hung for

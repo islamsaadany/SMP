@@ -547,6 +547,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   for it). 12 red on the §273 build; the check's own first run measured
   `{none:true}` everywhere because §8 reloads the page and §9 sat after it
   (§50.6). One assertion REVERSED and REWRITTEN, not deleted (§218).
+- **THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§279):** Islam, of
+  the closed cycle strip — *"what is the arrow function here beside the open new
+  cycle?"* **It has none.** `.fstrip-head::after` drew a `▸` as a BARE CLASS
+  selector, beside a rotate rule scoped to `details.fstrip` — so the mark saying
+  *this folds* was painted on every `.fstrip-head` and the mark saying *it is
+  open* on only the one that does. **Three surfaces wear that class and two are a
+  plain `<div>`** (Setup › Reporting cycle, the Focus board's strip): both drew a
+  triangle for a disclosure that does not exist — §96's family, §94.15's
+  furniture. **AND THE FIRST BUILD OF THE FIX TOOK IT OFF THE ONE PLACE IT
+  BELONGS**: `summary .fstrip-head` is a DESCENDANT selector and the panel's head
+  IS the summary, so it matched nothing — caught only because the check asserts
+  BOTH ENDS (§94.2). **The rotate rule carried the same mistake and had been dead
+  since it was written**, with `details.fstrip[open] > summary::after` beside it
+  doing the work, which is why nobody noticed; deleted (§24). **And
+  `.fstrip-head` was declared TWICE in one file** (§29.2, §51.5, §53.6, §88 —
+  fifth time). Measured as PAINT, never as a selector, and proved able to fail
+  both ways: 3 red on the bug, 3 red on my own first attempt.
 - **"OPEN A NEW CYCLE" DREW NOTHING, ON `main` (§273.5):** found while
   re-running the neighbours — `checks/repeat-project.py` hung on `#nc-name`, and
   the fault **reproduced on the shipped build before a line was written**.
@@ -5407,6 +5424,14 @@ python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the
                                 # pen's inks measured with the sweep's own function; and
                                 # §11 over HTTP, because a save cannot be seen over
                                 # file:// at all — 46 red on the build before
+python3 checks/fold-caret.py      # the caret belongs to the disclosure (§279): the two
+                                # strips that do NOT fold draw none, open and closed,
+                                # and the panel that DOES keeps its caret AND its
+                                # rotate — both ends, or a build that deleted the rule
+                                # outright passes the absence half (which is what the
+                                # first attempt did). Measured as PAINT, never as a
+                                # selector; the unit is FOUND at runtime, because the
+                                # panel is drawn only where focus marks exist
 python3 checks/attention-dismiss.py # every attention item can be ANSWERED, on the box it
                                 # is about: one item per kind (five of six made, §94.2),
                                 # the ring measured as PAINT not as a class, one press

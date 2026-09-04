@@ -32922,3 +32922,49 @@ Verified after the merge, not before: 520/0 authoriser, 131/0 differ,
 `cycle-edit` all green, `repeat-project` and `ytd-proration` green, and main's
 own `unit-follows`, `count-compile`, `monthly-plan`, `fn-perf-controls` and
 `master-picker` green beside them.
+
+## §279 — THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (2026-09-04)
+
+Islam, of the closed Reporting cycle strip: *"what is the arrow function here
+beside the open new cycle?"*
+
+**IT HAS NONE.** `.fstrip-head::after` drew a `▸` and was written as a **bare
+class selector**, sitting directly beside a rotate rule that IS scoped to
+`details.fstrip` — so the mark that says *this folds* was painted on every
+`.fstrip-head` in the product while the mark that says *it is open* was painted
+on only the one that folds. **Three surfaces wear that class and two of them are
+a plain `<div>`**: Setup › Reporting cycle, and the group's Focus board strip.
+Both drew a disclosure triangle for a disclosure that does not exist — pointing
+at nothing, never rotating, doing nothing when pressed. §96's family (renders
+perfectly, means nothing) and §94.15's (a control with no audience is
+furniture).
+
+**IT WAS ONLY EVER RIGHT ON ONE SURFACE**, the focus-measures panel, which is a
+real `<details>` with a `<summary>` and where the caret is load-bearing.
+
+**AND THE FIRST BUILD OF THE FIX TOOK IT OFF THAT ONE.** Written
+`details.fstrip > summary .fstrip-head::after`, which is a DESCENDANT selector —
+and the panel's head IS the summary, so it matched nothing at all. Measured, not
+read: the caret went from `"▸"` to `none` on the one place it belongs, and the
+check caught it because it asserts BOTH ENDS (§94.2). `summary.fstrip-head`,
+never `summary .fstrip-head`.
+
+**THE ROTATE RULE CARRIED THE SAME MISTAKE AND HAD BEEN DEAD SINCE IT WAS
+WRITTEN** — `details.fstrip[open] > summary .fstrip-head::after` never matched
+either, and `details.fstrip[open] > summary::after` beside it was doing the work,
+which is exactly why nobody ever noticed. The dead half is **DELETED, not left
+standing** (§24).
+
+**AND `.fstrip-head` WAS DECLARED TWICE IN ONE FILE** — the second block
+re-stating the four flex properties the first already sets, thirty lines up. The
+redundant copy goes with it: a rule written twice is why editing one of them
+appears to do nothing (§29.2, §51.5, §53.6, §88 — **fifth time in this
+project**).
+
+`checks/fold-caret.py` measures the **PAINT** rather than the selector (§94.8,
+§145.14 — a build that keeps the class and loses the rule reads `none`), and is
+proved able to fail **both ways**: **3 red** against the shipped build with the
+stray caret, and **3 red** against my own first attempt with the caret gone from
+the panel. The panel is drawn only for a unit carrying focus marks, so the unit
+is FOUND at runtime rather than named — and the sub-page key is `performance`,
+not `perf`, which cost the first run its panel entirely (§50.6).

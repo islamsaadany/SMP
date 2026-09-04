@@ -5023,17 +5023,6 @@ function capHead(c){
     '<div class="capkpi"><div><i>Reported</i><b>' + r.done + ' / ' + r.total + '</b></div></div></div>';
 }
 
-function fnKeyOf(key){ return String(key).replace(/^fn:/, ""); }
-function capHead(c){
-  var f = functionOf(c.fn), r = capReported(c);
-  return '<div class="caphdr">' +
-    '<div><div class="capname">' + esc(c.name) + '</div>' +
-      '<div class="why" style="margin:3px 0 0">' +
-        'Supporting function ' + esc(f ? f.name : "\u2014") +
-        (f ? ' &middot; ' + esc(functionPeople(c.fn).map(personName).join(", ")) : '') +
-        ' &middot; scored by the group, not by a business unit</div></div>' +
-    '<div class="capkpi"><div><i>Reported</i><b>' + r.done + ' / ' + r.total + '</b></div></div></div>';
-}
 
 /* THE FUNCTION'S OWN NAMEPLATE IS GONE (§51.4, Islam).
 

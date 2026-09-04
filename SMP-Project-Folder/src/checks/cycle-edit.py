@@ -14,21 +14,29 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       "there is an Edit" assertion while leaving the critical button exactly
       where it was (§94.2).
 
-  2 · THE PEN HOLDS ALL FIVE FACTS, and Close the cycle is INSIDE it.
+  2 · THE PEN HOLDS ALL FIVE FACTS, in two headed columns, with Close the
+      cycle INSIDE it and in the column that names what it does — and the
+      strip's Edit reading DONE EDITING and lit while it is open (§273.4,
+      Islam: "it should turn into done editing"). NO Save and NO Cancel,
+      asserted as absences beside the fields' presence: a build that only
+      hid them while keeping a draft behind them would pass a test for
+      either half alone (§94.2).
 
   3 · WHAT IS TYPED REACHES THE CYCLE. Every field driven through the real
       controls and read back off `REVIEW` — never off the screen, which is
       what an editor wired to nothing also shows (§96).
 
-  4 · CANCEL WRITES NOTHING, asserted against the values the draft was opened
-      with, so a build that saved on every keystroke fails here.
+  4 · CLOSING THE PEN COMMITS THE BOX YOU WERE IN (§219). Driven with the
+      KEYBOARD, because a mouse press blurs on the way past and would hide
+      exactly the fault this asserts.
 
-  5 · CLOSE REFUSES WHILE SOMETHING IS UNSAVED, and says so — pressed for
-      real, and the refusal proved by the cycle still being OPEN afterwards.
-      Then the same press with nothing unsaved is proved to WORK, or a build
-      whose Close is simply broken passes assertion 5 perfectly (§94.2).
+  5 · TYPING REACHES THE CYCLE WITH NOTHING PRESSED, which is what makes
+      Save and Cancel unnecessary rather than merely absent — and then, with
+      the pen open, the same Close press is proved to WORK.
 
-  6 · AN EMPTY NAME IS REFUSED, in the words the Open panel already uses.
+  6 · AN EMPTY NAME IS REFUSED, and the stored name COMES BACK into the box,
+      because with no Save there is no press to refuse at and a field left
+      showing what was not stored is §96 with the sign reversed.
 
   7 · THE MONTH IS PICKED IN THE PEN and lands on `REVIEW.asOfMonth`, and
       CLEARING it DELETES the key rather than storing an empty one (§50.6) —
@@ -161,19 +169,25 @@ def strip_state(pg):
 def pen_state(pg):
     return js(pg, """() => {
       const p = document.querySelector(".newcycle");
-      if (!p) return {none:true};
+      const t = document.querySelector("[data-editcycle]");
+      const word = t ? t.textContent.trim() : "";
+      if (!p) return {none:true, word:word};
       const btn = p.querySelector("[data-closecycle]");
-      const hold = p.querySelector("[data-ce-hold]");
       return {
-        head: (p.querySelector(".nc-h") || {}).textContent || "",
+        word: word,
+        lit: !!(t && t.classList.contains("penon")),
+        cols: !!p.querySelector(".cyc2-f") && !!p.querySelector(".cyc2-d"),
+        heads: [...p.querySelectorAll(".nc-h")].map(h => h.textContent.trim()),
         labels: [...p.querySelectorAll(".nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
         fields: [...p.querySelectorAll(".nc-grid input")].map(i => i.value),
+        bound: [...p.querySelectorAll(".nc-grid input")].every(i => i.hasAttribute("data-fld")),
         month: (p.querySelector(".monthbtn .mval") || {}).textContent || "",
         close: !!btn,
-        held: btn ? btn.getAttribute("aria-disabled") === "true" : null,
-        holdSaid: !!(hold && hold.getClientRects().length),
-        holdText: hold ? hold.textContent.trim() : ""
+        closeInDanger: !!(btn && btn.closest(".cyc2-d")),
+        save: !!p.querySelector("[data-ce-save]"),
+        cancel: !!p.querySelector("[data-ce-cancel]"),
+        held: btn ? btn.getAttribute("aria-disabled") : null
       };
     }""")
 
@@ -214,13 +228,32 @@ def press(pg, sel, what=None, force=False):
     return True
 
 
-def typeinto(pg, sel, value):
-    el = pg.query_selector(sel)
+def open_pen(pg):
+    """Edit is a TOGGLE since §273.4, so a section that presses it blind shuts
+    the pen a previous section left open — which cost §5b its Close on the
+    first run against a build doing exactly what was asked."""
+    if pg.query_selector(".newcycle"):
+        return True
+    return press(pg, "[data-editcycle]", "Edit")
+
+
+def setname(pg, value):
+    """The name box, typed and LEFT — there is no Save since §273.4, so a
+    field commits on blur (§35) and blurring is what a person does next."""
+    el = pg.query_selector(".newcycle .nc-grid input.fld")
     if not el:
         return False
-    el.click(); pg.keyboard.press("Control+A"); pg.type(sel, value, delay=8)
-    pg.wait_for_timeout(120)
+    el.click(); pg.keyboard.press("Control+A"); pg.keyboard.type(value, delay=6)
+    pg.evaluate("()=>document.activeElement && document.activeElement.blur()")
+    pg.wait_for_timeout(220)
     return True
+
+
+def namebox(pg):
+    return js(pg, """() => {
+      const el = document.querySelector(".newcycle .nc-grid input.fld");
+      return el ? el.value : null;
+    }""")
 
 
 with sync_playwright() as p:
@@ -254,67 +287,98 @@ with sync_playwright() as p:
        "of 12 months" in (before.get("asof") or ""), before.get("asof"))
 
     # ── 2 · the pen holds all five, Close included ───────────────────
-    print("\n── 2 · the pen holds everything editable ──")
+    print("\n── 2 · the pen holds everything editable, in two columns (§273.4) ──")
     press(pg, "[data-editcycle]", "Edit")
     pen = pen_state(pg)
-    ok("the pen opens", pen.get("head", "").lower() == "edit this cycle", pen.get("head"))
+    ok("the pen opens", pen.get("none") is not True, pen)
+    # THE TOGGLE SAYS WHICH WAY IT GOES — Islam: "why is the edit button still
+    # there it should turn into done editing". Asserted on the WORD and on the
+    # lit state, because a build that changed one and not the other is exactly
+    # the half-done version.
+    ok("the button becomes Done editing", pen.get("word") == "Done editing", pen.get("word"))
+    ok("...and lights up", pen.get("lit") is True, pen)
+    # NO SAVE AND NO CANCEL, asserted as absences beside the fields' presence,
+    # or a build that simply hid them while keeping the draft would pass (§94.2).
+    ok("there is no Save", pen.get("save") is False, pen)
+    ok("...and no Cancel", pen.get("cancel") is False, pen)
+    ok("every field is BOUND, which is what makes those unnecessary",
+       pen.get("bound") is True, pen)
     ok("it asks for all five facts",
-       [s.lower() for s in (pen.get("labels") or [])] ==
+       [x.lower() for x in (pen.get("labels") or [])] ==
        ["name", "covers from", "to", "reports due", "reporting as of"], pen.get("labels"))
+    # The month's label is the panel's own since §273 and is deliberately NOT
+    # the strip's wording: the strip states a fact ("reported as of Jun 26"),
+    # the field asks for one. Asserted so a later build cannot drift them into
+    # two spellings of the same word (§87).
     ok("filled from the cycle, not empty",
        (pen.get("fields") or [None])[0] == r0.get("name"), pen.get("fields"))
-    ok("Close the cycle is INSIDE the pen", pen.get("close") is True, pen)
-    ok("and nothing is held back yet", pen.get("held") is False and pen.get("holdSaid") is False,
-       pen)
+    ok("two columns, headed", pen.get("cols") is True and
+       [h.lower() for h in (pen.get("heads") or [])] == ["this cycle", "ending it"],
+       pen.get("heads"))
+    ok("Close the cycle is in the ENDING IT column, not among the fields",
+       pen.get("close") is True and pen.get("closeInDanger") is True, pen)
+    ok("...and it is live, because nothing can be unsaved",
+       pen.get("held") is None, pen)
 
-    # ── 5 · Close refuses over an unsaved change ─────────────────────
-    print("\n── 5 · Close refuses while something is unsaved, and says why ──")
-    typeinto(pg, "#ce-name", "H2 2026 renamed")
-    held = pen_state(pg)
-    ok("typing holds Close back at once, with no repaint", held.get("held") is True, held)
-    ok("and the sentence says why", "save or cancel" in (held.get("holdText") or "").lower(),
-       held.get("holdText"))
-    press(pg, ".newcycle [data-closecycle]", "Close the cycle in the pen", force=True)
-    ok("pressing it closes nothing", review(pg).get("state") == "open", review(pg))
-    ok("and the pen is still open", pen_state(pg).get("head", "").lower() == "edit this cycle")
+    # ── 5 · a field writes when you leave it, and the toggle just closes ──
+    print("\n── 5 · typing reaches the cycle without a Save (§273.4) ──")
+    # REWRITTEN, NOT DELETED (§218). §273 asserted that Close was HELD while a
+    # change was unsaved — a guard that existed only because there was a draft.
+    # Islam took the draft away, so what is asserted now is the thing that
+    # replaced it: the value is in the cycle before any button is pressed.
+    setname(pg, "H2 2026 renamed")
+    ok("the name is in the cycle with nothing pressed",
+       review(pg).get("name") == "H2 2026 renamed", review(pg))
+    ok("...and Close is still live", pen_state(pg).get("held") is None, pen_state(pg))
 
-    # Edit stays on the strip while the pen is open, so pressing it again must
-    # not hand back a fresh draft over what is being typed.
-    press(pg, "[data-editcycle]", "Edit")
-    ok("a second press on Edit keeps the draft",
-       (pen_state(pg).get("fields") or [None])[0] == "H2 2026 renamed",
-       pen_state(pg).get("fields"))
-
-    # ── 3 · what is typed reaches the cycle ──────────────────────────
-    print("\n── 3 · Save writes the name and every date ──")
-    typeinto(pg, "#ce-from", "Feb 2026")
-    typeinto(pg, "#ce-to", "Jul 2026")
-    typeinto(pg, "#ce-due", "20 Aug 2026")
-    press(pg, "[data-ce-save]", "Save")
+    # ── 3 · every date reaches the cycle, and Done editing closes ────
+    print("\n── 3 · every field writes, and Done editing collapses the pen ──")
+    flds = pg.query_selector_all(".newcycle .nc-grid input.fld")
+    for el, val in zip(flds[1:4], ("Feb 2026", "Jul 2026", "20 Aug 2026")):
+        el.click(); pg.keyboard.press("Control+A"); pg.keyboard.type(val, delay=6)
+        pg.evaluate("()=>document.activeElement && document.activeElement.blur()")
+        pg.wait_for_timeout(140)
     saved = review(pg)
     ok("the name landed", saved.get("name") == "H2 2026 renamed", saved)
     ok("Covers from landed", saved.get("from") == "Feb 2026", saved)
     ok("to landed", saved.get("to") == "Jul 2026", saved)
     ok("Reports due landed", saved.get("due") == "20 Aug 2026", saved)
-    ok("the pen shut", pen_state(pg).get("none") is True)
+    press(pg, "[data-editcycle]", "Done editing")
+    ok("the pen collapsed", pen_state(pg).get("none") is True, pen_state(pg))
+    ok("...and the button says Edit again", pen_state(pg).get("word") == "Edit",
+       pen_state(pg).get("word"))
     ok("and the strip says the new name",
        (strip_state(pg).get("name") or "").strip() == "H2 2026 renamed", strip_state(pg))
 
-    # ── 4 · Cancel writes nothing ────────────────────────────────────
-    print("\n── 4 · Cancel writes nothing ──")
+    # ── 4 · the toggle commits a field left mid-typing (§219) ────────
+    print("\n── 4 · closing the pen commits the box you were in (§219) ──")
+    # REWRITTEN, NOT DELETED (§218). §273 asserted that Cancel wrote nothing —
+    # there is no Cancel now, and the risk it guarded has moved: a field writes
+    # on `change`, which is on blur, so the danger is pressing Done editing
+    # while a box still has focus. Driven with the KEYBOARD, because a mouse
+    # press blurs on the way past and would hide the fault (§116).
     press(pg, "[data-editcycle]", "Edit")
-    typeinto(pg, "#ce-name", "thrown away")
-    typeinto(pg, "#ce-due", "nonsense")
-    press(pg, "[data-ce-cancel]", "Cancel")
-    after = review(pg)
-    ok("the name is untouched", after.get("name") == "H2 2026 renamed", after)
-    ok("and so is the due date", after.get("due") == "20 Aug 2026", after)
-    ok("and the pen shut", pen_state(pg).get("none") is True)
+    f = pg.query_selector(".newcycle .nc-grid input.fld")
+    if f:
+        f.click(); pg.keyboard.press("Control+A"); pg.keyboard.type("H2 2026 typed", delay=6)
+    pg.evaluate("""()=>{const b=document.querySelector("[data-editcycle]");
+                       if(b) b.click();}""")
+    pg.wait_for_timeout(400)
+    ok("what was still being typed reached the cycle",
+       review(pg).get("name") == "H2 2026 typed", review(pg))
+    ok("...and the pen shut", pen_state(pg).get("none") is True)
 
-    # ── 6 · an empty name is refused ─────────────────────────────────
-    print("\n── 6 · an empty name is refused, in the Open panel's words ──")
+    # ── 6 · an empty name is refused, and the box says so ────────────
+    print("\n── 6 · an empty name is refused, and the name comes back (§124) ──")
+    # REWRITTEN, NOT DELETED (§218). §273 refused an empty name at a Save press
+    # and explained itself in an alert. There is no press now, so the refusal
+    # had to become something a person can SEE without one: the stored name
+    # returning into the box. BOTH ENDS, because a build that merely kept the
+    # graph intact while leaving the field blank is the dangerous half — the
+    # screen and the cycle would disagree, and the screen is the one somebody
+    # believes (§96 with the sign reversed).
     # ONE dialog handler for the whole run, with a mode (§53.5 in a check):
-    # two of them meant §6's `dismiss` answered the confirm §5b was about to
+    # two of them meant a `dismiss` answered the confirm §5b was about to
     # accept, and the second handler then threw on an already-handled dialog.
     said, accepting = [], {"on": False}
 
@@ -323,15 +387,21 @@ with sync_playwright() as p:
         d.accept() if accepting["on"] else d.dismiss()
 
     pg.on("dialog", on_dialog)
-    press(pg, "[data-editcycle]", "Edit")
-    typeinto(pg, "#ce-name", " ")
-    press(pg, "[data-ce-save]", "Save")
-    ok("it says what a name is for", any("filed under" in m for m in said), said)
-    ok("and the name is not blanked", review(pg).get("name") == "H2 2026 renamed", review(pg))
+    open_pen(pg)
+    held = review(pg).get("name")
+    setname(pg, "   ")
+    ok("the name is not blanked", review(pg).get("name") == held, review(pg))
+    ok("...and the box shows what is stored, not what was typed",
+       namebox(pg) == held, namebox(pg))
+    # A NAME IS TRIMMED RATHER THAN REFUSED where there is something left of
+    # it, or every stray space would be a change to the thing figures are
+    # filed under (§96.2 from the other side).
+    setname(pg, "  H2 2026 renamed  ")
+    ok("a name with space around it is trimmed, not refused",
+       review(pg).get("name") == "H2 2026 renamed", review(pg))
 
     # ── 7 · the month, picked in the pen, and CLEARED to an absence ──
     print("\n── 7 · the month is picked in the pen, and clearing it deletes the key ──")
-    typeinto(pg, "#ce-name", "H2 2026 renamed")
     press(pg, ".newcycle .monthbtn", "the month picker in the pen")
     picked = js(pg, """() => {
       const pop = document.querySelector(".monthpop");
@@ -342,14 +412,15 @@ with sync_playwright() as p:
     }""")
     pg.wait_for_timeout(320)
     ok("a month can be picked", picked.get("picked") is True, picked)
-    press(pg, "[data-ce-save]", "Save")
     got = review(pg)
     ok("and it lands on the cycle", (got.get("asOf") or "").startswith("Mar"), got)
-    press(pg, "[data-editcycle]", "Edit")
+    # NO Edit press between the two — §273 needed one because Save closed the
+    # pen, and pressing it now would SHUT the pen that is already open (which
+    # is the toggle behaving, and cost the second half of this section on its
+    # first run against the build that behaves).
     press(pg, ".newcycle .monthbtn", "the month picker in the pen")
     js(pg, """() => { document.querySelector(".monthpop [data-mclear]").click(); }""")
     pg.wait_for_timeout(320)
-    press(pg, "[data-ce-save]", "Save")
     cleared = review(pg)
     ok("cleared, the key is DELETED and not emptied", cleared.get("hasAsOf") is False, cleared)
     ok("and the strip falls back rather than reading Missing",
@@ -357,11 +428,17 @@ with sync_playwright() as p:
 
     # ── 5b · with nothing unsaved, Close WORKS ───────────────────────
     print("\n── 5b · and with nothing unsaved the same press closes the cycle ──")
-    press(pg, "[data-editcycle]", "Edit")
+    open_pen(pg)
     st = pen_state(pg)
-    ok("Close is live again", st.get("held") is False and st.get("holdSaid") is False, st)
+    ok("Close carries no held state at all", st.get("held") is None, st)
     accepting["on"] = True
-    press(pg, ".newcycle [data-closecycle]", "Close the cycle in the pen")
+    # FORCED, and the reason is §215 rather than §222: on a build that still
+    # HOLDS Close behind a draft (the shape §273.4 replaced) Playwright waits
+    # 30s for an `aria-disabled` control and the file DIES with a third of its
+    # assertions unmade — on precisely the build it exists to measure. Nothing
+    # is held here, so the press is an ordinary one; forcing only keeps the
+    # check able to report on the build before it.
+    press(pg, ".newcycle [data-closecycle]", "Close the cycle in the pen", force=True)
     ok("the cycle closes", review(pg).get("state") == "closed", review(pg))
     shut = strip_state(pg)
     ok("the pen goes with it", pen_state(pg).get("none") is True)
@@ -372,6 +449,37 @@ with sync_playwright() as p:
     # other on its own.
     ok("and a closed cycle offers BOTH Open a new cycle and the pen (§273.2)",
        shut.get("opennew") is True and shut.get("edit") is True, shut)
+
+    # ── 5c · and Open a new cycle DRAWS ITS PANEL ────────────────────
+    print("\n── 5c · Open a new cycle draws its panel (§96) ──")
+    # FOUND BY `checks/repeat-project.py` HANGING, and reproduced on the shipped
+    # build before a line was written: §261.2 replaced the
+    # `NEWCYCLE ? ... : CYCLEEDIT ? ...` chain with a CYCLEEDIT-only branch and
+    # took the NEWCYCLE arm with it, so the button set the draft and rendered
+    # NOTHING — on the only way to start a cycle at all. Asserted here as well
+    # as there, because this is the file that owns the two panels: a button
+    # whose panel is gone is indistinguishable from a button that does nothing
+    # (§96), and the draft going up in `NEWCYCLE` makes every state assertion
+    # about it pass.
+    press(pg, "[data-opencycle]", "Open a new cycle")
+    newc = js(pg, """() => {
+      const p = document.querySelector(".cfg.newcycle");
+      if (!p) return {none:true, draft: !!NEWCYCLE};
+      return { draft: !!NEWCYCLE,
+               head: (p.querySelector(".nc-h") || {}).textContent || "",
+               name: !!document.getElementById("nc-name"),
+               month: !!p.querySelector(".monthbtn"),
+               go: !!p.querySelector("[data-nc-go]") };
+    }""")
+    ok("the draft is started", newc.get("draft") is True, newc)
+    ok("...and a panel is actually DRAWN for it", newc.get("none") is not True, newc)
+    ok("...headed Open a new cycle", "open a new cycle" in (newc.get("head") or "").lower(),
+       newc.get("head"))
+    ok("...carrying the fields and the way on",
+       newc.get("name") is True and newc.get("month") is True and newc.get("go") is True, newc)
+    press(pg, "[data-nc-cancel]", "Cancel")
+    ok("Cancel puts it away and opens nothing",
+       js(pg, "()=>!NEWCYCLE") is True and review(pg).get("state") == "closed", review(pg))
 
     # ── 9 · reopening a closed cycle ─────────────────────────────────
     print("\n── 9 · a closed cycle is reopened from the platform's dialog (§273.3) ──")
@@ -485,7 +593,6 @@ with sync_playwright() as p:
         pg.goto(URL); pg.wait_for_timeout(900)
         go_cycle(pg, "smo")
         press(pg, "[data-editcycle]", "Edit")
-        typeinto(pg, "#ce-name", "held back")       # the held state is the point
         for theme in ("light", "dark"):
             js(pg, "(t) => document.documentElement.setAttribute('data-theme', t)", theme)
             pg.wait_for_timeout(220)
@@ -506,8 +613,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     POSTS.clear()
     press(pg, "[data-editcycle]", "Edit")
-    typeinto(pg, "#ce-name", "H2 2026 posted")
-    press(pg, "[data-ce-save]", "Save")
+    setname(pg, "H2 2026 posted")
     pg.wait_for_timeout(1800)
     ok("a save was posted", len(POSTS) > 0, len(POSTS))
     ok("...and it carries the new name",

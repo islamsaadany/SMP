@@ -496,6 +496,90 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   held a literal of the old three rules — REWRITTEN as agreement (§214.3,
   §218). **Recorded, not done**: the deck keeps its dash where the page says
   the words.
+- **THE FAULT WAS NOT THE DUPLICATION, IT WAS THAT CORRECTNESS DEPENDED ON
+  ORDER (§281):** Islam — *"let's tidy things."* Three functions were declared
+  TWICE in the sources, all three already on `main` and none from §279, found by
+  grepping the merged result for its own declarations (§147.4). **TWO WERE
+  HARMLESS AND ONE WAS NOT**: `fnKeyOf` and `capHead` were byte-identical twins;
+  `capsReachable()` had **two different bodies** — one passing `reachesCap` the
+  capability's **id**, one passing the **object** — and `reachesCap(cap)` reads
+  `cap.fn`, so it wants the object. The later declaration wins by hoisting, so
+  the product was right; **measured before anything was deleted, the live body
+  returns 8 capabilities and the dead one returns 0**. One edit — a reorder, or
+  deleting the "wrong" copy without checking which is which — and **every
+  capability is unreachable for every viewer**, gone from the navigation and
+  every page that lists them, silently. §56.7's shape with a longer fuse.
+  **DELETED BY NAMED FUNCTION AND MATCHED TEXT, NEVER BY LINE RANGE** (§214),
+  and of the twins the SECOND went, because the first sits under the comment
+  that explains it. **THE SCAN IS THE DELIVERABLE, NOT THE THREE NAMES** — the
+  whole tree now has no duplicated top-level declaration.
+  **§281.1 — AND THE WIDER SCAN FOUND A BLOCK, NOT A LINE**: six duplicated
+  top-level `var`s in `config-render.js` are ONE 26-line block copied at a
+  constant offset of 351 lines, values identical and only the comment prose
+  differing. **Recorded and deliberately not removed** — different file,
+  different shape, behaviour-neutral, and rule 1b flags rather than folds in.
+  **§281.2 — AND A CHECK WAS RED ON `main` FOR SOMEBODY ELSE'S DECISION**:
+  `fn-pillars.py` asserted a unit's Objectives sheet was *"exactly what it was,
+  plus §233's Hidden"* and §278 had **appended Jan–Dec** to it, so it had been
+  failing on a build behaving exactly as decided — §214.3 for the second time
+  **on that one line**. REWRITTEN, never loosened (§218): the months asserted in
+  ORDER and at the END, because §65 makes a column's POSITION what the
+  workbook's validation ranges are built from.
+- **THE REPORTING PAGE SAYS WHERE SUBMIT IS HELD (§279):** Islam, from his own
+  tenant — *"the reporting is not submitting to the SMO as there is someting
+  requires a note but I can't find it."* **REPRODUCED BEFORE ANYTHING WAS
+  PROPOSED**: 17 of 17 entered, the plan owing nothing, the gate held by one
+  row (`notes:1, pending:0, owed:0, gaps:0`). **The row IS marked** (§105's red
+  edge and rung note box) and **a unit's page draws ONE pillar at a time**, so
+  it was not on the screen — and the banner above counted it and named no
+  place. **THE RAIL WAS WORSE THAN SILENT**: the pillar holding the report up
+  wore a **green 4/4**, because that tally counts figures ENTERED, and the line
+  that would have said *Complete* is not drawn at all (the rail ships
+  collapsed, §119) — so the one thing on the page that lists the places was
+  saying *nothing left here* in the platform's own colour for it. **AND ONE
+  SIDE OF THE SWITCH HAD NOTHING AT ALL**: a capability function's page has
+  never drawn a note banner and `capNoteBox()` passes `want:false` always, so
+  its Submit was refused with the reason on a hover and not one mark on the
+  page (§53.5, A15). Islam chose **C** from three drawn in the running platform
+  (rule 1c, §41.9): **it is §272's bar, class for class** — a count, one chip
+  per place, a walk — because a custodian already meets that control when a
+  plan is short; what is NOT shared is the code (that one walks a PLAN in fill
+  mode keyed on `EDIT_PAGE` and `.gapwalk`), so the shape is shared through the
+  CSS and the CURSOR through `gapLight()`, where §177.2's lessons live, with
+  the two field lists disjoint. **ONE ROW IS ONE THING TO FIX, SO THE BAR
+  COUNTS ROWS AND THE HOVER COUNTS REASONS**: a row that said In progress with
+  no per-cent is BOTH unanswered and pending, so the gate names it twice —
+  correctly, in two sentences — and a bar adding those up would say "4 to
+  finish" over three boxes; `rowBlock()` tests `pend` first, because the
+  per-cent is the control to land on. **THE PLAN'S GAPS ARE COUNTED HERE AND
+  FILLED THERE** — leaving them out would read *nothing to finish* over a shut
+  Submit — so that chip is a door to the Strategy tab and no walk is offered
+  when it is all that is left (§223). **THE MARKS ARE PUT ON IN ONE PLACE**
+  (`repMarkControls()`, driven from the CONTROLS so no id is escaped into a
+  selector and no builder needs a flag threaded through it, §104.7). **Drawn
+  for whoever may submit** (`canSpeakFor`, the gate that button asks) and never
+  over a closed report (§220). **§279.1 — THE CHIP WAS ADDRESSED BY THE WORD ON
+  THE PAGE**: `pillarCode()` renders **BE03** and the rail matches `p.code`
+  (**M03**), so the press set the rail to a code no pillar has and looked
+  exactly like a dead button — §48, and invisible on any tenant where the two
+  coincide, which is why the check asserts they DIFFER here (§94.5). Found by
+  pressing it. **§279.2 — A RED WORD ON A RAIL IS TYPE**: `--bad` measures
+  **4.49:1** on the rail row's ground in dark (§38.5, eighth time), and it was
+  already there — §106.2's *"N rows to check"* is the same class in the same
+  place — so one scoped rule repairs a reading nobody had measured; 8.02 light,
+  7.35 dark. **§279.3 — AND TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK**:
+  its first falsification run **died rather than reported** (§215, in the file
+  promising it does not), printing three of forty-three, and its §9 asked
+  `canSpeakFor()` of whoever was signed in while filtering for somebody it
+  refuses (§94.5). **AND A CHECK THAT CANNOT LAUNCH REPORTS NO FAILURES**:
+  three neighbours were run without the container's Chromium wrapper, printed
+  Playwright's own install banner, and were read here as *0 failures* — a
+  clean-looking result from a run that never happened (§54.5, §100.3). **43
+  red** on the build before, 51 green after; the bar holds one row 1500 → 900px
+  and the 4px overrun below 1000 is byte-identical to the build before (§158's
+  recorded residue). **RECORDED, NOT DONE**: a capability function's note boxes
+  are still drawn with `want:false`, so the box the bar sends you to is not
+  itself rung on that side.
 - **A PANEL EDITS, A DIALOG ASKS (§273.3, reshaping §273.2):** Islam, of the
   shipped closed-cycle panel on his own tenant — *"The design is very poor"* —
   and, of three shapes drawn for him, **"C"**. **MY FIRST TWO ANSWERS CHANGED
@@ -547,6 +631,76 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   for it). 12 red on the §273 build; the check's own first run measured
   `{none:true}` everywhere because §8 reloads the page and §9 sat after it
   (§50.6). One assertion REVERSED and REWRITTEN, not deleted (§218).
+- **THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§287):** Islam, of
+  the closed cycle strip — *"what is the arrow function here beside the open new
+  cycle?"* **It has none.** `.fstrip-head::after` drew a `▸` as a BARE CLASS
+  selector, beside a rotate rule scoped to `details.fstrip` — so the mark saying
+  *this folds* was painted on every `.fstrip-head` and the mark saying *it is
+  open* on only the one that does. **Three surfaces wear that class and two are a
+  plain `<div>`** (Setup › Reporting cycle, the Focus board's strip): both drew a
+  triangle for a disclosure that does not exist — §96's family, §94.15's
+  furniture. **AND THE FIRST BUILD OF THE FIX TOOK IT OFF THE ONE PLACE IT
+  BELONGS**: `summary .fstrip-head` is a DESCENDANT selector and the panel's head
+  IS the summary, so it matched nothing — caught only because the check asserts
+  BOTH ENDS (§94.2). **The rotate rule carried the same mistake and had been dead
+  since it was written**, with `details.fstrip[open] > summary::after` beside it
+  doing the work, which is why nobody noticed; deleted (§24). **And
+  `.fstrip-head` was declared TWICE in one file** (§29.2, §51.5, §53.6, §88 —
+  fifth time). Measured as PAINT, never as a selector, and proved able to fail
+  both ways: 3 red on the bug, 3 red on my own first attempt. **Merged with main's
+  §279–§281**, mine renumbered §279 → §287 (main took the number while this was
+  being built; §287 rather than §282 on purpose — §282–§286 left main with the
+  chat-round revert and still live on their own branch, so a gap is harmless
+  where a collision is not). **The caret rule was asserted to have SURVIVED the
+  merge**: main still carried the unscoped selector, so a silent revert would
+  have looked identical to a clean merge.
+- **"OPEN A NEW CYCLE" DREW NOTHING, ON `main` (§273.5):** found while
+  re-running the neighbours — `checks/repeat-project.py` hung on `#nc-name`, and
+  the fault **reproduced on the shipped build before a line was written**.
+  §261.2 replaced `renderCycle()`'s `NEWCYCLE ? … : CYCLEEDIT ? …` chain with a
+  `CYCLEEDIT`-only branch and took the NEWCYCLE arm with it, so the button set
+  the draft and **rendered nothing at all** — §96 in the worst place, because
+  the state it writes is CORRECT, so every assertion short of asking whether a
+  PANEL was DRAWN passes, and there is no other way to start a cycle. **Put back
+  VERBATIM, not rebuilt on §273.4's `cycleField()`**: this panel is wired by ID
+  in the shell and writes on `input` rather than `change` for a stated reason
+  (Open can be pressed from inside a field), so re-expressing it would be a
+  second change riding a restoration — and its Open/Cancel pair is NOT the Save
+  and Cancel §273.4 removed, because it describes a cycle that does not exist
+  yet. **The check was right and had been red for as long as the panel had been
+  gone** (§51.11 from the other side); `cycle-edit.py` §5c asserts the draft and
+  the panel SEPARATELY.
+- **THE PEN CLOSES ITSELF, AND THE BANNER IS TWO COLUMNS (§273.4, reshaping
+  §273):** Islam, using what §273 shipped — *"when I'm editing why is the edit
+  button still there it should turn into done editing so I clik it and thebox
+  collapse saving what I did rather tahn having a save and candel buttons inside
+  the box itself"*, and then, of three structures drawn in BOTH states: **"C"**.
+  **HE IS DESCRIBING THE PLATFORM'S OWN EDITING MODEL AND §273 INVENTED A SECOND
+  ONE**: every pen in SMP is `penBtn()` (Edit ⇄ **Done editing**) over fields
+  bound through `FIELDS` that write on `change`, i.e. on blur (§35) — **there is
+  no Save and no Cancel anywhere else in the product**, because there is nothing
+  for them to do. §273 built a DRAFT, and a draft is what forces a Save, a Cancel
+  AND a guard on Close. **THE DRAFT GOES AND THE THREE CONTROLS GO WITH IT** —
+  `cycleDraft()` and `cycleEditDirty()` DELETED, not left uncalled (§24), and
+  `CYCLEEDIT` becomes what its name says, a MODE. **THE GUARD IS NOT RELAXED, IT
+  IS UNREACHABLE**: §273 held Close while the draft differed from the cycle, and
+  with no draft the name is in `REVIEW` before the cursor has left the box.
+  **THE REFUSAL NEEDED SOMEWHERE TO HAPPEN** — an empty name is still refused (it
+  is what every snapshot is filed under) and there is no press to refuse at, so
+  it became **the stored name coming back into the box** (§124), wrapped in
+  `cycleField()` rather than at the call site: a box showing what was NOT stored
+  is §96 with the sign reversed. Trimmed rather than refused where anything is
+  left (§96.2). **BOTH STATES ARE WHAT DECIDED IT** (his ask): A, B and C differ
+  only with the pen OPEN, so a mockup of the closed strip would have shown three
+  identical pictures. **C puts the destructive act in its own column** behind a
+  rule under *Ending it*, so nobody arrives at it by tabbing down the form —
+  §273's security argument kept whole and sharpened; stacks below 1100px.
+  **Nothing server-side moves and it is asserted** (501/0). **37 red** on the
+  build before — **and three of the check's own first failures were one fault**:
+  Edit is a TOGGLE now, so a section pressing it blind SHUTS the pen a previous
+  section left open (`open_pen()` asks first), and it **died rather than
+  reporting** on the previous build (§215, third time in this file) because
+  Playwright waits 30s on an `aria-disabled` control.
 - **EDITING THE CYCLE THAT IS RUNNING (§273):** Islam — *"allow me to edit the
   cycle name. give me an edit button the cycle to edit the date as you already
   built and the cycel name edit as well"*, and then, of two shapes drawn in the
@@ -719,6 +873,40 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the sources and `db/seed-state.json` was never regenerated — *a seed that
   disagrees with the sources it is generated from is a fault nothing else would
   have found.*
+- **A FINGER GETS A WAY BACK (§280, reversing §265's forward-only for TOUCH and
+  not for a mouse):** Islam, presenting from a tablet — *"it doesn't go left or
+  right."* **§265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET**: its
+  forward-only rule is argued from a PROJECTOR, where the audience sees every
+  affordance you draw, and a tablet has no arrow keys at all — so there
+  forward-only is the only direction the deck can go, which is §265's own stated
+  cost arriving as a second symptom. **THE BOUNDARY IS AT A THIRD, NOT THE
+  MIDDLE** (his, from three drawn with the cost of each): forward is the act of
+  a talk and back is the exception, so forward keeps the large target and two
+  thirds of the slide can still be pointed at without the deck moving. **A MOUSE
+  IS UNCHANGED, HIS CALL, COST STATED** — one act now answers two ways by device
+  (§53.5) in exchange for nothing a laptop presenter has learned changing —
+  asserted at BOTH ends, a mouse click on the very pixel a finger goes back from
+  still going forward, or the check cannot tell them apart. **THE KIND IS
+  REMEMBERED FROM THE POINTERDOWN, NEVER READ OFF THE CLICK**: a `click` is not
+  reliably a `PointerEvent`, so asking it takes the mouse branch on exactly the
+  tablets this is for — invisible in Chromium, real in Safari. **SWIPE: LEFT IS
+  FORWARD, RIGHT IS BACK** (his), touch and pen only, horizontal beating vertical
+  or steadying the tablet turns a page. **A SWIPE ENDS IN A CLICK**, so the tap
+  and the swipe are two readings of ONE gesture (`DECKSWIPED`) with one
+  `deckOwnControl()` between them, or a gesture starting in the note box is
+  refused by one and obeyed by the other. **AND THE RIGHTWARD SWIPE WAS ALREADY
+  DOING SOMETHING WORSE THAN NOTHING**: with no `touch-action` the browser claims
+  it for its own back-navigation and the page LEFT — measured, `about:blank`,
+  the presenter dropped out of the platform mid-presentation — so `pan-y` on the
+  fullscreen stage is half the fix, not a detail; the vertical is given away
+  deliberately (a long cycle note still scrolls) and pinch-zoom goes with it, on
+  a slide already scaled to fit. `checks/deck-fullscreen.py` §6: **4 red** on the
+  build before, driving REAL touch through CDP — **and three of its own first
+  failures were the PROBE** (§215, in the file written to guard against it): the
+  navigation away made every later assertion answer `None`, six failures reported
+  where the truth is four and reported as nothing rather than anything. It is its
+  own assertion now, placed BEFORE the direction it would otherwise hide, and the
+  pass recovers so everything after still reports.
 - **FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (§265, reversing the
   second half of §69.7):** Islam, from a live presentation — *"on the
   presntation in full screen with every click the bottom banner appear then
@@ -5366,6 +5554,21 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/report-blockers.py # the reporting page says WHERE Submit is held
+                                # (§279): the bar's chips asserted as AGREEMENT with
+                                # reportPlaces() and never as a list, both ends every
+                                # time (nothing owed → no bar; owed → a bar; a viewer
+                                # who cannot submit → no bar, the office → one), the
+                                # chip addressed by the STORED pillar code and asserted
+                                # to DIFFER from the drawn one (§48, §279.1), Next
+                                # PRESSED and the lit control read back by its row id,
+                                # answering it clearing the bar AND opening Submit as a
+                                # PAIR, the plan-gap chip counted and proved a door
+                                # rather than a walk stop, a capability function shown
+                                # the same bar (it had no banner at all), and the paint
+                                # measured in both themes. 43 red on the build before —
+                                # and its own first run there DIED rather than
+                                # reporting (§215), printing three of forty-three
 python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the strip
                                 # carries ONE control and neither Close the cycle nor the
                                 # month picker — asserted as absences beside the presence,
@@ -5380,6 +5583,14 @@ python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the
                                 # pen's inks measured with the sweep's own function; and
                                 # §11 over HTTP, because a save cannot be seen over
                                 # file:// at all — 46 red on the build before
+python3 checks/fold-caret.py      # the caret belongs to the disclosure (§287): the two
+                                # strips that do NOT fold draw none, open and closed,
+                                # and the panel that DOES keeps its caret AND its
+                                # rotate — both ends, or a build that deleted the rule
+                                # outright passes the absence half (which is what the
+                                # first attempt did). Measured as PAINT, never as a
+                                # selector; the unit is FOUND at runtime, because the
+                                # panel is drawn only where focus marks exist
 python3 checks/attention-dismiss.py # every attention item can be ANSWERED, on the box it
                                 # is about: one item per kind (five of six made, §94.2),
                                 # the ring measured as PAINT not as a class, one press
@@ -5802,6 +6013,14 @@ python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and noth
                                 # build that lost the bar entirely cannot pass, both
                                 # directions of every key, and Escape leaving fullscreen
                                 # with the deck still open — 19 red on the shipped build
+                                # — and since §280 a §6 that drives REAL touch through CDP:
+                                # the left third going back and a MOUSE on that same pixel
+                                # still going forward (both ends, or the two cannot be told
+                                # apart), the swipes, one gesture moving exactly one slide,
+                                # a vertical drag turning no page, and the rightward swipe
+                                # asserted NOT to navigate the browser away — placed before
+                                # the direction it would otherwise hide, because a page that
+                                # has gone answers everything after it with None (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
 python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
@@ -5933,6 +6152,150 @@ function that does not hold the count &mdash; found by opening it (&sect;130.3).
 `checks/master-picker.py` §1b: **2 red** on the build before, its first failure
 printing his report as three numbers; it makes the state at the worst point and
 **puts it back** (&sect;94.2). 57/0 &middot; full sweep clean.*
+
+*Earlier the same day: **&sect;280.1: a check that could no longer
+go green.** Found running the neighbours after &sect;280's merge:
+`checks/report-chrome.py` failed *"Submit is filled"* &mdash; **reproduced on
+`main`'s OWN build before anything was concluded**, so it was established as not
+the deck's before a line of it was read. **THE PRODUCT IS RIGHT AND THE CHECK IS
+STALE**, both halves measured: on Mobile the button is `aria-disabled` with six
+rows owing a note and 44 plan gaps, drawn quiet &mdash; &sect;221's held state
+working as decided &mdash; and with the gate stubbed open the same button is
+`rgb(164, 81, 44)` with white ink, which is &sect;222's fill exactly. The
+assertion asked for the fill UNCONDITIONALLY; it was written under &sect;222 when
+Submit was always solid, &sect;221 gave it a held state the same day, and nobody
+came back (&sect;51.11). **AND IT COULD NEVER HAVE GONE GREEN AGAIN**, which is
+what makes it worth recording: all ten demo units are blocked by something, so
+the state it asserted is unreachable on the shipped data &mdash; *a check that
+cannot pass is a red line people learn to scroll past, and it takes the honest
+ones with it.* **Rewritten, not deleted** (&sect;218) and asserted at both ends:
+held and saying why, then filled the moment the gate opens, with the open state
+MADE because no demo unit provides one. Two traps on the way &mdash; the reason
+rides `data-tip` and not a native `title`, so asking for a title would have been
+another assertion that could not pass; and the neighbouring hue-family assertion
+was comparing against the HELD button, where `rgb("rgba(0,0,0,0)")` parses to
+`(0,0,0)` rather than to nothing, so it was passing over a value meaning *no
+colour at all* (&sect;94.5). **Proved able to fail from the SOURCES**, because
+&sect;238's hashed CSP silences a script block whose bytes changed (&sect;276):
+the fill given back to a held Submit, and the fill removed altogether, each
+failing its own assertion and no other. Nothing on any screen moves &mdash;
+every source byte-identical to the merged state, confirmed by diff.*
+
+
+*Earlier the same day: **&sect;280: a finger gets a way back.**
+Islam, presenting from a tablet: *"on a tablet it doesn't go left or right."*
+**&sect;265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET** &mdash; its
+forward-only click is argued from a PROJECTOR, where the audience sees every
+affordance you draw, and a tablet has no arrow keys at all, so there
+forward-only is not the cautious choice but the only direction the deck can go.
+**The boundary is at a THIRD, not the middle** (his, from three drawn with the
+cost of each): forward keeps the large target, a step back is deliberate rather
+than a slip, and two thirds of the slide can still be pointed at without the
+deck moving under the point. **A mouse is unchanged, also his call and its cost
+stated** &mdash; the product now answers one act two ways by device
+(&sect;53.5) in exchange for nothing a laptop presenter has learned changing
+&mdash; and it is asserted at both ends, a mouse click on the very pixel a
+finger goes back from still going forward. **The kind is remembered from the
+pointerdown, never read off the click**: a `click` is not reliably a
+`PointerEvent`, so asking it takes the mouse branch on exactly the tablets this
+exists for &mdash; invisible in Chromium and real in Safari. **Swipe left is
+forward, right is back**, touch and pen only, the horizontal beating the
+vertical or steadying the tablet turns a page; the tap and the swipe are two
+readings of ONE gesture, because a swipe ends in a click and one press would
+otherwise have moved two slides. **AND THE RIGHTWARD SWIPE WAS ALREADY DOING
+SOMETHING WORSE THAN NOTHING**: with no `touch-action` the browser claims a
+horizontal drag for its own back-navigation, and the page LEFT &mdash;
+measured, `about:blank`, the presenter dropped out of the platform in the
+middle of a presentation &mdash; so `pan-y` on the fullscreen stage is half the
+fix rather than a detail. `checks/deck-fullscreen.py` §6 drives REAL touch
+through CDP and is **4 red** on the build before &mdash; **and three of its own
+first failures were the PROBE** (&sect;215, inside the file written to guard
+against exactly that): the navigation away made every later assertion answer
+`None`, so it reported six failures where the truth is four, and reported them
+as nothing rather than as anything. Neighbours and the full `qa.py` sweep green.*
+
+
+*Earlier the same day: **&sect;273.4: the pen closes itself, and the
+
+*Earlier the same day: **&sect;279: the reporting page says where
+Submit is held.** Islam, from his own tenant: *"the reporting is not submitting
+to the SMO as there is someting requires a note but I can't find it. based on
+the current features we have what is the best way to identify the missing areas
+easliy?"* **REPRODUCED BEFORE ANYTHING WAS PROPOSED**, which is why the answer
+is not *make the mark bigger*: every figure entered (17 of 17), the plan owing
+nothing, and the gate held by one row and nothing else. **The row IS marked** —
+&sect;105 puts a red edge down its first cell and rings its note box — and **a
+unit's Reporting page draws ONE pillar at a time**, so a row owing a note in
+another pillar is not on the screen at all, while the banner above it counted
+that row and named no place. **THE RAIL WAS WORSE THAN SILENT**: it is the one
+thing on the page that lists the places, and the pillar holding the report up
+wore a **green 4/4**, because that tally counts figures ENTERED — a different
+question — with the line that would have said *Complete* not drawn at all,
+since the rail ships collapsed (&sect;119). **AND ONE SIDE OF THE SWITCH HAD
+NOTHING**: a capability function's page has never drawn a note banner and
+`capNoteBox()` passes `want:false` always, so its Submit was refused with the
+reason on a hover and not one mark on the page (&sect;53.5, A15). Three options
+were drawn out of the running platform (rule 1c, &sect;41.9) and Islam chose
+**C**: **&sect;272's bar, class for class** — a count, one chip per place, and
+a walk — because a custodian already meets that control when a plan is short.
+The shape and the CURSOR are shared (`gapLight()`, where &sect;177.2's lessons
+live); the LIST is not, because that walk is a plan's in fill mode and this is
+a cycle's. **The bar counts ROWS and the hover counts REASONS** (a row that
+said In progress with no per-cent is both unanswered and pending, so the gate
+names it twice and a sum would say 4 over three boxes), **the plan's gaps are
+counted here and filled there** (a door, never a walk stop), and **the marks
+are put on in ONE place** rather than threaded through eight builders.
+**&sect;279.1**: the chip was addressed by the word on the page — `pillarCode()`
+renders BE03 and the rail matches `p.code` (M03), so Next set the rail to a
+code no pillar has and looked exactly like a dead button (&sect;48), found by
+pressing it. **&sect;279.2**: a red word on a rail is TYPE, and `--bad` measures
+4.49:1 in dark (&sect;38.5, eighth time) — already true of &sect;106.2's mark on
+the neighbouring rail, so one scoped rule repairs a reading nobody had measured.
+**&sect;279.3**: two of the check's own failures were the CHECK (it died rather
+than reported, &sect;215; and it asked one person's rights of everybody,
+&sect;94.5) — **and a check that cannot launch reports no failures**, which is
+how three neighbours were read here as clean from runs that never happened.
+**43 red** on the build before, 51 green after. Full `qa.py` ERRORS none
+&middot; 514/0 authoriser &middot; 126/0 differ &middot; eleven neighbouring
+checks green &middot; the bar holds one row 1500 &rarr; 900px, with the 4px
+overrun below 1000 measured byte-identical to the build before. **Recorded, not
+done**: a capability function's note boxes are still drawn with `want:false`.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;273.4: the pen closes itself, and the
+banner is two columns &mdash; and &sect;273.5: "Open a new cycle" drew nothing.**
+Islam, using what &sect;273 shipped: *"when I'm editing why is the edit button
+still there it should turn into done editing so I clik it and thebox collapse
+saving what I did rather tahn having a save and candel buttons inside the box
+itself rearrange th e buttons and think of different structures of this banner"*
+&mdash; then, of three structures each drawn in BOTH states, **"C"**. **HE IS
+DESCRIBING THE PLATFORM'S OWN EDITING MODEL AND &sect;273 INVENTED A SECOND
+ONE**: every pen in SMP is `penBtn()` (Edit &rlarr; Done editing) over fields
+bound through `FIELDS` that write on blur, and there is no Save and no Cancel
+anywhere else in the product because there is nothing for them to do. &sect;273
+built a DRAFT, and a draft is what forces a Save, a Cancel and a guard on Close.
+The draft goes and the three controls go with it; the guard is not relaxed but
+**unreachable**; and the refusal of an empty name became the stored name coming
+back into the box (&sect;124). **Asking for BOTH states is what decided the
+structure** &mdash; A, B and C differ only with the pen open. **37 red** on the
+build before, 69 green after; three of the check's own first failures were one
+fault (Edit is a TOGGLE now, so a section pressing it blind shuts the pen a
+previous section left open) and it **died rather than reporting** on the previous
+build (&sect;215, third time in this file). **&sect;273.5 is the larger find**:
+re-running the neighbours, `repeat-project.py` hung on `#nc-name`, and the fault
+**reproduced on the shipped build** &mdash; &sect;261.2 had deleted the NEWCYCLE
+panel, so pressing *Open a new cycle&hellip;* set the draft and drew nothing, on
+the only way to start a cycle at all, since that merge. Put back verbatim, with
+the check asserting the draft and the panel separately. 514/0 authoriser &middot;
+126/0 differ &middot; `cycle-edit`, `repeat-project`, `ytd-proration`,
+`cycle-board`, `setup-overview`, `setup-header`, `setup-pages`, `table-fit`,
+`submit-gate`, `gap-fill` and `safety-banners` all green. **Merged with main's
+&sect;274&ndash;&sect;278.2 from five other sessions**: the three source files
+all three touched auto-merged and were grep'd for duplicate declarations
+(&sect;56.7, &sect;147.4 &mdash; one found, `capsReachable`, and it is duplicated
+on `main` too, so it is recorded rather than fixed here); the built file was
+REBUILT from the sources rather than merged (&sect;91); 520/0 and 131/0 after,
+with main's own `unit-follows`, `count-compile`, `monthly-plan`,
+`fn-perf-controls` and `master-picker` green beside the cycle's three.*
 
 *Earlier the same day: **&sect;266.10: the picker is two tables,
 searched, and dragged by its own numbers.** Islam, from his own tenant with
@@ -6105,7 +6468,23 @@ green. **Recorded, not done**: `setup-pages.py`'s three sticky-head failures
 reproduce identically on the build before this one.*
 
 
-*Earlier the same day: **&sect;272: empty is not missing, and the bar
+*Earlier: 2026-09-03 &mdash; **&sect;273: editing the cycle that is running.**
+Islam: *"allow me to edit the cycle name. give me an edit button the cycle to
+edit the date as you already built and the cycel name edit as well"* &mdash;
+then, of two shapes drawn in the real page: *"keep the close cycle inside the
+edit. as it's a critical button to click, the pen should hold everything
+editable so it's kept secured."* A cycle's name and its three dates were written
+ONCE, when it was opened, so a typo could only be put right by CLOSING the cycle,
+which archives and clears every figure. **His second instruction is the design**:
+with Close moved inside the pen the strip carries no control at all while a cycle
+runs. **&sect;273.2** gave the closed cycle the pen as well (Reopen where Close
+sits, his pick over a button on the strip), and **&sect;273.3** replaced its
+panel with the platform's own dialog after he saw the band on his own tenant
+&mdash; *"The design is very poor"* &mdash; where three of five values are empty
+and the band repeated the strip above it (&sect;245's rule unpaid: drawn on the
+one data the layout survives).*
+
+*Earlier: 2026-09-03 &mdash; **&sect;272: empty is not missing, and the bar
 now says which.** Islam, on Mobile and minutes later on Care: *"mobile keeps
 showing filling what's missing while we can't find something missing and there
 is no the side badges that identify where the missing part is."* **REPRODUCED BY

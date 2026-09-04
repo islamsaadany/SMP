@@ -32054,6 +32054,137 @@ not fail as written**: `A and B or A` collapses to `A`, so the cycle's name was
 never actually being checked in the title — both halves now, with the name read
 off the DATA rather than hardcoded (§94.8).
 
+## §273.4 — THE PEN CLOSES ITSELF, AND THE BANNER IS TWO COLUMNS (2026-09-04, reshaping §273)
+
+Islam, using what §273 shipped: *"when I'm editing why is the edit button still
+there it should turn into done editing so I clik it and thebox collapse saving
+what I did rather tahn having a save and candel buttons inside the box itself
+rearrange th e buttons and think of different structures of this banner for
+better use and giveme mockups"* — then, of three structures each drawn in BOTH
+states: **"C"**.
+
+**HE IS DESCRIBING THE PLATFORM'S OWN EDITING MODEL, AND §273 INVENTED A SECOND
+ONE.** Every pen in this product is `penBtn()`, which returns **Edit** or **Done
+editing**, and every field under it is bound through `FIELDS` and writes on
+`change` — that is, on blur (§35). **There is no Save and no Cancel anywhere else
+in SMP**, because there is nothing for them to do: the value is in the graph the
+moment the cursor leaves the box, and `SYNC` posts it. §273 built a DRAFT
+instead, and a draft is what forces a Save (to commit it), a Cancel (to throw it
+away), and a guard on Close (because the draft and the cycle can disagree).
+*Three controls, all of them there to manage a copy nothing else in the product
+makes.*
+
+**SO THE DRAFT GOES, AND THE THREE CONTROLS GO WITH IT.** `cycleDraft()` and
+`cycleEditDirty()` are **DELETED, not left uncalled** (§24); `CYCLEEDIT` stops
+being a draft and becomes what its name says, a MODE — `true` or `null`. Edit
+becomes a toggle reading **Done editing** and lit while the pen is open, in the
+platform's own wording and the platform's own `.penon` treatment, so a person
+who has edited anything else in SMP already knows what it does.
+
+**THE GUARD ON CLOSE DISAPPEARS BECAUSE ITS REASON DOES.** §273 held Close back
+while the draft differed, and the argument was good: closing files this cycle's
+figures under its NAME, so closing with an uncommitted rename would file them
+under the wrong one. With no draft there is nothing uncommitted — the name is in
+`REVIEW` before the cursor has left the box — so the hold is not relaxed, it is
+**unreachable**. §273's own assertion is **REWRITTEN, not deleted** (§218): what
+is asserted now is the thing that replaced it, that typing reaches the cycle
+with nothing pressed, and that Close carries no held state at all.
+
+**AND A REFUSAL NEEDED SOMEWHERE TO HAPPEN.** An empty name is still refused —
+it is what every snapshot and archived plan is filed under — and §273 refused it
+at the Save press, with an alert. There is no press now, so the refusal became
+**the stored name coming back into the box** (§124: the value returning is the
+explanation). The wrapper lives in `cycleField()` and not at the call site: a
+setter that declines returns `false` and the field is restored, because a box
+left showing what was NOT stored is §96 with the sign reversed — the screen and
+the graph saying different things, and the screen being the one somebody
+believes. **A name with space around it is TRIMMED rather than refused**
+(§96.2), asserted separately.
+
+**THE STRUCTURE IS ISLAM'S, PICKED FROM THREE DRAWN IN BOTH STATES.** He asked
+for both states — *"to decide for each option show me the 2 states of the banner
+open and closed"* — and that is what decided it: A and B differ from C only when
+the pen is OPEN, so a mockup of the closed strip alone would have shown three
+identical pictures. **C is two columns**: the five facts on the left under *This
+cycle*, and Close the cycle alone on the right behind a rule under *Ending it*,
+with one line saying what it does. It keeps §273's security argument whole — the
+strip carries no dangerous control while a cycle runs, everything is behind the
+pen — and adds the thing a single stack could not: **the destructive act is not
+in the same reading column as the fields**, so nobody arrives at it by tabbing
+down the form. It stacks below 1100px, where a 300px column beside the fields
+stops being affordable.
+
+**NOTHING SERVER-SIDE MOVES, AND THAT IS ASSERTED** — §273 already established
+these five fields classify as `cycle`, and this changes which controls write
+them, not what is written. 501/0.
+
+`checks/cycle-edit.py` **REWRITTEN, not replaced** (§218): §2 now asserts the
+word AND the lit state AND the absence of Save AND the absence of Cancel AND
+that every field is bound — because a build that merely hid the two buttons
+while keeping the draft behind them would pass a test for either half alone
+(§94.2). §4 and §5 are §273's Cancel and held-Close assertions rewritten to the
+behaviour that replaced them. **37 red** on the build before.
+
+**AND THREE OF ITS OWN FIRST FAILURES WERE THE CHECK**, all one fault: **Edit is
+a TOGGLE now**, so a section that presses it blind SHUTS the pen a previous
+section left open — §7 lost its second half and §5b lost its Close, on a build
+doing exactly what was asked. `open_pen()` asks before it presses. **And it DIED
+rather than reporting on the previous build** (§215, third time in this file):
+Playwright waits 30s for an `aria-disabled` control, so the one press aimed at a
+build that still HOLDS Close hung with a third of the assertions unmade.
+
+## §273.5 — "OPEN A NEW CYCLE" DREW NOTHING, ON `main` (2026-09-04)
+
+Found while re-running the neighbours after §273.4: `checks/repeat-project.py`
+hung for thirty seconds waiting for `#nc-name`. **REPRODUCED ON THE SHIPPED
+BUILD BEFORE ANYTHING WAS WRITTEN**, so it is not §273.4's doing — pressing
+*Open a new cycle…* as the office on a closed cycle sets `NEWCYCLE` to a draft
+and **renders nothing at all**: no panel, no fields, no way on.
+
+**§261.2 DID IT, AND IT WAS INVISIBLE BECAUSE THE DRAFT STILL APPEARS.** That
+section replaced `renderCycle()`'s `NEWCYCLE ? … : CYCLEEDIT ? …` chain with a
+`CYCLEEDIT`-only branch and took the `NEWCYCLE` arm with it. §96 exactly, and in
+the worst place: the button is present, enabled, hit-testable, and the state it
+writes is correct — so every assertion short of asking whether a PANEL was
+DRAWN passes, and the one function nobody can work around (there is no other way
+to start a cycle) has been dead on production since that merge.
+
+**PUT BACK VERBATIM, not rebuilt on §273.4's `cycleField()`.** The temptation is
+§53.5 — one builder for both panels — and it is the wrong call here: this panel
+is wired by ID in the shell and writes on `input` rather than `change` for a
+stated reason (Open can be pressed from inside a field, and `change` waits for
+blur), so re-expressing it would be a second change riding a restoration. The
+one thing that is NOT the Save and Cancel §273.4 removed is this panel's
+Open/Cancel pair: it describes a cycle that does not exist yet, so it really is
+a draft and nothing reaches `REVIEW` until Open is pressed.
+
+**AND THE CHECK WAS RIGHT AND HAD BEEN RED FOR AS LONG AS THE PANEL HAD BEEN
+GONE** — §51.11 from the other side. `checks/cycle-edit.py` gains §5c, which
+asserts the DRAFT and the PANEL separately, because the draft going up in
+`NEWCYCLE` is what made every state assertion pass over a screen with nothing on
+it.
+
+## §273.6 — RECORDED, NOT DONE: THE PEN CRIES MISSING OVER A WORKING FALLBACK (2026-09-04)
+
+Found by LOOKING at the built pen rather than by any assertion. With no review
+point picked — which is the demo's state and a legitimate one — the strip reads
+**"reported as of Jun 26 · 6 of 12 months, taken from the cycle's end"** and the
+month control six inches below it, inside the pen, reads a red **MISSING**.
+
+**§239.3 SETTLED THIS ONCE AND SETTLED IT FOR THE STRIP ONLY.** Its rule is
+exact: a working fallback must show the value IN USE rather than cry *Missing*
+over it (§177's shape with the sign reversed, §214.4's own argument). The strip
+was fixed; `monthBtnHtml()` was not, and the pen calls it directly. So one panel
+now says two things about one fact.
+
+**IT IS RIGHT IN THE OTHER PANEL, WHICH IS WHY IT CANNOT SIMPLY BE CHANGED IN
+`monthBtnHtml()`.** *Open a new cycle* refuses to open without a month (§239),
+so there *Missing* is true and load-bearing. The fix is a per-caller word, and
+what that word should be — *"taken from the cycle's end"*, the strip's own
+phrase, or something shorter — is a wording decision, not a bug fix.
+
+**It predates §273.4** (§273's pen called the same builder) and is left as it
+was rather than changed on the way past, per rule 1b.
 
 ## §274 — THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (2026-09-03)
 
@@ -32801,3 +32932,443 @@ measured as PAINT rather than as a class** (§145.14: a build that lost the rule
 keeps the class). **The lit assertion's first run reported a correct build as
 broken** — it read `getComputedStyle` after `paint()` had detached the node,
 which computes to an empty string (§222's own lesson, §68.10's family).
+
+## §273.7 — THE MERGE THAT CARRIED §273.4 TO MAIN (2026-09-04)
+
+Islam: **"MERGE"**. `main` had moved **twenty-one commits** under this branch
+while §273.4 was being built — §274 to §278.2, from five other sessions — and
+three of the files this change is about (`config-render.js`, `config-data.js`,
+`shell.html`) were touched by both sides.
+
+**THE NUMBERS DID NOT COLLIDE, AND THAT WAS CHECKED RATHER THAN ASSUMED**: main
+holds §273 to §273.3 and then jumps to §274, so §273.4, §273.5 and §273.6 were
+free. Three sessions in a row have had to renumber; this one did not, and only
+reading main's own headings could say so.
+
+**THE THREE SOURCE FILES AUTO-MERGED WITH NO CONFLICT, WHICH IS EXACTLY WHEN TO
+LOOK** (§56.7, §147.4): two branches each adding a declaration to one file merge
+silently, the later winning by hoisting, and the product then runs one copy while
+the comments describe the other. Grep'd for duplicate top-level declarations —
+**one found, `capsReachable()`, declared twice in `config-data.js`** — and it is
+duplicated **on `main` too**, so it predates this merge and is recorded rather
+than fixed on the way past (rule 1b).
+
+**THE BUILT FILE WAS REBUILT, NEVER MERGED** (§91): git will happily splice two
+versions of a generated file into something that belongs to neither. Four
+document conflicts resolved by keeping BOTH sides in section order, with main's
+own *Last Updated* demoted to *Earlier* rather than discarded.
+
+**`sw.js` BUMPED PAST A NAME MAIN HAD ALREADY SERVED** — main was at
+`v4.57-picker-tables`, so this is `v4.58-cycle-pen-two-columns`, confirmed
+against `origin/main` immediately before the push (§94.12, §94.16) — and
+`node --check sw.js` run after the merge, because §146.2 is a splice that does
+not conflict.
+
+Verified after the merge, not before: 520/0 authoriser, 131/0 differ,
+`cycle-edit` all green, `repeat-project` and `ytd-proration` green, and main's
+own `unit-follows`, `count-compile`, `monthly-plan`, `fn-perf-controls` and
+`master-picker` green beside them.
+---
+
+## §279 — THE REPORTING PAGE SAYS WHERE SUBMIT IS HELD (2026-09-04)
+
+Islam, from his own tenant: *"the reporting is not submitting to the SMO as
+there is someting requires a note but I can't find it. based on the current
+features we have what is the best way to identify the missing areas easliy?"*
+Three options were drawn out of the running platform (rule 1c, §41.9,
+`design-mockups/report-find-the-blocker/`) and he chose **C** — the bar names
+everything Submit is waiting for, not only the notes.
+
+**THE STATE WAS REPRODUCED BEFORE ANYTHING WAS PROPOSED, AND IT IS WHY THE
+ANSWER IS NOT "MAKE THE MARK BIGGER".** Every figure entered (17 of 17), the
+plan owing nothing, and `submitBlockers()` returning `notes:1, pending:0,
+owed:0, gaps:0` — the gate held by one row and by nothing else. The row IS
+marked: §105's `wantnote` puts a red edge down its first cell and rings its
+note box. **A unit's Reporting page draws ONE pillar at a time**, so a row
+owing a note in another pillar is not on the screen at all, and the banner
+above counted it and named no place.
+
+**THE RAIL WAS WORSE THAN SILENT.** It is the one thing on that page that
+lists the places, and the pillar holding the report up wore a **green 4/4** —
+because that tally counts figures ENTERED, which is a different question from
+*is anything owed here*. Worse, the small line that would have said *Complete*
+is not drawn at all: the rail ships collapsed (§119), so the state people
+actually meet had the tally and nothing else. A reader scanning for where to
+look was being told, in the platform's own colour for "nothing left here", to
+look anywhere but there.
+
+**AND ONE SIDE OF THE SWITCH HAD NOTHING AT ALL** (§53.5, A15). A capability
+function's Reporting page has never drawn a note banner, and `capNoteBox()`
+passes `want:false` always, so its note boxes are not rung either — a function
+head was refused by Submit with the reason on a hover and **not one mark on
+the page**. The unit's half was poor; the function's half was blind.
+
+**IT IS §272's BAR, CLASS FOR CLASS, AND THAT IS THE POINT.** A custodian
+already meets this control on the Strategy tab when a plan is short: a count,
+one chip per place, a walk. Bringing the same control to Reporting asks nothing
+new of anybody. What is NOT shared is the code: that bar walks a PLAN's
+fillable blanks in fill mode, keyed on `EDIT_PAGE` and `.gapwalk`; this walks a
+CYCLE's reporting controls, which have no mode and are not the same controls.
+So the SHAPE is shared through the CSS, and the CURSOR is shared through
+`gapLight()` — where §177.2's hard-won lessons live (the ring goes on the
+walkable element; a §130.1 picker's ring belongs to its `.ssbtn` sibling; focus
+without scrolling) — and the two field lists are disjoint, so a cursor left by
+the other walk reads as "nowhere" and this one starts at the top.
+
+**ONE ROW IS ONE THING TO FIX, WHICH IS WHY THE BAR COUNTS ROWS AND THE HOVER
+COUNTS REASONS.** A row that said *In progress* and gave no per-cent is BOTH
+unanswered and pending — `statusGiven()` is false without the number — so the
+gate's own arithmetic names it twice, correctly, in two sentences about two
+rules. A bar that added those up would say "4 to finish" over three boxes.
+`rowBlock()` tests `pend` before `owed` for the same reason the walk exists:
+what that row is owed is the per-cent, so that is the control to land on.
+
+**THE PLAN'S OWN GAPS ARE COUNTED HERE AND FILLED THERE.** They hold Submit
+(§221), so leaving them out would let this bar read *nothing to finish* over a
+Submit that is still shut — the exact fault it exists to remove. They are not
+walkable, because they are not fixed from this page: that chip is a door to the
+Strategy tab, where §272's bar already names and walks them, and with nothing
+else outstanding no walk button is drawn at all (§223 — a control that could
+only ever wrap on itself has nothing behind it).
+
+**THE MARKS ARE PUT ON IN ONE PLACE, NOT AT EIGHT CALL SITES.** Which control
+answers a row's blocker is a fact about the row, so `repMarkControls()` reads
+the same map the bar counts (§272's rule: the walk follows whatever the bar is
+counting) and applies it to the DOM the paint just produced — driven from the
+CONTROLS rather than from the ids, so no id is ever escaped into a selector,
+and a box builder added tomorrow needs no flag threaded through it (§104.7).
+
+**DRAWN FOR WHOEVER MAY SUBMIT, AND FOR NOBODY ELSE.** It explains the Submit
+button and nothing else, so it asks `canSpeakFor()` — the gate that button
+already asks — and a contributor limited to their own lines is not shown a
+count they cannot clear (§61, §177). A closed report is not chased: §220 locks
+it and Reopen is what that state offers.
+
+### §279.1 — THE CHIP WAS ADDRESSED BY THE WORD ON THE PAGE
+
+Found by pressing Next and watching the rail not move. `pillarCode()` renders
+the tenant's prefix (**BE03**) and the rail's own button and `unitRailPick()`
+match `p.code` (**M03**) — so a chip keyed on the label set the rail to a code
+no pillar has, the press repainted the same pane, and it looked exactly like a
+dead button. §48's rule: **address by the identifier, label with the word.**
+It would have passed unnoticed on any tenant where a pillar's code and its
+displayed code coincide, which is every tenant that has not set a prefix — so
+the check asserts the two DIFFER on this one, or the assertion proves nothing
+(§94.5).
+
+### §279.2 — A RED WORD ON A RAIL IS TYPE, SO IT TAKES THE TYPE RED
+
+`--bad` is a FILL colour and measures **4.49:1** against the rail row's ground
+in the dark palette — §38.5 for the eighth time. It was already there before
+this section: §106.2's *"N rows to check"* on a project's rail is the same
+class in the same place, so the one scoped rule repairs a reading nobody had
+measured as well as the mark added beside it. Scoped to the rail's small line
+and never to `.missing` at large, which on a plan's white cell is measured and
+fine — widening it would be restyling pages nobody asked about. **8.02 light,
+7.35 dark** after.
+
+### §279.3 — AND TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK
+
+Its first run against the previous build **died rather than reporting**
+(§215, in the file whose own docstring promises it does not): `reportPlaces`
+does not exist there, the probe came back `{__err:…}`, and the sum below it
+walked a string — three failures printed where there are forty-three, and
+`grep -c FAIL` read a crash as a nearly-clean build. Every list-shaped probe
+degrades to `[]` now. And its own §9 asked `canSpeakFor()` of whoever was
+already signed in while filtering the register for somebody it refuses — one
+person's rights asked of everybody (§94.5) — so it reported *"no such person"*
+on a register full of them; it switches viewer per candidate now.
+
+**AND A CHECK THAT CANNOT LAUNCH REPORTS NO FAILURES** (§54.5, §100.3's
+family). Three neighbouring checks were run without the container's Chromium
+wrapper, printed Playwright's own *"please run playwright install"* banner, and
+were read here as *0 failures* — a clean-looking result from a run that never
+happened. They are green through `qa-run.py`, and this file's own check now
+launches the way every other one does so the wrapper supplies the browser.
+
+**PROVED ABLE TO FAIL: 43 red** on the shipped build, the first of them the
+reported symptom itself. 51 green after. Full `qa.py` sweep ERRORS none;
+`test-authorize` 514/0 and `test-graph-diff` 126/0 (nothing server-side moved,
+and it is asserted rather than assumed); `submit-gate`, `fn-report-gate`,
+`gap-fill`, `gap-walk`, `empty-not-missing`, `milestone-fill`, `report-saves`,
+`table-fit`, `perf-line`, `cycle-board` and `setup-overview` all green. The
+bar holds one row from 1500 down to 900px; the 4px overrun at 900 and 768 is
+measured **byte-identical on the build before** (§158's recorded residue,
+§249.2).
+
+**RECORDED, NOT DONE.** A capability function's note boxes are still drawn with
+`want:false`, so the box the bar sends you to is not itself rung red on that
+side — the bar and the rail name the row, and ringing the box is one line in
+`capNoteBox()` that needs the row's KIND threaded to it, which is a change to
+four call sites and was not what was asked for.
+
+
+---
+
+
+---
+
+## §280 — A FINGER GETS A WAY BACK (2026-09-04, reversing §265's forward-only for touch)
+
+Islam, presenting from a tablet: *"for the ful lscreen presentation on a tablet
+it doesn't go left or right .. can we make that cliking on the screen on the
+right side takes forward and on the left side takes backward and maybe swipping
+as well where swpping left takes you forward and swiping riht takes you
+backrward?"*
+
+**§265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET.** It made a click in
+fullscreen advance the slide and deliberately stopped there — *"a click that
+went back on one half of the slide would need a visible boundary to be usable,
+and the whole point of fullscreen is that there is nothing drawn over the
+slide"* — and that argument is about a PROJECTOR, where the audience sees every
+affordance you draw. A tablet in somebody's hands has no arrow keys at all, so
+on that device forward-only is not the cautious choice, it is the only direction
+the deck can go: §265's own stated cost (*"a touch screen with no keyboard has
+no on-screen way out"*) arriving as a second, worse symptom.
+
+**THE BOUNDARY IS AT A THIRD, NOT THE MIDDLE**, Islam's pick from three drawn
+with the cost of each. Forward is the act of a talk and back is the exception,
+so forward keeps the large target and a step backwards is deliberate rather than
+a slip — and two thirds of the slide can still be pointed at without the deck
+moving under the point being made.
+
+**A MOUSE IS UNCHANGED, AND THAT IS ALSO HIS CALL**, taken from two with the
+cost stated before he chose: the product now answers one act two ways depending
+on the device, which is the drift §53.5 warns about, in exchange for nothing a
+laptop presenter has already learned changing under them. It is asserted at both
+ends — a mouse click on the very pixel a finger would have gone back from still
+goes forward — because without that the check cannot tell the two apart at all.
+
+**THE KIND IS REMEMBERED FROM THE POINTERDOWN, NEVER READ OFF THE CLICK.** A
+`click` is not reliably a `PointerEvent` in every browser, so asking the click
+for its `pointerType` takes the mouse branch on exactly the tablets this
+section exists for — the fault would have been invisible in Chromium and real
+in Safari, which is where the client presents.
+
+**SWIPE: LEFT IS FORWARD, RIGHT IS BACK** (his). The direction people already
+have from every photo album — the slide follows the finger — and it needs no
+boundary explained, which is what makes it the better half of this section.
+Touch and pen only, for the same reason the taps are: a drag with a mouse is
+how somebody selects text, not how they turn a page. The horizontal has to beat
+the vertical, or steadying the tablet turns a page.
+
+**A SWIPE ENDS IN A CLICK, SO ONE GESTURE WOULD HAVE MOVED TWO SLIDES.** That
+is why the tap and the swipe are two readings of ONE gesture rather than two
+features: `DECKSWIPED` is how they agree, and `deckOwnControl()` is one answer
+to *is this the stage or something on it*, asked by both — a gesture that starts
+in the cycle-note box refused by one and obeyed by the other is §53.5 inside a
+single interaction.
+
+**AND THE RIGHTWARD SWIPE WAS ALREADY DOING SOMETHING, WHICH IS WORSE THAN
+NOTHING.** Measured on the build before this one: with no `touch-action` on the
+stage the browser claims a horizontal drag for its own back-navigation, and a
+right-swipe left the page entirely — **`about:blank`**, the presenter dropped
+out of the platform in the middle of a presentation. So the CSS is not a tidying
+detail, it is half the fix; `pan-y` gives the vertical away deliberately so a
+long cycle note can still be scrolled, and the cost is that pinch-zoom is off
+inside the stage, which on a slide already scaled to fit is a gesture with
+nothing to do. Fullscreen only, so a windowed deck on a tablet behaves exactly
+as it always has, and that is asserted.
+
+`checks/deck-fullscreen.py` §6: **4 red** on the build before, driving REAL
+touch through CDP rather than synthesising events in the page. **AND THREE OF
+ITS OWN FIRST-RUN FAILURES WERE THE PROBE, NOT THE PRODUCT** — the right-swipe
+navigated the page away, so every assertion after it answered `None`: a check
+reporting six failures where the truth is four, and reporting them as nothing
+rather than as anything. §215 inside the file already written to guard against
+it. The navigation is its own assertion now, placed BEFORE the direction it
+would otherwise hide, and the pass recovers so everything after it still
+reports.
+
+Neighbours green: `notes-slide`, `hide-slide` 42/0, `deck-blank-slides`,
+`deck-dividers`, `deck-outcome`, `deck-figures`. Full `qa.py` sweep ERRORS none.
+
+---
+
+## §281 — THE FAULT WAS NOT THE DUPLICATION, IT WAS THAT CORRECTNESS DEPENDED ON ORDER (2026-09-04)
+
+Islam: *"let's tidy things."* Three functions were each declared TWICE in the
+platform sources, all three already on `main` and none of them from §279 — found
+by grepping the merged result for its own declarations, which is what §147.4
+prescribes after any merge touching a file both sides changed.
+
+**TWO WERE HARMLESS AND ONE WAS NOT, AND THE DIFFERENCE IS THE WHOLE POINT.**
+`fnKeyOf()` and `capHead()` in `group-render.js` were byte-identical twins
+twelve lines apart — clutter, and no more. `capsReachable()` in
+`config-data.js` had **two different bodies**:
+
+    function capsReachable(){                                    // line 4197
+      return GROUP.capabilities.filter(function(c){ return reachesCap(c.id); });
+    }
+    function capsReachable(){ return GROUP.capabilities.filter(reachesCap); }
+                                                                 // line 4456
+
+and `reachesCap(cap)`, declared one line above the second, reads `cap.fn` — so
+it wants the OBJECT. The later declaration wins by hoisting, so the product was
+correct. **Measured in the running platform before a line was deleted**: the
+body in force returns **8 capabilities**; the dead body, run by hand against
+the same data, returns **0**. So the surviving behaviour was right and the
+margin was one edit: move the earlier declaration below the later one, or
+delete the "wrong" copy without checking which is which, and **every capability
+becomes unreachable for every viewer** — a function's capabilities gone from
+the navigation and from every page that lists them, silently, with nothing
+thrown.
+
+*That is why this is worth a section rather than a tidy-up commit.* §56.7
+recorded this shape once (two `var pf` declarations six hundred lines apart,
+merged with no textual conflict) and the lesson there was that a clean merge is
+not a working one. This is the same shape with a longer fuse: not broken today,
+and one refactor away from being broken in the least visible way the product
+has.
+
+**DELETED BY NAMED FUNCTION AND MATCHED TEXT, NEVER BY LINE RANGE** (§214,
+which records a deletion-by-range that took a live neighbouring function with
+it and broke every clause Add and Remove in the product). Of the twins, the
+SECOND was removed: the first sits directly under the comment that explains it,
+and a comment left pointing at nothing is how the next reader comes to believe
+the survivor is the accidental one.
+
+**THE SCAN IS THE DELIVERABLE, NOT THE THREE NAMES.** The three were what one
+grep happened to surface; the check is that the whole source tree has no
+duplicated top-level declaration at all:
+
+    cat SMP-Project-Folder/src/*.js SMP-Project-Folder/src/shell.html |
+      grep -oE "^function [A-Za-z_$][A-Za-z0-9_$]*" | sort | uniq -d
+
+It prints nothing now.
+
+### §281.1 — AND THE WIDER SCAN FOUND A BLOCK, NOT A LINE
+
+The same scan over `var`/`const`/`let` finds **six** duplicated top-level names
+in `config-render.js` — `CLEARING`, `CLEARMENU`, `ICO_ATTN`, `ICO_CLEAR`,
+`ICO_DONE`, `ICO_EDIT` — and they are not six accidents but ONE 26-line block
+copied once, at a constant offset of 351 lines (474–499 mirroring 825–850).
+Every value is identical; only the comment prose above them differs (one copy
+escapes its em-dashes, the other does not), which is what says it was pasted
+rather than edited.
+
+**RECORDED AND DELIBERATELY NOT REMOVED HERE.** It is a different file, a
+different shape, and behaviour-neutral either way — and rule 1b's line is that
+a fix which reaches something the user did not mention is flagged rather than
+folded in. It is safe to remove and worth doing; it is not this section's to do.
+
+### §281.2 — AND A CHECK WAS RED ON `main` FOR A DECISION SOMEBODY ELSE TOOK
+
+`checks/fn-pillars.py` asserted a unit's Objectives sheet was *"exactly what it
+was, plus §233's Hidden"* — and §278 **appended Jan–Dec** to that sheet for the
+monthly plan, so the check had been failing on `main` since that landed, for a
+build behaving exactly as decided. §214.3 for the second time **on this one
+line**, which is its own argument: a check written against the last shape has
+to move every time the shape is chosen again.
+
+**REWRITTEN, NEVER LOOSENED** (§218). The twelve months are asserted in ORDER
+and at the END, because §65's rule is that a column's POSITION is what the
+workbook's validation ranges are built from — a check relaxed to "contains
+these columns somewhere" would go green on a build that had inserted them in
+the middle and silently moved every range.
+
+**Proved**: `capsReachable()` returns 8 before and after; no page error; full
+`qa.py` sweep ERRORS none; `fn-pillars`, `rail-standard` and `report-blockers`
+green; `test-authorize` 520/0 and `test-graph-diff` 131/0. No product behaviour
+changes — this section removes dead code and one stale assertion, and nothing
+else.
+
+---
+
+## §280.1 — A CHECK THAT COULD NO LONGER GO GREEN (2026-09-04)
+
+Found while running the neighbours after §280's merge: `checks/report-chrome.py`
+failed one assertion, *"Submit is filled"*. **Reproduced on `main`'s OWN build
+before anything was concluded** — identical failure, same values — so it was
+established as not the deck's before a line of it was read.
+
+**THE PRODUCT IS RIGHT AND THE CHECK IS STALE**, and both halves were measured
+rather than reasoned about. On Mobile the button is `aria-disabled="true"` with
+**6 rows owing a note and 44 plan gaps**, drawn quiet: §221's held state,
+working exactly as decided. With the gate stubbed open and the page repainted,
+the same button is **`rgb(164, 81, 44)`** with white ink — §222's fill, exactly
+as specified. So Submit *is* filled when it can be pressed.
+
+The assertion asked for the fill **unconditionally**. It was written on
+2026-08-31 under §222, when Submit was always solid; §221 gave it a held state
+the same day and nobody came back here. §51.11 in its plainest form.
+
+**AND IT COULD NEVER HAVE GONE GREEN AGAIN**, which is what makes it worth a
+section rather than a one-line edit: every one of the ten demo units is blocked
+by something — `mobile 6n/44g`, `retailstores 2n/16g`, `b2becomm 11n/12g`,
+`consumerelectronics 5 owed`, `nigeria 16 owed` — so the state it asserted is
+unreachable on the shipped data. A check that cannot pass is a red line people
+learn to scroll past, and it takes the honest ones down with it.
+
+**REWRITTEN, NOT DELETED** (§218) and asserted at **both ends** (§94.2,
+§113.8): held while the report is incomplete, saying why; filled the moment the
+gate opens, with light ink on it (§38.4). The open state is **MADE**, because no
+demo unit provides one.
+
+**TWO THINGS THE REWRITE HAD TO GET RIGHT.** The reason rides `data-tip` — the
+platform's own bubble, which opens on hover AND focus (§163) — never a native
+`title`, so asking for a `title` would have been an assertion that could not
+pass, the very fault being repaired. And the neighbouring *"Save draft's ink is
+the same hue family as Submit's fill"* was comparing against the HELD button:
+`rgb("rgba(0, 0, 0, 0)")` parses to `(0, 0, 0)` rather than to nothing, so it
+was passing over a value that means *no colour at all* (§94.5). It compares
+against the fill Submit actually wears now.
+
+**Proved able to fail, from the SOURCES rather than by editing the built file**
+(§238's hashed CSP silences a script block whose bytes changed, §276): a held
+Submit given the fill back fails *"a held Submit is deliberately NOT filled"*;
+Submit stripped of its fill entirely fails *"...and THEN it is filled"* and the
+hue-family assertion beside it. Each falsification lands on the assertion it
+should, and on no other.
+
+Nothing on any screen moves: `arrange.css` and every source file are
+byte-identical to the merged state, confirmed by diff. `report-chrome`,
+`submit-gate`, `report-saves`, `report-blockers`, `perf-line` and
+`deck-fullscreen` green; full `qa.py` sweep ERRORS none.
+
+
+## §287 — THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (2026-09-04)
+
+Islam, of the closed Reporting cycle strip: *"what is the arrow function here
+beside the open new cycle?"*
+
+**IT HAS NONE.** `.fstrip-head::after` drew a `▸` and was written as a **bare
+class selector**, sitting directly beside a rotate rule that IS scoped to
+`details.fstrip` — so the mark that says *this folds* was painted on every
+`.fstrip-head` in the product while the mark that says *it is open* was painted
+on only the one that folds. **Three surfaces wear that class and two of them are
+a plain `<div>`**: Setup › Reporting cycle, and the group's Focus board strip.
+Both drew a disclosure triangle for a disclosure that does not exist — pointing
+at nothing, never rotating, doing nothing when pressed. §96's family (renders
+perfectly, means nothing) and §94.15's (a control with no audience is
+furniture).
+
+**IT WAS ONLY EVER RIGHT ON ONE SURFACE**, the focus-measures panel, which is a
+real `<details>` with a `<summary>` and where the caret is load-bearing.
+
+**AND THE FIRST BUILD OF THE FIX TOOK IT OFF THAT ONE.** Written
+`details.fstrip > summary .fstrip-head::after`, which is a DESCENDANT selector —
+and the panel's head IS the summary, so it matched nothing at all. Measured, not
+read: the caret went from `"▸"` to `none` on the one place it belongs, and the
+check caught it because it asserts BOTH ENDS (§94.2). `summary.fstrip-head`,
+never `summary .fstrip-head`.
+
+**THE ROTATE RULE CARRIED THE SAME MISTAKE AND HAD BEEN DEAD SINCE IT WAS
+WRITTEN** — `details.fstrip[open] > summary .fstrip-head::after` never matched
+either, and `details.fstrip[open] > summary::after` beside it was doing the work,
+which is exactly why nobody ever noticed. The dead half is **DELETED, not left
+standing** (§24).
+
+**AND `.fstrip-head` WAS DECLARED TWICE IN ONE FILE** — the second block
+re-stating the four flex properties the first already sets, thirty lines up. The
+redundant copy goes with it: a rule written twice is why editing one of them
+appears to do nothing (§29.2, §51.5, §53.6, §88 — **fifth time in this
+project**).
+
+`checks/fold-caret.py` measures the **PAINT** rather than the selector (§94.8,
+§145.14 — a build that keeps the class and loses the rule reads `none`), and is
+proved able to fail **both ways**: **3 red** against the shipped build with the
+stray caret, and **3 red** against my own first attempt with the caret gone from
+the panel. The panel is drawn only for a unit carrying focus marks, so the unit
+is FOUND at runtime rather than named — and the sub-page key is `performance`,
+not `perf`, which cost the first run its panel entirely (§50.6).

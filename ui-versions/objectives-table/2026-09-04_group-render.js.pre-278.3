@@ -3879,24 +3879,15 @@ function monthlyChip(row, fld){
    being typed into (§71.2), which is why §145's counts refresh this way too. */
 function monthlyMsg(row, fld, tfld){
   var sh = monthlyShape(row, fld), n = SMPRules.monthlySet(sh);
-  /* TWO SPANS AND A SPACE. `.mpfoot` is a flex row with a gap, and these two
-     are wrapped in ONE flex item — so the gap falls between the message and
-     the Clear button, and nothing at all separated these: the footer read
-     "not in force yetUntil all twelve are filled" (found by looking at the
-     built page, not by reading the source). */
   if (n < 12)
     return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
-      ' <span>Until all twelve are filled, this target is still spread evenly ' +
+      '<span>Until all twelve are filled, this target is still spread evenly ' +
       'across the year.</span>';
   var c = SMPRules.monthlyCompile(sh);
-  /* THE RULES ARE READ, NEVER LISTED. This sentence said "Set Sum, Latest or
-     Average" — written before §276 added Count, so it named three of four and
-     nothing compared it with the list (§214.3). It is `COMPILES` now, so the
-     day a fifth rule is added the sentence is already right. */
   if (!c)
     return '<span class="part">Twelve months set — not in force yet</span>' +
-      ' <span>This row has no compile rule, so the platform cannot tell what ' +
-      'the twelve add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
+      '<span>This row has no compile rule, so the platform cannot tell what ' +
+      'the twelve add up to. Set Sum, Latest or Average.</span>';
   var ann = SMPRules.monthlyAnnual(sh);
   /* §276's Count adds up like Sum and is then owed in whole ones, so it says
      the same word — the rounding is what the figure beside it shows. */
@@ -3990,20 +3981,6 @@ function monthlyRefresh(row, fld, tfld){
    four tables to the `<td>` it already builds, so the box inside it goes on
    being whatever that table draws (a gapCell, with its pending lifecycle
    intact). */
-/* THE WHOLE CELL, from one place (§53.5). The four tables used to write
-   `'<td class="cc"' + monthlyTgtAttrs(...) + '>' + box + monthlyChip(...)`
-   themselves, which is four copies of one shape — and when §278.3 had to put
-   the box and the mark inside a wrapper so the `<td>` could stay a table-cell,
-   it would have been four edits to get right instead of one.
-
-   THE WRAPPER IS THE POINT. `display:flex` on the td made it stop stretching
-   to its row's height, so a tall row showed the bare table under it; the flex
-   box is `.mpcell` inside the cell now and the cell is a cell again. */
-function monthlyTgtCell(cls, row, fld, inner, on, partOnly){
-  if (!on) return '<td class="' + cls + '">' + inner + '</td>';
-  return '<td class="' + cls + '"' + monthlyTgtAttrs(row, fld, partOnly) + '>' +
-    '<span class="mpcell">' + inner + monthlyChip(row, fld) + '</span></td>';
-}
 function monthlyTgtAttrs(row, fld, partOnly){
   /* WHICH SHAPE THE BOX HOLDS. A measure's and an objective's target box holds
      the WHOLE string ("300M EGP"); a tactic outcome's holds the value alone
@@ -4290,25 +4267,10 @@ function koEdit(list, page, acKey, owner){
      `weight` on the row all along — so the column the office now sees on all
      three writes one field and `koWeights()` resolves the old array behind it
      for a tenant that already has one. */
-  /* §278.3: THE NUMBER COLUMN, AND THE HANDLE — Islam: *"the objectives needs
-     a number column as well like the key measures of direction with a handle
-     to move them as well."* The `#` and the grip are the key measures table's
-     own, copied rather than designed again (§53.5), and the number is drawn
-     whether or not anybody may drag: it is how a row is referred to out loud.
-
-     THE HANDLE IS THE SAME QUESTION THE MEASURES TABLE ASKS — `mayArrange`,
-     per subject — so nobody gains a right they do not already hold over the
-     rows beneath, and the server classifies this reorder exactly as it
-     classifies a pillar's (§101). */
-  var arr = owner && owner.ukey ? arranging("unit", owner.ukey, page)
-                                : arranging("group", null, page);
-  var sortA = arr ? ' class="sortable" data-item="tr" data-kind="kos" data-kolist="' +
-    li + '"' : '';
-  return '<div class="scroll"><table><thead><tr><th class="idx">#</th>' +
-    '<th>Objective</th><th class="cc">Dir.</th>' +
+  return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">Unit</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th>' +
-    '<th class="cc">Weight %</th><th></th></tr></thead><tbody' + sortA + '>' +
+    '<th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     list.map(function(m, i){
       /* \u00a7130: the four gap-fillable columns go through gapCell \u2014 in the
          office's edit they are the same bound fields as before (with the
@@ -4321,8 +4283,7 @@ function koEdit(list, page, acKey, owner){
          mode says "Yes / No" where the target goes, which is the whole fact,
          and dimming something somebody is only reading says nothing. */
       var yn = isYesNoRow(m);
-      return '<tr data-oi="' + i + '"' + hidCls(m) + '>' + idxCell(i, arr, m.name) +
-        '<td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
+      return '<tr' + hidCls(m) + '><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
         (pg ? '' : hidChip(m)) + '</td>' +
         '<td class="cc">' + (pg && yn ? offSelect(m.dir || "\u2265")
           : gapCell(page, acKey, m, "dir",
@@ -4346,11 +4307,11 @@ function koEdit(list, page, acKey, owner){
            shape a YEAR; a three-year horizon has no months to be given, and
            §251 already puts the unit in this year's target for the same
            reason. */
-        monthlyTgtCell("cc", m, "monthly",
+        '<td class="cc"' + (pg && !yn ? monthlyTgtAttrs(m, "monthly") : "") + '>' +
           (pg && yn ? offInput(targetKeep(m.target || ""))
           : gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })),
-          pg && !yn) +
+          { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) +
+          (pg && !yn ? monthlyChip(m, "monthly") : "") + '</td>' +
         '<td class="cc">' + (pg && yn ? offSelect(m.compile || "\u2014")
           : gapCell(page, acKey, m, "compile",
           { kind:"select", opts:SMPRules.COMPILES })) + '</td>' +
@@ -4360,39 +4321,14 @@ function koEdit(list, page, acKey, owner){
            weights that were set. */
         '<td class="cc">' + gapCell(page, acKey, m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
-        /* ONE LINE (§88, §278.3). The `#` column takes 63px, and on a
-           nine-column table that was enough to break the eye and Remove onto
-           a second line and take the row from 57px to 74 — measured, on a
-           column holding two controls. */
-        '<td class="cc acts1">' + (editing
+        '<td class="cc">' + (editing
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>' +
-        (pg && !yn ? monthlyRowFor(m, "monthly", "target", 9, m.name, pg) : "");
+        (pg && !yn ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
       '">+ Add an objective</button></div>' : '');
-}
-
-/* THE `#` CELL, for the two objectives tables (§278.3). The measures and
-   tactics tables write this inline; those two sit in one function each and
-   this sits in two, so it is written once rather than twice — and the pair
-   inside it is what §278.3 is about.
-
-   CENTRED BY THEIR MARKS, NOT BY THEIR BOXES. Islam, of the first drawing:
-   *"the number and the handle are a bit misalignment they both needs to be
-   centered vertically"*, and then of the second: *"these are not centered to
-   each other."* He was right both times, and the second time the measurement
-   was mine: the two BOXES centre to 0.00px and the digit still reads 1.62px
-   high, because a digit's box carries descender space the glyph never uses.
-   Four ways of centring the boxes were measured and every one read -1.62 — no
-   box-level alignment can move a glyph inside its box. The CSS trims the
-   number's box to the cap height and the baseline instead, so the box IS the
-   ink; -1.62px to +0.38px, read off the painted pixels at eight times scale. */
-function idxCell(i, arr, label){
-  return '<td class="idx"><span class="idxpair">' +
-    (arr ? handle("Reorder " + (label || ("row " + (i + 1)))) : '') +
-    '<span class="idx-n">' + (i + 1) + '</span></span></td>';
 }
 
 /* WHERE ADD AND REMOVE WRITE. Registered during render and emptied on every
@@ -6484,12 +6420,12 @@ function unitPlanBody(it, u, railed){
          the monthly plan IS the target — under Compiled it read as a second
          compile rule (mockup, signed off). Never on a yes/no row: there is no
          number for twelve months to shape. */
-      monthlyTgtCell("num", m, "monthly",
-        (ed && isYesNoRow(m) ? offInput(targetKeep(m.target || ""))
+      '<td class="num"' + (ed && !isYesNoRow(m) ? monthlyTgtAttrs(m, "monthly") : "") +
+        '>' + (ed && isYesNoRow(m) ? offInput(targetKeep(m.target || ""))
         : gapCell("plan", "u_plan", m, "target",
         { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m),
-          read: tgtShown })),
-        ed && !isYesNoRow(m)) +
+          read: tgtShown })) +
+        (ed && !isYesNoRow(m) ? monthlyChip(m, "monthly") : "") + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -6650,8 +6586,10 @@ function unitPlanBody(it, u, railed){
          start a third row half the cell wide, which is exactly the "hole
          among equal boxes" that section refused. Only in the pen, and never
          on a yes/no outcome. */
-      monthlyTgtCell((tgtOpen ? 'tgtcell' : 'tgtcol num'), t, "outMonthly",
-        tgtCell, ed && !SMPRules.isYesNo(t.outTarget), true) +
+      '<td class="' + (tgtOpen ? 'tgtcell' : 'tgtcol num') + '"' +
+        (ed && !SMPRules.isYesNo(t.outTarget) ? monthlyTgtAttrs(t, "outMonthly", true) : "") +
+        '>' + tgtCell +
+        (ed && !SMPRules.isYesNo(t.outTarget) ? monthlyChip(t, "outMonthly") : "") + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
          fed picker — an owner is PICKED, not typed, in the pen and in fill
@@ -7201,18 +7139,6 @@ function koReadBlock(list, emptyLine){
    a function that plans in pillars — the same string `koHolderById()` resolves
    on the other side of the click, so one table serves both and the add/remove
    handlers have one thing to look up. */
-/* WHICH SUBJECT A CAPABILITY'S OBJECTIVES BELONG TO (§278.3). The handle asks
-   `mayArrange`, which is answered per SUBJECT and not per page — and this
-   table is drawn for two shapes: a real capability, whose subject is the
-   function holding it, and a pillars function's own objectives, handed in
-   under a synthetic `fn:<key>` id (§59). Returns null for anything else, so a
-   shape nobody anticipated draws the number and no handle rather than a
-   handle the save would refuse (§94.3's fault, the safe way round). */
-function capKoTarget(c){
-  var id = String(c && c.id || "");
-  if (id.indexOf("fn:") === 0) return id;
-  return c && c.fn ? "fn:" + c.fn : null;
-}
 function capKoEdit(c){
   var pg = "capfoundation";
   /* §145: the four gap-fillable columns through gapCell; the NAME, Remove
@@ -7226,23 +7152,11 @@ function capKoEdit(c){
      office picks it and a filler may set a MISSING one), and a bare number
      typed into This year inherits the row's unit (§199.6). The unit's own
      koEdit is deliberately untouched — Islam: "don't touch the unit side". */
-  /* §278.3: the same `#` column and handle the unit's table gained, because
-     these two are one table asking one question (§53.5) — and this is the one
-     Islam was looking at when he asked for it. The subject is the FUNCTION: a
-     capability's objectives belong to the function that holds it, and a
-     pillars function's are drawn through this same table under a synthetic
-     `fn:<key>` id (§59). */
-  var tgt = capKoTarget(c);
-  var arr = !!tgt && arranging("unit", tgt, pg);
-  var li = KOLISTS.push({ list: c.keyObjectives, owner: c }) - 1;
-  return '<div class="scroll"><table><thead><tr><th class="idx">#</th>' +
-    '<th>Objective</th><th class="cc">Dir.</th>' +
+  return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">Unit</th>' +
-    '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody' +
-    (arr ? ' class="sortable" data-item="tr" data-kind="kos" data-kolist="' + li + '"' : '') + '>' +
+    '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     c.keyObjectives.map(function(m, i){
-      return '<tr data-oi="' + i + '"' + hidCls(m) + '>' + idxCell(i, arr, m.name) +
-        '<td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) +
+      return '<tr' + hidCls(m) + '><td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) +
         (ed ? '' : hidChip(m)) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
@@ -7255,18 +7169,18 @@ function capKoEdit(c){
         /* §278: a supporting function's objectives get the same drawer as a
            unit's, because they are the same cell asking the same question —
            Islam's "all four". */
-        monthlyTgtCell("cc", m, "monthly",
-          gapCell(pg, "k_found", m, "target",
-          { kind:"input", cls:"mono", parse: unitInherit(m) }),
-          ed && !isYesNoRow(m)) +
+        '<td class="cc"' + (ed && !isYesNoRow(m) ? monthlyTgtAttrs(m, "monthly") : "") +
+          '>' + gapCell(pg, "k_found", m, "target",
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) +
+          (ed && !isYesNoRow(m) ? monthlyChip(m, "monthly") : "") + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
           { kind:"select", opts:SMPRules.COMPILES }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
-        '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, "k_found") +
+        '<td class="cc">' + (ed ? eyeBtn(m, pg, "k_found") +
           ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>' +
-        (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
+        (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 7, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (ed ? '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
       '">+ Add an objective</button></div>' : '');

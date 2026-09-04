@@ -1660,6 +1660,14 @@ function andList(a){
   return a.length < 2 ? (a[0] || "")
     : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
 }
+/* The same list where the sentence offers a CHOICE rather than names a set —
+   "Set Sum, Count, Latest or Average". Beside `andList` on purpose: two ways
+   of joining a list is one decision, and separating them is how one gets
+   corrected and the other does not. */
+function orList(a){
+  return a.length < 2 ? (a[0] || "")
+    : a.slice(0, -1).join(", ") + " or " + a[a.length - 1];
+}
 
 function unitRolesFor(k){
   if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };

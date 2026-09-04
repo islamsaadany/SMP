@@ -291,9 +291,13 @@ var RECIPES = [
      unit head reading a benchmark that is not half the year with nothing
      anywhere explaining it. */
   { id: "monthly-plan", q: "How do I set a target month by month?", who: "office",
-    a: "Open the plan with the pen, and select <b>Monthly</b> beside the target. " +
-       "Twelve boxes open under the row \u2014 one for each month, in the target's " +
-       "own unit." +
+    /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
+       word — a recipe that tells somebody to look for a button that is no
+       longer there sends them hunting (§214.3, and §160's rule that a recipe
+       is part of the change that moves it). */
+    a: "Open the plan with the pen, and press the small grid mark beside the " +
+       "target. Twelve boxes open under the row \u2014 one for each month, in the " +
+       "target's own unit." +
        "|All twelve have to be filled in before it takes effect, and a month of " +
        "nought is a real answer: leave a box empty and the row keeps being spread " +
        "evenly across the year. Once it is complete the annual target becomes " +
@@ -304,6 +308,17 @@ var RECIPES = [
        "not flat \u2014 a season, a launch, a contract that starts in the second " +
        "half \u2014 because without it every target is measured as if each month " +
        "carried the same share of it." },
+  /* §278.3: the objectives tables gained the numbering and the handle a
+     pillar's key measures have always had, so the recipe that answers "how do
+     I reorder" has to name them too — one question with one answer, whichever
+     table somebody is standing in front of. */
+  { id: "reorder-objectives", q: "How do I change the order of the objectives?",
+    who: "office",
+    a: "Open the page with the pen. Each objective picks up a number and a drag " +
+       "handle in the first column \u2014 the same pair a {pillar} measure has \u2014 " +
+       "and dragging by the handle moves the row." +
+       "|The order is part of the plan, so it is saved with everything else and " +
+       "every page that lists those objectives follows it." },
   { id: "monthly-why", q: "Why is my year-to-date target not half the year?",
     a: "Because that measure carries a monthly plan: the office has said what each " +
        "month is expected to carry, so what you are measured against is the months " +

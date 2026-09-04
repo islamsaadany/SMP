@@ -1227,7 +1227,7 @@
    "id": "monthly-plan",
    "group": "Capabilities and projects",
    "q": "How do I set a target month by month?",
-   "a": "Open the plan with the pen, and select <b>Monthly</b> beside the target. Twelve boxes open under the row — one for each month, in the target's own unit.|All twelve have to be filled in before it takes effect, and a month of nought is a real answer: leave a box empty and the row keeps being spread evenly across the year. Once it is complete the annual target becomes whatever the twelve months come to, and the box shows it rather than taking a figure of its own.",
+   "a": "Open the plan with the pen, and press the small grid mark beside the target. Twelve boxes open under the row — one for each month, in the target's own unit.|All twelve have to be filled in before it takes effect, and a month of nought is a real answer: leave a box empty and the row keeps being spread evenly across the year. Once it is complete the annual target becomes whatever the twelve months come to, and the box shows it rather than taking a figure of its own.",
    "who": "office"
   },
   {
@@ -1236,6 +1236,13 @@
    "q": "How do I set a target month by month?",
    "a": "The Strategy Office sets that. It is worth asking for where your year is not flat — a season, a launch, a contract that starts in the second half — because without it every target is measured as if each month carried the same share of it.",
    "who": "everyone"
+  },
+  {
+   "id": "reorder-objectives",
+   "group": "Capabilities and projects",
+   "q": "How do I change the order of the objectives?",
+   "a": "Open the page with the pen. Each objective picks up a number and a drag handle in the first column — the same pair a {pillar} measure has — and dragging by the handle moves the row.|The order is part of the plan, so it is saved with everything else and every page that lists those objectives follows it.",
+   "who": "office"
   },
   {
    "id": "monthly-why",

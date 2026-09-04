@@ -1175,6 +1175,37 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
 
+/* ── AND A CAPABILITY'S OBJECTIVES REORDER THE SAME WAY (§278.3) ──
+   That walk had no reorder callback at all, so moving one of these rows fell
+   through to `capPlan` — the office's — while the identical act on a UNIT's
+   key objectives has classified as `arrange` since §101. One question with two
+   answers, and §278.3 draws a handle on both tables: a custodian would have
+   watched the row move and the save come back refused, which is §94.3's exact
+   fault.
+
+   BOTH ENDS, and the second one is the point: a build that classified every
+   change to these rows as `arrange` would satisfy the first assertion and hand
+   the plan to anybody who may reorder. */
+(function () {
+  const cap = (SEED.group.capabilities || []).filter(function (c) {
+    return (c.keyObjectives || []).length > 1; })[0];
+  check("the seed has a capability with two key objectives to reorder",
+        !!cap, "none — this assertion would be measuring nothing");
+  if (!cap) return;
+  const ci = (SEED.group.capabilities || []).indexOf(cap);
+  const inc = clone(SEED);
+  shuffleFirstToLast(inc.group.capabilities[ci].keyObjectives);
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("reordering a capability's key objectives is `arrange`, and nothing else",
+        kinds.length > 0 && kinds.every(function (k) { return k === "arrange"; }),
+        "got: " + JSON.stringify(kinds));
+  const inc2 = clone(SEED);
+  inc2.group.capabilities[ci].keyObjectives[0].name += " (renamed)";
+  const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
+  check("but RENAMING one is still `capPlan`",
+        kinds2.indexOf("capPlan") > -1, "got: " + JSON.stringify(kinds2));
+})();
+
 /* ── 14 · THE FOCUS SWITCH IS NOT A BIGGER MARK (§102) ────────────
    Marking a measure is the CEO's and the SMO's (§37); turning the whole
    feature off for the tenant is the SMO's alone. Asserted as a PAIR, because

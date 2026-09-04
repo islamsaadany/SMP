@@ -28,41 +28,6 @@
   td.idx .grip { vertical-align:middle; margin-right:2px; height:18px; }
   td.idx .idx-n { display:inline-block; min-width:14px; }
 
-  /* ── THE PAIR, CENTRED BY ITS MARKS (§278.3) ───────────────────────────
-     Islam, of the objectives tables' new `#` column: *"the number and the
-     handle are a bit misalignment they both needs to be centered
-     vertically"*, and of the round that centred their BOXES: *"these are not
-     centered to each other."*
-
-     HE WAS RIGHT AND THE FIRST MEASUREMENT WAS OF THE WRONG THING (§185, in
-     type). The two boxes centre to 0.00px and the digit still reads 1.62px
-     high, because a digit's line box carries descender space the glyph never
-     uses. Four ways of centring the boxes were measured — `vertical-align`
-     on both, a flex pair, a flex pair matching the grip's line-height, and
-     the grip's box shrunk to hug its own bars — and every one reads -1.62:
-     no box-level alignment can move a glyph inside its box.
-
-     `text-box: trim-both cap alphabetic` trims the number's box to the cap
-     height and the baseline, so the box IS the ink and centring it centres
-     the mark: -1.62px to +0.38px, which is the device pixel grid and as close
-     as sub-pixel rendering allows. Read off the PAINTED PIXELS at eight times
-     scale, never off the element boxes — measuring the boxes is what produced
-     the round that was rejected.
-
-     TAKEN FROM THE FONT'S OWN METRICS rather than from a nudge measured once,
-     which would be a guessed constant to re-measure the day the typeface
-     changes (§122.5). A browser that does not understand the line ignores it
-     and gets exactly what this looked like before. */
-  td.idx .idxpair { display:inline-flex; align-items:center; gap:2px; }
-  td.idx .idxpair .grip { margin-right:0; vertical-align:baseline; }
-  td.idx .idxpair .idx-n { text-align:center; vertical-align:baseline;
-    text-box: trim-both cap alphabetic; }
-
-  /* ONE LINE (§88). The `#` column costs 63px, and on a unit's nine-column
-     objectives table that was enough to break the eye and Remove onto a
-     second line — 57px row to 74, for a cell holding two controls. */
-  td.acts1 { white-space:nowrap; }
-
   /* Arrange mode reads as a distinct state, so nobody drags a row believing
      they are in the normal view. */
   .plist.arranging { border-color:var(--gold); }
@@ -1817,23 +1782,10 @@
      rule wins over the hover's at equal specificity and later source order,
      so a hovered striped row does not change colour at all today. Painting
      the pair grey there would invert the seam rather than close it. */
-  /* ── AND THE HOVER IS GONE ENTIRELY (§278.3, reversing §267.1) ────────
-     Islam, asked whether the tint earns its place beside the stripe:
-     *"for the hovering C remove it."* The rules above described a hovered
-     row taking `--surface-2` on an unstriped row and keeping `--zebra` on a
-     striped one — which is to say that on every second row the hover changed
-     NOTHING, measured: #FFFFFF -> #EFF2F6 on one parity, #F5F7FA -> #F5F7FA
-     on the other. A highlight that speaks on half the rows and is silent on
-     the other half reads as unreliable rather than helpful.
-
-     The global `tbody tr:hover > td` in `_shared.css` goes with them; these
-     two existed ONLY to make the frozen pair follow it, and with nothing to
-     follow they would be a rule that paints a tint no other cell has.
-     DELETED rather than left commented out (§24).
-
-     The cost is stated rather than argued: these tables are wide and scroll
-     sideways, and there is now nothing that follows one row across the
-     columns. The stripe alone separates them. */
+  .tblscroll tbody tr:hover > td.idx,
+  .tblscroll tbody tr:hover > td.idx + td { background:var(--surface-2); }
+  .tblscroll tbody tr:nth-child(even):hover > td.idx,
+  .tblscroll tbody tr:nth-child(even):hover > td.idx + td { background:var(--zebra); }
 
   /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
@@ -2188,31 +2140,19 @@ td > .bxkey:first-child, .tacfold .bxkey { margin-top:0; }
    THE ROW IS `--surface-2`, the platform's own second ground — never a tint
    of the accent, which this page spends on Report and the scoring colours
    (§41's budget). */
-/* ── AND THE CELL MUST STAY A CELL (§278.3) ──────────────────────────────
-   This was `td[data-mptgt] { display:flex }`, and a `display:flex` td is no
-   longer a table-cell: it stops stretching to its row's height. On a
-   supporting function's objectives, where the name wraps (§226), every cell
-   in the row measured 136px and the target cell measured 57 — and the 79px
-   underneath it was not the cell at all, it was the bare table showing
-   through. Islam, of a hovered row: *"all turnd grey but the target cell
-   turned white."* Nothing to do with hover; hover only made it visible.
-
-   THE FLEX BOX MOVES INSIDE. `.mpcell` seats the box and the mark on one
-   line and the `<td>` around it goes on being a cell, so it fills its row
-   and paints its own ground the whole height. */
-.mpcell { display:flex; align-items:center; gap:8px; }
+td[data-mptgt] { display:flex; align-items:center; gap:8px; }
 /* `.fld` is width:100% in this stylesheet, so without this the box asks for
    the whole cell and leaves the chip nothing (§248's own lesson, one cell
    over). */
-.mpcell > input.fld, .mpcell > .tgrid { flex:1; min-width:0; }
+td[data-mptgt] > input.fld, td[data-mptgt] > .tgrid { flex:1; min-width:0; }
 /* The mark keeps its own size in a flex cell, or the box beside it takes the
    whole line and leaves it nothing (§248's lesson, one cell over). */
-.mpcell > .mpopen { flex:0 0 auto; }
+td[data-mptgt] > .mpopen { flex:0 0 auto; }
 /* The outcome's cell stacks: four boxes, then the mark under them — `.tgrid`
    is two `--tw` columns and a fifth control in it would start a third row
    half the cell wide, which is the hole among equal boxes §248 refused. */
-.mpcell:has(> .tgrid) { display:block; }
-.mpcell > .tgrid + .mpopen { margin-top:6px; }
+td[data-mptgt]:has(> .tgrid) { display:block; }
+td[data-mptgt] > .tgrid + .mpopen { margin-top:6px; }
 /* The mark's SHAPE is declared beside the eye's, above — one block for one
    control, so the two cannot drift. This only says where it sits. */
 tr.mprow > td { background:var(--surface-2); border-top:0; }

@@ -6,12 +6,37 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§276 (the `Count` compile rule — a count is owed in
-whole ones) and §277 (a reported figure follows the target's unit) merged to
-`main` 2026-09-04 on Islam's word**, from
-`claude/integer-prorating-compilation-6dq77s`, on top of §260–§275 from other
-sessions; built as §260/§261 and renumbered at the merge because main had
-taken both numbers.
+**Latest version:** **§278 (a target with a shape of its own — the monthly
+plan) and §278.2 (the mark that opens it) merged to `main` 2026-09-04 on
+Islam's word**, on top of §260–§277 from other sessions.
+
+**§278.3 — the objectives table — is BUILT and ON ITS BRANCH**
+(`claude/seasonal-targets-monthly-proration-5clvu3`), **not merged**: `main` is
+production and every merge is Islam's word on the day (rule 4). Four reports
+from the live product, two causes. The monthly drawer spanned every column
+except the first, and a table shares a spanning cell's width across the columns
+it covers — so on the objectives tables, whose first column was the prose one,
+Objective went 242px → 97px the instant the drawer opened and the row 57px →
+136px. Islam's own proposal is the fix: the drawer starts at the second column,
+under a new `#` column, and no column moves at all. And `display:flex` on the
+target `<td>` had stopped it being a table-cell, which cost two more things
+nobody had connected — the cell no longer filled its row (his *"the target cell
+turned white"*) and, through the sibling `display:block` rule, a tactic's four
+target boxes laid out **on top of the Owner column** at every width (his *"the
+table is damged"*, measured on the shipped build with the grid reporting a width
+of zero). The flex box moved inside the cell and all three ended together. The
+row hover is gone at his instruction — measured, on a striped row the stripe
+outranked it and it changed nothing on every second row — and the objectives
+tables gained the `#` and the drag handle a pillar's key measures have always
+had, with the pair centred **by their marks** rather than by their boxes.
+Review page: `design-mockups/objectives-table/2026-09-04_the-objectives-table.html`;
+the reasoning is §278.3. `checks/objectives-table.py` is **24 red** on the build
+before and green after, 523/0 on the authoriser, 131/0 on the differ, the full
+`qa.py` sweep ERRORS none. Three checks held literals these decisions moved and
+were **rewritten, not deleted** (§218): `plan-tail-fold` asserted a hovered
+row's ground, `fn-ko-edit` held the column list and four position-keyed cell
+selectors, and `fn-pillars` held the workbook's column list — which had been red
+since §278 landed and was missed at that merge.
 
 **§261 — the master presentation — is BUILT and ON ITS BRANCH**
 (`claude/master-presentation-flow-f91mrl`), **not merged**: `main` is

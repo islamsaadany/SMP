@@ -188,6 +188,25 @@
   tr.dragging td { background:var(--attn-bg) !important; }
   tr.dragging .handle { cursor:grabbing; }
 
+  /* ── THE SWAP IS HELD WHILE A DRAG IS ON ──────────────────────────────
+     Measured, not guessed: with the swap driven by :hover alone, a four-row
+     drag swapped the bars SIX times, and half of those put the bars on a row
+     the pointer was passing rather than on the row in your hand — the row
+     moves in whole-row steps while the pointer moves continuously, so for
+     about half of every row crossed the pointer is not over the dragged
+     handle at all. That is the whole of "the handle feels glitchy", and it
+     belongs to this treatment rather than to the drawing: options 1 and 2
+     draw the bars always and cannot have it, which is why the platform's own
+     Setup tables measure zero swaps across a full drag.
+
+     So: the row being dragged keeps its bars wherever the pointer is, and
+     while a drag is on no other row may take them. */
+  tr.dragging .handle .num { visibility:hidden; }
+  tr.dragging .handle .grip { display:flex; position:absolute; }
+  tbody.sorting tr:not(.dragging) .handle:hover .num { visibility:visible; }
+  tbody.sorting tr:not(.dragging) .handle:hover .grip { display:none; }
+  tbody.sorting tr:not(.dragging) .handle:hover { background:none; }
+
   .empty { margin:0; padding:16px 8px; font-size:12.5px; color:var(--ink-3); }
 
   .acts {
@@ -444,6 +463,7 @@ function wireHandles(){
       ev.preventDefault();
       var tr = h.closest("tr");
       tr.classList.add("dragging");
+      flowBody.classList.add("sorting");
       /* ON THE DOCUMENT, NEVER ON THE HANDLE, and not by pointer capture:
          the first move REORDERS the row, and moving an element in the DOM
          releases the capture its descendant holds — so the drag stopped dead
@@ -467,6 +487,7 @@ function wireHandles(){
       }
       function up(){
         tr.classList.remove("dragging");
+        flowBody.classList.remove("sorting");
         document.removeEventListener("pointermove", move);
         document.removeEventListener("pointerup", up);
         commit();

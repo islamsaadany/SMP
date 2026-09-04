@@ -33897,3 +33897,131 @@ not the code: the sample pasted was a screenshot of a white region of the
 platform. Re-shot against a region with the navy header in it. *§185's rule
 from the other side: a correct build can look broken, and the way to tell is to
 change the input rather than the code.*
+
+---
+
+## §287 — A SAVE STOPS SHUTTING EVERYBODY ELSE OUT, AND A ROW SAYS THE REGISTER'S NAME (2026-09-04)
+
+Islam, on the shipped build: *"this error always comes and manytimes the chat
+disappears before coming back and disappear again"*, with the corner sitting on
+*Looking…* and the Platform Inbox drawing §231.4's card — *"We could not load
+the conversations. The server did not answer (no answer)."* And, of the search:
+*"the serach is bringing the full name and we agreed across the platform we use
+the short name from the registry and beside it the unit of the function for
+distinction."*
+
+**§282 FIXED ONE READER AND CALLED THE JOB DONE, AND THAT IS THE FAULT WORTH
+RECORDING.** That section took the register's name out of the chat's queue,
+proved it, shipped it — and left **three doors standing in front of it**. Every
+chat request reads two things before it reaches the action it was asked for,
+and a third sits in front of every authenticated request in the whole product:
+
+| what a request reads before it acts | under a save |
+| --- | --- |
+| the schema check, on a cold process | **blocked** |
+| `chatSettings()` — one row of `org` | **blocked** |
+| `auth.getSession()` — `sessions` **JOIN `people`** | **blocked** |
+| the conversation list | 1ms |
+| the messages | 1ms |
+| the search | 4ms |
+
+So §282's own three lines of evidence were all true and all about the part that
+was already working. *A measurement that only covers the thing you changed
+proves the thing you changed.*
+
+**AND MY OWN TEST PASSED ON IT.** `test-chat-during-save.js` held a save open by
+running `TRUNCATE people CASCADE` — one table. A save truncates **all 33**,
+`org` among them. §100.3 from the inside: *a stand-in that models LESS than the
+thing it stands in for reports a broken build as working.* The list is read out
+of `lib/state-io.js` now rather than copied (§283's rule), so a table added to
+the save tomorrow is locked here that day.
+
+**THE READERS ARE NOT PATCHED ONE AT A TIME, BECAUSE THERE ARE MORE OF THEM THAN
+CAN BE COUNTED.** Every door is a read of the state graph, and `getSession`
+alone means no authenticated request of any kind can complete while a save runs.
+Patching them individually would have been §282 a third time. **THE CLEAR STOPS
+BEING A `TRUNCATE`** — §282 named this as the eventual fix and deferred it, and
+the deferral was right then and expired the moment the readers turned out to be
+uncountable. `TRUNCATE` takes ACCESS EXCLUSIVE on every table it names for the
+whole of §240's transaction; `DELETE` takes ROW EXCLUSIVE, which does not
+conflict with a reader at all. Measured on a real Postgres with a save held open:
+
+|  | TRUNCATE | DELETE |
+| --- | --- | --- |
+| `auth.getSession()` | blocked | 2ms |
+| the chat's settings | blocked | 1ms |
+| the register | blocked | 1ms |
+| a unit's plan | blocked | 1ms |
+| the clear itself | 44ms | 116ms |
+
+**WHAT TRUNCATE WAS DOING WAS CHECKED, NOT ASSUMED**, against the schema this
+repo builds: all **14** foreign keys into these tables are `ON DELETE CASCADE`,
+so nothing is left behind whatever order the list is in; **no table outside the
+list references one inside it**, so the chat and the message record stay outside
+the clear exactly as before (§97, §146) — the only FKs into them are their own
+siblings'; there are **no user triggers**, so DELETE's row triggers and
+TRUNCATE's statement trigger are both nothing; and the statement carried no
+`RESTART IDENTITY` and there are no sequences here, every id being a text key.
+
+**THE ONE COST THAT NEEDED WATCHING IS BOUNDED, AND IT IS MEASURED RATHER THAN
+HOPED FOR.** A graph rewritten on every save is a great deal of churn, so: 160
+full saves against the worked example, vacuumed between rounds — **5.5 MB →
+15.4 → 15.5 → 15.5 → 15.5**. It steps up once and flattens, because the space a
+DELETE frees is reused rather than lost. §241's incremental writer keeps most
+saves off this path entirely; what still comes through it is every settings,
+register, reorder and add/remove change, and **every whole-graph post from a tab
+on an older build** — which is exactly the moment Islam was reporting, since a
+new build reloads every browser at once.
+
+**PROVED ABLE TO FAIL, TWO LEVERS, NEITHER A SWITCH IN THE PRODUCT** (§94.5):
+`SMP_SAVE_TRUNCATE=1` makes the test clear the way a save cleared before today —
+**4 red**, naming the session, the settings, the register and a unit's plan.
+With `SMP_CHAT_JOIN_PEOPLE=1` beside it, **5 red**: the original fault whole.
+And **§282's reader fix no longer goes red on its own**, which is the point
+rather than a gap — with the clear taking ROW EXCLUSIVE even the old joined
+query answers, so that fix is now belt to this one's braces and is kept.
+
+**ONE ASSERTION IN THIS FILE'S OWN TEST IS REVERSED AND REWRITTEN, NEVER DELETED
+(§218):** *"the register refuses quickly rather than hanging"* was the honest
+claim under §282, because a truncate made it genuinely unreadable and a fast
+refusal was the most that could be asked. It reads throughout now, so the
+assertion says so.
+
+### §287.1 — A ROW SAYS THE REGISTER'S NAME, AND WHERE THEY SIT
+
+Islam is right and it is my own drift one section old. **§187 shortened the name
+in the INBOX's list and put the place beside it, and this corner is the THIRD
+builder onto the same rows** — it drew `person_name` raw, the full legal name
+the server happened to store, with no place at all (§53.5, and §188 recorded the
+identical omission on the queue when §181 shortened the thread and stopped).
+**The search was already half-corrected**, which is what makes it the case he
+saw: `cqRows()` MATCHES on the short name (§93.8) and then drew the long one.
+
+**IT NEEDS NOTHING FROM THE SERVER.** `nameOf()` and `placeLabel()` resolve
+through the register the browser already holds, so a **search hit — which
+carries only a key and a stored name** — reads exactly like a queue row, which
+carries the register's fields too. No endpoint, no query and no stored column
+changes. **`chatPlaceOf()` is ONE answer to "where does this person sit", read
+by the corner AND the Inbox**: the register first, the row's own fields second
+for somebody the register no longer holds, both ends arriving at `placeLabel()`,
+which is the navigation's own word (§93.12) and never a second vocabulary.
+**A person the register does not hold keeps their stored name and is given NO
+place** — absent is not guessed (§35).
+
+**THE DEMO CANNOT SHOW THIS FAULT**: all 33 of its people have a two-word name,
+so short and long coincide and a build that lost the shortening would pass every
+assertion (§255). The check MAKES the state — the same keys, on the register
+under short names, with the stub sending the long form beside them exactly as a
+stored `person_name` does. **6 red** on the build before, printing his own
+symptom verbatim: *Ashraf Mohamed Laithy El Sayed*. The place is asserted as
+**AGREEMENT with `placeLabel(personAt(personBy(key)))`** rather than as a
+literal (§94.8), which a unit rename would otherwise break.
+
+**RECORDED, NOT DONE.** Sending to a person who has never written in, from the
+corner's search, is still only in the Platform Inbox (§247) — the shape has been
+put to Islam (two groups: conversations, then people with no conversation yet,
+drawn for the office alone and opening §247's own empty thread) and is a mockup
+away, not a build away. And `chat.js` keeps its own `esc2()`, which escapes
+`& < > "` and not `'` where §235's escaper does all five — inert today, since
+every attribute it writes is double-quoted, and a drift from the one-escaper
+rule all the same.

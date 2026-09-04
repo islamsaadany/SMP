@@ -1881,6 +1881,36 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   fix working with the falsified build on disk, once calling it broken with the
   good one. **Compare the file's mtime with the server's start time; never
   trust the order the commands were typed in.**
+- **A SAVE MUST NOT SHUT EVERYBODY ELSE OUT (§287, finishing §282):** that
+  section fixed one reader and left **three doors** in front of it — the schema
+  check, `chatSettings()` (one row of `org`), and **`auth.getSession()`, which
+  JOINs `people` and therefore sits in front of every authenticated request in
+  the product**. All three are inside the graph a save wipes; all three blocked
+  while the list §282 fixed answered in 1ms. *A measurement that only covers
+  the thing you changed proves the thing you changed.* **AND THE TEST PASSED ON
+  IT** — it held a save open with `TRUNCATE people`, one table where a save
+  truncates 33 (§100.3 from the inside); the list is READ OUT OF
+  `lib/state-io.js` now, never copied (§283). **THE CLEAR STOPS BEING A
+  `TRUNCATE`**: patching readers one at a time is §282 a third time, because
+  every door is a read of the graph and there are more of them than can be
+  counted. `DELETE` takes ROW EXCLUSIVE, which does not conflict with a reader
+  — every door 1–2ms where all four were blocked, for 72ms on the clear.
+  **CHECKED, NOT ASSUMED**: all 14 FKs cascade, nothing outside the list
+  references anything inside it (so the chat and the message record stay
+  outside the clear, §97/§146), no user triggers, no sequences.
+  **THE CHURN IS BOUNDED AND MEASURED** — 160 full saves: 5.5 → 15.4 → 15.5 →
+  15.5 → 15.5 MB, a step then flat, because the space a DELETE frees is reused.
+  §241's incremental writer keeps most saves off this path; what comes through
+  it is every settings, register, reorder and add/remove change, and **every
+  whole-graph post from a tab on an older build** — the exact moment reported,
+  since a new build reloads every browser at once. **§287.1 — A CHAT ROW SAYS
+  THE REGISTER'S SHORT NAME AND WHERE THEY SIT**: §187 did this for the INBOX's
+  list and the corner is the THIRD builder onto the same rows, MATCHING on the
+  short name (§93.8) and drawing the long one. It needs nothing from the server
+  — the browser holds the register — and `chatPlaceOf()` is ONE answer both
+  lists ask, ending at `placeLabel()` (§93.12); somebody the register no longer
+  holds keeps their stored name and is given NO place (§35). The demo cannot
+  show it (all 33 names are two words), so the check MAKES the state (§255).
 - **THE CHAT MUST NOT WAIT ON A SAVE (§282):** Islam, twice in two days —
   *"all conversations are gone!!"*, then *"before the fix all the chats
   disappeared"*, with §231.4's card reading *"The server did not answer (no
@@ -6271,7 +6301,48 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;282&ndash;&sect;286: the chat does not
+*Last Updated: 2026-09-04 &mdash; **&sect;287: a save stops shutting everybody
+else out, and a row says the register's name.** Islam, on the shipped build:
+*"this error always comes and manytimes the chat disappears before coming back
+and disappear again"*, with the corner on *Looking&hellip;* and the Inbox drawing
+*"The server did not answer"*. **&sect;282 FIXED ONE READER AND LEFT THREE DOORS
+STANDING**: every chat request reads the settings (one row of `org`) and, cold,
+the schema check, and `auth.getSession()` JOINs `people` in front of EVERY
+authenticated request in the product &mdash; all three inside the graph a save
+wipes, all three blocked, while the conversation list &sect;282 fixed answers in
+1ms. *A measurement that only covers the thing you changed proves the thing you
+changed.* **AND MY OWN TEST PASSED ON IT** &mdash; it held a save open with
+`TRUNCATE people`, one table where a save truncates 33 (&sect;100.3 from the
+inside); the list is read out of `lib/state-io.js` now rather than copied.
+**THE READERS ARE NOT PATCHED ONE AT A TIME, BECAUSE THERE ARE MORE OF THEM THAN
+CAN BE COUNTED**: the clear stops being a `TRUNCATE`, which &sect;282 named as
+the eventual fix and deferred &mdash; rightly then, and expired the moment the
+readers turned out to be uncountable. DELETE takes ROW EXCLUSIVE, which does not
+conflict with a reader at all: every door 1&ndash;2ms where all four were
+blocked, for 72ms on the clear. **CHECKED RATHER THAN ASSUMED** &mdash; all 14
+FKs cascade, no table outside the list references one inside it (so the chat and
+the message record stay outside the clear exactly as before), no user triggers,
+no sequences. **THE ONE COST THAT NEEDED WATCHING IS BOUNDED AND MEASURED**: 160
+full saves, 5.5 &rarr; 15.4 &rarr; 15.5 &rarr; 15.5 &rarr; 15.5 MB &mdash; it
+steps up once and flattens, because the space a DELETE frees is reused. Proved
+able to fail two ways, neither a switch in the product: **4 red** with the clear
+put back, **5 red** with &sect;282's old query beside it &mdash; the original
+fault whole. One assertion REVERSED and REWRITTEN, never deleted (&sect;218).
+**&sect;287.1 &mdash; the corner's rows say the register's short name and where
+they sit**, Islam's own correction and my drift one section old: &sect;187 did
+this for the INBOX's list and this corner is the THIRD builder onto the same
+rows, matching on the short name (&sect;93.8) and drawing the long one. It needs
+nothing from the server, since the browser holds the register; `chatPlaceOf()`
+is ONE answer read by both lists; somebody the register no longer holds keeps
+their stored name and is given no place (&sect;35). The demo cannot show it (all
+33 people have two-word names), so the check MAKES the state &mdash; **6 red**,
+printing his symptom verbatim. 11/0 during-save &middot; 103/0 test-chat
+&middot; 24/0 two-tabs &middot; 8/8 concurrent &middot; incremental
+byte-identical &middot; round trip and clean parity PASS on virgin databases
+&middot; 36/0 corner-queue &middot; office-chat, paste-picture and the full
+`qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;282&ndash;&sect;286: the chat does not
 wait on a save, the notifications say where they stop, a reply nobody was told
 about is chased, the corner survives the walk and carries the office's queue,
 and a picture is pasted.** &mdash; **&sect;282:** Islam, twice in two days

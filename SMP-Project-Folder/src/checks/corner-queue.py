@@ -27,17 +27,33 @@ HTML = (ROOT/"SMP-Project-Folder/src/strategy-management-platform.html").read_by
 GATE = (ROOT/"index.html").read_bytes(); SW = (ROOT/"sw.js").read_bytes()
 SEED = json.loads((ROOT/"db/seed-state.json").read_text())
 PERSON = {"key":"smo","name":"Mohamed Essam","role":"super"}
+# THE STORED NAME IS THE LONG ONE, WHICH IS WHAT THE SERVER ACTUALLY HOLDS
+# (§287). Islam's own report: "the serach is bringing the full name and we
+# agreed across the platform we use the short name from the registry". The
+# demo register cannot show this on its own — every one of its 33 people has
+# a two-word name, so short and long coincide and a build that lost the
+# shortening would pass every assertion (§255). So the state is MADE: these
+# keys ARE on the register, under short names, and the stub sends the long
+# form beside them exactly as a stored `person_name` does.
 QUEUE = [
- {"person_key":"mobhead","person_name":"Ashraf Laithy","last_at":"2026-09-03T09:41:00Z",
+ {"person_key":"mobhead","person_name":"Ashraf Mohamed Laithy El Sayed",
+  "last_at":"2026-09-03T09:41:00Z",
   "last_body":"The Q3 target on Active Base still reads 4.2M."},
  {"person_key":"cxcust","person_name":"Hala Nabil","last_at":"2026-09-03T09:12:00Z",
   "last_body":"I updated the definition and it did not stick."},
+ # AND SOMEBODY THE REGISTER DOES NOT HOLD, which is the one case the browser
+ # cannot answer: the stored name must stand, and no place may be invented.
+ {"person_key":"leftus","person_name":"Farida Selim","last_at":"2026-09-03T08:02:00Z",
+  "last_body":"Where do I find last year's plan?"},
 ]
 HITS = [
  {"person_key":"rethead","person_name":"Hossam Farid","waiting":False,
   "line":"...so the target we agreed in March is the one on the page.",
   "line_at":"2026-08-14T10:22:00Z","from_office":False,"is_last":False},
- {"person_key":"mobhead","person_name":"Ashraf Laithy","waiting":True,
+ # A SEARCH HIT CARRIES ONLY A KEY AND THE STORED NAME — no unit, no title —
+ # so it is the case Islam reported, and the case that proves the row reads
+ # the browser's own register rather than whatever the server sent.
+ {"person_key":"mobhead","person_name":"Ashraf Mohamed Laithy El Sayed","waiting":True,
   "line":"The Q3 target on Active Base still reads 4.2M.",
   "line_at":"2026-09-03T09:41:00Z","from_office":False,"is_last":True},
 ]
@@ -108,8 +124,27 @@ with sync_playwright() as p:
     print("\nTHE QUEUE")
     rows=pg.query_selector_all(".cqrow")
     ck("one row per waiting conversation", len(rows)==len(QUEUE), len(rows))
-    ck("the first row names the person",
-       "Ashraf Laithy" in (rows[0].inner_text() if rows else ""), rows[0].inner_text()[:40] if rows else "")
+    first = rows[0].inner_text() if rows else ""
+    ck("the first row names the person", "Ashraf Laithy" in first, first[:60])
+    # THE REGISTER'S NAME, NOT THE SERVER'S (§287) — asserted at BOTH ends, or
+    # a build that simply printed a shorter substring would satisfy the first.
+    ck("...the register's short name, not the stored long one",
+       "Ashraf Laithy" in first and "Ashraf Mohamed Laithy El Sayed" not in first, first[:60])
+    ck("...with where they sit beside it",
+       (rows[0].query_selector(".cqpl").inner_text().strip() if rows and rows[0].query_selector(".cqpl") else "") != "",
+       rows[0].query_selector(".cqpl").inner_text() if rows and rows[0].query_selector(".cqpl") else "no place drawn")
+    # AND IT IS THE NAVIGATION'S OWN WORD, asked of the platform rather than
+    # spelled here (§94.8) — a literal would go stale the day a unit is renamed.
+    want = pg.evaluate("""() => { try { return placeLabel(personAt(personBy('mobhead'))); }
+                                  catch(e){ return null; } }""")
+    got = rows[0].query_selector(".cqpl").inner_text().strip() if rows and rows[0].query_selector(".cqpl") else ""
+    ck("...and it agrees with placeLabel(), never a literal", bool(want) and got == want, got + " vs " + str(want))
+    # SOMEBODY THE REGISTER NO LONGER HOLDS keeps the stored name and gets NO
+    # place — absent is not guessed (§35).
+    gone = [r for r in rows if "Farida" in r.inner_text()]
+    ck("a person the register does not hold still reads as a name", len(gone)==1)
+    ck("...and no place is invented for them",
+       len(gone)==1 and gone[0].query_selector(".cqpl") is None)
     ck("a click at its centre reaches the row",
        pg.evaluate("""() => { const r=document.querySelector('.cqrow').getBoundingClientRect();
          const e=document.elementFromPoint(r.x+r.width/2, r.y+r.height/2);
@@ -164,6 +199,19 @@ with sync_playwright() as p:
        any("earlier message" in (h.inner_text() or "") for h in pg.query_selector_all(".cqrow")))
     ck("...and an answered conversation is reachable",
        any("Hossam" in (h.inner_text() or "") for h in pg.query_selector_all(".cqrow")))
+    # THE CASE ISLAM REPORTED (§287). A search hit carries only a key and the
+    # stored name, so if the row reads the browser's own register it shortens
+    # here too — and if it does not, this is the one place the long name shows.
+    hitrows = pg.query_selector_all(".cqrow")
+    ash = [h for h in hitrows if "Ashraf" in (h.inner_text() or "")]
+    ck("a search hit says the register's short name", len(ash)==1 and
+       "Ashraf Laithy" in ash[0].inner_text() and
+       "Ashraf Mohamed Laithy El Sayed" not in ash[0].inner_text(),
+       ash[0].inner_text()[:60] if ash else "no row")
+    ck("...with where they sit beside it, though the server sent no unit",
+       len(ash)==1 and ash[0].query_selector(".cqpl") is not None and
+       ash[0].query_selector(".cqpl").inner_text().strip() != "",
+       ash[0].query_selector(".cqpl").inner_text() if ash and ash[0].query_selector(".cqpl") else "no place")
     ck("the search box still holds what was typed",
        pg.eval_on_selector("#cqfind","e=>e.value")=="target",
        pg.eval_on_selector("#cqfind","e=>e.value"))

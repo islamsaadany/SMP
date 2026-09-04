@@ -438,10 +438,35 @@ var CHAT = (function(){
   /* ONE ROW BUILDER FOR BOTH LISTS, so a search result and a waiting row
      cannot drift apart (§53.5). `hit` carries the line that MATCHED and why
      it is here; a plain row carries the last line. */
-  function cqRow(key, name, at, line, hit){
-    return '<button class="cqrow" type="button" data-cqopen="' + esc2(key) + '">' +
-      '<div class="cqr1"><b>' + esc2(name || key) + "</b>" +
+  /* ── A ROW SAYS THE REGISTER'S NAME, AND WHERE THEY SIT (§287) ──────
+     Islam, of the search: "the serach is bringing the full name and we
+     agreed across the platform we use the short name from the registry and
+     beside it the unit of the function for distinction."
+
+     Right, and it is my own drift one section old. §187 shortened the name
+     in the INBOX's list and put the place beside it; this corner is the
+     THIRD builder onto the same rows and I drew `person_name` raw — the
+     full legal name the server happened to store — with no place at all.
+     §53.5, and the search was already half-corrected: `cqRows()` MATCHES on
+     the short name (§93.8) and then drew the long one.
+
+     IT NEEDS NOTHING FROM THE SERVER. `nameOf()` and `placeLabel()` resolve
+     through the register the browser already holds, so a search hit — which
+     carries only a key and a stored name — reads exactly like a queue row,
+     which carries the register's fields as well. The row's own fields are
+     the fallback for somebody the register no longer holds, which is the one
+     case the browser cannot answer (§35: absent, never guessed). */
+  function cqWho(row){
+    return { name: nameOf(row.person_key, row.live_name || row.person_name) || row.person_key,
+             place: chatPlaceOf(row) };
+  }
+
+  function cqRow(row, at, line, hit){
+    var who = cqWho(row);
+    return '<button class="cqrow" type="button" data-cqopen="' + esc2(row.person_key) + '">' +
+      '<div class="cqr1"><b>' + esc2(who.name) + "</b>" +
         '<span class="cqw">' + esc2(when(at)) + "</span></div>" +
+      (who.place ? '<div class="cqpl">' + esc2(who.place) + "</div>" : "") +
       '<div class="cqln">' + esc2(oneLine(line || "")) + "</div>" +
       (hit ? '<div class="cqhit">' + esc2(hit) + "</div>" : "") + "</button>";
   }
@@ -464,7 +489,7 @@ var CHAT = (function(){
       return '<div class="cqfound">' + hits.length + " found in all conversations, " +
         "waiting or not</div>" +
         hits.map(function(h){
-          return cqRow(h.person_key, h.person_name, h.line_at, h.line,
+          return cqRow(h, h.line_at, h.line,
             h.is_last ? "" : ("found in an earlier message" +
                               (h.waiting ? "" : " \u00b7 answered")));
         }).join("");
@@ -472,7 +497,7 @@ var CHAT = (function(){
     if (cq.rows === null) return '<div class="cqzero">One moment\u2026</div>';
     if (!cqRows().length) return '<div class="cqzero">Nobody is waiting on the office.</div>';
     return cqRows().map(function(r){
-      return cqRow(r.person_key, r.person_name, r.last_at, r.last_body, "");
+      return cqRow(r, r.last_at, r.last_body, "");
     }).join("");
   }
 
@@ -2089,10 +2114,30 @@ var CHAT = (function(){
     return (box.threads || []).length - boxRows().length;
   }
 
+  /* WHERE SOMEBODY SITS, ANSWERED ONCE FOR BOTH LISTS (§287, §53.5). The
+     REGISTER first, because the browser holds it and a search hit carries
+     nothing else; the row's own fields second, for a person the register no
+     longer holds. Both ends arrive at `placeLabel()`, the navigation's own
+     word (§93.12) — never a second vocabulary. */
+  function chatPlaceOf(t){
+    var at = null;
+    try {
+      var p = typeof personBy === "function" ? personBy(t.person_key) : null;
+      if (p && typeof personAt === "function") at = personAt(p);
+    } catch(e){}
+    if (at === "group") at = null;
+    if (!at) {
+      if (t.unit_key) at = t.unit_key;
+      else if (t.fn_key) at = "fn:" + t.fn_key;
+    }
+    if (!at || typeof placeLabel !== "function") return "";
+    return placeLabel(at) || "";
+  }
+
   function placeOf(t){
     var bits = [];
-    if (t.unit_key && typeof placeLabel === "function") bits.push(placeLabel(t.unit_key));
-    else if (t.fn_key && typeof placeLabel === "function") bits.push(placeLabel("fn:" + t.fn_key));
+    var where = chatPlaceOf(t);
+    if (where) bits.push(where);
     if (t.title) bits.push(t.title);
     if (t.gone) bits.push("no longer on the register");
     return bits.filter(Boolean).join(" · ");

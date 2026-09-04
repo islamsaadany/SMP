@@ -542,6 +542,13 @@ body.presenting .chatdock { display:none; }
 .cqr1 b { font-size: var(--fs-note); font-weight: 650; color: var(--ink); }
 .cqw { margin-left: auto; font-size: var(--fs-micro); color: var(--ink-3);
        white-space: nowrap; }
+/* WHERE THEY SIT (§287) — under the name, above the line they wrote, so a
+   row reads person, place, message. One line and clipped, never wrapped: a
+   queue row must be one height whatever the name is (§88), and the place is
+   the part that can run long. Quieter than the message, because the message
+   is what the office came to read. */
+.cqpl { font-size: var(--fs-micro); color: var(--ink-3); margin-top: 2px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cqln { font-size: var(--fs-note); color: var(--ink-2); margin-top: 4px;
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cqhit { font-size: var(--fs-micro); color: var(--ink-3); margin-top: 3px;

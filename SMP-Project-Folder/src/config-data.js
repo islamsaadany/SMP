@@ -7635,7 +7635,7 @@ function clearUnitPlan(u, why){
    the globals, so it is a pure function and the test can call it with nothing
    loaded.
 
-   IT HAD TWO JOBS AND HAS ONE (spec 024 §6.1). It drew §67's "Clear project"
+   IT HAD TWO JOBS AND HAS ONE (spec 030 §6.1). It drew §67's "Clear project"
    demo — what a client's deployment looks like on day one — and that button is
    gone with the whole Demo-data switch, because the worked example is a CLIENT
    now. What remains is the job it was written for: being the thing

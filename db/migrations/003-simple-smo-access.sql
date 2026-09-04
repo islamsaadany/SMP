@@ -18,7 +18,7 @@
 -- in. The hash below is scrypt with its own salt — the password itself is not
 -- stored anywhere.
 
--- GUARDED ON THE TENANT IT WAS WRITTEN FOR (spec 024, 2026-08-28).
+-- GUARDED ON THE TENANT IT WAS WRITTEN FOR (spec 030, 2026-08-28).
 -- Since the platform holds a schema per client, this file runs on every client
 -- created from now on — and unguarded it would put a known password on the
 -- door of a database that has no people in it at all. The WHERE EXISTS makes

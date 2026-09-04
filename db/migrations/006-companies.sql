@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS companies (
 -- explicit "its own company", which Setup names in words.
 ALTER TABLE units ADD COLUMN IF NOT EXISTS company text;
 
--- GUARDED ON THE TENANT IT WAS WRITTEN FOR (spec 024, 2026-08-28).
+-- GUARDED ON THE TENANT IT WAS WRITTEN FOR (spec 030, 2026-08-28).
 -- Distribution and B2C are RAYA's companies. With a schema per client this
 -- file runs for every client created from now on, and unguarded it would put
 -- one client's companies into another's database (§21: no invented content in

@@ -109,7 +109,7 @@ drift, flagged before it was corrected rather than quietly realigned.)*
 
 **On the multi-client branch, not merged to `main`:** §288 (one platform, many
 clients — spec 030), over v3.56, now merged with main at §278.3. Both numbers
-were renumbered on that merge: main had taken §147 and `specs/024-` first while
+were renumbered on that merge: main had taken §288 and `specs/024-` first while
 this branch waited 452 commits for a word.
 
 **Sign in with your EMAIL** (§288.2, spec 030): the person-key path is gone.
@@ -163,7 +163,7 @@ Nothing proceeds past this line without an answer.
 
 ## Agreed and specified, not built
 
-- **Multi-client — one door, many clients (`specs/024-multi-client/spec.md`,
+- **Multi-client — one door, many clients (`specs/030-multi-client/spec.md`,
   2026-08-28).** Every decision settled with Islam in session: one door, cards
   for Forefront only, **one Postgres schema per client** (§36.2), RHI and
   El Abd real and empty, an office-only page that creates a client, **email-only
@@ -1791,9 +1791,9 @@ took v3.52–v3.57 from four other sessions while they were being built.*
 - Proof: `checks/welcome.py` (three viewers, made state, doors pressed and
   read back, absences, proved to fail on the pre-§148 build) + full `qa.py`.
 
-### v3.57 — a custodian per project: two roles, not one (§147, spec 024)
+### v3.57 — a custodian per project: two roles, not one (§288, spec 030)
 
-- **Three bounded roles, all derived from being named** (§147.7, Islam's
+- **Three bounded roles, all derived from being named** (§288.7, Islam's
   correction of the first build): **Project owner** from a project's Owner
   row; **Pillar owner** from a pillar's, on a unit or a pillars function;
   **Contributor** for everyone else the plan names — collaborators,
@@ -4074,7 +4074,7 @@ walk → `DATABASE_URL=… node scripts/test-roundtrip.js` (clean slate, round t
 fixed point and the archived-plan round trip must all print PASS) →
 `node scripts/dev-server.js` and drive it in a browser.
 
-**Since §147 there are TWO more halves to that loop**, because neither of the
+**Since §288 there are TWO more halves to that loop**, because neither of the
 product's sweeps reaches them: the boundary and the seats on the server
 (`node scripts/test-platform.js`, `node scripts/test-platform-rules.js`) and
 Forefront's own two pages on screen (`checks/multi-client.py`,
@@ -4083,7 +4083,7 @@ demo switch — the worked example is a CLIENT now, at `/demo`.
 
 ---
 
-## Multi-client (§147, spec 024) — where it stands
+## Multi-client (§288, spec 030) — where it stands
 
 | Slice | What it is | State |
 |---|---|---|
@@ -4093,7 +4093,7 @@ demo switch — the worked example is a CLIENT now, at `/demo`.
 | US2b | The door is a door — Forefront's shell at `/platform` (Islam's correction) | **Built** |
 | US3b | A role is a seat on a client (Islam's correction; retires the four platform roles) | **Built** |
 | US4 | The Demo client, and the retirement of the Demo-data button and demo mode | **Built** |
-| Phase 7 | Byte-identical rebuild, the two sweeps, §147, the steering files | **Built** |
+| Phase 7 | Byte-identical rebuild, the two sweeps, §288, the steering files | **Built** |
 | — | **The live migration** | **Not run.** Rehearsed only. |
 
 **The one thing left, and it is Islam's call:** `scripts/migrate-to-multi-client.js`

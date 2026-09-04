@@ -1776,7 +1776,7 @@ function renderPeople(){
      a parameter again — passed false by the row, true by the dialog — and there
      are exactly two callers, both in this file, both named. */
   function roleCell(p, editable){
-    /* ── A FOREFRONT ROW IS SET SOMEWHERE ELSE (spec 024 §6) ──────
+    /* ── A FOREFRONT ROW IS SET SOMEWHERE ELSE (spec 030 §6) ──────
        Their seat comes from this client's configuration on the Forefront
        platform, and the next time they open the client it is written again —
        so a picker here would accept a change and silently un-make it, which
@@ -4232,7 +4232,7 @@ function renderKB(){
      ABSENT, NEVER DISABLED, when this viewer's roles match no story: a
      button that explains it cannot help you is worse than no button, and
      there is nothing the person could do to earn it. */
-  /* AND SAYING WHY IS NOT THE SAME AS BEING ABSENT (spec 024 §6.2, §61).
+  /* AND SAYING WHY IS NOT THE SAME AS BEING ABSENT (spec 030 §6.2, §61).
      The tour walks the person's OWN plan now — the worked example it used to
      borrow is a client of its own — so there is a second reason it may not
      run: the plan is not written yet. That is a state somebody can LEAVE, and

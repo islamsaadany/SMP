@@ -271,7 +271,7 @@ async function tellTheOffice(client, me, text, cfg) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    /* WHICH CLIENT IS THIS FOR (spec 024). The browser sends the slug it was
+    /* WHICH CLIENT IS THIS FOR (spec 030). The browser sends the slug it was
        served at; the schema comes from the registry row, never from the
        request (§36.4). An unknown client and one this account may not open are
        the same refusal, so trying slugs tells nobody anything. */

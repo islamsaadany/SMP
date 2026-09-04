@@ -425,7 +425,7 @@ def contrast(pg):
 def writes_nothing(pg):
     """THE TOUR HAS NO WRITE PATH AT ALL, which is a stronger thing to know
     than that one round trip happened to leave the state alone — and since
-    spec 024 it is the ONLY thing standing between the tour and the client's
+    spec 030 it is the ONLY thing standing between the tour and the client's
     own data. It used to walk the baked worked example, which refused every
     save (§21, §67); it walks the person's own plan now, so the backstop is
     gone and this assertion is carrying the whole weight.
@@ -444,7 +444,7 @@ def writes_nothing(pg):
                    "navigator.sendBeacon"]:
         check(banned not in src, f"the tour reaches for {banned!r} — it must write nothing")
     # AND IT CALLS NOTHING IN SYNC AT ALL NOW. `demoMode` and `setMode` were
-    # the two it was allowed, and both went with the dataset switch (spec 024
+    # the two it was allowed, and both went with the dataset switch (spec 030
     # §6.1) — so the allow-list is empty, which is the strongest form this
     # assertion has ever had.
     calls = sorted(set(re.findall(r"SYNC\.([A-Za-z]+)", src)))
@@ -482,7 +482,7 @@ def not_on_a_projector(pg):
 
 
 def nothing_to_tour(pg):
-    """AND A TOUR OF AN EMPTY SCREEN TEACHES NOTHING (spec 024 §6.2). With the
+    """AND A TOUR OF AN EMPTY SCREEN TEACHES NOTHING (spec 030 §6.2). With the
     demo dataset no longer borrowed, the tour walks the person's OWN plan — so
     it is not offered until there is one, and the Knowledge base says WHY
     rather than drawing a button that lights nothing (§61).

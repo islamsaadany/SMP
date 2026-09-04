@@ -123,7 +123,7 @@ var CHAT = (function(){
        goes through is the only place this cannot be forgotten. Found by
        qa.py, which walks every Setup page over file:// as the SMO. */
     if (!servable()) { done("There is no server behind this file.", null); return; }
-    /* THE CLIENT RIDES EVERY REQUEST (spec 024), and it is added HERE for the
+    /* THE CLIENT RIDES EVERY REQUEST (spec 030), and it is added HERE for the
        same reason the refusal above is: this is the one place every chat
        request goes through, so it is the only place it cannot be forgotten.
        Read from the path the page was served at — never stored, so two tabs

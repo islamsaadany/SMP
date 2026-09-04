@@ -33557,17 +33557,17 @@ the panel. The panel is drawn only for a unit carrying focus marks, so the unit
 is FOUND at runtime rather than named — and the sub-page key is `performance`,
 not `perf`, which cost the first run its panel entirely (§50.6).
 
-## §288 — RENUMBERED FROM §147, AND THE SPEC FROM 024 TO 030 (2026-09-04)
+## §288 — RENUMBERED FROM §288, AND THE SPEC FROM 024 TO 030 (2026-09-04)
 
 Main moved **452 commits** under this branch while it waited for a word — §148
-through §287 — and took BOTH numbers this work was built as: §147 is *A
+through §287 — and took BOTH numbers this work was built as: §288 is *A
 custodian per project* on main, and `specs/024-` is that feature's folder. The
 house rule is the one already written down three times in this file (§142–§144,
 §280, §287): **main takes the number first and mine is renumbered on merge**,
 because a section number is how one piece of work is pointed at from another
 and two sections sharing one is a reference that resolves to the wrong thing.
 
-So §147 → **§288** and `specs/024-multi-client` → **`specs/030-multi-client`**,
+So §288 → **§288** and `specs/030-multi-client` → **`specs/030-multi-client`**,
 everywhere: the sections below, every code comment that cites one, the checks,
 the migrations and the spec's own files. Nothing about the work changed — only
 what it is called.

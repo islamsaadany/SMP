@@ -411,7 +411,7 @@ var TOUR = (function(){
 
   /* ── RUNTIME STATE ────────────────────────────────────────────────────
      Private. `at` is -1 when nothing is running, which is what every guard
-     asks. `prevMode` was here until spec 024: it held the platform's dataset
+     asks. `prevMode` was here until spec 030: it held the platform's dataset
      before Start so every exit could put it back, and with the tour walking
      the person's own plan there is nothing to put back. */
   var story = null, steps = [], at = -1, asking = false,
@@ -670,7 +670,7 @@ var TOUR = (function(){
      Escape that leads to them. It used to have a second job, putting the
      platform back into the client's own data after the tour had switched it
      to the baked worked example; there is nothing to put back now, because
-     the tour walks the person's OWN plan (spec 024 §6.2). */
+     the tour walks the person's OWN plan (spec 030 §6.2). */
   function end(){
     at = -1; asking = false; docked = false;
     if (dock) dock.hidden = true;
@@ -683,7 +683,7 @@ var TOUR = (function(){
     if (!dock) return;
     story = key;
 
-    /* ── THE TOUR WALKS THE PERSON'S OWN PLAN (spec 024 §6.2) ────────
+    /* ── THE TOUR WALKS THE PERSON'S OWN PLAN (spec 030 §6.2) ────────
        It used to switch the platform to the baked worked example first, and
        §107.14's fix was about the ORDER of that switch — swap the dataset,
        THEN read who and where, because `setMode("demo")` replaces PEOPLE,
@@ -725,7 +725,7 @@ var TOUR = (function(){
 
      Six conditions, and every one of them is a reason somebody should not be
      interrupted. It declines in silence: declining is the common case. */
-  /* IS THERE ANYTHING TO TOUR (spec 024 §6.2). Asked of the place the story
+  /* IS THERE ANYTHING TO TOUR (spec 030 §6.2). Asked of the place the story
      would be told on, through the shared rule — never a second reading of
      "does this client have a plan" (constitution IX). A tour of an empty
      screen teaches nothing, and it is worse than that: every step lights a

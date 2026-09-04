@@ -5485,7 +5485,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `scripts/dev-server.js` and `sw.js` (which caches the **tenant path**, since a
   worker caches by request URL). From `file://` there is no server to rewrite,
   so the gate uses the real relative path there.
-- **MULTI-CLIENT (since v3.60, §147, spec 024): ONE PLATFORM, MANY CLIENTS.**
+- **MULTI-CLIENT (since v3.60, §288, spec 030): ONE PLATFORM, MANY CLIENTS.**
   §36's recommendation, built: **one Postgres schema per client**, resolved from
   the `platform.clients` registry off the slug the browser was **served at**,
   never from the request. `lib/platform-io.js` does it once for all four
@@ -5496,10 +5496,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **The addresses:** `/` is the door, `/platform` is Forefront's own shell, and
   `/raya-trade` · `/rhi` · `/el-abd` · `/demo` are the clients — carried by
   `vercel.json`, `scripts/dev-server.js` (which READS that list) and `sw.js`.
-- **THE DOOR IS A DOOR (§147.3):** the front page signs you in and stops — no
+- **THE DOOR IS A DOOR (§288.3):** the front page signs you in and stops — no
   cards, no tabs, no tables. `platform.html` holds Clients · Consultants · Who
   sees what, and a client's configuration opens from **that client's own card**.
-- **A ROLE IS A SEAT ON A CLIENT (§147.4, reversing the four platform roles):**
+- **A ROLE IS A SEAT ON A CLIENT (§288.4, reversing the four platform roles):**
   `accounts.is_admin` is the platform (adding clients, adding consultants, the
   table); `account_clients.seat` — `super` or `smoteam`, **the client's own two
   seats** — is everything inside one. Set on the client's configuration,
@@ -5508,17 +5508,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   a transaction. `lib/platform-rules.js` is the shared rules module (the
   platform's `lib/rules.js`); run `node scripts/test-platform-rules.js` after
   touching it.
-- **IDENTITY IS AN EMAIL (§147.2):** `platform.accounts` is keyed by address;
+- **IDENTITY IS AN EMAIL (§288.2):** `platform.accounts` is keyed by address;
   §43's scrypt, `must_change`, the httpOnly cookie and the 30-day life are
   unchanged. A register row with no email stays and cannot sign in. **Where
   somebody lands is decided by what they can OPEN**, never by the team they are
   on. Every statement names its schema explicitly, because each client still
   carries its own `sessions` and `credentials`.
-- **THE PLATFORM'S PRE-PHASE RUNS BEFORE ITS SCHEMA FILE (§147.4):** unlike a
+- **THE PLATFORM'S PRE-PHASE RUNS BEFORE ITS SCHEMA FILE (§288.4):** unlike a
   client's, where `schema.sql` has already run — so on a fresh database the
   tables do not exist at all and every step of a `db/platform-migrations/*.sql`
   pre-migration is guarded on `to_regclass`.
-- **THE DEMO CLIENT, AND WHAT IT RETIRES (§147.8):** the worked example is a
+- **THE DEMO CLIENT, AND WHAT IT RETIRES (§288.8):** the worked example is a
   CLIENT now — its own schema, its own address, and **it saves**. This
   **reverses §21's "never put invented content in the database"**, for one
   client and deliberately; what replaces §21's guard is the boundary above.
@@ -5528,13 +5528,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   survives — its own or the substitution's. **The Demo data button, demo mode
   and §67's Filled/Clear pair are gone**; the baked dataset stays as what the
   offline `file://` build runs on.
-- **THE TOUR RUNS ON THE PERSON'S OWN PLAN (§147.9):** `SMPRules.tourReady(w,
+- **THE TOUR RUNS ON THE PERSON'S OWN PLAN (§288.9):** `SMPRules.tourReady(w,
   target)` — at least one pillar or capability and one key objective — and it is
   not offered until there is one. The Knowledge base's replay button is
   **absent** for a viewer whose roles fit no story and **explained** for one
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
-  §147 together before changing how a client is resolved.
+  §288 together before changing how a client is resolved.
 - **WHEN A FIELD IS RENAMED, FIND THE CODE THAT CREATES IT** — not only the
   code that reads it (§51.10). §15 renamed a capability's `measures`/`tactics`
   to `keyObjectives`/`projects`; the ADD button kept minting the old shape for
@@ -8492,7 +8492,7 @@ watched to fail first: **5 / 1 / 2** on the client, **3 / 11** on the server.*
 
 *On the multi-client branch, not merged to `main`: 2026-09-04 &mdash; **v3.60:
 one platform, many clients (&sect;288, spec 030 &mdash; renumbered from
-&sect;147 / spec 024 on the merge, which main had taken first)**. Islam: *"Let's work together on splitting this platform
+&sect;288 / spec 030 on the merge, which main had taken first)**. Islam: *"Let's work together on splitting this platform
 to be multitenant. We have an external access for the SMO office and then they
 pick the client from different cards."* **ONE POSTGRES SCHEMA PER CLIENT**
 &mdash; &sect;36's own recommendation, four versions old and now built &mdash;

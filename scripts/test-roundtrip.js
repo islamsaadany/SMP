@@ -52,7 +52,7 @@ function firstDiff(a, b, at) {
 }
 
 /* `--client <schema>` runs the whole round trip inside ONE CLIENT's schema
-   (spec 024). Worth having as a flag rather than a separate script: §113.7 is
+   (spec 030). Worth having as a flag rather than a separate script: §113.7 is
    a migration that read a column schema.sql no longer creates — perfect on
    every database that already existed and broken on every fresh one — and the
    only way to see that class of fault is to run this against a client created
@@ -111,7 +111,7 @@ const CLIENT_ARG = (function () {
      FUNCTION survives the clean slate and its invented CONTENT does not (§21). */
   /* A CLIENT SCHEMA AND `public` ARE TWO DIFFERENT CLEAN SLATES, and asserting
      one of them of both reported FAIL on a perfectly correct empty client
-     (spec 024). `public` is seeded and then cleared by migration 004, so it
+     (spec 030). `public` is seeded and then cleared by migration 004, so it
      keeps the SETUP — ten units, eight functions, two companies — and loses
      every invented figure. A client created since the split is made with
      `seed: false` and never had any of it: the right expectation there is

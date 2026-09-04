@@ -208,10 +208,11 @@ with sync_playwright() as p:
     import tempfile, os
     tmp = tempfile.mkdtemp(prefix="smp-pptx-")
 
-    # §145.9 (Islam, 2026-08-27): the download BUTTON is hidden for everyone —
-    # the builder and its rule stand, kept for the feature's return, so the
-    # deck's content is still proved through a direct call to sendPlanPptx()
-    # while every surface is asserted to draw NO button.
+    # §252.2 (Islam, 2026-09-02): the download comes BACK — not to the pane
+    # corner §145.9 hid, but as an entry in the Presentation menu, and for the
+    # office ALONE. So every assertion here is REWRITTEN rather than deleted
+    # (§218): the ones that said "nobody sees it" now say where it is, and the
+    # ones that said a custodian's rule still answered now assert it refuses.
     def grab(pg, name, target):
         with pg.expect_download() as dl:
             pg.evaluate("(t) => sendPlanPptx(t)", target)
@@ -219,9 +220,33 @@ with sync_playwright() as p:
         dl.value.save_as(path)
         return path
 
+    def menu_entry(pg):
+        """The download entry INSIDE the Presentation menu, opened the way a
+           person opens it — a <details> that is shut draws its children but
+           shows nothing, so presence alone would pass on a menu nobody can
+           reach. Returns (found, reachable-by-a-real-click)."""
+        return pg.evaluate("""() => {
+          const d = [...document.querySelectorAll("details.dlmenu")]
+            .find(x => /Presentation/.test(x.querySelector("summary").textContent));
+          if (!d) return { menu:false, entry:false, hit:false };
+          d.open = true;
+          const b = d.querySelector("[data-dlpptx]");
+          if (!b) return { menu:true, entry:false, hit:false };
+          const r = b.getBoundingClientRect();
+          const at = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
+          return { menu:true, entry:true, hit: !!at && b.contains(at),
+                   label: b.textContent.trim() };
+        }""")
+
+    be(pg, who["smo"], who["unit"], "performance")
+    m = menu_entry(pg)
+    ck("§252.2: the SMO's Presentation menu carries the download",
+       m["menu"] and m["entry"], m)
+    ck("...and a click at its centre reaches it (§93.4)", m.get("hit") is True, m)
+    ck("...worded for what it is", "Download the plan" in m.get("label", ""), m)
     be(pg, who["smo"], who["unit"], "strategy", "plan")
-    ck("§145.9: the download button is drawn for nobody — the SMO included",
-       pg.query_selector("[data-dlpptx]") is None)
+    ck("...and it is NOT on the plan pane any more (§145.9's corner is gone)",
+       pg.query_selector(".pane .paneact [data-dlpptx]") is None)
     f = grab(pg, "smo-unit.pptx", who["unit"])
     ck("...and pressing it saves a file", f is not None)
     if f:
@@ -240,34 +265,47 @@ with sync_playwright() as p:
         for figure in ["2.7B", "48%", "3,180"]:
             ck("no reported figure leaks in (" + figure + ")", figure not in d["text"])
 
+    # THE THREE ROLES §117 GAVE IT TO AND §252.2 TOOK IT FROM. Both ends each
+    # time: no entry on the screen AND the shared rule refusing, or a build
+    # that merely stopped drawing it would pass while the press still worked.
+    for role, dest, tab in [("cust", who["unit"], "performance"),
+                            ("head", who["unit"], "performance")]:
+        be(pg, who[role], dest, tab)
+        mm = menu_entry(pg)
+        ck("the " + ("custodian" if role == "cust" else "unit owner") +
+           " has no download in the menu (§252.2)", mm["entry"] is False, mm)
+        ck("...and the rule refuses them too",
+           pg.evaluate("""(a) => SMPRules.mayDownloadPlan(world(), personBy(a.k), a.t)""",
+                       {"k": who[role], "t": who["unit"]}) is False)
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    ck("the custodian sees no download either (§145.9)",
-       pg.query_selector("[data-dlpptx]") is None)
-    ck("...and hiding it did not take the arrows with it",
+    ck("...and taking it away did not take the arrows with it",
        pg.query_selector(".pane .paneact [data-arrange]") is not None)
-    ck("...while the dormant rule still answers for them (kept for its return)",
-       grab(pg, "cust-unit.pptx", who["unit"]) is not None)
-
-    be(pg, who["head"], who["unit"], "strategy", "plan")
-    ck("the unit owner sees no download (§145.9)",
-       pg.query_selector("[data-dlpptx]") is None)
 
     # The fixture itself is asserted (§54.5): a demo with nobody to say no
     # about would pass the negative case by never running it.
     ck("the demo still holds a bystander to test the refusal with",
        who["floor"] is not None)
     if who["floor"]:
-        be(pg, who["floor"], who["floorUnit"], "strategy", "plan")
-        ck("somebody who does not hold the unit does NOT see it",
-           pg.query_selector("[data-dlpptx]") is None)
+        be(pg, who["floor"], who["floorUnit"], "performance")
+        ck("somebody who holds nothing sees no download either",
+           menu_entry(pg)["entry"] is False)
         rule = pg.evaluate("""(w) =>
           SMPRules.mayDownloadPlan(world(), personBy(w.floor), w.floorUnit)""", who)
-        ck("...and the dormant rule still refuses them", rule is False)
+        ck("...and the rule refuses them", rule is False)
 
     # A function's head, on the projects their plan lives behind.
     be(pg, who["fnhead"], "fn:" + who["fn"], "fnstrat", "proj")
-    ck("a function head sees no download on their Projects pane (§145.9)",
-       pg.query_selector("[data-dlpptx]") is None)
+    ck("a function head has no download in their menu either (§252.2)",
+       menu_entry(pg)["entry"] is False)
+    ck("...and the rule refuses them for their own function",
+       pg.evaluate("""(a) => SMPRules.mayDownloadPlan(world(), personBy(a.k), a.t)""",
+                   {"k": who["fnhead"], "t": "fn:" + who["fn"]}) is False)
+    # A FUNCTION'S PERFORMANCE TAB IS `fnperf`, not `performance` — the first
+    # run of this assertion navigated nowhere and reported a correct build as
+    # broken (§51.11's family: a check keyed on the wrong name).
+    be(pg, who["smo"], "fn:" + who["fn"], "fnperf")
+    ck("...while the office's menu carries it on that same function",
+       menu_entry(pg)["entry"] is True)
     ff = grab(pg, "fn-caps.pptx", "fn:" + who["fn"])
     ck("...and it downloads", ff is not None)
     if ff:
@@ -470,11 +508,13 @@ with sync_playwright() as p:
         txt = "".join(t.text or "" for t in ET.fromstring(z.read(last)).iter(A + "t"))
         ck("the last slide is the Thank you", "Thank you" in txt, txt[:60])
 
-    # THE FUNCTION OVERVIEW carried the download too (§119.9) and §145.9 hides
-    # it there like everywhere else — asserted, because a hide that missed one
-    # of the two surfaces would be exactly §119.9's fault inverted.
+    # §119.9 put the download on BOTH halves of a function's strategy tab
+    # because only one had a pane to hang it on. §252.2 settles that by moving
+    # it off the strategy tab altogether: one entry, in the menu, whichever
+    # section is open — asserted from the overview, the half that had to be
+    # given its own button before.
     be(pg, who["smo"], "fn:" + who["fn"], "fnstrat", "found")
-    ck("the Function overview draws no download either (§145.9)",
+    ck("the Function overview needs no download of its own now (§252.2)",
        pg.query_selector("[data-dlpptx]") is None)
     f = grab(pg, "fn-overview.pptx", "fn:" + who["fn"])
     ck("...while the builder still answers a direct ask", f is not None)

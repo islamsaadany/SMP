@@ -324,7 +324,76 @@
   .refused-keep:hover { background:color-mix(in srgb, currentColor 10%, transparent); }
   .refused-keep:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
+  /* ── THE SAVE-SAFETY CAUTIONS (§258) ──────────────────────────────────
+     Same slot and shape as the refusal above, on the ATTENTION ground rather
+     than the alarm red (§168, §190): nothing has gone wrong yet, and the
+     person is being told what to do to keep it that way. Tint + text twin,
+     never the solid fill as type (§38.4). Left-aligned with the action on the
+     right: this banner carries a control, and a centred sentence with a button
+     floating after it reads as two things. */
+  .banner.safety { background:var(--attn-bg); color:var(--attn-tx); display:flex;
+                   justify-content:flex-start; align-items:center; gap:12px;
+                   text-align:left; border-bottom:2px solid var(--attn); }
+  .banner.safety strong { color:inherit; display:block; font-weight:700; }
+  .banner.safety .safety-msg { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .banner.safety .safety-msg span { opacity:.9; }
+  .banner.safety .safety-ic { flex:none; width:20px; height:20px; color:var(--attn); }
+  .banner.safety .safety-acts { flex:none; display:flex; align-items:center; gap:8px; }
+  .safety-btn { font:inherit; font-size:var(--fs-small); font-weight:700; border-radius:7px;
+                padding:6px 13px; cursor:pointer; white-space:nowrap;
+                /* THE TYPE-GRADE AMBER AS THE FILL (§38.4, §94.8's --cta pair):
+                   --attn works as a mark and carries white at 3.25:1; --attn-tx
+                   is the same hue at a weight white can sit on (light 5.0, dark
+                   is dark-on-yellow), measured by checks/safety-banners.py. */
+                background:var(--attn-tx); color:var(--surface); border:1px solid var(--attn-tx); }
+  .safety-btn.ghost { background:transparent; color:inherit; border-color:currentColor; }
+  .safety-btn:disabled { opacity:.6; cursor:default; }
+  .safety-btn:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+  @media (max-width:680px){ .banner.safety { flex-wrap:wrap; } .banner.safety .safety-acts { width:100%; } }
   .banner.refused li { margin:2px 0; }
+
+  /* ── HISTORY (§262) ─────────────────────────────────────────────────
+     A setup table in the register's clothes (§88: one line per cell, the
+     long value on the hover), the changed pair in the mono face so a number
+     reads as a number, and Restore a quiet outline — it is a way back, not a
+     call to action. */
+  .hist-tools { display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .hist-tools .tk-search { width:200px; }
+  .hist-tools select.fld { width:auto; max-width:170px; }
+  .hist-page { padding:0 0 var(--pane-foot, 20px); }
+  .hist-count { font-size:var(--fs-small); color:var(--ink-3); margin:10px 0 8px; }
+  .hist-empty { font-size:var(--fs-small); color:var(--ink-3); margin:14px 0; }
+  .hist-err { color:var(--bad-tx); }
+  table.hist { width:100%; min-width:0; table-layout:fixed; border-collapse:collapse; font-size:var(--fs-small); }
+  table.hist th { text-align:left; white-space:nowrap; }
+  /* EVERY CELL WRAPS, NOTHING IS CUT (§262.2, Islam: "date and time needs to
+     wrap as well"). §88's clip was the register's answer to a row that must
+     stay one line; this page exists to SHOW values, so a cell takes the
+     height it needs; a word longer than its column breaks rather than being
+     cut, and the short columns are sized in pixels so a time never is. */
+  table.hist td { white-space:normal; overflow-wrap:anywhere; vertical-align:middle; }
+  table.hist td.hist-t { color:var(--ink-3); font-variant-numeric:tabular-nums; }
+  table.hist td.hist-fld { color:var(--ink-2); }
+  table.hist td.hist-fromto { font-family:var(--mono, ui-monospace, monospace); }
+  .hist-arr { color:var(--gold-deep); margin:0 5px; }
+  .hist-none { color:var(--ink-3); }
+  .hist-chip { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--ink-2); white-space:nowrap; }
+  i.hist-q { display:inline-block; width:9px; height:9px; border:1px solid var(--ink-3); border-radius:2px; margin-right:2px; vertical-align:-1px; }
+  i.hist-q.on { background:var(--gold-deep); border-color:var(--gold-deep); }
+  table.hist td.hist-act { text-align:right; }
+  .hist-rst { font:inherit; font-size:var(--fs-micro); font-weight:600; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; padding:3px 9px; cursor:pointer; }
+  .hist-rst:hover:not(:disabled) { border-color:var(--gold-deep); color:var(--ink); }
+  .hist-rst:disabled { opacity:.45; cursor:default; }
+  .hist-rst:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  .hist-confirm { border:1px solid var(--attn); background:var(--attn-bg); color:var(--attn-tx); border-radius:8px; padding:12px 14px; font-size:var(--fs-small); margin:0 0 14px; }
+  .hist-confirm p { margin:0 0 8px; } .hist-confirm b, .hist-confirm strong { color:inherit; }
+  .hist-confirm-acts { display:flex; gap:8px; justify-content:flex-end; }
+  .hist-confirm .btn { font:inherit; font-size:var(--fs-small); font-weight:700; border-radius:6px; padding:6px 12px; border:1px solid var(--attn-tx); background:var(--attn-tx); color:var(--surface); cursor:pointer; }
+  .hist-confirm .btn.ghost { background:transparent; color:inherit; border-color:currentColor; }
+  .hist-modal { min-width:0; }
+  .pband-hist { font-size:var(--fs-micro); color:var(--ink-3); font-weight:400; white-space:nowrap; margin-right:12px; }
+  .pband-hist b { font-weight:600; color:inherit; }
+  .pband-hist .linkbtn { font:inherit; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
 
   /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
      A title is one line of prose however long it is, so this must read as a
@@ -554,9 +623,12 @@
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
   .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
 
-  /* A LIGHT header, not a navy one, inside a clipped rounded box; rows
-     separate on HOVER rather than on a zebra stripe, and the columns are
-     divided by hairlines instead. The navy header went with the serif —
+  /* A LIGHT header, not a navy one, inside a clipped rounded box; the columns
+     are divided by hairlines instead of rules. Rows once separated on HOVER
+     rather than on a zebra stripe; a zebra was added to these tables later and
+     the hover was removed in §278.3, so the stripe is what separates them now
+     — recorded here because the sentence read the other way for versions after
+     it had stopped being true (§104.8). The navy header went with the serif —
      between them they were most of what made this look like a different
      product from the reference. */
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); }
@@ -630,7 +702,20 @@
              font-weight:700; background:var(--surface-2); white-space:nowrap;
              border-bottom:1px solid var(--line); }
   tbody tr:last-child td { border-bottom:0; }
-  tbody tr:hover > td { background:var(--surface-2); }
+  /* ── NO ROW HOVER (§278.3) ────────────────────────────────────────────
+     This was `tbody tr:hover > td { background:var(--surface-2) }`, and the
+     comment above still says the design separates rows "on HOVER rather than
+     on a zebra stripe" — which stopped being true the day a zebra was added
+     to these tables anyway. Both existed, and the zebra outranks the hover at
+     equal specificity and later source order, so on every second row the
+     hover changed nothing at all: measured #FFFFFF -> #EFF2F6 on one parity
+     and #F5F7FA -> #F5F7FA on the other.
+
+     Islam, asked whether it earns its place beside the stripe: *"for the
+     hovering C remove it."* Deleted rather than left in (§24), with the cost
+     stated: nothing now follows one row across a wide table. The register's
+     own hover on Setup is untouched — it sets the ROW where the zebra also
+     sets the row, so there the later rule wins and the hover works. */
   td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   td .why, .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
   /* Collabs. — the people supporting a tactic's owner (§50). Quieter than the

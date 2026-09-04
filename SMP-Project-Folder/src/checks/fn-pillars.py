@@ -341,13 +341,25 @@ with sync_playwright() as p:
     ok("a function's Objectives sheet asks for a Weight",
        any("Weight" in h for h in wb["fnObj"]), wb["fnObj"])
     ok("...and not a 3-year target", not any("3-year" in h for h in wb["fnObj"]), wb["fnObj"])
-    # §233 added the Hidden column to every row sheet, the unit's included —
-    # a deliberate decision, so the literal moved with it (§214.3's lesson:
-    # a check written against the last shape has to move when the shape is
-    # chosen again; what §213 guarded — no Weight, a 3-year target — holds).
-    ok("a UNIT's Objectives sheet is exactly what it was, plus §233's Hidden",
+    # §233 added the Hidden column to every row sheet, the unit's included, and
+    # §278 APPENDED Jan–Dec for the monthly plan — both deliberate decisions, so
+    # the literal moves with them (§214.3's lesson, for the second time on this
+    # one line: a check written against the last shape has to move when the
+    # shape is chosen again, and it had been red on `main` since §278 landed).
+    #
+    # REWRITTEN, NEVER LOOSENED (§218). The twelve months are ASSERTED, in
+    # order and at the END, because §65's rule is that a column's POSITION is
+    # what the workbook's validation ranges are built from — so "the front of
+    # the sheet is unchanged and the months follow it" is the property that
+    # matters, and a check relaxed to "contains these columns somewhere" would
+    # pass on a build that had inserted them in the middle and silently moved
+    # every range. What §213 guarded — no Weight, a 3-year target — holds.
+    MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    ok("a UNIT's Objectives sheet is what it was, plus §233's Hidden and §278's months",
        wb["unitObj"] == ["Objective", "Group", "Direction", "3-year target",
-                         "This year target", "Unit", "Compile", "Hidden"], wb["unitObj"])
+                         "This year target", "Unit", "Compile", "Hidden"] + MONTHS,
+       wb["unitObj"])
     ok("...and a unit keeps every sheet it had",
        wb["unit"] == ["Read me", "Foundation", "Aspiration", "Objectives", "SWOT",
                       "Pillars", "Measures", "Tactics"], wb["unit"])
@@ -378,9 +390,20 @@ with sync_playwright() as p:
        "Who we are" in uh and any("spiration" in h for h in uh), uh)
     pg.evaluate("()=>{ EDIT_PAGE.foundation=true; paint(); }")
     pg.wait_for_timeout(450)
-    ub = pg.query_selector_all("#panel .hoverpen textarea, #panel .hoverpen input")
+    # §268: `hoverpen` was the marker for the pen sitting in the CARD's corner,
+    # and a unit's Foundation pen is on the section line now — so keying on it
+    # asked whether the pen is still there rather than whether the PAGE still
+    # opens, which is what this assertion means (§51.11, on my own change).
+    ub = pg.query_selector_all("#panel .card textarea, #panel .card input")
     ok("...and still opens for editing", len(ub) >= 2, len(ub))
-    if ub:
+    # AND THE WRITE GOES TO THE FIELD IT NAMES. `.hoverpen` used to scope this
+    # to the aspiration CARD, so `[0]` was the aspiration; widened to `.card`
+    # it became the first clause of Who we are, and the assertion below then
+    # read the aspiration it had never written. Named outright now, which is
+    # what it should always have been (§94.8: assert the thing, not a position).
+    asp = pg.query_selector_all("#panel p.statement textarea, #panel p.statement input")
+    if asp:
+        ub = asp
         ub[0].click(); ub[0].fill("UNIT PROBE")
         pg.evaluate("()=>document.activeElement.blur()"); pg.wait_for_timeout(350)
         ok("...writing to the UNIT",

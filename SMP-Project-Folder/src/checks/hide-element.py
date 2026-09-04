@@ -60,7 +60,7 @@ with sync_playwright() as p:
        pg.evaluate("() => document.querySelectorAll('.eyebtn').length") == 0)
 
     # ── 2 · the pen's eye writes, and the score agrees ──────────────────
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     eyes = pg.evaluate("""() => ({
       n: document.querySelectorAll('.eyebtn').length,
@@ -117,7 +117,7 @@ with sync_playwright() as p:
        blank_gap["without"] == blank_gap["withHide"] + 1, blank_gap)
 
     # ── 3 · read mode says so, deck says nothing ────────────────────────
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     read = pg.evaluate("""(id) => {
       const chip = document.querySelector('tr.hiddenrow .hidchip');
@@ -155,7 +155,7 @@ with sync_playwright() as p:
     ck("...and the reader brings the mark back", wb["back"] == "1", wb)
 
     # ── 5 · the same press shows it again, key DELETED ──────────────────
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     press(pg, '.eyebtn[data-hiderow="%s"]' % before["id"]); pg.wait_for_timeout(400)
     back = pg.evaluate("""(id) => {
@@ -165,7 +165,7 @@ with sync_playwright() as p:
     }""", before["id"])
     ck("shown again: the key is DELETED, not false", not back["key"], back)
     ck("...and the score is back", back["perf"] == before["perf"], (back, before))
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(400)
 
     # ── 6 · a milestone on a function, and the project band has no eye ──
@@ -175,7 +175,7 @@ with sync_playwright() as p:
         if on and on[0] == "Functions": break
         pg.click("#units .navswitch"); pg.wait_for_timeout(150)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     fn = pg.evaluate("""() => {
       const onBand = document.querySelectorAll('.pband.edband .eyebtn').length;
@@ -208,7 +208,7 @@ with sync_playwright() as p:
          return !("hide" in c.projects[0].milestones.filter(x => x.id === id)[0]);
        }""", fn["id"]))
 
-    # ── 7 · A HIDDEN ROW OWES NOTHING, AND SAYS SO (§250) ───────────────
+    # ── 7 · A HIDDEN ROW OWES NOTHING, AND SAYS SO (§288) ───────────────
     #
     # Islam, from the running platform: *"for the hidden tactics or measures
     # they needs to be removed from the missing for the user and they don't
@@ -216,7 +216,7 @@ with sync_playwright() as p:
     #
     # §233 taught `gapMap()` and stopped, so the six readers that call
     # `gapMissing()` directly — the pillar's rail row above all — went on
-    # counting hidden rows. MEASURED on the pre-§250 build: with the five
+    # counting hidden rows. MEASURED on the pre-§288 build: with the five
     # owing tactics of Mobile's MB01 hidden, the band read 34 and dropped
     # MB01's chip while the pillar's own row still read "10 Missing", and
     # the rows carried 15 red `Missing` beside their own "Hidden — not
@@ -266,7 +266,7 @@ with sync_playwright() as p:
 
     # hide every owing tactic in that pillar, through the platform's own eye
     pg.click('#units button[data-u="mobile"]'); pg.wait_for_timeout(400)
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     pressed = 0
     for rid in owed["ids"]:
@@ -278,7 +278,7 @@ with sync_playwright() as p:
        pg.evaluate("""(ids) => ids.every(id =>
          SMPRules.isHidden(hideableById(id)))""", owed["ids"]))
     # out of the pen, so the read surface is what is being measured
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
 
     after = board()
@@ -332,12 +332,12 @@ with sync_playwright() as p:
         pg.click('[data-urail="mobile|%s"]' % owed["code"]); pg.wait_for_timeout(400)
 
     # ── and back, or "not counted" would be indistinguishable from "gone"
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     for rid in owed["ids"]:
         el = pg.query_selector('.eyebtn[data-hiderow="%s"]' % rid)
         if el: el.click(); pg.wait_for_timeout(200)
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     back = board()
     ck("showing them again brings the count, the row and the word back",

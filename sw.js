@@ -267,18 +267,106 @@
    v4.21, which git merges without a word while the bytes differ — so v4.22.
    Name checked against origin/main serving
    "smp-shell-v4.21-office-starts-a-conversation"; confirm again immediately
-   before the push (§94.16). */
-/* v4.26-hidden-owes-nothing — §250: a hidden row is not counted, so it is no
-   longer counted as MISSING either. `gapMissing()` returns nothing for it, so
-   the pillar's own rail row stops disagreeing with the band above it, and the
-   red word gives way to the platform's dash on a row nobody is asking about.
-   THE NAME IS AHEAD OF BOTH SIDES, which needed checking rather than assuming
-   (§94.12): this branch is serving v4.24 and origin/main v4.25-tactic-window-
-   proration, so the branch's own number is BEHIND main's — picking the next
-   one off the branch would have re-served a name main has already used, with
-   different bytes behind it, which is exactly the collision §94.12 records.
-   Confirm again immediately before any merge push (§94.16). */
-const SHELL = "smp-shell-v4.26-hidden-owes-nothing";
+   before the push (§94.16).
+
+   §250: a tactic's outcome is measured against its own window rather than the
+   year, so the built file's bytes changed and the name must too — a returning
+   browser caches by NAME and would go on serving itself the old platform out of
+   its own disk (§91). Checked against origin/main serving
+   "smp-shell-v4.24-outcome-missing-audit"; confirmed again immediately before
+   the push (§94.16).
+
+   §251 (another session, on main): the unit picker is drawn before the number
+   is — "smp-shell-v4.26-unit-before-number".
+
+   §252: the review deck's tactics slide reads the outcome's figure, and five
+   counters stopped looking in the old box — the built file's bytes changed, so
+   the name does too. AND THE NAME COLLIDED AGAIN (§94.12): this branch and main
+   both independently wrote v4.26, which git merges without a word while the
+   bytes behind the name differ — caught by §94.16's confirmation immediately
+   before the push, never by the merge. Checked against origin/main serving
+   "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
+   push.
+
+   §252.2: the plan download comes back as an entry in the Presentation menu
+   and the corner button is deleted, so the built file's bytes changed again.
+   Main moved 26 commits under this branch while it waited for a word — the
+   whole deck round, §251.2 to §257 — and was serving
+   "smp-shell-v4.34-yn-target" when this was merged in; confirm once more
+   immediately before the push (§94.16).
+
+   §259: the group's mark and the deck's four blue section dividers. Main had
+   moved again while this branch waited — §257's Y/N target and §258's
+   save-safety banners — and was serving "smp-shell-v4.36-save-safety-banners"
+   when this merge was made, so the name goes past it rather than beside it.
+   Confirmed against origin/main immediately before the push.
+
+   §260: a title is one line — the growing prose boxes on a plan draw and store
+   one line, and a one-off heal cleans what a tenant already holds. Main moved
+   28 commits under this branch while it waited for a word — the deck round,
+   §257's Y/N target, §258's save-safety banners and §259's blue dividers — and
+   was serving "smp-shell-v4.37-blue-dividers" when this merge was made, so the
+   name goes past it rather than beside it (§94.12), confirmed again
+   immediately before the push (§94.16).
+
+   §271: the reporting note is a growing textarea and a typed break survives
+   being read. Main moved a long way under this branch while it waited for a
+   word — §251 to §270 — and was serving "smp-shell-v4.49-edit-on-section-line"
+   when this merge was made, so the name goes PAST it rather than beside it
+   (§94.12); confirmed once more immediately before the push (§94.16).
+
+   §272: empty is not missing, and the bar now says which. Main moved 39
+   commits under this branch while it waited for a word — §261 through §271,
+   with FOUR different sessions each having claimed §261 and each renumbered
+   on merge, which is why this one is §272 — and was serving
+   "smp-shell-v4.50-note-wrap" when this merge was made, so the name goes PAST
+   it rather than beside it (§94.12); confirmed once more immediately before
+   the push (§94.16).
+   §273: editing the cycle that is running, and reopening one that has closed.
+   Main moved 42 commits under this branch while it waited for a word — and
+   FOUR sessions had each claimed §261 before this one, which is why this work
+   is §273 and not the §261 it was built as. Main was serving
+   "smp-shell-v4.51-empty-not-missing" when this merge was made, so the name
+   goes PAST it rather than beside it (§94.12); confirmed once more immediately
+   before the push (§94.16).
+
+   §276 · §277: the Count compile rule, and a reported figure following its
+   target's unit. Main moved sixteen sections under this branch while it
+   waited for a word — §260 to §275, so the two built as §260/§261 are
+   §276/§277 — and was serving "smp-shell-v4.54-box-keys-and-the-rail" when
+   this merge was made, so the name goes PAST it rather than beside it
+   (§94.12); confirmed once more immediately before the push (§94.16).
+
+   §278: a target with a shape of its own — twelve monthly numbers, compiled by
+   the row's own rule — and §278.2, the 24px mark that opens them. Main moved
+   from §260 to §277 under this branch while it waited for a word, and a FIFTH
+   session had claimed §261 by the time this merged, which is why this work is
+   §278 and not the §261 it was built as. Main was serving
+   "smp-shell-v4.55-count-and-unit-follow" when this merge was made, so the name
+   goes PAST it rather than beside it (§94.12); confirmed once more immediately
+   before the push (§94.16).
+
+   §278.3 merged with main at v4.63-picker-height and went to v4.64 rather than
+   beside it, same rule.
+
+   §288: a hidden row owes nothing — gapMissing() stops counting it, so the
+   pillar's rail row no longer disagrees with the band above it, and the red
+   word gives way to the platform's dash on a row nobody is asking about. The
+   built file's bytes changed, so the name does.
+
+   AND THIS BRANCH HAD ALREADY WRITTEN v4.26 (§94.12, the collision recorded
+   above happening to somebody reading the record). Built against a main
+   serving v4.25, the branch took v4.26 — and main had ALREADY served
+   v4.26-unit-before-number and gone on to v4.64 by the time this merge was
+   made. The same string, different bytes, and git merges it without a word.
+   Checked against origin/main serving "smp-shell-v4.64-objectives-table" AT
+   THE MERGE; confirm once more immediately before any push (§94.16).
+
+   THE SECTION NUMBER COLLIDED THE SAME WAY, which is the third face §99 named:
+   this was built as §250 and main had taken §250 (a tactic's outcome measured
+   against its own window) and everything up to §287 while it waited for a word.
+   Renumbered to §288 at the merge, never at authoring time. */
+const SHELL = "smp-shell-v4.65-hidden-owes-nothing";
 const ASSETS = [
   "/",
   "/index.html",

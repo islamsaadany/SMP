@@ -2,7 +2,7 @@
 
 TWO ASKS FROM ISLAM, MEASURED THE SAME WAY.
 
-THE RAIL. Below 820px the split stacks and the rail is meant to become a
+THE RAIL. Below 1200px the split stacks and the rail is meant to become a
 horizontal strip — `display:flex; overflow-x:auto` has said so since the
 stacked rail was written. It never did: reordering later wrapped the rows in a
 `.sortable` div, so the rail laid out its ONE child in a row and the pillars
@@ -18,7 +18,7 @@ satisfy while stacking again.
 BOTH SIDES OF THE SWITCH (§53.5): a unit's pillars and a supporting function's
 projects are one component and drift apart when only one is measured.
 
-AND ABOVE 820 NOTHING MOVES (§94.2): the two-column rail is a vertical list and
+AND ABOVE 1200 NOTHING MOVES (§94.2): the two-column rail is a vertical list and
 must stay one, or a fix for a squeezed window would have rewritten the page
 everybody actually uses.
 
@@ -78,7 +78,8 @@ def open_fn(pg):
 with sync_playwright() as p:
     b = p.chromium.launch()
 
-    for w, stacked in ((800, True), (768, True), (900, False), (1440, False)):
+    for w, stacked in ((800, True), (768, True), (1100, True),
+                       (1300, False), (1440, False)):
         pg = b.new_page(viewport={"width": w, "height": 800})
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -112,7 +113,7 @@ with sync_playwright() as p:
     # The stacked rail must be SHORTER than the stack it replaced, or nothing
     # was won — asserted as a relationship, not a number.
     heights = {}
-    for w in (900, 800):
+    for w in (1300, 800):
         pg = b.new_page(viewport={"width": w, "height": 800})
         pg.goto(url); pg.wait_for_timeout(650)
         who = pg.eval_on_selector_all("#asWho option", "els=>els.map(e=>e.value)")
@@ -121,7 +122,7 @@ with sync_playwright() as p:
         heights[w] = pg.evaluate(RAIL)["h"]
         pg.close()
     ck("stacking makes the rail shorter, not taller",
-       heights[800] < heights[900], heights)
+       heights[800] < heights[1300], heights)
 
     b.close()
 

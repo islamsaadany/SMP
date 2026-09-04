@@ -755,17 +755,31 @@ var UNITS = {
           { name: "Store operating standard and audit cycle", owner: "Nour", collaborators: ["Hossam", "Dalia"], q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 60 },
           { name: "Replenishment automation",                 owner: "Nour", q1: 0, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 50 }
         ] },
-      /* CARRIED BY A FUNCTION (spec 010) — Islam's own example: "the retail has
-         3 pillars, 2 the retail custodian progress and 1 of them is a pillar
-         for merchandizing where the merchandizing took and broke down in to 3
-         pillars where their collective performance represents the performance
-         of that pillar of the retail."
+      /* THE POINTER IS CUT (§253). This pillar carried `by: "merchandising"`,
+         which made Retail's fourth pillar read its two numbers off the
+         Merchandising function (spec 010, Islam's own example: the function
+         broke that pillar into three of its own, and their collective
+         performance stood in for it).
 
-         It carries NO measures and NO tactics of its own, deliberately: both
-         its numbers come from Merchandising. The empty arrays stay so every
-         reader that counts rows still counts, and reads zero. */
+         Islam, having seen what it produced on the projector: *"drop the
+         merchandizing connection with the retail stores."* It printed
+         93% / 60% / 61% across the top of a slide with nothing at all behind
+         those numbers, because the pillar holds no measures and no tactics of
+         its own by construction.
+
+         THE FEATURE IS UNTOUCHED — `pillarCarrier()`/`viaCarrier()` and the
+         `by` field are the product and still work; what is cut is this
+         tenant's use of it. The demo therefore no longer SHOWS a carried
+         pillar anywhere, which is stated rather than discovered: spec 010 is
+         still described, and is no longer visible (§45.2 accepted with the
+         cost named).
+
+         Retail's own numbers move, because the pillar now scores as what it
+         is — a pillar with nothing in it yet — instead of borrowing the
+         function's. The empty arrays stay so every reader that counts rows
+         still counts, and reads zero. */
       { code: "R04", name: "Merchandising", sub: "Assortment, space and supplier terms",
-        kind: "Capability", theme: "VC", owner: "Sara Helmy", by: "merchandising",
+        kind: "Capability", theme: "VC", owner: "Sara Helmy",
         measures: [], tactics: [] }
     ]
   },

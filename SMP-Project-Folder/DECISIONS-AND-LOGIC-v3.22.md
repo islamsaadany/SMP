@@ -33570,3 +33570,62 @@ deleted the bar would pass: his shape reproduced then no bar and no button,
 and a real gap bringing the door back. Against the build before it, it fails
 on exactly one line, printing his symptom verbatim — `cta: 'Fill in what is
 empty'` — while the other-end assertion stays green.
+
+---
+
+## §287.4 — THEIRS OPENS, NOT THE FIRST ONE (2026-09-02)
+
+Islam, viewing as a project owner: *"when the user login he should land on his
+project by default"*, and separately *"abdel azim still can't edit"*.
+
+**THOSE ARE ONE FAULT, AND THE MEASUREMENT IS WHAT SAYS SO.** In his shape —
+Project owner on a supporting function, own-function Reporting at edit:
+
+| where he lands | what is there |
+|---|---|
+| the function, Strategy tab | — |
+| Reporting, pane opened on the **first** project | **0 controls** |
+| the same page, after clicking **his** project on the rail | **12 live, enabled controls** + Mark done |
+
+The pane opens on `list[0]`, and for a bounded role the first project is
+somebody else's — where they correctly reach nothing (§147.7). So the platform
+knew which project was his, opened another, and left him on a read-only page
+with nothing saying why. *"Can't edit"* is that, exactly.
+
+### Only the fallback changes
+
+An explicit pick still wins on every pane. This decides what opens when `RAIL`
+holds nothing — which is precisely the state a fresh sign-in is in: §94.6
+decided the DESTINATION and stopped at the door.
+
+**NOTHING MOVES FOR ANYBODY UNBOUNDED**, and it is asserted. The office and the
+custodian reach every row, so "theirs" names nothing and reordering what opens
+for them would be a change nobody asked for. `boundedHere()` is the gate — the
+same question the reporting bar asks (§53.5).
+
+**THE TEST IS THE CONTAINER'S OWNER** — `mayMarkDone`, the rule §287 already
+settled — and deliberately NOT `boundedReach()`, whose contributor branch
+reaches a project through its stakeholders: being named on somebody else's
+project does not make it the one you came to open.
+
+**BOTH SIDES OF THE SWITCH** (§53.5): `railPick` opens a project owner's
+project, `unitRailPick` a pillar owner's pillar, through one helper.
+
+### Proved able to fail
+
+`checks/project-done.py` §8 puts his project **SECOND**, or "his" and "the
+first" coincide and the assertion proves nothing (§113.8). On the build before
+it: **2 red**, printing `pane: 'ITF01 … ' , controls: 0` — his complaint
+verbatim — while the custodian assertion stays green, which is what says the
+change did not reach past the bounded roles.
+
+### Asked and NOT built: hiding the other projects
+
+Islam, in the same message: *"no need to see another projects can we set that
+in the roles and accses table?"* It could be, and it is a different shape from
+anything that table holds: the matrix is **role × AREA**, 49 cells, deliberately
+small (§37), and this would be per-ROW visibility. It also has a cost worth
+seeing before it is chosen — a capability's headline numbers (*Project
+performance 100%*, *Execution 53% of 12 milestones*) are computed across every
+project in it, so a person shown one project would read totals describing
+projects they cannot see. Put to him with options rather than guessed at.

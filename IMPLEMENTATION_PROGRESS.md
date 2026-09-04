@@ -142,6 +142,22 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §287.4 — theirs opens, not the first one (2026-09-02, same branch)
+
+Islam: *"when the user login he should land on his project by default"* and
+*"abdel azim still can't edit"* — **one fault**. Measured: he lands on the
+function, the pane opens on the FIRST project (somebody else's), and there he
+correctly has **0 controls**; clicking his own on the rail gives **12 live,
+enabled controls**. Only the fallback changes — an explicit pick still wins,
+and nothing moves for the office or the custodian (asserted). 2 red on the
+build before, printing his complaint verbatim.
+
+**Asked and not built:** hiding the other projects via Roles & access. It is
+per-row visibility, a different shape from the 49-cell role × area matrix, and
+it would leave a capability's headline numbers describing projects the reader
+cannot see. Put to him with options rather than guessed at.
+
+
 ### §287.2 / §287.3 — what testing §287 found (2026-09-02, same branch)
 
 Islam, on the built branch, two things.

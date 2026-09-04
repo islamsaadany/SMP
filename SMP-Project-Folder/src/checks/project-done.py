@@ -315,6 +315,43 @@ with sync_playwright() as pw:
     ck("a real gap brings the door back", d2["counted"] > 0 and d2["bar"] and
        "missing" in (d2["cta"] or "").lower(), d2)
 
+    # ── 8 · THEIRS OPENS, NOT THE FIRST ONE (§287.4) ─────────────────────
+    # Islam: "when the user login he should land on his project by default"
+    # and "abdel azim still can't edit" — ONE fault. The pane opened on the
+    # first project in the rail, which for a bounded role is somebody else's,
+    # so the page he landed on was correctly read-only with nothing saying
+    # why. THE FIXTURE PUTS HIS SECOND, or "his" and "the first" coincide and
+    # the assertion proves nothing (§113.8).
+    print("-- landing: the project that opens")
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    second = pg.evaluate("""()=>{
+      var cap = capsOfFunction("%s")[0];
+      cap.projects[0].owner = "Somebody Else";        /* first is NOT his */
+      cap.projects[1].owner = "Project Owner 287";    /* his is second */
+      REVIEW.submitted = {};
+      paint();
+      return { id: cap.projects[1].id, code: projCode("%s", cap.projects[1]),
+               firstCode: projCode("%s", cap.projects[0]) };
+    }""" % (FN, FN, FN))
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
+    to_fn_reporting(pg)
+    land = pg.evaluate("""()=>({
+      pane: (document.querySelector('.pane .pband')||{}).innerText || null,
+      controls: [...document.querySelectorAll('[data-cpick],[data-crep],[data-cnote]')]
+                  .filter(e=>!e.disabled).length })""")
+    ck("his project opens, not the first one",
+       bool(land["pane"]) and second["code"] in land["pane"] and
+       second["firstCode"] not in land["pane"], land)
+    ck("...so the page he lands on actually takes his figures",
+       land["controls"] > 0, land)
+    # AND NOTHING MOVED FOR ANYBODY UNBOUNDED — the office and the custodian
+    # reach every row, so "theirs" names nothing and the first still opens.
+    pg.select_option("#asWho", ids["cust"]); pg.wait_for_timeout(400)
+    to_fn_reporting(pg)
+    cust = pg.evaluate("()=>(document.querySelector('.pane .pband')||{}).innerText || null")
+    ck("the custodian still opens on the first project — nothing moved for them",
+       bool(cust) and second["firstCode"] in cust, cust)
+
     ck("no console errors", not errs, "; ".join(errs[:3]))
     b.close()
 

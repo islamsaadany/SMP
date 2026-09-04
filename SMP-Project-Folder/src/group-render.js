@@ -5091,14 +5091,49 @@ function gapPlaceAttr(railKey, code){
     ' data-gplace="' + esc(railKey + "|" + code) + '"';
 }
 function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
+/* ── AND WHICH ONE OPENS WHEN NOBODY HAS PICKED (§287.4) ──────────────
+   Islam, viewing as a project owner: *"when the user login he should land on
+   his project by default"*, and *"abdel azim still can't edit"*.
+
+   THOSE ARE ONE FAULT. Measured in his shape: he lands on the function, the
+   pane opens on the FIRST project in the rail — which is not his — and there
+   he correctly has **0 controls**, because a bounded role reaches its own
+   rows and nothing beside them (§147.7). Pick his own project on the rail and
+   the same page gives **12 live, enabled controls**. So the platform knew
+   which project was his and opened somebody else's, and the person is left
+   looking at a read-only page with nothing saying why.
+
+   THE FALLBACK IS THE ONLY THING THAT CHANGES. An explicit pick still wins,
+   on every pane; this decides only what opens when `RAIL` holds nothing —
+   which is exactly the state a fresh sign-in is in (§94.6 decided the
+   destination and stopped at the door).
+
+   NOTHING MOVES FOR ANYBODY UNBOUNDED, and that is deliberate: the office and
+   the custodian reach every row, so "theirs" names nothing, and reordering
+   what opens for them would be a change nobody asked for. `boundedHere()` is
+   the gate, and it is the same question the reporting bar asks (§53.5).
+
+   THE TEST IS THE CONTAINER'S OWNER — `mayMarkDone`, the rule §287 already
+   settled — and never `boundedReach()`, whose contributor branch reaches a
+   project through its stakeholders: being named on somebody else's project
+   does not make it the one you came to open. */
+function railMine(target, list, ownerOf) {
+  if (!list.length || typeof boundedHere !== "function" || !boundedHere(target)) return null;
+  for (var i = 0; i < list.length; i++)
+    if (mayMarkDoneOn(target, ownerOf(list[i]))) return list[i];
+  return null;
+}
 function railPick(c){
   var k = railKeyFor(c), want = RAIL[k];
   var list = c.projects || [];
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (list[i].id === want) { railShow(k, list[i].id); return list[i]; }
-  railShow(k, list[0].id);
-  return list[0];
+  /* §287.4: theirs opens, not the first one. */
+  var mine = railMine("fn:" + c.fn, list, function(p){ return p.owner; });
+  var pick = mine || list[0];
+  railShow(k, pick.id);
+  return pick;
 }
 /* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
    It used to read "below two items there are no siblings to move between, so
@@ -6285,8 +6320,12 @@ function unitRailPick(u){
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
-  railShow(k, list[0].code);
-  return list[0];
+  /* §287.4 on the other side of the switch: a pillar owner's own pillar
+     opens, exactly as a project owner's project does (§53.5). */
+  var mine = railMine(u.ukey, list, function(p){ return p.owner; });
+  var pick = mine || list[0];
+  railShow(k, pick.code);
+  return pick;
 }
 function unitRailFor(u, sel){
   /* The rail does not group by Direction and Capability. It did in the first

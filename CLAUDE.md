@@ -1879,6 +1879,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **THEIRS OPENS, NOT THE FIRST ONE (§287.4):** Islam — *"when the user login
+  he should land on his project by default"* and *"abdel azim still can't
+  edit"*. **ONE FAULT, and the measurement says so**: he lands on the function,
+  the pane opens on the FIRST project — somebody else's — and there he
+  correctly has **0 controls** (§147.7); click his own on the rail and the same
+  page gives **12 live, enabled controls**. The platform knew which was his and
+  opened another. **ONLY THE FALLBACK CHANGES** — an explicit pick still wins,
+  and this decides what opens when `RAIL` holds nothing, which is exactly a
+  fresh sign-in (§94.6 decided the destination and stopped at the door).
+  **NOTHING MOVES FOR ANYBODY UNBOUNDED** and it is asserted: `boundedHere()`
+  is the gate, so the office and the custodian open on the first exactly as
+  before. **The test is the container's OWNER** (`mayMarkDone`) and never
+  `boundedReach()`, whose contributor branch reaches a project through its
+  stakeholders — being named on somebody else's project does not make it the
+  one you came to open. Both sides of the switch through one helper (§53.5).
+  Proved able to fail: **2 red**, printing his complaint verbatim, with his
+  project put SECOND in the fixture or "his" and "the first" coincide and the
+  assertion proves nothing (§113.8). **ASKED AND NOT BUILT**: hiding the other
+  projects from the rail — *"can we set that in the roles and accses table?"* —
+  is per-ROW visibility, a different shape from a 49-cell role × AREA matrix
+  (§37), and it would leave a capability's headline numbers describing projects
+  the reader cannot see. Put to him with options.
 - **A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (§287):** Islam —
   *"a project owner is not able to report, despite being the project owner and
   in the roles and access I allowed this."* **HE COULD, AND THE PAGE WAS

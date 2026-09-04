@@ -72,6 +72,27 @@ def press(pg, sel):
         return False
 
 
+# §268 MOVED THE PEN TO THE SECTION LINE while this branch waited for a word,
+# so `.pane .paneact .penbtn[data-page="plan"]` matches nothing any more — this
+# file reported 28 failures on a build whose chips were all being drawn (§51.11:
+# a check keyed on markup that moved usually passes quietly; here it failed
+# loudly, which is the better half of the same fault). The selector is main's
+# own, the one its checks already use.
+PEN = '#secrow-in .secpen, #panel [data-edit], #panel .penbtn, .pane .paneact .penbtn'
+
+
+def openpen(pg, page):
+    """Open the pen for `page`, and only if it is not already open. §268's
+    section pen opens the whole Strategy tab at once, so a blind press on a
+    page whose pen is already on CLOSES it — which is what turned this file
+    red on a build that was drawing every control correctly."""
+    on = pg.evaluate("(p) => !!(typeof EDIT_PAGE !== 'undefined' && EDIT_PAGE[p])", page)
+    if not on:
+        press(pg, PEN)
+        pg.wait_for_timeout(600)
+    return pg.evaluate("(p) => !!EDIT_PAGE[p]", page)
+
+
 def typemonths(pg, vals):
     return ev(pg, """(vals) => {
       const b = [...document.querySelectorAll('tr.mprow .mpm input')];
@@ -166,8 +187,7 @@ with sync_playwright() as p:
        before.get("due") == "150M EGP" and before.get("score") == 64, before)
 
     # ── 3 · the pen: a chip on every measure, none on a yes/no row ──────
-    press(pg, '.pane .paneact .penbtn[data-page="plan"]')
-    pg.wait_for_timeout(600)
+    openpen(pg, "plan")
     chips = ev(pg, """() => {
       const t = [...document.querySelectorAll('.pane table')]
         .find(x => x.querySelector('thead') &&
@@ -419,8 +439,7 @@ with sync_playwright() as p:
        tac.get("objJan") == 8 and tac.get("objHidden") == 7, tac)
 
     # ── 8 · Clear DELETES the key (§50.6) ──────────────────────────────
-    press(pg, '.pane .paneact .penbtn[data-page="plan"]')
-    pg.wait_for_timeout(500)
+    openpen(pg, "plan")
     ev(pg, """() => {
       const rows = [...document.querySelectorAll('.pane table tbody tr')];
       const r = rows.find(x => { const a = x.querySelector('td:nth-child(2) textarea');
@@ -492,8 +511,7 @@ with sync_playwright() as p:
       if (b) b.click();
     }""")
     pg.wait_for_timeout(600)
-    pg.evaluate("""() => { const p = document.querySelector('.penbtn'); if (p) p.click(); }""")
-    pg.wait_for_timeout(600)
+    openpen(pg, "foundation")
     pg.evaluate("""() => { const c = document.querySelector('.mpopen'); if (c) c.click(); }""")
     pg.wait_for_timeout(500)
     kb = ev(pg, """() => ({

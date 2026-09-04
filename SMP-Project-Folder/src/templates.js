@@ -79,6 +79,14 @@ function csvRow(cols, o){ return cols.map(function(c){ return csvCell(o[c]); }).
    answering "where does the number end" is §42's drift. This wrapper keeps
    every existing call site working. */
 function splitTarget(s){ return SMPRules.targetParts(s); }
+/* §276: an uploaded compile rule is checked against the ONE list the pen
+   offers and the workbook validates, and the refusal names that list rather
+   than a copy of it that would go stale the day a fifth rule is added. */
+function compileKnown(c){ return SMPRules.COMPILES.indexOf(c) > -1; }
+function compileProblem(c){
+  var l = SMPRules.COMPILES;
+  return 'compile "' + c + '" is not ' + l.slice(0, -1).join(", ") + " or " + l[l.length - 1];
+}
 /* §251: THE WORKBOOK SPLITS A TARGET THE WAY THE SCREEN DOES. A target may
    now hold its unit before its number ("%"), and `splitTarget` reads a value
    FOLLOWED BY a unit — so the raw pair would write "%" into the Value column
@@ -373,8 +381,8 @@ function validatePlan(u, rows){
     }
     if (r.direction && ["\u2265","\u2264",">=","<="].indexOf(r.direction) < 0)
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not \u2265 or \u2264' });
-    if (r.compile && ["Sum","Latest","Average"].indexOf(r.compile) < 0)
-      problems.push({ at:at, msg:'compile "' + r.compile + '" is not Sum, Latest or Average' });
+    if (r.compile && !compileKnown(r.compile))
+      problems.push({ at:at, msg:compileProblem(r.compile) });
     if (r.type === "TACTIC") {
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
@@ -1028,8 +1036,8 @@ function validateCapPlan(c, rows){
     if (r.direction && ["≥","≤",">=","<="].indexOf(r.direction) < 0)
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not ≥ or ≤' });
     if (r.type === "CAPOBJECTIVE") {
-      if (r.compile && ["Sum","Latest","Average"].indexOf(r.compile) < 0)
-        problems.push({ at:at, msg:'compile "' + r.compile + '" is not Sum, Latest or Average' });
+      if (r.compile && !compileKnown(r.compile))
+        problems.push({ at:at, msg:compileProblem(r.compile) });
       if (r.weight !== "" && r.weight != null && isNaN(parseFloat(r.weight)))
         problems.push({ at:at, msg:'weight "' + r.weight + '" is not a number' });
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });

@@ -6,11 +6,42 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §258 on `main` and live (the save-safety banners), on top
-of §257 (a target that is a yes or a no) and the whole deck round — all from
-other sessions. **§259 (the group's mark and the deck's four blue section
-dividers) is merging from `claude/deck-separators-brand`,** renumbered from
-§257 because main took that number while it was being built.
+**Latest version:** **§276 (the `Count` compile rule — a count is owed in
+whole ones) and §277 (a reported figure follows the target's unit) merged to
+`main` 2026-09-04 on Islam's word**, from
+`claude/integer-prorating-compilation-6dq77s`, on top of §260–§275 from other
+sessions; built as §260/§261 and renumbered at the merge because main had
+taken both numbers.
+
+**§261 — the master presentation — is BUILT and ON ITS BRANCH**
+(`claude/master-presentation-flow-f91mrl`), **not merged**: `main` is
+production and every merge is Islam's word on the day (rule 4). The SMO picks
+who presents and in what order from the Presentation menu, and the decks are
+run end to end as one flow. Six decisions were drawn in the running platform
+and answered before a line was written; the review page is
+`design-mockups/master-presentation/2026-09-03_master-presentation.html`, the
+reasoning is §261 and the spec is `specs/028-master-presentation/`.
+`checks/master-presentation.py` is 31 red on the build before and **43 green**
+after; 499/0 on the authoriser, the full `qa.py` sweep clean, and the round
+trip, clean parity and two tabs green on a virgin Postgres 16.
+
+**Two changes after he used it, both on the same branch:** the picker is
+**two columns** (§261.8 — he reversed his own choice of the single list, and
+§261.4's reasoning is kept rather than overwritten), and the strip's pills now
+carry each subject's **own code** — MB, RS, FIN, MRC — the letters already
+printed on its pillars and projects (§261.9), asked for from a real 308-slide
+flow.
+**At merge time:** bump `SHELL` in `sw.js` to a name `origin/main` does not
+hold (§91, §94.12, §94.16) — the built file's bytes have changed.
+**Latest version:** **§268, §269 and §270 are ON `main`** — the strategy pen on
+the section line, one edit for the whole tab, and three loose ends closed —
+merged 2026-09-02 on Islam's word, verified live (production serves the merged
+bytes; gate 200, api 401). **§274 is the audit of that merge**, asked for
+straight afterwards: nothing in the product was damaged, and the merge did leave
+three of main's own checks reading a control that had moved — two failing
+loudly, one (`band-corner`) falling silent while still printing "all passed".
+All three fixed; the rule earned is *grep the checks on BOTH sides of a merge,
+not only before it.*
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -145,6 +176,209 @@ build has 36 (§215).
 **On the branch, not merged.** Recorded, not done: the deck prints the seasonal
 benchmark with no word saying why it is not half the year, and a monthly plan is
 deliberately not a counted gap.
+### §277 — a reported figure follows the target's unit (2026-09-04, branch `claude/integer-prorating-compilation-6dq77s`)
+
+Islam, from his Performance page: *"the YTD is showing 2% from 2# I don't
+know where this error is happening."* Not the arithmetic — the reporting box
+stamps a typed number with the target's unit AT THAT MOMENT, and the office
+later changed the target from % to #, so the figure kept its old stamp.
+Reproduced on a tactic's outcome and a key measure alike.
+
+**Built:** when the office changes a target's unit, a figure carrying exactly
+the old unit is rewritten in the new one (`2%` → `2#`) with the target's own
+separator; a figure typed with its own unit is left as typed (§243); the
+FIRST unit is not a change (a filler's act, §201.2); Y/N is neither side
+(§257). One function, both surfaces, no server change, nothing migrated.
+**Cost stated and accepted:** a row already stored stays `2%` until the
+figure is re-entered once on Reporting.
+
+**Verified:** `checks/unit-follows.py` (new; **5 red** on the build before,
+printing `2% / 2#` verbatim), nine neighbouring checks, `test-authorize`
+491/0, full `qa.py` sweep green. **On the branch, not merged.**
+
+### §276 — a count is owed in whole ones (2026-09-03, branch `claude/integer-prorating-compilation-6dq77s`)
+
+Islam: *"we need a compilation type that prorate to integrs only .. if we have
+a target of 2 shops to open in the year so in the 8th month that proration asks
+for 1.3 stores which is not feasible."* Aligned first; **Count** as the name
+and **rounded down** are both his.
+
+**Built:**
+
+- **A fourth compile rule, `Count`** — Sum for things finished one at a time.
+  It prorates the target like Sum and rounds the due figure DOWN to a whole
+  one: 2 shops owe nothing until June, one from June, two in December. At
+  August his row reads **1 due, 100%** where Sum read 1.33 and 75%.
+- **Not a change to Sum**, because that would move stored scores on every
+  integer Sum target already planned; 0 of 122 demo rows carry Count and every
+  existing row prorates exactly as before, asserted.
+- **"Nothing due yet"** on the Performance page for a count with nothing owed,
+  in the tactics' own not-yet-due pill; the row leaves every average and no
+  `/ 0 #` benchmark is printed.
+- **One list (`SMPRules.COMPILES`) where there were seven** — four pen pickers,
+  the plan builder, the workbook's validation ranges and the upload's refusal
+  all read it. No server change, nothing migrated.
+
+**Verified:** `checks/count-compile.py` (new; **13 red** with the floor
+taken out, **2 red** with one picker left on the old list, both from rebuilt
+sources — editing the built file instead silenced the whole script block under
+§238's hashed CSP); `plan-builder.py` rewritten from a literal to
+agreement; `test-authorize` 491/0; eight neighbouring checks and the full
+`qa.py` sweep green. **On the branch, not merged.**
+### §275 — a function's Presentation button sits where a unit's does (2026-09-04, branch `claude/plans-edit-button-placement-jxw8or`)
+
+Islam: *"can you move the presntation button for the functions to be in the same
+place like what we did in the units while having the bands button as well?"* —
+then **"yes"** to the mockup.
+
+**Measuring narrowed the ask.** This was the **only** Performance page in the
+product drawing its controls in the page body: a unit's, the group's, a
+company's and a **pillars**-format function's all call `perfActs()`, which hangs
+them on the tab row and appends the Bands menu itself. So the two halves of
+"supporting function" had disagreed on this one screen since spec 010 routed the
+pillars format through the unit's own page — A15 with no *why* behind it.
+
+**The change is one line** in `renderFnPerformance()`. Screen only: no `api/`,
+`lib/` or `db/` file touched, read off the diff rather than remembered.
+
+- **The Bands half comes free and is NEW, not restored** — that page has printed
+  *Off track* pills since it was built with nowhere to learn what they mean.
+- **One row comes back**: capability band y 300 → 237.
+- **The controls land on x 1206 / 1372 — a unit's pixels exactly.**
+- **Nobody's rights move**: the menu is asked of `SMPRules.mayDownloadPlan()`,
+  of somebody it refuses as well as somebody it allows.
+- **The group and a company still carry no Presentation button**, outside the
+  ask, untouched and asserted as an absence.
+
+**Fit measured, not assumed** (§158): one line at 1920 / 1500 / 1280 / 1100 /
+1000 / 900 / 820 / 768, no overflow, no sideways scroll, 151px still clear at
+the narrowest.
+
+Green: `fn-perf-controls` (new, **16 red** on the build before), `perf-line`,
+`fn-pillars`, `scoring-bands`, `hide-slide`, `setup-header`, and the full
+`qa.py` sweep. `report-chrome`'s one failure reproduces byte-for-byte on main
+(§274's list) and is not this change's.
+
+**§275.1 — one of the new check's own assertions could not fail as written**: it
+measured the content's start off `panel.firstElementChild`, and before the change
+the `.pageact` div WAS that child, so it went green on the reverted build
+(§113.8). It measures the capability band now and fails at (224, 181).
+
+Mockup: `design-mockups/fn-performance-controls/2026-09-04_presentation-on-the-tab-row.html`
+
+### §274 — the audit of the §268–§270 merge (2026-09-03, branch `claude/plans-edit-button-placement-jxw8or`)
+
+Islam, straight after the merge: *"did we change or damage something on this
+merge from the previous changes?"*
+
+**Nothing in the product.** Every source line the merge removed is one this
+branch removed deliberately (`editBar()`, `dlPlanBtn()` and its call, the pen's
+old positions, three wrapper lines, two CSS rules); **no documentation was
+lost**; of 34 page keys only three remap and only on a function target;
+production serves the merged bytes (gate 200, api 401).
+
+**Three of main's own checks were reading a control that had moved**, and the
+split between them is the finding:
+
+- `plan-tail-fold.py` (19 failed) and `one-line-titles.py` (rc=1) pressed
+  `#panel .penbtn[data-page]`. They failed **loudly**. Both were **added on
+  main** (§253, §267) *after* the §268 sweep ran against this branch — so the
+  sweep was early rather than careless, and the rule gains a clause: **grep for
+  a moved control on both sides of a merge.** Green after: 0 failed / all good.
+- `band-corner.py` guarded its last assertion with *if the control is there*,
+  so it ran **twice on main and none here** while printing *"all band-corner
+  checks passed"*. The property was **measured, not assumed** — the corner still
+  holds §268's Arrange arrows, and a click reaches them for `mobhead` and
+  `own_mob` in both themes at scroll 0/300/700. The check switches to that
+  viewer now and says out loud that somebody still gets the control, so it can
+  never fall silent again (§113.8). Falsified: stubbed to nobody it fails twice.
+
+**Attributed, not mine:** nine checks were already red on main (verified against
+a worktree at `5cdcd1a`; `tactic-outcome` diffs line-for-line identical), and
+eight more fail on both with §167.2's *`welcomeover` intercepts pointer events*.
+`office-chat` was never red — it takes over four minutes and had been cut off by
+the runner's 240s cap.
+
+**Recorded and deliberately not fixed:** `tactic-outcome.py` skips its own pen
+the same silent way, but fails identically on main, so it belongs to its own
+pass rather than to this audit.
+
+### §273 — editing the cycle that is running (2026-09-03, branch `claude/cycle-name-date-edit-ze49d0`)
+
+Islam: *"allow me to edit the cycle name. give me an edit button the cycle to
+edit the date as you already built and the cycel name edit as well"* — then, of
+two shapes drawn in the real page: *"keep the close cycle inside the edit. as
+it's a critical button to click, the pen should hold everything editable so
+it's kept secured."*
+
+**What was wrong.** A cycle's name and its three dates are written once, when
+it is opened (§47.8), and were plain text ever after — so a typo in *H1 2026*,
+or a due date that moved, could only be corrected by CLOSING the cycle and
+opening another, which archives and clears every figure in the tenant (§49.1).
+
+**What is there now.** One **Edit** on the cycle strip, and nothing else: Close
+the cycle moved inside it and the review-point picker went with it, so while a
+cycle runs that line carries no control that can be pressed by accident. The
+pen is the *Open a new cycle* panel's own shape — Name · Covers from · to ·
+Reports due · Reporting as of — with Save and Cancel at one end of its act row
+and Close the cycle at the other. Nothing reaches the cycle until Save; Cancel
+writes nothing. While anything is unsaved **Close is held and says why**, asked
+again at press time rather than trusted from the render.
+
+**What it does not touch.** No figure, no score, no report state. Nothing new
+is stored and nothing is migrated: those five values were already there, and
+the server has always treated them as the office's (§234) — what is new is that
+until today nothing in the product could send one.
+
+**Verified.** `checks/cycle-edit.py` **46 red** on the build before and 47
+green after, re-falsified after every correction; full `qa.py` sweep ERRORS
+none; 496/0 authoriser (five new, both ways); 126/0 differ; `ytd-proration`,
+`repeat-project`, `cycle-board`, `setup-overview`, `setup-header`, `table-fit`,
+`safety-banners`, `submit-gate` and `gap-fill` green; the pen's two new inks
+measured with the sweep's own function (5.31 light / 5.96 dark) and the probe
+proved able to see them. Mockup:
+`design-mockups/cycle-name-date-edit/2026-09-03_edit-the-cycle.html`.
+
+**On the branch, not merged.**
+
+### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
+
+Islam, using the reporting page: *"in the reporting on saving the draft keep
+the submit to smo button there as it's posible to save the draft and if it's
+complete we can submit directly rather than reopen to submit."* Drawn in the
+real bar first and published as an artifact (rule 1c); he picked **C**, the
+variation that also gives Reopen back its quiet voice.
+
+**Built:**
+
+- **Submit stays on the bar while a draft is saved.** §220 built it as one
+  either/or — `subd || parked` drew the state word and Reopen, everything else
+  drew Submit — so the control disappeared at the moment somebody looks for it
+  and sending a finished draft took three presses.
+- **The report itself is unchanged and still locked** until Reopen. Measured
+  on the built file: `editable 0 of 25` before and after.
+- **One Submit button, written out once** (§53.5): §221's gate cannot differ
+  between the open bar and the parked one, and the check asserts the pair —
+  the button is back AND it is still shut while figures or plan items are owed.
+- **Reopen drops its box** where Submit is beside it, taking the quiet orange
+  type Save draft wears while the report is open. One declaration, two
+  selectors; the class stays `rc-reopen` so one handler answers for both states.
+
+**Cost, stated before he chose:** the bar rides the tab row, so it goes
+494 → 659px (against 577px for the open bar). Nothing moves at 1440 or 1280;
+below about 1000px the draft bar becomes the widest state of the page where
+today it is the narrowest. Asserted at 1500 and 1280 rather than remembered.
+
+**Checked:** `submit-gate.py` all green and **11 red** on the shipped
+pre-§263 build — its first falsification run *died rather than reporting*
+(§215), so every press in the new section degrades now. One assertion reversed
+and rewritten rather than deleted (§218). `perf-line`, `table-fit` green;
+`test-authorize` 491/0, `test-graph-diff` 126/0 (nothing server-side moved).
+`report-saves.py` is red on the untouched build for the stub-without-a-worker
+fault §250.2 records — reproduced before this change and not touched by it.
+
+**Merged to `main`** on Islam's word, 2026-09-03.
+
 
 ### §259 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
 
@@ -433,6 +667,121 @@ Green: `tactic-proration` (33), `ytd-proration`, `tactic-outcome` (47),
 `submit-gate`, `table-fit`, `cycle-board`, `project-tables`, `plan-fields`,
 `gap-fill`, `gap-walk`, `save-fidelity`, the full `qa.py` sweep (ERRORS none),
 `test-authorize` 472/0, `test-graph-diff` 126/0.
+### §270 — three loose ends closed (2026-09-02, same branch)
+
+Islam, on the three things §268 and §269 had recorded and not done: *"1. make
+the fix, noting that editing is only for the smo for now anyway 2. ok will see
+it later 3. ok."*
+
+**The screen and the save were asking two different questions.** For a
+supporting function's plan, the save checks the *function's* Strategy setting
+and the screen checked the *business unit's*. Measured: **nothing changes on
+this tenant** — both settings hold the same value for every role, and editing is
+the office's anyway, which is exactly why it was safe to fix now. Set them
+differently, which is the whole point of having two, and **six people** would
+get an Edit button that refuses to save, or be refused one that would have
+worked. Fixed in the three places the browser asks, rather than at the twenty
+places that ask them.
+
+**The remove × sits beside its field again** on Who we are (6) and the SWOT
+(23) — about 400px of empty height between them. The SWOT needed a column
+rather than a width, which the check caught on the build that was meant to have
+fixed it.
+
+**And two automatic tests stopped crying wolf.** Neither was a real problem: one
+was looking for something deliberately removed weeks ago (with another test
+asserting its absence — two tests arguing), the other had a fault in its own
+setup. A test that is always red is one people stop reading.
+
+25 checks green including the two that were red, full sweep clean, server 454/0
+and 126/0, build byte-identical.
+
+*The falsification is worth keeping: with the permissions fix reverted, the
+shipped data still passes all 264 person × function pairs. Only a deliberately
+divergent tenant goes red — a check that walked only what is in front of it
+would have blessed the broken build.*
+
+### §269 — one edit, one done (2026-09-02, same branch)
+
+Islam, on §268: *"the edit opens all so I don't need to edit each tab and then
+save for each — it's one edit and one save?"*
+
+**Right, and what was there was worse than three presses.** Measured first: the
+edit mode was held per SECTION and is only cleared when you change tab or
+destination — so opening Foundation and walking to SWOT left Foundation open
+behind you with the line reading *Edit*, and opening the Plan as well gave two
+open modes whose single control could close only the one you were standing on.
+A control whose word is true of one section and false of the one beside it.
+
+One press now opens every section of the Strategy tab, one press closes them
+all, and the word reads the same wherever you stand — **filtered to what that
+person may author**, which on a unit is the one Strategy grant (measured: its
+three pages can never differ) and on a supporting function is two separate
+columns. The red *Fill in what is empty* opens the same mode, so the two doors
+cannot leave the tab in a state the Edit button cannot describe.
+
+**And §268 had taken something away without noticing.** A fill-grant holder's
+way out of fill mode used to be the corner control; §268 removed it as a
+duplicate, and the bar only draws *Done filling* once nothing is missing — so a
+custodian with gaps left could leave only by changing tab. Restored, drawn
+beside *Next gap*, and asserted in both states. It surfaced as a check timing
+out on a control that was no longer there, not by anybody reading the code.
+
+`checks/plan-edit-line.py` §1b–§1d: 8 red with the behaviour broken, printing
+the old fault verbatim. Twenty checks green, full `qa.py` sweep clean, server
+454/0 and 126/0.
+
+*Recorded, not fixed — both pre-existing: the screen asks the unit's Strategy
+column for a supporting function's plan where the server asks the function's
+(they never disagree on this tenant, and correcting it would move rights); and
+the SWOT's remove × wraps onto its own line, because §114.4's fix is scoped to
+table cells and those fields are list items.*
+
+### §268 — the strategy pen lives on the section line (2026-09-02, this branch)
+
+Islam: *"the edit button of the plans can you make it in the same line of the
+foundation sowt and plan? as it's a better placement for opening and savng?
+verifying that it's only in the startegy anyway and not anywhere else."*
+
+**Checked first, and the check said more than the ask did.** With the plan open
+the line ALREADY carried a control — `Done filling`, the wrong word for the
+office (who are editing, not filling) and stripped of its button dress by
+`.tabs button`, which is §145.14's own recorded trap on the one control it
+missed. What was genuinely absent was the way IN. The pen sat at four different
+heights depending on the section (234 · 233 · 236 · 308) and **twice** on a
+two-project function, the second copy below the fold, both throwing one flag.
+Foundation and SWOT were hover-only, so on a tablet the pen measured hidden
+until the card itself was tapped — §70's own finding, fixed for the pane in
+August and left on the cards.
+
+**Islam picked A** (the red fill button stays beside the pen for the office) and
+**the whole Strategy tab** from three placements drawn into the real page and
+published as a mockup; the pen glyph was rejected because a 28px hollow circle
+built for a card corner all but disappears in a wide tab row. **Not `Save`** —
+asked, answered and recorded: the platform writes as you type, so the word would
+say the work is lost until it is pressed.
+
+**One map now answers which page a section's pen is**, read by the pen and by
+the fill bar — which fixed a bug nobody had reported: a pillars function's
+Overview button named `foundation` while that page has read `capfoundation`
+since §213, so it set a flag nothing acts on and opened **0 editable fields**,
+rendering perfectly the whole time.
+
+**The group is untouched**, which answers the second half of the ask: within a
+unit and a supporting function the pen is only on the Strategy tab, and the
+group's own Foundation and Temple are tabs with no section line, so both keep
+their controls. Arrange stays in the pane's corner (§101's arrows go to somebody
+who may reorder and not author, so the slot is never shared), and the pillar's
+pinned head keeps its code, name field and Remove.
+
+`checks/plan-edit-line.py`: **48 red** on the build before, all green after.
+Contrast 8.95/5.32 light and 8.53/9.82 dark. Full `qa.py` sweep clean, ERRORS
+none. **The check sweep was most of the work** — fourteen check files and
+`qa.py` pressed the moved pen and would have gone silently green (§51.11).
+
+*Two pre-existing failures were left alone rather than quietly folded in:
+`strategy-office.py` §4 and `report-saves.py` fail identically on the previous
+build.*
 
 ### §236.3 — slide by slide, only the originals pinned (2026-09-01, same branch)
 

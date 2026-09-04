@@ -293,7 +293,8 @@ function monthNums(start){
 }
 
 var DIRS = ["\u2265", "\u2264"];
-var COMPILES = ["Latest", "Sum", "Average"];
+/* §276: the workbook validates the list the pen offers, read from one place. */
+var COMPILES = SMPRules.COMPILES;
 var KINDS = ["Direction", "Capability"];
 var YESNO = ["Yes", "No"];
 
@@ -602,7 +603,7 @@ function planWorkbook(u){
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
-                   { range:"G2:G400", list:["Sum", "Latest", "Average"], soft:true },
+                   { range:"G2:G400", list:COMPILES, soft:true },
                    { range:"J2:M400", list:YESNO },
                    { range:"N2:N400", list:YESNO, soft:true }],
       rows:u.items.reduce(function(acc, p){

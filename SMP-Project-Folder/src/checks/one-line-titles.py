@@ -100,7 +100,8 @@ with sync_playwright() as pw:
         pg.evaluate("()=>{VIEWER=PEOPLE.filter(x=>SMPRules.mayEditAccess(world(),x))[0].key;}")
         pg.evaluate(go); pg.wait_for_timeout(300)
         pg.evaluate(mk)
-        pg.evaluate("()=>{const b=document.querySelector('#panel .penbtn[data-page]');"
+        # §268: the strategy pen is on the section line now, outside #panel
+        pg.evaluate("()=>{const b=document.querySelector('#secrow-in .secpen');"
                     " if(b) b.click();}")
         pg.wait_for_timeout(700)
 
@@ -138,7 +139,7 @@ with sync_playwright() as pw:
     pg.evaluate("()=>{ leaveModes(); }")
     pg.evaluate("()=>{current=UNIT_KEYS[0]; currentSub='strategy'; CURSEC.strategy='plan'; paint();}")
     pg.wait_for_timeout(300)
-    pg.evaluate("()=>{const b=document.querySelector('#panel .penbtn[data-page]');"
+    pg.evaluate("()=>{const b=document.querySelector('#secrow-in .secpen');"
                 " if(b) b.click();}")
     pg.wait_for_timeout(600)
     sel = "#panel table textarea.fld.grow"
@@ -171,7 +172,7 @@ with sync_playwright() as pw:
     pg.evaluate("()=>{current=UNIT_KEYS[0]; currentSub='strategy'; "
                 "CURSEC.strategy='found'; paint();}")
     pg.wait_for_timeout(300)
-    pg.evaluate("()=>{const b=document.querySelector('#panel .penbtn[data-page]');"
+    pg.evaluate("()=>{const b=document.querySelector('#secrow-in .secpen');"
                 " if(b) b.click();}")
     pg.wait_for_timeout(600)
     para = "#panel textarea.fld:not(.grow)"

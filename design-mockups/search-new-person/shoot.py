@@ -62,25 +62,19 @@ srv=socketserver.ThreadingTCPServer(("127.0.0.1",0),H); srv.daemon_threads=True
 threading.Thread(target=srv.serve_forever,daemon=True).start()
 URL="http://127.0.0.1:%d/raya-trade"%srv.server_address[1]
 
-# THE PROPOSAL, in the corner's OWN classes — nothing new is invented here.
+# THE PROPOSAL, in the corner's OWN classes.
 #
-# NO GROUP HEADINGS (Islam: "who we have a conversation with will apear with
-# the conversation and who is not will appear without the converstaion th
-# header is taking unneede space"). He is right and it is rule 1b-ii's own
-# argument: a heading that restates what the rows already show is furniture,
-# and in a 340px body two of them cost two rows of the list itself. The ROW
-# SHAPE carries the distinction — a last message and a time, or neither — and
-# the ORDER carries the grouping: conversations by recency, then people.
+# NO HEADINGS AT ALL, not even the scope line (Islam: "i still can see a
+# header"). He is right by his own test: it sat above the rows in grey and
+# read as one. THE SCOPE MOVES INTO THE SEARCH BOX'S PLACEHOLDER, which is
+# where somebody reads it at the moment they decide to type, and costs no row
+# at all — and the COUNT goes with it, because the list is the count.
 #
-# THE SCOPE LINE STAYS, because it is not a description. §285 put it there so
-# the office is not misled into thinking results are limited to Waiting while
-# the Waiting segment is the one lit, and that is a fact the screen states
-# nowhere else. Its wording widens to cover the register.
-#
-# AND THE CAP SPEAKS AT THE FOOT, not in a heading — which is where it belongs
-# anyway, since the foot is where the list runs out.
+# AND THE WAY OUT IS PINNED (Islam: "I cant see the button open the platform
+# inbox which should be always there"). It was inside the scrolling list, so a
+# list of any length carried it off the bottom. It sits above the composer now
+# and does not move. The cost is stated: one row of list height, always.
 PROPOSED = """
-<div class="cqfound">5 found in all conversations and on the register</div>
 <button class="cqrow" type="button">
   <div class="cqr1"><b>Abd El Hamid Mokhtar</b><span class="cqw">Yesterday 11:50</span></div>
   <div class="cqpl">Mobile</div><div class="cqln">done</div></button>
@@ -100,10 +94,7 @@ PROPOSED = """
   <div class="cqpl">Merchandising</div></button>
 """
 
-# AND THE SAME LIST WITH THE CAP BITING, so the foot line can be judged.
-CAPPED = PROPOSED.replace(
-  "5 found in all conversations and on the register",
-  "12 found in all conversations and on the register") + """
+CAPPED = PROPOSED + """
 <button class="cqrow" type="button">
   <div class="cqr1"><b>Abdallah Sherif</b></div>
   <div class="cqpl">Marketing</div></button>
@@ -123,8 +114,11 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1200)
     pg.click("#chatbtn"); pg.wait_for_timeout(700)
     # The one new class the proposal needs, injected so it can be LOOKED at.
-    pg.add_style_tag(content=".cqmore{padding:10px 10px 14px;font-size:var(--fs-micro);"
-                             "color:var(--ink-3);font-style:italic;}")
+    # The two new rules the proposal needs, injected so they can be LOOKED at.
+    pg.add_style_tag(content=
+      ".cqmore{padding:10px 10px 14px;font-size:var(--fs-micro);"
+      "color:var(--ink-3);font-style:italic;}"
+      ".cqfoot.cqpin{margin-top:0;flex:none;background:var(--surface);}")
     pg.fill("#cqfind","abd"); pg.wait_for_timeout(900)
 
     panel = pg.query_selector("#chatpanel")
@@ -133,7 +127,10 @@ with sync_playwright() as p:
     pg.evaluate("""(html) => {
       const b = document.getElementById('chatbody');
       const foot = b.querySelector('.cqfoot');
-      b.innerHTML = html + (foot ? foot.outerHTML : '');
+      b.innerHTML = html;
+      if (foot) { foot.classList.add('cqpin'); b.parentNode.insertBefore(foot, b.nextSibling); }
+      const f = document.getElementById('cqfind');
+      if (f) f.placeholder = 'Search all conversations and the register\u2026';
     }""", PROPOSED)
     pg.wait_for_timeout(300)
     panel.screenshot(path=str(OUT/"b-proposed.png"))
@@ -146,12 +143,20 @@ with sync_playwright() as p:
     # THE CAP, at the foot where the list runs out.
     pg.evaluate("""(html) => {
       const b = document.getElementById('chatbody');
-      const foot = b.querySelector('.cqfoot');
-      b.innerHTML = html + (foot ? foot.outerHTML : '');
+      b.innerHTML = html;
       b.scrollTop = b.scrollHeight;
     }""", CAPPED)
     pg.wait_for_timeout(250)
     panel.screenshot(path=str(OUT/"d-capped.png"))
+
+    # AND WHERE THE SCOPE WENT — the box empty, saying what it searches at the
+    # moment somebody decides to type, for no row at all.
+    pg.evaluate("""() => {
+      const f = document.getElementById('cqfind');
+      if (f) { f.value = ''; f.placeholder = 'Search all conversations and the register\u2026'; }
+    }""")
+    pg.wait_for_timeout(200)
+    panel.screenshot(path=str(OUT/"e-placeholder.png"))
     print("shot:", [f.name for f in sorted(OUT.glob('*.png'))])
     br.close()
 srv.shutdown()

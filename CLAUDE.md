@@ -1896,11 +1896,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   one you came to open. Both sides of the switch through one helper (§53.5).
   Proved able to fail: **2 red**, printing his complaint verbatim, with his
   project put SECOND in the fixture or "his" and "the first" coincide and the
-  assertion proves nothing (§113.8). **ASKED AND NOT BUILT**: hiding the other
+  assertion proves nothing (§113.8). **ASKED AND CLOSED**: hiding the other
   projects from the rail — *"can we set that in the roles and accses table?"* —
   is per-ROW visibility, a different shape from a 49-cell role × AREA matrix
   (§37), and it would leave a capability's headline numbers describing projects
-  the reader cannot see. Put to him with options.
+  the reader cannot see. Three answers put to him with that cost; he closed it:
+  *"no need to hide other projects. that's a stretch."* Nothing built, nothing
+  planned — §287.4 alone answers the complaint under it.
 - **A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (§287):** Islam —
   *"a project owner is not able to report, despite being the project owner and
   in the roles and access I allowed this."* **HE COULD, AND THE PAGE WAS

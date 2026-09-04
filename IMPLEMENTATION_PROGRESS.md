@@ -39,6 +39,8 @@ Nothing proceeds past this line without an answer.
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
 
 
+| **D11** | **The 10-minute collection** — replacing §261's instant-then-guarded chase with "collect for 10 minutes, send one email". Emails drawn: `design-mockups/chat-collect-email/2026-09-03_the-two-emails.html`. | Settled with Islam in conversation: presence stops deciding, only a reply stops the email, the office gets ONE email covering every waiting conversation, and the existing away setting is repurposed as the collection time (default 10, his current 3 to be set with it). The alarm clock is the platform's own traffic — no scheduler. Not started; awaiting the word. | §261 |
+
 **Answered:**
 
 - **D10 · The *Email again after* row on chat settings — ANSWERED 2026-09-03:

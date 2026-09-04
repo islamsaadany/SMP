@@ -355,7 +355,15 @@
    serving itself the old platform out of its own disk (§91). Checked against
    origin/main serving "smp-shell-v4.64-objectives-table" (aac6c32), and
    confirmed again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.65-office-corner-queue";
+/* §290: the corner is drawn from the state the page hydrated with rather than
+   waiting for the chat's first answer, and the search reaches people who have
+   never written in — the built file's bytes changed, so the name must too, or
+   a returning browser goes on serving itself the old platform out of its own
+   disk (§91). Checked against origin/main serving
+   "smp-shell-v4.65-office-corner-queue" (da96757) — this branch's own previous
+   name, already there — and confirmed again immediately before the push
+   (§94.16). */
+const SHELL = "smp-shell-v4.66-corner-arrives-with-the-page";
 const ASSETS = [
   "/",
   "/index.html",

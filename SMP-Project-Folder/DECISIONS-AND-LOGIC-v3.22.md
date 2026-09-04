@@ -30600,3 +30600,134 @@ ordinary deck" is a claim until it is measured.
 probe read `codes: [null × 18]` on a build that looked complete. *A command that
 prints something is not a command that did the thing; the measurement is what
 said so.*
+
+---
+
+## §266.10 — TWO TABLES, SEARCHED, AND DRAGGED BY THEIR OWN NUMBERS (2026-09-04)
+
+Islam, from his own tenant's picker with eighteen subjects in it: *"make the
+everyone who reports searchable and make it a simple table wiht a nother oclumn
+of a BU or a FUNC and make the popup a bit bigger to see more of the units and
+functions suggect a mockup"* — then, of the running order: *"I like option B but
+make the right hand side without the up and down arrows just the x to remove and
+make the list can be dragged by a handle to rearrange if needed"* — and then the
+question that shaped the handle: *"do you think the handle can be the same as
+the number? think with me beforeht emockup"*, followed by *"show me 3 in an
+interactive artificat"*.
+
+**THE ROWS ARE STILL THE SAME ROWS, AND THAT IS WHY THIS COST AN AFTERNOON.**
+This is the third time the picker has been redrawn — §266.4 a single list,
+§266.8 two columns, §266.10 two tables — and not once has the list underneath it
+moved. `masterSubjects()`, `masterOrder()`, `masterWrite()`, `GROUP.masterFlow`,
+its classification in `lib/authorize.js` and its refusal are byte for byte what
+§266 shipped, because `MFLOW.pick` was always the running order and a table is a
+way of showing a list. Nothing is stored that was not stored before; there is no
+migration; the server was not touched and its 503 assertions are unchanged.
+
+**THE DRAG IS `makeSortable`, NEVER A SECOND ONE.** The number is drawn as
+`.idx-n` and the bars come from `handle()`, so `arrange.js` renumbers the rows as
+they move, moves one from the keyboard, and — since §118 — **refuses a commit
+that is not a permutation** of the list it is applied to rather than half
+applying it. A second drag written here would be a second copy of all of that,
+including the bugs those two sections were written to close (§53.5).
+
+**AND THE GLITCH ISLAM REPORTED WAS MEASURED BEFORE ANYTHING WAS BUILT.** Of the
+interactive drawing he asked for, he said: *"the handle and movement of the
+functions or units is a bit glitchy is that in the mockup only or that's an issue
+will be in the paltofrm as well?"* Driven headless, move by move: with the
+digit-to-bars swap driven by `:hover` alone, a **four-row drag swapped the bars
+six times**, and half of those swaps put the bars on a row the pointer was
+*passing* rather than on the row in hand. The cause is not the drawing's
+plumbing — the dragged row moves in **whole-row steps** while the pointer moves
+continuously, so for about half of every row crossed the pointer is not over the
+dragged handle at all, and `:hover` matches the neighbour instead. Measured
+against the platform's own Setup tables, which draw the bars permanently: **zero
+swaps across a full drag**. So the fault belongs to *the number doubling as the
+handle*, and it would have shipped with it.
+
+The rule is therefore in the CSS and not in a drawing: **while a drag is on, the
+dragged row keeps its bars wherever the pointer is, and no other row may take
+them.** The suppression is scoped `tr:not(.dragging)`, because
+`tbody.sorting td.mfh:hover` outranks `tr.dragging td.mfh` and the first attempt
+hid the bars on exactly the row being dragged (§29.2, on specificity, again).
+
+**OPACITY, NEVER `display:none`.** `handle()` gives the grip the role and the
+tabindex, so it *is* the focusable control — and both `display:none` and
+`visibility:hidden` take an element out of the tab order, which would mean the
+keyboard route to reordering does not exist at all (§61) while rendering
+identically. Found by driving it: `.focus()` on the grip landed on the dialog's
+close button. Invisible-and-still-there also makes the **whole cell** the drag
+target, which is the point — a digit is 8px wide and nobody aims at that.
+
+**AND THE KEYBOARD'S FOCUS IS DECIDED BEFORE THE MOVE, NOT AFTER IT.** Moving a
+row with `insertBefore` **blurs** whatever inside it held the focus, so by the
+time the commit runs `document.activeElement` is the body and there is nothing
+left to say which row moved — the first build read it afterwards and the focus
+was silently lost on every press. A capture-phase listener records where the
+press is going before `makeSortable`'s own handler runs, and a press at either
+end of the list is recorded as **nothing**, or the next pointer drag would
+inherit a stale row.
+
+**THE SEARCH HIDES ROWS IN PLACE AND NEVER REPAINTS** (§35, §108.13) — a rebuild
+on every keystroke would throw away the box being typed into — **and a repaint
+KEEPS the filter**, or ticking somebody quietly shows the whole list again to a
+person who believes they are reading their results. It matches the **code** as
+well as the name, because the code is what §266.9 prints on every pill while the
+flow is being presented, so it is what somebody watching the deck would type.
+The cursor stays in the box when a tick was made from it: the next name is
+usually typed straight after.
+
+**THE TICK AND THE × ARE ONE ACT AND STAY ONE HANDLER** — both are `data-mftick`
+(§266.8's decision, unchanged) — and the arrows are **deleted, not left
+unwired** (§24): `data-mfmove` appears nowhere.
+
+**WIDER, AND MARKED ON THE OVERLAY.** Two tables of four and five columns in the
+940px every dialog gets leaves each about 440px, which clips a name before the
+Kind column is reached; the picker takes 1160px through a class on the
+**overlay** (§122's rule — `.modal` is shared by every dialog in the product) and
+**gives it back in `closeModal()`**, or the next thing to open would inherit it.
+
+**FOUR THINGS THE CHECK FOUND, AND EACH IS ITS OWN OLD LESSON.**
+· **The handle column was 198px**, because `table-layout:fixed` takes every
+  column's width from the **first row** and ignores the body's — §37's trap in
+  the access matrix, in a second table. The width moved onto the header cell.
+· **The waiting table overflowed its column by exactly 2px** at every width: the
+  cell's own padding is 16 and the tick is 22, so a 36px column cannot hold it —
+  and then again by 2px, because `SLIDES` measures 54 at 10.5px with the header's
+  letter-spacing and it is the **last** column of that table, where overflow
+  becomes sideways scroll rather than being clipped by the column after it.
+  §158's rule is *fit*, never *"and it scrolls"*.
+· **`--gold-deep` on `--surface-2` is 4.45:1** as words — §38.5 for the seventh
+  time, walked into while quoting it. The FUNC chip keeps the accent as its
+  **border**, where 3:1 is the bar, and takes `--ink-2` for the word (§38.4).
+· **And one of the check's own failures was the check** (§68.10): `.grip` carries
+  a 120ms opacity transition, so a row the pointer left a moment ago is still
+  measurably lit — it reported a row with no hover, no focus and no reason to be
+  lit except that it was on its way out. The probe settles before it measures.
+
+**AND TWO MORE CAME FROM LOOKING AT IT RATHER THAN MEASURING IT.** The Kind
+column shipped its first build reading **`FU…`** — a column that abbreviated the
+word it exists to show, because 58px less the cell's 16px of padding is 42 for a
+chip that renders 44, and the td's own ellipsis did the rest. And two columns in
+a 900px window give each about 380px, where two of the tenant's own names clip:
+they **stack at 960 now, not 820**. What still clips at exactly one width is
+*Strategy Management Office* in a 1000px window, and that is answered the way
+§88 answers it — the full name on the hover, **measured** at paint time so a
+name that fits is not given a title that would steal the pointer (§93.6).
+
+`checks/master-picker.py`: **37 red** on the shipped pre-§266.10 build, 51 green
+after — and **every input degrades** (§215), because its first run against that
+build died on a 30-second `pg.fill` timeout with five sections unmade, in a file
+whose own docstring promises otherwise. Six assertions in
+`checks/master-presentation.py` held the old markup and were **rewritten, never
+deleted** (§218, §51.11): a row is a `tr` and its name is the second cell in
+**both** tables, read by one getter, because two would let the halves drift.
+
+**RECORDED, NOT DONE.** The drag cannot **auto-scroll**: measured with all
+eighteen subjects in the flow, the list is 654px in a 420px box and dragging past
+the bottom does not move it, so a drop can only land where it can already be
+seen. The keyboard route does scroll the moved row into view, and the same
+limitation is true of every other sortable table in the product — closing it
+means changing `arrange.js` for all of them, which is its own decision. The row
+also **lags the pointer with no ghost**, which is `makeSortable`'s own behaviour
+everywhere.

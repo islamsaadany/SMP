@@ -7714,6 +7714,9 @@
     if (!overlay.classList.contains("on")) return;
     overlay.classList.remove("on");
     overlay.classList.remove("pdlg-on");
+    /* The master picker's extra width goes with it (§266.10): a class left on
+       the overlay would widen whatever opens next. */
+    overlay.classList.remove("mflow-on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }
     /* Back to the control that opened it — the one thing a keyboard user

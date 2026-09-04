@@ -591,6 +591,59 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **RECORDED, NOT DONE**: a single deck still draws one unlabelled dot per slide,
   nothing says the order is saved without presenting it, and a flow cannot be
   downloaded.
+- **THE PICKER IS TWO TABLES, SEARCHED, AND DRAGGED BY ITS OWN NUMBERS
+  (&sect;266.10):** Islam, from his own tenant &mdash; *"make the everyone who
+  reports searchable and make it a simple table wiht a nother oclumn of a BU or
+  a FUNC and make the popup a bit bigger"*, then *"without the up and down
+  arrows just the x to remove and make the list can be dragged by a handle"*,
+  then *"do you think the handle can be the same as the number?"*
+  **THE ROWS ARE STILL THE SAME ROWS**: third redraw of this dialog and the list
+  underneath it has never moved &mdash; `masterSubjects`, `masterOrder`,
+  `masterWrite`, `GROUP.masterFlow` and every server rule byte for byte what
+  &sect;266 shipped, no migration, 503 authoriser assertions unchanged. **THE
+  DRAG IS `makeSortable`, NEVER A SECOND ONE**: the number is `.idx-n` and the
+  bars are `handle()`, so &sect;118's refusal of a non-permutation commit and the
+  keyboard move come free (&sect;53.5). **AND THE GLITCH HE REPORTED WAS
+  MEASURED BEFORE IT WAS BUILT** &mdash; with the swap on `:hover` alone a
+  four-row drag swapped the bars **six times** and half of those put them on a
+  row the pointer was PASSING, because *the row moves in whole-row steps while
+  the pointer moves continuously*; the platform's own Setup tables, which draw
+  the bars always, measure **zero**. So the rule is in the CSS: the dragged row
+  keeps its bars wherever the pointer is, and no other row may take them &mdash;
+  scoped `tr:not(.dragging)`, because `tbody.sorting td.mfh:hover` outranks
+  `tr.dragging td.mfh` and the first attempt hid the bars on exactly the row
+  being dragged (&sect;29.2). **OPACITY, NEVER `display:none`**: `handle()` gives
+  the grip the role and the tabindex, so hiding it either of the other two ways
+  takes the keyboard route out of existence while rendering identically
+  (&sect;61) &mdash; found by focusing it and landing on the dialog's close
+  button. **AND THE KEYBOARD'S FOCUS IS DECIDED BEFORE THE MOVE**: `insertBefore`
+  BLURS whatever inside the row held the focus, so reading `activeElement` after
+  the commit finds the body; a capture-phase listener records where the press is
+  going, and a press at either end records **nothing** or the next drag inherits
+  a stale row. **The search hides in place and never repaints** (&sect;35), a
+  repaint KEEPS the filter (&sect;108.13), and it matches the **code**
+  (&sect;266.9's pills) as well as the name. **The tick and the &times; stay one
+  handler** and the arrows are DELETED (&sect;24). **Wider, marked on the
+  OVERLAY** and given back in `closeModal()` (&sect;122). **FOUR FAULTS THE
+  CHECK FOUND, EACH AN OLD LESSON**: the handle column 198px because
+  `table-layout:fixed` takes every width from the FIRST ROW (&sect;37, second
+  table); the waiting table 2px past its column twice over (a 22px button in a
+  36px cell, then `SLIDES` at 54 in the LAST column &mdash; &sect;158, *fit,
+  never "and it scrolls"*); `--gold-deep` on `--surface-2` **4.45:1** as words,
+  so the FUNC chip keeps the accent as a BORDER and takes `--ink-2` for the word
+  (&sect;38.4/&sect;38.5, seventh time); **and one failure was the CHECK**
+  &mdash; `.grip` fades over 120ms, so a row the pointer left is still measurably
+  lit (&sect;68.10). **AND TWO CAME FROM LOOKING RATHER THAN MEASURING**: the
+  Kind column shipped its first build reading **`FU…`**, and two columns in a
+  900px window clip two of the tenant's own names (they stack at 960 now, and
+  the one name that still clips at 1000 is on a hover, titled only when it is
+  actually clipped &mdash; &sect;88, &sect;93.6). **37 red** on the shipped build, and its first run there
+  DIED on a 30s `pg.fill` timeout with five sections unmade (&sect;215, in a file
+  promising every probe degrades); six assertions in `master-presentation.py`
+  REWRITTEN, never deleted (&sect;218). **RECORDED, NOT DONE**: a drag cannot
+  auto-scroll (654px of list in a 420px box), and the row lags the pointer with
+  no ghost &mdash; both true of every sortable table in the product, so closing
+  either means changing `arrange.js` for all of them.
 - **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
   (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
   an option in the drop down for the smo only."* §145.9 hid the pane-corner
@@ -4853,6 +4906,21 @@ python3 checks/master-presentation.py # one flow, several decks, back to back
                                 # unchanged, because everything rides one opener now.
                                 # 31 red on the build before — and its first run there
                                 # DIED on an empty list rather than reporting (§215)
+python3 checks/master-picker.py # the picker is two tables, searched, and dragged by
+                                # its own numbers (§266.10): Kind asserted as
+                                # AGREEMENT with boardFunctionTargets and Slides
+                                # with masterCount, never as literals; the search
+                                # proved to hide IN PLACE by node identity (a
+                                # build that rebuilt on every keystroke satisfies
+                                # every "the right rows show" assertion and still
+                                # throws away the box being typed into); the grip
+                                # proved FOCUSABLE, because display:none renders
+                                # identically and takes the keyboard route out of
+                                # existence; and the swap asserted at EVERY step
+                                # of a REAL pointer drag, both ways — the dragged
+                                # row keeps its bars AND no other row shows any.
+                                # 37 red on the shipped build; every input
+                                # degrades (§215)
 python3 checks/deck-dividers.py # the group's mark and the deck's four blue
                                 # section dividers (§259): the blue asserted as AGREEMENT
                                 # with `--panel` and never as a hex — it REBRANDS the
@@ -5172,7 +5240,44 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;266: one flow, several decks, back to
+*Last Updated: 2026-09-04 &mdash; **&sect;266.10: the picker is two tables,
+searched, and dragged by its own numbers.** Islam, from his own tenant with
+eighteen subjects in it &mdash; *"make the everyone who reports searchable and
+make it a simple table wiht a nother oclumn of a BU or a FUNC and make the popup
+a bit bigger"*, then *"without the up and down arrows just the x to remove and
+make the list can be dragged by a handle"*, then *"do you think the handle can
+be the same as the number?"* Four mockups, three of them published as artifacts
+and one of them interactive, before a line of `src/` was touched (rule 1c).
+**THE ROWS ARE STILL THE SAME ROWS**: this is the third redraw of that dialog and
+the list underneath it has never moved &mdash; `MFLOW.pick` was always the
+running order, so `masterSubjects`, `masterOrder`, `masterWrite`,
+`GROUP.masterFlow`, its classification and its refusal are byte for byte what
+&sect;266 shipped; no migration, nothing new stored, 503 authoriser assertions
+unchanged. **THE DRAG IS THE PLATFORM'S OWN** &mdash; the number is drawn as
+`.idx-n` and the bars come from `handle()`, so `makeSortable` renumbers, moves a
+row from the keyboard and refuses a commit that is not a permutation (&sect;118)
+without a second copy of any of it. **AND THE GLITCH HE REPORTED WAS MEASURED
+RATHER THAN GUESSED AT**: *"the handle and movement is a bit glitchy is that in
+the mockup only or that's an issue will be in the paltofrm as well?"* &mdash;
+driven move by move, a four-row drag swapped the bars **six times** with half of
+them landing on a row the pointer was PASSING, because the row moves in whole-row
+steps while the pointer moves continuously; the platform's own Setup tables,
+which draw the bars always, measure **zero**. It belonged to the treatment, not
+to the drawing, so it is answered in the CSS before it could ship. **AND
+`display:none` WOULD HAVE COST THE KEYBOARD ROUTE ENTIRELY** (&sect;61), found by
+focusing the grip and landing on the dialog's close button; and the keyboard's
+focus had to be decided BEFORE the move, because `insertBefore` blurs whatever
+inside the row held it. `checks/master-picker.py` **37 red** on the shipped
+build, 50 green after &mdash; and its own first run there died on a 30s timeout
+with five sections unmade (&sect;215), while one of its failures was the check
+(a 120ms fade, &sect;68.10) and three were real: a 198px handle column
+(&sect;37's fixed-layout trap), 2px of overflow twice over (&sect;158) and
+`--gold-deep` at 4.45:1 as words (&sect;38.5, seventh time). Six assertions in
+`master-presentation.py` REWRITTEN, never deleted (&sect;218). Full `qa.py`
+sweep clean &middot; 503/0 &middot; 126/0 &middot; setup-arrange, no-jump,
+table-fit and deck-fullscreen green.*
+
+*Earlier: 2026-09-03 &mdash; **&sect;266: one flow, several decks, back to
 back.** Islam: *"give an option for the smo from the presentation list to do
 master presentation which is a flow of presentations in a flow and he is just
 asked the flow of the units and functions who will present he make the flow and

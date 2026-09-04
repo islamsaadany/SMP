@@ -33556,7 +33556,14 @@ the panel. The panel is drawn only for a unit carrying focus marks, so the unit
 is FOUND at runtime rather than named — and the sub-page key is `performance`,
 not `perf`, which cost the first run its panel entirely (§50.6).
 
-## §290 — A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (2026-09-04)
+## §292 — A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (2026-09-04)
+
+*(Renumbered twice while it was being built: **§288 → §290 → §292**. Main took
+§288 and then §290 from two other sessions in the same afternoon — §94.12's
+collision in section numbers, and both were caught by FETCHING before writing,
+not by the merge, which would have taken two sections onto one number without a
+word. §291 is left clear on purpose: a gap is harmless where a collision is not
+(§287's own reasoning).)*
 
 Islam, from the live product, in one message: *"on a creation of a project I
 couldn't set the direction and we need to make the add deliverable or outcome
@@ -33681,7 +33688,7 @@ panes byte-for-byte what they were; and the table still fitting its pane at
 1600 / 1280 / 1100 (§158). **13 red** against the shipped build before it, and it
 REPORTS them rather than dying on the third (§215).
 
-**§290.1 — AND TWO OF ITS OWN FIRST FAILURES WERE THE CHECK.** It asserted that
+**§292.1 — AND TWO OF ITS OWN FIRST FAILURES WERE THE CHECK.** It asserted that
 *every* row's Type is a picker, which is false on a demo part-way through a cycle
 and would have been a blanket passing only on an unreported plan — it asserts the
 AGREEMENT now (a row is a picker exactly when it has not been reported against),
@@ -33690,13 +33697,13 @@ proves nothing (§113.8). And it counted every `<select>` in the Reporting pane'
 table and called four of them a leak: those are how a deliverable is REPORTED
 (§104.8), and the count is scoped to the Type column.
 
-**§290.2 — AND `qa.py` HELD A LITERAL THIS DECISION MOVED** (§214.3, sixth time),
+**§292.2 — AND `qa.py` HELD A LITERAL THIS DECISION MOVED** (§214.3, sixth time),
 **REWRITTEN AND NOT DELETED** (§218): its plan-edit sweep asserted an Add button
 for `outcome` and would have gone red on a build behaving exactly as decided.
 The property it was protecting — that every kind of row can still be CREATED
 (§61) — is asserted beside it instead, by finding the Type picker on the page.
 
-**§290.3 — RECORDED, NOT DONE.** A locked row's word is centred (`.dxtype` takes
+**§292.3 — RECORDED, NOT DONE.** A locked row's word is centred (`.dxtype` takes
 `text-align:center` so the column does not read as two different marks) and a
 picker's is left-aligned, so a table holding both reads ragged down that column.
 Centring the select is one line and it is a change to the drawing Islam signed

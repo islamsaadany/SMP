@@ -3100,8 +3100,8 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 })();
 
-/* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§290) ══
-   §290 gives a project's Deliverables and outcomes table a Type picker: the
+/* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§292) ══
+   §292 gives a project's Deliverables and outcomes table a Type picker: the
    press moves the row out of one list and into the other, with a new id. The
    claim made in that section's comment is that the SERVER needed nothing —
    `splitRows` already reads a row leaving one of these lists and appearing in
@@ -3112,13 +3112,13 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
    BOTH ENDS, or a build that allowed everything would pass the first half
    (§94.2). And the row is REBUILT rather than moved by reference, because
    that is what the browser does: a converted row is minted by the minter and
-   carries the name across (§290), so an id that travelled with it would be a
+   carries the name across (§292), so an id that travelled with it would be a
    different fixture from the one the product produces. */
-console.log("\n31 · a row's type is the office's to change (§290)");
+console.log("\n31 · a row's type is the office's to change (§292)");
 (function () {
   const cap = (SEED.group.capabilities || [])[0];
   const proj = cap && (cap.projects || [])[0];
-  check("§290: the seed holds a project with a deliverable", !!(proj && (proj.deliverables || [])[0]),
+  check("§292: the seed holds a project with a deliverable", !!(proj && (proj.deliverables || [])[0]),
         proj && proj.id);
   if (!proj || !(proj.deliverables || [])[0]) return;
 
@@ -3137,7 +3137,7 @@ console.log("\n31 · a row's type is the office's to change (§290)");
   };
 
   let v = run("smo");
-  check("§290: the office switches a row's type", v.ok, (v.refusals || []).join(" / "));
+  check("§292: the office switches a row's type", v.ok, (v.refusals || []).join(" / "));
 
   /* Whoever holds the function and is not the office. A custodian may report
      a deliverable (§147.3) and may not author the plan — which is exactly the
@@ -3147,9 +3147,9 @@ console.log("\n31 · a row's type is the office's to change (§290)");
   const cust = fkey && SEED.functions[fkey].custodian;
   if (cust && who(SEED, cust)) {
     v = run(cust);
-    check("§290 REFUSED: the function's custodian may not", !v.ok, "was ALLOWED");
+    check("§292 REFUSED: the function's custodian may not", !v.ok, "was ALLOWED");
   } else {
-    check("§290: a custodian to refuse", false, "none in the seed");
+    check("§292: a custodian to refuse", false, "none in the seed");
   }
 
   /* AND IT IS ONE KIND OF CHANGE, NOT TWO. A build that read the removal and
@@ -3159,7 +3159,7 @@ console.log("\n31 · a row's type is the office's to change (§290)");
   const inc = clone(SEED); convert(inc);
   const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
                  .map(function (c) { return c.kind; });
-  check("§290: every part of it classifies as capPlan",
+  check("§292: every part of it classifies as capPlan",
         kinds.length > 0 && kinds.every(function (k) { return k === "capPlan"; }),
         kinds.join(",") || "(nothing)");
 })();

@@ -40,7 +40,7 @@ var BFORM = null;         /* { kind, ctx, draft, added } while a row form is ope
 var BCHOOSE = null;       /* { side, confirm } while the chooser is open */
 
 /* ── Which way a subject plans ────────────────────────────────────── */
-/* IS THE BUILD UNDERWAY ON THE PLACE BEING DRAWN (§290)? Six places spell
+/* IS THE BUILD UNDERWAY ON THE PLACE BEING DRAWN (§292)? Six places spell
    this out inline (`BUILDER && BUILDER.target === current`); this is the
    first that needed it from a RENDERER rather than a handler, so it is
    named once here. The six are deliberately left as they are — folding them

@@ -7001,7 +7001,7 @@ function addOutcome(p){
   p.outcomes.push(o);
   return o;
 }
-/* ── A ROW'S TYPE IS WHICH LIST IT IS IN (§290) ──────────────────────────
+/* ── A ROW'S TYPE IS WHICH LIST IT IS IN (§292) ──────────────────────────
    Islam, from the live product: *"we need to make the add deliverable or
    outcome more of an options in the type rather than 2 buttons of add
    deliverable or outcome that I get confused between them."*

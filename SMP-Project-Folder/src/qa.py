@@ -1162,7 +1162,7 @@ with sync_playwright() as p:
     # querySelector check would have passed every day the control could not be
     # reached, which is how it shipped.
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
-    # §290 MOVED ONE OF THESE AND THE LINE IS REWRITTEN, NOT DELETED (§218).
+    # §292 MOVED ONE OF THESE AND THE LINE IS REWRITTEN, NOT DELETED (§218).
     # An outcome had an Add button of its own until Islam said the two ran
     # together and confused him; the way to one is now the Type picker on the
     # row. So the button list loses `outcome` — and the property this line was
@@ -1204,7 +1204,7 @@ with sync_playwright() as p:
         if missing:
             errs.append("PLAN EDIT (%s): no Add for %s" % (tag, ", ".join(missing)))
         if tag == "capability":
-            # §290: and an OUTCOME is still creatable — through the Type picker
+            # §292: and an OUTCOME is still creatable — through the Type picker
             # on a row rather than through a button of its own.
             kinds = pg.evaluate("""() => [...document.querySelectorAll('.pane tbody select')]
               .map(s => [...s.options].map(o => o.textContent.trim()).join('/'))

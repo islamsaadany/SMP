@@ -1,4 +1,4 @@
-"""A PROJECT ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§290).
+"""A PROJECT ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§292).
 
 Islam, from the live product: *"on a creation of a project I couldn't set the
 direction and we need to make the add deliverable or outcome more of an options

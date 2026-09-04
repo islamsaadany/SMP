@@ -174,7 +174,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §290 — a row's type is a picker, and its direction opens (2026-09-04, branch `claude/project-creation-direction-options-shcyal`)
+### §292 — a row's type is a picker, and its direction opens (2026-09-04, branch `claude/project-creation-direction-options-shcyal`)
 
 Islam, from the live product: *"on a creation of a project I couldn't set the
 direction and we need to make the add deliverable or outcome more of an options

@@ -437,7 +437,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§290):** Islam — *"on a
+- **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§292):** Islam — *"on a
   creation of a project I couldn't set the direction and we need to make the add
   deliverable or outcome more of an options in the type rather than 2 buttons of
   add deliverable or outcome that I get confused between them."* **TWO DIFFERENT
@@ -5651,7 +5651,7 @@ cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/project-row-type.py # a project row's type is a picker and its
-                                # direction opens (§290): ONE way to add a row and
+                                # direction opens (§292): ONE way to add a row and
                                 # pressing it adds a DELIVERABLE (an outcome's blank
                                 # target is a counted gap, so the other kind would add
                                 # a missing item every press); the picker MOVING the

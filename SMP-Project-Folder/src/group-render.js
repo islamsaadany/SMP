@@ -5362,7 +5362,7 @@ function dxType(row, p){
      "this column has a fixed measure" and "paint a box round it" are two
      different facts, and merging them is what made removing one remove both. */
   var word = dxIsDeliv(row) ? "Deliverable" : "Outcome";
-  /* §290: AND ON THE PLAN PANE IT IS THE CONTROL THAT SETS IT. Islam:
+  /* §292: AND ON THE PLAN PANE IT IS THE CONTROL THAT SETS IT. Islam:
      *"we need to make the add deliverable or outcome more of an options in
      the type rather than 2 buttons"* — so the question is answered in the
      column whose heading already asks it, and a row added as the wrong kind
@@ -5426,7 +5426,7 @@ var DX_KINDS = [{ v:"d", label:"Deliverable" }, { v:"o", label:"Outcome" }];
 /* A deliverable's direction and target are written FOR it rather than asked
    OF it, and shown quietly, because a value nobody can change should not look
    like a field. */
-/* §290: AN OUTCOME'S DIRECTION OPENS WITH THE PEN. Islam, creating a project:
+/* §292: AN OUTCOME'S DIRECTION OPENS WITH THE PEN. Islam, creating a project:
    *"I couldn't set the direction."* It had never been editable — on any
    project, in any mode — because this cell printed the sign and stopped: not
    a fault of creating a project, but of every outcome the table has ever
@@ -5992,13 +5992,13 @@ function projPlanBody(p, fk){
         : gapCell("plan", "k_proj", o, "target", { ctx: { project: p, row: o } })) +
       '</td></tr>';
   }).join("") +
-  /* ── ONE WAY IN (§290, reversing §53.4's two buttons) ───────────────
+  /* ── ONE WAY IN (§292, reversing §53.4's two buttons) ───────────────
      §53.4 put two buttons here on the reasoning that "a single add a row
      would have to ask which — a question the two buttons answer by existing".
      True, and what it did not ask is WHERE that question gets answered:
      Islam, from the live product, *"I get confused between them"*. The Type
      column answers it now, on the row, which is also the only way a row added
-     as the wrong kind was ever going to be correctable (§290's own finding —
+     as the wrong kind was ever going to be correctable (§292's own finding —
      until today it could only be removed and added again).
 
      AND THEY RENDERED AS ONE RUN OF TEXT. Measured on the shipped build and

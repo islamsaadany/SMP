@@ -1,0 +1,515 @@
+<title>The Number Is the Handle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* The platform's own Forefront tokens (rule 1c: navy/gold), so this dialog
+     is drawn in the product's language rather than in a mockup's. */
+  :root {
+    --panel:#16325C; --panel-ink:#FFFFFF; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --attn-bg:#FFFBEB; --attn-tx:#B45309; --good:#2E7D5B;
+    --fs-micro:10.5px; --shadow:0 18px 48px rgba(16,24,40,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --panel:#0E1014; --panel-ink:#E9ECF1; --gold:#D9B665; --gold-deep:#C9A24D;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#1F242C;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --attn-bg:#2A2415; --attn-tx:#FCD34D; --good:#5FB68C;
+      --shadow:0 18px 48px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --panel:#0E1014; --panel-ink:#E9ECF1; --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#1F242C;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --attn-bg:#2A2415; --attn-tx:#FCD34D; --good:#5FB68C;
+    --shadow:0 18px 48px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    background:var(--ground); color:var(--ink); margin:0;
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size:15px; line-height:1.5; padding:0 20px 64px;
+  }
+  .page { max-width:1240px; margin:0 auto; }
+
+  /* ── the framing note ─────────────────────────────────────────────── */
+  header { padding:44px 0 22px; }
+  .kicker {
+    font-size:var(--fs-micro); letter-spacing:.16em; text-transform:uppercase;
+    font-weight:600; color:var(--gold-deep); margin:0 0 12px;
+  }
+  h1 {
+    font-family:Newsreader, Georgia, serif; font-weight:400;
+    font-size:clamp(30px, 4vw, 42px); line-height:1.1; margin:0 0 14px;
+    letter-spacing:-.01em;
+  }
+  .lede { color:var(--ink-2); margin:0 0 18px; max-width:70ch; font-size:15.5px; }
+  .lede b { color:var(--ink); font-weight:600; }
+  .try {
+    display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center;
+    margin:0 0 26px; font-size:13px; color:var(--ink-3);
+  }
+  .try .t {
+    border:1px solid var(--line); border-radius:999px; padding:4px 11px;
+    background:var(--surface); color:var(--ink-2);
+  }
+  .try .t b { color:var(--ink); font-weight:600; }
+
+  /* the one control that is not part of the dialog: it lets the swap be
+     judged against the alternative rather than imagined */
+  .swap {
+    display:flex; align-items:center; gap:10px; margin:0 0 20px;
+    font-size:13px; color:var(--ink-2);
+  }
+  .swap .seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .swap button {
+    border:0; background:var(--surface); color:var(--ink-2); cursor:pointer;
+    font:inherit; font-size:12.5px; padding:6px 12px;
+  }
+  .swap button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); }
+  .swap button + button { border-left:1px solid var(--line); }
+
+  /* ── the dialog ───────────────────────────────────────────────────── */
+  .modal {
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow); max-width:1160px; overflow:hidden;
+  }
+  .modal-h {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:16px; padding:22px 26px 18px; border-bottom:1px solid var(--line);
+  }
+  .modal-h h3 { margin:0 0 4px; font-size:24px; font-weight:600; letter-spacing:-.01em; }
+  .modal-h p { margin:0; color:var(--ink-3); font-size:14px; }
+  .modal-x {
+    border:0; background:none; color:var(--ink-3); font-size:22px; line-height:1;
+    cursor:pointer; padding:2px 4px;
+  }
+  .modal-b { padding:20px 26px 22px; }
+
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:820px) { .cols { grid-template-columns:1fr; } }
+  .col { min-width:0; }
+  .colhead {
+    display:flex; align-items:center; gap:10px; margin:0 0 6px;
+    padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .colhead h4 {
+    margin:0; flex:none; font-size:var(--fs-micro); letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); font-weight:600;
+  }
+  .find {
+    flex:1 1 auto; min-width:0; height:27px; font:inherit; font-size:12.5px;
+    padding:0 9px; border:1px solid var(--line); border-radius:6px;
+    background:var(--surface); color:var(--ink);
+  }
+  .count { font-size:11px; color:var(--ink-3); flex:none; font-variant-numeric:tabular-nums; }
+  .listbox { max-height:min(52vh, 440px); overflow:auto; }
+
+  /* The platform floors every data table at 620px so a plan table never
+     squashes — inside a 520px column that would run out of the dialog, so
+     these are exempted explicitly. */
+  table { width:100%; min-width:0; border-collapse:collapse; font-size:13.5px; }
+  thead th {
+    background:var(--panel); color:var(--panel-ink); font-size:var(--fs-micro);
+    letter-spacing:.1em; text-transform:uppercase; font-weight:600;
+    text-align:left; padding:6px 8px; position:sticky; top:0; z-index:2;
+  }
+  tbody td {
+    padding:6px 8px; border-bottom:1px solid var(--line-soft);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  tbody tr:nth-child(even) td { background:var(--zebra); }
+  td.nm { max-width:0; width:99%; }
+  td.k, th.k { width:58px; }
+  td.n, th.n { width:56px; text-align:right; color:var(--ink-3);
+    font-variant-numeric:tabular-nums; }
+  td.t, th.t { width:36px; }
+  td.x, th.x { width:40px; text-align:right; }
+  td.h, th.h { width:38px; }
+
+  .kind {
+    font-size:9.5px; font-weight:600; letter-spacing:.07em;
+    border:1px solid var(--line); border-radius:4px; padding:1px 5px;
+    color:var(--ink-3);
+  }
+  .kind.fn { border-color:var(--gold-deep); color:var(--gold-deep); }
+
+  .tick, .xb {
+    width:22px; height:22px; padding:0; line-height:1; cursor:pointer;
+    border:1px solid var(--line); border-radius:5px; background:var(--surface);
+    color:var(--ink-2); font:inherit; font-size:13px;
+  }
+  .tick { color:transparent; }
+  .tick:hover, .xb:hover { background:var(--surface-2); color:var(--ink); }
+
+  /* ══ THE HANDLE IS THE NUMBER ════════════════════════════════════════
+     The digit at rest; the platform's own three bars the moment it is
+     pointed at or focused. The CELL is the target, never the glyph — a
+     digit is 8px wide and nobody aims at that. */
+  td.h { padding:0; }
+  .handle {
+    display:flex; align-items:center; justify-content:center;
+    width:100%; height:34px; border:0; background:none; padding:0;
+    font:inherit; font-size:13px; font-variant-numeric:tabular-nums;
+    color:var(--ink-3); cursor:grab; position:relative; border-radius:6px;
+    touch-action:none;
+  }
+  tr.on .handle { color:var(--ink); font-weight:600; }
+  .handle:hover { background:var(--surface-2); }
+  .handle:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .handle .grip {
+    display:none; flex-direction:column; gap:3px; align-items:center;
+  }
+  .handle .grip i {
+    display:block; width:12px; height:2px; border-radius:1px; background:var(--ink-3);
+  }
+  /* the swap: digit out, bars in */
+  .handle:hover .num, .handle:focus-visible .num { visibility:hidden; }
+  .handle:hover .grip, .handle:focus-visible .grip { display:flex; position:absolute; }
+  /* A TABLET HAS NO HOVER, so the bars are simply always there — otherwise
+     this degrades to a bare digit on the device where dragging is most
+     natural. */
+  @media (hover: none) {
+    .handle .num { visibility:hidden; }
+    .handle .grip { display:flex; position:absolute; }
+  }
+  /* the alternative, for comparison: bars always, digit beside them */
+  .alwaysgrip .handle .num { visibility:hidden; }
+  .alwaysgrip .handle .grip { display:flex; position:absolute; }
+
+  tr.dragging td { background:var(--attn-bg) !important; }
+  tr.dragging .handle { cursor:grabbing; }
+
+  .empty { margin:0; padding:16px 8px; font-size:12.5px; color:var(--ink-3); }
+
+  .acts {
+    display:flex; gap:8px; justify-content:flex-end; align-items:center;
+    padding-top:16px;
+  }
+  .acts .said { margin-right:auto; font-size:12.5px; color:var(--good); }
+  .acts button {
+    font:inherit; font-size:13px; padding:7px 15px; border-radius:7px; cursor:pointer;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+  }
+  .acts button:hover { background:var(--surface-2); color:var(--ink); }
+  .acts button.go { border-color:var(--panel); background:var(--panel); color:var(--panel-ink); }
+
+  footer {
+    margin-top:34px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:13px; color:var(--ink-3); max-width:74ch;
+  }
+  footer b { color:var(--ink-2); }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+
+<div class="page">
+
+<header>
+  <p class="kicker">SMP &middot; &sect;266 &middot; option 3, live</p>
+  <h1>The number is the handle</h1>
+  <p class="lede">The real dialog, working: <b>search</b> the left, <b>tick</b> to
+    put a subject into the flow, <b>drag the number</b> to reorder it, <b>&times;</b>
+    to take it out. The digit sits quietly until you point at it, and then it
+    becomes the platform's own grip.</p>
+  <div class="try">
+    <span class="t">Try: type <b>mb</b> &mdash; the code finds Mobile</span>
+    <span class="t">Point at a number in the flow</span>
+    <span class="t">Drag it, or focus it and press <b>&uarr; &darr;</b></span>
+  </div>
+  <div class="swap">
+    <span>Show the grip:</span>
+    <span class="seg">
+      <button id="s-hover" aria-pressed="true">On hover &middot; option 3</button>
+      <button id="s-always" aria-pressed="false">Always &middot; the alternative</button>
+    </span>
+  </div>
+</header>
+
+<div class="modal">
+  <div class="modal-h">
+    <div>
+      <h3>Master presentation</h3>
+      <p>Pick who presents, and in what order.</p>
+    </div>
+    <button class="modal-x" aria-label="Close">&times;</button>
+  </div>
+  <div class="modal-b">
+    <div class="cols">
+      <div class="col">
+        <div class="colhead">
+          <h4>Everyone who reports</h4>
+          <input class="find" id="find" placeholder="Search a unit or function…"
+                 autocomplete="off" aria-label="Search a unit or function">
+          <span class="count" id="restcount"></span>
+        </div>
+        <div class="listbox">
+          <table>
+            <thead><tr>
+              <th class="t"></th><th>Name</th><th class="k">Kind</th><th class="n">Slides</th>
+            </tr></thead>
+            <tbody id="rest"></tbody>
+          </table>
+          <p class="empty" id="restempty" hidden>Everybody is in the flow.</p>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="colhead">
+          <h4>The flow</h4>
+          <span class="count" id="flowcount" style="flex:1 1 auto"></span>
+        </div>
+        <div class="listbox">
+          <table>
+            <thead><tr>
+              <th class="h"></th><th>Name</th><th class="k">Kind</th>
+              <th class="n">Slides</th><th class="x"></th>
+            </tr></thead>
+            <tbody id="flow"></tbody>
+          </table>
+          <p class="empty" id="flowempty" hidden>Nobody yet — tick a unit or function on the left.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="acts">
+      <span class="said" id="said"></span>
+      <button>Cancel</button>
+      <button class="go" id="go">Start the flow</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><b>This is a drawing, not the product.</b> The subjects, their codes and
+    their slide counts are Raya Trade's real ones, read out of the platform. On
+    a touch screen the bars are always shown, because a tablet has no hover and
+    that is the device where dragging is most natural &mdash; try the switch
+    above to see what that looks like.</p>
+</footer>
+
+</div>
+
+<script>
+/* Raya Trade, read out of the running platform: the subject, its own code
+   (the letters printed on its pillars and projects) and the slides its deck
+   builds today. */
+var SUBJECTS = [
+  { name:"Mobile",                       code:"MB",  fn:false, n:28 },
+  { name:"Retail Stores",                code:"RS",  fn:false, n:26 },
+  { name:"B2B Ecomm",                    code:"BE",  fn:false, n:24 },
+  { name:"Consumer Electronics",         code:"CE",  fn:false, n:21 },
+  { name:"Online Shop",                  code:"OS",  fn:false, n:21 },
+  { name:"Corporate",                    code:"CO",  fn:false, n:21 },
+  { name:"Care",                         code:"CA",  fn:false, n:22 },
+  { name:"IT Dist.",                     code:"IT",  fn:false, n:21 },
+  { name:"Logistics",                    code:"LG",  fn:false, n:21 },
+  { name:"Nigeria",                      code:"NG",  fn:false, n:21 },
+  { name:"Finance",                      code:"FIN", fn:true,  n:14 },
+  { name:"HR",                           code:"HR",  fn:true,  n:14 },
+  { name:"Treasury",                     code:"TRS", fn:true,  n:14 },
+  { name:"Marketing",                    code:"MKT", fn:true,  n:15 },
+  { name:"IT",                           code:"ITF", fn:true,  n:14 },
+  { name:"Care (function)",              code:"CAF", fn:true,  n:11 },
+  { name:"Strategy Management Office",   code:"SMO", fn:true,  n:11 },
+  { name:"Merchandising",                code:"MRC", fn:true,  n:16 }
+];
+
+var pick = ["retailstores", "onlineshop", "finance", "mobile"].map(function(k){
+  return SUBJECTS.filter(function(s){
+    return s.name.toLowerCase().replace(/[^a-z]/g, "").indexOf(k) === 0;
+  })[0];
+}).filter(Boolean);
+
+var q = "";
+var restBody  = document.getElementById("rest");
+var flowBody  = document.getElementById("flow");
+var restEmpty = document.getElementById("restempty");
+var flowEmpty = document.getElementById("flowempty");
+var said      = document.getElementById("said");
+
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+  });
+}
+function kind(s){
+  return s.fn ? '<span class="kind fn">FUNC</span>' : '<span class="kind">BU</span>';
+}
+/* The search matches the NAME and the CODE, because the code is what the
+   deck's own pills show while you present. */
+function hit(s){
+  if (!q) return true;
+  var t = q.toLowerCase();
+  return s.name.toLowerCase().indexOf(t) > -1 || s.code.toLowerCase().indexOf(t) > -1;
+}
+
+function paint(){
+  var rest = SUBJECTS.filter(function(s){ return pick.indexOf(s) < 0; });
+  var shown = rest.filter(hit);
+
+  restBody.innerHTML = shown.map(function(s){
+    return '<tr><td class="t"><button class="tick" data-add="' + esc(s.code) +
+      '" aria-label="Put ' + esc(s.name) + ' into the flow">✓</button></td>' +
+      '<td class="nm">' + esc(s.name) + '</td>' +
+      '<td class="k">' + kind(s) + '</td>' +
+      '<td class="n">' + s.n + '</td></tr>';
+  }).join("");
+  restEmpty.hidden = shown.length > 0;
+  restEmpty.textContent = rest.length === 0
+    ? "Everybody is in the flow."
+    : "Nothing matches “" + q + "”.";
+  document.getElementById("restcount").textContent =
+    q ? shown.length + " of " + rest.length : rest.length;
+
+  flowBody.innerHTML = pick.map(function(s, i){
+    return '<tr class="on" data-oi="' + i + '">' +
+      '<td class="h"><span class="handle" role="button" tabindex="0" ' +
+        'aria-label="Drag to reorder ' + esc(s.name) + '" title="Drag to reorder">' +
+        '<span class="num">' + (i + 1) + '</span>' +
+        '<span class="grip"><i></i><i></i><i></i></span></span></td>' +
+      '<td class="nm"><b>' + esc(s.name) + '</b></td>' +
+      '<td class="k">' + kind(s) + '</td>' +
+      '<td class="n">' + s.n + '</td>' +
+      '<td class="x"><button class="xb" data-out="' + esc(s.code) +
+        '" aria-label="Take ' + esc(s.name) + ' out of the flow">×</button></td></tr>';
+  }).join("");
+  flowEmpty.hidden = pick.length > 0;
+
+  var total = pick.reduce(function(a, s){ return a + s.n; }, 0);
+  document.getElementById("flowcount").textContent = pick.length
+    ? "drag to reorder · about " + total + " slides"
+    : "";
+  wireHandles();
+}
+
+function byCode(c){
+  return SUBJECTS.filter(function(s){ return s.code === c; })[0];
+}
+
+document.addEventListener("click", function(e){
+  var add = e.target.closest("[data-add]"), out = e.target.closest("[data-out]");
+  if (add) { pick.push(byCode(add.dataset.add)); said.textContent = ""; paint(); }
+  if (out) {
+    var s = byCode(out.dataset.out);
+    pick = pick.filter(function(x){ return x !== s; });
+    said.textContent = ""; paint();
+  }
+});
+
+document.getElementById("find").addEventListener("input", function(){
+  /* Typing filters in place and never redraws the flow — a filter that hides
+     rows while you drag among them is how a drop lands somewhere else. */
+  q = this.value.trim();
+  paint();
+  this.focus();
+});
+
+document.getElementById("go").addEventListener("click", function(){
+  said.textContent = pick.length
+    ? "Would open " + pick.length + " decks, " +
+      pick.reduce(function(a, s){ return a + s.n; }, 0) + " slides, back to back."
+    : "Tick at least one unit or function to present.";
+});
+
+/* ── the drag, the platform's own shape ───────────────────────────────
+   Pointer events rather than HTML5 drag-and-drop (which cannot drag a table
+   row reliably and gives nothing on touch), the insertion point found by
+   closest edge, and the numbers renumbered as it moves — so the digit under
+   your finger is the position you would land on. */
+function rows(){
+  return Array.prototype.slice.call(flowBody.querySelectorAll("tr[data-oi]"));
+}
+function renumber(){
+  rows().forEach(function(tr, i){
+    var n = tr.querySelector(".num");
+    if (n) n.textContent = i + 1;
+  });
+}
+function commit(){
+  pick = rows().map(function(tr){ return pick[+tr.dataset.oi]; });
+  paint();
+}
+
+function wireHandles(){
+  flowBody.querySelectorAll(".handle").forEach(function(h){
+    h.addEventListener("pointerdown", function(ev){
+      ev.preventDefault();
+      var tr = h.closest("tr");
+      tr.classList.add("dragging");
+      /* ON THE DOCUMENT, NEVER ON THE HANDLE, and not by pointer capture:
+         the first move REORDERS the row, and moving an element in the DOM
+         releases the capture its descendant holds — so the drag stopped dead
+         after one step. Measured, and it is exactly why `arrange.js` binds
+         these two on the document. */
+
+      function move(e){
+        var others = rows().filter(function(x){ return x !== tr; });
+        for (var i = 0; i < others.length; i++) {
+          var b = others[i].getBoundingClientRect();
+          if (e.clientY < b.top + b.height / 2) {
+            flowBody.insertBefore(tr, others[i]);
+            renumber();
+            return;
+          }
+        }
+        if (others.length) {
+          flowBody.insertBefore(tr, others[others.length - 1].nextSibling);
+          renumber();
+        }
+      }
+      function up(){
+        tr.classList.remove("dragging");
+        document.removeEventListener("pointermove", move);
+        document.removeEventListener("pointerup", up);
+        commit();
+      }
+      document.addEventListener("pointermove", move);
+      document.addEventListener("pointerup", up);
+    });
+
+    /* The keyboard equivalent, which is why removing the two buttons costs
+       nobody their keyboard: focus a number and press up or down. */
+    h.addEventListener("keydown", function(e){
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) < 0) return;
+      e.preventDefault();
+      var tr = h.closest("tr"), all = rows(), i = all.indexOf(tr);
+      var j = (e.key === "ArrowUp" || e.key === "ArrowLeft") ? i - 1 : i + 1;
+      if (j < 0 || j >= all.length) return;
+      if (j < i) flowBody.insertBefore(tr, all[j]);
+      else flowBody.insertBefore(tr, all[j].nextSibling);
+      renumber();
+      commit();
+      /* Keep the moved row in view — the drag cannot auto-scroll, the
+         keyboard can. */
+      var moved = rows()[j];
+      if (moved) {
+        moved.scrollIntoView({ block:"nearest" });
+        var g = moved.querySelector(".handle");
+        if (g) g.focus();
+      }
+    });
+  });
+}
+
+/* The comparison switch — not part of the dialog, so the swap can be judged
+   against the alternative rather than imagined. */
+var hoverBtn = document.getElementById("s-hover");
+var alwaysBtn = document.getElementById("s-always");
+function mode(always){
+  document.body.classList.toggle("alwaysgrip", always);
+  hoverBtn.setAttribute("aria-pressed", String(!always));
+  alwaysBtn.setAttribute("aria-pressed", String(always));
+}
+hoverBtn.addEventListener("click", function(){ mode(false); });
+alwaysBtn.addEventListener("click", function(){ mode(true); });
+
+paint();
+</script>

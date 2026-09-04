@@ -620,7 +620,13 @@ function outcomeEdit(t, set, pendCls, fillOnly){
     selectOr("plan", unit, targetUnitOpts(unit), quiet,
              /* §257: and this picker repaints too — three of its four boxes
                 change state on the one press. */
-             function(v){ put(nextTargetUnit(t, v)); paint(); }) +
+             function(v){
+               /* §261: the reported figure follows a CHANGED unit. */
+               var was = outUnitOf(t), next = nextTargetUnit(t, v);
+               put(next);
+               actualFollowsUnit(t, "outActual", was, next);
+               paint();
+             }) +
     (yn
       /* A yes/no outcome's direction and compile rule are drawn dead in BOTH
          modes: to the filler they were already facts, and for the office they
@@ -3205,8 +3211,8 @@ function targetUnitOf(m){
    table puts a phantom change into the next save and a non-office save is
    refused for the rest of the cycle. */
 function setTargetUnit(m, u){
-  var want = String(u == null ? "" : u).trim();
-  if (want === targetUnitOf(m)) return;
+  var want = String(u == null ? "" : u).trim(), from = targetUnitOf(m);
+  if (want === from) return;
   /* BUILT HERE RATHER THAN THROUGH `joinTarget`, and that is deliberate:
      joinTarget takes its separator from the value it is REPLACING, which is
      exactly right when the unit has not changed and exactly wrong here —
@@ -3236,6 +3242,55 @@ function setTargetUnit(m, u){
      of these four tables carries. It stops being alone the moment a number is
      typed, because `unitInherit` reads it back out and joins the two. */
   if (!held && want) m.target = want;
+  /* §261: the figure already reported against this row follows the unit. */
+  actualFollowsUnit(m, "actual", from, m.target);
+}
+/* ── A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§261) ────────────────
+   Islam, from his Performance page: *"the YTD is showing 2% from 2# I don't
+   know where this error is happening."* Not the arithmetic — 2 of 2 due is
+   100% and it said so. The reporting box collects the BARE number and the
+   platform stamps it with the target's unit AT THAT MOMENT (§248, the save
+   handler's `joinTarget`); the office then changed the target from `%` to
+   `#`, and nothing told the figure. Reproduced on a tactic's outcome and on a
+   key measure alike: `3%` reported as `2%`, unit switched, target `3#`,
+   figure still `2%`.
+
+   THE PLATFORM'S OWN STAMP FOLLOWS; A PERSON'S DOES NOT. A figure whose unit
+   is EXACTLY the unit the target just left is one the platform wrote, so it
+   is rewritten in the new unit with the target's own separator. A figure
+   carrying any other unit was typed by somebody (§243: "8 B EGP" against a
+   target in M EGP is a specific statement) and is left as typed — rewriting
+   it would change a number a thousandfold without saying so.
+
+   ONLY A CHANGE, NEVER THE FIRST UNIT. A target that had no unit and gains
+   one is the FILLER's act (§201.2, `unitAddedOnly`), and a filler may not
+   write a reported figure — so following there would put a reporting change
+   into a fill's save and cost the whole post (§184). The office changing an
+   existing unit is authoring, which already carries the figure's write.
+
+   Y/N IS NEITHER SIDE OF THIS. §257 keeps every value untouched when a row
+   becomes yes/no and gives it back on the way out; a per cent rewritten as
+   "2 Y/N" would be a figure that scores as nothing (§257's ynScore reads a
+   word). Stated, and asserted.
+
+   A UNIT CLEARED IS NOT A UNIT CHANGED. Found by `unit-before-number.py`
+   going red on the first build: it clears a unit held alone and asserts the
+   row is byte-identical to one never touched (§50.6), and the follower had
+   stripped "28%" to "28". Removing the target's unit is taking the stamp
+   away, not re-stamping — the figure keeps the unit it was reported in. */
+function actualFollowsUnit(row, field, from, target){
+  var was = String(from == null ? "" : from).trim();
+  var now = unitOfTarget(target);
+  if (!was || !now || was === now) return;
+  if (SMPRules.isYesNo(was) || SMPRules.isYesNo(now)) return;
+  var cur = row[field];
+  if (cur == null || cur === "") return;
+  var got = splitTarget(String(cur));
+  var flat = function(x){ return String(x).replace(/\s+/g, "").toLowerCase(); };
+  if (!got.value || flat(got.unit) !== flat(was)) return;
+  /* The target's own separator, read by the joiner off the string the
+     target now holds — never a second copy of the spacing rule (§53.5). */
+  row[field] = now ? joinTarget(String(target), got.value, now) : got.value;
 }
 /* §251 TOOK THIS QUESTION OFF THE EDIT PATH. It used to decide whether the
    picker was drawn at all — a unit with no target to sit inside could not be

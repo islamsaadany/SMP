@@ -365,6 +365,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§261):** Islam — *"the YTD
+  is showing 2% from 2# I don't know where this error is happening."* Not the
+  arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
+  with the target's unit AT THAT MOMENT, the office later changed the target
+  from `%` to `#`, and nothing told the figure — invisible on Reporting, which
+  shows the number with the CURRENT unit beside it, and printed on Performance,
+  which shows the stored figure as it is (§96.2). **One fault on both sides**:
+  `setTargetUnit` (measures, objectives) and `nextTargetUnit` (a tactic's
+  outcome) both rewrote the target and neither told the figure.
+  `actualFollowsUnit()` is the one function both call: **the platform's own
+  stamp follows, a person's does not** — a figure whose unit is EXACTLY the
+  one the target just left is rewritten in the new unit with the target's own
+  separator; any other unit was typed (§243) and stays. **The FIRST unit is
+  not a change** (§201.2: a filler's act, and a filler may not write a figure
+  — following there would cost the whole fill's save, §184). **Y/N is neither
+  side** (§257). **A unit CLEARED is not a unit changed** — found by
+  `unit-before-number.py` going red on the first build (it stripped `28%` to
+  `28` against §50.6's byte-identical row), which is the argument for running
+  the whole suite (§214). No server change. **Cost stated before he chose**: a row
+  already stored stays `2%` until re-entered once (§254.1's heal on save); a
+  one-time heal was offered and not taken up. `checks/unit-follows.py` drives
+  the story through the REAL controls on both surfaces — **5 red** on the
+  build before, its third failure printing `2% / 2#` verbatim.
 - **A COUNT IS OWED IN WHOLE ONES (§260):** Islam — *"we need a compilation
   type that prorate to integrs only .. a target of 2 shops to open in the year
   so in the 8th month that proration asks for 1.3 stores which is not
@@ -4566,6 +4589,16 @@ python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its 
                                 # asserted UNCHANGED, only Sum prorating, both panes
                                 # driven, and §2b guarding the index-leak that
                                 # `.map(measureScore)` would reintroduce
+python3 checks/unit-follows.py  # a reported figure follows the target's unit (§261):
+                                # the story through the REAL controls on a tactic's
+                                # outcome AND a key measure — reported in % through the
+                                # Reporting box, switched to # through the pen's picker,
+                                # read back as 2# from the data and from Performance —
+                                # then the four things that must NOT follow (a typed
+                                # unit, the first unit, Y/N either way, an empty figure)
+                                # and the separator both ways. 5 red on the build
+                                # before, printing '2% / 2#' verbatim. SMP_BUILT points
+                                # it at another build.
 python3 checks/count-compile.py # a count is owed in whole ones (§260): the ONE compile
                                 # list and what on it prorates (both ends), Islam's own
                                 # 2-shops-at-August example MADE (Count owes 1 and reads
@@ -4861,7 +4894,21 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;260: a count is owed in whole
+*Last Updated: 2026-09-04 &mdash; **&sect;261: a reported figure follows the
+target's unit.** Islam, from his Performance page: *"the YTD is showing 2% from
+2# I don't know where this error is happening."* Not the arithmetic &mdash; the
+reporting box stamps a typed number with the target's unit at that moment, and
+the office later changed the target from % to #, so the figure kept its old
+stamp, invisible on Reporting and printed on Performance. Reproduced on a
+tactic's outcome and a key measure alike. When the office changes a target's
+unit, a figure carrying exactly the old unit now follows it (`2%` &rarr; `2#`);
+a figure typed with its own unit is left as typed, the first unit is not a
+change, and Y/N is neither side. One function, both surfaces, no server change.
+**Cost stated and accepted**: a row already stored stays `2%` until re-entered
+once. `checks/unit-follows.py` **5 red** on the build before; nine neighbouring
+checks, 491/0 and the full sweep green. **On the branch, not merged.***
+
+*Earlier: 2026-09-03 &mdash; **&sect;260: a count is owed in whole
 ones.** Islam: *"we need a compilation type that prorate to integrs only .. if
 we have a target of 2 shops to open in the year so in the 8th month that
 proration asks for 1.3 stores which is not feasible ... maybe of the lowest."*

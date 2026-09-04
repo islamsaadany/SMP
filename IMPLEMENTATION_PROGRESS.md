@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§260 (the `Count` compile rule — a count is owed in
-whole ones) is on `claude/integer-prorating-compilation-6dq77s`, not merged.**
+**Latest version:** **§260 (the `Count` compile rule) and §261 (a reported
+figure follows the target's unit) are on
+`claude/integer-prorating-compilation-6dq77s`, not merged.**
 §258 on `main` and live (the save-safety banners), on top
 of §257 (a target that is a yes or a no) and the whole deck round — all from
 other sessions. **§259 (the group's mark and the deck's four blue section
@@ -83,6 +84,26 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §261 — a reported figure follows the target's unit (2026-09-04, branch `claude/integer-prorating-compilation-6dq77s`)
+
+Islam, from his Performance page: *"the YTD is showing 2% from 2# I don't
+know where this error is happening."* Not the arithmetic — the reporting box
+stamps a typed number with the target's unit AT THAT MOMENT, and the office
+later changed the target from % to #, so the figure kept its old stamp.
+Reproduced on a tactic's outcome and a key measure alike.
+
+**Built:** when the office changes a target's unit, a figure carrying exactly
+the old unit is rewritten in the new one (`2%` → `2#`) with the target's own
+separator; a figure typed with its own unit is left as typed (§243); the
+FIRST unit is not a change (a filler's act, §201.2); Y/N is neither side
+(§257). One function, both surfaces, no server change, nothing migrated.
+**Cost stated and accepted:** a row already stored stays `2%` until the
+figure is re-entered once on Reporting.
+
+**Verified:** `checks/unit-follows.py` (new; **5 red** on the build before,
+printing `2% / 2#` verbatim), nine neighbouring checks, `test-authorize`
+491/0, full `qa.py` sweep green. **On the branch, not merged.**
 
 ### §260 — a count is owed in whole ones (2026-09-03, branch `claude/integer-prorating-compilation-6dq77s`)
 

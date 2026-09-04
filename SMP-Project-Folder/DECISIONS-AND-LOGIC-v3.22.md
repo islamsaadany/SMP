@@ -29618,3 +29618,94 @@ a correct build — REWRITTEN as agreement with the shared list, not deleted
   (§250's share), so a 2-shop outcome on a Q2–Q3 tactic owes one from the
   fourth of its six months. Correct by construction through the one
   arithmetic; not separately driven.
+
+## §261 — A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (2026-09-04)
+
+Islam, from his Performance page, a tactic whose Reporting row read `2#` of
+`3#` while Performance read **`2% / 2#`** at 100%: *"the YTD is showing 2%
+from 2# I don't know where this error is happening."*
+
+### §261.1 — What it was, measured
+
+Not the arithmetic: the score reads digits only, and 2 of 2 due is 100%, which
+is what it said. The figure's UNIT. The reporting box collects the bare number
+and the save handler stamps it with the target's unit at that moment (§248's
+`joinTarget`), and the Reporting page then only ever shows the number with the
+target's CURRENT unit beside it — so the stored stamp is invisible on the one
+page where it is written. That row's outcome was in `%` when the 2 was
+entered (`%` is the first unit on the picker); the office later switched the
+target to `#`; the target became `3#` and the figure stayed `2%`. Performance
+prints the stored figure as it is (§96.2) and so printed the stamp.
+
+Reproduced on the built file, and **on a key measure as well as on a tactic's
+outcome** — `setTargetUnit` and `nextTargetUnit` both rewrote the target and
+neither told the figure — so it is one fault on both sides (§53.5) and is
+fixed through one function.
+
+### §261.2 — The platform's own stamp follows; a person's does not
+
+`actualFollowsUnit(row, field, from, target)`, called from the two places a
+unit changes. A figure whose unit is EXACTLY the unit the target just left is
+one the platform wrote, so it is rewritten in the new unit — `2%` becomes `2#`
+in the same edit — with the target's own separator, read by the joiner off the
+string the target now holds rather than a second copy of the spacing rule.
+
+Three things deliberately do not follow, each asserted:
+
+- **A figure carrying any other unit is left as typed** (§243): "2 B EGP"
+  against a target in M EGP is a specific statement, and rewriting it would
+  change a number a thousandfold without saying so.
+- **The FIRST unit is not a change** (§201.2): a target that had no unit and
+  gains one is the filler's act through `unitAddedOnly`, and a filler may not
+  write a reported figure — following there would put a reporting change into
+  a fill's save and cost the whole post (§184). A bare figure against a bare
+  target stays bare; the office changing an EXISTING unit is authoring, which
+  already carries the figure's write.
+- **Y/N is neither side** (§257): a row becoming yes/no keeps every value
+  untouched and gives it back on the way out; a per cent rewritten as
+  "2 Y/N" would score as nothing.
+- **A unit CLEARED is not a unit changed.** Found by `unit-before-number.py`
+  going red on the first build, not by reading: it clears a unit held alone
+  and asserts the row is byte-identical to one never touched (§50.6), and the
+  follower had stripped `28%` to `28`. Removing the target's unit takes the
+  stamp away rather than re-stamping, so the figure keeps the unit it was
+  reported in. *A neighbouring check going red is the argument for running
+  the whole suite and not the file just written (§214).*
+
+The server needs nothing: the figure's write rides the same authoring save as
+the unit change. Nothing is migrated.
+
+### §261.3 — The cost, stated before he chose
+
+The fix cannot know the history of a row already stored: his row on the live
+tenant stays `2%` until the figure is entered once more on Reporting, where the
+box refills from the number and rejoins it with `#` (§254.1's "heal on save",
+the same road). Put to him with the alternative of a one-time heal for figures
+whose unit is one of the platform's own symbols and no longer matches the
+target; he chose to go ahead as proposed.
+
+### §261.4 — Proof
+
+`checks/unit-follows.py` drives the story through the REAL controls on both
+surfaces: the state MADE (§94.2) on Mobile's first tactic and first measure,
+each reported against a `%` target through the Reporting page's own box (the
+stamp asserted as `2%`), each switched to `#` through the pen's own unit
+picker, the data read back as `2#` on both, and the Performance page's YTD
+cell asserted to read `2#` and never `2%`, with both scores unchanged. Then the
+four things that must NOT follow, the separator both ways (`2M EGP`, `2 EGP`),
+a unit cleared leaving the figure alone, and the made state put back
+(§113.8). **5 red** on a build made from the
+sources with the two calls removed, its third failure printing `'2% / 2#'`
+verbatim; all green after. One of its own first-run failures was the check:
+it pressed the pen shut before leaving the page and the pen's button is a
+different control while open — a tab change leaves the mode on its own (§63).
+
+### §261.5 — Recorded, not done
+
+- `%` is the first non-blank unit on the picker, which is likely how the
+  outcome came to be in `%` before it was in `#`. Whether the picker should
+  open on `#` for an outcome, or on nothing, is a decision about the plan pen
+  and is not taken here.
+- A figure stored before this change with a unit its target has since left
+  is corrected only by re-entering it. A one-time heal was offered and not
+  taken up.

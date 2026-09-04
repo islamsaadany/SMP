@@ -1088,7 +1088,7 @@ function masterOpen(){
   /* ASKED AGAIN AT THE PRESS, never trusted from the render that drew the
      entry (§48.2): the menu is drawn once and a viewer switch is one click. */
   if (!SMPRules.mayMasterPresent(world(), viewer())) return;
-  MFLOW = { pick: masterOrder(), n: {}, note: "", q: "", focusAt: null, h: null };
+  MFLOW = { pick: masterOrder(), n: {}, note: "", q: "", focusAt: null };
   openModalHtml("Master presentation", "Pick who presents, and in what order.", "");
   /* WIDER, AND MARKED ON THE OVERLAY (§122, §266.10). Islam: *"make the popup
      a bit bigger to see more of the units and functions."* Two tables of four
@@ -1233,40 +1233,6 @@ function masterPaint(){
       (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
       '>Start the flow</button></div></div>';
   masterWire();
-  /* AFTER the wiring, and from HERE rather than from inside it: the count is
-     the whole list's, which `masterWire()` does not hold — the first build
-     passed it `all.length` from a scope that function cannot see, and every
-     paint threw with the dialog still on screen (§130.3's fault, found by
-     opening it). */
-  masterFix(box, all.length);
-}
-
-/* ── ONE HEIGHT, WHATEVER THE SPLIT (§266.11) ─────────────────────────
-   The two lists take the height the WHOLE list would need — both columns
-   together — so ticking a subject moves a row from one box to the other and
-   moves nothing else. It is measured, never a constant: a row and a header are
-   read off the page, because a number written here goes stale the day the type
-   scale or the padding changes and nothing compares the two (§122.5).
-
-   Measured ONCE per opening and remembered, because the count it is derived
-   from cannot change while the dialog is open — and written as
-   `min(Npx, 52vh, 420px)` rather than as a flat pixel height, so a short window
-   still keeps the buttons on screen (§90) and a resize while it is open is
-   still followed. */
-function masterFix(box, rows){
-  if (!box || !rows) return;
-  if (MFLOW.h == null) {
-    var tr = box.querySelector(".mftbl tbody tr");
-    var th = box.querySelector(".mftbl thead tr");
-    if (!tr || !th) return;
-    var rh = tr.getBoundingClientRect().height;
-    var hh = th.getBoundingClientRect().height;
-    if (!rh || !hh) return;
-    MFLOW.h = Math.ceil(hh + rows * rh + 2);
-  }
-  [].forEach.call(box.querySelectorAll(".mflist"), function(l){
-    l.style.height = "min(" + MFLOW.h + "px, 52vh, 420px)";
-  });
 }
 
 /* The search, in place. Both counts are rewritten INTO their nodes rather than

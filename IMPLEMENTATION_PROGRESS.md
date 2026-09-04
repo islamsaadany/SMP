@@ -34,6 +34,14 @@ bars six times, half of them onto a row the pointer was passing, so the CSS now
 holds the swap for the row in your hand. `checks/master-picker.py` is 37 red on
 the build before and **51 green** after.
 
+**§266.11 — and the dialog stopped changing size as rows move**, from his first
+minutes with it: each list was sized by its own content under a cap, so a tick
+made one column shorter and the other taller and the whole dialog stepped under
+the pointer (measured on that build: 571, 604 and 634px across twelve moves). It
+takes the height the whole list would need — both columns together, which cannot
+change while it is open — measured rather than written as a constant, and capped
+so *Start the flow* stays on screen.
+
 **Still open on it, and said rather than discovered:** a drag cannot
 auto-scroll — with all eighteen in the flow the list is 654px in a 420px box, so
 a drop can only land where you can already see (the keyboard route does scroll).

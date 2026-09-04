@@ -30734,6 +30734,52 @@ everywhere.
 
 ---
 
+## §266.11 — THE DIALOG DOES NOT CHANGE SIZE AS ROWS MOVE (2026-09-04)
+
+Islam, with a screenshot of the picker he had just been given: *"the window
+height keeps changing on the movement of the choices keep the size fixed."*
+
+**REPRODUCED BEFORE IT WAS EXPLAINED.** Twelve moves between the two columns on
+the shipped build, measuring the dialog after each: **571, 604 and 634px** —
+three heights, stepping up and down under the pointer. Each list was sized by
+its own content under a cap, so a tick made one column shorter and the other
+taller and the whole dialog followed; it is worst in the middle of the work,
+where the two columns are of comparable length and neither has reached the cap.
+
+**IT IS A HEIGHT NOW, NOT A max-height** — and the height is the one thing in
+that dialog that cannot change while it is open: **what the whole list would
+need, both columns together.** The subjects that report do not change between
+one tick and the next, so a height derived from their number is fixed by
+construction rather than by being pinned.
+
+**MEASURED, NEVER A CONSTANT** (§122.5, which is this file's own scar): a row
+and a header are read off the page, because a pixel number written here goes
+stale the day the type scale or a padding changes and nothing compares the two.
+It is taken **once per opening** and remembered on `MFLOW`.
+
+**AND IT IS WRITTEN AS `min(Npx, 52vh, 420px)`, NOT AS A FLAT PIXEL HEIGHT.**
+A stored pixel height would stop following the window, and the cap is what keeps
+*Start the flow* on screen (§90) — so the natural height, the viewport and the
+ceiling are all still in the answer. Measured: the tenant's eighteen subjects
+want 615px and get 420 at a 950px window and 364 at a 700px one; **a tenant with
+four gets 160px**, which is the point of deriving it rather than flattening it —
+fixed without being the same size for everybody.
+
+**THE FIRST BUILD THREW ON EVERY PAINT.** The call was put inside
+`masterWire()`, which does not hold the subject count — `all` is a local of
+`masterPaint()` — so every paint ended in a `ReferenceError` **with the dialog
+still on screen**, which is §130.3's fault exactly and reads as a control that
+does nothing. Found by opening it.
+
+`checks/master-picker.py` gains §1b and is **2 red** on the build before, its
+first failure printing Islam's report as three numbers. It **makes the state at
+the worst point** — twelve moves, so the columns pass through comparable lengths
+— and **puts it back afterwards** (§94.2): the first run left four subjects out
+of the flow and reported five real failures in a later section that was
+measuring something else entirely.
+
+---
+
 ## §267 — THE PLAN TABLE AT A NARROWER WINDOW (2026-09-03)
 
 Islam, on the build §260 had just merged, with a screenshot of a **zoomed**

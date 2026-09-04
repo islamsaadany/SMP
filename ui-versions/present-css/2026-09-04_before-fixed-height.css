@@ -712,22 +712,10 @@
   .mflow .mfempty {
     margin:0; padding:14px 8px; font-size:12.5px; color:var(--ink-3);
   }
-  /* ── THE DIALOG DOES NOT CHANGE SIZE AS ROWS MOVE (§266.11) ─────────
-     Islam: *"the window height keeps changing on the movement of the choices
-     keep the size fixed."* Each list was sized by its own content under a cap,
-     so every tick made one column shorter and the other taller and the whole
-     dialog stepped up and down under the pointer — worst in the middle of the
-     work, where the two are of comparable length.
-
-     So it is a HEIGHT and not a max-height, and the height is the one thing in
-     here that cannot change while the dialog is open: what the WHOLE list would
-     need, both columns together. `masterFix()` measures it (a header and a row,
-     both read off the page rather than guessed — §122.5) and writes
-     `min(Npx, 52vh, 420px)`, so a small tenant still gets a box the size of its
-     own list and a large one is still capped where the buttons stay on screen
-     (§90). The cap stays in the CSS as well, for the paint before the
-     measurement lands. */
-  .mflow .mflist { height:min(52vh, 420px); overflow:auto; }
+  /* Capped so the two buttons are always on screen: eighteen subjects is
+     taller than a laptop, and a control below the fold is a control that does
+     nothing (§90). */
+  .mflow .mflist { max-height:min(52vh, 420px); overflow:auto; }
 
   /* THE 620px FLOOR IS A FLOOR (§158), and inside a ~540px dialog column it
      would cut the last column off rather than shrink the table — so these two

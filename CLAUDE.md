@@ -840,6 +840,26 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **RECORDED, NOT DONE**: a single deck still draws one unlabelled dot per slide,
   nothing says the order is saved without presenting it, and a flow cannot be
   downloaded.
+- **THE DIALOG DOES NOT CHANGE SIZE AS ROWS MOVE (&sect;266.11):** Islam, of
+  what &sect;266.10 shipped &mdash; *"the window height keeps changing on the
+  movement of the choices keep the size fixed."* **REPRODUCED FIRST**: twelve
+  moves between the two columns on that build measured **571, 604 and 634px**,
+  because each list was sized by its own content under a cap &mdash; worst in
+  the middle of the work, where the columns are of comparable length and neither
+  has reached the cap. **IT IS A HEIGHT NOW, AND THE HEIGHT IS WHAT THE WHOLE
+  LIST WOULD NEED** &mdash; both columns together, which cannot change while the
+  dialog is open, so it is fixed by construction rather than pinned.
+  **MEASURED, NEVER A CONSTANT** (&sect;122.5): a row and a header are read off
+  the page, once per opening. **AND WRITTEN AS `min(Npx, 52vh, 420px)`**, not as
+  a flat pixel height, or it stops following the window and the cap that keeps
+  *Start the flow* on screen goes with it (&sect;90) &mdash; eighteen subjects
+  want 615 and get 420, **a tenant with four gets 160**, which is why it is
+  derived rather than flattened. **THE FIRST BUILD THREW ON EVERY PAINT**, the
+  call put inside `masterWire()`, which does not hold the count (&sect;130.3's
+  fault, found by opening it). **2 red** on the build before, and the check
+  makes the state at the worst point AND puts it back (&sect;94.2) &mdash; its
+  first run left four subjects out and reported five real failures in a section
+  measuring something else.
 - **THE PICKER IS TWO TABLES, SEARCHED, AND DRAGGED BY ITS OWN NUMBERS
   (&sect;266.10):** Islam, from his own tenant &mdash; *"make the everyone who
   reports searchable and make it a simple table wiht a nother oclumn of a BU or
@@ -5895,7 +5915,26 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;266.10: the picker is two tables,
+*Last Updated: 2026-09-04 &mdash; **&sect;266.11: the dialog does not change
+size as rows move.** Islam, of what &sect;266.10 had just put on production:
+*"the window height keeps changing on the movement of the choices keep the size
+fixed."* **REPRODUCED BEFORE IT WAS EXPLAINED** &mdash; twelve moves between the
+two columns, measuring after each: **571, 604 and 634px**. Each list was sized
+by its own content under a cap, so a tick made one column shorter and the other
+taller and the dialog stepped under the pointer, worst in the middle of the work
+where the two are of comparable length. **IT IS A HEIGHT NOW, AND THE HEIGHT IS
+WHAT THE WHOLE LIST WOULD NEED** &mdash; both columns together, which cannot
+change while the dialog is open, so it is fixed by construction. **Measured,
+never a constant** (&sect;122.5) and written as **`min(Npx, 52vh, 420px)`**, so a
+small tenant still gets a box its own list's size (160px for four subjects
+against 420 for eighteen) and a short window still keeps *Start the flow* on
+screen (&sect;90). **The first build threw on every paint**, the call put in a
+function that does not hold the count &mdash; found by opening it (&sect;130.3).
+`checks/master-picker.py` §1b: **2 red** on the build before, its first failure
+printing his report as three numbers; it makes the state at the worst point and
+**puts it back** (&sect;94.2). 57/0 &middot; full sweep clean.*
+
+*Earlier the same day: **&sect;266.10: the picker is two tables,
 searched, and dragged by its own numbers.** Islam, from his own tenant with
 eighteen subjects in it &mdash; *"make the everyone who reports searchable and
 make it a simple table wiht a nother oclumn of a BU or a FUNC and make the popup

@@ -62,14 +62,25 @@ srv=socketserver.ThreadingTCPServer(("127.0.0.1",0),H); srv.daemon_threads=True
 threading.Thread(target=srv.serve_forever,daemon=True).start()
 URL="http://127.0.0.1:%d/raya-trade"%srv.server_address[1]
 
-# The proposal, in the corner's OWN classes — nothing new is invented here.
-# The proposal, in the corner's OWN classes — nothing new is invented here.
-# A person with no conversation carries NO time and NO last line, because they
-# have neither: an em-dash in the time slot and "Start a conversation" repeated
-# down the column are both the screen saying nothing three times (§35, 1b-ii).
-# The row is shorter for it, which is why both groups fit.
+# THE PROPOSAL, in the corner's OWN classes — nothing new is invented here.
+#
+# NO GROUP HEADINGS (Islam: "who we have a conversation with will apear with
+# the conversation and who is not will appear without the converstaion th
+# header is taking unneede space"). He is right and it is rule 1b-ii's own
+# argument: a heading that restates what the rows already show is furniture,
+# and in a 340px body two of them cost two rows of the list itself. The ROW
+# SHAPE carries the distinction — a last message and a time, or neither — and
+# the ORDER carries the grouping: conversations by recency, then people.
+#
+# THE SCOPE LINE STAYS, because it is not a description. §285 put it there so
+# the office is not misled into thinking results are limited to Waiting while
+# the Waiting segment is the one lit, and that is a fact the screen states
+# nowhere else. Its wording widens to cover the register.
+#
+# AND THE CAP SPEAKS AT THE FOOT, not in a heading — which is where it belongs
+# anyway, since the foot is where the list runs out.
 PROPOSED = """
-<div class="cqfound">2 found in all conversations, waiting or not</div>
+<div class="cqfound">5 found in all conversations and on the register</div>
 <button class="cqrow" type="button">
   <div class="cqr1"><b>Abd El Hamid Mokhtar</b><span class="cqw">Yesterday 11:50</span></div>
   <div class="cqpl">Mobile</div><div class="cqln">done</div></button>
@@ -78,7 +89,6 @@ PROPOSED = """
   <div class="cqpl">CX</div>
   <div class="cqln">I updated the definition and it did not stick.</div>
   <div class="cqhit">found in an earlier message · answered</div></button>
-<div class="cqfound">3 more on the register, with no conversation yet</div>
 <button class="cqrow" type="button">
   <div class="cqr1"><b>Abdelrahman Fouad</b></div>
   <div class="cqpl">Retail Stores</div></button>
@@ -90,6 +100,19 @@ PROPOSED = """
   <div class="cqpl">Merchandising</div></button>
 """
 
+# AND THE SAME LIST WITH THE CAP BITING, so the foot line can be judged.
+CAPPED = PROPOSED.replace(
+  "5 found in all conversations and on the register",
+  "12 found in all conversations and on the register") + """
+<button class="cqrow" type="button">
+  <div class="cqr1"><b>Abdallah Sherif</b></div>
+  <div class="cqpl">Marketing</div></button>
+<button class="cqrow" type="button">
+  <div class="cqr1"><b>Abd El Aziz Helmy</b></div>
+  <div class="cqpl">Finance</div></button>
+<div class="cqmore">22 more on the register — narrow the search</div>
+"""
+
 with sync_playwright() as p:
     br=p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
     pg=br.new_page(viewport={"width":1400,"height":950}, device_scale_factor=2)
@@ -99,6 +122,9 @@ with sync_playwright() as p:
     pg.wait_for_selector("#chatdock:not([hidden])",timeout=20000)
     pg.wait_for_timeout(1200)
     pg.click("#chatbtn"); pg.wait_for_timeout(700)
+    # The one new class the proposal needs, injected so it can be LOOKED at.
+    pg.add_style_tag(content=".cqmore{padding:10px 10px 14px;font-size:var(--fs-micro);"
+                             "color:var(--ink-3);font-style:italic;}")
     pg.fill("#cqfind","abd"); pg.wait_for_timeout(900)
 
     panel = pg.query_selector("#chatpanel")
@@ -116,6 +142,16 @@ with sync_playwright() as p:
     pg.evaluate("() => { const b=document.getElementById('chatbody'); b.scrollTop=b.scrollHeight; }")
     pg.wait_for_timeout(250)
     panel.screenshot(path=str(OUT/"c-proposed-scrolled.png"))
+
+    # THE CAP, at the foot where the list runs out.
+    pg.evaluate("""(html) => {
+      const b = document.getElementById('chatbody');
+      const foot = b.querySelector('.cqfoot');
+      b.innerHTML = html + (foot ? foot.outerHTML : '');
+      b.scrollTop = b.scrollHeight;
+    }""", CAPPED)
+    pg.wait_for_timeout(250)
+    panel.screenshot(path=str(OUT/"d-capped.png"))
     print("shot:", [f.name for f in sorted(OUT.glob('*.png'))])
     br.close()
 srv.shutdown()

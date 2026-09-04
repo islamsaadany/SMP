@@ -34740,3 +34740,16 @@ off, so it is his to ask for (rule 1c). And `builderHere()` is named once in
 `builder.js` while **six places still spell `BUILDER && BUILDER.target ===
 current` out inline** — folding them in is a sweep nobody asked for (§2b), and it
 is written down so the next reader knows where a seventh belongs.
+
+### §289.3 — A CHECK RED ON `main`'S OWN TREE, RECORDED AT THE MERGE
+
+Merging main's §290 and §292 into this branch, `scripts/test-chat.js` reads
+**110 passed, 1 failed** on a fresh database — *"a person with no conversation
+was found to test with"* — and reads exactly the same on `main`'s own tree,
+so it is not this merge's. The §290 section searches `"ha"` for somebody with
+no conversation and the clean slate (004) leaves a fresh tenant with one
+person, the SMO, who is excluded by the test's own rule; on a database seeded
+with the worked example it finds one. §94.2 with the state not made: the
+section needs to add a person before it asks, and that is the §290 session's
+file. Everything else in that suite, this branch's register read included, is
+green (110/0 on the same run).

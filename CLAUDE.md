@@ -529,7 +529,27 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   29 slides, one added, none lost, none rewritten** &mdash; a clip is placed
   like any other custodian's slide (§50.3) and displaces nothing, so what took
   over was the WORD, on every row that was his.
-  62/0 on `checks/video-slides.py`, proved able to fail six ways (1/2/4/3/1/1 red);
+  **AND THE CLIP OWNED THE KEYBOARD (§261.14)**: Islam, presenting &mdash;
+  *"the video is on the first 3 slides &hellip; I'm not able to navigate from
+  it."* **The second half is the cause of the first**: a cross-origin player
+  that has been clicked takes every key (inside a YouTube frame the arrows
+  SEEK), the deck's listener is on `window` and never sees them, so the deck
+  does not move and the clip reads as being on every slide &mdash; **and a
+  frame left loaded goes on owning them from behind `display:none`**, every
+  slide being in the document at once. The address rides in `data-vsrc` and
+  **`videoArm()` loads it only on the slide showing**; emptying it is what
+  hands the keyboard back, with no dependence on a player's own API and so
+  none on which service the clip came from. **`live` is the ONE slide passed
+  in, never "every slide wearing `.on`"** &mdash; the rail marks every
+  thumbnail `.on` so it lays out, so reading the class would load one player
+  per row; two things come free, the rail draws no players and nothing is
+  asked of YouTube until a slide with a clip is reached. **And the bar stays
+  while a clip is on screen**, because nothing can take the keyboard back from
+  a player that has it &mdash; a browser guarantee, not an oversight &mdash; so
+  the way past must be on screen. Asserted as the frame's `src` at three
+  moments and never as a class (§94.8), at both ends (§113.8), proved able to
+  fail three ways.
+  68/0 on `checks/video-slides.py`, proved able to fail nine ways;
   13/13 and 15/15 on a virgin Postgres 16. **RECORDED, NOT DONE**: the bytes'
   journey through the multipart path is unproven until a store exists; the
   `.pptx` download has no video column; and the signed-off mockup did not show
@@ -5043,7 +5063,14 @@ keep, because two places write that word and both spelled it as a literal; one
 builder now, asserted at both ends. **And "the video took over all the slides"
 is measured, not guessed at**: 28 &rarr; 29 slides, one added, none lost, none
 rewritten &mdash; what took over was the WORD, on every row that was his.
-62/0 proved able to fail six ways;
+**AND THE CLIP OWNED THE KEYBOARD** (&sect;261.14): a player that has been
+clicked takes every key the presenter presses, so the arrows seek the video
+instead of moving the deck &mdash; and a frame left loaded goes on doing it
+from behind `display:none`. The frame is loaded only on the slide showing;
+emptying it is what hands the keyboard back, and the bar stays while a clip is
+on screen, because the way past a player that has the keyboard has to be on
+screen.
+68/0 proved able to fail nine ways;
 13/13 and 15/15 on a virgin Postgres 16; 491/0, 126/0, full sweep ERRORS none.
 **On the branch, not merged**, and the bytes' journey through the multipart
 path is unproven until the store exists.*

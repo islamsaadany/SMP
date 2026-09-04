@@ -30113,3 +30113,53 @@ slide compared: **28 → 29 slides, one added, none lost, none rewritten.** The
 clip is placed like any other custodian's slide (§50.3) and displaces nothing.
 His own rail screenshot agrees — slides 1, 2, 4 and 5 are the generated ones,
 unchanged. So what took over was the WORD, on every row that was his.
+
+### §261.14 — The clip belongs to one slide, and so does the keyboard (2026-09-04)
+
+Islam, presenting: *"THE VIDEO IS ON the first 3 slides, it's not on a specific
+slide, I'm not able to navigate from it."*
+
+**THE SECOND HALF IS THE CAUSE OF THE FIRST.** A cross-origin player that has
+been clicked owns every key the presenter presses — inside a YouTube frame the
+arrow keys **seek the clip**, and the deck's own `keydown` listener, which is
+on `window`, never sees them. So pressing → does nothing to the deck and the
+video stays on screen: from in front of the board that reads as the clip being
+on every slide.
+
+**AND A FRAME LEFT LOADED GOES ON OWNING THEM FROM BEHIND `display:none`.**
+Every slide in a deck is in the document at once and hidden by a class, so a
+player reached once was still loaded, still focused and still holding the
+keyboard on every slide after it.
+
+**THE FRAME IS ONLY EVER LOADED WHILE ITS OWN SLIDE IS SHOWING.** The address
+rides in `data-vsrc` and `videoArm()` moves it into `src` on the slide being
+shown and empties it everywhere else — **emptying it is what hands the keyboard
+back**, with no dependence on a player's own API and therefore none on which
+service the clip came from. A `<video>` is paused rather than emptied: it is
+our own element, so pausing is enough and the presenter keeps their place.
+
+**`live` IS THE ONE SLIDE PASSED IN, NEVER "every slide wearing `.on`"** — the
+Manage slides rail marks every thumbnail `.on` so it lays out, so reading the
+class would load one player per row. Two things come free with the same rule:
+the rail draws no players at all, and nothing is asked of YouTube until a slide
+with a clip on it is actually reached.
+
+**AND THE BAR STAYS WHILE A CLIP IS ON SCREEN.** Nothing can take the keyboard
+back from a player that currently has it — that is a browser guarantee, not an
+oversight — so the way past it must be on screen: in fullscreen the deck bar
+hides itself after 2.2s, and on a video slide it does not. No new furniture;
+the existing bar, held open.
+
+Asserted as the frame's `src` at three moments — before the slide is reached,
+on it, and after leaving — never as a class somebody could set and forget
+(§94.8), and at **both ends** (§113.8): a build that never loaded the player
+satisfies the emptying assertion perfectly, and one that never emptied it
+satisfies the loading assertion. Proved able to fail three ways: **1 red** with
+`videoArm` made a no-op, **2 red** with the frame never emptied, **1 red** with
+the bar left to hide.
+
+**WHAT IS NOT CLAIMED**: YouTube is unreachable from this sandbox, so the
+keyboard capture itself was reasoned from the mechanism and the fix was proved
+against a Vimeo address through the real deck. Whether three separate video
+slides were also sitting in that deck is a question about his data, and the
+rail lists every slide by number.

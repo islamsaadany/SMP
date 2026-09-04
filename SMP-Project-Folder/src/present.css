@@ -245,6 +245,9 @@
   .deckroot.fs .deckstage { inset:0; }
   .deckroot.fs .deckbar { transform:translateY(100%); opacity:0; pointer-events:none; }
   .deckroot.fs.peek .deckbar { transform:none; opacity:1; pointer-events:auto; }
+  /* A clip that has been clicked owns the keyboard (§261.14), so on a video
+     slide the bar stays: the arrows on it are the presenter's way out. */
+  .deckroot.fs.vidslide .deckbar { transform:none; opacity:1; pointer-events:auto; }
   @media (prefers-reduced-motion: reduce) { .deckbar { transition:none; } }
   .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;
                     font:inherit; font-size:15px; line-height:1; padding:8px 13px;

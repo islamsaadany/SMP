@@ -296,6 +296,53 @@ with sync_playwright() as pw:
     check("...and keeps the caption", "Opening morning" in cleared, cleared[:200])
     check("...and is not an empty slide", "This slide is empty" not in cleared)
 
+    # ── 5b. The clip plays on its own slide and nowhere else (§261.14) ──────
+    # Islam, presenting: "the video is on the first 3 slides ... I'm not able
+    # to navigate from it." A player that has been clicked owns every key the
+    # presenter presses, and one left loaded on a slide that is no longer
+    # showing owns them from behind `display:none`. Emptying the frame is what
+    # hands the keyboard back — so what is asserted is the frame's `src` at
+    # three moments, not a class somebody could set and forget (§94.8).
+    print("5b. the player is loaded on the slide you are on, and on no other")
+    armed = ev(pg, """() => {
+      const list = pslidesFor('mobile');
+      list.length = 0;
+      list.push({ id:'v1', at:'', kind:'video', title:'A clip',
+                  vid:{ url:'https://vimeo.com/123456789' } });
+      openDeck(UNITS['mobile']);
+      const root = document.getElementById('deckroot');
+      const f = root.querySelector('.d-video iframe');
+      if (!f) return { no: 'the deck drew no video frame' };
+      const read = () => ({ src: f.getAttribute('src') || '',
+                            bar: root.classList.contains('vidslide') });
+      const idx = DECK.slides.indexOf(f.closest('.dslide'));
+      const before = read();
+      deckShow(idx);
+      const on = read();
+      deckShow(idx > 0 ? idx - 1 : idx + 1);
+      const off = read();
+      closeDeck();
+      return { idx: idx, slides: DECK.slides.length,
+               before: before, on: on, off: off, want: f.dataset.vsrc || '' };
+    }""", default=THREW)
+
+    check("the deck drew the clip on exactly one slide",
+          get(armed, "idx") > 0 and get(armed, "slides") > 1, armed)
+    check("nothing is loaded before the slide is reached",
+          get(get(armed, "before"), "src") == "", get(armed, "before"))
+    check("the player is loaded on its own slide",
+          get(get(armed, "on"), "src") == get(armed, "want") and get(armed, "want"),
+          get(armed, "on"))
+    # Both ends (§113.8): a build that never loaded it satisfies the emptying
+    # assertion perfectly, and a build that never emptied it satisfies the
+    # loading one.
+    check("...and emptied again on leaving, which gives the keyboard back",
+          get(get(armed, "off"), "src") == "", get(armed, "off"))
+    check("the bar is held open while a clip is on screen",
+          get(get(armed, "on"), "bar") is True, get(armed, "on"))
+    check("...and lets itself hide again after it",
+          get(get(armed, "off"), "bar") is False, get(armed, "off"))
+
     # ── 6. The ceiling, and it is said before the press ────────────────────
     print("6. three a subject, refused with the reason")
     room = ev(pg, """() => {

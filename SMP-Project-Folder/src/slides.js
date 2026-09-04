@@ -182,7 +182,16 @@ function vslideHtml(sl, blank){
        the connection is ever downgraded. The element's own policy overrides
        the document's for this one request; every other request the platform
        makes still sends no referrer. */
-    body = '<iframe src="' + esc(how.play) + '" title="' + esc(sl.title || "Video") +
+    /* THE PLAYER IS LOADED ONLY ON THE SLIDE YOU ARE ON (§261.14). The
+       address rides in `data-vsrc` and `videoArm()` moves it into `src` when
+       this slide is the one showing, and empties it again when it is not.
+       Three things follow, and the first is the reported fault: a player
+       still loaded on a slide nobody is looking at goes on holding the
+       keyboard, so the arrow keys move the clip instead of the deck. It also
+       stops the rail drawing twenty players at one tenth, and means nothing
+       is asked of YouTube until a slide with a clip on it is actually
+       reached. */
+    body = '<iframe data-vsrc="' + esc(how.play) + '" title="' + esc(sl.title || "Video") +
       '" allowfullscreen allow="fullscreen" referrerpolicy="strict-origin" ' +
       /* Kept, and the two that matter are what it withholds: the frame cannot
          navigate the platform away from under the presenter, and cannot start
@@ -204,6 +213,33 @@ function vslideHtml(sl, blank){
     '<div class="vwrap">' + body + '</div>' +
     (sl.vcap ? '<figcaption>' + esc(sl.vcap) + '</figcaption>' : '') +
     '</section>';
+}
+
+/* THE CLIP BELONGS TO ONE SLIDE, AND SO DOES THE KEYBOARD (§261.14).
+
+   Islam, presenting: *"the video is on the first 3 slides ... I'm not able to
+   navigate from it."* A cross-origin player that has been clicked owns every
+   key the presenter presses — the arrows seek the clip and the deck does not
+   move — and a frame left loaded on a slide that is no longer showing goes on
+   owning them from behind `display:none`.
+
+   So the frame is only ever loaded while its own slide is the one on screen,
+   and emptying it is what hands the keyboard back. `<video>` is paused rather
+   than emptied: it is our own element, so pausing is enough and the presenter
+   keeps their place in the clip.
+
+   `live` is the ONE slide passed in, never "every slide wearing .on" — the
+   editor's rail marks every thumbnail `.on` so it lays out, and a rail that
+   armed them would load one player per row. */
+function videoArm(root, live){
+  if (!root) return;
+  [].forEach.call(root.querySelectorAll("iframe[data-vsrc]"), function(f){
+    var want = (live && live.contains(f)) ? (f.dataset.vsrc || "") : "";
+    if ((f.getAttribute("src") || "") !== want) f.setAttribute("src", want);
+  });
+  [].forEach.call(root.querySelectorAll(".d-video video"), function(v){
+    if (!(live && live.contains(v)) && !v.paused) v.pause();
+  });
 }
 
 /* ── Taking a picture in ─────────────────────────────────────────────────
@@ -656,6 +692,9 @@ function slidesPaint(){
     c.classList.add("on");
     stage.appendChild(c);
   }
+  /* The stage plays; the rail does not (§261.14) — twenty thumbnails each
+     loading a player is twenty players. */
+  videoArm(document.getElementById("slideroot"), stage);
   slidesFitStage();
   slidesWire();
   /* THE RAIL FOLLOWS THE SELECTION. Adding a slide in the middle of a
@@ -1064,6 +1103,7 @@ function slidesRestage(){
   /* The rail's WORDS as well as its picture. A slide whose thumbnail says
      "New stores this half" and whose label underneath still says "Slide" is
      the two halves of one row disagreeing. */
+  videoArm(root, root.querySelector(".sstage-in"));
   var lab = root.querySelector(".slrow.on .sl-lab");
   var made = root.querySelector(".sstage-in .dslide");
   if (lab && made) lab.innerHTML = esc(slidesLabel(made)) +

@@ -1081,6 +1081,13 @@ function deckShow(n){
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
+  /* §261.14: the player is loaded on this slide and on no other, which is
+     what stops a clip left behind owning the arrow keys — and while a clip IS
+     on screen the bar does not hide itself, because the on-screen arrows are
+     the way past a player that has taken the keyboard. */
+  var here = DECK.slides[DECK.i];
+  videoArm(root, here);
+  root.classList.toggle("vidslide", !!(here && here.classList.contains("d-video")));
   [].forEach.call(root.querySelectorAll(".ddot"), function(b, k){
     b.classList.toggle("on", k === DECK.i);
   });

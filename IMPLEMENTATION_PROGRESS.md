@@ -6,13 +6,14 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**On the branch, not merged:** **§261 — one chase per conversation, not one per
-message.** The platform stops emailing per message about a conversation already
-waiting on you, and what does go out carries everything still unanswered; the
-same rule runs the away chase going the other way. Migration 042, no backfill.
-**No new control** — the settings row was drawn, put to Islam and refused
-(§261.1); the quiet period ships fixed at 60 minutes. Awaiting a word before it
-goes to `main`.
+**On the branch, not merged:** **§261 → §262 — the platform collects for ten
+minutes, then sends one email.** Nothing goes out while the collection fills;
+one email then carries every waiting conversation, and the same rule runs the
+other way for a colleague who has not come back. Presence decides nothing (his
+ruling); only a reply stops it on the office's side. The existing away setting
+is repurposed as the collecting time and ships at 10 — no new control. The send
+rides the platform's own traffic, so no scheduler. Migration 042, no backfill.
+Awaiting a word before it goes to `main`.
 
 **Latest version:** §258 on `main` and live (the save-safety banners), on top
 of §257 (a target that is a yes or a no) and the whole deck round — all from
@@ -39,9 +40,15 @@ Nothing proceeds past this line without an answer.
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
 
 
-| **D11** | **The 10-minute collection** — replacing §261's instant-then-guarded chase with "collect for 10 minutes, send one email". Emails drawn: `design-mockups/chat-collect-email/2026-09-03_the-two-emails.html`. | Settled with Islam in conversation: presence stops deciding, only a reply stops the email, the office gets ONE email covering every waiting conversation, and the existing away setting is repurposed as the collection time (default 10, his current 3 to be set with it). The alarm clock is the platform's own traffic — no scheduler. Not started; awaiting the word. | §261 |
 
 **Answered:**
+
+- **D11 · The 10-minute collection — ANSWERED 2026-09-03: built** (§262).
+  Presence decides nothing; only a reply stops it on the office's side and only
+  coming back stops it on theirs; ONE email carries every waiting conversation;
+  the away setting is repurposed as the collecting time and ships at 10; the
+  send rides the platform's own traffic rather than a scheduler. Emails drawn
+  first: `design-mockups/chat-collect-email/`.
 
 - **D10 · The *Email again after* row on chat settings — ANSWERED 2026-09-03:
   refused.** Islam: *"I'm confused between the send email after 3 min and the

@@ -439,6 +439,45 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted in the same breath. 474/0; and one of the check's own first failures
   was the CHECK — a function's Performance tab is keyed `fnperf`.
 
+- **THE PLATFORM COLLECTS, THEN SENDS ONE EMAIL (§262, reshaping §261):**
+  Islam — *"if the smo is away he can get a collective email after 10min with
+  the pending messages ... and the user gets a collective email after 10 min of
+  being away when the smo replied"*, then the correction that decides
+  everything: *"even if I'm at my desk if the smo don't reply in 10 min the
+  email should come ... sometimes people might be at their desk but not
+  focusing."* **PRESENCE DECIDES NOTHING ABOUT EMAIL NOW**; what stops a
+  collection is a REPLY on the office's side and COMING BACK on theirs
+  (a reply needs reading, not answering) — and he took the strictest of three
+  on his own side, reading does not stop it, with the cost named.
+  **THERE IS STILL NO SCHEDULER AND THE SEND RIDES SOMEBODY'S REQUEST**: every
+  signed-in browser checks in at least every three minutes (§98), and one of
+  those carries the sweep — so **ten minutes is a floor, not a promise**, which
+  was stated before he chose it over a paid cron. **ONE EMAIL FOR EVERY WAITING
+  CONVERSATION** (his: *"not 1 for each person"*): the trigger is anything old
+  enough, the contents are everything unanswered, and a conversation carried
+  early is stamped by that email so it never triggers one of its own. **THE
+  AWAY SETTING CHANGED WHAT IT MEANS RATHER THAN GAINING A NEIGHBOUR** (his
+  move, closing §261.1) — same key, relabelled *Email after*, shipping at 10;
+  the KEY does not move (§30.2), and **the word "here" keeps its own short
+  window** (`CHAT_HERE_MIN`) or the screen calls somebody present nine minutes
+  after they shut the tab. **`src/mail.js` MOVED TO `lib/mail-html.js`**,
+  inlined by build.py and required by the server, because a collection has no
+  composer attached and a second builder is a second answer to *what does our
+  email look like* (§53.5) — the default footer moved with it. **ONE SWEEP AT A
+  TIME** on `pg_try_advisory_xact_lock`, skipping rather than queueing, and
+  **stamped only when the provider took it**. Proved able to fail once per
+  decision: **13 / 4 / 2 red** — and the third took two attempts, because a
+  throwing send never reaches the stamp AND the transaction rolls it back, so
+  the guard is defence behind two other things and only the plausible
+  regression (swallow the refusal, carry on) breaks it. **The check's own first
+  run was wrong twice in the harness**: it aged the messages and left the
+  watermark, which is a different history rather than ten minutes later, and
+  each trial inherited the last one's unemailed replies. **Two checks held the
+  old meaning and were REWRITTEN** (§218), and `test-mail-contrast.js` was
+  reading the builder by its old path (§51.11, loudly this time).
+  **RECORDED, NOT DONE**: with nobody signed in anywhere an overnight question
+  waits for the morning; the digest carries one button rather than a link per
+  conversation; two of the office replying at once still both collect.
 - **ONE CHASE PER CONVERSATION, NOT ONE PER MESSAGE (§261):** Islam, of the
   emails the platform sends him — *"when someone send to me when I don't reply
   it send an email for each message ... it needs to compile some messages
@@ -4677,14 +4716,19 @@ python3 checks/reported-note.py # a reported note is NAMED as one (§255): the n
                                 # asserted to use the same word. It MAKES the state: 0 of
                                 # 84 demo tactics carry a note, so every assertion here
                                 # passes on a build that lost the feature. 16 red before
-node scripts/test-chat-chase.js # one chase per conversation, not one per message
-                                # (§261): five messages and one email, the second
-                                # chase compiling the whole waiting spell, replying
-                                # ending it, the away chase the same both ways, and a
-                                # failed send buying no silence — through the REAL
-                                # handler against a real Postgres with a stand-in mail
-                                # service reading what left off the wire (needs a
-                                # database; 14 red on the build before)
+node scripts/test-chat-chase.js # the platform collects, then sends one email
+                                # (§262): nothing goes out while the collection
+                                # fills, ONE email then carries every waiting
+                                # conversation, a reply stops it on the office's
+                                # side and coming back stops it on theirs, being
+                                # at your desk suppresses nothing, and a refused
+                                # send buys no silence — through the REAL handler
+                                # against a real Postgres with a stand-in mail
+                                # service reading what left off the wire. Time is
+                                # moved in the database, never waited for, and it
+                                # moves the marks WITH the messages (needs a
+                                # database; 13 / 4 / 2 red, one falsification per
+                                # decision)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4920,7 +4964,45 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;261: one chase per conversation, not
+*Last Updated: 2026-09-03 &mdash; **&sect;262: the platform collects for ten
+minutes, then sends one email.** Islam, after &sect;261 stopped the flood:
+*"if the smo is away he can get a collective email after 10min with the pending
+messages, and that's a time we can adjust ... and the user gets a collective
+email after 10 min of being away when the smo replied. What do you think?"*
+**WHAT WAS PUT TO HIM FIRST WAS THE OBSTACLE**: &sect;261's own argument was
+that nothing wakes this platform up, and that is true of a TIMER and not of the
+platform &mdash; every signed-in browser checks in at least every three minutes,
+and a request is all a send needs. Three heartbeats were costed and **he took
+the platform's own traffic**, with the one cost stated: with nobody using it at
+all the email waits for the next sign of life, so ten minutes is a floor and
+not a promise. **THEN HE OVERRULED THE PART I HAD PROPOSED** &mdash; I would have
+suppressed the email for somebody at their desk; *"even if I'm at my desk if the
+smo don't reply in 10 min the email should come ... sometimes people might be at
+their desk but not focusing."* So presence decides nothing, and what stops a
+collection is a **reply** on his side and **coming back** on theirs; asked which
+of three on his own side he took the strictest, reading does not stop it, with
+the cost named. **THAT RETIRED THE AWAY THRESHOLD, so the same key changed what
+it means** (his move, closing &sect;261.1's refusal): one box, relabelled
+*Email after*, shipping at 10, the key unmoved so a tenant that typed a number
+keeps it &mdash; while the word *here* keeps its own short window, or the screen
+would call somebody present nine minutes after they shut the tab. **ONE EMAIL
+FOR EVERY WAITING CONVERSATION**, his correction to what &sect;261 built.
+**The mail builder MOVED rather than being copied** (`src/mail.js` &rarr;
+`lib/mail-html.js`), because a collection goes out with no composer attached.
+**The emails were drawn before they were built** (rule 1c) out of the
+platform's own builder, and the drawing settled three things: a screenshot is
+named rather than attached, the subject carries the count, and no button at all
+where nothing says where the platform is. Proved able to fail **once per
+decision &mdash; 13 / 4 / 2 red** &mdash; and the third took two attempts,
+which is recorded: a throwing send never reaches the stamp and the transaction
+rolls it back, so only the plausible regression breaks it. **The check's own
+first run was wrong twice in the harness.** Full `qa.py` sweep ERRORS none
+&middot; 491/0 authoriser &middot; 126/0 differ &middot; 95/0 on the existing
+chat suite (two assertions REWRITTEN, &sect;218) &middot; `office-chat.py` ALL
+CLEAR &middot; 12/0 mail contrast &middot; round trip PASS on a virgin Postgres
+16.*
+
+*Earlier the same day: **&sect;261: one chase per conversation, not
 one per message.** Islam, of the emails the platform sends him: *"when someone
 send to me when I don't reply it send an email for each message ... it needs to
 compile some messages rather than an emaile for each message."* Measured before

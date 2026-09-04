@@ -1,23 +1,28 @@
--- 042 · ONE CHASE PER CONVERSATION, NOT ONE PER MESSAGE (§261)
+-- 042 · THE COLLECTION'S MEMORY (§261, reshaped by §262)
 --
--- Islam: "the messages emailed to me from the platform when someone sends to
--- me — when I don't reply it sends an email for each message. It needs to
--- compile some messages rather than an email for each message."
+-- Islam: "when someone sends to me and I don't reply it sends an email for
+-- each message ... it needs to compile some messages", and then: "if the smo
+-- don't reply in 10 min the email should come and same for them."
 --
--- Both chases had the same shape and the same fault: the decision was made at
--- the moment a message arrived and nothing remembered that it had already been
--- made. Five messages, five emails; three replies to somebody who is away,
--- three emails. These two columns are that memory, and nothing else.
+-- Two columns, and both answer one question: HOW FAR HAVE WE ALREADY EMAILED
+-- THIS CONVERSATION? Everything newer than the mark is what the next email
+-- carries, and nothing older is ever sent twice.
 --
--- CLEARED BY THE ANSWER, never by a clock. `chased_at` is wiped when the
--- office replies and `chased_them_at` when the person's own browser polls, so
--- a fresh spell always chases and the quiet period only ever silences a
--- repeat (§261, and lib/rules.js `chatChaseDue` is the one rule).
+--   chased_at       · the office has been told about this conversation up to here
+--   chased_them_at  · this person has been told about our replies up to here
 --
--- NOTHING IS BACKFILLED, deliberately. NULL is "no email has gone out about
--- this spell", which is exactly what an untouched row means for a tenant
--- upgrading: the next message chases once, and every one after it is quiet.
--- A backfill of now() would silence conversations that are waiting today.
+-- CLEARED BY THE ANSWER, NEVER BY A CLOCK. `chased_at` is wiped when the
+-- office replies, because that ends the conversation's wait. `chased_them_at`
+-- is NOT wiped when the person comes back — the sweep reads the LATER of it
+-- and `here_at`, so a visit silences what arrived before it and nothing that
+-- arrived after (§262; clearing it would make messages they were already sent
+-- eligible all over again).
+--
+-- NOTHING IS BACKFILLED, deliberately. NULL is "nothing has gone out about
+-- this conversation", which is exactly what an upgrading tenant should mean:
+-- the first collection carries what is waiting, and every one after it carries
+-- only what is new. A backfill of now() would silence conversations that are
+-- waiting today.
 --
 -- OUTSIDE THE STATE GRAPH, like everything else in chat_threads: a save
 -- TRUNCATEs the thirty tables and cannot reach this (§97).

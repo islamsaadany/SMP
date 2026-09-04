@@ -34,6 +34,9 @@ const io = require("../lib/state-io.js");
 const Rules = require("../lib/rules.js");
 const Audience = require("../lib/audience.js");
 const mailer = require("../lib/mailer.js");
+/* The SAME builder the platform inlines (§262): one answer to what an
+   email from here looks like, whoever composes it. */
+const MAIL = require("../lib/mail-html.js");
 const assistant = require("../lib/assistant.js");
 const push = require("../lib/push.js");
 
@@ -236,10 +239,10 @@ function roleWord(me) {
    THE BOUNDARY EXCLUDES THE ASSISTANT'S HANDOFF LINE, and getting that wrong
    would have emptied the email at the one moment it matters most: the handoff
    is `from_office` (§104 — the assistant answers on the office's behalf) and
-   it is inserted BEFORE this runs, so a naive "since the last office message"
-   would find nothing to compile and send a chase with no words in it. An
-   assistant ANSWER is a different thing and correctly ends the spell: it sets
-   the conversation to answered, and nothing chases at all. */
+   it is written the moment the question arrives, so a naive "since the last
+   office message" would find nothing to compile. An assistant ANSWER is a
+   different thing and correctly ends the spell: it marks the conversation
+   answered, and an answered conversation is not collected at all. */
 async function waitingSpell(client, key) {
   const r = await client.query(
     "SELECT body, (shot IS NOT NULL) AS has_shot, at FROM chat_messages " +
@@ -251,99 +254,319 @@ async function waitingSpell(client, key) {
   return r.rows;
 }
 
-/* ── TELLING A PERSON THAT A PERSON IS NEEDED (§104.4, §261) ──────────
-   With the assistant answering most things, a handoff is the exception — and
-   an exception nobody is told about is one nobody acts on. Sent at the moment
-   it happens, because there is no scheduler on Vercel (§97.5 settled that).
+/* ── WHERE THE PLATFORM IS, ASKED OF THE REQUEST (§176, §262) ─────────
+   A link in an email has nothing to be relative to, so the button needs an
+   absolute address — and the browser that used to supply it is not in the
+   room when a collection goes out. The request that drove the sweep IS a
+   browser on this deployment, so its own address answers: a same-origin fetch
+   carries the page it came from, which is the platform's path rather than the
+   sign-in gate (§35.6, and spec 027's own ruling about which of the two is
+   right).
 
-   AND ONCE PER CONVERSATION, NOT ONCE PER MESSAGE (§261). Islam: "when I
-   don't reply it send an email for each message ... it needs to compile some
-   messages rather than an email for each message." With no scheduler there is
-   nothing that can hold five messages back and send one summary at the end of
-   the hour — but the moment a message arrives, whether an email about this
-   conversation has already gone out IS knowable, and that is the whole rule.
-   `chased_at` is the memory, `chatChaseDue` is the rule (asked here, on the
-   away chase, and by the office's own screen), and replying clears it so a
-   fresh spell always chases.
+   NO GUESS AND NO FALLBACK TO THE GATE. If nothing here says where the
+   platform is, the email draws no button at all rather than one that lands
+   somewhere nobody meant (§176: html() omits it when the href is empty). */
+function platformHref(req) {
+  const ref = String((req && req.headers && req.headers.referer) || "").trim();
+  if (/^https?:\/\//i.test(ref) && ref.indexOf("/api/") < 0) return ref.split("#")[0];
+  return "";
+}
 
-   WHAT DOES GO CARRIES THE WHOLE SPELL, which is the "compile": the first
-   email names one message and the one after an hour of silence names all of
-   them, so nothing anybody wrote is only ever mentioned in an email that has
-   already been read and forgotten.
+/* WHAT AN EMAIL FROM THIS PLATFORM LOOKS LIKE, resolved on the server from the
+   stored tenant (§72's shape, read where the sweep can reach it). The browser's
+   `commsShape()` answers the same question from the same fields; both hand it
+   to the same builder, which is now `lib/mail-html.js` (§262). */
+async function mailShape(client, req) {
+  const r = (await client.query("SELECT org_name, extra FROM org WHERE id = 1")).rows[0] || {};
+  const x = r.extra || {}, c = x.comms || {}, b = x.branding || {};
+  const org = c.headerName || r.org_name || "";
+  return {
+    org: org,
+    fromName: c.fromName || r.org_name || "Strategy Management Platform",
+    replyTo: c.replyTo || "",
+    eyebrow: c.eyebrow || "Strategy Management Platform",
+    footer: c.footer || MAIL.footerDefault(r.org_name || ""),
+    accent: b.accent || "",
+    panel: b.bar || "",
+    href: platformHref(req)
+  };
+}
 
-   IT NEVER COSTS THE HANDOFF. The conversation is already waiting before this
-   runs; a mail failure leaves it waiting, which is the correct state — and it
-   leaves `chased_at` alone too, so the next message chases rather than
-   inheriting a quiet period bought by an email that never went. */
-async function tellTheOffice(client, me, text, cfg) {
-  if (!cfg.notify || !cfg.rep) return;
-  if (cfg.rep === me.key) return;          /* nobody is emailed about their own message */
+/* ── THE COLLECTION (§262) ────────────────────────────────────────────
+   Islam, having had one email per message: *"if the smo don't reply in 10 min
+   the email should come and same for them ... sometimes people might be at
+   their desk but not focusing or they closed the notification."*
+
+   SO PRESENCE DECIDES NOTHING ANY MORE, and the shape follows from that: a
+   message that leaves a conversation waiting starts a clock, anything written
+   while it runs joins the collection, and at the end ONE email goes out
+   carrying all of it. Only an answer stops it — the office's reply on one
+   side, and on the other the person coming back to the platform, because a
+   reply needs reading rather than answering.
+
+   AND NOTHING WAKES THIS PLATFORM UP (§97.5, still true — there is no
+   scheduler on Vercel and this deployment has none). The collection is due at
+   a moment when, by definition, nobody is doing anything: he has not written
+   again, you are not looking. So the sweep borrows SOMEBODY ELSE'S request —
+   every signed-in browser checks in at least every three minutes (§98's idle
+   beat), and one of those check-ins carries the send. The stated cost, put to
+   Islam before it was built: with literally nobody using the platform the
+   email waits for the next sign of life, so ten minutes is a floor and not a
+   promise.
+
+   ONE SWEEP AT A TIME, ACROSS EVERY INSTANCE. `pg_try_advisory_xact_lock`
+   rather than a claim-then-send: claiming first would mark the conversations
+   emailed before the provider had accepted anything, and a stamp with no
+   email behind it is silence bought for nothing (§188's rule, and §261's).
+   A second instance arriving mid-sweep does not queue — it skips, because the
+   work is already being done and a queue of sweeps is a queue of duplicate
+   emails.
+
+   IT NEVER COSTS THE REQUEST IT RODE IN ON. Everything here is inside one
+   try; a mail failure, a lock it could not take, a query that threw all leave
+   the chat exactly as it was, which is the correct state (§104's ordering,
+   one layer out). */
+const SWEEP_LOCK = 262001;
+/* Once a minute per warm instance. The due test is two indexed reads, and
+   §98.1's lesson is that per-request work nobody thinks about is what a poll
+   turns into a bill — so the common case is a comparison against a number in
+   memory and nothing else. */
+const SWEEP_EVERY = 60000;
+let LAST_SWEEP = 0;
+
+async function sweep(client, cfg, req) {
+  /* WITH THE CHAT OFF NOTHING LEAVES THE PLATFORM (§98.2). The corner is not
+     drawn, nobody can answer what arrives, and an email pointing at a chat
+     that is switched off is a message with nowhere to go. */
+  if (!cfg.on) return;
   if (!mailer.configured()) return;
+  const now = Date.now();
+  if (now - LAST_SWEEP < SWEEP_EVERY) return;
+  LAST_SWEEP = now;
   try {
-    const t = (await client.query(
-      "SELECT chased_at FROM chat_threads WHERE person_key = $1", [me.key])).rows[0];
-    if (!Rules.chatChaseDue(t && t.chased_at, Date.now(), cfg.quiet)) return;
-    const r = (await client.query(
-      "SELECT name, extra FROM people WHERE key = $1", [cfg.rep])).rows[0];
-    const to = r && Audience.addressOf(r.extra || {});
-    if (!to) return;
-    const who = (me.name || me.key);
-    /* THE ONE JUST WRITTEN IS ALWAYS SAID, whatever the query found. It is
-       inserted before this runs so the spell holds it — but a spell that came
-       back empty (a boundary this could not read, a row written by something
-       else) must never produce an email with nothing in it (§45.2 in an
-       inbox). */
-    const said = await waitingSpell(client, me.key);
-    const lines = said.length
-      ? said
-      : [{ body: text, has_shot: false, at: null }];
-    /* A CAP, BECAUSE A CONVERSATION CAN BE LONG. The newest are the ones worth
-       reading, so an overrun is trimmed from the FRONT and says so — never
-       silently, or the email would misreport how much is waiting. */
-    const MAX_LINES = 12;
-    const shown = lines.slice(-MAX_LINES);
-    const hidden = lines.length - shown.length;
-    const n = lines.length;
-    const quote = (m) =>
-      '<blockquote style="margin:0 0 10px;padding:10px 14px;border-left:3px solid #C9A24D;' +
-      'background:#F4F6FA;color:#3D4C68">' +
-      escHtml(String(m.body || "").slice(0, 400) || (m.has_shot ? "(a screenshot)" : "")) +
-      (m.body && m.has_shot
-        ? '<span style="color:#5E6E88"> (with a screenshot)</span>' : "") +
-      "</blockquote>";
-    /* PLAIN, AND DELIBERATELY NOT THE TENANT'S BRANDED TEMPLATE. `MAIL.html`
-       is a browser file (§72) and the office's reply is composed there, so it
-       is out of reach here — but it should be anyway: that template exists for
-       what the ORGANISATION looks like to somebody outside the platform, and
-       this is an operational nudge to one person who works in it. Tables,
-       inline styles and literal colours all the same, because email is not the
-       web (§72). */
-    const id = await mailer.sendOne({
-      to: to,
-      subject: n > 1 ? n + " messages waiting: " + who
-                     : "A question is waiting: " + who,
-      html: '<div style="font:15px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#1B2740">' +
-            '<p style="margin:0 0 12px"><b>' + escHtml(who) + '</b> ' +
-            (n > 1 ? "has " + n + " messages waiting for an answer."
-                   : "is waiting for an answer.") + "</p>" +
-            (hidden > 0
-              ? '<p style="margin:0 0 10px;color:#5E6E88">The ' + shown.length +
-                " most recent are below; " + hidden +
-                (hidden === 1 ? " earlier one is" : " earlier ones are") +
-                " in the platform.</p>"
-              : "") +
-            shown.map(quote).join("") +
-            '<p style="margin:0;color:#5E6E88">It is waiting in Setup &rsaquo; Running the ' +
-            'cycle &rsaquo; Platform Inbox.</p></div>'
-    });
-    /* STAMPED ONLY WHEN IT ACTUALLY WENT (§188's rule, on the other chase).
-       A quiet period bought by an email nobody received is silence with no
-       message behind it. */
-    if (id) {
-      await client.query(
-        "UPDATE chat_threads SET chased_at = now() WHERE person_key = $1", [me.key]);
+    await client.query("BEGIN");
+    const got = (await client.query("SELECT pg_try_advisory_xact_lock($1) AS ok",
+                                    [SWEEP_LOCK])).rows[0];
+    if (!got || !got.ok) { await client.query("ROLLBACK"); return; }
+    await collectForOffice(client, cfg, req);
+    await collectForPeople(client, cfg, req);
+    await client.query("COMMIT");
+  } catch (e) {
+    try { await client.query("ROLLBACK"); } catch (e2) { /* the pool will drop it */ }
+    /* VISIBLE TO THE OPERATOR, INVISIBLE TO EVERYBODY ELSE (§133, §123). */
+    console.error("collection sweep:", (e && e.message) || e);
+  }
+}
+
+/* ── ONE EMAIL FOR EVERY CONVERSATION WAITING ON THE OFFICE (§262) ────
+   Islam: *"the email is sent with all the pending conversations, not one for
+   each person."* So the unit of the email is the OFFICE'S QUEUE, not the
+   conversation — three people waiting is one email naming three people, where
+   §261 would have sent three.
+
+   THE TRIGGER AND THE CONTENTS ARE DIFFERENT QUESTIONS. It is sent when
+   ANYTHING has been waiting long enough; what it then carries is every
+   conversation with something unanswered, including one that arrived a minute
+   ago. That is deliberate and it is fewer emails, not more: the newcomer is
+   covered by this email and stamped with it, so it will not trigger one of its
+   own ten minutes from now. */
+async function collectForOffice(client, cfg, req) {
+  if (!cfg.notify || !cfg.rep) return;
+  const rows = (await client.query(
+    "SELECT t.person_key, COALESCE(p.name, t.person_name, t.person_key) AS name, " +
+    "       p.unit_key, p.fn_key, p.extra->>'company' AS company, t.chased_at, " +
+    "       (SELECT min(m.at) FROM chat_messages m " +
+    "         WHERE m.person_key = t.person_key AND NOT m.from_office " +
+    "           AND m.at > COALESCE(t.chased_at, '-infinity'::timestamptz)) AS oldest " +
+    "  FROM chat_threads t LEFT JOIN people p ON p.key = t.person_key " +
+    " WHERE t.waiting AND t.person_key <> $1", [cfg.rep])).rows;
+  const withNew = rows.filter(r => r.oldest);
+  if (!withNew.length) return;
+  const due = withNew.some(r => Rules.chatCollectDue(r.oldest, Date.now(), cfg.away));
+  if (!due) return;
+
+  const to = await addressOfPerson(client, cfg.rep);
+  if (!to) return;
+  /* THE SPELL, PER CONVERSATION — everything since the office last answered
+     that person, not merely what arrived since the last email. The email is a
+     picture of what is waiting, and a picture missing the first half of a
+     conversation is worse than no picture. */
+  const blocks = [];
+  for (const r of withNew) {
+    const said = await waitingSpell(client, r.person_key);
+    if (said.length) blocks.push({ row: r, said: said });
+  }
+  if (!blocks.length) return;
+
+  const id = await mailer.sendOne({
+    to: to,
+    subject: blocks.length > 1
+      ? blocks.length + " conversations waiting"
+      : "A question is waiting: " + blocks[0].row.name,
+    html: officeDigestHtml(blocks, platformHref(req))
+  });
+  /* STAMPED ONLY WHEN IT ACTUALLY WENT, and every conversation the email
+     carried is stamped — including the one that was not yet due, because it
+     has now been said (§188's rule: the mark follows the send, never the
+     intention). */
+  if (id) {
+    await client.query(
+      "UPDATE chat_threads SET chased_at = now() WHERE person_key = ANY($1)",
+      [blocks.map(b => b.row.person_key)]);
+  }
+}
+
+/* PLAIN, AND DELIBERATELY NOT THE TENANT'S BRANDED TEMPLATE (§104.4). That
+   template exists for what the ORGANISATION looks like to somebody outside the
+   platform; this is a work queue for one person who works in it. Tables,
+   inline styles and literal colours all the same, because email is not the
+   web (§72). */
+function officeDigestHtml(blocks, href) {
+  const q = (m) =>
+    '<blockquote style="margin:0 0 8px;padding:9px 14px;border-left:3px solid #C9A24D;' +
+    'background:#F4F6FA;color:#3D4C68">' +
+    escHtml(String(m.body || "").slice(0, 400) || (m.has_shot ? "(a screenshot)" : "")) +
+    (m.body && m.has_shot ? '<span style="color:#5E6E88"> (with a screenshot)</span>' : "") +
+    "</blockquote>";
+  /* A CAP PER CONVERSATION, because one long thread must not push the other
+     people out of sight. Trimmed from the FRONT — the newest are the ones
+     worth reading — and said out loud, or the email misreports what is
+     waiting. */
+  const MAX = 6;
+  const one = (b) => {
+    const shown = b.said.slice(-MAX), hidden = b.said.length - shown.length;
+    const place = placeWord(b.row);
+    return '<div style="margin:0 0 20px">' +
+      '<p style="margin:0 0 7px;font:600 15px/1.4 -apple-system,Segoe UI,Arial,sans-serif">' +
+      escHtml(b.row.name) +
+      '<span style="font-weight:400;color:#5E6E88">' +
+      (place ? " &middot; " + escHtml(place) : "") +
+      " &middot; waiting " + escHtml(sinceWord(b.said[0].at)) + "</span></p>" +
+      shown.map(q).join("") +
+      (hidden > 0
+        ? '<p style="margin:0;color:#5E6E88;font-size:13px">and ' + hidden +
+          (hidden === 1 ? " earlier message" : " earlier messages") + " in the platform</p>"
+        : "") +
+      "</div>";
+  };
+  return '<div style="font:15px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#1B2740">' +
+    '<p style="margin:0 0 18px"><b>' +
+    (blocks.length > 1 ? blocks.length + " conversations</b> are" : "One conversation</b> is") +
+    " waiting for an answer.</p>" +
+    blocks.map(one).join("") +
+    (href
+      ? '<table role="presentation" cellpadding="0" cellspacing="0" border="0" ' +
+        'style="margin:6px 0 20px"><tr><td bgcolor="#16325C" style="border-radius:6px">' +
+        '<a href="' + escHtml(href) + '" style="display:inline-block;padding:11px 20px;' +
+        'font:600 14px/1 -apple-system,Segoe UI,Arial,sans-serif;color:#FFFFFF;' +
+        'text-decoration:none">Open the Platform Inbox</a></td></tr></table>'
+      : "") +
+    '<p style="margin:0;color:#5E6E88">Setup &rsaquo; Running the cycle &rsaquo; ' +
+    'Platform Inbox.</p></div>';
+}
+
+/* Where somebody sits, in the navigation's own words — the register already
+   answers this and the email should not invent a second vocabulary (§65,
+   §93.12). Absent is absent: a person the register has not placed gets no
+   suffix rather than a guess (§15.1). */
+function placeWord(r) {
+  if (r.fn_key) return String(r.fn_key) + " (function)";
+  if (r.unit_key) return String(r.unit_key);
+  if (r.company) return String(r.company);
+  return "";
+}
+function sinceWord(at) {
+  const ms = Date.now() - new Date(at).getTime();
+  const mins = Math.max(1, Math.round(ms / 60000));
+  if (mins < 60) return mins + (mins === 1 ? " minute" : " minutes");
+  const hrs = Math.round(mins / 60);
+  if (hrs < 48) return hrs + (hrs === 1 ? " hour" : " hours");
+  const days = Math.round(hrs / 24);
+  return days + (days === 1 ? " day" : " days");
+}
+
+async function addressOfPerson(client, key) {
+  const r = (await client.query(
+    "SELECT extra FROM people WHERE key = $1 " +
+    "  AND COALESCE(extra->>'active','true') <> 'false'", [key])).rows[0];
+  return r ? Audience.addressOf(r.extra || {}) : "";
+}
+
+/* ── AND THE SAME RULE GOING THE OTHER WAY (§262) ─────────────────────
+   One email per person, because a person only ever sees their own
+   conversation — there is nothing to group, and grouping across people is
+   exactly what must not happen here.
+
+   WHAT COUNTS AS UNSAID IS "SINCE THE LATER OF two things": the last email we
+   sent them, and the last time they had the platform open. Coming back is
+   what stops this (his rule: a reply needs reading, not answering), and
+   taking only the later of the two is what makes a person who looked in
+   half-way through get the replies that arrived AFTER their visit rather than
+   all of them or none.
+
+   THE ASSISTANT'S OWN MESSAGES ARE NOT CHASED. A handoff line says a person
+   will answer, and an assistant answer is already on their screen the moment
+   they ask — emailing either would be the platform writing to somebody about
+   its own reply to them (§104). */
+async function collectForPeople(client, cfg, req) {
+  if (!cfg.mail) return;
+  const rows = (await client.query(
+    "SELECT t.person_key, COALESCE(p.name, t.person_name) AS name, p.extra, " +
+    "       GREATEST(COALESCE(t.chased_them_at, '-infinity'::timestamptz), " +
+    "                COALESCE(t.here_at,        '-infinity'::timestamptz)) AS since " +
+    "  FROM chat_threads t JOIN people p ON p.key = t.person_key " +
+    " WHERE COALESCE(p.extra->>'active','true') <> 'false'")).rows;
+  if (!rows.length) return;
+  const shape = await mailShape(client, req);
+  for (const r of rows) {
+    const said = (await client.query(
+      "SELECT body, at FROM chat_messages " +
+      " WHERE person_key = $1 AND from_office AND NOT COALESCE(bot, false) " +
+      "   AND at > $2 ORDER BY at, id", [r.person_key, r.since])).rows;
+    if (!said.length) continue;
+    if (!Rules.chatCollectDue(said[0].at, Date.now(), cfg.away)) continue;
+    const addr = Audience.addressOf(r.extra || {});
+    if (!addr) continue;
+    const many = said.length > 1;
+    const body = (many
+        ? said.length + " replies are waiting for you in the platform.\n\n"
+        : "") +
+      said.map(m => "“" + String(m.body || "").slice(0, 600) + "”").join("\n\n") +
+      "\n\nOpen the platform to read " + (many ? "them" : "it") + " in full and answer.";
+    try {
+      const id = await mailer.sendOne({
+        to: addr,
+        fromName: shape.fromName,
+        replyTo: shape.replyTo,
+        subject: many ? said.length + " replies from the Strategy Office"
+                      : "A reply from the Strategy Office",
+        html: MAIL.html({
+          org: shape.org, accent: shape.accent, panel: shape.panel,
+          footer: shape.footer, eyebrow: shape.eyebrow,
+          title: many ? said.length + " replies from the Strategy Office"
+                      : "The Strategy Office replied",
+          preheader: String(said[0].body || "").slice(0, 140),
+          body: body,
+          cta: { label: "Open the platform", href: shape.href }
+        })
+      });
+      if (id) {
+        await client.query(
+          "UPDATE chat_threads SET chased_them_at = now() WHERE person_key = $1",
+          [r.person_key]);
+        /* §188's tag, on the messages this email actually carried. */
+        await client.query(
+          "UPDATE chat_messages SET emailed_to = $2 " +
+          " WHERE person_key = $1 AND from_office AND NOT COALESCE(bot,false) AND at > $3",
+          [r.person_key, addr, r.since]);
+      }
+    } catch (e) {
+      /* ONE PERSON'S EMAIL FAILING COSTS ONLY THAT PERSON'S EMAIL. Nothing is
+         stamped, so the next sweep tries again — and everybody else in this
+         sweep still receives theirs. */
+      console.error("collection to " + r.person_key + ":", (e && e.message) || e);
     }
-  } catch (e) { /* a mail failure never costs the handoff */ }
+  }
 }
 
 module.exports = async function handler(req, res) {
@@ -361,23 +584,32 @@ module.exports = async function handler(req, res) {
     const office = Rules.isOfficeRole(me.role);
     const cfg = await chatSettings(client);
 
+    /* ── THE HEARTBEAT (§262) ──────────────────────────────────────────
+       Every request through this endpoint is somebody's browser saying it is
+       there, and a collection that has come due needs exactly that: something
+       happening, at a moment when the person it concerns is doing nothing.
+       Throttled to once a minute per instance and skipped outright when
+       another instance holds the lock, so the ordinary poll pays a comparison
+       against a number in memory (§98.1).
+
+       BEFORE THE ACTION, not after: work queued after the response is work a
+       serverless function is free to kill. */
+    await sweep(client, cfg, req);
+
     /* ── WHAT THE PERSON'S OWN PANEL ASKS FOR ─────────────────────────
        And the one thing it writes without being told to: `here_at`, which is
        the whole of the presence test the email rule reads (§97.5). Stamped on
        the POLL rather than on a send, because being present is about looking
        at the screen, not about having typed. */
     if (action === "mine") {
-      /* AND COMING BACK ENDS THE AWAY CHASE (§261). `chased_them_at` says an
-         email about this conversation has already gone out to them; the poll
-         is the platform being open in front of them, which is the whole of
-         what that email was for. Cleared HERE, in the write that already
-         happens, so it costs nothing and there is no second place to keep
-         true — and so somebody who reads a reply, leaves, and is replied to
-         again tomorrow is chased again rather than silenced by yesterday's
-         email. */
+      /* AND COMING BACK IS WHAT STOPS THEIR COLLECTION (§262) — but it is
+         `here_at` that says so, not a cleared watermark. `chased_them_at`
+         means "we have emailed them up to here" and clearing it would make
+         messages they were already sent eligible all over again; the sweep
+         reads the LATER of the two, so a visit silences everything that
+         arrived before it and nothing that arrived after. */
       await client.query(
-        "UPDATE chat_threads SET here_at = now(), chased_them_at = NULL " +
-        " WHERE person_key = $1", [me.key]);
+        "UPDATE chat_threads SET here_at = now() WHERE person_key = $1", [me.key]);
       const out = await mine(client, me);
       out.office = office;
       /* THE SETTINGS TRAVEL WITH THE POLL, so the corner never needs a second
@@ -696,12 +928,14 @@ module.exports = async function handler(req, res) {
             [me.key]);
         }
       }
-      /* A HANDOFF REACHES A PERSON (§104.4). Only when the conversation is
-         still waiting — an answered one is not an exception and nobody needs
-         telling about it. */
+      /* NO EMAIL FROM HERE ANY MORE (§262). §104.4 emailed the office at the
+         moment a question arrived, which is what made five messages five
+         emails; the collection above sends instead, ten minutes later and
+         once. What stays here is everything that is INSTANT by nature — the
+         message stored, the conversation waiting, and the box below on a
+         device that asked for one. */
       const stillWaiting = (await client.query(
         "SELECT waiting FROM chat_threads WHERE person_key = $1", [me.key])).rows[0];
-      if (stillWaiting && stillWaiting.waiting) await tellTheOffice(client, me, text, cfg);
 
       /* AND A BOX ON THE OFFICE'S OWN SCREENS, WITH NO TAB OPEN (§231).
          Only while the conversation is still waiting — the same condition the
@@ -887,7 +1121,10 @@ module.exports = async function handler(req, res) {
         chat: cfg,
         waiting: rows.filter(function (r) { return r.waiting; }).length,
         flagged: rows.filter(function (r) { return +r.flagged > 0; }).length,
-        hereMinutes: cfg.away,
+        /* WHAT "HERE" MEANS, which is no longer what the setting says (§262):
+           the setting is how long the platform collects before emailing, and
+           this is the short window the word "here" describes. */
+        hereMinutes: Rules.CHAT_HERE_MIN,
         /* WHETHER THIS DEPLOYMENT CAN MAIL AT ALL, so the line above the reply
            box says "no mail is configured here" rather than promising a send
            that was never going to happen. */
@@ -908,18 +1145,18 @@ module.exports = async function handler(req, res) {
         [who])).rows;
       await client.query(
         "UPDATE chat_threads SET seen_by_us = now() WHERE person_key = $1", [who]);
-      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
+      /* PRESENT MEANS PRESENT, WHEREVER IT IS ASKED (§53.5, §262). This read
+         the collecting time until §262 changed what that number means, and
+         would then have called somebody "here" nine minutes after they shut
+         the tab — the same drift the reply path was fixed for, on the surface
+         that DRAWS the sentence rather than the one that answers it. */
+      const here = t.here_at &&
+        (Date.now() - new Date(t.here_at).getTime()) < Rules.CHAT_HERE_MIN * 60000;
       return send(res, 200, {
         ok: true, person: who, name: t.live_name || t.person_name,
         gone: !t.live_name, unit: t.unit_key, fn: t.fn_key, title: t.title,
         address: Audience.addressOf(t.extra || {}),
         waiting: t.waiting, here: !!here, hereAt: t.here_at,
-        /* WHEN THEY WERE LAST CHASED ABOUT THIS CONVERSATION (§261) — the raw
-           time, never a verdict, because the line above the reply box asks
-           `chatChaseDue` for itself: the office is shown the rule, the server
-           applies the same rule when Send lands, and there is exactly one
-           rule (§97.5, §42). */
-        chasedThemAt: t.chased_them_at,
         /* `mail` is BOTH questions at once: can this deployment send at all,
            and has the office asked it to. The line above the reply box says
            one sentence, so it needs one answer (§98.2). */
@@ -951,7 +1188,7 @@ module.exports = async function handler(req, res) {
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
       if (!text) return send(res, 400, { ok: false, error: "Nothing to send." });
       let t = (await client.query(
-        "SELECT here_at, chased_them_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+        "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
 
       /* ── THE OFFICE STARTS ONE (§247) ─────────────────────────────
          Islam: "from the platform inbox allow the smo to initiate a message
@@ -988,16 +1225,19 @@ module.exports = async function handler(req, res) {
         }
         await ensureThread(client, p.key, p.name);
         t = (await client.query(
-          "SELECT here_at, chased_them_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+          "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
       }
       if (!t) return send(res, 404, { ok: false, error: "No conversation with that person." });
 
-      /* THE ID COMES BACK, because §188 marks THIS message once the email
-         has actually gone — not the thread, and not the next one. */
-      const said = (await client.query(
+      /* NO ID BACK ANY MORE (§262, §24). §188 marked the one message the
+         chase carried, and the chase now carries every reply since they were
+         last here — so the tag is written by the sweep, over the messages the
+         email actually held, and there is nothing for this insert to hand
+         back. */
+      await client.query(
         "INSERT INTO chat_messages (person_key, from_office, by_key, by_name, body) " +
-        "VALUES ($1,true,$2,$3,$4) RETURNING id",
-        [who, me.key, me.name || null, text])).rows[0];
+        "VALUES ($1,true,$2,$3,$4)",
+        [who, me.key, me.name || null, text]);
       /* ANSWERED BY THE ACT, not by remembering to set it — the status nobody
          sets is the status somebody has to remember (§71).
 
@@ -1040,76 +1280,26 @@ module.exports = async function handler(req, res) {
         } catch (e) { /* a notification never costs the reply it is about */ }
       }
 
-      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
-      /* ONE CHASE PER AWAY SPELL, NOT ONE PER REPLY (§261). The same fault as
-         the office's own inbox, on the other half of the same feature: three
-         replies to somebody who has the platform shut were three emails, each
-         saying the same thing and each pointing at the same page. Cleared the
-         moment their browser polls, so coming back and going away again is
-         chased afresh. */
-      const chaseDue = Rules.chatChaseDue(t.chased_them_at, Date.now(), cfg.quiet);
-      let mailed = null;
-      if (!here && !cfg.mail) {
-        /* SAID, NOT SILENT. The office is shown the same sentence before it
-           presses Send; if the two ever disagree, this one is the truth. */
-        mailed = { sent: false, why: "chasing by email is turned off" };
-      } else if (!here && !chaseDue) {
-        /* AND THIS ONE IS SAID TOO. A reply that quietly did not chase would
-           read exactly like one that did, and the office would learn the rule
-           by being surprised by it (§35, §124). */
-        mailed = { sent: false, why: "they have already been emailed about this conversation" };
-      } else if (!here && body.html) {
-        const p = (await client.query(
-          "SELECT name, extra FROM people WHERE key = $1 " +
-          "  AND COALESCE(extra->>'active','true') <> 'false'", [who])).rows[0];
-        const addr = p ? Audience.addressOf(p.extra || {}) : "";
-        if (!addr) mailed = { sent: false, why: "no address on the register" };
-        else if (!mailer.configured()) mailed = { sent: false, why: "no mail is configured here" };
-        else {
-          try {
-            const id = await mailer.sendOne({
-              to: addr,
-              fromName: str(body.fromName, 120),
-              replyTo: str(body.replyTo, 200),
-              subject: str(body.subject, 200) || "A reply from the Strategy Office",
-              html: String(body.html)
-            });
-            mailed = { sent: !!id, to: addr, why: id ? null : "no mail is configured here" };
-            /* ── AND THE MESSAGE REMEMBERS IT (§188) ────────────────────
-               Islam: "if the previous message was sent by email let's add a
-               tag to it that it was sent by email as well." The chase has
-               existed since §97.5 and was reported to the browser once and
-               written down nowhere, so a thread read tomorrow could not say
-               which of its replies had left the platform.
+      /* ── WHAT WILL HAPPEN NEXT, SAID RATHER THAN DONE (§262) ──────
+         The email does not go from here any more. A reply starts their
+         collection and the sweep sends it ten minutes later if they have not
+         come back — so what this returns is not "did it send" but "what is
+         going to happen", which is the only honest answer at this moment.
 
-               WRITTEN ONLY WHEN IT ACTUALLY WENT. A failed send leaves this
-               null, which is the same thing an untouched row says — because
-               it is the same fact. A tag on a message that never left would
-               be worse than no tag (§35: absence reported as presence). */
-            if (id && said && said.id) {
-              await client.query(
-                "UPDATE chat_messages SET emailed_to = $2 WHERE id = $1",
-                [said.id, addr]);
-            }
-            /* AND THE CONVERSATION REMEMBERS IT TOO (§261), for the same
-               reason and under the same condition: written only when the
-               email actually went, or a failed send would buy an hour of
-               silence with a message nobody received. The message tag says
-               WHICH reply left; this says the person has been chased. */
-            if (id) {
-              await client.query(
-                "UPDATE chat_threads SET chased_them_at = now() WHERE person_key = $1",
-                [who]);
-            }
-          } catch (e) {
-            /* A FAILED EMAIL IS NOT A FAILED REPLY. The message is already in
-               the conversation and the person will see it the moment they
-               open the platform; what the office needs is to be told the
-               chase did not go out, not to have the reply rejected. */
-            mailed = { sent: false, why: e.resend ? e.message : "could not reach the mail service" };
-          }
-        }
-      }
+         `here` KEEPS ITS OWN SHORT WINDOW (`CHAT_HERE_MIN`), because it is a
+         description of right now — "they have the platform open" — and the
+         setting beside it is a collecting time. Reading presence off ten
+         minutes would call somebody present nine minutes after they closed
+         the tab (§262, and §169's floor argument for why three was already
+         marginal). */
+      const here = t.here_at &&
+        (Date.now() - new Date(t.here_at).getTime()) < Rules.CHAT_HERE_MIN * 60000;
+      const addr = await addressOfPerson(client, who);
+      let mailed = null;
+      if (!cfg.mail) mailed = { sent: false, why: "emailing is turned off" };
+      else if (!addr) mailed = { sent: false, why: "no address on the register" };
+      else if (!mailer.configured()) mailed = { sent: false, why: "no mail is configured here" };
+      else mailed = { sent: false, pending: true, to: addr, mins: cfg.away };
       return send(res, 200, { ok: true, here: !!here, mailed: mailed });
     }
 
@@ -1155,3 +1345,15 @@ module.exports = async function handler(req, res) {
     if (client) client.release();
   }
 };
+
+/* ── A DOOR FOR THE CHECK, AND NOTHING ELSE (§262) ────────────────────
+   The sweep is throttled to once a minute per warm instance, which is right
+   for a deployment and wrong for a file that drives ten trials in three
+   seconds — without this, every trial after the first would find the sweep
+   asleep and report a working build as silent (§100.3's shape: a harness that
+   cannot reach the thing under test measures something else).
+
+   It resets a clock and nothing more: no behaviour branches on it, so there
+   is no second code path shipping to production (§142.6's rule about the mail
+   endpoint, one module over). */
+module.exports.__resetSweep = function () { LAST_SWEEP = 0; };

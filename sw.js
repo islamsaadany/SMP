@@ -309,14 +309,14 @@
    name goes past it rather than beside it (§94.12), confirmed again
    immediately before the push (§94.16).
 
-   §261: one chase per conversation, not one per message — the platform stops
-   emailing per message about a conversation already waiting, and what does go
-   out carries the whole of what is unanswered. The built file's bytes changed
-   (the presence line above the reply box gained a state, and lib/rules.js is
-   inlined), which is the whole trigger (§91). Name read off origin/main when
-   this was written and to be confirmed again immediately before the push
-   (§94.12, §94.16). */
-const SHELL = "smp-shell-v4.41-one-chase-per-conversation";
+   §261 → §262: the platform collects for ten minutes and then sends one email.
+   The built file's bytes changed — the line above the reply box says what will
+   happen rather than whether an email goes, the settings row is relabelled, and
+   both lib/rules.js and the mail builder (now lib/mail-html.js) are inlined —
+   which is the whole trigger (§91). Name read off origin/main when this was
+   written and to be confirmed again immediately before the push (§94.12,
+   §94.16). */
+const SHELL = "smp-shell-v4.42-ten-minute-collection";
 const ASSETS = [
   "/",
   "/index.html",

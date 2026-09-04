@@ -28,6 +28,11 @@
 const pg = require("pg");
 const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
+/* ASKED OF THE SHARED RULE, never a number written here too — the whole
+   point of §169 was that the setting and the sentence about it stop
+   being two facts (§262 changed what it means, and this line did not
+   have to change with it). */
+const Rules = require("../lib/rules.js");
 
 const BASE = process.env.SMP_BASE || "http://127.0.0.1:3999";
 
@@ -487,27 +492,48 @@ async function signIn(who, password) {
     ok(r.body.waiting === undefined && r.body.waitingWho === undefined,
        "somebody who is not the office is told none of it");
 
-    console.log("\nAND THE AWAY THRESHOLD IS A SETTING, NOT A CONSTANT (§169).");
+    console.log("\nAND THE COLLECTING TIME IS A SETTING, NOT A CONSTANT (§169, §262).");
+    /* THIS SECTION MEASURED "how long before she counts as away", and §262
+       retired that question: presence stopped deciding whether an email goes,
+       so the same key now says how long the platform COLLECTS before sending
+       (Islam: *"I believe the 3 min is not relevant now and we can adjust this
+       setting to be the one which identifies the time away before sending the
+       email"*). The assertions are REWRITTEN rather than deleted (§218), or a
+       later build could drift back through the gap they left.
+
+       WHAT `here` MEANS DID NOT MOVE: it is the screen's own description of
+       this moment, on its own short window (`CHAT_HERE_MIN`), which is why
+       seven minutes out is away whatever the setting says. */
     await client.query(
       "UPDATE chat_threads SET here_at = now() - interval '7 minutes' WHERE person_key = $1",
       [OTHER.key]);
     await setChat({});
     r = await call(smo.cookie, { action: "thread", person: OTHER.key });
-    ok(r.body.here === false, "seven minutes out, and the shipped three calls her away");
+    ok(r.body.here === false, "seven minutes out is not 'has the platform open'");
     await setChat({ away: 20 });
     r = await call(smo.cookie, { action: "thread", person: OTHER.key });
-    ok(r.body.here === true, "...and twenty calls the same row here");
+    ok(r.body.here === false,
+       "...and a longer collecting time does not make her present again");
     r = await call(smo.cookie, { action: "queue" });
-    ok(r.body.hereMinutes === 20, "the office's page is told the number in force");
+    /* THE SETTING TRAVELS IN `chat`, WHICH IS THE WHOLE SETTINGS OBJECT — and
+       `hereMinutes` is a different fact now (§262): what the word "here"
+       means, which is a short fixed window and not the tenant's collecting
+       time. Both are asserted, because a build that collapsed them again
+       would satisfy either one alone. */
+    ok(r.body.chat.away === 20, "the office's page is told the number in force");
+    ok(r.body.hereMinutes === Rules.CHAT_HERE_MIN,
+       "...and 'here' keeps its own short window, whatever that number is");
     /* A STORED VALUE OUT OF RANGE IS CLAMPED, NEVER OBEYED — the endpoint runs
        on every poll, so a nonsense number must answer something rather than
        throw or divide by nothing. */
     await setChat({ away: 99999 });
     r = await call(smo.cookie, { action: "queue" });
-    ok(r.body.hereMinutes === 120, "an absurd value is clamped to the ceiling");
+    ok(r.body.chat.away === 120, "an absurd value is clamped to the ceiling");
     await setChat({ away: "nonsense" });
     r = await call(smo.cookie, { action: "queue" });
-    ok(r.body.hereMinutes === 3, "and a value that is not a number reads as the default");
+    ok(r.body.chat.away === Rules.chatCfg(null).away,
+       "and a value that is not a number reads as the default (" +
+       Rules.chatCfg(null).away + ")");
     await setChat({});
     await client.query(
       "UPDATE chat_threads SET here_at = now() - interval '10 minutes' WHERE person_key = $1",

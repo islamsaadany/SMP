@@ -796,9 +796,10 @@ function commsShape(){
   };
 }
 function COMMS_FOOTER_DEFAULT(){
-  return "Sent from the Strategy Management Platform" +
-         (GROUP.org ? " for " + GROUP.org : "") +
-         ". If you were not expecting this, tell your SMO.";
+  /* ASKED OF THE BUILDER, never written twice (§262). The server composes
+     this email too now, and a sentence spelled here as well is one that goes
+     out of step the first time either is improved. */
+  return MAIL.footerDefault(GROUP.org || "");
 }
 
 /* Every token the two inputs decide, worked out here so the page, the live

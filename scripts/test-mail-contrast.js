@@ -9,14 +9,13 @@
    as white-on-white, because the button sits INSIDE the card's cell and carries
    a ground of its own — a check that measures the wrong thing passes or fails
    for reasons that have nothing to do with the product (§50.6). */
-const fs=require("fs");
-const src=fs.readFileSync(__dirname+"/../SMP-Project-Folder/src/mail.js","utf8");
-/* SMPRules IS HANDED IN, not stubbed. The builder reads the greeting's region
-   markers from the shared module (spec 022), and build.py supplies them the
-   same way — by inlining lib/rules.js before mail.js. Feeding the real module
-   is what makes this the real builder's output rather than a near miss
-   (§103.4: a stub is what you reach for when you cannot supply the thing). */
-const MAIL=(new Function("SMPRules", src+";return MAIL;"))(require("../lib/rules.js"));
+/* THE BUILDER IS A MODULE NOW (§262), so it is required rather than read as
+   text and evaluated with SMPRules handed in. It moved to lib/ the day the
+   server had to compose an email of its own — one builder, two callers — and
+   this file was still reading `src/mail.js`, which is §51.11 exactly: a check
+   keyed on a path that moved does not fail quietly here, it fails loudly, and
+   that is the only reason this was noticed on the same afternoon. */
+const MAIL=require("../lib/mail-html.js");
 
 function rgb(h){h=String(h).replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
   return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16));}

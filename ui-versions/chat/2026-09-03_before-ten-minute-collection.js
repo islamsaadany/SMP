@@ -1399,18 +1399,14 @@ var CHAT = (function(){
 
         /* ── 7 · AND TOLD WHEN THEY ARE NOT LOOKING. Beside its sibling at
            last; the two were five rows apart. */
-        setRow("mail", "Email after",
-          /* THE SENTENCE READS THE SETTING (§169's rule), AND THE SETTING
-             CHANGED WHAT IT MEANS (§262). It was "how long before they count
-             as away"; it is now "how long the platform collects before it
-             emails", because presence stopped deciding whether an email goes
-             at all — Islam: *"even if I'm at my desk if the smo don't reply
-             in 10 min the email should come ... sometimes people might be at
-             their desk but not focusing."* */
-          "Anything left unanswered for " + plural(c.away, "minute") +
-          " is emailed — once, with everything still waiting in it. A reply " +
-          "stops it on this side; opening the platform stops it on theirs. " +
-          "Off keeps every conversation inside the platform.",
+        setRow("mail", "Away email",
+          /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
+             prose while the server read a constant, so the two were one edit
+             from disagreeing — and the edit is now a box on this very row. */
+          "A reply is emailed when they have not had the platform open for " +
+          plural(c.away, "minute") + ". Off keeps every conversation inside " +
+          "the platform. A shut chat checks in every three minutes, so anything " +
+          "below four can call somebody away while they are at their desk.",
           segHtml("mail", "Off", "On", c.mail, true),
           /* ONLY WHILE IT IS ON, the shape `rep` already has under Handover
              email: a threshold for an email nobody sends is a control with
@@ -1419,8 +1415,8 @@ var CHAT = (function(){
             ? '<div class="chset-ctl chset-away">' +
                 '<input class="chset-num" type="number" data-chaway="1" ' +
                   'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
-                  'value="' + c.away + '" aria-label="Minutes unanswered before an email is sent">' +
-                '<span class="chset-unit">' + plural(c.away, "minute") + '</span>' +
+                  'value="' + c.away + '" aria-label="Minutes away before a reply is emailed">' +
+                '<span class="chset-unit">' + plural(c.away, "minute") + ' away</span>' +
               '</div>'
             : "")) +
 
@@ -1636,41 +1632,42 @@ var CHAT = (function(){
     /* FIRST NAME THROUGH THE SHARED RULE (§135, §181), never split(" ")[0] —
        "Abd El Moniem" is one first name, and this register holds it. */
     var name = firstNameOf(d.person, d.name) || "They";
-    /* WITH THE CHAT OFF NOBODY CAN OPEN AN ANSWER, so what their presence
-       would have decided does not arise — saying "Yara is away" here would be
-       true and beside the point. */
+    /* THE FIFTH STATE, AND IT COMES FIRST. With the chat off nobody can open
+       an answer, so what somebody's presence would have decided does not
+       arise — saying "Yara is away" here would be true and beside the point. */
     if (!chatCfg().on) {
       return '<div class="chpres none">' + ICON_CLOCK +
         " The chat is off, so nobody would see a reply. Turn it back on in Settings.</div>";
     }
+    if (d.here) {
+      return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
+        " has the platform open — they will see this straight away, so no email will be sent.</div>";
+    }
     if (!d.address) {
       return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
-        " has no address on the register, so this waits in the platform for them.</div>";
+        " is away and has no address on the register, so this waits in the platform for them.</div>";
     }
     if (!d.mail) {
       return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
-        " will see this in the platform — emailing is turned off here.</div>";
+        " is away, and no mail is configured on this deployment — this waits in the platform.</div>";
     }
-    /* ── IT SAYS WHAT HAPPENS NEXT, NOT WHETHER AN EMAIL GOES (§262) ──
-       Presence no longer decides that. A reply starts their collection, and
-       when the time is up it is emailed unless they have come back — so
-       "they have the platform open" can no longer be allowed to read as "no
-       email", which is exactly what it used to mean (§124: a status word is a
-       claim, and this one would be claiming something that stopped being
-       true).
+    /* THE SIXTH STATE (§261). They are away, there is an address and mail is
+       on — and an email about this conversation has already gone out and has
+       not been answered by them opening the platform, so this reply adds
+       nothing a second email would carry. Said here rather than discovered
+       afterwards: the server applies this same rule when Send lands, and a
+       reply that quietly did not chase reads exactly like one that did.
 
-       THE NUMBER IS THE TENANT'S OWN SETTING, read from the same place the
-       server reads it. */
-    var mins = plural(chatCfg().away, "minute");
-    if (d.here) {
-      return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
-        " has the platform open, so they should see this now — and if they have not " +
-        "come back to it within " + mins + " it is emailed to " + esc2(d.address) + ".</div>";
+       ASKED OF THE SHARED RULE, never re-derived from the timestamp — the
+       whole point of the line is that it says what the server will do. */
+    if (!SMPRules.chatChaseDue(d.chasedThemAt, Date.now(), chatCfg().quiet)) {
+      return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
+        " is away and was already emailed about this conversation — this reply waits " +
+        "in the platform rather than sending a second email.</div>";
     }
     return '<div class="chpres away">' + ICON_CLOCK + " " + esc2(name) + " was last here " +
       esc2(d.hereAt ? ago(d.hereAt) : "a while ago") +
-      " — unless they open the platform, this goes to " + esc2(d.address) +
-      " in " + mins + ".</div>";
+      " — this will also go to " + esc2(d.address) + ".</div>";
   }
 
   /* ONE GROWER FOR BOTH COMPOSERS (§188, §53.5). The corner's was written
@@ -2003,15 +2000,9 @@ var CHAT = (function(){
       box.new = false; box.newWho = "";
       box.person = who;
       box.note = { text:
-        /* WHAT WILL HAPPEN, BECAUSE NOTHING HAS HAPPENED YET (§262). The
-           email is no longer sent by this request — it is collected and goes
-           when the time is up — so "emailed to …" would be a claim about
-           something that has not occurred (§124). The two states that are
-           still finished facts (no address, emailing off) say so as before. */
-        j && j.mailed && j.mailed.pending
-          ? "Sent. If they have not opened the platform in " + plural(j.mailed.mins, "minute") +
-            ", it is emailed to " + j.mailed.to + "."
-        : j && j.mailed && j.mailed.why ? "Sent. No email will go out \u2014 " + j.mailed.why + "."
+        j && j.here ? "Sent. They are on the platform and will see it now."
+        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
+        : j && j.mailed && j.mailed.why ? "Sent. No email went out \u2014 " + j.mailed.why + "."
         : "Sent." };
       if (typeof window !== "undefined" && typeof window.OVQUEUE !== "undefined")
         window.OVQUEUE = null;
@@ -2092,15 +2083,9 @@ var CHAT = (function(){
          two loads below redraw this pane, and a sentence that only exists in
          the DOM is a sentence the refresh destroys. */
       box.note = { text:
-        /* WHAT WILL HAPPEN, BECAUSE NOTHING HAS HAPPENED YET (§262). The
-           email is no longer sent by this request — it is collected and goes
-           when the time is up — so "emailed to …" would be a claim about
-           something that has not occurred (§124). The two states that are
-           still finished facts (no address, emailing off) say so as before. */
-        j && j.mailed && j.mailed.pending
-          ? "Sent. If they have not opened the platform in " + plural(j.mailed.mins, "minute") +
-            ", it is emailed to " + j.mailed.to + "."
-        : j && j.mailed && j.mailed.why ? "Sent. No email will go out \u2014 " + j.mailed.why + "."
+        j && j.here ? "Sent. They are on the platform and will see it now."
+        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
+        : j && j.mailed && j.mailed.why ? "Sent. No email went out — " + j.mailed.why + "."
         : "Sent." };
       /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§166). The Setup rail counts
          `OVQUEUE.waiting`, asked ONCE per visit because a summary is read and

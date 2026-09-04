@@ -29892,3 +29892,129 @@ who has not read this.
 
 **AND THE ROW WAS NEVER BUILT**, which is rule 1c paying for itself: the whole
 cost of finding this out was a mockup.
+
+---
+
+## §262 — THE PLATFORM COLLECTS FOR TEN MINUTES, THEN SENDS ONE EMAIL (2026-09-03)
+
+§261 stopped the flood by never chasing the same conversation twice. Islam
+then asked for the thing §261 could not do, and asked it in the shape of a
+question: *"I'm thinking that if the smo is away he can get a collective email
+after 10min with the pending messages, and that's a time we can adjust — and
+the user gets a collective email after 10 min of being away when the smo
+replied. What do you think?"*
+
+**WHAT WAS PUT TO HIM FIRST WAS THE OBSTACLE, NOT AN ESTIMATE.** §261's own
+argument was that there is no scheduler, so nothing can hold five messages
+back and send one summary. That is still true of a TIMER and it is not true of
+the platform: **every signed-in browser checks in at least every three
+minutes** (§98's idle beat), and a request is all a send needs. Three ways to
+get a heartbeat were costed — the platform's own traffic, a paid Vercel cron,
+an outside pinger — and **he took the traffic**, with its one cost stated: with
+literally nobody using the platform the email waits for the next sign of life,
+so **ten minutes is a floor and not a promise**.
+
+**THEN HE OVERRULED THE PART I HAD PROPOSED.** My shape suppressed the email
+for somebody with the platform open; he refused it: *"even if I'm at my desk if
+the smo don't reply in 10 min the email should come, and same for them —
+sometimes people might be at their desk but not focusing, or they closed the
+notification."* **PRESENCE NOW DECIDES NOTHING ABOUT EMAIL**, which is the
+decision this whole section turns on, and it settles what stops the collection
+instead: **a reply** on the office's side, and **coming back to the platform**
+on theirs, because a reply needs reading rather than answering. Asked which of
+three he wanted on his own side, he took the strictest — **only replying stops
+it** — knowing the cost, that an email can arrive about a conversation he is
+reading at that moment.
+
+**AND THAT RETIRED THE AWAY THRESHOLD, SO THE SAME KEY CHANGED WHAT IT MEANS**
+(his own move, and it closes §261.1): *"I believe the 3 min is not relevant now
+and we can adjust this setting to be the one which identifies the time away
+before sending the email."* One box, one number, relabelled **Email after**,
+shipping at **10**. The KEY does not move (§30.2) — a tenant that typed a
+number keeps it — and what changes is the shipped default, because 3 was a
+presence threshold and 10 is a collecting time. **The word "here" keeps its own
+short window** (`CHAT_HERE_MIN`), or the screen would call somebody present
+nine minutes after they shut the tab; and that had to be applied on **all three**
+surfaces that compute it, because the first build fixed the reply path and left
+the `thread` action reading the setting — found by `test-chat.js` going red,
+not by reading (§53.5, the same drift twice in one file).
+
+**ONE EMAIL FOR EVERY CONVERSATION WAITING, NOT ONE EACH** — his correction to
+what §261 built: *"the email is sent with all the pending conversations, not 1
+for each person."* So the unit of the office's email is the QUEUE. **The
+trigger and the contents are different questions**: it goes when ANYTHING has
+waited long enough, and then carries every conversation with something
+unanswered, including one that arrived a minute ago — deliberately, because
+that newcomer is stamped with the email that carried it and will not trigger
+one of its own ten minutes later. Fewer emails, not more. **The other
+direction stays one per person by construction**: a colleague only ever sees
+their own conversation.
+
+**WHAT COUNTS AS UNSAID IS "SINCE THE LATER OF TWO THINGS"** — the last email
+we sent them and the last time they had the platform open. That is what makes
+somebody who looked in half-way through get the replies that arrived AFTER
+their visit rather than all of them or none, and it is why `chased_them_at` is
+NOT cleared when they poll: clearing it would make messages they were already
+sent eligible all over again.
+
+**ONE SWEEP AT A TIME, ACROSS EVERY INSTANCE**, on `pg_try_advisory_xact_lock`
+rather than a claim-then-send: claiming first would mark conversations emailed
+before the provider had accepted anything, and a stamp with no email behind it
+is silence bought for nothing (§188, §261). A second instance arriving mid-sweep
+**skips rather than queues**, because a queue of sweeps is a queue of duplicate
+emails. Throttled to once a minute per warm instance, so the ordinary poll pays
+a comparison against a number in memory (§98.1).
+
+**THE MAIL BUILDER MOVED, IT WAS NOT COPIED.** `src/mail.js` was a browser file
+because the office's composer built the html as it pressed Send; a collection
+goes out with no composer attached, so the server has to build the same
+message. It is **`lib/mail-html.js`** now — inlined by build.py exactly as the
+rules are, required by `api/chat.js` — and the tenant's branding, the kicker
+and the footer are the same ones the preview shows (§53.5, §42 applied to an
+email). **The default footer moved with it**, out of `config-data.js`, so the
+sentence cannot be improved in one place and go stale in the other. And
+`lib/mail-html.js` now reaches the shared rules **on either side**, or a
+server-composed greeting would silently vanish behind a guard that returns "".
+
+**THE EMAILS WERE DRAWN BEFORE THEY WERE BUILT** (rule 1c;
+`design-mockups/chat-collect-email/`), out of the platform's own builder rather
+than described — the office's plain digest with each person, where they sit and
+how long they have waited, and the colleague's collected replies in the
+tenant's branding. Three things the drawing settled: **a screenshot is named,
+not attached**; **the subject carries the count**; and the button's address is
+taken from the request that drove the sweep, with **no button at all** when
+nothing says where the platform is (§176).
+
+**PROVED ABLE TO FAIL, ONE FALSIFICATION PER DECISION** — the collection
+removed: **13 red**; the digest narrowed to one conversation: **4 red**; the
+provider's refusal swallowed and stamped anyway: **2 red**. That last one took
+two attempts and the failures are worth recording: with the stamp merely
+un-guarded the check stayed green, because a throwing send never reaches the
+stamp AND the transaction rolls it back — **the `if (id)` guard is defence
+behind two other things**, and the property is carried by the throw. Only the
+plausible regression (catch the refusal, carry on) breaks it, and that is what
+the check now proves it catches.
+
+**AND THE CHECK'S OWN FIRST RUN WAS WRONG IN THE HARNESS, TWICE.** It aged the
+MESSAGES and left the watermark where it was, which is not "ten minutes later"
+but a different history — the messages landed BEFORE the mark that says what
+has been emailed, and a working build reported as silent. And each trial
+inherited the last one's unemailed replies, so an email arrived in the middle
+of a scenario that had not asked for one. Time now moves the marks with the
+messages, and every scenario starts clean.
+
+**TWO CHECKS HELD THE OLD MEANING AND WERE REWRITTEN, NOT DELETED** (§218):
+`test-chat.js`'s away-threshold section (which now asserts that a longer
+collecting time does NOT make somebody present) and its clamp assertions, which
+read `hereMinutes` — a field the client reads nowhere and which now carries a
+different fact, so the clamp is asserted where the setting actually travels.
+**And `test-mail-contrast.js` was reading `src/mail.js` by path** — §51.11, and
+loudly this time rather than quietly, which is the only reason it was noticed
+the same afternoon.
+
+**RECORDED, NOT DONE**: with nobody signed in anywhere, an overnight question
+waits for the first sign of life in the morning — the paid scheduler is what
+buys exact timing and was refused for now; the office's digest carries no
+per-conversation link, only one button to the Inbox; and two people in the
+office replying at the same moment still both start collections, because the
+memory is per conversation and not per sender.

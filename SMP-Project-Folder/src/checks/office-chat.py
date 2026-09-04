@@ -1632,18 +1632,19 @@ with sync_playwright() as p:
         ck("...and so does opening a conversation",
            pg.query_selector("#chnewwho") is None)
 
-    # ── 20 · ONE CHASE PER CONVERSATION, SAID BEFORE SEND (§261) ─────────
-    # Islam: "when I don't reply it send an email for each message ... it needs
-    # to compile some messages rather than an email for each message." The
-    # server half is scripts/test-chat-chase.js, against a real Postgres; what
-    # is measured HERE is the one thing the server cannot say — that the office
-    # is shown the rule before pressing Send, rather than discovering it
-    # afterwards from a reply that quietly did not chase (§97.5, §124).
+    # ── 20 · WHAT HAPPENS NEXT, SAID BEFORE SEND (§262) ─────────────────
+    # Islam: "even if I'm at my desk if the smo don't reply in 10 min the email
+    # should come ... sometimes people might be at their desk but not focusing."
+    # So presence stopped deciding whether an email goes — and the line above
+    # the reply box had said, for as long as it existed, "they have the platform
+    # open, so no email will be sent". A sentence that was true and stopped
+    # being true is worse than no sentence (§124), so what is asserted here is
+    # that BOTH states now name the email that is coming.
     #
-    # BOTH ENDS, OR NEITHER MEANS ANYTHING (§113.8). A build that always says
-    # "this will also go to …" and a build that always says "already emailed"
-    # each pass one of these two and fail the other; the pair is the assertion.
-    print("\n20 · one chase per conversation")
+    # THE SERVER HALF IS scripts/test-chat-chase.js, against a real Postgres.
+    # What is measured HERE is the one thing the server cannot say: that the
+    # office is told, in the words of its own setting, before it presses Send.
+    print("\n20 · what happens next, said before Send")
 
     def presence(over):
         THREAD.clear(); THREAD.update(over)
@@ -1657,32 +1658,39 @@ with sync_playwright() as p:
         el = pg.query_selector(".chpres")
         return (el.inner_text() if el else "")
 
-    away = {"address": "hend@example.com", "mail": True, "here": False,
-            "hereAt": "2026-08-25T07:00:00Z", "chasedThemAt": None}
-    said = presence(away)
-    ck("away and not yet chased — the office is told it will email",
-       "hend@example.com" in said and "already emailed" not in said, said)
+    reach = {"address": "hend@example.com", "mail": True,
+             "hereAt": "2026-08-25T07:00:00Z"}
 
-    # CHASED A MOMENT AGO. The time is made here rather than taken from the
-    # demo, because no conversation in the worked example has ever been chased
-    # — the state this exists for cannot occur by walking the product (§94.2).
-    import datetime
-    recent = (datetime.datetime.now(datetime.timezone.utc)
-              - datetime.timedelta(minutes=5)).isoformat()
-    said = presence(dict(away, chasedThemAt=recent))
-    ck("...and once chased, that a second email is not sent",
-       "already emailed" in said, said)
-    ck("...without claiming the reply itself goes nowhere",
-       "waits in the platform" in said, said)
+    said = presence(dict(reach, here=False))
+    ck("away — it names the address the email goes to",
+       "hend@example.com" in said, said)
+    ck("...and says the collection has to run out first",
+       "unless they open the platform" in said, said)
 
-    # AND THE QUIET PERIOD IS THE SETTING, NOT A NUMBER IN THE PAGE: the same
-    # chase, long enough ago, chases again. Asked of the shared rule by the
-    # page — so this fails on a build that hard-codes an hour anywhere.
-    old = (datetime.datetime.now(datetime.timezone.utc)
-           - datetime.timedelta(hours=3)).isoformat()
-    said = presence(dict(away, chasedThemAt=old))
-    ck("...and a chase old enough to have expired emails again",
-       "hend@example.com" in said and "already emailed" not in said, said)
+    # THE STATE HIS OWN RULE TURNS ON ITS HEAD. A build that kept the old
+    # sentence passes every assertion above and fails this one, which is the
+    # whole point of measuring both (§113.8).
+    said = presence(dict(reach, here=True))
+    ck("here — it no longer promises that no email will be sent",
+       "no email" not in said, said)
+    ck("...it says they should see it now",
+       "should see this now" in said, said)
+    ck("...and that it is emailed anyway if they do not come back",
+       "hend@example.com" in said and "come back" in said, said)
+
+    # THE NUMBER IS THE TENANT'S SETTING, read from the same place the server
+    # reads it — never a literal in the page (§169's own lesson: a sentence
+    # that says "three minutes" while the rule says something else is one edit
+    # from lying).
+    mins = pg.evaluate("() => SMPRules.chatCfg(GROUP.chat).away")
+    ck("...in the words of the setting (%s minutes)" % mins,
+       (str(mins) + " minute") in said, said)
+
+    # AND THE TWO STATES THAT ARE STILL FINISHED FACTS say so as before.
+    said = presence(dict(reach, here=False, address=None))
+    ck("no address — it waits in the platform", "no address" in said, said)
+    said = presence(dict(reach, here=False, mail=False))
+    ck("emailing off — it says that instead", "turned off" in said, said)
     THREAD.clear()
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────

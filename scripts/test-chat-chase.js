@@ -1,26 +1,26 @@
-/* ── ONE CHASE PER CONVERSATION, NOT ONE PER MESSAGE (§261) ───────────────
-   Islam: "the messages emailed to me from the platform when someone sends to
-   me — when I don't reply it sends an email for each message. It needs to
-   compile some messages rather than an email for each message."
+/* ── THE TEN-MINUTE COLLECTION (§262) ─────────────────────────────────────
+   Islam, having settled §261's per-conversation chase: *"if the smo don't
+   reply in 10 min the email should come and same for them ... sometimes
+   people might be at their desk but not focusing"*, and *"the email is sent
+   with all the pending conversations, not 1 for each person."*
 
-   BOTH HALVES OF THE SAME FAULT ARE HERE, because they are one feature seen
-   from two ends: the office chased once per message from a person, and a
-   person chased once per reply from the office. What is asserted is the pair —
-   a build that fixed one half and not the other passes half of this file and
-   fails the rest (§53.5).
+   SO WHAT IS ASSERTED HERE IS FOUR THINGS AT ONCE, and each of them fails on
+   its own if the build gets one wrong: nothing goes out before the time is
+   up; ONE email then carries every waiting conversation; only a reply stops
+   it on the office's side and only coming back stops it on theirs; and
+   presence suppresses nothing.
 
-   DRIVEN THROUGH THE REAL HANDLER with a mock req/res against a real Postgres,
-   in the shape scripts/test-safety-peek.js and test-concurrent-saves.js use —
-   and with a STAND-IN MAIL SERVICE in front of it (§142.6, §100.3), because
-   what actually left the platform is the whole of what this claims and the
-   only way to know it is to read it off the wire. `SMP_RESEND_ENDPOINT` is a
-   deployment variable, not a branch in lib/mailer.js: a test double behind an
-   `if` would be a second code path shipping to production.
+   THE SWEEP IS NOT A TIMER AND MUST NOT BE TESTED AS ONE. There is no
+   scheduler (§97.5) — the send rides somebody's ordinary request — so every
+   trial here MAKES a request and then reads what left. Time is moved in the
+   database rather than waited for: a check that slept through ten minutes is
+   a check nobody runs.
 
-   TIME IS MOVED IN THE DATABASE, never waited for. The quiet period is an hour
-   by default and a check that slept through one would never be run. What is
-   asserted is that a chase that is DUE goes and one that is not does not — the
-   clock itself belongs to `chatChaseDue`, which is asserted directly below.
+   DRIVEN THROUGH THE REAL HANDLER with a mock req/res against a real
+   Postgres, in the shape scripts/test-safety-peek.js uses, and with a
+   STAND-IN MAIL SERVICE in front of it (§142.6, §100.3) — `SMP_RESEND_ENDPOINT`
+   is a deployment variable, not a branch in lib/mailer.js — so what actually
+   left the platform is read off the wire rather than inferred.
 
    Run: DATABASE_URL=… node scripts/test-chat-chase.js
    ──────────────────────────────────────────────────────────────────────── */
@@ -72,7 +72,15 @@ const srv = http.createServer(function (req, res) {
      simply hangs for ever. A stand-in that models less than the thing it
      stands in for is not a stand-in (§231.5, §100.3). */
   const { Readable } = require("stream");
+  /* THE THROTTLE IS PER WARM INSTANCE (§98.1) and this file is one process,
+     so without this every trial after the first would find the sweep asleep
+     and report a working build as silent. Reset rather than removed: what is
+     under test is the sweep, not the interval in front of it. */
+  function wakeSweep() {
+    try { handler.__resetSweep && handler.__resetSweep(); } catch (e) {}
+  }
   async function call(cookie, body) {
+    wakeSweep();
     const res = mockRes();
     const req = Readable.from([JSON.stringify(body)]);
     req.method = "POST"; req.url = "/api/chat";
@@ -127,108 +135,185 @@ const srv = http.createServer(function (req, res) {
       "UPDATE chat_threads SET " + col + " = now() - ($1 || ' minutes')::interval " +
       " WHERE person_key = 'asker'", [String(mins)]);
 
-    console.log("\n1 · the office is chased once, not once per message");
-    for (const t of ["First one", "Second one", "Third one", "Fourth one", "Fifth one"]) {
-      const r = await say(t);
-      if (r.status !== 200) check("say was accepted (" + t + ")", false, r.status + " " + JSON.stringify(r.j));
-    }
-    check("five messages, one email", toOffice().length === 1, toOffice().length + " emails");
-    check("...and it names the person", /Asking Person/.test((toOffice()[0] || {}).subject || ""),
-          (toOffice()[0] || {}).subject);
-    check("...and the conversation remembers being chased", !!(await chased()).chased_at);
+    /* THE COLLECTING TIME, SHORTENED SO THE TRIALS CAN MOVE TIME RATHER THAN
+       WAIT FOR IT. The rule is asserted at the boundary either side of this
+       number, never at ten minutes specifically — a check pinned to the
+       shipped default fails the day somebody sets a different one. */
+    const MINS = 10;
+    /* TIME PASSING MOVES EVERYTHING TOGETHER — the messages AND the marks on
+       the conversation. Shifting only the messages backwards puts them BEFORE
+       the watermark that says what has been emailed, which is not "ten minutes
+       later", it is a different history: the first draft of this file did
+       exactly that and reported a working build as silent (§94.5's own lesson,
+       from the harness side). */
+    const passes = async (mins, key) => {
+      const k = key || "asker";
+      await c.query("UPDATE chat_messages SET at = at - ($1 || ' minutes')::interval " +
+                    " WHERE person_key = $2", [String(mins), k]);
+      await c.query("UPDATE chat_threads SET " +
+                    "  chased_at      = chased_at      - ($1 || ' minutes')::interval, " +
+                    "  chased_them_at = chased_them_at - ($1 || ' minutes')::interval, " +
+                    "  here_at        = here_at        - ($1 || ' minutes')::interval " +
+                    " WHERE person_key = $2", [String(mins), k]);
+    };
+    /* A CLEAN CONVERSATION, because each trial below is a different scenario
+       and a leftover unemailed reply from the last one sends an email in the
+       middle of the next (it did, and it read as a product fault). */
+    const reset = async () => {
+      await c.query("DELETE FROM chat_messages WHERE person_key = 'asker'");
+      await c.query("UPDATE chat_threads SET chased_at = NULL, chased_them_at = NULL, " +
+                    "  here_at = NULL, waiting = false WHERE person_key = 'asker'");
+      MAIL.length = 0;
+    };
 
-    console.log("\n2 · after a long silence it chases again, and COMPILES");
-    await ageChase("chased_at", 61);
-    await say("Sixth one");
-    const second = toOffice()[1];
-    check("a second email went", toOffice().length === 2, toOffice().length + " emails");
-    check("...its subject counts all six", /6 messages waiting/.test((second || {}).subject || ""),
-          (second || {}).subject);
-    check("...and it carries every unanswered message, not just the newest",
-          ["First one", "Second one", "Third one", "Fourth one", "Fifth one", "Sixth one"]
-            .every(w => (second || {}).html && second.html.indexOf(w) >= 0));
-    check("...and points at the page by its own name",
-          /Platform Inbox/.test((second || {}).html || ""));
+    console.log("\n1 · nothing goes out while the collection is still filling");
+    for (const t of ["First one", "Second one", "Third one"]) await say(t);
+    await call(her, { action: "mine" });   /* a request, so the sweep has run */
+    check("three messages, no email yet", toOffice().length === 0, toOffice().length + " emails");
+    check("...and nothing was marked as sent", !(await chased()).chased_at);
 
-    console.log("\n3 · replying ends the spell, and the next message chases at once");
-    /* She is HERE for this one, so the reply's own away chase does not fire and
-       what is counted below is unambiguous. */
+    console.log("\n2 · when the time is up, ONE email carrying all of it");
+    await passes(MINS + 1);
+    await call(her, { action: "mine" });
+    check("one email", toOffice().length === 1, toOffice().length + " emails");
+    const first = toOffice()[0] || {};
+    check("...naming the person", /Asking Person/.test(first.subject || ""), first.subject);
+    check("...and carrying every message, not just the newest",
+          ["First one", "Second one", "Third one"].every(w => (first.html || "").indexOf(w) >= 0));
+    check("...and the conversation is marked as said", !!(await chased()).chased_at);
+
+    console.log("\n3 · and it does not go again on its own");
+    await passes(MINS + 1);
+    await call(her, { action: "mine" });
+    check("no second email without something new", toOffice().length === 1,
+          toOffice().length + " emails");
+
+    console.log("\n4 · a new message starts a fresh collection");
+    await say("Fourth one, next morning");
+    await call(her, { action: "mine" });
+    check("still nothing while it fills", toOffice().length === 1, toOffice().length + " emails");
+    await passes(MINS + 1);
+    await call(her, { action: "mine" });
+    check("then one more", toOffice().length === 2, toOffice().length + " emails");
+    /* READ THROUGH A DEFAULT, because a missing email must be REPORTED and
+       not thrown on — a probe that dies prints fewer failures than there are
+       and `grep -c FAIL` reads the wrong number (§215). */
+    const mail = (i) => toOffice()[i] || {};
+    check("...carrying the whole waiting spell, the earlier ones included",
+          ["First one", "Fourth one, next morning"].every(w => (mail(1).html || "").indexOf(w) >= 0));
+
+    console.log("\n5 · being at your desk suppresses nothing (§262, his own case)");
+    await reset();
+    await say("Fifth one, while the office sits there");
+    await passes(MINS + 1);
+    /* The office is HERE, right now — the state Islam named: at the desk, not
+       focusing. Nothing about it may hold the email back. */
     await c.query("UPDATE chat_threads SET here_at = now() WHERE person_key = 'asker'");
+    await call(her, { action: "mine" });
+    check("the email goes anyway", toOffice().length === 1, toOffice().length + " emails");
+
+    console.log("\n6 · ONE email for every conversation waiting, not one each");
+    /* A SECOND PERSON, because "all the pending conversations" cannot be
+       measured on a tenant with one (§94.2: the state has to be MADE). */
+    await c.query(
+      "INSERT INTO people (key, idx, name, extra) VALUES " +
+      " ('hend2', 902, 'Second Person', '{\"email\":\"hend2@example.com\"}'::jsonb) " +
+      "ON CONFLICT (key) DO UPDATE SET extra = EXCLUDED.extra, name = EXCLUDED.name");
+    const him = "smp_session=" + await auth.createSession(c, "hend2");
+    await reset();
+    await say("From the first person");
+    await call(him, { action: "say", body: "From the second person" });
+    await passes(MINS + 1); await passes(MINS + 1, "hend2");
+    await call(her, { action: "mine" });
+    const digest = toOffice()[0] || {};
+    check("one email, not two", toOffice().length === 1, toOffice().length + " emails");
+    check("...and it names both conversations",
+          /Asking Person/.test(digest.html || "") && /Second Person/.test(digest.html || ""),
+          (digest.html || "").slice(0, 80));
+    check("...with the count in the subject", /2 conversations waiting/.test(digest.subject || ""),
+          digest.subject);
+    check("...and both are marked, so neither triggers its own email later",
+          (await c.query("SELECT count(*)::int AS n FROM chat_threads WHERE chased_at IS NOT NULL"))
+            .rows[0].n === 2);
+
+    console.log("\n7 · replying is what stops it");
+    await c.query("DELETE FROM chat_messages WHERE person_key = 'hend2'");
+    await c.query("DELETE FROM chat_threads WHERE person_key = 'hend2'");
+    await reset();
+    await say("Something they will answer");
     const rr = await reply("Here is your answer");
     check("the reply is accepted", rr.status === 200, rr.status + " " + JSON.stringify(rr.j));
-    check("...and it is not emailed to somebody sitting in the platform",
-          rr.j && rr.j.here === true && toHer().length === 0, JSON.stringify(rr.j && rr.j.mailed));
-    check("...and the office's chase is forgotten", !(await chased()).chased_at);
-    await say("A new question, next morning");
-    check("so the next message chases straight away", toOffice().length === 3, toOffice().length + " emails");
-    check("...and it counts only this spell", /A question is waiting/.test((toOffice()[2] || {}).subject || ""),
-          (toOffice()[2] || {}).subject);
-
-    console.log("\n4 · and the same rule going the other way (§261, the away chase)");
-    await c.query("UPDATE chat_threads SET here_at = now() - interval '2 hours' WHERE person_key = 'asker'");
-    const r1 = await reply("Reply one");
-    const r2 = await reply("Reply two");
-    const r3 = await reply("Reply three");
-    check("three replies to somebody away, one email", toHer().length === 1, toHer().length + " emails");
-    check("...the first says it went", r1.j && r1.j.mailed && r1.j.mailed.sent === true,
-          JSON.stringify(r1.j && r1.j.mailed));
-    check("...and the others SAY why they did not, rather than going quiet",
-          [r2, r3].every(r => r.j && r.j.mailed && r.j.mailed.sent === false &&
-                              /already been emailed/.test(r.j.mailed.why || "")),
-          JSON.stringify(r2.j && r2.j.mailed));
-    check("...and the message tag is only on the reply that left (§188)",
-          (await c.query("SELECT count(*)::int AS n FROM chat_messages " +
-                         " WHERE person_key = 'asker' AND emailed_to IS NOT NULL")).rows[0].n === 1);
-
-    console.log("\n5 · the office is shown the same rule before it presses Send (§97.5)");
-    const th = await thread();
-    check("the thread carries when they were last chased",
-          th.j && th.j.chasedThemAt != null, JSON.stringify(th.j && th.j.chasedThemAt));
-    check("...and the shared rule agrees with the server's own answer",
-          Rules.chatChaseDue(th.j.chasedThemAt, Date.now(), 60) === false);
-
-    console.log("\n6 · coming back to the platform ends the away spell");
+    await passes(MINS + 1);
     await call(her, { action: "mine" });
-    check("her own poll clears it", !(await chased()).chased_them_at);
-    await c.query("UPDATE chat_threads SET here_at = now() - interval '2 hours' WHERE person_key = 'asker'");
-    await reply("Reply four, next day");
-    check("so leaving again is chased afresh", toHer().length === 2, toHer().length + " emails");
+    check("no email about an answered conversation", toOffice().length === 0,
+          toOffice().length + " emails");
 
-    console.log("\n7 · a send that failed buys no silence");
-    await c.query("UPDATE chat_threads SET chased_at = NULL WHERE person_key = 'asker'");
-    const before = toOffice().length;
-    MAIL.refuse = true;
+    console.log("\n8 · and the same rule going the other way");
+    /* Their side: the office's replies collect, and COMING BACK is what stops
+       them — a reply needs reading, not answering (Islam's own distinction). */
+    const mailsToHer = () => toHer().length;
+    await reset();
+    await reply("Reply one"); await reply("Reply two");
+    await call(her, { action: "mine" });   /* NB: this also marks them present */
+    check("nothing while their collection fills", mailsToHer() === 0, mailsToHer() + " emails");
+    /* Their poll just said they are here, so those two replies are seen. The
+       next one is what they do not come back to. */
+    await reply("Reply three, after they left");
+    await passes(MINS + 1);
+    await call(smo, { action: "queue" });  /* somebody else's request drives it */
+    check("one email once the time is up", mailsToHer() === 1, mailsToHer() + " emails");
+    const hers = toHer()[0] || {};
+    check("...carrying only what they have not seen", /Reply three/.test(hers.html || "") &&
+          !/Reply one/.test(hers.html || ""), (hers.html || "").length + " bytes");
+    check("...in the tenant's branding, not the plain office note",
+          /Raya Trade/.test(hers.html || "") && /<table/.test(hers.html || ""));
+    check("...and the messages it carried are tagged (§188)",
+          (await c.query("SELECT count(*)::int AS n FROM chat_messages " +
+                         " WHERE person_key = 'asker' AND emailed_to IS NOT NULL")).rows[0].n >= 1);
+
+    console.log("\n9 · coming back stops theirs");
+    await reset();
+    await reply("Reply four");
+    await passes(MINS + 1);
+    await call(her, { action: "mine" });   /* they came back */
+    const n9 = mailsToHer();
+    await call(smo, { action: "queue" });
+    check("a reply they came back for is not emailed", mailsToHer() === n9,
+          mailsToHer() + " emails");
+
+    console.log("\n10 · a send that failed buys no silence");
+    await reset();
     await say("A question nobody will be told about");
+    await passes(MINS + 1);
+    MAIL.refuse = true;
+    await call(her, { action: "mine" });
     MAIL.refuse = false;
-    check("nothing went", toOffice().length === before, toOffice().length + " emails");
-    check("...and nothing was remembered", !(await chased()).chased_at);
-    await say("And another");
-    check("so the next message chases rather than waiting out an hour",
-          toOffice().length === before + 1, toOffice().length + " emails");
+    check("nothing was remembered", !(await chased()).chased_at);
+    await call(her, { action: "mine" });
+    check("so the next request sends it", toOffice().length === 1,
+          toOffice().length + " emails");
 
-    console.log("\n8 · the rule itself, at both ends (§94.5)");
-    check("never chased → due", Rules.chatChaseDue(null, Date.now(), 60) === true);
-    check("chased a minute ago → not due",
-          Rules.chatChaseDue(Date.now() - 60000, Date.now(), 60) === false);
-    check("chased two hours ago → due",
-          Rules.chatChaseDue(Date.now() - 7200000, Date.now(), 60) === true);
+    console.log("\n11 · the rule itself, at both ends (§94.5)");
+    check("nothing waiting is not 'not yet due', it is nothing to send",
+          Rules.chatCollectDue(null, Date.now(), 10) === false);
+    check("two minutes old → not due",
+          Rules.chatCollectDue(Date.now() - 120000, Date.now(), 10) === false);
+    check("eleven minutes old → due",
+          Rules.chatCollectDue(Date.now() - 660000, Date.now(), 10) === true);
     check("a time that will not read → due, never silent",
-          Rules.chatChaseDue("not a time", Date.now(), 60) === true);
-    check("...and the quiet period is the setting, not a number written twice",
-          Rules.chatChaseDue(Date.now() - 10 * 60000, Date.now(), 5) === true &&
-          Rules.chatChaseDue(Date.now() - 10 * 60000, Date.now(), 60) === false);
-
-    console.log("\n9 · and the flood is what it was before (§94.2, the other end)");
-    /* WITHOUT THIS THE WHOLE FILE PASSES ON A BUILD THAT SENDS NOTHING AT ALL.
-       Every assertion above is satisfied by a mailer that never fires, so one
-       of them has to prove an email still goes out for the right reason. */
-    check("a first message on a fresh spell still emails somebody",
-          toOffice().length >= 4 && /Asking Person/.test(toOffice()[toOffice().length - 1].subject || ""));
+          Rules.chatCollectDue("not a time", Date.now(), 10) === true);
+    check("...and the number is the tenant's setting, not one written twice",
+          Rules.chatCollectDue(Date.now() - 300000, Date.now(), 3) === true &&
+          Rules.chatCollectDue(Date.now() - 300000, Date.now(), 10) === false);
+    check("the setting ships at ten minutes", Rules.chatCfg(null).away === 10);
+    check("...and a tenant that typed one keeps it", Rules.chatCfg({ away: 25 }).away === 25);
 
   } finally {
-    await c.query("DELETE FROM chat_messages WHERE person_key = 'asker'").catch(() => {});
-    await c.query("DELETE FROM chat_threads WHERE person_key = 'asker'").catch(() => {});
-    await c.query("DELETE FROM people WHERE key = 'asker'").catch(() => {});
+    for (const k of ["asker", "hend2"]) {
+      await c.query("DELETE FROM chat_messages WHERE person_key = $1", [k]).catch(() => {});
+      await c.query("DELETE FROM chat_threads WHERE person_key = $1", [k]).catch(() => {});
+      await c.query("DELETE FROM people WHERE key = $1", [k]).catch(() => {});
+    }
     c.release();
     await pool.end();
     srv.close();

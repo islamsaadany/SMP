@@ -352,6 +352,36 @@ with sync_playwright() as pw:
     ck("the custodian still opens on the first project — nothing moved for them",
        bool(cust) and second["firstCode"] in cust, cust)
 
+    # ── 9 · THE UNIT MATCHES THE FUNCTION (§287.5) ───────────────────────
+    # Islam, of a project owner frozen on a function: "check the behavior of
+    # the units. to match." Measured on the unit's Reporting page with a
+    # pillar owner: 0 entry controls, 8 read-only cells — because the pane
+    # built its rows WITHOUT owner/pown, which canReportRow() reads, while
+    # reportItems() (the other builder, same file) has carried them since
+    # §147.7. Asserted as the two sides AGREEING, never as a count (§94.8).
+    print("-- the unit side reports too, and matches the function")
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    pg.evaluate("""()=>{ REVIEW.parked = {}; REVIEW.submitted = {}; paint(); }""")
+    pg.select_option("#asWho", "t287l"); pg.wait_for_timeout(400)
+    to_unit_reporting(pg)
+    un = pg.evaluate("""()=>({
+      boxes: document.querySelectorAll('#panel [data-rep]').length,
+      enabled: [...document.querySelectorAll('#panel [data-rep]')].filter(e=>!e.disabled).length,
+      readOnly: document.querySelectorAll('.pane .mono').length,
+      pane: (document.querySelector('.pane .pband')||{}).innerText || null })""")
+    ck("the pillar owner is given entry controls on their own pillar",
+       un["enabled"] > 0, un)
+    ck("...and none of its cells is left read-only", un["readOnly"] == 0, un)
+    # BOTH ENDS: a pillar they do NOT own still gives them nothing.
+    other = pg.evaluate("""()=>{
+      var u = UNITS["%s"], p = u.items.find(function(x){ return x.owner !== "Pillar Owner 287"; });
+      if (!p) return null;
+      RAIL[unitRailKey(u)] = p.code; paint();
+      return { code: p.code,
+               boxes: document.querySelectorAll('#panel [data-rep]').length }; }""" % UNIT)
+    ck("the pillar beside theirs still offers nothing — the reach is per row",
+       other is None or other["boxes"] == 0, other)
+
     ck("no console errors", not errs, "; ".join(errs[:3]))
     b.close()
 

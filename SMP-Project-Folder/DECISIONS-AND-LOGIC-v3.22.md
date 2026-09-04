@@ -33638,3 +33638,61 @@ obstacle. Recorded as his decision so it is not re-opened by the next reader
 who meets the same screen; the cost that made it a real question (headline
 numbers spanning projects a reader could not see) is exactly why it was worth
 declining rather than building.
+
+---
+
+## §287.5 — THE ROW CARRIES WHO IT BELONGS TO (2026-09-02)
+
+Islam, of a project owner who could not report on a supporting function:
+*"check the behavior of the units. to match."*
+
+**MEASURED ON BOTH SIDES, AND THEY DID NOT MATCH.**
+
+| state | unit · pillar owner | function · project owner |
+|---|---|---|
+| cycle open, nothing parked | **0 entry controls, 8 read-only cells** | 12 controls, all enabled |
+| a draft saved | locked | locked |
+| submitted | locked | locked |
+
+The lock behaves identically on both sides, so the thing he was looking at
+(*"reporting is closed for him"*) is §220 working as decided. **What did NOT
+match is the unpicked state**: on the pillar whose Owner names them, a pillar
+owner was given nothing at all.
+
+### The pane built its rows without the context the rule reads
+
+`canReportRow()` reads `owner`, `collaborators` and `pown` off the row it is
+handed. `reportItems()` — the builder behind *Figures I report* — has carried
+all three since §147.7, with a comment saying exactly why: *"owner travels with
+the row so canReportRow() can answer without walking back up to the pillar."*
+
+`reportPillarPane()`, which draws the unit's own **Reporting** page, was written
+beside it and never got them. So for every bounded role all three read
+`undefined`, `mayReportRow` answered false, and `entry()` fell to its read-only
+branch — **a pillar owner could enter their figures on one page of the product
+and not on the page named after the act.**
+
+§53.5 inside one side of the switch rather than across it: two builders for one
+list, and only one of them kept up. Asked of `canReportRow()` directly with the
+same row and its context on it, the answer is **true** — which is what says the
+rule was right and the caller was not.
+
+The three fields are copied from `reportItems()` verbatim rather than
+re-derived, or the two drift again the next time one of them learns something.
+
+### Proved able to fail
+
+`checks/project-done.py` §9 asserts the two sides AGREEING rather than a count
+(§94.8): the pillar owner is given controls on their own pillar, **none of its
+cells is left read-only**, and the pillar beside theirs still offers nothing —
+the reach stays per row. On the build before: **2 red**, printing
+`boxes: 0, enabled: 0, readOnly: 8`.
+
+### What this does NOT change, and it is the half he first reported
+
+A saved draft still closes the report on both sides, and a bounded role still
+holds no Reopen (§220, §287.2) — so somebody pressing **Save draft** still
+freezes every project owner under that subject until the custodian reopens it.
+That is §220's stated cost meeting a register that did not exist when §220 was
+decided, and it is a decision rather than a defect: put to him with three
+answers, and his reply was to make the two sides match first.

@@ -1879,6 +1879,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **THE ROW CARRIES WHO IT BELONGS TO (§287.5):** Islam, of a project owner who
+  could not report on a function — *"check the behavior of the units. to
+  match."* **MEASURED ON BOTH SIDES, AND THEY DID NOT MATCH**: with the cycle
+  open and nothing parked, a function's project owner had **12 enabled
+  controls** and a unit's pillar owner **0, with 8 read-only cells**, on the
+  pillar whose Owner names them. The LOCK matches on both sides (a saved draft
+  and a submission close the report identically, §220), so what he was looking
+  at there is a decision; **the unpicked state is what diverged**.
+  `canReportRow()` reads `owner`, `collaborators` and `pown` OFF THE ROW, and
+  `reportItems()` has carried all three since §147.7 with a comment saying why
+  — while `reportPillarPane()`, which draws the unit's own Reporting page, was
+  written beside it and never got them. So all three read `undefined`, the rule
+  answered false, and every cell fell to read-only: **a pillar owner could
+  enter their figures on one page of the product and not on the page named
+  after the act.** §53.5 inside one side of the switch rather than across it —
+  two builders for one list, only one kept up — and the fields are copied from
+  `reportItems()` VERBATIM rather than re-derived, or the two drift again.
+  Asserted as the two sides AGREEING, never as a count (§94.8), with the pillar
+  beside theirs still offering nothing so the reach stays per row: **2 red** on
+  the build before, printing `boxes: 0, enabled: 0, readOnly: 8`.
+  **STILL A DECISION, NOT FIXED HERE**: a saved draft freezes every bounded
+  reporter under the subject and none of them holds Reopen (§220, §287.2).
 - **THEIRS OPENS, NOT THE FIRST ONE (§287.4):** Islam — *"when the user login
   he should land on his project by default"* and *"abdel azim still can't
   edit"*. **ONE FAULT, and the measurement says so**: he lands on the function,

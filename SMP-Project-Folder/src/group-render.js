@@ -4819,11 +4819,34 @@ function renderReport(u){
     /* §233: a hidden row is not asked, so it is not drawn here — the same
        skip reportItems() makes, or the pane would collect a figure the
        submit gate no longer waits on. */
+    /* ── THE ROW CARRIES WHO IT BELONGS TO (§287.5) ──────────────────
+       Islam, of a project owner frozen on a function: *"check the behavior
+       of the units. to match."* Measured on the unit's own Reporting page
+       with a pillar owner: **0 entry controls and 8 read-only cells**, on
+       the pillar whose Owner names them — while `canReportRow()` answers
+       TRUE the moment it is handed the same row with its context on it.
+
+       THIS LIST WAS BUILT WITHOUT ANY. `reportItems()` — the other builder,
+       which feeds *Figures I report* — has carried `owner`, `collaborators`
+       and `pown` since §147.7, with a comment saying why ("owner travels
+       with the row so canReportRow() can answer without walking back up to
+       the pillar"). This one was written beside it and never got them, so
+       every bounded role read `undefined` for all three and fell out
+       read-only: a pillar owner could enter their figures on one page of the
+       product and not on the page named after the act.
+
+       §53.5, inside one side of the switch rather than across it — two
+       builders for one list, and only one of them was kept up. The fields
+       are copied from `reportItems()` verbatim rather than re-derived, or
+       the two drift again the next time one of them learns something. */
     var ms = [];
-    SMPRules.shown(p.measures).forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
+    SMPRules.shown(p.measures).forEach(function(m){
+      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner });
+    });
     var ts = [];
     SMPRules.shown(p.tactics).forEach(function(t){
-      ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t) });
+      ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
+                owner:t.owner, collaborators:t.collaborators, pown:p.owner });
     });
     var askedT = ts.filter(function(x){ return x.asked; });
     var done = doneOf(ms) + doneOf(askedT), total = ms.length + askedT.length;

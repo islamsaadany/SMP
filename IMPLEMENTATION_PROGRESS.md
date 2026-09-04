@@ -142,6 +142,20 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §287.5 — the unit reports too, and now matches (2026-09-02, same branch)
+
+Islam: *"check the behavior of the units. to match."* Measured both sides with
+the cycle open: a function's project owner had **12 enabled controls**, a
+unit's pillar owner **0, with 8 read-only cells**. The unit's Reporting page
+built its rows without the owner context the reach rule reads — the other
+builder in the same file has carried it since §147.7. Fixed by copying those
+three fields verbatim; 2 red on the build before. The LOCK already matched on
+both sides, so that half is §220 working as decided.
+
+**Still open, and a decision rather than a defect:** a saved draft closes the
+report and freezes every bounded reporter under it, none of whom holds Reopen.
+
+
 ### §287.4 — theirs opens, not the first one (2026-09-02, same branch)
 
 Islam: *"when the user login he should land on his project by default"* and

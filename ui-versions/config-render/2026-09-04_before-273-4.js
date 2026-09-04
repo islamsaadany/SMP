@@ -5567,30 +5567,6 @@ function renderOverview(){
     '</div>';
 }
 
-/* ── A CYCLE FIELD, BOUND LIKE EVERY OTHER FIELD HERE (§273.4) ───────
-   `inputOr2()`'s shape without its `mono` class: a value, its own label for a
-   screen reader, and a setter registered in `FIELDS` so the shell's one
-   `data-fld` handler writes it on `change` — which is on blur (§35), and is
-   what makes Save and Cancel unnecessary. Written once because five callers is
-   four more than the project's extract-at-three rule allows (§3b). */
-function cycleField(label, value, placeholder, setter){
-  /* A REFUSAL PUTS THE VALUE BACK IN THE BOX (§124). With no Save there is no
-     press to refuse at, so a setter that declines — by returning false — would
-     otherwise leave the field showing what was NOT stored, which is §96 with
-     the sign reversed: the screen and the graph saying different things, and
-     the screen being the one somebody believes. */
-  var i = FIELDS.length;
-  FIELDS.push(function(v){
-    if (setter(v) === false) {
-      var el = document.querySelector('.newcycle [data-fld="' + i + '"]');
-      if (el) el.value = value;
-    }
-  });
-  return '<label><span>' + esc(label) + '</span>' +
-    '<input class="fld" data-fld="' + i + '" value="' + esc(value || "") +
-    '" placeholder="' + esc(placeholder) + '" aria-label="' + esc(label) + '"></label>';
-}
-
 /* ── Setup · Reporting cycle ────────────────────────────────────────
    Opening turns a plan into a request. Closing snapshots it, which is the
    only way the product ever acquires a past to compare against.
@@ -5780,14 +5756,7 @@ function renderCycle(){
            nothing showed the consequence. `8 of 12 months` is the number every
            figure on the platform is actually prorated by, so a review point
            that is not working says so on the page rather than being inferred
-           from a table reading 100%.
-
-           §278: it is the number every figure is prorated by BY DEFAULT — a row
-           carrying a monthly plan is measured against the months that have
-           actually run instead. The sentence is unchanged because it is still
-           true of the review point, which is what this strip is about; the
-           clause is here so the next reader is not told something the code
-           stopped doing (§104.8). */
+           from a table reading 100%. */
         (elapsedMonths() != null
           ? ' <span class="why" style="margin:0">&middot; ' + elapsedMonths() +
             ' of 12 months' + (REVIEW.asOfMonth ? '' : ', taken from the cycle\u2019s end') +
@@ -5815,121 +5784,69 @@ function renderCycle(){
          nothing that changes anything. `Open a new cycle...` stays beside it
          because it is a different act with its own panel and its own
          confirmation, and it is the only way to start one. */
-      /* §273.4: THE PEN SAYS WHICH WAY IT GOES, and lights up — the platform's
-         own `penBtn()` has read `on ? "Done editing" : "Edit"` since it was
-         written, and this control said Edit while you were editing. Islam:
-         "why is the edit button still there it should turn into done editing
-         so I click it and the box collapse saving what I did". */
       (can
-        ? '<button class="editbtn' + (open && CYCLEEDIT ? ' penon' : '') +
-            '" data-editcycle="1">' +
-            (open && CYCLEEDIT ? 'Done editing' : 'Edit') + '</button>' +
+        ? '<button class="editbtn" data-editcycle="1">Edit</button>' +
           (open ? '' : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
         : '') +
     '</div>' +
-    /* ── OPENING A NEW CYCLE (§47.8), PUT BACK ────────────────────
-       §261.2 replaced the `NEWCYCLE ? ... : CYCLEEDIT ? ...` chain with a
-       CYCLEEDIT-only branch and took this arm with it, so on `main` today
-       "Open a new cycle..." sets the draft and DRAWS NOTHING — §96 exactly, a
-       control that renders perfectly and does nothing, and it is the only way
-       to start a cycle at all. Found by `checks/repeat-project.py` hanging on
-       `#nc-name`; reproduced on the shipped build before anything was written,
-       so it is not this section's doing and it is this section's to fix
-       (§51.11 from the other side: the check was RIGHT and had been red for
-       exactly as long as the panel had been gone).
+    /* ── THE PEN ITSELF ────────────────────────────────────────────
+       The panel `NEWCYCLE` already uses, because this asks for the same five
+       things and two shapes for one form is how the two drift (§53.5). What
+       differs is the act row: Save and Cancel at the near end, Close the cycle
+       at the far end of the same row -- inside the pen, apart from them, and
+       still the last thing the eye reaches.
 
-       PUT BACK VERBATIM, not rebuilt on §273.4's `cycleField()`: this panel
-       is wired by ID in the shell and writes on `input` rather than `change`
-       for a stated reason (Open can be pressed from inside a field), so
-       re-expressing it would be a second change riding a restoration. It keeps
-       its Open/Cancel pair, and that is NOT the Save and Cancel §273.4
-       removed — this really is a draft, describing a cycle that does not exist
-       yet, and nothing reaches REVIEW until Open is pressed. */
-    (NEWCYCLE
-      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        '<div class="nc-grid">' +
-          '<label><span>Name</span><input class="fld" id="nc-name" value="' +
-            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          '<label><span>Covers from</span><input class="fld" id="nc-from" value="' +
-            esc(NEWCYCLE.from) + '" placeholder="Jan 2027"></label>' +
-          '<label><span>to</span><input class="fld" id="nc-to" value="' +
-            esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
-          '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
-            esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
-          '<label><span>Reporting as of</span>' +
-            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
-              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
-            }) + '</label>' +
-        '</div>' +
-        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
-          'A target that adds up across the year is compared with the share of it due by then, ' +
-          'and a tactic whose span has not started yet is not asked for.</div>' +
-        '<div class="nc-act">' +
-          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
-          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
-      : '') +
-    /* ── THE PEN ITSELF (§273, restructured by §273.4) ─────────────
-       Islam, of the shipped panel: "rather than having a save and cancel
-       buttons inside the box itself rearrange the buttons and think of
-       different structures of this banner" — and, of three drawn on his own
-       tenant, "C".
+       CLOSE IS SAID, NOT HIDDEN, while something is unsaved (§221, §163): a
+       control that vanishes reads as broken, one that says why it is waiting
+       teaches the rule once. `aria-disabled`, never `disabled`, or the reason
+       beside it cannot be reached by keyboard -- and the handler asks again at
+       press time rather than trusting this render (§48.2). */
+    (CYCLEEDIT
+      ? (function(){
+          /* §273.3: THE CLOSED CYCLE'S PANEL IS GONE, AND THE PEN OPENS THE
+             PLATFORM'S OWN DIALOG INSTEAD. Islam, of three shapes drawn on his
+             own tenant: "C". §273.2 drew the record as a band under the strip,
+             and a band of facts sitting directly under a band of the SAME facts
+             is the fault — every one of them (the name, the dates, the review
+             point, the state) is already on the line above, and on a tenant
+             where three of five are empty what is left is a row of dashes.
 
-       SAVE AND CANCEL ARE GONE, AND THAT IS THE WHOLE OF IT. Nowhere else in
-       this product has either: every bound field writes on `change`, which is
-       on blur (§35), and the pen only ever closed the mode. §273 invented a
-       second model — a draft, a Save, a Cancel and a guard to make the draft
-       safe — and needed two buttons nothing else here needs. The fields write
-       straight through `FIELDS` now, like every other field in the platform,
-       so there is no draft, nothing unsaved, and nothing for a guard to hold.
-
-       TWO COLUMNS, WHICH IS HIS PICK OVER EDITING IN PLACE AND OVER THE PLAIN
-       BOX: the fields on the left, and ENDING IT behind a rule on the right,
-       so the destructive act never shares a row with the boxes you are typing
-       in. The cost was measured before he chose — pressing Edit moves the page
-       below by 156px here against 12px for the in-place shape. */
-    (CYCLEEDIT && open
-      ? '<div class="cfg newcycle"><div class="cyc2">' +
-          '<div class="cyc2-f">' +
-            '<div class="nc-h">This cycle</div>' +
+             A panel is the right shape for five fields you are EDITING, which
+             is what an open cycle has, and the wrong shape for one question you
+             are ANSWERING. So `CYCLEEDIT` is only ever the open cycle's now,
+             and the closed branch is DELETED rather than left unreachable
+             (§24). The dialog is wired in the shell, beside the other
+             confirmations it is built from. */
+          var held = cycleEditDirty();
+          return '<div class="cfg newcycle"><div class="nc-h">Edit this cycle</div>' +
             '<div class="nc-grid">' +
-              cycleField("Name", REVIEW.name, "H1 2027", function(v){
-                /* TRIMMED, and an empty name is REFUSED rather than stored:
-                   it is what every snapshot and archived plan is filed under
-                   once the cycle closes. With no Save there is no press to
-                   refuse at, so the refusal is the name COMING BACK into the
-                   box — the value returning is the explanation (§124). */
-                var t = String(v).trim();
-                if (!t) return false;
-                REVIEW.name = t;
-              }) +
-              cycleField("Covers from", REVIEW.from, "Jan 2027", function(v){
-                REVIEW.from = String(v).trim();
-              }) +
-              cycleField("to", REVIEW.to, "Jun 2027", function(v){
-                REVIEW.to = String(v).trim();
-              }) +
-              cycleField("Reports due", REVIEW.due, "15 Jul 2027", function(v){
-                REVIEW.due = String(v).trim();
-              }) +
+              '<label><span>Name</span><input class="fld" id="ce-name" value="' +
+                esc(CYCLEEDIT.name) + '" placeholder="H1 2027"></label>' +
+              '<label><span>Covers from</span><input class="fld" id="ce-from" value="' +
+                esc(CYCLEEDIT.from) + '" placeholder="Jan 2027"></label>' +
+              '<label><span>to</span><input class="fld" id="ce-to" value="' +
+                esc(CYCLEEDIT.to) + '" placeholder="Jun 2027"></label>' +
+              '<label><span>Reports due</span><input class="fld" id="ce-due" value="' +
+                esc(CYCLEEDIT.due) + '" placeholder="15 Jul 2027"></label>' +
               '<label><span>Reporting as of</span>' +
-                monthBtnHtml(REVIEW.asOfMonth || "", "asofbtn", function(v){
-                  /* Stored as an ABSENCE when cleared (§50.6), so a cycle that
-                     never picked one and one whose month was taken away are
-                     byte-identical. */
-                  if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
+                monthBtnHtml(CYCLEEDIT.asOfMonth || "", "asofbtn", function(v){
+                  if (v) CYCLEEDIT.asOfMonth = v; else delete CYCLEEDIT.asOfMonth;
                 }) + '</label>' +
             '</div>' +
             '<div class="nc-why"><b>The month decides what every figure is measured ' +
               'against.</b> A target that adds up across the year is compared with the ' +
-              'share of it due by then. Changes are kept as you type.</div>' +
-          '</div>' +
-          '<div class="cyc2-d">' +
-            '<div class="nc-h">Ending it</div>' +
-            '<p class="cyc2-p">Closing files every figure under this name and stops ' +
-              'the units reporting.</p>' +
-            '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>' +
-          '</div>' +
-        '</div></div>'
+              'share of it due by then, and a tactic whose span has not started yet is ' +
+              'not asked for.</div>' +
+            '<div class="nc-act">' +
+              '<button class="editbtn" data-ce-save="1">Save</button>' +
+              '<button class="linkbu" data-ce-cancel="1">Cancel</button>' +
+              '<span class="nc-gap"></span>' +
+              '<span class="why nc-hold" data-ce-hold="1"' + (held ? '' : ' hidden') +
+                '>Save or cancel your changes first</span>' +
+              '<button class="editbtn danger" data-closecycle="1"' +
+                (held ? ' aria-disabled="true"' : '') + '>Close the cycle</button>' +
+            '</div></div>';
+        })()
       : '') +
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +

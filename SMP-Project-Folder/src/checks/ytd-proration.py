@@ -226,12 +226,15 @@ def main():
         pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
             .find(x=>x.textContent.trim()==='Aug'); if(b)b.click();}""")
         pg.wait_for_timeout(400)
-        # AND A DRAFT IS A DRAFT (§273): the pick is not the cycle's until Save,
-        # which is what makes Cancel cost nothing — so the score cannot have
-        # moved yet, and asserting that is what proves the draft is real.
-        ck("the pick has not reached the cycle before Save",
-           pg.evaluate("()=>!REVIEW.asOfMonth"), pg.evaluate("()=>REVIEW.asOfMonth"))
-        pg.click("[data-ce-save]"); pg.wait_for_timeout(500)
+        # REWRITTEN, NOT DELETED (§218). This asserted the opposite until
+        # §273.4: §273 held the pick in a DRAFT until Save, and Islam took the
+        # draft away — every field in the pen is bound and writes where every
+        # other field in SMP writes, so the pick IS the cycle's on the press.
+        # Asserted rather than dropped, because a build that quietly went back
+        # to holding it would otherwise pass everything below.
+        ck("the pick reaches the cycle on the press, with no Save to make",
+           pg.evaluate("()=>REVIEW.asOfMonth === 'Aug 26'"),
+           pg.evaluate("()=>REVIEW.asOfMonth"))
         after = pg.evaluate("""()=>({stored:REVIEW.asOfMonth||null, months:elapsedMonths(),
                                      rev:measureScore(GROUP.keyObjectives[0])})""")
         ck("the pick reaches the stored cycle", after["stored"] == "Aug 26", after)
@@ -240,11 +243,13 @@ def main():
            before == 87 and after["rev"] == 65, (before, after["rev"]))
         # A CLEARED VALUE IS A DELETED KEY (§50.6), or an untouched cycle and one
         # set and cleared would differ and put a phantom change into every save.
-        pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
+        # EDIT IS A TOGGLE (§273.4), so it is pressed only if the pen is shut —
+        # pressing it blind here closed the pen this section is standing in.
+        if not pg.query_selector(".newcycle"):
+            pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
         pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(300)
         pg.evaluate("""()=>{var b=document.querySelector('.monthpop [data-mclear]'); if(b)b.click();}""")
-        pg.wait_for_timeout(300)
-        pg.click("[data-ce-save]"); pg.wait_for_timeout(400)
+        pg.wait_for_timeout(400)
         ck("clearing it deletes the key rather than storing an empty one",
            pg.evaluate("()=>!('asOfMonth' in REVIEW)"),
            pg.evaluate("()=>REVIEW.asOfMonth"))

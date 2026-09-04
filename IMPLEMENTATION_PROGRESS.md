@@ -6,58 +6,94 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§278 (a target with a shape of its own — the monthly
-plan) and §278.2 (the mark that opens it) merged to `main` 2026-09-04 on
-Islam's word**, on top of §260–§277 from other sessions.
+**Latest version:** **§278.3 — the objectives table — merged to `main`
+2026-09-04 on Islam's word**, from
+`claude/seasonal-targets-monthly-proration-5clvu3`, on top of §279–§287 from
+other sessions.
 
-**§278.3 — the objectives table — is BUILT and ON ITS BRANCH**
-(`claude/seasonal-targets-monthly-proration-5clvu3`), **not merged**: `main` is
-production and every merge is Islam's word on the day (rule 4). Four reports
-from the live product, two causes. The monthly drawer spanned every column
-except the first, and a table shares a spanning cell's width across the columns
-it covers — so on the objectives tables, whose first column was the prose one,
-Objective went 242px → 97px the instant the drawer opened and the row 57px →
-136px. Islam's own proposal is the fix: the drawer starts at the second column,
-under a new `#` column, and no column moves at all. And `display:flex` on the
-target `<td>` had stopped it being a table-cell, which cost two more things
-nobody had connected — the cell no longer filled its row (his *"the target cell
-turned white"*) and, through the sibling `display:block` rule, a tactic's four
-target boxes laid out **on top of the Owner column** at every width (his *"the
-table is damged"*, measured on the shipped build with the grid reporting a width
-of zero). The flex box moved inside the cell and all three ended together. The
-row hover is gone at his instruction — measured, on a striped row the stripe
-outranked it and it changed nothing on every second row — and the objectives
-tables gained the `#` and the drag handle a pillar's key measures have always
-had, with the pair centred **by their marks** rather than by their boxes.
-Review page: `design-mockups/objectives-table/2026-09-04_the-objectives-table.html`;
-the reasoning is §278.3. `checks/objectives-table.py` is **24 red** on the build
+**What §278.3 is.** Four reports from the live product, two causes. The monthly
+drawer spanned every column except the first, and a table shares a spanning
+cell's width across the columns it covers — so on the objectives tables, whose
+first column was the prose one, Objective went 242px → 97px the instant the
+drawer opened and the row 57px → 136px. Islam's own proposal is the fix: the
+drawer starts at the second column, under a new `#` column, and no column moves
+at all. And `display:flex` on the target `<td>` had stopped it being a
+table-cell, which cost two more things nobody had connected — the cell no longer
+filled its row (his *"the target cell turned white"*) and, through the sibling
+`display:block` rule, a tactic's four target boxes laid out **on top of the
+Owner column** at every width (his *"the table is damged"*, measured on the
+shipped build with the grid reporting a width of zero). The flex box moved
+inside the cell and all three ended together. The row hover is gone at his
+instruction — measured, on a striped row the stripe outranked it and it changed
+nothing on every second row — and the objectives tables gained the `#` and the
+drag handle a pillar's key measures have always had, with the pair centred **by
+their marks** rather than by their boxes. Review page:
+`design-mockups/objectives-table/2026-09-04_the-objectives-table.html`; the
+reasoning is §278.3. `checks/objectives-table.py` is **24 red** on the build
 before and green after, 523/0 on the authoriser, 131/0 on the differ, the full
 `qa.py` sweep ERRORS none. Three checks held literals these decisions moved and
-were **rewritten, not deleted** (§218): `plan-tail-fold` asserted a hovered
-row's ground, `fn-ko-edit` held the column list and four position-keyed cell
-selectors, and `fn-pillars` held the workbook's column list — which had been red
+were **rewritten, not deleted** (§218) — one of which had been red on `main`
 since §278 landed and was missed at that merge.
 
-**§261 — the master presentation — is BUILT and ON ITS BRANCH**
-(`claude/master-presentation-flow-f91mrl`), **not merged**: `main` is
-production and every merge is Islam's word on the day (rule 4). The SMO picks
-who presents and in what order from the Presentation menu, and the decks are
-run end to end as one flow. Six decisions were drawn in the running platform
-and answered before a line was written; the review page is
-`design-mockups/master-presentation/2026-09-03_master-presentation.html`, the
-reasoning is §261 and the spec is `specs/028-master-presentation/`.
-`checks/master-presentation.py` is 31 red on the build before and **43 green**
-after; 499/0 on the authoriser, the full `qa.py` sweep clean, and the round
-trip, clean parity and two tabs green on a virgin Postgres 16.
+**Before it: §279 — the reporting page says where Submit is held — merged to
+`main` 2026-09-04**, from `claude/smo-reporting-submission-m6gbwa`, on top of
+§274–§278.2 from five other sessions; built as §274 and renumbered at the merge
+because main had taken §274 through §278.2 while it was in flight.
 
-**Two changes after he used it, both on the same branch:** the picker is
-**two columns** (§261.8 — he reversed his own choice of the single list, and
-§261.4's reasoning is kept rather than overwritten), and the strip's pills now
-carry each subject's **own code** — MB, RS, FIN, MRC — the letters already
-printed on its pillars and projects (§261.9), asked for from a real 308-slide
-flow.
-**At merge time:** bump `SHELL` in `sw.js` to a name `origin/main` does not
-hold (§91, §94.12, §94.16) — the built file's bytes have changed.
+**What §279 is.** Islam, from his own tenant: *"the reporting is not submitting
+to the SMO as there is someting requires a note but I can't find it."* Every
+figure was in, the plan owed nothing, and the gate was held by a single row — in
+a pillar the page was not showing, since a unit's Reporting page draws one
+pillar at a time. The rail was worse than silent: the pillar holding the report
+up wore a **green 4/4**, because that tally counts figures *entered*. And a
+capability function had no note banner at all, so its Submit was refused with
+the reason on a hover and nothing on the page. From three options drawn in the
+running platform he chose **C**: §272's own missing bar, brought to Reporting —
+a count, one chip per place, and a **Next →** walk that opens the right pillar
+and puts the cursor in the box that is owed — counting all four things that
+hold Submit, with the plan's own gaps as a door to the Strategy tab. The rail
+carries the mark too, and stops showing green over a pillar that owes something.
+`checks/report-blockers.py` is **43 red** on the build before and **51 green**
+after.
+
+**Earlier:** §276 (the `Count` compile rule — a count is owed in whole ones)
+and §277 (a reported figure follows the target's unit), merged 2026-09-04 from
+`claude/integer-prorating-compilation-6dq77s`.
+
+**§266 — the master presentation — IS ON `main`**, merged 2026-09-03 on
+Islam's word (it was built as §261 and renumbered at that merge, because main
+had taken §261 and everything up to §265 while it was in flight). The SMO picks
+who presents and in what order from the Presentation menu, and the decks are run
+end to end as one flow. Six decisions were drawn in the running platform and
+answered before a line was written; the reasoning is §266 and the spec is
+`specs/029-master-presentation/`.
+
+**§266.10 — the picker is two tables, searched, and dragged by its own
+numbers** — merged 2026-09-04 on Islam's word, from his own tenant with eighteen
+subjects in it: a searchable *Everyone who reports* table with a **BU / FUNC**
+column, a wider dialog, and a running order where **the number is the handle**
+(the digit at rest, the platform's own bars the moment you point at it) with the
+↑ ↓ buttons gone and the × left. Nothing underneath it moved — the stored order,
+its classification and every server rule are byte for byte what §266 shipped, so
+no migration. **The glitch he reported on the drawing was measured before this
+was built**: with the swap driven by `:hover` alone a four-row drag swapped the
+bars six times, half of them onto a row the pointer was passing, so the CSS now
+holds the swap for the row in your hand. `checks/master-picker.py` is 37 red on
+the build before and **51 green** after.
+
+**§266.11 — and the dialog stopped changing size as rows move**, from his first
+minutes with it: each list was sized by its own content under a cap, so a tick
+made one column shorter and the other taller and the whole dialog stepped under
+the pointer (measured on that build: 571, 604 and 634px across twelve moves). It
+takes the height the whole list would need — both columns together, which cannot
+change while it is open — measured rather than written as a constant, and capped
+so *Start the flow* stays on screen.
+
+**Still open on it, and said rather than discovered:** a drag cannot
+auto-scroll — with all eighteen in the flow the list is 654px in a 420px box, so
+a drop can only land where you can already see (the keyboard route does scroll).
+That is true of every sortable table in the product, so closing it means
+changing `arrange.js` for all of them.
 **Latest version:** **§268, §269 and §270 are ON `main`** — the strategy pen on
 the section line, one edit for the whole tab, and three loose ends closed —
 merged 2026-09-02 on Islam's word, verified live (production serves the merged
@@ -364,8 +400,111 @@ measured with the sweep's own function (5.31 light / 5.96 dark) and the probe
 proved able to see them. Mockup:
 `design-mockups/cycle-name-date-edit/2026-09-03_edit-the-cycle.html`.
 
-**On the branch, not merged.**
+**Merged to `main` and live** (§273 · §273.1 · §273.2 · §273.3).
 
+### §273.4 — the pen closes itself, and the banner is two columns (2026-09-04, same branch)
+
+Islam, using what §273 shipped: *"when I'm editing why is the edit button still
+there it should turn into done editing so I clik it and thebox collapse saving
+what I did rather tahn having a save and candel buttons inside the box itself
+rearrange th e buttons and think of different structures of this banner"* —
+then, having asked to see **both states** of each, *"C"*.
+
+**What was wrong.** He is describing the platform's own editing model, and §273
+had invented a second one. Every pen in SMP is `penBtn()` — Edit ⇄ **Done
+editing** — over fields bound through `FIELDS` that write on blur (§35); there
+is no Save and no Cancel anywhere else in the product, because there is nothing
+for them to do. §273 built a DRAFT, and a draft is what forces a Save (to commit
+it), a Cancel (to throw it away) and a guard on Close (because the draft and the
+cycle can disagree).
+
+**What is there now.** The draft is gone and the three controls with it. Edit is
+a toggle that reads **Done editing** and lights up while the pen is open. The pen
+is two columns: the five facts on the left under *This cycle*, **Close the cycle**
+alone on the right behind a rule under *Ending it*, with one line saying what it
+does — so the destructive act never shares a reading column with the boxes you
+type in, which keeps §273's security argument and sharpens it. It stacks below
+1100px. An empty name is still refused, and the refusal is now **the stored name
+coming back into the box** (§124), because there is no press left to refuse at;
+a name with space around it is trimmed rather than refused.
+
+**What it does not touch.** Nothing server-side moves — these five fields already
+classified as `cycle` — and it is asserted (514/0).
+
+**Verified.** `checks/cycle-edit.py` **37 red** on the build before, **69 green**
+after; §2, §4 and §5 rewritten rather than deleted (§218). Three of the check's
+own first failures were one fault: Edit is a TOGGLE now, so a section pressing it
+blind shuts the pen a previous section left open. Mockup:
+`design-mockups/cycle-name-date-edit/2026-09-03_editing-strip-structures.html`.
+
+### §287 — the caret belongs to the disclosure, not to the class (2026-09-04)
+
+Islam, of the closed Reporting cycle strip: *"what is the arrow function here
+beside the open new cycle?"*
+
+**It has none.** The little `▸` was styled by a rule written for a panel
+elsewhere that folds open and shut. That rule was not scoped, so the arrow was
+drawn on every strip sharing the class — including two that are not foldable at
+all: Setup › Reporting cycle and the group's Focus board strip. Both showed a
+fold marker for a fold that does not exist; pressing it did nothing.
+
+**Scoped to the thing that folds.** The focus panel keeps its arrow and its
+turn; the two plain strips lose one that was never theirs. A duplicate copy of
+the same styling rule, thirty lines above, went with it.
+
+**The first attempt was wrong and the check caught it** — it took the arrow off
+the panel too, because the panel's head *is* its own summary rather than sitting
+inside one. Fixed and re-measured.
+
+**Verified.** `checks/fold-caret.py` proved able to fail **both ways**: 3 red
+against the shipped build with the stray arrow, 3 red against the first attempt
+with the arrow gone from the panel. `cycle-edit`, `perf-line` and `setup-header`
+green; full `qa.py` sweep clean.
+
+**Merged to `main`** on Islam's word, after merging main's §279–§281 into the
+branch. Mine was renumbered §279 → §287 — main took the number while this was
+being built, and §287 rather than §282 deliberately: §282–§286 came off main
+with the chat-round revert but still live on their own branch, so a gap here is
+harmless where a collision would not be. The caret rule was asserted to have
+SURVIVED the merge (main still carried the unscoped selector, so a silent revert
+would have looked identical to a clean merge), the sources were grep'd for
+duplicate declarations — none, main's own §281 having swept them — the built
+file was rebuilt rather than merged, and `sw.js` bumped past a name main had
+already served.
+
+### §273.5 — "Open a new cycle" drew nothing, on `main` (2026-09-04, same branch)
+
+Found while re-running the neighbours: `checks/repeat-project.py` hung for
+thirty seconds on `#nc-name`, and the fault **reproduced on the shipped build
+before a line was written**. §261.2 replaced `renderCycle()`'s
+`NEWCYCLE ? … : CYCLEEDIT ? …` chain with a `CYCLEEDIT`-only branch and took the
+NEWCYCLE arm with it — so pressing *Open a new cycle…* sets the draft and
+**renders nothing at all**, on the only way to start a cycle. §96 in the worst
+place: the state it writes is correct, so every assertion short of asking whether
+a PANEL was DRAWN passes.
+
+Put back **verbatim**, not rebuilt on §273.4's `cycleField()` — this panel is
+wired by ID in the shell and writes on `input` rather than `change` for a stated
+reason, so re-expressing it would be a second change riding a restoration.
+`cycle-edit.py` gains §5c, asserting the draft and the panel separately.
+
+**Recorded, not done (§273.6).** Found by looking at the built pen: with no
+review point picked — the demo's state, and a legitimate one — the strip reads
+*"taken from the cycle's end"* and the month control inside the pen reads a red
+**MISSING**. §239.3 settled that a working fallback must not cry Missing and
+settled it for the STRIP only; the pen calls `monthBtnHtml()` directly, where
+*Missing* is correct for the OTHER panel (opening a cycle refuses without a
+month). The fix is a per-caller word, which is a wording decision. It predates
+§273.4 and is left alone rather than changed on the way past.
+
+**Merged to `main`** — §273.4, §273.5 and §273.6 together, on Islam's word,
+after merging main's §274–§278.2 from five other sessions into the branch:
+the three source files both sides touched auto-merged and were grep'd for
+duplicate declarations (§56.7), the built file was rebuilt rather than merged
+(§91), and `sw.js` bumped past a name main had already served (§94.12, §94.16).
+520/0 authoriser and 131/0 differ after the merge, with main's own
+`unit-follows`, `count-compile`, `monthly-plan`, `fn-perf-controls` and
+`master-picker` green beside the cycle's three (§273.7).
 ### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
 
 Islam, using the reporting page: *"in the reporting on saving the draft keep

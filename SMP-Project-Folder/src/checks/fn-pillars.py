@@ -341,22 +341,25 @@ with sync_playwright() as p:
     ok("a function's Objectives sheet asks for a Weight",
        any("Weight" in h for h in wb["fnObj"]), wb["fnObj"])
     ok("...and not a 3-year target", not any("3-year" in h for h in wb["fnObj"]), wb["fnObj"])
-    # §233 added the Hidden column and §278 twelve month columns, both to every
-    # row sheet and both APPENDED. This held the literal and went red on a
-    # correct build the day §278 landed — the third time this file has recorded
-    # a check outliving the decision behind it (§214.3), and it is REWRITTEN
-    # rather than deleted (§218).
+    # §233 added the Hidden column to every row sheet, the unit's included, and
+    # §278 APPENDED Jan–Dec for the monthly plan — both deliberate decisions, so
+    # the literal moves with them (§214.3's lesson, for the second time on this
+    # one line: a check written against the last shape has to move when the
+    # shape is chosen again, and it had been red on `main` since §278 landed).
     #
-    # SO IT ASSERTS THE PROMISE, NOT THE LIST: what §213 guarded — no Weight, a
-    # 3-year target — holds, and what §22/§65 guard is that a column is only
-    # ever added at the END, because a validation range is a POSITION. A list
-    # written out again would go red on the next deliberate column too.
-    SETTLED = ["Objective", "Group", "Direction", "3-year target",
-               "This year target", "Unit", "Compile"]
-    ok("a UNIT's Objectives sheet still opens with exactly the columns it had",
-       wb["unitObj"][:len(SETTLED)] == SETTLED, wb["unitObj"])
-    ok("...and everything since was APPENDED, never inserted",
-       all(c not in SETTLED for c in wb["unitObj"][len(SETTLED):]), wb["unitObj"])
+    # REWRITTEN, NEVER LOOSENED (§218). The twelve months are ASSERTED, in
+    # order and at the END, because §65's rule is that a column's POSITION is
+    # what the workbook's validation ranges are built from — so "the front of
+    # the sheet is unchanged and the months follow it" is the property that
+    # matters, and a check relaxed to "contains these columns somewhere" would
+    # pass on a build that had inserted them in the middle and silently moved
+    # every range. What §213 guarded — no Weight, a 3-year target — holds.
+    MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    ok("a UNIT's Objectives sheet is what it was, plus §233's Hidden and §278's months",
+       wb["unitObj"] == ["Objective", "Group", "Direction", "3-year target",
+                         "This year target", "Unit", "Compile", "Hidden"] + MONTHS,
+       wb["unitObj"])
     ok("...and a unit keeps every sheet it had",
        wb["unit"] == ["Read me", "Foundation", "Aspiration", "Objectives", "SWOT",
                       "Pillars", "Measures", "Tactics"], wb["unit"])

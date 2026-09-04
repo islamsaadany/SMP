@@ -384,6 +384,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A PICTURE IS PASTED, NOT ONLY ATTACHED (§252):** Islam — *"allow in the chat
+  to copy paste a picture rather than only attaching it."* Somebody reporting a
+  wrong number has just pressed the screen-grab key; making them save the file
+  and find it again is asking them to do the computer's job. **IT FEEDS
+  `takePicture()` AND ADDS NOTHING** — §50's whole intake (1600px, both formats
+  with the smaller kept, the failure said in words) holds because it is the same
+  door, and the office's reply box being the same box means §251's queue gained
+  it with no second listener. **TEXT STILL PASTES AS TEXT**: only an image item
+  is taken and `preventDefault` fires only when one is found, so a paste
+  carrying both keeps its words. **`items` FIRST, THEN `files`** — a screenshot
+  lands on `items` in every desktop browser and on `files` in Safari. **AND WITH
+  PICTURES OFF IT IS REFUSED IN WORDS** (§98.2): a paste that appears to work and
+  then vanishes is worse than one that says no. **The hover says the capability
+  exists**, because it has no control of its own to be discovered by (§61).
+  Proved by dispatching a REAL ClipboardEvent with a real PNG — a probe calling
+  `takePicture()` directly passes on a build where the listener was never wired
+  (§96).
 - **THE OFFICE'S CORNER CARRIES THE QUEUE (§251):** Islam — *"the chat bubble
   of the SMO team shouldn't be something to be sent to the smo, that is
   redundancy … it should be the chats of the other people sending the smo the
@@ -4104,6 +4121,12 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
+python3 checks/paste-picture.py   # a picture PASTED into the composer (§252): a real
+                                # ClipboardEvent with a real PNG, because a probe that
+                                # calls takePicture() passes on a build where the
+                                # listener was never wired; text still pastes as text,
+                                # the picture TRAVELS with the message, and with
+                                # pictures off it is refused in words
 python3 checks/corner-queue.py    # the office's corner carries the queue (§251) and
                                 # survives the walk (§250): the badge is the LENGTH of
                                 # the list, a reply carries the SAME email the Inbox

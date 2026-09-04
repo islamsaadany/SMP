@@ -27675,3 +27675,59 @@ first fault produced none. It asserts the AGREEMENT rather than the numbers
 the one the Inbox builds. Plus `checks/office-chat.py` **ALL CLEAR, 202
 assertions** · `test-chat` 103/0 · `test-chase` 14/0 · `during-save` 8/0 ·
 `push` 33/0 · `authorize` 454/0 · `graph-diff` 126/0 · `qa.py` ERRORS: none.
+
+---
+
+## §252 — A PICTURE IS PASTED, NOT ONLY ATTACHED (2026-09-03)
+
+Islam: *"allow in the chat to copy paste a picture rather than only attaching
+it."*
+
+Somebody reporting a number that looks wrong has just pressed the screen-grab
+key. The picture is already on their clipboard; making them save it to a file
+and then find that file again is asking them to do the computer's job.
+
+### IT FEEDS THE ONE INTAKE AND ADDS NOTHING
+
+`takePicture()` is unchanged and is still the only way a picture enters the
+chat. Everything §50 settled about one — shrunk to 1600px, encoded as both PNG
+and JPEG with the smaller kept (a screenshot and a photograph want opposite
+formats and the file's own type predicts neither), the failure said in words —
+holds here because this is the same door. A second path would have been a
+second copy of all of it (§53.5), and the copy is what drifts.
+
+**AND THE OFFICE'S REPLY BOX IS THE SAME BOX** (§251), so the corner's queue
+side gained this without a second listener.
+
+### THREE THINGS THAT COULD HAVE GONE WRONG QUIETLY
+
+**TEXT STILL PASTES AS TEXT.** Only an image item is taken, and
+`preventDefault()` is called ONLY when one is found — so a paste carrying both,
+which is what a rich editor puts on the clipboard, keeps its words and takes the
+picture too.
+
+**`items` FIRST, THEN `files`.** A screenshot arrives on `clipboardData.items`
+with `kind: "file"` on every desktop browser; Safari and some file managers put
+a real image on `files` with no such item. Asked in that order rather than one
+or the other.
+
+**AND WITH PICTURES TURNED OFF IT IS REFUSED IN WORDS** (§98.2). The office's
+switch decides, and the server would refuse the message anyway — *a paste that
+appears to work and then vanishes is worse than one that says no.*
+
+### THE CAPABILITY SAYS IT EXISTS
+
+The attach button's hover becomes *"Attach a screenshot — or paste one straight
+into the box"*. A feature nobody is told about is a feature nobody uses, and
+this one has no control of its own to be discovered by (§61's shape).
+
+### PROVED BY A REAL PASTE
+
+`checks/paste-picture.py` dispatches a real `ClipboardEvent` carrying a real PNG
+in a real `DataTransfer` at the box. **A probe that called `takePicture()`
+directly would pass on a build where the listener was never wired** — §96's
+family, and the fault this project keeps finding. 7/7: the paste is taken over,
+the box says a picture is attached, the picture actually TRAVELS with the
+message rather than merely appearing to attach, ordinary text is left alone, and
+with pictures off it is refused in words. `checks/office-chat.py` ALL CLEAR
+(202) · `checks/corner-queue.py` 29/0 · `qa.py` ERRORS: none.

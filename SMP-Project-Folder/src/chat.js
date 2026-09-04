@@ -378,7 +378,7 @@ var CHAT = (function(){
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
           '<div class="chcomp">' +
-            '<button class="chicon" id="chatpic" type="button" title="Attach a screenshot" ' +
+            '<button class="chicon" id="chatpic" type="button" title="Attach a screenshot — or paste one straight into the box" ' +
               'aria-label="Attach a screenshot">' +
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
               'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -1524,6 +1524,53 @@ var CHAT = (function(){
     });
     el("chatpic").addEventListener("click", function(){ el("chatfile").click(); });
     el("chatfile").addEventListener("change", function(){ takePicture(this.files && this.files[0]); });
+    /* ── AND A PICTURE CAN SIMPLY BE PASTED (§252) ────────────────────
+       Islam: "allow in the chat to copy paste a picture rather than only
+       attaching it." Somebody reporting a number that looks wrong has just
+       pressed the screen-grab key; making them save the file and then find it
+       again is asking them to do the computer's job.
+
+       IT FEEDS `takePicture()` AND NOTHING ELSE (§53.5). Everything §50
+       settled about a picture — shrunk to 1600px, encoded both ways with the
+       smaller kept, the failure said in words — happens because this is the
+       same intake the attach button uses. A second path would be a second set
+       of all of it.
+
+       THE OFFICE'S REPLY BOX IS THE SAME BOX (§251), so this reaches the
+       corner's queue side without a second listener.
+
+       TEXT STILL PASTES AS TEXT: only an image item is taken, and
+       `preventDefault` is called ONLY when one is found — a paste carrying
+       both (a screenshot with a caption, which is what a rich editor puts on
+       the clipboard) keeps its words and takes the picture too.
+
+       AND WITH SCREENSHOTS TURNED OFF IT IS REFUSED IN WORDS, never silently
+       dropped (§98.2): the office's switch decides, and the server would
+       refuse it anyway — a paste that appeared to work and then vanished is
+       worse than one that says no. */
+    el("chatsay").addEventListener("paste", function(e){
+      var d = e.clipboardData; if (!d) return;
+      var items = d.items || [], file = null;
+      for (var i = 0; i < items.length && !file; i++) {
+        if (items[i].kind === "file" && /^image\//.test(items[i].type || "")) {
+          file = items[i].getAsFile();
+        }
+      }
+      /* Safari and the file managers put a real image on `files` without an
+         `items` entry of kind "file" — asked second, because `items` is what
+         carries a screenshot on every desktop browser. */
+      if (!file && d.files && d.files.length && /^image\//.test(d.files[0].type || "")) {
+        file = d.files[0];
+      }
+      if (!file) return;                       /* an ordinary paste, untouched */
+      e.preventDefault();
+      if (!cfg.shots) {
+        lastErr = "Pictures are turned off for this platform.";
+        drawPanel();
+        return;
+      }
+      takePicture(file);
+    });
     var say = el("chatsay");
     say.addEventListener("keydown", function(e){
       /* Enter sends, Shift+Enter makes a line — what every chat does, and the

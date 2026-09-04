@@ -5353,6 +5353,25 @@ function ownStateChip(target, list, word){
   var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
   var tip = 'You report your own rows. The ' + submits +
             ' custodian submits the report.';
+  /* ── A CLOSED REPORT SAYS SO TO THEM TOO (§250.2) ─────────────────
+     §220 disables every control in the pane the moment the report is
+     submitted or parked — and the word that explains it, `Submitted` /
+     `Draft saved`, lives in `repChrome`'s OTHER branch, the one a bounded
+     role never reaches. So the whole page went grey with nothing anywhere
+     saying why: before §250 that slot read *View only*, which is no
+     explanation either, and this section owns the slot now. The word is the
+     same word (§53.5) and the way back is NOT offered — reopening speaks for
+     the whole subject, which is exactly what a bounded role does not do. */
+  /* ONE WORD, and never a second one beside it: the first build put a
+     `Closed` pill next to it and the bar then read *Closed · Close*, one
+     letter apart and meaning different things — §87's twins in the chrome.
+     The word says the state, the hover says who can undo it. */
+  if (reportClosed(target)) {
+    var subd = !!(REVIEW.submitted || {})[String(target)];
+    return '<span class="rc-state ' + (subd ? 'done' : 'draft') + '" title="' +
+      esc('The report is closed — the ' + submits + ' custodian reopens it.') +
+      '">' + (subd ? 'Submitted' : 'Draft saved') + '</span>';
+  }
   if (!mine.length)
     return '<span class="pill none" title="' + esc(tip) + '">Your rows only</span>';
   if (mine.length === 1) {

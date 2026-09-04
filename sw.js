@@ -268,7 +268,7 @@
    Name checked against origin/main serving
    "smp-shell-v4.21-office-starts-a-conversation"; confirm again immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v4.25-project-done";
+const SHELL = "smp-shell-v4.26-project-done-closed";
 const ASSETS = [
   "/",
   "/index.html",

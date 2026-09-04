@@ -27774,3 +27774,60 @@ The **rail** does not yet show the mark: the custodian sees which projects are
 ready from the band as they scroll the panes, and not from the rail's own
 `3/3` · *Complete* line. Adding it there is a second surface for one fact and
 wants a mockup (rule 1c) rather than a quiet widening.
+
+---
+
+## §250.2 — A CLOSED REPORT SAYS SO TO THEM TOO (2026-09-02)
+
+Islam, testing §250: *"reporting is closed for him and showing a button of mark
+done only."*
+
+**Measured, and he is right about the state even where the wording is not what
+I first read it as.** With the custodian's submission in — which is §220's lock
+— the project owner's pane goes entirely read-only: all 8 figure boxes
+disabled, the note disabled, and (correctly) the new `Mark done` disabled with
+them, because §220 disables every control inside `#panel` in one place so a
+control added later is covered the day it is added. So the mark IS the only
+thing left that looks like an action, and **nothing anywhere said why**.
+
+**THE WORD THAT EXPLAINS IT LIVES IN THE BRANCH A BOUNDED ROLE NEVER REACHES.**
+`repChrome` draws `Submitted` / `Draft saved` inside its `mayAll` half, beside
+Reopen. Before §250 that slot read *View only* for everybody else, which is no
+explanation either — so this is not a regression §250 introduced, it is a hole
+§250 inherited and now owns, because §250 is what put a state chip in that
+slot. `ownStateChip()` reads `reportClosed()` first and says the same word the
+unbounded bar says (§53.5).
+
+**THE WAY BACK IS DELIBERATELY NOT OFFERED.** Reopening speaks for the whole
+subject and classifies as `reportState`, which a bounded role may not write —
+so a Reopen button there would be a control the server refuses (§61, §42). Who
+can undo it goes on the hover instead.
+
+**ONE WORD, NEVER A SECOND BESIDE IT.** The first build added a `Closed` pill
+next to the state word and the bar then read **`Submitted · Closed · Close`** —
+`Closed` and `Close` one letter apart, meaning different things (the report's
+state, and the control that leaves reporting mode). §87's twins, in the chrome.
+The state word carries it alone and the hover carries the rest.
+
+`checks/project-done.py` §6 asserts the word **with the lock**, or a build that
+said *Submitted* over live boxes would pass: `#panel.replocked`, and zero live
+controls left including the mark.
+
+### And two things measured on the way that are NOT this change
+
+- **`checks/report-chrome.py` fails one assertion** — *"Submit is filled"*, the
+  CTA reading a grey outline rather than the orange fill. **It reproduces
+  byte-for-byte on the pre-§250 build**, so it is not this work; recorded here
+  rather than fixed in passing, because a colour on the report's loudest
+  control is not something to change while looking at something else (rule 1b).
+- **`checks/report-saves.py` fails three** — *"The script has an unsupported
+  MIME type ('text/html')"* — its stub server, in this container, and again
+  identical on the pre-§250 build.
+
+**AND I REPORTED BOTH AS GREEN AN HOUR EARLIER, AND THEY HAD NOT RUN.** Neither
+file reads `SMP_CHROME`; both need the `qa-run.py` wrapper, and without it
+Playwright printed its *"Please run playwright install"* box and exited 0. I
+read the box-drawing line as their output. **A check that cannot launch a
+browser exits successfully**, and `tail -1` on it looks like a result — §51.11's
+family, in the harness rather than in a selector: *a check that did not run is
+not a check that passed.*

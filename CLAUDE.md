@@ -546,6 +546,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   putting `done` back in the whole-review path, where the first owner's mark is
   **destroyed**. **RECORDED, NOT DONE**: the rail does not show the mark — a
   second surface for one fact wants a mockup, not a quiet widening.
+- **A CLOSED REPORT SAYS SO TO THEM TOO (§250.2):** Islam, testing §250 —
+  *"reporting is closed for him and showing a button of mark done only."*
+  Measured: with the custodian's submission in, §220 disables all 8 figure
+  boxes, the note AND the new mark (one place, so a control added later is
+  covered the day it is added) — and **nothing said why**, because the word
+  that explains it (`Submitted` / `Draft saved`) lives in `repChrome`'s
+  `mayAll` half, which a bounded role never reaches. Not a §250 regression —
+  that slot read *View only* before, which explains no better — but a hole
+  §250 now owns, having put a chip there. **The way back is deliberately not
+  offered**: reopening classifies as `reportState`, which a bounded role may
+  not write, so the button would be one the server refuses (§61, §42); who can
+  undo it goes on the hover. **ONE WORD, NEVER A SECOND BESIDE IT** — the first
+  build added a `Closed` pill and the bar read *Submitted · Closed · Close*,
+  one letter apart and meaning different things (§87's twins, in the chrome).
+  Asserted WITH the lock, or a build saying *Submitted* over live boxes would
+  pass. **AND TWO CHECKS I HAD REPORTED GREEN HAD NOT RUN**: neither
+  `report-chrome` nor `report-saves` reads `SMP_CHROME`, so without the
+  `qa-run.py` wrapper Playwright printed its *"run playwright install"* box and
+  **exited 0** — and `tail -1` on that box looks like a result. Both their
+  failures reproduce byte-for-byte on the pre-§250 build and are recorded, not
+  fixed in passing. *A check that did not run is not a check that passed*
+  (§51.11's family, in the harness rather than in a selector).
 - **THE DIRECTION AND THE COMPILE RULE STAY THE OFFICE'S (§249.4):** Islam,
   from the running platform — *"I viewed as Ali Reda from corporate, I can't
   adjust the direction or the compiling. is that ment to be?"* It is: neither

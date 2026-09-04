@@ -243,6 +243,29 @@ with sync_playwright() as pw:
        bool(umine) and pg.evaluate("()=>Object.keys(REVIEW.done||{})") == [ids["pillar"]],
        pg.evaluate("()=>JSON.stringify(REVIEW.done||null)"))
 
+    # ── 6 · A CLOSED REPORT SAYS SO TO THEM TOO (§250.2) ─────────────────
+    # §220 disables every control the moment the custodian submits, and the
+    # word explaining it lives in the branch a bounded role never reaches —
+    # so the page went grey with nothing saying why. Asserted with the LOCK,
+    # or a build that said "Submitted" over live boxes would pass.
+    print("-- the project owner, once the custodian has submitted")
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    pg.evaluate("""()=>{ REVIEW.submitted = Object.assign({}, REVIEW.submitted);
+        REVIEW.submitted["%s"] = true; paint(); }""" % FDEST)
+    pg.select_option("#asWho", "t250p"); pg.wait_for_timeout(400)
+    to_fn_reporting(pg)
+    st = pg.evaluate(BAR)
+    shut = pg.evaluate("""()=>({
+      locked: !!document.querySelector('#panel.replocked'),
+      liveLeft: [...document.querySelectorAll('#panel [data-cpick],#panel [data-crep],#panel [data-rowdone]')]
+                  .filter(e=>!e.disabled).length })""")
+    ck("the bar says the report was submitted", "Submitted" in (st["ownChip"] or ""),
+       st["text"])
+    ck("...and never a second word for it beside Close (§87)",
+       "Closed" not in (st["text"] or ""), st["text"])
+    ck("the pane really is locked, mark included",
+       shut["locked"] and shut["liveLeft"] == 0, shut)
+
     ck("no console errors", not errs, "; ".join(errs[:3]))
     b.close()
 

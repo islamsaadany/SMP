@@ -1335,26 +1335,14 @@
   td:has(> .fld + .eyebtn) > .fld { width: calc(100% - 62px); vertical-align: middle; }
   td:has(> .fld + .eyebtn) > .eyebtn,
   td:has(> .fld + .eyebtn) > .xbtn { vertical-align: middle; margin-left: 4px; }
-  /* §261.2: THE MONTHLY MARK IS THE SAME CONTROL AND IS DECLARED WITH IT.
-     Islam, of the worded chip that shipped: *"the button montthly is big"* — and
-     it was, three ways at once (bordered, uppercase, bold) on eight rows that
-     mostly will not use it. Measured across four drawn treatments: every one of
-     them leaves the Target box between 334 and 343px and the row at 57px, so
-     the column had the slack all along and this was never about room.
-
-     A small per-row control with a lit state is a thing this table already has
-     — the eye, on the same row, two columns left — so the mark takes ITS
-     numbers rather than a second set of nearly-equal ones. Declared together
-     because they are one shape: two blocks would drift the first time either
-     was touched (§53.5). */
-  .eyebtn, .mpopen { width: 24px; height: 22px; border: 1px solid transparent; border-radius: 6px;
+  .eyebtn { width: 24px; height: 22px; border: 1px solid transparent; border-radius: 6px;
     background: none; color: var(--ink-3); cursor: pointer; padding: 2px 3px;
     display: inline-block; }
-  .eyebtn:hover, .mpopen:hover { background: var(--surface-2); color: var(--ink); }
+  .eyebtn:hover { background: var(--surface-2); color: var(--ink); }
   /* Lit on the attention ground while hidden — a decision, not a warning
      (§168): the warn family is for something owed, and nothing is. */
-  .eyebtn.on, .mpopen.on { background: var(--attn-bg); border-color: var(--attn-bg); color: var(--attn-tx); }
-  .eyebtn svg, .mpopen svg { width: 16px; height: 14px; display: block; }
+  .eyebtn.on { background: var(--attn-bg); border-color: var(--attn-bg); color: var(--attn-tx); }
+  .eyebtn svg { width: 16px; height: 14px; display: block; }
   .hidchip { display: inline-block; font: 600 10px/1 var(--sans); letter-spacing: .07em;
     text-transform: uppercase; color: var(--attn-tx); background: var(--attn-bg);
     border-radius: 99px; padding: 4px 8px; margin-left: 8px; white-space: nowrap;
@@ -1922,16 +1910,19 @@ td[data-mptgt] { display:flex; align-items:center; gap:8px; }
    the whole cell and leaves the chip nothing (§248's own lesson, one cell
    over). */
 td[data-mptgt] > input.fld, td[data-mptgt] > .tgrid { flex:1; min-width:0; }
-/* The mark keeps its own size in a flex cell, or the box beside it takes the
-   whole line and leaves it nothing (§248's lesson, one cell over). */
-td[data-mptgt] > .mpopen { flex:0 0 auto; }
-/* The outcome's cell stacks: four boxes, then the mark under them — `.tgrid`
+/* The outcome's cell stacks: four boxes, then the chip under them — `.tgrid`
    is two `--tw` columns and a fifth control in it would start a third row
    half the cell wide, which is the hole among equal boxes §248 refused. */
 td[data-mptgt]:has(> .tgrid) { display:block; }
-td[data-mptgt] > .tgrid + .mpopen { margin-top:6px; }
-/* The mark's SHAPE is declared beside the eye's, above — one block for one
-   control, so the two cannot drift. This only says where it sits. */
+td[data-mptgt] > .tgrid + .mpopen { margin-top:6px; width:100%; }
+.mpopen {
+  font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:700; color:var(--ink-3); background:none;
+  border:1px solid var(--line); border-radius:4px; padding:4px 7px;
+  cursor:pointer; white-space:nowrap;
+}
+.mpopen:hover { border-color:var(--ink-3); color:var(--ink-2); }
+.mpopen.on { color:var(--ink); border-color:var(--ink-3); background:var(--surface-2); }
 tr.mprow > td { background:var(--surface-2); border-top:0; }
 .mpwrap { padding:4px 2px 8px; }
 .mphead {

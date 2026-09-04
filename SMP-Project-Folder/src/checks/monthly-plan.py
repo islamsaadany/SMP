@@ -179,6 +179,59 @@ with sync_playwright() as p:
     ck("every measure carries the way in — the first one has to be makeable (§61)",
        chips.get("rows") and chips.get("rows") == chips.get("withChip"), chips)
 
+    # ── 3b · THE MARK IS DRAWN, AND IT SAYS WHAT IT IS (§261.2) ─────────
+    # Islam picked a 24px mark over the worded chip. With the word gone the
+    # hover is the only thing that says what the control does, and the SVG is
+    # the only thing on the button at all — so both are asserted, and the ink
+    # is asserted as TWELVE CELLS rather than as "an svg is present" (§52,
+    # §185: a mark that renders as nothing passes every presence test).
+    mk = ev(pg, """() => {
+      const b = document.querySelector('.pane .mpopen');
+      if (!b) return { none: true };
+      const r = b.getBoundingClientRect();
+      return { w: Math.round(r.width), h: Math.round(r.height),
+               cells: b.querySelectorAll('svg rect').length,
+               text: (b.textContent || "").trim(),
+               name: b.getAttribute('aria-label') || "",
+               title: b.getAttribute('title') || "" };
+    }""")
+    ck("the way in is a 24px mark, the size of the eye beside it",
+       mk.get("w") == 24 and mk.get("h") == 22, mk)
+    ck("...drawn as twelve cells, not a font character (§52)",
+       mk.get("cells") == 12, mk)
+    ck("...carrying no text, and saying what it is on the hover AND to a reader",
+       mk.get("text") == "" and "month by month" in mk.get("name", "") and
+       mk.get("title") == mk.get("name"), mk)
+
+    # AND THE LIT STATE IS THE POINT OF PICKING IT: a row with a plan has to be
+    # tellable from one without, across the table. Measured as PAINT, never as
+    # a class — a build that lost the rule keeps the class (§145.14).
+    lit = ev(pg, """() => {
+      const p = UNITS.mobile.items.find(x => x.code === '03');
+      const m = p.measures.find(x => x.name.indexOf('Accessory') === 0);
+      m.monthly = [1,2,3,4,5,6,7,8,9,10,11,12]; paint();
+      const t = [...document.querySelectorAll('.pane table')]
+        .find(x => x.querySelector('thead') &&
+                   x.querySelector('thead').textContent.indexOf('Measure') >= 0);
+      const rows = [...t.querySelectorAll('tbody tr')].filter(r => !r.classList.contains('newrow'));
+      const on = rows.map(r => r.querySelector('.mpopen'))
+                     .filter(b => b && b.classList.contains('on'));
+      const bg = b => getComputedStyle(b).backgroundColor;
+      const off = rows.map(r => r.querySelector('.mpopen'))
+                      .find(b => b && !b.classList.contains('on'));
+      /* READ THE PAINT BEFORE PUTTING THE STATE BACK. `paint()` detaches these
+         nodes and a detached element computes to an empty string — the first
+         run of this assertion reported a correct build as broken (§222's own
+         lesson, and §68.10's family). */
+      const out = { nOn: on.length, onBg: on[0] ? bg(on[0]) : null,
+                    offBg: off ? bg(off) : null };
+      delete m.monthly; paint();
+      return out;
+    }""")
+    ck("exactly the row with a plan is lit, and it is PAINTED differently",
+       lit.get("nOn") == 1 and lit.get("onBg") and lit.get("onBg") != lit.get("offBg") and
+       lit.get("onBg") != "rgba(0, 0, 0, 0)", lit)
+
     yn = ev(pg, """() => {
       const p = UNITS.mobile.items.find(x => x.code === '03');
       const m = p.measures[1];

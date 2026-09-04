@@ -82,6 +82,28 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §261.2 — a mark, not a word (2026-09-04, same branch)
+
+Islam, of what §261 shipped: *"the button montthly is big. do you suggest other
+options for it's setting or placement?"*
+
+**Measuring it reframed the complaint.** Four treatments drawn into the live
+table all leave the Target box between 334 and 343px and the row at 57px — the
+column had the slack, so this was never about room. It was bordered, uppercase
+and bold, eight times down one column, on rows that mostly will never use it.
+
+**He picked the 24px mark** — twelve cells, four across and three down, wearing
+the eye's own 24×22 and amber lit state from two columns to its left, declared
+in one CSS block with it. It is the only one of the four where *which of these
+eight has a monthly plan* reads at a glance. The caret was drawn and refused:
+invisible lit state, and it reads as a dropdown for the box beside it.
+
+Cost stated: the hover is now the only thing that says what the control is, so
+it says it in full and on `aria-label` too.
+
+`checks/monthly-plan.py` 51/51 · 497/0 · 131/0 · full sweep ERRORS none · six
+neighbouring checks green. **On the branch, not merged.**
+
 ### §261 — a target with a shape of its own (2026-09-03, branch `claude/seasonal-targets-monthly-proration-5clvu3`)
 
 Islam: *"targets proration is always flat acorss the year but some targets have

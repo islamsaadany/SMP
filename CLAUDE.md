@@ -463,6 +463,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   anything — the normalised-shape alternative was drawn and refused, because
   months adding to 1.05B under a 1.0B target stop matching what was typed.
   **ALL FOUR SURFACES** (his (b)) and **reporting unchanged** (his (c)).
+  **§261.2 — A MARK, NOT A WORD**: Islam, of what shipped — *"the button
+  montthly is big."* **MEASURING IT REFRAMED THE COMPLAINT**: four treatments
+  drawn in the live table all leave the Target box between 334 and 343px and the
+  row at 57px, so the column had the slack and this was never about room — it
+  was bordered, uppercase and bold, eight times down one column, on rows that
+  will mostly never use one. **EACH DRAWN IN BOTH STATES**, which is what
+  decided it: an option that is small and cannot say *this one is set* has moved
+  the problem, not solved it. He picked the **24px mark** (twelve cells, four
+  across and three down) — **the platform's own per-row control**, the eye's own
+  24×22 and amber lit state from two columns left, **declared in ONE CSS block
+  with it** because they are one shape (§53.5). 72 → 24px, and it is the only
+  one of the four where *which of these eight has a plan* reads at a glance.
+  **The cost is stated**: the hover is now the only thing saying what it is, so
+  it says it in full and on `aria-label` too (§124). **SVG, never a font
+  character** (§52). **The caret was drawn and REFUSED** — invisible lit state,
+  and a bare caret on a text field reads as a dropdown for that field. The
+  check's lit assertion is measured as PAINT, and **its first run reported a
+  correct build broken** by reading a computed style after `paint()` detached
+  the node (§222).
   **A DRAWER, NOT A PANEL**, from the signed-off mockup: `tr.dxband`'s own
   full-width shape (§99), the chip INLINE so the Target box goes 303 → 306px
   and the row 56 → 57 (the column had the slack), twelve boxes needing 970px and
@@ -4623,7 +4642,11 @@ python3 checks/monthly-plan.py  # a target with a shape of its own (§261): the
                                 # 36 red on the shipped build before; its own
                                 # first falsification run DIED and reported 9
                                 # (§215), and two of its assertions could not
-                                # fail as written (§94.5)
+                                # fail as written (§94.5). §261.2 adds the mark:
+                                # 24x22, TWELVE CELLS and not merely "an svg",
+                                # no text with the meaning on the hover AND the
+                                # aria-label, and exactly the row with a plan
+                                # lit — measured as PAINT, never as a class
 python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its own
                                 # window, not the year (§250): the share asserted as
                                 # AGREEMENT with a month count the check works out for
@@ -4935,7 +4958,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;261: a target with a shape of its
+*Last Updated: 2026-09-04 &mdash; **&sect;261.2: a mark, not a word.** Islam,
+of what &sect;261 shipped: *"the button montthly is big. do you suggest other
+options for it's setting or placement? think of it"* &mdash; and **measuring it
+reframed the complaint**, which is the part worth keeping. Four treatments were
+drawn into the live editing table and every one leaves the Target box between
+**334 and 343px** and the row at **57px**: the column had the slack all along,
+so the control comes out of the column's spare width and never out of the box.
+It was not big in the sense of taking room. It was **bordered, uppercase and
+bold** &mdash; three emphasis devices on a secondary control &mdash; repeated
+eight times down one column on rows that will mostly never carry a monthly plan,
+so the right answer was never "make it narrower": the quietest option buys no
+space at all, it only stops shouting. **EACH WAS DRAWN IN BOTH STATES**, and
+that is what decided it &mdash; an option that is small and cannot say *this one
+is set* has moved the problem rather than solved it. **He picked the 24px
+mark**: twelve cells, four across and three down, which is **the platform's own
+per-row control** &mdash; the eye that hides a row sits on the same row two
+columns left at exactly 24&times;22 with an amber lit state, so the mark takes
+ITS numbers and the two are declared in ONE CSS block because they are one shape
+(&sect;53.5). It is the only one of the four that answers the question people
+actually ask, *which of these eight has a monthly plan*, from across the table.
+**The cost is stated**: with the word gone the hover is the only thing that says
+what it is, so it says it in full and sits on `aria-label` as well as `title`
+(&sect;124). **Drawn as SVG, never a font character** (&sect;52). **The caret
+was drawn and REFUSED**, recorded rather than left out: its lit state is
+invisible and a bare caret against a text field reads as a dropdown that would
+fill it. Four new assertions, and **the first run of the lit one reported a
+correct build as broken** by reading a computed style after `paint()` had
+detached the node (&sect;222's own lesson). 497/0 &middot; 131/0 &middot; full
+sweep ERRORS none &middot; six neighbouring checks green. **On the branch, not
+merged.***
+
+*Earlier: 2026-09-03 &mdash; **&sect;261: a target with a shape of its
 own.** Islam: *"targets proration is always flat acorss the year but some
 targets have seasonality so the proration is not valid so some targets needs a
 monthly plan input so the calculation becomes more accurate."* **THE ARGUMENT IS

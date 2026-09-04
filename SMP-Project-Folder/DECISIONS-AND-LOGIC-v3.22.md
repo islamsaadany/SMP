@@ -29903,3 +29903,62 @@ asserts BOXES and not spans.
 - **The unit's and the capability's objective tables print `progress`**, the
   stored raw ratio, rather than `measureScore` — so a monthly plan does not move
   what those two tables show. That predates this and is unchanged by it.
+
+## §261.2 — A MARK, NOT A WORD (2026-09-04)
+
+Islam, of what §261 shipped: *"the button montthly is big. do you suggest other
+options for it's setting or placement? think of it"*
+
+**MEASURING IT REFRAMED THE COMPLAINT, AND THAT IS THE PART WORTH KEEPING.**
+Four treatments were drawn into the live editing table and every one of them
+leaves the Target box between **334 and 343px** and the row at **57px** — the
+column had the slack all along, so the control comes out of the column's spare
+width and never out of the box. It was not big in the sense of taking room. It
+was big in the sense of **bordered, uppercase and bold** — three emphasis
+devices on a secondary control — repeated **eight times down one column**, on
+rows that mostly will never carry a monthly plan. The right answer was
+therefore never "make it narrower"; the quietest option buys no space at all,
+it only stops shouting.
+
+**EACH WAS DRAWN IN BOTH STATES**, which is what decided it: row 4 carried a
+monthly plan and the other seven did not, because an option that is small and
+cannot say *this one is set* has moved the problem rather than solved it. That
+test is what eliminated the smallest one.
+
+**ISLAM PICKED THE MARK.** Twelve cells, four across and three down — a year by
+month, without a word. **It is the platform's own per-row control**: the eye
+that hides a row sits on the same row two columns to its left at exactly
+24×22px with an amber lit state, so the mark takes ITS numbers rather than a
+second set of nearly-equal ones, and the two are **declared in one CSS block**
+because they are one shape (§53.5: two blocks drift the first time either is
+touched). 72px → 24px.
+
+**IT IS THE ONLY ONE OF THE FOUR THAT ANSWERS THE QUESTION PEOPLE ACTUALLY
+ASK.** *Which of these eight measures has a monthly plan* gets asked every time
+the plan is opened; *what does this button do* gets asked once. The lit row
+wears the attention ground and the other seven are grey, so the first question
+is answered from across the table.
+
+**THE COST IS REAL AND IS STATED**: with the word gone, the hover is the only
+thing on the control that says what it is. So the hover says it in FULL on a
+row that has none — *"Set this target month by month"* — rather than the count
+alone, and it is on `aria-label` as well as `title`, or the button has no
+accessible name at all once its text is removed (§124).
+
+**DRAWN AS SVG, NEVER A FONT CHARACTER** (§52, §120.2, §185): a glyph can be
+mapped and not drawn, and ships as a blank box — this project has been bitten
+by that twice, once into the seed.
+
+**THE CARET WAS DRAWN AND REFUSED**, and it is recorded rather than left out:
+at 13px it is the quietest of the four, its lit state is invisible so a plan
+with three seasonal measures looks exactly like one with none, and a bare caret
+against a text field reads as a dropdown that would fill that field — which is
+not what it does.
+
+`checks/monthly-plan.py` gains four assertions: the mark is 24×22, it is
+**twelve cells** and not merely "an svg", it carries no text and says what it is
+to a hover AND to a screen reader, and **exactly the row with a plan is lit,
+measured as PAINT rather than as a class** (§145.14: a build that lost the rule
+keeps the class). **The lit assertion's first run reported a correct build as
+broken** — it read `getComputedStyle` after `paint()` had detached the node,
+which computes to an empty string (§222's own lesson, §68.10's family).

@@ -3331,46 +3331,16 @@ function monthlyShape(row, fld){
     ? { compile: row.outCompile, monthly: row.outMonthly }
     : row;
 }
-/* ── TWELVE CELLS, FOUR ACROSS AND THREE DOWN (§261.2) ─────────────
-   A year by month, without a word. DRAWN rather than a font character, for
-   §52's reason: a glyph can be MAPPED and not DRAWN, and ships as a blank box
-   — this project has been bitten by that twice, and once it reached the seed.
-   `currentColor`, so the button's own lit state colours it. */
-function monthlySvg(){
-  var s = '<svg viewBox="0 0 16 14" aria-hidden="true"><g fill="currentColor">';
-  for (var r = 0; r < 3; r++)
-    for (var c = 0; c < 4; c++)
-      s += '<rect x="' + (1 + c * 4) + '" y="' + (1 + r * 4) +
-           '" width="3" height="3" rx=".6"/>';
-  return s + '</g></svg>';
-}
 /* THE WAY IN, on every row that could have one — a plan with no monthly
    shape must still be able to grow its first (§61). Lit once anything has
-   been typed, so a plan somebody is halfway through is findable again.
-
-   A MARK AND NOT A WORD (§261.2), Islam's choice from four drawn in the real
-   table: *"the button montthly is big"*, and it was — bordered, uppercase and
-   bold, on eight rows that mostly will not use one. The mark is 24px against
-   72, it is the same control the eye beside it already is, and it is the only
-   one of the four where WHICH rows carry a monthly plan reads at a glance,
-   because the lit row wears the amber ground. Measured before he chose: all
-   four leave the Target box between 334 and 343px, so this was never about
-   room.
-
-   THE WORD MOVES TO THE HOVER, which is now the only thing that says what this
-   is — so it says it in full on a row that has none, rather than the count
-   alone (§124: a control whose meaning is not on its face has to carry it
-   somewhere). `aria-label` too, or the button has no accessible name at all
-   once the text is gone. */
+   been typed, so a plan somebody is halfway through is findable again. */
 function monthlyChip(row, fld){
   var n = SMPRules.monthlySet(monthlyShape(row, fld)),
       k = monthlyKey(row, fld), open = MONTHOPEN === k;
-  var word = n ? n + " of 12 months set — the target month by month"
-               : "Set this target month by month";
   return '<button class="mpopen' + (n ? ' on' : '') + '" data-mpopen="' + esc(k) +
-    '" aria-expanded="' + (open ? 'true' : 'false') +
-    '" title="' + esc(word) + '" aria-label="' + esc(word) + '">' +
-    monthlySvg() + '</button>';
+    '" aria-expanded="' + (open ? 'true' : 'false') + '" title="' +
+    (n ? esc(n + ' of 12 months set') : 'Give this target a shape month by month') +
+    '">Monthly' + (open ? ' ▾' : '') + '</button>';
 }
 /* The sentence under the boxes. Its own builder because it is rewritten IN
    PLACE as somebody types — a repaint under a typing hand destroys the box

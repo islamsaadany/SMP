@@ -33136,3 +33136,56 @@ reports.
 
 Neighbours green: `notes-slide`, `hide-slide` 42/0, `deck-blank-slides`,
 `deck-dividers`, `deck-outcome`, `deck-figures`. Full `qa.py` sweep ERRORS none.
+
+---
+
+## §280.1 — A CHECK THAT COULD NO LONGER GO GREEN (2026-09-04)
+
+Found while running the neighbours after §280's merge: `checks/report-chrome.py`
+failed one assertion, *"Submit is filled"*. **Reproduced on `main`'s OWN build
+before anything was concluded** — identical failure, same values — so it was
+established as not the deck's before a line of it was read.
+
+**THE PRODUCT IS RIGHT AND THE CHECK IS STALE**, and both halves were measured
+rather than reasoned about. On Mobile the button is `aria-disabled="true"` with
+**6 rows owing a note and 44 plan gaps**, drawn quiet: §221's held state,
+working exactly as decided. With the gate stubbed open and the page repainted,
+the same button is **`rgb(164, 81, 44)`** with white ink — §222's fill, exactly
+as specified. So Submit *is* filled when it can be pressed.
+
+The assertion asked for the fill **unconditionally**. It was written on
+2026-08-31 under §222, when Submit was always solid; §221 gave it a held state
+the same day and nobody came back here. §51.11 in its plainest form.
+
+**AND IT COULD NEVER HAVE GONE GREEN AGAIN**, which is what makes it worth a
+section rather than a one-line edit: every one of the ten demo units is blocked
+by something — `mobile 6n/44g`, `retailstores 2n/16g`, `b2becomm 11n/12g`,
+`consumerelectronics 5 owed`, `nigeria 16 owed` — so the state it asserted is
+unreachable on the shipped data. A check that cannot pass is a red line people
+learn to scroll past, and it takes the honest ones down with it.
+
+**REWRITTEN, NOT DELETED** (§218) and asserted at **both ends** (§94.2,
+§113.8): held while the report is incomplete, saying why; filled the moment the
+gate opens, with light ink on it (§38.4). The open state is **MADE**, because no
+demo unit provides one.
+
+**TWO THINGS THE REWRITE HAD TO GET RIGHT.** The reason rides `data-tip` — the
+platform's own bubble, which opens on hover AND focus (§163) — never a native
+`title`, so asking for a `title` would have been an assertion that could not
+pass, the very fault being repaired. And the neighbouring *"Save draft's ink is
+the same hue family as Submit's fill"* was comparing against the HELD button:
+`rgb("rgba(0, 0, 0, 0)")` parses to `(0, 0, 0)` rather than to nothing, so it
+was passing over a value that means *no colour at all* (§94.5). It compares
+against the fill Submit actually wears now.
+
+**Proved able to fail, from the SOURCES rather than by editing the built file**
+(§238's hashed CSP silences a script block whose bytes changed, §276): a held
+Submit given the fill back fails *"a held Submit is deliberately NOT filled"*;
+Submit stripped of its fill entirely fails *"...and THEN it is filled"* and the
+hue-family assertion beside it. Each falsification lands on the assertion it
+should, and on no other.
+
+Nothing on any screen moves: `arrange.css` and every source file are
+byte-identical to the merged state, confirmed by diff. `report-chrome`,
+`submit-gate`, `report-saves`, `report-blockers`, `perf-line` and
+`deck-fullscreen` green; full `qa.py` sweep ERRORS none.

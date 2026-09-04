@@ -6054,7 +6054,36 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;280: a finger gets a way back.**
+*Last Updated: 2026-09-04 &mdash; **&sect;280.1: a check that could no longer
+go green.** Found running the neighbours after &sect;280's merge:
+`checks/report-chrome.py` failed *"Submit is filled"* &mdash; **reproduced on
+`main`'s OWN build before anything was concluded**, so it was established as not
+the deck's before a line of it was read. **THE PRODUCT IS RIGHT AND THE CHECK IS
+STALE**, both halves measured: on Mobile the button is `aria-disabled` with six
+rows owing a note and 44 plan gaps, drawn quiet &mdash; &sect;221's held state
+working as decided &mdash; and with the gate stubbed open the same button is
+`rgb(164, 81, 44)` with white ink, which is &sect;222's fill exactly. The
+assertion asked for the fill UNCONDITIONALLY; it was written under &sect;222 when
+Submit was always solid, &sect;221 gave it a held state the same day, and nobody
+came back (&sect;51.11). **AND IT COULD NEVER HAVE GONE GREEN AGAIN**, which is
+what makes it worth recording: all ten demo units are blocked by something, so
+the state it asserted is unreachable on the shipped data &mdash; *a check that
+cannot pass is a red line people learn to scroll past, and it takes the honest
+ones with it.* **Rewritten, not deleted** (&sect;218) and asserted at both ends:
+held and saying why, then filled the moment the gate opens, with the open state
+MADE because no demo unit provides one. Two traps on the way &mdash; the reason
+rides `data-tip` and not a native `title`, so asking for a title would have been
+another assertion that could not pass; and the neighbouring hue-family assertion
+was comparing against the HELD button, where `rgb("rgba(0,0,0,0)")` parses to
+`(0,0,0)` rather than to nothing, so it was passing over a value meaning *no
+colour at all* (&sect;94.5). **Proved able to fail from the SOURCES**, because
+&sect;238's hashed CSP silences a script block whose bytes changed (&sect;276):
+the fill given back to a held Submit, and the fill removed altogether, each
+failing its own assertion and no other. Nothing on any screen moves &mdash;
+every source byte-identical to the merged state, confirmed by diff.*
+
+
+*Earlier the same day: **&sect;280: a finger gets a way back.**
 Islam, presenting from a tablet: *"on a tablet it doesn't go left or right."*
 **&sect;265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET** &mdash; its
 forward-only click is argued from a PROJECTOR, where the audience sees every

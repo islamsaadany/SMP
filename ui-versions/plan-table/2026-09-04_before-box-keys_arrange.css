@@ -1942,12 +1942,9 @@ th .subhd { font-weight:400; }
    than pushing the quarter marks off the end — and `min-width:0` on the select
    or a flex item refuses to shrink below its own content and does the pushing
    anyway (§100.5's rule, one box in). */
-.tacfold { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 16px;
-           margin-top:10px; }
+.tacfold { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px;
+           margin-top:8px; }
 .tacfold > * { min-width:0; }
-/* Each of the two is a named column of its own inside the strip, so its key
-   sits ABOVE its control rather than beside it (§267.2, Islam). */
-.tacfold > span { display:flex; flex-direction:column; align-items:flex-start; }
 /* A NAMELESS CONTROL MUST AT LEAST LOOK LIKE ONE. With its column heading gone
    (Islam) the collaborators picker on a tactic nobody supports is the platform's
    em-dash and a caret — 55px, measured — which beside four numbered marks reads
@@ -1970,27 +1967,3 @@ th .subhd { font-weight:400; }
 @media (max-width: 1200px) {
   .tgrid { grid-template-columns: var(--tw); }
 }
-
-/* ── EVERY BOX SAYS WHAT IT IS (§267.2) ─────────────────────────────────
-   Islam, of the cell §267 left behind: *"can we add a small title above the
-   tactic name and description to show what these boxes are"*, and then
-   *"collabs as well needs titles so name all 3 and the collbs and quarters"*.
-   Two prose boxes stacked on each other with a picker and four marks under
-   them, and the only thing naming any of it was a column heading — one of
-   which §267 had just taken away.
-
-   IT IS THE PLATFORM'S OWN KEY, not a new voice: the same 10px uppercase grey
-   the reported note wears on Performance (§255). And it is a NAME, never a
-   description — 1b-ii is about prose under a heading, and this is the label
-   of a control that had none.
-
-   THE SPACING IS THE WHOLE OF ISLAM'S CORRECTION, and the first drawing had
-   it wrong: *"titles of boxes needs to be closer to their box not the box
-   above — like description title is stuck to the tactic box"*. A key with 3px
-   under it and nothing over it belongs, visually, to whatever ended above it.
-   The gap over is four times the gap under, so a key reads down onto the box
-   it names — and the first key in a cell has nothing above it to be pushed
-   away from. */
-.bxkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
-         font-weight:700; color:var(--ink-3); margin:12px 0 3px; white-space:nowrap; }
-td > .bxkey:first-child, .tacfold .bxkey { margin-top:0; }

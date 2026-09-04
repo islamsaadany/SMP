@@ -171,6 +171,27 @@ A drift between specs and code is a documentation bug — report it before silen
   prose columns; with the fold and the stack in place the Tactic column is
   247px at a 1000px window on its own, so the floor would only be a thing to
   explain later (§2b).
+- **A BOX SIZED AT PAINT TIME CLIPS ON A RESIZE (§267.2).** A growing field is
+  sized by MEASURING its text (§189), at the end of a paint — so a window that
+  narrows without crossing a repaint threshold leaves the box holding a height
+  measured at the old width. **Only ever on a resize**, which is why nothing saw
+  it: opened at 1000px, 0 of 15 boxes cut; **narrowed** to 1000px, 9. Re-fit on
+  resize (one frame, sets a height, no paint, no state) — and assert it by
+  NARROWING, never by loading, or the check passes on the broken build.
+- **A KEY BELONGS TO THE BOX BELOW IT (§267.2).** Islam: *"the description title
+  is stuck to the tactic box"* — a label with 3px under it and nothing over it
+  reads as belonging to whatever ended above. The gap over is four times the gap
+  under; assert **over > under**, never either number. And name a control only
+  where nothing else does: with a column heading above it, a key underneath says
+  the word twice on one row (§87), so the folded tail's two are named and the
+  unfolded ones are not.
+- **A FIXED RAIL BESIDE A SQUEEZED TABLE IS THE FIRST THING TO SPEND (§267.2,
+  amending §162).** 196px of fixed width plus a gutter, beside the table through
+  the whole band where the prose columns are collapsing — and its own names
+  wrapping to four lines, so *the list is taller than the pane it is narrowing*.
+  Across at 1200 is worth a third more width to the prose (Tactic 369 → 492px at
+  1200) and takes 40–110px OFF every row. 820 was never argued as the right width
+  for it; it is where the page stops being two columns at all.
 - **A FIX FOR THE STRIPE IS NOT A FIX FOR THE HOVER (§267.1).** §73.2 gave the
   two FROZEN columns `background:inherit` so a striped row is striped all the
   way across, and answered the stripe only: `tbody tr:hover > td` is outranked
@@ -5072,6 +5093,12 @@ python3 checks/plan-tail-fold.py # the plan table at a narrower window (§267): 
                                 # unchanged, and narrowing the window folding the tail
                                 # with NO reload — the reported case is a zoom. 55 red
                                 # on the build before, on a unit AND a pillars function
+                                # — and since §267.2 the five box keys (drawn only with
+                                # the pen; the tail's two only where they have left their
+                                # columns), each key's gap asserted as over > under rather
+                                # than as a number, the pillars across at 1200 and beside
+                                # above it, and the boxes NARROWED to four widths and
+                                # asserted to fit their own text (37 red on the §267 build)
 python3 checks/email-link.py    # the link that LEAVES, read out of the html posted to
                                 # /api/mail — never the value in the box, which looked
                                 # right the whole time; both send buttons, both ends of

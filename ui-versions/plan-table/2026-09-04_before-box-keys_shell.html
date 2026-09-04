@@ -2486,39 +2486,12 @@
      on blur (§35), so repainting while one has the cursor destroys the box
      mid-word and the value with it. The paint waits for the blur that was
      going to commit it anyway. */
-  /* ── AND THE BOXES ARE RE-MEASURED WHEN THE WINDOW MOVES (§267.2) ────
-     Islam, of the §267 build: *"the tactic and description and outcome boxes
-     stopped fitting the content and started cutting it"*. A defect, and it is
-     §267's own: a growing box is sized by MEASURING its text (§189), and that
-     measurement happens at the end of a paint. `watchTailFold()` below
-     repaints only when the fold FLIPS, which is right — so between 1400 and
-     the next threshold the window narrows, the boxes narrow, the text needs
-     another line, and nothing re-measures them. The box keeps the height it
-     was given at the old width and clips.
-
-     IT ONLY EVER HAPPENS ON A RESIZE, which is exactly what a zoom is, and is
-     why nothing caught it: a page OPENED at 1000px has none of its fifteen
-     boxes cut, and the same page NARROWED to 1000px has nine.
-
-     Cheap enough to run on every frame of a drag and it is still throttled to
-     one, because resize fires per pixel. It sets a height and nothing else —
-     no paint, no state, nothing to disturb a half-typed sentence, which is
-     what lets it run under a cursor where a repaint may not (§35). */
-  var GROWSOON = 0;
-  function refitGrowOnResize(){
-    if (GROWSOON || typeof growFields !== "function") return;
-    GROWSOON = requestAnimationFrame(function(){ GROWSOON = 0; growFields(); });
-  }
-
   var TAIL_WATCHED = false, TAIL_WAS = false;
   function watchTailFold(){
     TAIL_WAS = typeof tailFolds === "function" && tailFolds();
     if (TAIL_WATCHED || typeof window === "undefined") return;
     TAIL_WATCHED = true;
     window.addEventListener("resize", function(){
-      /* First, and whatever the fold does: the boxes must fit their text at
-         the width the window is NOW (§267.2). */
-      refitGrowOnResize();
       if (typeof tailFolds !== "function") return;
       var now = tailFolds();
       if (now === TAIL_WAS) return;

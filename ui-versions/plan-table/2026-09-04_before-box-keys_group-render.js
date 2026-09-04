@@ -286,11 +286,6 @@ function miniTable(head, rows, sort, cls){
    changes at all (his instruction), and the whole ladder is the PEN's — read
    mode's columns are all text and shrink together (192px of Tactic at 1100,
    rows 140), and fill mode is deliberately left where §249.2 recorded it. */
-/* A BOX'S OWN NAME (§267.2). Drawn only with the pen: reading mode has a bold
-   name and a grey line under it, which are told apart by their weight, and a
-   key over each would spend height on a table nobody is filling in. */
-function bxkey(word){ return '<span class="bxkey">' + esc(word) + '</span>'; }
-
 var TAIL_FOLD_W = 1400;
 function tailFolds(){
   return typeof window !== "undefined" && !!window.innerWidth &&
@@ -2771,11 +2766,8 @@ function selectManyOr(page, values, opts, cls, setter, label){
   var i = FIELDS.push(setter) - 1;
   var has = {};
   list.forEach(function(v){ has[v] = 1; });
-  /* `aria-label` and NOT `title`: since §267.2 the folded strip draws the name
-     where anybody can read it, so a tooltip repeating it is noise over a
-     control that already says what it is. */
   return '<select class="fld ' + (cls || '') + '" multiple data-fld="' + i + '"' +
-    (label ? ' aria-label="' + esc(label) + '"' : '') + '>' +
+    (label ? ' aria-label="' + esc(label) + '" title="' + esc(label) + '"' : '') + '>' +
     optionsHtml((opts || []).filter(function(o){ return o !== ""; }),
       function(v){ return has[v] === 1; }) + '</select>';
 }
@@ -5830,9 +5822,8 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? bxkey("Tactic") : '') +
-        (ed ? textOr("plan", t.name, "", function(v){ t.name = v; })
-            : '<b class="tacname">' + esc(t.name) + '</b>') +
+      '<td>' + (ed ? textOr("plan", t.name, "", function(v){ t.name = v; })
+                    : '<b class="tacname">' + esc(t.name) + '</b>') +
         (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
         xb("tactics", t.id) +
         /* THE DESCRIPTION SITS UNDER THE TACTIC'S OWN NAME, in the same cell,
@@ -5845,7 +5836,7 @@ function unitPlanBody(it, u, railed){
 
            §158 comes free with it: seven columns fit the pane at every width,
            so nothing has to fold and no plan table scrolls sideways. */
-        (ed ? bxkey("Description") + textOr("plan", t.description || "", "tacdesc",
+        (ed ? textOr("plan", t.description || "", "tacdesc",
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
         /* §267: AND THE TAIL, when the window is too narrow for it to be two
@@ -5855,9 +5846,9 @@ function unitPlanBody(it, u, railed){
            170. Their headings are gone with their columns (Islam), so each
            control carries its own name (`aria-label`, above and in qsEdit). */
         (fold ? '<div class="tacfold">' +
-                  '<span class="collabs">' + bxkey("Collabs.") + collabsHtml + '</span>' +
+                  '<span class="collabs">' + collabsHtml + '</span>' +
                   '<span role="group" aria-label="Quarters this tactic runs in">' +
-                  bxkey("Quarters") + quartersHtml + '</span></div>' : '') +
+                  quartersHtml + '</span></div>' : '') +
         '</td>' +
       /* WHAT IT SHOULD PRODUCE (§248), AND IT IS OWED (§249, reversing that
          section's own exclusion at Islam's direction: *"the tactics outcome
@@ -5868,7 +5859,7 @@ function unitPlanBody(it, u, railed){
          definition and runs off the end — and it is a counted gap now, so the
          CONTROL is the hook's while the lifecycle, the red word and the walk
          mark stay gapCell's. §130.1's shape exactly, for its reason. */
-      '<td>' + (ed ? bxkey("Outcome") : '') + gapCell("plan", "u_plan", t, "outcome", {
+      '<td>' + gapCell("plan", "u_plan", t, "outcome", {
         /* §228.2: NAMING THE KIND IS WHAT KEEPS THE TWO LISTS ONE. Without
            it the cell opens to a filler whatever the shared list says, so a
            later decision to stop counting these would leave the box open and

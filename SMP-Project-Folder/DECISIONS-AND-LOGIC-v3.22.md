@@ -30779,3 +30779,77 @@ hover response it has never had is a change nobody asked for (§2b). Both
 parities are asserted, at a folded width and an unfolded one, as **one ground
 across every cell** rather than as a colour — so a later palette change stays
 green and a build that re-splits the row does not.
+
+### §267.2 — Every box says what it is, and the pillars go across at 1200
+
+Islam, from the shipped §267 build, three things in one message. One of them
+was a defect of mine, one a decision, one a decision whose remedy he proposed
+himself; all three were measured on the running platform and drawn for sign-off
+before anything was built (`design-mockups/plan-table-round-2/`).
+
+**THE BOXES CUTTING THEIR TEXT WAS §267'S OWN FAULT.** A growing box is sized
+by MEASURING its text (§189), and that measurement happens at the end of a
+paint. §267's watcher repaints only when the fold FLIPS — which is right, and
+which means that between 1400 and the next threshold the window narrows, the
+boxes narrow, the text needs another line, and **nothing re-measures them**:
+the box keeps the height it was given at the old width and clips. It happens on
+a RESIZE only, which is exactly a zoom, and never on a load — measured, a page
+**opened** at 1000px has none of its fifteen boxes cut and the same page
+**narrowed** to 1000px has nine, the box holding 53px where the text needs 93.
+`refitGrowOnResize()` sets a height and nothing else: no paint, no state,
+nothing that can disturb a half-typed sentence, throttled to one frame because
+resize fires per pixel. **The check asserts it by NARROWING, never by loading**
+— an assertion that opens the page at each width passes on the broken build.
+
+**EVERY BOX IS NAMED, AND THE SPACING IS ISLAM'S CORRECTION.** *"can we add a
+small title above the tactic name and description to show what these boxes
+are"*, then *"collabs as well needs titles so name all 3 and the collbs and
+quarters"* — five keys: Tactic · Description · Collabs. · Quarters · Outcome.
+**It is the platform's own key** (10px uppercase grey, the one §255's reported
+note wears) and it is a control's NAME, not prose under a heading, so 1b-ii is
+untouched. **The words are the columns' own** — `Collabs.`, not
+*Collaborators*, because that is what the heading said before §267 took it off
+(§53.5; the full form stays on the control's `aria-label`, and the `title`
+that duplicated it is gone now that the name is on screen). **THE FIRST
+DRAWING PUT THE GAP IN THE WRONG PLACE** and he caught it: *"titles of boxes
+needs to be closer to their box not the box above — like description title is
+stuck to the tactic box"*. A key with 3px under it and nothing over it belongs,
+visually, to whatever ended above it; the gap over is four times the gap under
+now, and the check asserts **over > under** rather than either number.
+**Collabs. and Quarters are named only where they have LEFT their columns** —
+with a heading above them a key underneath would say the word twice on one row
+(§87) — and **the keys are the pen's**: reading mode has a bold name and a grey
+line, told apart by their weight, and a key over each would spend height on a
+table nobody is filling in. Asserted absent there.
+
+**AND THE PILLARS GO ACROSS AT 1200 (amending §162).** His own proposal:
+*"the tactics table starts to require oritontal scrolling while we can make the
+pillars go up before that happens to give space"*. 820 was never argued as the
+right width for that — it is the width at which the page stops being two
+columns at all — and the rail is **196px of fixed width plus its gutter**
+sitting beside the table through the whole band where §267 is fighting for the
+prose, with its four pillar names wrapping to three and four lines inside it:
+*the list is taller than the pane it is narrowing.* Measured, rail beside then
+across: the Tactic column **369 → 492px** at 1200, **296 → 438** at 1100,
+**250 → 401** at 1000, **178 → 331** at 900 — and because the prose then needs
+fewer lines the rows get SHORTER, 278 → 170px at 1000. The costs were stated
+before he chose: the strip **scrolls sideways** when the pillars do not fit
+(four at 1200 leaves the fourth half off the end, where the column showed all
+four at once), it drops the rail's own header and footer, and the table starts
+about **112px further down** — paid once, against every row.
+
+**WHAT WAS NOT REPRODUCED IS SAID AS SUCH.** The tactics table does not scroll
+sideways on the demo at any width from 1400 down to 600: it stays inside its
+pane and the page never scrolls sideways either. What reproduces is the
+pressure one step earlier — the prose columns at 142px on an 830px window. The
+remedy is the same, so this was not a reason to wait, and the claim is not made.
+
+**Proved able to fail: 37 red** on the shipped §267 build, across the naming,
+the spacing, the rail and the narrowing. **Two of the check's own first
+failures were the CHECK**: the key order it expected put Outcome third, where
+the row's DOM has it last (it is in the next cell); and §267.1's hover probe
+stopped landing once the rail moved the table 112px down, reporting a row that
+was never hovered as a row that is not one colour (§94.5's shape). And
+`checks/squeezed-rail.py` held the 820 threshold in three places — REWRITTEN,
+not deleted (§218, §214.3), because a check left asserting the old number
+reports a decision as a regression.

@@ -631,7 +631,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **RECORDED, NOT DONE**: a single deck still draws one unlabelled dot per slide,
   nothing says the order is saved without presenting it, and a flow cannot be
   downloaded.
-- **A FUNCTION'S PRESENTATION BUTTON SITS WHERE A UNIT'S DOES (§272):** Islam —
+- **A FUNCTION'S PRESENTATION BUTTON SITS WHERE A UNIT'S DOES (§275):** Islam —
   *"can you move the presntation button for the functions to be in the same place
   like what we did in the units while having the bands button as well?"*
   **MEASURING NARROWED THE ASK BEFORE ANYTHING WAS PROPOSED**: this was the ONLY
@@ -656,7 +656,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   outside the ask, asserted as an absence. Screen only: no `api/`, `lib/` or
   `db/` file touched, read off the diff. **THE FIT WAS MEASURED** (§158: *fit,
   never "and it scrolls"*) — one line at 1920 down to 768, 151px still clear at
-  the narrowest. **16 red** on the build before. **§272.1 — AND ONE OF ITS OWN
+  the narrowest. **16 red** on the build before. **§275.1 — AND ONE OF ITS OWN
   ASSERTIONS COULD NOT FAIL**: it measured the content's start off
   `panel.firstElementChild`, and **before the change the `.pageact` div WAS that
   child**, so it went green on the reverted build (§113.8, found by falsifying
@@ -1172,7 +1172,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   first; two assertions changed MEANING rather than selector; and my own widened
   selector in `fn-pillars` then wrote to the wrong field while asserting the
   right one (§94.8).
-  **AND THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (§271):** it ran against
+  **AND THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (§274):** it ran against
   the BRANCH, correctly, and main then handed over two more checks written
   against the pen where it used to be — `one-line-titles.py` (§253) and
   `plan-tail-fold.py` (§267), both added on main after the sweep. *A merge
@@ -5111,7 +5111,7 @@ python3 checks/setup-arrange.py # the Setup tables are arranged and their rows a
                                 # own assertions passed vacuously there before they were
                                 # tightened (§113.8)
 python3 checks/fn-perf-controls.py # a supporting function's Performance controls sit
-                                # where a unit's do (§272): both pages asserted to DRAW
+                                # where a unit's do (§275): both pages asserted to DRAW
                                 # both controls before the two are compared (two empty
                                 # rows agree perfectly), the page body asserted EMPTY of
                                 # them, the position asserted as AGREEMENT and never as a

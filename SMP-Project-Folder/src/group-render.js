@@ -5053,7 +5053,7 @@ function renderFnPerformance(fnKey){
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment.
 
-     ── AND IN THE SAME PLACE AS A UNIT'S (§272) ──────────────────────────
+     ── AND IN THE SAME PLACE AS A UNIT'S (§275) ──────────────────────────
      Islam: *"can you move the presntation button for the functions to be in
      the same place like what we did in the units while having the bands
      button as well?"*

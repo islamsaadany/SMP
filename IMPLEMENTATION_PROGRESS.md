@@ -35,7 +35,7 @@ hold (§91, §94.12, §94.16) — the built file's bytes have changed.
 **Latest version:** **§268, §269 and §270 are ON `main`** — the strategy pen on
 the section line, one edit for the whole tab, and three loose ends closed —
 merged 2026-09-02 on Islam's word, verified live (production serves the merged
-bytes; gate 200, api 401). **§271 is the audit of that merge**, asked for
+bytes; gate 200, api 401). **§274 is the audit of that merge**, asked for
 straight afterwards: nothing in the product was damaged, and the merge did leave
 three of main's own checks reading a control that had moved — two failing
 loudly, one (`band-corner`) falling silent while still printing "all passed".
@@ -112,7 +112,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §272 — a function's Presentation button sits where a unit's does (2026-09-04, branch `claude/plans-edit-button-placement-jxw8or`)
+### §275 — a function's Presentation button sits where a unit's does (2026-09-04, branch `claude/plans-edit-button-placement-jxw8or`)
 
 Islam: *"can you move the presntation button for the functions to be in the same
 place like what we did in the units while having the bands button as well?"* —
@@ -144,16 +144,16 @@ the narrowest.
 Green: `fn-perf-controls` (new, **16 red** on the build before), `perf-line`,
 `fn-pillars`, `scoring-bands`, `hide-slide`, `setup-header`, and the full
 `qa.py` sweep. `report-chrome`'s one failure reproduces byte-for-byte on main
-(§271's list) and is not this change's.
+(§274's list) and is not this change's.
 
-**§272.1 — one of the new check's own assertions could not fail as written**: it
+**§275.1 — one of the new check's own assertions could not fail as written**: it
 measured the content's start off `panel.firstElementChild`, and before the change
 the `.pageact` div WAS that child, so it went green on the reverted build
 (§113.8). It measures the capability band now and fails at (224, 181).
 
 Mockup: `design-mockups/fn-performance-controls/2026-09-04_presentation-on-the-tab-row.html`
 
-### §271 — the audit of the §268–§270 merge (2026-09-03, branch `claude/plans-edit-button-placement-jxw8or`)
+### §274 — the audit of the §268–§270 merge (2026-09-03, branch `claude/plans-edit-button-placement-jxw8or`)
 
 Islam, straight after the merge: *"did we change or damage something on this
 merge from the previous changes?"*

@@ -31192,7 +31192,7 @@ resolves the same way now. *A check that stubs a rule has to stub it where the
 product actually asks it.*
 
 
-## §271 — THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (2026-09-03)
+## §274 — THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (2026-09-03)
 
 Islam, after the §268–§270 merge landed on main: *"did we change or damage
 something on this merge from the previous changes?"*
@@ -31287,7 +31287,7 @@ them. That is the argument for the audit, not against the merge — but the merg
 would have been better with the sweep run twice.
 
 
-## §272 — A FUNCTION'S PRESENTATION BUTTON SITS WHERE A UNIT'S DOES (2026-09-04)
+## §275 — A FUNCTION'S PRESENTATION BUTTON SITS WHERE A UNIT'S DOES (2026-09-04)
 
 Islam: *"can you move the presntation button for the functions to be in the same
 place like what we did in the units while having the bands button as well?"*
@@ -31391,7 +31391,7 @@ assertion about the capability half while having broken the product.
 **Proved able to fail: 16 red** on the build before, the first failures printing
 the reported fault verbatim (`x: 1303, y: 175` in the page body, no Bands).
 
-### §272.1 — AND ONE OF ITS OWN ASSERTIONS COULD NOT FAIL
+### §275.1 — AND ONE OF ITS OWN ASSERTIONS COULD NOT FAIL
 
 The first draft measured *"the content starts about where a unit's does"* off
 `panel.firstElementChild` — and **before this change the `.pageact` div WAS that

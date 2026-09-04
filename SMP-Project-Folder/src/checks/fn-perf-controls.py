@@ -1,4 +1,4 @@
-"""A supporting function's Performance controls sit where a unit's do (§272).
+"""A supporting function's Performance controls sit where a unit's do (§275).
 
 Islam: *"can you move the presntation button for the functions to be in the same
 place like what we did in the units while having the bands button as well?"*
@@ -18,7 +18,7 @@ compared — and the page body is asserted EMPTY of them, because leaving the ol
 `.pageact` behind while adding the new one draws the menu twice and satisfies
 every "it is on the tab row" assertion (§113.8).
 
-THE MENU'S ENTRIES ARE ASSERTED AGAINST THE RULE, not against a list. §272 moves
+THE MENU'S ENTRIES ARE ASSERTED AGAINST THE RULE, not against a list. §275 moves
 a control; it must move nobody's rights, and the way to know that is to ask
 `SMPRules.mayDownloadPlan()` of a viewer and compare it with what the menu draws
 for that viewer (§42, §252.2). A literal list of four entries would go stale the
@@ -73,7 +73,7 @@ WHERE = """()=>{
     entries: menuOf('.dlmenu:not(.bandsmenu)'),
     bandRows: (() => { const d = acts ? acts.querySelector('.bandsmenu') : null;
       return d ? d.querySelectorAll('.bandslist > div').length : 0; })(),
-    /* THE FIRST REAL CONTENT, never the first CHILD: before §272 the
+    /* THE FIRST REAL CONTENT, never the first CHILD: before §275 the
        `.pageact` div WAS that child, so a first-child measurement reported
        the same y either way and the assertion below could not fail
        (§113.8, found by falsifying rather than by reading). A capability
@@ -169,7 +169,7 @@ with sync_playwright() as p:
         ck("pillars function: %s agrees with the unit" % word,
            bool(u and q) and u["x"] == q["x"] and u["y"] == q["y"], (u, q))
     grp = read(pg, "group")
-    # The group has never had a Presentation button; §272 does not give it one,
+    # The group has never had a Presentation button; §275 does not give it one,
     # and that absence is asserted so a build that widened the change fails here.
     ck("the group still has Bands and still no Presentation",
        grp["bands"] and not grp["present"], grp["tab"])

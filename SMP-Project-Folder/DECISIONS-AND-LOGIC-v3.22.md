@@ -34377,3 +34377,40 @@ incremental write, one-line heal and two tabs all green on fresh databases ·
 the lock, so two cold starts on a tenant that has never run it could both
 attempt the heal; it is caught, and on every deployed tenant it is already
 recorded, so it is written down rather than moved.
+
+### §289.1 — THE RULE, AND ONE MORE INSTANCE OF IT, RECORDED NOT FIXED
+
+Islam: *"how to avoid this from happening again?"* and *"are these rules will
+be documented somewhere? as if we face any faults because of them we can
+check?"*
+
+**THE RULE IN ONE SENTENCE**, now in `CLAUDE.md` beside the database facts:
+on the pooled connection nothing session-level is trusted — a lock or a setting
+that must hold across statements lives inside a transaction, because a
+transaction is the only unit the pooler keeps on one backend. Session-level
+means `pg_advisory_lock`, `SET`, `LISTEN`, `PREPARE`, temp tables. The
+transaction-scoped forms are `pg_advisory_xact_lock` and `SET LOCAL`.
+
+**AND A SEARCH FOR THE CLASS FOUND ONE MORE**: `api/chat.js` sends
+`SET lock_timeout = '2s'` at the top of every chat request, outside any
+transaction (§282, merged 2026-09-04). Two consequences, neither proved on
+Neon's pooler from here and both following from the same mechanism as §289:
+the setting may not apply to the read it was meant to guard, and it STAYS on
+the backend it landed on — the chat polls from every open tab every few
+seconds, so within minutes most backends in the pool would carry a two-second
+lock timeout and be handed to other requests. A save waiting more than two
+seconds behind the save ahead of it (§240's lock), or a cold start waiting at
+the bootstrap's lock (§289), would then be cancelled by Postgres and read as
+the red save bar or the sign-in sentence, by a new route. **The fix is one
+line** — `SET LOCAL` inside a transaction around the one read it protects —
+and it is the chat session's file, so it is recorded here and put to Islam
+rather than changed in passing (rule 1b).
+
+**WHERE TO LOOK WHEN A FAULT LOOKS LIKE THIS.** A 500 that happens only under
+a burst or right after a deploy, or a hang nobody reproduces alone: the
+runtime log line the endpoint writes (`api/auth:`, `api/state:`, `api/chat:`)
+names the Postgres error; a `23505` on `_sql_migrations_pkey` is §289, a
+*"canceling statement due to lock timeout"* is the leaked setting above. Then
+grep `api/` and `lib/` for the five session-level words outside a
+transaction. A guard that fails the suite on their presence is proposed and
+not yet built.

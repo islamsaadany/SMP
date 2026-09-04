@@ -399,6 +399,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **generated from the platform sources** by `node scripts/extract-state.js`. Served over
   http(s) the platform hydrates from GET /api/state and autosaves on change; opened from
   file:// it runs on baked data.
+- **THE POOLED CONNECTION KEEPS NOTHING BETWEEN STATEMENTS (§289, 2026-09-04):**
+  production talks to Neon through PgBouncer in transaction mode, so every
+  statement sent OUTSIDE a transaction may run on a different backend. A
+  session-level lock (`pg_advisory_lock`), a session setting (`SET …`), `LISTEN`,
+  `PREPARE` or a temp table taken on one statement is NOT there on the next,
+  and worse, it stays on the backend it landed on and is handed to somebody
+  else's request. **Anything that must hold across statements lives inside
+  `BEGIN … COMMIT`**, with `pg_advisory_xact_lock` for a lock and `SET LOCAL`
+  for a setting — a transaction pins one backend for its life. §240 learned
+  this for the save; §289 learned it for the bootstrap, where a session lock
+  let two cold starts apply one migration and the sign-in page said
+  *"Something went wrong"* once per deploy. **When a fault looks like this** —
+  a 500 that only happens under a burst, right after a deploy, or a hang
+  nobody can reproduce alone — read the runtime log line the endpoint writes
+  (`api/auth:`, `api/state:`, `api/chat:`) and grep `api/` and `lib/` for the
+  five words above outside a transaction. `scripts/test-cold-starts.js` models
+  the pooler and is the shape a check for this class takes.
 - **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
   (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
   a session AND a password that is no longer temporary; a signed-in person sees

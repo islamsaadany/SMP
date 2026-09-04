@@ -25,14 +25,14 @@ __STYLE__
 <header>
   <p class="kicker">SMP &middot; mockup for sign-off &middot; objectives table</p>
   <h1>The objectives table</h1>
-  <p class="lede">Three things from one message, and two of them turn out to be
-    the same fault. Both were reproduced on your own screen before anything was
-    proposed &mdash; the pictures below are the running platform, not a drawing
-    of it.</p>
+  <p class="lede"><b>Second round.</b> Your three corrections are drawn: the
+    months start at the second column, the hover is gone, and the number and the
+    handle are centred to each other. The pictures are the running platform, not
+    a drawing of it.</p>
   <div class="drawn">
     <span><b>Drawn from</b> the running build, a supporting function &rsaquo; Overview, pen open, drawer open</span>
-    <span><b>1500px window</b>, first row hovered</span>
-    <span><b>4 September 2026</b></span>
+    <span><b>1500px window</b>, first row under the pointer</span>
+    <span><b>4 September 2026 &middot; round two</b></span>
   </div>
 </header>
 
@@ -68,117 +68,111 @@ __STYLE__
 
 <section class="opt rec">
   <div class="opthead">
-    <h2>The fix &mdash; and it is your own proposal</h2>
-    <span class="tag pick">recommended</span>
+    <h2>The fix, with your three corrections</h2>
+    <span class="tag pick">as drawn</span>
   </div>
-  <p class="measure">The drawer goes <b>under the whole width</b>, exactly as you
-    said: <em>"shall it go below the whole objective columns to keep the table
-    tidy?"</em> With nothing left outside the span there is no column to pay, and
-    every column returns to the pixel it had before the drawer opened. The target
-    cell becomes an ordinary table cell again with the box and the mark seated
-    inside it, so it fills its row and the white block is gone. And the
-    <b>#</b> column with a handle joins it.</p>
   __SHOT_PROPOSED__
-  <figcaption>The same table, same build, same width. Objective back to
-    <b>244px</b>, the row <b>136px &rarr; 56px</b>, the whole hovered row one
-    grey, the drawer starting at the left edge, and a numbered handle
-    column.</figcaption>
+  <figcaption>Same build, same width, same rows. Objective <b>97 &rarr;
+    234px</b>, the row <b>136 &rarr; 56px</b>, the target cell filling its row
+    again, the months starting under Objective, and no hover tint.</figcaption>
 
   <ul class="facts">
-    <li><span class="k">Costs</span><span class="v">The <b>#</b> column takes
-      38px from the table, which the Objective column absorbs &mdash; it is still
-      wider than it was before the drawer existed. Nothing else moves, on any of
-      the four tables that carry a monthly drawer.</span></li>
-    <li><span class="k">Reach</span><span class="v">The same three changes apply
-      to a unit's objectives, a pillar's key measures and a tactic's outcome
-      &mdash; one answer for all four, not a patch on the one you were looking
-      at.</span></li>
+    <li><span class="k">Months</span><span class="v"><b>From the second
+      column</b>, as you asked &mdash; the blank cell under <b>#</b> stays and
+      the drawer spans everything after it. That is what the key measures table
+      has always done, and it is only safe now: the squeeze was never the
+      indent, it was that the column left outside the span was the prose one.
+      With a <b>#</b> outside it instead, every column keeps the width it had
+      before the drawer opened.</span></li>
+    <li><span class="k">Hover</span><span class="v"><b>Gone</b>, your C. The
+      stripe alone separates the rows. Recorded with its cost: on these wide
+      tables there is now nothing that follows one row across the
+      columns.</span></li>
+    <li><span class="k">The pair</span><span class="v">Centred. Measured, the
+      handle sat <b>5px</b> above the number's middle; it is <b>0</b>
+      now.</span></li>
+    <li><span class="k">The cell</span><span class="v">The target cell is an
+      ordinary table cell again, with the box and the mark seated inside it
+      &mdash; so it fills its row and the white block is gone.</span></li>
   </ul>
 </section>
 
 <section>
-  <h2>The number column, and who may drag it</h2>
-  <p class="measure">The <b>#</b> and the grip are the key measures table's own
-    &mdash; copied, not designed again. Two things follow from that and are worth
-    saying before you agree to them:</p>
-  <ul class="facts">
-    <li><span class="k">The number</span><span class="v">Always drawn, in edit
-      and in reading, exactly as the measures table draws it.</span></li>
-    <li><span class="k">The handle</span><span class="v">Only while you are
-      arranging &mdash; the same rule the measures table follows, so a stray drag
-      cannot reorder a plan somebody is reading.</span></li>
-    <li><span class="k">Who</span><span class="v">Reordering objectives becomes
-      the same grant as reordering measures: the office, and the unit's own owner
-      or custodian while they are arranging. Nobody gains a right they do not
-      already have over the rows beneath.</span></li>
-  </ul>
-</section>
-
-<section class="opt">
-  <div class="opthead">
-    <h2>The hover &mdash; and it does nothing on every second row</h2>
-    <span class="tag">your call</span>
+  <h2>The pair, close up</h2>
+  <div class="pair">
+    <figure class="crop">__SHOT_GRIP_TODAY__<figcaption>As it aligns today
+      &mdash; the handle 5px high of the number.</figcaption></figure>
+    <figure class="crop">__SHOT_GRIP_CENTRED__<figcaption>Centred to each
+      other, and centred in the cell.</figcaption></figure>
   </div>
-  <p class="measure">You asked whether the colour change on hovering earns its
-    place when the next row is already grey. Measured, the answer is worse than
-    that: <b>on a striped row the stripe wins and the hover changes nothing at
-    all.</b> A white row hovered goes <code>#FFFFFF &rarr; #EFF2F6</code>; a
-    striped row hovered stays <code>#F5F7FA</code> &mdash; the same colour it
-    already was. So today the highlight speaks on half the rows and is silent on
-    the other half, which is why it reads as unreliable rather than as
-    helpful.</p>
-  <ul class="facts">
-    <li><span class="k">A &mdash; leave it</span><span class="v">No work, and it
-      goes on saying something on odd rows and nothing on even ones.</span></li>
-    <li><span class="k">B &mdash; fix it</span><span class="v">One hover ground
-      that is a clear step from <b>both</b> the white and the stripe
-      (<code>#E6EAF0</code>). These tables are wide and scroll sideways, and
-      following one row across ten columns is exactly what a row highlight is
-      for. <b>My recommendation.</b></span></li>
-    <li><span class="k">C &mdash; drop it</span><span class="v">No hover at all;
-      the stripe alone separates the rows. Quietest, and it costs the one thing
-      that helps on a wide table.</span></li>
-  </ul>
-  __SHOT_HOVERB__
-  <figcaption>B &mdash; a striped row hovered. It now steps to
-    <code>#E6EAF0</code> where today it does not move.</figcaption>
-  __SHOT_HOVERC__
-  <figcaption>C &mdash; no hover. The stripe does all the work.</figcaption>
+  <p class="measure quiet">The handle is the platform&rsquo;s own three-bar grip
+    &mdash; the same one the key measures table uses. The first round drew an
+    invented dotted mark, which is a picture of what the product could look like
+    rather than of what it does.</p>
 </section>
 
 <section>
-  <h2>Two more, found while measuring</h2>
+  <h2>What it costs, stated</h2>
   <ul class="facts">
-    <li><span class="k">The gap</span><span class="v">The drawer's footer reads
-      <em>"not in force yetUntil all twelve are filled"</em> &mdash; two
-      sentences with no space between them. One character.</span></li>
+    <li><span class="k">Width</span><span class="v">The <b>#</b> column takes
+      <b>63px</b>, which the Objective column absorbs and then some &mdash; it
+      is still more than twice what it has today with the drawer open, on both
+      tables.</span></li>
+    <li><span class="k">One line</span><span class="v">On a unit&rsquo;s
+      nine-column table those 63px were enough to break the eye and
+      <b>Remove</b> onto a second line, taking the row to 74px. That column is
+      held to one line, so both tables come out at <b>56px</b>.</span></li>
+    <li><span class="k">Reach</span><span class="v">The same three changes apply
+      to a unit&rsquo;s objectives, a supporting function&rsquo;s, a
+      pillar&rsquo;s key measures and a tactic&rsquo;s outcome &mdash; one
+      answer for all four.</span></li>
+    <li><span class="k">Who drags</span><span class="v">The handle shows only
+      while you are arranging, and reordering objectives becomes the same grant
+      as reordering measures. Nobody gains a right they do not already have over
+      the rows beneath.</span></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Two more, going in with it</h2>
+  <ul class="facts">
+    <li><span class="k">The gap</span><span class="v">The drawer&rsquo;s footer
+      reads <em>&ldquo;not in force yetUntil all twelve are filled&rdquo;</em>
+      &mdash; two sentences with no space between them.</span></li>
     <li><span class="k">Count</span><span class="v">The same footer says
-      <em>"Set Sum, Latest or Average"</em>, written before <b>Count</b> existed.
-      It should name all four, read off the platform's own list so it can never
-      go stale again.</span></li>
+      <em>&ldquo;Set Sum, Latest or Average&rdquo;</em>, written before
+      <b>Count</b> existed. It will name all four, read off the platform&rsquo;s
+      own list so it cannot go stale again.</span></li>
   </ul>
 </section>
 
 <section class="ask">
   <h2>What I need from you</h2>
   <ol>
-    <li><b>The drawer full width, the target cell put back, and the # column with
-      a handle</b> &mdash; yes or no, and whether the # goes on all four tables
-      or the objectives ones only.</li>
-    <li><b>The hover: A, B or C.</b> I recommend B.</li>
-    <li>The missing space and the Count wording go in with it unless you say
-      otherwise.</li>
+    <li>Say <b>go</b> and I build exactly this.</li>
+    <li>The only thing still open is whether the <b>#</b> column goes on the two
+      objectives tables only, or on all four that carry a monthly drawer. The
+      key measures and tactics tables already have one, so in practice this is a
+      question about the two objectives tables alone &mdash; I would put it on
+      both of them.</li>
   </ol>
 </section>
 </div>
 """
 
+BODY = BODY.replace("</style>", """
+  .pair { display:flex; gap:34px; flex-wrap:wrap; margin-top:18px; }
+  .crop { margin:0; }
+  .crop img { display:block; height:74px; width:auto; image-rendering:pixelated;
+    border:1px solid var(--shot-edge); border-radius:6px; background:var(--surface); }
+</style>""")
+
 html = (BODY
         .replace("__STYLE__", STYLE.read_text())
         .replace("__SHOT_TODAY__", img("fn-today", "The objectives table today"))
         .replace("__SHOT_PROPOSED__", img("fn-proposed", "The proposal"))
-        .replace("__SHOT_HOVERB__", img("fn-hoverB", "Hover treatment B"))
-        .replace("__SHOT_HOVERC__", img("fn-hoverC", "Hover treatment C")))
+        .replace("__SHOT_GRIP_TODAY__", img("grip-today", "The pair as it aligns today"))
+        .replace("__SHOT_GRIP_CENTRED__", img("grip-centred", "The pair centred")))
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(html)
 print("wrote", OUT, OUT.stat().st_size, "bytes")

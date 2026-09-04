@@ -1,5 +1,19 @@
 """THE OBJECTIVES TABLE, WITH THE MONTHLY DRAWER IN IT (rule 1c).
 
+SECOND ROUND. Islam, of the first: *"as drawn yes but I'd rather keep the months
+from the 2nd column of the objective not the numbering column"*, *"for the
+hovering C remove it"*, and *"the number and the handle are a bit misalignment
+they both needs to be centered vertically"*.
+
+The drawer therefore keeps a blank cell under the `#` and spans everything after
+it — which is what the key measures table has always done, and is only safe
+BECAUSE the `#` column now exists: the squeeze was never the drawer's indent, it
+was that the column left outside the span was the prose one.
+
+AND THE GRIP IS THE PRODUCT'S OWN, three bars from `handle()` — the first round
+drew an invented dotted mark, which is a mockup of what the product could look
+like rather than of what it does (§41.9).
+
 Islam, from his own tenant, in one message:
   1. *"trying t in the objectives the obecjtive part got damaged. shall it go
      below the whole objective columns to keep the table tidy?"*
@@ -42,6 +56,20 @@ td[data-mptgt] > .mpcell > .mpopen { flex:0 0 auto; }
 /* (3) the # column, the measures table's own */
 th.mpidx, td.mpidx { width:38px; text-align:center; font-family:var(--mono);
   font-size:11px; color:var(--ink-3); white-space:nowrap; }
+/* CENTRED TO EACH OTHER. `vertical-align:middle` on the grip alone aligns its
+   box to the text baseline plus half an x-height, which is not the middle of
+   the number beside it — so both take it, and the pair is centred in the cell
+   rather than merely near one another. Never `display:flex` on the td (§278.3
+   is that exact mistake one column over). */
+td.mpidx { vertical-align:middle; }
+td.mpidx .grip, td.mpidx .idx-n { vertical-align:middle; }
+td.mpidx .grip { margin-right:2px; height:18px; }
+td.mpidx .idx-n { display:inline-block; min-width:14px; }
+/* THE ACTIONS COLUMN KEEPS ITS LINE. The # column takes 63px, and on a unit's
+   nine-column table that is enough to break the eye and Remove onto two lines
+   — 57px row -> 74px, for a column holding two controls. Measured, not
+   guessed: with this the row is 57px on both tables. */
+td.mpacts { white-space:nowrap; }
 """
 
 HOVER_B = """
@@ -74,6 +102,10 @@ APPLY = """(what)=>{
     });
   }
   if (what.idx) {
+    [...t.querySelectorAll('tbody tr:not(.mprow):not(.newrow)')].forEach(r => {
+      const last = r.children[r.children.length - 1];
+      if (last) last.classList.add('mpacts');
+    });
     const hr = t.querySelector('thead tr');
     if (!hr.querySelector('th.mpidx'))
       hr.insertAdjacentHTML('afterbegin', '<th class="mpidx">#</th>');
@@ -92,20 +124,20 @@ APPLY = """(what)=>{
       n++;
       if (!r.querySelector('td.mpidx'))
         r.insertAdjacentHTML('afterbegin',
-          '<td class="mpidx"><span class="grip" title="Reorder" aria-hidden="true">' +
-          '<svg viewBox="0 0 10 16" width="10" height="16"><g fill="currentColor">' +
-          [0,1,2].map(row => [0,1].map(col =>
-            '<circle cx="' + (2 + col*5) + '" cy="' + (3 + row*5) + '" r="1.3"/>').join('')).join('') +
-          '</g></svg></span><span class="idx-n">' + n + '</span></td>');
+          '<td class="mpidx"><span class="grip" role="button" tabindex="0"' +
+          ' title="Drag to reorder"><i></i><i></i><i></i></span>' +
+          '<span class="idx-n">' + n + '</span></td>');
     });
   }
   if (what.span) {
+    // ISLAM'S: the months start at the SECOND column, so the blank cell under
+    // the # stays and the drawer spans everything after it.
     const n = [...t.querySelectorAll('thead th')].reduce((a,th)=>a+th.colSpan,0);
     t.querySelectorAll('tr.mprow').forEach(dr => {
       const cells = [...dr.children];
-      // keep exactly one cell and give it the whole width
-      cells.slice(0, -1).forEach(c => c.remove());
-      cells[cells.length-1].setAttribute('colspan', String(n));
+      const keep = cells[cells.length-1];
+      cells.slice(0, -1).forEach((c,i) => { if (i > 0) c.remove(); });
+      keep.setAttribute('colspan', String(n - 1));
     });
   }
   return 'ok';
@@ -120,8 +152,13 @@ MEAS = """()=>{
     w:Math.round(td.getBoundingClientRect().width),
     h:Math.round(td.getBoundingClientRect().height),
     bg:getComputedStyle(td).backgroundColor}));
+  const heads=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());
+  const oi=heads.indexOf('Objective');
   return {rowH:Math.round(r.getBoundingClientRect().height),
-    name:Math.round(r.children[0].getBoundingClientRect().width),
+    name:Math.round(r.children[oi].getBoundingClientRect().width),
+    tallest:Math.max.apply(null,[...r.children].map(td=>{
+      let m=0; [...td.querySelectorAll('*')].forEach(k=>{const h=k.getBoundingClientRect().height; if(h>m)m=h;}); return m;})),
+    tallCell:[...r.children].map((td,i)=>(heads[i]||'?')+' w'+Math.round(td.getBoundingClientRect().width)+' h'+Math.round(td.getBoundingClientRect().height)),
     tgt:(cells.find(c=>/cc/.test(c.c))||{}),
     grounds:[...new Set(cells.map(c=>c.bg))],
     heights:[...new Set(cells.map(c=>c.h))],
@@ -195,6 +232,9 @@ with sync_playwright() as pw:
         shot(pg, where + "-today")
 
         pg.add_style_tag(content=FIX_CSS)
+        # HIS C: the hover goes. Applied before the proposal is shot, so every
+        # picture below shows the table as it would actually be.
+        pg.add_style_tag(content=HOVER_C)
         pg.evaluate(APPLY, {"cell": True, "idx": True, "span": True})
         pg.wait_for_timeout(200)
         # §267.2: a growing box is sized by MEASURING its text at paint time, so
@@ -207,6 +247,23 @@ with sync_playwright() as pw:
         shot(pg, where + "-proposed")
 
         if where == "fn":
+            # THE PAIR, CLOSE UP: the grip and the number as they align today
+            # and as they align centred. Same cell, same build.
+            for tag, css in (("grip-today",
+                              "td.mpidx .grip, td.mpidx .idx-n { vertical-align:baseline !important; }"),
+                             ("grip-centred", "")):
+                if css: pg.add_style_tag(content=css)
+                else: pg.add_style_tag(content="td.mpidx .grip, td.mpidx .idx-n { vertical-align:middle !important; }")
+                pg.wait_for_timeout(200)
+                h = pg.evaluate_handle("""()=>[...document.querySelectorAll('#panel td.mpidx')].find(td=>td.querySelector('.grip'))""")
+                el = h.as_element()
+                if el:
+                    el.screenshot(path=str(OUT / (tag + ".png")))
+                    print("  shot", tag, pg.evaluate("""()=>{const td=[...document.querySelectorAll('#panel td.mpidx')].find(t=>t.querySelector('.grip'));
+                      const g=td.querySelector('.grip').getBoundingClientRect(), n=td.querySelector('.idx-n').getBoundingClientRect();
+                      return {gripMid:Math.round(g.y+g.height/2), numMid:Math.round(n.y+n.height/2),
+                              off:Math.round((g.y+g.height/2)-(n.y+n.height/2))};}"""))
+        if False:
             for tag, css in (("hoverB", HOVER_B), ("hoverC", HOVER_C)):
                 pg.add_style_tag(content=css)
                 # shoot the EVEN row hovered, which is the half that says nothing today

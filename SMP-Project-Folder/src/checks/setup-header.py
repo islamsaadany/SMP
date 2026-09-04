@@ -188,13 +188,21 @@ with sync_playwright() as p:
     # and the scroll is asserted before anything is read off it.
     pg.set_viewport_size({"width": 1400, "height": 560})
     go(pg, "access")
-    room = pg.evaluate("()=>Math.round(document.documentElement.scrollHeight-innerHeight)")
-    ck("the page has room to scroll, so there is a state to measure (%dpx)" % room,
-       room >= 200, room)
-    for y in (0, 100, 200):
-        pg.evaluate("(y)=>scrollTo(0,y)", y)
+    # ── THE BOX IS WHAT SCROLLS NOW (§174.1) ─────────────────────────
+    # This section scrolled the PAGE, which was the only thing that moved when
+    # it was written. The matrix is capped and pinned to its own box since
+    # §174, so the page barely scrolls at all and the state this measures had
+    # to be reached another way — §51.11 in the good direction: the check went
+    # red because the product changed, and the fault it guards (a header cell
+    # landing on a body row) is exactly as possible as it ever was.
+    room = pg.evaluate("""()=>{const b=document.querySelector('.acgrid');
+        return Math.round(b.scrollHeight - b.clientHeight);}""")
+    ck("the matrix has room to scroll, so there is a state to measure (%dpx)" % room,
+       room >= 60, room)
+    for y in (0, 60, 140):
+        pg.evaluate("(y)=>{document.querySelector('.acgrid').scrollTop=y;}", y)
         pg.wait_for_timeout(250)
-        at = pg.evaluate("()=>Math.round(scrollY)")
+        at = pg.evaluate("()=>Math.round(document.querySelector('.acgrid').scrollTop)")
         ck("@%d: it actually scrolled there (%d)" % (y, at), abs(at - y) <= 2, at)
         # THE CELLS, NOT THE `<tr>` — AND THAT IS THE WHOLE MEASUREMENT.
         # A table row has no box of its own once its cells are positioned, so
@@ -211,7 +219,11 @@ with sync_playwright() as p:
             .map(r=>[...r.children].map(c=>{const b=c.getBoundingClientRect();
                      return {top:Math.round(b.top), bottom:Math.round(b.bottom)};}));
           const first=document.querySelector('.acgrid tbody tr td');
+          const box=document.querySelector('.acgrid');
+          const bs=getComputedStyle(box);
           return {rows:rows,
+                  boxTop: Math.round(box.getBoundingClientRect().top
+                                     + parseFloat(bs.borderTopWidth || 0)),
                   bodyTop: first? Math.round(first.getBoundingClientRect().top) : null};}""")
         r = [{"top": min(c["top"] for c in row), "bottom": max(c["bottom"] for c in row),
               "spread": max(c["top"] for c in row) - min(c["top"] for c in row)}
@@ -220,17 +232,35 @@ with sync_playwright() as p:
            all(x["spread"] <= 1 for x in r), r)
         ck("@%d: the second level is BELOW the first, not on it" % y,
            len(r) == 2 and r[1]["top"] > r[0]["top"] + 4, r)
-        ck("@%d: and no header cell has landed on a body row" % y,
-           max(x["bottom"] for x in r) <= m["bodyTop"] + 1,
-           {"headBottom": max(x["bottom"] for x in r), "bodyTop": m["bodyTop"]})
-    pg.evaluate("()=>scrollTo(0,0)")
+        # THE FAULT WAS THE HEAD DISPLACED DOWN INSIDE THE TABLE (§130.2:
+        # 141px down, sitting across rows three and four), and the measurement
+        # of it was "a header cell has landed on a body row". That comparison
+        # stopped meaning anything the moment the head legitimately pinned:
+        # rows pass UNDER a pinned head by design, so the first body row is
+        # above its bottom at any scroll and the assertion failed on a correct
+        # build. What the fault actually violates is that the head sits at the
+        # TOP OF ITS BOX — 141px down is exactly what that catches, at rest and
+        # at every scroll position, and a head that slides away catches it too.
+        ck("@%d: the head is at the top of its box, not down inside the table" % y,
+           abs(min(x["top"] for x in r) - m["boxTop"]) <= 2,
+           {"headTop": min(x["top"] for x in r), "boxTop": m["boxTop"]})
+    pg.evaluate("()=>{document.querySelector('.acgrid').scrollTop=0;}")
     # WHAT THE DAMAGE WAS HIDING, asserted so a build that broke it again
     # cannot pass by drawing a header that merely does not overlap.
+    #
+    # THE HEADINGS ARE ABBREVIATED SINCE §174 and the full name moved to the
+    # hover, so this asks for BOTH: the short word on screen, and the long one
+    # still attached to it. Asserting only the short one would pass on a build
+    # that had dropped the meaning altogether.
     heads = pg.eval_on_selector_all(".acgrid thead th",
                                     "e=>e.map(x=>x.textContent.trim().toLowerCase())")
-    ck("the group headings are readable at all",
-       any("own business unit" in h for h in heads)
-       and any("own supporting function" in h for h in heads), heads)
+    titles = pg.eval_on_selector_all(".acgrid thead th",
+                                     "e=>e.map(x=>(x.getAttribute('title')||'').toLowerCase())")
+    ck("the group headings are on the page",
+       any("own bu" in h for h in heads) and any("own func" in h for h in heads), heads)
+    ck("...and each still says in full what it is",
+       any("own business unit" in t for t in titles)
+       and any("own supporting function" in t for t in titles), titles)
     pg.set_viewport_size({"width": 1560, "height": 900})
 
     # ── 5 · FOCUS MEASURES (§135.5) ──────────────────────────────────
@@ -391,10 +421,29 @@ with sync_playwright() as p:
                 if v and v["stuck"]:
                     g = v["gap"]
                     break
-            # NOT SKIPPED IN SILENCE (§54.5): a page whose head never pins is
-            # something to say, not something to pass over.
-            ck("%d %s: no slot between the two pinned heads (%s)" % (w, k, g),
-               g is not None and g <= 1, g if g is not None else "never pinned")
+            # AND SINCE §163.5 THE ORDINARY SETUP TABLE'S HEAD DOES NOT PIN
+            # AT ALL, which is why "never pinned" stopped being something to
+            # report and became the answer. Those heads pinned to a PAGE
+            # offset while sitting in a box that scrolls, so the browser
+            # measured the offset from the top of the TABLE and the head sat
+            # 136px down its own body, across the third row; the cure was
+            # `position:static`, and a head that does not pin cannot leave a
+            # slot under one that does. So the claim is asked of the POSITION
+            # rather than of a gap that can no longer occur (§51.11 — a check
+            # keyed on behaviour deliberately removed goes red for the wrong
+            # reason, and this one went red nine times).
+            #
+            # BOTH BRANCHES ARE REAL ASSERTIONS (§113.8): a build that makes one
+            # of these sticky again is measured for the slot exactly as before,
+            # so nothing is passed over by never being asked.
+            pos = pg.evaluate("""()=>{const th=document.querySelector('.setuppane table thead th');
+              return th ? getComputedStyle(th).position : null;}""")
+            if pos == "static":
+                ck("%d %s: the table's head does not pin, so there is no slot" % (w, k),
+                   g is None, g)
+            else:
+                ck("%d %s: no slot between the two pinned heads (%s)" % (w, k, g),
+                   g is not None and g <= 1, g if g is not None else "never pinned")
     pg.set_viewport_size({"width": 1560, "height": 700})
 
     # AND ONE FINE-GRAINED SWEEP, because "no gap" is the cause and "nothing is
@@ -421,17 +470,35 @@ with sync_playwright() as p:
     pg.evaluate("()=>scrollTo(0,0)")
     pg.set_viewport_size({"width": 1560, "height": 900})
 
-    # THE OFFSET IS PUBLISHED FROM THE REAL HEIGHT, asserted as the
-    # RELATIONSHIP (§53.5) so a header that legitimately changes height stays
-    # green and a literal creeping back does not.
+    # ── `--sethead-h` IS GONE, AND ITS ABSENCE IS THE ASSERTION (§273.1) ──
+    # This asserted the variable was published from the header's real height,
+    # so a table's head could pin under it (§135.10). §163.5, §130.2 and §174
+    # then took that page offset away from every table that had it — a Setup
+    # table sits in `.tblscroll` (`overflow:auto`), so a PAGE offset resolves
+    # inside the box and lands the head partway down its own body — and the
+    # variable was left being measured by a ResizeObserver with **zero readers
+    # in any stylesheet**. Deleted (§24), so the assertion is REWRITTEN rather
+    # than removed (§218): a mechanism with an elaborate justification beside
+    # it is one the next reader takes for load-bearing, and the way that stays
+    # true is for a check to say it is meant to be gone.
+    #
+    # THE HEADER'S OWN HEIGHT IS STILL ASSERTED, because that is what the rest
+    # of this file is about and it is what would break if the header changed
+    # shape again.
     for k in ("focusset", "units"):
         go(pg, k)
         m = pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
           return {h:Math.round(h.getBoundingClientRect().height),
                   v:getComputedStyle(document.documentElement)
-                      .getPropertyValue('--sethead-h').trim()};}""")
-        ck("%s: --sethead-h is the header's own height (%s vs %dpx)" % (k, m["v"], m["h"]),
-           m["v"] == str(m["h"]) + "px", m)
+                      .getPropertyValue('--sethead-h').trim(),
+                  readers:[...document.styleSheets].reduce((n,ss)=>{
+                    let r=[]; try { r=[...ss.cssRules]; } catch(e) { return n; }
+                    return n + r.filter(x=>(x.cssText||"").indexOf("--sethead-h")>-1).length;
+                  },0)};}""")
+        ck("%s: the header still has a real height (%dpx)" % (k, m["h"]),
+           40 <= m["h"] <= 90, m)
+        ck("%s: --sethead-h is not published any more" % k, m["v"] == "", m)
+        ck("%s: and no stylesheet reads it" % k, m["readers"] == 0, m)
 
     print("\n" + ("errors: " + str(errs[:4]) if errs else "no console errors"))
     if errs:

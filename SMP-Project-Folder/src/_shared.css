@@ -78,10 +78,11 @@
      degrades to the system font rather than to a default serif. Absence of the
      attribute is the system stack, which is why there is no [data-font="system"]
      block: nothing to set. */
-  :root[data-font="inter"]   { --sans:'Inter',var(--sys-sans); }
+  /* ONE BLOCK, because there is one embedded face (§157). The other three
+     went with their .woff2 files rather than being left here unreachable — a
+     rule for a face the product no longer carries is exactly what §24 is
+     about, and the next reader would have no way to tell it was dead. */
   :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
-  :root[data-font="manrope"] { --sans:'Manrope',var(--sys-sans); }
-  :root[data-font="plex"]    { --sans:'IBM Plex Sans',var(--sys-sans); }
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
      A colour that is legible as a FILL is usually not legible as TYPE. Every
@@ -285,7 +286,13 @@
      a measure on the few prose BLOCKS (the Knowledge base already carries one
      and is unaffected), and it is not worth adding before somebody runs the
      platform on a monitor that wide. */
-  .wrap { margin:0 auto; padding:0 24px 80px; }
+  .wrap { margin:0 auto; padding:0 24px var(--page-foot, 80px); }
+  /* A PAGE WHOSE CONTENT IS CAPPED TO THE WINDOW ENDS WHERE THE CAPS DO
+     (§167). Every Setup page is a rail beside a pane, both capped and both
+     scrolling their own list, so the page's 80px foot is 80px of nothing
+     below the fold — and it is exactly what made the page run 60px past the
+     window and slide the rail, with its pinned head, under the chrome. */
+  .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
@@ -305,8 +312,104 @@
                   border:0; padding:0; margin:0; cursor:pointer;
                   text-decoration:underline; text-underline-offset:2px; }
   .refused-undo:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+  /* THE ONE THAT KEEPS THE WORK IS THE ONE THAT LOOKS LIKE A BUTTON (§184).
+     Discard reads as a deliberate choice, above; putting the refused lines
+     back and saving the rest is the ordinary next step, so it wears a border
+     and the pair reads in two volumes rather than one. No new colour: the
+     banner's own text token, which is already measured against --bad-bg
+     (§38.4 — the tint and its TEXT twin, never the solid fill). */
+  .refused-keep { font:inherit; font-weight:700; color:inherit; background:none;
+                  border:1.5px solid currentColor; border-radius:var(--r-sm, 6px);
+                  padding:3px 10px; margin:0 6px 0 0; cursor:pointer; }
+  .refused-keep:hover { background:color-mix(in srgb, currentColor 10%, transparent); }
+  .refused-keep:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
+  /* ── THE SAVE-SAFETY CAUTIONS (§258) ──────────────────────────────────
+     Same slot and shape as the refusal above, on the ATTENTION ground rather
+     than the alarm red (§168, §190): nothing has gone wrong yet, and the
+     person is being told what to do to keep it that way. Tint + text twin,
+     never the solid fill as type (§38.4). Left-aligned with the action on the
+     right: this banner carries a control, and a centred sentence with a button
+     floating after it reads as two things. */
+  .banner.safety { background:var(--attn-bg); color:var(--attn-tx); display:flex;
+                   justify-content:flex-start; align-items:center; gap:12px;
+                   text-align:left; border-bottom:2px solid var(--attn); }
+  .banner.safety strong { color:inherit; display:block; font-weight:700; }
+  .banner.safety .safety-msg { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .banner.safety .safety-msg span { opacity:.9; }
+  .banner.safety .safety-ic { flex:none; width:20px; height:20px; color:var(--attn); }
+  .banner.safety .safety-acts { flex:none; display:flex; align-items:center; gap:8px; }
+  .safety-btn { font:inherit; font-size:var(--fs-small); font-weight:700; border-radius:7px;
+                padding:6px 13px; cursor:pointer; white-space:nowrap;
+                /* THE TYPE-GRADE AMBER AS THE FILL (§38.4, §94.8's --cta pair):
+                   --attn works as a mark and carries white at 3.25:1; --attn-tx
+                   is the same hue at a weight white can sit on (light 5.0, dark
+                   is dark-on-yellow), measured by checks/safety-banners.py. */
+                background:var(--attn-tx); color:var(--surface); border:1px solid var(--attn-tx); }
+  .safety-btn.ghost { background:transparent; color:inherit; border-color:currentColor; }
+  .safety-btn:disabled { opacity:.6; cursor:default; }
+  .safety-btn:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+  @media (max-width:680px){ .banner.safety { flex-wrap:wrap; } .banner.safety .safety-acts { width:100%; } }
   .banner.refused li { margin:2px 0; }
+
+  /* ── HISTORY (§262) ─────────────────────────────────────────────────
+     A setup table in the register's clothes (§88: one line per cell, the
+     long value on the hover), the changed pair in the mono face so a number
+     reads as a number, and Restore a quiet outline — it is a way back, not a
+     call to action. */
+  .hist-tools { display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .hist-tools .tk-search { width:200px; }
+  .hist-tools select.fld { width:auto; max-width:170px; }
+  .hist-page { padding:0 0 var(--pane-foot, 20px); }
+  .hist-count { font-size:var(--fs-small); color:var(--ink-3); margin:10px 0 8px; }
+  .hist-empty { font-size:var(--fs-small); color:var(--ink-3); margin:14px 0; }
+  .hist-err { color:var(--bad-tx); }
+  table.hist { width:100%; min-width:0; table-layout:fixed; border-collapse:collapse; font-size:var(--fs-small); }
+  table.hist th { text-align:left; white-space:nowrap; }
+  /* EVERY CELL WRAPS, NOTHING IS CUT (§262.2, Islam: "date and time needs to
+     wrap as well"). §88's clip was the register's answer to a row that must
+     stay one line; this page exists to SHOW values, so a cell takes the
+     height it needs; a word longer than its column breaks rather than being
+     cut, and the short columns are sized in pixels so a time never is. */
+  table.hist td { white-space:normal; overflow-wrap:anywhere; vertical-align:middle; }
+  table.hist td.hist-t { color:var(--ink-3); font-variant-numeric:tabular-nums; }
+  table.hist td.hist-fld { color:var(--ink-2); }
+  table.hist td.hist-fromto { font-family:var(--mono, ui-monospace, monospace); }
+  .hist-arr { color:var(--gold-deep); margin:0 5px; }
+  .hist-none { color:var(--ink-3); }
+  .hist-chip { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--ink-2); white-space:nowrap; }
+  i.hist-q { display:inline-block; width:9px; height:9px; border:1px solid var(--ink-3); border-radius:2px; margin-right:2px; vertical-align:-1px; }
+  i.hist-q.on { background:var(--gold-deep); border-color:var(--gold-deep); }
+  table.hist td.hist-act { text-align:right; }
+  .hist-rst { font:inherit; font-size:var(--fs-micro); font-weight:600; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; padding:3px 9px; cursor:pointer; }
+  .hist-rst:hover:not(:disabled) { border-color:var(--gold-deep); color:var(--ink); }
+  .hist-rst:disabled { opacity:.45; cursor:default; }
+  .hist-rst:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  .hist-confirm { border:1px solid var(--attn); background:var(--attn-bg); color:var(--attn-tx); border-radius:8px; padding:12px 14px; font-size:var(--fs-small); margin:0 0 14px; }
+  .hist-confirm p { margin:0 0 8px; } .hist-confirm b, .hist-confirm strong { color:inherit; }
+  .hist-confirm-acts { display:flex; gap:8px; justify-content:flex-end; }
+  .hist-confirm .btn { font:inherit; font-size:var(--fs-small); font-weight:700; border-radius:6px; padding:6px 12px; border:1px solid var(--attn-tx); background:var(--attn-tx); color:var(--surface); cursor:pointer; }
+  .hist-confirm .btn.ghost { background:transparent; color:inherit; border-color:currentColor; }
+  .hist-modal { min-width:0; }
+  .pband-hist { font-size:var(--fs-micro); color:var(--ink-3); font-weight:400; white-space:nowrap; margin-right:12px; }
+  .pband-hist b { font-weight:600; color:inherit; }
+  .pband-hist .linkbtn { font:inherit; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+
+  /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
+     A title is one line of prose however long it is, so this must read as a
+     field that happens to be tall rather than as a notes box: no resize grip,
+     no inner scrollbar (the height is set to fit, so there is never anything
+     to scroll), and the same metrics as the `<input>` it replaced, or a row
+     holding one of each reads as two kinds of control. */
+  /* INLINE-BLOCK, NOT BLOCK, and that is §114.4 (found by its own check going
+     red, not by reading): a cell holding a field AND a remove × seats the two
+     on one line by giving the field `calc(100% - 30px)` — a `display:block`
+     textarea takes the whole row regardless and pushes the × underneath it,
+     which is the exact fault §114.4 exists to prevent, reintroduced by
+     swapping the element under it. */
+  textarea.fld.grow { resize:none; overflow:hidden; line-height:1.45;
+                      min-height:0; display:inline-block; width:100%;
+                      vertical-align:middle; }
 
   /* ── THE BOOT SKELETON (§94.10) ───────────────────────────────────
      What is on screen between opening the platform and the database
@@ -407,6 +510,36 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  /* ── THE REPORTING TAB WEARS THE REPORT ORANGE (§222) ──────────────────
+     Islam picked the solid fill of three drawn options: the volume the Report
+     button had, moved onto the tab that replaces it. Unmistakable while you
+     are in it, which is the point — everything typed there is going to the
+     office.
+
+     `--cta`/`--cta-ink` are the pair §94.8 declared TOGETHER: the fill and
+     the ink that survives on it. Never `--cta` as type on a light ground and
+     never white on the bright half, which is §38.4's trap in both
+     directions.
+
+     `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
+     wins without an !important — the mistake §40 recorded, where an enforced
+     rule went on winning after the argument had changed. */
+  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
+     *"the reporting button should always become orange even if it's not open,
+     and it's appearing as long as the cycle is open."* The first build gave
+     the orange to the word when unselected and the fill only on selection,
+     which made it quiet exactly when somebody needs to notice it — the old
+     Report button was solid at all times, and that is the volume being moved
+     rather than a new one being added (§41's budget: the tab is drawn only
+     while a cycle is open, for somebody who may report).
+
+     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
+     never changes when you are standing on it stops answering "where am I".
+     `--cta-hover` is that half and is declared for every palette beside
+     `--cta`, so this needs no new token and no literal (§25). */
+  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
+  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
+  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -490,20 +623,99 @@
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
   .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
 
-  /* A LIGHT header, not a navy one, inside a clipped rounded box; rows
-     separate on HOVER rather than on a zebra stripe, and the columns are
-     divided by hairlines instead. The navy header went with the serif —
+  /* A LIGHT header, not a navy one, inside a clipped rounded box; the columns
+     are divided by hairlines instead of rules. Rows once separated on HOVER
+     rather than on a zebra stripe; a zebra was added to these tables later and
+     the hover was removed in §278.3, so the stripe is what separates them now
+     — recorded here because the sentence read the other way for versions after
+     it had stopped being true (§104.8). The navy header went with the serif —
      between them they were most of what made this look like a different
      product from the reference. */
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); }
   table { width:100%; border-collapse:collapse; font-size:var(--fs-note); min-width:620px; }
+  /* ── THE FLOOR IS RIGHT NEARLY EVERYWHERE, AND IT CUT THE PLAN (§158) ──
+     That 620px stops a data table squashing into unreadable columns, and it is
+     the right default. It is also a FLOOR, and a floor cannot yield: a unit's
+     plan pane narrows with the window, and once the pane is under 620 the
+     table holds its minimum while the pane keeps shrinking — so the last
+     column is sliced by the pane's edge. Measured on the demo tenant: the
+     pane is 585px at a 900px window and the table stays at exactly 620,
+     overflowing 35px, then 75 at 860 and 105 at 830.
+
+     IT IS THE FLOOR AND NOTHING ELSE, which is why the first fix drawn was
+     the wrong one. The obvious reading is "the columns need less room", so
+     the first attempt tightened the cell padding — 13px to 7px — and the
+     columns DID narrow while `scrollWidth` stayed at 620 to the pixel,
+     because the flexible Measure column simply absorbed every pixel saved.
+     Anything that does not move the floor moves nothing. The second attempt
+     was §108.5's pair, a scroll shadow and a visible track, which is the
+     right answer to "this box scrolls and does not say so" and the wrong
+     answer here: the box only scrolls BECAUSE of the floor, and a table that
+     fits needs no sign that it continues.
+
+     §109 wrote this same global rule down from the other side — it made a
+     small front-matter table overflow its own grid track by 300px. A rule
+     that is a good default in both directions is still a rule with two edges.
+
+     `:not(.setuppane)` IS LOAD-BEARING AND WAS FOUND BY THE CHECK, NOT BY
+     READING. Setup's pane is `<div class="pane setuppane">`, so the obvious
+     `.pane table` silently took the floor off every Setup table too — and
+     Setup's `.cfg table` floor is 760px on paper: §88 clips every cell to one
+     line and needs the room, and §122.5 caps that pane and lets it scroll ON
+     PURPOSE. Widening this to Setup would have traded a sliced plan for a
+     squashed register, which is the worse of the two.
+
+     THE CHECK CANNOT PROVE THAT BY MEASURING, AND SAYS SO RATHER THAN
+     PRETENDING. The natural assertion — "Setup's table keeps its 760px floor"
+     — was written, went red, and the fault was the assertion:
+     `group-extra.css:296` declares that floor and line 528 re-declares
+     `.cfg table { min-width:0 }` unscoped and later, so every Setup table has
+     computed 0 for a long time and the 760 is dead code (the fifth duplicated
+     rule this project has recorded — §29.2, §51.5, §53.6, §88, §93.11; found
+     by asking `document.styleSheets`, per §93.11, not by reading the cascade).
+     That value reads the same with or without the `:not()`, which is §113.8's
+     blind spot, so the reach is asserted on the SELECTOR the browser holds
+     instead. The dead 760 is recorded in §158.1, not fixed here.
+
+     Below 820 the split stacks and the pane is full-width again, so the window
+     where this applies is exactly the window where the two-column layout is
+     tighter than the floor. */
+  @media (max-width:1000px){
+    .pane:not(.setuppane) table { min-width:0; }
+    /* AND THE FLOOR WAS NOT THE WHOLE OF IT ON THE FUNCTION'S SIDE (§53.5,
+       earning its keep the moment the check asked both). With the floor gone a
+       unit's Plan fits at every width in the band; a supporting function's
+       Projects pane still ran 11px over at 860 and 41px at 830, because its
+       deliverables table carries five columns to the unit's, and what is left
+       once min-width yields is the columns' own intrinsic minimum. Padding
+       could not touch the floor (that is the note above) and is exactly what
+       moves an intrinsic minimum: 13px to 8px a side closes it to zero at
+       every width, with no column heading pushed onto a second line — which
+       is the failure mode to watch, and is asserted rather than assumed.
+       Islam signed off "the columns simply sit a little closer together";
+       this is that, and it is off again above 1000px. */
+    .pane:not(.setuppane) th, .pane:not(.setuppane) td { padding-left:8px; padding-right:8px; }
+  }
   th,td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
   th+th, td+td { border-left:1px solid var(--line-soft); }
   thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2);
              font-weight:700; background:var(--surface-2); white-space:nowrap;
              border-bottom:1px solid var(--line); }
   tbody tr:last-child td { border-bottom:0; }
-  tbody tr:hover > td { background:var(--surface-2); }
+  /* ── NO ROW HOVER (§278.3) ────────────────────────────────────────────
+     This was `tbody tr:hover > td { background:var(--surface-2) }`, and the
+     comment above still says the design separates rows "on HOVER rather than
+     on a zebra stripe" — which stopped being true the day a zebra was added
+     to these tables anyway. Both existed, and the zebra outranks the hover at
+     equal specificity and later source order, so on every second row the
+     hover changed nothing at all: measured #FFFFFF -> #EFF2F6 on one parity
+     and #F5F7FA -> #F5F7FA on the other.
+
+     Islam, asked whether it earns its place beside the stripe: *"for the
+     hovering C remove it."* Deleted rather than left in (§24), with the cost
+     stated: nothing now follows one row across a wide table. The register's
+     own hover on Setup is untouched — it sets the ROW where the zebra also
+     sets the row, so there the later rule wins and the hover works. */
   td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   td .why, .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
   /* Collabs. — the people supporting a tactic's owner (§50). Quieter than the

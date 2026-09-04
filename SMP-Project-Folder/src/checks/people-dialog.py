@@ -237,9 +237,16 @@ with sync_playwright() as p:
     pg.wait_for_timeout(700)
     ck("it opens the first of them", pg.evaluate("!!document.querySelector('#modal-b .pdlg')"))
     ck("...says where you are", " of " in pg.eval_on_selector("#modal-s", "e=>e.textContent"))
-    ck("...and says WHY, above the fields",
-       pg.evaluate("!!document.querySelector('#modal-b .pdband')") and
-       len(pg.eval_on_selector("#modal-b .pdband", "e=>e.textContent").strip()) > 20)
+    # §190 MOVED THE SENTENCE ONTO THE BOX IT IS ABOUT. It used to be a band
+    # above the fields (§116.2), which said what was wrong and left nine boxes
+    # to guess between — so this asserts the new contract rather than being
+    # deleted with the old markup (§51.11).
+    ck("...and says WHY, on the box it is about",
+       pg.evaluate("document.querySelectorAll('#modal-b .pdf.attn .attnsay').length") > 0 and
+       len(pg.eval_on_selector("#modal-b .pdf.attn .attnsay",
+                               "e=>e.textContent").strip()) > 20)
+    ck("...and the band that used to carry it is gone",
+       not pg.evaluate("!!document.querySelector('#modal-b .pdband')"))
     first = pg.evaluate("PDLG.key")
     pg.evaluate("()=>document.querySelector('[data-pdlg-next]').click()")
     pg.wait_for_timeout(700)
@@ -319,6 +326,105 @@ with sync_playwright() as p:
     ck("Escape closes it", pg.evaluate("!PDLG"))
     ck("...and empties the dialog rather than hiding a form in it",
        pg.eval_on_selector("#modal-b", "e=>e.innerHTML.trim()") == "")
+
+    # ── 8 · DISMISSING A DECLARATION (§180) ──────────────────────────
+    # The register offered only "Use it", so a claim the SMO DISAGREES with
+    # had no reply at all — while the Setup Overview had been saying "accept
+    # or dismiss" since §108.10. BOTH ENDS everywhere (§113.8): the answered
+    # state must be visibly different AND must stop counting, and the
+    # outstanding state must still do both of the things it always did.
+    print("\n8. dismissing what somebody said (§180)")
+    land(pg)
+    dk = pg.evaluate("""()=>{const p=PEOPLE.filter(x=>personAt(x)
+        && personAt(x)!=='fn:finance' && !x.retired)[0]; return p ? p.key : null;}""")
+
+    def state(k):
+        return pg.evaluate("""(k)=>{const m=document.querySelector('.saidmark');
+            return { count:saidWhereCount(),
+                     inQueue: attentionQueue().some(e=>e.key===k &&
+                        e.why.some(w=>w.kind==='said')),
+                     glyph: m ? m.textContent.trim() : null,
+                     done: !!(m && m.classList.contains('done')),
+                     outstanding: saidOutstanding(personBy(k)),
+                     at: saidAt(k), dismissed: saidDismissed(k) };}""", k)
+
+    # OUTSTANDING — the shape a server older than §180 also sends (a string),
+    # which is why it is written as one here (§58: read either).
+    pg.evaluate("(k)=>{ SAIDWHERE = {}; SAIDWHERE[k]='fn:finance'; paint(); }", dk)
+    pg.wait_for_timeout(600)
+    a = state(dk)
+    ck("outstanding: it is counted and it is in the queue",
+       a["count"] == 1 and a["inQueue"] and a["outstanding"], a)
+    ck("...and wears the waiting ring", not a["done"], a)
+
+    # BOTH CONTROLS, in the row's own dialog.
+    pg.evaluate("(k)=>{PDLG={key:k,mode:'edit'};paint();}", dk)
+    pg.wait_for_timeout(600)
+    btns = pg.evaluate("""()=>{const n=document.querySelector('#modal-b .saidwhere');
+        return n ? [...n.querySelectorAll('button')].map(b=>b.textContent.trim()) : [];}""")
+    ck("the dialog offers Use it AND Dismiss", btns == ["Use it", "Dismiss"], btns)
+
+    # DISMISSED — the shape §180's server sends for an answered claim.
+    pg.evaluate("(k)=>{ SAIDWHERE = {}; SAIDWHERE[k]={at:'fn:finance',dismissed:'2026-08-30'};"
+                " PDLG=null; paint(); }", dk)
+    pg.wait_for_timeout(600)
+    z = state(dk)
+    ck("answered: it stops counting and leaves the queue",
+       z["count"] == 0 and not z["inQueue"] and not z["outstanding"], z)
+    ck("...but the CLAIM is still on record and readable",
+       z["at"] == "fn:finance" and z["dismissed"] is True, z)
+    ck("...and the row's mark says answered",
+       z["done"], z)
+
+    # AND THE MARK IS VISIBLE, WHICH IS NOT THE SAME QUESTION (§185).
+    # §180 shipped `◎`/`◌` and measured them the wrong way: it asked whether
+    # each glyph DIFFERED from the tofu rectangle, which the dotted circle
+    # does — by about one pixel of ink. Re-measured in the font this mark
+    # actually computes to, the bullseye laid down 53 ink pixels and the
+    # dotted circle 29, against tofu's 28. So the answered mark was, to
+    # anybody looking at it, nothing at all: Islam, "I dismissed the case but
+    # the small mark is not there."
+    #
+    # A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND
+    # FAILS "IT IS A MARK." So the mark is CSS now, and what is asserted is
+    # what a person can see: two rings of the SAME footprint — the row must
+    # not move when one becomes the other (§88) — telling each other apart by
+    # being filled or open, never by ink alone at 9px.
+    marks = pg.evaluate("""()=>{
+      const one=(cls)=>{const e=document.createElement('span');
+        e.className='saidmark'+(cls?' '+cls:'');e.textContent='x';
+        document.body.appendChild(e);
+        const cs=getComputedStyle(e), r=e.getBoundingClientRect();
+        const o={w:Math.round(r.width),h:Math.round(r.height),
+                 border:parseFloat(cs.borderTopWidth),
+                 round:cs.borderTopLeftRadius,
+                 ink:cs.borderTopColor,
+                 filled:cs.backgroundColor!=='rgba(0, 0, 0, 0)'};
+        e.remove();return o;};
+      return {waiting:one(''), answered:one('done')};}""")
+    w, a = marks["waiting"], marks["answered"]
+    ck("the mark is a drawn ring, not a character that may not exist",
+       w["w"] >= 7 and w["border"] >= 1.5 and w["round"] == "50%", w)
+    ck("...and the two are the SAME size, so the row cannot move",
+       (w["w"], w["h"]) == (a["w"], a["h"]), marks)
+    ck("...and the same weight of ring, so neither is the faint one",
+       w["border"] == a["border"], marks)
+    # THE DIFFERENCE IS THE SHAPE. Colour alone was measured and rejected in
+    # §180's own mockup (gold against grey at 9px); this asserts that the
+    # shape still carries it, so a build that went back to two inks fails.
+    ck("waiting is FILLED and answered is OPEN",
+       w["filled"] and not a["filled"], marks)
+    ck("...and the ink moves with it rather than instead of it",
+       w["ink"] != a["ink"], marks)
+
+    # A dismissed claim keeps the way back and loses the way it came.
+    pg.evaluate("(k)=>{PDLG={key:k,mode:'edit'};paint();}", dk)
+    pg.wait_for_timeout(600)
+    btns2 = pg.evaluate("""()=>{const n=document.querySelector('#modal-b .saidwhere');
+        return n ? [...n.querySelectorAll('button')].map(b=>b.textContent.trim()) : [];}""")
+    ck("once answered, Use it stays and Dismiss goes", btns2 == ["Use it"], btns2)
+    pg.evaluate("()=>{ SAIDWHERE = null; PDLG = null; SAIDFAIL = null; paint(); }")
+    pg.wait_for_timeout(400)
 
     ck("no console errors", not errs, errs[:3])
     b.close()

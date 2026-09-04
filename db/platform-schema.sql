@@ -9,7 +9,7 @@
 -- (constitution XI) — and everything in this file must outlive every save of
 -- every client, because it is what decides who is allowed to make one.
 --
--- WHY A SCHEMA PER CLIENT AT ALL (§36.2, spec 024). readState and writeState
+-- WHY A SCHEMA PER CLIENT AT ALL (§36.2, spec 030). readState and writeState
 -- move a whole client's graph in one go, so the boundary can be one statement:
 -- SET search_path. A tenant COLUMN would touch every query, insert, migration
 -- and uniqueness constraint in the product, and §36.3's trap is fatal to it —
@@ -40,11 +40,11 @@ CREATE TABLE IF NOT EXISTS clients (
   -- kind of client later is a new value, not a second column and a rule about
   -- which of them wins.
   kind        text NOT NULL DEFAULT 'client',
-  -- WHOSE REGISTER IS IT (§147.31). A client CREATED HERE has its register
+  -- WHOSE REGISTER IS IT (§288.31). A client CREATED HERE has its register
   -- built by the platform, so putting somebody on its team adds them to that
   -- register automatically, seat and all. A client that predates the platform
   -- — Raya Trade — brought its own register of 33 people, and the platform
-  -- adds nobody to it: each account says which existing row it is (§147.30).
+  -- adds nobody to it: each account says which existing row it is (§288.30).
   --
   -- IT IS A FACT ABOUT THE CLIENT, NOT ABOUT THE REGISTER'S SIZE. Asked as
   -- "is the register empty" it was right for the first consultant and wrong
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS account_clients (
   CONSTRAINT account_clients_seat CHECK (seat IN ('super','smoteam'))
 );
 
--- A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§147.26, Islam 2026-09-01: "a
+-- A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§288.26, Islam 2026-09-01: "a
 -- project might have 2 super users"). This carried a UNIQUE INDEX enforcing
 -- one, on the reasoning that a client with two is a client where nobody can
 -- say who holds the access matrix — which is a tidy thought about a table and
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS account_clients (
 -- WHAT THE CONSTRAINT WAS REALLY PROTECTING is that somebody holds it, and
 -- that is unaffected: a client with none is still a client nobody can
 -- configure, and the platform's own super user reaches every client by right
--- (§147.20), so there is no client that can become unreachable.
+-- (§288.20), so there is no client that can become unreachable.
 
 CREATE INDEX IF NOT EXISTS account_clients_client ON account_clients (client_key);
 

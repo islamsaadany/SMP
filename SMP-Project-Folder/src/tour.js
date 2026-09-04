@@ -24,13 +24,21 @@
    there. The reversal is recorded in spec 017's decisions table rather than
    quietly overwritten (Constitution II).
 
-   ── IT RUNS ON DEMO DATA, AND THAT IS WHAT MAKES IT SAFE ──────────────────
-   A fresh tenant is EMPTY: a spotlight on an empty table teaches nothing. So
-   the tour switches to the worked example for its duration and puts the
-   platform back exactly as it found it. It needs no save guard of its own —
-   demo mode already refuses every write (§21, §67) — and the demo BUTTON being
-   the SMO's (§69.15) is about that control, not about the mode: this is its
-   own door into the same read-only view.
+   ── IT RUNS ON THE PERSON'S OWN PLAN (spec 030 §6.2) ──────────────────────
+   It used to switch the platform to the baked worked example for its duration
+   and put it back afterwards, which is what made it safe: demo mode refused
+   every write (§21, §67). That switch went with the Demo data button, and the
+   safety is now structural rather than borrowed — the tour NARRATES and
+   presses only the platform's own navigation (§107, reversing its first
+   interactive build), so there is nothing for it to write and nothing to put
+   back.
+
+   WHAT REPLACES THE WORKED EXAMPLE'S FULLNESS: `SMPRules.tourReady()`. A fresh
+   tenant is EMPTY and a spotlight on an empty table teaches nothing, so the
+   tour is not OFFERED until the person's own place carries at least one pillar
+   or capability and one key objective — the replay button is absent where no
+   story fits and explained where the plan is bare (§61: a control that opens
+   nothing).
 
    ── AND IT IS NOT DRAWN WHERE IT WOULD BE A LIE ───────────────────────────
    Never on a projector (CSS, off the class present.js already sets — no second
@@ -148,6 +156,12 @@ var TOUR = (function(){
   function isFnPlace(k){ return String(k).indexOf("fn:") === 0; }
   var FN_TABS = { strategy:"fnstrat", performance:"fnperf" };
   var FN_SECS = { found:"found", plan:"proj", swot:null };
+  /* §211.2 dropped `found` here for a function that plans in pillars, because
+     that section had removed its Overview. §212 put the Overview back for
+     every format — both tabs, always — so the step points at a section that
+     exists again and the drop is REMOVED rather than left standing: a rule
+     kept after its reason expires is one the next reader takes as load-bearing
+     (§94.15). The SWOT is the one genuine difference once more. */
   function tabKeyFor(place, k){
     return isFnPlace(place) ? (FN_TABS[k] || k) : k;
   }
@@ -273,9 +287,9 @@ var TOUR = (function(){
             "set ourselves is going, and whether the work happened."; } },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel [data-report]"],
+          targets:["#subtabs [data-s='report']"],
           title:"Where your figures go in",
-          body:function(at){ return "While a reporting cycle is open, <b>Report</b> is where " +
+          body:function(at){ return "While a reporting cycle is open, <b>Reporting</b> is where " +
             "you enter this quarter's figures and submit them for the " +
             (isFnPlace(at) ? "function" : "unit") + "."; } },
 
@@ -373,9 +387,9 @@ var TOUR = (function(){
                "and when they do the gap is the conversation." },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel [data-report]"],
+          targets:["#subtabs [data-s='report']"],
           title:"Where the figures come in",
-          body:"While a cycle is open, <b>Report</b> is where this quarter's figures are " +
+          body:"While a cycle is open, <b>Reporting</b> is where this quarter's figures are " +
                "entered and submitted. Submitting speaks for the whole unit, which is why it " +
                "sits with you and your custodian." },
 
@@ -683,8 +697,7 @@ var TOUR = (function(){
        than drawing "this row is the business" over the Knowledge base you
        replayed from. */
     /* `viewer()` is the platform's own answer to "who is this", and it
-       RESOLVES rather than returning a maybe — including after the swap
-       above has just moved the register under us. */
+       RESOLVES rather than returning a maybe. */
     own = ownPlace(viewer()) || firstDest();
     /* AND IT MUST BE SOMEWHERE THIS NAVIGATION CAN GO. A place that is not
        on the row is a place nothing can press, and a tour pressing nothing

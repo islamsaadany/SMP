@@ -1,4 +1,4 @@
-/* The Demo client's content (spec 024 §6.3).
+/* The Demo client's content (spec 030 §6.3).
    Run: DATABASE_URL=…  node scripts/seed-demo-client.js [--dry-run]
 
    Islam asked for a Demo client on the cards: somewhere real to practise, and
@@ -250,7 +250,7 @@ function demoGraph() {
   });
   (seed.people || []).forEach(function (p) {
     p.name = PEOPLE[p.key];
-    /* AN ADDRESS IS HOW SOMEBODY SIGNS IN NOW (spec 024 §5), so a demo whose
+    /* AN ADDRESS IS HOW SOMEBODY SIGNS IN NOW (spec 030 §5), so a demo whose
        register has none cannot demonstrate the thing it exists to
        demonstrate. Nothing here is a platform account: these are register
        rows in the demo's own schema. */

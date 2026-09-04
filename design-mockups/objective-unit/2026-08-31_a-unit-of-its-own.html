@@ -1,0 +1,217 @@
+<title>A unit for a key objective</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --panel:#12243F;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --stone:#6B7688;
+    --line:#D6DCE5; --gold:#C9A227; --gold-deep:#8A6100;
+    --bad:#B3341F; --bad-tx:#9C2C1A; --good-tx:#1E7A48;
+    --attn-bg:#FDF3DF; --attn-tx:#8A6100;
+    --r-sm:6px; --r:10px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+    --attn-bg:#3A2E12; --attn-tx:#E7B94A;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+    --attn-bg:#3A2E12; --attn-tx:#E7B94A;
+  }
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans); margin:0;
+    padding:26px 20px 80px;}
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:20px; margin:0 0 4px; letter-spacing:-.25px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 20px; max-width:78ch;}
+  .tag{font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); margin:30px 0 9px;}
+  .tag.now{color:var(--bad-tx);} .tag.a{color:var(--good-tx);}
+  .tag b{font-size:12.5px; letter-spacing:0; text-transform:none; color:var(--ink);}
+
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    overflow:hidden;}
+  table{width:100%; border-collapse:collapse;}
+  th{background:var(--panel); color:#fff; font:700 10px/1 var(--sans);
+    letter-spacing:.07em; text-transform:uppercase; text-align:left; padding:10px;}
+  th.cc, td.cc{text-align:right;}
+  td{border-bottom:1px solid var(--line); padding:9px 10px; font-size:13.5px;
+    vertical-align:middle;}
+  tr:last-child td{border-bottom:0;}
+  .num{font-variant-numeric:tabular-nums;}
+  .far{color:var(--ink-3); font-variant-numeric:tabular-nums;}
+  .u{color:var(--ink-3); font-size:11.5px; margin-left:3px;}
+  .uc{color:var(--ink-3); font-size:12px; font-variant-numeric:tabular-nums;}
+  .bare{color:var(--bad-tx); font-weight:700;}
+  .fld{border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:var(--r-sm); padding:4px 8px; font:inherit; font-size:12.5px;
+    width:100%; box-sizing:border-box;}
+
+  .dist{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px;
+    margin:14px 0 0;}
+  .dcell{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
+    padding:9px 11px;}
+  .dcell b{display:block; font:650 19px/1.1 var(--sans); font-variant-numeric:tabular-nums;}
+  .dcell span{color:var(--ink-3); font-size:11.5px;}
+  .dcell code{font-family:var(--mono); font-size:12px; color:var(--ink);}
+  .dcell.none b{color:var(--bad-tx);}
+
+  .note{color:var(--ink-3); font-size:12.5px; margin:11px 0 0; max-width:82ch;}
+  .note b{color:var(--ink);}
+  .q{background:var(--attn-bg); border:1px solid var(--attn-tx); color:var(--attn-tx);
+    border-radius:var(--r-sm); padding:12px 14px; font-size:13px; margin-top:14px;}
+  .q b{color:var(--attn-tx);}
+  .found{display:grid; gap:8px; margin:16px 0 0; padding:0; list-style:none;}
+  .found li{display:flex; gap:11px; font-size:13.5px; color:var(--ink-2);
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
+    padding:11px 13px;}
+  .found b{color:var(--ink);} .found code{font-family:var(--mono); font-size:12.5px;}
+  .n{flex:none; width:21px; height:21px; border-radius:50%; background:var(--panel);
+    color:#fff; font:700 11px/21px var(--sans); text-align:center;}
+</style>
+<div class="wrap">
+<h1>A unit for a key objective</h1>
+<p class="lede">You asked for one because some objectives are counts, some are money
+and some are square metres. Here is what the plan holds today, measured — not
+guessed — across all 90 key&#8209;objective targets that ship with the platform.</p>
+
+<ul class="found">
+  <li><span class="n">1</span><span><b>There is no unit field.</b> The unit is
+    typed into the target itself, as text: <code>"6.2B EGP"</code>,
+    <code>"60000 SQM"</code>, <code>"100#"</code>. The platform stores one
+    string and has no idea which part is the number.</span></li>
+  <li><span class="n">2</span><span><b>Which is why the actual has no unit.</b>
+    Your screenshot shows <code>100#</code> against a bare <code>70</code> — not
+    a bug, just nobody retyping the unit into the second box.</span></li>
+  <li><span class="n">3</span><span><b>Your upload template already has a Unit
+    column</b>, and the platform <i>glues</i> it onto the number on the way in
+    and pulls it apart again on the way out. So the concept exists and is
+    flattened at the door.</span></li>
+</ul>
+
+<div class="tag now">What the 90 shipped targets actually carry</div>
+<div class="dist">
+  <div class="dcell"><b>36</b><span><code>%</code> — percentages</span></div>
+  <div class="dcell none"><b>24</b><span>nothing at all &mdash; a bare number</span></div>
+  <div class="dcell"><b>19</b><span><code>B EGP</code> — billions</span></div>
+  <div class="dcell"><b>6</b><span><code>d</code> — days</span></div>
+  <div class="dcell"><b>3</b><span><code>M EGP</code> — millions</span></div>
+  <div class="dcell"><b>2</b><span><code>EGP</code></span></div>
+</div>
+<p class="note">Two things to notice. <b>A quarter of them carry no unit</b>, so
+whatever we build has to be fine with that. And <b><code>B EGP</code> is not one
+unit</b> — it is a scale and a currency, and the same money appears at three
+scales, which is why <code>6.2B EGP</code> and <code>900M EGP</code> cannot be
+compared or added by anything.</p>
+
+<div class="tag now">Now — the unit rides on the target and the actual goes bare</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Objective</th><th class="cc">By 2027</th><th class="cc">This year</th>
+      <th class="cc">Actual</th></tr></thead>
+    <tbody>
+      <tr><td>Daily B2B trips</td><td class="cc far">100#</td>
+        <td class="cc num">70</td><td class="cc num">64</td></tr>
+      <tr><td>Daily LMD delivered orders</td><td class="cc far">1500#</td>
+        <td class="cc num">1000</td><td class="cc num">870</td></tr>
+      <tr><td>Warehouse space</td><td class="cc far">60000 SQM</td>
+        <td class="cc num">40000</td><td class="cc num">38400</td></tr>
+      <tr><td>Logistics revenue</td><td class="cc far">2.4B EGP</td>
+        <td class="cc num">1.6B EGP</td><td class="cc num">0.71B</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note">Four rows, four different habits: <code>100#</code>,
+<code>60000 SQM</code>, <code>1.6B EGP</code> and an actual written
+<code>0.71B</code> with the currency dropped. Nothing is wrong with the data —
+there is simply nowhere else to put the unit.</p>
+
+<div class="q" style="background:transparent;border-color:var(--good-tx);color:var(--ink-2)">
+<b style="color:var(--good-tx)">BUILT &mdash; Option A, and cheaper than this page assumed.</b>
+The three questions below turned out to have one answer between them.
+<b>Nothing new is stored.</b> The platform already holds a matched pair for
+taking a target apart and putting it back &mdash; it round&#8209;trips through
+them on every download &mdash; and measured before anything was written,
+<b>178 targets across every unit, capability, group objective and pillar
+measure survive that round trip with zero failures.</b> So the Unit column is a
+view of what is already there: <code>target</code> goes on holding the whole
+string, all 103 places that read it keep working, the deck and both workbooks
+are untouched, and <b>there is no migration to decide about</b> &mdash; question
+1 below simply does not arise. It is free text (question 2). Question 3 stands:
+the pillar measures were included in the round&#8209;trip proof, so extending
+this to them is now cheap, and it is still your call.</div>
+
+<div class="tag a">Option A &mdash; <b>a Unit column; every number in that row wears it</b></div>
+<div class="card">
+  <table>
+    <thead><tr><th>Objective</th><th class="cc">Unit</th><th class="cc">By 2027</th>
+      <th class="cc">This year</th><th class="cc">Actual</th></tr></thead>
+    <tbody>
+      <tr><td>Daily B2B trips</td><td class="cc uc">trips</td>
+        <td class="cc far">100</td><td class="cc num">70</td><td class="cc num">64</td></tr>
+      <tr><td>Daily LMD delivered orders</td><td class="cc uc">orders</td>
+        <td class="cc far">1,500</td><td class="cc num">1,000</td><td class="cc num">870</td></tr>
+      <tr><td>Warehouse space</td><td class="cc uc">SQM</td>
+        <td class="cc far">60,000</td><td class="cc num">40,000</td><td class="cc num">38,400</td></tr>
+      <tr><td>Logistics revenue</td><td class="cc uc">EGP&nbsp;bn</td>
+        <td class="cc far">2.4</td><td class="cc num">1.6</td><td class="cc num">0.71</td></tr>
+      <tr><td>On-time delivery rate</td><td class="cc uc">%</td>
+        <td class="cc far">96</td><td class="cc num">92</td><td class="cc num">94</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note"><b>The unit is said once and the numbers line up under each
+other</b> — which is the real win: today no column of targets can be read down,
+because half of them carry text. The actual gets its unit for free, because the
+unit belongs to the row rather than to the box. <b>Cost:</b> one more column on
+a table that already has five, and <code>#</code> has to become a real word
+(<i>trips</i>, <i>orders</i>) — which is an improvement, but it is somebody
+typing it.</p>
+
+<div class="tag a">Option B &mdash; <b>the unit sits under the objective's name</b></div>
+<div class="card">
+  <table>
+    <thead><tr><th>Objective</th><th class="cc">By 2027</th><th class="cc">This year</th>
+      <th class="cc">Actual</th></tr></thead>
+    <tbody>
+      <tr><td>Daily B2B trips <span class="u">· trips</span></td>
+        <td class="cc far">100</td><td class="cc num">70</td><td class="cc num">64</td></tr>
+      <tr><td>Warehouse space <span class="u">· SQM</span></td>
+        <td class="cc far">60,000</td><td class="cc num">40,000</td><td class="cc num">38,400</td></tr>
+      <tr><td>Logistics revenue <span class="u">· EGP bn</span></td>
+        <td class="cc far">2.4</td><td class="cc num">1.6</td><td class="cc num">0.71</td></tr>
+      <tr><td>On-time delivery rate <span class="u">· %</span></td>
+        <td class="cc far">96</td><td class="cc num">92</td><td class="cc num">94</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note">Same numbers, no extra column — the unit rides quietly on the
+name. <b>Cost:</b> it reads as part of the objective's title rather than as a
+property of the figures, and on the narrow chip layout (the other objectives
+view) there is much less room for it.</p>
+
+<div class="q"><b>My recommendation: A.</b> The unit is a fact about the
+<i>numbers</i>, not about the name, and putting it in its own column is what
+makes a column of targets readable down the page for the first time.
+<br><br>
+<b>Three things I need from you before building either:</b><br><br>
+<b>1 · The 90 targets that already exist.</b> The platform can already split
+<code>"6.2B EGP"</code> into <code>6.2</code> and <code>B EGP</code> correctly —
+it does it on every download. Do I run that once over the stored plan so
+existing rows get their unit filled in, or leave them exactly as typed and let
+the office set units going forward? <i>Splitting is reversible and I would test
+it against every one of the 90 first.</i><br><br>
+<b>2 · Free text, or a list?</b> A list keeps it tidy and somebody has to
+maintain it; free text handles <i>SQM</i>, <i>trips</i>, <i>orders</i>,
+<i>days</i> without anybody being asked. I would suggest <b>free text with the
+tenant's own existing units offered as suggestions</b> — no maintenance, no
+dead end.<br><br>
+<b>3 · Does this reach the pillar measures too?</b> They have exactly the same
+shape and the same problem. Doing both together is barely more work than doing
+one; doing one leaves the platform saying it two ways.</div>
+</div>

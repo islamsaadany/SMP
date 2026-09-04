@@ -193,10 +193,155 @@ const CLIENT_ARG = (function () {
   console.log("mobile measures:", (await spot(
     "SELECT count(*) n FROM measures m JOIN pillars p ON m.pillar_id=p.id WHERE p.unit_key='mobile'"))[0].n);
   console.log("access grants:", (await spot("SELECT count(*) n FROM access_grants"))[0].n);
+
+  /* ── EVERY GRANT VALUE THE SCREEN CAN PRODUCE, NOT ONLY THE SHIPPED THREE
+     (§172) ────────────────────────────────────────────────────────────────
+     §145 gave the two Strategy cells a third state, `fill`, and the CHECK on
+     `access_grants` was never widened — so the first tenant to grant it got a
+     500 on that save AND on every save afterwards, of any page, because the
+     refused value stays in the posted graph. It reads exactly like "Roles &
+     access never saves", and that is how it was reported three times.
+
+     NOTHING HERE COULD HAVE SEEN IT. The seed grants no `fill` anywhere, so
+     this file wrote only none/view/edit and the fourth value was never once
+     offered to the database — §94.2's rule with the sign reversed: a check
+     that exercises only the shipped defaults cannot see a value nobody has
+     set. So the values are taken from the SHARED RULE rather than listed
+     here, and one is written and read back for each: a state added to
+     `STATE_RANK` tomorrow is exercised the day it is added, with no list to
+     remember. */
+  const RULES = require("../lib/rules.js");
+  const GRANTS = Object.keys(RULES.STATE_RANK);
+  const gState = await io.readState(client);
+  gState.access = JSON.parse(JSON.stringify(gState.access || {}));
+  GRANTS.forEach(function (g, i) {
+    gState.access["rtprobe" + i] = { a_unit_own_strat: g };
+  });
+  await io.writeState(client, gState);
+  const gBack = await io.readState(client);
+  const gGot = GRANTS.map(function (g, i) {
+    const row = gBack.access["rtprobe" + i];
+    return row && row.a_unit_own_strat;
+  });
+  const gOk = JSON.stringify(gGot) === JSON.stringify(GRANTS);
+  console.log("every grant value round trips:", gOk ? "PASS" : "FAIL",
+    "[" + GRANTS.join(", ") + "]" + (gOk ? "" : " got [" + gGot.join(", ") + "]"));
+  /* Put the tenant back, so this file stays a fixed point for whatever runs
+     after it (§94.2's other half: a trial that leaves state behind is a trial
+     the next one measures). */
+  GRANTS.forEach(function (g, i) { delete gBack.access["rtprobe" + i]; });
+  await io.writeState(client, gBack);
+  /* ── A PENDING FILL ON A ROW THAT HAS NEVER CARRIED ONE (§177) ─────────
+     §177 made an outcome's target and a milestone's owner and due date
+     fillable, and a fill is stored as `row.pend = { field: {by, at} }`. Those
+     two tables have no `pend` COLUMN — the mark rides `extra`, which is what
+     makes this migration-free — and "rides extra" is a claim, not a fact,
+     until something writes one and reads it back (§172's lesson: a value the
+     round trip has never offered the database is a value nobody has tested).
+     Written on the FIRST project that has both kinds of row, so this says
+     nothing about which project it is. */
+  const pState = await io.readState(client);
+  const pCap = (pState.group.capabilities || []).filter(function (c) {
+    return (c.projects || []).some(function (pr) {
+      return (pr.outcomes || []).length && (pr.milestones || []).length; });
+  })[0];
+  if (!pCap) {
+    console.log("pending marks round trip: SKIPPED — no project with both an outcome and a milestone");
+  } else {
+    const pPr = pCap.projects.filter(function (pr) {
+      return (pr.outcomes || []).length && (pr.milestones || []).length; })[0];
+    const MARK = { by: "rtprobe", at: "2026-08-29" };
+    pPr.outcomes[0].pend = { target: MARK };
+    pPr.milestones[0].pend = { finish: MARK, owner: MARK };
+    await io.writeState(client, pState);
+    const pBack = await io.readState(client);
+    const bCap = (pBack.group.capabilities || []).filter(function (c) { return c.id === pCap.id; })[0];
+    const bPr = ((bCap || {}).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
+    const got = bPr && {
+      outcome: JSON.stringify((bPr.outcomes[0].pend || {}).target),
+      finish:  JSON.stringify((bPr.milestones[0].pend || {}).finish),
+      owner:   JSON.stringify((bPr.milestones[0].pend || {}).owner) };
+    const want = JSON.stringify(MARK);
+    /* Postgres jsonb reorders an object's keys, so {by,at} comes back as
+       {at,by} — the mark is compared as a VALUE, never as a string (§145). */
+    const same_ = function (a) {
+      const o = JSON.parse(a || "null");
+      return !!o && o.by === MARK.by && o.at === MARK.at;
+    };
+    const pOk = got && same_(got.outcome) && same_(got.finish) && same_(got.owner);
+    console.log("pending marks round trip:", pOk ? "PASS" : "FAIL",
+      pOk ? "[outcome.target, milestone.finish, milestone.owner]" : JSON.stringify(got));
+    /* And put it back, or the next run measures this one's leavings. */
+    delete bPr.outcomes[0].pend;
+    delete bPr.milestones[0].pend;
+    await io.writeState(client, pBack);
+    const cleaned = await io.readState(client);
+    const cCap = (cleaned.group.capabilities || []).filter(function (c) { return c.id === pCap.id; })[0];
+    const cPr = ((cCap || {}).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
+    console.log("  ...and clears again:",
+      (!cPr.outcomes[0].pend && !cPr.milestones[0].pend) ? "PASS" : "FAIL");
+  }
+
+  /* ── A MONTHLY PLAN SURVIVES THE DATABASE (§278) ────────────────────
+     "No migration and no schema change" is a claim about `extra` JSONB, and
+     §172 is the reason it is not left as one: that section's fourth grant
+     value was agreed by four layers and REFUSED by a CHECK constraint nobody
+     had asked, because the seed never offered one. The seed carries no
+     monthly plan either, so the round trip above proves nothing about it —
+     one is written and read back here, on all three shapes that can hold one.
+
+     THE NULLS ARE THE POINT. A half-filled plan is stored, and a blank month
+     must come back as null rather than as 0 — through `JSON.stringify` into
+     jsonb and out again, where a lost null would silently put the row IN
+     FORCE against a target nobody typed (§278, §104.10). */
+  const mState = await io.readState(client);
+  const mUnit = Object.keys(mState.units)[0];
+  const mPil = (mState.units[mUnit].items || [])[0];
+  const mMeas = mPil && (mPil.measures || [])[0];
+  const mTac = mPil && (mPil.tactics || [])[0];
+  const mKo = (mState.units[mUnit].keyObjectives || [])[0];
+  if (mMeas && mTac && mKo) {
+    const FULL = [15, 14, 16, 16, 17, 18, 24, 28, 32, 36, 40, 44];
+    const PART = [0, 1, null, null, null, null, null, null, null, null, null, null];
+    mMeas.monthly = FULL.slice();
+    mKo.monthly = PART.slice();
+    mTac.outMonthly = FULL.slice();
+    await io.writeState(client, mState);
+    const mBack = await io.readState(client);
+    const bPil = (mBack.units[mUnit].items || []).filter(function (p) { return p.id === mPil.id; })[0];
+    const bMeas = bPil && (bPil.measures || []).filter(function (x) { return x.id === mMeas.id; })[0];
+    const bTac = bPil && (bPil.tactics || []).filter(function (x) { return x.id === mTac.id; })[0];
+    const bKo = (mBack.units[mUnit].keyObjectives || []).filter(function (x) { return x.id === mKo.id; })[0];
+    const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+    const mOk = bMeas && bTac && bKo &&
+      same(bMeas.monthly, FULL) && same(bTac.outMonthly, FULL) && same(bKo.monthly, PART);
+    console.log("monthly plan round trip:", mOk ? "PASS" : "FAIL",
+      mOk ? "[measure, tactic outcome, key objective — nulls kept]"
+          : JSON.stringify({ meas: bMeas && bMeas.monthly, tac: bTac && bTac.outMonthly,
+                             ko: bKo && bKo.monthly }));
+    if (!mOk) process.exitCode = 1;
+    /* AND THE KEY LEAVES AGAIN (§50.6). A row that never had one and one
+       whose plan was cleared must be byte-identical, or every save after a
+       clear carries a change nobody made. */
+    delete bMeas.monthly; delete bTac.outMonthly; delete bKo.monthly;
+    await io.writeState(client, mBack);
+    const mClean = await io.readState(client);
+    const cPil = (mClean.units[mUnit].items || []).filter(function (p) { return p.id === mPil.id; })[0];
+    const cMeas = cPil && (cPil.measures || []).filter(function (x) { return x.id === mMeas.id; })[0];
+    const cTac = cPil && (cPil.tactics || []).filter(function (x) { return x.id === mTac.id; })[0];
+    const cKo = (mClean.units[mUnit].keyObjectives || []).filter(function (x) { return x.id === mKo.id; })[0];
+    const cOk = cMeas && !("monthly" in cMeas) && !("outMonthly" in cTac) && !("monthly" in cKo);
+    console.log("  ...and clears again, key DELETED:", cOk ? "PASS" : "FAIL");
+    if (!cOk) process.exitCode = 1;
+  } else {
+    console.log("monthly plan round trip: SKIPPED — no measure/tactic/objective in the seed");
+    process.exitCode = 1;
+  }
+
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 
   client.release();
   await pool.end();
-  if (!equal || !slateOk || !archOk) process.exit(1);
+  if (!equal || !slateOk || !archOk || !gOk) process.exit(1);
 })().catch(function (e) { console.error("FAIL:", e); process.exit(1); });

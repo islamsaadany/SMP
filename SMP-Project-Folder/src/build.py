@@ -5,20 +5,22 @@
 css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
        + "\n" + open('config.css').read() + "\n" + open('arrange.css').read()
        + "\n" + open('present.css').read() + "\n" + open('chat.css').read()
-       + "\n" + open('tour.css').read() + "\n" + open('builder.css').read())
+       + "\n" + open('tour.css').read() + "\n" + open('welcome.css').read()
+       + "\n" + open('builder.css').read())
 shell = open('shell.html').read()
 
 # lib/rules.js is the SHARED one — the same file api/state.js requires. It is
 # inlined FIRST so config-data.js can alias it. Two copies of "may this person
 # edit this" would drift, and the drift is silent: a screen that offers an edit
 # the server then refuses (spec 006 §2).
-for tag, f in [("RULES","../../lib/rules.js"), ("AUDIENCE","../../lib/audience.js"),
+for tag, f in [("RULES","../../lib/rules.js"), ("DIFF","../../lib/graph-diff.js"),
+               ("AUDIENCE","../../lib/audience.js"),
                ("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("RECIPES","recipes.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
                ("PPTX","pptx.js"),
                ("MAIL","mail.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
-               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("SYNC","sync.js")]:
+               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("HISTORY","history.js"), ("SAFETY","safety.js"), ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')
 # The icon travels INSIDE the built file, as a data URI, because the file has
 # to carry everything it needs — opened from a memory stick it still shows its
@@ -37,16 +39,20 @@ ICON = (
 # that, and would put a request to a third party on every load of a file
 # holding a client's strategy.
 #
-# Latin subsets of variable faces, so four families cost 148 KB rather than the
-# several hundred a static family per weight would. font-display:swap so text
-# is readable while a face decodes rather than invisible — the data URI decodes
-# almost instantly, but swap is what makes the failure mode "the system font"
-# instead of "nothing".
+# ONE EMBEDDED FACE, NOT FOUR (§157). Four rode in every build from §38.7 so
+# they could be compared in the real product — "B is how you decide, A is how
+# you ship" — and Islam has now decided: the system stack and Source Sans 3,
+# nothing else. Inter, Manrope and IBM Plex Sans leave the file with their
+# .woff2 files, which is 116 KB off every handover and three faces that can no
+# longer drift out of step with the switch that offers them.
+#
+# A Latin subset of a variable face, so the whole family costs 28 KB rather
+# than the several hundred a static family per weight would. font-display:swap
+# so text is readable while it decodes rather than invisible — the data URI
+# decodes almost instantly, but swap is what makes the failure mode "the system
+# font" instead of "nothing", which is also the other option on the switch.
 import base64, glob, os
-FACES = [("Inter", "fonts/Inter.woff2"),
-         ("Source Sans 3", "fonts/Source_Sans_3.woff2"),
-         ("Manrope", "fonts/Manrope.woff2"),
-         ("IBM Plex Sans", "fonts/IBM_Plex_Sans.woff2")]
+FACES = [("Source Sans 3", "fonts/Source_Sans_3.woff2")]
 faces_css = []
 for family, path in FACES:
     if not os.path.exists(path):
@@ -109,6 +115,40 @@ def check_scripts(html):
     if r.returncode:
         sys.stderr.write("BUILD REFUSED — the built page does not parse:\n" + r.stderr)
         sys.exit(1)
+
+# ── A CSP SAFETY-NET, HASHED AT BUILD TIME (2026-09-01 security sweep) ───────
+# The XSS holes are closed by escaping (§235), but this is defence in depth: if
+# an escaping gap is ever reintroduced, an injected inline handler (onerror=,
+# onfocus=) must still not RUN. The vercel.json header keeps script-src
+# 'unsafe-inline' (the gate needs it, and it is not built here); this meta adds
+# a SECOND, stricter policy scoped to the platform page — every legitimate
+# inline <script> is allow-listed by the SHA-256 of its exact contents, and
+# nothing else inline can execute. The browser enforces both policies, so a
+# script must pass both: the real blocks pass (hash + unsafe-inline), an
+# injected handler is blocked by this one (no hash, no unsafe-inline).
+#
+# HASHED HERE, SO IT CAN NEVER GO STALE. The whole danger of a hashed CSP is a
+# hash that no longer matches the page (§91's "a stale hash is a page that does
+# not load"). Computing it in the same build that emits the scripts makes drift
+# impossible by construction — the hashes are of exactly the bytes shipped.
+#
+# ONLY script-src is set, so styles/images/etc. stay governed by the header and
+# nothing else about the page's policy changes. The meta is placed immediately
+# after <meta charset> so it precedes every <script> it must govern. The app
+# adds all its handlers with addEventListener and injects no <script> at
+# runtime (verified), so nothing legitimate relies on inline execution.
+import hashlib
+def csp_meta(html):
+    blocks = re.findall(r"<script>([\s\S]*?)</script>", html)
+    hashes = ["'sha256-" + base64.b64encode(
+        hashlib.sha256(b.encode("utf-8")).digest()).decode() + "'" for b in blocks]
+    return ('<meta http-equiv="Content-Security-Policy" '
+            'content="script-src \'self\' ' + " ".join(hashes) + '">')
+
+_meta = csp_meta(out)
+_anchor = "<meta charset='utf-8'>\n"
+assert out.count(_anchor) == 1, "charset meta anchor not found exactly once"
+out = out.replace(_anchor, _anchor + _meta + "\n", 1)
 
 check_scripts(out)
 open('strategy-management-platform.html','w').write(out)

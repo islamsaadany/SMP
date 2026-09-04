@@ -70,7 +70,7 @@ function send(res, code, obj) {
 }
 
 
-/* WHERE AN ACCOUNT LANDS AFTER THE DOOR (spec 024).
+/* WHERE AN ACCOUNT LANDS AFTER THE DOOR (spec 030).
    ONE DESTINATION IS NOT A QUESTION (§32), and the destinations are what this
    account can OPEN — not the clients it is on the team of. An Admin is on one
    team and can open every client, so counting team rows would land them in one
@@ -91,7 +91,7 @@ async function landingFor(client, account) {
   const world = { mine: mine, access: access };
   const all = (await client.query(
     "SELECT key, kind, status FROM platform.clients ORDER BY kind, name")).rows;
-  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§147.24) ──
+  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§288.24) ──
      This used to send anybody with exactly ONE openable client straight into
      it, on §32's rule that one destination is not a question. Islam, signing
      in: *"the access opens directly in raya trade! what are you doing?"*
@@ -118,14 +118,14 @@ async function landingFor(client, account) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    /* WHICH CLIENT IS THIS FOR (spec 024). The browser sends the slug it was
+    /* WHICH CLIENT IS THIS FOR (spec 030). The browser sends the slug it was
        served at; the schema comes from the registry row, never from the
        request (§36.4). An unknown client and one this account may not open are
        the same refusal, so trying slugs tells nobody anything. */
     const body = req.method === "POST" ? await readBody(req) : {};
     const action = body.action || (req.method === "GET" ? "me" : "");
 
-    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§147.13) ────
+    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§288.13) ────
        Identity is `platform.accounts`, which is shared: is anyone signed in,
        sign in, sign out, change the password. Every query in all four is
        platform-qualified already — the client was resolved purely to hand
@@ -149,7 +149,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "me") {
-      /* ASKED WITHOUT A CLIENT (spec 024). This is the door's own question —
+      /* ASKED WITHOUT A CLIENT (spec 030). This is the door's own question —
          "is there a live session, and where does it land" — and asking it
          against a client would refuse anybody whose client is not the default
          one, which from the door reads as "your session expired". */
@@ -182,7 +182,7 @@ module.exports = async function handler(req, res) {
         return send(res, 401, { ok: false, error: WRONG_SIGNIN });
       }
 
-      /* ── EMAIL, AND NOTHING ELSE (spec 024) ────────────────────────
+      /* ── EMAIL, AND NOTHING ELSE (spec 030) ────────────────────────
          Islam, 2026-08-28: "access only through email ... no access through
          user name SMO in any place." The person-key path is gone, and with it
          §69.23's two-rows-one-address refusal — an address is the PRIMARY KEY
@@ -288,7 +288,7 @@ module.exports = async function handler(req, res) {
          own on first sign-in. Their existing sessions end — a reset is
          usually a lockout or a handover, and either way old sessions die. */
       /* A PASSWORD IS ISSUED TO AN ADDRESS, because that is what the door
-         takes (spec 024). Somebody on the register with no address cannot be
+         takes (spec 030). Somebody on the register with no address cannot be
          given one — said plainly, with the thing to go and do, rather than
          refused as "not allowed" (§16.7). */
       const addr = String((await client.query(
@@ -496,8 +496,14 @@ module.exports = async function handler(req, res) {
         : (await client.query("SELECT 1 FROM units WHERE key = $1 AND active", [at])).rowCount;
       if (!known) return send(res, 400, { ok: false, error: "That is not somewhere in this organisation." });
       await client.query(
+        /* AND SAYING IT AGAIN CLEARS THE ANSWER (§180). A dismissal is the
+           SMO's reply to one statement; a new statement is owed a new reply,
+           or one dismissal would silence a person for the life of the tenant.
+           Cleared whether or not the place changed — "I still work in
+           Logistics" is a thing somebody can mean to say. */
         "INSERT INTO bu_declarations (person_key, at) VALUES ($1, $2) " +
-        "ON CONFLICT (person_key) DO UPDATE SET at = EXCLUDED.at, declared_on = now()",
+        "ON CONFLICT (person_key) DO UPDATE SET at = EXCLUDED.at, " +
+        "declared_on = now(), dismissed_on = NULL, dismissed_by = NULL",
         [person.key, at]);
       return send(res, 200, { ok: true, at: at });
     }
@@ -509,10 +515,52 @@ module.exports = async function handler(req, res) {
       if (!person || person.role !== "super") {
         return send(res, 403, { ok: false, error: "The register is the SMO's." });
       }
-      const rows = (await client.query("SELECT person_key, at FROM bu_declarations")).rows;
+      const rows = (await client.query(
+        "SELECT person_key, at, dismissed_on FROM bu_declarations")).rows;
+      /* §180 · TWO SHAPES, DELIBERATELY. An undismissed declaration is still
+         the bare string it has always been, so a client older than this
+         reads every outstanding claim exactly as before; only a DISMISSED one
+         becomes {at, dismissed}, which such a client reads as an object and
+         draws no note for — the safe way round, since the one it cannot
+         understand is the one that is already answered. §58's rule: write the
+         new shape, and leave the old one readable. */
       const said = {};
-      rows.forEach(function (r) { said[r.person_key] = r.at; });
+      rows.forEach(function (r) {
+        said[r.person_key] = r.dismissed_on
+          ? { at: r.at, dismissed: r.dismissed_on }
+          : r.at;
+      });
       return send(res, 200, { ok: true, said: said });
+    }
+
+    /* ── THE OTHER ANSWER (§180) ────────────────────────────────────────
+       "No, the register was already right." Accepting has always been an
+       ordinary edit of the person's BU on the People page; this is the reply
+       that has never existed, and without it a claim the SMO disagrees with
+       nags on five surfaces for ever.
+
+       IT STORES AN ANSWER, NOT A DELETION (Islam's pick): the claim stays
+       readable on the row and in the dialog, marked as answered.
+
+       THE SAME GATE AS READING THEM. Whoever may see every declaration may
+       answer one — and the gate is asked HERE rather than trusted from the
+       screen (§42), because a control that only hides is decoration. It
+       touches nothing but this table, so it moves nobody's access. */
+    if (action === "dismissWhere") {
+      const person = await auth.getSession(client, req);
+      if (!person || person.role !== "super") {
+        return send(res, 403, { ok: false, error: "The register is the SMO's." });
+      }
+      const key = String(body.person || "").trim();
+      if (!key) return send(res, 400, { ok: false, error: "Which person?" });
+      /* Nothing is INSERTED: dismissing something nobody said is not a state
+         this table should be able to hold, so an unknown key changes nothing
+         and says so rather than inventing a row (§15.1). */
+      const r = await client.query(
+        "UPDATE bu_declarations SET dismissed_on = now(), dismissed_by = $2 " +
+        "WHERE person_key = $1", [key, person.key]);
+      if (!r.rowCount) return send(res, 404, { ok: false, error: "They have not said where they work." });
+      return send(res, 200, { ok: true });
     }
 
     if (action === "passwordStates") {
@@ -520,7 +568,7 @@ module.exports = async function handler(req, res) {
       if (!person || !isOffice(person)) {
         return send(res, 403, { ok: false, error: "Passwords are the SMO's." });
       }
-      /* THE STATE IS THE ACCOUNT'S, READ THROUGH THIS CLIENT (spec 024).
+      /* THE STATE IS THE ACCOUNT'S, READ THROUGH THIS CLIENT (spec 030).
          A person with no account has no password — which is the same dash the
          column has always drawn for "we never asked" (§35) — and a person with
          no ADDRESS can never have one, which is why the register names them in
@@ -583,7 +631,7 @@ module.exports = async function handler(req, res) {
       const all = body.scope === "all";
 
       /* THE SERVER STILL DECIDES WHO IS IN THE SET — the client sends a scope,
-         never a list. What changed with spec 024 is only WHERE the password
+         never a list. What changed with spec 030 is only WHERE the password
          lands: platform.accounts, keyed by the address on the register, with
          the row that ties that account to this client written beside it.
 

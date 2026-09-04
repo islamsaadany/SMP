@@ -1,5 +1,5 @@
 -- @phase: pre
--- 001 · A role is a seat on a client (spec 024, revision 3 — Islam 2026-08-29).
+-- 001 · A role is a seat on a client (spec 030, revision 3 — Islam 2026-08-29).
 --
 -- The four platform roles go: what somebody may do about a client is the seat
 -- they hold ON that client, and the platform itself has one admin.

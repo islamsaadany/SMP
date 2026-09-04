@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiding an Element from the Presentation</title>
+<style>
+  /* The platform's own Forefront light palette, verbatim — the real
+     components with ONE addition, so the mockup wears their exact tokens. */
+  :root{
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --stone:#16325C; --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --attn-bg:#F7EFD6; --attn-tx:#7A5D1C;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --r:12px;
+  }
+  html,body{margin:0}
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans); padding:34px 26px 60px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+  h1{font:650 21px/1.3 var(--sans); letter-spacing:-.012em; margin:0 0 4px;}
+  .sub{color:var(--ink-3); font-size:13px; margin:0 0 30px; max-width:78ch;}
+  h2{font:600 11px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+     color:var(--stone); margin:38px 0 12px;}
+  .notew{font-size:12.5px; color:var(--ink-3); margin:8px 0 0; max-width:78ch;}
+
+  .pane{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+        padding:16px 18px 18px;}
+  h4.mini{font:600 10.5px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+          color:var(--stone); margin:0 0 8px;}
+  h4.mini em{font-style:normal; text-transform:none; letter-spacing:0; font-weight:400;
+             color:var(--ink-3); font-size:12px;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{background:var(--panel); color:var(--panel-ink); text-align:left;
+           font:600 10.5px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase;
+           padding:9px 10px;}
+  td{border-bottom:1px solid var(--line-soft); padding:8px 10px; vertical-align:middle;}
+  .idx{width:26px; color:var(--ink-3); font-family:var(--mono); font-size:11.5px;}
+  .cc{text-align:center;}
+  .num{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums;}
+  .fld{font:inherit; color:var(--ink); background:var(--surface);
+       border:1px solid var(--line); border-radius:6px; padding:5px 8px; width:100%;
+       box-sizing:border-box;}
+  .xbtn{font:inherit; font-size:14px; line-height:1; background:none; border:0;
+        color:var(--ink-3); cursor:pointer; padding:2px 5px;}
+  .xbtn:hover{color:var(--ink);}
+  td .pair{display:flex; align-items:center; gap:4px;}
+  td .pair .fld{flex:1; min-width:0;}
+
+  /* ── THE ADDITION: the per-row hide toggle, beside the × ──────────────
+     An SVG eye taking currentColor (a colour emoji cannot be coloured, §45),
+     quiet until the row is hidden, then lit on the attention ground — a
+     decision, not a warning. */
+  .eyebtn{flex:none; width:24px; height:22px; border:1px solid transparent; border-radius:6px;
+          background:none; color:var(--ink-3); cursor:pointer; padding:2px 3px;}
+  .eyebtn:hover{background:var(--surface-2); color:var(--ink);}
+  .eyebtn.on{background:var(--attn-bg); border-color:var(--attn-bg); color:var(--attn-tx);}
+  .eyebtn svg{width:16px; height:14px; display:block;}
+
+  /* a hidden row, in edit and in read mode */
+  tr.hiddenrow td{color:var(--ink-3);}
+  tr.hiddenrow .fld{color:var(--ink-3);}
+  .hidchip{display:inline-block; font:600 10px/1 var(--sans); letter-spacing:.07em;
+           text-transform:uppercase; color:var(--attn-tx); background:var(--attn-bg);
+           border-radius:99px; padding:4px 8px; margin-left:8px; white-space:nowrap;}
+
+  /* the deck slide, at a reduced size */
+  .slide{background:var(--surface); border:1px solid var(--line); border-radius:8px;
+         box-shadow:0 10px 30px rgba(23,27,34,.10); padding:22px 26px; max-width:760px;}
+  .slide .kick{font:600 10px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+               color:var(--gold-deep); margin:0 0 6px;}
+  .slide h3{font:650 19px/1.25 var(--sans); letter-spacing:-.012em; margin:0 0 4px;}
+  .slide .score{font-size:12.5px; color:var(--ink-2); margin:0 0 14px;}
+  .slide .score b{font-family:var(--mono);}
+
+  .decis{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+         padding:16px 18px;}
+  .decis dt{font:600 13px/1.4 var(--sans); margin:10px 0 2px;}
+  .decis dt:first-child{margin-top:0;}
+  .decis dd{margin:0; font-size:13px; color:var(--ink-2); max-width:80ch;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Hiding an element from the presentation</h1>
+  <p class="sub">A per-row switch in the plan pen, the office's only. A hidden row is
+    <b>kept</b> — every figure, every word — <b>left out of the presentation</b>, and
+    <b>not counted</b> in any score. It applies to an objective, a measure, a tactic,
+    a deliverable, an outcome or a milestone — never to a whole pillar, capability
+    or project.</p>
+
+  <h2>1 · The pen — an eye beside each row's ×</h2>
+  <div class="pane">
+    <h4 class="mini">Key measures <em>— as planned: this year’s target, and how it compiles</em></h4>
+    <table>
+      <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th>
+        <th class="cc">Target</th><th class="cc">Compiled</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="idx">1</td>
+          <td><span class="pair"><input class="fld" value="Data duplicate rate">
+            <button class="eyebtn" title="Hide from the presentation" aria-label="Hide from the presentation">
+              <svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"/><circle cx="12" cy="10" r="2.6"/></svg>
+            </button>
+            <button class="xbtn" title="Remove this row">&times;</button></span></td>
+          <td class="cc">&le;</td><td class="cc">1%</td><td class="cc">Latest</td>
+        </tr>
+        <tr class="hiddenrow">
+          <td class="idx">2</td>
+          <td><span class="pair"><input class="fld" value="Legacy churn index">
+            <button class="eyebtn on" title="Hidden from the presentation — press to show it again"
+                    aria-label="Hidden from the presentation — press to show it again">
+              <svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"/><circle cx="12" cy="10" r="2.6"/><line x1="4" y1="18" x2="20" y2="2"/></svg>
+            </button>
+            <button class="xbtn" title="Remove this row">&times;</button></span></td>
+          <td class="cc">&ge;</td><td class="cc">70</td><td class="cc">Average</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="notew">One press hides, the same press shows again — nothing is ever typed,
+      so nothing can be mistyped. The eye lights on the attention ground while the row is
+      hidden, and the row reads quiet, so the pen always says which rows the presentation
+      will not carry.</p>
+  </div>
+
+  <h2>2 · Read mode — the row stays, says so, and leaves the score</h2>
+  <div class="pane">
+    <h4 class="mini">Key measures</h4>
+    <table>
+      <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th>
+        <th class="cc">Target</th><th class="num">Actual</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Data duplicate rate</td>
+          <td class="cc">&le;</td><td class="cc">1%</td><td class="num">1.4%</td></tr>
+        <tr class="hiddenrow"><td class="idx">2</td>
+          <td>Legacy churn index<span class="hidchip">Hidden — not counted</span></td>
+          <td class="cc">&ge;</td><td class="cc">70</td><td class="num">64</td></tr>
+      </tbody>
+    </table>
+    <p class="notew">Everyone sees the chip, not only the office — a row that does not
+      count has to say so, or the average above it cannot be explained. The stored figure
+      stays readable; it simply weighs nothing.</p>
+  </div>
+
+  <h2>3 · The presentation — the row is not there, and the number agrees</h2>
+  <div class="slide">
+    <p class="kick">Mobile · Strategy review</p>
+    <h3>MB01 — Digital &amp; Data-Driven Operations</h3>
+    <p class="score">Pillar score <b>71%</b> — computed over the rows on this slide,
+      because a hidden row leaves the score everywhere at once.</p>
+    <table>
+      <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th>
+        <th class="cc">Target</th><th class="num">Actual</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Data duplicate rate</td>
+          <td class="cc">&le;</td><td class="cc">1%</td><td class="num">1.4%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="notew">The deck, Present mode and the plan-slides download all read the same
+    one rule — a slide can never show a number its own rows do not add up to.</p>
+
+  <h2>4 · What was decided, and what each decision carries</h2>
+  <div class="decis"><dl>
+    <dt>Hidden is not counted (Islam, 2026-09-01)</dt>
+    <dd>The row leaves every average — the pillar's, the unit's, the group's — on the
+      pages and in the deck alike, so there is one score everywhere. It follows that
+      reporting stops asking for its figure, its blanks stop counting as Missing, and
+      Submit no longer waits on it. Hiding every row of a pillar leaves the pillar
+      reading a dash, never 0.</dd>
+    <dt>Rows only — never a pillar, a capability or a project</dt>
+    <dd>The eye is drawn on the six row kinds and nowhere else, so a whole slide can
+      never disappear by accident.</dd>
+    <dt>The mark travels in the workbook</dt>
+    <dd>Each row sheet gains a <b>Hidden</b> column (Yes, or empty), so a download and
+      re-upload keeps the marks — without it, replacing a plan would silently show
+      everything again.</dd>
+  </dl></div>
+
+</div>
+</body>
+</html>

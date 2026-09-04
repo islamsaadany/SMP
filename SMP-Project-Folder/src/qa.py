@@ -79,7 +79,7 @@ def walk_subtabs(pg):
             # sections drop to one has no row at all).
             el = pg.query_selector('#secrow-in [data-sub2="%s"]' % s2)
             if el and el.is_visible(): el.click(); pg.wait_for_timeout(120)
-        rep = pg.query_selector("[data-report]")
+        rep = pg.query_selector('[data-s=report]')
         if rep:
             rep.click(); pg.wait_for_timeout(150)
             back = pg.query_selector("[data-repcancel]")
@@ -347,7 +347,7 @@ with sync_playwright() as p:
         pg.click('#subtabs button:has-text("Performance")'); pg.wait_for_timeout(300)
         perf = pg.evaluate("""() => ({
           secrow: !document.getElementById("secrow").hidden,
-          report: !!document.querySelector("[data-report]"),
+          report: !!document.querySelector('[data-s=report]'),
           present: !!document.querySelector("details.dlmenu [data-present]"),
           arrange: !!document.querySelector("[data-arrange]") })""")
         if perf["secrow"]:
@@ -359,13 +359,21 @@ with sync_playwright() as p:
         if perf["arrange"]:
             errs.append("PERFORMANCE (%s): Arrange is still here — it belongs to the plan"
                         % label)
-        pg.click("[data-report]"); pg.wait_for_timeout(300)
+        pg.click('[data-s=report]'); pg.wait_for_timeout(300)
+        # THE BAR MOVED, IT DID NOT GO (§150). The reporting controls now ride
+        # the tab row rather than sitting in the page, so this asked for
+        # `.rep-bar` and correctly found nothing — §51.11's fault caught doing
+        # its job for once: a check keyed on markup that changed, going red
+        # rather than quietly passing. It asks for the CONTROLS and for the
+        # box being in the pinned row, which is what the move was for.
         inrep = pg.evaluate("""() => ({
-          bar: !!document.querySelector(".rep-bar"),
+          box: !!document.querySelector(".repchrome"),
+          inChrome: !!document.querySelector("#subtabs .repchrome"),
           save: !!document.querySelector("[data-repsave]"),
           cancel: !!document.querySelector("[data-repcancel]") })""")
-        if not (inrep["bar"] and inrep["save"] and inrep["cancel"]):
-            errs.append("REPORT (%s): the mode does not carry its own bar (%r)" % (label, inrep))
+        if not (inrep["box"] and inrep["inChrome"] and inrep["save"] and inrep["cancel"]):
+            errs.append("REPORT (%s): the mode does not carry its controls on the tab row (%r)"
+                        % (label, inrep))
         pg.click("[data-repcancel]"); pg.wait_for_timeout(250)
         if pg.query_selector(".rep-bar"):
             errs.append("REPORT (%s): Cancel did not leave the mode" % label)
@@ -374,8 +382,9 @@ with sync_playwright() as p:
         pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
         el = pg.query_selector('#secrow-in [data-sub2="%s"]' % sec)
         if el: el.click(); pg.wait_for_timeout(250)
-        pg.locator(".pane").first.hover(); pg.wait_for_timeout(120)
-        pen = pg.query_selector(".penbtn")
+        # §268: no hover — the strategy pen is a worded button on the
+        # section line, drawn at rest for whoever may author the page.
+        pen = pg.query_selector("#secrow-in .secpen")
         if not pen:
             errs.append("PLAN (%s): no edit pen for the SMO" % label); continue
         pen.click(); pg.wait_for_timeout(300)
@@ -423,17 +432,27 @@ with sync_playwright() as p:
           const cards = [...el.querySelector(".scores").querySelectorAll(":scope > .card")]
             .map(c => ({ h:c.querySelector("h4").textContent.trim(),
                          big:c.querySelector(".big").textContent.trim() }));
-          /* Nothing scored anywhere: the middle number must be a dash. */
-          const keep = u.items.map(p => (p.measures || []).map(m => m.progress));
+          /* Nothing scored anywhere: the middle number must be a dash.
+
+             §235: IT IS THE ACTUAL THAT IS BLANKED NOW, not `progress`. The
+             score used to BE the stored `progress`, so clearing it modelled
+             "nobody reported"; it is derived from the actual against a
+             prorated target since §235, so clearing `progress` alone leaves
+             every measure perfectly scoreable and this asserted nothing. The
+             method depended on where the number came from -- §51.11's fault
+             one layer in, the check's own machinery rather than its
+             selectors. Both are cleared, because a row with a stored progress
+             and no actual is not a state the product can produce. */
+          const keep = u.items.map(p => (p.measures || []).map(m => ({ p:m.progress, a:m.actual })));
           const by = u.items.map(p => p.by);
           u.items.forEach(p => { delete p.by;
-            (p.measures || []).forEach(m => { m.progress = null; }); });
+            (p.measures || []).forEach(m => { m.progress = null; m.actual = ""; }); });
           const bare = document.createElement("div");
           bare.innerHTML = renderUnitPerformance(u);
           const blank = [...bare.querySelector(".scores").querySelectorAll(":scope > .card")][1]
             .querySelector(".big").textContent.trim();
           u.items.forEach((p, i) => { if (by[i]) p.by = by[i];
-            (p.measures || []).forEach((m, j) => { m.progress = keep[i][j]; }); });
+            (p.measures || []).forEach((m, j) => { m.progress = keep[i][j].p; m.actual = keep[i][j].a; }); });
           return { cards:cards, computed:unitPillars(u), blank:blank };
         }""", dest)
         if len(three["cards"]) != 3:
@@ -994,7 +1013,7 @@ with sync_playwright() as p:
     # And it must not appear on the GROUP, whose objectives have always shown
     # both and have nothing to toggle.
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(200)
-    pg.evaluate("() => { try { localStorage.removeItem('smp.ko.year'); } catch (e) {} }")
+    pg.evaluate("() => { try { localStorage.removeItem('smp.ko.year2'); } catch (e) {} }")
     show_units(pg)
     pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(200)
     pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
@@ -1005,32 +1024,53 @@ with sync_playwright() as p:
         const oh = document.querySelector('.ohead');
         return { on: SHOW_KO_THIS_YEAR,
                  cols: oh ? oh.querySelectorAll('span').length : null,
+                 heads: oh ? [...oh.querySelectorAll('span')].map(e=>e.textContent.trim()) : null,
                  chip: (document.querySelector('.ochip') || {}).innerText || null };
       };
+      /* §243: there is ONE layout now (Islam: "remove it and make the view in
+         table only"), so nothing selects one and the chips half of this trial
+         has nothing to measure. Its two assertions are REWRITTEN below rather
+         than deleted (§218) — what they were guarding is that the toggle
+         changes what is SHOWN, and that is still asserted, of the layout that
+         exists. */
       const out = { toggle: !!document.querySelector('[data-koyear]') };
-      KO_VIEW = "cols"; setKoThisYear(false); paint();
+      setKoThisYear(false); paint();
       out.colsOff = read();
       setKoThisYear(true); paint();
       out.colsOn = read();
-      KO_VIEW = "chips"; setKoThisYear(false); paint();
-      out.chipsOff = read();
-      setKoThisYear(true); paint();
-      out.chipsOn = read();
-      out.stored = localStorage.getItem("smp.ko.year");
-      setKoThisYear(false); KO_VIEW = "chips"; paint();
+      out.stored = localStorage.getItem("smp.ko.year2");
+      out.chipsGone = !document.querySelector('.ochip');
+      out.switchGone = !document.querySelector('[data-kov]');
+      setKoThisYear(false); paint();
       return out;
     }""")
     if not ko["toggle"]:
         errs.append("KO YEAR: no toggle on a unit's foundation")
-    if ko["colsOff"]["cols"] != 2 or ko["colsOn"]["cols"] != 3:
-        errs.append("KO YEAR: the columns view shows %r off and %r on, wanted 2 and 3"
+    # §199: ASSERT THE RELATIONSHIP, NOT THE COUNT (§94.8). This read `2 and 3`
+    # and went red the day the Unit column shipped — correctly noticing a
+    # change and wrongly calling it a fault, because what the toggle promises
+    # is that it DROPS THIS YEAR'S COLUMN, not that the table has three. Now it
+    # survives the next column too, and still fails a build where the toggle
+    # stops dropping anything.
+    if not (ko["colsOn"]["cols"] and ko["colsOff"]["cols"]
+            and ko["colsOn"]["cols"] == ko["colsOff"]["cols"] + 1):
+        errs.append("KO YEAR: the toggle must drop exactly one column — %r off, %r on"
                     % (ko["colsOff"]["cols"], ko["colsOn"]["cols"]))
-    if not ko["chipsOn"]["chip"] or "3-year" not in ko["chipsOn"]["chip"]:
-        errs.append("KO YEAR: the chips view does not carry both horizons when on (%r)"
-                    % ko["chipsOn"]["chip"])
-    if ko["chipsOff"]["chip"] and "3-year" in ko["chipsOff"]["chip"]:
-        errs.append("KO YEAR: the chips view still carries both when off (%r)"
-                    % ko["chipsOff"]["chip"])
+    # And the column it drops is THIS YEAR'S, never somebody else's (§113.8:
+    # "one fewer column" is preserved by dropping the wrong one).
+    if ko["colsOn"].get("heads") and "This year" not in ko["colsOn"]["heads"]:
+        errs.append("KO YEAR: with the toggle on there is no This year column (%r)"
+                    % ko["colsOn"]["heads"])
+    if ko["colsOff"].get("heads") and "This year" in ko["colsOff"]["heads"]:
+        errs.append("KO YEAR: with the toggle off This year is still drawn (%r)"
+                    % ko["colsOff"]["heads"])
+    # §243: the chip layout and the switch that chose it are GONE, and that is
+    # asserted rather than assumed — an absence nothing checks is one a later
+    # build brings back (§24, §51.11).
+    if not ko["chipsGone"]:
+        errs.append("KO YEAR: the chip layout is still drawn — §243 removed it")
+    if not ko["switchGone"]:
+        errs.append("KO YEAR: the cards/table switch is still on the page — §243 removed it")
     if ko["stored"] != "1":
         errs.append("KO YEAR: the choice is not remembered in localStorage (%r)" % ko["stored"])
     show_units(pg)
@@ -1135,7 +1175,7 @@ with sync_playwright() as p:
         pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(300)
         pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
         pg.click('#secrow button:has-text("%s")' % sec); pg.wait_for_timeout(350)
-        pen = pg.query_selector('.penbtn[data-page="plan"]')
+        pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
         if not pen or not pen.is_visible():
             errs.append("PLAN EDIT (%s): the pen is %s \u2014 the edit mode cannot be "
                         "reached without a hover" % (tag, "absent" if not pen else "invisible"))
@@ -1146,7 +1186,12 @@ with sync_playwright() as p:
           adds: [...document.querySelectorAll("[data-rowadd]")]
                   .map(e => e.dataset.rowadd.split("|")[0]),
           grips: document.querySelectorAll(".grip").length,
-          fields: document.querySelectorAll(".pane .fld, .pane input").length })""")
+          /* §177: a milestone's due date is a PICKER, not an input, so a
+             count of `.fld, input` alone silently under-reports the editable
+             controls by one per milestone — the number this line prints would
+             go on falling every time a field becomes a button (§51.11). */
+          fields: document.querySelectorAll(
+            ".pane .fld, .pane input, .pane [data-month]").length })""")
         missing = [w for w in wants if w not in got["adds"]]
         if missing:
             errs.append("PLAN EDIT (%s): no Add for %s" % (tag, ", ".join(missing)))
@@ -1154,7 +1199,7 @@ with sync_playwright() as p:
             errs.append("PLAN EDIT (%s): editing gives no drag handles" % tag)
         if not got["fields"]:
             errs.append("PLAN EDIT (%s): editing gives no editable fields" % tag)
-        back = pg.query_selector('.penbtn[data-page="plan"]')
+        back = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
         if back: back.click(); pg.wait_for_timeout(300)
         if pg.evaluate("() => EDIT_PAGE.plan"):
             errs.append("PLAN EDIT (%s): pressing Done did not leave edit mode" % tag)
@@ -1168,7 +1213,7 @@ with sync_playwright() as p:
     pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(300)
     pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
     pg.click('#secrow button:has-text("Plan")'); pg.wait_for_timeout(350)
-    if pg.query_selector('.penbtn[data-page="plan"]'):
+    if pg.query_selector('[data-page="plan"]'):
         errs.append("PLAN EDIT: a unit head is offered a pen \u2014 correcting a plan is "
                     "the SMO's (31)")
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)

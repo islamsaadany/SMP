@@ -104,6 +104,13 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/people-register-modal/2026-08-26_register-dialog-and-queue.html` | The register stops being a form: a one-line header, a dialog that edits and adds, and an attention queue that opens the rows it counts. Islam's six decisions drawn on the real platform, with the dialog built from the register's own controls. **Built in 3.39** (&sect;116) |
 | `../../design-mockups/people-register-width/2026-08-26_register-width-and-attention.html` | Why four complaints on the register were one cause &mdash; a 1417px table in a 1005px window &mdash; with each candidate measured rather than argued. Superseded by the dialog above, and kept because its measurements are what decided it. **Answered in 3.39** (&sect;116) |
 | `../../design-mockups/people-register/2026-08-26_compact-header-and-dialog.html` | One line above the table and a dialog that fits the window. The header's four asks with the pixel cost of each, and the dialog's 482px of content shown to be waste rather than density &mdash; an empty cell and a repeating paragraph. Both costs stated before they were agreed. **Built in 3.44** (&sect;122) |
+| `../../design-mockups/welcome-screen/2026-08-28_welcome-final.html` | The welcome screen after sign-in: the greeting leads, the tenant signs on the separator's edge, and every count lives inside its own sentence. Final of three rounds &mdash; the two earlier files in the same folder are the band variations (round 2) and the numbers variations (round 3), each with Islam's pick recorded. **Built in 3.58** (&sect;148, spec 025) |
+| `../../design-mockups/pillar-project-remove/2026-09-01_remove-controls.html` | Removing a whole pillar or project: the worded quiet-red control in the pinned editing head beside Done, and the confirmation naming what the thing holds, what has been reported this cycle, and the archive-first way back. Signed off by Islam 2026-09-01. **Built** (&sect;232) |
+| `../../design-mockups/hide-from-presentation/2026-09-01_hide-element.html` | Hiding an element from the presentation: a per-row eye in the plan pen &mdash; the row kept, left out of the deck, and NOT counted in any score (Islam's decision); rows only, never a pillar, capability or project; the workbook carries the mark. Signed off by Islam 2026-09-01. **Built** (&sect;233) |
+| `../../design-mockups/data-loss-warnings/2026-09-02_save-safety-banners.html` | The two save-safety cautions in the refusal's own slot: *a newer version is ready* (Reload) and *somebody else updated this page* (Reload &amp; keep mine / Dismiss). Islam: *"BOTH"*. **Built on the branch** (&sect;258) |
+| `../../design-mockups/history/2026-09-03_history-page.html` | Setup › History: who changed what, where, from what to what, with Restore &mdash; drawn from real change-log rows produced through the real save path. Islam: *"ok agreed let's build"*, with his three questions (office-only, restore vs rollback, filtered read) answered first. **Built on the branch** (&sect;262, spec 028) |
+| `../../design-mockups/empty-not-missing/2026-09-03_empty-not-missing.html` | Why Mobile and Care show *Fill in what is empty* with no count and no badges &mdash; the empty Collabs. column, which &sect;187 ruled is NOT missing. Three states shot out of the RUNNING platform with the state made (0 owed, 22 empty): today, the office with the bar gone, and a filler with a quiet count, a chip per pillar and a mark on each rail row. Islam picked *hide it from the office, guide the filler* from three options with the cost of each. Signed off 2026-09-03. **Built** (&sect;261) |
+| `../../design-mockups/report-find-the-blocker/2026-09-04_reporting-find-the-blocker.html` | Why a report will not submit when *something needs a note* and nothing on the page says where. Four states shot out of the RUNNING platform with the state MADE (17 of 17 entered, the gate held by one note): today, and three options &mdash; the rail marking the pillar, &sect;272's missing bar in the banner's place, and that bar counting all four blockers with a walk. The capture and the composer are kept beside it. Islam: **C**. **Built** (&sect;279) |
 
 ### Drawn, awaiting a decision
 
@@ -352,6 +359,21 @@ On the way, five authoring surfaces that could be read but never STARTED
 from empty were fixed — the first "Who we are" line, the SWOT, the empty
 Plan page, a virgin pillars function's first row, and a capability's key
 objectives.
+
+Version **3.57** adds **a custodian per project — as two new roles** (§147,
+spec 024). A **Project owner** is named on a project's Owner row and reports
+that project whole; a **Pillar owner** is named on a pillar's Owner row — on
+a unit or a pillars function — and reports that pillar whole; a
+**Contributor** is everyone else the plan names (collaborators,
+stakeholders, milestone owners) and reports nothing until the SMO opens the
+Contributor row, then only the rows that name them. All three are derived
+from the plan's own Owner rows, never granted by hand; each has its own row
+on Roles & access shipping at view, and an owner reports only when that row
+says edit AND the plan names them — Islam's two conditions, exactly. None of
+the three submits. On the way, two server drifts were fixed: a custodian's
+deliverable report (and the §104.10 milestone %) refused as plan since
+migration 024, and a pillars function's Report page reading the own-unit
+cell where the server judged the own-function one.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action. Then

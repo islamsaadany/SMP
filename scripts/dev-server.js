@@ -16,7 +16,7 @@ const platformHandler = require("../api/platform.js");
 const ROOT = path.join(__dirname, "..");
 const PORT = parseInt(process.argv[2], 10) || 3999;
 /* Mirrors vercel.json's rewrites: a client's own name in the URL, and the
-   versioned filename behind every one of them (§35.6, spec 024). The list is
+   versioned filename behind every one of them (§35.6, spec 030). The list is
    READ FROM vercel.json rather than typed again — the same rule the security
    headers below follow, and the one §35.6 asks for: three files carry this
    mapping and they must stay in step. */
@@ -38,7 +38,7 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
    production: sending it from http://localhost would pin the browser to https
    for localhost, which breaks every other local server on the machine. */
 const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
-/* ── A CLIENT'S PATH IS A PATTERN, NOT A LIST (§147.19) ────────────
+/* ── A CLIENT'S PATH IS A PATTERN, NOT A LIST (§288.19) ────────────
    It was four named paths, and the product can CREATE a client — so making
    one produced a card that opened a page the server had never heard of. The
    platform could make something it could not serve, and nothing said so: the

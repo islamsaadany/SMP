@@ -67,21 +67,48 @@ with sync_playwright() as p:
     # file would pass for ever and mean nothing the day the demo data moves.
     src = pg.evaluate("()=>{const t=cycleTotals();"
                       "return {done:t.done,total:t.total,sub:t.sub,none:t.none,prog:t.progress,units:t.units};}")
-    strip = pg.eval_on_selector(".ovcycle", "e=>e.textContent.replace(/\\s+/g,' ')")
+    # §198: THE STRIP IS NOW A COLUMN. The numbers and their source are
+    # unchanged; only where they are drawn moved, so the assertion follows the
+    # markup and goes on asking the same question (§94.8: assert the problem).
+    # §198: THE ROWS ARE READ AS LABEL AND VALUE, never as one blob. The first
+    # attempt matched "Submitted 6" against the summary's textContent, which
+    # has no space between the label span and its value — the numbers were
+    # right and the CHECK was wrong (§130.7's family: measure the thing, not a
+    # rendering of it).
+    side = pg.evaluate("""()=>{
+      const o = {};
+      document.querySelectorAll('.ovside .ovsline').forEach(r=>{
+        const k = r.querySelector('span'), v = r.querySelector('b');
+        if (k && v) o[k.textContent.trim()] = v.textContent.trim(); });
+      return o; }""")
     ck("done/total agree with cycleTotals()",
-       ("%d" % src["done"]) in strip and ("of %d items reported" % src["total"]) in strip,
-       "%s vs %s" % (src, strip[:90]))
-    ck("submitted agrees", ("%d submitted" % src["sub"]) in strip, src["sub"])
-    ck("in progress agrees", ("%d in progress" % src["prog"]) in strip, src["prog"])
+       side.get("Reported") == "%d of %d" % (src["done"], src["total"]), (src, side))
+    ck("submitted agrees", side.get("Submitted") == str(src["sub"]), (src["sub"], side))
+    ck("in progress agrees", side.get("In progress") == str(src["prog"]), (src["prog"], side))
+    ck("not started agrees, and is drawn only when there is one",
+       (side.get("Not started") == str(src["none"])) if src["none"]
+       else ("Not started" not in side), (src["none"], side))
     # DERIVED, NOT COUNTED — and the denominator is units AND the supporting
     # functions main's §105 put on this board. This assertion read
     # `activeKeys().length` while it was units-only, which the merge made
     # false: the CHECK carried the old assumption, not the product (§108.16).
     ck("in progress is the remainder, not a third count",
        src["prog"] == src["units"] - src["sub"] - src["none"], src)
-    ck("and the board counts the supporting functions too (§105)",
-       src["units"] == pg.evaluate("activeKeys().length + boardFunctionKeys().length")
+    # §244 WIDENED THE UNIT HALF and this assertion carried the old formula —
+    # the second time this line has held a stale copy of the board's own
+    # membership (the comment above records the first). It asks the PRODUCT
+    # which subjects are on the board now, rather than rebuilding the answer
+    # from a list of parts that keeps changing.
+    ck("and the board counts every subject on it, functions of both shapes too",
+       src["units"] == pg.evaluate("boardUnitTargets().length + boardFunctionKeys().length")
        and src["units"] > pg.evaluate("activeKeys().length"), src)
+    # §245 moved those rows to the function list; the ASSERTION is unchanged in
+    # substance — a function that plans in pillars is counted — and asks the
+    # product where it lives rather than naming a half (§94.8).
+    ck("...including a function that plans in pillars, wherever the board lists it",
+       pg.evaluate("boardUnitTargets().concat(boardFunctionTargets())"
+                   ".filter(t=>{const k=fnKeyOfTarget(t);"
+                   "return k && fnPlansInPillars(FUNCTIONS[k]||{});}).length") > 0)
     ck("the strip is a way through, not a control",
        pg.eval_on_selector(".ovcyc-go", "e=>e.dataset.setupgo") == "cycle")
 
@@ -197,39 +224,54 @@ with sync_playwright() as p:
     # apart about it (§53.5).
     full = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;currentSub='overview';paint();
-      return document.querySelector('.ovcyc-meta').textContent.trim();}""")
-    ck("with dates, it reads as a span", full == "Jan 2026 to Jun 2026 \u00b7 due 15 Jul 2026 \u00b7 as of Q2", full)
+      return document.querySelector('.ovsmeta').textContent.trim();}""")
+    # §239: THE SENTENCE NO LONGER CARRIES THE REVIEW POINT. It used to end
+    # "as of Q" + endsQuarter -- the words of one field over the value of
+    # another -- and the review point is now a control on the cycle strip, so
+    # printing it here as well would say one thing twice and let the two
+    # disagree the moment one is edited.
+    ck("with dates, it reads as a span", full == "Jan 2026 to Jun 2026 \u00b7 due 15 Jul 2026", full)
     bare = pg.evaluate("""()=>{REVIEW.from='';REVIEW.to='';REVIEW.due='';
       REVIEW.endsQuarter=4;paint();
-      return document.querySelector('.ovcyc-meta').textContent.trim();}""")
-    ck("with none, it says the dates are not set", bare == "Dates not set \u00b7 as of Q4", bare)
+      return document.querySelector('.ovsmeta').textContent.trim();}""")
+    ck("with none, it says the dates are not set", bare == "Dates not set", bare)
     ck("and never prints a bare separator",
        " \u00b7  \u00b7 " not in bare and not bare.startswith("\u00b7"), bare)
     onCycle = pg.evaluate("""()=>{currentSub='cycle';paint();
-      return document.querySelector('.fstrip-meta').textContent.trim();}""")
+      return document.querySelector('.fstrip-meta:not(.asof)').textContent.trim();}""")
     ck("the Reporting cycle page says exactly the same", onCycle == bare, (bare, onCycle))
     # ONE END IS NOT A SPAN: "Jan 2026 to" is worse than saying nothing.
     half = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='';REVIEW.due='';
       currentSub='overview';paint();
-      return document.querySelector('.ovcyc-meta').textContent.trim();}""")
-    ck("one end alone is reported on its own terms", half == "from Jan 2026 \u00b7 as of Q4", half)
+      return document.querySelector('.ovsmeta').textContent.trim();}""")
+    ck("one end alone is reported on its own terms", half == "from Jan 2026", half)
     pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;paint();}""")
     pg.wait_for_timeout(200)
 
-    print("\n── 6c · the way through keeps its place (§120.4) ──")
-    # It used to drop to the LEFT of a second line below 1280px, which reads as
-    # an accident. The assertion is the PROBLEM, not a width: wherever it ends
-    # up, it ends up at the right-hand edge (§94.8).
-    for w in [1920, 1600, 1400, 1280, 1150, 1024]:
+    print("\n── 6c · two columns, and the queue leads when they stack (§198) ──")
+    # §120.4's assertion is RETIRED WITH THE THING IT GUARDED: the way through
+    # used to share a wrapping row and drop to the left of a second line, and
+    # there is no such row any more. What replaces it is the property Option B
+    # is actually about — the width is used, and when it runs out the QUEUE is
+    # the half that stays first (§94.8: assert the problem, not the layout).
+    for w in [1920, 1600, 1400, 1280, 1150, 1024, 900, 820]:
         pg.set_viewport_size({"width": w, "height": 1000})
         pg.wait_for_timeout(280)
-        r = pg.evaluate("""()=>{const s=document.querySelector('.ovcycle');
-          const g=document.querySelector('.ovcyc-go');
-          const sb=s.getBoundingClientRect(), gb=g.getBoundingClientRect();
-          return {gap:Math.round(sb.right-gb.right), h:Math.round(sb.height)};}""")
-        ck("at %dpx the button sits at the right edge" % w, r["gap"] < 30, r)
-        ck("at %dpx the strip has not ballooned" % w, r["h"] <= 200, r)
+        r = pg.evaluate("""()=>{const m=document.querySelector('.ovmain');
+          const s=document.querySelector('.ovside');
+          if(!m||!s) return null;
+          const mb=m.getBoundingClientRect(), sb=s.getBoundingClientRect();
+          return { side:Math.round(sb.x), main:Math.round(mb.x),
+                   mainY:Math.round(mb.y), sideY:Math.round(sb.y),
+                   beside: Math.abs(mb.y-sb.y) < 3,
+                   scrolls: document.documentElement.scrollWidth > window.innerWidth + 1 };}""")
+        ck("at %dpx nothing scrolls sideways" % w, r and not r["scrolls"], r)
+        if w >= 950:
+            ck("at %dpx the cycle sits BESIDE the queue" % w, r["beside"] and r["side"] > r["main"], r)
+        else:
+            ck("at %dpx they stack, queue first" % w,
+               not r["beside"] and r["sideY"] > r["mainY"], r)
     pg.set_viewport_size({"width": 1600, "height": 1000})
     pg.wait_for_timeout(300)
 

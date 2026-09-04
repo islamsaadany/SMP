@@ -241,6 +241,21 @@ module.exports = async function handler(req, res) {
       const bodyText = String(body.body || "").trim();
       if (!subject) return send(res, 400, { ok: false, error: "A message needs a subject." });
       if (!bodyText) return send(res, 400, { ok: false, error: "A message needs something in it." });
+      /* ── AND THE BUTTON'S LINK IS ASKED AGAIN HERE (spec 027) ───────
+         The composer completes what it can and refuses the rest, and a guard
+         that only lives on the screen is decoration (§42, §44, §98.2): this is
+         the side that actually sends, so this is the side that has to be sure.
+         ONE RULE, asked by both — `SMPRules.webUrl` is in lib/rules.js for the
+         same reason every other shared judgement is.
+
+         WHAT THIS DOES NOT CLAIM. The `html` is built by the page and posted
+         whole (§72.3), so this checks the link the composer says it used, not
+         every href inside that document — it stops the product sending a dead
+         button, which is the fault, and it is not a sanitiser. */
+      const ctaHref = String(body.ctaHref || "").trim();
+      if (ctaHref && !Rules.webUrl(ctaHref)) return send(res, 400, { ok: false,
+        error: "The button's link is not a web address, so it would not open for " +
+               "anybody. Give it one starting https:// — or clear it." });
 
       /* RESOLVED AGAIN, on the stored register, never taken from the request.
          The page resolved it a moment ago to show a list; between then and now
@@ -291,7 +306,7 @@ module.exports = async function handler(req, res) {
         "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id",
         [me.key, me.name || null, subject, bodyText,
          String(body.ctaLabel || "").trim() || null,
-         String(body.ctaHref || "").trim() || null,
+         Rules.webUrl(ctaHref) || null,
          greetWord,
          JSON.stringify(body.criteria || {}), aud.to.length])).rows[0];
 

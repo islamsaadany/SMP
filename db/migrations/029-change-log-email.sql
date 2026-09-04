@@ -6,7 +6,7 @@
 -- and it corrects something I had stated as a cost.
 --
 -- Several of Forefront's people may act as ONE row on a client's register
--- (spec 024 §147.30): on Raya Trade, `smo` is Mohamed Essam, and the other
+-- (spec 030 §288.30): on Raya Trade, `smo` is Mohamed Essam, and the other
 -- consultants work as that same person rather than being added to the client's
 -- register as new people. Without this column the log says `smo` for all of
 -- them and the client cannot tell who did what — which would be a real cost of

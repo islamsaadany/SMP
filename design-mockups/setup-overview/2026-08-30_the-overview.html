@@ -1,0 +1,287 @@
+<title>The Setup Overview</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --panel:#12243F;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --stone:#6B7688;
+    --line:#D6DCE5; --gold:#C9A227; --gold-deep:#8A6100;
+    --attn-bg:#FDF3DF; --attn-tx:#8A6100;
+    --bad:#B3341F; --bad-tx:#9C2C1A; --good-tx:#1E7A48;
+    --r-sm:6px; --r:10px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --attn-bg:#3A2E12; --attn-tx:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --attn-bg:#3A2E12; --attn-tx:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans); margin:0;
+    padding:26px 20px 80px;}
+  .wrap{max-width:1180px; margin:0 auto;}
+  h1{font-size:20px; margin:0 0 4px; letter-spacing:-.25px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 4px; max-width:78ch;}
+
+  .found{display:grid; gap:8px; margin:20px 0 6px; padding:0; list-style:none;}
+  .found li{display:flex; gap:11px; font-size:13.5px; color:var(--ink-2);
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
+    padding:11px 13px;}
+  .found b{color:var(--ink);}
+  .n{flex:none; width:21px; height:21px; border-radius:50%; background:var(--panel);
+    color:#fff; font:700 11px/21px var(--sans); text-align:center;}
+
+  .tag{font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); margin:30px 0 9px;}
+  .tag.now{color:var(--bad-tx);} .tag.a{color:var(--good-tx);}
+  .tag b{font-size:12.5px; letter-spacing:0; text-transform:none; color:var(--ink);}
+
+  /* the pane, at the proportions the real one has */
+  .pane{background:var(--ground); border:1px solid var(--line); border-radius:var(--r);
+    padding:16px 18px 20px; overflow:hidden;}
+  .ptitle{font:700 21px/1.2 var(--sans); letter-spacing:-.3px; margin:0 0 13px;
+    padding-bottom:11px; border-bottom:1px solid var(--line);}
+
+  /* — the cycle strip — */
+  .cyc{display:flex; align-items:center; gap:20px; background:var(--surface);
+    border:1px solid var(--line); border-radius:var(--r-sm); padding:14px 16px;}
+  .cyc-l{min-width:0;}
+  .cyc-name{font:700 15px/1.3 var(--sans); display:flex; align-items:center; gap:9px;}
+  .cyc-meta{color:var(--ink-3); font-size:11.5px; margin-top:2px;}
+  .badge{font:700 9.5px/1 var(--sans); letter-spacing:.07em; text-transform:uppercase;
+    border-radius:20px; padding:4px 8px; border:1px solid currentColor;}
+  .b-open{color:var(--good-tx);} .b-late{color:var(--bad-tx);}
+  .cyc-n{margin-left:auto; display:flex; align-items:baseline; gap:7px; flex:none;}
+  .cyc-n b{font:650 34px/1 var(--sans); letter-spacing:-1px;}
+  .cyc-n.small b{font-size:19px;}
+  .cyc-n span{color:var(--ink-3); font-size:12px;}
+  .chips{display:flex; gap:7px; flex:none;}
+  .chip{font:700 9.5px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase;
+    border-radius:20px; padding:4px 9px; border:1px solid var(--line); color:var(--ink-2);}
+  .go{border:1px solid var(--gold); color:var(--gold-deep); background:transparent;
+    border-radius:var(--r-sm); padding:6px 13px; font:700 11px var(--sans);
+    letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; cursor:pointer;}
+
+  /* — the queue — */
+  .qh{font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); margin:16px 0 8px;}
+  .qh em{font-style:normal; color:var(--attn-tx);}
+  .qcard{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
+    overflow:hidden;}
+  .qrow{display:flex; align-items:center; gap:12px; padding:12px 15px;
+    border-bottom:1px solid var(--line);}
+  .qrow:last-child{border-bottom:0;}
+  .gl{flex:none; width:26px; height:26px; border-radius:var(--r-sm); background:var(--attn-bg);
+    color:var(--attn-tx); display:flex; align-items:center; justify-content:center;
+    font-size:13px;}
+  .qtx{flex:1; min-width:0; font-size:13.5px;}
+  .qtx small{display:block; color:var(--ink-3); font-size:11.5px; margin-top:1px;}
+  .qgo{flex:none; color:var(--gold-deep); font:700 12px var(--sans); white-space:nowrap;}
+  .qn{flex:none; font:700 15px var(--sans); color:var(--attn-tx);
+    font-variant-numeric:tabular-nums; min-width:26px; text-align:right;}
+  .quiet{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
+    padding:16px; color:var(--ink-3); font-size:13px;}
+  .quiet b{color:var(--ink); display:block; font-size:14px; margin-bottom:2px;}
+
+  /* — the rail, only enough of it to show the numbers — */
+  .rails{display:grid; grid-template-columns:236px 1fr; gap:16px; align-items:start;}
+  .rail{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    overflow:hidden;}
+  .rgrp{display:flex; align-items:center; gap:8px; background:var(--surface-2);
+    padding:8px 12px; font:700 9.5px var(--sans); letter-spacing:.09em;
+    text-transform:uppercase; color:var(--ink-3); border-bottom:1px solid var(--line);}
+  .rgn{margin-left:auto; font:700 10px var(--sans); color:var(--ink-3);}
+  .ritem{display:flex; align-items:center; gap:9px; padding:9px 12px; font-size:13px;
+    border-bottom:1px solid var(--line);}
+  .ritem:last-child{border-bottom:0;}
+  .ritem .g{color:var(--ink-3); width:14px; text-align:center; font-size:11px;}
+  .riwait{margin-left:auto; background:var(--gold); color:#12243F; border-radius:20px;
+    min-width:19px; height:19px; padding:0 6px; font:700 11px/19px var(--sans);
+    text-align:center;}
+  .mark{outline:2px dashed var(--bad-tx); outline-offset:3px; border-radius:4px;}
+
+  .two{display:grid; grid-template-columns:1fr 340px; gap:14px; align-items:start;}
+  @media (max-width:900px){ .two{grid-template-columns:1fr;} .rails{grid-template-columns:1fr;} }
+  .note{color:var(--ink-3); font-size:12.5px; margin:11px 0 0; max-width:82ch;}
+  .note b{color:var(--ink);}
+  .side{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
+    padding:13px 15px;}
+  .side h4{margin:0 0 9px; font:700 10px var(--sans); letter-spacing:.09em;
+    text-transform:uppercase; color:var(--ink-3);}
+  .sline{display:flex; justify-content:space-between; gap:10px; font-size:13px;
+    padding:6px 0; border-bottom:1px solid var(--line);}
+  .sline:last-child{border-bottom:0;}
+  .sline b{font-variant-numeric:tabular-nums;}
+  .rec{background:var(--attn-bg); border:1px solid var(--attn-tx); color:var(--attn-tx);
+    border-radius:var(--r-sm); padding:12px 14px; font-size:13px; margin-top:30px;}
+  .rec b{color:var(--attn-tx);}
+</style>
+<div class="wrap">
+<h1>The Setup Overview</h1>
+<p class="lede">Measured on the real page at 1500&times;1000, as the office, with
+things actually waiting (the demo tenant is all&#8209;clear, so the state was made).</p>
+
+<ul class="found">
+  <li><span class="n">1</span><span><b>Two kinds of number wear one look, in the
+    same rail.</b> <b>RUNNING THE CYCLE&nbsp;5</b> counts the entries directly
+    beneath it &mdash; which you can see. The gold <b>3</b> on People register
+    means three things are waiting on you. The meaningless one is on every group
+    always; the meaningful one is rare. That teaches you to read neither.</span></li>
+  <li><span class="n">2</span><span><b>The biggest thing on the page answers a
+    different question.</b> <b>222</b> is how much the whole business has
+    reported. The office opens Setup to ask <i>is anything waiting on me?</i>
+    &mdash; and that answer is in 13px type below it.</span></li>
+  <li><span class="n">3</span><span><b>264 pixels of content beside an 870&#8209;pixel
+    rail.</b> The page the gear lands on is the shortest in Setup, and the
+    all&#8209;clear state is a 78px card in a 1000px window.</span></li>
+</ul>
+
+<div class="tag a">BUILT &mdash; Option B shipped</div>
+<div class="tag now">Now</div>
+<div class="pane">
+  <div class="ptitle">Overview</div>
+  <div class="cyc">
+    <div class="cyc-l">
+      <div class="cyc-name">H1 2026 <span class="badge b-open">Open</span></div>
+      <div class="cyc-meta">Jan 2026 to Jun 2026 &middot; due 15 Jul 2026 &middot; as of Q2</div>
+    </div>
+    <div class="cyc-n"><b>222</b><span>of 245 items reported</span></div>
+    <div class="chips"><span class="chip">6 submitted</span><span class="chip">10 in progress</span>
+      <span class="chip">1 not started</span></div>
+    <button class="go">Open the cycle page</button>
+  </div>
+  <div class="qh">Waiting on the office</div>
+  <div class="qcard">
+    <div class="qrow"><span class="gl">&#9993;</span>
+      <span class="qtx">4 conversations waiting for an answer</span>
+      <span class="qgo">Platform Inbox &rsaquo;</span></div>
+    <div class="qrow"><span class="gl">&#9776;</span>
+      <span class="qtx">3 units with no custodian</span>
+      <span class="qgo">People register &rsaquo;</span></div>
+  </div>
+</div>
+<p class="note">The cycle takes the top and the loudest type; the queue &mdash;
+the reason the page exists &mdash; sits under a 10px grey heading.</p>
+
+<div class="tag a">Option A &mdash; <b>the queue leads, the cycle becomes one line</b></div>
+<div class="pane">
+  <div class="ptitle">Overview</div>
+  <div class="qh">Waiting on the office &mdash; <em>7 things</em></div>
+  <div class="qcard">
+    <div class="qrow"><span class="gl">&#9993;</span>
+      <span class="qtx">Conversations waiting for an answer
+        <small>Oldest has been waiting 3 days</small></span>
+      <span class="qn">4</span><span class="qgo">Platform Inbox &rsaquo;</span></div>
+    <div class="qrow"><span class="gl">&#9776;</span>
+      <span class="qtx">Units with no custodian
+        <small>Mobile, Retail Stores, B2B Ecomm</small></span>
+      <span class="qn">3</span><span class="qgo">People register &rsaquo;</span></div>
+  </div>
+  <div class="qh" style="margin-top:18px">The cycle</div>
+  <div class="cyc">
+    <div class="cyc-l">
+      <div class="cyc-name">H1 2026 <span class="badge b-open">Open</span></div>
+      <div class="cyc-meta">Jan&ndash;Jun 2026 &middot; due 15 Jul 2026 &middot; as of Q2</div>
+    </div>
+    <div class="cyc-n small"><b>222</b><span>of 245 reported</span></div>
+    <div class="chips"><span class="chip">6 submitted</span><span class="chip">10 in progress</span>
+      <span class="chip">1 not started</span></div>
+    <button class="go">Open the cycle page</button>
+  </div>
+</div>
+<p class="note"><b>What changes:</b> the order, and the volume. The queue is
+first and its total is on its own heading; each row gains a second line saying
+<i>which</i> &mdash; three units named, not just counted &mdash; and the count
+moves to its own column so the rows line up. The cycle keeps every number it
+had, at the size of a fact rather than a headline.
+<b>The cost:</b> on a tenant where nothing is ever waiting, the page opens on an
+empty box and the cycle is pushed down.</p>
+
+<div class="tag a">Option B &mdash; <b>two columns: the work, and the context</b></div>
+<div class="pane">
+  <div class="ptitle">Overview</div>
+  <div class="two">
+    <div>
+      <div class="qh">Waiting on the office &mdash; <em>7 things</em></div>
+      <div class="qcard">
+        <div class="qrow"><span class="gl">&#9993;</span>
+          <span class="qtx">Conversations waiting for an answer
+            <small>Oldest has been waiting 3 days</small></span>
+          <span class="qn">4</span><span class="qgo">Inbox &rsaquo;</span></div>
+        <div class="qrow"><span class="gl">&#9776;</span>
+          <span class="qtx">Units with no custodian
+            <small>Mobile, Retail Stores, B2B Ecomm</small></span>
+          <span class="qn">3</span><span class="qgo">Register &rsaquo;</span></div>
+      </div>
+    </div>
+    <div class="side">
+      <h4>H1 2026 &middot; open</h4>
+      <div class="sline"><span>Reported</span><b>222 of 245</b></div>
+      <div class="sline"><span>Submitted</span><b>6</b></div>
+      <div class="sline"><span>In progress</span><b>10</b></div>
+      <div class="sline"><span>Not started</span><b>1</b></div>
+      <div class="sline"><span>Due</span><b>15 Jul 2026</b></div>
+      <button class="go" style="width:100%;margin-top:11px">Open the cycle page</button>
+    </div>
+  </div>
+</div>
+<p class="note"><b>What changes:</b> the width gets used, so the page is about
+half as tall, and the cycle reads as a standing summary rather than a banner.
+<b>The cost:</b> below 900px it stacks back to Option A's shape, and the cycle's
+numbers are a list rather than one glance.</p>
+
+<div class="rec" style="margin:26px 0 0"><b>BUILT — and this half was
+narrowed on the way.</b> Option B shipped. The claim below, that the two rail
+numbers wear one look, was <b>overstated</b>: measured, the entry count is quiet
+grey mono and the alert is a gold pill, and they are already told apart. What is
+actually wrong is narrower and is what shipped — the entry count was drawn on an
+<b>open</b> group, where the rows it counts are all on screen. It is now drawn
+only when the group is FOLDED, which is the one moment it says something, and
+matches the rule the gold pill beside it already followed.</div>
+
+<div class="tag a">Both options &mdash; <b>the rail stops counting its own rows</b></div>
+<div class="rails">
+  <div>
+    <div class="tag now" style="margin:0 0 7px">Now</div>
+    <div class="rail">
+      <div class="rgrp">People &amp; access <span class="rgn mark">3</span></div>
+      <div class="ritem"><span class="g">&#9776;</span>People register<span class="riwait">3</span></div>
+      <div class="ritem"><span class="g">&#8862;</span>Roles &amp; access</div>
+      <div class="ritem"><span class="g">&#9638;</span>Official BU list</div>
+      <div class="rgrp">The organisation <span class="rgn mark">4</span></div>
+      <div class="ritem"><span class="g">&#9636;</span>Business units</div>
+      <div class="ritem"><span class="g">&#9707;</span>Companies</div>
+    </div>
+  </div>
+  <div>
+    <div class="tag a" style="margin:0 0 7px">Proposed</div>
+    <div class="rail">
+      <div class="rgrp">People &amp; access</div>
+      <div class="ritem"><span class="g">&#9776;</span>People register<span class="riwait">3</span></div>
+      <div class="ritem"><span class="g">&#8862;</span>Roles &amp; access</div>
+      <div class="ritem"><span class="g">&#9638;</span>Official BU list</div>
+      <div class="rgrp">The organisation</div>
+      <div class="ritem"><span class="g">&#9636;</span>Business units</div>
+      <div class="ritem"><span class="g">&#9707;</span>Companies</div>
+    </div>
+  </div>
+</div>
+<p class="note">The dashed marks are the counts that go. A number beside an open
+group heading tells you how many rows are already on screen; the gold one tells
+you something is waiting. With only one kind of number left in the rail, the
+gold one can be trusted. <b>Where the group is FOLDED</b> the gold count still
+shows, which is what it was built for.</p>
+
+<div class="rec"><b>My recommendation: A, with the rail change.</b> It is the
+smaller move, it survives a narrow window without changing shape, and it fixes
+the thing that is actually wrong &mdash; the page answered the cycle's question
+first and yours second. B is better on a wide screen and I would not build it
+until the queue routinely has more than three rows in it.</div>
+</div>

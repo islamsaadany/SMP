@@ -563,7 +563,7 @@
 </head>
 <body>
 
-<!-- THE CLIENT-MARK SPRITE IS GONE WITH THE MARK IT DREW (§147.15, §24).
+<!-- THE CLIENT-MARK SPRITE IS GONE WITH THE MARK IT DREW (§288.15, §24).
      It was 23 lines of path data for one client's lockup on a door that
      belongs to no client. `.clientmark`, `--client-mark` and the sprite
      rules go with it — leftover CSS is what a later reader takes for
@@ -673,7 +673,7 @@
 
       <!-- Sign in -->
       <div class="card" id="login">
-        <!-- NO CLIENT'S MARK ON THE DOOR (§147.15, and revision 2's own rule).
+        <!-- NO CLIENT'S MARK ON THE DOOR (§288.15, and revision 2's own rule).
              It carried Raya Trade's lockup, which is the same fault as naming
              a client on the front page and worse for being a picture: it told
              everybody at every other client whose door they were standing at.
@@ -847,7 +847,29 @@
      There is one honest thing to show before the answer arrives, and it is
      nothing. The gate is hidden until the session check resolves; if a session
      is live the platform is opened and the gate is never seen at all. */
+  /* ── WAS A CREDENTIAL ASKED FOR THIS VISIT (§179) ────────────────────────
+     Islam: "when I sign out and sign in I don't get the welcome screen."
+
+     Right, and the cause is that the welcome screen remembers "seen" in
+     sessionStorage while SIGNING OUT ONLY RELOADS THE PAGE IN THE SAME TAB —
+     so the memory outlives the session it was meant to belong to, and the
+     next sign-in is greeted by nothing. §148 meant "once per session" and
+     what the browser calls a session is not what a person does.
+
+     The rule is ONCE PER SIGN-IN: greeted whenever a credential was actually
+     accepted, never on a plain refresh, and never when an existing session is
+     simply resumed (opening the gate signed in bounces straight through, and
+     being re-greeted for walking past your own front door is the fault this
+     replaces, not a fix for it).
+
+     ASKED IS SET HERE AND NOWHERE ELSE, because this is the only function that
+     can put a credential card on screen: a sign-in path added later is
+     invisible until it calls show(), so it cannot forget to be counted
+     (§104.7 — a list of exceptions is a list somebody forgets to add to). */
+  var ASKED = false;
+
   function show(which) {
+    if (which === "login" || which === "change") ASKED = true;
     loginCard.style.display = which === "login" ? "block" : "none";
     changeCard.style.display = which === "change" ? "block" : "none";
     document.body.classList.add("ready");
@@ -891,8 +913,18 @@
      one particular client's address — which on a deployment where that client
      is not theirs is a refusal, and on one where it is not registered is a
      dead end. Nobody to open means Forefront's own platform, which is where
-     the cards are and where a person with no client is told so. */
+     the cards are and where a person with no client is told so.
+
+     THE ONE DOOR INTO THE PLATFORM, so it is also where the welcome screen's
+     memory is cleared (§179). The KEY IS SPELT ONCE HERE and once in
+     welcome.js, which is one copy too many and is still the smaller evil: the
+     gate is a separate document that shares no code with the platform, and the
+     alternative is a third file existing only to hold a string. A wrong key
+     here fails visibly — you are greeted every time — rather than silently.
+     Cleared on EVERY way through, the offline one included: which client is
+     being opened has nothing to do with whether a credential was asked for. */
   function openPlatform(clientKey) {
+    if (ASKED) { try { sessionStorage.removeItem("smp.welcome.done"); } catch (e) {} }
     if (!HOSTED) { location.replace(OFFLINE_FILE); return; }
     location.replace(clientKey ? "/" + clientKey : "/platform");
   }
@@ -943,7 +975,7 @@
     goOn();
   }
 
-  /* WHERE SOMEBODY GOES AFTER THE DOOR — decided by the SERVER (spec 024).
+  /* WHERE SOMEBODY GOES AFTER THE DOOR — decided by the SERVER (spec 030).
      A client's own person, and anybody at Forefront who can open exactly one
      client, goes straight there: a page whose only content is a button to the
      page you just asked for is a door behind a door (§32). Everybody else is
@@ -954,10 +986,19 @@
      the platform"). It signs somebody in and hands them over; the clients,
      the consultants and the table live at /platform. */
   var LANDING = null;
+  /* EVERY WAY THROUGH IS `openPlatform()` (§179, on the merge). This had grown
+     three exits — a client, the offline file, and a bare replace to /platform
+     — and only the first two went through the one function, so the third never
+     cleared the welcome screen's memory and signing in again after a sign-out
+     landed silently on the platform with no greeting. §179's own sentence says
+     why that matters: this is THE ONE DOOR into the platform, which is the
+     whole reason the clearing lives in it, and a second door past it is how
+     the two come to disagree (§53.5).
+
+     `openPlatform()` with no client already answers both of the cases this
+     dropped: offline it opens the file, hosted it goes to /platform. */
   function goOn() {
-    if (LANDING) { openPlatform(LANDING); return; }
-    if (!HOSTED) { openPlatform(); return; }
-    location.replace("/platform");
+    openPlatform(LANDING);
   }
 
   /* The door's whole job, and the whole file after this point: take an
@@ -1069,7 +1110,7 @@
          somebody their first sign-in. */
       var wrap = document.getElementById("whereWrap");
       var at = wrap && !wrap.hidden ? document.getElementById("whereSel").value : "";
-      /* THE SAME ROUTING AS THE DOOR (spec 024): whoever holds one client
+      /* THE SAME ROUTING AS THE DOOR (spec 030): whoever holds one client
          opens it, and everybody else gets the cards. Choosing a password must
          not land somebody somewhere the sign-in would not have. */
       var go = function () { goOn(); };

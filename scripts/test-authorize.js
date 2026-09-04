@@ -100,6 +100,29 @@ refuses(headKey, function (s) { s.group.branding = { accent: "#123456" }; },
   "a unit head cannot change the tenant's branding");
 allows("smo", function (s) { s.group.branding = { accent: "#123456" }; },
   "the SMO can");
+/* The group's mark (§259). Named rather than left to the unknown bucket for
+   the same reason `comms` is — it is refused for everybody but the SMO either
+   way, and what this pins is that the refusal says Setup, so somebody sent
+   back by it knows to open Branding (§16.7). */
+refuses(headKey, function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "a unit head cannot set the group's mark");
+allows("smo", function (s) { s.group.logo = "data:image/png;base64,AAAA"; },
+  "the SMO can");
+(function () {
+  /* THE SEED CARRIES NO MARK, so `delete incoming.group.logo` is a no-op and
+     an assertion built that way passes on every build (§94.5, its own
+     example). Both graphs are built: the STORED one holds a mark and the
+     incoming one does not, which is the clear somebody presses. */
+  const st = clone(SEED); st.group.logo = "data:image/png;base64,AAAA";
+  const inc = clone(st); delete inc.group.logo;
+  const v = A.authorize(st, inc, personOf(SEED, "smo"));
+  check("the SMO can CLEAR the mark — a removal is the same act as a set",
+        v.ok && v.changes.some(function (c) { return c.kind === "setup"; }),
+        v.refusals.join(" / ") + " / changes: " +
+        JSON.stringify(v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  const v2 = A.authorize(st, inc, personOf(SEED, headKey));
+  check("and a unit head cannot", !v2.ok);
+})();
 /* Communication (§72). The same shape as branding, and asserted rather than
    left to the unknown bucket: an unclassified change IS refused for everybody
    but the SMO, so this passes either way — what it pins is that the refusal
@@ -630,6 +653,101 @@ console.log("\n7 · a retired person");
 })();
 
 /* ── 8 · Picture slides are the unit's, not a row's (§50.5) ────── */
+/* ── §239: THE REVIEW POINT IS THE OFFICE'S ──────────────────────────────
+   It is a new field (`review.asOfMonth`, riding the review row's `extra`) and
+   it decides what EVERY figure in the tenant is measured against -- a target
+   that adds up is compared with the share of it due by then, and a tactic
+   whose span has not started is not asked at all. So it must be the office's,
+   and asserted BOTH WAYS: a rule that refuses everybody is not a rule that
+   protects anything, and a new value the authoriser has never been offered is
+   exactly what §172 records going wrong four layers down. */
+console.log("\n8a · the review point (§239)");
+(function () {
+  const setAsOf = function (s) {
+    s.review = Object.assign({}, s.review, { asOfMonth: "Aug 26" });
+  };
+  allows("smo", setAsOf, "the SMO moves the review point");
+  refuses(headKey, setAsOf, "a unit's head cannot move it");
+  refuses(custKey, setAsOf, "nor can a strategy custodian");
+})();
+
+/* ── §273: AND SO ARE THE CYCLE'S NAME AND ITS DATES ─────────────────────
+   The server has always classified these as `cycle` -- they are review fields
+   outside `REVIEW_PER_TARGET` (§234) -- and until now NOTHING IN THE PRODUCT
+   COULD SEND ONE: they were written once, when the cycle was opened, and were
+   plain text ever after. §273's pen makes that path reachable by a person for
+   the first time, which is exactly the moment to assert what the server does
+   with it (§172: four layers agreeing about a value the database has never
+   been offered is not the same as it working).
+
+   Both ways, or a rule that refuses everybody protects nothing (§94.2). And
+   the name matters more than it looks: it is what a closed cycle's figures are
+   filed under, so somebody able to rewrite it could re-label another team's
+   history. */
+console.log("\n8b · the cycle's name and dates (§273)");
+(function () {
+  const rename = function (s) {
+    s.review = Object.assign({}, s.review, { name: "H2 2026" });
+  };
+  const redate = function (s) {
+    s.review = Object.assign({}, s.review,
+      { from: "Feb 2026", to: "Jul 2026", due: "20 Aug 2026" });
+  };
+  allows("smo", rename, "the SMO renames the cycle");
+  allows("smo", redate, "the SMO moves its dates");
+  refuses(headKey, rename, "a unit's head cannot rename it");
+  refuses(custKey, rename, "nor can a strategy custodian");
+  refuses(headKey, redate, "a unit's head cannot move its dates");
+})();
+
+/* ── §273.2: AND REOPENING A CLOSED CYCLE IS THE OFFICE'S TOO ────────────
+   Same argument one act further on. `review.state` and `history` have always
+   classified as `cycle`, and until §273.2 NOTHING IN THE PRODUCT COULD SEND
+   EITHER on an existing cycle: the only place `state:"open"` was written was
+   the mint of a brand-new one, and no screen removed a HISTORY entry. So the
+   path is reachable by a person for the first time, and this is what the
+   server does with it (§172).
+
+   THE TWO HALVES ARE ASSERTED SEPARATELY, because reopening does both and a
+   rule that guarded only the flag would let anybody rewrite the record of what
+   a closed cycle scored. */
+console.log("\n8c · reopening a closed cycle (§273.2)");
+(function () {
+  /* NOT `allows`/`refuses`, AND THAT IS THE POINT. Those compare against the
+     SEED, whose cycle is already OPEN — so "reopen it" set a value to what it
+     already was, the differ found no change at all, and both refusals passed
+     as ALLOWED with `changes: []`. §94.5's own example, committed while
+     writing a test for it. The stored side has to be a CLOSED cycle. */
+  const shut = clone(SEED);
+  shut.review = Object.assign({}, shut.review, { state: "closed" });
+  shut.history = (shut.history || []).concat([{ name: shut.review.name, group: 71, units: {} }]);
+
+  const reopen = function (s) {
+    s.review = Object.assign({}, s.review, { state: "open" });
+  };
+  const unfile = function (s) { s.history = (s.history || []).slice(0, -1); };
+
+  const tryIt = function (who, mutate) {
+    const inc = clone(shut); mutate(inc);
+    return A.authorize(shut, inc, personOf(shut, who));
+  };
+  let v = tryIt("smo", reopen);
+  check("the SMO reopens a closed cycle", v.ok, v.refusals.join(" / "));
+  v = tryIt("smo", unfile);
+  check("...and takes its closing record back", v.ok, v.refusals.join(" / "));
+  /* PROVED TO BE A REAL CHANGE FIRST, or a refusal below is a refusal of
+     nothing (§94.5 again, from the other side). */
+  check("...and both are changes the differ actually sees",
+    tryIt("smo", reopen).changes.length > 0 && tryIt("smo", unfile).changes.length > 0,
+    JSON.stringify(tryIt("smo", reopen).changes.map(function (c) { return c.kind; })));
+  v = tryIt(headKey, reopen);
+  check("a unit's head cannot reopen one", !v.ok, "was ALLOWED");
+  v = tryIt(custKey, reopen);
+  check("nor can a strategy custodian", !v.ok, "was ALLOWED");
+  v = tryIt(headKey, unfile);
+  check("and nobody else rewrites the record of what closed", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n8 · the review's picture slides");
 (function () {
   const slide = { id: "psTEST", title: "Site visit", at: "cover", layout: 1,
@@ -739,10 +857,23 @@ console.log("\n9 · employee and contributor");
         R.personRoleKeys(R.worldOf(base), personOf(base, key)).join());
   check("...and it is not offered as a role either",
         R.ROLE_KEYS.indexOf(R.NO_ROLE) === -1, R.ROLE_KEYS.join());
-  check("...but they still see their own unit",
-        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT) === "view",
+  /* §207 REVERSES WHAT THIS USED TO ASSERT. It read "...but they still see
+     their own unit", on the floor's shipped `a_unit_own: view`. Islam:
+     "anyone who has no role should default as Employee with no access to
+     anything." The floor is what applies when NO decision has been made, so
+     it must be the safe answer rather than the friendly one — and on a
+     platform holding a group's strategy the friendly one meant anybody the
+     register holds could read the group's plan with nobody granting
+     anything. BOTH ENDS, or a build that emptied the map entirely would
+     satisfy the first line: nothing is open, AND a granted role still
+     opens what it grants (the Contributor case below is that half). */
+  check("...and they open NOTHING, not even their own unit (§207)",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT) === "none",
         R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT));
-  check("...and not somebody else's",
+  check("...nor the group",
+        R.grantIn(R.worldOf(base), personOf(base, key), "group", "group") === "none",
+        R.grantIn(R.worldOf(base), personOf(base, key), "group", "group"));
+  check("...nor somebody else's unit",
         R.grantIn(R.worldOf(base), personOf(base, key), "unit",
                   Object.keys(SEED.units)[1]) === "none");
 
@@ -1044,6 +1175,37 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
 
+/* ── AND A CAPABILITY'S OBJECTIVES REORDER THE SAME WAY (§278.3) ──
+   That walk had no reorder callback at all, so moving one of these rows fell
+   through to `capPlan` — the office's — while the identical act on a UNIT's
+   key objectives has classified as `arrange` since §101. One question with two
+   answers, and §278.3 draws a handle on both tables: a custodian would have
+   watched the row move and the save come back refused, which is §94.3's exact
+   fault.
+
+   BOTH ENDS, and the second one is the point: a build that classified every
+   change to these rows as `arrange` would satisfy the first assertion and hand
+   the plan to anybody who may reorder. */
+(function () {
+  const cap = (SEED.group.capabilities || []).filter(function (c) {
+    return (c.keyObjectives || []).length > 1; })[0];
+  check("the seed has a capability with two key objectives to reorder",
+        !!cap, "none — this assertion would be measuring nothing");
+  if (!cap) return;
+  const ci = (SEED.group.capabilities || []).indexOf(cap);
+  const inc = clone(SEED);
+  shuffleFirstToLast(inc.group.capabilities[ci].keyObjectives);
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("reordering a capability's key objectives is `arrange`, and nothing else",
+        kinds.length > 0 && kinds.every(function (k) { return k === "arrange"; }),
+        "got: " + JSON.stringify(kinds));
+  const inc2 = clone(SEED);
+  inc2.group.capabilities[ci].keyObjectives[0].name += " (renamed)";
+  const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
+  check("but RENAMING one is still `capPlan`",
+        kinds2.indexOf("capPlan") > -1, "got: " + JSON.stringify(kinds2));
+})();
+
 /* ── 14 · THE FOCUS SWITCH IS NOT A BIGGER MARK (§102) ────────────
    Marking a measure is the CEO's and the SMO's (§37); turning the whole
    feature off for the tenant is the SMO's alone. Asserted as a PAIR, because
@@ -1178,14 +1340,26 @@ console.log("\n15 · the strategy | reporting split (§117)");
   /* The download is a pure rule with no server half — asserted here so the
      one definition is proven where every other rule is (§117). */
   const wSeed = R.worldOf(SEED);
-  check("download: the unit's custodian may", R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === true);
-  check("download: the unit's owner may", R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === true);
+  /* §252.2 REVERSES §117's AUDIENCE at Islam's instruction — "for the smo
+     only" — so these three assertions are REWRITTEN rather than deleted
+     (§218): a build that quietly handed the file back to the roles that HOLD
+     the thing would otherwise pass through a gap where a test used to be. */
   check("download: the office may", R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), UNIT) === true);
+  check("download: the unit's custodian may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === false);
+  check("download: the unit's owner may NOT (§252.2)",
+        R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === false);
   if (fnCust) {
     const fnHead = (SEED.functions[FN] || {}).head;
-    check("download: a function's head may, for their function",
-          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === true);
+    check("download: a function's head may NOT, for their own function (§252.2)",
+          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === false);
+    check("download: the office may, for that same function",
+          R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), "fn:" + FN) === true);
   }
+  /* And arranging is untouched by the narrowing — the two questions stopped
+     sharing an answer, so the one that stayed open is asserted beside it. */
+  check("arrange: the unit's custodian still may (§101, unchanged)",
+        R.mayArrange(wSeed, personOf(SEED, custKey), UNIT) === true);
   const nobody = { key: "smp_test_nobody", unit: UNIT };
   check("download: somebody holding nothing may not",
         R.mayDownloadPlan(wSeed, nobody, UNIT) === false);
@@ -1344,17 +1518,78 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
     check("FILL: the same grant never renames a project", !v.ok, "was ALLOWED");
   }
 
-  /* 13 · collaborators join the fillable list (§145.10) — an empty list is
-     a gap, an existing one never opens, and A PENDING NAME CONFERS NO
-     REPORTING RIGHT until the office confirms: being named is what lets a
-     Contributor report the line (§50.2), so this is the half that makes
-     the reversal safe. */
+  /* 13 · COLLABORATORS ARE FILLABLE AND NOT COUNTED (§205, correcting how
+     §187 was implemented rather than what it decided).
+
+     §187 said: "remove the missing collaborators as missing items" — an
+     optional blank is not a gap (§119.1), and every tactic with nobody
+     supporting it was being counted as owing something. That decision
+     stands and the counts still exclude them.
+
+     WHAT WENT WRONG IS THAT IT WAS DONE BY EMPTYING THE ONE LIST THE SERVER
+     ALSO READS. The screen went on opening the cell — an empty list is
+     blank, and `filling()` only asks about the page — while every save of
+     one was refused as authoring. It reached the deployment: a BU owner
+     filling gaps had "Enable a seamless customer experience —
+     Collaborators" refused among rows that were accepted. Islam, settling
+     it: "collaborators are fillable but not counted as missing."
+
+     SO BOTH HALVES ARE ASSERTED HERE, because each alone is satisfied by a
+     build that gets the other wrong. */
   s = gappy();
   v = fromStored(s, custKey, function (i) {
     const t = i.units[UNIT].items[0].tactics[0];
     t.collaborators = ["Somebody Supporting"]; t.pend = { collaborators: MARK };
   });
-  check("FILL: an empty collaborators list is fillable", v.ok, v.refusals.join(" / "));
+  check("FILL: an empty collaborators list IS fillable", v.ok,
+        (v.refusals || []).join(" / "));
+  check("...and is still NOT counted as missing",
+        R.GAP_FIELDS.tactic.indexOf("collaborators") < 0, R.GAP_FIELDS.tactic);
+  /* §249 MOVED THE TOTAL AND NOT THE POINT. This asserted that a tactic
+     owning nothing else counts ZERO, which was a fair vehicle for "an empty
+     collaborators list is not owed" while owner and quarters were the whole
+     list — and §249 added the outcome and its target, so the literal now
+     reports a deliberate decision as a regression (§214.3, the fourth time
+     this file has recorded a number outliving the decision behind it). What
+     it exists to say is that the EMPTY LIST adds nothing, so it asks exactly
+     that: the same row with and without the field counts the same. */
+  check("...so an empty collaborators list adds nothing to the count",
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [],
+                                 outcome: "O", outTarget: "6 #" }).length ===
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1,
+                                 outcome: "O", outTarget: "6 #" }).length,
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [] }));
+  /* AND THE THING §187 ACTUALLY GUARDED IS UNTOUCHED: a list that already
+     has somebody in it is not a gap and never opens to the filler. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.collaborators = ["Already There"]; t.pend = { collaborators: MARK };
+    return t;
+  });
+  s.units[UNIT].items[0].tactics[0].collaborators = ["Already There"];
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.collaborators = ["Already There", "Sneaked In"];
+    t.pend = { collaborators: MARK };
+  });
+  check("REFUSED: adding to a list that already has somebody", !v.ok, "was ALLOWED");
+  check("...and collaborators is off the tactic's gap list",
+        R.GAP_FIELDS.tactic.indexOf("collaborators") === -1,
+        JSON.stringify(R.GAP_FIELDS.tactic));
+  check("...while a tactic owning nobody is not asked for one",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O", outTarget: "6 #" })
+          .indexOf("collaborators") === -1,
+        JSON.stringify(R.gapMissing("tactic", { owner: "A", q1: 1,
+                                                outcome: "O", outTarget: "6 #" })));
+  /* THE OTHER END: the owner is still fillable, and is the reason it stayed —
+     a line nobody owns is a line nobody can report. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.owner = "Somebody Accountable"; t.pend = { owner: MARK };
+  });
+  check("FILL: a tactic with no owner is still fillable", v.ok, v.refusals.join(" / "));
   s = gappy();
   v = fromStored(s, custKey, function (i) {
     const t = i.units[UNIT].items[0].tactics.filter(function (x) {
@@ -1363,20 +1598,34 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
     t.collaborators = t.collaborators.concat("Somebody Extra");
     t.pend = Object.assign({}, t.pend, { collaborators: MARK });
   });
-  check("FILL: adding to an EXISTING collaborators list refuses, mark or not",
+  check("REFUSED: adding to an EXISTING collaborators list, mark or not",
         !v.ok, "was ALLOWED");
+  /* §218 REVERSES §145.10 AT ISLAM'S DIRECTION, and the assertions are
+     rewritten rather than deleted: this pair used to say a filled-but-
+     unconfirmed name conferred nothing, which was true only while the
+     office's tick existed. With the approval gone there is nothing to wait
+     for, and a name the page plainly shows now counts.
+
+     THE COST WAS STATED BEFORE IT WAS ACCEPTED: somebody who may fill gaps
+     can write their own name into an empty Owner and thereby gain the right
+     to report that line. Islam: *"the custodian is already choosing from
+     lists and he is responsible."* Asserted so the reversal is deliberate
+     and a future build cannot drift back through it unnoticed. */
   (function () {
     const t = { owner: "", collaborators: ["Test Person"],
                 pend: { collaborators: MARK } };
     const who = { key: "tp", name: "Test Person" };
-    check("RIGHTS: a pending collaborator is not namedOn the line",
-          R.namedOn(t, who) === false);
+    check("RIGHTS (§218): a filled collaborator counts at once",
+          R.namedOn(t, who) === true);
     delete t.pend;
-    check("RIGHTS: the same name counts the moment the mark lifts",
+    check("RIGHTS: and still counts with no mark on it",
           R.namedOn(t, who) === true);
     const t2 = { owner: "Test Person", pend: { owner: MARK } };
-    check("RIGHTS: a pending owner is not namedOn either",
-          R.namedOn(t2, who) === false);
+    check("RIGHTS (§218): a filled owner counts at once too",
+          R.namedOn(t2, who) === true);
+    const t3 = { owner: "Somebody Else", collaborators: [] };
+    check("RIGHTS: and somebody the line does not name still counts for nothing",
+          R.namedOn(t3, who) === false);
   })();
 
   /* 14 · u_anal never fills: a strategy page with no fillable field must
@@ -1395,6 +1644,1460 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
   const sOther = withAccess("custodian", { a_unit_own_strat: "fill" });
   check("mayFillPage: never a unit this sign-in does not hold",
         R.mayFillPage(R.worldOf(sOther), personOf(sOther, custKey), "u_plan", OTHER) === false);
+
+  /* 15 · A MISSING UNIT IS THE FILLER'S TO ADD (§201.2). Islam, from the
+     deployment: "on filling the missing by the custodian he can't fill the
+     unit while he needs to fill if missing." The unit rides ON the target
+     string ("30" → "30%"), so to the diff it looks like amending a settled
+     value — which case 4 above rightly refuses. `unitAddedOnly()` is the
+     narrow licence: the NUMBER byte-identical, the stored unit empty, a
+     unit arriving, under the pend mark. Anything wider is authoring. */
+  function bare() {
+    const s2 = withAccess("custodian", { a_unit_own_strat: "fill" });
+    const m = s2.units[UNIT].keyObjectives[0];
+    m.target3y = "30"; delete m.pend;
+    return s2;
+  }
+  s = bare();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "30%"; m.pend = { target3y: MARK };
+  });
+  check("UNIT: adding a unit to a bare target, marked pending, is the filler's",
+        v.ok, v.refusals.join(" / "));
+  s = bare();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].keyObjectives[0].target3y = "30%";
+  });
+  check("UNIT: the same change without the mark refuses — still the office's",
+        !v.ok, "was ALLOWED");
+  s = bare();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "31%"; m.pend = { target3y: MARK };
+  });
+  check("UNIT: moving the NUMBER as well refuses — that is authoring",
+        !v.ok, "was ALLOWED");
+  /* the undo: taking the pending unit back off is the filler's too */
+  s = bare();
+  s.units[UNIT].keyObjectives[0].target3y = "30%";
+  s.units[UNIT].keyObjectives[0].pend = { target3y: MARK };
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "30"; delete m.pend;
+  });
+  check("UNIT: taking the unit back OFF (the undo) is accepted",
+        v.ok, v.refusals.join(" / "));
+  /* and the grant is the gate */
+  s = bare(); s.access = clone(SEED.access || {});
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "30%"; m.pend = { target3y: MARK };
+  });
+  check("UNIT: with the grant at VIEW the same act refuses", !v.ok, "was ALLOWED");
+  /* the rule's own ends, so a loosened regex fails here and not in the field */
+  check("unitAddedOnly: only target fields", !R.unitAddedOnly("name", "30", "30%"));
+  check("unitAddedOnly: a unit already there is never re-licensed",
+        !R.unitAddedOnly("target", "30%", "30 SQM"));
+})();
+
+/* ── 17 · A CUSTODIAN PER PROJECT — TWO ROLES, NOT ONE (§147.7) ────
+   Islam: "a project owner is a role", "we need to add another role which is
+   pillar owner ... same pattern", and "contributor is someone whose name is
+   on the project anywhere but that doesn't mean that he is a project owner".
+
+   TWO CONDITIONS before anybody reports (his words): the role's Reporting
+   cell opened to edit on Roles & access, AND being named the Owner on the
+   thing. Contributors — a milestone's owner, a stakeholder — report NOTHING
+   until the Contributor row is opened, and then only the rows that name
+   them. None of the three ever submits.
+
+   EVERY allows() ALSO ASSERTS THE FIXTURE CHANGED SOMETHING (§94.5): the
+   no-op assertion is this suite's own recorded fault. */
+console.log("\n17 · a custodian per project — two roles (§147.7)");
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const capOf = function (s) {
+    return s.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  /* The base: three people the plan names — an owner of project 1, the owner
+     of one of project 1's milestones, and a stakeholder on project 1 — and
+     the two owner rows opened, Islam's condition 1. DELIBERATELY UNATTACHED
+     (no p.unit, no p.fn): his two conditions do not include the register
+     attachment, and this is the exact shape of the Ahmed test that started
+     §147.7. The contributor row is left at its default. */
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner, { a_fn_own: "edit" });
+  base.people.push({ key: "t147_own",   name: "Project Owner 147",   active: true });
+  base.people.push({ key: "t147_mile",  name: "Milestone Owner 147", active: true });
+  base.people.push({ key: "t147_stake", name: "Stakeholder 147",     active: true });
+  const cap = capOf(base);
+  cap.projects[0].owner = "Project Owner 147";
+  cap.projects[0].milestones[0].owner = "Milestone Owner 147";
+  cap.projects[0].stakeholders = (cap.projects[0].stakeholders || []).concat("Stakeholder 147");
+  const wb = R.worldOf(base);
+
+  check("named Owner of a project derives PROJECT OWNER, unattached included",
+        JSON.stringify(R.personRoles(wb, personOf(base, "t147_own"))) ===
+        JSON.stringify([{ role: "powner", at: T }]),
+        JSON.stringify(R.personRoles(wb, personOf(base, "t147_own"))));
+  check("a project owner is bounded — never the whole function",
+        R.onlyOwnLines(wb, personOf(base, "t147_own"), "fn", T) === true);
+  check("the two owner roles are never grantable by hand",
+        R.isOwnLinesRole("powner") && R.isOwnLinesRole("plowner"));
+
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)),
+             moved: !same(stored, inc) };
+  };
+  const ok = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+
+  /* The custodian regressions §147.3 fixed stay fixed. */
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  if (fnCust && personOf(SEED, fnCust)) {
+    ok("the custodian reports a deliverable (the §147.3 drift, fixed)",
+       run(SEED, fnCust, function (s) {
+         capOf(s).projects[0].deliverables[0].status = "todo"; }));
+    ok("the custodian gives an In-progress milestone its required %",
+       run(SEED, fnCust, function (s) {
+         const m = capOf(s).projects[0].milestones[2]; m.pct = 75; }));
+    ok("the custodian still submits the function",
+       run(SEED, fnCust, function (s) {
+         s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  }
+
+  /* THE PROJECT OWNER: their project, whole — and nothing beside it. */
+  ok("the project owner reports their own project's deliverable",
+     run(base, "t147_own", function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  ok("the project owner reports their own project's milestone, % included",
+     run(base, "t147_own", function (s) {
+       const m = capOf(s).projects[0].milestones[2]; m.pct = 80; m.note = "on it"; }));
+  ok("the project owner reports their own project's outcome, note included",
+     run(base, "t147_own", function (s) {
+       const o = capOf(s).projects[0].outcomes[0]; o.actual = "3"; o.note = "up"; }));
+  not("the project owner may NOT report the project beside theirs",
+      run(base, "t147_own", function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+  not("the project owner may NOT enter the capability's own key objectives",
+      run(base, "t147_own", function (s) {
+        const k = capOf(s).keyObjectives[0]; if (k) k.actual = "99"; else s.group.capabilities[0].name = "x"; }));
+  not("the project owner may NOT submit the function",
+      run(base, "t147_own", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  not("the project owner may NOT write the function's cycle note",
+      run(base, "t147_own", function (s) {
+        s.review.note = Object.assign({}, s.review.note); s.review.note[T] = "our quarter"; }));
+  not("the project owner may NOT edit the project's plan",
+      run(base, "t147_own", function (s) {
+        capOf(s).projects[0].name = "Renamed by its owner"; }));
+
+  /* CONDITION 1 WITHOUT CONDITION 2, AND THE REVERSE. */
+  const unopened = clone(base);
+  delete unopened.access.powner;
+  not("named, but the Project owner row still at its default: nothing",
+      run(unopened, "t147_own", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  const unnamed = clone(base);
+  capOf(unnamed).projects[0].owner = "Somebody Else Entirely";
+  not("the row opened, but not named on any project: nothing",
+      run(unnamed, "t147_own", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+
+  /* CONTRIBUTORS REPORT NOTHING FOR NOW (Islam) — the row ships at view. */
+  check("a milestone's owner derives Contributor, not Project owner",
+        R.personRoleKeys(wb, personOf(base, "t147_mile")).join() === "contrib",
+        R.personRoleKeys(wb, personOf(base, "t147_mile")).join());
+  check("a stakeholder derives Contributor too",
+        R.personRoleKeys(wb, personOf(base, "t147_stake")).join() === "contrib",
+        R.personRoleKeys(wb, personOf(base, "t147_stake")).join());
+  not("with the shipped default a milestone owner reports nothing",
+      run(base, "t147_mile", function (s) {
+        const m = capOf(s).projects[0].milestones[0]; m.status = "todo"; }));
+
+  /* ...AND THE FUTURE ISLAM ASKED TO BE READY: contributor edit opened. */
+  const cOpen = clone(base);
+  cOpen.access.contrib = Object.assign({}, cOpen.access.contrib, { a_fn_own: "edit" });
+  ok("contrib opened: the milestone owner reports THEIR milestone",
+     run(cOpen, "t147_mile", function (s) {
+       const m = capOf(s).projects[0].milestones[0]; m.status = "wip"; m.pct = 10; }));
+  not("...and still not the deliverable beside it",
+      run(cOpen, "t147_mile", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  ok("contrib opened: the stakeholder reaches their project's rows",
+     run(cOpen, "t147_stake", function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  not("...and not the project beside it",
+      run(cOpen, "t147_stake", function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+
+  /* THE PILLAR OWNER — same pattern, on a unit's pillar. */
+  const pb = clone(SEED);
+  pb.access.plowner = Object.assign({}, pb.access.plowner, { a_unit_own: "edit" });
+  pb.people.push({ key: "t147_pill", name: "Pillar Owner 147", active: true });
+  pb.units[UNIT].items[0].owner = "Pillar Owner 147";
+  const wpb = R.worldOf(pb);
+  check("named Owner of a unit's pillar derives PILLAR OWNER",
+        JSON.stringify(R.personRoles(wpb, personOf(pb, "t147_pill"))) ===
+        JSON.stringify([{ role: "plowner", at: UNIT }]),
+        JSON.stringify(R.personRoles(wpb, personOf(pb, "t147_pill"))));
+  ok("the pillar owner reports a measure of their pillar",
+     run(pb, "t147_pill", function (s) {
+       const m = s.units[UNIT].items[0].measures[0]; m.actual = "7"; m.note = "up"; }));
+  ok("the pillar owner reports a tactic of their pillar",
+     run(pb, "t147_pill", function (s) {
+       const x = s.units[UNIT].items[0].tactics[0]; if (x) { x.status = "Done"; } else { s.units[UNIT].items[0].measures[0].note = "n2"; } }));
+  not("the pillar owner may NOT report the pillar beside theirs",
+      run(pb, "t147_pill", function (s) {
+        const q = s.units[UNIT].items[1];
+        const m = (q.measures || [])[0] || (q.tactics || [])[0];
+        if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+  not("the pillar owner may NOT submit the unit",
+      run(pb, "t147_pill", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[UNIT] = true; }));
+  not("named, but the Pillar owner row still at its default: nothing",
+      run((function () { const s2 = clone(pb); delete s2.access.plowner; return s2; })(),
+          "t147_pill", function (s) {
+            s.units[UNIT].items[0].measures[0].actual = "7"; }));
+
+  /* ...AND ON A PILLARS FUNCTION, where the old code skipped every fn:
+     target. Merchandising plans in pillars (spec 010). */
+  const MR = "merchandising";
+  if ((SEED.functions[MR] || {}).format === "pillars" &&
+      (SEED.functions[MR].items || []).length) {
+    const fb = clone(SEED);
+    fb.access.plowner = Object.assign({}, fb.access.plowner, { a_fn_own: "edit" });
+    fb.people.push({ key: "t147_fnp", name: "Fn Pillar Owner 147", active: true });
+    fb.functions[MR].items[0].owner = "Fn Pillar Owner 147";
+    check("named Owner of a pillars function's pillar derives PILLAR OWNER there",
+          JSON.stringify(R.personRoles(R.worldOf(fb), personOf(fb, "t147_fnp"))) ===
+          JSON.stringify([{ role: "plowner", at: "fn:" + MR }]),
+          JSON.stringify(R.personRoles(R.worldOf(fb), personOf(fb, "t147_fnp"))));
+    ok("...and reports a measure of that pillar",
+       run(fb, "t147_fnp", function (s) {
+         const m = s.functions[MR].items[0].measures[0]; m.actual = "5"; m.note = "up"; }));
+    if ((fb.functions[MR].items || []).length > 1) {
+      not("...and not the pillar beside it",
+          run(fb, "t147_fnp", function (s) {
+            const q = s.functions[MR].items[1];
+            const m = (q.measures || [])[0] || (q.tactics || [])[0];
+            if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+    }
+    not("...and never submits the function",
+        run(fb, "t147_fnp", function (s) {
+          s.review.submitted = Object.assign({}, s.review.submitted);
+          s.review.submitted["fn:" + MR] = true; }));
+  } else {
+    check("the pillars function fixture exists in the seed", false,
+          "merchandising is not a pillars function with items");
+  }
+
+  /* THE CUSTODIAN WHO ALSO OWNS A PROJECT LOSES NOTHING (§147.7, asked by
+     Islam): the most generous role wins (§33), so the powner chip beside the
+     custodian's narrows nothing — whole function, Submit and all. And the
+     roles stay separable: with the CUSTODIAN row closed and the Project
+     owner row open, the same person keeps their own project and loses the
+     rest — bounded reach engaging only when the bounded role is the only way
+     in. Guarded here so no later edit can turn the union into a narrowing. */
+  const both = clone(SEED);
+  const custKey2 = SEED.functions[FN].custodian;
+  const custName2 = SEED.people.filter(function (x) { return x.key === custKey2; })[0].name;
+  capOf(both).projects[0].owner = custName2;
+  check("custodian + project owner: not read as bounded",
+        R.onlyOwnLines(R.worldOf(both), personOf(both, custKey2), "fn", T) === false);
+  ok("custodian + project owner: still reports the OTHER project",
+     run(both, custKey2, function (s) {
+       capOf(s).projects[1].deliverables[0].status = "done"; }));
+  ok("custodian + project owner: still submits the function",
+     run(both, custKey2, function (s) {
+       s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  const narrowed = clone(both);
+  narrowed.access.custodian = Object.assign({}, narrowed.access.custodian, { a_fn_own: "view" });
+  narrowed.access.powner = Object.assign({}, narrowed.access.powner, { a_fn_own: "edit" });
+  ok("custodian row closed, owner row open: their project still reports",
+     run(narrowed, custKey2, function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  not("...and the rest of the function no longer does",
+      run(narrowed, custKey2, function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+
+  /* A retired owner derives nothing (§110.4). */
+  const retired = clone(base);
+  personOf(retired, "t147_own").active = false;
+  check("a retired project owner derives nothing",
+        R.personRoles(R.worldOf(retired), personOf(retired, "t147_own")).length === 0);
+})();
+
+console.log("\n18 · a bounded role fills only what it holds (§177)");
+/* §177 gave a milestone's owner and due date and an outcome's target to the
+   fill grant, and narrowed that grant to the ROWS a bounded role holds.
+   Islam: "his project has missing items. he should be able to fill the
+   missing items" and "the fill grant should be for his project only he is
+   not a cutodian."
+
+   PROVED ABLE TO FAIL (§94.5): on the pre-§177 rules every ALLOWED case here
+   refuses -- an outcome and a milestone are not gap kinds there, so the pass
+   never classifies the change and it lands on capPlan, which is office-only.
+   And the two REFUSED cases go green the moment mayFillRow() is replaced by
+   mayFillPage(), which is exactly the narrowing under test. */
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const MARK = { by: "t176_own", at: "2026-08-29" };
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const fromStored = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  };
+
+  /* A project owner who holds NOTHING else, over a function with two
+     projects, the Strategy half opened to `fill` -- Islam's own shape. */
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner,
+    { a_fn_own_strat: "fill", a_fn_own: "edit" });
+  base.people.push({ key: "t176_own", name: "Bounded Filler 176", active: true });
+  const cap = capOf(base);
+  if (!cap || (cap.projects || []).length < 2) {
+    check("§177: the fixture needs a function with two projects", false, FN);
+  } else {
+    const mine = cap.projects[0], theirs = cap.projects[1];
+    mine.owner = "Bounded Filler 176";
+    mine.milestones[0].finish = "";
+    mine.milestones[0].owner = "";
+    if ((mine.outcomes || []).length) mine.outcomes[0].target = "";
+    theirs.milestones[0].finish = "";
+    if ((cap.keyObjectives || []).length) cap.keyObjectives[0].compile = "";
+
+    const w = R.worldOf(base);
+    check("the fixture's filler holds project owner and nothing else",
+          JSON.stringify(R.personRoles(w, personOf(base, "t176_own"))) ===
+          JSON.stringify([{ role: "powner", at: T }]),
+          JSON.stringify(R.personRoles(w, personOf(base, "t176_own"))));
+
+    /* 1 · his own project's milestone: the whole point of §176. */
+    let v = fromStored(base, "t176_own", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.finish = "Jul 26"; m.pend = { finish: MARK };
+    });
+    check("FILL: a blank due date on HIS project is his", v.ok, v.refusals.join(" / "));
+
+    v = fromStored(base, "t176_own", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.owner = "Somebody Else"; m.pend = { owner: MARK };
+    });
+    check("FILL: a blank milestone owner on HIS project is his", v.ok, v.refusals.join(" / "));
+
+    if ((mine.outcomes || []).length) {
+      v = fromStored(base, "t176_own", function (i) {
+        const o = capOf(i).projects[0].outcomes[0];
+        o.target = "80%"; o.pend = { target: MARK };
+      });
+      check("FILL: a blank outcome target on HIS project is his", v.ok, v.refusals.join(" / "));
+    }
+
+    /* 2 · the project BESIDE it is not. This is the narrowing. */
+    v = fromStored(base, "t176_own", function (i) {
+      const m = capOf(i).projects[1].milestones[0];
+      m.finish = "Jul 26"; m.pend = { finish: MARK };
+    });
+    check("REFUSED: the same fill on the project beside it", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+
+    /* 3 · nor a gap that sits inside no project at all. */
+    if ((cap.keyObjectives || []).length) {
+      v = fromStored(base, "t176_own", function (i) {
+        const k = capOf(i).keyObjectives[0];
+        k.compile = "Latest"; k.pend = { compile: MARK };
+      });
+      check("REFUSED: the capability's own key objective", !v.ok,
+            "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+    }
+
+    /* 4 · and confirming is never the filler's, on his own project either. */
+    const pending = clone(base);
+    (function () {
+      const m = capOf(pending).projects[0].milestones[0];
+      m.finish = "Jul 26"; m.pend = { finish: MARK };
+    })();
+    v = fromStored(pending, "t176_own", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      delete m.pend;
+    });
+    check("REFUSED: the filler confirming their own fill", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+
+    /* 5 · THE UNBOUNDED ROLE IS UNTOUCHED (§94.2, the other end): a check
+       that only proves a door shut can be satisfied by shutting every door. */
+    const fnCust = (SEED.functions[FN] || {}).custodian;
+    if (fnCust && personOf(base, fnCust)) {
+      const open = clone(base);
+      open.access.custodian = Object.assign({}, open.access.custodian,
+        { a_fn_own_strat: "fill" });
+      v = fromStored(open, fnCust, function (i) {
+        const m = capOf(i).projects[1].milestones[0];
+        m.finish = "Jul 26"; m.pend = { finish: MARK };
+      });
+      check("a function custodian with fill still reaches every project", v.ok,
+            v.refusals.join(" / "));
+      /* And the office authors it outright, with no mark at all. */
+      v = fromStored(base, "smo", function (i) {
+        capOf(i).projects[1].milestones[0].finish = "Jul 26";
+      });
+      check("the office writes a due date with no mark and it settles", v.ok,
+            v.refusals.join(" / "));
+    }
+  }
+})();
+
+console.log("\n18b · a milestone's collaborators, the tactic's rule moved over (§227)");
+/* Islam: "for the projects milestones please add collaborators beside the
+   owner column similar to the collaborators in the tactics in the units."
+   Similar means the RULES too: fillable while empty and never counted
+   (§187/§205), an existing list the office's alone, and being named on the
+   milestone a reporting right once the Contributor row is opened (§147). */
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const MARK = { by: "t224_fill", at: "2026-09-01" };
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const fromStored = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  };
+
+  /* The fill half: §177's bounded filler, on a milestone's collaborators. */
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner,
+    { a_fn_own_strat: "fill", a_fn_own: "edit" });
+  base.people.push({ key: "t224_fill", name: "Bounded Filler 224", active: true });
+  const cap = capOf(base);
+  if (!cap || (cap.projects || []).length < 2) {
+    check("§227: the fixture needs a function with two projects", false, FN);
+  } else {
+    capOf(base).projects[0].owner = "Bounded Filler 224";
+
+    let v = fromStored(base, "t224_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.collaborators = ["Somebody Supporting"]; m.pend = { collaborators: MARK };
+    });
+    check("FILL: an empty milestone collaborators list IS fillable", v.ok,
+          (v.refusals || []).join(" / "));
+    check("...and is still NOT counted as missing",
+          R.GAP_FIELDS.milestone.indexOf("collaborators") < 0,
+          JSON.stringify(R.GAP_FIELDS.milestone));
+    check("...so a milestone owing nothing else counts 0",
+          R.gapMissing("milestone", { owner: "A", finish: "Jul 26" }).length === 0,
+          JSON.stringify(R.gapMissing("milestone", { owner: "A", finish: "Jul 26" })));
+
+    v = fromStored(base, "t224_fill", function (i) {
+      const m = capOf(i).projects[1].milestones[0];
+      m.collaborators = ["Somebody Supporting"]; m.pend = { collaborators: MARK };
+    });
+    check("REFUSED: the same fill on the project beside it", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+
+    const held = clone(base);
+    capOf(held).projects[0].milestones[0].collaborators = ["Already There"];
+    v = fromStored(held, "t224_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.collaborators = ["Already There", "Sneaked In"];
+      m.pend = { collaborators: MARK };
+    });
+    check("REFUSED: adding to a list that already has somebody", !v.ok, "was ALLOWED");
+
+    v = fromStored(base, "smo", function (i) {
+      capOf(i).projects[0].milestones[0].collaborators = ["Named By The Office"];
+    });
+    check("the office writes collaborators with no mark and it settles", v.ok,
+          (v.refusals || []).join(" / "));
+  }
+
+  /* The reporting half: being named is what the word MEANS on a tactic, and
+     now on a milestone — through the same namedOn(), so it cannot drift. */
+  const named = clone(SEED);
+  named.people.push({ key: "t224_col", name: "Milestone Collaborator 224", active: true });
+  const nc = capOf(named);
+  nc.projects[0].milestones[0].collaborators = ["Milestone Collaborator 224"];
+  const w = R.worldOf(named);
+  check("a milestone COLLABORATOR derives Contributor",
+        R.personRoleKeys(w, personOf(named, "t224_col")).join() === "contrib",
+        R.personRoleKeys(w, personOf(named, "t224_col")).join());
+  let v2 = fromStored(named, "t224_col", function (i) {
+    const m = capOf(i).projects[0].milestones[0]; m.status = "todo";
+  });
+  check("with the shipped default the collaborator reports nothing", !v2.ok,
+        "was ALLOWED — " + JSON.stringify((v2.changes || []).map(function (c) { return c.kind; })));
+  const cOpen = clone(named);
+  cOpen.access.contrib = Object.assign({}, cOpen.access.contrib, { a_fn_own: "edit" });
+  v2 = fromStored(cOpen, "t224_col", function (i) {
+    const m = capOf(i).projects[0].milestones[0]; m.status = "wip"; m.pct = 20;
+  });
+  check("contrib opened: the collaborator reports THEIR milestone", v2.ok,
+        (v2.refusals || []).join(" / "));
+  v2 = fromStored(cOpen, "t224_col", function (i) {
+    capOf(i).projects[0].deliverables[0].status = "todo";
+  });
+  check("...and still not the deliverable beside it", !v2.ok,
+        "was ALLOWED — " + JSON.stringify((v2.changes || []).map(function (c) { return c.kind; })));
+})();
+
+console.log("\n19 · a date the platform cannot read is a gap (§184)");
+/* Islam, on the CX strategy custodian: "they lost all data they inputed and
+   the dates showed waiting confirmation and I didn't get them as the SMO."
+
+   THE REFUSAL WAS CORRECT AND THE LOSS WAS EVERYTHING AROUND IT. He filled
+   three empty milestone due dates -- accepted, marked pending -- and touched
+   a fourth whose stored value was `30/09/2026`, a value `monthsOf()` cannot
+   read at all. Non-blank is not a gap, so correcting it classified as
+   AUTHORING and the whole save was refused; the whole graph posts together,
+   so the three good fills went down with it, and the only control on the
+   banner destroyed them.
+
+   Two halves are asserted here, and BOTH ENDS of each (§113.8):
+     · an unreadable date IS a gap, so filling it is accepted...
+     · ...while a date the platform CAN read is still the office's, or §184
+       has quietly handed every date to every filler.
+
+   PROVED ABLE TO FAIL (§94.5): put `gapBlank` back inside `R.gapEmpty` and
+   the first case refuses -- and the third, which is the one that reproduces
+   the report: three good fills refused because a fourth row was in the same
+   post. */
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const MARK = { by: "t184_fill", at: "2026-08-30" };
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const fromStored = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  };
+
+  /* The reader itself, before anything is asked of the authoriser. */
+  check("§184: `30/09/2026` is not a date the platform can read",
+        R.whenReadable("30/09/2026") === false);
+  check("§184: `Jul 26` is", R.whenReadable("Jul 26") === true);
+  check("§184: a bare quarter is, with no cycle to resolve it",
+        R.whenReadable("Q3") === true && R.whenMonths("Q3", false, null) === null);
+  check("§184: an unreadable due date is a GAP",
+        R.gapEmpty("finish", { finish: "30/09/2026" }) === true);
+  check("§184: a readable one is not",
+        R.gapEmpty("finish", { finish: "Jul 26" }) === false);
+  check("§184: and the rule is the FIELD's, not every field's — an unreadable " +
+        "TARGET is still a target somebody wrote",
+        R.gapEmpty("target", { target: "30/09/2026" }) === false);
+
+  const base = clone(SEED);
+  base.access.custodian = Object.assign({}, base.access.custodian,
+    { a_fn_own_strat: "fill" });
+  base.functions[FN].custodian = "t184_fill";
+  base.people.push({ key: "t184_fill", name: "Filler 184", active: true });
+  const cap = capOf(base);
+  if (!cap || !(cap.projects || []).length || (cap.projects[0].milestones || []).length < 3) {
+    check("§184: the fixture needs a project with three milestones", false, FN);
+  } else {
+    /* THE STATE IS MADE, because no seed row carries a bad date (§94.2): one
+       unreadable, two empty — the CX shape exactly. */
+    const ms = cap.projects[0].milestones;
+    ms[0].finish = "30/09/2026";
+    ms[1].finish = "";
+    ms[2].finish = "";
+
+    let v = fromStored(base, "t184_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.finish = "Sep 26"; m.pend = { finish: MARK };
+    });
+    check("FILL: correcting a due date the platform cannot read", v.ok,
+          v.refusals.join(" / "));
+
+    v = fromStored(base, "t184_fill", function (i) {
+      const m = capOf(i).projects[0].milestones;
+      m[0].finish = "Sep 26"; m[0].pend = { finish: MARK };
+      m[1].finish = "Jul 26"; m[1].pend = { finish: MARK };
+      m[2].finish = "Aug 26"; m[2].pend = { finish: MARK };
+    });
+    check("FILL: all three in one save — the report, reproduced", v.ok,
+          v.refusals.join(" / "));
+
+    /* THE OTHER END. A date that reads is a plan decision and stays one. */
+    const good = clone(base);
+    capOf(good).projects[0].milestones[0].finish = "Nov 26";
+    v = fromStored(good, "t184_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.finish = "Dec 27"; m.pend = { finish: MARK };
+    });
+    check("REFUSED: correcting a due date that READS is still the office's", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+  }
+})();
+
+console.log("\n20 · a refusal names the rows it refused (§184)");
+/* THE SECOND HALF OF THE SAME FAULT. Even with §184's date rule, some row
+   somewhere will be genuinely refused — and until now the verdict said only
+   WHY, so the platform had nothing to put back and the only way past a
+   refusal was to discard every unsaved change on the page.
+
+   What is asserted is the ADDRESS: target, row id, field, and the value the
+   row HELD — enough for the client to revert exactly those and re-save the
+   rest. And `undoable`, the server's own answer to "is every refusal
+   addressable", because a client working that out for itself would be a
+   second copy of the rule (§42).
+
+   BOTH ENDS: a refusal that CAN be put back, and one that cannot — a change
+   to which rows exist has no row address, and saying so is what stops the
+   client offering a button that would not work. */
+(function () {
+  const FN = "it";
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const base = clone(SEED);
+  base.functions[FN].custodian = "t184_row";
+  base.people.push({ key: "t184_row", name: "Row Namer 184", active: true });
+  const run = function (mutate) {
+    const inc = clone(base); mutate(inc);
+    return A.authorize(base, inc, personOf(base, "t184_row"));
+  };
+
+  /* A custodian correcting a milestone's due date: plan, and refused. */
+  let v = run(function (i) { capOf(i).projects[0].milestones[0].finish = "Dec 27"; });
+  check("the plan refusal happens at all", !v.ok);
+  const hit = (v.refused || []).filter(function (r) {
+    return (r.rows || []).some(function (x) { return x.field === "finish"; }); })[0];
+  check("...and it names the row and the field", !!hit,
+        JSON.stringify(v.refused));
+  if (hit) {
+    const row = hit.rows.filter(function (x) { return x.field === "finish"; })[0];
+    check("...with the id the plan actually holds",
+          row.id === capOf(base).projects[0].milestones[0].id, row.id);
+    check("...the row's NAME, so the banner can say which line",
+          row.name === capOf(base).projects[0].milestones[0].name, row.name);
+    check("...and the value it HELD, which is what gets put back",
+          row.from === capOf(base).projects[0].milestones[0].finish, row.from);
+    check("...`had` says the key was there, so it is set and not deleted",
+          row.had === true);
+    check("every refusal is addressable, so the offer can be made",
+          v.refused.every(function (r) { return r.rows && r.rows.length; }));
+  }
+
+  /* A project's own front matter — §179's Start and End (§184's other half). */
+  v = run(function (i) { capOf(i).projects[0].start = "Jan 27"; });
+  const front = (v.refused || []).filter(function (r) {
+    return (r.rows || []).some(function (x) { return x.field === "start"; }); })[0];
+  check("a project's Start is named too", !!front, JSON.stringify(v.refused));
+  if (front) {
+    const row = front.rows.filter(function (x) { return x.field === "start"; })[0];
+    check("...addressed by the PROJECT's id", row.id === capOf(base).projects[0].id, row.id);
+  }
+
+  /* A field the stored row did not have at all: `had` false, so the client
+     DELETES rather than writing null — a null where nothing was is a change
+     of its own and would be refused a second time. */
+  const bare = clone(base);
+  delete capOf(bare).projects[0].milestones[0].owner;
+  v = (function () {
+    const inc = clone(bare);
+    capOf(inc).projects[0].milestones[0].owner = "Somebody";
+    return A.authorize(bare, inc, personOf(bare, "t184_row"));
+  })();
+  const own = (v.refused || []).filter(function (r) {
+    return (r.rows || []).some(function (x) { return x.field === "owner"; }); })[0];
+  check("a field the stored row never had is marked absent, not null",
+        !!own && own.rows.filter(function (x) { return x.field === "owner"; })[0].had === false,
+        JSON.stringify(own && own.rows));
+
+  /* THE OTHER END: a change with no row address says so. Removing a project
+     changes WHICH rows exist, which no field revert can undo. */
+  v = run(function (i) { capOf(i).projects.pop(); });
+  check("removing a project is refused", !v.ok);
+  check("...and is NOT addressable, so no put-back is offered",
+        (v.refused || []).some(function (r) { return !r.rows || !r.rows.length; }),
+        JSON.stringify(v.refused));
+})();
+
+console.log("\n21 · viewing as somebody is judged as somebody (§185)");
+/* Islam: *"Hala got this error, when I view as her I didn't get it — so the
+   view-as function is not showing exactly what people see."*
+
+   THE MEASUREMENT THAT SETTLED IT, kept as an assertion: one edit, one
+   screen, two answers. The whole fault is that authorisation read the
+   session cookie while the page read the simulation, so the office could
+   never reproduce anybody's refusal — and could write through a colleague's
+   view what that colleague could never write.
+
+   `actingFor()` can only NARROW, and these are the three answers that make
+   that true. A session without the seat is judged as itself, so a forged
+   `viewAs` buys nothing (§42: a switch that only hides a control is
+   decoration); an unknown key is REFUSED rather than treated as somebody
+   with no roles, because "no roles" is a narrowing that hides a mistake
+   instead of reporting it. */
+(function () {
+  const FN = "it";
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const base = clone(SEED);
+  base.functions[FN].custodian = "t185_hala";
+  base.people.push({ key: "t185_hala", name: "Hala 185", active: true });
+  const smo = personOf(base, "smo") || { key: "smo", name: "SMO" };
+
+  /* The same edit, judged twice — the report, as an assertion. */
+  const edit = function () {
+    const i = clone(base);
+    capOf(i).projects[0].milestones[0].finish = "Dec 27";
+    return i;
+  };
+  const asHer = A.authorize(base, edit(), personOf(base, "t185_hala"));
+  const asSMO = A.authorize(base, edit(), smo);
+  check("the edit IS refused for her", !asHer.ok, asHer.refusals.join(" / "));
+  check("...and accepted for the office — which is why it could not be seen",
+        asSMO.ok, asSMO.refusals.join(" / "));
+
+  /* And the rule that closes it. */
+  const people = base.people;
+  check("§185: no viewAs is judged as yourself",
+        R.actingFor(smo, "", "super", people).person.key === "smo");
+  check("§185: viewAs YOURSELF is not a simulation either",
+        !R.actingFor(smo, "smo", "super", people).simulated);
+  const sim = R.actingFor(smo, "t185_hala", "super", people);
+  check("§185: the office viewing as her is judged as HER",
+        sim.person && sim.person.key === "t185_hala" && sim.simulated === true,
+        JSON.stringify(sim));
+  check("§185: and authorising with that person reproduces her refusal",
+        !A.authorize(base, edit(), sim.person).ok);
+
+  /* THE OTHER END (§113.8): it must not be a way to become somebody else. */
+  check("§185: a session without the seat cannot simulate at all",
+        !!R.actingFor(personOf(base, "t185_hala"), "smo", "custodian", people).refuse);
+  check("§185: ...and a person the register does not hold is refused, never " +
+        "waved through as somebody with no roles",
+        !!R.actingFor(smo, "nobody_at_all", "super", people).refuse);
+  /* A forged viewAs from a session that cannot simulate is REFUSED rather
+     than silently ignored: ignoring it would judge the save as the forger,
+     which is wider than what they asked for and hides that they asked. */
+  check("§185: the refusal is a sentence somebody can act on",
+        /Only the SMO/.test(R.actingFor(personOf(base, "t185_hala"), "smo",
+                                        "custodian", people).refuse));
+})();
+
+console.log("\n22 · a seat is granted, never derived (§187)");
+/* Islam: "level smo shouldn't be a super user — super user is only granted by
+   the super user in the registry, for now."
+
+   personRoles() read `p.level`, the pre-§33 field, as a fallback — so a person
+   object carrying `level:"smo"` derived Super user on the SCREEN and on the
+   SERVER, and an unrecognised key on a person round-trips through
+   `people.extra` untouched. Nothing in the product has written it for fifty
+   versions; it was an ungated fallback nobody was watching, which is §186's
+   shape exactly.
+
+   BOTH ENDS (§113.8): the fallback is gone AND a granted seat still works, or
+   a build that stopped deriving seats altogether would pass. */
+(function () {
+  const w = R.worldOf(SEED);
+  check("§187: level:\"smo\" derives nothing",
+        R.personRoles(w, { key: "t187", name: "T", level: "smo", unit: "group" }).length === 0);
+  check("§187: level:\"ceo\" derives nothing",
+        R.personRoles(w, { key: "t187", name: "T", level: "ceo", unit: "group" }).length === 0);
+  const real = R.personRoles(w, { key: "t187", name: "T", role: "super", unit: "group" });
+  check("§187: a GRANTED seat still derives",
+        real.length === 1 && real[0].role === "super" && real[0].at === "group",
+        JSON.stringify(real));
+  /* And the server agrees, which is the half that matters: a save that tries
+     to promote through the old field is judged on what personRoles() answers,
+     so this is asserted through authorize() and not only through the rule. */
+  const cust = SEED.people.filter(function (p) {
+    return R.personRoles(w, p).some(function (r) { return r.role === "custodian"; }); })[0];
+  const inc = clone(SEED);
+  const t = inc.people.filter(function (p) { return p.key === cust.key; })[0];
+  t.level = "smo";
+  check("§187: posting the old field promotes nobody",
+        !A.authorize(SEED, inc, cust).ok ||
+        !R.personRoles(R.worldOf(inc), t).some(function (r) { return r.role === "super"; }));
+})();
+
+console.log("\n23 · a line the platform cannot name is nobody's to change (§191)");
+/* Found while chasing a refusal that WAS correct. `byId()` drops a row with no
+   id — rightly, two rows sharing `undefined` are not one row — and the loops
+   that walk those maps then found nothing to classify, which reads as "no
+   change" and was allowed. Measured before the fix: a VIEW-ONLY unit head
+   could rewrite a key objective, a pillar, a measure, a tactic and a project's
+   front matter.
+
+   THREE BROKEN STATES, because each leaves a row unjudged in its own way: no
+   id at all, a null one (`byId` keeps it under the string "null", so a whole
+   list collapses onto one entry), and a DUPLICATE, where the second row takes
+   the first one's place in the map.
+
+   NINE LISTS, because the platform has THREE walks that build their own maps
+   rather than going through splitRows — the pillars, the projects, and
+   splitRows itself — and a fix that closed two of the three is exactly the
+   kind that gets trusted. The sweep is what found the other two.
+
+   BOTH ENDS (§113.8): the healthy plan is asserted UNCHANGED, or a build that
+   refused every plan write would pass all of this. */
+(function () {
+  const UNIT = "logistics", FN = "it";
+  const capOf = function (s) {
+    return (s.group.capabilities || []).filter(function (c) { return c.fn === FN; })[0] ||
+           s.group.capabilities[0]; };
+  /* Two plain readers: a unit head holds no strategy grant on their own unit
+     (§94), and a CFO holds nothing at all over this function. */
+  const HEAD = "loghead", OTHER = "cfo";
+  const LISTS = [
+    ["a unit's key objectives", HEAD,
+     function (s) { return s.units[UNIT].keyObjectives; },
+     function (i) { i.units[UNIT].keyObjectives[0].name = "X";
+                    i.units[UNIT].keyObjectives[0].target = "9"; }],
+    ["a unit's pillars", HEAD,
+     function (s) { return s.units[UNIT].items; },
+     function (i) { i.units[UNIT].items[0].name = "X"; i.units[UNIT].items[0].weight = 99; }],
+    ["a pillar's measures", HEAD,
+     function (s) { return s.units[UNIT].items[0].measures; },
+     function (i) { i.units[UNIT].items[0].measures[0].target = "9"; }],
+    ["a pillar's tactics", HEAD,
+     function (s) { return s.units[UNIT].items[0].tactics; },
+     function (i) { i.units[UNIT].items[0].tactics[0].owner = "X"; }],
+    ["a capability's key objectives", OTHER,
+     function (s) { return capOf(s).keyObjectives; },
+     function (i) { capOf(i).keyObjectives[0].target = "9"; }],
+    ["a capability's projects", OTHER,
+     function (s) { return capOf(s).projects; },
+     function (i) { capOf(i).projects[0].name = "X"; capOf(i).projects[0].owner = "X"; }],
+    ["a project's deliverables", OTHER,
+     function (s) { return capOf(s).projects[0].deliverables || []; },
+     function (i) { capOf(i).projects[0].deliverables[0].name = "X"; }],
+    ["a project's outcomes", OTHER,
+     function (s) { return capOf(s).projects[0].outcomes || []; },
+     function (i) { capOf(i).projects[0].outcomes[0].target = "9"; }],
+    ["a project's milestones", OTHER,
+     function (s) { return capOf(s).projects[0].milestones || []; },
+     function (i) { capOf(i).projects[0].milestones[0].name = "X"; }]
+  ];
+  const BREAK = {
+    "no id":      function (r) { delete r.id; },
+    "a null id":  function (r) { r.id = null; },
+    "one id for the lot": function (r) { r.id = "SAME"; }
+  };
+  LISTS.forEach(function (L) {
+    const label = L[0], who = L[1], listOf = L[2], edit = L[3];
+    /* THE OTHER END FIRST: with the ids as shipped, this same edit is refused
+       for its own reason, and the plan is still writable by the office. */
+    let stored = clone(SEED), inc = clone(stored);
+    edit(inc);
+    check("§191: " + label + " — the healthy list is still judged",
+          !A.authorize(stored, inc, personOf(stored, who)).ok);
+    Object.keys(BREAK).forEach(function (how) {
+      stored = clone(SEED);
+      const rows = listOf(stored);
+      if (!rows.length) { check("§191: " + label + " has rows to break", false); return; }
+      rows.forEach(BREAK[how]);
+      inc = clone(stored);
+      edit(inc);
+      check("§191: " + label + " with " + how + " is refused",
+            !A.authorize(stored, inc, personOf(stored, who)).ok, "was ALLOWED");
+      /* AND AN UNTOUCHED LIST COSTS NOBODY ANYTHING — a tenant that simply
+         holds such rows must still be able to save everything else. */
+      check("§191: ...and leaving it alone is not itself a change",
+            A.authorize(stored, clone(stored), personOf(stored, who)).ok);
+    });
+  });
+  /* And the office is not locked out of its own plan by the guard. */
+  const s = clone(SEED);
+  s.units[UNIT].keyObjectives.forEach(function (r) { delete r.id; });
+  const i2 = clone(s);
+  i2.units[UNIT].keyObjectives[0].target = "9";
+  check("§191: the office may still correct an unidentified list",
+        A.authorize(s, i2, personOf(s, "smo")).ok);
+})();
+
+/* 24 · THE OVERVIEW IS MANDATORY, AND FILLABLE (§214) ──────────────────
+   Islam: *"all the overview for the functions planning by pillars should be
+   mandatory and be counted as missing."* A blank definition is a gap now, on
+   BOTH function formats, because since §213 it is one page (§53.5) — so the
+   save has to accept the fill, or the count is §184's refusal waiting to
+   happen: a red chip, a control that opens, and a save that fails.
+
+   Proved able to fail: with `GAP_FIELDS.cap` removed the two FILL cases go
+   red, because the change falls through to capPlan on one side and to the
+   unknown sweep on the other — both office-only, which is the correct
+   DEFAULT and exactly why it has to be stated. */
+console.log("\n25 · the target decides the Strategy column (§217)");
+(function () {
+  /* Islam, on Hala and on CF: a custodian granted Edit on their own
+     supporting function still could not correct its plan, while a grant on
+     BUSINESS UNITS silently let them. The three unit-shaped guards named a
+     unit page key outright and the target they are handed can be `fn:<key>`,
+     because a pillars function is classified through the unit pass (§59).
+
+     ASSERTED IN BOTH DIRECTIONS AND ON BOTH SIDES OF THE SWITCH. One of them
+     alone cannot see the fault: before the fix the fn column granted nothing
+     and the unit column granted everything, so a test that only checked "the
+     custodian can edit" passes on the broken build by setting the wrong
+     cell. */
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const FK = Object.keys(SEED.functions).filter(function (k) {
+    return String((SEED.functions[k] || {}).format) === "pillars";
+  })[0];
+  check("§217: the seed holds a function that plans in pillars", !!FK);
+  if (FK) {
+    const CUST = "own_it";
+    const edit = function (i) {
+      i.functions[FK].items[0].tactics[0].owner = "Somebody New";
+    };
+    const base = function (patch) {
+      const s = withAccess("custodian", patch);
+      s.functions[FK].custodian = CUST;
+      if (s.review) s.review.state = "open";
+      return s;
+    };
+    let r = fromStored(base({ a_fn_own_strat: "edit", a_unit_own_strat: "view" }), CUST, edit);
+    check("§217: the FUNCTION column at edit authors a pillars function's plan",
+          r.ok, r.refusals.join(" / "));
+    r = fromStored(base({ a_fn_own_strat: "view", a_unit_own_strat: "edit" }), CUST, edit);
+    check("§217: ...and the BUSINESS UNIT column at edit does NOT", !r.ok);
+    r = fromStored(base({ a_fn_own_strat: "view", a_unit_own_strat: "view" }), CUST, edit);
+    check("§217: ...and neither column open refuses it", !r.ok);
+
+    /* THE UNIT SIDE IS UNTOUCHED, and it is asserted rather than assumed:
+       the pairing returns the page it was given for a unit target, so a
+       build that mapped everything to the function column would pass every
+       assertion above and break every business unit. */
+    const UK = Object.keys(SEED.units)[0];
+    const uedit = function (i) { i.units[UK].items[0].tactics[0].owner = "Somebody New"; };
+    const ubase = function (patch) {
+      const s = withAccess("custodian", patch);
+      s.unitRoles = Object.assign({}, s.unitRoles,
+        { [UK]: Object.assign({}, (s.unitRoles || {})[UK], { custodian: CUST }) });
+      if (s.review) s.review.state = "open";
+      return s;
+    };
+    r = fromStored(ubase({ a_unit_own_strat: "edit", a_fn_own_strat: "view" }), CUST, uedit);
+    check("§217: a unit's own column at edit still authors its plan",
+          r.ok, r.refusals.join(" / "));
+    r = fromStored(ubase({ a_unit_own_strat: "view", a_fn_own_strat: "edit" }), CUST, uedit);
+    check("§217: ...and the FUNCTION column does not reach a unit", !r.ok);
+  }
+})();
+
+console.log("\n24 · the Overview is mandatory; its definition is the office's (§214, §224.2)");
+(function () {
+  const MARK2 = { by: "own_it", at: "2026-08-31T00:00:00.000Z" };
+  /* The two helpers every fill section builds for itself — each IIFE in this
+     file keeps its own, so they are local here too rather than hoisted into a
+     shared scope nothing else expects. */
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  /* — the capability half — */
+  const FNC = Object.keys(SEED.functions).filter(function (k) {
+    return (SEED.functions[k] || {}).custodian && !(SEED.functions[k] || {}).format;
+  })[0];
+  const cust = FNC && (SEED.functions[FNC] || {}).custodian;
+  check("§214: the seed holds a capability-function custodian", !!cust);
+  if (cust) {
+    const sf = withAccess("custodian", { a_fn_own_strat: "fill" });
+    const cp = sf.group.capabilities.filter(function (c) { return c.fn === FNC; })[0];
+    cp.def = "";
+    let r = fromStored(sf, cust, function (i) {
+      const c = i.group.capabilities.filter(function (x) { return x.fn === FNC; })[0];
+      c.def = "What this capability is."; c.pend = { def: MARK2 };
+    });
+    /* §224.2 REVERSES §214's FILL AT ISLAM'S DIRECTION: *"remove the
+       definition of the functions overview from the filling … the SMO will
+       do it."* Rewritten rather than deleted, so the reversal is deliberate
+       and a later build cannot drift back through it unnoticed. */
+    check("§224.2: a filler may NOT write a capability's definition", !r.ok);
+    /* AND THE SAME GRANT MAY NOT REWRITE ONE THAT IS ALREADY WRITTEN — the
+       whole difference between filling and authoring (§145). */
+    const sf2 = withAccess("custodian", { a_fn_own_strat: "fill" });
+    r = fromStored(sf2, cust, function (i) {
+      const c = i.group.capabilities.filter(function (x) { return x.fn === FNC; })[0];
+      c.def = "Rewritten by a fill grant."; c.pend = { def: MARK2 };
+    });
+    check("§214: ...and never rewrites one already written", !r.ok, "was ALLOWED");
+  }
+
+  /* — the pillars half, which is a different code path entirely — */
+  const FNP = Object.keys(SEED.functions).filter(function (k) {
+    return String((SEED.functions[k] || {}).format) === "pillars" &&
+           (SEED.functions[k] || {}).custodian;
+  })[0];
+  check("§214: the seed holds a pillars-function custodian", !!FNP, Object.keys(SEED.functions));
+  if (FNP) {
+    const who = SEED.functions[FNP].custodian;
+    const sf = withAccess("custodian", { a_fn_own_strat: "fill" });
+    delete sf.functions[FNP].def;
+    let r = fromStored(sf, who, function (i) {
+      i.functions[FNP].def = "What this function is.";
+      i.functions[FNP].pend = { def: MARK2 };
+    });
+    check("§224.2: ...nor a pillars function's", !r.ok);
+
+    const sf2 = withAccess("custodian", { a_fn_own_strat: "fill" });
+    sf2.functions[FNP].def = "Already written.";
+    r = fromStored(sf2, who, function (i) {
+      i.functions[FNP].def = "Rewritten by a fill grant."; i.functions[FNP].pend = { def: MARK2 };
+    });
+    check("§214: ...and never rewrites one already written", !r.ok, "was ALLOWED");
+
+    /* AND THE OFFICE STILL AUTHORS IT — locking something down proves nothing
+       unless the right person stayed open (§102). */
+    const sf3 = clone(SEED);
+    sf3.functions[FNP].def = "Already written.";
+    r = fromStored(sf3, "smo", function (i) { i.functions[FNP].def = "The office's wording."; });
+    check("§214: the office rewrites it freely", r.ok, r.refusals.join(" / "));
+  }
+})();
+
+console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)");
+(function () {
+  /* Islam: *"the tactics outcome and target are not counting missing in the
+     units plans. they should count as missing."* \u00a7248 built both fields and
+     deliberately left them out of the counted list; this is that reversal,
+     and what has to be true on the SERVER for it is that the fill grant can
+     now write them \u2014 counted and fillable are one list's floor (\u00a7205), so a
+     build that counted them here and refused the save would be \u00a7184 exactly:
+     a red chip, a control that opens, and a save that costs the fills beside
+     it. */
+  const MARK3 = { by: "own_it", at: "2026-09-02T00:00:00.000Z" };
+  /* The two helpers every fill section builds for itself \u2014 each IIFE in this
+     file keeps its own rather than hoisting them into a shared scope nothing
+     else expects. */
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  check("\u00a7249: the seed holds a unit custodian to test with", !!CUST, UK);
+  if (!CUST) return;
+  const base = function (patch) {
+    const s = withAccess("custodian", patch || { a_unit_own_strat: "fill" });
+    s.unitRoles = Object.assign({}, s.unitRoles,
+      { [UK]: Object.assign({}, (s.unitRoles || {})[UK], { custodian: CUST }) });
+    const t = s.units[UK].items[0].tactics[0];
+    delete t.outcome; delete t.outTarget; delete t.outDir; delete t.outCompile;
+    return s;
+  };
+  const T = function (i) { return i.units[UK].items[0].tactics[0]; };
+
+  /* BOTH FIELDS, SEPARATELY, because one of them passing says nothing about
+     the other \u2014 they take different paths on the screen (a growing text box
+     and a four-control block) and it is one list that has to carry both. */
+  let r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outcome = "Share of wallet up"; t.pend = { outcome: MARK3 };
+  });
+  check("\u00a7249 FILL: an empty outcome is the custodian's to write",
+        r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outTarget = "6 #"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 FILL: ...and so is an empty target", r.ok, (r.refusals || []).join(" / "));
+
+  /* A UNIT ON ITS OWN IS NOT A TARGET (\u00a7249's numeric rule), so typing the
+     number that completes it is still a FILL and not an amend \u2014 which is what
+     lets the office pick the unit first without closing the box behind them. */
+  let s2 = base(); T(s2).outTarget = "%";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outTarget = "90%"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 FILL: a target holding only a unit is still empty", r.ok,
+        (r.refusals || []).join(" / "));
+
+  /* AND THE OTHER END, or the assertions above are satisfied by a build that
+     accepts anything a filler sends. */
+  s2 = base(); T(s2).outcome = "Already written.";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outcome = "Rewritten."; t.pend = { outcome: MARK3 };
+  });
+  check("\u00a7249 REFUSED: an outcome already written is the office's", !r.ok, "was ALLOWED");
+  s2 = base(); T(s2).outTarget = "6 #";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outTarget = "9 #"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 REFUSED: ...and so is a target already set", !r.ok, "was ALLOWED");
+
+  /* THE TWO NEIGHBOURS ARE NOT GAPS, and this is why the screen draws them
+     read-only in fill mode: both carry a working default, so a filler writing
+     one is authoring \u2014 and a save is all or nothing, so it would cost the
+     fills beside it (\u00a7184). */
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outDir = "\u2264"; t.pend = { outDir: MARK3 };
+  });
+  check("\u00a7249 REFUSED: the direction is not a gap", !r.ok, "was ALLOWED");
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outCompile = "Sum"; t.pend = { outCompile: MARK3 };
+  });
+  check("\u00a7249 REFUSED: nor is the compile rule", !r.ok, "was ALLOWED");
+
+  /* \u00a7249.2: THE UNIT-FIRST WALK, END TO END. \u00a7248 lets what a thing is
+     measured in be chosen before how much of it, so `outTarget` legitimately
+     holds "%" on the way to "90%" \u2014 a value that is non-blank and STILL a gap.
+     The first build of \u00a7249 refused exactly that save, which is the CX
+     refusal's shape (\u00a7184): one unclassified row costs every fill posted with
+     it. Each step is asserted, because the walk is only usable if all of them
+     land. */
+  let w = base(); T(w).outTarget = "%";
+  r = fromStored(base(), CUST, function (i) { T(i).outTarget = "%"; });
+  check("\u00a7249.2 FILL: the unit may be picked before the number", r.ok,
+        (r.refusals || []).join(" / "));
+  r = fromStored(w, CUST, function (i) {
+    const t = T(i); t.outTarget = "90%"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249.2 FILL: ...and the number then joins it", r.ok,
+        (r.refusals || []).join(" / "));
+  w = base(); T(w).outTarget = "90%"; T(w).pend = { outTarget: MARK3 };
+  r = fromStored(w, CUST, function (i) {
+    const t = T(i); t.outTarget = "%"; delete t.pend;
+  });
+  check("\u00a7249.2 FILL: ...and taking the number back off is theirs too", r.ok,
+        (r.refusals || []).join(" / "));
+  /* AND IT REACHES ONLY WHAT IS ALREADY A GAP. The widening is "a gap moved to
+     another gap"; a value the platform CAN use is settled and stays the
+     office's, or this would be a hole in \u00a794 rather than a fill. */
+  w = base(); T(w).owner = "Somebody Accountable";
+  r = fromStored(w, CUST, function (i) { T(i).owner = "Somebody Else"; });
+  check("\u00a7249.2 REFUSED: a settled value is not 'still a gap'", !r.ok, "was ALLOWED");
+
+  /* AND THE COUNT IS NOT QUIETENED BY THE MARK. `gapMissing` treats a pending
+     field as answered; a mark sitting on a value that is still empty must not
+     buy that, or a row leaves the count, the walk and Submit's refusal with
+     its target unusable. */
+  check("\u00a7249.2: an unusable target is counted even when marked",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "%", pend: { outTarget: MARK3 } })
+          .indexOf("outTarget") > -1,
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "%", pend: { outTarget: MARK3 } }));
+  check("\u00a7249.2: ...and a usable one marked is not",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "90%", pend: { outTarget: MARK3 } })
+          .indexOf("outTarget") === -1);
+
+  /* \u00a7249.3: TWO FILLS IN ONE POST, WHERE NEITHER KEY EXISTS YET. The gap
+     pass clears what it classifies by ASSIGNING onto the stored clone, which
+     APPENDS a key the stored row did not have \u2014 and `same()` is
+     stringify-based, so two appends in a different order from the incoming
+     row's leave the clone spelling the same row differently. The residual diff
+     then sees a change it cannot attribute, calls it `unitPlan`, and refuses
+     the whole save with every fill in it (\u00a7184).
+
+     IT PREDATES \u00a7249 and is asserted here because \u00a7249 makes it the COMMON
+     case: \u00a7248's five fields are absent on every tactic written before them,
+     and two of them are now what a filler is asked for. Measured on the build
+     before \u00a7249: the same two fills are REFUSED with both keys absent and
+     ACCEPTED with both present-but-empty. */
+  w = base();
+  const T2 = function (i) { return i.units[UK].items[0].tactics[0]; };
+  delete T2(w).outcome; delete T2(w).outTarget; delete T2(w).pend;
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 FILL: the outcome and its target in ONE post", r.ok,
+        (r.refusals || []).join(" / "));
+  /* AND THE SAME POST WITH ONE FIELD THE FILLER MAY NOT TOUCH IS STILL
+     REFUSED \u2014 the re-spelling only ever runs on rows whose CONTENT is already
+     identical, so it can never mask a real change. Asserted, because a fix
+     that made every save pass would satisfy the line above. */
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #"; t.name = "Renamed by a filler";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 REFUSED: ...but not with a rename smuggled in beside them",
+        !r.ok, "was ALLOWED");
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #"; t.outDir = "\u2264";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 REFUSED: ...nor with the direction changed beside them",
+        !r.ok, "was ALLOWED");
+
+  /* AND THE OFFICE AUTHORS ALL FOUR FREELY \u2014 locking something down proves
+     nothing unless the right person stayed open (\u00a7102). */
+  r = fromStored(base(), "smo", function (i) {
+    const t = T(i);
+    t.outcome = "The office's wording."; t.outTarget = "12 #";
+    t.outDir = "\u2264"; t.outCompile = "Average";
+  });
+  check("\u00a7249: the office writes all four with no mark at all",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n27 · which slides a review shows is the office's (§256)");
+(function () {
+  /* Islam: *"allow the smo to hide presentation slides of any unit or
+     function."* The screen draws the eye for the office alone; this is the
+     other end of that one question (§42) — a screen that hides a control the
+     server would have accepted, or offers one it refuses, is the drift
+     `lib/rules.js` exists to prevent.
+
+     BOTH SIDES OF EVERY ASSERTION. A test that only proves the custodian is
+     refused passes just as happily on a build that refuses EVERYBODY, which
+     would be a feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FNK = Object.keys(SEED.functions || {})[0];
+  check("§256: the seed holds a unit, a custodian and a function to test with",
+        !!(UK && CUST && FNK), [UK, CUST, FNK].join(" / "));
+  if (!(UK && CUST && FNK)) return;
+
+  /* — a business unit — */
+  let r = fromStored(SEED, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: the office hides a slide on a unit", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256 REFUSED: the unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§256: and the refusal names Manage slides, never Setup",
+        !r.ok && /Manage slides/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* SHOWING ONE AGAIN IS THE SAME ACT, and the emptied key is DELETED (§50.6)
+     — a build that classified the write and not the removal would let anybody
+     un-hide what only the office could hide. */
+  const hidden = clone(SEED); hidden.units[UK].hideSlides = ["swot"];
+  r = fromStored(hidden, CUST, function (i) { delete i.units[UK].hideSlides; });
+  check("§256 REFUSED: nor can they show it again", !r.ok, "was ALLOWED");
+  r = fromStored(hidden, "smo", function (i) { delete i.units[UK].hideSlides; });
+  check("§256: the office shows it again", r.ok, (r.refusals || []).join(" / "));
+
+  /* — a supporting function, BOTH FORMATS —
+     `asUnit()` builds a fresh object from named fields, so a function's list
+     never reaches the unit pass at all. If this were classified there and not
+     in collectFunction(), a pillars function's hidden slides would be seen by
+     nothing and therefore allowed to everybody (§191). */
+  ["pillars", "projects"].forEach(function (fmt) {
+    const s = clone(SEED); s.functions[FNK].format = fmt;
+    let x = fromStored(s, "smo", function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§256: the office hides a slide on a " + fmt + " function",
+          x.ok, (x.refusals || []).join(" / "));
+    x = fromStored(s, CUST, function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§256 REFUSED: a unit custodian cannot, on a " + fmt + " function",
+          !x.ok, "was ALLOWED");
+  });
+
+  /* IT PRODUCES EXACTLY ONE SENTENCE. The field sits in UNIT_KNOWN and in no
+     other list, and in FN_SEEN and not FN_KNOWN, precisely so a press does not
+     also report "the unit's settings" or "a supporting function" — two
+     sentences for one act is how somebody is sent to the wrong screen. */
+  /* ASKED OF `collect` BY NAME, never behind a guard. The first draft of this
+     assertion read `A.classify ? … : null` — and `classify` is not an export,
+     so it never ran at all while the suite printed it as passed (§54.5, and
+     §94.5 one file over: a check that asks whether it can run is a check that
+     passes). */
+  const kindsOf = function (mutate) {
+    const inc = clone(SEED); mutate(inc);
+    return A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+            .map(function (c) { return c.kind; });
+  };
+  let kinds = kindsOf(function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: a hidden slide classifies as deckHide and nothing else",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+  kinds = kindsOf(function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+  check("§256: and on a function, the same one sentence",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately (§256): a locked cycle has
+     stopped taking FIGURES, and the deck is presented after it locks. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§256: a locked cycle does not stop the office pruning the deck",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n28 · the order of the navigation is the office's (§273)");
+/* ── 28 · THE ORDER OF THE NAVIGATION IS THE OFFICE'S (§273) ──────────
+   Setup gained a way to drag the units and the functions into the order they
+   appear in. NOTHING NEW IS STORED — the order IS `unitKeys` / `functionKeys`,
+   which the server has classified as `setup` since it classified anything —
+   so this asserts that what was already true is still true, at BOTH ENDS
+   (§94.2): a build that let anybody reorder them would rewrite the navigation
+   for the whole tenant from a page they can open. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const swap = function (arr) {
+    const a = arr.slice(); const x = a.shift(); a.push(x); return a;
+  };
+  let r = fromStored(SEED, "smo", function (i) { i.unitKeys = swap(i.unitKeys); });
+  check("§273: the office may reorder the business units", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, "smo", function (i) { i.functionKeys = swap(i.functionKeys); });
+  check("§273: and the supporting functions", r.ok, (r.refusals || []).join(" / "));
+
+  /* THE OTHER END, and it is the one that matters: a unit head holds a page
+     of their own and none of Setup. */
+  const headKey = (SEED.unitRoles[UNIT] || {}).head;
+  if (!headKey) {
+    check("§273: the seed has a unit head to ask", false, "none");
+  } else {
+    r = fromStored(SEED, headKey, function (i) { i.unitKeys = swap(i.unitKeys); });
+    check("§273: a unit head may NOT reorder them", !r.ok,
+          r.ok ? "accepted" : "refused");
+    /* AND THE REFUSAL NAMES THE LIST, not "something changed" — §16.7's rule
+       that a refusal has to send somebody to a screen. */
+    check("§273: ...and the refusal names the list",
+          !r.ok && (r.refusals || []).join(" ").indexOf("business units") > -1,
+          (r.refusals || []).join(" / "));
+  }
+})();
+
+console.log("\n29 · the master presentation's running order is the office's (§266)");
+(function () {
+  /* Islam, asked before it was built: the SMO. The menu draws the entry for
+     the office alone; this is the other end of that one question (§42), and
+     BOTH sides of it — a test that only proves the custodian is refused passes
+     just as happily on a build that refuses everybody, which would be a
+     feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FLOW = [UK, "fn:" + Object.keys(SEED.functions || {})[0]];
+  check("§266: the seed holds a unit and a custodian to test with",
+        !!(UK && CUST), [UK, CUST].join(" / "));
+  if (!(UK && CUST)) return;
+
+  let r = fromStored(SEED, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§266: the office sets a running order", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  check("§266 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§266: and the refusal names the Presentation menu, never Setup",
+        !r.ok && /Presentation menu/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* CLEARING IT IS THE SAME ACT, and the key is DELETED rather than emptied
+     (§50.6) — a build that classified the write and not the removal would let
+     anybody throw away an order only the office could set. */
+  const set = clone(SEED); set.group.masterFlow = FLOW;
+  r = fromStored(set, CUST, function (i) { delete i.group.masterFlow; });
+  check("§266 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group.masterFlow; });
+  check("§266: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, AND IT IS ITS OWN KIND. Left to the unknown sweep this
+     would land on the SMO too — and would report "the group's masterFlow",
+     which sends nobody anywhere (§16.7). */
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§266: a change to it is classified `masterFlow` and nothing else",
+        kinds.length === 1 && kinds[0] === "masterFlow", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately: the flow is arranged the
+     morning of the meeting, which is after the lock and not before it. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§266: a locked cycle does not stop the office arranging the flow",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n30 · a monthly plan is part of the plan (§278)");
+(function () {
+  /* Islam: *"some targets needs a monthly plan input so the calculation
+     becomes more accurate."* The twelve months change what a row is measured
+     against, so writing them is AUTHORING and the server has to say so —
+     §94's rule, on a field that did not exist when it was written.
+
+     NOTHING NEW WAS ADDED TO THE AUTHORISER FOR THIS, and that is exactly why
+     it is asserted: `monthly` falls through to the same classification as
+     every other plan field, which is the SAFE direction (§42's "an
+     unrecognised change is the SMO's") — but "it should fall through" and "it
+     does fall through" are two different statements, and only one of them is
+     a measurement. If it ever stopped, a unit head could reshape the target
+     they are judged against and nothing would notice. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const P = SEED.units[UK].items && SEED.units[UK].items[0];
+  const M = P && P.measures && P.measures[0];
+  check("§278: the seed holds a unit, a custodian and a measure",
+        !!(UK && CUST && M), [UK, CUST, M && M.id].join(" / "));
+  if (!(UK && CUST && M)) return;
+  const TWELVE = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+  let r = fromStored(SEED, "smo", function (i) {
+    i.units[UK].items[0].measures[0].monthly = TWELVE; });
+  check("§278: the office gives a measure a monthly plan", r.ok,
+        (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) {
+    i.units[UK].items[0].measures[0].monthly = TWELVE; });
+  check("§278 REFUSED: the unit's own custodian cannot reshape its target",
+        !r.ok, "was ALLOWED");
+
+  /* CLEARING IT IS THE SAME ACT. A build that classified the write and not the
+     removal would let anybody put a row back on flat proration — which changes
+     every figure it is judged by, silently. */
+  const withPlan = clone(SEED);
+  withPlan.units[UK].items[0].measures[0].monthly = TWELVE;
+  r = fromStored(withPlan, CUST, function (i) {
+    delete i.units[UK].items[0].measures[0].monthly; });
+  check("§278 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(withPlan, "smo", function (i) {
+    delete i.units[UK].items[0].measures[0].monthly; });
+  check("§278: the office clears one", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, and it is the plan's. A refusal naming the unit's settings
+     would send somebody to Setup for a field that lives on the plan (§16.7). */
+  const inc = clone(SEED);
+  inc.units[UK].items[0].measures[0].monthly = TWELVE;
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§278: it classifies as the unit's PLAN and nothing else",
+        kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

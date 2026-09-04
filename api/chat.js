@@ -35,6 +35,7 @@ const Rules = require("../lib/rules.js");
 const Audience = require("../lib/audience.js");
 const mailer = require("../lib/mailer.js");
 const assistant = require("../lib/assistant.js");
+const push = require("../lib/push.js");
 
 /* THE CORPUS IS READ ONCE PER PROCESS. It is a 70KB file that never changes
    between deploys, and §98.1's lesson was that per-request work nobody thinks
@@ -70,12 +71,13 @@ const MAX_SHOT = 3 * 1024 * 1024;
 const MAX_TEXT = 4000;
 const FLAGS = ["issue", "idea", "question"];
 
-/* HOW LONG SOMEBODY COUNTS AS "HERE" (§97.5). Their own browser stamps
-   here_at every time it asks for new messages — 4 seconds while the panel is
-   open, 60 while it is not — so 3 minutes is comfortably longer than the slow
-   cadence plus a missed beat, and short enough that a closed laptop stops
-   counting as present within one coffee. */
-const HERE_MINUTES = 3;
+/* HOW LONG SOMEBODY COUNTS AS "HERE" (§97.5) IS THE TENANT'S NOW (§169).
+   Their own browser stamps here_at every time it asks for new messages — 4
+   seconds while the panel is open, 180 while it is not — and how long after
+   the last of those they stop counting as present is `chatCfg().away`, set on
+   the Away email row. It lives in `lib/rules.js` because the server decides
+   `here` from it and the office's page explains it, and a constant here with
+   a sentence there is two copies of one threshold (§53.5). */
 
 function readBody(req) {
   return new Promise(function (resolve, reject) {
@@ -96,6 +98,15 @@ function send(res, code, obj) {
   res.setHeader("Cache-Control", "no-store");
   res.end(JSON.stringify(obj));
 }
+/* THE FIRST LINE, for a notification (§225's wording B). One place, so the
+   box the office gets and the box a person gets are trimmed identically
+   (§53.5) — and it collapses whitespace, because a message typed with a
+   blank line in it would otherwise arrive as a title with a gap under it. */
+const firstLine = function (v) {
+  const t = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+  return t.length > 120 ? t.slice(0, 119) + "\u2026" : t;
+};
+
 const str = function (v, max) {
   return String(v == null ? "" : v).trim().slice(0, max || MAX_TEXT);
 };
@@ -107,9 +118,13 @@ const str = function (v, max) {
    tell an automated answer from a colleague's has no way to draw the
    difference, and the whole point of the column is that the difference is
    drawn. */
+/* `emailed_to` joins them for §188 — the ONE place these columns are named,
+   which is the whole reason that comment above exists: a column added to two
+   of the three readers is the bug nobody sees until a message renders
+   without the thing it was given. */
 const MSG_COLS =
   "id, at, from_office, by_key, by_name, body, flag, bot, source, handoff, " +
-  "(shot IS NOT NULL) AS has_shot";
+  "emailed_to, (shot IS NOT NULL) AS has_shot";
 
 /* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§98) ───────────────────────
    ONE SMALL QUERY, not `readState()`. This endpoint has never read the
@@ -177,7 +192,11 @@ async function assistantAnswer(client, me, question) {
       /* The tenant's rewritten and added answers, laid over the shipped
          corpus by the same rule the page renders with (§140). */
       kb: assistant.withTenant(kb, (org.extra || {}).kb), question: question, history: hist,
-      who: roleWord(me), labels: labels
+      who: roleWord(me), labels: labels,
+      /* The office's own operational answers are withheld from everybody else
+         (2026-08-29). Asked of the SEAT, the same test roleWord() above uses,
+         so the two can never describe the person differently. */
+      isOffice: Rules.isOfficeRole(String((me && me.role) || ""))
     });
     /* VISIBLE TO THE OPERATOR, INVISIBLE TO THE PERSON (§133, §123's rule).
        The person's screen stays silent by design — §112.2 — but a failure
@@ -285,7 +304,47 @@ module.exports = async function handler(req, res) {
          next save. `beat` is the number, not the flag, because the number is
          what the client sets its clock to (§98). */
       out.chat = { on: cfg.on, shots: cfg.shots, promise: cfg.promise,
+                   /* §225: NAMED HERE OR IT NEVER ARRIVES. This object lists
+                      the keys it forwards, so a setting added to the rules and
+                      not added here is silently dropped and the control it
+                      draws never appears — §135's fault, where `greet` was
+                      missing from the posted body and every stored row would
+                      have said no message ever greeted anybody. */
+                   popup: cfg.popup,
+                   /* §231: THE PUBLIC HALF OF THE KEY TRAVELS WITH THE POLL,
+                      like every other setting — the browser needs it to
+                      subscribe and it is public by construction (it is handed
+                      to every push service). Empty where none could be made,
+                      which is what the corner reads to know push is not
+                      available here rather than guessing. */
+                   vapid: cfg.popup ? await push.publicKey(client) : "",
                    beat: Rules.chatBeat({ fast: cfg.fast }) };
+      /* AND THE OFFICE IS TOLD HOW MANY ARE WAITING (§225). Their corner is
+         the only thing that polls on EVERY page — the Platform Inbox's own
+         clock stops the moment they navigate away (`boxBeat`) — so without
+         this the office would only be notified of a new question while sitting
+         on the page that already shows it, which is no notification at all.
+         One COUNT for a handful of people, and only for the office: everybody
+         else's poll is exactly as cheap as it was (§98). */
+      if (office) {
+        /* THE SAME TWO FACTS AS EVERYBODY ELSE'S BOX — who, and the first
+           line (Islam's wording B) — so the office is not served a bare
+           number where a person is served a sentence (§53.5). The newest
+           waiting conversation is the one that just arrived. */
+        const w = (await client.query(
+          "SELECT count(*)::int AS n, " +
+          "  (SELECT coalesce(p.name, t2.person_name, t2.person_key) " +
+          "     FROM chat_threads t2 LEFT JOIN people p ON p.key = t2.person_key " +
+          "    WHERE t2.waiting ORDER BY t2.last_at DESC LIMIT 1) AS who, " +
+          "  (SELECT m.body FROM chat_threads t3 " +
+          "     JOIN chat_messages m ON m.person_key = t3.person_key " +
+          "    WHERE t3.waiting ORDER BY t3.last_at DESC, m.at DESC, m.id DESC " +
+          "    LIMIT 1) AS body " +
+          "FROM chat_threads WHERE waiting")).rows[0] || {};
+        out.waiting = w.n | 0;
+        out.waitingWho = w.who || null;
+        out.waitingBody = w.body || null;
+      }
       return send(res, 200, out);
     }
 
@@ -296,6 +355,154 @@ module.exports = async function handler(req, res) {
       await client.query(
         "UPDATE chat_threads SET seen_by_them = now(), here_at = now() WHERE person_key = $1",
         [me.key]);
+      return send(res, 200, { ok: true });
+    }
+
+    /* ── THIS DEVICE SAYS YES, OR STOPS (§231) ───────────────────────
+       THE ROW IS THE SWITCH. There is no `on` column beside it to disagree
+       with: a device that has said yes has a row, one that has not does not,
+       and turning the bell off deletes it (§104.7, §50.6). That is also what
+       makes the person's switch genuinely per device without anything having
+       to remember which device is which.
+
+       AND IT IS THE SIGNED-IN PERSON'S, never a key from the body. Taking
+       `person` from the browser would let anybody subscribe their own phone
+       to somebody else's conversation and read every reply that person is
+       sent — the same rule that makes `/api/state` read the person off the
+       session and never off the payload (§185). */
+    /* ── IS IT WORKING? (§231.6) ──────────────────────────────────────
+       §123 built exactly this for the assistant and gave the reason: "it is
+       not working" sends somebody to look at everything, and naming the step
+       sends them to one page. Notifications are the same shape and worse —
+       four links, every one of them failing invisibly by design.
+
+       IT MAKES A REAL SEND, because a chain that is only inspected is a chain
+       nobody has walked: a key can be present and refused, a device
+       registered and long gone. And it STORES NOTHING — it answers about this
+       moment, and a stored answer goes stale where nobody can see it (§35). */
+    if (action === "pushTest") {
+      const steps = [];
+      /* THE WORD IS THE STEP'S TO CHOOSE (§124): "present" is not "working",
+         and a row that says the second about the first is the fault that
+         section exists to record. */
+      const step = function (name, state, detail, word) {
+        steps.push({ name: name, state: state, detail: detail || null, word: word || null });
+      };
+
+      if (!cfg.on) {
+        step("The chat", "off", "The whole chat is switched off, so nothing is sent.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The chat", "ok", null, "on");
+
+      if (!cfg.popup) {
+        step("Notifications", "off",
+             "Switched off for the company on this page. Nobody is notified.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Notifications", "ok", "Switched on for the company.", "on");
+
+      const h = await push.health(client, me.key);
+
+      /* THE LIBRARY. It is loaded lazily precisely so its absence cannot take
+         the chat down (§231.3) — which means its absence is now silent, and
+         this is where it stops being silent. */
+      if (!h.library) {
+        step("The sending library", "fail",
+             (h.libraryWhy || "It did not load.") +
+             " Notifications cannot be sent until the deployment carries it.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The sending library", "ok", null, "loaded");
+
+      if (!h.key) {
+        step("This platform's key", "fail",
+             h.keyWhy || "No key pair could be made or read.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("This platform's key", "ok",
+           (h.keyFrom === "env" ? "Set in the environment." : "Made by the platform itself.") +
+           " Sending as " + h.subject + ".", "present");
+
+      /* THIS DEVICE. A browser can allow notifications and still never have
+         registered — a hang rather than a refusal, which is what §231.5 was
+         about — so what is counted is what the SERVER holds, not what the
+         browser believes. */
+      if (!h.devices) {
+        step("Your devices", "fail",
+             (h.devicesWhy ? h.devicesWhy + " " : "") +
+             "None of your devices is registered here. Open the conversation " +
+             "in the corner and allow notifications, then press this again.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Your devices", "ok",
+           h.devices + (h.devices === 1 ? " device is registered." : " devices are registered."),
+           String(h.devices));
+
+      /* AND THE SEND ITSELF, to this person and nobody else — a diagnostic
+         that could reach somebody else's screen is a diagnostic nobody should
+         press. */
+      const out = await push.sendTo(client, await push.subsOf(client, me.key), {
+        title: "Strategy Office",
+        body: "This is a test. Notifications are working on this device.",
+        tag: "reply"
+      });
+      if (out.sent) {
+        step("A box on your screen", "ok",
+             "Sent to " + out.sent + (out.sent === 1 ? " device" : " devices") +
+             (out.dropped ? ", and " + out.dropped + " that no longer exists was forgotten." : ".") +
+             " If nothing appeared, the last step is your operating system: " +
+             "check that this browser is allowed to show notifications there.",
+             "sent");
+      } else {
+        step("A box on your screen", "fail",
+             (out.why ? out.why + " " : "") +
+             (out.dropped ? "Every registered device turned out to be gone and has been " +
+                            "forgotten — allow notifications again in the corner. "
+                          : "The push service would not take it. ") +
+             "Nothing reached you.");
+      }
+      return send(res, 200, { ok: true, steps: steps });
+    }
+
+    if (action === "pushOn") {
+      if (!cfg.on || !cfg.popup) {
+        return send(res, 403, { ok: false, error: "Notifications are off for this platform." });
+      }
+      const sub = body.sub || {};
+      const endpoint = str(sub.endpoint, 2000);
+      const p256dh = str((sub.keys || {}).p256dh, 300);
+      const auth2 = str((sub.keys || {}).auth, 300);
+      if (!endpoint || !p256dh || !auth2) {
+        return send(res, 400, { ok: false, error: "That is not a subscription this can store." });
+      }
+      /* A subscription must be a URL, and an https one: the endpoint is
+         fetched by our own server, so anything else is somebody pointing it
+         at a host of their choosing (§71's argument about a screenshot URL,
+         one endpoint out). */
+      if (!/^https:\/\//i.test(endpoint)) {
+        return send(res, 400, { ok: false, error: "That is not a subscription this can store." });
+      }
+      /* THE SAME DEVICE RE-SUBSCRIBING REPLACES ITS ROW rather than adding a
+         second — a browser re-issues the endpoint after clearing site data or
+         a long absence, and two rows for one device is two boxes. */
+      await client.query(
+        "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4) " +
+        "ON CONFLICT (endpoint) DO UPDATE SET person_key = EXCLUDED.person_key, " +
+        "  p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, seen_at = now()",
+        [endpoint, me.key, p256dh, auth2]);
+      return send(res, 200, { ok: true });
+    }
+
+    if (action === "pushOff") {
+      const endpoint = str((body.sub || {}).endpoint || body.endpoint, 2000);
+      /* SCOPED TO THE SIGNED-IN PERSON, so a stale or guessed endpoint can
+         only ever silence a device of their own. */
+      if (endpoint) {
+        await client.query(
+          "DELETE FROM push_subscriptions WHERE endpoint = $1 AND person_key = $2",
+          [endpoint, me.key]);
+      }
       return send(res, 200, { ok: true });
     }
 
@@ -414,6 +621,26 @@ module.exports = async function handler(req, res) {
         "SELECT waiting FROM chat_threads WHERE person_key = $1", [me.key])).rows[0];
       if (stillWaiting && stillWaiting.waiting) await tellTheOffice(client, me, text, cfg);
 
+      /* AND A BOX ON THE OFFICE'S OWN SCREENS, WITH NO TAB OPEN (§231).
+         Only while the conversation is still waiting — the same condition the
+         email chase already uses, so an assistant answer that settled it does
+         not also go and interrupt somebody. Never back to the sender's own
+         devices: they are the one person who knows this message exists.
+
+         IT NEVER COSTS THE MESSAGE. The message is stored and the thread is
+         already waiting before this runs (§104's ordering); a push service
+         that is slow, unreachable or refusing leaves all of that exactly as
+         it is, which is the correct state. */
+      if (cfg.popup && stillWaiting && stillWaiting.waiting) {
+        try {
+          await push.sendTo(client, await push.officeSubs(client, me.key), {
+            title: me.name || me.key,
+            body: firstLine(text || "(a screenshot)"),
+            tag: "office"
+          });
+        } catch (e) { /* a notification never costs the message it is about */ }
+      }
+
       return send(res, 200, await mine(client, me));
     }
 
@@ -512,7 +739,11 @@ module.exports = async function handler(req, res) {
         const q = "How is my unit's headline number worked out?";
         const out = await assistant.ask({
           kb: assistant.withTenant(kb, (orgT.extra || {}).kb), question: q, history: [],
-          who: "a member of the Strategy Office", labels: ((orgT.extra || {}).labels) || {}
+          who: "a member of the Strategy Office", labels: ((orgT.extra || {}).labels) || {},
+          /* The diagnostic is run FROM the office and must exercise the whole
+             corpus: a filtered one would test a smaller thing than the one it
+             is reporting on. */
+          isOffice: true
         });
         if (out && out.badKey) {
           /* REPORTED AGAINST THE KEY, because that is what is wrong and that
@@ -574,7 +805,7 @@ module.exports = async function handler(req, res) {
         chat: cfg,
         waiting: rows.filter(function (r) { return r.waiting; }).length,
         flagged: rows.filter(function (r) { return +r.flagged > 0; }).length,
-        hereMinutes: HERE_MINUTES,
+        hereMinutes: cfg.away,
         /* WHETHER THIS DEPLOYMENT CAN MAIL AT ALL, so the line above the reply
            box says "no mail is configured here" rather than promising a send
            that was never going to happen. */
@@ -595,7 +826,7 @@ module.exports = async function handler(req, res) {
         [who])).rows;
       await client.query(
         "UPDATE chat_threads SET seen_by_us = now() WHERE person_key = $1", [who]);
-      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < HERE_MINUTES * 60000;
+      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       return send(res, 200, {
         ok: true, person: who, name: t.live_name || t.person_name,
         gone: !t.live_name, unit: t.unit_key, fn: t.fn_key, title: t.title,
@@ -631,13 +862,54 @@ module.exports = async function handler(req, res) {
       const text = str(body.body);
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
       if (!text) return send(res, 400, { ok: false, error: "Nothing to send." });
-      const t = (await client.query(
+      let t = (await client.query(
         "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+
+      /* ── THE OFFICE STARTS ONE (§247) ─────────────────────────────
+         Islam: "from the platform inbox allow the smo to initiate a message
+         with someone." Until now the office could only ever ANSWER: with
+         nobody having written in there was no way to reach them from here at
+         all.
+
+         IT IS A FLAG ON THE REPLY, NOT AN ACTION OF ITS OWN. Everything a
+         message from the office does — marking the conversation answered
+         (§71), chasing by email when they are away (§97.5), the box on their
+         screen (§231) — is already written once, here. A second endpoint
+         would be a second copy of all of it, and the two would drift (§53.5).
+         What starting adds is exactly one thing: the conversation may not
+         exist yet.
+
+         AND THE PERSON MUST BE ONE. `ensureThread` will happily mint a row
+         for any string, so a typo would create a conversation with nobody,
+         visible in the queue for ever and answerable by no one — checked
+         against the STORED register, never against what the browser sent
+         (§74.2), and against the ACTIVE register, because a retired person
+         cannot sign in to read it (§35's rule about writing somewhere nobody
+         can reach).
+
+         ONE CONVERSATION PER PERSON SURVIVES UNTOUCHED (§97): starting one
+         with somebody who has already written in finds their thread on the
+         line above and simply carries on into it. This can never make a
+         second — `chat_threads.person_key` is the primary key. */
+      if (!t && body.start === true) {
+        const p = (await client.query(
+          "SELECT key, name FROM people WHERE key = $1 " +
+          "  AND COALESCE(extra->>'active','true') <> 'false'", [who])).rows[0];
+        if (!p) {
+          return send(res, 404, { ok: false, error: "There is no such person on the register." });
+        }
+        await ensureThread(client, p.key, p.name);
+        t = (await client.query(
+          "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+      }
       if (!t) return send(res, 404, { ok: false, error: "No conversation with that person." });
 
-      await client.query(
+      /* THE ID COMES BACK, because §188 marks THIS message once the email
+         has actually gone — not the thread, and not the next one. */
+      const said = (await client.query(
         "INSERT INTO chat_messages (person_key, from_office, by_key, by_name, body) " +
-        "VALUES ($1,true,$2,$3,$4)", [who, me.key, me.name || null, text]);
+        "VALUES ($1,true,$2,$3,$4) RETURNING id",
+        [who, me.key, me.name || null, text])).rows[0];
       /* ANSWERED BY THE ACT, not by remembering to set it — the status nobody
          sets is the status somebody has to remember (§71). */
       await client.query(
@@ -655,7 +927,26 @@ module.exports = async function handler(req, res) {
          never taken from the browser (§74.2). The browser sends the HTML it
          built with the one builder every other message uses (§72.3) — content,
          never a recipient. */
-      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < HERE_MINUTES * 60000;
+      /* AND A BOX ON THEIR OWN DEVICES, WITH NO TAB OPEN (§231). Sent
+         WHATEVER the email decides below: the two answer different questions —
+         a notification reaches the phone in their pocket now, an email reaches
+         them tomorrow — and gating one on the other would mean somebody
+         sitting in the platform with the panel shut is told nothing at all,
+         which is §225's whole fault by another road.
+
+         The page suppresses its own box on any device that is subscribed, so
+         nobody ever gets two (§53.5, and it is asserted). */
+      if (cfg.popup) {
+        try {
+          await push.sendTo(client, await push.subsOf(client, who), {
+            title: me.name || "Strategy Office",
+            body: firstLine(text),
+            tag: "reply"
+          });
+        } catch (e) { /* a notification never costs the reply it is about */ }
+      }
+
+      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       let mailed = null;
       if (!here && !cfg.mail) {
         /* SAID, NOT SILENT. The office is shown the same sentence before it
@@ -678,6 +969,22 @@ module.exports = async function handler(req, res) {
               html: String(body.html)
             });
             mailed = { sent: !!id, to: addr, why: id ? null : "no mail is configured here" };
+            /* ── AND THE MESSAGE REMEMBERS IT (§188) ────────────────────
+               Islam: "if the previous message was sent by email let's add a
+               tag to it that it was sent by email as well." The chase has
+               existed since §97.5 and was reported to the browser once and
+               written down nowhere, so a thread read tomorrow could not say
+               which of its replies had left the platform.
+
+               WRITTEN ONLY WHEN IT ACTUALLY WENT. A failed send leaves this
+               null, which is the same thing an untouched row says — because
+               it is the same fact. A tag on a message that never left would
+               be worse than no tag (§35: absence reported as presence). */
+            if (id && said && said.id) {
+              await client.query(
+                "UPDATE chat_messages SET emailed_to = $2 WHERE id = $1",
+                [said.id, addr]);
+            }
           } catch (e) {
             /* A FAILED EMAIL IS NOT A FAILED REPLY. The message is already in
                the conversation and the person will see it the moment they

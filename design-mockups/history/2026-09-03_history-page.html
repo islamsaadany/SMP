@@ -1,0 +1,85 @@
+<title>History Page</title>
+<style>
+  :root{ --navy:#13233b; --navy-2:#1c3350; --gold:#c6a24a; --gold-deep:#a5822f; --ground:#eaeef4; --surface:#fff; --surface-2:#f4f7fb;
+    --ink:#1a2634; --ink-2:#586576; --ink-3:#8592a3; --line:#d5dce6; --zebra:#f7f9fc; --warn-bg:#fff6e4; --warn-ink:#6f4e0c; --warn-line:#e6b45a;
+    --shadow:0 1px 2px rgba(19,35,59,.06),0 6px 18px rgba(19,35,59,.08); --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace; }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --navy:#0e1a2b; --navy-2:#16273f; --gold:#d3b25e; --gold-deep:#b7913c; --ground:#0d141e; --surface:#161f2c; --surface-2:#1b2735; --ink:#e7edf4; --ink-2:#9fadbe; --ink-3:#6f7d8f; --line:#293648; --zebra:#19232f; --warn-bg:#2c2411; --warn-ink:#f2ce76; --warn-line:#6a5222; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35); } }
+  :root[data-theme="dark"]{ --navy:#0e1a2b; --navy-2:#16273f; --gold:#d3b25e; --gold-deep:#b7913c; --ground:#0d141e; --surface:#161f2c; --surface-2:#1b2735; --ink:#e7edf4; --ink-2:#9fadbe; --ink-3:#6f7d8f; --line:#293648; --zebra:#19232f; --warn-bg:#2c2411; --warn-ink:#f2ce76; --warn-line:#6a5222; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35); }
+  *{box-sizing:border-box} body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 24px 72px}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 10px}
+  h1{font-size:28px;line-height:1.12;margin:0 0 8px;text-wrap:balance} .sub{color:var(--ink-2);margin:0 0 26px;max-width:70ch;font-size:15px} .sub b{color:var(--ink)}
+  h2{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  /* the Setup shell */
+  .frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);background:var(--surface)}
+  .chrome{background:var(--navy);color:#eef2f8;display:flex;align-items:center;gap:14px;padding:0 16px;height:44px;font-size:13px}
+  .chrome .b{font-weight:600} .chrome .tabs{display:flex;gap:2px;margin-left:8px} .chrome .tabs span{padding:5px 10px;border-radius:6px;color:#b9c6d8;font-size:12.5px} .chrome .tabs span.on{background:rgba(255,255,255,.1);color:#fff}
+  .split{display:grid;grid-template-columns:230px 1fr;min-height:520px}
+  .rail{border-right:1px solid var(--line);background:var(--surface-2);padding:10px 0}
+  .rail .rh{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:10px 16px 4px}
+  .rail .it{font-size:13px;padding:6px 16px;color:var(--ink-2)} .rail .it.on{color:var(--ink);font-weight:600;border-left:3px solid var(--gold);padding-left:13px;background:var(--surface)}
+  .pane{padding:0}
+  .phead{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+  .phead h3{font-size:15px;margin:0 14px 0 0}
+  .ctl{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--ink-2);background:var(--surface);white-space:nowrap} .ctl.on{color:var(--ink);border-color:var(--gold-deep)} .ctl.q{width:190px;color:var(--ink-3)}
+  .phead .sp{flex:1} .phead .count{font-size:12px;color:var(--ink-3)}
+  table{width:100%;border-collapse:collapse;font-size:13px} th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#eef2f8;background:var(--navy);padding:8px 12px;white-space:nowrap}
+  td{padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle} tr:nth-child(even) td{background:var(--zebra)}
+  td.t{color:var(--ink-3);font-variant-numeric:tabular-nums} td.name{max-width:260px;overflow:hidden;text-overflow:ellipsis} td.fld{color:var(--ink-2)}
+  .chip{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--ink-2)}
+  .fromto{font-family:var(--mono);font-size:12px} .arr{color:var(--gold-deep);margin:0 6px} .none{color:var(--ink-3)}
+  i.q{display:inline-block;width:9px;height:9px;border:1px solid var(--ink-3);border-radius:2px;margin-right:2px;vertical-align:-1px} i.qon{background:var(--gold-deep);border-color:var(--gold-deep)}
+  td.act{text-align:right} .rst{font:inherit;font-size:11.5px;font-weight:600;border:1px solid var(--line);background:transparent;color:var(--ink-2);border-radius:6px;padding:4px 10px;cursor:pointer} .rst:disabled{opacity:.45;cursor:default}
+  .confirm{margin:14px 18px 18px;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:12px 14px;font-size:13px;display:flex;gap:14px;align-items:center}
+  .confirm b{font-weight:700} .confirm .sp{flex:1} .btn{font:inherit;font-size:12px;font-weight:700;border-radius:6px;padding:6px 12px;border:1px solid var(--gold-deep);background:var(--gold-deep);color:#fff} .btn.ghost{background:transparent;color:inherit;border-color:currentColor}
+  /* unit page line */
+  .unitpane{padding:14px 18px} .pband{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px} .pband .code{font-family:var(--mono);font-size:12px;color:var(--gold-deep)}
+  .last{font-size:12px;color:var(--ink-3);margin-top:6px} .last a{color:var(--gold-deep);text-decoration:none;border-bottom:1px solid currentColor}
+  ul.notes{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px;max-width:72ch} ul.notes li{margin:6px 0} ul.notes b{color:var(--ink)}
+</style>
+<div class="wrap">
+  <p class="kicker">SMP · Mockup · 3 September 2026</p>
+  <h1>Setup › History</h1>
+  <p class="sub">Every row below is a <b>real change-log row</b>, produced by driving the real save path as five demo people this afternoon. The log already holds <b>who, when, where, which row, which field, the value before and the value after</b>. What is missing is only a screen and a way back — this is that screen.</p>
+
+  <h2>1 · The page, in Setup › Running the cycle</h2>
+  <div class="frame">
+    <div class="chrome"><span class="b">Strategy Management Platform</span><span class="tabs"><span>Group ▾</span><span>Units</span><span>Functions</span><span>Mobile</span><span>Retail</span><span class="on">Setup</span></span></div>
+    <div class="split">
+      <div class="rail">
+        <div class="rh">Running the cycle</div><div class="it">Overview</div><div class="it">Reporting cycle</div><div class="it">Platform Inbox</div><div class="it on">History</div><div class="it">Send an email</div>
+        <div class="rh">People and access</div><div class="it">People register</div><div class="it">Roles &amp; access</div>
+        <div class="rh">Measurement</div><div class="it">Scoring bands</div><div class="it">Focus measures</div>
+      </div>
+      <div class="pane">
+        <div class="phead"><h3>History</h3><span class="ctl q">Search a row or a person…</span><span class="ctl on">Person · Everyone ▾</span><span class="ctl on">Place · Everywhere ▾</span><span class="ctl">Kind · All ▾</span><span class="ctl">Today ▾</span><span class="sp"></span><span class="count">7 changes today</span></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>When</th><th>Who</th><th>Where</th><th>Kind</th><th>Row</th><th>Field</th><th>From → To</th><th></th></tr></thead>
+          <tbody><tr><td class="t">Today 05:16</td><td>Mohamed Essam</td><td>Mobile</td><td><span class="chip">Plan</span></td><td class="name" title="mobile-P1-T2">End-to-end order-to-cash digitization</td><td class="fld">Quarters</td><td class="fromto"><span class="none">—</span> <span class="arr">→</span> <i class="q"></i><i class="qon"></i><i class="qon"></i><i class="q"></i></td><td class="act"><button class="rst">Restore</button></td></tr>
+<tr><td class="t">Today 05:16</td><td>Mohamed Essam</td><td>Retail</td><td><span class="chip">Plan</span></td><td class="name" title="retailstores-P2-M1">E-store revenue</td><td class="fld">Compile rule</td><td class="fromto">Sum <span class="arr">→</span> Latest</td><td class="act"><button class="rst">Restore</button></td></tr>
+<tr><td class="t">Today 05:16</td><td>Yara Kamal</td><td>Marketing</td><td><span class="chip">Reporting</span></td><td class="name" title="cap4-P1-M1">Perception study fielded</td><td class="fld">% complete</td><td class="fromto"><span class="none">—</span> <span class="arr">→</span> 100</td><td class="act"><button class="rst">Restore</button></td></tr>
+<tr><td class="t">Today 05:16</td><td>Ashraf Laithy</td><td>Mobile</td><td><span class="chip">Report</span></td><td class="name">Submitted the report</td><td class="fld"></td><td class="fromto"><span class="none">—</span></td><td class="act"><button class="rst" disabled title="A submission is reopened from the Reporting tab, not from here">Restore</button></td></tr>
+<tr><td class="t">Today 05:16</td><td>Mennah Farouk</td><td>Mobile</td><td><span class="chip">Reporting</span></td><td class="name" title="mobile-P1-T1">Clean and standardize customer and SKU base</td><td class="fld">Note</td><td class="fromto"><span class="none">—</span> <span class="arr">→</span> Two stores opened in Q2, the third slipped to July</td><td class="act"><button class="rst">Restore</button></td></tr>
+<tr><td class="t">Today 05:16</td><td>Mennah Farouk</td><td>Mobile</td><td><span class="chip">Reporting</span></td><td class="name" title="mobile-P1-T1">Clean and standardize customer and SKU base</td><td class="fld">Actual</td><td class="fromto">45 <span class="arr">→</span> 60</td><td class="act"><button class="rst">Restore</button></td></tr>
+<tr><td class="t">Today 05:16</td><td>Mohamed Essam</td><td>Mobile</td><td><span class="chip">Plan</span></td><td class="name" title="mobile-P1-M1">Data duplicate rate</td><td class="fld">Target</td><td class="fromto">1% <span class="arr">→</span> 4.2B EGP</td><td class="act"><button class="rst">Restore</button></td></tr></tbody>
+        </table></div>
+        <div class="confirm"><span><b>Put back the target of Data duplicate rate on Mobile to 1%?</b><br>It reads 4.2B EGP now, set by Mohamed Essam today at 05:16. Putting it back is an ordinary change: it is saved, authorised and logged like any other, so it can itself be put back.</span><span class="sp"></span><button class="btn ghost">Cancel</button><button class="btn">Put it back</button></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>2 · On the unit's own page — one line, one door</h2>
+  <div class="frame"><div class="unitpane">
+    <div class="pband"><span class="code">MB01</span> Data foundation and customer 360</div>
+    <div class="last">Last changed by <b>Mennah Farouk</b>, today 05:16 (reported figures) · <a href="#">See this unit's history</a></div>
+  </div></div>
+
+  <h2>What this decides, and what it does not</h2>
+  <ul class="notes">
+    <li><b>Office only, by rule.</b> The page reads every person's changes, so it is gated like the Platform Inbox — the office's, never a matrix cell. A unit head gets the one line on their own page and the door to their own unit's rows only.</li>
+    <li><b>Restore is an ordinary save.</b> It writes the old value back through the same door every change goes through, so it is authorised, merged and logged — and a restore can itself be restored. It is never a database rollback.</li>
+    <li><b>Some rows have no Restore.</b> Submitting a report is reopened from the Reporting tab, where it always was; a row added or removed is put back from the plan archive. The button is greyed with the reason on hover rather than missing.</li>
+    <li><b>Nothing new is written.</b> The log has been written on production since §42; this page only reads it. The one server addition is a filtered read of the log (person, place, kind, day) so the page never loads the whole history.</li>
+    <li><b>What it cannot recover.</b> Work that never reached the server — a refused stale tab, a lost connection before the save landed — leaves no row. The banners are what stands in front of that.</li>
+  </ul>
+</div>

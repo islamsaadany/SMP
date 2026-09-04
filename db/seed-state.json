@@ -104,6 +104,7 @@
   ],
   "keyObjectives": [
    {
+    "id": "group-KO1",
     "name": "Revenue",
     "group": null,
     "dir": "≥",
@@ -114,6 +115,7 @@
     "progress": 43
    },
    {
+    "id": "group-KO2",
     "name": "EBITDA",
     "group": null,
     "dir": "≥",
@@ -124,6 +126,7 @@
     "progress": 78
    },
    {
+    "id": "group-KO3",
     "name": "Earnings concentration",
     "group": null,
     "dir": "≤",
@@ -134,6 +137,7 @@
     "progress": 87
    },
    {
+    "id": "group-KO4",
     "name": "Mobile Distribution",
     "group": "Market share",
     "dir": "≥",
@@ -144,6 +148,7 @@
     "progress": 88
    },
    {
+    "id": "group-KO5",
     "name": "CE Distribution",
     "group": "Market share",
     "dir": "≥",
@@ -154,6 +159,7 @@
     "progress": 78
    },
    {
+    "id": "group-KO6",
     "name": "Retail",
     "group": "Market share",
     "dir": "≥",
@@ -2954,7 +2960,6 @@
      "kind": "Capability",
      "theme": "VC",
      "owner": "Sara Helmy",
-     "by": "merchandising",
      "measures": [],
      "tactics": [],
      "id": "retailstores-P4"
@@ -5642,6 +5647,28 @@
    "a_cycle": "none",
    "a_setup": "none"
   },
+  "powner": {
+   "a_group": "view",
+   "a_unit_own": "none",
+   "a_unit_own_strat": "none",
+   "a_unit_other": "none",
+   "a_fn_own": "view",
+   "a_fn_own_strat": "view",
+   "a_fn_other": "none",
+   "a_cycle": "none",
+   "a_setup": "none"
+  },
+  "plowner": {
+   "a_group": "view",
+   "a_unit_own": "view",
+   "a_unit_own_strat": "view",
+   "a_unit_other": "none",
+   "a_fn_own": "view",
+   "a_fn_own_strat": "view",
+   "a_fn_other": "none",
+   "a_cycle": "none",
+   "a_setup": "none"
+  },
   "contrib": {
    "a_group": "view",
    "a_unit_own": "view",
@@ -5654,12 +5681,12 @@
    "a_setup": "none"
   },
   "employee": {
-   "a_group": "view",
-   "a_unit_own": "view",
-   "a_unit_own_strat": "view",
+   "a_group": "none",
+   "a_unit_own": "none",
+   "a_unit_own_strat": "none",
    "a_unit_other": "none",
-   "a_fn_own": "view",
-   "a_fn_own_strat": "view",
+   "a_fn_own": "none",
+   "a_fn_own_strat": "none",
    "a_fn_other": "none",
    "a_cycle": "none",
    "a_setup": "none"
@@ -5726,18 +5753,13 @@
  "bands": [
   {
    "key": "good",
-   "floor": 85,
+   "floor": 90,
    "label": "On track"
   },
   {
    "key": "attn",
    "floor": 70,
    "label": "Needs attention"
-  },
-  {
-   "key": "warn",
-   "floor": 50,
-   "label": "At risk"
   },
   {
    "key": "bad",

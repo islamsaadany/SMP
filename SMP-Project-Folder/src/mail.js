@@ -145,7 +145,14 @@ var MAIL = (function(){
     var onPanel = inkOn(panel), kicker = mix(onPanel, panel, 0.28);
     /* #8A94A6 on the mail ground is 2.83:1 — measured, and the second of the
        two failures in this file's first draft. */
-    var ink = "#1B2330", quiet = "#6B7686", line = "#E3E8EF", outer = "#626C7C";
+    /* §203: NO `outer` ANY MORE. The organisation's name was printed a
+       THIRD time in a grey line under the whole card — Islam: *"remove the
+       raya trade small title in the bottom, it's already in the long title
+       above."* It is in the header, and the footer line under the rule says
+       *"Sent from Raya Trade — Strategy Management Office"*, so the third
+       copy said nothing and was the one furthest from anything it explained.
+       The colour goes with the line it painted (§24). */
+    var ink = "#1B2330", quiet = "#6B7686", line = "#E3E8EF";
 
     var cta = (o.cta && o.cta.label && o.cta.href)
       /* A button is a table with a background, because a styled <a> loses its
@@ -222,8 +229,6 @@ var MAIL = (function(){
               (o.footer ? e(o.footer).replace(/\n/g, "<br>") : "") + '</p>' +
           '</td></tr>' +
         '</table>' +
-        '<div style="font:400 11px/1.5 Helvetica,Arial,sans-serif;color:' + outer + ';padding:14px 8px 0">' +
-          e(org) + '</div>' +
       '</td></tr></table></body></html>';
   }
 
@@ -240,7 +245,14 @@ var MAIL = (function(){
             "receives one.\n\nThe header carries your organisation's name and your " +
             "accent colour. The footer below carries whatever you set on the " +
             "Communication page.\n\nIf this looks right, it is ready to use.",
-      cta: { label: "Open the platform", href: o.href || "#" }
+      /* ── NEVER "#" (spec 027) ──────────────────────────────────────
+         It was `o.href || "#"`, and a "#" in an EMAIL is not a quiet no-op the
+         way it is on a page: there is no base document, so the mail client
+         hands it to the operating system and macOS answers "The application
+         can't be opened. -50". html() draws no button at all when the link is
+         empty, which is the honest shape — a test of the design that offers no
+         button is better than one offering a button that cannot open. */
+      cta: { label: "Open the platform", href: o.href || "" }
     });
   }
 

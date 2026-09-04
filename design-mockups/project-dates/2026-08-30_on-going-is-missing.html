@@ -1,0 +1,182 @@
+<title>A date the platform cannot read</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --panel:#12243F;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --stone:#6B7688;
+    --line:#D6DCE5; --gold:#C9A227; --gold-deep:#8A6100;
+    --bad:#B3341F; --bad-tx:#9C2C1A; --good-tx:#1E7A48;
+    --r-sm:6px; --r:10px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans); margin:0;
+    padding:26px 20px 80px;}
+  .wrap{max-width:900px; margin:0 auto;}
+  h1{font-size:20px; margin:0 0 4px; letter-spacing:-.25px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 22px; max-width:76ch;}
+  .tag{font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); margin:28px 0 9px;}
+  .tag.now{color:var(--bad-tx);} .tag.a{color:var(--good-tx);}
+  .tag b{font-size:12.5px; letter-spacing:0; text-transform:none; color:var(--ink);}
+
+  .pane{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    overflow:hidden;}
+  .band{display:flex; align-items:center; gap:11px; background:var(--surface-2);
+    padding:12px 17px; border-bottom:1px solid var(--line);}
+  .code{font:600 12.5px/1 var(--mono); color:var(--stone); letter-spacing:.05em;}
+  .bname{font:650 17px/1.3 var(--sans); letter-spacing:-.01em;}
+  .front{padding:14px 17px 17px; display:grid; grid-template-columns:1fr 1fr; gap:0 22px;}
+  .col{min-width:0;}
+  .row{display:flex; align-items:center; gap:12px; background:var(--surface-2);
+    border-radius:var(--r-sm); padding:8px 12px; margin:0 0 9px;}
+  .row em{font-style:normal; font:700 10px var(--sans); letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-3); min-width:64px;}
+  .val{flex:1; min-width:0;}
+  .missing{color:var(--bad-tx); font-weight:700;}
+  .was{color:var(--ink-3); font-size:12px;}
+  .tagmiss{display:inline-block; border:1px solid var(--bad-tx); color:var(--bad-tx);
+    border-radius:20px; padding:1px 8px; font:700 9.5px var(--sans);
+    letter-spacing:.07em; text-transform:uppercase; margin-left:8px; vertical-align:1px;}
+  .redval{color:var(--bad-tx); font-weight:700;}
+
+  .bar{display:flex; align-items:center; gap:9px; justify-content:flex-end;
+    padding:0 2px 10px; flex-wrap:wrap;}
+  .missn{color:var(--bad-tx); font-weight:800; font-size:14px;}
+  .mchip{border:1px solid var(--bad-tx); color:var(--bad-tx); border-radius:20px;
+    padding:2px 10px; font:700 11.5px var(--sans); background:transparent;}
+  .cta{background:var(--bad); border:1px solid var(--bad); color:#fff;
+    border-radius:var(--r-sm); padding:5px 13px; font:700 12px var(--sans);}
+
+  .mbtn{display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line);
+    background:var(--surface); border-radius:var(--r-sm); padding:5px 10px; font-size:13px;
+    color:var(--ink);}
+  .mbtn svg{width:15px; height:15px; color:var(--ink-3);}
+  .mbtn.gap{border:1px dashed var(--bad);}
+  .note{color:var(--ink-3); font-size:12.5px; margin:11px 0 0; max-width:80ch;}
+  .note b{color:var(--ink);}
+  .rec{background:#FDF3DF; border:1px solid #8A6100; color:#8A6100;
+    border-radius:var(--r-sm); padding:12px 14px; font-size:13px; margin-top:28px;}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .rec{
+    background:#3A2E12; border-color:#E7B94A; color:#E7B94A; }}
+  :root[data-theme="dark"] .rec{ background:#3A2E12; border-color:#E7B94A; color:#E7B94A; }
+</style>
+<div class="wrap">
+<h1>A date the platform cannot read</h1>
+<p class="lede">You asked that a project marked <b>On&#8209;going</b> reads as missing, and
+that filling it opens the date panel. <b>The filling half already works</b> &mdash; I drove
+it: <code>On-going</code> is counted as a gap today (FIN01 shows 1), and the fill
+control is the month&#8209;and&#8209;year panel. What is missing is on the page.</p>
+
+<div class="tag now">Now &mdash; the count says one thing is missing; the page says nothing is</div>
+<div class="bar"><span class="missn">1 Missing</span><span class="mchip">FIN01 &nbsp;1</span>
+  <span class="cta">Fill in missing elements</span></div>
+<div class="pane">
+  <div class="band"><span class="code">FIN01</span>
+    <span class="bname">Average debt utilisation report automation</span></div>
+  <div class="front">
+    <div class="col">
+      <div class="row"><em>Owner</em><span class="val">Hossam Abuelenien</span></div>
+      <div class="row"><em>Start</em><span class="val">1 Jan 2026</span></div>
+      <div class="row"><em>End</em><span class="val">On-going</span></div>
+    </div>
+    <div class="col">
+      <div class="row"><em>Brief</em><span class="val">Automate the monthly debt
+        utilisation report end to end.</span></div>
+    </div>
+  </div>
+</div>
+<p class="note">The bar says <b>1 Missing</b>. Every row on the page is filled in.
+Whoever is closing gaps has to guess which of the three the count means &mdash; and
+<b>On&#8209;going</b> looks like a perfectly good answer.</p>
+
+<div class="tag a">Option A &mdash; <b>Missing leads, the value follows it</b></div>
+<div class="bar"><span class="missn">1 Missing</span><span class="mchip">FIN01 &nbsp;1</span>
+  <span class="cta">Fill in missing elements</span></div>
+<div class="pane">
+  <div class="band"><span class="code">FIN01</span>
+    <span class="bname">Average debt utilisation report automation</span></div>
+  <div class="front">
+    <div class="col">
+      <div class="row"><em>Owner</em><span class="val">Hossam Abuelenien</span></div>
+      <div class="row"><em>Start</em><span class="val">1 Jan 2026</span></div>
+      <div class="row"><em>End</em><span class="val"><span class="missing">Missing</span>
+        <span class="was">&nbsp;&mdash; currently &ldquo;On-going&rdquo;</span></span></div>
+    </div>
+    <div class="col">
+      <div class="row"><em>Brief</em><span class="val">Automate the monthly debt
+        utilisation report end to end.</span></div>
+    </div>
+  </div>
+</div>
+<p class="note">The red word is what the eye catches, and it is the word the count
+uses &mdash; so the bar and the page agree at last. <b>The value is still on the
+screen</b>, which is the rule this has to keep: somebody is being asked to correct
+<b>On&#8209;going</b>, and hiding it would leave them correcting something they
+cannot see. <b>Cost:</b> the row is a few characters longer.</p>
+
+<div class="tag a">Option B &mdash; <b>the value itself turns red, with a tag</b></div>
+<div class="pane">
+  <div class="band"><span class="code">FIN01</span>
+    <span class="bname">Average debt utilisation report automation</span></div>
+  <div class="front">
+    <div class="col">
+      <div class="row"><em>Owner</em><span class="val">Hossam Abuelenien</span></div>
+      <div class="row"><em>Start</em><span class="val">1 Jan 2026</span></div>
+      <div class="row"><em>End</em><span class="val"><span class="redval">On-going</span>
+        <span class="tagmiss">Missing</span></span></div>
+    </div>
+    <div class="col">
+      <div class="row"><em>Brief</em><span class="val">Automate the monthly debt
+        utilisation report end to end.</span></div>
+    </div>
+  </div>
+</div>
+<p class="note">The value keeps its place and the tag says what is wrong with it.
+<b>Cost, and it is the reason I do not recommend it:</b> red type on a value means
+<i>this figure is off track</i> everywhere else in the platform. Using it for
+<i>this is not a date</i> gives one colour two jobs on the same screen.</p>
+
+<div class="tag a">Filling it &mdash; <b>unchanged, and already built</b></div>
+<div class="pane">
+  <div class="band"><span class="code">FIN01</span>
+    <span class="bname">Average debt utilisation report automation</span></div>
+  <div class="front">
+    <div class="col">
+      <div class="row"><em>Start</em><span class="val"><span class="mbtn">1 Jan 2026
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+          <path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg></span></span></div>
+      <div class="row"><em>End</em><span class="val"><span class="mbtn gap">
+        <span class="missing">Missing</span>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+          <path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg></span></span></div>
+    </div>
+    <div class="col"></div>
+  </div>
+</div>
+<p class="note">Pressing it opens the month&#8209;and&#8209;year panel, which opens on the
+cycle's year with nothing chosen &mdash; because <b>On&#8209;going</b> names no month, and
+guessing one would be the platform inventing a date. This is what the product does
+today; nothing here changes it.</p>
+
+<div class="rec"><b>My recommendation: A.</b> It makes the page say the word the
+count is already using, keeps the value visible for whoever has to correct it, and
+does not borrow the off&#8209;track red for a second meaning.<br><br>
+<b>And one thing that is not on this page:</b> a plan uploaded from Excel still
+takes <code>On-going</code> into a project's Start or End without a word &mdash; a
+milestone's due date is checked and refused, and these two are not. I would fix
+that in the same change.</div>
+</div>

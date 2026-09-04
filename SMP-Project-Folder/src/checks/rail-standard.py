@@ -100,7 +100,7 @@ with sync_playwright() as p:
     print("\n2 · Marketing — Reporting")
     go(pg, "fn:marketing")
     tab(pg, "performance")
-    rep = pg.query_selector("[data-report]")
+    rep = pg.query_selector('[data-s=report]')
     ck("there is a way into reporting", rep is not None)
     if rep:
         rep.click(); pg.wait_for_timeout(450)
@@ -130,7 +130,7 @@ with sync_playwright() as p:
            got and got[0]["rows"] == 1, got)
     go(pg, "nigeria")
     tab(pg, "performance")
-    rep = pg.query_selector("[data-report]")
+    rep = pg.query_selector('[data-s=report]')
     if rep:
         rep.click(); pg.wait_for_timeout(450)
         got = panes(pg)

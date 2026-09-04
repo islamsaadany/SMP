@@ -1,5 +1,5 @@
 -- @phase: pre
--- 005 · A client may have more than one super user (§147.26).
+-- 005 · A client may have more than one super user (§288.26).
 --
 -- Islam: "a project might have 2 super users." The unique index refused it,
 -- and it has to go BEFORE platform-schema.sql runs for the same reason 001's

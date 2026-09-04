@@ -1,0 +1,216 @@
+/* ═══ THE WELCOME SCREEN (§148) ═══════════════════════════════════════════
+   Styles for welcome.js, concatenated late beside chat.css and tour.css and
+   for the same reason: furniture floating over the page must not lose to
+   `.cfg table` on source order (§93.11). Every colour is a token, so the
+   tenant's branding and both themes carry it with no rule of its own —
+   the mockup's literals were these tokens' light values.
+
+   LAYERING: above the chat dock (45) — its row on this screen IS the door —
+   and below the tour (70), which the intro-round card hands the screen to. */
+.welcomeover { position:fixed; inset:0; z-index:60; overflow:auto;
+               background:var(--ground); color:var(--ink);
+               -webkit-font-smoothing:antialiased; }
+.welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
+
+/* ── VIEWING AS, ABOVE THE GREETING (§179) ──────────────────────────────
+   Islam's pick of two drawn placements. It sits on the PAGE's ground, not on
+   the hero's navy, so it takes the page's own ink — the drawing that put it
+   here first wore `--panel-ink` inherited from the hero and measured as a
+   pale label on a pale ground, which is §38.5's fault in a mockup rather than
+   in the product. Right-aligned: it is the one thing on this screen that is
+   about the screen rather than about the person being greeted, so it keeps
+   out of the greeting's reading line. */
+.welcomeover .wviewbar { display:flex; justify-content:flex-end;
+  align-items:center; gap:9px; margin:0 0 12px; }
+.welcomeover .wviewbar label { font-size:var(--fs-micro); letter-spacing:.14em;
+  text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+/* searchsel replaces the select with a `.ssbtn` past five options (§45.5) and
+   hides the native one in place, so both are sized here — never the button
+   alone, or a tenant with five people gets an unstyled dropdown. */
+.welcomeover .wviewbar select, .welcomeover .wviewbar .ssbtn {
+  font-size:var(--fs-small); max-width:min(340px, 60vw); }
+
+/* ── The navy band: greeting leads, tenant signs on the separator ───────── */
+/* ── THE ROLES STACK; THE TENANT HOLDS ITS PLACE (§187) ─────────────────
+   Islam: *"the roles can come under each other if that long, to avoid that
+   the company name and SMO section come down."*
+
+   The band was a flex row ALLOWED TO WRAP, so two long role chips filled the
+   line and the whole tenant block — the mark, the name, Strategy Management
+   Office — dropped underneath them. Measured, and it was not a narrow-window
+   problem: it happened at every width tested, 1440 included.
+
+       width   before            after
+       1440    294px, below      204px, beside
+       1100    294px, below      204px, beside
+        900    329px, below      239px, beside
+
+   `nowrap` with a flexible greeting is what makes the chips stack INSIDE
+   their own column instead of pushing the column beside them away. The cost
+   is stated: on a wide window the greeting is narrower, because the tenant
+   block now always reserves its width.
+
+   AND BELOW 820px THE OLD STACKING COMES BACK ON PURPOSE — that is the width
+   at which two columns stop being honest, and forcing them side by side
+   there would trade one broken layout for another. */
+.welcomeover .whero { background:var(--panel); color:var(--panel-ink);
+  border-radius:var(--r-md); padding:30px 34px 28px; display:flex;
+  justify-content:space-between; align-items:stretch; gap:30px; flex-wrap:nowrap; }
+.welcomeover .wgreet { flex:1 1 0; min-width:0; }
+.welcomeover .wtenant { flex:0 0 auto; }
+@media (max-width:820px){
+  .welcomeover .whero { flex-wrap:wrap; align-items:center; }
+  .welcomeover .wgreet { flex:1 1 auto; }
+}
+.welcomeover .wkick { font-size:var(--fs-micro); letter-spacing:.18em;
+  text-transform:uppercase; color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
+.welcomeover .wgreet h2 { margin:0 0 12px; font-size:30px; font-weight:800;
+  letter-spacing:-.02em; }
+.welcomeover .wwho { display:flex; gap:8px; flex-wrap:wrap; }
+.welcomeover .wchip { display:inline-flex; align-items:center; gap:6px;
+  font-size:var(--fs-label); font-weight:600; letter-spacing:.04em;
+  padding:4px 11px; border-radius:var(--r-pill);
+  border:1px solid rgba(255,255,255,.28); color:var(--panel-ink); }
+.welcomeover .wchip.wcycle { border-color:var(--panel-accent); color:var(--panel-accent); }
+.welcomeover .wchip.wcycle i { width:7px; height:7px; border-radius:99px;
+  background:var(--panel-accent); }
+/* ONE SHARED EDGE (round 3): every line of the tenant block starts AT the
+   separator, so the hairline and the text draw a single vertical. */
+.welcomeover .wtenant { display:flex; flex-direction:column; align-items:flex-start;
+  gap:8px; border-left:1px solid rgba(255,255,255,.18); padding-left:28px;
+  align-self:stretch; justify-content:center; }
+.welcomeover .wmark { width:36px; height:36px; border-radius:var(--r-sm);
+  background:var(--surface); color:var(--stone); font:800 13px/36px var(--sans);
+  text-align:center; letter-spacing:.02em; flex:none; }
+.welcomeover .wtenant h1 { margin:0; font-size:var(--fs-lead); font-weight:800;
+  letter-spacing:-.01em; }
+.welcomeover .woffice { font-size:var(--fs-label); letter-spacing:.06em;
+  text-transform:uppercase; color:var(--panel-quiet); }
+
+/* ── The list: every number lives inside its own sentence ──────────────── */
+.welcomeover .wcols { display:grid; grid-template-columns:1fr 336px; gap:22px;
+  margin-top:22px; }
+@media (max-width:960px){ .welcomeover .wcols { grid-template-columns:1fr; } }
+.welcomeover .wseclab { font-size:var(--fs-label); font-weight:900;
+  letter-spacing:var(--track); text-transform:uppercase; color:var(--ink-2);
+  margin:0 0 10px; }
+.welcomeover .wacts { display:flex; flex-direction:column; gap:10px; }
+.welcomeover .wact { background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:16px 18px; display:flex; align-items:center; gap:16px; }
+.welcomeover .wwhat { flex:1; min-width:0; }
+.welcomeover .wwhat b { display:block; font-size:15px; letter-spacing:-.01em; }
+.welcomeover .wwhat > span { display:block; font-size:var(--fs-note);
+  color:var(--ink-2); margin-top:2px; }
+.welcomeover .wwhat i { font-style:normal; font-weight:700; }
+/* Red is WORDS here, so it wears --bad-tx (§38.5) — the count with its noun,
+   never a bare number in a box (round 3, Islam). */
+.welcomeover .wwhat em.walert { font-style:normal; color:var(--bad-tx); font-weight:600; }
+.welcomeover .wempty .wwhat b { font-weight:600; color:var(--ink-2); }
+.welcomeover .wbtn { flex:none; font:inherit; cursor:pointer;
+  font-size:var(--fs-small); font-weight:700; letter-spacing:.03em;
+  padding:8px 16px; border-radius:var(--r-sm); border:1px solid var(--line);
+  background:var(--surface); color:var(--ink-2); }
+.welcomeover .wbtn:hover { border-color:var(--gold-deep); color:var(--ink); }
+/* §41's budget: the one solid fill on this screen is Report's own CTA pair,
+   worn only while a cycle is open. */
+.welcomeover .wbtn.wcta { background:var(--cta); border-color:var(--cta);
+  color:var(--cta-ink); }
+.welcomeover .wbtn.wcta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+/* ── THE WAY OUT (§159) ──────────────────────────────────────────────────
+   It was a text link at the foot of the LEFT COLUMN, which is three faults at
+   once: it is the only exit (there is no ×, no Escape, no click-outside), it
+   was the quietest thing on a screen holding three bordered buttons and one
+   solid fill, and it read as the end of the "Waiting on you" list rather than
+   the way past the screen. Below 960px it was not even last — the columns
+   stack, so 411px of side column sat AFTER the way out at 900px wide.
+
+   One bar across both columns answers all three: a real control, spanning the
+   grid so its scope is the screen, and last at every width. It wears the wide
+   row shape .wpages already uses (§53.5) and spends none of §41's accent —
+   except on the one screen where there is no other act to spend it on. */
+.welcomeover .wexit { margin-top:22px; width:100%; display:flex;
+  align-items:center; justify-content:space-between; gap:16px; cursor:pointer;
+  text-align:left; font:inherit; padding:17px 22px; border-radius:var(--r);
+  border:1px solid var(--line); background:var(--surface); color:var(--stone); }
+.welcomeover .wexit .wexlab { font-size:15px; font-weight:800; letter-spacing:-.01em; }
+.welcomeover .wexit .wgo { font-family:var(--mono); font-size:var(--fs-lead);
+  color:var(--gold-deep); }
+.welcomeover .wexit:hover { border-color:var(--gold-deep); }
+.welcomeover .wexit:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+/* PROMOTED ONLY WHEN IT IS THE ONLY ACT (§41, §45.2): with nothing waiting
+   there is no CTA on the screen, so the exit takes the fill — its own class,
+   because .wcta means "an action row shouts" and this is not an action row. */
+.welcomeover .wexit.wloud { background:var(--cta); border-color:var(--cta);
+  color:var(--cta-ink); }
+.welcomeover .wexit.wloud .wgo { color:var(--cta-ink); }
+.welcomeover .wexit.wloud:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+
+/* ── The side column ────────────────────────────────────────────────────── */
+.welcomeover .wside { display:flex; flex-direction:column; gap:22px; }
+.welcomeover .wcard { background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:16px 18px; }
+.welcomeover .wpages { display:flex; flex-direction:column; }
+.welcomeover .wpages a { display:flex; align-items:center; gap:8px; padding:9px 2px;
+  font-size:var(--fs-note); font-weight:600; color:var(--ink); text-decoration:none;
+  border-bottom:1px solid var(--line-soft); }
+.welcomeover .wpages a:last-child { border-bottom:0; }
+.welcomeover .wpages a small { flex:1; font-weight:500; color:var(--ink-3);
+  font-size:var(--fs-small); text-align:right; }
+.welcomeover .wpages a .wgo { color:var(--gold-deep); font-family:var(--mono);
+  margin-left:auto; }
+.welcomeover .wpages a:hover { color:var(--gold-deep); }
+.welcomeover .wtour { background:var(--over-bg); border:1px solid var(--over-line);
+  border-radius:var(--r); padding:18px; }
+/* ── THE FOLD (§202) ────────────────────────────────────────────────────
+   The heading IS the control, so it takes the whole row and carries the
+   caret at its far end — one target, and the obvious one. The card keeps
+   its padding in both states, or opening it would shift the column. */
+.welcomeover .wtoggle { display:flex; width:100%; align-items:center; gap:10px;
+  background:none; border:0; padding:0; margin:0; cursor:pointer;
+  color:inherit; font:inherit; text-align:left; }
+.welcomeover .wtour h3 { margin:0; font-size:var(--fs-lead); font-weight:700;
+  letter-spacing:-.01em; }
+.welcomeover .wtcar { margin-left:auto; color:var(--gold-deep); font-family:var(--mono);
+  font-size:var(--fs-lead); line-height:1; transform:rotate(90deg);
+  transition:transform .15s ease; }
+.welcomeover .wtour.wtopen .wtcar { transform:rotate(-90deg); }
+.welcomeover .wtoggle:hover h3 { color:var(--gold-deep); }
+.welcomeover .wtoggle:focus-visible { outline:2px solid var(--gold);
+  outline-offset:3px; border-radius:4px; }
+@media (prefers-reduced-motion: reduce) {
+  .welcomeover .wtcar { transition:none; }
+}
+.welcomeover .wtourbody { margin-top:10px; }
+.welcomeover .wtour p { margin:0 0 14px; font-size:var(--fs-note); color:var(--ink-2); }
+.welcomeover .wtourbtns { display:flex; gap:10px; align-items:center; }
+.welcomeover .wtbtn { font:inherit; cursor:pointer; font-size:var(--fs-small);
+  font-weight:700; letter-spacing:.03em; padding:8px 16px; border-radius:var(--r-pill);
+  border:1px solid var(--gold); background:none; color:var(--gold-deep); }
+.welcomeover .wtbtn:hover { border-color:var(--gold-deep); }
+.welcomeover .wtghost { font:inherit; cursor:pointer; font-size:var(--fs-small);
+  font-weight:600; border:0; background:none; color:var(--ink-3); padding:8px 6px; }
+.welcomeover .wtghost:hover { color:var(--ink); }
+
+/* ── THE CYCLE, ON THE WELCOME SCREEN (§200) ────────────────────────────
+   The Setup Overview's own summary, in the same shape: "the cycle, as
+   context" should look like itself wherever it is drawn (§53.5). It sits
+   under Your pages, in the column that holds what is true rather than what
+   is owed — the left column is the work. */
+.wcyc{ background:var(--surface); border:1px solid var(--line);
+       border-radius:var(--r); padding:12px 15px 14px; margin-top:14px; }
+.wcyc h4{ margin:0 0 8px; font:700 12px/1.3 var(--sans); color:var(--ink);
+          display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.wbdg{ font:700 9px/1 var(--sans); letter-spacing:.07em; text-transform:uppercase;
+       border:1px solid currentColor; border-radius:20px; padding:3px 7px; }
+.wb-open{ color:var(--good-tx); }
+.wb-shut{ color:var(--ink-3); }
+.wcycline{ display:flex; justify-content:space-between; align-items:baseline;
+           gap:10px; font-size:12.5px; padding:5px 0;
+           border-bottom:1px solid var(--line); }
+.wcycline:last-of-type{ border-bottom:0; }
+.wcycline b{ font-weight:700; font-variant-numeric:tabular-nums; }
+/* Not started is the one figure that is a problem rather than a fact, so it
+   is the one that takes a colour — as TYPE, hence `--bad-tx` and not `--bad`
+   (§38.5, which this project has paid for six times). */
+.wcycline b.wlate{ color:var(--bad-tx); }
+.wcycmeta{ color:var(--ink-3); font-size:11px; margin:9px 0 0; }

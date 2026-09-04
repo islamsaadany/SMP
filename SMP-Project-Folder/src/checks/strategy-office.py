@@ -124,8 +124,11 @@ with sync_playwright() as p:
     def pens(pg, key, dest, tab, sec):
         be(pg, key, dest, tab, sec)
         return pg.evaluate("""() => ({
-          pens: document.querySelectorAll(".pane .penbtn, .hoverpen > .penbtn, "
-                                          + ".paneact .penbtn, .ptitle .penbtn").length,
+          /* §268: the strategy pen is `#secrow-in .secpen` now; the old
+             homes stay in the list so a build that put one back is seen. */
+          pens: document.querySelectorAll("#secrow-in .secpen, .pane .penbtn, "
+                                          + ".hoverpen > .penbtn, .paneact .penbtn, "
+                                          + ".ptitle .penbtn").length,
           anyPen: document.querySelectorAll("[data-page]").length,
           arrange: document.querySelectorAll("[data-arrange]").length,
           grips: document.querySelectorAll(".grip").length
@@ -240,68 +243,24 @@ with sync_playwright() as p:
     ck("the SMO still lands on the group",
        pg.evaluate("() => current") == "group", pg.evaluate("() => current"))
 
-    # ── 4 · THE PERFORMANCE PAGE'S TWO BUTTONS ───────────────────────
-    # §94.9 REVERSED §94.8: they were moved out of the legend and then asked
-    # back into it, with the legend made smaller instead. So what is asserted
-    # is not a position but the ORDER OF LOUDNESS — the legend must be plainly
-    # quieter than the controls beside it, which is the thing that was wrong
-    # and the thing a later stylesheet edit could silently undo.
-    print("\n4 · Report and Presentation, in a legend that is quieter than they are")
+    # ── 4 · THE REPORTING TAB'S FILL, IN BOTH THEMES ─────────────────
+    # WHAT THIS SECTION USED TO ASSERT IS GONE, DELIBERATELY. §94.8/§94.9
+    # settled the loudness order between the reading-the-colours legend and the
+    # two controls beside it; §162/§163 then REMOVED that legend outright —
+    # `checks/perf-line.py` asserts its absence in so many words ("the
+    # reading-the-colours banner is gone"). So this file has been asserting
+    # that a deleted element exists, and has been red ever since: two checks
+    # arguing, and the wrong one still speaking. §51.11, from the side where
+    # the check is the thing that went stale rather than the product.
+    #
+    # Removed rather than made to pass — the subject no longer exists, and
+    # `perf-line.py` owns what replaced it. What survives is the half that is
+    # still true and still worth guarding: the Reporting tab's fill and its
+    # contrast, in both themes.
+    print("\n4 · the Reporting tab's fill, in both themes (§222)")
     be(pg, who["smo"], who["unit"], "performance")
-    v = pg.evaluate("""() => {
-      const bands = document.querySelector(".bands");
-      const rep = document.querySelector("[data-report]");
-      /* THE SUMMARY, NOT `[data-present]`. Presentation is a <details>, so
-         the element carrying that attribute is a menu ITEM inside the closed
-         popup — it has a box, at a position that means nothing. The first
-         version of this measured it and reported the two buttons 127px apart
-         and overlapping at once, which is what a rect inside a closed popup
-         looks like. What is on the row is the summary. */
-      const pres = document.querySelector(".bands details.dlmenu > summary");
-      const lab = bands && bands.querySelector("b");
-      if (!bands || !rep || !pres || !lab)
-        return { missing:{ bands:!!bands, rep:!!rep, pres:!!pres, lab:!!lab } };
-      const cs = getComputedStyle(rep);
-      const px = (el) => parseFloat(getComputedStyle(el).fontSize);
-      const lum = (c) => {
-        const m = c.match(/[\\d.]+/g).map(Number);
-        const f = m.slice(0,3).map(x => { x/=255; return x<=0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055,2.4); });
-        return 0.2126*f[0] + 0.7152*f[1] + 0.0722*f[2];
-      };
-      const cr = (a,b) => { const l1=lum(a), l2=lum(b), hi=Math.max(l1,l2), lo=Math.min(l1,l2);
-                            return Math.round(((hi+0.05)/(lo+0.05))*100)/100; };
-      const rb = rep.getBoundingClientRect(), bb = bands.getBoundingClientRect();
-      const pb = pres.getBoundingClientRect();
-      return {
-        inBands: !!rep.closest(".bands") && !!pres.closest(".bands"),
-        /* ONE LINE means the buttons sit inside the legend's own box, not
-           wrapped onto a second row of it. Measured, because "same line" is a
-           geometric claim and `flex-wrap` is on. */
-        oneLine: rb.top >= bb.top - 1 && rb.bottom <= bb.bottom + 1 &&
-                 Math.abs(rb.top - pb.top) < 2,
-        /* And they do not touch. */
-        gap: Math.round(pb.left - rb.right),
-        legendPx: px(bands), labelPx: px(lab), btnPx: px(rep),
-        bg: cs.backgroundColor, fg: cs.color,
-        solid: cs.backgroundColor !== "rgba(0, 0, 0, 0)" && cs.backgroundColor !== "transparent",
-        contrast: cr(cs.backgroundColor, cs.color)
-      };
-    }""")
-    if v.get("missing"):
-        ck("the Performance page draws both buttons and a legend", False, v["missing"])
-    else:
-        ck("Report and Presentation ride in the legend", v["inBands"] is True, v)
-        ck("...on one line with it", v["oneLine"] is True, v)
-        ck("...without touching", v["gap"] >= 4, v["gap"])
-        ck("the legend is SMALLER than the buttons beside it",
-           v["legendPx"] < v["btnPx"],
-           "legend %spx vs button %spx" % (v["legendPx"], v["btnPx"]))
-        ck("...and its label is quieter still",
-           v["labelPx"] < v["legendPx"],
-           "label %spx vs legend %spx" % (v["labelPx"], v["legendPx"]))
-        ck("Report is a solid fill, not an outline", v["solid"] is True, v["bg"])
-        ck("...and its words clear 4.5:1 on it", v["contrast"] >= 4.5,
-           "%s on %s = %s" % (v["fg"], v["bg"], v["contrast"]))
+    ck("the Report BUTTON has left the page (§222)",
+       pg.evaluate("()=>!document.querySelector('[data-report]')"))
 
     # THE SAME BUTTON IN THE OTHER THEME. A token declared in one block only
     # is the classic unreadable-page bug, and this one has four blocks.
@@ -309,8 +268,18 @@ with sync_playwright() as p:
         pg.evaluate("(t)=>{ document.documentElement.setAttribute('data-theme', t); }", theme)
         pg.wait_for_timeout(200)
         c = pg.evaluate("""() => {
-          const rep = document.querySelector("[data-report]"); if (!rep) return null;
-          const cs = getComputedStyle(rep);
+          /* §222: THE FILL IS ON THE TAB, AND ONLY WHILE IT IS SELECTED.
+             Measured unselected the tab is transparent, and comparing an ink
+             against `rgba(0,0,0,0)` produces a number that means nothing —
+             which is exactly what the first run after the move reported. */
+          const rep = document.querySelector('[data-s=report]'); if (!rep) return null;
+          rep.click();
+          /* AND RE-QUERY AFTER THE PRESS. Selecting the tab repaints the row,
+             so the node measured before the click is detached — and
+             `getComputedStyle` on a detached node returns empty strings, which
+             made the colour parser throw rather than report. */
+          const lit = document.querySelector('[data-s=report]'); if (!lit) return null;
+          const cs = getComputedStyle(lit);
           const lum = (c) => { const m = c.match(/[\\d.]+/g).map(Number);
             const f = m.slice(0,3).map(x => { x/=255; return x<=0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055,2.4); });
             return 0.2126*f[0] + 0.7152*f[1] + 0.0722*f[2]; };

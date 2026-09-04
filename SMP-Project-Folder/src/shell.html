@@ -182,6 +182,7 @@
 </main>
 
 <script src="RULES"></script>
+<script src="DIFF"></script>
 <script src="AUDIENCE"></script>
 <script src="DATA"></script>
 <script src="CONFIGDATA"></script>
@@ -200,6 +201,9 @@
 <script src="SEARCHSEL"></script>
 <script src="CHAT"></script>
 <script src="TOUR"></script>
+<script src="WELCOME"></script>
+<script src="HISTORY"></script>
+<script src="SAFETY"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -249,15 +253,62 @@
              The KEY stays `found` and the access key stays `k_found`: renaming
              either would lose every stored preference and every grant pointing
              at it, for a word (§65, the same rule as `bu`). */
+          /* AND A FUNCTION THAT PLANS IN PILLARS HAS NO OVERVIEW AT ALL
+             (§211.2, REVERSING the 2026-08-24 ruling recorded above at
+             Islam's direction: *"for functions planning in pillars they
+             shouldn't have an overview just the plan … this is an empty tab
+             with no need"*).
+
+             He is right, and the page had been saying so itself: for this
+             format `renderFnFoundation()` returned ONE SENTENCE — *"Its
+             foundation is Retail Stores's … Open Plan to see it"* — and
+             nothing else. A section whose only content is a pointer at the
+             section beside it is §32's door behind a door.
+
+             The earlier ruling is not wrong about the WORD (a function gets
+             Overview, not Foundation, whichever way it plans) and that half
+             stands for a capability function, which has capabilities to
+             describe. What changed is that the page for THIS format turned
+             out to have nothing to describe.
+
+             THE SENTENCE IS INFORMATION, NOT A DESCRIPTION (rule 1b-ii), so
+             it moves to the top of the Plan rather than being deleted: where
+             the aspiration and the key objectives actually live is a fact
+             this page cannot otherwise state. */
+          var pillars = fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]);
+          var plan = { k:"proj", ac:"k_proj", label:pillars ? "Plan" : "Projects",
+                       render:renderFnProjects };
+          /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
+             FORMAT. §211.2 removed the Overview here on a premise measured
+             against the wrong field name and simply WRONG: a pillars function
+             CAN hold an aspiration, an end in mind, who-we-are clauses, a
+             SWOT and key objectives — `fnAsUnit()` carries all five,
+             `fnWriteBack()` writes all five, and an uploaded plan puts them
+             there. The tab it deleted was the only place any of that could
+             ever have shown.
+
+             A conditional tab was built next and Islam replaced it with
+             something simpler: *"maintain the overview and the plan sub tabs
+             but in the overview if it's empty, it's empty and if we need to
+             add something, you find the button to add something."* Right, and
+             it is the honest reading of what was broken — THE PAGE, never the
+             tab. It held one sentence pointing at the section beside it; it
+             holds the function's own foundation now, with the same Add
+             controls a unit's has, so an empty one is an empty page you can
+             fill rather than a dead end (§61) — and nothing about the
+             navigation depends on the data, so a tab cannot appear and
+             disappear as rows arrive (§45.2). */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
-                  { k:"proj",  ac:"k_proj",
-                    label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
-                    render:renderFnProjects }];
+                  plan];
         } },
-      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, dot:true,
+      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
         render: function(k){
           return REPORTING === k ? renderFnReport(k) : renderFnPerformance(k);
-        } }
+        } },
+      /* The same tab on the other side of the switch (§53.5, §222). */
+      { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
+        when: function(){ return !!reportSectionState(); },
+        render: function(k){ return renderFnReport(k); } }
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -296,10 +347,33 @@
          which is what it always was for two weeks a quarter (§15.10), now said
          in the navigation instead of in a comment. REPORTING holds the TARGET
          rather than a boolean, so it can never open somebody else's report. */
-      { k:"performance", ac:"u_perf", label:"Performance", primary:true, dot:true,
+      { k:"performance", ac:"u_perf", label:"Performance", primary:true,
         render: function(u){
           return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
-        } }
+        } },
+      /* ── REPORTING IS A TAB (§222, revisiting §63) ────────────────────
+         Islam: *"how about for the reporting to split it as a tab beside the
+         Strategy and Performance to be more obvious to the users, with its
+         distinct orange colour."*
+
+         §63 removed a Reporting SECTION from inside Performance, on his own
+         point that *"performance is a result of reporting, so having inside
+         performance 2 buttons performance and reporting doesn't make
+         sense."* That argument was about two siblings under one heading, and
+         it still holds — this is not that. A top-level tab stops Reporting
+         being buried inside the thing it produces, and the Report button it
+         replaces was one control among four on the right of the row.
+
+         `when` IS THE CYCLE, `ac` IS THE GRANT. `allowed()` already asks the
+         grant, so this only has to answer the other half — and it is the
+         same pair `reportBtn()` asked, because a tab that opens nothing is
+         worse than no tab (§61).
+
+         THE DOT MOVES HERE from Performance. It means "you owe a
+         submission", and that now has a tab of its own to sit on. */
+      { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
+        when: function(){ return !!reportSectionState(); },
+        render: function(u){ return renderReport(u); } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 
@@ -456,6 +530,12 @@
       { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
+      /* HISTORY (§262): who changed what, where, from what to what — and a
+         way back. The office's by rule, like the inbox above it; never drawn
+         where there is no server to hold a log. */
+      { k:"history",  ac:"c_history", grp:"cycle", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
+        when: function(){ return inOffice() && TRAIL.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
+        render:function(){ return TRAIL.renderPage(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
@@ -554,6 +634,60 @@
      null makes the first paint ask entryDest() the same way every later one
      does. */
   var current = null, currentSub = null;
+
+  /* ── A REFRESH STAYS WHERE YOU ARE (§173) ──────────────────────────
+     Islam: *"on refresh don't take me to another page, the refresh stays on
+     the same page I'm at."* §94.6 decided where a SESSION opens — where the
+     person works, because "everyone opens on the group's Performance page"
+     was a literal nobody had chosen. That decision is untouched: this only
+     covers a reload, which is not the same event and had been landing you on
+     your own unit's Plan from wherever you happened to be.
+
+     SESSION STORAGE, NOT LOCAL, and the difference is the whole scope. A
+     refresh is inside one session, so `sessionStorage` remembers exactly as
+     long as the question lasts — and tomorrow's sign-in still opens where you
+     work, which is §94.6 and is his own earlier answer. A screen preference
+     never touches the state graph (§25, §47.1).
+
+     THE PLACE, NEVER A MODE. Where you were is a destination, a tab and a
+     section; edit, reporting and arrange are modes and §63.1 drops them on
+     every navigation, so restoring one would put somebody back inside an edit
+     they had left. And a throwing store reads as nothing remembered (§107),
+     because a platform that will not open is worse than one that opens
+     somewhere else. */
+  var WHERE_KEY = "smp.where";
+  var whereAsked = false;
+
+  function rememberWhere(){
+    if (!current) return;
+    try {
+      sessionStorage.setItem(WHERE_KEY, JSON.stringify({
+        d: current, s: currentSub, c: currentSub ? CURSEC[currentSub] : null }));
+    } catch (e) { /* a store that refuses is a preference nobody keeps */ }
+  }
+
+  /* CHECKED AGAINST WHAT THIS VIEWER CAN OPEN, never trusted (§94.6's own
+     rule): a remembered destination can stop being reachable between one load
+     and the next — a role revoked, a unit retired — and following it blindly
+     is how somebody lands on a page that renders nothing. Asked ONCE, because
+     `paintUnits()` runs on every paint and this must not drag you back after
+     you have navigated away. */
+  function restoreWhere(reach){
+    if (whereAsked) return null;
+    whereAsked = true;
+    var raw = null;
+    try { raw = sessionStorage.getItem(WHERE_KEY); } catch (e) { return null; }
+    if (!raw) return null;
+    var w = null;
+    try { w = JSON.parse(raw); } catch (e) { return null; }
+    if (!w || !w.d || reach.indexOf(w.d) === -1) return null;
+    /* The TAB has to still be one this viewer holds at that destination, or
+       the page under it is an empty frame. The section is corrected further
+       down by the renderer itself, so it is enough to hand it over. */
+    var defs = reachable(defsFor(w.d), w.d, w.d);
+    if (!w.s || !defs.some(function(d){ return d.k === w.s; })) return null;
+    return w;
+  }
   /* WHOSE report is open, or null. A target rather than a boolean: the page is
      per unit or per function, and a flag would follow you onto the next one
      (§63.1). Dropped by every navigation, exactly as the edit modes are. */
@@ -637,10 +771,98 @@
       send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
   }
 
+  /* ── THE WORK YOU DID AS YOURSELF IS SAVED AS YOURSELF (§204) ──────
+     Islam, from the deployment: the SMO team filled gaps, switched the
+     viewer, and the save came back with four refusals naming the register,
+     the archives, a SWOT and a plan — none of which they had touched while
+     simulating.
+
+     THE SWITCH WAS RE-LABELLING WORK ALREADY DONE. `sync.js` stamps
+     `viewAs` from `window.VIEWER` at the moment a body is POSTED, not at
+     the moment the change was made — and both switchers set VIEWER and
+     painted immediately, with no flush in between. So anything not yet on
+     the server (the trailing debounce, a save still in flight, and above
+     all a FAILED save, which the 5s interval keeps re-posting) went up
+     under the new identity and was judged as somebody who may not do it.
+     A 504 earlier in the day is enough to leave work in that state for
+     minutes.
+
+     So the switch WAITS for a clean server before it happens. Nothing about
+     what a simulated view shows or allows changes — that is §185 and it is
+     right (Islam: *"view as should show what this user see and can do"*).
+
+     A FAILED OR REFUSED SAVE DOES NOT SWITCH, and says so: switching then
+     would hand the same work to the next identity and produce exactly the
+     banner this exists to prevent. "clean" and "offline" go straight
+     through — there is nothing to mislabel, and a platform opened from a
+     file has no server to wait for. */
+  function switchViewer(key, after){
+    var go = function(){
+      leaveModes();
+      VIEWER = key;
+      var sel = document.getElementById("asWho");
+      if (sel) sel.value = VIEWER;
+      current = null; currentSub = null;
+      paint(); window.scrollTo(0, 0);
+      if (after) after();
+    };
+    if (typeof SYNC === "undefined" || !SYNC.saveNow) return go();
+    /* §209: HOME IS NEVER BLOCKED. A refusal while simulating left the person
+       TRAPPED: the banner's own advice is "switch back to your own view to
+       make it yourself", and this function — holding the switch until the
+       save lands — refused that switch too, because the save re-runs judged
+       as the simulated person and is refused again. Measured: viewing as
+       somebody, one refused change, and the only control left standing was
+       Discard everything (§184's fault, rebuilt by the fix for §204).
+
+       The re-labelling danger §204 guards does not exist on the way HOME:
+       work re-labelled to the SESSION person becomes YOURS, which is exactly
+       the recovery §185 designed — and only the SMO session draws this
+       switcher at all. Switching to a THIRD person stays blocked. */
+    var me = null;
+    try { me = SYNC.person() && SYNC.person().key; } catch(e){}
+    SYNC.saveNow(function(how){
+      if (how === "offline") return go();
+      /* §237: A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START.
+         With the SMO's own work flushed clean (the two answers above this
+         line), the tab takes the SERVER's current graph as its new truth —
+         exactly a fresh sign-in by the viewed person, so nothing of this
+         tab's past rides into a save judged as them (§234.2 records why
+         that mattered). A rebase that cannot fetch answers false and the
+         switch still happens on the old baseline — judged correctly either
+         way (§185), and never a blocked way home (§209). */
+      if (how === "saved" || how === "clean")
+        return SYNC.rebase(function () { go(); });
+      if (me && key === me) return go();
+      /* Refused or failed, and not the way home: the banner sync.js already
+         drew says what happened, and the view stays where it is so the work
+         keeps the identity that made it. NO REBASE on this path either way —
+         taking the server's copy here would silently destroy the refused
+         work §184's banner is offering to put back. */
+      var sel2 = document.getElementById("asWho");
+      if (sel2) sel2.value = VIEWER;   /* a select shows the refused value (§110) */
+    });
+  }
+
   function leaveModes(){
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
+    /* AND THE SETUP TABLE'S OWN (§272). Arranging is a mode, so it goes with
+       the page for the reason every other mode does — coming back to Setup an
+       hour later and finding the rows wearing handles is a state nobody chose.
+       The ORDER is not a mode and is untouched: it was saved as it was made. */
+    if (typeof SETARRANGE !== "undefined") SETARRANGE = null;
+    /* And an open row dialog goes with the page, CANCELLED rather than kept —
+       the same rule the open row already follows two lines below: the fields
+       have written themselves, so "keep" would mean half-typed values standing
+       with nothing on screen saying so (spec 012 §2.1). */
+    if (typeof ROWDLG !== "undefined" && ROWDLG) {
+      /* The teardown WITHOUT the repaint: leaveModes is called on the way into
+         a paint, and closeRowDialog ends in one — a second paint inside the
+         first is a loop waiting for somebody to add a line to it. */
+      rowEditCancel(); ROWDLG = null; PICKING = null; PICKQ = ""; closeModal();
+    }
     /* The open sent-message panel goes with the page (§93.15). It is asked
        fresh next time, because "what happened" can change while you are away —
        a send is still finishing when the list first draws. */
@@ -1024,12 +1246,20 @@
             ? '<span class="rgwait" title="' + gwait +
               ' waiting behind this group">' + gwait + '</span>'
             : '') +
-          /* The entry count KEEPS its job and its quiet shape. The audit's
-             complaint was that it wore the shape of a number that changes
-             while never changing — answered by giving the changing number a
-             different shape, not by taking this one away: folded, it is the
-             only thing that says how much is behind the heading. */
-          '<span class="rgn">' + items.length + '</span></button>' +
+          /* THE ENTRY COUNT, AND ONLY WHILE FOLDED (§198.2). Its own argument
+             above is exactly right and stops one word short: *folded, it is
+             the only thing that says how much is behind the heading.* Open,
+             the rows ARE that — a number saying how many lines sit directly
+             beneath it, while they are all on screen, is the same fault
+             §122 removed from the register's header ("the count said how big
+             the register is — the table under it IS that").
+
+             It keeps its quiet mono shape, so it still cannot be mistaken for
+             `rgwait` beside it; what goes is drawing it at the one moment it
+             says nothing. Now BOTH numbers on this row appear only when
+             folded, and both are about what you cannot see. */
+          (shut ? '<span class="rgn">' + items.length + '</span>' : '') +
+          '</button>' +
         '<div class="rgitems" data-railitems="' + g.k + '"' + (shut ? " hidden" : "") + '>' +
           items.map(function(d){
             var w = ATT[d.k] || 0;
@@ -1214,12 +1444,22 @@
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
       var dests = tabs.filter(function(t){ return t.k; });
-      current = entryDest(everything, dests);
-      /* The PAGE as well as the door, and by the same call the navigation
-         makes — otherwise the first paint lands on whichever tab happens to
-         be first (Strategy) and whichever section happens to be first inside
-         it (Foundation), which is not the plan. */
-      currentSub = current ? entrySub(current) : null;
+      /* WHERE YOU WERE BEATS WHERE YOU WORK, ON A RELOAD ONLY (§173). Null
+         `current` is both the first paint of a session and the first paint
+         after a refresh, and only the remembered place tells them apart. */
+      var back = restoreWhere(everything);
+      if (back) {
+        current = back.d;
+        currentSub = back.s;
+        if (back.c) CURSEC[back.s] = back.c;
+      } else {
+        current = entryDest(everything, dests);
+        /* The PAGE as well as the door, and by the same call the navigation
+           makes — otherwise the first paint lands on whichever tab happens to
+           be first (Strategy) and whichever section happens to be first inside
+           it (Foundation), which is not the plan. */
+        currentSub = current ? entrySub(current) : null;
+      }
     }
     var parts = tabs.map(function(t, i){
       if (t.folds) {
@@ -1282,14 +1522,14 @@
        below. */
     var isDest = tabs.map(function(t){ return !!t.k; });
     var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
-    document.getElementById("units").innerHTML = (d0 === -1
+    document.getElementById("units").innerHTML = chromeHomeHTML() + (d0 === -1
       ? parts.join("")
       : parts.slice(0, d0).join("") +
         '<div class="navclip">' +
           '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
           '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
         '</div>' +
-        parts.slice(d1 + 1).join("")) + menuHTML();
+        parts.slice(d1 + 1).join("")) + chromeActsHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -1392,9 +1632,92 @@
     '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/>' +
     '<circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
 
+  /* ── THE WAY BACK TO THE WELCOME SCREEN (§185) ──────────────────────
+     Islam: *"Allow me to go back to the welcome screen somehow."* It is
+     offered once a session, so what is waiting on you was readable for one
+     moment and then only by signing out again.
+
+     A HOUSE, BESIDE THE GEAR — his placement, over the Setup rail and the
+     Knowledge base. It has to be reachable from every page, and the other two
+     are not: the rail is two presses and needs Setup, and the Knowledge base
+     has been the office's since §119.4, so nobody else could get back.
+
+     NOT DRAWN WHERE THE SCREEN CANNOT EXIST — a projector, or a file with no
+     session — because a control that does nothing is worse than none (§61).
+     The same two silences `WELCOME.open()` keeps, asked once here so the
+     button and the screen cannot disagree about when it is possible. */
+  var ICON_HOME =
+    '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
+    '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
+    'stroke-linejoin="round" fill="none">' +
+    '<path d="M3 8.6 10 3.2l7 5.4V16a1 1 0 0 1-1 1h-3.4v-4.6H7.4V17H4a1 1 0 0 1-1-1Z"/>' +
+    '</g></svg>';
+  function welcomeBtnHTML(){
+    if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
+    if (location.protocol === "file:") return "";
+    if (document.body && document.body.classList.contains("presenting")) return "";
+    /* §197.2: QUIET WHEN NOTHING IS WAITING, GOLD WHEN SOMETHING IS.
+       Islam, having lived with §194.3's permanently gold square: *"it can be
+       option E when there is no actions waiting there and it turns gold when
+       there is action required, so the SMO or any other team can notice the
+       difference and go for actions."*
+
+       THAT ALSO SPENDS THE COST §194.3 RECORDED RATHER THAN CARRYING IT.
+       Gold on this row means *the destination you are on*, and a house that
+       is always gold borrows that meaning for nothing; a house that is gold
+       only when it has something to say is USING it. The two stay separate
+       classes (`homemark` / `.here`) so either can change without the other.
+
+       THE COUNT IS THE WELCOME SCREEN'S OWN (§16.7): the mark goes gold on
+       exactly the list the screen it opens will show, so pressing it can
+       never land on "Nothing is waiting on you". `WELCOME.waiting` is asked
+       of `viewer()` — the person being viewed AS, the same one `open()` is
+       given below, or the office would see their own queue while looking
+       through somebody else's eyes (§185).
+
+       THE BOX DOES NOT CHANGE SIZE between the two states. A mark that grew
+       when something arrived would shift every destination name on the row
+       (§41.8's rule: the control you are about to press must not move). */
+    var n = 0;
+    try { n = WELCOME.waiting ? WELCOME.waiting(viewer()) : 0; } catch(e){}
+    var say = n ? plural(n, "thing") + " waiting on you" : "What is waiting on me";
+    return '<button type="button" class="navmenu-btn navmenu-solo homemark' +
+      (n ? ' homemark-on' : '') + '" ' +
+      'data-welcomego="1" title="' + say + '" ' +
+      'aria-label="' + say + '">' + ICON_HOME + '</button>';
+  }
+
   /* The menu lives inside the row so it sits on the same baseline as the tabs,
      but its panel is absolutely positioned, so a long list never widens the
      row or pushes the units along. */
+  /* BOTH CONTROLS, AND THE WELCOME BUTTON DOES NOT RIDE ON THE GEAR (§185).
+     `menuHTML()` returns nothing at all for anybody with no Setup destination
+     — which is most of the register — so hanging the house off it would have
+     given the way back to the office alone, and the welcome screen is
+     everybody's (§61's trap: the people it is most for are the ones who would
+     have lost it). The separator belongs to whichever is drawn first. */
+  /* ── THE HOUSE LEADS THE ROW (§193.2) ──────────────────────────────
+     Islam: *"let's move the home screen to the top left for all people so it
+     becomes their home in general."* It sat at the far right beside the gear,
+     which is where the SETUP door is — and Setup is the office's, so the way
+     back to your own starting page was keeping company with a control most of
+     the register never sees. On the left it is the first thing on the row and
+     reads as where you begin, which is what it is.
+
+     TWO HALVES, because they now sit at opposite ends. The separator belongs
+     to whichever side draws — the house takes one AFTER it, the gear one
+     BEFORE — and neither is drawn when its own button is not, or the row ends
+     in a hairline attached to nothing (§24). `pinsep` keeps both out of the
+     scrolling region: a separator that scrolls away leaves the control it
+     divides looking like a destination (§136). */
+  function chromeHomeHTML(){
+    var home = welcomeBtnHTML();
+    return home ? home + '<span class="sep pinsep"></span>' : "";
+  }
+  function chromeActsHTML(){
+    var gear = menuHTML();
+    return gear ? '<span class="sep pinsep"></span>' + gear : "";
+  }
   function menuHTML(){
     var gs = menuGroups();
     if (!gs.length) return "";
@@ -1403,8 +1726,7 @@
        being a menu button and becomes a link — press it and you are on the
        page, with the rail carrying everything the menu used to list. */
     var only = gs[0].items[0];
-    return '<span class="sep pinsep"></span>' +
-      '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
+    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
         (on ? " here" : "") + '" data-md="setup" data-ms="' + only.k + '" ' +
         'title="Setup" aria-label="Setup">' + ICON_MANAGE + '</button>';
   }
@@ -1426,6 +1748,25 @@
         current = b.dataset.md;
         currentSub = b.dataset.ms;
         paint(); window.scrollTo(0,0);
+      });
+    });
+    /* §185's way back. WIRED HERE, beside the gear, because `paintUnits()`
+       rewrites this row's innerHTML and whoever destroys the wiring re-does
+       it in the same function (§29.5) — a handler bound in the page-wide
+       wire() would die the next time the destination row repainted.
+
+       IT NAVIGATES NOWHERE. The welcome screen is an overlay over the page
+       you are already on, so there is no destination to leave modes for and
+       nothing to scroll — pressing it while editing leaves the edit exactly
+       where it was, which is what a person who only wants to look expects. */
+    document.querySelectorAll("#units [data-welcomego]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        if (typeof WELCOME === "undefined" || !WELCOME.open) return;
+        /* The person being VIEWED, never the session (§185): the screen says
+           what is waiting on whoever this view belongs to, which is the whole
+           reason the viewer switcher sits on it. */
+        try { WELCOME.open(viewer()); } catch(err){}
       });
     });
   }
@@ -1588,12 +1929,22 @@
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
+    /* §177.2: and what each rail drew LAST time is not what it will draw this
+       time — the same reason FIELDS is emptied here. */
+    for (var rk in RAIL_SHOWN) delete RAIL_SHOWN[rk];
+    /* §272: and which register the bar is in — a fill can empty the counted
+       list mid-paint-cycle, so the answer is worked out once per paint and
+       never carried over (memoised in gapEmptyMode, reset here). */
+    GAP_MODE = null;
     /* Same reason, same line (§96): the objectives editor registers the array
        its Add and Remove act on, and an index from the last paint would act on
        the paint before it. */
     if (typeof KOLISTS !== "undefined") KOLISTS.length = 0;
+    /* §278: and the open monthly drawer registers the row it writes into,
+       for exactly the same reason — an index from the last paint would clear
+       a different row's twelve months. */
+    if (typeof MONTHREG !== "undefined") MONTHREG.length = 0;
     /* §145: the confirm ticks register the row they act on the same way. */
-    if (typeof PENDS !== "undefined") PENDS.length = 0;
     fillViewers();
     paintUnits();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
@@ -1620,19 +1971,28 @@
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
-    var v = viewer();
-    /* Guarded even though every person currently has a unit: reading
-       UNITS[null].name throws inside paint, which aborts the repaint and
-       leaves the previous screen showing \u2014 a crash that looks like a routing
-       bug. */
-    var where = v.unit === "group" ? "all units"
-              : (v.unit && UNITS[v.unit] ? UNITS[v.unit].name : "\u2014");
-    document.getElementById("viewerNote").innerHTML =
-      /* The roles they hold, not a level. Several is normal — group CEO who
-         also owns Care reads "Group CEO · Business unit owner". */
-      (personRoles(v).map(function(r){ return roleName(r.role); })
-        .filter(function(x, i, a){ return a.indexOf(x) === i; }).join(" &middot; ") || "No role") +
-      " &middot; " + where;
+    /* THE ROLES, AND WHERE EACH IS HELD (§178). One builder, beside
+       `placeLabel()` and asking `personAt()` like every other surface that
+       answers "where does this person sit" (§54). This line used to work it
+       out for itself off `p.unit` and nothing else, which is how it came to
+       say an em-dash for every function head and both company CEOs while the
+       DROPDOWN BESIDE IT said the function’s own name (§142). Two controls
+       on one row answering one question two ways — so the copy goes rather
+       than learning about functions. */
+    /* AND THE WHOLE LINE ON A HOVER. `.viewer-note` is one line with an
+       ellipsis, and below about 1280px this line is longer than the strip has
+       room for -- what gets cut is the tail, which is the PLACE, which is the
+       half §178 exists to add. §88's shape: one line, an ellipsis where it
+       does not fit, the whole value one hover away. Set unconditionally
+       rather than through `clipTitles()`, which is scoped to the setup tables
+       and would have to be widened to reach the chrome -- and unlike the
+       cells that rule was written for, this element carries no other title
+       for a hover to cover. */
+    (function(){
+      var el = document.getElementById("viewerNote");
+      el.textContent = viewerRoleLine(viewer());
+      el.title = el.textContent;
+    })();
 
     if (!current) {
       paintBuildBand();
@@ -1696,7 +2056,7 @@
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
-      var cls = (d.primary ? "primary" : "") +
+      var cls = (d.primary ? "primary" : "") + (d.cta ? " cta" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
         (cls.trim() ? ' class="' + cls.trim() + '"' : '') +
@@ -1764,6 +2124,13 @@
        2026-08-27); the error itself is kept, folded behind a closed
        disclosure, so the office can still read it without it shouting at
        anybody else. */
+    /* §222: BEING ON THE TAB IS THE MODE. `leaveModes()` clears REPORTING on
+       every tab change, so the tab has to set it back — done HERE, once,
+       rather than inside each of the two render functions, or the unit and
+       the function would each carry their own copy of the same rule (§53.5).
+       It holds the TARGET rather than a boolean, so it can never open
+       somebody else's report. */
+    if (def && def.k === "report") REPORTING = current;
     var body;
     try {
       body = (current === "group" || current === "setup" || current === "manage")
@@ -1801,7 +2168,13 @@
              other Setup page is a form or a short list and should keep growing
              the page instead. Both halves of this line came from different
              branches on the same day and both are load-bearing. */
-          (currentSub === "people" ? " panefill" : "") + '">' +
+          /* AND ROLES & ACCESS JOINS IT (§174), for the same reason and by the
+             same mark: its head is now pinned to its own box, and a box only
+             scrolls if something caps it. Flexing into what is left beats a
+             constant here as much as it did there — the legend under the
+             table, the header wrapping to a second line at a narrow width,
+             and §167's two feet all change that number. */
+          (currentSub === "people" || currentSub === "access" ? " panefill" : "") + '">' +
           /* ── AND THE PAGE'S CONTROLS ARE ON IT (§135) ────────────────
              `pageLineHTML()` is read AFTER `body`, because the page's own
              render is what fills the slots. The search sits left of the
@@ -1817,26 +2190,152 @@
     var failBtn = _panel.querySelector("[data-failreload]");
     if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
+    /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§150) ─────────────
+       Read AFTER the page's render, because the render is what fills the
+       slot — the same direction of travel `pageLineHTML()` makes for a Setup
+       page's controls, and the reason the tab row could not simply build
+       them itself: it is written further up, before this page exists.
+
+       The row is pinned chrome, so the box stays on screen for the whole
+       report — which is the entire feature. Appended rather than written
+       into the row's innerHTML, because that string is the tabs' and a
+       report is not a tab.
+
+       Its controls are bound by wire() below, which queries the DOCUMENT for
+       [data-submit] / [data-repsave] / [data-repcancel] — so the box works
+       from outside #panel without a second wiring path (§24). */
+    var tabrow = document.getElementById("subtabs");
+    /* WRAPPED, SO THE CONTROLS SIT HARD RIGHT (§163). Inserted bare they land
+       immediately after the last tab and read as two more tabs; the wrapper is
+       what carries `margin-left:auto`. One wrapper at the one insertion point
+       rather than a margin on each control — the page decides WHAT its
+       controls are, the row decides WHERE they go. */
+    if (REPORT_CHROME && tabrow && !railed)
+      tabrow.insertAdjacentHTML("beforeend",
+        '<span class="tabacts">' + REPORT_CHROME + '</span>');
+
+    /* ── A CLOSED REPORT IS CLOSED (§220) ────────────────────────────────
+       Islam: *"the submit or the save as a draft locks the report."* Before
+       this, submitting changed the WORDING and nothing else — measured: all
+       twelve figure boxes and the owner's note stayed fully editable after
+       Submit, so a report could be changed after the office had received it
+       and what they were told they were sent was not what the database held.
+
+       DISABLED, NOT ONLY DIMMED. `pointer-events:none` is a look, not a
+       lock — the keyboard walks straight past it — so every control inside
+       the report is actually disabled and the dimming is what says so.
+       Read-only rather than hidden: a closed report still has to be
+       readable, which is most of why anybody reopens it.
+
+       Done here, after the render, rather than at each of the render sites
+       that draw a reporting control: one place, so a control added later is
+       covered the day it is added (§104.7's argument). */
+    (function(){
+      var panel = document.getElementById("panel");
+      if (!panel) return;
+      var shut = !!(REPORTING && typeof reportClosed === "function" &&
+                    reportClosed(REPORTING));
+      panel.classList.toggle("replocked", shut);
+      if (!shut) return;
+      panel.querySelectorAll("input, textarea, select, button")
+        .forEach(function(el){
+          /* The way OUT of the closed state is not part of the closed
+             state — Reopen and Close live on the tab row, outside #panel,
+             but a report body that grows one later must not lock it. */
+          if (el.hasAttribute("data-unsubmit") || el.hasAttribute("data-repcancel")) return;
+          el.disabled = true;
+        });
+    })();
+
+    /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§151) ──
+       Done here, once, rather than at the dozen render sites that build a
+       table: every one of them would have had to remember, and the day one
+       forgot would be the day a client's plan is cut again with no way to
+       reach the rest of it (Islam, on Mazaya).
+
+       WRAPPED WHATEVER THE WIDTH, and that is deliberate: `overflow-x:auto`
+       shows no scrollbar and changes nothing while the table fits, so
+       wrapping unconditionally means the behaviour cannot depend on which
+       tenant's data happens to be loaded — the demo's plan fits at 1100px
+       and the client's does not, which is exactly how this reached
+       production unnoticed.
+
+       Tables already inside a scroller are left alone: the register brings
+       its own (§122.5), and a box inside a box scrolls neither well. */
+    _panel.querySelectorAll("table").forEach(function(t){
+      if (t.closest(".tblscroll") || t.closest(".acgrid")) return;
+      var w = document.createElement("div");
+      w.className = "tblscroll";
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+    /* THE SECOND FROZEN COLUMN PARKS AGAINST THE FIRST ONE'S MEASURED WIDTH,
+       NEVER AGAINST A CONSTANT (§151.1). It shipped as `left:38px` — the `#`
+       column's declared width — and the name slid 2.5px on every scroll,
+       because the RENDERED border box is the declared width plus its borders.
+       §122.5's rule ("a cap made of a guessed constant goes stale silently")
+       and the register's own note that the second frozen column must equal
+       the first one's rendered border box (§73.2), met again here.
+
+       Measured after the wrapping above, so the layout it reads is the one
+       that will be on screen; published as a variable on the box, because
+       every row's cell needs the same number and one of them deciding it is
+       how two frozen columns come to disagree. */
+    _panel.querySelectorAll(".tblscroll").forEach(function(w){
+      var first = w.querySelector("thead th.idx, tbody td.idx");
+      if (first) w.style.setProperty("--frozen-1", first.getBoundingClientRect().width + "px");
+    });
+
     /* Group Performance is four sections; they become a third nav row rather
        than one long scroll. The row exists only where there are sections. */
     var secrow = document.getElementById("secrow");
     var onSecPage = current === "group" && currentSub === "performance" && GROUP_SECTIONS.length;
+    /* §145.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam: "that
+       bar with that button is what goes up beside the plan, not to waste
+       lines") — the total, one red chip per place that owes, and the red
+       button, on the strategy tabs only, read mode too. */
+    var stratTab = (currentSub === "strategy" || currentSub === "fnstrat");
+    var missHTML = (stratTab && typeof missBar === "function") ? missBar() : "";
+    /* ── AND THE SECTION'S OWN PEN, ON THE SAME LINE (§268) ────────────
+       Islam: *"the edit button of the plans can you make it in the same line
+       of the foundation sowt and plan? as it's a better placement for opening
+       and savng?"* — and the line was already carrying half of it: with the
+       plan open it rendered *Done filling*, the wrong word for the office and
+       stripped of its button dress by `.tabs button` (§145.14's own trap, on
+       the one control that section missed). What was missing was the way IN.
+
+       ONE TAIL, NOT TWO. `.missbar` carries `margin-left:auto` itself, so a
+       second right-aligned group leaves the red button stranded in the middle
+       of the row with the pen at the end — drawn, looked at, and thrown away
+       (§41.9). The tail takes the auto and the bar gives its up. */
+    var penHTML = (stratTab && typeof secActs === "function") ? secActs() : "";
+    var tailHTML = (missHTML || penHTML)
+      ? '<span class="secttail">' + missHTML +
+          ((missHTML && penHTML) ? '<span class="sectsep" aria-hidden="true"></span>' : '') +
+          penHTML + '</span>'
+      : "";
+    /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
+       section left a pillars function with ONE section — and `> 1` took the
+       whole row away, the missing bar with it, so a function that genuinely
+       owed targets on its pillar measures would have lost the count AND the
+       fill button: §61 by exactly the road the same section was closing. The
+       row draws when it has sections to offer OR a bar to carry.
+
+       ONE SECTION STILL DRAWS NO BUTTON. A tab row of one says nothing —
+       §68's argument for a company having a single tab and therefore no row,
+       and the reason a pillars function's Strategy now goes straight to the
+       Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length > 1) {
+    if (!railed && secs && secs.length && (secs.length > 1 || tailHTML)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
-      document.getElementById("secrow-in").innerHTML = secs.map(function(s){
-        return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
-          ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
-      }).join("") +
-        /* §145.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam:
-           "that bar with that button is what goes up beside the plan, not
-           to waste lines") — the total, one red chip per place that owes,
-           and the red button, on the strategy tabs only, read mode too. */
-        ((currentSub === "strategy" || currentSub === "fnstrat") &&
-         typeof missBar === "function" ? missBar() : "");
+      document.getElementById("secrow-in").innerHTML =
+        (secs.length > 1 ? secs.map(function(s){
+          return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
+            ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
+        }).join("") : "") + tailHTML;
     } else {
       secrow.hidden = !onSecPage;
       /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the
@@ -1863,6 +2362,33 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* §189: size every growing prose box to what is in it. Here, at the end
+       of paint(), for SEARCHSEL's own reason — these are rebuilt on every
+       paint, and a height measured before the row is laid out is a height
+       measured against nothing. */
+    if (typeof growFields === "function") growFields();
+    /* §278: and a target the twelve months now derive is locked where it
+       stands. Here, beside growFields, for the same reason: the box is the
+       real bound field on every paint, and what changes is only whether it
+       accepts typing — so the state is applied to what the paint just drew
+       rather than baked into a second, unbound copy of the control (§96). */
+    if (typeof monthlyLocks === "function") monthlyLocks();
+    /* §279: and mark the reporting controls the bar is counting — after
+       wire(), because it reads the DOM this paint produced, and in ONE place
+       rather than threading a flag through eight box builders (§53.5, §104.7:
+       a list of call sites is a list somebody forgets to add to).
+
+       BOTH, and in this order: §278 decides whether a box accepts typing and
+       this one decides whether a box is walked to, so they annotate the same
+       controls about different things and neither reads the other's mark. The
+       merge offered them as alternatives; they are not (§56.7's shape, caught
+       by reading the conflict rather than taking a side). */
+    if (typeof repMarkControls === "function") repMarkControls();
+    /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
+       cannot take it with the button it belongs to — it would be left hanging
+       over a page it no longer points at. Same reason SEARCHSEL.wire() closes
+       its own popup first (§30.1). */
+    MONTHPOP.shut();
     /* The office's inbox, if this paint drew it. It binds ONCE per rendered
        frame and then fills and refreshes itself on its own clock — nothing in
        it ever calls paint(), or a reply being typed would be thrown away every
@@ -1874,6 +2400,8 @@
        around — so it re-resolves them and puts the shade and the card back.
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
+    if (typeof SAFETY !== "undefined") SAFETY.onPaint();
+    if (typeof TRAIL !== "undefined") TRAIL.onPaint();
     /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
        The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
        corners with the page's ground so nothing shows through them while it
@@ -1895,10 +2423,8 @@
        happen to agree. Shrink the root by that offset plus a pixel and the
        band stops being wholly inside it at exactly the moment it pins. */
     pinWatch();
+    watchTailFold();
     clipTitles();
-    /* The header this paint just drew is a different element from the last
-       one's, so the observer is re-pointed at it (§135.10). */
-    watchSetupHead();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
        then moved — that flash is the jump, only quicker. */
@@ -1921,6 +2447,17 @@
        loop — and it REPLACES the body, so the bindings wire() has just made on
        the old nodes die with them rather than doubling up (§47.2). */
     if (PDLG && document.getElementById("modal-b")) personDialogPaint();
+    /* AND THE SETUP TABLES' DIALOG, the same line for the same reason (§272). */
+    /* ON, not merely present: `#modal-b` is the shared overlay's body and is in
+       the document at all times, emptied rather than removed (§116.6). Without
+       the state test, the paint that runs just BEFORE the dialog opens would
+       write the body into a hidden overlay and openModalHtml would overwrite
+       it a line later — harmless, and a reader would have to prove it. */
+    if (ROWDLG && overlay.classList.contains("on")) rowDialogPaint();
+    /* AND WHERE YOU ARE IS REMEMBERED HERE, for the same reason the save is
+       (§173): every navigation ends in a paint, so one line covers a door
+       added tomorrow and there is no list of handlers to keep up to date. */
+    rememberWhere();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }
@@ -1962,6 +2499,71 @@
     }, { threshold: [1], rootMargin: "-" + (top + 1) + "px 0px 0px 0px" });
     Array.prototype.forEach.call(bands, function(b){ PINSEE.observe(b); });
   }
+  /* ── AND A WINDOW THAT CHANGES SIZE HAS TO REACH THE FOLD (§267) ─────
+     `tailFolds()` is read while the plan table is being BUILT, because what
+     folds is a control and a media query cannot move one. The cost of
+     deciding at render time is that a window resized afterwards is looking at
+     a layout chosen for the width before — and Islam's own report is a ZOOMED
+     page, which is a resize. So the answer is re-asked when the window
+     changes and the page is repainted only when it actually FLIPS: dragging a
+     window edge fires this on every pixel, and repainting on every pixel would
+     throw away the box somebody is typing in forty times a second (§35).
+
+     ARMED ONCE, LIKE THE OBSERVER ABOVE (§24, §47.2) — a listener added per
+     paint is a listener added a hundred times. `TAIL_WAS` is refreshed on
+     every paint, so it always holds what was actually DRAWN rather than what
+     was true when the listener was made.
+
+     AND NEVER UNDER A TYPING HAND: a bound field writes on `change`, which is
+     on blur (§35), so repainting while one has the cursor destroys the box
+     mid-word and the value with it. The paint waits for the blur that was
+     going to commit it anyway. */
+  /* ── AND THE BOXES ARE RE-MEASURED WHEN THE WINDOW MOVES (§267.2) ────
+     Islam, of the §267 build: *"the tactic and description and outcome boxes
+     stopped fitting the content and started cutting it"*. A defect, and it is
+     §267's own: a growing box is sized by MEASURING its text (§189), and that
+     measurement happens at the end of a paint. `watchTailFold()` below
+     repaints only when the fold FLIPS, which is right — so between 1400 and
+     the next threshold the window narrows, the boxes narrow, the text needs
+     another line, and nothing re-measures them. The box keeps the height it
+     was given at the old width and clips.
+
+     IT ONLY EVER HAPPENS ON A RESIZE, which is exactly what a zoom is, and is
+     why nothing caught it: a page OPENED at 1000px has none of its fifteen
+     boxes cut, and the same page NARROWED to 1000px has nine.
+
+     Cheap enough to run on every frame of a drag and it is still throttled to
+     one, because resize fires per pixel. It sets a height and nothing else —
+     no paint, no state, nothing to disturb a half-typed sentence, which is
+     what lets it run under a cursor where a repaint may not (§35). */
+  var GROWSOON = 0;
+  function refitGrowOnResize(){
+    if (GROWSOON || typeof growFields !== "function") return;
+    GROWSOON = requestAnimationFrame(function(){ GROWSOON = 0; growFields(); });
+  }
+
+  var TAIL_WATCHED = false, TAIL_WAS = false;
+  function watchTailFold(){
+    TAIL_WAS = typeof tailFolds === "function" && tailFolds();
+    if (TAIL_WATCHED || typeof window === "undefined") return;
+    TAIL_WATCHED = true;
+    window.addEventListener("resize", function(){
+      /* First, and whatever the fold does: the boxes must fit their text at
+         the width the window is NOW (§267.2). */
+      refitGrowOnResize();
+      if (typeof tailFolds !== "function") return;
+      var now = tailFolds();
+      if (now === TAIL_WAS) return;
+      TAIL_WAS = now;
+      var a = document.activeElement, pane = document.getElementById("panel");
+      if (a && a.tagName && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) &&
+          pane && pane.contains(a)) {
+        a.addEventListener("blur", function(){ paint(); }, { once: true });
+        return;
+      }
+      paint();
+    });
+  }
   function clipTitles(){
     document.querySelectorAll(".cfg table td").forEach(function(td){
       /* A CELL THAT ALREADY SAYS SOMETHING ON HOVER KEEPS SAYING IT. The
@@ -1997,6 +2599,36 @@
     var top = (below < h + 12 && r.top > below) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
     pop.style.left = Math.round(left) + "px";
     pop.style.top = Math.round(top) + "px";
+  }
+
+  /* ── AND A PRESS OUTSIDE PUTS IT AWAY (§203) ───────────────────────
+     Islam: *"when I choose the who to send to from the filters when I click
+     outside the drop down let it close. of course what is selected is
+     saved."* Nothing is at risk — every tick is written to `SENDMSG` the
+     moment it is made (`data-aud`'s own handler) and `DDOPEN` is only which
+     panel is on screen — so closing is purely putting the panel away.
+
+     ON `pointerdown`, NOT `click` (§100.4): a panel that lingers until the
+     mouse comes up reads as having missed the press. WIRED ONCE, at the
+     document, and never in `wire()` — that runs on every paint, so a
+     listener added there would stack one deep per repaint (§24, §47.2), and
+     this one repaints.
+
+     TWO THINGS ARE NOT "OUTSIDE": the panel itself, obviously, and the
+     BUTTON ROW — the buttons already toggle, so letting this fire there
+     would close the panel and then the button's own handler would reopen
+     it, or worse, close the one being opened. */
+  var DD_OUTSIDE = false;
+  function ddWireOutside(){
+    if (DD_OUTSIDE) return;
+    DD_OUTSIDE = true;
+    document.addEventListener("pointerdown", function(ev){
+      if (!DDOPEN) return;
+      var t = ev.target;
+      if (t && t.closest && (t.closest(".ddpop") || t.closest(".ddbar"))) return;
+      DDOPEN = null;
+      paint();
+    }, true);
   }
 
   /* A row's action menu is position:fixed, so somebody has to put it where its
@@ -2074,7 +2706,7 @@
        a selector that no longer covers everything it is asked about does not
        fail, it silently does nothing. A menu added to a third table is
        positioned the day it is added by being given an attribute here. */
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu]");
     if (!btn) return;
     var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
     var below = window.innerHeight - r.bottom - 8;
@@ -2092,6 +2724,15 @@
      the SWOT), the walk itself finds the first place that owes. */
   function enterFillMode(page){
     if (page) EDIT_PAGE[page] = true;
+    /* §269: AND FOR AN AUTHOR THIS DOOR OPENS WHAT THE OTHER ONE DOES. The
+       red button and the section line are two ways into one mode, so leaving
+       them opening different amounts of it would put the tab in a state the
+       Edit button cannot describe. `secPagesOpen()` answers with the pages
+       this person may AUTHOR, so a fill-grant holder — who authors nothing —
+       gets exactly what they got before: the one page they asked for, and
+       §145's walk still carries the mode across places on its own. */
+    if (typeof secPagesOpen === "function")
+      secPagesOpen().forEach(function(p){ EDIT_PAGE[p] = true; });
     paint();
     /* THE WALK WAITS FOR THE PAINT IT NEEDS. On a real press, paint() is HELD
        until the click has landed (§30.1's CLICKING guard, released by a timer
@@ -2108,36 +2749,346 @@
      press landed on. When the page holds none, the walk goes to the first
      PLACE still owing — through the band's own chip, so the two ways of
      moving cannot disagree about where a place is. */
-  function gapWalk(){
-    var els = [].slice.call(document.querySelectorAll(".fld.gapfld, .qs-fill"));
-    if (!els.length){
-      var chip = document.querySelector("[data-gapband] .mchip:not(.done)");
-      if (chip) chip.click();
-      return;
-    }
-    var cur = document.activeElement, at = -1;
-    for (var i = 0; i < els.length; i++)
-      if (cur && (els[i] === cur || els[i].contains(cur))) { at = i; break; }
-    var next = els[(at + 1) % els.length];
-    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN
-       in place with a button in front of it, so ringing or focusing the
-       select itself lights nothing anybody can see (§34: whoever hides a
-       field hides its furniture — and whoever walks to one walks to its
-       furniture). */
-    var lit = next;
+  /* ── WALKING THE GAPS (§145.14, made to work in §177.2) ──────────────
+     Islam, pressing it: *"the CUS01 3 button just opens the project and the
+     next gap does nothing."* Three faults, and each hid the next.
+
+     1 · THE SELECTOR WAS AN ELEMENT TYPE. `.fld.gapfld` means an input or a
+         select wearing fill mode's class, so §177's month picker — a BUTTON —
+         was invisible to it, and on a project whose only gaps are due dates
+         the walker found nothing and fell back to clicking the chip for the
+         page it was already on. `.gapwalk` is the marker now, put on by
+         gapCell in both modes and carrying no styling of its own.
+     2 · AN AUTHOR'S FIELDS WERE NEVER MARKED AT ALL, so this had never done
+         anything in the office's pen — the loudest button on the bar, dead
+         for the person who uses it most.
+     3 · IT USED `document.activeElement` AS ITS CURSOR, and pressing the
+         button moves focus TO THE BUTTON, so every press computed "I am
+         nowhere" and lit the first field again. It reads the lit element
+         instead, which nothing but this function touches.
+
+     AND IT CROSSES PLACES, because the button says "N left" of the whole
+     subject: exhaust this page and it presses the next chip that still owes,
+     then walks that page's first gap — behind `setTimeout`, because a real
+     press holds the paint until the click lands (§30.1, §145.14). */
+  function gapWalkFields(place){
+    /* Scoped to ONE place when a chip has just named one -- a function's
+       projects page draws every capability at once, so the page's first gap
+       is not the chip's first gap (§177.2). */
+    var root = document;
+    if (place) root = document.querySelector('[data-gplace="' +
+      place.replace(/"/g, '\\"') + '"]') || document;
+    return [].slice.call(root.querySelectorAll(".gapwalk, .qs-fill"));
+  }
+  function gapLight(el){
+    document.querySelectorAll(".gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
+    /* THE CURSOR IS MARKED ON THE WALKABLE ELEMENT, NOT ON THE LIT ONE. For a
+       §130.1 picker those are two different nodes -- the native select is
+       hidden and its `.ssbtn` is what gets the ring -- and the ssbtn is a
+       SIBLING, so a cursor read back off the lit element found nothing among
+       the fields and every press lit the first one again (§34: whoever hides
+       a field hides its furniture, and whoever walks to one must still know
+       which field it was). */
+    document.querySelectorAll("[data-gapat]").forEach(function(e){
+      e.removeAttribute("data-gapat"); });
+    el.setAttribute("data-gapat", "1");
+    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN in
+       place with a button in front of it, so ringing the select itself lights
+       nothing anybody can see (§34: whoever hides a field hides its
+       furniture — and whoever walks to one walks to its furniture). */
+    var lit = el;
     if (lit.previousElementSibling && lit.previousElementSibling.classList &&
         lit.previousElementSibling.classList.contains("ssbtn"))
       lit = lit.previousElementSibling;
-    els.forEach(function(e){ e.classList.remove("gaplit"); });
-    document.querySelectorAll(".ssbtn.gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
     lit.classList.add("gaplit");
     lit.scrollIntoView({ block: "center" });
     var f = lit.matches("input,select,textarea,button")
       ? lit : lit.querySelector("button,input,select,textarea");
     if (f) f.focus({ preventScroll: true });
   }
+  /* The first place that still owes and is NOT already on the screen.
+     A FUNCTION'S PROJECTS PAGE DRAWS EVERY CAPABILITY AT ONCE, each with its
+     own rail, so several chips can be showing at the same moment — "the next
+     chip after the current one" picked one of those and the walk appeared to
+     wrap without going anywhere. Asked as "is this one visible" instead,
+     which is the same question a unit's single rail answers trivially. */
+  function gapChipShown(c){
+    /* RAIL_SHOWN, not RAIL: the first holds what the renderer DREW, the
+       second only what somebody has picked, and on a page nobody has clicked
+       the second is empty while the panes are plainly there (§177.2). */
+    return (!c.dataset.grail || RAIL_SHOWN[c.dataset.grail] === c.dataset.gcode) &&
+           (!c.dataset.gsec || CURSEC[currentSub] === c.dataset.gsec);
+  }
+  function gapChips(){
+    return [].slice.call(document.querySelectorAll("[data-gapband] .mchip:not(.done)"));
+  }
+  function gapPlaceOfChip(c){
+    return c && c.dataset.grail ? c.dataset.grail + "|" + c.dataset.gcode : null;
+  }
+  /* WHICH CHIP'S PLACE WE ARE WALKING. Remembered across paints, because
+     landing on a place repaints the page and the answer has to survive that;
+     falls back to the first place that is actually on screen, which is what
+     the first press of all needs. */
+  var GAPWALK_KEY = null;
+  function gapChipAt(chips){
+    for (var i = 0; i < chips.length; i++)
+      if (chips[i].dataset.gkey === GAPWALK_KEY) return i;
+    for (var j = 0; j < chips.length; j++) if (gapChipShown(chips[j])) return j;
+    return -1;
+  }
+  function gapGoTo(chip){
+    GAPWALK_KEY = chip.dataset.gkey;
+    var place = gapPlaceOfChip(chip);
+    chip.click();
+    setTimeout(function(){
+      var f = gapWalkFields(place);
+      if (!f.length) f = gapWalkFields();
+      if (f.length) gapLight(f[0]);
+    }, 0);
+  }
+  function gapWalk(){
+    var chips = gapChips();
+    var i = gapChipAt(chips);
+    var els = gapWalkFields(i >= 0 ? gapPlaceOfChip(chips[i]) : null);
+    var cur = document.querySelector("[data-gapat]");
+    var at = cur ? els.indexOf(cur) : -1;
+    if (els.length && at < els.length - 1) return gapLight(els[at + 1]);
+    /* Exhausted here. THE NEXT PLACE IN THE BAND'S OWN ORDER, not the first
+       one that happens to be off screen -- taking the first sent the walk
+       between two places for ever and never reached the third.
+
+       AND WHAT IS SKIPPED IS THE SAME PAGE, NOT WHAT IS VISIBLE. Skipping
+       every chip already on screen looked right and was not: a function's
+       projects page draws several capabilities at once, so a project that was
+       plainly visible had never been WALKED -- the field list is scoped to one
+       place. Two chips are the same page when they name the same place, or
+       when neither names one and both sit in the same section (a unit's
+       Foundation and Objectives are two chips over one page). */
+    var here = i >= 0 ? gapPlaceOfChip(chips[i]) : null;
+    var hereSec = i >= 0 ? (chips[i].dataset.gsec || "") : "";
+    var n = chips.length;
+    for (var step = 1; step <= n; step++) {
+      var c = chips[((i < 0 ? 0 : i) + step) % n];
+      var cp = gapPlaceOfChip(c);
+      var samePage = cp === here &&
+        (cp !== null || (c.dataset.gsec || "") === hereSec);
+      if (!samePage) return gapGoTo(c);
+    }
+    if (els.length) gapLight(els[0]);
+  }
+
+  /* ══ WALKING WHAT HOLDS SUBMIT (§279) ═══════════════════════════════
+     The reporting half of §145.12's walk, and deliberately not the same
+     function: that one walks a PLAN's fillable blanks in fill mode, keyed on
+     `EDIT_PAGE` and `.gapwalk`; this walks a CYCLE's reporting controls, which
+     have no mode and are not the same controls. What IS shared is the cursor —
+     `gapLight()`, where every subtle lesson of §177.2 lives (the ring goes on
+     the walkable element, a §130.1 picker's ring belongs to its `.ssbtn`
+     sibling, focus without scrolling) — so there is one ring on the page
+     whoever put it there, and the two field lists are disjoint, so a cursor
+     left by the other walk simply reads as "nowhere" and this one starts at
+     the top.
+
+     THE MARKS ARE PUT ON IN ONE PLACE AND NOT AT EIGHT CALL SITES. Which
+     control answers a row's blocker is a fact about the row, so it is read off
+     the same map the bar counts (§272's rule: the walk follows whatever the
+     bar is counting) and applied to the DOM the paint just produced. Driven
+     from the CONTROLS rather than from the ids, so no id ever has to be
+     escaped into a selector. */
+  function repMarkControls(){
+    document.querySelectorAll(".repwalk").forEach(function(el){
+      el.classList.remove("repwalk");
+      el.removeAttribute("data-rplace");
+    });
+    if (!REPORTING || typeof reportPlaces !== "function") return;
+    var map = {};
+    reportPlaces(REPORTING).forEach(function(e){
+      e.rows.forEach(function(r){ map[r.id] = { block:r.block, place:e.key }; });
+    });
+    document.querySelectorAll("[data-rep],[data-crep],[data-cpick]," +
+      "[data-cpct],[data-note],[data-cnote]").forEach(function(el){
+      var d = el.dataset;
+      /* WHICH QUESTION THIS BOX ANSWERS. A status picker and a figure box are
+         both "the figure is not in yet"; the per-cent box is the row that said
+         In progress and did not say how far; the note box is the explanation.
+         A row is marked ONCE, on the control that answers what it actually
+         owes — which is why `rowBlock()` tests `pend` before `owed`: an
+         unanswered In-progress row is both, and the box to land on is the
+         per-cent. */
+      var id, kind;
+      if (d.rep != null)        { id = d.rep;   kind = "owed"; }
+      else if (d.crep != null)  { id = d.crep;  kind = "owed"; }
+      else if (d.cpick != null) { id = d.cpick; kind = "owed"; }
+      else if (d.cpct != null)  { id = d.cpct;  kind = "pend"; }
+      else if (d.note != null)  { id = d.note;  kind = "note"; }
+      else                      { id = d.cnote; kind = "note"; }
+      var m = map[id];
+      if (!m || m.block !== kind) return;
+      el.classList.add("repwalk");
+      el.setAttribute("data-rplace", m.place);
+    });
+  }
+  /* Scoped to ONE place when a chip has named one — a function's reporting
+     page draws every capability at once, so the page's first outstanding box
+     is not the chip's first (§177.2, the same fault one feature over). */
+  function repWalkFields(place){
+    var all = [].slice.call(document.querySelectorAll(".repwalk"));
+    if (!place) return all;
+    return all.filter(function(e){ return e.getAttribute("data-rplace") === place; });
+  }
+  /* The plan's own gaps are a door, never a walk stop: they are filled on the
+     Strategy tab, so a chip for them cannot be walked to from here. */
+  function repChips(){
+    return [].slice.call(document.querySelectorAll("[data-repband] .mchip:not([data-rplan])"));
+  }
+  /* A place is on screen when its controls are: only the drawn pane's exist,
+     so this asks the DOM rather than re-deriving which rail is showing. */
+  function repChipShown(c){ return repWalkFields(c.dataset.rkey).length > 0; }
+  var REPWALK_KEY = null;
+  function repGoTo(chip){
+    REPWALK_KEY = chip.dataset.rkey;
+    var place = chip.dataset.rkey;
+    if (chip.dataset.rrail) RAIL[chip.dataset.rrail] = chip.dataset.rcode;
+    paint();
+    if (typeof toPaneTop === "function") toPaneTop();
+    /* Queued, because a real press holds the paint until the click lands
+       (§30.1) and the marked controls do not exist until it has (§145.14's
+       own fault, and §177.2's). */
+    setTimeout(function(){
+      var f = repWalkFields(place);
+      if (!f.length) f = repWalkFields();
+      if (f.length) gapLight(f[0]);
+    }, 0);
+  }
+  function repWalk(){
+    var chips = repChips(), i = -1, a;
+    for (a = 0; a < chips.length; a++)
+      if (chips[a].dataset.rkey === REPWALK_KEY) { i = a; break; }
+    if (i < 0) for (a = 0; a < chips.length; a++)
+      if (repChipShown(chips[a])) { i = a; break; }
+    var here = i >= 0 ? chips[i].dataset.rkey : null;
+    var els = repWalkFields(here);
+    var cur = document.querySelector("[data-gapat]");
+    var at = cur ? els.indexOf(cur) : -1;
+    if (els.length && at < els.length - 1) return gapLight(els[at + 1]);
+    /* Exhausted here — the next PLACE in the bar's own order, so the walk
+       cannot shuttle between two and never reach the third (§177.2). */
+    var n = chips.length;
+    for (var step = 1; step <= n; step++) {
+      var c = chips[((i < 0 ? 0 : i) + step) % n];
+      if (c.dataset.rkey !== here) return repGoTo(c);
+    }
+    if (els.length) gapLight(els[0]);
+  }
+
+    /* ── THE MONTH PICKER (§177) ────────────────────────────────────────
+       A due date is chosen, never typed. The button carries the FIELDS index
+       and the month and year it is currently showing; the panel is built by
+       monthPopHtml() and mounted on <body> as position:fixed, because a
+       project's tables sit inside `.tblscroll` and an absolute panel is
+       clipped to a strip of it (§45.5 settled this for searchsel).
+
+       PICKING FIRES THE SETTER AND NOTHING ELSE. `data-fld` writes without
+       repainting (§71.2), and this is the same contract: close the panel
+       FIRST -- the click is still inside it (§30.1) -- then write, then let
+       paint() run, which is what turns the red button amber. Stepping the
+       year rebuilds only the panel, so the year can be walked without
+       committing anything. */
+  var MONTHPOP = (function(){
+      var open = null;
+      var shut = function(){
+        if (!open) return;
+        open.pop.remove();
+        open.btn.classList.remove("open");
+        open.btn.setAttribute("aria-expanded", "false");
+        document.removeEventListener("pointerdown", open.onDoc, true);
+        document.removeEventListener("keydown", open.onKey, true);
+        window.removeEventListener("scroll", open.onGone, true);
+        window.removeEventListener("resize", open.onGone, true);
+        open = null;
+      };
+      var place = function(btn, pop){
+        var r = btn.getBoundingClientRect();
+        var h = pop.offsetHeight, w = pop.offsetWidth;
+        var below = window.innerHeight - r.bottom - 8;
+        var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
+        var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+        pop.style.top = Math.max(8, top) + "px";
+        pop.style.left = left + "px";
+      };
+      var draw = function(btn){
+        var mi = btn.dataset.mi === "" ? null : +btn.dataset.mi;
+        var yr = +btn.dataset.yr;
+        /* The lit month belongs to the year it was set in: step to 2027 and
+           nothing is lit, step back and Jul lights again. */
+        open.pop.innerHTML = monthPopHtml(mi, yr, yr === open.setYear);
+        place(btn, open.pop);
+      };
+      var write = function(value){
+        var btn = open.btn, i = +btn.dataset.month;
+        shut();
+        var fn = FIELDS[i];
+        if (!fn) return;
+        fn(value);
+        fieldSaved();
+        paint();
+      };
+      document.addEventListener("click", function(ev){
+        var btn = ev.target.closest && ev.target.closest("[data-month]");
+        if (btn) {
+          var was = open && open.btn === btn;
+          shut();
+          if (was) return;
+          var pop = document.createElement("div");
+          pop.className = "monthpop";
+          pop.setAttribute("role", "dialog");
+          pop.setAttribute("aria-label", "Pick a month");
+          document.body.appendChild(pop);
+          var onDoc = function(e){
+            if (!pop.contains(e.target) && !btn.contains(e.target)) shut();
+          };
+          var onKey = function(e){ if (e.key === "Escape") { shut(); btn.focus(); } };
+          var onGone = function(e){ if (!pop.contains(e.target)) shut(); };
+          open = { btn: btn, pop: pop, onDoc: onDoc, onKey: onKey, onGone: onGone,
+                   setYear: +btn.dataset.yr };
+          /* Nothing is lit until a month has been set: an empty cell must not
+             open with July already looking chosen (§15.1, absent never zero). */
+          if (btn.dataset.mi === "") open.setYear = null;
+          btn.classList.add("open");
+          btn.setAttribute("aria-expanded", "true");
+          draw(btn);
+          document.addEventListener("pointerdown", onDoc, true);
+          document.addEventListener("keydown", onKey, true);
+          window.addEventListener("scroll", onGone, true);
+          window.addEventListener("resize", onGone, true);
+          return;
+        }
+        if (!open) return;
+        var step = ev.target.closest("[data-myr]");
+        if (step && open.pop.contains(step)) {
+          open.btn.dataset.yr = +open.btn.dataset.yr + (+step.dataset.myr);
+          draw(open.btn);
+          return;
+        }
+        var pick = ev.target.closest("[data-mpick]");
+        if (pick && open.pop.contains(pick))
+          return write(monthValue(+pick.dataset.mpick, +open.btn.dataset.yr));
+        if (ev.target.closest("[data-mclear]") && open.pop.contains(ev.target))
+          return write("");
+      });
+      return { shut: shut };
+    })();
+
   function wire(){
-    document.querySelectorAll("#subtabs button").forEach(function(b){
+    /* `[data-s]`, NOT every button in the row (§150.1). The row gained a
+       second kind of child when the reporting controls moved onto it, and
+       this selector said "a button here is a tab" — so pressing Save draft
+       set `currentSub = undefined`, dropped the modes and repainted, which
+       from the outside looked exactly like the report closing itself. A
+       control is not a tab because of where it sits; a tab is the thing
+       carrying the key. Found by pressing the button, not by reading — every
+       assertion short of clicking it passed (§96's family). */
+    document.querySelectorAll("#subtabs button[data-s]").forEach(function(b){
       b.addEventListener("click", function(){
         /* A TAB IS SOMEWHERE ELSE TOO. Only the destination change dropped the
            modes, so pressing Strategy while reporting and coming back landed
@@ -2294,50 +3245,29 @@
     });
     wirePillars();
     wireArrange();
-    document.querySelectorAll("input[data-uname]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* Name is display only — the key is untouched, so nothing downstream
-           has to be found and updated. */
-        UNITS[inp.dataset.uname].name = inp.value || UNITS[inp.dataset.uname].name;
-        var row = GROUP.weighting.units.filter(function(r){ return r.key === inp.dataset.uname; })[0];
-        if (row) row.unit = UNITS[inp.dataset.uname].name;
-        fieldSaved();                       /* §71.2 — write, do not rebuild */
-      });
-    });
-    document.querySelectorAll("input[data-upx]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
-        fieldSaved();
-      });
-    });
+    wireSetupFields(document);
     /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
        save that will not happen has to say so where the save is (§42). */
-    document.querySelectorAll("input[data-ulogo]").forEach(function(inp){
+    /* The GROUP's mark (§259), on Setup › Branding. The same intake, the
+       same page-level refusal and the same delete-don't-blank as a unit's
+       directly above — a second answer to "what may be uploaded" is how the
+       two would come to disagree (§53.5). */
+    document.querySelectorAll("input[data-glogo]").forEach(function(inp){
       inp.addEventListener("change", function(){
-        var k = inp.dataset.ulogo, f = inp.files && inp.files[0];
-        inp.value = "";                       /* or the same file cannot be picked twice */
+        var f = inp.files && inp.files[0];
+        inp.value = "";
         if (!f) return;
         LOGO_NOTE = "";
         logoIntake(f).then(function(uri){
-          UNITS[k].logo = uri;
-          LOGO_NOTE = "";
-          /* No save call: sync.js polls the serialised state every 5s and
-             writes when it differs. Calling one would be a second way to
-             save, and the wrong one. */
-          paint();
+          GROUP.logo = uri; LOGO_NOTE = ""; paint();
         }, function(err){
-          LOGO_NOTE = UNITS[k].name + ": " + err.message;
-          paint();
+          LOGO_NOTE = GROUP.org + ": " + err.message; paint();
         });
       });
     });
-    document.querySelectorAll("[data-ulogoclear]").forEach(function(b){
+    document.querySelectorAll("[data-glogoclear]").forEach(function(b){
       b.addEventListener("click", function(){
-        /* DELETE the key rather than blanking it, so a unit with no mark is
-           the same shape it was before anybody uploaded one (§52). */
-        delete UNITS[b.dataset.ulogoclear].logo;
-        LOGO_NOTE = "";
-        paint();
+        delete GROUP.logo; LOGO_NOTE = ""; paint();
       });
     });
     wireImport();
@@ -2355,9 +3285,34 @@
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
+        /* §224: THE FORMAT DECIDES THE DECK, NOT THE PREFIX. Islam: *"the
+           consumer finance presentation is not showing anything."* This
+           branched on `fn:` alone and sent EVERY function to the capability
+           deck — so a function that plans in PILLARS, which has no
+           capabilities at all, opened a deck reading "Capability review · 0
+           capabilities" and nothing else. Reproduced on the demo's own
+           pillars function before a line was changed.
+
+           §63.4 fixed the other half of this — the button used to carry no
+           target and a pillars function could not be presented at all — and
+           routed every `fn:` to `openDeckFn`, which is right for a capability
+           function and wrong for the other format. §59's rule in the one
+           place still asking by prefix: a pillars function's plan is
+           unit-shaped, so it takes the unit deck through `unitLike()`, which
+           resolves both kinds of key in one place. */
         var t = this.dataset.present;
-        if (t.indexOf("fn:") === 0) openDeckFn(t.slice(3));
-        else openDeck(UNITS[t]);
+        var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+        if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk);
+        else openDeck(unitLike(t));
+      });
+    });
+    /* The master presentation (§266) — beside Present, because a flow is
+       several of those decks. `this`, and the picker asks the rule again for
+       itself, so a stale menu cannot open one (§48.2). */
+    document.querySelectorAll("[data-master]").forEach(function(b){
+      b.addEventListener("click", function(){
+        closeDlMenu(this);
+        masterOpen();
       });
     });
     /* Picture slides — beside Present, because it is the deck they go into
@@ -2393,6 +3348,7 @@
       });
     });
     document.querySelectorAll("[data-cnote]").forEach(function(el){
+      growBox(el);   /* §271, as on the unit's side */
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cnote);
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
@@ -2460,36 +3416,12 @@
         if (c) { RAIL[railKeyFor(c)] = b.dataset.rail; paint(); }
       });
     });
-    document.querySelectorAll("[data-unav]").forEach(function(el){
-      el.addEventListener("change", function(){
-        UNITS[el.dataset.unav].navName = el.value.trim() || null;
-        fieldSaved();
-      });
-    });
     document.querySelectorAll("[data-clearmenu]").forEach(function(b){
       b.addEventListener("click", function(ev){
         ev.stopPropagation();
         CLEARMENU = (CLEARMENU === b.dataset.clearmenu) ? null : b.dataset.clearmenu;
         CLEARING = null;
         paint();
-      });
-    });
-    document.querySelectorAll("[data-fname]").forEach(function(el){
-      el.addEventListener("change", function(){
-        FUNCTIONS[el.dataset.fname].name = el.value.trim() || FUNCTIONS[el.dataset.fname].name;
-        fieldSaved();
-      });
-    });
-    document.querySelectorAll("[data-fnav]").forEach(function(el){
-      el.addEventListener("change", function(){
-        FUNCTIONS[el.dataset.fnav].navName = el.value.trim() || null;
-        fieldSaved();
-      });
-    });
-    document.querySelectorAll("[data-fpx]").forEach(function(el){
-      el.addEventListener("change", function(){
-        FUNCTIONS[el.dataset.fpx].codePrefix = el.value.trim().toUpperCase();
-        fieldSaved();
       });
     });
     /* ── How a supporting function plans, and where it sits (§59) ──
@@ -2499,24 +3431,6 @@
        one that matters is the one the person can see. `format` is deleted
        rather than set to "projects": the default is what an absent key means
        (§42, a reader must never create the field it was looking for). */
-    document.querySelectorAll("[data-fnformat]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var f = FUNCTIONS[this.dataset.fnformat];
-        if (this.value === "pillars") f.format = "pillars"; else delete f.format;
-        /* A projects function sits under nothing: the field would be stored
-           and never read, which is the column §53.4 removed from the database
-           for exactly this reason. */
-        if (!fnPlansInPillars(f)) delete f.under;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fnunder]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var f = FUNCTIONS[this.dataset.fnunder];
-        if (this.value) f.under = this.value; else delete f.under;
-        paint();
-      });
-    });
     document.querySelectorAll("[data-fnretire]").forEach(function(b){
       b.addEventListener("click", function(){
         var f = FUNCTIONS[b.dataset.fnretire];
@@ -2602,6 +3516,13 @@
     });
     var cc = document.querySelector("[data-closecycle]");
     if (cc) cc.addEventListener("click", function(){
+      /* §273.4: THE GUARD WENT WITH THE DRAFT. §273 held this button back while
+         a field had been changed and not saved, because closing files the
+         cycle's figures under its NAME and a press over an unsaved rename must
+         neither quietly save it nor quietly throw it away. With the fields
+         writing as they are left there is no unsaved state to protect, so
+         there is nothing to hold: the button is live, behind the pen, which is
+         where Islam asked for it. */
       var gaps = 0;
       activeKeys().forEach(function(k){ var c = reportedCount(UNITS[k]); gaps += c.total - c.done; });
       if (!confirm("Close " + REVIEW.name + "?" +
@@ -2613,28 +3534,136 @@
       activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
       HISTORY.push(snap);
       REVIEW.state = "closed";
+      /* The pen goes with the cycle it was editing (§273). Leaving it open
+         would put an "Edit this cycle" panel under a strip that has just
+         started offering "Open a new cycle...", with a Close button in it for
+         a cycle that is already closed. */
+      CYCLEEDIT = null;
       paint();
     });
+
+    /* ── EDITING THE OPEN CYCLE (§273, restructured by §273.4) ──────
+       ONE CONTROL, AND IT SAYS WHICH WAY IT GOES. Islam: "why is the edit
+       button still there it should turn into done editing so I click it and
+       the box collapse saving what I did rather than having a save and cancel
+       buttons inside the box itself."
+
+       So `CYCLEEDIT` is a MODE, not a draft: the fields write straight through
+       `FIELDS` on `change` like every other field in the platform, and this
+       button only opens and closes the pen. `cycleDraft()`, `cycleEditDirty()`,
+       `ceHoldPaint()`, the two `data-ce-*` handlers and the four `input`
+       handlers are DELETED rather than left unreachable (§24). */
+    var ec = document.querySelector("[data-editcycle]");
+    if (ec) ec.addEventListener("click", function(){
+      if (REVIEW.state !== "open") return reopenDialog();
+      /* COMMIT THE BOX BEFORE LEAVING IT (§219). A field writes on `change`,
+         which is on blur — a mouse press blurs on the way past, which is the
+         almost-always that hides this, and a keyboard press does not. `blur()`
+         rather than a synthesised event, because it is what the browser does
+         when focus moves, and a field already committed fires nothing. */
+      var a = document.activeElement;
+      if (CYCLEEDIT && a && a.blur) a.blur();
+      CYCLEEDIT = CYCLEEDIT ? null : true;
+      paint();
+      if (CYCLEEDIT) {
+        var f = document.querySelector(".newcycle input.fld");
+        if (f) f.focus();
+      }
+    });
+
+    /* ── REOPENING A CLOSED CYCLE (§273.2, reshaped by §273.3) ──────
+       Before this, NOTHING in the product reopened a cycle: `canReport()` and
+       `canReportFn()` both open with `REVIEW.state !== "open"` BEFORE any role
+       test, so a closed cycle took no figures from anyone, the office
+       included — and the reporting page said "The SMO reopens a cycle if
+       something has to be corrected", which nothing carried out (§104.8's
+       family). Exactly one place wrote `state:"open"` and it was the mint of a
+       brand-new cycle, which archives and clears the tenant.
+
+       CLOSING LOSES NOTHING, measured: it files a score snapshot and marks the
+       cycle closed, touching no figure, note, status, submission mark or
+       picture slide. So reopening undoes exactly two things.
+
+       §273.3: THE RECORD AND THE CONFIRMATION ARE ONE THING. It was a panel
+       and then a browser `confirm()` — two steps, and the first of them a band
+       repeating the strip above it. The platform's own dialog says what the
+       cycle closed at and what reopening does, and asks in the same breath.
+       AND IT REMOVES A `confirm()`, which §95 already ruled against for the
+       most irreversible act in the product: a browser dialog can be silenced
+       permanently on some other site and never appear again.
+
+       `.sendconfirm` AND `.cbtns`, NOT A FOURTH COPY. That shape — a title, a
+       stack of label/value rows, two buttons — is what every confirmation in
+       this product already wears (§53.5, and `.cbtns`' own note about the
+       third copy being the one that gets extracted). */
+    function reopenDialog(){
+      var last = HISTORY.length ? HISTORY[HISTORY.length - 1] : null;
+      var scored = last && last.name === REVIEW.name ? last.group : null;
+      var covers = cycleMeta();
+      openModalHtml("Reopen " + esc(REVIEW.name) + "?", "",
+        '<div class="sendconfirm reopenconfirm">' +
+          /* THE ONE FACT THAT IS NOT ON THE STRIP leads, because it is what
+             somebody deciding whether to reopen actually wants. Absent when the
+             record is not this cycle's, rather than invented (§35). */
+          (scored == null ? '' :
+            '<div class="kv"><span class="k">Closed at</span><span><b>' +
+              scored + '%</b></span></div>') +
+          '<div class="kv"><span class="k">Reported as of</span><span><b>' +
+            esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b></span></div>' +
+          '<div class="kv"><span class="k">Covers</span><span>' +
+            esc(covers) + '</span></div>' +
+          '<div class="kv"><span class="k">What happens</span><span>Its figures ' +
+            'become live again and the people who report can change them. The ' +
+            'closing record is taken back, so when you close it again the ' +
+            'corrected figures are what is kept.</span></div>' +
+          '<div class="cbtns"><button data-reopenno="1">Cancel</button>' +
+          '<button class="danger" data-reopenyes="1">Reopen ' +
+            esc(REVIEW.name) + '</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var no = box.querySelector("[data-reopenno]");
+      if (no) no.addEventListener("click", function(){ closeModal(); });
+      var yes = box.querySelector("[data-reopenyes]");
+      if (yes) yes.addEventListener("click", function(){
+        closeModal();
+        /* THE CLOSING RECORD COMES BACK, matched by NAME rather than popped
+           blind: this page lists HISTORY and `lastClose()` compares against
+           it, so a close/reopen/close that left the first record standing
+           would list the same cycle twice and compare against the stale,
+           uncorrected numbers. Re-read at press time rather than trusting what
+           the dialog was drawn from (§48.2). */
+        var l = HISTORY.length ? HISTORY[HISTORY.length - 1] : null;
+        if (l && l.name === REVIEW.name) HISTORY.pop();
+        REVIEW.state = "open";
+        CYCLEEDIT = null;
+        paint();
+      });
+    }
     /* Opening a cycle now DESCRIBES it first (§47.8). The button fills a draft
        from what can honestly be guessed — the new period starts where the last
        one ended — and asks for the rest. Nothing touches REVIEW until Open. */
     var oc = document.querySelector("[data-opencycle]");
     if (oc) oc.addEventListener("click", function(){
-      NEWCYCLE = { name:"", from:REVIEW.to || "", to:"", due:"",
-                   endsQuarter:REVIEW.endsQuarter || 4 };
+      /* §239: the draft carries the REVIEW POINT forward, not a quarter. It
+         is left EMPTY rather than guessed -- the whole fault this replaces was
+         a review point nobody had chosen, and a guess here would put one back. */
+      NEWCYCLE = { name:"", from:REVIEW.to || "", to:"", due:"" };
       paint();
       var f = document.getElementById("nc-name");
       if (f) f.focus();
     });
-    ["nc-name","nc-from","nc-to","nc-due","nc-q"].forEach(function(id){
+    /* `nc-q` is GONE with its select (§239): the review point is a month now
+       and is picked, not typed, so it writes through FIELDS like every other
+       month in the product rather than through an id read here. */
+    ["nc-name","nc-from","nc-to","nc-due"].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
       /* `input`, not `change`: the draft has to be current when Open is
          pressed, and a change event does not fire until blur — pressing Open
          directly from a field would read the value before the last one typed. */
       el.addEventListener("input", function(){
-        var k = id === "nc-q" ? "endsQuarter" : id.slice(3);
-        NEWCYCLE[k] = el.value;
+        NEWCYCLE[id.slice(3)] = el.value;
       });
     });
     var ncc = document.querySelector("[data-nc-cancel]");
@@ -2648,6 +3677,18 @@
         alert("Give the cycle a name — it is what its figures are filed under " +
               "once it closes, and what the next cycle compares against.");
         var f = document.getElementById("nc-name"); if (f) f.focus();
+        return;
+      }
+      /* §239: AND THE REVIEW POINT IS ASKED FOR, for a stronger reason than
+         the name. It decides what every figure in the cycle is measured
+         against -- a target that adds up is compared with the share of it due
+         by then, and a tactic whose span has not started is not asked at all.
+         §47.8 removed a hard-coded end quarter because "a wrong guess silently
+         changes every unit's execution score"; defaulting this would put that
+         guess straight back. */
+      if (!String(d.asOfMonth || "").trim()) {
+        alert("Pick the month this cycle reports as of \u2014 it decides what every " +
+              "figure is measured against.");
         return;
       }
       /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
@@ -2674,8 +3715,12 @@
       }
       clearForNewCycle();
       REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
-                 due:d.due || "", endsQuarter:Number(d.endsQuarter) || 4,
-                 state:"open", note:{}, submitted:{}, cadence:REVIEW.cadence };
+                 due:d.due || "", state:"open", note:{}, submitted:{},
+                 cadence:REVIEW.cadence };
+      /* Stored as an ABSENCE when it was not picked (§50.6), so an unasked
+         cycle and one whose month was cleared are byte-identical and neither
+         puts a phantom change into the next save. */
+      if (d.asOfMonth) REVIEW.asOfMonth = d.asOfMonth;
       NEWCYCLE = null;
       paint();
     });
@@ -2685,15 +3730,59 @@
            reporting page and is NOT a unit on "Figures I report" — that page
            carries rows from several units at once, so each field names its
            own. One handler, because two would drift (§42.3). */
-        var hit = findById(UNITS[el.dataset.repu || current], el.dataset.rep);
+        /* ── AND A SUPPORTING FUNCTION IS A DESTINATION TOO (§183) ────────
+           This said `UNITS[...]`, and on a function that plans in pillars
+           `current` is "fn:merchandising" — for which `UNITS[...]` is
+           undefined. `findById` then read `u.ukey` off nothing and THREW, so
+           **every figure and every note typed on such a function's reporting
+           page was discarded in silence**: the value never reached the row,
+           the save was never scheduled, and the only witness was a console
+           nobody has open. §63's own fault ("`UNITS["fn:…"]` is undefined —
+           one place still asking differently"), in the two places that fix
+           did not reach.
+
+           `unitLike()` and NOT `unitLikeWritable()`: this handler finds a row
+           that already exists and writes one value into it, and the reading
+           view hands out the function's REAL arrays (§61) — so the write goes
+           through — while the writing half MINTS containers, which is a side
+           effect nothing here asks for (§42, §50.6: a reader must never create
+           the field it was looking for). */
+        var subj = unitLike(el.dataset.repu || current);
+        if (!subj) return;
+        var hit = findById(subj, el.dataset.rep);
         if (!hit) return;
         var v = el.value.trim();
         /* The field holds the bare number; the unit lives in the suffix beside
            it. Rejoin them before storing, or every screen downstream reads a
            revenue of "2.7" where it expects "2.7B EGP". */
         var unit = el.dataset.unit || "";
+        /* ── §248: A TACTIC MEASURED BY ITS OUTCOME ───────────────────────
+           The box says which field it is for. `outActual` is a figure in the
+           outcome's OWN unit — stores, EGP, a per cent — so it is joined with
+           its unit and stored whole, exactly as a measure's actual is, and it
+           is NOT clamped to 0–100: 7 stores against a target of 6 is a real
+           answer and 700 would be nonsense. `actual` keeps meaning "% delivered"
+           and keeps every rule it had, so nothing already reported changes
+           meaning when an outcome is added beside it. */
+        if (el.dataset.fld === "outActual") {
+          if (v !== "" && unit) v = joinTarget(unitTight(hit.obj.outActual || ""), v, unit);
+          if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
+          /* The status still follows the work, and an outcome that has reached
+             its target is done. `tacticOutcomeScore` is the one reader of that
+             (§53.5) rather than a second comparison written here. */
+          var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
+          if (sc == null) hit.obj.status = "Not started";
+          else if (sc >= 100) hit.obj.status = "Done";
+          else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
+          paint(); return;   /* paint() ends in afterPaint() (§170) */
+        }
+        /* §254.1: JOINED AGAINST THE HEALED STRING. `joinTarget` takes its
+           separator from the value it is replacing, so a stored
+           "8 M EGP M EGP" would hand its own doubling back to the next save.
+           Healing the value it reads from is what makes "heal on save" true
+           rather than merely "heal on screen". */
         if (hit.kind !== "TACTIC" && v !== "" && unit)
-          v = joinTarget(hit.obj.actual || hit.obj.target, v, unit);
+          v = joinTarget(unitTight(hit.obj.actual || hit.obj.target), v, unit);
         if (hit.kind === "TACTIC") {
           var n = parseInt(v.replace("%",""), 10);
           hit.obj.actual = v === "" ? null : Math.max(0, Math.min(100, isNaN(n) ? 0 : n));
@@ -2715,13 +3804,24 @@
       });
     });
     document.querySelectorAll("[data-note]").forEach(function(el){
+      /* §271: the box follows what is being typed into it. Wired here rather
+         than in `growFields()` — that one sizes what a paint has just drawn,
+         and this is the listener for the keystrokes in between. */
+      growBox(el);
       el.addEventListener("change", function(){
-        var hit = findById(UNITS[current], el.dataset.note);
+        /* The same fault and the same fix as the figure beside it (§183): a
+           note typed on a pillars function's reporting page threw and was
+           lost. The note is the half a reporter is REQUIRED to write when a
+           figure is off track (§105's submit refusal), so losing it silently
+           also made that refusal impossible to satisfy. */
+        var subj = unitLike(current);
+        if (!subj) return;
+        var hit = findById(subj, el.dataset.note);
         if (hit) { hit.obj.note = el.value; paint(); }
       });
     });
     document.querySelectorAll("[data-unote]").forEach(function(el){
-      el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
+      el.addEventListener("change", function(){ setCycleNote(el.dataset.unote, el.value); });
     });
     /* ONE HANDLER FOR BOTH SUBMITS (§105). The attribute carries the TARGET --
        a unit key, or `fn:<key>` for a supporting function -- which is the same
@@ -2732,11 +3832,32 @@
       b.addEventListener("click", function(){
         var t = b.dataset.submit, why = submitRefusal(t);
         if (why) { alert(why + "\n\nNothing has been submitted."); return; }
-        REVIEW.submitted[t] = true; paint();
+        REVIEW.submitted[t] = true;
+        /* Submitting supersedes a parked draft: two closed states at once
+           would leave Reopen clearing one of them. */
+        if (REVIEW.parked) {
+          delete REVIEW.parked[t];
+          if (!Object.keys(REVIEW.parked).length) delete REVIEW.parked;
+        }
+        paint();
       });
     });
+    /* §220: ONE REOPEN FOR BOTH CLOSED STATES. A report is closed by
+       submitting it or by parking it as a draft, and the way back must not
+       depend on which — two buttons for one act is how the two states start
+       behaving differently (§53.5). */
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
-      b.addEventListener("click", function(){ delete REVIEW.submitted[b.dataset.unsubmit]; paint(); });
+      b.addEventListener("click", function(){
+        var t = b.dataset.unsubmit;
+        if (REVIEW.submitted) delete REVIEW.submitted[t];
+        if (REVIEW.parked) {
+          delete REVIEW.parked[t];
+          /* The last key leaving deletes the map (§50.6), or every save
+             carries a phantom change for ever. */
+          if (!Object.keys(REVIEW.parked).length) delete REVIEW.parked;
+        }
+        paint();
+      });
     });
     /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the
        top; each row is then a single mark. The half-set problem the first
@@ -2942,11 +4063,13 @@
        close as the question opens — and reopen for neither answer. */
     document.querySelectorAll("[data-clear]").forEach(function(b){
       b.addEventListener("click", function(){
-        CLEARING = b.dataset.clear; CLEARMENU = null; FNMENU = null; paint(); });
+        CLEARING = b.dataset.clear; CLEARMENU = null;
+        FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearno]").forEach(function(b){
       b.addEventListener("click", function(){
-        CLEARING = null; CLEARMENU = null; FNMENU = null; paint(); });
+        CLEARING = null; CLEARMENU = null;
+        FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearyes]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -2975,9 +4098,6 @@
         syncWeights();
         paint();
       });
-    });
-    document.querySelectorAll("[data-kov]").forEach(function(b){
-      b.addEventListener("click", function(){ KO_VIEW = b.dataset.kov; paint(); });
     });
     document.querySelectorAll("[data-tadd]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -3051,6 +4171,35 @@
         paint();
       });
     });
+    /* ── THE MONTHLY DRAWER (§278) ─────────────────────────────────────
+       Opening one closes any other: the drawer is 147px, and two of them push
+       the rows being compared off the screen. Toggling is a repaint, which is
+       safe here because it is a PRESS — the boxes inside refresh themselves in
+       place instead, so a repaint never lands under a typing hand (§71.2). */
+    document.querySelectorAll("[data-mpopen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.mpopen;
+        MONTHOPEN = (MONTHOPEN === k) ? null : k;
+        paint();
+      });
+    });
+    /* CLEARING IS A DELETION AND IS ASKED FOR ONCE. It throws away twelve
+       numbers somebody typed, and the target it derived stays behind as the
+       authored one — which is the honest carry-over (§278) and worth saying,
+       because the row does not visibly change until you look at the benchmark. */
+    document.querySelectorAll("[data-mpclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var e = MONTHREG[+b.dataset.mpclear];
+        if (!e) return;
+        if (!confirm("Clear this monthly plan? The twelve months are removed. " +
+                     "The annual target keeps the figure they added up to, and " +
+                     "the row goes back to being spread evenly across the year."))
+          return;
+        delete e.row[e.fld];
+        fieldSaved();
+        paint();
+      });
+    });
     document.querySelectorAll("[data-koadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var e = KOLISTS[+b.dataset.koadd];
@@ -3090,7 +4239,23 @@
            the rest — silently, which is the shape §96 exists to stop. Asked of
            the element rather than of the setter: `multiple` is undefined on an
            input and on a textarea, so every other field is untouched. */
+        /* AND A ONE-LINE BOX STORES ONE LINE (§260). §229 stopped Enter from
+           putting a break in here; nothing stopped a PASTE, and a paste of
+           four lines was measured storing them verbatim — after which the box
+           is as tall as what was pasted and every other surface goes on
+           printing the value on one line. Cleaned at the door it is stored
+           through, so there is no list of fields to keep up to date: the
+           `.grow` class IS the decision that this field is one line of prose,
+           and a rows-2 paragraph box never reaches this branch.
+
+           WRITTEN BACK INTO THE BOX, never only into the graph — seeing the
+           lines close up is the whole explanation (§124), and a box left
+           showing what was NOT stored is §96 with the sign reversed. */
         if (fn) {
+          if (el.classList.contains("grow") && typeof SMPRules !== "undefined") {
+            var one = SMPRules.oneLine(el.value);
+            if (one !== el.value) { el.value = one; fitGrow(el); }
+          }
           fn(el.multiple
             ? Array.prototype.filter.call(el.options, function(o){ return o.selected; })
                 .map(function(o){ return o.value; })
@@ -3107,17 +4272,39 @@
          `input` where a repaint would destroy the field being typed into
          (§35). Height is cleared first, or the box can only ever grow. */
       if (el.tagName === "TEXTAREA") {
-        var fit = function(){
-          el.style.height = "auto";
-          el.style.height = (el.scrollHeight + 2) + "px";
-        };
-        el.addEventListener("input", fit);
-        fit();
+        /* §260, through `growBox` since §271 — the sizer AND its listener,
+           because the reporting note needs the same pair and has no
+           `[data-fld]` branch to inherit it from. */
+        growBox(el);
+        /* §229: ENTER COMMITS A ONE-LINE PROSE BOX. §189's own text promised
+           it ("Enter blurs, which is what commits the value") and no code
+           ever carried it out, so a stray newline could ride a title into the
+           workbook and the deck. Only `.grow` — a rows-2 area (a definition,
+           a note) is a paragraph and keeps its key. Blur, never a synthesised
+           change (§219): it is what the browser does when focus moves, so an
+           already-committed box fires nothing. Wired here, in the one branch
+           every bound textarea passes through, so a box added tomorrow is
+           covered without a list to forget (§104.7). */
+        if (el.classList.contains("grow")) {
+          el.addEventListener("keydown", function(e){
+            if (e.key === "Enter") { e.preventDefault(); el.blur(); }
+          });
+        }
       }
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){
-        var k = b.dataset.page; EDIT_PAGE[k] = !EDIT_PAGE[k]; paint();
+        /* §269: ONE EDIT, ONE DONE. `data-page` is the control's OWN page and
+           decides the direction — the word on the button and the state it is
+           reversing; `data-pageset` is what the press moves, which for the
+           Strategy line is every section of the tab this person may author
+           (§268's `secPagesOpen()`). A control with no set — the group's
+           Foundation pen, its Temple bar, the fill bar's Done — moves its own
+           page and nothing else, which is the behaviour they have always had. */
+        var k = b.dataset.page, on = !EDIT_PAGE[k];
+        var set = b.dataset.pageset ? b.dataset.pageset.split("|") : [k];
+        set.forEach(function(pg){ if (pg) EDIT_PAGE[pg] = on; });
+        paint();
       });
     });
     /* The plan as slides (§117): builds and saves, repaints nothing — a
@@ -3171,6 +4358,81 @@
         paint();
       });
     });
+    /* THE AUDIENCE (§161). Its own handler rather than joining the q/a one
+       above: that one reads both fields off the card and writes them
+       together, and a <select> firing `change` would send its own value as
+       the question. Passed as the fourth argument, which the writers treat
+       as "leave it alone" when undefined. */
+    document.querySelectorAll("[data-kbaud]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var id = sel.dataset.kbaud, card = sel.closest(".kbed");
+        var q = ((card && card.querySelector("[data-kbq]")) || {}).value;
+        var a = ((card && card.querySelector("[data-kba]")) || {}).value;
+        if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a, sel.value);
+        else kbSetOver(id, q, a, sel.value);
+        paint();
+      });
+    });
+    /* ── THE QUESTIONS FILE (§161) ────────────────────────────────
+       The register file's handlers, on the knowledge base. Every one of them
+       is gated again here rather than trusting the render: a control is drawn
+       for the office and a handler is the thing that actually runs (§42, the
+       gate on the control). */
+    document.querySelectorAll("[data-kbfilemenu]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILEMENU = !KBFILEMENU; paint(); });
+    });
+    var dlkb = document.querySelector("[data-dlkb]");
+    if (dlkb) dlkb.addEventListener("click", function(){
+      if (!inOffice()) return;
+      KBFILEMENU = false;
+      sendXlsx(kbWorkbook(), "SMP - knowledge base questions.xlsx");
+    });
+    var kbf = document.getElementById("kb-file");
+    if (kbf) kbf.addEventListener("change", function(){
+      if (!inOffice()) return;
+      var file = this.files && this.files[0];
+      if (!file) return;
+      KBFILEMENU = false;   /* its job is done the moment a file is picked */
+      var rx = new FileReader();
+      rx.onload = function(){
+        readXlsx(rx.result).then(function(sheets){
+          /* §48.8: A FILE THAT CANNOT BE READ HAS TO SAY SO, where the upload
+             is. The likely mistake is a people workbook or a plan template
+             dropped here, and naming the sheet that is missing is what tells
+             somebody which file they picked up. */
+          if (!sheets["Questions"]) {
+            KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+              add:[], blank:0,
+              unknown:[{ id:"\u2014", q:"" }] } };
+            KBFILE.problem = file.name + " has no sheet called Questions. Download the " +
+              "questions file from Questions file and fill that one.";
+            paint();
+            return;
+          }
+          KBFILE = { name:file.name, changes:kbFromWorkbook(sheets) };
+          paint();
+        }).catch(function(e){
+          KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+            add:[], unknown:[], blank:0 },
+            problem:"That file could not be read (" + (e && e.message ? e.message : "unknown") +
+              "). It has to be the .xlsx downloaded from Questions file." };
+          paint();
+        });
+      };
+      rx.readAsArrayBuffer(file);
+      this.value = "";   /* or picking the same file twice fires nothing */
+    });
+    document.querySelectorAll("[data-kbapply]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice() || !KBFILE) return;
+        kbApply(KBFILE.changes);
+        KBFILE = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kbdiscard]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILE = null; paint(); });
+    });
     document.querySelectorAll("[data-kbreset]").forEach(function(b){
       b.addEventListener("click", function(){ kbResetOver(b.dataset.kbreset); paint(); });
     });
@@ -3192,36 +4454,43 @@
         paint();
       });
     });
+    /* A LEVEL'S COLOUR, AND THE TWO WAYS THE LIST CHANGES (§168). The colour
+       is the band's KEY — what its swatch, its pill and `needsNote()` all read
+       — so this writes the key and nothing else needs to know. */
+    document.querySelectorAll("[data-bcol]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var p = el.dataset.bcol.split("|");
+        BANDS.bands[+p[0]].key = p[1];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-bdel]").forEach(function(el){
+      el.addEventListener("click", function(){ removeBand(+el.dataset.bdel); paint(); });
+    });
+    document.querySelectorAll("[data-badd]").forEach(function(el){
+      el.addEventListener("click", function(){ addBand(); paint(); });
+    });
     /* A unit's company, and a company's two visibility flags. Both are
        configuration: they change who reaches what, never a figure. */
-    document.querySelectorAll("[data-ucomp]").forEach(function(el){
-      el.addEventListener("change", function(){
-        UNITS[el.dataset.ucomp].company = el.value || null;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-coflag]").forEach(function(el){
-      el.addEventListener("change", function(){
-        var p = el.dataset.coflag.split("|");
-        COMPANIES[p[0]][p[1]] = el.value === "yes";
-        paint();
-      });
-    });
     /* Companies get the life every other Setup table has (§49.3): a name that
        can be typed, an Add, and a Retire that refuses while units belong. The
        KEY is untouched by a rename, exactly as a unit's is, so every `cceo`
        role and every `units.company` pointer keeps working. */
-    document.querySelectorAll("input[data-coname]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        var co = COMPANIES[inp.dataset.coname];
-        if (co) co.name = inp.value.trim() || co.name;
-        fieldSaved();
+    /* Retiring or restoring a company is ASKED first (§272), because the
+       control moved into a menu: a menu item is one press from a stray click
+       in a way a worded button beside the row was not, and the refusal has to
+       live where the confirmation would be anyway (§62). */
+    document.querySelectorAll("[data-coclear]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        CLEARING = "co|" + b.dataset.coclear; COMENU = null; paint();
       });
     });
     document.querySelectorAll("[data-coact]").forEach(function(b){
       b.addEventListener("click", function(){
         var ck = b.dataset.coact;
         if (companyActive(ck)) retireCompany(ck); else restoreCompany(ck);
+        CLEARING = null; COMENU = null;
         paint();
       });
     });
@@ -3426,9 +4695,7 @@
     });
     document.querySelectorAll("[data-as]").forEach(function(b){
       b.addEventListener("click", function(){
-        VIEWER = b.dataset.as;
-        document.getElementById("asWho").value = VIEWER;
-        current = null; currentSub = null; paint(); window.scrollTo(0,0);
+        switchViewer(b.dataset.as);
       });
     });
     /* The SMO issues a temporary password; the server checks the policy and
@@ -3853,13 +5120,65 @@
           return;
         }
         ROLESTOP = null;
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           Islam, from the deployment: "hussein khaled is a custodian and
+           getting the super user … investigate how this happened as you
+           assured me that it's impossible." It was not impossible: §92 grants
+           a one-destination role ON THE PICK, a seat has exactly one
+           destination, and so the most powerful grant in the product was a
+           single `change` event with nothing in between.
+
+           §92's argument still holds for every OTHER role — a door behind a
+           door is a broken control — and it was an argument about a role
+           whose second question has one answer, never about how much the role
+           is worth. What a seat needs is not a second question; it is the
+           first one, asked out loud.
+
+           The dialog NAMES what it hands over rather than saying "are you
+           sure": the whole failure mode is somebody landing on the wrong line
+           of a dropdown, and a confirmation that does not say which line they
+           landed on catches none of them. */
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           The ask is STATE, drawn by the dialog's own body, and never a modal
+           of its own: the register's repaint rebuilds that dialog on every
+           change (§116.6), so a second modal opened from here is overwritten
+           before anybody can read it. Measured, not reasoned — the first
+           build did exactly that and the person form painted straight back
+           over the question. */
+        if (SMPRules.isSeatRole(role)) {
+          SEATASK = { key: key, role: role, at: at };
+          paint();
+          return;
+        }
+        SEATASK = null;
         grantPersonRole(key, role, at);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
+
     R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){
         tryGrantRole(sel.dataset.prolePick, sel.value);
+      });
+    });
+    /* §186's two answers. Cancel puts the picker back to "Choose a role…"
+       rather than leaving the seat showing: a select still displaying the
+       value it was just refused fires no `change` if it is picked again
+       (§110), so the control would read as dead for exactly the person who
+       changed their mind. */
+    R.querySelectorAll("[data-seatno]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SEATASK = null; ADDROLE_KIND = ""; paint();
+      });
+    });
+    R.querySelectorAll("[data-seatyes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = SEATASK;
+        SEATASK = null;
+        if (!a) { paint(); return; }
+        grantPersonRole(a.key, a.role, a.at);
+        ADDROLE = null; ADDROLE_KIND = "";
+        paint();
       });
     });
     R.querySelectorAll("[data-prole-off]").forEach(function(b){
@@ -3948,10 +5267,64 @@
     R.querySelectorAll("[data-usesaid]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.usesaid;
-        var said = SAIDWHERE && SAIDWHERE[key];
+        var said = saidAt(key);
         var p = personBy(key);
         if (!p || !said) return;
+        SAIDFAIL = null;
         attachPersonAt(p, said);
+        paint();
+      });
+    });
+
+    /* THE OTHER ANSWER (§180): the register was already right. Unlike Use it
+       beside it, this touches nothing in the state graph — a declaration lives
+       outside it (§56) — so there is no save to carry it and it goes straight
+       to the server.
+
+       WRITTEN LOCALLY BEFORE THE ANSWER COMES BACK, and that is deliberate:
+       the map is this screen's copy of a server fact, the press has to look
+       like it landed, and a failure PUTS IT BACK rather than leaving the row
+       claiming an answer the database never took (§171 — a failed write that
+       says nothing is the fault, not the failure). */
+    R.querySelectorAll("[data-dropsaid]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.dropsaid;
+        var was = SAIDWHERE && SAIDWHERE[key];
+        if (!was || typeof SYNC === "undefined" || !SYNC.dismissWhere) return;
+        SAIDFAIL = null;
+        SAIDWHERE[key] = { at: saidAt(key), dismissed: true };
+        paint();
+        SYNC.dismissWhere(key, function(err){
+          if (!err) return;
+          /* PUT IT BACK, AND SAY SO. Leaving the row claiming an answer the
+             database never took is the silent failure §171 was written about;
+             the sentence is the server's own, because it owns the refusal. */
+          SAIDWHERE[key] = was;
+          SAIDFAIL = { key: key, why: "Not saved \u2014 " + String(err.message || err) };
+          paint();
+        });
+      });
+    });
+
+    /* ── ANSWERING AN ATTENTION ITEM (§190) ───────────────────────────
+       Islam: "attention items that stays attention item is a problem — always
+       give me the option to dismiss." Every kind now has one, under the box it
+       is about.
+
+       IT WRITES THE FACT, NOT A PRESS. setAttnOff() stores what was answered
+       (§190's fingerprint), so the item comes back the moment that fact
+       changes — dismissing a Super user seat says nothing about the NEXT seat
+       somebody is given, which is exactly what §186 exists to catch.
+
+       AN ORDINARY EDIT OF THE ROW, so it rides the autosave and the server
+       authorises it as `setup` like every other person change (§42's
+       fall-through). paint() is what redraws the dialog, since §116 made the
+       register's repaint reach it. */
+    R.querySelectorAll("[data-attnoff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = personBy(b.dataset.attnoff);
+        if (!p || !b.dataset.attnkind) return;
+        setAttnOff(p, b.dataset.attnkind, true);
         paint();
       });
     });
@@ -4323,6 +5696,54 @@
         paint();
       });
     });
+    /* THE SAME TOGGLE FOR THE OTHER TWO TABLES (§272). Their own keys and
+       their own selectors, for the reason §93.14 gives about this one: the
+       three are never on screen together and a shared test would be a rule
+       that happens to work rather than one that is right. */
+    document.querySelectorAll("[data-umenu]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        UMENU = UMENU === b.dataset.umenu ? null : b.dataset.umenu;
+        CLEARING = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-comenu]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        COMENU = COMENU === b.dataset.comenu ? null : b.dataset.comenu;
+        CLEARING = null;
+        paint();
+      });
+    });
+    /* ── ARRANGING A SETUP TABLE (§272) ────────────────────────────────
+       THE FILTER AND THE SORT GO WITH THE PRESS, and that is not tidiness: a
+       search HIDES its rows rather than removing them, so they keep their
+       `data-oi` and sit invisibly between the ones you can see; a sort
+       REORDERS the rows in the DOM. Either one makes a drop land somewhere
+       other than where it looks — and what it would commit is the order of
+       the navigation, for everybody. The cost is stated on the band and is
+       one search box you have to type again. */
+    document.querySelectorAll("[data-setarrange]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.setarrange;
+        SETARRANGE = SETARRANGE === t ? null : t;
+        if (SETARRANGE) { TKQ[t] = ""; TKSORT[t] = null; }
+        UMENU = null; FNMENU = null; COMENU = null; CLEARING = null;
+        paint();
+      });
+    });
+    /* ── THE ROW'S DIALOG (§272) ───────────────────────────────────────
+       One door in for all three tables. `rowEditOpen` is what makes Cancel
+       able to undo: it takes the snapshot, and for a unit and a function it
+       now takes the role pointers with it (§110). */
+    document.querySelectorAll("[data-rowdlg]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        var bits = b.dataset.rowdlg.split("|");
+        openRowDialog(bits[0], bits.slice(1).join("|"));
+      });
+    });
     document.querySelectorAll("[data-fncolmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
@@ -4504,6 +5925,33 @@
         paintMsgPreview();
       });
     });
+    /* ── THE LINK IS COMPLETED WHERE IT IS TYPED (spec 027) ─────────
+       Islam typed `smp-orpin-tau.vercel.app` and the message went out with it
+       verbatim. In an email that is not an address at all — there is no base
+       document for it to be relative to — so the mail client handed it to
+       macOS, which looked for a file of that name and answered "-50". The
+       button was dead for everybody who pressed it.
+
+       ON `change`, WHICH FOR A TEXT BOX MEANS ON BLUR (§35) — never on
+       `input`, or `https://` would appear in front of the third character
+       somebody typed and the caret would sit behind it. So it happens once,
+       when they have finished, and it is WRITTEN INTO THE FIELD: seeing the
+       scheme appear IS the explanation, and a value quietly corrected on the
+       way out is one nobody can check (§124 — whatever reads a value cleans
+       it, rather than an instruction to go and look).
+
+       NOTHING IS REFUSED HERE. A half-typed address is a normal thing to have
+       in a box you are still filling in; the refusal belongs at the moment of
+       sending, where there is something to refuse. */
+    var ctahref = document.getElementById("msgctahref");
+    if (ctahref) ctahref.addEventListener("change", function(){
+      var fixed = SMPRules.webUrl(ctahref.value);
+      if (!fixed || fixed === ctahref.value.trim()) return;
+      ctahref.value = fixed;
+      sendmsg().ctaHref = fixed;
+      sendmsgTouched();
+      paintMsgPreview();
+    });
 
     /* THE OVERVIEW'S ONE LOUD CONTROL (§144.8). It moves to the other tab
        rather than doing anything itself — the composer is where the act
@@ -4579,6 +6027,7 @@
       });
     });
     positionDD();
+    ddWireOutside();
 
     /* ── Drafts (§76.1) ─────────────────────────────────────────────
        The word is written into the element, not painted: pressing Save must
@@ -4765,6 +6214,18 @@
       if (!sendmsgHasAny()) return say("Choose who it goes to first.", false);
       if (!st.subject.trim()) return say("It needs a subject.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
+      /* ── A BUTTON THAT CANNOT OPEN IS REFUSED (spec 027) ──────────
+         The blur above completes anything that CAN be completed, so what is
+         left here is a value no amount of tidying makes into a web address —
+         and the alternative to saying so is what happened: the message goes,
+         and every person who presses the button gets their operating system's
+         refusal instead of the platform. The one moment this can still be
+         stopped is before the confirmation, so it is checked here rather than
+         inside reallySend(), where a person has already said yes. */
+      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
+        return say("The button's link is not a web address, so it would not open " +
+                   "for anybody. Give it one starting https:// — or clear it " +
+                   "to send with no button.", false);
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       if (!n) return say("That comes to nobody with an address.", false);
       /* ── THE CONFIRMATION IS THE PLATFORM'S OWN (§95) ──────────────
@@ -4848,8 +6309,10 @@
              server fills it once per recipient, because who they are is the
              server's answer (spec 022, §74.2). */
           greeting: st.greet == null ? null : { word: st.greet },
-          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
-                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
+          /* THROUGH THE RULE, never the raw box: the two sends and the
+             preview must draw the same link, and it must be one that opens. */
+          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
+                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
         })
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
@@ -4915,6 +6378,13 @@
       }
       if (!st.subject.trim()) return say("It needs a subject before it can be previewed.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
+      /* THE SAME REFUSAL SEND MAKES (spec 027). A copy that quietly dropped the
+         button would be a preview of a message nobody can send — and the point
+         of a copy is to see what the recipients will see. */
+      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
+        return say("The button's link is not a web address, so it would not open " +
+                   "for anybody. Give it one starting https:// — or clear it " +
+                   "to send with no button.", false);
       var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
       var row = me ? PEOPLE.filter(function(p){ return p.key === me.key; })[0] : null;
       var addr = row ? String(row.email == null ? "" : row.email).trim() : "";
@@ -4937,8 +6407,10 @@
              there is one recipient and the browser knows who they are. */
           greeting: st.greet == null ? null
                       : { word: st.greet, name: SMPRules.firstName(row) },
-          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
-                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
+          /* THROUGH THE RULE, never the raw box: the two sends and the
+             preview must draw the same link, and it must be one that opens. */
+          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
+                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
         }),
         body: st.body.trim(),
         fromName: sh.fromName,
@@ -5071,23 +6543,152 @@
      handler rewrote the DOM under a button mid-click. A search box is an
      interaction that lasts several keystrokes; nothing may rebuild it while
      it is running. */
-  function wirePicker(){
-    document.querySelectorAll("[data-pick-open]").forEach(function(b){
+  /* ══ THE THREE SETUP TABLES' OWN FIELDS (§272) ══════════════════════
+     Every one of these was `document.querySelectorAll` inside `wire()`, which
+     is right while the fields are on the row and wrong the moment they are in
+     a dialog: the dialog's body is REPLACED after `wire()` has run, so the
+     bindings it just made die with the nodes and the fields go silent.
+
+     `root` is what fixes it, and it is the register's own arrangement
+     (`wirePersonFields`): `wire()` passes `document`, the dialog passes its
+     own body straight after writing it. Nothing about what a handler DOES has
+     changed — this is where they are looked for, not what they write.
+
+     ONE FUNCTION FOR THREE TABLES because a dialog can hold any of them and
+     asking which is open before wiring would be a fourth place to keep in step
+     (§104.7). Binding a selector that matches nothing costs nothing. */
+  function wireSetupFields(root){
+      root.querySelectorAll("input[data-uname]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          /* Name is display only — the key is untouched, so nothing downstream
+             has to be found and updated. */
+          UNITS[inp.dataset.uname].name = inp.value || UNITS[inp.dataset.uname].name;
+          var row = GROUP.weighting.units.filter(function(r){ return r.key === inp.dataset.uname; })[0];
+          if (row) row.unit = UNITS[inp.dataset.uname].name;
+          fieldSaved();                       /* §71.2 — write, do not rebuild */
+        });
+      });
+      root.querySelectorAll("input[data-upx]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("input[data-ulogo]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var k = inp.dataset.ulogo, f = inp.files && inp.files[0];
+          inp.value = "";                       /* or the same file cannot be picked twice */
+          if (!f) return;
+          LOGO_NOTE = "";
+          logoIntake(f).then(function(uri){
+            UNITS[k].logo = uri;
+            LOGO_NOTE = "";
+            /* No save call: sync.js polls the serialised state every 5s and
+               writes when it differs. Calling one would be a second way to
+               save, and the wrong one. */
+            paint();
+          }, function(err){
+            LOGO_NOTE = UNITS[k].name + ": " + err.message;
+            paint();
+          });
+        });
+      });
+      root.querySelectorAll("[data-ulogoclear]").forEach(function(b){
+        b.addEventListener("click", function(){
+          /* DELETE the key rather than blanking it, so a unit with no mark is
+             the same shape it was before anybody uploaded one (§52). */
+          delete UNITS[b.dataset.ulogoclear].logo;
+          LOGO_NOTE = "";
+          paint();
+        });
+      });
+      root.querySelectorAll("[data-unav]").forEach(function(el){
+        el.addEventListener("change", function(){
+          UNITS[el.dataset.unav].navName = el.value.trim() || null;
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("[data-fname]").forEach(function(el){
+        el.addEventListener("change", function(){
+          FUNCTIONS[el.dataset.fname].name = el.value.trim() || FUNCTIONS[el.dataset.fname].name;
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("[data-fnav]").forEach(function(el){
+        el.addEventListener("change", function(){
+          FUNCTIONS[el.dataset.fnav].navName = el.value.trim() || null;
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("[data-fpx]").forEach(function(el){
+        el.addEventListener("change", function(){
+          FUNCTIONS[el.dataset.fpx].codePrefix = el.value.trim().toUpperCase();
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("[data-fnformat]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var f = FUNCTIONS[this.dataset.fnformat];
+          if (this.value === "pillars") f.format = "pillars"; else delete f.format;
+          /* A projects function sits under nothing: the field would be stored
+             and never read, which is the column §53.4 removed from the database
+             for exactly this reason. */
+          if (!fnPlansInPillars(f)) delete f.under;
+          paint();
+        });
+      });
+      root.querySelectorAll("[data-fnunder]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var f = FUNCTIONS[this.dataset.fnunder];
+          if (this.value) f.under = this.value; else delete f.under;
+          paint();
+        });
+      });
+      root.querySelectorAll("[data-ucomp]").forEach(function(el){
+        el.addEventListener("change", function(){
+          UNITS[el.dataset.ucomp].company = el.value || null;
+          paint();
+        });
+      });
+      root.querySelectorAll("[data-coflag]").forEach(function(el){
+        el.addEventListener("change", function(){
+          var p = el.dataset.coflag.split("|");
+          COMPANIES[p[0]][p[1]] = el.value === "yes";
+          paint();
+        });
+      });
+      root.querySelectorAll("input[data-coname]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var co = COMPANIES[inp.dataset.coname];
+          if (co) co.name = inp.value.trim() || co.name;
+          fieldSaved();
+        });
+      });
+  }
+
+  /* SCOPED, FOR THE DIALOG (§272). The owner and custodian pickers are drawn
+     inside the row dialog now, and its body is replaced after `wire()` has run
+     — so the same argument `wireSetupFields` carries applies here, and for the
+     same reason it is one parameter rather than a second copy of the picker.
+     `#pickQ` stays a document lookup: exactly one picker is ever open. */
+  function wirePicker(root){
+    root = root || document;
+    root.querySelectorAll("[data-pick-open]").forEach(function(b){
       b.addEventListener("click", function(){
         PICKING = b.dataset.pickOpen; PICKQ = ""; paint();
       });
     });
-    document.querySelectorAll("[data-pick-cancel]").forEach(function(b){
+    root.querySelectorAll("[data-pick-cancel]").forEach(function(b){
       b.addEventListener("click", function(){ PICKING = null; PICKQ = ""; paint(); });
     });
-    document.querySelectorAll("[data-pick-set]").forEach(function(b){
+    root.querySelectorAll("[data-pick-set]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.pickSet.split("|");
         grantPersonRole(p[2], p[1], p[0]);
         PICKING = null; PICKQ = ""; paint();
       });
     });
-    document.querySelectorAll("[data-pick-clear]").forEach(function(b){
+    root.querySelectorAll("[data-pick-clear]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.pickClear.split("|");
         revokePersonRole(p[2], p[1], p[0]);
@@ -5098,7 +6699,7 @@
        which is the whole point — "create only the name and the Role", in
        Islam's words. They appear in the register immediately, for the rest of
        their details. */
-    document.querySelectorAll("[data-pick-new]").forEach(function(b){
+    root.querySelectorAll("[data-pick-new]").forEach(function(b){
       b.addEventListener("click", function(){
         var name = (PICKQ || "").trim();
         if (!name) return;
@@ -5134,12 +6735,12 @@
        way two copies of a rule drift. It writes { by } and nothing else: a
        figure a set holds is not offered a control at all, so this only ever
        sees a free figure or one this unit named itself. */
-    document.querySelectorAll("[data-name-open]").forEach(function(b){
+    root.querySelectorAll("[data-name-open]").forEach(function(b){
       b.addEventListener("click", function(){
         PICKING = b.dataset.nameOpen; PICKQ = ""; paint();
       });
     });
-    document.querySelectorAll("[data-name-set]").forEach(function(b){
+    root.querySelectorAll("[data-name-set]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.nameSet.split("|");        /* src|<unit>|<figure>|<person> */
         var hit = SMPRules.rowById(world(), p[1], p[2]);
@@ -5147,7 +6748,7 @@
         PICKING = null; PICKQ = ""; paint();
       });
     });
-    document.querySelectorAll("[data-name-clear]").forEach(function(b){
+    root.querySelectorAll("[data-name-clear]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.nameClear.split("|");
         var hit = SMPRules.rowById(world(), p[1], p[2]);
@@ -5162,7 +6763,7 @@
       PICKQ = q.value;
       var needle = PICKQ.trim().toLowerCase();
       var any = false;
-      document.querySelectorAll(".pickrow").forEach(function(r){
+      root.querySelectorAll(".pickrow").forEach(function(r){
         var hit = !needle || r.dataset.find.indexOf(needle) > -1;
         r.hidden = !hit;
         if (hit) any = true;
@@ -5180,14 +6781,14 @@
          thing that decides they are one person. */
       var near = false;
       if (needle && !any) {
-        document.querySelectorAll(".pickrow").forEach(function(r){
+        root.querySelectorAll(".pickrow").forEach(function(r){
           if (!namesLookLikeOne(needle, r.dataset.name)) return;
           r.hidden = false; near = true;
         });
       }
       /* A heading with nothing under it is a heading that lies about what the
          list contains. */
-      document.querySelectorAll(".pickhead").forEach(function(h){
+      root.querySelectorAll(".pickhead").forEach(function(h){
         var n = h.nextElementSibling, shown = false;
         while (n && n.classList.contains("pickrow")) {
           if (!n.hidden) shown = true;
@@ -5238,13 +6839,31 @@
     /* ── Reporting is a MODE now (§63.1) ─────────────────────────────
        Enter from Performance, leave with Cancel. Nothing is written by either:
        every figure was already saved as it was typed. */
-    document.querySelectorAll("[data-report]").forEach(function(b){
-      b.addEventListener("click", function(){
-        REPORTING = this.dataset.report; paint(); window.scrollTo(0,0);
-      });
-    });
+    /* §222: THE `[data-report]` HANDLER IS GONE WITH ITS BUTTON. Reporting
+       is a tab, and `paint()` sets the mode from the tab you are on — so this
+       wiring had nothing left to bind to. Deleted rather than left matching
+       nothing, because a handler for a control that no longer exists is one
+       the next reader takes for load-bearing (§24). */
+    /* §222: CLOSE LEAVES THE TAB, NOT ONLY THE MODE — and this is a fault the
+       tab created rather than a tidy-up. `REPORTING` is now set by paint()
+       from the tab you are on, so clearing it and repainting put it straight
+       back: Close rendered perfectly and did nothing, which is §96's family
+       exactly. Caught by `checks/report-chrome.py` pressing it.
+
+       It goes back to the tab marked `primary` — Performance on both sides of
+       the switch — read off the ROW rather than from a list of keys here, so
+       a destination whose primary tab is something else still lands
+       somewhere real instead of on a key this handler happened to know. */
     document.querySelectorAll("[data-repcancel]").forEach(function(b){
-      b.addEventListener("click", function(){ REPORTING = null; paint(); window.scrollTo(0,0); });
+      b.addEventListener("click", function(){
+        REPORTING = null;
+        var home = document.querySelector('#subtabs [role="tab"].primary');
+        if (home && home.dataset.s && home.dataset.s !== currentSub) {
+          leaveModes();
+          currentSub = home.dataset.s;
+        }
+        paint(); window.scrollTo(0,0);
+      });
     });
     /* SAVE DRAFT, AND IT SAYS THE TRUE THING (§63.2). The word is written into
        the element rather than through a repaint: paint() would replace the
@@ -5260,10 +6879,48 @@
         };
         show("Saving…", "");
         if (typeof SYNC === "undefined" || !SYNC.saveNow) { show("Saved", "ok"); return; }
+        /* `"busy"` USED TO BE A SIXTH OUTCOME AND IT IS GONE (§183). It was
+           answered the instant Save draft was pressed inside an autosave's
+           flight, and the branch here drew "Saving…" — a word with no
+           follow-up, because nothing ever told this button that the flight had
+           landed. The figure did save; the screen sat on a present participle
+           for ever. SYNC now parks such a caller and answers it when the next
+           save settles, so the five outcomes §63 named are the whole set
+           again — and this branch is deleted rather than left unreachable,
+           because a branch nobody can reach is one the next reader takes for
+           load-bearing (§24). */
+        /* §220: SAVING A DRAFT CLOSES THE REPORT — BUT ONLY IF IT SAVED.
+           Islam: *"the save draft should dim the full report until he press
+           reopen so it opens again."*
+
+           THE FIRST BUILD PARKED FIRST AND REPAINTED IN THE CALLBACK, AND
+           THAT BROKE §63.2 — the outcome is written INTO this button because
+           a repaint replaces the very control that was pressed, so the word
+           vanished in the frame it appeared and three checks went red saying
+           the save never answered. It also parked a report whose save had
+           FAILED, which is the worse half: the screen would have shown a
+           tidy "Draft saved" over work that never left the browser.
+
+           So the order is: save, then park only on success, and let the
+           REPAINTED BAR be the confirmation — it says "Draft saved" in its
+           own right, which is a better answer than a word beside a button
+           that is about to be replaced. A failure leaves the report OPEN and
+           keeps §63.2's sentence, because that is the case somebody has to
+           act on. */
+        var target = REPORTING;
         SYNC.saveNow(function(state){
-          if (state === "saved" || state === "clean") show("Saved", "ok");
-          else if (state === "offline") show("Nothing to save — no server here", "");
-          else if (state === "busy") show("Saving…", "");
+          if (state === "saved" || state === "clean") {
+            if (target) { REVIEW.parked = REVIEW.parked || {};
+                          REVIEW.parked[target] = true; }
+            /* NO WORD ON SUCCESS, and that is the point rather than an
+               omission: the repaint below turns the bar into "Draft saved ·
+               Reopen", which says the same thing and does not disappear a
+               frame later. §63.2's sentence survives for the outcomes that
+               still need one — the ones somebody has to act on. */
+            paint();
+            return;
+          }
+          if (state === "offline") show("Nothing to save — no server here", "");
           else show("Not saved — see the message above", "bad");
         });
       });
@@ -5352,14 +7009,6 @@
     });
     /* Confirming a pending fill — the office's act, re-asked at the click.
        The registry is this paint's, exactly as FIELDS is (§48.2's shape). */
-    document.querySelectorAll("[data-pconf]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var e = PENDS[+b.dataset.pconf];
-        if (!e || !mayAuthor(e.acKey)) return;
-        gapLift(e.row, e.field);
-        paint();
-      });
-    });
     /* ── THE GAP BAND'S CHIPS AND WALKER (§145.12) ─────────────────────
        ONE handler on the band, by delegation: gapBandRefresh() rewrites the
        chips' contents in place between paints (a repaint would destroy the
@@ -5376,6 +7025,20 @@
         if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
         paint();
         if (typeof toPaneTop === "function") toPaneTop();
+        /* §177.2: AND IT LANDS ON THE GAP IT NAMED. Islam: *"the CUS01 3
+           button just opens the project."* It did exactly that — the chip
+           says how many are missing there and then left you to find them,
+           which on a project of five milestones is the work the button was
+           supposed to save. Queued, because a real press holds the paint
+           until the click lands (§30.1) and the fields do not exist until it
+           has (§145.14's own fault, in the control beside it). */
+        var place = chip.dataset.grail
+          ? chip.dataset.grail + "|" + chip.dataset.gcode : null;
+        setTimeout(function(){
+          var f = gapWalkFields(place);
+          if (!f.length) f = gapWalkFields();
+          if (f.length) gapLight(f[0]);
+        }, 0);
         return;
       }
       if (ev.target.closest("[data-fillcta]")) {
@@ -5383,6 +7046,33 @@
         return;
       }
       if (ev.target.closest("[data-nextgap]")) gapWalk();
+    });
+    /* ── THE REPORTING BAR'S CHIPS AND WALK (§279) ────────────────────
+       One handler on the band by delegation, exactly as the gap band's is —
+       and its own, because the two bands carry different attributes and a
+       shared handler would have to ask which bar it was on before every act
+       (§53.5 cuts the other way here: one function answering two questions).
+
+       THE PLAN CHIP IS A DOOR, NOT A WALK STOP. Those gaps hold Submit, so
+       they are in the count; they are filled on the Strategy tab, where the
+       plan's own bar names and walks them — so this chip opens that tab and
+       hands over rather than pretending it can fill them here (§16.7: a count
+       that cannot take you to what it counts makes work). The tab is found by
+       key because a unit's is `strategy` and a function's is `fnstrat`. */
+    var rband = document.querySelector("[data-repband]");
+    if (rband) rband.addEventListener("click", function(ev){
+      var chip = ev.target.closest("[data-rkey]");
+      if (chip){
+        if (chip.dataset.rplan){
+          var tab = document.querySelector('#subtabs [data-s="strategy"]') ||
+                    document.querySelector('#subtabs [data-s="fnstrat"]');
+          if (tab) tab.click();
+          return;
+        }
+        repGoTo(chip);
+        return;
+      }
+      if (ev.target.closest("[data-repnext]")) repWalk();
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never
@@ -5402,6 +7092,35 @@
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
         removeRowById(listById(list, id), id);
         paint();
+      });
+    });
+    /* ── HIDDEN FROM THE PRESENTATION (§233) ───────────────────────────
+       One press hides, the same press shows again — the mark is stored as
+       an ABSENCE (§50.6), so a row never hidden and one hidden-and-shown
+       are byte-identical and no save carries a phantom change. The gate is
+       re-asked at the click through the page/acKey the button carries
+       (§48.2): the eye is drawn only under an authoring pen, and authoring
+       is what the press must still hold. */
+    document.querySelectorAll("[data-hiderow]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var ac = String(this.dataset.hideac || "").split("|");
+        if (!authoring(ac[0], ac[1])) return;
+        var row = hideableById(this.dataset.hiderow);
+        if (!row) return;
+        if (SMPRules.isHidden(row)) delete row.hide;
+        else row.hide = true;
+        paint();
+      });
+    });
+    /* The whole pillar and the whole project (§232): the worded control in
+       the editing head opens the platform's own confirmation — never
+       confirm(), which can be silenced for good on some other site (§95). */
+    document.querySelectorAll("[data-rmrow]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rmrow.split("|");
+        if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
+        else confirmRemoveProject(a[1]);
       });
     });
     /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§129's audit) ──
@@ -5437,7 +7156,10 @@
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.clauseadd;
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        /* §212: a function's page is gated on the FUNCTION's key. Gating an
+           `fn:` target on `u_found` is §211's fault exactly, and here it fails
+           CLOSED — the button renders and the click returns silently. */
+        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
         var o = t === "group" ? GROUP : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
@@ -5449,7 +7171,7 @@
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
         var o = t === "group" ? GROUP : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
@@ -5461,24 +7183,48 @@
     });
     document.querySelectorAll("[data-capkoadd]").forEach(function(b){
       b.addEventListener("click", function(){
-        var c = capById(b.dataset.capkoadd);
-        if (!c) return;
-        var t = c.fn ? "fn:" + c.fn : null;
+        /* §213: a capability, or the FUNCTION itself on a pillars function's
+           Overview — one resolver for both, because the two handlers must
+           agree about what a holder is. */
+        var h = koHolderById(b.dataset.capkoadd);
+        if (!h || !h.list) return;
+        var t = h.target;
         if (!mayAuthor("k_found", t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("capko", { capId:c.id }); return; }
-        c.keyObjectives.push({ name:"", dir:"≥", target:"", compile:"Latest",
+        if (BUILDER && BUILDER.target === t && h.cap) {
+          openBuilderForm("capko", { capId:h.cap.id }); return; }
+        /* §242: IT MINTS AN ID, AS EVERY OTHER ADD IN THE PRODUCT DOES.
+           Islam: *"the input there wasn't saved."* This pushed a row with no
+           id, so the reporting page drew its box carrying the string
+           "undefined", `findById()` matched nothing, and the handler returned
+           without writing — no error, no console, the figure gone. A line the
+           platform cannot name is also nobody's to change (§191), so the save
+           would have refused it even had the box worked.
+
+           The unit's own Add has minted one since §96.4 (`koSettle`); this
+           one, which serves a capability AND a pillars function's Overview,
+           never did. §51.10 exactly: the code that CREATES a field has to be
+           found as well as the code that reads it.
+
+           FROM THE MAXIMUM, never from the count (§96.2) — remove the middle
+           of KO1·KO2·KO3 and add, and a count-derived id collides with the
+           KO3 still on screen. `mintRowId` is the same helper `addMeasure`
+           and `addTactic` already use, and the prefix is the one the two
+           renumberers write: the capability's own id, or the function's
+           `fn:<key>`, which is what `h.target` already holds. */
+        h.list.push({ id: mintRowId(h.list, (h.cap ? h.cap.id : h.target) + "-KO"),
+          name:"", dir:"≥", target:"", compile:"Latest",
           weight:null, actual:"", progress:null });
         fieldSaved(); paint();
       });
     });
     document.querySelectorAll("[data-capkorm]").forEach(function(b){
       b.addEventListener("click", function(){
-        var a = b.dataset.capkorm.split("|"), c = capById(a[0]), i = +a[1];
-        if (!c || !c.keyObjectives[i]) return;
-        if (!mayAuthor("k_found", c.fn ? "fn:" + c.fn : null)) return;
-        if (c.keyObjectives[i].name &&
-            !confirm("Remove " + c.keyObjectives[i].name + "? This cannot be undone here.")) return;
-        c.keyObjectives.splice(i, 1);
+        var a = b.dataset.capkorm.split("|"), h = koHolderById(a[0]), i = +a[1];
+        if (!h || !h.list || !h.list[i]) return;
+        if (!mayAuthor("k_found", h.target)) return;
+        if (h.list[i].name &&
+            !confirm("Remove " + h.list[i].name + "? This cannot be undone here.")) return;
+        h.list.splice(i, 1);
         fieldSaved(); paint();
       });
     });
@@ -5531,7 +7277,24 @@
            the one it was rendered for. */
         var subj = unitLike(c.dataset.u || current);
         if (kind === "pillars") applyOrder(subj.items, order);
+        /* THE SAME LIST FROM TWO PLACES (§272). `units` was already here for
+           the group's cards; Setup's table commits into exactly the same array
+           through exactly the same function, so the two views cannot end up
+           with two orders. `fns` is new, and it has no second view — the
+           functions are arranged on their Setup page and nowhere else. */
         else if (kind === "units") applyOrder(UNIT_KEYS, order);
+        else if (kind === "fns") applyOrder(FUNCTION_KEYS, order);
+        /* §278.3: the objectives tables. The list is the one the TABLE
+           registered in `KOLISTS` while it rendered — the same registry Add
+           and Remove already act through — because the four callers hand in
+           four different arrays (a unit's, the group's, a capability's, a
+           pillars function's) and a second way of finding it is how two of
+           them come to disagree (§53.5). A stale index acts on nothing:
+           KOLISTS is emptied on every paint beside `FIELDS`. */
+        else if (kind === "kos") {
+          var ko = KOLISTS[+c.dataset.kolist];
+          if (ko && ko.list) applyOrder(ko.list, order);
+        }
         else if (kind === "caps") applyOrder(GROUP.capabilities, order);
         else if (kind === "themes") applyOrder(GROUP.themes, order); else {
           /* The plan states the pillar outright; the Performance accordion
@@ -5642,6 +7405,28 @@
     var d = el.closest("details.dlmenu");
     if (d) d.open = false;
   }
+
+  /* THE BANDS PANEL SHUTS ON A CLICK OUTSIDE (§163, Islam: "close on clicking
+     outside it or clicking on the button again"). The second half is what a
+     `<details>` already does; the first is not, and no dropdown in the product
+     had it before.
+
+     SCOPED TO THIS PANEL, DELIBERATELY. Presentation and the header dropdowns
+     are the same `<details class="dlmenu">` and they stay as they are — this
+     was asked for one control and widening it silently would change three
+     others nobody mentioned (rule 1c). The cost is that two identical-looking
+     dropdowns now dismiss differently, which is worth flagging rather than
+     hiding: it is a candidate for making general, not a decision already made.
+
+     `pointerdown`, not `click`: a panel that lingers until the mouse comes up
+     reads as having missed the press (§100.4). Bound ONCE on the document,
+     never per paint — this row is rebuilt on every render and a per-render
+     binding would stack (§24, §47.2). */
+  document.addEventListener("pointerdown", function(e){
+    document.querySelectorAll("details.bandsmenu[open]").forEach(function(d){
+      if (!d.contains(e.target)) d.open = false;
+    });
+  }, true);
 
   function sendXlsx(sheets, name){
     /* The blob dance itself lives in pptx.js as sendFileBytes() since §117 —
@@ -6028,6 +7813,81 @@
        to a focused field is what threw the register's rows about. */
     focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));
   }
+  /* ══ THE SETUP ROW DIALOG (§272) ══════════════════════════════════
+     `openPersonDialog`'s shape one table wider, and deliberately the SAME
+     shape: the platform has one dialog, and §116.6's rule that every way out
+     is the same way out only holds while there is one way out to share.
+
+     THE BODY IS REWRITTEN ON EVERY PAINT and re-wired in the same breath. That
+     is not an optimisation, it is the only correct order (§90.4, §116.6): the
+     dialog's own controls — the two pickers, the company select, the plan
+     format — all end in `paint()`, which rebuilds the page behind the dialog,
+     and before this the dialog itself went on showing the state it was built
+     with. Replacing the body also kills the bindings `wire()` has just made on
+     the old nodes, so nothing doubles up (§47.2). */
+  function rowDialogPaint(){
+    var el = document.getElementById("modal-b");
+    if (!el) return;
+    var t = rowDialogTitle();
+    document.getElementById("modal-t").textContent = t.t;
+    document.getElementById("modal-s").innerHTML = t.s;
+    el.innerHTML = rowDialogHtml();
+    wireRowDialog();
+  }
+  function wireRowDialog(){
+    var body = document.getElementById("modal-b");
+    if (!body) return;
+    /* The page's own field handlers and the page's own picker, scoped to this
+       body — the fields ARE the page's, so a second set of handlers would be a
+       second answer to what typing into them means (§53.5). */
+    wireSetupFields(body);
+    wirePicker(body);
+    if (typeof SEARCHSEL !== "undefined") SEARCHSEL.wire(body);
+    body.querySelectorAll("[data-rowdlg-close]").forEach(function(b){
+      b.addEventListener("click", function(){ closeRowDialog(false); });
+    });
+    body.querySelectorAll("[data-rowdlg-cancel]").forEach(function(b){
+      b.addEventListener("click", function(){ closeRowDialog(true); });
+    });
+  }
+  function openRowDialog(table, key){
+    /* A row the page cannot draw a dialog for opens nothing at all, rather
+       than an empty box (§61). Nothing reaches this today; it is what keeps a
+       fourth table honest the day one is given the menu entry and no spec. */
+    if (!ROWDLG_SPECS[table] || !ROWDLG_SPECS[table].find(key)) return;
+    ROWDLG = { table: table, key: key };
+    UMENU = null; FNMENU = null; COMENU = null; CLEARING = null;
+    /* WHAT MAKES CANCEL ABLE TO UNDO. `rowEditOpen` takes the snapshot, and on
+       a unit or a function it takes the role pointers with it (§110): a head is
+       not stored ON the unit, so restoring the unit alone would leave a grant
+       standing and the register reading one thing while the unit read another. */
+    rowEditOpen(table, key, ROWDLG_SPECS[table].find(key));
+    /* THE PAGE IS REDRAWN BEFORE THE DIALOG OPENS, or the menu this was chosen
+       from is still standing beside it — `openModalHtml` covers the page, it
+       does not rebuild it, so clearing UMENU above changes nothing until
+       something paints. Found by opening one and looking at it. */
+    paint();
+    var t = rowDialogTitle();
+    openModalHtml(esc(t.t), t.s, rowDialogHtml());
+    /* The register's narrower dialog, and the same class, because this is the
+       same kind of thing: a form of short fields three to a row (§122). It is
+       removed in closeModal(), the one door every way out goes through. */
+    overlay.classList.add("pdlg-on");
+    wireRowDialog();
+    /* Never scrolling to reach the field (§110.7) — the dialog is already in
+       view, and letting the browser scroll to it is what threw the register's
+       rows about. */
+    focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));
+  }
+  function closeRowDialog(cancel){
+    if (cancel) rowEditCancel(); else rowEditClose();
+    ROWDLG = null;
+    PICKING = null; PICKQ = "";
+    closeModal();
+    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+    paint();
+  }
+
   /* CLOSING IS WHERE THE REGISTER CATCHES UP. One door for all four ways out,
      so a mode that forgot to clear PDLG cannot leave the page believing a
      dialog is open (§24). */
@@ -6257,6 +8117,9 @@
     if (!overlay.classList.contains("on")) return;
     overlay.classList.remove("on");
     overlay.classList.remove("pdlg-on");
+    /* The master picker's extra width goes with it (§266.10): a class left on
+       the overlay would widen whatever opens next. */
+    overlay.classList.remove("mflow-on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }
     /* Back to the control that opened it — the one thing a keyboard user
@@ -6527,6 +8390,117 @@
     }
     return false;
   }
+  /* ── REMOVING A PILLAR OR A PROJECT (§232) ─────────────────────────────
+     The × removes a ROW; the whole pillar and the whole project had no
+     control at all, so taking one out meant re-uploading the plan. The
+     worded control sits in the pinned editing head (mockup signed off
+     2026-09-01), and the CONFIRMATION carries the weight: what the thing
+     holds, what has been reported against it this cycle, and the way back.
+
+     ARCHIVE FIRST, ALWAYS (§49.2's rule with a third caller): the removal
+     is exactly as destructive as Clear plan, so it goes through the same
+     archive the import and the clear already take, and the dialog says so.
+
+     NEVER renumber. `renumberUnit()` rewrites every id from POSITION, and
+     ids are what a reported figure, a focus mark and a cycle snapshot key
+     on (§69.13's own warning) — removing pillar 2 of 3 must not hand
+     pillar 3's history to a row that is not there any more. The survivors
+     keep their ids; positional CODES (a function's project codes) derive
+     at render time and close up on their own.
+
+     RESOLVED AT PRESS TIME, both times (§48.2): the row the button was
+     drawn for and the row being spliced are a dialog apart, so the Yes
+     handler looks the id up again rather than trusting a closure. */
+  function rmReportedInPillar(it){
+    var n = 0;
+    (it.measures || []).forEach(function(m){ if (m.actual != null && m.actual !== "") n++; });
+    (it.tactics  || []).forEach(function(t){ if (t.actual != null && t.actual !== "") n++; });
+    return n;
+  }
+  function rmReportedInProject(p){
+    var n = 0;
+    (p.deliverables || []).forEach(function(d){ if (d.status) n++; });
+    (p.outcomes    || []).forEach(function(o){ if (o.actual != null && o.actual !== "") n++; });
+    (p.milestones  || []).forEach(function(m){ if (m.status || (m.pct != null && m.pct !== "")) n++; });
+    return n;
+  }
+  /* One body for both kinds — the counts differ, the shape must not (§53.5).
+     A clean subject SAYS it is clean rather than merely not warning: the
+     absence of the amber line is not a sentence anybody can read (§45.2). */
+  function rmConfirmOpen(title, sub, holds, rep, scoresOf, yesWord, onYes){
+    openModalHtml(esc(title), esc(sub),
+      '<div class="rmconfirm">' +
+        '<p>' + holds + (rep ? '' :
+          ' Nothing has been reported against it this cycle.') + '</p>' +
+        (rep ? '<div class="repline">' +
+          plural(rep, "of its figures has been", "of its figures have been") +
+          ' reported this cycle — removing it moves ' + esc(scoresOf) +
+          '.</div>' : '') +
+        '<p class="archline">The plan as it stands is archived first. ' +
+          '<b>Setup › Import &amp; archives</b> holds the way back.</p>' +
+        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
+        '<button class="danger" data-rmyes="1">' + esc(yesWord) + '</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rmno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var yes = box.querySelector("[data-rmyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
+  }
+  function confirmRemovePillar(ukey, id){
+    var u = unitLikeWritable(ukey);
+    var it = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
+    if (!it) return;
+    var word = L("pillar", "bu").toLowerCase().replace(/s$/, "");
+    var code = pillarCode(u, u.items.indexOf(it));
+    var scoresOf = String(ukey).indexOf("fn:") === 0
+      ? "the function's scores" : "the unit's scores";
+    rmConfirmOpen("Remove this " + word + "?",
+      (code ? code + " — " : "") + (it.name || "Untitled"),
+      '<b>' + esc(it.name || "This " + word) + '</b> holds ' +
+        plural((it.measures || []).length, "measure") + ' and ' +
+        plural((it.tactics  || []).length, "tactic") + '.',
+      rmReportedInPillar(it), scoresOf, "Remove the " + word,
+      function(){
+        var u2 = unitLikeWritable(ukey);
+        if (!u2 || !Array.isArray(u2.items)) return;
+        var i = -1;
+        u2.items.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+        if (i < 0) return;
+        archiveUnitPlan(u2, "before " + (code || it.name || "a " + word) +
+          " was removed");
+        u2.items.splice(i, 1);
+        paint();
+      });
+  }
+  function confirmRemoveProject(id){
+    var c = capOfProjectId(id), p = projById(id);
+    if (!c || !p) return;
+    var code = projCode(c.fn, p);
+    rmConfirmOpen("Remove this project?",
+      (code ? code + " — " : "") + (p.name || "Untitled"),
+      '<b>' + esc(p.name || "This project") + '</b> holds ' +
+        plural((p.deliverables || []).length, "deliverable") + ', ' +
+        plural((p.outcomes    || []).length, "outcome") + ' and ' +
+        plural((p.milestones  || []).length, "milestone") + '.',
+      rmReportedInProject(p), "the function's scores", "Remove the project",
+      function(){
+        var c2 = capOfProjectId(id);
+        if (!c2 || !Array.isArray(c2.projects)) return;
+        var i = -1;
+        c2.projects.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+        if (i < 0) return;
+        archiveCapPlan(c2, "before " + (code || p.name || "a project") +
+          " was removed");
+        c2.projects.splice(i, 1);
+        /* The rail may be holding the removed project (§48.2's stale
+           pointer): dropped rather than repointed — the rail pick already
+           falls back to the first project on its own. */
+        if (RAIL[railKeyFor(c2)] === id) delete RAIL[railKeyFor(c2)];
+        paint();
+      });
+  }
   /* The band's own paint, called from paint() once the navigation has
      settled — the chips read currentSub/CURSEC, so earlier would read the
      paint before this one. */
@@ -6548,6 +8522,7 @@
   function modalDismiss(){
     if (BDLG) { builderDialogClose(); paint(); return; }
     if (PDLG) { closePersonDialog(false); return; }
+    if (ROWDLG) { closeRowDialog(false); return; }
     closeModal();
   }
   document.getElementById("modal-x").addEventListener("click", modalDismiss);
@@ -6573,6 +8548,15 @@
         !(e.target.closest && e.target.closest(".kmenu, [data-fnmenu]"))) {
       FNMENU = null; paint();
     }
+    /* And the Business units and Companies tables' own, the same way (§272). */
+    if (typeof UMENU !== "undefined" && UMENU !== null &&
+        !(e.target.closest && e.target.closest(".kmenu, [data-umenu]"))) {
+      UMENU = null; paint();
+    }
+    if (typeof COMENU !== "undefined" && COMENU !== null &&
+        !(e.target.closest && e.target.closest(".kmenu, [data-comenu]"))) {
+      COMENU = null; paint();
+    }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
     if (typeof PCOLMENU !== "undefined" &&
@@ -6586,6 +8570,8 @@
     if (e.key !== "Escape") return;
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
+    if (typeof UMENU !== "undefined" && UMENU !== null) { UMENU = null; paint(); }
+    if (typeof COMENU !== "undefined" && COMENU !== null) { COMENU = null; paint(); }
     if (typeof PCOLMENU !== "undefined" &&
         (PCOLMENU || PWMENU || FNCOLMENU)) {
       PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
@@ -6605,14 +8591,34 @@
     var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
     if (sig !== viewerSig) {
       viewerSig = sig;
+      /* \u2500\u2500 THE NAME AND THE PLACE, AND NOTHING ELSE (\u00a7142) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+         Islam: *"this needs to be only the name not the full name + the unit
+         name and that's all which will make it much smaller."* It read
+         "Mohamed Essam \u2014 Head of the Strategy Management Office" and the
+         control's cap cut it at the em dash, so the half that says WHAT YOU
+         ARE LOOKING AT was the half never shown.
+
+         The register's own two answers, never a third vocabulary (\u00a753.5):
+         `knownName()` is the short name the People page shows \u2014 with
+         `displayNames()` behind it, so a pair whose short names collide is
+         lengthened just enough to read apart and nobody is silently dropped
+         from a picker by the dedupe (\u00a7130.7, \u00a781.1) \u2014 and `placeLabel()` is
+         the navigation's own word for where they sit (\u00a793.12).
+
+         The job title goes from the option and stays on the `title`: it is
+         the thing you might want and never the thing you scan by. */
+      var dn = displayNames();
       sel.innerHTML = PEOPLE.map(function(p){
+        var where = placeLabel(personAt(p));
         /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 024). Every
            person on this register carried one until the office's own row
-           arrived from the client's configuration with none, and the option
-           read "Islam Saadany — und…". The dash belongs to the title, so it
-           goes with it. */
+           arrived from the client's configuration with none, and the hover
+           read "Islam Saadany — undefined". The dash belongs to the title, so
+           it goes with it. The option's own words are §230's — the register's
+           short name and where they sit — and are untouched. */
         var t = (p.title || "").trim();
-        return '<option value="' + p.key + '">' + p.name + (t ? " \u2014 " + t : "") + '</option>';
+        return '<option value="' + p.key + '" title="' + esc(p.name + (t ? " \u2014 " + t : "")) + '">' +
+          esc(knownName(p, dn)) + " \u2014 " + esc(where) + '</option>';
       }).join("");
     }
     viewer();               /* corrects VIEWER if the person selected has gone */
@@ -6626,8 +8632,7 @@
        editable for somebody the rule closes them to (§94). The same fault the
        unit-to-unit handler fixed for edit modes, on the one path that skipped
        it. */
-    leaveModes();
-    VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
+    switchViewer(sel.value);
   });
 
   /* The three nav rows sit in one sticky container, so nothing has to be
@@ -6646,47 +8651,20 @@
     document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
   }).observe(chromeEl);
 
-  /* ── AND A SETUP TABLE'S HEAD PINS UNDER THE PAGE'S (§135.10) ──────
-     Same pattern, one component in. `--sethead-h` was a literal 46px, and §135
-     changed the header's height by putting the page's own controls into it —
-     42px where they are small, 49px where a search box sits on the line. A
-     table head pinned 4px BELOW the page header leaves a slot between two
-     pinned things, and scrolling rows show through it: measured, a 4px leak on
-     Focus measures, and the thing Islam photographed.
+  /* ── `--sethead-h` IS GONE, AND SO IS WHAT MEASURED IT (§273.1) ────
+     §135.10 published the Setup header's measured height so a table's head
+     could pin UNDER it, and §163.5, §130.2 and §174 then took that page offset
+     away from every table that had it: a Setup table sits in `.tblscroll`,
+     which is `overflow:auto`, so a PAGE offset resolves inside the box and
+     lands the head partway down its own body — the fault §130.2 records at
+     141px and §121.4's own note at 293px. The three tables that do pin
+     (`.acgrid`, `.peoplecfg`, `.srctable`) pin at `top:0` INSIDE their own
+     boxes, which needs no measurement at all.
 
-     A CONSTANT COULD NOT HAVE BEEN RIGHT, which is why this is observed rather
-     than corrected to a better number: the header WRAPS on a narrow window, so
-     its height is a function of the window as well as of the page.
-
-     NOT §28.3's LOOP, and the difference is the whole reason this is safe: the
-     value feeds a sticky OFFSET and nothing else. An offset cannot change the
-     height it was measured from, so there is no path from the output back to
-     the input — unlike v2.8's max-height, which sized a box against a number
-     the box's own size decided.
-
-     Published on the ROOT rather than on the pane, because the pane is replaced
-     on every paint and an inline value would go with it. */
-  var SETHEAD_RO = new ResizeObserver(function(rs){
-    var el = rs[0] && rs[0].target;
-    if (!el) return;
-    document.documentElement.style.setProperty(
-      "--sethead-h", Math.round(el.getBoundingClientRect().height) + "px");
-  });
-  function watchSetupHead(){
-    /* GUARDED, BECAUSE paint() CAN RUN FIRST. `SETHEAD_RO` is a `var` assigned
-       here at the foot of the file, and the function declaration above it
-       hoists while the value does not — the same shape as §113.8's `undefined`
-       unshift. A boot that painted before this line would throw, and a throw
-       mid-paint keeps the previous page on screen with the only witness in a
-       console nobody has open (§118). */
-    if (!SETHEAD_RO) return;
-    SETHEAD_RO.disconnect();
-    var el = document.querySelector(".setuphead");
-    if (el) SETHEAD_RO.observe(el);
-    /* Removed rather than left holding the last Setup page's number: every
-       other page reads the fallback, and a stale value is worse than none. */
-    else document.documentElement.style.removeProperty("--sethead-h");
-  }
+     So the observer was measuring a value **nothing read** — grepped: zero
+     `var(--sethead-h)` in any stylesheet. Deleted rather than left running,
+     because a mechanism with an elaborate justification beside it is one the
+     next reader takes for load-bearing (§24). */
 
   /* NO CONDENSE-ON-SCROLL. The chrome is one height, always.
 

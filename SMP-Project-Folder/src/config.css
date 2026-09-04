@@ -306,7 +306,6 @@
   .prow[aria-expanded="true"] { background:var(--surface-2); }
   .pname { display:flex; flex-direction:column; gap:2px; min-width:0; }
   .pname b { font-size:14.5px; font-weight:600; }
-  .pname .psub { font-size:11.5px; color:var(--ink-3); font-weight:400; }
   .powner { font-size:12.5px; color:var(--ink-2); }
   .prow .num, .ptotal .num, .phead .num { text-align:right;
         font-family:var(--mono); font-variant-numeric:tabular-nums; }
@@ -343,6 +342,14 @@
   td.final { font-weight:700; font-size:14px; }
   .pair { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .pair b { font-weight:700; }
+  /* §239: THE BENCHMARK STEPS BACK. `.pair` shows a figure against what it is
+     measured by -- delivered against due, YTD actual against the share of the
+     target owed by now -- and the second half is the benchmark, not the
+     answer. Smaller and in the quiet ink, the way a repeated Compile rule
+     already recedes (§149). Measured: 10.9px at weight 400 against 13px at
+     700, 5.31:1 light and 6.37:1 dark, so it is quiet without falling under
+     the readable floor (§38.5). */
+  .pair i { font-style:normal; font-weight:400; font-size:.84em; color:var(--ink-3); }
   .pbody .qs { justify-content:flex-start; }
 
   @media (max-width:900px) {
@@ -362,11 +369,62 @@
   .cfg-bar .cfg-sum { flex:1; margin:0; }
   .cfg-lab { flex:1; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
              color:var(--ink-3); font-weight:700; }
+
+  /* ── ARRANGING A SETUP TABLE (§261) ────────────────────────────────
+     THE FIRST COLUMN WIDENS, and only while arranging. 38px is what a number
+     needs; a handle and a number want 54, and taking it from the table the
+     rest of the time would make the reading view pay for a mode it is not in
+     — measured, and it is exactly the 16px that keeps the units table inside
+     its pane at 1285 (§158: it FITS, never "and it scrolls"). */
+  .cfg.arranging th.idx, .cfg.arranging td.idx { width:54px; min-width:54px; }
+  .cfg.arranging td.idx .idx-n { color:var(--ink-3); }
+  /* A row being dragged is lifted off the table, and the one it will land
+     before shows the edge it will land on. `.dragging` and `.sorting` are
+     `makeSortable`'s own classes (arrange.js), so a table added tomorrow gets
+     this by being sortable rather than by remembering to style it. */
+  .cfg.arranging tbody.sorting tr { cursor:grabbing; }
+  .cfg.arranging tbody tr.dragging { background:var(--surface-2);
+             outline:2px solid var(--gold); outline-offset:-2px; position:relative; z-index:3; }
+
+  /* THE ARRANGE BUTTON IS LIT WHILE IT IS ON, in the same gold the pen it
+     replaced used for the same state (`.ico.on`) — a worded button rather than
+     an icon, because it sits in a row of worded controls (Columns, Register
+     file) and a lone glyph among words reads as something else. */
+  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
+  .editbtn.on:hover { background:var(--gold-deep); border-color:var(--gold-deep); }
+
+  /* The mark's two controls sit SIDE BY SIDE in the dialog. `.rowacts` is a
+     column in a table cell (§93.15's note above it), which is right there and
+     wrong in a field 150px wide with nothing under it. */
+  .pdlg .markacts { display:flex; flex-direction:row; gap:16px; align-items:center;
+                    padding-top:6px; }
+  .pdlg .umarkbox { max-width:100%; }
+  .pdlg .umarkimg { max-width:100%; max-height:30px; }
   .swatch { display:inline-block; width:11px; height:11px; border-radius:50%;
             margin-right:9px; vertical-align:baseline; }
   .cfg input.blabel { width:100%; max-width:none; text-align:left;
                       font-family:var(--sans); font-size:13px; }
   .cfg input.bfloor { width:64px; max-width:64px; }
+  /* ── PICKING A LEVEL'S COLOUR (§168) ──────────────────────────────
+     Five swatches in the cell that already carried one, so the row does not
+     change shape between reading and editing — the name still starts at the
+     same x, which is what lets somebody run their eye down the column while
+     a pen is open (§88's argument, applied to a control rather than a value).
+
+     THE LIT ONE IS RINGED, NEVER TICKED: a tick drawn on a coloured square is
+     unreadable on three of the five (U+2713 is outside the latin subsets in
+     any case, §120.2), and a ring reads at 14px against every ground the
+     product paints. `box-shadow` rather than a border, or the chosen swatch
+     would be 2px bigger than its neighbours and the row would twitch. */
+  .cfg .bcols { display:inline-flex; gap:3px; vertical-align:middle;
+                margin-right:8px; }
+  .cfg .bcol { width:14px; height:14px; border-radius:3px; border:0; padding:0;
+               cursor:pointer; box-shadow:inset 0 0 0 1px rgb(15 23 42/.22); }
+  .cfg .bcol:hover { box-shadow:inset 0 0 0 1px rgb(15 23 42/.22),
+                                0 0 0 2px var(--surface), 0 0 0 3px var(--line); }
+  .cfg .bcol.on { box-shadow:inset 0 0 0 1px rgb(15 23 42/.22),
+                              0 0 0 2px var(--surface), 0 0 0 3px var(--ink-2); }
+  .cfg .bcol:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
   .qual.static i { width:20px; height:20px; border:1px solid var(--line); border-radius:2px;
                    display:inline-flex; align-items:center; justify-content:center;
                    font-style:normal; font-size:10px; font-family:var(--mono);
@@ -452,7 +510,16 @@
      "Strategy Management Office — all units" would otherwise set the width of
      the chrome's first line and wrap the two buttons beside it onto a second.
      The name truncates; the popup shows it in full. */
-  .viewer .ssbtn { max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
+  /* ── THE WHOLE ANSWER, NOT THE FIRST 150 PIXELS OF IT (§152) ───────────
+     The cap cut "Mohamed Essam — Head of the Strategy Management Office" at
+     the em dash, so the control showed the name and hid the part that says
+     what is being looked at. With the option now reading name + place
+     (§152's own change), the label is short enough to show whole — Islam:
+     *"if we make it all visible it will be ok"* — so the cap rises to a
+     ceiling that only ever catches a genuinely long tenant name rather than
+     the ordinary case. The row has the room: it holds the label, this
+     control and the role line, and wraps as a whole if it ever runs out. */
+  .viewer .ssbtn { max-width:280px; font-size:11px; padding:1px 5px; line-height:1.4; }
 
   /* ══ THE SETUP RAIL (§46.1) ═══════════════════════════════════════
      `.rail` is the unit pages' component, reused wholesale — this block only
@@ -503,7 +570,8 @@
      rail forever on every screen, to fix a state that lasts one scroll. */
   .setuprail { display:flex; flex-direction:column; overflow:hidden;
                max-height:calc(100dvh - var(--chrome-h, 118px)
-                                      - var(--rail-gap, 22px) - 20px);
+                                      - var(--rail-gap, 22px)
+                                      - var(--pane-foot, 20px));
                /* Below this it stops shrinking and the page scrolls instead —
                   §100.5's floor, for the same reason: a rail squeezed into a
                   few rows is not navigation, and a window that short is
@@ -894,25 +962,18 @@
      `background` on the CELL, never the row: a `<tr>` cannot carry a
      background that survives sticky positioning in every engine, and a
      transparent head lets the rows show through it. */
-  /* NOT EVERY TABLE HERE PINS TO THE PAGE. `.cfg.peoplebox` and
-     `.cfg.srctable` are their own scroll boxes with their own sticky heads
-     pinned at `top:0` INSIDE them, which is the right answer for a boxed
-     table — and applying a page offset there put the register's headings 293px
-     down, measured. So they are excluded rather than overridden: two rules
-     fighting over one thead is how a head ends up pinned to neither. */
-  /* ── AND THE OFFSET IS MEASURED, NOT GUESSED (§135.10) ────────────
-     `--sethead-h` was the literal 46px, and §135 changed the header's height by
-     putting the page's controls in it: it is 42px where the controls are small
-     and 49px where a search box sits on the line. So the table's head pinned
-     4px BELOW the page header on some pages and 3px under it on others — and
-     that 4px slot is a hole between two pinned things, which scrolling rows
-     show through. Exactly what Islam saw, made obvious by a band that happened
-     to be navy.
-
-     Published by a ResizeObserver in the shell, the way `--chrome-h` already
-     is. NOT §28.3's loop: this feeds a sticky OFFSET and nothing else, and an
-     offset cannot change the height it was measured from. The literal survives
-     as the fallback for the frame before the observer first fires. */
+  /* AND IN THE END NO TABLE HERE PINS TO THE PAGE (§273.1). `.cfg.peoplebox`
+     and `.cfg.srctable` are their own scroll boxes with sticky heads pinned at
+     `top:0` INSIDE them, which is the right answer for a boxed table — and
+     applying a page offset there put the register's headings 293px down,
+     measured. §163.5 and §174 then reached the same answer for `.acgrid`, and
+     the general page-offset rule the paragraph above describes is GONE with
+     the variable that fed it: an ordinary Setup table sits in `.tblscroll`,
+     which is `overflow:auto`, so a page offset could only ever land its head
+     partway down its own body. What is left is three boxed tables that pin
+     inside themselves, and every other table's head scrolling away with the
+     page — which is a decision nobody has taken and is recorded as open, not
+     as done. */
   /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§135.2).
      *"in roles and access … check the table as the design is damaged."*
 
@@ -931,11 +992,60 @@
      REPAIRING IT REVEALED WHAT IT WAS COVERING: the "Own business unit" and
      "Own supporting function" group headings, which had been under the second
      row since §117 split them. */
-  .setuppane .cfg.acgrid table thead th { position:static; }
+  /* ── THE HEADER STAYS, AND THE BOX IS WHAT SCROLLS (§174) ─────────
+     Islam: *"make the roles and access table header sticky."* §163.5 made it
+     `static` and the reasoning was sound at the time — a PAGE offset resolves
+     inside the box, because `.cfg` is `overflow-x:auto` and a scroll container
+     is what a sticky child pins against, so the head landed 141px down its own
+     body (§130.2). What that argument rules out is pinning to the PAGE. It
+     does not rule out pinning to the BOX, which is what the register has
+     always done (§69.19).
+
+     SO THE BOX GETS A HEIGHT, and that is the real cost, stated: the matrix
+     scrolls inside the window instead of the page scrolling past it. It takes
+     the rail's own expression rather than a constant, exactly as §122.5 made
+     `.panefill` do, so the two halves of the split end at the same place and
+     no number here can go stale.
+
+     `thead`, NOT `thead th`, AND THAT IS WHAT MAKES A TWO-ROW HEAD WORK.
+     Pinning the cells would need a second `top` for the lower row, measured
+     from the upper one — a guessed constant between two pinned things is a
+     hole rows show through (§130.10). A sticky `<thead>` moves as one block
+     with a single offset: measured, both rows hold at the top of the box
+     while the rows scroll under them, so there is nothing to keep in step. */
+  /* FLEXED INTO WHAT IS LEFT, NEVER A CONSTANT. The first build subtracted a
+     guessed 52px for the legend under the table and overran the window by 5px
+     at 1024x760 — §122.5's own fault, committed while quoting it. `.panefill`
+     is the register's expression and the pane already carries it; the box
+     takes whatever the header, the legend and the two feet leave. */
+  .panefill .cfg.acgrid { flex:1 1 auto; min-height:0; max-height:none;
+                          overflow:auto; }
+  .setuppane .cfg.acgrid table thead { position:sticky; top:0; z-index:3; }
+  /* The cells keep their own ground, or rows show through the head as they
+     pass under it — a sticky element paints nothing of its own (§53.7). */
+  .setuppane .cfg.acgrid table thead th { position:static; background:var(--panel); }
+  /* ── AND THE TOP ROW SITS ON THE MIDDLE LINE (§174) ───────────────
+     Islam: *"align the header content vertically in the middle in the 1st
+     row."* It was `bottom`, which is right when every heading is one line and
+     reads as a stagger the moment one of them wraps — the group headings span
+     two rows and sat on the baseline of the second. */
+  .setuppane .cfg.acgrid table thead th { vertical-align:middle; }
+  /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§163.5).
+     The exclusion above fixed `.acgrid` and stopped there. `.cfg` is
+     `overflow-x:auto`, which makes the BOX what a sticky head pins against —
+     so a PAGE offset resolves inside the table, exactly as §130.2 wrote down.
+     Measured on Scoring bands: sticky top 136px, table top 246, head top
+     382 — the header pushed 136px down its own body, sitting across the third
+     row at rest, at every width and with the page unscrolled. Islam's "things
+     are damaged" picture, on a page neither of us was looking at.
+
+     `position:static`, following §130.2's own choice rather than inventing a
+     second answer: these are three-to-ten-row tables, and a head that pins
+     buys nothing on a table you can see all of. The register and the source
+     table keep their own handling — they are long, they scroll vertically,
+     and they were already excluded. */
   .setuppane .cfg:not(.peoplebox):not(.srctable):not(.acgrid) table thead th {
-      position:sticky; z-index:4;
-      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h, 46px));
-      background:var(--panel); }
+      position:static; background:var(--panel); }
   /* A HAIRLINE BETWEEN HEADINGS (§121.4). They are uppercase, letter-spaced
      and 8px-padded, so at a narrow pane "Shown in the nav" and "Code" merged
      into one word — measured on Islam's own screenshot. A divider costs no
@@ -952,55 +1062,42 @@
      one strip is how a summary stops reading as a summary (§B5). What it does
      NOT borrow is the layout: `.fstrip` is a card with a titled head and a
      body, and this is one row that ends in a way through. */
-  .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
-             justify-content:flex-end;
-             background:var(--surface); border:1px solid var(--line);
-             border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
-  .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
-                display:flex; align-items:center; gap:9px; }
-  .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
-  /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
-     wants rather than the size the page it summarises wants. */
-  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif); }
-  .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
-  .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
-  .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, so
-     below about 1280px the button dropped onto a line of its own and the strip
-     grew from 72px to 126px — not broken, but it reads as an accident rather
-     than a decision. The numbers and the chips are what should give way: they
-     are facts and wrap gracefully, while the way through is a control and
-     wants to stay where the eye last left it.
+  /* ── THE OVERVIEW IS TWO COLUMNS (§198) ───────────────────────────────
+     Islam picked Option B from two drawn in the real page. The queue takes
+     the width, the cycle stands beside it as a summary. §24: the one-row
+     strip and every rule that shaped it are DELETED, not left behind —
+     including §120.4's wrap argument, which was three paragraphs about a
+     control that no longer shares a line with anything.
 
-     `order` rather than a media query, because the wrap point depends on the
-     tenant's own cycle name and dates, not on a width anybody can name. */
-  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, and
-     below about 1280px the button dropped to a line of its own, growing the
-     strip from 72px to 126px — not broken, but it reads as an accident.
+     THE STACK POINT IS CSS, NOT A WIDTH TEST IN JAVASCRIPT. A summary page
+     that measured the window in two places would eventually disagree with
+     itself (§27.1); below 900px the columns become one and the QUEUE is
+     first, because that is the half somebody came for. */
+  .ovcols { display:grid; grid-template-columns:minmax(0,1fr) 320px;
+            gap:16px; align-items:start; }
+  .ovmain { min-width:0; }
+  @media (max-width:900px){ .ovcols { grid-template-columns:1fr; } }
 
-     THE FIRST ATTEMPT MADE IT WORSE, and the reason is worth the line: giving
-     the button `margin-left:auto` when `.ovcyc-n` already had one puts TWO
-     auto margins in the row, and they split the free space between them — so
-     the button was pushed out and wrapped at 1400px instead of 1280.
-
-     ONE auto margin, and the NAME takes the slack. The name and dates are the
-     only part that can afford to shrink (they wrap onto two lines gracefully);
-     the number, the chips and the way through are all fixed things. */
-  /* `flex-basis: 0`, NOT `auto`, and that is the whole mechanism: with
-     `flex-wrap:wrap` the browser fits items by their BASIS first and wraps
-     what will not fit — it only shrinks items already sharing a line. At
-     `auto` the name's basis is its full text, so the row overflowed and the
-     button wrapped; at `0` the name asks for nothing, everything fits on one
-     line, and the name then GROWS into whatever is left over. */
-  .ovcyc-l { flex:1 1 0; min-width:240px; }
-  /* THE ONE AUTO MARGIN, and it is on the button rather than the numbers:
-     the name grows now, so the numbers are pushed right without help — and
-     when the row DOES wrap at a genuinely narrow width, this keeps the button
-     at the right rather than letting it jump to the left of the second line,
-     which is what made a wrap read as a mistake rather than a decision. */
-  .ovcyc-go { white-space:nowrap; flex:0 0 auto; }
-  .ovcyc-n { flex:0 0 auto; }
-  .ovcyc-chips { flex:0 0 auto; }
+  /* The cycle, as a standing summary. It borrows the Reporting cycle page's
+     own ground, border and `.badge` chips — this is that page's numbers, and
+     two different-looking versions of one set is how a summary stops reading
+     as a summary (§B5). What it no longer borrows is the SIZE: 27px of serif
+     was the loudest thing on a page about something else. */
+  .ovside { background:var(--surface); border:1px solid var(--line);
+            border-radius:var(--r); padding:13px 15px 15px; }
+  .ovside h4 { margin:0 0 9px; font:700 12px/1.3 var(--sans); color:var(--ink);
+               display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ovsline { display:flex; justify-content:space-between; align-items:baseline;
+             gap:10px; font-size:13px; padding:6px 0;
+             border-bottom:1px solid var(--line); }
+  .ovsline b { font-weight:700; font-variant-numeric:tabular-nums; }
+  /* Not started is the one figure that is a problem rather than a fact, so it
+     is the one that takes a colour — as TYPE, which is why it is `--bad-tx`
+     and not `--bad` (§38.5, and this file has paid for that one six times). */
+  .ovsline b.ovlate { color:var(--bad-tx); }
+  .ovsmeta { color:var(--ink-3); font-size:11.5px; margin:9px 0 0; }
+  .ovside .ovcyc-go { width:100%; margin-top:11px; }
+  .ovcyc-go { white-space:nowrap; }
 
   .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
          color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
@@ -1195,7 +1292,8 @@
   .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
   .panefill { display:flex; flex-direction:column;
               max-height:calc(100dvh - var(--chrome-h, 118px)
-                                     - var(--rail-gap, 22px) - 20px);
+                                     - var(--rail-gap, 22px)
+                                     - var(--pane-foot, 20px));
               /* §100.5's floor, and the rail's: below this it stops shrinking
                  and the page scrolls instead, because a table squeezed to two
                  rows is not a table. */
@@ -1208,6 +1306,10 @@
                          display:flex; flex-direction:column; }
   .panefill > .section > .phead2 { flex:none; }
   .panefill .cfg.peoplebox { flex:1 1 auto; min-height:0; max-height:none; }
+  /* The legend under the matrix is not the thing that scrolls (§100.5's chain:
+     every sibling that must keep its height says so, or the flex box steals
+     it from the table). */
+  .panefill .chart-legend { flex:none; }
   /* THE VERTICAL STICKY GOES ON THE ROW, NOT ON THE CELL (§69.19). Written
      on `thead th` first, which is what `.cfg.srctable` uses and what every
      reference does — and it did NOTHING: measured, the header scrolled away
@@ -1760,7 +1862,35 @@
   .nc-grid label:nth-child(5) .fld { width:88px; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
-  .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; }
+  .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }
+  /* ── THE PEN'S TWO COLUMNS (§273.4) ───────────────────────────────
+     Islam picked this over editing in place and over a plain box: the fields
+     on the left, and ENDING IT behind a rule on the right, so the one
+     destructive control never shares a row with the boxes being typed in.
+
+     `.nc-gap`, `.nc-hold` and the held-Close rule are GONE with the draft they
+     served (§24): with the fields writing as they are left there is nothing
+     unsaved, so nothing to hold back and no sentence to explain it.
+
+     The right column collapses UNDER the fields below 1100px rather than
+     squeezing to nothing — 300px of prose and a button is the narrowest it
+     reads at, measured. */
+  .cyc2 { display:grid; grid-template-columns:1fr 300px; align-items:stretch; }
+  .cyc2-f { padding-right:26px; min-width:0; }
+  .cyc2-d { border-left:1px solid var(--line); padding-left:26px;
+            display:flex; flex-direction:column; align-items:flex-start; }
+  .cyc2-p { font-size:12.5px; line-height:1.5; color:var(--ink-3); margin:0 0 14px; }
+  @media (max-width:1100px){
+    .cyc2 { grid-template-columns:1fr; }
+    .cyc2-f { padding-right:0; }
+    .cyc2-d { border-left:0; border-top:1px solid var(--line);
+              padding-left:0; padding-top:16px; margin-top:16px; }
+  }
+  /* THE PEN LIT, in `penBtn()`'s own treatment rather than a second one
+     (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
+     control in a worded shape. */
+  .editbtn.penon, .editbtn.penon:hover {
+    background:var(--gold); border-color:var(--gold); color:var(--panel); }
 
   /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
   .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
@@ -1768,6 +1898,17 @@
   .umarkimg { display:block; max-width:190px; max-height:34px; width:auto; height:auto; }
   .umarkpick { cursor:pointer; }
   .logonote { color:var(--bad); margin:10px 0 0; }
+  /* The GROUP's mark (§259) — one row, not a table. The preview is allowed
+     to be bigger than a unit's: there is one of them and nothing beside it
+     to line up with, and this is the mark that stands in for every deck
+     that has none. */
+  .gmarkrow { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+  .gmarkrow .umarkbox { padding:10px 14px; }
+  .gmarkrow .umarkimg { max-width:280px; max-height:52px; }
+  /* Side by side, not stacked. `.rowacts` is a column in the units table,
+     which is right in a 22% cell and wrong on a row with the width of the
+     page. */
+  .gmarkrow .rowacts { flex-direction:row; gap:18px; }
 
   /* ══ THE EMAIL PREVIEW (§72) ═══════════════════════════════════════
      The host for a shadow root, not a box with rules of its own — the email's
@@ -2001,6 +2142,12 @@
      existing block is touched: both are `0,2,1` and keep winning over this
      `0,1,1`, so nothing already on screen moves, and the next confirmation
      dialog gets the product's buttons without a fourth copy. */
+  /* §273.3: this dialog's labels are longer than the send confirmation's, and
+     `Reported as of` and `What happens` both wrapped in the 92px column —
+     measured, not guessed. Scoped to this dialog, so nothing already on screen
+     moves: widening the shared rule would reflow every other confirmation to
+     fix one. */
+  .sendconfirm.reopenconfirm .kv { grid-template-columns:118px 1fr; }
   .cbtns { display:flex; gap:6px; justify-content:flex-end; }
   .cbtns button { display:inline-block; width:auto; white-space:nowrap;
                   border:1px solid var(--line); border-radius:var(--r-sm);
@@ -2374,6 +2521,15 @@
   .phead2 .pnocust { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--warn-tx); background:var(--warn-bg); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── HOW MANY HOLD A SEAT (§187) ────────────────────────────────────
+     QUIET, not amber. The chip beside it is a WARNING — a unit nobody is
+     keeping up to date — and this is a FACT that is true on every healthy
+     tenant: an office has seats, and saying so in alarm colours would cry
+     wolf on every page load until nobody read either of them (§41's budget,
+     from the other side). It reads as a value, and the hover is the list. */
+  .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -2392,8 +2548,60 @@
      INSIDE the value's own line. `.val` is display:block under §88's clip rule,
      so a sibling would start a second line and take the row from 39px to 57px —
      which is the fault this replaces. */
-  .saidmark { margin-left:6px; color:var(--gold-deep); font-size:11px;
-    cursor:help; }
+  /* ── ANSWERED, AND VISIBLY SO (§180, DRAWN PROPERLY IN §185) ────────
+     The SHAPE carries the state, not the colour: a filled ring while the
+     claim is waiting, an open dashed one once it has been answered. The ink
+     moves with it so the two agree rather than fight, but at this size a
+     colour alone is not a difference anybody reads (measured: rgb(138,107,34)
+     against rgb(99,108,121) on a 9.6px mark).
+
+     IT IS A BORDER NOW, NOT A CHARACTER, AND THAT IS §185's WHOLE FINDING.
+     §180 shipped `◎` and `◌` and measured them the wrong way: it asked
+     whether the glyph DIFFERED from the tofu rectangle, which U+25CC does —
+     by about one pixel of ink. Re-measured in the built page, in the font
+     this mark actually computes to: the bullseye lays down 53 ink pixels and
+     the dotted circle **29, against tofu's 28**. So the answered mark was, to
+     anybody looking at it, nothing at all — Islam: *"I dismissed the case but
+     the small mark is not there."*
+
+     A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND
+     FAILS "IT IS A MARK." (§52, §120.2, from a side neither of them saw: both
+     are about a character that is MAPPED and not drawn; this one is drawn and
+     not legible.) So it is CSS, which is under our control, scales, takes
+     currentColor and cannot fall back to somebody else's font — §45's answer
+     to the colour emoji, in a second place. */
+  .saidmark { margin-left:6px; font-size:11px; cursor:help;
+    display:inline-block; vertical-align:middle;
+    width:9px; height:9px; border-radius:50%;
+    border:2px solid var(--gold-deep); background:var(--gold-deep);
+    /* The character inside is kept for a copy-paste and a screen reader, and
+       is not what is looked at. */
+    text-indent:-999em; overflow:hidden; }
+  /* FULL AGAINST EMPTY, NOT SOLID AGAINST DASHED. The first CSS draft was a
+     dashed ring, and measuring it caught §180's own mistake a second time: at
+     a 9px circle a 1.5px dash rounds to 1px and lays down about four marks —
+     faint for exactly the reason the dotted CHARACTER was. Same weight of
+     ring, filled or not, is a difference that survives the size. */
+  .saidmark.done { border-color:var(--ink-3); background:none; }
+  /* ── THE SEAT ASK (§186) ────────────────────────────────────────────
+     Plain prose in the platform's own modal, not a warning panel. What makes
+     this catch a mis-click is that it NAMES the role and the person; dressing
+     it in red would say "something is wrong", which is not true — handing
+     somebody a seat is an ordinary thing the Super user does on purpose. */
+  .seatask { display:block; margin-top:8px; padding:10px 12px;
+             background:var(--surface-2); border:1px solid var(--line);
+             border-radius:var(--r-sm); }
+  .seatask b { display:block; margin-bottom:6px; }
+  .seatask p { margin:0 0 8px; max-width:56ch; font-size:var(--fs-small); }
+  .seatask .why { color:var(--ink-3); }
+  .seatask .pdrt { display:flex; gap:14px; justify-content:flex-end;
+                   align-items:center; }
+  /* Why a dismissal did not land (§171's rule, on a write that rides no
+     autosave and so has no banner of its own). --bad-tx because it is WORDS,
+     not a fill (§38.5). */
+  .saidwhere .saidfail { display:block; color:var(--bad-tx); font-weight:600; }
+  /* An answered claim is still readable and is not asking for anything. */
+  .saidwhere.done { color:var(--ink-3); }
   /* A sub-line under a value, on ITS own line and clipped like one. `.why` was
      doing this job and carries a top margin meant for prose. */
   .vwhy { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -2474,6 +2682,40 @@
   .pdband.bad { background:var(--bad-bg); color:var(--bad-tx); }
   .pdband .pdways { display:flex; gap:14px; flex-wrap:wrap; margin-top:3px;
     font-weight:600; }
+  /* ── THE OUTLINE, AND THE ANSWER UNDER IT (§190) ───────────────────
+     Islam: "mark the issue box with some sort of surrounding outline to make
+     sure I understand what is the issue", with the dismiss under it.
+
+     A RING AROUND THE WHOLE FIELD, label and control together — the label is
+     what names the box, so ringing the input alone leaves the name outside the
+     thing being pointed at. The warning ground rather than the bad one: an
+     outstanding item is something to answer, not something broken (§168's
+     rule that the colour is the meaning), and §130.8's argument holds — the
+     ring has to differ from the dialog's own ground by more than a shade, so
+     it takes `--warn-tx` at full strength on the tinted ground.
+
+     THE SENTENCE IS THE FIELD'S, so it wraps and sits inside the ring: a note
+     underneath the ring would read as being about the field below it.
+
+     THE RING IS OUT OF FLOW, and that is not a detail: a border with padding
+     and a negative margin to pay for it moves the field's own top by 8px, so
+     it stops sharing a grid row with its neighbours — `register-header.py`
+     caught exactly that, reporting two rows leaving a cell empty at every
+     width. An `outline` and a `box-shadow` spread paint outside the box
+     without changing it, so the grid is untouched and the ring still reads as
+     surrounding the field. */
+  .pdlg .pdf.attn { border-radius:var(--r-sm);
+    outline:2px solid var(--warn-tx); outline-offset:4px;
+    box-shadow:0 0 0 4px var(--warn-bg); background:var(--warn-bg); }
+  .pdlg .pdf.attn > .pdfl { color:var(--warn-tx); }
+  .pdlg .attnsay { font-size:12px; font-weight:600; line-height:1.45;
+    color:var(--warn-tx); white-space:normal; }
+  .pdlg .attnsay + .attnsay { margin-top:5px; }
+  .pdlg .attnsay .attndrop { display:inline-block; margin-left:2px;
+    color:var(--warn-tx); font-weight:700; }
+  /* A KIND NO FIELD ANSWERS still gets its ring and its dismiss — it simply
+     has nothing above it to ring (§190). */
+  .pdlg .attnloose { gap:0; }
   .pdfoot { display:flex; align-items:center; justify-content:space-between;
     gap:16px; border-top:1px solid var(--line-soft); margin-top:18px;
     padding-top:13px; flex-wrap:wrap; }

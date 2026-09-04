@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Forefront's own platform, measured (spec 024, T054-T055).
+"""Forefront's own platform, measured (spec 030, T054-T055).
 
 TWO THINGS NOTHING ELSE ASKS. The contrast sweep and the width sweep both walk
 the CLIENT's platform, which is a different file served at a different address

@@ -96,13 +96,28 @@ var GROUP = {
     ["Covering", "all over Egypt and Nigeria"],
     ["Empowered by", "a diversified portfolio, economy of scale, extensive reach, exceptional customer experience, and premium after-sales support (owning the value chain)"]
   ],
+  /* THE SIX CARRY THEIR OWN IDS (§191, closing §96.4). Only rows ADDED here
+     were ever given one, so the shipped six were the ONE list in the whole
+     product that nothing could name — §96.4 recorded it and left it, because
+     a list where one row is identified and six are not is worse than either
+     state, and nothing had needed the ids yet. §191 needs them: a list that
+     cannot be matched row to row is now judged as a whole and refused, and
+     an archive or a cycle snapshot is keyed by id (§48), so six rows keyed
+     `null` are six rows a snapshot cannot tell apart.
+
+     THE SPELLING IS `koSettle()`'s OWN — `group-KO<n>` — not a second
+     convention beside it (§53.5); that function has been minting exactly this
+     for every row added since it was written. Written into the DATA rather
+     than filled in by a reader, because a reader that writes what it reads
+     puts a phantom change into every save (§42, §50.6, and §96.4's own
+     reason for running it from Add and Remove rather than from paint). */
   keyObjectives: [
-    { name: "Revenue",                group: null,           dir: "≥", target3y: "34B EGP", target: "18B EGP", compile: "Sum",    actual: "7.8B",  progress: 43 },
-    { name: "EBITDA",                 group: null,           dir: "≥", target3y: "8.5%", target: "6.5%",    compile: "Latest", actual: "5.1%",  progress: 78 },
-    { name: "Earnings concentration", group: null,           dir: "≤", target3y: "30%", target: "40%",     compile: "Latest", actual: "46%",   progress: 87 },
-    { name: "Mobile Distribution",    group: "Market share", dir: "≥", target3y: "38%", target: "32%",     compile: "Latest", actual: "28%",   progress: 88 },
-    { name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
-    { name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
+    { id: "group-KO1", name: "Revenue",                group: null,           dir: "≥", target3y: "34B EGP", target: "18B EGP", compile: "Sum",    actual: "7.8B",  progress: 43 },
+    { id: "group-KO2", name: "EBITDA",                 group: null,           dir: "≥", target3y: "8.5%", target: "6.5%",    compile: "Latest", actual: "5.1%",  progress: 78 },
+    { id: "group-KO3", name: "Earnings concentration", group: null,           dir: "≤", target3y: "30%", target: "40%",     compile: "Latest", actual: "46%",   progress: 87 },
+    { id: "group-KO4", name: "Mobile Distribution",    group: "Market share", dir: "≥", target3y: "38%", target: "32%",     compile: "Latest", actual: "28%",   progress: 88 },
+    { id: "group-KO5", name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
+    { id: "group-KO6", name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
   ],
   themes: [
     { ab: "OT",  name: "One Trade",          note: "New for 2026" },
@@ -740,17 +755,31 @@ var UNITS = {
           { name: "Store operating standard and audit cycle", owner: "Nour", collaborators: ["Hossam", "Dalia"], q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 60 },
           { name: "Replenishment automation",                 owner: "Nour", q1: 0, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 50 }
         ] },
-      /* CARRIED BY A FUNCTION (spec 010) — Islam's own example: "the retail has
-         3 pillars, 2 the retail custodian progress and 1 of them is a pillar
-         for merchandizing where the merchandizing took and broke down in to 3
-         pillars where their collective performance represents the performance
-         of that pillar of the retail."
+      /* THE POINTER IS CUT (§253). This pillar carried `by: "merchandising"`,
+         which made Retail's fourth pillar read its two numbers off the
+         Merchandising function (spec 010, Islam's own example: the function
+         broke that pillar into three of its own, and their collective
+         performance stood in for it).
 
-         It carries NO measures and NO tactics of its own, deliberately: both
-         its numbers come from Merchandising. The empty arrays stay so every
-         reader that counts rows still counts, and reads zero. */
+         Islam, having seen what it produced on the projector: *"drop the
+         merchandizing connection with the retail stores."* It printed
+         93% / 60% / 61% across the top of a slide with nothing at all behind
+         those numbers, because the pillar holds no measures and no tactics of
+         its own by construction.
+
+         THE FEATURE IS UNTOUCHED — `pillarCarrier()`/`viaCarrier()` and the
+         `by` field are the product and still work; what is cut is this
+         tenant's use of it. The demo therefore no longer SHOWS a carried
+         pillar anywhere, which is stated rather than discovered: spec 010 is
+         still described, and is no longer visible (§45.2 accepted with the
+         cost named).
+
+         Retail's own numbers move, because the pillar now scores as what it
+         is — a pillar with nothing in it yet — instead of borrowing the
+         function's. The empty arrays stay so every reader that counts rows
+         still counts, and reads zero. */
       { code: "R04", name: "Merchandising", sub: "Assortment, space and supplier terms",
-        kind: "Capability", theme: "VC", owner: "Sara Helmy", by: "merchandising",
+        kind: "Capability", theme: "VC", owner: "Sara Helmy",
         measures: [], tactics: [] }
     ]
   },

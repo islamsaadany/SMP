@@ -116,6 +116,48 @@ with sync_playwright() as p:
        "%d posts, none carrying the mark" % len(POSTS))
     pg.close()
 
+    # ── A CHANGE IS SENT AT THE MOMENT IT IS MADE (§170) ────────────────
+    # WHAT THIS DOES *NOT* DO IS DRIVE A RELOAD, and that is the finding. The
+    # first version of this section pressed, reloaded 150ms later and asserted
+    # the POST arrived — and it PASSED on the pre-§170 build, because this stub
+    # answers in under a millisecond, so even the plain fetch `flushLeave()`
+    # issues at `pagehide` lands before the navigation can tear it down. A real
+    # server parsing 216KB, authorising it and writing thirty tables does not,
+    # which is why the loss reproduces against `scripts/dev-server.js` and a
+    # real Postgres and cannot reproduce here (§94.5: a check that cannot fail
+    # is not a check).
+    #
+    # So what is asserted is the PROPERTY that fixes it and that this harness
+    # can see honestly: a change is on the wire straight away rather than 800ms
+    # later. Whether it then survives a hard navigation is the server's
+    # problem, and it only has a body to work with if it was sent.
+    print("— a change is sent at once, not in 800ms —")
+    POSTS.clear()
+    pg = b.new_page(viewport={"width": 1440, "height": 900})
+    no_tour(pg)
+    pg.goto("http://127.0.0.1:%d/raya-trade" % port)
+    pg.wait_for_timeout(1500)
+    POSTS.clear()
+    MARK2 = "AT-ONCE-7T2"
+    pg.evaluate("GROUP.org = %s; paint();" % json.dumps(MARK2))
+    pg.wait_for_timeout(250)          # well inside the 800ms the old build waited
+    early = [x for x in POSTS if MARK2 in x]
+    ck("the change is on the wire inside 250ms", bool(early),
+       "%d posts after 250ms" % len(POSTS))
+    # AND IT IS NOT A FIREHOSE. A leading edge that bought durability by
+    # posting the whole 216KB graph once per click would be a bad trade; the
+    # trailing timer is what stops it, and this is the regression guard on it
+    # rather than a reproduction of anything.
+    pg.wait_for_timeout(1200)
+    POSTS.clear()
+    pg.evaluate("""() => { for (var i = 0; i < 5; i++) { GROUP.org = "burst-" + i; paint(); } }""")
+    pg.wait_for_timeout(2200)
+    ck("five changes in one burst cost at most two saves", len(POSTS) <= 2,
+       "%d posts" % len(POSTS))
+    ck("...and the LAST of them is what the server ends up with",
+       bool(POSTS) and "burst-4" in POSTS[-1], POSTS[-1][:60] if POSTS else "nothing")
+    pg.close()
+
     print("— nothing changed: hiding the tab sends nothing —")
     POSTS.clear()
     pg = b.new_page(viewport={"width": 1440, "height": 900})

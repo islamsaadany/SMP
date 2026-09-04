@@ -108,6 +108,16 @@ with sync_playwright() as p:
       x.items[0].tactics.slice(1).forEach(tt => {
         if (!(tt.collaborators || []).length) tt.collaborators = ["Somebody"];
       });
+      /* §249 made a tactic's outcome and its target counted gaps, and the
+         shipped plan has neither on any row — so every tactic on this pillar
+         is given both, exactly as the line above gives them a collaborator,
+         and the fixture goes on holding the gaps it MEANT to hold. The
+         outcome's own fill is proved on its own below, where the state is
+         made deliberately rather than inherited. */
+      x.items[0].tactics.forEach(tt => {
+        if (!tt.outcome)   tt.outcome   = "Something measurable";
+        if (!tt.outTarget) tt.outTarget = "6 #";
+      });
       x.keyObjectives[0].target = "";
       paint();
     }""", who["unit"])
@@ -116,8 +126,11 @@ with sync_playwright() as p:
     be(pg, who["cust"], who["unit"], "strategy", "plan")
     # §145.14: the fill control is a WORDED RED BUTTON beside the arrows,
     # not a pen glyph — drawn only while something is missing.
-    pen = pg.query_selector('.pane .paneact .fillcta[data-fillcta="plan"]')
-    ck("the custodian's red button appears beside the arrows", pen is not None)
+    # §268: the fill grant's control is the BAR's, in the section row. The
+    # corner copy is gone — one control, one place — so this presses the one
+    # that is actually there.
+    pen = pg.query_selector('#secrow-in .missbar .fillcta[data-fillcta="plan"]')
+    ck("the custodian's red button appears on the section line", pen is not None)
     ck("...and it says what it does",
        pen is not None and pen.text_content().strip() == "Fill in missing elements",
        pen and pen.text_content())
@@ -181,86 +194,61 @@ with sync_playwright() as p:
     ck("amending a pending value writes and keeps the mark",
        not r.get("none") and r["compile"] == "Average" and r["pend"], r)
 
-    # ── 4 · READ MODE: THE CHIP, THE COUNT, AND NO TICK FOR THE FILLER ──
-    print("\n4 · pending reads as pending, and the tick is the office's")
-    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
+    # ── 4 · §218: THE APPROVAL IS GONE, AND IT IS ASSERTED AS AN ABSENCE ──
+    print("\n4 · a filled value is live at once (§218)")
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""() => ({
       chips: document.querySelectorAll('.pane .pchip').length,
       ticks: document.querySelectorAll('.pane .gapok').length,
-      badge: (document.querySelector('.pendcount') || {}).textContent || "" })""")
-    ck("the pending chips are drawn in read mode", r["chips"] >= 2, r)
-    ck("the custodian sees no confirm tick", r["ticks"] == 0, r)
-    ck("the count sits on the band", "awaiting confirmation" in r["badge"], r)
+      badge: document.querySelectorAll('.pendcount').length,
+      cta:   document.querySelectorAll('.pendcta').length,
+      wait:  document.querySelectorAll('.pendwait').length })""")
+    ck("no 'pending' chip is drawn", r["chips"] == 0, r)
+    ck("no confirm tick is drawn", r["ticks"] == 0, r)
+    ck("no 'awaiting confirmation' count", r["badge"] == 0, r)
+    ck("no Review-pending control", r["cta"] == 0, r)
+    ck("no 'not counted yet' line", r["wait"] == 0, r)
+    # BOTH ENDS (§113.8): a build that drew no plan at all would pass every
+    # absence above, so the page must still be showing the values themselves.
+    r = pg.evaluate("""(w) => {
+      const p = UNITS[w.unit].items[0];
+      return { rows: document.querySelectorAll('.pane table tr').length,
+               filled: String(p.measures[0].compile || ""),
+               stamped: !!(p.measures[0].pend) };
+    }""", who)
+    ck("...and the plan is still on screen", r["rows"] > 3, r)
+    ck("the fill itself is still there", bool(r["filled"]), r)
+    ck("and the stamp is still kept, so the filler can correct it",
+       r["stamped"] is True, r)
 
-    # ── 5 · THE SCORE WAITS, THE REPORT DOES NOT ────────────────────────
-    print("\n5 · a pending target: dash, excluded, submit refused, draft alive")
+    # ── 5 · THE SCORE COUNTS IT STRAIGHT AWAY ───────────────────────────
+    print("\n5 · a filled target scores at once, and Submit does not wait")
     r = pg.evaluate("""(w) => {
       const p = UNITS[w.unit].items[0], m = p.measures[1];
       const inBefore = scorableMeasures(p).some(x => x.id === m.id);
       m.pend = { target: { by: w.cust, at: "2026-08-27" } };
       const inAfter = scorableMeasures(p).some(x => x.id === m.id);
       paint();
-      return { inBefore, inAfter, prog: m.progress,
-               pending: SMPRules.pendingScore(m) };
+      return { inBefore, inAfter };
     }""", who)
     pg.wait_for_timeout(300)
-    ck("the rule reads the row as score-pending", r["pending"] is True)
-    # THE RELATIONSHIP, NOT THE NUMBER (§94.14): excluding a value near the
-    # mean does not move a rounded average, so membership is what is asserted.
-    ck("the row leaves the scorable set the average reads",
-       r["inBefore"] is True and r["inAfter"] is False, r)
+    ck("a stamped row stays in the set the average reads",
+       r["inBefore"] is True and r["inAfter"] is True, r)
     be(pg, who["cust"], who["unit"], "performance")
-    perf = pg.evaluate("""() => {
-      const line = document.querySelector('.pendwait');
-      const dash = [...document.querySelectorAll('.pill.none')]
-        .some(e => (e.title || "").includes('not counted yet'));
-      return { dash, line: line ? line.textContent : "" };
-    }""")
-    ck("the score reads a dash with the reason on hover", perf["dash"], perf)
-    ck("...and the table says why — 'not counted yet'",
-       "not counted yet" in perf["line"] and
-       "awaiting Strategy Office confirmation" in perf["line"], perf)
+    perf = pg.evaluate("""() => ({
+      dash: [...document.querySelectorAll('.pill.none')]
+              .some(e => (e.title || "").includes('not counted yet')),
+      line: document.querySelectorAll('.pendwait').length })""")
+    ck("no dash standing in for a real score", perf["dash"] is False, perf)
+    ck("...and no sentence explaining a wait", perf["line"] == 0, perf)
     sub = pg.evaluate("""(w) => submitRefusal(w.unit)""", who)
-    ck("Submit is refused, naming the wait",
-       "awaiting Strategy Office confirmation" in sub, sub[:120])
-    ck("...and the refusal says reporting and drafts are unaffected",
-       "unaffected" in sub, sub[:160])
-    blockers = pg.evaluate("""(w) => submitBlockers(w.unit).confirms.length""", who)
-    ck("the blocker list carries the pending rows", blockers >= 2, blockers)
-
-    # ── 6 · THE OFFICE CONFIRMS — BY TICK, AND BY CORRECTING ────────────
-    print("\n6 · confirming, both of the office's ways")
-    be(pg, who["smo"], who["unit"], "strategy", "plan")
-    r = pg.evaluate("""() => ({
-      ticks: document.querySelectorAll('.pane .gapok').length })""")
-    ck("the office sees the confirm ticks", r["ticks"] >= 1, r)
-    r = pg.evaluate("""(w) => {
-      const t = document.querySelector('.pane .gapok');
-      if (!t) return { none: true };
-      t.click();
-      return { left: Object.keys(UNITS[w.unit].items[0].measures[0].pend || {}).length };
-    }""", who)
-    pg.wait_for_timeout(400)
-    ck("the tick lifts the mark from the data", not r.get("none") and r["left"] == 0, r)
-
-    # correcting confirms: the office edits the pending target through the pen
-    r = pg.evaluate("""(w) => {
-      const m = UNITS[w.unit].items[0].measures[1];
-      return { pendBefore: !!(m.pend && m.pend.target) };
-    }""", who)
-    ck("(fixture) the second measure still holds its pending target", r["pendBefore"])
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(400)
-    r = pg.evaluate("""(w) => {
-      const m = UNITS[w.unit].items[0].measures[1];
-      const flds = [...document.querySelectorAll('.pane .fld')];
-      const mine = flds.filter(f => f.value === String(m.target))[0];
-      if (!mine) return { none: true };
-      mine.value = m.target + " corrected";
-      mine.dispatchEvent(new Event('change', { bubbles: true }));
-      return { target: m.target, pend: !!(m.pend && m.pend.target) };
-    }""", who)
-    ck("an office write settles the value — correcting confirms",
-       not r.get("none") and r["pend"] is False, r)
+    ck("Submit no longer names a confirmation",
+       "awaiting Strategy Office confirmation" not in sub, sub[:140])
+    blk = pg.evaluate("""(w) => Object.keys(submitBlockers(w.unit))""", who)
+    ck("...and `confirms` has left the blocker list", "confirms" not in blk, blk)
+    # AND THE TWO REAL RULES SURVIVE, or a build that emptied the whole
+    # refusal would pass both assertions above (§113.8).
+    ck("the note rule still blocks", "note" in sub.lower(), sub[:140])
 
     # ── 7 · THE FOUNDATION'S GAPS FILL THE SAME WAY ─────────────────────
     print("\n7 · the key objectives table, through the same one builder")
@@ -287,7 +275,7 @@ with sync_playwright() as p:
     # ── 8 · COLLABORATORS FILL, AND THE RIGHT WAITS (§145.10) ───────────
     print("\n8 · collaborators fill, and the reporting right waits")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    pg.click('.pane .paneact .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
+    pg.click('#secrow-in .missbar .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
     # §130.1 MET §145 AT THE MERGE: collaborators are TICKED from the
     # register-fed list, never typed — so the fill control is the same
     # multi-select the office's pen uses, and the check picks two REAL
@@ -307,8 +295,12 @@ with sync_playwright() as p:
     ck("two register names picked land in the array and wear the mark",
        not r.get("none") and not r.get("few") and
        r["list"] == r["picked"] and r["pend"], r)
-    ck("...and the pending name confers NO reporting right (§50.2 held)",
-       r.get("named") is False, r)
+    # §218 REVERSES §145.10 at Islam's direction: with the approval gone
+    # there is nothing for the name to wait for, so it counts at once. The
+    # cost was stated before it was accepted — somebody who may fill gaps can
+    # name themselves and thereby gain that line's reporting right.
+    ck("...and a filled name confers the reporting right at once (§218)",
+       r.get("named") is True, r)
     r = pg.evaluate("""(w) => {
       const t = UNITS[w.unit].items[0].tactics[0];
       const name = t.collaborators[0];
@@ -317,7 +309,106 @@ with sync_playwright() as p:
       return SMPRules.namedOn(t, { key: "nh", name: name });
     }""", who)
     ck("...and counts the moment the mark lifts", r is True)
-    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
+
+    # ── 8b · THE OUTCOME AND ITS TARGET FILL, AND ONLY THOSE TWO (§249) ─
+    print("\n8b · a tactic's outcome and its target fill; the two beside them do not")
+    # §205's PAIRING, ASSERTED FROM THE SCREEN'S SIDE. The server half is in
+    # test-authorize.js §26; this is the half that opens the box. A build that
+    # counted these and never drew a control is §223 exactly — the server
+    # accepts a save the screen has no way of producing — and one that drew
+    # the direction and the compile rule beside them would offer a filler an
+    # edit the save refuses, costing the fills in the same post (§184).
+    pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      delete t.outcome; delete t.outTarget; delete t.outDir; delete t.outCompile;
+      if (t.pend) { delete t.pend.outcome; delete t.pend.outTarget; }
+      paint();
+    }""", who)
+    be(pg, who["cust"], who["unit"], "strategy", "plan")
+    # THE STATE IS ASSERTED BEFORE IT IS CLEARED, or every assertion below is
+    # satisfied by a build that never counted these at all: emptied, they must
+    # be OWED, and the point of the section is that filling them settles it.
+    owed = pg.evaluate("""(w) => SMPRules.gapMissing(
+      "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
+    ck("an empty outcome and target are owed to start with",
+       "outcome" in owed and "outTarget" in owed, owed)
+    pg.click('#secrow-in .missbar .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
+    r = pg.evaluate("""(w) => {
+      const row = document.querySelector('.pane tbody tr');
+      const grid = document.querySelector('.pane td.tgtcell .tgrid');
+      if (!grid) return { nogrid: true };
+      const out = { boxes: [...grid.children].filter(c => !c.classList.contains('ss-native')).length,
+                    opens: grid.querySelectorAll('.fld').length,
+                    folds: !!document.querySelector('.pane td.tgtcell') };
+      const area = [...document.querySelectorAll('.pane textarea.fld.gapfld')]
+        .filter(a => a.closest('td') && a.closest('td').cellIndex === 2)[0];
+      if (area) { area.value = "Stores opened";
+                  area.dispatchEvent(new Event('change', { bubbles: true })); }
+      const num = grid.querySelector('input.fld');
+      if (num) { num.value = "6"; num.dispatchEvent(new Event('change', { bubbles: true })); }
+      const t = UNITS[w.unit].items[0].tactics[0];
+      out.outcome = t.outcome; out.target = t.outTarget;
+      out.marks = Object.keys(t.pend || {});
+      return out;
+    }""", who)
+    ck("the four boxes are still four in fill mode", r.get("boxes") == 4, r)
+    # TWO OF THE FOUR OPEN AND TWO READ. The direction and the compile rule
+    # carry working defaults, so they are not gaps — drawn read-only rather
+    # than dropped, because inside a block of four equal boxes a hole reads as
+    # a control that failed to render (§248's own ruling about the unit).
+    ck("...and exactly two of them open", r.get("opens") == 2, r)
+    # §61: the cell keeps `.tgtcell` while it holds controls, or below 880 the
+    # Target column folds away and takes the only way to set one with it.
+    ck("...in a cell the narrow layout cannot fold away", r.get("folds"), r)
+    ck("the outcome written by a filler reaches the plan",
+       r.get("outcome") == "Stores opened", r)
+    ck("...and so does the target", str(r.get("target", "")).startswith("6"), r)
+    ck("...both stamped with the fill mark",
+       "outcome" in (r.get("marks") or []) and "outTarget" in (r.get("marks") or []), r)
+    # AND THE ROW STOPS BEING COUNTED, or the page would go on asking for what
+    # it has just been given (§116.2: the count and the field are one list).
+    left = pg.evaluate("""(w) => SMPRules.gapMissing(
+      "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
+    ck("...so neither is still owed", "outcome" not in left and "outTarget" not in left, left)
+
+    # §249.2: THE UNIT MAY BE PICKED BEFORE THE NUMBER, AND THAT IS NOT A FILL.
+    # §248 lets what a thing is measured in be chosen first, so `outTarget`
+    # holds "%" on the way to "90%" — non-blank, and still a gap. Two things
+    # must be true of that half-answer, and the first build of §249 got both
+    # wrong: the mark must NOT be stamped (a marked field reads as answered, so
+    # the row would leave the count, the walk and Submit's refusal with its
+    # target unusable), and the save must still be the filler's (it was
+    # refused, which is the CX refusal's shape — one unclassified row costs
+    # every fill posted with it, §184).
+    half = pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      delete t.outTarget; if (t.pend) delete t.pend.outTarget;
+      paint();
+      const grid = document.querySelector('.pane td.tgtcell .tgrid');
+      const uni = [...grid.querySelectorAll('select')].filter(
+        s => [...s.options].some(o => o.text === 'M EGP'))[0];
+      if (!uni) return { nouni: true };
+      uni.value = '%'; uni.dispatchEvent(new Event('change', { bubbles: true }));
+      return { stored: t.outTarget, marked: !!(t.pend && t.pend.outTarget),
+               missing: SMPRules.gapMissing('tactic', t).indexOf('outTarget') > -1 };
+    }""", who)
+    ck("a unit picked before the number is kept", half.get("stored") == "%", half)
+    ck("...and is NOT stamped as a fill", half.get("marked") is False, half)
+    ck("...and the row still says the target is missing", half.get("missing"), half)
+    # PUT THE STATE BACK (§94.2's neighbour). This section deliberately leaves
+    # the row holding a half-answer, and the sections below were written
+    # against a row that owes nothing here — a check that changes the world
+    # and walks away makes the NEXT one measure something nobody chose.
+    pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      t.outcome = "Something measurable"; t.outTarget = "6 #";
+      if (t.pend) { delete t.pend.outcome; delete t.pend.outTarget;
+                    if (!Object.keys(t.pend).length) delete t.pend; }
+      paint();
+    }""", who)
+    pg.wait_for_timeout(300)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
     # ── 9 · THE COUNTS THAT FIND YOU (§145.14) ──────────────────────────
     print("\n9 · the missing bar beside the sections, the rail words, the walker")
@@ -343,22 +434,29 @@ with sync_playwright() as p:
     # the PAINT is asserted: the bar's button wears the same ground as the
     # corner's (the relationship, §53.5), and that ground is a real colour —
     # both vanishing together must still fail. The chip keeps a real border.
+    # §268 REMOVED THE CORNER COPY, so this can no longer compare the bar's
+    # button with it — and a comparison to something that is gone is satisfied
+    # by both sides vanishing (§113.8). It asserts the PROBLEM instead, which
+    # is what §145.14 was ever about: inside `nav.tabs` a bare class is
+    # outranked and the control renders as a plain word, so the button must
+    # carry a solid ground of its own and ink that is not the tab row's.
     pr = pg.evaluate("""() => {
       const barBtn = document.querySelector('#secrow-in .missbar .fillcta');
-      const corner = document.querySelector('.pane .paneact .fillcta');
+      const tab = document.querySelector('#secrow-in [data-sub2]');
       const chip = document.querySelector('#secrow-in .missbar .mchip');
       const bs = barBtn ? getComputedStyle(barBtn) : null;
-      const cs = corner ? getComputedStyle(corner) : null;
+      const ts = tab ? getComputedStyle(tab) : null;
       const ch = chip ? getComputedStyle(chip) : null;
-      return { barBg: bs && bs.backgroundColor, cornerBg: cs && cs.backgroundColor,
-               barInk: bs && bs.color, cornerInk: cs && cs.color,
+      return { barBg: bs && bs.backgroundColor, barInk: bs && bs.color,
+               tabInk: ts && ts.color,
+               barBorder: bs && parseFloat(bs.borderTopWidth) > 0,
                chipBorder: ch && parseFloat(ch.borderTopWidth) > 0 &&
                            ch.borderTopColor !== ch.color };
     }""")
-    ck("...and the bar's button is PAINTED like the corner's — solid, not a tab",
-       pr["barBg"] is not None and pr["barBg"] == pr["cornerBg"] and
+    ck("...and the bar's button is PAINTED — solid, bordered, not a bare tab word",
+       pr["barBg"] is not None and
        "rgba(0, 0, 0, 0)" not in (pr["barBg"] or "rgba(0, 0, 0, 0)") and
-       pr["barInk"] == pr["cornerInk"], pr)
+       pr["barBorder"] is True and pr["barInk"] != pr["tabInk"], pr)
     ck("...and the chip keeps its border inside the tab row", pr["chipBorder"] is True, pr)
     ck("...and nothing of it in the page body", r["inPage"] is False, r)
     ck("the rail speaks the same words — 'N Missing'",
@@ -406,7 +504,15 @@ with sync_playwright() as p:
       if (inp.tagName === "SELECT") {
         const o = [...inp.options].filter(o => o.value)[0];
         if (inp.multiple) o.selected = true; else inp.value = o.value;
-      } else inp.value = "Somebody Named";
+      /* §249: A TARGET IS ANSWERED WITH A NUMBER. The outcome's target is four
+         controls in one cell and the number is one of them, so a trial that
+         types a NAME into it writes a value the platform cannot read — the
+         field stays a gap, the count rightly does not move, and the check
+         reports a working build as broken. The lesson is the one this trial's
+         own comment already records for a picker: answer the control you
+         landed on. */
+      } else if (inp.closest(".tgrid")) inp.value = "6";
+      else inp.value = "Somebody Named";
       inp.dispatchEvent(new Event('change', { bubbles: true }));
       const after = chip.textContent.trim();
       const totalWord = document.querySelector('[data-gapband] .secmiss').textContent;
@@ -444,10 +550,10 @@ with sync_playwright() as p:
     pg2 = b.new_page()
     pg2.goto(URL); pg2.wait_for_timeout(1200)
     r = pg2.evaluate("""(w) => {
-      try { localStorage.removeItem("smp.ko.year"); } catch (e) {}
+      try { localStorage.removeItem("smp.ko.year2"); } catch (e) {}
       VIEWER = w.smo; leaveModes(); current = w.unit;
       currentSub = "strategy"; CURSEC.strategy = "found";
-      KO_VIEW = "cols"; paint();
+      paint();  /* §243: one layout, nothing to select */
       const oh = document.querySelector(".ohead");
       return { on: SHOW_KO_THIS_YEAR,
                cols: oh ? oh.querySelectorAll("span").length : null };
@@ -455,7 +561,7 @@ with sync_playwright() as p:
     ck("a fresh browser shows both horizons", r["on"] is True and r["cols"] == 3, r)
     r = pg2.evaluate("""() => {
       setKoThisYear(false);
-      return localStorage.getItem("smp.ko.year");
+      return localStorage.getItem("smp.ko.year2");
     }""")
     ck("...and a person's explicit choice is stored to win next time", r == "0", r)
     pg2.close()

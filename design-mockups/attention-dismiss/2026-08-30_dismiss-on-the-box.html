@@ -1,0 +1,133 @@
+<title>Attention items, answered</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --line:#D6DCE5;
+    --warn-bg:#FDF3DF; --warn-tx:#8A6100; --panel:#12243F; --gold:#C9A227;
+    --r-sm:6px;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --line:#333A45;
+    --warn-bg:#3A2E12; --warn-tx:#E7B94A; --panel:#0B1526;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --line:#333A45;
+    --warn-bg:#3A2E12; --warn-tx:#E7B94A; --panel:#0B1526;
+  }
+  body{background:var(--ground); color:var(--ink);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:28px 20px 60px;}
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:19px; margin:0 0 4px; letter-spacing:-.2px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 26px; max-width:70ch;}
+  .card{background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:22px 24px 24px; margin:0 0 26px;}
+  .ttl{font-weight:700; font-size:15px; margin:0 0 2px;}
+  .sub{color:var(--ink-3); font-size:12px; margin:0 0 20px;}
+  .pdsect{grid-column:1/-1; font-size:10.5px; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--ink-3); font-weight:700;
+    border-top:1px solid var(--line); padding-top:13px; margin-top:8px;}
+  .pdsect:first-child{border-top:0;padding-top:0;margin-top:0;}
+  .pdlg{display:grid; grid-template-columns:repeat(3,minmax(150px,1fr));
+    gap:15px 18px;}
+  .pdf{display:flex; flex-direction:column; gap:4px; min-width:0;}
+  .pdf.wide{grid-column:1/-1;}
+  .pdfl{font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-3); font-weight:700;}
+  .fld{border:1px solid var(--line); background:var(--surface);
+    border-radius:var(--r-sm); padding:6px 8px; color:var(--ink); font:inherit;
+    font-size:13px; width:100%; min-width:0; box-sizing:border-box;}
+  .pdf.attn{border-radius:var(--r-sm); outline:2px solid var(--warn-tx);
+    outline-offset:4px; box-shadow:0 0 0 4px var(--warn-bg);
+    background:var(--warn-bg);}
+  .pdf.attn > .pdfl{color:var(--warn-tx);}
+  .attnsay{font-size:12px; font-weight:600; line-height:1.45;
+    color:var(--warn-tx);}
+  .attndrop{display:inline-block; margin-left:2px; color:var(--warn-tx);
+    font-weight:700; background:none; border:0; padding:0; cursor:pointer;
+    text-decoration:underline; font:inherit; font-weight:700;}
+  .chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{display:inline-flex; align-items:center; gap:5px; font-size:11.5px;
+    border:1px solid var(--line); border-radius:20px; padding:2px 8px;
+    background:var(--surface-2); color:var(--ink-2);}
+  .note{color:var(--ink-3); font-size:12px; margin:18px 0 0; max-width:75ch;
+    border-top:1px solid var(--line); padding-top:14px;}
+  .note b{color:var(--ink);}
+  .was{background:var(--warn-bg); color:var(--warn-tx); font-size:12.5px;
+    font-weight:600; line-height:1.45; border-radius:var(--r-sm);
+    padding:10px 13px; margin:0 0 16px; display:flex; flex-direction:column;
+    gap:5px;}
+  .tag{display:inline-block; font-size:10px; letter-spacing:.09em;
+    text-transform:uppercase; font-weight:700; color:var(--ink-3);
+    margin:0 0 8px;}
+</style>
+<div class="wrap">
+<h1>Attention items, answered</h1>
+<p class="lede">The sentence moves onto the box that answers it, inside a ring;
+every kind gains a Dismiss underneath. Below: what it looked like, and what it
+looks like now.</p>
+
+<div class="card">
+  <div class="tag">Before</div>
+  <div class="ttl">Hussein Khaled</div>
+  <div class="sub">1 of 4 needing attention</div>
+  <div class="was">
+    <span>They hold Super user over the group, and they sit in Mobile. A seat
+      is the Super user’s to give — take it off with the × on the chip if
+      nobody meant to.</span>
+    <span>No employee number and no email, so the next upload cannot match this
+      row and will add them again.</span>
+  </div>
+  <div class="pdlg">
+    <div class="pdsect">Who they are</div>
+    <div class="pdf"><div class="pdfl">Name</div><input class="fld" value="Hussein Khaled"></div>
+    <div class="pdf"><div class="pdfl">Emp. ID</div><input class="fld" value=""></div>
+    <div class="pdf"><div class="pdfl">Email</div><input class="fld" value=""></div>
+    <div class="pdsect">Where they sit, and what they may do</div>
+    <div class="pdf"><div class="pdfl">Unit or function</div><input class="fld" value="Mobile"></div>
+    <div class="pdf"><div class="pdfl">Company</div><input class="fld" value="Distribution"></div>
+    <div class="pdf"><div class="pdfl">Job title</div><input class="fld" value="Head of CX"></div>
+    <div class="pdf wide"><div class="pdfl">Roles</div>
+      <div class="chips"><span class="chip">Super user · The group ×</span>
+        <span class="chip">Strategy custodian · Mobile ×</span></div></div>
+  </div>
+  <p class="note">Two sentences, nine boxes, and nothing saying which. The two
+  that name a place read as being about whichever box you look at first — and
+  the seat item could not be answered at all: the register is right, and it
+  would have counted for ever.</p>
+</div>
+
+<div class="card">
+  <div class="tag">Now</div>
+  <div class="ttl">Hussein Khaled</div>
+  <div class="sub">1 of 4 needing attention</div>
+  <div class="pdlg">
+    <div class="pdsect">Who they are</div>
+    <div class="pdf"><div class="pdfl">Name</div><input class="fld" value="Hussein Khaled"></div>
+    <div class="pdf attn"><div class="pdfl">Emp. ID</div><input class="fld" value="">
+      <div class="attnsay">No employee number and no email, so the next upload
+        cannot match this row and will add them again.
+        <button class="attndrop">Dismiss</button></div></div>
+    <div class="pdf"><div class="pdfl">Email</div><input class="fld" value=""></div>
+    <div class="pdsect">Where they sit, and what they may do</div>
+    <div class="pdf"><div class="pdfl">Unit or function</div><input class="fld" value="Mobile"></div>
+    <div class="pdf"><div class="pdfl">Company</div><input class="fld" value="Distribution"></div>
+    <div class="pdf"><div class="pdfl">Job title</div><input class="fld" value="Head of CX"></div>
+    <div class="pdf wide attn"><div class="pdfl">Roles</div>
+      <div class="chips"><span class="chip">Super user · The group ×</span>
+        <span class="chip">Strategy custodian · Mobile ×</span></div>
+      <div class="attnsay">They hold Super user over the group, and they sit in
+        Mobile. A seat is the Super user’s to give — take it off with the × on
+        the chip if nobody meant to.
+        <button class="attndrop">Dismiss</button></div></div>
+  </div>
+  <p class="note"><b>The ring is out of flow</b> — an outline and a shadow, not
+  a border with padding — so the grid rows are unchanged and nothing shifts.
+  <b>Dismissing remembers what it answered</b>: move Hussein to another unit and
+  the seat item comes straight back, which is what makes it safe to offer at all.
+  <b>A kind no field answers</b> — “they have never been issued a password” —
+  gets a ring of its own at the end of the form.</p>
+</div>
+</div>

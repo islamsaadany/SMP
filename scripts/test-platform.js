@@ -253,7 +253,7 @@ async function main() {
       await sc.query("UPDATE people SET role = 'super' WHERE key = 'smo'");
     });
 
-    /* ── NOBODY IS CREATED ON A CLIENT THAT HAS A REGISTER (§147.30) ──
+    /* ── NOBODY IS CREATED ON A CLIENT THAT HAS A REGISTER (§288.30) ──
        Islam: "make the access from the platform match the raya registry
        without creating new people." Asserted HERE rather than through the
        screen, and that is the finding: with the mapping REQUIRED, the create
@@ -284,7 +284,7 @@ async function main() {
       await sc.query("INSERT INTO people SELECT * FROM kept");
     });
 
-    /* ── AND A CLIENT MADE HERE HAS ITS TEAM ON ITS REGISTER (§147.31) ──
+    /* ── AND A CLIENT MADE HERE HAS ITS TEAM ON ITS REGISTER (§288.31) ──
        Islam: "a client created from the multitenant platform will have its own
        registry, and on the settings of this client we will add the consultants
        and roles and accordingly they will be added to the registry
@@ -302,7 +302,7 @@ async function main() {
       await sc.query("DELETE FROM people WHERE key = 'ff_made_here'");
     });
 
-    /* ── THE LOG SAYS WHO SIGNED IN, NOT ONLY WHICH ROW (§147.30) ──
+    /* ── THE LOG SAYS WHO SIGNED IN, NOT ONLY WHICH ROW (§288.30) ──
        Several of Forefront's people may act as ONE row on a client whose
        register predates the platform, so the row alone no longer says who did
        something. Islam saw that the address was already known and simply not
@@ -372,7 +372,7 @@ async function main() {
       FF.mayIssuePasswordTo(world, admin, { email:"o@ff.example", is_admin:false }));
     check("nobody changes their own admin rights", !FF.maySetAdmin(world, admin, admin));
 
-    /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§147.26, Islam: "a project
+    /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§288.26, Islam: "a project
        might have 2 super users"). This asserted the OPPOSITE — a unique index
        refusing a second — and the reasoning behind it was tidy about a table
        and wrong about the work. Asked of the database, because that is where
@@ -403,7 +403,7 @@ async function main() {
     const team = await P.teamOf(c, "t-team");
     /* ASSERTED AS THE RULE, NOT AS A COUNT. It read `team.length === 1`, which
        is a fact about the fixture rather than about the filter — and the
-       moment §147.26 let a second super user sit on this client, a correct
+       moment §288.26 let a second super user sit on this client, a correct
        reading of `kind = 'office'` failed. The question is whether a CLIENT'S
        OWN person can appear here, and that is what is asked. */
     check("a client's team holds Forefront's people", team.length > 0, team.length);
@@ -417,7 +417,7 @@ async function main() {
     eq("…carrying the seat, not a boolean", held && held.seat, "super");
   });
 
-  /* ── 10 · a way in (§147.14) ──────────────────────────────────
+  /* ── 10 · a way in (§288.14) ──────────────────────────────────
      A PLATFORM WITH NO ACCOUNTS IS A PLATFORM NOBODY CAN OPEN, and there is
      nothing inside it that could grant the first one — the consultants page
      is behind the sign-in it would create. This is §43.1's own answer one
@@ -431,7 +431,7 @@ async function main() {
       /* THE FIRST THING IT CAN DO IS STOP BEING THIS. A known password that
          did not force a change is a back door, which is §43.1's whole
          reversal of §19.4. */
-      /* NOT FORCED, at Islam's explicit direction (§147.25) — and the
+      /* NOT FORCED, at Islam's explicit direction (§288.25) — and the
          machinery is untouched: a password ISSUED to a consultant still has
          to be replaced before they can go anywhere, which section 9 above
          exercises. */
@@ -452,7 +452,7 @@ async function main() {
     check("…and never re-made once any account exists", again && again.must_change === false, again);
   });
 
-  /* ── 11 · an explicit reset, once (§147.17) ───────────────────
+  /* ── 11 · an explicit reset, once (§288.17) ───────────────────
      Islam asked for 1234 back. The whole risk in granting that is a step that
      runs on EVERY deploy, which would put the password back to 1234 every time
      a real one was chosen — a permanent backdoor wearing a one-off's clothes,
@@ -477,7 +477,7 @@ async function main() {
     const me = (await c.query("SELECT password_hash, must_change FROM accounts WHERE email = $1",
       [EMAIL])).rows[0];
     check("…putting 1234 back over a real password", auth3.verifyPassword("1234", me.password_hash));
-    /* AND IT IS NOT TEMPORARY (§147.25). Islam asked for the PASSWORD, not
+    /* AND IT IS NOT TEMPORARY (§288.25). Islam asked for the PASSWORD, not
        for a way in to choose another, and reaffirmed it after the cost was
        stated. The forced change still means what it means for everybody else,
        which is what the next assertion is really about. */
@@ -502,7 +502,7 @@ async function main() {
       !auth3.verifyPassword("1234", now.password_hash));
   });
 
-  /* ── 12 · the tenant that was already here (§147.21) ──────────
+  /* ── 12 · the tenant that was already here (§288.21) ──────────
      A deployment carrying this code and an unmigrated database has a real
      client in it and no row saying so. Adoption registers it WHERE IT ALREADY
      LIVES — no table moves — which is what lets the code ship without the

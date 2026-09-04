@@ -73,12 +73,21 @@ body.presenting .chatdock { display:none; }
 .chathead .cht { font-size:var(--fs-body); font-weight:650; line-height:1.25; }
 .chathead .chs { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:2px;
                  display:flex; align-items:center; gap:5px; }
-.chathead .chx { margin-left:auto; background:none; border:none; color:var(--panel-quiet);
+/* THE MARGIN IS ON THE GROUP, NEVER ON EACH BUTTON (§225): two controls each
+   carrying `margin-left:auto` are each pushed right on their own and land a
+   gap apart with the heading squeezed between them. */
+.chathead .chbtns { margin-left:auto; display:flex; align-items:center; gap:2px; }
+.chathead .chx { background:none; border:none; color:var(--panel-quiet);
                  cursor:pointer; line-height:0; padding:4px; border-radius:5px;
                  display:grid; place-items:center; }
 .chathead .chx svg { width:16px; height:16px; }
 .chathead .chx:hover { color:var(--panel-ink); background:rgb(255 255 255/.12); }
 .chathead .chx:focus-visible { outline:2px solid var(--panel-ink); outline-offset:1px; }
+.chathead .chbell[hidden] { display:none; }
+/* OFF IS QUIETER, NOT ABSENT — the struck bell has to stay findable, because
+   it is the only way back on. */
+.chathead .chbell.belloff { opacity:.62; }
+.chathead .chbell.belloff:hover { opacity:1; }
 .chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
 
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
@@ -116,6 +125,12 @@ body.presenting .chatdock { display:none; }
 /* THE OFFICE'S SIDE CARRIES THE ACCENT EDGE, and it is the one thing that
    distinguishes the two — never a filled bubble on either side, because a
    colour block per line is a lot of colour for a page this quiet (§41). */
+/* IT ALSO LEFT THE PLATFORM (§188). Quiet, on the byline beside the time —
+   a fact about how the message travelled, never about what it says, so it
+   takes the byline's own ink and none of its own. */
+.chmail { display:inline-flex; align-items:center; gap:4px; cursor:help;
+          font-size:var(--fs-micro); font-weight:600; color:var(--ink-3); }
+.chmail svg { width:12px; height:12px; }
 .chmsg.chthem { align-self:flex-start; }
 .chmsg.chthem .chbod { background:var(--surface); border:1px solid var(--line);
                        border-left:2px solid var(--gold); border-radius:4px 10px 10px 4px; }
@@ -184,7 +199,7 @@ body.presenting .chatdock { display:none; }
    not move when the box gets taller or shorter, so the measurement is stable
    in a way a max-height fed by a height never was. */
 .chinbox { display:grid; grid-template-columns:272px 1fr;
-           height:calc(100dvh - var(--chin-top, 190px) - 20px);
+           height:calc(100dvh - var(--chin-top, 190px) - var(--pane-foot, 20px));
            /* Below this it stops shrinking and the page scrolls instead — a
               thread squeezed into 150px is not a usable screen, and a window
               that short is somebody's split view rather than their laptop. */
@@ -316,6 +331,15 @@ body.presenting .chatdock { display:none; }
             background:var(--ground); color:var(--ink); padding:7px 9px;
             font-family:inherit; font-size:var(--fs-note); }
 .chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+/* THE MINUTES BOX IS AS WIDE AS THE NUMBER IT HOLDS (§169), not as wide as
+   the row: three digits is the whole range, and a full-width box beside the
+   words "5 minutes away" reads as a text field somebody should write in. */
+.chset-away { display:flex; align-items:center; gap:8px; }
+.chset-num { width:72px; border:1px solid var(--line); border-radius:6px;
+             background:var(--surface); color:var(--ink); padding:5px 8px;
+             font-family:inherit; font-size:var(--fs-small); }
+.chset-num:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+.chset-unit { font-size:var(--fs-small); color:var(--ink-3); }
 /* THE COST, WHERE THE CHOICE IS MADE. A semantic colour, not the accent: it
    is a consequence being stated, not something being emphasised. */
 .chset-cost { font-size:var(--fs-micro); color:var(--attn-tx); background:var(--attn-bg);
@@ -356,6 +380,50 @@ body.presenting .chatdock { display:none; }
                      text-decoration:underline; text-underline-offset:2px; }
 .chnothing .chlink:hover { color:var(--gold); }
 .chnothing .chlink:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+/* WE COULD NOT ASK — a different KIND of thing from "there is nothing here"
+   (§231.4), so it does not read in the same quiet grey as an empty list.
+   OUTSTANDING RATHER THAN BROKEN, in the warning ground the attention items
+   already use (§168, §190): the conversations are fine, the connection is not,
+   and an alarm colour here would say the opposite. Wider than the empty state,
+   because it is a sentence rather than a phrase. */
+/* ── THE OFFICE STARTS A CONVERSATION (§247) ────────────────────────────
+   Islam's placement A: in the column it acts on, beside the search. `.chqtop`
+   was a single input; it is a row now, and the search flexes so the button
+   never wraps below it. */
+.chqtop { display:flex; gap:8px; align-items:center; }
+.chqtop #chqfind { flex:1 1 auto; min-width:0; }
+.chqnew { flex:none; display:inline-flex; align-items:center; gap:6px;
+          border:1px solid var(--line); background:var(--surface); color:var(--ink);
+          border-radius:7px; padding:6px 11px; font-size:var(--fs-note);
+          font-weight:600; line-height:1.2; cursor:pointer; white-space:nowrap; }
+.chqnew:hover { border-color:var(--gold-deep); color:var(--gold-deep); }
+.chqnew:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.chqnew svg { width:14px; height:14px; }
+
+/* It IS the thread pane — this is where a conversation is read and answered,
+   and starting one is that act with the name still to be chosen. */
+.chnew { display:flex; flex-direction:column; gap:14px; padding:16px 18px;
+         height:100%; min-height:0; }
+.chnew-h { font-size:var(--fs-body); font-weight:650; }
+.chnew-f { display:flex; flex-direction:column; gap:5px; }
+.chnew-grow { flex:1 1 auto; min-height:0; }
+.chnew-l { font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:.06em;
+           color:var(--ink-3); font-weight:700; }
+.chnew-sel, .chnew-ta { border:1px solid var(--line); border-radius:8px;
+                        background:var(--surface); color:var(--ink);
+                        font:inherit; font-size:var(--fs-note); padding:9px 11px; }
+.chnew-ta { flex:1 1 auto; min-height:110px; resize:none; line-height:1.5; }
+.chnew-sel:focus-visible, .chnew-ta:focus-visible { outline:2px solid var(--gold);
+                        outline-offset:1px; }
+.chnew-acts { display:flex; gap:8px; align-items:center; }
+.chnew-x { background:none; border:1px solid var(--line); color:var(--ink-2);
+           border-radius:7px; padding:8px 14px; font:inherit;
+           font-size:var(--fs-note); cursor:pointer; }
+.chnew-x:hover { border-color:var(--ink-3); color:var(--ink); }
+
+.chnothing.chqfail { color:var(--ink); max-width:44ch;
+                     background:var(--warn-bg); border:1px solid var(--warn);
+                     border-radius:8px; padding:14px 16px; }
 
 @media (max-width:820px) {
   .chinbox { grid-template-columns:1fr; }

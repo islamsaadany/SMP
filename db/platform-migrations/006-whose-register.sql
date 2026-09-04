@@ -1,5 +1,5 @@
 -- @phase: pre
--- 006 · Whose register is it (§147.31).
+-- 006 · Whose register is it (§288.31).
 --
 -- A client CREATED from the platform has its register built here, so its team
 -- is added to it automatically. A client that predates the platform brought
@@ -9,7 +9,7 @@
 -- register is not ours to write into", and the worst it can do is ask who
 -- somebody is on a register the platform did in fact build — a question with
 -- an answer. The other way round writes rows into a client's own register
--- without being asked, which is the thing §147.30 exists to stop.
+-- without being asked, which is the thing §288.30 exists to stop.
 --
 -- CONDITIONAL, like every step in this phase: on a fresh database
 -- platform-schema.sql creates the column and there is nothing to add.

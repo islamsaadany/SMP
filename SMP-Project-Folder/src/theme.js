@@ -57,9 +57,16 @@ var THEME = (function () {
      "system" first, because it is what the platform shipped with and a
      comparison needs its own starting point in it. */
   var FKEY = "smp.font";
-  var FONTS = ["system", "inter", "source", "manrope", "plex"];
-  var FNAMES = { system: "System", inter: "Inter", source: "Source Sans",
-                 manrope: "Manrope", plex: "IBM Plex" };
+  /* TWO, NOT FIVE (§157, Islam: "let's make the 2 fonts available are the
+     system font and the source san3"). §38.7 carried four embedded faces so
+     they could be compared in the real product; the comparison is over.
+
+     THIS LIST IS ALSO THE SANITISER — `chosenFont()` returns null for anything
+     not in it — so somebody whose browser remembers "manrope" from the
+     comparison lands on the system stack rather than on an attribute no
+     stylesheet answers any more. Nothing to migrate, and nobody stuck. */
+  var FONTS = ["system", "source"];
+  var FNAMES = { system: "System", source: "Source Sans" };
 
   /* Where the switch starts when nobody has chosen: whatever the device says.
      matchMedia is absent in very old engines and returns a stub in some test

@@ -234,8 +234,16 @@ var PAGE_INFO = {
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
-       "can reason about. The one exception is a rule with teeth rather than a setting: a " +
-       "contributor granted edit reaches <b>their own lines only</b>."],
+       "can reason about. The one exception is a rule with teeth rather than a setting: three " +
+       "rows here are <b>bounded</b>, and opening their Reporting cell reaches only what names " +
+       "the person. A <b>Project owner</b> reaches the project whose Owner row names them, " +
+       "whole; a <b>Pillar owner</b> the pillar whose Owner row names them, whole; a " +
+       "<b>Contributor</b> &mdash; anyone the plan names anywhere: a collaborator, a " +
+       "stakeholder, a milestone&rsquo;s owner &mdash; only the rows that name them. None of the " +
+       "three is granted anywhere: <b>being named is what derives the role</b>, in the plan pen, " +
+       "and the row&rsquo;s Reporting cell here is the other half &mdash; both have to say yes " +
+       "before anything is entered, and none of the three ever submits, writes the cycle note " +
+       "or adds a picture slide."],
       ["Two states, not three",
        "View and edit, and edit includes view. <b>None is not a third thing you choose</b>, it is " +
        "the absence of the other two &mdash; which is why a cell is two toggles and nothing lit is " +

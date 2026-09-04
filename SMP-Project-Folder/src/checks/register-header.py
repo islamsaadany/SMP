@@ -123,10 +123,22 @@ HITS = """(sel)=>{
   return out;}"""
 
 
+# THE WELCOME SCREEN COVERS THE PAGE, AND SETTING ITS FLAG AFTER `goto` IS
+# TOO LATE (§148, §167). Over the stub server §148's overlay draws across the
+# whole viewport, so every control on the header row reported unreachable —
+# `elementFromPoint` returning the overlay, at all four widths, while the row
+# itself was perfectly fine. Suppressed the way a RETURNING viewer has it, in
+# an init script so it is set before the platform reads it; the tour's flag
+# moves there with it, for the same reason.
+def _returning(pg):
+    pg.add_init_script(
+        "try{sessionStorage.setItem('smp.tour.later','1');"
+        "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
+
+
 def land(pg):
     pg.goto(URL)
     pg.wait_for_timeout(1900)
-    pg.evaluate("try{sessionStorage.setItem('smp.tour.later','1')}catch(e){}")
     pg.evaluate("()=>document.querySelector('[data-md=\"setup\"]').click()")
     pg.wait_for_timeout(400)
     pg.evaluate("()=>document.querySelector('[data-setupgo=\"people\"]').click()")
@@ -138,6 +150,7 @@ print("one line above the table — " + URL)
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page()
+    _returning(pg)
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
 
@@ -251,12 +264,37 @@ with sync_playwright() as p:
     # 640px-tall window now scrolls it by 50px. That is the price of the field
     # Islam asked for, stated rather than hidden; a check left asserting a
     # number that is no longer true is worse than the fifty pixels.
+    # AND IT IS MEASURED ON A ROW WITH NOTHING OUTSTANDING (§190). This opened
+    # `smo` for as long as the SMO had no attention item; §187 gave them a seat
+    # over the group while they sit in the SMO function, and §190 draws that
+    # item's sentence INSIDE the form rather than in a band above it — so from
+    # here on, "the dialog is compact" measured on that row is measuring a form
+    # plus three lines of alarm. The rule has not changed and its SUBJECT had
+    # drifted (§50.6's family): a form of eleven fields is what §122 shortened,
+    # and a dialog carrying something outstanding legitimately has more in it.
+    # What a person WITH an item must still do is fit on screen, asserted below.
     for w, h in ((1920, 1080), (1512, 860), (1440, 780), (1280, 720), (1280, 700)):
         pg.set_viewport_size({"width": w, "height": h})
         land(pg)
-        pg.evaluate("()=>document.querySelector('[data-pmenu=\"smo\"]').click()")
+        # THE CLEAN ROW IS MADE, never hunted (§94.2): the demo's people carry
+        # no employee numbers at all, so every one of them is outstanding for
+        # `noident` and there is no clean row to find.
+        who = pg.evaluate("""()=>{
+          var c = PEOPLE.filter(function(p){ return personActive(p) && !p.role; });
+          for (var i=0;i<c.length;i++){
+            var p=c[i];
+            p.empId = 'CLEAN1'; p.email = 'clean.row@rayatrade.com';
+            paint();
+            if (!attentionOf(p)) return p.key;
+            delete p.empId; delete p.email;
+          }
+          paint(); return null; }""")
+        ck("%dx%d: there is a row with nothing outstanding" % (w, h), bool(who), who)
+        if not who:
+            continue
+        pg.evaluate("(k)=>document.querySelector('[data-pmenu=\"'+k+'\"]').click()", who)
         pg.wait_for_timeout(250)
-        pg.evaluate("()=>document.querySelector('[data-pedit=\"smo\"]').click()")
+        pg.evaluate("(k)=>document.querySelector('[data-pedit=\"'+k+'\"]').click()", who)
         pg.wait_for_timeout(700)
         d = pg.evaluate("""()=>{
           const bd=document.querySelector('#modal-b'),
@@ -280,6 +318,35 @@ with sync_playwright() as p:
         ck("%dx%d: it does not scroll" % (w, h), not d["scrolls"], d)
         ck("%dx%d: and the whole dialog is on screen" % (w, h), d["fits"], d)
         ck("%dx%d: no row leaves a cell empty" % (w, h), d["orphanRows"] == 0, d)
+        ck("%dx%d: and it wears no ring" % (w, h),
+           pg.evaluate("document.querySelectorAll('#modal-b .pdf.attn').length") == 0)
+        pg.evaluate("()=>{const b=document.querySelector('[data-pdlg-close]');"
+                    "if(b) b.click();}")
+        pg.wait_for_timeout(500)
+        # AND A ROW THAT HAS SOMETHING OUTSTANDING STILL FITS ON SCREEN. It may
+        # SCROLL — it has more in it — but a dialog running off the bottom is
+        # the fault §122 was written about, and the ring must not change the
+        # grid it sits in (§190: the outline is out of flow).
+        pg.evaluate("()=>document.querySelector('[data-pmenu=\"smo\"]').click()")
+        pg.wait_for_timeout(250)
+        pg.evaluate("()=>document.querySelector('[data-pedit=\"smo\"]').click()")
+        pg.wait_for_timeout(700)
+        e = pg.evaluate("""()=>{
+          const g=document.querySelector('#modal-b .pdlg'),
+                m=document.querySelector('#overlay .modal');
+          const tracks=getComputedStyle(g).gridTemplateColumns.split(' ').length;
+          const byRow={};
+          [...g.children].forEach(x=>{const t=Math.round(x.getBoundingClientRect().top);
+             (byRow[t]=byRow[t]||[]).push(x);});
+          const short=Object.values(byRow).filter(v=>
+             v.length<tracks && !v.some(x=>x.classList.contains('wide')
+                                        || x.classList.contains('pdsect')));
+          return { rings:document.querySelectorAll('#modal-b .pdf.attn').length,
+                   orphanRows:short.length,
+                   fits:m.getBoundingClientRect().bottom<=innerHeight+1 };}""")
+        ck("%dx%d: a row with an item is ringed" % (w, h), e["rings"] > 0, e)
+        ck("%dx%d: ...and the ring orphans nothing" % (w, h), e["orphanRows"] == 0, e)
+        ck("%dx%d: ...and the dialog is still on screen" % (w, h), e["fits"], e)
         ck("%dx%d: narrower than the platform's other dialogs" % (w, h),
            d["modalW"] < 940, d["modalW"])
 

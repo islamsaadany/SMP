@@ -112,15 +112,22 @@ with sync_playwright() as p:
     ck("the identical twins stay the duplicate flag's, said once not twice",
        pg.evaluate("""()=>attentionQueue().filter(a=>(a.key==='twin1'||a.key==='twin2') &&
           a.why.some(w=>w.kind==='samename')).length""")==0)
-    # THE REASON IS SAID WHERE THE FIX IS: the queue's dialog, above the very
-    # field that clears it — the same band every other kind already uses.
+    # THE REASON IS SAID WHERE THE FIX IS: the queue's dialog, on the very
+    # field that clears it. §190 moved it OFF the band and onto the Name box
+    # itself, with a ring round it — so this asserts the new contract rather
+    # than dying on a selector the product no longer draws (§51.11). It crashed
+    # rather than passing quietly, which is the good way for that to fail.
     pg.evaluate("()=>document.querySelector('[data-attn]').click()")
     pg.wait_for_timeout(500)
     pg.evaluate("""()=>{ PDLG.at = PDLG.queue.findIndex(a=>a.key==='ahmedmostafamo');
         PDLG.key = 'ahmedmostafamo'; personDialogPaint(); }""")
     pg.wait_for_timeout(400)
-    band = pg.eval_on_selector("#modal-b .pdband", "e=>e.textContent")
-    ck("the dialog says it above the fields", "They read as" in band, band)
+    band = pg.evaluate("()=>[...document.querySelectorAll('#modal-b .attnsay')]"
+                       ".map(function(e){return e.textContent;}).join(' ')")
+    ck("the dialog says it on the box that clears it", "They read as" in band, band)
+    ck("...and that box is the Name, ringed",
+       pg.evaluate("()=>[...document.querySelectorAll('#modal-b .pdf.attn .pdfl')]"
+                   ".some(function(e){return e.textContent==='Name';})"))
     # AMENDING ONE CLEARS BOTH — typed through the dialog's own Name field, so
     # the whole path is pressed, and the band re-asks rather than trusting the
     # render that drew it (§48.2).

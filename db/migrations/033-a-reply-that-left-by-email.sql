@@ -1,0 +1,20 @@
+-- ── A REPLY THAT ALSO LEFT BY EMAIL SAYS SO (§188) ──────────────────────
+-- Islam, reading a thread: "if the previous message was sent by email let's
+-- add a tag to it that it was sent by email as well."
+--
+-- The platform has chased people by email since §97.5 and RECORDED NOTHING
+-- ABOUT IT: the outcome was returned to the browser, shown once under the
+-- composer, and forgotten. So the office could see what WOULD happen before
+-- pressing Send and never what DID happen afterwards.
+--
+-- ONE COLUMN HOLDING THE ADDRESS, never a boolean beside one (§104.7). NULL
+-- is "it did not leave", which is what every existing row honestly is: this
+-- backfills nothing, because nothing was ever written down to backfill from,
+-- and inventing it from who happened to be away would be a guess printed as
+-- a fact (the reading Islam was offered and turned down).
+--
+-- The address rather than a flag, because "it was emailed" and "it went to
+-- hala_latif@rayacorp.com" answer different questions and the second answers
+-- both — and a person's address on the register can change afterwards, so
+-- reading it back would tell you where it would go NOW, not where it went.
+ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS emailed_to TEXT;

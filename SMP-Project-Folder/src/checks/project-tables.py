@@ -36,9 +36,14 @@ DEST = "fn:finance"
 # §63 folded reporting out of it, and Reporting is a MODE reached from a
 # button there — pressing for a section row lands on Performance twice and
 # reports it under two names (§50.6, which cost twelve versions).
+# §222: REPORTING IS ITS OWN TAB, so the third pane is reached from
+# Reporting rather than from inside Performance. The label follows the
+# navigation, because a label that names a page the walk did not open is
+# §50.6's fault — twelve versions of measuring the wrong page under the
+# right name.
 PAGES = [("Strategy / Projects", "Strategy", "Projects", False),
          ("Performance", "Performance", None, False),
-         ("Performance / Report", "Performance", None, True)]
+         ("Reporting / Report", "Performance", None, True)]
 
 bad = 0
 errs = []
@@ -69,10 +74,17 @@ def goto(pg, key, tab, sec, report):
             .find(x=>x.textContent.trim().indexOf(t)===0); if(b)b.click()}""", [sel, t])
         pg.wait_for_timeout(250)
     if report:
-        r = pg.query_selector("[data-report]")
+        r = pg.query_selector('[data-s=report]')
         if not r:
-            return "no Report button"
+            return "no Reporting tab"
         r.click()
+        pg.wait_for_timeout(300)
+        # §220: A SUBMITTED REPORT IS READ-ONLY, and six of the ten demo units
+        # ship already submitted — so a check that drives the fields has to
+        # reopen first. Pressing the product's own control rather than
+        # clearing the flag, because that is the way a person gets back in.
+        pg.evaluate("""() => { const b = document.querySelector('.rc-reopen');
+                               if (b) b.click(); }""")
         pg.wait_for_timeout(350)
     return pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
         b=document.querySelector('#secrow [aria-selected="true"]');
@@ -98,6 +110,12 @@ READ = """
           cells: [...r.children].map(c => ({
             text: c.textContent.trim(), span: +c.colSpan,
             box: !!c.querySelector("input,select,textarea,button"),
+            /* §227: a collaborators cell's em-dash is the ANSWER — "nobody
+               supporting is a real and ordinary answer, not an omission"
+               (§15.1, §187) — where every other bare dash is the table
+               asking a question the row cannot answer (§99). The class is
+               what says which kind of dash this is. */
+            collabs: c.classList.contains("collabs"),
             late: !!c.querySelector(".lateval"),
             soon: !!c.querySelector(".soonval") })) })) });
   });
@@ -210,9 +228,16 @@ with sync_playwright() as p:
             # answers differently: a cell holding nothing but an em-dash is
             # the table asking a row a question its kind cannot answer.
             dead = [c["text"] for r in t["rows"] if not r["notDue"]
-                    for c in r["cells"] if c["text"] in ("—", "-", "") and not c["box"]]
+                    for c in r["cells"]
+                    if c["text"] in ("—", "-", "") and not c["box"]
+                    and not c.get("collabs")]
             ck("%s: no cell blank or dashed on a row being asked for" % t["head"][1],
                not dead, len(dead))
+            # ...and the exemption is exactly one column wide, or a build that
+            # classed every cell "collabs" would blind the probe (§113.8).
+            ck("%s: the collabs exemption covers one column" % t["head"][1],
+               all(sum(1 for c in r["cells"] if c.get("collabs")) <= 1
+                   for r in t["rows"]), t["head"])
 
         # THE DATE IS OFF THE TABLES (§104.8) and must not have taken its two
         # readings with it. A deliverable or outcome that is LATE says so
@@ -273,8 +298,12 @@ with sync_playwright() as p:
     }""")
     # §104.8: the template asks for neither a Kind nor a Due date. The OUTCOME
     # sheet keeps its date, deliberately -- see the note in the section.
+    # §233: the Hidden column joined every row sheet; what §104.8 guards is
+    # still guarded — no Kind, no date.
     ck("the plan's Deliverables sheet asks for neither a Kind nor a date",
-       wb["planDeliv"] == ["Project", "Deliverable"], wb["planDeliv"])
+       wb["planDeliv"] == ["Project", "Deliverable", "Hidden"] and
+       "Kind" not in wb["planDeliv"] and "Due date" not in wb["planDeliv"],
+       wb["planDeliv"])
     ck("the outcome sheet keeps its Due date", "Due date" in wb["planOut"], wb["planOut"])
     ck("the milestone sheet asks for a Description", "Description" in wb["planMs"], wb["planMs"])
     ck("the progress sheet asks for a status and a per-cent",
@@ -482,7 +511,13 @@ with sync_playwright() as p:
             return "(there is no Submit to press)"
         said = {}
         pg.once("dialog", lambda d: (said.update(m=d.message), d.dismiss()))
-        pg.click("[data-submit]", timeout=3000); pg.wait_for_timeout(350)
+        # §221: THE BUTTON IS DIMMED FOR EXACTLY THESE REASONS NOW, and
+        # Playwright treats `aria-disabled` as disabled and refuses to click
+        # it — which is itself worth knowing. `force` presses it anyway,
+        # because the click handler is still the enforcement: the dimming is
+        # the explanation given BEFORE the press, not a replacement for the
+        # refusal after it, and this section is about the refusal.
+        pg.click("[data-submit]", timeout=3000, force=True); pg.wait_for_timeout(350)
         return said.get("m", "")
 
     # 1 · a row that owes a per-cent stops it (§104.10 with teeth)
@@ -512,6 +547,20 @@ with sync_playwright() as p:
     pg.evaluate("""() => {
       fnMissingNotes("finance").forEach(x => x.obj.note = "Explained.");
       fnAskedItems("finance").forEach(x => { if (statusPending(x.obj)) x.obj.pct = 50; });
+      /* §221 ADDED TWO MORE WAYS TO BE UNREADY, so "nothing in the way" now
+         has to mean all five: every asked figure entered, and the plan
+         holding no gaps of its own. */
+      fnAskedItems("finance").forEach(x => {
+        const o = x.obj;
+        if (x.kind === "deliverable" || x.kind === "milestone") {
+          if (!statusGiven(o)) { o.status = "done"; o.pct = 100; }
+        } else if (o.actual == null || o.actual === "") o.actual = o.target || 1;
+      });
+      capsOfFunction("finance").forEach(c => (c.projects || []).forEach(pr => {
+        (pr.milestones || []).forEach(m => { if (!m.finish) m.finish = "Q4 26";
+                                             if (!m.owner) m.owner = pr.owner || "Owner"; });
+        (pr.outcomes || []).forEach(o => { if (!o.target) o.target = "1"; });
+      }));
       paint();
     }""")
     pg.wait_for_timeout(250)
@@ -519,9 +568,14 @@ with sync_playwright() as p:
        pg.evaluate("() => submitRefusal('%s')" % DEST))
     said = press()
     ck("...and then it submits", pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
-    ck("...the dot on the Performance tab clears",
+    ck("...the dot on the Reporting tab clears",
        not pg.evaluate("() => reportPending('%s')" % DEST))
-    bar = pg.eval_on_selector(".rep-bar", "e=>e.textContent")
+    # §199.2: `.rep-bar` HAS NOT EXISTED FOR VERSIONS. The reporting bar is
+    # `.repchrome` (repChrome()), and this line CRASHED the whole file rather
+    # than failing one assertion — which is why everything below it has gone
+    # unrun. §51.11 from the loud end: a selector that no longer matches
+    # usually passes quietly; this one took the check down with it.
+    bar = pg.eval_on_selector(".repchrome", "e=>e.textContent")
     ck("...the bar says Submitted and offers Reopen",
        "Submitted" in bar and "Reopen" in bar, bar)
     if pg.query_selector("[data-unsubmit]"):

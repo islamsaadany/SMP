@@ -239,8 +239,62 @@ function buildXlsx(sheets){
    update a plan rather than duplicate it.
    ─────────────────────────────────────────────────────────────────────── */
 
+/* ── A TARGET WITH A SHAPE OF ITS OWN, IN THE WORKBOOK (§278) ──────────
+   Twelve columns per row-kind that can carry one, APPENDED after the last
+   existing column on every sheet. Appended rather than inserted because a
+   validation range is a POSITION (§65): putting them in the middle would move
+   Q1–Q4, Hidden and the ID column and validate the wrong cells in silence —
+   the fault §248 had to correct in the same file.
+
+   THE ROUND TRIP IS THE POINT (§22). An upload AUTHORS a plan, so a column the
+   file does not carry is a column the plan LOSES: without these twelve, a
+   download and an untouched upload would silently strip every monthly plan in
+   the tenant and put every row back on flat proration. Twelve columns rather
+   than one delimited cell, because a plan by month is what a spreadsheet is
+   FOR — and they collapse to one field on the way through the reader, so the
+   pipeline behind it carries one column and not twelve. */
+var MONTH_COLS = SMPRules.MONTH_NAMES;
+function monthHead(prefix){
+  return MONTH_COLS.map(function(m){ return (prefix || "") + m; });
+}
+/* Twelve cells out of a stored plan. A month nobody set is an EMPTY CELL and
+   never a nought (§278, §104.10) — writing 0 for a blank would hand the file
+   back saying the office had planned nothing for that month. */
+function monthCells(row, fld){
+  var a = Array.isArray(row && row[fld]) ? row[fld] : [], out = [];
+  for (var i = 0; i < 12; i++) out.push(a[i] == null ? "" : a[i]);
+  return out;
+}
+/* And back: twelve cells into the one pipe-joined field the plan pipeline
+   carries. Answers "" when the file said nothing at all, so a workbook written
+   before this existed leaves the row exactly as it was (§58). */
+function monthRead(r, prefix){
+  var out = [], any = false;
+  for (var i = 0; i < 12; i++) {
+    var v = r[(prefix || "") + MONTH_COLS[i]];
+    var s = v == null ? "" : String(v).trim();
+    if (s !== "") any = true;
+    out.push(s);
+  }
+  return any ? out.join("|") : "";
+}
+/* Twelve columns of the same width, for the sheet's `widths`. */
+function monthWidths(w){
+  var out = [];
+  for (var i = 0; i < 12; i++) out.push(w);
+  return out;
+}
+/* The twelve column indexes, for `numCols` and for a validation range that has
+   to start after them. */
+function monthNums(start){
+  var out = [];
+  for (var i = 0; i < 12; i++) out.push(start + i);
+  return out;
+}
+
 var DIRS = ["\u2265", "\u2264"];
-var COMPILES = ["Latest", "Sum", "Average"];
+/* §276: the workbook validates the list the pen offers, read from one place. */
+var COMPILES = SMPRules.COMPILES;
 var KINDS = ["Direction", "Capability"];
 var YESNO = ["Yes", "No"];
 
@@ -277,7 +331,12 @@ function unitSuggestions(){
     if (!x || seen[x] || x.indexOf(",") > -1) return;
     seen[x] = 1; out.push(x);
   }
-  ["%", "EGP", "M EGP", "B EGP", "days", "#"].forEach(add);
+  /* §251: `Y/N` is offered here too, or a plan authored on the platform and
+     downloaded would come back with every yes/no target unrecognised — the
+     upload AUTHORS the plan (§22), so a unit the template cannot say is a
+     unit the round trip destroys. It is written into the Target cell whole,
+     exactly as `6.2B EGP` is; there is no separate column for a unit. */
+  ["%", "EGP", "M EGP", "B EGP", "days", "#", "Y/N"].forEach(add);
   UNIT_KEYS.forEach(function(k){
     var u = UNITS[k];
     (u.keyObjectives || []).forEach(function(m){ add(splitTarget(m.target).unit); });
@@ -417,9 +476,25 @@ function planWorkbook(u){
   var readmeSheet = readme("plan", "Business unit or function", planSubjectNames());
   readmeSheet.rows[1][1] = picked;
 
-  return [
-    readmeSheet,
+  /* THE FILE STOPS ASKING A FUNCTION FOR A STRATEGY IT DOES NOT AUTHOR
+     (§213, Islam: *"if you're talking about the template of the functions,
+     yes you can drop these columns of course"*).
 
+     A supporting function inherits its aspiration, SWOT and who-we-are from
+     the unit it plans under, so a template offering it those three sheets was
+     asking for content the product now has nowhere to show — which is the
+     fault §212 spent a section removing, arriving from the file end. Its
+     objectives take a CAPABILITY's shape for the same reason: that is what its
+     Overview draws, and a 3-year target column would collect a value no page
+     renders while the Weight the page shows would have nowhere to come from.
+
+     A UNIT'S WORKBOOK IS UNTOUCHED — every sheet, every column, every
+     validation range — and that is asserted rather than assumed. */
+  var isFn = !!(u && String(u.ukey || "").indexOf("fn:") === 0);
+
+  return [
+    readmeSheet]
+  .concat(isFn ? [] : [
     { name:"Foundation", widths:[20, 78],
       head:["Label", "Text"],
       rows:u.clauses.map(function(c){ return [c[0], c[1]]; }) },
@@ -433,17 +508,40 @@ function planWorkbook(u){
            are planning TO — an input, not a default the platform hands them,
            and a pre-filled year reads as a decision somebody already made. */
         ["Horizon (the year this plan runs to)", GROUP.horizon || ""]
-      ] },
-
-    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],
-      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile"],
-      numCols:[3, 4],
+      ] }
+  ])
+  .concat(isFn ? [
+    /* A function's objectives, in its Overview's own columns. `numCols` and
+       every validation range move with the columns — a range is a POSITION
+       (§65), and leaving them where a unit's are would validate the wrong
+       cells in silence. */
+    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10, 9].concat(monthWidths(8)),
+      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %", "Hidden"]
+        .concat(monthHead("")),
+      numCols:[2, 5].concat(monthNums(7)),
+      validations:[{ range:"B2:B60", list:DIRS },
+                   { range:"D2:D60", list:units, soft:true },
+                   { range:"E2:E60", list:COMPILES },
+                   { range:"G2:G60", list:YESNO, soft:true }],
+      rows:u.keyObjectives.map(function(m){
+        var a = splitTarget(m.target);
+        return [m.name, m.dir, a.value, a.unit, m.compile,
+                m.weight == null ? "" : m.weight,
+                SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
+      }) }
+  ] : [
+    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 9].concat(monthWidths(8)),
+      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Hidden"]
+        .concat(monthHead("")),
+      numCols:[3, 4].concat(monthNums(8)),
       validations:[{ range:"C2:C60", list:DIRS },
                    { range:"F2:F60", list:units, soft:true },
-                   { range:"G2:G60", list:COMPILES }],
+                   { range:"G2:G60", list:COMPILES },
+                   { range:"H2:H60", list:YESNO, soft:true }],
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target), b = splitTarget(m.target3y);
-        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile];
+        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile,
+                SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
       }) },
 
     { name:"SWOT", widths:[16, 78],
@@ -453,8 +551,9 @@ function planWorkbook(u){
         .reduce(function(acc, pair){
           (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
           return acc;
-        }, []) },
-
+        }, []) }
+  ])
+  .concat([
     { name:"Pillars", widths:[40, 14, 22, 22],
       head:["Pillar", "Kind", "Theme", "Owner"],
       validations:[{ range:"B2:B60", list:KINDS },
@@ -462,37 +561,62 @@ function planWorkbook(u){
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
 
-    { name:"Measures", widths:[34, 40, 11, 14, 12, 12],
-      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile"],
-      numCols:[3],
+    { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(monthWidths(8)),
+      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"]
+        .concat(monthHead("")),
+      numCols:[3].concat(monthNums(7)),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"C2:C400", list:DIRS },
                    { range:"E2:E400", list:units, soft:true },
-                   { range:"F2:F400", list:COMPILES }],
+                   { range:"F2:F400", list:COMPILES },
+                   { range:"G2:G400", list:YESNO, soft:true }],
       rows:u.items.reduce(function(acc, p){
         p.measures.forEach(function(m){
           var a = splitTarget(m.target);
-          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile]);
+          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile,
+                    SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly")));
         });
         return acc;
       }, []) },
 
-    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7],
-      head:["Pillar", "Tactic", "Description", "Outcome", "Owner", "Collaborators",
-            "Q1", "Q2", "Q3", "Q4"],
+    /* §248: THE OUTCOME'S THREE FACTS TRAVEL WITH IT, or downloading a plan
+       and uploading it back would silently drop every target the office had
+       set — §22's contract is that an upload AUTHORS the plan, so a column the
+       file does not carry is a column the plan loses.
+
+       A VALIDATION RANGE IS A POSITION (§65), so the three new columns push
+       Q1–Q4 from G:J to J:M and Hidden from K to N. Getting that wrong
+       validates the wrong cells in silence, which is why the ranges move in
+       the same edit as the head. */
+    { name:"Tactics",
+      widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
+        .concat(monthWidths(9)),
+      /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
+         already says so of the outcome's other three columns — a bare "Jan"
+         beside a tactic's own quarters would read as the tactic's month. */
+      head:["Pillar", "Tactic", "Description", "Outcome",
+            "Outcome direction", "Outcome target", "Outcome compiled",
+            "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
+        .concat(monthHead("Outcome ")),
+      numCols:monthNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
-                   { range:"G2:J400", list:YESNO }],
+                   { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
+                   { range:"G2:G400", list:COMPILES, soft:true },
+                   { range:"J2:M400", list:YESNO },
+                   { range:"N2:N400", list:YESNO, soft:true }],
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
-          acc.push([p.name, t.name, t.description || "", t.outcome || "", t.owner,
-            (t.collaborators || []).join(", "),
-            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No"]);
+          acc.push([p.name, t.name, t.description || "", t.outcome || "",
+            t.outDir || "", t.outTarget || "", t.outCompile || "",
+            t.owner, (t.collaborators || []).join(", "),
+            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
+            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly")));
         });
         return acc;
       }, []) }
-  ];
+  ]);
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -738,9 +862,17 @@ function planFromWorkbook(u, sheets){
   var kN = 0;
   sheetObjects(sheets["Objectives"]).forEach(function(r){
     if (!r["Objective"]) return;
+    /* §213: a function's sheet has no "3-year target" and DOES have a
+       "Weight %"; a unit's is the other way round. Read by header name and
+       both files pass through one reader — an absent column simply reads
+       undefined, which is what an absent value already means here (§58's
+       rule: write the new label, read either). */
     rows.push({ id:mint("KO" + (++kN)), type:"NORTHSTAR", name:r["Objective"],
       group:r["Group"], direction:r["Direction"], value:r["This year target"],
-      value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"] });
+      value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"],
+      weight:r["Weight %"],
+      monthly:monthRead(r, ""),
+      hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
@@ -758,7 +890,9 @@ function planFromWorkbook(u, sheets){
     mN[pid] = (mN[pid] || 0) + 1;
     rows.push({ id:pid ? pid + "-M" + mN[pid] : "", type:"MEASURE",
       parent_id:pid, name:r["Measure"], direction:r["Direction"],
-      value:r["Target"], unit:r["Unit"], compile:r["Compile"] });
+      value:r["Target"], unit:r["Unit"], compile:r["Compile"],
+      monthly:monthRead(r, ""),
+      hidden:yes(r["Hidden"]) ? "1" : "" });
   });
   sheetObjects(sheets["Tactics"]).forEach(function(r){
     if (!r["Tactic"]) return;
@@ -766,17 +900,25 @@ function planFromWorkbook(u, sheets){
     tN[pid] = (tN[pid] || 0) + 1;
     rows.push({ id:pid ? pid + "-T" + tN[pid] : "", type:"TACTIC",
       parent_id:pid, name:r["Tactic"],
-      description:r["Description"], outcome:r["Outcome"], owner:r["Owner"],
+      description:r["Description"], outcome:r["Outcome"],
+      /* Blank says nothing, exactly as every other optional column does — a
+         file written before this existed carries none of the three and its
+         tactics arrive measured the way they always were. */
+      outDir:r["Outcome direction"] || "", outTarget:r["Outcome target"] || "",
+      outCompile:r["Outcome compiled"] || "",
+      monthly:monthRead(r, "Outcome "),
+      owner:r["Owner"],
       collaborators:(r["Collaborators"] || "").split(/[,|]/).map(function(x){ return x.trim(); })
         .filter(Boolean).join("|"),
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",
-      q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0" });
+      q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0",
+      hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
   return rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
-     "theme","kind","notes","group"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
+     "theme","kind","notes","group","hidden","monthly"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
 }
@@ -874,15 +1016,17 @@ function capPlanWorkbook(c){
   return [
     capReadme("plan", names, c ? c.name : ""),
 
-    { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
-      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
+    { name:"Objectives", widths:[40, 11, 14, 12, 10, 12, 9],
+      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "Hidden"],
       numCols:[2, 4],
       validations:[{ range:"B2:B60", list:DIRS },
                    { range:"D2:D60", list:units, soft:true },
-                   { range:"F2:F60", list:COMPILES }],
+                   { range:"F2:F60", list:COMPILES },
+                   { range:"G2:G60", list:YESNO, soft:true }],
       rows:(c.keyObjectives || []).map(function(m){
         var a = splitTarget(m.target);
-        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile];
+        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile,
+                SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
     { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14],
@@ -897,43 +1041,55 @@ function capPlanWorkbook(c){
        deliverable is delivered when the project ends, and the project's owner
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
-    { name:"Deliverables", widths:[34, 60],
+    { name:"Deliverables", widths:[34, 60, 9],
       /* §104.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
          direction and target are written by the platform, and Islam took the
          date off the templates "for now" -- the field survives in the model
          and nothing asks for it, so every deliverable is simply always asked,
          which is what the product did before §104 put the date back. */
-      head:["Project", "Deliverable"],
+      /* §233: the old C2:C400 DELIV_KINDS validation was aimed at the Kind
+         column that sheet no longer has — Hidden takes the position, so the
+         stale list goes with it rather than dressing the new column. */
+      head:["Project", "Deliverable", "Hidden"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
-                   { range:"C2:C400", list:DELIV_KINDS }],
+                   { range:"C2:C400", list:YESNO, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
-        (p.deliverables || []).forEach(function(d){ acc.push([p.name, d.name]); });
+        (p.deliverables || []).forEach(function(d){
+          acc.push([p.name, d.name, SMPRules.isHidden(d) ? "Yes" : ""]); });
         return acc;
       }, []) },
 
-    { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14],
-      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date"],
+    { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14, 9],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date", "Hidden"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DIRS },
-                   { range:"E2:E400", list:units, soft:true }],
+                   { range:"E2:E400", list:units, soft:true },
+                   { range:"G2:G400", list:YESNO, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.outcomes || []).forEach(function(o){
           var a = splitTarget(o.target);
-          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || ""]);
+          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || "",
+                    SMPRules.isHidden(o) ? "Yes" : ""]);
         });
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[34, 38, 52, 16, 14],
-      head:["Project", "Milestone", "Description", "Owner", "Due date"],
+    /* §227: Collaborators beside the Owner, the tactics sheet's own column —
+       comma-separated names, and the export carries them or a download-and-
+       re-upload would silently drop every one (§22: an upload AUTHORS). */
+    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14, 9],
+      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date", "Hidden"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
-                     error:"Choose a project from the Projects sheet." }],
+                     error:"Choose a project from the Projects sheet." },
+                   { range:"G2:G400", list:YESNO, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || ""]);
+          acc.push([p.name, m.name, m.covers || "", m.owner || "",
+                    (m.collaborators || []).join(", "), m.finish || "",
+                    SMPRules.isHidden(m) ? "Yes" : ""]);
         });
         return acc;
       }, []) }
@@ -1032,6 +1188,7 @@ function capPlanFromWorkbook(c, sheets){
        instead, which is read and ignored (§58: write the new label, read
        whatever arrives). */
     row.finish = r["Due date"] != null ? r["Due date"] : "";
+    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];
@@ -1040,17 +1197,24 @@ function capPlanFromWorkbook(c, sheets){
        column keeps below, and for the same reason. */
     row.measure_at = r["Due date"] != null ? r["Due date"]
                    : r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
+    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
     /* Description since §103, read as either (§58). The STORED field keeps its
        spelling -- `covers` is an identifier, "Description" is a label. */
     row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
     row.owner = r["Owner"];
+    /* §227: normalised to the pipe-joined shape the differ compares and
+       applyCapPlan splits — the same road the Projects sheet's Stakeholders
+       already travel. A file written before the column reads "" (§58). */
+    row.collaborators = (r["Collaborators"] || "").split(/[,|]/)
+      .map(function(x){ return x.trim(); }).filter(Boolean).join("|");
     /* WRITE THE NEW LABEL, READ EITHER (§58, §65). The column is called Due
        date from §99; somebody is holding a workbook downloaded before that,
        and a header is a contract. The STORED field keeps its own spelling —
        renaming `finish` would be a migration for a word nobody reads. */
     row.finish = r["Due date"] != null ? r["Due date"] : r["Finish"];
+    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
 
   return rows.map(function(r){
@@ -1122,7 +1286,12 @@ function peopleWorkbook(){
   var names = mainbuNames();
   /* Neither floor role is offered, for the same reason the reader refuses
      them: both are derived, not granted. */
-  var roleNames = ROLES.filter(function(r){ return !SMPRules.isOwnLinesRole(r.key); })
+  /* §186: AND NO SEAT IN A FILE SOMEBODY CANNOT GIVE ONE WITH. The Role
+     column is the second road to `p.role = "super"` — the reader grants what
+     it names — so the template offered by somebody who may not hand out a
+     seat does not list one. `roleIsGrantable()` is the same question the
+     picker asks, so the file and the screen cannot disagree (§53.5). */
+  var roleNames = ROLES.filter(function(r){ return roleIsGrantable(r.key); })
                        .map(function(r){ return r.name; });
   /* COLUMNS MOVED WHEN Unit WAS INSERTED (§65): Role G→H, Status H→I. A
      validation range is a POSITION and nothing warns when it stops matching
@@ -1230,4 +1399,180 @@ function peopleWorkbook(){
    on the position. */
 function peopleFromWorkbook(sheets){
   return sheetObjects(sheets["People"] || []);
+}
+
+/* ── THE QUESTIONS FILE (§161) ─────────────────────────────────────────────
+   Islam: "let me able to export and import the questions and answers." He had
+   just done it by hand — the whole corpus into a spreadsheet, softened, and
+   back — so this is that round trip made part of the product.
+
+   THE EXPORT IS THE TEMPLATE, the people file's rule (§54): what downloads is
+   what uploads, so there is no second artefact to keep in step.
+
+   MATCHED ON Id, and that is the whole reason the column exists. The question
+   TEXT is the office's to edit, so it cannot be the key — §87's rule about
+   names and identifiers, arriving in a third place. A blank id is a new
+   question; an id nobody knows applies NOTHING and says so, because that is
+   the row that would otherwise become a silent duplicate.
+
+   PARAGRAPHS ARE BLANK LINES HERE, never the `|` the source file uses: a pipe
+   is not a thing anybody types into a cell. Both are read (SMPRules.kbParas),
+   and kbSetOver compares canonically, so an untouched round trip stores
+   nothing at all (§54.5). */
+/* NO REFERENCE COLUMN. The first build carried a read-only "Standard answer"
+   beside the editable one, because that is the shape Islam worked in by hand
+   (§160's Before/After). Looking at it, he asked for it out: "remove the
+   standard answer from the sheet not to be confused." Two columns of prose
+   that differ only where somebody has edited one is a sheet you have to read
+   twice to know which is which — and the shipped wording is one press away on
+   the page, on the button that also puts it back (§140's "Back to the
+   standard wording"). A comparison you can act on beats a column you cannot.
+
+   REMOVING IT COSTS NOTHING TO OLD FILES: sheetObjects() keys on the heading
+   row, so a file downloaded before today still reads, and its extra column is
+   simply a key nobody asks for (§58's rule — write the new shape, read
+   either). */
+var KB_FILE_COLS = ["Id", "Section", "Question", "Answer", "Audience"];
+
+function kbAudLabels(){
+  return SMPRules.KB_AUDIENCES.map(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k];
+  });
+}
+function kbAudFromLabel(v){
+  var t = String(v || "").trim().toLowerCase();
+  var hit = SMPRules.KB_AUDIENCES.filter(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k].toLowerCase() === t || k === t;
+  })[0];
+  return hit || null;
+}
+/* Paragraphs as a cell holds them. */
+function kbCellText(a){ return SMPRules.kbParas(a).join("\n\n"); }
+
+function kbReadme(){
+  return { name:"Read me", widths:[104], head:["The questions file"], rows:[
+    ["This is every question the knowledge base answers, and the words it answers with."],
+    [""],
+    ["It is the same file both ways: what you download is what you upload. Edit the"],
+    ["Question, the Answer and the Audience; leave everything else alone."],
+    [""],
+    ["Id — how a row is recognised. Do not change it. The question text is yours to"],
+    ["   edit, so it cannot be what a row is matched on."],
+    ["   Leave the Id EMPTY to add a question of your own — give it a Section."],
+    [""],
+    ["Answer — a blank line inside the cell starts a new paragraph (Alt+Enter)."],
+    [""],
+    ["Audience — who the assistant answers with this. One of:"],
+    ["   " + kbAudLabels().join("   |   ")],
+    [""],
+    ["Putting an Answer back to the standard wording clears your change for that"],
+    ["question, so this file is also how you undo one. The standard wording is on"],
+    ["the Knowledge base page itself: an answer you have changed says so, on the"],
+    ["button that puts it back."],
+    [""],
+    ["Uploading ADDS and AMENDS and never removes: a row you delete from this file"],
+    ["leaves the platform exactly as it was. Remove a question you added on the page."],
+    [""],
+    ["You see everything that will change, and press Apply, before anything is saved."]
+  ]};
+}
+
+function kbWorkbook(){
+  var rows = [];
+  RECIPES.forEach(function(g){
+    g.items.forEach(function(r){
+      var o = SMPRules.kbLook(GROUP.kb, r.id);
+      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
+      rows.push([r.id, g.g, (o && o.q) || r.q, kbCellText((o && o.a) || r.a),
+                 SMPRules.KB_AUDIENCE_LABEL[aud]]);
+    });
+  });
+  /* The office's own questions, at the foot. */
+  SMPRules.kbAllAdds(GROUP.kb).forEach(function(x){
+    rows.push([x.id, x.g || "", x.q, kbCellText(x.a),
+               SMPRules.KB_AUDIENCE_LABEL[SMPRules.kbAudienceWord(x.w)]]);
+  });
+  return [
+    kbReadme(),
+    { name:"Questions", widths:[22, 30, 46, 96, 22],
+      head:KB_FILE_COLS,
+      validations:[
+        { range:"E2:E2000", list:kbAudLabels(),
+          error:"Choose who the assistant answers with this question." }
+      ],
+      rows:rows }
+  ];
+}
+
+/* ── READING IT BACK ───────────────────────────────────────────────────────
+   Classifies and applies NOTHING. The caller shows the list and applies it on
+   a press, the way the people file and the plan import already do — a bad
+   paste must not be able to rewrite sixty-four answers in silence.
+
+   Every comparison is canonical, so a file downloaded and uploaded untouched
+   classifies as no change at all. That is the assertion the check makes first,
+   because a round trip that reports work is a round trip nobody trusts. */
+function kbFromWorkbook(sheets){
+  var rows = sheetObjects(sheets["Questions"] || []);
+  var out = { reword:[], audience:[], reset:[], add:[], unknown:[], blank:0 };
+  rows.forEach(function(r){
+    var id = String(r["Id"] || "").trim();
+    var q  = String(r["Question"] || "").trim();
+    var a  = String(r["Answer"] || "").trim();
+    var audRaw = r["Audience"];
+    var aud = kbAudFromLabel(audRaw);
+    if (!q && !a) { out.blank++; return; }
+    /* NEW: no id at all. Given one on apply, never here — minting inside a
+       classifier would leave ids behind on a discarded review. */
+    if (!id) {
+      out.add.push({ g: String(r["Section"] || "").trim(), q:q, a:a, w:aud || "everyone" });
+      return;
+    }
+    var added = SMPRules.kbAllAdds(GROUP.kb).filter(function(x){ return x.id === id; })[0];
+    if (added) {
+      var wasA = SMPRules.kbAudienceWord(added.w);
+      if (!SMPRules.kbSame(added.q, q) || !SMPRules.kbSame(added.a, a))
+        out.reword.push({ id:id, q:q, a:a, w:aud || wasA, mine:true });
+      else if (aud && aud !== wasA)
+        out.audience.push({ id:id, q:q, a:a, w:aud, mine:true, from:wasA });
+      return;
+    }
+    var std = kbShipped(id);
+    if (!std) { out.unknown.push({ id:id, q:q }); return; }
+    var now = SMPRules.kbLook(GROUP.kb, id);
+    var nowQ = (now && now.q) || std.q, nowA = (now && now.a) || std.a;
+    var nowW = SMPRules.kbAudience(GROUP.kb, id, std.who);
+    var sameText = SMPRules.kbSame(q, nowQ) && SMPRules.kbSame(a, nowA);
+    var backToStd = SMPRules.kbSame(q, std.q) && SMPRules.kbSame(a, std.a);
+    if (!sameText) {
+      /* Back to the shipped words IS the way to undo, so it is reported as a
+         reset rather than as another rewording — the two land somewhere
+         different and somebody reading the list needs to know which. */
+      (backToStd && now ? out.reset : out.reword).push({ id:id, q:q, a:a,
+        w: aud || nowW, from:nowW });
+    } else if (aud && aud !== nowW) {
+      out.audience.push({ id:id, q:q, a:a, w:aud, from:nowW });
+    }
+  });
+  return out;
+}
+function kbChangeCount(c){
+  return c.reword.length + c.audience.length + c.reset.length + c.add.length;
+}
+/* Applying is the only place that writes, and it goes through the SAME
+   writers the pen uses — so a rule about what may be stored (an override that
+   equals the shipped wording dies, §50.6) cannot be true on one path and not
+   the other (§53.5). */
+function kbApply(c){
+  c.reset.forEach(function(x){ kbResetOver(x.id); });
+  c.reword.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.audience.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.add.forEach(function(x){
+    var id = kbAddNew(x.g || (RECIPES[0] && RECIPES[0].g) || "");
+    kbSetAdded(id, x.q, x.a, x.w);
+  });
 }

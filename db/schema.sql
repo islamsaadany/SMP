@@ -293,7 +293,13 @@ CREATE TABLE IF NOT EXISTS unit_roles (
 CREATE TABLE IF NOT EXISTS access_grants (
   role_key text NOT NULL,
   page_key text NOT NULL,
-  grant_   text NOT NULL CHECK (grant_ IN ('none','view','edit')),
+  -- FOUR VALUES, BECAUSE §145 ADDED ONE AND THIS DID NOT FOLLOW (§172).
+  -- `fill` is the Strategy halves' third state — may write what is empty,
+  -- may not touch what is written. The screen has offered it since §145 and
+  -- the database refused it, so the FIRST tenant to grant it put a value in
+  -- the graph that Postgres would not take, and every save from then on —
+  -- of anything, anywhere in the product — died on this constraint.
+  grant_   text NOT NULL CHECK (grant_ IN ('none','view','fill','edit')),
   PRIMARY KEY (role_key, page_key)
 );
 
@@ -409,8 +415,14 @@ CREATE TABLE IF NOT EXISTS plan_archives (
 -- page. Outside the state graph and without a foreign key, because a save
 -- TRUNCATEs the thirty tables CASCADE and would otherwise take this with it —
 -- the same two reasons `credentials` is shaped this way. Added by migration 017.
+-- `dismissed_on` is the SMO's answer of "no, the register was already right"
+-- (§180, migration 031). NULL is the only honest default: every declaration
+-- that has not been answered is one nobody has answered. A new declaration
+-- clears it in api/auth.js, because saying it again is a fresh statement.
 CREATE TABLE IF NOT EXISTS bu_declarations (
-  person_key  text PRIMARY KEY,
-  at          text NOT NULL,
-  declared_on timestamptz NOT NULL DEFAULT now()
+  person_key   text PRIMARY KEY,
+  at           text NOT NULL,
+  declared_on  timestamptz NOT NULL DEFAULT now(),
+  dismissed_on timestamptz,
+  dismissed_by text
 );

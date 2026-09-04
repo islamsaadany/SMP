@@ -35,7 +35,7 @@ const NEW_CLIENTS = [
   { key: "el-abd", name: "El Abd",  schema: "el_abd", industry: "Food & beverage" },
   { key: "demo",   name: "Demo",    schema: "demo",   industry: "Worked example", kind: "demo" }
 ];
-/* ONE PLATFORM ADMIN, AND A SEAT ON EACH CLIENT (spec 024 §7.0a, revision 3).
+/* ONE PLATFORM ADMIN, AND A SEAT ON EACH CLIENT (spec 030 §7.0a, revision 3).
    The four platform roles are gone: `admin` is a flag on the account, and what
    somebody may do about a client is the seat they hold on it. */
 const OFFICE = [
@@ -118,7 +118,7 @@ async function main() {
 
     for (const cl of [LIVE].concat(NEW_CLIENTS)) {
       await pc.query(
-        /* THE SCHEMA IS UPDATED, NOT LEFT ALONE (§147.21). A deployment may
+        /* THE SCHEMA IS UPDATED, NOT LEFT ALONE (§288.21). A deployment may
            already have ADOPTED this client — one row saying it lives in
            `public`, which is what lets the code ship before this script runs.
            `DO NOTHING` would then leave the row pointing at a schema this
@@ -129,7 +129,7 @@ async function main() {
         /* `made_here` is FALSE for the live client — it brought its own
            register of 33 people and the platform adds nobody to it — and TRUE
            for the empty ones this script creates, whose registers are the
-           platform's to build (§147.31). */
+           platform's to build (§288.31). */
         "INSERT INTO clients (key, name, schema_name, industry, kind, made_here) VALUES ($1,$2,$3,$4,$5,$6) " +
         "ON CONFLICT (key) DO UPDATE SET schema_name = EXCLUDED.schema_name, " +
         "  name = CASE WHEN clients.name = '' THEN EXCLUDED.name ELSE clients.name END, " +

@@ -250,16 +250,7 @@
      comes and goes: `deckScale()` reads clientHeight, and a bar that resized
      the stage would rescale the whole deck every time it appeared. The stage
      takes the full inset in fullscreen and keeps it. */
-  /* ── THE HORIZONTAL GESTURE IS THE DECK'S (§279) ──────────────────
-     Without this the browser claims a horizontal drag for its own back/forward
-     navigation or an overscroll, so the swipe is stolen before `pointerup`
-     ever reaches us — and it is stolen SILENTLY, which reads as a swipe that
-     does nothing. `pan-y` gives the vertical away deliberately, so a long
-     cycle note can still be scrolled with a finger; the cost is that
-     pinch-zoom is off inside the stage, which on a slide scaled to fit is a
-     gesture with nothing to do. Fullscreen only, so a windowed deck on a
-     tablet behaves exactly as it always has. */
-  .deckroot.fs .deckstage { inset:0; touch-action:pan-y; }
+  .deckroot.fs .deckstage { inset:0; }
   .deckroot.fs .deckbar { transform:translateY(100%); opacity:0; pointer-events:none; }
   @media (prefers-reduced-motion: reduce) { .deckbar { transition:none; } }
   .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;

@@ -766,6 +766,40 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the sources and `db/seed-state.json` was never regenerated — *a seed that
   disagrees with the sources it is generated from is a fault nothing else would
   have found.*
+- **A FINGER GETS A WAY BACK (§279, reversing §265's forward-only for TOUCH and
+  not for a mouse):** Islam, presenting from a tablet — *"it doesn't go left or
+  right."* **§265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET**: its
+  forward-only rule is argued from a PROJECTOR, where the audience sees every
+  affordance you draw, and a tablet has no arrow keys at all — so there
+  forward-only is the only direction the deck can go, which is §265's own stated
+  cost arriving as a second symptom. **THE BOUNDARY IS AT A THIRD, NOT THE
+  MIDDLE** (his, from three drawn with the cost of each): forward is the act of
+  a talk and back is the exception, so forward keeps the large target and two
+  thirds of the slide can still be pointed at without the deck moving. **A MOUSE
+  IS UNCHANGED, HIS CALL, COST STATED** — one act now answers two ways by device
+  (§53.5) in exchange for nothing a laptop presenter has learned changing —
+  asserted at BOTH ends, a mouse click on the very pixel a finger goes back from
+  still going forward, or the check cannot tell them apart. **THE KIND IS
+  REMEMBERED FROM THE POINTERDOWN, NEVER READ OFF THE CLICK**: a `click` is not
+  reliably a `PointerEvent`, so asking it takes the mouse branch on exactly the
+  tablets this is for — invisible in Chromium, real in Safari. **SWIPE: LEFT IS
+  FORWARD, RIGHT IS BACK** (his), touch and pen only, horizontal beating vertical
+  or steadying the tablet turns a page. **A SWIPE ENDS IN A CLICK**, so the tap
+  and the swipe are two readings of ONE gesture (`DECKSWIPED`) with one
+  `deckOwnControl()` between them, or a gesture starting in the note box is
+  refused by one and obeyed by the other. **AND THE RIGHTWARD SWIPE WAS ALREADY
+  DOING SOMETHING WORSE THAN NOTHING**: with no `touch-action` the browser claims
+  it for its own back-navigation and the page LEFT — measured, `about:blank`,
+  the presenter dropped out of the platform mid-presentation — so `pan-y` on the
+  fullscreen stage is half the fix, not a detail; the vertical is given away
+  deliberately (a long cycle note still scrolls) and pinch-zoom goes with it, on
+  a slide already scaled to fit. `checks/deck-fullscreen.py` §6: **4 red** on the
+  build before, driving REAL touch through CDP — **and three of its own first
+  failures were the PROBE** (§215, in the file written to guard against it): the
+  navigation away made every later assertion answer `None`, six failures reported
+  where the truth is four and reported as nothing rather than anything. It is its
+  own assertion now, placed BEFORE the direction it would otherwise hide, and the
+  pass recovers so everything after still reports.
 - **FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (§265, reversing the
   second half of §69.7):** Islam, from a live presentation — *"on the
   presntation in full screen with every click the bottom banner appear then
@@ -5829,6 +5863,14 @@ python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and noth
                                 # build that lost the bar entirely cannot pass, both
                                 # directions of every key, and Escape leaving fullscreen
                                 # with the deck still open — 19 red on the shipped build
+                                # — and since §279 a §6 that drives REAL touch through CDP:
+                                # the left third going back and a MOUSE on that same pixel
+                                # still going forward (both ends, or the two cannot be told
+                                # apart), the swipes, one gesture moving exactly one slide,
+                                # a vertical drag turning no page, and the rightward swipe
+                                # asserted NOT to navigate the browser away — placed before
+                                # the direction it would otherwise hide, because a page that
+                                # has gone answers everything after it with None (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
 python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
@@ -5942,7 +5984,40 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;273.4: the pen closes itself, and the
+*Last Updated: 2026-09-04 &mdash; **&sect;279: a finger gets a way back.**
+Islam, presenting from a tablet: *"on a tablet it doesn't go left or right."*
+**&sect;265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET** &mdash; its
+forward-only click is argued from a PROJECTOR, where the audience sees every
+affordance you draw, and a tablet has no arrow keys at all, so there
+forward-only is not the cautious choice but the only direction the deck can go.
+**The boundary is at a THIRD, not the middle** (his, from three drawn with the
+cost of each): forward keeps the large target, a step back is deliberate rather
+than a slip, and two thirds of the slide can still be pointed at without the
+deck moving under the point. **A mouse is unchanged, also his call and its cost
+stated** &mdash; the product now answers one act two ways by device
+(&sect;53.5) in exchange for nothing a laptop presenter has learned changing
+&mdash; and it is asserted at both ends, a mouse click on the very pixel a
+finger goes back from still going forward. **The kind is remembered from the
+pointerdown, never read off the click**: a `click` is not reliably a
+`PointerEvent`, so asking it takes the mouse branch on exactly the tablets this
+exists for &mdash; invisible in Chromium and real in Safari. **Swipe left is
+forward, right is back**, touch and pen only, the horizontal beating the
+vertical or steadying the tablet turns a page; the tap and the swipe are two
+readings of ONE gesture, because a swipe ends in a click and one press would
+otherwise have moved two slides. **AND THE RIGHTWARD SWIPE WAS ALREADY DOING
+SOMETHING WORSE THAN NOTHING**: with no `touch-action` the browser claims a
+horizontal drag for its own back-navigation, and the page LEFT &mdash;
+measured, `about:blank`, the presenter dropped out of the platform in the
+middle of a presentation &mdash; so `pan-y` on the fullscreen stage is half the
+fix rather than a detail. `checks/deck-fullscreen.py` §6 drives REAL touch
+through CDP and is **4 red** on the build before &mdash; **and three of its own
+first failures were the PROBE** (&sect;215, inside the file written to guard
+against exactly that): the navigation away made every later assertion answer
+`None`, so it reported six failures where the truth is four, and reported them
+as nothing rather than as anything. Neighbours and the full `qa.py` sweep green.*
+
+
+*Earlier the same day: **&sect;273.4: the pen closes itself, and the
 banner is two columns &mdash; and &sect;273.5: "Open a new cycle" drew nothing.**
 Islam, using what &sect;273 shipped: *"when I'm editing why is the edit button
 still there it should turn into done editing so I clik it and thebox collapse

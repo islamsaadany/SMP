@@ -32922,3 +32922,80 @@ Verified after the merge, not before: 520/0 authoriser, 131/0 differ,
 `cycle-edit` all green, `repeat-project` and `ytd-proration` green, and main's
 own `unit-follows`, `count-compile`, `monthly-plan`, `fn-perf-controls` and
 `master-picker` green beside them.
+
+---
+
+## §279 — A FINGER GETS A WAY BACK (2026-09-04, reversing §265's forward-only for touch)
+
+Islam, presenting from a tablet: *"for the ful lscreen presentation on a tablet
+it doesn't go left or right .. can we make that cliking on the screen on the
+right side takes forward and on the left side takes backward and maybe swipping
+as well where swpping left takes you forward and swiping riht takes you
+backrward?"*
+
+**§265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET.** It made a click in
+fullscreen advance the slide and deliberately stopped there — *"a click that
+went back on one half of the slide would need a visible boundary to be usable,
+and the whole point of fullscreen is that there is nothing drawn over the
+slide"* — and that argument is about a PROJECTOR, where the audience sees every
+affordance you draw. A tablet in somebody's hands has no arrow keys at all, so
+on that device forward-only is not the cautious choice, it is the only direction
+the deck can go: §265's own stated cost (*"a touch screen with no keyboard has
+no on-screen way out"*) arriving as a second, worse symptom.
+
+**THE BOUNDARY IS AT A THIRD, NOT THE MIDDLE**, Islam's pick from three drawn
+with the cost of each. Forward is the act of a talk and back is the exception,
+so forward keeps the large target and a step backwards is deliberate rather than
+a slip — and two thirds of the slide can still be pointed at without the deck
+moving under the point being made.
+
+**A MOUSE IS UNCHANGED, AND THAT IS ALSO HIS CALL**, taken from two with the
+cost stated before he chose: the product now answers one act two ways depending
+on the device, which is the drift §53.5 warns about, in exchange for nothing a
+laptop presenter has already learned changing under them. It is asserted at both
+ends — a mouse click on the very pixel a finger would have gone back from still
+goes forward — because without that the check cannot tell the two apart at all.
+
+**THE KIND IS REMEMBERED FROM THE POINTERDOWN, NEVER READ OFF THE CLICK.** A
+`click` is not reliably a `PointerEvent` in every browser, so asking the click
+for its `pointerType` takes the mouse branch on exactly the tablets this
+section exists for — the fault would have been invisible in Chromium and real
+in Safari, which is where the client presents.
+
+**SWIPE: LEFT IS FORWARD, RIGHT IS BACK** (his). The direction people already
+have from every photo album — the slide follows the finger — and it needs no
+boundary explained, which is what makes it the better half of this section.
+Touch and pen only, for the same reason the taps are: a drag with a mouse is
+how somebody selects text, not how they turn a page. The horizontal has to beat
+the vertical, or steadying the tablet turns a page.
+
+**A SWIPE ENDS IN A CLICK, SO ONE GESTURE WOULD HAVE MOVED TWO SLIDES.** That
+is why the tap and the swipe are two readings of ONE gesture rather than two
+features: `DECKSWIPED` is how they agree, and `deckOwnControl()` is one answer
+to *is this the stage or something on it*, asked by both — a gesture that starts
+in the cycle-note box refused by one and obeyed by the other is §53.5 inside a
+single interaction.
+
+**AND THE RIGHTWARD SWIPE WAS ALREADY DOING SOMETHING, WHICH IS WORSE THAN
+NOTHING.** Measured on the build before this one: with no `touch-action` on the
+stage the browser claims a horizontal drag for its own back-navigation, and a
+right-swipe left the page entirely — **`about:blank`**, the presenter dropped
+out of the platform in the middle of a presentation. So the CSS is not a tidying
+detail, it is half the fix; `pan-y` gives the vertical away deliberately so a
+long cycle note can still be scrolled, and the cost is that pinch-zoom is off
+inside the stage, which on a slide already scaled to fit is a gesture with
+nothing to do. Fullscreen only, so a windowed deck on a tablet behaves exactly
+as it always has, and that is asserted.
+
+`checks/deck-fullscreen.py` §6: **4 red** on the build before, driving REAL
+touch through CDP rather than synthesising events in the page. **AND THREE OF
+ITS OWN FIRST-RUN FAILURES WERE THE PROBE, NOT THE PRODUCT** — the right-swipe
+navigated the page away, so every assertion after it answered `None`: a check
+reporting six failures where the truth is four, and reporting them as nothing
+rather than as anything. §215 inside the file already written to guard against
+it. The navigation is its own assertion now, placed BEFORE the direction it
+would otherwise hide, and the pass recovers so everything after it still
+reports.
+
+Neighbours green: `notes-slide`, `hide-slide` 42/0, `deck-blank-slides`,
+`deck-dividers`, `deck-outcome`, `deck-figures`. Full `qa.py` sweep ERRORS none.

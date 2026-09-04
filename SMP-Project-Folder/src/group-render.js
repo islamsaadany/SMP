@@ -483,7 +483,7 @@ function measureRows(ms, opts){
     return head + '<td class="num">' + actCell + '</td>' +
            (scored
              ? '<td class="num final" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
-             /* §260: a count with nothing owed yet has not been asked, which is
+             /* §276: a count with nothing owed yet has not been asked, which is
                 a different thing from a row that cannot be scored, and it wears
                 the tactics' own "not yet due" pill rather than the alarm one. */
              : nothingDueYet(m)
@@ -621,7 +621,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
              /* §257: and this picker repaints too — three of its four boxes
                 change state on the one press. */
              function(v){
-               /* §261: the reported figure follows a CHANGED unit. */
+               /* §277: the reported figure follows a CHANGED unit. */
                var was = outUnitOf(t), next = nextTargetUnit(t, v);
                put(next);
                actualFollowsUnit(t, "outActual", was, next);
@@ -3242,10 +3242,10 @@ function setTargetUnit(m, u){
      of these four tables carries. It stops being alone the moment a number is
      typed, because `unitInherit` reads it back out and joins the two. */
   if (!held && want) m.target = want;
-  /* §261: the figure already reported against this row follows the unit. */
+  /* §277: the figure already reported against this row follows the unit. */
   actualFollowsUnit(m, "actual", from, m.target);
 }
-/* ── A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§261) ────────────────
+/* ── A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277) ────────────────
    Islam, from his Performance page: *"the YTD is showing 2% from 2# I don't
    know where this error is happening."* Not the arithmetic — 2 of 2 due is
    100% and it said so. The reporting box collects the BARE number and the

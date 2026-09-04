@@ -365,7 +365,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§261):** Islam — *"the YTD
+- **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
   with the target's unit AT THAT MOMENT, the office later changed the target
@@ -388,7 +388,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   one-time heal was offered and not taken up. `checks/unit-follows.py` drives
   the story through the REAL controls on both surfaces — **5 red** on the
   build before, its third failure printing `2% / 2#` verbatim.
-- **A COUNT IS OWED IN WHOLE ONES (§260):** Islam — *"we need a compilation
+- **A COUNT IS OWED IN WHOLE ONES (§276):** Islam — *"we need a compilation
   type that prorate to integrs only .. a target of 2 shops to open in the year
   so in the 8th month that proration asks for 1.3 stores which is not
   feasible ... maybe of the lowest."* Aligned first; **Count** as the name and
@@ -4589,7 +4589,7 @@ python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its 
                                 # asserted UNCHANGED, only Sum prorating, both panes
                                 # driven, and §2b guarding the index-leak that
                                 # `.map(measureScore)` would reintroduce
-python3 checks/unit-follows.py  # a reported figure follows the target's unit (§261):
+python3 checks/unit-follows.py  # a reported figure follows the target's unit (§277):
                                 # the story through the REAL controls on a tactic's
                                 # outcome AND a key measure — reported in % through the
                                 # Reporting box, switched to # through the pen's picker,
@@ -4599,7 +4599,7 @@ python3 checks/unit-follows.py  # a reported figure follows the target's unit (�
                                 # and the separator both ways. 5 red on the build
                                 # before, printing '2% / 2#' verbatim. SMP_BUILT points
                                 # it at another build.
-python3 checks/count-compile.py # a count is owed in whole ones (§260): the ONE compile
+python3 checks/count-compile.py # a count is owed in whole ones (§276): the ONE compile
                                 # list and what on it prorates (both ends), Islam's own
                                 # 2-shops-at-August example MADE (Count owes 1 and reads
                                 # 100%, Sum on the same row still 1.33 and 75%), the floor
@@ -4894,7 +4894,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;261: a reported figure follows the
+*Last Updated: 2026-09-04 &mdash; **&sect;277: a reported figure follows the
 target's unit.** Islam, from his Performance page: *"the YTD is showing 2% from
 2# I don't know where this error is happening."* Not the arithmetic &mdash; the
 reporting box stamps a typed number with the target's unit at that moment, and
@@ -4908,7 +4908,7 @@ change, and Y/N is neither side. One function, both surfaces, no server change.
 once. `checks/unit-follows.py` **5 red** on the build before; nine neighbouring
 checks, 491/0 and the full sweep green. **On the branch, not merged.***
 
-*Earlier: 2026-09-03 &mdash; **&sect;260: a count is owed in whole
+*Earlier: 2026-09-03 &mdash; **&sect;276: a count is owed in whole
 ones.** Islam: *"we need a compilation type that prorate to integrs only .. if
 we have a target of 2 shops to open in the year so in the 8th month that
 proration asks for 1.3 stores which is not feasible ... maybe of the lowest."*

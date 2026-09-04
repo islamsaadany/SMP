@@ -268,7 +268,7 @@ function bformDef(kind, ctx){
                  opts:[["≥","≥ at least"],["≤","≤ at most"]] };
   var compileSeg = { k:"compile", label:"Compile rule — how the year’s figure is read",
                      type:"seg", def:"Latest",
-                     /* §260: the one list, in the pen's own order. */
+                     /* §276: the one list, in the pen's own order. */
                      opts:SMPRules.COMPILES.map(function(c){ return [c, c]; }) };
   var defs = {
     pillar: { title:"Add a " + L("pillar","bu").toLowerCase().replace(/s$/, ""),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""§261 — a reported figure follows the target's unit.
+"""§277 — a reported figure follows the target's unit.
 
 Islam, from his Performance page: *"the YTD is showing 2% from 2# I don't know
 where this error is happening."* The reporting box collects a bare number and

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§260 (the `Count` compile rule) and §261 (a reported
+**Latest version:** **§276 (the `Count` compile rule) and §277 (a reported
 figure follows the target's unit) are on
 `claude/integer-prorating-compilation-6dq77s`, not merged.**
 §258 on `main` and live (the save-safety banners), on top
@@ -85,7 +85,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §261 — a reported figure follows the target's unit (2026-09-04, branch `claude/integer-prorating-compilation-6dq77s`)
+### §277 — a reported figure follows the target's unit (2026-09-04, branch `claude/integer-prorating-compilation-6dq77s`)
 
 Islam, from his Performance page: *"the YTD is showing 2% from 2# I don't
 know where this error is happening."* Not the arithmetic — the reporting box
@@ -105,7 +105,7 @@ figure is re-entered once on Reporting.
 printing `2% / 2#` verbatim), nine neighbouring checks, `test-authorize`
 491/0, full `qa.py` sweep green. **On the branch, not merged.**
 
-### §260 — a count is owed in whole ones (2026-09-03, branch `claude/integer-prorating-compilation-6dq77s`)
+### §276 — a count is owed in whole ones (2026-09-03, branch `claude/integer-prorating-compilation-6dq77s`)
 
 Islam: *"we need a compilation type that prorate to integrs only .. if we have
 a target of 2 shops to open in the year so in the 8th month that proration asks

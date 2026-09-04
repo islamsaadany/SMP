@@ -29475,7 +29475,7 @@ have found.
 - **A group mark is not offered to a COMPANY.** A company has a page (§68) and
   no deck, so there is nothing yet for a company's own mark to appear on.
 
-## §260 — A COUNT IS OWED IN WHOLE ONES (2026-09-03)
+## §276 — A COUNT IS OWED IN WHOLE ONES (2026-09-03)
 
 Islam: *"we need a compilation type that prorate to integrs only .. if we have
 a target of 2 shops to open in the year so in the 8th month that proration asks
@@ -29485,7 +29485,7 @@ maybe to 1 store only."* Aligned before anything was built; both decisions are
 his: **Count** as the name, and **rounded down** with nothing owed in the early
 months.
 
-### §260.1 — What was true, measured
+### §276.1 — What was true, measured
 
 §239 prorates a `Sum` target by the share of the year that has passed, and
 compares the actual against that. For a target of 2 shops at a review point of
@@ -29499,7 +29499,7 @@ August the arithmetic is exactly the fault he describes:
 A shop is not 1.33 of a shop, and a unit that has opened the one shop it could
 have opened by August was reading 75% against a number nothing could satisfy.
 
-### §260.2 — A fourth compile rule, not a change to Sum
+### §276.2 — A fourth compile rule, not a change to Sum
 
 The tempting fix is for `Sum` to round whenever the target looks whole. It was
 refused because it **moves stored scores**: the demo alone has *Systems
@@ -29516,7 +29516,7 @@ consolidated, agreements signed. It prorates the target like Sum and then
 rounds the due figure DOWN to a whole one. The name fits the box the pen
 already draws for the compile rule, which §248 sized for *Average*.
 
-### §260.3 — Rounded down, and the early months owe nothing
+### §276.3 — Rounded down, and the early months owe nothing
 
 **Round down, his call** ("maybe of the lowest"): a shop is not owed until its
 whole share of the year has passed. Target 2: months 1–5 owe nothing, months
@@ -29549,7 +29549,7 @@ asked yet is not a row that cannot answer):
   strict early in the year (at most 2 closures allows none until June). Rare,
   stated rather than special-cased.
 
-### §260.4 — One list, where there were seven
+### §276.4 — One list, where there were seven
 
 The compile rule's vocabulary was spelled **seven times** — four pickers in the
 pen (a measure's, a key objective's, a capability objective's, a tactic's
@@ -29567,7 +29567,7 @@ The server needed nothing: `compile` is already a plan field the authoriser
 classifies, and no value list is validated there. Nothing is stored that was
 not stored before and nothing is migrated.
 
-### §260.5 — Proof
+### §276.5 — Proof
 
 `checks/count-compile.py` — the shared list and what on it prorates (both ends);
 Islam's own example MADE at August (Count owes 1 and reads 100%, Sum on the
@@ -29605,7 +29605,7 @@ a correct build — REWRITTEN as agreement with the shared list, not deleted
 `tactic-proration`, `deck-figures`, `deck-outcome`, `plan-fields`,
 `plan-builder`, `unit-before-number`, `fn-ko-edit` green.
 
-### §260.6 — Recorded, not done
+### §276.6 — Recorded, not done
 
 - **The deck says a dash where the page says "Nothing due yet."** One word on
   one surface; the projector keeps §35's dash for anything unscored. Whether
@@ -29619,13 +29619,13 @@ a correct build — REWRITTEN as agreement with the shared list, not deleted
   fourth of its six months. Correct by construction through the one
   arithmetic; not separately driven.
 
-## §261 — A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (2026-09-04)
+## §277 — A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (2026-09-04)
 
 Islam, from his Performance page, a tactic whose Reporting row read `2#` of
 `3#` while Performance read **`2% / 2#`** at 100%: *"the YTD is showing 2%
 from 2# I don't know where this error is happening."*
 
-### §261.1 — What it was, measured
+### §277.1 — What it was, measured
 
 Not the arithmetic: the score reads digits only, and 2 of 2 due is 100%, which
 is what it said. The figure's UNIT. The reporting box collects the bare number
@@ -29642,7 +29642,7 @@ outcome** — `setTargetUnit` and `nextTargetUnit` both rewrote the target and
 neither told the figure — so it is one fault on both sides (§53.5) and is
 fixed through one function.
 
-### §261.2 — The platform's own stamp follows; a person's does not
+### §277.2 — The platform's own stamp follows; a person's does not
 
 `actualFollowsUnit(row, field, from, target)`, called from the two places a
 unit changes. A figure whose unit is EXACTLY the unit the target just left is
@@ -29675,7 +29675,7 @@ Three things deliberately do not follow, each asserted:
 The server needs nothing: the figure's write rides the same authoring save as
 the unit change. Nothing is migrated.
 
-### §261.3 — The cost, stated before he chose
+### §277.3 — The cost, stated before he chose
 
 The fix cannot know the history of a row already stored: his row on the live
 tenant stays `2%` until the figure is entered once more on Reporting, where the
@@ -29684,7 +29684,7 @@ the same road). Put to him with the alternative of a one-time heal for figures
 whose unit is one of the platform's own symbols and no longer matches the
 target; he chose to go ahead as proposed.
 
-### §261.4 — Proof
+### §277.4 — Proof
 
 `checks/unit-follows.py` drives the story through the REAL controls on both
 surfaces: the state MADE (§94.2) on Mobile's first tactic and first measure,
@@ -29700,7 +29700,7 @@ verbatim; all green after. One of its own first-run failures was the check:
 it pressed the pen shut before leaving the page and the pen's button is a
 different control while open — a tab change leaves the mode on its own (§63).
 
-### §261.5 — Recorded, not done
+### §277.5 — Recorded, not done
 
 - `%` is the first non-blank unit on the picker, which is likely how the
   outcome came to be in `%` before it was in `#`. Whether the picker should

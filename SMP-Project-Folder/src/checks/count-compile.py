@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""§260 — a count is owed in whole ones.
+"""§276 — a count is owed in whole ones.
 
 Islam: *"we need a compilation type that prorate to integrs only .. if we have
 a target of 2 shops to open in the year so in the 8th month that proration asks

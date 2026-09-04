@@ -240,7 +240,7 @@ function buildXlsx(sheets){
    ─────────────────────────────────────────────────────────────────────── */
 
 var DIRS = ["\u2265", "\u2264"];
-/* §260: the workbook validates the list the pen offers, read from one place. */
+/* §276: the workbook validates the list the pen offers, read from one place. */
 var COMPILES = SMPRules.COMPILES;
 var KINDS = ["Direction", "Capability"];
 var YESNO = ["Yes", "No"];

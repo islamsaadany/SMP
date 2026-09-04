@@ -52,7 +52,7 @@ function csvRow(cols, o){ return cols.map(function(c){ return csvCell(o[c]); }).
    answering "where does the number end" is §42's drift. This wrapper keeps
    every existing call site working. */
 function splitTarget(s){ return SMPRules.targetParts(s); }
-/* §260: an uploaded compile rule is checked against the ONE list the pen
+/* §276: an uploaded compile rule is checked against the ONE list the pen
    offers and the workbook validates, and the refusal names that list rather
    than a copy of it that would go stale the day a fifth rule is added. */
 function compileKnown(c){ return SMPRules.COMPILES.indexOf(c) > -1; }

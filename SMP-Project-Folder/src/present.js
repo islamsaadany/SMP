@@ -531,7 +531,7 @@ function deckSlides(u){
         return '<tr>' + lead +
           '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
       /* What this row is measured against RIGHT NOW: an outcome answers with
-         its own target, prorated where it compiles by Sum or Count (§260); everything else
+         its own target, prorated where it compiles by Sum or Count (§276); everything else
          with the share of its plan that is due (§239). One function, so the
          slide and the page cannot differ about it. */
       var bench = tacticBenchmark(t);

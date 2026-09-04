@@ -5712,7 +5712,7 @@ function elapsedShare(){
    stored, prorating them would be inventing a glide path. Measured on the
    shipped tenant: 32 of 137 rows are Sum.
 
-   §260: ASKED OF THE SHARED RULE, because `Count` joined `Sum` and the list of
+   §276: ASKED OF THE SHARED RULE, because `Count` joined `Sum` and the list of
    what prorates is now the list of what the workbook validates and the pen
    offers — one place, or the picker offers a rule the scorer does not know. */
 function prorates(m){ return SMPRules.prorates(m && m.compile); }
@@ -5754,7 +5754,7 @@ function measureDue(m, share){
   if (!prorates(m)) return t;
   var s = share == null ? elapsedShare() : share;
   var due = s == null ? t : t * s;
-  /* ── A COUNT IS OWED IN WHOLE ONES (§260) ─────────────────────────
+  /* ── A COUNT IS OWED IN WHOLE ONES (§276) ─────────────────────────
      Islam: a target of 2 shops at month 8 "asks for 1.3 stores which is not
      feasible ... it should prorate for the closest integer maybe of the
      lowest". ROUNDED DOWN, his call: a shop is not owed until its whole share
@@ -5922,7 +5922,7 @@ function tacticProgress(t){
 function measureDueLabel(m, share){
   var due = measureDue(m, share);
   if (due == null) return null;
-  /* §260: a count with nothing owed yet says so in words (`nothingDueYet`),
+  /* §276: a count with nothing owed yet says so in words (`nothingDueYet`),
      never as "/ 0 #" beside a figure — a benchmark of nought is not a
      benchmark. */
   if (due === 0 && SMPRules.wholeUnits(m.compile)) return null;

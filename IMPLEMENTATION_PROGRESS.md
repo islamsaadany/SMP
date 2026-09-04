@@ -6,38 +6,48 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §258 on `main` and live (the save-safety banners), on top
-of §257 (a target that is a yes or a no) and the whole deck round — all from
-other sessions. **§259 (the group's mark and the deck's four blue section
-dividers) is merging from `claude/deck-separators-brand`,** renumbered from
-§257 because main took that number while it was being built.
+**Latest version:** **§276 (the `Count` compile rule — a count is owed in
+whole ones) and §277 (a reported figure follows the target's unit) merged to
+`main` 2026-09-04 on Islam's word**, from
+`claude/integer-prorating-compilation-6dq77s`, on top of §260–§275 from other
+sessions; built as §260/§261 and renumbered at the merge because main had
+taken both numbers.
 
-**§261 — the master presentation — is BUILT and ON ITS BRANCH**
-(`claude/master-presentation-flow-f91mrl`), **not merged**: `main` is
-production and every merge is Islam's word on the day (rule 4). The SMO picks
-who presents and in what order from the Presentation menu, and the decks are
-run end to end as one flow. Six decisions were drawn in the running platform
-and answered before a line was written; the review page is
-`design-mockups/master-presentation/2026-09-03_master-presentation.html`, the
-reasoning is §261 and the spec is `specs/028-master-presentation/`.
-`checks/master-presentation.py` is 31 red on the build before and **43 green**
-after; 499/0 on the authoriser, the full `qa.py` sweep clean, and the round
-trip, clean parity and two tabs green on a virgin Postgres 16.
+**§266 — the master presentation — IS ON `main`**, merged 2026-09-03 on
+Islam's word (it was built as §261 and renumbered at that merge, because main
+had taken §261 and everything up to §265 while it was in flight). The SMO picks
+who presents and in what order from the Presentation menu, and the decks are run
+end to end as one flow. Six decisions were drawn in the running platform and
+answered before a line was written; the reasoning is §266 and the spec is
+`specs/029-master-presentation/`.
 
-**Two changes after he used it, both on the same branch:** the picker is
-**two columns** (§261.8 — he reversed his own choice of the single list, and
-§261.4's reasoning is kept rather than overwritten), and the strip's pills now
-carry each subject's **own code** — MB, RS, FIN, MRC — the letters already
-printed on its pillars and projects (§261.9), asked for from a real 308-slide
-flow.
-**At merge time:** bump `SHELL` in `sw.js` to a name `origin/main` does not
-hold (§91, §94.12, §94.16) — the built file's bytes have changed.
-**Latest version:** §232/§233 on `main` (removing a pillar or a project, and
-hiding an element from the presentation). **§268, §269 and §270 — the strategy pen on the
-section line, one edit for the whole tab, and three loose ends — are built and
-pushed on
-`claude/plans-edit-button-placement-jxw8or`, not merged: `main` is Islam's call
-every time.**
+**§266.10 — the picker is two tables, searched, and dragged by its own
+numbers** — merged 2026-09-04 on Islam's word, from his own tenant with eighteen
+subjects in it: a searchable *Everyone who reports* table with a **BU / FUNC**
+column, a wider dialog, and a running order where **the number is the handle**
+(the digit at rest, the platform's own bars the moment you point at it) with the
+↑ ↓ buttons gone and the × left. Nothing underneath it moved — the stored order,
+its classification and every server rule are byte for byte what §266 shipped, so
+no migration. **The glitch he reported on the drawing was measured before this
+was built**: with the swap driven by `:hover` alone a four-row drag swapped the
+bars six times, half of them onto a row the pointer was passing, so the CSS now
+holds the swap for the row in your hand. `checks/master-picker.py` is 37 red on
+the build before and **51 green** after.
+
+**Still open on it, and said rather than discovered:** a drag cannot
+auto-scroll — with all eighteen in the flow the list is 654px in a 420px box, so
+a drop can only land where you can already see (the keyboard route does scroll).
+That is true of every sortable table in the product, so closing it means
+changing `arrange.js` for all of them.
+**Latest version:** **§268, §269 and §270 are ON `main`** — the strategy pen on
+the section line, one edit for the whole tab, and three loose ends closed —
+merged 2026-09-02 on Islam's word, verified live (production serves the merged
+bytes; gate 200, api 401). **§274 is the audit of that merge**, asked for
+straight afterwards: nothing in the product was damaged, and the merge did leave
+three of main's own checks reading a control that had moved — two failing
+loudly, one (`band-corner`) falling silent while still printing "all passed".
+All three fixed; the rule earned is *grep the checks on BOTH sides of a merge,
+not only before it.*
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -108,6 +118,196 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §278.2 — a mark, not a word (2026-09-04, same branch)
+
+Islam, of what §278 shipped: *"the button montthly is big. do you suggest other
+options for it's setting or placement?"*
+
+**Measuring it reframed the complaint.** Four treatments drawn into the live
+table all leave the Target box between 334 and 343px and the row at 57px — the
+column had the slack, so this was never about room. It was bordered, uppercase
+and bold, eight times down one column, on rows that mostly will never use it.
+
+**He picked the 24px mark** — twelve cells, four across and three down, wearing
+the eye's own 24×22 and amber lit state from two columns to its left, declared
+in one CSS block with it. It is the only one of the four where *which of these
+eight has a monthly plan* reads at a glance. The caret was drawn and refused:
+invisible lit state, and it reads as a dropdown for the box beside it.
+
+Cost stated: the hover is now the only thing that says what the control is, so
+it says it in full and on `aria-label` too.
+
+`checks/monthly-plan.py` 51/51 · 497/0 · 131/0 · full sweep ERRORS none · six
+neighbouring checks green. **On the branch, not merged.**
+
+### §278 — a target with a shape of its own (2026-09-03, branch `claude/seasonal-targets-monthly-proration-5clvu3`)
+
+Islam: *"targets proration is always flat acorss the year but some targets have
+seasonality so the proration is not valid so some targets needs a monthly plan
+input so the calculation becomes more accurate."*
+
+Aligned first, then drawn first: the mockup
+(`design-mockups/monthly-plan/2026-09-03_monthly-plan-entry.html`) was shot from
+the running plan pane and signed off before a source was touched. **The argument
+is one row of his own plan** — Accessory revenue, 300M EGP, 96M reported at
+June, reads 64% behind flat and 100% on plan against its own shape.
+
+**What was built.** Twelve numbers on a row, in the target's own unit, compiled
+by the row's own compile rule (Sum adds the elapsed months, Average takes their
+mean, Latest takes the month being stood in). It answers at `measureDue()`, the
+one seam every score, YTD column and deck benchmark already goes through, so no
+surface had to be taught anything. On all four surfaces he asked for: a pillar's
+key measures, a unit's and the group's key objectives, a supporting function's,
+and a tactic's outcome.
+
+**His three decisions, taken before it was built.** (a) The monthly plan becomes
+the target once complete — the annual box shows the sum, read-only. (a′) His own
+correction: a typed 0 is a real month and a blank box is not. (b) All four
+surfaces. (c) Reporting unchanged — one YTD figure per cycle.
+
+**Verified.** `checks/monthly-plan.py` 47/47 and **36 red** on the shipped
+pre-§278 build; `test-authorize.js` 497/0 (six new, both directions);
+`test-graph-diff.js` 131/0 (five new); round trip, clean parity and two tabs
+green on a virgin Postgres 16, with the monthly plan written and read back on
+all three shapes and its nulls intact; full `qa.py` sweep ERRORS none; twelve
+neighbouring checks green.
+
+**Two faults found by driving it rather than reading it.** The drawer's boxes
+named the `plan` page for all four callers, so on Foundation they rendered as
+read-only spans that looked exactly like boxes (§96). And the check's own first
+falsification run died on a missing control and reported 9 failures where the
+build has 36 (§215).
+
+**On the branch, not merged.** Recorded, not done: the deck prints the seasonal
+benchmark with no word saying why it is not half the year, and a monthly plan is
+deliberately not a counted gap.
+### §277 — a reported figure follows the target's unit (2026-09-04, branch `claude/integer-prorating-compilation-6dq77s`)
+
+Islam, from his Performance page: *"the YTD is showing 2% from 2# I don't
+know where this error is happening."* Not the arithmetic — the reporting box
+stamps a typed number with the target's unit AT THAT MOMENT, and the office
+later changed the target from % to #, so the figure kept its old stamp.
+Reproduced on a tactic's outcome and a key measure alike.
+
+**Built:** when the office changes a target's unit, a figure carrying exactly
+the old unit is rewritten in the new one (`2%` → `2#`) with the target's own
+separator; a figure typed with its own unit is left as typed (§243); the
+FIRST unit is not a change (a filler's act, §201.2); Y/N is neither side
+(§257). One function, both surfaces, no server change, nothing migrated.
+**Cost stated and accepted:** a row already stored stays `2%` until the
+figure is re-entered once on Reporting.
+
+**Verified:** `checks/unit-follows.py` (new; **5 red** on the build before,
+printing `2% / 2#` verbatim), nine neighbouring checks, `test-authorize`
+491/0, full `qa.py` sweep green. **On the branch, not merged.**
+
+### §276 — a count is owed in whole ones (2026-09-03, branch `claude/integer-prorating-compilation-6dq77s`)
+
+Islam: *"we need a compilation type that prorate to integrs only .. if we have
+a target of 2 shops to open in the year so in the 8th month that proration asks
+for 1.3 stores which is not feasible."* Aligned first; **Count** as the name
+and **rounded down** are both his.
+
+**Built:**
+
+- **A fourth compile rule, `Count`** — Sum for things finished one at a time.
+  It prorates the target like Sum and rounds the due figure DOWN to a whole
+  one: 2 shops owe nothing until June, one from June, two in December. At
+  August his row reads **1 due, 100%** where Sum read 1.33 and 75%.
+- **Not a change to Sum**, because that would move stored scores on every
+  integer Sum target already planned; 0 of 122 demo rows carry Count and every
+  existing row prorates exactly as before, asserted.
+- **"Nothing due yet"** on the Performance page for a count with nothing owed,
+  in the tactics' own not-yet-due pill; the row leaves every average and no
+  `/ 0 #` benchmark is printed.
+- **One list (`SMPRules.COMPILES`) where there were seven** — four pen pickers,
+  the plan builder, the workbook's validation ranges and the upload's refusal
+  all read it. No server change, nothing migrated.
+
+**Verified:** `checks/count-compile.py` (new; **13 red** with the floor
+taken out, **2 red** with one picker left on the old list, both from rebuilt
+sources — editing the built file instead silenced the whole script block under
+§238's hashed CSP); `plan-builder.py` rewritten from a literal to
+agreement; `test-authorize` 491/0; eight neighbouring checks and the full
+`qa.py` sweep green. **On the branch, not merged.**
+### §275 — a function's Presentation button sits where a unit's does (2026-09-04, branch `claude/plans-edit-button-placement-jxw8or`)
+
+Islam: *"can you move the presntation button for the functions to be in the same
+place like what we did in the units while having the bands button as well?"* —
+then **"yes"** to the mockup.
+
+**Measuring narrowed the ask.** This was the **only** Performance page in the
+product drawing its controls in the page body: a unit's, the group's, a
+company's and a **pillars**-format function's all call `perfActs()`, which hangs
+them on the tab row and appends the Bands menu itself. So the two halves of
+"supporting function" had disagreed on this one screen since spec 010 routed the
+pillars format through the unit's own page — A15 with no *why* behind it.
+
+**The change is one line** in `renderFnPerformance()`. Screen only: no `api/`,
+`lib/` or `db/` file touched, read off the diff rather than remembered.
+
+- **The Bands half comes free and is NEW, not restored** — that page has printed
+  *Off track* pills since it was built with nowhere to learn what they mean.
+- **One row comes back**: capability band y 300 → 237.
+- **The controls land on x 1206 / 1372 — a unit's pixels exactly.**
+- **Nobody's rights move**: the menu is asked of `SMPRules.mayDownloadPlan()`,
+  of somebody it refuses as well as somebody it allows.
+- **The group and a company still carry no Presentation button**, outside the
+  ask, untouched and asserted as an absence.
+
+**Fit measured, not assumed** (§158): one line at 1920 / 1500 / 1280 / 1100 /
+1000 / 900 / 820 / 768, no overflow, no sideways scroll, 151px still clear at
+the narrowest.
+
+Green: `fn-perf-controls` (new, **16 red** on the build before), `perf-line`,
+`fn-pillars`, `scoring-bands`, `hide-slide`, `setup-header`, and the full
+`qa.py` sweep. `report-chrome`'s one failure reproduces byte-for-byte on main
+(§274's list) and is not this change's.
+
+**§275.1 — one of the new check's own assertions could not fail as written**: it
+measured the content's start off `panel.firstElementChild`, and before the change
+the `.pageact` div WAS that child, so it went green on the reverted build
+(§113.8). It measures the capability band now and fails at (224, 181).
+
+Mockup: `design-mockups/fn-performance-controls/2026-09-04_presentation-on-the-tab-row.html`
+
+### §274 — the audit of the §268–§270 merge (2026-09-03, branch `claude/plans-edit-button-placement-jxw8or`)
+
+Islam, straight after the merge: *"did we change or damage something on this
+merge from the previous changes?"*
+
+**Nothing in the product.** Every source line the merge removed is one this
+branch removed deliberately (`editBar()`, `dlPlanBtn()` and its call, the pen's
+old positions, three wrapper lines, two CSS rules); **no documentation was
+lost**; of 34 page keys only three remap and only on a function target;
+production serves the merged bytes (gate 200, api 401).
+
+**Three of main's own checks were reading a control that had moved**, and the
+split between them is the finding:
+
+- `plan-tail-fold.py` (19 failed) and `one-line-titles.py` (rc=1) pressed
+  `#panel .penbtn[data-page]`. They failed **loudly**. Both were **added on
+  main** (§253, §267) *after* the §268 sweep ran against this branch — so the
+  sweep was early rather than careless, and the rule gains a clause: **grep for
+  a moved control on both sides of a merge.** Green after: 0 failed / all good.
+- `band-corner.py` guarded its last assertion with *if the control is there*,
+  so it ran **twice on main and none here** while printing *"all band-corner
+  checks passed"*. The property was **measured, not assumed** — the corner still
+  holds §268's Arrange arrows, and a click reaches them for `mobhead` and
+  `own_mob` in both themes at scroll 0/300/700. The check switches to that
+  viewer now and says out loud that somebody still gets the control, so it can
+  never fall silent again (§113.8). Falsified: stubbed to nobody it fails twice.
+
+**Attributed, not mine:** nine checks were already red on main (verified against
+a worktree at `5cdcd1a`; `tactic-outcome` diffs line-for-line identical), and
+eight more fail on both with §167.2's *`welcomeover` intercepts pointer events*.
+`office-chat` was never red — it takes over four minutes and had been cut off by
+the runner's 240s cap.
+
+**Recorded and deliberately not fixed:** `tactic-outcome.py` skips its own pen
+the same silent way, but fails identically on main, so it belongs to its own
+pass rather than to this audit.
 
 ### §273 — editing the cycle that is running (2026-09-03, branch `claude/cycle-name-date-edit-ze49d0`)
 
@@ -207,7 +407,14 @@ settled it for the STRIP only; the pen calls `monthBtnHtml()` directly, where
 month). The fix is a per-caller word, which is a wording decision. It predates
 §273.4 and is left alone rather than changed on the way past.
 
-**On the branch, not merged** — §273.4, §273.5 and §273.6 together.
+**Merged to `main`** — §273.4, §273.5 and §273.6 together, on Islam's word,
+after merging main's §274–§278.2 from five other sessions into the branch:
+the three source files both sides touched auto-merged and were grep'd for
+duplicate declarations (§56.7), the built file was rebuilt rather than merged
+(§91), and `sw.js` bumped past a name main had already served (§94.12, §94.16).
+520/0 authoriser and 131/0 differ after the merge, with main's own
+`unit-follows`, `count-compile`, `monthly-plan`, `fn-perf-controls` and
+`master-picker` green beside the cycle's three (§273.7).
 ### §263 — a saved draft can be submitted where it stands (2026-09-03, branch `claude/draft-save-smo-submit-8ew3n3`)
 
 Islam, using the reporting page: *"in the reporting on saving the draft keep

@@ -30603,6 +30603,137 @@ said so.*
 
 ---
 
+## §266.10 — TWO TABLES, SEARCHED, AND DRAGGED BY THEIR OWN NUMBERS (2026-09-04)
+
+Islam, from his own tenant's picker with eighteen subjects in it: *"make the
+everyone who reports searchable and make it a simple table wiht a nother oclumn
+of a BU or a FUNC and make the popup a bit bigger to see more of the units and
+functions suggect a mockup"* — then, of the running order: *"I like option B but
+make the right hand side without the up and down arrows just the x to remove and
+make the list can be dragged by a handle to rearrange if needed"* — and then the
+question that shaped the handle: *"do you think the handle can be the same as
+the number? think with me beforeht emockup"*, followed by *"show me 3 in an
+interactive artificat"*.
+
+**THE ROWS ARE STILL THE SAME ROWS, AND THAT IS WHY THIS COST AN AFTERNOON.**
+This is the third time the picker has been redrawn — §266.4 a single list,
+§266.8 two columns, §266.10 two tables — and not once has the list underneath it
+moved. `masterSubjects()`, `masterOrder()`, `masterWrite()`, `GROUP.masterFlow`,
+its classification in `lib/authorize.js` and its refusal are byte for byte what
+§266 shipped, because `MFLOW.pick` was always the running order and a table is a
+way of showing a list. Nothing is stored that was not stored before; there is no
+migration; the server was not touched and its 503 assertions are unchanged.
+
+**THE DRAG IS `makeSortable`, NEVER A SECOND ONE.** The number is drawn as
+`.idx-n` and the bars come from `handle()`, so `arrange.js` renumbers the rows as
+they move, moves one from the keyboard, and — since §118 — **refuses a commit
+that is not a permutation** of the list it is applied to rather than half
+applying it. A second drag written here would be a second copy of all of that,
+including the bugs those two sections were written to close (§53.5).
+
+**AND THE GLITCH ISLAM REPORTED WAS MEASURED BEFORE ANYTHING WAS BUILT.** Of the
+interactive drawing he asked for, he said: *"the handle and movement of the
+functions or units is a bit glitchy is that in the mockup only or that's an issue
+will be in the paltofrm as well?"* Driven headless, move by move: with the
+digit-to-bars swap driven by `:hover` alone, a **four-row drag swapped the bars
+six times**, and half of those swaps put the bars on a row the pointer was
+*passing* rather than on the row in hand. The cause is not the drawing's
+plumbing — the dragged row moves in **whole-row steps** while the pointer moves
+continuously, so for about half of every row crossed the pointer is not over the
+dragged handle at all, and `:hover` matches the neighbour instead. Measured
+against the platform's own Setup tables, which draw the bars permanently: **zero
+swaps across a full drag**. So the fault belongs to *the number doubling as the
+handle*, and it would have shipped with it.
+
+The rule is therefore in the CSS and not in a drawing: **while a drag is on, the
+dragged row keeps its bars wherever the pointer is, and no other row may take
+them.** The suppression is scoped `tr:not(.dragging)`, because
+`tbody.sorting td.mfh:hover` outranks `tr.dragging td.mfh` and the first attempt
+hid the bars on exactly the row being dragged (§29.2, on specificity, again).
+
+**OPACITY, NEVER `display:none`.** `handle()` gives the grip the role and the
+tabindex, so it *is* the focusable control — and both `display:none` and
+`visibility:hidden` take an element out of the tab order, which would mean the
+keyboard route to reordering does not exist at all (§61) while rendering
+identically. Found by driving it: `.focus()` on the grip landed on the dialog's
+close button. Invisible-and-still-there also makes the **whole cell** the drag
+target, which is the point — a digit is 8px wide and nobody aims at that.
+
+**AND THE KEYBOARD'S FOCUS IS DECIDED BEFORE THE MOVE, NOT AFTER IT.** Moving a
+row with `insertBefore` **blurs** whatever inside it held the focus, so by the
+time the commit runs `document.activeElement` is the body and there is nothing
+left to say which row moved — the first build read it afterwards and the focus
+was silently lost on every press. A capture-phase listener records where the
+press is going before `makeSortable`'s own handler runs, and a press at either
+end of the list is recorded as **nothing**, or the next pointer drag would
+inherit a stale row.
+
+**THE SEARCH HIDES ROWS IN PLACE AND NEVER REPAINTS** (§35, §108.13) — a rebuild
+on every keystroke would throw away the box being typed into — **and a repaint
+KEEPS the filter**, or ticking somebody quietly shows the whole list again to a
+person who believes they are reading their results. It matches the **code** as
+well as the name, because the code is what §266.9 prints on every pill while the
+flow is being presented, so it is what somebody watching the deck would type.
+The cursor stays in the box when a tick was made from it: the next name is
+usually typed straight after.
+
+**THE TICK AND THE × ARE ONE ACT AND STAY ONE HANDLER** — both are `data-mftick`
+(§266.8's decision, unchanged) — and the arrows are **deleted, not left
+unwired** (§24): `data-mfmove` appears nowhere.
+
+**WIDER, AND MARKED ON THE OVERLAY.** Two tables of four and five columns in the
+940px every dialog gets leaves each about 440px, which clips a name before the
+Kind column is reached; the picker takes 1160px through a class on the
+**overlay** (§122's rule — `.modal` is shared by every dialog in the product) and
+**gives it back in `closeModal()`**, or the next thing to open would inherit it.
+
+**FOUR THINGS THE CHECK FOUND, AND EACH IS ITS OWN OLD LESSON.**
+· **The handle column was 198px**, because `table-layout:fixed` takes every
+  column's width from the **first row** and ignores the body's — §37's trap in
+  the access matrix, in a second table. The width moved onto the header cell.
+· **The waiting table overflowed its column by exactly 2px** at every width: the
+  cell's own padding is 16 and the tick is 22, so a 36px column cannot hold it —
+  and then again by 2px, because `SLIDES` measures 54 at 10.5px with the header's
+  letter-spacing and it is the **last** column of that table, where overflow
+  becomes sideways scroll rather than being clipped by the column after it.
+  §158's rule is *fit*, never *"and it scrolls"*.
+· **`--gold-deep` on `--surface-2` is 4.45:1** as words — §38.5 for the seventh
+  time, walked into while quoting it. The FUNC chip keeps the accent as its
+  **border**, where 3:1 is the bar, and takes `--ink-2` for the word (§38.4).
+· **And one of the check's own failures was the check** (§68.10): `.grip` carries
+  a 120ms opacity transition, so a row the pointer left a moment ago is still
+  measurably lit — it reported a row with no hover, no focus and no reason to be
+  lit except that it was on its way out. The probe settles before it measures.
+
+**AND TWO MORE CAME FROM LOOKING AT IT RATHER THAN MEASURING IT.** The Kind
+column shipped its first build reading **`FU…`** — a column that abbreviated the
+word it exists to show, because 58px less the cell's 16px of padding is 42 for a
+chip that renders 44, and the td's own ellipsis did the rest. And two columns in
+a 900px window give each about 380px, where two of the tenant's own names clip:
+they **stack at 960 now, not 820**. What still clips at exactly one width is
+*Strategy Management Office* in a 1000px window, and that is answered the way
+§88 answers it — the full name on the hover, **measured** at paint time so a
+name that fits is not given a title that would steal the pointer (§93.6).
+
+`checks/master-picker.py`: **37 red** on the shipped pre-§266.10 build, 51 green
+after — and **every input degrades** (§215), because its first run against that
+build died on a 30-second `pg.fill` timeout with five sections unmade, in a file
+whose own docstring promises otherwise. Six assertions in
+`checks/master-presentation.py` held the old markup and were **rewritten, never
+deleted** (§218, §51.11): a row is a `tr` and its name is the second cell in
+**both** tables, read by one getter, because two would let the halves drift.
+
+**RECORDED, NOT DONE.** The drag cannot **auto-scroll**: measured with all
+eighteen subjects in the flow, the list is 654px in a 420px box and dragging past
+the bottom does not move it, so a drop can only land where it can already be
+seen. The keyboard route does scroll the moved row into view, and the same
+limitation is true of every other sortable table in the product — closing it
+means changing `arrange.js` for all of them, which is its own decision. The row
+also **lags the pointer with no ghost**, which is `makeSortable`'s own behaviour
+everywhere.
+
+---
+
 ## §267 — THE PLAN TABLE AT A NARROWER WINDOW (2026-09-03)
 
 Islam, on the build §260 had just merged, with a screenshot of a **zoomed**
@@ -32008,3 +32139,786 @@ phrase, or something shorter — is a wording decision, not a bug fix.
 
 **It predates §273.4** (§273's pen called the same builder) and is left as it
 was rather than changed on the way past, per rule 1b.
+
+## §274 — THE SWEEP HAS TO RUN AGAIN AFTER THE MERGE (2026-09-03)
+
+Islam, after the §268–§270 merge landed on main: *"did we change or damage
+something on this merge from the previous changes?"*
+
+The honest answer is **one thing, and it was in the checks rather than in the
+product** — but it is worth writing down, because it is a hole in a rule this
+file has recorded seven times and thought it had closed.
+
+### WHAT THE AUDIT ACTUALLY FOUND
+
+Every line the merge removed from main's sources is one this branch removed on
+purpose: `editBar()`, `dlPlanBtn()` and its call, the pen's old positions, three
+wrapper lines and two CSS rules. **Not one line of main's documentation was
+lost.** Of the 34 page keys, only three remap and only on a function target
+(`u_found`→`k_found`, `u_plan`→`k_proj`, `u_anal`→`k_found`); a unit target
+remaps none. Production serves byte-identical output; the gate answers 200 and
+the API 401.
+
+Of the sixteen checks that were red after the merge, **nine were already red on
+main** (`tactic-outcome`, `row-edit`, `report-chrome`, `smo-team`,
+`strategy-split`, `refusal-keeps-work`, `save-fidelity`, `identity-merge`,
+`tour`) — attributed by running each against a worktree of main at `5cdcd1a`
+and diffing the output, which for `tactic-outcome` came back identical line for
+line. `office-chat` was not red at all; it takes over four minutes and had been
+cut off by a 240s cap in the parallel runner. Eight more — `email-greeting`,
+`send-message`, `setup-overview-live` and the mockup shots — fail on main and on
+this build with the same sentence, *"`welcomeover` intercepts pointer events"*,
+which is §167.2 still uncovered on those files.
+
+### THE TWO THAT WERE MINE, AND WHY THE SWEEP MISSED THEM
+
+`plan-tail-fold.py` (19 failed) and `one-line-titles.py` (rc=1) both opened edit
+mode with `#panel .penbtn[data-page]` — the control §268 moved out of the pane
+and onto the section line as `#secrow-in .secpen`.
+
+**The §268 sweep was not careless; it was early.** Both files were **added on
+main** — `one-line-titles.py` by §253 on 2026-09-02, `plan-tail-fold.py` by §267
+on 2026-09-03 — and arrived here with the merge, hours after the sweep had run
+against the branch it was sweeping. So §51.11 gains a clause it did not have:
+
+> **Grep the checks for a moved control on BOTH sides of a merge, not only
+> before it.** A merge brings in checks written against the world as it was on
+> the other side, and they are as stale as any check the branch itself holds.
+
+Both of those failed **loudly**, because a `query_selector` that finds nothing
+returns `None` and the check falls over. Green after the selector moved:
+`plan-tail-fold` 0 failed, `one-line-titles` all good.
+
+### THE ONE WORTH THE SECTION NUMBER
+
+`band-corner.py` guarded its last assertion with
+
+```python
+if pg.query_selector(".pane .paneact .penbtn"):
+```
+
+and §268 took the SMO's pen out of that corner. So the guard went false, the
+assertion **ran twice on main and zero times here**, and the check went on
+printing *"all band-corner checks passed"*. A green that had quietly stopped
+measuring anything — §51.11's silent direction, inside a check written to catch
+a silent fault (§53.7: *a DOM probe calls the broken build clean*).
+
+**THE PROPERTY WAS MEASURED, NOT ASSUMED.** What that assertion protects — the
+pinned band's corner fill must not become a lid over the control beside it
+(§93.4, §70) — is still real, because §268 deliberately kept Arrange in the
+pane: `arrangePaneBtn()` draws for somebody who may reorder and **not** author,
+which on Mobile's plan is `mobhead` and `own_mob`. A click at the centre of that
+button reaches it in **both themes at scroll 0, 300 and 700**. What had gone was
+the check's SUBJECT, not the product's behaviour.
+
+**AS THE SMO THAT CORNER IS NOW LEGITIMATELY EMPTY, AND EMPTY IS NOT CLEAR.**
+So the subject is switched to rather than waited for, and the check asserts out
+loud that somebody still gets that control, so it can never again fall silent by
+finding nothing (§113.8: an assertion preserved by both sides vanishing). Proved
+able to fail (§94.5): with the viewer search stubbed to nobody it fails twice
+rather than passing quietly.
+
+### RECORDED AND DELIBERATELY NOT FIXED
+
+`tactic-outcome.py` skips its own pen the same way — `if pen: pen.click()` — so
+eleven of its assertions run against a READ-mode page and throw. It fails
+**identically on main**, so it is not this merge's doing and repairing it would
+change what a pre-existing red check reports; flagged for its own pass rather
+than folded into an audit. The eight `welcomeover` failures are the same shape:
+main's, and §167.2's fix (suppressing the welcome screen in an
+`add_init_script`) has never been applied to those files.
+
+### AND THE HONEST PART
+
+Main was pushed with two of its own checks red, and the audit is what found
+them. That is the argument for the audit, not against the merge — but the merge
+would have been better with the sweep run twice.
+
+
+## §275 — A FUNCTION'S PRESENTATION BUTTON SITS WHERE A UNIT'S DOES (2026-09-04)
+
+Islam: *"can you move the presntation button for the functions to be in the same
+place like what we did in the units while having the bands button as well?"*
+Then, on the mockup: *"yes"*.
+
+### MEASURING NARROWED THE ASK BEFORE ANYTHING WAS PROPOSED
+
+The ask reads as a preference about placement. It is not: **this was the only
+Performance page in the product drawing its controls in the page body.**
+
+| Performance page | how its controls are drawn | Presentation | Bands |
+|---|---|---|---|
+| Business unit | `perfActs(presentMenu(…))` | tab row | yes |
+| The group | `perfActs(arrangeBtn(…))` | — | yes |
+| A company | `perfActs("")` | — | yes |
+| Function · plans in **pillars** | → the unit's own page | tab row | yes |
+| Function · plans in **capabilities** | `<div class="pageact">…</div>` | **page body** | **none** |
+
+`perfActs()` is what hangs a page's controls on the tab row, and it appends
+`bandsMenu()` itself. Four of the five Performance pages call it. The fifth built
+its own wrapper.
+
+**AND THE TWO HALVES OF "SUPPORTING FUNCTION" HAVE DISAGREED SINCE SPEC 010**: a
+function that plans in pillars is drawn by `renderUnitPerformance(fnAsUnit(fk))`
+— the branch six lines above the one this changes — so it has had the right shape
+all along and only the capability half was ever odd. A15 exactly: *a unit and a
+function are the same product, and where they differ we say which and why*, and
+here there was no why.
+
+### THE BANDS HALF COMES FREE, AND THAT IS WORTH SAYING OUT LOUD
+
+`perfActs()` adds the legend itself, so the second half of the ask is one call
+rather than a second control. **It is NEW on this page, not restored** — that
+screen has printed *Off track* and *Needs attention* pills since it was built
+with nowhere to find out what they mean. Named as new in the mockup rather than
+allowed to look like a repair.
+
+### ONE ROW COMES BACK
+
+The `.pageact` div was a line of the page spent on one button. Measured: the
+capability band moves **y 300 → 237** and everything under it with it. The two
+controls land on **x 1206 and 1372, y 114 and 117** — a unit's pixels exactly.
+
+### THE CHANGE
+
+```js
+- return '<div class="pageact">' + presentMenu("fn", fk) + '</div>' +
++ return perfActs(presentMenu("fn", fk)) +
+```
+
+One line, in `renderFnPerformance()`. **Screen only** — no `api/`, `lib/` or
+`db/` file is touched, asserted from the diff and not from memory.
+
+### WHAT DID NOT MOVE
+
+**Nobody's rights.** The same menu with the same entries behind the same gates:
+*Download the plan* is still `SMPRules.mayDownloadPlan()`'s (§252.2), and
+reordering is untouched (§101). The check asks the RULE rather than a list of
+entries, and asks it of somebody it refuses as well as somebody it allows
+(§94.2) — a list of four strings would go stale the next time an entry is added
+and would never have proved the gate.
+
+**The group and a company still carry no Presentation button at all.** Outside
+the ask, deliberately untouched, and asserted as an ABSENCE so a build that
+widened this change fails. Put to Islam separately rather than slipped in.
+
+**A function with no capabilities** still returns `fnNothingBehind(fk)` before
+reaching this line, so it draws no controls — unchanged, and unchanged on
+purpose: there is nothing to present.
+
+### DRAWN FIRST, AS THE RULE REQUIRES (1c)
+
+`design-mockups/fn-performance-controls/2026-09-04_presentation-on-the-tab-row.html`,
+published as an artifact and signed off before a source was touched. Both
+pictures are the **running platform** with the control moved in the live DOM
+(§41.9) — this build with one thing in a different place, never a drawing beside
+a page.
+
+### THE FIT WAS MEASURED, NOT ASSUMED
+
+A function's tab names are longer than a unit's and the row now carries two more
+controls, so §158's rule applies: *fit, never "and it scrolls"*. Swept 1920 /
+1500 / 1280 / 1100 / 1000 / 900 / 820 / 768 — **one line at every width**, no
+overflow, no sideways page scroll, and **151px still clear** between the last tab
+and the controls at the narrowest.
+
+### THE CHECK ASSERTS THE AGREEMENT, NEVER A COORDINATE
+
+`checks/fn-perf-controls.py`. The point of the change is that one page stopped
+being odd, so what is asserted is that the two pages land on the same pixels
+(§94.8, §53.5) — true still if somebody later moves both deliberately, red the
+moment one moves alone. **Both ends first**, or a build drawing nothing on either
+page agrees perfectly with itself (§94.2): the controls are asserted present and
+named on both pages before they are compared, and the page body is asserted EMPTY
+of them, because leaving the old wrapper behind while adding the new one draws
+the menu twice and satisfies every "it is on the tab row" assertion. The pillars
+half is asserted unchanged in the same breath — it is the control case, and a
+build that routed everything through the unit's renderer would pass every
+assertion about the capability half while having broken the product.
+
+**Proved able to fail: 16 red** on the build before, the first failures printing
+the reported fault verbatim (`x: 1303, y: 175` in the page body, no Bands).
+
+### §275.1 — AND ONE OF ITS OWN ASSERTIONS COULD NOT FAIL
+
+The first draft measured *"the content starts about where a unit's does"* off
+`panel.firstElementChild` — and **before this change the `.pageact` div WAS that
+child**, so the measurement returned nearly the same y either way and the
+assertion went green on the reverted build. §113.8's shape, found by falsifying
+rather than by reading, in the one assertion whose whole job is the row that came
+back. It measures the first real CONTENT now — the capability band on a function,
+the score cards on a unit — and fails on the reverted build with **(224, 181)**,
+the 43px the row is worth.
+
+### §267.2 — Every box says what it is, and the pillars go across at 1200
+
+Islam, from the shipped §267 build, three things in one message. One of them
+was a defect of mine, one a decision, one a decision whose remedy he proposed
+himself; all three were measured on the running platform and drawn for sign-off
+before anything was built (`design-mockups/plan-table-round-2/`).
+
+**THE BOXES CUTTING THEIR TEXT WAS §267'S OWN FAULT.** A growing box is sized
+by MEASURING its text (§189), and that measurement happens at the end of a
+paint. §267's watcher repaints only when the fold FLIPS — which is right, and
+which means that between 1400 and the next threshold the window narrows, the
+boxes narrow, the text needs another line, and **nothing re-measures them**:
+the box keeps the height it was given at the old width and clips. It happens on
+a RESIZE only, which is exactly a zoom, and never on a load — measured, a page
+**opened** at 1000px has none of its fifteen boxes cut and the same page
+**narrowed** to 1000px has nine, the box holding 53px where the text needs 93.
+`refitGrowOnResize()` sets a height and nothing else: no paint, no state,
+nothing that can disturb a half-typed sentence, throttled to one frame because
+resize fires per pixel. **The check asserts it by NARROWING, never by loading**
+— an assertion that opens the page at each width passes on the broken build.
+
+**EVERY BOX IS NAMED, AND THE SPACING IS ISLAM'S CORRECTION.** *"can we add a
+small title above the tactic name and description to show what these boxes
+are"*, then *"collabs as well needs titles so name all 3 and the collbs and
+quarters"* — five keys: Tactic · Description · Collabs. · Quarters · Outcome.
+**It is the platform's own key** (10px uppercase grey, the one §255's reported
+note wears) and it is a control's NAME, not prose under a heading, so 1b-ii is
+untouched. **The words are the columns' own** — `Collabs.`, not
+*Collaborators*, because that is what the heading said before §267 took it off
+(§53.5; the full form stays on the control's `aria-label`, and the `title`
+that duplicated it is gone now that the name is on screen). **THE FIRST
+DRAWING PUT THE GAP IN THE WRONG PLACE** and he caught it: *"titles of boxes
+needs to be closer to their box not the box above — like description title is
+stuck to the tactic box"*. A key with 3px under it and nothing over it belongs,
+visually, to whatever ended above it; the gap over is four times the gap under
+now, and the check asserts **over > under** rather than either number.
+**Collabs. and Quarters are named only where they have LEFT their columns** —
+with a heading above them a key underneath would say the word twice on one row
+(§87) — and **the keys are the pen's**: reading mode has a bold name and a grey
+line, told apart by their weight, and a key over each would spend height on a
+table nobody is filling in. Asserted absent there.
+
+**AND THE PILLARS GO ACROSS AT 1200 (amending §162).** His own proposal:
+*"the tactics table starts to require oritontal scrolling while we can make the
+pillars go up before that happens to give space"*. 820 was never argued as the
+right width for that — it is the width at which the page stops being two
+columns at all — and the rail is **196px of fixed width plus its gutter**
+sitting beside the table through the whole band where §267 is fighting for the
+prose, with its four pillar names wrapping to three and four lines inside it:
+*the list is taller than the pane it is narrowing.* Measured, rail beside then
+across: the Tactic column **369 → 492px** at 1200, **296 → 438** at 1100,
+**250 → 401** at 1000, **178 → 331** at 900 — and because the prose then needs
+fewer lines the rows get SHORTER, 278 → 170px at 1000. The costs were stated
+before he chose: the strip **scrolls sideways** when the pillars do not fit
+(four at 1200 leaves the fourth half off the end, where the column showed all
+four at once), it drops the rail's own header and footer, and the table starts
+about **112px further down** — paid once, against every row.
+
+**WHAT WAS NOT REPRODUCED IS SAID AS SUCH.** The tactics table does not scroll
+sideways on the demo at any width from 1400 down to 600: it stays inside its
+pane and the page never scrolls sideways either. What reproduces is the
+pressure one step earlier — the prose columns at 142px on an 830px window. The
+remedy is the same, so this was not a reason to wait, and the claim is not made.
+
+**Proved able to fail: 37 red** on the shipped §267 build, across the naming,
+the spacing, the rail and the narrowing. **Two of the check's own first
+failures were the CHECK**: the key order it expected put Outcome third, where
+the row's DOM has it last (it is in the next cell); and §267.1's hover probe
+stopped landing once the rail moved the table 112px down, reporting a row that
+was never hovered as a row that is not one colour (§94.5's shape). And
+`checks/squeezed-rail.py` held the 820 threshold in three places — REWRITTEN,
+not deleted (§218, §214.3), because a check left asserting the old number
+reports a decision as a regression.
+## §276 — A COUNT IS OWED IN WHOLE ONES (2026-09-03)
+
+Islam: *"we need a compilation type that prorate to integrs only .. if we have
+a target of 2 shops to open in the year so in the 8th month that proration asks
+for 1.3 stores which is not feasible but it should prorate for the closest
+integer maybe of the lowest we need to think of it where it measures the actual
+maybe to 1 store only."* Aligned before anything was built; both decisions are
+his: **Count** as the name, and **rounded down** with nothing owed in the early
+months.
+
+### §276.1 — What was true, measured
+
+§239 prorates a `Sum` target by the share of the year that has passed, and
+compares the actual against that. For a target of 2 shops at a review point of
+August the arithmetic is exactly the fault he describes:
+
+| Target 2, review month 8 | Due so far | Actual 1 reads |
+|---|---|---|
+| `Sum` | 1.33 | 75% |
+| `Count` | 1 | 100% |
+
+A shop is not 1.33 of a shop, and a unit that has opened the one shop it could
+have opened by August was reading 75% against a number nothing could satisfy.
+
+### §276.2 — A fourth compile rule, not a change to Sum
+
+The tempting fix is for `Sum` to round whenever the target looks whole. It was
+refused because it **moves stored scores**: the demo alone has *Systems
+consolidated 6* and *Cycles reviewed on time 4* compiling by Sum, and every
+tenant with an integer Sum target would have watched its scores change on a
+morning nobody had touched a plan. A fourth value means nothing anybody has
+already planned moves, and choosing it is a plan decision (§99.8: *how a thing
+is measured is a plan decision, not a reporting one*). **0 of 122 demo rows
+carry Count**, and for every one of them the new "does this prorate" answers
+exactly what the old Sum-only test did — asserted, not assumed.
+
+**`Count` is Sum for things finished one at a time** — shops opened, systems
+consolidated, agreements signed. It prorates the target like Sum and then
+rounds the due figure DOWN to a whole one. The name fits the box the pen
+already draws for the compile rule, which §248 sized for *Average*.
+
+### §276.3 — Rounded down, and the early months owe nothing
+
+**Round down, his call** ("maybe of the lowest"): a shop is not owed until its
+whole share of the year has passed. Target 2: months 1–5 owe nothing, months
+6–11 owe one, month 12 owes two. Nearest rounding would owe the second shop
+from September, which is 1.5 read from the other side. Ceiling was never a
+candidate: it owes a shop in January.
+
+**The epsilon is not decoration.** `3 * (4/12)` is exactly 1 in JavaScript and
+`7 * (3/12)` is `1.7499999999999998`, so a floor taken on the raw product can
+owe one fewer than the arithmetic means on precisely the month a whole unit
+falls due. `Math.floor(due + 1e-9)` rounds only what is genuinely there, and
+the check sweeps four targets across all twelve months against a floor it
+works out for itself.
+
+**Due can now be nought while the target is not, and that is a real state.**
+It is *not* "Not scored" (§35: absent is not nought, and a row nobody has
+asked yet is not a row that cannot answer):
+
+- `measureScore` leaves the row out of every average, the way a not-started
+  tactic is left out. The alternative, scoring it 100 while nothing is owed,
+  rewards silence and was put to him and not taken.
+- `measureDueLabel` says nothing rather than printing `/ 0 #` beside a figure
+  — a benchmark of nought is not a benchmark.
+- The Performance page reads **"Nothing due yet"** in the tactics' own
+  not-yet-due pill, never the alarm one; `nothingDueYet()` is the one reader.
+  The deck prints its usual dash for an unscored row and is deliberately not
+  given a second word for this (§35's dash is what the deck already says for
+  *nothing to say*).
+- **A "less is better" count** gets a rounded-down allowance too, which is
+  strict early in the year (at most 2 closures allows none until June). Rare,
+  stated rather than special-cased.
+
+### §276.4 — One list, where there were seven
+
+The compile rule's vocabulary was spelled **seven times** — four pickers in the
+pen (a measure's, a key objective's, a capability objective's, a tactic's
+outcome's), the plan builder's segmented control, the workbook's validation
+ranges and the upload's refusal message. Adding a fourth value to seven copies
+is how one gets missed, and the missed one is then a picker offering a rule the
+scorer does not know, or a workbook refusing a rule the pen wrote (§53.5).
+`SMPRules.COMPILES` is the list now, in the pen's own order (the two that add
+up side by side, then the two that do not), with `prorates()` and
+`wholeUnits()` beside it; `config-data.js`'s `prorates(m)` asks the shared
+rule, the workbook's `COMPILES` is an alias of it, and the upload's refusal
+names the list rather than a copy of it.
+
+The server needed nothing: `compile` is already a plan field the authoriser
+classifies, and no value list is validated there. Nothing is stored that was
+not stored before and nothing is migrated.
+
+### §276.5 — Proof
+
+`checks/count-compile.py` — the shared list and what on it prorates (both ends);
+Islam's own example MADE at August (Count owes 1 and reads 100%, Sum on the
+identical row still owes 1.33 and reads 75%); the floor swept across four
+targets and twelve months as agreement with the check's own arithmetic, the
+epsilon months included; "nothing due yet" at both ends on the Performance page
+(the count wears the not-yet-due pill, an unscored Latest row beside it still
+reads Not scored, both rows put back); the demo asserted unmoved; nine compile
+pickers on an open plan every one offering exactly the shared list, a pick
+proved to WRITE and put back; the builder's control; and the workbook accepting
+`Count` and refusing a made-up rule by naming all four.
+
+**Three of the check's own first failures were the CHECK** (§51.11, §94.5):
+Plan is a SECTION of Strategy and not a tab, so `[data-s="plan"]` waited
+thirty seconds on nothing; a real pointer press on the Strategy tab at that
+viewport lands on the band pinned over it, so the tab is pressed from script;
+and a viewer switch made AFTER navigating re-lands on the remembered page
+(§173, §237), so the check switched to the SMO, then walked to the plan, and
+found no pen — the switch comes first now.
+
+**And the falsification found the build's own defence**: editing the BUILT file
+to take the floor out silenced the whole script block, because §238's hashed
+CSP refuses a block whose bytes no longer match its hash — every function in
+`config-data.js` vanished and the check reported *cannot continue* rather than
+the failures it exists to see. The broken builds were made from the SOURCES
+through `build.py`, which is the only honest way to make one, and the check
+takes `SMP_BUILT` so it can be pointed at a copy while the sweep reads the real
+file. **13 red** with the floor taken out (Count reading 1.33 due and 75%,
+`/ 0.67 #` printed, 150% for a shop opened before any was owed); **2 red** with
+one picker of nine left on the old list.
+
+`checks/plan-builder.py` held a literal of the old three rules and went red on
+a correct build — REWRITTEN as agreement with the shared list, not deleted
+(§214.3, §218). `test-authorize.js` 491/0. `ytd-proration`,
+`tactic-proration`, `deck-figures`, `deck-outcome`, `plan-fields`,
+`plan-builder`, `unit-before-number`, `fn-ko-edit` green.
+
+### §276.6 — Recorded, not done
+
+- **The deck says a dash where the page says "Nothing due yet."** One word on
+  one surface; the projector keeps §35's dash for anything unscored. Whether
+  the slide should say the words is a decision about what a review says.
+- **The knowledge base does not list the four rules anywhere** — the compile
+  cell's hover is where each rule is explained, and `Count` has its line
+  there. A recipe *"which compile rule do I pick"* would be the place if one is
+  wanted.
+- **`Count` on a tactic's OUTCOME** rounds against the tactic's own window
+  (§250's share), so a 2-shop outcome on a Q2–Q3 tactic owes one from the
+  fourth of its six months. Correct by construction through the one
+  arithmetic; not separately driven.
+
+## §277 — A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (2026-09-04)
+
+Islam, from his Performance page, a tactic whose Reporting row read `2#` of
+`3#` while Performance read **`2% / 2#`** at 100%: *"the YTD is showing 2%
+from 2# I don't know where this error is happening."*
+
+### §277.1 — What it was, measured
+
+Not the arithmetic: the score reads digits only, and 2 of 2 due is 100%, which
+is what it said. The figure's UNIT. The reporting box collects the bare number
+and the save handler stamps it with the target's unit at that moment (§248's
+`joinTarget`), and the Reporting page then only ever shows the number with the
+target's CURRENT unit beside it — so the stored stamp is invisible on the one
+page where it is written. That row's outcome was in `%` when the 2 was
+entered (`%` is the first unit on the picker); the office later switched the
+target to `#`; the target became `3#` and the figure stayed `2%`. Performance
+prints the stored figure as it is (§96.2) and so printed the stamp.
+
+Reproduced on the built file, and **on a key measure as well as on a tactic's
+outcome** — `setTargetUnit` and `nextTargetUnit` both rewrote the target and
+neither told the figure — so it is one fault on both sides (§53.5) and is
+fixed through one function.
+
+### §277.2 — The platform's own stamp follows; a person's does not
+
+`actualFollowsUnit(row, field, from, target)`, called from the two places a
+unit changes. A figure whose unit is EXACTLY the unit the target just left is
+one the platform wrote, so it is rewritten in the new unit — `2%` becomes `2#`
+in the same edit — with the target's own separator, read by the joiner off the
+string the target now holds rather than a second copy of the spacing rule.
+
+Three things deliberately do not follow, each asserted:
+
+- **A figure carrying any other unit is left as typed** (§243): "2 B EGP"
+  against a target in M EGP is a specific statement, and rewriting it would
+  change a number a thousandfold without saying so.
+- **The FIRST unit is not a change** (§201.2): a target that had no unit and
+  gains one is the filler's act through `unitAddedOnly`, and a filler may not
+  write a reported figure — following there would put a reporting change into
+  a fill's save and cost the whole post (§184). A bare figure against a bare
+  target stays bare; the office changing an EXISTING unit is authoring, which
+  already carries the figure's write.
+- **Y/N is neither side** (§257): a row becoming yes/no keeps every value
+  untouched and gives it back on the way out; a per cent rewritten as
+  "2 Y/N" would score as nothing.
+- **A unit CLEARED is not a unit changed.** Found by `unit-before-number.py`
+  going red on the first build, not by reading: it clears a unit held alone
+  and asserts the row is byte-identical to one never touched (§50.6), and the
+  follower had stripped `28%` to `28`. Removing the target's unit takes the
+  stamp away rather than re-stamping, so the figure keeps the unit it was
+  reported in. *A neighbouring check going red is the argument for running
+  the whole suite and not the file just written (§214).*
+
+The server needs nothing: the figure's write rides the same authoring save as
+the unit change. Nothing is migrated.
+
+### §277.3 — The cost, stated before he chose
+
+The fix cannot know the history of a row already stored: his row on the live
+tenant stays `2%` until the figure is entered once more on Reporting, where the
+box refills from the number and rejoins it with `#` (§254.1's "heal on save",
+the same road). Put to him with the alternative of a one-time heal for figures
+whose unit is one of the platform's own symbols and no longer matches the
+target; he chose to go ahead as proposed.
+
+### §277.4 — Proof
+
+`checks/unit-follows.py` drives the story through the REAL controls on both
+surfaces: the state MADE (§94.2) on Mobile's first tactic and first measure,
+each reported against a `%` target through the Reporting page's own box (the
+stamp asserted as `2%`), each switched to `#` through the pen's own unit
+picker, the data read back as `2#` on both, and the Performance page's YTD
+cell asserted to read `2#` and never `2%`, with both scores unchanged. Then the
+four things that must NOT follow, the separator both ways (`2M EGP`, `2 EGP`),
+a unit cleared leaving the figure alone, and the made state put back
+(§113.8). **5 red** on a build made from the
+sources with the two calls removed, its third failure printing `'2% / 2#'`
+verbatim; all green after. One of its own first-run failures was the check:
+it pressed the pen shut before leaving the page and the pen's button is a
+different control while open — a tab change leaves the mode on its own (§63).
+
+### §277.5 — Recorded, not done
+
+- `%` is the first non-blank unit on the picker, which is likely how the
+  outcome came to be in `%` before it was in `#`. Whether the picker should
+  open on `#` for an outcome, or on nothing, is a decision about the plan pen
+  and is not taken here.
+- A figure stored before this change with a unit its target has since left
+  is corrected only by re-entering it. A one-time heal was offered and not
+  taken up.
+- **`checks/tactic-outcome.py` is red on `main` before this merge and red
+  identically after it** — 13 of 47, every one a `TypeError` on a control
+  the check reaches by `td.tgtcell` and the pen's old place — measured by
+  building `origin/main`'s own sources on the side and running the check
+  against them (§274's class: a check reading a control another session
+  moved). It was 47/0 on this branch before the merge, so the drift is
+  main's and not this work's; it is recorded here rather than repaired in a
+  merge that was not asked to touch it, and it is a true signal until it is.
+## §278 — A TARGET WITH A SHAPE OF ITS OWN (2026-09-03)
+
+Islam: *"targets proration is always flat acorss the year but some targets have
+seasonality so the proration is not valid so some targets needs a monthly plan
+input so the calculation becomes more accurate nor flatly proration how can we
+make this feature?"*
+
+**THE ARGUMENT IS ONE ROW OF HIS OWN PLAN.** Mobile's *Accessory revenue*: a
+300M EGP year, 96M reported, read at June. Flat, it is measured against 150M
+and reads **64% — behind**. Against a monthly plan that adds to the same 300M
+it is measured against 96M and reads **100% — on plan**. Same plan, same
+figure, same day, and only one of the two is a fact about the business. §239
+has spread an annual target evenly since it was written, which is right for a
+business that trades evenly, and nothing in a plan could say otherwise.
+
+**THE COMPILE RULE ALREADY SAYS HOW TO READ TWELVE NUMBERS**, and that is what
+keeps this one arithmetic rather than a second scoring model: `Sum` adds up the
+months that have passed, `Average` takes their mean, `Latest` takes the month
+being stood in — the same three words the plan already uses to compile what is
+REPORTED (§53.5). It also retires §239's reason for refusing to prorate Latest
+and Average at all — *"with no baseline stored, prorating them would be
+inventing a glide path"* — because a monthly plan **is** that glide path,
+supplied by the tenant rather than invented here. **A row with no compile rule
+is not in force**: without one the platform cannot say whether the year is the
+sum of the twelve or the last of them, and guessing would put a number nobody
+chose on the page.
+
+**ONE SEAM.** `measureDue(m, share)` is the single place every score, every YTD
+column and the deck's benchmark already go through, and it has taken an
+optional share since §250 — so the monthly plan answers there and every surface
+picks it up with no second copy. It supersedes the SUPPLIED share as well as
+the flat one: a tactic's outcome is handed the share of its own window (§250),
+and a monthly plan already states what every month carries, including the
+noughts for months the thing does not run in, so prorating it again by the
+window would count the same season twice.
+
+**ISLAM'S THREE ANSWERS, TAKEN BEFORE ANYTHING WAS BUILT** (the mockup,
+`design-mockups/monthly-plan/`, shot from the running plan pane and signed off):
+
+- **(a) The monthly plan becomes the target once it is complete** — the annual
+  box then shows the sum and is read-only, so there is one authored place and
+  the two can never disagree. The alternative (the twelve as a normalised
+  *shape* under an authored annual figure) was drawn and refused: type months
+  adding to 1.05B against a 1.0B target and the year-to-date number stops
+  matching what you typed.
+- **(a′) HIS OWN CORRECTION, AND IT IS THE WHOLE OF THE ARITHMETIC:** *"a month
+  target might be entered 0 and it's fine."* A typed 0 is a real month and an
+  empty box is not. `Number("")` and `Number(null)` are both 0 and both finite
+  (§104.10), so a truthiness test or a bare `Number()` would read seven empty
+  boxes as seven planned noughts and cut the year by more than half — a target
+  nobody typed, arrived at by arithmetic nobody could see. The blank test comes
+  first and the number second, in ONE function, so there is one definition of
+  *this month is set*.
+- **(b) All four surfaces** — a pillar's key measures, a unit's and the group's
+  key objectives, a supporting function's, and a tactic's outcome. They run
+  through one arithmetic, so they get one control; half of them having it is
+  the drift §53.5 exists to stop.
+- **(c) Reporting is unchanged.** One YTD figure per cycle, compared against a
+  benchmark that is finally accurate. Monthly actuals were offered and refused.
+
+**A HALF-FILLED PLAN IS STORED AND NOT USED.** Twelve boxes are filled over
+more than one sitting, so what has been typed is kept; what it must not do is
+quietly become the target. Until the twelfth is set the row is prorated flat
+exactly as before, the annual box stays authored and stays LIVE (§61: never a
+box nobody can type in for a state nobody chose), and the drawer says *"5 of 12
+months set — not in force yet"* in the warning ink rather than the alarm one
+(§168: outstanding is not broken).
+
+**THE DRAWER, NOT A PANEL** — Islam's A, from two treatments drawn in the real
+table. Twelve boxes on a full-width row under the measure, which is
+`tr.dxband`'s own shape (§99), so nothing is covered while it is open and the
+sum lands directly under the target it replaces; the panel was drawn and it
+covers four rows including the target it is deriving. **Measured, not asserted:**
+the chip is INLINE with the target box, so the Target box is **303px before and
+306px after** and the row **56px against 57px** — the column had the slack, and
+a button under the box would have added ~24px to every measure in the table
+whether or not it ever gets a monthly plan. Twelve boxes need 970px and **wrap
+to two rows of six at 1280 and below**, so the table never gains a sideways
+scroll (§158: fit, never "and it scrolls").
+
+**THE DRAWER ROW CARRIES NO `data-oi`**, and that is not a detail: it sits
+inside a sortable tbody, and the "+ Add" row being counted in one of those is
+what pushed `undefined` into a plan and took a page down in §118.
+
+**THE BOX IS ALWAYS THE REAL BOUND FIELD.** A target the twelve now derive is
+locked in place after the paint (`monthlyLocks()`, beside `growFields()`) rather
+than drawn as a second, unbound copy — the twelfth month landing has to be able
+to lock it mid-session, and swapping a bound input for an unbound one is how a
+box comes to accept typing that goes nowhere (§96). Disabled, not merely dimmed
+(§220).
+
+**NOTHING REPAINTS UNDER A TYPING HAND.** The sentence, the Clear button and the
+locked target box are rewritten in place as each month commits (§71.2, §145's
+`gapBandRefresh` shape); only pressing the chip or Clear repaints.
+
+**THE READING SIDE IS ONE WORD**, *by month*, under the annual target on
+Performance — the one screen table that prints a benchmark. It goes in the cell
+whose meaning changed rather than under the row's name, where it would stack
+under a reporter's own note (§255).
+
+**NO MIGRATION AND NO SCHEMA CHANGE, MEASURED RATHER THAN CLAIMED.** It rides
+`extra` JSONB (§177's road) on measures, objectives and tactics — and §172 is
+why that is not left as a claim: that section's fourth grant value was agreed by
+four layers and refused by a CHECK constraint nobody had asked, because the seed
+never offered one. The seed carries no monthly plan either, so
+`test-roundtrip.js` now writes one on all three shapes against a real Postgres
+16 and reads it back, **with the nulls of a half-filled plan intact** and the key
+DELETED again on clear (§50.6).
+
+**THE SERVER NEEDED NOTHING, AND THAT IS ASSERTED TOO.** `monthly` falls through
+to the same classification as every other plan field — the safe direction (§42:
+an unrecognised change is the SMO's) — but *it should fall through* and *it does
+fall through* are two different statements and only one is a measurement: six
+new cases in `test-authorize.js` (497/0) prove the office may write and clear
+one, the unit's own custodian may do neither, and it classifies as `unitPlan`
+and nothing else, so a refusal names the plan rather than sending somebody to
+Setup (§16.7). Five in `test-graph-diff.js` (131/0) prove the twelve travel as
+ONE row edit, that a null month survives, that clearing removes the key, and
+that an unchanged plan sends nothing.
+
+**THE WORKBOOK CARRIES TWELVE COLUMNS, APPENDED** (§22, §65). An upload AUTHORS,
+so a column the file does not carry is a column the plan loses: without these,
+a download and an untouched upload would strip every monthly plan in the tenant
+and put every row back on flat proration. Appended after the last existing
+column on each sheet, because a validation range is a POSITION — Q1–Q4, Hidden
+and the ID column do not move, asserted by index. Twelve columns rather than one
+delimited cell, because a plan by month is what a spreadsheet is for; they
+collapse to one pipe-joined field in the reader, so the pipeline behind carries
+one column and not twelve.
+
+**PROVED ABLE TO FAIL: 36 red** on the shipped pre-§278 build —
+**and the first falsification run of `checks/monthly-plan.py` DIED rather than
+reporting**, on a control that does not exist there, so `grep -c FAIL` read 9
+where the build has thirty-six (§215, in the file written to quote it). Every
+press degrades now. **Two of its own assertions could not fail when written**
+(§94.5): *"a blank month leaves the plan out of force"* passed on a build with
+none of this in it, because the probe threw and `is None` was true of the
+error — it is asked beside a case that must answer; and *"a yes/no row gets no
+chip"* passed on a build drawing no chips anywhere — the row beside it is now
+asserted to have one.
+
+**AND THE FIRST BUILD DREW TWELVE BOXES THAT STORED NOTHING** (§96, found by
+driving it rather than by reading it). `inputOr` returns a plain SPAN when the
+named page's pen is shut, and the drawer named `"plan"` for all four callers —
+so on Foundation, where a unit's key objectives live, it drew twelve read-only
+labels that looked exactly like boxes. The page is passed in now, and the check
+asserts BOXES and not spans.
+
+### §278.1 — RECORDED, NOT DONE
+
+- **The deck prints the benchmark and not the word.** `figVsDue` (§254) shows
+  what a figure is measured against on every slide, so a seasonal benchmark
+  reaches the projector correctly and nothing on the slide says why it is not
+  half the year. Adding a line to a slide is a decision about what a slide
+  shows, not a tidy-up (§252.2's shape) — it wants a mockup.
+- **A monthly plan is not a counted gap**, deliberately: a row without one is a
+  complete way to write a plan, so it never joins the red Missing count or
+  blocks Submit. The cost is that the feature is quiet — the chip, the recipe
+  and the *by month* mark are the only things that mention it.
+- **The unit's and the capability's objective tables print `progress`**, the
+  stored raw ratio, rather than `measureScore` — so a monthly plan does not move
+  what those two tables show. That predates this and is unchanged by it.
+
+## §278.2 — A MARK, NOT A WORD (2026-09-04)
+
+Islam, of what §278 shipped: *"the button montthly is big. do you suggest other
+options for it's setting or placement? think of it"*
+
+**MEASURING IT REFRAMED THE COMPLAINT, AND THAT IS THE PART WORTH KEEPING.**
+Four treatments were drawn into the live editing table and every one of them
+leaves the Target box between **334 and 343px** and the row at **57px** — the
+column had the slack all along, so the control comes out of the column's spare
+width and never out of the box. It was not big in the sense of taking room. It
+was big in the sense of **bordered, uppercase and bold** — three emphasis
+devices on a secondary control — repeated **eight times down one column**, on
+rows that mostly will never carry a monthly plan. The right answer was
+therefore never "make it narrower"; the quietest option buys no space at all,
+it only stops shouting.
+
+**EACH WAS DRAWN IN BOTH STATES**, which is what decided it: row 4 carried a
+monthly plan and the other seven did not, because an option that is small and
+cannot say *this one is set* has moved the problem rather than solved it. That
+test is what eliminated the smallest one.
+
+**ISLAM PICKED THE MARK.** Twelve cells, four across and three down — a year by
+month, without a word. **It is the platform's own per-row control**: the eye
+that hides a row sits on the same row two columns to its left at exactly
+24×22px with an amber lit state, so the mark takes ITS numbers rather than a
+second set of nearly-equal ones, and the two are **declared in one CSS block**
+because they are one shape (§53.5: two blocks drift the first time either is
+touched). 72px → 24px.
+
+**IT IS THE ONLY ONE OF THE FOUR THAT ANSWERS THE QUESTION PEOPLE ACTUALLY
+ASK.** *Which of these eight measures has a monthly plan* gets asked every time
+the plan is opened; *what does this button do* gets asked once. The lit row
+wears the attention ground and the other seven are grey, so the first question
+is answered from across the table.
+
+**THE COST IS REAL AND IS STATED**: with the word gone, the hover is the only
+thing on the control that says what it is. So the hover says it in FULL on a
+row that has none — *"Set this target month by month"* — rather than the count
+alone, and it is on `aria-label` as well as `title`, or the button has no
+accessible name at all once its text is removed (§124).
+
+**DRAWN AS SVG, NEVER A FONT CHARACTER** (§52, §120.2, §185): a glyph can be
+mapped and not drawn, and ships as a blank box — this project has been bitten
+by that twice, once into the seed.
+
+**THE CARET WAS DRAWN AND REFUSED**, and it is recorded rather than left out:
+at 13px it is the quietest of the four, its lit state is invisible so a plan
+with three seasonal measures looks exactly like one with none, and a bare caret
+against a text field reads as a dropdown that would fill that field — which is
+not what it does.
+
+`checks/monthly-plan.py` gains four assertions: the mark is 24×22, it is
+**twelve cells** and not merely "an svg", it carries no text and says what it is
+to a hover AND to a screen reader, and **exactly the row with a plan is lit,
+measured as PAINT rather than as a class** (§145.14: a build that lost the rule
+keeps the class). **The lit assertion's first run reported a correct build as
+broken** — it read `getComputedStyle` after `paint()` had detached the node,
+which computes to an empty string (§222's own lesson, §68.10's family).
+
+## §273.7 — THE MERGE THAT CARRIED §273.4 TO MAIN (2026-09-04)
+
+Islam: **"MERGE"**. `main` had moved **twenty-one commits** under this branch
+while §273.4 was being built — §274 to §278.2, from five other sessions — and
+three of the files this change is about (`config-render.js`, `config-data.js`,
+`shell.html`) were touched by both sides.
+
+**THE NUMBERS DID NOT COLLIDE, AND THAT WAS CHECKED RATHER THAN ASSUMED**: main
+holds §273 to §273.3 and then jumps to §274, so §273.4, §273.5 and §273.6 were
+free. Three sessions in a row have had to renumber; this one did not, and only
+reading main's own headings could say so.
+
+**THE THREE SOURCE FILES AUTO-MERGED WITH NO CONFLICT, WHICH IS EXACTLY WHEN TO
+LOOK** (§56.7, §147.4): two branches each adding a declaration to one file merge
+silently, the later winning by hoisting, and the product then runs one copy while
+the comments describe the other. Grep'd for duplicate top-level declarations —
+**one found, `capsReachable()`, declared twice in `config-data.js`** — and it is
+duplicated **on `main` too**, so it predates this merge and is recorded rather
+than fixed on the way past (rule 1b).
+
+**THE BUILT FILE WAS REBUILT, NEVER MERGED** (§91): git will happily splice two
+versions of a generated file into something that belongs to neither. Four
+document conflicts resolved by keeping BOTH sides in section order, with main's
+own *Last Updated* demoted to *Earlier* rather than discarded.
+
+**`sw.js` BUMPED PAST A NAME MAIN HAD ALREADY SERVED** — main was at
+`v4.57-picker-tables`, so this is `v4.58-cycle-pen-two-columns`, confirmed
+against `origin/main` immediately before the push (§94.12, §94.16) — and
+`node --check sw.js` run after the merge, because §146.2 is a splice that does
+not conflict.
+
+Verified after the merge, not before: 520/0 authoriser, 131/0 differ,
+`cycle-edit` all green, `repeat-project` and `ytd-proration` green, and main's
+own `unit-follows`, `count-compile`, `monthly-plan`, `fn-perf-controls` and
+`master-picker` green beside them.

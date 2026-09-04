@@ -3010,5 +3010,64 @@ console.log("\n29 · the master presentation's running order is the office's (§
         r.ok, (r.refusals || []).join(" / "));
 })();
 
+console.log("\n30 · a monthly plan is part of the plan (§278)");
+(function () {
+  /* Islam: *"some targets needs a monthly plan input so the calculation
+     becomes more accurate."* The twelve months change what a row is measured
+     against, so writing them is AUTHORING and the server has to say so —
+     §94's rule, on a field that did not exist when it was written.
+
+     NOTHING NEW WAS ADDED TO THE AUTHORISER FOR THIS, and that is exactly why
+     it is asserted: `monthly` falls through to the same classification as
+     every other plan field, which is the SAFE direction (§42's "an
+     unrecognised change is the SMO's") — but "it should fall through" and "it
+     does fall through" are two different statements, and only one of them is
+     a measurement. If it ever stopped, a unit head could reshape the target
+     they are judged against and nothing would notice. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const P = SEED.units[UK].items && SEED.units[UK].items[0];
+  const M = P && P.measures && P.measures[0];
+  check("§278: the seed holds a unit, a custodian and a measure",
+        !!(UK && CUST && M), [UK, CUST, M && M.id].join(" / "));
+  if (!(UK && CUST && M)) return;
+  const TWELVE = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+  let r = fromStored(SEED, "smo", function (i) {
+    i.units[UK].items[0].measures[0].monthly = TWELVE; });
+  check("§278: the office gives a measure a monthly plan", r.ok,
+        (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) {
+    i.units[UK].items[0].measures[0].monthly = TWELVE; });
+  check("§278 REFUSED: the unit's own custodian cannot reshape its target",
+        !r.ok, "was ALLOWED");
+
+  /* CLEARING IT IS THE SAME ACT. A build that classified the write and not the
+     removal would let anybody put a row back on flat proration — which changes
+     every figure it is judged by, silently. */
+  const withPlan = clone(SEED);
+  withPlan.units[UK].items[0].measures[0].monthly = TWELVE;
+  r = fromStored(withPlan, CUST, function (i) {
+    delete i.units[UK].items[0].measures[0].monthly; });
+  check("§278 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(withPlan, "smo", function (i) {
+    delete i.units[UK].items[0].measures[0].monthly; });
+  check("§278: the office clears one", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, and it is the plan's. A refusal naming the unit's settings
+     would send somebody to Setup for a field that lives on the plan (§16.7). */
+  const inc = clone(SEED);
+  inc.units[UK].items[0].measures[0].monthly = TWELVE;
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§278: it classifies as the unit's PLAN and nothing else",
+        kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -5780,7 +5780,14 @@ function renderCycle(){
            nothing showed the consequence. `8 of 12 months` is the number every
            figure on the platform is actually prorated by, so a review point
            that is not working says so on the page rather than being inferred
-           from a table reading 100%. */
+           from a table reading 100%.
+
+           §278: it is the number every figure is prorated by BY DEFAULT — a row
+           carrying a monthly plan is measured against the months that have
+           actually run instead. The sentence is unchanged because it is still
+           true of the review point, which is what this strip is about; the
+           clause is here so the next reader is not told something the code
+           stopped doing (§104.8). */
         (elapsedMonths() != null
           ? ' <span class="why" style="margin:0">&middot; ' + elapsedMonths() +
             ' of 12 months' + (REVIEW.asOfMonth ? '' : ', taken from the cycle\u2019s end') +

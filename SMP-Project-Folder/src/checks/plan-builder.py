@@ -124,7 +124,11 @@ with sync_playwright() as p:
     ck("the fields come in the outcome's order",
        order[:2] == ["Measure", "Direction"] and "Compile rule" in order[-1], order)
     segs = pg.evaluate("Array.from(document.querySelectorAll('#modal-b .bfseg [data-bfv]')).map(e=>e.dataset.bfv)")
-    ck("the vocabulary is the pen's own", segs == ["≥", "≤", "Latest", "Sum", "Average"], segs)
+    # §276: asserted as AGREEMENT with the shared list rather than as a literal
+    # — this line held the three old rules and went red on a correct build
+    # the day Count joined them (§214.3, again).
+    want = pg.evaluate("['≥', '≤'].concat(SMPRules.COMPILES)")
+    ck("the vocabulary is the pen's own", segs == want, {"got": segs, "want": want})
     pg.fill('[data-bf="name"]', "Repair turnaround")
     pg.query_selector('.bfseg [data-bfv="≤"]').click()
     pg.wait_for_timeout(100)

@@ -286,6 +286,30 @@ var RECIPES = [
   { id: "add-project-ask", q: "How do I add a project to a capability?",
     a: "The Strategy Office can add a project to a capability for you. Let them " +
        "know which capability it belongs to and what the project should be called." },
+  /* §278: TWO ANSWERS TO ONE QUESTION, because the office does it and
+     everybody else meets the result. A single "office" entry would leave a
+     unit head reading a benchmark that is not half the year with nothing
+     anywhere explaining it. */
+  { id: "monthly-plan", q: "How do I set a target month by month?", who: "office",
+    a: "Open the plan with the pen, and select <b>Monthly</b> beside the target. " +
+       "Twelve boxes open under the row \u2014 one for each month, in the target's " +
+       "own unit." +
+       "|All twelve have to be filled in before it takes effect, and a month of " +
+       "nought is a real answer: leave a box empty and the row keeps being spread " +
+       "evenly across the year. Once it is complete the annual target becomes " +
+       "whatever the twelve months come to, and the box shows it rather than " +
+       "taking a figure of its own." },
+  { id: "monthly-plan-ask", q: "How do I set a target month by month?",
+    a: "The Strategy Office sets that. It is worth asking for where your year is " +
+       "not flat \u2014 a season, a launch, a contract that starts in the second " +
+       "half \u2014 because without it every target is measured as if each month " +
+       "carried the same share of it." },
+  { id: "monthly-why", q: "Why is my year-to-date target not half the year?",
+    a: "Because that measure carries a monthly plan: the office has said what each " +
+       "month is expected to carry, so what you are measured against is the months " +
+       "that have actually run rather than a flat share." +
+       "|Its annual target reads <b>by month</b> underneath on the Performance page. " +
+       "Without one, a target is still spread evenly." },
   { id: "deliverable-or-outcome", q: "Deliverable or outcome — which is this?",
     a: "A deliverable is something the project produces, while an outcome is a " +
        "measurable change the project is expected to achieve. If an item has a " +

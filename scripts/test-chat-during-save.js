@@ -5,12 +5,26 @@
    did not answer (no answer)" — which is `post()`'s own 25-second clock
    giving up, not a crash and not a 500.
 
-   MEASURED, NOT GUESSED. A save clears and rewrites the state graph's 33
-   tables with `TRUNCATE ... CASCADE`, and TRUNCATE takes an ACCESS EXCLUSIVE
-   lock on `people` for the whole of §240's transaction. The chat's queue
-   LEFT JOINed `people` for a live name — so while ANY save was running,
-   anywhere in the tenant, the conversation list was not slow, it was frozen,
-   and it stayed frozen until the save committed.
+   MEASURED, NOT GUESSED. A save that rewrites the whole graph clears its 33
+   tables, and it cleared them with `TRUNCATE ... CASCADE`, which takes an
+   ACCESS EXCLUSIVE lock on every one of them for the whole of §240's
+   transaction. The chat's queue LEFT JOINed `people` for a live name — so
+   while such a save was running, anywhere in the tenant, the conversation
+   list was not slow, it was frozen, and it stayed frozen until it committed.
+
+   WHICH SAVES THOSE ARE, SAID EXACTLY, or this file models something the
+   product rarely does: §241's incremental writer is LIVE on production
+   (SMP_INCREMENTAL_WRITE=1, since 2026-09-03) and rewrites only the subjects
+   that changed, with per-subject deletes that take ROW EXCLUSIVE and never
+   blocked a reader. So a plain field edit does NOT come here. What falls back
+   to the whole-graph clear is every settings, register, reorder and
+   add/remove change, and every whole-graph post from a tab on an older build
+   — which a new build produces across the entire tenant at once, and is
+   exactly when the chat was reported dying.
+
+   THIS FILE MODELS THAT FALLBACK, and does it by holding the clear open
+   directly rather than by calling the writer, because what is under test is a
+   LOCK and not a code path (§100.3).
 
    THIS FILE HOLDS A SAVE OPEN AND ASKS THE CHAT ITS QUESTIONS. It drives
    the REAL handler against a REAL Postgres, because the whole fault is a

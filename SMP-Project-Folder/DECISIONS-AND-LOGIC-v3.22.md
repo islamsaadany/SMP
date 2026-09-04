@@ -34241,11 +34241,22 @@ TRUNCATE's statement trigger are both nothing; and the statement carried no
 HOPED FOR.** A graph rewritten on every save is a great deal of churn, so: 160
 full saves against the worked example, vacuumed between rounds — **5.5 MB →
 15.4 → 15.5 → 15.5 → 15.5**. It steps up once and flattens, because the space a
-DELETE frees is reused rather than lost. §241's incremental writer keeps most
-saves off this path entirely; what still comes through it is every settings,
-register, reorder and add/remove change, and **every whole-graph post from a tab
-on an older build** — which is exactly the moment Islam was reporting, since a
-new build reloads every browser at once.
+DELETE frees is reused rather than lost.
+
+**AND THIS IS THE FALLBACK PATH, NOT EVERY SAVE**, which is worth stating
+exactly rather than letting the account read wider than it is. §241's
+incremental writer has been **live on production since 2026-09-03**, and its
+per-subject deletes take ROW EXCLUSIVE — so they never blocked a reader, and a
+plain field edit never comes near this clear at all. What still falls back to it
+is every **settings, register, reorder and add/remove** change, and **every
+whole-graph post from a tab on an older build**.
+
+**THAT NARROWING FITS THE REPORT RATHER THAN WEAKENING IT**: a new build reloads
+every browser at once, every one of them posts the whole graph, and Neon has
+usually gone to sleep — so the fallback path is taken by the whole tenant within
+a minute of a deploy, which is precisely when Islam saw the chat die, and
+precisely why it healed and came back. *A fix described more widely than it acts
+is one somebody later measures, finds not to fire, and stops trusting.*
 
 **PROVED ABLE TO FAIL, TWO LEVERS, NEITHER A SWITCH IN THE PRODUCT** (§94.5):
 `SMP_SAVE_TRUNCATE=1` makes the test clear the way a save cleared before today —

@@ -178,6 +178,16 @@ with sync_playwright() as pw:
     check("the slide is stored as a video",
           ev(pg, "() => pslideById(SLED.target, SLED.sel.slice(3)).kind") == "video")
 
+    # §261.13, Islam, from the rail: a video slide was labelled YOUR PICTURES —
+    # the one surface whose job is telling the slides apart naming a clip as the
+    # one thing it is not. Asked at BOTH ends and after a REPAINT of the rail,
+    # because two places write that word and only one of them is the rail's
+    # first build (§113.8, §53.5).
+    def mineword():
+        el = pg.query_selector("#slideroot .slrow.on .sl-lab em")
+        return el.inner_text().strip().lower() if el else "(no word)"
+    check("the rail says a video is a video", mineword() == "your video", mineword())
+
     pg.query_selector('#slidepane [data-slkind][data-v="pics"]').click()
     pg.wait_for_timeout(350)
     backpic = ev(pg, """() => {
@@ -192,6 +202,8 @@ with sync_playwright() as pw:
           get(backpic, "kind") == "(absent)", get(backpic, "kind"))
     check("the pictures came back untouched",
           get(backpic, "pics") == 1 and get(backpic, "cap") == "a picture", backpic)
+    check("...and the rail says pictures again", mineword() == "your pictures",
+          mineword())
 
     # ── 4. Pasting a link: the verdict is said at the desk ──────────────────
     print("4. the paste box says whether it will play, while they type")

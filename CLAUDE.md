@@ -516,7 +516,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   *"no video store here"* &mdash; the endpoint's own words, and a dead end
   &mdash; became a sentence saying nothing is lost and a link works meanwhile
   (§230.2).
-  60/0 on `checks/video-slides.py`, proved able to fail four ways (1/2/4/3 red);
+  **AND THE RAIL CALLED A VIDEO "YOUR PICTURES" (§261.13)**: the one surface
+  whose job is telling the slides apart naming a clip as the one thing it is
+  not, and a promise the signed-off mockup made that the build did not keep
+  &mdash; because **two places write that word and both spelled it as a
+  literal** (the rail is built once and the open row is rewritten as somebody
+  types). `slidesMineWord()` is the one builder both ask (§53.5), asserted at
+  BOTH ends and across the repaint, proved able to fail one way each &mdash;
+  *a build saying "your video" under every row satisfies the first assertion
+  perfectly.* **And "the video took over all the slides" is MEASURED, not
+  guessed at**: Mobile's deck built without a clip and with one is **28 &rarr;
+  29 slides, one added, none lost, none rewritten** &mdash; a clip is placed
+  like any other custodian's slide (§50.3) and displaces nothing, so what took
+  over was the WORD, on every row that was his.
+  62/0 on `checks/video-slides.py`, proved able to fail six ways (1/2/4/3/1/1 red);
   13/13 and 15/15 on a virgin Postgres 16. **RECORDED, NOT DONE**: the bytes'
   journey through the multipart path is unproven until a store exists; the
   `.pptx` download has no video column; and the signed-off mockup did not show
@@ -5023,7 +5036,14 @@ refusal rather than reading it, and 2 red with the bug put back. Setup &rsaquo;
 Video storage is his #3: the total on the page, no Delete on a clip in the open
 review, deleting the Super user's and asked twice, **a cleared clip keeping its
 slide and saying what happened** &mdash; and not counting against the ceiling,
-because clearing is what makes room. 52/0 proved able to fail four ways;
+because clearing is what makes room. **AND THE RAIL CALLED A VIDEO "YOUR
+PICTURES"** (&sect;261.13) &mdash; the one surface whose job is telling the
+slides apart, and a promise the signed-off mockup made that the build did not
+keep, because two places write that word and both spelled it as a literal; one
+builder now, asserted at both ends. **And "the video took over all the slides"
+is measured, not guessed at**: 28 &rarr; 29 slides, one added, none lost, none
+rewritten &mdash; what took over was the WORD, on every row that was his.
+62/0 proved able to fail six ways;
 13/13 and 15/15 on a virgin Postgres 16; 491/0, 126/0, full sweep ERRORS none.
 **On the branch, not merged**, and the bytes' journey through the multipart
 path is unproven until the store exists.*

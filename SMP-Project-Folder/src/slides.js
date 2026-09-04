@@ -543,6 +543,15 @@ function slidesLabel(el){
   var main = clone.textContent.trim();
   return [main].concat(extra).filter(Boolean).join(" \u00b7 ") || "Slide";
 }
+/* WHAT THE SLIDE HOLDS, IN ITS OWN WORD (\u00a7261.13). The rail said "your
+   pictures" under every slide the custodian added, video included \u2014 so a
+   clip was labelled as the one thing it is not, on the surface whose whole
+   job is telling the slides apart. Two places write that word (the rail is
+   built once and the open row is rewritten as somebody types), so it is one
+   function or they drift the next time either is touched (\u00a753.5). */
+function slidesMineWord(sl){
+  return slideIsVideo(sl) ? "your video" : "your pictures";
+}
 
 function slidesOpen(kind, key){
   var target = kind === "fn" ? "fn:" + key : key;
@@ -623,7 +632,8 @@ function slidesPaint(){
       '<span class="sl-n">' + (i + 1) + '</span>' +
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
       '<span class="sl-lab">' + esc(slidesLabel(el)) +
-        (mine ? '<em>your pictures</em>' : '') + '</span>' +
+        (mine ? '<em>' + esc(slidesMineWord(
+          pslideById(SLED.target, el.dataset.ps))) + '</em>' : '') + '</span>' +
       (el.dataset.off ? '<span class="sl-off">Hidden</span>' : '') +
       slidesEye(el, all) + '</div>';
   }).join("");
@@ -1056,7 +1066,8 @@ function slidesRestage(){
      the two halves of one row disagreeing. */
   var lab = root.querySelector(".slrow.on .sl-lab");
   var made = root.querySelector(".sstage-in .dslide");
-  if (lab && made) lab.innerHTML = esc(slidesLabel(made)) + '<em>your pictures</em>';
+  if (lab && made) lab.innerHTML = esc(slidesLabel(made)) +
+    '<em>' + esc(slidesMineWord(sl)) + '</em>';
 }
 /* The same picture in both places, so framing it moves the slide AND the
    thumbnail. Done by patching rather than restaging, because a drag redraws

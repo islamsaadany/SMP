@@ -30082,3 +30082,34 @@ and nothing has been lost, and that a link works in the meantime.
 2:01 and the limit is 2:00"* is the ceiling working exactly as agreed. Whether
 one second over deserves a little slack is a change to a number Islam set, so
 it is put to him rather than quietly widened.
+
+### §261.13 — The rail called a video "your pictures" (2026-09-04)
+
+Islam, from the Manage slides rail with his clip playing on the slide beside
+it: the row for slide 3 carried the video's own thumbnail and, underneath it,
+the words **YOUR PICTURES**. **The one surface whose entire job is telling the
+slides apart was naming a clip as the one thing it is not** — and the mockup he
+signed off says *"the label reads your video where a picture slide reads your
+pictures"*, so this is a promise the build did not keep rather than a decision
+being revisited.
+
+**TWO PLACES WRITE THAT WORD AND BOTH SPELLED IT AS A LITERAL** — `slidesPaint`
+builds the rail once, and `slidesRestage` rewrites the open row as somebody
+types, so a fix in one is the drift §53.5 exists to stop. It is
+**`slidesMineWord(sl)`**, asked by both, reading `slideIsVideo` — the same
+question the pane, the deck and the storage page already ask, and never a
+second test of what kind of slide this is.
+
+**ASSERTED AT BOTH ENDS, AND ACROSS THE REPAINT** (§113.8): switching a slide
+to video must say *your video* AND switching it back must say *your pictures* —
+proved able to fail one way each (**1 red** with the word hardcoded to
+pictures, **1 red** with it hardcoded to video), which is the point: a build
+that said *your video* under every row would satisfy the first assertion
+perfectly.
+
+**AND "THE VIDEO TOOK OVER ALL THE SLIDES" IS MEASURED, NOT GUESSED AT.**
+Mobile's deck was built with no video slide and then with one, and every other
+slide compared: **28 → 29 slides, one added, none lost, none rewritten.** The
+clip is placed like any other custodian's slide (§50.3) and displaces nothing.
+His own rail screenshot agrees — slides 1, 2, 4 and 5 are the generated ones,
+unchanged. So what took over was the WORD, on every row that was his.

@@ -34311,6 +34311,84 @@ away, not a build away. And `chat.js` keeps its own `esc2()`, which escapes
 every attribute it writes is double-quoted, and a drift from the one-escaper
 rule all the same.
 
+## §289 — THE BOOTSTRAP'S LOCK LIVES INSIDE ONE TRANSACTION (2026-09-04)
+
+Islam, with a screenshot of the sign-in page under his own `smo`: *"Something
+went wrong. Try again, and tell the SMO if it keeps happening"* — *"this
+happened twice now I want you to trace this issue."*
+
+**THAT SENTENCE COMES FROM EXACTLY ONE PLACE**: `safeError()` in `api/auth.js`,
+the catch-all that fires when the handler THROWS. Not a wrong password (that is
+`WRONG_SIGNIN`), not the rate limit (429 with its own words), not a server that
+did not answer (the gate says *"Could not reach the server"* for that). So the
+sign-in handler threw, and the question was what in it can.
+
+**IT WAS THE BOOTSTRAP, AND THE BOOTSTRAP'S LOCK WAS NOT ONE.** Every function
+runs `ensureReadyOnce()` on a cold start — schema, both migration phases, the
+bootstrap credential — under `pg_advisory_lock`, a SESSION lock, followed by
+the work as separate statements. Production is Neon behind PgBouncer in
+transaction pooling, and §240 already wrote down what that means: *a session
+lock could sit on a backend the next statement never sees.* The lock was taken
+on one backend, the migrations ran on another, the unlock landed wherever it
+landed. It protected nothing at precisely the moment it was for.
+
+**WHY TWICE, AND WHY TODAY.** A deploy that carries a migration file the
+tenant has not recorded makes every cold instance want to run it, and a deploy
+also reloads every open tab through §258's version banner — so several
+instances start cold in the same second. Two of them both applied the
+migration; the second's `INSERT INTO _sql_migrations` hit the primary key,
+`23505 duplicate key value violates unique constraint "_sql_migrations_pkey"`,
+the bootstrap threw, and the sign-in page said the sentence. Today's `main`
+carried a migration new to production at **09:45** (the chat round's two
+`040-…` files) and again at **11:55** (one of them restored after a revert):
+one failure per deploy.
+
+**REPRODUCED BEFORE IT WAS EXPLAINED** (§94.5): on a throwaway Postgres 16,
+one migration forgotten in the registry, two bootstraps run at once with the
+lock made a no-op, printed his sentence verbatim beside the runtime log's
+`23505`. **The pooler is MODELLED, never assumed** (§100.3): against a direct
+Postgres a session lock WOULD hold, so `scripts/test-cold-starts.js` wraps each
+client to lose any session state after every statement outside a transaction
+and to keep it inside one — which is the exact behaviour the fix relies on, so
+it is the exact behaviour the model reproduces. **1 red** on the module before,
+`23505` on `_sql_migrations_pkey`, the reported fault to the code.
+
+**THE WHOLE BOOTSTRAP IS ONE TRANSACTION, UNDER THE LOCK THE SAVE ALREADY
+USES.** `BEGIN`, `pg_advisory_xact_lock`, schema, migrations, seed (with
+`{ inTransaction: true }`, §240's own option, or it opens a second
+transaction inside the first), the credential, `COMMIT`. A transaction pins one
+backend behind the pooler, so the lock holds for its life; a second cold start
+waits at it, and when the first commits it reads the registry and finds the
+migration recorded. **Two things come free**: a migration is ATOMIC now — one
+that fails rolls back rather than leaving the tenant between two shapes, and
+records nothing, so the next boot tries again (asserted) — and the session lock
+that could be left standing on a pooled backend no longer exists to leak.
+Every statement in `db/` is transactional (checked: no `CONCURRENTLY`, no
+`VACUUM`, no `CREATE DATABASE`). **The one-line heal stays OUTSIDE, after the
+COMMIT**, for the reason it already had (§260: it may never shut the door) and
+one more — it opens its own transaction, and inside the bootstrap's a failed
+statement would take the bootstrap down with it.
+
+**WHAT IT COST NOBODY.** The migration itself ran correctly on the first
+instance both times; the second only failed to write a note that was already
+written. Nothing in the data moved, and pressing Sign In again worked because
+`ensureReady` does not remember a failed bootstrap. A scare, not a loss. The
+504 on `api/auth` the day before is probably a cousin — a session lock left on
+a pooled backend that a later cold start waited on past the function's 60s —
+and is NOT claimed, since nothing here reproduces it.
+
+**Server only.** No source under `src/` changes, the built file is
+byte-identical, no shell bump, no migration, no schema change; the deploy
+changes no save rules, so §258's banner is enough and nobody is signed out.
+`test-cold-starts` 9/0 · round trip, clean parity, concurrent saves,
+incremental write, one-line heal and two tabs all green on fresh databases ·
+523/0 authoriser · 131/0 differ.
+
+**RECORDED, NOT DONE**: `healOneLineTitles()` still registers itself outside
+the lock, so two cold starts on a tenant that has never run it could both
+attempt the heal; it is caught, and on every deployed tenant it is already
+recorded, so it is written down rather than moved.
+
 ---
 
 ## §290 — THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (2026-09-04)

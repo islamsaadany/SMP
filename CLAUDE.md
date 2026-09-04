@@ -6249,6 +6249,15 @@ node scripts/test-safety-peek.js # ...and the server half against a real Postgre
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to
                                 # the ordinary read
+node scripts/test-cold-starts.js # two cold starts, one new migration, a POOLED
+                                # connection (§289): the pooler is modelled — session
+                                # state lost after every statement outside a
+                                # transaction — and both bootstraps must succeed with
+                                # the migration recorded once; a migration that cannot
+                                # run fails loudly, records nothing, and the next boot
+                                # applies it. 1 red on the module before (23505 on
+                                # _sql_migrations_pkey — the sign-in page's "Something
+                                # went wrong", twice in a day, once per deploy)
 python3 checks/save-said.py     # a save that FAILS says so on the page: a server
                                 # error naming its status, an unreachable server, a
                                 # remembered refusal, and demo data — seven states
@@ -6473,6 +6482,34 @@ test-chat &middot; 55/0 corner-queue &middot; 523/0 &middot; 131/0 &middot; 11/0
 during-save &middot; 14/0 chase &middot; 33/0 push &middot; 24/0 two-tabs
 &middot; 8/8 concurrent &middot; incremental byte-identical &middot; office-chat,
 paste-picture, csp-net and the full `qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;289: the bootstrap's lock lives
+inside one transaction.** Islam, with the sign-in page under his own `smo`:
+*"Something went wrong. Try again, and tell the SMO if it keeps happening"*
+&mdash; *"this happened twice now I want you to trace this issue."* **THAT
+SENTENCE COMES FROM ONE PLACE**, the catch-all in `api/auth.js`, so the
+handler THREW &mdash; and what threw was the bootstrap every function runs on
+a cold start. It took a SESSION advisory lock and then ran the migrations as
+separate statements; behind Neon's transaction pooler a session lock sits on a
+backend the next statement never sees (&sect;240 wrote that down for the
+SAVE), so it protected nothing exactly when it was for: a deploy carrying a
+new migration file, which also reloads every open tab through &sect;258's
+banner and starts several instances cold in the same second. Two of them
+both applied it and the second's registry INSERT hit the primary key
+(`23505`). **Today's `main` carried a migration new to production twice, at
+09:45 and 11:55 &mdash; one failure per deploy.** **REPRODUCED BEFORE IT WAS
+EXPLAINED**: one migration forgotten in the registry, two bootstraps at once,
+his sentence printed verbatim beside the runtime log's `23505`. The whole
+bootstrap is ONE transaction now under `pg_advisory_xact_lock`, the seed
+written with `{ inTransaction: true }`, the heal outside after the COMMIT;
+a migration is atomic and a failed one records nothing (asserted). **The
+pooler is modelled in the test, never assumed** (&sect;100.3): 1 red on the
+module before. **Nothing in the data moved** &mdash; the migration ran
+correctly the first time both times, and the retry worked because a failed
+bootstrap is not remembered. Server only: no `src/` change, built file
+byte-identical, no shell bump, nobody signed out. Round trip, clean parity,
+concurrent saves, incremental write, one-line heal, two tabs, 523/0 and 131/0
+all green on fresh databases.*
 
 *Earlier: 2026-09-04 &mdash; **&sect;288: a save stops shutting everybody
 else out, and a row says the register's name.** Islam, on the shipped build:

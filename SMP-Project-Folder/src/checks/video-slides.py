@@ -238,6 +238,17 @@ with sync_playwright() as pw:
 
     emb = slide_html()
     check("an embed draws a frame", "<iframe" in emb, emb[:90])
+    # §261.11: YouTube answers "error 153 — video player configuration error"
+    # when it cannot see who is embedding it, and the site sends
+    # `Referrer-Policy: no-referrer` for everything. The embed must override
+    # that — with an ORIGIN policy, never the full URL, or the address of the
+    # unit and review being presented goes to the video host.
+    pol = re.search(r'referrerpolicy="([^"]+)"', emb)
+    check("the embed sends a referrer, or the player will not configure",
+          bool(pol) and pol.group(1) != "no-referrer", pol.group(1) if pol else "(none)")
+    check("...and only the origin, never the path",
+          bool(pol) and pol.group(1) in ("origin", "strict-origin"),
+          pol.group(1) if pol else "(none)")
     check("...at the service's player, never the share page",
           "player.vimeo.com" in emb, emb[:120])
     check("...and never autoplays", "autoplay" not in emb, emb[:120])
@@ -299,6 +310,22 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(300)
     err = pg.eval_on_selector("#slidepane", "e => e.innerText") or ""
     check("a fourth is refused", "limit" in err.lower(), err[:130])
+    # §261.12, Islam: "the error is on the top nearly not seen we need it at
+    # the upload part". It sat above the STAGE — a whole slide's height from
+    # the control that caused it, and off the top of the pane on a laptop.
+    where = ev(pg, """() => {
+      const e = document.querySelector('#slidepane .picerr');
+      const st = document.querySelector('#slidepane .sstage');
+      const ct = document.querySelector('#slidepane .slctl');
+      if (!e || !st || !ct) return null;
+      return { err: e.getBoundingClientRect().top,
+               stage: st.getBoundingClientRect().bottom,
+               inControls: ct.contains(e) };
+    }""")
+    check("the refusal is drawn inside the controls, not above the slide",
+          get(where, "inControls") is True, where)
+    check("...below the stage, where the person was looking",
+          bool(where) and get(where, "err", 0) > get(where, "stage", 1e9), where)
     check("...and the slide was NOT made a video anyway",
           ev(pg, "() => (pslideById(SLED.target,'x9')||{}).kind") != "video")
 

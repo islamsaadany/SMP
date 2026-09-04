@@ -169,8 +169,26 @@ function vslideHtml(sl, blank){
     /* `allowfullscreen` and nothing else: no autoplay, no camera, no
        microphone, no payment. A frame gets the narrowest hand we can give it
        (§43.6's argument, one element in). */
+    /* THE PLAYER HAS TO KNOW WHO IS EMBEDDING IT (§261.11). Islam got
+       YouTube's **error 153 — "Video player configuration error"**, and the
+       cause is ours twice over: `vercel.json` sets `Referrer-Policy:
+       no-referrer` for the whole site, and this iframe said it again. A player
+       that cannot see the embedding origin cannot check whether the video may
+       be shown there, so it refuses to configure at all.
+
+       `strict-origin` IS THE NARROWEST THING THAT WORKS: the scheme and host,
+       never the path — so YouTube learns the platform's address and nothing
+       about which unit or which review is on screen — and nothing at all if
+       the connection is ever downgraded. The element's own policy overrides
+       the document's for this one request; every other request the platform
+       makes still sends no referrer. */
     body = '<iframe src="' + esc(how.play) + '" title="' + esc(sl.title || "Video") +
-      '" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer" ' +
+      '" allowfullscreen allow="fullscreen" referrerpolicy="strict-origin" ' +
+      /* Kept, and the two that matter are what it withholds: the frame cannot
+         navigate the platform away from under the presenter, and cannot start
+         a download. `allow-same-origin` is not optional — without it the
+         player is given an opaque origin, loses its own storage, and fails
+         for a second reason. */
       'sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>';
   } else if (how.kind === "file") {
     body = '<video src="' + esc(how.play) + '" controls preload="metadata"' +
@@ -363,8 +381,14 @@ function videoUpload(file, target, onProgress){
       SYNC.videoSign({ target:target, name:file.name, bytes:file.size,
                        type:file.type }, function(err, j){
         if (err || !j || !j.path) {
-          return reject(new Error(err === "no server here"
-            ? "there is nowhere to put it from this copy of the platform"
+          return reject(new Error(
+            err === "no server here"
+              ? "there is nowhere to put it from this copy of the platform"
+            : err === "no video store here"
+              ? "video storage has not been switched on for this deployment yet. " +
+                "The clip is fine \u2014 nothing has been lost. A link to a video " +
+                "kept on YouTube, Vimeo, SharePoint or Google Drive works in the " +
+                "meantime"
             : (err || "the store would not take it")));
         }
         SYNC.videoPut({ file:file, path:j.path, key:j.key, uploadId:j.uploadId,
@@ -734,8 +758,7 @@ function slidesPaneHtml(cur, sl){
   var vid = slideIsVideo(sl);
   var slots = [];
   for (var i = 0; i < across; i++) slots.push(slidesSlot(sl, pics[i], i));
-  return head +
-    '<div class="sstage"><div class="sstage-in"></div></div>' +
+  return '<div class="sstage"><div class="sstage-in"></div></div>' +
     '<div class="slctl">' +
       '<div class="slctl-h">' +
         '<input class="fld picttl" data-picttl="' + esc(sl.id) + '" value="' + esc(sl.title || "") +
@@ -760,6 +783,9 @@ function slidesPaneHtml(cur, sl){
           'title="Move down">&#9660;</button></span>' +
         '<button class="editbtn" data-picdel="' + esc(sl.id) + '">Remove slide</button>' +
       '</div>' +
+      /* HERE, not at the top of the pane (§261.12): a refusal about a clip
+         belongs beside the box the clip was chosen in. */
+      head +
       (vid ? vslideCtl(sl) :
       '<div class="picslots">' + slots.join("") + '</div>' +
       (pics.length > across

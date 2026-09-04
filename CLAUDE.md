@@ -502,7 +502,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   is STUBBED and the handler driven in-process for a 302 to the signed address
   (5 red with the bug back), and every other call was validated against the
   real SDK by reaching *"This store does not exist"*.
-  56/0 on `checks/video-slides.py`, proved able to fail four ways (1/2/4/3 red);
+  **AND THE PLAYER HAS TO KNOW WHO IS EMBEDDING IT (§261.11)**: Islam got
+  YouTube's **error 153**, and the cause is ours twice over — `vercel.json`
+  sets `Referrer-Policy: no-referrer` for the whole site and the iframe said it
+  again, so the player could not check whether the video may be shown here and
+  refused to configure. `strict-origin` on the embed alone: the host, never the
+  path, so nothing says which unit is on screen. **NOT REPRODUCED HERE and said
+  so** — YouTube is unreachable from this sandbox — **and the first probe read
+  "looks ok" on a frame that had never loaded** (§93's absence-as-success).
+  **AND THE REFUSAL MOVED TO WHERE THE ACT WAS (§261.12)**: measured at **628px
+  above** the control that caused it and off the top of the pane on a laptop;
+  it renders inside the controls block now, which fixes the picture slots too.
+  *"no video store here"* &mdash; the endpoint's own words, and a dead end
+  &mdash; became a sentence saying nothing is lost and a link works meanwhile
+  (§230.2).
+  60/0 on `checks/video-slides.py`, proved able to fail four ways (1/2/4/3 red);
   13/13 and 15/15 on a virgin Postgres 16. **RECORDED, NOT DONE**: the bytes'
   journey through the multipart path is unproven until a store exists; the
   `.pptx` download has no video column; and the signed-off mockup did not show

@@ -30032,3 +30032,53 @@ reports. It uses `auth.createSession()` now, which is the platform's own door.
 traverse the multipart path into a real store. Every argument shape on that path
 is now validated against the real SDK, and the last step needs a signed-in
 person on the deployment — which is Islam, in two minutes, not this session.
+
+
+### §261.11 — The player has to know who is embedding it (2026-09-03)
+
+Islam, on the first YouTube link: **"Video player configuration error — Error
+153."** The cause is ours, twice over. `vercel.json` sets `Referrer-Policy:
+no-referrer` for the whole site (§43.6), and the embed iframe said it again.
+A player that cannot see the embedding origin cannot check whether the video is
+allowed to be shown there, so it refuses to configure at all.
+
+**`strict-origin` IS THE NARROWEST THING THAT WORKS**: the scheme and host,
+never the path — so the video host learns the platform's address and nothing
+about which unit or which review is on screen — and nothing at all over a
+downgraded connection. An element's own policy overrides the document's for
+that one request, so every other request the platform makes still sends no
+referrer.
+
+**NOT REPRODUCED HERE, AND SAID SO** (§3a): YouTube is unreachable from this
+sandbox — `ERR_CONNECTION_RESET` — so the diagnosis is from the two policies
+we set and the documented meaning of 153, not from seeing it fail and pass.
+**And the first probe was worse than useless**: it read "looks ok" whenever the
+frame's text lacked "153", which was true of a frame that had never loaded at
+all — absence read as success, on a run where nothing loaded (§93, §231.4).
+
+The `sandbox` attribute is kept and the reason written down: what it withholds
+that matters is top-navigation (a frame cannot take the presenter's page away)
+and downloads. `allow-same-origin` is not optional — without it the player gets
+an opaque origin, loses its own storage and fails for a second reason.
+
+### §261.12 — The refusal belongs beside the box, not above the slide (2026-09-03)
+
+Islam: *"when I ad a link or a video the error is on the top nearly not seen we
+need it at the upload part."* Measured: the message sat at **y=68** while the
+stage ended at **y=696** — **628px above the control that caused it**, and off
+the top of the pane on a laptop. It renders inside the controls block now,
+directly above the source boxes, and the same move fixes the picture slots,
+which had the fault for the same reason. Both ends asserted: inside the
+controls, and below the stage. **4 red** with the old placement and the old
+referrer policy put back.
+
+**AND THE ONE MESSAGE NOBODY COULD ACT ON WAS REWRITTEN** (§230.2): *"no video
+store here"* is the endpoint's own words — it names a thing the reader has
+never heard of and says nothing about what happens next. It says that video
+storage has not been switched on for this deployment yet, that the clip is fine
+and nothing has been lost, and that a link works in the meantime.
+
+**WHAT WAS CORRECT AND IS RECORDED AS SUCH**: the refusal reading *"it runs
+2:01 and the limit is 2:00"* is the ceiling working exactly as agreed. Whether
+one second over deserves a little slack is a change to a number Islam set, so
+it is put to him rather than quietly widened.

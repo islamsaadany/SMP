@@ -100,7 +100,7 @@ var CHAT = (function(){
      other field is what the server last said, never a second copy of it. */
   var cq = { side: "wait", person: null, name: "", msgs: [], q: "",
              hits: null, searching: false, rows: null, err: "",
-             /* §289: the people who match and have NO conversation yet, and
+             /* §290: the people who match and have NO conversation yet, and
                 how many more matched than the ten shown. `fresh` marks the
                 conversation open in the queue as one that does not exist on
                 the server yet, so the first message carries `start`. */
@@ -449,7 +449,7 @@ var CHAT = (function(){
 
   function cqFind(){
     return '<div class="cqfind"><input type="search" id="cqfind" ' +
-      /* THE BOX SAYS ITS OWN SCOPE (§289), which is where the grey line above
+      /* THE BOX SAYS ITS OWN SCOPE (§290), which is where the grey line above
          the rows used to say it. Read at the moment somebody decides to type,
          and it costs no row of the list. */
       'placeholder="Search all conversations and the register\u2026" ' +
@@ -510,7 +510,7 @@ var CHAT = (function(){
       var hits = cq.hits || [], folk = cq.people || [];
       if (!hits.length && !folk.length) return '<div class="cqzero">Nothing found for \u201c' +
         esc2(cq.q) + "\u201d.</div>";
-      /* ── ONE LIST, NO HEADINGS (§289) ─────────────────────────────────
+      /* ── ONE LIST, NO HEADINGS (§290) ─────────────────────────────────
          Islam, of the two group headings drawn first: "who we have a
          conversation with will apear with the conversation and who is not
          will appear without the converstaion th header is taking unneede
@@ -1380,7 +1380,7 @@ var CHAT = (function(){
     cq.person = key; cq.name = name || key; cq.msgs = []; cq.fresh = !!fresh;
     drawPanel();
     var box = el("chatsay");
-    /* WRITE, NOT REPLY, when there is nothing to reply to (§289, §124). */
+    /* WRITE, NOT REPLY, when there is nothing to reply to (§290, §124). */
     if (box) box.placeholder = (fresh ? "Write to " : "Reply to ") +
       (firstWord(cq.name) || "them") + "\u2026";
     /* AND NOTHING IS ASKED FOR A CONVERSATION THAT DOES NOT EXIST — the
@@ -1571,7 +1571,7 @@ var CHAT = (function(){
     var dock = document.createElement("div");
     dock.className = "chatdock";
     dock.id = "chatdock";
-    /* ── THE CORNER ARRIVES WITH THE PAGE (§289) ──────────────────────
+    /* ── THE CORNER ARRIVES WITH THE PAGE (§290) ──────────────────────
        Islam: "a lag happened where the chat icon didn't apperar on the reload
        of the branch. and then appeard after."
 

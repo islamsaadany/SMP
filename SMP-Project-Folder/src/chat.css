@@ -565,7 +565,7 @@ body.presenting .chatdock { display:none; }
 .cqfail b { display: block; font-size: var(--fs-note); color: var(--ink); }
 .cqfail p { margin: 5px 0 9px; font-size: var(--fs-note); color: var(--ink-2); }
 
-/* ── THE WAY OUT DOES NOT SCROLL AWAY (§289) ──────────────────────────
+/* ── THE WAY OUT DOES NOT SCROLL AWAY (§290) ──────────────────────────
    Islam: "I cant see the button open the platform inbox which should be
    always there." It lives INSIDE the scrolling list, so any search with a
    few results carried the corner's one permanent way out off the bottom —

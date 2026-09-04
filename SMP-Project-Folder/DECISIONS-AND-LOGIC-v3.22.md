@@ -34313,7 +34313,7 @@ rule all the same.
 
 ---
 
-## §289 — THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (2026-09-04)
+## §290 — THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (2026-09-04)
 
 Two from Islam in one message, using the shipped build: *"a lag happened where
 the chat icon didn't apperar on the reload of the branch. and then appeard
@@ -34379,7 +34379,7 @@ wrong when nothing is (§93).
 search for *a* and half the company matches, and a list that silently stops is
 one somebody scrolls looking for a name that is not coming.
 
-### §289.1 — Every heading goes, and the way out stops scrolling away
+### §290.1 — Every heading goes, and the way out stops scrolling away
 
 Both from Islam looking at the drawings, and both are better than what I drew.
 
@@ -34413,7 +34413,7 @@ two places draw that foot and one rule covers both, where restructuring the
 markup would have to be done twice and kept in step (§53.5). The cost is stated:
 one row of list height, always spent.
 
-### §289.2 — What the checks taught
+### §290.2 — What the checks taught
 
 **PROVED ABLE TO FAIL, FROM THE SOURCES** (§276: an edited built file is
 silenced by the hashed CSP): **11 red** with the people half removed, **1 red**

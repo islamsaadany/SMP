@@ -617,12 +617,12 @@ async function signIn(who, password) {
        "no email went out, and the reason is the setting: " + JSON.stringify(r.body.mailed));
     await setChat({});
 
-    /* ── THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (§289) ──
+    /* ── THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (§290) ──
        Islam: "in the serach I need to be able to send to a new person as
        well". The conversations half is §285's and is untouched; what is
        asserted here is the half that is new, and the ONE INVARIANT that makes
        two halves safe — nobody is ever in both. */
-    console.log("\nAND THE SEARCH REACHES PEOPLE WITH NO CONVERSATION (§289).");
+    console.log("\nAND THE SEARCH REACHES PEOPLE WITH NO CONVERSATION (§290).");
     r = await call(smo.cookie, { action: "chatSearch", q: "ha" });
     const folk = (r.body && r.body.people) || [];
     ok(r.status === 200 && Array.isArray(folk),

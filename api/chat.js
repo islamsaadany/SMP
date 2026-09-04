@@ -1136,7 +1136,7 @@ module.exports = async function handler(req, res) {
          anybody wants to read. */
       hits.sort(function (a, b) { return new Date(b.line_at) - new Date(a.line_at); });
 
-      /* ── AND THE PEOPLE WHO HAVE NEVER WRITTEN IN (§289) ──────────────
+      /* ── AND THE PEOPLE WHO HAVE NEVER WRITTEN IN (§290) ──────────────
          Islam: "in the serach I need to be able to send to a new person as
          well". Until now this searched conversations only, so a colleague who
          had never written was answered with "Nothing found" — a dead end on

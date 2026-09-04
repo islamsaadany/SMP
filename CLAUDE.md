@@ -1980,7 +1980,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   good one. **Compare the file's mtime with the server's start time; never
   trust the order the commands were typed in.**
 - **THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS
-  NEVER WRITTEN IN (§289):** Islam — *"a lag happened where the chat icon didn't
+  NEVER WRITTEN IN (§290):** Islam — *"a lag happened where the chat icon didn't
   apperar on the reload of the branch"*, and *"the erach for new peopele isn't
   working"*. **THE SECOND WAS NOT A FAULT AND SAYING SO CAME FIRST** (that
   feature was the mockup awaiting his wording), and he then asked for both.
@@ -2002,7 +2002,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **Nobody is in both halves** (§108.1), nothing new is authorised or stored, and
   the first message carries §247's own `start` — so the chase, the box and
   leaving the waiting list come free (§53.5). **Capped at ten** with the rest
-  COUNTED. **§289.1 — EVERY HEADING GOES**: Islam, of the group headings, *"the
+  COUNTED. **§290.1 — EVERY HEADING GOES**: Islam, of the group headings, *"the
   header is taking unneede space"*, then of the scope line, *"i still can see a
   header"*. Both right (1b-ii): the ROW SHAPE says which is which and the ORDER
   does the grouping, and the scope moved into the search box's placeholder, read
@@ -2013,7 +2013,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   sits inside the scrolling list, so any search carried the corner's one
   permanent way out off the bottom (§61) — sticky rather than moved, because two
   places draw that foot and one rule covers both (§53.5); the cost is one row of
-  list height, always. **§289.2 — 11 red** with the people half out and **1 red**
+  list height, always. **§290.2 — 11 red** with the people half out and **1 red**
   with the sticky rule out, from the SOURCES (§276); **three of the check's own
   failures were the CHECK** (it died rather than reporting, §215; it held a row
   handle across a poll that rebuilds the list; and it left the search box holding
@@ -6444,7 +6444,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;289: the corner arrives with the page,
+*Last Updated: 2026-09-04 &mdash; **&sect;290: the corner arrives with the page,
 and the search reaches somebody who has never written in.** Islam, on the shipped
 build &mdash; *"a lag happened where the chat icon didn't apperar on the reload of
 the branch"*, and *"the erach for new peopele isn't working"*. **THE SECOND WAS
@@ -6461,7 +6461,7 @@ SERVER'S ANSWER** &mdash; the test is *has no conversation AT ALL* and only the
 server knows every thread &mdash; with &sect;247's own active test COPIED rather
 than composed (the first draft guessed a status column and would have offered
 every retired person), nobody in both halves, nothing new stored, and the first
-message carrying &sect;247's `start`. **&sect;289.1 &mdash; every heading goes**,
+message carrying &sect;247's `start`. **&sect;290.1 &mdash; every heading goes**,
 both at Islam's word: the row shape says which is which, the order does the
 grouping, the scope moved into the box's placeholder, and the cap speaks at the
 foot. **And the way out was a real fault older than the feature** &mdash; the

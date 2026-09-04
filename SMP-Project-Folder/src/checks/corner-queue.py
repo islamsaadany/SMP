@@ -57,7 +57,7 @@ HITS = [
   "line":"The Q3 target on Active Base still reads 4.2M.",
   "line_at":"2026-09-03T09:41:00Z","from_office":False,"is_last":True},
 ]
-# PEOPLE WITH NO CONVERSATION (§289). These are on the register and have never
+# PEOPLE WITH NO CONVERSATION (§290). These are on the register and have never
 # written in — the case Islam reported as "Nothing found". ELEVEN of them, so
 # the cap at ten bites and the foot line has something to count.
 # NOBODY HERE IS IN `QUEUE` OR `HITS` — a person in both halves is exactly the
@@ -236,7 +236,7 @@ with sync_playwright() as p:
        pg.eval_on_selector("#cqfind","e=>e.value")=="target",
        pg.eval_on_selector("#cqfind","e=>e.value"))
 
-    print("\nREACHING SOMEBODY WHO HAS NEVER WRITTEN IN (§289)")
+    print("\nREACHING SOMEBODY WHO HAS NEVER WRITTEN IN (§290)")
     pg.fill("#cqfind","hazem"); pg.wait_for_timeout(900)
     rows=pg.query_selector_all(".cqrow")
     ck("the people who match are listed", len(rows)>0, len(rows))
@@ -336,7 +336,7 @@ with sync_playwright() as p:
     except Exception: pass          # nothing was open to come back from
     pg.fill("#cqfind","target"); pg.wait_for_timeout(800)
 
-    print("\nAND THE CORNER ARRIVES WITH THE PAGE (§289)")
+    print("\nAND THE CORNER ARRIVES WITH THE PAGE (§290)")
     # The bubble must be drawn from the state the page hydrated with, BEFORE
     # the chat has answered. Measured on a page whose chat endpoint is slow.
     ck("the switch is readable from the page's own state",

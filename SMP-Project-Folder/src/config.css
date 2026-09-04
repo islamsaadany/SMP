@@ -1863,20 +1863,34 @@
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }
-  /* §273: SAVE AND CANCEL AT ONE END, CLOSE THE CYCLE AT THE OTHER. The gap is
-     what keeps the destructive act away from the two ordinary ones inside the
-     same row -- and it collapses on a narrow window, where the row wraps and
-     Close lands on a line of its own, which separates them just as well. */
-  .nc-act .nc-gap { flex:1 1 auto; min-width:0; }
-  .nc-act .nc-hold { margin:0; text-align:right; }
-  /* Held rather than gone (§221). It stays READABLE -- the point is to say
-     what is waiting, and a control faded to a whisper says only that something
-     is wrong -- so it takes the page's own quiet ink and line rather than an
-     opacity, which would drag `--bad-tx` under the contrast floor (§38.5). */
-  .nc-act .editbtn.danger[aria-disabled="true"],
-  .nc-act .editbtn.danger[aria-disabled="true"]:hover {
-    color:var(--ink-3); border-color:var(--line); background:transparent;
-    cursor:default; }
+  /* ── THE PEN'S TWO COLUMNS (§273.4) ───────────────────────────────
+     Islam picked this over editing in place and over a plain box: the fields
+     on the left, and ENDING IT behind a rule on the right, so the one
+     destructive control never shares a row with the boxes being typed in.
+
+     `.nc-gap`, `.nc-hold` and the held-Close rule are GONE with the draft they
+     served (§24): with the fields writing as they are left there is nothing
+     unsaved, so nothing to hold back and no sentence to explain it.
+
+     The right column collapses UNDER the fields below 1100px rather than
+     squeezing to nothing — 300px of prose and a button is the narrowest it
+     reads at, measured. */
+  .cyc2 { display:grid; grid-template-columns:1fr 300px; align-items:stretch; }
+  .cyc2-f { padding-right:26px; min-width:0; }
+  .cyc2-d { border-left:1px solid var(--line); padding-left:26px;
+            display:flex; flex-direction:column; align-items:flex-start; }
+  .cyc2-p { font-size:12.5px; line-height:1.5; color:var(--ink-3); margin:0 0 14px; }
+  @media (max-width:1100px){
+    .cyc2 { grid-template-columns:1fr; }
+    .cyc2-f { padding-right:0; }
+    .cyc2-d { border-left:0; border-top:1px solid var(--line);
+              padding-left:0; padding-top:16px; margin-top:16px; }
+  }
+  /* THE PEN LIT, in `penBtn()`'s own treatment rather than a second one
+     (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
+     control in a worded shape. */
+  .editbtn.penon, .editbtn.penon:hover {
+    background:var(--gold); border-color:var(--gold); color:var(--panel); }
 
   /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
   .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;

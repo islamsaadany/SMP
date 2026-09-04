@@ -1367,14 +1367,26 @@
   td:has(> .fld + .eyebtn) > .fld { width: calc(100% - 62px); vertical-align: middle; }
   td:has(> .fld + .eyebtn) > .eyebtn,
   td:has(> .fld + .eyebtn) > .xbtn { vertical-align: middle; margin-left: 4px; }
-  .eyebtn { width: 24px; height: 22px; border: 1px solid transparent; border-radius: 6px;
+  /* §278.2: THE MONTHLY MARK IS THE SAME CONTROL AND IS DECLARED WITH IT.
+     Islam, of the worded chip that shipped: *"the button montthly is big"* — and
+     it was, three ways at once (bordered, uppercase, bold) on eight rows that
+     mostly will not use it. Measured across four drawn treatments: every one of
+     them leaves the Target box between 334 and 343px and the row at 57px, so
+     the column had the slack all along and this was never about room.
+
+     A small per-row control with a lit state is a thing this table already has
+     — the eye, on the same row, two columns left — so the mark takes ITS
+     numbers rather than a second set of nearly-equal ones. Declared together
+     because they are one shape: two blocks would drift the first time either
+     was touched (§53.5). */
+  .eyebtn, .mpopen { width: 24px; height: 22px; border: 1px solid transparent; border-radius: 6px;
     background: none; color: var(--ink-3); cursor: pointer; padding: 2px 3px;
     display: inline-block; }
-  .eyebtn:hover { background: var(--surface-2); color: var(--ink); }
+  .eyebtn:hover, .mpopen:hover { background: var(--surface-2); color: var(--ink); }
   /* Lit on the attention ground while hidden — a decision, not a warning
      (§168): the warn family is for something owed, and nothing is. */
-  .eyebtn.on { background: var(--attn-bg); border-color: var(--attn-bg); color: var(--attn-tx); }
-  .eyebtn svg { width: 16px; height: 14px; display: block; }
+  .eyebtn.on, .mpopen.on { background: var(--attn-bg); border-color: var(--attn-bg); color: var(--attn-tx); }
+  .eyebtn svg, .mpopen svg { width: 16px; height: 14px; display: block; }
   .hidchip { display: inline-block; font: 600 10px/1 var(--sans); letter-spacing: .07em;
     text-transform: uppercase; color: var(--attn-tx); background: var(--attn-bg);
     border-radius: 99px; padding: 4px 8px; margin-left: 8px; white-space: nowrap;
@@ -1581,7 +1593,7 @@
      as well as grey — the italic is the alarm's own emphasis, and a fact
      does not need it. */
   .ritem .rgap.req { color:var(--ink-2); font-weight:600; font-style:normal; }
-  /* §274: A RED WORD ON A RAIL IS TYPE, SO IT TAKES THE TYPE RED. `--bad` is
+  /* §279: A RED WORD ON A RAIL IS TYPE, SO IT TAKES THE TYPE RED. `--bad` is
      a FILL colour and measures 4.49:1 against the rail row's ground in the
      dark palette — §38.5 for the eighth time, and it was already there before
      this section: §106.2's "N rows to check" on a project's rail is the same
@@ -2073,9 +2085,12 @@ th .subhd { font-weight:400; }
    than pushing the quarter marks off the end — and `min-width:0` on the select
    or a flex item refuses to shrink below its own content and does the pushing
    anyway (§100.5's rule, one box in). */
-.tacfold { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px;
-           margin-top:8px; }
+.tacfold { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 16px;
+           margin-top:10px; }
 .tacfold > * { min-width:0; }
+/* Each of the two is a named column of its own inside the strip, so its key
+   sits ABOVE its control rather than beside it (§267.2, Islam). */
+.tacfold > span { display:flex; flex-direction:column; align-items:flex-start; }
 /* A NAMELESS CONTROL MUST AT LEAST LOOK LIKE ONE. With its column heading gone
    (Islam) the collaborators picker on a tactic nobody supports is the platform's
    em-dash and a caret — 55px, measured — which beside four numbered marks reads
@@ -2097,4 +2112,94 @@ th .subhd { font-weight:400; }
    not get narrower because the window did. */
 @media (max-width: 1200px) {
   .tgrid { grid-template-columns: var(--tw); }
+}
+
+/* ── EVERY BOX SAYS WHAT IT IS (§267.2) ─────────────────────────────────
+   Islam, of the cell §267 left behind: *"can we add a small title above the
+   tactic name and description to show what these boxes are"*, and then
+   *"collabs as well needs titles so name all 3 and the collbs and quarters"*.
+   Two prose boxes stacked on each other with a picker and four marks under
+   them, and the only thing naming any of it was a column heading — one of
+   which §267 had just taken away.
+
+   IT IS THE PLATFORM'S OWN KEY, not a new voice: the same 10px uppercase grey
+   the reported note wears on Performance (§255). And it is a NAME, never a
+   description — 1b-ii is about prose under a heading, and this is the label
+   of a control that had none.
+
+   THE SPACING IS THE WHOLE OF ISLAM'S CORRECTION, and the first drawing had
+   it wrong: *"titles of boxes needs to be closer to their box not the box
+   above — like description title is stuck to the tactic box"*. A key with 3px
+   under it and nothing over it belongs, visually, to whatever ended above it.
+   The gap over is four times the gap under, so a key reads down onto the box
+   it names — and the first key in a cell has nothing above it to be pushed
+   away from. */
+.bxkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+         font-weight:700; color:var(--ink-3); margin:12px 0 3px; white-space:nowrap; }
+td > .bxkey:first-child, .tacfold .bxkey { margin-top:0; }
+
+/* ── A TARGET WITH A SHAPE OF ITS OWN (§278) ───────────────────────────
+   Twelve boxes on a full-width row under the measure, from the mockup Islam
+   signed off. The chip is INLINE with the target box, which is what keeps it
+   free: measured on Mobile's own Key measures table, the Target box is 303px
+   before and 306px after and the row 56px against 57px — the column had the
+   slack, and a button UNDER the box would have added ~24px to every measure
+   in the table whether or not it ever gets a monthly plan.
+
+   THE ROW IS `--surface-2`, the platform's own second ground — never a tint
+   of the accent, which this page spends on Report and the scoring colours
+   (§41's budget). */
+td[data-mptgt] { display:flex; align-items:center; gap:8px; }
+/* `.fld` is width:100% in this stylesheet, so without this the box asks for
+   the whole cell and leaves the chip nothing (§248's own lesson, one cell
+   over). */
+td[data-mptgt] > input.fld, td[data-mptgt] > .tgrid { flex:1; min-width:0; }
+/* The mark keeps its own size in a flex cell, or the box beside it takes the
+   whole line and leaves it nothing (§248's lesson, one cell over). */
+td[data-mptgt] > .mpopen { flex:0 0 auto; }
+/* The outcome's cell stacks: four boxes, then the mark under them — `.tgrid`
+   is two `--tw` columns and a fifth control in it would start a third row
+   half the cell wide, which is the hole among equal boxes §248 refused. */
+td[data-mptgt]:has(> .tgrid) { display:block; }
+td[data-mptgt] > .tgrid + .mpopen { margin-top:6px; }
+/* The mark's SHAPE is declared beside the eye's, above — one block for one
+   control, so the two cannot drift. This only says where it sits. */
+tr.mprow > td { background:var(--surface-2); border-top:0; }
+.mpwrap { padding:4px 2px 8px; }
+.mphead {
+  font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  font-weight:700; color:var(--ink-3); margin:0 0 10px;
+}
+.mphead em {
+  font-style:normal; letter-spacing:0; text-transform:none;
+  font-weight:500; font-size:12px; margin-left:8px;
+}
+/* WRAPS RATHER THAN OVERFLOWING (§158: a plan table fits its pane, never
+   "and it scrolls"). Twelve boxes of 72px with their gutters need 970px, so
+   they sit on one row at 1500 and above and break to two rows of six at 1280
+   and below — measured at four widths, no sideways scroll at any of them. */
+.mpgrid { display:flex; flex-wrap:wrap; gap:8px 6px; }
+.mpm { display:flex; flex-direction:column; gap:3px; width:72px; }
+.mpm span {
+  font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); text-align:center;
+}
+.mpm input.fld { width:72px !important; min-width:0 !important; text-align:right; }
+.mpfoot {
+  margin-top:11px; font-size:12px; color:var(--ink-3);
+  display:flex; gap:14px; align-items:baseline; flex-wrap:wrap;
+}
+.mpfoot b { color:var(--ink); font-weight:600; }
+/* OUTSTANDING, NOT BROKEN (§168): a half-filled monthly plan is somebody
+   mid-sentence, so it wears the warning ink and never the alarm one. */
+.mpfoot .part { color:var(--attn); font-weight:600; }
+.mpbtn {
+  font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  font-weight:700; color:var(--ink-3); background:none;
+  border:1px solid var(--line); border-radius:4px; padding:3px 8px;
+  cursor:pointer;
+}
+.mpbtn:hover { border-color:var(--ink-3); color:var(--ink-2); }
+@media (max-width: 700px) {
+  .mpm, .mpm input.fld { width:64px !important; }
 }

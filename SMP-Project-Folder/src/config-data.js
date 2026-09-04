@@ -258,11 +258,12 @@ var PROLES = null;
    presses Open, or a half-filled form would already have closed the cycle it
    was going to succeed. */
 var NEWCYCLE = null;
-/* The OPEN cycle being edited (§273). Null when the pen is shut. A draft for
-   the same reason NEWCYCLE is one -- nothing reaches REVIEW until Save, so
-   Cancel writes nothing -- and it is a SECOND variable rather than a reused
-   one because the two panels answer different questions and could otherwise
-   only be told apart by which state the cycle happens to be in. */
+/* IS THE CYCLE'S PEN OPEN (§273, reshaped by §273.4). A MODE, not a draft:
+   the fields inside it write straight to REVIEW through `FIELDS`, exactly as
+   every other bound field in the platform does, so there is nothing held back
+   and nothing to save. It is a SECOND variable rather than a reused NEWCYCLE
+   because the two panels answer different questions — NEWCYCLE really is a
+   draft, of a cycle that does not exist yet and so has nothing to write to. */
 var CYCLEEDIT = null;
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
@@ -4789,7 +4790,7 @@ function reportItems(u){
   var out = [];
   /* §233: a hidden row is not asked — not counted means not owed, so it
      leaves the ask list, the note rule and the submit gate in one skip. */
-  /* §274: WHERE A ROW IS, carried on the row itself. The bar, the rail marks
+  /* §279: WHERE A ROW IS, carried on the row itself. The bar, the rail marks
      and the walk all read it, and deriving it a second time in the renderer is
      how a chip comes to open a pillar the count was never about. */
   var koPlace = { key:"ko", label:L("keyobj","bu") };
@@ -4904,7 +4905,7 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
 function fnReportItems(fk){
   var out = [];
   capsOfFunction(fk).forEach(function(c){
-    /* §274: a capability's objectives sit above its rail and each project is
+    /* §279: a capability's objectives sit above its rail and each project is
        one rail row, so the two are two places on one page. */
     var koPlace = { key:"c:" + c.id, label:c.name };
     /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
@@ -5053,7 +5054,7 @@ function submitWhyShort(target){
   if (!lines.length) return "";
   return "Cannot submit yet:\n\u2022 " + lines.join("\n\u2022 ");
 }
-/* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§274) ──────────────
+/* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
    needed a note, and there was no way to find it. Reproduced before anything
    was drawn — every figure entered, the plan owing nothing, the gate held by
@@ -5227,47 +5228,26 @@ function boardPlansLikeUnit(target){
    that a page must be able to say NOTHING is here rather than draw an empty
    shape. The quarter is always known (it is a number, not a date), so it is
    always said. */
-/* ── EDITING THE CYCLE THAT IS RUNNING (§273) ─────────────────────────
+/* ── EDITING THE CYCLE THAT IS RUNNING (§273, §273.4) ────────────────
    Islam: "allow me to edit the cycle name. give me an edit button the cycle to
-   edit the date as you already built and the cycel name edit as well" — and
-   then, of the two shapes drawn for him: "keep the close cycle inside the
-   edit. as it's a critical button to click, the pen should hold everything
-   editable so it's kept secured."
+   edit the date as you already built and the cycel name edit as well" — then
+   "keep the close cycle inside the edit. as it's a critical button to click,
+   the pen should hold everything editable so it's kept secured."
 
-   Until now a cycle's name and its three dates were written ONCE, when it was
-   opened (§47.8), and were plain text ever after — so a typo in the name, or a
-   due date that moved, could only be corrected by CLOSING the cycle and
-   opening another, which archives and clears every figure in the tenant
-   (§49.1). The review point was the one thing that could be changed while the
-   cycle ran (§239), and it was changed in place on the strip.
+   A cycle's name and its three dates were written ONCE, when it was opened
+   (§47.8), and were plain text ever after — so a typo could only be corrected
+   by CLOSING the cycle, which archives and clears every figure in the tenant
+   (§49.1).
 
-   THE DRAFT IS A DRAFT, exactly as `NEWCYCLE` is: nothing touches REVIEW until
-   Save, so Cancel writes nothing and there is no half-applied state to undo.
-   `asOfMonth` is carried only when it is SET, or opening the pen on a cycle
-   that never picked one would put an empty key into the draft and saving it
-   would write a phantom change into every later save (§50.6, §42's
-   `branding()` fault).
-
-   AND THE SECOND HALF IS WHY THE FIRST IS SAFE. With Close now inside the pen
-   it sits beside four fields somebody may have typed into, and closing files
-   this cycle's figures under its NAME — so `cycleEditDirty()` is what stops a
-   press from either quietly saving a rename or quietly throwing one away.
-   Compared TRIMMED against the stored cycle, so re-typing the same value with
-   a stray space is not a change to hold anybody up over (§96.2 is about what
-   is STORED; this is about whether anything moved). */
-function cycleDraft(){
-  var d = { name:String(REVIEW.name || ""), from:String(REVIEW.from || ""),
-            to:String(REVIEW.to || ""), due:String(REVIEW.due || "") };
-  if (REVIEW.asOfMonth) d.asOfMonth = REVIEW.asOfMonth;
-  return d;
-}
-function cycleEditDirty(){
-  if (!CYCLEEDIT) return false;
-  var same = ["name", "from", "to", "due"].every(function(k){
-    return String(CYCLEEDIT[k] || "").trim() === String(REVIEW[k] || "").trim();
-  });
-  return !same || String(CYCLEEDIT.asOfMonth || "") !== String(REVIEW.asOfMonth || "");
-}
+   §273.4 DELETED `cycleDraft()` AND `cycleEditDirty()` FROM HERE (§24). They
+   existed to hold a draft and to tell whether it differed from the stored
+   cycle, so Close could be held back over unsaved changes. Islam, of the
+   shipped result: "rather than having a save and cancel buttons inside the box
+   itself". Nowhere else in this product has either — every bound field writes
+   on `change`, which is on blur (§35) — so the fields write straight through
+   `FIELDS` now, there is no draft, and with nothing unsaved there is nothing
+   for a guard to hold. `CYCLEEDIT` is a mode, and it lives beside `NEWCYCLE`
+   in the state block above. */
 
 function cycleMeta(){
   var bits = [];
@@ -5934,8 +5914,12 @@ function elapsedShare(){
    "Latest" is a rate or a share at a point in time and "Average" is already
    normalised, so neither has anything to prorate -- and with no baseline
    stored, prorating them would be inventing a glide path. Measured on the
-   shipped tenant: 32 of 137 rows are Sum. */
-function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum"; }
+   shipped tenant: 32 of 137 rows are Sum.
+
+   §276: ASKED OF THE SHARED RULE, because `Count` joined `Sum` and the list of
+   what prorates is now the list of what the workbook validates and the pen
+   offers — one place, or the picker offers a rule the scorer does not know. */
+function prorates(m){ return SMPRules.prorates(m && m.compile); }
 /* The number this row is actually measured against right now.
    PRORATE THE TARGET, THEN COMPARE -- never the ratio. Dividing a score by the
    elapsed share is right for "more is better" and exactly backwards for "less
@@ -5969,11 +5953,56 @@ function measureDue(m, share){
      test is unchanged; what changes is that this asks for it rather than
      carrying its own copy of the same expression. */
   if (!SMPRules.targetHasNumber(m.target)) return null;
+  /* ── §278: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
+     Twelve numbers in the target's own unit, compiled by the row's own
+     compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
+     supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
+     its own window, and a monthly plan already states what every month is
+     expected to carry — including the noughts for the months the thing does
+     not run in — so it is the more specific answer and prorating it again by
+     the window would count the same season twice.
+
+     THE MONTH COMES FROM THE REVIEW POINT, which is the one place the
+     product answers "how far through the year are we" (§239.1). With no
+     readable review point there is no month to compile to, so the row falls
+     through to the flat path and reads exactly as it does today: a plan
+     nobody can date must not become a plan nobody can score. */
+  var mp = elapsedMonths();
+  if (mp != null) {
+    var md = SMPRules.monthlyDue(m, mp);
+    if (md != null) return md;
+  }
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;
   var s = share == null ? elapsedShare() : share;
-  return s == null ? t : t * s;
+  var due = s == null ? t : t * s;
+  /* ── A COUNT IS OWED IN WHOLE ONES (§276) ─────────────────────────
+     Islam: a target of 2 shops at month 8 "asks for 1.3 stores which is not
+     feasible ... it should prorate for the closest integer maybe of the
+     lowest". ROUNDED DOWN, his call: a shop is not owed until its whole share
+     of the year has passed, so 2 shops owe nothing until June, one from June,
+     two in December. Nearest rounding would owe the second shop from
+     September — 1.5 read from the other side.
+
+     THE EPSILON IS NOT DECORATION. `3 * (4/12)` is 1 in JavaScript and
+     `7 * (3/12)` is 1.7499999999999998, so a floor taken on the raw product
+     could owe one fewer than the arithmetic means on the month a whole unit
+     falls due; a hair above the product rounds only what is genuinely there.
+
+     DUE CAN NOW BE NOUGHT while the target is not, and that is a real state:
+     `measureScore` leaves such a row out of every average (nothing has been
+     asked yet — §35, §104.10), `measureDueLabel` says nothing rather than
+     printing "0 #", and the Performance page reads "Nothing due yet"
+     through `nothingDueYet()` rather than "Not scored". */
+  return SMPRules.wholeUnits(m.compile) ? Math.floor(due + 1e-9) : due;
+}
+/* Is this row a whole-unit count with nothing owed yet? Asked by the
+   surfaces that would otherwise print "Not scored" over a row that has simply
+   not been asked — the two mean different things (§35). */
+function nothingDueYet(m, share){
+  return !!(m && SMPRules.wholeUnits(m.compile) && !SMPRules.isYesNo(m.target)
+            && SMPRules.targetHasNumber(m.target) && measureDue(m, share) === 0);
 }
 /* WHAT THE ROW SCORES. Derived, never stored -- `m.progress` goes on holding
    the raw actual-against-the-ANNUAL-target ratio exactly as it always has, so
@@ -5996,6 +6025,14 @@ function measureScore(m, share){
      (§250 prorates a TARGET, and this row has no number to prorate). */
   if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
+  /* §278: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
+     Before a monthly plan existed this guard only ever caught a target of
+     nought, which is meaningless; a monthly plan makes it reachable on
+     purpose — a row planning nothing until July is owed nothing in June.
+     Not scored is what the product already says about work that has not
+     started (§250's not-due branch, tacticDue), and scoring it 100 would
+     credit a row that has done nothing while scoring it 0 would mark down a
+     unit for a month its own plan left empty. */
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
   if (isNaN(a)) return null;
@@ -6052,8 +6089,14 @@ function outcomeOf(t){
      is Islam's "a dash is not an entry" falling out of a rule already
      there rather than needing a second one. */
   if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
+  /* §278: AND ITS OWN MONTHLY PLAN. The outcome is normalised into a
+     measure here precisely so one arithmetic serves every scored row
+     (§248), so the twelve months ride across under the name the rules
+     module reads — `outMonthly` on the tactic, `monthly` on the shape.
+     Without this line the drawer would write a plan that nothing reads. */
   return { dir: t.outDir || "\u2265", target: t.outTarget,
-           compile: t.outCompile, actual: t.outActual };
+           compile: t.outCompile, actual: t.outActual,
+           monthly: t.outMonthly };
 }
 /* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
    open cycle: a tactic is read the OLD way until its outcome has both a target
@@ -6116,6 +6159,10 @@ function tacticProgress(t){
 function measureDueLabel(m, share){
   var due = measureDue(m, share);
   if (due == null) return null;
+  /* §276: a count with nothing owed yet says so in words (`nothingDueYet`),
+     never as "/ 0 #" beside a figure — a benchmark of nought is not a
+     benchmark. */
+  if (due === 0 && SMPRules.wholeUnits(m.compile)) return null;
   /* JOINED THE PLATFORM'S OWN WAY, never by hand: `18B EGP` keeps its spelling,
      so the benchmark reads `9B EGP` beside it rather than `9 B EGP`. One
      joiner, the same one the reporting page uses to put a typed figure back

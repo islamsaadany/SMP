@@ -237,21 +237,26 @@ with sync_playwright() as p:
     # §266.8: TWO COLUMNS, and each row is in exactly one of them. Scoped to the
     # column rather than to the dialog, or a build that drew every subject twice
     # would satisfy "every subject has a row" perfectly.
+    # §266.10 REWROTE THESE, NEVER DELETED THEM (§218): the columns became
+    # tables, so a row is a `tr` and the name is the second cell in BOTH — one
+    # getter, because two would let the halves drift. The `.on` class went with
+    # the rows; being in the flow is now being in the second column's tbody.
     listed = ev(pg, """() => {
       const want = boardUnitTargets().concat(boardFunctionTargets());
       const col = (i) => [...document.querySelectorAll(
-        '#modal-b .mfcol:nth-of-type(' + i + ') .mfrow')];
-      const name = r => r.querySelector('.mflab b').textContent;
+        '#modal-b .mfcol:nth-of-type(' + i + ') tbody tr')];
+      const name = r => r.cells[1].textContent.trim();
       return {
         want: want.map(t => placeLabel(t)),
         waiting: col(1).map(name),
         flow: col(2).map(name),
         cols: document.querySelectorAll('#modal-b .mfcol').length,
         picked: (typeof MFLOW === 'undefined' || !MFLOW) ? null : MFLOW.pick.slice(),
-        lit: [...document.querySelectorAll('#modal-b .mfrow')]
-               .filter(r => r.classList.contains('on')).length,
+        lit: col(2).length,
         heads: [...document.querySelectorAll('#modal-b .mfcol h4')].map(h => h.textContent),
-        empty: [...document.querySelectorAll('#modal-b .mfempty')].map(e => e.textContent)
+        counts: [...document.querySelectorAll('#modal-b .mfcount')].map(c => c.textContent),
+        empty: [...document.querySelectorAll('#modal-b .mfempty')]
+                 .filter(e => !e.hidden).map(e => e.textContent)
       };
     }""", None, THREW)
     check("the picker is two columns (§266.8)", get(listed, "cols") == 2, listed)
@@ -262,8 +267,8 @@ with sync_playwright() as p:
     check("...so the waiting column is empty AND says why (§45.2)",
           get(listed, "waiting") == [] and len(get(listed, "empty") or []) == 1,
           listed)
-    check("and the flow's heading carries the total",
-          "about" in at(get(listed, "heads"), 1), get(listed, "heads"))
+    check("and the flow's column carries the total",
+          "about" in at(get(listed, "counts"), 1), get(listed, "counts"))
 
     # ── 3 · the picks are written, and the default is stored as an absence ─
     keep = ["mobile", "retailstores"] + (ev(pg, "() => boardFunctionTargets()", None, []) or [])[:1]
@@ -279,8 +284,8 @@ with sync_playwright() as p:
           get(wrote, "stored") == keep and get(wrote, "pick") == keep, wrote)
     split = ev(pg, """() => {
       const col = (i) => [...document.querySelectorAll(
-        '#modal-b .mfcol:nth-of-type(' + i + ') .mfrow')].map(
-          r => r.querySelector('.mflab b').textContent);
+        '#modal-b .mfcol:nth-of-type(' + i + ') tbody tr')].map(
+          r => r.cells[1].textContent.trim());
       return { waiting: col(1), flow: col(2),
                want: MFLOW.pick.map(t => placeLabel(t)),
                out: boardUnitTargets().concat(boardFunctionTargets())
@@ -292,14 +297,28 @@ with sync_playwright() as p:
     check("...and the shared reader answers the same",
           get(wrote, "rule") == keep, wrote)
 
-    moved = ev(pg, """() => {
-      const t = MFLOW.pick[2];
-      document.querySelector('[data-mfmove="' + t + '|-1"]').click();
-      return { pick: MFLOW.pick.slice(), stored: GROUP.masterFlow || null };
-    }""", None, THREW)
-    check("the arrows reorder the flow and write it",
+    # §266.10: THE ARROWS ARE GONE AND THE HANDLE ANSWERS FOR THEM (§218).
+    # Islam: *"make the right hand side without the up and down arrows just the
+    # x to remove and make the list can be dragged by a handle."* A REAL key
+    # press on the real grip, because a dispatched commit would test the
+    # committer rather than the control (§70).
+    ev(pg, """() => { const g = document.querySelectorAll('[data-mfflow] .grip')[2];
+                       if (g) g.focus(); }""", None, THREW)
+    try:
+        pg.keyboard.press("ArrowUp")
+        pg.wait_for_timeout(300)
+    except Exception:
+        pass
+    moved = ev(pg, """() => ({ pick: MFLOW.pick.slice(), stored: GROUP.masterFlow || null,
+      arrows: document.querySelectorAll('[data-mfmove]').length,
+      xs: document.querySelectorAll('#modal-b .mfx').length,
+      grips: document.querySelectorAll('[data-mfflow] .grip').length })""", None, THREW)
+    check("the handle reorders the flow and writes it",
           get(moved, "pick") == [keep[0], keep[2], keep[1]] and
           get(moved, "stored") == get(moved, "pick"), moved)
+    check("...and the arrows are gone, the × and the handle standing for them",
+          get(moved, "arrows") == 0 and get(moved, "xs") == 3 and get(moved, "grips") == 3,
+          moved)
 
     back = ev(pg, """() => {
       const all = boardUnitTargets().concat(boardFunctionTargets());

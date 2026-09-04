@@ -328,8 +328,24 @@
    is §273 and not the §261 it was built as. Main was serving
    "smp-shell-v4.51-empty-not-missing" when this merge was made, so the name
    goes PAST it rather than beside it (§94.12); confirmed once more immediately
+   before the push (§94.16).
+
+   §276 · §277: the Count compile rule, and a reported figure following its
+   target's unit. Main moved sixteen sections under this branch while it
+   waited for a word — §260 to §275, so the two built as §260/§261 are
+   §276/§277 — and was serving "smp-shell-v4.54-box-keys-and-the-rail" when
+   this merge was made, so the name goes PAST it rather than beside it
+   (§94.12); confirmed once more immediately before the push (§94.16).
+
+   §278: a target with a shape of its own — twelve monthly numbers, compiled by
+   the row's own rule — and §278.2, the 24px mark that opens them. Main moved
+   from §260 to §277 under this branch while it waited for a word, and a FIFTH
+   session had claimed §261 by the time this merged, which is why this work is
+   §278 and not the §261 it was built as. Main was serving
+   "smp-shell-v4.55-count-and-unit-follow" when this merge was made, so the name
+   goes PAST it rather than beside it (§94.12); confirmed once more immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v4.52-cycle-edit-and-reopen";
+const SHELL = "smp-shell-v4.59-report-blocker-bar";
 const ASSETS = [
   "/",
   "/index.html",

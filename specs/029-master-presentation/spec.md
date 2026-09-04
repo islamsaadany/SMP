@@ -42,7 +42,7 @@ strip at the bottom of the deck was drawn twice.
 | # | question | answer |
 |---|---|---|
 | 1 | who may open it | **the SMO** |
-| 2 | the picker's shape | **A — one list** &rarr; **reversed to B, two columns** (§266.8) |
+| 2 | the picker's shape | **A — one list** &rarr; **reversed to B, two columns** (§266.8) &rarr; **two TABLES, searched, with a Kind column** (§266.10) |
 | 3 | is the flow remembered | **yes** |
 | 4 | the Thank you between subjects | **every deck whole — "evey deck for transition"** |
 | 5 | what the strip says | **the subject you are standing in, and its place in the order** |
@@ -92,7 +92,16 @@ in exactly one of them.
 
 - a **tick** on the left puts a subject into the flow; the **×** on the right
   takes it out — the same `data-mftick`, because it is the same act
-- **↑ ↓** move it, and the number beside it is its place in the running order
+- **the number IS the handle** (§266.10): the digit at rest, the platform's own
+  three bars the moment the cell is pointed at or the grip is focused, dragged
+  through `makeSortable` — so reordering costs no column and no second drag.
+  The ↑ ↓ buttons are **deleted**, not left unwired (§24), and the keyboard
+  still moves a row because the grip is the focusable control
+- **the waiting column is searched**, matching the name and the **code** the
+  deck's own pills print (§266.9) — hidden in place, never repainted (§35), and
+  the filter survives a repaint (§108.13)
+- a **Kind** column, **BU** or **FUNC**, read from `boardFunctionTargets()`
+  itself so it cannot disagree with the list it came from
 - each column **says when it is empty** (§45.2) — *Everybody is in the flow*,
   *Nobody yet — tick a unit or function on the left*
 - the flow's own heading carries the total — *The flow · about 83 slides* —

@@ -301,6 +301,17 @@ A drift between specs and code is a documentation bug — report it before silen
   service worker caches by URL: every returning browser would have been served
   the old platform out of its own disk whatever production served. The trigger
   is "the built file's bytes changed", which is every merge.
+- **A MERGE THAT CHANGES HOW A SAVE IS JUDGED SHIPS WITH THE FORCED SIGN-OUT
+  (2026-09-03, spec 029).** Islam: *"if I'm on the old shape how saving what I'm
+  doing now and reload save me? wouldn't what I save get lost as well?"* — and he
+  is right for exactly one kind of deploy. The save-safety banner (§258) tells a
+  stale tab to reload and saves first, which is enough when a deploy only
+  changes pages; when it changes the authoriser, the change-list diff, the
+  review map or what a save touches, an old tab's save can be refused and the
+  banner's save-first has nothing to save into. So such a merge carries a
+  one-shot `DELETE FROM sessions;` migration (precedent 040) and no tab can
+  stay on the old rules. **Say which kind every merge is** in the what-to-check
+  note.
 - **END EVERY MERGE WITH WHAT TO GO AND CHECK** (Islam, 2026-08-24; CLAUDE-RULES
   A16). The last thing said after a merge to `main` is a short list of screens:
   what to open, what to do there, and what should happen — one line each, in the
@@ -405,6 +416,124 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A PANEL EDITS, A DIALOG ASKS (§273.3, reshaping §273.2):** Islam, of the
+  shipped closed-cycle panel on his own tenant — *"The design is very poor"* —
+  and, of three shapes drawn for him, **"C"**. **MY FIRST TWO ANSWERS CHANGED
+  THE PAINT AND THE FAULT WAS THE SHAPE**: a full-width band of facts under a
+  full-width band of the SAME facts — measured, **zero of the five were not
+  already on the strip**. **AND IT WAS INVISIBLE ON THE WORKED EXAMPLE**:
+  `.nc-grid` sizes each label/value pair to its own content, so a wide label
+  over a one-character value goes ragged — every demo value is long, and on his
+  tenant three of five are empty, leaving a row of floating em-dashes. **§245's
+  rule unpaid**: drawn and signed off on the prototype's data, which is the one
+  state the layout survives. **A PANEL IS RIGHT FOR FIVE FIELDS YOU EDIT AND
+  WRONG FOR ONE QUESTION YOU ANSWER** — the open cycle keeps §273's panel
+  unchanged; the closed one loses its band and the pen opens the platform's own
+  dialog. **IT REMOVES A STEP RATHER THAN RESTYLING ONE** (it was a panel AND
+  THEN a `confirm()`) and **takes a `confirm()` out of the product**, which §95
+  ruled against for the most irreversible act here. **`.sendconfirm`/`.cbtns`,
+  never a fourth copy** (§53.5), with the ONE scoped override measured rather
+  than guessed (two labels wrapped in the shared 92px column). **The fact that
+  is not on the strip leads** — what it closed at — absent rather than invented
+  (§35), and the HISTORY pop re-read at press time (§48.2). **The cost is
+  named**: Edit means a panel while the cycle runs and a dialog once it has
+  closed. 12 red; the closed branch DELETED not left unreachable (§24); and one
+  of the check's own assertions could not fail — `A and B or A` collapses to
+  `A`, so the name was never checked.
+- **REOPENING A CLOSED CYCLE (§273.2):** Islam, of two placements drawn on the
+  strip §273 leaves behind — **"A"**. **NOTHING REOPENED A CYCLE AND THE PAGE
+  SAID THE SMO COULD**: `canReport()`/`canReportFn()` open with
+  `REVIEW.state !== "open"` BEFORE any role test, so a closed cycle took no
+  figures from anyone including the office, while the reporting page promised
+  *"The SMO reopens a cycle if something has to be corrected"* (§104.8's
+  family); exactly one place wrote `state:"open"` and it was the mint of a
+  brand-new cycle. **CLOSING LOSES NOTHING** — it files a score snapshot and
+  marks the cycle closed; the clearing happens when the NEXT cycle opens, and
+  that path archives first with a Restore. **THE PEN, NOT A BUTTON ON THE
+  STRIP** (his pick), which makes ONE rule of two acts: the pen's far end holds
+  the cycle's one dangerous state change whichever way it goes — Close while it
+  runs, Reopen once it has stopped — so §273's clearing of the strip is not
+  reversed one section later. **The closed pen shows the five facts as VALUES**
+  with the sentence saying why they cannot be touched (§45.2), because dropping
+  them would leave a button in an empty box. **The closing record comes back,
+  matched by NAME rather than popped blind** — this page lists HISTORY and
+  `lastClose()` compares against it, so close/reopen/close would otherwise list
+  the cycle twice and compare stale numbers. **The server needed nothing and it
+  is asserted** (`history` is in `TOP_CYCLE`), both halves separately, because
+  a rule guarding only the flag would let anybody rewrite what a closed cycle
+  scored. **AND THE TEST'S FIRST BUILD PASSED ITS REFUSALS AS ALLOWED** with
+  `changes: []` — the seed's cycle is already open, so "reopen it" set a value
+  to what it already was (§94.5's own example, committed while writing a test
+  for it). 12 red on the §273 build; the check's own first run measured
+  `{none:true}` everywhere because §8 reloads the page and §9 sat after it
+  (§50.6). One assertion REVERSED and REWRITTEN, not deleted (§218).
+- **EDITING THE CYCLE THAT IS RUNNING (§273):** Islam — *"allow me to edit the
+  cycle name. give me an edit button the cycle to edit the date as you already
+  built and the cycel name edit as well"*, and then, of two shapes drawn in the
+  real page: *"keep the close cycle inside the edit. as it's a critical button
+  to click, the pen should hold everything editable so it's kept secured."*
+  **A CYCLE'S NAME AND DATES WERE WRITTEN ONCE** (§47.8) and were plain text
+  ever after, so a typo could only be corrected by CLOSING the cycle — which
+  archives and clears every figure in the tenant (§49.1). **HIS SECOND
+  INSTRUCTION IS THE DESIGN**: with Close the cycle moved inside the pen the
+  strip carries NO control at all while a cycle runs, which is a security
+  argument and not a tidy one — *a door is only a guard if everything dangerous
+  is behind it.* **IT IS THE `NEWCYCLE` PANEL, NOT A SECOND SHAPE** (§53.5),
+  and `CYCLEEDIT` is a DRAFT exactly as `NEWCYCLE` is, so Cancel writes
+  nothing. **THE GUARD IS WHAT MAKES CLOSE SAFE TO PUT THERE**: closing files
+  this cycle's figures under its NAME, so while the draft differs Close is
+  **held and says why** — `aria-disabled`, never `disabled` (§221, §163) — and
+  the handler asks again at press time (§48.2) because the fields write on
+  `input` and the drawn state can be a keystroke behind; the guard is rewritten
+  IN PLACE, never painted (§71.2). **Trimmed**, or a stray space is no change
+  to the guard and a real change to the database. **Edit is idempotent**, since
+  it stays on the strip while the pen is open. **Open cycles only** — a closed
+  one's figures are filed under the name it closed with — and the pen is
+  cleared when the cycle closes. **THE SERVER NEEDED NOTHING AND IT IS
+  ASSERTED**: those fields have always classified as `cycle` (§234), and what
+  is new is that **nothing in the product could send one until today** (§172's
+  lesson). `checks/cycle-edit.py`: **46 red** before, and **four of its own
+  first failures were the CHECK** — it died rather than reporting (§215), swept
+  up the month button's value span as a label, hung 30s because Playwright
+  treats `aria-disabled` as disabled (§222, already learned once), and asked
+  the navigation where the honest answer is the RULE. **Two checks held a
+  literal this moved** (§214.3), both REWRITTEN not deleted (§218).
+- **THE REPORTING NOTE IS PROSE, AND HAD ONE LINE TO SAY IT IN (§271):** Islam
+  — *"in the reporting the notes table needs to wrap around the text and enable
+  multiple lines."* **§189's fault on the one field the platform REQUIRES**
+  (§105: anything at risk carries an explanation before it can be submitted):
+  the box was an `<input>`, which is ONE LINE by definition, so there was no
+  wrap available to it at all. Measured with a real off-track sentence in it —
+  **404px shown of 1334 needed** at 1500, **209 of 1334** on a supporting
+  function at 1100. **THE SHAPE IS §189'S AND IS NOT REBUILT**
+  (`textarea.fld.grow`, whose rules are declared once in `_shared.css`); what
+  is added is `vertical-align:top`, so a four-line note sits level with the row
+  it explains. **ITS OWN BUILDER (`noteBox`), NEVER `textOr`** — these two
+  fields are not bound through `FIELDS` at all: a note is written by a REPORTER
+  against a row id (`data-note` on a unit or a pillars function, `data-cnote`
+  on a capability function) and both handlers do more than set a value (§183).
+  **ENTER IS A NEWLINE HERE, WHICH REVERSES §229 FOR THIS FIELD ALONE** and
+  needed no code: that key handler lives in the `[data-fld]` branch these
+  fields do not pass through, so `grow` means *size yourself to your content*
+  and nothing about the key — **both ends asserted**, because a title and a
+  note now hold opposite rules one class apart. **AND THE BREAK MUST SURVIVE
+  BEING READ** (§161.3, one field over): HTML collapses a newline, so
+  `white-space:pre-line` on `.notetext` — through **one builder (`noteRead`)
+  for all six places that print a stored note**, because a class added at five
+  of them is the drift this exists to stop (§53.5, §104.7); scoped there and
+  never to `.why` at large, which is the platform's aside rather than a
+  reporter's words. The cycle note joins it: a `rows="3"` area has always taken
+  a paragraph key and had its breaks closed up on read. **ONE GROWER**
+  (`growBox`), where sizing-to-content was written out twice and this would
+  have been the third (§3b). **Nothing stored moves and nothing is migrated** —
+  and no workbook or `.pptx` carries a reported note at all, checked rather
+  than assumed, so there is no round trip for a newline to break. **The 95px
+  overrun at 900px is §249's recorded residue**, measured identical to the
+  pixel on the build before. Proved able to fail: **18 red**, printing the
+  reported symptom verbatim — **and one of the check's own failures was the
+  CHECK** (a stub not serving `sw.js`, §231.5), which is the same fault
+  §250.2 recorded as leaving `checks/report-saves.py` red on `main`, fixed in
+  the same edit.
 - **THE SETUP TABLES ARE ARRANGED, AND THEIR ROWS ACT FROM ONE MENU (§261):**
   Islam — *"allow me in the setup to rearrange the business units table so they
   appear in the navigation as per this order and let's clean this table making
@@ -720,6 +849,72 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   after. **§264.2 — RECORDED, NOT DONE**: a project's OUTCOMES are a different
   model (a reported figure, not a measure against a prorated target) and are
   left alone; whether they should prorate has not been put to Islam.
+- **EMPTY IS NOT MISSING, AND THE BAR NOW SAYS WHICH (§272):** Islam, on
+  Mobile and then Care — *"mobile keeps showing filling what's missing while we
+  can't find something missing and there is no the side badges that identify
+  where the missing part is."* **REPRODUCED BY MAKING THE STATE**: with every
+  counted gap on Mobile filled and the collaborators left alone, `gapTotal` is
+  **0** and `gapOpenable` is **22** — §223's door drawn with no count, no chips
+  and no rail marks, because all three read `GAP_FIELDS` and there is nothing in
+  it; his Care screenshot named the cause without my guessing it (the
+  **COLLABS.** column, an em-dash on both tactics). **BOTH HALVES WERE BEHAVING
+  AS DECIDED AND NOTHING JOINED THEM UP** — §187 ruled a tactic nobody supports
+  is not missing, §205 kept the box fillable, §223 drew a door from that second
+  list and stopped at the door (§113's shape, one feature over). **THE OFFICE IS
+  NOT SHOWN IT AT ALL**, which is the half that answers what he was looking at:
+  `mayFillPage` refuses the office outright (their write settles, so they hold
+  the pen), and with nothing owed the door is a second way into a page they can
+  already edit wearing a word that does not apply to them (§94.15) —
+  **`seesEmpty()` beside `seesGaps()`, asked BEFORE the count is taken** so the
+  office does not pay for a walk of the subject to be told about a bar they will
+  not see. **THE FILLER'S BAR IS THE SAME BAR IN A QUIETER VOICE** — a count, a
+  chip per place, a mark per rail row — through `missBarCta(n, empty)` and ONE
+  `missBar()`, never a second builder (§53.5). **GREY, NEVER RED AND NEVER
+  AMBER**: §145.14's rule is kept rather than bent, because a tactic nobody
+  supports is a fact on a healthy plan (§187's own reasoning for the register's
+  seat count, §41's budget). **NOTHING ABOUT COUNTING MOVES** — no score, no
+  average, nothing Submit refuses, nothing the deck marks — which is why §187
+  and §214.2 stand untouched underneath it. **THE WALK FOLLOWS WHATEVER THE BAR
+  IS COUNTING** (§192.4's rule kept, not weakened: the question stops being *is
+  this field counted* and becomes *is this one of the fields the bar in front of
+  me is counting*), worked out ONCE per paint in `GAP_MODE`, reset beside
+  `FIELDS`. **AND THE BOX IS NOT RUNG IN RED EITHER** (`eqfld` overrides the
+  colour and not the dash) — one screen cannot say Missing and empty about one
+  box. **AND THE SECOND COPY OF THE BUTTON WAS STILL RED** (§272.7), found by
+  LOOKING at the built page with every assertion green: §145.14 draws the door
+  in two places — the bar and the pane's corner — and the quiet register had
+  reached one; the check asks EVERY element carrying `data-fillcta` now, same
+  words, same class, same painted ground, because a count of doors is what
+  survives a third one being added. **AND §93.11 WAS EARNED TWICE IN ONE CSS
+  COMMENT** (§272.8, fifth time in this file): the `eqfld` rule provably matched
+  and provably did nothing — first because a paragraph sat AFTER the comment's
+  closing marker, then because the sentence recording that quoted the closing
+  marker literally, **which ends a CSS comment wherever it appears**, so the
+  same rule was eaten by the note explaining why it had been eaten. Both times
+  `document.styleSheets` named it in one run (*1 present, 2 of 3 missing*) where
+  reading the cascade would not have; and the assertion that caught it measures
+  the PAINTED border rather than the class, which is the only reason it could. **THE REFRESH READS THE MODE OFF THE BAND**, never re-derives it: on a
+  quiet bar `gapTotal` is 0, which is what a quiet bar MEANS, so re-asking it
+  would flip every chip to the green tick over a page still full of empty boxes
+  (§63). `SMPRules.gapEmptyFields()` is `gapMissing`'s twin one list over,
+  written once for three readers. **Proved able to fail: 26 red** on the shipped
+  build — **and its own first falsification run DIED rather than reporting**
+  (§215, fourth time in this file), computing a style from an element the old
+  build does not have and printing 11 of 26. **RECORDED, NOT DONE, AND
+  MEASURED**: a supporting function's Projects pane gets the bar and the chips
+  (Finance: 0 owed, 12 empty, FIN01 5 · FIN02 4 · FIN03 3) and no rail mark,
+  because **the two rails already disagree about scope** — a unit's counts what
+  its chip counts, a function's counts the project's front matter where its chip
+  counts the project plus its outcomes and milestones — and straightening that
+  changes a number already on screen. **AND THE MERGE IS PART OF THE RECORD**
+  (§272.9): main moved 39 commits under this branch, FOUR sessions had each
+  claimed §261 (hence §272), and §268 had deleted `editBar()` and moved the
+  office's pen to the section line — so §272.7's two-copy finding is answered
+  better by main (the second copy is GONE for a unit and a function),
+  `missBarCta` was COMBINED rather than picked (either side whole would have
+  dropped the other's fix — main's, and a filler has no way out of fill mode),
+  and the check's `.penbtn[data-page]` broke LOUDLY and now asks every editing
+  control AND `mayAuthorPage` beside it (§51.11).
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -4954,6 +5149,20 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the strip
+                                # carries ONE control and neither Close the cycle nor the
+                                # month picker — asserted as absences beside the presence,
+                                # or a build that merely added a button passes; the pen
+                                # holds all five facts with Close INSIDE it; every field
+                                # driven and read back off REVIEW, never off the screen;
+                                # Cancel writing nothing; Close REFUSED over an unsaved
+                                # change (forced, because Playwright treats aria-disabled
+                                # as disabled — §222) and then proved to WORK with nothing
+                                # unsaved; a cleared month DELETING the key; the office's,
+                                # asked of the RULE rather than of the navigation; the
+                                # pen's inks measured with the sweep's own function; and
+                                # §11 over HTTP, because a save cannot be seen over
+                                # file:// at all — 46 red on the build before
 python3 checks/attention-dismiss.py # every attention item can be ANSWERED, on the box it
                                 # is about: one item per kind (five of six made, §94.2),
                                 # the ring measured as PAINT not as a class, one press
@@ -4980,6 +5189,14 @@ python3 checks/report-saves.py  # reporting REACHES THE STORED PLAN and schedule
                                 # — over HTTP, because a save cannot be seen over file:// at
                                 # all; plus Save draft answering rather than sitting on
                                 # "Saving…" (§183)
+python3 checks/report-note-wrap.py # the reporting note is PROSE (§271): nothing clipped
+                                # sideways with a real sentence in it on all three shapes,
+                                # a real Enter making a line rather than committing, both
+                                # lines read back off the STORED row through each page's
+                                # own hook, the break kept wherever the note is READ —
+                                # the read-only cell and the projector — and a plan TITLE
+                                # asserted to still commit on Enter (§229 one class away).
+                                # 18 red on the shipped pre-§271 build
 python3 checks/project-dates.py # a project's Start and End are PICKED as `Jul 26`, and the
                                 # overrun warning reads them the platform's way — an EXACT set,
                                 # because Date.parse("Jul 26") is 26 July 2001 and any
@@ -5110,6 +5327,22 @@ python3 checks/setup-arrange.py # the Setup tables are arranged and their rows a
                                 # matrix cell. 37 red on the build before, and seven of its
                                 # own assertions passed vacuously there before they were
                                 # tightened (§113.8)
+python3 checks/empty-not-missing.py # empty is not missing (§272): the office shown
+                                # no bar with nothing owed AND still holding the pen
+                                # (both ends, or a build that dropped it for everybody
+                                # passes), the filler's count, chips and rail marks
+                                # asserted as AGREEMENT with gapOpenable and gapMap's
+                                # own fillable answer, the quiet dress measured as PAINT
+                                # against the palette's tokens (a bare class loses to
+                                # `.tabs button` inside the bar), the walk PRESSED and
+                                # the row read back, the missing register asserted
+                                # untouched in the same run, and the in-place refresh
+                                # proved not to flip every chip to a green tick. It
+                                # MAKES its state — the shipped plan owes 44 on Mobile,
+                                # so every assertion is unreachable until Islam's tenant
+                                # is reproduced. 26 red on the build before; every probe
+                                # degrades, because its own first run there DIED and
+                                # reported 11 (§215)
 python3 checks/fn-perf-controls.py # a supporting function's Performance controls sit
                                 # where a unit's do (§275): both pages asserted to DRAW
                                 # both controls before the two are compared (two empty
@@ -5400,7 +5633,98 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-03 &mdash; **&sect;267: the plan table at a narrower
+*Last Updated: 2026-09-03 &mdash; **&sect;273: editing the cycle that is
+running.** Islam: *"allow me to edit the cycle name. give me an edit button the
+cycle to edit the date as you already built and the cycel name edit as well"* —
+then, of the two shapes drawn for him in the real page: *"keep the close cycle
+inside the edit. as it's a critical button to click, the pen should hold
+everything editable so it's kept secured."* A cycle's name and its three dates
+were written ONCE, when it was opened, and were plain text ever after — so a
+typo could only be put right by CLOSING the cycle, which archives and clears
+every figure in the tenant. **His second instruction is the design**: with Close
+moved inside the pen the strip carries no control at all while a cycle runs,
+which is a security argument rather than a tidy one. The panel is `NEWCYCLE`'s
+own, the draft reaches nothing until Save, and **the guard is what makes Close
+safe to put there** — held with its reason while anything is unsaved, asked
+again at press time, rewritten in place rather than painted. The server needed
+nothing and it is asserted both ways, because until today nothing in the product
+could send those fields at all. `checks/cycle-edit.py`: **46 red** on the build
+before, 47 green after — and four of its own first failures were the check.
+Full `qa.py` ERRORS none &middot; 501/0 authoriser &middot; 126/0 differ
+&middot; `ytd-proration`, `repeat-project`, `cycle-board`, `setup-overview`,
+`setup-header`, `table-fit`, `safety-banners`, `submit-gate` and `gap-fill`
+green. **Recorded, not done**: `setup-pages.py`'s three sticky-head failures
+reproduce identically on the build before this one.*
+
+
+*Earlier the same day: **&sect;272: empty is not missing, and the bar
+now says which.** Islam, on Mobile and minutes later on Care: *"mobile keeps
+showing filling what's missing while we can't find something missing and there
+is no the side badges that identify where the missing part is."* **REPRODUCED BY
+MAKING THE STATE, NOT BY READING THE CODE** &mdash; the demo owes 44 on Mobile,
+so none of this is visible there; with every counted gap filled and the
+collaborators left alone, `gapTotal` is **0** and `gapOpenable` is **22**, and
+the band renders his screenshot to the pixel: a solid red *Fill in what is
+empty*, no count, no chips, no rail marks, with the pen sitting beside it. His
+Care screenshot then named the cause without my having to guess it &mdash; the
+**COLLABS.** column, an em-dash on both tactics. **BOTH HALVES WERE BEHAVING AS
+DECIDED AND NOTHING JOINED THEM UP**: &sect;187 ruled a tactic nobody supports is
+not missing (a tactic one person owns is a complete line), &sect;205 kept the box
+FILLABLE because emptying the list the server reads refuses a save the screen has
+offered, and &sect;223 drew a door from that second list for the best of reasons
+&mdash; and stopped at the door. *Two correct decisions meeting, and what was
+never asked is what they do to each other* (&sect;113's shape, one feature over).
+**THE OFFICE IS NOT SHOWN IT AT ALL**, which is the half that answers what he was
+looking at, and it is one line: `mayFillPage` refuses the office outright, so
+with nothing owed the door is a second way into a page they already hold the pen
+for, wearing a word that does not apply to them (&sect;94.15). **THE FILLER'S BAR
+IS THE SAME BAR IN A QUIETER VOICE** &mdash; a count, a chip per place, a mark
+per rail row, one builder. **GREY, NEVER RED AND NEVER AMBER**: &sect;145.14's
+rule kept rather than bent, because a tactic nobody supports is a fact on a
+healthy plan. **NOTHING ABOUT COUNTING MOVES** &mdash; no score, no average,
+nothing Submit refuses, nothing the deck marks &mdash; this finds boxes, it does
+not create obligations. **THE WALK FOLLOWS WHATEVER THE BAR IS COUNTING**
+(&sect;192.4's rule kept: the question stops being *is this field counted*),
+**the box is not rung in red either**, and **the in-place refresh reads its
+register off the band** rather than re-deriving it, or one fill would flip every
+chip to a green tick over a page still full of empty boxes. Both costs were
+stated on the mockup before he chose. **Proved able to fail: 26 red** on the
+shipped build &mdash; **and its own first falsification run DIED rather than
+reporting** (&sect;215, fourth time), printing 11 of 26. Neighbours green:
+`gap-fill`, `gap-walk`, `milestone-fill`, `fn-pillars`, `unit-before-number`,
+`submit-gate`, 491/0 authoriser, 126/0 differ, full `qa.py` sweep. **RECORDED,
+NOT DONE, AND MEASURED**: a function's Projects pane gets the bar and the chips
+(Finance: 0 owed, 12 empty) and no rail mark, because the two rails already
+disagree about scope and straightening that changes a number on screen.*
+
+*Earlier the same day: 2026-09-03 &mdash; **&sect;271: the reporting note is prose, and
+had one line to say it in.** Islam: *"in the reporting the notes table needs to
+wrap around the text and enable multiple lines."* **&sect;189's fault on the one
+field the platform REQUIRES somebody to write** (&sect;105's Submit refusal): the
+note box was an `<input>`, which is ONE LINE by definition, so there was no wrap
+available to it at all &mdash; a long explanation ran off the end and you
+scrolled sideways inside it. Measured first, with the kind of sentence somebody
+actually writes when a figure is off track: **404px shown of 1334 needed** at
+1500, and **209 of 1334** on a supporting function at 1100, on all three shapes.
+It takes &sect;189's own `textarea.fld.grow` &mdash; not rebuilt, inherited
+&mdash; plus one line of its own, `vertical-align:top`, so a four-line note sits
+level with the row it explains. **Enter is a newline here, which reverses
+&sect;229 for this field alone**: that rule is about TITLES, and a note is a
+paragraph somebody is explaining themselves in &mdash; it needed no code (the key
+handler lives in a branch these fields do not pass through) and **both ends are
+asserted**, because the two rules now sit one class apart. **And the break has to
+survive being READ** (&sect;161.3, one field over): HTML collapses a newline, so
+without `pre-line` the box would promise a paragraph it never makes &mdash;
+through ONE builder for all six places that print a stored note, including the
+deck on a projector. Nothing stored moves, nothing is migrated, and no workbook
+carries a reported note at all (checked, not assumed). **18 red** on the shipped
+build, 0 after; the table's fit at 900px is unchanged to the pixel, so
+&sect;249's recorded residue stays recorded. And one of the new check's own
+failures was the CHECK &mdash; a stub not serving `sw.js` (&sect;231.5) &mdash;
+which is the fault &sect;250.2 recorded as leaving `checks/report-saves.py` red
+on `main`, fixed in the same edit.*
+
+*Earlier: 2026-09-03 &mdash; **&sect;267: the plan table at a narrower
 window.** Islam, on the build &sect;260 had just merged, with a screenshot of a
 **zoomed** page: *"are you sure of your fix? this is a zoomed page"* &mdash; the
 TACTIC column reading one character per line. **MY FIRST DIAGNOSIS WAS WRONG FOR

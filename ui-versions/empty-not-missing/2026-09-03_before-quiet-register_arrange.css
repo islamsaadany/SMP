@@ -348,10 +348,10 @@
   .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
   /* The card head has to leave room for it, or a long label runs underneath. */
   .hoverpen .cardhead { padding-right:34px; }
-  /* §268: THE PLAN'S TITLE ROW HELD 34px OPEN FOR A PEN THAT HAS MOVED to the
-     section line, so the room goes with it (§24) — a gap kept for a control
-     that is not there is the next reader's puzzle. `.ptitle` keeps its own
-     flex rules below; only the pen's two lines are gone. */
+  /* The plan's title row is a flex header, not a card head; the pen sits in the
+     same corner and the row leaves it room. */
+  .ptitle.hoverpen { padding-right:34px; }
+  .ptitle.hoverpen .penbtn { top:0; right:0; }
 
   /* HALF THE HEIGHT. 47px -> 26px, and it is the CONTENT that had to shrink:
      the padding was 8px a side and the controls 31px, so squeezing the padding
@@ -854,20 +854,8 @@
     color:var(--ink)}
   input.field.filled{border-color:var(--good);background:var(--good-bg)}
   input.field:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
-  /* A NOTE IS PROSE AND GETS AS MANY LINES AS IT NEEDS (§271). This was an
-     `<input>`, so a real explanation ran off the end of a 404px box; it is
-     `textarea.fld.grow` now — §189's shape, whose own rules (no resize grip,
-     no inner scrollbar, sized to fit) are declared once in `_shared.css` and
-     are not repeated here. What is left is what a NOTE wants and a title does
-     not: the top of the box level with the row it explains, so a four-line
-     note does not float in the middle of a cell beside a one-line figure. */
-  .notefld{width:100%;max-width:none;text-align:left;font-size:13px;vertical-align:top}
+  .notefld{width:100%;max-width:none;text-align:left;font-size:13px}
   .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
-  /* And the break survives being read (§271, §161.3): `pre-line` keeps the
-     newlines somebody typed and wraps everything else. On the READ-ONLY note
-     wherever it is printed — never on `.why` at large, which is the page's
-     quiet aside and is written by the platform, not by a reporter. */
-  .notetext{white-space:pre-line}
   tr.wantnote td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
   .bad-note{border-left:3px solid var(--bad);background:var(--bad-bg)}
   .repcell{display:flex;align-items:center;gap:10px}
@@ -1336,28 +1324,8 @@
      border, deliberately: an × drawn inside an input is the search box's
      clear-the-text idiom, and this one removes the ROW. Keyed on the PAIR so
      it reaches every table using the pattern and nothing else. */
-  /* §270: AND THE TWO HOMES IT NEVER REACHED. §114.4 was written on a plan
-     table and scoped to `td`; the SWOT's lines are `<li>` and Who we are's are
-     `<dd>`, so on those two pages the × went on dropping to a line of its own
-     — measured with the pen open: 6 of 6 on Foundation and 23 of 23 on the
-     SWOT, 14px each, about 400px of empty height across the two. Invisible
-     until §269 made one press open all three sections, which is why it
-     surfaced now. Same rule, same pair, three seats. */
-  td:has(> .fld + .xbtn) > .fld,
-  dd:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
-  td:has(> .fld + .xbtn) > .xbtn,
-  dd:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
-  /* THE SWOT'S LINE IS A GRID, SO THE × NEEDS A COLUMN AND NOT A WIDTH.
-     `.swotlist li` is `22px 1fr` — the number and the line — so a third child
-     is placed on a second ROW whatever width the field is given, which is why
-     the calc above fixed Who we are and left all 23 of these where they were.
-     Measured, not reasoned: the first build of §270 gave it the width rule and
-     the check still read 23 of 23 wrapped. A column of its own, and `start`
-     rather than the read line's `baseline`, because a growing box and a 22px
-     button have no shared baseline worth aligning to. */
-  .swotlist li:has(> .fld + .xbtn) { grid-template-columns: 22px 1fr auto;
-    align-items: start; }
-  .swotlist li:has(> .fld + .xbtn) > .swot-n { padding-top: 7px; }
+  td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
+  td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
   /* ── HIDDEN FROM THE PRESENTATION (§233) ────────────────────────────
      The eye sits between the field and the × (the mockup's order), which
      the seat rule above cannot see — its `.fld + .xbtn` adjacency breaks —
@@ -1391,31 +1359,6 @@
      the contrast is the pill family's own, already measured. */
   .fld.gapfld { border:1px dashed var(--bad); }
   .fld.gapfld::placeholder { color:var(--bad); font-weight:600; opacity:.75; }
-  /* §272: THE BOX FOLLOWS THE BAR THAT SENT YOU TO IT. A dashed red border
-     says Missing, which is exactly right behind "Fill in missing elements"
-     and exactly wrong behind a grey chip reading "MB01 5" — one screen
-     cannot say both about one box. Colour only: the dash stays, so fill
-     mode still shows at a glance which boxes are open.
-
-     `--ink-3` AND NOT `--stone`: the word Islam signed off is *grey*, and
-     `--stone` is the house navy (#16325C), which as a dashed border on a
-     white field is LOUDER than the red it replaces rather than quieter.
-     A mid grey is plainly visible as a dash and unmistakably not an alarm.
-
-     AND THIS BLOCK EARNED §93.11 TWICE WHILE BEING WRITTEN. First the second
-     paragraph was put after the comment's closing marker, so the parser met
-     prose where a selector belongs and discarded the rule under it — the
-     border went back to red with the class still on the element. Then the
-     sentence recording THAT quoted the closing marker literally, which ENDS
-     A CSS COMMENT wherever it appears, so the same rule was eaten a second
-     time by the note explaining the first. Never write that pair inside a
-     comment; and when a declaration that provably matches provably does
-     nothing, ask `document.styleSheets` what the browser is actually holding
-     rather than reading the cascade — 1 rule present, 2 of 3 missing, which
-     is what named it in one run both times. */
-  .fld.gapfld.eqfld { border-color:var(--ink-3); }
-  .fld.gapfld.eqfld::placeholder { color:var(--ink-3); }
-  .monthbtn.gapfld.eqfld { border-color:var(--ink-3); }
   .fld.pendfld { border-color:var(--attn); background:var(--attn-bg); }
   .pchip { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
     border:1px solid var(--attn); border-radius:20px; font-size:10px;
@@ -1452,35 +1395,6 @@
      the section tabs: the total, one red chip per owing place, the red
      button. Nothing in the page body, no number on the Strategy tab. */
   .sectionrow .tabs-in { flex-wrap:wrap; align-items:center; }
-  /* ── ONE TAIL AT THE END OF THE SECTION LINE (§268) ────────────────
-     The missing bar and the section's own pen, grouped. `.secttail` carries
-     the `margin-left:auto` and `.missbar` gives its up, or the two right-align
-     independently and the red button is stranded mid-row with the pen at the
-     end (drawn, looked at, thrown away — §41.9). */
-  .secttail { margin-left:auto; display:flex; gap:10px; align-items:center;
-    flex-wrap:wrap; }
-  .secttail .missbar { margin-left:0; }
-  .sectsep { width:1px; height:18px; background:var(--line); flex:none; }
-  /* THE SECOND SELECTOR IS NOT A DUPLICATE — §145.14 wrote that three times in
-     one rule block and this is the fourth: inside `nav.tabs`, `.tabs button`
-     (0,1,1) outranks a bare class (0,1,0) and strips the control to a plain
-     word. That is precisely what `Done filling` has been wearing on this line
-     all along, measured: background `rgba(0,0,0,0)`, `border: 0px`, the quiet
-     ink — an unselected tab. */
-  .secpen, .tabs .secttail button.secpen {
-    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
-    border-radius:8px; font-size:12px; font-weight:700; padding:4px 13px;
-    cursor:pointer; font-family:inherit; white-space:nowrap; }
-  .tabs .secttail button.secpen:hover { border-color:var(--gold);
-    color:var(--gold-deep); background:var(--surface); }
-  /* Lit while the mode is open — the pen's own pair (`--gold` under
-     `--panel`), which is a measured 5.28:1 light and 9.75:1 dark. The GROUND
-     is `--surface` at rest and not `--surface-2`, because `--gold-deep` on
-     `--surface-2` is 4.45 and §38.5 has been paid for five times. */
-  .secpen.on, .tabs .secttail button.secpen.on {
-    border-color:var(--gold); background:var(--gold); color:var(--panel); }
-  .tabs .secttail button.secpen:focus-visible {
-    outline:2px solid var(--gold); outline-offset:2px; }
   .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
     flex-wrap:wrap; }
   .missbar .secmiss { color:var(--bad-tx); font-weight:800; font-size:12.5px;
@@ -1535,38 +1449,6 @@
      takes the ring and nothing else. */
   .pendwalk.gaplit { outline:2px solid var(--attn); outline-offset:2px; }
   .gapdone { color:var(--good-tx); font-size:12px; font-weight:600; }
-  /* ── THE QUIET REGISTER (§272) ──────────────────────────────────────
-     The same three controls in the same three places, in the voice a fact
-     gets rather than the voice a warning gets. §145.14's rule is that RED
-     MEANS MISSING and it is not bent here: a tactic nobody supports is an
-     ordinary and complete line (§187), so the count, the chips and the
-     button are drawn in the page's own inks and NOTHING on this bar is red.
-
-     THE SECOND SELECTOR IN EACH PAIR IS NOT A DUPLICATE, and this file has
-     paid for the lesson twice already (§145.14, §192): the bar sits inside
-     `nav.tabs`, where `.tabs button` (0,1,1) outranks a bare class (0,1,0)
-     and strips these to plain words while the same control outside the row
-     wears the design. One declaration, two selectors, so the two homes
-     cannot drift (§53.5). */
-  .missbar .eqcount { color:var(--ink-2); font-weight:700; font-size:12.5px;
-    white-space:nowrap; padding-left:12px; }
-  .eqchip, .missbar button.eqchip { border-color:var(--line);
-    color:var(--ink-2); }
-  .eqchip b, .missbar button.eqchip b { color:var(--ink); }
-  .eqchip:hover, .missbar button.eqchip:hover {
-    background:var(--surface-2); color:var(--ink); }
-  .eqcta, .missbar button.eqcta { border:1px solid var(--line);
-    background:var(--surface-2); color:var(--ink); border-radius:8px;
-    font-size:12px; font-weight:700; padding:4px 13px; cursor:pointer;
-    font-family:inherit; white-space:nowrap; }
-  .eqcta:hover, .missbar button.eqcta:hover { background:var(--surface-2);
-    color:var(--ink); border-color:var(--stone); }
-  /* The focus ring follows the register too — `--bad` on a control that is
-     not about anything bad would put the one red thing on the bar under the
-     keyboard (§163: a ring is what a keyboard has instead of a hover). */
-  .eqchip:focus-visible, .eqcta:focus-visible,
-  .missbar button.eqchip:focus-visible, .missbar button.eqcta:focus-visible {
-    outline:2px solid var(--focus); outline-offset:2px; }
   /* The corner pair: the worded button takes the second slot beside §101's
      arrows (right:0 when it stands alone). */
   .pane .paneact .cornerbtn { position:absolute; top:0; right:36px;
@@ -1577,10 +1459,6 @@
   .ritem .rgap { display:inline-block; margin-left:7px; color:var(--bad-tx);
     font-size:11px; font-weight:700; font-style:italic; white-space:nowrap; }
   .ritem .rgap.ok { color:var(--good-tx); font-style:normal; }
-  /* §272: the rail's mark in the quiet register. Upright rather than italic
-     as well as grey — the italic is the alarm's own emphasis, and a fact
-     does not need it. */
-  .ritem .rgap.req { color:var(--ink-2); font-weight:600; font-style:normal; }
   /* A page with nothing missing says so and points away (§145.14). */
   .emptynote { background:var(--surface-2); border:1px solid var(--line);
     border-radius:8px; padding:10px 14px; margin:0 0 12px; font-size:13px;
@@ -1656,21 +1534,11 @@
      family in two volumes: the act that ends the report shouts, the act that
      parks it speaks. `--cta` as TYPE, never the fill's own colour: §38.4 cuts
      both ways, and `--cta` is the deep half of the pair for exactly this. */
-  /* AND REOPEN JOINS IT WHEREVER SUBMIT IS BESIDE IT (§263). One
-     declaration and two selectors, never a second block that says the same
-     thing: the quiet half of this pair has to be one look, or the bar reads
-     in two volumes on one page and three on another (§53.5). The parked
-     Reopen keeps `rc-reopen` and takes `quiet` as a modifier, so the handler
-     and every check still find it by the one class it has always had. */
-  .repchrome .rc-draft,
-  .repchrome .rc-reopen.quiet { background:none; border:0; color:var(--cta);
+  .repchrome .rc-draft { background:none; border:0; color:var(--cta);
     font:inherit; font-size:12px; font-weight:500; letter-spacing:.04em;
     text-transform:uppercase; cursor:pointer; padding:6px 4px; }
-  .repchrome .rc-draft:hover,
-  .repchrome .rc-reopen.quiet:hover { text-decoration:underline; background:none;
-    color:var(--cta); }
-  .repchrome .rc-draft:focus-visible,
-  .repchrome .rc-reopen.quiet:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .repchrome .rc-draft:hover { text-decoration:underline; }
+  .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
   /* ── A CLOSED REPORT, AND THE WAY BACK (§220) ──────────────────────────
      Submitted or parked as a draft: the report is read-only and says so by
@@ -1747,33 +1615,6 @@
   /* The seam, so the frozen pair reads as a held edge rather than as text
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
-
-  /* ── AND THE SAME SEAM ON HOVER (§267.1) ────────────────────────────────
-     §73.2 (the block above) gave the frozen pair `background:inherit` so a
-     striped row is striped all the way across — and it answered the STRIPE
-     only. `tbody tr:hover > td` paints every cell of a hovered row, and
-     `.tblscroll td.idx` outranks it on specificity, so the two frozen cells
-     alone keep the row's own white: measured, cells 3 to 7 at #EFF2F6 and
-     cells 1 and 2 at #FFFFFF. The row reads as split down the middle, and
-     the step lands exactly on the left edge of the cell after the name —
-     which is what Islam reported, of the Outcome cell: *"on squeezing the
-     outcome cell left outline is damged"*.
-
-     IT IS OLDER THAN THE FOLD AND MEASURES IDENTICALLY ON THE BUILD BEFORE
-     IT (§267). What §267 changed is how big the untinted block is: the name
-     column goes from 74–269px to 431 and its cell is now two rows tall, so a
-     sliver became a slab. Conspicuous, not caused.
-
-     THE FIX FOLLOWS WHAT THE NEIGHBOURS ALREADY DO rather than deciding
-     anything new: on an unstriped row the pair takes the hover tint, and on
-     a STRIPED one it keeps the stripe — because there the zebra's own `> td`
-     rule wins over the hover's at equal specificity and later source order,
-     so a hovered striped row does not change colour at all today. Painting
-     the pair grey there would invert the seam rather than close it. */
-  .tblscroll tbody tr:hover > td.idx,
-  .tblscroll tbody tr:hover > td.idx + td { background:var(--surface-2); }
-  .tblscroll tbody tr:nth-child(even):hover > td.idx,
-  .tblscroll tbody tr:nth-child(even):hover > td.idx + td { background:var(--zebra); }
 
   /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
@@ -2051,41 +1892,4 @@ th .subhd { font-weight:400; }
 @media (max-width: 880px) {
   td.tgtcol:not(.tgtcell), th.tgtcol { display:none; }
   .narrowtgt { display:block; }
-}
-
-/* ══ THE PLAN TABLE AT A NARROWER WINDOW (§267) ═════════════════════════
-   Two rungs, and only the first of them is structural. Below 1400 the tail —
-   Collabs and Quarters — leaves its two columns for a strip under the tactic's
-   name, which is `tailFolds()`'s decision in group-render.js because moving a
-   CONTROL is not something a media query can do. This is what that strip
-   looks like once it is there.
-
-   A row, wrapping, so a long list of collaborators takes a second line rather
-   than pushing the quarter marks off the end — and `min-width:0` on the select
-   or a flex item refuses to shrink below its own content and does the pushing
-   anyway (§100.5's rule, one box in). */
-.tacfold { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px;
-           margin-top:8px; }
-.tacfold > * { min-width:0; }
-/* A NAMELESS CONTROL MUST AT LEAST LOOK LIKE ONE. With its column heading gone
-   (Islam) the collaborators picker on a tactic nobody supports is the platform's
-   em-dash and a caret — 55px, measured — which beside four numbered marks reads
-   as a stray character rather than a field. A floor, so it keeps the shape of
-   the box above it; it still grows with the names it holds. */
-.tacfold .collabs { flex:0 1 auto; }
-.tacfold .collabs .ssbtn, .tacfold .collabs select { min-width:118px; }
-/* The cell is `white-space:nowrap` for the table's sake (§88), and this strip
-   is the one thing in it that must be allowed to wrap. */
-.tacfold, .tacfold * { white-space:normal; }
-.tacfold .qs { white-space:nowrap; }
-
-/* RUNG TWO, AND IT IS PURE CSS BECAUSE NOTHING MOVES: below 1200 the outcome's
-   four boxes stack into ONE column instead of two. That hands the row back
-   ~100px — measured at 1200 as Tactic 283 → 365px — and costs height on the
-   one cell that has it to spare, which is §248's own argument for the two-wide
-   grid read in the other direction. Never below `--tw`: the width of the
-   widest word a select has to show is what made that token (§248), and it does
-   not get narrower because the window did. */
-@media (max-width: 1200px) {
-  .tgrid { grid-template-columns: var(--tw); }
 }

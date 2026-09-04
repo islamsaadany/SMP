@@ -369,37 +369,6 @@
   .cfg-bar .cfg-sum { flex:1; margin:0; }
   .cfg-lab { flex:1; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
              color:var(--ink-3); font-weight:700; }
-
-  /* ── ARRANGING A SETUP TABLE (§261) ────────────────────────────────
-     THE FIRST COLUMN WIDENS, and only while arranging. 38px is what a number
-     needs; a handle and a number want 54, and taking it from the table the
-     rest of the time would make the reading view pay for a mode it is not in
-     — measured, and it is exactly the 16px that keeps the units table inside
-     its pane at 1285 (§158: it FITS, never "and it scrolls"). */
-  .cfg.arranging th.idx, .cfg.arranging td.idx { width:54px; min-width:54px; }
-  .cfg.arranging td.idx .idx-n { color:var(--ink-3); }
-  /* A row being dragged is lifted off the table, and the one it will land
-     before shows the edge it will land on. `.dragging` and `.sorting` are
-     `makeSortable`'s own classes (arrange.js), so a table added tomorrow gets
-     this by being sortable rather than by remembering to style it. */
-  .cfg.arranging tbody.sorting tr { cursor:grabbing; }
-  .cfg.arranging tbody tr.dragging { background:var(--surface-2);
-             outline:2px solid var(--gold); outline-offset:-2px; position:relative; z-index:3; }
-
-  /* THE ARRANGE BUTTON IS LIT WHILE IT IS ON, in the same gold the pen it
-     replaced used for the same state (`.ico.on`) — a worded button rather than
-     an icon, because it sits in a row of worded controls (Columns, Register
-     file) and a lone glyph among words reads as something else. */
-  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
-  .editbtn.on:hover { background:var(--gold-deep); border-color:var(--gold-deep); }
-
-  /* The mark's two controls sit SIDE BY SIDE in the dialog. `.rowacts` is a
-     column in a table cell (§93.15's note above it), which is right there and
-     wrong in a field 150px wide with nothing under it. */
-  .pdlg .markacts { display:flex; flex-direction:row; gap:16px; align-items:center;
-                    padding-top:6px; }
-  .pdlg .umarkbox { max-width:100%; }
-  .pdlg .umarkimg { max-width:100%; max-height:30px; }
   .swatch { display:inline-block; width:11px; height:11px; border-radius:50%;
             margin-right:9px; vertical-align:baseline; }
   .cfg input.blabel { width:100%; max-width:none; text-align:left;
@@ -962,7 +931,7 @@
      `background` on the CELL, never the row: a `<tr>` cannot carry a
      background that survives sticky positioning in every engine, and a
      transparent head lets the rows show through it. */
-  /* AND IN THE END NO TABLE HERE PINS TO THE PAGE (§273.1). `.cfg.peoplebox`
+  /* AND IN THE END NO TABLE HERE PINS TO THE PAGE (§261.1). `.cfg.peoplebox`
      and `.cfg.srctable` are their own scroll boxes with sticky heads pinned at
      `top:0` INSIDE them, which is the right answer for a boxed table — and
      applying a page offset there put the register's headings 293px down,
@@ -1863,11 +1832,15 @@
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }
-  /* §273: SAVE AND CANCEL AT ONE END, CLOSE THE CYCLE AT THE OTHER. The gap is
+  /* §261: SAVE AND CANCEL AT ONE END, CLOSE THE CYCLE AT THE OTHER. The gap is
      what keeps the destructive act away from the two ordinary ones inside the
      same row -- and it collapses on a narrow window, where the row wraps and
      Close lands on a line of its own, which separates them just as well. */
   .nc-act .nc-gap { flex:1 1 auto; min-width:0; }
+  /* §261.2: a closed cycle's facts are VALUES, on the line a field would have
+     sat on — same row height, so the panel does not change shape between a
+     cycle you can edit and one you can only read. */
+  .nc-grid .nc-val { font:600 13px/28px var(--sans); color:var(--ink-2); }
   .nc-act .nc-hold { margin:0; text-align:right; }
   /* Held rather than gone (§221). It stays READABLE -- the point is to say
      what is waiting, and a control faded to a whisper says only that something
@@ -2128,12 +2101,6 @@
      existing block is touched: both are `0,2,1` and keep winning over this
      `0,1,1`, so nothing already on screen moves, and the next confirmation
      dialog gets the product's buttons without a fourth copy. */
-  /* §273.3: this dialog's labels are longer than the send confirmation's, and
-     `Reported as of` and `What happens` both wrapped in the 92px column —
-     measured, not guessed. Scoped to this dialog, so nothing already on screen
-     moves: widening the shared rule would reflow every other confirmation to
-     fix one. */
-  .sendconfirm.reopenconfirm .kv { grid-template-columns:118px 1fr; }
   .cbtns { display:flex; gap:6px; justify-content:flex-end; }
   .cbtns button { display:inline-block; width:auto; white-space:nowrap;
                   border:1px solid var(--line); border-radius:var(--r-sm);

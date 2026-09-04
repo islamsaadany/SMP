@@ -1,0 +1,813 @@
+/* ── PICTURE SLIDES (§50, backlog §16.12 built) ───────────────────────────
+   "Review mode should accommodate images: a screenshot of a platform or an
+   outcome, or an uploaded picture slide placed at a chosen point in the deck."
+
+   THE DECK IS BUILT FRESH EVERY TIME IT IS OPENED and there is no exported
+   copy — that is the whole argument for presenting out of the platform (§8.8).
+   A picture slide has to obey the same rule, so what is stored is not a slide:
+   it is a TITLE, a POSITION, an ARRANGEMENT and the pictures themselves. The
+   slide is assembled at the moment the deck opens, beside figures that are
+   current to the minute.
+
+   THEY BELONG TO THE CYCLE (Islam, 2026-08-23). A picture is evidence for one
+   review — the store that opened, the screen that went live, the shelf as it
+   actually looks. It is archived with the cycle's figures when the cycle
+   closes and the next cycle starts with a clean deck, exactly as the unit's
+   note does. The alternative was tried in the asking and rejected for the
+   reason that decides it: a picture that stays presents itself as this
+   cycle's until somebody remembers to take it out, and nobody does.
+
+   WHO MAY ADD ONE is not a new rule. A picture slide speaks for the whole unit
+   in front of the board, which is the same act as submitting and the same act
+   as the cycle note — so it is authorised by the SAME classification on the
+   server (`reportState`), and offered by the same function on the screen.
+   Custodian, owner and the SMO; a contributor limited to their own lines does
+   not put a picture in front of the board.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* The stage is 1600x900, so a picture longer than 1600px on its long edge is
+   detail nobody in the room can see, carried in every save for ever. */
+var PIC_MAX_EDGE   = 1600;
+var PIC_MAX_SLIDES = 12;    /* per unit or function, per cycle */
+var PIC_PER_SLIDE  = 4;
+
+/* ── The model ───────────────────────────────────────────────────────────
+   REVIEW.slides is keyed exactly as REVIEW.note is: a unit key, or "fn:<key>".
+   One keying, so a deck's pictures and a deck's note are found the same way.
+
+   READING NEVER WRITES. §42's lesson, and it cost a whole afternoon there: a
+   reader that quietly creates the field it was looking for makes every save
+   carry a change the database never held, and every non-SMO save is then
+   refused for ever. So this returns a shared empty array and the container is
+   created only by an act that actually puts something in it. */
+/* Frozen, because it is SHARED: every target with no pictures is handed this
+   same array, so one careless push would give a picture to all of them. */
+var PIC_NONE = Object.freeze([]);
+function pslidesOf(target){
+  var m = REVIEW && REVIEW.slides;
+  return (m && Array.isArray(m[target])) ? m[target] : PIC_NONE;
+}
+/* ...and the writing half, which does create it — and tidies up after itself,
+   so a tenant that adds a picture and then removes it is left byte for byte
+   where it started rather than carrying an empty object for ever. */
+function pslidesFor(target){
+  if (!REVIEW.slides) REVIEW.slides = {};
+  if (!Array.isArray(REVIEW.slides[target])) REVIEW.slides[target] = [];
+  return REVIEW.slides[target];
+}
+function pslidesTidy(target){
+  if (!REVIEW.slides) return;
+  if (REVIEW.slides[target] && !REVIEW.slides[target].length) delete REVIEW.slides[target];
+  if (!Object.keys(REVIEW.slides).length) delete REVIEW.slides;
+}
+function pslideById(target, id){
+  var hit = null;
+  pslidesOf(target).forEach(function(s){ if (s.id === id) hit = s; });
+  return hit;
+}
+/* An id that cannot collide with one made a second earlier in another tab.
+   Nothing here is derived from a picture's content: two identical pictures on
+   two slides are two slides. */
+function pslideNewId(){
+  return "ps" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+/* ── Drawing one, in the deck ────────────────────────────────────────────
+   The arrangement is how many pictures sit ACROSS; four means two by two. A
+   slot with no picture in it is not drawn — a hole in a grid in front of a
+   client is worse than a narrower row, and the grid closes up on its own.
+
+   The crop is `object-position` plus a scale, and it is the SAME two numbers
+   the editor writes and the same two the editor previews. One rendering, so
+   what was framed is what is shown. */
+/* FIT IS THE DEFAULT, NOT FILL (§51.10, Islam: "allow me to zoom out more as
+   the zoom in is too big", and "pictures need to be wrapped to fit in the space
+   you give to it in the slide").
+
+   Both notes are the same note. The frames were `object-fit:cover`, which fills
+   the box and throws away whatever does not fit — so a portrait infographic in
+   a landscape frame lost both its edges, and the zoom slider could only make
+   that worse because 100% was already the tightest crop available. There was no
+   way to say "show me all of it".
+
+   So a picture FITS its frame whole, and FILL is the deliberate choice for a
+   photograph that should bleed. §16.12 asks for a screenshot of a platform
+   before it asks for anything else, and a screenshot with its edges cut off is
+   not a screenshot of anything. Zoom starts at 50% so a picture can also be
+   made smaller than its box. */
+function picStyle(p){
+  var z = Math.max(0.5, Math.min(3, +p.z || 1));
+  return "object-fit:" + (p.fit === "cover" ? "cover" : "contain") + ";" +
+    "object-position:" + (+p.x == null ? 50 : +p.x) + "% " + (+p.y == null ? 50 : +p.y) + "%;" +
+    (z !== 1 ? "transform:scale(" + z + ");" : "");
+}
+/* `blank` is the EDITOR's flag and nothing else's. A slide with no picture in
+   it is not a slide and must never reach a projector (§50.2) — but the moment
+   after you press Add slide after it is exactly that, and a rail that does not show
+   the thing you just made is a rail that swallowed it. So the deck asks
+   without the flag and the editor asks with it. */
+function pslideHtml(sl, blank){
+  var pics = (sl.pics || []).filter(function(p){ return p && p.src; })
+                            .slice(0, PIC_PER_SLIDE);
+  if (!pics.length) {
+    if (!blank) return "";
+    return '<section class="dslide d-pics d-blank" data-ps="' + esc(sl.id) + '">' +
+      (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
+      '<div class="blankslide"><span>This slide is empty</span>' +
+      '<em>It will not appear in the review until it has a picture.</em></div></section>';
+  }
+  var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || pics.length));
+  var cells = pics.map(function(p){
+    return '<figure class="pcell"><span class="pframe">' +
+      '<img src="' + esc(p.src) + '" alt="' + esc(p.cap || sl.title || "Picture") +
+      '" style="' + picStyle(p) + '"></span>' +
+      (p.cap ? '<figcaption>' + esc(p.cap) + '</figcaption>' : '') + '</figure>';
+  }).join("");
+  return '<section class="dslide d-pics" data-ps="' + esc(sl.id) + '">' +
+    (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
+    '<div class="pgrid pg' + Math.min(across, pics.length) + '">' + cells + '</div></section>';
+}
+
+/* ── Taking a picture in ─────────────────────────────────────────────────
+   Shrunk in the browser, before it is ever stored. It travels inside the same
+   save as everything else in the platform, so a 4MB photograph is 4MB on every
+   save this tenant makes until somebody deletes it.
+
+   ENCODED BOTH WAYS, AND THE SMALLER ONE KEPT. §16.12 asks for two different
+   things — "a screenshot of a platform" and "an outcome". A photograph is far
+   smaller as a JPEG; a screenshot of a table is both smaller AND sharper as a
+   PNG, because JPEG puts a halo round every letter. Guessing from the file's
+   own type gets it wrong the moment somebody pastes a screenshot saved as JPG,
+   so it is measured rather than guessed. */
+function picIntake(file){
+  return new Promise(function(resolve, reject){
+    if (!file || !/^image\//.test(file.type || "")) {
+      reject(new Error("that is not a picture")); return;
+    }
+    imgToCanvas(file, PIC_MAX_EDGE, "#FFFFFF").then(function(cv){
+      var jpg = cv.toDataURL("image/jpeg", 0.82);
+      var png = cv.toDataURL("image/png");
+      resolve(png.length < jpg.length ? png : jpg);
+    }, reject);
+  });
+}
+
+/* Read a file, scale it to fit `maxEdge`, and hand back the canvas. The ONE
+   copy of decode-and-scale, because two things want it for opposite reasons.
+
+   `ground` is a colour painted before the picture, or null for none, and it
+   is not a detail: a slide picture needs WHITE underneath or a transparent
+   PNG re-encoded as a JPEG comes back with a black ground, while a LOGO needs
+   nothing underneath at all — a ground behind a logo is the very fault that
+   made the supplied JPEGs unusable (§52.2). One helper, and the difference
+   stated by its caller rather than guessed here. */
+function imgToCanvas(file, maxEdge, ground){
+  return new Promise(function(resolve, reject){
+    var fr = new FileReader();
+    fr.onerror = function(){ reject(new Error("the file could not be read")); };
+    fr.onload = function(){
+      var img = new Image();
+      img.onerror = function(){ reject(new Error("that picture could not be opened")); };
+      img.onload = function(){
+        var w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h) { reject(new Error("that picture has no size")); return; }
+        var k = Math.min(1, maxEdge / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * k)), ch = Math.max(1, Math.round(h * k));
+        var cv = document.createElement("canvas");
+        cv.width = cw; cv.height = ch;
+        var cx = cv.getContext("2d");
+        if (ground) { cx.fillStyle = ground; cx.fillRect(0, 0, cw, ch); }
+        cx.imageSmoothingQuality = "high";
+        cx.drawImage(img, 0, 0, cw, ch);
+        resolve(cv);
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/* ── MANAGE SLIDES (§51.8) ────────────────────────────────────────────────
+   Islam: "the buttons shouldn't be pictures it should be manage slides which
+   opens the slides list on the left like PowerPoint and on the right are the
+   slides view and the user can add a slide there a blank one and then add
+   pictures there. think of the customer experience to have something
+   functional."
+
+   THE LEFT RAIL IS THE WHOLE DECK, not just the picture slides — every
+   generated slide too, in the order they will project. That is what makes the
+   POSITION DROPDOWN DISAPPEAR: where a picture slide goes is said by where it
+   sits, which is how anybody who has used slides expects to say it. §50.3's
+   rule is unchanged underneath — the anchor is still read back out of the deck
+   — but it is now read from where you dropped the slide rather than typed into
+   a list describing the deck in words.
+
+   It is a MODE rather than a dialog, for the same reason presenting is: this
+   is looking at a deck, and a deck does not fit in a 940px box.
+
+   Nothing about what is STORED changed. Still a title, an anchor, an
+   arrangement and the pictures (§50.2). */
+
+var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+
+/* Every section in the assembled deck gets an identity the rail can hold on
+   to across a repaint: a picture slide by its own id, a generated slide by its
+   running position among the generated ones — which does not move when a
+   picture slide is added above it. */
+/* ── THE EDITOR ASSEMBLES THE SAME DECK THE PROJECTOR DOES (§69.5) ──────
+   It did not, and three of Islam's complaints about Manage slides were one
+   cause: content overflowed its slide, the unit's lockup was missing from
+   every footer, and a long table simply ran off the bottom instead of
+   continuing. All three are steps openDeckWith() runs and this did not —
+   deckFootMarks() and deckFitPass() — so the rail and the stage were showing a
+   deck nobody would ever project. The mode exists to show you the real slide
+   at one tenth (§51.8); it was showing an unfinished one.
+
+   THE BOX HAS TO BE IN THE DOCUMENT, and that is the whole reason this was
+   easy to miss. `deckFitPass()` decides by measuring — `s.scrollHeight >
+   s.clientHeight` — and both are 0 on a detached element, so a detached deck
+   reports every slide as fitting and the pass silently does nothing. §50.3
+   renders the deck detached to read its anchors out, which is fine for reading
+   markup and useless for reading a height.
+
+   So it goes into a host that is a real `.deck`: 1600x900, laid out, and
+   parked off-screen with `left:-99999px` rather than hidden — `display:none`
+   has no layout and `visibility:hidden` still keeps the box, but off-screen is
+   the one that is unambiguously measurable (§3.2's lesson from the other end).
+   `inert` and `aria-hidden`, because a full deck of slides in the accessibility
+   tree behind the editor is a screen reader walking the whole review twice. */
+function slidesAssemble(){
+  var host = document.createElement("div");
+  host.className = "slmeasure";
+  host.setAttribute("aria-hidden", "true");
+  host.inert = true;
+  var box = document.createElement("div");
+  box.className = "deck";
+  host.appendChild(box);
+  document.body.appendChild(host);
+  try {
+    box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
+    insertPictureSlides(box, SLED.target, true);
+    /* The same order openDeckWith() uses, and the order matters both ways:
+       AFTER the picture slides so a custodian's own slide is footed too, and
+       BEFORE the fit pass so a slide it splits carries the footer into every
+       continuation (§52.9). */
+    if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
+      deckFootMarks(box, UNITS[SLED.target]);
+    }
+    deckFitPass(box);
+    /* The keys are minted AFTER the fit pass, or a continuation slide it mints
+       carries a clone of its parent's `data-ed` — two rows in the rail with one
+       key, so selecting the second selects the first and the arrows stick. */
+    var g = 0;
+    [].forEach.call(box.querySelectorAll(".dslide"), function(el){
+      var id = el.getAttribute("data-ps");
+      el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
+    });
+  } finally {
+    /* Detached before it is read from, so a failure anywhere above cannot
+       leave a full deck parked in the document for the rest of the session. */
+    host.remove();
+  }
+  return box;
+}
+/* A heading carries its own kicker inside it (`.dwhich` — "Key measures",
+   "Tactics", "continued"), so reading the element's textContent ran the two
+   together: "RS03 Retail Operations ExcellenceKey measures". The parts are
+   read separately and joined with a separator, which is what the slide itself
+   shows visually. */
+function slidesLabel(el){
+  var h = el.querySelector("h1, h2");
+  if (!h) return el.classList.contains("d-swot") ? "SWOT" : "Slide";
+  var extra = [];
+  [].forEach.call(h.querySelectorAll("span, em"), function(x){
+    var t = x.textContent.trim();
+    if (t) extra.push(t);
+  });
+  var clone = h.cloneNode(true);
+  [].forEach.call(clone.querySelectorAll("span, em"), function(x){ x.remove(); });
+  var main = clone.textContent.trim();
+  return [main].concat(extra).filter(Boolean).join(" \u00b7 ") || "Slide";
+}
+
+function slidesOpen(kind, key){
+  var target = kind === "fn" ? "fn:" + key : key;
+  if (!canSpeakFor(target)) return;
+  SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
+  var root = document.getElementById("slideroot");
+  root.querySelector(".sl-title").textContent = "Manage slides";
+  root.querySelector(".sl-sub").textContent =
+    picTargetName(kind, key) + " · " + (REVIEW.name || "");
+  root.classList.add("on");
+  document.body.classList.add("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
+  slidesPaint();
+  root.focus();
+}
+function picTargetName(kind, key){
+  return kind === "fn" ? (FUNCTIONS[key] || {}).name || key
+                       : (UNITS[key] || {}).name || key;
+}
+function slidesClose(){
+  var root = document.getElementById("slideroot");
+  if (!root.classList.contains("on")) return;
+  root.classList.remove("on");
+  document.body.classList.remove("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
+  SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+  paint();
+}
+
+/* ── Painting ────────────────────────────────────────────────────────────
+   The rail's thumbnails are the REAL slides, scaled. Not a drawing of a slide
+   and not a description of one: the same markup the projector gets, at 1/10,
+   so a slide that is wrong is wrong here too. */
+var SL_THUMB = 0.105;
+
+function slidesPaint(){
+  var box = slidesAssemble();
+  var all = [].slice.call(box.querySelectorAll(".dslide"));
+  if (!all.length) return;
+  /* Keep the selection if it still exists; otherwise take the first picture
+     slide, and failing that the first slide. */
+  var keys = all.map(function(el){ return el.dataset.ed; });
+  if (keys.indexOf(SLED.sel) < 0) {
+    var firstPic = all.filter(function(el){ return el.dataset.ps; })[0];
+    SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
+  }
+
+  /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
+     rail, after all twenty-three rows — so the one control the whole mode
+     exists for could only be found by scrolling to the end of a list nobody
+     had a reason to scroll. A control you have to go looking for is a control
+     that is not there. */
+  var list = document.getElementById("slidelist");
+  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      '+ Add slide after</button>' +
+      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
+        ? "the one selected" : "the slide selected below") + '</span></div>' +
+    all.map(function(el, i){
+    var mine = !!el.dataset.ps;
+    return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
+        (mine ? " mine" : "") + '" data-slgo="' + esc(el.dataset.ed) + '">' +
+      '<span class="sl-n">' + (i + 1) + '</span>' +
+      '<span class="sthumb"><span class="sthumb-in"></span></span>' +
+      '<span class="sl-lab">' + esc(slidesLabel(el)) +
+        (mine ? '<em>your pictures</em>' : '') + '</span></div>';
+  }).join("");
+
+  /* The clones go in after the innerHTML, or writing the rail would discard
+     them. Each thumbnail is the slide itself with `.on` so it lays out. */
+  [].forEach.call(list.querySelectorAll(".sthumb-in"), function(holder, i){
+    var c = all[i].cloneNode(true);
+    c.classList.add("on");
+    holder.appendChild(c);
+  });
+
+  var pane = document.getElementById("slidepane");
+  var cur = all[keys.indexOf(SLED.sel)];
+  var sl = cur && cur.dataset.ps ? pslideById(SLED.target, cur.dataset.ps) : null;
+  pane.innerHTML = slidesPaneHtml(cur, sl);
+  var stage = pane.querySelector(".sstage-in");
+  if (stage && cur) {
+    var c = cur.cloneNode(true);
+    c.classList.add("on");
+    stage.appendChild(c);
+  }
+  slidesFitStage();
+  slidesWire();
+  /* THE RAIL FOLLOWS THE SELECTION. Adding a slide in the middle of a
+     twenty-three slide deck and being shown the bottom of the list is the rail
+     answering a question nobody asked. `nearest` rather than `center`, so a
+     selection already on screen does not jump. */
+  var on = list.querySelector(".slrow.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
+  SLED.err = "";
+}
+
+function slidesPaneHtml(cur, sl){
+  var head = SLED.err ? '<p class="picerr" role="alert">' + esc(SLED.err) + '</p>' : '';
+  if (!sl) {
+    return head +
+      '<div class="sstage"><div class="sstage-in"></div></div>' +
+      '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
+      'platform from what the unit has reported, and is refreshed every time the ' +
+      'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>';
+  }
+  var pics = sl.pics || [];
+  var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
+  var slots = [];
+  for (var i = 0; i < across; i++) slots.push(slidesSlot(sl, pics[i], i));
+  return head +
+    '<div class="sstage"><div class="sstage-in"></div></div>' +
+    '<div class="slctl">' +
+      '<div class="slctl-h">' +
+        '<input class="fld picttl" data-picttl="' + esc(sl.id) + '" value="' + esc(sl.title || "") +
+          '" placeholder="Slide title — optional" aria-label="Slide title">' +
+        '<span class="minisw" role="group" aria-label="Pictures on the slide">' +
+          [1,2,3,4].map(function(n){
+            return '<button data-piclay="' + esc(sl.id) + '" data-n="' + n + '" aria-pressed="' +
+              (across === n) + '" title="' + n + ' on the slide">' + n + '</button>';
+          }).join("") + '</span>' +
+        '<span class="slmove"><button data-slmove="-1" aria-label="Move this slide up" ' +
+          'title="Move up">&#9650;</button>' +
+          '<button data-slmove="1" aria-label="Move this slide down" ' +
+          'title="Move down">&#9660;</button></span>' +
+        '<button class="editbtn" data-picdel="' + esc(sl.id) + '">Remove slide</button>' +
+      '</div>' +
+      '<div class="picslots">' + slots.join("") + '</div>' +
+      (pics.length > across
+        ? '<p class="picsub picover">' + (pics.length - across) + ' more ' +
+          (pics.length - across === 1 ? "picture is" : "pictures are") +
+          ' kept but not shown at this arrangement.</p>' : '') +
+    '</div>';
+}
+
+function slidesSlot(sl, p, i){
+  if (!p || !p.src) {
+    return '<div class="picslot empty">' +
+      '<label class="picdrop"><input type="file" accept="image/*" data-picfile="' +
+        esc(sl.id) + '" data-i="' + i + '">' +
+      '<span class="picplus" aria-hidden="true">+</span><span>Add a picture</span></label></div>';
+  }
+  var z = Math.round((Math.max(0.5, Math.min(3, +p.z || 1))) * 100);
+  var fills = p.fit === "cover";
+  return '<div class="picslot" data-i="' + i + '">' +
+    '<span class="picframe" data-picdrag="' + esc(sl.id) + '" data-i="' + i + '" ' +
+      'title="Drag to move the picture inside the frame">' +
+      '<img src="' + esc(p.src) + '" alt="" style="' + picStyle(p) + '"></span>' +
+    '<div class="picctl">' +
+      /* WHOLE or CROPPED, said in two words rather than inferred from a
+         slider position (§51.10). Fit shows all of it; Fill bleeds it to the
+         edges and throws away what does not reach. */
+      '<span class="minisw" role="group" aria-label="How the picture sits">' +
+        '<button data-picfit="' + esc(sl.id) + '" data-i="' + i + '" data-v="contain" ' +
+          'aria-pressed="' + (!fills) + '" title="Show the whole picture">Fit</button>' +
+        '<button data-picfit="' + esc(sl.id) + '" data-i="' + i + '" data-v="cover" ' +
+          'aria-pressed="' + fills + '" title="Fill the frame, cropping the rest">Fill</button>' +
+      '</span>' +
+      '<button class="editbtn" data-picdrop="' + esc(sl.id) + '" data-i="' + i +
+        '" aria-label="Remove this picture">Remove</button>' +
+    '</div>' +
+    '<label class="piczoom"><span>Zoom</span>' +
+      '<input type="range" min="50" max="300" step="1" value="' + z + '" ' +
+      'data-piczoom="' + esc(sl.id) + '" data-i="' + i + '" aria-label="Zoom">' +
+      '<b>' + z + '%</b></label>' +
+    '<input class="fld piccap" data-piccap="' + esc(sl.id) + '" data-i="' + i +
+      '" value="' + esc(p.cap || "") + '" placeholder="Caption — optional" aria-label="Caption">' +
+  '</div>';
+}
+
+/* The stage is the deck's own 1600x900, scaled to whatever room the pane has.
+   Same trick deckScale() uses, and for the same reason: what is rehearsed has
+   to be what projects, so the slide is never re-laid-out at another size. */
+function slidesFitStage(){
+  var pane = document.getElementById("slidepane");
+  var st = pane && pane.querySelector(".sstage");
+  if (!st) return;
+  var k = Math.min(st.clientWidth / 1600, st.clientHeight / 900);
+  if (!(k > 0)) k = 0.01;
+  var inner = st.querySelector(".sstage-in");
+  /* Left is 50% of the box, so pulling back half the SCALED width centres it.
+     Translate before scale, because the two are applied right to left and a
+     translate written after would itself be scaled. */
+  if (inner) inner.style.transform = "translateX(" + (-1600 * k / 2) + "px) scale(" + k + ")";
+}
+
+/* ── Adding one where you are standing ───────────────────────────────────
+   THE ANCHOR IS READ OUT OF THE DECK, still (§50.3) — but out of the PLACE
+   rather than out of a dropdown. Walking back from the insertion point to the
+   nearest anchored slide is the same lookup the picker used to render, asked
+   from the other end.
+
+   Where it lands in the stored list matters as much: several picture slides
+   can share one anchor, and their order among themselves is list order. So
+   the new one is spliced in at the position its VISUAL place implies, not
+   appended and hoped for. */
+/* ── Putting a slide in a place ──────────────────────────────────────────
+   ONE function, because Add and the up/down arrows are the same act: decide
+   which anchor the slide now belongs to, and where among that anchor's other
+   slides it sits. Written twice they would drift, and the drift would be a
+   slide that moves one way when added and another way when nudged.
+
+   `after` is a position in the ASSEMBLED deck — insert immediately after that
+   slide. The anchor is the nearest anchored slide at or before it (§50.3, read
+   out of the deck as always), and the index inside the stored list is the
+   count of that anchor's slides already sitting at or before the point. */
+function slidesPlace(sl, all, after){
+  var anchor = "";
+  for (var i = after; i >= 0; i--) {
+    if (all[i] && all[i].dataset.anchor) { anchor = all[i].dataset.anchor; break; }
+  }
+  if (!anchor) {
+    for (var f = 0; f < all.length; f++) if (all[f].dataset.anchor) { anchor = all[f].dataset.anchor; break; }
+  }
+  if (!anchor) anchor = "end";
+
+  var list = pslidesFor(SLED.target);
+  var was = list.indexOf(sl);
+  if (was > -1) list.splice(was, 1);        /* out first, so the count is honest */
+
+  var k = 0;
+  for (var j = 0; j <= after && j < all.length; j++) {
+    var id = all[j].getAttribute("data-ps");
+    if (!id || id === sl.id) continue;
+    var other = pslideById(SLED.target, id);
+    if (other && other.at === anchor) k++;
+  }
+  var withA = [];
+  list.forEach(function(x, idx){ if (x.at === anchor) withA.push(idx); });
+  var pos = k < withA.length ? withA[k]
+          : (withA.length ? withA[withA.length - 1] + 1 : list.length);
+  sl.at = anchor;
+  list.splice(pos, 0, sl);
+}
+
+function slidesAdd(){
+  var list = pslidesFor(SLED.target);
+  if (list.length >= PIC_MAX_SLIDES) {
+    SLED.err = PIC_MAX_SLIDES + " slides is the limit — remove one to add another.";
+    slidesPaint();
+    return;
+  }
+  var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
+  var after = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (after < 0) after = all.length - 1;
+  var made = { id:pslideNewId(), title:"", layout:1, at:"", pics:[] };
+  slidesPlace(made, all, after);
+  SLED.sel = "ps:" + made.id;
+  slidesMark();
+  slidesPaint();
+}
+
+/* UP AND DOWN (§51.10; the walk re-cut in §236.2). Only picture slides move:
+   the generated ones are the deck's own order and are not ours to shuffle.
+
+   A PRESS MUST LAND SOMEWHERE A SLIDE CAN ACTUALLY LIVE. A stored position is
+   an anchor plus a place among that anchor's own slides (§50.3), so stepping
+   blindly one row recomputed the SAME position wherever the next row carries
+   no anchor — the button repainted in place and did nothing, silently
+   (measured: 25 dead presses of 28 walking Mobile's deck, §236.2). So the walk
+   goes to the nearest row that IS a place: an anchored slide, or another
+   picture slide (which keeps sibling reordering one step at a time). A slide
+   whose NEXT row carries the same anchor is a fit-pass continuation's parent
+   — the place is after the last of them, so the walk passes the clones. */
+function slidesMove(dir){
+  if (!SLED.sel || SLED.sel.indexOf("ps:") !== 0) return;
+  var sl = pslideById(SLED.target, SLED.sel.slice(3));
+  if (!sl) return;
+  var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
+  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (at < 0) return;
+  var slot = function(j){
+    if (all[j].getAttribute("data-ps")) return true;
+    var a = all[j].dataset.anchor;
+    return !!a && !(all[j + 1] && all[j + 1].dataset.anchor === a);
+  };
+  /* "after" is measured in the deck as it stands with this slide still in
+     it: down starts one below, up starts two above (the row directly above
+     is the one this slide already follows). */
+  var after = null, j;
+  if (dir > 0) { for (j = at + 1; j < all.length; j++) if (slot(j)) { after = j; break; } }
+  else         { for (j = at - 2; j >= 0;         j--) if (slot(j)) { after = j; break; } }
+  if (after == null) return;   /* the ceiling or the floor: nowhere further */
+  slidesPlace(sl, all, after);
+  slidesMark();
+  slidesPaint();
+}
+
+function slidesMark(){ if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint(); }
+
+/* Re-draw the SELECTED slide only — the big one and its thumbnail — from the
+   one function the deck itself uses. Not a repaint: the controls being typed
+   into live in `.slctl`, a different subtree, so nothing under the cursor is
+   replaced (§35's rule is about the field, not about the page).
+
+   It exists because patching the rendered slide by hand does not survive a
+   field going from empty to filled: typing the first title had nothing to
+   write into, since a slide with no title has no heading element at all. */
+function slidesRestage(){
+  if (!SLED.sel || SLED.sel.indexOf("ps:") !== 0) return;
+  var sl = pslideById(SLED.target, SLED.sel.slice(3));
+  if (!sl) return;
+  var html = pslideHtml(sl, true);
+  var root = document.getElementById("slideroot");
+  [root.querySelector(".sstage-in"), root.querySelector(".slrow.on .sthumb-in")]
+    .forEach(function(holder){
+      if (!holder) return;
+      holder.innerHTML = html;
+      if (holder.firstElementChild) holder.firstElementChild.classList.add("on");
+    });
+  /* The rail's WORDS as well as its picture. A slide whose thumbnail says
+     "New stores this half" and whose label underneath still says "Slide" is
+     the two halves of one row disagreeing. */
+  var lab = root.querySelector(".slrow.on .sl-lab");
+  var made = root.querySelector(".sstage-in .dslide");
+  if (lab && made) lab.innerHTML = esc(slidesLabel(made)) + '<em>your pictures</em>';
+}
+/* The same picture in both places, so framing it moves the slide AND the
+   thumbnail. Done by patching rather than restaging, because a drag redraws
+   many times a second and rebuilding the markup under the pointer is how a
+   drag gets dropped. */
+function slidesLive(i){
+  var root = document.getElementById("slideroot");
+  return [root.querySelectorAll(".sstage-in img")[i],
+          root.querySelectorAll(".slrow.on .sthumb-in img")[i]]
+    .filter(Boolean);
+}
+
+function slidesWire(){
+  var root = document.getElementById("slideroot");
+  var slideOf = function(el, attr){ return pslideById(SLED.target, el.dataset[attr]); };
+
+  root.querySelectorAll("[data-slgo]").forEach(function(r){
+    r.addEventListener("click", function(){ SLED.sel = r.dataset.slgo; slidesPaint(); });
+  });
+  root.querySelectorAll("[data-sladd]").forEach(function(b){
+    b.addEventListener("click", slidesAdd);
+  });
+  root.querySelectorAll("[data-slmove]").forEach(function(b){
+    b.addEventListener("click", function(){ slidesMove(+b.dataset.slmove); });
+  });
+  root.querySelectorAll("[data-picfit]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var sl = slideOf(b, "picfit"); if (!sl) return;
+      var p = (sl.pics || [])[+b.dataset.i]; if (!p) return;
+      p.fit = b.dataset.v;
+      slidesMark(); slidesPaint();
+    });
+  });
+  root.querySelectorAll("[data-picdel]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var list = pslidesFor(SLED.target), id = b.dataset.picdel;
+      for (var i = 0; i < list.length; i++) if (list[i].id === id) { list.splice(i, 1); break; }
+      pslidesTidy(SLED.target);
+      SLED.sel = null;
+      slidesMark(); slidesPaint();
+    });
+  });
+
+  /* Typing never repaints (§35) — the stage above is refreshed by hand from
+     the one field that changes it, so the slide follows the title without the
+     control being replaced under the cursor. */
+  root.querySelectorAll("[data-picttl]").forEach(function(f){
+    f.addEventListener("input", function(){
+      var sl = slideOf(f, "picttl"); if (!sl) return;
+      sl.title = f.value;
+      slidesRestage();
+      slidesMark();
+    });
+  });
+  root.querySelectorAll("[data-piccap]").forEach(function(f){
+    f.addEventListener("input", function(){
+      var sl = slideOf(f, "piccap"); if (!sl) return;
+      var p = (sl.pics || [])[+f.dataset.i]; if (!p) return;
+      p.cap = f.value;
+      slidesRestage();
+      slidesMark();
+    });
+  });
+
+  root.querySelectorAll("[data-piclay]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var sl = slideOf(b, "piclay"); if (!sl) return;
+      /* Pictures are never thrown away when the arrangement narrows: four to
+         one and back must return what was there (§50.6). */
+      sl.layout = +b.dataset.n;
+      slidesMark(); slidesPaint();
+    });
+  });
+
+  root.querySelectorAll("[data-picfile]").forEach(function(f){
+    f.addEventListener("change", function(){
+      var sl = slideOf(f, "picfile"), file = f.files && f.files[0];
+      if (!sl || !file) return;
+      picIntake(file).then(function(src){
+        sl.pics = sl.pics || [];
+        sl.pics[+f.dataset.i] = { src:src, cap:"", z:1, x:50, y:50 };
+        for (var i = 0; i < sl.pics.length; i++) if (!sl.pics[i]) sl.pics[i] = null;
+        slidesMark(); slidesPaint();
+      }).catch(function(e){
+        SLED.err = "That picture could not be added — " + e.message + ".";
+        slidesPaint();
+      });
+    });
+  });
+  root.querySelectorAll("[data-picdrop]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var sl = slideOf(b, "picdrop"); if (!sl) return;
+      (sl.pics || []).splice(+b.dataset.i, 1);
+      slidesMark(); slidesPaint();
+    });
+  });
+
+  /* Zoom and crop move the CONTROL's picture and the STAGE's picture together,
+     because the stage is the point: you are framing the slide, not a swatch. */
+  root.querySelectorAll("[data-piczoom]").forEach(function(r){
+    r.addEventListener("input", function(){
+      var sl = slideOf(r, "piczoom"); if (!sl) return;
+      var i = +r.dataset.i, p = (sl.pics || [])[i]; if (!p) return;
+      p.z = (+r.value) / 100;
+      var img = r.closest(".picslot").querySelector("img");
+      if (img) img.setAttribute("style", picStyle(p));
+      var readout = r.parentNode.querySelector("b");
+      if (readout) readout.textContent = r.value + "%";
+      slidesLive(i).forEach(function(x){ x.setAttribute("style", picStyle(p)); });
+      slidesMark();
+    });
+  });
+  root.querySelectorAll("[data-picdrag]").forEach(function(fr){
+    fr.addEventListener("pointerdown", function(ev){
+      var sl = slideOf(fr, "picdrag"); if (!sl) return;
+      var i = +fr.dataset.i, p = (sl.pics || [])[i]; if (!p) return;
+      var img = fr.querySelector("img"), r = fr.getBoundingClientRect();
+      var sx = ev.clientX, sy = ev.clientY, ox = +p.x || 0, oy = +p.y || 0;
+      fr.setPointerCapture(ev.pointerId);
+      fr.classList.add("dragging");
+      ev.preventDefault();
+      var move = function(e){
+        p.x = Math.max(0, Math.min(100, ox - (e.clientX - sx) / r.width  * 100));
+        p.y = Math.max(0, Math.min(100, oy - (e.clientY - sy) / r.height * 100));
+        if (img) img.setAttribute("style", picStyle(p));
+        slidesLive(i).forEach(function(x){ x.setAttribute("style", picStyle(p)); });
+      };
+      var up = function(e){
+        fr.removeEventListener("pointermove", move);
+        fr.removeEventListener("pointerup", up);
+        fr.removeEventListener("pointercancel", up);
+        fr.classList.remove("dragging");
+        try { fr.releasePointerCapture(e.pointerId); } catch (x) {}
+        slidesMark();
+      };
+      fr.addEventListener("pointermove", move);
+      fr.addEventListener("pointerup", up);
+      fr.addEventListener("pointercancel", up);
+    });
+  });
+}
+
+function wireSlides(){
+  var root = document.getElementById("slideroot");
+  root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
+  addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
+  addEventListener("keydown", function(ev){
+    if (!root.classList.contains("on")) return;
+    if (ev.target.tagName === "INPUT" || ev.target.isContentEditable) {
+      if (ev.key === "Escape") ev.target.blur();
+      return;
+    }
+    if (ev.key === "Escape") slidesClose();
+    /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
+       Islam: "allow the arrows up and down so I can navigate the slides while
+       adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —
+       and ←/→ move with them, because the thing being walked is a DECK and
+       every projector in the world uses those. Home and End for the same
+       reason the projector has them.
+
+       WHICH ARROW-KEY DEFAULT THIS TAKES OVER IS THE WHOLE CARE HERE. The
+       guard above already leaves an <input> and anything contenteditable
+       alone, and a `<select>` and a `<textarea>` need the same courtesy — a
+       picture slide's controls carry both, and stealing ↓ from an open
+       dropdown is how a keyboard user loses the ability to choose anything.
+       So the keys are taken only when focus is on nothing that reads them. */
+    if (SLIDE_ARROWS[ev.key] && !slidesTyping(ev.target)) {
+      ev.preventDefault();
+      slidesStep(SLIDE_ARROWS[ev.key]);
+    }
+  });
+}
+
+/* -1 / +1 / the ends. Written as a map rather than a chain of ifs so the set
+   of keys is one thing to read and one thing to change. */
+var SLIDE_ARROWS = { ArrowDown:1, ArrowRight:1, ArrowUp:-1, ArrowLeft:-1,
+                     PageDown:1, PageUp:-1, Home:"first", End:"last" };
+function slidesTyping(el){
+  if (!el) return false;
+  if (el.isContentEditable) return true;
+  var t = (el.tagName || "").toUpperCase();
+  return t === "INPUT" || t === "TEXTAREA" || t === "SELECT";
+}
+/* The rail's OWN order, read off the rail rather than recomputed. Assembling
+   the deck again to answer "what is next" is a second copy of the list — and
+   the rail is what the person is looking at, so it is the list that has to be
+   right (§51.8: the rail IS the deck). */
+function slidesStep(how){
+  var rows = [].slice.call(document.querySelectorAll("#slidelist [data-slgo]"));
+  if (!rows.length) return;
+  var keys = rows.map(function(r){ return r.dataset.slgo; });
+  var i = keys.indexOf(SLED.sel);
+  var next = how === "first" ? 0
+           : how === "last"  ? keys.length - 1
+           : Math.max(0, Math.min(keys.length - 1, (i < 0 ? 0 : i) + how));
+  if (keys[next] === SLED.sel) return;   /* at an end: nothing to repaint */
+  SLED.sel = keys[next];
+  slidesPaint();
+}
+
+/* The button that opens it, beside Present. It carries the count, because the
+   one thing you want to know before a review is whether the pictures are in. */
+/* picBtn() was here. It became the "Manage slides" entry inside the
+   Presentation menu (§63), and a function nothing calls is a function the next
+   reader has to prove is dead before touching anything near it (§24). */

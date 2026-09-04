@@ -239,8 +239,62 @@ function buildXlsx(sheets){
    update a plan rather than duplicate it.
    ─────────────────────────────────────────────────────────────────────── */
 
+/* ── A TARGET WITH A SHAPE OF ITS OWN, IN THE WORKBOOK (§278) ──────────
+   Twelve columns per row-kind that can carry one, APPENDED after the last
+   existing column on every sheet. Appended rather than inserted because a
+   validation range is a POSITION (§65): putting them in the middle would move
+   Q1–Q4, Hidden and the ID column and validate the wrong cells in silence —
+   the fault §248 had to correct in the same file.
+
+   THE ROUND TRIP IS THE POINT (§22). An upload AUTHORS a plan, so a column the
+   file does not carry is a column the plan LOSES: without these twelve, a
+   download and an untouched upload would silently strip every monthly plan in
+   the tenant and put every row back on flat proration. Twelve columns rather
+   than one delimited cell, because a plan by month is what a spreadsheet is
+   FOR — and they collapse to one field on the way through the reader, so the
+   pipeline behind it carries one column and not twelve. */
+var MONTH_COLS = SMPRules.MONTH_NAMES;
+function monthHead(prefix){
+  return MONTH_COLS.map(function(m){ return (prefix || "") + m; });
+}
+/* Twelve cells out of a stored plan. A month nobody set is an EMPTY CELL and
+   never a nought (§278, §104.10) — writing 0 for a blank would hand the file
+   back saying the office had planned nothing for that month. */
+function monthCells(row, fld){
+  var a = Array.isArray(row && row[fld]) ? row[fld] : [], out = [];
+  for (var i = 0; i < 12; i++) out.push(a[i] == null ? "" : a[i]);
+  return out;
+}
+/* And back: twelve cells into the one pipe-joined field the plan pipeline
+   carries. Answers "" when the file said nothing at all, so a workbook written
+   before this existed leaves the row exactly as it was (§58). */
+function monthRead(r, prefix){
+  var out = [], any = false;
+  for (var i = 0; i < 12; i++) {
+    var v = r[(prefix || "") + MONTH_COLS[i]];
+    var s = v == null ? "" : String(v).trim();
+    if (s !== "") any = true;
+    out.push(s);
+  }
+  return any ? out.join("|") : "";
+}
+/* Twelve columns of the same width, for the sheet's `widths`. */
+function monthWidths(w){
+  var out = [];
+  for (var i = 0; i < 12; i++) out.push(w);
+  return out;
+}
+/* The twelve column indexes, for `numCols` and for a validation range that has
+   to start after them. */
+function monthNums(start){
+  var out = [];
+  for (var i = 0; i < 12; i++) out.push(start + i);
+  return out;
+}
+
 var DIRS = ["\u2265", "\u2264"];
-var COMPILES = ["Latest", "Sum", "Average"];
+/* §276: the workbook validates the list the pen offers, read from one place. */
+var COMPILES = SMPRules.COMPILES;
 var KINDS = ["Direction", "Capability"];
 var YESNO = ["Yes", "No"];
 
@@ -277,7 +331,12 @@ function unitSuggestions(){
     if (!x || seen[x] || x.indexOf(",") > -1) return;
     seen[x] = 1; out.push(x);
   }
-  ["%", "EGP", "M EGP", "B EGP", "days", "#"].forEach(add);
+  /* §251: `Y/N` is offered here too, or a plan authored on the platform and
+     downloaded would come back with every yes/no target unrecognised — the
+     upload AUTHORS the plan (§22), so a unit the template cannot say is a
+     unit the round trip destroys. It is written into the Target cell whole,
+     exactly as `6.2B EGP` is; there is no separate column for a unit. */
+  ["%", "EGP", "M EGP", "B EGP", "days", "#", "Y/N"].forEach(add);
   UNIT_KEYS.forEach(function(k){
     var u = UNITS[k];
     (u.keyObjectives || []).forEach(function(m){ add(splitTarget(m.target).unit); });
@@ -456,9 +515,10 @@ function planWorkbook(u){
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
        cells in silence. */
-    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10, 9],
-      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %", "Hidden"],
-      numCols:[2, 5],
+    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10, 9].concat(monthWidths(8)),
+      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %", "Hidden"]
+        .concat(monthHead("")),
+      numCols:[2, 5].concat(monthNums(7)),
       validations:[{ range:"B2:B60", list:DIRS },
                    { range:"D2:D60", list:units, soft:true },
                    { range:"E2:E60", list:COMPILES },
@@ -467,12 +527,13 @@ function planWorkbook(u){
         var a = splitTarget(m.target);
         return [m.name, m.dir, a.value, a.unit, m.compile,
                 m.weight == null ? "" : m.weight,
-                SMPRules.isHidden(m) ? "Yes" : ""];
+                SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
       }) }
   ] : [
-    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 9],
-      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Hidden"],
-      numCols:[3, 4],
+    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 9].concat(monthWidths(8)),
+      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Hidden"]
+        .concat(monthHead("")),
+      numCols:[3, 4].concat(monthNums(8)),
       validations:[{ range:"C2:C60", list:DIRS },
                    { range:"F2:F60", list:units, soft:true },
                    { range:"G2:G60", list:COMPILES },
@@ -480,7 +541,7 @@ function planWorkbook(u){
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target), b = splitTarget(m.target3y);
         return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile,
-                SMPRules.isHidden(m) ? "Yes" : ""];
+                SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
       }) },
 
     { name:"SWOT", widths:[16, 78],
@@ -500,9 +561,10 @@ function planWorkbook(u){
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
 
-    { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9],
-      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"],
-      numCols:[3],
+    { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(monthWidths(8)),
+      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"]
+        .concat(monthHead("")),
+      numCols:[3].concat(monthNums(7)),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"C2:C400", list:DIRS },
@@ -513,7 +575,7 @@ function planWorkbook(u){
         p.measures.forEach(function(m){
           var a = splitTarget(m.target);
           acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile,
-                    SMPRules.isHidden(m) ? "Yes" : ""]);
+                    SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly")));
         });
         return acc;
       }, []) },
@@ -527,14 +589,21 @@ function planWorkbook(u){
        Q1–Q4 from G:J to J:M and Hidden from K to N. Getting that wrong
        validates the wrong cells in silence, which is why the ranges move in
        the same edit as the head. */
-    { name:"Tactics", widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9],
+    { name:"Tactics",
+      widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
+        .concat(monthWidths(9)),
+      /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
+         already says so of the outcome's other three columns — a bare "Jan"
+         beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
-            "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"],
+            "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
+        .concat(monthHead("Outcome ")),
+      numCols:monthNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
-                   { range:"G2:G400", list:["Sum", "Latest", "Average"], soft:true },
+                   { range:"G2:G400", list:COMPILES, soft:true },
                    { range:"J2:M400", list:YESNO },
                    { range:"N2:N400", list:YESNO, soft:true }],
       rows:u.items.reduce(function(acc, p){
@@ -543,7 +612,7 @@ function planWorkbook(u){
             t.outDir || "", t.outTarget || "", t.outCompile || "",
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
-            SMPRules.isHidden(t) ? "Yes" : ""]);
+            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly")));
         });
         return acc;
       }, []) }
@@ -802,6 +871,7 @@ function planFromWorkbook(u, sheets){
       group:r["Group"], direction:r["Direction"], value:r["This year target"],
       value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"],
       weight:r["Weight %"],
+      monthly:monthRead(r, ""),
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
@@ -821,6 +891,7 @@ function planFromWorkbook(u, sheets){
     rows.push({ id:pid ? pid + "-M" + mN[pid] : "", type:"MEASURE",
       parent_id:pid, name:r["Measure"], direction:r["Direction"],
       value:r["Target"], unit:r["Unit"], compile:r["Compile"],
+      monthly:monthRead(r, ""),
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
   sheetObjects(sheets["Tactics"]).forEach(function(r){
@@ -835,6 +906,7 @@ function planFromWorkbook(u, sheets){
          tactics arrive measured the way they always were. */
       outDir:r["Outcome direction"] || "", outTarget:r["Outcome target"] || "",
       outCompile:r["Outcome compiled"] || "",
+      monthly:monthRead(r, "Outcome "),
       owner:r["Owner"],
       collaborators:(r["Collaborators"] || "").split(/[,|]/).map(function(x){ return x.trim(); })
         .filter(Boolean).join("|"),
@@ -846,7 +918,7 @@ function planFromWorkbook(u, sheets){
   return rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
-     "theme","kind","notes","group","hidden"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
+     "theme","kind","notes","group","hidden","monthly"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
 }

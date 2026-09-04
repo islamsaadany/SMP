@@ -1,4 +1,4 @@
-"""A PROJECT OWNER REPORTS, AND THE BAR STOPS SAYING VIEW ONLY (S250).
+"""A PROJECT OWNER REPORTS, AND THE BAR STOPS SAYING VIEW ONLY (S287).
 
 Islam, from the running platform: "a project owner is not able to report,
 despite being the project owner and in the roles and access I allowed this."
@@ -27,9 +27,9 @@ WHAT THIS ASSERTS, both ends each time (S94.2, S42):
     same control (S53.5), and the two are asserted to AGREE rather than to
     match a literal (S94.8);
   * the shared rule answers the same way the screen renders;
-  * a CLOSED report says so to them too (S250.2) -- asserted with the lock, or
+  * a CLOSED report says so to them too (S287.2) -- asserted with the lock, or
     a build saying "Submitted" over live boxes would pass;
-  * and NO fill door on a plan that owes nothing (S250.3, reversing S223) --
+  * and NO fill door on a plan that owes nothing (S287.3, reversing S223) --
     both ends, because a build that simply deleted the bar would pass the
     first half.
 
@@ -114,13 +114,13 @@ with sync_playwright() as pw:
          at all and never meets the pill. Opened to VIEW, which is a real
          tenant's configuration and the one state "View only" describes. */
       ACCESS.employee = Object.assign({}, ACCESS.employee, { a_unit_own: "view" });
-      PEOPLE.push({ key:"t250p", name:"Project Owner 250", active:true });
-      PEOPLE.push({ key:"t250l", name:"Pillar Owner 250",  active:true });
-      PEOPLE.push({ key:"t250r", name:"Plain Reader 250",  active:true, unit:"%s" });
+      PEOPLE.push({ key:"t287p", name:"Project Owner 287", active:true });
+      PEOPLE.push({ key:"t287l", name:"Pillar Owner 287",  active:true });
+      PEOPLE.push({ key:"t287r", name:"Plain Reader 287",  active:true, unit:"%s" });
       var cap = capsOfFunction("%s")[0];
-      cap.projects[0].owner = "Project Owner 250";
+      cap.projects[0].owner = "Project Owner 287";
       var u = UNITS["%s"];
-      u.items[0].owner = "Pillar Owner 250";
+      u.items[0].owner = "Pillar Owner 287";
       paint();
       return { own: cap.projects[0].id, other: cap.projects[1].id,
                ownCode: projCode("%s", cap.projects[0]),
@@ -133,7 +133,7 @@ with sync_playwright() as pw:
 
     # ── 1 · THE PROJECT OWNER ────────────────────────────────────────────
     print("-- the project owner, on a supporting function")
-    pg.select_option("#asWho", "t250p"); pg.wait_for_timeout(400)
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     to_fn_reporting(pg)
     st = pg.evaluate(BAR)
     ck("the bar no longer says View only", not st["viewOnly"], st["text"])
@@ -149,7 +149,7 @@ with sync_playwright() as pw:
 
     # PRESSING IT, and the DATA read back (§96).
     # §215: A CHECK THAT DIES REPORTS NOTHING. The first run of this file
-    # against the pre-§250 build crashed on `mine[0]` and printed 3 failures
+    # against the pre-§287 build crashed on `mine[0]` and printed 3 failures
     # where there are 8 — a falsification that undercounts itself. Everything
     # below depends on a control that build does not draw, so each is reported
     # as failing rather than allowed to raise.
@@ -173,7 +173,7 @@ with sync_playwright() as pw:
            bool(after["mark"]) and after["keys"] == [ids["own"]],
            "before=%s after=%s" % (before, after))
         ck("the mark records who and when",
-           bool(after["mark"]) and after["mark"].get("by") == "t250p" and
+           bool(after["mark"]) and after["mark"].get("by") == "t287p" and
            bool(after["mark"].get("at")), after["mark"])
         st2 = pg.evaluate(BAR)
         ck("the bar now reads Done for that project",
@@ -223,7 +223,7 @@ with sync_playwright() as pw:
 
     # ── 4 · A PLAIN READER still reads View only ─────────────────────────
     print("-- a plain reader")
-    pg.select_option("#asWho", "t250r"); pg.wait_for_timeout(400)
+    pg.select_option("#asWho", "t287r"); pg.wait_for_timeout(400)
     to_unit_reporting(pg)
     st = pg.evaluate(BAR)
     ck("View only is still what a reader is told",
@@ -232,7 +232,7 @@ with sync_playwright() as pw:
 
     # ── 5 · THE UNIT SIDE: a pillar owner (§53.5) ────────────────────────
     print("-- the pillar owner, on a business unit")
-    pg.select_option("#asWho", "t250l"); pg.wait_for_timeout(400)
+    pg.select_option("#asWho", "t287l"); pg.wait_for_timeout(400)
     to_unit_reporting(pg)
     st = pg.evaluate(BAR)
     ck("the bar does not say View only here either", not st["viewOnly"], st["text"])
@@ -248,7 +248,7 @@ with sync_playwright() as pw:
        bool(umine) and pg.evaluate("()=>Object.keys(REVIEW.done||{})") == [ids["pillar"]],
        pg.evaluate("()=>JSON.stringify(REVIEW.done||null)"))
 
-    # ── 6 · A CLOSED REPORT SAYS SO TO THEM TOO (§250.2) ─────────────────
+    # ── 6 · A CLOSED REPORT SAYS SO TO THEM TOO (§287.2) ─────────────────
     # §220 disables every control the moment the custodian submits, and the
     # word explaining it lives in the branch a bounded role never reaches —
     # so the page went grey with nothing saying why. Asserted with the LOCK,
@@ -257,7 +257,7 @@ with sync_playwright() as pw:
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     pg.evaluate("""()=>{ REVIEW.submitted = Object.assign({}, REVIEW.submitted);
         REVIEW.submitted["%s"] = true; paint(); }""" % FDEST)
-    pg.select_option("#asWho", "t250p"); pg.wait_for_timeout(400)
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     to_fn_reporting(pg)
     st = pg.evaluate(BAR)
     shut = pg.evaluate("""()=>({
@@ -271,7 +271,7 @@ with sync_playwright() as pw:
     ck("the pane really is locked, mark included",
        shut["locked"] and shut["liveLeft"] == 0, shut)
 
-    # ── 7 · NO DOOR WHEN NOTHING IS OWED (§250.3, reversing §223) ────────
+    # ── 7 · NO DOOR WHEN NOTHING IS OWED (§287.3, reversing §223) ────────
     # Islam: "it requires him to fill something empty and there is nothing
     # empty." Measured in his shape: 0 counted, 0 red Missing on the page,
     # and a red "Fill in what is empty" button — opened by milestone
@@ -285,7 +285,7 @@ with sync_playwright() as pw:
       ACCESS.powner = Object.assign({}, ACCESS.powner, { a_fn_own_strat:"fill" });
       REVIEW.submitted = {};              /* §6 closed it; reopen for this */
       paint(); }""")
-    pg.select_option("#asWho", "t250p"); pg.wait_for_timeout(400)
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     for _ in range(3):
         if not pg.query_selector("#units .navswitch"): break
         on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")

@@ -152,6 +152,68 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "GET") {
+      /* §258: A LIGHT LOOK AT change_log, for the save-safety banner. While a
+         tab is open on a page the platform asks whether anybody ELSE landed a
+         change on that page since it loaded — never the whole graph (§98: a
+         poll is paid for in database round trips). Answered from the log the
+         save already writes (§42), the asker excluded, oldest first so the
+         client can remember the newest it has seen. The target is compared
+         exactly as the log stores it ("mobile", "fn:cf"). An unparseable
+         `since` falls through to the ordinary read rather than to a 500. */
+      let q = null;
+      try { q = new URL(req.url, "http://x").searchParams; } catch (e) {}
+      /* ── HISTORY (§262): A FILTERED READ OF THE LOG, NEVER THE WHOLE ──
+         The log grows for ever, so the page asks for a slice — a person, a
+         place, a kind, a window, a cap — and the office may ask for any
+         slice. Anybody else may ask about ONE place, and only a place they
+         hold a role at (read off the STORED world, §42): a unit head sees
+         their own unit's rows through the door on their page and nothing
+         else. The window is a pair of instants the client works out from its
+         own day, so "today" means the reader's today and not the server's. */
+      if (q && q.get("log")) {
+        const office = R.isOfficeRole(String(person.role || ""));
+        const t = q.get("target") || null, who = q.get("person") || null;
+        const kind = q.get("kind") || null, from = q.get("from") || null, to = q.get("to") || null;
+        const limit = Math.min(500, Math.max(1, parseInt(q.get("limit") || "200", 10) || 200));
+        if (!office) {
+          if (!t) return send(res, 403, { ok: false, error: "History is the Strategy Office's; ask about one unit or function by name." });
+          /* The world holds no people (rules.js answers from the world, the
+             authoriser keeps the register beside it — §42's own shape), so
+             the person is looked up on the STORED register. */
+          const stored = await readState(client);
+          const w = R.worldOf(stored);
+          const me = (stored.people || []).filter(function (p) { return p && p.key === person.key; })[0];
+          const places = R.personRoles(w, me).map(function (r) { return r.at; });
+          if (places.indexOf(t) < 0) return send(res, 403, { ok: false, error: "You hold no role there, so its history is not yours to read." });
+        }
+        const conds = [], params = [];
+        const add = function (sql, v) { params.push(v); conds.push(sql.replace("?", "$" + params.length)); };
+        if (t) add("target = ?", t);
+        if (who) add("person_key = ?", who);
+        if (kind) add("kind = ?", kind);
+        if (from && !isNaN(Date.parse(from))) add("at >= ?::timestamptz", from);
+        if (to && !isNaN(Date.parse(to))) add("at < ?::timestamptz", to);
+        params.push(limit);
+        const r = await client.query(
+          "SELECT id, at, person_key, person_name, kind, target, what, rows_ FROM change_log" +
+          (conds.length ? " WHERE " + conds.join(" AND ") : "") +
+          " ORDER BY at DESC, id DESC LIMIT $" + params.length, params);
+        return send(res, 200, { ok: true, office: office, log: r.rows });
+      }
+      const since = q && q.get("since"), target = q && q.get("target");
+      if (since && target && !isNaN(Date.parse(since))) {
+        /* §258.1: the tab's first ask syncs its clock to the database's. */
+        if (q.get("sync")) {
+          const n = await client.query("SELECT now() AS now");
+          return send(res, 200, { ok: true, changed: [], now: n.rows[0].now });
+        }
+        const r = await client.query(
+          "SELECT person_key AS by_key, person_name AS by, at FROM change_log " +
+          "WHERE target = $1 AND at > $2::timestamptz AND person_key <> $3 " +
+          "ORDER BY at ASC LIMIT 50", [target, since, person.key]);
+        return send(res, 200, { ok: true, changed: r.rows.map(function (x) {
+          return { by: x.by || x.by_key, at: x.at }; }) });
+      }
       const state = await readState(client);
       return send(res, 200, { ok: true, seeded: ready.seeded, person: person, state: state });
     }

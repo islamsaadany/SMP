@@ -29,7 +29,34 @@
 var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",
                  "outcome_direction","outcome_target","outcome_compiled",
                  "owner","collaborators","direction","value","value_3y","unit","horizon",
-                 "compile","q1","q2","q3","q4","theme","kind","notes"];
+                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly"];
+
+/* ── THE TWELVE, ON THE WAY IN (§278) ──────────────────────────────────
+   The workbook writes twelve columns and the reader joins them into one
+   pipe-separated field, exactly as `collaborators` travels — so the plan
+   pipeline carries one column rather than twelve, and this is where it
+   becomes the array a row stores.
+
+   A BLANK CELL IS NULL AND NEVER NOUGHT (§278, §104.10). Twelve cells of
+   which five were filled must arrive as five months set, not as five plus
+   seven planned zeros — that would be a target nobody typed, arrived at by
+   arithmetic nobody could see, and it would put the row IN FORCE on a plan
+   the office had only started. A cell that is not a number is kept as typed
+   (§96.2), which leaves the plan out of force rather than silently corrected.
+
+   ANSWERS NULL WHERE THE FILE SAID NOTHING, so a workbook written before this
+   existed adds no key at all and the row is byte-identical to what it was
+   (§50.6, §58). */
+function monthsFromText(s) {
+  var parts = String(s == null ? "" : s).split("|"), out = [], any = false;
+  for (var i = 0; i < 12; i++) {
+    var v = parts[i] == null ? "" : String(parts[i]).trim();
+    if (v === "") { out.push(null); continue; }
+    any = true;
+    out.push(SMPRules.monthSet(v) ? Number(v.replace(/,/g, "")) : v);
+  }
+  return any ? out : null;
+}
 /* The progress template mirrors the plan template's shape rather than
    inventing a second vocabulary: same ids, same types, same direction and
    unit columns. It adds `current` and `new_value`, and covers NORTHSTAR as
@@ -52,6 +79,42 @@ function csvRow(cols, o){ return cols.map(function(c){ return csvCell(o[c]); }).
    answering "where does the number end" is §42's drift. This wrapper keeps
    every existing call site working. */
 function splitTarget(s){ return SMPRules.targetParts(s); }
+/* §276: an uploaded compile rule is checked against the ONE list the pen
+   offers and the workbook validates, and the refusal names that list rather
+   than a copy of it that would go stale the day a fifth rule is added. */
+function compileKnown(c){ return SMPRules.COMPILES.indexOf(c) > -1; }
+function compileProblem(c){
+  var l = SMPRules.COMPILES;
+  return 'compile "' + c + '" is not ' + l.slice(0, -1).join(", ") + " or " + l[l.length - 1];
+}
+/* §251: THE WORKBOOK SPLITS A TARGET THE WAY THE SCREEN DOES. A target may
+   now hold its unit before its number ("%"), and `splitTarget` reads a value
+   FOLLOWED BY a unit — so the raw pair would write "%" into the Value column
+   and leave Unit empty, which is the round trip putting a fact in the wrong
+   box (§22: an upload AUTHORS a plan, so what the file says is what the plan
+   becomes). `targetKeep`/`unitOfTarget` answer identically for every value the
+   plan already holds — asserted: 208 of 208 non-blank targets are numeric —
+   so this moves nothing that exists and is right for the one state that is new. */
+function targetPair(v){ return { value: targetKeep(v), unit: unitOfTarget(v) }; }
+/* AND BACK THE OTHER WAY, FOR A PLAN TARGET ONLY (§251). `joinTarget` answers
+   "" for an empty value and must go on doing so: it also rebuilds a REPORTED
+   figure (§243), where a unit with no number is not an actual anybody entered
+   and storing one would put a word where a figure belongs. A plan TARGET is
+   the one place the pair may legitimately be unit-and-no-number, so it asks
+   this instead — and asks `joinTarget` for everything else, rather than
+   carrying a second copy of the separator rule it took §243 to get right.
+
+   THE ROUND TRIP IS THE POINT: without it a download and an untouched upload
+   DROPS a unit-only target, which is §22's contract broken in the quietest
+   way — an upload authors the plan, so what the file loses, the plan loses.
+   Found by the check, not by reading. */
+function targetFromPair(original, value, unit){
+  var v = String(value == null ? "" : value).trim();
+  var u = String(unit == null ? "" : unit).trim();
+  if (!v && u) return u;
+  return joinTarget(original, value, unit);
+}
+
 /* Rebuilding a target from its parts must give back the original spacing:
    "6.2B EGP" splits to 6.2 and "B EGP" and has to rejoin without a space,
    while "24 h" has to keep one. The separator is read from what is stored
@@ -91,7 +154,9 @@ function joinTarget(original, value, unit){
 /* Compared part by part, so a difference in spacing is never reported as a
    changed target. */
 function targetChanged(stored, value, unit){
-  var a = splitTarget(stored);
+  /* §251: through the same pair reader as the writer above, or a downloaded
+     unit-only target reads back as a CHANGE to a plan nobody touched. */
+  var a = targetPair(stored);
   return a.value !== String(value == null ? "" : value).trim() ||
          a.unit  !== String(unit  == null ? "" : unit).trim();
 }
@@ -117,7 +182,7 @@ function planTemplate(u){
   rows.push(csvRow(PLAN_COLS, { id:u.ukey + "-ASP2", type:"ASPIRATION", name:"End in mind",
     description:u.endInMind, source_slide:slide(u.ukey + "-ASP2") }));
   u.keyObjectives.forEach(function(m){
-    var a = splitTarget(m.target), b = splitTarget(m.target3y);
+    var a = targetPair(m.target), b = targetPair(m.target3y);
     rows.push(csvRow(PLAN_COLS, { id:m.id, type:"NORTHSTAR", name:m.name, direction:m.dir,
       value:a.value, value_3y:b.value, unit:a.unit, compile:m.compile,
       source_slide:m.slide, horizon:m.horizon, notes:m.notes }));
@@ -133,7 +198,7 @@ function planTemplate(u){
       theme:p.theme, owner:p.owner, source_slide:p.slide,
       notes:p.notes || (p.kind + " " + pillarCode(u, pi).replace(/^\D+/, "")) }));
     p.measures.forEach(function(m){
-      var a = splitTarget(m.target);
+      var a = targetPair(m.target);
       rows.push(csvRow(PLAN_COLS, { id:m.id, type:"MEASURE", parent_id:p.id, name:m.name,
         direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
         source_slide:m.slide, horizon:m.horizon, notes:m.notes }));
@@ -154,7 +219,7 @@ function planTemplate(u){
 function progressTemplate(u){
   var rows = [PROG_COLS.join(",")];
   u.keyObjectives.forEach(function(m){
-    var a = splitTarget(m.target);
+    var a = targetPair(m.target);
     rows.push(csvRow(PROG_COLS, { id:m.id, type:"NORTHSTAR", parent_name:u.name, name:m.name,
       direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
       current:m.actual, new_value:"",
@@ -162,7 +227,7 @@ function progressTemplate(u){
   });
   u.items.forEach(function(p){
     p.measures.forEach(function(m){
-      var a = splitTarget(m.target);
+      var a = targetPair(m.target);
       rows.push(csvRow(PROG_COLS, { id:m.id, type:"MEASURE", parent_id:p.id, parent_name:p.name,
         name:m.name, direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
         current:m.actual, new_value:"",
@@ -316,8 +381,8 @@ function validatePlan(u, rows){
     }
     if (r.direction && ["\u2265","\u2264",">=","<="].indexOf(r.direction) < 0)
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not \u2265 or \u2264' });
-    if (r.compile && ["Sum","Latest","Average"].indexOf(r.compile) < 0)
-      problems.push({ at:at, msg:'compile "' + r.compile + '" is not Sum, Latest or Average' });
+    if (r.compile && !compileKnown(r.compile))
+      problems.push({ at:at, msg:compileProblem(r.compile) });
     if (r.type === "TACTIC") {
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
@@ -391,9 +456,9 @@ function diffPlan(u, rows){
     else if (hit.kind === "OBJECTIVE") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value_3y !== "" && targetChanged(hit.obj.target3y, r.value_3y, r.unit))
-        changes.push({ f:"3-year", was:hit.obj.target3y || "", now:joinTarget(hit.obj.target3y, r.value_3y, r.unit) });
+        changes.push({ f:"3-year", was:hit.obj.target3y || "", now:targetFromPair(hit.obj.target3y, r.value_3y, r.unit) });
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
-        changes.push({ f:"this year", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
+        changes.push({ f:"this year", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
       cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
       cmp("compile", hit.obj.compile, r.compile);
     } else if (hit.kind === "PILLAR") {
@@ -406,7 +471,7 @@ function diffPlan(u, rows){
     } else if (hit.kind === "MEASURE") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
-        changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
+        changes.push({ f:"target", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
       cmp("compile", hit.obj.compile, r.compile);
       cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "TACTIC") {
@@ -471,7 +536,7 @@ function createFromPlan(u, d){
   var made = 0;
   news.forEach(function(r){
     var x = r.raw; if (!x) return;
-    var t3 = joinTarget("", x.value_3y, x.unit), t1 = joinTarget("", x.value, x.unit);
+    var t3 = targetFromPair("", x.value_3y, x.unit), t1 = targetFromPair("", x.value, x.unit);
     if (x.type === "PILLAR") {
       u.items.push({ id:x.id, name:x.name, sub:"", kind:x.kind || kindFromNotes(x.notes) || "Direction",
         theme:x.theme || "", owner:x.owner || "", slide:x.source_slide, notes:x.notes,
@@ -483,6 +548,11 @@ function createFromPlan(u, d){
       var mRow = { id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
         compile:x.compile || "Latest", actual:"", progress:null,
         slide:x.source_slide, horizon:x.horizon, notes:x.notes };
+      /* §278: set only where the file carried months, for §233's own reason —
+         a row that never had a monthly plan and one whose file said nothing
+         must be byte-identical. */
+      var mMon = monthsFromText(x.monthly);
+      if (mMon) mRow.monthly = mMon;
       /* §233: set only when the file says Yes — an absent key and a shown
          row must stay byte-identical (§50.6). */
       if (+x.hidden) mRow.hide = true;
@@ -502,6 +572,10 @@ function createFromPlan(u, d){
            would read as started-and-delivered-nothing, which is a false
            failure on the day a plan arrives \u2014 the same trap as clearing. */
         status:"Not started", actual:null, slide:x.source_slide, notes:x.notes };
+      /* §278: a tactic's twelve belong to its OUTCOME, and are stored under
+         the name the outcome's other four fields already use (§248). */
+      var tMon = monthsFromText(x.monthly);
+      if (tMon) tRow.outMonthly = tMon;
       if (+x.hidden) tRow.hide = true;
       p2.tactics.push(tRow);
       made++;
@@ -515,6 +589,8 @@ function createFromPlan(u, d){
         slide:x.source_slide };
       if (x.weight != null && String(x.weight).trim() !== "")
         ko.weight = Number(x.weight);
+      var kMon = monthsFromText(x.monthly);
+      if (kMon) ko.monthly = kMon;
       if (+x.hidden) ko.hide = true;
       u.keyObjectives.push(ko);
       made++;
@@ -757,7 +833,7 @@ function capPlanTemplate(c){
   rows.push(csvRow(CAPP_COLS, { id:c.id + "-PLAN", type:"PLAN", name:c.name + " capability plan",
     description:c.def, notes:"Generated by the platform" }));
   (c.keyObjectives || []).forEach(function(m){
-    var a = splitTarget(m.target);
+    var a = targetPair(m.target);
     rows.push(csvRow(CAPP_COLS, { id:m.id, type:"CAPOBJECTIVE", name:m.name, direction:m.dir,
       value:a.value, unit:a.unit, weight:(m.weight == null ? "" : m.weight),
       compile:m.compile, notes:m.notes, hidden:SMPRules.isHidden(m) ? "1" : "" }));
@@ -771,7 +847,7 @@ function capPlanTemplate(c){
         finish:d.due, hidden:SMPRules.isHidden(d) ? "1" : "" }));
     });
     (p.outcomes || []).forEach(function(o){
-      var a = splitTarget(o.target);
+      var a = targetPair(o.target);
       rows.push(csvRow(CAPP_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id, name:o.name,
         direction:o.dir, value:a.value, unit:a.unit, measure_at:o.measureAt,
         hidden:SMPRules.isHidden(o) ? "1" : "" }));
@@ -960,8 +1036,8 @@ function validateCapPlan(c, rows){
     if (r.direction && ["≥","≤",">=","<="].indexOf(r.direction) < 0)
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not ≥ or ≤' });
     if (r.type === "CAPOBJECTIVE") {
-      if (r.compile && ["Sum","Latest","Average"].indexOf(r.compile) < 0)
-        problems.push({ at:at, msg:'compile "' + r.compile + '" is not Sum, Latest or Average' });
+      if (r.compile && !compileKnown(r.compile))
+        problems.push({ at:at, msg:compileProblem(r.compile) });
       if (r.weight !== "" && r.weight != null && isNaN(parseFloat(r.weight)))
         problems.push({ at:at, msg:'weight "' + r.weight + '" is not a number' });
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
@@ -1038,7 +1114,7 @@ function diffCapPlan(c, rows){
     } else if (hit.kind === "CAPOBJECTIVE") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
-        changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
+        changes.push({ f:"target", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
       cmp("weight", hit.obj.weight == null ? "" : hit.obj.weight, r.weight);
       cmp("compile", hit.obj.compile, r.compile);
       cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
@@ -1057,7 +1133,7 @@ function diffCapPlan(c, rows){
     } else if (hit.kind === "OUTCOME") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
-        changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
+        changes.push({ f:"target", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
       cmp("measured at", hit.obj.measureAt, r.measure_at);
       cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "MILESTONE") {
@@ -1109,7 +1185,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "CAPOBJECTIVE") {
       var w = parseFloat(x.weight);
       var cko = { id:x.id, name:x.name, dir:x.direction || "≥",
-        target:joinTarget("", x.value, x.unit), compile:x.compile || "Latest",
+        target:targetFromPair("", x.value, x.unit), compile:x.compile || "Latest",
         weight:isNaN(w) ? null : w, actual:null, progress:null };
       if (+x.hidden) cko.hide = true;
       c.keyObjectives.push(cko);
@@ -1123,7 +1199,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "OUTCOME") {
       var p2 = projectById(x.parent_id); if (!p2) return;
       var oRow = { id:x.id, name:x.name, dir:x.direction || "≥",
-        target:joinTarget("", x.value, x.unit), measureAt:x.measure_at || "",
+        target:targetFromPair("", x.value, x.unit), measureAt:x.measure_at || "",
         actual:null, progress:null };
       if (+x.hidden) oRow.hide = true;
       p2.outcomes.push(oRow);

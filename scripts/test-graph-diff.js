@@ -231,6 +231,48 @@ console.log("\n§215 · row-level changes");
           got.ok && same(got.state, want), got.error || "the plan differs");
   });
 
+  /* — TWELVE MONTHS TRAVEL AS ONE FIELD ON ONE ROW (§278) —
+     `monthly` is an ARRAY on a plan row, which the differ has carried before
+     (`collaborators`, §227) and which is worth asserting here rather than
+     assuming: an array compared by identity rather than by value would send
+     the row on every save, and one compared too loosely would never send it at
+     all — and the second failure is silent (§210's whole reason). */
+  (function () {
+    const TWELVE = [15, 14, 16, 16, 17, 18, 24, 28, 32, 36, 40, 44];
+    const set = land(n => { n.units.mobile.items[0].measures[0].monthly = TWELVE.slice(); });
+    check("§278: a monthly plan travels as ONE row edit",
+          !!set.changes.rows && !set.changes.set["units.mobile"],
+          JSON.stringify(set.changes).slice(0, 120));
+    check("§278: ...and what lands is exactly what the screen has",
+          set.ok && same(set.state, edit(n => {
+            n.units.mobile.items[0].measures[0].monthly = TWELVE.slice(); })),
+          set.error || "the plan differs");
+    /* A BLANK MONTH IS A NULL INSIDE THE ARRAY and has to survive the trip —
+       a differ that dropped it would put a half-filled plan in force on the
+       server's copy (§278). */
+    const half = TWELVE.slice(); half[2] = null;
+    const h = land(n => { n.units.mobile.items[0].measures[0].monthly = half.slice(); });
+    check("§278: a null month survives the change list",
+          h.ok && h.state.units.mobile.items[0].measures[0].monthly[2] === null,
+          JSON.stringify((h.state.units.mobile.items[0].measures[0] || {}).monthly));
+    /* AND CLEARING IT IS A CHANGE, not a no-op. Written and then removed, the
+       row must come back without the key (§50.6). */
+    const withIt = clone(SEED);
+    withIt.units.mobile.items[0].measures[0].monthly = TWELVE.slice();
+    const gone = clone(withIt);
+    delete gone.units.mobile.items[0].measures[0].monthly;
+    const g = D.applyChanges(clone(withIt), D.graphChanges(withIt, gone));
+    check("§278: clearing it removes the key on the server's copy",
+          g.ok && !("monthly" in g.state.units.mobile.items[0].measures[0]),
+          g.error || JSON.stringify(g.state.units.mobile.items[0].measures[0]).slice(0, 90));
+    /* NOTHING MOVES WHEN NOTHING CHANGED: the same twelve sent twice must
+       produce no change at all, or every save carries one nobody made. */
+    const still = D.graphChanges(withIt, clone(withIt));
+    check("§278: an unchanged monthly plan sends nothing",
+          !Object.keys(still.set).length && !still.del.length && !still.rows,
+          JSON.stringify(still).slice(0, 120));
+  })();
+
   /* — A ROW WITHOUT AN ID IS NOT ADDRESSABLE (§191) — */
   (function () {
     const b = plan(); delete b.units.mobile.items[0].measures[0].id;
@@ -533,7 +575,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   }
 })();
 
-/* ── TWO PROJECT OWNERS, ONE FUNCTION (§250) ─────────────────────────────
+/* ── TWO PROJECT OWNERS, ONE FUNCTION (§287) ─────────────────────────────
    The reason the finished mark is keyed by the PROJECT and not by the
    subject. Keyed by target, both owners' saves would carry one map for the
    whole function, and the second — hydrated before the first's mark existed —
@@ -541,7 +583,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
    Asserted as the SCENARIO rather than as a path, so a later change of
    addressing that still keeps the two apart stays green (§94.8). */
 (function () {
-  console.log("\n§250 · two project owners marking in one function");
+  console.log("\n§287 · two project owners marking in one function");
   const A_ID = "cap3-P1", B_ID = "cap3-P2";
   const AT = { by: "owner_a", at: "2026-09-02" };
   const BT = { by: "owner_b", at: "2026-09-02" };
@@ -556,8 +598,8 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   aNew.review.done = {}; aNew.review.done[A_ID] = AT;
   const aCh = D.graphChanges(shared, aNew);
   const server = D.applyChanges(clone(shared), aCh);
-  check("§250: the first owner's mark lands", server.ok, server.error);
-  check("§250: ...and travels as its own entry, not the whole review",
+  check("§287: the first owner's mark lands", server.ok, server.error);
+  check("§287: ...and travels as its own entry, not the whole review",
         !!aCh.set["review.done." + A_ID] && !aCh.set.review,
         JSON.stringify(Object.keys(aCh.set)));
 
@@ -566,7 +608,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   const bNew = clone(shared);
   bNew.review.done = {}; bNew.review.done[B_ID] = BT;
   const bCh = D.graphChanges(shared, bNew);
-  check("§250: the second owner's save says nothing about the first's mark",
+  check("§287: the second owner's save says nothing about the first's mark",
         !("review.done." + A_ID in (bCh.set || {})) &&
         (bCh.del || []).indexOf("review.done." + A_ID) === -1,
         JSON.stringify({ set: Object.keys(bCh.set || {}), del: bCh.del }));
@@ -574,7 +616,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   /* Applied onto the graph A already wrote, BOTH marks survive — which is
      the whole claim, and the thing a target-keyed map could not do. */
   const both = D.applyChanges(server.state, bCh);
-  check("§250: applied onto the first's, BOTH marks survive",
+  check("§287: applied onto the first's, BOTH marks survive",
         both.ok && !!(both.state.review.done || {})[A_ID] &&
         !!(both.state.review.done || {})[B_ID],
         JSON.stringify((both.state || {}).review && both.state.review.done));
@@ -585,7 +627,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   delete off.review.done[A_ID];
   const offCh = D.graphChanges(both.state, off);
   const gone = D.applyChanges(clone(both.state), offCh);
-  check("§250: undoing DELETES that entry and leaves the other",
+  check("§287: undoing DELETES that entry and leaves the other",
         gone.ok && (gone.state.review.done || {})[A_ID] === undefined &&
         !!(gone.state.review.done || {})[B_ID],
         JSON.stringify((gone.state || {}).review && gone.state.review.done));

@@ -286,6 +286,30 @@ var RECIPES = [
   { id: "add-project-ask", q: "How do I add a project to a capability?",
     a: "The Strategy Office can add a project to a capability for you. Let them " +
        "know which capability it belongs to and what the project should be called." },
+  /* §278: TWO ANSWERS TO ONE QUESTION, because the office does it and
+     everybody else meets the result. A single "office" entry would leave a
+     unit head reading a benchmark that is not half the year with nothing
+     anywhere explaining it. */
+  { id: "monthly-plan", q: "How do I set a target month by month?", who: "office",
+    a: "Open the plan with the pen, and select <b>Monthly</b> beside the target. " +
+       "Twelve boxes open under the row \u2014 one for each month, in the target's " +
+       "own unit." +
+       "|All twelve have to be filled in before it takes effect, and a month of " +
+       "nought is a real answer: leave a box empty and the row keeps being spread " +
+       "evenly across the year. Once it is complete the annual target becomes " +
+       "whatever the twelve months come to, and the box shows it rather than " +
+       "taking a figure of its own." },
+  { id: "monthly-plan-ask", q: "How do I set a target month by month?",
+    a: "The Strategy Office sets that. It is worth asking for where your year is " +
+       "not flat \u2014 a season, a launch, a contract that starts in the second " +
+       "half \u2014 because without it every target is measured as if each month " +
+       "carried the same share of it." },
+  { id: "monthly-why", q: "Why is my year-to-date target not half the year?",
+    a: "Because that measure carries a monthly plan: the office has said what each " +
+       "month is expected to carry, so what you are measured against is the months " +
+       "that have actually run rather than a flat share." +
+       "|Its annual target reads <b>by month</b> underneath on the Performance page. " +
+       "Without one, a target is still spread evenly." },
   { id: "deliverable-or-outcome", q: "Deliverable or outcome — which is this?",
     a: "A deliverable is something the project produces, while an outcome is a " +
        "measurable change the project is expected to achieve. If an item has a " +
@@ -384,6 +408,19 @@ var RECIPES = [
 ]},
 
 { g: "Strategy Office questions", items: [
+  { id: "history-put-back", q: "Who changed this, and can I put it back?", who: "office",
+    a: "Open Setup and select History. Every change that reached the server is " +
+       "listed: who made it, when, on which unit or function, which row and field, " +
+       "and the value before and after. Filter by person, place, kind or day, or " +
+       "type a name or a row into the search. Select Restore on a line to put the " +
+       "old value back \u2014 it is saved as an ordinary change, so it is authorised, " +
+       "merged with everyone else's work and logged like any other, and can itself " +
+       "be put back. A submitted report is reopened from its Reporting tab and a " +
+       "removed row from the plan archive, so those lines show Restore greyed with " +
+       "the reason. A unit head sees their own unit's history through the line " +
+       "under the plan's heading. Work that never reached the server leaves no line " +
+       "here \u2014 the amber and red bars at the top of the page are what stand in " +
+       "front of that." },
   { id: "add-person", q: "How do I add somebody to the register?", who: "office",
     a: "Go to Setup › People and add them to the register. Make sure to include an " +
        "employee number or email as a unique identifier, since more than one " +
@@ -399,9 +436,14 @@ var RECIPES = [
        "figures and clears the reporting fields, so each unit is asked again " +
        "rather than inheriting the last set of answers." },
   { id: "branding", q: "How do I set the colours and the logo?", who: "office",
-    a: "Go to Setup › Branding to set the platform colours and logo. Logos should " +
-       "be uploaded in PNG format; SVG files aren't supported for security " +
-       "reasons." },
+    a: "Go to Setup › Branding for both. The two colours are the accent and the " +
+       "navigation bar, and everything else is worked out from them.|The group's " +
+       "mark sits above them: it is shown on any review deck whose subject has no " +
+       "mark of its own — a business unit that has not uploaded one, and every " +
+       "supporting function, which never has one.|A business unit's own mark is " +
+       "uploaded separately, on Setup › Business units.|Marks must be PNG with a " +
+       "transparent background. SVG is not accepted, for security reasons, and a " +
+       "mark with white behind it paints a box around itself on a dark slide." },
   { id: "focus-switch", q: "How do I turn focus measures off?", who: "office",
     a: "Go to Setup › Focus measures and use the control in the page header to " +
        "turn them off. This hides focus measures across the platform without " +

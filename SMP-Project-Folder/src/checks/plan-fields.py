@@ -42,7 +42,7 @@ with sync_playwright() as p:
     ck("pen off: no selects, no quarter toggles",
        off["dirSel"] == 0 and off["qtogs"] == 0, off)
 
-    pen = pg.query_selector('.pane .paneact .penbtn[data-page="plan"]')
+    pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
     ck("the plan pen is there", bool(pen))
     pen.click(); pg.wait_for_timeout(500)
 

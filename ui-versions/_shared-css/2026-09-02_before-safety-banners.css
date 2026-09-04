@@ -1,0 +1,685 @@
+  /* ══════════════════════════════════════════════════════════════════
+     TWO LAYERS, AND THE LINE BETWEEN THEM IS THE POINT (§38)
+
+     LAYER 1 — THE LANGUAGE. Type scale, shape, weight, rhythm. ONE set,
+     never themed, never per tenant. Islam chose one language with several
+     palettes over two languages side by side, and the reason is maintenance:
+     two languages means every page built from here is drawn twice and tested
+     twice, and they drift the first time one is fixed and the other is not.
+
+     LAYER 2 — THE PALETTE. Colours, and nothing else. Four blocks: two
+     palettes multiplied by light and dark. A tenant's own branding, when
+     multi-tenant lands (§36), supplies a PALETTE — never a language. That is
+     the whole reason the line is drawn here: a client can be given their
+     colours without being given a different product.
+
+     The token NAMES are unchanged from v3.10 on purpose. A thousand rules
+     read them; renaming would have meant touching every one of those rules to
+     change none of their meaning. What changed is the VALUES, and three slots
+     that now carry a job rather than a colour:
+
+         --panel      the dark bar        navy      → slate-900
+         --gold       the ACCENT          gold      → indigo-600
+         --stone      neutral-strong      navy      → slate-700
+
+     Which is why nothing had to be renamed: "gold" was never really gold, it
+     was whatever the accent happened to be.
+     ══════════════════════════════════════════════════════════════════ */
+
+  :root {
+    /* ── LAYER 1 · THE LANGUAGE ────────────────────────────────────
+       Ported from Strategy-Formulation, which is Tailwind's defaults used
+       directly: no webfont, a small type scale, and shape carried by radius
+       rather than by shadow. */
+    /* The fallback stack, and what every embedded face falls back TO. Never
+       read directly by a rule — rules read --sans, which is set on the font
+       axis below. */
+    --sys-sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --sans:var(--sys-sans);
+    /* The mono stack stays a system stack. It carries person keys and unit
+       codes — a dozen short strings — and a second embedded family to style
+       those would be 40 KB for nothing. */
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    /* THERE IS NO DISPLAY SERIF. The reference product has none anywhere, and
+       it is most of what tells the two languages apart at a glance. The token
+       survives pointing at the sans stack so the forty rules that name it did
+       not all have to be edited to say the same thing. */
+    --serif:var(--sans);
+
+    /* The scale. Eight steps, and the names say the job rather than the size,
+       so a step can be retuned in one place. */
+    --fs-micro:10px;    /* breadcrumbs, the smallest metric keys        */
+    --fs-label:11px;    /* THE MOVE: uppercase black-weight card titles */
+    --fs-small:12px;    /* controls, chips, secondary lines             */
+    --fs-note:13px;     /* table cells, notes                           */
+    --fs-body:14px;     /* body                                         */
+    --fs-lead:17px;     /* panel headings                               */
+    --fs-title:20px;    /* page title                                   */
+    --fs-big:34px;      /* the headline figure                          */
+    --track:.12em;      /* the tracking on every uppercase label        */
+
+    /* Shape. Radius does the work elevation used to. */
+    --r-sm:6px; --r:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    /* Almost nothing. A hairline border states a card; a shadow only ever
+       lifts something that is genuinely above the page. */
+    --shadow-sm:0 1px 3px rgb(15 23 42/.06);
+    --shadow-md:0 4px 6px -1px rgb(15 23 42/.10), 0 2px 4px -2px rgb(15 23 42/.10);
+    --shadow-accent:0 4px 6px -1px var(--accent-glow);
+  }
+
+  /* ── THE FONT AXIS (§38.8) ───────────────────────────────────────
+     Its own axis for now, independent of the palette, so the four faces can be
+     compared IN the real product rather than from a specimen sheet. Islam:
+     *"B first"* — try them all, then settle which face belongs to which
+     palette and collapse the axis into it, at which point the faces nobody
+     picked come out of the file.
+
+     Each face names the system stack after it, so a face that fails to decode
+     degrades to the system font rather than to a default serif. Absence of the
+     attribute is the system stack, which is why there is no [data-font="system"]
+     block: nothing to set. */
+  /* ONE BLOCK, because there is one embedded face (§157). The other three
+     went with their .woff2 files rather than being left here unreachable — a
+     rule for a face the product no longer carries is exactly what §24 is
+     about, and the next reader would have no way to tell it was dead. */
+  :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
+
+  /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
+     A colour that is legible as a FILL is usually not legible as TYPE. Every
+     -tx token is the same meaning one or two steps darker, for text; the bare
+     token stays the fill and the dot. Getting this wrong is not a wrong shade,
+     it is a word nobody can read — "On track" came out at 3.58 against its own
+     tint before these existed.
+
+     Two more for the dark bar and the accent fill, for the same reason: white
+     on the house gold is 2.4:1, so text on the accent gets --on-accent rather
+     than the page's --on-fill.
+
+     And the quiet inks are set against the QUIETEST GROUND THEY SIT ON, not
+     the whitest. --ink-3 cleared 4.5:1 on white and failed at 4.34 on
+     --surface-2 — which is where most of it actually is, in card heads, table
+     heads and section grounds. A token checked against the most generous
+     background it ever meets is a token checked against the one case that was
+     never in doubt.
+     Four blocks, each complete. They are NOT written as a base plus overrides:
+     a partial block inherits whatever the previous one happened to set, and
+     that is exactly how v3.0's zebra stripe survived into dark. Every block
+     states every colour it uses.
+
+     No @media (prefers-color-scheme) here any more. theme.js resolves the
+     device preference at boot and always writes an explicit data-theme (§27),
+     so one selector paints the page instead of two that have to agree. The
+     gate keeps its own media block — it has no switch and no script beyond
+     reading storage. */
+
+  /* SLATE. Ported with the design language in 3.11 and kept as the second
+     palette the layer proves itself against — but it is NO LONGER the bare
+     :root default: see FOREFRONT below. */
+  :root[data-palette="slate"], :root[data-palette="slate"][data-theme="light"] {
+    /* ── THE CALL TO ACTION (§93) ─────────────────────────────────
+       ONE solid fill in the product, worn by Report during an open cycle.
+       Two tokens, because §38.4 cuts both ways: the bright orange that works
+       as a FILL on a card cannot carry white type (2.5:1), and the deep
+       orange that works as TYPE is too dark to read the page's own ink off.
+       So light themes take the deep orange with white on it and dark themes
+       take the bright one with the page's near-black — measured, not guessed.
+       Both values are already in this palette; nothing new is invented, so a
+       tenant's branding recolours the button with everything else. */
+    --cta:#C2410C; --cta-ink:#FFFFFF; --cta-hover:#9A3412;
+
+    --good-tx:#047857; --attn-tx:#B45309; --warn-tx:#C2410C; --bad-tx:#B91C1C;
+    --on-accent:#FFFFFF; --panel-accent:#A5B4FC;
+    --panel-quiet:#94A3B8; --panel-hover:#1E293B;
+    color-scheme: light;
+    --stone:#334155; --stone-soft:#475569;
+    --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
+    --accent-glow:rgb(99 102 241/.20);
+    --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
+    --line:#E2E8F0; --line-soft:#F1F5F9;
+    --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
+    --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
+    --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
+    --panel:#0F172A; --panel-ink:#FFFFFF;
+    /* NO ZEBRA in this language — rows separate on hover instead, and the
+       columns are divided by hairlines. The token stays because a hundred
+       rules read it; it just resolves to the surface it sits on. */
+    --zebra:#F6F8FB; --zebra-focus:#FFFBEB;
+    --over-bg:#EEF2FF; --over-line:#C7D2FE;
+    --on-fill:#FFFFFF;
+  }
+  :root[data-palette="slate"][data-theme="dark"] {
+    --cta:#FB923C; --cta-ink:#0B1120; --cta-hover:#FDBA74;
+
+    --good-tx:#6EE7B7; --attn-tx:#FCD34D; --warn-tx:#FDBA74; --bad-tx:#FCA5A5;
+    --on-accent:#0B1120; --panel-accent:#A5B4FC;
+    --panel-quiet:#8B97A9; --panel-hover:#16203A;
+    color-scheme: dark;
+    --stone:#94A3B8; --stone-soft:#CBD5E1;
+    --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
+    --accent-glow:rgb(129 140 248/.22);
+    --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
+    --line:#2B3852; --line-soft:#212C42;
+    --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
+    --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
+    --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
+    --panel:#060B16; --panel-ink:#E8EDF5;
+    --zebra:#182339; --zebra-focus:#2E2510;
+    --over-bg:#1E1B3A; --over-line:#3F3A72;
+    --on-fill:#0B1120;
+  }
+
+  /* FOREFRONT — the house navy and gold, in the same language. This is what
+     "several palettes" buys: the colours Islam has been looking at for ten
+     versions, on the new type and the new shapes. */
+  /* THE BARE :root IS FOREFRONT, since 3.12. It was slate, which meant a
+     deployment whose script had not run yet painted in a palette that is not
+     the house one — invisible while a switch in the top bar let everybody
+     correct it, and a defect the moment that switch was removed. What paints
+     when nothing has decided must be what the product actually is. */
+  :root,
+  :root[data-palette="forefront"], :root[data-palette="forefront"][data-theme="light"] {
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+    --on-accent:#16325C; --panel-accent:#E6C65C;
+    --panel-quiet:#B7C4D8; --panel-hover:#24487A;
+    color-scheme: light;
+    --stone:#16325C; --stone-soft:#24487A;
+    /* gold-deep is TEXT weight — it labels things on a pale ground — so it is
+       darker than the fill it names. At #A8842F it read 3.5:1. */
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+    --accent-glow:rgb(201 162 77/.28);
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --zebra:#F5F7FA; --zebra-focus:#FDFAF1;
+    --over-bg:#FBF6E9; --over-line:#E8D9AE;
+    --on-fill:#FFFFFF;
+  }
+  :root[data-palette="forefront"][data-theme="dark"] {
+    --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --on-accent:#14161A; --panel-accent:#E6C65C;
+    --panel-quiet:#9AA6B8; --panel-hover:#1A2030;
+    color-scheme: dark;
+    --stone:#7FA3D8; --stone-soft:#5C82BC;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+    --accent-glow:rgb(217 182 101/.24);
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --zebra:#212630; --zebra-focus:#2A2720;
+    --over-bg:#332C16; --over-line:#4A3F1E;
+    --on-fill:#14161A;
+  }
+
+  * { box-sizing:border-box; }
+  /* ── THE PAGE MUST NOT MOVE SIDEWAYS BETWEEN UNITS (§60.3) ────────
+     Islam: "when I switch between the units the page somehow shifts a bit
+     left, when I pick IT and Corporate precisely, and in the supporting
+     functions as well."
+
+     Not those units — their HEIGHT. A unit with five pillars is taller than
+     the window and gets a scrollbar; one with four is not and does not, so the
+     content column re-centres by the scrollbar's width every time you cross
+     that line. Measured at 1500x900: Mobile's page is 918px and scrolls,
+     Corporate, IT, Consumer Electronics and Online Shop are 900px and do not
+     — which is the boundary, unit by unit.
+
+     `scrollbar-gutter: stable` reserves the space whether or not the bar is
+     there, so the column stays put. It costs the gutter's width on pages that
+     do not scroll, which is the trade: a constant margin nobody notices
+     against a jump everybody does.
+
+     NOT REPRODUCIBLE HEADLESS — Chromium there uses overlay scrollbars and
+     reports a width of 0, so the check that finds this is the page HEIGHT
+     crossing the viewport, not the shift itself. */
+  html { scrollbar-gutter: stable; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:var(--fs-body); line-height:1.55; -webkit-font-smoothing:antialiased; }
+  /* --focus, not --gold. The accent measures 2.40:1 on white and a focus ring
+     needs 3:1 (WCAG 1.4.11) — it cleared on the navy nav bar at 5.32 and in
+     dark mode at 6.81+, and failed on every light surface, which is most of
+     the product. §38.5 once more: a surface with its own ground needs its own
+     ink, and a RING is ink. Defined per palette beside the accent. */
+  :focus-visible { outline:2px solid var(--focus); outline-offset:2px; border-radius:var(--r-sm); }
+  /* The skip link (§48.5): first in the tab order, off-screen until focused. */
+  .skip { position:absolute; left:-9999px; top:0; z-index:200;
+          background:var(--panel); color:var(--panel-ink); padding:10px 16px;
+          font:600 13px/1 var(--sans); border-radius:0 0 var(--r) 0;
+          text-decoration:none; }
+  .skip:focus { left:0; }
+  h1,h2,h3,h4 { margin:0; text-wrap:balance; }
+  /* ── EVERY PAGE GETS THE WHOLE WINDOW (§94.13) ────────────────────
+     Islam: "the page is wide but the section below the navigation part is
+     compact with a lot of padding on the right and left not utilizing the
+     screen width — let's make it fit always."
+
+     THIS IS §93.9 FINISHED, NOT A NEW IDEA. That section answered the same
+     complaint for the RAILED pages and left every other page at 1180 — and
+     what made the difference visible rather than merely narrow is that the
+     destination row had already been let past the cap (`.units-in.folded`,
+     "a navigation bar is chrome, not content"). So at 1670px the row ran edge
+     to edge at 1655px while the page under it sat at 1132px, centred, with
+     238px of nothing down each side. The two stopped lining up, which is
+     exactly what §93.9 said it was avoiding when it widened all four
+     containers together.
+
+     THE CEILING GOES WITH THE CAP, so there is ONE behaviour and not two.
+     §93.9 chose 1600 over none because a table stretched across a 32-inch
+     monitor puts its first and last column a head-turn apart; that is true and
+     it is not what anybody is looking at — the register's frozen first and
+     last columns (§69.19, §69.20) exist for exactly that, and a second
+     threshold is a second thing to explain.
+
+     WHAT 1180 WAS FOR, AND WHAT REPLACES IT: it is a READING MEASURE, and
+     prose has an optimum line length. Measured at 1670px, a unit's Foundation
+     goes from 483 to 732px on its longest line — comfortable. At 2560px it
+     reaches 1166px, which is not. Recorded rather than pre-solved: the fix is
+     a measure on the few prose BLOCKS (the Knowledge base already carries one
+     and is unaffected), and it is not worth adding before somebody runs the
+     platform on a monitor that wide. */
+  .wrap { margin:0 auto; padding:0 24px var(--page-foot, 80px); }
+  /* A PAGE WHOSE CONTENT IS CAPPED TO THE WINDOW ENDS WHERE THE CAPS DO
+     (§167). Every Setup page is a rail beside a pane, both capped and both
+     scrolling their own list, so the page's 80px foot is 80px of nothing
+     below the fold — and it is exactly what made the page run 60px past the
+     window and slide the rail, with its pinned head, under the chrome. */
+  .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
+
+  .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
+            display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
+  .banner strong { color:var(--panel-accent); font-weight:700; }
+  /* The refusal banner. Same shape as the one above it so it is plainly part
+     of the product's chrome, in the bad-news colour so it is not read as
+     information. It carries the server's own sentence, never a paraphrase. */
+  /* The tint and its TEXT twin, not the solid fill: a colour that works as a
+     fill fails as type (§38.4), and this banner is nothing but type. */
+  .banner.refused { background:var(--bad-bg); color:var(--bad-tx); display:block;
+                    border-bottom:2px solid var(--bad); }
+  .banner.refused strong { color:inherit; }
+  /* The way out of a refusal (§48.3). Underlined rather than filled: it is a
+     destructive recovery, so it should read as a deliberate choice and not as
+     the obvious next button to press. */
+  .refused-undo { font:inherit; font-weight:700; color:inherit; background:none;
+                  border:0; padding:0; margin:0; cursor:pointer;
+                  text-decoration:underline; text-underline-offset:2px; }
+  .refused-undo:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+  /* THE ONE THAT KEEPS THE WORK IS THE ONE THAT LOOKS LIKE A BUTTON (§184).
+     Discard reads as a deliberate choice, above; putting the refused lines
+     back and saving the rest is the ordinary next step, so it wears a border
+     and the pair reads in two volumes rather than one. No new colour: the
+     banner's own text token, which is already measured against --bad-bg
+     (§38.4 — the tint and its TEXT twin, never the solid fill). */
+  .refused-keep { font:inherit; font-weight:700; color:inherit; background:none;
+                  border:1.5px solid currentColor; border-radius:var(--r-sm, 6px);
+                  padding:3px 10px; margin:0 6px 0 0; cursor:pointer; }
+  .refused-keep:hover { background:color-mix(in srgb, currentColor 10%, transparent); }
+  .refused-keep:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+  .banner.refused ul { margin:4px 0 0; padding-left:18px; }
+  .banner.refused li { margin:2px 0; }
+
+  /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
+     A title is one line of prose however long it is, so this must read as a
+     field that happens to be tall rather than as a notes box: no resize grip,
+     no inner scrollbar (the height is set to fit, so there is never anything
+     to scroll), and the same metrics as the `<input>` it replaced, or a row
+     holding one of each reads as two kinds of control. */
+  /* INLINE-BLOCK, NOT BLOCK, and that is §114.4 (found by its own check going
+     red, not by reading): a cell holding a field AND a remove × seats the two
+     on one line by giving the field `calc(100% - 30px)` — a `display:block`
+     textarea takes the whole row regardless and pushes the × underneath it,
+     which is the exact fault §114.4 exists to prevent, reintroduced by
+     swapping the element under it. */
+  textarea.fld.grow { resize:none; overflow:hidden; line-height:1.45;
+                      min-height:0; display:inline-block; width:100%;
+                      vertical-align:middle; }
+
+  /* ── THE BOOT SKELETON (§94.10) ───────────────────────────────────
+     What is on screen between opening the platform and the database
+     answering. Islam: "it opens on a color scheme and then it glitches and
+     shifts to the current color."
+
+     THE PALETTE HERE IS THE POINT. Every token below — `--surface-2`,
+     `--line`, `--ground` — is the page's own neutral, and NONE of them is
+     brandable: `brandTokens()` writes only `--gold*`, `--on-accent`,
+     `--accent-glow` and the `--panel*` family, so nothing on this screen can
+     change when the tenant's branding arrives. The real chrome IS `--panel`,
+     which is exactly why it has to be replaced rather than dimmed.
+
+     Both themes come free for the same reason: these tokens are already
+     redefined per palette and per theme, so a person who chose dark waits in
+     a dark skeleton. */
+  .bootsk, .bootpg { display:none; }
+  html.booting .bootsk { display:block; background:var(--surface-2);
+                         border-bottom:1px solid var(--line); }
+  /* THE REAL CHROME IS HIDDEN, NOT COVERED. Left in the flow it would paint
+     the tenant's bar colour behind this for the whole wait, which is the
+     thing being removed. */
+  html.booting #banner, html.booting .chrome { display:none; }
+  .bootsk-in { margin:0 auto; padding:0 24px; }
+  .bootsk-top { display:flex; align-items:center; gap:10px; padding:18px 0 16px; }
+  .bootsk-nav { display:flex; gap:8px; padding:0 0 12px; }
+  .bootsk-tabs { display:flex; gap:22px; padding:0 0 11px;
+                 border-top:1px solid var(--line); margin-top:2px; padding-top:12px; }
+  .bk-far { margin-left:auto; }
+  .bk { display:block; background:var(--line); border-radius:var(--r-sm);
+        height:13px; flex:none; }
+  .bk-pill { height:22px; border-radius:var(--r-pill); }
+  /* The quieter second line, and the three blocks that stand for the page. */
+  .bk-q { background:var(--surface-2); }
+  .bk-blk { height:64px; }
+  html.booting .bootpg { display:flex; flex-direction:column; gap:12px;
+                         padding:26px 0 0; }
+  .bootpg .bk { width:100%; }
+  .bootpg .bk-blk:nth-of-type(4) { opacity:.78; }
+  .bootpg .bk-blk:nth-of-type(5) { opacity:.56; }
+  /* A STATIC GREY PAGE READS AS BROKEN, so it breathes. Slow and shallow —
+     this is a strategy platform waiting for a database, not a spinner. The
+     bars hold still where the device asks for less motion, which is the rule
+     every animation in the product follows. */
+  html.booting .bk { animation:bootpulse 1.5s ease-in-out infinite; }
+  @keyframes bootpulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+  @media (prefers-reduced-motion:reduce) {
+    html.booting .bk { animation:none; opacity:.75; }
+  }
+
+  header.top { border-bottom:1px solid var(--line); background:var(--surface); }
+  .top-in { margin:0 auto; padding:18px 24px; display:flex;
+            align-items:flex-end; gap:20px; flex-wrap:wrap; }
+  .brand { display:flex; flex-direction:column; gap:2px; margin-right:auto; }
+  .eyebrow { font-size:var(--fs-micro); letter-spacing:.15em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; }
+  .brand h1 { font-size:17px; font-weight:700; letter-spacing:-.01em; }
+
+  nav.units { background:var(--panel); }
+  .units-in { margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
+  /* AN UNDERLINED TAB ROW, not a pill row (§41).
+
+     The retheme made this a filled accent pill with a pulsing dot, following
+     the reference, and made the rail match it. Islam, looking at both: *"it's
+     a strategy platform, needs to be subtly coloured."* He is right, and the
+     count is the argument — five places gained a solid accent fill at once, so
+     it was not any one of them being wrong, it was the budget.
+
+     An underline marks the place without repainting it, and it leaves the
+     accent doing four jobs across the product instead of nine.
+
+     The 3px line is a border reserved on EVERY button, transparent until it is
+     needed, so selecting one cannot move the row by three pixels. An inset
+     shadow would have avoided that too, but a rounded pill with a straight
+     underline reads as neither, so the radius goes with the fill. */
+  .units-in { padding:0 24px; align-items:stretch; gap:2px; height:46px; }
+  /* Its own two tokens, not --ink-3 and --surface-2. Those are PAGE colours,
+     and the nav bar is not the page: --ink-3 on the dark bar is a dark grey on
+     near-black at about 2.5:1, and --surface-2 as a hover paints a near-white
+     block onto it. A surface with its own background needs its own ink. */
+  .units button { font:inherit; font-size:var(--fs-small); font-weight:500; padding:0 13px;
+                  border:0; border-bottom:3px solid transparent; background:none;
+                  color:var(--panel-quiet); cursor:pointer; white-space:nowrap;
+                  display:inline-flex; align-items:center; gap:7px;
+                  transition:color .15s, border-color .15s; }
+  .units button:hover { color:var(--panel-ink); }
+  .units button[aria-selected="true"] { color:var(--panel-ink); font-weight:700;
+                  border-bottom-color:var(--gold); }
+  .units button:focus-visible { outline:2px solid var(--gold); outline-offset:-4px; }
+  .units .sep { width:1px; background:var(--panel-ink); opacity:.22; margin:12px 8px; flex:0 0 1px; }
+
+  nav.tabs { border-bottom:1px solid var(--line); background:var(--surface); }
+  .tabs-in { margin:0 auto; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
+  .tabs-in { padding:8px 24px; gap:4px; }
+  .tabs button { font:inherit; font-size:var(--fs-small); font-weight:500; padding:6px 12px; border:0;
+                 border-radius:var(--r); background:none; color:var(--ink-2); cursor:pointer;
+                 white-space:nowrap; transition:background .15s, color .15s; }
+  .tabs button:hover { background:var(--ground); color:var(--ink); }
+  .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
+  .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  /* ── THE REPORTING TAB WEARS THE REPORT ORANGE (§222) ──────────────────
+     Islam picked the solid fill of three drawn options: the volume the Report
+     button had, moved onto the tab that replaces it. Unmistakable while you
+     are in it, which is the point — everything typed there is going to the
+     office.
+
+     `--cta`/`--cta-ink` are the pair §94.8 declared TOGETHER: the fill and
+     the ink that survives on it. Never `--cta` as type on a light ground and
+     never white on the bright half, which is §38.4's trap in both
+     directions.
+
+     `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
+     wins without an !important — the mistake §40 recorded, where an enforced
+     rule went on winning after the argument had changed. */
+  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
+     *"the reporting button should always become orange even if it's not open,
+     and it's appearing as long as the cycle is open."* The first build gave
+     the orange to the word when unselected and the fill only on selection,
+     which made it quiet exactly when somebody needs to notice it — the old
+     Report button was solid at all times, and that is the volume being moved
+     rather than a new one being added (§41's budget: the tab is drawn only
+     while a cycle is open, for somebody who may report).
+
+     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
+     never changes when you are standing on it stops answering "where am I".
+     `--cta-hover` is that half and is declared for every palette beside
+     `--cta`, so this needs no new token and no literal (§25). */
+  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
+  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
+  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
+
+  .view { padding-top:32px; }
+  [hidden] { display:none !important; }
+
+  .lede { max-width:66ch; color:var(--ink-2); margin:0 0 26px; }
+  .lede strong { color:var(--ink); }
+  h2.sec { font-size:var(--fs-lead); font-weight:700; letter-spacing:-.01em; margin:34px 0 4px;
+           padding-top:20px; border-top:1px solid var(--line-soft); }
+  h2.sec.first { border-top:0; padding-top:0; margin-top:0; }
+  .sec-note { color:var(--ink-3); font-size:var(--fs-note); margin:0 0 16px; max-width:70ch; }
+
+  .temple { display:flex; flex-direction:column; margin:4px 0 8px; }
+  .roof { background:var(--panel); clip-path:polygon(50% 0,100% 100%,0 100%); height:70px; margin-bottom:-1px; }
+  .architrave { background:var(--panel); color:var(--panel-ink); padding:18px 26px;
+                font-family:var(--serif); font-size:18px; line-height:1.4; text-align:center; }
+  .entablature { background:var(--surface-2); border-left:1px solid var(--line); border-right:1px solid var(--line);
+                 padding:16px 18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px 20px; }
+  .ns-item { display:flex; flex-direction:column; gap:2px; }
+  .ns-label { font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); font-weight:600; }
+  .ns-value { font-family:var(--mono); font-size:15px; font-variant-numeric:tabular-nums; }
+  .ns-value.pending { color:var(--none); font-style:italic; font-family:var(--sans); font-size:13.5px; }
+  .pillars { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:16px 18px 0; }
+  .pillar { background:var(--panel); color:var(--panel-ink); padding:20px 14px; text-align:center;
+            min-height:104px; display:flex; flex-direction:column; justify-content:center; gap:6px; border-radius:var(--r); }
+  .pillar b { font-family:var(--serif); font-size:16px; }
+  /* --panel-accent, not --gold: the accent as a WORD on the dark panel. The
+     accent itself is chosen to work as a fill on the page, and on the panel it
+     is 2.84:1 — the same pairing .banner strong already had to solve. */
+  .pillar span { font-size:11px; letter-spacing:.12em; color:var(--panel-accent); font-weight:700; }
+  .pillar em { font-size:12px; font-style:normal; opacity:.8; }
+  .stylobate { margin-top:16px; padding:16px 18px 18px; border:1px solid var(--line);
+               border-top:3px solid var(--gold); background:var(--surface); }
+  .base-head { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+               font-weight:700; margin-bottom:12px; }
+  .base-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:8px; }
+  .cap { background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--r);
+         padding:10px 12px; font-size:13.5px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+
+  /* A hairline border and no shadow. A card states itself by its BORDER —
+     which is why the standing classes below colour the border rather than
+     painting a strip somewhere inside it. */
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:18px 20px; }
+  a.card, .card.clickable { display:block; color:inherit; text-decoration:none; cursor:pointer;
+                            transition:border-color .15s, box-shadow .15s; }
+  a.card:hover, .card.clickable:hover { border-color:var(--gold); box-shadow:var(--shadow-sm); }
+  .card.b-good { border-color:var(--good); } .card.b-attn { border-color:var(--attn); }
+  .card.b-warn { border-color:var(--warn); } .card.b-bad  { border-color:var(--bad); }
+  .scores { display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:16px; margin:4px 0 8px; }
+  .score-h { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px; }
+  /* THE MOVE, and it is everywhere: uppercase, black weight, wide tracking,
+     muted. Every card title and section label in the reference is this and
+     only this, which is what makes the language recognisable in one glance. */
+  .score-h h3 { font-size:var(--fs-label); font-weight:900; letter-spacing:var(--track);
+                text-transform:uppercase; color:var(--ink-3); }
+  .big { font-size:var(--fs-big); font-weight:800; line-height:1; letter-spacing:-.03em;
+         font-variant-numeric:tabular-nums; }
+  .big small { font-size:var(--fs-body); font-weight:700; margin-left:1px; }
+  .big .vs { font-size:var(--fs-body); font-weight:600; color:var(--ink-3); letter-spacing:0; }
+  .big.nodata { font-size:var(--fs-lead); font-weight:600; color:var(--none); font-style:italic; }
+  .sub { font-size:13px; color:var(--ink-2); margin-top:9px; }
+  .sub b { font-variant-numeric:tabular-nums; }
+  .track { height:6px; background:var(--surface-2); border-radius:var(--r-pill); margin-top:12px; position:relative; }
+  .track .fill { height:100%; border-radius:var(--r-pill); }
+  .track.empty { background:none; border:1px dashed var(--none); }
+  .marker { position:absolute; top:-4px; width:2px; height:17px; background:var(--ink); }
+  .marker::after { content:""; position:absolute; top:-4px; left:-3px; border-left:4px solid transparent;
+                   border-right:4px solid transparent; border-top:5px solid var(--ink); }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-3); margin-top:10px; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .sw { width:11px; height:11px; border-radius:2px; display:inline-block; }
+  .sw.dash { border:1px dashed var(--none); }
+  .sw.line { width:2px; height:13px; border-radius:0; background:var(--ink); }
+
+  .pill { display:inline-flex; align-items:center; gap:5px; font-size:var(--fs-label); font-weight:600;
+          letter-spacing:0; padding:3px 10px; border-radius:var(--r-pill); white-space:nowrap; }
+  .pill.good { background:var(--good-bg); color:var(--good-tx); }
+  .pill.attn { background:var(--attn-bg); color:var(--attn-tx); }
+  .pill.warn { background:var(--warn-bg); color:var(--warn-tx); }
+  .pill.bad { background:var(--bad-bg); color:var(--bad-tx); }
+  .pill.none { color:var(--none); border:1px dashed var(--none); font-weight:600; }
+  .pill.kind { background:var(--surface-2); color:var(--ink-2); }
+  .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
+
+  /* A LIGHT header, not a navy one, inside a clipped rounded box; rows
+     separate on HOVER rather than on a zebra stripe, and the columns are
+     divided by hairlines instead. The navy header went with the serif —
+     between them they were most of what made this look like a different
+     product from the reference. */
+  .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:var(--fs-note); min-width:620px; }
+  /* ── THE FLOOR IS RIGHT NEARLY EVERYWHERE, AND IT CUT THE PLAN (§158) ──
+     That 620px stops a data table squashing into unreadable columns, and it is
+     the right default. It is also a FLOOR, and a floor cannot yield: a unit's
+     plan pane narrows with the window, and once the pane is under 620 the
+     table holds its minimum while the pane keeps shrinking — so the last
+     column is sliced by the pane's edge. Measured on the demo tenant: the
+     pane is 585px at a 900px window and the table stays at exactly 620,
+     overflowing 35px, then 75 at 860 and 105 at 830.
+
+     IT IS THE FLOOR AND NOTHING ELSE, which is why the first fix drawn was
+     the wrong one. The obvious reading is "the columns need less room", so
+     the first attempt tightened the cell padding — 13px to 7px — and the
+     columns DID narrow while `scrollWidth` stayed at 620 to the pixel,
+     because the flexible Measure column simply absorbed every pixel saved.
+     Anything that does not move the floor moves nothing. The second attempt
+     was §108.5's pair, a scroll shadow and a visible track, which is the
+     right answer to "this box scrolls and does not say so" and the wrong
+     answer here: the box only scrolls BECAUSE of the floor, and a table that
+     fits needs no sign that it continues.
+
+     §109 wrote this same global rule down from the other side — it made a
+     small front-matter table overflow its own grid track by 300px. A rule
+     that is a good default in both directions is still a rule with two edges.
+
+     `:not(.setuppane)` IS LOAD-BEARING AND WAS FOUND BY THE CHECK, NOT BY
+     READING. Setup's pane is `<div class="pane setuppane">`, so the obvious
+     `.pane table` silently took the floor off every Setup table too — and
+     Setup's `.cfg table` floor is 760px on paper: §88 clips every cell to one
+     line and needs the room, and §122.5 caps that pane and lets it scroll ON
+     PURPOSE. Widening this to Setup would have traded a sliced plan for a
+     squashed register, which is the worse of the two.
+
+     THE CHECK CANNOT PROVE THAT BY MEASURING, AND SAYS SO RATHER THAN
+     PRETENDING. The natural assertion — "Setup's table keeps its 760px floor"
+     — was written, went red, and the fault was the assertion:
+     `group-extra.css:296` declares that floor and line 528 re-declares
+     `.cfg table { min-width:0 }` unscoped and later, so every Setup table has
+     computed 0 for a long time and the 760 is dead code (the fifth duplicated
+     rule this project has recorded — §29.2, §51.5, §53.6, §88, §93.11; found
+     by asking `document.styleSheets`, per §93.11, not by reading the cascade).
+     That value reads the same with or without the `:not()`, which is §113.8's
+     blind spot, so the reach is asserted on the SELECTOR the browser holds
+     instead. The dead 760 is recorded in §158.1, not fixed here.
+
+     Below 820 the split stacks and the pane is full-width again, so the window
+     where this applies is exactly the window where the two-column layout is
+     tighter than the floor. */
+  @media (max-width:1000px){
+    .pane:not(.setuppane) table { min-width:0; }
+    /* AND THE FLOOR WAS NOT THE WHOLE OF IT ON THE FUNCTION'S SIDE (§53.5,
+       earning its keep the moment the check asked both). With the floor gone a
+       unit's Plan fits at every width in the band; a supporting function's
+       Projects pane still ran 11px over at 860 and 41px at 830, because its
+       deliverables table carries five columns to the unit's, and what is left
+       once min-width yields is the columns' own intrinsic minimum. Padding
+       could not touch the floor (that is the note above) and is exactly what
+       moves an intrinsic minimum: 13px to 8px a side closes it to zero at
+       every width, with no column heading pushed onto a second line — which
+       is the failure mode to watch, and is asserted rather than assumed.
+       Islam signed off "the columns simply sit a little closer together";
+       this is that, and it is off again above 1000px. */
+    .pane:not(.setuppane) th, .pane:not(.setuppane) td { padding-left:8px; padding-right:8px; }
+  }
+  th,td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  th+th, td+td { border-left:1px solid var(--line-soft); }
+  thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2);
+             font-weight:700; background:var(--surface-2); white-space:nowrap;
+             border-bottom:1px solid var(--line); }
+  tbody tr:last-child td { border-bottom:0; }
+  tbody tr:hover > td { background:var(--surface-2); }
+  td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  td .why, .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
+  /* Collabs. — the people supporting a tactic's owner (§50). Quieter than the
+     owner beside it, because ONE name is accountable and the rest support; and
+     it wraps, because three names in a column sized for one is what makes a
+     row twice the height of every other row. */
+  td.collabs { color:var(--ink-2); font-size:var(--fs-small); }
+  .nobody { color:var(--none); }
+  .qs { display:flex; gap:3px; }
+  .qs i { width:18px; height:18px; border:1px solid var(--line); border-radius:var(--r-sm); font-style:normal;
+          font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
+          color:var(--none); background:var(--surface); }
+  .qs i.on { background:var(--gold); border-color:var(--gold); color:var(--on-fill); }
+
+  .fgrid { display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start; }
+  /* THE OBJECTIVES TABLE GETS THE WINDOW WHILE IT IS BEING WRITTEN (§96.6).
+     A band beneath both columns rather than a sixth of the page inside one of
+     them: 696px to 1493px at a 1537px page. It exists only in edit mode, so
+     there is no reading-mode rule to keep in step with it. */
+  .koband { margin-top:20px; }
+  @media (max-width:820px) { .fgrid { grid-template-columns:1fr; } }
+  .clause { display:grid; grid-template-columns:120px 1fr; gap:10px 14px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+  .clause:last-child { border-bottom:0; }
+  .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
+  .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
+  .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
+  /* Prose somebody typed keeps the shape they typed it in (§51.1). pre-LINE,
+     not pre-wrap: line breaks survive, accidental double spaces and pasted
+     indentation do not. */
+  .flow { white-space:pre-line; }
+  ul.values { display:flex; flex-wrap:wrap; gap:7px; padding:0; margin:0; }
+  ul.values li { list-style:none; background:var(--surface-2); border:1px solid var(--line-soft);
+                 border-radius:var(--r); padding:6px 11px; font-size:13.5px; }
+
+  .swot { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:760px) { .swot { grid-template-columns:1fr; } }
+  .swot section { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:14px 16px; }
+  .swot h3 { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); font-weight:700; margin-bottom:9px; }
+  .swot ul { margin:0; padding-left:18px; font-size:13.5px; }
+  .swot li { margin-bottom:5px; }
+  .swot section.s { border-top:3px solid var(--good); }
+  .swot section.w { border-top:3px solid var(--bad); }
+  .swot section.o { border-top:3px solid var(--stone-soft); }
+  .swot section.t { border-top:3px solid var(--warn); }
+
+  .note { border-left:3px solid var(--gold); background:var(--surface-2); padding:12px 16px;
+          margin:18px 0; font-size:13.5px; color:var(--ink-2); border-radius:0 var(--r) var(--r) 0; }
+  .note b { color:var(--ink); }
+  .note code { font-family:var(--mono); font-size:12.5px; background:var(--surface);
+               padding:1px 5px; border-radius:2px; border:1px solid var(--line-soft); }
+  .kv { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  footer.end { margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-3); }

@@ -54,7 +54,10 @@ def state(pg):
                const e=document.elementFromPoint(q.left+q.width/2, q.top+q.height/2);
                hit = e ? (e.closest('.arrpen') ? 'arrpen' : e.tagName) : 'nothing'; }
         return { arrange: !!a,
-                 pen: !!document.querySelector('.paneact .penbtn:not(.arrpen):not(.dlpen)'),
+                 /* §268: the pen left the pane corner for the section line,
+                    and the arrows deliberately did not — they belong beside
+                    the rail they reorder, and their holder never has a pen. */
+                 pen: !!document.querySelector('#secrow-in .secpen'),
                  pressable: hit,
                  grips: document.querySelectorAll('.grip').length,
                  rule: SMPRules.mayArrange(world(), viewer(), TARGET) }; }""")

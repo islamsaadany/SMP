@@ -1,0 +1,230 @@
+<title>Save-Safety Banners</title>
+<style>
+  :root{
+    --navy:#13233b; --navy-2:#1c3350; --gold:#c6a24a; --gold-deep:#a5822f;
+    --ground:#eaeef4; --surface:#ffffff; --surface-2:#f4f7fb;
+    --ink:#1a2634; --ink-2:#586576; --ink-3:#8592a3; --line:#d5dce6;
+    --warn-bg:#fff6e4; --warn-line:#e6b45a; --warn-edge:#c68912; --warn-ink:#6f4e0c;
+    --bad-bg:#fdeceb; --bad-line:#e2a19f; --bad-edge:#c0433f; --bad-ink:#8f2320;
+    --good:#2f7d5b;
+    --shadow:0 1px 2px rgba(19,35,59,.06), 0 6px 18px rgba(19,35,59,.08);
+    --radius:10px;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  :root:not([data-theme="light"]){ @media (prefers-color-scheme:dark){
+    :root{}
+  }}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --navy:#0e1a2b; --navy-2:#16273f; --gold:#d3b25e; --gold-deep:#b7913c;
+    --ground:#0d141e; --surface:#161f2c; --surface-2:#1b2735;
+    --ink:#e7edf4; --ink-2:#9fadbe; --ink-3:#6f7d8f; --line:#293648;
+    --warn-bg:#2c2411; --warn-line:#6a5222; --warn-edge:#d9a640; --warn-ink:#f2ce76;
+    --bad-bg:#2c1614; --bad-line:#6a2b28; --bad-edge:#e0645f; --bad-ink:#f2a9a5;
+    --good:#5cba8d;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 22px rgba(0,0,0,.35);
+  }}
+  :root[data-theme="dark"]{
+    --navy:#0e1a2b; --navy-2:#16273f; --gold:#d3b25e; --gold-deep:#b7913c;
+    --ground:#0d141e; --surface:#161f2c; --surface-2:#1b2735;
+    --ink:#e7edf4; --ink-2:#9fadbe; --ink-3:#6f7d8f; --line:#293648;
+    --warn-bg:#2c2411; --warn-line:#6a5222; --warn-edge:#d9a640; --warn-ink:#f2ce76;
+    --bad-bg:#2c1614; --bad-line:#6a2b28; --bad-edge:#e0645f; --bad-ink:#f2a9a5;
+    --good:#5cba8d;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 22px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding:40px 24px 72px}
+
+  /* ---- page intro ---- */
+  .lede{margin-bottom:34px}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--gold-deep);margin:0 0 10px}
+  h1{font-size:30px;line-height:1.12;letter-spacing:-.01em;margin:0 0 10px;text-wrap:balance}
+  .sub{font-size:16px;color:var(--ink-2);margin:0;max-width:64ch}
+
+  h2{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-3);margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+
+  /* ---- mock SMP page frame ---- */
+  .frame{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+    box-shadow:var(--shadow);background:var(--surface)}
+  .chrome{background:var(--navy);color:#eef2f8;display:flex;align-items:center;gap:18px;
+    padding:0 18px;height:46px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:13.5px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(198,162,74,.22)}
+  .navtabs{display:flex;gap:2px;margin-left:6px}
+  .navtabs span{font-size:12.5px;padding:6px 11px;border-radius:6px;color:#b9c6d8}
+  .navtabs span.on{background:rgba(255,255,255,.10);color:#fff}
+  .chrome .who{margin-left:auto;font-size:12px;color:#9fb0c6}
+
+  .paneband{background:var(--surface-2);border-bottom:1px solid var(--line);
+    padding:12px 18px;display:flex;align-items:center;gap:12px}
+  .paneband .code{font-size:11px;font-weight:700;letter-spacing:.06em;color:#fff;
+    background:var(--navy-2);padding:3px 8px;border-radius:5px}
+  .paneband .nm{font-weight:600;font-size:15px}
+  .panebody{padding:18px}
+
+  table.mini{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.mini thead th{background:var(--navy);color:#eaf0f8;text-align:left;
+    font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    padding:9px 12px}
+  table.mini tbody td{padding:11px 12px;border-bottom:1px solid var(--line);color:var(--ink-2)}
+  table.mini tbody tr:nth-child(even){background:var(--surface-2)}
+  table.mini .t-name{color:var(--ink);font-weight:600}
+  .pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;
+    border:1px solid var(--line);color:var(--ink-3)}
+
+  /* ---- the banner component ---- */
+  .banner{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;
+    border:1px solid var(--warn-line);border-left-width:4px;border-radius:9px;
+    background:var(--warn-bg);color:var(--warn-ink)}
+  .banner.inpane{border-radius:0;border-left-width:4px;margin:0}
+  .banner .ic{flex:none;width:22px;height:22px;margin-top:1px;color:var(--warn-edge)}
+  .banner .msg{flex:1;min-width:0}
+  .banner .msg strong{display:block;font-size:13.5px;color:var(--ink);font-weight:650;margin-bottom:2px}
+  .banner .msg span{display:block;font-size:12.5px;color:var(--ink-2)}
+  .banner .msg .who{color:var(--ink);font-weight:600}
+  .banner .acts{flex:none;display:flex;align-items:center;gap:8px;padding-top:1px}
+
+  .banner.bad{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad-ink)}
+  .banner.bad .ic{color:var(--bad-edge)}
+
+  .btn{font:inherit;font-size:12.5px;font-weight:600;border-radius:7px;padding:7px 14px;
+    cursor:pointer;border:1px solid transparent;white-space:nowrap}
+  .btn.primary{background:var(--warn-edge);color:#fff;border-color:var(--warn-edge)}
+  .btn.primary.bad{background:var(--bad-edge);border-color:var(--bad-edge)}
+  .btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--line)}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  /* ---- specimen cards ---- */
+  .spec{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;box-shadow:var(--shadow)}
+  .spec .cap{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .spec .tag{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold-deep);background:rgba(198,162,74,.12);padding:2px 8px;border-radius:5px}
+  .spec .cap p{margin:0;font-size:12.5px;color:var(--ink-2)}
+  .spec .cap p b{color:var(--ink);font-weight:600}
+
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pair .opt{display:flex;flex-direction:column;gap:10px;background:var(--surface);
+    border:1px dashed var(--line);border-radius:var(--radius);padding:15px}
+  .pair .opt h3{margin:0;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+  .pair .opt .note{font-size:12px;color:var(--ink-2);margin:0}
+  .pair .opt .rec{color:var(--good);font-weight:600}
+
+  .legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:8px;padding:15px 16px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+  .legend .row{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink-2);max-width:40ch}
+  .legend .sw{flex:none;width:14px;height:14px;border-radius:4px;margin-top:2px;border:1px solid}
+  .legend .sw.w{background:var(--warn-bg);border-color:var(--warn-line)}
+  .legend .sw.b{background:var(--bad-bg);border-color:var(--bad-line)}
+  .legend b{color:var(--ink)}
+
+  .ask{margin-top:26px;padding:16px 18px;border:1px solid var(--gold);border-left-width:4px;
+    border-radius:var(--radius);background:linear-gradient(0deg,rgba(198,162,74,.06),rgba(198,162,74,.06)),var(--surface)}
+  .ask h3{margin:0 0 4px;font-size:13px;color:var(--ink)}
+  .ask p{margin:0;font-size:12.5px;color:var(--ink-2)}
+
+  @media(max-width:680px){.pair{grid-template-columns:1fr}.banner{flex-wrap:wrap}.banner .acts{width:100%}}
+</style>
+
+<div class="wrap">
+  <div class="lede">
+    <p class="kicker">SMP · Proposal for sign-off</p>
+    <h1>Save-safety banners</h1>
+    <p class="sub">Two in-page warnings that catch data-loss risks <em>before</em> they cost a report — a stale tab on an old build, and a colleague editing the same page. Same look as the existing save banners, amber for caution rather than the red used for failure.</p>
+  </div>
+
+  <h2>In context — on a plan page</h2>
+  <div class="frame">
+    <div class="chrome">
+      <div class="brand"><span class="dot"></span> Raya Trade</div>
+      <div class="navtabs"><span>Strategy</span><span class="on">Plan</span><span>Performance</span><span>Reporting</span></div>
+      <div class="who">Ahmed Farag · Marketing</div>
+    </div>
+    <div class="banner warn inpane">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      <div class="msg">
+        <strong>A newer version of the platform is ready</strong>
+        <span>Reload to get it — your work is safe and already saved.</span>
+      </div>
+      <div class="acts"><button class="btn primary">Reload</button></div>
+    </div>
+    <div class="paneband"><span class="code">MKT-01</span><span class="nm">Grow qualified demand</span></div>
+    <div class="panebody">
+      <table class="mini">
+        <thead><tr><th>Tactic</th><th>Owner</th><th>Status</th><th>YTD actual</th></tr></thead>
+        <tbody>
+          <tr><td class="t-name">Lead generation campaigns</td><td>Ahmed Farag</td><td><span class="pill">In progress</span></td><td>1,030 (280%)</td></tr>
+          <tr><td class="t-name">Raya Elite launch events</td><td>Ahmed Farag</td><td><span class="pill">In progress</span></td><td>2 events</td></tr>
+          <tr><td class="t-name">AI adoption for CX &amp; Sales</td><td>Ahmed Farag</td><td><span class="pill">In progress</span></td><td>Mojeeb added</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>The two banners</h2>
+
+  <div class="spec">
+    <div class="cap"><span class="tag">Banner 1</span><p><b>A newer version is ready.</b> Shows when your tab is running an older build than the server — the exact cause of the reporting reversals. Warned here, you reload before a save can fail.</p></div>
+    <div class="banner warn">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      <div class="msg"><strong>A newer version of the platform is ready</strong><span>Reload to get it — your work is safe and already saved.</span></div>
+      <div class="acts"><button class="btn primary">Reload</button></div>
+    </div>
+  </div>
+
+  <div class="spec">
+    <div class="cap"><span class="tag">Banner 2 · simple</span><p><b>Someone else updated this page</b> — and you have no unsaved edits. A gentle nudge to see the latest.</p></div>
+    <div class="banner warn">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15 19a4.5 4.5 0 0 1 6.5-4"/></svg>
+      <div class="msg"><strong><span class="who">Sara Nabil</span> just updated this page</strong><span>Reload to see her latest figures.</span></div>
+      <div class="acts"><button class="btn primary">Reload</button><button class="btn ghost">Dismiss</button></div>
+    </div>
+  </div>
+
+  <h2>Banner 2, when <em>you</em> have unsaved edits — one decision to make</h2>
+  <div class="pair">
+    <div class="opt">
+      <h3>Option A · Keep your edits <span class="rec">(recommended)</span></h3>
+      <div class="banner warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15 19a4.5 4.5 0 0 1 6.5-4"/></svg>
+        <div class="msg"><strong><span class="who">Sara Nabil</span> updated this page while you were working</strong><span>Your changes are safe. Reload brings in her update and keeps yours on top.</span></div>
+        <div class="acts"><button class="btn primary">Reload &amp; keep mine</button></div>
+      </div>
+      <p class="note">Friendliest — nobody loses work. Slightly more to build (it re-applies your edits after reloading).</p>
+    </div>
+    <div class="opt">
+      <h3>Option B · Warn to copy first</h3>
+      <div class="banner warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15 19a4.5 4.5 0 0 1 6.5-4"/></svg>
+        <div class="msg"><strong><span class="who">Sara Nabil</span> updated this page while you were working</strong><span>Reloading replaces your unsaved changes with her latest — copy anything you need first.</span></div>
+        <div class="acts"><button class="btn primary">Reload</button><button class="btn ghost">Keep editing</button></div>
+      </div>
+      <p class="note">Simplest to build, but puts the burden on the person to not lose their typing.</p>
+    </div>
+  </div>
+
+  <h2>Why amber, and how it differs from the red you already have</h2>
+  <div class="legend">
+    <div class="row"><span class="sw w"></span><span><b>Amber — caution.</b> Nothing has gone wrong yet; act to stay safe. The two banners above.</span></div>
+    <div class="row"><span class="sw b"></span><span><b>Red — failure.</b> A save was refused or couldn't reach the server. Already in the platform today.</span></div>
+  </div>
+  <div class="spec" style="margin-top:14px">
+    <div class="cap"><span class="tag">Existing · red</span><p>For reference — the failure banner already in the platform, shown so the family reads clearly.</p></div>
+    <div class="banner bad">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      <div class="msg"><strong>That save couldn't be completed</strong><span>Nothing was changed. Try again, and tell the SMO if it keeps happening.</span></div>
+      <div class="acts"><button class="btn primary bad">Try again</button></div>
+    </div>
+  </div>
+
+  <div class="ask">
+    <h3>Two things to confirm</h3>
+    <p>1 · The overall look, wording, and placement above.&nbsp;&nbsp; 2 · For Banner 2 with unsaved edits — <b>Option A (keep your edits)</b> or <b>Option B (warn to copy)</b>? I recommend A.</p>
+  </div>
+</div>

@@ -1613,6 +1613,15 @@
      as well as grey — the italic is the alarm's own emphasis, and a fact
      does not need it. */
   .ritem .rgap.req { color:var(--ink-2); font-weight:600; font-style:normal; }
+  /* §279: A RED WORD ON A RAIL IS TYPE, SO IT TAKES THE TYPE RED. `--bad` is
+     a FILL colour and measures 4.49:1 against the rail row's ground in the
+     dark palette — §38.5 for the eighth time, and it was already there before
+     this section: §106.2's "N rows to check" on a project's rail is the same
+     class in the same place, so this repairs a reading nobody had measured as
+     well as the mark added beside it. Scoped to the rail's small line, never
+     to `.missing` at large — that word on a plan's white cell is measured and
+     fine, and widening this would be restyling pages nobody asked about. */
+  .ritem .rsub .missing { color:var(--bad-tx); }
   /* A page with nothing missing says so and points away (§145.14). */
   .emptynote { background:var(--surface-2); border:1px solid var(--line);
     border-radius:8px; padding:10px 14px; margin:0 0 12px; font-size:13px;

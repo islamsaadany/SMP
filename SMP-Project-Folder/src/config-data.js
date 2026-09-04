@@ -4194,9 +4194,6 @@ function capReported(c){
   return { done: n, total: total };
 }
 
-function capsReachable(){
-  return GROUP.capabilities.filter(function(c){ return reachesCap(c.id); });
-}
 function capsOfFunction(key){
   return GROUP.capabilities.filter(function(c){ return c.fn === key; });
 }
@@ -4790,11 +4787,29 @@ function reportItems(u){
   var out = [];
   /* §233: a hidden row is not asked — not counted means not owed, so it
      leaves the ask list, the note rule and the submit gate in one skip. */
+  /* §279: WHERE A ROW IS, carried on the row itself. The bar, the rail marks
+     and the walk all read it, and deriving it a second time in the renderer is
+     how a chip comes to open a pillar the count was never about. */
+  var koPlace = { key:"ko", label:L("keyobj","bu") };
   SMPRules.shown(u.keyObjectives).forEach(function(m){
-    out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"" });
+    out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"",
+               place:koPlace });
   });
   u.items.forEach(function(p, pi){
-    var head = pillarCode(u, pi) + " " + p.name;
+    var code = pillarCode(u, pi), head = code + " " + p.name;
+    /* The rail key is the rail's own, asked of the function that owns it
+       (§53.5) -- a literal "unit:" + key here is a second spelling of one
+       fact, and the pillars-function case ("unit:fn:<key>") is exactly where
+       a second spelling would quietly stop matching. */
+    /* THE RAIL IS ADDRESSED BY THE STORED CODE AND DRAWN WITH THE DISPLAY
+       ONE, and they are not the same string: `pillarCode()` renders the
+       tenant's prefix (BE03) while the rail's own button and `unitRailPick()`
+       match `p.code` (M03). Keying a chip on what the page SAYS is §48's rule
+       broken — address by the identifier, label with the word — and it would
+       fail invisibly on a tenant where the two happen to coincide. Found by
+       pressing Next and watching the rail not move. */
+    var place = { key:"p:" + (p.code || pi), label:code,
+                  rail:unitRailKey(u), code:p.code || "" };
     /* `owner` travels with the row so canReportRow() can answer without
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
@@ -4804,12 +4819,13 @@ function reportItems(u){
        so nothing a contributor could reach before the role existed moves. */
     SMPRules.shown(p.measures).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
-                 owner:p.owner, pown:p.owner });
+                 owner:p.owner, pown:p.owner, place:place });
     });
     SMPRules.shown(p.tactics).forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
-                 owner:t.owner, collaborators:t.collaborators, pown:p.owner });
+                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
+                 place:place });
     });
   });
   return out;
@@ -4886,23 +4902,30 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
 function fnReportItems(fk){
   var out = [];
   capsOfFunction(fk).forEach(function(c){
+    /* §279: a capability's objectives sit above its rail and each project is
+       one rail row, so the two are two places on one page. */
+    var koPlace = { key:"c:" + c.id, label:c.name };
     /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
     SMPRules.shown(c.keyObjectives).forEach(function(m){
-      out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true });
+      out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
+                 place:koPlace });
     });
     (c.projects || []).forEach(function(p){
       var head = c.name + " \u00b7 " + (p.code || p.name);
+      var place = { key:"pr:" + p.id, label:projCode(fk, p),
+                    rail:railKeyFor(c), code:p.id };
       SMPRules.shown(p.deliverables).forEach(function(d){
         out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
-                   asked:dueThisCycle(d.due), owner:p.owner });
+                   asked:dueThisCycle(d.due), owner:p.owner, place:place });
       });
       SMPRules.shown(p.outcomes).forEach(function(o){
         out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
-                   asked:outcomeDue(o), owner:p.owner });
+                   asked:outcomeDue(o), owner:p.owner, place:place });
       });
       SMPRules.shown(p.milestones).forEach(function(m){
         out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
-                   asked:dueThisCycle(m.finish), owner:m.owner || p.owner });
+                   asked:dueThisCycle(m.finish), owner:m.owner || p.owner,
+                   place:place });
       });
     });
   });
@@ -5027,6 +5050,76 @@ function submitWhyShort(target){
     " at risk with no note");
   if (!lines.length) return "";
   return "Cannot submit yet:\n\u2022 " + lines.join("\n\u2022 ");
+}
+/* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
+   Islam, from his own tenant: the report would not submit because something
+   needed a note, and there was no way to find it. Reproduced before anything
+   was drawn — every figure entered, the plan owing nothing, the gate held by
+   exactly one figure at risk with no note, and the pillar holding it up
+   wearing a green 4/4, because that tally counts figures ENTERED, which is a
+   different question. The row IS marked when it is on screen; the page draws
+   one pillar at a time, so it was not on the screen.
+
+   `submitBlockers()` has always known the rows. What it returns is four
+   COUNTS, and a count that cannot take you to what it counts makes work
+   (§16.7, §177.2's own lesson on the plan's half of this). These two
+   functions are that same list grouped by PLACE, so the bar, the rail marks
+   and the walk cannot disagree with the button they explain (§53.5).
+
+   ONE ROW IS ONE THING TO FIX, which is why this counts rows and the hover
+   counts reasons. A row that said In progress and gave no per-cent is BOTH
+   unanswered and pending — `statusGiven()` is false without the number — so
+   the gate's own arithmetic names it twice, correctly, in two sentences about
+   two rules. A bar that added those up would say "4 to finish" over three
+   boxes. `pend` is tested FIRST for the same reason the walk exists: what
+   that row is owed is the per-cent, so that is the control to land on. */
+function rowBlock(x){
+  if (statusPending(x.obj)) return "pend";
+  if (!rowAnswered(x))      return "owed";
+  if (needsNote(x))         return "note";
+  return "";
+}
+/* The places of a subject, in the order they are drawn, each carrying what it
+   owes and the ids of the rows that owe it. The rail and the code come off the
+   ROW (`place`, set where the rows are built), never re-derived here — two
+   answers to "which pillar is this" is how a chip comes to open the wrong one.
+
+   THE PLAN'S OWN GAPS ARE A PLACE TOO, and deliberately not a walkable one:
+   they hold Submit (§221) so they must be in the count, and they are filled on
+   the Strategy tab, where §272's bar already names and walks them. Leaving
+   them out would let this bar read "nothing to finish" over a Submit that is
+   still shut, which is the fault it exists to remove. */
+function reportPlaces(target){
+  var t = String(target || ""), seen = {}, out = [];
+  subjectAsked(t).forEach(function(x){
+    var pl = x.place || { key:"?", label:"" };
+    var e = seen[pl.key];
+    if (!e) {
+      e = seen[pl.key] = { key:pl.key, label:pl.label, rail:pl.rail || null,
+                           code:pl.code == null ? null : pl.code,
+                           owed:0, pend:0, note:0, count:0, rows:[] };
+      out.push(e);
+    }
+    var b = rowBlock(x);
+    if (!b) return;
+    e[b]++; e.count++; e.rows.push({ id:x.id, block:b });
+  });
+  var gaps = typeof gapTotalAll === "function" ? gapTotalAll(t) : 0;
+  if (gaps) out.push({ key:"plan", label:"In the plan", rail:null, code:null,
+                       plan:true, owed:0, pend:0, note:0, count:gaps, rows:[] });
+  return out;
+}
+/* What a place owes, in the words the page already uses for each rule — one
+   builder, because the rail's mark and the chip's hover are the same sentence
+   in two sizes and writing it twice is how they start disagreeing. */
+function blockWords(e){
+  var say = [];
+  if (e.plan) return plural(e.count, "item") + " missing in the plan";
+  if (e.owed) say.push(plural(e.owed, "figure") + " still to enter");
+  if (e.pend) say.push(plural(e.pend, "row") + " with no per-cent");
+  if (e.note) say.push(plural(e.note, "figure") +
+    (e.note === 1 ? " needs" : " need") + " a note");
+  return say.join(" · ");
 }
 function unitState(u){ return reportState(reportedCount(u), u.ukey); }
 function fnState(fk){ return reportState(fnReportedCount(fk), "fn:" + fk); }

@@ -6,12 +6,31 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§276 (the `Count` compile rule — a count is owed in
-whole ones) and §277 (a reported figure follows the target's unit) merged to
-`main` 2026-09-04 on Islam's word**, from
-`claude/integer-prorating-compilation-6dq77s`, on top of §260–§275 from other
-sessions; built as §260/§261 and renumbered at the merge because main had
-taken both numbers.
+**Latest version:** **§279 — the reporting page says where Submit is held —
+merged to `main` 2026-09-04 on Islam's word**, from
+`claude/smo-reporting-submission-m6gbwa`, on top of §274–§278.2 from five other
+sessions; built as §274 and renumbered at the merge because main had taken
+§274 through §278.2 while it was in flight.
+
+**What §279 is.** Islam, from his own tenant: *"the reporting is not submitting
+to the SMO as there is someting requires a note but I can't find it."* Every
+figure was in, the plan owed nothing, and the gate was held by a single row — in
+a pillar the page was not showing, since a unit's Reporting page draws one
+pillar at a time. The rail was worse than silent: the pillar holding the report
+up wore a **green 4/4**, because that tally counts figures *entered*. And a
+capability function had no note banner at all, so its Submit was refused with
+the reason on a hover and nothing on the page. From three options drawn in the
+running platform he chose **C**: §272's own missing bar, brought to Reporting —
+a count, one chip per place, and a **Next →** walk that opens the right pillar
+and puts the cursor in the box that is owed — counting all four things that
+hold Submit, with the plan's own gaps as a door to the Strategy tab. The rail
+carries the mark too, and stops showing green over a pillar that owes something.
+`checks/report-blockers.py` is **43 red** on the build before and **51 green**
+after.
+
+**Earlier:** §276 (the `Count` compile rule — a count is owed in whole ones)
+and §277 (a reported figure follows the target's unit), merged 2026-09-04 from
+`claude/integer-prorating-compilation-6dq77s`.
 
 **§266 — the master presentation — IS ON `main`**, merged 2026-09-03 on
 Islam's word (it was built as §261 and renumbered at that merge, because main
@@ -405,6 +424,17 @@ inside one. Fixed and re-measured.
 against the shipped build with the stray arrow, 3 red against the first attempt
 with the arrow gone from the panel. `cycle-edit`, `perf-line` and `setup-header`
 green; full `qa.py` sweep clean.
+
+**Merged to `main`** on Islam's word, after merging main's §279–§281 into the
+branch. Mine was renumbered §279 → §287 — main took the number while this was
+being built, and §287 rather than §282 deliberately: §282–§286 came off main
+with the chat-round revert but still live on their own branch, so a gap here is
+harmless where a collision would not be. The caret rule was asserted to have
+SURVIVED the merge (main still carried the unscoped selector, so a silent revert
+would have looked identical to a clean merge), the sources were grep'd for
+duplicate declarations — none, main's own §281 having swept them — the built
+file was rebuilt rather than merged, and `sw.js` bumped past a name main had
+already served.
 
 ### §273.5 — "Open a new cycle" drew nothing, on `main` (2026-09-04, same branch)
 

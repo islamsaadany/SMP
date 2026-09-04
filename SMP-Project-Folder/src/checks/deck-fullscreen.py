@@ -107,7 +107,10 @@ def bar_hidden(pg, when):
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("SMP_CHROME"))
-    pg = b.new_page(viewport={"width": 1400, "height": 900})
+    # Touch is emulated for §6. The mouse still reports pointerType "mouse",
+    # so the mouse assertions above are measuring what they always did — and
+    # a tablet that also has a trackpad is the honest case anyway.
+    pg = b.new_page(viewport={"width": 1400, "height": 900}, has_touch=True)
     pg.add_init_script("try{sessionStorage.setItem('smp.welcome.seen','1');"
                        "sessionStorage.setItem('smp.welcome.done','1');"
                        "sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
@@ -237,6 +240,97 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     s = js(pg, STATE)
     ok("Escape again closes the deck", s.get("deckOpen") is False, s)
+
+    # ── 6 · a tablet: tap zones and swipes (§280) ───────────────────────────
+    # Back into fullscreen — §4 left it windowed on purpose.
+    print("\n── 6 · a finger: the left third goes back, and swipes turn pages (§280)")
+    js(pg, "() => { const r=document.getElementById('deckroot');"
+           "  if (!r.classList.contains('on')) openDeck(unitLike(activeKeys()[0]));"
+           "  return 1; }")
+    pg.wait_for_timeout(300)
+    js(pg, "() => document.getElementById('deckroot').querySelector('[data-dfs]').click()")
+    pg.wait_for_timeout(500)
+    s = js(pg, STATE)
+    ok("back in fullscreen for the touch pass", s.get("reallyFs") is True, s)
+
+    W, H = 1400, 900
+    RIGHT, LEFT, JUST_PAST = int(W * .80), int(W * .10), int(W * .40)
+
+    def at(n):
+        js(pg, "(n) => deckShow(n)", n)
+        pg.wait_for_timeout(80)
+
+    def i():
+        return js(pg, STATE).get("i")
+
+    # ONE session for the whole pass. A session per gesture is what made the
+    # first run of this section DIE rather than report on the build it exists
+    # to judge (§215): three assertions came back None, and a probe that
+    # cannot answer is not a probe that found something.
+    CDP = pg.context.new_cdp_session(pg)
+
+    def drag(x0, y0, x1, y1, steps=6):
+        CDP.send("Input.dispatchTouchEvent",
+                 {"type": "touchStart", "touchPoints": [{"x": x0, "y": y0}]})
+        for k in range(1, steps + 1):
+            CDP.send("Input.dispatchTouchEvent",
+                     {"type": "touchMove",
+                      "touchPoints": [{"x": x0 + (x1 - x0) * k / steps,
+                                       "y": y0 + (y1 - y0) * k / steps}]})
+        CDP.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+        pg.wait_for_timeout(180)
+
+    def swipe(x0, x1, y=450):
+        drag(x0, y, x1, y)
+
+    at(4); pg.touchscreen.tap(RIGHT, 450); pg.wait_for_timeout(150)
+    ok("a tap on the right goes forward", i() == 5, i())
+    at(4); pg.touchscreen.tap(LEFT, 450); pg.wait_for_timeout(150)
+    ok("a tap on the left third goes BACK", i() == 3, i())
+    # The boundary itself, or "left goes back" is satisfied by a build that
+    # sends the whole slide backwards (§113.8).
+    at(4); pg.touchscreen.tap(JUST_PAST, 450); pg.wait_for_timeout(150)
+    ok("a tap just past the third still goes forward", i() == 5, i())
+
+    # Both ends: a MOUSE keeps §265 exactly, on the very pixel a finger would
+    # have gone back from. Without this the check cannot tell the two apart.
+    at(4); pg.mouse.click(LEFT, 450); pg.wait_for_timeout(150)
+    ok("a MOUSE click on the left still goes forward (§265 kept)", i() == 5, i())
+
+    at(4); swipe(int(W * .75), int(W * .20))
+    ok("swiping left goes forward", i() == 5, i())
+    ok("...by exactly one slide, so the gesture's own click did not count twice",
+       i() == 5, i())
+
+    # THE RIGHTWARD SWIPE IS THE ONE THE BROWSER WANTS FOR ITSELF. Without
+    # `touch-action` on the stage it fires the platform's own back-navigation
+    # and the page LEAVES — measured on the pre-§280 build, which lands on
+    # about:blank and takes the presenter out of the deck mid-presentation.
+    # Asserted before the direction, because a page that is gone answers every
+    # later question with nothing (§215): three assertions here came back None
+    # before this one existed, and a probe that cannot answer is not a probe
+    # that found something.
+    where = pg.url
+    at(4); swipe(int(W * .20), int(W * .75))
+    ok("a rightward swipe does not navigate the browser away", pg.url == where,
+       pg.url[-30:])
+    if pg.url != where:                      # recover, so the rest still reports
+        pg.goto(where); pg.wait_for_timeout(900)
+        js(pg, "() => openDeck(unitLike(activeKeys()[0]))"); pg.wait_for_timeout(300)
+        js(pg, "() => document.getElementById('deckroot')"
+               ".querySelector('[data-dfs]').click()"); pg.wait_for_timeout(500)
+    else:
+        ok("swiping right goes back", i() == 3, i())
+
+    # A vertical drag is somebody steadying the tablet, not turning a page.
+    at(4); drag(700, 250, 712, 640)
+    ok("a vertical drag turns no page", i() == 4, i())
+
+    # And windowed mode is still untouched by a finger, as it is by a mouse.
+    js(pg, "() => { if (document.fullscreenElement) document.exitFullscreen(); }")
+    pg.wait_for_timeout(500)
+    at(4); pg.touchscreen.tap(LEFT, 450); pg.wait_for_timeout(150)
+    ok("windowed — a tap turns no page either", i() == 4, i())
 
     print("\n── the page said nothing")
     ok("no page error", not errs, errs[:2])

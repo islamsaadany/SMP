@@ -2381,6 +2381,17 @@
        accepts typing — so the state is applied to what the paint just drew
        rather than baked into a second, unbound copy of the control (§96). */
     if (typeof monthlyLocks === "function") monthlyLocks();
+    /* §279: and mark the reporting controls the bar is counting — after
+       wire(), because it reads the DOM this paint produced, and in ONE place
+       rather than threading a flag through eight box builders (§53.5, §104.7:
+       a list of call sites is a list somebody forgets to add to).
+
+       BOTH, and in this order: §278 decides whether a box accepts typing and
+       this one decides whether a box is walked to, so they annotate the same
+       controls about different things and neither reads the other's mark. The
+       merge offered them as alternatives; they are not (§56.7's shape, caught
+       by reading the conflict rather than taking a side). */
+    if (typeof repMarkControls === "function") repMarkControls();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -2870,6 +2881,110 @@
       var samePage = cp === here &&
         (cp !== null || (c.dataset.gsec || "") === hereSec);
       if (!samePage) return gapGoTo(c);
+    }
+    if (els.length) gapLight(els[0]);
+  }
+
+  /* ══ WALKING WHAT HOLDS SUBMIT (§279) ═══════════════════════════════
+     The reporting half of §145.12's walk, and deliberately not the same
+     function: that one walks a PLAN's fillable blanks in fill mode, keyed on
+     `EDIT_PAGE` and `.gapwalk`; this walks a CYCLE's reporting controls, which
+     have no mode and are not the same controls. What IS shared is the cursor —
+     `gapLight()`, where every subtle lesson of §177.2 lives (the ring goes on
+     the walkable element, a §130.1 picker's ring belongs to its `.ssbtn`
+     sibling, focus without scrolling) — so there is one ring on the page
+     whoever put it there, and the two field lists are disjoint, so a cursor
+     left by the other walk simply reads as "nowhere" and this one starts at
+     the top.
+
+     THE MARKS ARE PUT ON IN ONE PLACE AND NOT AT EIGHT CALL SITES. Which
+     control answers a row's blocker is a fact about the row, so it is read off
+     the same map the bar counts (§272's rule: the walk follows whatever the
+     bar is counting) and applied to the DOM the paint just produced. Driven
+     from the CONTROLS rather than from the ids, so no id ever has to be
+     escaped into a selector. */
+  function repMarkControls(){
+    document.querySelectorAll(".repwalk").forEach(function(el){
+      el.classList.remove("repwalk");
+      el.removeAttribute("data-rplace");
+    });
+    if (!REPORTING || typeof reportPlaces !== "function") return;
+    var map = {};
+    reportPlaces(REPORTING).forEach(function(e){
+      e.rows.forEach(function(r){ map[r.id] = { block:r.block, place:e.key }; });
+    });
+    document.querySelectorAll("[data-rep],[data-crep],[data-cpick]," +
+      "[data-cpct],[data-note],[data-cnote]").forEach(function(el){
+      var d = el.dataset;
+      /* WHICH QUESTION THIS BOX ANSWERS. A status picker and a figure box are
+         both "the figure is not in yet"; the per-cent box is the row that said
+         In progress and did not say how far; the note box is the explanation.
+         A row is marked ONCE, on the control that answers what it actually
+         owes — which is why `rowBlock()` tests `pend` before `owed`: an
+         unanswered In-progress row is both, and the box to land on is the
+         per-cent. */
+      var id, kind;
+      if (d.rep != null)        { id = d.rep;   kind = "owed"; }
+      else if (d.crep != null)  { id = d.crep;  kind = "owed"; }
+      else if (d.cpick != null) { id = d.cpick; kind = "owed"; }
+      else if (d.cpct != null)  { id = d.cpct;  kind = "pend"; }
+      else if (d.note != null)  { id = d.note;  kind = "note"; }
+      else                      { id = d.cnote; kind = "note"; }
+      var m = map[id];
+      if (!m || m.block !== kind) return;
+      el.classList.add("repwalk");
+      el.setAttribute("data-rplace", m.place);
+    });
+  }
+  /* Scoped to ONE place when a chip has named one — a function's reporting
+     page draws every capability at once, so the page's first outstanding box
+     is not the chip's first (§177.2, the same fault one feature over). */
+  function repWalkFields(place){
+    var all = [].slice.call(document.querySelectorAll(".repwalk"));
+    if (!place) return all;
+    return all.filter(function(e){ return e.getAttribute("data-rplace") === place; });
+  }
+  /* The plan's own gaps are a door, never a walk stop: they are filled on the
+     Strategy tab, so a chip for them cannot be walked to from here. */
+  function repChips(){
+    return [].slice.call(document.querySelectorAll("[data-repband] .mchip:not([data-rplan])"));
+  }
+  /* A place is on screen when its controls are: only the drawn pane's exist,
+     so this asks the DOM rather than re-deriving which rail is showing. */
+  function repChipShown(c){ return repWalkFields(c.dataset.rkey).length > 0; }
+  var REPWALK_KEY = null;
+  function repGoTo(chip){
+    REPWALK_KEY = chip.dataset.rkey;
+    var place = chip.dataset.rkey;
+    if (chip.dataset.rrail) RAIL[chip.dataset.rrail] = chip.dataset.rcode;
+    paint();
+    if (typeof toPaneTop === "function") toPaneTop();
+    /* Queued, because a real press holds the paint until the click lands
+       (§30.1) and the marked controls do not exist until it has (§145.14's
+       own fault, and §177.2's). */
+    setTimeout(function(){
+      var f = repWalkFields(place);
+      if (!f.length) f = repWalkFields();
+      if (f.length) gapLight(f[0]);
+    }, 0);
+  }
+  function repWalk(){
+    var chips = repChips(), i = -1, a;
+    for (a = 0; a < chips.length; a++)
+      if (chips[a].dataset.rkey === REPWALK_KEY) { i = a; break; }
+    if (i < 0) for (a = 0; a < chips.length; a++)
+      if (repChipShown(chips[a])) { i = a; break; }
+    var here = i >= 0 ? chips[i].dataset.rkey : null;
+    var els = repWalkFields(here);
+    var cur = document.querySelector("[data-gapat]");
+    var at = cur ? els.indexOf(cur) : -1;
+    if (els.length && at < els.length - 1) return gapLight(els[at + 1]);
+    /* Exhausted here — the next PLACE in the bar's own order, so the walk
+       cannot shuttle between two and never reach the third (§177.2). */
+    var n = chips.length;
+    for (var step = 1; step <= n; step++) {
+      var c = chips[((i < 0 ? 0 : i) + step) % n];
+      if (c.dataset.rkey !== here) return repGoTo(c);
     }
     if (els.length) gapLight(els[0]);
   }
@@ -6939,6 +7054,33 @@
         return;
       }
       if (ev.target.closest("[data-nextgap]")) gapWalk();
+    });
+    /* ── THE REPORTING BAR'S CHIPS AND WALK (§279) ────────────────────
+       One handler on the band by delegation, exactly as the gap band's is —
+       and its own, because the two bands carry different attributes and a
+       shared handler would have to ask which bar it was on before every act
+       (§53.5 cuts the other way here: one function answering two questions).
+
+       THE PLAN CHIP IS A DOOR, NOT A WALK STOP. Those gaps hold Submit, so
+       they are in the count; they are filled on the Strategy tab, where the
+       plan's own bar names and walks them — so this chip opens that tab and
+       hands over rather than pretending it can fill them here (§16.7: a count
+       that cannot take you to what it counts makes work). The tab is found by
+       key because a unit's is `strategy` and a function's is `fnstrat`. */
+    var rband = document.querySelector("[data-repband]");
+    if (rband) rband.addEventListener("click", function(ev){
+      var chip = ev.target.closest("[data-rkey]");
+      if (chip){
+        if (chip.dataset.rplan){
+          var tab = document.querySelector('#subtabs [data-s="strategy"]') ||
+                    document.querySelector('#subtabs [data-s="fnstrat"]');
+          if (tab) tab.click();
+          return;
+        }
+        repGoTo(chip);
+        return;
+      }
+      if (ev.target.closest("[data-repnext]")) repWalk();
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never

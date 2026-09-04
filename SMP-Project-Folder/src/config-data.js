@@ -198,15 +198,15 @@ var PMENU = null;
    the two tables are never on screen together and sharing one would make
    "which table" a third thing to check. */
 var FNMENU = null;
-/* THE SAME STATE AGAIN, FOR THE BUSINESS UNITS TABLE (§261). Its own key for
+/* THE SAME STATE AGAIN, FOR THE BUSINESS UNITS TABLE (§272). Its own key for
    the reason FNMENU has its own: the three tables are never on screen together,
    and one shared key would make "which table" a third thing every reader of it
    has to check. */
 var UMENU = null;
-/* AND FOR COMPANIES (§261). */
+/* AND FOR COMPANIES (§272). */
 var COMENU = null;
 
-/* ── WHICH SETUP TABLE IS BEING ARRANGED (§261) ─────────────────────
+/* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────
    Islam: *"allow me in the setup to rearrange the business units table so they
    appear in the navigation as per this order."*
 
@@ -220,7 +220,7 @@ var COMENU = null;
    list itself and was already stored. */
 var SETARRANGE = null;
 
-/* ── WHICH ROW IS OPEN IN THE SETUP DIALOG (§261) ───────────────────
+/* ── WHICH ROW IS OPEN IN THE SETUP DIALOG (§272) ───────────────────
    `{ table, key }`, the register's `PDLG` one table wider. Editing left the row
    for the same reason it left the register (§116): every collision these tables
    have had was a control clicked inside a 150px cell, and none of them survives
@@ -258,6 +258,12 @@ var PROLES = null;
    presses Open, or a half-filled form would already have closed the cycle it
    was going to succeed. */
 var NEWCYCLE = null;
+/* The OPEN cycle being edited (§273). Null when the pen is shut. A draft for
+   the same reason NEWCYCLE is one -- nothing reaches REVIEW until Save, so
+   Cancel writes nothing -- and it is a SECOND variable rather than a reused
+   one because the two panels answer different questions and could otherwise
+   only be told apart by which state the cycle happens to be in. */
+var CYCLEEDIT = null;
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
@@ -997,7 +1003,7 @@ function restoreRolePointers(was){
     f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
   });
 }
-/* WHICH TABLES CAN MOVE A ROLE (§110, widened in §261). A person's roles are
+/* WHICH TABLES CAN MOVE A ROLE (§110, widened in §272). A person's roles are
    not ON the person and a unit's head is not ON the unit either: `UNIT_ROLES[k]
    .head` and `FUNCTIONS[k].custodian` are pointers, and `ROWWAS` is a copy of
    the ROW. So Cancel on a unit whose head had just been changed restored the
@@ -5125,6 +5131,48 @@ function boardPlansLikeUnit(target){
    that a page must be able to say NOTHING is here rather than draw an empty
    shape. The quarter is always known (it is a number, not a date), so it is
    always said. */
+/* ── EDITING THE CYCLE THAT IS RUNNING (§273) ─────────────────────────
+   Islam: "allow me to edit the cycle name. give me an edit button the cycle to
+   edit the date as you already built and the cycel name edit as well" — and
+   then, of the two shapes drawn for him: "keep the close cycle inside the
+   edit. as it's a critical button to click, the pen should hold everything
+   editable so it's kept secured."
+
+   Until now a cycle's name and its three dates were written ONCE, when it was
+   opened (§47.8), and were plain text ever after — so a typo in the name, or a
+   due date that moved, could only be corrected by CLOSING the cycle and
+   opening another, which archives and clears every figure in the tenant
+   (§49.1). The review point was the one thing that could be changed while the
+   cycle ran (§239), and it was changed in place on the strip.
+
+   THE DRAFT IS A DRAFT, exactly as `NEWCYCLE` is: nothing touches REVIEW until
+   Save, so Cancel writes nothing and there is no half-applied state to undo.
+   `asOfMonth` is carried only when it is SET, or opening the pen on a cycle
+   that never picked one would put an empty key into the draft and saving it
+   would write a phantom change into every later save (§50.6, §42's
+   `branding()` fault).
+
+   AND THE SECOND HALF IS WHY THE FIRST IS SAFE. With Close now inside the pen
+   it sits beside four fields somebody may have typed into, and closing files
+   this cycle's figures under its NAME — so `cycleEditDirty()` is what stops a
+   press from either quietly saving a rename or quietly throwing one away.
+   Compared TRIMMED against the stored cycle, so re-typing the same value with
+   a stray space is not a change to hold anybody up over (§96.2 is about what
+   is STORED; this is about whether anything moved). */
+function cycleDraft(){
+  var d = { name:String(REVIEW.name || ""), from:String(REVIEW.from || ""),
+            to:String(REVIEW.to || ""), due:String(REVIEW.due || "") };
+  if (REVIEW.asOfMonth) d.asOfMonth = REVIEW.asOfMonth;
+  return d;
+}
+function cycleEditDirty(){
+  if (!CYCLEEDIT) return false;
+  var same = ["name", "from", "to", "due"].every(function(k){
+    return String(CYCLEEDIT[k] || "").trim() === String(REVIEW[k] || "").trim();
+  });
+  return !same || String(CYCLEEDIT.asOfMonth || "") !== String(REVIEW.asOfMonth || "");
+}
+
 function cycleMeta(){
   var bits = [];
   var from = String(REVIEW.from || "").trim();
@@ -5320,9 +5368,35 @@ function reaches(unitKey){
    case of a general one and this function is that one asked about the plan.
    `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
    answer is the shared file's so the screen and the server cannot drift. */
+/* ── ASK THE COLUMN THE SAVE ASKS (§270, closing §217's other half) ──
+   §217 fixed the SERVER: `lib/authorize.js` resolves every strategy question
+   through `strategyPageOf()`, so a supporting function's plan is judged by the
+   FUNCTION's Strategy column. The SCREEN never caught up — it passed the raw
+   `u_found` / `u_anal` / `u_plan` at some twenty call sites, which on an `fn:`
+   target reads the BUSINESS UNIT's column instead. Two different questions
+   about one act, which is the drift `lib/rules.js` exists to prevent (§42).
+
+   MEASURED BEFORE AND AFTER, and today it costs nobody anything: every role's
+   two Strategy columns hold the same value on this tenant, so there are zero
+   disagreements and editing is the office's in any case. Set them differently
+   — which is the whole point of §117's split — and six people are handed an
+   Edit pen the save refuses, or refused one it would have accepted. This
+   closes the trap before it is armed.
+
+   IN THE WRAPPERS, NOT AT THE CALL SITES. The server resolves at each of its
+   six; the browser has twenty and would acquire a twenty-first the day
+   somebody adds a `gapCell`. One place, so a call site cannot forget (§104.7).
+   `strategyPageOf()` passes an unmapped key through untouched (§270), which is
+   what makes it safe to ask of every key rather than of a list somebody keeps.
+
+   NOTHING WIDENS: it can only ever move the screen onto the answer the save
+   was already giving. */
+function strategyAc(acKey, target){
+  return SMPRules.strategyPageOf(target === undefined ? TARGET : target, acKey);
+}
 function mayAuthor(acKey, target){
-  return SMPRules.mayAuthorPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
 /* MAY THIS PERSON FILL THIS PAGE'S GAPS (§145)? A wrapper, never a second
@@ -5330,15 +5404,19 @@ function mayEditPlan(){ return mayAuthor("u_plan"); }
    fill field the screen draws and the save the server accepts cannot
    disagree (§42). */
 function mayFill(acKey, target){
-  return SMPRules.mayFillPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+  /* §270: the same resolution, because `lib/authorize.js` judges a fill on a
+     function through `planPageOf()` (its own `strategyPageOf`) — fixing one
+     half and leaving the other is how the two came to disagree in the first
+     place (§53.5). */
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
    {project} or {pillarOwner} -- so a project owner fills their own project
    and a pillar owner their own pillar, and nobody fills a neighbour's. */
 function mayFillRow(acKey, ctx, target){
-  return SMPRules.mayFillRow(world(), viewer(), acKey,
-    target === undefined ? TARGET : target, ctx);
+  var t = target === undefined ? TARGET : target;   /* §270, as mayFill */
+  return SMPRules.mayFillRow(world(), viewer(), strategyAc(acKey, t), t, ctx);
 }
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
@@ -5760,8 +5838,12 @@ function elapsedShare(){
    "Latest" is a rate or a share at a point in time and "Average" is already
    normalised, so neither has anything to prorate -- and with no baseline
    stored, prorating them would be inventing a glide path. Measured on the
-   shipped tenant: 32 of 137 rows are Sum. */
-function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum"; }
+   shipped tenant: 32 of 137 rows are Sum.
+
+   §276: ASKED OF THE SHARED RULE, because `Count` joined `Sum` and the list of
+   what prorates is now the list of what the workbook validates and the pen
+   offers — one place, or the picker offers a rule the scorer does not know. */
+function prorates(m){ return SMPRules.prorates(m && m.compile); }
 /* The number this row is actually measured against right now.
    PRORATE THE TARGET, THEN COMPARE -- never the ratio. Dividing a score by the
    elapsed share is right for "more is better" and exactly backwards for "less
@@ -5795,11 +5877,56 @@ function measureDue(m, share){
      test is unchanged; what changes is that this asks for it rather than
      carrying its own copy of the same expression. */
   if (!SMPRules.targetHasNumber(m.target)) return null;
+  /* ── §278: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
+     Twelve numbers in the target's own unit, compiled by the row's own
+     compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
+     supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
+     its own window, and a monthly plan already states what every month is
+     expected to carry — including the noughts for the months the thing does
+     not run in — so it is the more specific answer and prorating it again by
+     the window would count the same season twice.
+
+     THE MONTH COMES FROM THE REVIEW POINT, which is the one place the
+     product answers "how far through the year are we" (§239.1). With no
+     readable review point there is no month to compile to, so the row falls
+     through to the flat path and reads exactly as it does today: a plan
+     nobody can date must not become a plan nobody can score. */
+  var mp = elapsedMonths();
+  if (mp != null) {
+    var md = SMPRules.monthlyDue(m, mp);
+    if (md != null) return md;
+  }
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;
   var s = share == null ? elapsedShare() : share;
-  return s == null ? t : t * s;
+  var due = s == null ? t : t * s;
+  /* ── A COUNT IS OWED IN WHOLE ONES (§276) ─────────────────────────
+     Islam: a target of 2 shops at month 8 "asks for 1.3 stores which is not
+     feasible ... it should prorate for the closest integer maybe of the
+     lowest". ROUNDED DOWN, his call: a shop is not owed until its whole share
+     of the year has passed, so 2 shops owe nothing until June, one from June,
+     two in December. Nearest rounding would owe the second shop from
+     September — 1.5 read from the other side.
+
+     THE EPSILON IS NOT DECORATION. `3 * (4/12)` is 1 in JavaScript and
+     `7 * (3/12)` is 1.7499999999999998, so a floor taken on the raw product
+     could owe one fewer than the arithmetic means on the month a whole unit
+     falls due; a hair above the product rounds only what is genuinely there.
+
+     DUE CAN NOW BE NOUGHT while the target is not, and that is a real state:
+     `measureScore` leaves such a row out of every average (nothing has been
+     asked yet — §35, §104.10), `measureDueLabel` says nothing rather than
+     printing "0 #", and the Performance page reads "Nothing due yet"
+     through `nothingDueYet()` rather than "Not scored". */
+  return SMPRules.wholeUnits(m.compile) ? Math.floor(due + 1e-9) : due;
+}
+/* Is this row a whole-unit count with nothing owed yet? Asked by the
+   surfaces that would otherwise print "Not scored" over a row that has simply
+   not been asked — the two mean different things (§35). */
+function nothingDueYet(m, share){
+  return !!(m && SMPRules.wholeUnits(m.compile) && !SMPRules.isYesNo(m.target)
+            && SMPRules.targetHasNumber(m.target) && measureDue(m, share) === 0);
 }
 /* WHAT THE ROW SCORES. Derived, never stored -- `m.progress` goes on holding
    the raw actual-against-the-ANNUAL-target ratio exactly as it always has, so
@@ -5822,6 +5949,14 @@ function measureScore(m, share){
      (§250 prorates a TARGET, and this row has no number to prorate). */
   if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
+  /* §278: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
+     Before a monthly plan existed this guard only ever caught a target of
+     nought, which is meaningless; a monthly plan makes it reachable on
+     purpose — a row planning nothing until July is owed nothing in June.
+     Not scored is what the product already says about work that has not
+     started (§250's not-due branch, tacticDue), and scoring it 100 would
+     credit a row that has done nothing while scoring it 0 would mark down a
+     unit for a month its own plan left empty. */
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
   if (isNaN(a)) return null;
@@ -5878,8 +6013,14 @@ function outcomeOf(t){
      is Islam's "a dash is not an entry" falling out of a rule already
      there rather than needing a second one. */
   if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
+  /* §278: AND ITS OWN MONTHLY PLAN. The outcome is normalised into a
+     measure here precisely so one arithmetic serves every scored row
+     (§248), so the twelve months ride across under the name the rules
+     module reads — `outMonthly` on the tactic, `monthly` on the shape.
+     Without this line the drawer would write a plan that nothing reads. */
   return { dir: t.outDir || "\u2265", target: t.outTarget,
-           compile: t.outCompile, actual: t.outActual };
+           compile: t.outCompile, actual: t.outActual,
+           monthly: t.outMonthly };
 }
 /* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
    open cycle: a tactic is read the OLD way until its outcome has both a target
@@ -5942,6 +6083,10 @@ function tacticProgress(t){
 function measureDueLabel(m, share){
   var due = measureDue(m, share);
   if (due == null) return null;
+  /* §276: a count with nothing owed yet says so in words (`nothingDueYet`),
+     never as "/ 0 #" beside a figure — a benchmark of nought is not a
+     benchmark. */
+  if (due === 0 && SMPRules.wholeUnits(m.compile)) return null;
   /* JOINED THE PLATFORM'S OWN WAY, never by hand: `18B EGP` keeps its spelling,
      so the benchmark reads `9B EGP` beside it rather than `9 B EGP`. One
      joiner, the same one the reporting page uses to put a typed figure back
@@ -6067,9 +6212,7 @@ function gapMap(target, all, fillable){
        §205's lesson from the other side: that one recorded a cell the screen
        OPENED and the server refused; this is a cell the server ACCEPTS and
        the screen never opens. */
-    if (fillable)
-      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
-        return SMPRules.gapEmpty(f, row); }).length;
+    if (fillable) return SMPRules.gapEmptyFields(kind, row).length;
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -6213,6 +6356,34 @@ function seesGaps(target){
   return SMPRules.FILL_PAGES.some(function(pg){
     return mayFill(pg, t) || mayAuthor(pg, t);
   });
+}
+/* ── AND WHO IS SHOWN WHAT IS MERELY EMPTY (§272) ────────────────────
+   Islam, on Mobile and then Care: *"mobile keeps showing filling what's
+   missing while we can't find something missing and there is no the side
+   badges that identify where the missing part is."*
+
+   Reproduced by MAKING the state rather than by reading it: with every
+   counted gap on Mobile filled and the collaborators left alone, `gapTotal`
+   is 0 and `gapOpenable` is 22 — §223's door drawn with no count, no chips
+   and no rail marks, because those three read the COUNTED list and there is
+   nothing in it. Both halves were behaving as decided (§187 ruled a tactic
+   nobody supports is not missing; §205 kept the box fillable); nothing
+   joined them up, so the way in was drawn and the destination was not.
+
+   THE OFFICE IS NOT SHOWN IT AT ALL, which is the half that answers what he
+   was looking at. `mayFillPage` refuses the office outright — their write
+   settles, so they hold the pen — and with nothing owed the door is a second
+   way into a page they can already edit, wearing a word that does not apply
+   to them (§94.15's argument: a control with no audience of its own is a
+   duplicate, not a choice). The moment anything is genuinely MISSING the red
+   count, the chips and the button come back for everybody exactly as before:
+   this narrows one register and touches neither the other nor any count.
+
+   ASKED HERE AND NOWHERE ELSE, so the bar, the rail and the walk cannot
+   answer it three ways (§53.5). */
+function seesEmpty(target){
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.FILL_PAGES.some(function(pg){ return mayFill(pg, t); });
 }
 function tacticRatio(t){
   var p = tacticPlanned(t);

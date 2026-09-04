@@ -60,7 +60,7 @@ with sync_playwright() as p:
        pg.evaluate("() => document.querySelectorAll('.eyebtn').length") == 0)
 
     # ── 2 · the pen's eye writes, and the score agrees ──────────────────
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     eyes = pg.evaluate("""() => ({
       n: document.querySelectorAll('.eyebtn').length,
@@ -117,7 +117,7 @@ with sync_playwright() as p:
        blank_gap["without"] == blank_gap["withHide"] + 1, blank_gap)
 
     # ── 3 · read mode says so, deck says nothing ────────────────────────
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     read = pg.evaluate("""(id) => {
       const chip = document.querySelector('tr.hiddenrow .hidchip');
@@ -155,7 +155,7 @@ with sync_playwright() as p:
     ck("...and the reader brings the mark back", wb["back"] == "1", wb)
 
     # ── 5 · the same press shows it again, key DELETED ──────────────────
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     press(pg, '.eyebtn[data-hiderow="%s"]' % before["id"]); pg.wait_for_timeout(400)
     back = pg.evaluate("""(id) => {
@@ -165,7 +165,7 @@ with sync_playwright() as p:
     }""", before["id"])
     ck("shown again: the key is DELETED, not false", not back["key"], back)
     ck("...and the score is back", back["perf"] == before["perf"], (back, before))
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(400)
 
     # ── 6 · a milestone on a function, and the project band has no eye ──
@@ -175,7 +175,7 @@ with sync_playwright() as p:
         if on and on[0] == "Functions": break
         pg.click("#units .navswitch"); pg.wait_for_timeout(150)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
-    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     fn = pg.evaluate("""() => {
       const onBand = document.querySelectorAll('.pband.edband .eyebtn').length;

@@ -547,7 +547,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   for it). 12 red on the §273 build; the check's own first run measured
   `{none:true}` everywhere because §8 reloads the page and §9 sat after it
   (§50.6). One assertion REVERSED and REWRITTEN, not deleted (§218).
-- **THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§279):** Islam, of
+- **THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§287):** Islam, of
   the closed cycle strip — *"what is the arrow function here beside the open new
   cycle?"* **It has none.** `.fstrip-head::after` drew a `▸` as a BARE CLASS
   selector, beside a rotate rule scoped to `details.fstrip` — so the mark saying
@@ -5424,7 +5424,7 @@ python3 checks/cycle-edit.py    # editing the cycle that is running (§261): the
                                 # pen's inks measured with the sweep's own function; and
                                 # §11 over HTTP, because a save cannot be seen over
                                 # file:// at all — 46 red on the build before
-python3 checks/fold-caret.py      # the caret belongs to the disclosure (§279): the two
+python3 checks/fold-caret.py      # the caret belongs to the disclosure (§287): the two
                                 # strips that do NOT fold draw none, open and closed,
                                 # and the panel that DOES keeps its caret AND its
                                 # rotate — both ends, or a build that deleted the rule

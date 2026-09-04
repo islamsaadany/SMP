@@ -1,4 +1,4 @@
-"""THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§279).
+"""THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§287).
 
 Islam, of the closed Reporting cycle strip: *"what is the arrow function here
 beside the open new cycle?"* It has none. `.fstrip-head::after` was written as a

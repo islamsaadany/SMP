@@ -382,7 +382,7 @@ own first failures were one fault: Edit is a TOGGLE now, so a section pressing i
 blind shuts the pen a previous section left open. Mockup:
 `design-mockups/cycle-name-date-edit/2026-09-03_editing-strip-structures.html`.
 
-### §279 — the caret belongs to the disclosure, not to the class (2026-09-04)
+### §287 — the caret belongs to the disclosure, not to the class (2026-09-04)
 
 Islam, of the closed Reporting cycle strip: *"what is the arrow function here
 beside the open new cycle?"*

@@ -32923,7 +32923,7 @@ Verified after the merge, not before: 520/0 authoriser, 131/0 differ,
 own `unit-follows`, `count-compile`, `monthly-plan`, `fn-perf-controls` and
 `master-picker` green beside them.
 
-## §279 — THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (2026-09-04)
+## §287 — THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (2026-09-04)
 
 Islam, of the closed Reporting cycle strip: *"what is the arrow function here
 beside the open new cycle?"*

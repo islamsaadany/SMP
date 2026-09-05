@@ -26275,7 +26275,87 @@ Proved able to fail: **4 red** on the pre-§237 build. `viewer-switch.py`
 `boot-skeleton`, `save-fidelity`, `report-saves`, `gap-fill`, `submit-gate`,
 the differ (126/0), the authoriser (451/0) and the full `qa.py` sweep green
 on the same build.
-## §239
+## §238 — A CSP NET BEHIND THE ESCAPING, AND NO DEV FILES SERVED (2026-09-01 security sweep)
+
+> *Recorded 2026-09-05, four days after it shipped. Both halves have been live
+> on production since the 1st and both were referenced by number from §276,
+> §282 and §287 as though they had a section — and they had none. That is a
+> Principle II failure on two changes nobody would want unwritten: a security
+> posture and what the deployment serves. The lateness is part of the record.*
+
+§235 fixed the escaping — `esc()` was a text-node escaper being used inside
+double-quoted attributes ~226 times, so a literal `"` in tenant data broke out
+and an injected `onfocus=`/`onerror=` RAN in the reader's browser. That fix is
+the answer. **THIS IS THE NET UNDER IT**, and the argument for a net is that
+the escaper is one function reached from hundreds of places and the next gap
+will look exactly like the last one: correct at every call site, and one call
+site that builds its own markup.
+
+**THE POLICY IS HASHED AT BUILD TIME, WHICH IS THE ONLY REASON IT IS SAFE.**
+`build.py` (`csp_meta()`) takes the SHA-256 of every inline `<script>` block's
+exact bytes and writes them into a
+`<meta http-equiv="Content-Security-Policy">` at the head of the built file,
+with `script-src` allow-listing those hashes and nothing else inline. **The
+whole danger of a hashed CSP is a stale hash — a page that will not load —
+and it cannot go stale here, because the hashing happens in the same build
+that emits the scripts it is hashing.** A build that is not byte-identical is
+already a stop-the-line condition (Principle III); this rides that.
+
+**IT IS A SECOND POLICY, NOT A REPLACEMENT.** `vercel.json`'s header still
+carries `'unsafe-inline'`, and must: it applies to every path including the
+GATE (`index.html`), which is not built by `build.py` and therefore has no
+hashes. The meta is scoped to the platform file alone. A browser enforces both
+policies, so a script must satisfy each — the real blocks pass on their hash,
+an injected handler passes neither. **Only `script-src` is set**, so nothing
+else about the policy changes and no other subresource behaviour moves.
+
+**NOTHING LEGITIMATE RELIES ON INLINE EXECUTION**, checked rather than
+assumed: every handler in the platform is added with `addEventListener` and
+nothing injects a `<script>` at runtime. Proved by `checks/csp-net.py` over
+HTTP — the real blocks run, an injected `onerror=` does NOT fire — and by a
+full `qa.py` walk of every page as every viewer, ERRORS none.
+
+**AND IT HAS A COST NOBODY PREDICTED, RECORDED IN §276**: a check that
+falsifies a build by EDITING THE BUILT FILE now silences the whole script
+block whose bytes it changed, so every function vanishes and the check reports
+*cannot continue* rather than failing. Broken builds are made from the SOURCES
+through `build.py`, and a check that needs one takes `SMP_BUILT` to be pointed
+at a copy. That is the right trade — the falsification technique changed, the
+product did not — but it is a real change to how this project proves things,
+and it arrived silently.
+
+### §238.1 — The deployment stopped serving its own workings
+
+Separately, and found in the same sweep: `src/`, the in-repo `checks/`,
+`scripts/`, `design-mockups/`, `ui-versions/`, `specs/`, `.specify/`,
+`clients/`, `smp-app/` and every `.md` were **publicly fetchable** on the
+deployment. **No secrets were ever exposed** — every credential is a server
+environment variable read in one place (§72, §231), and the client rules ship
+inline in the built file by design (§42) — so what leaked was implementation
+detail, not access. It is still not the deployment's to serve.
+
+`.vercelignore` excludes them. **`lib/` and `db/` are deliberately KEPT**,
+because the `api/*` functions require them: excluding a path removes it from
+the function bundle as well as from static serving, so anything the runtime
+needs may never appear in that file. That is the documented residual — server
+source, still no secrets — and it is stated rather than implied.
+
+Verified on production after the deploy rather than reasoned about
+(§91.5's rule, one surface out): `scripts/`, `smp-app/` and the sources answer
+404; the gate, the platform and `/api/state` answer 200.
+
+### §238.2 — What this sweep did NOT do
+
+**The server-side database write.** Every save still cleared and rewrote all
+31 tables, whatever changed. The acute cost was already gone (§195 batched the
+reads and writes, 236 network crossings to 45), and closing the rest means an
+incremental writer or a read-authorise-write lock on the LIVE write path —
+**the one change in this product that can corrupt a client's data**. So it was
+recorded here as needing its own staged pass rather than folded into a security
+afternoon. §240 took the lock the same day; §241 took the writer, behind a
+flag, and is the section that closes this one.
+
+## §239 — YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (2026-09-01)
 
 **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED.**
 
@@ -26541,6 +26621,101 @@ change is negligible. The larger "write only the changed rows instead of
 rewriting every table" optimisation is a separate, riskier piece and is NOT
 done here; the acute cost it targeted was already removed by §195's batching.
 ---
+
+## §241 — WRITE ONLY WHAT CHANGED (2026-09-01, merged flag-off; activated later)
+
+> *Recorded 2026-09-05. Merged on the 1st behind a flag, activated on
+> production at Islam's direction after that, and referenced by number from
+> §282 and §288 as though it had a section — and it had none. Like §238, the
+> lateness is part of the record: this is the live database write path, which
+> is the last thing in the product that should be undocumented.*
+
+**§238.2 NAMED THIS AND DEFERRED IT, AND THIS IS THE OTHER HALF.** Every save
+cleared and rewrote all 31 tables whatever changed — a one-word edit to a
+tactic's name rewrote every unit, every function, every capability and the
+whole register. §195 had already taken the acute cost out (236 network
+crossings to 45, by batching), so what is left is not a fire: it is that the
+write is O(the tenant) when the change is O(one row), and that scales the
+wrong way.
+
+**IT READS THE CHANGE LIST THE CLIENT ALREADY SENDS.** §210 and §215 made a
+save carry what changed rather than the whole graph, for data-safety reasons
+that had nothing to do with speed — and that list is exactly the input this
+needs. `writeStateIncremental` works out which SUBJECTS a change touches — a
+business unit, a supporting function, a capability — and rewrites only those.
+Nothing new is sent, nothing new is stored, and no new decision is made about
+what a change means.
+
+**IT IS NEVER WRONG, ONLY SOMETIMES UNOPTIMISED**, and that is the whole
+safety argument. `planSubjects()` is deliberately conservative and returns
+**null** for every shape it does not handle — any deletion, any reorder or
+add/remove of a top-level list, a settings change, the register, a group-own
+field, a whole-graph post from a tab on an older build — and the caller then
+runs the full `writeState` exactly as before. So the set of shapes it
+optimises can grow over time without any of them becoming load-bearing: an
+unrecognised shape is not a failure, it is the old behaviour.
+
+**IT REBUILDS ROWS WITH THE FULL WRITER'S OWN BUILDERS.** `rowsOf`, `colsFor`,
+`splitRow` and the `E` descriptors were lifted to module scope rather than
+copied, so a rewritten subject is **byte-identical** to what a full rewrite
+would have written — which is a property that can be asserted rather than
+argued, and is what `scripts/test-incremental-write.js` asserts: **17 change
+shapes, each written BOTH ways against a real Postgres and compared**, with
+the optimised shapes asserted handled and the fallback shapes asserted
+fallen-back. A test that only checked the optimised ones would pass on a build
+whose `planSubjects` had quietly started returning null for everything.
+
+**ONE DELETE CLEARS A SUBJECT'S SUBTREE**, because the foreign keys already
+cascade — a unit takes its clauses, objectives, SWOT and pillars, and pillars
+take their measures and tactics; a capability takes its objectives and
+projects, and projects take their deliverables, outcomes and milestones — and
+the reinsert order is parent before child, which every FK already requires.
+Nothing about the schema changed.
+
+**IT RUNS INSIDE THE CALLER'S TRANSACTION, UNDER §240's LOCK.** It does not
+open or close one of its own, or the advisory lock would release mid-write and
+the concurrency guarantee bought that same day would be given straight back.
+
+### §241.1 — Merged switched off, on purpose
+
+It went to `main` **behind `SMP_INCREMENTAL_WRITE`, off by default**, so
+merging it changed no behaviour at all: with the flag unset the module-scope
+refactor is the only thing that reached production, and that is
+behaviour-neutral by construction. Re-verified at the merge rather than
+claimed — the full database suite (round trip, two tabs, concurrent saves)
+green **both flag-off and flag-on**, the 17-shape equivalence byte-identical,
+and a **120-save concurrency stress losing nothing either way** (flag-on about
+four times faster). Fully revertible: flag-off is dormant, so a revert, or
+simply leaving the flag alone, is a no-op on live behaviour.
+
+**Then it was switched on for production at Islam's direction**, after the
+sweep proved nothing was lost. *What is asserted here is the code and the
+tests, which are in this repository; the state of an environment variable on
+the deployment is not something this document can verify, and it is recorded
+as an instruction carried out rather than as a measurement.*
+
+### §241.2 — A save says which way it was written
+
+A dark feature nobody can see running is one nobody can trust, so `/api/state`
+reports it: the success body carries **`wrote: "incremental"`** or
+**`"full"`**, mirrored by one `[save]` line in the runtime log. **It is a
+diagnostic and not a second decision** — the writer is chosen exactly as it
+was, and this only says which one ran (§171's rule: a thing that can fail
+invisibly must be visible to the operator, even when the failure mode here is
+merely "it fell back").
+
+### §241.3 — What still falls back, and why that is fine
+
+A capability **reorder or add/remove**, every group-own field, and all the
+settings and register tables. Each is a safe future extension of
+`planSubjects`, and each is today simply the old write. **The list is recorded
+so that adding one is a decision somebody makes rather than a gap somebody
+finds** — and so that the next person to read `planSubjects` knows its `null`
+branches are deliberate, not unfinished.
+
+**And §288 later leaned on this**: when the whole-graph clear stopped being a
+`TRUNCATE`, the argument that the remaining churn is bounded rests on most
+saves never reaching that path at all — which is true only while this is on.
 
 ## §242 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)
 

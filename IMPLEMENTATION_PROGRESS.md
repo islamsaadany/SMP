@@ -138,8 +138,9 @@ decision: `chaseDue()` and `chase_html` are gone, the column stays unread.
 
 ## Documentation sweep, 2026-09-05
 
-A pass over the whole platform's documentation against spec-kit. **No product
-code was touched.** What it found and what was done:
+A pass over the whole platform's documentation against spec-kit. It touched no
+product code **except one thing it found and Islam asked to be fixed** — see
+*The one defect, and the fix* at the end. What it found and what was done:
 
 - **§238 and §241 had no section in the decisions document at all**, while being
   referenced by number from §276, §282, §287 and §288 as though they had one.
@@ -201,11 +202,35 @@ None of them is a model anybody has to reconstruct, which was the test applied
 throughout: **a section gets a spec when reading it alone does not tell you how
 the thing works.**
 
-**One defect found and deliberately not fixed:** `src/config-data.js` cites
-§264 three times for the yes/no behaviour recorded at §257 — a number carried
-from before a merge renumbered it. Correcting a comment in product source pulls
-in a rebuild, the §238 CSP hashes and a shell bump, so it is a merge-shaped
-change and it is Islam's to schedule (recorded in spec 031 §15).
+### The one defect, and the fix (§264.3)
+
+Writing spec 031 turned up **17 comments in `config-data.js` and
+`group-render.js` citing §264 for the yes/no target behaviour, which is recorded
+at §257** — §264's body mentions `Y/N` nought times, against 34 in §257's. Islam
+asked for it to be fixed rather than left to ride along with a later change.
+
+**The cause ran the opposite way from the obvious guess**, which is why it is
+worth recording rather than just correcting. Both features were renumbered on
+their merges, and the Y/N comments had already been renumbered **correctly** to
+§257. It was §264's own merge — renumbering *its* §257 → §264 with a blanket
+sweep of the sources — that took main's along with its own. The arithmetic is
+exact: main carried 3 + 14 such citations, the branch 1 + 8, and the merged
+files hold 4 + 22. Every one of main's, none spared.
+
+**A renumber is scoped to the lines the renumbering branch wrote** — after a
+merge the sources are not all yours — **and it is silent**, because the number
+it produces is a real section, so nothing parses wrong and no check can see it.
+
+The two sets were separated twice by different methods (reading every comment;
+matching each line's text against main's own §257 lines at the merge parent),
+both naming the same 17. The 9 genuinely about the headline, the breakdown and
+the derived score keep §264. **Nothing on any screen moves**: the built file
+differs by those 17 comment lines and one §238 CSP hash, which regenerated in
+the same build exactly as that section designed it to. `yn-target`,
+`measure-score-spread`, `count-compile` and `unit-follows` green; 527/0 on the
+authoriser, 131/0 on the differ; full `qa.py` sweep clean. `sw.js` bumped,
+because the built file's bytes changed.
+
 
 ---
 

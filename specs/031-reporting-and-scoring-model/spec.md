@@ -378,13 +378,32 @@ re-entered once; a one-time heal was offered and not taken up.
 - **The objectives' reading view draws no `#`** where a pillar's key measures
   number their rows in both modes (§278.3).
 
-## 15 · One defect found while writing this
+## 15 · One defect found while writing this, and fixed
 
-`src/config-data.js` cites **§264** three times for the yes/no behaviour that is
-recorded at **§257** (§264 is the Highest/Lowest section and says nothing about
-Y/N). Almost certainly a number the branch carried before the merge renumbered
-it — §257's own header records being renumbered from §251 for exactly that
-reason. **Not corrected here**: it is a comment in product source, so changing
-it changes the built file's bytes and pulls in a rebuild, the §238 CSP hashes
-and a `sw.js` shell bump. It is a merge-shaped change, not a documentation one,
-and it is Islam's to schedule.
+`src/config-data.js` and `src/group-render.js` cited **§264** for the yes/no
+behaviour that is recorded at **§257** — §264 is the Highest/Lowest section and
+says nothing about Y/N at all (0 mentions across its whole body, against 34 in
+§257's).
+
+**The cause is a renumbering sweep, and it ran in the direction opposite to the
+obvious guess.** Both sections were renumbered on their merges: the Y/N work was
+§251 and became §257, and the summary work was §257 and became §264. The Y/N
+comments were correctly renumbered to §257 by commit `2a21442`. Then `2e254ef`,
+the summary branch's merge, renumbered *its own* §257 to §264 with a blanket
+sweep of the sources — and swept up main's Y/N citations, which had legitimately
+become §257 three commits earlier. The arithmetic is exact: main carried 3 + 14
+such citations, the branch carried 1 + 8 of its own, and the merged files hold
+4 + 22 §264s. Every one of main's was taken.
+
+**A blanket renumber over sources rewrites citations that belong to somebody
+else's section**, and it is silent, because the number it produces is a real
+section that exists.
+
+**Corrected 2026-09-05.** The 17 swept citations go back to §257; the 9 that are
+genuinely about the headline, the breakdown and the derived score stay §264. The
+two sets were separated twice over — once by reading each comment, and once
+mechanically by matching each line's text against main's own §257 lines at the
+merge parent — and the two methods named the same 17. No behaviour changed: the
+built file differs by those 17 comment lines and the one §238 CSP hash that
+regenerated with them, and `yn-target`, `measure-score-spread`, `count-compile`
+and `unit-follows` are all green.

@@ -505,7 +505,7 @@ function measureRows(ms, opts){
                   alone loses a shipped feature silently — §56.7's rule, with
                   the conflict marker doing its job for once. */
                repNote(m) +
-               /* §257: a yes/no row says so where its TARGET goes, and says
+               /* §264: a yes/no row says so where its TARGET goes, and says
                   nothing where its direction and compile rule would — both
                   are meaningless without a number, and printing `\u2265` beside
                   "Yes / No" invites reading it as part of the target. */
@@ -643,7 +643,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
      "Next gap" steps through (§177.2), and one gap wearing it twice would
      cost two presses to walk one blank. */
   var quiet = String(pendCls || "").replace(/\bgapwalk\b/g, "").trim();
-  /* §257: three of the four go dead on a yes/no outcome, SHOWING the values
+  /* §264: three of the four go dead on a yes/no outcome, SHOWING the values
      they keep — picking Y/N stops a figure counting, it does not destroy it.
      The unit picker is the one that stays live, because it is the only way
      back out: dimming the control that SET this state would strand the row
@@ -667,7 +667,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
        unit can be chosen FIRST and is held on its own until a number arrives
        to join it: `outTarget` is "%" for as long as it takes to type 90. */
     selectOr("plan", unit, targetUnitOpts(unit), quiet,
-             /* §257: and this picker repaints too — three of its four boxes
+             /* §264: and this picker repaints too — three of its four boxes
                 change state on the one press. */
              function(v){
                /* §277: the reported figure follows a CHANGED unit. */
@@ -752,7 +752,7 @@ function outcomeShown(t){
 /* The target as it is written on the plan — the whole year's number, unit and
    all. `tacticBenchmark` gives what it is measured against RIGHT NOW, which
    for a Sum row is a part of this. */
-/* §257: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
+/* §264: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
    answers with TEXT rather than html — its caller escapes — so it cannot use
    `tgtShown`; the two are kept in step by both asking `isYesNo`. */
 function outcomeTargetShown(t){
@@ -3782,7 +3782,7 @@ function unitInherit(m){
     var t = String(v == null ? "" : v).trim();
     if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
     var u = targetUnitOf(m);
-    /* §257: a yes/no row has no unit a number can inherit — joining them
+    /* §264: a yes/no row has no unit a number can inherit — joining them
        writes "5Y/N", which no reader can take apart and no score can use.
        The box is disabled on such a row, so this guards the paths that do
        not go through it (fill mode, an upload). */
@@ -4063,7 +4063,7 @@ function monthlyMark(row){
 /* Is this row judged by a yes or a no? Asked by every surface that decides
    whether to draw a number, so none of them decides it separately (§53.5).
    It reads main's own `targetUnitOf`, which already answers with a unit held
-   alone — so a bare `Y/N` and a `100 Y/N` are one kind of row (§257). */
+   alone — so a bare `Y/N` and a `100 Y/N` are one kind of row (§264). */
 function isYesNoRow(m){ return targetUnitOf(m) === SMPRules.YN_UNIT; }
 /* A control DRAWN AND DEAD, because the row's own unit made it meaningless:
    with no number there is nothing for a direction to point at and nothing for
@@ -4077,7 +4077,7 @@ function offInput(txt){
 function offSelect(txt){
   return '<select class="fld off" disabled><option>' + esc(txt) + '</option></select>';
 }
-/* PICKING A UNIT REDRAWS THE ROW (§257). A bound field writes WITHOUT
+/* PICKING A UNIT REDRAWS THE ROW (§264). A bound field writes WITHOUT
    repainting, deliberately — a repaint under a typing hand destroys the box
    being typed into (§71.2) — which is right for every field whose VALUE is
    the only thing that changes, and wrong for this one: Y/N changes the row's
@@ -4148,7 +4148,7 @@ function fillUnitCell(page, acKey, m, ctx){
    offered by the rule below and could never be CHOSEN for a new row. K and M
    only, which is what he asked for; `B USD` and `K EGP` are deliberately not
    invented alongside them. */
-/* §257: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
+/* §264: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
    half of the list that says what a row is COUNTED in rather than valued in,
    and it is the one entry saying the row carries no number at all. */
 var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
@@ -4315,7 +4315,7 @@ function koEdit(list, page, acKey, owner){
          setter lifting a pending mark, since correcting confirms); in fill
          mode only a blank or still-pending one opens. The NAME never does:
          a row that exists is named, and renaming is authoring. */
-      /* §257: a yes/no row has no number, so the direction, both targets and
+      /* §264: a yes/no row has no number, so the direction, both targets and
          the compile rule are drawn and dead — nothing for a `\u2265` to point at
          and nothing for `Sum` to add up. Only while the pen is open: read
          mode says "Yes / No" where the target goes, which is the whole fact,
@@ -4803,7 +4803,7 @@ function renderReport(u){
        which was stated and accepted. */
     var cur = x.obj[fld], has = cur != null && cur !== "";
     var heal = has ? unitTight(cur) : cur;
-    /* §257: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
+    /* §264: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
        answer is one of two words, so a free box would invite "done", "y" and
        "TRUE" — a dozen spellings of one fact, only some of which score. One
        control, in the one cell shape every reportable row already goes
@@ -6642,7 +6642,7 @@ function unitPlanBody(it, u, railed){
          mode carries the chip and the office's tick. \u00a7114's prepend rule for
          an out-of-list stored value lives inside gapCell now, and \u00a7148's
          hover words come back through `read`. */
-      /* §257: the same three go dead on a yes/no measure as on a yes/no
+      /* §264: the same three go dead on a yes/no measure as on a yes/no
          objective — one decision, both tables (§53.5). */
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.dir || "\u2265")
         : gapCell("plan", "u_plan", m, "dir",
@@ -6759,7 +6759,7 @@ function unitPlanBody(it, u, railed){
         : qs(t);
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
       ctx: pctx(t), del: true, fillKind: "tactic",
-      /* §257: read mode says "Yes / No", never the stored `Y/N` — one
+      /* §264: read mode says "Yes / No", never the stored `Y/N` — one
          formatter for every surface (§53.5). */
       read: tgtShown,
       control: function(set, pendCls){
@@ -6830,7 +6830,7 @@ function unitPlanBody(it, u, railed){
         (!ed && !tgtOpen ? '<span class="subhd narrowtgt">' +
            (SMPRules.gapEmpty("outTarget", t)
              ? '<span class="missing">Missing</span>'
-             /* §257: no direction on a yes/no outcome — there is nothing for
+             /* §264: no direction on a yes/no outcome — there is nothing for
                 it to point at, and `\u2265 Yes / No` reads as a comparison. */
              : SMPRules.isYesNo(t.outTarget) ? tgtShown(t.outTarget)
              : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
@@ -7329,7 +7329,7 @@ function unitTight(v){
    goes through this, or the deck and the page behind it spell one unit two
    ways (§53.5). An editable field is untouched: what somebody is correcting
    must be what they typed. */
-/* §257: and a yes/no target says so. `Y/N` is how it is STORED and is not
+/* §264: and a yes/no target says so. `Y/N` is how it is STORED and is not
    how a plan should read — the row asks a question, and "Yes / No" is what
    somebody will be choosing between. Inside main's own reader rather than
    beside it, or the deck and the page spell one target two ways. */

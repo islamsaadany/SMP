@@ -5945,7 +5945,7 @@ function prorates(m){ return SMPRules.prorates(m && m.compile); }
    empty the column for a plan whose timelines were never filled in. */
 function measureDue(m, share){
   if (!m || !m.target) return null;
-  /* §257: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
+  /* §264: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
      figure — picking Y/N keeps whatever number was there and stops counting
      it — so the digits are in the string and `parseFloat` would pull them
      out, printing "due at 100 Y/N" beside a control offering Yes and No.
@@ -6017,7 +6017,7 @@ function nothingDueYet(m, share){
    stays a year-end judgement); everything else reads this. */
 function measureScore(m, share){
   if (!m) return null;
-  /* ── A YES OR A NO SCORES 100 OR 0 (§257) ──────────────────────────
+  /* ── A YES OR A NO SCORES 100 OR 0 (§264) ──────────────────────────
      BEFORE the arithmetic, and that ordering is the whole of it: a Y/N
      target carries no number, so `measureDue` answers null and the row
      would fall out of every score unscored. Islam chose 100/0 over "shown
@@ -6086,7 +6086,7 @@ function outcomeOf(t){
      row comes to be counted as missing while quietly being scored (§53.5,
      §42). The test is unchanged; only its home moved. */
   if (!t || !t.outTarget) return null;
-  /* §257: a Y/N outcome is a real target with no number in it, so it is
+  /* §264: a Y/N outcome is a real target with no number in it, so it is
      admitted here or the tactic goes on being read the old way and the
      answer somebody gave is scored by nothing. `measureScore` takes it from
      here — one arithmetic for every scored row, as §248 settled. And it is

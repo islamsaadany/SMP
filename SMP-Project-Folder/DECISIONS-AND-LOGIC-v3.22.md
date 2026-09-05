@@ -30447,6 +30447,54 @@ disagreement between two cells, and it has not been put to Islam.
 
 ---
 
+## §264.3 — A BLANKET RENUMBER SWEPT SOMEBODY ELSE'S CITATIONS (2026-09-05)
+
+Found while writing spec 031 and fixed the same day, at Islam's word.
+
+`config-data.js` and `group-render.js` cited **§264** for the **yes/no** target
+behaviour, which is recorded at **§257**. Not a near miss: §264's whole body
+mentions `Y/N` **nought** times, against **34** in §257's — so the citation sent
+a reader to a section about Highest and Lowest to learn why a Y/N row scores
+100 or 0.
+
+**THE CAUSE RAN THE OPPOSITE WAY FROM THE OBVIOUS GUESS**, and that is the part
+worth keeping. Both features were renumbered on their merges, as this section's
+own heading records: the Y/N work was §251 and became §257 (`2a21442`,
+correctly, comments included), and this section was §257 and became §264
+(`2e254ef`). That second merge renumbered **its own** §257 to §264 with a
+blanket sweep of the sources — and the sources by then held main's Y/N
+citations, which had legitimately become §257 three commits earlier. It took
+every one of them.
+
+**THE ARITHMETIC IS EXACT AND IS HOW IT WAS PROVED**: at the merge parents main
+carried **3 + 14** such citations and this branch **1 + 8** of its own; the
+merged files hold **4 + 22**. Nothing was missed and nothing was spared.
+
+**A BLANKET RENUMBER OVER SOURCES REWRITES CITATIONS THAT BELONG TO SOMEBODY
+ELSE'S SECTION, AND IT IS SILENT** — the number it produces is a real section
+that exists, so nothing parses wrong, nothing renders wrong and no check can
+see it. §94.12's shape (two sessions independently writing one shell name) and
+§281's (a merged file grep'd for its own declarations) in a third place:
+**a renumber is scoped to the lines the renumbering branch wrote**, and after
+a merge the sources are not all yours.
+
+**THE TWO SETS WERE SEPARATED TWICE, BY DIFFERENT METHODS** (§94.8's habit): once
+by reading every comment and asking whether it is about a summary or about a
+yes/no row, and once mechanically, by matching each current §264 line's text
+against main's own §257 lines at the merge parent. Both named the same **17**.
+The **9** that are genuinely about the headline, the breakdown and the derived
+score keep §264.
+
+**NOTHING ON ANY SCREEN MOVES, AND IT IS ASSERTED RATHER THAN ASSUMED**: the
+built file differs by those 17 comment lines and **one** §238 CSP hash, which
+regenerated in the same build exactly as that section designed it to
+(§238: hashed in the build that emits the scripts, so it cannot go stale).
+`yn-target`, `measure-score-spread`, `count-compile` and `unit-follows` are
+green, 527/0 on the authoriser and 131/0 on the differ. The `sw.js` shell is
+bumped because the built file's bytes changed, which is the trigger §91 names.
+
+---
+
 ## §265 — FULLSCREEN IS THE SLIDE, THE ARROWS AND NOTHING ELSE (2026-09-03, reversing the second half of §69.7)
 
 Islam, from a live presentation: *"on the presntation in full screen with every

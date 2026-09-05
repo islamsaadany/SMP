@@ -49,6 +49,31 @@ function sendFileBytes(bytes, name, mime){
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
 }
 
+/* ── ONE FILE, OR SEVERAL AS A ZIP (§295) ──────────────────────────────
+   The download card hands over whatever is ticked, and one subject ticked is
+   ONE workbook rather than a zip holding one — a person who asked for Mobile's
+   plan and got an archive to unpack has been given a chore, not a file.
+
+   The zip itself is `zipStore()` from xlsx.js, which since §295 takes bytes as
+   well as text, so a zip of workbooks needs nothing new: each member is
+   already a Uint8Array from buildXlsx().
+
+   FOLDERS ARE THE MEMBER'S OWN NAME. A zip has no directory entries to make —
+   a slash in the name IS the folder — so `plans/mobile.xlsx` arrives inside a
+   folder called plans with no extra machinery. */
+function sendFilesZip(files, zipName){
+  if (!files.length) return 0;
+  if (files.length === 1) {
+    var one = files[0];
+    sendFileBytes(one.data, one.name.replace(/^.*\//, ""), one.mime ||
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    return 1;
+  }
+  sendFileBytes(zipStore(files.map(function(f){ return { name:f.name, data:f.data }; })),
+    zipName, "application/zip");
+  return files.length;
+}
+
 function pptxColors(){
   var b = branding();
   var strip = function(h, fb){ return String(h || fb).replace(/^#/, "").toUpperCase(); };

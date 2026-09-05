@@ -6,11 +6,51 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§294 — the template carries what the platform holds — on
-the branch `claude/data-export-import-archive-ot4vl8`, NOT merged**, awaiting
-Islam's word on the merge and on the export-all that follows it.
+**Latest version:** **§295 — Import & archives is three tabs — on the branch
+`claude/data-export-import-archive-ot4vl8`, NOT merged**, awaiting Islam's word
+on the merge and on which artefact "the presentation" means.
 
-**What §294 is.** Islam asked for a button that exports every plan at once, and
+**What §295 is.** Islam, of the page §294's audit was done for: *"I need a
+mockup to refine this page and the buttons inside it as it's too clumsy"*, then,
+of three tidier drawings of it, *"I don't like any of the options. we need to
+rethink the page."* He was right, and the reason is nameable: **the page was a
+tutorial — 1, 2, 3 — for something nobody does in one sitting.** You take a
+file, it goes away for a week, somebody sends it back. Numbering those as
+consecutive steps makes the page furniture for anyone who has done it once, and
+it forced *which kind of file* to be answered twice.
+
+Measured before anything was proposed, and it was one CSS declaration:
+`.minisw { margin-left:auto }` put step 1's controls **894px along an empty
+row**, at a distance that changed with the window (1180 / 860 / 680 at 1600 /
+1280 / 1100). Three tabs now — **Download · Upload · Archived plans** — the mode
+switch deleted rather than restyled, and the page **435px at rest against 727**.
+
+Download is a blank template card and one **ticked, searchable list of subjects**
+with **three buttons over whoever is ticked: Plans · Progress · Archives**, each
+carrying its count; one subject is one workbook, several are a zip. Upload is
+**two buttons**, and the file confirms the one you pressed — every workbook
+opens its Read me with *"Plan workbook"* or *"Progress workbook"*, so the wrong
+button is refused by name rather than read wrong. **No CSV leaves; a CSV is
+still read.** Every file now names its cycle — measured, no workbook named one
+at all, so two progress files taken a cycle apart were identical in their
+headings.
+
+**The builder's door moved** to the subject's own empty Plan page, where the
+empty state already offered two routes: `data-buildplan` appeared exactly once
+in the whole product, so taking the band off Import would have stranded spec 020
+entirely. Told that, Islam said *"keep the builder"*.
+
+**One line the whole export rests on:** `zipStore()` encoded every member with
+`TextEncoder`, and a workbook through that is mangled silently — the archive
+builds, downloads and refuses to open. Falsified: **0 of 19 workbooks open**
+without it, with `testzip` still passing.
+
+**Verified.** `checks/import-page.py` (1 red / 2 red on two falsifications, from
+the sources) · full `qa.py` ERRORS none · `test-authorize` 527/0 ·
+`test-graph-diff` 131/0 · `node --check sw.js` · eleven neighbouring checks
+green. `plan-builder.py` rewritten, never loosened.
+
+**Earlier on this branch — what §294 is.** Islam asked for a button that exports every plan at once, and
 put the precondition first: *"mka esure that the plans templates for upload and
 download are matching all what we have on the platform now and then let's think
 how to have this download all build."* That ordering is right, and §22 is why —
@@ -168,3 +208,21 @@ decision: `chaseDue()` and `chase_html` are gone, the column stays unread.
 ## Waiting on Islam
 
 Nothing proceeds past this line without an answer.
+
+**§295 — which artefact is "the presentation"?** Asked for on the Download tab
+alongside the workbooks. SMP has two things that answer to the word, and they
+differ by a lot of work:
+
+* **The plan as slides** — `buildPlanPptx()`, a real editable `.pptx`, plan
+  content only, no figures. It exists, and it is a fourth button for almost
+  nothing.
+* **The review deck** — what *Present* opens, with the cycle's figures. HTML
+  only; nothing converts it to `.pptx`, and `pptx.js`'s own comment says so:
+  *"the review deck with its figures already exists and is a different artefact
+  for a different meeting."*
+
+**§295 — the merge.** The branch is built, checked and pushed; `main` is Islam's
+call on that merge (rule 4). It changes how a save is judged in no way, so it
+carries no forced sign-out — but it does change the built file, so `SHELL` in
+`sw.js` needs bumping at the merge, to a name `origin/main` does not already
+hold (§91, §94.12, §94.16).

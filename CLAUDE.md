@@ -497,6 +497,70 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
   a picker is not, so that column reads ragged, and six places still spell
   `builderHere()` out inline.
+- **FILES OUT, FILES IN, AND THE RECORD (§295):** Islam, of the page §294's
+  audit was done for — *"I need a mockup to refine this page and the buttons
+  inside it as it's too clumsy"* — and then, of three tidier drawings of it,
+  *"I don't like any of the options. we need to rethink the page."*
+  **HE WAS RIGHT AND THE SHAPE WAS THE FAULT**: the page was a TUTORIAL — 1, 2,
+  3 — for something nobody does in one sitting (you take a file, it goes away
+  for a week, somebody sends it back), so the numbering was furniture for
+  anybody who had done it once and it forced *which kind of file* to be
+  answered TWICE. **MEASURED BEFORE ANYTHING WAS PROPOSED, and it was one
+  declaration**: `.minisw { margin-left:auto }` — the first auto margin in a
+  flex row eats the free space — so step 1's sentence ended at **x 898** and
+  its controls began at **x 1180** on a row starting at **286**, and it was a
+  DIFFERENT number at every window size (1180 / 860 / 680 at 1600 / 1280 /
+  1100). Three tabs now — **Download · Upload · Archived plans** — and the mode
+  switch DELETED rather than restyled (§24): out, you press the button for the
+  file you want; back, you press the kind, which **the file then CONFIRMS**
+  (every workbook opens its Read me with *"Plan workbook"* or *"Progress
+  workbook"*, so the wrong button is refused BY NAME rather than read wrong;
+  one with neither word is left alone). **435px at rest against 727.**
+  **THE THREE BUTTONS ARE HIS ANSWER TO A QUESTION I ANSWERED WORSE** — I
+  argued one button with folders in the zip, on the grounds that a folder is
+  the filter applied afterwards at no cost; it is **three acts over a set the
+  person chooses**, and a set somebody picks cannot be expressed by a folder.
+  **§295.1 — THE PICKER IS THE PLATFORM'S OWN AND TWO LABEL RULES ARE PER
+  CONTROL**: it took three rounds to read him and the third stopped rephrasing
+  and DREW the candidates (§266 — *a question the reader cannot parse is
+  answered by drawing it*). `data-sslabel="count"` answers *"why is the drop
+  down contain all the names in the box itself?"* — because that is `textOf()`'s
+  rule **and it is right where it was written**, the only multiple select until
+  now being a tactic's COLLABORATORS, where two or three names IS the answer;
+  `data-ssall` adds Select all / none **here alone**. Both asserted at BOTH ENDS
+  (§94.2), or a build that gave them to every ticking list passes half.
+  **§295.2 — THE BUILDER'S DOOR MOVED AND THE PAGE ALREADY ANSWERED WHERE**:
+  `data-buildplan` appeared EXACTLY ONCE in the product and
+  `openBuilderChooser()` had no other caller, so taking the band off stranded
+  spec 020 (§61) — told that, Islam said *"keep the builder"*, and an emptied
+  subject's Plan page already offered TWO routes, so the guided build is the
+  third route in a sentence that existed rather than a control on a line §268
+  got down to one. **RECORDED, NOT DONE**: the chooser and four functions with
+  it are callerless, and deleting five functions in the change that MOVES a door
+  is how a restoration and a removal get confused. **§295.3 — WHICH CYCLE**: a
+  figures archive is ALREADY named after its cycle, so the list is read rather
+  than invented; a PLAN archive stores none, which is stated rather than
+  discovered; and **no workbook named a cycle at all** — measured, `xlsx.js`
+  never read `REVIEW.name` — so two progress files taken a cycle apart were
+  identical in their headings. **§295.4 — UPLOAD STATES ITS CYCLE**, his own
+  correction (*"the upload only makes sense for new cycles not closed ones"*)
+  and the cheaper of two: a closed cycle takes no figures from ANYONE and
+  reopening is §273.2's control. **§295.5 — NO CSV LEAVES AND A CSV IS STILL
+  READ** (*"nobody builds in csv"*); `csvFor()` and `fileName()` go with the
+  links, `loadCSV` is untouched, and the four CSV builders are callerless and
+  deliberately left for their own sweep. **§295.6 — A ZIP MAY HOLD BYTES**, one
+  line the whole export rests on: `zipStore()` encoded every member with
+  `TextEncoder`, and a `Uint8Array` through that is mangled SILENTLY — the
+  archive builds, downloads and refuses to open; falsified, **0 of 19 workbooks
+  open** with `testzip` still passing. **AND ONE FAULT CAME FROM READING TWO
+  FILENAMES**: a single subject is sent as one file and the folder is dropped
+  when it is, so the plan and the progress file for one subject had **the same
+  name on disk**. `checks/import-page.py` 1 red / 2 red on two falsifications
+  from the SOURCES; **`plan-builder.py` REWRITTEN, never loosened** (§218), and
+  **three of the new check's own first failures were the CHECK** (§215's death
+  on Python slicing inside an evaluate; the collaborators button found by a
+  class that is on the SELECT; and `EDIT_PAGE` ASSIGNED where §269 made it a
+  map, so it opened nothing and measured a page the product never draws).
 - **THE TEMPLATE CARRIES WHAT THE PLATFORM HOLDS (§294):** Islam, before the
   export-all — *"mka esure that the plans templates for upload and download are
   matching all what we have on the platform now."* **§22'S CONTRACT IS THE
@@ -6004,6 +6068,22 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/import-page.py   # Import & archives, three tabs (§295): the mode
+                                # switch gone from BOTH tabs and Build a plan gone from
+                                # the page; the picker's count label and Select all/none
+                                # asserted PRESENT here and ABSENT on a tactic's
+                                # collaborators (§94.2 — opt-in per control, so a build
+                                # that gave them to every ticking list passes half); a
+                                # tick leaving the popup OPEN with the counts following
+                                # it in place (§130.1); every download PRESSED and the
+                                # bytes opened (§96), the zip's members each read as a
+                                # workbook — 0 of 19 open without §295.6's one line, and
+                                # testzip still passes; the plan and the progress file
+                                # for one subject asserted NOT to share a name; Archives
+                                # held at nought with its reason and live once the check
+                                # MAKES an archive (§255); and a plan pressed as Progress
+                                # refused BY NAME with nothing read. 1 red / 2 red on the
+                                # two falsifications, from the SOURCES (§276)
 python3 checks/project-row-type.py # a project row's type is a picker and its
                                 # direction opens (§292): ONE way to add a row and
                                 # pressing it adds a DELIVERABLE (an outcome's blank
@@ -6666,7 +6746,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;294: the template carries what the
+*Last Updated: 2026-09-05 &mdash; **&sect;295: Import &amp; archives is three
+tabs &mdash; files out, files in, and the record.** Islam, of the page
+&sect;294's audit was done for: *"I need a mockup to refine this page and the
+buttons inside it as it's too clumsy"*, then, of three tidier drawings of it,
+*"I don't like any of the options. we need to rethink the page."* **HE WAS
+RIGHT AND THE SHAPE WAS THE FAULT** &mdash; the page was a tutorial (1, 2, 3)
+for something nobody does in one sitting, so it was furniture for anybody who
+had done it once and it asked *which kind of file* twice. Measured before
+anything was drawn, and it was ONE declaration: `.minisw { margin-left:auto }`
+put step 1's controls 894px along an empty row, **at a different distance at
+every window size**. Three tabs now, the mode switch DELETED rather than
+restyled, **435px at rest against 727** &mdash; one ticked list of subjects and
+**three buttons over whoever is ticked**, which is Islam's answer to a question
+I had answered worse (I argued one button with folders in the zip; it is three
+acts over a set the person chooses, and a folder cannot express that). The
+picker is the platform's own searchable list with **two label rules that are
+per control** (&sect;295.1) &mdash; and reading him took three rounds, the third
+of which stopped rephrasing and DREW the candidates (&sect;266). The builder's
+door moved to the subject's own empty Plan page, where the empty state already
+offered two routes (&sect;295.2); every file names its cycle, because
+**measured, no workbook named one at all** (&sect;295.3); the upload states its
+cycle and the FILE confirms the button pressed (&sect;295.4); no CSV leaves and
+a CSV is still read (&sect;295.5); and `zipStore()` learned to hold BYTES
+(&sect;295.6) &mdash; one line the whole export rests on, falsified at **0 of 19
+workbooks opening** while the zip still passed `testzip`. Full `qa.py` ERRORS
+none &middot; 527/0 &middot; 131/0 &middot; eleven neighbouring checks green
+&middot; `plan-builder.py` REWRITTEN not loosened, and three of the new check's
+own first failures were the CHECK. **Still open and asked**: which of the two
+things called "the presentation" joins the download &mdash; the plan as slides,
+which exists, or the review deck, which has no `.pptx` builder.*
+
+*Earlier: 2026-09-05 &mdash; **&sect;294: the template carries what the
 platform holds.** Islam, asking for a button that exports every plan at once,
 and putting the precondition first: *"mka esure that the plans templates for
 upload and download are matching all what we have on the platform now and then

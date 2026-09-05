@@ -54,18 +54,51 @@ with sync_playwright() as p:
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(300)
 
+    # THE DOOR MOVED (§295.2), so this presses where it is now rather than
+    # where it was — §51.11, and §218: the assertion is REWRITTEN, never
+    # loosened. What it asserted was "the SMO can start a build"; that is still
+    # what it asserts, from the subject's own page.
+    #
+    # THE CHOOSER HAS NO DOOR IN THE PRODUCT TODAY and is deliberately kept
+    # (Islam: "keep the builder"), so sections 2 and 3 open it from script and
+    # say so. Left running rather than deleted: the day it is given a door back
+    # — or deleted outright — this is what tells us it still works, or that it
+    # has gone (§24's decision belongs in its own change).
     def open_chooser():
-        pg.query_selector(".navmenu-btn").click(); pg.wait_for_timeout(300)
-        pg.query_selector('[data-setupgo="import"]').click(); pg.wait_for_timeout(300)
-        pg.query_selector("[data-buildplan]").click(); pg.wait_for_timeout(250)
+        pg.evaluate("() => { closeModal(); openBuilderChooser(); }")
+        pg.wait_for_timeout(250)
 
-    print("\n── 1 · the door, and who it opens for ──")
+    print("\n── 1 · the door, on the subject's own empty plan page ──")
+    # THE STATE IS MADE: every demo unit has a plan, so the empty state this
+    # door lives in cannot be reached by navigating (§94.2, §255).
+    pg.evaluate("() => {"
+                "  var k = UNIT_KEYS[0], u = UNITS[k];"
+                "  window.__kept = JSON.parse(JSON.stringify(u));"
+                "  u.items = []; u.keyObjectives = []; u.clauses = [];"
+                "  u.swot = { s:[], w:[], o:[], t:[] }; u.aspiration = ''; u.endInMind = '';"
+                "  current = k; currentSub = 'strategy'; CURSEC.strategy = 'plan'; paint();"
+                "}")
+    pg.wait_for_timeout(300)
+    door = pg.query_selector("[data-buildplan]")
+    ck("an empty plan offers the guided build", bool(door))
+    ck("and the door names its own subject",
+       bool(door) and door.get_attribute("data-buildplan") == pg.evaluate("UNIT_KEYS[0]"),
+       door and door.get_attribute("data-buildplan"))
+    # BOTH ENDS (§94.2): it is on the plan page AND off the files page.
     pg.query_selector(".navmenu-btn").click(); pg.wait_for_timeout(300)
     pg.query_selector('[data-setupgo="import"]').click(); pg.wait_for_timeout(300)
-    ck("the SMO finds Build a plan beside Import", bool(pg.query_selector("[data-buildplan]")))
+    ck("and it is gone from Import & archives",
+       not pg.query_selector("[data-buildplan]"))
+    # AND THE STATE GOES BACK (§94.2). Section 10 needs this unit to HAVE a
+    # plan; a section that empties one and walks away makes its neighbour fail
+    # for a reason that has nothing to do with it.
+    pg.evaluate("() => { UNITS[UNIT_KEYS[0]] = window.__kept; paint(); }")
+    pg.wait_for_timeout(200)
+    ck("…and the unit it was tried on is put back",
+       pg.evaluate("(UNITS[UNIT_KEYS[0]].items || []).length") > 0)
 
     print("\n── 2 · the chooser tells the truth about every subject ──")
-    pg.query_selector("[data-buildplan]").click(); pg.wait_for_timeout(250)
+    open_chooser()
     rows = pg.evaluate("""Array.from(document.querySelectorAll('.brow[data-bpick], .brow:has([data-bpick])')).length""")
     # statuses must AGREE with the data's own answer, never a hard-coded count (§53.5)
     agree = pg.evaluate("""(() => {

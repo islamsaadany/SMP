@@ -1212,8 +1212,15 @@ function rowDialogHtml(){
    the other is whose finished plan makes the clearest example. Sharing the
    field would move a selection somebody made on one control by pressing the
    other. Screen state, never saved (§25.2). */
+/* `pick` is which subjects the DOWNLOAD is for and `cycle` which cycle it
+   comes from (§295). `pick` is null for "all of them", stored as an absence so
+   a subject created tomorrow joins the selection rather than being silently
+   left out of a list written before it existed (§50.6's rule, in screen
+   state). `unit` remains what an UPLOAD resolved to — the two are chosen for
+   opposite reasons and sharing one field would move a selection somebody made
+   on one control by pressing another. Screen state, never saved (§25.2). */
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
-            read:"", check:null, done:null, filled:"" };
+            read:"", check:null, done:null, filled:"", pick:null, cycle:"" };
 
 /* WHICH OF THE TWO PLANS A SUBJECT KEEPS (§61). A business unit and a function
    that plans in pillars take the PILLARS workbook; a capability and the
@@ -5029,171 +5036,230 @@ function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
 function impUnit(){ return unitLike(IMP.unit); }
 function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
 
-function renderImport(){
-  /* The second of three gates, and it is not belt-and-braces for its own sake:
-     the rail's `when` decides whether the ROW is drawn, this decides whether
-     the PAGE renders, and the two handlers decide whether the file is applied.
-     A destination can be reached with a stale `currentSub` after a role
-     changes under the viewer, so the page checks for itself. */
-  if (grant("c_import") !== "edit") {
-    return '<div class="note"><b>Importing is the SMO\u2019s.</b> A plan arrives by ' +
-      'upload and is authored by it \u2014 codes are minted, the outgoing plan is ' +
-      'archived \u2014 so it is not something a unit does for itself. Ask the SMO, or ' +
-      'report figures on your unit\u2019s own <b>Report</b> page.</div>';
+/* ── SETUP · IMPORT & ARCHIVES (§295) ────────────────────────────────
+   Islam: *"I need a mockup to refine this page and the buttons inside it as
+   it's too clumsy"*, then, of three tidier drawings of the same page, *"I
+   don't like any of the options. we need to rethink the page."*
+
+   HE WAS RIGHT AND THE FAULT WAS THE SHAPE. The page was a tutorial — 1, 2,
+   3 — for something nobody does in one sitting: you take a file, it goes away
+   for a week, somebody sends it back. Numbering those as consecutive steps
+   makes the page furniture for anyone who has done it once, and it forced one
+   question to be answered twice — WHICH KIND OF FILE, on the way out and again
+   on the way back — through a 42x21px switch that governed both steps, every
+   sentence on the page, and what the upload would accept.
+
+   So the steps go and the page becomes what it is: files out, files in, and
+   the record of what a returning file displaced. THREE TABS.
+
+   AND THE MODE SWITCH IS DELETED RATHER THAN RESTYLED (§24). On the way out
+   you press the button for the file you want; on the way back you press the
+   kind you are uploading, which the file then CONFIRMS — every workbook the
+   platform writes carries a Read me sheet whose first cell reads "Plan
+   workbook" or "Progress workbook".
+
+   NO CSV LEAVES (Islam: *"we should always download properly designed
+   templates not csvs"*), and a CSV is still READ — *"we can accept the csv but
+   nobody builds in csv"*. So `csvFor()` and its two links go from the page and
+   `loadCSV` is untouched.
+
+   BUILD A PLAN LEAVES (§295.2): *"its already a function that is working
+   inside the function itself"*. It is not on a page about files; it is on the
+   subject's own empty Plan page, where the empty state already offered two
+   routes and now offers three. */
+
+/* Every subject a plan or a progress file can be written for, grouped the way
+   the navigation groups them. One list, so the picker, the counts and the
+   download all walk the same subjects (§53.5). */
+/* A subject's name, made safe to put in a filename. MODULE SCOPE since §295 —
+   it was inside the shell's wiring closure, and the download tab needs it from
+   a renderer as well; two copies of "how do we spell this in a filename" is
+   two answers waiting to differ. */
+function safeFileBit(name){
+  return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "plan";
+}
+
+function impPlanSubjects(){
+  var out = [];
+  UNIT_KEYS.forEach(function(k){
+    if (UNITS[k].active === false) return;
+    out.push({ v:k, label:UNITS[k].name, grp:"Business units" });
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    var f = FUNCTIONS[k];
+    if (f.active === false || !fnPlansInPillars(f)) return;
+    out.push({ v:"fn:" + k, label:f.name, grp:"Supporting functions" });
+  });
+  (GROUP.capabilities || []).forEach(function(c){
+    var f = c.fn ? FUNCTIONS[c.fn] : null;
+    out.push({ v:"cap:" + c.id, label:c.name, hint:f ? f.name : "", grp:"Capabilities" });
+  });
+  return out;
+}
+
+/* WHICH ARE TICKED. `null` means every one of them, which is what the page
+   opens on — and it is stored as an absence so a subject added tomorrow joins
+   the selection rather than being silently left out of it (§50.6's shape, in
+   screen state). A key the tenant no longer holds falls out here rather than
+   reaching a builder. */
+function impPicked(){
+  var all = impPlanSubjects();
+  if (IMP.pick == null) return all;
+  return all.filter(function(o){ return IMP.pick.indexOf(o.v) > -1; });
+}
+
+/* THE CYCLES A DOWNLOAD CAN COME FROM (§295.3). Islam: *"we need first to
+   select the cycle we are downloading from or uploading to."*
+
+   The one running, and every cycle a figures archive was taken for — and that
+   archive is ALREADY NAMED AFTER ITS CYCLE (`archiveFigures` files it under
+   `REVIEW.name`), so this list is read rather than invented.
+
+   Uploading has no such list, deliberately: *"the upload only makes sense for
+   new cycles not closed ones"*. A closed cycle takes no figures from anyone,
+   office included — `canReport()` and `canReportFn()` both open with
+   `REVIEW.state !== "open"` — and reopening one is its own deliberate control
+   on Setup › Reporting cycle (§273.2). So the Upload tab STATES its cycle. */
+function impCycles(){
+  var out = [{ v:"", label:(REVIEW.name || "This cycle") + " — open" }];
+  (ARCHIVES || []).forEach(function(a){
+    if (a.kind === "figures") out.push({ v:a.id, label:a.name + " — closed " + a.at });
+  });
+  return out;
+}
+/* The cycle's name, made safe for a filename — what tells one download from
+   the next once both are sitting in somebody's Downloads folder. */
+function impCycleStamp(){
+  var c = impCycles().filter(function(o){ return o.v === (IMP.cycle || ""); })[0];
+  var name = c ? String(c.label).split(" — ")[0] : (REVIEW.name || "cycle");
+  return safeFileBit(name);
+}
+function impCycleLabel(){
+  var c = impCycles().filter(function(o){ return o.v === (IMP.cycle || ""); })[0];
+  return c ? c.label : (REVIEW.name || "this cycle");
+}
+
+/* The archives that belong to the ticked subjects — plan archives only. A
+   cycle's FIGURES archive belongs to no subject, so it is not reachable from a
+   tick and rides with the cycle instead (§295.3). */
+function impArchivesFor(keys){
+  return (ARCHIVES || []).filter(function(a){
+    if (a.kind === "figures") return false;
+    var v = a.kind === "unit" ? a.key : "cap:" + a.key;
+    return keys.indexOf(v) > -1;
+  });
+}
+
+function impRefusal(){
+  return '<div class="note"><b>Importing is the SMO’s.</b> A plan arrives by ' +
+    'upload and is authored by it — codes are minted, the outgoing plan is ' +
+    'archived — so it is not something a unit does for itself. Ask the SMO, or ' +
+    'report figures on your unit’s own <b>Report</b> page.</div>';
+}
+
+/* ── The Download tab ─────────────────────────────────────────────── */
+function renderImportDownload(){
+  if (grant("c_import") !== "edit") return impRefusal();
+
+  var subs = impPlanSubjects(), picked = impPicked();
+  var keys = picked.map(function(o){ return o.v; });
+  var nArch = impArchivesFor(keys).length;
+
+  /* ONE CONTROL, TICKED, SEARCHABLE — and it is the platform's own (§45.5,
+     §130.1): a `<select multiple>` past five options becomes SEARCHSEL's list.
+     What is new is asked for by attribute and nowhere else: the closed control
+     says a COUNT rather than nineteen names run together, and the popup gets
+     Select all / Select none (§295.1). */
+  var pick = '<select multiple class="fld" id="imp-pick" data-sslabel="count" ' +
+    'data-ssnoun="subject|subjects" data-ssall="1" aria-label="Which subjects">' +
+    ["Business units", "Supporting functions", "Capabilities"].map(function(g){
+      var rows = subs.filter(function(o){ return o.grp === g; });
+      if (!rows.length) return "";
+      return '<optgroup label="' + esc(g) + '">' + rows.map(function(o){
+        return '<option value="' + esc(o.v) + '"' +
+          (keys.indexOf(o.v) > -1 ? " selected" : "") +
+          (o.hint ? ' data-hint="' + esc(o.hint) + '"' : '') + '>' +
+          esc(o.label) + '</option>';
+      }).join("") + '</optgroup>';
+    }).join("") + '</select>';
+
+  var cyc = '<select class="fld" id="imp-cycle" aria-label="Which cycle">' +
+    impCycles().map(function(o){
+      return '<option value="' + esc(o.v) + '"' +
+        (o.v === (IMP.cycle || "") ? " selected" : "") + '>' + esc(o.label) + '</option>';
+    }).join("") + '</select>';
+
+  /* A COUNT ON THE BUTTON, and nought is said rather than drawn as a live
+     control that does nothing (§221, §163): held with `aria-disabled` and a
+     reason, never `disabled`, so the reason can be reached. */
+  function dlBtn(kind, word, n){
+    var off = !n;
+    return '<button class="editbtn"' + (off ? ' aria-disabled="true"' : '') +
+      ' data-dlpick="' + kind + '"' +
+      (off ? ' data-tip="Nothing is ticked that has one."' : '') + '>' +
+      word + ' <span class="cnt">(' + n + ')</span></button>';
   }
+
+  var blank =
+    '<div class="fkey">A blank template to fill in</div>' +
+    '<div class="fcard"><div class="fbody"><p>The same file whoever it is for &mdash; the ' +
+      'subject is chosen on its Read me sheet, and the platform mints every code on ' +
+      'arrival.</p></div>' +
+    '<div class="ffoot"><span class="why">Two formats, because a capability plans in ' +
+      'projects and everything else in pillars.</span>' +
+      '<button class="editbtn" data-dlblank="pillars">Pillars</button>' +
+      '<button class="editbtn" data-dlblank="projects">Projects</button></div></div>';
+
+  var files =
+    '<div class="fkey">Files from the platform</div>' +
+    '<div class="fcard"><div class="pickrow">' +
+      '<span class="lab">For</span>' + pick +
+      '<span class="lab">from</span>' + cyc +
+    '</div>' +
+    '<div class="ffoot"><span class="why">One subject is one workbook; several arrive as a ' +
+      'zip. Always the designed workbook.</span>' +
+      dlBtn("plans", "Plans", keys.length) +
+      dlBtn("progress", "Progress", keys.length) +
+      dlBtn("archives", "Archives", nArch) +
+    '</div></div>';
+
+  return cfgHead("Import & archives", null, null, false) + blank + files;
+}
+
+/* ── The Upload tab ───────────────────────────────────────────────── */
+function renderImportUpload(){
+  if (grant("c_import") !== "edit") return impRefusal();
+
   var isCap = impIsCap();
   var u = isCap ? impCap() : impUnit();
   var isPlan = IMP.kind === "plan";
   var d = IMP.diff;
 
-  /* Narrowed to the chosen format, not units-and-capabilities in one list
-     (§61) — the list is the subjects that keep THAT plan, so choosing the
-     format above it is what makes the two agree. */
-  var unitPick = '<select class="fld" id="imp-unit">' +
-    impSubjects(impFmtOf(IMP.unit)).map(function(o){
-      return '<option value="' + esc(o.v) + '"' + (o.v === IMP.unit ? " selected" : "") + '>' +
-        esc(o.label) + '</option>';
-    }).join("") + '</select>';
-
-  /* ONE BUTTON, TWO ENTRIES. `<details>` rather than a button and a flag:
-     a menu's action fires before the menu closes (§47.2), and a `<details>`
-     that is closed from inside its own click has not unmounted the button the
-     click is still in — it hides it. Keyboard and screen reader come free. */
-  function dlMenu(label, act){
-    return '<details class="dlmenu"><summary class="editbtn">' + label +
-      '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-      '<div class="menu" role="menu">' +
-        '<button role="menuitem" data-' + act + '="pillars">Pillars template' +
-          '<span class="dlsub">Business units and the functions that plan in pillars</span></button>' +
-        '<button role="menuitem" data-' + act + '="projects">Projects template' +
-          '<span class="dlsub">Capabilities and the functions that improve them</span></button>' +
-      '</div></details>';
-  }
-
-  var kindPick = '<span class="minisw">' +
-    '<button data-impkind="plan" aria-pressed="' + isPlan + '">Plan</button>' +
-    '<button data-impkind="progress" aria-pressed="' + !isPlan + '">Progress</button></span>';
-
-  /* ── A FILLED ONE, TO EXPLAIN THE BLANK ONE (§69.12) ───────────────
-     Islam: "add a button for me to download a prefilled template, and an
-     option for any unit and one for projects for any function, so I can
-     explain using them."
-
-     Which the blank template cannot do. §22's plan file is deliberately
-     generic — one file whoever it is for, no codes, the subject chosen on the
-     Read me sheet — and that is right for AUTHORING and useless for showing
-     somebody what a finished one looks like. An empty grid with a Read me is
-     not an example (§45.2, from the other side: a feature that renders nothing
-     looks like a feature that was not built).
-
-     ONE SELECT AND ONE BUTTON, and THE FORMAT IS READ OFF THE SUBJECT rather
-     than chosen beside it — §61's rule, and the reason it is a rule: a format
-     stored next to a subject is a second fact that can disagree with the
-     first. Picking Mobile downloads the pillars workbook; picking a capability
-     downloads the projects one; nothing else has to be answered.
-
-     Both halves in one list under their own headings, because "any unit" and
-     "projects for any function" are the two things he asked for and putting
-     them in two controls would ask which one first. A capability is labelled
-     with the FUNCTION that improves it, or "projects for any function" cannot
-     be answered from a list of capability names. */
-  var filledOpts = impSubjects("pillars").filter(function(o){
-    var u = unitLike(o.v);
-    return u && u.items && u.items.length;
-  });
-  var filledCaps = impSubjects("projects").filter(function(o){
-    var c = capById(o.v.slice(4));
-    return c && c.projects && c.projects.length;
-  }).map(function(o){
-    var c = capById(o.v.slice(4)), f = c && c.fn ? FUNCTIONS[c.fn] : null;
-    return { v:o.v, label:o.label + (f ? " \u2014 " + f.name : "") };
-  });
-  var filledAll = filledOpts.concat(filledCaps);
-  /* NOTHING FILLED IN, NOTHING TO OFFER. On a clean tenant (§67) there is no
-     plan anywhere, so the control would be a dropdown of nothing beside a
-     button that downloads an empty file — which is the blank template, badly.
-     It is absent, and the sentence says why rather than leaving a gap. */
-  var filled = !isPlan ? "" :
-    '<div class="imp-sub">' +
-      (filledAll.length
-        ? '<p class="sub" style="margin:0 0 8px"><b>Or take one already filled in.</b> ' +
-            'The same file, carrying a real plan &mdash; for showing somebody what a ' +
-            'finished one looks like before they start their own. The format follows ' +
-            'the subject, so there is nothing else to choose.</p>' +
-          '<div class="imp-row">' +
-            '<select class="fld" id="imp-filled" aria-label="Which plan to fill it with">' +
-              (filledOpts.length ? '<optgroup label="Pillars">' + filledOpts.map(function(o){
-                return '<option value="' + esc(o.v) + '"' +
-                  (o.v === IMP.filled ? " selected" : "") + '>' + esc(o.label) + '</option>';
-              }).join("") + '</optgroup>' : '') +
-              (filledCaps.length ? '<optgroup label="Projects">' + filledCaps.map(function(o){
-                return '<option value="' + esc(o.v) + '"' +
-                  (o.v === IMP.filled ? " selected" : "") + '>' + esc(o.label) + '</option>';
-              }).join("") + '</optgroup>' : '') +
-            '</select>' +
-            '<button class="editbtn" data-dlfilled="1">Download it filled in</button>' +
-          '</div>'
-        : '<p class="sub" style="margin:0">Nothing is planned yet, so there is no ' +
-          'filled example to take. Once a plan has been uploaded, the same file comes ' +
-          'back down carrying it.</p>') +
-    '</div>';
-
-  var counts;
-  if (isCap) {
-    var nd = 0, no = 0, nm = 0;
-    u.projects.forEach(function(p){
-      nd += p.deliverables.length; no += p.outcomes.length; nm += p.milestones.length;
-    });
-    counts = isPlan
-      ? u.keyObjectives.length + " objectives &middot; " + u.projects.length + " projects &middot; " +
-        nd + " deliverables &middot; " + no + " outcomes &middot; " + nm + " milestones"
-      : capReported(u).total + " reportable rows";
-  } else {
-    counts = isPlan
-      ? u.clauses.length + " clauses &middot; " + u.keyObjectives.length + " objectives &middot; " +
-        u.items.length + " pillars &middot; " +
-        u.items.reduce(function(a,p){ return a + p.measures.length; }, 0) + " measures &middot; " +
-        u.items.reduce(function(a,p){ return a + p.tactics.length; }, 0) + " tactics"
-      : u.items.reduce(function(a,p){ return a + p.measures.length + p.tactics.length; }, 0) + " reportable rows";
-  }
-
-  /* The plan template is GENERIC (§22): one file, whichever unit is being
-     planned, with the unit chosen on its own Read me sheet. So the picker is
-     not part of downloading a plan — it belongs to reporting, which is per
-     unit and amends rows that already exist. */
-  var step1 =
-    '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
-      '<h4>Download the template</h4>' +
-      '<p class="sub">' + (isPlan
-        ? "Two formats: <b>pillars</b> for a business unit or a function that plans like one, <b>projects</b> for a capability. Each is the same file whoever it is for &mdash; choose the subject on its Read me sheet, fill it in Excel, and the platform assigns every code itself."
-        : "One row per reportable item, with its target and what is currently recorded. Only the New value column is typed.") +
-      '</p>' +
-      '<div class="imp-row">' + kindPick +
-        (isPlan
-          ? dlMenu("Download plan template", "dlplan")
-          : dlMenu("Download progress template", "dlprog") + unitPick +
-            '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
-            '<button class="linkbu" data-showcsv="1">View the CSV</button>') +
-      '</div>' +
-      '<p class="sub" style="margin-top:8px">' + (isPlan
-        ? planSubjectNames().length + " business units and functions, " +
-          GROUP.capabilities.length + " capabilities and " +
-          GROUP.themes.length + " themes are in its dropdowns"
-        : counts) + '</p>' +
-      filled +
-    '</div></div>';
-
-  var step2 =
-    '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
-      '<h4>Upload the filled file</h4>' +
-      '<p class="sub">' + (isPlan
-        ? "The file says which unit, function or capability it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and nothing else is touched."
-        : "Fill the new_value column only where a figure changed. Blank rows are ignored.") + '</p>' +
-      '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv" ' +
-        'aria-label="Choose a template file to upload">' +
-        (isPlan ? "" : '<button class="linkbu" data-paste="1">or paste the file</button>') +
-        (IMP.read ? '<span class="pill quiet">Read &middot; ' + esc(IMP.read) + '</span>' : '') +
-      '</div>' +
+  /* TWO BUTTONS, THE SHAPE THE TEMPLATE CARD ALREADY USES (Islam: *"make the
+     upload of plan or progress 2 buttons like what we did in the download of
+     templates"*). Pressing one records the kind and opens the file chooser, so
+     one press replaces set-a-mode-then-choose-a-file. The input is real and
+     hidden BEHIND the label rather than drawn: a picker cannot be opened from
+     script without a gesture (§90). */
+  var ask =
+    '<div class="fkey">Upload a filled file</div>' +
+    '<div class="fcard"><div class="fbody"><p>The file names its own subject on its Read me ' +
+      'sheet, so there is nothing else to pick &mdash; and it says which kind it is, so ' +
+      'pressing the wrong one is refused rather than read wrong. An upload <b>authors</b> a ' +
+      'plan: the outgoing one is archived, never destroyed.</p>' +
+      '<p class="sub" style="margin-top:8px">Reporting into <b>' +
+        esc(REVIEW.name || "this cycle") + '</b>' +
+        (REVIEW.state === "open" ? "" :
+          ' &mdash; which is closed. Reopen it on <b>Setup &rsaquo; Reporting cycle</b> before ' +
+          'a progress file can land.') + '</p></div>' +
+    '<div class="ffoot"><span class="why">A <code>.csv</code> is still read, though nothing ' +
+      'hands one out.</span>' +
+      '<label class="editbtn upbtn" data-upkind="plan">A plan' +
+        '<input type="file" id="imp-file-plan" accept=".xlsx,.csv" hidden></label>' +
+      '<label class="editbtn upbtn" data-upkind="progress">Progress' +
+        '<input type="file" id="imp-file-progress" accept=".xlsx,.csv" hidden></label>' +
+      (IMP.read ? '<span class="pill quiet">Read &middot; ' + esc(IMP.read) + '</span>' : '') +
     '</div></div>';
 
   var chk = IMP.check;
@@ -5214,8 +5280,7 @@ function renderImport(){
     : '';
 
   /* The receipt. An apply that just makes the review vanish leaves the SMO
-     with no proof anything happened except going to look \u2014 so the result is
-     stated, with the way there. */
+     with no proof anything happened except going to look. */
   var receipt = IMP.done
     ? '<div class="applied"><b>Applied to ' + esc(IMP.done.unit) + '.</b> ' + IMP.done.what +
       (IMP.done.fn
@@ -5225,27 +5290,14 @@ function renderImport(){
       '</div>'
     : '';
 
-  /* A FILE THAT FAILS TO READ HAS TO SAY SO (§48.8). `impFail()` writes the
-     reason into IMP.check and clears IMP.summary and IMP.diff — but checkBlock
-     was only ever concatenated INSIDE step3, and step3 is only built when
-     there is a summary or a diff to review. So the one case where the message
-     matters most, the file that could not be read at all, was the one case
-     where it had nowhere to render: upload the wrong template and the page did
-     not move. The sentence existed the whole time.
-
-     §32's rule, which this codebase states outright: a blocked save must say
-     why, where the save is. An unreadable upload is the same thing one step
-     earlier. */
-  var step3 = receipt;
-  if (!step3 && chk && chk.problems.length) {
-    step3 = '<div class="imp-step"><div class="imp-n">!</div><div class="imp-b">' +
-      '<h4>This file could not be read</h4>' + checkBlock + '</div></div>';
+  /* A FILE THAT FAILS TO READ HAS TO SAY SO (§48.8), and on this tab it has
+     somewhere to say it whether or not there is anything to review. */
+  var body = receipt;
+  if (!body && chk && chk.problems.length) {
+    body = '<div class="readbar bad"><b>This file could not be read</b></div>' + checkBlock;
   }
 
-  /* A plan upload is not a diff any more (§22). What is shown is the exchange:
-     what the file holds, what it displaces, and what of that was reported —
-     and then the one button that makes it happen. */
-  if (isPlan && IMP.summary) {
+  if (isPlan && IMP.summary && u) {
     var sm = IMP.summary, inc = sm.incoming, cur = sm.current;
     var line = isCap
       ? inc.objectives + " objectives &middot; " + inc.projects + " projects &middot; " +
@@ -5262,44 +5314,39 @@ function renderImport(){
         cur.measures + " measures &middot; " + cur.tactics + " tactics";
     var hasPlan = !planIsEmpty(cur);
 
-    step3 =
-      '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
-        '<h4>Review, then apply</h4>' + checkBlock +
-        '<div class="imp-tally">' +
-          '<span class="pill kind">' + esc(u.name) + '</span>' +
-          (hasPlan
-            ? '<span class="pill attn">Replacing &mdash; the old plan is archived</span>'
-            : '<span class="pill good">First plan &mdash; nothing to lose</span>') +
-        '</div>' +
-        '<div class="scroll"><table><thead><tr><th>What</th><th>Holds</th></tr></thead><tbody>' +
-          '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
-          '<tr><td>' + (hasPlan ? "Recorded now" : "Recorded now") + '</td><td>' +
-            (hasPlan ? had : "nothing yet") + '</td></tr>' +
-        '</tbody></table></div>' +
+    body =
+      '<div class="readbar"><b>Plan workbook &middot; ' + esc(u.name) + '</b>' +
+        '<span class="why">' + line + '</span>' +
+        '<button class="linkbu" data-cancel="1">Choose a different file</button></div>' +
+      checkBlock +
+      '<div class="imp-tally">' +
         (hasPlan
-          ? '<div class="note"><b>' + esc(u.name) + '\u2019s current plan' +
-            (cur.reported
-              ? ' and its ' + cur.reported + ' reported figure' + (cur.reported === 1 ? '' : 's')
-              : '') +
-            ' come off the screen.</b> ' +
-            (cur.reported
-              ? 'They are kept as an archive dated today and can be restored from Archived plans at any time. '
-              : 'It is kept as an archive dated today and can be restored from Archived plans at any time. ') +
-            'Nothing is destroyed.</div>'
-          : '') +
-        '<div class="imp-row" style="margin-top:14px">' +
-          (blocked
-            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
-            : '<button class="editbtn apply" data-apply="1">' +
-              (hasPlan ? "Replace " : "Write ") + esc(u.name) + '\u2019s plan</button>') +
-          '<button class="linkbu" data-cancel="1">Discard</button></div>' +
-      '</div></div>';
-  } else if (d) {
-    /* Reporting is unchanged: it amends figures that already exist, so it is
-       still a difference against what is recorded. */
+          ? '<span class="pill attn">Replacing &mdash; the old plan is archived</span>'
+          : '<span class="pill good">First plan &mdash; nothing to lose</span>') +
+      '</div>' +
+      '<div class="scroll"><table><thead><tr><th>What</th><th>Holds</th></tr></thead><tbody>' +
+        '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
+        '<tr><td>Recorded now</td><td>' + (hasPlan ? had : "nothing yet") + '</td></tr>' +
+      '</tbody></table></div>' +
+      (hasPlan
+        ? '<div class="note"><b>' + esc(u.name) + '’s current plan' +
+          (cur.reported
+            ? ' and its ' + cur.reported + ' reported figure' + (cur.reported === 1 ? '' : 's')
+            : '') +
+          ' come off the screen.</b> ' +
+          'Kept as an archive dated today and restorable from <b>Archived plans</b> at any ' +
+          'time. Nothing is destroyed.</div>'
+        : '') +
+      '<div class="imp-row" style="margin-top:14px">' +
+        (blocked
+          ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
+          : '<button class="editbtn apply" data-apply="1">' +
+            (hasPlan ? "Replace " : "Write ") + esc(u.name) + '’s plan</button>') +
+        '<button class="linkbu" data-cancel="1">Discard</button></div>';
+  } else if (d && u) {
     var changed = d.rows.filter(function(r){ return r.status === "changed"; });
     var unknown = d.rows.filter(function(r){ return r.status === "unknown"; });
-    var body = changed.length
+    var rowsHtml = changed.length
         ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? "Project" : L("pillar","bu")) + '</th><th>Item</th>' +
             '<th class="cc">Type</th><th class="cc">Recorded</th><th class="cc">In the file</th></tr></thead><tbody>' +
           changed.map(function(r){
@@ -5309,37 +5356,23 @@ function renderImport(){
           }).join("") + '</tbody></table></div>'
         : '<div class="note">No reported figure differs from what is recorded.</div>';
 
-    step3 =
-      '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
-        '<h4>Review, then apply</h4>' + checkBlock +
-        '<div class="imp-tally">' +
-          '<span class="pill attn">' + changed.length + ' changed</span>' +
-          (unknown.length ? '<span class="pill bad">' + unknown.length + ' unrecognised id</span>' : '') +
-        '</div>' + body +
-        (changed.length
-          ? '<div class="imp-row" style="margin-top:14px">' +
-            (blocked
-              ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
-              : '<button class="editbtn apply" data-apply="1">Apply to ' + esc(u.name) + '</button>') +
-            '<button class="linkbu" data-cancel="1">Discard</button></div>'
-          : '') +
-      '</div></div>';
+    body =
+      '<div class="readbar"><b>Progress workbook &middot; ' + esc(u.name) + '</b>' +
+        '<span class="why">' + changed.length + ' figure' + (changed.length === 1 ? '' : 's') +
+        ' differ from what is recorded' +
+        (unknown.length ? ' &middot; ' + unknown.length + ' unrecognised id' : '') + '</span>' +
+        '<button class="linkbu" data-cancel="1">Choose a different file</button></div>' +
+      checkBlock + rowsHtml +
+      (changed.length
+        ? '<div class="imp-row" style="margin-top:14px">' +
+          (blocked
+            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
+            : '<button class="editbtn apply" data-apply="1">Apply to ' + esc(u.name) + '</button>') +
+          '<button class="linkbu" data-cancel="1">Discard</button></div>'
+        : '');
   }
 
-  return cfgHead("Import & archives",
-      ['<span class="pill kind">' + (isPlan
-        ? "One generic template &middot; one unit per file"
-        : "One file per unit or capability") + '</span>'],
-      null, false) +
-    /* THE SECOND DOOR (§129, spec 020): a plan can be BUILT here as well as
-       uploaded — the two are siblings on the page where plans arrive, and
-       building over a standing plan archives it exactly as an upload does. */
-    '<div class="bdoor"><b>Build it here</b>' +
-      '<span class="bwhy">A guided flow through the plan’s own pages &mdash; pick a unit or a ' +
-      'function, or create one, and author the plan directly. No file needed.</span>' +
-      '<button class="bprim" data-buildplan="1">Build a plan</button></div>' +
-    section("", (isPlan ? "Plan" : "Progress") + " import", null,
-      '<div class="imp">' + step1 + step2 + step3 + '</div>');
+  return cfgHead("Import & archives", null, null, false) + ask + body;
 }
 
 /* ── Manage · Archived plans (§22) ───────────────────────────────────

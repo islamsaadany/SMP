@@ -45,7 +45,26 @@ var SEARCHSEL = (function(){
   var MIN = 6;             /* "beyond 5 items" */
   var open = null;
 
+  /* ── WHAT THE CLOSED CONTROL SAYS (§295) ──────────────────────────
+     Islam, of nineteen subjects run together in the box: *"why is the drop
+     down contain all the names in the box itself?"*
+
+     Because that is this rule, AND IT IS RIGHT WHERE IT WAS WRITTEN. The only
+     multiple select in the product until now is a tactic's COLLABORATORS,
+     where the answer is two or three names and printing them IS the answer.
+     At nineteen it says nothing and truncates mid-word.
+
+     So the label is a decision PER CONTROL, never a change to the control:
+     `data-sslabel="count"` asks for "19 of 19 subjects" and everything else
+     goes on listing its names. `data-ssnoun` is the word, singular and plural
+     separated by a pipe, because "1 of 19 subjects" is not English. */
+  function countLabel(sel){
+    var noun = String(sel.dataset.ssnoun || "chosen|chosen").split("|");
+    var n = chosenTexts(sel).length, m = sel.options.length;
+    return n + " of " + m + " " + (m === 1 ? noun[0] : (noun[1] || noun[0]));
+  }
   function textOf(sel){
+    if (sel.multiple && sel.dataset.sslabel === "count") return countLabel(sel);
     if (sel.multiple) return chosenTexts(sel).join(", ");
     var o = sel.options[sel.selectedIndex];
     return o ? o.text : "";
@@ -180,6 +199,7 @@ var SEARCHSEL = (function(){
       r.setAttribute("role", "option");
       r.setAttribute("aria-selected", on ? "true" : "false");
       r._q = ((op.text || "") + " " + (hint || "")).toLowerCase();
+      r._op = op;
       r.addEventListener("click", function(){
         if (many) toggle(sel, btn, op, r); else choose(sel, btn, op.value);
       });
@@ -218,7 +238,39 @@ var SEARCHSEL = (function(){
       none.hidden = n > 0;
     });
 
-    pop.appendChild(q);
+    /* ── SELECT ALL / NONE, OPT-IN (§295) ────────────────────────────
+       Asked for by the download picker, which holds a whole tenant. It is
+       `data-ssall` on the select rather than a rule for every ticking list:
+       a tactic's collaborators are two names off a register of thirty-three
+       and "select all" there is a control with no meaning (§53.5, rule 1b).
+
+       Each press goes through toggle() row by row, so the label, the stored
+       value and the row's own lit state are all written by the one function
+       that already does it — a second writer is how the three drift. */
+    if (many && sel.dataset.ssall) {
+      var allrow = document.createElement("div");
+      allrow.className = "ssall";
+      var mk = function(word, want){
+        var lb = document.createElement("button");
+        lb.type = "button"; lb.className = "linkbu"; lb.textContent = word;
+        lb.addEventListener("click", function(){
+          rows.forEach(function(r){
+            if (r.hidden) return;              /* a search narrows what "all" means */
+            if (!!r._op.selected !== want) toggle(sel, btn, r._op, r);
+          });
+        });
+        return lb;
+      };
+      allrow.appendChild(mk("Select all", true));
+      var dot = document.createElement("span");
+      dot.className = "sssep"; dot.textContent = "\u00b7";
+      allrow.appendChild(dot);
+      allrow.appendChild(mk("Select none", false));
+      pop.appendChild(q);
+      pop.appendChild(allrow);
+    } else {
+      pop.appendChild(q);
+    }
     pop.appendChild(list);
     pop.appendChild(none);
     document.body.appendChild(pop);

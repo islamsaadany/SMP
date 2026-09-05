@@ -608,9 +608,17 @@
          two separate rows did, in one row. */
       { k:"import",   ac:"c_import", grp:"cycle", label:"Import & archives", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
         sections: function(){
-          return [{ k:"in",   ac:"c_import", label:"Import a plan",
+          /* THREE, SINCE §295: what leaves, what arrives, and the record of
+             what an arrival displaced. The two import sections keep the SAME
+             gate they had — §48.2 closed importing to anybody without `edit`
+             because there is nothing to READ on it — so a view-only holder of
+             c_import still sees Archived plans alone. */
+          return [{ k:"dl",   ac:"c_import", label:"Download",
                     when: function(){ return grant("c_import") === "edit"; },
-                                                                        render:renderImport },
+                                                                        render:renderImportDownload },
+                  { k:"up",   ac:"c_import", label:"Upload",
+                    when: function(){ return grant("c_import") === "edit"; },
+                                                                        render:renderImportUpload },
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
       /* Last in its group: it explains the rest, so it is not where you start.
@@ -7246,8 +7254,23 @@
       });
     });
     /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
+    /* ── THE DOOR KNOWS ITS SUBJECT (§295.2) ─────────────────────────
+       It used to be one amber band on a page about files, so the first thing
+       it had to ask was "whose plan is this?". The door is now on the
+       subject's OWN empty Plan page, so the answer is the page you are
+       standing on and `builderStart()` takes it directly.
+
+       RECORDED, NOT DONE: `openBuilderChooser()`, `BCHOOSE`,
+       `builderChooserHtml()`, `wireBuilderChooser()` and `builderStartFresh()`
+       are callerless from today. §24 says dead code goes, and deleting five
+       functions in the same change that moves the door is how a restoration
+       and a removal get confused with one another — it is its own edit, with
+       its own run of the checks. */
     document.querySelectorAll("[data-buildplan]").forEach(function(b){
-      b.addEventListener("click", function(){ openBuilderChooser(); });
+      b.addEventListener("click", function(){
+        var t = b.dataset.buildplan;
+        if (t && t !== "1") builderStart(t); else openBuilderChooser();
+      });
     });
     /* Scoped to the band: the review dialog carries data-bnav rows of its
        own, wired by its own painter — a page-wide query here would bind
@@ -7326,29 +7349,21 @@
     });
   }
 
-  /* Import. Downloading is attempted as a file and always offered as text,
-     because a sandboxed frame may refuse the download and leaving the SMO with
-     nothing would be worse than a copy box. */
-  function csvFor(){
-    if (impIsCap()) {
-      var c = impCap();
-      return IMP.kind === "plan" ? capPlanTemplate(c) : capProgressTemplate(c);
-    }
-    var u = impUnit();
-    return IMP.kind === "plan" ? planTemplate(u) : progressTemplate(u);
-  }
-  /* A subject's name, made safe to put in a filename. Extracted from
-     fileName() below, which was the only caller until the filled example
-     needed the same thing — two copies of "how do we spell this in a
-     filename" is two answers waiting to differ. */
-  function safeFileBit(name){
-    return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "plan";
-  }
-  function fileName(){
-    var name = impIsCap() ? impCap().name : impUnit().name;
-    return safeFileBit(name) + "-" + IMP.kind + "-template.csv";
-  }
+  /* ── THE CSV WRITERS LOSE THEIR LAST CALLER (§295) ────────────────
+     Islam: *"we can accept the csv but nobody builds in csv."* So the two
+     links that handed one out — the raw download and the copy box — go, and
+     with them `csvFor()` and `fileName()`, which had no other caller.
+
+     `safeFileBit` MOVES TO MODULE SCOPE rather than dying with them: it is how
+     this platform spells a name in a filename, and the download tab now needs
+     it from a renderer as well as from a handler. It lives beside the import
+     state in config-render.js.
+
+     THE READER IS UNTOUCHED. `loadCSV` still takes a progress file, because a
+     file that arrives as one is still read — what has gone is the platform
+     producing one. The four CSV builders in templates.js are callerless from
+     today and are deliberately NOT deleted in the same breath: they are §22's
+     other half and removing them is its own sweep, with its own checks. */
   /* A plan file is READ into a summary, not diffed: it authors the plan, so
      what matters is what it holds and what that displaces (§22). Reporting is
      still a difference against what is recorded. */
@@ -7444,103 +7459,132 @@
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   }
 
-  function wireImport(){
-    var us = document.getElementById("imp-unit");
-    if (us) us.addEventListener("change", function(){ IMP.unit = us.value; IMP.diff = null; paint(); });
+  /* THE COUNTS ARE REWRITTEN IN PLACE (§71.2, §130.1). A ticking list stays
+     open and commits per tick, so a `paint()` here would destroy the popup
+     under the pointer — the three buttons are found by their own attribute and
+     their number written into the span that holds it. */
+  function impCounts(){
+    var subs = impPicked(), n = subs.length;
+    var nArch = impArchivesFor(subs.map(function(o){ return o.v; })).length;
+    document.querySelectorAll("[data-dlpick]").forEach(function(b){
+      var k = b.dataset.dlpick, want = k === "archives" ? nArch : n;
+      var c = b.querySelector(".cnt");
+      if (c) c.textContent = "(" + want + ")";
+      if (want) b.removeAttribute("aria-disabled");
+      else b.setAttribute("aria-disabled", "true");
+    });
+  }
 
-    document.querySelectorAll("[data-impkind]").forEach(function(b){
-      b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
+  function wireImport(){
+    /* ── THE DOWNLOAD TAB (§295) ─────────────────────────────────────
+       Two controls and five buttons, and every one of them reads its answer
+       off the page at the moment it is pressed rather than off a mode set
+       earlier. `IMP.pick` and `IMP.cycle` exist only so a repaint caused by
+       something else does not throw a selection away (§35). */
+    var ps = document.getElementById("imp-pick");
+    if (ps) ps.addEventListener("change", function(){
+      IMP.pick = Array.prototype.filter.call(ps.options, function(o){ return o.selected; })
+                   .map(function(o){ return o.value; });
+      /* NOTHING REPAINTS UNDER A TICKING HAND (§130.1): the counts on the
+         buttons are rewritten in place instead, or the popup dies under the
+         pointer on the first tick. */
+      impCounts();
     });
 
-    /* THE PLAN TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
+    var cs = document.getElementById("imp-cycle");
+    if (cs) cs.addEventListener("change", function(){ IMP.cycle = cs.value; impCounts(); });
+
+    /* THE BLANK TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
        an empty shape rather than a chosen subject's content, with the subject
-       named on the Read me sheet. Two files, one menu. */
-    document.querySelectorAll("[data-dlplan]").forEach(function(b){
+       named on the Read me sheet. */
+    document.querySelectorAll("[data-dlblank]").forEach(function(b){
       b.addEventListener("click", function(){
-        closeDlMenu(this);
-        if (this.dataset.dlplan === "projects")
+        if (this.dataset.dlblank === "projects")
           sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - projects plan template.xlsx");
         else
           sendXlsx(planWorkbook(blankUnitShape()), "SMP - pillars plan template.xlsx");
       });
     });
 
-    /* A PROGRESS FILE IS NOT GENERIC — it is one subject's current rows, so
-       the subject travels with the format. Choosing a format the selected
-       subject does not keep moves the selection to the first that does AND
-       repaints, so the select shows exactly what was downloaded rather than
-       leaving a file arriving from a list that says something else. */
-    document.querySelectorAll("[data-dlprog]").forEach(function(b){
+    /* ── PLANS · PROGRESS · ARCHIVES, OVER WHOEVER IS TICKED ──────────
+       One builder per kind, one file per subject, and `sendFilesZip` decides
+       whether that is a workbook or a zip — one subject is one file, because
+       an archive holding one file is a chore rather than a download.
+
+       THE REFUSAL IS ASKED AGAIN AT PRESS TIME (§48.2), never trusted from the
+       render that drew the button: the tick list writes without repainting, so
+       a count drawn a moment ago can be a press behind. */
+    document.querySelectorAll("[data-dlpick]").forEach(function(b){
       b.addEventListener("click", function(){
-        closeDlMenu(this);
-        var want = this.dataset.dlprog;
-        if (impFmtOf(IMP.unit) !== want) {
-          var first = impSubjects(want)[0];
-          if (!first) {
-            alert(want === "projects"
-              ? "There are no capabilities yet, so there is no projects file to download."
-              : "There are no business units yet, so there is no pillars file to download.");
-            return;
-          }
-          IMP.unit = first.v; IMP.diff = null; IMP.summary = null; IMP.read = "";
+        if (grant("c_import") !== "edit") return;
+        var kind = this.dataset.dlpick;
+        var subs = impPicked();
+        var files = [], stamp = impCycleStamp();
+        /* THE LEAF NAMES THE KIND, not only the folder (§295). One subject is
+           sent as ONE FILE, and `sendFilesZip` drops the folder when it does —
+           so a name that leaned on `plans/` gave the plan and the progress file
+           for one subject the SAME name on disk. Found by downloading both and
+           reading the two filenames, not by reading the code. */
+        var word = kind === "plans" ? "plan" : kind === "progress" ? "progress" : "archive";
+        if (kind === "archives") {
+          var arcs = impArchivesFor(subs.map(function(o){ return o.v; }));
+          if (!arcs.length) return;
+          arcs.forEach(function(a){
+            var w = archiveWorkbook(a);
+            if (w) files.push({ name:"archives/" + safeFileBit(a.name) + " - " + word +
+                                      " - " + safeFileBit(a.at) + ".xlsx", data:buildXlsx(w) });
+          });
+        } else {
+          if (!subs.length) return;
+          subs.forEach(function(o){
+            var w = kind === "plans" ? impPlanWorkbookFor(o.v) : impProgressWorkbookFor(o.v, IMP.cycle);
+            if (w) files.push({ name:kind + "/" + safeFileBit(o.label) + " - " + word +
+                                      " - " + stamp + ".xlsx", data:buildXlsx(w) });
+          });
         }
-        var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(impUnit());
-        sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
-        paint();
+        sendFilesZip(files, "SMP - " + kind + " - " + stamp + ".zip");
       });
     });
 
-    /* ── THE FILLED EXAMPLE (§69.12) ─────────────────────────────────
-       The FORMAT IS READ OFF THE SUBJECT, here as everywhere (§61): the
-       select's value is a unit key, `fn:<key>` or `cap:<id>`, and that is
-       already the whole answer. Nothing stores which workbook to build.
+    /* ── TWO BUTTONS, ONE READER (§295) ──────────────────────────────
+       Islam: *"make the upload of plan or progress 2 buttons like what we did
+       in the download of templates."* Each button is a <label> over its own
+       hidden input, so one press both says WHICH KIND and opens the chooser —
+       a file picker cannot be opened from script without a gesture (§90).
 
-       The selection is read off the control at the moment of pressing rather
-       than tracked on `change`, because nothing here repaints — the only
-       reason IMP.filled exists at all is so a repaint caused by something ELSE
-       on this page does not throw the choice away (§35). */
-    var fsel = document.getElementById("imp-filled");
-    if (fsel) fsel.addEventListener("change", function(){ IMP.filled = fsel.value; });
-    document.querySelectorAll("[data-dlfilled]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var sel = document.getElementById("imp-filled");
-        var v = sel ? sel.value : IMP.filled;
-        if (!v) return;
-        IMP.filled = v;
-        if (v.indexOf("cap:") === 0) {
-          var c = capById(v.slice(4));
-          if (!c) return;
-          sendXlsx(capPlanWorkbook(c),
-            "SMP - projects plan - " + safeFileBit(c.name) + ".xlsx");
-          return;
-        }
-        /* unitLike(), not UNITS[...] — a function that plans in pillars is one
-           of these and its key carries the "fn:" prefix (§59). */
-        var u = unitLike(v);
-        if (!u) return;
-        sendXlsx(planWorkbook(u), "SMP - pillars plan - " + safeFileBit(u.name) + ".xlsx");
-      });
-    });
-
-    var dl = document.querySelector("[data-dl]");
-    if (dl) dl.addEventListener("click", function(){
-      sendFileBytes(csvFor(), fileName(), "text/csv;charset=utf-8");
-    });
-
-    var show = document.querySelector("[data-showcsv]");
-    if (show) show.addEventListener("click", function(){
-      openModalHtml(esc(fileName()), "Select all and copy, if the download is blocked",
-        '<textarea class="csvbox" readonly>' + csvFor().replace(/</g, "&lt;") + '</textarea>');
-    });
-
-    var f = document.getElementById("imp-file");
+       The kind is recorded from the input that fired, never from a mode set
+       earlier, and the FILE then confirms it: every workbook the platform
+       writes says "Plan workbook" or "Progress workbook" in the first cell of
+       its Read me sheet, so pressing the wrong one is refused BY NAME instead
+       of read wrong (§295.4). */
+    ["plan", "progress"].forEach(function(kind){
+    var f = document.getElementById("imp-file-" + kind);
     if (f) f.addEventListener("change", function(){
       if (grant("c_import") !== "edit") return;
       var file = f.files && f.files[0]; if (!file) return;
+      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null;
       if (/\.xlsx$/i.test(file.name)) {
         var rx = new FileReader();
         rx.onload = function(){
           readXlsx(rx.result).then(function(sheets){
+            /* ── THE FILE CONFIRMS THE BUTTON (§295.4) ───────────────
+               Every workbook this platform writes opens its Read me sheet
+               with "Plan workbook" or "Progress workbook", so the kind the
+               person pressed is CHECKED rather than trusted — press the wrong
+               one and the file is refused BY NAME instead of read as something
+               it is not, which is a refusal somebody can act on (§32, §16.7).
+
+               A file with neither word is left alone: a workbook rebuilt by
+               hand is not wrong, it simply cannot confirm anything, and
+               refusing it would turn a helpful check into a wall. */
+            var says = readmeKind(sheets);
+            if (says && says !== IMP.kind) {
+              impFail("this is a " + says + " workbook and you pressed " +
+                (IMP.kind === "plan" ? "A plan" : "Progress") +
+                ". Press " + (says === "plan" ? "A plan" : "Progress") +
+                " and choose it again.");
+              return;
+            }
             /* The template is generic, so the file itself says whose plan it
                is: one cell on the Read me sheet. Nothing else in the workbook
                names a unit, and with the codes gone nothing else could. */
@@ -7637,6 +7681,7 @@
       var rd = new FileReader();
       rd.onload = function(){ loadCSV(String(rd.result)); };
       rd.readAsText(file);
+    });
     });
 
     var paste = document.querySelector("[data-paste]");

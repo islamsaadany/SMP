@@ -35130,3 +35130,198 @@ archives**, in one zip, from the download dropdown that already holds the
 templates. The one piece of new machinery is that `zipStore()` encodes its
 members with `TextEncoder`, so it must accept a `Uint8Array` before a zip can
 hold `.xlsx` files.
+
+---
+
+## §295 — Import & archives is three tabs: files out, files in, and the record
+
+Islam, of the page §294's audit had just been done for: ***"I need a mockup to
+refine this page and the buttons inside it as it's too clumsy."*** Then, of
+three tidier drawings of the same page: ***"I don't like any of the options. we
+need to rethink the page."***
+
+**HE WAS RIGHT TO REJECT ALL THREE AND THE REASON IS NAMEABLE.** Every one of
+them kept the shape and straightened it. **The shape is the fault: the page was
+a tutorial — 1, 2, 3 — for something nobody does in one sitting.** You take a
+file, it goes away for a week, somebody sends it back. Numbering those as
+consecutive steps makes the whole page furniture for anybody who has done it
+once, and it forces one question to be answered **twice** — *which kind of
+file?* on the way out and again on the way back.
+
+**THE OLD PAGE'S FAULT WAS MEASURED BEFORE ANYTHING WAS PROPOSED, and it was
+one declaration.** `.minisw { margin-left:auto }` — the first auto margin in a
+flex row eats the free space — so step 1's sentence ended at **x 898** and its
+controls began at **x 1180**, on a row starting at **x 286**: 894px of empty
+row before the first control, and **a different number at every window size**
+(1180 / 860 / 680 at 1600 / 1280 / 1100). Nothing else on the page moved like
+that. `arrange.css` already recorded that trap at line 237, about a different
+row. Progress mode put **six controls in five treatments** on it; the control
+that governed the whole page was **42×21px** and hung off the download button;
+the one control that does the work was the browser's raw `Choose File`.
+
+### The page
+
+**THREE TABS — Download · Upload · Archived plans.** The steps go, and with
+them the mode switch, **deleted rather than restyled** (§24): on the way out you
+press the button for the file you want, and on the way back you press the kind
+you are uploading. Download is **435px at rest** against **727** for the one
+crowded page.
+
+**DOWNLOAD IS TWO CARDS.** The blank template stands alone because it is the one
+file with nothing to choose — §22 makes it generic and the subject is picked on
+its Read me sheet. Everything else is **one ticked list of subjects and three
+buttons over whoever is ticked: Plans · Progress · Archives**, each carrying its
+count. One subject is one workbook; several arrive as a zip.
+
+**AND THE THREE BUTTONS ARE ISLAM'S ANSWER TO A QUESTION I HAD ANSWERED WORSE.**
+Asked whether the export should carry sub-options, I argued for one button with
+folders inside the zip, on the grounds that a folder is the filter applied
+afterwards at no cost. He said ***"3 buttons in this case download plans,
+progress and archives"***, and he is right: it is not one act with a filter, it
+is **three acts over a set the person chooses**, and a set somebody picks cannot
+be expressed by a folder. Recorded as a reversal of my recommendation.
+
+**§295.1 — THE PICKER IS THE PLATFORM'S OWN, AND TWO LABEL RULES ARE PER
+CONTROL.** It took three rounds to read him, and the third round stopped
+rephrasing and **drew** the candidates (§266's own lesson: *a question the
+reader cannot parse is answered by drawing it*). He chose **A**, the searchable
+dropdown — which is `SEARCHSEL`, already in the product and already ticking
+(§45.5, §130.1). What is new is asked for **by attribute and nowhere else**:
+
+* **`data-sslabel="count"`** — of nineteen names run together in the closed box
+  Islam asked ***"why is the drop down contain all the names in the box
+  itself?"***. Because that is `textOf()`'s rule **and it is right where it was
+  written**: the only multiple select in the product until now is a tactic's
+  **collaborators**, where the answer is two or three names and printing them IS
+  the answer. At nineteen it says nothing and truncates mid-word. So this one
+  reads *19 of 19 subjects* and the collaborators picker keeps its names.
+* **`data-ssall`** — Select all / Select none, in the popup, **on this control
+  alone**. A tactic's collaborators are two names off a register of thirty-three
+  and *select all* there is a control with no meaning (§53.5, rule 1b).
+
+Both are asserted **at both ends** (§94.2): present here, absent on the
+collaborators picker — a build that gave them to every ticking list would pass
+the first half alone.
+
+**§295.2 — WHERE BUILDING STARTS.** Islam: ***"we need to remove build a plan
+from here as its already a function that is working inside the function
+itself"***, and then ***"it should be in the bu or function when navigated to
+this page not burried in the setup page."***
+
+He is right that authoring already works where the plan lives — the pen and the
+*+ Add a row* buttons write it directly. But **measured, `data-buildplan`
+appeared exactly once in the whole product** and `openBuilderChooser()` had no
+other caller: taking the band off stranded spec 020's guided builder entirely
+(§61, §24). Told this, he said ***"keep the builder"***, and the door moved.
+
+**AND THE PAGE ALREADY ANSWERED WHERE.** Emptied of everything, a subject's Plan
+page already drew an empty state offering **two** routes — *Add the first one*,
+or upload a plan — so the guided build is the **third route in a sentence that
+already existed**, not a new control on a line §268 spent a whole section
+getting down to one. Drawn against the alternative (a permanent control on the
+section line, which already carries a count, four chips, a red button and the
+pen) and Islam chose **A**.
+
+**FOUND ON THE WAY**: that sentence pointed at *"Setup → Import & plans"* and
+the page has been called **Import & archives** for as long as it has existed
+(§104.8 — prose describing something the product no longer calls that).
+Corrected in the same edit.
+
+**RECORDED, NOT DONE**: with the door knowing its subject, `openBuilderChooser`,
+`BCHOOSE`, `builderChooserHtml`, `wireBuilderChooser` and `builderStartFresh`
+are callerless. §24 says dead code goes — and deleting five functions in the
+same change that MOVES a door is how a restoration and a removal get confused
+with one another. It is its own edit, with its own run of the checks.
+
+**§295.3 — WHICH CYCLE.** Islam: ***"we need first to know what cycle are we
+downloading."*** Three facts, measured rather than assumed:
+
+* A **figures archive is already named after its cycle** (`archiveFigures` files
+  it under `REVIEW.name`), so the list of cycles a download can come from is
+  **read rather than invented**.
+* A **plan archive stores no cycle** — the subject's name and the date it was
+  archived. That is the one part of the question that cannot be answered for
+  what is already stored, and it is stated rather than discovered.
+* **No workbook named a cycle at all** — measured, `xlsx.js` never read
+  `REVIEW.name`. So a progress file taken this cycle and one taken next were
+  **identical in their headings**, and two of them on a disk could not be told
+  apart. Every Read me sheet carries the cycle now, and so does every filename.
+
+**§295.4 — UPLOAD IS TWO BUTTONS, AND THE FILE CONFIRMS THE ONE YOU PRESSED.**
+Islam: ***"make the upload of plan or progress 2 buttons like what we did in the
+download of templates"***, so one press replaces set-a-mode-then-choose-a-file;
+each button is a `<label>` over its own hidden input, because a file picker
+cannot be opened from script without a gesture (§90).
+
+**And the cycle is not asked on this tab**, which is his correction of his own
+earlier answer and the cheaper of the two: ***"the upload only makes sense for
+new cycles not closed ones."*** A closed cycle takes no figures **from anyone**,
+office included — `canReport()` and `canReportFn()` both open with
+`REVIEW.state !== "open"` — and reopening one is its own deliberate control
+(§273.2). So the tab **states** which cycle it writes into, and neither the
+reporting rules nor the archive change.
+
+**THE KIND IS CHECKED, NEVER TRUSTED.** Every workbook the platform writes opens
+its Read me sheet with *"Plan workbook"* or *"Progress workbook"*, so pressing
+the wrong button is **refused by name** — *"this is a plan workbook and you
+pressed Progress"* — rather than read as something it is not (§32, §16.7). A
+workbook with neither word is left alone: one rebuilt by hand is not wrong, it
+simply cannot confirm anything, and refusing it would turn a helpful check into
+a wall.
+
+**§295.5 — NO CSV LEAVES, AND A CSV IS STILL READ.** Islam: ***"we should always
+download properly designed templates not csvs"***, then ***"we can accept the
+csv but nobody builds in csv."*** Both CSV links go, and `csvFor()` and
+`fileName()` with them (§24). `loadCSV` is untouched. The four CSV builders in
+`templates.js` are callerless from today and **deliberately not deleted in the
+same breath** — they are §22's other half and removing them is its own sweep.
+
+**§295.6 — A ZIP MAY HOLD BYTES.** One line, and the whole export rests on it:
+`zipStore()` encoded every member with `TextEncoder` because every caller until
+now handed it XML. A zip of **workbooks** holds files that are themselves zips,
+and running a `Uint8Array` through `TextEncoder` mangles every byte above 0x7F
+**silently** — the archive builds, downloads, and refuses to open. Falsified:
+with the line reverted, **0 of 19 workbooks open** and the zip still passes
+`testzip`.
+
+**AND ONE FAULT WAS FOUND BY DOWNLOADING TWO FILES AND READING THEIR NAMES.**
+A single subject is sent as one file and `sendFilesZip` drops the folder when it
+does — so a leaf name that leaned on `plans/` gave the plan and the progress
+file for one subject **the same name on disk**. The kind is in the leaf now.
+
+### Verification
+
+`checks/import-page.py`, proved able to fail twice from the **sources** (§276 —
+§238's hashed CSP silences an edited built file): the zip's binary members
+reverted, **1 red** printing *0 of 19*; the kind confirmation removed, **2 red**.
+Full `qa.py` sweep **ERRORS none** · `test-authorize` **527/0** ·
+`test-graph-diff` **131/0** · `node --check sw.js` · `template-round-trip`,
+`plan-builder`, `owner-picker`, `master-picker`, `setup-pages`, `setup-search`,
+`repeat-project`, `one-line-titles`, `fn-pillars`, `monthly-plan` and
+`project-row-type` all green.
+
+**`checks/plan-builder.py` was REWRITTEN, never loosened** (§218, §51.11): its
+§1 asserted *"the SMO finds Build a plan beside Import"*, and what it was really
+asserting — that the SMO can start a build — is asserted from the subject's own
+page now, with the absence from Import beside it (§94.2). Its sections 2 and 3
+open the chooser **from script** and say out loud that it has no door in the
+product today, so the day it is deleted or given one back, that is what reports
+it. And the section **puts its state back**: it empties a unit to reach the
+empty state, and §10 needs that unit to have a plan.
+
+**THREE OF THE NEW CHECK'S OWN FIRST FAILURES WERE THE CHECK.** It **died rather
+than reporting** on Python slice syntax inside an `evaluate` — §215, in the file
+whose own docstring promises every probe degrades; it hunted the collaborators
+picker by a class that is on the SELECT while `SEARCHSEL` puts its button
+BEFORE it (§34); and it **assigned** `EDIT_PAGE = ['plan']` where §269 made that
+a map keyed by page, so it set a shape nothing reads and opened nothing (§96 —
+a probe that models the state instead of pressing the control measures a page
+the product never draws).
+
+**STILL OPEN, AND ASKED**: Islam has asked for the **presentation** to be
+downloadable here as well as the workbook. SMP has two artefacts that answer to
+that word — the **plan as slides** (`buildPlanPptx()`, which exists and is a
+fourth button for almost nothing) and the **review deck** with its figures,
+which is HTML only and which `pptx.js`'s own comment calls *"a different
+artefact for a different meeting"*. Which one has been put to him and is not
+built.

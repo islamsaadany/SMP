@@ -2283,3 +2283,43 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 @media (max-width: 700px) {
   .mpm, .mpm input.fld { width:64px !important; }
 }
+
+/* ── SETUP · IMPORT & ARCHIVES (§295) ─────────────────────────────────
+   Two cards on the Download tab and one on Upload, all the same object: a
+   body that explains, and a foot that acts. The foot is the page's second
+   surface, so a control sits somewhere that is ITS place rather than at the
+   far end of a row from the sentence about it (which is what the old page
+   did — 894px of empty row before the first control, at a distance that
+   changed with the window). */
+.fkey { font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:600;
+  color:var(--ink-3); margin:22px 0 8px; }
+.fcard { border:1px solid var(--line); border-radius:10px; background:var(--surface);
+  max-width:1080px; }
+.fcard .fbody { padding:15px 18px; }
+.fcard .fbody p { margin:0; font-size:13px; color:var(--ink-3); max-width:64ch; }
+.fcard .fbody p.sub { font-size:12.5px; }
+.fcard .ffoot { padding:12px 18px; background:var(--surface-2);
+  border-top:1px solid var(--line); display:flex; align-items:center; gap:12px;
+  flex-wrap:wrap; border-radius:0 0 10px 10px; }
+.fcard .ffoot .why { color:var(--ink-3); font-size:12.5px; margin-right:auto; max-width:56ch; }
+.fcard .pickrow { display:flex; align-items:center; gap:14px; padding:15px 18px;
+  flex-wrap:wrap; }
+.fcard .pickrow .lab { font-size:13px; color:var(--ink-2); }
+.fcard .pickrow .ssbtn { min-width:250px; }
+.fcard .pickrow select.fld { width:auto; min-width:190px; max-width:none; }
+.fcard .cnt { font-variant-numeric:tabular-nums; }
+/* HELD, NOT DISABLED (§221, §163): a button with nothing to give says so and
+   keeps its focus, so the reason on it can be reached. */
+.fcard .ffoot [aria-disabled="true"] { opacity:.5; }
+/* A LABEL IS THE CONTROL (§295): the file input cannot be opened from script
+   without a gesture, so the press target is its own <label> wearing the
+   button's dress, with the input hidden inside it. */
+.upbtn { cursor:pointer; display:inline-flex; align-items:center; }
+/* What the platform read, above the review it produced. */
+.readbar { max-width:1080px; border:1px solid var(--line); border-left:3px solid var(--good);
+  border-radius:8px; background:var(--surface); padding:12px 16px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:18px 0 12px; }
+.readbar.bad { border-left-color:var(--bad); }
+.readbar b { font-size:14px; }
+.readbar .why { color:var(--ink-3); font-size:12.5px; }
+.readbar .linkbu { margin-left:auto; }

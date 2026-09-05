@@ -23,13 +23,20 @@ function crc32(bytes){
   return (c ^ 0xFFFFFFFF) >>> 0;
 }
 
+/* A MEMBER MAY BE BYTES AS WELL AS TEXT (§295). Every caller until now handed
+   this XML, so `f.data` was always a string and encoding it here was the whole
+   of the job. A zip of WORKBOOKS holds files that are themselves zips, and
+   putting a Uint8Array through TextEncoder would mangle every byte above 0x7F
+   silently — the archive would build, download, and refuse to open. */
 function zipStore(files){
   var enc = new TextEncoder(), chunks = [], central = [], offset = 0;
   function u16(n){ return [n & 255, (n >>> 8) & 255]; }
   function u32(n){ return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; }
 
   files.forEach(function(f){
-    var name = enc.encode(f.name), data = enc.encode(f.data), crc = crc32(data);
+    var name = enc.encode(f.name);
+    var data = (f.data instanceof Uint8Array) ? f.data : enc.encode(f.data);
+    var crc = crc32(data);
     var local = [].concat([0x50,0x4b,0x03,0x04], u16(20), u16(0), u16(0), u16(0), u16(0),
                           u32(crc), u32(data.length), u32(data.length),
                           u16(name.length), u16(0));
@@ -371,6 +378,14 @@ function readme(kind, pickLabel, pickList){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        [pickLabel, ""],
+       /* WHICH CYCLE THIS FILE CAME FROM (§295.3). Islam: *"we need first to
+          select the cycle we are downloading from."* No workbook named one
+          until today — measured, `xlsx.js` never read REVIEW.name — so a
+          progress file taken this cycle and one taken next were identical in
+          their headings, and two of them on a disk could not be told apart.
+          Written, never read back: it is a fact about the download, and an
+          upload lands in the cycle that is open (§295.4). */
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Pillars FIRST \u2014 Measures and Tactics choose their pillar from what you type there."],
        ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -385,6 +400,7 @@ function readme(kind, pickLabel, pickList){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        [pickLabel, ""],
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "Type only in the New value column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank New value means nothing changed. Only the rows you fill are read."],
@@ -439,6 +455,19 @@ function readmeCell(sheets, label){
    reader stops finding the cell, the upload reports "no business unit called
    ''", and nothing says why. */
 var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability"];
+/* WHICH KIND OF WORKBOOK THIS IS, off its own first cell (§295.4). Written by
+   `readme()` and `capReadme()` for every file the platform produces, so it is
+   the file's own word rather than a guess about its shape. "" when the sheet
+   says neither — a workbook somebody rebuilt by hand cannot confirm anything
+   and is not refused for it. */
+function readmeKind(sheets){
+  var rows = (sheets && sheets["Read me"]) || [];
+  var first = String((rows[0] || [])[0] || "").trim().toLowerCase();
+  if (first === "plan workbook") return "plan";
+  if (first === "progress workbook") return "progress";
+  return "";
+}
+
 function readmePick(sheets){
   for (var i = 0; i < READ_PICK_LABELS.length; i++) {
     var v = readmeCell(sheets, READ_PICK_LABELS[i]);
@@ -1022,6 +1051,7 @@ function capReadme(kind, capNames, picked){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        ["Capability", ""],
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -1036,6 +1066,7 @@ function capReadme(kind, capNames, picked){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Capability", ""],
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -1058,6 +1089,81 @@ function capReadme(kind, capNames, picked){
    asked the question — a template people keep on disk for months and which
    stops opening is a template that has broken. */
 function readmePickFn(){ return ""; }
+
+/* ── WHICH WORKBOOK A SUBJECT KEEPS, AND FOR WHICH CYCLE (§295) ───────
+   The download card hands over whatever is ticked, and a tick is a unit key,
+   `fn:<key>` or `cap:<id>`. The FORMAT is read off the subject and never
+   stored beside it (§61) — the subject already says which plan it keeps.
+
+   A CLOSED CYCLE'S FIGURES COME FROM ITS ARCHIVE, laid over a CLONE of the
+   plan as it stands. Never over the plan itself: this is a download, and a
+   reader that writes what it reads is §42's phantom change. Rows added since
+   the cycle closed simply carry nothing, which is the truth about them. */
+function impPlanWorkbookFor(v){
+  if (String(v).indexOf("cap:") === 0) {
+    var c = capById(String(v).slice(4));
+    return c ? capPlanWorkbook(c) : null;
+  }
+  var u = unitLike(v);
+  return u ? planWorkbook(u) : null;
+}
+
+function impFiguresArchive(id){
+  if (!id) return null;
+  return (ARCHIVES || []).filter(function(a){
+    return a.kind === "figures" && a.id === id;
+  })[0] || null;
+}
+
+/* Lay a cycle's archived figures over a clone of the subject. `put` writes the
+   three fields a snapshot keeps, and a row the snapshot never saw is CLEARED
+   rather than left showing this cycle's number under last cycle's heading. */
+function impAtCycle(subject, isCap, archiveId){
+  var a = impFiguresArchive(archiveId);
+  if (!a || !a.figures || !subject) return subject;
+  var snap = a.figures, c = clone(subject);
+  var lay = function(m, row, fields){
+    var o = (m || {})[row.id] || {};
+    fields.forEach(function(f){ row[f] = o[f] == null ? "" : o[f]; });
+  };
+  if (isCap) {
+    var m = (snap.caps || {})[c.id] || (snap.groupCaps || {})[c.id] || {};
+    (c.keyObjectives || []).forEach(function(x){ lay(m, x, ["actual","progress","note"]); });
+    (c.projects || []).forEach(function(p){
+      (p.deliverables || []).forEach(function(x){ lay(m, x, ["status","pct","note"]); });
+      (p.outcomes || []).forEach(function(x){ lay(m, x, ["actual","progress","note"]); });
+      (p.milestones || []).forEach(function(x){ lay(m, x, ["status","pct","note"]); });
+    });
+    return c;
+  }
+  var um = (snap.units || {})[c.ukey] || {};
+  (c.keyObjectives || []).forEach(function(x){ lay(um, x, ["actual","progress","note"]); });
+  (c.items || []).forEach(function(p){
+    (p.measures || []).forEach(function(x){ lay(um, x, ["actual","progress","note"]); });
+    (p.tactics  || []).forEach(function(x){ lay(um, x, ["actual","status","note"]); });
+  });
+  return c;
+}
+
+function impProgressWorkbookFor(v, cycleId){
+  if (String(v).indexOf("cap:") === 0) {
+    var c = capById(String(v).slice(4));
+    return c ? capProgressWorkbook(impAtCycle(c, true, cycleId)) : null;
+  }
+  var u = unitLike(v);
+  return u ? progressWorkbook(impAtCycle(u, false, cycleId)) : null;
+}
+
+/* An archived PLAN as the workbook it would have been downloaded as. The
+   snapshot holds exactly the fields the builders read; the name and key come
+   off the archive, because a snapshot does not carry its own subject. */
+function archiveWorkbook(a){
+  if (!a || !a.plan) return null;
+  var snap = clone(a.plan);
+  if (a.kind === "cap") { snap.name = a.name; snap.id = a.key; return capPlanWorkbook(snap); }
+  snap.name = a.name; snap.ukey = a.key;
+  return planWorkbook(snap);
+}
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });

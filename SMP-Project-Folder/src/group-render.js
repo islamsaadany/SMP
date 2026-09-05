@@ -7012,12 +7012,37 @@ function renderUnitPlan(u){
      plan here was to upload one. The button asks mayEditPlan() itself
      because there is no pen on an empty page to gate it (\u00a761's trap: the
      control's anchor is the thing that does not exist yet). */
-  if (!sel) return '<div class="note">' + esc(u.name) + ' has no ' +
-    L("pillar", "bu").toLowerCase() + ' yet, so there is no plan to show. ' +
+  /* ── AND IT IS WHERE BUILDING STARTS (§295.2) ─────────────────────
+     Islam: *"for the builder it should be in the bu or function when navigated
+     to this page not burried in the setup page."* The guided builder's only
+     door was an amber band on Setup › Import & archives — a page about FILES —
+     and he is right that it belongs where the plan does.
+
+     THE PAGE ALREADY ANSWERED THIS, which is why the door costs a sentence
+     rather than a control: this empty state already offered two routes out of
+     an empty plan, and the guided build is the third. So the offer is dressed
+     as an offer, the loud control is the one that walks you through it, and
+     the two routes that were already here keep their words.
+
+     THE BUTTON ASKS `mayEditPlan()` ITSELF because there is no pen on an empty
+     page to gate it — §61's trap, and the same reason the Add button beside it
+     does. And the page it points at is named CORRECTLY: this sentence said
+     "Setup → Import & plans" and the page has been called Import & archives
+     for as long as it has existed (§104.8). */
+  if (!sel) return '<div class="bempty">' +
+    '<b>' + esc(u.name) + ' has no plan yet.</b>' +
     (typeof mayEditPlan === "function" && mayEditPlan()
-      ? '<button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
-        '">Add the first one</button> &mdash; or upload a plan on <b>Setup \u2192 Import &amp; plans</b>.'
-      : 'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.') + '</div>';
+      ? '<p>Build it here and the platform walks you through it section by section &mdash; ' +
+          'the foundation, the SWOT, then the ' + esc(L("pillar", "bu").toLowerCase()) +
+          ', their measures and their tactics.</p>' +
+        '<div class="row"><button class="bprim" data-buildplan="' + esc(u.ukey) + '">' +
+          'Build the plan</button>' +
+        '<span class="alt">or <button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
+          '">add the first ' + esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+          '</button> yourself, or upload a file on <b>Setup \u2192 Import &amp; archives</b>.</span>' +
+        '</div>'
+      : '<p>A plan arrives as a file: <b>Setup \u2192 Import &amp; archives</b>, the pillars ' +
+        'template.</p>') + '</div>';
   /* Key objectives are NOT repeated here. They are authored on Foundation and
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table

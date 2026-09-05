@@ -307,50 +307,6 @@ body.presenting .chatdock { display:none; }
    header dropdown (§90) — the same control, so it needs no second appearance —
    and adds only the rows inside it. */
 .hmenu-panel.chset { width:392px; }
-/* ── AND IT SCROLLS INSIDE ITSELF (§294) ───────────────────────────────
-   Islam: *"there is no scrolling inside the settings pan while there is a
-   uselss scrolling in the main page."* BOTH HALVES ARE ONE FACT. This panel
-   had no `max-height` and `overflow-y:visible`, so there was nothing inside
-   it to scroll — 0px, measured — and at 725px, which is what it stands at
-   once both diagnostics have been run, it hangs off the bottom of an
-   ordinary laptop window. It is positioned inside the page, so that overrun
-   BECOMES the page's scroll: the Platform Inbox needs 0px of scroll at every
-   height swept with the panel shut, and exactly the overrun with it open
-   (98px at 760). The useless scroll was the panel.
-
-   64vh IS NOT A GUESSED CONSTANT (§122.5). It is `.hmenu-panel.wide`'s own
-   cap — the platform's existing answer for a dropdown taller than the window
-   — so this adds no second answer to *how tall may a dropdown be* (§53.5).
-
-   AND IT SAYS IT CONTINUES, which is §108.6's rule and not decoration: a
-   capped list with no sign of more below is a list that lies, and a
-   scrollbar cannot carry that sign on a Mac, where it is an overlay that
-   appears only once you are already scrolling (§158). So the sign is the
-   platform's own — a sticky `::after` that gets out of its own way, coming
-   to rest after the last row where it has nothing left to cover, plus a
-   visible thin track. THERE IS NO NEGATIVE MARGIN: §108.6 records that
-   giving the fade's height back that way takes it off the SCROLLABLE range
-   and strands the last rows, which is this element's own fault arriving by
-   the other road. The 22px is paid.
-
-   THE PADDING STAYS, SO THE PAINTING COMPENSATES FOR IT. `.hmenu-panel`
-   carries `padding:6px` and every row in here is inset by it — visible, and
-   nobody asked for it to change (rule 1b). But a sticky box sticks to the
-   PADDING edge, so `top:0` would leave a 6px strip above the pinned heading
-   with rows sliding through it, and `bottom:0` the same below the fade. A
-   box-shadow paints that strip in the panel's own surface without moving
-   anything: invisible at rest, opaque while scrolling. The number is the
-   panel's padding and nothing else — asserted as the PROPERTY (no content
-   above the heading, none below the fade) rather than as the number, so a
-   later change to that padding goes red rather than silent (§94.8). */
-.hmenu-panel.chset { max-height:64vh; overflow-y:auto; overscroll-behavior:contain;
-                     scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
-.chset .chset-h { position:sticky; top:0; z-index:2;
-                  box-shadow:0 -6px 0 var(--surface); }
-.hmenu-panel.chset::after {
-  content:""; display:block; position:sticky; bottom:0; z-index:1;
-  height:22px; pointer-events:none; box-shadow:0 6px 0 var(--surface);
-  background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
 /* THE NOTE OPENS ON A TAP (§127). `.tip` and its bubble are the platform's,
    declared once in group-extra.css and reused here rather than drawn again
    (§53.5) — this adds the open state and nothing else, so a mark that was

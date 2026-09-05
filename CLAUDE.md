@@ -640,6 +640,46 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   recorded residue). **RECORDED, NOT DONE**: a capability function's note boxes
   are still drawn with `want:false`, so the box the bar sends you to is not
   itself rung on that side.
+- **THE SETTINGS PANEL SCROLLS INSIDE ITSELF (§294):** Islam &mdash; *"there is
+  no scrolling inside the settings pan while there is a uselss scrolling in the
+  main page."* **BOTH HALVES ARE ONE FACT**: `.hmenu-panel.chset` carried a width
+  and nothing else, so there was **0px** to scroll inside it, and at **725px**
+  (once both diagnostics have run; 521 before) it hangs off an ordinary laptop
+  window &mdash; and being positioned inside the page, that overrun BECOMES the
+  document's height. Measured, the Inbox needs **0px** of scroll with the panel
+  shut at every height swept and scrolls **exactly the overrun** with it open
+  (58px at 800, 98px at 760, 158px at 700): *the useless scroll was the panel, to
+  the pixel.* **64vh IS NOT A GUESSED CONSTANT** (§122.5) &mdash; it is
+  `.hmenu-panel.wide`'s own cap, so no second answer to *how tall may a dropdown
+  be* (§53.5). **AND IT SAYS IT CONTINUES**, which is §108.6's rule and not
+  decoration: a sticky `::after` that comes to rest after the last row where it
+  has nothing left to cover, plus a visible thin track, because on a Mac a
+  scrollbar is an overlay that appears only once you are already scrolling
+  (§158). **NO NEGATIVE MARGIN** &mdash; §108.6 records that giving the fade's
+  height back that way takes it off the SCROLLABLE range and strands the last
+  rows. **THE PADDING STAYS, SO THE PAINTING COMPENSATES FOR IT**: the first
+  build carried `padding:0` and measuring stopped it shipping &mdash; every row
+  is inset 7px by `.hmenu-panel`'s 6px today, and zeroing it is a restyle nobody
+  asked for (rule 1b) &mdash; so the pinned heading covers that strip with a
+  box-shadow, which moves nothing. **AND THE CHECK FOR IT WENT RED ON A CORRECT
+  BUILD** (§294.1): a shadow paints without HIT-TESTING, so `elementFromPoint`
+  returned the row behind it and named `chset-lab` in both palettes; read off the
+  painted pixels the strip is 388&times;6 and every one is the panel's own
+  surface, once the rounded corners are inset out of the sample. §53.7's own
+  instruction, walked into while quoting it. **HE ASKED FOR THE WHOLE PAGE SCROLL
+  REMOVED OR TO BE PUSHED BACK, AND IT IS BOTH, MEASURED**: at 1280px wide and up
+  it is gone entirely, panel open or shut; at ~1100 and below the page scrolls
+  414px with the panel SHUT and **that scroll is useful** &mdash; the rail stacks
+  above the pane there (§167), putting the Settings button 758px down the
+  document at 1100 and 898 at 1000, so removing it would strand half the Inbox
+  &mdash; and it is ASSERTED PRESENT (§94.2), or a build that capped the page
+  would pass everything else here. **RECORDED, NOT DONE**: at those widths the
+  open panel still lengthens an already-scrolling document (414 &rarr; 518 at
+  1100&times;760), and closing that means anchoring the panel to the viewport
+  (§45.5's answer for the searchable select), which is a structural change to a
+  control signed off as a scroll. Four rules in `chat.css`: **no builder change,
+  no new element, nothing stored, no server rule**, with every row asserted at
+  the same place, width and count as the build before. **11 red** on that build.
 - **A PANEL EDITS, A DIALOG ASKS (§273.3, reshaping §273.2):** Islam, of the
   shipped closed-cycle panel on his own tenant — *"The design is very poor"* —
   and, of three shapes drawn for him, **"C"**. **MY FIRST TWO ANSWERS CHANGED
@@ -6441,6 +6481,23 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
+python3 checks/chat-settings-scroll.py # the settings panel scrolls inside itself
+                                # (§294): the panel capped and scrolling, the page's own
+                                # scroll asserted GONE where it needs none and asserted
+                                # STILL THERE at the widths where it is the only way to
+                                # reach the rest of the page (§167, §94.2); the strip
+                                # above the pinned heading read off the PAINTED PIXELS in
+                                # both palettes, because a box-shadow paints without
+                                # hit-testing and `elementFromPoint` calls a correct build
+                                # broken (§53.7, §294.1); the heading's offset asserted to
+                                # AGREE with the panel's own padding, so zeroing one
+                                # without the other goes red; the last row AND the note
+                                # behind its mark scrolled fully into view (§108.6's own
+                                # recorded fault); and no sideways scroll gained, since
+                                # `overflow-y` computes `overflow-x:auto` too. It RUNS
+                                # both diagnostics first — the panel is 521px until they
+                                # have and 725px after, and the short one fits. 11 red on
+                                # the build before; SMP_BUILT points it at another build
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
@@ -6592,7 +6649,35 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;293: the platform collects for ten
+*Last Updated: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
+itself.** Islam, of the chat settings dropdown: *"there is no scrolling inside
+the settings pan while there is a uselss scrolling in the main page."*
+**MEASURING SAID THE TWO HALVES ARE ONE FACT** &mdash; the panel had no
+`max-height` and `overflow-y:visible`, so **0px** scrolled inside it, and at
+**725px** its overrun became the document's own height: the Platform Inbox needs
+**0px** of scroll with the panel shut at every height swept, and scrolls exactly
+the overrun with it open. **DRAWN IN THE RUNNING PLATFORM AND LEFT FOR SIGN-OFF**
+(rule 1c) with no source touched &mdash; two treatments, **both shot SCROLLED**,
+because that is the only state in which they differ (&sect;273.4); Islam picked
+**B**. Every part of it is the platform's own rather than a new answer: 64vh is
+`.hmenu-panel.wide`'s cap (&sect;53.5, &sect;122.5), the fade and the visible
+track are the Setup rail's (&sect;108.6), and there is no negative margin,
+because that section records it stranding the last rows. **THE FIRST BUILD
+CARRIED `padding:0` AND MEASURING STOPPED IT** &mdash; every row is inset 7px
+today and zeroing that is a restyle nobody asked for (rule 1b) &mdash; so the
+pinned heading covers the strip by PAINTING rather than by moving anything.
+**AND THE CHECK THEN REPORTED A CORRECT BUILD BROKEN** (&sect;294.1): a
+box-shadow paints without hit-testing, so `elementFromPoint` named the row behind
+it in both palettes; read off the pixels, all 388&times;6 of that strip are the
+panel's own surface. **HIS SECOND ASK IS ANSWERED BOTH WAYS**: the page scroll is
+gone entirely at 1280px and up, and at ~1100 and below the 414px that remains is
+**useful** &mdash; the rail stacks there (&sect;167) and removing it would strand
+half the Inbox &mdash; so it is asserted PRESENT rather than assumed. **11 red**
+on the build before, 0 after; `office-chat` and the full `qa.py` sweep green.
+Four rules in one file: no builder change, no new element, nothing stored, no
+server rule.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;293: the platform collects for ten
 minutes, then sends one email.** Islam, of the emails the platform sends him:
 *"when someone send to me when I don't reply it send an email for each message
 ... it needs to compile some messages rather than an emaile for each message."*

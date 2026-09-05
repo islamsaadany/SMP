@@ -34925,3 +34925,111 @@ button rather than a per-conversation link; two people in the office replying at
 the same moment still both start collections, because the memory is per
 conversation and not per sender; and **§283's `chase_html` column and migration
 stay in the database**, read by nothing.
+
+## §294 — THE SETTINGS PANEL SCROLLS INSIDE ITSELF (2026-09-05)
+
+Islam, of the chat settings dropdown on the Platform Inbox: *"there is no
+scrolling inside the settings pan while there is a uselss scrolling in the main
+page."*
+
+**BOTH HALVES ARE ONE FACT, AND MEASURING IS WHAT SAID SO.** `.hmenu-panel.chset`
+carried a width and nothing else — `max-height:none`, `overflow-y:visible` — so
+there was **0px** to scroll inside it, measured. At **725px**, which is what it
+stands at once both diagnostics have been run (521px before), it hangs off the
+bottom of an ordinary laptop window. And it is positioned inside the page, so
+that overrun *becomes* the document's height: with the panel **shut** the
+Platform Inbox needs **0px** of scroll at 1000, 950, 900, 800, 760 and 700px
+tall, and with it **open** the page scrolls **exactly the overrun** — 58px at
+800, 98px at 760, 158px at 700. *The useless scroll was the panel, to the pixel.*
+
+### What was drawn, and what he picked
+
+Two treatments, both produced by injecting CSS into the **running platform**
+(rule 1c, §41.9 — both sides the same build), published as an artifact and left
+for sign-off with no source touched:
+
+- **A** — the cap alone.
+- **B** — the same cap with the heading pinned and a fade at the foot.
+
+**AND BOTH WERE DRAWN SCROLLED, because that is the only state in which they
+differ**: a mockup of the shut panel would have been two identical pictures
+(§273.4's lesson). Islam picked **B**.
+
+### 64vh is not a guessed constant
+
+It is `.hmenu-panel.wide`'s own cap — the platform's existing answer for a
+dropdown taller than the window — so this adds no second answer to *how tall may
+a dropdown be* (§53.5). §122.5 is why that mattered enough to go looking for one
+rather than reach for a number that fits today's panel.
+
+### It says it continues, and that is §108.6's rule rather than decoration
+
+A capped list with no sign of more below is a list that lies, and a scrollbar
+cannot carry that sign on a Mac, where it is an overlay that appears only once
+you are already scrolling (§158). So the sign is the platform's own, lifted from
+the Setup rail: a **sticky `::after`** that gets out of its own way, coming to
+rest after the last row where it has nothing left to cover, plus a visible thin
+track. **THERE IS NO NEGATIVE MARGIN.** §108.6 records that giving the fade's
+height back that way takes it off the **scrollable** range and strands the last
+rows — this element's own fault arriving by the other road — so the 22px is
+paid, and the last row and the note behind its mark are both asserted reachable.
+
+### The padding stays, so the painting compensates for it
+
+The first build of B carried `padding:0`, and measuring the shipped panel is
+what stopped it shipping: `.hmenu-panel` carries **6px** and every row in here
+is inset **7px** on every side by it. Zeroing that would push every row
+edge-to-edge — a restyle nobody asked for (rule 1b), inside a change that was
+signed off as a scroll. But a sticky box sticks to the **padding** edge, so
+`top:0` leaves a 6px strip above the pinned heading with rows sliding through
+it. A **box-shadow** paints that strip in the panel's own surface without moving
+anything: invisible at rest, opaque while scrolling.
+
+**AND THE CHECK FOR IT WENT RED ON A CORRECT BUILD** (§294.1, below).
+
+### What is not claimed, and what he was pushed back on
+
+He asked to *"remove the whole page scroll or push back if it's usefull in any
+way."* Both, and the boundary is measured:
+
+- **At 1280px wide and above the page's scroll is gone entirely** — 0px at every
+  height swept, panel open or shut. That is the reported fault, closed.
+- **At ~1100px and below the page scrolls 414px with the panel SHUT, and that
+  scroll is useful.** Below that width the Setup rail stops being a side column
+  and stacks above the pane (§167), so the Settings button itself sits **758px**
+  down the document at 1100 and **898px** at 1000. Removing that scroll would
+  put the rail and half the Inbox out of reach. **It is asserted present**
+  (§94.2), or a build that capped the page would satisfy every other assertion
+  here and strand the page it was meant to fix.
+- **RECORDED, NOT DONE**: at those widths the open panel still extends the
+  document — 414 → 518px at 1100×760, 414 → 608 at 1000×900. On a page that
+  already scrolls, an absolutely positioned dropdown lengthening it is ordinary
+  rather than the reported fault, and closing it means anchoring the panel to
+  the viewport (§45.5's answer for the searchable select), which is a structural
+  change to a control that was signed off as a scroll. Named rather than
+  quietly widened.
+
+### §294.1 — a shadow paints without hit-testing
+
+The first version of the strip assertion used `elementFromPoint` and reported
+**2 failures on a correct build**, in both palettes, naming `chset-lab` — a
+row's label — as showing above the pinned heading. It is not: a **box-shadow
+paints but does not participate in hit testing**, so a DOM probe returns
+whatever is underneath it. §53.7 records exactly this about a `::before` and
+says *measure this in PIXELS*; it was walked into again while quoting it.
+
+Read off the painted pixels instead, the strip is **388×6** and every pixel is
+the panel's own surface in both palettes (`#FFFFFF` light, `#1C2027` dark) once
+the rounded corners are inset out of the sample — the corners are legitimately
+not the surface colour, which is the one thing a naive full-width sample gets
+wrong. *A correct build reported broken costs exactly as much as a broken build
+reported clean, and the first instinct — to go and change the CSS — would have
+damaged a working fix.*
+
+### What it costs, and what it does not touch
+
+Four rules in `chat.css`. **No builder change, no new element, no DOM change, no
+setting, nothing stored and no server rule** — read off the diff, which touches
+one file. Every row is asserted to be in the same place, at the same width, in
+the same number as the build before it, with the panel's own width and the
+heading's inset on all three sides unchanged.

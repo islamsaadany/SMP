@@ -1898,7 +1898,7 @@ var CHAT = (function(){
     var head = bad ? "It is not working \u2014 " + unCap(bad.name)
              : off ? "It is switched off"
              : "It is working";
-    /* IT ARRIVES FOLDED, AND THE VERDICT IS THE SUMMARY (§295). Islam:
+    /* IT ARRIVES FOLDED, AND THE VERDICT IS THE SUMMARY (§296). Islam:
        *"enable me to collapse it after it finish rather than being always open
        like that"*, and, of three shapes drawn in this panel, **B** — closed on
        arrival, opened for the steps.
@@ -2117,7 +2117,7 @@ var CHAT = (function(){
                 '<input class="chset-num" type="number" data-chaway="1" ' +
                   'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
                   'value="' + c.away + '" aria-label="Minutes unanswered before an email is sent">' +
-                /* THE BOX IS ALREADY SHOWING THE NUMBER (§295). Islam:
+                /* THE BOX IS ALREADY SHOWING THE NUMBER (§296). Islam:
                    *"it should say minuites oly as the 10 is identified in the
                    box."* `plural()` returns the count AND the word, which
                    beside a field holding that count says it twice — so this

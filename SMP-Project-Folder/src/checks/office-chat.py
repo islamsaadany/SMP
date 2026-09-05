@@ -1575,7 +1575,7 @@ with sync_playwright() as p:
         {"name": "A box on your screen", "state": "ok", "word": "sent",
          "detail": "Sent to 1 device."}]
     pg.click("[data-chpoptest]"); pg.wait_for_timeout(2600)
-    # THE VERDICT IS THE SUMMARY AND THE STEPS ARE FOLDED (§295, Islam's B),
+    # THE VERDICT IS THE SUMMARY AND THE STEPS ARE FOLDED (§296, Islam's B),
     # so the block's text is the verdict alone until it is opened. §51.11: the
     # property here — that the result NAMES the device it reached — has not
     # moved, only what you must do to read it, so the fold is opened rather

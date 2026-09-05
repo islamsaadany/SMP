@@ -35116,7 +35116,7 @@ one file. Every row is asserted to be in the same place, at the same width, in
 the same number as the build before it, with the panel's own width and the
 heading's inset on all three sides unchanged.
 
-## §295 — THE LABEL, THE FOLD, AND A SETUP PAGE THAT IS NOT A UNIT'S (2026-09-05)
+## §296 — THE LABEL, THE FOLD, AND A SETUP PAGE THAT IS NOT A UNIT'S (2026-09-05)
 
 Three from Islam in one round, all drawn in the running platform before
 anything was built (rule 1c) and all three settled by him.
@@ -35208,7 +35208,7 @@ every Setup assertion and silently undo §267.2. **The one cost is stated**: bel
 been hiding it, and the band is 12px taller for it. That is the pre-§267.2
 behaviour restored rather than something new.
 
-### §295.1 — three probes called a correct build broken, all the same fault
+### §296.1 — three probes called a correct build broken, all the same fault
 
 `elementFromPoint` cannot see a **box-shadow** (§294.1). `getClientRects()`
 returns boxes for the children of a **closed `<details>`** — three "visible"

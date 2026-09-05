@@ -506,7 +506,7 @@ body.presenting .chatdock { display:none; }
 .chset-test { margin-top:10px; }
 .chtest { margin-top:10px; border:1px solid var(--line); border-radius:6px;
           overflow:hidden; background:var(--surface); }
-/* THE VERDICT LINE IS THE DISCLOSURE (§295). The caret is scoped to the
+/* THE VERDICT LINE IS THE DISCLOSURE (§296). The caret is scoped to the
    `<details>` itself and never to the class: §287 records `.fstrip-head::after`
    painting a fold mark on two surfaces that do not fold, and the same class is
    worn here by nothing else only for as long as that stays true. */

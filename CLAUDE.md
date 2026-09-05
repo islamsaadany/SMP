@@ -640,7 +640,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   recorded residue). **RECORDED, NOT DONE**: a capability function's note boxes
   are still drawn with `want:false`, so the box the bar sends you to is not
   itself rung on that side.
-- **THE LABEL, THE FOLD, AND A SETUP PAGE THAT IS NOT A UNIT'S (§295):**
+- **THE LABEL, THE FOLD, AND A SETUP PAGE THAT IS NOT A UNIT'S (§296):**
   three from Islam in one round. **THE MINUTES LABEL** &mdash; *"it should say
   minuites oly as the 10 is identified in the box"* &mdash; and **the wiring half
   he asked about was already right, named rather than reassured**: `api/chat.js`
@@ -673,7 +673,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   document so the calc fell to its 340px floor, and CSS injected AFTER paint kept
   that stale number; built into the sources the Inbox stands at 705px. *A mockup
   made by injecting into a running page is made after every measurement that page
-  has already taken.* **§295.1 &mdash; THREE PROBES CALLED A CORRECT BUILD BROKEN,
+  has already taken.* **§296.1 &mdash; THREE PROBES CALLED A CORRECT BUILD BROKEN,
   ALL ONE FAULT**: `elementFromPoint` cannot see a box-shadow, `getClientRects()`
   returns boxes for the children of a CLOSED `<details>` (three "visible" steps
   inside a 39px block), and a `cmp` run from the wrong directory reported the
@@ -6570,7 +6570,7 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
 python3 checks/setup-squeezed.py # the Setup page is not a unit's plan page
-                                # (§295): at 1250/1100/1000/950 the rail is a 196px
+                                # (§296): at 1250/1100/1000/950 the rail is a 196px
                                 # COLUMN again, the page's own title is on screen and the
                                 # page needs no scroll — and the Inbox fills the window
                                 # rather than sitting on its 340px floor, which is what
@@ -6750,7 +6750,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;295: the label, the fold, and a Setup
+*Last Updated: 2026-09-05 &mdash; **&sect;296: the label, the fold, and a Setup
 page that is not a unit's.** Three from Islam in one round. The minutes label
 said the number the box beside it was already showing &mdash; and **the wiring
 half he asked about was already right and is NAMED rather than reassured** (the
@@ -6770,7 +6770,7 @@ unit's page asserted byte-identical** so &sect;267.2 cannot be silently undone.
 **It also answered the mockup's own question** &mdash; the Inbox looking short in
 the drawing was the mockup, not the fix: CSS injected after paint kept a stale
 measurement, and built into the sources the box stands at 705px rather than its
-340px floor. **&sect;295.1: three probes called a correct build broken in one
+340px floor. **&sect;296.1: three probes called a correct build broken in one
 day**, all by asking the DOM instead of the paint. 0 failures on both checks,
 `office-chat` clean, full sweep ERRORS none.*
 

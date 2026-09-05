@@ -251,7 +251,7 @@ with sync_playwright() as pw:
            % (w, hh, shut, m["page"]), shut == 0 and m["page"] == 0, m)
         pg.close()
 
-    # ── 4b · THE LABEL SAYS THE UNIT, NOT THE NUMBER (§295) ─────────────
+    # ── 4b · THE LABEL SAYS THE UNIT, NOT THE NUMBER (§296) ─────────────
     # Islam: *"it should say minuites oly as the 10 is identified in the box."*
     # BOTH ENDS: the words beside the box lose the count, and the SENTENCE on
     # the hover keeps it — a label beside a field and a rule being explained
@@ -273,7 +273,7 @@ with sync_playwright() as pw:
        bool(lab["tip"]) and (lab["box"] + " minute") in lab["tip"], (lab["tip"] or "")[:80])
     pg.close()
 
-    # ── 4c · THE DIAGNOSTIC ARRIVES FOLDED (§295, Islam's B) ─────────────
+    # ── 4c · THE DIAGNOSTIC ARRIVES FOLDED (§296, Islam's B) ─────────────
     # MEASURED AS PAINT, NOT AS A DOM QUERY. `getClientRects()` returns boxes
     # for the children of a CLOSED <details> in Chromium, so a probe asking
     # that reports three visible steps over a block 39px tall and calls a
@@ -315,7 +315,7 @@ with sync_playwright() as pw:
     # presence of that scroll is asserted rather than assumed (§94.2).
     print("\n5 · and the scroll that is useful is still there")
     # REWRITTEN, NOT DELETED (§218). This asserted 1000x900, where the page
-    # scrolled 414px — and §295 established that was the REGRESSION rather than
+    # scrolled 414px — and §296 established that was the REGRESSION rather than
     # the design: `.setupsplit` wears `.split`, so it was stacking at 1200 and
     # at 1000 the page now correctly scrolls nothing. The PROPERTY is unchanged
     # — where the page legitimately stacks, its scroll must survive — and the

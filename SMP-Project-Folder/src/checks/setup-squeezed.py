@@ -1,4 +1,4 @@
-"""THE SETUP PAGE IS NOT A UNIT'S PLAN PAGE (§295).
+"""THE SETUP PAGE IS NOT A UNIT'S PLAN PAGE (§296).
 
 Islam, of Setup at a squeezed window: *"the whole settings page look like that
 when squeezed can we fix this?"*

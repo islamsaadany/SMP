@@ -141,24 +141,23 @@ code was touched.** What it found and what was done:
   | **035** | Gaps, filling, and where Submit is held | §205, §214, §223, §249, §272, §279 |
   | **036** | Setup: the register, the matrix and the cycle | §116, §174, §175, §186, §187, §190, §261, §273 |
   | **037** | Authoring a plan on the screen | §189, §194, §226–§229, §232, §260, §267–§271, §281 |
+  | **038** | The escaping sweep, and the net behind it | §235, §238 |
+  | **039** | Reporting is a tab | §222, revisiting §63 |
+  | **040** | A supporting function's report | §242 |
 
-**Coverage: 122 → 208 of 279 decision sections named in a spec (75%).**
+**Coverage: 122 → 212 of 279 decision sections named in a spec (76%), and every
+feature-sized decision now has one.**
 
-**What is left, honestly.** The 71 uncovered sections are overwhelmingly small
-fixes and refinements, where the decisions document is the right home and a spec
-would be filing for its own sake. Three are arguably feature-sized and are named
-here rather than left to be found:
+**What is left, honestly.** The 67 uncovered sections are fixes and refinements,
+where the decisions document is the right home and a spec would be filing for
+its own sake: §10–§20 (the original handoff), §77–§86 (the table standard's
+detail, under spec 012), §131–§146 (email and messaging detail, under specs 014,
+022 and 027), §149–§157 (the UI audit waves), §164–§167 (the knowledge base),
+§173 and §200–§209 (welcome, session and boot follow-ups), §274 and §287.
 
-- **§235** — the escaping sweep. Its net (§238) now has a section; the sweep
-  itself sits with spec 007's family and has no spec of its own.
-- **§222** — Reporting became a tab, revisiting §63.
-- **§242** — a supporting function's report is asked for, and its objectives can
-  be answered.
-
-Also uncovered by design: §10–§20 (the original handoff), §149–§157 (the UI
-audit waves), §164–§167 (the knowledge base), §200–§209 (welcome, session and
-boot follow-ups) — all recorded and none of them a model anybody has to
-reconstruct.
+None of them is a model anybody has to reconstruct, which was the test applied
+throughout: **a section gets a spec when reading it alone does not tell you how
+the thing works.**
 
 **One defect found and deliberately not fixed:** `src/config-data.js` cites
 §264 three times for the yes/no behaviour recorded at §257 — a number carried

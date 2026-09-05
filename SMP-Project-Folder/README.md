@@ -40,11 +40,16 @@ model IS — which is what the constitution's backfill provision is for:
 | **035** | Gaps, filling, and where Submit is held |
 | **036** | Setup: the register, the matrix and the cycle |
 | **037** | Authoring a plan on the screen |
+| **038** | The escaping sweep, and the net behind it |
+| **039** | Reporting is a tab |
+| **040** | A supporting function's report |
 
 Coverage went from **122 of 279** decision sections named in a spec to
-**208 (75%)**. What is left is overwhelmingly small fixes and refinements, where
-the decisions document is the right home; the feature-sized remainder is named
-in `IMPLEMENTATION_PROGRESS.md` rather than left to be discovered.
+**212 (76%)**, and **every feature-sized decision now has one**. The 67 left are
+fixes and refinements — the original handoff (§10–§20), the UI audit waves
+(§149–§157), the knowledge base (§164–§167), the welcome and boot follow-ups
+(§200–§209) — where the decisions document is the right home and a spec would be
+filing for its own sake.
 
 ---
 

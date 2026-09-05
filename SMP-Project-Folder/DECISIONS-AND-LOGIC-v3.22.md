@@ -30780,6 +30780,88 @@ measuring something else entirely.
 
 ---
 
+## §266.12 — ONE DECK'S STRIP IS LABELLED, AND ITS PILLS ARE GROUPED (2026-09-04)
+
+Islam, of the flow's own strip: *"for the presentations in general of the units
+not the master how can we use the bullets in the bottom like we did in the
+master one?"* — and then, of the four treatments drawn for him, *"B is good but
+we can make them grouped like C as well."*
+
+**MEASURED FIRST, AND THE MEASUREMENT IS WHY IT WAS CHEAP.** A unit's deck drew
+**one blank dot per slide** — 31 of them for Mobile, at 1500px **on three rows**
+— which is a strip you can count and cannot read. What the flow needed for its
+pills, a single deck already had: **every slide carries an anchor**, and the
+anchors already name the deck's parts (`sfound`, `swothead`, `spillars`,
+`sperf`, `p<CODE>d`, `cap<id>c`). So this is not a new model of what a deck is;
+it is the model the picture placer has used since §50, read a second time.
+
+**THE STRIP IS DRAWN FROM WHAT THE DECK DECLARES, NEVER FROM WHAT IT LOOKS
+LIKE.** `sec(code, name, head)` is stamped by the builder that knows the pillar's
+code and the capability's name, exactly as §266 stamped `data-subject` — a strip
+that read a code back out of a heading would be parsing prose it does not own
+(§96), and the heading of a measures slide is *"MB01 Digital & Data-Driven
+OperationsKey measures"*.
+
+**FOUR TREATMENTS WERE DRAWN AND THREE OF THEM WERE KILLED BY BEING DRAWN**,
+which is rule 1c earning its place again: **A** (five words) leaves a projects
+function with a two-pill strip, because such a function has no dividers at all;
+**C** (the dots, grouped) is **998px** of dots on Mobile and wraps at every
+width, 1920 included; and **B2** — B1 with the current section's slides shown as
+dots inside it — is 677px, past the edge at 1024, and **re-flows as you
+present**, which is the thing §266.11 was asked to stop one round earlier.
+
+**THE GROUPS ARE THE DECK'S OWN FOUR BLUE DIVIDERS (§259)**, so the four pillars
+read as one stretch of the review rather than as four things among ten. **The
+separator is a border on the group, never a character**: a bar typed between two
+pills is a thing that can be selected, copied and read aloud as though it meant
+something.
+
+**ONE LIST FOR BOTH KINDS OF STRIP (§53.5).** `DECK.stops` now holds a flow's
+subjects OR one deck's sections, and everything downstream — which pill is lit,
+which one a slide belongs to — asks it without caring which it got. **`.bygrp`
+rides on top of `.bysub`** rather than replacing it, so there is one description
+of what a pill is.
+
+**AND THE LINE THAT RENAMES THE TITLE BAR HAD TO START ASKING `DECK.flow`.** It
+was gated on `DECK.stops`, which was the flow's alone until today — so without
+that one word a unit's deck would have renamed itself *"Foundation · 2 of 10"*
+and lost the unit, which is precisely what §266 wrote that line to prevent.
+
+**A CAPABILITY HAS NO CODE**, so it falls back to two letters — BP, PM — which is
+§266.9's own fallback for a subject with no prefix, and it is a fallback rather
+than a scheme: a pillar HAS a code, printed on every one of its slides, and
+inventing a second abbreviation beside it is what that section refused.
+
+**A DECK THAT DECLARES FEWER THAN TWO SECTIONS FALLS BACK TO A DOT PER SLIDE**,
+so a shape nobody has thought of still gets a strip (§61).
+
+Measured on the built file: Mobile **10 pills in 5 groups, 547px**, Merchandising
+7 in 3 at 392px, Marketing 4 in 1 at 149px — **one row and nothing past the edge
+at 1920, 1400, 1280 and 1024**. Read as boxes rather than as `scrollWidth`, which
+lies on a flex row carrying margins (§105.2) — the drawing's own first
+measurement reported 18px of overflow no element had, and **that wrong reading
+then hid a real fault**: the grouped pills were not wearing the pill rule at all,
+because it was scoped to the flow's class alone, so ten labels were rendering
+inside 7px circles.
+
+`checks/deck-strip.py`: **19 red** on the build before, its first failure printing
+Islam's complaint as 31 empty labels on three rows. It walks **every slide** and
+asserts the lit pill is the section that slide belongs to (a build that lit the
+first pill always passes every *"there is a lit pill"* test), asserts the codes as
+**agreement with `pillarCode()`** rather than as a list, and asserts the **flow
+untouched at both ends** — everything rides one strip now, so *"we did not touch
+the master presentation"* is a claim until it is measured. Three assertions in
+`checks/master-presentation.py` stated the old behaviour and were **rewritten,
+never deleted** (§218): what they guarded — that a single deck is not a flow and
+does not wear the flow's strip — is still asserted.
+
+**RECORDED, NOT DONE:** a projects function's pills are its capabilities, not its
+projects, so Marketing's strip is four pills with no grouping to do. Opening it
+to a pill per project is a decision about how much a strip should hold, and it
+was not in what Islam signed off.
+
+---
+
 ## §267 — THE PLAN TABLE AT A NARROWER WINDOW (2026-09-03)
 
 Islam, on the build §260 had just merged, with a screenshot of a **zoomed**

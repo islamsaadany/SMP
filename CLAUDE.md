@@ -1128,6 +1128,43 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **RECORDED, NOT DONE**: a single deck still draws one unlabelled dot per slide,
   nothing says the order is saved without presenting it, and a flow cannot be
   downloaded.
+- **ONE DECK'S STRIP IS LABELLED, AND ITS PILLS ARE GROUPED (&sect;266.12):**
+  Islam, of the flow's own strip &mdash; *"for the presentations in general of
+  the units not the master how can we use the bullets in the bottom like we did
+  in the master one?"*, then of four treatments drawn for him, *"B is good but
+  we can make them grouped like C as well."* **MEASURED FIRST**: a unit's deck
+  drew **31 blank dots on three rows** at 1500px. **WHAT THE FLOW NEEDED, A
+  SINGLE DECK ALREADY HAD** &mdash; every slide carries an anchor and the
+  anchors already name the deck's parts, so this is the model the picture placer
+  has used since &sect;50 read a second time. **DECLARED, NEVER PARSED**:
+  `sec(code, name, head)` is stamped by the builder that knows the pillar's code,
+  exactly as &sect;266 stamped `data-subject` &mdash; a measures slide's heading
+  reads *"MB01 Digital & Data-Driven OperationsKey measures"*, so reading a code
+  back out of prose is guessing at something the strip does not own (&sect;96).
+  **THREE OF THE FOUR TREATMENTS WERE KILLED BY BEING DRAWN** (rule 1c): words
+  alone leave a projects function a two-pill strip, the grouped DOTS are 998px
+  and wrap at 1920, and pills-with-slides-inside re-flows as you present, which
+  is what &sect;266.11 was asked to stop one round earlier. **THE GROUPS ARE THE
+  DECK'S OWN FOUR BLUE DIVIDERS** (&sect;259), and **the separator is a border,
+  never a character** &mdash; a bar typed between two pills can be selected,
+  copied and read aloud as though it meant something. **ONE LIST FOR BOTH**
+  (&sect;53.5): `DECK.stops` holds a flow's subjects OR one deck's sections and
+  everything downstream asks it without caring &mdash; **so the line that renames
+  the title bar had to start asking `DECK.flow`**, or a unit's deck would rename
+  itself *"Foundation &middot; 2 of 10"* and lose the unit, which is exactly what
+  &sect;266 wrote that line to prevent. **A capability has no code**, so two
+  letters &mdash; &sect;266.9's own fallback, and a fallback rather than a scheme.
+  **Fewer than two sections falls back to a dot per slide** (&sect;61). Measured:
+  10 pills in 5 groups at **547px**, one row and nothing past the edge at 1920,
+  1400, 1280 and 1024 &mdash; read as BOXES, because `scrollWidth` lies on a flex
+  row carrying margins (&sect;105.2) and its 18px of phantom overflow **hid a real
+  fault**, the grouped pills not wearing the pill rule at all. **19 red** on the
+  build before, the first failure printing his complaint as 31 empty labels on
+  three rows; the check walks EVERY slide (a build lighting the first pill always
+  passes *"there is a lit pill"*) and asserts the flow untouched at both ends.
+  Three assertions in `master-presentation.py` REWRITTEN, never deleted
+  (&sect;218). **RECORDED, NOT DONE**: a projects function's pills are its
+  capabilities and not its projects.
 - **THE DIALOG DOES NOT CHANGE SIZE AS ROWS MOVE (&sect;266.11):** Islam, of
   what &sect;266.10 shipped &mdash; *"the window height keeps changing on the
   movement of the choices keep the size fixed."* **REPRODUCED FIRST**: twelve
@@ -6206,6 +6243,16 @@ python3 checks/master-presentation.py # one flow, several decks, back to back
                                 # unchanged, because everything rides one opener now.
                                 # 31 red on the build before — and its first run there
                                 # DIED on an empty list rather than reporting (§215)
+python3 checks/deck-strip.py    # one deck's strip is labelled and its pills grouped
+                                # (§266.12): the codes asserted as AGREEMENT with
+                                # pillarCode and never as a list; the groups against
+                                # the slides that DECLARE themselves heads; the lit
+                                # pill walked slide by slide across the whole deck,
+                                # because a build that lights the first one always
+                                # passes "there is a lit pill"; both supporting
+                                # function shapes; and the master flow asserted
+                                # UNCHANGED at both ends, since everything rides one
+                                # strip now. 19 red on the build before
 python3 checks/master-picker.py # the picker is two tables, searched, and dragged by
                                 # its own numbers (§266.10): Kind asserted as
                                 # AGREEMENT with boardFunctionTargets and Slides
@@ -6678,6 +6725,35 @@ Four rules in one file: no builder change, no new element, nothing stored, no
 server rule.*
 
 *Earlier: 2026-09-04 &mdash; **&sect;293: the platform collects for ten
+
+*Earlier: 2026-09-04 &mdash; **&sect;266.12: one deck's strip is labelled,
+and its pills are grouped.** Islam, of what the master flow already does:
+*"for the presentations in general of the units not the master how can we use
+the bullets in the bottom like we did in the master one?"* &mdash; then, of four
+treatments drawn for him in the real deck's own bar, *"B is good but we can make
+them grouped like C as well."* **MEASURED BEFORE ANYTHING WAS PROPOSED**: a
+unit's deck drew **31 blank dots on three rows**. **AND WHAT THE FLOW NEEDED, A
+SINGLE DECK ALREADY HAD** &mdash; every slide carries an anchor, and the anchors
+already name the deck's parts, so the whole feature is the picture placer's own
+model (&sect;50) read a second time rather than a new one. **THREE OF THE FOUR
+TREATMENTS WERE KILLED BY BEING DRAWN**, which is what rule 1c is for: words
+alone leave a projects function a two-pill strip, grouped DOTS are 998px and wrap
+at 1920, and pills-with-slides-inside re-flows as you present &mdash; the thing
+&sect;266.11 was asked to stop one round earlier. **The groups are the deck's own
+four blue dividers** (&sect;259), the separator is a border rather than a
+character, and **one list serves both strips** (&sect;53.5) &mdash; which is why
+the line that renames the title bar had to start asking `DECK.flow`, or a unit's
+deck would rename itself *"Foundation &middot; 2 of 10"* and lose the unit.
+Measured: **10 pills in 5 groups, 547px, one row, nothing past the edge** at
+1920, 1400, 1280 and 1024 &mdash; read as boxes, because `scrollWidth` lies on a
+flex row with margins and its phantom 18px **hid a real fault** (the grouped
+pills wearing no pill rule at all). `checks/deck-strip.py` **19 red** on the
+build before, walking every slide; three assertions in `master-presentation.py`
+REWRITTEN, never deleted (&sect;218). 30/0 &middot; 44/0 &middot; six deck checks
+&middot; full sweep clean.*
+
+
+*Earlier the same day: **&sect;293: the platform collects for ten
 minutes, then sends one email.** Islam, of the emails the platform sends him:
 *"when someone send to me when I don't reply it send an email for each message
 ... it needs to compile some messages rather than an emaile for each message."*

@@ -89,7 +89,19 @@ takes the height the whole list would need — both columns together, which cann
 change while it is open — measured rather than written as a constant, and capped
 so *Start the flow* stays on screen.
 
-**Still open on it, and said rather than discovered:** a drag cannot
+**§266.12 — and one deck's strip is labelled, and its pills grouped**, from
+what the master flow already does: a unit's own deck drew 31 blank dots on three
+rows, and everything the flow's labelled strip needed a single deck already had
+— every slide carries an anchor, and the anchors name the deck's parts. One pill
+per section, gathered into the deck's own four blue dividers, so Mobile reads
+COVER │ FOUND │ SWOT │ PILLARS MB01 MB02 MB03 MB04 │ SCORE END: 10 pills in 5
+groups, 547px, one row at every width from 1920 down to 1024. Four treatments
+were drawn in the real deck's bar first and three of them died by being drawn.
+The master flow's own strip is unchanged and it is asserted.
+
+**Still open on it, and said rather than discovered:** a projects function's
+pills are its capabilities and not its projects, so Marketing gets four pills
+with nothing to group. And a drag cannot
 auto-scroll — with all eighteen in the flow the list is 654px in a 420px box, so
 a drop can only land where you can already see (the keyboard route does scroll).
 That is true of every sortable table in the product, so closing it means

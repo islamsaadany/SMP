@@ -670,29 +670,6 @@
     background:var(--gold); border-color:var(--gold); color:#12161C;
     transform:none;
   }
-  /* ── ONE DECK'S PILLS ARE GROUPED (§266.12) ────────────────────────
-     Islam, of the four treatments drawn: *"B is good but we can make them
-     grouped like C as well."* The groups are the deck's own four blue dividers
-     (§259), so the four pillars read as one stretch of the review rather than
-     as four things among ten.
-
-     THE SEPARATOR IS A BORDER ON THE GROUP, NEVER A CHARACTER: a bar typed
-     between two pills is a thing that can be selected, copied and read aloud by
-     a screen reader as though it meant something.
-
-     `.bygrp` rides ON TOP of `.bysub` rather than replacing it — the pill is the
-     flow's own pill and there is one description of it (§53.5). What this adds
-     is where the pills sit. */
-  .ddots.bygrp { max-width:66vw; gap:0; }
-  .ddots.bygrp .dgrp {
-    display:flex; gap:3px; align-items:center;
-    padding-right:9px; margin-right:9px;
-    border-right:1px solid rgba(255,255,255,.18);
-  }
-  .ddots.bygrp .dgrp:last-child {
-    border-right:0; margin-right:0; padding-right:0;
-  }
-
   /* AFTER the rules it narrows, never before them: `.ddots.bysub .ddot` and
      this carry the same specificity, so source order is the whole of what
      decides — written above, the tighter padding lost silently and the strip
@@ -701,9 +678,6 @@
   @media (max-width: 1400px) {
     .ddots.bysub { gap:2px; }
     .ddots.bysub .ddot { padding:0 5px; letter-spacing:.05em; }
-    /* the gap between pills is the GROUP's here, so the narrowing has to reach
-       it too or a grouped strip keeps its wide gutters at 1280 */
-    .ddots.bygrp .dgrp { gap:2px; padding-right:7px; margin-right:7px; }
   }
 
   .mflow { font-size:13.5px; }

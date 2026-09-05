@@ -1771,7 +1771,7 @@ var DECKSWIPE_MIN = 45;
    refused by one and obeyed by the other (§53.5). */
 function deckOwnControl(t){
   return !!(t && t.closest &&
-    /* ── A PLAYER IS SOMETHING ON THE STAGE, NOT THE STAGE (§296) ────
+    /* ── A PLAYER IS SOMETHING ON THE STAGE, NOT THE STAGE (§297) ────
        A click inside an IFRAME never reaches this document, so the embed was
        safe by accident — but a native `<video>` is in our own page, and its
        clicks land here. In fullscreen, where §265 makes a click on the stage
@@ -1785,7 +1785,7 @@ function deckOwnControl(t){
 
 function wireDeck(){
   var root = document.getElementById("deckroot");
-  /* The keyboard is the presentation's, on every slide (§296). Armed once,
+  /* The keyboard is the presentation's, on every slide (§297). Armed once,
      here, beside the rest of the deck's wiring. */
   videoKeepKeys(root);
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });

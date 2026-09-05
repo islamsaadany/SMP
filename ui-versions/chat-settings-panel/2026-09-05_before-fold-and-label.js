@@ -1898,23 +1898,8 @@ var CHAT = (function(){
     var head = bad ? "It is not working \u2014 " + unCap(bad.name)
              : off ? "It is switched off"
              : "It is working";
-    /* IT ARRIVES FOLDED, AND THE VERDICT IS THE SUMMARY (§296). Islam:
-       *"enable me to collapse it after it finish rather than being always open
-       like that"*, and, of three shapes drawn in this panel, **B** — closed on
-       arrival, opened for the steps.
-
-       NO NEW WORDS. The line above the steps is already a verdict ("It is not
-       working — the API key"), so it was written to be the one thing you read
-       first; making it the `<summary>` costs nothing and hides nothing that
-       was not already summarised. A `<details>` rather than a flag and a
-       handler: the open state is the element's own, so nothing here has to
-       remember it and no repaint can lose it (§24).
-
-       AND IT IS WHY THE PANEL FITS. Measured: with a result open the panel
-       needs 745px of content and must scroll 139; folded it needs 590 and
-       scrolls not at all — §294 and this are one problem from two ends. */
-    return '<details class="chtest' + (bad ? " bad" : off ? " off" : " good") + '">' +
-      '<summary class="chtest-h">' + esc2(head) + "</summary>" +
+    return '<div class="chtest' + (bad ? " bad" : off ? " off" : " good") + '">' +
+      '<div class="chtest-h">' + esc2(head) + "</div>" +
       steps.map(function(st){
         return '<div class="chtest-r">' +
           (TESTMARK[st.state] || TESTMARK.fail) +
@@ -1922,7 +1907,7 @@ var CHAT = (function(){
           '<span class="chtest-s">' + esc2(st.word || TESTWORD[st.state] || st.state) + "</span>" +
           (st.detail ? '<div class="chtest-d">' + esc2(st.detail) + "</div>" : "") +
         "</div>";
-      }).join("") + "</details>";
+      }).join("") + "</div>";
   }
 
   /* ── THE SETTINGS, IN THE ORDER SOMEBODY DECIDES THEM (§127) ────────
@@ -2117,16 +2102,7 @@ var CHAT = (function(){
                 '<input class="chset-num" type="number" data-chaway="1" ' +
                   'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
                   'value="' + c.away + '" aria-label="Minutes unanswered before an email is sent">' +
-                /* THE BOX IS ALREADY SHOWING THE NUMBER (§296). Islam:
-                   *"it should say minuites oly as the 10 is identified in the
-                   box."* `plural()` returns the count AND the word, which
-                   beside a field holding that count says it twice — so this
-                   takes the word alone. The SENTENCE on the hover keeps its
-                   number: a label beside a box and a rule being explained are
-                   two different jobs, and only one of them is repeating
-                   itself (§87's twins, one row apart). */
-                '<span class="chset-unit">' +
-                  (c.away === 1 ? "minute" : "minutes") + '</span>' +
+                '<span class="chset-unit">' + plural(c.away, "minute") + '</span>' +
               '</div>'
             : "")) +
 

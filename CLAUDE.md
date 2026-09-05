@@ -456,7 +456,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **THE KEYBOARD BELONGS TO THE PRESENTATION (§296):** Islam, presenting with a
+- **THE KEYBOARD BELONGS TO THE PRESENTATION (§297):** Islam, presenting with a
   clip on a slide — *"the right and elft arrows are editing the video forward and
   backward &hellip; we lose the functionality ot the forward and backrward
   clicks &hellip; the forward and backward of the video stream should be done by
@@ -483,7 +483,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   was safe BY ACCIDENT while a native `<video>`'s clicks land here, and in
   fullscreen (§265) **pressing the player's own play button advanced the slide
   too**, measured `{was: 0, now: 1}`. **4 red** before, printing the symptom
-  verbatim. **§296.1 — three of the check's own failures were the CHECK**: it
+  verbatim. **§297.1 — three of the check's own failures were the CHECK**: it
   died rather than reporting twice (§215), and its probe **invented a slide
   shape** (`sl.video` where the product stores `sl.vid`), so it reported a
   working builder as broken (§100.3).
@@ -717,6 +717,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   recorded residue). **RECORDED, NOT DONE**: a capability function's note boxes
   are still drawn with `want:false`, so the box the bar sends you to is not
   itself rung on that side.
+- **THE LABEL, THE FOLD, AND A SETUP PAGE THAT IS NOT A UNIT'S (§296):**
+  three from Islam in one round. **THE MINUTES LABEL** &mdash; *"it should say
+  minuites oly as the 10 is identified in the box"* &mdash; and **the wiring half
+  he asked about was already right, named rather than reassured**: `api/chat.js`
+  reads `cfg.away` at the two places that decide when a collection email goes,
+  and §169 stores it as a number. `plural()` returns the count AND the word, so
+  beside a field holding `10` the row said it twice; it takes the word alone, and
+  **the hover SENTENCE keeps its number** (§87's twins, one row apart), asserted
+  at both ends. **THE DIAGNOSTIC ARRIVES FOLDED** &mdash; Islam's **B** of three
+  drawn, with the cost of each stated &mdash; and it costs **no new words**,
+  because the verdict line was already written to be the one thing read first
+  (§123), so it becomes the `<summary>`; a real `<details>`, never a flag and a
+  handler, so no repaint can lose the state (§24), and the caret is scoped to the
+  disclosure (§287). **AND IT IS WHY THE PANEL FITS**: open it needs 745px and
+  must scroll 139, folded it needs 590 and scrolls nothing &mdash; §294 capped the
+  panel, this removes the reason it needed capping. **AND THE SETUP PAGE WAS A
+  REGRESSION FROM ANOTHER SESSION**: §267.2 moved the shared `.split` from 820 to
+  1200 for a UNIT's pillar rail and did not scope it, and **`.setupsplit` IS a
+  `.split`** &mdash; so between 900 and 1200 the Setup rail was a full-width,
+  window-tall scrolling COLUMN (911px: rail 848&times;763, the page's own title at
+  document y=878, 414px of scroll on a page needing none). **§158's recorded trap
+  with a different class** (*".pane INCLUDES SETUP"*). **THE FIRST FIX DRAWN MADE
+  IT WORSE** &mdash; extending Setup's own 900 band to 1200 takes the rail 763
+  &rarr; 907 and the scroll 414 &rarr; 558 &mdash; so the unit-rail block is
+  scoped AWAY from Setup instead and Setup gets no rules of its own: rail 196px,
+  title at y=99, scroll 0 at four widths, **with a unit's page asserted
+  byte-identical at 1200/1100/1000** or a breakpoint change would pass everything
+  and undo §267.2. **AND IT ANSWERED THE MOCKUP'S OWN QUESTION** (*"is that by
+  design or a glitch from you?"*): a glitch of the mockup &mdash; `--chin-top` is
+  measured at paint (§100.5), the stacked rail put the Inbox 934px down the
+  document so the calc fell to its 340px floor, and CSS injected AFTER paint kept
+  that stale number; built into the sources the Inbox stands at 705px. *A mockup
+  made by injecting into a running page is made after every measurement that page
+  has already taken.* **§296.1 &mdash; THREE PROBES CALLED A CORRECT BUILD BROKEN,
+  ALL ONE FAULT**: `elementFromPoint` cannot see a box-shadow, `getClientRects()`
+  returns boxes for the children of a CLOSED `<details>` (three "visible" steps
+  inside a 39px block), and a `cmp` run from the wrong directory reported the
+  build out of step. Every one fixed by measuring the PAINT &mdash;
+  `checkVisibility()`, the block's height, a hit-test, the pixels. One §294
+  assertion **REWRITTEN, not deleted** (§218): it asserted the page still scrolls
+  at 1000&times;900, true only because of the regression this removes.
 - **THE SETTINGS PANEL SCROLLS INSIDE ITSELF (§294):** Islam &mdash; *"there is
   no scrolling inside the settings pan while there is a uselss scrolling in the
   main page."* **BOTH HALVES ARE ONE FACT**: `.hmenu-panel.chset` carried a width
@@ -6783,6 +6824,19 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
+python3 checks/setup-squeezed.py # the Setup page is not a unit's plan page
+                                # (§296): at 1250/1100/1000/950 the rail is a 196px
+                                # COLUMN again, the page's own title is on screen and the
+                                # page needs no scroll — and the Inbox fills the window
+                                # rather than sitting on its 340px floor, which is what
+                                # "the chat part is not full page" was (`--chin-top` is
+                                # measured at paint, §100.5). Below 900 the designed band
+                                # is asserted STILL a band, or a build keeping two columns
+                                # all the way down passes everything above and squeezes the
+                                # page at 760. AND A UNIT'S PILLAR RAIL IS THE CONTROL,
+                                # asserted still going across at 1200/1100/1000 — a "fix"
+                                # that moved the breakpoint back would pass every Setup
+                                # assertion here and silently undo §267.2
 python3 checks/chat-settings-scroll.py # the settings panel scrolls inside itself
                                 # (§294): the panel capped and scrolling, the page's own
                                 # scroll asserted GONE where it needs none and asserted
@@ -6822,7 +6876,7 @@ python3 checks/hide-slide.py    # the office hides a slide and the projector ski
                                 # seeing the marks and getting no control — and the editor
                                 # and the projector proved to build ONE deck (§256.2).
                                 # 33 red on the build before; every probe degrades (§215)
-python3 checks/video-keys.py    # the keyboard belongs to the presentation (§296):
+python3 checks/video-keys.py    # the keyboard belongs to the presentation (§297):
                                 # focus landing in a player handed straight back, on the
                                 # projector AND in Manage slides (the editor arms a live
                                 # player and walks its rail with the same arrows, §69.6),
@@ -6990,7 +7044,62 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;295: the presentation loop.** Islam,
+*Last Updated: 2026-09-05 &mdash; **&sect;297: the keyboard belongs to the
+presentation.** Islam, presenting with a clip on a slide: *"when I'm playing the
+video the right and elft arrows are editing the video forward and backward &hellip;
+the forward and backward of the video stream should be done by clicing on the
+video directly and the right and left arrows and same for the up and down and
+pagup and down stay for the repsentaiton."* **THE KEYS WERE NEVER IGNORED &mdash;
+THEY NEVER ARRIVED**, and measuring that first is what decided where the fix
+goes: with focus inside the player's frame the deck's own window listener fires
+**zero** times, because a cross-origin iframe keeps every key it holds focus
+for. Nothing about the deck's key handling was wrong and none of it changed.
+&sect;261.14 fixed the other half of this &mdash; a player loaded on a slide
+nobody is looking at &mdash; and left the slide you ARE on, where the player is
+legitimately live. **AND THE TWO KINDS FAIL DIFFERENTLY**: a native `<video>` is
+in our own document, so the deck already received the key and already cancelled
+the seek; that side is asserted rather than touched. **THE FOCUS IS HANDED BACK,
+NOT THE KEY INTERCEPTED** &mdash; `blur` on the WINDOW (focus moving into a frame
+is not a focus event here), queued rather than synchronous, and guarded on
+`document.activeElement` or the deck steals focus from the whole browser on an
+ordinary tab-switch. **ONE HELPER, BOTH SURFACES** (&sect;53.5, A15), because
+Manage slides arms a live player and walks its rail with the same arrows.
+**THE COST WAS STATED BEFORE HE TOOK IT**: the player's own shortcuts stop
+working and stay reachable by mouse. **AND A SECOND FAULT FOUND BY ASKING WHAT A
+CLICK DOES**: a click inside an iframe never reaches this document, so the embed
+was safe BY ACCIDENT while a native player's clicks land here &mdash; in
+fullscreen (&sect;265) **pressing the video's own play button advanced the slide
+too**, measured `{was: 0, now: 1}`. **4 red** on the build before, printing the
+symptom verbatim; **three of the check's own failures were the CHECK**
+(&sect;215 twice, and a probe that invented a slide shape the product does not
+use, &sect;100.3). No visual change, nothing stored, nothing migrated, no server
+file touched. **Merged to `main`.***
+
+*Earlier the same day: **&sect;296: the label, the fold, and a Setup
+page that is not a unit's.** Three from Islam in one round. The minutes label
+said the number the box beside it was already showing &mdash; and **the wiring
+half he asked about was already right and is NAMED rather than reassured** (the
+server reads that value at the two places deciding when the email goes). The
+diagnostic now **arrives folded**, his B of three drawn with the cost of each,
+costing no new words because the verdict line was already the one thing written
+to be read first &mdash; and it is why the panel fits at all: open it needs 745px
+and must scroll 139, folded it needs 590 and scrolls nothing, so &sect;294 capped
+the panel and this removes the reason it needed capping. **AND THE SQUEEZED SETUP
+PAGE WAS A REGRESSION FROM ANOTHER SESSION** &mdash; &sect;267.2 moved the shared
+`.split` from 820 to 1200 for a unit's pillar rail and did not scope it, and
+`.setupsplit` IS a `.split`, so the Setup rail became a full-width, window-tall
+scrolling column with the page underneath it (&sect;158's recorded trap, different
+class). **The first fix drawn made it worse** and was drawn for exactly that
+reason; the shipped one scopes the unit-rail block away from Setup, **with a
+unit's page asserted byte-identical** so &sect;267.2 cannot be silently undone.
+**It also answered the mockup's own question** &mdash; the Inbox looking short in
+the drawing was the mockup, not the fix: CSS injected after paint kept a stale
+measurement, and built into the sources the box stands at 705px rather than its
+340px floor. **&sect;296.1: three probes called a correct build broken in one
+day**, all by asking the DOM instead of the paint. 0 failures on both checks,
+`office-chat` clean, full sweep ERRORS none.*
+
+*Earlier the same day: 2026-09-05 &mdash; **&sect;295: the presentation loop.** Islam,
 thinking aloud rather than reporting a fault: *"why don't we make the indvidual
 presentation section act like normal ppts &hellip; they see the manage section
 part and then present from there and if they exit the presentation mood thye get
@@ -7024,8 +7133,6 @@ deck checks green. **&sect;295.1**: two of the check's own failures were the
 CHECK (it died rather than reporting, &sect;215; and an assertion passed on
 `None == None`, &sect;113.8), and one page error was a function key I had
 misspelt. **Merged to `main`.***
-
-*Earlier: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
 
 *Earlier the same day: **&sect;261: a video in the review, and the
 bytes are not in the database.** Islam asked whether to squeeze the quality on

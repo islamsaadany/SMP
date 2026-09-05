@@ -506,18 +506,6 @@ body.presenting .chatdock { display:none; }
 .chset-test { margin-top:10px; }
 .chtest { margin-top:10px; border:1px solid var(--line); border-radius:6px;
           overflow:hidden; background:var(--surface); }
-/* THE VERDICT LINE IS THE DISCLOSURE (§296). The caret is scoped to the
-   `<details>` itself and never to the class: §287 records `.fstrip-head::after`
-   painting a fold mark on two surfaces that do not fold, and the same class is
-   worn here by nothing else only for as long as that stays true. */
-details.chtest > summary.chtest-h { cursor:pointer; list-style:none;
-  display:flex; align-items:center; gap:8px; }
-details.chtest > summary.chtest-h::-webkit-details-marker { display:none; }
-details.chtest > summary.chtest-h::after { content:"\25B8"; margin-left:auto;
-  font-size:10px; opacity:.75; flex:none; }
-details.chtest[open] > summary.chtest-h::after { content:"\25BE"; }
-details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus);
-  outline-offset:-2px; }
 .chtest-h { padding:8px 10px; font-size:var(--fs-note); font-weight:600;
             border-bottom:1px solid var(--line); background:var(--ground); }
 .chtest.good .chtest-h { color:var(--good-tx); }

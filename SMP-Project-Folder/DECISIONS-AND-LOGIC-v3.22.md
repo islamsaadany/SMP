@@ -36008,9 +36008,121 @@ edits" asked for, and syncing the two would move somebody's selection under
 them; and Shape B is left on the table rather than dismissed, to be judged once
 this loop has been used.
 
+
+## §296 — THE LABEL, THE FOLD, AND A SETUP PAGE THAT IS NOT A UNIT'S (2026-09-05)
+
+Three from Islam in one round, all drawn in the running platform before
+anything was built (rule 1c) and all three settled by him.
+
+### The box already says ten
+
+*"it should say 10 min it should say minuites oly as the 10 is identified in the
+box. make sure that the box value would change the time to email not hard
+coded."*
+
+**THE WIRING HALF WAS ALREADY RIGHT, AND IT WAS MEASURED RATHER THAN ASSERTED.**
+`api/chat.js` reads `cfg.away` at both places that decide when a collection
+email goes — the batch test and the sweep — and §169 stores it as a real
+number, so typing 25 genuinely moves the email to twenty-five minutes. Nothing
+was hard-coded and nothing needed building for that half. *Answering "yes it
+works" is worth nothing; naming the two lines that read it is the answer.*
+
+**ONLY THE WORDS REPEAT.** `plural()` returns the count AND the word, so beside
+a field already holding `10` the row read **10 minutes**. It takes the word
+alone. **The SENTENCE on the hover keeps its number** — a label beside a box and
+a rule being explained are two different jobs, and only one of them was saying
+the same thing twice (§87's twins, one row apart). Asserted at both ends, or a
+build that stripped the number from both would satisfy half of this and read
+wrongly.
+
+### The diagnostic folds, and arrives folded
+
+*"when I test the notifcaitons or the ai assistane enable me to collapse it
+after it finish rather than being always open like that."*
+
+Three shapes drawn in the panel — **A** arrives open and folds, **B** arrives
+folded, **C** a × that clears it — and **Islam picked B**, with the cost of each
+stated: B costs a second press to read a result you just asked for, and that
+press falls exactly when something has failed.
+
+**NO NEW WORDS, BECAUSE THE VERDICT LINE IS ALREADY A HEADING.** *"It is not
+working — the API key"* was written to be the one thing read first (§123), so
+making it the `<summary>` hides nothing that was not already summarised. A real
+`<details>` rather than a flag and a handler: the open state is the element's
+own, so nothing has to remember it and no repaint can lose it (§24).
+
+**AND IT IS WHY THE PANEL FITS.** Measured: with a result open the panel needs
+**745px** of content and must scroll **139**; folded it needs **590** and
+scrolls **not at all**. §294 capped the panel and gave it a scroll; this removes
+the reason it needed one. *The same fault from two ends, a day apart.*
+
+**THE CARET IS SCOPED TO THE DISCLOSURE** (§287, whose whole subject was a fold
+mark painted on two surfaces that do not fold).
+
+### The Setup page is not a unit's plan page
+
+*"the whole settings page look like that when squeezed can we fix this?"*
+
+**A REGRESSION, AND NOT FROM THIS WORK.** §267.2 moved the shared `.split` from
+stacking at **820px** to stacking at **1200px** for a UNIT's pillar rail —
+argued and measured and right for that page — touched `group-extra.css` only,
+and did not scope it. **`.setupsplit` IS a `.split`.** So Setup began stacking
+at 1200 while its own narrow treatment starts at 900 (`config.css`), and between
+those two numbers the rail was a full-width, window-tall scrolling COLUMN with
+the page underneath it: at 911px a rail of **848×763**, the page's own title at
+document **y=878**, and **414px** of page scroll on a page that needs none.
+
+**§158 RECORDED THIS EXACT TRAP WITH A DIFFERENT CLASS** — *".pane INCLUDES
+SETUP, so scope any pane rule with `:not(.setuppane)` or it reaches the
+register"* — and `.split`/`.rail` are the same shape one component over.
+
+**AND THE FIRST FIX DRAWN MADE IT WORSE, WHICH IS WHY IT WAS DRAWN.** Simply
+extending Setup's own 900px band up to 1200 takes the rail **763 → 907px** and
+the scroll **414 → 558**, because that band is a full-width list rather than a
+compact strip. What works is scoping the unit-rail block AWAY from Setup, so
+Setup is not given rules of its own at all — it falls back to what it had before
+§267.2. Measured after: rail **196px**, the page's title at **y=99**, page
+scroll **0** at 1250, 1100, 1000 and 911.
+
+**AND IT ANSWERED A QUESTION THE MOCKUP HAD RAISED.** Islam, of the drawn fix:
+*"you are showing that the chat part is not full page as is now is that by
+design or that's a glitch from you?"* **A glitch of the mockup, and the built
+fix removes it**: `--chin-top` is measured at paint (§100.5), the stacked rail
+put the Inbox **934px** down the document, and the height calc fell through to
+its **340px** floor. Injecting CSS after paint left that stale measurement, so
+the drawing showed a 340px box; built into the sources it measures 155 and the
+Inbox stands at **705px**. *A mockup made by injecting into a running page is
+made after every measurement that page has already taken.*
+
+**THE UNIT'S PAGE IS THE CONTROL AND IS ASSERTED BYTE-IDENTICAL** at 1200, 1100
+and 1000 — a build that "fixed" Setup by moving the breakpoint back would pass
+every Setup assertion and silently undo §267.2. **The one cost is stated**: below
+900 the rail's own SETUP heading is visible again where the unscoped rule had
+been hiding it, and the band is 12px taller for it. That is the pre-§267.2
+behaviour restored rather than something new.
+
+### §296.1 — three probes called a correct build broken, all the same fault
+
+`elementFromPoint` cannot see a **box-shadow** (§294.1). `getClientRects()`
+returns boxes for the children of a **closed `<details>`** — three "visible"
+steps inside a block measuring 39px tall. And a `cmp` run from the wrong
+directory reported the build OUT OF STEP when it was not. Every one was fixed by
+measuring the PAINT rather than asking the DOM: `checkVisibility()`, the block's
+own height, a hit-test, the pixels. *§53.7 says measure this in pixels, and it
+had to be earned three more times in one day.*
+
+### What it costs
+
+Two rules in `chat.js`, one block in `chat.css`, eight selectors scoped in
+`group-extra.css`. **No builder change of substance, nothing stored, nothing
+migrated, no server rule** — read off the diff. `checks/setup-squeezed.py` is
+new; `checks/chat-settings-scroll.py` gains the label and the fold, and **one of
+its own §294 assertions was REWRITTEN rather than deleted** (§218): it asserted
+the page still scrolls at 1000×900, which was true only because of the
+regression this section removes.
 ---
 
-## §296 — THE KEYBOARD BELONGS TO THE PRESENTATION (2026-09-05)
+## §297 — THE KEYBOARD BELONGS TO THE PRESENTATION (2026-09-05)
 
 Islam, presenting with a clip on a slide: *"when I'm playing the video the right
 and elft arrows are editing the video forward and backward. but this is tricky
@@ -36073,7 +36185,7 @@ should be controlled, doing two things at once. Measured on the build before:
 `{'was': 0, 'now': 1}`. `.vwrap` joins the list in the same breath, so the
 poster and the "opens in a new tab" card behave the same.
 
-### §296.1 — three of the check's own failures were the check
+### §297.1 — three of the check's own failures were the check
 
 It **died rather than reporting**, twice in one session and for the second time
 in this file's own history (§215): `pg.click` on an element with no box throws

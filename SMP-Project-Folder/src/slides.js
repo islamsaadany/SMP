@@ -231,7 +231,7 @@ function vslideHtml(sl, blank){
    `live` is the ONE slide passed in, never "every slide wearing .on" — the
    editor's rail marks every thumbnail `.on` so it lays out, and a rail that
    armed them would load one player per row. */
-/* ── THE KEYBOARD BELONGS TO THE PRESENTATION (§296) ─────────────────────
+/* ── THE KEYBOARD BELONGS TO THE PRESENTATION (§297) ─────────────────────
    Islam, presenting with a clip on a slide: *"when I'm playing the video the
    right and elft arrows are editing the video forward and backward. but this is
    tricky because we lose the functionality ot the forward and backrward
@@ -1520,7 +1520,7 @@ function slidesWire(){
 
 function wireSlides(){
   var root = document.getElementById("slideroot");
-  /* Both sides of the switch (§296, §53.5): this mode shows a live player on
+  /* Both sides of the switch (§297, §53.5): this mode shows a live player on
      the slide it is arranging and walks its rail with the same arrow keys
      (§69.6), so it loses them the same way. */
   videoKeepKeys(root);

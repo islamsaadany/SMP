@@ -1,4 +1,4 @@
-"""THE KEYBOARD BELONGS TO THE PRESENTATION (§296).
+"""THE KEYBOARD BELONGS TO THE PRESENTATION (§297).
 
 Islam, presenting with a clip on a slide: *"when I'm playing the video the right
 and elft arrows are editing the video forward and backward &hellip; the forward
@@ -39,7 +39,7 @@ WHAT IS ASSERTED, AND WHY EACH ONE IS HERE:
 It MAKES its state: the demo tenant carries no video slide, so every assertion
 here passes on a build that lost the feature entirely (§94.2).
 
-Run it against the pre-§296 file to watch it fail:
+Run it against the pre-§297 file to watch it fail:
   python3 qa-run.py checks/video-keys.py ../strategy-management-platform-v3.22.html
 """
 import os, sys

@@ -1090,31 +1090,10 @@
      pillars do not fit (four of them at 1200 leaves the fourth half off the
      end, where the column showed all four at once), and the table starts
      about 112px further down the page — paid once, against every row. */
-  /* ── AND SETUP IS NOT A UNIT'S PLAN PAGE (§296) ────────────────────
-     Islam, of the Setup page at a squeezed window: *"the whole settings page
-     look like that when squeezed can we fix this?"*
-
-     THE RULES BELOW ARE A UNIT'S PILLAR RAIL, AND `.setupsplit` WEARS THE SAME
-     TWO CLASSES. §267.2 moved this block from 820px to 1200px for the pillar
-     rail — argued, measured and right for that page — and did not scope it, so
-     Setup began stacking at 1200 as well while its OWN narrow treatment starts
-     at 900 (`config.css`). Between those two numbers the Setup rail was a
-     full-width, window-tall scrolling COLUMN with the page pushed under it:
-     measured at 911px, a rail of 848x763, the page's own title at document
-     y=878, and 414px of page scroll on a page that needs none.
-
-     §158 RECORDED THIS EXACT TRAP WITH A DIFFERENT CLASS — *".pane INCLUDES
-     SETUP, so scope any pane rule with :not(.setuppane) or it reaches the
-     register"* — and `.split`/`.rail` are the same shape one component over.
-
-     SO SETUP IS SIMPLY NOT REACHED, rather than given rules of its own: it
-     falls back to what it had before §267.2 and keeps its own 900px band
-     untouched. Nothing about a unit's rail changes, and that is asserted
-     rather than assumed. */
   @media (max-width:1200px){
-    .split:not(.setupsplit) { grid-template-columns:1fr; }
+    .split { grid-template-columns:1fr; }
     /* Stacked, the rail is not sticky and there is no gap above it to fill. */
-    .rail:not(.setuprail) { position:static; display:flex; overflow-x:auto; }
+    .rail { position:static; display:flex; overflow-x:auto; }
     /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§162). The line
        above has said `display:flex` since the stacked rail was written, and
        for a long time it did nothing: reordering later wrapped every row in a
@@ -1127,13 +1106,13 @@
        `display:flex` on the wrapper rather than `display:contents`, which also
        works and would remove the wrapper's BOX — and `makeSortable` measures
        that box to decide where a dragged row lands. */
-    .rail:not(.setuprail) .sortable { display:flex; gap:2px; flex:0 0 auto; }
-    .split:not(.setupsplit) .rail::before { display:none; }
-    .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
-    .rail:not(.setuprail) button.ritem { border-bottom:3px solid transparent; border-left:0; white-space:nowrap;
+    .rail .sortable { display:flex; gap:2px; flex:0 0 auto; }
+    .split .rail::before { display:none; }
+    .rail .rhead, .rail .rfoot, .rail .rgroup { display:none; }
+    .rail button.ritem { border-bottom:3px solid transparent; border-left:0; white-space:nowrap;
       grid-template-columns:auto auto; }
-    .rail:not(.setuprail) button.ritem.on { border-left-color:transparent; border-bottom-color:var(--gold); }
-    .rail:not(.setuprail) .ritem .rsub { display:none; }
+    .rail button.ritem.on { border-left-color:transparent; border-bottom-color:var(--gold); }
+    .rail .ritem .rsub { display:none; }
   }
 
   /* The Report section in the third row. Gold while a cycle is asking for

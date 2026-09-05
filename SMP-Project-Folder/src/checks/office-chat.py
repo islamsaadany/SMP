@@ -1575,9 +1575,18 @@ with sync_playwright() as p:
         {"name": "A box on your screen", "state": "ok", "word": "sent",
          "detail": "Sent to 1 device."}]
     pg.click("[data-chpoptest]"); pg.wait_for_timeout(2600)
+    # THE VERDICT IS THE SUMMARY AND THE STEPS ARE FOLDED (§295, Islam's B),
+    # so the block's text is the verdict alone until it is opened. §51.11: the
+    # property here — that the result NAMES the device it reached — has not
+    # moved, only what you must do to read it, so the fold is opened rather
+    # than the assertion loosened. Opening it is now part of what is proved.
     said = pg.inner_text(".chtest").strip() if pg.query_selector(".chtest") else ""
     ck("and a working chain says it is working", said.lower().startswith("it is working"), said[:80])
-    ck("...naming the device it reached", "sent to 1 device" in said.lower(), said[:160])
+    pg.evaluate("()=>{const d=document.querySelector('details.chtest'); if(d) d.open = true;}")
+    pg.wait_for_timeout(200)
+    said = pg.inner_text(".chtest").strip() if pg.query_selector(".chtest") else ""
+    ck("...naming the device it reached, once opened",
+       "sent to 1 device" in said.lower(), said[:160])
     pg.click("[data-chsetmenu]"); pg.wait_for_timeout(300)
 
     # ── 19 · THE OFFICE STARTS A CONVERSATION (§247) ─────────────────────

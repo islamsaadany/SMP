@@ -640,6 +640,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   recorded residue). **RECORDED, NOT DONE**: a capability function's note boxes
   are still drawn with `want:false`, so the box the bar sends you to is not
   itself rung on that side.
+- **THE LABEL, THE FOLD, AND A SETUP PAGE THAT IS NOT A UNIT'S (§295):**
+  three from Islam in one round. **THE MINUTES LABEL** &mdash; *"it should say
+  minuites oly as the 10 is identified in the box"* &mdash; and **the wiring half
+  he asked about was already right, named rather than reassured**: `api/chat.js`
+  reads `cfg.away` at the two places that decide when a collection email goes,
+  and §169 stores it as a number. `plural()` returns the count AND the word, so
+  beside a field holding `10` the row said it twice; it takes the word alone, and
+  **the hover SENTENCE keeps its number** (§87's twins, one row apart), asserted
+  at both ends. **THE DIAGNOSTIC ARRIVES FOLDED** &mdash; Islam's **B** of three
+  drawn, with the cost of each stated &mdash; and it costs **no new words**,
+  because the verdict line was already written to be the one thing read first
+  (§123), so it becomes the `<summary>`; a real `<details>`, never a flag and a
+  handler, so no repaint can lose the state (§24), and the caret is scoped to the
+  disclosure (§287). **AND IT IS WHY THE PANEL FITS**: open it needs 745px and
+  must scroll 139, folded it needs 590 and scrolls nothing &mdash; §294 capped the
+  panel, this removes the reason it needed capping. **AND THE SETUP PAGE WAS A
+  REGRESSION FROM ANOTHER SESSION**: §267.2 moved the shared `.split` from 820 to
+  1200 for a UNIT's pillar rail and did not scope it, and **`.setupsplit` IS a
+  `.split`** &mdash; so between 900 and 1200 the Setup rail was a full-width,
+  window-tall scrolling COLUMN (911px: rail 848&times;763, the page's own title at
+  document y=878, 414px of scroll on a page needing none). **§158's recorded trap
+  with a different class** (*".pane INCLUDES SETUP"*). **THE FIRST FIX DRAWN MADE
+  IT WORSE** &mdash; extending Setup's own 900 band to 1200 takes the rail 763
+  &rarr; 907 and the scroll 414 &rarr; 558 &mdash; so the unit-rail block is
+  scoped AWAY from Setup instead and Setup gets no rules of its own: rail 196px,
+  title at y=99, scroll 0 at four widths, **with a unit's page asserted
+  byte-identical at 1200/1100/1000** or a breakpoint change would pass everything
+  and undo §267.2. **AND IT ANSWERED THE MOCKUP'S OWN QUESTION** (*"is that by
+  design or a glitch from you?"*): a glitch of the mockup &mdash; `--chin-top` is
+  measured at paint (§100.5), the stacked rail put the Inbox 934px down the
+  document so the calc fell to its 340px floor, and CSS injected AFTER paint kept
+  that stale number; built into the sources the Inbox stands at 705px. *A mockup
+  made by injecting into a running page is made after every measurement that page
+  has already taken.* **§295.1 &mdash; THREE PROBES CALLED A CORRECT BUILD BROKEN,
+  ALL ONE FAULT**: `elementFromPoint` cannot see a box-shadow, `getClientRects()`
+  returns boxes for the children of a CLOSED `<details>` (three "visible" steps
+  inside a 39px block), and a `cmp` run from the wrong directory reported the
+  build out of step. Every one fixed by measuring the PAINT &mdash;
+  `checkVisibility()`, the block's height, a hit-test, the pixels. One §294
+  assertion **REWRITTEN, not deleted** (§218): it asserted the page still scrolls
+  at 1000&times;900, true only because of the regression this removes.
 - **THE SETTINGS PANEL SCROLLS INSIDE ITSELF (§294):** Islam &mdash; *"there is
   no scrolling inside the settings pan while there is a uselss scrolling in the
   main page."* **BOTH HALVES ARE ONE FACT**: `.hmenu-panel.chset` carried a width
@@ -6528,6 +6569,19 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
+python3 checks/setup-squeezed.py # the Setup page is not a unit's plan page
+                                # (§295): at 1250/1100/1000/950 the rail is a 196px
+                                # COLUMN again, the page's own title is on screen and the
+                                # page needs no scroll — and the Inbox fills the window
+                                # rather than sitting on its 340px floor, which is what
+                                # "the chat part is not full page" was (`--chin-top` is
+                                # measured at paint, §100.5). Below 900 the designed band
+                                # is asserted STILL a band, or a build keeping two columns
+                                # all the way down passes everything above and squeezes the
+                                # page at 760. AND A UNIT'S PILLAR RAIL IS THE CONTROL,
+                                # asserted still going across at 1200/1100/1000 — a "fix"
+                                # that moved the breakpoint back would pass every Setup
+                                # assertion here and silently undo §267.2
 python3 checks/chat-settings-scroll.py # the settings panel scrolls inside itself
                                 # (§294): the panel capped and scrolling, the page's own
                                 # scroll asserted GONE where it needs none and asserted
@@ -6696,7 +6750,31 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
+*Last Updated: 2026-09-05 &mdash; **&sect;295: the label, the fold, and a Setup
+page that is not a unit's.** Three from Islam in one round. The minutes label
+said the number the box beside it was already showing &mdash; and **the wiring
+half he asked about was already right and is NAMED rather than reassured** (the
+server reads that value at the two places deciding when the email goes). The
+diagnostic now **arrives folded**, his B of three drawn with the cost of each,
+costing no new words because the verdict line was already the one thing written
+to be read first &mdash; and it is why the panel fits at all: open it needs 745px
+and must scroll 139, folded it needs 590 and scrolls nothing, so &sect;294 capped
+the panel and this removes the reason it needed capping. **AND THE SQUEEZED SETUP
+PAGE WAS A REGRESSION FROM ANOTHER SESSION** &mdash; &sect;267.2 moved the shared
+`.split` from 820 to 1200 for a unit's pillar rail and did not scope it, and
+`.setupsplit` IS a `.split`, so the Setup rail became a full-width, window-tall
+scrolling column with the page underneath it (&sect;158's recorded trap, different
+class). **The first fix drawn made it worse** and was drawn for exactly that
+reason; the shipped one scopes the unit-rail block away from Setup, **with a
+unit's page asserted byte-identical** so &sect;267.2 cannot be silently undone.
+**It also answered the mockup's own question** &mdash; the Inbox looking short in
+the drawing was the mockup, not the fix: CSS injected after paint kept a stale
+measurement, and built into the sources the box stands at 705px rather than its
+340px floor. **&sect;295.1: three probes called a correct build broken in one
+day**, all by asking the DOM instead of the paint. 0 failures on both checks,
+`office-chat` clean, full sweep ERRORS none.*
+
+*Earlier: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
 itself.** Islam, of the chat settings dropdown: *"there is no scrolling inside
 the settings pan while there is a uselss scrolling in the main page."*
 **MEASURING SAID THE TWO HALVES ARE ONE FACT** &mdash; the panel had no

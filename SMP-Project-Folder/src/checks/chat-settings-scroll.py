@@ -251,6 +251,62 @@ with sync_playwright() as pw:
            % (w, hh, shut, m["page"]), shut == 0 and m["page"] == 0, m)
         pg.close()
 
+    # ── 4b · THE LABEL SAYS THE UNIT, NOT THE NUMBER (§295) ─────────────
+    # Islam: *"it should say minuites oly as the 10 is identified in the box."*
+    # BOTH ENDS: the words beside the box lose the count, and the SENTENCE on
+    # the hover keeps it — a label beside a field and a rule being explained
+    # are two jobs, and a build that stripped the number from both would
+    # satisfy half of this and read wrongly (§87's twins, one row apart).
+    print("\n4b · the minutes label")
+    pg = b.new_page(viewport={"width": 1400, "height": 950})
+    drive(pg); openpanel(pg)
+    lab = pg.evaluate("""()=>{const s=document.querySelector('.chset-away .chset-unit');
+      const n=document.querySelector('[data-chaway]');
+      const r=[...document.querySelectorAll('.chset-row')].find(x=>/Email after/.test(x.textContent));
+      const t=r&&r.querySelector('[data-tip]');
+      return { unit:s?s.textContent.trim():null, box:n?n.value:null,
+               tip:t?t.getAttribute('data-tip'):null };}""")
+    ck("the words beside the box are the unit alone",
+       lab["unit"] in ("minute", "minutes"), lab)
+    ck("...and the box is still the thing holding the number", lab["box"], lab)
+    ck("the hover sentence keeps its number",
+       bool(lab["tip"]) and (lab["box"] + " minute") in lab["tip"], (lab["tip"] or "")[:80])
+    pg.close()
+
+    # ── 4c · THE DIAGNOSTIC ARRIVES FOLDED (§295, Islam's B) ─────────────
+    # MEASURED AS PAINT, NOT AS A DOM QUERY. `getClientRects()` returns boxes
+    # for the children of a CLOSED <details> in Chromium, so a probe asking
+    # that reports three visible steps over a block 39px tall and calls a
+    # correct build broken — the same fault as §294.1's box-shadow, by another
+    # road. `checkVisibility()` and the block's own height are the truth.
+    print("\n4c · the diagnostic folds")
+    pg = b.new_page(viewport={"width": 1400, "height": 950})
+    drive(pg); openpanel(pg)
+    st = pg.evaluate("""()=>{const d=document.querySelector('details.chtest');
+      if(!d) return {none:true};
+      const p=document.querySelector('.chset'), sum=d.querySelector('summary.chtest-h');
+      const rows=[...d.querySelectorAll('.chtest-r')];
+      const shut={open:d.open, h:Math.round(d.getBoundingClientRect().height),
+        seen:rows.filter(r=>r.checkVisibility&&r.checkVisibility()).length,
+        verdict:sum?sum.textContent.trim():null,
+        content:p.scrollHeight, mustScroll:p.scrollHeight-p.clientHeight};
+      sum.click();
+      const open={open:d.open, h:Math.round(d.getBoundingClientRect().height),
+        seen:rows.filter(r=>r.checkVisibility&&r.checkVisibility()).length,
+        content:p.scrollHeight};
+      return {shut, open, steps:rows.length};}""")
+    ck("the result is a real disclosure", not st.get("none"), st)
+    ck("it arrives FOLDED", st["shut"]["open"] is False, st["shut"])
+    ck("the verdict still reads while folded", bool(st["shut"]["verdict"]), st["shut"])
+    ck("and not one step is painted", st["shut"]["seen"] == 0, st["shut"])
+    ck("pressing the verdict shows every step",
+       st["open"]["open"] is True and st["open"]["seen"] == st["steps"], st["open"])
+    # THE REASON IT MATTERS TO §294: folded, the panel stops needing a scroll.
+    ck("folded, the panel needs no scroll at all", st["shut"]["mustScroll"] == 0, st["shut"])
+    ck("...and opening it is what makes the scroll necessary",
+       st["open"]["content"] > st["shut"]["content"], st)
+    pg.close()
+
     # ── 5 · AND WHERE THE PAGE LEGITIMATELY SCROLLS, IT STILL DOES ───────
     # Below ~1100px the Setup rail stops being a side column and stacks above
     # the pane, so the page scrolls by design (§167) — and that scroll is the
@@ -258,11 +314,17 @@ with sync_playwright() as pw:
     # pass every assertion above and put half the Inbox out of reach, so the
     # presence of that scroll is asserted rather than assumed (§94.2).
     print("\n5 · and the scroll that is useful is still there")
-    pg = b.new_page(viewport={"width": 1000, "height": 900})
+    # REWRITTEN, NOT DELETED (§218). This asserted 1000x900, where the page
+    # scrolled 414px — and §295 established that was the REGRESSION rather than
+    # the design: `.setupsplit` wears `.split`, so it was stacking at 1200 and
+    # at 1000 the page now correctly scrolls nothing. The PROPERTY is unchanged
+    # — where the page legitimately stacks, its scroll must survive — and the
+    # width where that is true is below Setup's own 900px band.
+    pg = b.new_page(viewport={"width": 860, "height": 880})
     drive(pg)
     shut = pg.evaluate("()=>{const d=document.documentElement;"
                        "return d.scrollHeight-d.clientHeight;}")
-    ck("1000x900: the stacked page still scrolls with the panel shut", shut > 0, shut)
+    ck("860x880: the stacked page still scrolls with the panel shut", shut > 0, shut)
     pg.close()
     b.close()
 

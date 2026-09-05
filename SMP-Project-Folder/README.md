@@ -24,6 +24,17 @@ including reversals recorded as reversals. Three sections matter most:
 feature, adopted in 1.9. The decisions document stays authoritative; a spec
 records how one feature was cut against it.
 
+*Swept 2026-09-05.* Two folders both numbered 029 (save-safety-banners became
+**030**), three specs titled with a number other than their folder's, and four
+that still said they were unbuilt long after they shipped — all corrected.
+**031** and **032** are backfills rather than features: the reporting and
+scoring model, and how a save reaches the database. Both were built across a
+dozen decision sections each and had no single place that said what the model
+IS, which is exactly what the constitution's backfill provision is for. The rest
+of the platform's recent work — roughly §149 onward — is recorded in the
+decisions document and has no spec; that gap is named here rather than left to
+be discovered.
+
 ---
 
 ## The platform

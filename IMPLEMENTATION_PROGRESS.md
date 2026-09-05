@@ -113,6 +113,40 @@ reversing §19.4).
 
 ---
 
+## Documentation sweep, 2026-09-05
+
+A pass over the whole platform's documentation against spec-kit. **No product
+code was touched.** What it found and what was done:
+
+- **§238 and §241 had no section in the decisions document at all**, while being
+  referenced by number from §276, §282, §287 and §288 as though they had one.
+  Both are live: the hashed CSP plus the `.vercelignore`, and the incremental
+  writer. Written up, marked as recorded late.
+- **The constitution contradicted the rules file.** Principle I still said
+  mockup-first *"is retired"*, eleven days after Islam reinstated it and while
+  every feature in that period was being settled from a published mockup.
+  Corrected in both files as a reversal; constitution bumped to **1.2.0**.
+- **specs/ hygiene**: a duplicate 029 (save-safety-banners → **030**), three
+  specs titled with the wrong number, four saying "not built" long after they
+  shipped (010, 012, 016, 017 — 016's provisional §101 was never claimed).
+- **Two backfills**, both of behaviour built across a dozen sections with no
+  single place stating the model: **031** the reporting and scoring model,
+  **032** how a save reaches the database.
+
+**What it did not do, and is the real remaining gap:** roughly §149 onward has
+no spec — the deck round, notifications, the setup/admin work, gaps-and-fill.
+The constitution permits backfilling "when next touched" rather than as an
+exercise, and clusters 1 and 2 were done first because those are the two where
+being wrong costs a client's numbers or their data.
+
+**One defect found and deliberately not fixed:** `src/config-data.js` cites
+§264 three times for the yes/no behaviour recorded at §257 — a number carried
+from before a merge renumbered it. Correcting a comment in product source pulls
+in a rebuild, the §238 CSP hashes and a shell bump, so it is a merge-shaped
+change and it is Islam's to schedule (recorded in spec 031 §15).
+
+---
+
 ## Waiting on Islam
 
 Nothing proceeds past this line without an answer.

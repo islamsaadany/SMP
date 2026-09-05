@@ -273,6 +273,17 @@
      tablet behaves exactly as it always has. */
   .deckroot.fs .deckstage { inset:0; touch-action:pan-y; }
   .deckroot.fs .deckbar { transform:translateY(100%); opacity:0; pointer-events:none; }
+  /* §261.16 DROPPED `.deckroot.fs.vidslide .deckbar` HERE. §261.14 held the
+     bar open on a video slide, because a player that has been clicked owns the
+     keyboard and the arrows on the bar were the way past it. §265 then
+     removed the peek mechanism outright, at Islam's report that the bar
+     flashed on every click — so in fullscreen the bar does not appear at
+     all, and a rule reinstating it for one slide kind would put back furniture
+     he had just had taken away. The residual cost is stated rather than
+     hidden: in FULLSCREEN, on a video slide whose player has the keyboard,
+     there is no on-screen control — §265's own answer (Escape leaves
+     fullscreen) does not reach us from inside a cross-origin frame either. Out
+     of fullscreen the bar is always there, which is where a review is driven. */
   @media (prefers-reduced-motion: reduce) { .deckbar { transition:none; } }
   .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;
                     font:inherit; font-size:15px; line-height:1; padding:8px 13px;
@@ -490,6 +501,89 @@
   .slctl-read p { margin:0; }
   .slctl-h { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
   .slctl-h .picttl { flex:1; min-width:180px; }
+
+  /* ── A VIDEO ON A SLIDE (§261) ────────────────────────────────────────
+     The clip fills the slide under the title, because a video in a box on a
+     projector is a video nobody in the room can see. The caption sits where a
+     picture's already does, so a deck of both reads as one deck.
+
+     AND THERE IS NO `display` HERE, WHICH IS THE WHOLE OF §261.15. This block
+     opened `.d-video { display:flex; flex-direction:column; }` — both halves
+     saying nothing `.dslide` does not already say, and the first half saying
+     it at the SAME specificity (0,1,0) as `.dslide { display:none }` and 426
+     lines LATER, so it won on source order and the clip's slide was drawn on
+     top of EVERY slide in the deck. Measured: `display:flex`, 1579×888,
+     `elementFromPoint` at the middle of the stage returning the IFRAME, on
+     slides 1, 2, 3 and 4 alike. Whether a slide is shown is `.dslide`'s
+     question and no slide kind may answer it. */
+  .d-video .vwrap { position:relative; flex:1; min-height:0; overflow:hidden;
+                    background:#0D1520; border-radius:var(--r-sm);
+                    display:flex; align-items:center; justify-content:center; }
+  .d-video .vwrap video,
+  .d-video .vwrap iframe { width:100%; height:100%; border:0; display:block; }
+  .d-video .vwrap video { object-fit:contain; background:#0D1520; }
+  .d-video .vwrap > img { width:100%; height:100%; object-fit:contain; }
+  .d-video figcaption { margin-top:14px; font-size:var(--fs-small); color:var(--ink-2); }
+  /* A LINK WE CANNOT PLAY IS NOT DRAWN AS A BROKEN PLAYER (§15.1). It says so
+     and offers the way out, over the poster if there is one. */
+  .vaway { position:absolute; inset:0; display:flex; flex-direction:column; gap:10px;
+           align-items:center; justify-content:center; text-align:center;
+           background:rgba(13,21,32,.72); color:#fff; padding:20px; }
+  .vaway b { font-size:var(--fs-body); font-weight:600; }
+  .vaway a { color:#fff; text-underline-offset:3px; font-size:var(--fs-small); }
+
+  /* ── The video controls ───────────────────────────────────────────────
+     TWO WAYS IN, SIDE BY SIDE AND EQUAL — Islam asked for both, and neither is
+     the fallback. `align-items:start` because `.slctl` is a flex column and a
+     grid left to stretch grows both boxes to whatever is left of the pane. */
+  .vsrc { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
+  @media (max-width:820px) { .vsrc { grid-template-columns:1fr; } }
+  /* `.picdrop` carries `aspect-ratio:16/10`, which is right for a slot
+     previewing a picture's SHAPE and wrong for a source chooser — at half-pane
+     width that ratio is a 390px dashed rectangle holding two lines of text. */
+  .vsrc .picdrop { aspect-ratio:auto; min-height:104px; padding:12px;
+                   background:var(--surface-2); }
+  .vsrc .picdrop b { font-size:var(--fs-small); color:var(--ink); }
+  .vsrc .picdrop .picsub { margin:0; text-align:center; }
+  .vlink { display:flex; flex-direction:column; justify-content:center; gap:8px;
+           min-height:104px; border:1px solid var(--line); border-radius:var(--r-sm);
+           background:var(--surface-2); padding:12px 14px; }
+  .vlink b { font-size:var(--fs-small); }
+  .vlink .fld { width:100%; }
+  /* The verdict, said while they type. Never an alarm colour for "it opens in
+     a new tab" — that is a fact about where the video lives, not a fault
+     (§168, §187). */
+  .vyes { color:var(--good-tx); }
+  .vwarn { color:var(--attn-tx); }
+  .vno { color:var(--bad-tx); }
+  .vfull { margin:0; }
+
+  .vhas { display:flex; align-items:center; gap:14px; padding:12px 14px;
+          border:1px solid var(--line); border-radius:var(--r-sm);
+          background:var(--surface-2); }
+  .vhas .vthumb { position:relative; flex:none; width:112px; height:63px;
+                  border-radius:var(--r-sm); overflow:hidden; background:#0D1520; }
+  .vhas .vthumb img { width:100%; height:100%; object-fit:cover; }
+  .vhas .vmeta { flex:1; min-width:0; }
+  .vhas .vmeta b { display:block; font-size:var(--fs-small); white-space:nowrap;
+                   overflow:hidden; text-overflow:ellipsis; }
+  .vhas .vmeta .picsub { margin:2px 0 0; }
+  .vhas .vacts { display:flex; gap:6px; flex:none; }
+  .vcap { margin-top:10px; width:100%; }
+  /* Drawn on the poster, so a still frame reads as a video rather than as a
+     picture that will not move. CSS, never a glyph: a mark the font does not
+     carry ships as a blank box (§52, §185). */
+  .vbadge { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+            width:26px; height:26px; border-radius:50%; background:rgba(12,20,32,.62);
+            border:1px solid rgba(255,255,255,.86); display:flex;
+            align-items:center; justify-content:center; }
+  .vbadge::after { content:""; border-left:8px solid #fff; border-top:5px solid transparent;
+                   border-bottom:5px solid transparent; margin-left:2px; }
+  /* A 50MB clip takes real seconds to leave the building, and silence while it
+     does is indistinguishable from a control that did nothing (§193). */
+  .picbusy { margin:0 0 4px; padding:9px 12px; border-radius:var(--r-sm);
+             background:var(--surface-2); border-left:3px solid var(--attn);
+             color:var(--ink-2); font-size:var(--fs-note); }
 
   /* ── The picture controls ─────────────────────────────────────────── */
   .picnone { margin:0; color:var(--ink-3); font-size:var(--fs-note); }

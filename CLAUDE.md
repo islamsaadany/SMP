@@ -1019,6 +1019,158 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the sources and `db/seed-state.json` was never regenerated — *a seed that
   disagrees with the sources it is generated from is a fault nothing else would
   have found.*
+- **A VIDEO IN THE REVIEW, AND THE BYTES ARE NOT IN THE DATABASE (§261):**
+  Islam — *"add to the presentation to be able to add a video to play inside the
+  presentation how do you think we can do it without overloading the data base
+  with videos? is it by squeezing the video quality or by uploading it temp with
+  the normal quality and then squeeze after the cycle."* **THE QUESTION WAS
+  ABOUT QUALITY AND THE ANSWER IS ABOUT PLACE.** Measured before anything was
+  proposed: the tenant's whole graph is **297KB** and every person downloads all
+  of it on every sign-in; a picture already rides in it (`review.extra`, one
+  JSONB column, one row) at 150–300KB; a two-minute clip at 720p is **20–40MB,
+  about a hundred times the entire platform**, and squeezed to 480p/30s it is
+  still ~2MB — *compression moves the number and not the order of magnitude.*
+  **AND NEITHER ROUTE WAS REACHABLE ANYWAY**: a function refuses a body over
+  4.5MB, and the CSP set no `media-src` (so a `data:` video fell through to
+  `default-src 'self'`) with `frame-src 'none'` blocking every embed.
+  **Squeeze-after-the-cycle is REFUSED with its reasons named** — it makes the
+  busiest week the heaviest, there is no scheduler on Vercel (§97.5), and
+  re-encoding stored evidence cuts against §49.2. **WHAT IS STORED IS A POINTER,
+  A FRAME AND TWO NUMBERS**, on §50's untouched model: `kind:"video"` plus a
+  `vid` holding EITHER `path` (our store) OR `url` (a pasted address), and
+  **nothing stores what KIND of link it is** — derived at drawing time, so
+  adding a host makes every link already pasted for it start playing (§42). The
+  poster is the one part that rides in the graph, thumbnail-sized, and it is
+  what makes the deck survive a clip it cannot reach (§15.1). **NO MIGRATION,
+  PROVED NOT CLAIMED** — `scripts/test-video-roundtrip.js` writes all three
+  shapes beside a picture slide on a real Postgres, asserts `write(read())` is a
+  fixed point with a CANONICAL compare (§249.3: jsonb reorders keys) and that
+  the table gained no column. **`kind` DECIDES WHAT IS DRAWN AND NOTHING IS
+  THROWN AWAY** (§257.2's correction): switching keeps the pictures, switching
+  back DELETES the mark rather than writing `"pics"` (§50.6), both ends
+  asserted. **TWO WAYS IN, AND THE VERDICT IS SAID AT THE DESK**: every link is
+  accepted, the ones we can play play, the rest open in a new tab — and the box
+  says which WHILE THEY TYPE, because a share page is not a video and the one
+  moment that matters is while somebody still holds the link (§32, §171).
+  **THE HOSTS ARE NAMED, AND THAT IS ISLAM'S CHOICE** between two put to him
+  with the cost of each (a fifth service opens in a tab, against admitting
+  frames from anywhere and with them a false sign-in inside our own chrome);
+  the check asserts the policy and `VIDEO_EMBED_HOSTS` name EXACTLY the same
+  hosts in both directions (§234) — **and that assertion's first draft could not
+  fail**, testing `"frame-src https:" not in csp`, which is false of every
+  correct policy because a named host starts with it. **THE FILE GOES UP IN
+  PIECES**: a function refuses 4.5MB, so the store's own multipart upload is
+  used — the browser needs no SDK of its own (one self-contained HTML file, no
+  bundler) and EVERY PIECE IS AUTHORISED rather than one address minted and then
+  trusted. **THE FINDING (§261.5): `grantIn` ANSWERS WITH A WORD, AND ONE OF THE
+  WORDS IS `"none"` — WHICH IS TRUTHY**, so the playback gate's `if (!grantIn(…))`
+  never fired and **anybody signed in could play any unit's clip**; §104.10's
+  family, found by driving the refusal rather than reading it, fixed as
+  `mayWatch()`, both ends asserted, 2 red with the bug put back. **AND THE
+  GUARDS BEHIND THE STORE CHECK WERE UNTESTED UNTIL THE TEST SET A FAKE TOKEN**
+  — with none the endpoint answers "no video store here" first. **SETUP › IMPORT &
+  STORAGE, THIRD SECTION** is his #3 (§261.9, reversing §261.6's own
+  placement): it first took a rail entry under *Running the cycle*, and Islam
+  questioned it — the group's own note says *"What you do while a cycle is
+  open"* and clearing storage is what you do when one is NOT, so my placement
+  failed the group's stated test. An archived plan and a stored clip are the
+  same errand, so the page is **Import & storage** — one way in, two things
+  held — and the rail loses a line. **Each section keeps its own gate** (§130.4)
+  and here that is LOAD-BEARING: `c_import` is "view" for all 33 people
+  (measured), so without `when: inOffice()` every unit head would see every
+  unit's clips and sizes. **A rename leaves stale strings** — two live ones
+  still named the old page, one of them a promise about where the way back is
+  (§16.7, §51.11) — and the old entry is DELETED, not left beside its new home
+  (§24). **The fetch gate had to follow the SECTION, and `CURSEC` is a MAP
+  keyed by page**, so `CURSEC === "vids"` is false always and the section would
+  have said *"Asking…"* for ever (§93, caught before it shipped). The total on
+  the page, **no Delete on a clip in the
+  open review** (§61), **deleting is the Super user's** and asked twice (§89,
+  §146), **a cleared clip keeps its slide and says what happened** (§15.1) and
+  **does not count against the ceiling**, because clearing is what makes room.
+  **THREE PER UNIT AND PER FUNCTION**, 50MB and two minutes, **measured off the
+  file** and **counted on the SERVER from the stored slides** or the limit is
+  decoration (§42, §44); refused with the reason, never silently re-encoded; and
+  **it does not autoplay**, or the clip takes the room from the presenter.
+  **AND THE READ ADDRESS IS TWO STEPS (§261.10, found the moment the store
+  existed)**: `getDownloadUrl` takes a full blob URL and is SYNCHRONOUS — it
+  only appends a download flag — so handed a pathname it threw `Invalid URL`,
+  the catch swallowed it, and **nothing would ever have played**. A private
+  blob has no address of its own: `issueSignedToken` (one path, `get` only, an
+  expiry) then `presignUrl`. Invisible to every existing test — no token
+  answers "no store" first, a fake token is refused by the store — so the SDK
+  is STUBBED and the handler driven in-process for a 302 to the signed address
+  (5 red with the bug back), and every other call was validated against the
+  real SDK by reaching *"This store does not exist"*.
+  **AND THE PLAYER HAS TO KNOW WHO IS EMBEDDING IT (§261.11)**: Islam got
+  YouTube's **error 153**, and the cause is ours twice over — `vercel.json`
+  sets `Referrer-Policy: no-referrer` for the whole site and the iframe said it
+  again, so the player could not check whether the video may be shown here and
+  refused to configure. `strict-origin` on the embed alone: the host, never the
+  path, so nothing says which unit is on screen. **NOT REPRODUCED HERE and said
+  so** — YouTube is unreachable from this sandbox — **and the first probe read
+  "looks ok" on a frame that had never loaded** (§93's absence-as-success).
+  **AND THE REFUSAL MOVED TO WHERE THE ACT WAS (§261.12)**: measured at **628px
+  above** the control that caused it and off the top of the pane on a laptop;
+  it renders inside the controls block now, which fixes the picture slots too.
+  *"no video store here"* &mdash; the endpoint's own words, and a dead end
+  &mdash; became a sentence saying nothing is lost and a link works meanwhile
+  (§230.2).
+  **AND THE RAIL CALLED A VIDEO "YOUR PICTURES" (§261.13)**: the one surface
+  whose job is telling the slides apart naming a clip as the one thing it is
+  not, and a promise the signed-off mockup made that the build did not keep
+  &mdash; because **two places write that word and both spelled it as a
+  literal** (the rail is built once and the open row is rewritten as somebody
+  types). `slidesMineWord()` is the one builder both ask (§53.5), asserted at
+  BOTH ends and across the repaint, proved able to fail one way each &mdash;
+  *a build saying "your video" under every row satisfies the first assertion
+  perfectly.* **And "the video took over all the slides" is MEASURED, not
+  guessed at**: Mobile's deck built without a clip and with one is **28 &rarr;
+  29 slides, one added, none lost, none rewritten** &mdash; a clip is placed
+  like any other custodian's slide (§50.3) and displaces nothing, so what took
+  over was the WORD, on every row that was his.
+  **AND THE CLIP OWNED THE KEYBOARD (§261.14)**: Islam, presenting &mdash;
+  *"the video is on the first 3 slides &hellip; I'm not able to navigate from
+  it."* **The second half is the cause of the first**: a cross-origin player
+  that has been clicked takes every key (inside a YouTube frame the arrows
+  SEEK), the deck's listener is on `window` and never sees them, so the deck
+  does not move and the clip reads as being on every slide &mdash; **and a
+  frame left loaded goes on owning them from behind `display:none`**, every
+  slide being in the document at once. The address rides in `data-vsrc` and
+  **`videoArm()` loads it only on the slide showing**; emptying it is what
+  hands the keyboard back, with no dependence on a player's own API and so
+  none on which service the clip came from. **`live` is the ONE slide passed
+  in, never "every slide wearing `.on`"** &mdash; the rail marks every
+  thumbnail `.on` so it lays out, so reading the class would load one player
+  per row; two things come free, the rail draws no players and nothing is
+  asked of YouTube until a slide with a clip is reached. **And the bar stays
+  while a clip is on screen**, because nothing can take the keyboard back from
+  a player that has it &mdash; a browser guarantee, not an oversight &mdash; so
+  the way past must be on screen. Asserted as the frame's `src` at three
+  moments and never as a class (§94.8), at both ends (§113.8), proved able to
+  fail three ways.
+  **AND THE CLIP'S SLIDE WAS DRAWN ON EVERY SLIDE (§261.15)**: Islam &mdash;
+  *"STILL THE VIDEO IS SHOWING ON THE first 3 slides &hellip; and the video
+  should only play if someone press play on it not by normal clicking."*
+  **Both halves are one declaration**: `.d-video { display:flex }` sits **426
+  lines after** `.dslide { display:none }` at the **same specificity**, so it
+  won on source order and the clip lay over the whole stage at all times
+  &mdash; measured on slides 1&ndash;4 as `display:flex`, 1579&times;888, with
+  `elementFromPoint` at the middle of the stage returning the IFRAME, which is
+  why a click meant for the deck started the video. Both halves of the rule
+  said nothing `.dslide` already said, so it is **DELETED, not scoped**
+  (&sect;24): **whether a slide is shown is `.dslide`'s question and no slide
+  kind may answer it.** Asserted as PAINT and as `elementFromPoint`, never as a
+  class (&sect;94.8), at both ends, 2 red each way. **&sect;261.14's `src`
+  assertions could not have caught it** &mdash; the frame was emptied and went
+  on being drawn: *an assertion about a property is not an assertion about
+  what is on the screen.* And the probe first read the EDITOR's clone of the
+  same slide through an unscoped `elementFromPoint` (&sect;50.6's family).
+  73/0 on `checks/video-slides.py`, proved able to fail thirteen ways;
+  13/13 and 15/15 on a virgin Postgres 16. **RECORDED, NOT DONE**: the bytes'
+  journey through the multipart path is unproven until a store exists; the
+  `.pptx` download has no video column; and the signed-off mockup did not show
+  the cleared state or the ceiling message.
 - **A FINGER GETS A WAY BACK (§280, reversing §265's forward-only for TOUCH and
   not for a mouse):** Islam, presenting from a tablet — *"it doesn't go left or
   right."* **§265 WAS RIGHT ABOUT A ROOM AND SILENT ABOUT A TABLET**: its
@@ -1492,6 +1644,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   after. **§264.2 — RECORDED, NOT DONE**: a project's OUTCOMES are a different
   model (a reported figure, not a measure against a prorated target) and are
   left alone; whether they should prorate has not been put to Islam.
+  **§264.3 — A BLANKET RENUMBER SWEPT SOMEBODY ELSE'S CITATIONS**: this
+  section's own merge renumbered its §257 → §264 across the SOURCES, and the
+  sources by then held main's **Y/N** citations, which had legitimately become
+  §257 three commits earlier — so 17 comments pointed at a section whose body
+  says `Y/N` **nought** times (against 34 in §257's). The arithmetic is exact
+  (main 3+14, branch 1+8, merged 4+22): every one of main's was taken.
+  **A RENUMBER IS SCOPED TO THE LINES THE RENUMBERING BRANCH WROTE** — after a
+  merge the sources are not all yours — **and it is silent**, because the number
+  it produces is a real section, so nothing parses wrong and no check can see
+  it (§94.12's shape, §281's habit of grepping the merged result). Separated
+  twice by different methods (reading each comment; matching each line against
+  main's own §257 lines at the merge parent), both naming the same 17.
+  Corrected 2026-09-05; nothing on any screen moves, and the one §238 CSP hash
+  regenerated in the same build exactly as designed.
 - **EMPTY IS NOT MISSING, AND THE BAR NOW SAYS WHICH (§272):** Islam, on
   Mobile and then Care — *"mobile keeps showing filling what's missing while we
   can't find something missing and there is no the side badges that identify
@@ -6344,6 +6510,18 @@ python3 checks/one-line-titles.py # a title is one line and the box says so (§2
                                 # never as a pixel count; a pasted value read back
                                 # from the DATA; and both ends — a rows-2 paragraph
                                 # box keeps its breaks (5 red on the shipped build)
+python3 checks/video-slides.py  # a video in the review (§261): which links play and
+                                # which are honestly refused, the policy and the rule
+                                # naming the SAME hosts in both directions, the
+                                # Pictures|Video switch at both ends (the pictures come
+                                # back, and the mark is DELETED not set to "pics"), the
+                                # paste box's verdict while they type, each kind drawn
+                                # its own way and never autoplaying, a cleared clip
+                                # saying so rather than drawing an empty slide, the
+                                # ceiling refused with its reason, and no server
+                                # answering rather than hanging. It MAKES the state —
+                                # the demo has no videos, so every assertion here would
+                                # pass on a build that lost the feature
 python3 checks/deck-outcome.py  # the presentation reads what was reported (§252): the
                                 # tactics slide's nine columns, its figures asserted as
                                 # AGREEMENT with the Performance page rather than as
@@ -6713,6 +6891,14 @@ node scripts/test-kb-audience.js # who sees which answer (§160): an office answ
                                 # a two-answer question leaving each side exactly one.
                                 # No database, no network — officeOnly() is pure.
 ```
+A video slide needs no migration, and the clip endpoint's refusals — both
+against a throwaway Postgres (the second starts its own dev-server, and sets a
+NONSENSE store token on purpose, or every guard behind the store check goes
+unexercised):
+`DATABASE_URL=… node scripts/test-video-roundtrip.js` (§261.1)
+`DATABASE_URL=… node scripts/test-video-endpoint.js` (§261.5 — the file that found
+the truthy `"none"`)
+
 Two people, one database — the scenario that was destroying work before §210
 (needs a throwaway Postgres; `SMP_WHOLE_GRAPH=1` restores the old behaviour and
 it must go red):
@@ -6791,9 +6977,90 @@ nothing migrated, the menu untouched, nobody's rights moved; eight neighbouring
 deck checks green. **&sect;295.1**: two of the check's own failures were the
 CHECK (it died rather than reporting, &sect;215; and an assertion passed on
 `None == None`, &sect;113.8), and one page error was a function key I had
-misspelt. **On the branch, not merged.***
+misspelt. **Merged to `main`.***
 
 *Earlier: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
+
+*Earlier the same day: **&sect;261: a video in the review, and the
+bytes are not in the database.** Islam asked whether to squeeze the quality on
+upload or squeeze after the cycle. **The question was about quality and the
+answer is about place**: both routes keep the clip in the state graph, which is
+**297KB** and travels to every person on every sign-in, while a two-minute clip
+at 720p is **20&ndash;40MB &mdash; about a hundred times the entire platform**;
+squeezed to 480p/30s it is still seven times everything else. *Compression moves
+the number and not the order of magnitude.* And neither route was reachable
+anyway &mdash; a function refuses a body over 4.5MB, and the policy set no
+`media-src` while `frame-src 'none'` blocked every embed. So the bytes go to a
+blob store and the slide keeps a pointer, a poster frame and two numbers, on
+&sect;50's untouched model &mdash; **no migration, proved on a real Postgres
+with a canonical compare** (&sect;249.3). **Two ways in, both his**: every link
+is accepted, the ones we can play play, the rest open in a new tab, **and the
+box says which while they type** &mdash; because a share page is not a video and
+the one moment that fact is worth anything is while somebody still holds the
+link. **The hosts are named, and that is his choice** between two put to him
+with the cost of each. **The file goes up in pieces**, because a function
+refuses 4.5MB and the browser has no bundler to give it an SDK &mdash; and
+every piece is authorised rather than one address minted and then trusted.
+**THE FINDING: `grantIn` answers with a WORD, and one of the words is `"none"`,
+which is truthy** &mdash; so the playback gate never fired and **anybody signed
+in could play any unit's clip**; &sect;104.10's family, found by driving the
+refusal rather than reading it, and 2 red with the bug put back. Setup &rsaquo;
+Video storage is his #3: the total on the page, no Delete on a clip in the open
+review, deleting the Super user's and asked twice, **a cleared clip keeping its
+slide and saying what happened** &mdash; and not counting against the ceiling,
+because clearing is what makes room. **AND THE RAIL CALLED A VIDEO "YOUR
+PICTURES"** (&sect;261.13) &mdash; the one surface whose job is telling the
+slides apart, and a promise the signed-off mockup made that the build did not
+keep, because two places write that word and both spelled it as a literal; one
+builder now, asserted at both ends. **And "the video took over all the slides"
+is measured, not guessed at**: 28 &rarr; 29 slides, one added, none lost, none
+rewritten &mdash; what took over was the WORD, on every row that was his.
+**AND THE CLIP OWNED THE KEYBOARD** (&sect;261.14): a player that has been
+clicked takes every key the presenter presses, so the arrows seek the video
+instead of moving the deck &mdash; and a frame left loaded goes on doing it
+from behind `display:none`. The frame is loaded only on the slide showing;
+emptying it is what hands the keyboard back, and the bar stays while a clip is
+on screen, because the way past a player that has the keyboard has to be on
+screen. **AND THE CLIP'S SLIDE WAS DRAWN ON EVERY SLIDE** (&sect;261.15), which
+is the reported fault and both halves of it: `.d-video { display:flex }` sits
+426 lines after `.dslide { display:none }` at the same specificity and won on
+source order, so the player lay over the whole stage at all times &mdash; 
+1579&times;888 on slides 1 to 4, `elementFromPoint` returning the IFRAME, which
+is why a click meant for the deck started the video. Deleted, not scoped:
+whether a slide is shown is `.dslide`'s question. *An assertion about a
+property is not an assertion about what is on the screen* &mdash;
+&sect;261.14's `src` assertions were right and could not have caught it.
+73/0 proved able to fail thirteen ways;
+13/13 and 15/15 on a virgin Postgres 16; 491/0, 126/0, full sweep ERRORS none.
+Merged after 166 of main's commits came in under it. The bytes' journey
+through the multipart path is still unproven until the store exists.*
+
+*Earlier: 2026-09-05 &mdash; **&sect;264.3: a blanket renumber swept
+somebody else's citations.** Found while writing spec 031 and fixed at Islam's
+word. Seventeen comments in `config-data.js` and `group-render.js` cited
+**&sect;264** for the **yes/no** target behaviour, which is recorded at
+**&sect;257** &mdash; and not as a near miss: &sect;264's body mentions `Y/N`
+**nought** times against **34** in &sect;257's. **THE CAUSE RAN THE OPPOSITE WAY
+FROM THE OBVIOUS GUESS**: both features were renumbered on their merges, and the
+Y/N comments had already been renumbered CORRECTLY to &sect;257; it was
+&sect;264's own merge, renumbering its &sect;257 &rarr; &sect;264 with a blanket
+sweep of the sources, that took them. The arithmetic is exact (main 3+14, branch
+1+8, merged 4+22) &mdash; every one of main's, none spared. **A RENUMBER IS
+SCOPED TO THE LINES THE RENUMBERING BRANCH WROTE**, because after a merge the
+sources are not all yours, **and it is silent**: the number it produces is a
+real section, so nothing parses wrong and no check can see it (&sect;94.12's
+shape, &sect;281's habit of grepping the merged result). Separated **twice by
+different methods** and both naming the same 17 &mdash; by reading every
+comment, and mechanically by matching each line's text against main's own
+&sect;257 lines at the merge parent. **Nothing on any screen moves and it is
+asserted rather than assumed**: the built file differs by those 17 comment lines
+and **one** &sect;238 CSP hash, which regenerated in the same build exactly as
+that section designed it to; `yn-target`, `measure-score-spread`,
+`count-compile` and `unit-follows` green, 527/0 authoriser, 131/0 differ, full
+`qa.py` sweep clean. The `sw.js` shell is bumped because the built file's bytes
+changed, which is &sect;91's trigger.*
+
+*Earlier the same day: **&sect;294: the settings panel scrolls inside
 itself.** Islam, of the chat settings dropdown: *"there is no scrolling inside
 the settings pan while there is a uselss scrolling in the main page."*
 **MEASURING SAID THE TWO HALVES ARE ONE FACT** &mdash; the panel had no

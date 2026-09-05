@@ -26275,7 +26275,87 @@ Proved able to fail: **4 red** on the pre-§237 build. `viewer-switch.py`
 `boot-skeleton`, `save-fidelity`, `report-saves`, `gap-fill`, `submit-gate`,
 the differ (126/0), the authoriser (451/0) and the full `qa.py` sweep green
 on the same build.
-## §239
+## §238 — A CSP NET BEHIND THE ESCAPING, AND NO DEV FILES SERVED (2026-09-01 security sweep)
+
+> *Recorded 2026-09-05, four days after it shipped. Both halves have been live
+> on production since the 1st and both were referenced by number from §276,
+> §282 and §287 as though they had a section — and they had none. That is a
+> Principle II failure on two changes nobody would want unwritten: a security
+> posture and what the deployment serves. The lateness is part of the record.*
+
+§235 fixed the escaping — `esc()` was a text-node escaper being used inside
+double-quoted attributes ~226 times, so a literal `"` in tenant data broke out
+and an injected `onfocus=`/`onerror=` RAN in the reader's browser. That fix is
+the answer. **THIS IS THE NET UNDER IT**, and the argument for a net is that
+the escaper is one function reached from hundreds of places and the next gap
+will look exactly like the last one: correct at every call site, and one call
+site that builds its own markup.
+
+**THE POLICY IS HASHED AT BUILD TIME, WHICH IS THE ONLY REASON IT IS SAFE.**
+`build.py` (`csp_meta()`) takes the SHA-256 of every inline `<script>` block's
+exact bytes and writes them into a
+`<meta http-equiv="Content-Security-Policy">` at the head of the built file,
+with `script-src` allow-listing those hashes and nothing else inline. **The
+whole danger of a hashed CSP is a stale hash — a page that will not load —
+and it cannot go stale here, because the hashing happens in the same build
+that emits the scripts it is hashing.** A build that is not byte-identical is
+already a stop-the-line condition (Principle III); this rides that.
+
+**IT IS A SECOND POLICY, NOT A REPLACEMENT.** `vercel.json`'s header still
+carries `'unsafe-inline'`, and must: it applies to every path including the
+GATE (`index.html`), which is not built by `build.py` and therefore has no
+hashes. The meta is scoped to the platform file alone. A browser enforces both
+policies, so a script must satisfy each — the real blocks pass on their hash,
+an injected handler passes neither. **Only `script-src` is set**, so nothing
+else about the policy changes and no other subresource behaviour moves.
+
+**NOTHING LEGITIMATE RELIES ON INLINE EXECUTION**, checked rather than
+assumed: every handler in the platform is added with `addEventListener` and
+nothing injects a `<script>` at runtime. Proved by `checks/csp-net.py` over
+HTTP — the real blocks run, an injected `onerror=` does NOT fire — and by a
+full `qa.py` walk of every page as every viewer, ERRORS none.
+
+**AND IT HAS A COST NOBODY PREDICTED, RECORDED IN §276**: a check that
+falsifies a build by EDITING THE BUILT FILE now silences the whole script
+block whose bytes it changed, so every function vanishes and the check reports
+*cannot continue* rather than failing. Broken builds are made from the SOURCES
+through `build.py`, and a check that needs one takes `SMP_BUILT` to be pointed
+at a copy. That is the right trade — the falsification technique changed, the
+product did not — but it is a real change to how this project proves things,
+and it arrived silently.
+
+### §238.1 — The deployment stopped serving its own workings
+
+Separately, and found in the same sweep: `src/`, the in-repo `checks/`,
+`scripts/`, `design-mockups/`, `ui-versions/`, `specs/`, `.specify/`,
+`clients/`, `smp-app/` and every `.md` were **publicly fetchable** on the
+deployment. **No secrets were ever exposed** — every credential is a server
+environment variable read in one place (§72, §231), and the client rules ship
+inline in the built file by design (§42) — so what leaked was implementation
+detail, not access. It is still not the deployment's to serve.
+
+`.vercelignore` excludes them. **`lib/` and `db/` are deliberately KEPT**,
+because the `api/*` functions require them: excluding a path removes it from
+the function bundle as well as from static serving, so anything the runtime
+needs may never appear in that file. That is the documented residual — server
+source, still no secrets — and it is stated rather than implied.
+
+Verified on production after the deploy rather than reasoned about
+(§91.5's rule, one surface out): `scripts/`, `smp-app/` and the sources answer
+404; the gate, the platform and `/api/state` answer 200.
+
+### §238.2 — What this sweep did NOT do
+
+**The server-side database write.** Every save still cleared and rewrote all
+31 tables, whatever changed. The acute cost was already gone (§195 batched the
+reads and writes, 236 network crossings to 45), and closing the rest means an
+incremental writer or a read-authorise-write lock on the LIVE write path —
+**the one change in this product that can corrupt a client's data**. So it was
+recorded here as needing its own staged pass rather than folded into a security
+afternoon. §240 took the lock the same day; §241 took the writer, behind a
+flag, and is the section that closes this one.
+
+## §239 — YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (2026-09-01)
 
 **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED.**
 
@@ -26541,6 +26621,104 @@ change is negligible. The larger "write only the changed rows instead of
 rewriting every table" optimisation is a separate, riskier piece and is NOT
 done here; the acute cost it targeted was already removed by §195's batching.
 ---
+
+## §241 — WRITE ONLY WHAT CHANGED (2026-09-01, merged flag-off; activated later)
+
+> *Recorded 2026-09-05. Merged on the 1st behind a flag, activated on
+> production at Islam's direction after that, and referenced by number from
+> §282 and §288 as though it had a section — and it had none. Like §238, the
+> lateness is part of the record: this is the live database write path, which
+> is the last thing in the product that should be undocumented.*
+
+**§238.2 NAMED THIS AND DEFERRED IT, AND THIS IS THE OTHER HALF.** Every save
+cleared and rewrote all 31 tables whatever changed — a one-word edit to a
+tactic's name rewrote every unit, every function, every capability and the
+whole register. §195 had already taken the acute cost out (236 network
+crossings to 45, by batching), so what is left is not a fire: it is that the
+write is O(the tenant) when the change is O(one row), and that scales the
+wrong way.
+
+**IT READS THE CHANGE LIST THE CLIENT ALREADY SENDS.** §210 and §215 made a
+save carry what changed rather than the whole graph, for data-safety reasons
+that had nothing to do with speed — and that list is exactly the input this
+needs. `writeStateIncremental` works out which SUBJECTS a change touches — a
+business unit, a supporting function, a capability — and rewrites only those.
+Nothing new is sent, nothing new is stored, and no new decision is made about
+what a change means.
+
+**IT IS NEVER WRONG, ONLY SOMETIMES UNOPTIMISED**, and that is the whole
+safety argument. `planSubjects()` is deliberately conservative and returns
+**null** for every shape it does not handle — any deletion, any reorder or
+add/remove of a top-level list, a settings change, the register, a group-own
+field, a whole-graph post from a tab on an older build — and the caller then
+runs the full `writeState` exactly as before. So the set of shapes it
+optimises can grow over time without any of them becoming load-bearing: an
+unrecognised shape is not a failure, it is the old behaviour.
+
+**IT REBUILDS ROWS WITH THE FULL WRITER'S OWN BUILDERS.** `rowsOf`, `colsFor`,
+`splitRow` and the `E` descriptors were lifted to module scope rather than
+copied, so a rewritten subject is **byte-identical** to what a full rewrite
+would have written — which is a property that can be asserted rather than
+argued, and is what `scripts/test-incremental-write.js` asserts: **17 change
+shapes, each written BOTH ways against a real Postgres and compared**, with
+the optimised shapes asserted handled and the fallback shapes asserted
+fallen-back. A test that only checked the optimised ones would pass on a build
+whose `planSubjects` had quietly started returning null for everything.
+
+**ONE DELETE CLEARS A SUBJECT'S SUBTREE**, because the foreign keys already
+cascade — a unit takes its clauses, objectives, SWOT and pillars, and pillars
+take their measures and tactics; a capability takes its objectives and
+projects, and projects take their deliverables, outcomes and milestones — and
+the reinsert order is parent before child, which every FK already requires.
+Nothing about the schema changed.
+
+**IT RUNS INSIDE THE CALLER'S TRANSACTION, UNDER §240's LOCK.** It does not
+open or close one of its own, or the advisory lock would release mid-write and
+the concurrency guarantee bought that same day would be given straight back.
+
+### §241.1 — Merged switched off, on purpose
+
+It went to `main` **behind `SMP_INCREMENTAL_WRITE`, off by default**, so
+merging it changed no behaviour at all: with the flag unset the module-scope
+refactor is the only thing that reached production, and that is
+behaviour-neutral by construction. Re-verified at the merge rather than
+claimed — the full database suite (round trip, two tabs, concurrent saves)
+green **both flag-off and flag-on**, the 17-shape equivalence byte-identical,
+and a **120-save concurrency stress losing nothing either way** (flag-on about
+four times faster). Fully revertible: flag-off is dormant, so a revert, or
+simply leaving the flag alone, is a no-op on live behaviour.
+
+**Then it was switched on for production at Islam's direction**, after the
+sweep proved nothing was lost. *When this section was written it could assert
+the code and the tests, which are in this repository, and not the state of an
+environment variable on a deployment — so it recorded the activation as an
+instruction carried out rather than as a measurement.* **§288 closes that gap
+from the other side**: it states the writer has been **live on production since
+2026-09-03**, and its whole narrowing argument depends on that being true, which
+is a better witness than this section could be on its own.
+
+### §241.2 — A save says which way it was written
+
+A dark feature nobody can see running is one nobody can trust, so `/api/state`
+reports it: the success body carries **`wrote: "incremental"`** or
+**`"full"`**, mirrored by one `[save]` line in the runtime log. **It is a
+diagnostic and not a second decision** — the writer is chosen exactly as it
+was, and this only says which one ran (§171's rule: a thing that can fail
+invisibly must be visible to the operator, even when the failure mode here is
+merely "it fell back").
+
+### §241.3 — What still falls back, and why that is fine
+
+A capability **reorder or add/remove**, every group-own field, and all the
+settings and register tables. Each is a safe future extension of
+`planSubjects`, and each is today simply the old write. **The list is recorded
+so that adding one is a decision somebody makes rather than a gap somebody
+finds** — and so that the next person to read `planSubjects` knows its `null`
+branches are deliberate, not unfinished.
+
+**And §288 later leaned on this**: when the whole-graph clear stopped being a
+`TRUNCATE`, the argument that the remaining churn is bounded rests on most
+saves never reaching that path at all — which is true only while this is on.
 
 ## §242 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)
 
@@ -30266,6 +30444,54 @@ panes, which is a different model entirely — an outcome's reported figure, not
 measure scored against a prorated target. Whether a project outcome should
 prorate at all is a decision about how projects are measured, not a
 disagreement between two cells, and it has not been put to Islam.
+
+---
+
+## §264.3 — A BLANKET RENUMBER SWEPT SOMEBODY ELSE'S CITATIONS (2026-09-05)
+
+Found while writing spec 031 and fixed the same day, at Islam's word.
+
+`config-data.js` and `group-render.js` cited **§264** for the **yes/no** target
+behaviour, which is recorded at **§257**. Not a near miss: §264's whole body
+mentions `Y/N` **nought** times, against **34** in §257's — so the citation sent
+a reader to a section about Highest and Lowest to learn why a Y/N row scores
+100 or 0.
+
+**THE CAUSE RAN THE OPPOSITE WAY FROM THE OBVIOUS GUESS**, and that is the part
+worth keeping. Both features were renumbered on their merges, as this section's
+own heading records: the Y/N work was §251 and became §257 (`2a21442`,
+correctly, comments included), and this section was §257 and became §264
+(`2e254ef`). That second merge renumbered **its own** §257 to §264 with a
+blanket sweep of the sources — and the sources by then held main's Y/N
+citations, which had legitimately become §257 three commits earlier. It took
+every one of them.
+
+**THE ARITHMETIC IS EXACT AND IS HOW IT WAS PROVED**: at the merge parents main
+carried **3 + 14** such citations and this branch **1 + 8** of its own; the
+merged files hold **4 + 22**. Nothing was missed and nothing was spared.
+
+**A BLANKET RENUMBER OVER SOURCES REWRITES CITATIONS THAT BELONG TO SOMEBODY
+ELSE'S SECTION, AND IT IS SILENT** — the number it produces is a real section
+that exists, so nothing parses wrong, nothing renders wrong and no check can
+see it. §94.12's shape (two sessions independently writing one shell name) and
+§281's (a merged file grep'd for its own declarations) in a third place:
+**a renumber is scoped to the lines the renumbering branch wrote**, and after
+a merge the sources are not all yours.
+
+**THE TWO SETS WERE SEPARATED TWICE, BY DIFFERENT METHODS** (§94.8's habit): once
+by reading every comment and asking whether it is about a summary or about a
+yes/no row, and once mechanically, by matching each current §264 line's text
+against main's own §257 lines at the merge parent. Both named the same **17**.
+The **9** that are genuinely about the headline, the breakdown and the derived
+score keep §264.
+
+**NOTHING ON ANY SCREEN MOVES, AND IT IS ASSERTED RATHER THAN ASSUMED**: the
+built file differs by those 17 comment lines and **one** §238 CSP hash, which
+regenerated in the same build exactly as that section designed it to
+(§238: hashed in the build that emits the scripts, so it cannot go stale).
+`yn-target`, `measure-score-spread`, `count-compile` and `unit-follows` are
+green, 527/0 on the authoriser and 131/0 on the differ. The `sw.js` shell is
+bumped because the built file's bytes changed, which is the trigger §91 names.
 
 ---
 
@@ -35115,6 +35341,535 @@ setting, nothing stored and no server rule** — read off the diff, which touche
 one file. Every row is asserted to be in the same place, at the same width, in
 the same number as the build before it, with the panel's own width and the
 heading's inset on all three sides unchanged.
+## §261 — A VIDEO IN THE REVIEW, AND THE BYTES ARE NOT IN THE DATABASE (2026-09-03)
+
+Islam: *"add to the presentation to be able to add a video to play inside the
+presentation how do you think we can do it without overloading the data base
+with videos? is it by squeezing the video quality or by uploading it temp with
+the normal quality and then squeeze after the cycle. how canw e do this?"*
+
+**THE QUESTION WAS ABOUT QUALITY AND THE ANSWER IS ABOUT PLACE**, and that is
+the whole of §261. Both routes he weighed keep the clip in the state graph.
+Measured before anything was proposed: the whole tenant's data is **297KB**,
+`GET /api/state` hands all of it to every person on every sign-in, and a
+picture slide already rides inside it (`review.extra`, one JSONB column in one
+row) at 150–300KB. A two-minute clip at 720p is **20–40MB — about a hundred
+times the entire platform, per clip**; squeezed to 480p and thirty seconds it
+is still ~2MB, seven times everything else. *Compression moves the number and
+not the order of magnitude.*
+
+**AND NEITHER ROUTE WAS REACHABLE ANYWAY.** A Vercel function refuses a request
+body over 4.5MB, so a save carrying a clip fails outright — at a reporting
+deadline, when saves are busiest. And `vercel.json` set no `media-src`, so it
+fell through to `default-src 'self'` and a `data:` video would not have played
+at all, while `frame-src 'none'` blocked every embed. The feature could not
+have worked in either shape he described.
+
+**SQUEEZE-AFTER-THE-CYCLE IS REFUSED WITH ITS REASONS NAMED**: it makes the
+busiest week the heaviest one; there is no scheduler on Vercel to run it
+(§97.5 already records that, which is why the away-email decision is made at
+the moment of sending); and re-encoding stored evidence after the fact cuts
+against §49.2 — *a record somebody tidied is no longer the record.*
+
+### §261.1 — What is stored is a pointer, a frame and two numbers
+
+`review.slides` is untouched in shape (§50): same list, same anchor, same place
+in the deck, same cycle, same permission. A slide gains `kind:"video"` and a
+`vid` holding **either** `path` (a file in our own store) **or** `url` (an
+address the office pasted), plus a poster frame, a length and a size.
+
+**NOTHING STORES WHAT KIND OF LINK IT IS.** That is derived at the moment of
+drawing, so the day the office adds their own host on the storage page, every
+link already pasted for that host starts playing on the slide (§42: one reader,
+asked when the answer is needed).
+
+**THE POSTER IS THE ONE PART THAT DOES RIDE IN THE GRAPH**, sized like a
+thumbnail (640px, JPEG 0.7) rather than like a picture slide — and it is what
+makes the deck survive a clip it cannot reach (§15.1).
+
+**NO MIGRATION, AND IT IS PROVED RATHER THAN CLAIMED.**
+`scripts/test-video-roundtrip.js` writes all three shapes — uploaded, linked,
+cleared — beside a picture slide, reads them back off a real Postgres 16,
+asserts `write(read())` is a fixed point with a **canonical** compare (§249.3:
+jsonb reorders keys, and a stringify compare calls that a difference), and
+asserts the `review` table gained no column. 13/13.
+
+### §261.2 — `kind` decides what is drawn, and nothing is thrown away
+
+Switching a slide to Video keeps its pictures, exactly as narrowing the
+arrangement keeps them — §257.2's correction, which is that making somebody pay
+for changing their mind is a defect. Switching back **DELETES** the mark rather
+than writing `"pics"` (§50.6), so a slide that has never been a video and one
+switched back are the same bytes; both ends asserted.
+
+### §261.3 — Two ways in, and the verdict is said at the desk
+
+Islam asked for **both** upload and a pasted link, and neither is the fallback:
+a unit whose clip already sits on the company's storage should not have to
+download it in order to upload it again.
+
+**"WOULDN'T ANY LINK APPLY?"** — his question, and the honest answer is that a
+link being *accepted* and a video *playing* are two things. A share page is not
+a video: `youtube.com/watch?v=…` in a player shows nothing, so each service
+needs its own player address built. Every link is accepted; the ones we can
+play, play; the rest open in a new tab. **And the box says which while they
+type**, because the one moment that fact is worth anything is while somebody is
+still holding the link — never in the meeting room (§32, §171).
+
+**THE HOSTS ARE NAMED, AND THAT IS ISLAM'S CHOICE** between two put to him with
+the cost of each: naming them means a clip on a fifth service opens in a new tab
+until the office adds it; not naming them means admitting media and frames from
+anywhere, which is an open door for an injected script to frame a false sign-in
+inside the platform's own chrome. He took the narrower one. `VIDEO_EMBED_HOSTS`
+is the list, and `checks/video-slides.py` asserts the policy and the rule name
+**exactly** the same hosts in both directions — a list spelled twice is §234's
+fault, and here the second spelling decides whether anything plays at all.
+
+**AND THE CHECK'S FIRST DRAFT OF THAT ASSERTION COULD NOT FAIL**: it tested
+`"frame-src https:" not in csp`, which is false of every correct policy,
+because a named host *starts with* that string. Asserted over the tokens now.
+
+### §261.4 — The file goes up in pieces, and every piece is authorised
+
+A function refuses a body over 4.5MB, so a 50MB clip cannot be posted in one
+go. The documented way round it is the store's own multipart upload: the
+browser slices, each piece comes through `/api/blob` under the cap, the store
+reassembles. It costs a dozen round trips and buys two things — **the browser
+needs no SDK of its own** (the platform is one self-contained HTML file with no
+bundler, so a browser package is not available to it), and **every piece is
+authorised**, rather than one address being minted and then trusted for the
+next several minutes.
+
+**WHAT COULD AND COULD NOT BE PROVED FROM HERE, STATED PLAINLY (§3a).** There
+is no blob store on this machine and none can be conjured. What IS proved:
+`@vercel/blob` 2.8.0 carries every call used, `access:"private"` is a value it
+accepts (it answers *"This store does not exist"* rather than an argument
+error, so the shape is right), and `getDownloadUrl` exists. What is NOT proved:
+that 50MB of bytes actually traverse the multipart path. That is the first
+thing to drive the day the store is created.
+
+### §261.5 — The finding: `grantIn` answers with a word, and one word is "none"
+
+Writing `scripts/test-video-endpoint.js` found a real hole. The playback gate
+read `if (!R.grantIn(...))` — and `grantIn` returns the **string** `"none"` for
+a unit somebody cannot see, which is **truthy**. So **anybody signed in could
+play any unit's clip.** §104.10's family (`Number("")` is 0 and finite; `""` is
+a real answer), and invisible to every assertion short of driving the refusal
+with somebody who ought to be refused.
+
+`mayWatch()` tests the value now. Both ends asserted: a unit head is refused on
+another unit's clip and gets past the gate on their own, and the office gets
+past it everywhere. Proved able to fail — with the bug put back the test reads
+**2 red**, and the refusal becomes a 404 from the store instead of a 403 at the
+door.
+
+**AND THE GUARDS BEHIND THE STORE CHECK WERE UNTESTED UNTIL THE TEST SET A FAKE
+TOKEN**: with no token the endpoint answers *"no video store here"* first and
+the size and path guards never run. The token is nonsense, so nothing leaves
+the machine — the guards run and the call fails at the store afterwards.
+
+### §261.6 — Setup › Video storage, and what clearing costs
+
+Islam's #3: *"keep but we need a way to clear the storage not to be overwhelmed
+by uploaded videos."* No automatic expiry. Its own rail entry under *Running
+the cycle*, beside Import & archives rather than inside it, because that page is
+about **plans**. The total is on the page, because *am I being overwhelmed* is
+the question somebody opens it to answer.
+
+**A CLIP IN THE OPEN REVIEW OFFERS NO DELETE** — removing what a unit is about
+to present is not storage hygiene, and the control that does that belongs on
+the slide (§61). **DELETING IS THE SUPER USER'S, not merely the office's**
+(§89, §146): two questions with the same answer today, and §94's drift the day
+the first is widened; asked on the screen by `mayDestroy()` and again on the
+server by `isSuperRole`.
+
+**A CLEARED CLIP KEEPS ITS SLIDE AND SAYS WHAT HAPPENED** (§15.1) — poster and
+caption stay, so an archived review still shows what was presented and when it
+was cleared; it is never drawn as a player that failed to load. **The cost is
+stated rather than discovered**: a past review can no longer be played in full,
+which is the trade Islam accepted by choosing *keep, with a way to clear*.
+
+**AND A CLEARED CLIP DOES NOT COUNT AGAINST THE CEILING** — clearing is what
+makes room. That assertion was written the other way round first and the
+product was right; it is kept as the thing that pins the behaviour.
+
+### §261.7 — The ceiling, and where it is enforced
+
+Three clips per subject — **per business unit AND per supporting function**,
+per cycle, keyed exactly as `review.slides` already keys them. 50MB and two
+minutes each, **measured off the file** rather than trusted: the length comes
+from the browser's own decoder, because a name and a size say nothing about how
+long something runs. Refused above the ceiling with the reason said, **never
+silently re-encoded** — what somebody exported on purpose is what the room
+sees, and there is no `canvas.toDataURL` for video to re-encode with anyway.
+
+**AND THE CEILING IS COUNTED ON THE SERVER FROM THE STORED SLIDES**, or a limit
+the screen alone enforces is decoration (§42, §44, §98.2) — two tabs each
+carrying two clips would both pass a check made against their own copy.
+
+**IT DOES NOT AUTOPLAY**, deliberately: a clip that starts the moment the deck
+reaches the slide takes the room away from whoever is presenting.
+
+### §261.8 — What was proved
+
+`checks/video-slides.py` **52 ok, 0 failed**, and proved able to fail four ways
+against builds with the host matching broken (1 red), the embed rewrite dropped
+(2), the cleared slide and the switch destroying pictures (4), and the policy
+opened wide (3). `scripts/test-video-roundtrip.js` 13/13 and
+`scripts/test-video-endpoint.js` 15/15 against a virgin Postgres 16.
+`test-authorize` 491/0, `test-graph-diff` 126/0, round trip PASS,
+`hide-slide` 42/0, `notes-slide`, `deck-blank-slides`, `deck-outcome` green,
+full `qa.py` sweep **ERRORS: none**.
+
+**RECORDED, NOT DONE.** The bytes' journey through the multipart path is
+unproven until a store exists (§261.4). The `.pptx` plan download has no video
+column, and a deck already open on a projector still does not redraw. And the
+mockup that was signed off did not show the cleared state or the ceiling
+message — both were built from the decisions rather than from a drawing, and
+are the two screens to look at first.
+
+
+### §261.9 — Video storage is a section of Import & storage, not a page of its own (2026-09-03)
+
+Islam, looking at what §261 shipped: *"the import and archive has 2 subtabs
+now. I'm not sure that this is the right place to store the videos. challenge
+this if you want."*
+
+**HE IS RIGHT, AND THE REASON IS SHARPER THAN THE ONE I HAD.** §261.6 put Video
+storage under *Running the cycle* because that is where Import & archives sits —
+which is proximity, not an argument. The group's own note says **"What you do
+while a cycle is open"**, and clearing storage is exactly what you do when one
+is NOT. My own placement failed the group's stated test.
+
+**WHAT THE THREE SHARE IS THE PAGE'S NAME.** An archived plan and a stored clip
+are the same errand — *what has piled up, and how do I clear it* — so the page
+becomes **Import & storage**: one way in, two things held. §108.4's argument for
+joining import and archives (an upload IS an archiving act) is untouched; this
+adds a third thing held, not a third meaning. Two placements were put to Islam
+with the cost of each and he chose this one; the rail loses a line with it.
+
+**EACH SECTION KEEPS ITS OWN GATE** (§130.4), and here that is load-bearing
+rather than belt-and-braces: **`c_import` is "view" for all 33 people on the
+register** — measured, not assumed — so without `when: inOffice()` every unit
+head would see every unit's clips and their sizes. Proved able to fail: with the
+gate removed the check goes red naming exactly that.
+
+**AND A RENAME LEAVES STALE STRINGS.** Two live ones still said the old name —
+the section's own `cfgHead` (which `setup-pages.py` compares against the rail's
+word, §51.11) and the removal dialog's sentence promising *"Setup › Import &
+archives holds the way back"*, which is §16.7's fault: a promise naming a page
+nobody can find. Both moved. The old rail entry is **DELETED, not left standing
+beside its new home** (§24) and the check asserts that absence, or a rename
+quietly becomes a duplicate.
+
+**THE FETCH GATE MOVED WITH IT, AND ITS FIRST DRAFT WAS THE SILENT KIND.** It
+had to follow the SECTION rather than the page key — and `CURSEC` is a MAP keyed
+by page, not a string, so `CURSEC === "vids"` is false always: the store would
+never have been asked and the section would have said *"Asking…"* for ever.
+§93's gate-that-stopped-matching, caught before it shipped by reading the
+variable rather than assuming it.
+
+**TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK**, both the same family: it
+read `#panel` for the rail, which holds the pane TOO, so counting the old name
+counted the new section tab — an assertion measuring its own subject; and it
+reached for a `SETUP_DEFS` global that does not exist (the defs are a closure on
+`SUBS.setup`), threw, and **skipped the both-ends assertion in silence, twice**.
+It drives the viewer switch and reads the real pane now.
+
+**AND THE THIRD FAILURE WAS A CORRECT BUILD.** Asserting the non-office viewer
+still sees a tab row is wrong: with one section left the row is not drawn at
+all, so the assertion moved to the PANE. 56/0.
+
+**RECORDED, NOT CHANGED**: all three sections print their own name as an `<h2>`
+directly under the tab that already says it — *Archived plans* has always done
+this, so the new one is consistent rather than odd, and fixing it is a decision
+about the whole page. And `checks/setup-pages.py` has **3 failures about a
+sticky table head that reproduce on `origin/main`** — measured on main, on
+§261's commit, and on this one; pre-existing and untouched by any of it.
+
+
+### §261.10 — The read address is TWO steps, and the one-step call was a different function (2026-09-03)
+
+Islam created the Blob store, and the first thing to do with it was the thing
+§261.4 recorded as unproven. The store's token is not in this session and must
+not be pasted into one, so what could be proved from here was proved instead:
+**every call in `api/blob.js` was made against the real SDK with the real
+arguments.** Five reached the store and failed only with *"This store does not
+exist"* — which is the answer that means the arguments are right.
+
+**THE SIXTH DID NOT, AND IT WAS THE ONE THAT MATTERS.** `getDownloadUrl` threw
+`Invalid URL`. Reading its type settles why: it is `(blobUrl: string): string`
+— a **full blob URL**, **synchronous**, and it only appends a download flag. It
+is not a signing function at all. Handed a pathname it throws, the catch in
+`signedRead()` swallowed it, and **every clip would have reported "no longer
+here": nothing would ever have played.**
+
+A private blob has no fetchable address of its own. The real flow is two steps —
+`issueSignedToken({pathname, operations:['get'], validUntil})` for a delegation
+scoped to ONE path and ONE operation, then `presignUrl(token, {operation:'get',
+access:'private', pathname})` for the concrete signed URL. Both were then
+validated the same way: `issueSignedToken` reaches the store, and `presignUrl`
+rejects only the *fake* delegation token it was handed, which is exactly right.
+
+**IT WAS INVISIBLE TO EVERY TEST THAT EXISTED, AND THAT IS THE LESSON.** With no
+token the endpoint answers *"no video store here"* before reaching it; with a
+fake token the store refuses first; with a real store there is nothing here to
+run against. So the SDK is **stubbed** and the handler driven in-process
+(`test-video-endpoint.js` §0): a permitted viewer must get a **302** to the
+address the store signed, scoped to that pathname, `get` only, `private`, with
+an expiry. **5 red** with `getDownloadUrl` put back.
+
+**AND THE GUARD'S OWN FIRST DRAFT HUNG RATHER THAN FAILING.** It wrote the
+session row by hand as `sessions(id, …)` — the table keys on `token_hash`,
+because a session is stored by the SHA-256 of its token and never the token
+(§43) — so the insert threw, and it had also closed the SHARED pool the rest of
+the file still needed. A throw with nothing left to close is a test that never
+reports. It uses `auth.createSession()` now, which is the platform's own door.
+
+**STILL NOT PROVED, AND ONLY ONE THING REMAINS**: that 50MB of bytes actually
+traverse the multipart path into a real store. Every argument shape on that path
+is now validated against the real SDK, and the last step needs a signed-in
+person on the deployment — which is Islam, in two minutes, not this session.
+
+
+### §261.11 — The player has to know who is embedding it (2026-09-03)
+
+Islam, on the first YouTube link: **"Video player configuration error — Error
+153."** The cause is ours, twice over. `vercel.json` sets `Referrer-Policy:
+no-referrer` for the whole site (§43.6), and the embed iframe said it again.
+A player that cannot see the embedding origin cannot check whether the video is
+allowed to be shown there, so it refuses to configure at all.
+
+**`strict-origin` IS THE NARROWEST THING THAT WORKS**: the scheme and host,
+never the path — so the video host learns the platform's address and nothing
+about which unit or which review is on screen — and nothing at all over a
+downgraded connection. An element's own policy overrides the document's for
+that one request, so every other request the platform makes still sends no
+referrer.
+
+**NOT REPRODUCED HERE, AND SAID SO** (§3a): YouTube is unreachable from this
+sandbox — `ERR_CONNECTION_RESET` — so the diagnosis is from the two policies
+we set and the documented meaning of 153, not from seeing it fail and pass.
+**And the first probe was worse than useless**: it read "looks ok" whenever the
+frame's text lacked "153", which was true of a frame that had never loaded at
+all — absence read as success, on a run where nothing loaded (§93, §231.4).
+
+The `sandbox` attribute is kept and the reason written down: what it withholds
+that matters is top-navigation (a frame cannot take the presenter's page away)
+and downloads. `allow-same-origin` is not optional — without it the player gets
+an opaque origin, loses its own storage and fails for a second reason.
+
+### §261.12 — The refusal belongs beside the box, not above the slide (2026-09-03)
+
+Islam: *"when I ad a link or a video the error is on the top nearly not seen we
+need it at the upload part."* Measured: the message sat at **y=68** while the
+stage ended at **y=696** — **628px above the control that caused it**, and off
+the top of the pane on a laptop. It renders inside the controls block now,
+directly above the source boxes, and the same move fixes the picture slots,
+which had the fault for the same reason. Both ends asserted: inside the
+controls, and below the stage. **4 red** with the old placement and the old
+referrer policy put back.
+
+**AND THE ONE MESSAGE NOBODY COULD ACT ON WAS REWRITTEN** (§230.2): *"no video
+store here"* is the endpoint's own words — it names a thing the reader has
+never heard of and says nothing about what happens next. It says that video
+storage has not been switched on for this deployment yet, that the clip is fine
+and nothing has been lost, and that a link works in the meantime.
+
+**WHAT WAS CORRECT AND IS RECORDED AS SUCH**: the refusal reading *"it runs
+2:01 and the limit is 2:00"* is the ceiling working exactly as agreed. Whether
+one second over deserves a little slack is a change to a number Islam set, so
+it is put to him rather than quietly widened.
+
+### §261.13 — The rail called a video "your pictures" (2026-09-04)
+
+Islam, from the Manage slides rail with his clip playing on the slide beside
+it: the row for slide 3 carried the video's own thumbnail and, underneath it,
+the words **YOUR PICTURES**. **The one surface whose entire job is telling the
+slides apart was naming a clip as the one thing it is not** — and the mockup he
+signed off says *"the label reads your video where a picture slide reads your
+pictures"*, so this is a promise the build did not keep rather than a decision
+being revisited.
+
+**TWO PLACES WRITE THAT WORD AND BOTH SPELLED IT AS A LITERAL** — `slidesPaint`
+builds the rail once, and `slidesRestage` rewrites the open row as somebody
+types, so a fix in one is the drift §53.5 exists to stop. It is
+**`slidesMineWord(sl)`**, asked by both, reading `slideIsVideo` — the same
+question the pane, the deck and the storage page already ask, and never a
+second test of what kind of slide this is.
+
+**ASSERTED AT BOTH ENDS, AND ACROSS THE REPAINT** (§113.8): switching a slide
+to video must say *your video* AND switching it back must say *your pictures* —
+proved able to fail one way each (**1 red** with the word hardcoded to
+pictures, **1 red** with it hardcoded to video), which is the point: a build
+that said *your video* under every row would satisfy the first assertion
+perfectly.
+
+**AND "THE VIDEO TOOK OVER ALL THE SLIDES" IS MEASURED, NOT GUESSED AT.**
+Mobile's deck was built with no video slide and then with one, and every other
+slide compared: **28 → 29 slides, one added, none lost, none rewritten.** The
+clip is placed like any other custodian's slide (§50.3) and displaces nothing.
+His own rail screenshot agrees — slides 1, 2, 4 and 5 are the generated ones,
+unchanged. So what took over was the WORD, on every row that was his.
+
+### §261.14 — The clip belongs to one slide, and so does the keyboard (2026-09-04)
+
+Islam, presenting: *"THE VIDEO IS ON the first 3 slides, it's not on a specific
+slide, I'm not able to navigate from it."*
+
+**THE SECOND HALF IS THE CAUSE OF THE FIRST.** A cross-origin player that has
+been clicked owns every key the presenter presses — inside a YouTube frame the
+arrow keys **seek the clip**, and the deck's own `keydown` listener, which is
+on `window`, never sees them. So pressing → does nothing to the deck and the
+video stays on screen: from in front of the board that reads as the clip being
+on every slide.
+
+**AND A FRAME LEFT LOADED GOES ON OWNING THEM FROM BEHIND `display:none`.**
+Every slide in a deck is in the document at once and hidden by a class, so a
+player reached once was still loaded, still focused and still holding the
+keyboard on every slide after it.
+
+**THE FRAME IS ONLY EVER LOADED WHILE ITS OWN SLIDE IS SHOWING.** The address
+rides in `data-vsrc` and `videoArm()` moves it into `src` on the slide being
+shown and empties it everywhere else — **emptying it is what hands the keyboard
+back**, with no dependence on a player's own API and therefore none on which
+service the clip came from. A `<video>` is paused rather than emptied: it is
+our own element, so pausing is enough and the presenter keeps their place.
+
+**`live` IS THE ONE SLIDE PASSED IN, NEVER "every slide wearing `.on`"** — the
+Manage slides rail marks every thumbnail `.on` so it lays out, so reading the
+class would load one player per row. Two things come free with the same rule:
+the rail draws no players at all, and nothing is asked of YouTube until a slide
+with a clip on it is actually reached.
+
+**AND THE BAR STAYS WHILE A CLIP IS ON SCREEN.** Nothing can take the keyboard
+back from a player that currently has it — that is a browser guarantee, not an
+oversight — so the way past it must be on screen: in fullscreen the deck bar
+hides itself after 2.2s, and on a video slide it does not. No new furniture;
+the existing bar, held open.
+
+Asserted as the frame's `src` at three moments — before the slide is reached,
+on it, and after leaving — never as a class somebody could set and forget
+(§94.8), and at **both ends** (§113.8): a build that never loaded the player
+satisfies the emptying assertion perfectly, and one that never emptied it
+satisfies the loading assertion. Proved able to fail three ways: **1 red** with
+`videoArm` made a no-op, **2 red** with the frame never emptied, **1 red** with
+the bar left to hide.
+
+**WHAT IS NOT CLAIMED**: YouTube is unreachable from this sandbox, so the
+keyboard capture itself was reasoned from the mechanism and the fix was proved
+against a Vimeo address through the real deck. Whether three separate video
+slides were also sitting in that deck is a question about his data, and the
+rail lists every slide by number.
+
+### §261.15 — The clip's slide was drawn on every slide (2026-09-05)
+
+Islam, from the deck: *"STILL THE VIDEO IS SHOWING ON THE first 3 slides.
+that's a bug. and the video should only play if someone press play on it not by
+normal clicking."*
+
+**BOTH HALVES ARE ONE FAULT, AND IT IS ONE DECLARATION.** `present.css` opened
+its video block with
+
+```css
+.d-video { display:flex; flex-direction:column; }
+```
+
+and `.dslide { … display:none … }` sits **426 lines earlier at the same
+specificity** (0,1,0). Equal specificity is settled by source order, so the
+later rule won: **the clip's slide was `display:flex` at all times**, and
+`.dslide` is `position:absolute; inset:0`, so it lay over the whole stage on
+every slide in the deck. Measured, not reasoned — with the deck open on slides
+1, 2, 3 and 4 in turn: `display:flex`, **1579×888**, and
+`document.elementFromPoint` at the middle of the stage returning the
+**IFRAME** every time.
+
+**THE SECOND HALF FOLLOWS FROM THE FIRST.** With the player covering the stage,
+a click meant for the deck — anywhere, on any slide — landed inside it, which
+is exactly *"it plays by normal clicking"*. Nothing needed to be built for that
+half; it was the same overlay.
+
+**BOTH HALVES OF THE RULE SAID NOTHING `.dslide` DID NOT ALREADY SAY**:
+`flex-direction:column` is on `.dslide`, and whether a slide is shown is
+`.dslide`/`.dslide.on`'s question. So the declaration is **DELETED** rather
+than scoped (§24) — a rule kept and narrowed reads as load-bearing to the next
+person. **Whether a slide is shown is `.dslide`'s question and no slide kind
+may answer it**: `.d-video` was the only slide-kind class in the file setting
+`display` on the slide itself; every other one scopes to a descendant.
+
+**ASSERTED AS PAINT AND AS `elementFromPoint`, NEVER AS A CLASS** (§94.8) —
+what was wrong was what a person could see and click, and a class assertion
+passes on exactly the build that produces it. **At BOTH ends** (§113.8): the
+clip drawn on its own slide and the middle of that stage being the player, or a
+build that drew the clip nowhere at all would satisfy the first two assertions
+perfectly. Proved able to fail both ways: **2 red** with the declaration put
+back — printing Islam's report as three slides painted 1579×888 with the
+pointer inside the player — and **2 red** with the clip hidden outright.
+
+**§261.14's `src` ASSERTIONS COULD NOT HAVE CAUGHT THIS.** They ask what
+address the frame holds, which was right and stayed right; the frame was
+emptied on every slide but its own and **went on being drawn**. *An assertion
+about a property is not an assertion about what is on the screen.*
+
+**AND THE PROBE FIRST MEASURED THE SURFACE BEHIND THE ONE UNDER TEST** (§50.6's
+family): with Manage slides still open behind the deck, the editor's own stage
+holds a clone of this very slide, so an unscoped `elementFromPoint` read the
+EDITOR's iframe and reported a correct build broken. The deck is measured with
+the editor shut — the two are one menu's two entries and never both open — and
+the probe is scoped to `#deckroot`.
+
+**WHERE HE IS TESTING, MEASURED**: the production platform file carries **no
+video code at all** (`slideIsVideo`, `videoArm`, `vslideHtml`, `data-vsrc`:
+zero occurrences), so the build showing him this is a preview of the branch,
+and production is untouched by any of it. Signing in to look from his side
+could not be done from here — the sandbox's browser cannot reach the
+deployment (`ERR_CONNECTION_RESET`, through the proxy and without it) — and
+that is stated rather than worked around.
+
+### §261.16 — The bar §261.14 held open had been removed under it (2026-09-05)
+
+The merge to `main`, after **166 of main's commits** had landed under this
+branch while it waited for a word.
+
+**ONE DECISION HAD TO BE GIVEN UP, AND IT IS ISLAM'S OWN THAT TOOK IT.**
+§261.14 held the deck bar open while a clip was on screen, because a player
+that has been clicked owns the keyboard and the arrows on the bar were the way
+past it. **§265 then removed the peek mechanism outright** — Islam, from a live
+presentation: *"with every click the bottom banner appear then hide."* So in
+fullscreen the bar does not appear at all, and `.deckroot.fs.vidslide .deckbar`
+would have put back, for one slide kind, furniture he had just had taken away.
+The rule is **DELETED rather than scoped** (§24), and the class it read goes
+with it — a class nothing reads is what the next reader takes for load-bearing.
+
+**THE RESIDUAL COST IS STATED RATHER THAN HIDDEN**: in FULLSCREEN, on a video
+slide whose player has taken the keyboard, there is no on-screen control, and
+§265's own answer — Escape leaves fullscreen — does not reach us from inside a
+cross-origin frame either. Out of fullscreen the bar is always there, which is
+where a review is driven from a laptop. §261.15's fix is what makes this
+survivable: the clip is now drawn on its own slide only, so nothing can take
+the keyboard on any other.
+
+**THE TWO ASSERTIONS ARE REWRITTEN, NOT DELETED** (§218): the check now asserts
+that a video slide is **not a special case** — whatever §265 decides the bar
+does, it does the same on a clip's slide as off it — so a build reinstating
+§261.14's rule fails on the first of them.
+
+**AND ONE VARIABLE HAD TO BE RENAMED**: `deckShow()` gained §266's `here`, a
+STOP INDEX in the master flow, in exactly the lines where §261.14 had written
+`here` for the slide element. One scope, one word, two meanings — §56.7's fault
+with no textual conflict to announce it, and here git DID conflict, which is
+the only reason it was seen. `shown` is the slide.
+
+**WHAT THE MERGE WAS CHECKED FOR, beyond the conflicts**: the merged sources
+were grepped for duplicate `function` declarations (§256.2 — two sessions
+writing one name in one file is merged silently and the later wins by
+hoisting). **36 pairs, every one pre-existing** — module closures and the
+browser's wrappers around `lib/rules.js` — and **not one of this branch's
+names**. `sw.js` parses and holds exactly **one** `const SHELL` (§146.2), named
+past main's rather than beside it (§94.12). The built file was **regenerated**
+rather than taken from either side (§56.7). 73/0 on `checks/video-slides.py`,
+every deck check, `slide-move`, 527/0 on the authoriser, 131/0 on the differ,
+and the full `qa.py` sweep ERRORS none — all on the MERGED build.
 
 ---
 

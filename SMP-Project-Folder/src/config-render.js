@@ -5326,7 +5326,7 @@ function renderImport(){
       '</div></div>';
   }
 
-  return cfgHead("Import & archives",
+  return cfgHead("Import & storage",
       ['<span class="pill kind">' + (isPlan
         ? "One generic template &middot; one unit per file"
         : "One file per unit or capability") + '</span>'],
@@ -7635,3 +7635,180 @@ function tkHead(id, allow){
    (§75), and a search that emptied itself when you added somebody would be a
    filter you have to retype every time you use the page. */
 var TKQ = {};
+
+/* ── SETUP › VIDEO STORAGE (§261) ─────────────────────────────────────────
+   Islam's #3: *"keep but we need a way to clear the storage not to be
+   overwhelmed by uploaded videos."* No automatic expiry, no re-encoding after
+   the cycle (§49.2: a record somebody tidied is no longer the record) — the
+   office looks at what is held and deletes.
+
+   THE TOTAL IS ON THE PAGE, because "am I being overwhelmed" is the question
+   somebody opens it to answer, and a table of rows makes you add them up.
+
+   A CLIP IN THE OPEN CYCLE OFFERS NO DELETE. Removing what a unit is about to
+   present is not storage hygiene, and the control that does it belongs on the
+   slide (§61: the way back is where the thing is).
+
+   NULL IS NOT EMPTY (§93, §231.4). Until the store has answered, the page says
+   it is asking; a failure says so and says nothing was lost. An empty table
+   drawn over an ask that never happened is a statement about somebody's data
+   made when nothing was read. */
+var VIDSTORE = null;   /* {ready, clips:[{path,bytes,at}]} | {__error} | null */
+
+function vidStoreClips(){
+  return (VIDSTORE && !VIDSTORE.__error && VIDSTORE.clips) || [];
+}
+function vidStoreBytes(list){
+  return (list || []).reduce(function(n, c){ return n + (+c.bytes || 0); }, 0);
+}
+/* Every clip a slide currently points at, and the subject it belongs to. The
+   store knows sizes and the PLAN knows meaning — which review, whose, and
+   what the slide is called — so the table is the two read together. A file in
+   the store that no slide points at is still shown: it is exactly the kind of
+   thing this page exists to clear. */
+function vidStoreRows(){
+  var live = {};
+  var slides = (REVIEW && REVIEW.slides) || {};
+  Object.keys(slides).forEach(function(t){
+    (slides[t] || []).forEach(function(sl){
+      if (sl && sl.vid && sl.vid.path) {
+        live[sl.vid.path] = { target:t, title:sl.title || "", vid:sl.vid };
+      }
+    });
+  });
+  return vidStoreClips().map(function(c){
+    var m = live[c.path];
+    return { path:c.path, bytes:c.bytes, at:c.at, open:!!m,
+             where: m ? deckSubjectName(m.target) : vidStoreWhere(c.path),
+             title: m ? m.title : "",
+             name: m && m.vid.name ? m.vid.name : "" };
+  });
+}
+/* A path carries its target, so a clip whose slide has gone can still say
+   which review it came from rather than reading as an orphan of nowhere. */
+function vidStoreWhere(path){
+  var m = String(path || "").match(/^videos\/([^\/]+)\//);
+  return m ? deckSubjectName(m[1].replace(/-/g, ":").replace(/^fn:/, "fn:")) : "—";
+}
+function deckSubjectName(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[t.slice(3)];
+    return f ? f.name + " (function)" : t;
+  }
+  var u = UNITS[t];
+  return u ? u.name : t;
+}
+
+function renderVideoStore(){
+  var can = mayDestroy();
+  /* THREE ANSWERS, NOT TWO (§93, §108.10): a list, nothing, and *we have not
+     asked yet*. Drawing an empty table over an ask still in flight is a
+     statement about somebody's data made before anything was read. */
+  /* Opened from a file there is no server to ask, so nothing is ever coming
+     and "Asking…" would stand for ever — §32's rule: before the answer is
+     known there is exactly one honest thing to say, and here it is that there
+     is nobody to ask. */
+  if (typeof SYNC === "undefined" || !SYNC.isLive()) {
+    return section("", "Video storage", null,
+      '<div class="note">This copy of the platform is opened from a file, so there ' +
+      'is no store to ask. Video storage is shown on the deployed platform.</div>');
+  }
+  if (VIDSTORE === null || VIDSTORE.asking) {
+    return section("", "Video storage", null,
+      '<div class="note">Asking the store what it is holding…</div>');
+  }
+  if (VIDSTORE.__error) {
+    /* §231.4: a failed ask is not an answer, and where it would be frightening
+       it says outright that nothing has been lost. */
+    return section("", "Video storage", null,
+      '<div class="note attn"><b>The store could not be reached.</b>' +
+      '<span class="why">Nothing has been lost — the clips are where they were, and ' +
+      'so are the reviews that point at them. ' + esc(VIDSTORE.__error) + '</span>' +
+      '<button class="editbtn" data-vidrefresh="1">Try again</button></div>');
+  }
+  if (!VIDSTORE.ready) {
+    return section("", "Video storage", null,
+      '<div class="note"><b>No video store is set up on this deployment.</b>' +
+      '<span class="why">Clips cannot be uploaded until one is. A video kept on ' +
+      'YouTube, Vimeo, SharePoint or Google Drive still works — those are pasted ' +
+      'as a link on the slide and are not held here.</span></div>');
+  }
+
+  var rows = vidStoreRows();
+  if (!rows.length) {
+    return section("", "Video storage", null,
+      '<div class="note">Nothing is stored. Clips uploaded onto a review’s slides ' +
+      'appear here with what they take up.</div>');
+  }
+  var total = vidStoreBytes(rows);
+  var closed = rows.filter(function(r){ return !r.open; });
+  var freeable = vidStoreBytes(closed);
+
+  var body = rows.map(function(r){
+    return '<tr><td><b>' + esc(r.where) + '</b>' +
+        (r.title ? '<span class="why">' + esc(r.title) + '</span>' : '') + '</td>' +
+      '<td>' + esc(r.name || r.path.split("/").pop()) + '</td>' +
+      '<td class="cc">' + esc(vidSize(r.bytes)) + '</td>' +
+      '<td>' + esc(r.at ? String(r.at).slice(0, 10) : "—") + '</td>' +
+      '<td class="cc">' + (r.open
+        ? '<span class="pill none" title="This clip is on a slide in the review that ' +
+          'is open now. Remove it from the slide first.">In the open review</span>'
+        : can ? '<button class="rmbtn" data-viddel="' + esc(r.path) + '">Delete the clip</button>'
+              : '<span class="pill none">View only</span>') + '</td></tr>';
+  }).join("");
+
+  return section("", "Video storage", null,
+    '<div class="note"><b>' + esc(vidSize(total)) + '</b> in ' +
+      plural(rows.length, "clip") + '. ' +
+      (freeable
+        ? '<b>' + esc(vidSize(freeable)) + '</b> of that is not on a slide in the open review.'
+        : 'All of it is on a slide in the review that is open now.') +
+      '<span class="why">Deleting a clip frees the space and leaves the slide where it ' +
+      'is, saying the clip was removed. Nothing else about the review changes.</span></div>' +
+    '<table><thead><tr><th>Review</th><th>File</th><th class="cc">Size</th>' +
+      '<th>Uploaded</th><th class="cc"></th></tr></thead><tbody>' + body + '</tbody></table>' +
+    (can && closed.length
+      ? '<div class="note"><button class="rmbtn" data-viddelold="1">Delete every clip ' +
+        'that is not in the open review</button> <span class="why">' +
+        plural(closed.length, "clip") + ', ' + esc(vidSize(freeable)) +
+        '. The clips on the open review are left alone.</span></div>'
+      : ''));
+}
+
+/* Deleting bytes, and the two things that must happen together: the store
+   forgets the file, and the page stops claiming to hold it. The list is
+   patched rather than re-asked — a second round trip to learn what we just
+   did is a spinner for nothing — and a FAILURE puts nothing back, because the
+   store is the truth and guessing at it is how a page comes to show clips
+   that are gone (§35). */
+function vidStoreDrop(paths){
+  if (!paths || !paths.length) return;
+  SYNC.videoDrop(paths, function(err){
+    if (err) {
+      VIDSTORE = { __error: String(err.message || err) };
+      paint();
+      return;
+    }
+    var gone = {};
+    paths.forEach(function(p){ gone[p] = true; });
+    if (VIDSTORE && VIDSTORE.clips) {
+      VIDSTORE.clips = VIDSTORE.clips.filter(function(c){ return !gone[c.path]; });
+    }
+    /* THE SLIDE KEEPS ITS PLACE AND SAYS WHAT HAPPENED (§15.1). A pointer to
+       bytes that are gone must never be drawn as a player that failed to load
+       — and the poster and the caption stay, so an archived review still
+       shows what was presented and when it was cleared. */
+    var slides = (REVIEW && REVIEW.slides) || {};
+    Object.keys(slides).forEach(function(t){
+      (slides[t] || []).forEach(function(sl){
+        if (sl && sl.vid && gone[sl.vid.path]) {
+          delete sl.vid.path;
+          sl.vid.cleared = todayLabel();
+        }
+      });
+    });
+    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+    paint();
+  });
+}

@@ -371,7 +371,15 @@
    is the whole trigger (§91). Read off origin/main serving
    "smp-shell-v4.67-project-row-type" at the moment of this merge; confirmed
    again immediately before the push (§94.12, §94.16). */
-const SHELL = "smp-shell-v4.70-settings-scroll";
+/* v4.72-video-in-the-review — §261: a clip plays on a review slide, with the
+   bytes in a blob store and a pointer in the graph. The built file's bytes
+   changed (the slide kind, the editor, the deck, Setup › Import & storage and
+   lib/rules.js are all inlined), which is the whole trigger (§91). Main moved
+   166 commits under this branch while it waited for a word and was serving
+   "smp-shell-v4.71-yn-citations" at the moment of this merge, so the name goes
+   PAST it rather than beside it (§94.12) — confirmed once more immediately
+   before the push (§94.16). */
+const SHELL = "smp-shell-v4.73-present-loop";
 const ASSETS = [
   "/",
   "/index.html",

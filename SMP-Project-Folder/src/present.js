@@ -1689,6 +1689,13 @@ function deckShow(n){
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
+  /* §261.14: the player is loaded on THIS slide and on no other, which is
+     what stops a clip left behind owning the arrow keys from behind
+     `display:none`. Named `shown` and never `here`: §266's `here` two lines
+     down is a STOP INDEX in the master flow, and one scope holding two
+     meanings of one word is §56.7 waiting to happen. */
+  var shown = DECK.slides[DECK.i];
+  videoArm(root, shown);
   var here = DECK.stops ? deckStopAt(DECK.i) : -1;
   [].forEach.call(root.querySelectorAll(".ddot"), function(b, k){
     b.classList.toggle("on", DECK.stops ? k === here : k === DECK.i);

@@ -24,6 +24,35 @@ including reversals recorded as reversals. Three sections matter most:
 feature, adopted in 1.9. The decisions document stays authoritative; a spec
 records how one feature was cut against it.
 
+*Swept 2026-09-05.* Two folders both numbered 029 (save-safety-banners became
+**030**), three specs titled with a number other than their folder's, and four
+that still said they were unbuilt long after they shipped — all corrected.
+**031–037** are backfills rather than features, each covering behaviour built
+across a dozen or more decision sections with no single place saying what the
+model IS — which is what the constitution's backfill provision is for:
+
+| | |
+|---|---|
+| **031** | How a figure is scored |
+| **032** | How a save reaches the database |
+| **033** | Reaching somebody who is not looking (notifications, the corner) |
+| **034** | The review deck |
+| **035** | Gaps, filling, and where Submit is held |
+| **036** | Setup: the register, the matrix and the cycle |
+| **037** | Authoring a plan on the screen |
+| **038** | The escaping sweep, and the net behind it |
+| **039** | Reporting is a tab |
+| **040** | A supporting function's report |
+
+Coverage went from **122 of 279** decision sections named in a spec to
+**217 of 286 (76%)**, and **every feature-sized decision up to §288 now has
+one**. §289, §292 and §294 arrived from other sessions after the sweep and are
+named in `IMPLEMENTATION_PROGRESS.md`. The 67 left are
+fixes and refinements — the original handoff (§10–§20), the UI audit waves
+(§149–§157), the knowledge base (§164–§167), the welcome and boot follow-ups
+(§200–§209) — where the decisions document is the right home and a spec would be
+filing for its own sake.
+
 ---
 
 ## The platform

@@ -1,12 +1,16 @@
 # 010 · Functions that plan in pillars, and functions under a unit
-> *Completed in §59: the Setup controls (Plans in, Under), the authoriser
-> classification, ids on a function's pillars, its place in the navigation,
-> and one resolver for a target. The import template is still open.*
+**Status:** BUILT. **Decisions:** §59 (the Setup controls — Plans in, Under —
+the authoriser classification, ids on a function's pillars, its place in the
+navigation, and one resolver for a target), reshaped by §211–§213 (a supporting
+function's Overview is the capability function's, and the import template stops
+asking for a strategy a function does not author). Every decision below was put
+to Islam before anything was written; his answers are marked.
 
-**Status:** DESIGNED, being built. Every decision below was put to Islam before
-anything was written; his answers are marked.
-**Records as** §52 in the decisions document — *(number to confirm against the
-other session's §52; see §7)*.
+> *Status corrected 2026-09-05. This document read "DESIGNED, being built" and
+> "the import template is still open" for eleven versions after §213 closed
+> both, and its "Records as §52" line was a guess at a number that was never
+> taken. §94's lesson applied late: a spec is numbered when it lands, and it is
+> the landing that has to be written back here.*
 
 ---
 

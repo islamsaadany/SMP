@@ -1,6 +1,9 @@
 # 012 · One table standard
 
-**Version:** v3.24 (unbuilt) · **Decisions:** §79 · **Status:** answered; building
+**Version:** v3.24 · **Decisions:** §79, built out in §80–§88 · **Status:** BUILT
+
+> *Status corrected 2026-09-05: this read "(unbuilt) … building" long after §80
+> put the row edit on the row and §88 made a Setup table row one line.*
 **Constitution:** checked against v1.1.0 — principles VI, XIV, XV and XVI carry weight here.
 
 Islam, twice: *"in any table in the app always give it the following

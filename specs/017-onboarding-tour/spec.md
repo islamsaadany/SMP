@@ -4,8 +4,12 @@
 
 **Created**: 2026-08-26
 
-**Status**: Agreed — mockup rev 4 signed off; not built. The decisions-document
-§ is assigned when this reaches `main` (§94's lesson: numbered when it lands).
+**Status**: BUILT (v3.32). **Decisions**: §107 — mockup rev 4 signed off, then
+built; §107.8 and §107.14 carry the two faults found by walking it.
+
+> *Status corrected 2026-09-05. This said "not built" and left its § blank on
+> the rule that a number is assigned when the work lands — which is right, and
+> was never carried out: §107 landed and this line stayed as it was.*
 
 **Input**: Islam: *"for first time users we need some orientation flow that
 takes them through the platform — the concept of highlighting some areas while

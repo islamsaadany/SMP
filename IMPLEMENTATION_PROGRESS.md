@@ -6,12 +6,55 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§278.3 — the objectives table — merged to `main`
+**Latest version:** **§294 — the template carries what the platform holds — on
+the branch `claude/data-export-import-archive-ot4vl8`, NOT merged**, awaiting
+Islam's word on the merge and on the export-all that follows it.
+
+**What §294 is.** Islam asked for a button that exports every plan at once, and
+put the precondition first: *"mka esure that the plans templates for upload and
+download are matching all what we have on the platform now and then let's think
+how to have this download all build."* That ordering is right, and §22 is why —
+an upload AUTHORS a plan, so a column the file does not carry is a column the
+plan loses on a download-and-re-upload, and a bulk export built on such files is
+a complete-looking archive that cannot be restored.
+
+Measured rather than read: each subject's workbook built with the platform's own
+builder, zipped, read back with its own reader, applied through the real replace
+path, compared field by field. **Five gaps, and a sixth found on the way — and
+every one of them is invisible on the demo data**, so the state had to be made
+first. A unit's objectives lost the Weight §243 gave them, so a round trip read
+the headline back at equal weight. A capability's `Hidden` was written and never
+read, so a hidden objective came home counted. A project's repeat mark had no
+column, which changes what happens to its figures at the next cycle. A
+capability's progress upload **could not report a deliverable at all** — the
+reader asked two fields §104 removed, so "In progress" became `"no"` in a field
+nothing reads and the row went on saying Not started while the upload looked
+accepted — and a milestone dropped the per-cent §104.10 requires while its
+stored figure was written into the box the reporter fills. And a unit's progress
+file had no Note column at all, so a report filed entirely by file could never
+satisfy §105 and never submit; nor could it carry a tactic's outcome figure,
+which §248 made the question that row is actually asked.
+
+Nothing stored moves and nothing is migrated. `checks/template-round-trip.py`
+asserts a fixed point rather than a list of columns, so a field added to the pen
+turns it red until the file carries it: **19 red** on the shipped build, proved
+able to fail one fix at a time. Full `qa.py` ERRORS none, 527/0 on the
+authoriser, 131/0 on the differ, and round trip, clean parity, two tabs and eight
+concurrent saves green on a virgin Postgres 16. Three neighbouring checks were
+stale — one of them **13 red on `main`** since §268 moved the strategy pen — and
+were repaired or rewritten rather than loosened (§218).
+
+**Next, already settled with Islam:** the export-all itself — plans + progress +
+archives in one zip, from the download dropdown that already holds the
+templates. The one piece of new machinery is that `zipStore()` encodes its
+members as text, so it must accept bytes before a zip can hold `.xlsx` files.
+
+**Before it: §278.3 — the objectives table — merged to `main`
 2026-09-04 on Islam's word**, from
 `claude/seasonal-targets-monthly-proration-5clvu3`, on top of §279–§287 from
 other sessions.
 
-**What §278.3 is.** Four reports from the live product, two causes. The monthly
+**What §278.3 was.** Four reports from the live product, two causes. The monthly
 drawer spanned every column except the first, and a table shares a spanning
 cell's width across the columns it covers — so on the objectives tables, whose
 first column was the prose one, Objective went 242px → 97px the instant the

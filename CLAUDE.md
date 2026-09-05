@@ -497,6 +497,61 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
   a picker is not, so that column reads ragged, and six places still spell
   `builderHere()` out inline.
+- **THE TEMPLATE CARRIES WHAT THE PLATFORM HOLDS (§294):** Islam, before the
+  export-all — *"mka esure that the plans templates for upload and download are
+  matching all what we have on the platform now."* **§22'S CONTRACT IS THE
+  REASON IT COMES FIRST**: an upload AUTHORS, so a column the file does not
+  carry is a column the plan LOSES, and a bulk export built on such files is a
+  complete-looking archive that cannot be restored. **MEASURED, NEVER READ** —
+  each workbook built by the platform's own builder, zipped, read back by its
+  own reader, applied through the REAL replace path, compared field by field —
+  and **the state had to be MADE** (§255), because the worked example carries no
+  weight, no repeat mark, no hidden objective and no tactic outcome, so every one
+  of these faults is invisible on the demo. **FIVE GAPS AND A SIXTH FOUND ON THE
+  WAY.** §294.1 **a unit's objectives lost their weight** — §243 gave that table
+  an editable Weight column and only a unit's sheet was left behind (a
+  capability's and a function's have had it since §213), so a round trip read the
+  headline back at EQUAL WEIGHT; the reader needed nothing, because it keys on the
+  header name. §294.2 **a capability's `Hidden` was written and never read**, so a
+  hidden objective travelled out marked and came home counted — *a write-only
+  column is the quietest fault, because the file looks right.* §294.3 **a
+  project's repeat mark had no column**, which is not a label: at the next cycle
+  a marked project is archived, cleared and date-shifted where an unmarked one
+  keeps its figures — `repeatFromLabel()` is named once and the pen asks it too
+  (§53.5), answering **null** for the default so the caller DELETES the key
+  (§50.6). §294.4 **a capability's progress upload could not report a deliverable
+  at all**: `diffCapProgress` read `hit.obj.actual` and `hit.obj.kind`, BOTH
+  removed by §104/§53.4, so "In progress" fell down the binary branch, became
+  `"no"` and was written to a field nothing reads — the row said Not started on
+  every screen while the upload looked accepted; the milestone took its status and
+  **dropped the per-cent §104.10 REQUIRES**; and `m.pct` was written under
+  **"New %"**, the box the reporter fills, so the sheet handed the stored figure
+  back as though somebody had typed it. **The screen's two rules move into one
+  place** — `setRowStatus`/`setRowPct`, asked by the reporting handlers AND the
+  reader, because two answers to *what does reporting this row mean* is how this
+  drifted. §294.5 **a unit's progress file could not finish a report**: no Note
+  column anywhere, and §105 holds Submit until a figure at risk is explained; and
+  since §248 an outcome-measured tactic is asked for the OUTCOME's figure in the
+  outcome's own unit, while the sheet went on asking for a per-cent — so the
+  number landed in `actual`, clamped 0–100, moving the status pill. The sheet
+  asks what the screen asks (a **Measured by** column, decided by `outcomeOf`,
+  never a second reading of *has it a target*), `"New %"` becomes `"New value"`
+  and **both are read** (§58), and **a note is a change of its own** on both
+  routes. §294.6 **the CSV route came too** — a plan may only arrive as a
+  workbook, but reporting still takes a CSV, and the deliverable's `current`
+  column read the field migration 024 removed and had therefore been EMPTY on
+  every deliverable row since. **RECORDED, NOT DONE**: `diffPlan`, `applyPlan`,
+  `diffCapPlan` and `applyCapPlan` are callerless (every plan upload replaces),
+  and the CSV *plan* templates are download-only because `loadCSV` refuses a
+  plan outright. **Nothing stored moves and nothing is migrated.** 19 red, proved
+  able to fail one fix at a time — **and THREE NEIGHBOURING CHECKS WERE STALE**:
+  `tactic-outcome` had been **13 red on `main`** because §268 moved the pen to
+  `.secpen` and it still hunted `.penbtn` (§51.11, §274 — repaired here, because
+  it covers the very fields this changes and a red neighbour masks a regression),
+  while `monthly-plan` and `fn-pillars` held literal column POSITIONS this moves
+  (§214.3; the third time on `fn-pillars`' one line) and were **REWRITTEN, never
+  loosened** (§218) — one to the property §65 actually guarantees, the other to
+  the two sheets' DIFFERENCE rather than two literals agreeing by accident.
 - **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
@@ -6071,6 +6126,25 @@ python3 checks/objectives-table.py # the objectives table with the monthly drawe
                                 # the tall row is built rather than waited for.
                                 # 24 red on the build before; SMP_BUILT points it
                                 # at another build
+python3 checks/template-round-trip.py # the template carries what the platform
+                                # holds (§294): a FIXED POINT, never a list of columns —
+                                # the plan goes out through the platform's own builder,
+                                # is zipped, is read back through its own reader and
+                                # applied through the REAL replace path, and every field
+                                # a person can author has to come back the same (§22: an
+                                # upload AUTHORS, so a column the file does not carry is
+                                # a column the plan loses). Add a field to the pen and
+                                # this goes red until the file carries it. Both ends
+                                # every time (§94.2 — a row the file says nothing about
+                                # is untouched), the state MADE rather than waited for
+                                # (§255: the demo carries no weight, no repeat mark, no
+                                # hidden objective and no tactic outcome, so every
+                                # assertion passes on a build that lost the feature),
+                                # and both live upload doors — the workbook AND the CSV
+                                # progress route. 19 red on the build before, proved able
+                                # to fail one fix at a time (3/1/1/3/4); SMP_BUILT points
+                                # it at another build. Two of its own first failures were
+                                # the CHECK (§215's family)
 python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # arithmetic asked of the rule, the drawer PRESSED
                                 # on all four surfaces and the stored plan read
@@ -6592,7 +6666,50 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-04 &mdash; **&sect;293: the platform collects for ten
+*Last Updated: 2026-09-05 &mdash; **&sect;294: the template carries what the
+platform holds.** Islam, asking for a button that exports every plan at once,
+and putting the precondition first: *"mka esure that the plans templates for
+upload and download are matching all what we have on the platform now and then
+let's think how to have this download all build."* **HE IS RIGHT THAT IT IS A
+PRECONDITION, AND &sect;22 IS WHY**: an upload AUTHORS a plan, so a column the
+file does not carry is a column the plan LOSES on a download-and-re-upload
+&mdash; and a bulk export built on such files is not a backup, it is a
+complete-looking archive that cannot be restored. So the audit came first and
+the button waits. **MEASURED, NEVER READ**: each subject's workbook built with
+the platform's own builder, zipped, read back with its own reader, applied
+through the REAL replace path, compared field by field &mdash; **and the state
+had to be MADE** (&sect;255), because the worked example carries no weight on a
+unit's objectives, no repeat mark, no hidden capability objective and no tactic
+outcome, so **every one of these faults is invisible on the demo data** and a
+probe that merely walked the tenant would have called the templates clean.
+**FIVE GAPS AND A SIXTH FOUND ON THE WAY**, and the worst was not the one
+reported: a capability's progress upload **could not report a deliverable at
+all** &mdash; the reader asked two fields &sect;104 and &sect;53.4 had removed,
+so "In progress" was coerced to `"no"` and written where nothing reads it, and
+the row went on saying Not started on every screen while the file looked
+accepted. Beside it: a unit's objectives lost the Weight &sect;243 gave them, so
+the headline came back at equal weight; a capability's `Hidden` was written and
+never read; a project's repeat mark had no column, which changes what happens to
+its figures at the next cycle; a milestone's per-cent was written into the box
+the REPORTER fills; and a unit's progress file had no Note column at all, so a
+report filed entirely by file could never satisfy &sect;105 and never submit.
+**THE SCREEN'S OWN RULES MOVE INTO ONE PLACE** where the two had drifted
+(`setRowStatus`/`setRowPct`, `repeatFromLabel`, `outcomeOf`), because two answers
+to one question is how every one of these started. **Nothing stored moves and
+nothing is migrated.** `checks/template-round-trip.py` asserts a FIXED POINT
+rather than a list of columns, so a field added to the pen tomorrow turns it red
+until the file carries it: **19 red** on the shipped build, proved able to fail
+one fix at a time (3 / 1 / 1 / 3 / 4), on both live upload doors. **Two of its
+own first failures were the CHECK**, and **three neighbours were stale** &mdash;
+`tactic-outcome` had been **13 red on `main`** since &sect;268 moved the pen, and
+two more held literal column positions this decision moves, **REWRITTEN rather
+than loosened** (&sect;218). Full `qa.py` ERRORS none &middot; 527/0 &middot;
+131/0 &middot; round trip, clean parity, two tabs and eight concurrent saves
+green on a virgin Postgres 16. **Next, already settled with Islam**: the
+export-all itself &mdash; plans + progress + archives in one zip, from the
+download dropdown that already holds the templates.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;293: the platform collects for ten
 minutes, then sends one email.** Islam, of the emails the platform sends him:
 *"when someone send to me when I don't reply it send an email for each message
 ... it needs to compile some messages rather than an emaile for each message."*

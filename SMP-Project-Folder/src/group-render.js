@@ -5885,13 +5885,14 @@ function projFrontMatter(p, ed){
     if (repOpts.indexOf(repVal) < 0) repOpts.splice(1, 0, repVal);
     repRow = row("l", "Repeats",
       selectOr("plan", repVal, repOpts, "", function(v){
-        var n = REPEAT_MONTHS.filter(function(m){ return repeatLabel(m) === v; })[0];
-        if (n) p.repeats = n;
-        else if (v === "Each cycle") p.repeats = "cycle";
+        /* §294: ASKED OF `repeatFromLabel`, which the projects workbook now
+           asks too — the conversion was written out here and would have been
+           written out a second time in the file reader (§53.5). */
+        var n = repeatFromLabel(v);
         /* DELETED on the default (§50.6): a project unmarked and one never
            asked must be byte-identical, or every save carries a phantom
            change and a non-office save is refused for ever (§42). */
-        else delete p.repeats;
+        if (n == null) delete p.repeats; else p.repeats = n;
       }));
   } else if (repeatsOn(p)) {
     repRow = row("l", "Repeats", esc(repVal));

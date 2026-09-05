@@ -3372,8 +3372,10 @@
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        hit.obj.status = el.value || null;
-        if (hit.obj.status !== "wip") hit.obj.pct = null;
+        /* §294: ASKED OF `setRowStatus`, which the workbook reader now asks
+           too. These two lines and the file's were two answers to one
+           question, and the file's had been wrong since §104 (§53.5). */
+        setRowStatus(hit.obj, el.value || null);
         paint();
       });
     });
@@ -3385,9 +3387,7 @@
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpct);
         if (!hit) return;
-        var v = el.value.trim();
-        if (v === "" || isNaN(Number(v))) hit.obj.pct = null;
-        else hit.obj.pct = Math.max(0, Math.min(100, Math.round(Number(v))));
+        setRowPct(hit.obj, el.value);
         paint();
       });
     });

@@ -7423,6 +7423,24 @@ function repeatLabel(v){
   return n > 0 ? "Every " + plural(n, "month") : "No";
 }
 function repeatsOn(p){ return !!p && (p.repeats === "cycle" || Number(p.repeats) > 0); }
+/* AND BACK THE OTHER WAY (§294). `repeatLabel` turns what is stored into the
+   word on the screen; this turns the word back into what is stored, and it is
+   named here rather than spelled out at each call site because there are two
+   of them now — the pen's dropdown and the projects workbook — and two
+   readings of "Every 6 months" is how a file comes to store something the
+   screen would not (§53.5, §42).
+
+   ANSWERS `null` FOR THE DEFAULT, never 0 or "": the caller DELETES the key on
+   a null (§50.6), because a project unmarked and one never asked must be
+   byte-identical or every save carries a phantom change (§42). */
+function repeatFromLabel(v){
+  var w = String(v == null ? "" : v).trim();
+  if (!w) return null;
+  var n = REPEAT_MONTHS.filter(function(m){ return repeatLabel(m) === w; })[0];
+  if (n) return n;
+  if (/^each cycle$/i.test(w)) return "cycle";
+  return null;
+}
 
 /* HOW FAR THE DATES MOVE when a cycle opens.
 

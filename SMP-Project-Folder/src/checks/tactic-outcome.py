@@ -24,7 +24,16 @@ def open_plan(pg, edit=False, tab=None):
     el = pg.query_selector('#secrow-in [data-sub2="plan"]')
     if el: el.click(); pg.wait_for_timeout(420)
     if edit:
-        pen = pg.query_selector('.pane .penbtn') or pg.query_selector('.penbtn')
+        # §294: THE PEN MOVED AND THIS CHECK DID NOT. §268 put the strategy
+        # pen on the SECTION LINE (`.secpen`) and deleted `editBar()`, so this
+        # selector had matched nothing since — the pen never opened, and every
+        # assertion after the first section died on an undefined cell and
+        # reported 13 failures on a build behaving exactly as decided (§51.11,
+        # §274: grep for the CONTROL on both sides of a merge, and a control
+        # that moved has more than one class).
+        pen = (pg.query_selector('#secrow-in .secpen')
+               or pg.query_selector('.secpen')
+               or pg.query_selector('.pane .penbtn') or pg.query_selector('.penbtn'))
         if pen: pen.click(); pg.wait_for_timeout(650)
 
 def heads(pg, word="Tactic"):

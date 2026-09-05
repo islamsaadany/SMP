@@ -34925,3 +34925,208 @@ button rather than a per-conversation link; two people in the office replying at
 the same moment still both start collections, because the memory is per
 conversation and not per sender; and **§283's `chase_html` column and migration
 stay in the database**, read by nothing.
+
+---
+
+## §294 — THE TEMPLATE CARRIES WHAT THE PLATFORM HOLDS (2026-09-05)
+
+Islam, asking for a way to export every plan at once, and putting the
+precondition first: *"mka esure that the plans templates for upload and download
+are matching all what we have on the platform now and then let's think how to
+have this download all build."*
+
+He is right that it is a precondition, and the reason is §22's contract. **An
+upload AUTHORS a plan**, so a column the file does not carry is a column the
+plan LOSES on a download-and-re-upload — and a bulk export built on files that
+drop things is not a backup, it is a complete-looking archive that cannot be
+restored. So the audit came first and the button waits.
+
+### What was measured, and how
+
+Not read — **measured**. Each subject's workbook was built with the platform's
+own builder, zipped with `buildXlsx`, read back with `readXlsx` +
+`planFromWorkbook`, applied through the REAL replace path, and compared field by
+field against what was stored. The maximal state was MADE first (§255): the
+worked example carries no monthly plan, no hidden row, no repeat mark, no tactic
+outcome and no weight on a unit's objectives, so **every one of these faults is
+invisible on the demo data** and a probe that merely walked the tenant would have
+reported the templates clean.
+
+**Five gaps, and a sixth found on the way.**
+
+### §294.1 — A unit's objectives lost their weight
+
+§243 gave a unit's objectives an editable **Weight** column at Islam's own
+instruction (*"there is no weighting on the objectives in units it needs to be
+added"*), and the workbook was left behind — a capability's and a supporting
+function's sheets have both asked for "Weight %" since §213, and only a unit's
+did not. So a download and an untouched re-upload dropped every weight, and
+`koWeights()` then read the unit's headline objectives score back at **equal
+weight**: a number on the front page moving for a reason nothing on any screen
+states.
+
+**The reader needed nothing.** It keys on the header name, and
+`createFromPlan` has read `x.weight` since §213 — the column was the whole of
+the missing half, which is what made it a one-line fix and a five-year-old-shaped
+bug.
+
+**A VALIDATION RANGE IS A POSITION (§65).** Weight takes H and Hidden moves
+H → I, so the range moves in the same edit as the head. Getting that wrong
+validates the wrong cells in silence — and the falsification proved it: removing
+the header shifted all twelve month columns by one and the monthly-plan check
+caught it, which is §65 demonstrating itself.
+
+### §294.2 — A capability's objectives: a column written and never read
+
+That sheet has WRITTEN `Hidden` since §233 and `capPlanFromWorkbook` never read
+it, so a hidden objective travelled out marked and came home **counted** — and
+§233's whole rule is that a hidden row leaves every score. Every other sheet in
+that workbook already read it; this was the one left out (§53.5).
+
+*A write-only column is the quietest kind of fault, because the file looks
+right.*
+
+### §294.3 — A project's repeat mark had no column
+
+§115 made *Repeats* an editable fact in a project's front matter, and the file
+never carried it. That is not a label: at the next cycle a marked project is
+**archived, cleared and date-shifted** where an unmarked one keeps its figures —
+so a round trip silently changed what happens to the numbers.
+
+**The conversion is named once.** The pen spelled label → value inline and the
+file reader would have been the second copy, so `repeatFromLabel()` sits beside
+`repeatLabel()` and both ask it (§53.5). It answers **null** for the default and
+the caller DELETES the key (§50.6), because a project the file left as "No" and
+one nobody ever asked must be byte-identical or every save carries a phantom
+change (§42). Appended, so Timeline stays at E and no range above it moves.
+
+### §294.4 — A capability's progress upload could not report a deliverable at all
+
+The worst of the six, and it was not the one reported. Measured end to end with
+a file saying **"In progress, 63%"**:
+
+- **The deliverable stayed Not started.** `diffCapProgress` read `hit.obj.actual`
+  and `hit.obj.kind` — *both removed by §104 and §53.4* — so "In progress" fell
+  down the binary branch, was coerced to `"no"`, and was written to `actual`, a
+  field nothing reads. The row went on saying Not started on every screen while
+  the upload looked accepted.
+- **The milestone took its status and dropped its per-cent.** "New %" has been on
+  that sheet since §104 and the reader took the first of the two columns and
+  stopped — so the reporter typed the very figure §104.10 REQUIRES before the row
+  counts, and it was discarded on the way in.
+- **And `m.pct` was written under "New %"** — the box the reporter fills — so the
+  sheet handed the stored figure back as though somebody had just typed it. It
+  reads under "Current %" now, beside the current status.
+
+**The screen's two rules move into one place.** Leaving *In progress* clears the
+per-cent, and a typed figure is clamped rather than refused — the page has done
+both since §104 and the file path had neither. `setRowStatus()`/`setRowPct()` are
+what the reporting handlers and the workbook reader now both ask, because two
+answers to *what does reporting this row mean* is exactly how this drifted.
+
+### §294.5 — A unit's progress file could not finish a report
+
+Two things, one consequence. **No Note column anywhere** — and §105 holds Submit
+while a figure at risk carries no explanation, so a unit reporting entirely by
+file filled the workbook, uploaded it, and still had to open every row on the
+page to type the sentence that unlocks Submit. **And no outcome figure**: since
+§248 a tactic whose outcome carries a target is reported by that OUTCOME's
+figure, in the outcome's own unit, and the sheet went on asking for a per-cent —
+so the number landed in `actual`, which has always meant "% delivered", clamped
+to 0–100, with the status pill moved on the strength of it. One row, two fields,
+depending on which door the answer came through.
+
+**The sheet asks what the screen asks.** A "Measured by" column says per row
+which question is being put, decided by `outcomeOf` — the same function the
+reporting box asks, never a second reading of *has it a target* (§42). "New %"
+becomes "New value" and **both are read** (§58), so a workbook downloaded before
+today still uploads.
+
+**A note is a change of its own**, on both routes: a row whose figure is already
+right and whose note is owed had nothing for the file to carry, which is the case
+Submit is actually waiting on.
+
+### §294.6 — The CSV route came too
+
+A plan may only arrive as a workbook (§22: its Read me sheet is what says whose
+plan it is), but **reporting still takes a CSV**, so the same facts land through
+that door or the product has two answers depending on which file somebody chose.
+`PROG_COLS` gains `new_note`, `CAPPROG_COLS` gains `new_pct` and `new_note`, and
+the deliverable's `current` column — which read the field migration 024 removed,
+and had therefore been **empty on every deliverable row since** — reads its
+status.
+
+### What is recorded and deliberately NOT done
+
+- **`diffPlan`, `applyPlan`, `diffCapPlan` and `applyCapPlan` are callerless.**
+  Every plan upload goes through the REPLACE path (§22), so the diff-driven
+  half has had no caller since. Flagged rather than deleted (§24 says it should
+  go; doing it here would ride on a change about something else — rule 1b).
+- **The CSV *plan* templates are download-only.** `loadCSV` refuses a plan
+  outright, so `planTemplate`/`capPlanTemplate` produce a file nothing can read
+  back. They are kept in step where it was free and named here as the larger
+  question.
+- **A measure's `target3y` and `horizon`, a pillar's `sub`, a deliverable's
+  `kind`, and `notes` on any plan row** are stored and nothing on any screen
+  writes them, so the file is right not to ask. Checked, not assumed.
+
+### The check
+
+`checks/template-round-trip.py` asserts **a fixed point, never a list of
+columns** (§94.8): the plan goes out through the platform's own builder and
+comes back through its own reader, and every field a person can author has to
+survive. Add a field to the pen tomorrow and this goes red until the file
+carries it, which a list of expected headers could never do. Both ends every
+time (§94.2) — a row the file says nothing about must be untouched — and every
+probe degrades rather than throwing (§215).
+
+**19 red** on the shipped build. **Proved able to fail one fix at a time**
+afterwards: 3 / 1 / 1 / 3 / 4 red with each taken back out, on both doors for
+the outcome routing.
+
+**AND TWO OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK** — it required the
+pillars function to carry key objectives, which §214.2 says such a function
+legitimately has none of, and it picked `items[0]` for the pillar when that
+function's first pillar has no measures. Both reported a healthy tenant as
+having nothing to measure.
+
+### Three neighbouring checks were stale, and one had been red on `main`
+
+- **`checks/tactic-outcome.py` — 13 red on `main`, and it is the check.** §268
+  moved the strategy pen onto the section line (`.secpen`) and deleted
+  `editBar()`; this file still hunted `.penbtn`, so the pen never opened and
+  every assertion after the first section died on an undefined cell. §51.11, and
+  §274's rule exactly — *grep for the CONTROL on both sides of a merge, and a
+  control that moved has more than one class*. Repaired here rather than left,
+  because it covers the very fields §294 changes and a red neighbour masks a
+  regression. **47/0** after.
+- **`checks/monthly-plan.py` and `checks/fn-pillars.py` held literal column
+  positions** that this decision moves — §214.3, and for `fn-pillars` it is the
+  **third** time on that one line (§281.2 recorded the second). **REWRITTEN, never
+  loosened** (§218): `monthly-plan` now asserts the property §65 actually
+  guarantees — the twelve are last, in order, after Hidden — so the next column
+  added does not break it while a month moved into the middle still does; and
+  `fn-pillars` asserts the two sheets' **difference** rather than two literals
+  sitting apart in one file agreeing by accident. Both proved still able to fail.
+
+### What was run
+
+`checks/template-round-trip.py` 19 red → all green &middot; full `qa.py` sweep
+**ERRORS: none** &middot; `test-authorize` **527/0** &middot; `test-graph-diff`
+**131/0** &middot; round trip, clean parity, two tabs (24/0) and eight concurrent
+saves all green on a virgin Postgres 16 &middot; `tactic-outcome` 47/0,
+`fn-pillars`, `monthly-plan`, `project-tables`, `repeat-project`,
+`project-row-type`, `plan-fields`, `gap-fill`, `plan-builder`,
+`upload-duplicates`, `one-line-titles`, `plan-tail-fold`, `submit-gate`,
+`objectives-table`, `hide-element`, `objective-unit`, `unit-before-number`,
+`yn-target`, `count-compile` all clean.
+
+**Nothing is stored that was not stored before, and nothing is migrated.**
+
+### Next
+
+The export-all itself, which Islam has already settled: **plans + progress +
+archives**, in one zip, from the download dropdown that already holds the
+templates. The one piece of new machinery is that `zipStore()` encodes its
+members with `TextEncoder`, so it must accept a `Uint8Array` before a zip can
+hold `.xlsx` files.

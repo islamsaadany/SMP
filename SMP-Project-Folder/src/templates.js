@@ -62,8 +62,12 @@ function monthsFromText(s) {
    unit columns. It adds `current` and `new_value`, and covers NORTHSTAR as
    well as measures and tactics \u2014 the unit's headline is its Key Objectives,
    so leaving them out made the one number the page is built on unreportable. */
+/* §294: `new_note` beside `new_value`, for §105's reason — a figure at risk
+   needs its explanation before the report can be submitted, and a file that
+   carried one and not the other was a route that could never finish. Appended,
+   so a file written before today reads exactly as it did (§58, §65). */
 var PROG_COLS = ["id","type","parent_id","parent_name","name","direction",
-                 "value","unit","compile","current","new_value","notes"];
+                 "value","unit","compile","current","new_value","new_note","notes"];
 
 function csvCell(v){
   v = v == null ? "" : String(v);
@@ -222,7 +226,7 @@ function progressTemplate(u){
     var a = targetPair(m.target);
     rows.push(csvRow(PROG_COLS, { id:m.id, type:"NORTHSTAR", parent_name:u.name, name:m.name,
       direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
-      current:m.actual, new_value:"",
+      current:m.actual, new_value:"", new_note:"",
       notes:m.target ? "" : "no target set \u2014 recorded, not scored" }));
   });
   u.items.forEach(function(p){
@@ -230,16 +234,22 @@ function progressTemplate(u){
       var a = targetPair(m.target);
       rows.push(csvRow(PROG_COLS, { id:m.id, type:"MEASURE", parent_id:p.id, parent_name:p.name,
         name:m.name, direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
-        current:m.actual, new_value:"",
+        current:m.actual, new_value:"", new_note:"",
         notes:m.target ? (m.horizon ? "measured at " + m.horizon : "")
                        : "no target set \u2014 recorded, not scored" }));
     });
     p.tactics.forEach(function(t){
-      var pl = tacticPlanned(t);
+      /* §294: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
+         FIGURE (§248), in the outcome's own unit — the same question the
+         reporting box asks, decided by the same function (§42, §53.5). */
+      var oc = outcomeOf(t), pl = tacticPlanned(t);
       rows.push(csvRow(PROG_COLS, { id:t.id, type:"TACTIC", parent_id:p.id, parent_name:p.name,
-        name:t.name, value:(pl == null ? "" : pl), unit:"%",
-        current:t.actual, new_value:"",
-        notes:tacticDue(t) ? "" : "not yet due \u2014 " + spanLabel(t) }));
+        name:t.name,
+        value:oc ? (t.outTarget || "") : (pl == null ? "" : pl),
+        unit:oc ? splitTarget(oc.target).unit : "%",
+        current:oc ? t.outActual : t.actual, new_value:"", new_note:"",
+        notes:oc ? "measured by its outcome: " + (t.outcome || "")
+                 : (tacticDue(t) ? "" : "not yet due \u2014 " + spanLabel(t)) }));
     });
   });
   return rows.join("\n");
@@ -508,16 +518,35 @@ function diffPlan(u, rows){
 function diffProgress(u, rows){
   var out = [];
   rows.forEach(function(r){
-    if (!r.id || (r.new_value || "") === "") return;
+    var hasVal = (r.new_value || "") !== "";
+    /* §294: A NOTE IS A CHANGE OF ITS OWN — §105 holds Submit while a figure
+       at risk carries no explanation, and a row whose figure is already right
+       and whose note is owed had nothing for the file to carry. */
+    var hasNote = (r.new_note || "") !== "";
+    if (!r.id || (!hasVal && !hasNote)) return;
     var hit = findById(u, r.id);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
     if (["MEASURE","TACTIC","OBJECTIVE"].indexOf(hit.kind) < 0) return;
-    var was = hit.kind === "TACTIC" ? hit.obj.actual + "%" : hit.obj.actual;
-    var now = r.new_value;
-    if (String(was) === String(now)) return;
+    /* §294: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
+       FIGURE (§248), which the screen has stored in `outActual` since that
+       section and this path never learned — so a file reported the outcome's
+       number into `actual`, which has always meant "% delivered", clamped it
+       to 0–100 and moved the status pill on the strength of it. One row, two
+       fields, depending on which door the figure came through (§53.5).
+
+       `outcomeOf` IS THE TEST, never a second reading of "has it a target"
+       (§42) — the same function the reporting box asks. */
+    var oc = hit.kind === "TACTIC" ? outcomeOf(hit.obj) : null;
+    var was = oc ? (hit.obj.outActual == null ? "" : String(hit.obj.outActual))
+            : hit.kind === "TACTIC" ? hit.obj.actual + "%" : hit.obj.actual;
+    var now = hasVal ? r.new_value : was;
+    var wasNote = hit.obj.note == null ? "" : String(hit.obj.note);
+    var nowNote = hasNote ? String(r.new_note).trim() : wasNote;
+    if (String(was) === String(now) && wasNote === nowNote) return;
     out.push({ id:r.id, type:hit.kind, name:hit.obj.name,
                pillar:hit.pillar ? hit.pillar.name : (r.parent_name || ""),
-               was:was, now:now, status:"changed", hit:hit });
+               was:was, now:now, outcome:!!oc,
+               note:hasNote ? nowNote : null, status:"changed", hit:hit });
   });
   return { rows:out, missing:[] };
 }
@@ -718,7 +747,17 @@ function applyCapPlanReplace(c, rows){
 function applyProgress(u, d){
   d.rows.forEach(function(r){
     if (!r.hit) return;
-    if (r.hit.kind === "TACTIC") {
+    /* §294: THE OUTCOME'S FIGURE GOES TO THE OUTCOME'S FIELD, in the unit the
+       outcome is measured in (§243's rejoin, the same one the reporting box
+       uses) — never through the per-cent clamp below, which would turn a
+       target of 80 M EGP into 80 and a status pill into "Done". */
+    if (r.hit.kind === "TACTIC" && r.outcome) {
+      var ov = String(r.now == null ? "" : r.now).trim();
+      var oc = outcomeOf(r.hit.obj);
+      if (ov === "") delete r.hit.obj.outActual;
+      else r.hit.obj.outActual =
+        joinTarget(r.hit.obj.outActual || "", ov, oc ? splitTarget(oc.target).unit : "");
+    } else if (r.hit.kind === "TACTIC") {
       var n = parseInt(String(r.now).replace("%",""), 10);
       if (!isNaN(n)) {
         r.hit.obj.actual = Math.max(0, Math.min(100, n));
@@ -740,6 +779,10 @@ function applyProgress(u, d){
         var pct = r.hit.obj.dir === "\u2264" ? (t / a) * 100 : (a / t) * 100;
         r.hit.obj.progress = Math.max(0, Math.min(150, Math.round(pct)));
       }
+    }
+    /* §294: AND THE NOTE, on every kind — the field §105 holds Submit for. */
+    if (r.note != null) {
+      if (String(r.note) === "") delete r.hit.obj.note; else r.hit.obj.note = String(r.note);
     }
   });
 }
@@ -809,8 +852,11 @@ var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakehold
                  "collaborators",
                  "direction","value","unit","kind","measure_at","start","end",
                  "finish","covers","weight","compile","timeline","notes","hidden"];
+/* §294: `new_pct` and `new_note`. The per-cent is what §104.10 REQUIRES of an
+   In progress row and there was no column for it at all here, so the CSV route
+   could set a status the platform then reported as unanswered. */
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
-                    "measure_at","finish","current","new_value","notes"];
+                    "measure_at","finish","current","new_value","new_pct","new_note","notes"];
 
 /* Address any row inside ONE capability — the import must never write into a
    neighbour, which is what scoping the finder (rather than reusing the global
@@ -885,6 +931,27 @@ function msStatusKey(v){
   if (s === "todo" || s === "not started") return "todo";
   return null;
 }
+/* §294: HOW A STATUS AND A PER-CENT ARE WRITTEN, IN ONE PLACE.
+
+   The screen has had these two rules since §104 — leaving In progress CLEARS
+   the per-cent rather than stranding a 35% behind "Delivered", and a typed
+   figure is clamped rather than refused — and the file path had neither,
+   because the file path was still writing a field §104 removed. Two answers
+   to "what does reporting this row mean" is exactly how that drift happened
+   (§53.5), so the screen's handlers and the workbook reader now ask the same
+   pair. */
+function setRowStatus(o, key){
+  if (!o || key == null) return;
+  o.status = key || null;
+  if (o.status !== "wip") o.pct = null;
+}
+function setRowPct(o, v){
+  if (!o) return;
+  var t = String(v == null ? "" : v).replace("%", "").trim();
+  if (t === "" || isNaN(Number(t))) o.pct = null;
+  else o.pct = Math.max(0, Math.min(100, Math.round(Number(t))));
+}
+
 function timelineKey(v){
   var s = String(v == null ? "" : v).trim().toLowerCase();
   if (!s) return "";
@@ -898,26 +965,31 @@ function capProgressTemplate(c){
   (c.keyObjectives || []).forEach(function(m){
     rows.push(csvRow(CAPPROG_COLS, { id:m.id, type:"CAPOBJECTIVE", parent_name:c.name,
       name:m.name, target:m.target || "no target",
-      current:(m.actual == null ? "" : m.actual), new_value:"",
+      current:(m.actual == null ? "" : m.actual), new_value:"", new_note:"",
       notes:m.target ? "" : "no target set — recorded, not scored" }));
   });
   (c.projects || []).forEach(function(p){
     (p.deliverables || []).forEach(function(d){
+      /* §294: A DELIVERABLE IS A STATUS AND A PER-CENT (§104), not the
+         `actual` this read — a field migration 024 removed, so the column
+         headed "current" had been empty on every deliverable row since. */
       rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
         parent_name:p.name, name:d.name,
         finish:d.due,
-        current:(d.actual == null ? "" : d.actual), new_value:"" }));
+        current:delivStatusWord(d.status), new_value:"", new_pct:"", new_note:"",
+        notes:d.pct == null ? "" : "currently " + d.pct + "%" }));
     });
     (p.outcomes || []).forEach(function(o){
       rows.push(csvRow(CAPPROG_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id,
         parent_name:p.name, name:o.name, target:o.target, measure_at:o.measureAt,
-        current:(o.actual == null ? "" : o.actual), new_value:"",
+        current:(o.actual == null ? "" : o.actual), new_value:"", new_note:"",
         notes:outcomeDue(o) ? "" : "not asked — measured at " + o.measureAt }));
     });
     (p.milestones || []).forEach(function(m){
       rows.push(csvRow(CAPPROG_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id,
         parent_name:p.name, name:m.name, finish:m.finish,
-        current:msStatusWord(m.status), new_value:"" }));
+        current:msStatusWord(m.status), new_value:"", new_pct:"", new_note:"",
+        notes:m.pct == null ? "" : "currently " + m.pct + "%" }));
     });
   });
   return rows.join("\n");
@@ -1181,6 +1253,12 @@ function createFromCapPlan(c, d){
         stakeholders:(x.stakeholders || "").split(/[,|]/).map(function(s){ return s.trim(); }).filter(Boolean),
         timeline:timelineKey(x.timeline) || "quarter", start:x.start || "", end:x.end || "",
         deliverables:[], outcomes:[], milestones:[] });
+      /* §294: SET ONLY WHERE THE FILE MARKED IT (§50.6) — a project the file
+         left as "No", and one whose file predates the column, must both be
+         byte-identical to a project nobody ever asked, or every save carries a
+         phantom change and a non-office save is refused for ever (§42). */
+      if (x.repeats != null && x.repeats !== "")
+        c.projects[c.projects.length - 1].repeats = x.repeats;
       made++;
     } else if (x.type === "CAPOBJECTIVE") {
       var w = parseFloat(x.weight);
@@ -1254,26 +1332,50 @@ function applyCapPlan(c, d){
 function diffCapProgress(c, rows){
   var out = [];
   rows.forEach(function(r){
-    if (!r.id || (r.new_value || "") === "") return;
+    var hasVal = (r.new_value || "") !== "";
+    /* §294: A PER-CENT AND A NOTE ARE CHANGES OF THEIR OWN. The gate used to
+       be the new value alone, so a row whose status was already right and
+       whose per-cent was owed had nothing to report — and §104.10 makes that
+       row OUTSTANDING on the page, so the file could not answer the very
+       thing the platform was asking for. */
+    var hasPct = (r.new_pct || "") !== "";
+    var hasNote = (r.new_note || "") !== "";
+    if (!r.id || (!hasVal && !hasPct && !hasNote)) return;
     var hit = capFindById(c, r.id);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
-    var was, now = String(r.new_value).trim();
-    if (hit.kind === "MILESTONE") {
-      was = msStatusWord(hit.obj.status);
-      var key = msStatusKey(now);
-      if (key == null) { out.push({ id:r.id, name:hit.obj.name, status:"unknown",
-        pillar:hit.proj ? hit.proj.name : "" }); return; }
-      now = msStatusWord(key);
-    } else if (hit.kind === "DELIVERABLE") {
-      was = hit.obj.actual == null ? "" : String(hit.obj.actual);
-      if (hit.obj.kind === "binary") now = /^(y|yes|delivered)$/i.test(now) ? "yes" : "no";
+    var was, now = String(r.new_value == null ? "" : r.new_value).trim();
+    var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE";
+    if (isStatusRow) {
+      /* §294: A DELIVERABLE IS A STATUS, exactly as a milestone is. It read
+         `hit.obj.actual` and `hit.obj.kind` — both removed by §104/§53.4 —
+         so an upload saying "In progress" was coerced down the binary branch
+         to "no" and written to a field nothing reads: the row went on saying
+         Not started on every screen while the file looked accepted. The two
+         differ by ONE WORD (Delivered against Completed) and that word is
+         what `delivStatusWord`/`delivStatusKey` already carry (§104). */
+      var word = hit.kind === "DELIVERABLE" ? delivStatusWord : msStatusWord;
+      var toKey = hit.kind === "DELIVERABLE" ? delivStatusKey : msStatusKey;
+      was = word(hit.obj.status);
+      if (hasVal) {
+        var key = toKey(now);
+        if (key == null) { out.push({ id:r.id, name:hit.obj.name, status:"unknown",
+          pillar:hit.proj ? hit.proj.name : "" }); return; }
+        now = word(key);
+      } else now = was;
     } else if (hit.kind === "OUTCOME" || hit.kind === "CAPOBJECTIVE") {
       was = hit.obj.actual == null ? "" : String(hit.obj.actual);
+      if (!hasVal) now = was;
     } else return;
-    if (String(was) === String(now)) return;
+    var wasPct = isStatusRow && hit.obj.pct != null ? String(hit.obj.pct) : "";
+    var nowPct = hasPct ? String(r.new_pct).replace("%", "").trim() : wasPct;
+    var wasNote = hit.obj.note == null ? "" : String(hit.obj.note);
+    var nowNote = hasNote ? String(r.new_note).trim() : wasNote;
+    if (String(was) === String(now) && wasPct === nowPct && wasNote === nowNote) return;
     out.push({ id:r.id, type:hit.kind, name:hit.obj.name,
                pillar:hit.proj ? hit.proj.name : (r.parent_name || c.name),
-               was:was, now:now, status:"changed", hit:hit });
+               was:was, now:now,
+               pct:hasPct ? nowPct : null, note:hasNote ? nowNote : null,
+               status:"changed", hit:hit });
   });
   return { rows:out, missing:[] };
 }
@@ -1282,15 +1384,19 @@ function applyCapProgress(c, d){
   d.rows.forEach(function(r){
     if (!r.hit || r.status !== "changed") return;
     var o = r.hit.obj;
-    if (r.hit.kind === "MILESTONE") {
-      o.status = msStatusKey(r.now) || o.status;
-    } else if (r.hit.kind === "DELIVERABLE") {
-      if (o.kind === "pct") {
-        var n = parseFloat(String(r.now).replace("%",""));
-        if (!isNaN(n)) o.actual = Math.max(0, Math.min(100, Math.round(n)));
-      } else {
-        o.actual = /^(y|yes|delivered)$/i.test(String(r.now)) ? "yes" : "no";
-      }
+    if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE") {
+      /* §294: BOTH WRITE `status` AND `pct`, through the same pair the
+         screen's own handlers now ask (§53.5) — so a file that says In
+         progress leaves the row In progress with its per-cent set, which is
+         what §104.10 REQUIRES before the row counts at all. The deliverable
+         branch used to write `actual`, a field §104 removed. */
+      var key = (r.hit.kind === "DELIVERABLE" ? delivStatusKey : msStatusKey)(r.now);
+      if (key) setRowStatus(o, key);
+      /* AFTER the status, never before: leaving In progress clears the
+         per-cent, so setting it first would throw the figure away. And only
+         where the file said one — a row whose status was already right and
+         whose per-cent the file left blank keeps what it had. */
+      if (r.pct != null) setRowPct(o, r.pct);
     } else if (r.hit.kind === "OUTCOME" || r.hit.kind === "CAPOBJECTIVE") {
       o.actual = r.now;
       /* Progress is what the actual implies against the target, worked out on
@@ -1302,6 +1408,12 @@ function applyCapProgress(c, d){
         var pctv = o.dir === "≤" ? (t / a) * 100 : (a / t) * 100;
         o.progress = Math.max(0, Math.min(150, Math.round(pctv)));
       } else o.progress = null;
+    }
+    /* §294: THE NOTE, on every kind. §105 refuses a submission while a figure
+       at risk carries no explanation, so a file that could enter the figure
+       and not the note was a route that could never finish. */
+    if (r.note != null) {
+      if (String(r.note) === "") delete o.note; else o.note = String(r.note);
     }
   });
 }

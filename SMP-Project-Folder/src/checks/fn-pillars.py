@@ -341,11 +341,19 @@ with sync_playwright() as p:
     ok("a function's Objectives sheet asks for a Weight",
        any("Weight" in h for h in wb["fnObj"]), wb["fnObj"])
     ok("...and not a 3-year target", not any("3-year" in h for h in wb["fnObj"]), wb["fnObj"])
-    # §233 added the Hidden column to every row sheet, the unit's included, and
-    # §278 APPENDED Jan–Dec for the monthly plan — both deliberate decisions, so
-    # the literal moves with them (§214.3's lesson, for the second time on this
-    # one line: a check written against the last shape has to move when the
-    # shape is chosen again, and it had been red on `main` since §278 landed).
+    # §233 added the Hidden column to every row sheet, the unit's included,
+    # §278 APPENDED Jan–Dec for the monthly plan, and §294 gave a unit's
+    # objectives the Weight column §243 had already given the screen — three
+    # deliberate decisions, so the literal moves with them (§214.3's lesson, for
+    # the THIRD time on this one line: it had been red on `main` since §278
+    # landed, and went red again the day the weight was added).
+    #
+    # AND THE ASSERTION THAT KEEPS EARNING ITS PLACE IS THE ONE BELOW IT —
+    # a function's sheet asks for a Weight and a unit's did not, which is what
+    # §213 decided and §294 has now deliberately reversed for the unit half. The
+    # two sheets differ in exactly one column now (Group and the 3-year target),
+    # so the difference is spelt out rather than left to two literals to agree
+    # about by accident.
     #
     # REWRITTEN, NEVER LOOSENED (§218). The twelve months are ASSERTED, in
     # order and at the END, because §65's rule is that a column's POSITION is
@@ -356,10 +364,19 @@ with sync_playwright() as p:
     # every range. What §213 guarded — no Weight, a 3-year target — holds.
     MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    ok("a UNIT's Objectives sheet is what it was, plus §233's Hidden and §278's months",
+    ok("a UNIT's Objectives sheet is what it was, plus §233's Hidden, §278's "
+       "months and §294's Weight",
        wb["unitObj"] == ["Objective", "Group", "Direction", "3-year target",
-                         "This year target", "Unit", "Compile", "Hidden"] + MONTHS,
+                         "This year target", "Unit", "Compile", "Weight %",
+                         "Hidden"] + MONTHS,
        wb["unitObj"])
+    # §294: BOTH SHEETS ASK FOR THE WEIGHT NOW, and a unit's keeps the two
+    # columns a function's does not — asserted as the DIFFERENCE, because two
+    # literals sitting apart in one file is how they come to disagree.
+    ok("a unit's sheet is a function's plus Group and the 3-year target",
+       [h for h in wb["unitObj"] if h not in ("Group", "3-year target")]
+         == [h for h in wb["fnObj"]],
+       (wb["unitObj"], wb["fnObj"]))
     ok("...and a unit keeps every sheet it had",
        wb["unit"] == ["Read me", "Foundation", "Aspiration", "Objectives", "SWOT",
                       "Pillars", "Measures", "Tactics"], wb["unit"])

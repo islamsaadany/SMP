@@ -422,21 +422,39 @@ with sync_playwright() as p:
     ck("a row with no monthly plan carries nothing through the file",
        wb.get("sibBack") == "", wb)
 
+    # §294: THESE TWO ASSERTED A POSITION AND A POSITION IS NOT THE PROMISE.
+    # They held `objHidden == 7` and `objJan == 8`, and §294 gave a unit's
+    # objectives the Weight column §243 had already given the screen — so
+    # Hidden moved 7 → 8 and the twelve moved with it, and a check written
+    # against a literal went red on a build behaving exactly as decided
+    # (§214.3, again). REWRITTEN, never loosened (§218): what §65 actually
+    # guarantees is that the twelve are APPENDED — last, in order, after
+    # Hidden — so that is what is asserted, and the next column added does
+    # not break it while a month moved into the middle still does.
     tac = ev(pg, """() => {
       const u = UNITS.mobile;
       const sheets = planWorkbook(u);
       const ts = sheets.filter(s => s.name === "Tactics")[0];
       const os = sheets.filter(s => s.name === "Objectives")[0];
-      return { tacJan: ts.head.indexOf("Outcome Jan"),
-               tacDec: ts.head.indexOf("Outcome Dec"),
-               tacQ1: ts.head.indexOf("Q1"), tacHidden: ts.head.indexOf("Hidden"),
-               objJan: os.head.indexOf("Jan"), objHidden: os.head.indexOf("Hidden") };
+      const M = ["Jan","Feb","Mar","Apr","May","Jun",
+                 "Jul","Aug","Sep","Oct","Nov","Dec"];
+      const tail = (head, prefix) =>
+        head.slice(-12).join("|") === M.map(m => prefix + m).join("|");
+      return { tacTail: tail(ts.head, "Outcome "), objTail: tail(os.head, ""),
+               tacHiddenLast: ts.head[ts.head.length - 13] === "Hidden",
+               objHiddenLast: os.head[os.head.length - 13] === "Hidden",
+               tacQ1: ts.head.indexOf("Q1"), tacQ4: ts.head.indexOf("Q4"),
+               tacHead: ts.head, objHead: os.head };
     }""")
-    ck("the Tactics sheet names the outcome's twelve, and Q1–Q4 have NOT moved",
-       tac.get("tacJan") == 14 and tac.get("tacDec") == 25 and
-       tac.get("tacQ1") == 9 and tac.get("tacHidden") == 13, tac)
+    ck("the Tactics sheet's twelve are the last columns, named for the outcome",
+       tac.get("tacTail") is True and tac.get("tacHiddenLast") is True, tac.get("tacHead"))
+    # Q1–Q4 keep their literal positions on purpose: a workbook written before
+    # §278 is read by header NAME, but its VALIDATION ranges are positions
+    # (§65), so this is the one place a number is the promise.
+    ck("...and Q1–Q4 have NOT moved",
+       tac.get("tacQ1") == 9 and tac.get("tacQ4") == 12, tac.get("tacHead"))
     ck("the Objectives sheet appends its twelve after Hidden",
-       tac.get("objJan") == 8 and tac.get("objHidden") == 7, tac)
+       tac.get("objTail") is True and tac.get("objHiddenLast") is True, tac.get("objHead"))
 
     # ── 8 · Clear DELETES the key (§50.6) ──────────────────────────────
     openpen(pg, "plan")

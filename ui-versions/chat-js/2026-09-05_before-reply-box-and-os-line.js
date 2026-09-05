@@ -394,12 +394,7 @@ var CHAT = (function(){
            choice (§61). */
         '<div class="cqbar" id="cqbar" hidden></div>' +
         '<div class="chatbody" id="chatbody"></div>' +
-        /* THE COMPOSER IS NOT DRAWN OVER A LIST OF PEOPLE (§297). It is
-           still the panel's ONE composer (§285) and it is still here in the
-           markup; what changed is that `drawPanelChrome` decides whether the
-           foot is on screen, in the one function that answers every other
-           question about what is NOT the body (§53.5). */
-        '<div class="chatfoot" id="chatfoot">' +
+        '<div class="chatfoot">' +
           /* WHAT IS ATTACHED, SHOWN (§286.2) — above the composer, so the box
              under the cursor never moves. Empty and absent until there is a
              picture. */
@@ -647,43 +642,6 @@ var CHAT = (function(){
         ? cqSeg() + ((cq.side === "wait" && !cq.person) ? cqFind() : "")
         : "";
     }
-
-    /* ── NO COMPOSER OVER A LIST OF PEOPLE (§297) ──────────────────────
-       Islam, as the office: *"After sending the reply message as an sMO the
-       message didn't appear in the box and when it appeard it appeard above
-       the message of ht employee which is wrong"*, then *"and the message
-       never reached the user."*
-
-       THREE SYMPTOMS, ONE CAUSE, REPRODUCED BEFORE ANYTHING WAS PROPOSED
-       (§3a). §285 forked this composer at the top — with a conversation open
-       inside the queue it is a REPLY, otherwise it is a `say` — and on the
-       Waiting LIST there is no conversation open, so `cqSend`'s guard falls
-       through and Send posts `action:"say"` with no recipient at all: the
-       office writing to the office. Measured, that one fact produces every
-       word of the report — the message never reaches them; it does not appear,
-       because the body being drawn is the queue and the echo went into
-       `state.messages`; and it sorts ABOVE theirs, because the office's own
-       thread is the one that just moved.
-
-       THE BOX WAS TECHNICALLY HONEST AND STILL WRONG. It says "Write to the
-       office…", which for the office means themselves — true, and unreadable
-       as such under a list of people waiting on you. So the answer is not a
-       better placeholder: there is nobody on this screen to write to, and a
-       control with nothing to act on is not a choice (§61, §94.15).
-
-       AND IT IS NOT A NEW SHAPE — the Platform Inbox draws no composer at all
-       with nobody picked (measured), so the corner is catching up with its own
-       neighbour rather than inventing a rule (§53.5). Everything else is
-       untouched and is asserted: `My messages` keeps its box, and a
-       conversation OPENED from the list keeps the reply box that already reads
-       "Reply to <name>…" and already posts `reply`.
-
-       HIDDEN, NEVER REMOVED. The foot holds the one composer, its attach
-       button, the preview strip and the note; taking it out of the document
-       would mean rebuilding all four on the way back and losing whatever is
-       half-typed or already attached (§100.2's rule, from the other side). */
-    var foot = el("chatfoot");
-    if (foot) foot.hidden = !!(state.office && cq.side === "wait" && !cq.person);
 
     var sub = el("chatsub");
     if (sub && state.office && cq.side === "wait" && cq.person) {
@@ -1932,16 +1890,6 @@ var CHAT = (function(){
     return /^The /.test(t) ? "the " + t.slice(4) : t;
   }
 
-  /* ── WHAT THE TEST CANNOT SEE (§297) ────────────────────────────────
-     True exactly when every link reported working — which is the state that
-     needs a sentence, because a step that FAILED already names the address to
-     go to and a second one beside it is noise. */
-  function testClean(steps){
-    return !!(steps && steps.length) && !steps.some(function(s){
-      return s.state === "fail" || s.state === "off";
-    });
-  }
-
   function testHtml(steps){
     /* WHERE IT STOPS IS THE ANSWER, so the failing row is the loud one and
        everything above it is quiet confirmation that the chain got that far. */
@@ -2117,37 +2065,6 @@ var CHAT = (function(){
                 '<button class="editbtn" data-chpoptest="1">' +
                 (POPTEST.busy ? "Testing\u2026" : "Test on this device") + '</button>' +
                 (POPTEST.steps ? testHtml(POPTEST.steps) : "") +
-                /* ── AND IT SAYS WHAT IT CANNOT SEE (§297) ────────────────
-                   Islam, having fixed it himself: *"notificatoin is working
-                   after fixing it from systems settings, should this be an
-                   instructions for the people who are not having notifcations
-                   set from settings?"* — after reporting it silent in one
-                   browser and working in another on the same machine, which is
-                   what ruled the platform out.
-
-                   A BROWSER CANNOT READ THE COMPUTER'S OWN SETTING, so this
-                   diagnostic reports seven green steps while the box is being
-                   blocked one layer above it — §124 exactly: a status claiming
-                   more than the thing measuring it can see. The chain ends at
-                   "the device took it", and the last hop after that is
-                   somebody else's.
-
-                   ONLY OVER A CLEAN RESULT, and that is the whole placement:
-                   all green with nothing on screen is the one moment this is
-                   the answer, and beside a failing step it would compete with
-                   the row that actually names where it stopped (§123).
-
-                   NOT INSIDE `testHtml`. That builder is shared with the
-                   assistant's test, where an operating system has nothing to do
-                   with anything — one line added there would be the same
-                   sentence on two unrelated chains (§53.5, from the other
-                   side). */
-                (testClean(POPTEST.steps)
-                  ? '<p class="chtest-os">Nothing appeared? Your computer has a ' +
-                    "switch of its own too \u2014 on a Mac, System Settings " +
-                    "\u203a Notifications \u203a your browser. This test cannot " +
-                    "see that one.</p>"
-                  : "") +
               "</div>"
             : "")) +
 

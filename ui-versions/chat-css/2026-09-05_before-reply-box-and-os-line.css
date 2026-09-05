@@ -169,12 +169,6 @@ body.presenting .chatdock { display:none; }
 
 .chatfoot { border-top:1px solid var(--line); background:var(--surface); padding:9px 10px;
             display:flex; flex-direction:column; gap:8px; }
-/* AN AUTHOR `display` BEATS `[hidden]` (§297). The browser hides a `hidden`
-   element with `[hidden]{display:none}` in its OWN stylesheet, which any
-   author declaration outranks — so the line above would leave the foot on
-   screen with `hidden` set, and every assertion about the attribute would
-   pass over a composer that is still drawn (§96's family). */
-.chatfoot[hidden] { display:none; }
 .chcomp { display:flex; align-items:flex-end; gap:8px; }
 .chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;
                    background:var(--ground); color:var(--ink); padding:8px 10px;
@@ -540,13 +534,6 @@ details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus)
    sentence in a 90px column is a column of single words. */
 .chtest-d { grid-column:1 / -1; color:var(--ink-3); line-height:1.5;
             word-break:break-word; }
-/* WHAT THE TEST CANNOT SEE (§297) — under a clean result, in the panel's own
-   quiet register, set apart by a rule rather than by a colour: this is not a
-   failure and must not read as one (§168), and there is nothing here for
-   anybody to fix on our side. */
-.chtest-os { margin:8px 0 0; padding-left:9px; border-left:2px solid var(--line);
-             font-size:var(--fs-micro); line-height:1.5; color:var(--ink-3); }
-
 .tdot { width:7px; height:7px; border-radius:50%; display:inline-block;
         background:var(--ink-3); position:relative; top:-1px; }
 .tdot.ok   { background:var(--good); }

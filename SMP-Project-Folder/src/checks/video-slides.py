@@ -309,21 +309,42 @@ with sync_playwright() as pw:
       list.length = 0;
       list.push({ id:'v1', at:'', kind:'video', title:'A clip',
                   vid:{ url:'https://vimeo.com/123456789' } });
+      slidesClose();
       openDeck(UNITS['mobile']);
       const root = document.getElementById('deckroot');
       const f = root.querySelector('.d-video iframe');
       if (!f) return { no: 'the deck drew no video frame' };
       const read = () => ({ src: f.getAttribute('src') || '',
                             bar: root.classList.contains('vidslide') });
-      const idx = DECK.slides.indexOf(f.closest('.dslide'));
+      const vs = f.closest('.dslide');
+      const idx = DECK.slides.indexOf(vs);
       const before = read();
       deckShow(idx);
       const on = read();
       deckShow(idx > 0 ? idx - 1 : idx + 1);
       const off = read();
+      /* §261.15: is the clip's slide DRAWN on slides it is not the slide of,
+         and does a click meant for the deck land inside the player? Asked of
+         the paint and of elementFromPoint, never of a class (§94.8). */
+      const look = (k) => {
+        deckShow(k);
+        const r = vs.getBoundingClientRect();
+        const mid = document.elementFromPoint(
+          Math.round(innerWidth / 2), Math.round(innerHeight / 2));
+        /* Scoped to the DECK: with Manage slides still open behind it the
+           editor's own stage holds a clone of this very slide, and an
+           unscoped elementFromPoint reads that instead (§50.6's family — a
+           probe that measures the surface behind the one under test). */
+        return { painted: !!(r.width && r.height),
+                 inClip: !!(mid && mid.closest &&
+                            !!mid.closest('#deckroot .d-video')) };
+      };
+      const elsewhere = [0, 1, 2].filter(k => k !== idx).map(look);
+      const here = look(idx);
       closeDeck();
       return { idx: idx, slides: DECK.slides.length,
-               before: before, on: on, off: off, want: f.dataset.vsrc || '' };
+               before: before, on: on, off: off, want: f.dataset.vsrc || '',
+               elsewhere: elsewhere, here: here };
     }""", default=THREW)
 
     check("the deck drew the clip on exactly one slide",
@@ -342,6 +363,34 @@ with sync_playwright() as pw:
           get(get(armed, "on"), "bar") is True, get(armed, "on"))
     check("...and lets itself hide again after it",
           get(get(armed, "off"), "bar") is False, get(armed, "off"))
+
+    # §261.15, Islam: "THE VIDEO IS SHOWING ON THE first 3 slides ... and the
+    # video should only play if someone press play on it not by normal
+    # clicking." ONE FAULT, BOTH HALVES — `.d-video` set `display:flex` at the
+    # same specificity as `.dslide { display:none }` and 426 lines later, so
+    # the clip's slide was painted over every slide in the deck and a click
+    # meant for the deck landed in the player. Asked of the PAINT and of
+    # elementFromPoint, never of a class (§94.8), and at BOTH ends (§113.8): a
+    # build that drew the clip nowhere at all satisfies the first two
+    # assertions perfectly.
+    away = get(armed, "elsewhere") or []
+    check("the clip is not drawn on slides it is not the slide of",
+          bool(away) and all(not get(s, "painted") for s in away), away)
+    check("...so a click meant for the deck cannot land in the player",
+          bool(away) and all(not get(s, "inClip") for s in away), away)
+    check("and it IS drawn on its own slide",
+          get(get(armed, "here"), "painted") is True, get(armed, "here"))
+    check("...where the middle of the stage is the player",
+          get(get(armed, "here"), "inClip") is True, get(armed, "here"))
+
+    # The deck was measured with Manage slides SHUT, because the two are one
+    # menu's two entries and never both open — and the editor's stage holds a
+    # clone of this very slide, which an unscoped probe reads instead. Put the
+    # editor back for the sections that follow.
+    ev(pg, "() => slidesOpen('unit', %s)" % json.dumps(UNIT))
+    pg.wait_for_timeout(500)
+    check("Manage slides is back for what follows",
+          bool(pg.query_selector("#slideroot.on")))
 
     # ── 6. The ceiling, and it is said before the press ────────────────────
     print("6. three a subject, refused with the reason")

@@ -30163,3 +30163,67 @@ keyboard capture itself was reasoned from the mechanism and the fix was proved
 against a Vimeo address through the real deck. Whether three separate video
 slides were also sitting in that deck is a question about his data, and the
 rail lists every slide by number.
+
+### §261.15 — The clip's slide was drawn on every slide (2026-09-05)
+
+Islam, from the deck: *"STILL THE VIDEO IS SHOWING ON THE first 3 slides.
+that's a bug. and the video should only play if someone press play on it not by
+normal clicking."*
+
+**BOTH HALVES ARE ONE FAULT, AND IT IS ONE DECLARATION.** `present.css` opened
+its video block with
+
+```css
+.d-video { display:flex; flex-direction:column; }
+```
+
+and `.dslide { … display:none … }` sits **426 lines earlier at the same
+specificity** (0,1,0). Equal specificity is settled by source order, so the
+later rule won: **the clip's slide was `display:flex` at all times**, and
+`.dslide` is `position:absolute; inset:0`, so it lay over the whole stage on
+every slide in the deck. Measured, not reasoned — with the deck open on slides
+1, 2, 3 and 4 in turn: `display:flex`, **1579×888**, and
+`document.elementFromPoint` at the middle of the stage returning the
+**IFRAME** every time.
+
+**THE SECOND HALF FOLLOWS FROM THE FIRST.** With the player covering the stage,
+a click meant for the deck — anywhere, on any slide — landed inside it, which
+is exactly *"it plays by normal clicking"*. Nothing needed to be built for that
+half; it was the same overlay.
+
+**BOTH HALVES OF THE RULE SAID NOTHING `.dslide` DID NOT ALREADY SAY**:
+`flex-direction:column` is on `.dslide`, and whether a slide is shown is
+`.dslide`/`.dslide.on`'s question. So the declaration is **DELETED** rather
+than scoped (§24) — a rule kept and narrowed reads as load-bearing to the next
+person. **Whether a slide is shown is `.dslide`'s question and no slide kind
+may answer it**: `.d-video` was the only slide-kind class in the file setting
+`display` on the slide itself; every other one scopes to a descendant.
+
+**ASSERTED AS PAINT AND AS `elementFromPoint`, NEVER AS A CLASS** (§94.8) —
+what was wrong was what a person could see and click, and a class assertion
+passes on exactly the build that produces it. **At BOTH ends** (§113.8): the
+clip drawn on its own slide and the middle of that stage being the player, or a
+build that drew the clip nowhere at all would satisfy the first two assertions
+perfectly. Proved able to fail both ways: **2 red** with the declaration put
+back — printing Islam's report as three slides painted 1579×888 with the
+pointer inside the player — and **2 red** with the clip hidden outright.
+
+**§261.14's `src` ASSERTIONS COULD NOT HAVE CAUGHT THIS.** They ask what
+address the frame holds, which was right and stayed right; the frame was
+emptied on every slide but its own and **went on being drawn**. *An assertion
+about a property is not an assertion about what is on the screen.*
+
+**AND THE PROBE FIRST MEASURED THE SURFACE BEHIND THE ONE UNDER TEST** (§50.6's
+family): with Manage slides still open behind the deck, the editor's own stage
+holds a clone of this very slide, so an unscoped `elementFromPoint` read the
+EDITOR's iframe and reported a correct build broken. The deck is measured with
+the editor shut — the two are one menu's two entries and never both open — and
+the probe is scoped to `#deckroot`.
+
+**WHERE HE IS TESTING, MEASURED**: the production platform file carries **no
+video code at all** (`slideIsVideo`, `videoArm`, `vslideHtml`, `data-vsrc`:
+zero occurrences), so the build showing him this is a preview of the branch,
+and production is untouched by any of it. Signing in to look from his side
+could not be done from here — the sandbox's browser cannot reach the
+deployment (`ERR_CONNECTION_RESET`, through the proxy and without it) — and
+that is stated rather than worked around.

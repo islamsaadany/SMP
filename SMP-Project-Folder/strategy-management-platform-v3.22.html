@@ -6860,8 +6860,17 @@ th .subhd { font-weight:400; }
   /* ── A VIDEO ON A SLIDE (§261) ────────────────────────────────────────
      The clip fills the slide under the title, because a video in a box on a
      projector is a video nobody in the room can see. The caption sits where a
-     picture's already does, so a deck of both reads as one deck. */
-  .d-video { display:flex; flex-direction:column; }
+     picture's already does, so a deck of both reads as one deck.
+
+     AND THERE IS NO `display` HERE, WHICH IS THE WHOLE OF §261.15. This block
+     opened `.d-video { display:flex; flex-direction:column; }` — both halves
+     saying nothing `.dslide` does not already say, and the first half saying
+     it at the SAME specificity (0,1,0) as `.dslide { display:none }` and 426
+     lines LATER, so it won on source order and the clip's slide was drawn on
+     top of EVERY slide in the deck. Measured: `display:flex`, 1579×888,
+     `elementFromPoint` at the middle of the stage returning the IFRAME, on
+     slides 1, 2, 3 and 4 alike. Whether a slide is shown is `.dslide`'s
+     question and no slide kind may answer it. */
   .d-video .vwrap { position:relative; flex:1; min-height:0; overflow:hidden;
                     background:#0D1520; border-radius:var(--r-sm);
                     display:flex; align-items:center; justify-content:center; }

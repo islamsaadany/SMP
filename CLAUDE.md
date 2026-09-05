@@ -549,7 +549,24 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the way past must be on screen. Asserted as the frame's `src` at three
   moments and never as a class (§94.8), at both ends (§113.8), proved able to
   fail three ways.
-  68/0 on `checks/video-slides.py`, proved able to fail nine ways;
+  **AND THE CLIP'S SLIDE WAS DRAWN ON EVERY SLIDE (§261.15)**: Islam &mdash;
+  *"STILL THE VIDEO IS SHOWING ON THE first 3 slides &hellip; and the video
+  should only play if someone press play on it not by normal clicking."*
+  **Both halves are one declaration**: `.d-video { display:flex }` sits **426
+  lines after** `.dslide { display:none }` at the **same specificity**, so it
+  won on source order and the clip lay over the whole stage at all times
+  &mdash; measured on slides 1&ndash;4 as `display:flex`, 1579&times;888, with
+  `elementFromPoint` at the middle of the stage returning the IFRAME, which is
+  why a click meant for the deck started the video. Both halves of the rule
+  said nothing `.dslide` already said, so it is **DELETED, not scoped**
+  (&sect;24): **whether a slide is shown is `.dslide`'s question and no slide
+  kind may answer it.** Asserted as PAINT and as `elementFromPoint`, never as a
+  class (&sect;94.8), at both ends, 2 red each way. **&sect;261.14's `src`
+  assertions could not have caught it** &mdash; the frame was emptied and went
+  on being drawn: *an assertion about a property is not an assertion about
+  what is on the screen.* And the probe first read the EDITOR's clone of the
+  same slide through an unscoped `elementFromPoint` (&sect;50.6's family).
+  73/0 on `checks/video-slides.py`, proved able to fail thirteen ways;
   13/13 and 15/15 on a virgin Postgres 16. **RECORDED, NOT DONE**: the bytes'
   journey through the multipart path is unproven until a store exists; the
   `.pptx` download has no video column; and the signed-off mockup did not show
@@ -5069,8 +5086,16 @@ instead of moving the deck &mdash; and a frame left loaded goes on doing it
 from behind `display:none`. The frame is loaded only on the slide showing;
 emptying it is what hands the keyboard back, and the bar stays while a clip is
 on screen, because the way past a player that has the keyboard has to be on
-screen.
-68/0 proved able to fail nine ways;
+screen. **AND THE CLIP'S SLIDE WAS DRAWN ON EVERY SLIDE** (&sect;261.15), which
+is the reported fault and both halves of it: `.d-video { display:flex }` sits
+426 lines after `.dslide { display:none }` at the same specificity and won on
+source order, so the player lay over the whole stage at all times &mdash; 
+1579&times;888 on slides 1 to 4, `elementFromPoint` returning the IFRAME, which
+is why a click meant for the deck started the video. Deleted, not scoped:
+whether a slide is shown is `.dslide`'s question. *An assertion about a
+property is not an assertion about what is on the screen* &mdash;
+&sect;261.14's `src` assertions were right and could not have caught it.
+73/0 proved able to fail thirteen ways;
 13/13 and 15/15 on a virgin Postgres 16; 491/0, 126/0, full sweep ERRORS none.
 **On the branch, not merged**, and the bytes' journey through the multipart
 path is unproven until the store exists.*

@@ -27,13 +27,24 @@ records how one feature was cut against it.
 *Swept 2026-09-05.* Two folders both numbered 029 (save-safety-banners became
 **030**), three specs titled with a number other than their folder's, and four
 that still said they were unbuilt long after they shipped — all corrected.
-**031** and **032** are backfills rather than features: the reporting and
-scoring model, and how a save reaches the database. Both were built across a
-dozen decision sections each and had no single place that said what the model
-IS, which is exactly what the constitution's backfill provision is for. The rest
-of the platform's recent work — roughly §149 onward — is recorded in the
-decisions document and has no spec; that gap is named here rather than left to
-be discovered.
+**031–037** are backfills rather than features, each covering behaviour built
+across a dozen or more decision sections with no single place saying what the
+model IS — which is what the constitution's backfill provision is for:
+
+| | |
+|---|---|
+| **031** | How a figure is scored |
+| **032** | How a save reaches the database |
+| **033** | Reaching somebody who is not looking (notifications, the corner) |
+| **034** | The review deck |
+| **035** | Gaps, filling, and where Submit is held |
+| **036** | Setup: the register, the matrix and the cycle |
+| **037** | Authoring a plan on the screen |
+
+Coverage went from **122 of 279** decision sections named in a spec to
+**208 (75%)**. What is left is overwhelmingly small fixes and refinements, where
+the decisions document is the right home; the feature-sized remainder is named
+in `IMPLEMENTATION_PROGRESS.md` rather than left to be discovered.
 
 ---
 

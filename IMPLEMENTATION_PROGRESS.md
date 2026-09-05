@@ -129,15 +129,36 @@ code was touched.** What it found and what was done:
 - **specs/ hygiene**: a duplicate 029 (save-safety-banners → **030**), three
   specs titled with the wrong number, four saying "not built" long after they
   shipped (010, 012, 016, 017 — 016's provisional §101 was never claimed).
-- **Two backfills**, both of behaviour built across a dozen sections with no
-  single place stating the model: **031** the reporting and scoring model,
-  **032** how a save reaches the database.
+- **Seven backfills**, each of behaviour built across a dozen or more sections
+  with no single place stating the model:
 
-**What it did not do, and is the real remaining gap:** roughly §149 onward has
-no spec — the deck round, notifications, the setup/admin work, gaps-and-fill.
-The constitution permits backfilling "when next touched" rather than as an
-exercise, and clusters 1 and 2 were done first because those are the two where
-being wrong costs a client's numbers or their data.
+  | | | |
+  |---|---|---|
+  | **031** | How a figure is scored | §239, §243, §248–§251, §257, §264, §276–§278 |
+  | **032** | How a save reaches the database | §195, §210, §215, §216, §234, §240, §241, §288 |
+  | **033** | Reaching somebody who is not looking | §225, §231, §247, §283–§286 |
+  | **034** | The review deck | §224, §236, §252–§256, §259, §265, §275, §280 |
+  | **035** | Gaps, filling, and where Submit is held | §205, §214, §223, §249, §272, §279 |
+  | **036** | Setup: the register, the matrix and the cycle | §116, §174, §175, §186, §187, §190, §261, §273 |
+  | **037** | Authoring a plan on the screen | §189, §194, §226–§229, §232, §260, §267–§271, §281 |
+
+**Coverage: 122 → 208 of 279 decision sections named in a spec (75%).**
+
+**What is left, honestly.** The 71 uncovered sections are overwhelmingly small
+fixes and refinements, where the decisions document is the right home and a spec
+would be filing for its own sake. Three are arguably feature-sized and are named
+here rather than left to be found:
+
+- **§235** — the escaping sweep. Its net (§238) now has a section; the sweep
+  itself sits with spec 007's family and has no spec of its own.
+- **§222** — Reporting became a tab, revisiting §63.
+- **§242** — a supporting function's report is asked for, and its objectives can
+  be answered.
+
+Also uncovered by design: §10–§20 (the original handoff), §149–§157 (the UI
+audit waves), §164–§167 (the knowledge base), §200–§209 (welcome, session and
+boot follow-ups) — all recorded and none of them a model anybody has to
+reconstruct.
 
 **One defect found and deliberately not fixed:** `src/config-data.js` cites
 §264 three times for the yes/no behaviour recorded at §257 — a number carried

@@ -497,6 +497,55 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
   a picker is not, so that column reads ragged, and six places still spell
   `builderHere()` out inline.
+- **THE DECK ON PAPER (§296):** Islam, answering §295's open question —
+  *"I mean the performance deck. the one the units present from"* — then, of two
+  ways of building it, *"let's go with the pdf for now."* **SMP HAS TWO THINGS
+  CALLED THE PRESENTATION**: `buildPlanPptx()` writes the PLAN as editable slides
+  (§117, in this menu since §252.2), and the **review deck** — the one with the
+  figures, the one a unit presents from — had never left the browser in any form.
+  **THE RECOMMENDATION WAS MEASURED, NOT PREFERRED**: `deckSlides` + `deckSlidesFn`
+  are **639 lines** over some twenty-one slide kinds against `pptxUnitSlides`'s
+  **79** over about five, and **this deck has moved four times in a fortnight**
+  (§243, §253, §254, §259) — so a second `.pptx` builder is a second answer to
+  *what is on this slide* (§53.5) that would have had to be made twice each time,
+  with the drifting copy being the one nobody is standing in front of a room
+  looking at. **IT PRINTS THE REAL DECK, WHICH IS THE WHOLE ARGUMENT**: the entry
+  presses the same `openDeckTarget()` Present presses and asks the browser to
+  print, so the file cannot be a different deck from the one the projector shows.
+  **THE DECK MUST BE ATTACHED WHEN IT IS MEASURED** — §69: `scrollHeight` is **0**
+  on a detached element, so `deckFitPass()` silently splits nothing there; proved
+  rather than reasoned, the PDF breaks tables across slides 13/14, 20/21, 24/25.
+  **FIT-TO-WINDOW IS TURNED OFF FIRST AND PUT BACK** (§69.7 — it persists between
+  openings and resizes `.deck`, so a presenter who had it on would get a PDF
+  breaking in different places from the deck they rehearsed). **`@page` IS THE
+  AUTHORED BOX, NEVER A PREFERENCE**: 1600×900 is what every slide was drawn in
+  and what the fit pass splits against; the file comes out at a MediaBox of
+  `[0 0 1200 675.12]`, that size exactly. **THE COLOURS HAVE TO SURVIVE**
+  (`print-color-adjust:exact`, asserted — a review deck printed in outline is not
+  the deck). **NO GATE, AND THAT IS THE DECISION**: §252.2's plan download is the
+  office's because a `.pptx` of the plan is the plan leaving in an EDITABLE form;
+  this is a picture of a review anybody here may already project, and Present has
+  never had a gate, so gating it would refuse on paper what the button above it
+  grants on a screen (§61). **THE WORD PDF IS ON THE LABEL** because the file
+  cannot be edited and the press opens the browser's print dialog rather than
+  downloading at once. **`openDeckTarget()` IS §224's ANSWER MOVED, NOT COPIED**
+  — that rule lived inside the Present button's own handler and §253.3 found the
+  same fault again on two more surfaces. `checks/deck-pdf.py` **0 failures**,
+  proved able to fail twice **from the SOURCES** (§276): **6 red** with the print
+  stylesheet out, **2 red** with the fit-to-window handling out. **AND THE CHECK
+  WAS WRONG TWICE FIRST**: it measured `getBoundingClientRect()` and read
+  **1490×838** on a correct build (`.deck` is transform-scaled, so the rect is the
+  FIT and `clientWidth` is the authored box), and its fit-to-window assertion
+  compared slide COUNTS (31 against 31), passing on coincidence and on a build
+  ignoring `fitwin` entirely (§113.8). **TWO NEIGHBOURS REPAIRED, ONE RED ON
+  `main`**: `strategy-split.py` had asked the pane since §268 moved the pen to the
+  section line — **both halves stale and only one saying so**, the absence passing
+  for the wrong reason — established as not mine by reproducing it on a baseline
+  built from `ui-versions/` before it was touched (§294); and `fn-perf-controls.py`
+  held the bare word `"download"` and was REWRITTEN, never loosened (§218).
+  **Screen only** — 527/0, 131/0, full sweep ERRORS none. **RECORDED, NOT DONE**:
+  the editable `.pptx` of the review deck (his *"for now"*), and a master flow
+  (§266) cannot be downloaded, the entry being per subject.
 - **FILES OUT, FILES IN, AND THE RECORD (§295):** Islam, of the page §294's
   audit was done for — *"I need a mockup to refine this page and the buttons
   inside it as it's too clumsy"* — and then, of three tidier drawings of it,
@@ -6068,6 +6117,23 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/deck-pdf.py      # the deck on paper (§296): the entry beside Present
+                                # on all three deck shapes with the word PDF on it;
+                                # the press opening the deck and asking to print
+                                # EXACTLY once; every slide one page at 1600×900 with
+                                # the transform gone — the LAYOUT box, never the
+                                # painted one, since `.deck` is transform-scaled and
+                                # its rect is the fit; neither the deck bar nor the
+                                # platform printing; the colours surviving
+                                # (`print-color-adjust`, measured on a real table
+                                # header); fit-to-window off before the pages are
+                                # measured and put back, with a prior assertion that
+                                # the toggle really moves the box (a slide COUNT
+                                # passes on coincidence, §113.8); and BOTH ENDS — on
+                                # a screen exactly one slide shows. The two new
+                                # readers are asked for BY NAME first (§215). 0
+                                # failures; 6 red / 2 red on two falsifications made
+                                # from the SOURCES (§276)
 python3 checks/import-page.py   # Import & archives, three tabs (§295): the mode
                                 # switch gone from BOTH tabs and Build a plan gone from
                                 # the page; the picker's count label and Select all/none
@@ -6746,7 +6812,54 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;295: Import &amp; archives is three
+*Last Updated: 2026-09-05 &mdash; **&sect;296: the deck on paper.** Islam,
+answering &sect;295's open question &mdash; *"I mean the performance deck. the one
+the units present from"* &mdash; and then, of the two ways of building it,
+*"let's go with the pdf for now."* **SMP HAS TWO THINGS CALLED THE
+PRESENTATION** and only one of them had a file: `buildPlanPptx()` writes the
+PLAN as editable slides and has been an entry in this menu since &sect;252.2,
+while the **review deck** &mdash; the one with the figures on it, the one a unit
+stands up and presents from &mdash; is HTML and had never left the browser in any
+form. **THE RECOMMENDATION WAS MEASURED, NOT PREFERRED**: the deck's two builders
+are **639 lines** over some twenty-one kinds of slide against `pptxUnitSlides`'s
+**79** over about five, and **this deck has moved four times in a fortnight**
+(&sect;243, &sect;253, &sect;254, &sect;259) &mdash; so a second `.pptx` builder
+is a second answer to *what is on this slide* (&sect;53.5) that would have had to
+be made twice on every one of those, with the drifting copy being the one nobody
+is standing in front of a room looking at. **IT PRINTS THE REAL DECK, WHICH IS
+THE WHOLE ARGUMENT**: the entry presses the same resolver Present presses and
+asks the browser to print, so the file cannot be a different deck from the one
+the projector shows. **THE DECK MUST BE ATTACHED WHEN IT IS MEASURED** &mdash;
+&sect;69 recorded that `scrollHeight` is **0** on a detached element, so
+`deckFitPass()` silently splits nothing there; proved rather than reasoned, the
+generated file breaks tables across slides 13/14, 20/21 and 24/25.
+**FIT-TO-WINDOW IS TURNED OFF FIRST AND PUT BACK** (&sect;69.7: it persists
+between openings and resizes the deck, so a presenter who had it on would have
+got a PDF breaking in different places from the deck they rehearsed).
+**`@page` IS THE AUTHORED BOX, NEVER A PREFERENCE** &mdash; 1600&times;900 is
+what every slide was drawn in and what the fit pass splits against; the file
+comes out at a MediaBox of `[0 0 1200 675.12]`, that size exactly. **NO GATE,
+AND THAT IS THE DECISION**: &sect;252.2's plan download is the office's because a
+`.pptx` of the plan is the plan leaving in an EDITABLE form; this is a picture of
+a review anybody standing here may already project, and Present has never had a
+gate, so gating it would refuse on paper what the button above it grants on a
+screen (&sect;61). `checks/deck-pdf.py` **0 failures**, proved able to fail twice
+**from the SOURCES** (&sect;276) &mdash; **6 red** with the print stylesheet out,
+**2 red** with the fit-to-window handling out &mdash; **and the check was wrong
+twice before it was trusted**, measuring the transform-scaled rect rather than
+the authored box, and comparing slide COUNTS for the fit-to-window assertion,
+which passed on coincidence and on a build ignoring it entirely (&sect;113.8).
+**TWO NEIGHBOURS REPAIRED, ONE OF THEM RED ON `main`**: `strategy-split.py` had
+asked the pane since &sect;268 moved the pen to the section line, **both halves
+stale and only one saying so**, established as not mine by reproducing it on a
+baseline built from `ui-versions/` before it was touched (&sect;294); and
+`fn-perf-controls.py` held a bare `"download"` this decision moves and was
+REWRITTEN, never loosened (&sect;218). **Screen only, and asserted**: 527/0
+&middot; 131/0 &middot; full `qa.py` ERRORS none &middot; seven deck checks
+green. **Recorded, not done**: the editable `.pptx` of the review deck (his
+*"for now"*), and a master flow (&sect;266) cannot be downloaded.*
+
+*Earlier: 2026-09-05 &mdash; **&sect;295: Import &amp; archives is three
 tabs &mdash; files out, files in, and the record.** Islam, of the page
 &sect;294's audit was done for: *"I need a mockup to refine this page and the
 buttons inside it as it's too clumsy"*, then, of three tidier drawings of it,

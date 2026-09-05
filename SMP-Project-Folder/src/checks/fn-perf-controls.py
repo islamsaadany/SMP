@@ -184,7 +184,12 @@ with sync_playwright() as p:
            any(e.lower().startswith("present") for e in fn["entries"]), fn["entries"])
         may = pg.evaluate("()=>{try{return !!SMPRules.mayDownloadPlan(world(), viewer(),"
                           " current);}catch(e){return 'ERR '+e;}}")
-        has = any("download" in e.lower() for e in fn["entries"])
+        # THE PLAN, BY NAME. §296 put a second download in this menu — the
+        # review deck as a PDF — and it is deliberately ungated (anybody who
+        # may Present may take a picture of what they may project), so the
+        # bare word "download" stopped saying which entry this is about.
+        # Rewritten, never loosened (§218, §214.3).
+        has = any(e.lower().startswith("download the plan") for e in fn["entries"])
         ck("...and Download the plan is drawn exactly when the rule allows it",
            may is True and has, (may, fn["entries"]))
 
@@ -200,9 +205,19 @@ with sync_playwright() as p:
             pg.evaluate("(k)=>{VIEWER=k; paint();}", who[0])
             pg.wait_for_timeout(650)
             r = pg.evaluate(WHERE)
-            ck("...and their menu does not offer the download",
+            ck("...and their menu does not offer the PLAN",
                r["entries"] is not None
-               and not any("download" in e.lower() for e in r["entries"]),
+               and not any(e.lower().startswith("download the plan")
+                           for e in r["entries"]),
+               (who[0], r["entries"]))
+            # AND STILL OFFERS THE DECK (§296). Both ends in one breath: a
+            # build that gated the PDF with the plan would satisfy the
+            # absence above and quietly refuse on paper what Present grants
+            # on a screen (§61).
+            ck("...and still offers the presentation, which has no gate",
+               r["entries"] is not None
+               and any(e.lower().startswith("download the presentation")
+                       for e in r["entries"]),
                (who[0], r["entries"]))
             pg.evaluate("()=>{VIEWER=PEOPLE.filter(x=>SMPRules.mayEditAccess(world(),x))[0].key;"
                         " paint();}")

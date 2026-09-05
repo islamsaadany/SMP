@@ -205,24 +205,27 @@ collecting time and ships at 10 — no new control. The send rides the platform'
 own traffic, so no scheduler. **It supersedes §283's chase**, at Islam's
 decision: `chaseDue()` and `chase_html` are gone, the column stays unread.
 
+**Latest built:** **§296 — the deck on paper.** The review deck — the one a unit
+presents from — downloads as a PDF from the Presentation menu, beside Present.
+It prints the real deck rather than rebuilding it, which is the whole argument:
+one builder, so the file cannot drift from what the projector shows. Fit-to-
+window is turned off first and put back, or the tables break in different places
+from the deck that was rehearsed. No gate — what can be projected can be taken
+away. Screen only: 527/0, 131/0, sweep clean. The editable `.pptx` of that deck
+is Islam's *"for now"* left open.
+
 ## Waiting on Islam
 
 Nothing proceeds past this line without an answer.
 
-**§295 — which artefact is "the presentation"?** Asked for on the Download tab
-alongside the workbooks. SMP has two things that answer to the word, and they
-differ by a lot of work:
+**§296 — the editable `.pptx` of the review deck.** He chose the PDF *"for
+now"*, which leaves the other one open. It is about a day, and the cost is
+permanent rather than one-off: a second builder is a second answer to *what is
+on this slide*, and this deck has moved four times in a fortnight, so every such
+change would have to be made twice from then on.
 
-* **The plan as slides** — `buildPlanPptx()`, a real editable `.pptx`, plan
-  content only, no figures. It exists, and it is a fourth button for almost
-  nothing.
-* **The review deck** — what *Present* opens, with the cycle's figures. HTML
-  only; nothing converts it to `.pptx`, and `pptx.js`'s own comment says so:
-  *"the review deck with its figures already exists and is a different artefact
-  for a different meeting."*
-
-**§295 — the merge.** The branch is built, checked and pushed; `main` is Islam's
-call on that merge (rule 4). It changes how a save is judged in no way, so it
-carries no forced sign-out — but it does change the built file, so `SHELL` in
+**§295 / §296 — the merge.** The branch is built, checked and pushed; `main` is
+Islam's call on that merge (rule 4). Neither section changes how a save is
+judged, so no forced sign-out — but both change the built file, so `SHELL` in
 `sw.js` needs bumping at the merge, to a name `origin/main` does not already
-hold (§91, §94.12, §94.16).
+hold, confirmed again immediately before the push (§91, §94.12, §94.16).

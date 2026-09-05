@@ -35325,3 +35325,150 @@ fourth button for almost nothing) and the **review deck** with its figures,
 which is HTML only and which `pptx.js`'s own comment calls *"a different
 artefact for a different meeting"*. Which one has been put to him and is not
 built.
+
+---
+
+## §296 — The deck on paper
+
+Islam, answering §295's open question: ***"I mean the performance deck. the one
+the units present from."*** Then, of the two ways of building it: ***"let's go
+with the pdf for now."***
+
+**THE QUESTION MATTERED BECAUSE SMP HAS TWO THINGS CALLED "THE PRESENTATION"**
+and only one of them had a file. `buildPlanPptx()` (§117) writes the PLAN as
+editable slides and has been an entry in this menu since §252.2. The **review
+deck** — the one with the figures on it, the one a unit stands up and presents
+from — is HTML and has never left the browser in any form. That is the one he
+meant, and `pptx.js`'s own comment had already named the difference: *"a
+different artefact for a different meeting."*
+
+### The two ways, and why B was the honest recommendation
+
+**A — a second `.pptx` builder.** Editable, native, matches what the plan
+download already does. About a day, and it carries a permanent cost.
+
+**B — the deck printed to a PDF.** Not editable, and faithful by construction.
+
+**THE RECOMMENDATION WAS MEASURED, NOT PREFERRED.** `deckSlides` is **473
+lines** and `deckSlidesFn` **166**, covering some twenty-one kinds of slide;
+`pptxUnitSlides`, which does the same job for the plan, is **79** and covers
+about five. A second builder is a second answer to *what is on this slide*
+(§53.5) — and **this deck has moved four times in a fortnight**: §243 reshaped
+the aim slide and the headline numbers, §253 stopped drawing a table with no
+rows, §254 put the benchmark on every figure, §259 gave it section dividers.
+Every one of those would have had to be made twice, and the copy that drifts is
+the one nobody is standing in front of a room looking at. Islam took B, and
+*"for now"* leaves A on the table.
+
+### What was built
+
+**IT PRINTS THE REAL DECK, WHICH IS THE WHOLE ARGUMENT.** The entry presses the
+same `openDeckTarget()` the Present button presses, then asks the browser to
+print. There is no second assembly, no second list of slides, no second idea of
+what a pillar slide holds — so the file cannot be a different deck from the one
+the projector shows, in the way that a second builder eventually is.
+
+**THE DECK MUST BE ATTACHED WHEN IT IS MEASURED.** §69 recorded that
+`scrollHeight` and `clientHeight` are both **0** on a detached element, so
+`deckFitPass()` — which splits a long table across continuation slides by
+measuring whether it fits — silently does nothing on a deck rendered off-page.
+That is why this opens the deck for real rather than rendering one into a
+fragment: the artefact has to be produced by the same pass that produced what
+was rehearsed. **Proved rather than reasoned**: the generated PDF splits tables
+across slides 13/14, 20/21 and 24/25.
+
+**FIT-TO-WINDOW IS TURNED OFF FIRST, AND PUT BACK.** `.deckroot.fitwin` swaps
+`.deck` from its authored 1600×900 to `100%/100%` and **persists between
+openings** (§69.7) — so a presenter who had it on would have got a PDF whose
+tables broke in different places from the deck they rehearsed. Off before the
+fit pass runs, restored after.
+
+**`@page { size: 1600px 900px }` IS NOT A PREFERENCE.** It is the box every
+slide was authored in and the box `deckFitPass()` splits against; any other page
+size re-asks a question that has already been answered. The PDF comes out at a
+MediaBox of `[0 0 1200 675.12]` — 1600×900 CSS pixels at 96dpi exactly.
+
+**THE COLOURS HAVE TO SURVIVE.** Browsers drop backgrounds when printing unless
+told otherwise, and this deck is navy table headers, scoring colours and §259's
+blue section dividers — a review deck printed in outline is not the deck.
+`print-color-adjust:exact`, asserted rather than assumed.
+
+**THE DECK CLOSES WHEN THE DIALOG DOES**, on `afterprint`. A browser that never
+fires it leaves the deck open on screen with Exit where Exit always is — a
+nuisance and not a trap (§61).
+
+### The two decisions inside it
+
+**NO GATE, AND THAT IS THE DECISION.** §252.2's plan download is the office's
+because a `.pptx` of the plan is the plan leaving the platform in an **editable**
+form. This is a picture of a review that anybody standing on this page may
+already project — Present has never had a gate — so gating it would refuse on
+paper what the button directly above it grants on a screen (§61). What can be
+projected can be taken away.
+
+**THE WORD PDF IS ON THE LABEL**, for two reasons and not for tidiness: the file
+cannot be edited, which is a thing to know before you press rather than after;
+and the press opens the browser's own print dialog rather than downloading at
+once, which is a surprise the word takes away.
+
+### One thing was tidied because it had already failed once
+
+**`openDeckTarget()` IS THE RESOLUTION MOVED, NOT WRITTEN TWICE.** §224 settled
+that the FORMAT decides which deck a target opens and never the `fn:` prefix —
+and that answer lived **inside the Present button's own click handler**. §253.3
+then found the same fault again, one surface at a time, on `slidesAssemble()`
+and `deckAnchors()`. The PDF entry is a second door onto the same act, so the
+resolution moved into a function both doors ask rather than becoming the fourth
+copy.
+
+### Proof
+
+`checks/deck-pdf.py` — **0 failures**, and **proved able to fail twice from the
+SOURCES** (§276: §238's hashed CSP silences an edited built file, so a broken
+build is made by editing `src/` and running `build.py`): **6 red** with the print
+stylesheet removed, **2 red** with the fit-to-window handling removed. Its nine
+sections assert the two new readers by name first (§215, so a build without them
+reports rather than dies), the entry beside Present on **all three deck shapes**
+(a unit, a capability function, a pillars function), the press opening the deck
+and asking to print **exactly once**, every slide taking one page at 1600×900
+with the transform gone, neither the deck bar nor the platform printing, the
+colours surviving, and **both ends** — on a screen exactly one slide shows
+(§94.2).
+
+**THE CHECK WAS WRONG TWICE BEFORE IT WAS TRUSTED, AND BOTH ARE WORTH KEEPING.**
+It measured `getBoundingClientRect()` and failed at **1490×838** on a correct
+build: `.deck` is scaled into the window by a transform, so the rect is the
+**fit** and `clientWidth`/`clientHeight` is the box the slides were authored and
+fitted in — which is the one that has to be the page. And its
+fit-to-window assertion compared **slide counts** (31 against 31): at a
+1600×900 viewport `fitwin` changes the deck's height by 62px and happened to
+change no split, so the assertion passed on coincidence and would have passed on
+a build that ignored `fitwin` entirely (§113.8). It asserts the property
+directly now — the pages are laid out in a 1600×900 box — with a prior assertion
+that the toggle really does move that box, or the first one proves nothing.
+
+**TWO NEIGHBOURS WERE REPAIRED, AND ONE OF THEM WAS RED ON `main`.**
+`checks/strategy-split.py` had been asking `.pane .paneact [data-page]` since
+**§268 moved the strategy pen onto the section line** (§51.11, §274) — and
+**both halves were stale while only one said so**: its absence assertion passed
+for the wrong reason, because nothing is ever drawn in that corner now, so it
+was true of every build (§113.8), while its opened twin failed on a product
+behaving exactly as decided. **Established as not mine before it was touched**:
+a pre-change baseline was built from the `ui-versions/` snapshots and reproduced
+the identical failure. Repaired here rather than left, because it covers the
+very menu and pen this change touches and **a red neighbour masks a regression**
+(§294). `checks/fn-perf-controls.py` held the bare word `"download"`, which this
+decision moves — **REWRITTEN, never loosened** (§214.3, §218): it names the PLAN
+now, with the PDF's presence asserted in the same breath and both ends, so a
+viewer the plan rule refuses is proved still to get the presentation.
+
+**Screen only.** No `api/`, `lib/` or `db/` file touched, read off the diff and
+asserted: `test-authorize` **527/0**, `test-graph-diff` **131/0**, full `qa.py`
+sweep **ERRORS none**. Deck neighbours green: `deck-blank-slides`,
+`deck-figures`, `deck-outcome`, `deck-dividers`, `notes-slide`, `hide-slide`
+42/0, `master-presentation` 44/0.
+
+**RECORDED, NOT DONE**: the editable `.pptx` of the review deck is Islam's
+*"for now"* left open, and a **master flow** (§266) cannot be downloaded — the
+entry is per subject, because a flow is several decks and printing one would be
+one file holding a room's whole morning.

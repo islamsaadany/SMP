@@ -3301,21 +3301,25 @@
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
-        /* §224's rule — the FORMAT decides the deck, never the `fn:`
-           prefix — now lives in `openDeckTarget()` beside the two openers,
-           because §296's PDF entry is a second door onto the same act and
-           two copies of that branch is how the fault came back one surface
-           at a time (§253.3). */
-        openDeckTarget(this.dataset.present);
-      });
-    });
-    /* The same deck, taken away as a PDF (§296). Beside Present and through
-       the same resolver, so the file can never be a different deck from the
-       one that press opens. */
-    document.querySelectorAll("[data-deckpdf]").forEach(function(b){
-      b.addEventListener("click", function(){
-        closeDlMenu(this);
-        deckToPdf(this.dataset.deckpdf);
+        /* §224: THE FORMAT DECIDES THE DECK, NOT THE PREFIX. Islam: *"the
+           consumer finance presentation is not showing anything."* This
+           branched on `fn:` alone and sent EVERY function to the capability
+           deck — so a function that plans in PILLARS, which has no
+           capabilities at all, opened a deck reading "Capability review · 0
+           capabilities" and nothing else. Reproduced on the demo's own
+           pillars function before a line was changed.
+
+           §63.4 fixed the other half of this — the button used to carry no
+           target and a pillars function could not be presented at all — and
+           routed every `fn:` to `openDeckFn`, which is right for a capability
+           function and wrong for the other format. §59's rule in the one
+           place still asking by prefix: a pillars function's plan is
+           unit-shaped, so it takes the unit deck through `unitLike()`, which
+           resolves both kinds of key in one place. */
+        var t = this.dataset.present;
+        var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+        if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk);
+        else openDeck(unitLike(t));
       });
     });
     /* The master presentation (§266) — beside Present, because a flow is

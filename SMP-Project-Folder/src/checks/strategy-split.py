@@ -165,8 +165,15 @@ with sync_playwright() as p:
     ck("before: reporting reads edit", before["report"] == "edit", before["report"])
 
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    ck("before: no pen on the custodian's plan pane",
-       pg.query_selector(".pane .paneact [data-page]") is None)
+    # §268 MOVED THE STRATEGY PEN OFF THE PANE AND ONTO THE SECTION LINE,
+    # and this pair was left asking the pane (§51.11, §274). Both halves were
+    # stale and only one said so: the absence below passed for the wrong
+    # reason — nothing is ever drawn in that corner now, so it was true of
+    # every build (§113.8) — while its opened twin failed on a product
+    # behaving exactly as decided. Rewritten, never loosened (§218): the
+    # control the office actually presses.
+    ck("before: no strategy pen for the custodian",
+       pg.query_selector("#secrow-in .secpen") is None)
     ck("before: the arrange control IS drawn",
        pg.query_selector(".pane .paneact [data-arrange]") is not None)
 
@@ -181,15 +188,15 @@ with sync_playwright() as p:
     after = asks(pg, who)
     ck("opened: the rule now allows the custodian the plan", after["rule"] is True, after)
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    pen = pg.query_selector(".pane .paneact [data-page]")
+    pen = pg.query_selector("#secrow-in .secpen")
     ck("opened: the pen is drawn for the custodian", pen is not None)
     if pen:
         pen.click(); pg.wait_for_timeout(400)
         fields = pg.evaluate("() => document.querySelectorAll('.pane input, .pane textarea, .pane select').length")
         ck("opened: pressing it produces fields", fields > 0, fields)
-        # In edit mode the pen sits on the pillar's own title row, not in the
-        # corner slot — ask for it anywhere in the pane to press Done.
-        pg.query_selector(".pane [data-page]").click(); pg.wait_for_timeout(300)
+        # Done editing is the SAME control (§269 made it a toggle), on the
+        # section line where §268 put it.
+        pg.query_selector("#secrow-in .secpen").click(); pg.wait_for_timeout(300)
 
     # And closed again — the direction a stuck-open door would hide (§94.5).
     be(pg, who["smo"])
@@ -201,7 +208,7 @@ with sync_playwright() as p:
     ck("closed again: the rule refuses once more", closed["rule"] is False, closed)
     be(pg, who["cust"], who["unit"], "strategy", "plan")
     ck("closed again: the pen is gone from the screen",
-       pg.query_selector(".pane .paneact [data-page]") is None)
+       pg.query_selector("#secrow-in .secpen") is None)
 
     # ── 3 · THE DOWNLOAD, FOR THE PEOPLE ISLAM NAMED ─────────────────
     print("\n3 · the plan leaves as slides, for the right people")

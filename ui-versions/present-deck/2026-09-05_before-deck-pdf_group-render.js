@@ -1194,25 +1194,6 @@ function presentMenu(kind, key){
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
     (String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
-  /* ── THE DECK AS A PDF (§296) ───────────────────────────────
-     BESIDE PRESENT, because it is the same deck: one entry opens it on a
-     projector and the next takes it away as a file. §252.2's entry below
-     takes the PLAN away, which is a different document — the plan carries no
-     reported figure and this carries nothing else.
-
-     NO GATE, AND THAT IS THE DECISION. §252.2's download is the office's
-     because a .pptx of the plan is the plan leaving the platform in an
-     editable form; this is a picture of a review anybody standing here may
-     already project, so gating it would refuse on paper what the button
-     above it grants on a screen (§61). Present has never had a gate.
-
-     THE WORD PDF IS ON THE LABEL FOR TWO REASONS, both of which would
-     otherwise be met as a surprise: the file cannot be edited, and the press
-     opens the browser's own print dialog rather than downloading at once. */
-  var pdf = '<button role="menuitem" data-deckpdf="' + esc(target) + '">' +
-    'Download the presentation' +
-    '<span class="dlsub">The review deck as a PDF &mdash; exactly what the ' +
-    'projector shows</span></button>';
   /* \u2500\u2500 THE PLAN AS SLIDES, BACK AS AN ENTRY HERE (\u00a7252.2) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
      Islam: *"the ppt download leave it as an option in the drop down for the
      smo only."* \u00a7145.9 hid the pane-corner button for everyone and kept the
@@ -1257,7 +1238,7 @@ function presentMenu(kind, key){
     : "";
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + present + pdf + slides + dl + master + '</div></details>';
+    '<div class="menu" role="menu">' + present + slides + dl + master + '</div></details>';
 }
 
 /* ── Cards or a table (§16.6) ────────────────────────────────────────

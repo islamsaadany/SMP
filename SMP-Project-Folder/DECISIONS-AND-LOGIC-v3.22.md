@@ -36007,3 +36007,134 @@ it was left on — the editor keeps the selection it had, which is what "quick
 edits" asked for, and syncing the two would move somebody's selection under
 them; and Shape B is left on the table rather than dismissed, to be judged once
 this loop has been used.
+
+---
+
+## §296 — AN ACTION HALF WAY THROUGH ITS WINDOW (2026-09-05)
+
+Islam: *"on setting a tactic on Y/N it sets the 100 or 0 however some of the
+tactics spread acorss 2 review cycles so on reporting we need to report not only
+y or no we need to have in progress to get some sort of % of progress and in
+this case the progress % needs to be mandatory and the % required or measured
+against needs to be prorated. I think we did something similar in the proejcts.
+have a look and cpush back if you wan."*
+
+**HE INVITED THE PUSH-BACK AND THE FIRST ANSWER WAS A REFRAMING.** The per-cent
+he describes already exists on every tactic — `tacticRatio` divides the figure
+delivered by `tacticPlanned`, which is the share of the tactic's OWN quarters
+that has passed (§250) — and **setting a Y/N outcome is what takes it away**:
+`entry()` switches the reporting box to the outcome's field the moment that
+outcome has a target, so the graded question is replaced by a binary one. The
+projects give the CONTROL (Not started / In progress + a mandatory per-cent /
+Done, §104.10) and **not** the proration: a milestone's per-cent is read as its
+own score. Projects have the shape, tactics have the arithmetic, neither had
+both.
+
+**THE FAULT, MEASURED ON THE RUNNING PLATFORM BEFORE ANYTHING WAS PROPOSED.** A
+Y/N action running Q2–Q3, reported at the end of June: `tacticShare` is **0.5**
+and the reporter's three choices are **blank** (which the row counts as
+unanswered, so §221 refuses Submit), **No** (scores 0 — and §105's note rule
+then demands an explanation for a failure that has not happened) and **Yes**
+(untrue). *The only answer that could honestly be given was the one that marks
+the unit down for work that is on track.* And the YTD Target column printed an
+em-dash while the platform already knew the window was half gone.
+
+**HIS THREE DECISIONS, TAKEN ONE AT A TIME BECAUSE THE FIRST ROUND WAS TOO
+BUSY** (*"you are making things too complex let's take things one by one"*):
+the window is the action's own quarters inside one plan year; **In progress with
+a typed, mandatory per-cent**, chosen over two alternatives that asked for no
+number at all; and **every Y/N row**, not tactics alone. The arithmetic was put
+to him with its oddity named — 60% done at the half-way point reads **120** —
+and he ruled on it directly: *"it should read 120 as 60% would lower the
+progrses value while it's not due in Q2."* He also asked twice for the **YTD
+Target column to show the prorated target**, which it now does.
+
+**AND ONE OF HIS ANSWERS OVERRULED MY OWN RECOMMENDATION MID-ROUND.** Offered
+"hand the row back to the % delivered it already has" — the smallest build — he
+refused it: *"% of delivery is confusing for the actions Y/N actions."* Right,
+and it is why the per-cent belongs to the ANSWER rather than to a second field
+borrowed from a different question.
+
+**ONE SEAM, BECAUSE THERE WAS ONLY EVER ONE READER.** `measureScore` is the
+single caller of `ynScore` in the whole product, so the third answer is one
+rule in `lib/rules.js` and the share is passed to it exactly as `measureDue`
+already resolves one — a tactic's outcome supplies its own window, a key
+measure and an objective (which have none) fall back to the year. **A second
+`ynDue()` beside it would be two definitions of proration**, so the benchmark
+the column prints and the number the score divides by are the same call.
+
+**THE MARKER IS STORED, NEVER INFERRED FROM THE NUMBER — and that is the whole
+of why nothing already in a database moves.** Reading "any number here means in
+progress" was the smaller shape and it silently reinterprets stored data:
+§257.2 KEEPS a figure when a row is switched to Y/N, so a measure reported
+`28%` and later made yes/no still holds "28%" — unscored today, and scored 56
+by the looser rule. Asserted: such a row still scores nothing.
+
+**NO NEW FIELD, SO THE SERVER NEEDED NOTHING — AND IT IS ASSERTED ANYWAY**
+(§172). The answer stays in the field it has always been in (`actual` on a
+measure, `outActual` on a tactic's outcome, which rides `extra`), both already
+classified as reporting; `tactics.actual` is `numeric` in Postgres and is
+deliberately not touched. Four new authoriser assertions, both ends — the
+reporter may write it, the target stays the office's — and the first draft of
+them was **rightly refused**, because it set the target in the incoming graph
+and was therefore asking whether a unit head may rewrite the plan (§94's
+question, not this one).
+
+**STACKED, AND THE MOCKUP DECIDED IT BY BEING MEASURED.** Two treatments drawn
+in the real table: side by side needs ~200px in a column that is 133px, taking
+the Tactic prose column **303 → 217px** at 1500 — and at 1280 the name wraps
+anyway, so it costs the width AND the height (§267, one table over). Stacked
+costs 17px of prose and a taller row on in-progress rows only. Islam picked
+stacked and the word *In progress*, which is what a project milestone already
+says here. **The picker is sized to its longest option**: the first mockup
+rendered *"In progres"*, found by shooting it rather than by reading it (§52 —
+a control that draws is not a control that reads).
+
+**THE GATE FALLS OUT RATHER THAN BEING BUILT.** `In progress` with no per-cent
+scores null, so the row is unanswered, Submit is shut and §279's bar names it —
+and `rowPending()` joins it to `statusPending()` so the refusal uses the wording
+a milestone already has (*"said In progress and did not say how far"*) instead
+of a second sentence. `rowAnswered` needed the one line that does not fall out:
+on a measure the stored value is a non-empty string, so without it the row would
+read as reported while contributing nothing to any average — §104.10's own
+fault, one row kind over.
+
+**AND THE WORKBOOK FOUND A LATENT ONE.** `applyProgress` recomputes `progress`
+from actual ÷ target, which was unreachable for a Y/N row because "Yes" holds
+no digits — a part-way answer holds one, so an upload against a KEPT target
+number ("100 Y/N") would have divided 60 by a target nobody set and written a
+figure onto the Focus board, which reads raw `progress` on purpose (§239).
+Guarded, and proved able to fail: with the guard out the check reports
+`progress: 60`.
+
+**PROVED ABLE TO FAIL: 22 red** on the shipped build — **and the check's own
+first two runs were the check**, both faults this file has recorded before. It
+**died rather than reporting** on a 30s timeout with every later assertion
+unmade, so `grep -c FAIL` read a crash as a clean run in a file written to
+reject that build (§215); and it **leaned on the new rule to measure with**, so
+six honest assertions came back as *"rowPending is not defined"* (§264.1). Every
+press degrades now and the new rule is asked for by name.
+
+**THREE ASSERTIONS IN `yn-target.py` WERE REWRITTEN, NEVER DELETED** (§218,
+§214.3): they asserted §257's *"there is nothing to be due"* and its two-option
+picker, which this decision moves. What §257 settled and this leaves alone — a
+yes is 100, a no is 0, a kept figure is ignored, silence is not scored — is
+asserted unchanged beside them.
+
+**Verified:** full `qa.py` sweep ERRORS none · 13 neighbouring checks 0 red ·
+`test-authorize` 531/0 · `test-graph-diff` 131/0 · the table fits its pane at
+1500 / 1280 / 1100 · the measure and objective surfaces driven separately and
+scored against the year. The demo carries **0 of 210** Y/N targets, so nothing
+in the worked example moves and the check MAKES its state (§255).
+
+**RENUMBERED §282 → §296**: main took §282–§295 while this was built, and the
+renumber was **scoped to the lines this branch wrote** (§264.3) — 28 lines
+moved, and it is asserted that **no line containing §282 was removed**, so the
+chat round's 15 references are untouched.
+
+**RECORDED, NOT DONE**: no workbook carries a tactic's outcome figure at all
+(`outActual` appears nowhere in `xlsx.js`), so a Y/N tactic's answer cannot be
+uploaded — that predates this and is §250.2's neighbourhood; and a part-way
+answer's per-cent is measured against the calendar, so a row can read "on plan"
+by saying In progress at the right moment, which is the cost of asking for a
+self-reported number and was stated before he chose it.

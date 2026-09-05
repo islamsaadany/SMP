@@ -543,6 +543,56 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
   a picker is not, so that column reads ragged, and six places still spell
   `builderHere()` out inline.
+- **AN ACTION HALF WAY THROUGH ITS WINDOW (§296):** Islam &mdash; a Y/N tactic
+  spread over Q2 and Q3, reported after Q2: *"if we report mid way it's either
+  done or not and that is not fair"*. **THE PER-CENT HE WANTED ALREADY EXISTED
+  AND Y/N WAS WHAT TOOK IT AWAY** &mdash; `tacticRatio` has divided the figure
+  delivered by the share of a tactic's OWN quarters since &sect;250, and setting
+  an outcome target swaps that graded question for a binary one. **MEASURED
+  BEFORE ANYTHING WAS PROPOSED**: at the end of June the share is **0.5** and
+  the three answers are blank (unanswered, so &sect;221 refuses Submit), No
+  (scores 0, and &sect;105 then demands a note for a failure that has not
+  happened) and Yes (untrue) &mdash; while the YTD Target column printed an
+  em-dash over a benchmark the platform already knew. **THE PROJECTS GIVE THE
+  CONTROL AND NOT THE ARITHMETIC** (a milestone's In-progress per-cent is read
+  as its own score, &sect;104.10), so neither half of the product had both.
+  **HIS THREE DECISIONS, TAKEN ONE AT A TIME** at his instruction (*"let's take
+  things one by one"*): the action's own quarters; **In progress with a typed,
+  MANDATORY per-cent**, chosen over two shapes that asked for no number; and
+  **every Y/N row**. The oddity was named before he ruled on it &mdash; 60% at
+  the half-way point reads **120** &mdash; *"it should read 120 as 60% would
+  lower the progrses value while it's not due in Q2."* **AND HE OVERRULED MY OWN
+  RECOMMENDATION** (handing the row back to the % delivered): *"% of delivery is
+  confusing for the actions Y/N actions."* **ONE SEAM, BECAUSE THERE WAS ONE
+  READER** &mdash; `measureScore` is the only caller of `ynScore` in the product
+  &mdash; and the share is resolved there exactly as `measureDue` resolves one,
+  with `ynDue()` the same call the column prints, or the benchmark and the score
+  would drift (&sect;53.5). **THE MARKER IS STORED, NEVER INFERRED FROM THE
+  NUMBER**: &sect;257.2 KEEPS a figure when a row is switched to Y/N, so `28%`
+  sits in `actual` on rows in the wild &mdash; unscored today and scored 56 by a
+  rule that read any bare number as the answer (&sect;96.2), asserted still
+  unscored. **NO NEW FIELD, SO THE SERVER NEEDED NOTHING, AND IT IS ASSERTED
+  ANYWAY** (&sect;172, 531/0): the answer stays in `actual` / `outActual`, both
+  already classified as reporting, and `tactics.actual` is `numeric` in Postgres
+  and deliberately untouched. **STACKED, AND THE MOCKUP DECIDED IT BY BEING
+  MEASURED** &mdash; side by side takes the Tactic prose column **303 &rarr;
+  217px** at 1500 and wraps the name anyway at 1280, so it costs the width AND
+  the height (&sect;267); the picker is sized to its longest option, because the
+  first drawing rendered *"In progres"* (&sect;52). **THE GATE FALLS OUT RATHER
+  THAN BEING BUILT**: an In progress with no number scores null, so the row is
+  unanswered and &sect;279's bar names it, with `rowPending()` joining it to
+  `statusPending()` so the refusal keeps the wording a milestone already has.
+  **AND THE WORKBOOK HELD A LATENT ONE**: `applyProgress` recomputes `progress`
+  from actual over target &mdash; unreachable while "Yes" held no digits, and an
+  upload against a kept target number would have written 60 onto the Focus
+  board (&sect;239). **22 red** on the build before &mdash; **and the check's own
+  first two runs were the CHECK**: it died rather than reporting (&sect;215) and
+  leaned on the new rule to measure with (&sect;264.1). Three assertions in
+  `yn-target.py` REWRITTEN, never deleted (&sect;218). **Renumbered
+  &sect;282 &rarr; &sect;296, scoped to this branch's own lines** (&sect;264.3),
+  asserted by no removed line carrying the old number. **RECORDED, NOT DONE**:
+  no workbook carries `outActual` at all, so a Y/N tactic's answer cannot be
+  uploaded; and the per-cent is self-reported against the calendar.
 - **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
@@ -6238,6 +6288,19 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/yn-in-progress.py # an action half way through its window (§296):
+                                # the third answer driven through the REAL controls with
+                                # the STORED plan read back after every press; both ends
+                                # of the gate (In progress with no number must NOT answer
+                                # the row, or a unit submits a report it has not made);
+                                # the number surviving a second pick (§96.2, no undo); a
+                                # figure KEPT from before the row was made yes/no still
+                                # scoring nothing (§257.2 — a build reading any bare
+                                # number as the answer passes everything else here and
+                                # silently moves stored scores); the workbook path; and
+                                # the table fitting its pane at 1500/1280/1100. It MAKES
+                                # its state — 0 of 210 demo targets are Y/N. 22 red on
+                                # the build before, and every press degrades (§215)
 python3 checks/project-row-type.py # a project row's type is a picker and its
                                 # direction opens (§292): ONE way to add a row and
                                 # pressing it adds a DELIVERABLE (an outcome's blank
@@ -6944,7 +7007,39 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;295: the presentation loop.** Islam,
+*Last Updated: 2026-09-05 &mdash; **&sect;296: an action half way through its
+window.** Islam &mdash; *"on setting a tactic on Y/N it sets the 100 or 0 however
+some of the tactics spread acorss 2 review cycles &hellip; we need to have in
+progress to get some sort of % of progress &hellip; and the % required or measured
+against needs to be prorated. have a look and cpush back if you wan."*
+**THE FIRST ANSWER WAS A REFRAMING, WHICH HE ASKED FOR**: that per-cent already
+exists on every tactic (&sect;250 divides the figure delivered by the share of
+its own quarters) and **setting a Y/N outcome is what removes it**. **REPRODUCED
+ON THE RUNNING PLATFORM BEFORE ANYTHING WAS PROPOSED**: a Q2&ndash;Q3 action at
+the end of June has a window share of **0.5**, and the reporter's three choices
+are blank (unanswered, so Submit is refused), No (scores 0, and the red then
+demands a note for a failure that has not happened) and Yes (untrue) &mdash;
+*the only honest answer available was the one that marks the unit down* &mdash;
+while the YTD Target column printed an em-dash over a number the platform had
+already worked out. **THE PROJECTS HAVE THE CONTROL AND NOT THE PRORATION**, so
+neither half of the product had both. **THREE DECISIONS, TAKEN ONE AT A TIME AT
+HIS INSTRUCTION** (*"you are making things too complex let's take things one by
+one"*), and one of them overruled my own recommendation (*"% of delivery is
+confusing for the actions Y/N actions"*). **ONE SEAM, BECAUSE THERE WAS ONE
+READER** &mdash; and **the marker is stored rather than inferred from the number**,
+which is the whole of why nothing already in a tenant's database moves
+(&sect;257.2 keeps a figure when a row is switched to Y/N; that figure is
+asserted still unscored). **The server needed nothing and it is asserted anyway**
+(531/0). **Stacked, and the mockup decided it by being measured** &mdash; side by
+side costs the prose column 303 &rarr; 217px and wraps the name anyway at 1280.
+**The gate falls out rather than being built**, and **the workbook held a latent
+fault** an upload would have written onto the Focus board. **22 red** on the
+build before &mdash; and the check's own first two runs were the CHECK, both
+faults this file already records (&sect;215, &sect;264.1). Full sweep ERRORS
+none, 13 neighbours green, three assertions rewritten not deleted (&sect;218).
+**On the branch, not merged.***
+
+*Earlier: 2026-09-05 &mdash; **&sect;295: the presentation loop.** Islam,
 thinking aloud rather than reporting a fault: *"why don't we make the indvidual
 presentation section act like normal ppts &hellip; they see the manage section
 part and then present from there and if they exit the presentation mood thye get

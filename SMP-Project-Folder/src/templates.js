@@ -734,6 +734,17 @@ function applyProgress(u, d){
       r.hit.obj.actual = r.now;
       /* Progress is what the actual implies against the target, so it is
          recomputed rather than typed into a sheet where it could disagree. */
+      /* ── §296: A YES/NO ROW HAS NO RATIO TO WORK OUT ──────────────────
+         Its target carries no number to divide by — and where it LOOKS like
+         it does, it does not: §257.2 keeps a figure when a row is switched to
+         yes/no ("100 Y/N") precisely so nothing is destroyed, and that kept
+         number is explicitly not counted. Before this the arithmetic was
+         unreachable, because "Yes" and "No" hold no digits either; a part-way
+         answer holds one, so an upload would have divided 60 by a target
+         nobody set and written a figure onto the Focus board, which reads the
+         raw `progress` on purpose (§239). The row is scored by `ynScore`,
+         which is derived and needs nothing stored. */
+      if (SMPRules.isYesNo(r.hit.obj.target)) return;
       var t = parseFloat(String(r.hit.obj.target).replace(/[^0-9.]/g, ""));
       var a = parseFloat(String(r.now).replace(/[^0-9.]/g, ""));
       if (!isNaN(t) && !isNaN(a) && t !== 0) {

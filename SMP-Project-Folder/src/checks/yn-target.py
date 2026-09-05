@@ -207,7 +207,8 @@ with sync_playwright() as pw:
     ck("unanswered is not scored", sc["none"] is None, sc)
     ck("a Sum yes/no is not prorated to 50", sc["half"] == 100, sc)
     ck("a measured row scores exactly as it did", sc["keep"] == 50, sc)
-    ck("there is no 'due at' benchmark to print", sc["due"] is None, sc)
+    ck("and the benchmark is the part of the period that has passed (§296)",
+       sc["due"] == "50%", sc)
 
     print("\n── 5 · a tactic's outcome is admitted and scored (§248's shape)")
     oc = ev(pg, """() => {
@@ -224,7 +225,8 @@ with sync_playwright() as pw:
     ck("a Y/N outcome is a real outcome", oc["on"] is True, oc)
     ck("...scoring 100 and 0", [oc["score"], oc["no"]] == [100, 0], oc)
     ck("...not scored until somebody answers", oc["quiet"] is None, oc)
-    ck("...with nothing to compare it against", oc["bench"] is None, oc)
+    ck("...against the part of its own window that has passed (§296)",
+       oc["bench"] == "50%", oc)
     ck("...and it does not owe a target", oc["gapYN"] is False, oc)
     ck("a bare unit is still not an outcome and still owes one (§249 intact)",
        oc["unitOnly"] is False and oc["gapPct"] is True, oc)
@@ -325,8 +327,9 @@ with sync_playwright() as pw:
       const opts = [...s.options].map(o => o.value);
       s.value = 'Yes'; s.dispatchEvent(new Event('change', {bubbles:true}));
       return { opts: opts, ok: true }; }""")
-    ck("the reporting page asks for a yes or a no, picked not typed",
-       not rep.get("none") and rep.get("opts") == ["", "Yes", "No"], rep)
+    ck("the reporting page asks for a yes, a no or how far — picked, not typed",
+       not rep.get("none") and
+       rep.get("opts") == ["", "Yes", "In progress", "No"], rep)
     if not rep.get("none"):
         pg.wait_for_timeout(400)
         got = ev(pg, """() => {

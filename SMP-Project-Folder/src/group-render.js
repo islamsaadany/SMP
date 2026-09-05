@@ -4821,20 +4821,59 @@ function renderReport(u){
     if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
-        (has ? esc(unitTight(cur)) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
+        (has ? (ynRow ? esc(SMPRules.ynShown(cur))          /* \u00a7282 */
+                      : esc(unitTight(cur)) + ((isT && !oc) ? "%" : "")) : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
     /* THE UNIT IS NOT SENT WITH A YES OR A NO. `data-unit` is what the save
        handler rejoins onto a typed figure, and joining here would store
        "YesY/N" — so it is empty and the word is stored whole. */
-    if (ynRow)
-      return '<span class="entry' + (has ? " filled" : "") + '">' +
-        '<select class="field ynfield" data-rep="' + x.id + '" data-fld="' + fld +
-        '" data-unit="" aria-label="Report ' + esc(x.obj.name) + '">' +
-        ["", "Yes", "No"].map(function(o){
-          return '<option value="' + esc(o) + '"' + (shown === o ? " selected" : "") +
+    if (ynRow) {
+      /* \u2500\u2500 \u00a7282: THREE ANSWERS, AND THE THIRD OWES A NUMBER \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+         An action running Q2 and Q3 reported after Q2 could only be called
+         done or not done, and neither was true. `In progress` is the third,
+         and its per-cent is measured against the share of the action's own
+         window that has passed, so 60% at the half-way point reads 120.
+
+         THE PICKER IS READ OFF THE STORED ANSWER, never off `shown`: a
+         part-way answer is stored as the word AND the number ("In progress
+         60"), which matches no option, so the select would fall back to the
+         dash and the row would read as unanswered on every repaint (\u00a796 \u2014
+         a control that renders is not a control that says the truth). */
+      var wip = SMPRules.ynIsWip(cur), wpct = SMPRules.ynPct(cur);
+      var pick = wip ? SMPRules.YN_WIP : shown;
+      var ysel = '<select class="field ynfield" data-rep="' + x.id + '" data-fld="' + fld +
+        '" data-unit="" data-yn="1" aria-label="Report ' + esc(x.obj.name) + '">' +
+        ["", "Yes", SMPRules.YN_WIP, "No"].map(function(o){
+          return '<option value="' + esc(o) + '"' + (pick === o ? " selected" : "") +
                  '>' + (o || "\u2014") + '</option>';
-        }).join("") + '</select></span>';
+        }).join("") + '</select>';
+      if (!wip)
+        return '<span class="entry' + (has ? " filled" : "") + '">' + ysel + '</span>';
+      /* STACKED, Islam's pick from two drawn in the real table. Side by side
+         needs about 200px in a column that is 133px today and takes the
+         difference off the Tactic prose beside it \u2014 measured, 303 \u2192 217px at
+         1500, and at 1280 the name then wraps anyway, so it costs the width
+         AND the height (\u00a7267's lesson, one table over). Stacked costs 17px of
+         prose and a taller row, and only on the rows actually in progress.
+
+         THE BOX IS THE SAME FIELD. Both controls write the one answer, so
+         there is no second thing stored and nothing to migrate; which of them
+         wrote it is `data-ynpct`, read by the one handler that commits it. */
+      return '<span class="ynstack">' +
+        '<span class="entry filled">' + ysel + '</span>' +
+        '<span class="entry' + (wpct == null ? "" : " filled") + '">' +
+        '<input class="field ynpct" data-rep="' + x.id + '" data-fld="' + fld +
+        '" data-ynpct="1" value="' + (wpct == null ? "" : esc(String(wpct))) +
+        '" placeholder="\u2014" aria-label="Per cent complete, ' + esc(x.obj.name) + '">' +
+        '<span class="unitsuf">%</span></span>' +
+        /* SAID, NOT ONLY REFUSED (\u00a7221): the row is unanswered until the
+           number is there, so Submit is shut and the bar names it \u2014 and the
+           cell itself says which number is missing, in the platform's own
+           word for a thing the plan still owes. */
+        (wpct == null ? '<span class="missing">Needs a %</span>' : "") +
+        '</span>';
+    }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
@@ -7353,6 +7392,12 @@ function figVsDue(m, share){
 }
 
 function figShown(m){
+  /* §296: A PART-WAY ANSWER IS WORDS AND A NUMBER, not a figure in a unit —
+     so it is never scaled, never abbreviated and never given a magnitude it
+     does not have. ONE reader for how it reads (`ynShown`), or the page and
+     the projector spell the same stored answer two ways (§53.5). */
+  if (m && SMPRules.isYesNo(m.target) && SMPRules.ynIsWip(m.actual))
+    return esc(SMPRules.ynShown(m.actual));
   var s = unitTight(figureScaled(m.target, m.actual)), full = figureFull(m.target, m.actual);
   return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
 }

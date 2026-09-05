@@ -3164,5 +3164,59 @@ console.log("\n31 · a row's type is the office's to change (§292)");
         kinds.join(",") || "(nothing)");
 })();
 
+/* ── §296 · THE SERVER NEEDED NOTHING, AND THAT IS ASSERTED ─────────
+   A yes/no row's third answer is stored in the field the answer has always
+   been stored in — `actual` on a measure or an objective, `outActual` on a
+   tactic's outcome — so no field was added, nothing was migrated and no rule
+   was widened. §172's lesson is that "the server needed nothing" is a CLAIM
+   until something asks it: a build that classified the new value as a plan
+   change would refuse every reporter mid-round, and every screen assertion
+   would still be green.
+
+   BOTH ENDS. The reporter may write it, and it must still classify as
+   reporting rather than as authoring the plan — a rule that let this through
+   as `unitPlan` would hand the office's pen to whoever can report. */
+(function () {
+  console.log("\n§296: an action reported as In progress");
+
+  /* THE ROW IS ALREADY YES/NO IN THE STORED GRAPH, which is the whole point:
+     making it one is a plan decision the office takes (§257) and answering it
+     is not. The first draft of this block set the target in the INCOMING graph
+     and was rightly refused — it was asking whether a unit head may rewrite
+     the plan, which is a question §94 settled and this is not about. */
+  const base = clone(SEED);
+  base.units[UNIT].items[0].measures[0].target = "Y/N";
+  base.units[UNIT].items[0].tactics[0].outTarget = "Y/N";
+  const say = function (key, mutate, name) {
+    const inc = clone(base); mutate(inc);
+    const v = A.authorize(base, inc, personOf(base, key));
+    check(name, v.ok, (v.refusals || []).join(" / "));
+  };
+
+  say(headKey, function (s) {
+    s.units[UNIT].items[0].measures[0].actual = "In progress 60";
+  }, "a unit head reports how far along their own action is");
+
+  if (custKey) say(custKey, function (s) {
+    s.units[UNIT].items[0].tactics[0].outActual = "In progress 60";
+  }, "...and so does the strategy custodian, on a tactic's outcome");
+
+  /* THE TARGET IS STILL THE OFFICE'S. Making a row yes/no is a plan decision
+     (§257) and answering one is not — the two travel in adjacent fields, so
+     this is the line that must not blur. */
+  refuses(headKey, function (s) {
+    s.units[OTHER].items[0].measures[0].target = "Y/N";
+  }, "a unit head may not make somebody else's row a yes/no one");
+
+  /* AND THE ANSWER CLASSIFIES AS REPORTING, not as a change to the plan. */
+  const inc = clone(base);
+  inc.units[UNIT].items[0].measures[0].actual = "In progress 60";
+  const kinds = A.collect(base, inc, A.worldOf ? A.worldOf(base) : base)
+                 .map(function (c) { return c.kind; });
+  check("§296: it is a reported figure, not a plan edit",
+        kinds.length > 0 && kinds.every(function (k) { return /report/i.test(k); }),
+        kinds.join(",") || "(nothing)");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

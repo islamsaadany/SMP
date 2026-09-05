@@ -3795,6 +3795,43 @@
            it. Rejoin them before storing, or every screen downstream reads a
            revenue of "2.7" where it expects "2.7B EGP". */
         var unit = el.dataset.unit || "";
+        /* ── §296: A YES/NO ROW'S TWO CONTROLS WRITE ONE ANSWER ───────────
+           The picker sends the word and the box under it sends the number,
+           and what is stored is the pair — so the commit goes through the
+           shared rule rather than either control's raw value. Two things that
+           rule does and neither control could: picking `In progress` a second
+           time must not throw away a number already given (§96.2, no undo),
+           and clearing the box must leave the row OWING one rather than
+           silently unanswered (§221).
+
+           HERE, ahead of every field branch, because the answer lands in
+           `actual` on a measure or an objective and in `outActual` on a
+           tactic's outcome, and the two must store it identically or one side
+           of the switch drifts (§53.5, A15).
+
+           AND THE UNIT IS DROPPED ON PURPOSE: `data-unit` is what a typed
+           FIGURE is rejoined with, and joining here would store
+           "In progress 60Y/N", which no reader can take apart. */
+        if (el.dataset.yn || el.dataset.ynpct) {
+          var ynfld = el.dataset.fld;
+          var ynv = el.dataset.ynpct ? SMPRules.ynCommitPct(v)
+                                     : SMPRules.ynCommit(hit.obj[ynfld], v);
+          if (ynv === "") delete hit.obj[ynfld]; else hit.obj[ynfld] = ynv;
+          /* The status follows the work, exactly as it does for a figure
+             below — and an action that has SAID it is under way is under way
+             whether or not it has said how far, which the score cannot
+             express because it deliberately answers null there. */
+          if (ynfld === "outActual") {
+            var ysc = typeof tacticOutcomeScore === "function"
+              ? tacticOutcomeScore(hit.obj) : null;
+            if (SMPRules.ynIsWip(hit.obj[ynfld])) {
+              if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
+            } else if (ysc == null) hit.obj.status = "Not started";
+            else if (ysc >= 100) hit.obj.status = "Done";
+            else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
+          }
+          paint(); return;   /* paint() ends in afterPaint() (§170) */
+        }
         /* ── §248: A TACTIC MEASURED BY ITS OUTCOME ───────────────────────
            The box says which field it is for. `outActual` is a figure in the
            outcome's OWN unit — stores, EGP, a per cent — so it is joined with

@@ -3907,6 +3907,29 @@ function statusGiven(x){ return statusReads(x) != null; }
 /* Said something, and did not finish saying it. Not the same as "unanswered":
    a row nobody has touched is silent, this one is halfway through a sentence. */
 function statusPending(x){ return !!x && x.status === "wip" && statusReads(x) == null; }
+/* ── §296: THE SAME STATE, IN A DIFFERENT FIELD ──────────────────────────
+   A yes/no row that said `In progress` and did not say how far is halfway
+   through a sentence exactly as a milestone is, and everything that already
+   knows what to do about a milestone in that state — the Submit refusal's own
+   wording, the reporting bar's chip, the cursor the walk lands on — should do
+   it here too rather than gaining a second branch each (§53.5).
+
+   THE ANSWER LIVES IN A DIFFERENT FIELD ON EACH KIND (a tactic's outcome in
+   `outActual`, a measure's and an objective's in `actual`), which is the only
+   thing this has to know; the STATE is `SMPRules.ynPending`, asked once. */
+function ynPendingRow(x){
+  var o = x && (x.obj || x);
+  if (!o) return false;
+  if (x && x.kind === "tactic") {
+    var oc = outcomeOf(o);
+    return !!(oc && SMPRules.isYesNo(oc.target) && SMPRules.ynPending(oc.actual));
+  }
+  return !!(SMPRules.isYesNo(o.target) && SMPRules.ynPending(o.actual));
+}
+/* Said something and did not finish saying it, whatever kind of row it is.
+   ONE QUESTION: two predicates that must agree about one row are how "pending"
+   comes to mean one thing to the gate and another to the bar. */
+function rowPending(x){ return statusPending(x && x.obj) || ynPendingRow(x); }
 function sideAvg(vals){
   var v = vals.filter(function(x){ return x != null && !isNaN(x); });
   if (!v.length) return null;
@@ -4861,6 +4884,13 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
+  /* §296: AN `In progress` WITH NO PER-CENT IS NOT AN ANSWER — on a measure or
+     an objective as much as on a tactic, where it already falls out because
+     the outcome scores null and `tacticAnswered` reads the score. Here the
+     stored value is a non-empty string, so without this the row would read as
+     reported while contributing nothing to any average: §104.10's own fault,
+     one row kind over. */
+  if (ynPendingRow(x)) return false;
   return o.actual != null && o.actual !== "";
 }
 function reportedCount(u){
@@ -5016,7 +5046,7 @@ function submitBlockers(target){
   var t = String(target || "");
   var rows = subjectAsked(t), counted = subjectReported(t);
   return { notes: rows.filter(needsNote),
-           pending: rows.filter(function(x){ return statusPending(x.obj); }),
+           pending: rows.filter(rowPending),   /* §296: and a yes/no row that said In progress */
            /* §221, Islam: *"remove the ability of people to submit a report
               that is not complete … until everything is submitted the report
               should be only saved as draft."* Two rules, and the second is
@@ -5083,7 +5113,7 @@ function submitWhyShort(target){
    boxes. `pend` is tested FIRST for the same reason the walk exists: what
    that row is owed is the per-cent, so that is the control to land on. */
 function rowBlock(x){
-  if (statusPending(x.obj)) return "pend";
+  if (rowPending(x)) return "pend";   /* §296 */
   if (!rowAnswered(x))      return "owed";
   if (needsNote(x))         return "note";
   return "";
@@ -6029,7 +6059,15 @@ function measureScore(m, share){
      failure marks a unit down for a question nobody has been asked yet (§35,
      §104.10). The share is not consulted: there is no partial yes to prorate
      (§250 prorates a TARGET, and this row has no number to prorate). */
-  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
+  /* §296: AND THE SHARE GOES WITH IT. A yes or a no still scores 100 or 0 and
+     never consults it; a part-way answer is measured against the share of the
+     period that has passed, and it is resolved HERE the same way `measureDue`
+     resolves it one line down — a tactic's outcome supplies its own window
+     (§250), everything else falls back to the year (§239). Two resolutions of
+     "which period is this" is how the score and the benchmark printed beside
+     it come to disagree about one row. */
+  if (SMPRules.isYesNo(m.target))
+    return SMPRules.ynScore(m.actual, share == null ? elapsedShare() : share);
   var due = measureDue(m, share);
   /* §278: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
      Before a monthly plan existed this guard only ever caught a target of
@@ -6163,6 +6201,19 @@ function tacticProgress(t){
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
 function measureDueLabel(m, share){
+  /* ── §296: A YES/NO ROW HAS SOMETHING DUE NOW, AND IT IS NOT IN THE
+     TARGET'S UNIT — that target has no unit to be in. What is due of an
+     ACTION is the part of its own window that has passed, which is the very
+     share `ynScore` divides by, so the column and the score are one answer.
+
+     BEFORE `measureDue()`, which answers null for a Y/N row by design (§257:
+     a target carrying no number has nothing to prorate) — that stands for the
+     arithmetic; what changes is that the page stops printing an em-dash over
+     a benchmark the platform has known all along. */
+  if (m && SMPRules.isYesNo(m.target)) {
+    var yd = SMPRules.ynDue(share == null ? elapsedShare() : share);
+    return yd == null ? null : yd + "%";
+  }
   var due = measureDue(m, share);
   if (due == null) return null;
   /* §276: a count with nothing owed yet says so in words (`nothingDueYet`),

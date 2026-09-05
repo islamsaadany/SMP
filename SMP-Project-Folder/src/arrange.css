@@ -137,6 +137,24 @@
      A `%` entry is 78px of field plus its chip, which comes to exactly the
      width a bare number box already has, so one token answers both. */
   .entry .field.ynfield { width:var(--rep-w); }
+  /* ── §296: THE ANSWER, AND THE PER-CENT UNDER IT ─────────────────────
+     STACKED, and Islam picked it with the cost of both measured in the real
+     table: side by side wants about 200px in a column that is 133px today and
+     takes the difference off the Tactic prose beside it (303 → 217px at 1500),
+     and at 1280 the name then wraps anyway — so it costs the width AND the
+     height. Stacked costs 17px of prose and a taller row, on in-progress rows
+     only.
+
+     AND THE PICKER IS SIZED TO ITS LONGEST OPTION. `--rep-w` is the width of a
+     NUMBER entry and "In progress" does not fit in it: the first draft of the
+     mockup rendered "In progres", found by shooting it rather than by reading
+     it (§52 — a control that draws is not a control that reads). It never goes
+     below `--rep-w`, so a yes/no row still lines up with the number rows
+     around it. */
+  .ynstack { display:inline-flex; flex-direction:column; gap:4px;
+    align-items:flex-end; }
+  .ynstack .entry .field.ynfield { width:auto; min-width:var(--rep-w); }
+  .ynstack .field.ynpct { width:52px; }
   .big-field { font-family:var(--serif); font-size:15px; }
   .swot .fld { font-size:13px; }
   td.horizon { color:var(--ink-3); }

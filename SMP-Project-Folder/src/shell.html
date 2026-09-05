@@ -150,7 +150,14 @@
   <div class="slidebar">
     <span class="sl-title" id="sl-title"></span>
     <span class="sl-sub"></span>
-    <button data-slexit class="txt" title="Done (Esc)">Done</button>
+    <!-- PLAY, AND THEN DONE (§295). Islam: *"when they open the presentation,
+         they see the manage section part and then present from there and if
+         they exit the presentation mood thye get back to the manage ppt."*
+         The pair sits in one group so the two do not drift apart (§225). -->
+    <span class="sl-acts">
+      <button data-slplay class="sl-play" title="Play the deck (it comes back here)">&#9654;&ensp;Play</button>
+      <button data-slexit class="txt" title="Done (Esc)">Done</button>
+    </span>
   </div>
   <div class="slidebody">
     <div class="slidelist" id="slidelist"></div>
@@ -3308,10 +3315,12 @@
            place still asking by prefix: a pillars function's plan is
            unit-shaped, so it takes the unit deck through `unitLike()`, which
            resolves both kinds of key in one place. */
-        var t = this.dataset.present;
-        var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
-        if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk);
-        else openDeck(unitLike(t));
+        /* ONE OPENER FOR THE TWO DOORS (§295). The branch below used to be
+           written out here and nowhere else, and Play needs the same answer —
+           so it moved into `openDeckFor()` rather than being copied, which is
+           how §224 and §253.3 each came to be fixed on one surface and left
+           broken on another. */
+        openDeckFor(this.dataset.present);
       });
     });
     /* The master presentation (§266) — beside Present, because a flow is

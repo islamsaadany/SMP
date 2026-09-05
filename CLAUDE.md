@@ -456,6 +456,52 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE PRESENTATION LOOP: PLAY FROM THE EDITOR, AND COME BACK TO IT (§295):**
+  Islam, thinking aloud — *"why don't we make the indvidual presentation section
+  act like normal ppts &hellip; they see the manage section part and then present
+  from there and if they exit the presentation mood thye get back to the manage
+  ppt for quick edits."* **THE LITERAL MODEL IS RULED OUT BY WHO EACH ENTRY IS
+  FOR**: Present has **no permission gate at all**, Manage slides is
+  `canSpeakFor`, and hiding a slide is `inOffice()` alone (§256) — three
+  audiences inside two menu entries, so "Present always opens the editor" either
+  widens what §256 kept to the office or makes one button behave two ways by
+  role. That measurement turned one idea into **three shapes drawn in the
+  platform's own pixels** (rule 1c) — **Today** drawn beside them on purpose,
+  because a flow cannot be shown in a still — and **Islam picked A**: both
+  entries stay, the editor gains **Play**, and a deck played from the editor
+  returns to it. **THE EDITOR IS STOOD DOWN, NEVER CLOSED** (`inert` +
+  `aria-hidden`, the pair `slidesOpen()` already uses): the mode is left exactly
+  as it was, because coming back to where you were is the ask, and closing it
+  would repaint (§71.2) and land you at the top of a 31-row rail. **ONE DOOR
+  DECIDES THE RETURN** — Escape and the button both reach `closeDeck()` (§53.5)
+  — with `DECK.from` written on EVERY open, or a value left standing sends the
+  next deck home to a mode nobody opened (§265's `fs` class). **THE WORD SAYS
+  WHERE YOU LAND** (*Back to slides* / *Exit*, §124), Islam's from the mockup.
+  **ONE OPENER FOR THE THREE DOORS**: the which-deck branch was inline on the
+  Present button, §224 fixed it there and §253.3 had to fix it again twice, so
+  Play became `openDeckFor()` rather than a fourth copy — `from` threaded
+  through, and **checked rather than assumed** that none of the three is passed
+  BY NAME (§250.1). **TWO FAULTS THAT WOULD HAVE SHIPPED**: both overlays were
+  `z-index:60` with the editor LATER in the document, so Play would have set
+  every class, laid the deck out, scaled it and shown **nothing** (§96's family,
+  invisible to any class assertion — the check hit-tests instead; **61**, because
+  it must beat the editor and nothing else); and `body.presenting` is the
+  editor's too, so removing it unconditionally gave the mode back its scrollbar
+  and its chat bubble. **AND ONE THE CHECK FOUND**: both keydown listeners are on
+  the WINDOW and each gates on its own root, so while a deck is played from the
+  editor **both are live** — every arrow moved the slide AND walked the rail, and
+  Escape ran two closers. **THE FIRST FIX WAS ORDER-DEPENDENT**: `#deckroot.on`
+  is true right until the deck's own handler closes it, so whichever listener was
+  registered first decided the outcome — the mark travels on the EVENT now, so
+  neither has to run first. **36 red** before, 55 green after; **screen only**
+  (no `api/`, `lib/` or `db/` file, read off the diff), nothing stored, nothing
+  migrated, the menu untouched and nobody's rights moved. **§295.1 — two of the
+  check's own failures were the CHECK**: it died rather than reporting (§215, in
+  a file promising every probe degrades) because `pg.click` on an absent control
+  throws after 30s, and *"on the same line"* passed on `None == None` (§113.8).
+  **RECORDED, NOT DONE**: the rail is not scrolled to the slide the deck was left
+  on (the selection is the person's), and Shape B is left on the table rather
+  than dismissed.
 - **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§292):** Islam — *"on a
   creation of a project I couldn't set the direction and we need to make the add
   deliverable or outcome more of an options in the type rather than 2 buttons of
@@ -6567,6 +6613,22 @@ python3 checks/hide-slide.py    # the office hides a slide and the projector ski
                                 # seeing the marks and getting no control — and the editor
                                 # and the projector proved to build ONE deck (§256.2).
                                 # 33 red on the build before; every probe degrades (§215)
+python3 checks/present-loop.py  # play from the editor, and come back to it (§295):
+                                # Play beside Done on ONE row (two auto margins land
+                                # a gap apart, §225), the deck proved to be IN FRONT
+                                # by a HIT-TEST rather than by a class — both roots
+                                # were z-index 60 and the editor paints later, so the
+                                # old build opens a deck nobody can see — the exit
+                                # word at BOTH ends, Escape returning to the editor
+                                # with `presenting` held and the SAME slide selected,
+                                # one arrow key moving the deck and NOT the rail
+                                # under it, a deck opened from the menu asserted
+                                # unchanged AFTER the editor's (a `from` left
+                                # standing is caught, not hidden), both sides of the
+                                # switch, and the paint in both palettes. 36 red on
+                                # the build before — and its own first run there DIED
+                                # rather than reporting (§215) while "on the same
+                                # line" passed on None == None (§113.8)
 python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and nothing else
                                 # (§265): REAL fullscreen, the bar measured as a BOX and a
                                 # hit-test rather than a class, immediately after the click
@@ -6696,7 +6758,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
+*Last Updated: 2026-09-05 &mdash; **&sect;295: the presentation loop.** Islam,
+thinking aloud rather than reporting a fault: *"why don't we make the indvidual
+presentation section act like normal ppts &hellip; they see the manage section
+part and then present from there and if they exit the presentation mood thye get
+back to the manage ppt for quick edits."* **THE ROUND TRIP HE IS DESCRIBING WAS
+MEASURED FIRST**: Present and Manage slides are siblings in one menu and never
+speak to each other, so Escape from a deck lands on the platform page and
+correcting a slide you have just watched go wrong costs finding the menu again
+and three presses. **AND THE LITERAL MODEL IS RULED OUT BY WHO EACH ENTRY IS
+FOR** &mdash; Present has no permission gate at all, Manage slides is
+`canSpeakFor`, hiding a slide is the office's alone (&sect;256) &mdash; so
+landing everyone in the editor either widens that or makes one button behave two
+ways by role. That turned one idea into **three shapes drawn in the running
+platform** and published as an artifact (rule 1c), with **Today drawn beside them
+on purpose**, because a flow cannot be shown in a still. **Islam picked A**: both
+entries stay, the editor's bar gains **Play**, and a deck played from the editor
+returns to it. **THE EDITOR IS STOOD DOWN, NEVER CLOSED**, so the same slide is
+still selected when you come back &mdash; which is the whole ask. **ONE DOOR
+DECIDES THE RETURN** (&sect;53.5) and **the word says where you land**
+(&sect;124, his pick from the mockup). **TWO FAULTS THAT WOULD HAVE SHIPPED**:
+both overlays were `z-index:60` with the editor later in the document, so Play
+would have opened a deck **nobody could see** &mdash; &sect;96's family, and
+invisible to every class-based assertion, which is why the check hit-tests
+&mdash; and `body.presenting` is the editor's too. **AND ONE THE CHECK FOUND**:
+both keydown listeners are on the window and each gates on its own root, so
+while a deck is played from the editor both are live; the first fix was
+order-dependent and closed the mode as well as the deck, so the mark travels on
+the EVENT. **36 red** on the build before, 55 green after. Screen only &mdash; no
+`api/`, `lib/` or `db/` file touched, read off the diff &mdash; nothing stored,
+nothing migrated, the menu untouched, nobody's rights moved; eight neighbouring
+deck checks green. **&sect;295.1**: two of the check's own failures were the
+CHECK (it died rather than reporting, &sect;215; and an assertion passed on
+`None == None`, &sect;113.8), and one page error was a function key I had
+misspelt. **On the branch, not merged.***
+
+*Earlier: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
 itself.** Islam, of the chat settings dropdown: *"there is no scrolling inside
 the settings pan while there is a uselss scrolling in the main page."*
 **MEASURING SAID THE TWO HALVES ARE ONE FACT** &mdash; the panel had no

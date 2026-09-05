@@ -35115,3 +35115,140 @@ setting, nothing stored and no server rule** — read off the diff, which touche
 one file. Every row is asserted to be in the same place, at the same width, in
 the same number as the build before it, with the panel's own width and the
 heading's inset on all three sides unchanged.
+
+---
+
+## §295 — THE PRESENTATION LOOP: PLAY FROM THE EDITOR, AND COME BACK TO IT (2026-09-05)
+
+Islam, thinking aloud rather than reporting a fault: *"for the presntation
+section I was thinking of something why don't we make the indvidual
+presentation section act like normal ppts. like when they open the
+presentation, they see the manage section part and then present from there and
+if they exit the presentation mood thye get back to the manage ppt for quick
+edits if needed etc. think with me."*
+
+**THE ASK IS THE MODEL EVERYBODY ALREADY HAS**, and the round trip it removes is
+real work. Measured on the shipped build: Present and Manage slides are siblings
+in one menu and **never speak to each other** — Escape from a deck lands on the
+platform page, not on the deck and not on the editor, so correcting a slide you
+have just watched go wrong on a projector costs finding the menu again and
+three presses.
+
+### The literal model is ruled out by who each entry is for
+
+**PRESENT HAS NO PERMISSION GATE AT ALL** — any viewer who can reach the page
+opens the deck — **Manage slides is `canSpeakFor(target)`**, and **hiding a
+slide is `inOffice()` alone** (§256). Three audiences stacked inside two menu
+entries. So *"Present always opens the editor"* means either every reader gets
+the editor, which widens the one control §256 deliberately kept to the office,
+or one button behaves differently depending on who pressed it — and you cannot
+tell by looking which it will do.
+
+That measurement is what turned one idea into three, drawn in the platform's own
+pixels and published as an artifact (rule 1c):
+`design-mockups/presentation-flow/2026-09-05_editor-first.html`.
+
+  * **Today** — drawn beside the other two on purpose. A flow cannot be shown in
+    a still, so the current round trip is something to press rather than read.
+  * **A** — both entries stay; the editor's bar gains **Play**, and a deck
+    played from the editor returns to it.
+  * **B** — one entry: Present opens the editor for whoever may edit it and the
+    deck for everybody else.
+
+**ISLAM PICKED A.** The recommendation was A too, and the mockup is why: pressing
+through B, the extra step lands exactly where it hurts — you have opened the
+menu in order to project, and the editor is in the way. That is a cost paid
+every time, against a menu entry saved once.
+
+### The editor is stood down, never closed
+
+The deck is painted over the mode and the mode is left exactly as it was — the
+same slide selected, the rail at the same scroll — because *coming back to where
+you were* is the whole of what was asked for. Closing and reopening would
+repaint it (§71.2) and land you at the top of a 31-row rail. `inert` and
+`aria-hidden` are the pair `slidesOpen()` already puts on the page behind it.
+
+**THE RETURN IS DECIDED IN ONE PLACE.** Escape and the bar's own button both
+arrive at `closeDeck()`, so the two cannot disagree about where they land
+(§53.5). `DECK.from` is written on **every** open and not only the editor's: a
+value left standing would send the next deck home to a mode nobody opened, which
+is §265's `fs` class by another road.
+
+**THE WORD SAYS WHERE YOU LAND** — *Back to slides* when the deck was played
+from the editor, *Exit* when it was opened from the page (§124). Islam's, from
+the mockup. A presenter who has just been arranging slides is the one person who
+would read *Exit* literally.
+
+**ONE OPENER FOR THE THREE DOORS.** The branch that decides which deck a target
+gets was written out inline on the Present button; §224 fixed it there and
+§253.3 had to fix it again on Manage slides and on the anchors, each time
+because it had been copied. Play is the third caller, so it became
+`openDeckFor()` rather than a fourth copy. The two existing openers stay —
+§253.3 keeps them deliberately — with an optional `from` threaded through;
+**checked rather than assumed (§250.1)**, none of the three is ever passed BY
+NAME, so no caller picks the new parameter up from a `map` index.
+
+### The two faults that would have shipped
+
+**BOTH OVERLAYS WERE z-index 60, AND THE EDITOR COMES LATER IN THE DOCUMENT.**
+So at equal z-index the editor paints on top: Play would have set the class,
+laid the deck out, scaled it — and shown **nothing**, with the editor still
+covering it. §96's family, and the one fault here that every class-based
+assertion reports as a pass; the check hit-tests the middle of the window
+instead. **61, not 70** — it has to beat the editor and nothing else, and the
+modal (100) and the tour (70) stay above the deck exactly as they do today.
+
+**AND `body.presenting` IS THE EDITOR'S TOO.** `closeDeck()` removed it
+unconditionally, which would have given the mode back its scrollbar and its chat
+bubble the moment a deck closed over it.
+
+### And one the check found: the key that two handlers both answered
+
+The deck's keydown listener and the editor's are both on the **window**, and
+each gates on its OWN root being `.on` — so while a deck is played from the
+editor **both are live**. Every arrow key moved the slide AND walked the rail
+underneath it, and Escape ran two closers.
+
+**THE FIRST FIX WAS ORDER-DEPENDENT AND THE CHECK CAUGHT IT.** Gating the
+editor on `#deckroot.on` is true right up until the deck's own handler closes
+it — so whichever listener was registered first decided the outcome, and with
+the deck's first the editor saw a deck already shut, passed its gate, and closed
+the **mode** as well. Measured: the editor gone and the page underneath, which
+is the one thing this change exists to prevent. **The mark travels on the
+EVENT** (`ev.smpDeckKey`), so neither listener has to run first: the editor is
+stopped by the class while the deck is still open, and by the mark once it is
+not.
+
+### §295.1 — the check's own two failures
+
+Its first falsification run **died rather than reporting** (§215, in a file
+whose docstring promises every probe degrades): `pg.click` on a control the old
+build does not have waits thirty seconds and then throws, so four assertions
+were made and reported as the whole story. Every press goes through a helper
+that degrades now. And **"on the same line" passed vacuously** on the build with
+no Play button at all, because `None == None` (§113.8); it asserts the type
+first.
+
+**And one page error was the CHECK, not the product**: it named the pillars
+function `merchandizing` where the tenant's key is `merchandising`, so
+`openDeckFor` resolved an undefined function and threw — the same throw the
+inline branch it replaced would have produced, so no behaviour moved, and no
+guard was added for a state the product cannot reach (§24).
+
+### What it costs, and what it does not touch
+
+**36 red** on the shipped pre-§295 build, 55 green after. The menu is untouched:
+four entries, same words, same order. **Nobody's rights move** — Present stays
+open to every viewer, the editor stays `canSpeakFor`, hiding a slide stays the
+office's — and the master flow is unchanged, because a flow is several subjects'
+decks and there is no one editor for it to land in. **Screen only**: no `api/`,
+`lib/` or `db/` file is touched, read off the diff; nothing is stored and
+nothing is migrated. A deck opened from the menu is asserted byte-for-byte what
+it was, *after* the editor's case in the same session, or a `from` left standing
+would be hidden rather than caught (§94.2).
+
+**RECORDED, NOT DONE**: the deck does not scroll the editor's rail to the slide
+it was left on — the editor keeps the selection it had, which is what "quick
+edits" asked for, and syncing the two would move somebody's selection under
+them; and Shape B is left on the table rather than dismissed, to be judged once
+this loop has been used.

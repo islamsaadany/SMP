@@ -348,6 +348,45 @@ function picTargetName(kind, key){
   return kind === "fn" ? (FUNCTIONS[key] || {}).name || key
                        : (UNITS[key] || {}).name || key;
 }
+/* ── PLAY, AND COMING BACK (§295) ────────────────────────────────────────
+   Islam: *"if they exit the presentation mood thye get back to the manage ppt
+   for quick edits if needed."*
+
+   THE EDITOR IS NOT CLOSED, IT IS STOOD DOWN. The deck is painted over it and
+   the mode is left exactly as it was — the same slide selected, the rail at the
+   same scroll — because coming back to where you were is the whole of what was
+   asked for. Closing and reopening would repaint it (§71.2) and land you at the
+   top of a 31-row rail.
+
+   `inert` AND `aria-hidden`, the pair `slidesOpen()` already puts on the page
+   behind it: without them the keyboard walks out of the deck and into a rail
+   nobody can see. */
+function slidesSuspend(){
+  var root = document.getElementById("slideroot");
+  root.inert = true;
+  root.setAttribute("aria-hidden", "true");
+}
+function slidesResume(){
+  var root = document.getElementById("slideroot");
+  root.inert = false;
+  root.removeAttribute("aria-hidden");
+  root.focus();
+}
+/* The deck for whatever this editor is editing, through the ONE resolver
+   (§295): the Present button and this ask `openDeckFor()` the same question,
+   so a pillars function cannot get one deck here and another there — which is
+   the fault §253.3 found on this very screen. */
+function slidesPlay(){
+  if (!SLED.target) return;
+  /* THE DECK OPENS FIRST, AND ONLY THEN IS THE EDITOR STOOD DOWN. The other
+     order is one line shorter and leaves the mode INERT WITH NOTHING IN FRONT
+     OF IT if the deck cannot be built — an editor nobody can click, with the
+     reason in a console nobody has open (§32, §171). Standing down after the
+     open means a throw costs the press and nothing else. */
+  openDeckFor(SLED.target, "editor");
+  slidesSuspend();
+}
+
 function slidesClose(){
   var root = document.getElementById("slideroot");
   if (!root.classList.contains("on")) return;
@@ -922,9 +961,19 @@ function slidesWire(){
 function wireSlides(){
   var root = document.getElementById("slideroot");
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
+  root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
   addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
+    /* ── THE DECK IN FRONT HAS THE KEYBOARD (§295) ──────────────────
+       Both handlers are on the window and each gates on its OWN root being
+       `.on`, and while a deck is played from here BOTH are on — so without
+       this line Escape ran `closeDeck()` and `slidesClose()` and threw away
+       the mode as well as the deck, and every arrow key moved the slide AND
+       walked the rail underneath it. Found by reading the two gates together,
+       which is the only place it is visible. */
+    if (document.getElementById("deckroot").classList.contains("on") ||
+        ev.smpDeckKey) return;
     if (ev.target.tagName === "INPUT" || ev.target.isContentEditable) {
       if (ev.key === "Escape") ev.target.blur();
       return;

@@ -7,7 +7,12 @@
    disappears, and Exit returns the presenter to exactly where they were.
    ──────────────────────────────────────────────────────────────────────── */
 
-var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"" };
+var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"", from:"page" };
+/* `from` is WHERE THIS DECK WAS OPENED FROM — "page" or "editor" (§295). It is
+   read by `closeDeck()` alone, to decide where Escape and Exit put you, and it
+   is written on EVERY open rather than only the editor's: a value left standing
+   would send the NEXT deck back to a Manage slides nobody opened, which is the
+   shape §265 recorded when the `fs` class survived a windowed close. */
 
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
@@ -1040,10 +1045,29 @@ function deckBuild(target){
    `DECK.flow` is the LIST OF SUBJECTS, held only while a flow is open. It is
    read by the strip at the bottom and by nothing else; a single subject sets
    it to null, so every existing behaviour is untouched by construction. */
-function openDeckWith(titleHtml, targets){
+function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
+     BOTH BRANCHES, EVERY OPEN. Stamping only the editor's case would leave the
+     word standing on the next deck opened from a page — a button reading "Back
+     to slides" that lands on the platform is worse than one that never said it.
+
+     THE WORD SAYS WHERE YOU LAND, which is the platform's own habit (§124):
+     "Exit" is true of a deck opened from the page and false of one played from
+     the editor, and a presenter who has just been arranging slides is the one
+     person who would read it literally.
+
+     `from` is optional, so `openDeck`, `openDeckFn` and the master flow are
+     unchanged by construction. Checked rather than assumed (§250.1): none of
+     the three is ever passed BY NAME, so no caller picks the new parameter up
+     from a `map` index. */
+  DECK.from = from === "editor" ? "editor" : "page";
+  var back = DECK.from === "editor";
+  var ex = root.querySelector("[data-dexit]");
+  ex.textContent = back ? "Back to slides" : "Exit";
+  ex.title = (back ? "Back to slides" : "Exit") + " (Esc)";
   DECK.flow = list.length > 1 ? list : null;
   DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
@@ -1059,12 +1083,29 @@ function openDeckWith(titleHtml, targets){
    are two doors onto one question — Present on a unit, Present on a function —
    and `deckHtmlFor()` is what decides which deck each gets, so a pillars
    function opened through either lands on the same slides. */
-function openDeck(u){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey]);
+function openDeck(u, from){
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
 }
-function openDeckFn(fk){
+function openDeckFn(fk, from){
   openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
-    ["fn:" + fk]);
+    ["fn:" + fk], from);
+}
+/* ── WHICH DECK A TARGET GETS, ASKED ONCE (§295) ──────────────────────────
+   §224 fixed this branch on the Present button and §253.3 fixed it again on
+   Manage slides and the anchors, each time because it had been written out
+   separately — so the third caller (Play) is the moment to stop copying it.
+   The two doors above stay: §253.3 keeps them deliberately, and this is the
+   resolver in front of them rather than a replacement for either.
+
+   THE FORMAT DECIDES, NEVER THE PREFIX: a function that plans in PILLARS is
+   unit-shaped, so it takes the unit deck through `unitLike()`, and only a
+   capability function takes `openDeckFn`. Asking by `fn:` alone is what gave a
+   pillars function a deck reading "Capability review - 0 capabilities". */
+function openDeckFor(target, from){
+  var t = String(target);
+  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+  if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk, from);
+  else openDeck(unitLike(t), from);
 }
 
 /* ══ THE MASTER PRESENTATION (§266) ═══════════════════════════════════
@@ -1447,14 +1488,30 @@ function masterMoved(order){
    Removed rather than reconciled, because one question may have one answer. */
 function closeDeck(){
   var root = document.getElementById("deckroot");
+  /* ── ONE DOOR DECIDES WHERE YOU LAND (§295, §53.5) ────────────────
+     Escape and the bar's own button both arrive here, so the return path is
+     written once and the two cannot disagree about it.
+
+     ASKED OF THE EDITOR'S CLASS AS WELL AS THE FLAG: the deck outlives nothing
+     here, but a build that ever closed the editor while a deck it opened was
+     still up would otherwise return to a hidden pane and leave the platform
+     inert behind it. Both, or neither. */
+  var toEditor = DECK.from === "editor" &&
+                 document.getElementById("slideroot").classList.contains("on");
+  DECK.from = "page";
   root.classList.remove("on");
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
      never fires that event, and `fs` left standing would give the NEXT deck a
      hidden bar and a click that advances slides (§265) in a window. */
   root.classList.remove("fs");
-  document.body.classList.remove("presenting");
+  /* `presenting` STAYS when the editor is underneath — it is the editor's too
+     (it is what hides the chat dock and stops the page behind scrolling), so
+     removing it here would give the mode back its scrollbar and its bubble the
+     moment a deck closed over it. */
+  if (!toEditor) document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
+  if (toEditor) slidesResume();
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
@@ -1822,6 +1879,19 @@ function wireDeck(){
   });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
+    /* ── THIS KEY IS THE DECK'S, WHICHEVER LISTENER RUNS FIRST (§295) ──
+       The editor stands its own keyboard down while a deck is up by asking
+       whether `#deckroot` is `.on` — which is true right up until the line
+       below closes it. So on Escape the answer depends on the order the two
+       window listeners happened to be registered in: deck first, and the
+       editor then sees a deck that is already shut, passes its own gate, and
+       closes the MODE as well. Measured — the editor was gone and the page was
+       underneath, which is the one thing this whole change exists to prevent.
+
+       The mark travels on the EVENT, so neither listener has to run first: the
+       editor is stopped by the class while the deck is still open, and by this
+       once it is not. */
+    ev.smpDeckKey = true;
     if (ev.target.isContentEditable) { if (ev.key === "Escape") ev.target.blur(); return; }
     /* ── FORWARD IS FOUR KEYS AND BACK IS THREE (§265) ────────────────
        Islam: "down and rigth for moving the slides forward left and up takes

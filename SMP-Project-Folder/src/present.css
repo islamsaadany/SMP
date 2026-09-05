@@ -5,7 +5,19 @@
      Every slide is authored at one fixed size and scaled to fit, so what is
      rehearsed is what projects — the same line breaks and the same rows per
      slide on any screen. */
-  .deckroot { position:fixed; inset:0; z-index:60; background:#0B1A33; display:none; }
+  /* ── 61, AND THE ONE PIXEL OF IT THAT MATTERS (§295) ──────────────
+     `.slideroot` is also 60 and comes LATER in the document, so at equal
+     z-index the editor paints on top: a deck played from Manage slides would
+     have set `.on`, laid out, scaled, and shown NOTHING, with the editor still
+     covering it. §96's family — renders perfectly, does nothing — and the one
+     fault in this change that no assertion short of a hit-test would have
+     caught.
+
+     61 rather than 70: it has to beat the EDITOR and nothing else. The modal
+     overlay is 100 and the tour is 70, and both stay above the deck exactly as
+     they do today; the two other 60s are page popups that cannot coexist with
+     it. */
+  .deckroot { position:fixed; inset:0; z-index:61; background:#0B1A33; display:none; }
   .deckroot.on { display:block; }
   body.presenting { overflow:hidden; }
   .deckstage { position:absolute; inset:0 0 62px; display:flex; align-items:center;
@@ -340,7 +352,38 @@
               background:var(--panel); color:var(--panel-ink); flex:none; }
   .sl-title { font-weight:700; font-size:var(--fs-body); }
   .sl-sub { font-size:var(--fs-small); color:var(--panel-quiet); }
-  .slidebar [data-slexit] { margin-left:auto; font:inherit; font-size:var(--fs-small);
+  /* ── THE PAIR IS A GROUP, NEVER TWO AUTO MARGINS (§225, §295) ─────
+     Play joins Done at the right end of the bar. `margin-left:auto` on each of
+     two flex items does not put them together — the free space is split
+     BETWEEN the two margins and they land a gap apart, which is exactly the
+     fault §225 recorded when the chat header grew its second button. The group
+     carries the auto; the buttons carry the gap. */
+  .sl-acts { margin-left:auto; display:flex; align-items:center; gap:10px; }
+  /* ── PLAY IS THE ACCENT AS A FILL (§38.4, §295) ───────────────────
+     Islam's pick from the mockup. It is the reason somebody is on this screen
+     once the arranging is done, so it takes the volume — and on a navy bar the
+     platform's own way of saying that is the accent FILLED with `--on-accent`
+     over it, which is what the deck's own lit pill does two surfaces away
+     (§266.9). Never gold TYPE: the accent carries a mark and cannot carry
+     words.
+
+     `--on-accent`, not a literal and not `--panel-ink`: it is the token
+     `brandTokens()` writes, so a tenant who rebrands gets an ink that can be
+     read on their own accent rather than one chosen for ours (§25).
+     Measured on the shipped palette: 5.34 light, 9.56 dark.
+
+     THE HOVER MOVES THE FILL RATHER THAN ADDING ONE (§94.8's rule for the
+     other solid button, and §154's reason). `--gold-deep` would have been the
+     obvious darker step and FAILS — 2.57:1 against this ink in light — so the
+     hover goes the other way, to `--panel-accent`, the accent as it reads on
+     this very panel: 7.68 light, 11.12 dark, both better than at rest. */
+  .sl-play { font:inherit; font-size:var(--fs-small); letter-spacing:.08em;
+             text-transform:uppercase; font-weight:700; cursor:pointer;
+             background:var(--gold); border:1px solid var(--gold);
+             color:var(--on-accent); border-radius:var(--r-pill);
+             padding:6px 18px; display:inline-flex; align-items:center; gap:8px; }
+  .sl-play:hover { background:var(--panel-accent); border-color:var(--panel-accent); }
+  .slidebar [data-slexit] { font:inherit; font-size:var(--fs-small);
               letter-spacing:.08em; text-transform:uppercase; font-weight:700;
               background:none; border:1px solid rgba(255,255,255,.35);
               color:var(--panel-ink); border-radius:var(--r-pill);

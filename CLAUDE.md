@@ -399,6 +399,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **generated from the platform sources** by `node scripts/extract-state.js`. Served over
   http(s) the platform hydrates from GET /api/state and autosaves on change; opened from
   file:// it runs on baked data.
+- **THE POOLED CONNECTION KEEPS NOTHING BETWEEN STATEMENTS (§289, 2026-09-04):**
+  production talks to Neon through PgBouncer in transaction mode, so every
+  statement sent OUTSIDE a transaction may run on a different backend. A
+  session-level lock (`pg_advisory_lock`), a session setting (`SET …`), `LISTEN`,
+  `PREPARE` or a temp table taken on one statement is NOT there on the next,
+  and worse, it stays on the backend it landed on and is handed to somebody
+  else's request. **Anything that must hold across statements lives inside
+  `BEGIN … COMMIT`**, with `pg_advisory_xact_lock` for a lock and `SET LOCAL`
+  for a setting — a transaction pins one backend for its life. §240 learned
+  this for the save; §289 learned it for the bootstrap, where a session lock
+  let two cold starts apply one migration and the sign-in page said
+  *"Something went wrong"* once per deploy. **When a fault looks like this** —
+  a 500 that only happens under a burst, right after a deploy, or a hang
+  nobody can reproduce alone — read the runtime log line the endpoint writes
+  (`api/auth:`, `api/state:`, `api/chat:`) and grep `api/` and `lib/` for the
+  five words above outside a transaction — or run
+  `node scripts/test-session-state.js`, which does that grep for you and is
+  red on any of them (§289.2). `scripts/test-cold-starts.js` models the pooler
+  and is the shape a behavioural check for this class takes.
 - **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
   (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
   a session AND a password that is no longer temporary; a signed-in person sees
@@ -437,6 +456,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§292):** Islam — *"on a
+  creation of a project I couldn't set the direction and we need to make the add
+  deliverable or outcome more of an options in the type rather than 2 buttons of
+  add deliverable or outcome that I get confused between them."* **TWO DIFFERENT
+  KINDS OF FAULT.** The direction had **never been editable on any project in any
+  mode** — §114 opened exactly this control on a pillar's key measures and nobody
+  carried it across to a project's outcomes (§53.5); a deliverable's `=` stays
+  printed (§104), and it is **not a gap**, so the direction stays the office's and
+  joins no count (§249.4, with that section's cost — an outcome where less is
+  better scores backwards until corrected — holding here too). **AND THE TWO
+  BUTTONS RENDERED AS ONE RUN OF TEXT**: measured, `Add a deliverableAdd an
+  outcome`, so the fault was never only *which one* but *is that one control or
+  two*. **THE TYPE IS NOT A LABEL** — it is WHICH OF TWO LISTS the row is in, and
+  the two are reported and scored differently — so the picker performs a
+  CONVERSION: minted by the minter an ADDED row uses, carrying the **name** and
+  the **hidden mark** (§233) and nothing else, under a **new id**, appended
+  (§99's one list). **ISLAM PICKED C** from three drawn in the running platform
+  (rule 1c): the picker locks once `reportedAny` says the row has been reported,
+  because A can throw a figure away on a `change` event with no press and no
+  confirmation. **`reportedAny` IS THE TEST, NEVER A SECOND ONE** (§104.8) — and
+  its cost is stated rather than discovered and is what C was chosen for: a
+  deliverable reads as answered the moment somebody picks *Not started*, so
+  **37 of the demo's 42** are locked; the × is still there, because a deliberate
+  press may throw a figure away and a dropdown may not. **THE REASON IS ON THE
+  HOVER** (§88, 1b-ii — drawn under the word it takes the column 251 → 406px).
+  **ONE WAY IN, REVERSING §53.4**, and **the new row is a DELIVERABLE** by
+  arithmetic rather than taste: an outcome with a blank target is a counted gap
+  (§249), so a button minting one would add a missing item and hold Submit every
+  press. **BUILD MODE KEEPS BOTH**, with a reason — there a row is added WHOLE
+  through a titled form (§129), and the outcome's is the only place `measureAt`
+  can still be set (§104.8). **The server needed nothing and it is asserted
+  anyway** (§172): `splitRows` already reads the move as `capPlan`, both ends,
+  every part of it one kind — proved able to fail twice (2 red, 4 red), 527/0.
+  No migration; a converted row is byte-shaped like an added one.
+  `checks/project-row-type.py` **13 red** on the build before — **and two of its
+  own first failures were the CHECK** (a blanket where the demo legitimately
+  holds locked rows, and four Reporting selects that are how a deliverable is
+  reported), while **`qa.py` held a literal this moved and was REWRITTEN, not
+  deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
+  a picker is not, so that column reads ragged, and six places still spell
+  `builderHere()` out inline.
 - **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
@@ -1189,6 +1249,61 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted in the same breath. 474/0; and one of the check's own first failures
   was the CHECK — a function's Performance tab is keyed `fnperf`.
 
+- **THE OBJECTIVES TABLE, AND A CELL THAT STOPPED BEING ONE (§278.3):** four
+  reports from the live product, two causes. **THE DRAWER SPANNED EVERY COLUMN
+  BUT THE FIRST** — right on the key measures table, whose first column is `#`,
+  and wrong on the objectives tables, whose first column is the PROSE one: a
+  table shares a spanning cell's width across the columns it covers, so the
+  twelve month boxes pushed those wider and the one column outside the span
+  paid for all of it (**Objective 242 → 97px**, the table's own width
+  unchanged; on a supporting function, whose name WRAPS, the row then went
+  **57 → 136px**). Islam's own proposal is the fix and, once a `#` column
+  exists, it is the shape the drawer already had. **`display:flex` ON A `<td>`
+  IS NOT A TABLE-CELL**, and that one line cost two more things nobody had
+  connected: the cell stopped stretching to its row, so a tall row showed the
+  bare table under it (*"the target cell turned white"* — nothing to do with
+  hover), and the sibling `display:block` rule made a tactic's four target
+  boxes lay out **on top of the Owner column** with the `.tgrid` reporting a
+  width of **zero** at every width (*"the table is damged"*). The flex box
+  moves inside (`.mpcell`) and all three end together; **one builder**
+  (`monthlyTgtCell`) writes that cell for all four tables, where the shape was
+  written out four times. **THE ROW HOVER IS GONE** (his C): measured, the
+  zebra outranks it, so a white row hovered went `#FFFFFF → #EFF2F6` and a
+  striped row **did not change at all** — a highlight that speaks on half the
+  rows reads as unreliable; §267.1's two patches go with it (they existed only
+  to make the frozen pair follow it), the stale `_shared.css` comment claiming
+  rows separate "on HOVER rather than on a zebra stripe" is corrected in the
+  same edit (§104.8), and the cost is stated — nothing now follows one row
+  across a wide table. **THE `#` AND THE HANDLE ARE THE KEY MEASURES TABLE'S
+  OWN**, copied not redesigned, and it is the SAME question (`mayArrange`, per
+  subject), so nobody gains a right they do not already hold. Two things had to
+  move for the screen and the server to agree: `arranging()` **names its page**
+  (these tables are not on Plan, and the named-page branch does not repeat
+  `mayEditPlan()` — the pen is already an authorisation test), and
+  `lib/authorize.js` **classifies a capability's objectives reorder as
+  `arrange`**, which it never did (a custodian would have watched a row move
+  and the save come back refused, §94.3 exactly). The reorder commits through
+  `KOLISTS`, the registry Add and Remove already use. **THE PAIR IS CENTRED BY
+  ITS MARKS, NOT ITS BOXES** — Islam: *"these are not centered to each other"*,
+  and the measurement was mine: the boxes centre to **0.00px** and the digit
+  still reads **1.62px high**, because its line box carries descender space the
+  glyph never uses; four ways of centring the boxes all read −1.62, because no
+  box-level alignment can move a glyph inside its box. `text-box: trim-both cap
+  alphabetic` makes the box the ink (−1.62 → **0.06px** shipped), taken from
+  the font's own metrics rather than a nudge that would be a guessed constant
+  (§122.5), degrading to today's look where unsupported — and read off the
+  PAINTED PIXELS at eight times scale (§185, in type). **Costs stated**: the
+  `#` column is 63px, which on a unit's nine-column table broke the eye and
+  Remove onto a second line (57 → 74px), so that cell is held to one line and
+  both tables come out at 56. **24 red** on the build before; **three checks
+  held literals these decisions moved and were REWRITTEN, not deleted**
+  (§218) — `plan-tail-fold` asserted a HOVERED row's ground, `fn-ko-edit` and
+  `objective-unit` held four position-keyed cell selectors between them (a
+  position-keyed probe does not fail honestly, it measures the neighbour), and
+  `fn-pillars` held the workbook's column list and **had been red since §278
+  landed, missed at that merge**. **Recorded, not done**: the objectives'
+  READING view still draws no `#`, where a pillar's key measures number their
+  rows in both modes.
 - **A TARGET WITH A SHAPE OF ITS OWN (§278):** Islam — *"targets proration is
   always flat acorss the year but some targets have seasonality so the proration
   is not valid ... so some targets needs a monthly plan input."* **THE ARGUMENT
@@ -1357,6 +1472,49 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   dropped the other's fix — main's, and a filler has no way out of fill mode),
   and the check's `.penbtn[data-page]` broke LOUDLY and now asks every editing
   control AND `mayAuthorPage` beside it (§51.11).
+- **THE PLATFORM COLLECTS, THEN SENDS ONE EMAIL (§293, superseding §283):**
+  Islam — *"when someone send to me when I don't reply it send an email for
+  each message ... it needs to compile some messages rather than an emaile for
+  each message"*, then the correction that decides everything: *"even if I'm at
+  my desk if the smo don't reply in 10 min the email should come ... sometimes
+  people might be at their desk but not focusing."* **PRESENCE DECIDES NOTHING
+  ABOUT EMAIL NOW**; what stops a collection is a REPLY on the office's side and
+  COMING BACK on theirs (a reply needs reading, not answering) — and he took the
+  strictest of three on his own side, reading does not stop it, with the cost
+  named. **THERE IS STILL NO SCHEDULER AND THE SEND RIDES SOMEBODY'S REQUEST**
+  (§283's own mechanism): every signed-in browser checks in at least every three
+  minutes (§98), so **ten minutes is a floor, not a promise**, stated before he
+  chose it over a paid cron. **ONE EMAIL FOR EVERY WAITING CONVERSATION** (his:
+  *"not 1 for each person"*): the trigger is anything old enough, the contents
+  are everything unanswered, and a conversation carried early is stamped by that
+  email so it never triggers one of its own. **THE AWAY SETTING CHANGED WHAT IT
+  MEANS RATHER THAN GAINING A NEIGHBOUR** — same key, relabelled *Email after*,
+  shipping at 10; the KEY does not move (§30.2), and **the word "here" keeps its
+  own short window** (`CHAT_HERE_MIN`) on all three surfaces that compute it, or
+  the screen calls somebody present nine minutes after they shut the tab.
+  **§283 IS SUPERSEDED, NOT JOINED, AND THAT WAS ISLAM'S CALL**: that section
+  built the same idea from one side and left two numbers on one panel — the
+  shape he objected to (*"is that a duplication?"*) — and two mechanisms sending
+  one email is two emails, so `chaseDue()` and every `chase_html` write are
+  DELETED (§24) while **the column stays in the database, read by nothing**.
+  The merge was stopped and put to him, because deleting a shipped feature from
+  production is not a merge decision. **`src/mail.js` MOVED TO
+  `lib/mail-html.js`**, inlined by build.py and required by the server, because
+  a collection has no composer attached (§53.5) — the default footer moved with
+  it. **ONE SWEEP AT A TIME** on `pg_try_advisory_xact_lock`, skipping rather
+  than queueing, **awaited** where §283's was fire-and-forget, and **stamped
+  only when the provider took it**. Proved able to fail once per decision:
+  **13 / 4 / 2 red** — and the third took two attempts, because a throwing send
+  never reaches the stamp AND the transaction rolls it back, so the guard is
+  defence behind two other things. **The check's own first run was wrong twice
+  in the harness**: it aged the messages and left the watermark, which is a
+  different history rather than ten minutes later, and each trial inherited the
+  last one's unemailed replies. **Two checks held the old meaning and were
+  REWRITTEN** (§218), and `test-mail-contrast.js` was reading the builder by its
+  old path (§51.11, loudly this time). **RECORDED, NOT DONE**: with nobody
+  signed in anywhere an overnight question waits for the morning; the digest
+  carries one button rather than a link per conversation; two of the office
+  replying at once still both collect.
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -1844,6 +2002,243 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **WHAT IS ATTACHED IS SHOWN, NOT DESCRIBED (§286.2):** Islam, having pasted one
+  — *"the message is very subtle I didn't notice that something was attached."*
+  The whole confirmation was one line of `.chnote`, the page's quietest grey,
+  below the box, at the weight of an empty space. Four drawn in the REAL
+  composer; he picked the strip above it — **the picture, a line naming it, and
+  a way to take it off**. The picture is the part a sentence cannot replace
+  (*which* screenshot is about to go), and it sits ABOVE the box so the thing
+  under the cursor never moves. **The thumbnail is the already-shrunk data**
+  (§50): what is previewed is what SENDS, never a second rendering. **The grey
+  sentence goes with it** (1b-ii), while an error still speaks there because
+  that is not a description of state (§124). **The remove is wired on the FOOT,
+  not the button** — the strip is rewritten every paint (§24, §47.2) — and it
+  clears the file input or the same file cannot be picked twice.
+- **ONE PANEL, WHATEVER IS IN IT (§285.2):** *"the 2 options have different panel
+  sizes let's unify things."* Measured: **531 against 498, with the top edge at
+  351 against 384** — the panel is anchored at the BOTTOM, so what moved was the
+  top, 33px every time you switched. Two causes, both from §285: the search box
+  is drawn on the list and not in a conversation, and the line under the title
+  was made to say nothing on the queue side — **an empty line is a shorter
+  header**. `.chatbody` held a flat `height:340px` and the panel was the sum of
+  its parts; **it is the other way round now** — the panel holds the height, the
+  body flexes with `min-height:0` (§100.5), and anything added to the chrome
+  costs a row rather than moving the panel. Capped to the window for
+  `.chinbox`'s reason (a fixed height puts the composer off a short screen);
+  checked at 900 / 760 / 640. **And the title's line never falls empty** —
+  reserving its space with a number would be a guessed constant going stale
+  (§122.5); §285 was right that the words were redundant and wrong about what
+  removing them costs.
+- **A PICTURE IS PASTED, NOT ONLY ATTACHED (§286):** Islam — *"allow in the chat
+  to copy paste a picture rather than only attaching it."* Somebody reporting a
+  wrong number has just pressed the screen-grab key; making them save the file
+  and find it again is asking them to do the computer's job. **IT FEEDS
+  `takePicture()` AND ADDS NOTHING** — §50's whole intake (1600px, both formats
+  with the smaller kept, the failure said in words) holds because it is the same
+  door, and the office's reply box being the same box means §285's queue gained
+  it with no second listener. **TEXT STILL PASTES AS TEXT**: only an image item
+  is taken and `preventDefault` fires only when one is found, so a paste
+  carrying both keeps its words. **`items` FIRST, THEN `files`** — a screenshot
+  lands on `items` in every desktop browser and on `files` in Safari. **AND WITH
+  PICTURES OFF IT IS REFUSED IN WORDS** (§98.2): a paste that appears to work and
+  then vanishes is worse than one that says no. **The hover says the capability
+  exists**, because it has no control of its own to be discovered by (§61).
+  Proved by dispatching a REAL ClipboardEvent with a real PNG — a probe calling
+  `takePicture()` directly passes on a build where the listener was never wired
+  (§96).
+- **THE OFFICE'S CORNER CARRIES THE QUEUE (§285):** Islam — *"the chat bubble
+  of the SMO team shouldn't be something to be sent to the smo, that is
+  redundancy … it should be the chats of the other people sending the smo the
+  messages"*, with a switch to reach their own thread. **REDUNDANCY OF AN ODD
+  KIND**: the corner is *your* conversation with the office, and for the office
+  that is a conversation with themselves. His decisions, all recorded: waiting
+  only · no cap · all of the office · **the badge is the LENGTH of the list**
+  (he first said messages; a badge reading 7 over 4 rows is what gets reported
+  as a bug, §108.1) · the one you have open never vanishes under you (§113) ·
+  search reaches **all history** and shows **the line that matched**.
+  **NOTHING NEW IS AUTHORISED OR STORED** — opening is the Inbox's `thread`,
+  replying its `reply`, so §283's chase, §231's box and §71's answered-by-the-act
+  come free. **THE QUEUE RIDES THE POLL THAT ALREADY EXISTS** (§98) and never
+  touches the register (§282). **ONE COMPOSER, FORKED AT THE TOP** (§53.5), and
+  **`replyPost()` is the one email builder both screens call** — the corner's
+  first draft built a smaller one, which would have emailed somebody differently
+  depending on which screen the office was looking at. **The search says its own
+  scope out loud** (§35, §124), because results reach conversations that are not
+  waiting while the Waiting segment is lit. **Prefixed `cq`, never `ch`** — the
+  Inbox owns `.chq*` (§65.9). **TWO `var` COLLISIONS IN ONE CHANGE, BOTH FOUND
+  BY THE CHECK GOING RED**: `firstLine` is a SERVER helper and threw inside the
+  list builder, leaving the body's class set and its contents empty — a blank
+  corner with nothing on the console, because the throw was in the poll's own
+  callback; and `var cfg` in `drawPanelChrome()` shadowed the module's, which is
+  filled from the SERVER, so the panel wore the shipped promise over the
+  office's own.
+- **THE CORNER SURVIVES THE WALK (§284, REVERSING §100.4):** *"we need the chat
+  to sustain the navigation so it's open while me navigating across the
+  different pages."* Measured: one press on a page tab closed it. §100.4
+  minimised on any `pointerdown` outside the dock — his own earlier instruction
+  — and **the two cannot both be true, because the platform is ONE PAGE**: every
+  destination, tab, section and card is a press "outside", so a rule exempting
+  navigation would exempt everything but the empty margins. **Recorded as a
+  reversal, not overwritten**: §100.4 was right for a panel you dip into and
+  leave, and stopped being right when the panel became somewhere you WORK. The
+  minus and Escape remain, and **both are an act**; nothing typed is lost either
+  way, because the panel is hidden rather than rebuilt. **The assertion is
+  REWRITTEN, never deleted** (§218) — it now asserts the panel STAYS — and one
+  of the check's own comments went with it: a section pressed the bubble after
+  navigating *because* navigating used to close the panel, and with it arriving
+  open the bubble is not drawn and the press timed out on an invisible control.
+- **A REPLY NOBODY WAS EVER TOLD ABOUT (§283):** the platform decided whether to
+  email AT THE INSTANT the office replied — *has this person had a page open in
+  the last few minutes?* — and a **yes** is a prediction, wrong in one
+  direction: somebody reading two minutes ago who then shuts their laptop
+  counts as present, gets no email, and is **never told at all**. §97.5 wrote
+  the edge down when it built the rule and called a sweep a later decision;
+  this is that decision. **STOP PREDICTING, START LOOKING**: a reply still
+  UNREAD after the office's wait (30 minutes, Islam's number) is chased then.
+  One row of the table moves — away is still mailed at once, a read reply is
+  still never mailed, and **present-and-never-came-back stops being silence**.
+  **THE MESSAGE IS KEPT, NOT REBUILT** (§72.3: the browser builds the email and
+  the server resolves the recipient, so a chase half an hour later has no
+  browser to ask) — the SAME email merely later, never a second kind that would
+  drift (§53.5); written only when the send is deferred and cleared the moment
+  it goes or they read it. **`chaseDue()` RIDES ORDINARY REQUESTS**, which is
+  what §43 already does with expired sign-in attempts, **once a minute per
+  process** so §98's 14→5 is not given back, and it can never fail the request
+  it rode in on. The limitation is stated: **nobody touching the platform means
+  nothing goes out until somebody does.** The address is resolved AT SEND TIME
+  from the stored register (§74.2) — never kept, so a retired person is not
+  written to. **`chatSet()` needed nothing**: §104.7 takes the type from the
+  DEFAULT, so a third number setting worked the day it was added. **AND THE
+  CHECK FOUND A HOLE IN MY OWN QUERY** — it read the SQL out of `api/chat.js`
+  rather than keeping a copy, and went red because the sweep did not say
+  `from_office`: harmless today, since only `reply` writes a kept message, and
+  *a query that relies on what cannot happen yet breaks silently the day it
+  can*. **AND §105.6 BIT TWICE IN AN HOUR**: two runs were measured against a
+  dev-server started BEFORE the file under test was written — once calling the
+  fix working with the falsified build on disk, once calling it broken with the
+  good one. **Compare the file's mtime with the server's start time; never
+  trust the order the commands were typed in.**
+- **THE CORNER ARRIVES WITH THE PAGE, AND THE SEARCH REACHES SOMEBODY WHO HAS
+  NEVER WRITTEN IN (§290):** Islam — *"a lag happened where the chat icon didn't
+  apperar on the reload of the branch"*, and *"the erach for new peopele isn't
+  working"*. **THE SECOND WAS NOT A FAULT AND SAYING SO CAME FIRST** (that
+  feature was the mockup awaiting his wording), and he then asked for both.
+  **§197 HID THE BUBBLE UNTIL THE CHAT ANSWERED, FOR A GOOD REASON THAT DOES NOT
+  APPLY HERE**: *an optimistic bubble that vanishes is a control that lied* —
+  and this is not a guess, because the switch lives in `org.extra.chat`, the
+  browser holds it as `GROUP.chat` before the page draws, and `chatSettings()`
+  reads that same value from that same row (measured both ways on a real
+  Postgres: off reads `{on:false}` on both sides). Asked ONLY when the platform
+  hydrated (`SYNC.isLive()`), so `file://` and §201's wall are unchanged; and
+  nobody the chat would refuse can see it, since `/api/state` refuses a session
+  that has not chosen a password (§43.2). **The poll stays the authority** — this
+  decides only the seconds before the first answer, which after a new build is
+  the whole tenant at once. **THE PEOPLE HALF IS THE SERVER'S ANSWER** though the
+  browser holds the register, because the test is *has no conversation AT ALL*
+  and only the server knows every thread; the active test is **copied from
+  §247's own query** (`extra->>'active' <> 'false'`), which the first draft
+  guessed as a status column and would have offered every retired person (§42).
+  **Nobody is in both halves** (§108.1), nothing new is authorised or stored, and
+  the first message carries §247's own `start` — so the chase, the box and
+  leaving the waiting list come free (§53.5). **Capped at ten** with the rest
+  COUNTED. **§290.1 — EVERY HEADING GOES**: Islam, of the group headings, *"the
+  header is taking unneede space"*, then of the scope line, *"i still can see a
+  header"*. Both right (1b-ii): the ROW SHAPE says which is which and the ORDER
+  does the grouping, and the scope moved into the search box's placeholder, read
+  when somebody decides to type and costing no row — still SAID, because the
+  Waiting half is lit while results reach answered conversations (§35, §124). The
+  cap speaks at the FOOT, where the list runs out, never in a heading. **AND THE
+  WAY OUT WAS A REAL FAULT, OLDER THAN ALL OF IT**: *Open the Platform Inbox*
+  sits inside the scrolling list, so any search carried the corner's one
+  permanent way out off the bottom (§61) — sticky rather than moved, because two
+  places draw that foot and one rule covers both (§53.5); the cost is one row of
+  list height, always. **§290.2 — 11 red** with the people half out and **1 red**
+  with the sticky rule out, from the SOURCES (§276); **three of the check's own
+  failures were the CHECK** (it died rather than reporting, §215; it held a row
+  handle across a poll that rebuilds the list; and it left the search box holding
+  another term, failing its NEIGHBOUR, §94.2), and one assertion was REVERSED and
+  REWRITTEN, never deleted (§218). **One half of the sticky assertion cannot
+  fail** and is kept as the control, said so in the check (§113.8).
+- **A SAVE MUST NOT SHUT EVERYBODY ELSE OUT (§288, finishing §282):** that
+  section fixed one reader and left **three doors** in front of it — the schema
+  check, `chatSettings()` (one row of `org`), and **`auth.getSession()`, which
+  JOINs `people` and therefore sits in front of every authenticated request in
+  the product**. All three are inside the graph a save wipes; all three blocked
+  while the list §282 fixed answered in 1ms. *A measurement that only covers
+  the thing you changed proves the thing you changed.* **AND THE TEST PASSED ON
+  IT** — it held a save open with `TRUNCATE people`, one table where a save
+  truncates 33 (§100.3 from the inside); the list is READ OUT OF
+  `lib/state-io.js` now, never copied (§283). **THE CLEAR STOPS BEING A
+  `TRUNCATE`**: patching readers one at a time is §282 a third time, because
+  every door is a read of the graph and there are more of them than can be
+  counted. `DELETE` takes ROW EXCLUSIVE, which does not conflict with a reader
+  — every door 1–2ms where all four were blocked, for 72ms on the clear.
+  **CHECKED, NOT ASSUMED**: all 14 FKs cascade, nothing outside the list
+  references anything inside it (so the chat and the message record stay
+  outside the clear, §97/§146), no user triggers, no sequences.
+  **THE CHURN IS BOUNDED AND MEASURED** — 160 full saves: 5.5 → 15.4 → 15.5 →
+  15.5 → 15.5 MB, a step then flat, because the space a DELETE frees is reused.
+  **AND IT IS THE FALLBACK PATH, NOT EVERY SAVE**: §241's incremental writer is
+  LIVE on production (since 2026-09-03) and its per-subject deletes take ROW
+  EXCLUSIVE, so a plain field edit never reaches this clear and never blocked a
+  reader. What falls back is every settings, register, reorder and add/remove
+  change, and **every whole-graph post from a tab on an older build** — which
+  narrows the claim and fits the report, since a new build reloads every browser
+  at once and each posts the whole graph. **§288.1 — A CHAT ROW SAYS
+  THE REGISTER'S SHORT NAME AND WHERE THEY SIT**: §187 did this for the INBOX's
+  list and the corner is the THIRD builder onto the same rows, MATCHING on the
+  short name (§93.8) and drawing the long one. It needs nothing from the server
+  — the browser holds the register — and `chatPlaceOf()` is ONE answer both
+  lists ask, ending at `placeLabel()` (§93.12); somebody the register no longer
+  holds keeps their stored name and is given NO place (§35). The demo cannot
+  show it (all 33 names are two words), so the check MAKES the state (§255).
+- **THE CHAT MUST NOT WAIT ON A SAVE (§282):** Islam, twice in two days —
+  *"all conversations are gone!!"*, then *"before the fix all the chats
+  disappeared"*, with §231.4's card reading *"The server did not answer (no
+  answer)"*. **NOTHING WAS LOST AND THE CARD WAS TRUE**: the chat's tables sit
+  outside the state graph, so a save cannot reach them (asserted). *"No answer"*
+  is `post()`'s 25-second clock, so the endpoint was neither down nor erroring —
+  it was **waiting**. A save clears the graph with `TRUNCATE … CASCADE`, which
+  takes ACCESS EXCLUSIVE on `people` for the whole of §240's (correctly) long
+  transaction, and the queue `LEFT JOIN`ed `people` for a live name: **frozen at
+  8s, against 2ms reading its own stored `person_name` and 1ms for the
+  messages** — only the join was ever blocked. **Worst exactly when somebody is
+  looking**: a new build reloads every browser, the platform autosaves, Neon has
+  slept, so the slowest save of the day lands as the corner opens. **THE READER
+  IS FIXED AND THE WRITER DELIBERATELY IS NOT** — `DELETE` was measured and is
+  better on every axis (3ms against 72ms, all 14 FKs already cascade, readers
+  never block), and it is still not done, because it was verified HERE and not
+  against production, where drift would make a save FAIL rather than merely be
+  slower (§238 already records the write path as its own staged pass, and §241
+  removes the TRUNCATE from the other side when its flag is switched on). The
+  register is asked **separately and allowed to fail**, with a 2s `lock_timeout`
+  under it — safe because a chat WRITE can never collide with a save, so it can
+  only fire on the read that must not hang; **and the backstop alone is not
+  enough, which the red run shows** (the old query still fails, just faster).
+  Cost stated: for a second or two a RENAMED person shows their previous name,
+  and **`gone` reads NULL, never true** — an unread register is not somebody
+  leaving it (§93), and the page already treats null as *say nothing*.
+- **A REFUSAL WITHOUT ITS CAUSE IS WHY NOTHING CONVERGES (§282.2–4):** measured
+  against a stand-in push service, a mismatched key (403), a dead registration
+  (400) and an oversized payload (413) all returned `failed: 1` and printed one
+  sentence — *"The push service would not take it."* **Four rounds of fixes
+  converged on nothing because nothing ever named one thing** (§124 at the far
+  end of the chain). The service's words are carried back, the service is NAMED
+  from the endpoint's host alone (Apple will not deliver until the platform is
+  on the home screen — a different errand from Chrome), and the diagnostic asks
+  **this browser** as well as the server, because a browser registered at one
+  address while the server sends to another read as perfect health at both ends.
+  **AND A REGISTRATION IS BOUND TO THE KEY IT WAS MADE WITH**: accepting an
+  existing one without looking at it means that once the key changes the browser
+  hands the old one back FOR EVER — bell on, device counted, every send refused,
+  and nothing able to notice. Compared and re-made now; **a browser that will
+  not report its key is left alone**, because churning on a guess is worse.
+  **AND THE FIRST BUILD OF THAT STOPPED SUBSCRIBING ENTIRELY** — `pushSync`
+  already had a `want`, a second `var want` in the same callback HOISTED over
+  it, `if (!want)` read `undefined` and took the unsubscribe branch every time:
+  §56.7's collision, valid on both sides, past `node --check`, **found by the
+  check going red and not by reading it**.
 - **THE OFFICE STARTS A CONVERSATION (§247):** Islam — *"from the platform
   inbox allow the smo to initiate a message with someone."* Until now the office
   could only ever ANSWER: with nobody having written in there was no way to
@@ -5591,6 +5986,22 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/project-row-type.py # a project row's type is a picker and its
+                                # direction opens (§292): ONE way to add a row and
+                                # pressing it adds a DELIVERABLE (an outcome's blank
+                                # target is a counted gap, so the other kind would add
+                                # a missing item every press); the picker MOVING the
+                                # row read back off the STORED plan (§96) with its new
+                                # id, its name and its hidden mark; a row that is a
+                                # picker EXACTLY when it has not been reported against,
+                                # asserted as an AGREEMENT with the demo proved to hold
+                                # an example of each (§113.8); the direction writing and
+                                # a deliverable's `=` still printed; read mode and both
+                                # other panes byte-for-byte what they were; and the
+                                # table fitting its pane at 1600/1280/1100 (§158).
+                                # 13 red on the build before, and every probe degrades
+                                # rather than dying (§215). SMP_BUILT points it at
+                                # another build
 python3 checks/report-blockers.py # the reporting page says WHERE Submit is held
                                 # (§279): the bar's chips asserted as AGREEMENT with
                                 # reportPlaces() and never as a list, both ends every
@@ -5679,6 +6090,24 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/objectives-table.py # the objectives table with the monthly drawer
+                                # in it (§278.3): opening the drawer moves NO column
+                                # (the squeeze was the column left outside the span,
+                                # not the indent), every cell fills its row on a row
+                                # made TALL on purpose, hovering changes nothing on
+                                # BOTH parities, a tactic's four target boxes stay
+                                # inside their cell at six widths, a REAL pointer
+                                # drag reorders the STORED list, the handle's gate
+                                # falsified by making the rule say no and watching
+                                # the same table draw (since §94 no viewer can open
+                                # this table and not reorder it, so an absence over
+                                # an empty table would prove nothing — §113.8), and
+                                # the number and the handle centred by their MARKS,
+                                # read off the painted pixels at 8x. It MAKES its
+                                # state: the demo's objective names are short, so
+                                # the tall row is built rather than waited for.
+                                # 24 red on the build before; SMP_BUILT points it
+                                # at another build
 python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # arithmetic asked of the rule, the drawer PRESSED
                                 # on all four surfaces and the stored plan read
@@ -5888,6 +6317,19 @@ python3 checks/fn-perf-controls.py # a supporting function's Performance control
                                 # UNCHANGED, and the row one line from 1920 to 768.
                                 # 16 red on the build before, and one of its own
                                 # assertions could not fail as first written (§113.8)
+node scripts/test-chat-chase.js # the platform collects, then sends one email
+                                # (§293): nothing goes out while the collection
+                                # fills, ONE email then carries every waiting
+                                # conversation, a reply stops it on the office's
+                                # side and coming back stops it on theirs, being
+                                # at your desk suppresses nothing, and a refused
+                                # send buys no silence — through the REAL handler
+                                # against a real Postgres with a stand-in mail
+                                # service reading what left off the wire. Time is
+                                # moved in the database, never waited for, and it
+                                # moves the marks WITH the messages (needs a
+                                # database; 13 / 4 / 2 red, one falsification per
+                                # decision)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -5986,6 +6428,22 @@ node scripts/test-safety-peek.js # ...and the server half against a real Postgre
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to
                                 # the ordinary read
+node scripts/test-session-state.js # nothing session-level on the pooled connection
+                                # (§289.2): every server file read, comments dropped,
+                                # concatenated literals rejoined, and any statement
+                                # starting with pg_advisory_lock, a bare SET, LISTEN,
+                                # PREPARE or a temp table is a failure; SET LOCAL and
+                                # the xact lock pass. Red on the chat's SET before
+                                # §289.2, green after. No database, no network
+node scripts/test-cold-starts.js # two cold starts, one new migration, a POOLED
+                                # connection (§289): the pooler is modelled — session
+                                # state lost after every statement outside a
+                                # transaction — and both bootstraps must succeed with
+                                # the migration recorded once; a migration that cannot
+                                # run fails loudly, records nothing, and the next boot
+                                # applies it. 1 red on the module before (23505 on
+                                # _sql_migrations_pkey — the sign-in page's "Something
+                                # went wrong", twice in a day, once per deploy)
 python3 checks/save-said.py     # a save that FAILS says so on the page: a server
                                 # error naming its status, an unreachable server, a
                                 # remembered refusal, and demo data — seven states
@@ -6207,7 +6665,260 @@ build before, walking every slide; three assertions in `master-presentation.py`
 REWRITTEN, never deleted (&sect;218). 30/0 &middot; 44/0 &middot; six deck checks
 &middot; full sweep clean.*
 
-*Earlier the same day: **&sect;266.11: the dialog does not change
+
+*Earlier the same day: **&sect;293: the platform collects for ten
+minutes, then sends one email.** Islam, of the emails the platform sends him:
+*"when someone send to me when I don't reply it send an email for each message
+... it needs to compile some messages rather than an emaile for each message."*
+Measured first: the office was chased on every message, and the same fault sat
+on the other half of the same feature. **WHAT WAS PUT TO HIM FIRST WAS THE
+OBSTACLE** &mdash; &sect;97.5 says nothing wakes this platform up, which is true
+of a TIMER and not of the platform: every signed-in browser checks in at least
+every three minutes, and a request is all a send needs (&sect;283's own
+mechanism). Three heartbeats were costed and **he took the platform's own
+traffic**, with the cost stated: with nobody using it at all the email waits for
+the next sign of life, so ten minutes is a floor and not a promise. **THEN HE
+OVERRULED THE PART I HAD PROPOSED** &mdash; I would have suppressed the email
+for somebody at their desk; *"even if I'm at my desk if the smo don't reply in
+10 min the email should come ... sometimes people might be at their desk but not
+focusing."* So presence decides nothing, and what stops a collection is a
+**reply** on his side and **coming back** on theirs; asked which of three on his
+own side he took the strictest, reading does not stop it. **THAT RETIRED THE
+AWAY THRESHOLD, so the same key changed what it means**: one box, relabelled
+*Email after*, shipping at 10, the key unmoved so a tenant that typed a number
+keeps it &mdash; while the word *here* keeps its own short window on all three
+surfaces that compute it. **ONE EMAIL FOR EVERY WAITING CONVERSATION**, his
+correction. **&sect;283 IS SUPERSEDED, NOT JOINED, AND THAT WAS HIS CALL**: it
+built the same idea from one side and left the two-numbers panel he objected to,
+and two mechanisms sending one email is two emails &mdash; so the merge was
+STOPPED and put to him, because deleting a shipped feature from production is
+not a merge decision. `chaseDue()` and every `chase_html` write are deleted; the
+column stays in the database, read by nothing. **The mail builder MOVED rather
+than being copied** (`src/mail.js` &rarr; `lib/mail-html.js`), because a
+collection goes out with no composer attached. **The emails were drawn before
+they were built** (rule 1c) out of the platform's own builder. Proved able to
+fail **once per decision &mdash; 13 / 4 / 2 red** &mdash; and the third took two
+attempts, which is recorded: a throwing send never reaches the stamp and the
+transaction rolls it back, so only the plausible regression breaks it. **The
+check's own first run was wrong twice in the harness.** Renumbered &sect;261
+&rarr; &sect;262 &rarr; &sect;293 as main took thirty numbers while this was
+built (&sect;99, the fourth face of &sect;94.12).*
+
+*Earlier: **&sect;292: a row's type is a picker, and its
+direction opens.** Islam, from the live product: *"on a creation of a project I
+couldn't set the direction and we need to make the add deliverable or outcome
+more of an options in the type rather than 2 buttons of add deliverable or
+outcome that I get confused between them."* **TWO DIFFERENT KINDS OF FAULT, AND
+SAYING WHICH IS HALF THE WORK.** The direction had **never been editable on any
+project in any mode** &mdash; not a fault of creating a project, but of every
+outcome the table has ever held; &sect;114 opened exactly this control on a
+pillar's key measures and nobody carried it the two inches across. **And the two
+buttons rendered as one run of text** &mdash; measured, `Add a deliverableAdd an
+outcome` &mdash; so the confusion was never only *which one do I press*. **A
+third nobody reported**: a row added as the wrong kind could not be corrected at
+all. **The type is not a label**, which is what decides how far a picker can go:
+it is which of two lists the row is in, and the two are reported and scored
+differently, so the switch is a CONVERSION &mdash; minted by the minter an added
+row uses, carrying the name and the hidden mark and nothing else, under a new id.
+**Islam picked C** from three drawn in the running platform and published as an
+artifact (rule 1c): the picker locks once the row has been reported against,
+because A throws a figure away on a `change` event with no press and no
+confirmation. Its cost was measured before he chose and is what C was chosen for
+&mdash; **37 of the demo's 42 deliverables** are locked, and the &times; is still
+there. **One way in, reversing &sect;53.4**, minting a DELIVERABLE by arithmetic
+rather than taste (an outcome's blank target is a counted gap, so the other kind
+would hold Submit every press), with build mode keeping both for a stated reason.
+**The server needed nothing and it is asserted anyway** &mdash; 527/0, proved able
+to fail twice &mdash; no migration, full `qa.py` sweep ERRORS none, ten
+neighbouring checks green, and `checks/project-row-type.py` **13 red** on the
+build before. **Two of that check's own first failures were the check**, and
+`qa.py` held a literal this moved and was rewritten rather than deleted. **Merged to `main`**, with main's
+&sect;282&ndash;&sect;290 from the chat round brought in first, the built file
+REBUILT rather than merged (&sect;91) and the whole suite re-run after.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;290: the corner arrives with the page,
+and the search reaches somebody who has never written in.** Islam, on the shipped
+build &mdash; *"a lag happened where the chat icon didn't apperar on the reload of
+the branch"*, and *"the erach for new peopele isn't working"*. **THE SECOND WAS
+NOT A FAULT AND SAYING SO CAME FIRST**: it was the mockup awaiting his wording,
+so *"Nothing found"* was the search behaving as built. He asked for both.
+**&sect;197 HID THE BUBBLE FOR A REASON THAT DOES NOT APPLY HERE** &mdash; *an
+optimistic bubble that vanishes is a control that lied* &mdash; because this is
+not a guess: the switch lives in `org.extra.chat`, the browser holds it as
+`GROUP.chat` before the page draws, and the server reads that same value from
+that same row (measured both ways: off is `{on:false}` on both sides). Asked only
+when the platform hydrated, so `file://` and &sect;201's wall are unchanged, and
+`/api/state` already refuses anybody `/api/chat` would. **THE PEOPLE HALF IS THE
+SERVER'S ANSWER** &mdash; the test is *has no conversation AT ALL* and only the
+server knows every thread &mdash; with &sect;247's own active test COPIED rather
+than composed (the first draft guessed a status column and would have offered
+every retired person), nobody in both halves, nothing new stored, and the first
+message carrying &sect;247's `start`. **&sect;290.1 &mdash; every heading goes**,
+both at Islam's word: the row shape says which is which, the order does the
+grouping, the scope moved into the box's placeholder, and the cap speaks at the
+foot. **And the way out was a real fault older than the feature** &mdash; the
+Inbox link scrolled away with the list (&sect;61); pinned now, one row of height,
+stated. **11 red** with the people half out, **1 red** with the pin out, from the
+sources; **three of the check's own failures were the CHECK** (&sect;215,
+&sect;94.2) and one assertion was REWRITTEN not deleted (&sect;218). 112/0
+test-chat &middot; 55/0 corner-queue &middot; 523/0 &middot; 131/0 &middot; 11/0
+during-save &middot; 14/0 chase &middot; 33/0 push &middot; 24/0 two-tabs
+&middot; 8/8 concurrent &middot; incremental byte-identical &middot; office-chat,
+paste-picture, csp-net and the full `qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;289: the bootstrap's lock lives
+inside one transaction.** Islam, with the sign-in page under his own `smo`:
+*"Something went wrong. Try again, and tell the SMO if it keeps happening"*
+&mdash; *"this happened twice now I want you to trace this issue."* **THAT
+SENTENCE COMES FROM ONE PLACE**, the catch-all in `api/auth.js`, so the
+handler THREW &mdash; and what threw was the bootstrap every function runs on
+a cold start. It took a SESSION advisory lock and then ran the migrations as
+separate statements; behind Neon's transaction pooler a session lock sits on a
+backend the next statement never sees (&sect;240 wrote that down for the
+SAVE), so it protected nothing exactly when it was for: a deploy carrying a
+new migration file, which also reloads every open tab through &sect;258's
+banner and starts several instances cold in the same second. Two of them
+both applied it and the second's registry INSERT hit the primary key
+(`23505`). **Today's `main` carried a migration new to production twice, at
+09:45 and 11:55 &mdash; one failure per deploy.** **REPRODUCED BEFORE IT WAS
+EXPLAINED**: one migration forgotten in the registry, two bootstraps at once,
+his sentence printed verbatim beside the runtime log's `23505`. The whole
+bootstrap is ONE transaction now under `pg_advisory_xact_lock`, the seed
+written with `{ inTransaction: true }`, the heal outside after the COMMIT;
+a migration is atomic and a failed one records nothing (asserted). **The
+pooler is modelled in the test, never assumed** (&sect;100.3): 1 red on the
+module before. **Nothing in the data moved** &mdash; the migration ran
+correctly the first time both times, and the retry worked because a failed
+bootstrap is not remembered. Server only: no `src/` change, built file
+byte-identical, no shell bump, nobody signed out. Round trip, clean parity,
+concurrent saves, incremental write, one-line heal, two tabs, 523/0 and 131/0
+all green on fresh databases. **&sect;289.1&ndash;.2**: the rule written down
+beside the database facts; the chat's own `SET lock_timeout` &mdash; the same
+class, found by searching for it &mdash; scoped to the one read it protects
+with `SET LOCAL` inside a transaction (chat suites 103/0, 11/0, 14/0); and
+`scripts/test-session-state.js` makes the rule a check, red on that line
+before and green after.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;288: a save stops shutting everybody
+else out, and a row says the register's name.** Islam, on the shipped build:
+*"this error always comes and manytimes the chat disappears before coming back
+and disappear again"*, with the corner on *Looking&hellip;* and the Inbox drawing
+*"The server did not answer"*. **&sect;282 FIXED ONE READER AND LEFT THREE DOORS
+STANDING**: every chat request reads the settings (one row of `org`) and, cold,
+the schema check, and `auth.getSession()` JOINs `people` in front of EVERY
+authenticated request in the product &mdash; all three inside the graph a save
+wipes, all three blocked, while the conversation list &sect;282 fixed answers in
+1ms. *A measurement that only covers the thing you changed proves the thing you
+changed.* **AND MY OWN TEST PASSED ON IT** &mdash; it held a save open with
+`TRUNCATE people`, one table where a save truncates 33 (&sect;100.3 from the
+inside); the list is read out of `lib/state-io.js` now rather than copied.
+**THE READERS ARE NOT PATCHED ONE AT A TIME, BECAUSE THERE ARE MORE OF THEM THAN
+CAN BE COUNTED**: the clear stops being a `TRUNCATE`, which &sect;282 named as
+the eventual fix and deferred &mdash; rightly then, and expired the moment the
+readers turned out to be uncountable. DELETE takes ROW EXCLUSIVE, which does not
+conflict with a reader at all: every door 1&ndash;2ms where all four were
+blocked, for 72ms on the clear. **CHECKED RATHER THAN ASSUMED** &mdash; all 14
+FKs cascade, no table outside the list references one inside it (so the chat and
+the message record stay outside the clear exactly as before), no user triggers,
+no sequences. **THE ONE COST THAT NEEDED WATCHING IS BOUNDED AND MEASURED**: 160
+full saves, 5.5 &rarr; 15.4 &rarr; 15.5 &rarr; 15.5 &rarr; 15.5 MB &mdash; it
+steps up once and flattens, because the space a DELETE frees is reused. Proved
+able to fail two ways, neither a switch in the product: **4 red** with the clear
+put back, **5 red** with &sect;282's old query beside it &mdash; the original
+fault whole. One assertion REVERSED and REWRITTEN, never deleted (&sect;218).
+**&sect;288.1 &mdash; the corner's rows say the register's short name and where
+they sit**, Islam's own correction and my drift one section old: &sect;187 did
+this for the INBOX's list and this corner is the THIRD builder onto the same
+rows, matching on the short name (&sect;93.8) and drawing the long one. It needs
+nothing from the server, since the browser holds the register; `chatPlaceOf()`
+is ONE answer read by both lists; somebody the register no longer holds keeps
+their stored name and is given no place (&sect;35). The demo cannot show it (all
+33 people have two-word names), so the check MAKES the state &mdash; **6 red**,
+printing his symptom verbatim. 11/0 during-save &middot; 103/0 test-chat
+&middot; 24/0 two-tabs &middot; 8/8 concurrent &middot; incremental
+byte-identical &middot; round trip and clean parity PASS on virgin databases
+&middot; 36/0 corner-queue &middot; office-chat, paste-picture and the full
+`qa.py` sweep clean.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;282&ndash;&sect;286: the chat does not
+wait on a save, the notifications say where they stop, a reply nobody was told
+about is chased, the corner survives the walk and carries the office's queue,
+and a picture is pasted.** &mdash; **&sect;282:** Islam, twice in two days
+&mdash; *"all conversations are gone!!"* and *"before the fix all the chats
+disappeared"* &mdash; and, separately, *"the notification system is still not
+working &hellip; we tried many things."* **NOTHING WAS EVER LOST**, established
+first: the chat's tables sit outside the state graph. *"No answer"* was the
+corner's own 25-second clock, so the endpoint was neither down nor erroring
+&mdash; it was WAITING on the ACCESS EXCLUSIVE lock a save's `TRUNCATE` takes on
+`people`, which the queue joined for a live name (**frozen at 8s against 2ms
+without the join**). Worst exactly when somebody is looking, because a new build
+reloads every browser and the platform autosaves onto a sleeping database.
+**The reader is fixed and the writer deliberately is not** &mdash; `DELETE` was
+measured and is better on every axis, and it is the one file where a mistake
+costs real data, so it stays a staged piece (&sect;238; and &sect;241 removes
+the TRUNCATE from the other side when its flag is turned on). **And the
+notifications stopped shrugging**: a mismatched key, a dead registration and an
+oversized payload all reported as `failed: 1` under one sentence, which is why
+four rounds converged on nothing; the service's own words are carried back, the
+service is named, the diagnostic asks this browser as well as the server, and a
+registration made with a superseded key &mdash; which could never heal &mdash;
+is caught and re-made. **The first build of that stopped subscribing entirely**
+on a `var` collision valid on both sides, found by the check going red.
+`test-chat-during-save` RED on the old query and 8/8 green; `test-chat` 103/0
+(falsified 102/1); `office-chat` all clear (falsified, 6 red); sweep clean.
+**&sect;283: a reply nobody was ever told about** &mdash; the platform decided
+whether to email AT THE INSTANT the office replied, and a *yes* is a prediction
+wrong in one direction; a reply still unread after the office's wait (30 minutes,
+Islam's number) is chased then, with the SAME email kept rather than rebuilt.
+**&sect;284: the corner survives the walk**, reversing &sect;100.4 &mdash;
+*"we need the chat to sustain the navigation"*, and the two cannot both be true
+because the platform is ONE PAGE. **&sect;285: the office's corner carries the
+queue** &mdash; *"the chat bubble of the SMO team shouldn't be something to be
+sent to the smo, that is redundancy"*; nothing new is authorised or stored, it
+rides the poll that already exists, and `replyPost()` is the one email builder
+both screens call. **&sect;286: a picture is pasted, not only attached**, feeding
+&sect;50's own intake and adding nothing &mdash; with **&sect;286.2** showing what
+is attached, from a mockup Islam picked (A), and **&sect;285.2** unifying the two
+corners' panel size, which had differed by 138px.*
+
+*Earlier: 2026-09-04 &mdash; **&sect;278.3: the objectives table, and a
+cell that stopped being one.** Four reports from the live product in two
+messages, and they come down to two causes. **The drawer spanned every column
+but the first**, which is right on the key measures table (first column `#`,
+narrow) and wrong on the objectives tables (first column the PROSE one): a table
+shares a spanning cell's width across the columns it covers, so the twelve month
+boxes pushed those wider and the one column outside the span paid for all of it
+&mdash; **Objective 242 &rarr; 97px**, the table's own width unchanged, and on a
+supporting function, whose name wraps, the row then went **57 &rarr; 136px**.
+Islam's own proposal (*"shall it go below the whole objective columns"*) is the
+fix, and once a `#` column exists it is the shape the drawer already had.
+**`display:flex` on a `<td>` is not a table-cell**, and that one line cost two
+more things nobody had connected: the cell stopped stretching to its row, so a
+tall row showed the bare table underneath (*"the target cell turned white"*),
+and the sibling `display:block` rule made a tactic's four target boxes lay out
+**on top of the Owner column** with their grid reporting a width of **zero**
+(*"the table is damged"*, measured on the shipped build at every width). The
+flex box moves inside the cell and all three end together, through **one
+builder** where the shape was written out four times. **The row hover is gone**
+at his instruction, and the measurement is why: the zebra outranks it, so a
+white row hovered changed and **a striped row did not change at all**. **The
+`#` and the drag handle** are the key measures table's own, asking the same
+`mayArrange` question &mdash; which needed `arranging()` to name its page and
+the server to classify a capability's objectives reorder as `arrange`, which it
+never did. **And the pair is centred by its MARKS**: Islam sent back a round
+whose boxes centred to 0.00px, because a digit's ink sits 1.62px above the
+middle of its own box and no box-level alignment can move it; `text-box:
+trim-both` makes the box the ink, **0.06px** shipped, read off the painted
+pixels at eight times scale. `checks/objectives-table.py` **24 red** on the
+build before; 523/0 authoriser (two new, both ends, proved able to fail), 131/0
+differ, full `qa.py` ERRORS none, round trip and clean parity green on a virgin
+Postgres 16, and **three checks held literals these decisions moved &mdash;
+rewritten, not deleted**, one of which had been red since &sect;278 landed and
+was missed at that merge. **Merged to `main`.***
+
+
+
+*Earlier: 2026-09-04 &mdash; **&sect;266.11: the dialog does not change
 size as rows move.** Islam, of what &sect;266.10 had just put on production:
 *"the window height keeps changing on the movement of the choices keep the size
 fixed."* **REPRODUCED BEFORE IT WAS EXPLAINED** &mdash; twelve moves between the
@@ -6491,7 +7202,7 @@ a figure typed with its own unit is left as typed, the first unit is not a
 change, and Y/N is neither side. One function, both surfaces, no server change.
 **Cost stated and accepted**: a row already stored stays `2%` until re-entered
 once. `checks/unit-follows.py` **5 red** on the build before; nine neighbouring
-checks, 491/0 and the full sweep green. **On the branch, not merged.***
+checks, 491/0 and the full sweep green. **Merged to `main`.***
 
 *Earlier: 2026-09-03 &mdash; **&sect;276: a count is owed in whole
 ones.** Islam: *"we need a compilation type that prorate to integrs only .. if
@@ -6859,7 +7570,7 @@ door on the unit's own band** for the people who hold it. **The global is
 `TRAIL`**, because `HISTORY` is the platform's closed cycles and hydration
 silently replaced the module (&sect;56.7). `checks/history-page.py` **25
 red** on `main`'s build; `test-history-read.js` on a real Postgres; 491/0;
-KB corpus in step; full sweep ERRORS none. **On the branch, not merged.***
+KB corpus in step; full sweep ERRORS none. **Merged to `main`.***
 *Earlier: 2026-09-03 &mdash; **&sect;261: the Setup tables are arranged,
 and their rows act from one menu.** Islam: *"allow me in the setup to rearrange
 the business units table so they appear in the navigation as per this order and

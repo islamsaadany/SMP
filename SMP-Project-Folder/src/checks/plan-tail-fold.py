@@ -314,17 +314,25 @@ with sync_playwright() as p:
            not m.get("none") and not m["keys"], m.get("keys"))
         pg.close()
 
-    # ── A HOVERED ROW IS ONE COLOUR ALL THE WAY ACROSS (§267.1) ───────────
+    # ── A ROW IS ONE COLOUR ALL THE WAY ACROSS (§267.1, REWRITTEN AT §278.3) ──
     # Islam, of the folded table: *"on squeezing the outcome cell left outline
-    # is damged"*. `tbody tr:hover > td` paints every cell, and the frozen
-    # pair's `background:inherit` outranks it — so the two cells before the
-    # Outcome kept the row's own white and the row read as split down the
-    # middle. OLDER THAN THE FOLD and measured identically on the build before
-    # it; what the fold changed is that the untinted block went from a sliver
-    # to a slab. Both parities, because a striped row's cells and an unstriped
-    # row's take DIFFERENT colours and a fix that painted one over the other
-    # would only move the seam.
-    print("\n== a hovered row is one colour ==")
+    # is damged"*. §267.1's answer was to make the frozen pair follow the row
+    # HOVER, and this asserted the hovered row was one ground.
+    #
+    # THE HOVER IS GONE (§278.3) — Islam, asked whether the tint earned its
+    # place beside the stripe: *"for the hovering C remove it"* — so an
+    # assertion about a hovered row now asserts a rule the product does not
+    # have. REWRITTEN RATHER THAN DELETED (§218): the property Islam reported
+    # is that a row does not read as split down the middle, and that is still
+    # worth guarding — it is simply no longer a fact about hover.
+    #
+    # SO IT IS MEASURED AS PAINT, NOT AS A COMPUTED STRING. The frozen pair
+    # carries an explicit `#FFFFFF` where the rest of the row carries
+    # `rgba(0,0,0,0)`; on the table's own white ground those are the same
+    # pixels, and comparing the strings would report a seam that nobody can
+    # see. The row is hovered first anyway, because the assertion has to hold
+    # in the state Islam was in when he reported it.
+    print("\n== a row is one colour, hover or no hover ==")
     for w, where in ((1500, "unfolded"), (1200, "folded")):
         pg = b.new_page(viewport={"width": w, "height": 1000})
         pg.goto(url); pg.wait_for_timeout(750)
@@ -355,9 +363,20 @@ with sync_playwright() as p:
                 .filter(function(x){ var h = x.querySelector('thead');
                                      return h && /tactic/i.test(h.textContent || ''); })[0];
               var r = t && t.querySelectorAll('tbody tr')[n];
-              return r ? [].map.call(r.children, function(td){
-                return getComputedStyle(td).backgroundColor; }) : []; }""", n)
-            ck("%s · a hovered %s row has ONE ground across every cell" % (where, parity),
+              if (!r) return [];
+              /* WHAT IS PAINTED, walking up to whatever actually lays down a
+                 colour: a transparent cell shows its table's ground, and a
+                 cell carrying that same ground explicitly is not a seam. */
+              function ground(el){
+                while (el) {
+                  var c = getComputedStyle(el).backgroundColor;
+                  if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c;
+                  el = el.parentElement;
+                }
+                return 'none';
+              }
+              return [].map.call(r.children, ground); }""", n)
+            ck("%s · a %s row is one ground across every cell" % (where, parity),
                len(set(grounds)) == 1, grounds)
         pg.close()
 

@@ -832,9 +832,10 @@ function commsShape(){
   };
 }
 function COMMS_FOOTER_DEFAULT(){
-  return "Sent from the Strategy Management Platform" +
-         (GROUP.org ? " for " + GROUP.org : "") +
-         ". If you were not expecting this, tell your SMO.";
+  /* ASKED OF THE BUILDER, never written twice (§293). The server composes
+     this email too now, and a sentence spelled here as well is one that goes
+     out of step the first time either is improved. */
+  return MAIL.footerDefault(GROUP.org || "");
 }
 
 /* Every token the two inputs decide, worked out here so the page, the live
@@ -1660,6 +1661,14 @@ function viewerRoleLine(p){
 function andList(a){
   return a.length < 2 ? (a[0] || "")
     : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+}
+/* The same list where the sentence offers a CHOICE rather than names a set —
+   "Set Sum, Count, Latest or Average". Beside `andList` on purpose: two ways
+   of joining a list is one decision, and separating them is how one gets
+   corrected and the other does not. */
+function orList(a){
+  return a.length < 2 ? (a[0] || "")
+    : a.slice(0, -1).join(", ") + " or " + a[a.length - 1];
 }
 
 function unitRolesFor(k){
@@ -6992,6 +7001,71 @@ function addOutcome(p){
             target: "", measureAt: "", actual: "" };
   p.outcomes.push(o);
   return o;
+}
+/* ── A ROW'S TYPE IS WHICH LIST IT IS IN (§292) ──────────────────────────
+   Islam, from the live product: *"we need to make the add deliverable or
+   outcome more of an options in the type rather than 2 buttons of add
+   deliverable or outcome that I get confused between them."*
+
+   SO THE PICKER MOVES THE ROW, because the type was never a label on it. A
+   deliverable is answered Not started / In progress / Delivered with a
+   per-cent, and its direction and target are written FOR it (§104); an
+   outcome is answered with a figure read against a target and a direction.
+   Two lists, two shapes, two ways of being scored — so switching one is a
+   CONVERSION and not a rename, and it is worth saying so in the code that
+   does it.
+
+   THE DESTINATION ROW IS MINTED BY THE MINTER AN ADDED ROW USES, and two
+   facts are carried onto it: the NAME, which is the row, and the hidden mark
+   (§233), which is a decision ABOUT the row rather than a figure against it.
+   Everything else is dropped, because everything else belongs to the kind
+   being left — a target on a row that no longer has one, or a note explaining
+   a figure that has gone, is worse than an empty cell (§35). Building it out
+   of the minter is what stops the two shapes drifting: a field added to
+   `addOutcome` tomorrow is on a converted row that day (§53.5).
+
+   IT APPENDS, and that is visible rather than hidden: the table draws every
+   deliverable and then every outcome (§99's one list, §104's one row shape),
+   so a converted row necessarily leaves its place in the order — it goes to
+   the end of the list it has joined, which is where an added row goes.
+
+   THE NEW ID IS THE POINT OF MINTING ONE. A row's id encodes its kind
+   (`…-D3`, `…-O2`), so carrying the old one across would leave a row named
+   as a deliverable sitting in the outcomes — and ids are what a cycle
+   snapshot keys on (§48.1). A snapshot already filed keeps the id it was
+   filed under, which is correct: it is a record of what was.
+
+   NOTHING ON THE SERVER MOVES, and it is asserted rather than assumed:
+   `splitRows` already classifies a row leaving one of these lists and
+   appearing in the other as `capPlan` — the office's — so the switch is
+   authorised the day it is built (§42's fall-through working as designed). */
+function dxKindOf(p, id){
+  if (!p) return "";
+  var has = function(list){
+    return (list || []).filter(function(x){ return x && x.id === id; }).length > 0;
+  };
+  if (has(p.deliverables)) return "d";
+  if (has(p.outcomes)) return "o";
+  return "";
+}
+function dxSwitchKind(p, id, want){
+  var from = dxKindOf(p, id);
+  if (!p || !from || from === want || (want !== "d" && want !== "o")) return null;
+  p.deliverables = p.deliverables || [];
+  p.outcomes = p.outcomes || [];
+  var src = from === "d" ? p.deliverables : p.outcomes, i = -1;
+  src.forEach(function(x, n){ if (x && x.id === id) i = n; });
+  if (i < 0) return null;
+  var old = src[i];
+  var made = want === "d" ? addDeliverable(p) : addOutcome(p);
+  if (!made) return null;
+  made.name = old.name || "";
+  /* §50.6: carried only when it is TRUE — a row that was never hidden and one
+     hidden and shown again must be byte-identical, or every conversion puts a
+     phantom `hide:false` into the save. */
+  if (old.hide === true) made.hide = true;
+  src.splice(i, 1);
+  return made;
 }
 function addMilestone(p){
   if (!p) return null;

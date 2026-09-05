@@ -1175,6 +1175,37 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
 
+/* ── AND A CAPABILITY'S OBJECTIVES REORDER THE SAME WAY (§278.3) ──
+   That walk had no reorder callback at all, so moving one of these rows fell
+   through to `capPlan` — the office's — while the identical act on a UNIT's
+   key objectives has classified as `arrange` since §101. One question with two
+   answers, and §278.3 draws a handle on both tables: a custodian would have
+   watched the row move and the save come back refused, which is §94.3's exact
+   fault.
+
+   BOTH ENDS, and the second one is the point: a build that classified every
+   change to these rows as `arrange` would satisfy the first assertion and hand
+   the plan to anybody who may reorder. */
+(function () {
+  const cap = (SEED.group.capabilities || []).filter(function (c) {
+    return (c.keyObjectives || []).length > 1; })[0];
+  check("the seed has a capability with two key objectives to reorder",
+        !!cap, "none — this assertion would be measuring nothing");
+  if (!cap) return;
+  const ci = (SEED.group.capabilities || []).indexOf(cap);
+  const inc = clone(SEED);
+  shuffleFirstToLast(inc.group.capabilities[ci].keyObjectives);
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("reordering a capability's key objectives is `arrange`, and nothing else",
+        kinds.length > 0 && kinds.every(function (k) { return k === "arrange"; }),
+        "got: " + JSON.stringify(kinds));
+  const inc2 = clone(SEED);
+  inc2.group.capabilities[ci].keyObjectives[0].name += " (renamed)";
+  const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
+  check("but RENAMING one is still `capPlan`",
+        kinds2.indexOf("capPlan") > -1, "got: " + JSON.stringify(kinds2));
+})();
+
 /* ── 14 · THE FOCUS SWITCH IS NOT A BIGGER MARK (§102) ────────────
    Marking a measure is the CEO's and the SMO's (§37); turning the whole
    feature off for the tenant is the SMO's alone. Asserted as a PAIR, because
@@ -3067,6 +3098,70 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
                  .map(function (c) { return c.kind; });
   check("§278: it classifies as the unit's PLAN and nothing else",
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
+})();
+
+/* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§292) ══
+   §292 gives a project's Deliverables and outcomes table a Type picker: the
+   press moves the row out of one list and into the other, with a new id. The
+   claim made in that section's comment is that the SERVER needed nothing —
+   `splitRows` already reads a row leaving one of these lists and appearing in
+   the other as `capPlan`, the office's — and a claim like that is either
+   measured or it is a hope (§172's lesson: four layers agreed about a fourth
+   value the database had never been offered).
+
+   BOTH ENDS, or a build that allowed everything would pass the first half
+   (§94.2). And the row is REBUILT rather than moved by reference, because
+   that is what the browser does: a converted row is minted by the minter and
+   carries the name across (§292), so an id that travelled with it would be a
+   different fixture from the one the product produces. */
+console.log("\n31 · a row's type is the office's to change (§292)");
+(function () {
+  const cap = (SEED.group.capabilities || [])[0];
+  const proj = cap && (cap.projects || [])[0];
+  check("§292: the seed holds a project with a deliverable", !!(proj && (proj.deliverables || [])[0]),
+        proj && proj.id);
+  if (!proj || !(proj.deliverables || [])[0]) return;
+
+  /* The conversion, exactly as `dxSwitchKind` performs it. */
+  const convert = function (st) {
+    const c = (st.group.capabilities || [])[0];
+    const p = (c.projects || [])[0];
+    const old = p.deliverables.shift();
+    p.outcomes.push({ id: p.id + "-Oz", name: old.name, dir: "\u2265",
+                      target: "", measureAt: "", actual: "" });
+  };
+  const who = function (st, key) { return personOf(st, key); };
+  const run = function (key) {
+    const inc = clone(SEED); convert(inc);
+    return A.authorize(SEED, inc, who(SEED, key));
+  };
+
+  let v = run("smo");
+  check("§292: the office switches a row's type", v.ok, (v.refusals || []).join(" / "));
+
+  /* Whoever holds the function and is not the office. A custodian may report
+     a deliverable (§147.3) and may not author the plan — which is exactly the
+     line this switch sits on. */
+  const fkey = Object.keys(SEED.functions || {}).filter(function (k) {
+    return (SEED.functions[k] || {}).custodian; })[0];
+  const cust = fkey && SEED.functions[fkey].custodian;
+  if (cust && who(SEED, cust)) {
+    v = run(cust);
+    check("§292 REFUSED: the function's custodian may not", !v.ok, "was ALLOWED");
+  } else {
+    check("§292: a custodian to refuse", false, "none in the seed");
+  }
+
+  /* AND IT IS ONE KIND OF CHANGE, NOT TWO. A build that read the removal and
+     the arrival as different things would refuse half of a save the screen
+     makes in one press (§184: a refusal costs the row it names and nothing
+     else). */
+  const inc = clone(SEED); convert(inc);
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§292: every part of it classifies as capPlan",
+        kinds.length > 0 && kinds.every(function (k) { return k === "capPlan"; }),
+        kinds.join(",") || "(nothing)");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

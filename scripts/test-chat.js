@@ -28,6 +28,11 @@
 const pg = require("pg");
 const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
+/* ASKED OF THE SHARED RULE, never a number written here too — the whole
+   point of §169 was that the setting and the sentence about it stop
+   being two facts (§262 changed what it means, and this line did not
+   have to change with it). */
+const Rules = require("../lib/rules.js");
 
 const BASE = process.env.SMP_BASE || "http://127.0.0.1:3999";
 
@@ -395,6 +400,75 @@ async function signIn(who, password) {
     await client.query("DELETE FROM push_subscriptions");
     await setChat({});
 
+    /* ── THE TEST NAMES WHERE THE CHAIN STOPS (§282.4) ──────────────
+       "Test on this device" only ever asked the SERVER, and the server can
+       only report what it HOLDS — so a browser registered at one address
+       while the server sends to another read as perfect health at both ends
+       with nothing arriving. Both halves are compared now, and each way of
+       being wrong has to produce its own sentence: a diagnostic whose
+       failures all read alike is the fault it exists to cure (§124). */
+    console.log("\nTHE TEST SAYS WHERE THE CHAIN STOPS (§282.4).");
+    await setChat({ popup: true });
+
+    const stepNamed = function (rr, name) {
+      return ((rr.body && rr.body.steps) || []).filter(function (x) { return x.name === name; })[0];
+    };
+    const lastStep = function (rr) {
+      const st = (rr.body && rr.body.steps) || []; return st[st.length - 1] || {};
+    };
+
+    r = await call(her.cookie, { action: "pushTest", here: { permission: "denied" } });
+    let st = stepNamed(r, "This browser");
+    ok(!!st && st.state === "fail" && /block/i.test(st.detail || ""),
+       "a browser set to block says so, and stops there", st && st.detail);
+
+    r = await call(her.cookie, { action: "pushTest", here: { permission: "granted" } });
+    st = stepNamed(r, "This browser");
+    ok(!!st && st.state === "fail" && /not registered/i.test(st.detail || ""),
+       "a browser that is not registered says so", st && st.detail);
+
+    /* REGISTERED HERE, AND THE SERVER HAS NEVER HEARD OF IT. */
+    r = await call(her.cookie, { action: "pushTest",
+      here: { permission: "granted", endpoint: "https://fcm.googleapis.com/x/never-sent" } });
+    st = stepNamed(r, "This browser");
+    ok(!!st && st.state === "ok", "a registered browser passes its own step", st && st.word);
+    ok(/Google/.test((st && st.detail) || ""),
+       "...and the service is named, because Apple and Google are different errands",
+       st && st.detail);
+    st = stepNamed(r, "Your devices");
+    ok(!!st && st.state === "fail" && /never reached the server/i.test(st.detail || ""),
+       "a registration the server never received is named as that",
+       st && st.detail);
+
+    /* THE MISMATCH — the one that read as health at both ends. */
+    await call(her.cookie, { action: "pushOn", sub: SUB("hers") });
+    r = await call(her.cookie, { action: "pushTest",
+      here: { permission: "granted", endpoint: "https://fcm.googleapis.com/x/a-different-one" } });
+    st = stepNamed(r, "Your devices");
+    ok(!!st && st.state === "fail" && /none of them is this browser/i.test(st.detail || ""),
+       "a device registered that is NOT this browser is named as that",
+       st && st.detail);
+
+    /* AND THE OTHER END (§94.2): the matching endpoint gets past that step. */
+    r = await call(her.cookie, { action: "pushTest",
+      here: { permission: "granted", endpoint: SUB("hers").endpoint } });
+    st = stepNamed(r, "Your devices");
+    ok(!!st && st.state === "ok" && /this one among them/i.test(st.detail || ""),
+       "...and this browser among them passes", st && st.detail);
+    ok(lastStep(r).name === "A box on your screen",
+       "...so the walk reaches the send itself", lastStep(r).name);
+
+    /* AN OLDER TAB SENDS NOTHING ABOUT ITSELF, and must still get a report
+       rather than a refusal — the diagnostic is most needed by whoever has
+       not reloaded (§231.5). */
+    r = await call(her.cookie, { action: "pushTest" });
+    ok(((r.body && r.body.steps) || []).length > 0,
+       "a tab that sends no browser half still gets a report",
+       ((r.body && r.body.steps) || []).length + " steps");
+
+    await client.query("DELETE FROM push_subscriptions");
+    await setChat({});
+
     /* ── THE OFFICE STARTS A CONVERSATION (§247) ────────────────────
        Islam: "from the platform inbox allow the smo to initiate a message
        with someone." It is a FLAG on the reply, not an action of its own —
@@ -487,27 +561,48 @@ async function signIn(who, password) {
     ok(r.body.waiting === undefined && r.body.waitingWho === undefined,
        "somebody who is not the office is told none of it");
 
-    console.log("\nAND THE AWAY THRESHOLD IS A SETTING, NOT A CONSTANT (§169).");
+    console.log("\nAND THE COLLECTING TIME IS A SETTING, NOT A CONSTANT (§169, §262).");
+    /* THIS SECTION MEASURED "how long before she counts as away", and §262
+       retired that question: presence stopped deciding whether an email goes,
+       so the same key now says how long the platform COLLECTS before sending
+       (Islam: *"I believe the 3 min is not relevant now and we can adjust this
+       setting to be the one which identifies the time away before sending the
+       email"*). The assertions are REWRITTEN rather than deleted (§218), or a
+       later build could drift back through the gap they left.
+
+       WHAT `here` MEANS DID NOT MOVE: it is the screen's own description of
+       this moment, on its own short window (`CHAT_HERE_MIN`), which is why
+       seven minutes out is away whatever the setting says. */
     await client.query(
       "UPDATE chat_threads SET here_at = now() - interval '7 minutes' WHERE person_key = $1",
       [OTHER.key]);
     await setChat({});
     r = await call(smo.cookie, { action: "thread", person: OTHER.key });
-    ok(r.body.here === false, "seven minutes out, and the shipped three calls her away");
+    ok(r.body.here === false, "seven minutes out is not 'has the platform open'");
     await setChat({ away: 20 });
     r = await call(smo.cookie, { action: "thread", person: OTHER.key });
-    ok(r.body.here === true, "...and twenty calls the same row here");
+    ok(r.body.here === false,
+       "...and a longer collecting time does not make her present again");
     r = await call(smo.cookie, { action: "queue" });
-    ok(r.body.hereMinutes === 20, "the office's page is told the number in force");
+    /* THE SETTING TRAVELS IN `chat`, WHICH IS THE WHOLE SETTINGS OBJECT — and
+       `hereMinutes` is a different fact now (§262): what the word "here"
+       means, which is a short fixed window and not the tenant's collecting
+       time. Both are asserted, because a build that collapsed them again
+       would satisfy either one alone. */
+    ok(r.body.chat.away === 20, "the office's page is told the number in force");
+    ok(r.body.hereMinutes === Rules.CHAT_HERE_MIN,
+       "...and 'here' keeps its own short window, whatever that number is");
     /* A STORED VALUE OUT OF RANGE IS CLAMPED, NEVER OBEYED — the endpoint runs
        on every poll, so a nonsense number must answer something rather than
        throw or divide by nothing. */
     await setChat({ away: 99999 });
     r = await call(smo.cookie, { action: "queue" });
-    ok(r.body.hereMinutes === 120, "an absurd value is clamped to the ceiling");
+    ok(r.body.chat.away === 120, "an absurd value is clamped to the ceiling");
     await setChat({ away: "nonsense" });
     r = await call(smo.cookie, { action: "queue" });
-    ok(r.body.hereMinutes === 3, "and a value that is not a number reads as the default");
+    ok(r.body.chat.away === Rules.chatCfg(null).away,
+       "and a value that is not a number reads as the default (" +
+       Rules.chatCfg(null).away + ")");
     await setChat({});
     await client.query(
       "UPDATE chat_threads SET here_at = now() - interval '10 minutes' WHERE person_key = $1",
@@ -547,6 +642,51 @@ async function signIn(who, password) {
        /turned off/i.test(String(r.body.mailed.why)),
        "no email went out, and the reason is the setting: " + JSON.stringify(r.body.mailed));
     await setChat({});
+
+    /* ── THE SEARCH REACHES SOMEBODY WHO HAS NEVER WRITTEN IN (§290) ──
+       Islam: "in the serach I need to be able to send to a new person as
+       well". The conversations half is §285's and is untouched; what is
+       asserted here is the half that is new, and the ONE INVARIANT that makes
+       two halves safe — nobody is ever in both. */
+    console.log("\nAND THE SEARCH REACHES PEOPLE WITH NO CONVERSATION (§290).");
+    r = await call(smo.cookie, { action: "chatSearch", q: "ha" });
+    const folk = (r.body && r.body.people) || [];
+    ok(r.status === 200 && Array.isArray(folk),
+       "the search carries people with no conversation", folk.length + " found");
+    ok(folk.length <= 10, "capped at ten, Islam's number", folk.length);
+    ok(typeof (r.body && r.body.more) === "number",
+       "and the rest are COUNTED rather than dropped", r.body && r.body.more);
+    ok(!folk.some(function (p) { return p.key === "smo"; }),
+       "the asker is not offered a conversation with themselves");
+    ok(folk.every(function (p) { return !!p.name; }), "every one carries a name to draw");
+    /* NOBODY IN BOTH HALVES — what the NOT EXISTS clause is for, and the one
+       thing a mixed list would get wrong in a way nobody would notice. */
+    const hitKeys = ((r.body && r.body.hits) || []).map(function (h) { return h.person_key; });
+    ok(!folk.some(function (p) { return hitKeys.indexOf(p.key) > -1; }),
+       "nobody is in both halves at once");
+
+    /* AND THE MOMENT THEY HAVE A CONVERSATION THEY LEAVE — made, then put
+       back, because this is a state the seed does not hold (§94.2). */
+    const first = folk[0] && folk[0].key;
+    if (first) {
+      await call(smo.cookie, { action: "reply", person: first,
+                               body: "A first word from the office.", start: true });
+      const r2 = await call(smo.cookie, { action: "chatSearch", q: "ha" });
+      const keys2 = ((r2.body && r2.body.people) || []).map(function (p) { return p.key; });
+      const hits2 = ((r2.body && r2.body.hits) || []).map(function (h) { return h.person_key; });
+      ok(keys2.indexOf(first) === -1, "once they have one they leave the people half", first);
+      ok(hits2.indexOf(first) > -1, "...and appear as a conversation instead");
+      await client.query("DELETE FROM chat_threads WHERE person_key = $1", [first]);
+    } else {
+      ok(false, "a person with no conversation was found to test with", "none");
+    }
+
+    /* THE ACTIVE TEST IS §247'S OWN, read out of the file rather than
+       restated here — the first draft of it guessed a status column and would
+       have offered every retired person on the register (§42). */
+    ok(require("fs").readFileSync(require("path").join(__dirname, "..", "api", "chat.js"), "utf8")
+         .indexOf("COALESCE(p.extra->>'active','true') <> 'false'") > -1,
+       "a retired person is excluded by the register's own test");
 
     console.log("\nAND DROPPING ONE IS THE SUPER USER'S ALONE (§89).");
     r = await call(smo.cookie, { action: "drop", person: OTHER.key });

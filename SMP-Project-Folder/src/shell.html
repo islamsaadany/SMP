@@ -7292,6 +7292,17 @@
            functions are arranged on their Setup page and nowhere else. */
         else if (kind === "units") applyOrder(UNIT_KEYS, order);
         else if (kind === "fns") applyOrder(FUNCTION_KEYS, order);
+        /* §278.3: the objectives tables. The list is the one the TABLE
+           registered in `KOLISTS` while it rendered — the same registry Add
+           and Remove already act through — because the four callers hand in
+           four different arrays (a unit's, the group's, a capability's, a
+           pillars function's) and a second way of finding it is how two of
+           them come to disagree (§53.5). A stale index acts on nothing:
+           KOLISTS is emptied on every paint beside `FIELDS`. */
+        else if (kind === "kos") {
+          var ko = KOLISTS[+c.dataset.kolist];
+          if (ko && ko.list) applyOrder(ko.list, order);
+        }
         else if (kind === "caps") applyOrder(GROUP.capabilities, order);
         else if (kind === "themes") applyOrder(GROUP.themes, order); else {
           /* The plan states the pillar outright; the Performance accordion

@@ -456,6 +456,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE KEYBOARD BELONGS TO THE PRESENTATION (§296):** Islam, presenting with a
+  clip on a slide — *"the right and elft arrows are editing the video forward and
+  backward &hellip; we lose the functionality ot the forward and backrward
+  clicks &hellip; the forward and backward of the video stream should be done by
+  clicing on the video directly."* **THE KEYS WERE NEVER IGNORED, THEY NEVER
+  ARRIVED**: measured, with focus inside the player's frame the deck's window
+  listener fires **zero** times — a cross-origin iframe keeps every key it holds
+  focus for, so there is nothing for `preventDefault` to cancel. Nothing about
+  the deck's key handling was wrong and none of it is changed. **§261.14 FIXED
+  THE OTHER HALF** (a player loaded on a slide nobody is looking at) and left the
+  slide you ARE on, where the player is legitimately live. **AND THE TWO KINDS
+  FAIL DIFFERENTLY**: a native `<video>` is in our own document, so the deck
+  still gets the key and cancels the seek — that side already behaved, and is
+  asserted rather than touched. **THE FOCUS IS HANDED BACK, NOT THE KEY
+  INTERCEPTED** — `blur` on the WINDOW, because focus moving into a frame is not
+  a focus event in this document; **queued, never synchronous** (refocusing
+  inside the handler runs while the browser is still moving focus); **guarded on
+  `document.activeElement`**, or the deck steals focus from the whole browser on
+  an ordinary tab-switch, asserted. **ONE HELPER, BOTH SURFACES** (§53.5, A15):
+  Manage slides arms a live player and walks its rail with the same arrows
+  (§69.6). **THE COST WAS STATED BEFORE HE TOOK IT**: the player's own shortcuts
+  (space, `f`, `c`, `j`/`l`) stop working and stay reachable by mouse. **AND A
+  SECOND FAULT FOUND BY ASKING WHAT A CLICK DOES**: `deckOwnControl()` listed no
+  player, and a click inside an iframe never reaches this document — so the embed
+  was safe BY ACCIDENT while a native `<video>`'s clicks land here, and in
+  fullscreen (§265) **pressing the player's own play button advanced the slide
+  too**, measured `{was: 0, now: 1}`. **4 red** before, printing the symptom
+  verbatim. **§296.1 — three of the check's own failures were the CHECK**: it
+  died rather than reporting twice (§215), and its probe **invented a slide
+  shape** (`sl.video` where the product stores `sl.vid`), so it reported a
+  working builder as broken (§100.3).
 - **THE PRESENTATION LOOP: PLAY FROM THE EDITOR, AND COME BACK TO IT (§295):**
   Islam, thinking aloud — *"why don't we make the indvidual presentation section
   act like normal ppts &hellip; they see the manage section part and then present
@@ -6791,6 +6822,21 @@ python3 checks/hide-slide.py    # the office hides a slide and the projector ski
                                 # seeing the marks and getting no control — and the editor
                                 # and the projector proved to build ONE deck (§256.2).
                                 # 33 red on the build before; every probe degrades (§215)
+python3 checks/video-keys.py    # the keyboard belongs to the presentation (§296):
+                                # focus landing in a player handed straight back, on the
+                                # projector AND in Manage slides (the editor arms a live
+                                # player and walks its rail with the same arrows, §69.6),
+                                # asserted as a PAIR with the arrow then MOVING the slide —
+                                # focus coming back is worth nothing if the deck cannot
+                                # then hear the key; a click on a player NOT advancing the
+                                # slide in fullscreen while a click on the STAGE still
+                                # does (both ends, §113.8); an ordinary blur elsewhere
+                                # handing nothing back; and §261.11's sandbox, referrer
+                                # policy and the file player's controls asserted
+                                # UNCHANGED. It MAKES its state — the demo carries no
+                                # video slide. 4 red on the build before, printing the
+                                # symptom verbatim; three of its own first failures were
+                                # the CHECK (§215 twice, §100.3 once)
 python3 checks/present-loop.py  # play from the editor, and come back to it (§295):
                                 # Play beside Done on ONE row (two auto margins land
                                 # a gap apart, §225), the deck proved to be IN FRONT

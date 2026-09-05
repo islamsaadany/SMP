@@ -36007,3 +36007,94 @@ it was left on — the editor keeps the selection it had, which is what "quick
 edits" asked for, and syncing the two would move somebody's selection under
 them; and Shape B is left on the table rather than dismissed, to be judged once
 this loop has been used.
+
+---
+
+## §296 — THE KEYBOARD BELONGS TO THE PRESENTATION (2026-09-05)
+
+Islam, presenting with a clip on a slide: *"when I'm playing the video the right
+and elft arrows are editing the video forward and backward. but this is tricky
+because we lose the functionality ot the forward and backrward clicks. the
+forward and backward of the video stream should be done by clicing on the video
+directly and the right and left arrows and same for the up and down and pagup
+and down stay for the repsentaiton."*
+
+### The keys were never ignored — they never arrived
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED, AND IT CHANGED THE FIX.** With focus
+inside the player's frame the deck's own window listener fires **zero** times: a
+cross-origin iframe keeps every key pressed while it holds focus, so there is no
+event for `preventDefault` to cancel and no handler that could have run. Nothing
+about the deck's key handling was wrong, which is why nothing in it is changed.
+
+**§261.14 FOUND THE OTHER HALF OF THIS AND FIXED IT.** Its own comment says a
+player still loaded on a slide nobody is looking at *"goes on holding the
+keyboard, so the arrow keys move the clip instead of the deck"* — and the answer
+was to empty `src` on every slide but the live one. What was left is the slide
+you ARE on, where the player is legitimately loaded and legitimately has focus.
+
+**AND THE TWO KINDS OF VIDEO FAIL DIFFERENTLY**, which is the whole reason the
+fix is where it is. A native `<video>` lives in our own document, so the deck
+still receives the key and cancels the browser's own seek — **that side already
+behaved**, measured, and is asserted rather than touched. Only the embed loses
+the keyboard.
+
+### The focus is handed back, not the key intercepted
+
+The parent cannot see the key. It can see that it has lost focus TO the frame,
+and it can take it back — so `videoKeepKeys()` listens for `blur` and, if the
+active element is a player inside its own root, returns focus on the next tick.
+
+**`blur` ON THE WINDOW, NOT `focusin` ON THE FRAME**: focus moving into a frame
+is not a focus event in this document, so there is nothing to listen for on the
+iframe itself. **QUEUED, NEVER SYNCHRONOUS** — refocusing inside the handler runs
+while the browser is still moving focus, and the move lands after it.
+**GUARDED ON `document.activeElement`**, so an ordinary switch to another
+application hands nothing back; without that the deck would steal focus from the
+whole browser, and it is asserted.
+
+**ONE HELPER, BOTH SURFACES** (§53.5, A15): Manage slides arms a live player on
+the slide it is arranging and walks its rail with the same arrow keys (§69.6),
+so it had the identical fault. A fix on the projector alone is how the two drift.
+
+**THE COST WAS STATED BEFORE HE CHOSE IT AND HE TOOK IT**: with the keyboard
+held by the presentation, the PLAYER's own shortcuts stop working — space, `f`,
+`c`, `j`/`l` on YouTube. Every one of them stays reachable through the player's
+own controls with a mouse, which is what he asked for.
+
+### And a second fault, found by asking what a click does
+
+`deckOwnControl()` listed the bar, buttons, links and fields — and no player.
+A click inside an IFRAME never reaches this document, so the embed was safe **by
+accident**; a native `<video>` is in our own page, so in fullscreen, where §265
+makes a click on the stage advance the slide, **pressing the player's own play
+button moved the deck on as well.** The one gesture Islam named as how a clip
+should be controlled, doing two things at once. Measured on the build before:
+`{'was': 0, 'now': 1}`. `.vwrap` joins the list in the same breath, so the
+poster and the "opens in a new tab" card behave the same.
+
+### §296.1 — three of the check's own failures were the check
+
+It **died rather than reporting**, twice in one session and for the second time
+in this file's own history (§215): `pg.click` on an element with no box throws
+after its timeout, so the first run printed four results instead of sixteen.
+Every press degrades now.
+
+Its §4 probe **invented a slide shape** — `sl.video` where the product stores
+`sl.vid`, and no `kind` — so `vslideHtml()` drew nothing and three assertions
+reported a working builder as broken. §100.3: a stand-in that models less than
+the thing it stands in for reports a working build as broken. It builds the
+slide the way the product does now, and asserts that BOTH kinds are drawn before
+asserting anything about what they contain.
+
+And the editor's section found **two `#vk-frame`s** — the projector's planted
+player was still in the document — so the locator was ambiguous and the run died
+on it. Each surface clears the last one's.
+
+### What it costs, and what it does not touch
+
+**4 red** on the build before, printing the reported symptom verbatim
+(`active: 'vk-frame'`, the arrow moving the deck from 0 to 0). No visual change,
+nothing stored, nothing migrated, no server file touched. §261.11's sandbox and
+referrer policy and the file player's `controls` are asserted UNCHANGED, because
+a fix that quietly dropped either would satisfy every other assertion here.

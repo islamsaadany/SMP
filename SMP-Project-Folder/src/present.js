@@ -1771,11 +1771,23 @@ var DECKSWIPE_MIN = 45;
    refused by one and obeyed by the other (§53.5). */
 function deckOwnControl(t){
   return !!(t && t.closest &&
-    t.closest(".deckbar, button, a, input, textarea, select, [contenteditable]"));
+    /* ── A PLAYER IS SOMETHING ON THE STAGE, NOT THE STAGE (§296) ────
+       A click inside an IFRAME never reaches this document, so the embed was
+       safe by accident — but a native `<video>` is in our own page, and its
+       clicks land here. In fullscreen, where §265 makes a click on the stage
+       advance the slide, pressing that player's own play button moved the deck
+       on as well: the one gesture Islam named as how a clip should be
+       controlled, doing two things at once. `.vwrap` covers the poster and the
+       "opens in a new tab" card in the same breath. */
+    t.closest(".deckbar, .vwrap, video, iframe, button, a, input, textarea, " +
+              "select, [contenteditable]"));
 }
 
 function wireDeck(){
   var root = document.getElementById("deckroot");
+  /* The keyboard is the presentation's, on every slide (§296). Armed once,
+     here, beside the rest of the deck's wiring. */
+  videoKeepKeys(root);
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
   root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);

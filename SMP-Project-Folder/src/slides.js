@@ -231,6 +231,60 @@ function vslideHtml(sl, blank){
    `live` is the ONE slide passed in, never "every slide wearing .on" — the
    editor's rail marks every thumbnail `.on` so it lays out, and a rail that
    armed them would load one player per row. */
+/* ── THE KEYBOARD BELONGS TO THE PRESENTATION (§296) ─────────────────────
+   Islam, presenting with a clip on a slide: *"when I'm playing the video the
+   right and elft arrows are editing the video forward and backward. but this is
+   tricky because we lose the functionality ot the forward and backrward
+   clicks &hellip; the forward and backward of the video stream should be done by
+   clicing on the video directly and the right and left arrows and same for the
+   up and down and pagup and down stay for the repsentaiton."*
+
+   THE KEYS WERE NOT IGNORED, THEY NEVER ARRIVED. Measured: with focus inside
+   the player's frame the deck's own window listener fires **zero** times. A
+   cross-origin iframe keeps every key that is pressed while it holds focus, so
+   there is nothing for `preventDefault` to cancel and no handler that could
+   have run. §261.14 found the other half of this and fixed it for slides you
+   are NOT on — *"a player still loaded on a slide nobody is looking at goes on
+   holding the keyboard"* — and the slide you ARE on was left, because there the
+   player is legitimately live.
+
+   SO THE FOCUS IS HANDED BACK RATHER THAN THE KEY INTERCEPTED. The parent
+   cannot see the key, but it can see that it has lost focus TO the frame, and
+   it can take it back. Everything the mouse does is untouched: clicking the
+   player still plays, pauses and scrubs it, which is exactly what was asked
+   for.
+
+   THE COST IS STATED AND IS THE POINT OF THE TRADE: with the keyboard held by
+   the deck, the PLAYER's own shortcuts stop working — space, `f`, `c`, `j`/`l`
+   on YouTube — and all of them stay reachable through the player's own
+   controls with a mouse. Islam took that trade.
+
+   ONE HELPER, BOTH SURFACES (§53.5). The Manage slides editor arms a live
+   player on the slide it is showing too, and walks its rail with the same arrow
+   keys (§69.6), so it has the identical fault; a fix on the projector alone is
+   how the two drift.
+
+   `blur` ON THE WINDOW, NOT `focusin` ON THE FRAME: focus moving into a frame
+   is not a focus event in this document — the parent simply loses it — so
+   `focusin` never fires and there is nothing to listen for on the iframe
+   itself. The guard is `document.activeElement`, so an ordinary tab-switch
+   away from the browser (where the active element is not one of our players)
+   hands nothing back.
+
+   AND IT IS QUEUED, NEVER SYNCHRONOUS: refocusing inside the blur handler runs
+   while the browser is still moving focus, and the move lands after it. */
+function videoKeepKeys(root){
+  if (!root || root.dataset.vkeys) return;
+  root.dataset.vkeys = "1";
+  addEventListener("blur", function(){
+    if (!root.isConnected) return;
+    var a = document.activeElement;
+    if (a && a.tagName === "IFRAME" && root.contains(a)) {
+      setTimeout(function(){ if (root.isConnected) root.focus(); }, 0);
+    }
+  });
+}
+
 function videoArm(root, live){
   if (!root) return;
   [].forEach.call(root.querySelectorAll("iframe[data-vsrc]"), function(f){
@@ -1466,6 +1520,10 @@ function slidesWire(){
 
 function wireSlides(){
   var root = document.getElementById("slideroot");
+  /* Both sides of the switch (§296, §53.5): this mode shows a live player on
+     the slide it is arranging and walks its rail with the same arrow keys
+     (§69.6), so it loses them the same way. */
+  videoKeepKeys(root);
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
   addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });

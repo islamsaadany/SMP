@@ -133,6 +133,15 @@ the corner is created hidden and revealed only by a *successful* answer, so a
 500 matched no branch and the bubble was simply never drawn. Reproduced: with
 the package moved aside the dev-server will not start.
 
+> **§290 has since changed that arrival, and §197's rule is the reason it could
+> be changed safely.** That rule guards against an *optimistic* bubble that
+> vanishes on the next beat — a control that lied. The chat's on/off switch is
+> not a guess: it rides `org.extra.chat` and the browser holds it as
+> `GROUP.chat` by the time the page draws, so the corner can arrive with the
+> page rather than seconds later. The window §290 closes is the one after a new
+> build, when every browser reloads at once onto a cold function and a sleeping
+> database — *which is exactly the window Islam was in when he reported it.*
+
 **§104's rule, one module out**: no key, a refusal, a timeout and the switch off
 all land on the chat as it worked before — and *"the package did not load"*
 belongs on that list. **It degrades to no push, never to no conversation.**
@@ -209,7 +218,58 @@ first, or a browser that allowed notifications and never registered is told
 
 ---
 
-## 5 · A reply nobody was ever told about (§283)
+## 5 · Email when somebody is not looking (§283, superseded by §293)
+
+> **CORRECTED 2026-09-05, at the merge.** §283 is below as built, because it
+> reached `main` and ran. **§293 then superseded it at Islam's decision** —
+> `chaseDue()` and `chase_html` are gone from the product, the column stays and
+> is unread — so the section that follows is the reasoning that survives, not
+> the behaviour that ships. §274's rule: *a merge brings in work written against
+> the world as it was on the other side, so the sweep runs again after it.*
+
+### 5.1 · What ships now (§293)
+
+*"THE MESSAGES emailed to me from the platform when someone send to me when I
+don't reply it send an email for each message I beleive it needs to compile some
+messages rather than an emaile for each message."*
+
+**The platform collects for ten minutes, then sends one email.** Nothing goes
+out while a collection fills; one email then carries **every** conversation with
+something unanswered — the unit of the office's email is the **queue**, not the
+message and not the person. The other direction stays one per person by
+construction, because a colleague only ever sees their own conversation.
+
+- **Presence decides nothing about email**, and that is the decision it turns
+  on. Islam overruled the proposed shape: *"even if I'm at my desk if the smo
+  don't reply in 10 min the email should come — sometimes people might be at
+  their desk but not focusing, or they closed the notification."* What stops a
+  collection instead is **a reply** on the office's side and **coming back to
+  the platform** on theirs, *because a reply needs reading rather than
+  answering.* Offered three rules for his own side he took the strictest, knowing
+  the cost: an email can arrive about a conversation he is reading at that
+  moment.
+- **The trigger and the contents are different questions**: it goes when
+  anything has waited long enough and then carries everything unanswered,
+  including a conversation that arrived a minute ago — deliberately, because that
+  newcomer is stamped by the email that carried it and never triggers one of its
+  own. **Fewer emails, not more.**
+- **It retired the away threshold, and the same key changed what it means** —
+  his own move, and it closes the duplication he objected to (*"I'm confused
+  between the send email after 3 min and the send after 60 min"*). One box, one
+  number, relabelled **Email after**, shipping at **10**. The KEY does not move
+  (§30.2), so a tenant that typed a number keeps it; what changes is the shipped
+  default, because 3 was a presence threshold and 10 is a collecting time.
+- **The word "here" keeps its own short window** (`CHAT_HERE_MIN`), or the screen
+  calls somebody present nine minutes after they shut the tab — applied on **all
+  three** surfaces that compute it, because the first build fixed the reply path
+  and left the `thread` action reading the setting, *found by `test-chat.js`
+  going red, not by reading.*
+- **No scheduler**: the send rides the platform's own traffic (§98's idle beat
+  means every signed-in browser checks in at least every three minutes), with the
+  cost stated — with nobody using the platform the email waits for the next sign
+  of life, so **ten minutes is a floor and not a promise.**
+
+### 5.2 · What §283 was, and why its reasoning survives
 
 The platform decided whether to email **at the instant the office replied** —
 *has this person had a page open in the last few minutes?* — and a **yes is a
@@ -248,6 +308,13 @@ started **before** the file under test was written — once calling the fix
 working with the falsified build on disk, once calling it broken with the good
 one. **Compare the file's mtime with the server's start time; never trust the
 order the commands were typed in.**
+
+**Why it went.** §293's own record quotes what survives — *present is a guess
+about the future* — and names what §283 could not do: the half Islam actually
+reported (the office still got one email **per message**), and the panel it left
+behind, `away: 3` beside `chase: 30`, **two numbers for one decision.** Two
+sessions reached the same problem from opposite sides within a day; his call was
+that one shape answers both halves and the other answers one.
 
 ---
 
@@ -371,8 +438,10 @@ file cannot be picked twice.
 - **R4** The private VAPID half never appears in a return value or an error.
 - **R5** A refusal names the service and carries its words.
 - **R6** A registration made with a superseded key is re-made, not accepted.
-- **R7** A reply unread after the office's wait is emailed; a read one never is.
-- **R8** The chase resolves the address at send time from the stored register.
+- **R7** One email carries every conversation waiting, never one per message;
+  presence does not suppress it (§293).
+- **R8** The address is resolved at send time from the stored register, so a
+  retired person is never written to.
 - **R9** The corner survives navigation and does not draw the bubble under an
   open panel.
 - **R10** A pasted image goes through the same intake as an attached one.
@@ -387,7 +456,8 @@ file cannot be picked twice.
 | The server sends | §231 | `scripts/test-push.js` (a throwaway HTTPS server stands in front of the real service, so the encrypted body and the VAPID header are read **off the wire**) |
 | The bell's five states | §231.2, §231.5 | `checks/office-chat.py` |
 | The office starts one | §247 | `checks/send-message.py`, `office-inbox.py` |
-| The chase | §283 | `scripts/test-chat.js` |
+| The collected email | §293 (superseding §283) | `scripts/test-chat.js` |
+| The corner arrives with the page | §290 | `checks/office-chat.py` |
 | The corner survives the walk | §284 | `checks/chat-corner.py` |
 | The office's queue | §285, §288.1 | `checks/corner-queue.py` |
 | Paste a picture | §286 | `checks/paste-picture.py` |
@@ -400,8 +470,11 @@ file cannot be picked twice.
   service can only hand a message over while the browser runs somewhere. Stated
   in §231 rather than claimed away.
 - **iOS still needs the platform on the home screen** before Apple will deliver.
-- **The chase cannot fire on its own**: with no scheduler on Vercel it rides
-  ordinary requests, so nobody touching the platform means nothing goes out
-  until somebody does.
-- **A same-second collision between a chase and a read** is not guarded; the
-  worst case is one email somebody did not need.
+- **The collected email cannot fire on its own**: with no scheduler on Vercel it
+  rides ordinary requests, so nobody touching the platform means nothing goes out
+  until somebody does — **ten minutes is a floor, not a promise** (§293).
+- **An email can arrive about a conversation the office is reading at that
+  moment** — the cost of the strictest of the three rules offered, taken
+  knowingly (§293).
+- **`chase_html` and its index remain in the schema, unread** (migration 040),
+  because §293 superseded the reader rather than migrating the column away.

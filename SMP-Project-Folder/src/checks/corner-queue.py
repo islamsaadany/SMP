@@ -57,6 +57,16 @@ HITS = [
   "line":"The Q3 target on Active Base still reads 4.2M.",
   "line_at":"2026-09-03T09:41:00Z","from_office":False,"is_last":True},
 ]
+# PEOPLE WITH NO CONVERSATION (§290). These are on the register and have never
+# written in — the case Islam reported as "Nothing found". ELEVEN of them, so
+# the cap at ten bites and the foot line has something to count.
+# NOBODY HERE IS IN `QUEUE` OR `HITS` — a person in both halves is exactly the
+# fault the server's NOT EXISTS clause prevents, so a stub that put one in both
+# would make that assertion untestable. `loghead` IS on the demo register, which
+# is what lets the row be asserted to draw the register's short name and place.
+FOLK=[{"key":"loghead","name":"Hazem Roushdy","unit_key":"logistics","fn_key":None,"title":None}] + [
+  {"key":"newp%d"%i,"name":"Hazem Newcomer %d"%i,"unit_key":None,"fn_key":None,"title":None}
+  for i in range(1,11)]
 POSTED=[]
 class H(http.server.BaseHTTPRequestHandler):
     def log_message(self,*a): pass
@@ -77,8 +87,10 @@ class H(http.server.BaseHTTPRequestHandler):
              "beat":4000,"popup":False,"vapid":""}
         if a=="chatSearch":
             q=(b.get("q") or "").lower()
+            folk=[f for f in FOLK if q in f["name"].lower()]
             self._s(200,json.dumps({"ok":True,"q":q,
-              "hits":[h for h in HITS if q in h["line"].lower() or q in h["person_name"].lower()]
+              "hits":[h for h in HITS if q in h["line"].lower() or q in h["person_name"].lower()],
+              "people":folk[:10], "more":max(0,len(folk)-10)
               }).encode(),"application/json"); return
         if a=="thread":
             who=b.get("person")
@@ -192,9 +204,17 @@ with sync_playwright() as p:
     pg.fill("#cqfind","target"); pg.wait_for_timeout(1400)
     ck("it asks the server", any(b.get("action")=="chatSearch" for b in POSTED),
        [b.get("action") for b in POSTED])
-    ck("the count says the scope out loud",
-       "all conversations" in (pg.eval_on_selector(".cqfound","e=>e.textContent") or ""),
-       pg.eval_on_selector(".cqfound","e=>e.textContent") if pg.query_selector(".cqfound") else "no line")
+    # REVERSED AND REWRITTEN, NEVER DELETED (§218). Under §285 the scope was a
+    # grey line above the rows, and asserting it was right. Islam read that line
+    # as a header — it was one — so the scope moved INTO THE BOX, where it is
+    # read at the moment somebody decides to type and costs no row. The claim is
+    # unchanged: the office must not be left thinking the search is limited to
+    # Waiting while that segment is the one lit (§35, §124). Both ends, or a
+    # build that simply dropped the scope entirely would pass the absence half.
+    ph = pg.eval_on_selector("#cqfind","e=>e.placeholder") or ""
+    ck("the box says the scope out loud", "all conversations" in ph and "register" in ph, ph)
+    ck("...and no grey line says it above the rows", pg.query_selector(".cqfound") is None,
+       (pg.eval_on_selector(".cqfound","e=>e.textContent") or "") if pg.query_selector(".cqfound") else "none")
     ck("a match in an older message says so",
        any("earlier message" in (h.inner_text() or "") for h in pg.query_selector_all(".cqrow")))
     ck("...and an answered conversation is reachable",
@@ -215,6 +235,112 @@ with sync_playwright() as p:
     ck("the search box still holds what was typed",
        pg.eval_on_selector("#cqfind","e=>e.value")=="target",
        pg.eval_on_selector("#cqfind","e=>e.value"))
+
+    print("\nREACHING SOMEBODY WHO HAS NEVER WRITTEN IN (§290)")
+    pg.fill("#cqfind","hazem"); pg.wait_for_timeout(900)
+    rows=pg.query_selector_all(".cqrow")
+    ck("the people who match are listed", len(rows)>0, len(rows))
+    # NO HEADINGS AT ALL — Islam's own instruction, and asserted as an ABSENCE
+    # beside the presence, or a build that kept them satisfies everything else.
+    ck("no group heading is drawn", pg.query_selector(".cqfound") is None,
+       pg.eval_on_selector(".cqfound","e=>e.textContent") if pg.query_selector(".cqfound") else "none")
+    # THE ROW SHAPE IS WHAT SAYS WHICH IS WHICH: a person who has never written
+    # has no message line and no time. That IS the grouping, so it is the thing
+    # to assert — not a class, not a heading.
+    fresh=[r for r in rows if r.get_attribute("data-cqfresh")=="1"]
+    ck("they are marked as having no conversation yet", len(fresh)>0, len(fresh))
+    ck("...and carry no time, because they have none",
+       all(r.query_selector(".cqw") is None for r in fresh))
+    ck("...and no last message either",
+       all((r.query_selector(".cqln").inner_text().strip() if r.query_selector(".cqln") else "")==""
+           for r in fresh))
+    # THE REGISTER'S NAME AND PLACE, same reader as a conversation row (§288.1).
+    hz=[r for r in fresh if "Hazem Roushdy" in (r.inner_text() or "")]
+    ck("a person on the register reads with their place", len(hz)==1 and
+       hz[0].query_selector(".cqpl") is not None, len(hz))
+    want = pg.evaluate("""() => { try { return placeLabel(personAt(personBy('loghead'))); }
+                                  catch(e){ return null; } }""")
+    got = hz[0].query_selector(".cqpl").inner_text().strip() if hz and hz[0].query_selector(".cqpl") else ""
+    ck("...and it agrees with placeLabel(), never a literal", bool(want) and got==want, got+" vs "+str(want))
+    # THE CAP SPEAKS AT THE FOOT — eleven match, ten are shown.
+    ck("ten are shown, not eleven", len(fresh)==10, len(fresh))
+    more = pg.query_selector(".cqmore")
+    ck("the rest are counted at the foot", more is not None and "1 more" in more.inner_text(),
+       more.inner_text() if more else "no line")
+    # AND THE WAY OUT DOES NOT SCROLL AWAY — measured as a BOX against the
+    # body's own box, never as a class: sticky is paint, not markup.
+    #
+    # THE FIRST OF THE TWO IS THE CONTROL CASE AND CANNOT FAIL (§113.8): with
+    # the list scrolled to its end the foot is at the end whether it is pinned
+    # or not. It is kept because it proves the foot is DRAWN at all — the
+    # second one, at the TOP of a long list, is the one that goes red, and it
+    # was watched doing so with the sticky rule taken out.
+    pg.evaluate("() => { const b=document.getElementById('chatbody'); b.scrollTop=b.scrollHeight; }")
+    pg.wait_for_timeout(200)
+    ck("the way out is still on screen at the bottom of a long list",
+       pg.evaluate("""() => { const f=document.querySelector('.cqfoot'),
+                                    b=document.getElementById('chatbody');
+         if (!f||!b) return false;
+         const fr=f.getBoundingClientRect(), br=b.getBoundingClientRect();
+         return fr.bottom <= br.bottom + 2 && fr.top >= br.top - 2 && fr.height > 0; }"""))
+    pg.evaluate("() => { document.getElementById('chatbody').scrollTop = 0; }")
+    pg.wait_for_timeout(150)
+    ck("...and at the top of it too",
+       pg.evaluate("""() => { const f=document.querySelector('.cqfoot'),
+                                    b=document.getElementById('chatbody');
+         const fr=f.getBoundingClientRect(), br=b.getBoundingClientRect();
+         return fr.bottom <= br.bottom + 2 && fr.height > 0; }"""))
+    # OPENING ONE OPENS AN EMPTY CONVERSATION AND ASKS THE SERVER NOTHING —
+    # a 404 drawn as a failure would say something is wrong when nothing is.
+    before=len([b for b in POSTED if b.get("action")=="thread"])
+    # RE-QUERIED AT PRESS TIME, never held from before: the poll rebuilds this
+    # list every few seconds, so a handle taken earlier is detached by the time
+    # it is used — which is a failure of the CHECK reported as one of the
+    # product's (§215). The row is addressed by the key it carries.
+    # EVERY PROBE BELOW DEGRADES (§215). On a build with no people half the row
+    # is simply not there, and a check that DIES on it reports six failures of
+    # sixteen and calls the run finished — which is this file's own lesson,
+    # walked into while writing the section that quotes it.
+    opened = False
+    try:
+        pg.wait_for_selector('.cqrow[data-cqopen="loghead"]', timeout=4000)
+        pg.click('.cqrow[data-cqopen="loghead"]'); pg.wait_for_timeout(700)
+        opened = True
+    except Exception as e:
+        pass
+    ck("the row can be opened at all", opened)
+    after=len([b for b in POSTED if b.get("action")=="thread"])
+    ck("opening one asks the server nothing", opened and after==before, str(before)+" -> "+str(after))
+    def txt(sel, prop="textContent"):
+        try: return pg.eval_on_selector(sel, "e=>e."+prop) or ""
+        except Exception: return ""
+    ck("...and the header becomes them", "Hazem" in txt("#chatpanel .cht"), txt("#chatpanel .cht"))
+    ck("...with a composer that says WRITE, not reply",
+       "Write to" in txt("#chatsay","placeholder"), txt("#chatsay","placeholder"))
+    # AND THE FIRST MESSAGE CARRIES `start`, which is what mints it (§247).
+    sent=[]
+    if opened:
+        try:
+            pg.fill("#chatsay","Could you look at the Q3 figure?")
+            pg.click("#chatsend"); pg.wait_for_timeout(800)
+        except Exception: pass
+        sent=[b for b in POSTED if b.get("action")=="reply" and b.get("person")=="loghead"]
+    ck("the first message is sent as a NEW conversation", len(sent)==1 and sent[0].get("start") is True,
+       json.dumps(sent[0].get("start")) if sent else "nothing sent")
+    ck("...and it carries the same email every reply carries",
+       len(sent)==1 and bool(sent[0].get("html")))
+    # AND THE STATE IS PUT BACK (§94.2) — the section below asserts the search
+    # survives navigating, and it asserts the term IT typed. A section that
+    # leaves the box holding something else fails its neighbour, not itself.
+    try: pg.click("[data-cqback]", timeout=3000); pg.wait_for_timeout(400)
+    except Exception: pass          # nothing was open to come back from
+    pg.fill("#cqfind","target"); pg.wait_for_timeout(800)
+
+    print("\nAND THE CORNER ARRIVES WITH THE PAGE (§290)")
+    # The bubble must be drawn from the state the page hydrated with, BEFORE
+    # the chat has answered. Measured on a page whose chat endpoint is slow.
+    ck("the switch is readable from the page's own state",
+       pg.evaluate("() => { try { return !!SMPRules.chatCfg(GROUP.chat).on; } catch(e){ return null; } }"))
 
     print("\nAND IT SURVIVES MOVING ABOUT (§284)")
     tabs=[e for e in pg.query_selector_all("[data-s]") if e.is_visible()]

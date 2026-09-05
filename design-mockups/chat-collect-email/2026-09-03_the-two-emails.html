@@ -1,0 +1,85 @@
+<title>The two collection emails</title>
+<style>
+:root{
+  --ground:#F4F6F9; --card:#FFFFFF; --ink:#141C2B; --ink-2:#41506A; --ink-3:#6B7A93;
+  --line:#DCE3EC; --gold:#B08A38; --head:#EEF1F6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#12171F; --card:#1A2029; --ink:#EAEEF5; --ink-2:#B4BECD; --ink-3:#8B97A9;
+    --line:#2C3543; --gold:#DCB463; --head:#212934;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12171F; --card:#1A2029; --ink:#EAEEF5; --ink-2:#B4BECD; --ink-3:#8B97A9;
+  --line:#2C3543; --gold:#DCB463; --head:#212934;
+}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;padding:30px 22px 60px}
+.wrap{max-width:1244px;margin:0 auto}
+h1{font-size:22px;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+p.lede{color:var(--ink-2);margin:0 0 30px;max-width:66ch}
+.cols{display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap}
+.col{flex:1 1 520px;min-width:0}
+/* The branded email is a fixed 600px table, as every mail client renders it.
+   The column is sized to hold it whole: a narrower one clips the sentences,
+   which is the one thing a mockup of an email must not do. */
+.col.mailcol{flex:0 1 642px}
+h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 4px;font-weight:700}
+p.sub{color:var(--ink-3);font-size:13.5px;margin:0 0 14px;max-width:60ch}
+.mail{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.hdr{padding:13px 18px;border-bottom:1px solid var(--line);background:var(--head)}
+.row{display:flex;gap:10px;font-size:13px;color:var(--ink-2)}
+.row+.row{margin-top:3px}
+.k{color:var(--ink-3);width:56px;flex:none}
+.subj{font-weight:650;color:var(--ink)}
+.bd{overflow-x:auto;background:#FFFFFF}
+.bd.pad{padding:20px 22px}
+.note{margin-top:16px;padding:13px 16px;border-left:3px solid var(--gold);
+  background:var(--card);border-radius:0 8px 8px 0;color:var(--ink-2);font-size:14px}
+.note b{color:var(--ink);display:block;margin-bottom:3px}
+.foot{margin-top:34px;display:flex;gap:22px;flex-wrap:wrap}
+.foot .note{flex:1 1 320px;margin-top:0}
+</style>
+<div class="wrap">
+<h1>The two collection emails</h1>
+<p class="lede">What actually lands in an inbox after ten minutes of silence. The one on the
+right is drawn by the platform's own mail builder, so it is your branding rather than a
+picture of it.</p>
+
+<div class="cols">
+  <div class="col">
+    <h2>To you &mdash; the office</h2>
+    <p class="sub">Everyone waiting, in one email. Plain and operational: a nudge to one
+    person who works here, not something the company sends outward.</p>
+    <div class="mail"><div class="hdr"><div class="row"><span class="k">From</span><span>Raya Trade &lt;smp@&hellip;&gt;</span></div><div class="row"><span class="k">Subject</span><span class="subj">3 conversations waiting</span></div></div><div class="bd pad"><div style="font:15px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#1B2740"><p style="margin:0 0 18px"><b>3 conversations</b> are waiting for an answer.</p><div style="margin:0 0 20px"><p style="margin:0 0 7px;font:600 15px/1.4 -apple-system,Segoe UI,Arial,sans-serif">Hend Farouk<span style="font-weight:400;color:#5E6E88"> &middot; Mobile &middot; waiting 14 minutes</span></p><blockquote style="margin:0 0 8px;padding:9px 14px;border-left:3px solid #C9A24D;background:#F4F6FA;color:#3D4C68">The Q3 target on Active Base still reads 4.2M on our page — the import moved it, but Performance has not caught up.</blockquote><blockquote style="margin:0 0 8px;padding:9px 14px;border-left:3px solid #C9A24D;background:#F4F6FA;color:#3D4C68">And the same on Retail Stores: RS04 shows 93% with no measures behind it.</blockquote></div><div style="margin:0 0 20px"><p style="margin:0 0 7px;font:600 15px/1.4 -apple-system,Segoe UI,Arial,sans-serif">Ali Reda<span style="font-weight:400;color:#5E6E88"> &middot; Corporate &middot; waiting 11 minutes</span></p><blockquote style="margin:0 0 8px;padding:9px 14px;border-left:3px solid #C9A24D;background:#F4F6FA;color:#3D4C68">I can&#x27;t adjust the direction or the compiling on my objectives — is that meant to be?</blockquote></div><div style="margin:0 0 20px"><p style="margin:0 0 7px;font:600 15px/1.4 -apple-system,Segoe UI,Arial,sans-serif">Hala Mostafa<span style="font-weight:400;color:#5E6E88"> &middot; CX (function) &middot; waiting 10 minutes</span></p><blockquote style="margin:0 0 8px;padding:9px 14px;border-left:3px solid #C9A24D;background:#F4F6FA;color:#3D4C68">Can you reopen our report? We submitted a day early by mistake. (with a screenshot)</blockquote></div><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 20px"><tr><td bgcolor="#16325C" style="border-radius:6px"><a href="#" style="display:inline-block;padding:11px 20px;font:600 14px/1 -apple-system,Segoe UI,Arial,sans-serif;color:#FFFFFF;text-decoration:none">Open the Platform Inbox</a></td></tr></table><p style="margin:0;color:#5E6E88">Setup &rsaquo; Running the cycle &rsaquo; Platform Inbox.</p></div></div></div>
+    <div class="note"><b>Why it is not branded</b>
+    The branded template exists for what Raya Trade looks like to somebody outside the
+    platform. This is a work queue, and dressing it up would only slow it down.</div>
+  </div>
+
+  <div class="col mailcol">
+    <h2>To them &mdash; a colleague</h2>
+    <p class="sub">Only their own conversation, so there is nothing to group: your replies
+    collected into one message, in the tenant's branding.</p>
+    <div class="mail"><div class="hdr"><div class="row"><span class="k">From</span><span>Raya Trade &lt;smp@&hellip;&gt;</span></div><div class="row"><span class="k">Subject</span><span class="subj">3 replies from the Strategy Office</span></div></div><div class="bd"><!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>3 replies from the Strategy Office</title></head><body style="margin:0;padding:0;background:#F4F6FA"><div style="display:none;max-height:0;overflow:hidden;opacity:0">Three replies are waiting for you in the platform.</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F4F6FA"><tr><td align="center" style="padding:28px 12px"><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;background:#FFFFFF;border:1px solid #E3E8EF;border-radius:10px;overflow:hidden"><tr><td bgcolor="#16325C" style="padding:20px 28px"><div style="font:700 15px/1.3 Helvetica,Arial,sans-serif;color:#FFFFFF;letter-spacing:.01em">Raya Trade</div><div style="font:600 10.5px/1.4 Helvetica,Arial,sans-serif;color:#BEC6D1;letter-spacing:.14em;text-transform:uppercase;padding-top:3px">Strategy Management Platform</div></td></tr><tr><td bgcolor="#B8862B" style="font-size:0;line-height:0;height:3px">&nbsp;</td></tr><tr><td style="padding:28px 28px 8px"><h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;color:#1B2330">3 replies from the Strategy Office</h1><div data-mail-body><p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#1B2330">Three replies are waiting for you in the platform.</p><p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#1B2330">“The Q3 target on Active Base still reads 4.2M on our page — the import moved it, but Performance has not caught up.”</p><p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#1B2330">“And the same on Retail: the pillar shows 93% with no measures behind it.”</p><p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#1B2330">“Last one — can you reopen our report? We submitted it a day early by mistake.”</p><p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#1B2330">Open the platform to read them in full and answer.</p></div><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 22px"><tr><td bgcolor="#16325C" style="border-radius:6px"><a href="http://127.0.0.1:47119/raya-trade" style="display:inline-block;padding:11px 22px;font:600 14px/1 Helvetica,Arial,sans-serif;color:#FFFFFF;text-decoration:none">Open the platform</a></td></tr></table></td></tr><tr><td style="padding:0 28px"><div style="border-top:1px solid #E3E8EF"></div></td></tr><tr><td style="padding:16px 28px 24px"><p style="margin:0;font:400 12px/1.55 Helvetica,Arial,sans-serif;color:#6B7686">Sent from the Strategy Management Platform for Raya Trade. If you were not expecting this, tell your SMO.</p></td></tr></table></td></tr></table></body></html></div></div>
+    <div class="note"><b>One thing this changes</b>
+    Today this email is built in your browser as you press Send. Collecting for ten minutes
+    means the platform builds it later instead &mdash; same builder, same branding, no longer
+    depending on the tab that wrote it still being open.</div>
+  </div>
+</div>
+
+<div class="foot">
+  <div class="note"><b>The subject carries the count</b>
+  &ldquo;3 conversations waiting&rdquo; when there are several, &ldquo;A question is waiting:
+  Hend Farouk&rdquo; when there is one &mdash; so the inbox list alone tells you the size of it.</div>
+  <div class="note"><b>Where the button points</b>
+  The platform's address is taken from the platform's own traffic, so the link is a real
+  absolute address rather than something a mail client tries to open as a file.</div>
+  <div class="note"><b>Screenshots</b>
+  Named in words rather than attached &mdash; an email carrying pictures is an email that
+  gets held up on the way in.</div>
+</div>
+</div>

@@ -355,7 +355,23 @@
    serving itself the old platform out of its own disk (§91). Checked against
    origin/main serving "smp-shell-v4.64-objectives-table" (aac6c32), and
    confirmed again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.65-office-corner-queue";
+/* §290: the corner is drawn from the state the page hydrated with rather than
+   waiting for the chat's first answer, and the search reaches people who have
+   never written in — the built file's bytes changed, so the name must too, or
+   a returning browser goes on serving itself the old platform out of its own
+   disk (§91). Checked against origin/main serving
+   "smp-shell-v4.65-office-corner-queue" (da96757) — this branch's own previous
+   name, already there — and confirmed again immediately before the push
+   (§94.16). */
+/* v4.68-ten-minute-collection — §293: the platform collects for ten minutes
+   and then sends one email, superseding §283's chase-if-unread. The built
+   file's bytes changed — the line above the reply box says what will happen
+   rather than whether an email goes, the settings row is relabelled, and both
+   lib/rules.js and the mail builder (now lib/mail-html.js) are inlined — which
+   is the whole trigger (§91). Read off origin/main serving
+   "smp-shell-v4.67-project-row-type" at the moment of this merge; confirmed
+   again immediately before the push (§94.12, §94.16). */
+const SHELL = "smp-shell-v4.70-settings-scroll";
 const ASSETS = [
   "/",
   "/index.html",

@@ -221,6 +221,28 @@ sequences.
 deal of churn. It is **bounded**: 160 full saves went 5.5 → 15.4 → 15.5 → 15.5 →
 15.5 MB. It steps once and flattens, because the space a DELETE frees is reused.
 
+**And this is the FALLBACK path, not every save** — §288's own narrowing, worth
+stating exactly rather than letting the account read wider than it acts. §241's
+incremental writer has been live on production since **2026-09-03**, and its
+per-subject deletes take ROW EXCLUSIVE, so they never blocked a reader and a
+plain field edit never comes near this clear at all. What still falls back to it
+is every **settings, register, reorder and add/remove** change, and **every
+whole-graph post from a tab on an older build.**
+
+**The narrowing fits the report rather than weakening it**: a new build reloads
+every browser at once, every one of them posts the whole graph, and Neon has
+usually gone to sleep — so the fallback path is taken by the whole tenant within
+a minute of a deploy, *which is precisely when Islam saw the chat die, and
+precisely why it healed and came back.*
+
+> **A fix described more widely than it acts is one somebody later measures,
+> finds not to fire, and stops trusting.**
+
+**Proved able to fail, two levers, neither a switch in the product**:
+`SMP_SAVE_TRUNCATE=1` clears the way a save cleared before — **4 red**, naming
+the session, the settings, the register and a unit's plan. With
+`SMP_CHAT_JOIN_PEOPLE=1` beside it, **5 red**: the original fault whole.
+
 ---
 
 ## 7 · What a save is allowed to cost when it is refused (§184)

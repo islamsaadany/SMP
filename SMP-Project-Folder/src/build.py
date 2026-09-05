@@ -18,7 +18,7 @@ for tag, f in [("RULES","../../lib/rules.js"), ("DIFF","../../lib/graph-diff.js"
                ("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("RECIPES","recipes.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
                ("PPTX","pptx.js"),
-               ("MAIL","mail.js"),
+               ("MAIL","../../lib/mail-html.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
                ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("HISTORY","history.js"), ("SAFETY","safety.js"), ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')

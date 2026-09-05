@@ -84,6 +84,10 @@ BOXQUEUE = [{"person_key": "hend", "person_name": "Hend Farouk", "live_name": "H
              "unread": 1, "last_body": BOXMSGS[-1]["body"],
              "last_from_office": BOXMSGS[-1]["from_office"],
              "last_by": BOXMSGS[-1]["by_name"], "flagged": 0}]
+# WHAT THE THREAD ANSWER SAYS BEYOND THE DEFAULTS ABOVE (§293). Set by the
+# check between drives, so the line above the reply box can be measured in each
+# of the states the server can actually put it in.
+THREAD = {}
 errs, bad = [], 0
 
 
@@ -190,12 +194,18 @@ class H(http.server.BaseHTTPRequestHandler):
                 "application/json")
             return
         if body.get("action") == "thread":
-            self._send(200, json.dumps({
+            # §293: THE PRESENCE LINE'S OWN STATES ARE SET FROM HERE. What the
+            # office is told before pressing Send depends on facts only the
+            # server has (an address, whether emailing is on, whether they are
+            # here), so the stub has to be able to hold each of them — a
+            # stand-in that models less than the thing it stands in for
+            # reports a working build as broken (§231.5, §100.3).
+            self._send(200, json.dumps(dict({
                 "ok": True, "person": "hend", "name": "Hend Farouk", "gone": False,
                 "unit": "mobile", "fn": None, "title": "Head of Mobile",
                 "address": None, "waiting": True, "here": False, "hereAt": None,
                 "mail": False, "chatOn": CHAT["cfg"].get("on", True),
-                "messages": BOXMSGS}).encode(), "application/json")
+                "messages": BOXMSGS}, **THREAD)).encode(), "application/json")
             return
         if body.get("action") == "mine":
             CHAT["polls"] += 1
@@ -1750,6 +1760,67 @@ with sync_playwright() as p:
     ck("a browser that does not report its key is not churned",
        pg.evaluate("() => (window.__unsub || []).length") == 0,
        pg.evaluate("() => window.__unsub"))
+
+    # ── 21 · WHAT HAPPENS NEXT, SAID BEFORE SEND (§293) ─────────────────
+    # Islam: "even if I'm at my desk if the smo don't reply in 10 min the email
+    # should come ... sometimes people might be at their desk but not focusing."
+    # So presence stopped deciding whether an email goes — and the line above
+    # the reply box had said, for as long as it existed, "they have the platform
+    # open, so no email will be sent". A sentence that was true and stopped
+    # being true is worse than no sentence (§124), so what is asserted here is
+    # that BOTH states now name the email that is coming.
+    #
+    # THE SERVER HALF IS scripts/test-chat-chase.js, against a real Postgres.
+    # What is measured HERE is the one thing the server cannot say: that the
+    # office is told, in the words of its own setting, before it presses Send.
+    print("\n21 · what happens next, said before Send")
+
+    def presence(over):
+        THREAD.clear(); THREAD.update(over)
+        pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+        pg.goto(URL, wait_until="networkidle"); pg.wait_for_timeout(1000)
+        pg.click('[data-md="setup"]'); pg.wait_for_timeout(700)
+        pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(1500)
+        row = pg.query_selector("[data-chpick]")
+        if row:
+            row.click(); pg.wait_for_timeout(1200)
+        el = pg.query_selector(".chpres")
+        return (el.inner_text() if el else "")
+
+    reach = {"address": "hend@example.com", "mail": True,
+             "hereAt": "2026-08-25T07:00:00Z"}
+
+    said = presence(dict(reach, here=False))
+    ck("away — it names the address the email goes to",
+       "hend@example.com" in said, said)
+    ck("...and says the collection has to run out first",
+       "unless they open the platform" in said, said)
+
+    # THE STATE HIS OWN RULE TURNS ON ITS HEAD. A build that kept the old
+    # sentence passes every assertion above and fails this one, which is the
+    # whole point of measuring both (§113.8).
+    said = presence(dict(reach, here=True))
+    ck("here — it no longer promises that no email will be sent",
+       "no email" not in said, said)
+    ck("...it says they should see it now",
+       "should see this now" in said, said)
+    ck("...and that it is emailed anyway if they do not come back",
+       "hend@example.com" in said and "come back" in said, said)
+
+    # THE NUMBER IS THE TENANT'S SETTING, read from the same place the server
+    # reads it — never a literal in the page (§169's own lesson: a sentence
+    # that says "three minutes" while the rule says something else is one edit
+    # from lying).
+    mins = pg.evaluate("() => SMPRules.chatCfg(GROUP.chat).away")
+    ck("...in the words of the setting (%s minutes)" % mins,
+       (str(mins) + " minute") in said, said)
+
+    # AND THE TWO STATES THAT ARE STILL FINISHED FACTS say so as before.
+    said = presence(dict(reach, here=False, address=None))
+    ck("no address — it waits in the platform", "no address" in said, said)
+    said = presence(dict(reach, here=False, mail=False))
+    ck("emailing off — it says that instead", "turned off" in said, said)
+    THREAD.clear()
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

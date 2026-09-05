@@ -99,7 +99,12 @@ var CHAT = (function(){
      conversation open INSIDE the queue half, and null means the list. Every
      other field is what the server last said, never a second copy of it. */
   var cq = { side: "wait", person: null, name: "", msgs: [], q: "",
-             hits: null, searching: false, rows: null, err: "" };
+             hits: null, searching: false, rows: null, err: "",
+             /* §290: the people who match and have NO conversation yet, and
+                how many more matched than the ten shown. `fresh` marks the
+                conversation open in the queue as one that does not exist on
+                the server yet, so the first message carries `start`. */
+             people: null, more: 0, fresh: false };
   /* The office's own thread is fetched on the same poll as everybody's, so
      switching to "My messages" costs nothing and shows what is already here. */
   /* HOW MANY WERE WAITING LAST TIME WE ASKED — the office's half of §225.
@@ -128,6 +133,19 @@ var CHAT = (function(){
               new: false, newWho: "" };
 
   function servable(){ return location.protocol !== "file:"; }
+
+  /* Is the chat switched on, according to the state this page hydrated with?
+     Absent means the tenant never touched the setting, which `chatCfg` reads
+     as ON — the same default the server applies (§104, §98). Anything at all
+     going wrong here answers NO, because a corner that fails to appear for a
+     second is a smaller fault than one that appears and is taken away. */
+  function chatOnFromState(){
+    try {
+      if (typeof SYNC === "undefined" || !SYNC.isLive || !SYNC.isLive()) return false;
+      if (typeof GROUP === "undefined" || !GROUP) return false;
+      return !!SMPRules.chatCfg(GROUP.chat).on;
+    } catch (e) { return false; }
+  }
   function el(id){ return document.getElementById(id); }
   function esc2(s){
     return String(s == null ? "" : s)
@@ -431,8 +449,12 @@ var CHAT = (function(){
 
   function cqFind(){
     return '<div class="cqfind"><input type="search" id="cqfind" ' +
-      'placeholder="Search a name or a word\u2026" value="' + esc2(cq.q) + '" ' +
-      'aria-label="Search the conversations"></div>';
+      /* THE BOX SAYS ITS OWN SCOPE (§290), which is where the grey line above
+         the rows used to say it. Read at the moment somebody decides to type,
+         and it costs no row of the list. */
+      'placeholder="Search all conversations and the register\u2026" ' +
+      'value="' + esc2(cq.q) + '" ' +
+      'aria-label="Search all conversations and the register"></div>';
   }
 
   /* ONE ROW BUILDER FOR BOTH LISTS, so a search result and a waiting row
@@ -463,9 +485,14 @@ var CHAT = (function(){
 
   function cqRow(row, at, line, hit){
     var who = cqWho(row);
-    return '<button class="cqrow" type="button" data-cqopen="' + esc2(row.person_key) + '">' +
+    /* NO TIME FOR SOMEBODY WHO HAS NEVER WRITTEN, because they have none —
+       and the span goes rather than rendering empty (§35). The guard is not
+       decoration: `new Date(null)` is the EPOCH and not an invalid date, so
+       `when(null)` would print "1 Jan 00:00" against every such row. */
+    return '<button class="cqrow" type="button" data-cqopen="' + esc2(row.person_key) + '"' +
+      (row.fresh ? ' data-cqfresh="1"' : '') + '>' +
       '<div class="cqr1"><b>' + esc2(who.name) + "</b>" +
-        '<span class="cqw">' + esc2(when(at)) + "</span></div>" +
+        (at ? '<span class="cqw">' + esc2(when(at)) + "</span>" : "") + "</div>" +
       (who.place ? '<div class="cqpl">' + esc2(who.place) + "</div>" : "") +
       '<div class="cqln">' + esc2(oneLine(line || "")) + "</div>" +
       (hit ? '<div class="cqhit">' + esc2(hit) + "</div>" : "") + "</button>";
@@ -480,19 +507,48 @@ var CHAT = (function(){
     }
     if (cq.q && cq.q.length >= 2) {
       if (cq.searching && !cq.hits) return '<div class="cqzero">Looking\u2026</div>';
-      var hits = cq.hits || [];
-      if (!hits.length) return '<div class="cqzero">Nothing found for \u201c' +
+      var hits = cq.hits || [], folk = cq.people || [];
+      if (!hits.length && !folk.length) return '<div class="cqzero">Nothing found for \u201c' +
         esc2(cq.q) + "\u201d.</div>";
-      /* SAID OUT LOUD, because the results reach conversations that are NOT
-         waiting while the Waiting half is the one lit — a screen must not
-         imply a scope it is not using (§35, §124). */
-      return '<div class="cqfound">' + hits.length + " found in all conversations, " +
-        "waiting or not</div>" +
-        hits.map(function(h){
+      /* ── ONE LIST, NO HEADINGS (§290) ─────────────────────────────────
+         Islam, of the two group headings drawn first: "who we have a
+         conversation with will apear with the conversation and who is not
+         will appear without the converstaion th header is taking unneede
+         space." He is right and it is rule 1b-ii's own argument — a heading
+         that restates what the rows already show is furniture, and in a body
+         this small each one cost a whole row of the list.
+
+         THE ROW SHAPE CARRIES IT: a conversation has a last message and a
+         time, somebody who has never written has neither, and that is the
+         difference somebody reads. THE ORDER CARRIES THE GROUPING —
+         conversations by recency, then people by name — so it must never be
+         interleaved.
+
+         AND THE SCOPE LINE WENT WITH THEM. It said two things: how many, and
+         where the search looked. The count was never needed (the list is the
+         count), and where it looked moved into the box's own placeholder,
+         which is read at the moment somebody decides to type and costs no
+         row — while still saying it, because the Waiting half is the one lit
+         and the results reach conversations that are answered (§35, §124). */
+      return hits.map(function(h){
           return cqRow(h, h.line_at, h.line,
             h.is_last ? "" : ("found in an earlier message" +
                               (h.waiting ? "" : " \u00b7 answered")));
-        }).join("");
+        }).join("") +
+        folk.map(function(f){
+          return cqRow({ person_key: f.key, person_name: f.name, live_name: f.name,
+                         unit_key: f.unit_key, fn_key: f.fn_key, title: f.title,
+                         fresh: true },
+                       null, "", "");
+        }).join("") +
+        /* THE CAP SPEAKS AT THE FOOT, never in a heading: the top is where
+           nobody has run out of anything yet, and this line only means
+           something once somebody has read to the bottom without finding the
+           person they wanted. It says what to do, not only what is missing. */
+        (cq.more > 0
+          ? '<div class="cqmore">' + cq.more + " more on the register \u2014 " +
+            "narrow the search</div>"
+          : "");
     }
     if (cq.rows === null) return '<div class="cqzero">One moment\u2026</div>';
     if (!cqRows().length) return '<div class="cqzero">Nobody is waiting on the office.</div>';
@@ -1320,11 +1376,18 @@ var CHAT = (function(){
      uses. Nothing new is authorised, nothing new is stored, and a rule the
      Inbox keeps is a rule the corner keeps by construction. */
 
-  function cqOpen(key, name){
-    cq.person = key; cq.name = name || key; cq.msgs = [];
+  function cqOpen(key, name, fresh){
+    cq.person = key; cq.name = name || key; cq.msgs = []; cq.fresh = !!fresh;
     drawPanel();
     var box = el("chatsay");
-    if (box) box.placeholder = "Reply to " + (firstWord(cq.name) || "them") + "\u2026";
+    /* WRITE, NOT REPLY, when there is nothing to reply to (§290, §124). */
+    if (box) box.placeholder = (fresh ? "Write to " : "Reply to ") +
+      (firstWord(cq.name) || "them") + "\u2026";
+    /* AND NOTHING IS ASKED FOR A CONVERSATION THAT DOES NOT EXIST — the
+       server would answer 404, correctly, and a 404 drawn as a failure would
+       say something is wrong when nothing is (§93). The empty pane IS the
+       state; the conversation is minted by the first message (§247). */
+    if (fresh) return;
     post({ action: "thread", person: key }, function(err, j){
       if (cq.person !== key) return;          /* they moved on while it loaded */
       if (err || !j) { cq.msgs = []; drawPanel(); return; }
@@ -1335,7 +1398,7 @@ var CHAT = (function(){
   }
 
   function cqBack(){
-    cq.person = null; cq.msgs = []; cq.name = "";
+    cq.person = null; cq.msgs = []; cq.name = ""; cq.fresh = false;
     var box = el("chatsay");
     if (box) box.placeholder = "Write to the office\u2026";
     drawPanel();
@@ -1356,9 +1419,18 @@ var CHAT = (function(){
        (§72.3) — content, never a recipient, which the server resolves from
        the stored register (§74.2). Without it a reply from the corner could
        never chase anybody, and the same reply from the Inbox could. */
-    post(replyPost(who, text), function(err, j){
+    /* AND `start` IS WHAT MINTS THE CONVERSATION (§247's own flag, not a
+       second endpoint) — so the chase, the box on their screen and leaving
+       the waiting list all come free, and there is only ever one way to
+       begin one (§53.5). The server checks the person is real and active;
+       this only says which kind of send it is. */
+    var payload = replyPost(who, text);
+    if (cq.fresh) payload.start = true;
+    post(payload, function(err, j){
       sending = false;
       if (btn) btn.disabled = false;
+      /* IT EXISTS NOW, so a second message is an ordinary reply. */
+      if (j && j.ok) cq.fresh = false;
       if (err || !j || !j.ok) {
         cq.msgs = was;
         if (box && !box.value) box.value = text;
@@ -1394,7 +1466,10 @@ var CHAT = (function(){
   function cqSearch(q){
     cq.q = q;
     if (cqFindTimer) clearTimeout(cqFindTimer);
-    if (q.trim().length < 2) { cq.hits = null; cq.searching = false; cqBodyOnly(); return; }
+    if (q.trim().length < 2) {
+      cq.hits = null; cq.people = null; cq.more = 0;
+      cq.searching = false; cqBodyOnly(); return;
+    }
     cq.searching = true; cqBodyOnly();
     cqFindTimer = setTimeout(function(){
       var asked = q;
@@ -1402,6 +1477,8 @@ var CHAT = (function(){
         if (cq.q !== asked) return;           /* they have typed on since */
         cq.searching = false;
         cq.hits = (err || !j) ? [] : (j.hits || []);
+        cq.people = (err || !j) ? [] : (j.people || []);
+        cq.more = (err || !j) ? 0 : (j.more || 0);
         cqBodyOnly();
       });
     }, 300);
@@ -1494,7 +1571,34 @@ var CHAT = (function(){
     var dock = document.createElement("div");
     dock.className = "chatdock";
     dock.id = "chatdock";
-    dock.hidden = true;           /* until the server says there is somebody here */
+    /* ── THE CORNER ARRIVES WITH THE PAGE (§290) ──────────────────────
+       Islam: "a lag happened where the chat icon didn't apperar on the reload
+       of the branch. and then appeard after."
+
+       §197 created this hidden and revealed it only on a successful answer,
+       for a good reason it stated: an optimistic bubble that vanishes on the
+       next beat is a control that lied. That reason does not apply here,
+       because THIS IS NOT A GUESS — the chat's on/off switch lives in
+       `org.extra.chat`, the browser holds it as `GROUP.chat` by the time the
+       page draws, and `chatSettings()` on the server reads that same value
+       from that same row. Measured both ways on a real database: switched
+       off, the browser reads {on:false} and the server reads {on:false}.
+
+       SO IT IS ONLY EVER ASKED WHEN THE PLATFORM HYDRATED FROM THE SERVER
+       (`SYNC.isLive()`), which is what makes it the tenant's answer rather
+       than the baked example's — on file:// mount() never runs at all, and
+       behind §201's wall the state is the demo's and this stays hidden and
+       waits, exactly as before.
+
+       AND NOBODY THE CHAT WOULD REFUSE CAN SEE IT: /api/state refuses a
+       session that has not chosen a password (§43.2), so a page that
+       hydrated is a person /api/chat will answer. A 401 or 403 still hides
+       the corner on the first beat.
+
+       THE POLL REMAINS THE AUTHORITY. This decides only what is drawn in the
+       seconds before the first answer, which after a new build is the whole
+       tenant at once on a cold server — the moment Islam was reporting. */
+    dock.hidden = !chatOnFromState();
     dock.innerHTML = dockHtml();
     document.body.appendChild(dock);
 
@@ -1551,7 +1655,8 @@ var CHAT = (function(){
       var row = t.closest("[data-cqopen]");
       if (row) {
         var nm = row.querySelector("b");
-        cqOpen(row.dataset.cqopen, nm ? nm.textContent : "");
+        cqOpen(row.dataset.cqopen, nm ? nm.textContent : "",
+               row.dataset.cqfresh === "1");
         return;
       }
       if (t.closest("[data-cqback]")) { cqBack(); return; }
@@ -1969,21 +2074,25 @@ var CHAT = (function(){
 
         /* ── 7 · AND TOLD WHEN THEY ARE NOT LOOKING. Beside its sibling at
            last; the two were five rows apart. */
-        setRow("mail", "Away email",
-          /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
-             prose while the server read a constant, so the two were one edit
-             from disagreeing — and the edit is now a box on this very row. */
-          /* AND THE SECOND HALF, WHICH IS THE ONE THAT WAS MISSING (§283):
-             somebody PRESENT used to get nothing at all, for ever, if they
-             then shut their laptop — the platform decided at the instant of
-             replying and never looked again. The two numbers do different
-             jobs and the sentence says both, in order. */
-          "A reply is emailed when they have not had the platform open for " +
-          plural(c.away, "minute") + ". Somebody who WAS here is chased " +
-          plural(c.chase, "minute") + " later if they still have not read it — " +
-          "and not at all if they have. Off keeps every conversation inside " +
-          "the platform. A shut chat checks in every three minutes, so anything " +
-          "below four can call somebody away while they are at their desk.",
+        setRow("mail", "Email after",
+          /* THE SENTENCE READS THE SETTING (§169's rule), AND THE SETTING
+             CHANGED WHAT IT MEANS (§293). It was "how long before they count
+             as away"; it is now "how long the platform collects before it
+             emails", because presence stopped deciding whether an email goes
+             at all — Islam: *"even if I'm at my desk if the smo don't reply
+             in 10 min the email should come ... sometimes people might be at
+             their desk but not focusing."*
+
+             AND THE SECOND BOX GOES WITH IT. §283 put a chase beside the away
+             threshold, on the sound argument that present is a guess about
+             the future — and Islam read the pair and asked *"I'm confused
+             between the send email after 3 min and the send after 60 min, is
+             that a duplication?"* It was two numbers for one decision; this
+             is the one number that decision needs. */
+          "Anything left unanswered for " + plural(c.away, "minute") +
+          " is emailed — once, with everything still waiting in it. A reply " +
+          "stops it on this side; opening the platform stops it on theirs. " +
+          "Off keeps every conversation inside the platform.",
           segHtml("mail", "Off", "On", c.mail, true),
           /* ONLY WHILE IT IS ON, the shape `rep` already has under Handover
              email: a threshold for an email nobody sends is a control with
@@ -1992,20 +2101,8 @@ var CHAT = (function(){
             ? '<div class="chset-ctl chset-away">' +
                 '<input class="chset-num" type="number" data-chaway="1" ' +
                   'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
-                  'value="' + c.away + '" aria-label="Minutes away before a reply is emailed">' +
-                '<span class="chset-unit">' + plural(c.away, "minute") + ' away</span>' +
-              '</div>' +
-              /* THE CHASE, ON THE SAME ROW AND NEVER ITS OWN (§127): it is
-                 the same decision — whether and when a reply leaves the
-                 platform — and a row of its own would read as a second
-                 feature. Drawn only while the email is on, for the reason
-                 above it. */
-              '<div class="chset-ctl chset-away">' +
-                '<input class="chset-num" type="number" data-chchase="1" ' +
-                  'min="' + SMPRules.CHAT_CHASE_MIN + '" max="' + SMPRules.CHAT_CHASE_MAX + '" ' +
-                  'value="' + c.chase + '" ' +
-                  'aria-label="Minutes before an unread reply is chased">' +
-                '<span class="chset-unit">' + plural(c.chase, "minute") + ' unread</span>' +
+                  'value="' + c.away + '" aria-label="Minutes unanswered before an email is sent">' +
+                '<span class="chset-unit">' + plural(c.away, "minute") + '</span>' +
               '</div>'
             : "")) +
 
@@ -2241,28 +2338,42 @@ var CHAT = (function(){
     /* FIRST NAME THROUGH THE SHARED RULE (§135, §181), never split(" ")[0] —
        "Abd El Moniem" is one first name, and this register holds it. */
     var name = firstNameOf(d.person, d.name) || "They";
-    /* THE FIFTH STATE, AND IT COMES FIRST. With the chat off nobody can open
-       an answer, so what somebody's presence would have decided does not
-       arise — saying "Yara is away" here would be true and beside the point. */
+    /* WITH THE CHAT OFF NOBODY CAN OPEN AN ANSWER, so what their presence
+       would have decided does not arise — saying "Yara is away" here would be
+       true and beside the point. */
     if (!chatCfg().on) {
       return '<div class="chpres none">' + ICON_CLOCK +
         " The chat is off, so nobody would see a reply. Turn it back on in Settings.</div>";
     }
-    if (d.here) {
-      return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
-        " has the platform open — they will see this straight away, so no email will be sent.</div>";
-    }
     if (!d.address) {
       return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
-        " is away and has no address on the register, so this waits in the platform for them.</div>";
+        " has no address on the register, so this waits in the platform for them.</div>";
     }
     if (!d.mail) {
       return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
-        " is away, and no mail is configured on this deployment — this waits in the platform.</div>";
+        " will see this in the platform — emailing is turned off here.</div>";
+    }
+    /* ── IT SAYS WHAT HAPPENS NEXT, NOT WHETHER AN EMAIL GOES (§293) ──
+       Presence no longer decides that. A reply starts their collection, and
+       when the time is up it is emailed unless they have come back — so
+       "they have the platform open" can no longer be allowed to read as "no
+       email", which is exactly what it used to mean (§124: a status word is a
+       claim, and this one would be claiming something that stopped being
+       true). §283 had already made that sentence half-false by keeping the
+       message and chasing it later; this makes the line say so.
+
+       THE NUMBER IS THE TENANT'S OWN SETTING, read from the same place the
+       server reads it. */
+    var mins = plural(chatCfg().away, "minute");
+    if (d.here) {
+      return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
+        " has the platform open, so they should see this now — and if they have not " +
+        "come back to it within " + mins + " it is emailed to " + esc2(d.address) + ".</div>";
     }
     return '<div class="chpres away">' + ICON_CLOCK + " " + esc2(name) + " was last here " +
       esc2(d.hereAt ? ago(d.hereAt) : "a while ago") +
-      " — this will also go to " + esc2(d.address) + ".</div>";
+      " — unless they open the platform, this goes to " + esc2(d.address) +
+      " in " + mins + ".</div>";
   }
 
   /* ONE GROWER FOR BOTH COMPOSERS (§188, §53.5). The corner's was written
@@ -2595,9 +2706,15 @@ var CHAT = (function(){
       box.new = false; box.newWho = "";
       box.person = who;
       box.note = { text:
-        j && j.here ? "Sent. They are on the platform and will see it now."
-        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
-        : j && j.mailed && j.mailed.why ? "Sent. No email went out \u2014 " + j.mailed.why + "."
+        /* WHAT WILL HAPPEN, BECAUSE NOTHING HAS HAPPENED YET (§293). The
+           email is no longer sent by this request — it is collected and goes
+           when the time is up — so "emailed to …" would be a claim about
+           something that has not occurred (§124). The two states that are
+           still finished facts (no address, emailing off) say so as before. */
+        j && j.mailed && j.mailed.pending
+          ? "Sent. If they have not opened the platform in " + plural(j.mailed.mins, "minute") +
+            ", it is emailed to " + j.mailed.to + "."
+        : j && j.mailed && j.mailed.why ? "Sent. No email will go out \u2014 " + j.mailed.why + "."
         : "Sent." };
       if (typeof window !== "undefined" && typeof window.OVQUEUE !== "undefined")
         window.OVQUEUE = null;
@@ -2661,9 +2778,15 @@ var CHAT = (function(){
          two loads below redraw this pane, and a sentence that only exists in
          the DOM is a sentence the refresh destroys. */
       box.note = { text:
-        j && j.here ? "Sent. They are on the platform and will see it now."
-        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
-        : j && j.mailed && j.mailed.why ? "Sent. No email went out — " + j.mailed.why + "."
+        /* WHAT WILL HAPPEN, BECAUSE NOTHING HAS HAPPENED YET (§293). The
+           email is no longer sent by this request — it is collected and goes
+           when the time is up — so "emailed to …" would be a claim about
+           something that has not occurred (§124). The two states that are
+           still finished facts (no address, emailing off) say so as before. */
+        j && j.mailed && j.mailed.pending
+          ? "Sent. If they have not opened the platform in " + plural(j.mailed.mins, "minute") +
+            ", it is emailed to " + j.mailed.to + "."
+        : j && j.mailed && j.mailed.why ? "Sent. No email will go out — " + j.mailed.why + "."
         : "Sent." };
       /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§166). The Setup rail counts
          `OVQUEUE.waiting`, asked ONCE per visit because a summary is read and
@@ -2870,14 +2993,6 @@ var CHAT = (function(){
       var away = e.target.closest("[data-chaway]");
       if (away) {
         chatSet("away", away.value);
-        saved();
-        setMenuPaint();
-        return;
-      }
-      /* THE CHASE (§283), read the same way for the same reason. */
-      var chase = e.target.closest("[data-chchase]");
-      if (chase) {
-        chatSet("chase", chase.value);
         saved();
         setMenuPaint();
         return;

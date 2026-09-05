@@ -1446,6 +1446,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   after. **§264.2 — RECORDED, NOT DONE**: a project's OUTCOMES are a different
   model (a reported figure, not a measure against a prorated target) and are
   left alone; whether they should prorate has not been put to Islam.
+  **§264.3 — A BLANKET RENUMBER SWEPT SOMEBODY ELSE'S CITATIONS**: this
+  section's own merge renumbered its §257 → §264 across the SOURCES, and the
+  sources by then held main's **Y/N** citations, which had legitimately become
+  §257 three commits earlier — so 17 comments pointed at a section whose body
+  says `Y/N` **nought** times (against 34 in §257's). The arithmetic is exact
+  (main 3+14, branch 1+8, merged 4+22): every one of main's was taken.
+  **A RENUMBER IS SCOPED TO THE LINES THE RENUMBERING BRANCH WROTE** — after a
+  merge the sources are not all yours — **and it is silent**, because the number
+  it produces is a real section, so nothing parses wrong and no check can see
+  it (§94.12's shape, §281's habit of grepping the merged result). Separated
+  twice by different methods (reading each comment; matching each line against
+  main's own §257 lines at the merge parent), both naming the same 17.
+  Corrected 2026-09-05; nothing on any screen moves, and the one §238 CSP hash
+  regenerated in the same build exactly as designed.
 - **EMPTY IS NOT MISSING, AND THE BAR NOW SAYS WHICH (§272):** Islam, on
   Mobile and then Care — *"mobile keeps showing filling what's missing while we
   can't find something missing and there is no the side badges that identify
@@ -6696,7 +6710,32 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;294: the settings panel scrolls inside
+*Last Updated: 2026-09-05 &mdash; **&sect;264.3: a blanket renumber swept
+somebody else's citations.** Found while writing spec 031 and fixed at Islam's
+word. Seventeen comments in `config-data.js` and `group-render.js` cited
+**&sect;264** for the **yes/no** target behaviour, which is recorded at
+**&sect;257** &mdash; and not as a near miss: &sect;264's body mentions `Y/N`
+**nought** times against **34** in &sect;257's. **THE CAUSE RAN THE OPPOSITE WAY
+FROM THE OBVIOUS GUESS**: both features were renumbered on their merges, and the
+Y/N comments had already been renumbered CORRECTLY to &sect;257; it was
+&sect;264's own merge, renumbering its &sect;257 &rarr; &sect;264 with a blanket
+sweep of the sources, that took them. The arithmetic is exact (main 3+14, branch
+1+8, merged 4+22) &mdash; every one of main's, none spared. **A RENUMBER IS
+SCOPED TO THE LINES THE RENUMBERING BRANCH WROTE**, because after a merge the
+sources are not all yours, **and it is silent**: the number it produces is a
+real section, so nothing parses wrong and no check can see it (&sect;94.12's
+shape, &sect;281's habit of grepping the merged result). Separated **twice by
+different methods** and both naming the same 17 &mdash; by reading every
+comment, and mechanically by matching each line's text against main's own
+&sect;257 lines at the merge parent. **Nothing on any screen moves and it is
+asserted rather than assumed**: the built file differs by those 17 comment lines
+and **one** &sect;238 CSP hash, which regenerated in the same build exactly as
+that section designed it to; `yn-target`, `measure-score-spread`,
+`count-compile` and `unit-follows` green, 527/0 authoriser, 131/0 differ, full
+`qa.py` sweep clean. The `sw.js` shell is bumped because the built file's bytes
+changed, which is &sect;91's trigger.*
+
+*Earlier the same day: **&sect;294: the settings panel scrolls inside
 itself.** Islam, of the chat settings dropdown: *"there is no scrolling inside
 the settings pan while there is a uselss scrolling in the main page."*
 **MEASURING SAID THE TWO HALVES ARE ONE FACT** &mdash; the panel had no

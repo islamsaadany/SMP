@@ -371,7 +371,7 @@
    is the whole trigger (§91). Read off origin/main serving
    "smp-shell-v4.67-project-row-type" at the moment of this merge; confirmed
    again immediately before the push (§94.12, §94.16). */
-const SHELL = "smp-shell-v4.70-settings-scroll";
+const SHELL = "smp-shell-v4.71-yn-citations";
 const ASSETS = [
   "/",
   "/index.html",

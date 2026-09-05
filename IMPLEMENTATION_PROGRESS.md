@@ -6,7 +6,33 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§278.3 — the objectives table — merged to `main`
+**Latest version:** **§296 — the label, the fold, and a Setup page that is not a
+unit's — merged to `main` 2026-09-05 on Islam's word**, carrying §294 with it.
+
+**In flight, on the branch and not merged:** **§297 — no composer over a list of
+people, and a test that says what it cannot see.** Two from Islam, both signed
+off from a mockup drawn in the running platform
+(`design-mockups/corner-reply-box/2026-09-05_corner-reply-box.html`). As the
+office, the box under the Waiting **list** posted `say` with no recipient — the
+office writing to the office — which produces all three symptoms he reported;
+nothing was lost. It is no longer drawn there, and the Platform Inbox has always
+behaved that way with nobody picked. And the notification diagnostic now says
+what it cannot see: a browser cannot read the computer's own notification
+switch, which is what silenced it in Dia while Chrome worked. Awaiting his word
+on the merge.
+
+**Before it: §296 — the label, the fold, and a Setup page — merged 2026-09-05.**
+The minutes label said the number the box beside it already showed; the
+notification and assistant diagnostics arrive folded (his B of three drawn),
+which is also why the settings panel now fits; and the Setup page's rail was a
+full-width, window-tall column between 900 and 1200px — a regression from another
+session's unscoped `.split` breakpoint, fixed by scoping that block away from
+Setup rather than by giving Setup rules of its own, **with a unit's plan page
+asserted byte-identical** so nothing was silently undone. §294 went with it: the
+chat settings dropdown scrolls inside itself instead of pushing a scroll onto the
+page behind it.
+
+**Before that: §278.3 — the objectives table — merged to `main`
 2026-09-04 on Islam's word**, from
 `claude/seasonal-targets-monthly-proration-5clvu3`, on top of §279–§287 from
 other sessions.

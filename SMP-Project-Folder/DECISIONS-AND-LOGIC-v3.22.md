@@ -36120,3 +36120,180 @@ new; `checks/chat-settings-scroll.py` gains the label and the fold, and **one of
 its own §294 assertions was REWRITTEN rather than deleted** (§218): it asserted
 the page still scrolls at 1000×900, which was true only because of the
 regression this section removes.
+
+---
+
+## §297 — NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE (2026-09-05)
+
+Two from Islam, a day apart in the same conversation, and the second one he
+diagnosed himself.
+
+### What was reported
+
+> After sending the reply message as an sMO the message didn't appear in the box
+> and when it appeard it appeard above the message of ht employee which is wrong.
+
+and, a minute later:
+
+> and the message never reached the user.
+
+### Three symptoms, one cause — reproduced before anything was proposed (§3a)
+
+Driving the corner as the office, standing on the Waiting **list**, typing into
+the box and pressing Send, and reading what the server is actually asked for:
+
+```
+── the office, corner open, standing on the Waiting LIST ──
+  bodyClass          chatbody cqbody
+  rowsOnTheList      1
+  composerDrawn      True      composerVisible   True
+  placeholder        Write to the office…
+── what the server was actually asked ──
+  [{'action': 'say', 'to': None, 'body': 'Thanks Hend — looking at it now.'}]
+── what the box shows afterwards ──
+  bodyClass        chatbody cqbody
+  messagesShown    0
+```
+
+**§285 forked this composer at the top** and the fork is right: with a
+conversation open inside the queue the box is a REPLY, so it goes through
+`reply`; otherwise it is the person's own message and goes through `say`. What
+that section never asked is what the box does on the **list**, where no
+conversation is open at all — and there the guard falls through and Send posts
+`say` with **no recipient**: the office writing to the office.
+
+That single fact produces every word of the report:
+
+| What was seen | What is happening |
+|---|---|
+| the message never reached her | it went into the office's own thread; nobody was ever named |
+| it did not appear in the box | the body being drawn is the queue, while the echo went into `state.messages` |
+| it appeared above her message | `say` freshens the office's own thread, so it sorts to the top of Waiting |
+
+**Nothing is lost** — the text is in the office's own conversation, readable
+under *My messages*. Establishing that first was most of the reassurance worth
+giving.
+
+### Both ends were measured, and one of them is the design
+
+With her conversation OPEN the same box is correct: the placeholder reads
+*"Reply to Hend…"* and the server is asked `{'action': 'reply'}` with her named.
+**So the fault is the list state and nothing else** — the reply path is sound,
+and a fix aimed at `cqSend` would have been aimed at the half that works.
+
+And the **Platform Inbox page draws no composer at all with nobody picked**
+(`composerDrawn: False`, measured). So the proposal is not a new shape: it is
+the corner catching up with its own neighbour, and the two surfaces have been
+disagreeing about one question since §285 (§53.5).
+
+### The answer is not a better placeholder
+
+The box was **technically honest** — it says *"Write to the office…"*, which for
+the office means themselves — and unreadable as such under a list of people
+waiting on you. Renaming it would have made it more accurate and no more
+useful: *there is nobody on that screen to write to*, and a control with nothing
+to act on is not a choice (§61, §94.15).
+
+**THE DECISION LIVES IN `drawPanelChrome`**, the one function that answers every
+other question about what is NOT the body — the title, the segments, the search,
+the bell, the badge, the attach button, the preview and the note (§53.5). A
+second place deciding what the foot does is how the two halves drift.
+
+**HIDDEN, NEVER REMOVED.** The foot holds the composer, its attach button, the
+preview strip and the note; taking it out of the document means rebuilding all
+four on the way back and losing whatever is half-typed or already attached —
+§100.2's rule from the other side, that minimising is never discarding.
+
+**AND THE ONE PERMANENT WAY OUT SURVIVES IT**: *Open the Platform Inbox* sits in
+the queue's own foot rather than the composer's, and it is asserted still drawn
+and still reachable — a fix that took both would strand somebody on the list
+(§61, §290.1's own finding about that link).
+
+### §297.2 — the CSS line I wrote as the fix is a no-op, and the falsification said so
+
+`.chatfoot` is `display:flex`, and an author declaration ordinarily outranks the
+browser's own `[hidden]{display:none}` — so setting the attribute alone *looked*
+like it would leave the composer on screen while every assertion about the
+attribute passed (§96's family). A rule was written to close it, and the
+commit that carried it said it was load-bearing.
+
+**It is not.** The falsification run built the version with that rule removed and
+the decision left in, and the check went **green**: measured, Chromium computes
+`display:none` on the hidden foot without any help, because its UA sheet
+declares that one `!important`. *I reasoned about the cascade instead of asking
+it, and only a build made to fail found out.* §93.11's instruction — ask
+`document.styleSheets` and the computed value, never the rule you remember —
+earned in a fourth place.
+
+The line stays as one line of belt and braces, for the engines this product is
+used in and this sandbox cannot run (Safari on a Mac, most of all), **and it
+says in its own comment that it fixes nothing today** rather than being left to
+read as the fix. The check asserts `checkVisibility()` and a hit test rather
+than the attribute — which is what makes it right either way, and what would
+turn red the day an engine stopped hiding it.
+
+### And the notification test says what it cannot see
+
+Islam, after four rounds on notifications that would not arrive:
+
+> notificatoin is working after fixing it from systems settings, should this be
+> an instructions for the people who are not having notifcations set from
+> settings?
+
+**He diagnosed it himself, and the sequence is why the answer is small.** He
+reported it silent in Dia; the first question put to him was whether permission
+had been granted *in Dia specifically*, since a subscription made in Chrome is a
+different device. He answered *"it's working on chrome. not on dia"* — which
+**ruled the platform out entirely**, because Chrome proves the whole chain end to
+end. What was left was his Mac, and the switch that fixed it is in **System
+Settings › Notifications**, one layer above every browser.
+
+**A BROWSER CANNOT READ THAT SWITCH.** So §231.6's diagnostic — which walks the
+chain and names where it stops — reports **seven green steps** while the box is
+being blocked outside it, and will do so for ever. §124 exactly: a status
+claiming more than the thing measuring it can see. The chain honestly ends at
+*"the device took it"*, and the last hop after that is somebody else's.
+
+One sentence, under the result:
+
+> *Nothing appeared? Your computer has a switch of its own too — on a Mac,
+> System Settings › Notifications › your browser. This test cannot see that one.*
+
+**ONLY OVER A CLEAN RESULT**, and that placement is the whole of it: all green
+with nothing on screen is the one moment this is the answer. Beside a failing
+step it would compete with the row that names where it actually stopped (§123),
+which is the address somebody should be going to.
+
+**NOT INSIDE `testHtml`.** That builder draws the assistant's result too, where
+an operating system has nothing to do with anything — one line added there is
+the same sentence on two unrelated chains (§53.5, from the other side). The
+check asserts the line is under the notification test **and never under the
+assistant's**, with the assistant's own steps made clean on purpose, because a
+build that put it in the shared builder satisfies every other assertion here.
+
+**Quiet, never an alarm** (§168): a rule and the panel's own `--ink-3`, because
+nothing has gone wrong and there is nothing on our side to fix.
+
+### §297.1 — and the check's own first failure was the check
+
+It recorded the recipient as `to` and the endpoint carries it as `person`, so it
+reported a correct build broken **on the one assertion the whole section exists
+for**. Read the endpoint's own field, never the one the sentence would use.
+
+### What it costs
+
+Two rules in `chat.js` (a decision in `drawPanelChrome`, a predicate beside
+`testHtml`), two blocks in `chat.css`. **No builder change of substance, nothing
+stored, nothing migrated, no server rule** — read off the diff; `api/chat.js`,
+`lib/` and `db/` are untouched. `checks/corner-reply-box.py` is new: **35
+assertions, proved able to fail three ways from the SOURCES** (§276) — the
+composer decision reverted (**6 red**, the reported state reproduced), the
+sentence removed (**10 red**) and the sentence moved into the shared builder
+(**4 red**, drawn twice). The fourth attempt — the CSS line removed with the
+decision left in — went **green**, which is §297.2 above and is why that line
+no longer claims to be doing anything.
+
+**Recorded, not done**: the office's own thread is reached through *My
+messages*, which is where the text a person typed on the list will be found —
+nothing points them there when it happens, and nothing can, since after this
+change it cannot happen again.

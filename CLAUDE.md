@@ -727,6 +727,58 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `checkVisibility()`, the block's height, a hit-test, the pixels. One §294
   assertion **REWRITTEN, not deleted** (§218): it asserted the page still scrolls
   at 1000&times;900, true only because of the regression this removes.
+- **NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE
+  (§297):** Islam, as the office &mdash; *"After sending the reply message as
+  an sMO the message didn't appear in the box and when it appeard it appeard above
+  the message of ht employee which is wrong"*, then *"and the message never reached
+  the user."* **THREE SYMPTOMS, ONE CAUSE, REPRODUCED BEFORE ANYTHING WAS PROPOSED**
+  (§3a): §285 forks this composer at the top &mdash; a conversation open
+  inside the queue makes it a REPLY &mdash; and on the Waiting **list** nothing is
+  open, so the guard falls through and Send posts `action:"say"` with **no
+  recipient**: the office writing to the office. Measured, that one fact produces
+  every word of the report &mdash; it never reaches them; it does not appear,
+  because the body drawn is the queue while the echo went into `state.messages`;
+  and it sorts ABOVE theirs, because the office's own thread is the one that just
+  moved. **Nothing is lost**, and saying so first was most of the reassurance worth
+  giving. **BOTH ENDS WERE MEASURED AND ONE OF THEM IS THE DESIGN**: with her
+  conversation OPEN the same box reads *"Reply to Hend&hellip;"* and posts `reply`
+  with her named, so the reply path is sound and a fix aimed at `cqSend` would have
+  been aimed at the half that works &mdash; **and the Platform Inbox draws no
+  composer at all with nobody picked**, so this is the corner catching up with its
+  own neighbour rather than a new rule (§53.5). **THE ANSWER IS NOT A BETTER
+  PLACEHOLDER**: the box was technically honest (*"Write to the office&hellip;"*,
+  which for the office means themselves) and unreadable as such under a list of
+  people waiting on you &mdash; there is nobody on that screen to write to, and a
+  control with nothing to act on is not a choice (§61, §94.15). **THE
+  DECISION IS IN `drawPanelChrome`**, the one function answering every other
+  question about what is NOT the body, and the foot is **HIDDEN, NEVER REMOVED**
+  &mdash; it holds the composer, the attach button, the preview and the note, so
+  rebuilding all four on the way back would lose whatever is half-typed or already
+  attached (§100.2 from the other side). **AND THE ONE PERMANENT WAY OUT
+  SURVIVES IT** (*Open the Platform Inbox* sits in the queue's own foot),
+  asserted drawn AND reachable. **§297.2 &mdash; THE CSS LINE I WROTE AS THE
+  FIX IS A NO-OP, AND THE FALSIFICATION SAID SO**: an author `display:flex`
+  ordinarily outranks the browser's `[hidden]{display:none}`, so a guard was
+  written and the commit called it load-bearing &mdash; then the build made
+  WITHOUT it went **green**, because Chromium declares that rule `!important`.
+  *I reasoned about the cascade instead of asking it* (§93.11, a fourth
+  time). The line stays as belt and braces for the engines this sandbox cannot
+  run and **says in its own comment that it fixes nothing today**; the check
+  asserts the PAINT and a hit test rather than the attribute, which is what makes
+  it right either way. **AND THE NOTIFICATION TEST SAYS WHAT IT CANNOT SEE**:
+  Islam diagnosed this one himself &mdash; silent in Dia, working in Chrome, which
+  **ruled the platform out entirely**, then cured from macOS System Settings. A
+  browser cannot read that switch, so §231.6's diagnostic reports seven green
+  steps while the box is blocked one layer above it (§124: a status claiming
+  more than the thing measuring it can see). One sentence, **over a CLEAN result
+  only** &mdash; beside a failing step it would compete with the row that names
+  where it actually stopped (§123) &mdash; **and never inside `testHtml`**,
+  which the assistant's test shares and where an operating system has nothing to do
+  with anything (§53.5). Quiet, never an alarm (§168): nothing has gone
+  wrong and there is nothing on our side to fix. **§297.1 &mdash; the check's
+  own first failure was the CHECK** (it asked for `to` where the endpoint carries
+  `person`, so it reported a correct build broken on the one assertion the section
+  exists for). No server rule, nothing stored, nothing migrated.
 - **THE SETTINGS PANEL SCROLLS INSIDE ITSELF (§294):** Islam &mdash; *"there is
   no scrolling inside the settings pan while there is a uselss scrolling in the
   main page."* **BOTH HALVES ARE ONE FACT**: `.hmenu-panel.chset` carried a width
@@ -6806,6 +6858,29 @@ python3 checks/setup-squeezed.py # the Setup page is not a unit's plan page
                                 # asserted still going across at 1200/1100/1000 — a "fix"
                                 # that moved the breakpoint back would pass every Setup
                                 # assertion here and silently undo §267.2
+python3 checks/corner-reply-box.py # no composer over a list of people, and a
+                                # test that says what it cannot see (§297): on the
+                                # office's Waiting LIST no composer, no Send, no attach
+                                # button — measured as PAINT and as a hit test, never as
+                                # the `hidden` attribute, because `.chatfoot` is
+                                # `display:flex` and the attribute reads exactly as
+                                # intended on a build where the box is still drawn
+                                # (§96's family); the one permanent way out (Open the
+                                # Platform Inbox) asserted still reachable (§61); and
+                                # BOTH ENDS every time (§94.2) — her conversation opened
+                                # from that list posting `reply` with her named, the
+                                # office's own thread posting `say`, and somebody who is
+                                # not the office keeping their box — or a build that
+                                # removed the composer entirely passes every absence
+                                # here. The panel asserted the same height in both
+                                # states (§285.2). And the OS line: drawn ONCE over a
+                                # clean notification result, absent over a failing one,
+                                # and never under the ASSISTANT's clean result, whose
+                                # steps are made clean on purpose — `testHtml` is shared,
+                                # so a build that put the sentence inside it satisfies
+                                # every other assertion and says it twice (§53.5). Proved
+                                # able to fail three ways from the SOURCES: 6 / 10 / 4
+                                # red. SMP_BUILT points it at another build
 python3 checks/chat-settings-scroll.py # the settings panel scrolls inside itself
                                 # (§294): the panel capped and scrolling, the page's own
                                 # scroll asserted GONE where it needs none and asserted
@@ -6998,7 +7073,35 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;296: the label, the fold, and a Setup
+*Last Updated: 2026-09-05 &mdash; **&sect;297: no composer over a list of
+people, and a test that says what it cannot see.** Islam, as the office: a reply
+he typed never reached the person, did not appear in the box, and then sorted
+above her own message. **THREE SYMPTOMS, ONE CAUSE, REPRODUCED BEFORE ANYTHING
+WAS PROPOSED** &mdash; on the Waiting LIST there is no conversation open, so
+&sect;285's fork falls through and Send posts `say` with **no recipient**: the
+office writing to the office. Nothing was lost, and establishing that first was
+most of the reassurance worth giving. **BOTH ENDS MEASURED, AND ONE OF THEM IS
+THE DESIGN**: with her conversation open the same box posts `reply` with her
+named, so the reply path was never at fault &mdash; and the Platform Inbox
+already draws no composer with nobody picked, so this is the corner catching up
+with its own neighbour rather than a new rule. **THE ANSWER IS NOT A BETTER
+PLACEHOLDER**: the box was technically honest and unreadable as such under a
+list of people waiting on you. The foot is hidden, never removed, and the one
+permanent way out is asserted still reachable. **&sect;297.2 &mdash; AND THE CSS
+LINE I WROTE AS THE FIX IS A NO-OP**: the falsification build made WITHOUT it
+went green, because Chromium declares its own `[hidden]` rule `!important`
+&mdash; *I reasoned about the cascade instead of asking it*. It stays as belt and
+braces for engines this sandbox cannot run, saying in its own comment that it
+fixes nothing today. **AND THE NOTIFICATION TEST SAYS WHAT IT CANNOT SEE**:
+Islam diagnosed that one himself &mdash; silent in Dia, working in Chrome, cured
+from macOS System Settings &mdash; so one sentence goes under a CLEAN result
+only, and never inside the builder the assistant's test shares. **0 failures**
+on `checks/corner-reply-box.py` (35 assertions), proved able to fail three ways
+from the SOURCES: **6 / 10 / 4 red**. 527/0 authoriser &middot; 131/0 differ
+&middot; neighbours and the full sweep green. **&sect;297.1 &mdash; the check's
+own first failure was the check.***
+
+*Earlier the same day: 2026-09-05 &mdash; **&sect;296: the label, the fold, and a Setup
 page that is not a unit's.** Three from Islam in one round. The minutes label
 said the number the box beside it was already showing &mdash; and **the wiring
 half he asked about was already right and is NAMED rather than reassured** (the

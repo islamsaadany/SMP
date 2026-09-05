@@ -681,7 +681,13 @@ var CHAT = (function(){
        HIDDEN, NEVER REMOVED. The foot holds the one composer, its attach
        button, the preview strip and the note; taking it out of the document
        would mean rebuilding all four on the way back and losing whatever is
-       half-typed or already attached (§100.2's rule, from the other side). */
+       half-typed or already attached (§100.2's rule, from the other side).
+
+       AND THE ATTRIBUTE IS ENOUGH, MEASURED (§297.2): Chromium's own
+       `[hidden]` rule is `!important`, so it beats `.chatfoot`'s `display:flex`
+       without help. `chat.css` carries a one-line guard beside it for the
+       engines that cannot be measured from here, and says so rather than
+       pretending to be the fix. */
     var foot = el("chatfoot");
     if (foot) foot.hidden = !!(state.office && cq.side === "wait" && !cq.person);
 

@@ -169,11 +169,19 @@ body.presenting .chatdock { display:none; }
 
 .chatfoot { border-top:1px solid var(--line); background:var(--surface); padding:9px 10px;
             display:flex; flex-direction:column; gap:8px; }
-/* AN AUTHOR `display` BEATS `[hidden]` (§297). The browser hides a `hidden`
-   element with `[hidden]{display:none}` in its OWN stylesheet, which any
-   author declaration outranks — so the line above would leave the foot on
-   screen with `hidden` set, and every assertion about the attribute would
-   pass over a composer that is still drawn (§96's family). */
+/* A GUARD, AND IT IS A NO-OP HERE — SAID RATHER THAN IMPLIED (§297). The line
+   above sets `display:flex`, and an author declaration ordinarily outranks the
+   browser's own `[hidden]{display:none}` — so this looked load-bearing, and I
+   wrote it as though it were. MEASURED, IT IS NOT: with this rule taken out,
+   Chromium still computes `display:none` on the hidden foot, because its UA
+   sheet declares that one `!important`. The falsification run is what said so
+   (§297.2) — the check went green on the build without it.
+
+   It stays as one line of belt and braces, because the engines this product is
+   actually used in (Safari on a Mac, most of all) cannot be measured from here
+   and the ordinary cascade rule would favour `flex`. What is NOT claimed is
+   that it fixes anything today. The check asserts the PAINT rather than the
+   attribute either way, so an engine that ever stops hiding it goes red. */
 .chatfoot[hidden] { display:none; }
 .chcomp { display:flex; align-items:flex-end; gap:8px; }
 .chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;

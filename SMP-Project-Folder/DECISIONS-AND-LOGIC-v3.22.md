@@ -36280,6 +36280,20 @@ It recorded the recipient as `to` and the endpoint carries it as `person`, so it
 reported a correct build broken **on the one assertion the whole section exists
 for**. Read the endpoint's own field, never the one the sentence would use.
 
+### §297.3 — and a capped run reports no failures
+
+The neighbouring checks were run in a loop under `timeout 300` and piped through
+`grep -c "^  FAIL"`. `checks/office-chat.py` takes longer than that, so it was
+killed — and a killed run prints no failures, which reads **exactly like a clean
+one**. The count said `0` and the word `Terminated` sat one line above it,
+outside what the count was reading.
+
+§54.5 and §100.3 record this twice already (*a check that cannot launch reports
+no failures*); this is the same fault with a clock instead of a missing browser,
+and it was caught only because the raw output was read rather than the number.
+**Read the tail, not the count** — and never cap a check at a number chosen for
+the loop rather than for the check.
+
 ### What it costs
 
 Two rules in `chat.js` (a decision in `drawPanelChrome`, a predicate beside

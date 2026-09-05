@@ -778,7 +778,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   wrong and there is nothing on our side to fix. **§297.1 &mdash; the check's
   own first failure was the CHECK** (it asked for `to` where the endpoint carries
   `person`, so it reported a correct build broken on the one assertion the section
-  exists for). No server rule, nothing stored, nothing migrated.
+  exists for). **§297.3 &mdash; AND A CAPPED RUN REPORTS NO FAILURES**: the
+  neighbours were run under `timeout 300` and piped through `grep -c "^  FAIL"`,
+  and `office-chat.py` takes longer than that &mdash; so it was killed, printed
+  nothing, and the count read **0** with the word *Terminated* one line above it,
+  outside what the count was reading. §54.5 and §100.3 twice over, with a clock
+  instead of a missing browser: **read the tail, not the count**, and never cap a
+  check at a number chosen for the loop rather than for the check. No server rule,
+  nothing stored, nothing migrated.
 - **THE SETTINGS PANEL SCROLLS INSIDE ITSELF (§294):** Islam &mdash; *"there is
   no scrolling inside the settings pan while there is a uselss scrolling in the
   main page."* **BOTH HALVES ARE ONE FACT**: `.hmenu-panel.chset` carried a width

@@ -369,6 +369,37 @@
   .cfg-bar .cfg-sum { flex:1; margin:0; }
   .cfg-lab { flex:1; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
              color:var(--ink-3); font-weight:700; }
+
+  /* ── ARRANGING A SETUP TABLE (§261) ────────────────────────────────
+     THE FIRST COLUMN WIDENS, and only while arranging. 38px is what a number
+     needs; a handle and a number want 54, and taking it from the table the
+     rest of the time would make the reading view pay for a mode it is not in
+     — measured, and it is exactly the 16px that keeps the units table inside
+     its pane at 1285 (§158: it FITS, never "and it scrolls"). */
+  .cfg.arranging th.idx, .cfg.arranging td.idx { width:54px; min-width:54px; }
+  .cfg.arranging td.idx .idx-n { color:var(--ink-3); }
+  /* A row being dragged is lifted off the table, and the one it will land
+     before shows the edge it will land on. `.dragging` and `.sorting` are
+     `makeSortable`'s own classes (arrange.js), so a table added tomorrow gets
+     this by being sortable rather than by remembering to style it. */
+  .cfg.arranging tbody.sorting tr { cursor:grabbing; }
+  .cfg.arranging tbody tr.dragging { background:var(--surface-2);
+             outline:2px solid var(--gold); outline-offset:-2px; position:relative; z-index:3; }
+
+  /* THE ARRANGE BUTTON IS LIT WHILE IT IS ON, in the same gold the pen it
+     replaced used for the same state (`.ico.on`) — a worded button rather than
+     an icon, because it sits in a row of worded controls (Columns, Register
+     file) and a lone glyph among words reads as something else. */
+  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
+  .editbtn.on:hover { background:var(--gold-deep); border-color:var(--gold-deep); }
+
+  /* The mark's two controls sit SIDE BY SIDE in the dialog. `.rowacts` is a
+     column in a table cell (§93.15's note above it), which is right there and
+     wrong in a field 150px wide with nothing under it. */
+  .pdlg .markacts { display:flex; flex-direction:row; gap:16px; align-items:center;
+                    padding-top:6px; }
+  .pdlg .umarkbox { max-width:100%; }
+  .pdlg .umarkimg { max-width:100%; max-height:30px; }
   .swatch { display:inline-block; width:11px; height:11px; border-radius:50%;
             margin-right:9px; vertical-align:baseline; }
   .cfg input.blabel { width:100%; max-width:none; text-align:left;
@@ -931,25 +962,18 @@
      `background` on the CELL, never the row: a `<tr>` cannot carry a
      background that survives sticky positioning in every engine, and a
      transparent head lets the rows show through it. */
-  /* NOT EVERY TABLE HERE PINS TO THE PAGE. `.cfg.peoplebox` and
-     `.cfg.srctable` are their own scroll boxes with their own sticky heads
-     pinned at `top:0` INSIDE them, which is the right answer for a boxed
-     table — and applying a page offset there put the register's headings 293px
-     down, measured. So they are excluded rather than overridden: two rules
-     fighting over one thead is how a head ends up pinned to neither. */
-  /* ── AND THE OFFSET IS MEASURED, NOT GUESSED (§135.10) ────────────
-     `--sethead-h` was the literal 46px, and §135 changed the header's height by
-     putting the page's controls in it: it is 42px where the controls are small
-     and 49px where a search box sits on the line. So the table's head pinned
-     4px BELOW the page header on some pages and 3px under it on others — and
-     that 4px slot is a hole between two pinned things, which scrolling rows
-     show through. Exactly what Islam saw, made obvious by a band that happened
-     to be navy.
-
-     Published by a ResizeObserver in the shell, the way `--chrome-h` already
-     is. NOT §28.3's loop: this feeds a sticky OFFSET and nothing else, and an
-     offset cannot change the height it was measured from. The literal survives
-     as the fallback for the frame before the observer first fires. */
+  /* AND IN THE END NO TABLE HERE PINS TO THE PAGE (§273.1). `.cfg.peoplebox`
+     and `.cfg.srctable` are their own scroll boxes with sticky heads pinned at
+     `top:0` INSIDE them, which is the right answer for a boxed table — and
+     applying a page offset there put the register's headings 293px down,
+     measured. §163.5 and §174 then reached the same answer for `.acgrid`, and
+     the general page-offset rule the paragraph above describes is GONE with
+     the variable that fed it: an ordinary Setup table sits in `.tblscroll`,
+     which is `overflow:auto`, so a page offset could only ever land its head
+     partway down its own body. What is left is three boxed tables that pin
+     inside themselves, and every other table's head scrolling away with the
+     page — which is a decision nobody has taken and is recorded as open, not
+     as done. */
   /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§135.2).
      *"in roles and access … check the table as the design is damaged."*
 
@@ -1838,7 +1862,35 @@
   .nc-grid label:nth-child(5) .fld { width:88px; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
-  .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; }
+  .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }
+  /* ── THE PEN'S TWO COLUMNS (§273.4) ───────────────────────────────
+     Islam picked this over editing in place and over a plain box: the fields
+     on the left, and ENDING IT behind a rule on the right, so the one
+     destructive control never shares a row with the boxes being typed in.
+
+     `.nc-gap`, `.nc-hold` and the held-Close rule are GONE with the draft they
+     served (§24): with the fields writing as they are left there is nothing
+     unsaved, so nothing to hold back and no sentence to explain it.
+
+     The right column collapses UNDER the fields below 1100px rather than
+     squeezing to nothing — 300px of prose and a button is the narrowest it
+     reads at, measured. */
+  .cyc2 { display:grid; grid-template-columns:1fr 300px; align-items:stretch; }
+  .cyc2-f { padding-right:26px; min-width:0; }
+  .cyc2-d { border-left:1px solid var(--line); padding-left:26px;
+            display:flex; flex-direction:column; align-items:flex-start; }
+  .cyc2-p { font-size:12.5px; line-height:1.5; color:var(--ink-3); margin:0 0 14px; }
+  @media (max-width:1100px){
+    .cyc2 { grid-template-columns:1fr; }
+    .cyc2-f { padding-right:0; }
+    .cyc2-d { border-left:0; border-top:1px solid var(--line);
+              padding-left:0; padding-top:16px; margin-top:16px; }
+  }
+  /* THE PEN LIT, in `penBtn()`'s own treatment rather than a second one
+     (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
+     control in a worded shape. */
+  .editbtn.penon, .editbtn.penon:hover {
+    background:var(--gold); border-color:var(--gold); color:var(--panel); }
 
   /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
   .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
@@ -2090,6 +2142,12 @@
      existing block is touched: both are `0,2,1` and keep winning over this
      `0,1,1`, so nothing already on screen moves, and the next confirmation
      dialog gets the product's buttons without a fourth copy. */
+  /* §273.3: this dialog's labels are longer than the send confirmation's, and
+     `Reported as of` and `What happens` both wrapped in the 92px column —
+     measured, not guessed. Scoped to this dialog, so nothing already on screen
+     moves: widening the shared rule would reflow every other confirmation to
+     fix one. */
+  .sendconfirm.reopenconfirm .kv { grid-template-columns:118px 1fr; }
   .cbtns { display:flex; gap:6px; justify-content:flex-end; }
   .cbtns button { display:inline-block; width:auto; white-space:nowrap;
                   border:1px solid var(--line); border-radius:var(--r-sm);

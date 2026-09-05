@@ -1224,6 +1224,34 @@
    "who": "everyone"
   },
   {
+   "id": "monthly-plan",
+   "group": "Capabilities and projects",
+   "q": "How do I set a target month by month?",
+   "a": "Open the plan with the pen, and press the small grid mark beside the target. Twelve boxes open under the row — one for each month, in the target's own unit.|All twelve have to be filled in before it takes effect, and a month of nought is a real answer: leave a box empty and the row keeps being spread evenly across the year. Once it is complete the annual target becomes whatever the twelve months come to, and the box shows it rather than taking a figure of its own.",
+   "who": "office"
+  },
+  {
+   "id": "monthly-plan-ask",
+   "group": "Capabilities and projects",
+   "q": "How do I set a target month by month?",
+   "a": "The Strategy Office sets that. It is worth asking for where your year is not flat — a season, a launch, a contract that starts in the second half — because without it every target is measured as if each month carried the same share of it.",
+   "who": "everyone"
+  },
+  {
+   "id": "reorder-objectives",
+   "group": "Capabilities and projects",
+   "q": "How do I change the order of the objectives?",
+   "a": "Open the page with the pen. Each objective picks up a number and a drag handle in the first column — the same pair a {pillar} measure has — and dragging by the handle moves the row.|The order is part of the plan, so it is saved with everything else and every page that lists those objectives follows it.",
+   "who": "office"
+  },
+  {
+   "id": "monthly-why",
+   "group": "Capabilities and projects",
+   "q": "Why is my year-to-date target not half the year?",
+   "a": "Because that measure carries a monthly plan: the office has said what each month is expected to carry, so what you are measured against is the months that have actually run rather than a flat share.|Its annual target reads <b>by month</b> underneath on the Performance page. Without one, a target is still spread evenly.",
+   "who": "everyone"
+  },
+  {
    "id": "deliverable-or-outcome",
    "group": "Capabilities and projects",
    "q": "Deliverable or outcome — which is this?",
@@ -1341,6 +1369,13 @@
    "q": "What does Demo data do, and why can't I save in it?",
    "a": "Demo data gives you a fully worked example so you can explore how a completed platform looks without affecting your organization's data. Saving is intentionally disabled in Demo mode. Clear project shows the opposite: what a new deployment looks like before information is added.",
    "who": "everyone"
+  },
+  {
+   "id": "history-put-back",
+   "group": "Strategy Office questions",
+   "q": "Who changed this, and can I put it back?",
+   "a": "Open Setup and select History. Every change that reached the server is listed: who made it, when, on which unit or function, which row and field, and the value before and after. Filter by person, place, kind or day, or type a name or a row into the search. Select Restore on a line to put the old value back — it is saved as an ordinary change, so it is authorised, merged with everyone else's work and logged like any other, and can itself be put back. A submitted report is reopened from its Reporting tab and a removed row from the plan archive, so those lines show Restore greyed with the reason. A unit head sees their own unit's history through the line under the plan's heading. Work that never reached the server leaves no line here — the amber and red bars at the top of the page are what stand in front of that.",
+   "who": "office"
   },
   {
    "id": "add-person",

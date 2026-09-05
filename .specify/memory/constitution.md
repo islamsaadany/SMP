@@ -15,9 +15,30 @@ to Islam comes back as a question of his own, the choice is still open: answer
 it and wait. A feature already settled by a recorded decision may be built
 against that record; anything new is agreed in words first.
 
-*Amended 2026-08-20:* this principle previously required a static HTML mockup
-before any visual or structural change. That belonged to the prototype era and
-is retired; the alignment it protected is not.
+**MOCKUP-FIRST IS PART OF THIS PRINCIPLE.** No visual or structural change —
+layout, section order, styling, any visual element — is made without first
+showing a static HTML mockup of the proposed look and getting explicit sign-off
+on that view. The mockup is **published as an artifact, never handed over as a
+file to download** (`CLAUDE-RULES.md` A17): it exists to be looked at, and a
+file somebody has to save and open is a review that happens later or not at
+all. The HTML still lives under `design-mockups/<feature>/<YYYY-MM-DD>_<desc>.html`
+as the record of what was proposed, settled or rejected. There is no "build it
+and review at the end" for visual work.
+
+*Amended 2026-08-20, and REVERSED 2026-08-24:* this principle briefly retired
+the mockup requirement as belonging to the prototype era. Islam reinstated it
+two days later — *"the mockup needs to be always an artifact here not a
+downloadable html"* — and it has been in force since. Recorded as a reversal
+rather than overwritten (Principle II): the versions built in between made
+visual changes under the weaker "describe it in words" rule, and that is why
+the reversal exists.
+
+*Corrected 2026-09-05:* this file went on carrying the retirement for eleven
+days after it was reversed, while every feature in that period (§259, §261,
+§266, §273, §278.2, §279) was in fact settled from a published mockup — so the
+document specs are checked against said the opposite of what the project does.
+`CLAUDE-RULES.md` A1 carried the same stale note and is corrected in the same
+change.
 
 ### II. The decisions document is the contract
 
@@ -160,4 +181,16 @@ XIV three, XVI four), and each was recorded only in the decisions document where
 a spec review would not meet it. A principle is where a rule goes once it has
 cost something more than once.
 
-**Version**: 1.1.0 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-08-24
+*Amended 2026-09-05 to 1.2.0:* Principle I corrected to carry mockup-first,
+which Islam reinstated on 2026-08-24 and this file had gone on denying. Nothing
+new is decided here — the correction brings the constitution back into step with
+`CLAUDE-RULES.md` A17 and with what the work has actually been doing. Recorded
+in the same change: this file was edited on 2026-08-31 (§214.3, removing a line
+whose wording was unsettled) without a version bump or an amendment note, which
+this section requires; that edit is acknowledged here rather than backdated.
+
+**Known and not decided here:** `CLAUDE.md` rule 1b-ii (2026-08-27, no grey
+descriptions under page and section headings) is a standing rule with no
+principle. Whether it becomes one is Islam's call, not a tidy-up.
+
+**Version**: 1.2.0 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-09-05

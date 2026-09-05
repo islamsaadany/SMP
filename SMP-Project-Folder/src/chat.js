@@ -82,6 +82,31 @@ var CHAT = (function(){
 
   var open = false, mounted = false, timer = null;
   var state = { messages: [], unread: 0, thread: null, office: false };
+  /* ── THE OFFICE'S CORNER IS TWO THINGS (§285) ────────────────────────
+     Islam: "the chat bubble of the SMO team shouldn't be something to be sent
+     to the smo, that is redundancy — it should be the chats of the other
+     people sending the smo the messages … and he can with a switch go
+     directly to the SMO."
+
+     He is right, and it was redundancy of an odd kind: the corner is "your
+     conversation with the office", and for the office that is a conversation
+     with themselves. So the corner splits — a queue down one side, their own
+     thread down the other — and the second half is kept, not dropped,
+     because it is where the assistant is tested and where a member of the
+     office writes to the office (§247's own reason inverted).
+
+     KEPT IN ONE OBJECT, NOT FOUR FLAGS. `side` is which half; `person` is the
+     conversation open INSIDE the queue half, and null means the list. Every
+     other field is what the server last said, never a second copy of it. */
+  var cq = { side: "wait", person: null, name: "", msgs: [], q: "",
+             hits: null, searching: false, rows: null, err: "",
+             /* §290: the people who match and have NO conversation yet, and
+                how many more matched than the ten shown. `fresh` marks the
+                conversation open in the queue as one that does not exist on
+                the server yet, so the first message carries `start`. */
+             people: null, more: 0, fresh: false };
+  /* The office's own thread is fetched on the same poll as everybody's, so
+     switching to "My messages" costs nothing and shows what is already here. */
   /* HOW MANY WERE WAITING LAST TIME WE ASKED — the office's half of §225.
      `null` until the first answer, so the very first poll of a session can
      never announce a queue that was already there when they signed in. */
@@ -108,6 +133,19 @@ var CHAT = (function(){
               new: false, newWho: "" };
 
   function servable(){ return location.protocol !== "file:"; }
+
+  /* Is the chat switched on, according to the state this page hydrated with?
+     Absent means the tenant never touched the setting, which `chatCfg` reads
+     as ON — the same default the server applies (§104, §98). Anything at all
+     going wrong here answers NO, because a corner that fails to appear for a
+     second is a smaller fault than one that appears and is taken away. */
+  function chatOnFromState(){
+    try {
+      if (typeof SYNC === "undefined" || !SYNC.isLive || !SYNC.isLive()) return false;
+      if (typeof GROUP === "undefined" || !GROUP) return false;
+      return !!SMPRules.chatCfg(GROUP.chat).on;
+    } catch (e) { return false; }
+  }
   function el(id){ return document.getElementById(id); }
   function esc2(s){
     return String(s == null ? "" : s)
@@ -350,10 +388,19 @@ var CHAT = (function(){
               'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
           "</div>" +
         "</div>" +
+        /* THE SPLIT AND THE SEARCH (§285), between the head and the body so
+           they stay put while the list scrolls. Empty and hidden for
+           everybody but the office — a control that changes nothing is not a
+           choice (§61). */
+        '<div class="cqbar" id="cqbar" hidden></div>' +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
+          /* WHAT IS ATTACHED, SHOWN (§286.2) — above the composer, so the box
+             under the cursor never moves. Empty and absent until there is a
+             picture. */
+          '<div class="chprev" id="chatprev" hidden></div>' +
           '<div class="chcomp">' +
-            '<button class="chicon" id="chatpic" type="button" title="Attach a screenshot" ' +
+            '<button class="chicon" id="chatpic" type="button" title="Attach a screenshot — or paste one straight into the box" ' +
               'aria-label="Attach a screenshot">' +
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
               'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -378,8 +425,166 @@ var CHAT = (function(){
 
   /* Only the BODY and the badge, never the composer — see the rule at the top
      of this file. Called on every poll, so it must be safe mid-typing. */
+  /* ── THE OFFICE'S HALF OF THE CORNER (§285) ──────────────────────────
+     Drawn into the SAME body as everybody else's conversation, because it is
+     the same box and a second panel would be a second set of every rule this
+     file already keeps — the poll, the scroll, the composer that must not be
+     rebuilt under a typing hand (§71.2). */
+
+  /* WAITING ONLY, AND THE BADGE IS ITS LENGTH. His decision on both, and they
+     are one decision: a count that is not the length of the list under it gets
+     reported as a bug (§108.1). */
+  function cqRows(){ return cq.rows || []; }
+
+  function cqSeg(){
+    var n = cqRows().length;
+    return '<div class="cqseg" role="tablist">' +
+      '<button type="button" role="tab" data-cqside="wait"' +
+        (cq.side === "wait" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
+        '>Waiting' + (n ? ' <span class="cqn">' + n + "</span>" : "") + "</button>" +
+      '<button type="button" role="tab" data-cqside="mine"' +
+        (cq.side === "mine" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
+        ">My messages</button></div>";
+  }
+
+  function cqFind(){
+    return '<div class="cqfind"><input type="search" id="cqfind" ' +
+      /* THE BOX SAYS ITS OWN SCOPE (§290), which is where the grey line above
+         the rows used to say it. Read at the moment somebody decides to type,
+         and it costs no row of the list. */
+      'placeholder="Search all conversations and the register\u2026" ' +
+      'value="' + esc2(cq.q) + '" ' +
+      'aria-label="Search all conversations and the register"></div>';
+  }
+
+  /* ONE ROW BUILDER FOR BOTH LISTS, so a search result and a waiting row
+     cannot drift apart (§53.5). `hit` carries the line that MATCHED and why
+     it is here; a plain row carries the last line. */
+  /* ── A ROW SAYS THE REGISTER'S NAME, AND WHERE THEY SIT (§288) ──────
+     Islam, of the search: "the serach is bringing the full name and we
+     agreed across the platform we use the short name from the registry and
+     beside it the unit of the function for distinction."
+
+     Right, and it is my own drift one section old. §187 shortened the name
+     in the INBOX's list and put the place beside it; this corner is the
+     THIRD builder onto the same rows and I drew `person_name` raw — the
+     full legal name the server happened to store — with no place at all.
+     §53.5, and the search was already half-corrected: `cqRows()` MATCHES on
+     the short name (§93.8) and then drew the long one.
+
+     IT NEEDS NOTHING FROM THE SERVER. `nameOf()` and `placeLabel()` resolve
+     through the register the browser already holds, so a search hit — which
+     carries only a key and a stored name — reads exactly like a queue row,
+     which carries the register's fields as well. The row's own fields are
+     the fallback for somebody the register no longer holds, which is the one
+     case the browser cannot answer (§35: absent, never guessed). */
+  function cqWho(row){
+    return { name: nameOf(row.person_key, row.live_name || row.person_name) || row.person_key,
+             place: chatPlaceOf(row) };
+  }
+
+  function cqRow(row, at, line, hit){
+    var who = cqWho(row);
+    /* NO TIME FOR SOMEBODY WHO HAS NEVER WRITTEN, because they have none —
+       and the span goes rather than rendering empty (§35). The guard is not
+       decoration: `new Date(null)` is the EPOCH and not an invalid date, so
+       `when(null)` would print "1 Jan 00:00" against every such row. */
+    return '<button class="cqrow" type="button" data-cqopen="' + esc2(row.person_key) + '"' +
+      (row.fresh ? ' data-cqfresh="1"' : '') + '>' +
+      '<div class="cqr1"><b>' + esc2(who.name) + "</b>" +
+        (at ? '<span class="cqw">' + esc2(when(at)) + "</span>" : "") + "</div>" +
+      (who.place ? '<div class="cqpl">' + esc2(who.place) + "</div>" : "") +
+      '<div class="cqln">' + esc2(oneLine(line || "")) + "</div>" +
+      (hit ? '<div class="cqhit">' + esc2(hit) + "</div>" : "") + "</button>";
+  }
+
+  function cqListHtml(){
+    /* A FAILED ASK IS NOT AN EMPTY QUEUE (§93, §231.4). */
+    if (cq.err) {
+      return '<div class="cqfail"><b>We could not load the conversations.</b>' +
+        "<p>" + esc2(cq.err) + " Nothing has been lost.</p>" +
+        '<button class="chbtn" type="button" data-cqretry="1">Try again</button></div>';
+    }
+    if (cq.q && cq.q.length >= 2) {
+      if (cq.searching && !cq.hits) return '<div class="cqzero">Looking\u2026</div>';
+      var hits = cq.hits || [], folk = cq.people || [];
+      if (!hits.length && !folk.length) return '<div class="cqzero">Nothing found for \u201c' +
+        esc2(cq.q) + "\u201d.</div>";
+      /* ── ONE LIST, NO HEADINGS (§290) ─────────────────────────────────
+         Islam, of the two group headings drawn first: "who we have a
+         conversation with will apear with the conversation and who is not
+         will appear without the converstaion th header is taking unneede
+         space." He is right and it is rule 1b-ii's own argument — a heading
+         that restates what the rows already show is furniture, and in a body
+         this small each one cost a whole row of the list.
+
+         THE ROW SHAPE CARRIES IT: a conversation has a last message and a
+         time, somebody who has never written has neither, and that is the
+         difference somebody reads. THE ORDER CARRIES THE GROUPING —
+         conversations by recency, then people by name — so it must never be
+         interleaved.
+
+         AND THE SCOPE LINE WENT WITH THEM. It said two things: how many, and
+         where the search looked. The count was never needed (the list is the
+         count), and where it looked moved into the box's own placeholder,
+         which is read at the moment somebody decides to type and costs no
+         row — while still saying it, because the Waiting half is the one lit
+         and the results reach conversations that are answered (§35, §124). */
+      return hits.map(function(h){
+          return cqRow(h, h.line_at, h.line,
+            h.is_last ? "" : ("found in an earlier message" +
+                              (h.waiting ? "" : " \u00b7 answered")));
+        }).join("") +
+        folk.map(function(f){
+          return cqRow({ person_key: f.key, person_name: f.name, live_name: f.name,
+                         unit_key: f.unit_key, fn_key: f.fn_key, title: f.title,
+                         fresh: true },
+                       null, "", "");
+        }).join("") +
+        /* THE CAP SPEAKS AT THE FOOT, never in a heading: the top is where
+           nobody has run out of anything yet, and this line only means
+           something once somebody has read to the bottom without finding the
+           person they wanted. It says what to do, not only what is missing. */
+        (cq.more > 0
+          ? '<div class="cqmore">' + cq.more + " more on the register \u2014 " +
+            "narrow the search</div>"
+          : "");
+    }
+    if (cq.rows === null) return '<div class="cqzero">One moment\u2026</div>';
+    if (!cqRows().length) return '<div class="cqzero">Nobody is waiting on the office.</div>';
+    return cqRows().map(function(r){
+      return cqRow(r, r.last_at, r.last_body, "");
+    }).join("");
+  }
+
+  function drawCorner(){
+    var body = el("chatbody"); if (!body) return;
+    /* THE CONVERSATION OPEN INSIDE THE QUEUE reads exactly as everybody
+       else's does — the same builder, so a reply looks the same wherever it
+       is read (§53.5). */
+    if (cq.side === "wait" && cq.person) {
+      var atEnd2 = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
+      body.className = "chatbody";
+      body.innerHTML = cq.msgs.length
+        ? threadHtml(cq.msgs, true, false)
+        : '<div class="chempty"><p>One moment\u2026</p></div>';
+      if (atEnd2) body.scrollTop = body.scrollHeight;
+      return;
+    }
+    body.className = "chatbody cqbody";
+    body.innerHTML = cqListHtml() +
+      '<div class="cqfoot"><button class="cqinbox" type="button" data-cqinbox="1">' +
+      "Open the Platform Inbox \u203a</button></div>";
+  }
+
   function drawPanel(){
     var body = el("chatbody"); if (!body) return;
+    /* THE OFFICE'S QUEUE IS A DIFFERENT SCREEN IN THE SAME BOX (§285) — and
+       only ever for the office, and only on the Waiting half. Everything
+       below is unchanged for everybody else, and for the office reading
+       their own thread. */
+    if (state.office && cq.side === "wait") { drawCorner(); drawPanelChrome(); return; }
+    body.className = "chatbody";
     /* KEEP THE PLACE UNLESS THEY WERE AT THE BOTTOM. Somebody reading back
        through a conversation must not be dragged to the end because an answer
        arrived — but somebody at the end wants to follow it. */
@@ -400,9 +605,62 @@ var CHAT = (function(){
           ? '<div class="chsys chwait">Asking the assistant\u2026</div>' : "");
     }
     if (atEnd) body.scrollTop = body.scrollHeight;
+    drawPanelChrome();
+  }
+
+  /* THE HEAD, THE BELL, THE BADGE AND THE FOOT — everything in the panel that
+     is NOT the body, extracted so the office's queue and everybody's
+     conversation cannot draw them differently (§53.5, §285). */
+  function drawPanelChrome(){
+    /* NO `var cfg` HERE. The module holds one, filled from the SERVER's answer
+       on every poll, and this function reads `cfg.promise` and `cfg.shots`
+       below — a local one shadows it and silently answers from the local
+       graph instead, so the panel wore the shipped promise while the office
+       had set its own. §56.7's `var` collision for the second time in one
+       change, and found the same way: the check went red. */
+    /* THE TITLE IS THE PERSON while a conversation is open inside the queue,
+       with a way back — a header that still said "Strategy Office" over
+       somebody else's messages would name the wrong side of the conversation. */
+    var t = document.querySelector("#chatpanel .cht");
+    if (t) {
+      t.innerHTML = (state.office && cq.side === "wait" && cq.person)
+        ? '<button class="cqback" type="button" data-cqback="1" ' +
+            'aria-label="Back to the conversations">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+              'stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" ' +
+              'aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>' +
+            "<span>" + esc2(cq.name || cq.person) + "</span></button>"
+        : "Strategy Office";
+    }
+    /* THE SPLIT AND THE SEARCH live between the head and the body, drawn only
+       for the office and only on the list — a conversation open in the corner
+       is a conversation, and a search box over it would filter nothing. */
+    var slot = el("cqbar");
+    if (slot) {
+      slot.hidden = !state.office;
+      slot.innerHTML = state.office
+        ? cqSeg() + ((cq.side === "wait" && !cq.person) ? cqFind() : "")
+        : "";
+    }
 
     var sub = el("chatsub");
-    if (sub) {
+    if (sub && state.office && cq.side === "wait" && cq.person) {
+      /* ── THE LINE IS NEVER EMPTY (§285.2) ─────────────────────────
+         This said nothing on the queue's list, on the reasoning that the
+         segment above had already named it — and an EMPTY line is a shorter
+         header, so the panel changed height as you switched halves. Islam:
+         "the 2 options have different panel sizes let's unify things."
+         Measured: head 46 against 57, and the panel is anchored at the
+         BOTTOM, so its top jumped as you moved between them.
+
+         Reserving the space with a number would be a guessed constant that
+         goes stale the first time the type scale moves (§122.5). The line
+         simply always says something instead: whose conversation this is
+         while one is open, and the office's own promise otherwise — which
+         is what every other viewer's panel has always shown. */
+      sub.innerHTML = '<span class="chatdot" style="background:var(--attn)"></span> ' +
+        esc2("Waiting on the office");
+    } else if (sub) {
       /* THE DOT CARRIES THE STATUS AND THE WORDS CARRY THE PROMISE. It used
          to be either/or — "With the office" while something was outstanding,
          the promise otherwise — which hid the promise at the one moment
@@ -419,11 +677,52 @@ var CHAT = (function(){
 
     var n = el("chatn");
     if (n) {
-      if (state.unread > 0 && !open) { n.hidden = false; n.textContent = String(state.unread); }
+      /* ── THE BADGE COUNTS PEOPLE WAITING, FOR THE OFFICE (§285) ─────
+         His decision, and it is the LENGTH OF THE LIST rather than a second
+         count of the same thing — a badge saying seven over four rows is
+         what gets reported as a bug (§108.1). Everybody else's badge is
+         unchanged: a reply for you.
+
+         AND IT IS SHOWN WHILE THE PANEL IS OPEN for the office, because the
+         panel may be on "My messages" with people waiting on the other half
+         — the one case where the number is news you cannot already see. */
+      var num = state.office ? cqRows().length : state.unread;
+      var hide = state.office ? !num : (!(state.unread > 0) || open);
+      if (!hide) { n.hidden = false; n.textContent = String(num); }
       else n.hidden = true;
     }
     var pic = el("chatpic");
     if (pic) pic.hidden = !cfg.shots;
+    /* ── THE PICTURE ITSELF, NOT A SENTENCE ABOUT IT (§286.2) ────────
+       Islam, having pasted one: "the message is very subtle I didn't notice
+       that something was attached." He was right — the whole confirmation was
+       one line in the page's quietest grey, below the box, at the same weight
+       as an empty space.
+
+       He chose this from four drawn in the real composer. It shows the
+       picture, because that is the part a sentence cannot replace: WHICH
+       screenshot is about to go, which matters the moment somebody has taken
+       three. And it sits ABOVE the composer, so the box being typed into does
+       not move when a picture arrives.
+
+       THE THUMBNAIL IS THE ALREADY-SHRUNK DATA (§50) — `shot` is what will be
+       sent, so what is previewed is what goes, never a second rendering of the
+       original file that could differ from it. */
+    var prev = el("chatprev");
+    if (prev) {
+      prev.hidden = !shot;
+      prev.innerHTML = shot
+        ? '<img src="' + esc2(shot) + '" alt="">' +
+          '<div class="chprev-t"><b>Screenshot attached</b>' +
+          "<span>Sent with your next message</span></div>" +
+          '<button class="chprev-x" type="button" data-chdrop="1" ' +
+            'title="Remove this picture" aria-label="Remove this picture">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+              'stroke-width="2.4" stroke-linecap="round" aria-hidden="true">' +
+              '<path d="M6 6l12 12M18 6L6 18"/></svg></button>'
+        : "";
+    }
+
     var note = el("chatnote");
     if (note) {
       note.className = "chnote" + (lastErr ? " bad" : "");
@@ -431,9 +730,12 @@ var CHAT = (function(){
          on is sent with your message", which stopped being true the moment
          that stopped happening — and a sentence that is merely stale is worse
          than no sentence, because somebody believes it. */
-      note.textContent = lastErr ? lastErr
-        : shot ? "A screenshot is attached. It is sent with your next message."
-        : "";
+      /* AND THE SENTENCE GOES WITH IT (§286.2, 1b-ii): the strip above says
+         the same thing and shows the picture besides, so the line would be
+         the product saying it twice — quietly, in the register somebody has
+         already told us they do not read. An ERROR still speaks here, because
+         that is not a description of state (§124). */
+      note.textContent = lastErr ? lastErr : "";
     }
   }
 
@@ -465,6 +767,15 @@ var CHAT = (function(){
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
         state.office = !!j.office;
+        /* ── THE QUEUE ARRIVES WITH THE POLL (§285) ────────────────────
+           ABSENT IS NOT EMPTY (§93, §231.4). `queue` is undefined for
+           everybody but the office and null when the server could not read
+           it — neither is "nobody is waiting", so the list keeps saying
+           "one moment" rather than reporting an all-clear it never read. */
+        if (state.office) {
+          if (Array.isArray(j.queue)) { cq.rows = j.queue; cq.err = ""; }
+          else if (j.queue === null) { cq.err = "The list could not be read."; }
+        }
         /* THE FIRST ANSWER ENDS THE SHORT BEAT (§197). The interval was set
            before it arrived, so the clock is re-struck here — the same thing
            the cadence change below does, for the same reason. */
@@ -708,6 +1019,21 @@ var CHAT = (function(){
     });
   }
 
+  /* WHICH KEY A REGISTRATION WAS MADE WITH (§282.3), in the spelling the
+     server hands out — base64url, no padding — so the two can be compared as
+     strings. Absent on a browser that does not report it, which is a
+     different answer from "a different key" and is treated as one. */
+  var REKEYING = false;
+  function subKey(sub){
+    try {
+      var k = sub && sub.options && sub.options.applicationServerKey;
+      if (!k) return null;
+      var b = new Uint8Array(k), out = "";
+      for (var i = 0; i < b.length; i++) out += String.fromCharCode(b[i]);
+      return btoa(out).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    } catch (e) { return null; }
+  }
+
   function pushSync(){
     if (!pushCan()) return;
     var want = !!(cfg.popup && popMine() && popState() === "granted");
@@ -726,6 +1052,48 @@ var CHAT = (function(){
           });
         }
         if (sub) {
+          /* ── AND IT MUST BE THE KEY WE ARE SENDING WITH (§282.3) ──────
+             THIS BRANCH ACCEPTED ANY EXISTING REGISTRATION WITHOUT LOOKING
+             AT IT, and that is a fault that can never heal on its own. A
+             registration is bound to the key it was made with; if the
+             platform's key has changed since — an environment variable added
+             or removed, a key minted after a device had already subscribed —
+             then the browser goes on handing back the OLD registration for
+             ever, the bell reads on, the server counts the device, and every
+             single send is refused by the push service. Everything reads
+             healthy at both ends and nothing arrives, which is exactly the
+             shape of "we tried many things and it still does not work".
+
+             So it is compared, and a registration made with a different key
+             is thrown away and made again. Costs the person nothing: the
+             browser has already granted permission, so no question is asked.
+
+             A BROWSER THAT WILL NOT SAY which key it used (no `options`) is
+             left exactly as it is — churning a registration on a guess is
+             worse than keeping one that is probably right (§35: unknown is
+             not "wrong"). */
+          /* NAMED `keyWanted`, NEVER `want` — `pushSync` already has a `want`
+             (the boolean deciding whether this device should be subscribed at
+             all), and a second `var want` in this callback HOISTS over it, so
+             the `if (!want)` above reads `undefined`, takes the unsubscribe
+             branch every time, and nothing ever subscribes. Valid on both
+             sides, silent, and it shipped past `node --check` — §56.7's `var`
+             collision, caught by `checks/office-chat.py` going red rather
+             than by reading it. */
+          var made = subKey(sub);
+          var keyWanted = String(cfg.vapid || "").replace(/=+$/, "");
+          if (made && keyWanted && made !== keyWanted && !REKEYING) {
+            REKEYING = true;
+            var stale = sub.endpoint;
+            return sub.unsubscribe().catch(function(){}).then(function(){
+              /* TOLD BOTH WAYS ROUND, as the switch-off path is: the row for
+                 a registration that can never receive anything again is not
+                 left behind to be sent to for ever. */
+              post({ action: "pushOff", endpoint: stale }, function(){});
+              REKEYING = false;
+              return pushSync();          /* now with nothing subscribed */
+            }).catch(function(){ REKEYING = false; });
+          }
           /* ALREADY SUBSCRIBED, AND IT IS STILL SENT. A push service expires
              an endpoint on its own schedule and the server may have dropped
              a row it was told was gone; re-registering the same endpoint
@@ -971,10 +1339,184 @@ var CHAT = (function(){
      get back is what they typed, and a chat that eats it because the network
      blinked is a chat nobody uses twice (that rule survives from the version
      this replaces; it now restores rather than merely not-clearing). */
+  /* ── WHAT A REPLY POSTS, BUILT ONCE (§53.5, §285) ────────────────────
+     THE HTML IS BUILT HERE, BY THE ONE BUILDER (§72.3), and the server decides
+     whether to actually send it and to WHOM — the browser sends content, never
+     a recipient (§74.2).
+
+     EXTRACTED BECAUSE THERE ARE TWO PLACES A REPLY IS NOW WRITTEN: the
+     Platform Inbox and the corner's queue. A reply is a reply, so the email it
+     chases with must be the same email — the moment the corner built a lesser
+     one, somebody would be emailed differently depending on which screen the
+     office happened to be looking at. */
+  function replyPost(who, text){
+    var body = { action: "reply", person: who, body: text };
+    try {
+      var sh = commsShape(), c = comms();
+      body.fromName = c.fromName || sh.org;
+      body.replyTo = c.replyTo || "";
+      body.subject = "A reply from the Strategy Office";
+      body.html = MAIL.html({
+        org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer, eyebrow: sh.eyebrow,
+        title: "The Strategy Office replied",
+        preheader: text.slice(0, 140),
+        body: text + "\n\nOpen the platform to answer.",
+        /* THE SAME ANSWER THE TEST EMAIL USES (spec 027). This line was the
+           second copy of "where is the platform" and the two had drifted:
+           commsShape() said the gate, this said the platform. One asker now,
+           and an empty answer draws no button rather than a broken one. */
+        cta: { label: "Open the platform", href: sh.href || "" }
+      });
+    } catch (e) { /* No mail builder here is not a reason to refuse the reply. */ }
+    return body;
+  }
+
+  /* ── OPENING, REPLYING AND SEARCHING FROM THE CORNER (§285) ──────────
+     Every one of these goes through an action the Platform Inbox already
+     uses. Nothing new is authorised, nothing new is stored, and a rule the
+     Inbox keeps is a rule the corner keeps by construction. */
+
+  function cqOpen(key, name, fresh){
+    cq.person = key; cq.name = name || key; cq.msgs = []; cq.fresh = !!fresh;
+    drawPanel();
+    var box = el("chatsay");
+    /* WRITE, NOT REPLY, when there is nothing to reply to (§290, §124). */
+    if (box) box.placeholder = (fresh ? "Write to " : "Reply to ") +
+      (firstWord(cq.name) || "them") + "\u2026";
+    /* AND NOTHING IS ASKED FOR A CONVERSATION THAT DOES NOT EXIST — the
+       server would answer 404, correctly, and a 404 drawn as a failure would
+       say something is wrong when nothing is (§93). The empty pane IS the
+       state; the conversation is minted by the first message (§247). */
+    if (fresh) return;
+    post({ action: "thread", person: key }, function(err, j){
+      if (cq.person !== key) return;          /* they moved on while it loaded */
+      if (err || !j) { cq.msgs = []; drawPanel(); return; }
+      cq.name = j.name || cq.name;
+      cq.msgs = j.messages || [];
+      drawPanel();
+    });
+  }
+
+  function cqBack(){
+    cq.person = null; cq.msgs = []; cq.name = ""; cq.fresh = false;
+    var box = el("chatsay");
+    if (box) box.placeholder = "Write to the office\u2026";
+    drawPanel();
+  }
+
+  /* THE REPLY, WITH THE ECHO AND THE ROLL-BACK the ordinary send already has
+     — what nobody can get back is what they typed (§139). */
+  function cqSend(text){
+    var who = cq.person, box = el("chatsay");
+    sending = true; lastErr = "";
+    var btn = el("chatsend"); if (btn) btn.disabled = true;
+    var was = cq.msgs;
+    cq.msgs = cq.msgs.concat([{ id: "echo", at: new Date().toISOString(),
+      from_office: true, by_key: "", by_name: "", body: text, flag: null, echo: true }]);
+    if (box) { box.value = ""; box.style.height = ""; }
+    drawPanel();
+    /* THE EMAIL IS BUILT HERE, with the one builder every message uses
+       (§72.3) — content, never a recipient, which the server resolves from
+       the stored register (§74.2). Without it a reply from the corner could
+       never chase anybody, and the same reply from the Inbox could. */
+    /* AND `start` IS WHAT MINTS THE CONVERSATION (§247's own flag, not a
+       second endpoint) — so the chase, the box on their screen and leaving
+       the waiting list all come free, and there is only ever one way to
+       begin one (§53.5). The server checks the person is real and active;
+       this only says which kind of send it is. */
+    var payload = replyPost(who, text);
+    if (cq.fresh) payload.start = true;
+    post(payload, function(err, j){
+      sending = false;
+      if (btn) btn.disabled = false;
+      /* IT EXISTS NOW, so a second message is an ordinary reply. */
+      if (j && j.ok) cq.fresh = false;
+      if (err || !j || !j.ok) {
+        cq.msgs = was;
+        if (box && !box.value) box.value = text;
+        lastErr = err === NO_ANSWER
+          ? "No answer from the server. The reply may still have gone."
+          : ((j && j.error) || "That did not send.");
+        drawPanel();
+        return;
+      }
+      lastErr = "";
+      /* THE CONVERSATION YOU ARE IN NEVER LEAVES THE LIST UNDER YOU (§113,
+         and his own decision). Replying stops it waiting, so the next poll
+         drops it from `cq.rows` — and it stays on screen because you are
+         standing in it, and goes when you press back. */
+      poll();
+      cqOpenRefresh(who);
+    });
+  }
+
+  function cqOpenRefresh(key){
+    post({ action: "thread", person: key }, function(err, j){
+      if (cq.person !== key || err || !j) return;
+      cq.msgs = j.messages || cq.msgs;
+      drawPanel();
+    });
+  }
+
+  /* SEARCHING WAITS FOR A PAUSE, because every keystroke would otherwise be a
+     question to the database — and it NEVER repaints from the box's own input
+     handler beyond the list, or the field being typed into is replaced under
+     the cursor (§35). */
+  var cqFindTimer = null;
+  function cqSearch(q){
+    cq.q = q;
+    if (cqFindTimer) clearTimeout(cqFindTimer);
+    if (q.trim().length < 2) {
+      cq.hits = null; cq.people = null; cq.more = 0;
+      cq.searching = false; cqBodyOnly(); return;
+    }
+    cq.searching = true; cqBodyOnly();
+    cqFindTimer = setTimeout(function(){
+      var asked = q;
+      post({ action: "chatSearch", q: q }, function(err, j){
+        if (cq.q !== asked) return;           /* they have typed on since */
+        cq.searching = false;
+        cq.hits = (err || !j) ? [] : (j.hits || []);
+        cq.people = (err || !j) ? [] : (j.people || []);
+        cq.more = (err || !j) ? 0 : (j.more || 0);
+        cqBodyOnly();
+      });
+    }, 300);
+  }
+
+  /* THE LIST ALONE, never the chrome — redrawing the bar would replace the
+     search box mid-word (§71.2, §29.5). */
+  function cqBodyOnly(){
+    var body = el("chatbody");
+    if (!body || !state.office || cq.side !== "wait" || cq.person) return;
+    body.innerHTML = cqListHtml() +
+      '<div class="cqfoot"><button class="cqinbox" type="button" data-cqinbox="1">' +
+      "Open the Platform Inbox \u203a</button></div>";
+  }
+
+  function firstWord(n){ return String(n || "").trim().split(/\s+/)[0] || ""; }
+  /* THE FIRST LINE OF A MESSAGE, for a row that has one line to give it.
+     `firstLine` is api/chat.js's — a SERVER helper — and using its name here
+     threw inside `cqListHtml()`, which left the body's class set and its
+     contents empty: a corner that rendered as a blank box with no error on
+     the page, because the throw was inside the poll's own callback. Found by
+     driving it (§96, §231.5's family). */
+  function oneLine(v){
+    var t = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+    return t.length > 160 ? t.slice(0, 160) + "\u2026" : t;
+  }
+
   function send(){
     var t = el("chatsay"); if (!t || sending) return;
     var text = t.value.trim();
     if (!text && !shot) return;
+    /* ── THE SAME BOX ANSWERS SOMEBODY ELSE (§285) ────────────────────
+       With a conversation open inside the queue, this composer is a REPLY —
+       to them, from the office — so it goes through `reply` and not `say`.
+       One composer, because a second would be a second set of every rule
+       around it: the echo, the roll-back, the attach button, the growing
+       box (§53.5). */
+    if (state.office && cq.side === "wait" && cq.person) { cqSend(text); return; }
     sending = true; lastErr = "";
     var btn = el("chatsend"); if (btn) btn.disabled = true;
     var hadShot = shot;
@@ -1029,7 +1571,34 @@ var CHAT = (function(){
     var dock = document.createElement("div");
     dock.className = "chatdock";
     dock.id = "chatdock";
-    dock.hidden = true;           /* until the server says there is somebody here */
+    /* ── THE CORNER ARRIVES WITH THE PAGE (§290) ──────────────────────
+       Islam: "a lag happened where the chat icon didn't apperar on the reload
+       of the branch. and then appeard after."
+
+       §197 created this hidden and revealed it only on a successful answer,
+       for a good reason it stated: an optimistic bubble that vanishes on the
+       next beat is a control that lied. That reason does not apply here,
+       because THIS IS NOT A GUESS — the chat's on/off switch lives in
+       `org.extra.chat`, the browser holds it as `GROUP.chat` by the time the
+       page draws, and `chatSettings()` on the server reads that same value
+       from that same row. Measured both ways on a real database: switched
+       off, the browser reads {on:false} and the server reads {on:false}.
+
+       SO IT IS ONLY EVER ASKED WHEN THE PLATFORM HYDRATED FROM THE SERVER
+       (`SYNC.isLive()`), which is what makes it the tenant's answer rather
+       than the baked example's — on file:// mount() never runs at all, and
+       behind §201's wall the state is the demo's and this stays hidden and
+       waits, exactly as before.
+
+       AND NOBODY THE CHAT WOULD REFUSE CAN SEE IT: /api/state refuses a
+       session that has not chosen a password (§43.2), so a page that
+       hydrated is a person /api/chat will answer. A 401 or 403 still hides
+       the corner on the first beat.
+
+       THE POLL REMAINS THE AUTHORITY. This decides only what is drawn in the
+       seconds before the first answer, which after a new build is the whole
+       tenant at once on a cold server — the moment Islam was reporting. */
+    dock.hidden = !chatOnFromState();
     dock.innerHTML = dockHtml();
     document.body.appendChild(dock);
 
@@ -1064,6 +1633,53 @@ var CHAT = (function(){
        handler bound to the button itself would be destroyed four seconds after
        it appeared (§24: whoever rewrites the DOM re-wires it, and the cheapest
        way to obey that is not to bind to the thing being rewritten). */
+    /* ── THE CORNER'S QUEUE, WIRED ONCE (§285) ───────────────────────
+       On the panel, never on each row: the list is rewritten on every poll,
+       so a handler per row would be re-bound every few seconds and leak
+       (§24, §47.2). Delegation costs nothing and cannot drift. */
+    el("chatpanel").addEventListener("click", function(e){
+      var t = e.target;
+      if (!t || !t.closest) return;
+      var seg = t.closest("[data-cqside]");
+      if (seg) {
+        cq.side = seg.dataset.cqside;
+        /* LEAVING THE QUEUE LEAVES THE CONVERSATION, or coming back would
+           land in somebody else's thread with "My messages" lit. */
+        if (cq.side !== "wait") { cq.person = null; cq.msgs = []; }
+        var box0 = el("chatsay");
+        if (box0) box0.placeholder = (cq.side === "wait" && cq.person)
+          ? box0.placeholder : "Write to the office\u2026";
+        drawPanel();
+        return;
+      }
+      var row = t.closest("[data-cqopen]");
+      if (row) {
+        var nm = row.querySelector("b");
+        cqOpen(row.dataset.cqopen, nm ? nm.textContent : "",
+               row.dataset.cqfresh === "1");
+        return;
+      }
+      if (t.closest("[data-cqback]")) { cqBack(); return; }
+      if (t.closest("[data-cqretry]")) { cq.err = ""; cq.rows = null; cqBodyOnly(); poll(); return; }
+      if (t.closest("[data-cqinbox]")) {
+        /* THE PLATFORM'S OWN CONTROL IS PRESSED, never a second navigation
+           (§107: the tour navigates by pressing what is already there). */
+        setOpen(false);
+        var gear = document.querySelector('[data-md="setup"]');
+        if (gear) gear.click();
+        setTimeout(function(){
+          var go = document.querySelector('[data-setupgo="chat"]');
+          if (go) go.click();
+        }, 0);
+        return;
+      }
+    });
+    /* Typing NEVER repaints past the list (§35). */
+    el("cqbar").addEventListener("input", function(e){
+      var f = e.target.closest && e.target.closest("#cqfind");
+      if (f) cqSearch(f.value);
+    });
+
     el("chatbody").addEventListener("click", function(e){
       var b = e.target.closest && e.target.closest("[data-chhuman]");
       if (!b) return;
@@ -1082,8 +1698,64 @@ var CHAT = (function(){
         drawPanel();
       });
     });
+    /* TAKING IT BACK OFF (§286.2). Wired on the foot rather than the button,
+       because the strip is rewritten on every paint and a handler bound to the
+       button inside it would be re-bound every few seconds (§24, §47.2). */
+    document.querySelector("#chatpanel .chatfoot").addEventListener("click", function(e){
+      if (!e.target.closest || !e.target.closest("[data-chdrop]")) return;
+      shot = null; lastErr = "";
+      var f = el("chatfile"); if (f) f.value = "";   /* or the same file cannot be picked again */
+      drawPanel();
+    });
     el("chatpic").addEventListener("click", function(){ el("chatfile").click(); });
     el("chatfile").addEventListener("change", function(){ takePicture(this.files && this.files[0]); });
+    /* ── AND A PICTURE CAN SIMPLY BE PASTED (§286) ────────────────────
+       Islam: "allow in the chat to copy paste a picture rather than only
+       attaching it." Somebody reporting a number that looks wrong has just
+       pressed the screen-grab key; making them save the file and then find it
+       again is asking them to do the computer's job.
+
+       IT FEEDS `takePicture()` AND NOTHING ELSE (§53.5). Everything §50
+       settled about a picture — shrunk to 1600px, encoded both ways with the
+       smaller kept, the failure said in words — happens because this is the
+       same intake the attach button uses. A second path would be a second set
+       of all of it.
+
+       THE OFFICE'S REPLY BOX IS THE SAME BOX (§285), so this reaches the
+       corner's queue side without a second listener.
+
+       TEXT STILL PASTES AS TEXT: only an image item is taken, and
+       `preventDefault` is called ONLY when one is found — a paste carrying
+       both (a screenshot with a caption, which is what a rich editor puts on
+       the clipboard) keeps its words and takes the picture too.
+
+       AND WITH SCREENSHOTS TURNED OFF IT IS REFUSED IN WORDS, never silently
+       dropped (§98.2): the office's switch decides, and the server would
+       refuse it anyway — a paste that appeared to work and then vanished is
+       worse than one that says no. */
+    el("chatsay").addEventListener("paste", function(e){
+      var d = e.clipboardData; if (!d) return;
+      var items = d.items || [], file = null;
+      for (var i = 0; i < items.length && !file; i++) {
+        if (items[i].kind === "file" && /^image\//.test(items[i].type || "")) {
+          file = items[i].getAsFile();
+        }
+      }
+      /* Safari and the file managers put a real image on `files` without an
+         `items` entry of kind "file" — asked second, because `items` is what
+         carries a screenshot on every desktop browser. */
+      if (!file && d.files && d.files.length && /^image\//.test(d.files[0].type || "")) {
+        file = d.files[0];
+      }
+      if (!file) return;                       /* an ordinary paste, untouched */
+      e.preventDefault();
+      if (!cfg.shots) {
+        lastErr = "Pictures are turned off for this platform.";
+        drawPanel();
+        return;
+      }
+      takePicture(file);
+    });
     var say = el("chatsay");
     say.addEventListener("keydown", function(e){
       /* Enter sends, Shift+Enter makes a line — what every chat does, and the
@@ -1097,27 +1769,30 @@ var CHAT = (function(){
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
        for (§98.1). */
-    /* ── CLICKING AWAY MINIMISES IT (§100.4) ────────────────────────
-       Islam: "if I click outside the box minimize it please." Nothing is lost
-       by it — the panel is hidden rather than rebuilt, so a half-typed message
-       is still in the box when it comes back, which is what makes dismissing
-       it this cheaply safe.
+    /* ── AND IT STAYS OPEN WHILE YOU MOVE ABOUT (§284, REVERSING §100.4)
+       Islam: "we need the chat to sustain the navigation so it's open while
+       me navigating across the different pages in the platform."
 
-       CAPTURE PHASE, so a control that stops propagation cannot leave the
-       panel open behind whatever it just did; `pointerdown` rather than
-       `click`, so it goes away as the press lands rather than on release.
+       §100.4 minimised the panel on any press outside the dock — his own
+       earlier instruction, *"if I click outside the box minimise it please"* —
+       and the two cannot both be true, because THE PLATFORM IS ONE PAGE.
+       Measured rather than argued: with the corner open, one press on a page
+       tab closed it. Every destination, tab, section, rail row and unit card
+       is a press outside the dock, so "outside" was very nearly the whole
+       product, and a rule that exempted navigation would be exempting
+       everything except the empty margins.
 
-       TWO THINGS ARE NOT "OUTSIDE": the dock itself, and an open modal — a
-       screenshot opened FROM the panel renders into the platform's own overlay,
-       and closing the panel behind it would be dismissing the thing you are
-       standing in. */
-    document.addEventListener("pointerdown", function(e){
-      if (!open) return;
-      var t = e.target;
-      if (t && t.closest && t.closest("#chatdock")) return;
-      if (document.querySelector(".overlay.on")) return;
-      setOpen(false);
-    }, true);
+       So it goes, and this is recorded as a REVERSAL rather than overwritten
+       (Principle II): §100.4's reasoning was sound for a panel you dip into
+       and leave, and it stopped being sound the moment the panel became
+       somewhere you WORK — the office's queue (§285) is read while walking
+       around the plan it is about.
+
+       WHAT REPLACES IT IS WHAT WAS ALWAYS THERE: the minus, which says
+       Minimise and does, and Escape below. Both are an act; neither can
+       happen by accident. Nothing is ever lost either way — the panel is
+       hidden rather than rebuilt, so a half-typed message survives (§100.4's
+       own observation, still true and now doing more work). */
     /* Escape, from anywhere — it was only wired inside the composer, so it did
        nothing once the focus had moved to the attach button or a message. */
     document.addEventListener("keydown", function(e){
@@ -1399,14 +2074,25 @@ var CHAT = (function(){
 
         /* ── 7 · AND TOLD WHEN THEY ARE NOT LOOKING. Beside its sibling at
            last; the two were five rows apart. */
-        setRow("mail", "Away email",
-          /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
-             prose while the server read a constant, so the two were one edit
-             from disagreeing — and the edit is now a box on this very row. */
-          "A reply is emailed when they have not had the platform open for " +
-          plural(c.away, "minute") + ". Off keeps every conversation inside " +
-          "the platform. A shut chat checks in every three minutes, so anything " +
-          "below four can call somebody away while they are at their desk.",
+        setRow("mail", "Email after",
+          /* THE SENTENCE READS THE SETTING (§169's rule), AND THE SETTING
+             CHANGED WHAT IT MEANS (§293). It was "how long before they count
+             as away"; it is now "how long the platform collects before it
+             emails", because presence stopped deciding whether an email goes
+             at all — Islam: *"even if I'm at my desk if the smo don't reply
+             in 10 min the email should come ... sometimes people might be at
+             their desk but not focusing."*
+
+             AND THE SECOND BOX GOES WITH IT. §283 put a chase beside the away
+             threshold, on the sound argument that present is a guess about
+             the future — and Islam read the pair and asked *"I'm confused
+             between the send email after 3 min and the send after 60 min, is
+             that a duplication?"* It was two numbers for one decision; this
+             is the one number that decision needs. */
+          "Anything left unanswered for " + plural(c.away, "minute") +
+          " is emailed — once, with everything still waiting in it. A reply " +
+          "stops it on this side; opening the platform stops it on theirs. " +
+          "Off keeps every conversation inside the platform.",
           segHtml("mail", "Off", "On", c.mail, true),
           /* ONLY WHILE IT IS ON, the shape `rep` already has under Handover
              email: a threshold for an email nobody sends is a control with
@@ -1415,8 +2101,8 @@ var CHAT = (function(){
             ? '<div class="chset-ctl chset-away">' +
                 '<input class="chset-num" type="number" data-chaway="1" ' +
                   'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
-                  'value="' + c.away + '" aria-label="Minutes away before a reply is emailed">' +
-                '<span class="chset-unit">' + plural(c.away, "minute") + ' away</span>' +
+                  'value="' + c.away + '" aria-label="Minutes unanswered before an email is sent">' +
+                '<span class="chset-unit">' + plural(c.away, "minute") + '</span>' +
               '</div>'
             : "")) +
 
@@ -1525,10 +2211,30 @@ var CHAT = (function(){
     return (box.threads || []).length - boxRows().length;
   }
 
+  /* WHERE SOMEBODY SITS, ANSWERED ONCE FOR BOTH LISTS (§288, §53.5). The
+     REGISTER first, because the browser holds it and a search hit carries
+     nothing else; the row's own fields second, for a person the register no
+     longer holds. Both ends arrive at `placeLabel()`, the navigation's own
+     word (§93.12) — never a second vocabulary. */
+  function chatPlaceOf(t){
+    var at = null;
+    try {
+      var p = typeof personBy === "function" ? personBy(t.person_key) : null;
+      if (p && typeof personAt === "function") at = personAt(p);
+    } catch(e){}
+    if (at === "group") at = null;
+    if (!at) {
+      if (t.unit_key) at = t.unit_key;
+      else if (t.fn_key) at = "fn:" + t.fn_key;
+    }
+    if (!at || typeof placeLabel !== "function") return "";
+    return placeLabel(at) || "";
+  }
+
   function placeOf(t){
     var bits = [];
-    if (t.unit_key && typeof placeLabel === "function") bits.push(placeLabel(t.unit_key));
-    else if (t.fn_key && typeof placeLabel === "function") bits.push(placeLabel("fn:" + t.fn_key));
+    var where = chatPlaceOf(t);
+    if (where) bits.push(where);
     if (t.title) bits.push(t.title);
     if (t.gone) bits.push("no longer on the register");
     return bits.filter(Boolean).join(" · ");
@@ -1632,28 +2338,42 @@ var CHAT = (function(){
     /* FIRST NAME THROUGH THE SHARED RULE (§135, §181), never split(" ")[0] —
        "Abd El Moniem" is one first name, and this register holds it. */
     var name = firstNameOf(d.person, d.name) || "They";
-    /* THE FIFTH STATE, AND IT COMES FIRST. With the chat off nobody can open
-       an answer, so what somebody's presence would have decided does not
-       arise — saying "Yara is away" here would be true and beside the point. */
+    /* WITH THE CHAT OFF NOBODY CAN OPEN AN ANSWER, so what their presence
+       would have decided does not arise — saying "Yara is away" here would be
+       true and beside the point. */
     if (!chatCfg().on) {
       return '<div class="chpres none">' + ICON_CLOCK +
         " The chat is off, so nobody would see a reply. Turn it back on in Settings.</div>";
     }
-    if (d.here) {
-      return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
-        " has the platform open — they will see this straight away, so no email will be sent.</div>";
-    }
     if (!d.address) {
       return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
-        " is away and has no address on the register, so this waits in the platform for them.</div>";
+        " has no address on the register, so this waits in the platform for them.</div>";
     }
     if (!d.mail) {
       return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
-        " is away, and no mail is configured on this deployment — this waits in the platform.</div>";
+        " will see this in the platform — emailing is turned off here.</div>";
+    }
+    /* ── IT SAYS WHAT HAPPENS NEXT, NOT WHETHER AN EMAIL GOES (§293) ──
+       Presence no longer decides that. A reply starts their collection, and
+       when the time is up it is emailed unless they have come back — so
+       "they have the platform open" can no longer be allowed to read as "no
+       email", which is exactly what it used to mean (§124: a status word is a
+       claim, and this one would be claiming something that stopped being
+       true). §283 had already made that sentence half-false by keeping the
+       message and chasing it later; this makes the line say so.
+
+       THE NUMBER IS THE TENANT'S OWN SETTING, read from the same place the
+       server reads it. */
+    var mins = plural(chatCfg().away, "minute");
+    if (d.here) {
+      return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
+        " has the platform open, so they should see this now — and if they have not " +
+        "come back to it within " + mins + " it is emailed to " + esc2(d.address) + ".</div>";
     }
     return '<div class="chpres away">' + ICON_CLOCK + " " + esc2(name) + " was last here " +
       esc2(d.hereAt ? ago(d.hereAt) : "a while ago") +
-      " — this will also go to " + esc2(d.address) + ".</div>";
+      " — unless they open the platform, this goes to " + esc2(d.address) +
+      " in " + mins + ".</div>";
   }
 
   /* ONE GROWER FOR BOTH COMPOSERS (§188, §53.5). The corner's was written
@@ -1986,9 +2706,15 @@ var CHAT = (function(){
       box.new = false; box.newWho = "";
       box.person = who;
       box.note = { text:
-        j && j.here ? "Sent. They are on the platform and will see it now."
-        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
-        : j && j.mailed && j.mailed.why ? "Sent. No email went out \u2014 " + j.mailed.why + "."
+        /* WHAT WILL HAPPEN, BECAUSE NOTHING HAS HAPPENED YET (§293). The
+           email is no longer sent by this request — it is collected and goes
+           when the time is up — so "emailed to …" would be a claim about
+           something that has not occurred (§124). The two states that are
+           still finished facts (no address, emailing off) say so as before. */
+        j && j.mailed && j.mailed.pending
+          ? "Sent. If they have not opened the platform in " + plural(j.mailed.mins, "minute") +
+            ", it is emailed to " + j.mailed.to + "."
+        : j && j.mailed && j.mailed.why ? "Sent. No email will go out \u2014 " + j.mailed.why + "."
         : "Sent." };
       if (typeof window !== "undefined" && typeof window.OVQUEUE !== "undefined")
         window.OVQUEUE = null;
@@ -2013,24 +2739,7 @@ var CHAT = (function(){
     /* THE HTML IS BUILT HERE, BY THE ONE BUILDER (§72.3), and the server
        decides whether to actually send it and to WHOM — the browser sends
        content, never a recipient (§74.2). */
-    var body = { action:"reply", person:who, body:text };
-    try {
-      var sh = commsShape(), c = comms();
-      body.fromName = c.fromName || sh.org;
-      body.replyTo = c.replyTo || "";
-      body.subject = "A reply from the Strategy Office";
-      body.html = MAIL.html({
-        org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer, eyebrow: sh.eyebrow,
-        title: "The Strategy Office replied",
-        preheader: text.slice(0, 140),
-        body: text + "\n\nOpen the platform to answer.",
-        /* THE SAME ANSWER THE TEST EMAIL USES (spec 027). This line was the
-           second copy of "where is the platform" and the two had drifted:
-           commsShape() said the gate, this said the platform. One asker now,
-           and an empty answer draws no button rather than a broken one. */
-        cta: { label: "Open the platform", href: sh.href || "" }
-      });
-    } catch (e) { /* No mail builder here is not a reason to refuse the reply. */ }
+    var body = replyPost(who, text);
 
     post(body, function(err, j){
       if (btn) btn.disabled = false;
@@ -2069,9 +2778,15 @@ var CHAT = (function(){
          two loads below redraw this pane, and a sentence that only exists in
          the DOM is a sentence the refresh destroys. */
       box.note = { text:
-        j && j.here ? "Sent. They are on the platform and will see it now."
-        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
-        : j && j.mailed && j.mailed.why ? "Sent. No email went out — " + j.mailed.why + "."
+        /* WHAT WILL HAPPEN, BECAUSE NOTHING HAS HAPPENED YET (§293). The
+           email is no longer sent by this request — it is collected and goes
+           when the time is up — so "emailed to …" would be a claim about
+           something that has not occurred (§124). The two states that are
+           still finished facts (no address, emailing off) say so as before. */
+        j && j.mailed && j.mailed.pending
+          ? "Sent. If they have not opened the platform in " + plural(j.mailed.mins, "minute") +
+            ", it is emailed to " + j.mailed.to + "."
+        : j && j.mailed && j.mailed.why ? "Sent. No email will go out — " + j.mailed.why + "."
         : "Sent." };
       /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§166). The Setup rail counts
          `OVQUEUE.waiting`, asked ONCE per visit because a summary is read and
@@ -2170,13 +2885,41 @@ var CHAT = (function(){
            the ask goes after it. */
         pushSync();
         setTimeout(function(){
-          post({ action:"pushTest" }, function(err, j){
+          /* ── AND THIS BROWSER SAYS WHAT IT HOLDS (§282.4) ─────────────
+             THE TEST ONLY EVER ASKED THE SERVER, and the server can only
+             report what it HOLDS — so a browser subscribed to one address
+             while the server sends to another read as perfect health at both
+             ends, with nothing arriving. The two halves are now compared, and
+             the one place they can be compared is here, because only this
+             browser knows its own.
+
+             NOTHING IDENTIFYING TRAVELS THAT DOES NOT ALREADY: the endpoint
+             is what `pushOn` posts on every subscribe, and it is the row the
+             server already stores. */
+          var here = { permission: popState(), why: PUSHWHY || null,
+                       endpoint: null, key: null };
+          var askAfter = function(){
+            post({ action:"pushTest", here: here }, done);
+          };
+          var done = function(err, j){
             POPTEST.busy = false;
             POPTEST.steps = (j && j.steps) || [{ name:"The platform", state:"fail",
               detail: err === "failed" ? "Could not reach the server."
                                        : String(err || "No answer.") }];
             setMenuPaint();
-          });
+          };
+          /* Asked of the browser, then sent — and if the browser will not
+             answer, the ask still goes, because a diagnostic that refuses to
+             run when one of its own questions fails is a diagnostic that is
+             silent exactly when something is wrong (§231.5). */
+          if (!pushCan()) { askAfter(); return; }
+          navigator.serviceWorker.getRegistration()
+            .then(function(reg){ return reg && reg.pushManager.getSubscription(); })
+            .then(function(sub){
+              if (sub) { here.endpoint = sub.endpoint; here.key = subKey(sub); }
+              askAfter();
+            })
+            .catch(function(){ askAfter(); });
         }, 1200);
         return;
       }

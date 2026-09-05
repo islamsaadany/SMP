@@ -307,8 +307,79 @@
    §257's Y/N target, §258's save-safety banners and §259's blue dividers — and
    was serving "smp-shell-v4.37-blue-dividers" when this merge was made, so the
    name goes past it rather than beside it (§94.12), confirmed again
-   immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.41-video-in-the-review";
+   immediately before the push (§94.16).
+
+   §271: the reporting note is a growing textarea and a typed break survives
+   being read. Main moved a long way under this branch while it waited for a
+   word — §251 to §270 — and was serving "smp-shell-v4.49-edit-on-section-line"
+   when this merge was made, so the name goes PAST it rather than beside it
+   (§94.12); confirmed once more immediately before the push (§94.16).
+
+   §272: empty is not missing, and the bar now says which. Main moved 39
+   commits under this branch while it waited for a word — §261 through §271,
+   with FOUR different sessions each having claimed §261 and each renumbered
+   on merge, which is why this one is §272 — and was serving
+   "smp-shell-v4.50-note-wrap" when this merge was made, so the name goes PAST
+   it rather than beside it (§94.12); confirmed once more immediately before
+   the push (§94.16).
+   §273: editing the cycle that is running, and reopening one that has closed.
+   Main moved 42 commits under this branch while it waited for a word — and
+   FOUR sessions had each claimed §261 before this one, which is why this work
+   is §273 and not the §261 it was built as. Main was serving
+   "smp-shell-v4.51-empty-not-missing" when this merge was made, so the name
+   goes PAST it rather than beside it (§94.12); confirmed once more immediately
+   before the push (§94.16).
+
+   §276 · §277: the Count compile rule, and a reported figure following its
+   target's unit. Main moved sixteen sections under this branch while it
+   waited for a word — §260 to §275, so the two built as §260/§261 are
+   §276/§277 — and was serving "smp-shell-v4.54-box-keys-and-the-rail" when
+   this merge was made, so the name goes PAST it rather than beside it
+   (§94.12); confirmed once more immediately before the push (§94.16).
+
+   §278: a target with a shape of its own — twelve monthly numbers, compiled by
+   the row's own rule — and §278.2, the 24px mark that opens them. Main moved
+   from §260 to §277 under this branch while it waited for a word, and a FIFTH
+   session had claimed §261 by the time this merged, which is why this work is
+   §278 and not the §261 it was built as. Main was serving
+   "smp-shell-v4.55-count-and-unit-follow" when this merge was made, so the name
+   goes PAST it rather than beside it (§94.12); confirmed once more immediately
+   before the push (§94.16).
+
+   §278.3 merged with main at v4.63-picker-height and went to v4.64 rather than
+   beside it, same rule. */
+/* §282–§286 and §288 (the chat round): the office's corner carries the queue
+   and survives the walk, a picture pastes into it, a reply nobody was told
+   about is chased, and a save stops shutting every reader out — the built
+   file's bytes changed, so the name must too, or a returning browser goes on
+   serving itself the old platform out of its own disk (§91). Checked against
+   origin/main serving "smp-shell-v4.64-objectives-table" (aac6c32), and
+   confirmed again immediately before the push (§94.16). */
+/* §290: the corner is drawn from the state the page hydrated with rather than
+   waiting for the chat's first answer, and the search reaches people who have
+   never written in — the built file's bytes changed, so the name must too, or
+   a returning browser goes on serving itself the old platform out of its own
+   disk (§91). Checked against origin/main serving
+   "smp-shell-v4.65-office-corner-queue" (da96757) — this branch's own previous
+   name, already there — and confirmed again immediately before the push
+   (§94.16). */
+/* v4.68-ten-minute-collection — §293: the platform collects for ten minutes
+   and then sends one email, superseding §283's chase-if-unread. The built
+   file's bytes changed — the line above the reply box says what will happen
+   rather than whether an email goes, the settings row is relabelled, and both
+   lib/rules.js and the mail builder (now lib/mail-html.js) are inlined — which
+   is the whole trigger (§91). Read off origin/main serving
+   "smp-shell-v4.67-project-row-type" at the moment of this merge; confirmed
+   again immediately before the push (§94.12, §94.16). */
+/* v4.72-video-in-the-review — §261: a clip plays on a review slide, with the
+   bytes in a blob store and a pointer in the graph. The built file's bytes
+   changed (the slide kind, the editor, the deck, Setup › Import & storage and
+   lib/rules.js are all inlined), which is the whole trigger (§91). Main moved
+   166 commits under this branch while it waited for a word and was serving
+   "smp-shell-v4.71-yn-citations" at the moment of this merge, so the name goes
+   PAST it rather than beside it (§94.12) — confirmed once more immediately
+   before the push (§94.16). */
+const SHELL = "smp-shell-v4.72-video-in-the-review";
 const ASSETS = [
   "/",
   "/index.html",

@@ -359,10 +359,19 @@ with sync_playwright() as pw:
     # loading one.
     check("...and emptied again on leaving, which gives the keyboard back",
           get(get(armed, "off"), "src") == "", get(armed, "off"))
-    check("the bar is held open while a clip is on screen",
-          get(get(armed, "on"), "bar") is True, get(armed, "on"))
-    check("...and lets itself hide again after it",
-          get(get(armed, "off"), "bar") is False, get(armed, "off"))
+    # §261.16 REWROTE THESE TWO, it did not delete them (§218). §261.14 held
+    # the deck bar open on a video slide, because a player that has been
+    # clicked owns the keyboard and the arrows on the bar were the way past
+    # it — and §265 then removed the peek mechanism outright, at Islam's
+    # report that the bar flashed on every click. So the assertion is now
+    # that a video slide is NOT a special case: whatever §265 decides the bar
+    # does, it does the same here, and a build reinstating §261.14's rule
+    # fails on the first of these.
+    check("a clip does not hold the deck bar open",
+          get(get(armed, "on"), "bar") is False, get(armed, "on"))
+    check("...and the bar reads the same off the clip's slide as on it",
+          get(get(armed, "on"), "bar") == get(get(armed, "off"), "bar"),
+          [get(armed, "on"), get(armed, "off")])
 
     # §261.15, Islam: "THE VIDEO IS SHOWING ON THE first 3 slides ... and the
     # video should only play if someone press play on it not by normal

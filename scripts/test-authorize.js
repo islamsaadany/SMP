@@ -671,6 +671,83 @@ console.log("\n8a · the review point (§239)");
   refuses(custKey, setAsOf, "nor can a strategy custodian");
 })();
 
+/* ── §273: AND SO ARE THE CYCLE'S NAME AND ITS DATES ─────────────────────
+   The server has always classified these as `cycle` -- they are review fields
+   outside `REVIEW_PER_TARGET` (§234) -- and until now NOTHING IN THE PRODUCT
+   COULD SEND ONE: they were written once, when the cycle was opened, and were
+   plain text ever after. §273's pen makes that path reachable by a person for
+   the first time, which is exactly the moment to assert what the server does
+   with it (§172: four layers agreeing about a value the database has never
+   been offered is not the same as it working).
+
+   Both ways, or a rule that refuses everybody protects nothing (§94.2). And
+   the name matters more than it looks: it is what a closed cycle's figures are
+   filed under, so somebody able to rewrite it could re-label another team's
+   history. */
+console.log("\n8b · the cycle's name and dates (§273)");
+(function () {
+  const rename = function (s) {
+    s.review = Object.assign({}, s.review, { name: "H2 2026" });
+  };
+  const redate = function (s) {
+    s.review = Object.assign({}, s.review,
+      { from: "Feb 2026", to: "Jul 2026", due: "20 Aug 2026" });
+  };
+  allows("smo", rename, "the SMO renames the cycle");
+  allows("smo", redate, "the SMO moves its dates");
+  refuses(headKey, rename, "a unit's head cannot rename it");
+  refuses(custKey, rename, "nor can a strategy custodian");
+  refuses(headKey, redate, "a unit's head cannot move its dates");
+})();
+
+/* ── §273.2: AND REOPENING A CLOSED CYCLE IS THE OFFICE'S TOO ────────────
+   Same argument one act further on. `review.state` and `history` have always
+   classified as `cycle`, and until §273.2 NOTHING IN THE PRODUCT COULD SEND
+   EITHER on an existing cycle: the only place `state:"open"` was written was
+   the mint of a brand-new one, and no screen removed a HISTORY entry. So the
+   path is reachable by a person for the first time, and this is what the
+   server does with it (§172).
+
+   THE TWO HALVES ARE ASSERTED SEPARATELY, because reopening does both and a
+   rule that guarded only the flag would let anybody rewrite the record of what
+   a closed cycle scored. */
+console.log("\n8c · reopening a closed cycle (§273.2)");
+(function () {
+  /* NOT `allows`/`refuses`, AND THAT IS THE POINT. Those compare against the
+     SEED, whose cycle is already OPEN — so "reopen it" set a value to what it
+     already was, the differ found no change at all, and both refusals passed
+     as ALLOWED with `changes: []`. §94.5's own example, committed while
+     writing a test for it. The stored side has to be a CLOSED cycle. */
+  const shut = clone(SEED);
+  shut.review = Object.assign({}, shut.review, { state: "closed" });
+  shut.history = (shut.history || []).concat([{ name: shut.review.name, group: 71, units: {} }]);
+
+  const reopen = function (s) {
+    s.review = Object.assign({}, s.review, { state: "open" });
+  };
+  const unfile = function (s) { s.history = (s.history || []).slice(0, -1); };
+
+  const tryIt = function (who, mutate) {
+    const inc = clone(shut); mutate(inc);
+    return A.authorize(shut, inc, personOf(shut, who));
+  };
+  let v = tryIt("smo", reopen);
+  check("the SMO reopens a closed cycle", v.ok, v.refusals.join(" / "));
+  v = tryIt("smo", unfile);
+  check("...and takes its closing record back", v.ok, v.refusals.join(" / "));
+  /* PROVED TO BE A REAL CHANGE FIRST, or a refusal below is a refusal of
+     nothing (§94.5 again, from the other side). */
+  check("...and both are changes the differ actually sees",
+    tryIt("smo", reopen).changes.length > 0 && tryIt("smo", unfile).changes.length > 0,
+    JSON.stringify(tryIt("smo", reopen).changes.map(function (c) { return c.kind; })));
+  v = tryIt(headKey, reopen);
+  check("a unit's head cannot reopen one", !v.ok, "was ALLOWED");
+  v = tryIt(custKey, reopen);
+  check("nor can a strategy custodian", !v.ok, "was ALLOWED");
+  v = tryIt(headKey, unfile);
+  check("and nobody else rewrites the record of what closed", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n8 · the review's picture slides");
 (function () {
   const slide = { id: "psTEST", title: "Site visit", at: "cover", layout: 1,
@@ -1096,6 +1173,37 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
   const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
   check("but a removed row is still `unitPlan`",
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
+})();
+
+/* ── AND A CAPABILITY'S OBJECTIVES REORDER THE SAME WAY (§278.3) ──
+   That walk had no reorder callback at all, so moving one of these rows fell
+   through to `capPlan` — the office's — while the identical act on a UNIT's
+   key objectives has classified as `arrange` since §101. One question with two
+   answers, and §278.3 draws a handle on both tables: a custodian would have
+   watched the row move and the save come back refused, which is §94.3's exact
+   fault.
+
+   BOTH ENDS, and the second one is the point: a build that classified every
+   change to these rows as `arrange` would satisfy the first assertion and hand
+   the plan to anybody who may reorder. */
+(function () {
+  const cap = (SEED.group.capabilities || []).filter(function (c) {
+    return (c.keyObjectives || []).length > 1; })[0];
+  check("the seed has a capability with two key objectives to reorder",
+        !!cap, "none — this assertion would be measuring nothing");
+  if (!cap) return;
+  const ci = (SEED.group.capabilities || []).indexOf(cap);
+  const inc = clone(SEED);
+  shuffleFirstToLast(inc.group.capabilities[ci].keyObjectives);
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("reordering a capability's key objectives is `arrange`, and nothing else",
+        kinds.length > 0 && kinds.every(function (k) { return k === "arrange"; }),
+        "got: " + JSON.stringify(kinds));
+  const inc2 = clone(SEED);
+  inc2.group.capabilities[ci].keyObjectives[0].name += " (renamed)";
+  const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
+  check("but RENAMING one is still `capPlan`",
+        kinds2.indexOf("capPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
 
 /* ── 14 · THE FOCUS SWITCH IS NOT A BIGGER MARK (§102) ────────────
@@ -2841,6 +2949,219 @@ console.log("\n27 · which slides a review shows is the office's (§256)");
   r = fromStored(lock, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
   check("§256: a locked cycle does not stop the office pruning the deck",
         r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n28 · the order of the navigation is the office's (§273)");
+/* ── 28 · THE ORDER OF THE NAVIGATION IS THE OFFICE'S (§273) ──────────
+   Setup gained a way to drag the units and the functions into the order they
+   appear in. NOTHING NEW IS STORED — the order IS `unitKeys` / `functionKeys`,
+   which the server has classified as `setup` since it classified anything —
+   so this asserts that what was already true is still true, at BOTH ENDS
+   (§94.2): a build that let anybody reorder them would rewrite the navigation
+   for the whole tenant from a page they can open. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const swap = function (arr) {
+    const a = arr.slice(); const x = a.shift(); a.push(x); return a;
+  };
+  let r = fromStored(SEED, "smo", function (i) { i.unitKeys = swap(i.unitKeys); });
+  check("§273: the office may reorder the business units", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, "smo", function (i) { i.functionKeys = swap(i.functionKeys); });
+  check("§273: and the supporting functions", r.ok, (r.refusals || []).join(" / "));
+
+  /* THE OTHER END, and it is the one that matters: a unit head holds a page
+     of their own and none of Setup. */
+  const headKey = (SEED.unitRoles[UNIT] || {}).head;
+  if (!headKey) {
+    check("§273: the seed has a unit head to ask", false, "none");
+  } else {
+    r = fromStored(SEED, headKey, function (i) { i.unitKeys = swap(i.unitKeys); });
+    check("§273: a unit head may NOT reorder them", !r.ok,
+          r.ok ? "accepted" : "refused");
+    /* AND THE REFUSAL NAMES THE LIST, not "something changed" — §16.7's rule
+       that a refusal has to send somebody to a screen. */
+    check("§273: ...and the refusal names the list",
+          !r.ok && (r.refusals || []).join(" ").indexOf("business units") > -1,
+          (r.refusals || []).join(" / "));
+  }
+})();
+
+console.log("\n29 · the master presentation's running order is the office's (§266)");
+(function () {
+  /* Islam, asked before it was built: the SMO. The menu draws the entry for
+     the office alone; this is the other end of that one question (§42), and
+     BOTH sides of it — a test that only proves the custodian is refused passes
+     just as happily on a build that refuses everybody, which would be a
+     feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FLOW = [UK, "fn:" + Object.keys(SEED.functions || {})[0]];
+  check("§266: the seed holds a unit and a custodian to test with",
+        !!(UK && CUST), [UK, CUST].join(" / "));
+  if (!(UK && CUST)) return;
+
+  let r = fromStored(SEED, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§266: the office sets a running order", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  check("§266 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§266: and the refusal names the Presentation menu, never Setup",
+        !r.ok && /Presentation menu/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* CLEARING IT IS THE SAME ACT, and the key is DELETED rather than emptied
+     (§50.6) — a build that classified the write and not the removal would let
+     anybody throw away an order only the office could set. */
+  const set = clone(SEED); set.group.masterFlow = FLOW;
+  r = fromStored(set, CUST, function (i) { delete i.group.masterFlow; });
+  check("§266 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group.masterFlow; });
+  check("§266: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, AND IT IS ITS OWN KIND. Left to the unknown sweep this
+     would land on the SMO too — and would report "the group's masterFlow",
+     which sends nobody anywhere (§16.7). */
+  r = fromStored(SEED, CUST, function (i) { i.group.masterFlow = FLOW; });
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§266: a change to it is classified `masterFlow` and nothing else",
+        kinds.length === 1 && kinds[0] === "masterFlow", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately: the flow is arranged the
+     morning of the meeting, which is after the lock and not before it. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.group.masterFlow = FLOW; });
+  check("§266: a locked cycle does not stop the office arranging the flow",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n30 · a monthly plan is part of the plan (§278)");
+(function () {
+  /* Islam: *"some targets needs a monthly plan input so the calculation
+     becomes more accurate."* The twelve months change what a row is measured
+     against, so writing them is AUTHORING and the server has to say so —
+     §94's rule, on a field that did not exist when it was written.
+
+     NOTHING NEW WAS ADDED TO THE AUTHORISER FOR THIS, and that is exactly why
+     it is asserted: `monthly` falls through to the same classification as
+     every other plan field, which is the SAFE direction (§42's "an
+     unrecognised change is the SMO's") — but "it should fall through" and "it
+     does fall through" are two different statements, and only one of them is
+     a measurement. If it ever stopped, a unit head could reshape the target
+     they are judged against and nothing would notice. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const P = SEED.units[UK].items && SEED.units[UK].items[0];
+  const M = P && P.measures && P.measures[0];
+  check("§278: the seed holds a unit, a custodian and a measure",
+        !!(UK && CUST && M), [UK, CUST, M && M.id].join(" / "));
+  if (!(UK && CUST && M)) return;
+  const TWELVE = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+  let r = fromStored(SEED, "smo", function (i) {
+    i.units[UK].items[0].measures[0].monthly = TWELVE; });
+  check("§278: the office gives a measure a monthly plan", r.ok,
+        (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) {
+    i.units[UK].items[0].measures[0].monthly = TWELVE; });
+  check("§278 REFUSED: the unit's own custodian cannot reshape its target",
+        !r.ok, "was ALLOWED");
+
+  /* CLEARING IT IS THE SAME ACT. A build that classified the write and not the
+     removal would let anybody put a row back on flat proration — which changes
+     every figure it is judged by, silently. */
+  const withPlan = clone(SEED);
+  withPlan.units[UK].items[0].measures[0].monthly = TWELVE;
+  r = fromStored(withPlan, CUST, function (i) {
+    delete i.units[UK].items[0].measures[0].monthly; });
+  check("§278 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(withPlan, "smo", function (i) {
+    delete i.units[UK].items[0].measures[0].monthly; });
+  check("§278: the office clears one", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, and it is the plan's. A refusal naming the unit's settings
+     would send somebody to Setup for a field that lives on the plan (§16.7). */
+  const inc = clone(SEED);
+  inc.units[UK].items[0].measures[0].monthly = TWELVE;
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§278: it classifies as the unit's PLAN and nothing else",
+        kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
+})();
+
+/* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§292) ══
+   §292 gives a project's Deliverables and outcomes table a Type picker: the
+   press moves the row out of one list and into the other, with a new id. The
+   claim made in that section's comment is that the SERVER needed nothing —
+   `splitRows` already reads a row leaving one of these lists and appearing in
+   the other as `capPlan`, the office's — and a claim like that is either
+   measured or it is a hope (§172's lesson: four layers agreed about a fourth
+   value the database had never been offered).
+
+   BOTH ENDS, or a build that allowed everything would pass the first half
+   (§94.2). And the row is REBUILT rather than moved by reference, because
+   that is what the browser does: a converted row is minted by the minter and
+   carries the name across (§292), so an id that travelled with it would be a
+   different fixture from the one the product produces. */
+console.log("\n31 · a row's type is the office's to change (§292)");
+(function () {
+  const cap = (SEED.group.capabilities || [])[0];
+  const proj = cap && (cap.projects || [])[0];
+  check("§292: the seed holds a project with a deliverable", !!(proj && (proj.deliverables || [])[0]),
+        proj && proj.id);
+  if (!proj || !(proj.deliverables || [])[0]) return;
+
+  /* The conversion, exactly as `dxSwitchKind` performs it. */
+  const convert = function (st) {
+    const c = (st.group.capabilities || [])[0];
+    const p = (c.projects || [])[0];
+    const old = p.deliverables.shift();
+    p.outcomes.push({ id: p.id + "-Oz", name: old.name, dir: "\u2265",
+                      target: "", measureAt: "", actual: "" });
+  };
+  const who = function (st, key) { return personOf(st, key); };
+  const run = function (key) {
+    const inc = clone(SEED); convert(inc);
+    return A.authorize(SEED, inc, who(SEED, key));
+  };
+
+  let v = run("smo");
+  check("§292: the office switches a row's type", v.ok, (v.refusals || []).join(" / "));
+
+  /* Whoever holds the function and is not the office. A custodian may report
+     a deliverable (§147.3) and may not author the plan — which is exactly the
+     line this switch sits on. */
+  const fkey = Object.keys(SEED.functions || {}).filter(function (k) {
+    return (SEED.functions[k] || {}).custodian; })[0];
+  const cust = fkey && SEED.functions[fkey].custodian;
+  if (cust && who(SEED, cust)) {
+    v = run(cust);
+    check("§292 REFUSED: the function's custodian may not", !v.ok, "was ALLOWED");
+  } else {
+    check("§292: a custodian to refuse", false, "none in the seed");
+  }
+
+  /* AND IT IS ONE KIND OF CHANGE, NOT TWO. A build that read the removal and
+     the arrival as different things would refuse half of a save the screen
+     makes in one press (§184: a refusal costs the row it names and nothing
+     else). */
+  const inc = clone(SEED); convert(inc);
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§292: every part of it classifies as capPlan",
+        kinds.length > 0 && kinds.every(function (k) { return k === "capPlan"; }),
+        kinds.join(",") || "(nothing)");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

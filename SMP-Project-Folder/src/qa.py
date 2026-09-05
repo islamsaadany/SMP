@@ -382,8 +382,9 @@ with sync_playwright() as p:
         pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
         el = pg.query_selector('#secrow-in [data-sub2="%s"]' % sec)
         if el: el.click(); pg.wait_for_timeout(250)
-        pg.locator(".pane").first.hover(); pg.wait_for_timeout(120)
-        pen = pg.query_selector(".penbtn")
+        # §268: no hover — the strategy pen is a worded button on the
+        # section line, drawn at rest for whoever may author the page.
+        pen = pg.query_selector("#secrow-in .secpen")
         if not pen:
             errs.append("PLAN (%s): no edit pen for the SMO" % label); continue
         pen.click(); pg.wait_for_timeout(300)
@@ -1161,8 +1162,16 @@ with sync_playwright() as p:
     # querySelector check would have passed every day the control could not be
     # reached, which is how it shipped.
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    # §292 MOVED ONE OF THESE AND THE LINE IS REWRITTEN, NOT DELETED (§218).
+    # An outcome had an Add button of its own until Islam said the two ran
+    # together and confused him; the way to one is now the Type picker on the
+    # row. So the button list loses `outcome` — and the property this line was
+    # protecting, that every kind of row can still be CREATED, is asserted
+    # below instead (§61: a kind you can read and never write). Left as it was,
+    # it would have gone red on a build behaving exactly as decided; deleted,
+    # nothing would notice the day the picker goes.
     for dest, sec, tag, wants in [("fn:finance", "Projects", "capability",
-                                   ["project", "deliverable", "outcome", "milestone"]),
+                                   ["project", "deliverable", "milestone"]),
                                   ("mobile", "Plan", "unit",
                                    ["pillar", "measure", "tactic"])]:
         if dest.startswith("fn:"):
@@ -1174,7 +1183,7 @@ with sync_playwright() as p:
         pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(300)
         pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
         pg.click('#secrow button:has-text("%s")' % sec); pg.wait_for_timeout(350)
-        pen = pg.query_selector('.penbtn[data-page="plan"]')
+        pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
         if not pen or not pen.is_visible():
             errs.append("PLAN EDIT (%s): the pen is %s \u2014 the edit mode cannot be "
                         "reached without a hover" % (tag, "absent" if not pen else "invisible"))
@@ -1194,11 +1203,20 @@ with sync_playwright() as p:
         missing = [w for w in wants if w not in got["adds"]]
         if missing:
             errs.append("PLAN EDIT (%s): no Add for %s" % (tag, ", ".join(missing)))
+        if tag == "capability":
+            # §292: and an OUTCOME is still creatable — through the Type picker
+            # on a row rather than through a button of its own.
+            kinds = pg.evaluate("""() => [...document.querySelectorAll('.pane tbody select')]
+              .map(s => [...s.options].map(o => o.textContent.trim()).join('/'))
+              .filter(v => v === 'Deliverable/Outcome').length""")
+            if not kinds:
+                errs.append("PLAN EDIT (%s): no way to make an outcome \u2014 the "
+                            "Type picker is not drawn on any row" % tag)
         if not got["grips"]:
             errs.append("PLAN EDIT (%s): editing gives no drag handles" % tag)
         if not got["fields"]:
             errs.append("PLAN EDIT (%s): editing gives no editable fields" % tag)
-        back = pg.query_selector('.penbtn[data-page="plan"]')
+        back = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
         if back: back.click(); pg.wait_for_timeout(300)
         if pg.evaluate("() => EDIT_PAGE.plan"):
             errs.append("PLAN EDIT (%s): pressing Done did not leave edit mode" % tag)
@@ -1212,7 +1230,7 @@ with sync_playwright() as p:
     pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(300)
     pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
     pg.click('#secrow button:has-text("Plan")'); pg.wait_for_timeout(350)
-    if pg.query_selector('.penbtn[data-page="plan"]'):
+    if pg.query_selector('[data-page="plan"]'):
         errs.append("PLAN EDIT: a unit head is offered a pen \u2014 correcting a plan is "
                     "the SMO's (31)")
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)

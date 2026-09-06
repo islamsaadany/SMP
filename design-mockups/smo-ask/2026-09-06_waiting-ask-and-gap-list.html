@@ -86,18 +86,23 @@ body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
    tallest of them, so a neighbour carrying a count badge — or a label long
    enough to wrap — leaves the shorter one riding high. Centring is the fix,
    and nowrap is why nothing has to wrap in the first place. */
-.seg span{ flex:1 1 0; display:flex; align-items:center; justify-content:center;
+.seg > span{ flex:1 1 0; display:flex; align-items:center; justify-content:center;
            text-align:center; white-space:nowrap;
            padding:7px 9px; font-size:var(--fs-small);
            font-weight:650; color:var(--ink-2); background:transparent; }
-.seg span + span{ box-shadow:inset 1px 0 0 var(--line); }
+.seg > span + span{ box-shadow:inset 1px 0 0 var(--line); }
 /* WAITING TAKES TWO THIRDS. It is the common errand and Ask is the exception,
    so the two halves are not the same size — his call. Scoped to the corner's
    own switch (`.cqseg` in the product), never to every segmented control:
    the filter on the list below is two equal choices and stays equal. */
-.seg.wa span:first-child{ flex:2 1 0; }
-.seg.wa span + span{ flex:1 1 0; }
-.seg span.on{ background:var(--panel); color:var(--panel-ink); }
+.seg.wa > span:first-child{ flex:2 1 0; }
+.seg.wa > span + span{ flex:1 1 0; }
+.seg > span.on{ background:var(--panel); color:var(--panel-ink); }
+/* THE BADGE IS A SPAN INSIDE THE SWITCH, so `.seg span` reached it and gave
+   it the half's own `flex:1 1 0` — harmless while the half was not a flex
+   row, and the moment centring made it one the badge grew to fill it. The
+   half's rules are scoped to its direct children now; this one stays what it
+   always was, a small pill sized to the number in it. */
 .cqn{ display:inline-block; min-width:17px; padding:1px 5px; border-radius:9px;
       background:var(--surface-2); color:var(--ink-2); font-size:var(--fs-micro);
       font-weight:800; margin-left:5px; }
@@ -155,7 +160,7 @@ body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
 .paneh h3{ margin:0; font-size:var(--fs-body); font-weight:650; }
 .paneh .sub{ font-size:var(--fs-small); color:var(--ink-3); }
 .paneh .right{ margin-left:auto; display:flex; gap:8px; align-items:center; }
-.seg.sm span{ padding:5px 11px; font-size:var(--fs-small); }
+.seg.sm > span{ padding:5px 11px; font-size:var(--fs-small); }
 
 .qtable{ width:100%; border-collapse:collapse; }
 .qtable th{ text-align:left; font-size:var(--fs-micro); letter-spacing:.09em;

@@ -1,6 +1,6 @@
-# 041 — A yes or a no that can be under way (§298)
+# 041 — A yes or a no that can be under way (§300)
 
-**Status:** built on `claude/tactic-progress-reporting-re26th-i7778w`, not merged.
+**Status:** merged to `main` 2026-09-06.
 **Decided with Islam, 2026-09-06.** Mockup: `design-mockups/yn-in-progress/2026-09-06_yn-in-progress.html`.
 
 ## The question

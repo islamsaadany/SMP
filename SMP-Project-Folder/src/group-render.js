@@ -747,7 +747,7 @@ function outcomeCell(t){
 function outcomeShown(t){
   var o = outcomeOf(t);
   if (!o || o.actual == null || o.actual === "") return null;
-  /* §298: TEXT, not html — the caller escapes — and never joined with a unit,
+  /* §300: TEXT, not html — the caller escapes — and never joined with a unit,
      because `Y/N` is the unit and "Done Y/N" is not an answer anybody gave. */
   if (SMPRules.isYesNo(o.target)) return SMPRules.ynShown(o.actual);
   return joinTarget("", String(o.actual), splitTarget(o.target).unit) || String(o.actual);
@@ -776,7 +776,7 @@ function tacticRows(ts, unitKey){
     /* §252: the ternary that used to sit here is `tacticProgress()` now --
        it was the only copy in the product and the deck needed it too. */
     var oc = onOutcome(t), bench = tacticBenchmark(t);
-    /* §298: beside a figure the benchmark is a comparison — "Done / 50%" is
+    /* §300: beside a figure the benchmark is a comparison — "Done / 50%" is
        not one — so a yes/no row shows it only against a partial. The
        not-reported line below keeps `bench`, where it is telling somebody
        what is still owed rather than comparing anything. */
@@ -4828,7 +4828,7 @@ function renderReport(u){
        server, so neither is offered here. */
     if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
-      /* §298: a yes/no figure is READ through `ynShown`, so a row holding a
+      /* §300: a yes/no figure is READ through `ynShown`, so a row holding a
          tenant's old `Yes` reads in the words the control now offers without
          anything stored being rewritten. */
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
@@ -4836,7 +4836,7 @@ function renderReport(u){
              : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
-    /* §298: the status picker and its per-cent box, which are §104's own pair
+    /* §300: the status picker and its per-cent box, which are §104's own pair
        (`ynBoxes`) rather than a control of this table's — Islam: *"for the
        inprogress and the % we used ot have them 2 stached boxes not one"*. */
     if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld);
@@ -4937,7 +4937,7 @@ function renderReport(u){
               '<td class="idx">' + (i+1) + '</td>' +
               nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
               '<td>' + qs(x.obj) + '</td>' +
-              /* §298: a yes/no row's benchmark is a per cent of its own window,
+              /* §300: a yes/no row's benchmark is a per cent of its own window,
                  and the whole it is a part of is the word "Yes / No" — "50% of
                  Yes / No" is not a sentence anybody reads, so the second line
                  is for a row whose target is a NUMBER. */
@@ -6231,7 +6231,7 @@ function renderFnProjects(fnKey){
 function capEntryBox(x, unit, may, label){
   var cur = x.actual, has = cur != null && cur !== "";
   var shown = !has ? "" : (unit === "%" ? String(cur) : (splitTarget(String(cur)).value || String(cur)));
-  /* ── AND THE OTHER SIDE OF THE SWITCH ASKS THE SAME WAY (§298, A15) ──────
+  /* ── AND THE OTHER SIDE OF THE SWITCH ASKS THE SAME WAY (§300, A15) ──────
      A capability function's key objectives take the unit picker a unit's do
      (§226), so a yes/no row is reachable here — and this box has never known
      about one: it drew a free text field, where a reporter could type "done",
@@ -6251,7 +6251,7 @@ function capEntryBox(x, unit, may, label){
    capEntryBox's, because that one writes `actual` -- the outcome's figure --
    and this writes `pct`. One box, two meanings, would be exactly the fault
    this whole section removed from the tables. */
-/* ── THE YES/NO PAIR, ONE BUILDER (§298) ──────────────────────────────────
+/* ── THE YES/NO PAIR, ONE BUILDER (§300) ──────────────────────────────────
    A status picker, and a per-cent box drawn only while the answer is In
    progress — §104's own control, which is what Islam was pointing at: *"for
    the inprogress and the % we used ot have them 2 stached boxes not one as
@@ -7405,12 +7405,12 @@ function tgtShown(v){
    worked out here — and the shape is the one the tactics table has worn since
    §252, so the deck gains no new vocabulary. */
 function figVsDue(m, share){
-  var due = benchBeside(m, share);   /* §298 */
+  var due = benchBeside(m, share);   /* §300 */
   return figShown(m) + (due ? ' <i class="duehalf">/ ' + tgtShown(due) + '</i>' : '');
 }
 
 function figShown(m){
-  /* §298: a yes/no figure is a word (and, In progress, a word and a number),
+  /* §300: a yes/no figure is a word (and, In progress, a word and a number),
      so it is never scaled, tightened or given a magnitude hover — those are
      for a figure with a unit on the end of it. One reader, `ynShown`. */
   if (SMPRules.isYesNo(m.target)) return esc(SMPRules.ynShown(m.actual));

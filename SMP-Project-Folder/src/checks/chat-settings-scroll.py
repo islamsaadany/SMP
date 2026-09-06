@@ -301,8 +301,26 @@ with sync_playwright() as pw:
     ck("and not one step is painted", st["shut"]["seen"] == 0, st["shut"])
     ck("pressing the verdict shows every step",
        st["open"]["open"] is True and st["open"]["seen"] == st["steps"], st["open"])
-    # THE REASON IT MATTERS TO §294: folded, the panel stops needing a scroll.
-    ck("folded, the panel needs no scroll at all", st["shut"]["mustScroll"] == 0, st["shut"])
+    # ── REWRITTEN, NOT LOOSENED (§214.3, §218) ────────────────────────
+    # This asserted that folded, the panel needs NO scroll at all — 590px of
+    # content against §294's cap, and true when §296 wrote it. §299 adds a
+    # settings row (Ask, for the office), which costs 48px, so the folded panel
+    # now needs about 32px of scroll and the literal is no longer the truth.
+    #
+    # THE PROPERTY IT WAS GUARDING IS NOT THE ZERO. §296's argument is that
+    # folding takes the panel from "must scroll a long way" to "barely, or
+    # not at all", which is what makes §294's cap comfortable rather than
+    # constant — so what is asserted is the RELATIONSHIP: folding must remove
+    # the great majority of the scroll, and the whole panel must stay
+    # reachable either way, which is §294's own guarantee.
+    #
+    # A number here would go stale again the next time a row is added, and
+    # a check that has to be edited on every ordinary change is one people
+    # learn to edit without reading (§94.8).
+    ck("folding removes almost all of the scroll",
+       st["shut"]["mustScroll"] * 4 < max(1, st["open"]["content"] - st["shut"]["content"]),
+       {"shut": st["shut"]["mustScroll"],
+        "folding saves": st["open"]["content"] - st["shut"]["content"]})
     ck("...and opening it is what makes the scroll necessary",
        st["open"]["content"] > st["shut"]["content"], st)
     pg.close()

@@ -104,15 +104,7 @@ var CHAT = (function(){
                 how many more matched than the ten shown. `fresh` marks the
                 conversation open in the queue as one that does not exist on
                 the server yet, so the first message carries `start`. */
-             people: null, more: 0, fresh: false,
-             /* ── THE OFFICE'S ASK (§299) ──────────────────────────────
-                `asks` is null until the half is opened — absent is not empty
-                (§93), and the difference is what draws "One moment…" rather
-                than "nothing has been asked". `asking` is a question in
-                flight; `askErr` is the one thing the office must be told that
-                nobody else is (§123: for everybody else a failure is silent
-                because a person is coming, and here nobody is). */
-             asks: null, asking: false, askErr: "", pending: "" };
+             people: null, more: 0, fresh: false };
   /* The office's own thread is fetched on the same poll as everybody's, so
      switching to "My messages" costs nothing and shows what is already here. */
   /* HOW MANY WERE WAITING LAST TIME WE ASKED — the office's half of §225.
@@ -402,12 +394,7 @@ var CHAT = (function(){
            choice (§61). */
         '<div class="cqbar" id="cqbar" hidden></div>' +
         '<div class="chatbody" id="chatbody"></div>' +
-        /* THE COMPOSER IS NOT DRAWN OVER A LIST OF PEOPLE (§298). It is
-           still the panel's ONE composer (§285) and it is still here in the
-           markup; what changed is that `drawPanelChrome` decides whether the
-           foot is on screen, in the one function that answers every other
-           question about what is NOT the body (§53.5). */
-        '<div class="chatfoot" id="chatfoot">' +
+        '<div class="chatfoot">' +
           /* WHAT IS ATTACHED, SHOWN (§286.2) — above the composer, so the box
              under the cursor never moves. Empty and absent until there is a
              picture. */
@@ -449,92 +436,15 @@ var CHAT = (function(){
      reported as a bug (§108.1). */
   function cqRows(){ return cq.rows || []; }
 
-  /* ── WAITING AND ASK (§299, replacing §285's second half) ───────────
-     Islam: *"I don't think the smo should get a my message part it's
-     confusing. the smo only replies to people if they have an issue they
-     should talk directly to their mnager."*
-
-     MEASURED BEFORE IT WAS AGREED: nothing excluded the office's own thread
-     from the office's own waiting queue or badge, so a member of the office
-     writing there rang their own bubble and put themselves in their own list;
-     §293's collection had already had to write `person_key <> $1` so the
-     office was not emailed about itself. And §285's two stated reasons for
-     keeping the half had both expired — the assistant is tested from the
-     settings panel, and writing to the office as the office is what he is
-     overruling. Nothing is lost: the Platform Inbox lists every conversation,
-     the office's own included.
-
-     WAITING TAKES TWO THIRDS, his call, because it is the common errand and
-     Ask is the exception (`.cqseg` carries it — no other segmented control in
-     the product is a 2:1).
-
-     AND WITH THE SWITCH OFF THERE IS NO SWITCH. A segmented control with one
-     half is not a choice (§61), so the bar holds the search alone — which is
-     what every tenant sees until the office turns Ask on. */
   function cqSeg(){
     var n = cqRows().length;
-    var wait = '<button type="button" role="tab" data-cqside="wait"' +
-      (cq.side === "wait" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
-      '>Waiting' + (n ? ' <span class="cqn">' + n + "</span>" : "") + "</button>";
-    if (!cfg.ask) return "";
-    return '<div class="cqseg" role="tablist">' + wait +
-      '<button type="button" role="tab" data-cqside="ask"' +
-        (cq.side === "ask" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
-        ">Ask</button></div>";
-  }
-
-  /* THE LINE WHEN IT CANNOT ANSWER, AND IT IS NOT THE OTHER ONE. `HANDOFF_LINE`
-     tells a person that the office will pick it up, which is true for them and
-     false here — the office IS who would pick it up. So this says what
-     happened and where the question went, and nothing about anybody coming
-     (§125's rule: the words are the product's, never the model's). */
-  var ASK_NONE = "I don\u2019t have an answer for that one. It has been added to " +
-    "Questions asked, on the Knowledge base page, so it can be answered once " +
-    "and for everyone.";
-
-  /* THE ASK HISTORY AS A CONVERSATION READS, through the SAME builder every
-     other message in this panel goes through (§53.5) — so an assistant answer
-     is captioned identically wherever it is read, and a declined question
-     wears `msgHtml`'s narrated line rather than a bubble. Two rows out of one
-     stored row: what was asked, and what came back. */
-  function askMsgs(){
-    var out = [];
-    /* THE QUESTION IS ON SCREEN BEFORE THE ANSWER IS (§139's echo, one
-       surface over). It is drawn from `pending` rather than pushed into
-       `asks`, because `asks` is what the server said and a row invented here
-       would be indistinguishable from a stored one the moment anything else
-       read it. */
-    (cq.asks || []).forEach(function(r){
-      out.push({ id: "q" + r.id, at: r.at, from_office: false,
-                 by_key: "", by_name: "", body: r.question });
-      out.push(r.answered
-        ? { id: "a" + r.id, at: r.at, from_office: true, bot: true,
-            by_key: "assistant", by_name: "Assistant", body: r.answer || "" }
-        : { id: "a" + r.id, at: r.at, from_office: true, bot: true, handoff: true,
-            by_key: "assistant", by_name: "Assistant", body: ASK_NONE });
-    });
-    if (cq.pending) {
-      out.push({ id: "qecho", at: new Date().toISOString(), from_office: false,
-                 by_key: "", by_name: "", body: cq.pending, echo: true });
-    }
-    return out;
-  }
-
-  function askHtml(){
-    if (cq.asks === null) return '<div class="chempty"><p>One moment\u2026</p></div>';
-    var body = (cq.asks.length || cq.pending)
-      ? threadHtml(askMsgs(), false, false)
-      : '<div class="chempty"><div class="chbig">Ask about the platform</div>' +
-        "<p>How a score is worked out, what a control does, why a save was " +
-        "refused. It answers from the knowledge base \u2014 it cannot see a " +
-        "figure, a plan or a score, and it says so rather than guessing.</p></div>";
-    if (cq.asking) body += '<div class="chsys chwait">Asking the assistant\u2026</div>';
-    /* AND THE OFFICE IS TOLD WHEN IT WAS NEVER REACHED (§123, §124). Everybody
-       else's screen stays silent on a failure because a person is coming
-       (§112.2); here nobody is, so silence would be the feature failing
-       invisibly — and it names the diagnostic rather than guessing at a cause. */
-    if (cq.askErr) body += '<div class="chsys chaskbad">' + esc2(cq.askErr) + "</div>";
-    return body;
+    return '<div class="cqseg" role="tablist">' +
+      '<button type="button" role="tab" data-cqside="wait"' +
+        (cq.side === "wait" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
+        '>Waiting' + (n ? ' <span class="cqn">' + n + "</span>" : "") + "</button>" +
+      '<button type="button" role="tab" data-cqside="mine"' +
+        (cq.side === "mine" ? ' class="on" aria-selected="true"' : ' aria-selected="false"') +
+        ">My messages</button></div>";
   }
 
   function cqFind(){
@@ -667,30 +577,12 @@ var CHAT = (function(){
       "Open the Platform Inbox \u203a</button></div>";
   }
 
-  /* THE ASK HALF'S BODY. Its own function beside drawCorner's for the same
-     reason that one exists: one screen, one builder, and the chrome is drawn
-     by drawPanelChrome for both (§53.5). */
-  function drawAsk(){
-    var body = el("chatbody"); if (!body) return;
-    var atEnd = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
-    body.className = "chatbody";
-    body.innerHTML = askHtml();
-    if (atEnd || cq.asking) body.scrollTop = body.scrollHeight;
-  }
-
   function drawPanel(){
     var body = el("chatbody"); if (!body) return;
     /* THE OFFICE'S QUEUE IS A DIFFERENT SCREEN IN THE SAME BOX (§285) — and
        only ever for the office, and only on the Waiting half. Everything
        below is unchanged for everybody else, and for the office reading
        their own thread. */
-    /* THE SWITCH CAN GO OFF UNDER SOMEBODY WHO IS STANDING ON IT. It is the
-       office's own setting and every browser reads it from the poll, so a
-       colleague turning Ask off leaves this one on a half that no longer has a
-       control to leave it by (§61's trap). Asked here, where every draw passes,
-       rather than at the one place that sets `side`. */
-    if (cq.side === "ask" && !cfg.ask) { cq.side = "wait"; }
-    if (state.office && cq.side === "ask") { drawAsk(); drawPanelChrome(); return; }
     if (state.office && cq.side === "wait") { drawCorner(); drawPanelChrome(); return; }
     body.className = "chatbody";
     /* KEEP THE PLACE UNLESS THEY WERE AT THE BOTTOM. Somebody reading back
@@ -751,69 +643,8 @@ var CHAT = (function(){
         : "";
     }
 
-    /* ── NO COMPOSER OVER A LIST OF PEOPLE (§298) ──────────────────────
-       Islam, as the office: *"After sending the reply message as an sMO the
-       message didn't appear in the box and when it appeard it appeard above
-       the message of ht employee which is wrong"*, then *"and the message
-       never reached the user."*
-
-       THREE SYMPTOMS, ONE CAUSE, REPRODUCED BEFORE ANYTHING WAS PROPOSED
-       (§3a). §285 forked this composer at the top — with a conversation open
-       inside the queue it is a REPLY, otherwise it is a `say` — and on the
-       Waiting LIST there is no conversation open, so `cqSend`'s guard falls
-       through and Send posts `action:"say"` with no recipient at all: the
-       office writing to the office. Measured, that one fact produces every
-       word of the report — the message never reaches them; it does not appear,
-       because the body being drawn is the queue and the echo went into
-       `state.messages`; and it sorts ABOVE theirs, because the office's own
-       thread is the one that just moved.
-
-       THE BOX WAS TECHNICALLY HONEST AND STILL WRONG. It says "Write to the
-       office…", which for the office means themselves — true, and unreadable
-       as such under a list of people waiting on you. So the answer is not a
-       better placeholder: there is nobody on this screen to write to, and a
-       control with nothing to act on is not a choice (§61, §94.15).
-
-       AND IT IS NOT A NEW SHAPE — the Platform Inbox draws no composer at all
-       with nobody picked (measured), so the corner is catching up with its own
-       neighbour rather than inventing a rule (§53.5). Everything else is
-       untouched and is asserted: `My messages` keeps its box, and a
-       conversation OPENED from the list keeps the reply box that already reads
-       "Reply to <name>…" and already posts `reply`.
-
-       HIDDEN, NEVER REMOVED. The foot holds the one composer, its attach
-       button, the preview strip and the note; taking it out of the document
-       would mean rebuilding all four on the way back and losing whatever is
-       half-typed or already attached (§100.2's rule, from the other side).
-
-       AND THE ATTRIBUTE IS ENOUGH, MEASURED (§298.2): Chromium's own
-       `[hidden]` rule is `!important`, so it beats `.chatfoot`'s `display:flex`
-       without help. `chat.css` carries a one-line guard beside it for the
-       engines that cannot be measured from here, and says so rather than
-       pretending to be the fix. */
-    var foot = el("chatfoot");
-    if (foot) foot.hidden = !!(state.office && cq.side === "wait" && !cq.person);
-
-    /* THE PLACEHOLDER SAYS WHICH BOX THIS IS. One composer, three errands —
-       a message to the office, a reply to somebody, a question to the
-       assistant — and the word in the box is the only thing that says which
-       (§298: the box was technically honest and unreadable as such). Written
-       here rather than at the press, because the half can be switched with
-       something already typed. */
-    var box = el("chatsay");
-    if (box && state.office) {
-      box.placeholder = (cq.side === "ask") ? "Ask about the platform\u2026"
-        : (cq.side === "wait" && cq.person) ? box.placeholder
-        : "Write to the office\u2026";
-    }
-
     var sub = el("chatsub");
-    if (sub && state.office && cq.side === "ask") {
-      /* NEVER A DOT. The dot is a STATUS — waiting on somebody, or the
-         office's promise — and there is nobody on this side to be waiting on
-         (§299). The line says what the half is and stops. */
-      sub.innerHTML = esc2("Answers from the knowledge base");
-    } else if (sub && state.office && cq.side === "wait" && cq.person) {
+    if (sub && state.office && cq.side === "wait" && cq.person) {
       /* ── THE LINE IS NEVER EMPTY (§285.2) ─────────────────────────
          This said nothing on the queue's list, on the reasoning that the
          segment above had already named it — and an EMPTY line is a shorter
@@ -860,15 +691,8 @@ var CHAT = (function(){
       if (!hide) { n.hidden = false; n.textContent = String(num); }
       else n.hidden = true;
     }
-    /* ── NO ATTACH BUTTON ON THE ASK HALF (§299) ─────────────────────
-       A screenshot is for a person, and there is no person on that side — the
-       assistant cannot see a picture, and a control that changes nothing is
-       not a choice (§61, §298's own reasoning about the composer over a list
-       of people). Hidden rather than removed, like the foot: it comes back
-       intact the moment the office switches to Waiting. */
-    var onAsk = !!(state.office && cq.side === "ask");
     var pic = el("chatpic");
-    if (pic) pic.hidden = !cfg.shots || onAsk;
+    if (pic) pic.hidden = !cfg.shots;
     /* ── THE PICTURE ITSELF, NOT A SENTENCE ABOUT IT (§286.2) ────────
        Islam, having pasted one: "the message is very subtle I didn't notice
        that something was attached." He was right — the whole confirmation was
@@ -911,15 +735,7 @@ var CHAT = (function(){
          the product saying it twice — quietly, in the register somebody has
          already told us they do not read. An ERROR still speaks here, because
          that is not a description of state (§124). */
-      /* AND THE ASK HALF SAYS WHAT BECOMES OF THE QUESTIONS (§299). Islam,
-         settling who reads them: *"the office questions are not a secret and
-         it's fine to be seen by the rest of the team."* So this is a plain
-         statement rather than a caution (§168) — and it is said at all
-         because the questions are KEPT, which is a fact about the box that
-         nothing else on the screen would tell anybody (§35). An error still
-         outranks it: that is not a description of state (§124). */
-      note.textContent = lastErr ? lastErr
-        : (onAsk ? "Kept, and the office can see them." : "");
+      note.textContent = lastErr ? lastErr : "";
     }
   }
 
@@ -1678,57 +1494,6 @@ var CHAT = (function(){
       "Open the Platform Inbox \u203a</button></div>";
   }
 
-  /* ── ASKING, AND NOTHING ELSE MOVING (§299) ────────────────────────
-     No thread, no waiting flag, no badge, no email — the server does none of
-     those for `ask`, and the client asks for none of them: this never touches
-     `state`, so the office's own conversation and everybody's unread count are
-     exactly as they were. */
-  function askLoad(){
-    if (cq.asks !== null) return;
-    post({ action: "askMine" }, function(err, j){
-      /* ABSENT IS NOT EMPTY (§93). A failed ask leaves the list null and says
-         so, rather than drawing "nothing has been asked" over a history that
-         is sitting on the server. */
-      if (err || !j) { cq.askErr = "The questions could not be loaded."; cq.asks = []; }
-      else { cq.asks = j.rows || []; }
-      if (cq.side === "ask") drawPanel();
-    });
-  }
-
-  function askSend(text){
-    if (cq.asking) return;
-    var t = el("chatsay"), btn = el("chatsend");
-    cq.asking = true; cq.askErr = ""; cq.pending = text;
-    if (t) { t.value = ""; t.style.height = ""; }
-    if (btn) btn.disabled = true;
-    drawPanel();
-    post({ action: "ask", body: text }, function(err, j){
-      cq.asking = false; cq.pending = "";
-      if (btn) btn.disabled = false;
-      if (err || !j) {
-        /* THE QUESTION GOES BACK IN THE BOX. Nothing was stored, so retyping it
-           would be the platform losing something it never told anybody it had
-           lost (§170's window, one control over). */
-        if (t) t.value = text;
-        cq.askErr = (err === "failed" || !err)
-          ? "That did not send. Try again."
-          : String(err.message || err);
-        drawPanel();
-        return;
-      }
-      cq.asks = j.rows || cq.asks || [];
-      /* REACHED IS NOT ANSWERED (§123, §124). A declined question is a row in
-         the history wearing the narrated line; a question the assistant was
-         never reached FOR has no row at all, and the office is the one person
-         who has to be told which of the two happened — nobody is coming to
-         answer it either way. */
-      cq.askErr = j.reached ? "" :
-        "The assistant could not be reached, so nothing was recorded. " +
-        "Settings \u203a Test the assistant says where it stopped.";
-      drawPanel();
-    });
-  }
-
   function firstWord(n){ return String(n || "").trim().split(/\s+/)[0] || ""; }
   /* THE FIRST LINE OF A MESSAGE, for a row that has one line to give it.
      `firstLine` is api/chat.js's — a SERVER helper — and using its name here
@@ -1751,7 +1516,6 @@ var CHAT = (function(){
        One composer, because a second would be a second set of every rule
        around it: the echo, the roll-back, the attach button, the growing
        box (§53.5). */
-    if (state.office && cq.side === "ask") { askSend(text); return; }
     if (state.office && cq.side === "wait" && cq.person) { cqSend(text); return; }
     sending = true; lastErr = "";
     var btn = el("chatsend"); if (btn) btn.disabled = true;
@@ -1882,14 +1646,9 @@ var CHAT = (function(){
         /* LEAVING THE QUEUE LEAVES THE CONVERSATION, or coming back would
            land in somebody else's thread with "My messages" lit. */
         if (cq.side !== "wait") { cq.person = null; cq.msgs = []; }
-        /* ASKED WHEN THE HALF IS OPENED, never on the poll: the poll runs on
-           every page in the platform every few seconds, and nobody has asked
-           it to carry a history somebody may never look at (§98). */
-        if (cq.side === "ask") askLoad();
-        /* THE PLACEHOLDER IS WRITTEN BY `drawPanelChrome`, which runs on the
-           line below and answers for all three errands in one place — it was
-           set here as well, and two writers for one word is how they drift
-           (§53.5). */
+        var box0 = el("chatsay");
+        if (box0) box0.placeholder = (cq.side === "wait" && cq.person)
+          ? box0.placeholder : "Write to the office\u2026";
         drawPanel();
         return;
       }
@@ -2131,16 +1890,6 @@ var CHAT = (function(){
     return /^The /.test(t) ? "the " + t.slice(4) : t;
   }
 
-  /* ── WHAT THE TEST CANNOT SEE (§298) ────────────────────────────────
-     True exactly when every link reported working — which is the state that
-     needs a sentence, because a step that FAILED already names the address to
-     go to and a second one beside it is noise. */
-  function testClean(steps){
-    return !!(steps && steps.length) && !steps.some(function(s){
-      return s.state === "fail" || s.state === "off";
-    });
-  }
-
   function testHtml(steps){
     /* WHERE IT STOPS IS THE ANSWER, so the failing row is the loud one and
        everything above it is quiet confirmation that the chain got that far. */
@@ -2271,31 +2020,6 @@ var CHAT = (function(){
             (BOXTEST.steps ? testHtml(BOXTEST.steps) : "") +
           '</div>') +
 
-        /* ── 4b · AND THE OFFICE'S OWN (§299). Its own switch, not a wider
-           reading of the one above: Islam asked for the two split, and the key
-           above already means *answer people before the office does* — every
-           tenant that turned it on chose exactly that, and reading it as "and
-           give the office an Ask box too" would switch a new capability on for
-           all of them unasked (§30.2 from the other side).
-
-           IT SITS UNDER Assistant AND ABOVE Test, because the two switches are
-           one subject — who the assistant answers — and the test below asks
-           the chain both of them use. */
-        /* NAMED FOR THE THING IT TURNS ON, in one word — `Ask` is what the
-           half of the corner is called, and §127's rule for this panel is one
-           or two words a reader scans rather than a sentence they parse. The
-           first draft read "Ask, for the office" and the check said so; who it
-           is for is the hover's first clause, where every other explanation in
-           this panel lives. */
-        setRow("ask", "Ask",
-          "Adds an Ask box beside Waiting in the office's own corner. It answers " +
-          "from the same knowledge base and starts nothing: no conversation, " +
-          "nothing waiting, no email \u2014 there is nobody to hand a question to " +
-          "here, because the office is who a question would be handed to. Every " +
-          "question the assistant is asked, by anybody, is listed on the " +
-          "Knowledge base page.",
-          segHtml("ask", "Off", "On", c.ask, true)) +
-
         /* ── 5 · TOLD WHILE THEY ARE HERE (§225). Islam, correcting my first
            framing of it: *"the notification is when the person is opening the
            tab already and email when he is not opening the platform — what is
@@ -2341,37 +2065,6 @@ var CHAT = (function(){
                 '<button class="editbtn" data-chpoptest="1">' +
                 (POPTEST.busy ? "Testing\u2026" : "Test on this device") + '</button>' +
                 (POPTEST.steps ? testHtml(POPTEST.steps) : "") +
-                /* ── AND IT SAYS WHAT IT CANNOT SEE (§298) ────────────────
-                   Islam, having fixed it himself: *"notificatoin is working
-                   after fixing it from systems settings, should this be an
-                   instructions for the people who are not having notifcations
-                   set from settings?"* — after reporting it silent in one
-                   browser and working in another on the same machine, which is
-                   what ruled the platform out.
-
-                   A BROWSER CANNOT READ THE COMPUTER'S OWN SETTING, so this
-                   diagnostic reports seven green steps while the box is being
-                   blocked one layer above it — §124 exactly: a status claiming
-                   more than the thing measuring it can see. The chain ends at
-                   "the device took it", and the last hop after that is
-                   somebody else's.
-
-                   ONLY OVER A CLEAN RESULT, and that is the whole placement:
-                   all green with nothing on screen is the one moment this is
-                   the answer, and beside a failing step it would compete with
-                   the row that actually names where it stopped (§123).
-
-                   NOT INSIDE `testHtml`. That builder is shared with the
-                   assistant's test, where an operating system has nothing to do
-                   with anything — one line added there would be the same
-                   sentence on two unrelated chains (§53.5, from the other
-                   side). */
-                (testClean(POPTEST.steps)
-                  ? '<p class="chtest-os">Nothing appeared? Your computer has a ' +
-                    "switch of its own too \u2014 on a Mac, System Settings " +
-                    "\u203a Notifications \u203a your browser. This test cannot " +
-                    "see that one.</p>"
-                  : "") +
               "</div>"
             : "")) +
 
@@ -3500,19 +3193,6 @@ var CHAT = (function(){
        `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
        caller draws nothing for a null and "nothing is waiting" for a 0, and
        those are different things to say (§108.10, §93). */
-    /* ── WHAT THE ASSISTANT WAS ASKED, FOR THE KNOWLEDGE BASE PAGE (§299) ──
-       A second READER of the endpoint the corner already calls, never a second
-       endpoint (§108.10's shape). `null` rather than an empty list on every
-       failure, including no server at all — the page draws nothing for a null
-       and "nothing has been asked" for an empty list, and those are different
-       things to say (§93, §231.4). */
-    questions: function(cb){
-      if (!servable()) return cb(null, null);
-      post({ action:"askQuestions" }, function(err, j){
-        if (err || !j) return cb(err || new Error("no answer"), null);
-        cb(null, { days: j.days | 0, rows: j.rows || [] });
-      });
-    },
     officeQueue: function(cb){
       if (!servable()) return cb(null, null);
       post({ action:"queue" }, function(err, j){

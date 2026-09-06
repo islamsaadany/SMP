@@ -319,7 +319,7 @@ with sync_playwright() as pw:
     ev(pg, """() => { const b = document.querySelector('[data-s=report]');
       if (b) b.click(); }""")
     pg.wait_for_timeout(700)
-    # §298 REWROTE THIS, IT DID NOT LOOSEN IT (§218). The answer is still
+    # §300 REWROTE THIS, IT DID NOT LOOSEN IT (§218). The answer is still
     # PICKED and never typed — that is what this assertion has always been
     # about — but a yes/no row has three answers now (Not started · In
     # progress · Done), so a check still demanding exactly `["", "Yes", "No"]`
@@ -348,7 +348,7 @@ with sync_playwright() as pw:
                 return { actual: t.outActual, score: tacticOutcomeScore(t) };
           }
           return null; }""")
-        # §298: the stored word is the platform's own (`Done`), and the
+        # §300: the stored word is the platform's own (`Done`), and the
         # point of the assertion is unchanged — the unit is never joined onto
         # an answer, so "DoneY/N" can never be written.
         ck("the answer is stored whole — 'Done', never 'DoneY/N'",
@@ -358,7 +358,7 @@ with sync_playwright() as pw:
         # §251.2, both from Islam using the running page.
         print("\n── 9 · it stands level with a number box, and it COUNTS")
         # §251.6 asserted the yes/no control was the same WIDTH as a number
-        # entry, which was right while it held `Yes` or `No`. §298 makes it a
+        # entry, which was right while it held `Yes` or `No`. §300 makes it a
         # status picker holding "Not started", so equal width would now mean a
         # clipped word — REWRITTEN rather than deleted (§218): what still has
         # to be true is that the rows line up (same HEIGHT) and that the

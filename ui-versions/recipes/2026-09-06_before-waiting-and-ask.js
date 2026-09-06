@@ -436,35 +436,6 @@ var RECIPES = [
        "under the plan's heading. Work that never reached the server leaves no line " +
        "here \u2014 the amber and red bars at the top of the page are what stand in " +
        "front of that." },
-  /* ── ASK, AND THE LIST IT FILLS (§299) ────────────────────────────
-     Both office-only, because both describe a control only the office can
-     reach — and §160 makes the corpus part of the change rather than
-     something written afterwards, since these are the words the assistant
-     will answer from as well as the words the page shows. */
-  { id: "office-ask", q: "Can I ask the assistant something myself?", who: "office",
-    a: "Yes, once it is switched on. Open the settings on <b>Setup \u203a Platform " +
-       "Inbox</b> and turn on <b>Ask</b>; the corner then carries " +
-       "two halves, <b>Waiting</b> and <b>Ask</b>.|Ask answers from the knowledge " +
-       "base \u2014 these same pages \u2014 and starts nothing: no conversation, " +
-       "nothing waiting on anybody, no email. There is nobody to hand a question to " +
-       "here, because the office is who a question would be handed to.|Your " +
-       "questions are kept, so an answer you found last week is still there, and " +
-       "everyone in the office can see them. Anything it cannot answer is added to " +
-       "<b>Questions asked</b>, on the Knowledge base page." },
-  { id: "questions-asked", q: "How do I see what people have been asking?", who: "office",
-    a: "Go to <b>Setup \u203a Knowledge base</b> and select the <b>Questions &amp; " +
-       "answers</b> tab. Every question the assistant has been asked is listed \u2014 " +
-       "by anybody, including the office \u2014 with how many times it has been " +
-       "asked, by how many people, and what the assistant said.|The ones it could " +
-       "not answer are marked, and <b>Add an answer</b> writes one straight into " +
-       "the knowledge base: pick the group, edit the wording if it needs it, and " +
-       "the answer is live at once. Whoever asks next gets it from the assistant " +
-       "rather than from you.|Answered questions stay on the list on purpose. A " +
-       "question answered correctly nine times is still telling you a screen is not " +
-       "clear.|Only questions the assistant actually read are listed. If it could " +
-       "not be reached at all \u2014 no key, or the service down \u2014 that is a " +
-       "different problem, and <b>Test the assistant</b> in the chat settings says " +
-       "where it stopped." },
   { id: "add-person", q: "How do I add somebody to the register?", who: "office",
     a: "Go to Setup › People and add them to the register. Make sure to include an " +
        "employee number or email as a unique identifier, since more than one " +

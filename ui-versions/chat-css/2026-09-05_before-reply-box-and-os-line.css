@@ -169,20 +169,6 @@ body.presenting .chatdock { display:none; }
 
 .chatfoot { border-top:1px solid var(--line); background:var(--surface); padding:9px 10px;
             display:flex; flex-direction:column; gap:8px; }
-/* A GUARD, AND IT IS A NO-OP HERE — SAID RATHER THAN IMPLIED (§298). The line
-   above sets `display:flex`, and an author declaration ordinarily outranks the
-   browser's own `[hidden]{display:none}` — so this looked load-bearing, and I
-   wrote it as though it were. MEASURED, IT IS NOT: with this rule taken out,
-   Chromium still computes `display:none` on the hidden foot, because its UA
-   sheet declares that one `!important`. The falsification run is what said so
-   (§298.2) — the check went green on the build without it.
-
-   It stays as one line of belt and braces, because the engines this product is
-   actually used in (Safari on a Mac, most of all) cannot be measured from here
-   and the ordinary cascade rule would favour `flex`. What is NOT claimed is
-   that it fixes anything today. The check asserts the PAINT rather than the
-   attribute either way, so an engine that ever stops hiding it goes red. */
-.chatfoot[hidden] { display:none; }
 .chcomp { display:flex; align-items:flex-end; gap:8px; }
 .chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;
                    background:var(--ground); color:var(--ink); padding:8px 10px;
@@ -497,15 +483,6 @@ body.presenting .chatdock { display:none; }
            font-size:var(--fs-note); cursor:pointer; }
 .chnew-x:hover { border-color:var(--ink-3); color:var(--ink); }
 
-/* ── THE ONE THING THE OFFICE IS TOLD THAT NOBODY ELSE IS (§299) ────────
-   Everybody else's screen stays silent when the assistant cannot be reached,
-   because a person is coming anyway (§112.2). On the Ask half nobody is
-   coming, so silence would be the feature failing invisibly (§123) — and this
-   is not an alarm: the questions are fine, the connection is not (§168,
-   §190, §231.4's own ground, whose colours these are). */
-.chsys.chaskbad { color:var(--ink); background:var(--warn-bg);
-                  border:1px solid var(--warn); text-align:left; max-width:92%; }
-
 .chnothing.chqfail { color:var(--ink); max-width:44ch;
                      background:var(--warn-bg); border:1px solid var(--warn);
                      border-radius:8px; padding:14px 16px; }
@@ -557,13 +534,6 @@ details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus)
    sentence in a 90px column is a column of single words. */
 .chtest-d { grid-column:1 / -1; color:var(--ink-3); line-height:1.5;
             word-break:break-word; }
-/* WHAT THE TEST CANNOT SEE (§298) — under a clean result, in the panel's own
-   quiet register, set apart by a rule rather than by a colour: this is not a
-   failure and must not read as one (§168), and there is nothing here for
-   anybody to fix on our side. */
-.chtest-os { margin:8px 0 0; padding-left:9px; border-left:2px solid var(--line);
-             font-size:var(--fs-micro); line-height:1.5; color:var(--ink-3); }
-
 .tdot { width:7px; height:7px; border-radius:50%; display:inline-block;
         background:var(--ink-3); position:relative; top:-1px; }
 .tdot.ok   { background:var(--good); }
@@ -597,23 +567,6 @@ details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus)
                 display: inline-flex; align-items: center; justify-content: center;
                 gap: 6px; }
 .cqseg button + button { box-shadow: inset 1px 0 0 var(--line); }
-/* ── WAITING TAKES TWO THIRDS (§299) ────────────────────────────────────
-   Islam, of the drawing: "the waiting should occupy maybe 2/3 of the panel
-   width as it's the common use and ask takes less space." The two halves are
-   not equally likely — Waiting is what the office opens the corner for and Ask
-   is the exception — so they are not the same size.
-
-   SCOPED TO THIS SWITCH AND NOTHING ELSE. Every other segmented control in the
-   product is two equal choices; this is the one where the two errands are not.
-   `Ask` is 26px of word in about 116px of half at the panel's width, so it
-   holds one line down to the 460px breakpoint, where the panel goes full width
-   and the third only grows. */
-.cqseg button:first-child { flex: 2 1 0; }
-/* AND NEITHER HALF WRAPS. A count badge makes one half taller than the other
-   the moment its label breaks, and a switch whose two halves are different
-   heights reads as a fault rather than as a choice — measured on the mockup
-   before it reached here. */
-.cqseg button { white-space: nowrap; }
 .cqseg button:hover { color: var(--gold-deep); }
 /* THE SEGMENT IS LIT, NOT THE WORD COLOURED — a filled container has nowhere
    for an accent word to sit, and lighting the segment is what a segmented

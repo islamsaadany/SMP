@@ -811,7 +811,7 @@ function deckSlidesFn(fk){
         var got = d ? (o.status === "done" ? "Delivered" : o.status === "wip" ? "In progress"
                        : o.status === "todo" ? "Not started" : "\u2014")
                     : (o.actual == null || o.actual === "" ? "\u2014"
-                       /* §298: a yes/no answer reads in words on the projector
+                       /* §300: a yes/no answer reads in words on the projector
                           too, so the room is never shown the stored spelling
                           of one ("In progress 60"). */
                        : esc(SMPRules.isYesNo(o.target) ? SMPRules.ynShown(o.actual)

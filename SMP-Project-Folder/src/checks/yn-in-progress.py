@@ -1,4 +1,4 @@
-"""A YES OR A NO THAT CAN BE UNDER WAY (§298).
+"""A YES OR A NO THAT CAN BE UNDER WAY (§300).
 
 Islam: *"sometimes we have a directly y/n situation like getting profitable so
 nothing to be in progress there but some y/n can take in the in progress like
@@ -45,7 +45,7 @@ WHAT IS ASSERTED, and why each one is here:
   · BOTH SIDES OF THE SWITCH (§53.5, A15): a capability function's reporting
     page draws the same pair, where it drew a free text box before.
 
-Proved able to fail (§94.5): against the build before §298 it goes red from
+Proved able to fail (§94.5): against the build before §300 it goes red from
 its first section. `SMP_BUILT` points it at another build.
 
 Run:  SMP_CHROME=/opt/pw-browsers/chromium python3 qa-run.py checks/yn-in-progress.py
@@ -332,4 +332,4 @@ with sync_playwright() as pw:
 
     b.close()
 
-print("\n" + ("  " + str(bad) + " FAILED" if bad else "  all §298 checks passed"))
+print("\n" + ("  " + str(bad) + " FAILED" if bad else "  all §300 checks passed"))

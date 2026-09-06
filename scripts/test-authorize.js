@@ -3164,8 +3164,8 @@ console.log("\n31 · a row's type is the office's to change (§292)");
         kinds.join(",") || "(nothing)");
 })();
 
-/* ══ 32 · A YES/NO ANSWER IS A REPORTED FIGURE (§298) ═══════════════════
-   §298 gives a yes/no row three answers — Not started, In progress with a
+/* ══ 32 · A YES/NO ANSWER IS A REPORTED FIGURE (§300) ═══════════════════
+   §300 gives a yes/no row three answers — Not started, In progress with a
    per-cent, Done — stored in the field the figure already lived in. The
    section's claim is that the SERVER needed nothing, and §172's lesson is
    that such a claim is measured or it is a hope: four layers agreed about a
@@ -3175,7 +3175,7 @@ console.log("\n31 · a row's type is the office's to change (§292)");
    change would refuse every report of one — the fault would look exactly like
    §234's, a refusal naming something the reporter never touched — and a build
    that classified it as nothing at all would let anybody write it. */
-console.log("\n32 · a yes/no answer is a reported figure (§298)");
+console.log("\n32 · a yes/no answer is a reported figure (§300)");
 (function () {
   const ukey = Object.keys(SEED.units || {}).find(function (k) {
     return (SEED.units[k].items || []).some(function (p) { return (p.tactics || []).length; });
@@ -3185,7 +3185,7 @@ console.log("\n32 · a yes/no answer is a reported figure (§298)");
     for (const p of (u.items || [])) if ((p.tactics || [])[0]) return p.tactics[0];
     return null;
   };
-  check("§298: the seed holds a tactic to answer", !!(ukey && pick(SEED)), ukey);
+  check("§300: the seed holds a tactic to answer", !!(ukey && pick(SEED)), ukey);
   if (!ukey || !pick(SEED)) return;
 
   /* The row is made yes/no in the STORED graph, because the target is the
@@ -3203,7 +3203,7 @@ console.log("\n32 · a yes/no answer is a reported figure (§298)");
   };
   ["In progress", "In progress 60", "Done", "Not started"].forEach(function (v) {
     const k = kindsOf(v);
-    check("§298: '" + v + "' classifies as reporting and nothing else",
+    check("§300: '" + v + "' classifies as reporting and nothing else",
           k.length > 0 && k.every(function (x) { return x === "unitReporting"; }),
           k.join(",") || "(nothing)");
   });
@@ -3215,10 +3215,10 @@ console.log("\n32 · a yes/no answer is a reported figure (§298)");
   const head = roles.head || roles.custodian;
   if (head && personOf(SEED, head)) {
     const v = A.authorize(base, answer("In progress 60"), personOf(base, head));
-    check("§298: whoever reports for the unit may answer one", v.ok,
+    check("§300: whoever reports for the unit may answer one", v.ok,
           (v.refusals || []).join(" / "));
   } else {
-    check("§298: a reporter to allow", false, "none in the seed");
+    check("§300: a reporter to allow", false, "none in the seed");
   }
 
   /* AND SOMEBODY WITH NO REPORTING GRANT MAY NOT. Without this the first half
@@ -3228,9 +3228,9 @@ console.log("\n32 · a yes/no answer is a reported figure (§298)");
   }) || (SEED.people || []).find(function (p) { return !p.role; });
   if (outsider) {
     const v = A.authorize(base, answer("Done"), personOf(base, outsider.key));
-    check("§298 REFUSED: somebody who does not report for it may not", !v.ok, "was ALLOWED");
+    check("§300 REFUSED: somebody who does not report for it may not", !v.ok, "was ALLOWED");
   } else {
-    check("§298: an outsider to refuse", false, "none in the seed");
+    check("§300: an outsider to refuse", false, "none in the seed");
   }
 })();
 

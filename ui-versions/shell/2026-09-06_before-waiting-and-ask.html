@@ -3372,19 +3372,6 @@
         var hit = capItemById(el.dataset.crep);
         if (!hit) return;
         var v = el.value.trim();
-        /* §300: the yes/no pair writes one field between them, exactly as it
-           does on a unit's page — one join, so the two sides of the switch
-           cannot store the answer differently (§53.5). A cleared answer is a
-           null here rather than a deleted key, because that is what this
-           handler has always written for an emptied box. */
-        if (el.dataset.ynpart) {
-          var was = SMPRules.ynState(hit.obj.actual);
-          var next = el.dataset.ynpart === "status"
-            ? SMPRules.ynJoin(v, v === "wip" ? was.pct : null)
-            : SMPRules.ynJoin(was.status || "wip", v);
-          hit.obj.actual = next === "" ? null : next;
-          paint(); return;
-        }
         if (v === "") { hit.obj.actual = null; }
         else if (hit.kind === "deliverable") { hit.obj.actual = Number(v); }
         else {
@@ -3808,40 +3795,6 @@
            it. Rejoin them before storing, or every screen downstream reads a
            revenue of "2.7" where it expects "2.7B EGP". */
         var unit = el.dataset.unit || "";
-        /* ── §300: A YES/NO ROW IS ANSWERED IN TWO HALVES ─────────────────
-           The picker and the per-cent box write ONE field between them, which
-           is why neither of them can simply store what it holds: the answer is
-           `Not started` / `In progress` / `In progress 60` / `Done`, joined by
-           the shared rule so the screen and the server read one spelling
-           (§42). Each half keeps the other's — picking In progress on a row
-           that already had a number keeps it, and typing a number on a row
-           that says nothing yet MEANS In progress.
-
-           LEAVING In progress CLEARS THE NUMBER, which is §104's own rule for
-           the milestone control this copies: a stale 35% behind `Done` is a
-           figure the score does not read and nobody can see, and it would come
-           back the moment somebody picked In progress again.
-
-           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. The
-           branch below sets `Done` from a score of 100 or more, which is right
-           for a figure against a target and wrong here: an outcome 60% through
-           a half-elapsed window scores 120, and reading that as Done would put
-           the word on a row whose own answer says In progress. */
-        if (el.dataset.ynpart) {
-          var ynFld = el.dataset.fld === "outActual" ? "outActual" : "actual";
-          var was = SMPRules.ynState(hit.obj[ynFld]);
-          var next = el.dataset.ynpart === "status"
-            ? SMPRules.ynJoin(v, v === "wip" ? was.pct : null)
-            : SMPRules.ynJoin(was.status || "wip", v);
-          if (next === "") delete hit.obj[ynFld]; else hit.obj[ynFld] = next;
-          if (ynFld === "outActual") {
-            var yst = SMPRules.ynState(hit.obj.outActual);
-            if (yst.status === "done") hit.obj.status = "Done";
-            else if (yst.status === "wip" && hit.obj.status !== "Blocked") hit.obj.status = "WIP";
-            else if (yst.status === "todo" || yst.status === "") hit.obj.status = "Not started";
-          }
-          paint(); return;   /* paint() ends in afterPaint() (§170) */
-        }
         /* ── §248: A TACTIC MEASURED BY ITS OUTCOME ───────────────────────
            The box says which field it is for. `outActual` is a figure in the
            outcome's OWN unit — stores, EGP, a per cent — so it is joined with
@@ -4527,81 +4480,6 @@
     });
     document.querySelectorAll("[data-kbadd]").forEach(function(b){
       b.addEventListener("click", function(){ kbAddNew(b.dataset.kbadd); paint(); });
-    });
-    /* ── QUESTIONS ASKED (§299) ─────────────────────────────────────
-       The filter hides nothing the office cannot get back in one press, so it
-       is state on the page and not a stored preference — reopening the page
-       shows everything, which is what somebody arriving to read it wants. */
-    document.querySelectorAll("[data-askfilter]").forEach(function(b){
-      b.addEventListener("click", function(){
-        ASKMISS = b.dataset.askfilter === "miss"; paint();
-      });
-    });
-    /* WRITING THE ANSWER IS MINTING A KNOWLEDGE BASE ENTRY, through the page's
-       OWN writers (§53.5) — `kbAddNew` and `kbSetAdded`, exactly what "+ Add a
-       question to this group" already calls — so an answer written here is
-       indistinguishable from one typed below, and everything downstream (the
-       page, the assistant's corpus, the questions file) needs nothing.
-
-       THE QUESTION COMES ACROSS EDITABLE AND EDITING IT CHANGES NOTHING ON THE
-       LIST. What somebody typed in a hurry is rarely how it should read in the
-       knowledge base, and the record of what was actually asked has to stay
-       honest — they are two different strings and this is the only place they
-       are ever the same one.
-
-       AND THE AUDIENCE DEFAULTS TO THE SIDE THAT ASKED (§161.1). Islam:
-       "sometimes the same question gets 2 different answers depending on their
-       role smo or user" — a distinction he deliberately left for later, which
-       is safe precisely because the entry carries it from the first day. */
-    /* AN ANSWER THAT ALREADY EXISTS IS OPENED, NEVER DUPLICATED (§299, §87).
-       The pen goes on and the page lands on the card, which is the same pair
-       the Add handler below does — the two differ in whether an entry has to
-       be minted first, and in nothing else. */
-    document.querySelectorAll("[data-askopen]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var id = b.dataset.askopen;
-        KBEDIT = true;
-        paint();
-        setTimeout(function(){
-          var card = document.querySelector('[data-kbq="' + id + '"]');
-          /* A SHIPPED ANSWER MAY HAVE NO CARD UNTIL THE PEN IS OPEN, and it
-             may have none at all if the corpus has moved on since the question
-             was asked — which is a real state, not a fault, so it says nothing
-             rather than throwing (§35). */
-          if (!card) return;
-          card.scrollIntoView({ block: "center" });
-          card.focus();
-        }, 0);
-      });
-    });
-    document.querySelectorAll("[data-askadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var qkey = b.dataset.askadd;
-        var row = ((ASKS && ASKS.rows) || []).filter(function(r){
-          return r.qkey === qkey; })[0];
-        if (!row) return;
-        var sel = b.parentNode && b.parentNode.querySelector(".askgrp");
-        var g = (sel && sel.value) || (RECIPES[0] && RECIPES[0].g);
-        if (!g) return;
-        var aud = row.office_only ? "office" : (row.by_office ? "everyone" : "others");
-        var id = kbAddNew(g);
-        kbSetAdded(id, row.question, "", aud);
-        /* THE PEN GOES ON, or the card that was just minted renders as a
-           read-only question with no answer under it — §61's trap, one press
-           after the control that created it. */
-        KBEDIT = true;
-        paint();
-        /* AND THE PAGE LANDS ON IT. The entry is in a group that may be a long
-           way down a long page, and a control that creates something out of
-           sight has done half its job (§90: a control below the fold does
-           nothing). Queued, because the paint above has to have happened. */
-        setTimeout(function(){
-          var box = document.querySelector('[data-kba="' + id + '"]');
-          if (!box) return;
-          box.scrollIntoView({ block: "center" });
-          box.focus();
-        }, 0);
-      });
     });
     document.querySelectorAll("input.blabel").forEach(function(inp){
       inp.addEventListener("change", function(){
@@ -6654,26 +6532,6 @@
            A column that cannot answer says so. */
         if (err) { PWSTATES = { __error: String(err.message || err) }; paint(); return; }
         PWSTATES = st;
-        paint();
-      });
-    }
-    /* ── WHAT THE ASSISTANT WAS ASKED (§299) ───────────────────────────
-       The same shape and the same moment as the password states: asked once
-       per visit to the page that shows it, gated on the page KEY rather than
-       on markup it happens to carry (§93, §137's fault, twice recorded), and
-       absent rather than empty from file://, where there is no server and
-       never was.
-
-       A REFUSAL IS SAID (§93, §231.4). `return` would leave this as an empty
-       list — "asked, and nobody has asked anything" — which over a real
-       history is the one thing this page must never say. */
-    if (ASKS === null && current === "setup" && currentSub === "kb" &&
-        typeof SYNC !== "undefined" && SYNC.isLive() && inOffice() &&
-        typeof CHAT !== "undefined" && CHAT.questions) {
-      ASKS = { asking: true };
-      CHAT.questions(function(err, j){
-        ASKS = (err || !j) ? { __error: String((err && err.message) || err || "no answer") }
-                           : { days: j.days, rows: j.rows };
         paint();
       });
     }

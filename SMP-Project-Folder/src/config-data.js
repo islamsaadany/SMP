@@ -4861,7 +4861,7 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
-  /* §298: a yes/no row is answered by one of the two ends, or by In progress
+  /* §300: a yes/no row is answered by one of the two ends, or by In progress
      WITH its per-cent — `"In progress"` on its own is a non-empty string and
      would otherwise have counted as a figure entered, which is §104.10's
      fault one column over: the tally would say the report was complete while
@@ -6035,7 +6035,7 @@ function measureScore(m, share){
      failure marks a unit down for a question nobody has been asked yet (§35,
      §104.10). The share is not consulted: there is no partial yes to prorate
      (§250 prorates a TARGET, and this row has no number to prorate). */
-  /* §298: AND THE SHARE IS CONSULTED AFTER ALL, for the middle answer alone.
+  /* §300: AND THE SHARE IS CONSULTED AFTER ALL, for the middle answer alone.
      §257 wrote "the share is not consulted: there is no partial yes to
      prorate", which was true while a yes/no row had only two answers. It has
      three now, and Islam's own case is the argument: an action running Q2 and
@@ -6177,7 +6177,7 @@ function tacticProgress(t){
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
 function measureDueLabel(m, share){
-  /* §298: A YES/NO ROW HAS A BENCHMARK NOW, and it is a per cent of its own
+  /* §300: A YES/NO ROW HAS A BENCHMARK NOW, and it is a per cent of its own
      window rather than a part of a target — there is no number in `Y/N` to
      take a share of, which is why `measureDue` still answers null for one.
      Absent share means the row names no window (a key measure, a key
@@ -6198,7 +6198,7 @@ function measureDueLabel(m, share){
   return joinTarget(String(m.target), String(Math.round(due * 100) / 100),
                     splitTarget(String(m.target)).unit || "");
 }
-/* ── WHAT IS PRINTED BESIDE A FIGURE (§298) ────────────────────────────────
+/* ── WHAT IS PRINTED BESIDE A FIGURE (§300) ────────────────────────────────
    `measureDueLabel` answers the PLAN's question — what is owed by now — and
    the reporting page asks it of every row, answered or not, because that is
    what a reporter needs to see before typing. Beside a FIGURE it is a

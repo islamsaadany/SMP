@@ -1378,6 +1378,20 @@
    "who": "office"
   },
   {
+   "id": "office-ask",
+   "group": "Strategy Office questions",
+   "q": "Can I ask the assistant something myself?",
+   "a": "Yes, once it is switched on. Open the settings on <b>Setup › Platform Inbox</b> and turn on <b>Ask</b>; the corner then carries two halves, <b>Waiting</b> and <b>Ask</b>.|Ask answers from the knowledge base — these same pages — and starts nothing: no conversation, nothing waiting on anybody, no email. There is nobody to hand a question to here, because the office is who a question would be handed to.|Your questions are kept, so an answer you found last week is still there, and everyone in the office can see them. Anything it cannot answer is added to <b>Questions asked</b>, on the Knowledge base page.",
+   "who": "office"
+  },
+  {
+   "id": "questions-asked",
+   "group": "Strategy Office questions",
+   "q": "How do I see what people have been asking?",
+   "a": "Go to <b>Setup › Knowledge base</b> and select the <b>Questions &amp; answers</b> tab. Every question the assistant has been asked is listed — by anybody, including the office — with how many times it has been asked, by how many people, and what the assistant said.|The ones it could not answer are marked, and <b>Add an answer</b> writes one straight into the knowledge base: pick the group, edit the wording if it needs it, and the answer is live at once. Whoever asks next gets it from the assistant rather than from you.|Answered questions stay on the list on purpose. A question answered correctly nine times is still telling you a screen is not clear.|Only questions the assistant actually read are listed. If it could not be reached at all — no key, or the service down — that is a different problem, and <b>Test the assistant</b> in the chat settings says where it stopped.",
+   "who": "office"
+  },
+  {
    "id": "add-person",
    "group": "Strategy Office questions",
    "q": "How do I add somebody to the register?",

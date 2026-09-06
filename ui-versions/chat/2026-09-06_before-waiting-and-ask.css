@@ -497,15 +497,6 @@ body.presenting .chatdock { display:none; }
            font-size:var(--fs-note); cursor:pointer; }
 .chnew-x:hover { border-color:var(--ink-3); color:var(--ink); }
 
-/* ── THE ONE THING THE OFFICE IS TOLD THAT NOBODY ELSE IS (§299) ────────
-   Everybody else's screen stays silent when the assistant cannot be reached,
-   because a person is coming anyway (§112.2). On the Ask half nobody is
-   coming, so silence would be the feature failing invisibly (§123) — and this
-   is not an alarm: the questions are fine, the connection is not (§168,
-   §190, §231.4's own ground, whose colours these are). */
-.chsys.chaskbad { color:var(--ink); background:var(--warn-bg);
-                  border:1px solid var(--warn); text-align:left; max-width:92%; }
-
 .chnothing.chqfail { color:var(--ink); max-width:44ch;
                      background:var(--warn-bg); border:1px solid var(--warn);
                      border-radius:8px; padding:14px 16px; }
@@ -597,23 +588,6 @@ details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus)
                 display: inline-flex; align-items: center; justify-content: center;
                 gap: 6px; }
 .cqseg button + button { box-shadow: inset 1px 0 0 var(--line); }
-/* ── WAITING TAKES TWO THIRDS (§299) ────────────────────────────────────
-   Islam, of the drawing: "the waiting should occupy maybe 2/3 of the panel
-   width as it's the common use and ask takes less space." The two halves are
-   not equally likely — Waiting is what the office opens the corner for and Ask
-   is the exception — so they are not the same size.
-
-   SCOPED TO THIS SWITCH AND NOTHING ELSE. Every other segmented control in the
-   product is two equal choices; this is the one where the two errands are not.
-   `Ask` is 26px of word in about 116px of half at the panel's width, so it
-   holds one line down to the 460px breakpoint, where the panel goes full width
-   and the third only grows. */
-.cqseg button:first-child { flex: 2 1 0; }
-/* AND NEITHER HALF WRAPS. A count badge makes one half taller than the other
-   the moment its label breaks, and a switch whose two halves are different
-   heights reads as a fault rather than as a choice — measured on the mockup
-   before it reached here. */
-.cqseg button { white-space: nowrap; }
 .cqseg button:hover { color: var(--gold-deep); }
 /* THE SEGMENT IS LIT, NOT THE WORD COLOURED — a filled container has nowhere
    for an accent word to sit, and lighting the segment is what a segmented

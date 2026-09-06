@@ -4861,12 +4861,6 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
-  /* §298: a yes/no row is answered by one of the two ends, or by In progress
-     WITH its per-cent — `"In progress"` on its own is a non-empty string and
-     would otherwise have counted as a figure entered, which is §104.10's
-     fault one column over: the tally would say the report was complete while
-     the row had not said how far. */
-  if (SMPRules.isYesNo(o.target)) return SMPRules.ynAnswered(o.actual);
   return o.actual != null && o.actual !== "";
 }
 function reportedCount(u){
@@ -6035,15 +6029,7 @@ function measureScore(m, share){
      failure marks a unit down for a question nobody has been asked yet (§35,
      §104.10). The share is not consulted: there is no partial yes to prorate
      (§250 prorates a TARGET, and this row has no number to prorate). */
-  /* §298: AND THE SHARE IS CONSULTED AFTER ALL, for the middle answer alone.
-     §257 wrote "the share is not consulted: there is no partial yes to
-     prorate", which was true while a yes/no row had only two answers. It has
-     three now, and Islam's own case is the argument: an action running Q2 and
-     Q3, reported at the end of Q2 at 60%, is 60 against the 50 its own window
-     owes — ahead, not behind. `ynScore` takes the share and uses it for the
-     partial only; Done is 100 whenever it arrives (his call) and Not started
-     is 0, so nothing any tenant already reported moves. */
-  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual, share);
+  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
   /* §278: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
      Before a monthly plan existed this guard only ever caught a target of
@@ -6177,14 +6163,6 @@ function tacticProgress(t){
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
 function measureDueLabel(m, share){
-  /* §298: A YES/NO ROW HAS A BENCHMARK NOW, and it is a per cent of its own
-     window rather than a part of a target — there is no number in `Y/N` to
-     take a share of, which is why `measureDue` still answers null for one.
-     Absent share means the row names no window (a key measure, a key
-     objective), and a benchmark nothing was measured against is not printed
-     at all rather than printed as nought (§35, §276). */
-  if (SMPRules.isYesNo(m.target))
-    return share == null || !(share > 0) ? null : Math.round(share * 100) + "%";
   var due = measureDue(m, share);
   if (due == null) return null;
   /* §276: a count with nothing owed yet says so in words (`nothingDueYet`),
@@ -6197,21 +6175,6 @@ function measureDueLabel(m, share){
      together (§53.5). */
   return joinTarget(String(m.target), String(Math.round(due * 100) / 100),
                     splitTarget(String(m.target)).unit || "");
-}
-/* ── WHAT IS PRINTED BESIDE A FIGURE (§298) ────────────────────────────────
-   `measureDueLabel` answers the PLAN's question — what is owed by now — and
-   the reporting page asks it of every row, answered or not, because that is
-   what a reporter needs to see before typing. Beside a FIGURE it is a
-   comparison, and a comparison only reads as one where both halves are of the
-   same kind: "In progress · 60% / 50%" is a sentence and "Done / 50%" is not.
-
-   So a yes/no row prints its benchmark beside the partial and nowhere else.
-   One reader, asked by the measures table and by a tactic's row, or the two
-   would disagree about one cell (§53.5). */
-function benchBeside(m, share){
-  if (m && SMPRules.isYesNo(m.target) &&
-      SMPRules.ynState(m.actual).status !== "wip") return null;
-  return measureDueLabel(m, share);
 }
 /* HOW FAR THROUGH THIS TACTIC'S OWN WINDOW WE ARE, as an exact fraction.
    `elapsedShare()` answers the same question of the YEAR; this answers it of

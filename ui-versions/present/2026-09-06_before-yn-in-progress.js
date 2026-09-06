@@ -810,12 +810,7 @@ function deckSlidesFn(fk){
         var reads = d ? statusReads(o) : o.progress;
         var got = d ? (o.status === "done" ? "Delivered" : o.status === "wip" ? "In progress"
                        : o.status === "todo" ? "Not started" : "\u2014")
-                    : (o.actual == null || o.actual === "" ? "\u2014"
-                       /* §298: a yes/no answer reads in words on the projector
-                          too, so the room is never shown the stored spelling
-                          of one ("In progress 60"). */
-                       : esc(SMPRules.isYesNo(o.target) ? SMPRules.ynShown(o.actual)
-                                                        : String(o.actual)));
+                    : (o.actual == null || o.actual === "" ? "\u2014" : esc(String(o.actual)));
         var notDue = !dueThisCycle(dxWhen(row));
         return '<tr' + (notDue ? ' class="dim"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(o.name) + '</td>' +

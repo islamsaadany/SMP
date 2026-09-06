@@ -533,6 +533,50 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **RECORDED, NOT DONE**: the rail is not scrolled to the slide the deck was left
   on (the selection is the person's), and Shape B is left on the table rather
   than dismissed.
+- **A YES OR A NO THAT CAN BE UNDER WAY (§298):** Islam, asking rather than
+  reporting — *"some y/n can take in the in progress like an agrement we are
+  working on ... shall we add a third cateogry?"* **THE PRODUCT HAD ANSWERED IT
+  ONCE ALREADY, ONE COLUMN OVER**: §104 deleted a deliverable's plan-time
+  `kind` because Not started / In progress with a per-cent / Delivered serves
+  both, and a row that is genuinely done-or-not never touches the middle. So
+  one kind of Y/N row, the plan unchanged, and the REPORTING control gains the
+  middle answer (his C of three). **THE PARTIAL IS PRORATED AND MY FIRST ANSWER
+  WAS WRONG** — Islam: *"a progress of 60% in Q2 while the action reuqire Q2 &
+  3 ... that's 60% against due of 50%."* A tactic STATES its window in its
+  quarters (`tacticShare`, already handed to the scorer since §250), so there is
+  no glide path to invent and 60 at half a window is **120, ahead**; a key
+  measure names no window, so there the partial reads as ITSELF rather than
+  against a straight line to December (§239's own refusal for `Latest` and
+  `Average`). **DONE DOES NOT PRORATE**, his call with the cost stated —
+  *"delivering early of an action doesn't indicate a higher % of achievement"* —
+  so finishing lowers the number on a row that was ahead. **AN IN PROGRESS WITH
+  NO PER-CENT IS NOT AN ANSWER** (§104.10): not counted, marked *Needs a %*, and
+  Submit waits for it. **THE THREE WORDS ARE THE PRODUCT'S OWN** — I offered
+  *No* or *Not yet* as though it were open and he answered *"there is no not yet
+  answer. it's either Done, In progress, Didn't Start"*, which is what a
+  tactic's Status column has said since the model was written, one cell to the
+  left (§87). **TWO BOXES, NOT ONE** — *"we used ot have them 2 stached boxes"* —
+  §104's picker and its separate per-cent box, through **`ynBoxes()` on both
+  sides of the switch** (§53.5, A15: a capability function's page had never
+  known about a yes/no row and drew a free text box). **ONE FIELD, BECAUSE THE
+  ROW HAS ONE**: a milestone has `status` and `pct`, a measure has `actual`, so
+  the answer is stored whole (`In progress 60`) with `ynState`/`ynJoin` the one
+  reader and writer — **no migration, no schema change, no workbook column**,
+  and a tenant's stored `Yes`/`No` go on scoring 100 and 0 while being READ in
+  the new words (§96.2). **THE TARGET KEEPS `Y/N`**, also his, after *Delivery*,
+  *Completion*, *Stage*, *Achievement* and *Done / Not done* were weighed:
+  nothing is renamed and no downloaded workbook gains a second spelling, at the
+  cost of the picker's word and the reporter's words being one step apart.
+  **The server needed nothing and it is asserted** (§172): all four spellings
+  classify as `unitReporting` and nothing else, allowed for a reporter and
+  refused for somebody else — 534/0. **30 red** on the build before, and **one
+  of the check's own first failures was the CHECK** (it made two rows yes/no and
+  read a third, §100.3); two assertions in `yn-target.py` REWRITTEN, never
+  deleted (§218), including §251.6's equal-WIDTH rule, which would now mean a
+  picker that cannot show *Not started*. **RECORDED, NOT DONE**: the progress
+  workbook still carries no column for a tactic's outcome (§250.2), and
+  `checks/tactic-outcome.py` is red on `main` with 13 assertions, reproduced
+  identically before this change.
 - **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§292):** Islam — *"on a
   creation of a project I couldn't set the direction and we need to make the add
   deliverable or outcome more of an options in the type rather than 2 buttons of
@@ -6326,6 +6370,17 @@ python3 checks/project-row-type.py # a project row's type is a picker and its
                                 # 13 red on the build before, and every probe degrades
                                 # rather than dying (§215). SMP_BUILT points it at
                                 # another build
+python3 checks/yn-in-progress.py  # a yes or a no that can be under way (§298): the
+                                # three answers are the product's own words, the control
+                                # is TWO boxes (a build that merged them passes every
+                                # "you can say 60%" assertion and is the drawing Islam
+                                # sent back), the partial asserted as AGREEMENT with
+                                # tacticShare rather than as a literal, Done asserted NOT
+                                # to prorate at both ends, an In progress with no per-cent
+                                # neither counted nor scored, `Yes`/`No` still 100 and 0,
+                                # and the same pair on a capability function's page. It
+                                # MAKES its state — no row in the demo is yes/no — 30 red
+                                # on the build before; SMP_BUILT points it at another build
 python3 checks/report-blockers.py # the reporting page says WHERE Submit is held
                                 # (§279): the bar's chips asserted as AGREEMENT with
                                 # reportPlaces() and never as a list, both ends every
@@ -7044,7 +7099,35 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;297: the keyboard belongs to the
+*Last Updated: 2026-09-06 &mdash; **&sect;298: a yes or a no that can be under
+way.** Islam, asking rather than reporting: *"sometimes we have a directly y/n
+situation like getting profitable so nothing to be in progress there but some
+y/n can take in the in progress like an agrement we are working on."* **THE
+PRODUCT HAD ALREADY ANSWERED THIS ONCE, ONE COLUMN OVER** &mdash; &sect;104
+deleted a deliverable's plan-time `kind` because Not started / In progress with
+a per-cent / Delivered serves both kinds of row, and one that is genuinely
+done-or-not simply never touches the middle. So: one kind of Y/N row, the plan
+untouched, and the reporting control gains the middle answer. **HE CORRECTED ME
+TWICE AND BOTH TIMES THE PRODUCT WAS ALREADY RIGHT**: the words are *Not started
+&middot; In progress &middot; Done*, which is what a tactic's own Status column
+has said since the model was written (I had offered *No* or *Not yet* as though
+it were an open question), and the control is TWO boxes &mdash; a picker and a
+separate per-cent box &mdash; which is &sect;104's own pair, where my drawing had
+invented a compound field. **AND HE CORRECTED THE ARITHMETIC**: *"a progress of
+60% in Q2 while the action reuqire Q2 & 3 doesn't score 60% that's 60% against
+due of 50%."* Right &mdash; a tactic STATES its window in its quarters, so there
+is no glide path for the platform to invent and the partial is prorated against
+that window (120, ahead); my objection only ever held for a row that names no
+window, where it now reads as itself. **Done does not prorate, his call with the
+cost stated** (finishing lowers the number on a row that was ahead), an In
+progress with no per-cent is not an answer, and **nothing stored moves**: one
+field, the answer written whole, `Yes` and `No` still 100 and 0 and read in the
+new words. **The target keeps `Y/N`**, his choice after five alternatives were
+weighed. Server asserted rather than claimed (534/0, 131/0); **30 red** on the
+build before; two assertions rewritten, never deleted (&sect;218); one of the
+check's own failures was the check. **On the branch, not merged.***
+
+*Earlier: 2026-09-05 &mdash; **&sect;297: the keyboard belongs to the
 presentation.** Islam, presenting with a clip on a slide: *"when I'm playing the
 video the right and elft arrows are editing the video forward and backward &hellip;
 the forward and backward of the video stream should be done by clicing on the

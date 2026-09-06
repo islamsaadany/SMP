@@ -234,6 +234,47 @@ because the built file's bytes changed.
 
 ---
 
+## In flight — §298, a yes or a no that can be under way
+
+**On `claude/tactic-progress-reporting-re26th-i7778w`, built and not merged.**
+
+Islam asked whether a Y/N row that can be part-way — an agreement under
+negotiation — needs a third category beside the strictly binary one. It does
+not: §104 already deleted a deliverable's plan-time `kind` for the same reason,
+so the plan keeps one Y/N row and the REPORTING control gains the middle answer.
+
+- **Reporting** draws §104's own pair — a picker (*Not started · In progress ·
+  Done*, the tactic's own Status words) and, only while In progress, a separate
+  per-cent box stacked under it. `ynBoxes()`, one builder, on a unit's page and
+  on a capability function's, which had never known about a yes/no row at all.
+- **Performance** prorates the partial against the row's own window
+  (`tacticShare`): 60% at half a Q2–Q3 window reads **120%**. A row that names
+  no window reads as itself. **Done is 100 whenever it arrives** — Islam's call,
+  with the cost stated: finishing lowers the number on a row that was ahead.
+- **An In progress with no per-cent is not an answer** — not counted, marked
+  *Needs a %*, and Submit waits for it.
+- **Nothing stored moves.** One field, the answer written whole (`In progress
+  60`); a tenant's `Yes` and `No` still score 100 and 0 and are read in the new
+  words. No migration, no schema change, no workbook column. The target keeps
+  `Y/N`, his choice after five alternatives were weighed.
+
+Verified: `checks/yn-in-progress.py` **33 red** on the build before and green
+after (its clipping assertion proved able to fail by narrowing the control);
+`yn-target` rewritten in two places (§218) and green; `ytd-proration`,
+`deck-outcome`, `measure-score-spread`, `submit-gate`, `tactic-proration`,
+`count-compile`, `monthly-plan`, `fn-report-gate`, `gap-fill`,
+`empty-not-missing`, `objectives-table` green; **534/0** on the authoriser with
+a new section asserting the answer classifies as reporting and nothing else,
+both ends; **131/0** on the differ; full `qa.py` sweep ERRORS none.
+
+**Recorded, not done:** the progress workbook carries no column for a tactic's
+outcome figure at all (§250.2), so a yes/no answer on a tactic does not
+round-trip through the file; and `checks/tactic-outcome.py` is red on `main`
+with 13 assertions in its plan-pen section, reproduced identically on the build
+before this change and left alone.
+
+---
+
 ## Waiting on Islam
 
 Nothing proceeds past this line without an answer.

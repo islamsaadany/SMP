@@ -319,14 +319,22 @@ with sync_playwright() as pw:
     ev(pg, """() => { const b = document.querySelector('[data-s=report]');
       if (b) b.click(); }""")
     pg.wait_for_timeout(700)
+    # §298 REWROTE THIS, IT DID NOT LOOSEN IT (§218). The answer is still
+    # PICKED and never typed — that is what this assertion has always been
+    # about — but a yes/no row has three answers now (Not started · In
+    # progress · Done), so a check still demanding exactly `["", "Yes", "No"]`
+    # would be asserting a control the product deliberately replaced.
     rep = ev(pg, """() => {
-      const s = document.querySelector('select.ynfield');
+      const s = document.querySelector('select[data-ynpart=status]');
       if (!s) return { none: true };
       const opts = [...s.options].map(o => o.value);
-      s.value = 'Yes'; s.dispatchEvent(new Event('change', {bubbles:true}));
-      return { opts: opts, ok: true }; }""")
-    ck("the reporting page asks for a yes or a no, picked not typed",
-       not rep.get("none") and rep.get("opts") == ["", "Yes", "No"], rep)
+      const typed = document.querySelector(
+        'input[data-rep="' + s.dataset.rep + '"]:not([data-ynpart])');
+      s.value = 'done'; s.dispatchEvent(new Event('change', {bubbles:true}));
+      return { opts: opts, typed: !!typed, ok: true }; }""")
+    ck("the reporting page asks for the answer, picked not typed",
+       not rep.get("none") and rep.get("opts") == ["", "todo", "wip", "done"] and
+       rep.get("typed") is False, rep)
     if not rep.get("none"):
         pg.wait_for_timeout(400)
         got = ev(pg, """() => {
@@ -340,17 +348,23 @@ with sync_playwright() as pw:
                 return { actual: t.outActual, score: tacticOutcomeScore(t) };
           }
           return null; }""")
-        ck("the answer is stored whole — 'Yes', never 'YesY/N'",
-           got and got["actual"] == "Yes", got)
+        # §298: the stored word is the platform's own (`Done`), and the
+        # point of the assertion is unchanged — the unit is never joined onto
+        # an answer, so "DoneY/N" can never be written.
+        ck("the answer is stored whole — 'Done', never 'DoneY/N'",
+           got and got["actual"] == "Done", got)
         ck("...and it scores 100", got and got["score"] == 100, got)
 
         # §251.2, both from Islam using the running page.
-        print("\n── 9 · it is the same size as a number box, and it COUNTS")
-        # THE WIDTH: `.entry .field` is 78px because a number gives 26px back
-        # to the unit suffix beside it. This control has no suffix, so it
-        # rendered short in a column an eye runs down.
+        print("\n── 9 · it stands level with a number box, and it COUNTS")
+        # §251.6 asserted the yes/no control was the same WIDTH as a number
+        # entry, which was right while it held `Yes` or `No`. §298 makes it a
+        # status picker holding "Not started", so equal width would now mean a
+        # clipped word — REWRITTEN rather than deleted (§218): what still has
+        # to be true is that the rows line up (same HEIGHT) and that the
+        # control shows its own longest answer.
         w = ev(pg, """() => {
-          const yn  = document.querySelector('select.ynfield');
+          const yn  = document.querySelector('select[data-ynpart=status]');
           /* AGAINST A `%` ENTRY, deliberately. An entry's width follows its
              unit chip — `B EGP` is legitimately wider than `%` — so
              comparing against whichever happened to come first is what made
@@ -359,18 +373,36 @@ with sync_playwright() as pw:
                         .filter(e => e.querySelector('input.field'));
           const num = all.find(e => (e.querySelector('.unitsuf')||{}).textContent === '%')
                       || all[0];
-          const box = yn ? (yn.closest('.entry') || yn) : null;
           const r = e => { const b = e.getBoundingClientRect();
             return [Math.round(b.width), Math.round(b.height)]; };
-          return { yn: box ? r(box) : null, num: num ? r(num) : null,
+          return { yn: yn ? r(yn) : null, num: num ? r(num) : null,
+                   /* MEASURED IN THE FONT, NOT OFF `scrollWidth` — a
+                      <select> does not report its options that way, so the
+                      first version of this assertion went green on a build
+                      whose control read "Not starte" (§100.3, in the check).
+                      The canvas measures the longest word the picker offers
+                      and compares it with the room the control actually has. */
+                   clipped: (() => {
+                     if (!yn) return null;
+                     const cs = getComputedStyle(yn);
+                     const c = document.createElement('canvas').getContext('2d');
+                     c.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+                     const wide = Math.max(...[...yn.options]
+                       .map(o => c.measureText(o.textContent).width));
+                     /* the arrow and the padding are the control's own, and
+                        neither is available to the word. */
+                     const room = yn.clientWidth -
+                       parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+                     return wide > room + 1;
+                   })(),
                    rail: [...document.querySelectorAll('.rail .rtally')].map(e=>e.textContent),
                    band: (document.querySelector('.pane .rtally')||{}).textContent }; }""")
         ck("both shapes are present to compare",
            w["yn"] and w["num"], w)
         # ASSERTED AS AGREEMENT, never as a number — a later change to the
         # reporting box must move both or fail here (§94.8, §122.5).
-        ck("the yes/no picker is the same width as a % number entry",
-           w["yn"] and w["num"] and abs(w["yn"][0] - w["num"][0]) <= 2, w)
+        ck("the picker shows its own longest answer, unclipped",
+           w["clipped"] is False, w)
         # HEIGHT TOO, and it is the half that was actually wrong: `input.field`
         # is ELEMENT-scoped, so the <select> received none of its box and stood
         # 19px against 34. Measuring one dimension and calling it level is how

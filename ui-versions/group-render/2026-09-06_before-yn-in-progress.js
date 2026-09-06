@@ -747,9 +747,6 @@ function outcomeCell(t){
 function outcomeShown(t){
   var o = outcomeOf(t);
   if (!o || o.actual == null || o.actual === "") return null;
-  /* §298: TEXT, not html — the caller escapes — and never joined with a unit,
-     because `Y/N` is the unit and "Done Y/N" is not an answer anybody gave. */
-  if (SMPRules.isYesNo(o.target)) return SMPRules.ynShown(o.actual);
   return joinTarget("", String(o.actual), splitTarget(o.target).unit) || String(o.actual);
 }
 /* The target as it is written on the plan — the whole year's number, unit and
@@ -776,11 +773,6 @@ function tacticRows(ts, unitKey){
     /* §252: the ternary that used to sit here is `tacticProgress()` now --
        it was the only copy in the product and the deck needed it too. */
     var oc = onOutcome(t), bench = tacticBenchmark(t);
-    /* §298: beside a figure the benchmark is a comparison — "Done / 50%" is
-       not one — so a yes/no row shows it only against a partial. The
-       not-reported line below keeps `bench`, where it is telling somebody
-       what is still owed rather than comparing anything. */
-    var benchPair = oc && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
     var status = t.status === "Done" ? '<span class="pill good">Done</span>'
@@ -797,7 +789,7 @@ function tacticRows(ts, unitKey){
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
         (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'
       : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-        (benchPair ? ' <i>/ ' + esc(benchPair) + '</i>' : '') + '</span></td>' +
+        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
       /* §252: `tacticAnswered`, or a row answered through its outcome is
@@ -4828,18 +4820,21 @@ function renderReport(u){
        server, so neither is offered here. */
     if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
-      /* §298: a yes/no figure is READ through `ynShown`, so a row holding a
-         tenant's old `Yes` reads in the words the control now offers without
-         anything stored being rewritten. */
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
-        (has ? esc(ynRow ? SMPRules.ynShown(cur) : unitTight(cur) + ((isT && !oc) ? "%" : ""))
-             : "\u2014") + '</span>' +
+        (has ? esc(unitTight(cur)) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
-    /* §298: the status picker and its per-cent box, which are §104's own pair
-       (`ynBoxes`) rather than a control of this table's — Islam: *"for the
-       inprogress and the % we used ot have them 2 stached boxes not one"*. */
-    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld);
+    /* THE UNIT IS NOT SENT WITH A YES OR A NO. `data-unit` is what the save
+       handler rejoins onto a typed figure, and joining here would store
+       "YesY/N" — so it is empty and the word is stored whole. */
+    if (ynRow)
+      return '<span class="entry' + (has ? " filled" : "") + '">' +
+        '<select class="field ynfield" data-rep="' + x.id + '" data-fld="' + fld +
+        '" data-unit="" aria-label="Report ' + esc(x.obj.name) + '">' +
+        ["", "Yes", "No"].map(function(o){
+          return '<option value="' + esc(o) + '"' + (shown === o ? " selected" : "") +
+                 '>' + (o || "\u2014") + '</option>';
+        }).join("") + '</select></span>';
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
@@ -4937,13 +4932,8 @@ function renderReport(u){
               '<td class="idx">' + (i+1) + '</td>' +
               nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
               '<td>' + qs(x.obj) + '</td>' +
-              /* §298: a yes/no row's benchmark is a per cent of its own window,
-                 and the whole it is a part of is the word "Yes / No" — "50% of
-                 Yes / No" is not a sentence anybody reads, so the second line
-                 is for a row whose target is a NUMBER. */
               '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
-                (whole && whole !== bench && !SMPRules.isYesNo(x.obj.outTarget)
-                  ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
+                (whole && whole !== bench ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
                 '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
@@ -6231,16 +6221,6 @@ function renderFnProjects(fnKey){
 function capEntryBox(x, unit, may, label){
   var cur = x.actual, has = cur != null && cur !== "";
   var shown = !has ? "" : (unit === "%" ? String(cur) : (splitTarget(String(cur)).value || String(cur)));
-  /* ── AND THE OTHER SIDE OF THE SWITCH ASKS THE SAME WAY (§298, A15) ──────
-     A capability function's key objectives take the unit picker a unit's do
-     (§226), so a yes/no row is reachable here — and this box has never known
-     about one: it drew a free text field, where a reporter could type "done",
-     "y" or "TRUE" and only some of those score. It is `ynBoxes()`, the same
-     builder the unit's pane uses, so the two halves of one product cannot be
-     fine differently (§53.5). */
-  if (SMPRules.isYesNo(x.target))
-    return may ? ynBoxes(x.id, "crep", x.actual, label)
-               : '<span class="mono">' + (has ? esc(SMPRules.ynShown(cur)) : "\u2014") + '</span>';
   if (!may) return '<span class="mono">' + (has ? esc(String(cur)) : "\u2014") + '</span>';
   return '<span class="entry' + (has ? " filled" : "") + '">' +
     '<input class="field" data-crep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
@@ -6251,43 +6231,6 @@ function capEntryBox(x, unit, may, label){
    capEntryBox's, because that one writes `actual` -- the outcome's figure --
    and this writes `pct`. One box, two meanings, would be exactly the fault
    this whole section removed from the tables. */
-/* ── THE YES/NO PAIR, ONE BUILDER (§298) ──────────────────────────────────
-   A status picker, and a per-cent box drawn only while the answer is In
-   progress — §104's own control, which is what Islam was pointing at: *"for
-   the inprogress and the % we used ot have them 2 stached boxes not one as
-   you showed"*. Both write the SAME field through the shared join, so the
-   answer is stored whole (`Not started` / `In progress 60` / `Done`).
-
-   ONE BUILDER FOR BOTH SIDES OF THE SWITCH (§53.5, A15): `hook` is `rep` on a
-   unit's or a pillars function's reporting page and `crep` on a capability
-   function's, which is the only thing that differs between them. `fld` is the
-   unit side's `actual` / `outActual`; the capability side has one field and
-   passes nothing.
-
-   THE UNIT IS NOT SENT WITH EITHER HALF — `data-unit` is what the save handler
-   rejoins onto a typed figure, and joining here would store "DoneY/N".
-
-   AND THE NUMBER IS ASKED FOR WHERE IT IS OWED: an In progress with no
-   per-cent is not an answer (§104.10), so the box carries `needsPct()`, the
-   same mark the projects page puts on a milestone in that state. */
-function ynBoxes(id, hook, cur, label, fld){
-  var st = SMPRules.ynState(cur), keys = ["todo", "wip", "done"];
-  var at = ' data-' + hook + '="' + esc(id) + '"' +
-    (fld ? ' data-fld="' + esc(fld) + '"' : '') + ' data-unit=""';
-  var pick = '<select class="fld selbox ynpick"' + at +
-    ' data-ynpart="status" aria-label="Report ' + esc(label) + '">' +
-    [["", "\u2014"]].concat(SMPRules.YN_WORDS.map(function(w, i){ return [keys[i], w]; }))
-      .map(function(o){
-        return '<option value="' + esc(o[0]) + '"' + (st.status === o[0] ? " selected" : "") +
-               '>' + esc(o[1]) + '</option>';
-      }).join("") + '</select>';
-  if (st.status !== "wip") return pick;
-  return pick + '<span class="entry ynpct' + (st.pct == null ? "" : " filled") + '">' +
-    '<input class="field"' + at + ' data-ynpart="pct" value="' +
-    esc(st.pct == null ? "" : String(st.pct)) +
-    '" placeholder="\u2014" aria-label="Per cent complete for ' + esc(label) + '">' +
-    '<span class="unitsuf">%</span></span>' + (st.pct == null ? needsPct() : "");
-}
 function capPctBox(x, may, label){
   var has = x.pct != null && x.pct !== "";
   if (!may) return '<span class="mono">' + (has ? esc(String(x.pct)) + "%" : "\u2014") + '</span>';
@@ -7405,15 +7348,11 @@ function tgtShown(v){
    worked out here — and the shape is the one the tactics table has worn since
    §252, so the deck gains no new vocabulary. */
 function figVsDue(m, share){
-  var due = benchBeside(m, share);   /* §298 */
+  var due = measureDueLabel(m, share);
   return figShown(m) + (due ? ' <i class="duehalf">/ ' + tgtShown(due) + '</i>' : '');
 }
 
 function figShown(m){
-  /* §298: a yes/no figure is a word (and, In progress, a word and a number),
-     so it is never scaled, tightened or given a magnitude hover — those are
-     for a figure with a unit on the end of it. One reader, `ynShown`. */
-  if (SMPRules.isYesNo(m.target)) return esc(SMPRules.ynShown(m.actual));
   var s = unitTight(figureScaled(m.target, m.actual)), full = figureFull(m.target, m.actual);
   return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
 }

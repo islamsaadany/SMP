@@ -36210,3 +36210,118 @@ on it. Each surface clears the last one's.
 nothing stored, nothing migrated, no server file touched. §261.11's sandbox and
 referrer policy and the file player's `controls` are asserted UNCHANGED, because
 a fix that quietly dropped either would satisfy every other assertion here.
+
+---
+
+## §298 — A YES OR A NO THAT CAN BE UNDER WAY (2026-09-06)
+
+**Islam, asking rather than reporting:** *"sometimes we have a directly y/n
+situation like getting profitable so nothing to be in progress there but some
+y/n can take in the in progress like an agrement we are working on. so should
+we keep the y/n to the direct y/n and the anything that can be in progress to
+be with the % or shall we add a third cateogry?"*
+
+**THE PRODUCT HAD ALREADY ANSWERED THIS ONCE, ONE COLUMN OVER, AND THAT IS THE
+WHOLE OF THE RECOMMENDATION.** §104 deleted a deliverable's `kind` — the plan's
+old choice between *delivered or not* and *a percentage* — because **Not started
+/ In progress with a per-cent / Delivered** serves both, and a row that is
+genuinely done-or-not simply never touches the middle answer. The same question
+on a measure gets the same answer: **one kind of Y/N row, and the REPORTING
+control gains the middle answer** (his C of three). A third category in the plan
+was refused with its cost named — it puts the decision at the one moment nobody
+knows whether the agreement is a two-week signature or an eight-month
+negotiation, and it makes two yes/no shapes that read identically and score
+differently. Planning it as a `%` row was refused too: the row would stop being
+a yes/no question, needing a direction and a compile rule, and *"80% of an
+agreement"* would read as an achievement of 80 rather than as *not signed*.
+
+**AND MY FIRST ANSWER ABOUT PRORATION WAS WRONG, AND HE CORRECTED IT:** *"a
+progress of 60% in Q2 while the action reuqire Q2 & 3 doesn't score 60% that's
+60% against due of 50% it's not fair to report it non prorated."* Right. I had
+generalised from the case that has no window — a key measure names no quarters,
+so prorating it invents a straight line to December and marks a December
+commitment behind all year, which is §239's own reason for refusing to prorate
+`Latest` and `Average`. **A TACTIC STATES ITS WINDOW IN ITS QUARTERS**, and
+`tacticShare` has computed exactly that fraction since §250 and is already
+handed to the scorer; the yes/no branch simply returned before it looked at it.
+So: **prorate wherever the plan states a window, read as itself where it does
+not** — 60% of a half-elapsed Q2–Q3 window is **120%, ahead**.
+
+**DONE DOES NOT PRORATE, AND IT IS HIS CALL WITH THE COST STATED:** *"yes
+delivers the 100% and that's it. delivering early of an action doesn't indicate
+a higher % of achievement."* The cost, put to him before he took it, is that a
+row at 60% of a half-elapsed window reads 120 and the same row, finished, reads
+100 — **finishing lowers the number on a row that was ahead** — which is the
+price of a yes meaning one thing whenever it arrives. Not started is 0, silence
+is **not scored** (§35), and an **In progress with no per-cent is not an
+answer** (§104.10's own rule): it is not counted, the box says *Needs a %*, and
+Submit waits for it.
+
+**THE THREE WORDS ARE THE PRODUCT'S, NOT A NEW SET.** The first drawing offered
+*Not yet* and asked him to choose between it and *No*; he answered *"there is no
+not yet answer. it's either Done, In progress, Didn't Start"* — and **a tactic's
+own Status column has said Not started and Done since the model was written**,
+one cell to the left of the one being answered. A third vocabulary was never on
+the table (§87's twins), and the question I had put to him was a question the
+product had already closed.
+
+**TWO BOXES, NOT ONE, AND THAT IS THE SAME CORRECTION AGAIN:** *"for the
+inprogress and the % we used ot have them 2 stached boxes not one as you
+showed."* §104's control is a status PICKER and a SEPARATE per-cent box drawn
+only while the answer is In progress; my drawing had invented a compound control
+with a select and a number sharing one bordered `.entry`. `ynBoxes()` is that
+pair, stacked into the one Reported cell this table has where the projects page
+spends two columns — **one builder for both sides of the switch** (§53.5, A15),
+because a capability function's reporting page had never known about a yes/no
+row at all and drew a free text box, where *"done"*, *"y"* and *"TRUE"* are a
+dozen spellings of one fact and only some of them score.
+
+**ONE FIELD, BECAUSE THE ROW HAS ONE.** A milestone keeps `status` and `pct` in
+two columns; a measure has `actual` and nothing else, so a second field would
+mean a schema change, a workbook column and a round trip that can lose it (§22)
+— for a fact that is one answer. The answer is stored whole: `Not started`,
+`In progress`, `In progress 60`, `Done`, with `SMPRules.ynState` the one reader
+and `ynJoin` the one writer, so the parsing lives in one place rather than at
+every call site. **NOTHING STORED MOVES AND NOTHING IS MIGRATED**: `Yes` and
+`No` are every Y/N figure any tenant holds today, they go on scoring 100 and 0,
+and they are READ in the new words without being rewritten (§96.2, §30.2).
+
+**THE TARGET KEEPS `Y/N`, AND THAT IS ALSO HIS.** He asked whether the word
+should change now that the answers do, and proposed *Delivery*. Weighed against
+it: *Completion* (twins with the milestones' *Completed*), *Stage*,
+*Achievement*, *Done / Not done* — with *Deliverable*, *Milestone*, *Progress*,
+*Status* and *Outcome* ruled out first as words the product already spends
+elsewhere. He chose **keep Y/N**, and the cost is recorded rather than hidden:
+the picker's word and the reporter's words are one step apart. What it buys is
+that no stored string moves, no migration is needed, and no workbook already
+downloaded acquires a second spelling for one unit (§58, §65).
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED RATHER THAN CLAIMED** (§172):
+`test-authorize.js` §32 classifies all four spellings and finds `unitReporting`
+and nothing else, allows whoever reports for the unit and **refuses somebody who
+does not** — both ends, or a build that accepted everything would pass the first
+half (§94.2). 534/0, 131/0 on the differ.
+
+**AND THE CHECK FOUND SOMETHING THE EYE WOULD HAVE MISSED:** the picker stood
+**30px against a number entry's 34**, so in a column whose other rows are number
+boxes the rows did not line up — §251.6's own fault (*"a `<select>` receives
+none of `input.field`'s box"*) reappearing the moment the control became a
+picker again. The height is derived from `--rep-h` plus its border rather than
+typed as a constant (§122.5).
+
+`checks/yn-in-progress.py`: **30 red** on the build before, green after — and
+**one of its own first failures was the CHECK**, not the product: it made BOTH
+the first measure and the first tactic yes/no, so a bare `querySelector` found
+the measure's control while the probe read the tactic's row, reporting a working
+build as broken in five places (§100.3). Every probe is scoped to the row it is
+about now. **Two assertions in `checks/yn-target.py` were REWRITTEN, never
+deleted** (§218): *"the reporting page asks for a yes or a no"* became *"asks for
+the answer, picked not typed"* with the three values, and §251.6's equal-WIDTH
+assertion became *unclipped, and level in height* — equal width would now mean a
+picker that cannot show *Not started*.
+
+**RECORDED, NOT DONE:** the progress workbook still carries no column for a
+tactic's outcome figure at all (§250.2's standing gap), so a yes/no answer given
+on a tactic round-trips through the screen and not through the file; and
+`checks/tactic-outcome.py` is red on `main` with 13 assertions in its plan-pen
+section, reproduced identically on the build before this one and left alone.

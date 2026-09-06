@@ -4270,7 +4270,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 </div>
 
 <h2><span class="n">2</span>Reporting &mdash; the middle answer</h2>
-<p class="mkcap">One control, three answers. A row that simply happened or did not &mdash; getting profitable &mdash; is answered at the two ends and never touches the middle. <em>In progress</em> asks for a per-cent, and until it has one the row is unanswered and holds Submit, exactly as an In progress milestone does today.</p>
+<p class="mkcap">The status picker and the per-cent box the projects page already uses, stacked in the one Reported cell. Three answers. A row that simply happened or did not &mdash; getting profitable &mdash; is answered at the two ends and never touches the middle. <em>In progress</em> asks for a per-cent, and until it has one the row is unanswered and holds Submit, exactly as an In progress milestone does today.</p>
 <div class="frame">
   <p class="flabel">Reporting &mdash; tactics</p>
   <div class="scroll"><table>
@@ -4283,7 +4283,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
         <td>Sara Nabil</td>
         <td><span class="qs"><i></i><i class="on past">2</i><i class="on">3</i><i></i></span></td>
         <td class="num">50%</td>
-        <td class="cc"><span class="entry"><select class="field ynfield"><option>&mdash;</option><option>Not yet</option><option>In progress</option><option>Yes</option></select></span></td>
+        <td class="cc"><select class="fld selbox" style="width:132px"><option>&mdash;</option><option>Not started</option><option>In progress</option><option>Done</option></select></td>
         <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one"></textarea></td>
       </tr>
       <tr>
@@ -4293,7 +4293,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
         <td>Hazem Fouad</td>
         <td><span class="qs"><i></i><i class="on past">2</i><i class="on">3</i><i></i></span></td>
         <td class="num">50%</td>
-        <td class="cc"><span class="entry filled"><select class="field ynfield"><option selected>Not yet</option></select></span></td>
+        <td class="cc"><select class="fld selbox" style="width:132px"><option>&mdash;</option><option selected>Not started</option><option>In progress</option><option>Done</option></select></td>
         <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one"></textarea></td>
       </tr>
       <tr>
@@ -4303,7 +4303,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
         <td>Sara Nabil</td>
         <td><span class="qs"><i></i><i class="on past">2</i><i class="on">3</i><i></i></span></td>
         <td class="num">50%</td>
-        <td class="cc"><span class="entry filled"><select class="field ynfield" style="width:128px"><option selected>In progress</option></select><input class="field" style="width:54px;text-align:right" value="60"><span class="unitsuf">%</span></span></td>
+        <td class="cc"><select class="fld selbox" style="width:132px"><option>&mdash;</option><option>Not started</option><option selected>In progress</option><option>Done</option></select><br><span class="entry filled" style="margin-top:6px"><input class="field" value="60"><span class="unitsuf">%</span></span></td>
         <td class="notecol"><textarea class="fld grow notefld" rows="2">Terms agreed, legal review in September.</textarea></td>
       </tr>
       <tr>
@@ -4313,7 +4313,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
         <td>Mona Adel</td>
         <td><span class="qs"><i></i><i class="on past">2</i><i class="on">3</i><i></i></span></td>
         <td class="num">50%</td>
-        <td class="cc"><span class="entry filled"><select class="field ynfield"><option selected>Yes</option></select></span></td>
+        <td class="cc"><select class="fld selbox" style="width:132px"><option>&mdash;</option><option>Not started</option><option>In progress</option><option selected>Done</option></select></td>
         <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one"></textarea></td>
       </tr>
     </tbody>
@@ -4321,8 +4321,8 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 </div>
 <p class="mkcap"><em>The YTD Target column is new on these rows.</em> A Y/N row prints an em-dash there today, because nothing was due of it. Half of a Q2&ndash;Q3 window has passed, so <em>50%</em> is what the middle answer is measured against &mdash; and it is what makes 60% readable as ahead rather than as a number on its own.</p>
 
-<h2><span class="n">3</span>Performance &mdash; the partial is prorated, the yes is not</h2>
-<p class="mkcap">Row 3 is 60% against the 50% its own window owes, so it reads <em>120% &mdash; ahead</em>. Row 4 is finished and reads 100, whenever it was finished. Silence is not scored; it is not a nought.</p>
+<h2><span class="n">3</span>Performance &mdash; the partial is prorated, Done is not</h2>
+<p class="mkcap">Row 3 is 60% against the 50% its own window owes, so it reads <em>120% &mdash; ahead</em>. Row 4 is Done and reads 100, whenever it was finished. Silence is not scored; it is not a nought.</p>
 <div class="frame">
   <p class="flabel">Performance &mdash; tactics</p>
   <div class="scroll"><table>
@@ -4340,7 +4340,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
         <td>Warehouse operating</td><td>Hazem Fouad</td>
         <td><span class="qs"><i></i><i class="on past">2</i><i class="on">3</i><i></i></span></td>
         <td class="cc"><span class="pill warn">Not started</span></td>
-        <td class="num"><span class="pair"><b>Not yet</b></span></td>
+        <td class="num"><span class="pair"><b>Not started</b></span></td>
         <td class="num final" style="color:var(--bad-tx)">0%</td>
       </tr>
       <tr>
@@ -4357,7 +4357,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
         <td>Certificate issued</td><td>Mona Adel</td>
         <td><span class="qs"><i></i><i class="on past">2</i><i class="on">3</i><i></i></span></td>
         <td class="cc"><span class="pill good">Done</span></td>
-        <td class="num"><span class="pair"><b>Yes</b></span></td>
+        <td class="num"><span class="pair"><b>Done</b></span></td>
         <td class="num final" style="color:var(--good-tx)">100%</td>
       </tr>
     </tbody>
@@ -4381,28 +4381,15 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   </table></div>
 </div>
 
-<h2><span class="n">5</span>The one word left to pick</h2>
-<p class="mkcap">The bottom answer scores 0 either way. <em>No</em> is what the control says today; <em>Not yet</em> is what a milestone says. One of them, everywhere &mdash; two spellings of one state would be twins.</p>
-<div class="mktwo">
-  <div class="frame">
-    <p class="flabel">A &mdash; No</p>
-    <div style="padding:4px 0 12px"><span class="entry"><select class="field ynfield"><option>&mdash;</option><option selected>No</option><option>In progress</option><option>Yes</option></select></span></div>
-  </div>
-  <div class="frame">
-    <p class="flabel">B &mdash; Not yet</p>
-    <div style="padding:4px 0 12px"><span class="entry"><select class="field ynfield"><option>&mdash;</option><option selected>Not yet</option><option>In progress</option><option>Yes</option></select></span></div>
-  </div>
-</div>
-
-<h2><span class="n">6</span>What it costs, stated</h2>
+<h2><span class="n">5</span>What it costs, stated</h2>
 <ul class="cost">
-  <li><b>Finishing lowers the number on a row that was ahead.</b> 60% at half the window reads 120%; pressing Yes reads 100%. That is your rule &mdash; delivering early is not more than delivered &mdash; and this is where it shows.</li>
+  <li><b>Finishing lowers the number on a row that was ahead.</b> 60% at half the window reads 120%; Done reads 100%. That is your rule &mdash; delivering early is not more than delivered &mdash; and this is where it shows.</li>
   <li><b>In progress with no per-cent holds Submit.</b> The row counts as unanswered, the same as a milestone that says In progress and does not say how far.</li>
-  <li><b>Nothing already reported moves.</b> Every Y/N row in the tenant holds Yes, No or nothing, and all three read exactly as they do today. No migration, no new field in the plan.</li>
+  <li><b>Nothing already reported moves.</b> Every Y/N row in the tenant holds Yes, No or nothing; those keep their score (100, 0, not scored) and simply read in the new words. No migration, no new field in the plan.</li><li><b>The plan still says Yes / No</b> while the answers say Not started &middot; In progress &middot; Done. Say if the target&rsquo;s own word should change with them.</li>
   <li><b>Not carried across:</b> a deliverable or milestone at 60% still reads 60 with no proration &mdash; changing that would move every tenant&rsquo;s Execution figure, so it stays as it is and the two are recorded as reading differently.</li>
 </ul>
 
-<div class="ask"><b>To sign off:</b> the three answers and where the % box sits, the YTD Target column appearing on a Y/N row, and <b>A or B</b> for the bottom word.</div>
+<div class="ask"><b>To sign off:</b> the two stacked boxes in the Reported cell, and the YTD Target column appearing on a Y/N row.</div>
 
 </div>
 

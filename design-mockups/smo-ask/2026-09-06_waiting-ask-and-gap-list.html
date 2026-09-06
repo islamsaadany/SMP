@@ -82,7 +82,13 @@ body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
 .cqbar.top{ padding-top:12px; }
 .seg{ display:flex; border:1px solid var(--line); border-radius:var(--r);
       overflow:hidden; }
-.seg span{ flex:1 1 0; text-align:center; padding:7px 9px; font-size:var(--fs-small);
+/* CENTRED IN THE BOX, NOT SITTING ON TOP OF IT. The halves stretch to the
+   tallest of them, so a neighbour carrying a count badge — or a label long
+   enough to wrap — leaves the shorter one riding high. Centring is the fix,
+   and nowrap is why nothing has to wrap in the first place. */
+.seg span{ flex:1 1 0; display:flex; align-items:center; justify-content:center;
+           text-align:center; white-space:nowrap;
+           padding:7px 9px; font-size:var(--fs-small);
            font-weight:650; color:var(--ink-2); background:transparent; }
 .seg span + span{ box-shadow:inset 1px 0 0 var(--line); }
 /* WAITING TAKES TWO THIRDS. It is the common errand and Ask is the exception,

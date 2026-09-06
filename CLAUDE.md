@@ -817,6 +817,77 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   instead of a missing browser: **read the tail, not the count**, and never cap a
   check at a number chosen for the loop rather than for the check. No server rule,
   nothing stored, nothing migrated.
+- **WAITING AND ASK, AND THE LIST THE QUESTIONS FILL (§299):** Islam &mdash;
+  *"I don't think the smo should get a my message part it's confusing. the smo
+  only replies to people"* &mdash; then, asked where the office would get help
+  instead, *"if we are building the ai agent support for the smo related
+  questions how can we make it?"* **THE HALF HE WANTS REMOVED WAS ALREADY
+  WRITING TO ITSELF**, measured before anything was proposed (&sect;3a): nothing
+  excluded the office's own thread from the office's own waiting queue or badge,
+  so a member of the office writing there rang their own bubble &mdash; and
+  &sect;293's collection had ALREADY had to write `person_key <> $1` so the
+  office was not emailed about itself, *the exclusion existing in exactly one of
+  the three places that needed it*. **AND &sect;285's TWO STATED REASONS FOR
+  KEEPING IT HAD BOTH EXPIRED** (the assistant is tested from the settings
+  panel; writing to the office as the office is what he is overruling). Nothing
+  is lost &mdash; the Platform Inbox lists every conversation. **FOR THE OFFICE
+  THE ASSISTANT CANNOT HAND OVER, BECAUSE THEY ARE THE HANDOVER**, and that one
+  fact is the whole design: an Ask writes no chat message, touches no thread,
+  sets nothing waiting, moves no badge and is chased by no email &mdash; all
+  three asserted by measuring those rows before and after, because *"it worked"*
+  is equally true of a build that did all of them. **THE HISTORY IS KEPT, HIS
+  OWN REVERSAL** (*"no need fo history true"*, then *"I think the history is
+  good to maintain in this case"*), and it lives in the SAME table as everybody
+  else's questions: the office's history and the list on the Knowledge base page
+  are the same rows read two ways, because a second store would be a second
+  answer to *what has been asked* (&sect;53.5). **AND THE QUESTIONS ARE NOT A
+  SECRET** (*"the office questions are not a secret and it's fine to be seen by
+  the rest of the team"*), so the box says so in one plain line &mdash; a
+  statement, never a caution (&sect;168), said at all because being KEPT is a
+  fact nothing else on the screen would tell anybody (&sect;35). **Nothing new
+  is exposed on the users' side and it was checked rather than assumed**: their
+  questions and the assistant's answers are already rows in `chat_messages` that
+  the Inbox reads. **ONLY WHAT THE ASSISTANT ACTUALLY READ IS RECORDED** &mdash;
+  answered or declined, never unreachable, which is a plumbing fault with its
+  own diagnostic (&sect;123) and would otherwise fill the list with rows no
+  answer can close &mdash; **and the office is the one person told which
+  happened**, because on that half nobody is coming either way (&sect;124 with
+  the sign reversed). **THE SAME QUESTION, NEVER A SIMILAR ONE**:
+  `SMPRules.askKey()` normalises case, space and a trailing `?` and nothing
+  looser, refused deliberately; SHARED (&sect;42) because the server groups on
+  it and the page asks it of an answer already written, and stored on the row so
+  touching it cannot regroup a tenant's history. **ANSWERED ROWS STAY** &mdash;
+  a question answered correctly nine times is still a screen worth fixing, which
+  is his second reason &mdash; **and an answered question is never offered a
+  second entry**: it already has one, named by the assistant's own `source`, so
+  the row OPENS it (&sect;87's duplicates, found by the check going red on a
+  build where both rows offered). **THE SMO-VERSUS-USER DISTINCTION IS SAFELY
+  DEFERRED** (his: *"a distinction we need to make later"*) because
+  &sect;161.1's audience already rides every entry, so the row records which
+  side asked and the minted entry defaults to it. **TWO SWITCHES, THE NEW ONE
+  OFF**: `ask` is its own key, because `assistant` means *answer people before
+  the office does* and every tenant that turned it on chose exactly that
+  (&sect;30.2 from the other side) &mdash; enforced on the SERVER, and **with
+  the switch off there is no switch at all** (&sect;61), checked on every draw
+  so a colleague turning it off cannot strand whoever is standing on it.
+  **WAITING TAKES TWO THIRDS** (his), scoped to `.cqseg` alone. **AND THE
+  MOCKUP FOUND TWO FAULTS BEFORE EITHER REACHED THE SOURCES**: labels sitting at
+  the top of their box rather than the middle, and `.seg span` reaching the
+  count badge as well as the half it sits in &mdash; *a rule with two subjects,
+  whose second subject woke up two changes later*. `scripts/test-ask.js` **31
+  assertions** against a real Postgres with a stand-in for the model
+  (&sect;100.3, &sect;142.6), proved able to fail three ways (**5 / 2 / 8
+  red**); `checks/office-ask.py` **44 assertions** over HTTP (&sect;94.11),
+  proved able to fail three ways (**3 / 2 / 3 red**) &mdash; **and its own
+  first run reported a working build broken twice** (a plain object where the
+  endpoint reads a STREAM; the Knowledge base page's default tab). One
+  assertion in `chat-settings-scroll.py` REWRITTEN, not loosened (&sect;214.3,
+  &sect;218): &sect;296's *"folded, the panel needs no scroll at all"* was true
+  at 590px and is not with a row added, so it asserts the RELATIONSHIP now.
+  **RECORDED, NOT DONE**: the list sits on the *Questions &amp; answers* tab,
+  which is not the tab the page opens on; 90 days is a starting number; and
+  nothing is backfilled, because every earlier question was answered inside a
+  conversation that is still readable (&sect;35).
 - **THE SETTINGS PANEL SCROLLS INSIDE ITSELF (§294):** Islam &mdash; *"there is
   no scrolling inside the settings pan while there is a uselss scrolling in the
   main page."* **BOTH HALVES ARE ONE FACT**: `.hmenu-panel.chset` carried a width
@@ -6896,6 +6967,40 @@ python3 checks/setup-squeezed.py # the Setup page is not a unit's plan page
                                 # asserted still going across at 1200/1100/1000 — a "fix"
                                 # that moved the breakpoint back would pass every Setup
                                 # assertion here and silently undo §267.2
+python3 checks/office-ask.py    # Waiting and Ask, and the list the questions
+                                # fill (§299): BOTH ENDS of the switch (with Ask off
+                                # there is no segmented control at all — the state
+                                # every tenant is in until the office turns it on,
+                                # and the one a presence-only check would never see);
+                                # Waiting asserted as a RATIO of the two halves and
+                                # never as a pixel count; the composer coming back
+                                # WITHOUT its attach button; a declined question
+                                # narrated rather than spoken and promising nobody is
+                                # coming; unreached asserted at both ends against
+                                # declined; nothing else moving (no `say` ever
+                                # posted, the waiting list untouched); the switch
+                                # going off under somebody standing on it; and the
+                                # list on the Knowledge base page — the unanswered
+                                # row marked as PAINT, offered an answer where the
+                                # answered one is offered its own entry, and the row
+                                # saying an answer is being written before it says
+                                # one has been. 44 assertions over HTTP, because none
+                                # of it exists over file://; proved able to fail
+                                # three ways (3 / 2 / 3 red). Its own first run
+                                # reported a working build broken twice
+node scripts/test-ask.js        # ...and the server half on a real Postgres with a
+                                # stand-in for the model (§100.3): off is a refusal
+                                # ON THE SERVER; an Ask writes no chat message, moves
+                                # no thread and sets nothing waiting (measured before
+                                # and after, because "it worked" is true of a build
+                                # that did all three); answered and declined are rows
+                                # and unreachable is NOT; a user's question lands on
+                                # the same list through `say`; the grouping is one
+                                # spelling of one string and a differently worded
+                                # question is its own row; both ends of who may read
+                                # it; and a full save leaves every question standing.
+                                # 31 assertions, proved able to fail three ways
+                                # (5 / 2 / 8 red)
 python3 checks/corner-reply-box.py # no composer over a list of people, and a
                                 # test that says what it cannot see (§298): on the
                                 # office's Waiting LIST no composer, no Send, no attach
@@ -7126,7 +7231,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;298: no composer over a list of
+*Last Updated: 2026-09-06 &mdash; **&sect;299: Waiting and Ask, and the list
+the questions fill.** Islam, of the corner &sect;285 built: *"I don't think the
+smo should get a my message part it's confusing. the smo only replies to
+people"* &mdash; then, asked where the office would get help instead, *"if we
+are building the ai agent support for the smo related questions how can we make
+it?"* **THE HALF HE WANTED REMOVED WAS ALREADY WRITING TO ITSELF**, measured
+before anything was proposed: nothing excluded the office's own thread from the
+office's own waiting queue or badge, and &sect;293's collection had already had
+to write that exclusion for the email &mdash; *it existed in exactly one of the
+three places that needed it*. **FOR THE OFFICE THE ASSISTANT CANNOT HAND OVER,
+BECAUSE THEY ARE THE HANDOVER**, and that one fact decides everything: an Ask
+writes no message, starts no conversation, sets nothing waiting and is chased by
+no email. **THE HISTORY IS KEPT** &mdash; his own reversal, recorded as one
+&mdash; in the SAME table as everybody else's questions, because the office's
+history and the office's list are the same rows read two ways. **AND ONLY WHAT
+THE ASSISTANT ACTUALLY READ IS RECORDED**: answered or declined, never
+unreachable, which is a plumbing fault with its own diagnostic and would
+otherwise fill the list with rows no answer can close. **ANSWERED ROWS STAY**,
+because a question answered correctly nine times is still a screen worth fixing
+&mdash; and an answered question is never offered a second entry, it OPENS the
+one it was answered from. **THE SMO-VERSUS-USER DISTINCTION IS SAFELY
+DEFERRED**, because every knowledge base answer has carried its audience since
+&sect;161.1, so the row records which side asked from the first day. **A NEW
+SWITCH, OFF**, enforced on the server, and with it off there is no switch at
+all. **31 assertions** against a real Postgres with a stand-in for the model and
+**44** over HTTP, each proved able to fail three ways (**5 / 2 / 8** and **3 / 2
+/ 3 red**) &mdash; and the browser check's own first run reported a working
+build broken twice. One assertion in `chat-settings-scroll.py` REWRITTEN, not
+loosened. Full sweep, 527/0 authoriser, 131/0 differ, round trip and clean
+parity green on a virgin Postgres 16. **On the branch, not merged.***
+
+*Earlier: 2026-09-05 &mdash; **&sect;298: no composer over a list of
 people, and a test that says what it cannot see.** Islam, as the office: a reply
 he typed never reached the person, did not appear in the box, and then sorted
 above her own message. **THREE SYMPTOMS, ONE CAUSE, REPRODUCED BEFORE ANYTHING

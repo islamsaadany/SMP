@@ -38,7 +38,10 @@ VAPID = base64.urlsafe_b64encode(b"\x04" + bytes(range(64))).decode().rstrip("="
 GATE = b"<!doctype html><title>Sign in</title><h1 id='gate'>Sign in</h1>"
 
 CFG = {"on": True, "shots": True, "promise": "Usually answers the same day",
-       "beat": 4000, "assistant": True, "popup": True, "notify": False, "away": 10}
+       "beat": 4000, "assistant": True, "popup": True, "notify": False, "away": 10,
+       # §299: OFF, as it ships. §3 turns it on, so the sections before it are
+       # measuring the corner every tenant has until the office presses it.
+       "ask": False}
 QUEUE = [{"person_key": "hend", "person_name": "Hend Farouk", "live_name": "Hend Farouk",
           "waiting": True, "last_at": "2026-09-05T13:37:00Z", "here_at": None,
           "unit_key": "mobile", "fn_key": None, "title": "Head of Mobile", "gone": False,
@@ -103,7 +106,11 @@ class H(http.server.BaseHTTPRequestHandler):
         if not self.path.startswith("/api/chat"):
             self._s(200, b'{"ok":true}', "application/json"); return
         a = body.get("action")
-        if a in ("say", "reply"):
+        # §299: `ask` is watched here for the same reason as the other two —
+        # what the composer POSTS is the whole of what §298 and §299 decide,
+        # and a build that drew the right box and posted the wrong action
+        # would look identical on screen.
+        if a in ("say", "reply", "ask"):
             # THE RECIPIENT RIDES IN `person`, and the first draft of this file
             # asked for `to` — so it reported a correct build broken on the one
             # assertion the whole section exists for. Read the endpoint's own
@@ -121,6 +128,12 @@ class H(http.server.BaseHTTPRequestHandler):
             out["messages"] = HERMSGS
             out["thread"] = {"person_key": "hend", "person_name": "Hend Farouk",
                              "waiting": True, "here_at": None, "flagged": 0}
+        if a in ("ask", "askMine"):
+            out["reached"] = True
+            out["rows"] = [{"id": 1, "at": "2026-09-06T09:00:00Z",
+                            "question": body.get("body") or "",
+                            "answered": True, "answer": "Against the share due by now.",
+                            "source": "scoring"}] if a == "ask" else []
         if a == "assistantTest":
             out["steps"] = ATEST
         if a == "pushTest":
@@ -264,23 +277,41 @@ with sync_playwright() as pw:
        listH is not None and m2.get("bodyH") is not None and listH > m2.get("bodyH"),
        (listH, m2.get("bodyH")))
 
-    # ── 3 · AND THE OFFICE'S OWN THREAD IS UNTOUCHED ────────────────────
-    print("\n§3  the office's own thread — My messages")
+    # ── 3 · AND THE OTHER HALF KEEPS ITS BOX ────────────────────────────
+    # REWRITTEN, NOT DELETED (§214.3, §218). This asserted the office's own
+    # thread — *My messages* — kept the composer §298 hides over the list, and
+    # that the box posted `say`. §299 removed that half at Islam's word: the
+    # office writing to the office put them in their own waiting queue, and
+    # nothing in the product can post `say` as the office any more.
+    #
+    # THE CLAIM IS UNCHANGED AND THE SUBJECT MOVED. What §298 decided is that
+    # the composer is hidden where there is nobody to write to and drawn where
+    # there is somebody — so the second half of that pair is now **Ask**, where
+    # the somebody is the assistant. Asserting it here is what stops a later
+    # build hiding the foot for the whole of the office's corner and passing
+    # §1 and §2 perfectly (§94.2).
+    print("\n§3  the other half keeps its box — Ask")
     SEEN.clear()
-    pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-cqside]')]
-        .filter(x=>/my/i.test(x.textContent))[0]; if(b) b.click();}""")
+    CFG["ask"] = True
+    pg.wait_for_timeout(5200)                 # one poll, so the switch arrives
+    pg.evaluate("""()=>{const b=document.querySelector('[data-cqside="ask"]');
+        if(b) b.click();}""")
     pg.wait_for_timeout(1300)
     m3 = look(pg)
     ck("the composer is drawn", m3.get("sayPainted") is True, m3)
-    ck("it writes to the office", m3.get("placeholder") == "Write to the office…",
+    ck("it says which box it is", "Ask about" in (m3.get("placeholder") or ""),
        m3.get("placeholder"))
     try:
-        pg.fill("#chatsay", "A note to myself.")
+        pg.fill("#chatsay", "How is a Sum measure judged?")
         pg.click("#chatsend"); pg.wait_for_timeout(1400)
     except Exception as e:
         ck("it could be sent", False, e)
-    ck("and it is sent as `say`",
-       len(SEEN) == 1 and SEEN[0]["action"] == "say", SEEN)
+    ck("and it is sent as an `ask`, never a `say`",
+       len(SEEN) == 1 and SEEN[0]["action"] == "ask", SEEN)
+    # AND NOTHING IN THE OFFICE'S CORNER CAN POST `say` ANY MORE (§299): that
+    # was the half that wrote to itself, and the absence is the fix.
+    ck("...and no `say` is reachable from the office's corner",
+       not any(x.get("action") == "say" for x in SEEN), SEEN)
     pg.close()
 
     # ── 4 · SOMEBODY WHO IS NOT THE OFFICE ──────────────────────────────

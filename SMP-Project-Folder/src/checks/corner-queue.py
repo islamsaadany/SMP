@@ -68,6 +68,13 @@ FOLK=[{"key":"loghead","name":"Hazem Roushdy","unit_key":"logistics","fn_key":No
   {"key":"newp%d"%i,"name":"Hazem Newcomer %d"%i,"unit_key":None,"fn_key":None,"title":None}
   for i in range(1,11)]
 POSTED=[]
+# THE SETTINGS ARE MODULE-SCOPE, so a section can turn one on mid-run and the
+# next poll carries it — they were local to the handler, which meant every
+# request rebuilt them and nothing outside could move one (§299).
+cfg={"on":True,"shots":True,"promise":"Usually answers the same day",
+     "beat":4000,"popup":False,"vapid":"","ask":False}
+
+
 class H(http.server.BaseHTTPRequestHandler):
     def log_message(self,*a): pass
     def _s(self,c,b,t):
@@ -83,8 +90,6 @@ class H(http.server.BaseHTTPRequestHandler):
         n=int(self.headers.get("Content-Length") or 0); raw=self.rfile.read(n)
         b=json.loads(raw or b"{}"); a=b.get("action") or ""
         POSTED.append(b)
-        cfg={"on":True,"shots":True,"promise":"Usually answers the same day",
-             "beat":4000,"popup":False,"vapid":""}
         if a=="chatSearch":
             q=(b.get("q") or "").lower()
             folk=[f for f in FOLK if q in f["name"].lower()]
@@ -128,8 +133,27 @@ with sync_playwright() as p:
        pg.eval_on_selector("#chatn","e=>e.textContent"))
 
     pg.click("#chatbtn"); pg.wait_for_timeout(900)
+    # ── REWRITTEN, NOT DELETED (§214.3, §218) ─────────────────────────
+    # This asserted a split of TWO whatever the settings said, which was true
+    # while the second half was *My messages* and the office always had it.
+    # §299 replaced that half with **Ask** and put it behind its own switch,
+    # off until the office turns it on — so the number of segments is now a
+    # consequence of a setting rather than a constant, and asserting the
+    # constant would have frozen the corner in the shape it had.
+    #
+    # BOTH ENDS, which is what the old assertion could not have (§94.2): with
+    # Ask off there is NO segmented control at all, because a switch with one
+    # half is not a choice (§61) — and that is the state every tenant is in
+    # until somebody presses it, so it is the one worth guarding here.
     print("\nTHE SPLIT")
-    ck("the two segments are drawn", pg.query_selector_all(".cqseg button").__len__()==2)
+    ck("with Ask off there is no switch at all", pg.query_selector(".cqseg") is None)
+    ck("...and the search box is still there", pg.query_selector("#cqfind") is not None)
+    ck("...and the queue is what the panel shows", pg.query_selector(".cqrow") is not None)
+    cfg["ask"] = True
+    pg.wait_for_timeout(5200)                 # one poll, so the switch arrives
+    ck("turned on, the two segments are drawn",
+       len(pg.query_selector_all(".cqseg button"))==2,
+       len(pg.query_selector_all(".cqseg button")))
     ck("Waiting is the one lit", pg.eval_on_selector(".cqseg button","e=>e.classList.contains('on')"))
     ck("the search box is there", pg.query_selector("#cqfind") is not None)
 
@@ -191,11 +215,16 @@ with sync_playwright() as p:
     ck("back returns to the list", len(pg.query_selector_all(".cqrow"))==len(QUEUE))
     ck("...and the header is the office again",
        "Strategy Office" in pg.eval_on_selector("#chatpanel .cht","e=>e.textContent"))
-    pg.click("[data-cqside='mine']"); pg.wait_for_timeout(700)
-    ck("My messages shows their own conversation, not the queue",
+    # REWRITTEN WITH THE HALF IT WAS ABOUT (§214.3, §218). *My messages* is
+    # gone — the office writing to the office put them in their own waiting
+    # queue (§299) — and what stands in its place is Ask. The claim survives
+    # whole: the other half is NOT the queue, and its composer says which box
+    # it is.
+    pg.click("[data-cqside='ask']"); pg.wait_for_timeout(700)
+    ck("Ask shows a box to ask in, not the queue",
        pg.query_selector(".cqrow") is None and pg.query_selector("#chatbody") is not None)
-    ck("...and the composer writes to the office again",
-       "office" in pg.eval_on_selector("#chatsay","e=>e.placeholder").lower(),
+    ck("...and the composer says which box it is",
+       "ask about" in pg.eval_on_selector("#chatsay","e=>e.placeholder").lower(),
        pg.eval_on_selector("#chatsay","e=>e.placeholder"))
     pg.click("[data-cqside='wait']"); pg.wait_for_timeout(700)
 

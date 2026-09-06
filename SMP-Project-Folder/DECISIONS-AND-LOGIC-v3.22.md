@@ -36401,3 +36401,243 @@ no longer claims to be doing anything.
 messages*, which is where the text a person typed on the list will be found —
 nothing points them there when it happens, and nothing can, since after this
 change it cannot happen again.
+
+---
+
+## §299 — WAITING AND ASK, AND THE LIST THE QUESTIONS FILL (2026-09-06)
+
+Islam, of the corner §285 built: *"I don't think the smo should get a my
+message part it's confusing. the smo only replies to people if they have an
+issue they should talk directly to their mnager or whoever through other
+communication platforms. what do you think?"* — then, asked where the office
+would get help instead: *"my question is if we are building the ai agent
+support for the smo related questions how can we make it? is it another button
+with support or something?"*
+
+### The half he wants removed was already writing to itself
+
+Measured before anything was proposed (§3a), and the measurement is what turned
+an opinion into a decision. **Nothing excluded the office's own thread from the
+office's own waiting queue**: `mine`'s badge counts `FROM chat_threads WHERE
+waiting` and the corner's queue reads the same rows with no exclusion, so a
+member of the office writing there put themselves in their own list and rang
+their own bubble. §293's collection had ALREADY had to write `t.person_key <>
+$1` so that the office would not be emailed about itself — *the exclusion this
+half needed existed in exactly one of the three places that needed it.*
+
+**And §285's two stated reasons for keeping it had both expired.** That section
+kept the half *"because it is where the assistant is tested and where a member
+of the office writes to the office"* — the assistant is tested from the
+settings panel on the Platform Inbox (§123), and writing to the office as the
+office is what Islam is overruling. **Nothing is lost**: the Platform Inbox
+lists every conversation, the office's own included, so a thread that already
+exists stays readable exactly where it was.
+
+### For the office, the assistant cannot hand over — they ARE the handover
+
+This is the rule the whole feature is built on, and it is what makes Ask a
+different thing from the assistant everybody else meets. For a person writing
+in, the assistant is the first line of a conversation a human can take over:
+§104 stores the message and leaves the thread WAITING, so an answer it declines
+still reaches somebody. **For the office there is nobody to take over.** So an
+Ask must never create a waiting conversation, never join the queue, never move
+the badge, and never be chased by email — every one of which would put the
+office in their own queue owing themselves an answer, which is the fault this
+section began by removing.
+
+It is a **lookup, not a chat**, and the endpoint says so: `ask` writes no chat
+message, touches no thread and sets nothing waiting — asserted by measuring
+those three rows before and after, because *"it worked"* is equally true of a
+build that also did all three.
+
+### The history is kept, and that is a reversal of his own first answer
+
+*"3. and no need fo history true"*, then, next message: *"3. I think the
+history is good to maintain in this case."* Recorded as a reversal rather than
+overwritten (Principle II): the earlier answer made Ask a box that forgot, and
+an answer found last week is no use if it evaporated when the panel closed.
+
+**It lives in the same table as everybody else's questions**, which is the
+whole design rather than a convenience: the office's history and the list on
+the Knowledge base page are the same rows read two ways — by asker, and grouped
+by question. A second store for the history would be a second answer to *what
+has been asked*, and the two would drift the first time either was corrected
+(§53.5).
+
+### And the questions are not a secret
+
+Islam: *"the history of questions needs to be kept somewhere visible by the
+super user as well, in case of something is not working on the platform or
+question that repeates that require a fix"*, and then, of who: *"the office
+questions are not a secret and it's fine to be seen by the rest of the team."*
+So the list is the office's, both roles — which is the gate the Knowledge base
+page already sits behind (§119.4, `inOffice()` by rule and not by a matrix
+cell).
+
+**That makes the Ask box something other than a private notebook, so it says
+so** — one plain line under the composer, *"Kept, and the office can see
+them."* Not a caution (§168): nothing has gone wrong and nothing is being
+warned about. It is said at all because the questions are KEPT, which is a fact
+about the box that nothing else on the screen would tell anybody (§35).
+
+**And nothing new is exposed on the users' side, which was checked rather than
+assumed.** A person's question and the assistant's answer to it are rows in
+`chat_messages` keyed to that person — the same table the Platform Inbox reads
+— so the office can already read every one of them today.
+
+### Only what the assistant actually read
+
+The list records a question when the model **answered or declined**. It records
+nothing when the assistant could not be reached at all — no key, a refusal, a
+timeout, the switch off — because those are a plumbing fault with their own
+diagnostic (§123) and mixing them in would fill the office's list with rows no
+answer could ever close. §112.2's rule read from the other end: that section
+makes a failure land on the chat as it worked before, and this one makes sure a
+failure does not masquerade as a gap in what the platform knows.
+
+**The office is the one person told which of the two happened**, and that is
+not an inconsistency: everybody else's screen stays silent on a failure because
+a person is coming anyway, and on the Ask half nobody is — so a silent box
+would be the feature failing invisibly (§124's rule about a status claiming
+more than it can see, with the sign reversed).
+
+### The same question, never a similar one
+
+`SMPRules.askKey()` normalises case, surrounding space and a trailing question
+mark — one string spelled twice. **Anything looser was refused deliberately**:
+the platform deciding that *"how do I close the cycle"* and *"when does the
+cycle close"* are one errand is a guess made in front of the office, and wrong
+often enough that the counts stop being read. It is a SHARED rule (§42) because
+the server groups on it and the page asks it of an answer already written; two
+copies would answer differently the first time either was corrected, and the
+disagreement would read as a row that will not stop asking however many times
+it is answered. It is stored on the row as well, so touching the normaliser
+cannot silently regroup a tenant's history under it.
+
+### Answered rows stay, and that is the half worth defending
+
+His second reason — *a question that repeats and requires a fix* — needs the
+answered rows: a question the assistant answered correctly nine times is still
+telling the office that a screen is not clear. A list that dropped a row the
+moment it was answered would destroy the very count that reason depends on. So
+the list is one list, sorted by how often a question has been asked, with the
+unanswered marked and filterable.
+
+**And an answered question is not offered a second entry.** The assistant
+answered it FROM the knowledge base, so an entry already exists; the row opens
+that one, named by the `source` the assistant itself returns. Offering *Add an
+answer* there would be the platform manufacturing exactly the duplicates §87
+spends its length refusing — found by the check, which asserted "only the
+unanswered row offers to be answered" and went red on a build where both did.
+
+### Writing the answer, and the distinction he deferred
+
+*"smo's unanswered question shall go to the list but with a distinction we need
+to make later is it an SMO answer or a user answer becuaes sometimes the same
+question gets 2 different answers depending on their role smo or user."*
+
+**Deferring it is safe because the entry carries it from the first day.**
+§161.1 already marks every knowledge base answer with its audience — the
+office, everybody else, or both — so the row records which side asked and the
+minted entry defaults to that side, changeable in one press. Nothing has to be
+decided now, and the day the same question needs two answers the editor already
+writes them.
+
+The act goes through the page's **own writers** (`kbAddNew`, `kbSetAdded`) —
+exactly what *"+ Add a question to this group"* already calls — so an answer
+written from the list is indistinguishable from one typed below it, and the
+page, the assistant's corpus and the questions file all need nothing. **The
+question comes across editable and editing it changes nothing on the list**:
+what somebody typed in a hurry is rarely how it should read in the knowledge
+base, and the record of what was actually asked has to stay honest.
+
+**The group is picked on the row before the press**, because an added question
+has to live in one of the nine and defaulting silently would put it wherever
+the first group happens to be. **And the row stops offering the moment an entry
+exists** — before an answer has been typed into it — or two presses would mint
+two entries for one question; it says *an answer is being written* rather than
+*written*, because an entry with nothing in it is not an answer (§35).
+
+### Two switches, and the new one starts off
+
+*"in the settings the enablement of the assistant for the smo and the users
+should be splitted"*, then *"ok a new switch for the smo."*
+
+`ask` is its own key rather than a wider reading of `assistant`, and the reason
+is §30.2 from the other side: `assistant` means *answer people before the
+office does*, and every tenant that turned it on chose exactly that. Reading it
+as *"and give the office an Ask box too"* would switch a new capability on for
+all of them without anybody being asked. Off, read the same way round as the
+three settings beside it — only an explicit `true` — so a deployment that
+upgrades gets exactly the chat it had, **which is the state Islam's own tenant
+is in until he presses it**.
+
+**Off is enforced on the server.** With `ask` off the corner draws no second
+half at all, so nothing in the product can reach the action — which is exactly
+why the guard is there (§42, §98.2: a switch that only hides a control is
+decoration). And **with the switch off there is no switch**: a segmented
+control with one half is not a choice (§61), so the bar holds the search alone.
+
+**The switch can go off under somebody standing on it** — the office is several
+people and every browser reads the setting from the poll — so the half is
+checked on every draw rather than at the one place that sets it, or a colleague
+turning Ask off would strand whoever was on it with no control to leave by
+(§61's trap).
+
+### Waiting takes two thirds
+
+Islam, of the mockup: *"the waiting should occupy maybe 2/3 of the panel width
+as it's the common use and ask takes less space."* The two errands are not
+equally likely, so the two halves are not the same size — scoped to `.cqseg`,
+which is the one segmented control in the product where that is true; the
+filter on the list below is two equally likely choices and stays equal.
+
+**And the drawing found two faults before either reached the sources**: the
+labels sat at the top of their box rather than the middle, so a half carrying a
+count badge left its neighbour riding high; and `.seg span` was a DESCENDANT
+selector that matched the badge as well as the half, handing the badge the
+half's own `flex:1 1 0` — inert until centring made the parent a flex row, at
+which point the badge swelled to fill it. *A rule with two subjects, whose
+second subject woke up two changes later.*
+
+### What it costs
+
+One migration (043, a new table outside the state graph — a save clears thirty
+tables and cannot reach this, asserted), one shared rule, three server actions,
+the corner's second half, one settings row and one list on the Knowledge base
+page. **Nothing anybody's rights change**, no authoriser rule moves (527/0,
+131/0), and the users' assistant behaves exactly as it did.
+
+`scripts/test-ask.js`: **31 assertions against a real Postgres and a stand-in
+for the model** (§100.3, §142.6 — `GEMINI_ENDPOINT` is an environment variable
+for exactly this, so the code under test is the code that ships), proved able
+to fail three ways — the switch removed (**5 red**), a failure recorded as a
+gap (**2 red**), a looser normaliser (**8 red**). `checks/office-ask.py`: **44
+assertions over HTTP**, because none of this exists over `file://` (§94.11),
+proved able to fail three ways — the switch drawn always (**3 red**), the
+composer the wrong way round (**2 red**), an existing entry never noticed
+(**3 red**).
+
+**And its own first run reported a working build broken twice** (§100.3, from
+the check's side): it drove the handler with a plain object where the endpoint
+reads its body off a STREAM, so every assertion in the first run was a 500; and
+it measured the Knowledge base page's default tab, where the list correctly is
+not drawn.
+
+**One assertion in `chat-settings-scroll.py` was REWRITTEN, not loosened**
+(§214.3, §218): §296 asserted that with the diagnostic folded the settings
+panel needs NO scroll at all, which was true at 590px and is not at 638 with a
+row added. The property it was guarding is not the zero — it is that folding
+removes the great majority of the scroll, which is what makes §294's cap
+comfortable — so that is what it asserts now, as a relationship rather than a
+number that would go stale on the next row (§94.8).
+
+**Recorded, not done**: the list sits on the *Questions & answers* tab, which
+is not the tab the page opens on — correct, since it is a list of questions and
+the thing you do with a row is write one of the answers below it, and worth
+saying because the office lands on *How it works* first. The mockup's *Last 90
+days* is a starting number rather than a decision. And a question asked before
+today is not on the list: nothing is backfilled, because those were answered or
+handed over inside conversations that are still there and still readable, and
+inventing rows for them would put questions on the list with no record of what
+the assistant actually said (§35).

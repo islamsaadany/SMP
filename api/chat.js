@@ -198,18 +198,31 @@ async function mine(client, me) {
    Returns `{answered, reply, source}` or null. NEVER THROWS: a caller that has
    already stored the person's message must not lose it to a provider having a
    bad afternoon (spec 016 §4.2). */
-async function assistantAnswer(client, me, question) {
+async function assistantAnswer(client, me, question, given) {
   const kb = corpus();
   if (!kb || !assistant.configured()) return null;
   try {
     /* The conversation so far, so a follow-up reads as one. Bounded, because
        an old thread is unbounded and the corpus is already 13k tokens. */
-    const hist = (await client.query(
-      "SELECT from_office, body FROM chat_messages WHERE person_key = $1 " +
-      "ORDER BY at DESC, id DESC LIMIT 9", [me.key])).rows.reverse();
-    /* The last row IS the question just stored; the model gets it as the
-       question rather than twice. */
-    hist.pop();
+    /* ── AND THE OFFICE'S ASK BRINGS ITS OWN (§299) ──────────────────
+       The Ask box is not a conversation and writes nothing to
+       `chat_messages`, so reading the thread there would hand the model the
+       office's own long-dead conversation with itself — or, far more likely,
+       nothing at all, which would make every follow-up read as a first
+       question. The caller passes what it has; nobody else's path changes,
+       and the two are the same shape so `assistant.ask` cannot tell them
+       apart (§53.5). */
+    let hist;
+    if (given) {
+      hist = given.slice(-8);
+    } else {
+      hist = (await client.query(
+        "SELECT from_office, body FROM chat_messages WHERE person_key = $1 " +
+        "ORDER BY at DESC, id DESC LIMIT 9", [me.key])).rows.reverse();
+      /* The last row IS the question just stored; the model gets it as the
+         question rather than twice. */
+      hist.pop();
+    }
     const org = (await client.query("SELECT extra FROM org WHERE id = 1")).rows[0] || {};
     const labels = ((org.extra || {}).labels) || {};
     const out = await assistant.ask({
@@ -237,6 +250,69 @@ async function assistantAnswer(client, me, question) {
     console.error("assistant did not answer:", (e && e.message) || e);
     return null;
   }
+}
+
+/* ── WHAT THE ASSISTANT WAS ASKED (§299) ────────────────────────────────
+   Islam: *"if the SMO asks a question that the assistant can't answer it
+   should be recorded for the future enrichment of the data base, btw that
+   should be the same for the users questions"* — and the office reads it as a
+   list on the Knowledge base page.
+
+   THE SAME SPELLING OF THE SAME STRING, NEVER A SIMILAR ONE. Case, the space
+   around it and a trailing question mark are one question written twice;
+   anything looser is the platform deciding that "how do I close the cycle" and
+   "when does the cycle close" are the same errand, in front of the office and
+   wrong often enough that the counts stop being read. Refused deliberately
+   when this was drawn, and the refusal is this function's whole shape.
+
+   Stored on the row rather than computed on read, so touching this cannot
+   silently regroup a tenant's history under it.
+
+   THE RULE ITSELF IS `lib/rules.js`'s (§42), because the Knowledge base page
+   asks the same question of an answer the office has already written — two
+   copies would drift, and the drift would read as a row that will not stop
+   asking however many times it is answered. */
+function askKey(q) { return Rules.askKey(q); }
+
+/* ONLY WHAT THE ASSISTANT ACTUALLY READ (§299). `a` is null whenever it could
+   not be reached at all — no key, no corpus, a refusal, a timeout — and every
+   one of those is a plumbing fault with its own diagnostic (§123). A row here
+   means the model saw the question and either answered it or declined, which
+   is the only pair the office can act on: write the answer, or fix the screen
+   that keeps producing the question.
+
+   AND IT NEVER COSTS THE ANSWER. The answer is already stored and on its way
+   back by the time this runs, so a table that is missing, locked or slow
+   leaves the chat exactly as it was (§104's ordering, one layer out). */
+async function recordAsk(client, me, question, a, isOffice) {
+  if (!a || !question) return;
+  try {
+    await client.query(
+      "INSERT INTO assistant_asks (asker_key, asker_name, office, question, qkey, " +
+      "                            answer, answered, source) " +
+      "VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+      [me.key, me.name || null, !!isOffice, question, askKey(question),
+       a.answered ? (a.reply || null) : null, !!a.answered,
+       a.answered ? (a.source || null) : null]);
+  } catch (e) {
+    console.error("assistant ask not recorded:", (e && e.message) || e);
+  }
+}
+
+/* HOW FAR BACK THE LIST LOOKS. A starting number rather than a decision — it
+   is named once here and travels to the page in the answer, so the words on
+   screen and the window queried can never disagree. */
+const ASK_WINDOW_DAYS = 90;
+
+/* One person's own Ask history, oldest first, so the corner draws it as a
+   conversation reads. Bounded: this is a notebook, not an archive, and the
+   whole of it is on the Knowledge base page. */
+async function askRows(client, me) {
+  const rows = (await client.query(
+    "SELECT id, at, question, answer, answered, source FROM assistant_asks " +
+    " WHERE asker_key = $1 AND office ORDER BY at DESC, id DESC LIMIT 40",
+    [me.key])).rows;
+  return rows.reverse();
 }
 
 /* WHO IS ASKING, in the words the corpus uses — so the assistant can pick
@@ -708,6 +784,12 @@ module.exports = async function handler(req, res) {
                       missing from the posted body and every stored row would
                       have said no message ever greeted anybody. */
                    popup: cfg.popup,
+                   /* §299: NAMED HERE OR IT NEVER ARRIVES — this object lists
+                      the keys it forwards, and the corner reads `ask` to know
+                      whether to draw the office's second half at all. Left out,
+                      the switch would work perfectly and the control it governs
+                      would never appear (§135's own fault, quoted above). */
+                   ask: cfg.ask,
                    /* §231: THE PUBLIC HALF OF THE KEY TRAVELS WITH THE POLL,
                       like every other setting — the browser needs it to
                       subscribe and it is public by construction (it is handed
@@ -1070,6 +1152,12 @@ module.exports = async function handler(req, res) {
          only shown when it is true. */
       if (cfg.assistant) {
         const a = await assistantAnswer(client, me, text);
+        /* RECORDED FOR THE OFFICE'S LIST (§299), whichever way it went — an
+           answered question that keeps coming back is a screen worth fixing,
+           and a declined one is a gap in the corpus. Written before the two
+           branches below so neither has to remember it, and only when `a` is
+           non-null, which is exactly "the assistant read this". */
+        await recordAsk(client, me, text, a, false);
         /* SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§125). A handoff used to
            write nothing at all, on the sound reasoning that a sentence would
            make the thread read as answered — and the person was left looking
@@ -1146,6 +1234,112 @@ module.exports = async function handler(req, res) {
        is the same sentence: naming which of the two roles somebody lacks tells
        an outsider the shape of the office. */
     if (!office) return send(res, 403, { ok: false, error: "The Strategy Office answers these." });
+
+    /* ── THE OFFICE ASKS, AND NOBODY IS WAITING ON ANYTHING (§299) ────
+       Islam, of the half of the corner this replaces: *"I don't think the smo
+       should get a my message part it's confusing. the smo only replies to
+       people"* — and then, asked where the office would get help instead:
+       *"if we are building the ai agent support for the smo related questions
+       how can we make it?"*
+
+       IT IS A LOOKUP, NOT A CHAT, AND THAT IS THE RULE THE WHOLE ACTION IS
+       BUILT ON. For everybody else the assistant is the first line of a
+       conversation a person can take over; for the office there is nobody to
+       take over, because they ARE the people who would. So this writes NO
+       chat message, touches NO thread, sets nothing waiting, moves no badge
+       and is reached by no email chase — every one of which would put the
+       office in their own queue owing themselves an answer.
+
+       AND THE HISTORY IS KEPT — Islam reversed his own first answer here
+       (*"no need fo history true"*, then *"I think the history is good to
+       maintain in this case"*), so an answer found last week is still there
+       this week. It lives in `assistant_asks` beside everybody else's
+       questions, which is the same table the Knowledge base page reads: one
+       store, two readings (§53.5).
+
+       OFF IS ENFORCED HERE. With `ask` off the corner draws no second half at
+       all, so nothing in the product can reach this — which is exactly why the
+       guard is on the server (§42, §98.2: a switch that only hides a control
+       is decoration). */
+    if (action === "ask") {
+      if (!cfg.ask) {
+        return send(res, 403, { ok: false, error: "Ask is off for this platform." });
+      }
+      const q = str(body.body);
+      if (!q) return send(res, 400, { ok: false, error: "Nothing to ask." });
+      /* THE MODEL IS GIVEN THIS BOX'S OWN HISTORY, never the office's dead
+         conversation with itself (see assistantAnswer). Oldest first, and the
+         question just typed is not in it yet — it is passed as the question. */
+      const prev = (await client.query(
+        "SELECT question, answer, answered FROM assistant_asks " +
+        " WHERE asker_key = $1 AND office ORDER BY at DESC, id DESC LIMIT 4",
+        [me.key])).rows.reverse();
+      const hist = [];
+      prev.forEach(function (r) {
+        hist.push({ from_office: false, body: r.question });
+        if (r.answered && r.answer) hist.push({ from_office: true, body: r.answer });
+      });
+      const a = await assistantAnswer(client, me, q, hist);
+      await recordAsk(client, me, q, a, true);
+      /* A FAILURE IS NOT A DECLINE, AND THE OFFICE IS THE ONE PERSON WHO MUST
+         BE TOLD WHICH (§123, §124). Everybody else's screen stays silent when
+         the assistant cannot be reached, because a person is coming anyway
+         (§112.2) — here nobody is coming, so a silent box would be the whole
+         feature failing invisibly. `reached:false` is what the corner draws
+         its one line from, and it names the diagnostic rather than guessing at
+         a cause. */
+      return send(res, 200, { ok: true, reached: !!a, rows: await askRows(client, me) });
+    }
+
+    /* The office's own Ask history, asked when they open that half — not on
+       the poll, which every page in the platform runs every few seconds and
+       which nobody has asked to carry this (§98). */
+    if (action === "askMine") {
+      if (!cfg.ask) return send(res, 200, { ok: true, rows: [] });
+      return send(res, 200, { ok: true, rows: await askRows(client, me) });
+    }
+
+    /* ── THE LIST, FOR THE KNOWLEDGE BASE PAGE (§299) ──────────────────
+       Islam: *"the history of questions needs to be kept somewhere visible by
+       the super user as well, in case of something is not working on the
+       platform or question that repeates that require a fix."*
+
+       ANSWERED ROWS STAY, and that is the half worth stating: a question the
+       assistant answered correctly nine times is still telling the office that
+       a screen is not clear, so removing it would destroy the very count his
+       second reason needs. `answered` here means the assistant answered it at
+       least once — a question that was declined and later answered is no
+       longer a gap in the corpus.
+
+       GROUPED ON `qkey`, which is the same string spelled the same way and
+       nothing looser (see askKey). Ordered by how often it has been asked,
+       because that is the question the page exists to answer.
+
+       IT IS THE OFFICE'S, BOTH ROLES — Islam: *"the office questions are not a
+       secret and it's fine to be seen by the rest of the team"* — which is the
+       gate this whole half of the file already sits behind. */
+    if (action === "askQuestions") {
+      const days = Math.max(1, Math.min(730, Math.round(Number(body.days) || ASK_WINDOW_DAYS)));
+      const rows = (await client.query(
+        "SELECT qkey, " +
+        "       (array_agg(question ORDER BY at DESC, id DESC))[1] AS question, " +
+        "       count(*)::int AS times, " +
+        "       count(DISTINCT asker_key)::int AS people, " +
+        "       max(at) AS last_at, " +
+        "       bool_or(office) AS by_office, " +
+        "       bool_and(office) AS office_only, " +
+        "       bool_or(answered) AS answered, " +
+        "       (array_agg(answer ORDER BY at DESC, id DESC) " +
+        "          FILTER (WHERE answer IS NOT NULL))[1] AS answer, " +
+        "       (array_agg(source ORDER BY at DESC, id DESC) " +
+        "          FILTER (WHERE source IS NOT NULL))[1] AS source " +
+        "  FROM assistant_asks " +
+        " WHERE at > now() - make_interval(days => $1) " +
+        " GROUP BY qkey " +
+        " ORDER BY count(*) DESC, max(at) DESC " +
+        " LIMIT 300", [days])).rows;
+      return send(res, 200, { ok: true, days: days, rows: rows });
+    }
 
     /* ── IS THE BOT WORKING? (§123) ───────────────────────────────────
        Islam, having turned the assistant on and had nothing come back: "I need

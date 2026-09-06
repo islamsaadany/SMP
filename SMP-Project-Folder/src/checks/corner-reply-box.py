@@ -1,4 +1,4 @@
-"""NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE (§297).
+"""NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE (§298).
 
 Islam, as the office: *"After sending the reply message as an sMO the message
 didn't appear in the box and when it appeard it appeard above the message of ht

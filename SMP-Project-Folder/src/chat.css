@@ -169,13 +169,13 @@ body.presenting .chatdock { display:none; }
 
 .chatfoot { border-top:1px solid var(--line); background:var(--surface); padding:9px 10px;
             display:flex; flex-direction:column; gap:8px; }
-/* A GUARD, AND IT IS A NO-OP HERE — SAID RATHER THAN IMPLIED (§297). The line
+/* A GUARD, AND IT IS A NO-OP HERE — SAID RATHER THAN IMPLIED (§298). The line
    above sets `display:flex`, and an author declaration ordinarily outranks the
    browser's own `[hidden]{display:none}` — so this looked load-bearing, and I
    wrote it as though it were. MEASURED, IT IS NOT: with this rule taken out,
    Chromium still computes `display:none` on the hidden foot, because its UA
    sheet declares that one `!important`. The falsification run is what said so
-   (§297.2) — the check went green on the build without it.
+   (§298.2) — the check went green on the build without it.
 
    It stays as one line of belt and braces, because the engines this product is
    actually used in (Safari on a Mac, most of all) cannot be measured from here
@@ -548,7 +548,7 @@ details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus)
    sentence in a 90px column is a column of single words. */
 .chtest-d { grid-column:1 / -1; color:var(--ink-3); line-height:1.5;
             word-break:break-word; }
-/* WHAT THE TEST CANNOT SEE (§297) — under a clean result, in the panel's own
+/* WHAT THE TEST CANNOT SEE (§298) — under a clean result, in the panel's own
    quiet register, set apart by a rule rather than by a colour: this is not a
    failure and must not read as one (§168), and there is nothing here for
    anybody to fix on our side. */

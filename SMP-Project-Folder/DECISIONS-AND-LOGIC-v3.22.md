@@ -36123,7 +36123,7 @@ regression this section removes.
 
 ---
 
-## §297 — NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE (2026-09-05)
+## §298 — NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE (2026-09-05)
 
 Two from Islam, a day apart in the same conversation, and the second one he
 diagnosed himself.
@@ -36209,7 +36209,7 @@ the queue's own foot rather than the composer's, and it is asserted still drawn
 and still reachable — a fix that took both would strand somebody on the list
 (§61, §290.1's own finding about that link).
 
-### §297.2 — the CSS line I wrote as the fix is a no-op, and the falsification said so
+### §298.2 — the CSS line I wrote as the fix is a no-op, and the falsification said so
 
 `.chatfoot` is `display:flex`, and an author declaration ordinarily outranks the
 browser's own `[hidden]{display:none}` — so setting the attribute alone *looked*
@@ -36274,13 +36274,13 @@ build that put it in the shared builder satisfies every other assertion here.
 **Quiet, never an alarm** (§168): a rule and the panel's own `--ink-3`, because
 nothing has gone wrong and there is nothing on our side to fix.
 
-### §297.1 — and the check's own first failure was the check
+### §298.1 — and the check's own first failure was the check
 
 It recorded the recipient as `to` and the endpoint carries it as `person`, so it
 reported a correct build broken **on the one assertion the whole section exists
 for**. Read the endpoint's own field, never the one the sentence would use.
 
-### §297.3 — and a capped run reports no failures
+### §298.3 — and a capped run reports no failures
 
 The neighbouring checks were run in a loop under `timeout 300` and piped through
 `grep -c "^  FAIL"`. `checks/office-chat.py` takes longer than that, so it was
@@ -36304,7 +36304,7 @@ assertions, proved able to fail three ways from the SOURCES** (§276) — the
 composer decision reverted (**6 red**, the reported state reproduced), the
 sentence removed (**10 red**) and the sentence moved into the shared builder
 (**4 red**, drawn twice). The fourth attempt — the CSS line removed with the
-decision left in — went **green**, which is §297.2 above and is why that line
+decision left in — went **green**, which is §298.2 above and is why that line
 no longer claims to be doing anything.
 
 **Recorded, not done**: the office's own thread is reached through *My

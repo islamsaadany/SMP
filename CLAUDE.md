@@ -728,7 +728,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   assertion **REWRITTEN, not deleted** (§218): it asserted the page still scrolls
   at 1000&times;900, true only because of the regression this removes.
 - **NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE
-  (§297):** Islam, as the office &mdash; *"After sending the reply message as
+  (§298):** Islam, as the office &mdash; *"After sending the reply message as
   an sMO the message didn't appear in the box and when it appeard it appeard above
   the message of ht employee which is wrong"*, then *"and the message never reached
   the user."* **THREE SYMPTOMS, ONE CAUSE, REPRODUCED BEFORE ANYTHING WAS PROPOSED**
@@ -756,7 +756,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   rebuilding all four on the way back would lose whatever is half-typed or already
   attached (§100.2 from the other side). **AND THE ONE PERMANENT WAY OUT
   SURVIVES IT** (*Open the Platform Inbox* sits in the queue's own foot),
-  asserted drawn AND reachable. **§297.2 &mdash; THE CSS LINE I WROTE AS THE
+  asserted drawn AND reachable. **§298.2 &mdash; THE CSS LINE I WROTE AS THE
   FIX IS A NO-OP, AND THE FALSIFICATION SAID SO**: an author `display:flex`
   ordinarily outranks the browser's `[hidden]{display:none}`, so a guard was
   written and the commit called it load-bearing &mdash; then the build made
@@ -775,10 +775,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   where it actually stopped (§123) &mdash; **and never inside `testHtml`**,
   which the assistant's test shares and where an operating system has nothing to do
   with anything (§53.5). Quiet, never an alarm (§168): nothing has gone
-  wrong and there is nothing on our side to fix. **§297.1 &mdash; the check's
+  wrong and there is nothing on our side to fix. **§298.1 &mdash; the check's
   own first failure was the CHECK** (it asked for `to` where the endpoint carries
   `person`, so it reported a correct build broken on the one assertion the section
-  exists for). **§297.3 &mdash; AND A CAPPED RUN REPORTS NO FAILURES**: the
+  exists for). **§298.3 &mdash; AND A CAPPED RUN REPORTS NO FAILURES**: the
   neighbours were run under `timeout 300` and piped through `grep -c "^  FAIL"`,
   and `office-chat.py` takes longer than that &mdash; so it was killed, printed
   nothing, and the count read **0** with the word *Terminated* one line above it,
@@ -6866,7 +6866,7 @@ python3 checks/setup-squeezed.py # the Setup page is not a unit's plan page
                                 # that moved the breakpoint back would pass every Setup
                                 # assertion here and silently undo §267.2
 python3 checks/corner-reply-box.py # no composer over a list of people, and a
-                                # test that says what it cannot see (§297): on the
+                                # test that says what it cannot see (§298): on the
                                 # office's Waiting LIST no composer, no Send, no attach
                                 # button — measured as PAINT and as a hit test, never as
                                 # the `hidden` attribute, because `.chatfoot` is
@@ -7080,7 +7080,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;297: no composer over a list of
+*Last Updated: 2026-09-05 &mdash; **&sect;298: no composer over a list of
 people, and a test that says what it cannot see.** Islam, as the office: a reply
 he typed never reached the person, did not appear in the box, and then sorted
 above her own message. **THREE SYMPTOMS, ONE CAUSE, REPRODUCED BEFORE ANYTHING
@@ -7094,7 +7094,7 @@ already draws no composer with nobody picked, so this is the corner catching up
 with its own neighbour rather than a new rule. **THE ANSWER IS NOT A BETTER
 PLACEHOLDER**: the box was technically honest and unreadable as such under a
 list of people waiting on you. The foot is hidden, never removed, and the one
-permanent way out is asserted still reachable. **&sect;297.2 &mdash; AND THE CSS
+permanent way out is asserted still reachable. **&sect;298.2 &mdash; AND THE CSS
 LINE I WROTE AS THE FIX IS A NO-OP**: the falsification build made WITHOUT it
 went green, because Chromium declares its own `[hidden]` rule `!important`
 &mdash; *I reasoned about the cascade instead of asking it*. It stays as belt and
@@ -7105,7 +7105,7 @@ from macOS System Settings &mdash; so one sentence goes under a CLEAN result
 only, and never inside the builder the assistant's test shares. **0 failures**
 on `checks/corner-reply-box.py` (35 assertions), proved able to fail three ways
 from the SOURCES: **6 / 10 / 4 red**. 527/0 authoriser &middot; 131/0 differ
-&middot; neighbours and the full sweep green. **&sect;297.1 &mdash; the check's
+&middot; neighbours and the full sweep green. **&sect;298.1 &mdash; the check's
 own first failure was the check.***
 
 *Earlier the same day: 2026-09-05 &mdash; **&sect;296: the label, the fold, and a Setup

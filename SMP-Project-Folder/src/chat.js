@@ -394,7 +394,7 @@ var CHAT = (function(){
            choice (§61). */
         '<div class="cqbar" id="cqbar" hidden></div>' +
         '<div class="chatbody" id="chatbody"></div>' +
-        /* THE COMPOSER IS NOT DRAWN OVER A LIST OF PEOPLE (§297). It is
+        /* THE COMPOSER IS NOT DRAWN OVER A LIST OF PEOPLE (§298). It is
            still the panel's ONE composer (§285) and it is still here in the
            markup; what changed is that `drawPanelChrome` decides whether the
            foot is on screen, in the one function that answers every other
@@ -648,7 +648,7 @@ var CHAT = (function(){
         : "";
     }
 
-    /* ── NO COMPOSER OVER A LIST OF PEOPLE (§297) ──────────────────────
+    /* ── NO COMPOSER OVER A LIST OF PEOPLE (§298) ──────────────────────
        Islam, as the office: *"After sending the reply message as an sMO the
        message didn't appear in the box and when it appeard it appeard above
        the message of ht employee which is wrong"*, then *"and the message
@@ -683,7 +683,7 @@ var CHAT = (function(){
        would mean rebuilding all four on the way back and losing whatever is
        half-typed or already attached (§100.2's rule, from the other side).
 
-       AND THE ATTRIBUTE IS ENOUGH, MEASURED (§297.2): Chromium's own
+       AND THE ATTRIBUTE IS ENOUGH, MEASURED (§298.2): Chromium's own
        `[hidden]` rule is `!important`, so it beats `.chatfoot`'s `display:flex`
        without help. `chat.css` carries a one-line guard beside it for the
        engines that cannot be measured from here, and says so rather than
@@ -1938,7 +1938,7 @@ var CHAT = (function(){
     return /^The /.test(t) ? "the " + t.slice(4) : t;
   }
 
-  /* ── WHAT THE TEST CANNOT SEE (§297) ────────────────────────────────
+  /* ── WHAT THE TEST CANNOT SEE (§298) ────────────────────────────────
      True exactly when every link reported working — which is the state that
      needs a sentence, because a step that FAILED already names the address to
      go to and a second one beside it is noise. */
@@ -2123,7 +2123,7 @@ var CHAT = (function(){
                 '<button class="editbtn" data-chpoptest="1">' +
                 (POPTEST.busy ? "Testing\u2026" : "Test on this device") + '</button>' +
                 (POPTEST.steps ? testHtml(POPTEST.steps) : "") +
-                /* ── AND IT SAYS WHAT IT CANNOT SEE (§297) ────────────────
+                /* ── AND IT SAYS WHAT IT CANNOT SEE (§298) ────────────────
                    Islam, having fixed it himself: *"notificatoin is working
                    after fixing it from systems settings, should this be an
                    instructions for the people who are not having notifcations

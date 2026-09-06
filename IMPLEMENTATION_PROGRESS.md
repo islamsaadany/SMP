@@ -9,7 +9,7 @@ serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** **§296 — the label, the fold, and a Setup page that is not a
 unit's — merged to `main` 2026-09-05 on Islam's word**, carrying §294 with it.
 
-**In flight, on the branch and not merged:** **§297 — no composer over a list of
+**In flight, on the branch and not merged:** **§298 — no composer over a list of
 people, and a test that says what it cannot see.** Two from Islam, both signed
 off from a mockup drawn in the running platform
 (`design-mockups/corner-reply-box/2026-09-05_corner-reply-box.html`). As the

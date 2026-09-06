@@ -85,6 +85,12 @@ body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
 .seg span{ flex:1 1 0; text-align:center; padding:7px 9px; font-size:var(--fs-small);
            font-weight:650; color:var(--ink-2); background:transparent; }
 .seg span + span{ box-shadow:inset 1px 0 0 var(--line); }
+/* WAITING TAKES TWO THIRDS. It is the common errand and Ask is the exception,
+   so the two halves are not the same size — his call. Scoped to the corner's
+   own switch (`.cqseg` in the product), never to every segmented control:
+   the filter on the list below is two equal choices and stays equal. */
+.seg.wa span:first-child{ flex:2 1 0; }
+.seg.wa span + span{ flex:1 1 0; }
 .seg span.on{ background:var(--panel); color:var(--panel-ink); }
 .cqn{ display:inline-block; min-width:17px; padding:1px 5px; border-radius:9px;
       background:var(--surface-2); color:var(--ink-2); font-size:var(--fs-micro);
@@ -237,7 +243,7 @@ body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
           <div class="x">&minus;</div>
         </div>
         <div class="cqbar top">
-          <div class="seg"><span class="on">Waiting <span class="cqn">4</span></span><span>Ask</span></div>
+          <div class="seg wa"><span class="on">Waiting <span class="cqn">4</span></span><span>Ask</span></div>
           <div class="find">Search all conversations and the register&hellip;</div>
         </div>
         <div class="body list">
@@ -275,7 +281,7 @@ body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
           <div class="x">&minus;</div>
         </div>
         <div class="cqbar top">
-          <div class="seg"><span>Waiting <span class="cqn">4</span></span><span class="on">Ask</span></div>
+          <div class="seg wa"><span>Waiting <span class="cqn">4</span></span><span class="on">Ask</span></div>
         </div>
         <div class="body talk">
           <div class="day">Yesterday</div>

@@ -88,6 +88,9 @@ h1{margin:0;font:650 27px/1.25 var(--sans);letter-spacing:-.015em;text-wrap:bala
   padding:16px 22px;background:var(--surface-2);border-bottom:1px solid var(--line)}
 .opt .tag{font:700 13px/1 var(--mono);letter-spacing:.06em;color:var(--stone)}
 .opt h2{margin:0;font:650 19px/1.3 var(--sans);letter-spacing:-.012em}
+.opt.settled{border-color:var(--gold)}
+.opt.settled>header{background:var(--attn-bg);border-bottom-color:var(--gold)}
+.opt.settled .stage .pband + .pband{margin-top:2px}
 .opt .pick{margin-left:auto;font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.1em;
   text-transform:uppercase;color:var(--gold-deep);border:1px solid var(--gold);
   border-radius:var(--r-pill);padding:4px 11px}
@@ -180,6 +183,81 @@ footer{border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;
       before the press and after it, because that is the only place they differ.
       Nothing is built yet.</p>
   </div>
+
+  <!-- SETTLED: B. WHAT TO CALL THE BUTTON ------------------------------- -->
+  <section class="opt settled">
+    <header>
+      <span class="tag">B</span>
+      <h2>Settled — one question left: what the button says</h2>
+      <span class="pick">chosen 7 Sep</span>
+    </header>
+    <div class="body">
+      <p class="plain">B is the shape: the press pushes it, freezes his project, and
+        <b>Reopen</b> is the way back. Once it freezes, <em>Mark done</em> is the
+        wrong word for it. Two candidates, drawn in both states — the only
+        difference is the word.</p>
+
+      <div class="states">
+        <div class="state">
+          <div class="cap">"Save" — your word</div>
+          <div class="stage">
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <button class="editbtn">Save</button>
+              </span>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <span class="frozen">Saved · closed</span>
+                <button class="editbtn cta">Reopen</button>
+              </span>
+            </div>
+            <p class="note">Short and plain. But every number is already kept, so
+              the word promises something that has been happening all along — and
+              the bar above says <b>Save draft</b> for the whole function, so the
+              screen carries two Saves of different widths.</p>
+          </div>
+        </div>
+
+        <div class="state">
+          <div class="cap">"Save draft" — my pick</div>
+          <div class="stage">
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <button class="editbtn">Save draft</button>
+              </span>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <span class="frozen">Draft saved</span>
+                <button class="editbtn cta">Reopen</button>
+              </span>
+            </div>
+            <p class="note">The same two words the bar already uses for the same two
+              acts, one project wide instead of the whole function — and the state it
+              leaves behind, <b>Draft saved · Reopen</b>, is word for word what the
+              bar shows. Nothing new to learn.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="cost"><b>Either way nothing is lost:</b> a frozen project <em>is</em>
+        the finished declaration, so the bar still reads <b>Your 2 projects · 1 of 2
+        done</b> and whoever submits still sees which are ready.</p>
+    </div>
+  </section>
 
   <!-- WHAT MARK DONE DOES TODAY ---------------------------------------- -->
   <section class="today">

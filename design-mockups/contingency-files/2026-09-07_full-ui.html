@@ -147,6 +147,8 @@
   .f.new .fld{ border-color:var(--gold); box-shadow:0 0 0 3px rgb(201 162 77 / .18); }
   .newtag{ font-size:var(--fs-micro); font-weight:800; letter-spacing:var(--track);
            text-transform:uppercase; color:var(--gold-deep); }
+  .penrow{ border-top:1px solid var(--line); padding:16px; }
+  .penrow .fkey{ margin-bottom:10px; }
   .pennote{ margin:14px 0 0; font-size:var(--fs-note); color:var(--ink-2); max-width:60ch; }
   .pennote b{ color:var(--ink); }
   .redbtn{ font:inherit; font-size:var(--fs-small); font-weight:800;
@@ -314,13 +316,10 @@
                 <div class="f"><label>to</label><input class="fld" value="Jun 2026" readonly></div>
                 <div class="f"><label>Reports due</label><input class="fld" value="15 Jul 2026" readonly></div>
                 <div class="f"><label>Reporting as of</label><input class="fld" value="Jun 26" readonly></div>
-                <div class="f new"><label>Review day <span class="newtag">new</span></label>
-                  <input class="fld" value="28 Jul 2026" readonly></div>
-                <div class="f new"><label>at</label><input class="fld" style="min-width:96px" value="10:00" readonly></div>
               </div>
-              <p class="pennote"><b>The review day is when the units present.</b>
-                The reminders to take the contingency files count back from it.
-                Leave it empty and no reminder is ever sent.</p>
+              <p class="pennote">Three dates, one subject: <b>what the cycle covers</b>,
+                <b>when figures are due</b>, and <b>the month they are measured against</b>.
+                Nothing else belongs here.</p>
             </div>
             <div class="col">
               <p class="fkey">Ending it</p>
@@ -328,6 +327,20 @@
                 Closing files every figure under this name and stops the units reporting.</p>
               <button class="redbtn" type="button">Close the cycle</button>
             </div>
+          </div>
+          <div class="penrow">
+            <p class="fkey" style="color:var(--gold-deep)">The review &nbsp;·&nbsp; new</p>
+            <div class="fields">
+              <div class="f new"><label>Review day</label>
+                <input class="fld" value="28 Jul 2026" readonly></div>
+              <div class="f new"><label>at</label>
+                <input class="fld" style="min-width:92px" value="10:00" readonly></div>
+              <div class="f new"><label>Remind the SMO team</label>
+                <input class="fld" style="min-width:210px" value="24 · 12 · 6 · 3 hours before" readonly></div>
+            </div>
+            <p class="pennote">The day the units present, and when to remind the office
+              to take the contingency files. <b>Not a measurement date</b> — it changes no
+              score and no proration. Leave the day empty and nothing is ever sent.</p>
           </div>
         </div>
       </div></div>
@@ -552,19 +565,26 @@
 
   <!-- ─────────────────────────────────────────────────────────────── -->
   <div class="ask">
-    <h2>What I still need from you</h2>
+    <h2>Settled, and the one cost worth restating</h2>
     <ol>
-      <li><b>The slides.</b> This is the one thing still unresolved. Today's
-        <em>Download the plan</em> is the <b>plan</b> as slides — no figures, no scores —
-        so it cannot rescue a review. A PowerPoint of the <em>review deck</em> does not
-        exist and would be a second builder: about a day, and maintained twice for ever
-        on a deck that has moved four times in a fortnight. Three ways out —
-        <b>build it</b>, <b>ship the plan slides as the second file</b> and accept they
-        carry no figures, or <b>drop the slides</b> and let the working copy be the
-        contingency on its own.</li>
-      <li><b>The review day.</b> Confirmed as a new field with a time, as drawn?</li>
-      <li><b>The list in §5</b> — worth building, or is the banner enough?</li>
+      <li><b>The review day is not a fourth measuring date.</b> Your objection stands
+        and it changed where it sits, not whether it exists: the three dates under
+        <em>This cycle</em> stay exactly as they are — time covered, figures due,
+        month measured against — and the review day moves out to a block of its own
+        with the thing it drives. It changes no score and no proration. Nothing
+        counts back from it if it is empty.</li>
+      <li><b>The moments live with it</b> — one line, <span class="stamp-t">24 · 12 · 6 · 3
+        hours before</span> — because they belong to that review rather than to the
+        tenant. Not a settings page for one line (§32).</li>
+      <li><b>The slides will be the review deck, with the figures as at the moment of
+        download.</b> That is a second builder and its cost is real: about a day, and
+        the deck has moved four times in a fortnight, so the two would part company
+        silently. The guard is a check that builds both and compares them column for
+        column — drift then breaks a check instead of shipping a stale deck to the one
+        person standing in front of a room (§294's own shape).</li>
     </ol>
   </div>
+
+</div>
 
 </div>

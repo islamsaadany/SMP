@@ -166,10 +166,10 @@ td input[type=text]{ padding:5px 8px; font-size:13px; }
 .shape h2{ font-size:13px; margin:0 0 2px; font-weight:700; }
 .shape .cap{ color:var(--ink-3); font-size:12px; margin:0 0 14px; }
 
-.org{ border:1px solid var(--gold); border-radius:8px; padding:9px 11px; background:var(--attn-bg);
+.shorg{ border:1px solid var(--gold); border-radius:8px; padding:9px 11px; background:var(--attn-bg);
       display:flex; align-items:center; gap:9px; }
-.org .nm{ font-weight:700; font-size:14px; }
-.org .yr{ margin-left:auto; font-size:12px; color:var(--attn-tx); font-variant-numeric:tabular-nums; }
+.shorg .nm{ font-weight:700; font-size:14px; }
+.shorg .yr{ margin-left:auto; font-size:12px; color:var(--attn-tx); font-variant-numeric:tabular-nums; }
 
 .stem{ width:1px; height:14px; background:var(--line); margin:0 auto; }
 
@@ -197,6 +197,22 @@ td input[type=text]{ padding:5px 8px; font-size:13px; }
 .beneath{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft); }
 .beneath .row{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-2); padding:2px 0; }
 .beneath .row .b{ width:7px; height:7px; border-radius:2px; flex:none; }
+
+
+/* ── WHAT THE PLATFORM CANNOT DO YET IS DRAWN AND DULLED ──────────────
+   Islam: "keep the mockup as is but keep the non existing parts dull for
+   now." So the intended shape stays visible and nothing pretends to be
+   ready: every dulled control is inert and says LATER, which is the one
+   thing a greyed control must do or it reads as broken (§61). */
+.later{ opacity:.5; }
+.later, .later *{ cursor:not-allowed !important; }
+.later input, .later select{ pointer-events:none; }
+.tag{ font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+      color:var(--ink-3); border:1px solid var(--line); border-radius:999px;
+      padding:1px 6px; background:var(--surface-2); flex:none; }
+.step.later{ border-style:dashed; }
+.laterline{ margin-top:10px; font-size:12.5px; color:var(--ink-3); border-left:2px solid var(--line);
+            padding-left:10px; }
 
 /* ── Foot: back / next ───────────────────────────────────────────── */
 .foot{ display:flex; align-items:center; gap:10px; margin-top:22px; padding-top:16px;
@@ -277,6 +293,10 @@ td input[type=text]{ padding:5px 8px; font-size:13px; }
       <li>Each choice carrying <b>its own small drawing</b> rather than a paragraph explaining it.</li>
       <li>The <b>words step generated from the answers</b> — it asks about objectives, actions and requirements because he said his functions plan that way, and never asks what he calls a capability if he has none.</li>
       <li>The <b>summary with both doors</b>, and every line on it a way back.</li>
+      <li><b>Dull means drawn and not built yet</b> — the capabilities step, the objectives plan type
+          and the three words under it. Every one is inert and says <i>Later</i>, so nothing on this
+          screen offers a choice that would open an empty page. They light up the day the shape behind
+          them exists, and that is your separate discussion.</li>
       <li><b>It builds up rather than interrogates.</b> Units, capabilities and functions are lists you add to,
           and every thing you add carries its own <b>owner</b> and its own <b>plan type</b> — change one on the
           right and the shape redraws. One client can run all three plan types at once.</li>
@@ -305,7 +325,7 @@ var STEPS = [
   { key:"The organisation", label:"The year",       q:"Which year is this plan for?" },
   { key:"The organisation", label:"Business units", q:"What are the business units?" },
   { key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
-  { key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?" },
+  { key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?", later:1 },
   { key:"Strategy",         label:"Functions",      q:"How does each supporting function plan?" },
   { key:"Language",         label:"The words",      q:"What does Elabd call these things?" },
   { key:"People",           label:"The office",     q:"Who runs the strategy office?" },
@@ -318,10 +338,12 @@ var seen = [0,1,2,3,4]; /* steps already answered, for the rail's ticks */
 /* ONE plan-type control, wherever a thing is listed. The wizard does not
    ask "how do functions plan" — it asks it of each thing it holds, which is
    what lets one client mix all three. */
-var FORMATS = [["pillars","Pillars"],["projects","Projects"],["objectives","Objectives &amp; actions"]];
+var FORMATS = [["pillars","Pillars",1],["projects","Projects",1],["objectives","Objectives &amp; actions",0]];
+var LATER = "Not built yet — a separate discussion.";
 function fmtSel(kind, n, val){
   return '<select data-kind="' + kind + '" data-n="' + n + '">' + FORMATS.map(function(f){
-    return '<option value="' + f[0] + '"' + (val === f[0] ? " selected" : "") + '>' + f[1] + '</option>';
+    return '<option value="' + f[0] + '"' + (val === f[0] ? " selected" : "") +
+           (f[2] ? "" : " disabled") + '>' + f[1] + (f[2] ? "" : " (later)") + '</option>';
   }).join("") + '</select>';
 }
 var esc = function(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); };
@@ -332,7 +354,7 @@ function drawRail(){
     var cls = "step" + (seen.indexOf(i) >= 0 && i !== at ? " done" : "");
     var cur = i === at ? ' aria-current="step"' : "";
     var n = (seen.indexOf(i) >= 0 && i !== at) ? "✓" : (i + 1);
-    return '<button type="button" class="' + cls + '" data-go="' + i + '"' + cur + '>' +
+    return '<button type="button" class="' + cls + (s.later ? " later" : "") + '" data-go="' + i + '"' + cur + '>' +
            '<span class="n">' + n + '</span>' + esc(s.label) + '</button>';
   }).join("");
   document.getElementById("progress").textContent =
@@ -345,6 +367,12 @@ function choice(on, name, why, pic){
     '<span class="pic">' + pic + '</span>' +
     '<span><span class="cname">' + esc(name) + '<span class="tick">✓</span></span>' +
     '<span class="cwhy">' + why + '</span></span></button>';
+}
+function choiceLater(name, why, pic){
+  return '<div class="choice later" aria-disabled="true">' +
+    '<span class="pic">' + pic + '</span>' +
+    '<span><span class="cname">' + name + '<span class="tag">Later</span></span>' +
+    '<span class="cwhy">' + why + '</span></span></div>';
 }
 var PIC = {
   pillars: '<span class="mini navy"></span><span class="mini row"><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="mini thin"></span><span class="mini thin"></span>',
@@ -382,23 +410,26 @@ function body(i){
     '</div>';
 
   if (i === 4) return '<p class="qwhy" style="margin-top:-8px">A capability is strategic work that sits beside the business units, planned in pillars, and owned by a function head.</p>' +
-    '<div class="listrows">' + M.caps.map(function(c, n){
+    '<div class="laterline"><b>' + LATER + '</b> The platform has capabilities today only underneath a function that plans in projects — not as their own entry on the strategic side. Drawn here so the whole shape is visible.</div>' +
+    '<div class="listrows later" style="margin-top:12px">' + M.caps.map(function(c, n){
       return '<div class="listrow"><span class="grab">∷</span><span class="nm">' + esc(c.n) + '</span>' +
              '<span class="rt"><span style="font-size:12px;color:var(--ink-3)">owned by</span>' +
              '<select><option>' + esc(c.by) + '</option></select>' +
              fmtSel("c", n, c.f) + '</span></div>'; }).join("") +
-    '</div><button class="addrow" type="button" style="margin-top:8px">+ Add a capability</button>';
+    '</div><button class="addrow later" type="button" style="margin-top:8px">+ Add a capability</button>';
 
   if (i === 5) return '<div class="listrows">' + M.fns.map(function(f, n){
-      return '<div class="listrow"><span class="grab">∷</span><span class="nm">' + esc(f.n) + '</span>' +
+      var soon = f.f === "objectives";
+      return '<div class="listrow' + (soon ? " later" : "") + '"><span class="grab">∷</span>' +
+        '<span class="nm">' + esc(f.n) + '</span>' + (soon ? '<span class="tag">Later</span>' : "") +
         '<span class="rt"><span style="font-size:12px;color:var(--ink-3)">plans in</span>' +
         fmtSel("f", n, f.f) + '</span></div>'; }).join("") +
     '</div><button class="addrow" type="button" style="margin-top:8px">+ Add a supporting function</button>' +
     '<div style="margin-top:18px" class="key">What each one means</div>' +
     '<div class="choices" style="margin-top:8px">' +
-    choice(true, "Objectives &amp; actions",
-      "Objectives measured like a key measure, actions under them with a due date, and requirements raised on other functions. <b>New — this is Elabd’s shape.</b>", PIC.objs) +
-    choice(false, "Pillars",
+    choiceLater("Objectives &amp; actions",
+      "Objectives measured like a key measure, actions under them with a due date, and requirements raised on other functions. <b>Elabd’s shape — not built yet.</b>", PIC.objs) +
+    choice(true, "Pillars",
       "The same shape a business unit has: pillars, key measures and tactics.", PIC.pillars) +
     choice(false, "Projects",
       "Capabilities held by the function, each with projects, deliverables and milestones.", PIC.projects) +
@@ -410,15 +441,16 @@ function body(i){
       ["Capability","Capability","Because you added capabilities"],
       ["Pillar","Pillar","Units plan in pillars"],
       ["Key measure","Key Measure","Under a pillar"],
-      ["Functional objective","Functional Objective","Because two functions plan in objectives"],
-      ["Action","Action","Under a functional objective"],
-      ["Requirement","Requirement","Raised on another function"]
+      ["Functional objective","Functional Objective","Because two functions plan in objectives", 1],
+      ["Action","Action","Under a functional objective", 1],
+      ["Requirement","Requirement","Raised on another function", 1]
     ];
     return '<div class="tblwrap"><table><thead><tr><th style="width:34%">What it is</th>' +
       '<th style="width:33%">What Elabd calls it</th><th style="width:33%">Why we ask</th></tr></thead><tbody>' +
       rows.map(function(r){
-        return '<tr><td><b>' + esc(r[0]) + '</b></td>' +
-               '<td><input type="text" value="' + esc(r[1]) + '"></td>' +
+        return '<tr' + (r[3] ? ' class="later"' : "") + '><td><b>' + esc(r[0]) + '</b>' +
+               (r[3] ? ' <span class="tag">Later</span>' : "") + '</td>' +
+               '<td><input type="text" value="' + esc(r[1]) + '"' + (r[3] ? " readonly" : "") + '></td>' +
                '<td class="ours">' + esc(r[2]) + '</td></tr>'; }).join("") +
       '</tbody></table></div>' +
       '<p class="qwhy" style="margin-top:12px">Seven rows, not the platform’s full list — nothing here asks what Elabd calls a thing Elabd does not have.</p>';
@@ -437,7 +469,7 @@ function body(i){
     ["The year", "2027"],
     ["Business units", M.units.map(function(u){ return u.n; }).join(" · ")],
     ["Companies", "None — units sit under Elabd"],
-    ["Capabilities", M.caps.map(function(c){ return c.n; }).join(" · ")],
+    ["Capabilities", M.caps.map(function(c){ return c.n; }).join(" · ") + "  — waiting on the shape"],
     ["Functions", M.fns.map(function(f){ return f.n + " (" + fmtWord(f.f) + ")"; }).join(" · ")],
     ["The words", "7 set"],
     ["The office", "Islam Saadany"]
@@ -459,7 +491,7 @@ function body(i){
 function fmtWord(f){ return f === "objectives" ? "obj" : f === "projects" ? "proj" : "pillars"; }
 function shape(){
   var k = at;                            /* what is known by this step */
-  var h = '<div class="org"><span class="nm">' + esc(k >= 1 ? M.name : "The client") + '</span>' +
+  var h = '<div class="shorg"><span class="nm">' + esc(k >= 1 ? M.name : "The client") + '</span>' +
           (k >= 2 ? '<span class="yr">to ' + esc(M.year) + '</span>' : "") + '</div>';
   if (k < 3) { h += '<div class="stem"></div><div class="empty">Its units come next.</div>';
                document.getElementById("shapebody").innerHTML = h; return; }
@@ -470,7 +502,7 @@ function shape(){
        '<div class="chips">' + M.units.map(function(u){
          return '<span class="chip unit">' + esc(u.n) + '<span class="fmt">' + fmtWord(u.f) + '</span></span>'; }).join("") + '</div></div>';
 
-  if (k >= 5) h += '<div class="side"><div class="sidekey">Capabilities <span class="ct">' + M.caps.length + '</span></div>' +
+  if (k >= 5) h += '<div class="side later"><div class="sidekey">Capabilities <span class="tag">Later</span> <span class="ct">' + M.caps.length + '</span></div>' +
        '<div class="chips">' + M.caps.map(function(c){
          return '<span class="chip cap">' + esc(c.n) + '<span class="own">' + esc(c.by) + '</span>' +
                 '<span class="fmt">' + fmtWord(c.f) + '</span></span>'; }).join("") +
@@ -478,7 +510,8 @@ function shape(){
 
   if (k >= 6) h += '<div class="side"><div class="sidekey">Supporting functions <span class="ct">' + M.fns.length + '</span></div>' +
        '<div class="chips">' + M.fns.map(function(f){
-         return '<span class="chip fn">' + esc(f.n) + '<span class="fmt">' + fmtWord(f.f) + '</span></span>'; }).join("") +
+         return '<span class="chip fn' + (f.f === "objectives" ? " later" : "") + '">' + esc(f.n) +
+                '<span class="fmt">' + fmtWord(f.f) + '</span></span>'; }).join("") +
        '</div></div>';
 
   if (k >= 6) h += '<div class="beneath">' +

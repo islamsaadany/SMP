@@ -5835,59 +5835,6 @@ function cyclePick(label, value, setter, opts){
     monthBtnHtml(value || "", "cycbtn " + (o.cls || ""), setter, o) + '</label>';
 }
 
-/* ── THE PLANNING PERIOD (§299) ──────────────────────────
-   FIRST IN THE PEN, because it is the frame the cycle sits inside: a strip
-   reading "2 of 6 months of the plan" is answered by the block above the one
-   that sets the cycle, not below it.
-
-   IT IS THE PEN'S, NOT THE NEW-CYCLE PANEL'S, and that is the decision rather
-   than an omission: the period is not a property of a cycle and must not be
-   re-asked every time one opens (§50). The cost is stated — with no cycle
-   open there is no pen, so a tenant between cycles sets it when the next one
-   opens.
-
-   THE SAME `cyclePick` THE DATES USE. A second kind of month control on one
-   screen is two answers to "what does a date look like here" (§53.5), and
-   this one is picked for §177's reason as well: with no box there is nothing
-   to mistype, and a period the arithmetic cannot read would silently go back
-   to being a calendar year. */
-function planPeriodBlock(){
-  return '<div class="cyc2-r planper">' +
-    '<div class="nc-h">The planning period</div>' +
-    '<div class="nc-grid nc-1line">' +
-      cyclePick("Plan starts", GROUP[SMPRules.PLAN_FROM], function(v){
-        /* CLEARED IS DELETED, never an empty string left behind: a tenant
-           that set a period and took it back must be byte-identical to one
-           that never set one, or every save carries a phantom key (§50.6). */
-        var t = String(v).trim();
-        if (t) GROUP[SMPRules.PLAN_FROM] = t; else delete GROUP[SMPRules.PLAN_FROM];
-      }, { wide:true, none:"Not set" }) +
-      cyclePick("and ends", GROUP[SMPRules.PLAN_TO], function(v){
-        var t = String(v).trim();
-        if (t) GROUP[SMPRules.PLAN_TO] = t; else delete GROUP[SMPRules.PLAN_TO];
-      /* NEVER `tobtn` (§65.9): that class carries no style at all — it is the
-         NAME the checks address the CYCLE's end month by, and a second control
-         wearing it makes `.newcycle .tobtn` point at whichever is drawn first.
-         Found by `checks/ytd-proration.py` going red on five assertions about
-         a picker this block had quietly taken the handle from. `.planper`
-         scopes everything here already. */
-      }, { wide:true, none:"Not set" }) +
-      /* A STATUS, NOT A DESCRIPTION (§127's own line, 1b-ii): the length is
-         the thing the office is actually setting, and "not set" is a fact
-         about right now that nothing else on the page states \u2014 without it
-         somebody picks one month, nothing happens, and there is no way to
-         tell whether the platform took it. */
-      '<span class="nc-unit">' + (planSet()
-        ? planLength() + ' months'
-        : 'not set \u2014 the calendar year is used') + '</span>' +
-    '</div>' +
-    '<div class="nc-why">The period the targets belong to \u2014 usually a year, and shorter ' +
-      'where a plan started mid-year. <b>Set once for the whole business</b>, and it does ' +
-      'not change when a cycle closes. Every figure is measured against the share of it ' +
-      'that has passed by the month the cycle covers to.</div>' +
-  '</div>';
-}
-
 /* ── Setup · Reporting cycle ────────────────────────────────────────
    Opening turns a plan into a request. Closing snapshots it, which is the
    only way the product ever acquires a past to compare against.
@@ -6089,24 +6036,13 @@ function renderCycle(){
            true of the review point, which is what this strip is about; the
            clause is here so the next reader is not told something the code
            stopped doing (§104.8). */
-        /* §299: OF THE PLAN, AND IT SAYS WHICH PLAN. The denominator was a
-           hard-coded twelve and the count was months of the calendar year, so
-           a cycle covering July to August read "8 of 12" — a number taken
-           from neither of its own dates. It is the planning period now, and
-           where nobody has set one the line NAMES the assumption instead of
-           printing it as a fact (§35, §124). */
-        (function(){
-          var em = elapsedMonths();
-          if (em == null)
-            return ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
-              'figure is measured against a whole one</span>';
-          var why = [];
-          if (!planSet()) why.push('taken from the calendar year');
-          if (reviewAsOfDerived()) why.push('the month is from the cycle\u2019s name');
-          return ' <span class="why" style="margin:0">&middot; ' + em + ' of ' +
-            planLength() + ' months' + (planSet() ? ' of the plan' : '') +
-            (why.length ? ', ' + why.join(', ') : '') + '</span>';
-        })() + '</span>' +
+        (elapsedMonths() != null
+          ? ' <span class="why" style="margin:0">&middot; ' + elapsedMonths() +
+            ' of 12 months' + (reviewAsOfDerived()
+              ? ', taken from the cycle\u2019s name' : '') +
+            '</span>'
+          : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
+            'figure is measured against a whole one</span>') + '</span>' +
       /* THE REVIEW DAY IS ON THE STRIP, so the day is readable without
          opening the pen — and only when there is one, because a line reading
          "not set" over a thing nobody has to set is furniture (§45.2, §94.15).
@@ -6214,7 +6150,7 @@ function renderCycle(){
        in. The cost was measured before he chose — pressing Edit moves the page
        below by 156px here against 12px for the in-place shape. */
     (CYCLEEDIT && open
-      ? '<div class="cfg newcycle">' + planPeriodBlock() + '<div class="cyc2">' +
+      ? '<div class="cfg newcycle"><div class="cyc2">' +
           '<div class="cyc2-f">' +
             '<div class="nc-h">This cycle</div>' +
             '<div class="nc-grid nc-1line">' +

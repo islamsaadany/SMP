@@ -208,6 +208,7 @@ function firstDiff(a, b, at) {
      round trip has never offered the database is a value nobody has tested).
      Written on the FIRST project that has both kinds of row, so this says
      nothing about which project it is. */
+  const R = require("../lib/rules.js");
   const pState = await io.readState(client);
   const pCap = (pState.group.capabilities || []).filter(function (c) {
     return (c.projects || []).some(function (pr) {
@@ -345,6 +346,30 @@ function firstDiff(a, b, at) {
   console.log("  ...and clear again, keys DELETED:", rcOk ? "PASS" : "FAIL",
     rcOk ? "" : JSON.stringify(Object.keys(rClean.review)));
   if (!rcOk) process.exitCode = 1;
+
+  /* ── THE PLANNING PERIOD (§299) ────────────────────────────────
+     §172 IS WHY THIS IS MEASURED RATHER THAN CLAIMED: "it rides `extra`, so
+     there is no migration" is exactly the shape of claim that shipped a
+     CHECK constraint refusing a value four layers had agreed on. Two months
+     on the GROUP, written, read back, and taken away again. */
+  const ppState = await io.readState(client);
+  ppState.group[R.PLAN_FROM] = "Jul 2026";
+  ppState.group[R.PLAN_TO]   = "Dec 2026";
+  await io.writeState(client, ppState);
+  const ppBack = await io.readState(client);
+  const ppOk = ppBack.group[R.PLAN_FROM] === "Jul 2026" &&
+              ppBack.group[R.PLAN_TO]   === "Dec 2026";
+  console.log("planning period round trip:", ppOk ? "PASS" : "FAIL",
+    ppOk ? "[no migration — org.extra]"
+        : JSON.stringify({ from: ppBack.group[R.PLAN_FROM], to: ppBack.group[R.PLAN_TO] }));
+  if (!ppOk) process.exitCode = 1;
+  delete ppBack.group[R.PLAN_FROM]; delete ppBack.group[R.PLAN_TO];
+  await io.writeState(client, ppBack);
+  const ppClean = await io.readState(client);
+  const ppcOk = !(R.PLAN_FROM in ppClean.group) && !(R.PLAN_TO in ppClean.group);
+  console.log("  ...and clear again, keys DELETED:", ppcOk ? "PASS" : "FAIL",
+    ppcOk ? "" : JSON.stringify(Object.keys(ppClean.group).filter(k => k.indexOf("plan") === 0)));
+  if (!ppcOk) process.exitCode = 1;
 
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);

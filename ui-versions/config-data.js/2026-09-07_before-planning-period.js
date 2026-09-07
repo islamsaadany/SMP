@@ -5918,62 +5918,12 @@ function reviewYear(){
   var t = reviewAsOf();
   return t == null ? cycleYear() : Math.floor(t / 12);
 }
-/* ── WHICH MONTH OF ITS OWN YEAR THE REVIEW POINT IS IN ──────────────
-   1 to 12, January to December.
-
-   §299 SEPARATED THIS FROM "HOW MUCH OF THE PLAN HAS PASSED", which were one
-   function and are two questions. A monthly plan is twelve boxes LABELLED Jan
-   to Dec (§278) and a tactic's quarters are calendar quarters, so both want a
-   month's position in its year whatever period the plan itself runs over —
-   while the share a target is owed by now is a fact about the PLAN's period,
-   which may start in July. One function answering both is how "the year
-   starts in January" came to be an assumption nobody had made on purpose. */
-function monthOfYear(){
+/* Months of the plan year already passed, 1 to 12. The plan year runs January
+   to December (Islam, asked outright), so the count is from the cycle's year. */
+function elapsedMonths(){
   var a = reviewAsOf(), y = reviewYear();
   if (a == null || y == null) return null;
   return Math.max(0, Math.min(12, a - y * 12 + 1));
-}
-/* ── THE PLANNING PERIOD (§299) ──────────────────────────────────────
-   Islam: *"the cycle of planning is yearly so that's the full time start and
-   end dates. and then we have a review cycle that has a cycle start and end
-   ... the issue is sometimes we start planning mid year. the main planning
-   cycle is not a year maybe 6 month but the review cycle might have the same
-   start date but will have a closer end date."*
-
-   TWO PERIODS, AND ONLY ONE OF THEM WAS STORED. `REVIEW.from`/`to` are the
-   REVIEW's; what a target belongs to had nowhere to live at all, so the share
-   due was months-of-the-calendar-year over twelve — January assumed on a plan
-   that may have started in July, and printed on the strip as a number nobody
-   had given it. His own report: *"how is it reading 8 or 12 months while I
-   didn't add the covers from?"* — and it was reading neither of his dates.
-
-   ONE FOR THE TENANT, his answer, so it rides GROUP and not REVIEW: a cycle
-   closing must not take the period its targets belong to with it (§50). It
-   rides `extra`, so no migration and no schema change (§266's own road), and
-   it is stored as an ABSENCE — a tenant that has never set one is
-   byte-identical to one that never will (§50.6). */
-function planFrom(){ return monthsOf(GROUP[SMPRules.PLAN_FROM]); }
-function planTo(){ return monthsOf(GROUP[SMPRules.PLAN_TO]); }
-/* BOTH ENDS, AND IN ORDER. Half a period says nothing, and an end before its
-   start is a contradiction somebody typed rather than a period to divide by —
-   both fall back rather than producing a length of nought or a negative one. */
-function planSet(){
-  var a = planFrom(), b = planTo();
-  return a != null && b != null && b >= a;
-}
-/* HOW LONG THE PLAN RUNS, in months. TWELVE where nobody has said, which is
-   what makes this safe on a live tenant: every figure reads exactly as it did
-   until the office sets a period, and the strip SAYS the year was assumed
-   rather than letting it pass for a fact (§35, §124). */
-function planLength(){ return planSet() ? planTo() - planFrom() + 1 : 12; }
-/* HOW MUCH OF THE PLAN HAS PASSED by the month the cycle covers to. Clamped at
-   both ends: a review point before the plan starts owes nothing, and one after
-   it ends owes the whole target rather than more than it. */
-function elapsedMonths(){
-  if (!planSet()) return monthOfYear();
-  var a = reviewAsOf();
-  if (a == null) return null;
-  return Math.max(0, Math.min(planLength(), a - planFrom() + 1));
 }
 /* Is this quarter behind us? A quarter counts as passed when its LAST month
    has, which is what `asOfQuarter` meant before it became a month (H1 means Q1
@@ -5984,12 +5934,9 @@ function quarterPast(i){
   if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
   return y * 12 + i * 3 + 2 <= a;
 }
-/* §299: OVER THE PLAN'S OWN LENGTH, never a hard-coded twelve. On a tenant
-   with no planning period `planLength()` is twelve and this is the expression
-   it has always been. */
 function elapsedShare(){
   var m = elapsedMonths();
-  return m == null ? null : m / planLength();
+  return m == null ? null : m / 12;
 }
 /* WHICH MEASURES PRORATE, and the plan already answers it. `compile` says what
    kind of number this is: "Sum" adds up across the period, so six months of
@@ -6050,11 +5997,7 @@ function measureDue(m, share){
      readable review point there is no month to compile to, so the row falls
      through to the flat path and reads exactly as it does today: a plan
      nobody can date must not become a plan nobody can score. */
-  /* §299: THE MONTH OF THE YEAR, not the share of the plan. These twelve
-     boxes are labelled January to December, so a plan running July to
-     December still reports its August cell as the eighth — asking the plan's
-     elapsed count here would have summed January to February instead. */
-  var mp = monthOfYear();
+  var mp = elapsedMonths();
   if (mp != null) {
     var md = SMPRules.monthlyDue(m, mp);
     if (md != null) return md;

@@ -177,7 +177,15 @@ def pen_state(pg):
         word: word,
         lit: !!(t && t.classList.contains("penon")),
         cols: !!p.querySelector(".cyc2-f") && !!p.querySelector(".cyc2-d"),
-        heads: [...p.querySelectorAll(".nc-h")].map(h => h.textContent.trim()),
+        /* §299: THE CYCLE'S OWN BLOCKS, asked apart from the planning
+           period's. That block is `.cyc2-r.planper` and leads the pen, so a
+           flat `.nc-h` sweep reports four headings and every positional
+           assertion below it shifts by one — §214.3 with a heading rather
+           than a column. Scoped rather than loosened (§218): what this file
+           owns is the CYCLE, and `checks/planning-period.py` owns the frame
+           it sits in. */
+        heads: [...p.querySelectorAll(".cyc2-f .nc-h, .cyc2-d .nc-h, .cyc2-r:not(.planper) .nc-h")]
+                  .map(h => h.textContent.trim()),
         labels: [...p.querySelectorAll(".nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
         /* spec 030: THE CYCLE'S OWN FIELDS, asked apart from the review
@@ -188,11 +196,11 @@ def pen_state(pg):
            pen, which is what makes it able to catch the drift back. */
         cycleLabels: [...p.querySelectorAll(".cyc2-f .nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
-        reviewLabels: [...p.querySelectorAll(".cyc2-r .nc-grid label > span:first-child")]
+        reviewLabels: [...p.querySelectorAll(".cyc2-r:not(.planper) .nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
         fields: [...p.querySelectorAll(".nc-grid input")].map(i => i.value),
         bound: [...p.querySelectorAll(".nc-grid input")].every(i => i.hasAttribute("data-fld")),
-        month: (p.querySelector(".monthbtn .mval") || {}).textContent || "",
+        month: (p.querySelector(".cyc2-f .monthbtn .mval") || {}).textContent || "",
         close: !!btn,
         closeInDanger: !!(btn && btn.closest(".cyc2-d")),
         save: !!p.querySelector("[data-ce-save]"),
@@ -376,7 +384,11 @@ with sync_playwright() as p:
     # window, never as a pixel count (§94.8). At 1280 the pen's field area is
     # 641px, which is where the five boxes wrapped.
     row = js(pg, """() => {
-      const g = document.querySelector(".newcycle .nc-1line");
+      /* §299: THE CYCLE'S ROW. The planning period draws a `.nc-1line` of
+         its own and draws it FIRST, so an unscoped query measures three boxes
+         and calls a correct build broken (§51.11: a selector that still
+         matches and points at another control). */
+      const g = document.querySelector(".newcycle .cyc2-f .nc-1line");
       if (!g) return {no:"no cycle row"};
       const kids = [...g.children], r = kids.map(k => k.getBoundingClientRect());
       const gr = g.getBoundingClientRect();
@@ -435,9 +447,9 @@ with sync_playwright() as p:
     #
     # PRESSED THROUGH THE REAL CONTROLS and read back off the CYCLE, because a
     # picker wired to nothing renders identically to one that works (§96).
-    pick_month(pg, ".newcycle label:nth-child(2) .monthbtn", "Feb")
+    pick_month(pg, ".newcycle .cyc2-f label:nth-child(2) .monthbtn", "Feb")
     pick_month(pg, ".newcycle .tobtn", "Jul")
-    pick_day(pg, ".newcycle label:nth-child(4) .monthbtn", 20)
+    pick_day(pg, ".newcycle .cyc2-f label:nth-child(4) .monthbtn", 20)
     saved = review(pg)
     ok("the name landed", saved.get("name") == "H2 2026 renamed", saved)
     # FOUR DIGITS, and that is not a style: `cycleYear()` scrapes a four-digit

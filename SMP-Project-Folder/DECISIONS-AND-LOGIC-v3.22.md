@@ -35782,3 +35782,126 @@ of* control already wore — consistent, and not asked about; and a tenant whose
 `from` now sits after its `to` is told nothing on the page beyond the two
 months reading oddly beside each other, which is the contradiction it already
 had rather than one this made.
+
+---
+
+## §299 — The planning period, and the review cycle inside it
+
+Islam, from his own tenant with `Covers from` empty and the strip reading
+*"reported as of Aug 2026 · 8 of 12 months"*: **"how is it reading 8 or 12
+months while I didn't add the covers from?"** Then, when the readings were put
+to him, the model itself:
+
+> *"the cycle of planning is yearly so that's the full time start and end
+> dates. and then we have a review cycle that has a cycle start and end. was
+> that what you meant ealier? the issue is sometimes we start planning mid
+> year. the main planning yccle is not a year maybe 6 month but the review
+> cycle might have the same start date but will have a closer end date."*
+
+**HE WAS RIGHT AND THE PLATFORM WAS READING NEITHER OF HIS DATES.** The share
+of a target due by now was *months of the calendar year* over *twelve* — so
+January was assumed on a plan that may have started in July, and `Covers from`
+was consulted by nothing. The number he was looking at came out of the review
+point's own year and nowhere else.
+
+**TWO PERIODS, AND ONLY ONE WAS STORED.** `REVIEW.from`/`to` are the REVIEW's;
+what a target belongs to had nowhere to live at all. `GROUP.planFrom` /
+`planTo` is that period — **one for the tenant**, his answer, so a cycle
+closing cannot take it with it (§50); **set beside the cycle**, his answer
+again, because that is the page somebody already opens to say what period is
+being reported.
+
+**THE ARITHMETIC IS HIS SENTENCE:** the share due is how much of the planning
+period has passed by the month the cycle covers to, over the planning period's
+own length. On Mobile's Non‑Samsung revenue (4B EGP, 1.6B reported):
+
+| Plan | Covers to | Share | Owed | Reads |
+|---|---|---|---|---|
+| Jan – Dec 2026 | Jun 2026 | 6 of 12 | 2.00B | 80% — today's answer |
+| Jul – Dec 2026 | Aug 2026 | 2 of 6 | 1.33B | 120% |
+| Jul – Dec 2026 | Dec 2026 | 6 of 6 | 4.00B | 40% |
+
+**NOTHING MOVES UNTIL A PERIOD IS SET, AND THE STRIP NAMES THE ASSUMPTION.**
+With none, `planLength()` is twelve and `elapsedMonths()` is the month of the
+year — the expression this replaces, asserted as an AGREEMENT rather than as a
+number — so no figure in any live tenant moves on the day this ships, and the
+line reads *"8 of 12 months, taken from the calendar year"* instead of letting
+the assumption pass for a fact (§35, §124). **Refusing to prorate at all was
+offered and is not what shipped**: a unit compared with a whole year's target
+reads as behind, which is the fault §239 was written to remove.
+
+**ONE FUNCTION WAS ANSWERING TWO QUESTIONS, AND THAT IS WHY JANUARY WAS AN
+ASSUMPTION NOBODY MADE ON PURPOSE.** `monthOfYear()` — the review point's
+position in its own year — is what a **monthly plan** (twelve boxes LABELLED
+Jan to Dec, §278) and a tactic's **calendar quarters** want; `elapsedMonths()`
+is a fact about the PLAN. Asking the plan's count for the monthly boxes would
+have compiled a July‑to‑December plan's August cell as its **second** month —
+falsified from the sources, 2 red, printing exactly that.
+
+**THE EDGES ARE THE PART THE OLD ARITHMETIC COULD NOT REACH.** A review point
+BEFORE the plan starts owes nothing and is **not scored** rather than divided
+by nought (`measureScore`'s existing `!due` guard, §278's own). An end before
+its start is a contradiction somebody typed rather than a length to divide by,
+so it falls back to the year — never a negative one.
+
+**`Not set` IS NOT `Missing`.** The month picker drew a red italic *Missing*
+for every empty date, which is right where the platform NEEDS one (a cycle
+cannot be opened without the month it covers to, §298) and wrong for a field
+with a working fallback — §214.4's fault, and beside a status chip already
+saying *"not set — the calendar year is used"* it would have been two
+statements about one fact with one of them alarmed. `monthBtnHtml` takes the
+empty word from its caller now, and **both ends are asserted**, or a build that
+quietened every picker in the product satisfies half of it and loses §177's red
+word everywhere.
+
+**AND THE CLASS `tobtn` CARRIES NO STYLE AT ALL** — it is the NAME the checks
+address the cycle's end month by. The new block's end wore it for one build and
+`.newcycle .tobtn` started pointing at whichever was drawn first: **5 red in
+`ytd-proration.py`**, on a picker this section never touched (§65.9, and
+§51.11 from the product's side rather than the check's). `.planper` scopes the
+block; the handle stays the cycle's.
+
+**THE SERVER NEEDED TWO EDITS AND THEY GO TOGETHER** (§259.2): the pair is
+classified `cycle` — the same grant that governs the cycle's own dates, because
+asking a different one for the two halves of one pen is §42's drift — **and**
+the two keys join the group's known list. Falsified separately: with the
+classification out and the keys still known, the change is INVISIBLE and a
+custodian's save is **ALLOWED** (5 red); with the keys out and the
+classification kept, it lands twice (1 red). **ONE SENTENCE FOR THE PAIR**,
+because half a period is not a second decision (§184). No migration and no
+schema change — it rides `org.extra`, **measured on a real Postgres 16 rather
+than claimed** (§172), written, read back and taken away again with the keys
+DELETED (§50.6).
+
+**Proved able to fail from the SOURCES** (§276, because §238's hashed CSP
+silences an edited built file): the length forced to twelve goes **4 red**, the
+monthly plan put back on the plan's count goes **2 red**.
+`checks/planning-period.py` 33 assertions, 0 failures — **and one of its own
+first failures was the CHECK**, a fixture writing `extra.monthly` where the
+product reads `row.monthly`, so it reported a correct build broken (§215's
+family). **Two neighbours held a selector this block moved and were REWRITTEN,
+never loosened** (§218): `cycle-edit.py` measured the pen's first `.nc-1line`,
+first `.monthbtn` and a flat list of `.nc-h` — all of which the new block now
+leads — and `contingency.py` asked for a bare `.cyc2-r`, which the period
+satisfies, so its assertion could no longer fail for its own reason (§113.8).
+
+534 → **541/0** on the authoriser · 131/0 on the differ · round trip, two tabs
+and eight concurrent saves green on a virgin Postgres 16 · `ytd-proration`,
+`cycle-edit`, `count-compile`, `monthly-plan`, `tactic-proration`,
+`tactic-outcome`, `unit-follows`, `contingency`, `repeat-project` all green.
+
+**RECORDED, NOT DONE.** The monthly plan is twelve boxes labelled Jan to Dec;
+on a six‑month plan six of them mean nothing, and what they should be is its
+own decision. The block is in the OPEN cycle's pen, so a tenant between cycles
+sets the period when the next one opens — stated on the mockup before it was
+signed off rather than discovered. And `Covers from` now measures nothing at
+all: it writes the strip's line and sets how far a repeating project's dates
+shift at the next cycle, which is what makes an empty one harmless.
+
+**AND `scripts/test-clean-parity.js` IS RED ON `origin/main`, NOT ON THIS.**
+Established by reproducing it on a worktree of main against a virgin database
+before anything here was blamed (§294): migration 004 leaves a unit's pillars,
+SWOT, objectives and `perf` standing where `clearedGraph()` clears them — so
+the platform's Clear Project view and what a new client's database actually
+gets have drifted apart, which is precisely the pair §67 wrote that test to
+keep in step. Its own decision, and not this one's to make in passing.

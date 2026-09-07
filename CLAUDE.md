@@ -456,6 +456,63 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE PLANNING PERIOD, AND THE REVIEW CYCLE INSIDE IT (§299):** Islam, with
+  `Covers from` empty and the strip reading *"reported as of Aug 2026 · 8 of 12
+  months"* — *"how is it reading 8 or 12 months while I didn't add the covers
+  from?"* — then the model itself: *"the cycle of planning is yearly so that's
+  the full time start and end dates. and then we have a review cycle that has a
+  cycle start and end ... sometimes we start planning mid year. the main
+  planning cycle is not a year maybe 6 month but the review cycle might have the
+  same start date but will have a closer end date."* **THE PLATFORM WAS READING
+  NEITHER OF HIS DATES**: the share due was months of the CALENDAR YEAR over
+  twelve, so January was assumed on a plan that may have started in July and
+  `Covers from` was consulted by nothing. **TWO PERIODS, AND ONLY ONE WAS
+  STORED** — `GROUP.planFrom`/`planTo` is what a target belongs to, **one for
+  the tenant** (his), so a closing cycle cannot take it with it (§50), **set
+  beside the cycle** (his), riding `org.extra` with **no migration, measured on
+  a real Postgres rather than claimed** (§172) and stored as an ABSENCE
+  (§50.6). The share is now *how much of the planning period has passed by the
+  month the cycle covers to*, over the period's own length. **NOTHING MOVES
+  UNTIL ONE IS SET**: `planLength()` is twelve and `elapsedMonths()` is the
+  month of the year — the expression it replaces, asserted as an AGREEMENT and
+  never a number — and the strip **names the assumption** rather than letting
+  it pass for a fact (§35, §124); refusing to prorate at all was offered and
+  refused, because a whole year's target makes every unit read as behind
+  (§239's own fault). **ONE FUNCTION WAS ANSWERING TWO QUESTIONS**, which is
+  why January was an assumption nobody made on purpose: `monthOfYear()` is what
+  the monthly plan's twelve Jan–Dec boxes (§278) and a tactic's calendar
+  quarters want, `elapsedMonths()` is a fact about the PLAN — asking the plan's
+  count for the boxes compiles a July plan's August cell as its SECOND month
+  (falsified, 2 red, printing exactly that). **THE EDGES THE OLD ARITHMETIC
+  COULD NOT REACH**: a review point before the plan starts owes nothing and is
+  **not scored** rather than divided by nought, and an end before its start
+  falls back rather than producing a negative length. **`Not set` IS NOT
+  `Missing`** — the red italic is right where the platform NEEDS a date and
+  wrong beside a status chip already saying what happens instead (§214.4), so
+  `monthBtnHtml` takes the empty word from its caller and **both ends are
+  asserted** or a build that quietened every picker passes half. **AND `tobtn`
+  CARRIES NO STYLE AT ALL** — it is the NAME checks address the cycle's end
+  month by, and the new block wore it for one build: **5 red in
+  `ytd-proration.py`** on a picker this never touched (§65.9, §51.11 from the
+  product's side). **THE SERVER'S TWO EDITS GO TOGETHER** (§259.2): classified
+  `cycle` — the grant that already governs the cycle's dates, because two
+  grants for one pen is §42's drift — **and** the keys join the group's known
+  list; falsified separately, **5 red** with the classification out (the change
+  is INVISIBLE and therefore ALLOWED) and **1 red** with the keys out. **ONE
+  SENTENCE FOR THE PAIR** (§184). `checks/planning-period.py` 33/0, falsified
+  from the SOURCES **4 red / 2 red** (§276) — and one of its own first failures
+  was the CHECK, a fixture writing `extra.monthly` where the product reads
+  `row.monthly` (§215). **Two neighbours REWRITTEN, never loosened** (§218):
+  `cycle-edit.py` measured the pen's first `.nc-1line`, first `.monthbtn` and a
+  flat `.nc-h` list, all of which this block now leads, and `contingency.py`
+  asked for a bare `.cyc2-r`, which the period satisfies (§113.8). 541/0
+  &middot; 131/0 &middot; full `qa.py` ERRORS none. **RECORDED, NOT DONE**: the
+  monthly plan's twelve boxes are still Jan–Dec on a six-month plan; the block
+  is in the OPEN cycle's pen, so a tenant between cycles sets it when the next
+  one opens; and `scripts/test-clean-parity.js` is **red on `origin/main`**,
+  reproduced there on a virgin database before anything here was blamed (§294)
+  — migration 004 leaves a unit's pillars, SWOT, objectives and `perf` standing
+  where `clearedGraph()` clears them.
 - **ONE MONTH, ONE MEANING (§298):** Islam, of the Reporting cycle pen —
   *"all the dates should be date selector like the reporting as of. and why do
   we still have the reporting as of? ... the reports due is the only 1 with a
@@ -6916,7 +6973,44 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-07 &mdash; **&sect;297: the contingency files.** Islam,
+*Last Updated: 2026-09-07 &mdash; **&sect;299: the planning period, and the
+review cycle inside it.** Islam, with `Covers from` empty and the strip reading
+*"reported as of Aug 2026 &middot; 8 of 12 months"* &mdash; ***"how is it
+reading 8 or 12 months while I didn't add the covers from?"*** &mdash; and the
+honest answer was that it was reading NEITHER of his dates: the share a target
+is owed was months of the CALENDAR YEAR over twelve, so January was assumed on
+a plan that may have started in July. Then his own model, which is better than
+any of the three readings put to him: ***"the cycle of planning is yearly so
+that's the full time start and end dates. and then we have a review cycle that
+has a cycle start and end ... sometimes we start planning mid year. the main
+planning cycle is not a year maybe 6 month but the review cycle might have the
+same start date but will have a closer end date."*** **TWO PERIODS, AND ONLY
+ONE OF THEM WAS STORED.** The planning period is what a target belongs to; the
+reporting cycle sits inside it and ends at the review point; the share due is
+how much of the first has passed by the end of the second. **ONE FOR THE
+TENANT and SET BESIDE THE CYCLE**, both his answers, drawn out of the running
+platform and signed off before a source was touched (rule 1c). **NOTHING MOVES
+UNTIL A PERIOD IS SET** &mdash; the length is twelve and the count is the month
+of the year, which is the expression it replaces, asserted as an AGREEMENT
+rather than as a number &mdash; and the strip **names the assumption** instead
+of printing it as a fact. **ONE FUNCTION WAS ANSWERING TWO QUESTIONS**, which
+is why January was an assumption nobody made on purpose: the monthly plan's
+twelve boxes are LABELLED Jan to Dec and want the month of the year, while the
+share is a fact about the plan &mdash; asking the plan's count for the boxes
+compiles a July plan's August cell as its second month, falsified at 2 red
+printing exactly that. **THE SERVER'S TWO EDITS GO TOGETHER** (&sect;259.2) and
+were falsified separately: with the classification out the change is INVISIBLE
+and a custodian's save is **ALLOWED**. `checks/planning-period.py` 33/0,
+falsified from the SOURCES **4 red / 2 red**; **two neighbours REWRITTEN, never
+loosened**, one of them because `tobtn` carries no style at all and is the NAME
+a check addresses the cycle's end month by (5 red on a picker this never
+touched). 541/0 &middot; 131/0 &middot; round trip, two tabs and eight
+concurrent saves green on a virgin Postgres 16 &middot; full `qa.py` sweep
+ERRORS none. **AND `scripts/test-clean-parity.js` IS RED ON `origin/main`, NOT
+ON THIS** &mdash; reproduced on a worktree of main against a virgin database
+before anything here was blamed (&sect;294). **On the branch, not merged.***
+
+*Earlier: 2026-09-07 &mdash; **&sect;297: the contingency files.** Islam,
 over five messages: ***"if the platform all is down we need to have a substitue
 action. so before the review day I will download all the presnetations with a
 time stamp. so in case if things are down I have a backup to adjust to and

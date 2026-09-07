@@ -3213,5 +3213,68 @@ console.log("\n31 · a row's type is the office's to change (§292)");
         kinds.join(",") || "(nothing)");
 })();
 
+console.log("\n32 · the planning period (§299)");
+(function () {
+  /* Islam: *"the cycle of planning is yearly so that's the full time start and
+     end dates ... sometimes we start planning mid year."* The two months
+     decide what share of every target is due by now, so a unit that could set
+     them could decide what it is measured against — §94's rule on a field
+     that did not exist when it was written.
+
+     BOTH ENDS, AND THE PAIR TOGETHER (§259.2): a build that classified the
+     field and left it out of the group's known list — or the reverse — makes
+     the change INVISIBLE, which does not refuse the save, it allows it to
+     everybody (§191). So the office's yes is asserted beside the refusal, and
+     the kind is asserted rather than merely the outcome. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units || {})[0];
+  const CUST = (SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian) || "own_mobile";
+  let r = fromStored(SEED, "smo", function (i) {
+    i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
+  });
+  check("§299: the office sets the planning period", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) {
+    i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
+  });
+  check("§299 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§299: and the refusal NAMES the planning period",
+        !r.ok && /planning period/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* CLEARING IT IS THE SAME ACT, and the key is DELETED rather than emptied
+     (§50.6) — a build reading only the write would let anybody throw away a
+     period only the office could set. */
+  const set = clone(SEED);
+  set.group[R.PLAN_FROM] = "Jul 2026"; set.group[R.PLAN_TO] = "Dec 2026";
+  r = fromStored(set, CUST, function (i) {
+    delete i.group[R.PLAN_FROM]; delete i.group[R.PLAN_TO];
+  });
+  check("§299 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) {
+    delete i.group[R.PLAN_FROM]; delete i.group[R.PLAN_TO];
+  });
+  check("§299: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE FOR THE PAIR, not one per month: half a period is not a
+     second decision, and two refusals for one press is §184 with the volume
+     doubled. */
+  r = fromStored(SEED, CUST, function (i) {
+    i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
+  });
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§299: it classifies as `cycle`, once, and nothing else",
+        kinds.length === 1 && kinds[0] === "cycle", kinds.join(",") || "(nothing)");
+
+  /* AND MOVING ONE END ALONE IS STILL SEEN. A build testing only `planFrom`
+     would leave the end of the period unguarded, which is the half that sets
+     the denominator. */
+  r = fromStored(set, CUST, function (i) { i.group[R.PLAN_TO] = "Mar 2027"; });
+  check("§299 REFUSED: moving the end alone is judged too", !r.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

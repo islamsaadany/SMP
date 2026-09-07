@@ -238,30 +238,36 @@ with sync_playwright() as pw:
             btn.click(); pg.wait_for_timeout(400); opened = True
             break
     ck("the cycle pen opens", opened)
+    # §299: THE REVIEW BLOCK, NAMED. The planning period is a `.cyc2-r` too
+    # and it is drawn FIRST, so a bare `.cyc2-r` is satisfied by a build that
+    # lost the review block entirely — §113.8, an assertion that can no longer
+    # fail for its own reason. Rewritten rather than loosened (§218): it asks
+    # for the block that holds the review day, and still asserts it is not
+    # among the cycle's own dates, which is Islam's decision.
     ck("and the review block is in it, not among the cycle's own dates",
-       js(pg, "()=>!!document.querySelector('.cyc2-r') && "
+       js(pg, "()=>!!document.querySelector('.cyc2-r:not(.planper) input[type=date]') && "
               "!document.querySelector('.cyc2-f .cyc2-r')") is True)
 
-    if pg.query_selector(".cyc2-r input[type=date]"):
-        pg.fill(".cyc2-r input[type=date]", "2026-07-28")
-        pg.fill(".cyc2-r input[type=time]", "10:00")
+    if pg.query_selector(".cyc2-r:not(.planper) input[type=date]"):
+        pg.fill(".cyc2-r:not(.planper) input[type=date]", "2026-07-28")
+        pg.fill(".cyc2-r:not(.planper) input[type=time]", "10:00")
         pg.click("body"); pg.wait_for_timeout(250)
         ck("the day and time reach the stored review",
            js(pg, "()=>[REVIEW.reviewDay, REVIEW.reviewAt]") == ["2026-07-28", "10:00"],
            js(pg, "()=>[REVIEW.reviewDay, REVIEW.reviewAt]"))
-        pg.fill(".cyc2-r .nc-rem", "48, 6, 6, x")
+        pg.fill(".cyc2-r:not(.planper) .nc-rem", "48, 6, 6, x")
         pg.click("body"); pg.wait_for_timeout(250)
         ck("the moments are cleaned by the shared rule, and the box says what is stored",
            js(pg, "()=>[SMPRules.remindHours(REVIEW), document.querySelector('.nc-rem').value]")
            == [[48, 6], "48 · 6"],
            js(pg, "()=>[SMPRules.remindHours(REVIEW), document.querySelector('.nc-rem').value]"))
-        pg.fill(".cyc2-r input[type=date]", "")
+        pg.fill(".cyc2-r:not(.planper) input[type=date]", "")
         pg.click("body"); pg.wait_for_timeout(250)
         ck("clearing the day DELETES both keys, never stores an empty string",
            js(pg, "()=>['reviewDay' in REVIEW, 'reviewAt' in REVIEW]") == [False, False],
            js(pg, "()=>[REVIEW.reviewDay, REVIEW.reviewAt]"))
     else:
-        ck("the review block draws its three fields", False, "no date box in .cyc2-r")
+        ck("the review block draws its three fields", False, "no date box in the review block")
 
     # ── 4 · the reminder ────────────────────────────────────────────────
     head("4 · the reminder, at each moment")

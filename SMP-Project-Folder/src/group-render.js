@@ -2992,8 +2992,15 @@ function monthBtnHtml(value, cls, setter, opts){
     ' aria-haspopup="dialog" aria-expanded="false"' +
     ' title="' + (shown ? (o.day ? "Change the date" : "Change the month")
                         : (o.day ? "Pick a date" : "Pick a month")) + '">' +
+    /* §299: THE EMPTY WORD IS THE CALLER'S, AND SO IS WHETHER IT IS AN ALARM.
+       `Missing` in `--bad-tx` is right for a date the platform NEEDS — a
+       cycle cannot be opened without the month it covers to — and wrong for
+       one with a working fallback: a red word over something that is not owed
+       is §214.4's fault, and the planning period says "not set" beside a
+       status line already naming what happens instead. */
     (shown ? '<span class="mval">' + esc(shown) + '</span>'
-           : '<span class="mval mnone">Missing</span>') +
+           : '<span class="mval' + (o.none ? '' : ' mnone') + '">' +
+             esc(o.none || "Missing") + '</span>') +
     '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" ' +
       'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
       '<rect x="3" y="4.5" width="14" height="12.5" rx="2"/>' +

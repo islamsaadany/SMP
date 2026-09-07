@@ -1942,19 +1942,6 @@
      A rule and a heading say it is a different subject; the box shapes are
      the pen's own, so nothing new is invented (§53.5). */
   .cyc2-r { border-top:1px solid var(--line); margin-top:18px; padding-top:16px; }
-  /* §299: THE PLANNING PERIOD LEADS, so its rule is UNDER it. `.cyc2-r` was
-     written for the block that ends the pen and carries its line above; the
-     first block in the pen must carry one below or the period and the cycle
-     run together as one form. Scoped to the first child rather than to the
-     class, because the same block would want the other rule anywhere else. */
-  .newcycle > .cyc2-r.planper:first-child {
-    border-top:0; margin-top:0; padding-top:0;
-    border-bottom:1px solid var(--line); margin-bottom:18px; padding-bottom:16px;
-  }
-  /* The status sits ON the line with the two months, never as a third label:
-     it belongs to the pair beside it, and a stacked one reads as a field
-     (§87's twins, in a form — the review block's "hours before" already). */
-  .planper .nc-unit { white-space:nowrap; }
   .cyc2-r .nc-grid .fld { width:170px; }
   .cyc2-r .nc-grid .nc-time { width:108px; }
   .cyc2-r .nc-grid .nc-rem { width:150px; }

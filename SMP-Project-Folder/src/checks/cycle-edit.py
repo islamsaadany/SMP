@@ -180,6 +180,16 @@ def pen_state(pg):
         heads: [...p.querySelectorAll(".nc-h")].map(h => h.textContent.trim()),
         labels: [...p.querySelectorAll(".nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
+        /* spec 030: THE CYCLE'S OWN FIELDS, asked apart from the review
+           block's. Islam's decision was that the review day must NOT join
+           these — *"the cycle is about the time we cover and what we report
+           already and how we preorate more dates will create confusion"* —
+           so the assertion below reads this list and not every box in the
+           pen, which is what makes it able to catch the drift back. */
+        cycleLabels: [...p.querySelectorAll(".cyc2-f .nc-grid label > span:first-child")]
+                  .map(s => s.textContent.trim()),
+        reviewLabels: [...p.querySelectorAll(".cyc2-r .nc-grid label > span:first-child")]
+                  .map(s => s.textContent.trim()),
         fields: [...p.querySelectorAll(".nc-grid input")].map(i => i.value),
         bound: [...p.querySelectorAll(".nc-grid input")].every(i => i.hasAttribute("data-fld")),
         month: (p.querySelector(".monthbtn .mval") || {}).textContent || "",
@@ -303,9 +313,20 @@ with sync_playwright() as p:
     ok("...and no Cancel", pen.get("cancel") is False, pen)
     ok("every field is BOUND, which is what makes those unnecessary",
        pen.get("bound") is True, pen)
-    ok("it asks for all five facts",
-       [x.lower() for x in (pen.get("labels") or [])] ==
-       ["name", "covers from", "to", "reports due", "reporting as of"], pen.get("labels"))
+    # REWRITTEN, NEVER LOOSENED (§214.3, §218). This held every box in the pen
+    # as one flat list, which spec 030 moves: the review day and its reminder
+    # times are in the pen and are deliberately NOT among the cycle's own
+    # fields. Widening the literal to eight would have made it pass and stopped
+    # it guarding anything; asserting the two lists SEPARATELY is what keeps
+    # Islam's decision — the measuring dates are these five and no more — the
+    # thing the check is about.
+    ok("the cycle's own block asks for exactly its five facts, and no more",
+       [x.lower() for x in (pen.get("cycleLabels") or [])] ==
+       ["name", "covers from", "to", "reports due", "reporting as of"],
+       pen.get("cycleLabels"))
+    ok("and the review day is NOT among them — it changes no figure (spec 030)",
+       not any("review" in x.lower() for x in (pen.get("cycleLabels") or [])),
+       pen.get("cycleLabels"))
     # The month's label is the panel's own since §273 and is deliberately NOT
     # the strip's wording: the strip states a fact ("reported as of Jun 26"),
     # the field asks for one. Asserted so a later build cannot drift them into
@@ -313,8 +334,15 @@ with sync_playwright() as p:
     ok("filled from the cycle, not empty",
        (pen.get("fields") or [None])[0] == r0.get("name"), pen.get("fields"))
     ok("two columns, headed", pen.get("cols") is True and
-       [h.lower() for h in (pen.get("heads") or [])] == ["this cycle", "ending it"],
+       [h.lower() for h in (pen.get("heads") or [])][:2] == ["this cycle", "ending it"],
        pen.get("heads"))
+    # spec 030: and the review sits UNDER them in a block of its own, which is
+    # the whole of how it is kept out of the arithmetic. Asserted at both ends
+    # — present as its own block, and its fields absent from the cycle's.
+    ok("with the review under them, in a block of its own",
+       [h.lower() for h in (pen.get("heads") or [])][2:] == ["the review"] and
+       len(pen.get("reviewLabels") or []) == 3,
+       [pen.get("heads"), pen.get("reviewLabels")])
     ok("Close the cycle is in the ENDING IT column, not among the fields",
        pen.get("close") is True and pen.get("closeInDanger") is True, pen)
     ok("...and it is live, because nothing can be unsaved",

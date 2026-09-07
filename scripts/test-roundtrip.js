@@ -306,6 +306,46 @@ function firstDiff(a, b, at) {
     process.exitCode = 1;
   }
 
+  /* ── spec 030: THE REVIEW DAY, THE MOMENTS AND THE RECORD ──────────────
+     THE CLAIM IS "NO MIGRATION", AND §172 IS WHY IT IS NOT LEFT AS A CLAIM:
+     four layers agreed about a value the database had never once been offered,
+     and the column refused it. These three ride the review row's `extra`, so
+     the assertion is that they come back exactly — a list of numbers through
+     jsonb, and a map keyed by person, both of which are where a silent
+     reshaping would hide. */
+  const rState = await io.readState(client);
+  rState.review = Object.assign({}, rState.review, {
+    reviewDay: "2026-07-28", reviewAt: "10:00", remindAt: [24, 12, 6, 3],
+    taken: { smo: { copy: "2026-07-27T09:00:00.000Z",
+                    slides: "2026-07-27T09:01:00.000Z" },
+             other: { slides: "2026-07-27T11:00:00.000Z" } }
+  });
+  await io.writeState(client, rState);
+  const rBack = await io.readState(client);
+  const rSame = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const rOk = rBack.review.reviewDay === "2026-07-28" &&
+              rBack.review.reviewAt === "10:00" &&
+              rSame(rBack.review.remindAt, [24, 12, 6, 3]) &&
+              rSame(rBack.review.taken, rState.review.taken);
+  console.log("contingency: review day, moments and record round trip:",
+    rOk ? "PASS" : "FAIL",
+    rOk ? "[no migration — review.extra]"
+        : JSON.stringify({ day: rBack.review.reviewDay, at: rBack.review.reviewAt,
+                           moments: rBack.review.remindAt, taken: rBack.review.taken }));
+  if (!rOk) process.exitCode = 1;
+  /* AND THEY LEAVE AGAIN (§50.6), or a cycle that never named a day and one
+     whose day was taken away are not the same row, and every save after a
+     clear carries a change nobody made. */
+  delete rBack.review.reviewDay; delete rBack.review.reviewAt;
+  delete rBack.review.remindAt; delete rBack.review.taken;
+  await io.writeState(client, rBack);
+  const rClean = await io.readState(client);
+  const rcOk = !("reviewDay" in rClean.review) && !("reviewAt" in rClean.review) &&
+               !("remindAt" in rClean.review) && !("taken" in rClean.review);
+  console.log("  ...and clear again, keys DELETED:", rcOk ? "PASS" : "FAIL",
+    rcOk ? "" : JSON.stringify(Object.keys(rClean.review)));
+  if (!rcOk) process.exitCode = 1;
+
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 

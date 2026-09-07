@@ -1892,42 +1892,6 @@
     .cyc2-d { border-left:0; border-top:1px solid var(--line);
               padding-left:0; padding-top:16px; margin-top:16px; }
   }
-  /* ── THE CONTINGENCY CARD AND ITS RECORD (spec 030) ──────────────────
-     The card is the Download tab's own shape and needs almost nothing. What
-     it does need is the second paragraph reading as an aside rather than as
-     more of the first: `.fbody` sets the colour for everything inside it, so
-     `.why` alone lost on specificity and the caution about the file having no
-     sign-in in front of it read at the same weight as the sentence describing
-     the feature — which is the one line on this card somebody must not skim
-     (§38.5's shape, in type rather than colour). */
-  .contwhy { display:block; margin:10px 0 0; color:var(--ink-3); font-size:12px;
-             line-height:1.55; }
-  .contgot { margin:10px 0 0; font-size:12.5px; font-weight:600; color:var(--good-tx); }
-  /* WHO HAS TAKEN THEM. Two marks per row and a time, in the platform's own
-     pill vocabulary — never a tick and a cross, which say right and wrong
-     about something that is only done or not yet. */
-  .contlist td .pill { font:800 10px/1 var(--sans); letter-spacing:.11em;
-                       text-transform:uppercase; padding:4px 9px; border-radius:999px; }
-  .contlist .p-yes { background:var(--good-bg); color:var(--good-tx); }
-  .contlist .p-no  { background:var(--attn-bg); color:var(--attn-tx); }
-  .contlist .contat { font:12px/1 var(--mono, ui-monospace,SFMono-Regular,Menlo,monospace);
-                      color:var(--ink-3); }
-
-  /* ── THE REVIEW BLOCK (spec 030) ──────────────────────────────────────
-     ITS OWN ROW UNDER THE TWO COLUMNS, which is the whole of Islam's
-     objection answered: among the cycle's other fields a fourth date reads as
-     a fourth thing the arithmetic consults, and this one consults nothing.
-     A rule and a heading say it is a different subject; the box shapes are
-     the pen's own, so nothing new is invented (§53.5). */
-  .cyc2-r { border-top:1px solid var(--line); margin-top:18px; padding-top:16px; }
-  .cyc2-r .nc-grid .fld { width:170px; }
-  .cyc2-r .nc-grid .nc-time { width:108px; }
-  .cyc2-r .nc-grid .nc-rem { width:150px; }
-  /* The unit sits ON the line with the boxes, never as a label above one:
-     "hours before" belongs to the number beside it, and a second stacked
-     label would read as a fourth field (§87's twins, in a form). */
-  .nc-unit { font-size:12px; color:var(--ink-3); padding-bottom:9px; }
-
   /* THE PEN LIT, in `penBtn()`'s own treatment rather than a second one
      (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
      control in a worded shape. */

@@ -5224,69 +5224,7 @@ function renderImportDownload(){
       dlBtn("archives", "Archives", nArch) +
     '</div></div>';
 
-  return cfgHead("Import & archives", null, null, false) + blank + files + contCard();
-}
-
-/* ── THE CONTINGENCY FILES (spec 030) ────────────────────────────────────
-   Islam: *"if the platform all is down we need to have a substitue action ...
-   so in case if things are down I have a backup to adjust to and present
-   from."*
-
-   THE THIRD CARD, IN THE SHAPE OF THE TWO ABOVE IT — this is the page where
-   files leave the platform, and a fourth vocabulary for "press this and a file
-   arrives" would be a second answer to a settled question (§53.5).
-
-   DRAWN FOR THE SMO TEAM AND NOBODY ELSE, which is Islam's own correction of
-   the first drawing: it had put the reminder on the welcome screen, which
-   EVERY viewer opens, so it appeared beside a unit head's own row. A unit head
-   has nothing to take. Absent rather than drawn and refused — §61's trap is
-   about a control somebody NEEDS being unreachable, and this is the opposite:
-   a control nobody outside the office has any use for.
-
-   THE PICKER ABOVE DOES NOT APPLY AND THE CARD SAYS SO. A backup of some of
-   the subjects is not a backup; the argument for ticking a few is that you
-   want a few workbooks, and there is no such argument for the day the
-   platform is down.
-
-   IT SAYS WHAT THE WORKING COPY IS. There is no sign-in in front of it —
-   whoever holds the file sees everything in it — and that comes with any
-   backup, which is exactly why it is said on the card rather than discovered
-   (§124, and rule A14's "what the solution costs"). */
-function contCard(){
-  if (typeof CONT === "undefined" || !CONT.mayTake()) return "";
-  var t = CONT.taken() || {}, n = 0;
-  try { n = CONT.subjects().length; } catch (e) {}
-  /* WHAT THIS PERSON ALREADY HAS, said on the buttons' own line rather than
-     as a chip beside each: two ticks in a row of two buttons is a table
-     nobody asked for, and the sentence answers "am I covered" in one read. */
-  var got = (t.copy && t.slides) ? "You have both, taken " + esc(contWhen(t.slides > t.copy ? t.slides : t.copy)) + "."
-          : t.copy   ? "You have the working copy \u2014 the slides are still missing."
-          : t.slides ? "You have the slides \u2014 the working copy is still missing."
-          : "";
-  return '<div class="fkey contkey">Contingency files</div>' +
-    '<div class="fcard contcard"><div class="fbody">' +
-      '<p>Take these before a review. If the platform cannot be reached on the day, the ' +
-        '<b>working copy</b> opens from your laptop with no connection at all \u2014 every ' +
-        'plan, every figure, every deck \u2014 and the <b>slides</b> can be presented from ' +
-        'PowerPoint.</p>' +
-      '<p class="why contwhy">Both carry the date and time you took them in their name, and ' +
-        'hold everything as it stood at that moment. The working copy has no sign-in in ' +
-        'front of it: whoever holds the file sees everything in it.</p>' +
-      (got ? '<p class="contgot">' + got + '</p>' : '') +
-    '</div>' +
-    '<div class="ffoot"><span class="why">Everything, not a selection \u2014 the picker above ' +
-      'does not apply here.</span>' +
-      '<button class="editbtn" data-conttake="copy">Working copy</button>' +
-      '<button class="editbtn" data-conttake="slides">Slides <span class="cnt">(' + n +
-        ')</span></button>' +
-    '</div></div>';
-}
-
-function contWhen(iso){
-  var d = new Date(iso);
-  return isFinite(d.getTime())
-    ? d.toLocaleString(undefined, { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
-    : "";
+  return cfgHead("Import & archives", null, null, false) + blank + files;
 }
 
 /* ── The Upload tab ───────────────────────────────────────────────── */
@@ -5668,139 +5606,6 @@ function renderOverview(){
    `data-fld` handler writes it on `change` — which is on blur (§35), and is
    what makes Save and Cancel unnecessary. Written once because five callers is
    four more than the project's extract-at-three rule allows (§3b). */
-/* ── THE REVIEW DAY, AND WHEN TO REMIND THE OFFICE (spec 030) ────────────
-   Islam, of the first drawing, which put this among the cycle's other dates:
-   *"the cycle is about the time we cover and what we report already and how
-   we preorate more dates will create confusion. push back if you want."*
-
-   HE IS RIGHT, AND IT MOVED RATHER THAN WENT. The three fields under *This
-   cycle* answer ONE question in three parts — what stretch of the year, when
-   the units hand figures in, and which month the figures are MEASURED against
-   (§239) — so a fourth box among them reads as a fourth thing the arithmetic
-   consults. It consults nothing: the review day changes no score, no
-   benchmark and no proration. It says when the meeting is, so a countdown has
-   something to count from. Its own block, under the two columns, with the
-   thing it drives beside it.
-
-   AND IT COULD NOT RIDE ON `Reports due`, measured before a field was
-   proposed: that is thirteen days earlier in the worked example, and it is
-   free text carrying no time of day at all.
-
-   BOTH ARE PICKED, NOT TYPED — §177's rule, for §177's reason: a countdown
-   cannot read "15 Jul 2027", and the platform's own answer to that is a
-   control that can only produce a date. Cleared, the keys are DELETED
-   (§50.6), so a cycle that never named a day and one whose day was taken
-   away are byte-identical and neither reminds anybody. */
-/* The review day the way the strip says it: the day, and the time when one
-   was given. Empty when no day is set, which is what keeps the strip from
-   carrying a line about something nobody has answered. */
-/* ── WHO ON THE TEAM HAS TAKEN THE FILES (spec 030) ──────────────────────
-   Islam: *"all the smo team will download the conteignecy files."* Without a
-   list that cannot be established — the banner tells each person about their
-   own files and says nothing about anybody else's, so "the team is covered"
-   would be a hope. Here, under the cycle it is about.
-
-   IT IS THE REGISTER'S OWN LIST, NOT A SECOND ONE (§53.5): everybody the
-   shared rule says may take them, in the register's order, so a new SMO team
-   member appears the day they are given the seat rather than the day somebody
-   remembers this page.
-
-   DRAWN ONLY WHILE THERE IS A REVIEW DAY. With no day nothing is being
-   counted down to, so a table of "not yet" against a deadline that does not
-   exist is an alarm about nothing (§45.2, §177 with the sign reversed).
-
-   TWO MARKS AND A TIME, never a tick and a cross: those say right and wrong,
-   and this is only done or not yet (§15.1's vocabulary). */
-function contTakenSection(){
-  if (typeof SMPRules === "undefined" || !SMPRules.reviewMoment(REVIEW)) return "";
-  var w = world();
-  var team = (PEOPLE || []).filter(function(p){
-    return personActive(p) && SMPRules.mayTakeContingency(w, p);
-  });
-  if (!team.length) return "";
-  /* The register's own short name (§93.8), never `p.name`: this list sits
-     beside every other table on the page and one of them reading a full legal
-     name where the others read two would look like a different person. */
-  var names = displayNames();
-  var both = 0;
-  var rows = team.map(function(p){
-    var t = SMPRules.contingencyTaken(REVIEW, p.key) || {};
-    if (t.copy && t.slides) both++;
-    var last = (t.copy && t.slides) ? (t.slides > t.copy ? t.slides : t.copy) : (t.copy || t.slides);
-    function pill(v){
-      return '<span class="pill ' + (v ? "p-yes" : "p-no") + '">' +
-        (v ? "Taken" : "Not yet") + '</span>';
-    }
-    return '<tr><td>' + esc((names[p.key] || {}).label || p.name) + '</td>' +
-      '<td class="cc">' + pill(t.copy) + '</td>' +
-      '<td class="cc">' + pill(t.slides) + '</td>' +
-      '<td class="contat">' + (last ? esc(contWhen(last)) : "\u2014") + '</td></tr>';
-  }).join("");
-  return section("", "Contingency files", null,
-    '<div class="cfg contlist"><table><thead><tr><th>SMO team</th>' +
-      '<th class="cc" style="width:16%">Working copy</th>' +
-      '<th class="cc" style="width:16%">Slides</th>' +
-      '<th style="width:22%">Taken</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div class="note"><b>' + both + ' of ' + team.length + '</b> ' +
-      (both === team.length
-        ? 'have both files for ' + esc(REVIEW.name || "this cycle") + '.'
-        : 'have both. The platform records that a file was taken and when \u2014 never the ' +
-          'file itself.') +
-      ' Take yours on <b>Import &amp; archives</b>.</div>');
-}
-
-function reviewDayWord(){
-  var w = SMPRules.reviewMoment(REVIEW);
-  if (!w) return "";
-  var day = w.toLocaleDateString(undefined, { day:"numeric", month:"short" });
-  return REVIEW.reviewAt
-    ? day + ", " + w.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" })
-    : day;
-}
-
-function reviewDayBlock(){
-  var hrs = SMPRules.remindHours(REVIEW);
-  var dayI = FIELDS.length;
-  FIELDS.push(function(v){
-    var t = String(v || "").trim();
-    if (t) REVIEW.reviewDay = t; else { delete REVIEW.reviewDay; delete REVIEW.reviewAt; }
-  });
-  var atI = FIELDS.length;
-  FIELDS.push(function(v){
-    var t = String(v || "").trim();
-    if (t) REVIEW.reviewAt = t; else delete REVIEW.reviewAt;
-  });
-  /* THE MOMENTS ARE ONE FIELD, NOT FOUR BOXES. Islam: *"we need to set the
-     moments somehwer"* — and four boxes for four numbers is a form for
-     something nobody changes twice a year. Typed as a list, read through the
-     shared rule, and put back into the box in the rule's own spelling so
-     what is stored and what is shown cannot differ (§124). */
-  var remI = FIELDS.length;
-  FIELDS.push(function(v){
-    var raw = String(v || "").split(/[^0-9]+/).filter(Boolean).map(Number);
-    if (!String(v || "").trim()) REVIEW.remindAt = [];
-    else REVIEW.remindAt = raw;
-    var el = document.querySelector('.newcycle [data-fld="' + remI + '"]');
-    if (el) el.value = SMPRules.remindHours(REVIEW).join(" · ");
-  });
-  return '<div class="cyc2-r">' +
-    '<div class="nc-h">The review</div>' +
-    '<div class="nc-grid">' +
-      '<label><span>Review day</span><input type="date" class="fld" data-fld="' + dayI +
-        '" value="' + esc(REVIEW.reviewDay || "") + '" aria-label="Review day"></label>' +
-      '<label><span>at</span><input type="time" class="fld nc-time" data-fld="' + atI +
-        '" value="' + esc(REVIEW.reviewAt || "") + '" aria-label="Time of the review"></label>' +
-      '<label><span>Remind the SMO team</span><input class="fld nc-rem" data-fld="' + remI +
-        '" value="' + esc(hrs.join(" \u00b7 ")) + '" placeholder="24 \u00b7 12 \u00b7 6 \u00b7 3" ' +
-        'aria-label="Hours before the review to remind the SMO team"></label>' +
-      '<span class="nc-unit">hours before</span>' +
-    '</div>' +
-    '<div class="nc-why">The day the units present, and when to remind the office to take ' +
-      'the contingency files. <b>Not a measuring date</b> \u2014 it changes no score and no ' +
-      'figure. Leave the day empty and nothing is ever sent.</div>' +
-  '</div>';
-}
-
 function cycleField(label, value, placeholder, setter){
   /* A REFUSAL PUTS THE VALUE BACK IN THE BOX (§124). With no Save there is no
      press to refuse at, so a setter that declines — by returning false — would
@@ -6022,13 +5827,6 @@ function renderCycle(){
             '</span>'
           : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
             'figure is measured against a whole one</span>') + '</span>' +
-      /* THE REVIEW DAY IS ON THE STRIP, so the day is readable without
-         opening the pen — and only when there is one, because a line reading
-         "not set" over a thing nobody has to set is furniture (§45.2, §94.15).
-         Drawn for everybody: the day of the review is not a secret, and only
-         TAKING the files is the office's. */
-      (reviewDayWord() ? '<span class="fstrip-meta">presents <b>' +
-        esc(reviewDayWord()) + '</b></span>' : '') +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
          Islam: "keep the close cycle inside the edit. as it's a critical
@@ -6164,7 +5962,7 @@ function renderCycle(){
               'the units reporting.</p>' +
             '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>' +
           '</div>' +
-        '</div>' + reviewDayBlock() + '</div>'
+        '</div></div>'
       : '') +
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
@@ -6198,7 +5996,7 @@ function renderCycle(){
       ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
         claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
           (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + head + contTakenSection() +
+      null, false) + head +
     (claims.length
       ? section("", "Claim requests", null,
           '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +

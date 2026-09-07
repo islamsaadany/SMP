@@ -497,6 +497,54 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   deleted** (§214.3, §218). **RECORDED, NOT DONE**: a locked word is centred and
   a picker is not, so that column reads ragged, and six places still spell
   `builderHere()` out inline.
+- **A BACKUP TO ADJUST TO AND PRESENT FROM (§297, spec 030):** Islam —
+  *"if the platform all is down we need to have a substitue action ... so in
+  case if things are down I have a backup to adjust to and present from."*
+  **A PDF CANNOT BE ADJUSTED**, so the format first asked for answers the
+  errand first described and not the one he arrived at; said plainly, and he
+  dropped the collective PDF himself. **THE WORKING COPY IS THE PLATFORM, NOT A
+  RENDERING OF IT**: the built file with the tenant's graph in a
+  `<script type="application/json">` block, which `sync.js` reads at the exact
+  point it already decides a `file://` page runs on baked data. **THE BLOCK
+  MUST SIT ABOVE THE PLATFORM'S OWN SCRIPTS** — at the end it is not in the
+  document when the boot code looks, and the copy comes up on the baked WORKED
+  EXAMPLE with no error anywhere, which is worse than no backup and renders
+  perfectly. §238's hashed policy covers BARE `<script>` tags only, so a data
+  block is not silenced by it (both ends asserted). **THE SLIDES ARE CONVERTED,
+  NEVER DESCRIBED TWICE**: §296's refusal was measured (639 lines, twenty-one
+  slide kinds, four moves in a fortnight) and Islam overruled the conclusion
+  rather than the reasoning, so `deckHtmlFor()` assembles the REAL deck and the
+  converter walks headings, prose and TABLES — it knows nothing about a
+  pillar's measures or a project's milestones, so a slide kind added tomorrow
+  arrives with no edit. **THREE CONVERSION FAULTS FOUND BY READING THE FILE**
+  (§96): a heading run together into one word, a quarters cell reading `1234`
+  (which says a tactic runs all year when it runs in two), and the pillars
+  roll-call converting to an empty page — so the lead falls back to LEAF TEXT.
+  **THE REVIEW DAY IS NOT A MEASURING DATE**, which is Islam's own objection
+  answered rather than argued with (*"more dates will create confusion"*): the
+  three fields under *This cycle* are the year covered, when figures are due
+  and the month they are MEASURED against (§239), and the review day consults
+  none of it — its own block, and every score read before and after and
+  asserted byte-identical. **IT COULD NOT RIDE ON `Reports due`**: thirteen
+  days earlier in the worked example and free text with no time of day.
+  **THE REMINDER IS §258's BANNER IN THREE VOICES** — quiet at 24 and 12,
+  alarm at 6 and 3, no *Later* at the last — **ending for the person who has
+  BOTH files, never when somebody else has** (§190), the office's alone (his
+  correction: the first drawing used the welcome screen, which EVERY viewer
+  opens). **NOTHING WAKES THIS PLATFORM UP** (§97.5, §283, §293), so a
+  reminder appears the next time that person opens it, said on the page rather
+  than discovered. **NO MIGRATION, PROVED** (§172) and **the server needed
+  nothing and it is asserted anyway** — `cycle`, office allowed, unit head and
+  custodian refused, the stamp included, because a map keyed by PERSON reads
+  as everybody's own and is not. **TWO COSTS NAMED**: the copy has no sign-in
+  in front of it, and the `taken` map travels whole so two of the office
+  pressing at once can lose a stamp (§234's shape — one extra reminder, never
+  a lost file). 63 assertions, 0 failures, falsified from the SOURCES **3 / 1 /
+  5** (§276); `cycle-edit.py` REWRITTEN, never loosened (§214.3, §218) — it
+  held every box in the pen as one flat list and now asserts the two blocks
+  SEPARATELY, which is the decision itself turned into a check. **Recorded,
+  not done**: a flow (§266) cannot be downloaded, and with nobody signed in
+  anywhere an overnight reminder waits for the morning.
 - **THE DECK ON PAPER (§296):** Islam, answering §295's open question —
   *"I mean the performance deck. the one the units present from"* — then, of two
   ways of building it, *"let's go with the pdf for now."* **SMP HAS TWO THINGS
@@ -6134,6 +6182,22 @@ python3 checks/deck-pdf.py      # the deck on paper (§296): the entry beside Pr
                                 # readers are asked for BY NAME first (§215). 0
                                 # failures; 6 red / 2 red on two falsifications made
                                 # from the SOURCES (§276)
+python3 checks/contingency.py   # the contingency files (§297): the card, the
+                                # banner and the list drawn for the office and ABSENT for
+                                # somebody the shared rule refuses — switched TO, never a
+                                # doctored matrix cell; every score and the review point
+                                # read before and after a review day is set and asserted
+                                # byte-identical (if this fails the day has grown into the
+                                # arithmetic and Islam's objection has come true); the
+                                # reminder at each moment, quiet then loud, measured as
+                                # PAINT and ending only for the person who has BOTH files;
+                                # the working copy OPENED rather than only built, from a
+                                # file with nothing running, holding this tenant (a copy
+                                # that boots on the worked example renders perfectly); and
+                                # the slides asserted to carry YTD, Progress and a figure
+                                # against its benchmark — which the plan download does not,
+                                # so a build shipping that file goes 5 red. 63 assertions;
+                                # falsified from the SOURCES 3 / 1 / 5 (§276)
 python3 checks/import-page.py   # Import & archives, three tabs (§295): the mode
                                 # switch gone from BOTH tabs and Build a plan gone from
                                 # the page; the picker's count label and Select all/none
@@ -6812,7 +6876,48 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-05 &mdash; **&sect;296: the deck on paper.** Islam,
+*Last Updated: 2026-09-07 &mdash; **&sect;297: the contingency files.** Islam,
+over five messages: ***"if the platform all is down we need to have a substitue
+action. so before the review day I will download all the presnetations with a
+time stamp. so in case if things are down I have a backup to adjust to and
+present from."*** **THE ASK MOVED TWICE AND BOTH TURNS CHANGED THE ANSWER** —
+from a fixed record, to *"in case something needs fixing"*, to that sentence —
+and **a PDF cannot be adjusted**, so the format first asked for answers the
+errand first described and not the one he arrived at. Said plainly; he dropped
+the collective PDF himself. **THE OFFER THAT REPLACED IT WAS SPIKED BEFORE IT
+WAS QUOTED**, because *"about a day"* on an unproven mechanism is a guess with a
+number on it: one hour, and the real `checks/deck-pdf.py` run against the
+offline file, **0 failures on all three subject shapes**. **THE BLOCK MUST SIT
+ABOVE THE PLATFORM'S OWN SCRIPTS** — found by putting it at the end and watching
+the copy come up on the baked WORKED EXAMPLE with no error anywhere, which is
+worse than no backup and renders perfectly. **TWO CORRECTIONS OF THE FIRST
+DRAWING, EACH KILLING AN OPTION RATHER THAN ADJUSTING IT**: the feature is the
+SMO team's (the mockup had hung the reminder on the welcome screen, which EVERY
+viewer opens, so it sat beside a unit head's own row), and ***"the cycle is
+about the time we cover and what we report already and how we preorate more
+dates will create confusion. push back if you want."*** **HE IS RIGHT AND IT
+MOVED RATHER THAN WENT** — the review day consults none of the arithmetic, which
+is asserted rather than promised: every score, benchmark, elapsed-month count
+and review point read before and after, byte-identical. **THE SLIDES ARE
+CONVERTED, NEVER DESCRIBED A SECOND TIME**: &sect;296's refusal was measured and
+Islam overruled the conclusion rather than the reasoning, so the converter walks
+the REAL deck's headings, prose and tables and knows nothing about a pillar's
+measures or a project's milestones. **THREE CONVERSION FAULTS FOUND BY READING
+THE FILE AND NOT THE CODE** &mdash; a heading run together into one word, a
+quarters cell reading `1234`, and the pillars roll-call converting to an empty
+page. **NO MIGRATION, PROVED ON A VIRGIN POSTGRES**; the server needed nothing
+and it is asserted anyway. **Two costs named rather than found out**: the copy
+has no sign-in in front of it, and the record of who has taken them travels
+whole, so two of the office pressing at once can lose a stamp &mdash; one extra
+reminder, never a lost file. `checks/contingency.py` **63/0**, falsified from
+the SOURCES **3 / 1 / 5**, and one of its own first failures was the CHECK
+(&sect;237 rebases on a viewer switch, so it was measuring a review day it had
+itself destroyed). 534/0 &middot; 131/0 &middot; round trip, clean parity, two
+tabs, concurrent saves and the incremental writer all green on a real Postgres
+16 &middot; full `qa.py` sweep ERRORS none &middot; `cycle-edit.py` REWRITTEN,
+never loosened. **On the branch, not merged.***
+
+*Earlier: 2026-09-05 &mdash; **&sect;296: the deck on paper.** Islam,
 answering &sect;295's open question &mdash; *"I mean the performance deck. the one
 the units present from"* &mdash; and then, of the two ways of building it,
 *"let's go with the pdf for now."* **SMP HAS TWO THINGS CALLED THE

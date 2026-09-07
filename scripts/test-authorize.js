@@ -700,6 +700,47 @@ console.log("\n8b · the cycle's name and dates (§273)");
   refuses(headKey, redate, "a unit's head cannot move its dates");
 })();
 
+/* ── spec 030: THE REVIEW DAY, THE REMINDER TIMES AND THE RECORD OF WHO
+   HAS TAKEN THE CONTINGENCY FILES ─────────────────────────────────────────
+   THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY (§172). All three are
+   review fields outside `REVIEW_PER_TARGET`, so they fall to `cycle` by the
+   rule that has classified the cycle's own facts all along — and §172 is the
+   record of exactly this going wrong four layers down, where every layer
+   agreed about a value the database had never been offered.
+
+   BOTH WAYS, or a rule that refuses everybody protects nothing (§94.2).
+
+   AND THE STAMP IS THE ONE WORTH ASSERTING. It is written by each member of
+   the office about themselves, so it has to be ACCEPTED from them — a rule
+   that quietly refused it would leave the reminder firing for ever on a
+   person who had taken both files, with nothing on any screen saying why. */
+console.log("\n8b2 · the review day and the contingency record (spec 030)");
+(function () {
+  const setDay = function (s) {
+    s.review = Object.assign({}, s.review,
+      { reviewDay: "2026-07-28", reviewAt: "10:00" });
+  };
+  const setMoments = function (s) {
+    s.review = Object.assign({}, s.review, { remindAt: [48, 12] });
+  };
+  const stamp = function (s) {
+    s.review = Object.assign({}, s.review,
+      { taken: { smo: { copy: "2026-07-27T10:00:00.000Z",
+                        slides: "2026-07-27T10:01:00.000Z" } } });
+  };
+  allows("smo", setDay, "the SMO sets the review day");
+  allows("smo", setMoments, "and when the team is reminded");
+  allows("smo", stamp, "and records having taken the files");
+  refuses(headKey, setDay, "a unit's head cannot set the review day");
+  refuses(custKey, setDay, "nor can a strategy custodian");
+  refuses(headKey, setMoments, "a unit's head cannot change the reminder times");
+  /* THE STAMP IS NOT A BACK DOOR INTO THE CYCLE. It is stored on the review
+     like everything else there, so somebody who cannot touch the cycle cannot
+     write one either — asserted, because a map keyed by PERSON reads as
+     "everybody's own" and it is not. */
+  refuses(headKey, stamp, "and cannot record one either");
+})();
+
 /* ── §273.2: AND REOPENING A CLOSED CYCLE IS THE OFFICE'S TOO ────────────
    Same argument one act further on. `review.state` and `history` have always
    classified as `cycle`, and until §273.2 NOTHING IN THE PRODUCT COULD SEND

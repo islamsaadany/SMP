@@ -212,7 +212,6 @@
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
 <script src="SAFETY"></script>
-<script src="CONTINGENCY"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -2418,7 +2417,6 @@
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
     if (typeof SAFETY !== "undefined") SAFETY.onPaint();
-    if (typeof CONT !== "undefined") CONT.onPaint();
     if (typeof TRAIL !== "undefined") TRAIL.onPaint();
     /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
        The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
@@ -7541,39 +7539,6 @@
           });
         }
         sendFilesZip(files, "SMP - " + kind + " - " + stamp + ".zip");
-      });
-    });
-
-    /* ── THE CONTINGENCY FILES (spec 030) ────────────────────────────
-       ASKED AGAIN AT PRESS TIME (§48.2, §42), never trusted from the render
-       that drew the card: the viewer switcher can change who this is between
-       the paint and the click, and this is the one download that hands over
-       the whole graph in one file.
-
-       THE OUTCOME IS WRITTEN INTO THE BUTTON, not said by a repaint (§63):
-       building the copy is a request and a three-megabyte string, so a press
-       with no acknowledgement reads as a dead control — and `paint()` would
-       replace the very button that was pressed. */
-    document.querySelectorAll("[data-conttake]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (typeof CONT === "undefined" || !CONT.mayTake()) return;
-        var btn = this, kind = btn.dataset.conttake, was = btn.innerHTML;
-        if (btn.dataset.busy) return;
-        btn.dataset.busy = "1";
-        btn.innerHTML = "Taking\u2026";
-        var go = kind === "slides" ? CONT.takeSlides : CONT.takeCopy;
-        go(function(err){
-          delete btn.dataset.busy;
-          if (err) {
-            btn.innerHTML = "Could not";
-            btn.title = String((err && err.message) || err);
-            setTimeout(function(){ btn.innerHTML = was; btn.title = ""; }, 4000);
-            return;
-          }
-          /* The stamp is state, so the page follows it: the card's own line
-             and the cycle page's list both read it. */
-          paint();
-        });
       });
     });
 

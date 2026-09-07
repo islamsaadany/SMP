@@ -35472,3 +35472,139 @@ sweep **ERRORS none**. Deck neighbours green: `deck-blank-slides`,
 *"for now"* left open, and a **master flow** (§266) cannot be downloaded — the
 entry is per subject, because a flow is several decks and printing one would be
 one file holding a room's whole morning.
+
+---
+
+## §297 — The contingency files: a working copy, the slides, and four reminders
+
+Islam, over five messages, arriving at a requirement none of the first four
+stated: ***"if the platform all is down we need to have a substitue action. so
+before the review day I will download all the presnetations with a time stamp.
+so in case if things are down I have a backup to adjust to and present from."***
+
+**THE ASK MOVED TWICE AND BOTH TURNS CHANGED THE ANSWER.** It opened as *where
+is the presentation download*, became *"for mass keeping and documentation"* —
+for which a fixed record is enough — then *"in case something needs fixing"*,
+for which it is not, and finally the sentence above. **A PDF cannot be
+adjusted**, so on his own terms the format he first asked for answers the
+errand he first described and not the one he arrived at. It was said plainly
+rather than built quietly, and he then dropped the collective PDF himself
+(*"pdf is not needed"*), leaving §296's per-subject print standing.
+
+**THE OFFER THAT REPLACED IT WAS SPIKED BEFORE IT WAS QUOTED**, because *"about
+a day"* on an unproven mechanism is a guess with a number on it. One hour: the
+built file plus the tenant's graph in a `<script type="application/json">`
+block, opened from disk with nothing running, hydrating and holding a renamed
+unit — and then **the real `checks/deck-pdf.py` run against that offline file,
+0 failures on all three subject shapes**. Two things nearly stopped it and
+neither does: the build's script policy hashes only BARE `<script>` tags, so a
+data block is not silenced by it (asserted at both ends — the untouched file
+logs no complaint, the file with the block logs no complaint, a naively edited
+one logs one immediately); and **the block must sit ABOVE the platform's own
+scripts**, which was found by putting it at the end and watching the copy come
+up on the baked worked example with no error anywhere. *A backup showing
+another company's figures is worse than no backup, and it renders perfectly.*
+
+**TWO CORRECTIONS OF THE FIRST DRAWING, EACH KILLING AN OPTION RATHER THAN
+ADJUSTING IT.** The whole feature is the SMO team's: the mockup had hung the
+reminder on the welcome screen's *Waiting on you* list — a screen EVERY viewer
+opens — so it was drawn beside a unit head's own row. A unit head has nothing
+to download, so the card, the banner and the list are ABSENT for them rather
+than drawn and refused (§61's trap is a control somebody needs being
+unreachable; this is the opposite). And ***"the cycle is about the time we
+cover and what we report already and how we preorate more dates will create
+confusion. push back if you want."***
+
+**HE IS RIGHT AND IT MOVED RATHER THAN WENT.** The three fields under *This
+cycle* answer one question in three parts — what stretch of the year, when the
+units hand figures in, and which month the figures are MEASURED against (§239)
+— so a fourth box among them reads as a fourth thing the arithmetic consults.
+It consults nothing. Its own block, under the two columns, behind a rule, with
+the reminder times beside it; and **that it changes no figure is asserted
+rather than promised** — every score, benchmark, elapsed-month count and review
+point read before and after, byte-identical. **AND IT COULD NOT RIDE ON
+`Reports due`**, measured before a field was proposed: thirteen days earlier in
+the worked example, and free text carrying no time of day at all.
+
+**THE SLIDES ARE CONVERTED, NEVER DESCRIBED A SECOND TIME.** §296's refusal to
+write the review deck as a `.pptx` was measured — 639 lines over twenty-one
+slide kinds, four moves in a fortnight — and Islam overruled the conclusion
+(*"we need the ppt downloads the final presentations reported according to the
+last performance at the moment of download"*) rather than the reasoning, so
+the reasoning had to be answered instead of set aside. `deckHtmlFor()`
+assembles the REAL deck and the converter walks the slides it produced, turning
+headings, prose and TABLES into shapes: it knows nothing about a pillar's
+measures or a project's milestones, so a slide kind added tomorrow arrives with
+no edit. **The existing button is a different document and that is measured,
+not asserted** — its own cover slide reads *"as agreed, no reported figures"*
+and its tables are Measure · Dir. · Target · Compiles and Tactic · Owner ·
+Collaborators · Q1–Q4.
+
+**THREE CONVERSION FAULTS, ALL FOUND BY READING THE FILE AND NOT THE CODE**
+(§96's family): a heading came out `…OperationsKey measures`, one word made of
+two, because the deck puts the name and its sub-label in one `<h2>` and CSS
+separates them; a quarters cell read **`1234`**, which says a tactic runs all
+year when it runs in two; and the pillars roll-call converted to a heading over
+an empty page, because it is a grid of cards and matched no prose selector.
+*An empty slide in a file taken as a backup is the one thing this exists to
+prevent*, so the lead falls back to LEAF TEXT and a card kind added later lands
+rather than vanishing.
+
+**THE REMINDER IS §258's OWN BANNER IN THREE VOICES** (Islam's option B, from
+two drawn): quiet at 24 and 12 on the attention ground, where nothing has gone
+wrong yet (§168, §190); the alarm at 6 and 3; and the last drops *Later*,
+because at three hours there is no later. **Each person's reminders end when
+THAT person has both files** — not when somebody else has — or it is four nags
+whatever anybody does and people learn to dismiss it (§190). The moments are
+one field, not four boxes, per review rather than per tenant, with no settings
+page for one line (§32). **THE LIMIT IS ON THE PAGE, NOT DISCOVERED ON THE
+NIGHT**: nothing wakes this platform up (§97.5, §283, §293), so a reminder
+appears the next time that person opens it.
+
+**AND THE RECORD IS WHAT MAKES "ALL THE SMO TEAM WILL DOWNLOAD" A FACT.**
+Without it the banner tells each person about their own files and nothing about
+anybody else's, so *covered* would be a hope. The register's own list through
+the same rule; drawn only while there is a review day, because a table of *Not
+yet* against a deadline that does not exist is an alarm about nothing.
+
+**NO MIGRATION, PROVED RATHER THAN CLAIMED** (§172): all three ride
+`review.extra` and round trip on a virgin Postgres 16, keys DELETED again
+(§50.6). **THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY** (§172 again,
+which is the record of four layers agreeing about a value the database had
+never been offered): they classify as `cycle`, the office allowed and a unit
+head and a strategy custodian refused, both ways — **including the stamp**,
+because a map keyed by PERSON reads as *everybody's own* and it is not.
+
+**TWO COSTS NAMED RATHER THAN FOUND OUT.** The working copy has no sign-in in
+front of it — whoever holds the file sees everything in it — which comes with
+any backup and is therefore said on the card. And the `taken` map travels
+whole, so two of the office pressing inside one save window can lose a stamp
+(§234's shape, one map over); the cost of losing one is one extra reminder
+rather than a lost file, which is why it is recorded instead of split per
+person, a change the differ and the authoriser would have to be taught
+together.
+
+`checks/contingency.py` **63 assertions, 0 failures**, over HTTP because the
+banner does not exist over `file://` (§94.11) — and it **OPENS** the working
+copy rather than only building it. Falsified from the SOURCES (§276): the block
+appended at the end **3 red**, printing `Mobile`; the reminder never ending
+**1 red**; the slides built by the plan builder **5 red**. **AND ONE OF ITS OWN
+FIRST FAILURES WAS THE CHECK** — §237 rebases on the server's graph when the
+viewer switches, so the section after the both-ends test was measuring a review
+day it had itself destroyed. Beside it: 534/0 authoriser, 131/0 differ, round
+trip and clean parity on a virgin database, two tabs 24/0, eight concurrent
+saves none lost, the incremental writer byte-identical, the full `qa.py` sweep
+ERRORS none, and the banner measured 5.36–10.18:1 in both themes at three
+widths with no sideways scroll.
+
+**AND `cycle-edit.py` WAS REWRITTEN, NEVER LOOSENED** (§214.3, §218): it held
+every box in the pen as ONE FLAT LIST, which this decision deliberately splits.
+Widening the literal to eight would have made it pass and stopped it guarding
+anything; it asserts the two blocks SEPARATELY now — the cycle's own fields are
+exactly those five and the review day is asserted NOT to be among them — which
+is the decision itself turned into a check.
+
+**RECORDED, NOT DONE**: a flow (§266) still cannot be downloaded, the slides
+being one file per subject; nothing carries a PDF of every subject, Islam
+having dropped it once the working copy existed; and with nobody signed in
+anywhere an overnight reminder waits for the morning.

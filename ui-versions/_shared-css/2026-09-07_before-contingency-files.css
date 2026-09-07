@@ -349,26 +349,6 @@
   .safety-btn.ghost { background:transparent; color:inherit; border-color:currentColor; }
   .safety-btn:disabled { opacity:.6; cursor:default; }
   .safety-btn:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
-  /* ── THE CONTINGENCY REMINDER (spec 030) ──────────────────────────────
-     The same banner in three voices. Amber is inherited from `.safety` above
-     and needs nothing: at 24 and 12 hours nothing has gone wrong yet, which
-     is exactly what that ground already means (§168, §190). What is added is
-     the near moments, which are an alarm, and the receipt, which is not.
-
-     THE TYPE-GRADE TWIN AS THE FILL, never the solid mark (§38.4, §94.8's
-     pair): `--bad` and `--good` carry white at about 3:1 and their `-tx`
-     twins are the same hue at a weight white can sit on. */
-  .banner.safety.loud { background:var(--bad-bg); color:var(--bad-tx);
-                        border-bottom-color:var(--bad); }
-  .banner.safety.loud .safety-ic { color:var(--bad); }
-  .banner.safety.loud .safety-btn { background:var(--bad-tx); border-color:var(--bad-tx); }
-  .banner.safety.done { background:var(--good-bg); color:var(--good-tx);
-                        border-bottom-color:var(--good); }
-  .banner.safety.done .safety-ic { color:var(--good); }
-  .banner.safety.done .safety-btn { background:var(--good-tx); border-color:var(--good-tx); }
-  .banner.safety.loud .safety-btn.ghost,
-  .banner.safety.done .safety-btn.ghost { background:transparent; color:inherit;
-                                          border-color:currentColor; }
   @media (max-width:680px){ .banner.safety { flex-wrap:wrap; } .banner.safety .safety-acts { width:100%; } }
   .banner.refused li { margin:2px 0; }
 

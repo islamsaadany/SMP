@@ -1241,17 +1241,10 @@
      34px square leaves THIRTEEN pixels of slack, so each side wants 6.5 and
      the browser snaps the drawing half a pixel sideways — measured +0.50px
      right, identical at 1500/1280/1100 and at 100/125/150%, which is what
-     says it is arithmetic rather than layout. It is the SQUARE MINUS THE
-     MARK that must be even; the mark's own size is neither here nor there,
-     which is why this is a constraint on the pair and not a magic number.
-
-     SO THE MARK GROWS IN TWOS (§302.4). Islam: *"let's make the home icon
-     bigger a bit but keep the box with teh same size."* The box is 34, so
-     22 leaves 12 and sits 6 a side; 24 leaves 10 and sits 5. 23 leaves 11
-     and brings the snap straight back — an odd size here is not a slightly
-     different look, it is the reported fault again. 22 is the "a bit", and
-     24 is one word away and still whole. */
-  .units .navmenu-btn.homemark .navmenusvg{ width:22px; height:22px; }
+     says it is arithmetic rather than layout. 20px leaves 14, and 7 a side
+     is a whole number. The mark is 5% smaller; at this size that is not a
+     size anybody can see, and it is the only way to a whole-pixel answer. */
+  .units .navmenu-btn.homemark .navmenusvg{ width:20px; height:20px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }
   /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so

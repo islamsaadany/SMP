@@ -225,15 +225,37 @@ A drift between specs and code is a documentation bug — report it before silen
   whole number*, never the mark size that produces one.
 - **FIXING TWO THINGS AT ONCE MEANS RE-MEASURING AFTER THE FIRST.** 0.6 of the
   2.06 was that same snap, so correcting the slack and then shifting the full 2
-  the mockup drew put the house **0.54px HIGH**; the shipped figure is **1.5**,
-  residual 0.04. The mockup is left saying 2 — it is the record of what was
-  signed off, not of what was built (Principle II).
-- **THE CORRECTION LIVES IN THE DRAWING, NEVER IN A CSS NUDGE**: one `transform`
-  on the group, the path's bytes and its `viewBox` untouched, so §202's four
-  gaps stay true and a mark drawn here later inherits no offset measured for
-  this one. **And §202's own assertions needed no editing** — they assert that
-  opposite gaps are EQUAL and never what they are, so they survived 21 → 20
-  untouched: *a check written against the problem survives the fix* (§94.8).
+  the mockup drew put the house **0.54px HIGH**; §302 shipped **1.5**, residual
+  0.04. The mockup is left saying 2 — it is the record of what was signed off,
+  not of what was built (Principle II).
+- **AND THE OPTICAL SHIFT IS REVERSED (§302.3): THE BOX, NOT THE WEIGHT.**
+  Islam, an hour after the merge — *"we need to center the drawing in the box
+  not the weight ... go with A."* **The two readings cannot both be nought**,
+  and that is the decision rather than a defect: §302's build put the drawing's
+  own box **1.438px high**, measured. So the `transform` is DELETED, and option
+  A turns out **not to be a smaller nudge but none at all** — at 20px the path
+  is already centred in its `viewBox` to 0.062px, and a guessed micro-constant
+  would only be a thing to explain later (§122.5). *The argument in §302 is
+  right about how an eye works and wrong about what was asked for; both halves
+  are kept.* **The assertion is REWRITTEN, never loosened** (§218): the
+  drawing's bounding box, with the centroid measured beside it and **printed
+  rather than asserted**, because asserting either is choosing against the
+  other and that choice belongs in the decisions log, not in a tolerance —
+  printed so the cost stays visible in every run. Falsified both ways from the
+  SOURCES (§276), and **neither earlier build passes it**.
+- **THE SLACK RULE IS ABOUT THE PAIR, NOT THE MARK (§302.4).** *"make the home
+  icon bigger a bit but keep the box with teh same size."* What must be even is
+  **the square minus the mark**; 20 was never magic. In a 34px box: 22 sits 6 a
+  side, 24 sits 5, and **23 is the reported fault again** (3 red, `slack 5.5`,
+  `box 0.5` across). An odd size here is not a slightly different look.
+- **THE CORRECTION LIVES IN THE DRAWING, NEVER IN A CSS NUDGE** — and with
+  §302.3 there is no correction at all, which is the better end of that rule:
+  the path's bytes and its `viewBox` are untouched either way, so §202's four
+  gaps stay true and a mark drawn here later inherits nothing measured for this
+  one. **And §202's own assertions needed no editing** — they assert that
+  opposite gaps are EQUAL and never what they are, so they survived
+  21 → 20 → 22 untouched: *a check written against the problem survives the
+  fix* (§94.8).
 - **The stroke is `--on-accent` #16325C, byte-identical to the bar's navy**, so
   the square's rounded corners classify as house ink and the mark measures a
   perfect 34×34 — that called a correct build broken twice before the sample
@@ -7532,7 +7554,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-07 &mdash; **&sect;302: the box was centred and the house
+*Last Updated: 2026-09-07 &mdash; **&sect;302.3&ndash;.4: the box, not the
+weight &mdash; and the mark grows in twos.** Islam, an hour after &sect;302
+merged: *"I'm confused we need to center the drawing in the box not the weight
+&hellip; so go with A"*, then *"let's make the home icon bigger a bit but keep
+the box with teh same size."* **HE IS LOOKING AT SOMETHING REAL AND &sect;302
+PUT IT THERE**: measured on the merged build, the drawing's own box sat
+**1.438px high** while its weight sat centred, which is that section working
+exactly as drawn for him and not what he wants. **THE TWO READINGS CANNOT BOTH
+BE NOUGHT** &mdash; a roof is a point, so every position that centres the mass
+leaves the box high and every position that centres the box leaves the mass low
+&mdash; so this is a choice rather than a defect, it is his, and the cost is
+stated: to an eye that reads weight the roof now sits a shade light, which is
+the reading &sect;302 existed to answer. Recorded as a reversal, never
+overwritten (Principle II). **AND OPTION A IS NOT A SMALLER NUDGE, IT IS NONE**:
+&sect;302's own comment predicted `-0.6`, measured against the 21px mark, and
+once that went to 20 the path is already centred in its `viewBox` to 0.062px
+&mdash; so the `transform` is deleted outright rather than given a micro-constant
+to explain later (&sect;122.5). **THE SLACK RULE TURNS OUT TO BE ABOUT THE
+PAIR**, which is what let the mark grow: the square MINUS the mark is what must
+halve into whole pixels, so in a 34px box 22 sits 6 a side and 24 sits 5, while
+**23 is the reported fault again** &mdash; proved, 3 red, `slack (5.5, 5.5)` and
+`box (0.5, 0.625)`. **THE ASSERTION IS REWRITTEN, NOT LOOSENED** (&sect;218):
+the drawing's bounding box, with the centroid measured beside it and PRINTED
+rather than asserted, because asserting either is choosing against the other and
+that choice belongs in the decisions log rather than inside a tolerance
+&mdash; **and neither of the two builds before this one passes it**, falsified
+both ways from the SOURCES (&sect;276). Shipped at 22px: **0.000 across, 0.125
+down**, at 1500/1280/1000 alike; 24/24 on `checks/home-mark.py`, `welcome`,
+`nav-scroll` and `setup-pages` green, full `qa.py` sweep ERRORS none.
+**Screen only** &mdash; no `api/`, `lib/` or `db/` file, read off the diff
+&mdash; nothing stored, nothing migrated. **On the branch, not merged**; a merge
+still owes the `sw.js` shell bump (&sect;91), and `main` is Islam's call every
+time.*
+
+*Earlier the same day: **&sect;302: the box was centred and the house
 inside it was not.** Islam, of the top-left corner: *"the home icon is not
 centered in the top box."* **THE BOX WAS INNOCENT, AND SAYING SO FIRST WAS MOST
 OF THE WORK** &mdash; three sections have already answered a complaint about this

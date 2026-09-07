@@ -37392,3 +37392,99 @@ moved are recorded here rather than written back over the drawing (Principle II:
 a record of what was agreed is not a record of what was built). The gear at the
 other end of the row is a different mark in the same 34px box and has not been
 measured; nothing suggests it is wrong, and it was outside the ask.
+
+### §302.3 — THE BOX, NOT THE WEIGHT (reversing §302's optical shift)
+
+Islam, of the build §302 merged an hour earlier: *"I'm confused we need to
+center the drawing in the box not the weight. can you shoe me again. so go
+with A."*
+
+**HE IS LOOKING AT A REAL THING AND §302 PUT IT THERE.** Measured on the
+merged build, at 1500, 1280 and 1000px alike:
+
+| | across | down |
+|---|---|---|
+| the drawing's **box** | +0.000 | **−1.438** — sitting high |
+| the drawing's **weight** | −0.002 | −0.041 — centred |
+
+That is §302 working exactly as designed and exactly as it was drawn for him,
+and it is not what he wants. **The two readings cannot both be nought**, which
+is the whole of the decision: a house's roof is a point, so nearly all its ink
+sits in the lower half, and every position that centres the mass leaves the
+box high while every position that centres the box leaves the mass low. There
+is no third answer, and offering one would be a lie about the geometry.
+
+**SO IT IS A CHOICE AND IT IS HIS.** §302 recommended the optical centre on
+the grounds that the eye reads weight; he has overruled it, and the cost is
+stated rather than discovered: to an eye that reads weight the roof now sits a
+shade light, which is the reading §302 existed to answer. Recorded as a
+reversal, never overwritten (Principle II) — the argument in §302 is right
+about how an eye works and wrong about what he asked for, and both halves are
+worth keeping.
+
+**AND OPTION A IS NOT A SMALLER NUDGE, IT IS NONE.** §302's own comment
+predicted A as `translate(0 -0.6)`, measured against the **21px** mark. Once
+that mark went to 20px — the half-pixel snap fix, which is arithmetic and
+survives this reversal untouched — the path is already centred in its own
+`viewBox` to **0.062px**, so the `transform` attribute is deleted outright
+rather than given a smaller number. **Which is better than a small number and
+not merely equal to one**: a guessed micro-constant would be a thing to
+explain later (§122.5), and a mark drawn in this box afterwards now inherits
+no offset that was measured for this one. Shipped: box **+0.000 across,
++0.062 down**, at every width.
+
+**THE ASSERTION IS REWRITTEN, NOT DELETED, AND NOT LOOSENED** (§218). §302
+added a pass that reads the PAINTED PIXELS at 8&times; because no assertion
+about the SVG *element* could see a drawing off-centre inside it; that pass
+stays and is what makes any of this measurable. What changes is which of its
+two readings is asserted: the drawing's own **bounding box** now, with the
+centroid measured beside it and **printed rather than asserted** — asserting
+either one is choosing against the other, and that choice belongs in this
+document rather than inside a tolerance. Printing it keeps the cost visible in
+every run instead of looking like something nobody paid for.
+
+**Proved able to fail both ways, from the SOURCES** (§238's hashed CSP
+silences an edited built file, §276): §302's own `translate(0 -1.5)` put back
+&rarr; **2 red**, printing `{'box': (0.0, -1.438), 'weight': (-0.002,
+-0.041)}` — the state he wrote back about; a downward `translate(0 2)` &rarr;
+**2 red** at `(0.0, 2.062)`. **Neither of the two builds before this one
+passes it**, which is what makes the line worth having. 24/24 green after.
+
+**Drawn again before it was handed over** (rule 1c): all three states shot out
+of the running platform at 16&times; with the square's true centre ruled
+across each, so *"they cannot both be centred"* is a picture rather than a
+paragraph —
+`design-mockups/home-icon-centering/2026-09-07_box-not-weight.html`.
+
+### §302.4 — the mark grows in twos, and the box does not move
+
+Islam, in the same breath as confirming A: *"let's make the home icon bigger a
+bit but keep the box with teh same size."*
+
+**THE CONSTRAINT IS NOT THE MARK'S SIZE, IT IS THE PAIR.** §302 read as though
+20px were a magic number; it is not, and saying so is what makes this
+extensible. What must be even is **the square minus the mark**, because that
+difference is halved to place the drawing and a browser cannot inset by half a
+pixel without snapping. The box stays 34 (his instruction, and §41.8's reason —
+a mark that changed size would shift every destination name on the row), so:
+
+| mark | slack | a side | |
+|---|---|---|---|
+| 20px | 14 | 7 | this morning |
+| **22px** | **12** | **6** | **shipped** |
+| 23px | 11 | 5.5 | **the reported fault, again** |
+| 24px | 10 | 5 | still whole, one word away |
+
+**22 IS THE "A BIT" AND 24 IS OFFERED RATHER THAN CHOSEN FOR HIM**, both drawn
+at real size and at 16&times; in the same page as the rest of this decision.
+**And an odd size is not a slightly different look** — it is the half-pixel
+lean he reported in the first place, which is why this is written down as a
+rule about the pair rather than left as a number somebody later nudges by one.
+Proved rather than argued: 23px &rarr; **3 red**, `slack (5.5, 5.5)` and
+`box (0.5, 0.625)`, the lean reproduced exactly.
+
+**Nothing else in the chrome moves and it is asserted**: the box is still a
+34px square at 1000px, the two states still differ only in their fill, and
+§202's four gaps still read equal — they assert opposite gaps AGREE and never
+what they are (§94.8), so they survived 21 &rarr; 20 &rarr; 22 untouched. Box
+offset at 22px: **+0.000 across, +0.125 down**, at 1500, 1280 and 1000 alike.

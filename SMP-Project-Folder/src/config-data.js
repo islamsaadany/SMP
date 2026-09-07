@@ -832,9 +832,10 @@ function commsShape(){
   };
 }
 function COMMS_FOOTER_DEFAULT(){
-  return "Sent from the Strategy Management Platform" +
-         (GROUP.org ? " for " + GROUP.org : "") +
-         ". If you were not expecting this, tell your SMO.";
+  /* ASKED OF THE BUILDER, never written twice (§293). The server composes
+     this email too now, and a sentence spelled here as well is one that goes
+     out of step the first time either is improved. */
+  return MAIL.footerDefault(GROUP.org || "");
 }
 
 /* Every token the two inputs decide, worked out here so the page, the live
@@ -1660,6 +1661,14 @@ function viewerRoleLine(p){
 function andList(a){
   return a.length < 2 ? (a[0] || "")
     : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+}
+/* The same list where the sentence offers a CHOICE rather than names a set —
+   "Set Sum, Count, Latest or Average". Beside `andList` on purpose: two ways
+   of joining a list is one decision, and separating them is how one gets
+   corrected and the other does not. */
+function orList(a){
+  return a.length < 2 ? (a[0] || "")
+    : a.slice(0, -1).join(", ") + " or " + a[a.length - 1];
 }
 
 function unitRolesFor(k){
@@ -4852,6 +4861,12 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
+  /* §300: a yes/no row is answered by one of the two ends, or by In progress
+     WITH its per-cent — `"In progress"` on its own is a non-empty string and
+     would otherwise have counted as a figure entered, which is §104.10's
+     fault one column over: the tally would say the report was complete while
+     the row had not said how far. */
+  if (SMPRules.isYesNo(o.target)) return SMPRules.ynAnswered(o.actual);
   return o.actual != null && o.actual !== "";
 }
 function reportedCount(u){
@@ -6012,7 +6027,7 @@ function prorates(m){ return SMPRules.prorates(m && m.compile); }
    empty the column for a plan whose timelines were never filled in. */
 function measureDue(m, share){
   if (!m || !m.target) return null;
-  /* §264: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
+  /* §257: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
      figure — picking Y/N keeps whatever number was there and stops counting
      it — so the digits are in the string and `parseFloat` would pull them
      out, printing "due at 100 Y/N" beside a control offering Yes and No.
@@ -6084,7 +6099,7 @@ function nothingDueYet(m, share){
    stays a year-end judgement); everything else reads this. */
 function measureScore(m, share){
   if (!m) return null;
-  /* ── A YES OR A NO SCORES 100 OR 0 (§264) ──────────────────────────
+  /* ── A YES OR A NO SCORES 100 OR 0 (§257) ──────────────────────────
      BEFORE the arithmetic, and that ordering is the whole of it: a Y/N
      target carries no number, so `measureDue` answers null and the row
      would fall out of every score unscored. Islam chose 100/0 over "shown
@@ -6096,7 +6111,15 @@ function measureScore(m, share){
      failure marks a unit down for a question nobody has been asked yet (§35,
      §104.10). The share is not consulted: there is no partial yes to prorate
      (§250 prorates a TARGET, and this row has no number to prorate). */
-  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
+  /* §300: AND THE SHARE IS CONSULTED AFTER ALL, for the middle answer alone.
+     §257 wrote "the share is not consulted: there is no partial yes to
+     prorate", which was true while a yes/no row had only two answers. It has
+     three now, and Islam's own case is the argument: an action running Q2 and
+     Q3, reported at the end of Q2 at 60%, is 60 against the 50 its own window
+     owes — ahead, not behind. `ynScore` takes the share and uses it for the
+     partial only; Done is 100 whenever it arrives (his call) and Not started
+     is 0, so nothing any tenant already reported moves. */
+  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual, share);
   var due = measureDue(m, share);
   /* §278: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
      Before a monthly plan existed this guard only ever caught a target of
@@ -6153,7 +6176,7 @@ function outcomeOf(t){
      row comes to be counted as missing while quietly being scored (§53.5,
      §42). The test is unchanged; only its home moved. */
   if (!t || !t.outTarget) return null;
-  /* §264: a Y/N outcome is a real target with no number in it, so it is
+  /* §257: a Y/N outcome is a real target with no number in it, so it is
      admitted here or the tactic goes on being read the old way and the
      answer somebody gave is scored by nothing. `measureScore` takes it from
      here — one arithmetic for every scored row, as §248 settled. And it is
@@ -6230,6 +6253,14 @@ function tacticProgress(t){
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
 function measureDueLabel(m, share){
+  /* §300: A YES/NO ROW HAS A BENCHMARK NOW, and it is a per cent of its own
+     window rather than a part of a target — there is no number in `Y/N` to
+     take a share of, which is why `measureDue` still answers null for one.
+     Absent share means the row names no window (a key measure, a key
+     objective), and a benchmark nothing was measured against is not printed
+     at all rather than printed as nought (§35, §276). */
+  if (SMPRules.isYesNo(m.target))
+    return share == null || !(share > 0) ? null : Math.round(share * 100) + "%";
   var due = measureDue(m, share);
   if (due == null) return null;
   /* §276: a count with nothing owed yet says so in words (`nothingDueYet`),
@@ -6242,6 +6273,21 @@ function measureDueLabel(m, share){
      together (§53.5). */
   return joinTarget(String(m.target), String(Math.round(due * 100) / 100),
                     splitTarget(String(m.target)).unit || "");
+}
+/* ── WHAT IS PRINTED BESIDE A FIGURE (§300) ────────────────────────────────
+   `measureDueLabel` answers the PLAN's question — what is owed by now — and
+   the reporting page asks it of every row, answered or not, because that is
+   what a reporter needs to see before typing. Beside a FIGURE it is a
+   comparison, and a comparison only reads as one where both halves are of the
+   same kind: "In progress · 60% / 50%" is a sentence and "Done / 50%" is not.
+
+   So a yes/no row prints its benchmark beside the partial and nowhere else.
+   One reader, asked by the measures table and by a tactic's row, or the two
+   would disagree about one cell (§53.5). */
+function benchBeside(m, share){
+  if (m && SMPRules.isYesNo(m.target) &&
+      SMPRules.ynState(m.actual).status !== "wip") return null;
+  return measureDueLabel(m, share);
 }
 /* HOW FAR THROUGH THIS TACTIC'S OWN WINDOW WE ARE, as an exact fraction.
    `elapsedShare()` answers the same question of the YEAR; this answers it of
@@ -7083,6 +7129,71 @@ function addOutcome(p){
             target: "", measureAt: "", actual: "" };
   p.outcomes.push(o);
   return o;
+}
+/* ── A ROW'S TYPE IS WHICH LIST IT IS IN (§292) ──────────────────────────
+   Islam, from the live product: *"we need to make the add deliverable or
+   outcome more of an options in the type rather than 2 buttons of add
+   deliverable or outcome that I get confused between them."*
+
+   SO THE PICKER MOVES THE ROW, because the type was never a label on it. A
+   deliverable is answered Not started / In progress / Delivered with a
+   per-cent, and its direction and target are written FOR it (§104); an
+   outcome is answered with a figure read against a target and a direction.
+   Two lists, two shapes, two ways of being scored — so switching one is a
+   CONVERSION and not a rename, and it is worth saying so in the code that
+   does it.
+
+   THE DESTINATION ROW IS MINTED BY THE MINTER AN ADDED ROW USES, and two
+   facts are carried onto it: the NAME, which is the row, and the hidden mark
+   (§233), which is a decision ABOUT the row rather than a figure against it.
+   Everything else is dropped, because everything else belongs to the kind
+   being left — a target on a row that no longer has one, or a note explaining
+   a figure that has gone, is worse than an empty cell (§35). Building it out
+   of the minter is what stops the two shapes drifting: a field added to
+   `addOutcome` tomorrow is on a converted row that day (§53.5).
+
+   IT APPENDS, and that is visible rather than hidden: the table draws every
+   deliverable and then every outcome (§99's one list, §104's one row shape),
+   so a converted row necessarily leaves its place in the order — it goes to
+   the end of the list it has joined, which is where an added row goes.
+
+   THE NEW ID IS THE POINT OF MINTING ONE. A row's id encodes its kind
+   (`…-D3`, `…-O2`), so carrying the old one across would leave a row named
+   as a deliverable sitting in the outcomes — and ids are what a cycle
+   snapshot keys on (§48.1). A snapshot already filed keeps the id it was
+   filed under, which is correct: it is a record of what was.
+
+   NOTHING ON THE SERVER MOVES, and it is asserted rather than assumed:
+   `splitRows` already classifies a row leaving one of these lists and
+   appearing in the other as `capPlan` — the office's — so the switch is
+   authorised the day it is built (§42's fall-through working as designed). */
+function dxKindOf(p, id){
+  if (!p) return "";
+  var has = function(list){
+    return (list || []).filter(function(x){ return x && x.id === id; }).length > 0;
+  };
+  if (has(p.deliverables)) return "d";
+  if (has(p.outcomes)) return "o";
+  return "";
+}
+function dxSwitchKind(p, id, want){
+  var from = dxKindOf(p, id);
+  if (!p || !from || from === want || (want !== "d" && want !== "o")) return null;
+  p.deliverables = p.deliverables || [];
+  p.outcomes = p.outcomes || [];
+  var src = from === "d" ? p.deliverables : p.outcomes, i = -1;
+  src.forEach(function(x, n){ if (x && x.id === id) i = n; });
+  if (i < 0) return null;
+  var old = src[i];
+  var made = want === "d" ? addDeliverable(p) : addOutcome(p);
+  if (!made) return null;
+  made.name = old.name || "";
+  /* §50.6: carried only when it is TRUE — a row that was never hidden and one
+     hidden and shown again must be byte-identical, or every conversion puts a
+     phantom `hide:false` into the save. */
+  if (old.hide === true) made.hide = true;
+  src.splice(i, 1);
+  return made;
 }
 function addMilestone(p){
   if (!p) return null;

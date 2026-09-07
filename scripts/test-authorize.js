@@ -1175,6 +1175,37 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
 
+/* ── AND A CAPABILITY'S OBJECTIVES REORDER THE SAME WAY (§278.3) ──
+   That walk had no reorder callback at all, so moving one of these rows fell
+   through to `capPlan` — the office's — while the identical act on a UNIT's
+   key objectives has classified as `arrange` since §101. One question with two
+   answers, and §278.3 draws a handle on both tables: a custodian would have
+   watched the row move and the save come back refused, which is §94.3's exact
+   fault.
+
+   BOTH ENDS, and the second one is the point: a build that classified every
+   change to these rows as `arrange` would satisfy the first assertion and hand
+   the plan to anybody who may reorder. */
+(function () {
+  const cap = (SEED.group.capabilities || []).filter(function (c) {
+    return (c.keyObjectives || []).length > 1; })[0];
+  check("the seed has a capability with two key objectives to reorder",
+        !!cap, "none — this assertion would be measuring nothing");
+  if (!cap) return;
+  const ci = (SEED.group.capabilities || []).indexOf(cap);
+  const inc = clone(SEED);
+  shuffleFirstToLast(inc.group.capabilities[ci].keyObjectives);
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("reordering a capability's key objectives is `arrange`, and nothing else",
+        kinds.length > 0 && kinds.every(function (k) { return k === "arrange"; }),
+        "got: " + JSON.stringify(kinds));
+  const inc2 = clone(SEED);
+  inc2.group.capabilities[ci].keyObjectives[0].name += " (renamed)";
+  const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
+  check("but RENAMING one is still `capPlan`",
+        kinds2.indexOf("capPlan") > -1, "got: " + JSON.stringify(kinds2));
+})();
+
 /* ── 14 · THE FOCUS SWITCH IS NOT A BIGGER MARK (§102) ────────────
    Marking a measure is the CEO's and the SMO's (§37); turning the whole
    feature off for the tenant is the SMO's alone. Asserted as a PAIR, because
@@ -3069,7 +3100,141 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 })();
 
-console.log("\n31 · a project owner marks their own project finished (§301)");
+/* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§292) ══
+   §292 gives a project's Deliverables and outcomes table a Type picker: the
+   press moves the row out of one list and into the other, with a new id. The
+   claim made in that section's comment is that the SERVER needed nothing —
+   `splitRows` already reads a row leaving one of these lists and appearing in
+   the other as `capPlan`, the office's — and a claim like that is either
+   measured or it is a hope (§172's lesson: four layers agreed about a fourth
+   value the database had never been offered).
+
+   BOTH ENDS, or a build that allowed everything would pass the first half
+   (§94.2). And the row is REBUILT rather than moved by reference, because
+   that is what the browser does: a converted row is minted by the minter and
+   carries the name across (§292), so an id that travelled with it would be a
+   different fixture from the one the product produces. */
+console.log("\n31 · a row's type is the office's to change (§292)");
+(function () {
+  const cap = (SEED.group.capabilities || [])[0];
+  const proj = cap && (cap.projects || [])[0];
+  check("§292: the seed holds a project with a deliverable", !!(proj && (proj.deliverables || [])[0]),
+        proj && proj.id);
+  if (!proj || !(proj.deliverables || [])[0]) return;
+
+  /* The conversion, exactly as `dxSwitchKind` performs it. */
+  const convert = function (st) {
+    const c = (st.group.capabilities || [])[0];
+    const p = (c.projects || [])[0];
+    const old = p.deliverables.shift();
+    p.outcomes.push({ id: p.id + "-Oz", name: old.name, dir: "\u2265",
+                      target: "", measureAt: "", actual: "" });
+  };
+  const who = function (st, key) { return personOf(st, key); };
+  const run = function (key) {
+    const inc = clone(SEED); convert(inc);
+    return A.authorize(SEED, inc, who(SEED, key));
+  };
+
+  let v = run("smo");
+  check("§292: the office switches a row's type", v.ok, (v.refusals || []).join(" / "));
+
+  /* Whoever holds the function and is not the office. A custodian may report
+     a deliverable (§147.3) and may not author the plan — which is exactly the
+     line this switch sits on. */
+  const fkey = Object.keys(SEED.functions || {}).filter(function (k) {
+    return (SEED.functions[k] || {}).custodian; })[0];
+  const cust = fkey && SEED.functions[fkey].custodian;
+  if (cust && who(SEED, cust)) {
+    v = run(cust);
+    check("§292 REFUSED: the function's custodian may not", !v.ok, "was ALLOWED");
+  } else {
+    check("§292: a custodian to refuse", false, "none in the seed");
+  }
+
+  /* AND IT IS ONE KIND OF CHANGE, NOT TWO. A build that read the removal and
+     the arrival as different things would refuse half of a save the screen
+     makes in one press (§184: a refusal costs the row it names and nothing
+     else). */
+  const inc = clone(SEED); convert(inc);
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§292: every part of it classifies as capPlan",
+        kinds.length > 0 && kinds.every(function (k) { return k === "capPlan"; }),
+        kinds.join(",") || "(nothing)");
+})();
+
+/* ══ 32 · A YES/NO ANSWER IS A REPORTED FIGURE (§300) ═══════════════════
+   §300 gives a yes/no row three answers — Not started, In progress with a
+   per-cent, Done — stored in the field the figure already lived in. The
+   section's claim is that the SERVER needed nothing, and §172's lesson is
+   that such a claim is measured or it is a hope: four layers agreed about a
+   fourth value the database had never been offered.
+
+   BOTH ENDS (§94.2). A build that classified the new spelling as a plan
+   change would refuse every report of one — the fault would look exactly like
+   §234's, a refusal naming something the reporter never touched — and a build
+   that classified it as nothing at all would let anybody write it. */
+console.log("\n32 · a yes/no answer is a reported figure (§300)");
+(function () {
+  const ukey = Object.keys(SEED.units || {}).find(function (k) {
+    return (SEED.units[k].items || []).some(function (p) { return (p.tactics || []).length; });
+  });
+  const pick = function (st) {
+    const u = st.units[ukey];
+    for (const p of (u.items || [])) if ((p.tactics || [])[0]) return p.tactics[0];
+    return null;
+  };
+  check("§300: the seed holds a tactic to answer", !!(ukey && pick(SEED)), ukey);
+  if (!ukey || !pick(SEED)) return;
+
+  /* The row is made yes/no in the STORED graph, because the target is the
+     office's and this section is about the ANSWER (§42: authorise against the
+     world as it is, never as the save would like it to be). */
+  const base = clone(SEED);
+  pick(base).outTarget = "Y/N";
+
+  const answer = function (v) {
+    const inc = clone(base); pick(inc).outActual = v; return inc;
+  };
+  const kindsOf = function (v) {
+    return A.collect(base, answer(v), A.worldOf ? A.worldOf(base) : base)
+            .map(function (c) { return c.kind; });
+  };
+  ["In progress", "In progress 60", "Done", "Not started"].forEach(function (v) {
+    const k = kindsOf(v);
+    check("§300: '" + v + "' classifies as reporting and nothing else",
+          k.length > 0 && k.every(function (x) { return x === "unitReporting"; }),
+          k.join(",") || "(nothing)");
+  });
+
+  /* WHO REPORTS FOR A UNIT IS `unitRoles`, not a field on the unit — asked
+     of the seed's own map rather than guessed, which is what the first draft
+     of this section did (it looked for `units[k].head` and found nobody). */
+  const roles = (SEED.unitRoles || {})[ukey] || {};
+  const head = roles.head || roles.custodian;
+  if (head && personOf(SEED, head)) {
+    const v = A.authorize(base, answer("In progress 60"), personOf(base, head));
+    check("§300: whoever reports for the unit may answer one", v.ok,
+          (v.refusals || []).join(" / "));
+  } else {
+    check("§300: a reporter to allow", false, "none in the seed");
+  }
+
+  /* AND SOMEBODY WITH NO REPORTING GRANT MAY NOT. Without this the first half
+     passes on a build that accepts everything. */
+  const outsider = (SEED.people || []).find(function (p) {
+    return p.unit && p.unit !== ukey && !p.role;
+  }) || (SEED.people || []).find(function (p) { return !p.role; });
+  if (outsider) {
+    const v = A.authorize(base, answer("Done"), personOf(base, outsider.key));
+    check("§300 REFUSED: somebody who does not report for it may not", !v.ok, "was ALLOWED");
+  } else {
+    check("§300: an outsider to refuse", false, "none in the seed");
+  }
+})();
+
+console.log("\n33 · a project owner marks their own project finished (§301)");
 (function () {
   const FN = "it", T = "fn:" + FN, UK = Object.keys(SEED.units)[0];
   const capOf = function (s) {
@@ -3177,7 +3342,7 @@ console.log("\n31 · a project owner marks their own project finished (§301)");
   not("a locked cycle takes no mark either",
       run(locked, "t287_own", mark(MINE, MARK)));})();
 
-console.log("\n32 · a saved draft is the owner's to reopen (§301.6)");
+console.log("\n34 · a saved draft is the owner's to reopen (§301.6)");
 (function () {
   const FN = "it", T = "fn:" + FN;
   const base = clone(SEED);

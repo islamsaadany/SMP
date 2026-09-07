@@ -200,6 +200,72 @@ with sync_playwright() as p:
     check("and Start the flow is still on screen (§90)",
           get(shape, "onScreen") is True, shape)
 
+    # ══ 1b · AND IT DOES NOT CHANGE SIZE AS ROWS MOVE ══════════════════
+    head("1b · The dialog keeps one height however the rows are split (§266.11)")
+    # THE STATE IS MADE, AND AT THE WORST POINT: a tick moves a row from one
+    # column to the other, so the two are of comparable length in the middle of
+    # the work — exactly where a content-sized box steps up and down under the
+    # pointer. Twelve moves, and the dialog must not move once.
+    MH = ("() => Math.round(document.querySelector('.overlay .modal')"
+          ".getBoundingClientRect().height)")
+    hs = [ev(pg, MH, None, 0)]
+    for _ in range(8):
+        ev(pg, "() => { const b = document.querySelector('#modal-b .mfx'); if (b) b.click(); }")
+        pg.wait_for_timeout(120)
+        hs.append(ev(pg, MH, None, 0))
+    for _ in range(4):
+        ev(pg, "() => { const b = document.querySelector('#modal-b .mftick'); if (b) b.click(); }")
+        pg.wait_for_timeout(120)
+        hs.append(ev(pg, MH, None, 0))
+    check("twelve moves between the columns, and one height throughout",
+          len(set(hs)) == 1 and hs[0] > 0, sorted(set(hs)))
+    fixed = ev(pg, """() => {
+      const l = [...document.querySelectorAll('#modal-b .mflist')];
+      return { same: l.length === 2 &&
+                     Math.round(l[0].getBoundingClientRect().height) ===
+                     Math.round(l[1].getBoundingClientRect().height),
+               style: l[0] ? l[0].style.height : null,
+               capped: l[0] ? Math.round(l[0].getBoundingClientRect().height) <= 420 : null,
+               go: (() => { const g = document.querySelector('#modal-b .mfgo');
+                 if (!g) return false; const r = g.getBoundingClientRect();
+                 return r.bottom <= window.innerHeight && r.top > 0; })() };
+    }""", None, {})
+    check("both lists are the same height, and it is a height not a cap",
+          get(fixed, "same") is True and "min(" in str(get(fixed, "style")), fixed)
+    check("...still capped so Start the flow stays on screen (§90)",
+          get(fixed, "capped") is True and get(fixed, "go") is True, fixed)
+    # AND A SMALL TENANT IS NOT GIVEN A LARGE TENANT'S BOX — the height is what
+    # the WHOLE list needs, measured, so it is fixed without being flat.
+    small = ev(pg, """() => {
+      closeModal();
+      const real = masterSubjects;
+      window.masterSubjects = () => real().slice(0, 4);
+      masterOpen();
+      const l = document.querySelector('#modal-b .mflist');
+      const r = { h: l ? Math.round(l.getBoundingClientRect().height) : null,
+                  style: l ? l.style.height : null };
+      window.masterSubjects = real;
+      closeModal();
+      return r;
+    }""", None, {})
+    check("a tenant with four subjects gets a box its own list's size",
+          0 < (get(small, "h") or 999) < 300, small)
+    check("the picker reopens after that", openpicker(pg) is True)
+    # AND THE STATE GOES BACK (§94.2). This section makes its own state by
+    # moving twelve rows, and §3 below starts by taking five out of a FULL
+    # flow — the first run of this file left four subjects behind and reported
+    # five real failures in a section that was measuring something else.
+    back = ev(pg, """() => {
+      let guard = 40;
+      let b;
+      while ((b = document.querySelector('#modal-b .mftick')) && guard--) b.click();
+      return { waiting: document.querySelectorAll('#modal-b tr[data-mfrest]').length,
+               flow: MFLOW.pick.length,
+               all: masterSubjects().length };
+    }""", None, {})
+    check("...and everybody is back in the flow, ready for the next section",
+          get(back, "waiting") == 0 and get(back, "flow") == get(back, "all"), back)
+
     # ══ 2 · THE COLUMNS SAY WHAT THE PRODUCT SAYS ══════════════════════
     head("2 · Kind and Slides agree with the rules they are read from (§94.8)")
     agree = ev(pg, """() => {

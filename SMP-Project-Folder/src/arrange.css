@@ -28,6 +28,41 @@
   td.idx .grip { vertical-align:middle; margin-right:2px; height:18px; }
   td.idx .idx-n { display:inline-block; min-width:14px; }
 
+  /* ── THE PAIR, CENTRED BY ITS MARKS (§278.3) ───────────────────────────
+     Islam, of the objectives tables' new `#` column: *"the number and the
+     handle are a bit misalignment they both needs to be centered
+     vertically"*, and of the round that centred their BOXES: *"these are not
+     centered to each other."*
+
+     HE WAS RIGHT AND THE FIRST MEASUREMENT WAS OF THE WRONG THING (§185, in
+     type). The two boxes centre to 0.00px and the digit still reads 1.62px
+     high, because a digit's line box carries descender space the glyph never
+     uses. Four ways of centring the boxes were measured — `vertical-align`
+     on both, a flex pair, a flex pair matching the grip's line-height, and
+     the grip's box shrunk to hug its own bars — and every one reads -1.62:
+     no box-level alignment can move a glyph inside its box.
+
+     `text-box: trim-both cap alphabetic` trims the number's box to the cap
+     height and the baseline, so the box IS the ink and centring it centres
+     the mark: -1.62px to +0.38px, which is the device pixel grid and as close
+     as sub-pixel rendering allows. Read off the PAINTED PIXELS at eight times
+     scale, never off the element boxes — measuring the boxes is what produced
+     the round that was rejected.
+
+     TAKEN FROM THE FONT'S OWN METRICS rather than from a nudge measured once,
+     which would be a guessed constant to re-measure the day the typeface
+     changes (§122.5). A browser that does not understand the line ignores it
+     and gets exactly what this looked like before. */
+  td.idx .idxpair { display:inline-flex; align-items:center; gap:2px; }
+  td.idx .idxpair .grip { margin-right:0; vertical-align:baseline; }
+  td.idx .idxpair .idx-n { text-align:center; vertical-align:baseline;
+    text-box: trim-both cap alphabetic; }
+
+  /* ONE LINE (§88). The `#` column costs 63px, and on a unit's nine-column
+     objectives table that was enough to break the eye and Remove onto a
+     second line — 57px row to 74, for a cell holding two controls. */
+  td.acts1 { white-space:nowrap; }
+
   /* Arrange mode reads as a distinct state, so nobody drags a row believing
      they are in the normal view. */
   .plist.arranging { border-color:var(--gold); }
@@ -813,10 +848,30 @@
      not the unit's headline. */
   details.fstrip > summary{list-style:none;cursor:pointer}
   details.fstrip > summary::-webkit-details-marker{display:none}
-  .fstrip-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .fstrip-head::after{content:"▸";margin-left:4px;color:var(--ink-3);font-size:11px;
-    transition:transform .15s ease}
-  details.fstrip[open] > summary .fstrip-head::after,
+  /* THE CARET BELONGS TO THE DISCLOSURE, NOT TO THE CLASS (§287). It was
+     written as a bare `.fstrip-head::after` beside the rotate rule, which IS
+     scoped to `details.fstrip` — so the mark that says "this folds" was drawn
+     on every `.fstrip-head` in the product and the mark that says "it is open"
+     on only the one that folds. Three surfaces wear that class and two of them
+     are a plain `<div>`: Setup › Reporting cycle and the Focus board's cycle
+     strip both drew a disclosure triangle for a disclosure that does not
+     exist — pointing at nothing, never rotating, doing nothing when pressed
+     (§96's family, and §94.15: a control with no audience is furniture).
+
+     The redundant re-declaration of `.fstrip-head`'s flex line went with it:
+     the block 30 lines above already sets all four properties, and a rule
+     written twice in one file is why editing one of them appears to do
+     nothing (§29.2, §51.5, §53.6, §88 — fifth time).
+
+     `summary.fstrip-head`, NEVER `summary .fstrip-head` — the panel's head IS
+     the summary, so a descendant selector matches nothing, and the first build
+     of this fix took the caret off the one place it belongs. Measured, not
+     read. The rotate rule beside it carried the same mistake and had been dead
+     since it was written; `details.fstrip[open] > summary::after` was doing the
+     work all along, which is why nobody ever noticed. That dead half is
+     DELETED rather than left standing (§24). */
+  details.fstrip > summary.fstrip-head::after{content:"▸";margin-left:4px;
+    color:var(--ink-3);font-size:11px;transition:transform .15s ease}
   details.fstrip[open] > summary::after{transform:rotate(90deg)}
   .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
   /* The count is TYPE, so it takes the good family's text twin rather than
@@ -1272,6 +1327,29 @@
      "Missing" a plan puts against an unset target keeps behaving as it does. */
   .pctneed { display:block; margin-top:3px; font-size:11.5px; line-height:1.25;
              white-space:nowrap; }
+
+  /* ── §300: THE PER-CENT SITS UNDER THE ANSWER IT BELONGS TO ────────────
+     Islam asked for the pair the projects page has, and that page spends two
+     COLUMNS on it; a unit's reporting table has one Reported cell, so the two
+     boxes stack inside it. `.entry` is inline-flex, so `flex` is what puts the
+     box on its own line — a `<br>` would put the gap in the markup instead of
+     in the layout (§149's rule: let layout do the spacing). */
+  .ynpct { display:flex; margin-top:6px; }
+  /* AND THE PICKER STANDS LEVEL WITH A NUMBER BOX. §251.6 recorded this once
+     — a <select> takes none of `input.field`'s box, so it stood 19px against
+     34 — and the yes/no control is a picker again, in a column whose other
+     rows are number entries. Derived from the entry's own height plus its
+     border rather than typed as a constant (§122.5), so a later change to the
+     reporting box moves both or fails the check that measures them.
+
+     AND IT IS AS WIDE AS ITS OWN LONGEST ANSWER. `.fld` is width:100%, which
+     in this column is narrower than the word "Not started" — so the control
+     clipped the very answer it was offering, which a screenshot showed and
+     `scrollWidth` did not (a <select> does not report its options that way).
+     `width:auto` is the browser sizing it to its widest option: derived, not
+     a constant somebody has to keep in step with the wording (§122.5). */
+  select.ynpick { height:calc(var(--rep-h) + 2px); width:auto; min-width:0;
+                 max-width:100%; }
 
   /* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────
      One box, one ground, one hairline down the middle: who and when on the
@@ -1791,10 +1869,23 @@
      rule wins over the hover's at equal specificity and later source order,
      so a hovered striped row does not change colour at all today. Painting
      the pair grey there would invert the seam rather than close it. */
-  .tblscroll tbody tr:hover > td.idx,
-  .tblscroll tbody tr:hover > td.idx + td { background:var(--surface-2); }
-  .tblscroll tbody tr:nth-child(even):hover > td.idx,
-  .tblscroll tbody tr:nth-child(even):hover > td.idx + td { background:var(--zebra); }
+  /* ── AND THE HOVER IS GONE ENTIRELY (§278.3, reversing §267.1) ────────
+     Islam, asked whether the tint earns its place beside the stripe:
+     *"for the hovering C remove it."* The rules above described a hovered
+     row taking `--surface-2` on an unstriped row and keeping `--zebra` on a
+     striped one — which is to say that on every second row the hover changed
+     NOTHING, measured: #FFFFFF -> #EFF2F6 on one parity, #F5F7FA -> #F5F7FA
+     on the other. A highlight that speaks on half the rows and is silent on
+     the other half reads as unreliable rather than helpful.
+
+     The global `tbody tr:hover > td` in `_shared.css` goes with them; these
+     two existed ONLY to make the frozen pair follow it, and with nothing to
+     follow they would be a rule that paints a tint no other cell has.
+     DELETED rather than left commented out (§24).
+
+     The cost is stated rather than argued: these tables are wide and scroll
+     sideways, and there is now nothing that follows one row across the
+     columns. The stripe alone separates them. */
 
   /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
@@ -1858,6 +1949,75 @@
          margin:6px 0 4px; cursor:pointer; }
 .kbadd:hover { border-color:var(--gold); }
 .kbed-lede b { color:var(--ink); }
+
+/* ── QUESTIONS ASKED (§299) ────────────────────────────────────────────
+   The office's list of what the assistant was asked, above the answers it was
+   asked from. Built out of the page's own furniture — the setup pane's card,
+   the platform's one-line table rule (§88), the segmented pair the tabs above
+   it already wear — because it is a table on a Setup page and nothing about it
+   is a new kind of thing. */
+.askpane { border:1px solid var(--line); border-radius:var(--r-md);
+           background:var(--surface); overflow:hidden; margin:0 0 22px; }
+.askhead { display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+           padding:11px 15px; border-bottom:1px solid var(--line);
+           background:var(--surface-2); }
+.askhead h3 { margin:0; font-size:var(--fs-body); font-weight:650; }
+.askwin { font-size:var(--fs-small); color:var(--ink-3); }
+/* THE FILTER IS TWO EQUALLY LIKELY CHOICES, so its halves are equal — the 2:1
+   next door is the corner's switch, where they are not (§299). */
+.askseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
+          border-radius:var(--r-sm); overflow:hidden; }
+.askseg button { font:inherit; font-size:var(--fs-small); font-weight:650;
+                 color:var(--ink-2); background:var(--surface); border:0;
+                 padding:5px 11px; cursor:pointer; white-space:nowrap; }
+.askseg button + button { box-shadow:inset 1px 0 0 var(--line); }
+.askseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); }
+.askseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.asknone { padding:22px 16px; color:var(--ink-3); font-size:var(--fs-note); }
+.asknone.bad-note { color:var(--ink); background:var(--warn-bg);
+                    border-left:3px solid var(--warn); }
+.asktable { width:100%; border-collapse:collapse; }
+.asktable th { text-align:left; font-size:var(--fs-micro); letter-spacing:.09em;
+               text-transform:uppercase; color:var(--ink-3); font-weight:700;
+               padding:8px 15px; border-bottom:1px solid var(--line);
+               background:var(--surface); white-space:nowrap; }
+.asktable td { padding:11px 15px; border-bottom:1px solid var(--line-soft);
+               font-size:var(--fs-note); vertical-align:top; }
+.asktable tr:last-child td { border-bottom:0; }
+/* THE ROW THE OFFICE CAN CLOSE. Warning ground rather than an alarm one: a gap
+   in the corpus is a fact about a healthy platform, not a failure (§168,
+   §145.14's rule that red means missing and nothing else here does). */
+.asktable tr.askmiss td { background:var(--attn-bg); }
+.askq { font-weight:600; color:var(--ink); }
+/* THE QUESTION IS THE ONE THING HERE THAT MAY WRAP. Everything else in the row
+   is a count, a date or a control and holds one line (§88); a question is prose
+   and clipping it would hide the thing the row is about. */
+.asktable .askq, .asktable .askans { white-space:normal; }
+.askby { display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+         margin-top:3px; font-size:var(--fs-micro); color:var(--ink-3); }
+.chip.kind.askwho { border-color:var(--gold); color:var(--gold-deep);
+                    background:var(--attn-bg); }
+.asktimes { font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink-2);
+            white-space:nowrap; }
+.askans { color:var(--ink-2); max-width:56ch; }
+.askno { color:var(--attn-tx); font-weight:650; }
+.askdone { margin-top:4px; font-size:var(--fs-micro); color:var(--good-tx);
+           font-weight:650; }
+/* AN ENTRY WITH NOTHING TYPED INTO IT YET IS NOT AN ANSWER (§35), so it does
+   not wear the colour that says one has been written. */
+.askdone.part { color:var(--ink-3); font-weight:600; }
+.askact { white-space:nowrap; }
+.askgrp { font:inherit; font-size:var(--fs-small); color:var(--ink);
+          background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r-sm); padding:4px 7px; margin-right:7px;
+          max-width:170px; }
+.askact .mini { font:inherit; font-size:var(--fs-small); font-weight:600;
+                color:var(--ink-2); background:var(--surface);
+                border:1px solid var(--line); border-radius:var(--r-sm);
+                padding:5px 10px; cursor:pointer; white-space:nowrap; }
+.askact .mini.go { border-color:var(--gold); color:var(--gold-deep); }
+.askact .mini:hover { border-color:var(--gold-deep); color:var(--ink); }
+.askact .mini:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 
 /* ── THE KNOWLEDGE BASE'S TWO TABS (§141) ─────────────────────────────
    The approved mockup's segmented pair: the active half wears the tenant's
@@ -2149,19 +2309,31 @@ td > .bxkey:first-child, .tacfold .bxkey { margin-top:0; }
    THE ROW IS `--surface-2`, the platform's own second ground — never a tint
    of the accent, which this page spends on Report and the scoring colours
    (§41's budget). */
-td[data-mptgt] { display:flex; align-items:center; gap:8px; }
+/* ── AND THE CELL MUST STAY A CELL (§278.3) ──────────────────────────────
+   This was `td[data-mptgt] { display:flex }`, and a `display:flex` td is no
+   longer a table-cell: it stops stretching to its row's height. On a
+   supporting function's objectives, where the name wraps (§226), every cell
+   in the row measured 136px and the target cell measured 57 — and the 79px
+   underneath it was not the cell at all, it was the bare table showing
+   through. Islam, of a hovered row: *"all turnd grey but the target cell
+   turned white."* Nothing to do with hover; hover only made it visible.
+
+   THE FLEX BOX MOVES INSIDE. `.mpcell` seats the box and the mark on one
+   line and the `<td>` around it goes on being a cell, so it fills its row
+   and paints its own ground the whole height. */
+.mpcell { display:flex; align-items:center; gap:8px; }
 /* `.fld` is width:100% in this stylesheet, so without this the box asks for
    the whole cell and leaves the chip nothing (§248's own lesson, one cell
    over). */
-td[data-mptgt] > input.fld, td[data-mptgt] > .tgrid { flex:1; min-width:0; }
+.mpcell > input.fld, .mpcell > .tgrid { flex:1; min-width:0; }
 /* The mark keeps its own size in a flex cell, or the box beside it takes the
    whole line and leaves it nothing (§248's lesson, one cell over). */
-td[data-mptgt] > .mpopen { flex:0 0 auto; }
+.mpcell > .mpopen { flex:0 0 auto; }
 /* The outcome's cell stacks: four boxes, then the mark under them — `.tgrid`
    is two `--tw` columns and a fifth control in it would start a third row
    half the cell wide, which is the hole among equal boxes §248 refused. */
-td[data-mptgt]:has(> .tgrid) { display:block; }
-td[data-mptgt] > .tgrid + .mpopen { margin-top:6px; }
+.mpcell:has(> .tgrid) { display:block; }
+.mpcell > .tgrid + .mpopen { margin-top:6px; }
 /* The mark's SHAPE is declared beside the eye's, above — one block for one
    control, so the two cannot drift. This only says where it sits. */
 tr.mprow > td { background:var(--surface-2); border-top:0; }

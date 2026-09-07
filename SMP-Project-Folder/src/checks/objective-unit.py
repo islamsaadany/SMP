@@ -218,8 +218,14 @@ with sync_playwright() as pw:
     w = pg.evaluate("""() => {
       const heads = [...document.querySelectorAll('.koband thead th')].map(t=>t.textContent.trim());
       const row = document.querySelectorAll('.koband tbody tr')[0];
-      const sel = row.querySelectorAll('td')[2].querySelector('select');
-      if (!sel) return { heads: heads, noPicker: row.querySelectorAll('td')[2].innerHTML.slice(0,90) };
+      /* §278.3 PUT A `#` COLUMN IN FRONT, and this reached for `td[2]` — which
+         was the Unit and is now the direction. Found by the column's own name
+         (§51.11: a position-keyed probe does not fail honestly, it measures
+         the neighbour and reports it). */
+      const ui = heads.indexOf('Unit');
+      const cell = ui > -1 ? row.querySelectorAll('td')[ui] : null;
+      const sel = cell && cell.querySelector('select');
+      if (!sel) return { heads: heads, noPicker: cell ? cell.innerHTML.slice(0,90) : 'no Unit column' };
       const m = UNITS.logistics.keyObjectives[0];
       const was = [m.target, m.target3y];
       const opts = [...sel.options].map(o => o.value);

@@ -291,9 +291,13 @@ var RECIPES = [
      unit head reading a benchmark that is not half the year with nothing
      anywhere explaining it. */
   { id: "monthly-plan", q: "How do I set a target month by month?", who: "office",
-    a: "Open the plan with the pen, and select <b>Monthly</b> beside the target. " +
-       "Twelve boxes open under the row \u2014 one for each month, in the target's " +
-       "own unit." +
+    /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
+       word — a recipe that tells somebody to look for a button that is no
+       longer there sends them hunting (§214.3, and §160's rule that a recipe
+       is part of the change that moves it). */
+    a: "Open the plan with the pen, and press the small grid mark beside the " +
+       "target. Twelve boxes open under the row \u2014 one for each month, in the " +
+       "target's own unit." +
        "|All twelve have to be filled in before it takes effect, and a month of " +
        "nought is a real answer: leave a box empty and the row keeps being spread " +
        "evenly across the year. Once it is complete the annual target becomes " +
@@ -304,6 +308,17 @@ var RECIPES = [
        "not flat \u2014 a season, a launch, a contract that starts in the second " +
        "half \u2014 because without it every target is measured as if each month " +
        "carried the same share of it." },
+  /* §278.3: the objectives tables gained the numbering and the handle a
+     pillar's key measures have always had, so the recipe that answers "how do
+     I reorder" has to name them too — one question with one answer, whichever
+     table somebody is standing in front of. */
+  { id: "reorder-objectives", q: "How do I change the order of the objectives?",
+    who: "office",
+    a: "Open the page with the pen. Each objective picks up a number and a drag " +
+       "handle in the first column \u2014 the same pair a {pillar} measure has \u2014 " +
+       "and dragging by the handle moves the row." +
+       "|The order is part of the plan, so it is saved with everything else and " +
+       "every page that lists those objectives follows it." },
   { id: "monthly-why", q: "Why is my year-to-date target not half the year?",
     a: "Because that measure carries a monthly plan: the office has said what each " +
        "month is expected to carry, so what you are measured against is the months " +
@@ -421,6 +436,35 @@ var RECIPES = [
        "under the plan's heading. Work that never reached the server leaves no line " +
        "here \u2014 the amber and red bars at the top of the page are what stand in " +
        "front of that." },
+  /* ── ASK, AND THE LIST IT FILLS (§299) ────────────────────────────
+     Both office-only, because both describe a control only the office can
+     reach — and §160 makes the corpus part of the change rather than
+     something written afterwards, since these are the words the assistant
+     will answer from as well as the words the page shows. */
+  { id: "office-ask", q: "Can I ask the assistant something myself?", who: "office",
+    a: "Yes, once it is switched on. Open the settings on <b>Setup \u203a Platform " +
+       "Inbox</b> and turn on <b>Ask</b>; the corner then carries " +
+       "two halves, <b>Waiting</b> and <b>Ask</b>.|Ask answers from the knowledge " +
+       "base \u2014 these same pages \u2014 and starts nothing: no conversation, " +
+       "nothing waiting on anybody, no email. There is nobody to hand a question to " +
+       "here, because the office is who a question would be handed to.|Your " +
+       "questions are kept, so an answer you found last week is still there, and " +
+       "everyone in the office can see them. Anything it cannot answer is added to " +
+       "<b>Questions asked</b>, on the Knowledge base page." },
+  { id: "questions-asked", q: "How do I see what people have been asking?", who: "office",
+    a: "Go to <b>Setup \u203a Knowledge base</b> and select the <b>Questions &amp; " +
+       "answers</b> tab. Every question the assistant has been asked is listed \u2014 " +
+       "by anybody, including the office \u2014 with how many times it has been " +
+       "asked, by how many people, and what the assistant said.|The ones it could " +
+       "not answer are marked, and <b>Add an answer</b> writes one straight into " +
+       "the knowledge base: pick the group, edit the wording if it needs it, and " +
+       "the answer is live at once. Whoever asks next gets it from the assistant " +
+       "rather than from you.|Answered questions stay on the list on purpose. A " +
+       "question answered correctly nine times is still telling you a screen is not " +
+       "clear.|Only questions the assistant actually read are listed. If it could " +
+       "not be reached at all \u2014 no key, or the service down \u2014 that is a " +
+       "different problem, and <b>Test the assistant</b> in the chat settings says " +
+       "where it stopped." },
   { id: "add-person", q: "How do I add somebody to the register?", who: "office",
     a: "Go to Setup › People and add them to the register. Make sure to include an " +
        "employee number or email as a unique identifier, since more than one " +

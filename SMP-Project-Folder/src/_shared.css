@@ -623,9 +623,12 @@
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
   .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
 
-  /* A LIGHT header, not a navy one, inside a clipped rounded box; rows
-     separate on HOVER rather than on a zebra stripe, and the columns are
-     divided by hairlines instead. The navy header went with the serif —
+  /* A LIGHT header, not a navy one, inside a clipped rounded box; the columns
+     are divided by hairlines instead of rules. Rows once separated on HOVER
+     rather than on a zebra stripe; a zebra was added to these tables later and
+     the hover was removed in §278.3, so the stripe is what separates them now
+     — recorded here because the sentence read the other way for versions after
+     it had stopped being true (§104.8). The navy header went with the serif —
      between them they were most of what made this look like a different
      product from the reference. */
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); }
@@ -699,7 +702,20 @@
              font-weight:700; background:var(--surface-2); white-space:nowrap;
              border-bottom:1px solid var(--line); }
   tbody tr:last-child td { border-bottom:0; }
-  tbody tr:hover > td { background:var(--surface-2); }
+  /* ── NO ROW HOVER (§278.3) ────────────────────────────────────────────
+     This was `tbody tr:hover > td { background:var(--surface-2) }`, and the
+     comment above still says the design separates rows "on HOVER rather than
+     on a zebra stripe" — which stopped being true the day a zebra was added
+     to these tables anyway. Both existed, and the zebra outranks the hover at
+     equal specificity and later source order, so on every second row the
+     hover changed nothing at all: measured #FFFFFF -> #EFF2F6 on one parity
+     and #F5F7FA -> #F5F7FA on the other.
+
+     Islam, asked whether it earns its place beside the stripe: *"for the
+     hovering C remove it."* Deleted rather than left in (§24), with the cost
+     stated: nothing now follows one row across a wide table. The register's
+     own hover on Setup is untouched — it sets the ROW where the zebra also
+     sets the row, so there the later rule wins and the hover works. */
   td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   td .why, .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
   /* Collabs. — the people supporting a tactic's owner (§50). Quieter than the

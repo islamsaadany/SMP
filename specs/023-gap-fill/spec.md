@@ -1,4 +1,4 @@
-# Spec 021 — Fill the gaps
+# 023 — Fill the gaps
 
 **Status:** agreed 2026-08-27 (Islam, in session), mockup signed off
 (`design-mockups/gap-fill/2026-08-27_gap-fill-states.html`, published as an

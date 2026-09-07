@@ -35,11 +35,26 @@ var ARRANGE = false;
    (§31) — and could arrange before this, so they keep an explicit button:
    tying the handles to the pen alone would have taken reordering away from
    the people who use it most, silently. */
-function arranging(scope, unitKey){
+/* ── AND THE PAGE IS NAMED, WHERE IT IS NOT THE PLAN (§278.3) ──────
+   Islam, of the objectives tables: *"the objectives needs a number column as
+   well like the key measures of direction with a handle to move them as
+   well."* Those tables are not on the Plan page — a unit's are on Foundation,
+   the group's on the Temple, a function's on its Overview — so this had no way
+   to answer for them. `page` names the pen that turns the handles on.
+
+   THE PEN IS ALREADY AN AUTHORISATION TEST, which is why the named-page branch
+   does not repeat `mayEditPlan()`: `EDIT_PAGE[page]` is only ever true for
+   somebody who may author that page, and `canArrange()` above has already
+   asked the separate question of whether they may reorder this subject. Asking
+   the PLAN's grant of a Foundation table would have been a third question
+   nobody meant (§101: reordering is its own rule, never a hole in another). */
+function arranging(scope, unitKey, page){
   if (!canArrange(scope, unitKey)) return false;
   if (ARRANGE) return true;
-  return scope === "unit" && typeof EDIT_PAGE !== "undefined" &&
-         EDIT_PAGE.plan && typeof mayEditPlan === "function" && mayEditPlan();
+  if (typeof EDIT_PAGE === "undefined") return false;
+  if (page) return !!EDIT_PAGE[page];
+  return scope === "unit" && EDIT_PAGE.plan &&
+         typeof mayEditPlan === "function" && mayEditPlan();
 }
 
 /* ROLES, NOT LEVELS — THE THIRD INSTANCE OF THE SAME FAULT (§48.6).

@@ -22,11 +22,22 @@ answer it and wait. *(Broken once, 2026-08-20: the A-or-B stack question came
 back as "which is better, and does B change the branding?", and v2.1 was built
 on A regardless. Recorded here rather than quietly fixed.)*
 
-*Changed 2026-08-20:* this rule used to require a **static HTML mockup** before
-any visual or structural change, because the product was itself a mockup. That
-requirement is retired — SMP is now implemented against a real database and
-server, and the artefact to align on is a written proposal, not a drawn page.
-What survives unchanged is the alignment: agree the shape first, in plain words.
+**MOCKUP-FIRST, AND IT IS NOT OPTIONAL.** No visual or structural change is
+made without first showing a static HTML mockup and getting sign-off on that
+view — published as an artifact, never sent as a file (A17).
+
+*Changed 2026-08-20, and REVERSED 2026-08-24:* this rule briefly retired the
+mockup requirement, on the argument that the product had stopped being a mockup
+itself and a written proposal was enough. Islam reinstated it two days later
+and it has been in force since; A17 below, added at that reinstatement, assumes
+it throughout. Recorded as a reversal rather than overwritten (A7): the versions
+built in between — §80–§85's table standard among them — made visual changes
+under the weaker rule, and that is why the reversal exists.
+
+*Corrected 2026-09-05:* this note went on stating the retirement for eleven days
+after it was reversed, one screen above an A17 that only makes sense if
+mockup-first is live. The constitution carried the same contradiction and is
+corrected in the same change.
 
 ### A2 · Don't send the project file unless asked
 

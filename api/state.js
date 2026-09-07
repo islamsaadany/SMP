@@ -107,7 +107,7 @@ const USE_INCREMENTAL = process.env.SMP_INCREMENTAL_WRITE === "1";
 /* `person` is the REGISTER ROW — what the stored graph knows, which is what
    decides authorisation — and `email` is who actually signed in. On a client
    whose register predates the platform those are deliberately different
-   things: several of Forefront's people act as one row (§288.30), so the row
+   things: several of Forefront's people act as one row (§303.30), so the row
    says what may be done and the address says who did it. Written first as
    `person.email`, which is the register's own address and empty for a row the
    client wrote — so the column landed and stayed blank. */
@@ -123,7 +123,7 @@ async function logChanges(client, person, changes, email) {
       const rows = ch.rows && ch.rows.length
         ? { count: ch.rows.length, moved: ch.rows.slice(0, LOG_ROW_CAP) }
         : null;
-      /* AND THE ADDRESS THEY SIGNED IN WITH (§288.30). Several of Forefront's
+      /* AND THE ADDRESS THEY SIGNED IN WITH (§303.30). Several of Forefront's
          people may act as one row on a client's register, so the row alone no
          longer says who did it — the session has always known the address and
          it simply was not written down. */
@@ -175,20 +175,20 @@ module.exports = async function handler(req, res) {
          later, or a team changed while nobody was looking, would otherwise
          leave a person signed in and holding nothing. */
       if (person.kind !== "client") {
-        /* THE SEAT THE SESSION ALREADY RESOLVED, not a second lookup (§288.22).
+        /* THE SEAT THE SESSION ALREADY RESOLVED, not a second lookup (§303.22).
            This asked `seatIn()` again — which returns nothing for an office
            account with no row on this client — so the platform's super user
            opening a client nobody has been put on got NO register row, and the
            page told them they were "signed in but not on this register" over a
            plan that was sitting right there.
 
-           §288.20's fault one layer on, and the same shape: getSession() has
+           §303.20's fault one layer on, and the same shape: getSession() has
            already answered this, including the seat the RULE gives somebody
            arriving without one, so asking the database a second way could only
            ever disagree with it. */
         await P.ensureOfficeRow(client, { person_key: person.key, seat: person.seat },
           { name: person.name, email: person.email, kind: person.kind },
-          /* WHOSE REGISTER IT IS (§288.31) — the registry row says, and the
+          /* WHOSE REGISTER IT IS (§303.31) — the registry row says, and the
              endpoint has it already. */
           !!client._smpClient.made_here);
       }

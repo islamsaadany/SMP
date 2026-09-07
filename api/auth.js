@@ -91,7 +91,7 @@ async function landingFor(client, account) {
   const world = { mine: mine, access: access };
   const all = (await client.query(
     "SELECT key, kind, status FROM platform.clients ORDER BY kind, name")).rows;
-  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§288.24) ──
+  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§303.24) ──
      This used to send anybody with exactly ONE openable client straight into
      it, on §32's rule that one destination is not a question. Islam, signing
      in: *"the access opens directly in raya trade! what are you doing?"*
@@ -125,7 +125,7 @@ module.exports = async function handler(req, res) {
     const body = req.method === "POST" ? await readBody(req) : {};
     const action = body.action || (req.method === "GET" ? "me" : "");
 
-    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§288.13) ────
+    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§303.13) ────
        Identity is `platform.accounts`, which is shared: is anyone signed in,
        sign in, sign out, change the password. Every query in all four is
        platform-qualified already — the client was resolved purely to hand

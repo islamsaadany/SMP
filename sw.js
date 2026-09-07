@@ -348,32 +348,55 @@
 
    §278.3 merged with main at v4.63-picker-height and went to v4.64 rather than
    beside it, same rule. */
-/* v4.65-multi-client — spec 030 / §288: one platform, many clients. The
-   client is resolved from the slug the browser was SERVED at, Forefront's own
-   shell lives at /platform, and the in-product Demo data button is retired in
-   favour of a Demo CLIENT. The built file's bytes changed, which is the whole
-   trigger (§91).
+/* §282–§286 and §288 (the chat round): the office's corner carries the queue
+   and survives the walk, a picture pastes into it, a reply nobody was told
+   about is chased, and a save stops shutting every reader out — the built
+   file's bytes changed, so the name must too, or a returning browser goes on
+   serving itself the old platform out of its own disk (§91). Checked against
+   origin/main serving "smp-shell-v4.64-objectives-table" (aac6c32), and
+   confirmed again immediately before the push (§94.16). */
+/* §290: the corner is drawn from the state the page hydrated with rather than
+   waiting for the chat's first answer, and the search reaches people who have
+   never written in — the built file's bytes changed, so the name must too, or
+   a returning browser goes on serving itself the old platform out of its own
+   disk (§91). Checked against origin/main serving
+   "smp-shell-v4.65-office-corner-queue" (da96757) — this branch's own previous
+   name, already there — and confirmed again immediately before the push
+   (§94.16). */
+/* v4.68-ten-minute-collection — §293: the platform collects for ten minutes
+   and then sends one email, superseding §283's chase-if-unread. The built
+   file's bytes changed — the line above the reply box says what will happen
+   rather than whether an email goes, the settings row is relabelled, and both
+   lib/rules.js and the mail builder (now lib/mail-html.js) are inlined — which
+   is the whole trigger (§91). Read off origin/main serving
+   "smp-shell-v4.67-project-row-type" at the moment of this merge; confirmed
+   again immediately before the push (§94.12, §94.16). */
+/* v4.72-video-in-the-review — §261: a clip plays on a review slide, with the
+   bytes in a blob store and a pointer in the graph. The built file's bytes
+   changed (the slide kind, the editor, the deck, Setup › Import & storage and
+   lib/rules.js are all inlined), which is the whole trigger (§91). Main moved
+   166 commits under this branch while it waited for a word and was serving
+   "smp-shell-v4.71-yn-citations" at the moment of this merge, so the name goes
+   PAST it rather than beside it (§94.12) — confirmed once more immediately
+   before the push (§94.16). */
+/* v4.82-placed-by-address — §303.32 and the multi-client split (spec 030): an
+   office account is placed on a client's register by its ADDRESS and never
+   invented, /platform is Forefront's own shell, and a client is resolved from
+   the slug the browser was served at. The built file's bytes changed, which is
+   the whole trigger (§91).
 
-   REBUILT FROM MAIN'S COPY AND THE BRANCH'S ONE LINE RE-APPLIED (§146.2): a
+   REBUILT FROM MAIN'S COPY AND THE BRANCH'S TWO LINES RE-APPLIED (§146.2): a
    textual merge of this file splices the two name blocks together and leaves
    two `const SHELL` declarations with loose prose between them — a
    SyntaxError, so the worker never installs and every returning browser goes
-   on serving itself the old shell, which is §91's own failure by a route §91
-   does not name.
+   on serving itself the old shell.
 
-   Main moved 452 commits under this branch while it waited — §148 through
-   §278.3 — and was serving "smp-shell-v4.64-objectives-table" when this merge
-   was made, so the name goes PAST it rather than beside it (§94.12); confirm
-   once more immediately before the push (§94.16). `node --check sw.js` run
+   Main moved 103 commits under this branch while it waited — §282 through
+   §302.4 — and was serving "smp-shell-v4.81-home-mark-box" when this merge was
+   made, so the name goes PAST it rather than beside it (§94.12); confirm once
+   more immediately before any push to main (§94.16). `node --check sw.js` run
    after the merge. */
-/* v4.66-placed-by-address — §288.32: an office account is placed on a client's
-   register by its ADDRESS and never invented. The built file's bytes changed
-   (sync.js carries the refusal's reason to the cards), which is the whole
-   trigger (§91). Main is still serving "smp-shell-v4.64-objectives-table" and
-   nothing has served v4.65 but this branch's own preview, so "-placed-by-
-   address" is a name nobody has served; confirm once more immediately before
-   any push to main (§94.16). `node --check sw.js` run. */
-const SHELL = "smp-shell-v4.66-placed-by-address";
+const SHELL = "smp-shell-v4.82-placed-by-address";
 const ASSETS = [
   "/",
   "/index.html",
@@ -385,7 +408,7 @@ const ASSETS = [
 
      AND FOREFRONT'S OWN SHELL (spec 030), which is where somebody with more
      than one client lands and the only route to Consultants and Who sees
-     what. A client's own path is still cached by name: since §288 that path
+     what. A client's own path is still cached by name: since §303 that path
      is a PATTERN rather than four fixed ones, so only the clients this
      deployment actually serves can be listed, and /raya-trade is the one
      this deployment has. */

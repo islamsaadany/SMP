@@ -12,6 +12,7 @@ const authHandler = require("../api/auth.js");
 const chatHandler = require("../api/chat.js");
 const mailHandler = require("../api/mail.js");
 const platformHandler = require("../api/platform.js");
+const blobHandler = require("../api/blob.js");
 
 const ROOT = path.join(__dirname, "..");
 const PORT = parseInt(process.argv[2], 10) || 3999;
@@ -38,7 +39,7 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
    production: sending it from http://localhost would pin the browser to https
    for localhost, which breaks every other local server on the machine. */
 const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
-/* ── A CLIENT'S PATH IS A PATTERN, NOT A LIST (§288.19) ────────────
+/* ── A CLIENT'S PATH IS A PATTERN, NOT A LIST (§303.19) ────────────
    It was four named paths, and the product can CREATE a client — so making
    one produced a card that opened a page the server had never heard of. The
    platform could make something it could not serve, and nothing said so: the
@@ -72,6 +73,10 @@ http.createServer(function (req, res) {
   if (url.pathname === "/api/chat") return chatHandler(req, res);
   if (url.pathname === "/api/mail") return mailHandler(req, res);
   if (url.pathname === "/api/platform") return platformHandler(req, res);
+  /* §261. Without this line the video half is untestable locally and
+     answers the platform's own 404 page, which reads as a bug in the
+     feature rather than a gap in the harness. */
+  if (url.pathname === "/api/blob") return blobHandler(req, res);
   if (url.pathname === "/favicon.ico") { res.statusCode = 204; return res.end(); }
   let p = path.normalize(path.join(ROOT, decodeURIComponent(url.pathname)));
   if (!p.startsWith(ROOT)) { res.statusCode = 403; return res.end(); }

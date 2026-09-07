@@ -1,0 +1,31 @@
+-- 042 · THE COLLECTION'S MEMORY (§293, reshaped by §293)
+--
+-- Islam: "when someone sends to me and I don't reply it sends an email for
+-- each message ... it needs to compile some messages", and then: "if the smo
+-- don't reply in 10 min the email should come and same for them."
+--
+-- Two columns, and both answer one question: HOW FAR HAVE WE ALREADY EMAILED
+-- THIS CONVERSATION? Everything newer than the mark is what the next email
+-- carries, and nothing older is ever sent twice.
+--
+--   chased_at       · the office has been told about this conversation up to here
+--   chased_them_at  · this person has been told about our replies up to here
+--
+-- CLEARED BY THE ANSWER, NEVER BY A CLOCK. `chased_at` is wiped when the
+-- office replies, because that ends the conversation's wait. `chased_them_at`
+-- is NOT wiped when the person comes back — the sweep reads the LATER of it
+-- and `here_at`, so a visit silences what arrived before it and nothing that
+-- arrived after (§293; clearing it would make messages they were already sent
+-- eligible all over again).
+--
+-- NOTHING IS BACKFILLED, deliberately. NULL is "nothing has gone out about
+-- this conversation", which is exactly what an upgrading tenant should mean:
+-- the first collection carries what is waiting, and every one after it carries
+-- only what is new. A backfill of now() would silence conversations that are
+-- waiting today.
+--
+-- OUTSIDE THE STATE GRAPH, like everything else in chat_threads: a save
+-- TRUNCATEs the thirty tables and cannot reach this (§97).
+
+ALTER TABLE chat_threads ADD COLUMN IF NOT EXISTS chased_at      TIMESTAMPTZ;
+ALTER TABLE chat_threads ADD COLUMN IF NOT EXISTS chased_them_at TIMESTAMPTZ;

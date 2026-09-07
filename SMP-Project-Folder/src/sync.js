@@ -743,7 +743,7 @@ var SYNC = (function () {
          back (a client's own person) the label is untouched. */
       var org = document.getElementById("orgname");
       if (org) org.hidden = true;
-      /* STRAIGHT TO THE PLATFORM, NOT THROUGH THE DOOR (§288.23). It went to
+      /* STRAIGHT TO THE PLATFORM, NOT THROUGH THE DOOR (§303.23). It went to
          "/", and the door hands somebody over to what they can OPEN — so on a
          deployment where this person has exactly one client, the way back to
          the cards walked out of the client and straight back into it. A loop,
@@ -900,6 +900,23 @@ var SYNC = (function () {
     fetch("/api/auth", { method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(withClientBody(body))
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
+      .catch(function (e) { done(String(e.message || e), null); });
+  }
+
+  /* One shape for every /api/blob call, and ONE guard in front of all of them
+     (§97.9's rule, learned when `qa.py` walked the platform over file://):
+     opened from a file there is no server to ask, and demo data writes nothing
+     at all (§67), so a clip must not be able to reach the store from either.
+     Refused HERE rather than at each call site, because a call site added
+     later would be the one that forgot. */
+  function blobLive() { return enabled && !isDemoMode(); }
+  function blobPost(body, done) {
+    if (!blobLive()) return done("no server here", null);
+    fetch("/api/blob", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
     }).then(function (r) { return r.json(); })
       .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
       .catch(function (e) { done(String(e.message || e), null); });
@@ -1110,6 +1127,48 @@ var SYNC = (function () {
                  fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
     },
+    /* ── A CLIP GOES UP IN PIECES (§261) ────────────────────────────────
+       A serverless function refuses a body over 4.5MB, so a 50MB clip cannot
+       be posted in one go. The store's own multipart upload is the documented
+       way round it: begin, then a piece at a time under the cap, then finish.
+       Every piece is authorised on the way through, so this is not one address
+       minted and then trusted for several minutes.
+
+       SEQUENTIAL, NOT PARALLEL. Six pieces at once would be quicker on a good
+       connection and is exactly what saturates a bad one, and the office is
+       often uploading from an office. */
+    videoSign: function (o, done) { blobPost({ action: "begin", target: o.target,
+                 name: o.name, bytes: o.bytes, type: o.type }, done); },
+    videoStatus: function (done) { blobPost({ action: "status" }, done); },
+    videoList: function (done) { blobPost({ action: "list" }, done); },
+    videoDrop: function (paths, done) { blobPost({ action: "drop", paths: paths }, done); },
+    videoPut: function (o, done) {
+      if (!blobLive()) return done("no server here", null);
+      var PIECE = 4 * 1024 * 1024;
+      var total = Math.max(1, Math.ceil(o.file.size / PIECE));
+      var parts = [];
+      var step = function (n) {
+        if (n > total) {
+          return blobPost({ action: "finish", path: o.path, key: o.key,
+                            uploadId: o.uploadId, parts: parts }, done);
+        }
+        var slice = o.file.slice((n - 1) * PIECE, n * PIECE);
+        fetch("/api/blob?action=part&path=" + encodeURIComponent(o.path) +
+              "&key=" + encodeURIComponent(o.key) +
+              "&uploadId=" + encodeURIComponent(o.uploadId) + "&n=" + n,
+              { method: "POST", headers: { "Content-Type": "application/octet-stream" },
+                body: slice })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (!j || !j.ok) throw new Error((j && j.error) || "a piece did not arrive");
+            parts.push({ partNumber: n, etag: j.etag });
+            if (o.onPart) o.onPart(n, total);
+            step(n + 1);
+          })
+          .catch(function (e) { done(String(e.message || e), null); });
+      };
+      step(1);
+    },
     mailDraftSave: function (o, done) {
       mailPost({ action: "draftSave", id: o.id, subject: o.subject, body: o.body,
                  ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, greet: o.greet,
@@ -1231,20 +1290,20 @@ var SYNC = (function () {
              password now gets the same answer — the server refuses the state
              until a real one is chosen, and the gate is where that happens. */
           if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
-          /* ── AN ADDRESS THAT NAMES NO CLIENT (§288.19) ──────────────
+          /* ── AN ADDRESS THAT NAMES NO CLIENT (§303.19) ──────────────
              Since a client's path became a PATTERN rather than four named
              ones, any single-segment address reaches this file — so a typo,
              or a client that has been retired, now lands here instead of
              404ing at the edge. And the catch below falls back to the BAKED
              worked example, which would put Raya Trade's units and figures on
              screen under somebody else's address: §94.10's fault, made
-             reachable by the fix for §288.19.
+             reachable by the fix for §303.19.
 
              The platform's own cards are where somebody with a bad client
              address should be, and it is the one page that can tell them
              which clients they actually have. */
           if (r.status === 404) {
-            /* ── AND A REFUSAL CARRIES ITS REASON WITH IT (§288.32) ───
+            /* ── AND A REFUSAL CARRIES ITS REASON WITH IT (§303.32) ───
                Two different things answer 404 here and only one of them has
                anything to say: a slug naming no client (nothing to explain —
                the cards ARE the explanation), and an account this client's

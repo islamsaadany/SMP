@@ -3823,6 +3823,148 @@ function kbAudPick(id, w){
     }).join("") + '</select></label>';
 }
 
+/* ── QUESTIONS ASKED (§299) ────────────────────────────────────────────
+   Islam: *"if the SMO asks a question that the assistant can't answer it
+   should be recorded for the future enrichment of the data base, btw that
+   should be the same for the users questions"*, and then, of where it is read:
+   *"the history of questions needs to be kept somewhere visible by the super
+   user as well, in case of something is not working on the platform or
+   question that repeates that require a fix."*
+
+   ONE LIST, ANSWERED AND UNANSWERED TOGETHER, and the answered rows are the
+   half worth defending: a question the assistant answered correctly nine times
+   is still telling the office that a screen is not clear, so dropping it would
+   destroy the very count his second reason needs. Sorted by how often it has
+   been asked, because that is the question the page exists to answer.
+
+   `null` IS NOT AN EMPTY LIST (§93, §231.4). Until the server answers, the
+   page says it is asking; a failure says so and says nothing was lost. An
+   empty list is the only one of the three that means nothing has been asked. */
+var ASKS = null;        /* { days, rows } once asked; {__error} on a refusal */
+var ASKMISS = false;    /* the filter: unanswered only */
+
+/* WHETHER AN ENTRY HAS ALREADY BEEN MINTED FOR THIS ROW, matched on the
+   question it was minted FROM through the SHARED normaliser (§42) — never a
+   fresh comparison here, or a row would go on offering to be answered after it
+   had been, and pressing twice would manufacture the duplicate questions §87
+   spends its length refusing.
+
+   TWO STATES, NOT ONE. An entry with no answer typed into it yet is not an
+   answer (§35) and must not say it is — but it is still a reason to stop
+   offering to add another. */
+function askEntry(qkey){
+  return SMPRules.kbAllAdds(GROUP.kb).filter(function(x){
+    return SMPRules.askKey(x.q) === qkey;
+  })[0] || null;
+}
+
+function askRowHtml(r){
+  var miss = !r.answered;
+  var mine = askEntry(r.qkey);
+  var done = !!(mine && String(mine.a || "").trim());
+  var who = r.office_only ? "Office" : (r.by_office ? "Office and others" : "");
+  var groups = RECIPES.map(function(g){
+    return '<option value="' + esc(g.g) + '">' + esc(g.g) + '</option>';
+  }).join("");
+  return '<tr' + (miss && !mine ? ' class="askmiss"' : '') + '>' +
+    '<td><div class="askq">' + esc(r.question) + '</div>' +
+      '<div class="askby">' +
+        (who ? '<span class="chip kind askwho">' + esc(who) + '</span>' : "") +
+        '<span>' + esc(plural(r.people, "person", "people")) + '</span>' +
+        '<span>Last ' + esc(whenWord(r.last_at)) + '</span>' +
+      '</div></td>' +
+    '<td class="asktimes">' + (r.times | 0) + '×</td>' +
+    '<td class="askans">' +
+      (r.answered
+        ? esc(oneLine160(r.answer || ""))
+        : '<b class="askno">No answer — the assistant said it could not ' +
+          'answer this</b>') +
+      (mine
+        ? '<div class="askdone' + (done ? "" : " part") + '">' +
+          (done ? "An answer has been written here" : "An answer is being written here") +
+          "</div>"
+        : "") +
+    '</td>' +
+    '<td class="askact">' +
+      /* AN ANSWERED QUESTION ALREADY HAS AN ENTRY — the assistant answered it
+         from one — so the row opens THAT rather than offering to write a
+         second beside it (§87: the duplicate is the thing to refuse). The
+         entry is named by the assistant itself, in `source`; where it did not
+         name one the row carries nothing rather than a control that would land
+         nowhere (§61). */
+      (mine ? ""
+        : r.answered
+          ? (r.source
+              ? '<button type="button" class="mini" data-askopen="' + esc(r.source) +
+                '">Open the answer</button>'
+              : "")
+          : '<select class="askgrp" aria-label="Which group the answer belongs in">' +
+              groups + '</select>' +
+            '<button type="button" class="mini go" data-askadd="' + esc(r.qkey) +
+            '">Add an answer</button>') +
+    '</td></tr>';
+}
+
+/* A DATE THE WAY THE REST OF THE PLATFORM SAYS ONE. Its own small reader
+   rather than a second date library: this column has one job and the value
+   arrives as an ISO string from the server. */
+function whenWord(at){
+  var d = new Date(at);
+  if (isNaN(d.getTime())) return "";
+  var now = new Date();
+  var sameDay = d.toDateString() === now.toDateString();
+  if (sameDay) return "today";
+  var y = new Date(now.getTime() - 864e5);
+  if (d.toDateString() === y.toDateString()) return "yesterday";
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+function oneLine160(v){
+  var t = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+  return t.length > 160 ? t.slice(0, 160) + "…" : t;
+}
+
+function askListHtml(){
+  /* DRAWN ONLY WHERE IT COULD SAY ANYTHING. Over file:// there is no server
+     and never was one, so a panel reading "we could not load this" would be
+     reporting a failure that is not one (§45.2 from the other side). */
+  if (typeof SYNC === "undefined" || !SYNC.isLive()) return "";
+  var head = function(inner){
+    return '<div class="pane askpane"><div class="askhead">' +
+      '<h3>Questions asked</h3>' + inner + "</div>";
+  };
+  if (ASKS && ASKS.__error) {
+    return head('<span class="askwin">Nothing has been lost</span>') +
+      '<div class="asknone bad-note"><b>These could not be loaded.</b> ' +
+      esc(ASKS.__error) + " Nothing has been lost — the questions are on the " +
+      "server and the list will come back.</div></div>";
+  }
+  if (!ASKS) {
+    return head("") + '<div class="asknone">Asking…</div></div>';
+  }
+  var rows = ASKS.rows || [];
+  var miss = rows.filter(function(r){ return !r.answered; });
+  var shown = ASKMISS ? miss : rows;
+  var seg = '<span class="seg askseg">' +
+    '<button type="button" data-askfilter="all" aria-pressed="' + (!ASKMISS) +
+      '">All ' + rows.length + "</button>" +
+    '<button type="button" data-askfilter="miss" aria-pressed="' + (!!ASKMISS) +
+      '">Unanswered ' + miss.length + "</button></span>";
+  var body = shown.length
+    ? '<div class="tblscroll"><table class="asktable"><thead><tr>' +
+        "<th>Question</th><th>Asked</th><th>What the assistant said</th><th></th>" +
+      "</tr></thead><tbody>" +
+      shown.map(askRowHtml).join("") + "</tbody></table></div>"
+    /* AND THE EMPTY CASE DESCRIBES THIS FILTER, never the whole product
+       (§113's lesson on the inbox's own tabs). */
+    : '<div class="asknone">' + (ASKMISS
+        ? "Every question asked has been answered."
+        : "Nothing has been asked yet. This fills up as people use the " +
+          "assistant.") + "</div>";
+  return head('<span class="askwin">Last ' + (ASKS.days | 0) + " days</span>" + seg) +
+    body + "</div>";
+}
+
 function kbEdCard(id, q, a, mark, aud){
   return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
     '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
@@ -4356,7 +4498,15 @@ function renderKB(){
     '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
       'place. This grows: anything we settle that a reader would need to know belongs here ' +
       'rather than in a note under the screen it happens to affect.</p>' +
-    tabs + toc + '<div class="kb">' + shown.join("") + '</div>';
+    tabs +
+    /* ── QUESTIONS ASKED (§299) ────────────────────────────────────
+       On the questions tab, above the questions themselves: it is a list OF
+       questions and the thing you do with a row is write one of the answers
+       below it. Nothing on the explanations tab is in it, and the pen does not
+       reach it — this is not one of the answers, it is what is missing from
+       them. */
+    (tab === "qa" ? askListHtml() : "") +
+    toc + '<div class="kb">' + shown.join("") + '</div>';
 }
 
 
@@ -5358,7 +5508,7 @@ function renderImport(){
       '</div></div>';
   }
 
-  return cfgHead("Import & archives",
+  return cfgHead("Import & storage",
       ['<span class="pill kind">' + (isPlan
         ? "One generic template &middot; one unit per file"
         : "One file per unit or capability") + '</span>'],
@@ -7667,3 +7817,180 @@ function tkHead(id, allow){
    (§75), and a search that emptied itself when you added somebody would be a
    filter you have to retype every time you use the page. */
 var TKQ = {};
+
+/* ── SETUP › VIDEO STORAGE (§261) ─────────────────────────────────────────
+   Islam's #3: *"keep but we need a way to clear the storage not to be
+   overwhelmed by uploaded videos."* No automatic expiry, no re-encoding after
+   the cycle (§49.2: a record somebody tidied is no longer the record) — the
+   office looks at what is held and deletes.
+
+   THE TOTAL IS ON THE PAGE, because "am I being overwhelmed" is the question
+   somebody opens it to answer, and a table of rows makes you add them up.
+
+   A CLIP IN THE OPEN CYCLE OFFERS NO DELETE. Removing what a unit is about to
+   present is not storage hygiene, and the control that does it belongs on the
+   slide (§61: the way back is where the thing is).
+
+   NULL IS NOT EMPTY (§93, §231.4). Until the store has answered, the page says
+   it is asking; a failure says so and says nothing was lost. An empty table
+   drawn over an ask that never happened is a statement about somebody's data
+   made when nothing was read. */
+var VIDSTORE = null;   /* {ready, clips:[{path,bytes,at}]} | {__error} | null */
+
+function vidStoreClips(){
+  return (VIDSTORE && !VIDSTORE.__error && VIDSTORE.clips) || [];
+}
+function vidStoreBytes(list){
+  return (list || []).reduce(function(n, c){ return n + (+c.bytes || 0); }, 0);
+}
+/* Every clip a slide currently points at, and the subject it belongs to. The
+   store knows sizes and the PLAN knows meaning — which review, whose, and
+   what the slide is called — so the table is the two read together. A file in
+   the store that no slide points at is still shown: it is exactly the kind of
+   thing this page exists to clear. */
+function vidStoreRows(){
+  var live = {};
+  var slides = (REVIEW && REVIEW.slides) || {};
+  Object.keys(slides).forEach(function(t){
+    (slides[t] || []).forEach(function(sl){
+      if (sl && sl.vid && sl.vid.path) {
+        live[sl.vid.path] = { target:t, title:sl.title || "", vid:sl.vid };
+      }
+    });
+  });
+  return vidStoreClips().map(function(c){
+    var m = live[c.path];
+    return { path:c.path, bytes:c.bytes, at:c.at, open:!!m,
+             where: m ? deckSubjectName(m.target) : vidStoreWhere(c.path),
+             title: m ? m.title : "",
+             name: m && m.vid.name ? m.vid.name : "" };
+  });
+}
+/* A path carries its target, so a clip whose slide has gone can still say
+   which review it came from rather than reading as an orphan of nowhere. */
+function vidStoreWhere(path){
+  var m = String(path || "").match(/^videos\/([^\/]+)\//);
+  return m ? deckSubjectName(m[1].replace(/-/g, ":").replace(/^fn:/, "fn:")) : "—";
+}
+function deckSubjectName(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[t.slice(3)];
+    return f ? f.name + " (function)" : t;
+  }
+  var u = UNITS[t];
+  return u ? u.name : t;
+}
+
+function renderVideoStore(){
+  var can = mayDestroy();
+  /* THREE ANSWERS, NOT TWO (§93, §108.10): a list, nothing, and *we have not
+     asked yet*. Drawing an empty table over an ask still in flight is a
+     statement about somebody's data made before anything was read. */
+  /* Opened from a file there is no server to ask, so nothing is ever coming
+     and "Asking…" would stand for ever — §32's rule: before the answer is
+     known there is exactly one honest thing to say, and here it is that there
+     is nobody to ask. */
+  if (typeof SYNC === "undefined" || !SYNC.isLive()) {
+    return section("", "Video storage", null,
+      '<div class="note">This copy of the platform is opened from a file, so there ' +
+      'is no store to ask. Video storage is shown on the deployed platform.</div>');
+  }
+  if (VIDSTORE === null || VIDSTORE.asking) {
+    return section("", "Video storage", null,
+      '<div class="note">Asking the store what it is holding…</div>');
+  }
+  if (VIDSTORE.__error) {
+    /* §231.4: a failed ask is not an answer, and where it would be frightening
+       it says outright that nothing has been lost. */
+    return section("", "Video storage", null,
+      '<div class="note attn"><b>The store could not be reached.</b>' +
+      '<span class="why">Nothing has been lost — the clips are where they were, and ' +
+      'so are the reviews that point at them. ' + esc(VIDSTORE.__error) + '</span>' +
+      '<button class="editbtn" data-vidrefresh="1">Try again</button></div>');
+  }
+  if (!VIDSTORE.ready) {
+    return section("", "Video storage", null,
+      '<div class="note"><b>No video store is set up on this deployment.</b>' +
+      '<span class="why">Clips cannot be uploaded until one is. A video kept on ' +
+      'YouTube, Vimeo, SharePoint or Google Drive still works — those are pasted ' +
+      'as a link on the slide and are not held here.</span></div>');
+  }
+
+  var rows = vidStoreRows();
+  if (!rows.length) {
+    return section("", "Video storage", null,
+      '<div class="note">Nothing is stored. Clips uploaded onto a review’s slides ' +
+      'appear here with what they take up.</div>');
+  }
+  var total = vidStoreBytes(rows);
+  var closed = rows.filter(function(r){ return !r.open; });
+  var freeable = vidStoreBytes(closed);
+
+  var body = rows.map(function(r){
+    return '<tr><td><b>' + esc(r.where) + '</b>' +
+        (r.title ? '<span class="why">' + esc(r.title) + '</span>' : '') + '</td>' +
+      '<td>' + esc(r.name || r.path.split("/").pop()) + '</td>' +
+      '<td class="cc">' + esc(vidSize(r.bytes)) + '</td>' +
+      '<td>' + esc(r.at ? String(r.at).slice(0, 10) : "—") + '</td>' +
+      '<td class="cc">' + (r.open
+        ? '<span class="pill none" title="This clip is on a slide in the review that ' +
+          'is open now. Remove it from the slide first.">In the open review</span>'
+        : can ? '<button class="rmbtn" data-viddel="' + esc(r.path) + '">Delete the clip</button>'
+              : '<span class="pill none">View only</span>') + '</td></tr>';
+  }).join("");
+
+  return section("", "Video storage", null,
+    '<div class="note"><b>' + esc(vidSize(total)) + '</b> in ' +
+      plural(rows.length, "clip") + '. ' +
+      (freeable
+        ? '<b>' + esc(vidSize(freeable)) + '</b> of that is not on a slide in the open review.'
+        : 'All of it is on a slide in the review that is open now.') +
+      '<span class="why">Deleting a clip frees the space and leaves the slide where it ' +
+      'is, saying the clip was removed. Nothing else about the review changes.</span></div>' +
+    '<table><thead><tr><th>Review</th><th>File</th><th class="cc">Size</th>' +
+      '<th>Uploaded</th><th class="cc"></th></tr></thead><tbody>' + body + '</tbody></table>' +
+    (can && closed.length
+      ? '<div class="note"><button class="rmbtn" data-viddelold="1">Delete every clip ' +
+        'that is not in the open review</button> <span class="why">' +
+        plural(closed.length, "clip") + ', ' + esc(vidSize(freeable)) +
+        '. The clips on the open review are left alone.</span></div>'
+      : ''));
+}
+
+/* Deleting bytes, and the two things that must happen together: the store
+   forgets the file, and the page stops claiming to hold it. The list is
+   patched rather than re-asked — a second round trip to learn what we just
+   did is a spinner for nothing — and a FAILURE puts nothing back, because the
+   store is the truth and guessing at it is how a page comes to show clips
+   that are gone (§35). */
+function vidStoreDrop(paths){
+  if (!paths || !paths.length) return;
+  SYNC.videoDrop(paths, function(err){
+    if (err) {
+      VIDSTORE = { __error: String(err.message || err) };
+      paint();
+      return;
+    }
+    var gone = {};
+    paths.forEach(function(p){ gone[p] = true; });
+    if (VIDSTORE && VIDSTORE.clips) {
+      VIDSTORE.clips = VIDSTORE.clips.filter(function(c){ return !gone[c.path]; });
+    }
+    /* THE SLIDE KEEPS ITS PLACE AND SAYS WHAT HAPPENED (§15.1). A pointer to
+       bytes that are gone must never be drawn as a player that failed to load
+       — and the poster and the caption stay, so an archived review still
+       shows what was presented and when it was cleared. */
+    var slides = (REVIEW && REVIEW.slides) || {};
+    Object.keys(slides).forEach(function(t){
+      (slides[t] || []).forEach(function(sl){
+        if (sl && sl.vid && gone[sl.vid.path]) {
+          delete sl.vid.path;
+          sl.vid.cleared = todayLabel();
+        }
+      });
+    });
+    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+    paint();
+  });
+}

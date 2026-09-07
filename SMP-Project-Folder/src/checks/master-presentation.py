@@ -485,17 +485,27 @@ with sync_playwright() as p:
         flow: DECK.flow, stops: DECK.stops
       };
     }""", None, THREW)
-    check("...and its dots carry no code, because there is one subject",
-          all(t.strip() == "" for t in (ev(pg, """() => [...document.querySelectorAll(
-            '#deckroot .ddot')].map(d => d.textContent)""", None, ["x"]) or ["x"])),
-          "a single deck's dots are labelled")
-    check("a single subject still gets one dot per slide",
-          get(one, "dots") == get(one, "slides") and get(one, "dots"), one)
+    # §266.12 REWROTE THESE THREE, NEVER DELETED THEM (§218). They asserted
+    # that one subject's deck draws a blank dot per slide and holds no stops,
+    # which was true until Islam asked for the flow's own strip on a single
+    # deck: *"how can we use the bullets in the bottom like we did in the master
+    # one?"* What they were GUARDING is still asserted, and is the part that
+    # matters here — a single deck is not a flow, and its strip is not the
+    # flow's: the pills are its own SECTIONS, and the title bar is left alone.
+    codes = ev(pg, """() => [...document.querySelectorAll('#deckroot .ddot')]
+      .map(d => d.textContent)""", None, [])
+    subjects = ev(pg, """() => boardUnitTargets().concat(boardFunctionTargets())
+      .map(t => deckCode(t, placeLabel(t)))""", None, [])
+    check("a single subject's strip is its own sections, never subjects",
+          bool(codes) and not any(c in (subjects or []) for c in codes if c),
+          {"codes": codes, "subjects": subjects})
+    check("...so it is fewer pills than it has slides",
+          0 < len(codes) < (get(one, "slides") or 0), one)
     check("...and its title is the subject and the cycle, with no running order",
           " of " not in (get(one, "title") or " of ") and
           "Mobile" in (get(one, "title") or ""), get(one, "title"))
     check("...and it is not a flow",
-          get(one, "flow") is None and get(one, "stops") is None, one)
+          not get(one, "flow"), one)
 
     # ── 7 · a hidden slide stays hidden inside a flow (§256) ───────────
     hid = ev(pg, """(flow) => {

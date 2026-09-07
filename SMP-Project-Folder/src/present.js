@@ -7,7 +7,12 @@
    disappears, and Exit returns the presenter to exactly where they were.
    ──────────────────────────────────────────────────────────────────────── */
 
-var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"" };
+var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"", from:"page" };
+/* `from` is WHERE THIS DECK WAS OPENED FROM — "page" or "editor" (§295). It is
+   read by `closeDeck()` alone, to decide where Escape and Exit put you, and it
+   is written on EVERY open rather than only the editor's: a value left standing
+   would send the NEXT deck back to a Manage slides nobody opened, which is the
+   shape §265 recorded when the `fs` class survived a windowed close. */
 
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
@@ -48,8 +53,11 @@ function dBand(v){ return band(v); }
    would have vanished into its own ground. `deckFootMarks()` skips `.d-sect`,
    which is one test rather than an unconditional plate and a white rectangle
    in the corner of every divider. */
+var SEC_WORD = { sfound:"FOUND", swothead:"SWOT", spillars:"PILLARS",
+                 sperf:"SCORE" };
 function sectSlide(key, label, title, sub, cells){
-  return '<section class="dslide d-cover d-sect"' + anch(key, label) + '>' +
+  return '<section class="dslide d-cover d-sect"' + anch(key, label) +
+    sec(SEC_WORD[key] || secTwo(title), title, true) + '>' +
     '<span class="seclab">Section</span>' +
     '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">' + esc(sub) + '</p>' +
@@ -60,6 +68,35 @@ function sectSlide(key, label, title, sub, cells){
         }).join("") + '</div>'
       : '') +
     '</section>';
+}
+
+/* ── A SLIDE THAT STARTS A SECTION SAYS SO (§266.12) ───────────────────
+   Islam, of the flow's own labelled strip: *"for the presentations in general
+   of the units not the master how can we use the bullets in the bottom like we
+   did in the master one?"*, and of the four treatments drawn for him,
+   *"B is good but we can make them grouped like C as well."*
+
+   The strip is drawn from what the deck DECLARES, never from what it looks
+   like: the builder knows the pillar's code and the capability's name, and a
+   strip that read them back out of a heading would be guessing at prose it does
+   not own (§96, and `deckStops()`'s own reason for reading `data-subject`).
+
+   `head` marks the ones the deck's four blue dividers already are (§259) — the
+   groups are the parts of the review, not a decoration invented for the bar. */
+function sec(code, name, head){
+  return ' data-sec="' + esc(code) + '" data-sec-name="' + esc(name) + '"' +
+         (head ? ' data-sec-head="1"' : '');
+}
+
+/* Two letters, for a section with no code of its own — a capability. The rule
+   is §266.9's own fallback for a subject with no prefix, and it is a fallback
+   rather than a scheme: a pillar HAS a code, printed on every one of its
+   slides, and inventing a second abbreviation beside it is what that section
+   refused. */
+function secTwo(name){
+  var w = String(name || "").trim().split(/\s+/).filter(Boolean);
+  return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0)
+                       : String(w[0] || "?").slice(0, 2)).toUpperCase();
 }
 
 function anch(key, label, where){
@@ -155,7 +192,8 @@ function deckSlides(u){
     (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
+  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", u.name, true) + '>' +
     (deckMark(u)
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
@@ -456,6 +494,7 @@ function deckSlides(u){
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     S.push('<section class="dslide d-cover"' +
       anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
+      sec(pillarCode(u, pi), p.name) +
       '><span class="seclab">' + esc(p.kind) +
       ' &middot; theme ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
       '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
@@ -614,6 +653,7 @@ function deckSlides(u){
   if (noteSlide) S.push(noteSlide);
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
+    sec("END", "Thank you") +
     '><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(u.name) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
@@ -677,7 +717,8 @@ function deckSlidesFn(fk){
   var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
   var S = [];
 
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
+  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", f.name, true) + '>' +
     (groupLogo()
         ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
@@ -694,6 +735,7 @@ function deckSlidesFn(fk){
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
     S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
+      sec(secTwo(c.name), c.name) +
       '><span class="seclab">Capability &middot; ' +
         esc(f.name) + '</span>' +
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
@@ -768,7 +810,12 @@ function deckSlidesFn(fk){
         var reads = d ? statusReads(o) : o.progress;
         var got = d ? (o.status === "done" ? "Delivered" : o.status === "wip" ? "In progress"
                        : o.status === "todo" ? "Not started" : "\u2014")
-                    : (o.actual == null || o.actual === "" ? "\u2014" : esc(String(o.actual)));
+                    : (o.actual == null || o.actual === "" ? "\u2014"
+                       /* §300: a yes/no answer reads in words on the projector
+                          too, so the room is never shown the stored spelling
+                          of one ("In progress 60"). */
+                       : esc(SMPRules.isYesNo(o.target) ? SMPRules.ynShown(o.actual)
+                                                        : String(o.actual)));
         var notDue = !dueThisCycle(dxWhen(row));
         return '<tr' + (notDue ? ' class="dim"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(o.name) + '</td>' +
@@ -834,6 +881,7 @@ function deckSlidesFn(fk){
     'platform, not in a deck that is already wrong.</p></section>');
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
+    sec("END", "Thank you") +
     '><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(f.name) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
@@ -1002,10 +1050,29 @@ function deckBuild(target){
    `DECK.flow` is the LIST OF SUBJECTS, held only while a flow is open. It is
    read by the strip at the bottom and by nothing else; a single subject sets
    it to null, so every existing behaviour is untouched by construction. */
-function openDeckWith(titleHtml, targets){
+function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
+     BOTH BRANCHES, EVERY OPEN. Stamping only the editor's case would leave the
+     word standing on the next deck opened from a page — a button reading "Back
+     to slides" that lands on the platform is worse than one that never said it.
+
+     THE WORD SAYS WHERE YOU LAND, which is the platform's own habit (§124):
+     "Exit" is true of a deck opened from the page and false of one played from
+     the editor, and a presenter who has just been arranging slides is the one
+     person who would read it literally.
+
+     `from` is optional, so `openDeck`, `openDeckFn` and the master flow are
+     unchanged by construction. Checked rather than assumed (§250.1): none of
+     the three is ever passed BY NAME, so no caller picks the new parameter up
+     from a `map` index. */
+  DECK.from = from === "editor" ? "editor" : "page";
+  var back = DECK.from === "editor";
+  var ex = root.querySelector("[data-dexit]");
+  ex.textContent = back ? "Back to slides" : "Exit";
+  ex.title = (back ? "Back to slides" : "Exit") + " (Esc)";
   DECK.flow = list.length > 1 ? list : null;
   DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
@@ -1021,12 +1088,29 @@ function openDeckWith(titleHtml, targets){
    are two doors onto one question — Present on a unit, Present on a function —
    and `deckHtmlFor()` is what decides which deck each gets, so a pillars
    function opened through either lands on the same slides. */
-function openDeck(u){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey]);
+function openDeck(u, from){
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
 }
-function openDeckFn(fk){
+function openDeckFn(fk, from){
   openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
-    ["fn:" + fk]);
+    ["fn:" + fk], from);
+}
+/* ── WHICH DECK A TARGET GETS, ASKED ONCE (§295) ──────────────────────────
+   §224 fixed this branch on the Present button and §253.3 fixed it again on
+   Manage slides and the anchors, each time because it had been written out
+   separately — so the third caller (Play) is the moment to stop copying it.
+   The two doors above stay: §253.3 keeps them deliberately, and this is the
+   resolver in front of them rather than a replacement for either.
+
+   THE FORMAT DECIDES, NEVER THE PREFIX: a function that plans in PILLARS is
+   unit-shaped, so it takes the unit deck through `unitLike()`, and only a
+   capability function takes `openDeckFn`. Asking by `fn:` alone is what gave a
+   pillars function a deck reading "Capability review - 0 capabilities". */
+function openDeckFor(target, from){
+  var t = String(target);
+  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+  if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk, from);
+  else openDeck(unitLike(t), from);
 }
 
 /* ══ THE MASTER PRESENTATION (§266) ═══════════════════════════════════
@@ -1409,14 +1493,30 @@ function masterMoved(order){
    Removed rather than reconciled, because one question may have one answer. */
 function closeDeck(){
   var root = document.getElementById("deckroot");
+  /* ── ONE DOOR DECIDES WHERE YOU LAND (§295, §53.5) ────────────────
+     Escape and the bar's own button both arrive here, so the return path is
+     written once and the two cannot disagree about it.
+
+     ASKED OF THE EDITOR'S CLASS AS WELL AS THE FLAG: the deck outlives nothing
+     here, but a build that ever closed the editor while a deck it opened was
+     still up would otherwise return to a hidden pane and leave the platform
+     inert behind it. Both, or neither. */
+  var toEditor = DECK.from === "editor" &&
+                 document.getElementById("slideroot").classList.contains("on");
+  DECK.from = "page";
   root.classList.remove("on");
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
      never fires that event, and `fs` left standing would give the NEXT deck a
      hidden bar and a click that advances slides (§265) in a window. */
   root.classList.remove("fs");
-  document.body.classList.remove("presenting");
+  /* `presenting` STAYS when the editor is underneath — it is the editor's too
+     (it is what hides the chat dock and stops the page behind scrolling), so
+     removing it here would give the mode back its scrollbar and its bubble the
+     moment a deck closed over it. */
+  if (!toEditor) document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
+  if (toEditor) slidesResume();
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
@@ -1523,21 +1623,58 @@ function deckStops(){
    "32 / 71" is the question a presenter actually asks of it. A single
    subject's deck is untouched: `DECK.flow` is null there and this is the
    branch it has always taken. */
+/* The sections of ONE subject's deck, read off the slides themselves (§266.12).
+   A `data-sec` is written by the builder that knows the code and the name, so
+   this reads a declaration rather than parsing a heading. */
+function deckSections(){
+  var out = [];
+  DECK.slides.forEach(function(sl, k){
+    if (!sl.dataset.sec) return;
+    out.push({ at: k, code: sl.dataset.sec, name: sl.dataset.secName || sl.dataset.sec,
+               head: sl.dataset.secHead === "1" });
+  });
+  return out;
+}
+/* One pill per stop, and the pills gathered into the parts of the review
+   (§266.12). Islam, of the four treatments drawn: *"B is good but we can make
+   them grouped like C as well."*
+
+   THE GROUPS ARE THE DECK'S OWN FOUR BLUE DIVIDERS (§259) — nothing invented
+   for the bar, and the four pillars read as one stretch of the review rather
+   than as four things among ten. A flow's strip is untouched: there the stops
+   are subjects and every one is its own group. */
+function deckPills(stops, grouped){
+  var pill = function(st){
+    /* The code is DRAWN and the name is on the hover: a pill wide enough to
+       hold "Strategy Management Office" is not a pill (§88's rule, on the
+       projector's own chrome). */
+    return '<button class="ddot" data-dgo="' + st.at + '" title="' + esc(st.name) +
+      '" aria-label="' + esc(st.name) + '">' + esc(st.code) + '</button>';
+  };
+  if (!grouped) return stops.map(pill).join("");
+  var out = "", open = false;
+  stops.forEach(function(st, k){
+    if (!k || st.head) { if (open) out += "</div>"; out += '<div class="dgrp">'; open = true; }
+    out += pill(st);
+  });
+  return out + (open ? "</div>" : "");
+}
 function deckIndex(){
   var root = document.getElementById("deckroot");
   DECK.slides = [].slice.call(root.querySelectorAll(".dslide"));
   root.querySelector(".dcount-t").textContent = DECK.slides.length;
   var dots = root.querySelector(".ddots");
-  DECK.stops = DECK.flow ? deckStops() : null;
+  /* ONE LIST FOR BOTH (§53.5): a flow's stops are its subjects and one deck's
+     are its sections, and everything downstream — which pill is lit, which one
+     a slide belongs to — asks `DECK.stops` without caring which it got. A deck
+     that declares fewer than two sections falls back to a dot per slide, so a
+     shape nobody has thought of still gets a strip (§61). */
+  var secs = DECK.flow ? null : deckSections();
+  DECK.stops = DECK.flow ? deckStops() : (secs && secs.length > 1 ? secs : null);
   dots.classList.toggle("bysub", !!DECK.stops);
+  dots.classList.toggle("bygrp", !!DECK.stops && !DECK.flow);
   dots.innerHTML = DECK.stops
-    ? DECK.stops.map(function(st){
-        /* The code is DRAWN and the name is on the hover: a pill wide enough to
-           hold "Strategy Management Office" is not a pill (§88's rule, on the
-           projector's own chrome). */
-        return '<button class="ddot" data-dgo="' + st.at + '" title="' + esc(st.name) +
-          '" aria-label="' + esc(st.name) + '">' + esc(st.code) + '</button>';
-      }).join("")
+    ? deckPills(DECK.stops, !DECK.flow)
     : DECK.slides.map(function(_, k){
         return '<button class="ddot" data-dgo="' + k + '" aria-label="Slide ' + (k+1) + '"></button>';
       }).join("");
@@ -1557,6 +1694,13 @@ function deckShow(n){
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
+  /* §261.14: the player is loaded on THIS slide and on no other, which is
+     what stops a clip left behind owning the arrow keys from behind
+     `display:none`. Named `shown` and never `here`: §266's `here` two lines
+     down is a STOP INDEX in the master flow, and one scope holding two
+     meanings of one word is §56.7 waiting to happen. */
+  var shown = DECK.slides[DECK.i];
+  videoArm(root, shown);
   var here = DECK.stops ? deckStopAt(DECK.i) : -1;
   [].forEach.call(root.querySelectorAll(".ddot"), function(b, k){
     b.classList.toggle("on", DECK.stops ? k === here : k === DECK.i);
@@ -1567,7 +1711,11 @@ function deckShow(n){
      running order is stated with it, because "which unit is this" and "how
      much is left" are the two questions a room asks. Written into the node,
      never repainted (§63): this runs on every arrow press. */
-  if (DECK.stops && here >= 0) {
+  /* THE FLOW'S, NEVER ONE DECK'S. §266.12 gives a single deck stops of its own,
+     and `DECK.stops` is now set for both — so this had to start asking
+     `DECK.flow`, or a unit's deck would rename its own title bar "Foundation ·
+     2 of 10" and lose the unit (§266's whole reason for writing it). */
+  if (DECK.flow && DECK.stops && here >= 0) {
     var st = DECK.stops[here];
     root.querySelector(".dtitle").innerHTML =
       "<b>" + esc(st.name) + "</b> &middot; " + (here + 1) + " of " + DECK.stops.length +
@@ -1628,11 +1776,23 @@ var DECKSWIPE_MIN = 45;
    refused by one and obeyed by the other (§53.5). */
 function deckOwnControl(t){
   return !!(t && t.closest &&
-    t.closest(".deckbar, button, a, input, textarea, select, [contenteditable]"));
+    /* ── A PLAYER IS SOMETHING ON THE STAGE, NOT THE STAGE (§297) ────
+       A click inside an IFRAME never reaches this document, so the embed was
+       safe by accident — but a native `<video>` is in our own page, and its
+       clicks land here. In fullscreen, where §265 makes a click on the stage
+       advance the slide, pressing that player's own play button moved the deck
+       on as well: the one gesture Islam named as how a clip should be
+       controlled, doing two things at once. `.vwrap` covers the poster and the
+       "opens in a new tab" card in the same breath. */
+    t.closest(".deckbar, .vwrap, video, iframe, button, a, input, textarea, " +
+              "select, [contenteditable]"));
 }
 
 function wireDeck(){
   var root = document.getElementById("deckroot");
+  /* The keyboard is the presentation's, on every slide (§297). Armed once,
+     here, beside the rest of the deck's wiring. */
+  videoKeepKeys(root);
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
   root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);
@@ -1743,6 +1903,19 @@ function wireDeck(){
   });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
+    /* ── THIS KEY IS THE DECK'S, WHICHEVER LISTENER RUNS FIRST (§295) ──
+       The editor stands its own keyboard down while a deck is up by asking
+       whether `#deckroot` is `.on` — which is true right up until the line
+       below closes it. So on Escape the answer depends on the order the two
+       window listeners happened to be registered in: deck first, and the
+       editor then sees a deck that is already shut, passes its own gate, and
+       closes the MODE as well. Measured — the editor was gone and the page was
+       underneath, which is the one thing this whole change exists to prevent.
+
+       The mark travels on the EVENT, so neither listener has to run first: the
+       editor is stopped by the class while the deck is still open, and by this
+       once it is not. */
+    ev.smpDeckKey = true;
     if (ev.target.isContentEditable) { if (ev.key === "Escape") ev.target.blur(); return; }
     /* ── FORWARD IS FOUR KEYS AND BACK IS THREE (§265) ────────────────
        Islam: "down and rigth for moving the slides forward left and up takes

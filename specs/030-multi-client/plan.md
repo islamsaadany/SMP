@@ -41,7 +41,7 @@ registers. Five new screens; ~30 existing tables per client, unchanged.
 | Principle | How this plan satisfies it |
 |---|---|
 | **I · Align before building** | Every decision was put to Islam and answered (spec §2); the mockup was published and signed off before any source is touched. |
-| **II · The decisions document is the contract** | §288 is written in the same commit as the first code, and records the two reversals this carries: §21's "no invented content in the database" (for the Demo client) and the Demo-data button's retirement. |
+| **II · The decisions document is the contract** | §303 is written in the same commit as the first code, and records the two reversals this carries: §21's "no invented content in the database" (for the Demo client) and the Demo-data button's retirement. |
 | **III · Edit the sources, never the built file** | All screen work in `SMP-Project-Folder/src/`; `build.py` must reproduce byte-identically; `sw.js` `SHELL` bumped on every content change (§91). |
 | **IV · Verify by walking** | `qa.py` runs against a **blank** client as well as a full one; new checks under `src/checks/`. |
 | **V · Derived, never stored** | Untouched — no scoring surface changes. "My clients" is **derived** from the client's team, never a second stored list. |

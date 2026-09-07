@@ -3,6 +3,7 @@
   "private": true,
   "description": "Strategy Management Platform — static prototype + /api/state persistence (Vercel + Neon). Deliberately no build script: Vercel serves the repo statically and bundles api/ as functions.",
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "pg": "^8.16.3",
     "web-push": "^3.6.7"
   }

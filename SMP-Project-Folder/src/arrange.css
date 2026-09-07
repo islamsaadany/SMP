@@ -1237,7 +1237,23 @@
     color:rgba(255,255,255,.86); border-radius:5px; padding:0;
     width:34px; height:34px; flex:none; align-self:center;
     justify-content:center; }
-  .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
+  /* AND THE SLACK HAS TO HALVE INTO WHOLE PIXELS (§302). A 21px mark in a
+     34px square leaves THIRTEEN pixels of slack, so each side wants 6.5 and
+     the browser snaps the drawing half a pixel sideways — measured +0.50px
+     right, identical at 1500/1280/1100 and at 100/125/150%, which is what
+     says it is arithmetic rather than layout. It is the SQUARE MINUS THE
+     MARK that must be even; the mark's own size is neither here nor there,
+     which is why this is a constraint on the pair and not a magic number.
+
+     SO THE MARK GROWS IN TWOS (§302.4). Islam: *"let's make the home icon
+     bigger a bit but keep the box with teh same size"*, then, of the three
+     sizes drawn for him at real size and at 16×, *"24px"*. The box is 34,
+     so 24 leaves 10 and sits 5 a side. 23 leaves 11 and brings the snap
+     straight back — an odd size here is not a slightly different look, it
+     is the reported fault again (proved: 3 red, slack 5.5, box 0.5 across).
+     The next size up would be 26, at 4 a side, which is where the drawing
+     starts meeting the corners of a 5px radius rather than sitting in it. */
+  .units .navmenu-btn.homemark .navmenusvg{ width:24px; height:24px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }
   /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so
@@ -1327,6 +1343,29 @@
      "Missing" a plan puts against an unset target keeps behaving as it does. */
   .pctneed { display:block; margin-top:3px; font-size:11.5px; line-height:1.25;
              white-space:nowrap; }
+
+  /* ── §300: THE PER-CENT SITS UNDER THE ANSWER IT BELONGS TO ────────────
+     Islam asked for the pair the projects page has, and that page spends two
+     COLUMNS on it; a unit's reporting table has one Reported cell, so the two
+     boxes stack inside it. `.entry` is inline-flex, so `flex` is what puts the
+     box on its own line — a `<br>` would put the gap in the markup instead of
+     in the layout (§149's rule: let layout do the spacing). */
+  .ynpct { display:flex; margin-top:6px; }
+  /* AND THE PICKER STANDS LEVEL WITH A NUMBER BOX. §251.6 recorded this once
+     — a <select> takes none of `input.field`'s box, so it stood 19px against
+     34 — and the yes/no control is a picker again, in a column whose other
+     rows are number entries. Derived from the entry's own height plus its
+     border rather than typed as a constant (§122.5), so a later change to the
+     reporting box moves both or fails the check that measures them.
+
+     AND IT IS AS WIDE AS ITS OWN LONGEST ANSWER. `.fld` is width:100%, which
+     in this column is narrower than the word "Not started" — so the control
+     clipped the very answer it was offering, which a screenshot showed and
+     `scrollWidth` did not (a <select> does not report its options that way).
+     `width:auto` is the browser sizing it to its widest option: derived, not
+     a constant somebody has to keep in step with the wording (§122.5). */
+  select.ynpick { height:calc(var(--rep-h) + 2px); width:auto; min-width:0;
+                 max-width:100%; }
 
   /* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────
      One box, one ground, one hairline down the middle: who and when on the
@@ -1926,6 +1965,75 @@
          margin:6px 0 4px; cursor:pointer; }
 .kbadd:hover { border-color:var(--gold); }
 .kbed-lede b { color:var(--ink); }
+
+/* ── QUESTIONS ASKED (§299) ────────────────────────────────────────────
+   The office's list of what the assistant was asked, above the answers it was
+   asked from. Built out of the page's own furniture — the setup pane's card,
+   the platform's one-line table rule (§88), the segmented pair the tabs above
+   it already wear — because it is a table on a Setup page and nothing about it
+   is a new kind of thing. */
+.askpane { border:1px solid var(--line); border-radius:var(--r-md);
+           background:var(--surface); overflow:hidden; margin:0 0 22px; }
+.askhead { display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+           padding:11px 15px; border-bottom:1px solid var(--line);
+           background:var(--surface-2); }
+.askhead h3 { margin:0; font-size:var(--fs-body); font-weight:650; }
+.askwin { font-size:var(--fs-small); color:var(--ink-3); }
+/* THE FILTER IS TWO EQUALLY LIKELY CHOICES, so its halves are equal — the 2:1
+   next door is the corner's switch, where they are not (§299). */
+.askseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
+          border-radius:var(--r-sm); overflow:hidden; }
+.askseg button { font:inherit; font-size:var(--fs-small); font-weight:650;
+                 color:var(--ink-2); background:var(--surface); border:0;
+                 padding:5px 11px; cursor:pointer; white-space:nowrap; }
+.askseg button + button { box-shadow:inset 1px 0 0 var(--line); }
+.askseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); }
+.askseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.asknone { padding:22px 16px; color:var(--ink-3); font-size:var(--fs-note); }
+.asknone.bad-note { color:var(--ink); background:var(--warn-bg);
+                    border-left:3px solid var(--warn); }
+.asktable { width:100%; border-collapse:collapse; }
+.asktable th { text-align:left; font-size:var(--fs-micro); letter-spacing:.09em;
+               text-transform:uppercase; color:var(--ink-3); font-weight:700;
+               padding:8px 15px; border-bottom:1px solid var(--line);
+               background:var(--surface); white-space:nowrap; }
+.asktable td { padding:11px 15px; border-bottom:1px solid var(--line-soft);
+               font-size:var(--fs-note); vertical-align:top; }
+.asktable tr:last-child td { border-bottom:0; }
+/* THE ROW THE OFFICE CAN CLOSE. Warning ground rather than an alarm one: a gap
+   in the corpus is a fact about a healthy platform, not a failure (§168,
+   §145.14's rule that red means missing and nothing else here does). */
+.asktable tr.askmiss td { background:var(--attn-bg); }
+.askq { font-weight:600; color:var(--ink); }
+/* THE QUESTION IS THE ONE THING HERE THAT MAY WRAP. Everything else in the row
+   is a count, a date or a control and holds one line (§88); a question is prose
+   and clipping it would hide the thing the row is about. */
+.asktable .askq, .asktable .askans { white-space:normal; }
+.askby { display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+         margin-top:3px; font-size:var(--fs-micro); color:var(--ink-3); }
+.chip.kind.askwho { border-color:var(--gold); color:var(--gold-deep);
+                    background:var(--attn-bg); }
+.asktimes { font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink-2);
+            white-space:nowrap; }
+.askans { color:var(--ink-2); max-width:56ch; }
+.askno { color:var(--attn-tx); font-weight:650; }
+.askdone { margin-top:4px; font-size:var(--fs-micro); color:var(--good-tx);
+           font-weight:650; }
+/* AN ENTRY WITH NOTHING TYPED INTO IT YET IS NOT AN ANSWER (§35), so it does
+   not wear the colour that says one has been written. */
+.askdone.part { color:var(--ink-3); font-weight:600; }
+.askact { white-space:nowrap; }
+.askgrp { font:inherit; font-size:var(--fs-small); color:var(--ink);
+          background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r-sm); padding:4px 7px; margin-right:7px;
+          max-width:170px; }
+.askact .mini { font:inherit; font-size:var(--fs-small); font-weight:600;
+                color:var(--ink-2); background:var(--surface);
+                border:1px solid var(--line); border-radius:var(--r-sm);
+                padding:5px 10px; cursor:pointer; white-space:nowrap; }
+.askact .mini.go { border-color:var(--gold); color:var(--gold-deep); }
+.askact .mini:hover { border-color:var(--gold-deep); color:var(--ink); }
+.askact .mini:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 
 /* ── THE KNOWLEDGE BASE'S TWO TABS (§141) ─────────────────────────────
    The approved mockup's segmented pair: the active half wears the tenant's

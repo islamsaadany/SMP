@@ -49,7 +49,7 @@ async function main() {
     await c.query("DELETE FROM platform_access");
   });
 
-  /* ── AND THE ROWS THOSE MAPPINGS NAME (§288.32) ────────────────────
+  /* ── AND THE ROWS THOSE MAPPINGS NAME (§303.32) ────────────────────
      This mapped the two office accounts to `ff_islam` and `ff_omar` and never
      created either row — which was survivable only while a key naming nobody
      silently INVENTED a person. It does not any more: on a client whose

@@ -505,7 +505,7 @@ function measureRows(ms, opts){
                   alone loses a shipped feature silently — §56.7's rule, with
                   the conflict marker doing its job for once. */
                repNote(m) +
-               /* §264: a yes/no row says so where its TARGET goes, and says
+               /* §257: a yes/no row says so where its TARGET goes, and says
                   nothing where its direction and compile rule would — both
                   are meaningless without a number, and printing `\u2265` beside
                   "Yes / No" invites reading it as part of the target. */
@@ -643,7 +643,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
      "Next gap" steps through (§177.2), and one gap wearing it twice would
      cost two presses to walk one blank. */
   var quiet = String(pendCls || "").replace(/\bgapwalk\b/g, "").trim();
-  /* §264: three of the four go dead on a yes/no outcome, SHOWING the values
+  /* §257: three of the four go dead on a yes/no outcome, SHOWING the values
      they keep — picking Y/N stops a figure counting, it does not destroy it.
      The unit picker is the one that stays live, because it is the only way
      back out: dimming the control that SET this state would strand the row
@@ -667,7 +667,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
        unit can be chosen FIRST and is held on its own until a number arrives
        to join it: `outTarget` is "%" for as long as it takes to type 90. */
     selectOr("plan", unit, targetUnitOpts(unit), quiet,
-             /* §264: and this picker repaints too — three of its four boxes
+             /* §257: and this picker repaints too — three of its four boxes
                 change state on the one press. */
              function(v){
                /* §277: the reported figure follows a CHANGED unit. */
@@ -747,12 +747,15 @@ function outcomeCell(t){
 function outcomeShown(t){
   var o = outcomeOf(t);
   if (!o || o.actual == null || o.actual === "") return null;
+  /* §300: TEXT, not html — the caller escapes — and never joined with a unit,
+     because `Y/N` is the unit and "Done Y/N" is not an answer anybody gave. */
+  if (SMPRules.isYesNo(o.target)) return SMPRules.ynShown(o.actual);
   return joinTarget("", String(o.actual), splitTarget(o.target).unit) || String(o.actual);
 }
 /* The target as it is written on the plan — the whole year's number, unit and
    all. `tacticBenchmark` gives what it is measured against RIGHT NOW, which
    for a Sum row is a part of this. */
-/* §264: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
+/* §257: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
    answers with TEXT rather than html — its caller escapes — so it cannot use
    `tgtShown`; the two are kept in step by both asking `isYesNo`. */
 function outcomeTargetShown(t){
@@ -773,6 +776,11 @@ function tacticRows(ts, unitKey){
     /* §252: the ternary that used to sit here is `tacticProgress()` now --
        it was the only copy in the product and the deck needed it too. */
     var oc = onOutcome(t), bench = tacticBenchmark(t);
+    /* §300: beside a figure the benchmark is a comparison — "Done / 50%" is
+       not one — so a yes/no row shows it only against a partial. The
+       not-reported line below keeps `bench`, where it is telling somebody
+       what is still owed rather than comparing anything. */
+    var benchPair = oc && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
     var status = t.status === "Done" ? '<span class="pill good">Done</span>'
@@ -789,7 +797,7 @@ function tacticRows(ts, unitKey){
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
         (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'
       : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</span></td>' +
+        (benchPair ? ' <i>/ ' + esc(benchPair) + '</i>' : '') + '</span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
       /* §252: `tacticAnswered`, or a row answered through its outcome is
@@ -1111,7 +1119,11 @@ function draftBtns(){
    with no box and a lighter weight — one family in two volumes, the act that
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
-function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
+/* `own` (§301) is what stands where the "View only" pill did, for somebody
+   who reports here through bounded roles alone — built by the caller through
+   ownStateChip(). Null for everybody else, and the pill is then the honest
+   answer it always was: they really are reading. */
+function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, own){
   /* §263: ONE SUBMIT BUTTON, BUILT ONCE, DRAWN IN TWO STATES. Islam: *"on
      saving the draft keep the submit to smo button there as it's posible to
      save the draft and if it's complete we can submit directly rather than
@@ -1162,7 +1174,7 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
           ? '<span class="rc-state draft">Draft saved</span>' + submit +
             '<button class="rc-reopen quiet" data-unsubmit="' + esc(target) + '">Reopen</button>'
           : submit + '<button class="rc-draft" data-repsave="1">Save draft</button>')
-      : '<span class="pill none">View only</span>') +
+      : (own || '<span class="pill none">View only</span>')) +
     /* §220: CLOSE, NOT CANCEL. The handler is `REPORTING = null; paint()` and
        nothing is discarded — figures are written as they are typed — so the
        old word promised a threat it never carried out. */
@@ -3782,7 +3794,7 @@ function unitInherit(m){
     var t = String(v == null ? "" : v).trim();
     if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
     var u = targetUnitOf(m);
-    /* §264: a yes/no row has no unit a number can inherit — joining them
+    /* §257: a yes/no row has no unit a number can inherit — joining them
        writes "5Y/N", which no reader can take apart and no score can use.
        The box is disabled on such a row, so this guards the paths that do
        not go through it (fill mode, an upload). */
@@ -4063,7 +4075,7 @@ function monthlyMark(row){
 /* Is this row judged by a yes or a no? Asked by every surface that decides
    whether to draw a number, so none of them decides it separately (§53.5).
    It reads main's own `targetUnitOf`, which already answers with a unit held
-   alone — so a bare `Y/N` and a `100 Y/N` are one kind of row (§264). */
+   alone — so a bare `Y/N` and a `100 Y/N` are one kind of row (§257). */
 function isYesNoRow(m){ return targetUnitOf(m) === SMPRules.YN_UNIT; }
 /* A control DRAWN AND DEAD, because the row's own unit made it meaningless:
    with no number there is nothing for a direction to point at and nothing for
@@ -4077,7 +4089,7 @@ function offInput(txt){
 function offSelect(txt){
   return '<select class="fld off" disabled><option>' + esc(txt) + '</option></select>';
 }
-/* PICKING A UNIT REDRAWS THE ROW (§264). A bound field writes WITHOUT
+/* PICKING A UNIT REDRAWS THE ROW (§257). A bound field writes WITHOUT
    repainting, deliberately — a repaint under a typing hand destroys the box
    being typed into (§71.2) — which is right for every field whose VALUE is
    the only thing that changes, and wrong for this one: Y/N changes the row's
@@ -4148,7 +4160,7 @@ function fillUnitCell(page, acKey, m, ctx){
    offered by the rule below and could never be CHOSEN for a new row. K and M
    only, which is what he asked for; `B USD` and `K EGP` are deliberately not
    invented alongside them. */
-/* §264: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
+/* §257: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
    half of the list that says what a row is COUNTED in rather than valued in,
    and it is the one entry saying the row carries no number at all. */
 var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
@@ -4315,7 +4327,7 @@ function koEdit(list, page, acKey, owner){
          setter lifting a pending mark, since correcting confirms); in fill
          mode only a blank or still-pending one opens. The NAME never does:
          a row that exists is named, and renaming is authoring. */
-      /* §264: a yes/no row has no number, so the direction, both targets and
+      /* §257: a yes/no row has no number, so the direction, both targets and
          the compile rule are drawn and dead — nothing for a `\u2265` to point at
          and nothing for `Sum` to add up. Only while the pen is open: read
          mode says "Yes / No" where the target goes, which is the whole fact,
@@ -4803,7 +4815,7 @@ function renderReport(u){
        which was stated and accepted. */
     var cur = x.obj[fld], has = cur != null && cur !== "";
     var heal = has ? unitTight(cur) : cur;
-    /* §264: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
+    /* §257: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
        answer is one of two words, so a free box would invite "done", "y" and
        "TRUE" — a dozen spellings of one fact, only some of which score. One
        control, in the one cell shape every reportable row already goes
@@ -4820,21 +4832,18 @@ function renderReport(u){
        server, so neither is offered here. */
     if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
+      /* §300: a yes/no figure is READ through `ynShown`, so a row holding a
+         tenant's old `Yes` reads in the words the control now offers without
+         anything stored being rewritten. */
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
-        (has ? esc(unitTight(cur)) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
+        (has ? esc(ynRow ? SMPRules.ynShown(cur) : unitTight(cur) + ((isT && !oc) ? "%" : ""))
+             : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
-    /* THE UNIT IS NOT SENT WITH A YES OR A NO. `data-unit` is what the save
-       handler rejoins onto a typed figure, and joining here would store
-       "YesY/N" — so it is empty and the word is stored whole. */
-    if (ynRow)
-      return '<span class="entry' + (has ? " filled" : "") + '">' +
-        '<select class="field ynfield" data-rep="' + x.id + '" data-fld="' + fld +
-        '" data-unit="" aria-label="Report ' + esc(x.obj.name) + '">' +
-        ["", "Yes", "No"].map(function(o){
-          return '<option value="' + esc(o) + '"' + (shown === o ? " selected" : "") +
-                 '>' + (o || "\u2014") + '</option>';
-        }).join("") + '</select></span>';
+    /* §300: the status picker and its per-cent box, which are §104's own pair
+       (`ynBoxes`) rather than a control of this table's — Islam: *"for the
+       inprogress and the % we used ot have them 2 stached boxes not one"*. */
+    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld);
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
@@ -4879,11 +4888,34 @@ function renderReport(u){
     /* §233: a hidden row is not asked, so it is not drawn here — the same
        skip reportItems() makes, or the pane would collect a figure the
        submit gate no longer waits on. */
+    /* ── THE ROW CARRIES WHO IT BELONGS TO (§301.5) ──────────────────
+       Islam, of a project owner frozen on a function: *"check the behavior
+       of the units. to match."* Measured on the unit's own Reporting page
+       with a pillar owner: **0 entry controls and 8 read-only cells**, on
+       the pillar whose Owner names them — while `canReportRow()` answers
+       TRUE the moment it is handed the same row with its context on it.
+
+       THIS LIST WAS BUILT WITHOUT ANY. `reportItems()` — the other builder,
+       which feeds *Figures I report* — has carried `owner`, `collaborators`
+       and `pown` since §147.7, with a comment saying why ("owner travels
+       with the row so canReportRow() can answer without walking back up to
+       the pillar"). This one was written beside it and never got them, so
+       every bounded role read `undefined` for all three and fell out
+       read-only: a pillar owner could enter their figures on one page of the
+       product and not on the page named after the act.
+
+       §53.5, inside one side of the switch rather than across it — two
+       builders for one list, and only one of them was kept up. The fields
+       are copied from `reportItems()` verbatim rather than re-derived, or
+       the two drift again the next time one of them learns something. */
     var ms = [];
-    SMPRules.shown(p.measures).forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
+    SMPRules.shown(p.measures).forEach(function(m){
+      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner });
+    });
     var ts = [];
     SMPRules.shown(p.tactics).forEach(function(t){
-      ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t) });
+      ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
+                owner:t.owner, collaborators:t.collaborators, pown:p.owner });
     });
     var askedT = ts.filter(function(x){ return x.asked; });
     var done = doneOf(ms) + doneOf(askedT), total = ms.length + askedT.length;
@@ -4932,8 +4964,13 @@ function renderReport(u){
               '<td class="idx">' + (i+1) + '</td>' +
               nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
               '<td>' + qs(x.obj) + '</td>' +
+              /* §300: a yes/no row's benchmark is a per cent of its own window,
+                 and the whole it is a part of is the word "Yes / No" — "50% of
+                 Yes / No" is not a sentence anybody reads, so the second line
+                 is for a row whose target is a NUMBER. */
               '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
-                (whole && whole !== bench ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
+                (whole && whole !== bench && !SMPRules.isYesNo(x.obj.outTarget)
+                  ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
                 '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
@@ -4952,7 +4989,9 @@ function renderReport(u){
         '<span class="pband-n">' + ms.length + ' measures &middot; ' +
         askedT.length + ' tactics asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
-        '</span>' + tally(done, total)) +
+        '</span>' + tally(done, total) +
+        /* §301: the finished mark, on the pillar it is about. */
+        doneCtl(u.ukey, p.id, p.owner)) +
       mTable + tTable;
   };
 
@@ -5019,8 +5058,16 @@ function renderReport(u){
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
      trip PAGE_TOOLS already makes. */
+  /* §301: what a bounded reporter is told in place of "View only" — built
+     from the SAME pillarTally() the rail rows read, so the chip and the rail
+     can never disagree about how much is entered. */
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
-                            reportParked(u.ukey), submitWhyShort(u.ukey));
+                            reportParked(u.ukey), submitWhyShort(u.ukey),
+    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
+      var t = pillarTally(p);
+      return { id:p.id, code:pillarCode(u, pi), owner:p.owner,
+               done:t.done, total:t.total };
+    }), L("pillar","bu").toLowerCase()));
   var bar = "";
 
   var summary =
@@ -5141,14 +5188,49 @@ function gapPlaceAttr(railKey, code){
     ' data-gplace="' + esc(railKey + "|" + code) + '"';
 }
 function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
+/* ── AND WHICH ONE OPENS WHEN NOBODY HAS PICKED (§301.4) ──────────────
+   Islam, viewing as a project owner: *"when the user login he should land on
+   his project by default"*, and *"abdel azim still can't edit"*.
+
+   THOSE ARE ONE FAULT. Measured in his shape: he lands on the function, the
+   pane opens on the FIRST project in the rail — which is not his — and there
+   he correctly has **0 controls**, because a bounded role reaches its own
+   rows and nothing beside them (§147.7). Pick his own project on the rail and
+   the same page gives **12 live, enabled controls**. So the platform knew
+   which project was his and opened somebody else's, and the person is left
+   looking at a read-only page with nothing saying why.
+
+   THE FALLBACK IS THE ONLY THING THAT CHANGES. An explicit pick still wins,
+   on every pane; this decides only what opens when `RAIL` holds nothing —
+   which is exactly the state a fresh sign-in is in (§94.6 decided the
+   destination and stopped at the door).
+
+   NOTHING MOVES FOR ANYBODY UNBOUNDED, and that is deliberate: the office and
+   the custodian reach every row, so "theirs" names nothing, and reordering
+   what opens for them would be a change nobody asked for. `boundedHere()` is
+   the gate, and it is the same question the reporting bar asks (§53.5).
+
+   THE TEST IS THE CONTAINER'S OWNER — `mayMarkDone`, the rule §301 already
+   settled — and never `boundedReach()`, whose contributor branch reaches a
+   project through its stakeholders: being named on somebody else's project
+   does not make it the one you came to open. */
+function railMine(target, list, ownerOf) {
+  if (!list.length || !boundedHere(target)) return null;
+  for (var i = 0; i < list.length; i++)
+    if (mayMarkDoneOn(target, ownerOf(list[i]))) return list[i];
+  return null;
+}
 function railPick(c){
   var k = railKeyFor(c), want = RAIL[k];
   var list = c.projects || [];
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (list[i].id === want) { railShow(k, list[i].id); return list[i]; }
-  railShow(k, list[0].id);
-  return list[0];
+  /* §301.4: theirs opens, not the first one. */
+  var mine = railMine("fn:" + c.fn, list, function(p){ return p.owner; });
+  var pick = mine || list[0];
+  railShow(k, pick.id);
+  return pick;
 }
 /* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
    It used to read "below two items there are no siblings to move between, so
@@ -5343,7 +5425,7 @@ var DX_HEADING = "Deliverables and outcomes";
 var DX_PCT = "Performance";
 var MS_PCT = "Progress";
 function dxIsDeliv(row){ return row.kind === "d"; }
-function dxType(row){
+function dxType(row, p){
   /* PLAIN TEXT, NEVER A CHIP (§179). Islam: "for the types deliverable and
      Outcome don't make them chips let's make them normal text."
 
@@ -5361,12 +5443,103 @@ function dxType(row){
      else, which is why it is its own class rather than a stripped `.pill`:
      "this column has a fixed measure" and "paint a box round it" are two
      different facts, and merging them is what made removing one remove both. */
-  return '<span class="dxtype">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
+  var word = dxIsDeliv(row) ? "Deliverable" : "Outcome";
+  /* §292: AND ON THE PLAN PANE IT IS THE CONTROL THAT SETS IT. Islam:
+     *"we need to make the add deliverable or outcome more of an options in
+     the type rather than 2 buttons"* — so the question is answered in the
+     column whose heading already asks it, and a row added as the wrong kind
+     is corrected in place rather than removed and added again.
+
+     `p` IS WHAT SAYS WHICH PANE THIS IS. Three tables print this word and only
+     the plan pane may write it; the other two pass nothing and get the text
+     they have always had — one builder, never a second one that drifts
+     (§53.5) — and the mode is asked of `projEditing()` here rather than
+     threaded in, exactly as `selectOr` asks it.
+
+     A REPORTED ROW IS NOT A PICKER, and that is the whole of C over A (the
+     mockup, signed off 2026-09-04): the conversion drops what the other kind
+     cannot hold, so on a row that has been reported against it would throw a
+     figure away on a `change` event, with no press and no confirmation.
+     `reportedAny` is the product's own answer to *has this row been answered*
+     — the same one both panes and the note rule ask (§104.8) — so the lock
+     and the score can never disagree about what has been reported, and there
+     is no second definition of "reported" to drift (§53.5).
+
+     THE COST IS STATED RATHER THAN DISCOVERED, and it is what he chose C for
+     over A: a deliverable reads as answered the moment somebody picks even
+     *Not started*, so on a tenant part-way through a cycle most rows are
+     locked — measured, 37 of the demo's 42 deliverables. The × is still
+     there, which is the point: a deliberate press with a row's whole content
+     in front of you may throw a figure away; a `change` event on a dropdown
+     may not.
+
+     THE REASON IS ON THE HOVER, NOT ON THE PAGE (§88, 1b-ii). Drawn under the
+     word it is a second line in a one-line cell, which is §116.4's fault and
+     measured: it takes the Type column 251 → 406px and the name column pays
+     for all of it. `noteSpan` is the platform's own bubble, so it opens on
+     focus as well as hover (§163) and reads to a screen reader. */
+  if (!p || !projEditing()) return '<span class="dxtype">' + word + '</span>';
+  var o = row.obj, d = dxIsDeliv(row);
+  if (reportedAny(o, d))
+    return noteSpan(word, "This row has been reported against, so changing its type " +
+      "would throw that away. Remove the row and add it again if the type is wrong.",
+      "dxtype");
+  /* NO CLASS OF ITS OWN. `.dxtype`'s 92px measure exists so the column does
+     not resize with its rows; a select is wider than that by construction, so
+     a second rule here would be a leftover from the day it was needed (§24).
+     The check finds the control by the two options it offers, never by a
+     class (§94.8). */
+  return selectOr("plan", d ? "d" : "o", DX_KINDS, "", function(v){
+    /* §257.2a: A CONTROL THAT CHANGES THE ROW'S SHAPE REPAINTS. A bound field
+       writes WITHOUT repainting (§71.2) — right while somebody is typing, and
+       wrong here, where the press moves the row into another list and changes
+       which cells beside it are controls at all. Safe because this is a
+       SINGLE select, which closes before its `change` fires (§30.1); a ticking
+       list may not do this (§130.1). */
+    dxSwitchKind(p, o.id, v);
+    paint();
+  });
 }
+/* The two kinds as the picker offers them. The VALUE is the letter `dxRows`
+   already keys on and the LABEL is the word the column has always printed —
+   never the word as the value, or the control's vocabulary and the plan's
+   become two things to keep in step (§65's rule about a stored identifier). */
+var DX_KINDS = [{ v:"d", label:"Deliverable" }, { v:"o", label:"Outcome" }];
 /* A deliverable's direction and target are written FOR it rather than asked
    OF it, and shown quietly, because a value nobody can change should not look
    like a field. */
-function dxDir(row){ return dxIsDeliv(row) ? '<span class="fixedval">=</span>' : esc(row.obj.dir || ""); }
+/* §292: AN OUTCOME'S DIRECTION OPENS WITH THE PEN. Islam, creating a project:
+   *"I couldn't set the direction."* It had never been editable — on any
+   project, in any mode — because this cell printed the sign and stopped: not
+   a fault of creating a project, but of every outcome the table has ever
+   held. §114 opened exactly this control on a pillar's key measures, on the
+   argument that §31 closed them while the pen could fall to the person being
+   measured and §94 gave the pen to the office; nobody carried it the two
+   inches across to a project's outcomes (§53.5, on two tables asking one
+   question).
+
+   A DELIVERABLE'S `=` STAYS PRINTED. It is written FOR the row rather than
+   asked OF it (§104) — with a target of Y/N there is nothing to be greater
+   than — so there is no decision here for a control to carry.
+
+   IT IS NOT A GAP, so it does not go through `gapCell` and joins no count:
+   the direction carries a working default, which makes writing one AUTHORING
+   and the office's, and a filler who wrote one would have the whole save
+   refused (§249.4, taken on exactly this question one table over). The cost
+   that ruling states holds here too and is stated rather than discovered: an
+   outcome where less is better scores backwards until the office corrects
+   it — which, until today, it could not.
+
+   THE VOCABULARY IS THE ONE EVERY OTHER DIRECTION USES, never a second list
+   (§53.5) — and read mode is byte-for-byte what it was, because `selectOr`
+   is only reached under the pen. */
+function dxDir(row, ed){
+  if (dxIsDeliv(row)) return '<span class="fixedval">=</span>';
+  var o = row.obj;
+  if (!ed) return esc(o.dir || "");
+  return selectOr("plan", o.dir || "\u2265", ["\u2265", "\u2264"], "mono",
+    function(v){ o.dir = v; });
+}
 function dxTarget(row){
   return dxIsDeliv(row) ? '<span class="fixedval">Y/N</span>'
                         : (row.obj.target ? esc(row.obj.target) : '<span class="missing">Missing</span>');
@@ -5891,8 +6064,8 @@ function projPlanBody(p, fk){
       '<td>' + (ed ? textOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
         (ed ? eyeBtn(o, "plan", "k_proj") : hidChip(o)) +
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
-      '<td class="cc">' + dxType(row) + '</td>' +
-      '<td class="cc">' + dxDir(row) + '</td>' +
+      '<td class="cc">' + dxType(row, p) + '</td>' +
+      '<td class="cc">' + dxDir(row, ed) + '</td>' +
       /* §177: AN OUTCOME'S TARGET IS FILLABLE, A DELIVERABLE'S IS NOT.
          `dxTarget` prints a deliverable's fixed "Y/N" -- written for it, not
          asked of it (§104) -- so there is nothing there to fill; the outcome
@@ -5901,12 +6074,37 @@ function projPlanBody(p, fk){
         : gapCell("plan", "k_proj", o, "target", { ctx: { project: p, row: o } })) +
       '</td></tr>';
   }).join("") +
-  /* TWO ADD BUTTONS UNDER ONE TABLE, as §53.4 had them: one table of two
-     kinds, and a single "add a row" would have to ask which -- a question
-     the two buttons answer by existing. */
+  /* ── ONE WAY IN (§292, reversing §53.4's two buttons) ───────────────
+     §53.4 put two buttons here on the reasoning that "a single add a row
+     would have to ask which — a question the two buttons answer by existing".
+     True, and what it did not ask is WHERE that question gets answered:
+     Islam, from the live product, *"I get confused between them"*. The Type
+     column answers it now, on the row, which is also the only way a row added
+     as the wrong kind was ever going to be correctable (§292's own finding —
+     until today it could only be removed and added again).
+
+     AND THEY RENDERED AS ONE RUN OF TEXT. Measured on the shipped build and
+     visible in his screenshot: `Add a deliverableAdd an outcome`, two link
+     buttons with nothing between them, so part of the confusion was that they
+     did not read as two controls at all.
+
+     NO LEADING "+", because the idx cell draws one and the milestone button
+     directly beneath carries none — two plus signs on one pane read as two
+     different kinds of control (§87's twins, in punctuation).
+
+     BUILD MODE KEEPS BOTH, and that is a difference with a reason rather than
+     an exception (§53.5 cuts the other way here). There a row is added WHOLE
+     through a titled form (§129), and the two forms ask different questions —
+     a deliverable how it is measured, an outcome its direction, target and
+     measure date, which is the one place `measureAt` can still be set at all
+     (§104.8 took the date off these panes). So the kind has to be answered
+     before the form opens, and the forms are titled dialogs rather than the
+     run-together pair. */
   (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
-      '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
-      '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
+      (builderHere() ?
+        '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
+        '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>'
+      : '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a row</button>') +
     '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"' + hidCls(m) + '><td class="idx">' +
@@ -6105,6 +6303,16 @@ function renderFnProjects(fnKey){
 function capEntryBox(x, unit, may, label){
   var cur = x.actual, has = cur != null && cur !== "";
   var shown = !has ? "" : (unit === "%" ? String(cur) : (splitTarget(String(cur)).value || String(cur)));
+  /* ── AND THE OTHER SIDE OF THE SWITCH ASKS THE SAME WAY (§300, A15) ──────
+     A capability function's key objectives take the unit picker a unit's do
+     (§226), so a yes/no row is reachable here — and this box has never known
+     about one: it drew a free text field, where a reporter could type "done",
+     "y" or "TRUE" and only some of those score. It is `ynBoxes()`, the same
+     builder the unit's pane uses, so the two halves of one product cannot be
+     fine differently (§53.5). */
+  if (SMPRules.isYesNo(x.target))
+    return may ? ynBoxes(x.id, "crep", x.actual, label)
+               : '<span class="mono">' + (has ? esc(SMPRules.ynShown(cur)) : "\u2014") + '</span>';
   if (!may) return '<span class="mono">' + (has ? esc(String(cur)) : "\u2014") + '</span>';
   return '<span class="entry' + (has ? " filled" : "") + '">' +
     '<input class="field" data-crep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
@@ -6115,6 +6323,43 @@ function capEntryBox(x, unit, may, label){
    capEntryBox's, because that one writes `actual` -- the outcome's figure --
    and this writes `pct`. One box, two meanings, would be exactly the fault
    this whole section removed from the tables. */
+/* ── THE YES/NO PAIR, ONE BUILDER (§300) ──────────────────────────────────
+   A status picker, and a per-cent box drawn only while the answer is In
+   progress — §104's own control, which is what Islam was pointing at: *"for
+   the inprogress and the % we used ot have them 2 stached boxes not one as
+   you showed"*. Both write the SAME field through the shared join, so the
+   answer is stored whole (`Not started` / `In progress 60` / `Done`).
+
+   ONE BUILDER FOR BOTH SIDES OF THE SWITCH (§53.5, A15): `hook` is `rep` on a
+   unit's or a pillars function's reporting page and `crep` on a capability
+   function's, which is the only thing that differs between them. `fld` is the
+   unit side's `actual` / `outActual`; the capability side has one field and
+   passes nothing.
+
+   THE UNIT IS NOT SENT WITH EITHER HALF — `data-unit` is what the save handler
+   rejoins onto a typed figure, and joining here would store "DoneY/N".
+
+   AND THE NUMBER IS ASKED FOR WHERE IT IS OWED: an In progress with no
+   per-cent is not an answer (§104.10), so the box carries `needsPct()`, the
+   same mark the projects page puts on a milestone in that state. */
+function ynBoxes(id, hook, cur, label, fld){
+  var st = SMPRules.ynState(cur), keys = ["todo", "wip", "done"];
+  var at = ' data-' + hook + '="' + esc(id) + '"' +
+    (fld ? ' data-fld="' + esc(fld) + '"' : '') + ' data-unit=""';
+  var pick = '<select class="fld selbox ynpick"' + at +
+    ' data-ynpart="status" aria-label="Report ' + esc(label) + '">' +
+    [["", "\u2014"]].concat(SMPRules.YN_WORDS.map(function(w, i){ return [keys[i], w]; }))
+      .map(function(o){
+        return '<option value="' + esc(o[0]) + '"' + (st.status === o[0] ? " selected" : "") +
+               '>' + esc(o[1]) + '</option>';
+      }).join("") + '</select>';
+  if (st.status !== "wip") return pick;
+  return pick + '<span class="entry ynpct' + (st.pct == null ? "" : " filled") + '">' +
+    '<input class="field"' + at + ' data-ynpart="pct" value="' +
+    esc(st.pct == null ? "" : String(st.pct)) +
+    '" placeholder="\u2014" aria-label="Per cent complete for ' + esc(label) + '">' +
+    '<span class="unitsuf">%</span></span>' + (st.pct == null ? needsPct() : "");
+}
 function capPctBox(x, may, label){
   var has = x.pct != null && x.pct !== "";
   if (!may) return '<span class="mono">' + (has ? esc(String(x.pct)) + "%" : "\u2014") + '</span>';
@@ -6205,7 +6450,9 @@ function projReportBody(p, fk){
       '<td class="notecol">' + capNoteBox(m, mayM) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
-      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
+      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
+      /* §301: the finished mark, on the project it is about. */
+      doneCtl("fn:" + fk, p.id, p.owner)) +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
     '<h4 class="mini">Milestones</h4>' +
@@ -6293,14 +6540,34 @@ function renderFnReport(fnKey){
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
+  /* §301: the same chip the unit's bar carries, over this function's
+     projects. A function that plans in PILLARS never reaches here — it
+     returned above through `renderReport(fnAsUnit(fk))`, the unit's own path,
+     which carries the chip and the band control already (§59: one shape, one
+     answer, and no second copy of either). */
+  var ownList = [];
+  caps.forEach(function(c){
+    (c.projects || []).forEach(function(p){
+      var r = projReported(p);
+      ownList.push({ id:p.id, code:projCode(fk, p), owner:p.owner,
+                     done:r.done, total:r.total });
+    });
+  });
   REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd,
-                            reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget));
+                            reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget),
+    !boundedReporter(fnKeyTarget) ? null
+      : ownStateChip(fnKeyTarget, ownList, "projects"));
   /* §279: AND THIS SIDE HAD NOTHING AT ALL. A unit's page has carried a red
      banner for a missing note since the note rule existed; a capability
      function's never did — and `capNoteBox()` passes `want:false` always, so
      its note boxes are not rung either. So a function head was refused by
      Submit with the reason on a hover and NOTHING on the page. One bar, both
-     sides (§53.5, A15). */
+     sides (§53.5, A15).
+
+     RESTORED: the §301 merge resolved this line to an empty string and took
+     §279's whole banner off this page with it — a loss no assertion in either
+     section would have caught, because §301's own checks ask about the CHIP
+     and §279's run on the unit. */
   var bar = reportBar(fnKeyTarget);
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
@@ -6324,8 +6591,12 @@ function unitRailPick(u){
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
-  railShow(k, list[0].code);
-  return list[0];
+  /* §301.4 on the other side of the switch: a pillar owner's own pillar
+     opens, exactly as a project owner's project does (§53.5). */
+  var mine = railMine(u.ukey, list, function(p){ return p.owner; });
+  var pick = mine || list[0];
+  railShow(k, pick.code);
+  return pick;
 }
 function unitRailFor(u, sel){
   /* The rail does not group by Direction and Capability. It did in the first
@@ -6453,6 +6724,107 @@ function unitRailFor(u, sel){
    No border, deliberately — a bordered box inside a bordered pane reads as a
    control, and this is a label. Theme and owner stay gone: the rail card
    carries the owner, and the theme is a Strategy question. */
+/* ── THE CONTROL SITS ON THE BOX IT IS ABOUT (§301) ────────────────────
+   Islam, generally, in §190: *"make generally the dismiss under the box with
+   the issue"* — and §192 said the same of a count that could not take you to
+   what it counted. A finished mark is about ONE project, so it goes in that
+   project's own band, beside the tally it is a statement about.
+
+   THE MOCKUP PUT IT IN THE REPORTING BAR AND IT MOVED, for a reason the
+   mockup could not show: a supporting function draws EVERY capability at
+   once, each with its own project rail, so a single control in the bar would
+   have to guess which project it meant — and a person who owns projects in
+   two capabilities would find one of them unreachable (§147.7 names that
+   trade: one `may` for the pane either over-offers or under-offers). In the
+   band there is nothing to guess. The bar still stops lying; it carries the
+   state (`ownStateChip` below) and no longer the control.
+
+   NO NEW VOCABULARY: `Mark done` is the ordinary small button every pen bar
+   wears, and marked reads as the pill-and-way-back pair the report already
+   uses for Submitted · Reopen. Nothing new in the stylesheets. */
+function doneCtl(target, id, owner){
+  if (!mayMarkDoneOn(target, owner)) return "";
+  var on = !!doneMark(id);
+  var addr = esc(String(id));
+  return on
+    ? '<span class="pill good" title="Marked finished. The report is still open ' +
+      '— figures can still be entered.">Done</span>' +
+      '<button class="linkbu" data-rowdone="' + addr + '|0">Undo</button>'
+    : '<button class="editbtn" data-rowdone="' + addr + '|1" ' +
+      'title="Tells whoever submits the report that your part is finished. ' +
+      'It does not close anything.">Mark done</button>';
+}
+
+/* ── AND THE BAR STOPS SAYING "View only" TO SOMEBODY WHO REPORTS (§301) ──
+   `repChrome`'s pill is drawn from `canSpeakFor()` — may this person SUBMIT —
+   so a project owner with twelve live boxes beneath it was told the page was
+   read-only. This is what stands in that slot for anybody who reports here
+   through bounded roles alone: their own container's state where they own
+   one, a count where they own several, and the plain fact where they own none
+   but still report rows that name them.
+
+   `list` is `[{id, code, owner, done, total}]`, built by each caller from the
+   containers that caller already tallies, so the chip can never disagree with
+   the rail beside it (§53.5). */
+function ownStateChip(target, list, word){
+  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner); });
+  var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
+  var tip = 'You report your own rows. The ' + submits +
+            ' custodian submits the report.';
+  /* ── A CLOSED REPORT SAYS SO TO THEM TOO (§301.2) ─────────────────
+     §220 disables every control in the pane the moment the report is
+     submitted or parked — and the word that explains it, `Submitted` /
+     `Draft saved`, lives in `repChrome`'s OTHER branch, the one a bounded
+     role never reaches. So the whole page went grey with nothing anywhere
+     saying why: before §301 that slot read *View only*, which is no
+     explanation either, and this section owns the slot now. The word is the
+     same word (§53.5) and the way back is NOT offered — reopening speaks for
+     the whole subject, which is exactly what a bounded role does not do. */
+  /* ONE WORD, and never a second one beside it: the first build put a
+     `Closed` pill next to it and the bar then read *Closed · Close*, one
+     letter apart and meaning different things — §87's twins in the chrome.
+     The word says the state, the hover says who can undo it. */
+  if (reportClosed(target)) {
+    var subd = !!(REVIEW.submitted || {})[String(target)];
+    /* ── AND A SAVED DRAFT IS THEIRS TO REOPEN (§301.6) ──────────────
+       Islam: *"project owner can reopen eventually he can only report or
+       fill missing for his own project."* A park froze every bounded owner
+       under the subject with no way out but the custodian; nothing was sent,
+       so taking the lock off retracts nothing and the custodian may park it
+       again. Same button, same handler, same selector as the office's
+       (§53.5) — the server allows exactly this transition and no other.
+
+       A SUBMISSION IS NOT OFFERED, and that is the one part held back: it
+       would let one project's owner pull back a report the office has
+       already received on behalf of every other project in it. The word
+       still says what happened, and the hover says who can undo it. */
+    if (!subd)
+      return '<span class="rc-state draft">Draft saved</span>' +
+        '<button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>';
+    return '<span class="rc-state done" title="' +
+      esc('Submitted — the ' + submits + ' custodian reopens it.') +
+      '">Submitted</span>';
+  }
+  if (!mine.length)
+    return '<span class="pill none" title="' + esc(tip) + '">Your rows only</span>';
+  if (mine.length === 1) {
+    var c = mine[0];
+    return doneMark(c.id)
+      ? '<span class="rc-state done" title="' + esc(tip) + '">' +
+        esc(c.code) + ' · Done</span>'
+      : '<span class="rc-state draft" title="' + esc(tip) + '">' +
+        esc(c.code) + ' · ' + c.done + ' of ' + c.total + ' entered</span>';
+  }
+  var n = mine.filter(function(c){ return !!doneMark(c.id); }).length;
+  return '<span class="rc-state ' + (n >= mine.length ? "done" : "draft") +
+    /* NEVER `plural()` HERE (§107.8, and §160.6 for the second time): a
+       tenant's label is already plural — `L("pillar","bu")` is "Pillars" —
+       so plural() would print "2 pillarss". This branch only runs at two or
+       more, so the count and the label as given are always right. */
+    '" title="' + esc(tip) + '">Your ' + mine.length + ' ' + esc(word) +
+    ' · ' + n + ' of ' + mine.length + ' done</span>';
+}
+
 function pillarBand(code, name, right){
   return '<div class="pband"><span class="pband-code">' + esc(code) + '</span>' +
     '<span class="pband-name">' + esc(name) + '</span>' +
@@ -6526,7 +6898,7 @@ function unitPlanBody(it, u, railed){
          mode carries the chip and the office's tick. \u00a7114's prepend rule for
          an out-of-list stored value lives inside gapCell now, and \u00a7148's
          hover words come back through `read`. */
-      /* §264: the same three go dead on a yes/no measure as on a yes/no
+      /* §257: the same three go dead on a yes/no measure as on a yes/no
          objective — one decision, both tables (§53.5). */
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.dir || "\u2265")
         : gapCell("plan", "u_plan", m, "dir",
@@ -6643,7 +7015,7 @@ function unitPlanBody(it, u, railed){
         : qs(t);
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
       ctx: pctx(t), del: true, fillKind: "tactic",
-      /* §264: read mode says "Yes / No", never the stored `Y/N` — one
+      /* §257: read mode says "Yes / No", never the stored `Y/N` — one
          formatter for every surface (§53.5). */
       read: tgtShown,
       control: function(set, pendCls){
@@ -6714,7 +7086,7 @@ function unitPlanBody(it, u, railed){
         (!ed && !tgtOpen ? '<span class="subhd narrowtgt">' +
            (SMPRules.gapEmpty("outTarget", t)
              ? '<span class="missing">Missing</span>'
-             /* §264: no direction on a yes/no outcome — there is nothing for
+             /* §257: no direction on a yes/no outcome — there is nothing for
                 it to point at, and `\u2265 Yes / No` reads as a comparison. */
              : SMPRules.isYesNo(t.outTarget) ? tgtShown(t.outTarget)
              : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
@@ -7213,7 +7585,7 @@ function unitTight(v){
    goes through this, or the deck and the page behind it spell one unit two
    ways (§53.5). An editable field is untouched: what somebody is correcting
    must be what they typed. */
-/* §264: and a yes/no target says so. `Y/N` is how it is STORED and is not
+/* §257: and a yes/no target says so. `Y/N` is how it is STORED and is not
    how a plan should read — the row asks a question, and "Yes / No" is what
    somebody will be choosing between. Inside main's own reader rather than
    beside it, or the deck and the page spell one target two ways. */
@@ -7232,11 +7604,15 @@ function tgtShown(v){
    worked out here — and the shape is the one the tactics table has worn since
    §252, so the deck gains no new vocabulary. */
 function figVsDue(m, share){
-  var due = measureDueLabel(m, share);
+  var due = benchBeside(m, share);   /* §300 */
   return figShown(m) + (due ? ' <i class="duehalf">/ ' + tgtShown(due) + '</i>' : '');
 }
 
 function figShown(m){
+  /* §300: a yes/no figure is a word (and, In progress, a word and a number),
+     so it is never scaled, tightened or given a magnitude hover — those are
+     for a figure with a unit on the end of it. One reader, `ynShown`. */
+  if (SMPRules.isYesNo(m.target)) return esc(SMPRules.ynShown(m.actual));
   var s = unitTight(figureScaled(m.target, m.actual)), full = figureFull(m.target, m.actual);
   return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
 }

@@ -173,7 +173,7 @@ platform admin alone adds clients and consultants.
 - [x] T053 Rebuild with `python3 build.py` and confirm the shipped file is reproduced byte-identically (Principle III)
 - [x] T054 [P] Run the contrast sweep over the new outer-platform pages in both themes and both palettes, and record the numbers (Principle XIII)
 - [x] T055 [P] Sweep the door, the cards and the configuration page at 1920 / 1500 / 1280 / 1000 px asserting no sideways scroll (§27.1, §27.2)
-- [x] T056 Write §288 in `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.22.md` — the decisions, and the two reversals: §21's "no invented content in the database" for the Demo client, and the Demo-data button's retirement
+- [x] T056 Write §303 in `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.22.md` — the decisions, and the two reversals: §21's "no invented content in the database" for the Demo client, and the Demo-data button's retirement
 - [x] T057 [P] Update `CLAUDE.md` (the multi-client facts, the new commands) and `IMPLEMENTATION_PROGRESS.md` in the same commit as the work (steering currency)
 - [x] T058 Rehearse `scripts/migrate-to-multi-client.js` against a **copy of production**, with the rollback written down first, and report what it found before it is run for real
 - [x] T059 End the merge with what to go and check — the screens, in the navigation's own words (rule A16) — `specs/030-multi-client/what-to-check.md`

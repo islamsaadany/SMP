@@ -40,6 +40,16 @@ var BFORM = null;         /* { kind, ctx, draft, added } while a row form is ope
 var BCHOOSE = null;       /* { side, confirm } while the chooser is open */
 
 /* ── Which way a subject plans ────────────────────────────────────── */
+/* IS THE BUILD UNDERWAY ON THE PLACE BEING DRAWN (§292)? Six places spell
+   this out inline (`BUILDER && BUILDER.target === current`); this is the
+   first that needed it from a RENDERER rather than a handler, so it is
+   named once here. The six are deliberately left as they are — folding them
+   in is a sweep nobody asked for (§2b) — and recorded so the next reader
+   knows the helper is the place to add a seventh. */
+function builderHere(){
+  return !!(typeof BUILDER !== "undefined" && BUILDER &&
+            typeof current !== "undefined" && BUILDER.target === current);
+}
 function builderRoute(target){
   var t = String(target || "");
   if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;

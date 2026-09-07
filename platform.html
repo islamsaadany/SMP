@@ -290,7 +290,7 @@
     return redraw();
   }
 
-  /* ── A SILENT REFRESH (§288.28) ───────────────────────────────────
+  /* ── A SILENT REFRESH (§303.28) ───────────────────────────────────
      Islam: "this page needs silent refresh." Every control here ended in a
      full redraw that CLEARED the page first and put "Reading…" in its place,
      so pressing a seat blanked the whole pane and rebuilt it — a flash, a
@@ -331,7 +331,7 @@
 
   /* ── Clients ─────────────────────────────────────────────────── */
   function drawClients() {
-    /* ── WHY A CLIENT SENT THEM BACK HERE (§288.32) ──────────────────
+    /* ── WHY A CLIENT SENT THEM BACK HERE (§303.32) ──────────────────
        A client whose register cannot place this account refuses and lands
        them on the cards, because the cards are beside the configuration that
        answers it. Said BEFORE the title, so it is the first thing read rather
@@ -364,7 +364,7 @@
     post({ action: "cards" }).then(function (j) {
       grid.textContent = "";
       if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
-      /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§288.18, §61) ──
+      /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§303.18, §61) ──
          This RETURNED on an empty list, before the Add card was appended — so
          the one person who can create a client was the one shown a dead end,
          and the sentence it showed them said to ask the platform's super
@@ -531,7 +531,7 @@
         who.appendChild(el("div", "em", m.email));
         tr.appendChild(who);
         var sp = el("div", "sp");
-        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§288.29) ──────────
+        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§303.29) ──────────
            Drawn only where the client's register has somebody it could be —
            which after the platform becomes the entry point is nobody, and this
            control quietly stops appearing rather than having to be removed. */
@@ -565,7 +565,7 @@
           op.value = o.email;
           pick.appendChild(op);
         });
-        /* ── AND WHO THEY ARE ON THIS REGISTER (§288.30) ─────────────
+        /* ── AND WHO THEY ARE ON THIS REGISTER (§303.30) ─────────────
            Nothing is created on a client that already has a register, so
            adding somebody without saying who they are would give them a seat
            and no row — a team member who opens the client and is shown
@@ -593,7 +593,7 @@
             });
         });
         addRow.appendChild(pick);
-        /* NOT ASKED ON A CLIENT MADE HERE (§288.31): adding somebody to the
+        /* NOT ASKED ON A CLIENT MADE HERE (§303.31): adding somebody to the
            team IS adding them to its register, so the question has already
            been answered by the act (§93.13). */
         if (!c.made_here && (j.register || []).length) addRow.appendChild(asWho);
@@ -740,7 +740,7 @@
   function consultantRow(p, j) {
     var tr = el("tr");
 
-    /* ── THE NAME AND THE ADDRESS ARE EDITABLE (§288.27) ────────────
+    /* ── THE NAME AND THE ADDRESS ARE EDITABLE (§303.27) ────────────
        Islam: "I need to edit the consultants names and emails as well." Two
        fields on the row rather than a dialog, because there are two of them
        and one row is not a form (§116's argument runs the other way at this

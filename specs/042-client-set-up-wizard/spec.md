@@ -30,12 +30,24 @@ published as an artifact, rule 1c).
 3. Every choice is **shown, not described**: a small drawing per option, and a
    diagram of the client's shape that grows as it is answered.
 4. A **third plan type** — objectives, actions, requirements — because Elabd's
-   functions plan that way and the platform has no shape for it.
+   functions plan that way and the platform has no shape for it. **Drawn dull
+   in the wizard and NOT built here** — see §2.
 5. It ends on a **summary with two doors**: start the plans, or bring the people in.
 6. **Nothing it writes is final.** Every answer lands on a Setup page that
    already exists and stays editable there (Islam: *"6. yes"*).
 
 ## 2 · What is NOT in scope, and why
+
+Islam, 2026-09-07: *"don't build things that doesn't exist now in the platform.
+we are focused on the building the wizard and then i will take it to another
+discussion to build what's missing."* And, on how they should read meanwhile:
+*"keep the mockup as is but kepe the non existing parts dull for now."*
+
+So **the wizard offers only what the platform can already do**, and the three
+shapes below are drawn in the wizard, dulled, inert and each saying *Later* —
+visible so the whole intent reads, offering nothing that would open an empty
+page (§61). Their decisions are recorded here so the separate discussion starts
+from them rather than from scratch.
 
 - **Multi-tenancy.** Islam, 2026-09-07: *"this is a fix I will do in the tenant
   management platform let's just build the wizard and the flow."* This
@@ -45,6 +57,15 @@ published as an artifact, rule 1c).
   unchanged and unbuilt, and the wizard deliberately does not depend on it —
   the client's name is `GROUP.org`, which is already data, so the wizard shapes
   a deployment from empty with nothing new underneath it.
+- **A function that plans in objectives, actions and requirements** (§5 below).
+  Two of Islam's answers about it are already taken and are recorded, not acted
+  on: such a function shows **two headline numbers side by side** — objectives
+  and actions, allowed to disagree, on §64's reasoning — and a requirement is
+  **raised on the raiser's own page**, appearing on the owing function's page as
+  owed. Neither is built here.
+- **A capability as its own strategic entry** beside the units, owned by a
+  function head (§4 below). Today a capability exists only underneath a function
+  that plans in projects, and the wizard sets exactly that.
 - **The single-business shape.** `shape = SINGLE_COMPANY | GROUP` is in §4 of
   the model document and has never been built. Neither Raya nor Elabd is
   single-business, so it is **left out of round one** at Islam's direction — a
@@ -113,7 +134,8 @@ Islam: *"each function has objectives like the measures we have and actions
 like tactics they work on that has due dates. and finally they have
 requirements from other functions and departments."*
 
-`format` gains a third value beside `pillars` and `projects`:
+**Not built in this round** — recorded so the separate discussion has the
+model. `format` would gain a third value beside `pillars` and `projects`:
 
 - **Objective** — the measure row the platform already has: direction, unit,
   target, compile rule, actual, scored by `measureScore` (§239, §276). Nothing
@@ -131,17 +153,18 @@ requirements from other functions and departments."*
   choice of three) — which is what keeps it small: no dispute rule, no
   arithmetic, no second definition of what a function is judged on.
 
-## 6 · Still to settle before the build
+## 6 · Still to settle, for the round that builds the missing shapes
 
-1. **A function's headline number** when it plans in objectives — one figure
-   from the objectives alone, or objectives and actions read side by side as a
-   unit's Performance page reads three (§64)? Put to Islam, not yet answered.
-2. **Where a requirement is raised from** — the raiser's own page, or the page
-   of the function being asked. Affects which side's pen draws it.
-3. **Whether a requirement is a counted gap** (§249) and whether it holds
+1. **Whether a requirement is a counted gap** (§249) and whether it holds
    Submit (§221). Recommendation: neither, matching its not-scored decision.
-4. **The workbook.** A plan is authored by upload (§22), so the three new row
+2. **The workbook.** A plan is authored by upload (§22), so the three new row
    kinds need sheets and a round trip, or a download-and-re-upload drops them.
+3. **What happens to a function already holding a plan** if its type is
+   changed to objectives — the switch is already refused while the other side
+   holds content (§59), and a third value needs the same guard.
+
+*(Answered and recorded above: the two headline numbers, and where a
+requirement is raised from.)*
 
 ## 7 · What the check must assert
 
@@ -151,7 +174,10 @@ requirements from other functions and departments."*
   a client's mix produces, and the rows it does not (§94.2).
 - The shape diagram asserted as **agreement** with the data, never as a count
   (§94.8).
-- A function set to each of the three plan types drawing that type's pages, and
-  the other two's absent.
+- A function set to each plan type the platform HAS drawing that type's pages,
+  and the other's absent.
+- Every dulled control asserted **inert** — present, saying *Later*, and
+  changing nothing when pressed (§61, §94.15): a mockup's dulling is a drawing,
+  a product's has to be enforced.
 - Nothing new stored outside what Setup already holds — no draft, no progress
   flag (§25, §47.1).

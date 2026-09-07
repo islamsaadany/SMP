@@ -244,10 +244,13 @@ A drift between specs and code is a documentation bug — report it before silen
   printed so the cost stays visible in every run. Falsified both ways from the
   SOURCES (§276), and **neither earlier build passes it**.
 - **THE SLACK RULE IS ABOUT THE PAIR, NOT THE MARK (§302.4).** *"make the home
-  icon bigger a bit but keep the box with teh same size."* What must be even is
-  **the square minus the mark**; 20 was never magic. In a 34px box: 22 sits 6 a
-  side, 24 sits 5, and **23 is the reported fault again** (3 red, `slack 5.5`,
-  `box 0.5` across). An odd size here is not a slightly different look.
+  icon bigger a bit but keep the box with teh same size"*, then, of three sizes
+  drawn for him, *"24px"*. What must be even is **the square minus the mark**;
+  20 was never magic. In a 34px box: 22 sits 6 a side, **24 sits 5 (shipped)**,
+  and **23 is the reported fault again** (3 red, `slack 5.5`, `box 0.5`
+  across). An odd size here is not a slightly different look. **26 is where it
+  stops being free** — 4 a side meets the button's own 5px radius, so the next
+  step up is a look decision rather than an arithmetic one.
 - **THE CORRECTION LIVES IN THE DRAWING, NEVER IN A CSS NUDGE** — and with
   §302.3 there is no correction at all, which is the better end of that rule:
   the path's bytes and its `viewBox` are untouched either way, so §202's four
@@ -7573,14 +7576,15 @@ once that went to 20 the path is already centred in its `viewBox` to 0.062px
 &mdash; so the `transform` is deleted outright rather than given a micro-constant
 to explain later (&sect;122.5). **THE SLACK RULE TURNS OUT TO BE ABOUT THE
 PAIR**, which is what let the mark grow: the square MINUS the mark is what must
-halve into whole pixels, so in a 34px box 22 sits 6 a side and 24 sits 5, while
-**23 is the reported fault again** &mdash; proved, 3 red, `slack (5.5, 5.5)` and
+halve into whole pixels, so in a 34px box 22 sits 6 a side and **24 sits 5, his
+pick from three drawn at real size and at 16&times;**, while **23 is the
+reported fault again** &mdash; proved, 3 red, `slack (5.5, 5.5)` and
 `box (0.5, 0.625)`. **THE ASSERTION IS REWRITTEN, NOT LOOSENED** (&sect;218):
 the drawing's bounding box, with the centroid measured beside it and PRINTED
 rather than asserted, because asserting either is choosing against the other and
 that choice belongs in the decisions log rather than inside a tolerance
 &mdash; **and neither of the two builds before this one passes it**, falsified
-both ways from the SOURCES (&sect;276). Shipped at 22px: **0.000 across, 0.125
+both ways from the SOURCES (&sect;276). Shipped at 24px: **0.000 across, 0.125
 down**, at 1500/1280/1000 alike; 24/24 on `checks/home-mark.py`, `welcome`,
 `nav-scroll` and `setup-pages` green, full `qa.py` sweep ERRORS none.
 **Screen only** &mdash; no `api/`, `lib/` or `db/` file, read off the diff

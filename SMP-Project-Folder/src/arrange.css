@@ -1246,12 +1246,14 @@
      which is why this is a constraint on the pair and not a magic number.
 
      SO THE MARK GROWS IN TWOS (§302.4). Islam: *"let's make the home icon
-     bigger a bit but keep the box with teh same size."* The box is 34, so
-     22 leaves 12 and sits 6 a side; 24 leaves 10 and sits 5. 23 leaves 11
-     and brings the snap straight back — an odd size here is not a slightly
-     different look, it is the reported fault again. 22 is the "a bit", and
-     24 is one word away and still whole. */
-  .units .navmenu-btn.homemark .navmenusvg{ width:22px; height:22px; }
+     bigger a bit but keep the box with teh same size"*, then, of the three
+     sizes drawn for him at real size and at 16×, *"24px"*. The box is 34,
+     so 24 leaves 10 and sits 5 a side. 23 leaves 11 and brings the snap
+     straight back — an odd size here is not a slightly different look, it
+     is the reported fault again (proved: 3 red, slack 5.5, box 0.5 across).
+     The next size up would be 26, at 4 a side, which is where the drawing
+     starts meeting the corners of a 5px radius rather than sitting in it. */
+  .units .navmenu-btn.homemark .navmenusvg{ width:24px; height:24px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }
   /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so

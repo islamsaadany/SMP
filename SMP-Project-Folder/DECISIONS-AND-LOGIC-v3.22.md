@@ -37471,20 +37471,26 @@ a mark that changed size would shift every destination name on the row), so:
 | mark | slack | a side | |
 |---|---|---|---|
 | 20px | 14 | 7 | this morning |
-| **22px** | **12** | **6** | **shipped** |
+| 22px | 12 | 6 | offered as the "a bit" |
 | 23px | 11 | 5.5 | **the reported fault, again** |
-| 24px | 10 | 5 | still whole, one word away |
+| **24px** | **10** | **5** | **his pick, shipped** |
 
-**22 IS THE "A BIT" AND 24 IS OFFERED RATHER THAN CHOSEN FOR HIM**, both drawn
-at real size and at 16&times; in the same page as the rest of this decision.
-**And an odd size is not a slightly different look** — it is the half-pixel
-lean he reported in the first place, which is why this is written down as a
-rule about the pair rather than left as a number somebody later nudges by one.
-Proved rather than argued: 23px &rarr; **3 red**, `slack (5.5, 5.5)` and
-`box (0.5, 0.625)`, the lean reproduced exactly.
+**THE SIZES WERE DRAWN RATHER THAN DESCRIBED** (rule 1c) — 20, 22 and 24 at
+real size in a mock bar and again at 16&times; in the same page as the rest of
+this decision — and he answered **"24px"**, the larger of the two whole
+answers. **And an odd size is not a slightly different look**: it is the
+half-pixel lean he reported in the first place, which is why this is written
+down as a rule about the pair rather than left as a number somebody later
+nudges by one. Proved rather than argued: 23px &rarr; **3 red**, `slack (5.5,
+5.5)` and `box (0.5, 0.625)`, the lean reproduced exactly.
+
+**26 IS WHERE IT WOULD STOP BEING A FREE CHOICE**, and it is worth saying
+before somebody reaches for it: at 4px a side the drawing starts meeting the
+button's own 5px corner radius rather than sitting inside it, so the next step
+up is a look decision and not only an arithmetic one.
 
 **Nothing else in the chrome moves and it is asserted**: the box is still a
 34px square at 1000px, the two states still differ only in their fill, and
 §202's four gaps still read equal — they assert opposite gaps AGREE and never
-what they are (§94.8), so they survived 21 &rarr; 20 &rarr; 22 untouched. Box
-offset at 22px: **+0.000 across, +0.125 down**, at 1500, 1280 and 1000 alike.
+what they are (§94.8), so they survived 21 &rarr; 20 &rarr; 24 untouched. Box
+offset at 24px: **+0.000 across, +0.125 down**, at 1500, 1280 and 1000 alike.

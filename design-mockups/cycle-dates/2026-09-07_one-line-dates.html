@@ -1,0 +1,363 @@
+<title>The Cycle's Dates</title>
+<style>
+:root{
+  --gold:#C9A24D; --gold-deep:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --attn:#B8860B; --bad:#B04434;
+  --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --bad-bg:#F7E3E0;
+  --good-tx:#1F6248; --attn-tx:#7A5D1C; --bad-tx:#8C3327;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#A9BBD8; --panel-accent:#E6C65C;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --gold:#D9B665; --gold-deep:#C9A24D;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --attn:#D9B23C; --bad:#D97066;
+  --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+  --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+}}
+:root[data-theme="dark"]{
+  --gold:#D9B665; --gold-deep:#C9A24D;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --attn:#D9B23C; --bad:#D97066;
+  --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+  --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;
+     line-height:1.5;margin:0}
+.page{max-width:1180px;margin:0 auto;padding:34px 24px 90px;display:flex;
+      flex-direction:column;gap:36px}
+h1{font-size:27px;margin:0 0 8px;letter-spacing:-.01em}
+.lede p{margin:0;color:var(--ink-2);max-width:70ch}
+h2{font-size:17px;margin:0;display:flex;align-items:baseline;gap:10px}
+h2 .n{font-family:var(--mono);font-size:12px;color:var(--gold-deep);font-weight:700}
+section{display:flex;flex-direction:column;gap:13px}
+section>p{margin:0;color:var(--ink-2);max-width:72ch}
+section>p b{color:var(--ink)}
+
+.frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.frame>.cap{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;
+   color:var(--ink-3);background:var(--surface-2);padding:7px 14px;border-bottom:1px solid var(--line);
+   display:flex;gap:10px;align-items:center}
+.frame>.cap .w{margin-left:auto;font-family:var(--mono);letter-spacing:0;font-weight:600}
+.frame.bad>.cap{background:var(--bad-bg);color:var(--bad-tx)}
+.frame.good>.cap{background:var(--good-bg);color:var(--good-tx)}
+.stage{background:var(--ground);padding:18px;overflow-x:auto}
+.stage>.in{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+
+/* ── the cycle strip, as the platform draws it ── */
+.strip-h{display:flex;align-items:center;gap:18px;padding:12px 16px;background:var(--surface-2);
+   border-bottom:1px solid var(--line);flex-wrap:wrap}
+.strip-h .nm{font:800 11px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase}
+.strip-h .meta{color:var(--ink-3);font-size:13px}
+.strip-h .asof{color:var(--ink-2);font-size:13px;margin-left:auto}
+.strip-h .asof b{color:var(--ink)}
+.pill{font:800 10px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;
+  padding:4px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-3)}
+.editbtn{font:800 12px/1 var(--sans);text-transform:uppercase;letter-spacing:.08em;
+  border:1px solid var(--gold);color:var(--gold-deep);background:transparent;
+  border-radius:999px;padding:8px 15px;cursor:default;white-space:nowrap}
+.editbtn.penon{background:var(--gold);color:#2A2100;border-color:var(--gold)}
+.editbtn.danger{border-color:var(--bad);color:var(--bad-tx)}
+
+/* ── the pen ── */
+.pen{padding:16px 18px}
+.cyc2{display:grid;grid-template-columns:1fr 300px}
+.cyc2-f{padding-right:26px;min-width:0}
+.cyc2-d{border-left:1px solid var(--line);padding-left:26px;display:flex;
+  flex-direction:column;align-items:flex-start}
+.cyc2-p{font-size:12.5px;color:var(--ink-3);margin:0 0 14px}
+.nc-h{font:700 11px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 12px}
+.nc-grid{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end}
+.nc-grid label{display:flex;flex-direction:column;gap:5px;min-width:0}
+.nc-grid label span{font:600 10.5px/1 var(--sans);letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3)}
+.fld{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:7px;
+  padding:8px 10px;background:var(--surface);color:var(--ink);width:160px;box-sizing:border-box}
+.nc-why{font-size:12px;color:var(--ink-3);margin:14px 0 0}
+.nc-why b{color:var(--ink-2)}
+
+/* the platform's own picker button, as built for milestone dates */
+.monthbtn{display:inline-flex;align-items:center;gap:8px;justify-content:space-between;
+  font:inherit;font-size:13px;border:1px solid var(--line);border-radius:7px;
+  padding:7px 10px;background:var(--surface);color:var(--ink);cursor:default;
+  width:160px;box-sizing:border-box;text-align:left}
+.monthbtn svg{width:16px;height:16px;flex:none;color:var(--ink-3)}
+.monthbtn .mval{font-variant-numeric:tabular-nums}
+.monthbtn .mnone{color:var(--bad-tx);font-weight:700}
+.monthbtn.lit{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,77,.18)}
+
+/* the proposed row: the dates keep their size, the name takes what is left */
+.newrow .nm-lab{flex:1 1 190px;min-width:150px}
+.newrow .nm-lab .fld{width:100%}
+.newrow .dt{flex:0 0 auto}
+
+.tagrow{display:flex;gap:8px;flex-wrap:wrap;margin:0}
+.tag{font:700 10.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+  padding:5px 10px;border-radius:999px}
+.tag.go{background:var(--bad-bg);color:var(--bad-tx)}
+.tag.mv{background:var(--attn-bg);color:var(--attn-tx)}
+.tag.ok{background:var(--good-bg);color:var(--good-tx)}
+
+table.ch{width:100%;border-collapse:collapse;font-size:13px}
+table.ch th{text-align:left;font:800 10px/1 var(--sans);letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);padding:10px 14px;
+  background:var(--surface-2);border-bottom:1px solid var(--line)}
+table.ch td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+table.ch tr:last-child td{border-bottom:0}
+table.ch td b{color:var(--ink)}
+table.ch code{font-family:var(--mono);font-size:12px;color:var(--ink)}
+
+.care{border:1px solid var(--attn);background:var(--attn-bg);color:var(--attn-tx);
+  border-radius:10px;padding:14px 16px}
+.care b{display:block;margin:0 0 6px;font-size:13px}
+.care p{margin:0 0 8px;font-size:13px;line-height:1.55}
+.care p:last-child{margin:0}
+.arrow{color:var(--ink-3);font-family:var(--mono)}
+</style>
+
+<div class="page">
+
+<div class="lede">
+  <h1>The cycle's dates</h1>
+  <p>Four boxes on one line. <b>Covers to</b> becomes the review point — the month
+     every figure is measured against — so the fifth box goes and there is one
+     answer to “how far through the year are we”. Every date is picked, and
+     <b>Reports due</b> is the only one with a day, because it is a cut-off.</p>
+</div>
+
+<section>
+  <h2><span class="n">NOW</span> Five boxes, and two of them disagree</h2>
+  <p>At your window the row already wraps. Worse, <b>Covers to</b> decides which
+     work is asked for this round and <b>Reporting as of</b> decides what the
+     numbers are judged against — so a cycle can ask for work due to June and
+     mark it against August.</p>
+  <div class="frame bad">
+    <div class="cap">Setup › Reporting cycle — today<span class="w">field area 641px</span></div>
+    <div class="stage"><div class="in">
+      <div class="strip-h">
+        <span class="nm">Cycle 2</span>
+        <span class="meta">Jan 2027 to Jun 2027 · due 15 Jul 2027</span>
+        <span class="asof">reported as of <b>Aug 26</b><br><span style="font-size:12px;color:var(--ink-3)">· 8 of 12 months</span></span>
+        <span class="pill">Open</span>
+        <button class="editbtn penon">Done editing</button>
+      </div>
+      <div class="pen"><div class="cyc2">
+        <div class="cyc2-f">
+          <div class="nc-h">This cycle</div>
+          <div class="nc-grid" style="max-width:641px">
+            <label><span>Name</span><input class="fld" value="Cycle 2"></label>
+            <label><span>Covers from</span><input class="fld" value="Jan 2027"></label>
+            <label><span>to</span><input class="fld" value="Jun 2027"></label>
+            <label><span>Reports due</span><input class="fld" value="15 Jul 2027"></label>
+            <label><span>Reporting as of</span>
+              <button class="monthbtn" style="width:88px"><span class="mval">Aug 26</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+                  <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+          </div>
+          <div class="nc-why"><b>The month decides what every figure is measured against.</b>
+            A target that adds up across the year is compared with the share of it due by
+            then. Changes are kept as you type.</div>
+        </div>
+        <div class="cyc2-d">
+          <div class="nc-h">Ending it</div>
+          <p class="cyc2-p">Closing files every figure under this name and stops the units reporting.</p>
+          <button class="editbtn danger">Close the cycle</button>
+        </div>
+      </div></div>
+    </div></div>
+  </div>
+  <p class="tagrow">
+    <span class="tag go">two answers to one question</span>
+    <span class="tag go">three boxes typed by hand</span>
+    <span class="tag go">wraps onto a second row</span>
+  </p>
+</section>
+
+<section>
+  <h2><span class="n">PROPOSED</span> Four boxes, one line, every date picked</h2>
+  <p>The three dates hold the width a date needs; <b>Name</b> takes whatever is
+     left, so the row stays on one line from a narrow laptop upward and the name
+     grows on a wide screen. The sentence under the row now belongs to
+     <b>Covers to</b>, which is the month doing the measuring.</p>
+  <div class="frame good">
+    <div class="cap">Setup › Reporting cycle — proposed<span class="w">field area 641px — the same width</span></div>
+    <div class="stage"><div class="in">
+      <div class="strip-h">
+        <span class="nm">Cycle 2</span>
+        <span class="meta">Jan 2027 to Jun 2027 · due 15 Jul 2027</span>
+        <span class="asof">reported as of <b>Jun 2027</b><br><span style="font-size:12px;color:var(--ink-3)">· 6 of 12 months</span></span>
+        <span class="pill">Open</span>
+        <button class="editbtn penon">Done editing</button>
+      </div>
+      <div class="pen"><div class="cyc2">
+        <div class="cyc2-f">
+          <div class="nc-h">This cycle</div>
+          <div class="nc-grid newrow" style="max-width:641px;flex-wrap:nowrap">
+            <label class="nm-lab"><span>Name</span><input class="fld" value="Cycle 2"></label>
+            <label class="dt"><span>Covers from</span>
+              <button class="monthbtn" style="width:150px"><span class="mval">Jan 2027</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+                  <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+            <label class="dt"><span>to</span>
+              <button class="monthbtn lit" style="width:150px"><span class="mval">Jun 2027</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+                  <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+            <label class="dt"><span>Reports due</span>
+              <button class="monthbtn" style="width:150px"><span class="mval">15 Jul 2027</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+                  <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+          </div>
+          <div class="nc-why"><b>The month it covers to decides what every figure is measured
+            against.</b> A target that adds up across the year is compared with the share of it
+            due by then, and work dated after it is not asked for. Changes are kept as you type.</div>
+        </div>
+        <div class="cyc2-d">
+          <div class="nc-h">Ending it</div>
+          <p class="cyc2-p">Closing files every figure under this name and stops the units reporting.</p>
+          <button class="editbtn danger">Close the cycle</button>
+        </div>
+      </div></div>
+    </div></div>
+  </div>
+  <p class="tagrow">
+    <span class="tag ok">one answer</span>
+    <span class="tag ok">nothing typed by hand</span>
+    <span class="tag ok">one line at your width</span>
+  </p>
+</section>
+
+<section>
+  <h2><span class="n">WIDE</span> The same row on a large screen</h2>
+  <p>The dates do not stretch. The extra width goes to the name, which is the
+     only box holding words.</p>
+  <div class="frame">
+    <div class="cap">Proposed<span class="w">field area 961px</span></div>
+    <div class="stage"><div class="in"><div class="pen"><div class="cyc2">
+      <div class="cyc2-f">
+        <div class="nc-h">This cycle</div>
+        <div class="nc-grid newrow" style="max-width:961px;flex-wrap:nowrap">
+          <label class="nm-lab"><span>Name</span><input class="fld" value="H1 2027 — half-year review"></label>
+          <label class="dt"><span>Covers from</span>
+            <button class="monthbtn" style="width:150px"><span class="mval">Jan 2027</span>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+                <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+          <label class="dt"><span>to</span>
+            <button class="monthbtn" style="width:150px"><span class="mval">Jun 2027</span>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+                <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+          <label class="dt"><span>Reports due</span>
+            <button class="monthbtn" style="width:150px"><span class="mval">15 Jul 2027</span>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+                <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+        </div>
+      </div>
+      <div class="cyc2-d">
+        <div class="nc-h">Ending it</div>
+        <p class="cyc2-p">Closing files every figure under this name and stops the units reporting.</p>
+        <button class="editbtn danger">Close the cycle</button>
+      </div>
+    </div></div></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">MISSING</span> A cycle with no month picked</h2>
+  <p>Opening a cycle already refuses to go ahead without the review month. With
+     the two fields joined it refuses without <b>Covers to</b> — the same refusal,
+     one box earlier.</p>
+  <div class="frame">
+    <div class="cap">Open a new cycle — the month is still required</div>
+    <div class="stage"><div class="in"><div class="pen">
+      <div class="nc-h">Open a new cycle</div>
+      <div class="nc-grid newrow" style="max-width:641px;flex-wrap:nowrap">
+        <label class="nm-lab"><span>Name</span><input class="fld" value="H2 2027"></label>
+        <label class="dt"><span>Covers from</span>
+          <button class="monthbtn" style="width:150px"><span class="mval">Jul 2027</span>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+              <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+        <label class="dt"><span>to</span>
+          <button class="monthbtn" style="width:150px"><span class="mval mnone">Missing</span>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+              <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+        <label class="dt"><span>Reports due</span>
+          <button class="monthbtn" style="width:150px"><span class="mval mnone">Missing</span>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/>
+              <path d="M3 8.5h14M7 3v3M13 3v3"/></svg></button></label>
+      </div>
+      <div class="nc-why"><b>The month it covers to decides what every figure is measured
+        against.</b> A target that adds up across the year is compared with the share of it
+        due by then, and work dated after it is not asked for.</div>
+    </div></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">UNDERNEATH</span> What goes, what moves, what is untouched</h2>
+  <div class="frame"><table class="ch">
+    <thead><tr><th style="width:26%">Thing</th><th style="width:16%">What happens</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><b>Reporting as of</b> — the box and the stored month</td>
+          <td><span class="tag go">removed</span></td>
+          <td>Its job moves to <b>Covers to</b>. Nothing keeps a second copy, so
+              the two can never disagree again.</td></tr>
+      <tr><td><b>Covers to</b></td>
+          <td><span class="tag mv">becomes the review point</span></td>
+          <td>It already decided which work is asked for. Now it also decides
+              what the figures are judged against — one month, one meaning.</td></tr>
+      <tr><td><b>Covers from</b> and <b>Covers to</b> — how you set them</td>
+          <td><span class="tag mv">picked, not typed</span></td>
+          <td>Month and year, the platform's own picker. Today they are free text,
+              and a cycle whose dates cannot be read silently falls back to six months.</td></tr>
+      <tr><td><b>Reports due</b></td>
+          <td><span class="tag mv">picked, with a day</span></td>
+          <td>A cut-off is a day. Nothing is measured against it — it is printed
+              and nothing more — so a day there costs nothing.</td></tr>
+      <tr><td>The strip's <b>reported as of</b> line</td>
+          <td><span class="tag mv">same words, one source</span></td>
+          <td>It reads the cycle's end instead of the separate month.</td></tr>
+      <tr><td>Every score, target and proration</td>
+          <td><span class="tag ok">unchanged</span></td>
+          <td>The arithmetic is not touched. It goes on asking one month and
+              getting the same answer — from one field instead of two.</td></tr>
+      <tr><td>The review day and its reminders</td>
+          <td><span class="tag ok">unchanged</span></td>
+          <td>A different block, a different subject. It consults none of this.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">CARE</span> The one thing that changes on your live tenant</h2>
+  <div class="care">
+    <b>Where your two fields disagree today, the cycle's end moves to the review month.</b>
+    <p>Your figures are measured against <b>Reporting as of</b> right now, so that
+      month is carried into <b>Covers to</b> — which means <span class="arrow">not one
+      score moves</span>. That is the point of doing it in that direction.</p>
+    <p>What does change is <b>which work is asked for</b>. Anything dated between
+      the old end and the new one moves in or out of this round's reporting. On a
+      cycle where the two already agree — which is the case on the worked example —
+      nothing changes at all.</p>
+    <p>I will measure it on the real data before it is merged and tell you exactly
+      how many rows move, if any.</p>
+  </div>
+</section>
+
+</div>

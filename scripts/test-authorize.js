@@ -654,17 +654,25 @@ console.log("\n7 · a retired person");
 
 /* ── 8 · Picture slides are the unit's, not a row's (§50.5) ────── */
 /* ── §239: THE REVIEW POINT IS THE OFFICE'S ──────────────────────────────
-   It is a new field (`review.asOfMonth`, riding the review row's `extra`) and
-   it decides what EVERY figure in the tenant is measured against -- a target
+   It decides what EVERY figure in the tenant is measured against -- a target
    that adds up is compared with the share of it due by then, and a tactic
    whose span has not started is not asked at all. So it must be the office's,
    and asserted BOTH WAYS: a rule that refuses everybody is not a rule that
    protects anything, and a new value the authoriser has never been offered is
-   exactly what §172 records going wrong four layers down. */
-console.log("\n8a · the review point (§239)");
+   exactly what §172 records going wrong four layers down.
+
+   §298: REWRITTEN, NOT DELETED (§218). This asserted `review.asOfMonth`, which
+   no longer exists — the review point IS the cycle's end now — so the
+   assertion that would have gone green over a field nothing writes asks about
+   `to` instead. It is deliberately kept as its own section beside §273's
+   dates: what is being asserted here is not "the office may edit a date" but
+   "the office alone may move what every score is measured against", and those
+   are now the same field answering two questions. A build that opened `to` to
+   a unit head would pass §8b's rename and fail here. */
+console.log("\n8a · the review point (§239, §298)");
 (function () {
   const setAsOf = function (s) {
-    s.review = Object.assign({}, s.review, { asOfMonth: "Aug 26" });
+    s.review = Object.assign({}, s.review, { to: "Aug 2026" });
   };
   allows("smo", setAsOf, "the SMO moves the review point");
   refuses(headKey, setAsOf, "a unit's head cannot move it");

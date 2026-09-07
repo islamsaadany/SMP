@@ -35608,3 +35608,177 @@ is the decision itself turned into a check.
 being one file per subject; nothing carries a PDF of every subject, Islam
 having dropped it once the working copy existed; and with nobody signed in
 anywhere an overnight reminder waits for the morning.
+
+---
+
+## §298 — One month, one meaning: the cycle's end IS the review point
+
+Islam, with the Reporting cycle pen open on his own tenant and five boxes
+wrapping onto two rows:
+
+> *"all the dates should be date selector like the reporting as of. and why do
+> we still have the reporting as of? didn't we say that the cycle end will be
+> the reporting as of the reports due is the only 1 with a day date as it's a
+> cutt off dates. and if we set that they will be only 4 boxes can be in 1
+> line"*
+
+Then, deciding the question underneath it himself:
+
+> *"the cycle ending is the reporting as of so that's what the proration depend
+> on this is a critical change so take care what you will remove and what to
+> adjust. so take care if you are using reporting as of then this should
+> replace the cover to."*
+
+**WE NEVER SAID IT, AND SAYING SO CAME FIRST.** §239.1 established that an
+*unset* review point falls back to the last month of `REVIEW.endsQuarter` —
+the cycle's end QUARTER — and the field exists precisely because two fields
+were found disagreeing. So the honest answer to *"didn't we say"* is no, and
+the honest answer to what he was proposing is that it is right anyway.
+
+**HIS POINT IS STRONGER THAN HE PUT IT, AND IT IS A MEASUREMENT.** `REVIEW.to`
+already decided which rows are ASKED for — `cycleMonth()` → `dueThisCycle()` —
+while `REVIEW.asOfMonth` decided what they are MEASURED against —
+`reviewAsOf()` → `elapsedShare()` → `measureDue()`. Two fields, two answers,
+one question. So the platform could ask a unit for work due to June and judge
+that work against August, which is exactly the state his screenshot is in: a
+cycle covering to **Jun 2027**, reporting as of **Aug 26**. **On the worked
+example the two read the same month** (`to` = Jun 2026, `endsQuarter` = 2 →
+Jun 2026), which is why it has never been seen here and why every sweep for
+four versions walked past it.
+
+**ONE FUNCTION NOW, NOT TWO.** `cycleMonth()` delegates to `reviewAsOf()` and
+`reviewAsOf()` reads `to`. The fallbacks are the UNION of the two it replaces,
+most specific first: `to`, then the cycle's NAME read as a period (`cycleMonth`
+always kept that — "H1 2026" names a period even where `to` was never filled
+in), then `cycleYear()` + `endsQuarter`. **`endsQuarter` is kept and is not a
+live field**: nothing in the product has minted one since §47.8, and it is a
+real column on a real tenant, so it stays as the floor rather than being
+deleted out from under a deployment that still holds one.
+
+**THE HEAL RUNS THIS WAY ROUND AND THAT IS THE WHOLE SAFETY ARGUMENT.** Every
+score on the platform is computed from the review point TODAY, so carrying that
+month into `to` **moves no score** — asserted rather than reasoned about, by
+reading the review point before the heal and after it and requiring the same
+month. Healing the other way — leaving `to` alone and calling it the review
+point — would have re-measured every figure in the tenant against a different
+month, silently. What DOES change is which work is asked for: anything dated
+between the old `to` and the new one moves in or out of this cycle's reporting.
+That cost was stated on the mockup before he agreed to it, and it is stated on
+the handover.
+
+**AND A TENANT WHERE THEY DISAGREED WILL SHOW A CONTRADICTION IT ALREADY
+HAD.** On his cycle the heal writes `from` Jan 2027 and `to` Aug 2026 — a
+period that ends before it starts. That contradiction is not made by this
+change; it is the two fields' disagreement becoming visible in one line, and
+it is one press of the `Covers from` picker to correct. Inventing a start date
+to tidy it would be the platform deciding something nobody said (§96.2), and
+`clearForNewCycle()` already falls back to six months for a span it cannot
+read, exactly as it did before.
+
+**EVERY DATE IS PICKED (§177, one field along).** `Covers from` and `to` are
+the platform's own month picker; `Reports due` is a **day** picker, which is
+Islam's *"the only 1 with a day date as it's a cutt off dates"*. §177's refusal
+of days stands where it was made — every comparison the platform makes about a
+PLAN date is monthly, so a day there was precision it could not use — and
+`Reports due` is the one date **nothing measures anything against**: grepped,
+not assumed, it is printed on the strip, on the tab row and in one hover, and
+read by nothing else. A day there costs the arithmetic nothing and is what the
+field means.
+
+**FOUR DIGITS, AND IT IS NOT A STYLE.** `cycleYear()` scrapes a four-digit year
+out of `to`, `name` and `due`. With `to` now the review point, a two-digit
+"Jun 27" there would take `to` OUT of that scrape and land §239.3's own fault
+(a cycle whose year cannot be read stops prorating entirely, and every tactic
+reads 100%) on the very field this section makes load-bearing. `SMPRules.
+monthLabel()` is the one writer, shared by the browser and the heal (§42); a
+MILESTONE's picker still writes two digits, which is the shape those plans
+carry, so §177's own reason is untouched. And `reviewYear()` was rewritten to
+read the review point rather than `cycleYear()`, so a `to` carrying a two-digit
+year still prorates — asserted, because that is the last place the old fault
+could come back.
+
+**ONE POPUP, TWO BODIES** (§53.5). The day panel is the month panel's sibling:
+same box, same placement, same Escape, same Clear, same write through `FIELDS`
+— a header that steps MONTHS and a seven-column grid under a weekday strip.
+The lit day belongs to the month it was set in, which is `monthPopHtml`'s own
+rule for the year kept rather than re-decided, and the origin is remembered at
+OPEN time rather than read off the button, whose `data-mi` walks as the header
+is stepped (§15.1: otherwise the 15th lights in every month you pass).
+
+**FOUR BOXES, ONE LINE — AND THE MEASUREMENT CAME FIRST.** The pen's field area
+is **641px at 1280**, which is Islam's own window, and five boxes at
+160/160/160/160/121 wrapped. The three dates take a fixed 150px and the NAME
+takes what is left, because a date needs the width of a date and the name is
+the only box here holding words — so the row holds at 641px and a wide screen
+gives its extra width to the name rather than to three controls that cannot use
+it. `flex-wrap:nowrap` is the assertion rather than an optimisation: a wrap
+here would be this section's fault coming back silently at some width nobody
+measured.
+
+**THE NEW-CYCLE PANEL TAKES THE SAME FOUR CONTROLS.** It typed its three dates
+and picked a fourth month that no longer exists, so it was the one place in the
+product where a cycle could be opened with an end its own arithmetic could not
+read. Its refusal moves with it: *"Pick the month this cycle covers to"* — the
+same refusal §239 wrote, one box earlier. Only the NAME is still typed, so only
+the name is still read by id.
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY (§172).** `to` is a review
+field outside `REVIEW_PER_TARGET`, so it classifies as `cycle` exactly as
+`asOfMonth` did — the office's. §8a of `test-authorize.js` was REWRITTEN rather
+than deleted (§218): it asserted a field that no longer exists and would have
+gone green over nothing; it asks about `to` now, and is deliberately kept beside
+§273's date test because what it asserts is not "the office may edit a date" but
+"the office alone may move what every score is measured against". 534/0.
+
+**THE CHECKS WERE REWRITTEN, NEVER LOOSENED (§214.3, §218).** Eight files set
+the old field to make state. Three of the rewrites are the section itself:
+
+* `cycle-edit.py` held a literal list of **five** labels — it could have been
+  shortened to four and gone on guarding nothing, so it asserts the four in
+  order AND asserts *Reporting as of* absent **by name**, because a build
+  drawing a fifth box under any other wording satisfies a bare count of four
+  (§94.2). It presses the three real pickers and reads the CYCLE back (§96: a
+  picker wired to nothing renders identically), asserts the day survives on
+  `Reports due`, and asserts that picking the END moved what everything is
+  measured against — §298 in one assertion.
+* `ytd-proration.py` §8 pressed *"the month picker in the pen"*, a selector that
+  still MATCHES and now points at `Covers from` — §51.11's own fault, passing
+  quietly while measuring a control that moves no score. Its clearing assertion
+  asked whether a KEY was deleted, which was the right question while the field
+  rode `extra`; `to` is a real column, so it asks the question that now matters
+  and is worse: **with no end month, does the year silently become whole?** It
+  does not — the name answers — and that is the assertion. Its §9 (§239.3's
+  year fault) is impossible by construction now, so rather than leave an
+  assertion that cannot fail (§113.8) it asserts the same fault one step along:
+  a `to` with a TWO-DIGIT year, invisible to `cycleYear()`, must prorate
+  identically to one with four.
+* `repeat-project.py` filled `#nc-to`, a box the panel no longer draws; it picks
+  through the real control and asserts the draft carries the month.
+
+**AND ONE ASSERTION IN `cycle-edit.py` FAILED ON A CORRECT BUILD BEFORE IT WAS
+FIXED**: it counted distinct `top` values to decide how many rows the boxes are
+on, and the four controls are bottom-aligned at three different heights — one
+row is not one `top` (§122.4, already written down once). They are on one line
+when every box overlaps every other one vertically.
+
+**MEASURED, NOT CLAIMED.** `checks/cycle-edit.py` ALL GREEN (5 red on the build
+before, every one of them a five-box assertion); `ytd-proration`,
+`tactic-proration`, `tactic-outcome`, `count-compile`, `unit-follows`,
+`repeat-project` all green; 534/0 on the authoriser; round trip, clean slate,
+grant values, pending marks, monthly plan and the contingency record all PASS
+on a virgin Postgres 16; `scripts/test-review-month-heal.js` **9/0**, proved
+able to fail twice from the sources — the heal stubbed out goes **4 red**, and
+writing a two-digit year goes **2 red**. The seed is byte-identical, because
+the worked example's two fields already agreed.
+
+**AND `tactic-proration.py` REPORTED NOTHING RATHER THAN PASSING**: run through
+the container's wrapper it printed Playwright's own install banner, which is
+§279.3's lesson — a check that cannot launch reports no failures. It takes
+`SMP_CHROME` itself and was re-run directly.
+
+**RECORDED, NOT DONE**: the cycle's dates are drawn uppercase inside the pen,
+which is `.cfg`'s own treatment of a button and is what the old *Reporting as
+of* control already wore — consistent, and not asked about; and a tenant whose
+`from` now sits after its `to` is told nothing on the page beyond the two
+months reading oddly beside each other, which is the contradiction it already
+had rather than one this made.

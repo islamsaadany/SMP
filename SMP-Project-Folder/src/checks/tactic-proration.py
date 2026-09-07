@@ -107,7 +107,7 @@ def main():
         # year's own share does (8/12, never 7/12). Index 7, zero-based.
         AUG = 7
         r = pg.evaluate("""()=>{
-          REVIEW.asOfMonth = "Aug 26";
+          REVIEW.to = "Aug 2026";
           const Q = (...qs) => { const t={id:"ck",name:"ck"}; qs.forEach(q=>t["q"+q]=true); return t; };
           const s = t => (typeof tacticShare === 'function') ? tacticShare(t) : null;
           const shapes = [[1],[2],[3],[4],[1,2],[2,3],[3,4],[1,2,3],[2,3,4],[1,2,3,4]];
@@ -144,7 +144,7 @@ def main():
         # ── 2 · the outcome's target is prorated by that share ────────────────
         print("\n── 2 · an outcome is measured against its tactic's window ──")
         o = pg.evaluate("""()=>{
-          REVIEW.asOfMonth = "Aug 26";
+          REVIEW.to = "Aug 2026";
           const Q = (...qs) => { const t={id:"ck",name:"ck",outcome:"Stores fitted",
               outDir:"\\u2265", outTarget:"12", outCompile:"Sum", outActual:"7"};
             qs.forEach(q=>t["q"+q]=true); return t; };
@@ -196,7 +196,7 @@ def main():
         # leaked the index disagrees the moment a pillar holds two Sum rows.
         print("\n── 2b · a pillar's score is its measures', asked one at a time ──")
         pp = pg.evaluate("""()=>{
-          REVIEW.asOfMonth = "Aug 26";
+          REVIEW.to = "Aug 2026";
           var bad = [], sums = 0, seen = 0, carried = 0;
           /* §254: THE STATE IS MADE, NOT WAITED FOR. This asserted that the
              demo HELD a handed-over pillar, which it did until §253.2 cut the
@@ -249,7 +249,7 @@ def main():
         # ── 3 · which compile rules move ──────────────────────────────────────
         print("\n── 3 · only a Sum outcome prorates ──")
         c = pg.evaluate("""()=>{
-          REVIEW.asOfMonth = "Aug 26";
+          REVIEW.to = "Aug 2026";
           const mk = compile => ({ id:"ck", name:"ck", q2:true, q3:true, outcome:"x",
               outDir:"\\u2265", outTarget:"12", outCompile:compile, outActual:"7" });
           const out = {};
@@ -267,7 +267,7 @@ def main():
         # ── 4 · the direction, the cap and the nought rule all survive ────────
         print("\n── 4 · direction, cap and nought, on the window's share ──")
         d = pg.evaluate("""()=>{
-          REVIEW.asOfMonth = "Aug 26";
+          REVIEW.to = "Aug 2026";
           const mk = (dir, target, actual) => ({ id:"ck", name:"ck", q2:true, q3:true,
               outcome:"x", outDir:dir, outTarget:target, outCompile:"Sum", outActual:actual });
           return {
@@ -287,7 +287,7 @@ def main():
         # ── 5 · the unit survives the proration ───────────────────────────────
         print("\n── 5 · the target keeps its unit (§199.4) ──")
         u = pg.evaluate("""()=>{
-          REVIEW.asOfMonth = "Aug 26";
+          REVIEW.to = "Aug 2026";
           const mk = tg => ({ id:"ck", name:"ck", q2:true, q3:true, outcome:"x",
               outDir:"\\u2265", outTarget:tg, outCompile:"Sum", outActual:"5" });
           const out={}; ["18B EGP","90%","6 #","1.6M USD"].forEach(tg=>{ out[tg]=tacticBenchmark(mk(tg)); });
@@ -303,7 +303,7 @@ def main():
         # demo carries no outcome at all, so the state is MADE (§94.2).
         print("\n── 6 · the panes read the same answer ──")
         pg.evaluate("""()=>{
-          REVIEW.asOfMonth = "Aug 26";
+          REVIEW.to = "Aug 2026";
           var t = UNITS.mobile.items[0].tactics[0];
           window.__keep = JSON.stringify(t);
           t.q1=false; t.q2=true; t.q3=true; t.q4=false;

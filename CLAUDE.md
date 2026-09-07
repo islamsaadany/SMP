@@ -456,6 +456,46 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **ONE MONTH, ONE MEANING (§298):** Islam, of the Reporting cycle pen —
+  *"all the dates should be date selector like the reporting as of. and why do
+  we still have the reporting as of? ... the reports due is the only 1 with a
+  day date as it's a cutt off dates. and if we set that they will be only 4
+  boxes can be in 1 line"* — then *"the cycle ending is the reporting as of so
+  that's what the proration depend on ... if you are using reporting as of then
+  this should replace the cover to."* **TWO FIELDS ANSWERED ONE QUESTION**:
+  `REVIEW.to` decided which rows are ASKED for (`cycleMonth` → `dueThisCycle`)
+  and `REVIEW.asOfMonth` decided what they are MEASURED against (`reviewAsOf` →
+  `elapsedShare` → `measureDue`), so the platform could ask for work due to June
+  and judge it against August — his own tenant exactly, and invisible on the
+  worked example where both read Jun 2026. **`asOfMonth` IS GONE AND
+  `reviewAsOf()` READS `to`**, with `cycleMonth()` delegating to it: one
+  function, fallbacks the UNION of the two it replaces (`to`, then the cycle's
+  NAME as a period, then `cycleYear()` + `endsQuarter` — kept as the floor
+  because nothing has minted one since §47.8 and it is a real column on a real
+  tenant). **THE HEAL WRITES `to := asOfMonth` AND THE DIRECTION IS THE SAFETY
+  ARGUMENT**: scores are computed from the review point today, so this moves NO
+  SCORE (asserted by reading it before and after); the other way round would
+  re-measure every figure in the tenant. What changes is which work is asked
+  for. **A TENANT WHERE THEY DISAGREED SEES A CONTRADICTION IT ALREADY HAD** —
+  `from` Jan 2027 with `to` Aug 2026 — one press of the picker to correct, and
+  inventing a start date would be the platform deciding something nobody said
+  (§96.2). **EVERY DATE IS PICKED** (§177 one field along) and **`Reports due`
+  is a DAY**, because it is the one date nothing measures anything against —
+  grepped, not assumed. **FOUR DIGITS, NOT A STYLE**: `cycleYear()` scrapes a
+  four-digit year out of `to`, so a two-digit one there lands §239.3's fault on
+  the field this makes load-bearing; `SMPRules.monthLabel()` is the one writer,
+  shared by the browser and the heal, and a MILESTONE's picker still writes two.
+  **ONE POPUP, TWO BODIES** (§53.5) — the day panel steps months, lights the day
+  from an origin remembered at OPEN time (the button's `data-mi` walks as the
+  header steps, §15.1). **FOUR BOXES ON ONE LINE, MEASURED FIRST**: 641px of
+  field area at 1280, five boxes wrapped; the three dates take 150px and the
+  NAME flexes, `nowrap` as the assertion. **The server needed nothing and it is
+  asserted anyway** (§172, 534/0). `checks/cycle-edit.py` **5 red** before, and
+  its own four-boxes probe reported a correct build broken by counting distinct
+  `top` values on bottom-aligned controls (§122.4). `scripts/test-review-month-heal.js`
+  9/0, falsified **4 red / 2 red** from the sources. **Recorded, not done**: the
+  pen draws its dates uppercase, which is `.cfg`'s own treatment and what the
+  old control already wore.
 - **A ROW'S TYPE IS A PICKER, AND ITS DIRECTION OPENS (§292):** Islam — *"on a
   creation of a project I couldn't set the direction and we need to make the add
   deliverable or outcome more of an options in the type rather than 2 buttons of

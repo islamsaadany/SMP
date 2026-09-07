@@ -3037,20 +3037,9 @@
       var draw = function(btn){
         var mi = btn.dataset.mi === "" ? null : +btn.dataset.mi;
         var yr = +btn.dataset.yr;
-        /* §298: ONE POPUP, TWO BODIES. A day picker steps months and lights a
-           day; a month picker steps years and lights a month. Everything
-           around them — placing, dismissing, Escape, the write through FIELDS
-           — is the same machinery, because it is the same control (§53.5). */
-        if (btn.dataset.day) {
-          var o = open.dayOrigin;
-          var lit = (o && o.mi === mi && o.year === yr) ? o.day : null;
-          open.pop.classList.add("daypop");
-          open.pop.innerHTML = dayPopHtml(lit, mi == null ? 0 : mi, yr);
-        } else {
-          /* The lit month belongs to the year it was set in: step to 2027 and
-             nothing is lit, step back and Jul lights again. */
-          open.pop.innerHTML = monthPopHtml(mi, yr, yr === open.setYear);
-        }
+        /* The lit month belongs to the year it was set in: step to 2027 and
+           nothing is lit, step back and Jul lights again. */
+        open.pop.innerHTML = monthPopHtml(mi, yr, yr === open.setYear);
         place(btn, open.pop);
       };
       var write = function(value){
@@ -3079,14 +3068,7 @@
           var onKey = function(e){ if (e.key === "Escape") { shut(); btn.focus(); } };
           var onGone = function(e){ if (!pop.contains(e.target)) shut(); };
           open = { btn: btn, pop: pop, onDoc: onDoc, onKey: onKey, onGone: onGone,
-                   setYear: +btn.dataset.yr,
-                   /* Where the stored day actually sits, remembered at OPEN
-                      time: the button's own `data-mi` walks as the header is
-                      stepped, so lighting off it would light the 15th of every
-                      month somebody walks past (§15.1). */
-                   dayOrigin: (btn.dataset.day && btn.dataset.dv !== "")
-                     ? { day: +btn.dataset.dv, mi: +btn.dataset.mi, year: +btn.dataset.yr }
-                     : null };
+                   setYear: +btn.dataset.yr };
           /* Nothing is lit until a month has been set: an empty cell must not
              open with July already looking chosen (§15.1, absent never zero). */
           if (btn.dataset.mi === "") open.setYear = null;
@@ -3106,23 +3088,9 @@
           draw(open.btn);
           return;
         }
-        /* Stepping a MONTH rolls the year with it, or December has no next. */
-        var mstep = ev.target.closest("[data-mstep]");
-        if (mstep && open.pop.contains(mstep)) {
-          var t = (+open.btn.dataset.yr) * 12 + (+open.btn.dataset.mi || 0) + (+mstep.dataset.mstep);
-          open.btn.dataset.mi = ((t % 12) + 12) % 12;
-          open.btn.dataset.yr = Math.floor(t / 12);
-          draw(open.btn);
-          return;
-        }
-        var dpick = ev.target.closest("[data-dpick]");
-        if (dpick && open.pop.contains(dpick))
-          return write(dayValue(+dpick.dataset.dpick, +open.btn.dataset.mi || 0,
-                                +open.btn.dataset.yr));
         var pick = ev.target.closest("[data-mpick]");
         if (pick && open.pop.contains(pick))
-          return write(monthValue(+pick.dataset.mpick, +open.btn.dataset.yr,
-                                  open.btn.dataset.yw === "1"));
+          return write(monthValue(+pick.dataset.mpick, +open.btn.dataset.yr));
         if (ev.target.closest("[data-mclear]") && open.pop.contains(ev.target))
           return write("");
       });
@@ -3655,7 +3623,7 @@
             '<div class="kv"><span class="k">Closed at</span><span><b>' +
               scored + '%</b></span></div>') +
           '<div class="kv"><span class="k">Reported as of</span><span><b>' +
-            esc(reviewAsOfLabel()) + '</b></span></div>' +
+            esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b></span></div>' +
           '<div class="kv"><span class="k">Covers</span><span>' +
             esc(covers) + '</span></div>' +
           '<div class="kv"><span class="k">What happens</span><span>Its figures ' +
@@ -3701,12 +3669,8 @@
     });
     /* `nc-q` is GONE with its select (§239): the review point is a month now
        and is picked, not typed, so it writes through FIELDS like every other
-       month in the product rather than through an id read here.
-
-       §298: AND SO ARE THE THREE DATES. They are pickers writing into the
-       draft through FIELDS, so the only thing still read by id is the NAME,
-       which is the only thing still typed. */
-    ["nc-name"].forEach(function(id){
+       month in the product rather than through an id read here. */
+    ["nc-name","nc-from","nc-to","nc-due"].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
       /* `input`, not `change`: the draft has to be current when Open is
@@ -3735,13 +3699,10 @@
          by then, and a tactic whose span has not started is not asked at all.
          §47.8 removed a hard-coded end quarter because "a wrong guess silently
          changes every unit's execution score"; defaulting this would put that
-         guess straight back.
-
-         §298: IT IS `to` THAT IS ASKED FOR NOW — the same refusal, one box
-         earlier, because the cycle's end IS the review point. */
-      if (!String(d.to || "").trim()) {
-        alert("Pick the month this cycle covers to \u2014 it decides what every " +
-              "figure is measured against, and what is asked for at all.");
+         guess straight back. */
+      if (!String(d.asOfMonth || "").trim()) {
+        alert("Pick the month this cycle reports as of \u2014 it decides what every " +
+              "figure is measured against.");
         return;
       }
       /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
@@ -3770,8 +3731,10 @@
       REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
                  due:d.due || "", state:"open", note:{}, submitted:{},
                  cadence:REVIEW.cadence };
-      /* §298: nothing else to carry. The review point travelled as a field of
-         its own here; it is `to`, which the line above already wrote. */
+      /* Stored as an ABSENCE when it was not picked (§50.6), so an unasked
+         cycle and one whose month was cleared are byte-identical and neither
+         puts a phantom change into the next save. */
+      if (d.asOfMonth) REVIEW.asOfMonth = d.asOfMonth;
       NEWCYCLE = null;
       paint();
     });

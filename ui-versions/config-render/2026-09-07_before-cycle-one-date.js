@@ -5801,7 +5801,7 @@ function reviewDayBlock(){
   '</div>';
 }
 
-function cycleField(label, value, placeholder, setter, cls){
+function cycleField(label, value, placeholder, setter){
   /* A REFUSAL PUTS THE VALUE BACK IN THE BOX (§124). With no Save there is no
      press to refuse at, so a setter that declines — by returning false — would
      otherwise leave the field showing what was NOT stored, which is §96 with
@@ -5814,25 +5814,9 @@ function cycleField(label, value, placeholder, setter, cls){
       if (el) el.value = value;
     }
   });
-  return '<label class="' + esc(cls || "") + '"><span>' + esc(label) + '</span>' +
+  return '<label><span>' + esc(label) + '</span>' +
     '<input class="fld" data-fld="' + i + '" value="' + esc(value || "") +
     '" placeholder="' + esc(placeholder) + '" aria-label="' + esc(label) + '"></label>';
-}
-/* ── A DATE IN THE CYCLE'S OWN ROW (§298) ─────────────────────────────
-   `cycleField`'s sibling, and deliberately not a flag on it: one draws a box
-   somebody types into and this draws a control somebody presses, and the
-   difference is the whole of what Islam asked for. Both the pen and the
-   new-cycle panel call it, so the two can never disagree about what a cycle's
-   date looks like (§53.5) — which they did, the panel typing three dates while
-   the pen typed three and picked a fourth.
-
-   THE LABEL WRAPS THE BUTTON, exactly as "Reporting as of" did: a `<button>`
-   is a labelable element, so the uppercase key above it is its accessible name
-   and no second one is written (§87's twins, in a form). */
-function cyclePick(label, value, setter, opts){
-  var o = opts || {};
-  return '<label class="dt"><span>' + esc(label) + '</span>' +
-    monthBtnHtml(value || "", "cycbtn " + (o.cls || ""), setter, o) + '</label>';
 }
 
 /* ── Setup · Reporting cycle ────────────────────────────────────────
@@ -6017,11 +6001,7 @@ function renderCycle(){
            can be pressed by accident. One control for one fact (§53.5): a
            picker here AND a picker in the panel is two, and they would have to
            be kept in step. */
-        /* §298: ONE SOURCE. This read the stored month and fell back to the
-           derived one, which is exactly the pair that could disagree with the
-           `Jan 2027 to Jun 2027` printed six pixels to its left. It reads the
-           cycle's end now, through the one function every score reads. */
-        '<b>' + esc(reviewAsOfLabel()) + '</b>' +
+        '<b>' + esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b>' +
         /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
            whether the month he picked had taken -- "can you check if the cycle
            adjustment is saved" -- because the strip showed the value and
@@ -6038,8 +6018,7 @@ function renderCycle(){
            stopped doing (§104.8). */
         (elapsedMonths() != null
           ? ' <span class="why" style="margin:0">&middot; ' + elapsedMonths() +
-            ' of 12 months' + (reviewAsOfDerived()
-              ? ', taken from the cycle\u2019s name' : '') +
+            ' of 12 months' + (REVIEW.asOfMonth ? '' : ', taken from the cycle\u2019s end') +
             '</span>'
           : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
             'figure is measured against a whole one</span>') + '</span>' +
@@ -6103,29 +6082,23 @@ function renderCycle(){
        yet, and nothing reaches REVIEW until Open is pressed. */
     (NEWCYCLE
       ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        /* §298: THE SAME FOUR CONTROLS THE PEN DRAWS. This panel typed its
-           three dates and picked a fourth month that no longer exists, so it
-           was the one place in the product where a cycle could be opened with
-           an end its own arithmetic could not read. The dates go through
-           `cyclePick` and write into the draft through FIELDS; only the NAME
-           is still typed, so only the name is still read by id. */
-        '<div class="nc-grid nc-1line">' +
-          '<label class="nm-lab"><span>Name</span><input class="fld" id="nc-name" value="' +
+        '<div class="nc-grid">' +
+          '<label><span>Name</span><input class="fld" id="nc-name" value="' +
             esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          cyclePick("Covers from", NEWCYCLE.from, function(v){
-            NEWCYCLE.from = String(v).trim();
-          }, { wide:true }) +
-          cyclePick("to", NEWCYCLE.to, function(v){
-            NEWCYCLE.to = String(v).trim();
-          }, { wide:true, cls:"tobtn" }) +
-          cyclePick("Reports due", NEWCYCLE.due, function(v){
-            NEWCYCLE.due = String(v).trim();
-          }, { day:true }) +
+          '<label><span>Covers from</span><input class="fld" id="nc-from" value="' +
+            esc(NEWCYCLE.from) + '" placeholder="Jan 2027"></label>' +
+          '<label><span>to</span><input class="fld" id="nc-to" value="' +
+            esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
+          '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
+            esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
+          '<label><span>Reporting as of</span>' +
+            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
+              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
+            }) + '</label>' +
         '</div>' +
-        '<div class="nc-why"><b>The month it covers to decides what every figure is ' +
-          'measured against.</b> A target that adds up across the year is compared with ' +
-          'the share of it due by then, and a tactic whose span has not started yet is ' +
-          'not asked for.</div>' +
+        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
+          'A target that adds up across the year is compared with the share of it due by then, ' +
+          'and a tactic whose span has not started yet is not asked for.</div>' +
         '<div class="nc-act">' +
           '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
           '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
@@ -6153,7 +6126,7 @@ function renderCycle(){
       ? '<div class="cfg newcycle"><div class="cyc2">' +
           '<div class="cyc2-f">' +
             '<div class="nc-h">This cycle</div>' +
-            '<div class="nc-grid nc-1line">' +
+            '<div class="nc-grid">' +
               cycleField("Name", REVIEW.name, "H1 2027", function(v){
                 /* TRIMMED, and an empty name is REFUSED rather than stored:
                    it is what every snapshot and archived plan is filed under
@@ -6163,42 +6136,27 @@ function renderCycle(){
                 var t = String(v).trim();
                 if (!t) return false;
                 REVIEW.name = t;
-              }, "nm-lab") +
-              /* ── EVERY DATE IS PICKED, AND THERE ARE THREE (§298) ────
-                 Islam: "all the dates should be date selector like the
-                 reporting as of. and why do we still have the reporting as
-                 of? ... the reports due is the only 1 with a day date as it's
-                 a cutt off dates. and if we set that they will be only 4 boxes
-                 can be in 1 line" — and then, deciding the question underneath
-                 it himself: "the cycle ending is the reporting as of so that's
-                 what the proration depend on ... if you are using reporting as
-                 of then this should replace the cover to."
-
-                 THE REPORTING AS OF BOX IS GONE, and its meaning is in `to`.
-                 Nothing keeps a second copy, so the two can never disagree
-                 again — which they could, and on his own tenant did: a cycle
-                 covering to Jun 2027 reporting as of Aug 2026, asking for work
-                 due to June and judging it against August.
-
-                 PICKED, NEVER TYPED, for §177's reason one field along: with
-                 no box there is nothing to mistype, and a cycle whose end
-                 cannot be read falls back — silently, until now — to a quarter
-                 nobody chose. `wide` because `cycleYear()` scrapes these
-                 strings for a four-digit year. */
-              cyclePick("Covers from", REVIEW.from, function(v){
+              }) +
+              cycleField("Covers from", REVIEW.from, "Jan 2027", function(v){
                 REVIEW.from = String(v).trim();
-              }, { wide:true }) +
-              cyclePick("to", REVIEW.to, function(v){
+              }) +
+              cycleField("to", REVIEW.to, "Jun 2027", function(v){
                 REVIEW.to = String(v).trim();
-              }, { wide:true, cls:"tobtn" }) +
-              cyclePick("Reports due", REVIEW.due, function(v){
+              }) +
+              cycleField("Reports due", REVIEW.due, "15 Jul 2027", function(v){
                 REVIEW.due = String(v).trim();
-              }, { day:true }) +
+              }) +
+              '<label><span>Reporting as of</span>' +
+                monthBtnHtml(REVIEW.asOfMonth || "", "asofbtn", function(v){
+                  /* Stored as an ABSENCE when cleared (§50.6), so a cycle that
+                     never picked one and one whose month was taken away are
+                     byte-identical. */
+                  if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
+                }) + '</label>' +
             '</div>' +
-            '<div class="nc-why"><b>The month it covers to decides what every figure ' +
-              'is measured against.</b> A target that adds up across the year is compared ' +
-              'with the share of it due by then, and work dated after it is not asked for. ' +
-              'Changes are kept as you type.</div>' +
+            '<div class="nc-why"><b>The month decides what every figure is measured ' +
+              'against.</b> A target that adds up across the year is compared with the ' +
+              'share of it due by then. Changes are kept as you type.</div>' +
           '</div>' +
           '<div class="cyc2-d">' +
             '<div class="nc-h">Ending it</div>' +

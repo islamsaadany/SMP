@@ -4134,12 +4134,10 @@ function cycleYear(){
                          " " + String(REVIEW.due || ""));
   return m ? +m[1] : null;
 }
-/* ONE MONTH, ONE MEANING (§298). This used to be its own reader and
-   `reviewAsOf()` was another, so the platform could ASK for work due to June
-   and JUDGE it against August — two fields answering one question, which is
-   the fault §239.1 was written to remove and then left half-removed. They are
-   one function now, and this is the alias the reporting side reads by. */
-function cycleMonth(){ return reviewAsOf(); }
+function cycleMonth(){
+  var t = monthsOf(REVIEW.to);
+  return t != null ? t : monthsOf(REVIEW.name, true);
+}
 /* IS THIS ROW ASKED FOR THIS CYCLE? A row with no date is always asked: the
    plan did not say when, so the platform does not get to decide it is early.
    A row whose date cannot be read is also asked, for the same reason -- the
@@ -5855,43 +5853,21 @@ function quartersOf(t){
    WRITES: a reader that creates the field it looked for puts a phantom change
    into every save (§42, §50.6). */
 function reviewAsOf(){
-  /* §298: THE CYCLE'S END IS THE REVIEW POINT, and there is no second field.
-     `to` has always decided which rows are ASKED for; it now also decides what
-     they are MEASURED against, which is Islam's own ruling — "the cycle ending
-     is the reporting as of so that's what the proration depend on". */
-  var t = monthsOf(REVIEW.to);
-  if (t != null) return t;
-  /* The name is the fallback `cycleMonth()` has always kept: "H1 2026" names a
-     period even where `to` was never filled in. `last` because a cycle called
-     H1 covers TO June, not FROM January. */
-  t = monthsOf(REVIEW.name, true);
-  if (t != null) return t;
-  /* And the last resort is §239.1's own: a cycle whose end cannot be read at
-     all still has the quarter it was opened with. `endsQuarter` is written by
-     nothing in the product any more — no control has minted one since §47.8 —
-     and it is a real column on a real tenant, so it is kept as the floor
-     rather than deleted out from under a deployment that still holds one. */
+  var m = REVIEW.asOfMonth ? monthsOf(REVIEW.asOfMonth) : null;
+  if (m != null) return m;
   var y = cycleYear();
   if (y == null) return null;
   var q = Number(REVIEW.endsQuarter);
   if (!q || q < 1 || q > 4) q = 4;
   return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
 }
-/* Did the month come from the cycle's own end, or from one of the fallbacks
-   above? The strip says which, because a review point nobody set is a guess
-   the page must not print as a fact (§35, §177). */
-function reviewAsOfDerived(){ return monthsOf(REVIEW.to) == null; }
 /* The review point written the way a month is written everywhere else. Falls
    back to the derived quarter-end so a tenant that has never set one still
    reads a true sentence rather than a dash. */
 function reviewAsOfLabel(){
   var t = reviewAsOf();
   if (t == null) return "\u2014";
-  /* FOUR DIGITS, because this is the same month the strip prints beside it as
-     "Jan 2027 to Jun 2027" — a line reading "Jun 2027 ... reported as of
-     Jun 27" would look like two different months (§298). One writer, shared
-     with the heal that merged the fields (§42). */
-  return SMPRules.monthLabel(t);
+  return monthValue(((t % 12) + 12) % 12, Math.floor(t / 12));
 }
 /* WHICH YEAR THE REVIEW POINT IS IN (§239.3).
 
@@ -5912,11 +5888,11 @@ function reviewAsOfLabel(){
    The review point is now the authority on its own year and `cycleYear()` is
    only the fallback for a cycle where nobody has picked a month yet. */
 function reviewYear(){
-  /* §298: the review point is the cycle's END, and it carries its own year —
-     `cycleYear()` remains the fallback for a cycle whose end cannot be read at
-     all, which is the only case `reviewAsOf()` derives one for. */
-  var t = reviewAsOf();
-  return t == null ? cycleYear() : Math.floor(t / 12);
+  if (REVIEW.asOfMonth) {
+    var t = monthsOf(REVIEW.asOfMonth);
+    if (t != null) return Math.floor(t / 12);
+  }
+  return cycleYear();
 }
 /* Months of the plan year already passed, 1 to 12. The plan year runs January
    to December (Islam, asked outright), so the count is from the cycle's year. */

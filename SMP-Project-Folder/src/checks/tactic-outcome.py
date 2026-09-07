@@ -202,7 +202,7 @@ with sync_playwright() as p:
     pg.add_init_script("try{localStorage.setItem('smp.welcome.seen','1')}catch(e){}")
     pg.goto("file://"+SRC); pg.wait_for_timeout(1200)
     m = pg.evaluate("""()=>{ try{
-      REVIEW.asOfMonth = 'Aug 26';
+      REVIEW.to = 'Aug 2026';
       var mk=function(o){ return Object.assign({name:'x',actual:null}, o); };
       var sum   = mk({outDir:'\\u2265', outTarget:'12#', outCompile:'Sum',     outActual:'8'});
       var late  = mk({outDir:'\\u2265', outTarget:'90%', outCompile:'Latest',  outActual:'62'});
@@ -236,7 +236,7 @@ with sync_playwright() as p:
     # THE REVIEW POINT HAS TO BE SET OR THE ASSERTION IS ABOUT THE WRONG
     # NUMBER: without it the cycle's own quarter end answers, so a target of 12
     # is measured at 6 and 8 reads 133 — correct arithmetic, wrong question.
-    pg.evaluate("""()=>{ REVIEW.asOfMonth='Aug 26';
+    pg.evaluate("""()=>{ REVIEW.to='Aug 2026';
       var t=UNITS.mobile.items[0].tactics[0];
       t.outcome='Stores opened'; t.outDir='\\u2265'; t.outTarget='12#'; t.outCompile='Sum';
       t.actual=45; t.q1=1;t.q2=1;t.q3=1;t.q4=1; }""")

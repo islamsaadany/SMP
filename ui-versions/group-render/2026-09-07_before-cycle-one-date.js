@@ -2916,37 +2916,7 @@ function selectOr(page, value, opts, cls, setter){
 var MONTH_ABB = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 /* What the picker WRITES. Two digits, because that is the shape the plans in
    this tenant already carry and `shiftWhen()` preserves the width it is given. */
-function monthValue(mi, year, wide){
-  return wide ? SMPRules.monthLabel(year * 12 + mi)
-              : MONTH_ABB[mi] + " " + ("0" + (year % 100)).slice(-2);
-}
-/* ── A CUT-OFF IS A DAY (§298) ────────────────────────────────────────
-   Islam: "the reports due is the only 1 with a day date as it's a cutt off
-   dates." §177 refused days for a MILESTONE and its reasoning holds there
-   unchanged — every comparison the platform makes about a plan date is
-   monthly, so a day was precision it could not use. `Reports due` is the one
-   date nothing measures anything against: it is printed on the strip, on the
-   tab row and in a hover, and read by nothing else (grepped, not assumed), so
-   a day there costs the arithmetic nothing and is the whole point of the
-   field — people hand figures in ON a date.
-
-   FOUR DIGITS for `cycleYear()`'s sake, exactly as the month picker's wide
-   form: `due` is one of the three strings that scrape is taken from. */
-function dayValue(d, mi, year){ return d + " " + MONTH_ABB[mi] + " " + year; }
-/* Reading a stored due date back into the picker. The MONTH comes from the
-   platform's own reader, so every shape it has ever accepted opens somewhere
-   sensible; the DAY is the leading number, and only where a month was actually
-   named — "Q3 2026" names no day and lights none (§15.1). A value it cannot
-   read opens on today rather than on nothing, and is left exactly as stored
-   until somebody picks (§96.2). */
-function dayParts(v){
-  var s = String(v == null ? "" : v).trim();
-  var p = monthParts(s);
-  var m = /^(\d{1,2})\b/.exec(s);
-  var d = p.mi == null || !m ? null : +m[1];
-  if (d != null && (d < 1 || d > 31)) d = null;
-  return { day: d, mi: p.mi == null ? new Date().getMonth() : p.mi, year: p.year };
-}
+function monthValue(mi, year){ return MONTH_ABB[mi] + " " + ("0" + (year % 100)).slice(-2); }
 /* Reading a stored value BACK into the picker: which month and which year it
    should open on. Anything the platform cannot read as a time -- "On-going",
    "Done" -- opens on the cycle's year with nothing chosen, and is left
@@ -2976,52 +2946,20 @@ function monthPickOr(page, value, cls, setter){
    cycle has no edit mode and reaches it directly, because the office either
    may change the review point or is not offered a control at all. One builder,
    because two would drift about what a month looks like (§53.5). */
-/* §298: ONE BUILDER, THREE SHAPES — a month with a two-digit year (a plan
-   date, which is what §177 built), a month with four (a cycle's own from/to,
-   because `cycleYear()` reads them), and a DAY. Three builders would be three
-   answers to "what does a date control look like" (§53.5); the differences
-   ride on the button as data and the one popup reads them. */
-function monthBtnHtml(value, cls, setter, opts){
-  var o = opts || {}, shown = value == null ? "" : String(value);
+function monthBtnHtml(value, cls, setter){
+  var shown = value == null ? "" : String(value);
   var i = FIELDS.push(setter) - 1;
-  var p = o.day ? dayParts(shown) : monthParts(shown);
+  var p = monthParts(shown);
   return '<button type="button" class="monthbtn ' + (cls || '') + '" data-month="' + i + '"' +
-    (o.day ? ' data-day="1" data-dv="' + (p.day == null ? "" : p.day) + '"' : '') +
-    (o.wide ? ' data-yw="1"' : '') +
     ' data-mi="' + (p.mi == null ? "" : p.mi) + '" data-yr="' + p.year + '"' +
     ' aria-haspopup="dialog" aria-expanded="false"' +
-    ' title="' + (shown ? (o.day ? "Change the date" : "Change the month")
-                        : (o.day ? "Pick a date" : "Pick a month")) + '">' +
+    ' title="' + (shown ? "Change the month" : "Pick a month") + '">' +
     (shown ? '<span class="mval">' + esc(shown) + '</span>'
            : '<span class="mval mnone">Missing</span>') +
     '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" ' +
       'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
       '<rect x="3" y="4.5" width="14" height="12.5" rx="2"/>' +
       '<path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg></button>';
-}
-/* THE DAY PANEL (§298), the month panel's sibling: the header steps MONTHS
-   rather than years, because a cut-off is picked by walking to the month it
-   falls in. The lit day belongs to the month it was set in — step away and
-   nothing is lit, step back and it lights again — which is `monthPopHtml`'s
-   own rule for the year, kept rather than re-decided. */
-var WEEK_ABB = ["S","M","T","W","T","F","S"];
-function dayPopHtml(day, mi, year){
-  var first = new Date(year, mi, 1).getDay();
-  var days = new Date(year, mi + 1, 0).getDate();
-  var cells = "", d;
-  for (d = 0; d < first; d++) cells += '<span class="mp-d mp-x"></span>';
-  for (d = 1; d <= days; d++)
-    cells += '<button type="button" class="mp-d' + (d === day ? " on" : "") +
-      '" data-dpick="' + d + '">' + d + '</button>';
-  return '<div class="mp-yr">' +
-      '<button type="button" class="mp-nav" data-mstep="-1" aria-label="Previous month">&lsaquo;</button>' +
-      '<b>' + MONTH_ABB[mi] + ' ' + year + '</b>' +
-      '<button type="button" class="mp-nav" data-mstep="1" aria-label="Next month">&rsaquo;</button>' +
-    '</div><div class="mp-wk">' + WEEK_ABB.map(function(w){
-      return '<span>' + w + '</span>'; }).join("") + '</div>' +
-    '<div class="mp-days">' + cells + '</div>' +
-    '<div class="mp-foot">' +
-      '<button type="button" class="linkbu" data-mclear="1">Clear</button></div>';
 }
 /* The panel itself, rebuilt on every year step so the lit month follows the
    year it belongs to -- Jul 26 lit on 2026 and nothing lit on 2027. */

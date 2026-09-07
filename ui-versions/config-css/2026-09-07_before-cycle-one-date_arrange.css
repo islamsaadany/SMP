@@ -2035,26 +2035,6 @@
            font-weight:600; }
 .mp-foot { display:flex; justify-content:flex-end; padding-top:8px; margin-top:6px;
            border-top:1px solid var(--line); }
-/* ── THE DAY PANEL (§298) ──────────────────────────────────────────────
-   The month panel's own vocabulary — same box, same header, same Clear — with
-   a seven-column grid under a weekday strip. It is WIDER because seven columns
-   of two digits do not fit in three columns' width; everything else is
-   inherited rather than re-decided (§53.5). */
-.monthpop.daypop { width:236px; }
-.mp-wk { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; padding:0 0 4px; }
-.mp-wk span { text-align:center; font:700 9.5px/1 var(--sans); letter-spacing:.06em;
-              color:var(--ink-3); }
-.mp-days { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
-.mp-d { padding:5px 0; border:1px solid transparent; border-radius:5px; background:none;
-        color:var(--ink); font:inherit; font-size:var(--fs-small);
-        font-variant-numeric:tabular-nums; cursor:pointer; }
-.mp-d:hover { background:var(--surface-2); border-color:var(--line); }
-.mp-d.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel);
-           font-weight:600; }
-/* The blanks before the first of the month are not buttons and must not look
-   like one under a pointer. */
-.mp-x { cursor:default; }
-.mp-x:hover { background:none; border-color:transparent; }
 
   /* ── THE SERVER DID NOT ANSWER (§201) ─────────────────────────────────
      Over everything, deliberately: the page behind it is the worked example

@@ -1866,28 +1866,6 @@
                         text-transform:uppercase; color:var(--ink-3); }
   .nc-grid .fld { width:160px; max-width:none; }
   .nc-grid label:nth-child(5) .fld { width:88px; }
-  /* ── FOUR BOXES, ONE LINE (§298) ─────────────────────────────────
-     Islam: "if we set that they will be only 4 boxes can be in 1 line."
-     Measured on his own window before it was drawn: the pen's field area is
-     641px at 1280, and five boxes at 160/160/160/160/121 wrapped onto a
-     second row.
-
-     THE THREE DATES DO NOT STRETCH AND THE NAME DOES. A date needs exactly
-     the width of a date, and the name is the only box here holding words —
-     so the fixed ones take 150px each and the name takes what is left, which
-     is what keeps the row on one line at 641px and gives the extra width to
-     the name rather than to three controls that cannot use it.
-
-     `nowrap` is the assertion, not an optimisation: with the name allowed to
-     shrink to 150px the row fits, and a wrap here would be the fault this
-     section exists to remove coming back silently at some width nobody
-     measured. Below that the pen's own column stacks (1100px, above) long
-     before the row runs out of room. */
-  .nc-1line { flex-wrap:nowrap; }
-  .nc-1line .nm-lab { flex:1 1 190px; min-width:150px; }
-  .nc-1line .nm-lab .fld { width:100%; }
-  .nc-1line .dt { flex:0 0 auto; }
-  .nc-1line .cycbtn { width:150px; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }

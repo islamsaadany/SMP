@@ -203,6 +203,42 @@ A drift between specs and code is a documentation bug — report it before silen
   beats the hover, so painting the pair grey there inverts the seam instead of
   closing it.
 
+#### A BOX CAN BE CENTRED AND THE DRAWING INSIDE IT NOT BE (§302)
+- Islam: *"the home icon is not centered in the top box."* **The box was
+  innocent and saying so first was most of the work** — three sections have
+  already answered a complaint about this one control (§197.2, §200.2, §202),
+  so the first question is whether one came undone. None had: **6.00px above
+  and below** in the 46px bar, **6.50px on all four sides** of the drawing.
+  What sat low was the **painted house, by 2.06px**.
+- **A HOUSE HAS A POINTED ROOF, SO ITS BOX CENTRES AND ITS MASS DOES NOT.**
+  Nearly all its ink is in the lower half, and the eye reads weight — which is
+  why **every assertion we had passed on the build he reported**: §202's four
+  gaps measure the BOX. *An assertion about where a drawing sits is not an
+  assertion about where it looks like it sits.* Measure the INK, as an
+  **alpha-weighted centroid** off the painted pixels at 8× (§185, §294.1) — a
+  **threshold** reports both builds identically, because the drawing reaches
+  the same rows either way and what moved is where its weight is.
+- **A FIGURE THAT DOES NOT MOVE WITH THE WINDOW IS ARITHMETIC, NOT LAYOUT.**
+  The +0.50px across was the same at every width and every zoom: a 21px mark in
+  a 34px square leaves **thirteen** pixels of slack, which cannot halve into
+  whole pixels, so the browser snaps it. 20px leaves 14. Assert *the slack is a
+  whole number*, never the mark size that produces one.
+- **FIXING TWO THINGS AT ONCE MEANS RE-MEASURING AFTER THE FIRST.** 0.6 of the
+  2.06 was that same snap, so correcting the slack and then shifting the full 2
+  the mockup drew put the house **0.54px HIGH**; the shipped figure is **1.5**,
+  residual 0.04. The mockup is left saying 2 — it is the record of what was
+  signed off, not of what was built (Principle II).
+- **THE CORRECTION LIVES IN THE DRAWING, NEVER IN A CSS NUDGE**: one `transform`
+  on the group, the path's bytes and its `viewBox` untouched, so §202's four
+  gaps stay true and a mark drawn here later inherits no offset measured for
+  this one. **And §202's own assertions needed no editing** — they assert that
+  opposite gaps are EQUAL and never what they are, so they survived 21 → 20
+  untouched: *a check written against the problem survives the fix* (§94.8).
+- **The stroke is `--on-accent` #16325C, byte-identical to the bar's navy**, so
+  the square's rounded corners classify as house ink and the mark measures a
+  perfect 34×34 — that called a correct build broken twice before the sample
+  was scoped to the drawing's own box.
+
 #### A pinned header's ground filler paints when it is NOT pinned too (§53.7)
 - `.pane > .pband::before` and `.split .rail::before` fill the gap between the
   chrome and the pinned pair with `--ground`. **CSS cannot ask whether a sticky
@@ -7297,6 +7333,22 @@ python3 checks/welcome.py       # the welcome screen (§148): three viewers over
                                 # calls, every door pressed and read back, and the absences
                                 # — and since §159 the way OUT: outside the list's column,
                                 # last in the wrap, spanning both, and the fill at both ends
+python3 checks/home-mark.py     # the home mark: centred in the row, square at every
+                                # width, gold exactly when something is waiting, and
+                                # pressable — and since §302 the HOUSE's own ink centred
+                                # in that square, read off the painted pixels at 8x as an
+                                # alpha-weighted centroid (a threshold reports the broken
+                                # build and the fixed one identically, because the drawing
+                                # reaches the same rows either way), asserted as agreement
+                                # with the square's centre and never as a figure; plus the
+                                # slack asserted to halve into WHOLE pixels, phrased as a
+                                # whole number rather than as the 20px mark that gives one.
+                                # §202's four gaps are untouched — they assert opposite
+                                # gaps are EQUAL, so they survived 21 → 20 (§94.8). Proved
+                                # able to fail twice from the SOURCES (§238's hashed CSP
+                                # silences an edited built file, §276): 3 red reverted
+                                # whole, printing (0.499, 2.057) with everything else
+                                # green; 2 red with the shift alone absent, at 1.459
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
@@ -7480,7 +7532,49 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-07 &mdash; **&sect;301: a project owner reports, and the
+*Last Updated: 2026-09-07 &mdash; **&sect;302: the box was centred and the house
+inside it was not.** Islam, of the top-left corner: *"the home icon is not
+centered in the top box."* **THE BOX WAS INNOCENT, AND SAYING SO FIRST WAS MOST
+OF THE WORK** &mdash; three sections have already answered a complaint about this
+one control (&sect;197.2, &sect;200.2, &sect;202), so the first question was
+whether one had come undone. None had: measured at three widths and three zoom
+levels, **6.00px above and below** in the 46px bar and **6.50px on all four
+sides** of the drawing, every existing assertion green. What sat low was the
+**painted house, by 2.06px**. **A HOUSE HAS A POINTED ROOF, SO ITS BOX CENTRES
+AND ITS MASS DOES NOT** &mdash; nearly all its ink is in the lower half, and the
+eye reads weight, which is exactly why the build he reported passed everything:
+&sect;202's four gaps measure the BOX. *An assertion about where a drawing sits
+is not an assertion about where it looks like it sits.* **AND THE HALF PIXEL
+BESIDE IT WAS ARITHMETIC RATHER THAN LAYOUT**, which is what the figure not
+moving with the window said: a 21px mark in a 34px square leaves **thirteen**
+pixels of slack, which cannot halve into whole pixels, so the browser snaps it;
+20px leaves 14. **Drawn before it was built** (rule 1c), with both corrections
+shown at real size and enlarged with the square's own centre ruled across them;
+Islam took the recommendation. **AND THE SHIPPED NUMBER IS 1.5, NOT THE 2 THE
+MOCKUP DREW**: the two faults were measured together and one was hiding inside
+the other &mdash; 0.6 of that 2.06 was the same snap the 20px mark removes, so
+correcting the slack and then shifting a full 2 put the house **0.54px HIGH**,
+caught only by measuring again after the first build. *Fixing two things at once
+means re-measuring after the first, or the second is corrected against a number
+that has since moved.* Residual **0.04px down, 0.00 across**, at every width and
+zoom. **The correction lives in the drawing, never in a CSS nudge** &mdash; one
+`transform`, the path's bytes and its `viewBox` untouched &mdash; so &sect;202's
+gaps stay true and a later mark inherits no offset measured for this one, and
+**those gaps needed no editing at all**, because they assert opposite gaps are
+EQUAL and never what they are (&sect;94.8). The square does not move, so no
+destination name shifts (&sect;41.8). **24/24** on `checks/home-mark.py`, proved
+able to fail twice from the SOURCES (**3 red** reverted whole, printing
+`(0.499, 2.057)` with everything else still green; **2 red** with the shift alone
+absent, at `1.459`) &mdash; and **two of the probe's own first runs called a
+correct build broken**, the stroke being byte-identical to the bar's navy so the
+square's rounded corners read as house ink. Full `qa.py` sweep ERRORS none;
+`welcome`, `nav-scroll`, `setup-pages` and `boot-skeleton` green. **Screen only**
+&mdash; no `api/`, `lib/` or `db/` file, read off the diff &mdash; nothing stored,
+nothing migrated. **On the branch, not merged**: a merge to `main` still owes the
+`sw.js` SHELL bump (&sect;91, &sect;94.12, &sect;94.16), and `main` is Islam's
+call every time.*
+
+*Earlier: 2026-09-07 &mdash; **&sect;301: a project owner reports, and the
 bar said View only.** Islam, from the running platform: *"a project owner is not
 able to report, despite being the project owner and in the roles and access I
 allowed this."* **HE COULD, AND THE PAGE WAS TELLING HIM HE COULD NOT** &mdash;

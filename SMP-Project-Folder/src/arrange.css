@@ -1237,7 +1237,14 @@
     color:rgba(255,255,255,.86); border-radius:5px; padding:0;
     width:34px; height:34px; flex:none; align-self:center;
     justify-content:center; }
-  .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
+  /* AND THE SLACK HAS TO HALVE INTO WHOLE PIXELS (§302). A 21px mark in a
+     34px square leaves THIRTEEN pixels of slack, so each side wants 6.5 and
+     the browser snaps the drawing half a pixel sideways — measured +0.50px
+     right, identical at 1500/1280/1100 and at 100/125/150%, which is what
+     says it is arithmetic rather than layout. 20px leaves 14, and 7 a side
+     is a whole number. The mark is 5% smaller; at this size that is not a
+     size anybody can see, and it is the only way to a whole-pixel answer. */
+  .units .navmenu-btn.homemark .navmenusvg{ width:20px; height:20px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }
   /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so

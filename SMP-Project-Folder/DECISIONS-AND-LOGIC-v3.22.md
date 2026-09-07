@@ -37289,3 +37289,106 @@ every behaviour in it traces to a sentence of Islam's or to a measurement
 recorded beside it. `seesEmpty()` returning false leaves §272's machinery
 reachable and unused, which is deliberate and recorded in §301.3: it is one
 line to give back.
+
+---
+
+## §302 — THE BOX WAS CENTRED AND THE HOUSE INSIDE IT WAS NOT (2026-09-07)
+
+Islam, with a screenshot of the top-left corner: *"the home icon is not
+centered in the top box."*
+
+**THE BOX WAS INNOCENT, AND SAYING SO FIRST WAS MOST OF THE WORK.** Three
+sections have already answered a complaint about this one control — §197.2
+centred the square in the row, §200.2 stopped the row squeezing it, §202
+centred the drawing across as well as down — so the first question was
+whether one of them had come undone. None had. Measured on the running
+platform at 1500, 1280 and 1100px and at 100%, 125% and 150% zoom, the same
+figures every time:
+
+  · the gold square, in the 46px bar        **6.00 above / 6.00 below**
+  · the drawing's box, in the square        **6.50 on all four sides**
+  · **the painted house**                   **+2.06px low, +0.50px right**
+
+**A HOUSE HAS A POINTED ROOF, SO ITS BOX CENTRES AND ITS MASS DOES NOT.**
+Nearly all a house's ink is in its lower half — the roof's point carries
+almost none — so a drawing whose bounding box is dead centre still collects
+its weight along the base and the door, and the eye reads weight. That is the
+2px, and it is why **every assertion we had passed on the build he reported**:
+§202's four gaps measure the BOX, which was never the thing that was wrong.
+*An assertion about where a drawing sits is not an assertion about where it
+looks like it sits.*
+
+**AND THE HALF PIXEL WAS ARITHMETIC, NOT LAYOUT.** A 21px mark in a 34px
+square leaves **thirteen** pixels of slack, so each side wants 6.5 and the
+browser snaps the drawing to one side. What said so was that the figure did
+not move: +0.50 at every width and at every zoom, where a layout fault varies
+with both. 20px leaves 14, and 7 a side is a whole number — the mark is 5%
+smaller, which at this size is not a size anybody can see, and it is the only
+route to a whole-pixel answer.
+
+**DRAWN BEFORE IT WAS BUILT** (rule 1c), with both corrections shown at real
+size in the bar and enlarged with the square's own centre ruled across them:
+**A** centres the drawing's box (up 0.6px, geometrically exact and an answer
+to the arithmetic rather than to the complaint), **B** centres its weight.
+Islam took the recommendation.
+
+**AND THE SHIPPED NUMBER IS 1.5, NOT THE 2 THE MOCKUP DREW.** The two faults
+were measured together and one was hiding inside the other: **0.6 of that 2.06
+was the same snap the 20px mark removes**, so correcting the slack and then
+shifting a full 2 put the house **0.54px HIGH** — measured after the first
+build, which is the only reason it was caught. *Fixing two things at once means
+re-measuring after the first, or the second is corrected against a number that
+has since moved.* At 1.5 the residual is **0.04px**, and the across is **0.00**.
+
+**THE CORRECTION LIVES IN THE DRAWING, NEVER IN A CSS NUDGE.** The path's own
+bytes and its `viewBox` are untouched — the shift is one `transform` on the
+group — so the four gaps §202 asserts stay true at 7/7/7/7 and go on meaning
+something, a mark drawn here later inherits no offset that was measured for
+this one, and Islam's fallback is the same line reading `-0.6` rather than a
+different fix. Measured, never guessed (§122.5): the ink's own centre of mass,
+read off the painted pixels at 8×, never off the element (§185).
+
+**NOTHING ELSE MOVES.** The square stays 34px in a 46px bar, so no destination
+name on the row shifts by a pixel (§41.8). The gold, the quiet state, the
+hover, the box, what the mark does and when it turns gold are all untouched
+and are asserted so. **Screen only** — no `api/`, `lib/` or `db/` file, read
+off the diff — nothing stored, nothing migrated, nobody's rights moved.
+
+### §302.1 — the check now measures the ink, because the box could not see it
+
+`checks/home-mark.py` gains the assertion that would have failed on the build
+Islam reported and did not exist to: the house's ink read as an
+**alpha-weighted centroid** off the painted pixels at 8×, asserted as agreement
+with the square's own centre (§94.8) rather than against a figure. A
+**threshold** would have reported both builds identically, because the drawing
+reaches the same rows either way — what moved is where its weight is. Beside
+it, the slack is asserted to **halve into whole pixels**, phrased as *a whole
+number* and never as the 20px that produces one, so a later mark size fails for
+being wrong rather than for being new.
+
+**§202's four gaps are not rewritten and did not need to be**: they assert that
+opposite gaps are EQUAL, never what they are, so they survived the mark going
+21 → 20 untouched. *A check written against the problem survives the fix* (§94.8).
+
+**Proved able to fail two ways** (§94.5), from the SOURCES rather than by
+editing the built file, which §238's hashed CSP silences (§276): reverted whole
+— **3 red**, printing the complaint as `(0.499, 2.057)` with every other
+assertion still green, which is the finding itself; and with the slack fixed
+and the shift alone absent — **2 red** at `(-0.002, 1.459)`, which is both that
+the two assertions are independent and the arithmetic of the overshoot
+confirmed from the other end.
+
+**And two of the probe's own first runs called a correct build broken** (§294.1's
+family): the stroke colour is `--on-accent` **#16325C**, byte-identical to the
+bar's own navy, so the square's rounded corners classified as house ink and the
+mark measured a perfect 34×34 twice before the sample was scoped to the
+drawing's own box.
+
+### §302.2 — recorded, not done
+
+The mockup at `design-mockups/home-icon-centering/2026-09-07_optical-centre.html`
+is left saying **2px**, which is what was signed off; the shipped 1.5 and why it
+moved are recorded here rather than written back over the drawing (Principle II:
+a record of what was agreed is not a record of what was built). The gear at the
+other end of the row is a different mark in the same 34px box and has not been
+measured; nothing suggests it is wrong, and it was outside the ask.

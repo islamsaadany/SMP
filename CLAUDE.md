@@ -6883,7 +6883,16 @@ python3 checks/project-done.py  # a project owner reports, and the bar stops say
                                 # tally, the mark PRESSED and read back from REVIEW.done,
                                 # the project beside theirs offering none — and a plain
                                 # reader still told View only, or a build that deleted
-                                # the pill would pass everything else
+                                # the pill would pass everything else — and since §302
+                                # the freeze: the band saying Draft saved beside Reopen,
+                                # the project's OWN boxes shut (measured against what
+                                # that band held before the press, because a shut cell
+                                # draws no control at all — §113.8), the report around
+                                # it asserted NOT closed, the CUSTODIAN keeping every
+                                # control on that same project and getting the word
+                                # with no button, and a REFUSED save closing nothing.
+                                # Served over HTTP, because a save cannot be seen over
+                                # file:// at all (§94.11); 4 red on the build before
 python3 checks/deck-figures.py   # a figure is read against what it is measured by
                                 # (§254): the benchmark asserted as AGREEMENT with
                                 # measureDueLabel and never as a literal, every
@@ -7480,7 +7489,61 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-07 &mdash; **&sect;301: a project owner reports, and the
+*Last Updated: 2026-09-07 &mdash; **&sect;302: a project saved as a draft.**
+Islam: *"can we make the project owner save on the project level that is similar
+to the save for the submit of the whole cabaiblity."* **MEASURING NARROWED THE
+ASK BEFORE ANYTHING WAS PROPOSED**: the capability's *Save draft* is not a save
+&mdash; every figure is written the moment the box is left (&sect;35) and posted
+by the autosave (&sect;170), so what that button does is push what is already
+there, say so, and **CLOSE the report until Reopen** (&sect;220). A project owner
+already had two of the three: &sect;301's mark put the state on the band and in
+the bar, and nothing was ever unsaved. So the gap is two lines, not a feature
+&mdash; which is why three shapes could be drawn in the platform's own pixels
+with each one's cost stated on the panel beside it (rule 1c). **Islam took B**
+(push, confirm, freeze, Reopen) **and was right about the word**: once the press
+freezes, *Mark done* stops describing it. Which word was put back to him and
+**drawn rather than argued** (&sect;266) &mdash; a bare *Save* against *Save
+draft*, in the band, in both states &mdash; and he took **Save draft**, which is
+the bar's own word for the bar's own act: a bare *Save* promises something that
+has been happening all along, and the bar one row above already carries a Save
+draft of its own (&sect;87's twins). The state it leaves behind, **Draft saved
+&middot; Reopen**, is word for word what that bar shows. **THE MARK IS THE LOCK,
+WHICH IS WHY IT COSTS NOTHING TO STORE**: `review.done[<container>]` already
+exists, already travels per container (&sect;301's own decision, and what stops
+two owners in one function colliding) and already classifies as `rowDone` &mdash;
+**no migration, no schema change, no server rule**, asserted rather than assumed
+(&sect;172, 574/0 and 136/0 unchanged). **AND IT IS A SCREEN LOCK AT EXACTLY
+&sect;220'S STRENGTH**, because that one does not refuse a figure on the server
+either; widening one without the other would be two answers to what a closed
+report means. **ONE READER AT THE TWO ROW GATES** (`ownDraftShut`), asked inside
+`canReportRow()` and `canReportFnRow()` rather than at the twenty cells they
+feed, with `cid` travelling on the row for the same reason `owner` does
+(&sect;301.5) &mdash; and a unit's key objectives carry none, deliberately, so
+nobody's draft can close them. **BOTH HALVES OF THE PREDICATE ARE THE RULE**: the
+container, because this closes one project and never the report around it; the
+viewer, because the custodian and the office hold the bar's own Save draft and a
+second lock inside it would be two ways to close one report. **THE CUSTODIAN'S
+CONTROL HAD TO GO AND THE WORD STAYED** &mdash; &sect;301 drew the mark for every
+unbounded role, right while it was a signal and wrong the moment it closed
+something, so they **SEE the state and get no button** (&sect;256's own pattern),
+which keeps the signal this control exists for. **SAVE, THEN CLOSE, AND ONLY ON
+SUCCESS**, &sect;220's own corrected ordering and worse if skipped here, because
+the boxes go read-only behind a word that would be a lie; reopening is
+deliberately not a save. **THE CHECK MOVED TO HTTP AND SINCE THIS SECTION IT HAS
+TO** (&sect;94.11) &mdash; over `file://` SYNC is never live, so every press
+answers *offline* and the whole feature would report as missing on a build
+carrying it perfectly &mdash; **and moving it exposed a fixture that could not
+have worked**: &sect;237 rebases the tab on every view-as switch, so every "set
+it as the SMO, then look as them" fixture in that file was thrown away in the
+hop, invisible while it opened the built HTML. **&sect;302.1 &mdash; two of the
+new assertions could not fail as first written**, both found by falsifying: one
+counted every control in a pane that draws every capability at once, the other
+asserted *no live controls* when a shut cell draws no control at all
+(&sect;113.8). **&sect;302.2 &mdash; and the refused-save case was unreachable
+until the graph was dirty**, because `save()` answers *clean* before it reaches
+the server. **4 red** on the build before, one per decision.*
+
+*Earlier: 2026-09-07 &mdash; **&sect;301: a project owner reports, and the
 bar said View only.** Islam, from the running platform: *"a project owner is not
 able to report, despite being the project owner and in the roles and access I
 allowed this."* **HE COULD, AND THE PAGE WAS TELLING HIM HE COULD NOT** &mdash;

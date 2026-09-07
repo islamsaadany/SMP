@@ -37289,3 +37289,150 @@ every behaviour in it traces to a sentence of Islam's or to a measurement
 recorded beside it. `seesEmpty()` returning false leaves §272's machinery
 reachable and unused, which is deliberate and recorded in §301.3: it is one
 line to give back.
+
+---
+
+## §302 — A PROJECT SAVED AS A DRAFT (2026-09-07)
+
+Islam: *"can we make the project owner save on the project level that is
+similar to the save for the submit of the whole cabaiblity."* Then, of three
+shapes drawn: *"we can go with B but make the mark done as Save that freeze
+the project and reopen to open it for editing. what do you think?"* And of two
+words drawn in the band: *"ok with save draft."*
+
+**MEASURING NARROWED THE ASK BEFORE ANYTHING WAS PROPOSED, AND THAT
+MEASUREMENT IS MOST OF THE SECTION.** The capability's *Save draft* is not a
+save. Every figure in this product is written the moment the box is left
+(§35) and posted by the autosave (§170), so what that button does is push
+what is already almost certainly there, say so, and **CLOSE the report until
+Reopen** (§220). Against it, a project owner had two of the three already:
+§301's mark put the state on the band and in the bar (`Your 2 projects · 1 of
+2 done`), and nothing was ever unsaved. What was missing was **a press that
+pushes it there and then and says whether it landed, and a freeze.**
+
+So the ask is a two-line gap, not a feature — which is why three shapes could
+be drawn in the platform's own pixels and each one's cost stated on the panel
+beside it (rule 1c, §41.9, `design-mockups/project-level-save/`):
+
+  * **A** — the press pushes and confirms; nothing freezes. Cost: nothing is
+    protected, so a project can read *finished* over a number changed after.
+  * **B** — A, plus the project goes read-only until Reopen.
+  * **C** — a second button, *Save my project*, beside the mark. Cost: two
+    controls on a small band, one of them doing what the platform already
+    does by itself — so it reads as though the numbers were **not** being
+    kept until it was pressed, which is the opposite of the truth.
+
+**HE TOOK B AND WAS RIGHT ABOUT THE WORD**: once the press freezes, *Mark
+done* stops describing it. What was put back to him was WHICH word, and it
+was **drawn rather than argued** (§266: a question the reader cannot parse is
+answered by drawing it) — a bare *Save* against *Save draft*, both in the
+band, in both states.
+
+**"SAVE DRAFT" IS THE BAR'S OWN WORD FOR THE BAR'S OWN ACT.** A bare *Save*
+promises something that has been happening all along, and the bar one row
+above already carries a *Save draft* of its own — two Saves of different
+widths on one page is §87's twins, and the one people press is the one nearer
+the thing they were looking at. With the word matched, the state it leaves
+behind (**Draft saved · Reopen**) is word for word what that bar shows, so
+there is nothing new to learn on either side.
+
+**THE MARK IS THE LOCK, WHICH IS WHY IT COSTS NOTHING TO STORE.**
+`review.done[<container id>]` already exists, already travels per container
+(§301's own decision, which is what stops two owners in one function
+colliding), and already classifies as `rowDone` on the server. **No
+migration, no schema change, no new field, and no server rule** — asserted
+rather than assumed (§172): 574/0 and 136/0 unchanged, and the authoriser
+still accepts the owner's figures exactly as before.
+
+**AND IT IS A SCREEN LOCK, AT EXACTLY §220'S STRENGTH.** The server does not
+refuse a figure while a report is parked either — `parked` and `submitted`
+shut the controls, not the endpoint — so this is the same promise at the same
+strength. Widening one without the other would be two answers to what a
+closed report means (§53.5). Stated rather than discovered.
+
+**ONE READER, ASKED AT THE TWO ROW GATES AND NOWHERE ELSE.**
+`ownDraftShut(target, id)` is `doneMark(id) && boundedHere(target)`, asked
+inside `canReportRow()` and `canReportFnRow()` — the two functions every
+figure, picker and note cell on both sides of the switch already passes
+through. Asking it at the twenty cells they feed is how one cell comes to be
+the one the server accepts and the screen refuses (§42).
+
+**BOTH HALVES OF THE PREDICATE ARE THE WHOLE RULE.** The container, because
+this closes ONE project and never the report around it. The viewer, because
+the lock is the owner's own act: the custodian and the office hold the bar's
+Save draft for the whole function, and a second lock inside it would be two
+ways to close one report.
+
+**`cid` TRAVELS ON THE ROW, ON BOTH BUILDERS.** The row gate is handed a row,
+not a page, so the container it sits in comes with it — for the same reason
+`owner` does (§301.5), and in `reportItems()` as well as in the reporting
+pane's own list, or the two pages disagree about whether a row is shut. **A
+unit's key objectives carry none, deliberately**: they are the unit's
+headline and belong to no pillar, so nobody's draft can close them.
+
+**THE CUSTODIAN'S CONTROL HAD TO GO, AND THE WORD STAYED.** §301 drew the
+mark for anybody `mayMarkDone` allows, which is every unbounded role — right
+while it was a signal, and wrong the moment the press closed something,
+because `ownDraftShut()` asks `boundedHere()` and a custodian would have
+watched the word change and nothing freeze. A control that means two things
+by role is what §295 refused to build. The answer is not to freeze them too:
+they **SEE the state and get no button** (§256's own pattern), which keeps
+the signal this control exists for — the person who submits still reads,
+project by project, which are finished. Drawn only when it is SET, because
+"not saved yet" is the ordinary state and a word for it on every band is
+furniture (§94.15).
+
+**SAVE, THEN CLOSE, AND ONLY ON SUCCESS** — §220's own corrected ordering,
+and it matters more here: marking first would draw a tidy *Draft saved ·
+Reopen* over work that never left the browser, **with the boxes read-only
+behind it**. Reopening is deliberately NOT a save: it takes a lock off, there
+is nothing new to push, and asking the server first would make the way out of
+a closed project depend on the connection that closed it.
+
+**AND THE REFUSAL IS SAID WHERE THE PRESS WAS.** The first build used
+`alert()`, which is a dialog for something the bar says in a row (§63.2) and
+which stops every check dead at the one press they all have to make (§215).
+The word is written into the button, which is the one element on this path
+guaranteed to survive, because nothing repaints when a save fails.
+
+**THE CHECK MOVED TO HTTP, AND SINCE THIS SECTION IT HAS TO** (§94.11): the
+press goes through `SYNC.saveNow` and marks only if the save landed, and over
+`file://` SYNC is never live, so every press answers *offline* and nothing is
+ever closed — `checks/project-done.py` would have reported the whole feature
+missing on a build carrying it perfectly.
+
+**AND MOVING IT EXPOSED A FIXTURE THAT COULD NOT HAVE WORKED**: §237 rebases
+the tab from the server on every view-as switch, so every *set it as the SMO,
+then look as them* fixture in that file was thrown away in the hop. Invisible
+while it opened the built HTML over `file://`, where there is no server to
+rebase from. The standing fixture is in the SEED the stub serves; the mid-run
+ones are written while already viewing as the person they are about.
+
+**§302.1 — TWO OF THE NEW ASSERTIONS COULD NOT FAIL AS FIRST WRITTEN**, both
+found by falsifying rather than by reading (§94.5):
+
+  * *the custodian's controls stay live* counted every control in the pane,
+    and a function draws EVERY capability at once — so it can never reach
+    zero while any other project is open, and it went green on a build that
+    froze the custodian too, which is the one thing it exists to tell apart.
+    It walks from the band bearing the project's CODE to the next band now,
+    and addresses by the code the band SHOWS, because the custodian is drawn
+    no `data-rowdone` to address by.
+  * *their own project's boxes are shut* asserted no live controls, and **a
+    shut cell draws a read-only value rather than a disabled control** — so
+    it is also true of a band that has no controls at all (§113.8). It
+    compares against what the band held BEFORE the press.
+
+**§302.2 — AND THE REFUSED-SAVE CASE WAS UNREACHABLE UNTIL THE GRAPH WAS
+DIRTY.** `save()` answers *clean* when nothing has changed since the last
+successful post, so pressing twice with no edit in between never reaches the
+server and the press is right to close — the product behaving correctly, and
+not the case the assertion is about. The stub refuses on demand and the check
+makes something unsaved first. **4 red** on the build before, one per
+decision: the freeze removed, the freeze widened to everybody, the mark
+written without waiting for the save, and the custodian offered the button.
+
+**RECORDED, NOT DONE**: the lock is per person, so two people who both own
+the same project can each close it for themselves — true of §220 for a
+whole report as well, and not a state this tenant can reach; and the deck
+still says nothing about a project saved as a draft.

@@ -1153,3 +1153,17 @@
   .pband-r { margin-left:auto; display:inline-flex; align-items:center; gap:10px;
              flex:none; }
   .pband-n { font-size:11.5px; color:var(--ink-3); }
+  /* ── A PROJECT SAVED AS A DRAFT (§302) ────────────────────────────────
+     The bar's own two volumes, on the band: the state speaks and the way
+     back is a bordered control. `.pbdone` takes `.rc-state.draft`'s exact
+     treatment rather than a second one — the two say the same word about
+     the same act, one project wide instead of the whole function (§53.5) —
+     and Reopen takes `.editbtn`'s shape in the report's own orange, so it
+     reads as the same act as the bar's Reopen without being a fourth copy
+     of that button's rules. */
+  .pbdone { font-size:11.5px; font-weight:700; letter-spacing:.06em;
+            text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+  .editbtn.saybad { color:var(--bad-tx); border-color:var(--bad); }
+  .editbtn.reopen { color:var(--cta); border-color:var(--cta); }
+  .editbtn.reopen:hover { background:var(--cta); color:var(--cta-ink);
+                          border-color:var(--cta); }

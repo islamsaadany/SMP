@@ -6,7 +6,25 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§301 — a project owner reports, and the bar said
+**Latest version:** **§302 — a project saved as a draft — on the branch
+`claude/project-owner-reporting-access-uzze9s`, not merged.** Islam: *"can we
+make the project owner save on the project level that is similar to the save
+for the submit of the whole cabaiblity."* Measured first, and the measurement
+narrowed it: the capability's *Save draft* is not a save (every figure is
+already written on blur and posted by the autosave) — it pushes, says so, and
+**closes the report until Reopen**. A project owner already had the state on
+his band and in the bar since §301, so the gap was a press that pushes and
+confirms, and a freeze. Three shapes were drawn in the platform's own pixels
+with each cost stated (`design-mockups/project-level-save/`); he took **B**,
+and the button's word was drawn both ways before he settled it: **Save draft**,
+the bar's own word for the bar's own act, leaving **Draft saved · Reopen** —
+word for word what that bar shows. The mark §301 already stores per project
+IS the lock, so nothing new is stored, nothing is migrated and the server is
+unchanged (asserted: 574/0, 136/0). The custodian and the office are untouched
+and keep every control on that project; they see the word and get no button.
+4 red on the build before, one per decision.
+
+**Before it:** **§301 — a project owner reports, and the bar said
 View only — merged to `main` 2026-09-07 on Islam's word**, from
 `claude/project-owner-reporting-access-uzze9s`, carrying §285–§300 from
 several other sessions in with it; built as §287 and renumbered at the

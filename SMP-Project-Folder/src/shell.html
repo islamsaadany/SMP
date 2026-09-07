@@ -3956,8 +3956,42 @@
       b.addEventListener("click", function(){
         var a = String(b.dataset.rowdone).split("|");
         if (a.length < 2) return;
-        setDoneMark(a[0], a[1] === "1");
-        paint();
+        /* ── §302: SAVE, THEN CLOSE, AND ONLY ON SUCCESS ────────────────
+           The button says "Save draft" now and it closes the container it
+           sits on, so the order is the one §220's own bar was corrected to
+           use: push first, and mark only if it landed. Marking first and
+           saving afterwards would draw a tidy "Draft saved · Reopen" over
+           work that never left the browser — the worse half of that
+           section's first build, and worse here, because the boxes go
+           read-only behind it.
+
+           REOPENING IS NOT A SAVE. It takes a lock off; there is nothing
+           new to push, and asking the server first would make the way out
+           of a closed project depend on the connection that closed it. */
+        if (a[1] !== "1") { setDoneMark(a[0], false); paint(); return; }
+        SYNC.saveNow(function(state){
+          if (state === "saved" || state === "clean") {
+            setDoneMark(a[0], true);
+            /* No word on success: the band itself becomes "Draft saved ·
+               Reopen", which says it and does not vanish a frame later
+               (§63.2 — a repaint replaces the very button pressed). */
+            paint();
+            return;
+          }
+          /* A REFUSAL IS SAID WHERE THE PRESS WAS, NOT IN A DIALOG. The
+             report bar's own Save draft writes its outcome into the row it
+             sits in (§63.2) and this does the same — into the button, which
+             is the one element here guaranteed to survive, because nothing
+             repaints on this path. An `alert()` would also stop every check
+             dead at the one press they all have to make (§215). */
+          var was = b.textContent;
+          b.textContent = state === "offline"
+            ? "No server here" : "Not saved — see above";
+          b.classList.add("saybad");
+          setTimeout(function(){
+            b.textContent = was; b.classList.remove("saybad");
+          }, 3200);
+        });
       });
     });
     /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the

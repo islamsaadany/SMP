@@ -4908,14 +4908,19 @@ function renderReport(u){
        builders for one list, and only one of them was kept up. The fields
        are copied from `reportItems()` verbatim rather than re-derived, or
        the two drift again the next time one of them learns something. */
+    /* §302: `cid` joins them for the same reason — it is the pillar a saved
+       draft closes, and `reportItems()` carries it too, so the two builders
+       still answer alike. */
     var ms = [];
     SMPRules.shown(p.measures).forEach(function(m){
-      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner });
+      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner,
+                cid:p.id });
     });
     var ts = [];
     SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
-                owner:t.owner, collaborators:t.collaborators, pown:p.owner });
+                owner:t.owner, collaborators:t.collaborators, pown:p.owner,
+                cid:p.id });
     });
     var askedT = ts.filter(function(x){ return x.asked; });
     var done = doneOf(ms) + doneOf(askedT), total = ms.length + askedT.length;
@@ -4991,7 +4996,7 @@ function renderReport(u){
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
-        doneCtl(u.ukey, p.id, p.owner)) +
+        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi))) +
       mTable + tTable;
   };
 
@@ -6452,7 +6457,7 @@ function projReportBody(p, fk){
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
       /* §301: the finished mark, on the project it is about. */
-      doneCtl("fn:" + fk, p.id, p.owner)) +
+      doneCtl("fn:" + fk, p.id, p.owner, projCode(fk, p))) +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
     '<h4 class="mini">Milestones</h4>' +
@@ -6742,17 +6747,50 @@ function unitRailFor(u, sel){
    NO NEW VOCABULARY: `Mark done` is the ordinary small button every pen bar
    wears, and marked reads as the pill-and-way-back pair the report already
    uses for Submitted · Reopen. Nothing new in the stylesheets. */
-function doneCtl(target, id, owner){
-  if (!mayMarkDoneOn(target, owner)) return "";
+function doneCtl(target, id, owner, code){
   var on = !!doneMark(id);
+  /* ── SEEING A STATE IS NOT SETTING IT (§302, §256's own pattern) ──────
+     §301 drew this control for anybody `mayMarkDone` allows, which is every
+     unbounded role as well — right while it was a SIGNAL, and wrong the
+     moment the word became "Save draft" and the press closed the container:
+     `ownDraftShut()` asks `boundedHere()`, so a custodian pressing it would
+     have watched the word change and nothing freeze. A control that means
+     two different things depending on who is holding it is what §295 refused
+     to build; the answer is not to freeze them too — they hold the bar's own
+     Save draft for the whole function, and a second lock inside it would be
+     two ways to close one report (§53.5).
+
+     So the pair is the bounded owner's, and everybody else who can see the
+     band SEES THE STATE and gets no button — which is what keeps the signal
+     this control exists for: the person who submits still reads, project by
+     project, which are finished. Drawn only when it is SET, because "not
+     saved yet" is the ordinary state and a word for it on every band would
+     be furniture (§94.15). */
+  if (!boundedHere(target) || !mayMarkDoneOn(target, owner))
+    return on ? '<span class="pbdone" title="' +
+      esc("Its owner has saved it as a draft and closed it. They can reopen it.") +
+      '">Draft saved</span>' : "";
   var addr = esc(String(id));
+  /* §302: THE BAR'S OWN TWO WORDS, ONE CONTAINER WIDE. Islam settled the
+     word from two drawn in the band — *"ok with save draft"* — over a bare
+     "Save", which would have promised something the platform has been doing
+     all along (a figure is written the moment the box is left, §35/§170) and
+     put a second, narrower Save on a page whose bar already carries one
+     (§87's twins). "Save draft" is that bar's word for that bar's act, so
+     the state it leaves behind — `Draft saved · Reopen` — reads the same
+     here as it does up there and there is nothing new to learn. */
+  /* THE HOVER NAMES THE CODE, NEVER A NOUN (§107.8, §160.6): a tenant's
+     label is already plural — `L("pillar","bu")` is "Pillars" — so a
+     sentence reaching for the singular has none to reach for. The band
+     beside it is showing the code anyway. */
+  var it = code ? esc(code) : "it";
   return on
-    ? '<span class="pill good" title="Marked finished. The report is still open ' +
-      '— figures can still be entered.">Done</span>' +
-      '<button class="linkbu" data-rowdone="' + addr + '|0">Undo</button>'
+    ? '<span class="pbdone" title="Your figures are saved and ' + it +
+      ' is closed. Reopen it to change them.">Draft saved</span>' +
+      '<button class="editbtn reopen" data-rowdone="' + addr + '|0">Reopen</button>'
     : '<button class="editbtn" data-rowdone="' + addr + '|1" ' +
-      'title="Tells whoever submits the report that your part is finished. ' +
-      'It does not close anything.">Mark done</button>';
+      'title="Saves your figures and closes ' + it +
+      '. Reopen it whenever you need to change them.">Save draft</button>';
 }
 
 /* ── AND THE BAR STOPS SAYING "View only" TO SOMEBODY WHO REPORTS (§301) ──

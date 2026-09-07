@@ -4573,6 +4573,13 @@ function canReport(unitKey){
    leans on its pillar's owner), `x.pown` is the pillar's own Owner. */
 function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
+  /* §302: their own saved draft shuts their own pillar. `x.cid` is the
+     container the row sits in, carried on the row by both builders for the
+     same reason `owner` is (§301.5) — walking back up to the pillar from
+     here would mean this gate knowing the shape of the page above it. A
+     unit's key objectives carry none, deliberately: they are the unit's
+     headline and belong to no pillar, so nobody's draft can close them. */
+  if (ownDraftShut(unitKey, x && x.cid)) return false;
   var area = String(unitKey).indexOf("fn:") === 0 ? "fn" : "unit";
   return SMPRules.mayReportRow(world(), viewer(), area, unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
@@ -4595,6 +4602,10 @@ function canReportFn(fk){
 }
 function canReportFnRow(fk, project, rowObj){
   if (!canReportFn(fk)) return false;
+  /* §302: the project's own saved draft, asked here because this gate is
+     already handed the project — every deliverable, outcome, milestone and
+     note on that band goes through it. */
+  if (ownDraftShut("fn:" + fk, project && project.id)) return false;
   return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk,
                                { row: rowObj, project: project });
 }
@@ -4826,15 +4837,18 @@ function reportItems(u){
     /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
        (§147.7) — carried beside §55's `owner` lean rather than replacing it,
        so nothing a contributor could reach before the role existed moves. */
+    /* `cid` is the pillar this row sits in, for §302's per-container draft —
+       carried for the same reason `owner` is, and on BOTH builders or the two
+       pages disagree about whether a row is shut. */
     SMPRules.shown(p.measures).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
-                 owner:p.owner, pown:p.owner, place:place });
+                 owner:p.owner, pown:p.owner, cid:p.id, place:place });
     });
     SMPRules.shown(p.tactics).forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                 place:place });
+                 cid:p.id, place:place });
     });
   });
   return out;
@@ -5004,9 +5018,25 @@ function reportClosed(target){
    Nothing clears it on a new cycle because nothing has to: the shell replaces
    REVIEW wholesale, so an unmarked cycle and a fresh one are the same object.
 
-   It is a SIGNAL, never a lock: a project marked done still takes figures
-   until the report itself is closed (§220). What it does is tell the person
-   who submits which projects are ready. */
+   §302 — IT IS A LOCK NOW, AND THE WORD MOVED WITH IT. Islam, of the shape
+   drawn for him: *"we can go with B but make the mark done as Save that
+   freeze the project and reopen to open it for editing"*, and then, of the
+   two words drawn: *"ok with save draft."* So the same mark that told the
+   custodian a project was ready now CLOSES that project to the person who
+   pressed it, and Reopen is the way back — which is the capability bar's own
+   pair (§220, §263), one project wide instead of the whole function.
+
+   THE MARK IS THE LOCK, so nothing new is stored and nothing is migrated:
+   `review.done[<id>]` already travels per container (which is what stops two
+   owners in one function colliding, above) and already classifies as
+   `rowDone` on the server. What changed is what the screen does with it.
+
+   AND IT IS A SCREEN LOCK, EXACTLY AS §220'S IS. The server does not refuse
+   a figure while a report is parked either — `parked` and `submitted` shut
+   the controls, they do not shut the endpoint — so this is the same promise
+   at the same strength, and widening one without the other would be a second
+   answer to what a closed report means (§53.5). Asserted rather than assumed
+   (§172): the authoriser is unchanged and still accepts the owner's figures. */
 function doneMark(id){
   return (REVIEW.done || {})[String(id)] || null;
 }
@@ -5024,6 +5054,22 @@ function setDoneMark(id, on){
      it looked for puts a phantom change into every save from then on (§42,
      §50.6). */
   if (!Object.keys(REVIEW.done).length) delete REVIEW.done;
+}
+/* ── A SAVED DRAFT SHUTS THE PROJECT IT IS ABOUT (§302) ──────────────────
+   Asked of the CONTAINER and of the VIEWER, and both halves are the whole
+   rule. The container, because this closes one project and never the report
+   around it — the custodian and the office go on editing every row of it,
+   which is what makes a per-project draft different from §220's. The viewer,
+   because the lock is the owner's own act: somebody unbounded here has
+   Submit and Save draft on the bar, and freezing them out of a project they
+   may still have to correct would be a second lock nobody asked for.
+
+   One reader for both sides of the switch (§53.5), asked by the two row
+   gates rather than at the twenty cells they feed — a cell that forgot it is
+   a cell the server would accept and the screen refuses, or the reverse. */
+function ownDraftShut(target, id){
+  if (!id) return false;
+  return !!doneMark(id) && boundedHere(target);
 }
 /* Whose mark it is, asked of the SHARED rule so the screen draws exactly what
    the server accepts (§42). `owner` is the container's Owner as STORED. */

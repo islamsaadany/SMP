@@ -379,7 +379,7 @@
    "smp-shell-v4.71-yn-citations" at the moment of this merge, so the name goes
    PAST it rather than beside it (§94.12) — confirmed once more immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v4.79-project-owner-reports";
+const SHELL = "smp-shell-v4.81-project-save-draft";
 const ASSETS = [
   "/",
   "/index.html",

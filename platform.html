@@ -331,6 +331,19 @@
 
   /* ── Clients ─────────────────────────────────────────────────── */
   function drawClients() {
+    /* ── WHY A CLIENT SENT THEM BACK HERE (§288.32) ──────────────────
+       A client whose register cannot place this account refuses and lands
+       them on the cards, because the cards are beside the configuration that
+       answers it. Said BEFORE the title, so it is the first thing read rather
+       than a line under a grid of cards; taken once and cleared, or it would
+       reappear on every visit long after the mapping was corrected. */
+    var why = null;
+    try {
+      why = sessionStorage.getItem("smp.client.why");
+      if (why) sessionStorage.removeItem("smp.client.why");
+    } catch (e) { /* no storage is simply no sentence */ }
+    if (why) say(why, true);
+
     var right = el("div");
     var search = el("input", "fld");
     search.placeholder = "Search clients"; search.style.width = "190px";

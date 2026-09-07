@@ -366,7 +366,14 @@
    was made, so the name goes PAST it rather than beside it (§94.12); confirm
    once more immediately before the push (§94.16). `node --check sw.js` run
    after the merge. */
-const SHELL = "smp-shell-v4.65-multi-client";
+/* v4.66-placed-by-address — §288.32: an office account is placed on a client's
+   register by its ADDRESS and never invented. The built file's bytes changed
+   (sync.js carries the refusal's reason to the cards), which is the whole
+   trigger (§91). Main is still serving "smp-shell-v4.64-objectives-table" and
+   nothing has served v4.65 but this branch's own preview, so "-placed-by-
+   address" is a name nobody has served; confirm once more immediately before
+   any push to main (§94.16). `node --check sw.js` run. */
+const SHELL = "smp-shell-v4.66-placed-by-address";
 const ASSETS = [
   "/",
   "/index.html",

@@ -455,7 +455,7 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" ? 404 : 500,
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500,
                 { ok: false, error: "Something went wrong." });
   } finally {
     if (client) await P.releaseClient(client);

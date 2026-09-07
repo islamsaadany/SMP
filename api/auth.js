@@ -48,7 +48,7 @@ function readBody(req) {
    it means nothing to the person who hit it. The real error goes to the
    function's own log, where it is visible to us and to nobody else. */
 function safeError(e) {
-  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT")) return String(e.message);
+  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT" || e.code === "NO_PERSON")) return String(e.message);
   console.error("api/auth:", e && (e.stack || e.message || e));
   return "Something went wrong. Try again, and tell the SMO if it keeps happening.";
 }
@@ -675,7 +675,7 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" ? 404 : 500, { ok: false, error: safeError(e) });
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500, { ok: false, error: safeError(e) });
   } finally {
     if (client) await P.releaseClient(client);
   }

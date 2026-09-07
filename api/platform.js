@@ -35,7 +35,7 @@ function readBody(req) {
 }
 
 function safeError(e) {
-  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT")) return String(e.message);
+  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT" || e.code === "NO_PERSON")) return String(e.message);
   console.error("api/platform:", e && (e.stack || e.message || e));
   return "Something went wrong. Nothing was changed — try again, and tell the platform's admin if it keeps happening.";
 }
@@ -612,7 +612,7 @@ module.exports = async function handler(req, res) {
       return send(res, 400, { ok: false, error: "unknown action" });
     });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" ? 404 : 500,
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500,
                 { ok: false, error: safeError(e) });
   }
 };

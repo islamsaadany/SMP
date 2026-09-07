@@ -153,12 +153,56 @@ async function main() {
 
     /* Everyone at Forefront is on the live client's team to begin with, with
        Islam holding its super seat — his own answer, and the only shape that
-       lets anybody open it on day one. */
+       lets anybody open it on day one.
+
+       ── AND WHICH ROW THEY ARE IS READ OFF THE REGISTER (§288.32) ──────
+       This wrote `o.person` — `ff_islam`, `ff_essam`, `ff_omar` — and on a
+       client whose register the platform did NOT build, nothing ever creates
+       those rows (§288.30). So the mapping named nobody from the moment this
+       script ran, and the sign-in fell through to inventing a person: the
+       account's own name over the client's Super user seat.
+
+       The live client's register already holds these people under these very
+       addresses, so the address is what resolves it — exactly one active row
+       or none, never a guess between two (§87). `getSession` does the same
+       match and heals a mapping that is already wrong; doing it here as well
+       means a fresh migration is right on the first request rather than the
+       second, and the client's configuration shows the correct row from the
+       start.
+
+       THE MINTED KEY SURVIVES AS THE FALLBACK and is not dead weight: on a
+       register with nobody on it — a client the platform builds — it is the
+       key the first row is written under, which is `ensureOfficeRow`'s own
+       exception. `person_key` is NOT NULL, so there is always something to
+       write; what changes is that it is now the right thing wherever the
+       register can answer. */
     for (const o of OFFICE) {
+      let personKey = o.person;
+      try {
+        const m = await P.withSchema(pg, LIVE.schema, async function (sc) {
+          return (await sc.query(
+            "SELECT key FROM people " +
+            "WHERE lower(COALESCE(extra->>'email','')) = $1 " +
+            "  AND COALESCE(extra->>'active','true') <> 'false'",
+            [o.email.toLowerCase()])).rows;
+        });
+        if (m.length === 1) {
+          personKey = m[0].key;
+          say("  " + o.email + " is already on " + LIVE.key + "'s register as " + personKey);
+        } else if (m.length > 1) {
+          /* SAID, NEVER GUESSED (§87). Two rows sharing an address identify
+             nobody, and the platform's own configuration is where a person
+             answers it. */
+          say("  " + o.email + " matches " + m.length + " rows on " + LIVE.key +
+              "'s register — left unmapped; say which row on the client's configuration.");
+        }
+      } catch (e) {
+        say("  could not read " + LIVE.key + "'s register to place " + o.email + ": " + e.message);
+      }
       await pc.query(
         "INSERT INTO account_clients (email, client_key, person_key, seat) VALUES ($1,$2,$3,$4) " +
         "ON CONFLICT (email, client_key) DO NOTHING",
-        [o.email, LIVE.key, o.person, o.seat]);
+        [o.email, LIVE.key, personKey, o.seat]);
     }
     say("team on " + LIVE.key + ": " +
         (await pc.query("SELECT count(*)::int AS n FROM account_clients WHERE client_key=$1", [LIVE.key])).rows[0].n);

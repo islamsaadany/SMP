@@ -33572,6 +33572,82 @@ everywhere: the sections below, every code comment that cites one, the checks,
 the migrations and the spec's own files. Nothing about the work changed — only
 what it is called.
 
+## §288.32 — THE ADDRESS IS WHAT PLACES SOMEBODY ON A REGISTER THE PLATFORM DID NOT BUILD (2026-09-07)
+
+Islam, opening Raya Trade from the cards: *"when I open raya from the platform I
+open as a user named forefront - the group .. that's not supposed to happen I
+already have an email access inside the raya platform that supposedly matches my
+email on the multitenant."*
+
+**HE WAS NOT OPENING AS THE STRAY ROW HE COULD SEE.** The register showed a
+retired *Forefront* row beside his own, and the obvious reading — that the
+session had landed on it — is wrong: the person lookup already excludes anybody
+retired, so it found NOBODY, and the fallback under it **invented a person out
+of the account's own name and the seat the rules give them**. The first office
+accounts were named after the company, so that phantom read *Forefront*, and
+with no unit or function it read *the group*. Nothing on any screen said the
+mapping was broken.
+
+**THE MAPPING WAS WRONG FROM THE MOMENT IT WAS WRITTEN, AND NOT BY DRIFTING
+LATER.** `migrate-to-multi-client.js` wrote `person_key = ff_islam` (and
+`ff_essam`, `ff_omar`) for every office account, and on a client whose register
+the platform did NOT build **nothing ever creates those rows** (§288.30). So the
+key named nobody on the day the migration ran, on every client that predates the
+platform — reproduced by running the migration on a production-shaped copy and
+reading the mapping back.
+
+**THE ADDRESS IS THE ONE IDENTIFIER BOTH SIDES SHARE** (Islam's own answer:
+*"if the client is new they should land on the register dirrectly if an old
+client in this case they should match with the email to land gracefully"*), so
+it is what resolves it — `people.extra->>'email'` against the account's, matched
+case-insensitively and **only among people who have not been retired**, which is
+what makes a retired duplicate harmless rather than fatal and answers the
+duplicate on his own register without deleting anything.
+
+**EXACTLY ONE, OR NOTHING** (§87): an address on two rows identifies nobody, and
+picking one of them is precisely the fault that put one human on a register
+twice. Two matches refuse and say which problem it is.
+
+**AND THE MAPPING IS PUT RIGHT WHERE ONE EXISTS**, never inserted where one does
+not. Without the write-back the sign-in would resolve correctly for ever while
+the client's own configuration went on showing the wrong row selected — one fact
+with two answers (§53.5). Inserting would grant a team membership nobody granted.
+
+**THE REFUSAL IS ITS OWN CODE AND CARRIES ITS REASON TO THE SCREEN.**
+`NO_PERSON` is not `NO_CLIENT`: that one is deliberately vague because telling an
+outsider which slugs exist is what it guards against, and this one is answered to
+somebody already signed in as one of Forefront's own. It rides the 404 the boot
+already sends to `/platform` — which is where it is answered — and the sentence
+travels in `sessionStorage` and is read once by the cards. Landing there with no
+sentence would send somebody straight back to the card they just pressed, which
+is §61's dead end wearing a redirect.
+
+**THE FIRST BUILD ASKED ONLY `made_here` AND THAT WAS TOO NARROW.** Every client
+on an older deployment carries `made_here = false` by default, so the empty ones
+became unopenable — with no way left to put it right, because building the
+register is what opening it is for. The test is `ensureOfficeRow`'s OWN two-part
+one, mirrored so the two cannot answer differently: **a client the platform built
+is writing that row a moment later, and a register with nobody on it has nobody
+to match.** Found by `checks/multi-client.py` going red, not by reading.
+
+**AND THE FIXTURE WAS MODELLING A STATE THE MIGRATION NO LONGER PRODUCES**
+(§51.11): `checks/fixture-platform.js` mapped two accounts to `ff_islam` and
+`ff_omar` and never created either row — survivable only while a key naming
+nobody silently invented a person. It writes the rows its own mappings name, and
+**asserts them rather than skipping them**, because an earlier run had left one
+retired and `DO NOTHING` would have preserved it, leaving the check measuring
+whatever the last run happened to leave behind (§94.2).
+
+Proved able to fail: **7 red** on the shipped build, watched before the green run
+was believed. 74 platform assertions · 523 authoriser · 131 differ · 45 rules ·
+101 multi-client · 27 platform-look · round trip and the migration both green on
+a virgin database.
+
+**RECORDED, NOT DIAGNOSED**: Islam also met a *"Something went wrong"* on the
+platform's own Clients tab. It could not be reproduced — that endpoint never
+resolves a person on a register, so it is not this — and the real error is in the
+deployment's own log by design (§43: raw errors do not reach the browser).
+
 ## §288 — ONE PLATFORM, MANY CLIENTS (v3.57–v3.59, spec 030)
 
 Islam: *"Let's work together on splitting this platform to be multitenant. We

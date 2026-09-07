@@ -48,6 +48,45 @@ async function main() {
     /* Nothing lit is what an untouched platform looks like (§37, §50.6). */
     await c.query("DELETE FROM platform_access");
   });
+
+  /* ── AND THE ROWS THOSE MAPPINGS NAME (§288.32) ────────────────────
+     This mapped the two office accounts to `ff_islam` and `ff_omar` and never
+     created either row — which was survivable only while a key naming nobody
+     silently INVENTED a person. It does not any more: on a client whose
+     register the platform did not build, an account the register cannot place
+     is refused, so the fixture has to model a placed one.
+
+     WRITTEN AS THE ROWS THE MAPPING ALREADY NAMES rather than by giving the
+     accounts a matching address, so nothing here depends on which of the
+     client's own 33 people happens to sit where — a check that reads its
+     subject out of the demo's data moves every time the demo does.
+
+     Additive and idempotent, like everything else in this file: it adds two
+     people and touches nobody who is already there. */
+  const rows = [
+    ["ff_islam", "Islam Saadany", "islam.saadany@forefront.consulting", "super"],
+    ["ff_omar",  "Omar Alaa",     "omar.alaa@forefront.consulting",     "smoteam"],
+  ];
+  const live = await P.withPlatform(pg, function (c) {
+    return c.query("SELECT schema_name FROM clients WHERE key = $1", ["raya-trade"]);
+  });
+  if (live.rowCount) {
+    await P.withSchema(pg, live.rows[0].schema_name, async function (c) {
+      for (const [key, name, email, role] of rows) {
+        await c.query(
+          "INSERT INTO people (key, idx, name, role, extra) " +
+          "VALUES ($1, (SELECT COALESCE(MAX(idx),0)+1 FROM people), $2, $3, $4) " +
+          /* ASSERTED, NOT SKIPPED. These two rows are the fixture's OWN
+             (`ffrow`), and an earlier run may have left one retired — which
+             `DO NOTHING` would preserve, so the check would go on measuring
+             whatever the last run happened to leave behind (§94.2). It sets
+             them exactly as it sets the accounts above, retirement included. */
+          "ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, " +
+          "role = EXCLUDED.role, extra = people.extra || EXCLUDED.extra",
+          [key, name, role, JSON.stringify({ email: email, forefront: true, ffrow: true, active: true })]);
+      }
+    });
+  }
   await P.getPool(pg).end();
   console.log("fixture ready");
 }

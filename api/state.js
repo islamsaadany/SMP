@@ -45,7 +45,7 @@ function readBody(req) {
    the schema to anyone probing, and meaningless to the person who hit it. The
    real one goes to the function's log. */
 function safeError(e) {
-  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT")) return String(e.message);
+  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT" || e.code === "NO_PERSON")) return String(e.message);
   console.error("api/state:", e && (e.stack || e.message || e));
   return "Something went wrong saving. Nothing was changed — try again, and tell the SMO if it keeps happening.";
 }
@@ -393,7 +393,7 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { ok: false, error: "method not allowed" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" ? 404 : 500, { ok: false, error: safeError(e) });
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500, { ok: false, error: safeError(e) });
   } finally {
     if (client) await P.releaseClient(client);
   }

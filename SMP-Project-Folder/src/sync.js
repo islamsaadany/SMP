@@ -1243,7 +1243,27 @@ var SYNC = (function () {
              The platform's own cards are where somebody with a bad client
              address should be, and it is the one page that can tell them
              which clients they actually have. */
-          if (r.status === 404) { location.replace("/platform"); throw new Error("sign in"); }
+          if (r.status === 404) {
+            /* ── AND A REFUSAL CARRIES ITS REASON WITH IT (§288.32) ───
+               Two different things answer 404 here and only one of them has
+               anything to say: a slug naming no client (nothing to explain —
+               the cards ARE the explanation), and an account this client's
+               register cannot place, which is answered on that client's
+               configuration and is invisible from the cards.
+
+               Landing on /platform with no sentence would send somebody
+               straight back to the card they just pressed, which is §61's
+               dead end wearing a redirect. The sentence is carried in
+               sessionStorage — the shortest thing that survives a navigation
+               — read once by the platform's own page and cleared there. */
+            return r.json().catch(function () { return null; }).then(function (j) {
+              try {
+                if (j && j.error) sessionStorage.setItem("smp.client.why", j.error);
+              } catch (e) { /* a browser refusing storage still gets the cards */ }
+              location.replace("/platform");
+              throw new Error("sign in");
+            });
+          }
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
         })

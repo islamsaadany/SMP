@@ -5518,6 +5518,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   client's, where `schema.sql` has already run — so on a fresh database the
   tables do not exist at all and every step of a `db/platform-migrations/*.sql`
   pre-migration is guarded on `to_regclass`.
+- **AN OFFICE ACCOUNT IS PLACED BY ITS ADDRESS, NEVER INVENTED (§288.32):**
+  on a client whose register the platform did NOT build, an account whose
+  `person_key` names nobody is resolved against that register **by email** —
+  exactly one ACTIVE row, or refused. `migrate-to-multi-client.js` wrote
+  `ff_islam`/`ff_essam`/`ff_omar` and §288.30 never creates those rows, so the
+  mapping named nobody from the day it ran and the session **invented a person
+  out of the account's own name over the client's Super user seat**. Two
+  matches refuse rather than guess (§87); the mapping is UPDATED where one
+  exists and never inserted. **The exception is `ensureOfficeRow`'s own
+  two-part test, mirrored** — a client the platform BUILT, or a register with
+  nobody on it — because asking only `made_here` makes every empty client on an
+  older deployment unopenable with no way left to fix it (§61). The refusal is
+  `NO_PERSON`, its own code, riding the 404 the boot already sends to
+  `/platform` with its sentence carried in `sessionStorage` and read once by the
+  cards — a redirect with no reason is a dead end wearing a redirect.
 - **THE DEMO CLIENT, AND WHAT IT RETIRES (§288.8):** the worked example is a
   CLIENT now — its own schema, its own address, and **it saves**. This
   **reverses §21's "never put invented content in the database"**, for one

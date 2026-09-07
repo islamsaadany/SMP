@@ -520,6 +520,115 @@ async function main() {
     check("…and does not ask again", again.adopted === null, again);
   });
 
+  /* ── 13 · the address is what places somebody on a register the
+        platform did not build (§288.32) ────────────────────────────
+     Islam, opening Raya from the cards: *"I open as a user named forefront —
+     the group .. that's not supposed to happen I already have an email access
+     inside the raya platform that supposedly matches my email."*
+
+     `migrate-to-multi-client.js` wrote `person_key = ff_islam` for every
+     office account, and on a client whose register the platform did NOT build
+     nothing ever creates that row — so the key named NOBODY from the moment
+     the migration ran, and the session fell through to inventing a person out
+     of the account's own name over the client's Super user seat.
+
+     MADE, NOT WAITED FOR (§94.2): no fixture carries this state, so the state
+     is built here — a client the platform did not build, a register row
+     carrying an office address, and a mapping pointing at nobody. */
+  await P.createClientSchema(pg, "t_old", "Old Client");
+  await P.createClientSchema(pg, "t_built", "Built Here");
+  await P.withPlatform(pg, async function (c) {
+    /* The registry row is what `getSession` reads to know whose register it
+       is — creating the schema does not write one. */
+    await c.query("INSERT INTO clients (key, name, schema_name, made_here) " +
+                  "VALUES ('t-old','Old Client','t_old',false) ON CONFLICT (key) DO NOTHING");
+    await c.query("INSERT INTO clients (key, name, schema_name, made_here) " +
+                  "VALUES ('t-built','Built Here','t_built',true) ON CONFLICT (key) DO NOTHING");
+    await c.query(
+      "INSERT INTO accounts (email, name, kind, is_admin, password_hash, must_change) " +
+      "VALUES ($1,$2,'office',true,$3,false) ON CONFLICT (email) DO NOTHING",
+      ["placed@forefront.consulting", "Placed Person", auth.hashPassword("x")]);
+    await c.query(
+      "INSERT INTO accounts (email, name, kind, is_admin, password_hash, must_change) " +
+      "VALUES ($1,$2,'office',true,$3,false) ON CONFLICT (email) DO NOTHING",
+      ["nowhere@forefront.consulting", "Nowhere Person", auth.hashPassword("x")]);
+    for (const e of ["placed@forefront.consulting", "nowhere@forefront.consulting"]) {
+      await c.query(
+        "INSERT INTO account_clients (email, client_key, person_key, seat) " +
+        "VALUES ($1,'t-old','ff_nobody','super') ON CONFLICT (email, client_key) DO NOTHING", [e]);
+    }
+  });
+  await P.withSchema(pg, "t_old", async function (c) {
+    /* Two people, and only one of them carries an office address. */
+    await c.query(
+      "INSERT INTO people (key, idx, name, role, unit_key, extra) VALUES " +
+      "('theirs',1,'Their Own Person','super','group',$1), " +
+      "('other',2,'Somebody Else','','group','{}'::jsonb)",
+      [JSON.stringify({ email: "placed@forefront.consulting" })]);
+  });
+
+  const asWho = async function (email) {
+    return await P.withSchema(pg, "t_old", async function (c) {
+      const token = await auth.createSession(c, email);
+      const req = { headers: { cookie: "smp_session=" + token } };
+      try { return { person: await auth.getSession(c, req, "t-old") }; }
+      catch (e) { return { refused: e.message, code: e.code }; }
+    });
+  };
+
+  const placed = await asWho("placed@forefront.consulting");
+  check("an office account is placed by its ADDRESS where the key names nobody",
+    placed.person && placed.person.key === "theirs", placed);
+  check("…so they arrive as a real person on that register, not as their account",
+    placed.person && placed.person.name === "Their Own Person", placed);
+  /* THE MAPPING IS PUT RIGHT, or sign-in and the client's own configuration
+     would go on disagreeing about the same fact (§53.5). */
+  await P.withPlatform(pg, async function (c) {
+    const now = (await c.query(
+      "SELECT person_key FROM account_clients WHERE email=$1 AND client_key='t-old'",
+      ["placed@forefront.consulting"])).rows[0];
+    check("…and the mapping heals itself, once", now && now.person_key === "theirs", now);
+  });
+
+  const nowhere = await asWho("nowhere@forefront.consulting");
+  check("an address on nobody's row is REFUSED, never invented",
+    nowhere.refused && nowhere.code === "NO_PERSON", nowhere);
+  check("…and the refusal names where it is answered (§16.7)",
+    nowhere.refused && nowhere.refused.indexOf("configuration") > -1, nowhere);
+
+  /* §87: an address on two rows identifies nobody, and picking one of them is
+     the fault that put one human on a register twice. */
+  await P.withSchema(pg, "t_old", function (c) {
+    return c.query("UPDATE people SET extra = extra || $1::jsonb WHERE key = 'other'",
+                   [JSON.stringify({ email: "placed@forefront.consulting" })]);
+  });
+  await P.withPlatform(pg, function (c) {
+    return c.query("UPDATE account_clients SET person_key='ff_nobody' " +
+                   "WHERE email=$1 AND client_key='t-old'", ["placed@forefront.consulting"]);
+  });
+  const twice = await asWho("placed@forefront.consulting");
+  check("an address on TWO rows is refused rather than guessed between (§87)",
+    twice.refused && twice.code === "NO_PERSON", twice);
+  check("…and says so, so the two can be told apart",
+    twice.refused && twice.refused.indexOf("more than one") > -1, twice);
+
+  /* THE EXCEPTION IS NOT WEAKENED: on a client the platform DID build there is
+     nobody to match and inventing is the row's first draft (§288.30). */
+  await P.withPlatform(pg, async function (c) {
+    await c.query(
+      "INSERT INTO account_clients (email, client_key, person_key, seat) " +
+      "VALUES ($1,'t-built','ff_nobody','super') ON CONFLICT (email, client_key) DO NOTHING",
+      ["nowhere@forefront.consulting"]);
+  });
+  const built = await P.withSchema(pg, "t_built", async function (c) {
+    const token = await auth.createSession(c, "nowhere@forefront.consulting");
+    const req = { headers: { cookie: "smp_session=" + token } };
+    try { return { person: await auth.getSession(c, req, "t-built") }; }
+    catch (e) { return { refused: e.message, code: e.code }; }
+  });
+  check("…and a client the platform BUILT still lets its office in",
+    built.person && built.person.key === "ff_nobody", built);
+
   console.log("\n" + pass + " passed, " + fail + " failed");
   await pool.end();
   process.exit(fail ? 1 : 0);

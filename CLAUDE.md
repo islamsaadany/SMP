@@ -479,6 +479,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-session-state.js`, which does that grep for you and is
   red on any of them (§289.2). `scripts/test-cold-starts.js` models the pooler
   and is the shape a behavioural check for this class takes.
+- **AND THE DIRECT CONNECTION IS ASKED FOR FIRST (§303.34):** since the
+  multi-client split, a request is aimed at a client with `SET search_path` —
+  the one line the whole boundary rests on, and precisely the shape above. So
+  `getPool()`'s list of env names is an **order**, not a spelling:
+  `DATABASE_URL_UNPOOLED` and `POSTGRES_URL_NON_POOLING` win over
+  `DATABASE_URL` and friends, because on a DIRECT connection a checked-out
+  client is one backend for the life of the checkout, which is what
+  `withSchema()`'s set-and-reset has always assumed. The pooled names stay as
+  the fallback (a project holding only those must still start) and the process
+  writes **one line to the runtime log** naming the setting to add, since a
+  deployment silently running on the risky endpoint is worse than the risk.
+  The cost: a direct connection is a real connection, so **a great many people
+  saving in the same seconds** is the named trigger to revisit, and the answer
+  then is every client request in one transaction with `SET LOCAL`. The
+  preference is asserted by `node scripts/test-db-url-choice.js`, and
+  `pointAt()` carries the ONE named, printed exception in
+  `scripts/test-session-state.js`.
 - **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
   (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
   a session AND a password that is no longer temporary; a signed-in person sees
@@ -7271,7 +7288,26 @@ node scripts/test-session-state.js # nothing session-level on the pooled connect
                                 # starting with pg_advisory_lock, a bare SET, LISTEN,
                                 # PREPARE or a temp table is a failure; SET LOCAL and
                                 # the xact lock pass. Red on the chat's SET before
-                                # §289.2, green after. No database, no network
+                                # §289.2, green after. No database, no network —
+                                # and since §303.34 an exception must NAME a section
+                                # (`/* session-state-ok: §303.34 … */`) and every
+                                # honoured one is PRINTED on every run, so the cost
+                                # stays visible rather than disappearing into a green
+                                # tick; its SET rule is NARROWED not loosened (a
+                                # session SET never has a WHERE), which kills the
+                                # UPDATE … SET … WHERE false positive §303.33 recorded
+node scripts/test-db-url-choice.js # the direct connection is asked for FIRST
+                                # (§303.34): a client's schema is chosen with SET
+                                # search_path, which a transaction pooler does not keep
+                                # between statements — so the unpooled names win over
+                                # the pooled ones, asserted at both ends (direct wins
+                                # with both set; either direct spelling wins; each
+                                # pooled spelling still works alone and is reported as
+                                # pooled; nothing set answers nothing). 4 red with the
+                                # two lists swapped. It puts the process's own
+                                # environment back in a finally, or it decides the
+                                # answer for whatever runs after it. No database, no
+                                # network
 node scripts/test-cold-starts.js # two cold starts, one new migration, a POOLED
                                 # connection (§289): the pooler is modelled — session
                                 # state lost after every statement outside a

@@ -37520,6 +37520,102 @@ references to main's own section. It is a blanket rename in the files only this
 branch has, and our-added-lines-only everywhere else — asserted after the fact
 by grepping for main's five citations and finding all five intact.
 
+## §303.34 — THE DIRECT CONNECTION IS ASKED FOR FIRST (2026-09-07)
+
+§303.33 left the one open question of the whole merge and put both answers to
+Islam. He came back with *"I can't choose between the 2 options"* — **and he was
+right to, because handing over two and asking somebody to pick is exactly what
+rule 2b forbids** (*"Deliver ONE thing. Never hand over alternatives … Pick the
+best one and give that"*). The mistake was mine; what follows is the one answer,
+with its cost stated rather than a menu.
+
+**THE HAZARD IS THE ONE LINE THE WHOLE BOUNDARY RESTS ON.** `pointAt()` aims a
+request at a client with `SET search_path`, and behind Neon's POOLED endpoint —
+PgBouncer in transaction mode — a statement sent outside a transaction may run
+on any backend. So the SET can land on one backend and the query that depends on
+it on another: at best *"relation does not exist"*, at worst a request reading
+against whatever schema the previous request left behind. §240 learned this for
+the save, §289 for the bootstrap, and this is the same shape with the setting
+that decides **whose data you are looking at**.
+
+**THE ANSWER IS THE ENDPOINT, NOT THE CODE.** `getPool()`'s list of environment
+names stops being a spelling and becomes an **order**: the unpooled names
+(`DATABASE_URL_UNPOOLED`, `POSTGRES_URL_NON_POOLING`) are asked for FIRST, the
+pooled ones kept underneath. On a direct connection the hazard does not exist at
+all — a checked-out client is one backend for the life of the checkout, which is
+what `withSchema()`'s set-and-reset has assumed since it was written — so this
+is not a mitigation, it is the condition the code was already correct under,
+made true by construction instead of by luck.
+
+**THE COST IS STATED AND IT IS REAL**: a direct connection is a real connection
+and a database holds a bounded number of them, where a pooler is what lets a
+great many short requests share a few. With a handful of consultants and one
+client's people that is nowhere near the limit; the trigger to revisit is named
+rather than left to be discovered — **a great many people saving in the same
+seconds** — and the answer then is the other option, every client request in one
+transaction with `SET LOCAL`, which is correct at any scale and is a change to
+every endpoint. Not a thing to do in the same week as a live migration (rule
+1b), so it is written down here rather than half-built.
+
+**THE POOLED NAMES STAY AS THE FALLBACK, AND THE DEPLOYMENT SAYS SO ONCE.** A
+project that has only the pooled string must still start — refusing to boot
+would turn a risk into an outage — but **a deployment silently running on the
+risky endpoint is the one thing worse than the risk**, so `getPool()` writes one
+line to the runtime log naming the setting to add. Once per process, and never
+with the address in it (§72's rule: nothing a credential-reader returns contains
+the credential).
+
+**THE PREFERENCE IS ASSERTED, BECAUSE AN ORDER IS EXACTLY THE KIND OF THING A
+LATER EDIT REVERSES WITHOUT NOTICING.** `scripts/test-db-url-choice.js` — 10
+assertions, no database and no network — asks it at both ends: direct wins with
+both set, either direct spelling wins, each pooled spelling is still read alone
+and is reported as pooled, and nothing set answers nothing. Proved able to fail:
+with the two lists swapped, **4 red**. It restores the process's own environment
+in a `finally`, or it would decide the answer for whatever ran after it.
+
+**AND THE EXCEPTION IS NAMED AND PRINTED, NEVER SILENCED.**
+`scripts/test-session-state.js` is main's §289.2 rule made executable and it is
+right about `pointAt()` in general, so the line is not contorted to slip past it
+and the rule is not loosened. It gains a marker that must **name a section**
+(`/* session-state-ok: §303.34 … */`) and every honoured exception is **printed
+on every run** — `ALLOWED …`, above the count — so the cost stays visible rather
+than disappearing into a green tick (§302's own argument for printing a figure
+beside an assertion). A marker with no section does not excuse anything.
+
+**AND ITS SET RULE WAS NARROWED, NOT LOOSENED** (§218). §303.33 recorded
+`lib/auth.js`'s `UPDATE … SET person_key = $3 WHERE …` as the check's own blind
+spot and left it: a table name interpolated into the middle breaks the run of
+literals, so the fragment the check reads genuinely begins with the word SET. The
+rule now says what it always meant — **a session `SET` never has a `WHERE`** — so
+the false positive goes and nothing a real session setting could write is
+admitted. Falsified: a genuine `SET statement_timeout` added to `api/state.js`
+is caught while the marked line stays ALLOWED.
+
+**Verified**: round trip and clean parity PASS on virgin databases · two tabs
+24/0 · session state ok with one named exception · 574/0 authoriser · 136/0
+differ · 74/0 platform · 45/0 platform rules · 10/0 the new preference ·
+`multi-client.py` **101/0** and `platform-look.py` 27/0 on a database migrated
+from single-tenant in this run · `boot-skeleton.py` all green · the full `qa.py`
+sweep, ERRORS none. **Nothing on any screen moves and nothing is stored
+differently**; the whole change is which address the process dials, one comment,
+one warning and two test files.
+
+**AND ONE CHECK WENT RED FOR A REASON THAT IS NEITHER THE PRODUCT NOR THIS
+CHANGE** (§303.34a): run against the database `scripts/test-platform.js` had
+already used, `multi-client.py` fails *"…and nobody who belongs to a client"*
+naming `a@ff.example` and `o@ff.example` — rows that suite **deliberately
+inserts into `accounts` and never removes**. 101/0 on a database migrated in the
+same run, so it is order-dependent, which is worse than simply red: *a check
+whose result depends on which sibling ran first is one nobody can read.* And the
+assertion is a proxy for the property it means — it tests the **address domain**
+where the product tests `kind = 'office'`, so a Forefront consultant with a
+partner address would fail it and a client's person with a `@forefront.consulting`
+address would pass it, wrong in both directions (§94.8). Its own comment names
+the row it exists to exclude (`smo@rayatrade.com`), which is what it should
+assert. **Recorded and deliberately not changed here**: it is somebody else's
+check, it is test-only, it blocks nothing, and rewriting an assertion during the
+verification of an unrelated change is how a green run stops meaning anything.
+
 ## §303.33 — MAIN'S NEW CHECK WENT RED ON THIS BRANCH'S OWN CODE (2026-09-07)
 
 The second catch-up merge brought in `scripts/test-session-state.js`, main's
@@ -37569,6 +37665,12 @@ at the unpooled endpoint, or make every client request one transaction with
 **Put to Islam with both costs; the check stays red on those two until he
 picks**, because a red line that names an open question is worth more than a
 green one that hides it.
+
+**HE ANSWERED BY REFUSING THE MENU, AND HE WAS RIGHT TO** — *"I can't choose
+between the 2 options"*. Putting two costed answers to somebody and asking them
+to pick is rule 2b's own fault, not diligence; **§303.34 is the one answer**,
+and the paragraph above is left standing as the record of the question rather
+than rewritten to look as though it was never open (Principle II).
 
 ## §303.32 — THE ADDRESS IS WHAT PLACES SOMEBODY ON A REGISTER THE PLATFORM DID NOT BUILD (2026-09-07)
 

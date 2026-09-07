@@ -170,15 +170,15 @@ with sync_playwright() as p:
     ck("...which the rule says too, not just the screen",
        office["mayAuthor"] is True, office)
 
-    # ── 2 · AND SINCE §287.3, THE FILLER IS NOT SHOWN IT EITHER ────────
+    # ── 2 · AND SINCE §301.3, THE FILLER IS NOT SHOWN IT EITHER ────────
     # REWRITTEN, NEVER DELETED (§218). §272 shipped a quiet bar for a filler
-    # standing on a page that owes nothing, and Islam — testing §287 as a
+    # standing on a page that owes nothing, and Islam — testing §301 as a
     # PROJECT OWNER, which is exactly that filler — took it away: *"it
     # requires him to fill something empty and there is nothing empty."*
     # Three answers were put to him with the cost of each and he chose **no
     # button when nothing is owed**, so `seesEmpty()` answers false for
     # everybody and every piece of §272's machinery is untouched and
-    # reversible (§287.3).
+    # reversible (§301.3).
     #
     # THE ASSERTIONS THAT MOVED ARE INVERTED IN PLACE rather than removed, so
     # a later build cannot drift back through them unnoticed — and BOTH ENDS
@@ -186,7 +186,7 @@ with sync_playwright() as p:
     # a real gap back and watches the missing bar return with its walk intact.
     # A check that only asserted the absence would pass on a build that had
     # lost the missing register too (§113.8).
-    print("\n2 · the filler is shown no bar either (§287.3)")
+    print("\n2 · the filler is shown no bar either (§301.3)")
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
@@ -219,7 +219,7 @@ with sync_playwright() as p:
     # ── 3 · AND THE MISSING REGISTER STILL WORKS, WHOLE ────────────────
     # One gap put back, and everything §272 built for the loud half is
     # asserted here: the count, the chips, the red dress, the door, the walk
-    # and the fill. This is the half §287.3 did NOT touch, and it is asserted
+    # and the fill. This is the half §301.3 did NOT touch, and it is asserted
     # on the SAME page in the SAME run, or "the bar is gone" and "the bar is
     # broken" look identical from outside.
     print("\n3 · put one gap back — the missing bar returns, and walks")

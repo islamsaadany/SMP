@@ -4962,7 +4962,7 @@ function reportClosed(target){
          !!((REVIEW.submitted || {})[String(target || "")]);
 }
 
-/* ── "I HAVE FINISHED MINE" (§287) ───────────────────────────────────────
+/* ── "I HAVE FINISHED MINE" (§301) ───────────────────────────────────────
    Islam, of a project owner on Shared Services: *"a project owner is not able
    to report, despite being the project owner and in the roles and access I
    allowed this."* He could — 12 live, enabled controls on his own project and
@@ -6350,7 +6350,7 @@ function gapMap(target, all, fillable){
     if (!reach(acKey, ctx)) return 0;
     /* §223: COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE
        SECOND — the machinery is main's (§223, §272) and is untouched here.
-       WHO is shown it is the decision §287.3 changed, and that question is
+       WHO is shown it is the decision §301.3 changed, and that question is
        asked in ONE place, `seesEmpty()` below. */
     if (fillable) return SMPRules.gapEmptyFields(kind, row).length;
     return SMPRules.gapMissing(kind, row).length;
@@ -6521,8 +6521,8 @@ function seesGaps(target){
 
    ASKED HERE AND NOWHERE ELSE, so the bar, the rail and the walk cannot
    answer it three ways (§53.5). */
-/* ── AND SINCE §287.3, NOBODY IS (reversing §272's remaining half) ────
-   Islam, testing §287 as a PROJECT OWNER — a filler, exactly the register
+/* ── AND SINCE §301.3, NOBODY IS (reversing §272's remaining half) ────
+   Islam, testing §301 as a PROJECT OWNER — a filler, exactly the register
    §272 kept the door for: *"it requires him to fill something empty and
    there is nothing empty."* Measured in his shape: 0 counted, 0 red
    *Missing* on the page, and a red **Fill in what is empty** button whose

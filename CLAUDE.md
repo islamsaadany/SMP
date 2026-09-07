@@ -1879,13 +1879,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
-- **WHAT THE ROUND LEFT BEHIND (§287.7):** Islam, once the owner could report
+- **WHAT THE ROUND LEFT BEHIND (§301.7):** Islam, once the owner could report
   — *"review the code written and remove any excess fixed that were not
   relevant."* **THE ONE THAT MATTERED WAS A LOSS, NOT AN EXCESS**: the merge
   resolved `renderFnReport()`'s last line to this branch's older `var bar =
   ""` and took **§279's whole note banner** off a capability function's
   Reporting page with it — and **no assertion on either side would have caught
-  it**, because §287's checks ask about the CHIP above it and §279's own check
+  it**, because §301's checks ask about the CHIP above it and §279's own check
   walks a UNIT. Found by reading every line of main's code the branch REMOVES
   (§147.4's rule pointed at a deletion). **A blanket renumber swept up
   somebody else's section**: nine `§250` references in `config-data.js` and
@@ -1893,7 +1893,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   line range (§214). **One dead guard** — `typeof boundedHere !== "function"`,
   unreachable because `build.py` inlines `config-data.js` first and a
   declaration hoists (§24). **AND `checks/empty-not-missing.py` WAS RED 27
-  WAYS**, every failure the same decision: §287.3 took §272's quiet bar away.
+  WAYS**, every failure the same decision: §301.3 took §272's quiet bar away.
   **REWRITTEN, NEVER DELETED OR LOOSENED** (§218) — the moved assertions
   inverted in place, the absence asserted **over a page that really does still
   hold empty boxes** (or a fixture with nothing empty passes it while proving
@@ -1904,10 +1904,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   CHECK: *missing* is the ABSENCE of the quiet register's attribute, and **the
   walkable element is not always the bound one** (§177.2 — a picker rings its
   `.ssbtn` while `data-fld` sits on the select beside it).
-- **A SAVED DRAFT IS THE OWNER'S TO REOPEN (§287.6):** Islam — *"project owner
+- **A SAVED DRAFT IS THE OWNER'S TO REOPEN (§301.6):** Islam — *"project owner
   can reopen eventually he can only report or fill missing for his own
   project."* §220 made a saved draft close the WHOLE report at his own
-  instruction, when everybody who could park also held Reopen; §147.7 and §287
+  instruction, when everybody who could park also held Reopen; §147.7 and §301
   then added roles affected by a park and holding none, so one press froze
   every bounded owner under the subject until the custodian came back
   (measured: **12 boxes drawn, 0 enabled**, the mark disabled with them).
@@ -1925,7 +1925,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **2 red** on the screen; and one of the check's own failures was the CHECK —
   `innerText` is the RENDERED text and `.rc-state` is uppercased by CSS, so a
   case-sensitive compare asserts the stylesheet (§51.11's family).
-- **THE ROW CARRIES WHO IT BELONGS TO (§287.5):** Islam, of a project owner who
+- **THE ROW CARRIES WHO IT BELONGS TO (§301.5):** Islam, of a project owner who
   could not report on a function — *"check the behavior of the units. to
   match."* **MEASURED ON BOTH SIDES, AND THEY DID NOT MATCH**: with the cycle
   open and nothing parked, a function's project owner had **12 enabled
@@ -1946,8 +1946,8 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   beside theirs still offering nothing so the reach stays per row: **2 red** on
   the build before, printing `boxes: 0, enabled: 0, readOnly: 8`.
   **STILL A DECISION, NOT FIXED HERE**: a saved draft freezes every bounded
-  reporter under the subject and none of them holds Reopen (§220, §287.2).
-- **THEIRS OPENS, NOT THE FIRST ONE (§287.4):** Islam — *"when the user login
+  reporter under the subject and none of them holds Reopen (§220, §301.2).
+- **THEIRS OPENS, NOT THE FIRST ONE (§301.4):** Islam — *"when the user login
   he should land on his project by default"* and *"abdel azim still can't
   edit"*. **ONE FAULT, and the measurement says so**: he lands on the function,
   the pane opens on the FIRST project — somebody else's — and there he
@@ -1970,8 +1970,8 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (§37), and it would leave a capability's headline numbers describing projects
   the reader cannot see. Three answers put to him with that cost; he closed it:
   *"no need to hide other projects. that's a stretch."* Nothing built, nothing
-  planned — §287.4 alone answers the complaint under it.
-- **A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (§287):** Islam —
+  planned — §301.4 alone answers the complaint under it.
+- **A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (§301):** Islam —
   *"a project owner is not able to report, despite being the project owner and
   in the roles and access I allowed this."* **HE COULD, AND THE PAGE WAS
   TELLING HIM HE COULD NOT**: measured in his own shape, **12 live, ENABLED
@@ -2018,13 +2018,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   putting `done` back in the whole-review path, where the first owner's mark is
   **destroyed**. **RECORDED, NOT DONE**: the rail does not show the mark — a
   second surface for one fact wants a mockup, not a quiet widening.
-- **NO DOOR WHEN NOTHING IS OWED (§287.3, narrowing §272 to nobody):** Islam,
-  testing §287 as a PROJECT OWNER — *"it requires him to fill something empty
+- **NO DOOR WHEN NOTHING IS OWED (§301.3, narrowing §272 to nobody):** Islam,
+  testing §301 as a PROJECT OWNER — *"it requires him to fill something empty
   and there is nothing empty."* **MEASURED IN HIS SHAPE AND HE IS EXACTLY
   RIGHT**: 0 counted, 0 red *Missing* on the page, and a red **Fill in what is
   empty** button whose only cause is **milestone collaborators** — the field he
   ruled must never count (§187, carried to milestones by §227). **IT PREDATES
-  §287** and was proved to. **§272 HAD ALREADY ANSWERED HALF OF IT**, from the
+  §301** and was proved to. **§272 HAD ALREADY ANSWERED HALF OF IT**, from the
   same symptom in his own words and the same measurement (`gapTotal` 0 against
   `gapOpenable` 22): it took the door away from the OFFICE and joined up the
   chips and the rail marks, and deliberately kept it for a FILLER — which is
@@ -2045,15 +2045,15 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   file ever asserted its words — so `project-done.py` §7 asserts BOTH ENDS: his
   shape reproduced then no bar and no button, and a real gap bringing the door
   back. 1 red on the build before, printing his symptom verbatim.
-- **A CLOSED REPORT SAYS SO TO THEM TOO (§287.2):** Islam, testing §287 —
+- **A CLOSED REPORT SAYS SO TO THEM TOO (§301.2):** Islam, testing §301 —
   *"reporting is closed for him and showing a button of mark done only."*
   Measured: with the custodian's submission in, §220 disables all 8 figure
   boxes, the note AND the new mark (one place, so a control added later is
   covered the day it is added) — and **nothing said why**, because the word
   that explains it (`Submitted` / `Draft saved`) lives in `repChrome`'s
-  `mayAll` half, which a bounded role never reaches. Not a §287 regression —
+  `mayAll` half, which a bounded role never reaches. Not a §301 regression —
   that slot read *View only* before, which explains no better — but a hole
-  §287 now owns, having put a chip there. **The way back is deliberately not
+  §301 now owns, having put a chip there. **The way back is deliberately not
   offered**: reopening classifies as `reportState`, which a bounded role may
   not write, so the button would be one the server refuses (§61, §42); who can
   undo it goes on the hover. **ONE WORD, NEVER A SECOND BESIDE IT** — the first
@@ -2064,7 +2064,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `report-chrome` nor `report-saves` reads `SMP_CHROME`, so without the
   `qa-run.py` wrapper Playwright printed its *"run playwright install"* box and
   **exited 0** — and `tail -1` on that box looks like a result. Both their
-  failures reproduce byte-for-byte on the pre-§287 build and are recorded, not
+  failures reproduce byte-for-byte on the pre-§301 build and are recorded, not
   fixed in passing. *A check that did not run is not a check that passed*
   (§51.11's family, in the harness rather than in a selector).
 - **THE UNIT IS THERE BEFORE THE NUMBER IS (§251, reversing §248's own
@@ -5853,7 +5853,7 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
 python3 checks/project-done.py  # a project owner reports, and the bar stops saying
-                                # View only (§287): the chip built from the rail's own
+                                # View only (§301): the chip built from the rail's own
                                 # tally, the mark PRESSED and read back from REVIEW.done,
                                 # the project beside theirs offering none — and a plain
                                 # reader still told View only, or a build that deleted

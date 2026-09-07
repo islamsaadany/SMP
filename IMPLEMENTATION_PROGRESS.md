@@ -7,7 +7,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** §232/§233 on `main` (removing a pillar or a project,
-and hiding an element from the presentation). **§287 is on
+and hiding an element from the presentation). **§301 is on
 `claude/project-owner-reporting-access-uzze9s`, pushed and not merged** — a
 project owner's reporting bar, and the finished mark.
 **Latest version:** **§279 — the reporting page says where Submit is held —
@@ -142,7 +142,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §287.6 — a saved draft is the owner's to reopen (2026-09-02, same branch)
+### §301.6 — a saved draft is the owner's to reopen (2026-09-02, same branch)
 
 Islam: *"project owner can reopen eventually he can only report or fill missing
 for his own project."* A saved draft closes the whole report (§220, his own
@@ -159,7 +159,7 @@ decision rather than an accident.
 560/0 on the server, falsified twice; 2 red on the screen.
 
 
-### §287.5 — the unit reports too, and now matches (2026-09-02, same branch)
+### §301.5 — the unit reports too, and now matches (2026-09-02, same branch)
 
 Islam: *"check the behavior of the units. to match."* Measured both sides with
 the cycle open: a function's project owner had **12 enabled controls**, a
@@ -173,7 +173,7 @@ both sides, so that half is §220 working as decided.
 report and freezes every bounded reporter under it, none of whom holds Reopen.
 
 
-### §287.4 — theirs opens, not the first one (2026-09-02, same branch)
+### §301.4 — theirs opens, not the first one (2026-09-02, same branch)
 
 Islam: *"when the user login he should land on his project by default"* and
 *"abdel azim still can't edit"* — **one fault**. Measured: he lands on the
@@ -189,26 +189,26 @@ it would leave a capability's headline numbers describing projects the reader
 cannot see. Put to him with options rather than guessed at.
 
 
-### §287.2 / §287.3 — what testing §287 found (2026-09-02, same branch)
+### §301.2 / §301.3 — what testing §301 found (2026-09-02, same branch)
 
 Islam, on the built branch, two things.
 
-**§287.2 — a closed report says so to him too.** *"reporting is closed for him
+**§301.2 — a closed report says so to him too.** *"reporting is closed for him
 and showing a button of mark done only."* Measured: with the custodian's
 submission in, §220 correctly disables all 8 figure boxes, the note and the new
 Mark done — and **nothing said why**, because the word `Submitted` lives in the
-half of the bar a bounded role never reaches. Not a §287 regression (that slot
-read *View only* before, which explains no better), but a hole §287 now owns.
+half of the bar a bounded role never reaches. Not a §301 regression (that slot
+read *View only* before, which explains no better), but a hole §301 now owns.
 The bar says `Submitted`, with who can reopen it on the hover; the way back is
 deliberately not offered, because reopening speaks for the whole subject and
 the server would refuse it. The first build put a `Closed` pill beside the
 `Close` link — one letter apart, meaning different things — and that is gone.
 
-**§287.3 — no fill door when nothing is owed, narrowing §272 to nobody.** *"it requires
+**§301.3 — no fill door when nothing is owed, narrowing §272 to nobody.** *"it requires
 him to fill something empty and there is nothing empty."* Measured in his
 shape: **0 counted, 0 red *Missing* on the page, and a red button** — opened by
 **milestone collaborators alone**, the field he ruled must never count (§187,
-§227). **Proved to predate §287**: identical on the previous build. Three
+§227). **Proved to predate §301**: identical on the previous build. Three
 answers were put to him with the cost of each; he chose *no button when nothing
 is owed* over the recommendation, and **the cost is recorded as his**: a
 bounded role holds Fill and not Edit, so an optional field is now beyond them
@@ -223,14 +223,14 @@ merging main made the deletion wrong and it was reverted.
 `report-saves` were reported green and **had not run** — neither reads this
 container's browser variable, so Playwright printed an error box and exited 0,
 and `tail -1` on that box looked like a result. Run properly they fail 1 and 3,
-and **both reproduce identically on the pre-§287 build**, so neither is this
+and **both reproduce identically on the pre-§301 build**, so neither is this
 work; recorded, not fixed in passing.
 
 `checks/project-done.py` now carries both, each proved able to fail on the
 build before it.
 
 
-### §287 — a project owner reports, and the bar said View only (2026-09-02, branch `claude/project-owner-reporting-access-uzze9s`)
+### §301 — a project owner reports, and the bar said View only (2026-09-02, branch `claude/project-owner-reporting-access-uzze9s`)
 
 Islam, from the running platform: *"a project owner is not able to report,
 despite being the project owner and in the roles and access I allowed this."*

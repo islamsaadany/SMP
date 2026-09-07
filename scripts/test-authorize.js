@@ -3069,7 +3069,7 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 })();
 
-console.log("\n31 · a project owner marks their own project finished (§287)");
+console.log("\n31 · a project owner marks their own project finished (§301)");
 (function () {
   const FN = "it", T = "fn:" + FN, UK = Object.keys(SEED.units)[0];
   const capOf = function (s) {
@@ -3106,7 +3106,7 @@ console.log("\n31 · a project owner marks their own project finished (§287)");
     check(name, !r.v.ok, "was ALLOWED — " +
       JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
   };
-  /* KEYED BY THE CONTAINER, never by the subject (§287): keyed by target,
+  /* KEYED BY THE CONTAINER, never by the subject (§301): keyed by target,
      two owners marking two projects in one function would collide, and the
      second would be refused for reverting the first (§234 one level finer). */
   const mark = function (id, m) {
@@ -3177,7 +3177,7 @@ console.log("\n31 · a project owner marks their own project finished (§287)");
   not("a locked cycle takes no mark either",
       run(locked, "t287_own", mark(MINE, MARK)));})();
 
-console.log("\n32 · a saved draft is the owner's to reopen (§287.6)");
+console.log("\n32 · a saved draft is the owner's to reopen (§301.6)");
 (function () {
   const FN = "it", T = "fn:" + FN;
   const base = clone(SEED);

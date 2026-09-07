@@ -575,7 +575,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   }
 })();
 
-/* ── TWO PROJECT OWNERS, ONE FUNCTION (§287) ─────────────────────────────
+/* ── TWO PROJECT OWNERS, ONE FUNCTION (§301) ─────────────────────────────
    The reason the finished mark is keyed by the PROJECT and not by the
    subject. Keyed by target, both owners' saves would carry one map for the
    whole function, and the second — hydrated before the first's mark existed —
@@ -583,7 +583,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
    Asserted as the SCENARIO rather than as a path, so a later change of
    addressing that still keeps the two apart stays green (§94.8). */
 (function () {
-  console.log("\n§287 · two project owners marking in one function");
+  console.log("\n§301 · two project owners marking in one function");
   const A_ID = "cap3-P1", B_ID = "cap3-P2";
   const AT = { by: "owner_a", at: "2026-09-02" };
   const BT = { by: "owner_b", at: "2026-09-02" };
@@ -598,8 +598,8 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   aNew.review.done = {}; aNew.review.done[A_ID] = AT;
   const aCh = D.graphChanges(shared, aNew);
   const server = D.applyChanges(clone(shared), aCh);
-  check("§287: the first owner's mark lands", server.ok, server.error);
-  check("§287: ...and travels as its own entry, not the whole review",
+  check("§301: the first owner's mark lands", server.ok, server.error);
+  check("§301: ...and travels as its own entry, not the whole review",
         !!aCh.set["review.done." + A_ID] && !aCh.set.review,
         JSON.stringify(Object.keys(aCh.set)));
 
@@ -608,7 +608,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   const bNew = clone(shared);
   bNew.review.done = {}; bNew.review.done[B_ID] = BT;
   const bCh = D.graphChanges(shared, bNew);
-  check("§287: the second owner's save says nothing about the first's mark",
+  check("§301: the second owner's save says nothing about the first's mark",
         !("review.done." + A_ID in (bCh.set || {})) &&
         (bCh.del || []).indexOf("review.done." + A_ID) === -1,
         JSON.stringify({ set: Object.keys(bCh.set || {}), del: bCh.del }));
@@ -616,7 +616,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   /* Applied onto the graph A already wrote, BOTH marks survive — which is
      the whole claim, and the thing a target-keyed map could not do. */
   const both = D.applyChanges(server.state, bCh);
-  check("§287: applied onto the first's, BOTH marks survive",
+  check("§301: applied onto the first's, BOTH marks survive",
         both.ok && !!(both.state.review.done || {})[A_ID] &&
         !!(both.state.review.done || {})[B_ID],
         JSON.stringify((both.state || {}).review && both.state.review.done));
@@ -627,7 +627,7 @@ console.log("\n§234 · one function's submit carries nobody else's report");
   delete off.review.done[A_ID];
   const offCh = D.graphChanges(both.state, off);
   const gone = D.applyChanges(clone(both.state), offCh);
-  check("§287: undoing DELETES that entry and leaves the other",
+  check("§301: undoing DELETES that entry and leaves the other",
         gone.ok && (gone.state.review.done || {})[A_ID] === undefined &&
         !!(gone.state.review.done || {})[B_ID],
         JSON.stringify((gone.state || {}).review && gone.state.review.done));

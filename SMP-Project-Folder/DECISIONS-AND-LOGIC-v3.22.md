@@ -33279,7 +33279,7 @@ Nothing on any screen moves: `arrange.css` and every source file are
 byte-identical to the merged state, confirmed by diff. `report-chrome`,
 `submit-gate`, `report-saves`, `report-blockers`, `perf-line` and
 `deck-fullscreen` green; full `qa.py` sweep ERRORS none.
-## §287 — A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (2026-09-02)
+## §301 — A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (2026-09-02)
 
 Islam, from the running platform, with a screenshot of Ahmed Abdel Azim on
 Shared Services: *"a project owner is not able to report, despite being the
@@ -33445,7 +33445,7 @@ wants a mockup (rule 1c) rather than a quiet widening.
 
 ---
 
-## §287.2 — A CLOSED REPORT SAYS SO TO THEM TOO (2026-09-02)
+## §301.2 — A CLOSED REPORT SAYS SO TO THEM TOO (2026-09-02)
 
 Islam, testing §250: *"reporting is closed for him and showing a button of mark
 done only."*
@@ -33502,9 +33502,9 @@ not a check that passed.*
 
 ---
 
-## §287.3 — NO DOOR WHEN NOTHING IS OWED (2026-09-02, narrowing §272 to nobody)
+## §301.3 — NO DOOR WHEN NOTHING IS OWED (2026-09-02, narrowing §272 to nobody)
 
-Islam, testing §287 as a PROJECT OWNER: *"I opened as abdel azim who owns the
+Islam, testing §301 as a PROJECT OWNER: *"I opened as abdel azim who owns the
 cost increase protection and … it requires him to fill something empty and
 there is nothing empty."*
 
@@ -33522,7 +33522,7 @@ Every milestone on his project has an owner and a due date. The only blanks are
 carried onto milestones by §227). So the plan asks for nothing, and a red
 button tells him to fill something in.
 
-**IT PREDATES §287 AND WAS PROVED TO**: the same probe against the pre-§287
+**IT PREDATES §301 AND WAS PROVED TO**: the same probe against the pre-§301
 build returns the same four fields and the same button, byte for byte.
 
 ### §272 had already answered half of it, and this is the other half
@@ -33573,7 +33573,7 @@ empty'` — while the other-end assertion stays green.
 
 ---
 
-## §287.4 — THEIRS OPENS, NOT THE FIRST ONE (2026-09-02)
+## §301.4 — THEIRS OPENS, NOT THE FIRST ONE (2026-09-02)
 
 Islam, viewing as a project owner: *"when the user login he should land on his
 project by default"*, and separately *"abdel azim still can't edit"*.
@@ -33603,7 +33603,7 @@ custodian reach every row, so "theirs" names nothing and reordering what opens
 for them would be a change nobody asked for. `boundedHere()` is the gate — the
 same question the reporting bar asks (§53.5).
 
-**THE TEST IS THE CONTAINER'S OWNER** — `mayMarkDone`, the rule §287 already
+**THE TEST IS THE CONTAINER'S OWNER** — `mayMarkDone`, the rule §301 already
 settled — and deliberately NOT `boundedReach()`, whose contributor branch
 reaches a project through its stakeholders: being named on somebody else's
 project does not make it the one you came to open.
@@ -33633,7 +33633,7 @@ projects they cannot see. Three answers were put to him with that cost stated.
 **HE CLOSED IT: *"no need to hide other projects. that's a stretch."*** So
 nothing is built and nothing is planned — the rail goes on listing every
 project in the capability, and what answers the complaint underneath it is
-§287.4 alone: theirs opens first, so the others are context rather than an
+§301.4 alone: theirs opens first, so the others are context rather than an
 obstacle. Recorded as his decision so it is not re-opened by the next reader
 who meets the same screen; the cost that made it a real question (headline
 numbers spanning projects a reader could not see) is exactly why it was worth
@@ -33641,7 +33641,7 @@ declining rather than building.
 
 ---
 
-## §287.5 — THE ROW CARRIES WHO IT BELONGS TO (2026-09-02)
+## §301.5 — THE ROW CARRIES WHO IT BELONGS TO (2026-09-02)
 
 Islam, of a project owner who could not report on a supporting function:
 *"check the behavior of the units. to match."*
@@ -33691,7 +33691,7 @@ the reach stays per row. On the build before: **2 red**, printing
 ### What this does NOT change, and it is the half he first reported
 
 A saved draft still closes the report on both sides, and a bounded role still
-holds no Reopen (§220, §287.2) — so somebody pressing **Save draft** still
+holds no Reopen (§220, §301.2) — so somebody pressing **Save draft** still
 freezes every project owner under that subject until the custodian reopens it.
 That is §220's stated cost meeting a register that did not exist when §220 was
 decided, and it is a decision rather than a defect: put to him with three
@@ -33699,13 +33699,13 @@ answers, and his reply was to make the two sides match first.
 
 ---
 
-## §287.6 — A SAVED DRAFT IS THE OWNER'S TO REOPEN (2026-09-02)
+## §301.6 — A SAVED DRAFT IS THE OWNER'S TO REOPEN (2026-09-02)
 
 Islam, of a project owner frozen by somebody else's Save draft: *"project owner
 can reopen eventually he can only report or fill missing for his own project."*
 
 **§220 MADE A SAVED DRAFT CLOSE THE WHOLE REPORT**, at his own instruction, and
-at the time everybody who could park also held Reopen. §147.7 and §287 then
+at the time everybody who could park also held Reopen. §147.7 and §301 then
 added roles that are AFFECTED by a park and hold no Reopen — so one press of
 Save draft froze every project owner and pillar owner under that subject until
 the custodian came back. Measured in his shape: **12 entry boxes drawn, 0
@@ -33751,7 +33751,7 @@ recorded here for him to take or leave, rather than quietly included.
   text and `.rc-state` is uppercased by CSS, so a case-sensitive compare
   asserts the stylesheet rather than the words (§51.11's family).
 
-## §287.7 — WHAT THE ROUND LEFT BEHIND (2026-09-07)
+## §301.7 — WHAT THE ROUND LEFT BEHIND (2026-09-07)
 
 Islam, once the owner could report: *"review the code written and remove any
 excess fixed that were not relevant."* Three things, and the middle one is the
@@ -33763,7 +33763,7 @@ that `bar` was `reportBar(fnKeyTarget)` — §279's *where Submit is held*, buil
 from his own report that a capability function's page marked nothing at all.
 The merge resolved that line to this branch's older `var bar = "";` and took
 the whole banner with it. **No assertion on either side would have caught it**:
-§287's own checks ask about the CHIP in the bar above, and §279's own check
+§301's own checks ask about the CHIP in the bar above, and §279's own check
 walks a UNIT, where the banner was never missing. Found by diffing this branch
 against the main it was built on and reading every line of main's code the
 branch removes — which is the only thing that finds a loss a merge makes
@@ -33772,7 +33772,7 @@ Restored verbatim, with its comment, and `checks/report-blockers.py` green
 again.
 
 **A BLANKET RENUMBER SWEPT UP SOMEBODY ELSE'S SECTION.** Renaming this
-branch's own §250 to §287 ahead of the merge rewrote nine `§250` references in
+branch's own §250 to §301 ahead of the merge rewrote nine `§250` references in
 `config-data.js` and `lib/rules.js` that belong to **main's** §250 — a tactic's
 outcome measured against its own window. Comment-only, no behaviour, and still
 a fault: a comment that names the wrong decision sends the next reader to the
@@ -33788,7 +33788,7 @@ either file runs — so that branch can never be taken. §24: a branch for a pat
 that cannot be reached is one the next reader takes for load-bearing.
 
 **AND `checks/empty-not-missing.py` WAS RED ON THIS BRANCH, 27 WAYS.** It is
-§272's check and every one of its failures was the same fact: §287.3 took the
+§272's check and every one of its failures was the same fact: §301.3 took the
 quiet bar away, at Islam's own instruction. **REWRITTEN, NEVER DELETED AND
 NEVER LOOSENED** (§218) — the assertions that moved are inverted in place, so a
 build that drifted back would fail them; the absence is asserted **over a page
@@ -33811,5 +33811,5 @@ the cell rather than on the marked node.
 **Nothing else was removed.** Every function added in this round has callers;
 every behaviour in it traces to a sentence of Islam's or to a measurement
 recorded beside it. `seesEmpty()` returning false leaves §272's machinery
-reachable and unused, which is deliberate and recorded in §287.3: it is one
+reachable and unused, which is deliberate and recorded in §301.3: it is one
 line to give back.

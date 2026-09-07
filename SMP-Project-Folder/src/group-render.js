@@ -1111,7 +1111,7 @@ function draftBtns(){
    with no box and a lighter weight — one family in two volumes, the act that
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
-/* `own` (§287) is what stands where the "View only" pill did, for somebody
+/* `own` (§301) is what stands where the "View only" pill did, for somebody
    who reports here through bounded roles alone — built by the caller through
    ownStateChip(). Null for everybody else, and the pill is then the honest
    answer it always was: they really are reading. */
@@ -4819,7 +4819,7 @@ function renderReport(u){
     /* §233: a hidden row is not asked, so it is not drawn here — the same
        skip reportItems() makes, or the pane would collect a figure the
        submit gate no longer waits on. */
-    /* ── THE ROW CARRIES WHO IT BELONGS TO (§287.5) ──────────────────
+    /* ── THE ROW CARRIES WHO IT BELONGS TO (§301.5) ──────────────────
        Islam, of a project owner frozen on a function: *"check the behavior
        of the units. to match."* Measured on the unit's own Reporting page
        with a pillar owner: **0 entry controls and 8 read-only cells**, on
@@ -4916,7 +4916,7 @@ function renderReport(u){
         askedT.length + ' tactics asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
-        /* §287: the finished mark, on the pillar it is about. */
+        /* §301: the finished mark, on the pillar it is about. */
         doneCtl(u.ukey, p.id, p.owner)) +
       mTable + tTable;
   };
@@ -4984,7 +4984,7 @@ function renderReport(u){
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
      trip PAGE_TOOLS already makes. */
-  /* §287: what a bounded reporter is told in place of "View only" — built
+  /* §301: what a bounded reporter is told in place of "View only" — built
      from the SAME pillarTally() the rail rows read, so the chip and the rail
      can never disagree about how much is entered. */
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
@@ -5114,7 +5114,7 @@ function gapPlaceAttr(railKey, code){
     ' data-gplace="' + esc(railKey + "|" + code) + '"';
 }
 function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
-/* ── AND WHICH ONE OPENS WHEN NOBODY HAS PICKED (§287.4) ──────────────
+/* ── AND WHICH ONE OPENS WHEN NOBODY HAS PICKED (§301.4) ──────────────
    Islam, viewing as a project owner: *"when the user login he should land on
    his project by default"*, and *"abdel azim still can't edit"*.
 
@@ -5136,7 +5136,7 @@ function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
    what opens for them would be a change nobody asked for. `boundedHere()` is
    the gate, and it is the same question the reporting bar asks (§53.5).
 
-   THE TEST IS THE CONTAINER'S OWNER — `mayMarkDone`, the rule §287 already
+   THE TEST IS THE CONTAINER'S OWNER — `mayMarkDone`, the rule §301 already
    settled — and never `boundedReach()`, whose contributor branch reaches a
    project through its stakeholders: being named on somebody else's project
    does not make it the one you came to open. */
@@ -5152,7 +5152,7 @@ function railPick(c){
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (list[i].id === want) { railShow(k, list[i].id); return list[i]; }
-  /* §287.4: theirs opens, not the first one. */
+  /* §301.4: theirs opens, not the first one. */
   var mine = railMine("fn:" + c.fn, list, function(p){ return p.owner; });
   var pick = mine || list[0];
   railShow(k, pick.id);
@@ -6214,7 +6214,7 @@ function projReportBody(p, fk){
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
-      /* §287: the finished mark, on the project it is about. */
+      /* §301: the finished mark, on the project it is about. */
       doneCtl("fn:" + fk, p.id, p.owner)) +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
@@ -6303,7 +6303,7 @@ function renderFnReport(fnKey){
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
-  /* §287: the same chip the unit's bar carries, over this function's
+  /* §301: the same chip the unit's bar carries, over this function's
      projects. A function that plans in PILLARS never reaches here — it
      returned above through `renderReport(fnAsUnit(fk))`, the unit's own path,
      which carries the chip and the band control already (§59: one shape, one
@@ -6327,9 +6327,9 @@ function renderFnReport(fnKey){
      Submit with the reason on a hover and NOTHING on the page. One bar, both
      sides (§53.5, A15).
 
-     RESTORED: the §287 merge resolved this line to an empty string and took
+     RESTORED: the §301 merge resolved this line to an empty string and took
      §279's whole banner off this page with it — a loss no assertion in either
-     section would have caught, because §287's own checks ask about the CHIP
+     section would have caught, because §301's own checks ask about the CHIP
      and §279's run on the unit. */
   var bar = reportBar(fnKeyTarget);
   return bar + caps.map(function(c){
@@ -6354,7 +6354,7 @@ function unitRailPick(u){
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
-  /* §287.4 on the other side of the switch: a pillar owner's own pillar
+  /* §301.4 on the other side of the switch: a pillar owner's own pillar
      opens, exactly as a project owner's project does (§53.5). */
   var mine = railMine(u.ukey, list, function(p){ return p.owner; });
   var pick = mine || list[0];
@@ -6487,7 +6487,7 @@ function unitRailFor(u, sel){
    No border, deliberately — a bordered box inside a bordered pane reads as a
    control, and this is a label. Theme and owner stay gone: the rail card
    carries the owner, and the theme is a Strategy question. */
-/* ── THE CONTROL SITS ON THE BOX IT IS ABOUT (§287) ────────────────────
+/* ── THE CONTROL SITS ON THE BOX IT IS ABOUT (§301) ────────────────────
    Islam, generally, in §190: *"make generally the dismiss under the box with
    the issue"* — and §192 said the same of a count that could not take you to
    what it counted. A finished mark is about ONE project, so it goes in that
@@ -6518,7 +6518,7 @@ function doneCtl(target, id, owner){
       'It does not close anything.">Mark done</button>';
 }
 
-/* ── AND THE BAR STOPS SAYING "View only" TO SOMEBODY WHO REPORTS (§287) ──
+/* ── AND THE BAR STOPS SAYING "View only" TO SOMEBODY WHO REPORTS (§301) ──
    `repChrome`'s pill is drawn from `canSpeakFor()` — may this person SUBMIT —
    so a project owner with twelve live boxes beneath it was told the page was
    read-only. This is what stands in that slot for anybody who reports here
@@ -6534,12 +6534,12 @@ function ownStateChip(target, list, word){
   var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
   var tip = 'You report your own rows. The ' + submits +
             ' custodian submits the report.';
-  /* ── A CLOSED REPORT SAYS SO TO THEM TOO (§287.2) ─────────────────
+  /* ── A CLOSED REPORT SAYS SO TO THEM TOO (§301.2) ─────────────────
      §220 disables every control in the pane the moment the report is
      submitted or parked — and the word that explains it, `Submitted` /
      `Draft saved`, lives in `repChrome`'s OTHER branch, the one a bounded
      role never reaches. So the whole page went grey with nothing anywhere
-     saying why: before §287 that slot read *View only*, which is no
+     saying why: before §301 that slot read *View only*, which is no
      explanation either, and this section owns the slot now. The word is the
      same word (§53.5) and the way back is NOT offered — reopening speaks for
      the whole subject, which is exactly what a bounded role does not do. */
@@ -6549,7 +6549,7 @@ function ownStateChip(target, list, word){
      The word says the state, the hover says who can undo it. */
   if (reportClosed(target)) {
     var subd = !!(REVIEW.submitted || {})[String(target)];
-    /* ── AND A SAVED DRAFT IS THEIRS TO REOPEN (§287.6) ──────────────
+    /* ── AND A SAVED DRAFT IS THEIRS TO REOPEN (§301.6) ──────────────
        Islam: *"project owner can reopen eventually he can only report or
        fill missing for his own project."* A park froze every bounded owner
        under the subject with no way out but the custodian; nothing was sent,

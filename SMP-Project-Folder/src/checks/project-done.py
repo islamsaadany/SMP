@@ -149,7 +149,7 @@ with sync_playwright() as pw:
 
     # PRESSING IT, and the DATA read back (§96).
     # §215: A CHECK THAT DIES REPORTS NOTHING. The first run of this file
-    # against the pre-§287 build crashed on `mine[0]` and printed 3 failures
+    # against the pre-§301 build crashed on `mine[0]` and printed 3 failures
     # where there are 8 — a falsification that undercounts itself. Everything
     # below depends on a control that build does not draw, so each is reported
     # as failing rather than allowed to raise.
@@ -248,7 +248,7 @@ with sync_playwright() as pw:
        bool(umine) and pg.evaluate("()=>Object.keys(REVIEW.done||{})") == [ids["pillar"]],
        pg.evaluate("()=>JSON.stringify(REVIEW.done||null)"))
 
-    # ── 6 · A CLOSED REPORT SAYS SO TO THEM TOO (§287.2) ─────────────────
+    # ── 6 · A CLOSED REPORT SAYS SO TO THEM TOO (§301.2) ─────────────────
     # §220 disables every control the moment the custodian submits, and the
     # word explaining it lives in the branch a bounded role never reaches —
     # so the page went grey with nothing saying why. Asserted with the LOCK,
@@ -271,7 +271,7 @@ with sync_playwright() as pw:
     ck("the pane really is locked, mark included",
        shut["locked"] and shut["liveLeft"] == 0, shut)
 
-    # ── 7 · NO DOOR WHEN NOTHING IS OWED (§287.3, reversing §223) ────────
+    # ── 7 · NO DOOR WHEN NOTHING IS OWED (§301.3, reversing §223) ────────
     # Islam: "it requires him to fill something empty and there is nothing
     # empty." Measured in his shape: 0 counted, 0 red Missing on the page,
     # and a red "Fill in what is empty" button — opened by milestone
@@ -315,7 +315,7 @@ with sync_playwright() as pw:
     ck("a real gap brings the door back", d2["counted"] > 0 and d2["bar"] and
        "missing" in (d2["cta"] or "").lower(), d2)
 
-    # ── 8 · THEIRS OPENS, NOT THE FIRST ONE (§287.4) ─────────────────────
+    # ── 8 · THEIRS OPENS, NOT THE FIRST ONE (§301.4) ─────────────────────
     # Islam: "when the user login he should land on his project by default"
     # and "abdel azim still can't edit" — ONE fault. The pane opened on the
     # first project in the rail, which for a bounded role is somebody else's,
@@ -352,7 +352,7 @@ with sync_playwright() as pw:
     ck("the custodian still opens on the first project — nothing moved for them",
        bool(cust) and second["firstCode"] in cust, cust)
 
-    # ── 9 · THE UNIT MATCHES THE FUNCTION (§287.5) ───────────────────────
+    # ── 9 · THE UNIT MATCHES THE FUNCTION (§301.5) ───────────────────────
     # Islam, of a project owner frozen on a function: "check the behavior of
     # the units. to match." Measured on the unit's Reporting page with a
     # pillar owner: 0 entry controls, 8 read-only cells — because the pane
@@ -382,7 +382,7 @@ with sync_playwright() as pw:
     ck("the pillar beside theirs still offers nothing — the reach is per row",
        other is None or other["boxes"] == 0, other)
 
-    # ── 10 · A SAVED DRAFT IS THEIRS TO REOPEN (§287.6) ──────────────────
+    # ── 10 · A SAVED DRAFT IS THEIRS TO REOPEN (§301.6) ──────────────────
     # Islam: "project owner can reopen eventually he can only report or fill
     # missing for his own project." A park froze every bounded owner with no
     # way out but the custodian. Nothing was sent, so nothing is retracted.

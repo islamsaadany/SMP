@@ -342,7 +342,7 @@ with sync_playwright() as p:
        any("Weight" in h for h in wb["fnObj"]), wb["fnObj"])
     ok("...and not a 3-year target", not any("3-year" in h for h in wb["fnObj"]), wb["fnObj"])
     # §233 added the Hidden column to every row sheet, the unit's included,
-    # §278 APPENDED Jan–Dec for the monthly plan, and §294 gave a unit's
+    # §278 APPENDED Jan–Dec for the monthly plan, and §303 gave a unit's
     # objectives the Weight column §243 had already given the screen — three
     # deliberate decisions, so the literal moves with them (§214.3's lesson, for
     # the THIRD time on this one line: it had been red on `main` since §278
@@ -350,7 +350,7 @@ with sync_playwright() as p:
     #
     # AND THE ASSERTION THAT KEEPS EARNING ITS PLACE IS THE ONE BELOW IT —
     # a function's sheet asks for a Weight and a unit's did not, which is what
-    # §213 decided and §294 has now deliberately reversed for the unit half. The
+    # §213 decided and §303 has now deliberately reversed for the unit half. The
     # two sheets differ in exactly one column now (Group and the 3-year target),
     # so the difference is spelt out rather than left to two literals to agree
     # about by accident.
@@ -365,12 +365,12 @@ with sync_playwright() as p:
     MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     ok("a UNIT's Objectives sheet is what it was, plus §233's Hidden, §278's "
-       "months and §294's Weight",
+       "months and §303's Weight",
        wb["unitObj"] == ["Objective", "Group", "Direction", "3-year target",
                          "This year target", "Unit", "Compile", "Weight %",
                          "Hidden"] + MONTHS,
        wb["unitObj"])
-    # §294: BOTH SHEETS ASK FOR THE WEIGHT NOW, and a unit's keeps the two
+    # §303: BOTH SHEETS ASK FOR THE WEIGHT NOW, and a unit's keeps the two
     # columns a function's does not — asserted as the DIFFERENCE, because two
     # literals sitting apart in one file is how they come to disagree.
     ok("a unit's sheet is a function's plus Group and the 3-year target",

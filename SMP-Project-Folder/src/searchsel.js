@@ -45,7 +45,7 @@ var SEARCHSEL = (function(){
   var MIN = 6;             /* "beyond 5 items" */
   var open = null;
 
-  /* ── WHAT THE CLOSED CONTROL SAYS (§295) ──────────────────────────
+  /* ── WHAT THE CLOSED CONTROL SAYS (§304) ──────────────────────────
      Islam, of nineteen subjects run together in the box: *"why is the drop
      down contain all the names in the box itself?"*
 
@@ -238,7 +238,7 @@ var SEARCHSEL = (function(){
       none.hidden = n > 0;
     });
 
-    /* ── SELECT ALL / NONE, OPT-IN (§295) ────────────────────────────
+    /* ── SELECT ALL / NONE, OPT-IN (§304) ────────────────────────────
        Asked for by the download picker, which holds a whole tenant. It is
        `data-ssall` on the select rather than a rule for every ticking list:
        a tactic's collaborators are two names off a register of thirty-three

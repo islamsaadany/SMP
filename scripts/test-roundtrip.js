@@ -347,7 +347,7 @@ function firstDiff(a, b, at) {
     rcOk ? "" : JSON.stringify(Object.keys(rClean.review)));
   if (!rcOk) process.exitCode = 1;
 
-  /* ── THE PLANNING PERIOD (§299) ────────────────────────────────
+  /* ── THE PLANNING PERIOD (§308) ────────────────────────────────
      §172 IS WHY THIS IS MEASURED RATHER THAN CLAIMED: "it rides `extra`, so
      there is no migration" is exactly the shape of claim that shipped a
      CHECK constraint refusing a value four layers had agreed on. Two months

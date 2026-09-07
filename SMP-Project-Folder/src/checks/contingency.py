@@ -238,7 +238,7 @@ with sync_playwright() as pw:
             btn.click(); pg.wait_for_timeout(400); opened = True
             break
     ck("the cycle pen opens", opened)
-    # §299: THE REVIEW BLOCK, NAMED. The planning period is a `.cyc2-r` too
+    # §308: THE REVIEW BLOCK, NAMED. The planning period is a `.cyc2-r` too
     # and it is drawn FIRST, so a bare `.cyc2-r` is satisfied by a build that
     # lost the review block entirely — §113.8, an assertion that can no longer
     # fail for its own reason. Rewritten rather than loosened (§218): it asks

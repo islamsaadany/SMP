@@ -54,7 +54,7 @@ with sync_playwright() as p:
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(300)
 
-    # THE DOOR MOVED (§295.2), so this presses where it is now rather than
+    # THE DOOR MOVED (§304.2), so this presses where it is now rather than
     # where it was — §51.11, and §218: the assertion is REWRITTEN, never
     # loosened. What it asserted was "the SMO can start a build"; that is still
     # what it asserts, from the subject's own page.
@@ -87,7 +87,7 @@ with sync_playwright() as p:
     # BOTH ENDS (§94.2): it is on the plan page AND off the files page.
     pg.query_selector(".navmenu-btn").click(); pg.wait_for_timeout(300)
     pg.query_selector('[data-setupgo="import"]').click(); pg.wait_for_timeout(300)
-    ck("and it is gone from Import & archives",
+    ck("and it is gone from Import & storage",
        not pg.query_selector("[data-buildplan]"))
     # AND THE STATE GOES BACK (§94.2). Section 10 needs this unit to HAVE a
     # plan; a section that empties one and walks away makes its neighbour fail

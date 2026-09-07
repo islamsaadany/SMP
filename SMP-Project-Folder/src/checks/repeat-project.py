@@ -209,7 +209,7 @@ with sync_playwright() as p:
     # chose was deciding every score. Pressed through the real picker, because
     # writing the draft directly would test a door nobody can open.
     #
-    # §298: AND THE REVIEW POINT IS THE CYCLE'S END, so there is no fourth
+    # §307: AND THE REVIEW POINT IS THE CYCLE'S END, so there is no fourth
     # control to press: `Covers from` and `to` are pickers themselves now, and
     # picking `to` IS picking what everything is measured against. REWRITTEN,
     # never loosened (§218) — `pg.fill("#nc-to", ...)` would have gone on

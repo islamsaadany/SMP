@@ -169,6 +169,20 @@ body.presenting .chatdock { display:none; }
 
 .chatfoot { border-top:1px solid var(--line); background:var(--surface); padding:9px 10px;
             display:flex; flex-direction:column; gap:8px; }
+/* A GUARD, AND IT IS A NO-OP HERE — SAID RATHER THAN IMPLIED (§298). The line
+   above sets `display:flex`, and an author declaration ordinarily outranks the
+   browser's own `[hidden]{display:none}` — so this looked load-bearing, and I
+   wrote it as though it were. MEASURED, IT IS NOT: with this rule taken out,
+   Chromium still computes `display:none` on the hidden foot, because its UA
+   sheet declares that one `!important`. The falsification run is what said so
+   (§298.2) — the check went green on the build without it.
+
+   It stays as one line of belt and braces, because the engines this product is
+   actually used in (Safari on a Mac, most of all) cannot be measured from here
+   and the ordinary cascade rule would favour `flex`. What is NOT claimed is
+   that it fixes anything today. The check asserts the PAINT rather than the
+   attribute either way, so an engine that ever stops hiding it goes red. */
+.chatfoot[hidden] { display:none; }
 .chcomp { display:flex; align-items:flex-end; gap:8px; }
 .chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;
                    background:var(--ground); color:var(--ink); padding:8px 10px;
@@ -307,6 +321,50 @@ body.presenting .chatdock { display:none; }
    header dropdown (§90) — the same control, so it needs no second appearance —
    and adds only the rows inside it. */
 .hmenu-panel.chset { width:392px; }
+/* ── AND IT SCROLLS INSIDE ITSELF (§294) ───────────────────────────────
+   Islam: *"there is no scrolling inside the settings pan while there is a
+   uselss scrolling in the main page."* BOTH HALVES ARE ONE FACT. This panel
+   had no `max-height` and `overflow-y:visible`, so there was nothing inside
+   it to scroll — 0px, measured — and at 725px, which is what it stands at
+   once both diagnostics have been run, it hangs off the bottom of an
+   ordinary laptop window. It is positioned inside the page, so that overrun
+   BECOMES the page's scroll: the Platform Inbox needs 0px of scroll at every
+   height swept with the panel shut, and exactly the overrun with it open
+   (98px at 760). The useless scroll was the panel.
+
+   64vh IS NOT A GUESSED CONSTANT (§122.5). It is `.hmenu-panel.wide`'s own
+   cap — the platform's existing answer for a dropdown taller than the window
+   — so this adds no second answer to *how tall may a dropdown be* (§53.5).
+
+   AND IT SAYS IT CONTINUES, which is §108.6's rule and not decoration: a
+   capped list with no sign of more below is a list that lies, and a
+   scrollbar cannot carry that sign on a Mac, where it is an overlay that
+   appears only once you are already scrolling (§158). So the sign is the
+   platform's own — a sticky `::after` that gets out of its own way, coming
+   to rest after the last row where it has nothing left to cover, plus a
+   visible thin track. THERE IS NO NEGATIVE MARGIN: §108.6 records that
+   giving the fade's height back that way takes it off the SCROLLABLE range
+   and strands the last rows, which is this element's own fault arriving by
+   the other road. The 22px is paid.
+
+   THE PADDING STAYS, SO THE PAINTING COMPENSATES FOR IT. `.hmenu-panel`
+   carries `padding:6px` and every row in here is inset by it — visible, and
+   nobody asked for it to change (rule 1b). But a sticky box sticks to the
+   PADDING edge, so `top:0` would leave a 6px strip above the pinned heading
+   with rows sliding through it, and `bottom:0` the same below the fade. A
+   box-shadow paints that strip in the panel's own surface without moving
+   anything: invisible at rest, opaque while scrolling. The number is the
+   panel's padding and nothing else — asserted as the PROPERTY (no content
+   above the heading, none below the fade) rather than as the number, so a
+   later change to that padding goes red rather than silent (§94.8). */
+.hmenu-panel.chset { max-height:64vh; overflow-y:auto; overscroll-behavior:contain;
+                     scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+.chset .chset-h { position:sticky; top:0; z-index:2;
+                  box-shadow:0 -6px 0 var(--surface); }
+.hmenu-panel.chset::after {
+  content:""; display:block; position:sticky; bottom:0; z-index:1;
+  height:22px; pointer-events:none; box-shadow:0 6px 0 var(--surface);
+  background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
 /* THE NOTE OPENS ON A TAP (§127). `.tip` and its bubble are the platform's,
    declared once in group-extra.css and reused here rather than drawn again
    (§53.5) — this adds the open state and nothing else, so a mark that was
@@ -439,6 +497,15 @@ body.presenting .chatdock { display:none; }
            font-size:var(--fs-note); cursor:pointer; }
 .chnew-x:hover { border-color:var(--ink-3); color:var(--ink); }
 
+/* ── THE ONE THING THE OFFICE IS TOLD THAT NOBODY ELSE IS (§299) ────────
+   Everybody else's screen stays silent when the assistant cannot be reached,
+   because a person is coming anyway (§112.2). On the Ask half nobody is
+   coming, so silence would be the feature failing invisibly (§123) — and this
+   is not an alarm: the questions are fine, the connection is not (§168,
+   §190, §231.4's own ground, whose colours these are). */
+.chsys.chaskbad { color:var(--ink); background:var(--warn-bg);
+                  border:1px solid var(--warn); text-align:left; max-width:92%; }
+
 .chnothing.chqfail { color:var(--ink); max-width:44ch;
                      background:var(--warn-bg); border:1px solid var(--warn);
                      border-radius:8px; padding:14px 16px; }
@@ -462,6 +529,18 @@ body.presenting .chatdock { display:none; }
 .chset-test { margin-top:10px; }
 .chtest { margin-top:10px; border:1px solid var(--line); border-radius:6px;
           overflow:hidden; background:var(--surface); }
+/* THE VERDICT LINE IS THE DISCLOSURE (§296). The caret is scoped to the
+   `<details>` itself and never to the class: §287 records `.fstrip-head::after`
+   painting a fold mark on two surfaces that do not fold, and the same class is
+   worn here by nothing else only for as long as that stays true. */
+details.chtest > summary.chtest-h { cursor:pointer; list-style:none;
+  display:flex; align-items:center; gap:8px; }
+details.chtest > summary.chtest-h::-webkit-details-marker { display:none; }
+details.chtest > summary.chtest-h::after { content:"\25B8"; margin-left:auto;
+  font-size:10px; opacity:.75; flex:none; }
+details.chtest[open] > summary.chtest-h::after { content:"\25BE"; }
+details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus);
+  outline-offset:-2px; }
 .chtest-h { padding:8px 10px; font-size:var(--fs-note); font-weight:600;
             border-bottom:1px solid var(--line); background:var(--ground); }
 .chtest.good .chtest-h { color:var(--good-tx); }
@@ -478,6 +557,13 @@ body.presenting .chatdock { display:none; }
    sentence in a 90px column is a column of single words. */
 .chtest-d { grid-column:1 / -1; color:var(--ink-3); line-height:1.5;
             word-break:break-word; }
+/* WHAT THE TEST CANNOT SEE (§298) — under a clean result, in the panel's own
+   quiet register, set apart by a rule rather than by a colour: this is not a
+   failure and must not read as one (§168), and there is nothing here for
+   anybody to fix on our side. */
+.chtest-os { margin:8px 0 0; padding-left:9px; border-left:2px solid var(--line);
+             font-size:var(--fs-micro); line-height:1.5; color:var(--ink-3); }
+
 .tdot { width:7px; height:7px; border-radius:50%; display:inline-block;
         background:var(--ink-3); position:relative; top:-1px; }
 .tdot.ok   { background:var(--good); }
@@ -511,6 +597,23 @@ body.presenting .chatdock { display:none; }
                 display: inline-flex; align-items: center; justify-content: center;
                 gap: 6px; }
 .cqseg button + button { box-shadow: inset 1px 0 0 var(--line); }
+/* ── WAITING TAKES TWO THIRDS (§299) ────────────────────────────────────
+   Islam, of the drawing: "the waiting should occupy maybe 2/3 of the panel
+   width as it's the common use and ask takes less space." The two halves are
+   not equally likely — Waiting is what the office opens the corner for and Ask
+   is the exception — so they are not the same size.
+
+   SCOPED TO THIS SWITCH AND NOTHING ELSE. Every other segmented control in the
+   product is two equal choices; this is the one where the two errands are not.
+   `Ask` is 26px of word in about 116px of half at the panel's width, so it
+   holds one line down to the 460px breakpoint, where the panel goes full width
+   and the third only grows. */
+.cqseg button:first-child { flex: 2 1 0; }
+/* AND NEITHER HALF WRAPS. A count badge makes one half taller than the other
+   the moment its label breaks, and a switch whose two halves are different
+   heights reads as a fault rather than as a choice — measured on the mockup
+   before it reached here. */
+.cqseg button { white-space: nowrap; }
 .cqseg button:hover { color: var(--gold-deep); }
 /* THE SEGMENT IS LIT, NOT THE WORD COLOURED — a filled container has nowhere
    for an accent word to sit, and lighting the segment is what a segmented

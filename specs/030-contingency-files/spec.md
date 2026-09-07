@@ -1,6 +1,6 @@
 # 030 · The contingency files
 
-**Version:** v3.22 · **Decisions:** §297 · **Status:** answered; built
+**Version:** v3.22 · **Decisions:** §306 · **Status:** answered; built
 
 Islam, over five messages, arriving at the requirement that governs everything
 here:
@@ -57,7 +57,7 @@ on a machine that is not theirs.
 
 ### Why the slides are converted and not written a second time
 
-§296 refused to write the review deck as a `.pptx`, and the refusal was
+§305 refused to write the review deck as a `.pptx`, and the refusal was
 measured: `deckSlides` + `deckSlidesFn` are 639 lines over some twenty-one
 kinds of slide, and the deck has moved four times in a fortnight (§243, §253,
 §254, §259). A second description would have had to be corrected on every one
@@ -204,6 +204,6 @@ in the pen as one flat list, which this decision deliberately splits.
 ## 8 · Recorded, not done
 
 - A flow (§266) still cannot be downloaded; the slides are one file per subject.
-- Nothing carries a **PDF** of every subject: §296's per-subject print stands,
+- Nothing carries a **PDF** of every subject: §305's per-subject print stands,
   and Islam dropped the collective PDF once the working copy existed.
 - With nobody signed in anywhere, an overnight reminder waits for the morning.

@@ -107,7 +107,7 @@ textarea.bfi { resize:vertical; }
 /* On a projector nothing of the builder exists (§97's rule for the corner). */
 body.presenting #buildband { display:none; }
 
-/* ── WHERE BUILDING STARTS (§295.2) ───────────────────────────────────
+/* ── WHERE BUILDING STARTS (§304.2) ───────────────────────────────────
    The subject's own empty Plan page. An offer rather than a note: the guided
    build is the loud control, and the two routes the sentence already carried
    keep their words beside it. */

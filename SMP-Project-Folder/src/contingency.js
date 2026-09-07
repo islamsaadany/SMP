@@ -130,7 +130,7 @@ var CONT = (function () {
      Every subject that presents, one PowerPoint each, in the cycle board's
      own order (§245) — the same list the master presentation walks, so the
      folder and the running order cannot disagree. One subject is one file
-     rather than a zip holding one (§295). */
+     rather than a zip holding one (§304). */
   function subjects() {
     try { return masterSubjects(); } catch (e) { return []; }
   }

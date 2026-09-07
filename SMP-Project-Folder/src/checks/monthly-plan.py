@@ -422,8 +422,8 @@ with sync_playwright() as p:
     ck("a row with no monthly plan carries nothing through the file",
        wb.get("sibBack") == "", wb)
 
-    # §294: THESE TWO ASSERTED A POSITION AND A POSITION IS NOT THE PROMISE.
-    # They held `objHidden == 7` and `objJan == 8`, and §294 gave a unit's
+    # §303: THESE TWO ASSERTED A POSITION AND A POSITION IS NOT THE PROMISE.
+    # They held `objHidden == 7` and `objJan == 8`, and §303 gave a unit's
     # objectives the Weight column §243 had already given the screen — so
     # Hidden moved 7 → 8 and the twelve moved with it, and a check written
     # against a literal went red on a build behaving exactly as decided

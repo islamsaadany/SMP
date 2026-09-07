@@ -49,12 +49,12 @@ function sendFileBytes(bytes, name, mime){
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
 }
 
-/* ── ONE FILE, OR SEVERAL AS A ZIP (§295) ──────────────────────────────
+/* ── ONE FILE, OR SEVERAL AS A ZIP (§304) ──────────────────────────────
    The download card hands over whatever is ticked, and one subject ticked is
    ONE workbook rather than a zip holding one — a person who asked for Mobile's
    plan and got an archive to unpack has been given a chore, not a file.
 
-   The zip itself is `zipStore()` from xlsx.js, which since §295 takes bytes as
+   The zip itself is `zipStore()` from xlsx.js, which since §304 takes bytes as
    well as text, so a zip of workbooks needs nothing new: each member is
    already a Uint8Array from buildXlsx().
 
@@ -581,7 +581,7 @@ function sendPlanPptx(target){
    deck, which carries the YTD figure against the benchmark due, the progress,
    the band, the reporter's note and the score tables.
 
-   §296 REFUSED TO WRITE THAT DECK A SECOND TIME AND THAT REFUSAL STILL
+   §305 REFUSED TO WRITE THAT DECK A SECOND TIME AND THAT REFUSAL STILL
    STANDS. Its argument was measured: `deckSlides` + `deckSlidesFn` are 639
    lines over some twenty-one kinds of slide, the deck has moved four times in
    a fortnight (§243, §253, §254, §259), and a second description of the same

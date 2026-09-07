@@ -1,4 +1,4 @@
-"""IMPORT & ARCHIVES, REBUILT AS THREE TABS (§295).
+"""IMPORT & ARCHIVES, REBUILT AS THREE TABS (§304).
 
 Islam: *"I need a mockup to refine this page and the buttons inside it as it's
 too clumsy"*, then, of three tidier drawings of it, *"I don't like any of the
@@ -16,7 +16,7 @@ FIVE THINGS IT DELIBERATELY MEASURES THE HARD WAY:
     are caught and opened. A button wired to nothing renders identically to one
     that works, and this page is six of them.
 
-  · THE ZIP IS OPENED AND EVERY MEMBER READ. §295 taught `zipStore()` to hold
+  · THE ZIP IS OPENED AND EVERY MEMBER READ. §304 taught `zipStore()` to hold
     bytes; a zip of workbooks built by a writer that still ran them through
     TextEncoder would download, look right, and refuse to open.
 
@@ -100,11 +100,19 @@ with sync_playwright() as p:
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(300)
 
-    print("\n§1  three tabs, and the mode switch is gone")
+    print("\n§1  the three tabs lead the page, and the mode switch is gone")
     setup(pg, "dl")
     tabs = pg.eval_on_selector_all(".setuppane .secrow button",
                                    "e => e.map(x => x.textContent.trim())")
-    ck("the page's three tabs", tabs == ["Download", "Upload", "Archived plans"], tabs)
+    # THE THREE ARE ASSERTED IN ORDER AND AT THE FRONT, never as the whole list
+    # (§218, §214.3): §261.9 from another session hangs **Video storage** off
+    # this same page — a fourth thing the platform is HOLDING rather than a
+    # fourth way in — so a flat comparison would call a build behaving exactly
+    # as two decisions decided it broken. What this section is about is that
+    # out and back are two tabs and the mode switch is gone; what comes after
+    # them is that section's to say.
+    ck("the page's three tabs lead it, in order",
+       tabs[:3] == ["Download", "Upload", "Archived plans"], tabs)
     # BOTH ENDS: the switch is gone from the page, not merely from this tab.
     setup(pg, "up")
     up_sw = pg.eval_on_selector_all("[data-impkind]", "e => e.length")
@@ -112,7 +120,7 @@ with sync_playwright() as p:
     dl_sw = pg.eval_on_selector_all("[data-impkind]", "e => e.length")
     ck("the Plan|Progress switch is gone from both tabs", up_sw == 0 and dl_sw == 0,
        "%s / %s" % (dl_sw, up_sw))
-    ck("Build a plan is off this page (§295.2)", not pg.query_selector("[data-buildplan]"))
+    ck("Build a plan is off this page (§304.2)", not pg.query_selector("[data-buildplan]"))
 
     print("\n§2  the blank template, both formats, as files")
     n1, d1 = grab(pg, '[data-dlblank="pillars"]', "pillars template")
@@ -120,7 +128,7 @@ with sync_playwright() as p:
         names, first = sheets_of(d1)
         ck("the pillars template is a workbook with a Read me", names[0] == "Read me", names[:3])
         ck("…and it says which kind it is", "Plan workbook" in first)
-        ck("…and it names the cycle (§295.3)", "Cycle" in first)
+        ck("…and it names the cycle (§304.3)", "Cycle" in first)
     n2, d2 = grab(pg, '[data-dlblank="projects"]', "projects template")
     if d2:
         names2, _ = sheets_of(d2)
@@ -204,7 +212,7 @@ with sync_playwright() as p:
         ck("…in a folder that says what they are",
            all(m.startswith("plans/") for m in mem), mem[:2])
         ck("…and testzip passes", z.testzip() is None)
-        # EVERY MEMBER IS ITSELF A WORKBOOK — the whole of §295's binary-zip change.
+        # EVERY MEMBER IS ITSELF A WORKBOOK — the whole of §304's binary-zip change.
         okd = 0
         for m in mem:
             try:
@@ -244,7 +252,7 @@ with sync_playwright() as p:
         pg.set_input_files("#imp-file-progress", str(DL / np))
         pg.wait_for_timeout(900)
         msg = pg.evaluate("() => ((IMP.check && IMP.check.problems) || []).map(x => x.msg).join(' ')")
-        ck("a plan pressed as Progress is refused BY NAME (§295.4)",
+        ck("a plan pressed as Progress is refused BY NAME (§304.4)",
            "plan workbook" in msg and "Progress" in msg, msg[:90])
         ck("…and nothing was read", pg.evaluate("() => !IMP.summary && !IMP.diff"))
         pg.set_input_files("#imp-file-plan", str(DL / np))

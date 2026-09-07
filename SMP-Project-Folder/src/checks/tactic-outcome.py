@@ -24,7 +24,7 @@ def open_plan(pg, edit=False, tab=None):
     el = pg.query_selector('#secrow-in [data-sub2="plan"]')
     if el: el.click(); pg.wait_for_timeout(420)
     if edit:
-        # §294: THE PEN MOVED AND THIS CHECK DID NOT. §268 put the strategy
+        # §303: THE PEN MOVED AND THIS CHECK DID NOT. §268 put the strategy
         # pen on the SECTION LINE (`.secpen`) and deleted `editBar()`, so this
         # selector had matched nothing since — the pen never opened, and every
         # assertion after the first section died on an undefined cell and

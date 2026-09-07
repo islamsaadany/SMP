@@ -1,8 +1,14 @@
 # 016 · The assistant answers first
 
-**Version:** not built · **Decisions:** §101 (provisional — a shared sequential
-number, so it is claimed at merge time, not now) · **Status:** agreed in
-outline, awaiting sign-off on this document.
+**Version:** v3.31 · **Decisions:** §111 (step 1, the knowledge base's missing
+half) and §112 (step 2, the assistant answers first) · **Status:** BUILT
+
+> *Status corrected 2026-09-05. The provisional §101 was never claimed — that
+> number went to another session's "One table, one row shape" — and this file
+> went on saying "not built" while `lib/assistant.js` shipped and §123–§127
+> spent four rounds refining the thing it describes. This is exactly what
+> "claimed at merge time" is supposed to prevent, and nobody came back to
+> write the number in.*
 **Constitution:** checked against v1.1.0.
 
 Islam: *"Can we take this chat to another setting which is an AI bot option,

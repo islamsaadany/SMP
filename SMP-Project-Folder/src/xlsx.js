@@ -23,7 +23,7 @@ function crc32(bytes){
   return (c ^ 0xFFFFFFFF) >>> 0;
 }
 
-/* A MEMBER MAY BE BYTES AS WELL AS TEXT (§295). Every caller until now handed
+/* A MEMBER MAY BE BYTES AS WELL AS TEXT (§304). Every caller until now handed
    this XML, so `f.data` was always a string and encoding it here was the whole
    of the job. A zip of WORKBOOKS holds files that are themselves zips, and
    putting a Uint8Array through TextEncoder would mangle every byte above 0x7F
@@ -378,13 +378,13 @@ function readme(kind, pickLabel, pickList){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        [pickLabel, ""],
-       /* WHICH CYCLE THIS FILE CAME FROM (§295.3). Islam: *"we need first to
+       /* WHICH CYCLE THIS FILE CAME FROM (§304.3). Islam: *"we need first to
           select the cycle we are downloading from."* No workbook named one
           until today — measured, `xlsx.js` never read REVIEW.name — so a
           progress file taken this cycle and one taken next were identical in
           their headings, and two of them on a disk could not be told apart.
           Written, never read back: it is a fact about the download, and an
-          upload lands in the cycle that is open (§295.4). */
+          upload lands in the cycle that is open (§304.4). */
        ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Pillars FIRST \u2014 Measures and Tactics choose their pillar from what you type there."],
@@ -455,7 +455,7 @@ function readmeCell(sheets, label){
    reader stops finding the cell, the upload reports "no business unit called
    ''", and nothing says why. */
 var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability"];
-/* WHICH KIND OF WORKBOOK THIS IS, off its own first cell (§295.4). Written by
+/* WHICH KIND OF WORKBOOK THIS IS, off its own first cell (§304.4). Written by
    `readme()` and `capReadme()` for every file the platform produces, so it is
    the file's own word rather than a guess about its shape. "" when the sheet
    says neither — a workbook somebody rebuilt by hand cannot confirm anything
@@ -559,7 +559,7 @@ function planWorkbook(u){
                 SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
       }) }
   ] : [
-    /* §294: A UNIT'S OBJECTIVES CARRY A WEIGHT, and until now the file did
+    /* §303: A UNIT'S OBJECTIVES CARRY A WEIGHT, and until now the file did
        not ask for one. §243 gave this table an editable Weight column at
        Islam's own instruction and the workbook was left behind — so a
        download and an untouched re-upload DROPPED every weight, and
@@ -675,7 +675,7 @@ function progressWorkbook(u){
   return [
     sheet,
 
-    /* §294: EVERY SHEET ASKS FOR A NOTE, for the reason §105 gives — a figure
+    /* §303: EVERY SHEET ASKS FOR A NOTE, for the reason §105 gives — a figure
        at risk needs an explanation before the report can be submitted, so a
        file that carried the figure and not the note was a route that could
        never finish. */
@@ -695,7 +695,7 @@ function progressWorkbook(u){
         return acc;
       }, []) },
 
-    /* §294: THE SHEET ASKS WHAT THE SCREEN ASKS. Since §248 a tactic whose
+    /* §303: THE SHEET ASKS WHAT THE SCREEN ASKS. Since §248 a tactic whose
        outcome carries a target is reported by that OUTCOME'S figure, in the
        outcome's own unit — and this sheet went on asking for a per-cent and
        calling the column "New %", so the number a reporter typed landed in
@@ -999,11 +999,11 @@ function progressFromWorkbook(u, sheets){
   ["Objectives","Measures","Tactics"].forEach(function(name){
     sheetObjects(sheets[name]).forEach(function(r){
       /* Either spelling (§58): "New %" is what the Tactics sheet said before
-         §294 renamed it, and a workbook downloaded then still uploads. */
+         §303 renamed it, and a workbook downloaded then still uploads. */
       var v = r["New value"] != null ? r["New value"] : r["New %"];
       var note = r["Note"];
       var has = function(x){ return x != null && String(x).trim() !== ""; };
-      /* §294: A NOTE ALONE IS WORTH READING — the figure may already be right
+      /* §303: A NOTE ALONE IS WORTH READING — the figure may already be right
          and the note is what §105 is holding Submit for. */
       if (!has(v) && !has(note)) return;
       out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC" : name === "Measures" ? "MEASURE" : "NORTHSTAR",
@@ -1090,7 +1090,7 @@ function capReadme(kind, capNames, picked){
    stops opening is a template that has broken. */
 function readmePickFn(){ return ""; }
 
-/* ── WHICH WORKBOOK A SUBJECT KEEPS, AND FOR WHICH CYCLE (§295) ───────
+/* ── WHICH WORKBOOK A SUBJECT KEEPS, AND FOR WHICH CYCLE (§304) ───────
    The download card hands over whatever is ticked, and a tick is a unit key,
    `fn:<key>` or `cap:<id>`. The FORMAT is read off the subject and never
    stored beside it (§61) — the subject already says which plan it keeps.
@@ -1184,7 +1184,7 @@ function capPlanWorkbook(c){
                 SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
-    /* §294: THE REPEAT MARK TRAVELS. §115 made "does this project run again"
+    /* §303: THE REPEAT MARK TRAVELS. §115 made "does this project run again"
        an editable fact in the front matter and the file never carried it, so
        a download and an untouched re-upload turned every repeating project
        into a build-once one — and that is not a label: at the next cycle a
@@ -1270,7 +1270,7 @@ function capProgressWorkbook(c){
   return [
     capReadme("progress", [c.name], c.name),
 
-    /* §294: EVERY SHEET ASKS FOR A NOTE. §105 refuses a submission while a
+    /* §303: EVERY SHEET ASKS FOR A NOTE. §105 refuses a submission while a
        figure at risk carries no explanation, so a file that could enter the
        figure and not the note was a route that could never finish — the
        reporter filled the workbook, uploaded it, and still had to open every
@@ -1289,7 +1289,7 @@ function capProgressWorkbook(c){
        had. "New %" is read only for In progress -- the word decides the
        figure at both ends, and a per-cent behind "Delivered" is a number
        nobody can see. */
-    /* §294: AND THE CURRENT PER-CENT IS SHOWN. Without it a reporter cannot
+    /* §303: AND THE CURRENT PER-CENT IS SHOWN. Without it a reporter cannot
        see the figure they are being asked to correct, which is the one thing
        "Currently recorded" exists for on every other sheet here. */
     { name:"Deliverables", widths:[30, 48, 18, 18, 14, 12, 44, 16], lockedCols:[7],
@@ -1313,7 +1313,7 @@ function capProgressWorkbook(c){
         return acc;
       }, []) },
 
-    /* §294: THE PER-CENT WAS IN THE WRONG COLUMN. `m.pct` — what is RECORDED
+    /* §303: THE PER-CENT WAS IN THE WRONG COLUMN. `m.pct` — what is RECORDED
        — was written under "New %", the box the reporter is meant to fill, so
        the sheet handed back the stored figure as though somebody had just
        typed it. It reads under "Current %" now, beside the current status,
@@ -1349,7 +1349,7 @@ function capPlanFromWorkbook(c, sheets){
       owner:r["Owner"], stakeholders:(r["Stakeholders"] || "").split(/[,|]/)
         .map(function(x){ return x.trim(); }).filter(Boolean).join("|"),
       timeline:timelineKey(r["Timeline"]) || "", start:r["Start"], end:r["End"],
-      /* §294: a file written before this existed carries no column at all, so
+      /* §303: a file written before this existed carries no column at all, so
          `repeatFromLabel` answers null and the project arrives unmarked —
          which is what it was (§58). */
       repeats:repeatFromLabel(r["Repeats"]) });
@@ -1358,7 +1358,7 @@ function capPlanFromWorkbook(c, sheets){
   var kN = 0;
   sheetObjects(sheets["Objectives"]).forEach(function(r){
     if (!r["Objective"]) return;
-    /* §294: HIDDEN IS READ BACK. This sheet has WRITTEN the column since
+    /* §303: HIDDEN IS READ BACK. This sheet has WRITTEN the column since
        §233 and this reader ignored it — so a hidden objective travelled out
        marked and came home counted, which is the one direction a write-only
        column fails in and the reason it went unnoticed: the file looks
@@ -1430,7 +1430,7 @@ function capProgressFromWorkbook(c, sheets){
    ["Milestones","MILESTONE","Milestone"]].forEach(function(def){
     sheetObjects(sheets[def[0]]).forEach(function(r){
       var v = r["New value"] != null ? r["New value"] : r["New status"];
-      /* §294: THE PER-CENT AND THE NOTE ARE READ. This took the first of the
+      /* §303: THE PER-CENT AND THE NOTE ARE READ. This took the first of the
          two columns and stopped, so "New %" — which the Deliverables and
          Milestones sheets have OFFERED since §104 — was written into the file
          and never read out of it: the reporter typed the very figure §104.10

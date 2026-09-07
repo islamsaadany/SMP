@@ -62,7 +62,7 @@ function monthsFromText(s) {
    unit columns. It adds `current` and `new_value`, and covers NORTHSTAR as
    well as measures and tactics \u2014 the unit's headline is its Key Objectives,
    so leaving them out made the one number the page is built on unreportable. */
-/* §294: `new_note` beside `new_value`, for §105's reason — a figure at risk
+/* §303: `new_note` beside `new_value`, for §105's reason — a figure at risk
    needs its explanation before the report can be submitted, and a file that
    carried one and not the other was a route that could never finish. Appended,
    so a file written before today reads exactly as it did (§58, §65). */
@@ -239,7 +239,7 @@ function progressTemplate(u){
                        : "no target set \u2014 recorded, not scored" }));
     });
     p.tactics.forEach(function(t){
-      /* §294: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
+      /* §303: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
          FIGURE (§248), in the outcome's own unit — the same question the
          reporting box asks, decided by the same function (§42, §53.5). */
       var oc = outcomeOf(t), pl = tacticPlanned(t);
@@ -519,7 +519,7 @@ function diffProgress(u, rows){
   var out = [];
   rows.forEach(function(r){
     var hasVal = (r.new_value || "") !== "";
-    /* §294: A NOTE IS A CHANGE OF ITS OWN — §105 holds Submit while a figure
+    /* §303: A NOTE IS A CHANGE OF ITS OWN — §105 holds Submit while a figure
        at risk carries no explanation, and a row whose figure is already right
        and whose note is owed had nothing for the file to carry. */
     var hasNote = (r.new_note || "") !== "";
@@ -527,7 +527,7 @@ function diffProgress(u, rows){
     var hit = findById(u, r.id);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
     if (["MEASURE","TACTIC","OBJECTIVE"].indexOf(hit.kind) < 0) return;
-    /* §294: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
+    /* §303: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
        FIGURE (§248), which the screen has stored in `outActual` since that
        section and this path never learned — so a file reported the outcome's
        number into `actual`, which has always meant "% delivered", clamped it
@@ -747,7 +747,7 @@ function applyCapPlanReplace(c, rows){
 function applyProgress(u, d){
   d.rows.forEach(function(r){
     if (!r.hit) return;
-    /* §294: THE OUTCOME'S FIGURE GOES TO THE OUTCOME'S FIELD, in the unit the
+    /* §303: THE OUTCOME'S FIGURE GOES TO THE OUTCOME'S FIELD, in the unit the
        outcome is measured in (§243's rejoin, the same one the reporting box
        uses) — never through the per-cent clamp below, which would turn a
        target of 80 M EGP into 80 and a status pill into "Done". */
@@ -780,7 +780,7 @@ function applyProgress(u, d){
         r.hit.obj.progress = Math.max(0, Math.min(150, Math.round(pct)));
       }
     }
-    /* §294: AND THE NOTE, on every kind — the field §105 holds Submit for. */
+    /* §303: AND THE NOTE, on every kind — the field §105 holds Submit for. */
     if (r.note != null) {
       if (String(r.note) === "") delete r.hit.obj.note; else r.hit.obj.note = String(r.note);
     }
@@ -852,7 +852,7 @@ var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakehold
                  "collaborators",
                  "direction","value","unit","kind","measure_at","start","end",
                  "finish","covers","weight","compile","timeline","notes","hidden"];
-/* §294: `new_pct` and `new_note`. The per-cent is what §104.10 REQUIRES of an
+/* §303: `new_pct` and `new_note`. The per-cent is what §104.10 REQUIRES of an
    In progress row and there was no column for it at all here, so the CSV route
    could set a status the platform then reported as unanswered. */
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
@@ -931,7 +931,7 @@ function msStatusKey(v){
   if (s === "todo" || s === "not started") return "todo";
   return null;
 }
-/* §294: HOW A STATUS AND A PER-CENT ARE WRITTEN, IN ONE PLACE.
+/* §303: HOW A STATUS AND A PER-CENT ARE WRITTEN, IN ONE PLACE.
 
    The screen has had these two rules since §104 — leaving In progress CLEARS
    the per-cent rather than stranding a 35% behind "Delivered", and a typed
@@ -970,7 +970,7 @@ function capProgressTemplate(c){
   });
   (c.projects || []).forEach(function(p){
     (p.deliverables || []).forEach(function(d){
-      /* §294: A DELIVERABLE IS A STATUS AND A PER-CENT (§104), not the
+      /* §303: A DELIVERABLE IS A STATUS AND A PER-CENT (§104), not the
          `actual` this read — a field migration 024 removed, so the column
          headed "current" had been empty on every deliverable row since. */
       rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
@@ -1253,7 +1253,7 @@ function createFromCapPlan(c, d){
         stakeholders:(x.stakeholders || "").split(/[,|]/).map(function(s){ return s.trim(); }).filter(Boolean),
         timeline:timelineKey(x.timeline) || "quarter", start:x.start || "", end:x.end || "",
         deliverables:[], outcomes:[], milestones:[] });
-      /* §294: SET ONLY WHERE THE FILE MARKED IT (§50.6) — a project the file
+      /* §303: SET ONLY WHERE THE FILE MARKED IT (§50.6) — a project the file
          left as "No", and one whose file predates the column, must both be
          byte-identical to a project nobody ever asked, or every save carries a
          phantom change and a non-office save is refused for ever (§42). */
@@ -1333,7 +1333,7 @@ function diffCapProgress(c, rows){
   var out = [];
   rows.forEach(function(r){
     var hasVal = (r.new_value || "") !== "";
-    /* §294: A PER-CENT AND A NOTE ARE CHANGES OF THEIR OWN. The gate used to
+    /* §303: A PER-CENT AND A NOTE ARE CHANGES OF THEIR OWN. The gate used to
        be the new value alone, so a row whose status was already right and
        whose per-cent was owed had nothing to report — and §104.10 makes that
        row OUTSTANDING on the page, so the file could not answer the very
@@ -1346,7 +1346,7 @@ function diffCapProgress(c, rows){
     var was, now = String(r.new_value == null ? "" : r.new_value).trim();
     var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE";
     if (isStatusRow) {
-      /* §294: A DELIVERABLE IS A STATUS, exactly as a milestone is. It read
+      /* §303: A DELIVERABLE IS A STATUS, exactly as a milestone is. It read
          `hit.obj.actual` and `hit.obj.kind` — both removed by §104/§53.4 —
          so an upload saying "In progress" was coerced down the binary branch
          to "no" and written to a field nothing reads: the row went on saying
@@ -1385,7 +1385,7 @@ function applyCapProgress(c, d){
     if (!r.hit || r.status !== "changed") return;
     var o = r.hit.obj;
     if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE") {
-      /* §294: BOTH WRITE `status` AND `pct`, through the same pair the
+      /* §303: BOTH WRITE `status` AND `pct`, through the same pair the
          screen's own handlers now ask (§53.5) — so a file that says In
          progress leaves the row In progress with its per-cent set, which is
          what §104.10 REQUIRES before the row counts at all. The deliverable
@@ -1409,7 +1409,7 @@ function applyCapProgress(c, d){
         o.progress = Math.max(0, Math.min(150, Math.round(pctv)));
       } else o.progress = null;
     }
-    /* §294: THE NOTE, on every kind. §105 refuses a submission while a figure
+    /* §303: THE NOTE, on every kind. §105 refuses a submission while a figure
        at risk carries no explanation, so a file that could enter the figure
        and not the note was a route that could never finish. */
     if (r.note != null) {

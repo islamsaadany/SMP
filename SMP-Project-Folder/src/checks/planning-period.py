@@ -1,4 +1,4 @@
-"""THE PLANNING PERIOD, AND THE REVIEW CYCLE INSIDE IT (§299).
+"""THE PLANNING PERIOD, AND THE REVIEW CYCLE INSIDE IT (§308).
 
 Islam, from his own tenant with `Covers from` empty and the strip reading
 *"reported as of Aug 2026 · 8 of 12 months"*: **"how is it reading 8 or 12

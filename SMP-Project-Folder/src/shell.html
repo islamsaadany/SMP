@@ -150,7 +150,14 @@
   <div class="slidebar">
     <span class="sl-title" id="sl-title"></span>
     <span class="sl-sub"></span>
-    <button data-slexit class="txt" title="Done (Esc)">Done</button>
+    <!-- PLAY, AND THEN DONE (§295). Islam: *"when they open the presentation,
+         they see the manage section part and then present from there and if
+         they exit the presentation mood thye get back to the manage ppt."*
+         The pair sits in one group so the two do not drift apart (§225). -->
+    <span class="sl-acts">
+      <button data-slplay class="sl-play" title="Play the deck (it comes back here)">&#9654;&ensp;Play</button>
+      <button data-slexit class="txt" title="Done (Esc)">Done</button>
+    </span>
   </div>
   <div class="slidebody">
     <div class="slidelist" id="slidelist"></div>
@@ -607,20 +614,45 @@
          section is refused, so a view-only holder of c_import sees Archived
          plans alone and somebody with neither sees no entry — exactly what the
          two separate rows did, in one row. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Import & archives", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
+      /* ── AND VIDEO STORAGE IS A SECTION OF IT (§261.9, Islam) ─────────
+         §261 gave it a rail entry of its own under *Running the cycle*, and
+         he questioned it: *"the import and archive has 2 subtabs now. I'm not
+         sure that this is the right place to store the videos."* He is right,
+         and the reason is sharper than proximity — the group's own note says
+         **"What you do while a cycle is open"**, and clearing storage is
+         exactly what you do when one is NOT.
+
+         WHAT THEY SHARE IS THE PAGE'S NAME: what the platform is
+         holding, the ways in and the things held. An archived plan and a
+         stored clip are the same errand — *what has piled up, and how do I
+         clear it* — which is why the label moves to **Import & storage**
+         rather than the section being bolted under a name describing the
+         other two. §108.4's argument for joining import and archives (an
+         upload IS an archiving act) is untouched; this adds a third thing
+         held, not a third meaning.
+
+         EACH SECTION KEEPS ITS OWN GATE (§130.4), which is what lets Video
+         storage be the office's while the others follow `c_import` — and
+         it is why this could not simply inherit the page's key. */
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Import & storage", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace video clips storage space delete clear mb size presentation",
         sections: function(){
-          /* THREE, SINCE §295: what leaves, what arrives, and the record of
-             what an arrival displaced. The two import sections keep the SAME
-             gate they had — §48.2 closed importing to anybody without `edit`
-             because there is nothing to READ on it — so a view-only holder of
-             c_import still sees Archived plans alone. */
+          /* FOUR: what leaves, what arrives, the record of what an arrival
+             displaced, and what the platform is holding. §304 split the one
+             import section into Download and Upload — a file goes away for a
+             week and somebody sends it back, so the two halves are not one
+             sitting — and §261.9's Video storage is the fourth. The two import
+             sections keep the SAME gate they had — §48.2 closed importing to
+             anybody without `edit` because there is nothing to READ on it — so
+             a view-only holder of c_import still sees Archived plans alone. */
           return [{ k:"dl",   ac:"c_import", label:"Download",
                     when: function(){ return grant("c_import") === "edit"; },
                                                                         render:renderImportDownload },
                   { k:"up",   ac:"c_import", label:"Upload",
                     when: function(){ return grant("c_import") === "edit"; },
                                                                         render:renderImportUpload },
-                  { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
+                  { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives },
+                  { k:"vids", ac:"c_import", label:"Video storage",
+                    when: function(){ return inOffice(); },             render:renderVideoStore }];
         } },
       /* Last in its group: it explains the rest, so it is not where you start.
 
@@ -1663,6 +1695,39 @@
      session — because a control that does nothing is worse than none (§61).
      The same two silences `WELCOME.open()` keeps, asked once here so the
      button and the screen cannot disagree about when it is possible. */
+  /* ── THE DRAWING IS CENTRED IN ITS BOX, AND NOTHING NUDGES IT
+        (§302.3, reversing §302's optical shift at Islam's direction) ─────
+     Islam: *"the home icon is not centered in the top box."* The BUTTON was
+     centred and stayed centred — 6.00px above and below in the 46px bar,
+     the drawing 6.50px from all four edges (§197.2, §200.2, §202, all
+     intact and all measured again). Two things were measured off it, and
+     only one of them is corrected here.
+
+     THE HALF PIXEL ACROSS WAS ARITHMETIC AND IS FIXED IN THE CSS: a 21px
+     mark in a 34px square leaves THIRTEEN pixels of slack, which cannot
+     halve into whole pixels, so the browser snapped the drawing sideways —
+     identical at every width and every zoom, which is what says it is not
+     layout. 20px leaves 14 and halves at 7 a side (`arrange.css`).
+
+     THE 2px DOWN WAS THE INK'S CENTRE OF MASS, AND ISLAM RULED IT OUT.
+     A house has a pointed roof, so nearly all its ink sits in the lower
+     half: its bounding box centres and its MASS does not. §302 shifted the
+     drawing up 1.5 units to centre the mass — measured, and it put the
+     drawing's own BOX 1.438px HIGH, which is what he was then looking at:
+     *"we need to center the drawing in the box not the weight ... go with
+     A."* His call, recorded as a reversal rather than overwritten
+     (Principle II) — the cost is stated and it is his to take: the roof
+     reads a shade light to an eye that measures weight, which is the
+     complaint §302 was built to answer.
+
+     SO THERE IS NO TRANSFORM AT ALL, WHICH IS THE POINT rather than a
+     tidy-up: with the mark at 20px the path is already centred in its own
+     viewBox to within 0.06px, so option A is not a smaller nudge, it is
+     none — and a mark drawn here later inherits no offset measured for
+     this one. The path's bytes and the `viewBox` are untouched either way,
+     so §202's four gaps stay 7/7/7/7 and go on meaning something.
+     Measured, never guessed (§122.5), off the PAINTED pixels at 8× and
+     never off the element (§185): box +0.000 across, +0.062 down. */
   var ICON_HOME =
     '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
     '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
@@ -3037,7 +3102,7 @@
       var draw = function(btn){
         var mi = btn.dataset.mi === "" ? null : +btn.dataset.mi;
         var yr = +btn.dataset.yr;
-        /* §298: ONE POPUP, TWO BODIES. A day picker steps months and lights a
+        /* §307: ONE POPUP, TWO BODIES. A day picker steps months and lights a
            day; a month picker steps years and lights a month. Everything
            around them — placing, dismissing, Escape, the write through FIELDS
            — is the same machinery, because it is the same control (§53.5). */
@@ -3335,17 +3400,36 @@
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
-        /* §224's rule — the FORMAT decides the deck, never the `fn:`
-           prefix — now lives in `openDeckTarget()` beside the two openers,
-           because §296's PDF entry is a second door onto the same act and
-           two copies of that branch is how the fault came back one surface
-           at a time (§253.3). */
-        openDeckTarget(this.dataset.present);
+        /* §224: THE FORMAT DECIDES THE DECK, NOT THE PREFIX. Islam: *"the
+           consumer finance presentation is not showing anything."* This
+           branched on `fn:` alone and sent EVERY function to the capability
+           deck — so a function that plans in PILLARS, which has no
+           capabilities at all, opened a deck reading "Capability review · 0
+           capabilities" and nothing else. Reproduced on the demo's own
+           pillars function before a line was changed.
+
+           §63.4 fixed the other half of this — the button used to carry no
+           target and a pillars function could not be presented at all — and
+           routed every `fn:` to `openDeckFn`, which is right for a capability
+           function and wrong for the other format. §59's rule in the one
+           place still asking by prefix: a pillars function's plan is
+           unit-shaped, so it takes the unit deck through `unitLike()`, which
+           resolves both kinds of key in one place.
+
+           ONE OPENER FOR EVERY DOOR (§295, and the PDF entry with it). The
+           branch below used to be written out here and nowhere else; Play
+           needs the same answer, and so does the PDF, which is a second door
+           onto the very act this button performs — so it lives in
+           `openDeckFor()` rather than being copied, which is how §224 and
+           §253.3 each came to be fixed on one surface and left broken on
+           another. Two functions answering it was found and closed AT THE
+           MERGE that brought both here (§281). */
+        openDeckFor(this.dataset.present);
       });
     });
-    /* The same deck, taken away as a PDF (§296). Beside Present and through
-       the same resolver, so the file can never be a different deck from the
-       one that press opens. */
+    /* The same deck, taken away as a PDF. Beside Present and through the same
+       resolver, so the file can never be a different deck from the one that
+       press opens. */
     document.querySelectorAll("[data-deckpdf]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
@@ -3379,6 +3463,19 @@
         var hit = capItemById(el.dataset.crep);
         if (!hit) return;
         var v = el.value.trim();
+        /* §300: the yes/no pair writes one field between them, exactly as it
+           does on a unit's page — one join, so the two sides of the switch
+           cannot store the answer differently (§53.5). A cleared answer is a
+           null here rather than a deleted key, because that is what this
+           handler has always written for an emptied box. */
+        if (el.dataset.ynpart) {
+          var was = SMPRules.ynState(hit.obj.actual);
+          var next = el.dataset.ynpart === "status"
+            ? SMPRules.ynJoin(v, v === "wip" ? was.pct : null)
+            : SMPRules.ynJoin(was.status || "wip", v);
+          hit.obj.actual = next === "" ? null : next;
+          paint(); return;
+        }
         if (v === "") { hit.obj.actual = null; }
         else if (hit.kind === "deliverable") { hit.obj.actual = Number(v); }
         else {
@@ -3410,7 +3507,7 @@
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        /* §294: ASKED OF `setRowStatus`, which the workbook reader now asks
+        /* §303: ASKED OF `setRowStatus`, which the workbook reader now asks
            too. These two lines and the file's were two answers to one
            question, and the file's had been wrong since §104 (§53.5). */
         setRowStatus(hit.obj, el.value || null);
@@ -3703,7 +3800,7 @@
        and is picked, not typed, so it writes through FIELDS like every other
        month in the product rather than through an id read here.
 
-       §298: AND SO ARE THE THREE DATES. They are pickers writing into the
+       §307: AND SO ARE THE THREE DATES. They are pickers writing into the
        draft through FIELDS, so the only thing still read by id is the NAME,
        which is the only thing still typed. */
     ["nc-name"].forEach(function(id){
@@ -3737,7 +3834,7 @@
          changes every unit's execution score"; defaulting this would put that
          guess straight back.
 
-         §298: IT IS `to` THAT IS ASKED FOR NOW — the same refusal, one box
+         §307: IT IS `to` THAT IS ASKED FOR NOW — the same refusal, one box
          earlier, because the cycle's end IS the review point. */
       if (!String(d.to || "").trim()) {
         alert("Pick the month this cycle covers to \u2014 it decides what every " +
@@ -3770,7 +3867,7 @@
       REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
                  due:d.due || "", state:"open", note:{}, submitted:{},
                  cadence:REVIEW.cadence };
-      /* §298: nothing else to carry. The review point travelled as a field of
+      /* §307: nothing else to carry. The review point travelled as a field of
          its own here; it is `to`, which the line above already wrote. */
       NEWCYCLE = null;
       paint();
@@ -3807,6 +3904,40 @@
            it. Rejoin them before storing, or every screen downstream reads a
            revenue of "2.7" where it expects "2.7B EGP". */
         var unit = el.dataset.unit || "";
+        /* ── §300: A YES/NO ROW IS ANSWERED IN TWO HALVES ─────────────────
+           The picker and the per-cent box write ONE field between them, which
+           is why neither of them can simply store what it holds: the answer is
+           `Not started` / `In progress` / `In progress 60` / `Done`, joined by
+           the shared rule so the screen and the server read one spelling
+           (§42). Each half keeps the other's — picking In progress on a row
+           that already had a number keeps it, and typing a number on a row
+           that says nothing yet MEANS In progress.
+
+           LEAVING In progress CLEARS THE NUMBER, which is §104's own rule for
+           the milestone control this copies: a stale 35% behind `Done` is a
+           figure the score does not read and nobody can see, and it would come
+           back the moment somebody picked In progress again.
+
+           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. The
+           branch below sets `Done` from a score of 100 or more, which is right
+           for a figure against a target and wrong here: an outcome 60% through
+           a half-elapsed window scores 120, and reading that as Done would put
+           the word on a row whose own answer says In progress. */
+        if (el.dataset.ynpart) {
+          var ynFld = el.dataset.fld === "outActual" ? "outActual" : "actual";
+          var was = SMPRules.ynState(hit.obj[ynFld]);
+          var next = el.dataset.ynpart === "status"
+            ? SMPRules.ynJoin(v, v === "wip" ? was.pct : null)
+            : SMPRules.ynJoin(was.status || "wip", v);
+          if (next === "") delete hit.obj[ynFld]; else hit.obj[ynFld] = next;
+          if (ynFld === "outActual") {
+            var yst = SMPRules.ynState(hit.obj.outActual);
+            if (yst.status === "done") hit.obj.status = "Done";
+            else if (yst.status === "wip" && hit.obj.status !== "Blocked") hit.obj.status = "WIP";
+            else if (yst.status === "todo" || yst.status === "") hit.obj.status = "Not started";
+          }
+          paint(); return;   /* paint() ends in afterPaint() (§170) */
+        }
         /* ── §248: A TACTIC MEASURED BY ITS OUTCOME ───────────────────────
            The box says which field it is for. `outActual` is a figure in the
            outcome's OWN unit — stores, EGP, a per cent — so it is joined with
@@ -3907,6 +4038,21 @@
              carries a phantom change for ever. */
           if (!Object.keys(REVIEW.parked).length) delete REVIEW.parked;
         }
+        paint();
+      });
+    });
+    /* ── "I HAVE FINISHED MINE" (§301) ────────────────────────────────
+       The one control a bounded reporter has. The address carries the target
+       and the container's id because the band that drew it is inside a pane
+       that does not otherwise know which subject it belongs to — the same
+       reason §177.2's gap chips carry their own rail-and-code pair. The
+       DIRECTION is in the address too, read off the state at render time, so
+       the handler never has to work out which way it is toggling. */
+    document.querySelectorAll("[data-rowdone]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = String(b.dataset.rowdone).split("|");
+        if (a.length < 2) return;
+        setDoneMark(a[0], a[1] === "1");
         paint();
       });
     });
@@ -4492,6 +4638,81 @@
     });
     document.querySelectorAll("[data-kbadd]").forEach(function(b){
       b.addEventListener("click", function(){ kbAddNew(b.dataset.kbadd); paint(); });
+    });
+    /* ── QUESTIONS ASKED (§299) ─────────────────────────────────────
+       The filter hides nothing the office cannot get back in one press, so it
+       is state on the page and not a stored preference — reopening the page
+       shows everything, which is what somebody arriving to read it wants. */
+    document.querySelectorAll("[data-askfilter]").forEach(function(b){
+      b.addEventListener("click", function(){
+        ASKMISS = b.dataset.askfilter === "miss"; paint();
+      });
+    });
+    /* WRITING THE ANSWER IS MINTING A KNOWLEDGE BASE ENTRY, through the page's
+       OWN writers (§53.5) — `kbAddNew` and `kbSetAdded`, exactly what "+ Add a
+       question to this group" already calls — so an answer written here is
+       indistinguishable from one typed below, and everything downstream (the
+       page, the assistant's corpus, the questions file) needs nothing.
+
+       THE QUESTION COMES ACROSS EDITABLE AND EDITING IT CHANGES NOTHING ON THE
+       LIST. What somebody typed in a hurry is rarely how it should read in the
+       knowledge base, and the record of what was actually asked has to stay
+       honest — they are two different strings and this is the only place they
+       are ever the same one.
+
+       AND THE AUDIENCE DEFAULTS TO THE SIDE THAT ASKED (§161.1). Islam:
+       "sometimes the same question gets 2 different answers depending on their
+       role smo or user" — a distinction he deliberately left for later, which
+       is safe precisely because the entry carries it from the first day. */
+    /* AN ANSWER THAT ALREADY EXISTS IS OPENED, NEVER DUPLICATED (§299, §87).
+       The pen goes on and the page lands on the card, which is the same pair
+       the Add handler below does — the two differ in whether an entry has to
+       be minted first, and in nothing else. */
+    document.querySelectorAll("[data-askopen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var id = b.dataset.askopen;
+        KBEDIT = true;
+        paint();
+        setTimeout(function(){
+          var card = document.querySelector('[data-kbq="' + id + '"]');
+          /* A SHIPPED ANSWER MAY HAVE NO CARD UNTIL THE PEN IS OPEN, and it
+             may have none at all if the corpus has moved on since the question
+             was asked — which is a real state, not a fault, so it says nothing
+             rather than throwing (§35). */
+          if (!card) return;
+          card.scrollIntoView({ block: "center" });
+          card.focus();
+        }, 0);
+      });
+    });
+    document.querySelectorAll("[data-askadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var qkey = b.dataset.askadd;
+        var row = ((ASKS && ASKS.rows) || []).filter(function(r){
+          return r.qkey === qkey; })[0];
+        if (!row) return;
+        var sel = b.parentNode && b.parentNode.querySelector(".askgrp");
+        var g = (sel && sel.value) || (RECIPES[0] && RECIPES[0].g);
+        if (!g) return;
+        var aud = row.office_only ? "office" : (row.by_office ? "everyone" : "others");
+        var id = kbAddNew(g);
+        kbSetAdded(id, row.question, "", aud);
+        /* THE PEN GOES ON, or the card that was just minted renders as a
+           read-only question with no answer under it — §61's trap, one press
+           after the control that created it. */
+        KBEDIT = true;
+        paint();
+        /* AND THE PAGE LANDS ON IT. The entry is in a group that may be a long
+           way down a long page, and a control that creates something out of
+           sight has done half its job (§90: a control below the fold does
+           nothing). Queued, because the paint above has to have happened. */
+        setTimeout(function(){
+          var box = document.querySelector('[data-kba="' + id + '"]');
+          if (!box) return;
+          box.scrollIntoView({ block: "center" });
+          box.focus();
+        }, 0);
+      });
     });
     document.querySelectorAll("input.blabel").forEach(function(inp){
       inp.addEventListener("change", function(){
@@ -6547,6 +6768,42 @@
         paint();
       });
     }
+    /* ── WHAT THE ASSISTANT WAS ASKED (§299) ───────────────────────────
+       The same shape and the same moment as the password states: asked once
+       per visit to the page that shows it, gated on the page KEY rather than
+       on markup it happens to carry (§93, §137's fault, twice recorded), and
+       absent rather than empty from file://, where there is no server and
+       never was.
+
+       A REFUSAL IS SAID (§93, §231.4). `return` would leave this as an empty
+       list — "asked, and nobody has asked anything" — which over a real
+       history is the one thing this page must never say. */
+    if (ASKS === null && current === "setup" && currentSub === "kb" &&
+        typeof SYNC !== "undefined" && SYNC.isLive() && inOffice() &&
+        typeof CHAT !== "undefined" && CHAT.questions) {
+      ASKS = { asking: true };
+      CHAT.questions(function(err, j){
+        ASKS = (err || !j) ? { __error: String((err && err.message) || err || "no answer") }
+                           : { days: j.days, rows: j.rows };
+        paint();
+      });
+    }
+    /* THE STORE IS ASKED ONLY ON THE PAGE THAT SHOWS IT (§261), and only over
+       a server. Gated on the page KEY rather than on markup the page happens
+       to carry — §93 and §137's fault, where a gate keyed on a selector that
+       later moved stopped matching in silence and in the safe-looking
+       direction. */
+    if (VIDSTORE === null && current === "setup" && currentSub === "import" &&
+        CURSEC[currentSub] === "vids" &&
+        typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
+      VIDSTORE = { asking:true };   /* asked, and not yet answered — which is
+                                      not the same as "there is no store" (§93) */
+      SYNC.videoList(function(err, j){
+        VIDSTORE = err ? { __error:String(err.message || err) }
+                       : { ready:!!j.ready, clips:j.clips || [] };
+        paint();
+      });
+    }
     /* The same shape and the same moment as the password states: asked once
        per visit to the page, and absent rather than empty from file:// (§56). */
     /* The same selector, and it had gone the same way (§93.2). */
@@ -7289,7 +7546,7 @@
       });
     });
     /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
-    /* ── THE DOOR KNOWS ITS SUBJECT (§295.2) ─────────────────────────
+    /* ── THE DOOR KNOWS ITS SUBJECT (§304.2) ─────────────────────────
        It used to be one amber band on a page about files, so the first thing
        it had to ask was "whose plan is this?". The door is now on the
        subject's OWN empty Plan page, so the answer is the page you are
@@ -7384,7 +7641,7 @@
     });
   }
 
-  /* ── THE CSV WRITERS LOSE THEIR LAST CALLER (§295) ────────────────
+  /* ── THE CSV WRITERS LOSE THEIR LAST CALLER (§304) ────────────────
      Islam: *"we can accept the csv but nobody builds in csv."* So the two
      links that handed one out — the raw download and the copy box — go, and
      with them `csvFor()` and `fileName()`, which had no other caller.
@@ -7511,7 +7768,7 @@
   }
 
   function wireImport(){
-    /* ── THE DOWNLOAD TAB (§295) ─────────────────────────────────────
+    /* ── THE DOWNLOAD TAB (§304) ─────────────────────────────────────
        Two controls and five buttons, and every one of them reads its answer
        off the page at the moment it is pressed rather than off a mode set
        earlier. `IMP.pick` and `IMP.cycle` exist only so a repaint caused by
@@ -7555,7 +7812,7 @@
         var kind = this.dataset.dlpick;
         var subs = impPicked();
         var files = [], stamp = impCycleStamp();
-        /* THE LEAF NAMES THE KIND, not only the folder (§295). One subject is
+        /* THE LEAF NAMES THE KIND, not only the folder (§304). One subject is
            sent as ONE FILE, and `sendFilesZip` drops the folder when it does —
            so a name that leaned on `plans/` gave the plan and the progress file
            for one subject the SAME name on disk. Found by downloading both and
@@ -7614,7 +7871,7 @@
       });
     });
 
-    /* ── TWO BUTTONS, ONE READER (§295) ──────────────────────────────
+    /* ── TWO BUTTONS, ONE READER (§304) ──────────────────────────────
        Islam: *"make the upload of plan or progress 2 buttons like what we did
        in the download of templates."* Each button is a <label> over its own
        hidden input, so one press both says WHICH KIND and opens the chooser —
@@ -7624,7 +7881,7 @@
        earlier, and the FILE then confirms it: every workbook the platform
        writes says "Plan workbook" or "Progress workbook" in the first cell of
        its Read me sheet, so pressing the wrong one is refused BY NAME instead
-       of read wrong (§295.4). */
+       of read wrong (§304.4). */
     ["plan", "progress"].forEach(function(kind){
     var f = document.getElementById("imp-file-" + kind);
     if (f) f.addEventListener("change", function(){
@@ -7635,7 +7892,7 @@
         var rx = new FileReader();
         rx.onload = function(){
           readXlsx(rx.result).then(function(sheets){
-            /* ── THE FILE CONFIRMS THE BUTTON (§295.4) ───────────────
+            /* ── THE FILE CONFIRMS THE BUTTON (§304.4) ───────────────
                Every workbook this platform writes opens its Read me sheet
                with "Plan workbook" or "Progress workbook", so the kind the
                person pressed is CHECKED rather than trusted — press the wrong
@@ -7821,6 +8078,37 @@
       b.addEventListener("click", function(){
         if (restoreArchive(b.dataset.restore)) paint();
       });
+    });
+    /* ── Video storage (§261) ─────────────────────────────────────────────
+       DELETING BYTES IS THE ONE THING HERE THAT CANNOT BE UNDONE, so it is
+       asked out loud and the ask NAMES what goes (§186's rule: a confirmation
+       that does not say which line catches none of the mistakes it exists
+       for). The server asks again — `mayDestroy` draws the button, and
+       `isSuperRole` decides on the way in (§146). */
+    document.querySelectorAll("[data-viddel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var path = b.dataset.viddel;
+        var row = vidStoreRows().filter(function(r){ return r.path === path; })[0];
+        if (!row) return;
+        if (!confirm("Delete this clip for good?\n\n" +
+              (row.name || path) + " — " + vidSize(row.bytes) + ", from " + row.where +
+              "\n\nThe slide stays where it is and will say the clip was removed. " +
+              "The bytes cannot be brought back.")) return;
+        vidStoreDrop([path]);
+      });
+    });
+    document.querySelectorAll("[data-viddelold]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var old = vidStoreRows().filter(function(r){ return !r.open; });
+        if (!old.length) return;
+        if (!confirm("Delete " + plural(old.length, "clip") + " for good, freeing " +
+              vidSize(vidStoreBytes(old)) + "?\n\nNothing on the review that is open " +
+              "now is touched. The bytes cannot be brought back.")) return;
+        vidStoreDrop(old.map(function(r){ return r.path; }));
+      });
+    });
+    document.querySelectorAll("[data-vidrefresh]").forEach(function(b){
+      b.addEventListener("click", function(){ VIDSTORE = null; paint(); });
     });
     document.querySelectorAll("[data-forget]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -8558,7 +8846,7 @@
           ' reported this cycle — removing it moves ' + esc(scoresOf) +
           '.</div>' : '') +
         '<p class="archline">The plan as it stands is archived first. ' +
-          '<b>Setup › Import &amp; archives</b> holds the way back.</p>' +
+          '<b>Setup › Import &amp; storage</b> holds the way back.</p>' +
         '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
         '<button class="danger" data-rmyes="1">' + esc(yesWord) + '</button></div>' +
       '</div>');

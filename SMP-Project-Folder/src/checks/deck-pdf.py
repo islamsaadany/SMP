@@ -1,4 +1,4 @@
-"""THE DECK AS A PDF (§296).
+"""THE DECK AS A PDF (§305).
 
 Islam, having asked for the presentation to be downloadable beside the plan:
 *"let's go with the pdf for now."*
@@ -8,7 +8,7 @@ into a .pptx. That was the other option and its cost was stated before he
 chose: this deck has moved four times in a fortnight (§243, §253, §254,
 §259), so a second builder would be two answers to "what is on this slide"
 and they would part company at the next change, silently, with the file
-still opening and still looking right (§53.5, §294). Printing what the
+still opening and still looking right (§53.5, §303). Printing what the
 platform already assembled cannot drift by construction.
 
 WHAT IS ASSERTED, and why each one can fail:
@@ -149,10 +149,10 @@ with sync_playwright() as p:
     print("\n── 1 · the readers this check needs")
     have = js(pg, """()=>({
       deckToPdf: typeof deckToPdf === 'function',
-      openDeckTarget: typeof openDeckTarget === 'function',
+      openDeckFor: typeof openDeckFor === 'function',
       closeDeck: typeof closeDeck === 'function'
     })""")
-    for k in ("deckToPdf", "openDeckTarget", "closeDeck"):
+    for k in ("deckToPdf", "openDeckFor", "closeDeck"):
         ok("the build carries " + k, have.get(k) is True, have)
 
     print("\n── 2 · the entry, beside Present, on both sides of the switch")
@@ -174,7 +174,7 @@ with sync_playwright() as p:
            "PDF" in sub, sub)
 
     # From here on, one subject is enough: the entry resolves through the same
-    # `openDeckTarget()` the Present button uses, and §2 asserted all three
+    # `openDeckFor()` the Present button uses, and §2 asserted all three
     # draw it.
     t = js(pg, TARGETS[0][1])
     pg.evaluate(GO, t)
@@ -187,7 +187,7 @@ with sync_playwright() as p:
     # fitted deck is 838 tall where an authored one is 900 — and that height
     # is what `deckFitPass()` splits a long table against.
     js(pg, "()=>{ document.getElementById('deckroot').classList.add('fitwin'); }")
-    js(pg, "(t)=>openDeckTarget(t)", t)
+    js(pg, "(t)=>openDeckFor(t)", t)
     pg.wait_for_timeout(700)
     fitted = js(pg, SHAPE)
     ok("fit-to-window really does change the box the slides are fitted in",

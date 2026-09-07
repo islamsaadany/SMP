@@ -465,7 +465,7 @@
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
   .sslist { max-height:230px; overflow-y:auto; }
-  /* Select all / none (§295): a row of its own between the search and the
+  /* Select all / none (§304): a row of its own between the search and the
      list, so a press cannot be mistaken for a row of the list. */
   .ssall { display:flex; align-items:center; gap:10px; padding:2px 2px 8px;
            border-bottom:1px solid var(--line-soft); margin-bottom:6px; }
@@ -1866,7 +1866,7 @@
                         text-transform:uppercase; color:var(--ink-3); }
   .nc-grid .fld { width:160px; max-width:none; }
   .nc-grid label:nth-child(5) .fld { width:88px; }
-  /* ── FOUR BOXES, ONE LINE (§298) ─────────────────────────────────
+  /* ── FOUR BOXES, ONE LINE (§307) ─────────────────────────────────
      Islam: "if we set that they will be only 4 boxes can be in 1 line."
      Measured on his own window before it was drawn: the pen's field area is
      641px at 1280, and five boxes at 160/160/160/160/121 wrapped onto a
@@ -1942,7 +1942,7 @@
      A rule and a heading say it is a different subject; the box shapes are
      the pen's own, so nothing new is invented (§53.5). */
   .cyc2-r { border-top:1px solid var(--line); margin-top:18px; padding-top:16px; }
-  /* §299: THE PLANNING PERIOD LEADS, so its rule is UNDER it. `.cyc2-r` was
+  /* §308: THE PLANNING PERIOD LEADS, so its rule is UNDER it. `.cyc2-r` was
      written for the block that ends the pen and carries its line above; the
      first block in the pen must carry one below or the period and the cycle
      run together as one form. Scoped to the first child rather than to the

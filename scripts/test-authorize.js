@@ -661,7 +661,7 @@ console.log("\n7 · a retired person");
    protects anything, and a new value the authoriser has never been offered is
    exactly what §172 records going wrong four layers down.
 
-   §298: REWRITTEN, NOT DELETED (§218). This asserted `review.asOfMonth`, which
+   §307: REWRITTEN, NOT DELETED (§218). This asserted `review.asOfMonth`, which
    no longer exists — the review point IS the cycle's end now — so the
    assertion that would have gone green over a field nothing writes asks about
    `to` instead. It is deliberately kept as its own section beside §273's
@@ -669,7 +669,7 @@ console.log("\n7 · a retired person");
    "the office alone may move what every score is measured against", and those
    are now the same field answering two questions. A build that opened `to` to
    a unit head would pass §8b's rename and fail here. */
-console.log("\n8a · the review point (§239, §298)");
+console.log("\n8a · the review point (§239, §307)");
 (function () {
   const setAsOf = function (s) {
     s.review = Object.assign({}, s.review, { to: "Aug 2026" });
@@ -3213,7 +3213,244 @@ console.log("\n31 · a row's type is the office's to change (§292)");
         kinds.join(",") || "(nothing)");
 })();
 
-console.log("\n32 · the planning period (§299)");
+/* ══ 32 · A YES/NO ANSWER IS A REPORTED FIGURE (§300) ═══════════════════
+   §300 gives a yes/no row three answers — Not started, In progress with a
+   per-cent, Done — stored in the field the figure already lived in. The
+   section's claim is that the SERVER needed nothing, and §172's lesson is
+   that such a claim is measured or it is a hope: four layers agreed about a
+   fourth value the database had never been offered.
+
+   BOTH ENDS (§94.2). A build that classified the new spelling as a plan
+   change would refuse every report of one — the fault would look exactly like
+   §234's, a refusal naming something the reporter never touched — and a build
+   that classified it as nothing at all would let anybody write it. */
+console.log("\n32 · a yes/no answer is a reported figure (§300)");
+(function () {
+  const ukey = Object.keys(SEED.units || {}).find(function (k) {
+    return (SEED.units[k].items || []).some(function (p) { return (p.tactics || []).length; });
+  });
+  const pick = function (st) {
+    const u = st.units[ukey];
+    for (const p of (u.items || [])) if ((p.tactics || [])[0]) return p.tactics[0];
+    return null;
+  };
+  check("§300: the seed holds a tactic to answer", !!(ukey && pick(SEED)), ukey);
+  if (!ukey || !pick(SEED)) return;
+
+  /* The row is made yes/no in the STORED graph, because the target is the
+     office's and this section is about the ANSWER (§42: authorise against the
+     world as it is, never as the save would like it to be). */
+  const base = clone(SEED);
+  pick(base).outTarget = "Y/N";
+
+  const answer = function (v) {
+    const inc = clone(base); pick(inc).outActual = v; return inc;
+  };
+  const kindsOf = function (v) {
+    return A.collect(base, answer(v), A.worldOf ? A.worldOf(base) : base)
+            .map(function (c) { return c.kind; });
+  };
+  ["In progress", "In progress 60", "Done", "Not started"].forEach(function (v) {
+    const k = kindsOf(v);
+    check("§300: '" + v + "' classifies as reporting and nothing else",
+          k.length > 0 && k.every(function (x) { return x === "unitReporting"; }),
+          k.join(",") || "(nothing)");
+  });
+
+  /* WHO REPORTS FOR A UNIT IS `unitRoles`, not a field on the unit — asked
+     of the seed's own map rather than guessed, which is what the first draft
+     of this section did (it looked for `units[k].head` and found nobody). */
+  const roles = (SEED.unitRoles || {})[ukey] || {};
+  const head = roles.head || roles.custodian;
+  if (head && personOf(SEED, head)) {
+    const v = A.authorize(base, answer("In progress 60"), personOf(base, head));
+    check("§300: whoever reports for the unit may answer one", v.ok,
+          (v.refusals || []).join(" / "));
+  } else {
+    check("§300: a reporter to allow", false, "none in the seed");
+  }
+
+  /* AND SOMEBODY WITH NO REPORTING GRANT MAY NOT. Without this the first half
+     passes on a build that accepts everything. */
+  const outsider = (SEED.people || []).find(function (p) {
+    return p.unit && p.unit !== ukey && !p.role;
+  }) || (SEED.people || []).find(function (p) { return !p.role; });
+  if (outsider) {
+    const v = A.authorize(base, answer("Done"), personOf(base, outsider.key));
+    check("§300 REFUSED: somebody who does not report for it may not", !v.ok, "was ALLOWED");
+  } else {
+    check("§300: an outsider to refuse", false, "none in the seed");
+  }
+})();
+
+console.log("\n33 · a project owner marks their own project finished (§301)");
+(function () {
+  const FN = "it", T = "fn:" + FN, UK = Object.keys(SEED.units)[0];
+  const capOf = function (s) {
+    return s.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  /* THE SHAPE ISLAM REPORTED: named as one project's Owner, the Project owner
+     row opened to edit on its own function, attached to nothing (§147.7's two
+     conditions, and the register attachment is not one of them). The pillar
+     owner beside them is the other side of the switch (§53.5). */
+  const base = clone(SEED);
+  base.access.powner  = Object.assign({}, base.access.powner,  { a_fn_own: "edit" });
+  base.access.plowner = Object.assign({}, base.access.plowner, { a_unit_own: "edit" });
+  base.people.push({ key: "t287_own",  name: "Project Owner 250", active: true });
+  base.people.push({ key: "t287_pill", name: "Pillar Owner 250",  active: true });
+  const cap = capOf(base);
+  cap.projects[0].owner = "Project Owner 250";
+  base.units[UK].items[0].owner = "Pillar Owner 250";
+  const MINE = cap.projects[0].id, THEIRS = cap.projects[1].id;
+  const PILL = base.units[UK].items[0].id;
+  const MARK = { by: "t287_own", at: "2026-09-02" };
+
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)),
+             moved: !same(stored, inc) };
+  };
+  const ok = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+  /* KEYED BY THE CONTAINER, never by the subject (§301): keyed by target,
+     two owners marking two projects in one function would collide, and the
+     second would be refused for reverting the first (§234 one level finer). */
+  const mark = function (id, m) {
+    return function (s) {
+      s.review = Object.assign({}, s.review);
+      s.review.done = Object.assign({}, s.review.done);
+      if (m) s.review.done[id] = m;
+      else delete s.review.done[id];
+    };
+  };
+
+  /* IT IS CLASSIFIED APART FROM SUBMITTING, which is the whole point: the
+     bounded role that may NOT submit is exactly the one this is for. */
+  ok("the project owner marks their OWN project finished",
+     run(base, "t287_own", mark(MINE, MARK)));
+  not("...and NOT the project beside theirs",
+      run(base, "t287_own", mark(THEIRS, MARK)));
+  not("...nor an id that is not a project of this function",
+      run(base, "t287_own", mark("not-a-project", MARK)));
+  not("...nor a pillar in a unit they hold nothing in",
+      run(base, "t287_own", mark(PILL, MARK)));
+
+  /* TAKING IT OFF IS THEIRS TOO — a mark that could be set and not cleared
+     would be a lock, and this is a signal (§220 is what closes a report). */
+  const marked = clone(base);
+  marked.review = Object.assign({}, marked.review);
+  marked.review.done = {}; marked.review.done[MINE] = MARK;
+  ok("...and takes it off again", run(marked, "t287_own", mark(MINE, null)));
+
+  /* SUBMITTING IS STILL NOT THEIRS. Asserted beside the mark, because a
+     change that let them write `review.done` by widening `reportState` would
+     satisfy every line above and hand them the submission too. */
+  not("the project owner still may NOT submit the function",
+      run(base, "t287_own", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted);
+        s.review.submitted[T] = true; }));
+  not("...nor write the function's note on the cycle",
+      run(base, "t287_own", function (s) {
+        s.review.note = Object.assign({}, s.review.note);
+        s.review.note[T] = "Mine to say."; }));
+
+  /* THE OTHER SIDE OF THE SWITCH (§53.5). */
+  ok("a pillar owner marks their own pillar finished",
+     run(base, "t287_pill", mark(PILL, { by: "t287_pill", at: "2026-09-02" })));
+  not("...and not a pillar beside it",
+      run(base, "t287_pill",
+          mark(base.units[UK].items[1].id, { by: "t287_pill", at: "2026-09-02" })));
+
+  /* AND THE UNBOUNDED ROLES ARE UNCHANGED — locking something down proves
+     nothing unless the right people stayed open (§102). */
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  if (fnCust && personOf(base, fnCust))
+    ok("the function's custodian marks any project in it",
+       run(base, fnCust, mark(THEIRS, { by: fnCust, at: "2026-09-02" })));
+  ok("the office marks anything", run(base, "smo", mark(THEIRS, MARK)));
+  /* ...ANYTHING THAT IS ACTUALLY THERE. For a bounded role a stranger id is
+     refused by the owner rule anyway (nobody owns nothing), so this guard is
+     only ever reached by somebody unbounded — which is exactly why it has to
+     be asserted of them, or it is a branch nothing in the suite can enter. */
+  not("...but not an id that is no project or pillar of this subject",
+      run(base, "smo", mark("not-a-project", MARK)));
+
+  /* A LOCKED CYCLE TAKES NO MARK, exactly as it takes no figure (spec 006
+     §7.1) — the mark rides the reporting gates rather than sitting beside
+     them. */
+  const locked = clone(base);
+  locked.cycle = Object.assign({}, locked.cycle, { locked: true });
+  not("a locked cycle takes no mark either",
+      run(locked, "t287_own", mark(MINE, MARK)));})();
+
+console.log("\n34 · a saved draft is the owner's to reopen (§301.6)");
+(function () {
+  const FN = "it", T = "fn:" + FN;
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner, { a_fn_own: "edit" });
+  base.people.push({ key: "t287u", name: "Unpark Owner", active: true });
+  const cap = base.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  cap.projects[0].owner = "Unpark Owner";
+
+  const parked = clone(base);
+  parked.review = Object.assign({}, parked.review);
+  parked.review.parked = {}; parked.review.parked[T] = true;
+
+  const subd = clone(base);
+  subd.review = Object.assign({}, subd.review);
+  subd.review.submitted = {}; subd.review.submitted[T] = true;
+
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)), moved: !same(stored, inc) };
+  };
+  const ok = function (n, r) {
+    check(n + " — the fixture actually changed something", r.moved);
+    check(n, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (n, r) {
+    check(n + " — the fixture actually changed something", r.moved);
+    check(n, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+  const unpark = function (s) { delete s.review.parked[T]; };
+
+  ok("the project owner takes a saved draft's lock off",
+     run(parked, "t287u", unpark));
+  /* THE ONE PART HELD BACK, asserted so a later widening is a decision and
+     not an accident: retracting a SUBMISSION would let one project's owner
+     pull back a report the office already has, on behalf of every other
+     project in it. */
+  not("...and may NOT retract a submission",
+      run(subd, "t287u", function (s) { delete s.review.submitted[T]; }));
+  /* PARKING is still speaking for the subject — only UNparking moved. */
+  not("...nor park it in the first place",
+      run(base, "t287u", function (s) {
+        s.review.parked = Object.assign({}, s.review.parked); s.review.parked[T] = true; }));
+  not("...nor write the subject's note",
+      run(parked, "t287u", function (s) {
+        s.review.note = Object.assign({}, s.review.note); s.review.note[T] = "mine"; }));
+  /* And the unbounded roles are unchanged (§102). */
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  if (fnCust && personOf(parked, fnCust))
+    ok("the custodian still reopens a draft", run(parked, fnCust, unpark));
+  ok("the office still reopens a draft", run(parked, "smo", unpark));
+  /* A LOCKED CYCLE takes no unpark either — it rides the reporting gates. */
+  const lk = clone(parked);
+  lk.cycle = Object.assign({}, lk.cycle, { locked: true });
+  not("a locked cycle takes no reopen from them", run(lk, "t287u", unpark));
+})();
+
+console.log("\n35 · the planning period (§308)");
 (function () {
   /* Islam: *"the cycle of planning is yearly so that's the full time start and
      end dates ... sometimes we start planning mid year."* The two months
@@ -3235,13 +3472,13 @@ console.log("\n32 · the planning period (§299)");
   let r = fromStored(SEED, "smo", function (i) {
     i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
   });
-  check("§299: the office sets the planning period", r.ok, (r.refusals || []).join(" / "));
+  check("§308: the office sets the planning period", r.ok, (r.refusals || []).join(" / "));
 
   r = fromStored(SEED, CUST, function (i) {
     i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
   });
-  check("§299 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
-  check("§299: and the refusal NAMES the planning period",
+  check("§308 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§308: and the refusal NAMES the planning period",
         !r.ok && /planning period/.test((r.refusals || []).join(" ")),
         (r.refusals || []).join(" / "));
 
@@ -3253,11 +3490,11 @@ console.log("\n32 · the planning period (§299)");
   r = fromStored(set, CUST, function (i) {
     delete i.group[R.PLAN_FROM]; delete i.group[R.PLAN_TO];
   });
-  check("§299 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  check("§308 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
   r = fromStored(set, "smo", function (i) {
     delete i.group[R.PLAN_FROM]; delete i.group[R.PLAN_TO];
   });
-  check("§299: the office clears it", r.ok, (r.refusals || []).join(" / "));
+  check("§308: the office clears it", r.ok, (r.refusals || []).join(" / "));
 
   /* ONE SENTENCE FOR THE PAIR, not one per month: half a period is not a
      second decision, and two refusals for one press is §184 with the volume
@@ -3266,14 +3503,14 @@ console.log("\n32 · the planning period (§299)");
     i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
   });
   const kinds = (r.changes || []).map(function (c) { return c.kind; });
-  check("§299: it classifies as `cycle`, once, and nothing else",
+  check("§308: it classifies as `cycle`, once, and nothing else",
         kinds.length === 1 && kinds[0] === "cycle", kinds.join(",") || "(nothing)");
 
   /* AND MOVING ONE END ALONE IS STILL SEEN. A build testing only `planFrom`
      would leave the end of the period unguarded, which is the half that sets
      the denominator. */
   r = fromStored(set, CUST, function (i) { i.group[R.PLAN_TO] = "Mar 2027"; });
-  check("§299 REFUSED: moving the end alone is judged too", !r.ok, "was ALLOWED");
+  check("§308 REFUSED: moving the end alone is judged too", !r.ok, "was ALLOWED");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

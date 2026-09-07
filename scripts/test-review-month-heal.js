@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* ── ONE MONTH, ONE MEANING — THE HEAL (§298) ────────────────────────────
+/* ── ONE MONTH, ONE MEANING — THE HEAL (§307) ────────────────────────────
    Islam: *"the cycle ending is the reporting as of so that's what the
    proration depend on this is a critical change so take care what you will
    remove and what to adjust."*

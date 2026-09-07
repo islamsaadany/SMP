@@ -184,7 +184,7 @@ with sync_playwright() as p:
            any(e.lower().startswith("present") for e in fn["entries"]), fn["entries"])
         may = pg.evaluate("()=>{try{return !!SMPRules.mayDownloadPlan(world(), viewer(),"
                           " current);}catch(e){return 'ERR '+e;}}")
-        # THE PLAN, BY NAME. §296 put a second download in this menu — the
+        # THE PLAN, BY NAME. §305 put a second download in this menu — the
         # review deck as a PDF — and it is deliberately ungated (anybody who
         # may Present may take a picture of what they may project), so the
         # bare word "download" stopped saying which entry this is about.
@@ -210,7 +210,7 @@ with sync_playwright() as p:
                and not any(e.lower().startswith("download the plan")
                            for e in r["entries"]),
                (who[0], r["entries"]))
-            # AND STILL OFFERS THE DECK (§296). Both ends in one breath: a
+            # AND STILL OFFERS THE DECK (§305). Both ends in one breath: a
             # build that gated the PDF with the plan would satisfy the
             # absence above and quietly refuse on paper what Present grants
             # on a screen (§61).

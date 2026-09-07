@@ -24,6 +24,35 @@ including reversals recorded as reversals. Three sections matter most:
 feature, adopted in 1.9. The decisions document stays authoritative; a spec
 records how one feature was cut against it.
 
+*Swept 2026-09-05.* Two folders both numbered 029 (save-safety-banners became
+**030**), three specs titled with a number other than their folder's, and four
+that still said they were unbuilt long after they shipped — all corrected.
+**031–037** are backfills rather than features, each covering behaviour built
+across a dozen or more decision sections with no single place saying what the
+model IS — which is what the constitution's backfill provision is for:
+
+| | |
+|---|---|
+| **031** | How a figure is scored |
+| **032** | How a save reaches the database |
+| **033** | Reaching somebody who is not looking (notifications, the corner) |
+| **034** | The review deck |
+| **035** | Gaps, filling, and where Submit is held |
+| **036** | Setup: the register, the matrix and the cycle |
+| **037** | Authoring a plan on the screen |
+| **038** | The escaping sweep, and the net behind it |
+| **039** | Reporting is a tab |
+| **040** | A supporting function's report |
+
+Coverage went from **122 of 279** decision sections named in a spec to
+**217 of 286 (76%)**, and **every feature-sized decision up to §288 now has
+one**. §289, §292 and §294 arrived from other sessions after the sweep and are
+named in `IMPLEMENTATION_PROGRESS.md`. The 67 left are
+fixes and refinements — the original handoff (§10–§20), the UI audit waves
+(§149–§157), the knowledge base (§164–§167), the welcome and boot follow-ups
+(§200–§209) — where the decisions document is the right home and a spec would be
+filing for its own sake.
+
 ---
 
 ## The platform
@@ -110,7 +139,9 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/data-loss-warnings/2026-09-02_save-safety-banners.html` | The two save-safety cautions in the refusal's own slot: *a newer version is ready* (Reload) and *somebody else updated this page* (Reload &amp; keep mine / Dismiss). Islam: *"BOTH"*. **Built on the branch** (&sect;258) |
 | `../../design-mockups/history/2026-09-03_history-page.html` | Setup › History: who changed what, where, from what to what, with Restore &mdash; drawn from real change-log rows produced through the real save path. Islam: *"ok agreed let's build"*, with his three questions (office-only, restore vs rollback, filtered read) answered first. **Built on the branch** (&sect;262, spec 028) |
 | `../../design-mockups/empty-not-missing/2026-09-03_empty-not-missing.html` | Why Mobile and Care show *Fill in what is empty* with no count and no badges &mdash; the empty Collabs. column, which &sect;187 ruled is NOT missing. Three states shot out of the RUNNING platform with the state made (0 owed, 22 empty): today, the office with the bar gone, and a filler with a quiet count, a chip per pillar and a mark on each rail row. Islam picked *hide it from the office, guide the filler* from three options with the cost of each. Signed off 2026-09-03. **Built** (&sect;261) |
+| `../../design-mockups/corner-reply-box/2026-09-05_corner-reply-box.html` | The office's corner: the box under the Waiting list writes to their own thread rather than to the person they are looking at &mdash; reproduced first, so all three of Islam's symptoms are shown as one cause. Today beside the proposal in BOTH palettes, plus the conversation-open state that does NOT change and already reads *"Reply to Hend&hellip;"*. Carries the notification test's second half: one line saying what a browser cannot see about the computer's own settings, drawn over a clean result only. Islam: *"build"*. **Built on the branch** (&sect;298) |
 | `../../design-mockups/report-find-the-blocker/2026-09-04_reporting-find-the-blocker.html` | Why a report will not submit when *something needs a note* and nothing on the page says where. Four states shot out of the RUNNING platform with the state MADE (17 of 17 entered, the gate held by one note): today, and three options &mdash; the rail marking the pillar, &sect;272's missing bar in the banner's place, and that bar counting all four blockers with a walk. The capture and the composer are kept beside it. Islam: **C**. **Built** (&sect;279) |
+| `../../design-mockups/yn-in-progress/2026-09-06_yn-in-progress.html` | A yes/no row gains an **In progress** answer with a per-cent, reported through &sect;104's own pair of boxes and prorated against the row's own window. Drawn in the platform's own CSS, both themes, with the costs stated in their own panel. Published as an artifact; corrected twice by Islam (the three words are the tactic's own, and the boxes are two, not one) and the target kept as `Y/N` after five alternatives were weighed. **Merged** (&sect;300, spec 041) |
 
 ### Drawn, awaiting a decision
 

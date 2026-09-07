@@ -38,7 +38,7 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       because with no Save there is no press to refuse at and a field left
       showing what was not stored is §96 with the sign reversed.
 
-  7 · THE CYCLE'S END IS THE REVIEW POINT (§298) — picked in the pen, and
+  7 · THE CYCLE'S END IS THE REVIEW POINT (§307) — picked in the pen, and
       CLEARING it empties the box without inventing a month, with the cycle's
       NAME as the fallback, so a plan whose end is not set does not silently go
       back to being measured against a whole year.
@@ -177,7 +177,7 @@ def pen_state(pg):
         word: word,
         lit: !!(t && t.classList.contains("penon")),
         cols: !!p.querySelector(".cyc2-f") && !!p.querySelector(".cyc2-d"),
-        /* §299: THE CYCLE'S OWN BLOCKS, asked apart from the planning
+        /* §308: THE CYCLE'S OWN BLOCKS, asked apart from the planning
            period's. That block is `.cyc2-r.planper` and leads the pen, so a
            flat `.nc-h` sweep reports four headings and every positional
            assertion below it shifts by one — §214.3 with a heading rather
@@ -213,7 +213,7 @@ def pen_state(pg):
 def review(pg):
     return js(pg, """() => ({name:REVIEW.name, from:REVIEW.from, to:REVIEW.to,
                             due:REVIEW.due, state:REVIEW.state,
-                            /* §298: the review point is no longer a field of
+                            /* §307: the review point is no longer a field of
                                its own. `asOf` is what the arithmetic actually
                                answers, so a build that kept a second month
                                somewhere would be caught by the two
@@ -235,7 +235,7 @@ def go_cycle(pg, who):
 
 
 def pick_month(pg, sel, word):
-    """§298: A DATE IS PRESSED, NEVER TYPED. Through the real popup, because a
+    """§307: A DATE IS PRESSED, NEVER TYPED. Through the real popup, because a
     picker that writes nothing renders exactly like one that works (§96) — and
     every probe degrades rather than throwing (§215)."""
     if not press(pg, sel, "the month picker at " + sel):
@@ -365,7 +365,7 @@ with sync_playwright() as p:
     # day and its reminder times are in the pen and are deliberately NOT among
     # the cycle's own fields, so the two lists are asserted separately.
     #
-    # §298 takes one of those fields AWAY, which is the harder rewrite: the
+    # §307 takes one of those fields AWAY, which is the harder rewrite: the
     # literal could have been shortened to four and gone on passing while
     # guarding nothing. What is asserted is Islam's decision — "if you are
     # using reporting as of then this should replace the cover to" — so the
@@ -384,7 +384,7 @@ with sync_playwright() as p:
     # window, never as a pixel count (§94.8). At 1280 the pen's field area is
     # 641px, which is where the five boxes wrapped.
     row = js(pg, """() => {
-      /* §299: THE CYCLE'S ROW. The planning period draws a `.nc-1line` of
+      /* §308: THE CYCLE'S ROW. The planning period draws a `.nc-1line` of
          its own and draws it FIRST, so an unscoped query measures three boxes
          and calls a correct build broken (§51.11: a selector that still
          matches and points at another control). */
@@ -439,7 +439,7 @@ with sync_playwright() as p:
 
     # ── 3 · every date reaches the cycle, and Done editing closes ────
     print("\n── 3 · every field writes, and Done editing collapses the pen ──")
-    # §298: REWRITTEN, NEVER LOOSENED (§218). These three were typed into
+    # §307: REWRITTEN, NEVER LOOSENED (§218). These three were typed into
     # boxes; Islam: "all the dates should be date selector like the reporting
     # as of." Typing into a box the pen no longer draws would have thrown, and
     # narrowing this to the name alone would have left the three dates — one of
@@ -453,14 +453,14 @@ with sync_playwright() as p:
     saved = review(pg)
     ok("the name landed", saved.get("name") == "H2 2026 renamed", saved)
     # FOUR DIGITS, and that is not a style: `cycleYear()` scrapes a four-digit
-    # year out of these strings, and since §298 `to` is the review point — so a
+    # year out of these strings, and since §307 `to` is the review point — so a
     # two-digit one here would take `to` out of that scrape and land §239.3's
     # fault on the field this change made load-bearing.
     ok("Covers from landed, with a four-digit year", saved.get("from") == "Feb 2026", saved)
     ok("to landed, with a four-digit year", saved.get("to") == "Jul 2026", saved)
     ok("Reports due landed, WITH A DAY on it", saved.get("due") == "20 Jul 2026", saved)
     # AND PICKING THE END MOVED WHAT EVERYTHING IS MEASURED AGAINST. This is the
-    # whole of §298 in one assertion: one field, two jobs, no second copy.
+    # whole of §307 in one assertion: one field, two jobs, no second copy.
     ok("...and the cycle's end IS the review point, with no second field to set",
        saved.get("asOf") == "Jul 2026" and saved.get("months") == 7, saved)
     press(pg, "[data-editcycle]", "Done editing")
@@ -522,7 +522,7 @@ with sync_playwright() as p:
 
     # ── 7 · the end is the review point, and clearing it falls back ──
     print("\n── 7 · the cycle's end is the review point, and clearing it falls back ──")
-    # §298: REWRITTEN, NEVER LOOSENED (§218). This pressed "the month picker in
+    # §307: REWRITTEN, NEVER LOOSENED (§218). This pressed "the month picker in
     # the pen" — a selector that still MATCHES and now points at Covers from,
     # which is §51.11's own fault: it would have gone on passing while
     # measuring a control that moves no score at all.
@@ -548,7 +548,7 @@ with sync_playwright() as p:
     # year? It must not — the cycle's NAME is the fallback `cycleMonth()` has
     # always kept — and no month is ever stored that nobody picked.
     ok("cleared, the box is empty and no month is invented", cleared.get("to") == "", cleared)
-    ok("...and nothing is left behind under the old name either (§298)",
+    ok("...and nothing is left behind under the old name either (§307)",
        cleared.get("hasAsOf") is False, cleared)
     ok("...and the year does NOT become whole — the name answers", cleared.get("months") == 6, cleared)
     ok("and the strip falls back rather than reading Missing",

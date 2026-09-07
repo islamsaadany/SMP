@@ -62,7 +62,7 @@ def main():
         r = pg.evaluate("""()=>({
           lab: reviewAsOfLabel(), months: elapsedMonths(), share: elapsedShare(),
           pips: [0,1,2,3].map(quarterPast), stored: REVIEW.to || null })""")
-        # §298: REWRITTEN, NEVER LOOSENED (§218). This asserted the FALLBACK —
+        # §307: REWRITTEN, NEVER LOOSENED (§218). This asserted the FALLBACK —
         # with no review point set, the cycle's own quarter end answered — which
         # was the safety argument §239.1 shipped on. There is no second field to
         # leave unset any more: the cycle's end IS the review point, so what is
@@ -228,7 +228,7 @@ def main():
            pg.evaluate("!!document.querySelector('[data-editcycle]')"))
         before = pg.evaluate("()=>measureScore(GROUP.keyObjectives[0])")
         pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
-        # §298: THE REVIEW POINT IS THE CYCLE'S END, so the control pressed is
+        # §307: THE REVIEW POINT IS THE CYCLE'S END, so the control pressed is
         # the `to` picker and not "the month button in the pen" — which is now
         # the FIRST of three and is Covers from. A selector that keeps working
         # while pointing at the wrong control is §51.11's own fault, and it
@@ -263,7 +263,7 @@ def main():
         pg.click(".newcycle .tobtn"); pg.wait_for_timeout(300)
         pg.evaluate("""()=>{var b=document.querySelector('.monthpop [data-mclear]'); if(b)b.click();}""")
         pg.wait_for_timeout(400)
-        # REWRITTEN, NOT DELETED (§218, §298). This asserted that clearing the
+        # REWRITTEN, NOT DELETED (§218, §307). This asserted that clearing the
         # month DELETED its key, which was right while the review point was a
         # field of its own riding `extra`: an absent key and an empty one had to
         # be byte-identical or every save carried a phantom change. `to` is a
@@ -290,7 +290,7 @@ def main():
         # stopped prorating and every tactic read 100% again, with the month
         # sitting there plainly set. Two fields answering one question, which is
         # the fault §239.1 exists to have removed, committed by its own fix.
-        # §298: REWRITTEN, NOT DELETED (§218). §239.3's fault was two fields
+        # §307: REWRITTEN, NOT DELETED (§218). §239.3's fault was two fields
         # disagreeing about the YEAR — the review point carried its own and
         # `elapsedMonths()` threw it away and asked `cycleYear()`, which scrapes
         # a four-digit year out of the cycle's `to`, `name` and `due`. With the
@@ -346,7 +346,7 @@ def main():
         }""")
         ck("with a month picked it says how much of the year has passed",
            "8 of 12 months" in said["set"], said["set"])
-        # §298: and it still names WHERE the number came from when the cycle's
+        # §307: and it still names WHERE the number came from when the cycle's
         # own end cannot be read — the fallback is the name now, and a strip
         # that printed a derived month as a chosen one would be a guess drawn
         # as a fact (§35).

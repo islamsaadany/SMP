@@ -1879,6 +1879,31 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **WHAT THE ROUND LEFT BEHIND (§287.7):** Islam, once the owner could report
+  — *"review the code written and remove any excess fixed that were not
+  relevant."* **THE ONE THAT MATTERED WAS A LOSS, NOT AN EXCESS**: the merge
+  resolved `renderFnReport()`'s last line to this branch's older `var bar =
+  ""` and took **§279's whole note banner** off a capability function's
+  Reporting page with it — and **no assertion on either side would have caught
+  it**, because §287's checks ask about the CHIP above it and §279's own check
+  walks a UNIT. Found by reading every line of main's code the branch REMOVES
+  (§147.4's rule pointed at a deletion). **A blanket renumber swept up
+  somebody else's section**: nine `§250` references in `config-data.js` and
+  `lib/rules.js` belong to main's §250, put back by matched text and never by
+  line range (§214). **One dead guard** — `typeof boundedHere !== "function"`,
+  unreachable because `build.py` inlines `config-data.js` first and a
+  declaration hoists (§24). **AND `checks/empty-not-missing.py` WAS RED 27
+  WAYS**, every failure the same decision: §287.3 took §272's quiet bar away.
+  **REWRITTEN, NEVER DELETED OR LOOSENED** (§218) — the moved assertions
+  inverted in place, the absence asserted **over a page that really does still
+  hold empty boxes** (or a fixture with nothing empty passes it while proving
+  nothing, §94.5), and §3 putting one real gap back to assert the MISSING
+  register whole in the same run, because *gone* and *broken* look identical
+  from outside (§113.8). **4 red** with main's own `seesEmpty()` body restored,
+  the missing half green beside it. Two of its own first failures were the
+  CHECK: *missing* is the ABSENCE of the quiet register's attribute, and **the
+  walkable element is not always the bound one** (§177.2 — a picker rings its
+  `.ssbtn` while `data-fld` sits on the select beside it).
 - **A SAVED DRAFT IS THE OWNER'S TO REOPEN (§287.6):** Islam — *"project owner
   can reopen eventually he can only report or fill missing for his own
   project."* §220 made a saved draft close the WHOLE report at his own

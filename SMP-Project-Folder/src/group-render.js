@@ -5141,7 +5141,7 @@ function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
    project through its stakeholders: being named on somebody else's project
    does not make it the one you came to open. */
 function railMine(target, list, ownerOf) {
-  if (!list.length || typeof boundedHere !== "function" || !boundedHere(target)) return null;
+  if (!list.length || !boundedHere(target)) return null;
   for (var i = 0; i < list.length; i++)
     if (mayMarkDoneOn(target, ownerOf(list[i]))) return list[i];
   return null;
@@ -6320,7 +6320,18 @@ function renderFnReport(fnKey){
                             reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget),
     !boundedReporter(fnKeyTarget) ? null
       : ownStateChip(fnKeyTarget, ownList, "projects"));
-  var bar = "";
+  /* §279: AND THIS SIDE HAD NOTHING AT ALL. A unit's page has carried a red
+     banner for a missing note since the note rule existed; a capability
+     function's never did — and `capNoteBox()` passes `want:false` always, so
+     its note boxes are not rung either. So a function head was refused by
+     Submit with the reason on a hover and NOTHING on the page. One bar, both
+     sides (§53.5, A15).
+
+     RESTORED: the §287 merge resolved this line to an empty string and took
+     §279's whole banner off this page with it — a loss no assertion in either
+     section would have caught, because §287's own checks ask about the CHIP
+     and §279's run on the unit. */
+  var bar = reportBar(fnKeyTarget);
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");

@@ -33750,3 +33750,66 @@ recorded here for him to take or leave, rather than quietly included.
 - One of its own first failures was the CHECK: `innerText` returns the RENDERED
   text and `.rc-state` is uppercased by CSS, so a case-sensitive compare
   asserts the stylesheet rather than the words (§51.11's family).
+
+## §287.7 — WHAT THE ROUND LEFT BEHIND (2026-09-07)
+
+Islam, once the owner could report: *"review the code written and remove any
+excess fixed that were not relevant."* Three things, and the middle one is the
+only one that mattered.
+
+**§279's NOTE BANNER HAD BEEN DROPPED BY THE MERGE, ON ONE SIDE OF THE SWITCH.**
+`renderFnReport()` ends `return bar + …`, and on the main this branch merged
+that `bar` was `reportBar(fnKeyTarget)` — §279's *where Submit is held*, built
+from his own report that a capability function's page marked nothing at all.
+The merge resolved that line to this branch's older `var bar = "";` and took
+the whole banner with it. **No assertion on either side would have caught it**:
+§287's own checks ask about the CHIP in the bar above, and §279's own check
+walks a UNIT, where the banner was never missing. Found by diffing this branch
+against the main it was built on and reading every line of main's code the
+branch removes — which is the only thing that finds a loss a merge makes
+silently (§147.4's rule, applied to a deletion rather than to a duplicate).
+Restored verbatim, with its comment, and `checks/report-blockers.py` green
+again.
+
+**A BLANKET RENUMBER SWEPT UP SOMEBODY ELSE'S SECTION.** Renaming this
+branch's own §250 to §287 ahead of the merge rewrote nine `§250` references in
+`config-data.js` and `lib/rules.js` that belong to **main's** §250 — a tactic's
+outcome measured against its own window. Comment-only, no behaviour, and still
+a fault: a comment that names the wrong decision sends the next reader to the
+wrong argument. (Four more had already been caught and reverted in `CLAUDE.md`
+and `IMPLEMENTATION_PROGRESS.md` while the renumber was being made; these nine
+were in the sources and were missed.) Put back by matched text, never by line
+range (§214).
+
+**ONE DEAD GUARD.** `railMine()` opened `typeof boundedHere !== "function"`.
+`build.py` inlines `config-data.js` before `group-render.js` into the same
+document, and a top-level function declaration is there before anything in
+either file runs — so that branch can never be taken. §24: a branch for a path
+that cannot be reached is one the next reader takes for load-bearing.
+
+**AND `checks/empty-not-missing.py` WAS RED ON THIS BRANCH, 27 WAYS.** It is
+§272's check and every one of its failures was the same fact: §287.3 took the
+quiet bar away, at Islam's own instruction. **REWRITTEN, NEVER DELETED AND
+NEVER LOOSENED** (§218) — the assertions that moved are inverted in place, so a
+build that drifted back would fail them; the absence is asserted **over a page
+that really does still hold empty boxes**, or a fixture with nothing empty
+satisfies every line of it while proving nothing (§94.5); and §3 now puts one
+real gap back and asserts the MISSING register whole — count, chips, red paint,
+door, walk and fill — on the same page in the same run, because *the bar is
+gone* and *the bar is broken* look identical from outside (§113.8).
+**Proved able to fail: 4 red** with main's own `seesEmpty()` body put back, and
+the missing half staying green beside it, which is what says the reversal is
+the narrow one it claims to be.
+
+**Two of the rewritten check's own first failures were the CHECK**: the quiet
+register is marked with a `data-gapmode` attribute and the loud one carries
+none, so *missing* is an ABSENCE and not a word; and **the walkable element is
+not always the bound one** (§177.2) — a §130.1 picker rings its `.ssbtn` while
+`data-fld` sits on the hidden select beside it, so the setter is looked for in
+the cell rather than on the marked node.
+
+**Nothing else was removed.** Every function added in this round has callers;
+every behaviour in it traces to a sentence of Islam's or to a measurement
+recorded beside it. `seesEmpty()` returning false leaves §272's machinery
+reachable and unused, which is deliberate and recorded in §287.3: it is one
+line to give back.

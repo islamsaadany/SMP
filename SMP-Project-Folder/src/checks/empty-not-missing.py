@@ -170,131 +170,129 @@ with sync_playwright() as p:
     ck("...which the rule says too, not just the screen",
        office["mayAuthor"] is True, office)
 
-    # ── 2 · THE FILLER IS SHOWN IT, AND IT SAYS WHERE ──────────────────
-    print("\n2 · the filler's bar carries the count, the chips and the rail marks")
+    # ── 2 · AND SINCE §287.3, THE FILLER IS NOT SHOWN IT EITHER ────────
+    # REWRITTEN, NEVER DELETED (§218). §272 shipped a quiet bar for a filler
+    # standing on a page that owes nothing, and Islam — testing §287 as a
+    # PROJECT OWNER, which is exactly that filler — took it away: *"it
+    # requires him to fill something empty and there is nothing empty."*
+    # Three answers were put to him with the cost of each and he chose **no
+    # button when nothing is owed**, so `seesEmpty()` answers false for
+    # everybody and every piece of §272's machinery is untouched and
+    # reversible (§287.3).
+    #
+    # THE ASSERTIONS THAT MOVED ARE INVERTED IN PLACE rather than removed, so
+    # a later build cannot drift back through them unnoticed — and BOTH ENDS
+    # are asserted: nothing is drawn while nothing is owed, and §3 below puts
+    # a real gap back and watches the missing bar return with its walk intact.
+    # A check that only asserted the absence would pass on a build that had
+    # lost the missing register too (§113.8).
+    print("\n2 · the filler is shown no bar either (§287.3)")
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
     pg.click('[data-ac="custodian|a_unit_own_strat|fill"]'); pg.wait_for_timeout(350)
     be(pg, who["cust"], who["unit"], "strategy", "plan")
 
-    fil = pg.evaluate("""() => {
+    fil = pg.evaluate("""() => ({
+      band: !!document.querySelector('[data-gapband]'),
+      cta:  document.querySelectorAll('[data-fillcta]').length,
+      rail: document.querySelectorAll('.ritem .rgap').length,
+      openable: gapOpenable(TARGET),
+      total: gapTotal(TARGET),
+      sees: seesEmpty(TARGET),
+      pens: document.querySelectorAll(
+        '.penbtn[data-page], .secpen[data-page], .editbtn[data-page]').length,
+      mayAuthor: SMPRules.mayAuthorPage(world(), viewer(), "u_plan", TARGET)
+    })""")
+    ck("the filler is shown no bar", fil["band"] is False, fil)
+    ck("...no door anywhere on the page", fil["cta"] == 0, fil)
+    ck("...no rail mark either", fil["rail"] == 0, fil)
+    ck("...and the rule says so, not just the screen", fil["sees"] is False, fil)
+    # THE ABSENCE IS A DECISION AND NOT AN EMPTY PAGE. Without this line a
+    # build whose fixture had nothing empty in it would satisfy every
+    # assertion above while proving nothing (§94.5).
+    ck("...over a page that really does still hold empty boxes",
+       fil["openable"] > 0 and fil["total"] == 0, fil)
+    ck("the filler still has no pen — which is what made the door theirs",
+       fil["pens"] == 0 and fil["mayAuthor"] is False, fil)
+
+    # ── 3 · AND THE MISSING REGISTER STILL WORKS, WHOLE ────────────────
+    # One gap put back, and everything §272 built for the loud half is
+    # asserted here: the count, the chips, the red dress, the door, the walk
+    # and the fill. This is the half §287.3 did NOT touch, and it is asserted
+    # on the SAME page in the SAME run, or "the bar is gone" and "the bar is
+    # broken" look identical from outside.
+    print("\n3 · put one gap back — the missing bar returns, and walks")
+    pg.evaluate("""(u) => {
+      const t = UNITS[u].items.reduce((a, p) => a.concat(p.tactics || []), [])[0];
+      delete t.owner;
+      paint();
+    }""", who["unit"])
+    pg.wait_for_timeout(400)
+
+    back = pg.evaluate("""() => {
       const band = document.querySelector('[data-gapband]');
       if (!band) return { drawn:false };
       const chips = [].slice.call(band.querySelectorAll('.mchip'));
-      const rail  = [].slice.call(document.querySelectorAll('.ritem .rgap'));
-      const map = gapMap(TARGET, false, true).filter(e => e.count > 0);
+      const map = gapMap(TARGET, false, false).filter(e => e.count > 0);
       return { drawn:true,
         mode:  band.dataset.gapmode || "",
         count: (band.querySelector('[data-gapcount]') || {}).textContent || "",
-        openable: gapOpenable(TARGET),
         total: gapTotal(TARGET),
-        chipN: chips.length,
-        quietChips: band.querySelectorAll('.mchip.eqchip').length,
-        chipText: chips.map(c => c.textContent.replace(/\\s+/g, " ").trim()),
+        chipText: chips.map(c => c.textContent.replace(/\s+/g, " ").trim()),
         want: map.map(e => e.label + " " + e.count),
-        loud: band.querySelectorAll('.fillcta, .secmiss').length,
-        cta: (band.querySelector('.eqcta') || {}).textContent || "",
-        railText: rail.map(r => r.textContent.trim()),
-        railQuiet: document.querySelectorAll('.ritem .rgap.req').length,
-        pens: document.querySelectorAll(
-          '.penbtn[data-page], .secpen[data-page], .editbtn[data-page]').length,
-        mayAuthor: SMPRules.mayAuthorPage(world(), viewer(), "u_plan", TARGET) };
+        quiet: band.querySelectorAll('.eqchip, .eqcta').length,
+        cta: (band.querySelector('.fillcta') || {}).textContent || "",
+        rail: [].slice.call(document.querySelectorAll('.ritem .rgap'))
+                .map(r => r.textContent.trim()) };
     }""")
-    ck("the filler IS shown the bar", fil.get("drawn"), fil)
-    ck("...in the quiet register", fil.get("mode") == "empty", fil.get("mode"))
-    ck("...counting what is empty, in agreement with the rule",
-       fil.get("count") == str(fil.get("openable")) + " empty", fil.get("count"))
-    ck("...with a chip per place, agreeing with gapMap's fillable answer",
-       fil.get("chipText") == fil.get("want"), (fil.get("chipText"), fil.get("want")))
-    ck("...every chip quiet, none of them the missing kind",
-       fil.get("chipN", 0) > 0 and fil.get("quietChips") == fil.get("chipN"), fil)
-    ck("...and nothing on the bar wearing the missing dress",
-       fil.get("loud") == 0, fil.get("loud"))
-    ck("the button says what it opens",
-       fil.get("cta", "").strip() == "Fill in what is empty", fil.get("cta"))
-    ck("the rail marks say where, quietly",
-       fil.get("railQuiet", 0) > 0 and
-       fil.get("railQuiet") == len(fil.get("railText", [])) and
-       all(t.endswith(" empty") for t in fil.get("railText", [])), fil.get("railText"))
-    ck("...and the rail's numbers add up to the bar's",
-       sum(int(t.split()[0]) for t in fil.get("railText", []))
-       <= fil.get("openable", 0), fil.get("railText"))
-    ck("the filler has no pen — which is why the door is theirs",
-       fil.get("pens") == 0 and fil.get("mayAuthor") is False, fil)
+    ck("the bar is drawn again the moment something is owed", back.get("drawn"), back)
+    # THE ATTRIBUTE IS THE QUIET REGISTER'S MARK AND THE LOUD ONE CARRIES
+    # NONE — so its absence is what "missing" looks like from outside.
+    ck("...in the counted register, which wears no quiet mark",
+       back.get("mode") == "", back.get("mode"))
+    ck("...saying 'N Missing', in agreement with the rule",
+       back.get("count") == str(back.get("total")) + " Missing", back.get("count"))
+    ck("...with a chip per owing place, agreeing with gapMap",
+       back.get("chipText") == back.get("want"),
+       (back.get("chipText"), back.get("want")))
+    ck("...and no quiet control anywhere on it", back.get("quiet") == 0, back)
+    ck("the red button keeps its words",
+       "Fill in missing elements" in back.get("cta", ""), back.get("cta"))
+    ck("the rail says where, in the missing register",
+       back.get("rail") and all(t.endswith(" Missing") for t in back.get("rail", [])),
+       back.get("rail"))
 
-    # §145.14 DRAWS THE DOOR TWICE — the section row's bar and the pane's
-    # corner — so every copy is asked, not the one this section happened to
-    # measure. The first build dressed the bar and left the corner red: two
-    # copies of one control saying the same four words in two voices, on one
-    # screen, and no assertion here saw it (§53.5, found by looking).
-    doors = pg.evaluate("""() => [].slice.call(
-      document.querySelectorAll('[data-fillcta]')).map(b => ({
-        text: b.textContent.trim(),
-        quiet: b.classList.contains('eqcta'),
-        loud: b.classList.contains('fillcta'),
-        bg: getComputedStyle(b).backgroundColor }))""")
-    ck("every copy of the door is drawn, wherever it is drawn",
-       len(doors) > 0, doors)
-    ck("...all of them saying the same words",
-       len(set(d["text"] for d in doors)) == 1, doors)
-    ck("...all of them quiet, none of them the red fill",
-       all(d["quiet"] and not d["loud"] for d in doors), doors)
-    ck("...and all of them PAINTED the same",
-       len(set(d["bg"] for d in doors)) == 1, doors)
-
-    # THE PAINT, not the class (§145.14: inside nav.tabs a bare class loses).
-    print("\n2b · and it is PAINTED quiet, not merely classed quiet")
-    # EVERY PROBE DEGRADES (§215). This file's own first falsification run
-    # DIED here — a build without the quiet controls has nothing to compute a
-    # style from, so `grep -c FAIL` under-reported the very build it exists to
-    # see. A missing element reports a missing element.
+    # THE PAINT, not the class (§145.14: inside nav.tabs a bare class loses,
+    # which is how the bar shipped undressed with every assertion green).
+    # EVERY PROBE DEGRADES (§215): a build without the control has nothing to
+    # compute a style from, and a missing element must report a missing
+    # element rather than throw.
+    print("\n3b · and red still means missing")
     paint = pg.evaluate("""() => {
       const band = document.querySelector('[data-gapband]');
       const q = s => (band ? band.querySelector(s) : null);
       const g = e => e ? getComputedStyle(e) : null;
       const c = g(q('[data-gapcount]')), chip = g(q('.mchip')),
-            cta = g(q('.eqcta')), rail = g(document.querySelector('.ritem .rgap.req'));
+            cta = g(q('.fillcta'));
       return { count: c && c.color, chip: chip && chip.borderTopColor,
-               ctaBg: cta && cta.backgroundColor, ctaInk: cta && cta.color,
-               rail: rail && rail.color, railStyle: rail && rail.fontStyle,
+               ctaBg: cta && cta.backgroundColor,
                chipRadius: chip && chip.borderTopLeftRadius };
     }""")
-    ink2, ink, bad_, line, surf2 = (tok(pg, "--ink-2"), tok(pg, "--ink"),
-                                   tok(pg, "--bad"), tok(pg, "--line"),
-                                   tok(pg, "--surface-2"))
-    ck("the count is drawn in the page's own ink", paint["count"] == ink2,
-       (paint["count"], ink2))
-    ck("...never in --bad", paint["count"] != bad_, paint["count"])
-    ck("the chip's edge is the ordinary line, not the alarm",
-       paint["chip"] == line and paint["chip"] != bad_, (paint["chip"], line, bad_))
+    bad_tx, bad_ = tok(pg, "--bad-tx"), tok(pg, "--bad")
+    ck("the count is drawn in the alarm ink", paint["count"] == bad_tx,
+       (paint["count"], bad_tx))
+    ck("the chip's edge is the alarm", paint["chip"] == bad_, (paint["chip"], bad_))
     ck("...and it is still a chip (the tab row did not strip it)",
-       paint["chipRadius"] not in ("", "0px"), paint["chipRadius"])
-    ck("the button is a quiet button, not the red fill",
-       paint["ctaBg"] == surf2 and paint["ctaInk"] == ink,
-       (paint["ctaBg"], surf2, paint["ctaInk"], ink))
-    ck("the rail mark is quiet and upright",
-       paint["rail"] == ink2 and paint["railStyle"] == "normal", paint)
+       paint["chipRadius"] not in ("", "0px", None), paint["chipRadius"])
+    ck("the button keeps the red FILL", paint["ctaBg"] == bad_,
+       (paint["ctaBg"], bad_))
 
-    # ── 3 · THE CHIP GOES THERE, AND THE WALK WALKS ────────────────────
-    print("\n3 · pressing it takes you to the boxes")
     # A CLICK ON WHAT IS NOT THERE HANGS FOR THIRTY SECONDS AND THEN THROWS
-    # (§215 again, wearing Playwright's clothes): asked for first, so a build
-    # without the control fails this line and goes on to the next.
-    chip2 = pg.query_selector('[data-gapband] .mchip:nth-of-type(2)')
-    ck("there is a second place to press", chip2 is not None)
-    went = {}
-    if chip2:
-        chip2.click(); pg.wait_for_timeout(450)
-        went = pg.evaluate("""() => ({
-          rail: (document.querySelector('.ritem.on .rcode') || {}).textContent || "",
-          want: ((document.querySelectorAll('[data-gapband] .mchip')[1] || {textContent:""})
-                  .textContent.replace(/\\s+/g," ").trim().split(" ")[0]) })""")
-    ck("a chip lands on the place it names",
-       bool(went) and went["rail"].strip() == went["want"].strip(), went)
-
-    door = pg.query_selector('[data-gapband] .eqcta')
-    ck("the quiet door is there to press", door is not None)
+    # (§215 wearing Playwright's clothes): asked for first, so a build without
+    # the control fails this line and goes on to the next.
+    door = pg.query_selector('[data-gapband] .fillcta')
+    ck("the door is there to press", door is not None)
     if door:
         door.click(); pg.wait_for_timeout(600)
     inmode = pg.evaluate("""() => {
@@ -302,64 +300,51 @@ with sync_playwright() as p:
       return { fill: !!EDIT_PAGE.plan,
                next: ((band && band.querySelector('[data-nextgap]')) || {}).textContent || "",
                walkable: document.querySelectorAll('.gapwalk').length,
-               lit: !!document.querySelector('.gaplit'),
-               red: document.querySelectorAll('[data-gapband] .fillcta').length };
-    }""") if door else {"fill": False, "next": "", "walkable": 0,
-                        "lit": False, "red": 0}
+               lit: !!document.querySelector('.gaplit') };
+    }""") if door else {"fill": False, "next": "", "walkable": 0, "lit": False}
     ck("the door opens fill mode", inmode["fill"], inmode)
-    ck("...and the walk has something to walk (§192.4's rule, one list over)",
-       inmode["walkable"] > 0, inmode)
+    ck("...and the walk has something to walk", inmode["walkable"] > 0, inmode)
     ck("...the press landed on one of them", inmode["lit"], inmode)
-    ck("...the next control says 'Next empty', quietly",
-       "Next empty" in inmode["next"] and inmode["red"] == 0, inmode)
-
-    box = pg.evaluate("""() => {
-      const el = document.querySelector('.fld.gapfld, .monthbtn.gapfld');
-      if (!el) return null;
-      const g = getComputedStyle(el);
-      return { eq: el.classList.contains('eqfld'),
-               border: g.borderTopColor, style: g.borderTopStyle };
-    }""")
-    ck("the box the chip sent you to is not rung in red either",
-       box and box["eq"] and box["border"] != bad_, box)
-    ck("...and is still dashed, so fill mode still shows what is open",
-       box and box["style"] == "dashed", box)
+    ck("...the next control says 'Next gap'",
+       "Next gap" in inmode["next"], inmode)
 
     # ── 4 · A FILL LANDS IN THE PLAN ───────────────────────────────────
     print("\n4 · and a fill reaches the data")
-    wrote = pg.evaluate("""() => {
+    wrote = pg.evaluate("""(u) => {
       /* The walk lit a control; write through the FIELD's own setter, which
-         is what the picker does when somebody ticks a name (§96: read the
+         is what the picker does when somebody picks a name (§96: read the
          data back, never the screen). */
-      const el = document.querySelector('[data-gapat]') ||
+      /* THE WALKABLE ELEMENT IS NOT ALWAYS THE BOUND ONE (§177.2): a
+         §130.1 picker rings its `.ssbtn` and the `data-fld` sits on the
+         hidden select beside it, so the setter is looked for in the cell
+         rather than on the marked node. */
+      const el = document.querySelector('.gaplit') ||
                  document.querySelector('.gapwalk');
       if (!el) return { ok:false, why:"nothing to walk" };
-      const i = el.dataset.fld;
+      const cell = el.closest('td, th, div') || el;
+      const b = el.dataset.fld != null ? el : cell.querySelector('[data-fld]');
+      const i = b && b.dataset.fld;
       if (i == null) return { ok:false, why:"the walked control is not bound" };
-      FIELDS[+i](["Ramy Behairy"]);
-      const t = UNITS.mobile.items.reduce((a, p) => a.concat(p.tactics || []), [])
-        .filter(x => (x.collaborators || []).length);
-      return { ok:true, wrote: t.length, name: t.length ? t[0].collaborators[0] : null };
-    }""")
+      FIELDS[+i]("Ramy Behairy");
+      const t = UNITS[u].items.reduce((a, p) => a.concat(p.tactics || []), [])[0];
+      return { ok:true, owner: t.owner || null };
+    }""", who["unit"])
     ck("the walked control is bound and writes the plan",
-       wrote.get("ok") and wrote.get("wrote", 0) > 0, wrote)
+       wrote.get("ok") and wrote.get("owner"), wrote)
 
-    # ── 5 · THE REFRESH KNOWS WHICH REGISTER IT IS IN ──────────────────
+    # ── 5 · THE REFRESH REWRITES THE COUNT WHERE IT STANDS ─────────────
+    # §71.2: never a repaint under a typing hand, so the number is rewritten
+    # in place — and it must follow the register it is IN.
     print("\n5 · the count is rewritten in place, in its own register")
     after = pg.evaluate("""() => {
       gapBandRefresh();
       const band = document.querySelector('[data-gapband]');
-      const q = s => band ? band.querySelectorAll(s).length : 0;
       return { count: ((band && band.querySelector('[data-gapcount]')) || {}).textContent || "",
-               openable: gapOpenable(TARGET),
-               total: gapTotal(TARGET),
-               ticked: q('.mchip.done'), chips: q('.mchip') };
+               total: gapTotal(TARGET) };
     }""")
-    ck("the count follows what is empty, not what is owed",
-       after["count"] == str(after["openable"]) + " empty", after)
-    ck("...and NOT every chip flipped to the green tick",
-       after["ticked"] < after["chips"], after)
-    ck("...while nothing became owed", after["total"] == 0, after)
+    ck("the count follows what is owed",
+       after["count"] == str(after["total"]) + " Missing", after)
+    ck("...and the fill took one off it", after["total"] == 0, after)
 
 print("\nerrors: " + (str(errs) if errs else "none"))
 print("failures: %d" % (bad + len(errs)))

@@ -5999,7 +5999,7 @@ function prorates(m){ return SMPRules.prorates(m && m.compile); }
    is better", so the share goes on the target and one expression serves both
    directions.
 
-   §287: THE SHARE MAY BE SUPPLIED, and that is the whole of this change.
+   §250: THE SHARE MAY BE SUPPLIED, and that is the whole of this change.
    A key objective and a pillar measure are the YEAR's, so they pass nothing and
    read `elapsedShare()` exactly as they always have. A TACTIC'S OUTCOME belongs
    to the tactic's own window -- April to September is six months, not twelve --
@@ -6029,7 +6029,7 @@ function measureDue(m, share){
   /* ── §278: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
      Twelve numbers in the target's own unit, compiled by the row's own
      compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
-     supersedes the SUPPLIED one: §287 hands a tactic's outcome the share of
+     supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
      its own window, and a monthly plan already states what every month is
      expected to carry — including the noughts for the months the thing does
      not run in — so it is the more specific answer and prorating it again by
@@ -6095,7 +6095,7 @@ function measureScore(m, share){
      average, exactly as an empty number box does — reading silence as a
      failure marks a unit down for a question nobody has been asked yet (§35,
      §104.10). The share is not consulted: there is no partial yes to prorate
-     (§287 prorates a TARGET, and this row has no number to prorate). */
+     (§250 prorates a TARGET, and this row has no number to prorate). */
   if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
   /* §278: A DUE OF NOUGHT IS "NOT DUE YET", AND THAT IS DELIBERATE NOW.
@@ -6103,7 +6103,7 @@ function measureScore(m, share){
      nought, which is meaningless; a monthly plan makes it reachable on
      purpose — a row planning nothing until July is owed nothing in June.
      Not scored is what the product already says about work that has not
-     started (§287's not-due branch, tacticDue), and scoring it 100 would
+     started (§250's not-due branch, tacticDue), and scoring it 100 would
      credit a row that has done nothing while scoring it 0 would mark down a
      unit for a month its own plan left empty. */
   if (due == null || !due) return null;
@@ -6189,7 +6189,7 @@ function tacticReads(t){
 /* What this tactic's figure is compared against, for the quiet half of the
    YTD cell. An outcome answers with its own (prorated) target; everything
    else answers with the share of its plan that is due, exactly as before.
-   §287: BOTH HALVES NOW SPEAK OF THE SAME PERIOD -- the share on the left is
+   §250: BOTH HALVES NOW SPEAK OF THE SAME PERIOD -- the share on the left is
    the tactic's own window and so is the one on the right, where before a row
    could read "83% delivered" beside a target prorated across the year. */
 function tacticBenchmark(t){
@@ -6259,10 +6259,10 @@ function measureDueLabel(m, share){
    reviewed at August has had 5 of its 9 months. Whole quarters would say a
    tactic planned for the quarter we are standing in has not started.
 
-   §287: IT IS A FRACTION, AND `tacticPlanned()` IS IT ROUNDED -- never the
+   §250: IT IS A FRACTION, AND `tacticPlanned()` IS IT ROUNDED -- never the
    other way round. Islam: a tactic in Q2 and Q3 "is a 6 months project from
    april till september .. now we are reporting till august", so five of its six
-   months have passed. The first build of §287 read the share back OUT of the
+   months have passed. The first build of §250 read the share back OUT of the
    rounded per cent, and 83/100 is not 5/6: a target of 12 read `9.96` instead
    of `10`, and a WHOLE-YEAR tactic -- which must be untouched by this change --
    moved from 88% to 87%. One value, computed once, with the per cent derived
@@ -6835,7 +6835,7 @@ function viaCarrier(p, own, roll){
 function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && measureScore(m) != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
-    /* §287: WRAPPED, NEVER PASSED BY NAME. `measureScore` takes an optional
+    /* §250: WRAPPED, NEVER PASSED BY NAME. `measureScore` takes an optional
        share now, and `Array.map` hands its callback the INDEX as a second
        argument -- so a bare `.map(measureScore)` would prorate the first
        measure of every pillar by 0 (unscorable), the second by the whole year,

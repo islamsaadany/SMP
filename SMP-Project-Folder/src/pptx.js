@@ -85,7 +85,7 @@ function pptxColors(){
     /* The platform's own light --bad: what `.missing` wears on screen, worn
        here on the slide's white ground (§119). */
     bad:   "B04434",
-    /* ── A SCORE WEARS ITS BAND (§309) ─────────────────────────────────
+    /* ── A SCORE WEARS ITS BAND (§311) ─────────────────────────────────
        The deck colours a figure by the band it falls in (`.final.good`), and
        the download printed all of them black — so the one column a room runs
        its eye down said nothing until you read every number in it.
@@ -164,7 +164,7 @@ function pptxTable(id, box, widths, head, rows, o){
   function cell(c, hdr, ri){
     /* A cell is a string, or an object: `{miss:true}` renders the bold red
        Missing (§119); `{t, align}` carries a mark that wants centring; and
-       since §309 `{color, b}` carry a band, `{sub}` a second line, and
+       since §311 `{color, b}` carry a band, `{sub}` a second line, and
        `{runs}` a cell written as several runs — which is what lets a figure
        and the benchmark it is measured against sit in one cell in two
        weights, the way the deck draws them. */
@@ -186,7 +186,7 @@ function pptxTable(id, box, widths, head, rows, o){
     /* A SECOND LINE IS A SECOND PARAGRAPH, never the same one. The deck's
        score table writes a pillar's name over a grey line naming its kind
        and owner; read as one string they arrive as one word, which is what
-       "…Scale RAYA Smart CareDirection · · Mahmoud" was (§309). */
+       "…Scale RAYA Smart CareDirection · · Mahmoud" was (§311). */
     if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200), color:C.quiet }), pPr);
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' + body +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
@@ -209,7 +209,7 @@ function pptxTable(id, box, widths, head, rows, o){
     '</a:tbl></a:graphicData></a:graphic></p:graphicFrame>';
 }
 
-/* ── A PICTURE IN THE PACKAGE (§309) ───────────────────────────────────
+/* ── A PICTURE IN THE PACKAGE (§311) ───────────────────────────────────
    The one change in this round that the FILE FORMAT has to grow for. Every
    other fix is text and geometry inside slides that already existed; a mark
    is bytes, so the zip gains a `ppt/media` member, `[Content_Types].xml`
@@ -270,7 +270,7 @@ function pptxSlideXml(shapes){
 
 /* Every content slide opens the same way: a kicker naming where we are, the
    slide's own title, and a hairline of the tenant's accent under them. */
-/* ── THE PAIR SITS WHERE THE ROOM LOOKS FOR IT (§309) ──────────────────
+/* ── THE PAIR SITS WHERE THE ROOM LOOKS FOR IT (§311) ──────────────────
    A pillar's two headline figures are drawn top RIGHT on the screen, and the
    converter had no idea they were a pair: they came through `deckLead()` as
    four paragraphs — MEASURES, 117%, EXECUTION, 81% — stacked top left above
@@ -711,7 +711,7 @@ function deckTxt(el){
   return String((el && el.textContent) || "").replace(/\s+/g, " ").trim();
 }
 
-/* ── TWO THINGS THE SCREEN SEPARATES AND A FLAT READ DOES NOT (§309) ────
+/* ── TWO THINGS THE SCREEN SEPARATES AND A FLAT READ DOES NOT (§311) ────
    `textContent` is the concatenation of the descendants, and the deck relies
    on layout for the gaps between them — so a SWOT item written as
    `<li><span class="n">1</span><span>Long-standing…</span></li>` reads back
@@ -760,7 +760,7 @@ function deckQuarters(el){
   return on.length ? on.join(" ") : "—";
 }
 
-/* ── A BAND IS A CLASS ON THE CELL (§309) ──────────────────────────────
+/* ── A BAND IS A CLASS ON THE CELL (§311) ──────────────────────────────
    `dBand()` writes the band's own key onto the cell (`.final.good`) and the
    deck's stylesheet turns it into a colour. Read it back here rather than
    re-deriving the score, or the file and the projector could disagree about
@@ -774,7 +774,7 @@ function deckBandColor(el){
   return hit;
 }
 
-/* ── ONE CELL, AS THE DECK DRAWS IT (§309) ─────────────────────────────
+/* ── ONE CELL, AS THE DECK DRAWS IT (§311) ─────────────────────────────
    Every figure came through as plain black text hard left, so the column a
    room runs its eye down said nothing and the benchmark behind the slash
    carried the same weight as the figure it judges. Four facts are read off
@@ -829,7 +829,7 @@ function deckCellSpec(td){
    tactics table and a three-column score table both come out readable
    without either being named here.
 
-   ── AND A HEADING MUST FIT ITS OWN COLUMN (§309) ──────────────────────
+   ── AND A HEADING MUST FIT ITS OWN COLUMN (§311) ──────────────────────
    Shares alone gave a numeric column half a prose one whatever it was
    called, so PowerPoint broke the headings as "Progres s" and "Quarter s" —
    a column narrower than the word naming it. Each column now STARTS at the
@@ -877,7 +877,7 @@ function deckTable(tbl){
            rows: rows };
 }
 
-/* ── THE SHAPES THAT ARE NEITHER PROSE NOR A TABLE (§309) ──────────────
+/* ── THE SHAPES THAT ARE NEITHER PROSE NOR A TABLE (§311) ──────────────
    Three of the deck's slide kinds are laid out rather than written, and each
    arrived in the download as something worse than nothing:
 
@@ -941,7 +941,7 @@ function deckLead(sl){
        sub-label inside the `<h2>`, so without this the title is printed and
        then immediately printed again a line below it, in pieces.
 
-       NOR ANYTHING A LAID-OUT SHAPE OWNS (§309): those are drawn by the
+       NOR ANYTHING A LAID-OUT SHAPE OWNS (§311): those are drawn by the
        three readers above, and reading them here as well printed each one
        twice — once as a shape and once as a stack of stray lines. */
     if (el.closest("table") || el.closest("h1, h2, h3") || el.closest(DECK_LAID_OUT)) return;
@@ -949,7 +949,7 @@ function deckLead(sl){
     if (n) {
       /* A NUMBERED ITEM KEEPS ITS NUMBER APART. The deck sets a SWOT item's
          index in its own quiet column; run into the words it is the fault
-         §309 removed, and glued back on with a space it is one grey word at
+         §311 removed, and glued back on with a space it is one grey word at
          the head of a sentence. */
       var c = el.cloneNode(true); c.querySelector(".n").remove();
       out.push({ n: deckTxt(n), t: deckPieces(c), key:false });
@@ -970,7 +970,7 @@ function deckLead(sl){
          that it did not: a pillar's tables carry no prose at all, so the
          selector pass came back empty and the leaf reader then swept up the
          headline pair a second time — drawn once in the head and once as
-         two stray lines above the table, which is the fault §309 removed
+         two stray lines above the table, which is the fault §311 removed
          wearing a different hat. */
       if (el.closest("table") || el.closest("h1, h2, h3") ||
           el.closest(DECK_LAID_OUT) || el.querySelector("*")) return;
@@ -983,7 +983,7 @@ function deckLead(sl){
 
 var DECK_LEAD_LINE = 274320;                 /* one line of lead prose, EMU */
 
-/* ── A TABLE IS THE CONTENT OF ITS SLIDE, NOT A FOOTNOTE ON IT (§309) ───
+/* ── A TABLE IS THE CONTENT OF ITS SLIDE, NOT A FOOTNOTE ON IT (§311) ───
    The plan download's 11pt over a 335280 row is right for a plan somebody
    marks up at a desk. A review is read off a projector, and at that size a
    three-row table sat in the top third of the page reading like small print.
@@ -1024,7 +1024,7 @@ function deckSlidePptx(sl, kicker, mark){
   var foot = mark ? [mark] : [];
 
   /* WHERE THE UNIT STANDS — the three readings the whole review builds to,
-     which the download printed as three headings and nothing else (§309). */
+     which the download printed as three headings and nothing else (§311). */
   var cells = deckHeadCells(sl);
   if (cells) {
     var shapes = pptxHead(kicker, title);
@@ -1045,7 +1045,7 @@ function deckSlidePptx(sl, kicker, mark){
   }
 
   /* THE PILLARS ROLL-CALL — cards on the screen, and eight lines of flat
-     text in the file until §309. Drawn as PowerPoint rectangles, so they are
+     text in the file until §311. Drawn as PowerPoint rectangles, so they are
      still four things somebody can move rather than a picture of four. */
   var cards = deckCards(sl);
   if (cards) {
@@ -1081,7 +1081,7 @@ function deckSlidePptx(sl, kicker, mark){
   var tables = [].slice.call(sl.querySelectorAll("table"))
                  .map(deckTable).filter(Boolean);
 
-  /* ── PROSE IS AN INTRODUCTION OR IT IS THE SLIDE (§309) ──────────────
+  /* ── PROSE IS AN INTRODUCTION OR IT IS THE SLIDE (§311) ──────────────
      Above a table it introduces one, so it stays small and out of the way.
      With no table it IS the content — the four SWOT slides and the cycle's
      notes — and 13pt at the top of an otherwise empty page reads as small
@@ -1132,7 +1132,7 @@ function deckSlidePptx(sl, kicker, mark){
   return out;
 }
 
-/* ── THE MARK IN THE FOOTER (§309) ─────────────────────────────────────
+/* ── THE MARK IN THE FOOTER (§311) ─────────────────────────────────────
    `deckFootMarks()` puts the subject's own lockup along the foot of every
    content slide of the deck (§259), and the download had none at all — so
    the file a unit hands round was the one artefact of the review with

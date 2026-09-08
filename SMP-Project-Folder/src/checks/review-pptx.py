@@ -1,4 +1,4 @@
-"""THE REVIEW DECK AS A POWERPOINT, MADE TO READ LIKE THE DECK (§309).
+"""THE REVIEW DECK AS A POWERPOINT, MADE TO READ LIKE THE DECK (§311).
 
 Islam, of a file downloaded from his own tenant: *"the presentations design
 look bad is there a way to make it look better? matching what we present?"* —
@@ -235,7 +235,7 @@ def main():
                [g[:40] for g in glued if g in allt][:1])
             # REWRITTEN, NOT LOOSENED (§218, §214.3). This asked for the
             # number and the words as ONE run with a space between them,
-            # which was the first build's shape; §309 then gave the number
+            # which was the first build's shape; §311 then gave the number
             # its own run in the accent, as the signed-off mockup drew it.
             # The claim is unchanged — the item is there AND it is numbered
             # — and it is now asserted of the two runs rather than of one

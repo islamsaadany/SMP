@@ -1136,8 +1136,8 @@ function openDeckFor(target, from){
    cancelling cost nothing; a browser that never fires it leaves the deck
    open on screen, with Exit where Exit always is — a nuisance and not a trap
    (§61). */
-/* ONE PRINTER, TWO WAYS IN (§53.5, §310). §305 wrote all of this against a
-   single subject and §310 needed the same act over a FLOW; a second copy
+/* ONE PRINTER, TWO WAYS IN (§53.5, §312). §305 wrote all of this against a
+   single subject and §312 needed the same act over a FLOW; a second copy
    would be a second answer to "what does the platform do to make a PDF",
    and the fit-pass handling and the put-back are exactly the parts that
    would drift. What differs between the two is which deck is opened, so
@@ -1162,7 +1162,7 @@ function deckToPdf(target){
   deckPrint(function(){ openDeckFor(target); });
 }
 
-/* ── EVERY SUBJECT, ONE PDF (§310) ────────────────────────────────────
+/* ── EVERY SUBJECT, ONE PDF (§312) ────────────────────────────────────
    Islam, of the contingency pack: *"the pdf in the contiengcy back is like
    the master presentation a full pdf with all slides there."*
 

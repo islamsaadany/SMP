@@ -638,7 +638,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   workbook still carries no column for a tactic's outcome (§250.2), and
   `checks/tactic-outcome.py` is red on `main` with 13 assertions, reproduced
   identically before this change.
-- **THE REVIEW DECK AS A POWERPOINT, MADE TO READ LIKE THE DECK (§309):**
+- **THE REVIEW DECK AS A POWERPOINT, MADE TO READ LIKE THE DECK (§311):**
   Islam, with a file downloaded from his own tenant — *"the presentations
   design look bad is there a way to make it look better? matching what we
   present?"* **MEASURED FIRST, AND THE BRAND WAS ALREADY RIGHT IN IT**: the
@@ -697,7 +697,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (§94.2) — its rows still 335280, its cells still 11pt, no media
   part. Nothing stored moves, nothing is migrated, no `api/`, `lib/` or `db/`
   file touched.
-- **ONE PDF OF THE WHOLE FLOW, IN THE CONTINGENCY PACK (§310):** Islam
+- **ONE PDF OF THE WHOLE FLOW, IN THE CONTINGENCY PACK (§312):** Islam
   — *"the pdf in the contiengcy back is like the master presentation a
   full pdf with all slides there."* **THAT SENTENCE DISSOLVES THE OBSTACLE
   RATHER THAN WORKING AROUND IT**: a PDF here is the BROWSER printing
@@ -7149,7 +7149,7 @@ python3 checks/deck-pdf.py      # the deck on paper (§296): the entry beside Pr
                                 # readers are asked for BY NAME first (§215). 0
                                 # failures; 6 red / 2 red on two falsifications made
                                 # from the SOURCES (§276)
-python3 checks/review-pptx.py   # the review deck as a PowerPoint (§309):
+python3 checks/review-pptx.py   # the review deck as a PowerPoint (§311):
                                 # the file is BUILT and READ BACK — the real
                                 # buildReviewPptx() driven in the page, unzipped,
                                 # and the slide XML read, because a builder wired
@@ -7428,7 +7428,33 @@ python3 checks/project-done.py  # a project owner reports, and the bar stops say
                                 # tally, the mark PRESSED and read back from REVIEW.done,
                                 # the project beside theirs offering none — and a plain
                                 # reader still told View only, or a build that deleted
-                                # the pill would pass everything else
+                                # the pill would pass everything else — and since §309
+                                # the freeze: the band saying Draft saved beside Reopen,
+                                # the project's OWN boxes shut (measured against what
+                                # that band held before the press, because a shut cell
+                                # draws no control at all — §113.8), the report around
+                                # it asserted NOT closed, the CUSTODIAN keeping every
+                                # control on that same project and getting the word
+                                # with no button, and a REFUSED save closing nothing.
+                                # Served over HTTP, because a save cannot be seen over
+                                # file:// at all (§94.11); 4 red on the build before
+python3 checks/capability-first.py # theirs is the capability that leads (§310):
+                                # on Projects, Reporting and Performance the capability
+                                # holding his project is drawn FIRST — asserted as
+                                # AGREEMENT with a running order the check works out for
+                                # itself from the data, never a literal (§94.8) — his
+                                # band above the fold with its controls live, every
+                                # capability still drawn (nothing is hidden), the CODES
+                                # asserted identical to the office's (a code is a
+                                # POSITION, so reordering the stored list renames every
+                                # project for that viewer — §48), the office untouched on
+                                # all four pages, the OVERVIEW keeping the stored order
+                                # for him too (the stated decision), and an owner already
+                                # first seeing nothing move. The state is MADE, with his
+                                # capability deliberately NOT the one stored first, or the
+                                # whole file proves nothing (§113.8). Proved able to fail
+                                # three ways: 3 / 1 / 6 red, the third printing the rename
+                                # verbatim. SMP_BUILT points it at another build
 python3 checks/deck-figures.py   # a figure is read against what it is measured by
                                 # (§254): the benchmark asserted as AGREEMENT with
                                 # measureDueLabel and never as a literal, every
@@ -8041,7 +8067,105 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-08 &mdash; **&sect;309 and &sect;310: the review deck as
+*Last Updated: 2026-09-08 &mdash; **&sect;310: theirs is the capability that
+leads.** Islam, using what &sect;301 shipped: *"the porject owner should open the
+capability by defaut on his project."* **MEASURED IN HIS SHAPE BEFORE ANYTHING
+WAS PROPOSED**: a project owner whose only project sits in the SECOND of a
+function's two capabilities lands at the top of the page on somebody ELSE'S
+capability, where he correctly has **0 controls** (&sect;147.7), with his own
+starting **705px** down and his twelve boxes below the fold on a 900px window
+&mdash; while the rail INSIDE his capability already picks his project. **SO
+&sect;301.4 CHOSE THE RIGHT PROJECT INSIDE EACH CAPABILITY AND NEVER CHOSE WHICH
+CAPABILITY LEADS**, which also made the two sides of the switch disagree: a UNIT
+draws one pillar at a time and &sect;301.4 opens his, so a unit was already right
+(&sect;53.5, A15). **THREE SHAPES WERE PUT TO HIM WITH THE COST OF EACH** and he
+chose **A**, his capability first with the rest below it &mdash; over scrolling
+to it, and over drawing his alone, which he had already closed one level down
+(*"no need to hide other projects. that's a stretch"*). **AND THE MOCKUP FOUND
+THE COST THAT DECIDES THE IMPLEMENTATION**: drawn out of the running platform by
+reordering `GROUP.capabilities`, his project's code changed from **MKT03 to
+MKT01** on his own screen while the deck, the workbook and everybody else went
+on saying MKT03 &mdash; `projCode()` is the project's **POSITION across the whole
+function**, so **a code is a position and a per-viewer order renames every
+project for that viewer** (&sect;48). Only the DRAWING order moves: `capsShown()`
+reorders what the three pages map over and `capsOfFunction()` stays the order the
+codes ask, re-shot to prove it and asserted as *he reads the same codes the
+office does*. **IT IS &sect;301.4'S OWN SHAPE ONE LEVEL UP AND ASKS &sect;301.4'S
+OWN QUESTION** (`railMine()`, so the page and the rail cannot disagree about
+whose a project is), **nothing moves for anybody unbounded**, and **nothing is
+hidden**. **THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION**: the Overview's
+rows belong to no project, so there is nothing there to open on and it keeps the
+tenant's order for everybody &mdash; asserted, or a build sweeping all four
+would quietly widen the change. **The server needed nothing and it is asserted
+rather than claimed** (&sect;172): no `api/`, `lib/` or `db/` file touched, read
+off the diff; 574/0 and 136/0 unchanged; nothing stored, nothing migrated.
+**Proved able to fail three ways, one per decision** &mdash; 3 / 1 / 6 red, the
+third printing the rename verbatim. **&sect;310.1 &mdash; four of the check's own
+first failures were the CHECK**: a capability's name read off a class that does
+not exist, the **Overview** asked of `#subtabs` when it is a SECTION addressed by
+KEY (twice, reporting a page plainly on screen as missing), and his live controls
+measured **after** a loop had left the browser on another page (&sect;50.6's
+family). **RECORDED, NOT DONE**: nothing on the page SAYS the order is his rather
+than the tenant's. **Merged to `main` 2026-09-08 with &sect;309 beside it**, carrying
+`main`'s &sect;303&ndash;&sect;308 in: both were BUILT as &sect;302 and &sect;303 and renumbered at
+the merge, because `main` took both numbers while this was in flight &mdash; mine moved
+line by line and `main`'s own citations were left where they were (&sect;264.3).*
+
+*Earlier: 2026-09-07 &mdash; **&sect;309: a project saved as a draft.**
+Islam: *"can we make the project owner save on the project level that is similar
+to the save for the submit of the whole cabaiblity."* **MEASURING NARROWED THE
+ASK BEFORE ANYTHING WAS PROPOSED**: the capability's *Save draft* is not a save
+&mdash; every figure is written the moment the box is left (&sect;35) and posted
+by the autosave (&sect;170), so what that button does is push what is already
+there, say so, and **CLOSE the report until Reopen** (&sect;220). A project owner
+already had two of the three: &sect;301's mark put the state on the band and in
+the bar, and nothing was ever unsaved. So the gap is two lines, not a feature
+&mdash; which is why three shapes could be drawn in the platform's own pixels
+with each one's cost stated on the panel beside it (rule 1c). **Islam took B**
+(push, confirm, freeze, Reopen) **and was right about the word**: once the press
+freezes, *Mark done* stops describing it. Which word was put back to him and
+**drawn rather than argued** (&sect;266) &mdash; a bare *Save* against *Save
+draft*, in the band, in both states &mdash; and he took **Save draft**, which is
+the bar's own word for the bar's own act: a bare *Save* promises something that
+has been happening all along, and the bar one row above already carries a Save
+draft of its own (&sect;87's twins). The state it leaves behind, **Draft saved
+&middot; Reopen**, is word for word what that bar shows. **THE MARK IS THE LOCK,
+WHICH IS WHY IT COSTS NOTHING TO STORE**: `review.done[<container>]` already
+exists, already travels per container (&sect;301's own decision, and what stops
+two owners in one function colliding) and already classifies as `rowDone` &mdash;
+**no migration, no schema change, no server rule**, asserted rather than assumed
+(&sect;172, 574/0 and 136/0 unchanged). **AND IT IS A SCREEN LOCK AT EXACTLY
+&sect;220'S STRENGTH**, because that one does not refuse a figure on the server
+either; widening one without the other would be two answers to what a closed
+report means. **ONE READER AT THE TWO ROW GATES** (`ownDraftShut`), asked inside
+`canReportRow()` and `canReportFnRow()` rather than at the twenty cells they
+feed, with `cid` travelling on the row for the same reason `owner` does
+(&sect;301.5) &mdash; and a unit's key objectives carry none, deliberately, so
+nobody's draft can close them. **BOTH HALVES OF THE PREDICATE ARE THE RULE**: the
+container, because this closes one project and never the report around it; the
+viewer, because the custodian and the office hold the bar's own Save draft and a
+second lock inside it would be two ways to close one report. **THE CUSTODIAN'S
+CONTROL HAD TO GO AND THE WORD STAYED** &mdash; &sect;301 drew the mark for every
+unbounded role, right while it was a signal and wrong the moment it closed
+something, so they **SEE the state and get no button** (&sect;256's own pattern),
+which keeps the signal this control exists for. **SAVE, THEN CLOSE, AND ONLY ON
+SUCCESS**, &sect;220's own corrected ordering and worse if skipped here, because
+the boxes go read-only behind a word that would be a lie; reopening is
+deliberately not a save. **THE CHECK MOVED TO HTTP AND SINCE THIS SECTION IT HAS
+TO** (&sect;94.11) &mdash; over `file://` SYNC is never live, so every press
+answers *offline* and the whole feature would report as missing on a build
+carrying it perfectly &mdash; **and moving it exposed a fixture that could not
+have worked**: &sect;237 rebases the tab on every view-as switch, so every "set
+it as the SMO, then look as them" fixture in that file was thrown away in the
+hop, invisible while it opened the built HTML. **&sect;309.1 &mdash; two of the
+new assertions could not fail as first written**, both found by falsifying: one
+counted every control in a pane that draws every capability at once, the other
+asserted *no live controls* when a shut cell draws no control at all
+(&sect;113.8). **&sect;309.2 &mdash; and the refused-save case was unreachable
+until the graph was dirty**, because `save()` answers *clean* before it reaches
+the server. **4 red** on the build before, one per decision.*
+
+*Earlier: 2026-09-08 &mdash; **&sect;311 and &sect;312: the review deck as
 a PowerPoint, and one PDF of the whole flow.** Islam, with a file downloaded
 from his own tenant attached &mdash; ***"the presentations design look bad is
 there a way to make it look better? matching what we present?"*** **THE FILE WAS
@@ -8070,7 +8194,7 @@ THING FROM THE MOCKUP NOT DELIVERED, SAID RATHER THAN QUIETLY DROPPED**: a
 PowerPoint run names ONE face with no fallback list, so naming the platform's own
 would substitute to something arbitrary on any machine that lacks it. **FOUR
 FAULTS WERE FOUND BY LOOKING AT A RENDERED PAGE AND NONE BY READING THE XML**
-(&sect;296.1). **AND &sect;310 IS HIS ANSWER TO WHERE THE PDF BELONGS** &mdash;
+(&sect;296.1). **AND &sect;312 IS HIS ANSWER TO WHERE THE PDF BELONGS** &mdash;
 ***"the pdf in the contiengcy back is like the master presentation a full pdf
 with all slides there"*** &mdash; which dissolves the obstacle rather than
 working around it: a PDF here is the BROWSER printing, so nineteen files would
@@ -8081,13 +8205,18 @@ cannot see. `checks/review-pptx.py` **builds the file and reads it back**, prove
 able to fail five ways from the SOURCES (**1 / 3 / 4 / 3 / 2 red**) &mdash; and
 its own first run was wrong three times, while **the check found a real fault in
 my own fix** (the leaf fallback sweeping the headline pair up a second time).
-`checks/contingency.py` gains a &sect;310 block, **2 / 4 red**, with one
+`checks/contingency.py` gains a &sect;312 block, **2 / 4 red**, with one
 assertion of mine REWRITTEN for comparing an attached slide count with a DETACHED
 one (&sect;69, &sect;113.8) and two more rewritten rather than loosened
 (&sect;218). Nothing stored moves, nothing is migrated, no `api/`, `lib/` or
 `db/` file is touched. 588/0 authoriser &middot; 136/0 differ &middot; full
-`qa.py` ERRORS none &middot; twelve neighbouring checks green. **On the branch,
-not merged.***
+`qa.py` ERRORS none &middot; twelve neighbouring checks green. **MERGED TO
+`main` 2026-09-08, and RENUMBERED at that merge &sect;309/&sect;310 &rarr;
+&sect;311/&sect;312** &mdash; `main` took both numbers while this was in flight
+(&sect;287's precedent), and the renumber was SCOPED to the lines this branch
+wrote (&sect;264.3): five files are the branch's alone, and the one line in
+`shell.html` was matched by its own text, with `main`'s &sect;309 asserted to
+have survived it.*
 
 *Earlier: 2026-09-07 &mdash; **&sect;308: the planning period, and the
 review cycle inside it.** Islam, with `Covers from` empty and the strip reading

@@ -6,7 +6,49 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§303–§308 — the export round — merged to `main`
+**Latest version:** **§309 and §310 — a project saved as a draft, and theirs
+is the capability that leads — merged to `main` 2026-09-08 on Islam's word**,
+from `claude/project-owner-reporting-access-uzze9s`, carrying `main`'s
+§303–§308 in with it; built as §302 and §303 and renumbered at the merge,
+because `main` took both numbers while this was in flight (the precedent §287
+and §301 both set).
+
+**§310 — theirs is the capability that leads.** Islam:
+*"the porject owner should open the capability by defaut on his project."*
+Measured in his shape first: a project owner whose only project sits in the
+**second** of a function's two capabilities lands on somebody else's — 0
+controls for him there — with his own starting 705px down and his twelve boxes
+below the fold. §301.4 picked the right project inside each capability's rail
+and never picked which capability leads, which also left a unit (one pillar at
+a time) right and a function wrong. Three shapes were put to him with the cost
+of each (`design-mockups/project-owner-capability-first/`); he took **A**: his
+capability first, the rest below it, nothing hidden. **The mockup found the
+cost that decides it** — reordering the stored list renamed his project
+**MKT03 → MKT01** on his own screen while the deck and everybody else still
+said MKT03, because a code is a POSITION — so only the drawing order moves and
+the codes are asserted identical to the office's. Nothing stored, nothing
+migrated, the server unchanged (574/0, 136/0), the office and the custodian
+untouched, and the **Overview** deliberately keeps the tenant's order. Proved
+able to fail three ways: 3 / 1 / 6 red.
+
+**§309 — a project saved as a draft.** Islam: *"can we
+make the project owner save on the project level that is similar to the save
+for the submit of the whole cabaiblity."* Measured first, and the measurement
+narrowed it: the capability's *Save draft* is not a save (every figure is
+already written on blur and posted by the autosave) — it pushes, says so, and
+**closes the report until Reopen**. A project owner already had the state on
+his band and in the bar since §301, so the gap was a press that pushes and
+confirms, and a freeze. Three shapes were drawn in the platform's own pixels
+with each cost stated (`design-mockups/project-level-save/`); he took **B**,
+and the button's word was drawn both ways before he settled it: **Save draft**,
+the bar's own word for the bar's own act, leaving **Draft saved · Reopen** —
+word for word what that bar shows. The mark §301 already stores per project
+IS the lock, so nothing new is stored, nothing is migrated and the server is
+unchanged (asserted: 574/0, 136/0). The custodian and the office are untouched
+and keep every control on that project; they see the word and get no button.
+4 red on the build before, one per decision.
+
+**Before it:** **§303–§308 — the export round — merged to `main`
 2026-09-07 on Islam's word**, from `claude/data-export-import-archive-ot4vl8`,
 carrying `main`'s §294–§302 from five other sessions in with it. Built as
 §294–§299 and **renumbered at the merge**, because `main` took those numbers
@@ -30,7 +72,8 @@ months instead of assuming January.
 `openDeckTarget()` and `main`'s §295 `openDeckFor()`, the same six lines under
 two names. `main`'s is kept and mine deleted by name (§24, §281).
 
-**Latest version:** **§301 — a project owner reports, and the bar said
+
+**Before it:** **§301 — a project owner reports, and the bar said
 View only — merged to `main` 2026-09-07 on Islam's word**, from
 `claude/project-owner-reporting-access-uzze9s`, carrying §285–§300 from
 several other sessions in with it; built as §287 and renumbered at the

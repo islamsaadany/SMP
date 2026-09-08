@@ -4996,14 +4996,19 @@ function renderReport(u){
        builders for one list, and only one of them was kept up. The fields
        are copied from `reportItems()` verbatim rather than re-derived, or
        the two drift again the next time one of them learns something. */
+    /* §309: `cid` joins them for the same reason — it is the pillar a saved
+       draft closes, and `reportItems()` carries it too, so the two builders
+       still answer alike. */
     var ms = [];
     SMPRules.shown(p.measures).forEach(function(m){
-      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner });
+      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner,
+                cid:p.id });
     });
     var ts = [];
     SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
-                owner:t.owner, collaborators:t.collaborators, pown:p.owner });
+                owner:t.owner, collaborators:t.collaborators, pown:p.owner,
+                cid:p.id });
     });
     var askedT = ts.filter(function(x){ return x.asked; });
     var done = doneOf(ms) + doneOf(askedT), total = ms.length + askedT.length;
@@ -5079,7 +5084,7 @@ function renderReport(u){
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
-        doneCtl(u.ukey, p.id, p.owner)) +
+        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi))) +
       mTable + tTable;
   };
 
@@ -5320,6 +5325,48 @@ function railPick(c){
   railShow(k, pick.id);
   return pick;
 }
+/* ── AND THEIRS IS THE CAPABILITY THAT LEADS (§310) ───────────────────────
+   Islam: *"the porject owner should open the capability by defaut on his
+   project."*
+
+   §301.4 CHOSE THE RIGHT PROJECT INSIDE EACH CAPABILITY AND NEVER CHOSE WHICH
+   CAPABILITY LEADS. A function draws every capability at once, top to bottom,
+   so measured in his shape — a project owner whose only project sits in the
+   second of Marketing's two — he lands at the top on somebody ELSE'S
+   capability, where he correctly has **0 controls** (§147.7), with his own
+   starting 705px down and his twelve boxes below the fold on a 900px window.
+   And it made the two sides of the switch disagree: on a UNIT the rail draws
+   one pillar at a time and §301.4 opens his, so a unit was already right.
+
+   ONLY THE DRAWING ORDER MOVES, AND THAT IS NOT A DETAIL. `projCode()` is the
+   project's POSITION across the whole function, so reordering the stored list
+   renames every project for that viewer — measured while drawing this, MKT03
+   became **MKT01** on his screen while the deck, the workbook and everybody
+   else went on saying MKT03. `capsOfFunction()` stays the stored order and the
+   codes go on asking it; this reorders what the three PAGES map over.
+
+   NOTHING IS HIDDEN (Islam closed that one on the rail: *"no need to hide
+   other projects. that's a stretch"*) and NOTHING MOVES FOR ANYBODY UNBOUNDED
+   — the office and the custodian reach every row, so "theirs" names nothing,
+   which is §301.4's own gate and the same `railMine()` test the rail asks, so
+   the page and the rail cannot disagree about whose it is (§53.5). */
+function capsShown(fk) {
+  var caps = capsOfFunction(fk), target = "fn:" + fk;
+  if (caps.length < 2 || !boundedHere(target)) return caps;
+  var mine = [], rest = [];
+  caps.forEach(function(c){
+    (railMine(target, c.projects || [], function(p){ return p.owner; })
+      ? mine : rest).push(c);
+  });
+  return mine.length ? mine.concat(rest) : caps;
+}
+/* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
+   halves differ we say which and why). Projects, Reporting and Performance
+   all draw a project — the thing that is his — so a page that reordered on one
+   of them and not the others would answer differently depending on which tab
+   he came in on. The OVERVIEW draws a capability's definition and its key
+   objectives, which belong to no project and are nobody's own lines, so there
+   is nothing there to open on and it keeps the tenant's order for everybody. */
 /* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
    It used to read "below two items there are no siblings to move between, so
    the rail is a column of wasted width" — true about the width, and it made
@@ -5906,7 +5953,7 @@ function fnNothingBehind(fk){
 }
 
 function renderFnPerformance(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
   /* A FUNCTION THAT PLANS IN PILLARS IS DRAWN BY THE UNIT'S PAGE (spec 010).
      One branch at the top of each of the four function pages, and nothing
      below it changes — the alternative was four more renderers that would have
@@ -6325,7 +6372,7 @@ function projPlanBody(p, fk){
    RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
    function's pages now says its strategy is the parent unit's. */
 function renderFnProjects(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
@@ -6541,7 +6588,7 @@ function projReportBody(p, fk){
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
       /* §301: the finished mark, on the project it is about. */
-      doneCtl("fn:" + fk, p.id, p.owner)) +
+      doneCtl("fn:" + fk, p.id, p.owner, projCode(fk, p))) +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
     '<h4 class="mini">Milestones</h4>' +
@@ -6602,7 +6649,7 @@ function capReportBody(c){
 }
 
 function renderFnReport(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderReport(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   if (REVIEW.state !== "open") {
@@ -6831,17 +6878,50 @@ function unitRailFor(u, sel){
    NO NEW VOCABULARY: `Mark done` is the ordinary small button every pen bar
    wears, and marked reads as the pill-and-way-back pair the report already
    uses for Submitted · Reopen. Nothing new in the stylesheets. */
-function doneCtl(target, id, owner){
-  if (!mayMarkDoneOn(target, owner)) return "";
+function doneCtl(target, id, owner, code){
   var on = !!doneMark(id);
+  /* ── SEEING A STATE IS NOT SETTING IT (§309, §256's own pattern) ──────
+     §301 drew this control for anybody `mayMarkDone` allows, which is every
+     unbounded role as well — right while it was a SIGNAL, and wrong the
+     moment the word became "Save draft" and the press closed the container:
+     `ownDraftShut()` asks `boundedHere()`, so a custodian pressing it would
+     have watched the word change and nothing freeze. A control that means
+     two different things depending on who is holding it is what §295 refused
+     to build; the answer is not to freeze them too — they hold the bar's own
+     Save draft for the whole function, and a second lock inside it would be
+     two ways to close one report (§53.5).
+
+     So the pair is the bounded owner's, and everybody else who can see the
+     band SEES THE STATE and gets no button — which is what keeps the signal
+     this control exists for: the person who submits still reads, project by
+     project, which are finished. Drawn only when it is SET, because "not
+     saved yet" is the ordinary state and a word for it on every band would
+     be furniture (§94.15). */
+  if (!boundedHere(target) || !mayMarkDoneOn(target, owner))
+    return on ? '<span class="pbdone" title="' +
+      esc("Its owner has saved it as a draft and closed it. They can reopen it.") +
+      '">Draft saved</span>' : "";
   var addr = esc(String(id));
+  /* §309: THE BAR'S OWN TWO WORDS, ONE CONTAINER WIDE. Islam settled the
+     word from two drawn in the band — *"ok with save draft"* — over a bare
+     "Save", which would have promised something the platform has been doing
+     all along (a figure is written the moment the box is left, §35/§170) and
+     put a second, narrower Save on a page whose bar already carries one
+     (§87's twins). "Save draft" is that bar's word for that bar's act, so
+     the state it leaves behind — `Draft saved · Reopen` — reads the same
+     here as it does up there and there is nothing new to learn. */
+  /* THE HOVER NAMES THE CODE, NEVER A NOUN (§107.8, §160.6): a tenant's
+     label is already plural — `L("pillar","bu")` is "Pillars" — so a
+     sentence reaching for the singular has none to reach for. The band
+     beside it is showing the code anyway. */
+  var it = code ? esc(code) : "it";
   return on
-    ? '<span class="pill good" title="Marked finished. The report is still open ' +
-      '— figures can still be entered.">Done</span>' +
-      '<button class="linkbu" data-rowdone="' + addr + '|0">Undo</button>'
+    ? '<span class="pbdone" title="Your figures are saved and ' + it +
+      ' is closed. Reopen it to change them.">Draft saved</span>' +
+      '<button class="editbtn reopen" data-rowdone="' + addr + '|0">Reopen</button>'
     : '<button class="editbtn" data-rowdone="' + addr + '|1" ' +
-      'title="Tells whoever submits the report that your part is finished. ' +
-      'It does not close anything.">Mark done</button>';
+      'title="Saves your figures and closes ' + it +
+      '. Reopen it whenever you need to change them.">Save draft</button>';
 }
 
 /* ── AND THE BAR STOPS SAYING "View only" TO SOMEBODY WHO REPORTS (§301) ──

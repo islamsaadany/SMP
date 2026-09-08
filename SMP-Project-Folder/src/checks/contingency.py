@@ -324,14 +324,14 @@ with sync_playwright() as pw:
     js(pg, "()=>{ current='setup'; currentSub='import'; paint(); }")
     pg.wait_for_timeout(400)
     ck("the office is drawn the card", js(pg, "()=>!!document.querySelector('.contcard')") is True)
-    # REWRITTEN, NOT LOOSENED (§218, §214.3): §310 gives the card a third
+    # REWRITTEN, NOT LOOSENED (§218, §214.3): §312 gives the card a third
     # act, so the claim is the same — the card carries every way of taking
     # the files — and the list it is asserted against grew by one.
     ck("with all three buttons on it",
        js(pg, "()=>[...document.querySelectorAll('[data-conttake]')].map(b=>b.dataset.conttake)")
        == ["copy", "slides", "pdf"])
 
-    # ── §310 · ONE PDF, EVERY SUBJECT ────────────────────────
+    # ── §312 · ONE PDF, EVERY SUBJECT ────────────────────────
     # Islam: *"the pdf in the contiengcy back is like the master presentation
     # a full pdf with all slides there."* Three things must be true at once,
     # and each can fail on its own: the deck opened is the FLOW rather than

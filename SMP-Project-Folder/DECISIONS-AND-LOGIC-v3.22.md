@@ -37436,3 +37436,98 @@ written without waiting for the save, and the custodian offered the button.
 the same project can each close it for themselves — true of §220 for a
 whole report as well, and not a state this tenant can reach; and the deck
 still says nothing about a project saved as a draft.
+
+---
+
+## §303 — THEIRS IS THE CAPABILITY THAT LEADS (2026-09-08)
+
+Islam, using what §301 shipped: *"the porject owner should open the capability
+by defaut on his project."*
+
+**MEASURED IN HIS SHAPE BEFORE ANYTHING WAS PROPOSED (rule 3a).** A project
+owner whose only project sits in the SECOND of a function's two capabilities,
+on Marketing › Reporting at 1500×900:
+
+| | |
+|---|---|
+| where he lands | scroll 0, on **Brand Positioning** — not his |
+| controls on that first screen | **0**, correctly (§147.7: a bounded role reaches its own rows and nothing beside them) |
+| his own capability | starts **705px** down |
+| his own project's band | **783px** down, its twelve boxes below the fold |
+| the rail INSIDE his capability | already picks his project |
+
+**SO §301.4 CHOSE THE RIGHT PROJECT INSIDE EACH CAPABILITY AND NEVER CHOSE
+WHICH CAPABILITY LEADS.** A function draws every capability at once, top to
+bottom, in the tenant's stored order — so that section's own reasoning stopped
+one level short of the page. **And it made the two sides of the switch
+disagree**: a UNIT draws one pillar at a time through a rail, and §301.4 opens
+his there, so a unit was already right and a function was not (§53.5, A15).
+
+**THREE SHAPES WERE PUT TO HIM WITH THE COST OF EACH** and he chose **A**:
+
+* **A — his capability first**, the rest below it. He sees a different order
+  from everybody else; nothing hidden, nothing stored.
+* **B — the page scrolls to his capability.** The order stays the same for
+  everyone and the page jumps when it opens.
+* **C — only his capability is drawn.** Refused: he could not see the rest of
+  the function at all, and Islam had already closed the equivalent idea one
+  level down (*"no need to hide other projects. that's a stretch"*, §301.4).
+
+**AND THE MOCKUP FOUND THE COST THAT DECIDES THE IMPLEMENTATION.** Drawn out
+of the running platform (rule 1c, §41.9) by reordering `GROUP.capabilities`
+and repainting — and his project's code changed from **MKT03 to MKT01** on his
+own screen, measured, while the deck, the workbook and everybody else went on
+saying MKT03. `projCode()` is the project's **POSITION across the whole
+function** (`fnProjects()` → `capsOfFunction()`), so **a code is a position and
+a per-viewer order renames every project for that viewer** — §48 exactly. So
+only the DRAWING order moves: `capsShown()` reorders what the three pages map
+over and `capsOfFunction()` stays the stored order the codes go on asking. The
+mockup was re-shot moving nothing but the drawing, and the check asserts that
+he reads the same codes the office does.
+
+**IT IS §301.4's OWN SHAPE ONE LEVEL UP, AND ASKS §301.4's OWN QUESTION**:
+`capsShown()` calls `railMine()` — the same test the rail asks — so the page
+and the rail cannot disagree about whose a project is (§53.5). `boundedHere()`
+is the gate, so **nothing moves for anybody unbounded**: the office and the
+custodian reach every row, so *theirs* names nothing, and their page is
+byte-for-byte what it was. A function with one capability, and an owner whose
+project is already in the first, are both the identity case and are asserted
+as such — a *put mine first* rule that disturbed those would be a change nobody
+asked for.
+
+**THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION** (§53.5: where the two
+halves differ we say which and why). Projects, Reporting and Performance all
+draw a project, so a page reordering on one and not the others would answer
+differently depending on which tab you came in on. The **Overview** draws a
+capability's definition and its key objectives, which belong to no project and
+are nobody's own lines — there is nothing there to open on, so it keeps the
+tenant's order for everybody, and the check asserts it, or a build that swept
+all four pages would quietly widen the change.
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED RATHER THAN CLAIMED** (§172):
+no `api/`, `lib/` or `db/` file is touched, read off the diff; 574/0 authoriser
+and 136/0 differ unchanged; nothing stored, nothing migrated, no export moved.
+
+`checks/capability-first.py` — **proved able to fail three ways, one per
+decision**: the three pages reading the stored order again (**3 red**, the
+reported fault whole), the Overview swept in with them (**1 red**), and the
+codes made to follow the drawing (**6 red**, printing the rename verbatim —
+`his ['MKT01','MKT02'] / the office ['MKT01','MKT03']`). The state is MADE, and
+his capability is deliberately NOT the one stored first: if *his* and *the
+first one* coincide the whole file proves nothing (§113.8).
+
+**§303.1 — AND FOUR OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK.** It
+read the capability's name off `.capname`, which does not exist (`.capnm`), so
+every order assertion compared a name against *"CapabilityBrand Positioning2 /
+2 reported"*; it asked `#subtabs` for the **Overview**, which is a SECTION of
+the Strategy tab addressed by KEY (`found` / `proj`) and not a page tab, so a
+page plainly on screen was reported missing twice; and it measured his live
+controls **after** a loop that had left the browser on Performance, reading 0
+on a build where they are all there (§50.6's family — measure the page you
+opened, not the one you were last on).
+
+**RECORDED, NOT DONE**: with two owners in one function each holding a project
+in a different capability, each sees their own first — which is the feature —
+but nothing on the page SAYS the order is theirs rather than the tenant's; and
+a capability holding two projects still opens on whichever of them §301.4
+picks, which is right, and unremarked on the band.

@@ -5237,6 +5237,48 @@ function railPick(c){
   railShow(k, pick.id);
   return pick;
 }
+/* ── AND THEIRS IS THE CAPABILITY THAT LEADS (§303) ───────────────────────
+   Islam: *"the porject owner should open the capability by defaut on his
+   project."*
+
+   §301.4 CHOSE THE RIGHT PROJECT INSIDE EACH CAPABILITY AND NEVER CHOSE WHICH
+   CAPABILITY LEADS. A function draws every capability at once, top to bottom,
+   so measured in his shape — a project owner whose only project sits in the
+   second of Marketing's two — he lands at the top on somebody ELSE'S
+   capability, where he correctly has **0 controls** (§147.7), with his own
+   starting 705px down and his twelve boxes below the fold on a 900px window.
+   And it made the two sides of the switch disagree: on a UNIT the rail draws
+   one pillar at a time and §301.4 opens his, so a unit was already right.
+
+   ONLY THE DRAWING ORDER MOVES, AND THAT IS NOT A DETAIL. `projCode()` is the
+   project's POSITION across the whole function, so reordering the stored list
+   renames every project for that viewer — measured while drawing this, MKT03
+   became **MKT01** on his screen while the deck, the workbook and everybody
+   else went on saying MKT03. `capsOfFunction()` stays the stored order and the
+   codes go on asking it; this reorders what the three PAGES map over.
+
+   NOTHING IS HIDDEN (Islam closed that one on the rail: *"no need to hide
+   other projects. that's a stretch"*) and NOTHING MOVES FOR ANYBODY UNBOUNDED
+   — the office and the custodian reach every row, so "theirs" names nothing,
+   which is §301.4's own gate and the same `railMine()` test the rail asks, so
+   the page and the rail cannot disagree about whose it is (§53.5). */
+function capsShown(fk) {
+  var caps = capsOfFunction(fk), target = "fn:" + fk;
+  if (caps.length < 2 || !boundedHere(target)) return caps;
+  var mine = [], rest = [];
+  caps.forEach(function(c){
+    (railMine(target, c.projects || [], function(p){ return p.owner; })
+      ? mine : rest).push(c);
+  });
+  return mine.length ? mine.concat(rest) : caps;
+}
+/* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
+   halves differ we say which and why). Projects, Reporting and Performance
+   all draw a project — the thing that is his — so a page that reordered on one
+   of them and not the others would answer differently depending on which tab
+   he came in on. The OVERVIEW draws a capability's definition and its key
+   objectives, which belong to no project and are nobody's own lines, so there
+   is nothing there to open on and it keeps the tenant's order for everybody. */
 /* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
    It used to read "below two items there are no siblings to move between, so
    the rail is a column of wasted width" — true about the width, and it made
@@ -5823,7 +5865,7 @@ function fnNothingBehind(fk){
 }
 
 function renderFnPerformance(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
   /* A FUNCTION THAT PLANS IN PILLARS IS DRAWN BY THE UNIT'S PAGE (spec 010).
      One branch at the top of each of the four function pages, and nothing
      below it changes — the alternative was four more renderers that would have
@@ -6241,7 +6283,7 @@ function projPlanBody(p, fk){
    RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
    function's pages now says its strategy is the parent unit's. */
 function renderFnProjects(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
@@ -6518,7 +6560,7 @@ function capReportBody(c){
 }
 
 function renderFnReport(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderReport(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   if (REVIEW.state !== "open") {

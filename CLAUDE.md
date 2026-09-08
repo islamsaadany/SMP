@@ -6893,6 +6893,23 @@ python3 checks/project-done.py  # a project owner reports, and the bar stops say
                                 # with no button, and a REFUSED save closing nothing.
                                 # Served over HTTP, because a save cannot be seen over
                                 # file:// at all (§94.11); 4 red on the build before
+python3 checks/capability-first.py # theirs is the capability that leads (§303):
+                                # on Projects, Reporting and Performance the capability
+                                # holding his project is drawn FIRST — asserted as
+                                # AGREEMENT with a running order the check works out for
+                                # itself from the data, never a literal (§94.8) — his
+                                # band above the fold with its controls live, every
+                                # capability still drawn (nothing is hidden), the CODES
+                                # asserted identical to the office's (a code is a
+                                # POSITION, so reordering the stored list renames every
+                                # project for that viewer — §48), the office untouched on
+                                # all four pages, the OVERVIEW keeping the stored order
+                                # for him too (the stated decision), and an owner already
+                                # first seeing nothing move. The state is MADE, with his
+                                # capability deliberately NOT the one stored first, or the
+                                # whole file proves nothing (§113.8). Proved able to fail
+                                # three ways: 3 / 1 / 6 red, the third printing the rename
+                                # verbatim. SMP_BUILT points it at another build
 python3 checks/deck-figures.py   # a figure is read against what it is measured by
                                 # (§254): the benchmark asserted as AGREEMENT with
                                 # measureDueLabel and never as a literal, every
@@ -7489,7 +7506,48 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-07 &mdash; **&sect;302: a project saved as a draft.**
+*Last Updated: 2026-09-08 &mdash; **&sect;303: theirs is the capability that
+leads.** Islam, using what &sect;301 shipped: *"the porject owner should open the
+capability by defaut on his project."* **MEASURED IN HIS SHAPE BEFORE ANYTHING
+WAS PROPOSED**: a project owner whose only project sits in the SECOND of a
+function's two capabilities lands at the top of the page on somebody ELSE'S
+capability, where he correctly has **0 controls** (&sect;147.7), with his own
+starting **705px** down and his twelve boxes below the fold on a 900px window
+&mdash; while the rail INSIDE his capability already picks his project. **SO
+&sect;301.4 CHOSE THE RIGHT PROJECT INSIDE EACH CAPABILITY AND NEVER CHOSE WHICH
+CAPABILITY LEADS**, which also made the two sides of the switch disagree: a UNIT
+draws one pillar at a time and &sect;301.4 opens his, so a unit was already right
+(&sect;53.5, A15). **THREE SHAPES WERE PUT TO HIM WITH THE COST OF EACH** and he
+chose **A**, his capability first with the rest below it &mdash; over scrolling
+to it, and over drawing his alone, which he had already closed one level down
+(*"no need to hide other projects. that's a stretch"*). **AND THE MOCKUP FOUND
+THE COST THAT DECIDES THE IMPLEMENTATION**: drawn out of the running platform by
+reordering `GROUP.capabilities`, his project's code changed from **MKT03 to
+MKT01** on his own screen while the deck, the workbook and everybody else went
+on saying MKT03 &mdash; `projCode()` is the project's **POSITION across the whole
+function**, so **a code is a position and a per-viewer order renames every
+project for that viewer** (&sect;48). Only the DRAWING order moves: `capsShown()`
+reorders what the three pages map over and `capsOfFunction()` stays the order the
+codes ask, re-shot to prove it and asserted as *he reads the same codes the
+office does*. **IT IS &sect;301.4'S OWN SHAPE ONE LEVEL UP AND ASKS &sect;301.4'S
+OWN QUESTION** (`railMine()`, so the page and the rail cannot disagree about
+whose a project is), **nothing moves for anybody unbounded**, and **nothing is
+hidden**. **THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION**: the Overview's
+rows belong to no project, so there is nothing there to open on and it keeps the
+tenant's order for everybody &mdash; asserted, or a build sweeping all four
+would quietly widen the change. **The server needed nothing and it is asserted
+rather than claimed** (&sect;172): no `api/`, `lib/` or `db/` file touched, read
+off the diff; 574/0 and 136/0 unchanged; nothing stored, nothing migrated.
+**Proved able to fail three ways, one per decision** &mdash; 3 / 1 / 6 red, the
+third printing the rename verbatim. **&sect;303.1 &mdash; four of the check's own
+first failures were the CHECK**: a capability's name read off a class that does
+not exist, the **Overview** asked of `#subtabs` when it is a SECTION addressed by
+KEY (twice, reporting a page plainly on screen as missing), and his live controls
+measured **after** a loop had left the browser on another page (&sect;50.6's
+family). **RECORDED, NOT DONE**: nothing on the page SAYS the order is his rather
+than the tenant's.*
+
+*Earlier: 2026-09-07 &mdash; **&sect;302: a project saved as a draft.**
 Islam: *"can we make the project owner save on the project level that is similar
 to the save for the submit of the whole cabaiblity."* **MEASURING NARROWED THE
 ASK BEFORE ANYTHING WAS PROPOSED**: the capability's *Save draft* is not a save

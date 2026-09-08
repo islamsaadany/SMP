@@ -6,7 +6,26 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§302 — a project saved as a draft — on the branch
+**Latest version:** **§303 — theirs is the capability that leads — on the
+branch `claude/project-owner-reporting-access-uzze9s`, not merged.** Islam:
+*"the porject owner should open the capability by defaut on his project."*
+Measured in his shape first: a project owner whose only project sits in the
+**second** of a function's two capabilities lands on somebody else's — 0
+controls for him there — with his own starting 705px down and his twelve boxes
+below the fold. §301.4 picked the right project inside each capability's rail
+and never picked which capability leads, which also left a unit (one pillar at
+a time) right and a function wrong. Three shapes were put to him with the cost
+of each (`design-mockups/project-owner-capability-first/`); he took **A**: his
+capability first, the rest below it, nothing hidden. **The mockup found the
+cost that decides it** — reordering the stored list renamed his project
+**MKT03 → MKT01** on his own screen while the deck and everybody else still
+said MKT03, because a code is a POSITION — so only the drawing order moves and
+the codes are asserted identical to the office's. Nothing stored, nothing
+migrated, the server unchanged (574/0, 136/0), the office and the custodian
+untouched, and the **Overview** deliberately keeps the tenant's order. Proved
+able to fail three ways: 3 / 1 / 6 red.
+
+**Before it:** **§302 — a project saved as a draft — on the branch
 `claude/project-owner-reporting-access-uzze9s`, not merged.** Islam: *"can we
 make the project owner save on the project level that is similar to the save
 for the submit of the whole cabaiblity."* Measured first, and the measurement

@@ -2011,13 +2011,20 @@
           background:var(--surface); border:1px solid var(--line);
           border-radius:var(--r-sm); padding:4px 7px; margin-right:7px;
           max-width:170px; }
-.askact .mini { font:inherit; font-size:var(--fs-small); font-weight:600;
-                color:var(--ink-2); background:var(--surface);
-                border:1px solid var(--line); border-radius:var(--r-sm);
-                padding:5px 10px; cursor:pointer; white-space:nowrap; }
-.askact .mini.go { border-color:var(--gold); color:var(--gold-deep); }
-.askact .mini:hover { border-color:var(--gold-deep); color:var(--ink); }
-.askact .mini:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+/* SCOPED TO THE PANE, NOT TO THE ACTIONS CELL. The failure card carries a Try
+   again of its own (§302), and a rule keyed on `.askact` left it drawn as a
+   bare browser button on the one screen whose whole job is saying something
+   has gone wrong quietly (§168). */
+.askpane .mini { font:inherit; font-size:var(--fs-small); font-weight:600;
+                 color:var(--ink-2); background:var(--surface);
+                 border:1px solid var(--line); border-radius:var(--r-sm);
+                 padding:5px 10px; cursor:pointer; white-space:nowrap; }
+.askpane .mini.go { border-color:var(--gold); color:var(--gold-deep); }
+.askpane .mini:hover { border-color:var(--gold-deep); color:var(--ink); }
+.askpane .mini:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+/* The card is prose and its button is a control; the gap is what stops the
+   sentence and the press reading as one run of text (§298). */
+.asknone.bad-note .mini { margin-left:8px; }
 
 /* ── THE KNOWLEDGE BASE'S TWO TABS (§141) ─────────────────────────────
    The approved mockup's segmented pair: the active half wears the tenant's

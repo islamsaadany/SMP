@@ -4537,6 +4537,13 @@
         ASKMISS = b.dataset.askfilter === "miss"; paint();
       });
     });
+    /* TRYING AGAIN IS FORGETTING THE ANSWER, never a second fetch written here
+       (§302). `null` is what the block below `paint()` waits for, so putting it
+       back sends the request through the one door that already knows how to
+       ask, how to say it is asking, and how to record a refusal (§53.5). */
+    document.querySelectorAll("[data-askretry]").forEach(function(b){
+      b.addEventListener("click", function(){ ASKS = null; paint(); });
+    });
     /* WRITING THE ANSWER IS MINTING A KNOWLEDGE BASE ENTRY, through the page's
        OWN writers (§53.5) — `kbAddNew` and `kbSetAdded`, exactly what "+ Add a
        question to this group" already calls — so an answer written here is

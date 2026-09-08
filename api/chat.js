@@ -680,9 +680,16 @@ async function collectForPeople(client, cfg, req) {
           [r.person_key, addr, r.since]);
       }
     } catch (e) {
-      /* ONE PERSON'S EMAIL FAILING COSTS ONLY THAT PERSON'S EMAIL. Nothing is
-         stamped, so the next sweep tries again — and everybody else in this
-         sweep still receives theirs. */
+      /* A PROVIDER THAT IS NOT ANSWERING ENDS THE SWEEP (§302). Carrying on
+         through the list is right when one address is wrong and wrong when the
+         provider itself is stuck: the next person's send will not go either,
+         and this loop is thirty-three people long, so continuing would spend
+         thirty-three ceilings on one request. `sweep()` catches it, nothing is
+         stamped, and the next minute tries again. */
+      if (e && e.timeout) throw e;
+      /* OTHERWISE ONE PERSON'S EMAIL FAILING COSTS ONLY THAT PERSON'S EMAIL.
+         Nothing is stamped, so the next sweep tries again — and everybody else
+         in this sweep still receives theirs. */
       console.error("collection to " + r.person_key + ":", (e && e.message) || e);
     }
   }

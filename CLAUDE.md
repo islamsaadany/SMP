@@ -7042,7 +7042,24 @@ python3 checks/office-ask.py    # Waiting and Ask, and the list the questions
                                 # one has been. 44 assertions over HTTP, because none
                                 # of it exists over file://; proved able to fail
                                 # three ways (3 / 2 / 3 red). Its own first run
-                                # reported a working build broken twice
+                                # reported a working build broken twice.
+                                # §10 adds the two states a stub that always
+                                # answers at once can never reach (§302): the list
+                                # SLOW — repainted mid-flight, because the first
+                                # paint is honest on every build and every one after
+                                # it fell through to "Nothing has been asked yet"
+                                # over a real history — and the list REFUSED, where
+                                # the card must say nothing was lost exactly once,
+                                # print none of the browser's own words, and carry a
+                                # Try again drawn as the pane's control (measured as
+                                # PAINT) that actually asks again. 11 red on the
+                                # build before; every press degrades rather than
+                                # dying (§215, walked into while adding to the file
+                                # that warns about it), the console listener does not
+                                # count the 500 the check itself asks for (§128), and
+                                # the harness OWNS ITS PID — killing by port through
+                                # a tool this image lacks measured the old process
+                                # and called the fix broken (§105.6)
 node scripts/test-ask.js        # ...and the server half on a real Postgres with a
                                 # stand-in for the model (§100.3): off is a refusal
                                 # ON THE SERVER; an Ask writes no chat message, moves
@@ -7286,7 +7303,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-06 &mdash; **&sect;300: a yes or a no that can be under
+*Last Updated: 2026-09-08 &mdash; **&sect;302: the list did not fail, it hung.**
+Islam, of the Knowledge base's Questions &amp; answers tab: a garbled card reading
+*"These could not be loaded. no answer Nothing has been lost&hellip;"* while his own
+Ask answered normally beside it. **"NO ANSWER" IS THE BROWSER'S OWN 25-SECOND
+CLOCK, SO NOTHING HAD FAILED** &mdash; the request was WAITING, behind &sect;293's
+collection sweep, which every `/api/chat` request runs before it reaches the
+action dispatch. And `fetch` has no timeout of its own, so a provider that
+accepts the connection and never answers holds it indefinitely: measured against
+a stand-in doing exactly that, a **15ms** query hung past **45 seconds** while
+the very next request answered in **18ms**, because the sweep is throttled once a
+minute per instance. *One request a minute paid the whole hang, and it was the
+one asking for the list.* **He was right to keep asking why email was involved**
+&mdash; it is not part of the feature at all; it was standing in the doorway.
+**THE CEILING GOES WHERE EVERY MESSAGE LEAVES** (&sect;97.5), ten seconds, with
+the single and batch calls folded into one so a ceiling on one is a ceiling on
+both (&sect;53.5). **AND THE LOOP MULTIPLIED IT**: `collectForPeople` catches per
+person and continues &mdash; right for a bad address, wrong for a stuck provider
+&mdash; **50,039ms** with five people owed a chase against **10,026ms** with the
+timeout ending the sweep, and the comment claiming otherwise corrected in the same
+edit (&sect;104.8). **&sect;302.1**: the card said *"Nothing has been lost"* twice
+one line apart, printed `post()`'s own sentinel mid-sentence (&sect;124), and was a
+dead end where &sect;231.4's card has had **Try again** since the day it was
+written &mdash; and the first build of that button shipped undressed, because
+`.askact .mini` cannot reach a control in the card. **&sect;302.2**: *"Asking&hellip;"*
+tested `!ASKS` and the shell sets `{asking:true}`, so the first paint was honest
+and **every paint after it** drew *Last 0 days* and *"Nothing has been asked yet"*
+over a real ninety-day history &mdash; and a repaint mid-flight is the common case,
+since the corner polls. **&sect;302.3 &mdash; the check was wrong twice before the
+fix could be believed**: it measured the OLD process (killing by port through a
+tool this image lacks &mdash; &sect;105.6), it died rather than reporting and printed
+3 failures of 11 (&sect;215, in the file that warns about it), one assertion could
+not fail (&sect;94.5), and the console listener counted the refusal the check itself
+asks for (&sect;128). **11 red** on the build before, ALL CLEAR after; neighbours,
+534/0, 131/0, 31/0 green. **On the branch, not merged.***
+
+*Earlier: 2026-09-06 &mdash; **&sect;300: a yes or a no that can be under
 way.** Islam, asking rather than reporting: *"sometimes we have a directly y/n
 situation like getting profitable so nothing to be in progress there but some
 y/n can take in the in progress like an agrement we are working on."* **THE

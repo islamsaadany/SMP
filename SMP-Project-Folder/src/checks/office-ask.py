@@ -29,7 +29,7 @@ WHAT IS ASSERTED, AND WHY EACH HALF IS HERE:
 The list on the Knowledge base page is measured here too, because it is drawn
 from the same endpoint and is equally invisible over `file://`.
 """
-import json, pathlib, threading, http.server, socketserver
+import json, pathlib, threading, time, http.server, socketserver
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -47,7 +47,8 @@ def _no_tour(pg):
 
 CFG = {"on": True, "shots": True, "promise": "Usually answers the same day",
        "beat": 4000, "ask": False}
-STUB = {"posted": [], "asks": [], "reached": True, "questions": []}
+STUB = {"posted": [], "asks": [], "reached": True, "questions": [],
+        "asksHold": 0, "asksFail": False}
 QUEUE = [{"person_key": "hend", "person_name": "Hend Farouk", "last_at": "2026-09-05T09:19:00Z",
           "last_body": "The Q3 target on Active Base still reads 4.2M."},
          {"person_key": "ramy", "person_name": "Ramy Behairy", "last_at": "2026-09-05T08:02:00Z",
@@ -109,6 +110,16 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(200, json.dumps({"ok": True, "rows": STUB["asks"]}).encode(),
                        "application/json"); return
         if a == "askQuestions":
+            # THE STUB CAN BE SLOW AND CAN REFUSE (§302). Both states are
+            # reachable in the product — the list rides §293's collection
+            # sweep, which sits in front of every chat request — and neither
+            # was ever driven here, so a panel that said "Nothing has been
+            # asked yet" over a real history went green for as long as it
+            # existed.
+            if STUB["asksHold"]:
+                time.sleep(STUB["asksHold"])
+            if STUB["asksFail"]:
+                self._send(500, b'{"ok":false,"error":"nope"}', "application/json"); return
             self._send(200, json.dumps({"ok": True, "days": 90,
                                         "rows": STUB["questions"]}).encode(),
                        "application/json"); return
@@ -133,7 +144,15 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={"width": 1400, "height": 950})
     _no_tour(pg)
-    pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+    # THE REFUSAL §10 ASKS FOR IS NOT A CONSOLE ERROR THIS FILE FOUND (§128).
+    # A listener that counts the 500 the check itself produces reports a clean
+    # build as broken — recorded once already, in a file that drives a refusal
+    # on purpose. Narrowed to that window and nothing else.
+    def _console(m):
+        if m.type != "error": return
+        if STUB["asksFail"] and "500" in m.text: return
+        errs.append(m.text)
+    pg.on("console", _console)
     pg.on("pageerror", lambda e: errs.append("pageerror: " + str(e)))
 
     def open_corner():
@@ -344,6 +363,113 @@ with sync_playwright() as p:
     ck("...and once it is written, the row says so",
        "An answer has been written here" in pg.inner_text(".askpane"),
        pg.inner_text(".askpane")[:200])
+
+    # ── 10 · THE LIST WHILE IT IS COMING, AND WHEN IT DOES NOT (§302) ────
+    # Islam, of this panel on his own tenant: a card reading "Questions asked
+    # Nothing has been lost" over "**These could not be loaded.** no answer
+    # Nothing has been lost…", with the assistant beside it answering normally.
+    # Three faults in one card and none of them reachable through a stub that
+    # always answers at once, which is why none was ever measured.
+    print("\n10 · the list is slow, and the list refuses")
+    n_asks = lambda: len([p for p in STUB["posted"] if p.get("action") == "askQuestions"])
+    # PUT THE PAGE BACK FIRST (§94.2). §8 left the filter on the unanswered and
+    # §9 then answered the only row it holds, so the last assertion here would
+    # be measuring an empty filter rather than an arrived list.
+    if pg.query_selector('[data-askfilter="all"]'):
+        pg.click('[data-askfilter="all"]')
+        pg.wait_for_timeout(300)
+
+    # THE WAIT FIRST, AND ON ITS OWN. Once the failure card is up the retry is
+    # the only way back, so on a build that draws no retry the loading state is
+    # unreachable through that path and its assertions pass for the wrong
+    # reason (§113.8). Driven here through the product's own state — `null` is
+    # what the shell waits for — so it is measured on every build.
+    STUB["asksHold"] = 1.5
+    pg.evaluate("() => { ASKS = null; paint(); }")
+    pg.wait_for_timeout(400)          # inside the hold, deliberately
+    # AND THE SECOND PAINT IS THE ONE THAT MATTERS. The first render happens
+    # while `ASKS` is still null, so even the broken build says "Asking…" once;
+    # the shell then sets `{asking:true}`, and every paint after that fell
+    # through to the empty list. A repaint mid-flight is not a contrivance —
+    # the corner polls every few seconds and each answer repaints — so a check
+    # that only looked once would have called the fault clean.
+    pg.evaluate("() => paint()")
+    pg.wait_for_timeout(150)
+    wait = pg.inner_text(".askpane") if pg.query_selector(".askpane") else ""
+    ck("while the list is coming the panel says so", "Asking" in wait, wait[:160])
+    ck("...and does not say nothing has been asked",
+       "Nothing has been asked yet" not in wait, wait[:200])
+    ck("...nor count a history it has not read",
+       "Last 0 days" not in wait and "All 0" not in wait, wait[:200])
+    pg.wait_for_timeout(1800)
+    STUB["asksHold"] = 0
+
+    # THEN THE REFUSAL. Same door, so the page under it is the page the office
+    # was already reading rather than a reload.
+    STUB["asksFail"] = True
+    before = n_asks()
+    pg.evaluate("() => { ASKS = null; paint(); }")
+    pg.wait_for_timeout(700)
+    ck("a refusal is asked for once", n_asks() == before + 1, n_asks() - before)
+    card = pg.inner_text(".askpane") if pg.query_selector(".askpane") else ""
+    ck("the card says the list could not be loaded", "could not be loaded" in card, card[:160])
+    # SAID ONCE. It was the window's label AND the sentence, one line apart.
+    ck("...and says nothing was lost exactly once",
+       card.count("Nothing has been lost") == 1, card.count("Nothing has been lost"))
+    # AND IT SAYS ONLY WHAT IT MEANS TO SAY. The card printed `post()`'s own
+    # sentinel — "no answer", its word for a 25-second clock running out —
+    # mid-sentence, where it reads as a fragment of somebody else's error
+    # (§124). Asserted as the WHOLE wording rather than as the absence of that
+    # one string: the sentinel arrives only on a real timeout, so a stub
+    # answering 500 can never produce it and an assertion naming it could not
+    # fail here (§94.5).
+    want = ("The list could not be loaded. Nothing has been lost — "
+            "the questions are on the server. Try again")
+    ck("...and says nothing else", " ".join(card.split()).endswith(want),
+       " ".join(card.split())[:200])
+    # A DEAD END IS THE OTHER HALF OF THE FAULT: the list is asked once per
+    # visit, so a moment's trouble stood until the whole page was reloaded.
+    ck("...and carries a way out", pg.query_selector("[data-askretry]") is not None)
+    # DRESSED AS A CONTROL. `.askact .mini` could not reach a button in the
+    # card, so a correct fix still shipped a bare browser button on the one
+    # screen whose job is saying something went wrong quietly (§168). Measured
+    # as PAINT, never as a class (§94.8).
+    look = pg.evaluate("""() => { const b = document.querySelector('[data-askretry]');
+        if (!b) return null; const s = getComputedStyle(b);
+        return { w: s.fontWeight, r: s.borderRadius, st: s.borderTopStyle }; }""")
+    ck("...drawn as the pane's own control",
+       bool(look) and int(look["w"]) >= 600 and look["r"] != "0px" and look["st"] == "solid",
+       look)
+
+    # THEN THE WAIT. With the server healthy again but slow, the panel must say
+    # it is asking — the branch that says so read `!ASKS` and could never run,
+    # because the shell sets `{asking:true}` the moment it asks, so the page
+    # fell through and told the office nothing had ever been asked.
+    STUB["asksFail"] = False
+    STUB["asksHold"] = 1.5
+    before = n_asks()
+    # DEGRADES RATHER THAN DYING (§215). Playwright waits 30s on a control that
+    # is not there and then throws, so this section's first falsification run
+    # reported three failures where there are seven — the exact fault this
+    # file's own docstring warns about, walked into while adding to it.
+    if pg.query_selector("[data-askretry]"):
+        pg.click("[data-askretry]")
+    else:
+        ck("there is a way out to press", False, "no [data-askretry] drawn")
+    pg.wait_for_timeout(400)          # inside the hold, deliberately
+    mid = pg.inner_text(".askpane") if pg.query_selector(".askpane") else ""
+    ck("trying again asks again", n_asks() == before + 1, n_asks() - before)
+    ck("...and while it is coming the panel says so", "Asking" in mid, mid[:160])
+    # BOTH ENDS (§94.2): a build that only ever said "Asking…" would satisfy
+    # the line above and be useless.
+    ck("...and never says nothing has been asked",
+       "Nothing has been asked yet" not in mid, mid[:200])
+    ck("...nor counts a history it has not read",
+       "Last 0 days" not in mid and "All 0" not in mid, mid[:200])
+    pg.wait_for_timeout(1800)
+    done = pg.inner_text(".askpane") if pg.query_selector(".askpane") else ""
+    ck("...and the list arrives", "less than the full target" in done, done[:200])
+    STUB["asksHold"] = 0
 
     b.close()
 

@@ -3909,13 +3909,28 @@ function askListHtml(){
     return '<div class="pane askpane"><div class="askhead">' +
       '<h3>Questions asked</h3>' + inner + "</div>";
   };
+  /* THE FAILURE CARD SAYS ONE THING ONCE, AND CARRIES A WAY OUT (§302).
+     It said "Nothing has been lost" twice, one line apart — once as the
+     window's own label, where the count belongs — and printed the raw
+     sentinel `no answer` mid-sentence, which is the browser's word for its own
+     clock running out and means nothing to whoever is reading it. And it was a
+     dead end: the list is asked once per visit, so a moment's trouble stood
+     until the whole page was reloaded (§231.4's card, which has had Try again
+     since the day it was written). */
   if (ASKS && ASKS.__error) {
-    return head('<span class="askwin">Nothing has been lost</span>') +
-      '<div class="asknone bad-note"><b>These could not be loaded.</b> ' +
-      esc(ASKS.__error) + " Nothing has been lost — the questions are on the " +
-      "server and the list will come back.</div></div>";
+    return head("") +
+      '<div class="asknone bad-note"><b>The list could not be loaded.</b> ' +
+      "Nothing has been lost — the questions are on the server. " +
+      '<button type="button" class="mini" data-askretry="1">Try again</button>' +
+      "</div></div>";
   }
-  if (!ASKS) {
+  /* ASKED AND NOT YET ANSWERED IS NOT AN EMPTY LIST (§93). This branch read
+     `!ASKS` and could never run: the shell sets `{asking:true}` the moment it
+     asks, so while the answer was in flight the page fell through to the list
+     below and drew "Last 0 days", "All 0", and "Nothing has been asked yet"
+     over a real ninety-day history — the one thing this panel must never say
+     (§231.4). */
+  if (!ASKS || ASKS.asking) {
     return head("") + '<div class="asknone">Asking…</div></div>';
   }
   var rows = ASKS.rows || [];

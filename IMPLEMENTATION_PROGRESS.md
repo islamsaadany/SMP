@@ -6,7 +6,32 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§300 — a yes or a no that can be under way — merged to
+**Latest version:** **§302 — the list did not fail, it hung — on the branch
+`claude/queue-own-conversation-exclusion-6islxd`, not merged.**
+
+**In flight:** Islam reported the Knowledge base's Questions & answers tab
+drawing a garbled failure card while his own Ask answered normally beside it.
+It had not failed — it had **hung**, behind the email collection sweep every
+chat request runs first, on a mail call with no time limit anywhere in the
+path. Fixed in three places: a ten-second ceiling where every message leaves
+the platform; a stuck provider now ends the sweep instead of paying that
+ceiling once per person (50,039ms → 10,026ms with five people owed a chase);
+and the card itself, which said the same sentence twice, printed the browser's
+own word for its clock mid-sentence, and had no way back. The panel also now
+says it is asking rather than reporting an empty history while the answer is
+in flight. **11 red** on the build before, green after.
+
+**Waiting on Islam:** the questions history is being widened, from his own
+words — *"the history of questions is about what has been asked, answered
+through the bot or throu the smo team."* Drawn and signed off (shape A, one
+pane, the two histories behind a switch:
+`design-mockups/questions-history/2026-09-08_two-histories.html`), with his
+rule for the office half: **collected as it happens and never marked**, because
+the platform can say whether the bot answered — the bot says so — and cannot
+judge a human reply. Unanswered questions will show, in three states, including
+the one that never reached the assistant at all. Not built yet.
+
+**Before it: §300 — a yes or a no that can be under way — merged to
 `main` 2026-09-06 on Islam's word**, carrying §298 and §299 in with it from two
 other sessions.
 

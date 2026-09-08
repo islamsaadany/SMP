@@ -36754,3 +36754,134 @@ tactic's outcome figure at all (§250.2's standing gap), so a yes/no answer give
 on a tactic round-trips through the screen and not through the file; and
 `checks/tactic-outcome.py` is red on `main` with 13 assertions in its plan-pen
 section, reproduced identically on the build before this one and left alone.
+
+---
+
+## §302 — THE LIST DID NOT FAIL, IT HUNG (2026-09-08)
+
+Islam, on the Knowledge base's **Questions & answers** tab, with a screenshot:
+
+> Questions asked · Nothing has been lost
+> **These could not be loaded.** no answer Nothing has been lost — the questions
+> are on the server and the list will come back.
+
+and, in the corner beside it, his own Ask answering normally at 11:56. Then,
+four times over: *"what mail this is the hisotry of the messages sent to the
+assistant"*, *"what is a mail call?"*, *"why are we talking about mai lcall here?
+while fixing the questions asked to the assistant?"* — which was the right
+question every time, and the answer is that the email has nothing to do with the
+feature and everything to do with why the page could not draw it.
+
+**"NO ANSWER" IS THE BROWSER'S OWN CLOCK, SO NOTHING HAD FAILED.** `post()` in
+`src/chat.js` aborts at 25 seconds and hands back the string `no answer`; the
+endpoint was neither down nor erroring. It was **waiting**. Every request to
+`/api/chat` runs §293's collection sweep before it reaches the action
+dispatch — the sweep is how a platform with no scheduler sends anything at all —
+and `fetch` has no timeout of its own, so a mail provider that accepts the
+connection and never answers holds it for as long as the function is allowed to
+live. Measured against a stand-in provider doing exactly that: `askQuestions`, a
+**15ms** query, hung past **45 seconds** (cut off; it would have hung
+indefinitely), while the very next request answered in **18ms** and the corner's
+poll in **12ms**, because the sweep is throttled once a minute per warm
+instance. *One request a minute paid the whole hang, and it was the one asking
+for the list.* That is the report exactly: the assistant answered and the list
+beside it did not.
+
+**THE CEILING GOES IN THE ONE PLACE A MESSAGE LEAVES THE PLATFORM** (§97.5's
+own argument): `lib/mailer.js` gains `MAIL_WAIT` at ten seconds, and the single
+and batch calls — which were the same twelve lines written twice — become one
+`call()`, because a ceiling written into one of them is a ceiling the other does
+not have (§53.5). Ten is generous and is not the interesting number; what
+matters is that there IS one, so no caller has to remember it.
+
+**AND THE LOOP MULTIPLIED IT.** `collectForPeople` catches per person and
+CONTINUES, and its comment says why — *"one person's email failing costs only
+that person's email"* — which is right for a bad address and wrong for a
+provider that is stuck: the next person's send will not go either, and the loop
+is as long as the register. Measured with five people owed a chase:
+**50,039ms**, five ceilings, past the browser's clock, so the card comes back.
+A **timeout** ends the sweep (`e.timeout`, set only on our own abort, never on a
+refusal); anything else keeps the old behaviour. With it: **10,026ms**, one
+ceiling, 0 per-person failures, 1 sweep abandoned, nothing stamped, and the next
+minute tries again. **The comment was corrected in the same edit** rather than
+left describing what the code no longer does (§104.8).
+
+**THE COST IS STATED**: a provider that is genuinely slow rather than stuck can
+now be cut off after accepting a message, so that message may go and still count
+as failed — and since nothing is stamped unless the send came back with an id
+(§293), the next sweep sends it again. One duplicate email, against a platform
+that stops answering.
+
+### §302.1 — the card said one thing twice and one thing that was not for reading
+
+Three faults in one card, none of them reachable through a stub that always
+answers at once, which is why none had ever been measured.
+
+- **"Nothing has been lost" twice, one line apart** — once as the window's own
+  label, where the count belongs, and once in the sentence.
+- **The raw sentinel printed mid-sentence.** `no answer` is `post()`'s word for
+  its own clock; in the middle of an English sentence it reads as a fragment of
+  somebody else's error (§124). The card says only what it means to say now.
+- **It was a dead end.** The list is asked once per visit, so a moment's trouble
+  stood until the whole page was reloaded — where §231.4's card, whose shape
+  this one borrowed, has carried **Try again** since the day it was written.
+  Trying again is `ASKS = null; paint()`: forgetting the answer, so the request
+  goes through the one door that already knows how to ask, how to say it is
+  asking and how to record a refusal (§53.5), rather than a second fetch
+  written at the button.
+
+**AND THE BUTTON SHIPPED UNDRESSED IN THE FIRST BUILD**: `.askact .mini` is
+scoped to the actions cell, so a control in the card fell outside it and drew as
+a bare browser button — on the one screen whose whole job is saying something
+went wrong quietly (§168). Scoped to `.askpane` now, which is what it was always
+about. Asserted as PAINT (weight, radius, border style), never as a class.
+
+### §302.2 — "Asking…" could not be reached, so the page said the history was empty
+
+`askListHtml` tested `!ASKS` for the in-flight state, and the shell sets
+`ASKS = {asking:true}` the moment it asks — so **the first paint says "Asking…"
+and every paint after it fell through to the empty list**, drawing *Last 0
+days*, *All 0* and **"Nothing has been asked yet"** over a real ninety-day
+history. §93 and §231.4's fault on the panel those two sections exist for.
+
+**A REPAINT MID-FLIGHT IS NOT A CONTRIVANCE, AND IT IS WHAT THE FIRST CHECK
+MISSED**: the corner polls every few seconds and each answer repaints, so the
+broken state is the common one — but a probe that renders once and looks once
+sees only the honest first paint. The check paints again inside the wait, and
+those three assertions go from green to red on the build before.
+
+### §302.3 — and the check was wrong twice before the fix could be believed
+
+- **A MEASUREMENT AGAINST THE WRONG BYTES** (§105.6, again). The harness killed
+  the old dev-server by port through `ss`, which does not exist in this image —
+  so the kill was a no-op, the new server died on `EADDRINUSE`, and the
+  measurement went to the **old process**: it reported the restored build at
+  50,028ms, which is the broken build's number. It owns its own pid now and
+  **refuses to measure** when the port is still held.
+- **IT DIED RATHER THAN REPORTING** (§215, in a file whose own docstring warns
+  about it): with no retry button to press, Playwright waited 30 seconds and
+  threw, printing **3** failures where there are **11**. Every press degrades.
+- **AND ONE ASSERTION COULD NOT FAIL** (§94.5): *"never prints the raw
+  sentinel"* names a string only a real 25-second timeout produces, and a stub
+  answering 500 never produces it. It asserts the WHOLE wording instead.
+- **AND THE CONSOLE LISTENER COUNTED THE REFUSAL THE CHECK ASKS FOR** (§128,
+  recorded once already), reporting a clean build as broken. Narrowed to that
+  window and nothing else.
+
+`checks/office-ask.py` §10: **11 red** on the build before, ALL CLEAR after, and
+its third failure prints his card verbatim — the stub's own error text sitting
+mid-sentence exactly where `no answer` sat in his screenshot.
+
+**Neighbours green**: `corner-reply-box` 0, `chat-settings-scroll` 0,
+`test-chat-chase` all ok (its one red was rows this session had put in the
+database, not the change), `test-authorize` 534/0, `test-graph-diff` 131/0,
+`test-ask` 31/0, `test-session-state` ok. **Recorded, not fixed**:
+`scripts/test-chat.js` is 107/5 here on the push/VAPID fixtures, reproduced
+identically on `main`'s own untouched server code.
+
+**RECORDED, NOT DONE**: the sweep is still awaited in front of every chat
+request (§293's own decision — work left running after the response is work a
+serverless function may kill), so a stuck provider still costs one request ten
+seconds once a minute. The ceiling makes that survivable; moving the sweep off
+the request path is a change to how anything is sent at all, and it has not been
+put to Islam.

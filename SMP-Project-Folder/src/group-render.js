@@ -1206,6 +1206,25 @@ function presentMenu(kind, key){
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
     (String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+  /* ── THE DECK AS A PDF (§305) ───────────────────────────────
+     BESIDE PRESENT, because it is the same deck: one entry opens it on a
+     projector and the next takes it away as a file. §252.2's entry below
+     takes the PLAN away, which is a different document — the plan carries no
+     reported figure and this carries nothing else.
+
+     NO GATE, AND THAT IS THE DECISION. §252.2's download is the office's
+     because a .pptx of the plan is the plan leaving the platform in an
+     editable form; this is a picture of a review anybody standing here may
+     already project, so gating it would refuse on paper what the button
+     above it grants on a screen (§61). Present has never had a gate.
+
+     THE WORD PDF IS ON THE LABEL FOR TWO REASONS, both of which would
+     otherwise be met as a surprise: the file cannot be edited, and the press
+     opens the browser's own print dialog rather than downloading at once. */
+  var pdf = '<button role="menuitem" data-deckpdf="' + esc(target) + '">' +
+    'Download the presentation' +
+    '<span class="dlsub">The review deck as a PDF &mdash; exactly what the ' +
+    'projector shows</span></button>';
   /* \u2500\u2500 THE PLAN AS SLIDES, BACK AS AN ENTRY HERE (\u00a7252.2) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
      Islam: *"the ppt download leave it as an option in the drop down for the
      smo only."* \u00a7145.9 hid the pane-corner button for everyone and kept the
@@ -1250,7 +1269,7 @@ function presentMenu(kind, key){
     : "";
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + present + slides + dl + master + '</div></details>';
+    '<div class="menu" role="menu">' + present + pdf + slides + dl + master + '</div></details>';
 }
 
 /* ── Cards or a table (§16.6) ────────────────────────────────────────
@@ -2909,7 +2928,37 @@ function selectOr(page, value, opts, cls, setter){
 var MONTH_ABB = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 /* What the picker WRITES. Two digits, because that is the shape the plans in
    this tenant already carry and `shiftWhen()` preserves the width it is given. */
-function monthValue(mi, year){ return MONTH_ABB[mi] + " " + ("0" + (year % 100)).slice(-2); }
+function monthValue(mi, year, wide){
+  return wide ? SMPRules.monthLabel(year * 12 + mi)
+              : MONTH_ABB[mi] + " " + ("0" + (year % 100)).slice(-2);
+}
+/* ── A CUT-OFF IS A DAY (§307) ────────────────────────────────────────
+   Islam: "the reports due is the only 1 with a day date as it's a cutt off
+   dates." §177 refused days for a MILESTONE and its reasoning holds there
+   unchanged — every comparison the platform makes about a plan date is
+   monthly, so a day was precision it could not use. `Reports due` is the one
+   date nothing measures anything against: it is printed on the strip, on the
+   tab row and in a hover, and read by nothing else (grepped, not assumed), so
+   a day there costs the arithmetic nothing and is the whole point of the
+   field — people hand figures in ON a date.
+
+   FOUR DIGITS for `cycleYear()`'s sake, exactly as the month picker's wide
+   form: `due` is one of the three strings that scrape is taken from. */
+function dayValue(d, mi, year){ return d + " " + MONTH_ABB[mi] + " " + year; }
+/* Reading a stored due date back into the picker. The MONTH comes from the
+   platform's own reader, so every shape it has ever accepted opens somewhere
+   sensible; the DAY is the leading number, and only where a month was actually
+   named — "Q3 2026" names no day and lights none (§15.1). A value it cannot
+   read opens on today rather than on nothing, and is left exactly as stored
+   until somebody picks (§96.2). */
+function dayParts(v){
+  var s = String(v == null ? "" : v).trim();
+  var p = monthParts(s);
+  var m = /^(\d{1,2})\b/.exec(s);
+  var d = p.mi == null || !m ? null : +m[1];
+  if (d != null && (d < 1 || d > 31)) d = null;
+  return { day: d, mi: p.mi == null ? new Date().getMonth() : p.mi, year: p.year };
+}
 /* Reading a stored value BACK into the picker: which month and which year it
    should open on. Anything the platform cannot read as a time -- "On-going",
    "Done" -- opens on the cycle's year with nothing chosen, and is left
@@ -2939,20 +2988,59 @@ function monthPickOr(page, value, cls, setter){
    cycle has no edit mode and reaches it directly, because the office either
    may change the review point or is not offered a control at all. One builder,
    because two would drift about what a month looks like (§53.5). */
-function monthBtnHtml(value, cls, setter){
-  var shown = value == null ? "" : String(value);
+/* §307: ONE BUILDER, THREE SHAPES — a month with a two-digit year (a plan
+   date, which is what §177 built), a month with four (a cycle's own from/to,
+   because `cycleYear()` reads them), and a DAY. Three builders would be three
+   answers to "what does a date control look like" (§53.5); the differences
+   ride on the button as data and the one popup reads them. */
+function monthBtnHtml(value, cls, setter, opts){
+  var o = opts || {}, shown = value == null ? "" : String(value);
   var i = FIELDS.push(setter) - 1;
-  var p = monthParts(shown);
+  var p = o.day ? dayParts(shown) : monthParts(shown);
   return '<button type="button" class="monthbtn ' + (cls || '') + '" data-month="' + i + '"' +
+    (o.day ? ' data-day="1" data-dv="' + (p.day == null ? "" : p.day) + '"' : '') +
+    (o.wide ? ' data-yw="1"' : '') +
     ' data-mi="' + (p.mi == null ? "" : p.mi) + '" data-yr="' + p.year + '"' +
     ' aria-haspopup="dialog" aria-expanded="false"' +
-    ' title="' + (shown ? "Change the month" : "Pick a month") + '">' +
+    ' title="' + (shown ? (o.day ? "Change the date" : "Change the month")
+                        : (o.day ? "Pick a date" : "Pick a month")) + '">' +
+    /* §308: THE EMPTY WORD IS THE CALLER'S, AND SO IS WHETHER IT IS AN ALARM.
+       `Missing` in `--bad-tx` is right for a date the platform NEEDS — a
+       cycle cannot be opened without the month it covers to — and wrong for
+       one with a working fallback: a red word over something that is not owed
+       is §214.4's fault, and the planning period says "not set" beside a
+       status line already naming what happens instead. */
     (shown ? '<span class="mval">' + esc(shown) + '</span>'
-           : '<span class="mval mnone">Missing</span>') +
+           : '<span class="mval' + (o.none ? '' : ' mnone') + '">' +
+             esc(o.none || "Missing") + '</span>') +
     '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" ' +
       'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
       '<rect x="3" y="4.5" width="14" height="12.5" rx="2"/>' +
       '<path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg></button>';
+}
+/* THE DAY PANEL (§307), the month panel's sibling: the header steps MONTHS
+   rather than years, because a cut-off is picked by walking to the month it
+   falls in. The lit day belongs to the month it was set in — step away and
+   nothing is lit, step back and it lights again — which is `monthPopHtml`'s
+   own rule for the year, kept rather than re-decided. */
+var WEEK_ABB = ["S","M","T","W","T","F","S"];
+function dayPopHtml(day, mi, year){
+  var first = new Date(year, mi, 1).getDay();
+  var days = new Date(year, mi + 1, 0).getDate();
+  var cells = "", d;
+  for (d = 0; d < first; d++) cells += '<span class="mp-d mp-x"></span>';
+  for (d = 1; d <= days; d++)
+    cells += '<button type="button" class="mp-d' + (d === day ? " on" : "") +
+      '" data-dpick="' + d + '">' + d + '</button>';
+  return '<div class="mp-yr">' +
+      '<button type="button" class="mp-nav" data-mstep="-1" aria-label="Previous month">&lsaquo;</button>' +
+      '<b>' + MONTH_ABB[mi] + ' ' + year + '</b>' +
+      '<button type="button" class="mp-nav" data-mstep="1" aria-label="Next month">&rsaquo;</button>' +
+    '</div><div class="mp-wk">' + WEEK_ABB.map(function(w){
+      return '<span>' + w + '</span>'; }).join("") + '</div>' +
+    '<div class="mp-days">' + cells + '</div>' +
+    '<div class="mp-foot">' +
+      '<button type="button" class="linkbu" data-mclear="1">Clear</button></div>';
 }
 /* The panel itself, rebuilt on every year step so the lit month follows the
    year it belongs to -- Jul 26 lit on 2026 and nothing lit on 2027. */
@@ -4908,7 +4996,7 @@ function renderReport(u){
        builders for one list, and only one of them was kept up. The fields
        are copied from `reportItems()` verbatim rather than re-derived, or
        the two drift again the next time one of them learns something. */
-    /* §302: `cid` joins them for the same reason — it is the pillar a saved
+    /* §309: `cid` joins them for the same reason — it is the pillar a saved
        draft closes, and `reportItems()` carries it too, so the two builders
        still answer alike. */
     var ms = [];
@@ -5237,7 +5325,7 @@ function railPick(c){
   railShow(k, pick.id);
   return pick;
 }
-/* ── AND THEIRS IS THE CAPABILITY THAT LEADS (§303) ───────────────────────
+/* ── AND THEIRS IS THE CAPABILITY THAT LEADS (§310) ───────────────────────
    Islam: *"the porject owner should open the capability by defaut on his
    project."*
 
@@ -6014,13 +6102,14 @@ function projFrontMatter(p, ed){
     if (repOpts.indexOf(repVal) < 0) repOpts.splice(1, 0, repVal);
     repRow = row("l", "Repeats",
       selectOr("plan", repVal, repOpts, "", function(v){
-        var n = REPEAT_MONTHS.filter(function(m){ return repeatLabel(m) === v; })[0];
-        if (n) p.repeats = n;
-        else if (v === "Each cycle") p.repeats = "cycle";
+        /* §303: ASKED OF `repeatFromLabel`, which the projects workbook now
+           asks too — the conversion was written out here and would have been
+           written out a second time in the file reader (§53.5). */
+        var n = repeatFromLabel(v);
         /* DELETED on the default (§50.6): a project unmarked and one never
            asked must be byte-identical, or every save carries a phantom
            change and a non-office save is refused for ever (§42). */
-        else delete p.repeats;
+        if (n == null) delete p.repeats; else p.repeats = n;
       }));
   } else if (repeatsOn(p)) {
     repRow = row("l", "Repeats", esc(repVal));
@@ -6791,7 +6880,7 @@ function unitRailFor(u, sel){
    uses for Submitted · Reopen. Nothing new in the stylesheets. */
 function doneCtl(target, id, owner, code){
   var on = !!doneMark(id);
-  /* ── SEEING A STATE IS NOT SETTING IT (§302, §256's own pattern) ──────
+  /* ── SEEING A STATE IS NOT SETTING IT (§309, §256's own pattern) ──────
      §301 drew this control for anybody `mayMarkDone` allows, which is every
      unbounded role as well — right while it was a SIGNAL, and wrong the
      moment the word became "Save draft" and the press closed the container:
@@ -6813,7 +6902,7 @@ function doneCtl(target, id, owner, code){
       esc("Its owner has saved it as a draft and closed it. They can reopen it.") +
       '">Draft saved</span>' : "";
   var addr = esc(String(id));
-  /* §302: THE BAR'S OWN TWO WORDS, ONE CONTAINER WIDE. Islam settled the
+  /* §309: THE BAR'S OWN TWO WORDS, ONE CONTAINER WIDE. Islam settled the
      word from two drawn in the band — *"ok with save draft"* — over a bare
      "Save", which would have promised something the platform has been doing
      all along (a figure is written the moment the box is left, §35/§170) and
@@ -7347,12 +7436,37 @@ function renderUnitPlan(u){
      plan here was to upload one. The button asks mayEditPlan() itself
      because there is no pen on an empty page to gate it (\u00a761's trap: the
      control's anchor is the thing that does not exist yet). */
-  if (!sel) return '<div class="note">' + esc(u.name) + ' has no ' +
-    L("pillar", "bu").toLowerCase() + ' yet, so there is no plan to show. ' +
+  /* ── AND IT IS WHERE BUILDING STARTS (§304.2) ─────────────────────
+     Islam: *"for the builder it should be in the bu or function when navigated
+     to this page not burried in the setup page."* The guided builder's only
+     door was an amber band on Setup › Import & archives — a page about FILES —
+     and he is right that it belongs where the plan does.
+
+     THE PAGE ALREADY ANSWERED THIS, which is why the door costs a sentence
+     rather than a control: this empty state already offered two routes out of
+     an empty plan, and the guided build is the third. So the offer is dressed
+     as an offer, the loud control is the one that walks you through it, and
+     the two routes that were already here keep their words.
+
+     THE BUTTON ASKS `mayEditPlan()` ITSELF because there is no pen on an empty
+     page to gate it — §61's trap, and the same reason the Add button beside it
+     does. And the page it points at is named CORRECTLY: this sentence said
+     "Setup → Import & plans" and the page has been called Import & archives
+     for as long as it has existed (§104.8). */
+  if (!sel) return '<div class="bempty">' +
+    '<b>' + esc(u.name) + ' has no plan yet.</b>' +
     (typeof mayEditPlan === "function" && mayEditPlan()
-      ? '<button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
-        '">Add the first one</button> &mdash; or upload a plan on <b>Setup \u2192 Import &amp; plans</b>.'
-      : 'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.') + '</div>';
+      ? '<p>Build it here and the platform walks you through it section by section &mdash; ' +
+          'the foundation, the SWOT, then the ' + esc(L("pillar", "bu").toLowerCase()) +
+          ', their measures and their tactics.</p>' +
+        '<div class="row"><button class="bprim" data-buildplan="' + esc(u.ukey) + '">' +
+          'Build the plan</button>' +
+        '<span class="alt">or <button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
+          '">add the first ' + esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+          '</button> yourself, or upload a file on <b>Setup \u2192 Import &amp; archives</b>.</span>' +
+        '</div>'
+      : '<p>A plan arrives as a file: <b>Setup \u2192 Import &amp; archives</b>, the pillars ' +
+        'template.</p>') + '</div>';
   /* Key objectives are NOT repeated here. They are authored on Foundation and
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table

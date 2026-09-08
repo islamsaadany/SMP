@@ -1153,7 +1153,7 @@
   .pband-r { margin-left:auto; display:inline-flex; align-items:center; gap:10px;
              flex:none; }
   .pband-n { font-size:11.5px; color:var(--ink-3); }
-  /* ── A PROJECT SAVED AS A DRAFT (§302) ────────────────────────────────
+  /* ── A PROJECT SAVED AS A DRAFT (§309) ────────────────────────────────
      The bar's own two volumes, on the band: the state speaks and the way
      back is a bordered control. `.pbdone` takes `.rc-state.draft`'s exact
      treatment rather than a second one — the two say the same word about

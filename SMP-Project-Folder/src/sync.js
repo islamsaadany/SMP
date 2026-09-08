@@ -29,6 +29,10 @@ var SYNC = (function () {
      for a cold serverless function and a sleeping Neon branch, short enough
      that nobody is left looking at grey wondering whether it is broken. */
   var BOOT_FLOOR = 180, BOOT_GIVEUP = 8000;
+  /* True only in a contingency copy: the page is running on data baked
+     into the file rather than on the baked EXAMPLE, so the demo banner
+     would be a lie and the date it was taken is what matters. */
+  var OFFLINE = false;
   function bootNow() { return Date.now(); }
   /* Takes the skeleton down. Idempotent, and the ONLY thing that does it —
      theme.js puts the class on and never removes it, so there is one place to
@@ -1064,6 +1068,12 @@ var SYNC = (function () {
 
   return {
     isLive: function () { return live; },
+    /* THE GRAPH, FOR THE ONE THING THAT WRITES A FILE OUT OF IT (spec 030).
+       Exposed rather than rebuilt: a contingency copy that carried a second
+       idea of what the state is would be a backup of something the platform
+       never held. */
+    graph: function () { return graph(); },
+    isOffline: function () { return OFFLINE; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
@@ -1247,7 +1257,26 @@ var SYNC = (function () {
          No fetch, so nothing arrives late and there is nothing for a
          skeleton to cover. theme.js does not stamp `booting` here either;
          bootLand() is called anyway so the two can never disagree. */
-      if (!enabled) { bootLand(); paint(); return; }
+      /* ── AN OFFLINE COPY BRINGS ITS OWN DATA (spec 030) ──────────────
+         A contingency copy is this same file with the tenant's graph parked
+         in a `<script type="application/json">` block, and it is opened from
+         a laptop with nothing running anywhere — so this is the one place it
+         can be read. It sits ABOVE every other script in the file, or it is
+         not in the document yet when this runs (measured: the element was
+         simply absent, and the platform booted happily on the baked example
+         — a backup that silently shows Raya Trade instead of the client).
+
+         The block is NOT executable and is not hashed by the build's script
+         policy, which is why a copy made after the build still runs. Wrapped,
+         because a corrupted block must land on the baked data rather than a
+         page that will not paint. */
+      if (!enabled) {
+        try {
+          var isl = document.getElementById("smp-offline");
+          if (isl) { hydrate(JSON.parse(isl.textContent)); OFFLINE = true; }
+        } catch (e) { try { console.warn("[offline] " + e.message); } catch (e2) {} }
+        bootLand(); paint(); return;
+      }
       /* Taken before hydration, while the globals still hold the baked-in
          example — after hydration it is gone from memory. */
       DEMO = clone(graph());

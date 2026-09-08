@@ -208,6 +208,7 @@ function firstDiff(a, b, at) {
      round trip has never offered the database is a value nobody has tested).
      Written on the FIRST project that has both kinds of row, so this says
      nothing about which project it is. */
+  const R = require("../lib/rules.js");
   const pState = await io.readState(client);
   const pCap = (pState.group.capabilities || []).filter(function (c) {
     return (c.projects || []).some(function (pr) {
@@ -305,6 +306,70 @@ function firstDiff(a, b, at) {
     console.log("monthly plan round trip: SKIPPED — no measure/tactic/objective in the seed");
     process.exitCode = 1;
   }
+
+  /* ── spec 030: THE REVIEW DAY, THE MOMENTS AND THE RECORD ──────────────
+     THE CLAIM IS "NO MIGRATION", AND §172 IS WHY IT IS NOT LEFT AS A CLAIM:
+     four layers agreed about a value the database had never once been offered,
+     and the column refused it. These three ride the review row's `extra`, so
+     the assertion is that they come back exactly — a list of numbers through
+     jsonb, and a map keyed by person, both of which are where a silent
+     reshaping would hide. */
+  const rState = await io.readState(client);
+  rState.review = Object.assign({}, rState.review, {
+    reviewDay: "2026-07-28", reviewAt: "10:00", remindAt: [24, 12, 6, 3],
+    taken: { smo: { copy: "2026-07-27T09:00:00.000Z",
+                    slides: "2026-07-27T09:01:00.000Z" },
+             other: { slides: "2026-07-27T11:00:00.000Z" } }
+  });
+  await io.writeState(client, rState);
+  const rBack = await io.readState(client);
+  const rSame = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const rOk = rBack.review.reviewDay === "2026-07-28" &&
+              rBack.review.reviewAt === "10:00" &&
+              rSame(rBack.review.remindAt, [24, 12, 6, 3]) &&
+              rSame(rBack.review.taken, rState.review.taken);
+  console.log("contingency: review day, moments and record round trip:",
+    rOk ? "PASS" : "FAIL",
+    rOk ? "[no migration — review.extra]"
+        : JSON.stringify({ day: rBack.review.reviewDay, at: rBack.review.reviewAt,
+                           moments: rBack.review.remindAt, taken: rBack.review.taken }));
+  if (!rOk) process.exitCode = 1;
+  /* AND THEY LEAVE AGAIN (§50.6), or a cycle that never named a day and one
+     whose day was taken away are not the same row, and every save after a
+     clear carries a change nobody made. */
+  delete rBack.review.reviewDay; delete rBack.review.reviewAt;
+  delete rBack.review.remindAt; delete rBack.review.taken;
+  await io.writeState(client, rBack);
+  const rClean = await io.readState(client);
+  const rcOk = !("reviewDay" in rClean.review) && !("reviewAt" in rClean.review) &&
+               !("remindAt" in rClean.review) && !("taken" in rClean.review);
+  console.log("  ...and clear again, keys DELETED:", rcOk ? "PASS" : "FAIL",
+    rcOk ? "" : JSON.stringify(Object.keys(rClean.review)));
+  if (!rcOk) process.exitCode = 1;
+
+  /* ── THE PLANNING PERIOD (§308) ────────────────────────────────
+     §172 IS WHY THIS IS MEASURED RATHER THAN CLAIMED: "it rides `extra`, so
+     there is no migration" is exactly the shape of claim that shipped a
+     CHECK constraint refusing a value four layers had agreed on. Two months
+     on the GROUP, written, read back, and taken away again. */
+  const ppState = await io.readState(client);
+  ppState.group[R.PLAN_FROM] = "Jul 2026";
+  ppState.group[R.PLAN_TO]   = "Dec 2026";
+  await io.writeState(client, ppState);
+  const ppBack = await io.readState(client);
+  const ppOk = ppBack.group[R.PLAN_FROM] === "Jul 2026" &&
+              ppBack.group[R.PLAN_TO]   === "Dec 2026";
+  console.log("planning period round trip:", ppOk ? "PASS" : "FAIL",
+    ppOk ? "[no migration — org.extra]"
+        : JSON.stringify({ from: ppBack.group[R.PLAN_FROM], to: ppBack.group[R.PLAN_TO] }));
+  if (!ppOk) process.exitCode = 1;
+  delete ppBack.group[R.PLAN_FROM]; delete ppBack.group[R.PLAN_TO];
+  await io.writeState(client, ppBack);
+  const ppClean = await io.readState(client);
+  const ppcOk = !(R.PLAN_FROM in ppClean.group) && !(R.PLAN_TO in ppClean.group);
+  console.log("  ...and clear again, keys DELETED:", ppcOk ? "PASS" : "FAIL",
+    ppcOk ? "" : JSON.stringify(Object.keys(ppClean.group).filter(k => k.indexOf("plan") === 0)));
+  if (!ppcOk) process.exitCode = 1;
 
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);

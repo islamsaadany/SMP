@@ -49,6 +49,31 @@ function sendFileBytes(bytes, name, mime){
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
 }
 
+/* ── ONE FILE, OR SEVERAL AS A ZIP (§304) ──────────────────────────────
+   The download card hands over whatever is ticked, and one subject ticked is
+   ONE workbook rather than a zip holding one — a person who asked for Mobile's
+   plan and got an archive to unpack has been given a chore, not a file.
+
+   The zip itself is `zipStore()` from xlsx.js, which since §304 takes bytes as
+   well as text, so a zip of workbooks needs nothing new: each member is
+   already a Uint8Array from buildXlsx().
+
+   FOLDERS ARE THE MEMBER'S OWN NAME. A zip has no directory entries to make —
+   a slash in the name IS the folder — so `plans/mobile.xlsx` arrives inside a
+   folder called plans with no extra machinery. */
+function sendFilesZip(files, zipName){
+  if (!files.length) return 0;
+  if (files.length === 1) {
+    var one = files[0];
+    sendFileBytes(one.data, one.name.replace(/^.*\//, ""), one.mime ||
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    return 1;
+  }
+  sendFileBytes(zipStore(files.map(function(f){ return { name:f.name, data:f.data }; })),
+    zipName, "application/zip");
+  return files.length;
+}
+
 function pptxColors(){
   var b = branding();
   var strip = function(h, fb){ return String(h || fb).replace(/^#/, "").toUpperCase(); };
@@ -542,4 +567,232 @@ function sendPlanPptx(target){
   if (!SMPRules.mayDownloadPlan(world(), viewer(), target)) return;
   sendFileBytes(buildPlanPptx(target), planPptxName(target),
     "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+}
+
+/* ══ THE REVIEW DECK AS A POWERPOINT (spec 030) ════════════════════════════
+   Islam: *"we need the ppt downloads the final presentations reported
+   according to the last performance at the moment of download."*
+
+   THIS IS NOT `pptxUnitSlides` WITH FIGURES ADDED, AND THE DIFFERENCE IS THE
+   WHOLE DESIGN. That builder writes the PLAN — its own cover slide says so in
+   words, "as agreed, no reported figures" — and its tables are Measure · Dir.
+   · Target · Compiles and Tactic · Owner · Collaborators · Q1–Q4. Not one
+   reported number appears in it. What a unit presents from is the REVIEW
+   deck, which carries the YTD figure against the benchmark due, the progress,
+   the band, the reporter's note and the score tables.
+
+   §305 REFUSED TO WRITE THAT DECK A SECOND TIME AND THAT REFUSAL STILL
+   STANDS. Its argument was measured: `deckSlides` + `deckSlidesFn` are 639
+   lines over some twenty-one kinds of slide, the deck has moved four times in
+   a fortnight (§243, §253, §254, §259), and a second description of the same
+   slides would have had to be corrected on every one of those — with the
+   drifting copy being the one nobody looks at until the platform is down.
+
+   SO IT IS NOT DESCRIBED A SECOND TIME. IT IS CONVERTED. `deckHtmlFor()`
+   assembles the real deck — the same call Present and the PDF make — and this
+   walks the slides it produced, turning each one's heading, prose and TABLES
+   into PowerPoint shapes. A slide kind added to the deck tomorrow arrives here
+   with no edit, because nothing here knows the difference between a pillar's
+   measures and a project's milestones: it knows headings, paragraphs and
+   tables. One answer to *what is on this slide*, converted twice (§53.5).
+
+   WHAT IT COSTS, STATED RATHER THAN DISCOVERED: the file is text and tables,
+   not a picture of the deck. The gauges, the band colours behind a pill and
+   the SWOT's four hues do not survive — a figure that reads "Off track" as a
+   red pill on the screen reads as the words "Off track" here. That is the
+   trade for slides somebody can actually edit in PowerPoint at 6am, which is
+   what the file is for.
+
+   THE DECK MUST BE ATTACHED FOR ANYTHING THAT MEASURES (§69) — and nothing
+   here measures. `deckFitPass()` splits long tables against a box, which is
+   why the PDF has to attach; this counts rows instead (§51.10's own argument,
+   in `pptxTableSlides`), so a detached render is correct AND cheap. */
+
+/* Text of an element, collapsed the way a slide reads it. */
+function deckTxt(el){
+  return String((el && el.textContent) || "").replace(/\s+/g, " ").trim();
+}
+
+/* ── THREE THINGS A RAW `textContent` GETS WRONG, EACH FOUND BY READING THE
+   FILE RATHER THAN THE CODE (§96's family) ──────────────────────────────
+
+   A HEADING IS TWO THINGS RUN TOGETHER. The deck writes a pillar's slide as
+   `<h2><span class="dcode">MB01</span> Digital…<span class="dwhich">Key
+   measures</span></h2>` — a name and a sub-label with no separator between
+   them, because on the screen CSS puts the sub-label on its own line. Read
+   flat it comes out "…OperationsKey measures", one word made of two. */
+function deckHeading(sl){
+  var h = sl.querySelector("h1, h2, h3");
+  if (!h) return "";
+  var w = h.querySelector(".dwhich"), which = w ? deckTxt(w) : "";
+  var c = h.cloneNode(true), cw = c.querySelector(".dwhich");
+  if (cw) cw.remove();
+  var main = deckTxt(c);
+  return which ? (main + " — " + which) : main;
+}
+
+/* A QUARTER CELL IS FOUR MARKS AND ONLY THE LIT ONES MEAN ANYTHING. The
+   deck draws `<i>1</i><i class="on">2</i><i class="on">3</i><i>4</i>`, so
+   flat text reads "1234" — which says a tactic runs all year when it runs in
+   two quarters, and is worse than saying nothing. */
+function deckQuarters(el){
+  var on = [].slice.call(el.querySelectorAll("i")).filter(function(i){
+    return i.classList.contains("on");
+  }).map(function(i){ return "Q" + deckTxt(i); });
+  return on.length ? on.join(" ") : "—";
+}
+
+function deckCellText(td){
+  var qs = td.querySelector(".qs");
+  if (qs) return deckQuarters(qs);
+  return deckTxt(td) || "—";
+}
+
+/* THE COLUMN WIDTHS ARE READ OFF THE HEADER, never guessed per slide kind.
+   The deck marks its own numeric columns (`.num`) and its index column
+   (`.idx`), so a prose column takes two shares of what is left, a figure
+   takes one, and the `#` takes a fixed sliver — which is how a nine-column
+   tactics table and a three-column score table both come out readable
+   without either being named here. */
+function deckColWidths(ths){
+  var IDX = 320040, shares = [], total = 0, fixed = 0;
+  ths.forEach(function(th){
+    if (th.classList.contains("idx")) { shares.push(0); fixed += IDX; return; }
+    var s = th.classList.contains("num") ? 1 : 2;
+    shares.push(s); total += s;
+  });
+  var room = PPTX_CW - fixed;
+  return shares.map(function(s){
+    return s === 0 ? IDX : Math.round(room * s / total);
+  });
+}
+
+/* One HTML table → head and rows of plain strings. A cell that renders as
+   nothing becomes an em-dash rather than an empty box, which is the word the
+   platform already uses for "there is nothing to say" (§15.1). */
+function deckTable(tbl){
+  var ths = [].slice.call(tbl.querySelectorAll("thead th"));
+  if (!ths.length) return null;
+  var rows = [].slice.call(tbl.querySelectorAll("tbody tr")).map(function(tr){
+    return [].slice.call(tr.children).map(function(td){
+      return deckCellText(td);
+    });
+  });
+  return { widths: deckColWidths(ths), head: ths.map(function(t){ return deckTxt(t); }),
+           rows: rows };
+}
+
+/* The prose a slide carries above its table: the deck writes a small
+   uppercase key (`.dlab`, `.seclab`) over a paragraph, and both are kept —
+   the key is what says whether a paragraph is an aspiration or a note. */
+function deckLead(sl){
+  var out = [];
+  [].forEach.call(sl.querySelectorAll(".dlab, .coversub, .asp2, .asp3, p, li"), function(el){
+    /* NOT THE HEADING'S OWN PARTS. The pillar slides put the code and the
+       sub-label inside the `<h2>`, so without this the title is printed and
+       then immediately printed again a line below it, in pieces. */
+    if (el.closest("table") || el.closest("h1, h2, h3")) return;
+    var t = deckTxt(el);
+    if (!t) return;
+    out.push({ t:t, key: el.classList.contains("dlab") });
+  });
+  /* A SLIDE THAT IS NEITHER PROSE NOR A TABLE IS STILL A SLIDE. The pillars
+     roll-call is a grid of cards — a code, a name and an end-state in three
+     spans — and it matched none of the selectors above, so it converted to a
+     heading over an empty page. An empty slide in a file taken as a backup is
+     the one thing this feature exists to prevent, so the fallback reads the
+     LEAF text: every element carrying words that has no child carrying words.
+     A card kind added to the deck tomorrow lands here rather than vanishing. */
+  if (!out.length) {
+    [].forEach.call(sl.querySelectorAll("*"), function(el){
+      if (el.closest("table") || el.closest("h1, h2, h3") || el.querySelector("*")) return;
+      var t = deckTxt(el);
+      if (t) out.push({ t:t, key: false });
+    });
+  }
+  return out;
+}
+
+var DECK_LEAD_LINE = 274320;                 /* one line of lead prose, EMU */
+
+/* One slide of the deck → one or more PowerPoint slides. Long tables
+   continue, exactly as the plan download's do. */
+function deckSlidePptx(sl, kicker){
+  var C = pptxColors();
+  var title = deckHeading(sl) || kicker;
+
+  /* A section divider or the cover: the deck's own big-type slides, and they
+     become the same here rather than being flattened into a heading with
+     nothing under it. */
+  if (sl.classList.contains("d-thanks")) return [pptxThanks(kicker, deckTxt(sl.querySelector(".coversub")))];
+  if (sl.classList.contains("d-cover")) {
+    var sub = deckTxt(sl.querySelector(".coversub")) ||
+      [].slice.call(sl.querySelectorAll(".seccell")).map(deckTxt).join("  ·  ");
+    return [pptxCover(GROUP.org || "", title, sub)];
+  }
+
+  var lead = deckLead(sl);
+  var tables = [].slice.call(sl.querySelectorAll("table"))
+                 .map(deckTable).filter(Boolean);
+
+  var paras = lead.map(function(l){
+    return pptxPara(pptxRun(l.key ? l.t.toUpperCase() : l.t,
+      l.key ? { sz:1000, b:true, color:C.quiet } : { sz:1300, color:C.ink }),
+      { before: l.key ? 300 : 60 });
+  });
+
+  if (!tables.length) {
+    return [pptxSlideXml(pptxHead(kicker, title).concat(
+      paras.length ? [pptxText(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW,
+                                     cy:PPTX_H - PPTX_TABLE_Y - 457200 }, paras)]
+                   : []))];
+  }
+
+  /* WITH A TABLE, THE PROSE SITS ABOVE IT AND THE TABLE MOVES DOWN. The
+     alternative — prose on a slide of its own — doubles a deck whose aim
+     slide is one aspiration over one table, and separates the sentence from
+     the thing it introduces. Capped, so a long note cannot push a table off
+     the bottom: past four lines it is the table that matters. */
+  var out = [], leadH = Math.min(lead.length, 4) * DECK_LEAD_LINE;
+  tables.forEach(function(t, ti){
+    var y = PPTX_TABLE_Y + (ti === 0 ? leadH : 0);
+    for (var i = 0; i < t.rows.length || i === 0; i += PPTX_ROWS_PER_SLIDE) {
+      var part = t.rows.slice(i, i + PPTX_ROWS_PER_SLIDE);
+      var ttl = (i || ti) ? title + " (continued)" : title;
+      var shapes = pptxHead(kicker, ttl);
+      if (ti === 0 && i === 0 && paras.length)
+        shapes = shapes.concat([pptxText(9, { x:PPTX_MX, y:PPTX_TABLE_Y,
+          cx:PPTX_CW, cy:leadH }, paras.slice(0, 4))]);
+      shapes = shapes.concat(part.length
+        ? [pptxTable(10, { x:PPTX_MX, y:(i ? PPTX_TABLE_Y : y), cx:PPTX_CW },
+            t.widths, t.head, part)]
+        : [pptxText(10, { x:PPTX_MX, y:y, cx:PPTX_CW, cy:457200 },
+            [pptxPara(pptxRun("Nothing here yet.", { sz:1200, i:true, color:C.quiet }))])]);
+      out.push(pptxSlideXml(shapes));
+    }
+  });
+  return out;
+}
+
+/* THE SUBJECT'S OWN NAME IS THE KICKER on every slide, because the file is
+   read a fortnight later out of a folder of nineteen of them. */
+function reviewPptxSlides(target){
+  var box = document.createElement("div");
+  box.innerHTML = deckHtmlFor(target);
+  var kicker = placeLabel(target) || String(target || "");
+  var out = [];
+  [].forEach.call(box.querySelectorAll(".dslide"), function(sl){
+    out = out.concat(deckSlidePptx(sl, kicker));
+  });
+  return out;
+}
+
+function reviewPptxName(target){
+  return (placeLabel(target) || "Review") + " — " +
+    ((REVIEW && REVIEW.name) || "review") + ".pptx";
+}
+
+function buildReviewPptx(target){
+  return pptxPackage(reviewPptxSlides(target),
+    reviewPptxName(target).replace(/\.pptx$/, ""));
 }

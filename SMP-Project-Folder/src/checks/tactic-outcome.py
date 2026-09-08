@@ -24,7 +24,16 @@ def open_plan(pg, edit=False, tab=None):
     el = pg.query_selector('#secrow-in [data-sub2="plan"]')
     if el: el.click(); pg.wait_for_timeout(420)
     if edit:
-        pen = pg.query_selector('.pane .penbtn') or pg.query_selector('.penbtn')
+        # §303: THE PEN MOVED AND THIS CHECK DID NOT. §268 put the strategy
+        # pen on the SECTION LINE (`.secpen`) and deleted `editBar()`, so this
+        # selector had matched nothing since — the pen never opened, and every
+        # assertion after the first section died on an undefined cell and
+        # reported 13 failures on a build behaving exactly as decided (§51.11,
+        # §274: grep for the CONTROL on both sides of a merge, and a control
+        # that moved has more than one class).
+        pen = (pg.query_selector('#secrow-in .secpen')
+               or pg.query_selector('.secpen')
+               or pg.query_selector('.pane .penbtn') or pg.query_selector('.penbtn'))
         if pen: pen.click(); pg.wait_for_timeout(650)
 
 def heads(pg, word="Tactic"):
@@ -193,7 +202,7 @@ with sync_playwright() as p:
     pg.add_init_script("try{localStorage.setItem('smp.welcome.seen','1')}catch(e){}")
     pg.goto("file://"+SRC); pg.wait_for_timeout(1200)
     m = pg.evaluate("""()=>{ try{
-      REVIEW.asOfMonth = 'Aug 26';
+      REVIEW.to = 'Aug 2026';
       var mk=function(o){ return Object.assign({name:'x',actual:null}, o); };
       var sum   = mk({outDir:'\\u2265', outTarget:'12#', outCompile:'Sum',     outActual:'8'});
       var late  = mk({outDir:'\\u2265', outTarget:'90%', outCompile:'Latest',  outActual:'62'});
@@ -227,7 +236,7 @@ with sync_playwright() as p:
     # THE REVIEW POINT HAS TO BE SET OR THE ASSERTION IS ABOUT THE WRONG
     # NUMBER: without it the cycle's own quarter end answers, so a target of 12
     # is measured at 6 and 8 reads 133 — correct arithmetic, wrong question.
-    pg.evaluate("""()=>{ REVIEW.asOfMonth='Aug 26';
+    pg.evaluate("""()=>{ REVIEW.to='Aug 2026';
       var t=UNITS.mobile.items[0].tactics[0];
       t.outcome='Stores opened'; t.outDir='\\u2265'; t.outTarget='12#'; t.outCompile='Sum';
       t.actual=45; t.q1=1;t.q2=1;t.q3=1;t.q4=1; }""")

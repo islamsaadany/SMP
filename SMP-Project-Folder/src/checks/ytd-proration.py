@@ -61,9 +61,17 @@ def main():
         print("\n── 1 · one answer to \"how far through the year are we\" ──")
         r = pg.evaluate("""()=>({
           lab: reviewAsOfLabel(), months: elapsedMonths(), share: elapsedShare(),
-          pips: [0,1,2,3].map(quarterPast), stored: REVIEW.asOfMonth || null })""")
-        ck("an unset review point falls back to the cycle's own quarter end",
-           r["stored"] is None and r["lab"] == "Jun 26", r)
+          pips: [0,1,2,3].map(quarterPast), stored: REVIEW.to || null })""")
+        # §307: REWRITTEN, NEVER LOOSENED (§218). This asserted the FALLBACK —
+        # with no review point set, the cycle's own quarter end answered — which
+        # was the safety argument §239.1 shipped on. There is no second field to
+        # leave unset any more: the cycle's end IS the review point, so what is
+        # asserted is that the two are the same month and that it is printed
+        # the way the strip beside it prints `to` (four digits, or one line
+        # would read "Jun 2026 ... reported as of Jun 26" and look like two
+        # different months).
+        ck("the review point is the month the cycle covers to",
+           r["stored"] == "Jun 2026" and r["lab"] == "Jun 2026", r)
         ck("...which is six months of twelve", r["months"] == 6 and r["share"] == 0.5, r)
         # THE AGREEMENT, not the number: the pips and the figures must answer
         # from one place, which is the whole of what §239 repaired.
@@ -220,7 +228,12 @@ def main():
            pg.evaluate("!!document.querySelector('[data-editcycle]')"))
         before = pg.evaluate("()=>measureScore(GROUP.keyObjectives[0])")
         pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
-        pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(300)
+        # §307: THE REVIEW POINT IS THE CYCLE'S END, so the control pressed is
+        # the `to` picker and not "the month button in the pen" — which is now
+        # the FIRST of three and is Covers from. A selector that keeps working
+        # while pointing at the wrong control is §51.11's own fault, and it
+        # would have measured a build that never moved the review point at all.
+        pg.click(".newcycle .tobtn"); pg.wait_for_timeout(300)
         ck("...which opens the platform's own month picker",
            pg.evaluate("!!document.querySelector('.monthpop [data-mpick]')"))
         pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
@@ -233,11 +246,11 @@ def main():
         # Asserted rather than dropped, because a build that quietly went back
         # to holding it would otherwise pass everything below.
         ck("the pick reaches the cycle on the press, with no Save to make",
-           pg.evaluate("()=>REVIEW.asOfMonth === 'Aug 26'"),
-           pg.evaluate("()=>REVIEW.asOfMonth"))
-        after = pg.evaluate("""()=>({stored:REVIEW.asOfMonth||null, months:elapsedMonths(),
+           pg.evaluate("()=>REVIEW.to === 'Aug 2026'"),
+           pg.evaluate("()=>REVIEW.to"))
+        after = pg.evaluate("""()=>({stored:REVIEW.to||null, months:elapsedMonths(),
                                      rev:measureScore(GROUP.keyObjectives[0])})""")
-        ck("the pick reaches the stored cycle", after["stored"] == "Aug 26", after)
+        ck("the pick reaches the stored cycle", after["stored"] == "Aug 2026", after)
         ck("...eight months of twelve", after["months"] == 8, after)
         ck("...and the figures move with it, 87% against half a year to 65% against two thirds",
            before == 87 and after["rev"] == 65, (before, after["rev"]))
@@ -247,12 +260,27 @@ def main():
         # pressing it blind here closed the pen this section is standing in.
         if not pg.query_selector(".newcycle"):
             pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
-        pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(300)
+        pg.click(".newcycle .tobtn"); pg.wait_for_timeout(300)
         pg.evaluate("""()=>{var b=document.querySelector('.monthpop [data-mclear]'); if(b)b.click();}""")
         pg.wait_for_timeout(400)
-        ck("clearing it deletes the key rather than storing an empty one",
-           pg.evaluate("()=>!('asOfMonth' in REVIEW)"),
-           pg.evaluate("()=>REVIEW.asOfMonth"))
+        # REWRITTEN, NOT DELETED (§218, §307). This asserted that clearing the
+        # month DELETED its key, which was right while the review point was a
+        # field of its own riding `extra`: an absent key and an empty one had to
+        # be byte-identical or every save carried a phantom change. `to` is a
+        # real column and cannot be absent, so the question changes to the one
+        # that now matters and is far more dangerous: with no end month, does
+        # the platform quietly go back to measuring against a WHOLE YEAR?
+        # It does not — the cycle's name is the fallback `cycleMonth()` has
+        # always kept — and this is the assertion that says so.
+        cleared = pg.evaluate("""()=>({to:REVIEW.to, months:elapsedMonths()})""")
+        ck("clearing the end empties the box rather than storing a month nobody picked",
+           cleared["to"] == "", cleared)
+        ck("...and the year does NOT silently become whole — the name is the fallback",
+           cleared["months"] == 6, cleared)
+        pg.click(".newcycle .tobtn"); pg.wait_for_timeout(300)
+        pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
+            .find(x=>x.textContent.trim()==='Jun'); if(b)b.click();}""")
+        pg.wait_for_timeout(400)
 
         print("\n── 9 · the review point knows its own year (§239.3) ──")
         # THE STATE THE DEMO CANNOT PRODUCE, so it is MADE (§94.2). Islam's own
@@ -262,30 +290,43 @@ def main():
         # stopped prorating and every tactic read 100% again, with the month
         # sitting there plainly set. Two fields answering one question, which is
         # the fault §239.1 exists to have removed, committed by its own fix.
+        # §307: REWRITTEN, NOT DELETED (§218). §239.3's fault was two fields
+        # disagreeing about the YEAR — the review point carried its own and
+        # `elapsedMonths()` threw it away and asked `cycleYear()`, which scrapes
+        # a four-digit year out of the cycle's `to`, `name` and `due`. With the
+        # review point BEING `to`, that particular disagreement is impossible by
+        # construction, and asserting it as written would be an assertion that
+        # can no longer fail (§113.8).
+        #
+        # WHAT CAN STILL FAIL IS THE SAME FAULT ONE STEP ALONG, and it is the
+        # reason `reviewYear()` was rewritten: a `to` carrying a TWO-DIGIT year
+        # is read perfectly by `monthsOf()` and is invisible to `cycleYear()`'s
+        # four-digit regex. If anything on the measuring path went back to
+        # asking `cycleYear()`, such a cycle would stop prorating entirely and
+        # every tactic would read 100% again — §239.3 exactly, with the field
+        # this section made load-bearing.
         shapes = pg.evaluate("""()=>{
-          var keep = {name:REVIEW.name, from:REVIEW.from, to:REVIEW.to,
-                      due:REVIEW.due, asOfMonth:REVIEW.asOfMonth};
+          var keep = {name:REVIEW.name, from:REVIEW.from, to:REVIEW.to, due:REVIEW.due};
           var out = {};
           var probe = function(rv){
             Object.keys(rv).forEach(function(k){ REVIEW[k] = rv[k]; });
-            REVIEW.asOfMonth = "Aug 26";
             return { year: cycleYear(), months: elapsedMonths(),
                      tactic: tacticPlanned(UNITS.mobile.items[0].tactics[0]),
                      rev: measureScore(GROUP.keyObjectives[0]) };
           };
-          out.withYear = probe({name:"2026", from:"Jan 2026", to:"Dec 2026", due:"15 Jan 2027"});
-          out.noYear   = probe({name:"Annual Plan", from:"Jan", to:"Dec", due:""});
-          Object.keys(keep).forEach(function(k){
-            if (keep[k] === undefined) delete REVIEW[k]; else REVIEW[k] = keep[k]; });
+          out.withYear = probe({name:"2026", from:"Jan 2026", to:"Aug 2026", due:"15 Jan 2027"});
+          out.noYear   = probe({name:"Annual Plan", from:"Jan", to:"Aug 26", due:""});
+          Object.keys(keep).forEach(function(k){ REVIEW[k] = keep[k]; });
           paint();
           return out;
         }""")
         w, n = shapes["withYear"], shapes["noYear"]
-        ck("a cycle whose name carries a year prorates", w["months"] == 8 and w["tactic"] == 83, w)
-        ck("...and the year really is absent from the other one", n["year"] is None, n)
+        ck("a cycle whose end carries a four-digit year prorates", w["months"] == 8 and w["tactic"] == 83, w)
+        ck("...and the four-digit scrape really is blind to the other one", n["year"] is None, n)
         # ASSERTED AS THE AGREEMENT, never as a number: the two shapes must
         # answer identically, because the month is the same month.
-        ck("a cycle with NO year anywhere answers exactly the same", n == dict(w, year=None), (w, n))
+        ck("a cycle whose end carries a two-digit year answers exactly the same",
+           n == dict(w, year=None), (w, n))
 
         print("\n── 10 · the strip says what the month MEANS ──")
         # Islam could not tell whether the month he picked had taken effect.
@@ -296,17 +337,21 @@ def main():
         said = pg.evaluate("""()=>{
           var read = function(){ var e=document.querySelector('.fstrip-meta.asof');
             return e ? e.textContent.replace(/\\s+/g,' ').trim() : null; };
-          var keep = REVIEW.asOfMonth;
-          delete REVIEW.asOfMonth; paint(); var unset = read();
-          REVIEW.asOfMonth = "Aug 26"; paint(); var set = read();
-          if (keep === undefined) delete REVIEW.asOfMonth; else REVIEW.asOfMonth = keep;
+          var keep = REVIEW.to;
+          REVIEW.to = ""; paint(); var unset = read();
+          REVIEW.to = "Aug 2026"; paint(); var set = read();
+          REVIEW.to = keep;
           paint();
           return {unset:unset, set:set};
         }""")
         ck("with a month picked it says how much of the year has passed",
            "8 of 12 months" in said["set"], said["set"])
-        ck("...and with none it says so, and where the number came from",
-           "6 of 12 months" in said["unset"] and "cycle" in said["unset"], said["unset"])
+        # §307: and it still names WHERE the number came from when the cycle's
+        # own end cannot be read — the fallback is the name now, and a strip
+        # that printed a derived month as a chosen one would be a guess drawn
+        # as a fact (§35).
+        ck("...and with no end month it says so, and where the number came from",
+           "6 of 12 months" in said["unset"] and "name" in said["unset"], said["unset"])
         # AND IT NEVER PRINTS "Missing" over something that is not owed
         # (§177, §214.4): with no month picked the platform still has an answer.
         ck("...without crying Missing over a working fallback",

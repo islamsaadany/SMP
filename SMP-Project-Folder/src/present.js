@@ -1113,6 +1113,45 @@ function openDeckFor(target, from){
   else openDeck(unitLike(t), from);
 }
 
+/* ── THE DECK AS A PDF (§305) ─────────────────────────────────────────
+   Islam asked for the presentation to be downloadable beside the plan, and
+   chose the PDF over an editable .pptx for now.
+
+   IT PRINTS THE REAL DECK, WHICH IS THE WHOLE ARGUMENT. The deck is
+   assembled fresh on the press (§253.3) and then MEASURED — `deckFitPass()`
+   splits a long table across slides by reading heights off the attached
+   page, and §69 records what happens to that pass on a detached element:
+   `scrollHeight` and `clientHeight` are both 0, so every slide reports as
+   fitting and the pass silently does nothing. So the deck is opened for
+   real, exactly as Present opens it, and the browser prints what is there.
+
+   FIT-TO-WINDOW IS TURNED OFF FIRST, AND PUT BACK. It is a toggle that
+   persists on the root between openings (§69.7), and it changes `.deck` to
+   the window's size — so the fit pass would split the tables against a box
+   that is not the page, and the presenter would get a PDF whose slides break
+   in different places from the one they rehearsed.
+
+   THE DECK CLOSES WHEN THE DIALOG DOES, so the press ends where it started.
+   `afterprint` fires on Save and on Cancel alike, which is what makes
+   cancelling cost nothing; a browser that never fires it leaves the deck
+   open on screen, with Exit where Exit always is — a nuisance and not a trap
+   (§61). */
+function deckToPdf(target){
+  var root = document.getElementById("deckroot");
+  var wasFit = root.classList.contains("fitwin");
+  root.classList.remove("fitwin");
+  openDeckFor(target);
+  var done = function(){
+    window.removeEventListener("afterprint", done);
+    closeDeck();
+    if (wasFit) root.classList.add("fitwin");
+  };
+  window.addEventListener("afterprint", done);
+  /* One tick, so the paint that `openDeckWith()` just asked for has happened
+     before the browser is asked to lay the same thing out for paper. */
+  setTimeout(function(){ window.print(); }, 50);
+}
+
 /* ══ THE MASTER PRESENTATION (§266) ═══════════════════════════════════
    Islam: *"give an option for the SMO from the presentation list to do master
    presentation which is a flow of presentations in a flow and he is just asked

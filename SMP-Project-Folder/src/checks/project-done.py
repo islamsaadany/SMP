@@ -37,14 +37,14 @@ THE STATE IS MADE, not found: no demo person is named as a project's Owner
 while attached to nothing else, so waiting for one means shipping this
 unexercised (S94.2).
 
-AND SINCE S302 THE MARK IS A LOCK: pressing it saves, closes the container to
+AND SINCE S309 THE MARK IS A LOCK: pressing it saves, closes the container to
 the person who pressed it, and Reopen is the way back -- so this also asserts
 that their own rows really do go read-only, that the neighbouring container
 does not, and that the CUSTODIAN keeps every one of theirs (a build that
 froze the pane would pass every "it is shut" assertion and be a second lock
 nobody asked for).
 
-SERVED OVER HTTP, AND SINCE S302 IT HAS TO BE (S94.11). The button says
+SERVED OVER HTTP, AND SINCE S309 IT HAS TO BE (S94.11). The button says
 "Save draft" now and CLOSES the container, so the press goes through
 SYNC.saveNow and marks only if the save landed -- and over file:// SYNC is
 never live, so every press answers "offline" and nothing is ever closed. A
@@ -110,7 +110,7 @@ class H(http.server.BaseHTTPRequestHandler):
         n = int(self.headers.get("Content-Length") or 0)
         self.rfile.read(n)
         if self.path.startswith("/api/state"):
-            # REFUSABLE ON PURPOSE (§302): the press saves and closes only if
+            # REFUSABLE ON PURPOSE (§309): the press saves and closes only if
             # the save LANDED, and a stub that always says yes cannot tell
             # that ordering from the other one.
             if REFUSE["on"]:
@@ -128,7 +128,7 @@ srv = S(("127.0.0.1", 0), H)
 URL = "http://127.0.0.1:%d/raya-trade" % srv.server_address[1]
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 
-# ── LIVE CONTROLS INSIDE ONE PROJECT'S BAND (§302) ───────────────────────
+# ── LIVE CONTROLS INSIDE ONE PROJECT'S BAND (§309) ───────────────────────
 # Scoped by walking from the band bearing the project's CODE to the next
 # band. The first draft of this counted every control in the pane, which on
 # a function drawing EVERY capability at once can never reach zero while any
@@ -199,7 +199,7 @@ BAR = """()=>{
                ? box.querySelector('.rc-state').textContent.trim() : null,
     submit: !!document.querySelector('[data-submit]'),
     marks: [...document.querySelectorAll('[data-rowdone]')].map(e=>e.dataset.rowdone),
-    /* §302: THE WORD MOVED AND THE ASSERTION IS REWRITTEN, NOT DELETED
+    /* §309: THE WORD MOVED AND THE ASSERTION IS REWRITTEN, NOT DELETED
        (§218). It was a `.pill.good` reading "Done" while the mark was a
        signal; the mark is a LOCK now and the band says the bar's own word,
        `Draft saved`, beside a Reopen. Both are read, so a build that drew
@@ -300,7 +300,7 @@ with sync_playwright() as pw:
         ck("the band says a draft was saved, and offers the way back",
            "Draft saved" in st2["bandState"] and "Reopen" in st2["bandReopen"] and
            any(m.endswith("|0") for m in st2["marks"]), st2)
-        # §302: AND THE PROJECT IS REALLY SHUT — to them, and to them only.
+        # §309: AND THE PROJECT IS REALLY SHUT — to them, and to them only.
         # A build that merely changed the word passes every assertion above.
         frz = pg.evaluate(INBAND, ids["ownCode"])
         locked = pg.evaluate("()=>!!document.querySelector('#panel.replocked')")
@@ -314,7 +314,7 @@ with sync_playwright() as pw:
         ck("...and the report around it is NOT closed (§220 is the bar's, not this)",
            not locked, locked)
 
-        # ── A SAVE THAT DID NOT LAND CLOSES NOTHING (§302) ───────────
+        # ── A SAVE THAT DID NOT LAND CLOSES NOTHING (§309) ───────────
         # §220's own first build parked before it knew, and drew a tidy
         # "Draft saved" over work that never left the browser. Worse here,
         # because the boxes go read-only behind it. Reopen first, refuse the
@@ -386,7 +386,7 @@ with sync_playwright() as pw:
     ck("Submit is still drawn for them", st["submit"], st["text"])
     ck("no View only pill, and no own-project chip either",
        not st["viewOnly"] and st["ownChip"] is None, st["text"])
-    # ── §302: AN OWNER'S DRAFT DOES NOT SHUT THE CUSTODIAN OUT ───────────
+    # ── §309: AN OWNER'S DRAFT DOES NOT SHUT THE CUSTODIAN OUT ───────────
     # The lock is the owner's own act. The custodian holds the bar's Save
     # draft for the whole function, and a second lock inside it would be two
     # ways to close one report (§53.5) — so they keep every control on that
@@ -470,7 +470,7 @@ with sync_playwright() as pw:
     pg.evaluate("""()=>{
       ACCESS.powner = Object.assign({}, ACCESS.powner, { a_fn_own_strat:"fill" });
       REVIEW.submitted = {};              /* §6 closed it; reopen for this */
-      REVIEW.done = undefined;            /* §302: and its own draft too */
+      REVIEW.done = undefined;            /* §309: and its own draft too */
       paint(); }""")
     pg.wait_for_timeout(300)
     for _ in range(3):

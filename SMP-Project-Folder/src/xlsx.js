@@ -23,13 +23,20 @@ function crc32(bytes){
   return (c ^ 0xFFFFFFFF) >>> 0;
 }
 
+/* A MEMBER MAY BE BYTES AS WELL AS TEXT (§304). Every caller until now handed
+   this XML, so `f.data` was always a string and encoding it here was the whole
+   of the job. A zip of WORKBOOKS holds files that are themselves zips, and
+   putting a Uint8Array through TextEncoder would mangle every byte above 0x7F
+   silently — the archive would build, download, and refuse to open. */
 function zipStore(files){
   var enc = new TextEncoder(), chunks = [], central = [], offset = 0;
   function u16(n){ return [n & 255, (n >>> 8) & 255]; }
   function u32(n){ return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; }
 
   files.forEach(function(f){
-    var name = enc.encode(f.name), data = enc.encode(f.data), crc = crc32(data);
+    var name = enc.encode(f.name);
+    var data = (f.data instanceof Uint8Array) ? f.data : enc.encode(f.data);
+    var crc = crc32(data);
     var local = [].concat([0x50,0x4b,0x03,0x04], u16(20), u16(0), u16(0), u16(0), u16(0),
                           u32(crc), u32(data.length), u32(data.length),
                           u16(name.length), u16(0));
@@ -371,6 +378,14 @@ function readme(kind, pickLabel, pickList){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        [pickLabel, ""],
+       /* WHICH CYCLE THIS FILE CAME FROM (§304.3). Islam: *"we need first to
+          select the cycle we are downloading from."* No workbook named one
+          until today — measured, `xlsx.js` never read REVIEW.name — so a
+          progress file taken this cycle and one taken next were identical in
+          their headings, and two of them on a disk could not be told apart.
+          Written, never read back: it is a fact about the download, and an
+          upload lands in the cycle that is open (§304.4). */
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Pillars FIRST \u2014 Measures and Tactics choose their pillar from what you type there."],
        ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -385,6 +400,7 @@ function readme(kind, pickLabel, pickList){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        [pickLabel, ""],
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "Type only in the New value column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank New value means nothing changed. Only the rows you fill are read."],
@@ -439,6 +455,19 @@ function readmeCell(sheets, label){
    reader stops finding the cell, the upload reports "no business unit called
    ''", and nothing says why. */
 var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability"];
+/* WHICH KIND OF WORKBOOK THIS IS, off its own first cell (§304.4). Written by
+   `readme()` and `capReadme()` for every file the platform produces, so it is
+   the file's own word rather than a guess about its shape. "" when the sheet
+   says neither — a workbook somebody rebuilt by hand cannot confirm anything
+   and is not refused for it. */
+function readmeKind(sheets){
+  var rows = (sheets && sheets["Read me"]) || [];
+  var first = String((rows[0] || [])[0] || "").trim().toLowerCase();
+  if (first === "plan workbook") return "plan";
+  if (first === "progress workbook") return "progress";
+  return "";
+}
+
 function readmePick(sheets){
   for (var i = 0; i < READ_PICK_LABELS.length; i++) {
     var v = readmeCell(sheets, READ_PICK_LABELS[i]);
@@ -530,17 +559,35 @@ function planWorkbook(u){
                 SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
       }) }
   ] : [
-    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 9].concat(monthWidths(8)),
-      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Hidden"]
+    /* §303: A UNIT'S OBJECTIVES CARRY A WEIGHT, and until now the file did
+       not ask for one. §243 gave this table an editable Weight column at
+       Islam's own instruction and the workbook was left behind — so a
+       download and an untouched re-upload DROPPED every weight, and
+       `koWeights()` then read the unit's headline back at equal weight. A
+       column the file does not carry is a column the plan loses (§22), and
+       this one moves a number on the front page.
+
+       IT IS THE COLUMN THE OTHER TWO SHEETS ALREADY HAVE — a capability's
+       and a supporting function's objectives have both asked for "Weight %"
+       since §213, and the reader keys on that header name, so it reads back
+       with no change at all (§58). One question, one spelling, three sheets
+       (§53.5).
+
+       A VALIDATION RANGE IS A POSITION (§65): Weight takes H and Hidden moves
+       H → I. Getting that wrong validates the wrong cells in silence, which
+       is why the range moves in the same edit as the head. */
+    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 10, 9].concat(monthWidths(9)),
+      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Weight %", "Hidden"]
         .concat(monthHead("")),
-      numCols:[3, 4].concat(monthNums(8)),
+      numCols:[3, 4, 7].concat(monthNums(9)),
       validations:[{ range:"C2:C60", list:DIRS },
                    { range:"F2:F60", list:units, soft:true },
                    { range:"G2:G60", list:COMPILES },
-                   { range:"H2:H60", list:YESNO, soft:true }],
+                   { range:"I2:I60", list:YESNO, soft:true }],
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target), b = splitTarget(m.target3y);
         return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile,
+                m.weight == null ? "" : m.weight,
                 SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
       }) },
 
@@ -628,29 +675,53 @@ function progressWorkbook(u){
   return [
     sheet,
 
-    { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
-      head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
+    /* §303: EVERY SHEET ASKS FOR A NOTE, for the reason §105 gives — a figure
+       at risk needs an explanation before the report can be submitted, so a
+       file that carried the figure and not the note was a route that could
+       never finish. */
+    { name:"Objectives", widths:[40, 11, 16, 18, 18, 44, 16], lockedCols:[6],
+      head:["Objective", "Direction", "Target", "Currently recorded", "New value", "Note", "ID"],
       rows:u.keyObjectives.map(function(m){
-        return [m.name, m.dir, m.target || "no target", m.actual || "", "", m.id];
+        return [m.name, m.dir, m.target || "no target", m.actual || "", "", m.note || "", m.id];
       }) },
 
-    { name:"Measures", widths:[30, 38, 11, 16, 18, 18, 16], lockedCols:[6],
-      head:["Pillar", "Measure", "Direction", "Target", "Currently recorded", "New value", "ID"],
+    { name:"Measures", widths:[30, 38, 11, 16, 18, 18, 44, 16], lockedCols:[7],
+      head:["Pillar", "Measure", "Direction", "Target", "Currently recorded", "New value", "Note", "ID"],
       rows:u.items.reduce(function(acc, p){
         p.measures.forEach(function(m){
-          acc.push([p.name, m.name, m.dir, m.target || "no target", m.actual || "", "", m.id]);
+          acc.push([p.name, m.name, m.dir, m.target || "no target", m.actual || "", "",
+                    m.note || "", m.id]);
         });
         return acc;
       }, []) },
 
-    { name:"Tactics", widths:[30, 42, 16, 12, 18, 18, 16], lockedCols:[6],
-      head:["Pillar", "Tactic", "Quarters", "Due %", "Currently recorded %", "New %", "ID"],
+    /* §303: THE SHEET ASKS WHAT THE SCREEN ASKS. Since §248 a tactic whose
+       outcome carries a target is reported by that OUTCOME'S figure, in the
+       outcome's own unit — and this sheet went on asking for a per-cent and
+       calling the column "New %", so the number a reporter typed landed in
+       `actual`, which has always meant "% delivered". One row, two questions,
+       depending on which door the answer came through (§53.5).
+
+       "MEASURED BY" IS WHY THE COLUMN CAN BE ONE COLUMN: the reporter is told
+       per row what is being asked of them, which is what the reporting box
+       does on the page (§124). `outcomeOf` decides it, never a second reading
+       of "has it a target" (§42).
+
+       "New %" BECOMES "New value" AND BOTH ARE READ (§58): a workbook
+       downloaded before today still uploads, because the reader has taken
+       either since it was written. */
+    { name:"Tactics", widths:[30, 42, 16, 26, 14, 18, 18, 44, 16], lockedCols:[8],
+      head:["Pillar", "Tactic", "Quarters", "Measured by", "Target",
+            "Currently recorded", "New value", "Note", "ID"],
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
-          var pl = tacticPlanned(t);
+          var oc = outcomeOf(t), pl = tacticPlanned(t);
           acc.push([p.name, t.name, spanLabel(t),
-            tacticDue(t) ? String(pl) : "not yet due",
-            t.actual == null ? "" : String(t.actual), "", t.id]);
+            oc ? (t.outcome || "its outcome") : "% delivered",
+            oc ? (t.outTarget || "") : (tacticDue(t) ? String(pl) : "not yet due"),
+            oc ? (t.outActual == null ? "" : String(t.outActual))
+               : (t.actual == null ? "" : String(t.actual)),
+            "", t.note || "", t.id]);
         });
         return acc;
       }, []) }
@@ -927,11 +998,18 @@ function progressFromWorkbook(u, sheets){
   var out = [];
   ["Objectives","Measures","Tactics"].forEach(function(name){
     sheetObjects(sheets[name]).forEach(function(r){
+      /* Either spelling (§58): "New %" is what the Tactics sheet said before
+         §303 renamed it, and a workbook downloaded then still uploads. */
       var v = r["New value"] != null ? r["New value"] : r["New %"];
-      if (!v) return;
+      var note = r["Note"];
+      var has = function(x){ return x != null && String(x).trim() !== ""; };
+      /* §303: A NOTE ALONE IS WORTH READING — the figure may already be right
+         and the note is what §105 is holding Submit for. */
+      if (!has(v) && !has(note)) return;
       out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC" : name === "Measures" ? "MEASURE" : "NORTHSTAR",
                  parent_name:r["Pillar"] || "", name:r["Measure"] || r["Tactic"] || r["Objective"],
-                 new_value:String(v).trim() });
+                 new_value:has(v) ? String(v).trim() : "",
+                 new_note:has(note) ? String(note).trim() : "" });
     });
   });
   return out;
@@ -973,6 +1051,7 @@ function capReadme(kind, capNames, picked){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        ["Capability", ""],
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -987,6 +1066,7 @@ function capReadme(kind, capNames, picked){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Capability", ""],
+       ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -1010,6 +1090,81 @@ function capReadme(kind, capNames, picked){
    stops opening is a template that has broken. */
 function readmePickFn(){ return ""; }
 
+/* ── WHICH WORKBOOK A SUBJECT KEEPS, AND FOR WHICH CYCLE (§304) ───────
+   The download card hands over whatever is ticked, and a tick is a unit key,
+   `fn:<key>` or `cap:<id>`. The FORMAT is read off the subject and never
+   stored beside it (§61) — the subject already says which plan it keeps.
+
+   A CLOSED CYCLE'S FIGURES COME FROM ITS ARCHIVE, laid over a CLONE of the
+   plan as it stands. Never over the plan itself: this is a download, and a
+   reader that writes what it reads is §42's phantom change. Rows added since
+   the cycle closed simply carry nothing, which is the truth about them. */
+function impPlanWorkbookFor(v){
+  if (String(v).indexOf("cap:") === 0) {
+    var c = capById(String(v).slice(4));
+    return c ? capPlanWorkbook(c) : null;
+  }
+  var u = unitLike(v);
+  return u ? planWorkbook(u) : null;
+}
+
+function impFiguresArchive(id){
+  if (!id) return null;
+  return (ARCHIVES || []).filter(function(a){
+    return a.kind === "figures" && a.id === id;
+  })[0] || null;
+}
+
+/* Lay a cycle's archived figures over a clone of the subject. `put` writes the
+   three fields a snapshot keeps, and a row the snapshot never saw is CLEARED
+   rather than left showing this cycle's number under last cycle's heading. */
+function impAtCycle(subject, isCap, archiveId){
+  var a = impFiguresArchive(archiveId);
+  if (!a || !a.figures || !subject) return subject;
+  var snap = a.figures, c = clone(subject);
+  var lay = function(m, row, fields){
+    var o = (m || {})[row.id] || {};
+    fields.forEach(function(f){ row[f] = o[f] == null ? "" : o[f]; });
+  };
+  if (isCap) {
+    var m = (snap.caps || {})[c.id] || (snap.groupCaps || {})[c.id] || {};
+    (c.keyObjectives || []).forEach(function(x){ lay(m, x, ["actual","progress","note"]); });
+    (c.projects || []).forEach(function(p){
+      (p.deliverables || []).forEach(function(x){ lay(m, x, ["status","pct","note"]); });
+      (p.outcomes || []).forEach(function(x){ lay(m, x, ["actual","progress","note"]); });
+      (p.milestones || []).forEach(function(x){ lay(m, x, ["status","pct","note"]); });
+    });
+    return c;
+  }
+  var um = (snap.units || {})[c.ukey] || {};
+  (c.keyObjectives || []).forEach(function(x){ lay(um, x, ["actual","progress","note"]); });
+  (c.items || []).forEach(function(p){
+    (p.measures || []).forEach(function(x){ lay(um, x, ["actual","progress","note"]); });
+    (p.tactics  || []).forEach(function(x){ lay(um, x, ["actual","status","note"]); });
+  });
+  return c;
+}
+
+function impProgressWorkbookFor(v, cycleId){
+  if (String(v).indexOf("cap:") === 0) {
+    var c = capById(String(v).slice(4));
+    return c ? capProgressWorkbook(impAtCycle(c, true, cycleId)) : null;
+  }
+  var u = unitLike(v);
+  return u ? progressWorkbook(impAtCycle(u, false, cycleId)) : null;
+}
+
+/* An archived PLAN as the workbook it would have been downloaded as. The
+   snapshot holds exactly the fields the builders read; the name and key come
+   off the archive, because a snapshot does not carry its own subject. */
+function archiveWorkbook(a){
+  if (!a || !a.plan) return null;
+  var snap = clone(a.plan);
+  if (a.kind === "cap") { snap.name = a.name; snap.id = a.key; return capPlanWorkbook(snap); }
+  snap.name = a.name; snap.ukey = a.key;
+  return planWorkbook(snap);
+}
+
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });
   var units = unitSuggestions();
@@ -1029,12 +1184,27 @@ function capPlanWorkbook(c){
                 SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
-    { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14],
-      head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End"],
-      validations:[{ range:"E2:E100", list:TIMELINES }],
+    /* §303: THE REPEAT MARK TRAVELS. §115 made "does this project run again"
+       an editable fact in the front matter and the file never carried it, so
+       a download and an untouched re-upload turned every repeating project
+       into a build-once one — and that is not a label: at the next cycle a
+       marked project is archived, cleared and date-shifted where an unmarked
+       one keeps its figures. The plan silently changed what happens to the
+       numbers.
+
+       APPENDED, so Timeline stays at E and the ranges above it do not move
+       (§65). The words are `repeatLabel`'s own, and the list is built from
+       `REPEAT_MONTHS` rather than typed out, so a fourth rhythm added
+       tomorrow is offered here the day it is added (§53.5). */
+    { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14, 16],
+      head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End", "Repeats"],
+      validations:[{ range:"E2:E100", list:TIMELINES },
+                   { range:"H2:H100", list:["No"].concat(REPEAT_MONTHS.map(repeatLabel)),
+                     soft:true }],
       rows:(c.projects || []).map(function(p){
         return [p.name, p.brief || "", p.owner || "", (p.stakeholders || []).join(", "),
-                p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || ""];
+                p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || "",
+                repeatLabel(p.repeats)];
       }) },
 
     /* THREE COLUMNS. Due and Owner went with the fields (§53.4): a
@@ -1100,44 +1270,62 @@ function capProgressWorkbook(c){
   return [
     capReadme("progress", [c.name], c.name),
 
-    { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
-      head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
+    /* §303: EVERY SHEET ASKS FOR A NOTE. §105 refuses a submission while a
+       figure at risk carries no explanation, so a file that could enter the
+       figure and not the note was a route that could never finish — the
+       reporter filled the workbook, uploaded it, and still had to open every
+       row on the page to type the sentence that unlocks Submit.
+
+       LAST, AFTER the value and before the ID, so nothing already in the file
+       moves and a workbook downloaded before today still reads (§58, §65). */
+    { name:"Objectives", widths:[40, 11, 16, 18, 18, 44, 16], lockedCols:[6],
+      head:["Objective", "Direction", "Target", "Currently recorded", "New value", "Note", "ID"],
       rows:(c.keyObjectives || []).map(function(m){
         return [m.name, m.dir, m.target || "no target",
-                m.actual == null ? "" : String(m.actual), "", m.id];
+                m.actual == null ? "" : String(m.actual), "", m.note || "", m.id];
       }) },
 
     /* §104: a status and a per-cent, the pair the Milestones sheet has always
        had. "New %" is read only for In progress -- the word decides the
        figure at both ends, and a per-cent behind "Delivered" is a number
        nobody can see. */
-    { name:"Deliverables", widths:[30, 48, 18, 18, 12, 16], lockedCols:[5],
-      head:["Project", "Deliverable", "Current status", "New status", "New %", "ID"],
-      validations:[{ range:"D2:D400", list:MS_STATUSES_D }],
+    /* §303: AND THE CURRENT PER-CENT IS SHOWN. Without it a reporter cannot
+       see the figure they are being asked to correct, which is the one thing
+       "Currently recorded" exists for on every other sheet here. */
+    { name:"Deliverables", widths:[30, 48, 18, 18, 14, 12, 44, 16], lockedCols:[7],
+      head:["Project", "Deliverable", "Current status", "Current %", "New status", "New %", "Note", "ID"],
+      validations:[{ range:"E2:E400", list:MS_STATUSES_D }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, delivStatusWord(d.status), "", "", d.id]);
+          acc.push([p.name, d.name, delivStatusWord(d.status),
+                    d.pct == null ? "" : String(d.pct), "", "", d.note || "", d.id]);
         });
         return acc;
       }, []) },
 
-    { name:"Outcomes", widths:[30, 40, 14, 14, 18, 18, 16], lockedCols:[6],
-      head:["Project", "Outcome", "Target", "Measure date", "Currently recorded", "New value", "ID"],
+    { name:"Outcomes", widths:[30, 40, 14, 14, 18, 18, 44, 16], lockedCols:[7],
+      head:["Project", "Outcome", "Target", "Measure date", "Currently recorded", "New value", "Note", "ID"],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.outcomes || []).forEach(function(o){
           acc.push([p.name, o.name, o.target || "no target", o.measureAt || "",
-                    o.actual == null ? "" : String(o.actual), "", o.id]);
+                    o.actual == null ? "" : String(o.actual), "", o.note || "", o.id]);
         });
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[30, 40, 14, 16, 18, 12, 16], lockedCols:[6],
-      head:["Project", "Milestone", "Due date", "Current status", "New status", "New %", "ID"],
-      validations:[{ range:"E2:E400", list:MS_STATUSES }],
+    /* §303: THE PER-CENT WAS IN THE WRONG COLUMN. `m.pct` — what is RECORDED
+       — was written under "New %", the box the reporter is meant to fill, so
+       the sheet handed back the stored figure as though somebody had just
+       typed it. It reads under "Current %" now, beside the current status,
+       and the ranges move with it (§65). */
+    { name:"Milestones", widths:[30, 40, 14, 16, 12, 18, 12, 44, 16], lockedCols:[8],
+      head:["Project", "Milestone", "Due date", "Current status", "Current %",
+            "New status", "New %", "Note", "ID"],
+      validations:[{ range:"F2:F400", list:MS_STATUSES }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status), "",
-                    m.pct == null ? "" : String(m.pct), m.id]);
+          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status),
+                    m.pct == null ? "" : String(m.pct), "", "", m.note || "", m.id]);
         });
         return acc;
       }, []) }
@@ -1160,15 +1348,26 @@ function capPlanFromWorkbook(c, sheets){
     rows.push({ id:id, type:"PROJECT", name:r["Project"], description:r["Brief"],
       owner:r["Owner"], stakeholders:(r["Stakeholders"] || "").split(/[,|]/)
         .map(function(x){ return x.trim(); }).filter(Boolean).join("|"),
-      timeline:timelineKey(r["Timeline"]) || "", start:r["Start"], end:r["End"] });
+      timeline:timelineKey(r["Timeline"]) || "", start:r["Start"], end:r["End"],
+      /* §303: a file written before this existed carries no column at all, so
+         `repeatFromLabel` answers null and the project arrives unmarked —
+         which is what it was (§58). */
+      repeats:repeatFromLabel(r["Repeats"]) });
   });
 
   var kN = 0;
   sheetObjects(sheets["Objectives"]).forEach(function(r){
     if (!r["Objective"]) return;
+    /* §303: HIDDEN IS READ BACK. This sheet has WRITTEN the column since
+       §233 and this reader ignored it — so a hidden objective travelled out
+       marked and came home counted, which is the one direction a write-only
+       column fails in and the reason it went unnoticed: the file looks
+       right. Every other sheet here already reads it; this was the one left
+       out (§53.5). */
     rows.push({ id:c.id + "-KO" + (++kN), type:"CAPOBJECTIVE",
       name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
-      weight:r["Weight"], compile:r["Compile"] });
+      weight:r["Weight"], compile:r["Compile"],
+      hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
   function child(sheet, type, nameCol, letter, extra){
@@ -1231,9 +1430,23 @@ function capProgressFromWorkbook(c, sheets){
    ["Milestones","MILESTONE","Milestone"]].forEach(function(def){
     sheetObjects(sheets[def[0]]).forEach(function(r){
       var v = r["New value"] != null ? r["New value"] : r["New status"];
-      if (!v) return;
+      /* §303: THE PER-CENT AND THE NOTE ARE READ. This took the first of the
+         two columns and stopped, so "New %" — which the Deliverables and
+         Milestones sheets have OFFERED since §104 — was written into the file
+         and never read out of it: the reporter typed the very figure §104.10
+         requires and it was dropped on the way in.
+
+         AND A ROW IS WORTH READING FOR EITHER (§104.10): a status already
+         right with a per-cent still owed has no new status to carry it, so
+         gating on `v` alone left that row unreportable by file. */
+      var pct = r["New %"], note = r["Note"];
+      var has = function(x){ return x != null && String(x).trim() !== ""; };
+      if (!has(v) && !has(pct) && !has(note)) return;
       out.push({ id:r["ID"], type:def[1], parent_name:r["Project"] || "",
-                 name:r[def[2]], new_value:String(v).trim() });
+                 name:r[def[2]],
+                 new_value:has(v) ? String(v).trim() : "",
+                 new_pct:has(pct) ? String(pct).trim() : "",
+                 new_note:has(note) ? String(note).trim() : "" });
     });
   });
   return out;

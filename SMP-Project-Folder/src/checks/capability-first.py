@@ -1,4 +1,4 @@
-"""THEIRS IS THE CAPABILITY THAT LEADS (S303).
+"""THEIRS IS THE CAPABILITY THAT LEADS (S310).
 
 Islam: "the porject owner should open the capability by defaut on his
 project."

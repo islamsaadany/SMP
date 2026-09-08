@@ -465,6 +465,12 @@
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
   .sslist { max-height:230px; overflow-y:auto; }
+  /* Select all / none (§304): a row of its own between the search and the
+     list, so a press cannot be mistaken for a row of the list. */
+  .ssall { display:flex; align-items:center; gap:10px; padding:2px 2px 8px;
+           border-bottom:1px solid var(--line-soft); margin-bottom:6px; }
+  .ssall .linkbu { font-size:12px; }
+  .ssall .sssep { color:var(--ink-3); }
   .ssrow { display:block; width:100%; text-align:left; font:inherit; font-size:13px;
            color:var(--ink); background:none; border:0; border-radius:6px;
            padding:6px 8px; cursor:pointer; }
@@ -1860,6 +1866,28 @@
                         text-transform:uppercase; color:var(--ink-3); }
   .nc-grid .fld { width:160px; max-width:none; }
   .nc-grid label:nth-child(5) .fld { width:88px; }
+  /* ── FOUR BOXES, ONE LINE (§307) ─────────────────────────────────
+     Islam: "if we set that they will be only 4 boxes can be in 1 line."
+     Measured on his own window before it was drawn: the pen's field area is
+     641px at 1280, and five boxes at 160/160/160/160/121 wrapped onto a
+     second row.
+
+     THE THREE DATES DO NOT STRETCH AND THE NAME DOES. A date needs exactly
+     the width of a date, and the name is the only box here holding words —
+     so the fixed ones take 150px each and the name takes what is left, which
+     is what keeps the row on one line at 641px and gives the extra width to
+     the name rather than to three controls that cannot use it.
+
+     `nowrap` is the assertion, not an optimisation: with the name allowed to
+     shrink to 150px the row fits, and a wrap here would be the fault this
+     section exists to remove coming back silently at some width nobody
+     measured. Below that the pen's own column stacks (1100px, above) long
+     before the row runs out of room. */
+  .nc-1line { flex-wrap:nowrap; }
+  .nc-1line .nm-lab { flex:1 1 190px; min-width:150px; }
+  .nc-1line .nm-lab .fld { width:100%; }
+  .nc-1line .dt { flex:0 0 auto; }
+  .nc-1line .cycbtn { width:150px; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }
@@ -1886,6 +1914,55 @@
     .cyc2-d { border-left:0; border-top:1px solid var(--line);
               padding-left:0; padding-top:16px; margin-top:16px; }
   }
+  /* ── THE CONTINGENCY CARD AND ITS RECORD (spec 030) ──────────────────
+     The card is the Download tab's own shape and needs almost nothing. What
+     it does need is the second paragraph reading as an aside rather than as
+     more of the first: `.fbody` sets the colour for everything inside it, so
+     `.why` alone lost on specificity and the caution about the file having no
+     sign-in in front of it read at the same weight as the sentence describing
+     the feature — which is the one line on this card somebody must not skim
+     (§38.5's shape, in type rather than colour). */
+  .contwhy { display:block; margin:10px 0 0; color:var(--ink-3); font-size:12px;
+             line-height:1.55; }
+  .contgot { margin:10px 0 0; font-size:12.5px; font-weight:600; color:var(--good-tx); }
+  /* WHO HAS TAKEN THEM. Two marks per row and a time, in the platform's own
+     pill vocabulary — never a tick and a cross, which say right and wrong
+     about something that is only done or not yet. */
+  .contlist td .pill { font:800 10px/1 var(--sans); letter-spacing:.11em;
+                       text-transform:uppercase; padding:4px 9px; border-radius:999px; }
+  .contlist .p-yes { background:var(--good-bg); color:var(--good-tx); }
+  .contlist .p-no  { background:var(--attn-bg); color:var(--attn-tx); }
+  .contlist .contat { font:12px/1 var(--mono, ui-monospace,SFMono-Regular,Menlo,monospace);
+                      color:var(--ink-3); }
+
+  /* ── THE REVIEW BLOCK (spec 030) ──────────────────────────────────────
+     ITS OWN ROW UNDER THE TWO COLUMNS, which is the whole of Islam's
+     objection answered: among the cycle's other fields a fourth date reads as
+     a fourth thing the arithmetic consults, and this one consults nothing.
+     A rule and a heading say it is a different subject; the box shapes are
+     the pen's own, so nothing new is invented (§53.5). */
+  .cyc2-r { border-top:1px solid var(--line); margin-top:18px; padding-top:16px; }
+  /* §308: THE PLANNING PERIOD LEADS, so its rule is UNDER it. `.cyc2-r` was
+     written for the block that ends the pen and carries its line above; the
+     first block in the pen must carry one below or the period and the cycle
+     run together as one form. Scoped to the first child rather than to the
+     class, because the same block would want the other rule anywhere else. */
+  .newcycle > .cyc2-r.planper:first-child {
+    border-top:0; margin-top:0; padding-top:0;
+    border-bottom:1px solid var(--line); margin-bottom:18px; padding-bottom:16px;
+  }
+  /* The status sits ON the line with the two months, never as a third label:
+     it belongs to the pair beside it, and a stacked one reads as a field
+     (§87's twins, in a form — the review block's "hours before" already). */
+  .planper .nc-unit { white-space:nowrap; }
+  .cyc2-r .nc-grid .fld { width:170px; }
+  .cyc2-r .nc-grid .nc-time { width:108px; }
+  .cyc2-r .nc-grid .nc-rem { width:150px; }
+  /* The unit sits ON the line with the boxes, never as a label above one:
+     "hours before" belongs to the number beside it, and a second stacked
+     label would read as a fourth field (§87's twins, in a form). */
+  .nc-unit { font-size:12px; color:var(--ink-3); padding-bottom:9px; }
+
   /* THE PEN LIT, in `penBtn()`'s own treatment rather than a second one
      (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
      control in a worded shape. */

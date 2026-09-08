@@ -14,6 +14,7 @@ const P = require("../lib/platform-io.js");
 const auth = require("../lib/auth.js");
 
 const PORT = 3991;
+const TINY_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAEUlEQVR4nGPQ0Cv7j4wZ0AUA6MYOWXY6hxsAAAAASUVORK5CYII=";
 const BASE = "http://127.0.0.1:" + PORT;
 
 function waitFor(url, tries) {
@@ -330,6 +331,75 @@ async function main() {
       check("…beside the register row it was done as",
         r.rowCount > 0 && !!r.rows[0].person_key, r.rows[0]);
     });
+
+    /* ── EVERY CLIENT HAS A DOOR, AND THE DOOR ASKS THE SERVER (§303.36) ──
+       What a door wears is readable by anybody (the address already names
+       the client); where a sign-in lands is the server's, and the door's
+       client wins only when this account may open it. BOTH ENDS each time. */
+    const doorGet = (q, withCookie) => fetch(BASE + "/api/auth" + q,
+      { headers: withCookie && cookie ? { cookie: cookie } : {} }).then((r) => r.json());
+    let d = await doorGet("?door=t-http", false);
+    eq("a door names its client before anybody signs in", d.door && d.door.name, "HTTP Client");
+    check("…and carries no mark while none is set", d.door && d.door.mark === null, d.door);
+    check("…and nothing else about the client", d.door && Object.keys(d.door).sort().join() === "key,mark,name", d.door);
+    await P.withPlatform(pg, (c) => c.query("UPDATE clients SET mark = $2 WHERE key = $1", ["t-http", TINY_PNG]));
+    d = await doorGet("?door=t-http", false);
+    eq("…and the mark once one is set", d.door && d.door.mark, TINY_PNG);
+    d = await doorGet("?door=nobody-here", false);
+    check("an unknown slug answers a plain door, not a refusal", d.ok === true && d.door === null, d);
+    d = await doorGet("?door=t_http", false);
+    check("a SCHEMA name answers a plain door too — the door is addressed by the slug", d.door === null, d);
+    d = await doorGet("?door=" + encodeURIComponent("x/../y"), false);
+    check("…and so does anything that is not a slug", d.door === null, d);
+    await P.withPlatform(pg, (c) => c.query("UPDATE clients SET status = 'retired' WHERE key = 't-http'"));
+    d = await doorGet("?door=t-http", false);
+    check("a retired client's door is plain", d.door === null, d);
+    await P.withPlatform(pg, (c) => c.query("UPDATE clients SET status = 'active' WHERE key = 't-http'"));
+
+    /* Where a sign-in lands. A second registry row this person holds no seat
+       on, so "may not open" has a real subject. */
+    await P.withPlatform(pg, (c) => c.query(
+      "INSERT INTO clients (key, name, schema_name) VALUES ('t-alpha','Alpha Group','t_alpha') ON CONFLICT (key) DO NOTHING"));
+    let at = await (await post({ action:"login", user:"desk@t-http.example", password:"testpw123", door:"t-http" })).json();
+    eq("signing in at their own client's door lands in it", at.client, "t-http");
+    at = await (await post({ action:"login", user:"desk@t-http.example", password:"testpw123", door:"t-alpha" })).json();
+    eq("…and at a door they may not open, in their own client all the same", at.client, "t-http");
+    at = await (await post({ action:"login", user:"desk@t-http.example", password:"testpw123", door:"nobody-here" })).json();
+    eq("…and at a door that does not exist, where the root would send them", at.client, "t-http");
+    d = await doorGet("?door=t-alpha", true);
+    check("a live session asked from another client's door still lands in its own",
+      d.person && d.client === "t-http", { client: d.client });
+    d = await doorGet("?door=t-http", true);
+    check("…and from its own door, there", d.person && d.client === "t-http", { client: d.client });
+
+    /* THE SUBJECT FOR WHOM THE DOOR CHANGES THE ANSWER. A client's person
+       holds one client and lands there from every door, so the five above
+       pass on a build that ignores the door entirely (§94.5, watched: 87/0
+       with the door branch cut out). Somebody at Forefront holding seats on
+       TWO clients lands on the cards from the root and in the door's client
+       from a door — the one shape where "the door wins" is measurable. */
+    await P.withPlatform(pg, async (c) => {
+      await c.query("INSERT INTO accounts (email, name, kind, is_admin, password_hash, must_change) " +
+        "VALUES ('two@ff.example','Two Seats','office',false,$1,false) " +
+        "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, must_change = false",
+        [auth.hashPassword("twopw12345")]);
+      for (const k of ["t-http", "t-alpha"]) {
+        await c.query("INSERT INTO account_clients (email, client_key, person_key, seat) " +
+          "VALUES ('two@ff.example',$1,'smo','smoteam') ON CONFLICT (email, client_key) DO NOTHING", [k]);
+      }
+    });
+    const two = (door) => post({ action:"login", user:"two@ff.example", password:"twopw12345", door: door })
+      .then((r) => r.json());
+    let t = await two(undefined);
+    check("a consultant on two clients lands on the cards from the root", t.ok && t.client === null &&
+      Array.isArray(t.clients) && t.clients.indexOf("t-http") > -1 && t.clients.indexOf("t-alpha") > -1, t);
+    t = await two("t-http");
+    eq("…and in the door's client from that client's door", t.client, "t-http");
+    check("…with the cards still theirs to go back to", Array.isArray(t.clients) && t.clients.length >= 2, t.clients);
+    t = await two("t-alpha");
+    eq("…whichever of their clients the door is", t.client, "t-alpha");
+    t = await two("nobody-here");
+    check("…and a door for nobody sends them where the root does", t.client === null, t);
   } finally {
     dev.kill();
   }

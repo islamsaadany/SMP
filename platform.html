@@ -127,6 +127,13 @@
   .ccard:disabled{ cursor:default; opacity:.72 }
   .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
     font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  /* A client that has a mark wears it on its card — the same picture its
+     door wears (§303.36), so the two cannot disagree; a light plate under it
+     because a PNG cannot be recoloured (§52). Initials until then. */
+  .ccard img.cmark{ width:auto; max-width:120px; height:36px; object-fit:contain; background:#fff; padding:4px 8px; box-sizing:content-box }
+  .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+  .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
+  .markrow .none{ font-size:13px; color:var(--ink-3) }
   .ccard h2{ margin:0; font-size:17px; font-weight:600 }
   .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
   .ccard .foot{ margin-top:auto; display:flex; gap:6px; flex-wrap:wrap }
@@ -394,7 +401,11 @@
     b.type = "button";
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
-    b.appendChild(el("div", "cmark", initials(c.name)));
+    if (c.mark) {
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+    } else {
+      b.appendChild(el("div", "cmark", initials(c.name)));
+    }
     b.appendChild(el("h2", null, c.name));
     if (c.industry) b.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
@@ -520,6 +531,58 @@
       addr.appendChild(a);
       addr.appendChild(el("p", "note", "Set once from the name, so a link that has been sent keeps working."));
       left.appendChild(addr);
+
+      /* ── THE MARK ON THE CLIENT'S DOOR (§303.36) ───────────────────
+         PNG only (§52: an SVG is executable content, a JPEG paints its own
+         ground). Shrunk here to what a door needs — 640px across is four
+         times the height it is drawn at — on a TRANSPARENT canvas, never a
+         white one: the platform's own picture intake paints white first
+         (right for a slide, fatal for a mark, §52.3). Held in `markState`
+         until Save: undefined leaves it alone, "" clears it, a data URI sets
+         it — the three answers the server takes. */
+      var markState;
+      var mk = el("div");
+      mk.appendChild(el("span", "lab", "Mark on this client's door"));
+      var mrow = el("div", "markrow");
+      var preview = el("img"); preview.alt = "";
+      var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
+      function showMark(src) {
+        if (src) { preview.src = src; preview.hidden = false; noneNote.hidden = true; }
+        else { preview.removeAttribute("src"); preview.hidden = true; noneNote.hidden = false; }
+      }
+      mrow.appendChild(preview); mrow.appendChild(noneNote);
+      showMark(c.mark);
+      if (j.canEdit) {
+        var pick = el("input"); pick.type = "file"; pick.accept = "image/png"; pick.hidden = true;
+        var choose = el("button", "btn", "Choose a PNG"); choose.type = "button";
+        choose.addEventListener("click", function () { pick.click(); });
+        var drop = el("button", "btn", "Remove"); drop.type = "button";
+        drop.addEventListener("click", function () { markState = ""; showMark(null); pick.value = ""; });
+        pick.addEventListener("change", function () {
+          var f = pick.files && pick.files[0];
+          if (!f) return;
+          if (f.type !== "image/png") { say("The mark must be a PNG.", true); pick.value = ""; return; }
+          var url = URL.createObjectURL(f);
+          var img = new Image();
+          img.onload = function () {
+            URL.revokeObjectURL(url);
+            var scale = Math.min(1, 640 / img.naturalWidth, 200 / img.naturalHeight);
+            var cv = document.createElement("canvas");
+            cv.width = Math.max(1, Math.round(img.naturalWidth * scale));
+            cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
+            cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+            var out = cv.toDataURL("image/png");
+            if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
+            markState = out; showMark(out);
+          };
+          img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
+          img.src = url;
+        });
+        mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(pick);
+      }
+      mk.appendChild(mrow);
+      mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + c.key + "/sign-in, the door this client's people sign in at."));
+      left.appendChild(mk);
       grid.appendChild(left);
 
       var rightCol = el("div");
@@ -618,9 +681,14 @@
 
       if (j.canEdit) {
         save.addEventListener("click", function () {
-          post({ action: "saveClient", key: c.key, name: inputs.name.value.trim(),
-                 industry: inputs.industry.value.trim(), notes: inputs.notes.value })
-            .then(function (r) { say(r.ok ? "Saved." : (r.error || "Not saved."), !r.ok); });
+          var body = { action: "saveClient", key: c.key, name: inputs.name.value.trim(),
+                       industry: inputs.industry.value.trim(), notes: inputs.notes.value };
+          if (markState !== undefined) body.mark = markState;
+          post(body)
+            .then(function (r) {
+              say(r.ok ? "Saved." : (r.error || "Not saved."), !r.ok);
+              if (r.ok && markState !== undefined) { c.mark = markState || null; markState = undefined; }
+            });
         });
       }
       });

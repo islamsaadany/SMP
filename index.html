@@ -11,6 +11,19 @@
      installs from and the page the installed app opens on. -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- SERVED AT A CLIENT'S DOOR (§303.36) the page lives at /<client>/sign-in,
+     and a relative href would then look for /<client>/favicon.svg, which is
+     nothing. Root-relative when there is a server, relative on disk — decided
+     once here for every link above rather than by rewriting each one, and
+     never with <base>: the policy says base-uri 'none' on purpose (§43.6). -->
+<script>
+  if (location.protocol.indexOf("http") === 0) {
+    Array.prototype.forEach.call(document.querySelectorAll("link[href]"), function (l) {
+      var h = l.getAttribute("href");
+      if (h && h.charAt(0) !== "/" && h.indexOf(":") < 0) l.setAttribute("href", "/" + h);
+    });
+  }
+</script>
 <!-- The window chrome around an installed app follows the theme too, or the
      title bar stays navy-on-white while the page underneath went dark. Two
      tags, because theme-color takes a media query but not a class.
@@ -128,6 +141,10 @@
     /* The tenant's own mark. Its two brand colours, read off the vector
        artwork in the client's brand manual, not sampled from a screenshot. */
     --client-flag: #3a67b1;
+    /* A PNG cannot be recoloured (§52), so on a dark card the client's mark
+       sits on a light plate; on a light card the plate is the card. */
+    --mark-plate: transparent;
+    --mark-pad: 0;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -178,6 +195,8 @@
       --icon: #7f8b9d;
       /* Reversed on a dark ground, which is how the client supplies it. */
       --client-flag: #ffffff;
+      --mark-plate: #ffffff;
+      --mark-pad: 6px 12px;
     }
   }
   :root[data-theme="dark"] {
@@ -226,6 +245,8 @@
     --icon: #7f8b9d;
     /* Reversed on a dark ground, which is how the client supplies it. */
     --client-flag: #ffffff;
+    --mark-plate: #ffffff;
+    --mark-pad: 6px 12px;
   }
 
   /* ---------------------------------------------------------------
@@ -377,6 +398,24 @@
   }
   .card h2 { font-size: 22px; font-weight: 700; text-align: center; color: var(--label); letter-spacing: -0.01em; }
   .card h2 + p { margin-top: 6px; text-align: center; font-size: 13.5px; color: var(--muted); }
+  /* ── THE CLIENT'S OWN MARK, ON THE CLIENT'S OWN DOOR (§303.36) ──
+     Whose platform this is, on the thing you actually touch — §52's placement,
+     given back now that every client has a door of its own: Forefront's
+     temple stays on the wall, the client's lockup sits on the card, and the
+     two never compete for a corner. Below 980px the wall is gone and the card
+     is all there is, which is the second reason it lives here. It is an <img>
+     read from the client's own row on the platform, so no client's artwork is
+     baked into this page and the root door draws none at all. Sized by
+     HEIGHT and left to find its own width: a lockup is wide, a crest is
+     square, and the door cannot know which it was handed. */
+  .clientmark {
+    display: block; height: 34px; width: auto; max-width: 190px; margin: 0 auto 18px;
+    object-fit: contain; background: var(--mark-plate); padding: var(--mark-pad); border-radius: 8px;
+    box-sizing: content-box;
+  }
+  /* Separates whose platform this is from the greeting. Without it the lockup
+     reads as a picture inside the greeting rather than a letterhead over it. */
+  .clientmark + hr { border: 0; border-top: 1px solid var(--line); margin: 0 0 20px; }
   .card form { margin-top: 26px; }
 
   label {
@@ -524,6 +563,8 @@
     .card { padding: 30px 22px 26px; border-radius: 16px; }
     /* Same reason as the short-window block: the mark's ~49px was 2px more
        than a 320x640 phone had left. Measured at 320, not assumed from 390. */
+    .clientmark { height: 28px; margin-bottom: 12px; }
+    .clientmark + hr { margin-bottom: 14px; }
   }
   /* SHORT windows, not narrow ones. Measured: the wall's content needs about
      600px of height, so on a 1024x560 laptop the quote fell below the fold and
@@ -553,6 +594,8 @@
 
      Measured at every size, not estimated from one that passed. */
   @media (max-height: 700px) {
+    .clientmark { height: 28px; margin-bottom: 12px; }
+    .clientmark + hr { margin-bottom: 14px; }
   }
   /* An entrance is a courtesy; for anyone who has asked for less motion it is
      an obstacle. Nothing here depends on an animation to become visible. */
@@ -673,13 +716,18 @@
 
       <!-- Sign in -->
       <div class="card" id="login">
-        <!-- NO CLIENT'S MARK ON THE DOOR (§303.15, and revision 2's own rule).
-             It carried Raya Trade's lockup, which is the same fault as naming
-             a client on the front page and worse for being a picture: it told
-             everybody at every other client whose door they were standing at.
-             Nothing replaces it — the wall above 980px and .mobrand below it
-             both already say FOREFRONT CONSULTING, and a third copy of one
-             fact on one screen is what §120 took off the register's header. -->
+        <!-- THE MARK IS THE DOOR'S CLIENT'S, AND THE ROOT DOOR HAS NONE
+             (§303.36, narrowing §303.15). §303.15 took Raya Trade's lockup
+             off this card because the door was SHARED: a picture of one client
+             on a page every client's people stand at tells them all whose
+             door it is. That argument is about the shared door and holds for
+             it — the root still draws no client. What changed is that every
+             client now has a door of its own at /<client>/sign-in, and there
+             the mark is not a leak but the answer to "whose platform is this"
+             — §52's own placement, given back. dressDoor() below inserts it,
+             read from the client's row on the platform, on both cards; nothing
+             is written here, because the root and a client's door are ONE file
+             and the difference is what the server answers for the address. -->
         <h2>Welcome back</h2>
         <p>Sign in to continue</p>
         <form id="loginForm">
@@ -945,7 +993,38 @@
     });
   });
 
+  /* ── WHICH CLIENT'S DOOR THIS IS (§303.36) ────────────────────────
+     Read off the address and nowhere else: /<client>/sign-in is that client's
+     door, / is Forefront's. Sent to the server on the session check and on
+     sign-in, and the server answers two things — what the door wears (name
+     and mark, readable by anybody, since the address already names the
+     client) and where THIS person lands, which is the door's client only if
+     they may open it (mayOpenClient, the same rule as every card and endpoint).
+     A slug the server does not know answers a plain door, so a misspelt link
+     still signs somebody in and still lands them where the root would. */
+  var DOOR = (function () {
+    var m = /^\/([a-z0-9][a-z0-9-]{0,48})\/sign-in\/?$/.exec(location.pathname || "");
+    return m ? m[1] : "";
+  })();
+  function dressDoor(door) {
+    if (!door || !door.mark) return;
+    Array.prototype.forEach.call(document.querySelectorAll(".card"), function (card) {
+      if (card.querySelector(".clientmark")) return;
+      var h2 = card.querySelector("h2");
+      if (!h2) return;
+      var img = document.createElement("img");
+      img.className = "clientmark";
+      img.src = door.mark;
+      img.alt = door.name || "";
+      var hr = document.createElement("hr");
+      card.insertBefore(img, h2);
+      card.insertBefore(hr, h2);
+    });
+    if (door.name) document.title = door.name + " — Strategy Management Platform";
+  }
+
   function api(body) {
+    if (DOOR) body.door = DOOR;
     return fetch("/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1131,13 +1210,14 @@
     else show("login");
   }
   if (location.protocol === "http:" || location.protocol === "https:") {
-    fetch("/api/auth", { cache: "no-store" })
+    fetch("/api/auth" + (DOOR ? "?door=" + encodeURIComponent(DOOR) : ""), { cache: "no-store" })
       .then(function (r) {
         if (r.status === 503) throw new Error("no db");
         return r.json();
       })
       .then(function (j) {
         enterServerMode();
+        dressDoor(j.door);
         if (j.ok && j.person) signedIn(j.person, j.client);
         else show("login");
       })

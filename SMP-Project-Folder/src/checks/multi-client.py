@@ -649,6 +649,92 @@ def main():
             api(pg, {"action": "setTeam", "key": "raya-trade", "email": OFFICE[0],
                      "seat": "super", "personKey": "smo"})
 
+            # ── 17 · every client has its own door (§303.36) ───────
+            #    The door at /<client>/sign-in wears that client's mark, the
+            #    root wears none, a sign-in at a client's door lands in that
+            #    client, and a signed-out person is sent to their own door.
+            #    Both ends throughout: a check that only finds the mark on
+            #    Raya's door passes on a build that draws it on every door.
+            pd = page(viewport={"width": 1200, "height": 800})
+            pd.on("pageerror", lambda e: errs.append("door: " + str(e)))
+            pd.goto(BASE + "/raya-trade/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1500)
+            told = pd.evaluate("""async () => { const r = await fetch('/api/auth?door=raya-trade', {cache:'no-store'});
+              return (await r.json()).door; }""")
+            check("the server names the door's client and its mark", bool(told and told.get("mark")), told)
+            mk = pd.query_selector("#login img.clientmark")
+            check("Raya's door wears Raya's mark", bool(mk and mk.is_visible()))
+            check("…the very picture on the client's row",
+                  bool(mk) and mk.get_attribute("src") == (told or {}).get("mark"))
+            check("…on both cards, and once each",
+                  pd.evaluate("() => document.querySelectorAll('#login .clientmark').length") == 1 and
+                  pd.evaluate("() => document.querySelectorAll('#change .clientmark').length") == 1)
+            check("…over a hairline, above the greeting",
+                  pd.evaluate("""() => { const m = document.querySelector('#login .clientmark');
+                    return m && m.nextElementSibling && m.nextElementSibling.tagName === 'HR' &&
+                           m.nextElementSibling.nextElementSibling.tagName === 'H2'; }"""))
+            # Degrades rather than dies (§215): on a build with no mark this
+            # probe threw, and every assertion after it went unmade.
+            box = pd.evaluate("""() => { const m = document.querySelector('#login img.clientmark');
+              if (!m) return [0, 0]; const b = m.getBoundingClientRect(); return [b.width, b.height]; }""")
+            check("…drawn at a size, not a dot", box[1] >= 20 and box[0] >= 20, box)
+            check("…and the tab says whose door it is", pd.title().startswith("Raya Trade"), pd.title())
+            check("the door's own links are root-relative, not under the client's address",
+                  pd.evaluate("() => document.querySelector('link[rel=manifest]').href").endswith("/manifest.webmanifest")
+                  and "/raya-trade/" not in pd.evaluate("() => document.querySelector('link[rel=manifest]').href"))
+            check("…and the wall is still Forefront's", "FOREFRONT" in (pd.text_content(".brand") or ""))
+
+            pd.goto(BASE + "/", wait_until="networkidle"); pd.wait_for_timeout(1200)
+            check("the root door wears no client's mark", pd.query_selector(".clientmark") is None)
+            pd.goto(BASE + "/nope/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1200)
+            check("a door for a client that does not exist is plain and still a door",
+                  pd.query_selector(".clientmark") is None and pd.query_selector("#loginForm") is not None)
+
+            # a consultant who may open Raya signs in at Raya's door and lands in Raya
+            pd.goto(BASE + "/raya-trade/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1200)
+            pd.fill("#user", CONSULT[0]); pd.fill("#password", CONSULT[1])
+            pd.click("#loginForm button[type=submit]")
+            pd.wait_for_load_state("networkidle"); pd.wait_for_timeout(2600)
+            check("a consultant signing in at Raya's door lands in Raya", pd.url.endswith("/raya-trade"), pd.url)
+
+            # signed out at a client's address, you are sent to THAT client's door
+            pd.evaluate("""() => fetch('/api/auth', {method:'POST', headers:{'Content-Type':'application/json'},
+                                     body:'{"action":"logout"}'})""")
+            pd.wait_for_timeout(800)
+            pd.goto(BASE + "/raya-trade", wait_until="networkidle"); pd.wait_for_timeout(2600)
+            check("signed out at /raya-trade, the way in is Raya's own door",
+                  pd.url.endswith("/raya-trade/sign-in"), pd.url)
+            check("…which is dressed", pd.query_selector("#login img.clientmark") is not None)
+
+            # a client's own person at a door they may not open lands in their own client
+            pd.goto(BASE + "/nope/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1200)
+            pd.fill("#user", CLIENTP[0]); pd.fill("#password", CLIENTP[1])
+            pd.click("#loginForm button[type=submit]")
+            pd.wait_for_load_state("networkidle"); pd.wait_for_timeout(2600)
+            check("a client's person at another door still lands in their own client",
+                  pd.url.endswith("/raya-trade"), pd.url)
+            pd.evaluate("""() => fetch('/api/auth', {method:'POST', headers:{'Content-Type':'application/json'},
+                                     body:'{"action":"logout"}'})""")
+            pd.wait_for_timeout(600)
+
+            # the mark is set from the client's card, PNG only, and cleared to nothing
+            bad = api(pg, {"action": "saveClient", "key": "raya-trade", "mark": "data:image/jpeg;base64,/9j/AAAA"})
+            check("a JPEG is refused as the mark, on the server", bad["__status"] == 400, bad)
+            svg = api(pg, {"action": "saveClient", "key": "raya-trade", "mark": "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="})
+            check("…and so is an SVG (§52)", svg["__status"] == 400, svg)
+            cleared = api(pg, {"action": "saveClient", "key": "raya-trade", "mark": ""})
+            check("an empty mark clears it", cleared.get("ok") is True, cleared)
+            pd.goto(BASE + "/raya-trade/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1200)
+            check("…and the door opens plain until one is set", pd.query_selector(".clientmark") is None)
+            back = api(pg, {"action": "saveClient", "key": "raya-trade", "mark": (told or {}).get("mark")})
+            check("a PNG is taken", back.get("ok") is True, back)
+            card = pg.evaluate("""async () => { const r = await fetch('/api/platform', {method:'POST',
+              headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'cards'})});
+              const j = await r.json(); const c = (j.cards || []).filter(x => x.key === 'raya-trade')[0];
+              return c && c.mark; }""")
+            check("…and the card carries the same picture as the door", card == (told or {}).get("mark"))
+            pd.goto(BASE + "/raya-trade/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1200)
+            check("…which the door wears again", pd.query_selector("#login img.clientmark") is not None)
+
             check("no page errors anywhere", not errs, errs)
             b.close()
     finally:

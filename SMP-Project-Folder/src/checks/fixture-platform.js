@@ -11,6 +11,7 @@
 
 const pg = require("pg");
 const path = require("path");
+const FIXTURE_MARK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAEUlEQVR4nGPQ0Cv7j4wZ0AUA6MYOWXY6hxsAAAAASUVORK5CYII=";
 const P = require(path.join(__dirname, "..", "..", "..", "lib", "platform-io.js"));
 const auth = require(path.join(__dirname, "..", "..", "..", "lib", "auth.js"));
 
@@ -69,6 +70,15 @@ async function main() {
   ];
   const live = await P.withPlatform(pg, function (c) {
     return c.query("SELECT schema_name FROM clients WHERE key = $1", ["raya-trade"]);
+  });
+  /* ── AND RAYA HAS A MARK (§303.36) ──────────────────────────────
+     A client's door wears the mark on its row, and the rehearsal database
+     carries none — so every assertion about the dressed door would pass
+     vacuously on a build that lost it (§94.2). A 4×2 PNG, the smallest
+     picture the server accepts, set on Raya alone: every other client stays
+     markless, which is the other end. */
+  await P.withPlatform(pg, function (c) {
+    return c.query("UPDATE clients SET mark = $2 WHERE key = $1", ["raya-trade", FIXTURE_MARK]);
   });
   if (live.rowCount) {
     await P.withSchema(pg, live.rows[0].schema_name, async function (c) {

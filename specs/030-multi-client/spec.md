@@ -311,6 +311,29 @@ Mockup: `design-mockups/multi-client/2026-08-29_forefront-platform.html`.
 **The pages themselves are unchanged from the ones signed off on 28 August**;
 what moves is where they live.
 
+## 7.0.1 · Every client has a door of its own (§303.36, Islam 2026-09-08)
+
+*"yes every client needs his door."* §7.0's door is Forefront's and shows no
+client (§303.15); a CLIENT's people sign in at `/<client>/sign-in`, the same
+page dressed with that client's mark from its registry row — §52's placement,
+given back where the mark is the answer rather than a leak.
+
+- **The link does not change.** `/raya-trade` is still the platform; signed
+  out it sends you to `/raya-trade/sign-in`. The root stays plain.
+- **The door asks the server** what it wears (name and mark, public — an
+  unknown, retired or schema-shaped slug answers a plain door) and where the
+  sign-in lands: the door's client if `mayOpenClient` allows it, otherwise
+  exactly where the root would send them. A door is a place to stand, not a
+  right.
+- **The mark is set on the client's card** (configuration › *Mark on this
+  client's door*): PNG only, shrunk on the page on a transparent canvas,
+  refused by shape on the server, cleared to nothing. The card wears it too.
+- **A dark card puts the PNG on a light plate** (§52.4).
+
+Mockup: `design-mockups/client-door/2026-09-08_client-door.html`. Proved by
+`scripts/test-platform.js` (a consultant on two clients — the only subject
+for whom the door changes the answer) and `checks/multi-client.py` §17.
+
 ## 7 · The outer platform — what it holds
 
 Four things, and nothing else. It is the office's platform, not a second copy

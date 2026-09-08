@@ -62,6 +62,16 @@ const CLIENT_RE = (function () {
   const m = /^\/:[A-Za-z0-9_]+\((.*)\)$/.exec(r.source);
   return new RegExp("^/" + (m ? m[1] : r.source.replace(/^\//, "")) + "$");
 })();
+/* A CLIENT'S OWN DOOR (§303.36): /<client>/sign-in is the gate, dressed
+   with that client's mark. Read from vercel.json like the client paths, so
+   the local server and the deployment agree about where a door is. */
+const DOOR_RE = (function () {
+  const r = (VERCEL.rewrites || [])
+    .filter(function (x) { return x.destination === "/index.html"; })[0];
+  if (!r) return null;
+  const m = /^\/:[A-Za-z0-9_]+\((.*)\)(\/.*)$/.exec(r.source);
+  return m ? new RegExp("^/" + m[1] + m[2].replace(/\//g, "\\/") + "$") : null;
+})();
 const SECURITY = ((VERCEL.headers || []).filter(function (h) { return h.source === "/(.*)"; })[0] || {})
   .headers.filter(function (h) { return h.key !== "Strict-Transport-Security"; });
 
@@ -81,6 +91,7 @@ http.createServer(function (req, res) {
   let p = path.normalize(path.join(ROOT, decodeURIComponent(url.pathname)));
   if (!p.startsWith(ROOT)) { res.statusCode = 403; return res.end(); }
   if (url.pathname === "/" || url.pathname === "") p = path.join(ROOT, "index.html");
+  if (DOOR_RE && DOOR_RE.test(url.pathname)) p = path.join(ROOT, "index.html");
   /* The same rewrite vercel.json performs, so what is tested here is what
      ships. Without it the gate's /raya-trade link 404s locally and the
      pretty URL is only ever exercised in production — which is the one
@@ -99,4 +110,5 @@ http.createServer(function (req, res) {
 }).listen(PORT, function () {
   console.log("dev server on http://localhost:" + PORT);
   console.log("client paths: " + (CLIENT_RE ? CLIENT_RE.source : "(none in vercel.json)"));
+  console.log("client doors: " + (DOOR_RE ? DOOR_RE.source : "(none in vercel.json)"));
 });

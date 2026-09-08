@@ -37520,6 +37520,104 @@ references to main's own section. It is a blanket rename in the files only this
 branch has, and our-added-lines-only everywhere else — asserted after the fact
 by grepping for main's five citations and finding all five intact.
 
+## §303.36 — EVERY CLIENT HAS A DOOR OF ITS OWN (2026-09-08)
+
+Islam, verifying the move before it happens: *"just to verify, now the raya
+users will need another link right? to access the platform and their window
+opens the login window that has the raya trade logo and their credentials?"*
+Answered from the record first — the link does not change, the sign-in is by
+email and password, and **the shared door shows no client's logo** (§303.15
+took Raya's lockup off it, because a picture of one client on a page every
+client's people stand at tells them all whose door it is). Then his decision,
+in five words: *"yes every client needs his door."*
+
+**THE TWO SENTENCES ARE BOTH RIGHT, AND THE DOOR IS WHAT RECONCILES THEM.**
+§303.15's argument is about a SHARED door and holds for it: the root still
+draws no client. What Islam is asking for is not a client's mark on that door
+but a door that is the client's — and at a client's own address the mark is
+not a leak, it is the answer to *whose platform is this*. So §52's placement is
+given back where it belongs: Forefront's temple on the wall, the client's
+lockup on the card over the hairline, the two never sharing a corner.
+
+**THE ADDRESS.** `/<client>/sign-in` is the door; `/<client>` is the platform;
+`/` stays Forefront's door and `/platform` Forefront's shell. One rewrite in
+`vercel.json` serves `index.html` at the door path, `scripts/dev-server.js`
+reads it from there (three files carry the client paths and this is one of
+them, §35.6), and the service worker needs nothing: a navigation it cannot
+serve already falls back to the gate. **A signed-out person is sent to their
+own client's door**, not the root — the six places `sync.js` used to send to
+`/` go through ONE `doorUrl()`, or a seventh written later greets a Raya
+person with Forefront (§53.5). So the link people hold — `/raya-trade` — is
+unchanged, and signed out it opens Raya's door.
+
+**THE DOOR READS ITS CLIENT OFF THE ADDRESS AND NOWHERE ELSE**, and asks the
+server two things on the session check and on sign-in. *What the door wears*
+— the client's name and mark, and nothing else about it — is readable by
+anybody, since the address already names the client; an unknown, retired or
+misspelt slug, and a SCHEMA name (§36.4), all answer a plain door, so trying
+doors tells nobody anything the address bar did not. *Where this person
+lands* is the server's: the door's client wins **only if this account may
+open it**, asked of the same `mayOpenClient` the cards and every endpoint ask
+(§42) — a client's own person at another client's door lands in their own, a
+consultant at Raya's door lands in Raya, and a consultant at a door for
+nobody lands where the root would have sent them. The door is a place to
+stand, never a right.
+
+**THE MARK IS SET ON THE CLIENT'S CARD, AND THE CARD WEARS IT TOO.** The
+registry row has carried a `mark` column since spec 030 and nothing in the
+product could write it — §61's trap, found by looking for the control the
+mockup promised. The client's configuration gains *Mark on this client's
+door*: PNG only (§52 — an SVG is executable content, a JPEG paints its own
+ground), shrunk on the page to what a door needs on a TRANSPARENT canvas
+(the platform's own picture intake paints white first, right for a slide and
+fatal for a mark, §52.3), **refused by shape on the server** because the
+form's `accept` is a courtesy and not a rule (§42), capped so one row cannot
+make every door slow, and cleared to NULL rather than a blank picture
+(§50.6). The card draws the same picture, so the two cannot disagree; until
+one is set the card shows initials and the door opens plain — a client with
+no mark gets a door, not a hole.
+
+**A PNG CANNOT BE RECOLOURED, SO A DARK CARD GIVES IT A PLATE** — §52.4's
+own answer for the review deck, carried to the door through one token pair
+declared in all three theme blocks (light, dark-by-system, dark-by-choice),
+because a colour that exists in only one of them is the unreadable-artifact
+bug in a sign-in page. The links in the head become root-relative when there
+is a server and stay relative on disk, decided once for all of them and never
+with `<base>`, which the policy forbids on purpose (§43.6).
+
+**PROVED, AND PROVED ABLE TO FAIL — AND THE SERVER HALF COULD NOT, AT FIRST.**
+`scripts/test-platform.js` gained the door's answer at both ends (a name and
+a mark; null for an unknown slug, a schema name, a non-slug and a retired
+client) and where a sign-in lands from three doors — and **passed 87/0 with
+the door branch cut out**, because its subject was a client's own person, who
+holds one client and lands there from every door (§94.5, §113.8: the door
+changed nothing for them). The subject for whom the door changes the answer
+is a consultant holding seats on TWO clients — cards from the root, the
+door's client from a door — and with them the same cut is **2 red**.
+`checks/multi-client.py` §17 drives the real door over HTTP: the mark on both
+cards over its hairline, drawn at a size, the tab named, the head's links
+root-relative, the root and an unknown slug plain, a consultant landing in
+Raya from Raya's door, a signed-out person at `/raya-trade` sent to
+`/raya-trade/sign-in`, a client's person at another door landing in their
+own, and the mark set, refused (JPEG, SVG), cleared and set again from the
+card — **10 red** with the three halves broken at once. **§303.36.1 — and
+its own first red run DIED rather than reporting** (§215, in the file whose
+neighbours already say so): a probe read a box off an element the broken
+build does not draw. **§303.36.2 — `checks/boot-skeleton.py`'s stub served
+the platform at the door path**, so its 401 case looped for ever — the stub
+has to model the deployment (§100.3), and its assertion was REWRITTEN to the
+client's own door, never loosened (§218). 92/0 · 123/0 · boot-skeleton,
+welcome and platform-look green · full `qa.py` sweep ERRORS none.
+
+**RECORDED, NOT DONE.** Raya's own PNG (`clients/raya-trade/brand/`) is
+uploaded on the card by the office, one press, not seeded by the migration —
+the mark is the office's act on every client and the migration should not
+be the one exception. The root door still greets a client's person who
+arrives there by a stale link and lands them in their own client; nothing
+sends them on to their door first, and nothing should until somebody asks.
+And **this changes the built file**, so a merge still owes the `sw.js`
+shell bump (§91).
+
 ## §303.35 — A CLIENT'S CONNECTION WEARS THAT CLIENT'S BADGE (2026-09-08)
 
 Islam, the morning after §303.34: *"you told me earlier that every client needs

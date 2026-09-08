@@ -76,21 +76,35 @@ function send(res, code, obj) {
    team and can open every client, so counting team rows would land them in one
    client and they would never see the cards their own row entitles them to.
    Asked through the shared rules, so the answer and the cards agree. */
-async function landingFor(client, account) {
+async function landingFor(client, account, door) {
   if (!account || !account.email) return { land: null, list: [] };
   const mine = (await client.query(
     "SELECT client_key, person_key, seat FROM platform.account_clients WHERE email = $1",
     [account.email])).rows;
-  if (account.kind === "client") {
-    /* Their one client, always — and never a card. */
-    return { land: mine.length ? mine[0].client_key : null, list: null };
-  }
   const access = (await client.query(
     "SELECT role_key, area_key, grant_ FROM platform.platform_access")).rows
     .reduce(function (m, r) { (m[r.role_key] = m[r.role_key] || {})[r.area_key] = r.grant_; return m; }, {});
   const world = { mine: mine, access: access };
   const all = (await client.query(
     "SELECT key, kind, status FROM platform.clients ORDER BY kind, name")).rows;
+  /* ── SIGNED IN AT A CLIENT'S OWN DOOR, THEY LAND IN THAT CLIENT (§303.36) ──
+     Every client has a door at /<client>/sign-in. Somebody who signs in
+     there was trying to open THAT client, so it wins over the rules below —
+     but only if this account may open it: the door is a place to stand, not
+     a right, and the same `mayOpenClient` the cards and every endpoint ask
+     decides. A door for a client they may not open (or one that does not
+     exist) falls through to exactly the landing they would get at the root,
+     so trying doors tells nobody anything the root would not. */
+  const doorRow = door ? all.filter(function (c) { return c.key === door && c.status === "active"; })[0] : null;
+  if (doorRow && FF.mayOpenClient(world, account, doorRow)) {
+    return { land: doorRow.key,
+             list: account.kind === "client" ? null
+                 : FF.visibleClients(world, account, all).map(function (c) { return c.key; }) };
+  }
+  if (account.kind === "client") {
+    /* Their one client, always — and never a card. */
+    return { land: mine.length ? mine[0].client_key : null, list: null };
+  }
   /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§303.24) ──
      This used to send anybody with exactly ONE openable client straight into
      it, on §32's rule that one destination is not a question. Islam, signing
@@ -113,6 +127,28 @@ async function landingFor(client, account) {
      be a door to a room with one door. */
   const listed = FF.visibleClients(world, account, all).map(function (c) { return c.key; });
   return { land: null, list: listed };
+}
+
+/* ── WHAT A CLIENT'S DOOR WEARS (§303.36) ──────────────────────────
+   The client's name and its mark, and nothing else — the two things the door
+   shows before anybody has signed in, so they are readable by anybody, and
+   everything else about a client (industry, notes, status, who is on it)
+   stays behind sign-in. An unknown, retired or misspelt slug answers null and
+   the door draws itself plain: the slug is already in the address bar, so a
+   name for it gives nothing away that the address did not. A SCHEMA name
+   answers null too — the door is addressed by the slug alone (§36.4). */
+const DOOR_SLUG = /^[a-z0-9][a-z0-9-]{0,48}$/;
+async function doorFor(client, slug) {
+  const key = String(slug || "").trim().toLowerCase();
+  if (!DOOR_SLUG.test(key)) return null;
+  const row = (await client.query(
+    "SELECT key, name, mark FROM platform.clients WHERE key = $1 AND status = 'active'", [key])).rows[0];
+  return row ? { key: row.key, name: row.name, mark: row.mark || null } : null;
+}
+function doorSlugFrom(req, body) {
+  if (body && typeof body.door === "string") return body.door;
+  try { return new URL(req.url, "http://x").searchParams.get("door") || ""; }
+  catch (e) { return ""; }
 }
 
 module.exports = async function handler(req, res) {
@@ -153,11 +189,13 @@ module.exports = async function handler(req, res) {
          "is there a live session, and where does it land" — and asking it
          against a client would refuse anybody whose client is not the default
          one, which from the door reads as "your session expired". */
+      const doorSlug = doorSlugFrom(req, body);
+      const door = doorSlug ? await doorFor(client, doorSlug) : null;
       const person = await auth.getSession(client, req, null);
-      if (!person) return send(res, 200, { ok: true, person: null });
+      if (!person) return send(res, 200, { ok: true, person: null, door: door });
       const where = await landingFor(client, { email: person.email, kind: person.kind,
-                                               is_admin: person.isAdmin, status: "active" });
-      return send(res, 200, { ok: true, person: person, client: where.land, clients: where.list });
+                                               is_admin: person.isAdmin, status: "active" }, doorSlug);
+      return send(res, 200, { ok: true, person: person, client: where.land, clients: where.list, door: door });
     }
 
     if (action === "login") {
@@ -213,7 +251,8 @@ module.exports = async function handler(req, res) {
          Answered HERE, on the server, because the browser asking would have
          to be told the list first. */
       const where = await landingFor(client, { email: acct.email, kind: acct.kind,
-                                               is_admin: acct.is_admin, status: acct.status });
+                                               is_admin: acct.is_admin, status: acct.status },
+                                     doorSlugFrom(req, body));
       return send(res, 200, { ok: true, person: {
         key: acct.email, email: acct.email, name: acct.name, kind: acct.kind,
         isAdmin: !!acct.is_admin, mustChange: acct.must_change

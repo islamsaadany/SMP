@@ -515,6 +515,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   named, printed exception in `test-session-state.js`, which learned the word.
   Proved on three database roles including one shaped like Neon's; run
   `node scripts/test-client-badge.js` after touching any of it.
+- **AND EVERY CLIENT HAS A DOOR OF ITS OWN (§303.36):** `/<client>/sign-in`
+  is the gate served for that client, wearing the mark on its registry row
+  (set on the client's card, PNG only, refused by shape on the server);
+  `/` stays Forefront's door and draws no client. A signed-out person is sent
+  to their client's door through the ONE `doorUrl()` in `sync.js`, never to
+  the root. The door reads its client off the address, and the server answers
+  what it wears (name and mark, public — the address already names the
+  client; unknown, retired, schema-shaped or misspelt all answer a plain door)
+  and where the sign-in lands — the door's client only if `mayOpenClient`
+  says so, else where the root would send them. Three files carry the door
+  path: `vercel.json`, `scripts/dev-server.js` (reads it) and
+  `checks/boot-skeleton.py`'s stub. Proved at both ends by
+  `scripts/test-platform.js` (the subject that can fail is a consultant on
+  TWO clients — a client's own person lands the same from every door) and
+  `checks/multi-client.py` §17.
 - **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
   (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
   a session AND a password that is no longer temporary; a signed-in person sees
@@ -7659,6 +7674,10 @@ DATABASE_URL=… node scripts/test-platform-rules.js    # the seats and the admi
 DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/multi-client.py
                                 # the door holds nothing but sign-in; the cards, the
                                 # seats read-only, the Demo button gone for everyone
+                                # — and since §303.36 every client's OWN door: the
+                                # mark on both cards, the root plain, the landing from
+                                # three doors, the signed-out redirect, and the mark
+                                # set/refused/cleared from the card (10 red broken)
 DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-look.py
                                 # Forefront's own two pages: contrast in both themes
                                 # and no sideways scroll at four widths — neither of
@@ -7706,7 +7725,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-08 &mdash; **&sect;303.35: a client's connection
+*Last Updated: 2026-09-08 &mdash; **&sect;303.36: every client has a door of
+its own.** Islam, verifying before the move &mdash; *"their window opens the
+login window that has the raya trade logo and their credentials?"* &mdash;
+answered from the record (the shared door shows no client's logo, by
+&sect;303.15's own argument), and then decided: *"yes every client needs his
+door."* Mockup first (rule 1c), approved, built. **The two sentences are both
+right and the door reconciles them**: the root stays Forefront's and plain,
+and `/<client>/sign-in` is the client's, wearing the mark on its registry row
+&mdash; &sect;52's placement given back where the mark is the answer rather
+than a leak. **The link people hold does not change**: signed out at
+`/raya-trade` you are sent to Raya's door, through the ONE `doorUrl()` that
+replaced six redirects to the root. **The door reads its client off the
+address and the server answers two things**: what it wears (public, and a
+plain door for anything that is not an active client's slug) and where the
+sign-in lands (the door's client only if `mayOpenClient` says so). **The mark
+had no way in** &mdash; the column existed and no control wrote it (&sect;61)
+&mdash; so the client's card gained one, PNG only and refused by shape on the
+server, with the card wearing the same picture. **The server test passed 87/0
+with the door cut out**: its subject was a client's own person, for whom the
+door changes nothing; a consultant on two clients is the subject that can
+fail, and does &mdash; 2 red. Browser half 10 red with all three halves
+broken; its own first red run DIED rather than reporting (&sect;215), and
+`boot-skeleton`'s stub looped at the new path until it modelled the
+deployment (&sect;100.3). 92/0 &middot; 123/0 &middot; full sweep ERRORS none.
+**On the branch, not merged**; a merge owes the `sw.js` shell bump.*
+
+*Earlier: 2026-09-08 &mdash; **&sect;303.35: a client's connection
 wears that client's badge.** Islam, the morning after &sect;303.34 &mdash;
 *"you told me earlier that every client needs to have his access code"*, then
 *"we are building already why can't we build this now?"*, then, of the

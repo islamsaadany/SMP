@@ -58,3 +58,19 @@ that is a separate decision, and `rollback.md` is the way back.
   exactly how they were served before; give the key CREATEROLE.
 - **Videos**, on any client: Manage slides › a video slide still plays, and an
   upload still lands. That endpoint had never been routed by client and is now.
+
+## §303.36 — every client's own door
+
+- **Clients › Raya Trade › Settings**: a row *Mark on this client's door* —
+  choose the Raya PNG (`clients/raya-trade/brand/raya-trade-group-mark.png`),
+  Save, and the card wears it.
+- **Signed out, open `<domain>/raya-trade`**: you are sent to
+  `<domain>/raya-trade/sign-in`, which shows Raya's mark above *Welcome back*;
+  the tab reads *Raya Trade — Strategy Management Platform*. Sign in as a
+  Raya person and you land in Raya Trade.
+- **Open `<domain>/`**: Forefront's door, no client's mark, as before.
+- **Open `<domain>/rhi/sign-in`** before a mark is set there: a plain door
+  that still signs you in.
+- **Dark theme** on the door: the mark sits on a white plate.
+- Not from a screen: the refusal of a JPEG or an SVG as a mark is the
+  server's, asserted in `checks/multi-client.py` §17.

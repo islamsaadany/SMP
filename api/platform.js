@@ -329,13 +329,30 @@ module.exports = async function handler(req, res) {
         if (!FF.mayConfigureClient(world, account, row)) {
           return send(res, 403, { ok: false, error: "This client's configuration is not yours to change." });
         }
+        /* ── THE MARK IS A PNG, OR IT IS NOTHING (§303.36, §52) ─────
+           It is drawn on the client's own door before anybody has signed in,
+           so what is stored here is served to whoever opens that address. An
+           SVG is executable content (§52) and a JPEG carries an opaque ground
+           that paints a rectangle around itself; both are refused by shape,
+           on the server, because the form's `accept` is a courtesy and not a
+           rule (§42). Capped so one client's row cannot make every door slow —
+           the page shrinks it before sending, and this is what stops a page
+           that did not. An EMPTY string clears the mark (§50.6: absent, not
+           a blank picture); absent leaves it alone, as every field here does. */
+        let mark = null;
+        if (typeof body.mark === "string") {
+          if (body.mark === "") mark = "";
+          else if (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(body.mark) && body.mark.length <= 400000) mark = body.mark;
+          else return send(res, 400, { ok: false, error: "The mark must be a PNG under 300 KB." });
+        }
         /* THE SCHEMA NAME IS NEVER TOUCHED HERE. A client whose name is
            corrected must not change schema — that is a move, not an edit. */
         await c.query(
           "UPDATE clients SET name = COALESCE($2,name), industry = COALESCE($3,industry), " +
-          "notes = COALESCE($4,notes), mark = COALESCE($5,mark) WHERE key = $1",
+          "notes = COALESCE($4,notes), mark = CASE WHEN $5::text IS NULL THEN mark WHEN $5 = '' THEN NULL ELSE $5 END " +
+          "WHERE key = $1",
           [row.key, body.name || null, body.industry == null ? null : String(body.industry),
-           body.notes == null ? null : String(body.notes), body.mark || null]);
+           body.notes == null ? null : String(body.notes), mark]);
         return send(res, 200, { ok: true });
       }
 

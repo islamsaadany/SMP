@@ -631,12 +631,12 @@ var SYNC = (function () {
          tried normally. */
       /* Signed out, or signed in on a password that still has to be changed:
          the door, not a banner. */
-      if (r.status === 401) { location.replace("/"); return; }
+      if (r.status === 401) { location.replace(doorUrl()); return; }
       if (r.status === 403) {
         refusedBody = now; refusedAs = actingAs();
         say("refused");
         return r.json().then(function (j) {
-          if (j && j.mustChange) { location.replace("/"); return; }
+          if (j && j.mustChange) { location.replace(doorUrl()); return; }
           refusedWhy = (j && j.refusals) || null;
           refusedRows = (j && j.refusedChanges) || null;
           refusedUndoable = !!(j && j.undoable);
@@ -840,7 +840,7 @@ var SYNC = (function () {
       fetch("/api/auth", { method: "POST",
         headers: { "Content-Type": "application/json" },
         body: '{"action":"logout"}'
-      }).finally(function () { location.replace("/"); });
+      }).finally(function () { location.replace(doorUrl()); });
     });
     /* Far right of the first line, beside Demo data — the two controls that
        leave the product sit together, away from the one that changes what you
@@ -866,6 +866,22 @@ var SYNC = (function () {
     var c = clientSlug();
     if (!c) return url;
     return url + (url.indexOf("?") > -1 ? "&" : "?") + "client=" + encodeURIComponent(c);
+  }
+  /* ── A SIGNED-OUT PERSON IS SENT TO THEIR OWN CLIENT'S DOOR (§303.36) ──
+     Every client has a door of its own at /<client>/sign-in, wearing that
+     client's mark; the root is Forefront's door and shows no client at all.
+     So the six places that used to send somebody to "/" — signed out, a
+     password still to be chosen, a sign-out — go to the door of the client
+     this page was served at, which is the one they were trying to open and
+     the one they will land back in. Nobody's rights move: the door still
+     asks the server where a sign-in lands, and the server still refuses a
+     client this person may not open. With no client in the address (file://,
+     or Forefront's own shell) the root is the door, exactly as before. ONE
+     function, or a seventh redirect written later goes back to the root and
+     a Raya person is greeted by Forefront (§53.5). */
+  function doorUrl() {
+    var c = clientSlug();
+    return c ? "/" + c + "/sign-in" : "/";
   }
   /* Posted bodies carry it as a field rather than a query, because that is
      what the endpoints read first and because a body survives a redirect. */
@@ -1025,7 +1041,7 @@ var SYNC = (function () {
     if (!live || saving) return done(false);
     fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
-        if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+        if (r.status === 401 || r.status === 403) { location.replace(doorUrl()); throw new Error("sign in"); }
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
@@ -1294,7 +1310,7 @@ var SYNC = (function () {
           /* Deployed and not signed in: the gate is the way in. A TEMPORARY
              password now gets the same answer — the server refuses the state
              until a real one is chosen, and the gate is where that happens. */
-          if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+          if (r.status === 401 || r.status === 403) { location.replace(doorUrl()); throw new Error("sign in"); }
           /* ── AN ADDRESS THAT NAMES NO CLIENT (§303.19) ──────────────
              Since a client's path became a PATTERN rather than four named
              ones, any single-segment address reaches this file — so a typo,
@@ -1337,7 +1353,7 @@ var SYNC = (function () {
              paint a page the browser is already navigating away from, and
              the skeleton stays up until it does — which is right: the gate
              is where this person is going. */
-          if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace("/"); return; }
+          if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace(doorUrl()); return; }
           hydrate(data.state);
           live = true;
           person = data.person || null;

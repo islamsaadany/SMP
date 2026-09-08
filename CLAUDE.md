@@ -496,6 +496,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   preference is asserted by `node scripts/test-db-url-choice.js`, and
   `pointAt()` carries the ONE named, printed exception in
   `scripts/test-session-state.js`.
+- **AND A CLIENT'S CONNECTION WEARS THAT CLIENT'S BADGE (§303.35):** rules 1
+  and 2 of `lib/platform-io.js` are our code being right; rule 3 is the
+  database refusing when it is not. One role per client schema (`smp_<schema>`,
+  no login, creates nothing), made and granted BY THE PLATFORM with the room
+  and memoised per process under a transaction-scoped lock; every connection
+  serving a client request does `SET ROLE` into it after `ensureReady` has run
+  as the owner, and `RESET ROLE` at release. Another client's schema is refused
+  by the database (42501 by name, 42P01 by a moved path). **What it does not
+  do, stated**: the owner's key still opens every room (the badge fences a
+  MISTAKE, not a leaked key), and the shared platform tables the door reads are
+  listed once in `PLATFORM_FOR_CLIENTS` and reachable from every badge. No key
+  cannot make a role → served as the owner, said once in the log. `withOwner()`
+  is the door for creating and migrating a schema and has three callers;
+  everything else is `withSchema()`/`connectFor()`. `api/blob.js` was the fifth
+  endpoint and had never been routed by client at all — it is now, and the
+  browser names the client on all three of its calls. `SET ROLE` is the second
+  named, printed exception in `test-session-state.js`, which learned the word.
+  Proved on three database roles including one shaped like Neon's; run
+  `node scripts/test-client-badge.js` after touching any of it.
 - **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
   (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
   a session AND a password that is no longer temporary; a signed-in person sees
@@ -7308,6 +7327,22 @@ node scripts/test-db-url-choice.js # the direct connection is asked for FIRST
                                 # environment back in a finally, or it decides the
                                 # answer for whatever runs after it. No database, no
                                 # network
+node scripts/test-client-badge.js # a client's connection wears that client's badge
+                                # (§303.35): both ends every time — what the badge
+                                # allows beside what it refuses (its own room, its
+                                # sequences, the shared account book; the other room
+                                # by name AND by a moved path, making a table, adding
+                                # or removing a client), connectFor/releaseClient
+                                # asserted to put it on and take it off, a table added
+                                # AFTER the badge still readable, two cold starts
+                                # making one badge, and the OWNER asserted still to
+                                # reach both rooms (the stated limit). Run three times
+                                # as three database roles — superuser, CREATEROLE-not-
+                                # superuser (Neon's shape), and neither with
+                                # SMP_EXPECT_BADGE=0 for the degrade path. 23/23/19;
+                                # proved able to fail three ways (9 / 3 / 4 red); every
+                                # section degrades rather than dies (§215). Needs a
+                                # database; its write probes roll back
 node scripts/test-cold-starts.js # two cold starts, one new migration, a POOLED
                                 # connection (§289): the pooler is modelled — session
                                 # state lost after every statement outside a
@@ -7671,7 +7706,39 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-07 &mdash; **&sect;302.3&ndash;.4: the box, not the
+*Last Updated: 2026-09-08 &mdash; **&sect;303.35: a client's connection
+wears that client's badge.** Islam, the morning after &sect;303.34 &mdash;
+*"you told me earlier that every client needs to have his access code"*, then
+*"we are building already why can't we build this now?"*, then, of the
+encrypted-keys idea he proposed himself, *"is there a less logitsical wy but
+still safe and do the same purpose"*, and of the three levels laid out, *"go
+with the badge, check neon and build it."* **THE RECORD HELD NO ACCESS CODE AND
+SAYING SO CAME FIRST**: what was on the shelf was a database key per client, and
+his better question was not *when* but *what is the least logistics that still
+does the job*. **THE BADGE**: one database role per client schema, made by the
+platform with the room, that cannot log in and cannot create anything; every
+connection serving a client request wears it (`SET ROLE`) after `ensureReady`
+has run as the owner, and takes it off at release. Another client's room is
+then refused by Postgres &mdash; rules 1 and 2 of `platform-io.js` were our code
+being right, rule 3 is the database refusing when it is not. Nothing stored,
+nothing in Vercel, adding a client stays one press; and it is the first half of
+his own idea rather than a lesser one, since a password on a badge later is
+level three built on two. **What it does not do is stated**: the owner's key
+still opens every room, and the shared tables sign-in reads are listed once and
+reachable from every badge. **"Check Neon" was done the only honest way from
+here** &mdash; the host modelled as three database roles on the rehearsal
+Postgres, including one shaped like `neondb_owner`; a key that cannot make a
+role is served as before and says so once. **AND THE REHEARSAL FOUND THE
+ENDPOINT THE SPLIT HAD MISSED**: `api/blob.js` had never been routed by client
+at all and would have shown every clip as lost after the move; and the
+migration script's first build made the badge before the platform schema it
+grants existed &mdash; found by running it. Proved able to fail three ways
+(9 / 3 / 4 red); 23/23/19 across the three roles; the full suite green on a
+Neon-shaped key with two pre-existing reds recorded as somebody else's checks.
+**On the branch, not merged** &mdash; a merge still owes the `sw.js` shell bump
+(&sect;91), since the built file changed, and `main` is Islam's call.*
+
+*Earlier: 2026-09-07 &mdash; **&sect;302.3&ndash;.4: the box, not the
 weight &mdash; and the mark grows in twos.** Islam, an hour after &sect;302
 merged: *"I'm confused we need to center the drawing in the box not the weight
 &hellip; so go with A"*, then *"let's make the home icon bigger a bit but keep

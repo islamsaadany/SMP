@@ -916,7 +916,7 @@ var SYNC = (function () {
     if (!blobLive()) return done("no server here", null);
     fetch("/api/blob", { method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(withClientBody(body))
     }).then(function (r) { return r.json(); })
       .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
       .catch(function (e) { done(String(e.message || e), null); });
@@ -1040,6 +1040,11 @@ var SYNC = (function () {
 
   return {
     isLive: function () { return live; },
+    /* An address with this client's name on it (spec 030, §303.35). The play
+       address for a clip is built in slides.js, outside this module, and a
+       GET has no body to carry the slug in — so the one helper that knows the
+       slug is exported rather than copied (§53.5). */
+    withClient: function (url) { return withClient(url); },
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
@@ -1153,9 +1158,9 @@ var SYNC = (function () {
                             uploadId: o.uploadId, parts: parts }, done);
         }
         var slice = o.file.slice((n - 1) * PIECE, n * PIECE);
-        fetch("/api/blob?action=part&path=" + encodeURIComponent(o.path) +
+        fetch(withClient("/api/blob?action=part&path=" + encodeURIComponent(o.path) +
               "&key=" + encodeURIComponent(o.key) +
-              "&uploadId=" + encodeURIComponent(o.uploadId) + "&n=" + n,
+              "&uploadId=" + encodeURIComponent(o.uploadId) + "&n=" + n),
               { method: "POST", headers: { "Content-Type": "application/octet-stream" },
                 body: slice })
           .then(function (r) { return r.json(); })

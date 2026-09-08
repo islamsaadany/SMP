@@ -75,7 +75,8 @@ One Neon database. **One schema per client**, plus one shared schema.
 That is the whole argument for schemas over a tenant column (§36.2): the
 boundary is `SET search_path`, so no query, insert, migration or uniqueness
 constraint changes, and one forgotten `WHERE` cannot show one client another's
-plan. §36.3's trap disappears with it — every client wants a person keyed
+plan — and since §303.35 the connection also wears a per-client database role,
+so a query that names another client's schema is refused by Postgres itself. §36.3's trap disappears with it — every client wants a person keyed
 `smo`, and under separate schemas that is simply a different table.
 
 ### 3.1 Resolving the client on a request
@@ -90,6 +91,11 @@ plan. §36.3's trap disappears with it — every client wants a person keyed
    must not be told apart, or the door lists Forefront's client book.
 4. `SET search_path TO <schema>` on the checked-out connection, reset on
    release. Never on the pool.
+5. **The connection wears the client's badge (§303.35).** `ensureReady` runs as
+   the owner, then `SET ROLE smp_<schema>` — a role the platform made with the
+   room, that can see that schema and the shared platform tables sign-in reads,
+   and nothing else. `RESET ROLE` at release. Another client's schema is then
+   refused by Postgres, not by our code.
 
 Two tabs on two clients therefore work, and neither can be steered into the
 other by editing a URL.

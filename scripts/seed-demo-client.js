@@ -330,7 +330,7 @@ async function main() {
   if (!row || !row.key) {
     throw new Error("there is no '" + CLIENT_KEY + "' client — create it on the platform first");
   }
-  await P.withSchema(pg, row.schema_name, async function (c) {
+  await P.withOwner(pg, row.schema_name, async function (c) {
     await io.ensureReady(c, row.schema_name, { seed: false, orgName: graph.group.org });
     await io.writeState(c, graph);
     const back = await io.readState(c);

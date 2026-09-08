@@ -110,7 +110,7 @@ async function main() {
   /* t_migrated runs the real path — seed then migrations, as a deployment
      that has existed since v2.0 did. */
   await P.withPlatform(pg, function (c) { return c.query("CREATE SCHEMA IF NOT EXISTS t_migrated"); });
-  await P.withSchema(pg, "t_migrated", function (c) { return io.ensureReady(c, "t_migrated"); });
+  await P.withOwner(pg, "t_migrated", function (c) { return io.ensureReady(c, "t_migrated"); });
   const baselined = await shapeOf("t_beta");
   const migrated = await shapeOf("t_migrated");
   const only = (a, b) => a.filter(function (x) { return b.indexOf(x) < 0; });

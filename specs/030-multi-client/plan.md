@@ -11,7 +11,8 @@ email, sees the clients their row reaches, and opens one; inside, it is the
 platform exactly as it is today, named after that client and holding only that
 client's data. Isolation is **one Postgres schema per client** (§36.2), so
 `readState`, `writeState`, `lib/rules.js` and `lib/authorize.js` are untouched
-and the boundary is `SET search_path` on a connection. A new **platform schema**
+and the boundary is `SET search_path` on a connection, worn under a per-client
+database role since §303.35 (the badge). A new **platform schema**
 holds the client registry, the office's accounts, their per-client teams and the
 office's own access matrix.
 
@@ -128,7 +129,10 @@ needed to prove an earlier one.
 1. **The boundary** (invisible to anyone). `platform` schema; `search_path` per
    request; `ensureReady` memoised per schema; the client resolved from the
    registry and authorised. Raya moves from `public` to `raya_trade`. The
-   product looks identical and every existing check still passes.
+   product looks identical and every existing check still passes. Since
+   §303.35 the request also wears the client's badge (`SET ROLE smp_<schema>`),
+   made by the platform with the room — the database refuses a cross-client
+   query where before only the code declined to make one.
 2. **The door and the cards.** Email-only sign-in against `platform.accounts`;
    the cards; the client name in the chrome. `rhi`, `el_abd` created empty.
 3. **The outer platform's pages.** Consultants (with §35's password machinery),

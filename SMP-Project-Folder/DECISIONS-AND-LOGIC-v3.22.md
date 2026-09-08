@@ -37520,6 +37520,164 @@ references to main's own section. It is a blanket rename in the files only this
 branch has, and our-added-lines-only everywhere else — asserted after the fact
 by grepping for main's five citations and finding all five intact.
 
+## §303.35 — A CLIENT'S CONNECTION WEARS THAT CLIENT'S BADGE (2026-09-08)
+
+Islam, the morning after §303.34: *"you told me earlier that every client needs
+to have his access code"* — then, told what a key per client would take and
+what it would cost, *"we are building already why can't we build this now? not
+to face complications in the future"*, then *"do we always need separate keys in
+vercel? can't we have a master key in vercel for encryption and a key in the
+multtenant main platform? is there a less logitsical wy but still safe and do
+the same purpose"*, and, of the three levels laid out for him, *"go with the
+badge, check neon and build it."*
+
+**THE FIRST ANSWER GIVEN WAS WRONG ABOUT WHAT WAS IN THE RECORD, AND SAID SO.**
+Nothing in this log or in spec 030 says every client needs an access code; what
+was on the shelf was *a database key per client*, deferred by agreement until
+after the move. That was put to him plainly rather than remembered into
+existence, and his reply was the better question: not *when* but *what is the
+least logistics that still does the job*. His own proposal — the per-client
+keys held in the platform's database, encrypted with one master key in Vercel
+— is sound and would work; what it costs is a second secret, encryption we have
+to get right, and a second open connection on every request, for the same
+protection. **THE BADGE GETS THE SAME RESULT FOR A TENTH OF THE LOGISTICS**, and
+it is not a lesser version of his idea but the first half of it: a badge IS the
+client's identity in the database, and giving it a password later is level
+three built on level two rather than instead of it. He chose the badge.
+
+**WHAT THE BOUNDARY WAS, AND WHAT IT IS NOW.** Rules 1 and 2 at the top of
+`lib/platform-io.js` — the schema comes from the registry row, never the
+request; the path is set on a checked-out connection and reset at release —
+are OUR code being right. Every request was served wearing the owner's key,
+which can see every client's room, so the only thing between Raya and El Abd
+was that code never making a mistake. **Rule 3 is the database refusing when
+it does**: one role per client schema, `smp_<schema>`, that cannot log in and
+cannot create anything, holding its own schema's tables and sequences and
+nothing else; the owner is made a member of it, and every connection serving a
+client request does `SET ROLE` into it before the first query and `RESET ROLE`
+at release. While it wears the badge, Postgres judges every statement as the
+badge: a query that names another client's schema is refused (42501), a path
+moved to another client's schema finds nothing there (42P01 — Postgres leaves a
+schema the role may not use OUT of name resolution, which is a refusal by a
+different word), and it cannot make a table, add a client or remove one.
+The migration rehearsal reads it back in one line:
+*as smp_raya_trade · rhi from raya: 42501 · as smp_rhi · raya from rhi: 42501.*
+
+**MADE BY THE PLATFORM, NEVER BY A PERSON.** The badge is created and granted
+by the platform itself — with the room, in `createClientSchema()` (so a client
+made from the Clients page is fenced from its first request) and in
+`migrate-to-multi-client.js` for the client the move carries across; and
+lazily, memoised per process exactly as `ensureReady` is, on the first client
+request of any process, under a transaction-scoped lock (§289) so two cold
+starts cannot both `CREATE ROLE`. Re-granting on `ALL TABLES` at each process
+start covers a table a migration added since; `ALTER DEFAULT PRIVILEGES`
+covers one added later in the process's life. No password, because it can only
+be worn from inside by somebody already holding the owner's key; nothing
+stored; nothing added to Vercel, ever; adding a client stays one press.
+
+**THE SCHEMA IS BROUGHT UP TO DATE BEFORE THE BADGE GOES ON.** `ensureReady`
+creates tables and runs migrations, which the badge may not do, so
+`connectFor()` runs it as the owner first and puts the badge on after — the
+endpoints still call it themselves and hit the same memo; only the order moved.
+`withSchema()` wears the badge for every client schema and never for the
+platform's own; `withOwner()` is the door for the two things a badge cannot do,
+creating a schema's tables and migrating them, and has three callers.
+
+**WHAT IT DOES NOT DO, STATED SO NOBODY READS THE CHECK AS CLAIMING IT.** The
+owner's key still opens every room — the badge fences a mistake in our code,
+not a leaked key, which is true of every arrangement in which the platform is
+able to create clients, his encrypted-keys idea included. And the shared
+platform tables the door reads are reachable from every badge, listed once in
+`PLATFORM_FOR_CLIENTS` with the verb each needs (sign-in, the session, a
+person's account and the password states are all shared rows read through a
+client's connection — `lib/auth.js`, `api/auth.js`); anything a client path
+touches in `platform` that is not on that list fails loudly, on purpose. Both
+limits are asserted in the check rather than left to be assumed.
+
+**IF THE HOST WILL NOT LET THE KEY MAKE A ROLE**, the request is served as the
+owner — exactly as every request was before this section — and the process
+says so ONCE in the runtime log, naming the fix (*give the key CREATEROLE*). A
+boundary that takes every client down to prove a point is the wrong boundary
+(§61); one that degrades quietly is not much better, so it is not quiet.
+**AND "CHECK NEON" WAS DONE THE ONLY HONEST WAY AVAILABLE FROM HERE**: Neon is
+unreachable from this sandbox (and no connection string is ever pasted into
+chat), so the host was MODELLED — the check runs three times as three database
+roles on the rehearsal Postgres 16: a superuser, a role that may create roles
+and is not a superuser (Neon's `neondb_owner` is a member of `neon_superuser`,
+which carries CREATEROLE), and one that may do neither. 23 / 23 / 19 green, the
+third being the degrade path with its warning printed once. Postgres 16 stopped
+granting SET to a role's creator by default, so membership is granted `WITH SET
+TRUE` there and plainly before 16 — read off `server_version_num`, because
+Neon's version is theirs to choose.
+
+**THE SECOND SESSION-LEVEL STATEMENT IN THE PRODUCT, ARGUED FOR BY THE SAME
+PARAGRAPH AS THE FIRST.** `SET ROLE` is session state exactly as `search_path`
+is, and §303.34's answer — the direct connection is asked for first, where a
+checked-out client is one backend for the life of the checkout — is what makes
+it safe, with `RESET ROLE` beside the `RESET search_path` that was already
+there. `scripts/test-session-state.js` learned the word: a `SET ROLE` has
+neither `=` nor `TO`, so the existing rule walked past it; it is named now, and
+the one line that wears a badge carries the second printed exception.
+
+**AND THE REHEARSAL FOUND THE ENDPOINT THE SPLIT HAD MISSED.** `api/blob.js`
+— the video store — was the one of five that never asked which client it was
+for: it checked out a raw connection and read `public`, which after the move
+holds no client at all. Every clip would have looked lost on every client, and
+the connection served it wearing the owner's rights. It goes through the same
+door as the other four now and wears the badge; the browser names the client
+on all three of its calls (the piece upload posts raw bytes and the play address
+is a GET, so the slug rides the query there — through the one helper `sync.js`
+already had, exported rather than copied, §53.5). §303's own drift: four
+endpoints were routed and the fifth was not, and no check asked the fifth.
+
+**AND THE MIGRATION SCRIPT'S FIRST BUILD PUT THE BADGE BEFORE THE ROOM IT
+GRANTS.** A badge is granted the shared platform tables, and the first
+rehearsal made it in step 2 (the move), before step 3 makes the platform schema
+— *schema "platform" does not exist*, with 47 tables already moved. Found by
+running it, not by reading it; it is made in step 3 now, after
+`ensurePlatformReady`, and the rehearsal was rerun from a fresh database:
+47 tables moved, four badges (`smp_raya_trade`, `smp_rhi`, `smp_el_abd`,
+`smp_demo`), both refusals above, `multi-client.py` 101/0, `platform-look.py`
+27/0.
+
+**PROVED ABLE TO FAIL THREE WAYS** (§94.5), from the sources and put back each
+time: the badge made and never worn — **9 red**; the badge granted the other
+room too — **3 red**, the three refusals; the badge never taken off at release
+— **4 red**, the released connection still the badge and two later sections
+dying on it, which is what made every section degrade rather than die (§215).
+**AND TWO OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK**: it asked for
+42501 on the moved-path case where Postgres answers 42P01, and reported a
+correct build broken; and on the no-badge run its two write probes were
+ALLOWED — the degrade path stated honestly — and LANDED, deleting the very
+client the next section asked for. They run inside a rolled-back transaction
+now, in every mode.
+
+**VERIFIED**, on a throwaway Postgres 16 as the Neon-shaped role wherever a
+database is needed: `test-client-badge` 23/23/19 across the three roles ·
+`test-platform` 74/0 · `test-platform-rules` 45/0 · `test-cold-starts` green ·
+round trip and clean parity PASS on a virgin database · `test-two-tabs` 24/0 ·
+`test-authorize` 574/0 · `test-graph-diff` 136/0 · `test-db-url-choice` 10/0 ·
+`test-session-state` clean with two named exceptions · the migration
+rehearsal above · `video-slides.py` 73/0 on the rebuilt platform · full `qa.py`
+sweep ERRORS none. **Recorded, not fixed, and neither is this change's**:
+`test-concurrent-saves.js` fails on this branch with *platform.sessions does not
+exist* — it mints a session without bringing the platform schema up, and it
+fails identically at the commit before this one; and `checks/csp-net.py`
+reports the shipped build's scripts blocked while the 26 hashes in its meta
+match its 26 script blocks byte for byte — also identical on the build before.
+Both are the checks, not the product, and both are somebody else's to look at
+rather than rewritten during the verification of an unrelated change (§303.34a).
+
+**§303.35a — THE THREE LEVELS, FOR THE RECORD.** One: one key, rooms kept apart
+by our code (before this section). Two: the badge — same key, the database
+enforces the room (this section). Three: a password on each badge, stored
+encrypted under a master key, so a client can be opened without the owner at
+all — built ON level two, and worth building the day a client asks in writing
+to be openable only with a credential that is theirs, or wants a database of
+their own. Not before, because none of the three protects against the owner's
+key leaking, and that is a different job: who at Forefront can see the Vercel
+settings, and rotating the key.
+
 ## §303.34 — THE DIRECT CONNECTION IS ASKED FOR FIRST (2026-09-07)
 
 §303.33 left the one open question of the whole merge and put both answers to

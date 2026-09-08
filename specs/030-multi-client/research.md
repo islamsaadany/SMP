@@ -6,7 +6,13 @@ reading the running code, not by preference.
 ## 1 · Where the tenant boundary goes
 
 **Decision:** one Postgres **schema** per client; `SET search_path` on each
-checked-out connection, reset on release; never on the pool.
+checked-out connection, reset on release; never on the pool. **Amended §303.35:**
+and `SET ROLE smp_<schema>` on that same connection — one no-login role per
+client, made by the platform with the room, so the database itself refuses a
+query that reaches another client's schema. Chosen over a key per client
+(a secret and a connection per client, and adding a client stops being a press
+on the page) and over encrypted per-client keys held in the database (the same
+protection for more moving parts); both remain buildable on top of it.
 
 **Rationale:** `readState`/`writeState` move a whole client's graph in one go, so
 the boundary can be one statement. A tenant column would touch every query,

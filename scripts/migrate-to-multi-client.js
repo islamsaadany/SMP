@@ -115,6 +115,16 @@ async function main() {
   /* ── 3 · the platform ─────────────────────────────────────────── */
   await P.withPlatform(pg, async function (pc) {
     await P.ensurePlatformReady(pc);
+    /* THE MOVED CLIENT'S BADGE IS MADE WITH ITS ROOM (§303.35), as
+       createClientSchema does for a new one — so the first request after the
+       move is already fenced rather than waiting for a cold start to notice.
+       HERE and not in step 2: a badge is granted the shared platform tables
+       the door reads, and the rehearsal's first run put this before the
+       platform schema existed and stopped on "schema platform does not
+       exist" with the tables already moved. Found by running it, not by
+       reading it. */
+    await P.ensureBadge(pc, LIVE.schema);
+    say("badge " + P.badgeRoleFor(LIVE.schema) + " made and granted.");
 
     for (const cl of [LIVE].concat(NEW_CLIENTS)) {
       await pc.query(

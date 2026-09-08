@@ -33,6 +33,10 @@ const BAD = [
      SET clause, and an UPDATE with no WHERE at all is still flagged, which is
      the safe way to be wrong. */
   [/^\s*SET\s+(?!LOCAL\b)[\w.]+\s*(=|\bTO\b)(?![\s\S]*\bWHERE\b)/i, "SET — a session setting that stays on the backend; use SET LOCAL inside a transaction"],
+  /* A `SET ROLE` has neither `=` nor `TO`, so the rule above walks past it —
+     and it is session state exactly as search_path is (§303.35). Named here
+     so the one line that wears a badge has to carry a named exception. */
+  [/^\s*SET\s+ROLE\b/i,                "SET ROLE — a session role that stays on the backend; only on a direct connection, and reset at release"],
   [/^\s*LISTEN\b/i,                    "LISTEN — session-level, never reaches the right backend"],
   [/^\s*PREPARE\b/i,                   "PREPARE — a session-level statement; use parameterised queries"],
   [/\bCREATE\s+(GLOBAL\s+|LOCAL\s+)?TEMP(ORARY)?\s+TABLE\b/i, "a temp table — lives on one backend"],

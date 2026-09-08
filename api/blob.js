@@ -32,6 +32,7 @@
 const pg = require("pg");
 const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
+const P = require("../lib/platform-io.js");
 const R = require("../lib/rules.js");
 const { ensureReady, readState } = io;
 function getPool() { return io.getPool(pg); }
@@ -143,9 +144,16 @@ module.exports = async function handler(req, res) {
     const url = new URL(req.url, "http://x");
     const play = url.searchParams.get("play");
 
-    client = await getPool().connect();
-    await ensureReady(client);
-    const me = await auth.getSession(client, req);
+    /* WHICH CLIENT THIS IS (spec 030, §303.35). This endpoint was the one of
+       five that never asked: it checked out a raw connection and read
+       `public`, which after the move holds no client at all — so every clip
+       would have looked lost on every client, and the connection served it
+       wearing the owner's rights. It goes through the same door as the other
+       four now, and wears the badge. The slug rides the QUERY here, because
+       the piece upload posts raw bytes and the play address is a GET. */
+    client = await P.connectFor(pg, P.clientSlugFrom(req, {}));
+    await ensureReady(client, client._smpClient.schema_name);
+    const me = await auth.getSession(client, req, client._smpClient.key);
     if (!me) return send(res, 401, { ok: false, error: "sign in first" });
 
     const state = await readState(client);
@@ -271,7 +279,7 @@ module.exports = async function handler(req, res) {
        inside of this deployment to anybody probing it (§43). */
     return send(res, 500, { ok: false, error: "that did not work" });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };
 

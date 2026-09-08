@@ -7854,8 +7854,12 @@
         var btn = this, kind = btn.dataset.conttake, was = btn.innerHTML;
         if (btn.dataset.busy) return;
         btn.dataset.busy = "1";
-        btn.innerHTML = "Taking\u2026";
-        var go = kind === "slides" ? CONT.takeSlides : CONT.takeCopy;
+        /* THE PDF IS OPENED, NOT TAKEN (§310), so it says so: it hands the
+           deck to the browser's print dialog and there is nothing to wait
+           for afterwards. */
+        btn.innerHTML = kind === "pdf" ? "Opening\u2026" : "Taking\u2026";
+        var go = kind === "pdf" ? CONT.takeFlowPdf
+               : kind === "slides" ? CONT.takeSlides : CONT.takeCopy;
         go(function(err){
           delete btn.dataset.busy;
           if (err) {
@@ -7864,6 +7868,10 @@
             setTimeout(function(){ btn.innerHTML = was; btn.title = ""; }, 4000);
             return;
           }
+          /* AND IT DOES NOT REPAINT. Nothing was stamped, so there is no
+             state for the page to follow — and a paint under an open print
+             dialog would rebuild the deck the browser is laying out. */
+          if (kind === "pdf") { btn.innerHTML = was; return; }
           /* The stamp is state, so the page follows it: the card's own line
              and the cycle page's list both read it. */
           paint();

@@ -5419,9 +5419,13 @@ function contCard(){
         '<b>working copy</b> opens from your laptop with no connection at all \u2014 every ' +
         'plan, every figure, every deck \u2014 and the <b>slides</b> can be presented from ' +
         'PowerPoint.</p>' +
-      '<p class="why contwhy">Both carry the date and time you took them in their name, and ' +
-        'hold everything as it stood at that moment. The working copy has no sign-in in ' +
-        'front of it: whoever holds the file sees everything in it.</p>' +
+      '<p>And <b>one PDF</b> holds every subject back to back, in the order the ' +
+        'master presentation runs them — a single file to present from with nothing ' +
+        'to open it but a PDF reader. It opens your browser’s print dialog rather ' +
+        'than downloading, because it is the deck itself being printed.</p>' +
+      '<p class="why contwhy">The two downloads carry the date and time you took them in ' +
+        'their name, and hold everything as it stood at that moment. The working copy has ' +
+        'no sign-in in front of it: whoever holds the file sees everything in it.</p>' +
       (got ? '<p class="contgot">' + got + '</p>' : '') +
     '</div>' +
     '<div class="ffoot"><span class="why">Everything, not a selection \u2014 the picker above ' +
@@ -5429,6 +5433,10 @@ function contCard(){
       '<button class="editbtn" data-conttake="copy">Working copy</button>' +
       '<button class="editbtn" data-conttake="slides">Slides <span class="cnt">(' + n +
         ')</span></button>' +
+      /* THE WORD PDF IS ON THE LABEL, for §305's own two reasons met here as
+         well: the file cannot be edited, and the press opens the browser's
+         print dialog rather than downloading at once. */
+      '<button class="editbtn" data-conttake="pdf">One PDF</button>' +
     '</div></div>';
 }
 

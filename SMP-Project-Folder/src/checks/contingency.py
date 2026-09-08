@@ -324,9 +324,62 @@ with sync_playwright() as pw:
     js(pg, "()=>{ current='setup'; currentSub='import'; paint(); }")
     pg.wait_for_timeout(400)
     ck("the office is drawn the card", js(pg, "()=>!!document.querySelector('.contcard')") is True)
-    ck("with both buttons on it",
+    # REWRITTEN, NOT LOOSENED (§218, §214.3): §310 gives the card a third
+    # act, so the claim is the same — the card carries every way of taking
+    # the files — and the list it is asserted against grew by one.
+    ck("with all three buttons on it",
        js(pg, "()=>[...document.querySelectorAll('[data-conttake]')].map(b=>b.dataset.conttake)")
-       == ["copy", "slides"])
+       == ["copy", "slides", "pdf"])
+
+    # ── §310 · ONE PDF, EVERY SUBJECT ────────────────────────
+    # Islam: *"the pdf in the contiengcy back is like the master presentation
+    # a full pdf with all slides there."* Three things must be true at once,
+    # and each can fail on its own: the deck opened is the FLOW rather than
+    # one subject, the browser is asked to print it exactly once, and nothing
+    # is stamped — because `afterprint` fires on Cancel too, so a mark would
+    # be a claim the platform cannot see (§124).
+    js(pg, "()=>{ window.__printed = 0; window.print = function(){ window.__printed++; }; }")
+    before = js(pg, "()=>JSON.stringify(REVIEW.taken || null)")
+    subs = js(pg, "()=>masterSubjects().length")
+    js(pg, "()=>document.querySelector('[data-conttake=\"pdf\"]').click()")
+    pg.wait_for_timeout(1200)
+    got = js(pg, "()=>{ const r=document.getElementById('deckroot');"
+                 " return { on:r.classList.contains('on'),"
+                 " slides:r.querySelectorAll('.dslide').length,"
+                 " subjects:new Set([...r.querySelectorAll('.dslide')]"
+                 "   .map(s=>s.dataset.subject)).size,"
+                 " printed: window.__printed }; }")
+    ck("the print dialog is asked for, once", got.get("printed") == 1, got)
+    ck("the deck opened holds every subject that presents",
+       got.get("subjects") == subs and isinstance(subs, int) and subs > 1,
+       (got.get("subjects"), subs))
+    # REWRITTEN, not kept (§113.8). This first compared the flow's slide
+    # count against one subject's deck built DETACHED — and §69 records that
+    # `deckFitPass()` measures nothing on a detached element, so the single
+    # deck came back short and the comparison passed for the wrong reason
+    # even on a build opening one subject. Asked of the SUBJECTS instead: a
+    # flow ends on a different subject from the one it opens on, which one
+    # deck can never do.
+    ends = js(pg, "()=>{ const s=[...document.getElementById('deckroot')"
+                  "  .querySelectorAll('.dslide')];"
+                  " return s.length ? [s[0].dataset.subject,"
+                  " s[s.length-1].dataset.subject] : []; }")
+    ck("and it is a FLOW, not one subject's deck",
+       isinstance(ends, list) and len(ends) == 2 and ends[0] != ends[1], ends)
+    ck("nothing is stamped by it",
+       js(pg, "()=>JSON.stringify(REVIEW.taken || null)") == before, before)
+    js(pg, "()=>window.dispatchEvent(new Event('afterprint'))")
+    pg.wait_for_timeout(400)
+    ck("and it closes when the dialog does",
+       js(pg, "()=>document.getElementById('deckroot').classList.contains('on')") is False)
+    # BOTH ENDS (§94.2): the banner's one press stays a silent download of
+    # TWO things — a build that folded the PDF into it would hang that press
+    # on a dialog nobody pressing it is expecting.
+    ck("the banner's own press asks for no dialog",
+       js(pg, "()=>{ const s = String(CONT.takeBoth || '');"
+              " return s.indexOf('FlowPdf') < 0 && s.indexOf('print') < 0; }") is True)
+    js(pg, "()=>{ current='setup'; currentSub='import'; paint(); }")
+    pg.wait_for_timeout(400)
 
     # SWITCHED TO, never doctored: a matrix cell edited by hand would be
     # testing a tenant nobody has (§270's own falsification argument).

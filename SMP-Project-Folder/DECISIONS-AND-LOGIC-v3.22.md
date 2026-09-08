@@ -38518,3 +38518,242 @@ the platform's Clear Project view and what a new client's database actually
 gets have drifted apart, which is precisely the pair §67 wrote that test to
 keep in step. Its own decision, and not this one's to make in passing.
 
+
+---
+
+## §309 — The review deck as a PowerPoint, made to read like the deck
+
+Islam, with a file downloaded from his own tenant attached — `Care — Cycle
+2.pptx` — *"the presentations design look bad is there a way to make it look
+better? matching what we present?"*
+
+**THE FILE WAS MEASURED BEFORE ANYTHING WAS PROPOSED**, and the first thing it
+settled is that the tenant's brand was already in it correctly: the cover is a
+full bleed of Raya's own `#001780` with the amber kicker on it, from
+`branding()`, exactly as designed. Colour was not the fault. What was wrong was
+six things that are FAULTS and four that are only UNMATCHED, and separating
+those two is most of what made the round tractable.
+
+**THE SIX FAULTS.** *Where the unit stands* — the slide the whole review builds
+to — printed **three headings with all three figures missing**, then the
+footnote explaining readings that were not there. A pillar's name ran into its
+own grey sub-line: `…Scale RAYA Smart CareDirection · · Mahmoud`. Every SWOT
+item on all four slides read `1Long-standing presence`. Column headings broke
+mid-word into `Progres s` and `Quarter s`. A pillar's two headline figures
+arrived as **four naked lines of lead prose** — MEASURES, 117%, EXECUTION, 81%
+— stacked top left where the deck draws them large top right. And the pillars
+roll-call, four cards on the screen, converted to eight lines of flat text.
+
+**THE FOUR UNMATCHED.** Every figure hard left in plain black, with no scoring
+colour on the one column a room runs its eye down; the benchmark behind the
+slash carrying the same weight as the figure it judges; no unit mark in the
+footer; and the whole file set in Calibri where the deck is set in the
+platform's own face.
+
+**ISLAM CHOSE B** — fix the faults AND match the look — from three put to him
+with the cost of each. **AND THE PICTURE CAME FIRST** (rule 1c): five slide
+kinds drawn at full size, today's output beside the proposal, published as an
+artifact and signed off (*"mockup is right"*) before a source was touched. The
+mockup is `design-mockups/review-pptx-design/2026-09-08_slide-kinds.html`.
+
+**ONE CLAIM WAS CORRECTED BEFORE PUBLISHING RATHER THAN LEFT TO STAND.** The
+first draft called *"content stops a third of the way down"* a fault; it is
+not, because the deck leaves whitespace under a short table too. What is
+actually wrong there is the SIZE — 11pt with tight rows — so a three-row table
+reads as small print on the page rather than as the thing on it. §124 with the
+sign reversed: a complaint claiming more than the measurement supports.
+
+**IT IS STILL A CONVERTER AND THAT IS THE WHOLE ARGUMENT.** §305 measured the
+case against a second builder — `deckSlides` + `deckSlidesFn` are 639 lines
+over twenty-one slide kinds, and this deck moved four times in a fortnight — so
+every fix here reads something the deck ALREADY MARKS ON ITSELF rather than
+naming a slide kind: `.num` for a figure, `.final` plus its band key for a
+score, `.duehalf` for the benchmark, `.missing` for a gap, `.dsub` for a second
+line, `.headgrid`, `.dstats` and `.pcards` for the three shapes that are laid
+out rather than written. **A table added to the deck tomorrow marks its own
+columns the same way and arrives here already right**, and a fourth laid-out
+kind still falls back to the leaf text rather than vanishing.
+
+**TWO THINGS THE SCREEN SEPARATES AND A FLAT READ DOES NOT.** `textContent` is
+the concatenation of the descendants and the deck relies on layout for the gaps
+between them, which is one cause behind both the pillar names and the SWOT
+items. `deckPieces()` joins the direct children with ONE space and then
+collapses — so it can only ever add a separator where the document had none,
+and a value already carrying its own spacing is untouched.
+
+**A BAND IS READ BACK, NEVER RE-DERIVED.** `dBand()` writes the band's own key
+onto the cell and the deck's stylesheet turns it into a colour; reading the
+class means the file and the projector cannot disagree about a number they both
+got from `bandOf()` (§53.5). The five colours are literals for the reason every
+colour in this file is one: **a slide is white whatever theme the person
+downloading it is sitting in**, so the light palette's bands are the right ones
+on it — reading the live tokens would put dark mode's mint green on a white
+page.
+
+**A HEADING MUST FIT ITS OWN COLUMN.** Shares alone gave a numeric column half
+a prose one whatever it was called, which is what broke `Progress` in half.
+Each column now starts at the room its own heading needs and the shares divide
+what is left, so a longer heading takes its width from the table rather than
+from itself — and a table whose headings alone overflow keeps its proportions
+rather than running off the edge (§158's rule, one artefact along).
+
+**THE ROW AND THE TYPE GROW TOGETHER, AND THE ROWS A SLIDE HOLDS ARE DERIVED.**
+`deckRowsPerSlide()` works the count out from the row height rather than
+restating it, so changing one number cannot leave a table running off the
+bottom (§122.5). A table that used to fit on one slide at eleven rows now
+splits at eight — the honest consequence of type somebody can read, and the
+arithmetic is asserted rather than assumed.
+
+**THE MARK IS THE ONE CHANGE THE FILE FORMAT HAD TO GROW FOR**, which is why it
+was drawn as a dashed box in the mockup with a cheaper alternative named beside
+it: the zip gains a `ppt/media` member, `[Content_Types].xml` a png default,
+and every slide's relationships a link. **One media part for the whole file**,
+so a twenty-slide deck carries the mark once. It is ASKED FOR rather than
+parsed out of the HTML, because the deck this walks is `deckHtmlFor()`, which
+runs before `deckFootMarks()` — asking `deckMark()` is asking the same question
+that pass asks rather than depending on the order two passes happen to run in.
+It is sized from its OWN PIXELS, read out of the PNG's IHDR header
+synchronously, because an `Image` answers asynchronously and everything here is
+synchronous — a mark whose shape arrives after the file is written is a mark
+stretched to whatever box was guessed for it.
+
+**THE TYPEFACE IS THE ONE THING FROM THE MOCKUP THAT IS NOT DELIVERED, AND IT
+IS SAID RATHER THAN QUIETLY DROPPED.** DrawingML names ONE face per run with no
+fallback list, so naming the platform's own would substitute to something
+arbitrary on any machine that lacks it — worse than Calibri, not better. The
+honest alternatives are embedding the font (PowerPoint wants an obfuscated TTF
+and the platform ships a latin-subset woff2) or leaving it. It is left, and the
+PDF (§305) is where the real face already comes across.
+
+**FOUR THINGS WERE FOUND BY LOOKING AT A RENDERED PAGE AND NONE BY READING THE
+XML** (§296.1's rule paid). The cards' text sat at the top of a 3.4-inch panel,
+because a PowerPoint text box needs `anchor="ctr"` and nothing else says so.
+The footer band was a guessed constant — 685800 — and a full table and the
+cards were both drawn straight over the lockup; it is the mark's own margin,
+its own height and a gap now, so a change to any of the three moves it. The
+SWOT slides set their items at 13pt at the top of an otherwise empty page, so
+prose with no table under it is now set at the size of the thing somebody is
+being shown rather than the size of an introduction. And the bold red `Missing`
+was right-aligned outright, so a tactic with no outcome read as a figure —
+it follows its column like every other value in it.
+
+**`checks/review-pptx.py` BUILDS THE FILE AND READS IT BACK**, which is the
+only way a converter can be checked at all: it drives the real
+`buildReviewPptx()`, unzips what comes out and reads the slide XML, comparing
+against what the deck's own HTML holds rather than against numbers typed into
+the check (§94.8). **Proved able to fail five ways from the SOURCES** (§276,
+because §238's hashed CSP silences a script block whose bytes changed): the
+whole file reverted **1 red** and it stops there by design (§215); the
+`.headgrid` branch out **3 red**; a cell's alignment, band and benchmark out
+**4 red**; the media left out of the package **3 red**; the headline pair back
+in the lead **2 red**.
+
+**AND THE CHECK'S OWN FIRST RUN WAS WRONG THREE TIMES.** It searched for *"where
+we stand"*, which is the deck's phrasing for TWO slides (§254.5's own note about
+them being named apart), so it measured the objectives table and reported a
+correct build broken. It read `.dstats > span` across the WHOLE deck and got all
+eight — two pillars, two tables each — so a per-slide count could never match.
+And it asked whether the glued form appeared in every run JOINED, which it does
+on any correct file, since the two halves are consecutive `<a:t>` elements — an
+assertion that could only ever fail (§94.5 with the sign reversed).
+
+**AND THE CHECK FOUND A REAL FAULT IN MY OWN FIX**: with the laid-out shapes
+excluded from the lead's selector pass, a pillar's tables carry no prose at all,
+so the pass came back empty and the LEAF FALLBACK then swept the headline pair
+up a second time — drawn once in the head and once as two stray lines above the
+table, which is the fault this section removes wearing a different hat. The
+fallback obeys the same exclusion now.
+
+**ONE ASSERTION WAS REWRITTEN, NEVER LOOSENED** (§218, §214.3): it asked for a
+SWOT item's number and words as one run with a space between them, which was
+the first build's shape before the number was given its own run in the accent
+as the mockup drew it. The claim is unchanged — the item is there and it is
+numbered — and it is asserted of the two runs rather than of one spelling.
+
+**THE PLAN DOWNLOAD IS UNTOUCHED AND IT IS ASSERTED** (§94.2). It shares every
+primitive changed here, so a build that moved its row height, its type size or
+its head would have passed everything else and silently altered a second
+artefact nobody asked about: its rows are still 335280, its cells still 11pt,
+and it carries no media part.
+
+Nothing stored moves, nothing is migrated, no `api/`, `lib/` or `db/` file is
+touched. 588/0 authoriser · 136/0 differ · full `qa.py` ERRORS none ·
+`deck-pdf`, `strategy-split`, `fn-perf-controls`, `deck-blank-slides`,
+`deck-figures`, `deck-strip`, `master-presentation`, `import-page`,
+`present-loop`, `deck-fullscreen`, `video-keys`, `setup-pages` all green.
+
+---
+
+## §310 — One PDF of the whole flow, in the contingency pack
+
+Islam, answering where the PDF belongs — *"the pdf in the contiengcy back is
+like the master presentation a full pdf with all slides there."*
+
+**THAT SENTENCE DISSOLVES THE OBSTACLE RATHER THAN WORKING AROUND IT.** The
+three ways out put to him were: leave the pack as it is and take a PDF per
+subject from the Presentation menu; have the pack walk the subjects and open
+the print dialog once each; or build a PDF writer into the platform. His answer
+is none of them. A PDF here is the BROWSER printing (§305) — the platform never
+holds PDF bytes, which is exactly why the file cannot differ from the projector
+— so nineteen PDFs would have been nineteen dialogs answered one at a time. **A
+flow is ONE deck, so it is one dialog and one file**, and §266 already
+assembles one.
+
+**AND IT CLOSES §305'S OWN RECORDED GAP**: *"a master flow cannot be
+downloaded, the entry being per subject."*
+
+**EVERY SUBJECT, IN THE FLOW'S ORDER WHERE ONE IS SET.** `masterOrder()` is the
+running order and is allowed to be a SELECTION — the office may tick three of
+eighteen for a board meeting — and **a backup of some of the subjects is not a
+backup**, which is what the card above it already says about the picker. So
+`contFlowTargets()` takes the flow's order first and appends everything else:
+the membership is everything and the order is the flow's, which answers both
+halves of his sentence rather than one.
+
+**ONE PRINTER, TWO WAYS IN** (§53.5). §305 wrote the fit-pass handling, the
+put-back and the close-on-`afterprint` against a single subject; a second copy
+would be a second answer to *what does the platform do to make a PDF*, and
+those are exactly the parts that would drift. What differs between the two is
+which deck is opened, so that is the argument `deckPrint()` takes.
+
+**IT IS NOT A DOWNLOAD AND IS NOT IN `takeBoth`.** A print opens a dialog and
+waits for a person, which is right for a button somebody presses and wrong for
+the banner's one press, whose whole promise is that it hands the files over
+without asking anything. The banner keeps its two; the card gains a third.
+Asserted at both ends, or a build that folded it in would hang that press on a
+dialog nobody pressing it expects.
+
+**NOTHING IS STAMPED, AND THAT IS A DECISION.** `afterprint` fires on Save and
+on Cancel alike (§305), so marking this person as holding the PDF would be a
+claim the platform cannot see (§124) — and it would move when §306's reminders
+stop, which nobody asked for. The reminders go on ending when the two DOWNLOADS
+are taken.
+
+**AND IT DOES NOT REPAINT.** Nothing was stamped, so there is no state for the
+page to follow — and a `paint()` under an open print dialog would rebuild the
+very deck the browser is laying out. The outcome is written into the button
+(§63), and the word is *Opening…* rather than *Taking…*, because that is what
+the press does.
+
+**THE WORD PDF IS ON THE LABEL**, for §305's own two reasons met again here:
+the file cannot be edited, and the press opens the browser's print dialog
+rather than downloading at once.
+
+`checks/contingency.py` gains a §310 block, proved able to fail twice: the flow
+opened as one subject **2 red** (naming both the subject count and the two ends
+of the deck), the button removed **4 red**. **One assertion of mine was
+rewritten rather than kept** (§113.8): it compared the flow's slide count
+against one subject's deck built DETACHED, and §69 records that `deckFitPass()`
+measures nothing on a detached element — so the single deck came back short and
+the comparison passed for the wrong reason even on a build that opened one
+subject. It asks the SUBJECTS instead: a flow ends on a different subject from
+the one it opens on, which one deck can never do. **And one assertion was
+rewritten, never loosened** (§218, §214.3): the card's button list grew from two
+to three, so the claim — the card carries every way of taking the files — is
+unchanged and the list it is asserted against grew by one.
+
+**RECORDED, NOT DONE.** The PDF is the whole flow or nothing; there is no way
+to print one subject's from the pack, because the Presentation menu already has
+that entry and a second door to it would be §32's door behind a door. And a
+tenant with eighteen subjects prints some four hundred slides in one press,
+which is what he asked for and is worth knowing before the first time.

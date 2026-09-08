@@ -151,6 +151,28 @@ var CONT = (function () {
     } catch (e) { done(e); }
   }
 
+  /* ── AND ONE PDF OF THE WHOLE FLOW (§310) ────────────────────────────
+     Islam: *"the pdf in the contiengcy back is like the master presentation a
+     full pdf with all slides there."*
+
+     IT IS NOT A DOWNLOAD AND IS NOT IN `takeBoth`. A PDF here is the browser
+     printing (§305), so it opens a dialog and waits for a person — which is
+     right for a button somebody presses and wrong for the banner's one press,
+     whose whole promise is that it hands over the files without asking
+     anything. The banner keeps its two; the card gains a third.
+
+     NOTHING IS STAMPED. `afterprint` fires on Save and on Cancel alike, so a
+     mark saying this person holds the PDF would be a claim the platform
+     cannot see (§124) — and it would move when §306's reminders stop, which
+     nobody asked for. */
+  function takeFlowPdf(done) {
+    if (!subjects().length) return done(new Error("nothing is set up to present yet"));
+    try {
+      if (!flowToPdf()) return done(new Error("nothing is set up to present yet"));
+      done(null);
+    } catch (e) { done(e); }
+  }
+
   /* Both, which is what the banner's one button does — a person told to take
      the contingency files should not have to know there are two. */
   function takeBoth(done) {
@@ -331,6 +353,7 @@ var CONT = (function () {
     mayTake: mayTake,
     takeCopy: takeCopy,
     takeSlides: takeSlides,
+    takeFlowPdf: takeFlowPdf,
     buildCopy: buildCopy,
     subjects: subjects,
     stamp: stamp,

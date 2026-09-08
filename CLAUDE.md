@@ -638,6 +638,92 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   workbook still carries no column for a tactic's outcome (§250.2), and
   `checks/tactic-outcome.py` is red on `main` with 13 assertions, reproduced
   identically before this change.
+- **THE REVIEW DECK AS A POWERPOINT, MADE TO READ LIKE THE DECK (§309):**
+  Islam, with a file downloaded from his own tenant — *"the presentations
+  design look bad is there a way to make it look better? matching what we
+  present?"* **MEASURED FIRST, AND THE BRAND WAS ALREADY RIGHT IN IT**: the
+  cover is a full bleed of the tenant's own navy from `branding()`, so colour
+  was never the fault. **SIX FAULTS AND FOUR THINGS ONLY UNMATCHED, and
+  separating those is most of what made the round tractable** — *Where the
+  unit stands* printed **three headings with all three figures missing**, a
+  pillar's name ran into its own sub-line (`…Smart CareDirection ·
+  · Mahmoud`), every SWOT item read `1Long-standing presence`, headings
+  broke into `Progres s`, the headline pair arrived as four naked lines of lead
+  prose, and the pillars roll-call became eight lines of flat text; against
+  figures hard left with no scoring colour, a benchmark carrying the same weight
+  as the figure it judges, no footer mark, and Calibri. Islam chose **B** (fix
+  and match) from three, and **the picture came first** (rule 1c): five slide
+  kinds at full size, today beside the proposal, signed off before a source
+  moved. **ONE CLAIM WAS CORRECTED BEFORE PUBLISHING** — *"content stops a
+  third of the way down"* is not a fault, because the deck leaves whitespace
+  under a short table too; what is wrong is the SIZE. **IT IS STILL A
+  CONVERTER** (§305's measured refusal of a second builder), so every fix
+  reads something the deck ALREADY MARKS — `.num`, `.final` + its band
+  key, `.duehalf`, `.missing`, `.dsub`, `.headgrid`, `.dstats`, `.pcards`
+  — and a table added tomorrow arrives right with no edit. **`deckPieces()`
+  can only ADD a separator where the document had none**, which is one cause
+  behind both run-together faults. **A BAND IS READ BACK, NEVER RE-DERIVED**,
+  with the five colours as literals for the reason every colour here is one: **a
+  slide is white whatever theme the reader sits in**, so the live tokens would
+  put dark mode's mint green on a white page. **A HEADING TAKES ITS WIDTH FROM
+  THE TABLE RATHER THAN FROM ITSELF**, and **the rows a slide holds are DERIVED
+  from the row height** (§122.5), so eleven rows become eight — the
+  honest cost of type somebody can read. **THE MARK IS THE ONE CHANGE THE FORMAT
+  GREW FOR** (a media part, a png default, a per-slide relationship), drawn as a
+  dashed box in the mockup so the cost was agreed rather than discovered;
+  **asked for rather than parsed out of the HTML** (`deckHtmlFor()` runs before
+  `deckFootMarks()`), and **sized from its own IHDR bytes**, because an `Image`
+  answers asynchronously and a mark whose shape arrives after the file is
+  written is a mark stretched. **THE TYPEFACE IS THE ONE THING FROM THE MOCKUP
+  NOT DELIVERED AND IT IS SAID**: DrawingML names ONE face with no fallback, so
+  naming the platform's would substitute to something arbitrary — worse
+  than Calibri, not better. **FOUR FAULTS WERE FOUND BY LOOKING AT A RENDERED
+  PAGE AND NONE BY READING THE XML** (§296.1): a card's text needs
+  `anchor="ctr"`, the footer band was a guessed constant that drew tables over
+  the lockup, SWOT items sat at 13pt on an empty page, and the red `Missing` was
+  right-aligned outright so a tactic with no outcome read as a figure.
+  `checks/review-pptx.py` **builds the file and reads it back**, comparing with
+  the deck's own HTML rather than with typed numbers (§94.8), proved able
+  to fail five ways from the SOURCES (**1 / 3 / 4 / 3 / 2 red**, §276)
+  — **and its own first run was wrong three times** (searching a phrase two
+  slides share, reading `.dstats` across the whole deck, and asking whether the
+  glued form appears in every run JOINED, which is true of every correct file).
+  **AND THE CHECK FOUND A REAL FAULT IN MY OWN FIX**: with the laid-out shapes
+  excluded from the selector pass, a pillar's tables carry no prose at all, so
+  the LEAF FALLBACK swept the headline pair up a second time — drawn once
+  in the head and once as two stray lines above the table, which is the fault
+  this removes wearing a different hat. One assertion REWRITTEN, never loosened
+  (§218). **The plan download is untouched and it is asserted**
+  (§94.2) — its rows still 335280, its cells still 11pt, no media
+  part. Nothing stored moves, nothing is migrated, no `api/`, `lib/` or `db/`
+  file touched.
+- **ONE PDF OF THE WHOLE FLOW, IN THE CONTINGENCY PACK (§310):** Islam
+  — *"the pdf in the contiengcy back is like the master presentation a
+  full pdf with all slides there."* **THAT SENTENCE DISSOLVES THE OBSTACLE
+  RATHER THAN WORKING AROUND IT**: a PDF here is the BROWSER printing
+  (§305), so nineteen files would be nineteen dialogs answered one at a
+  time — and a flow is ONE deck, so it is one dialog and one file. **It
+  closes §305's own recorded gap** (*"a master flow cannot be
+  downloaded"*). **EVERY SUBJECT, IN THE FLOW'S ORDER WHERE ONE IS SET**:
+  `masterOrder()` may be a SELECTION and **a backup of some of the subjects is
+  not a backup**, which the card already says about the picker — so the
+  order is the flow's and the membership is everything. **ONE PRINTER, TWO WAYS
+  IN** (§53.5): the fit-pass handling, the put-back and the
+  close-on-`afterprint` are §305's and are not copied. **NOT A DOWNLOAD AND
+  NOT IN `takeBoth`**, because a dialog waits for a person and the banner's one
+  press must not — asserted at both ends. **NOTHING IS STAMPED**:
+  `afterprint` fires on Cancel too, so a mark would be a claim the platform
+  cannot see (§124), and it would move when §306's reminders stop.
+  **AND IT DOES NOT REPAINT** — a `paint()` under an open dialog rebuilds
+  the deck the browser is laying out — so the outcome is written into the
+  button and the word is *Opening…*. Proved able to fail twice (**2 / 4
+  red**); one assertion of mine REWRITTEN because it compared an attached slide
+  count with a DETACHED one (§69, §113.8), and one rewritten rather
+  than loosened as the button list grew from two to three (§218).
+  **RECORDED, NOT DONE**: the PDF is the whole flow or nothing — the
+  Presentation menu already carries the per-subject entry and a second door to
+  it would be §32's door behind a door — and eighteen subjects is
+  some four hundred slides in one press.
 - **THE PLANNING PERIOD, AND THE REVIEW CYCLE INSIDE IT (§308):** Islam, with
   `Covers from` empty and the strip reading *"reported as of Aug 2026 · 8 of 12
   months"* — *"how is it reading 8 or 12 months while I didn't add the covers
@@ -7063,6 +7149,23 @@ python3 checks/deck-pdf.py      # the deck on paper (§296): the entry beside Pr
                                 # readers are asked for BY NAME first (§215). 0
                                 # failures; 6 red / 2 red on two falsifications made
                                 # from the SOURCES (§276)
+python3 checks/review-pptx.py   # the review deck as a PowerPoint (§309):
+                                # the file is BUILT and READ BACK — the real
+                                # buildReviewPptx() driven in the page, unzipped,
+                                # and the slide XML read, because a builder wired
+                                # to nothing renders perfectly (§96). Where the
+                                # unit stands carries its three figures, asserted
+                                # as AGREEMENT with the deck's own HTML and never
+                                # as three literals; nothing runs together, at
+                                # both ends; a figure is right-aligned, its score
+                                # wears its band and the benchmark is the quieter
+                                # half of its own cell; every heading fits its own
+                                # column; the headline pair is in the head and NOT
+                                # in the lead; the roll-call is cards; the mark is
+                                # in the package and on the content slides only;
+                                # and the PLAN download is asserted untouched
+                                # (§94.2 — it shares every primitive changed).
+                                # 5 falsifications from the SOURCES, 1/3/4/3/2 red
 python3 checks/contingency.py   # the contingency files (§297): the card, the
                                 # banner and the list drawn for the office and ABSENT for
                                 # somebody the shared rule refuses — switched TO, never a
@@ -7938,7 +8041,55 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-07 &mdash; **&sect;308: the planning period, and the
+*Last Updated: 2026-09-08 &mdash; **&sect;309 and &sect;310: the review deck as
+a PowerPoint, and one PDF of the whole flow.** Islam, with a file downloaded
+from his own tenant attached &mdash; ***"the presentations design look bad is
+there a way to make it look better? matching what we present?"*** **THE FILE WAS
+MEASURED BEFORE ANYTHING WAS PROPOSED, AND THE FIRST THING IT SETTLED IS THAT
+THE BRAND WAS ALREADY RIGHT IN IT**: the cover is a full bleed of Raya's own
+navy from `branding()`, so colour was never the fault. **SIX FAULTS AND FOUR
+THINGS ONLY UNMATCHED, and separating those two is most of what made the round
+tractable** &mdash; *Where the unit stands*, the slide the whole review builds
+to, printed **three headings with all three figures missing**; a pillar's name
+ran into its own grey sub-line; every SWOT item on all four slides read
+*1Long-standing presence*; column headings broke into *Progres s*; the two
+headline figures arrived as four naked lines of lead prose where the deck draws
+them large top right; and the pillars roll-call became eight lines of flat text.
+Islam chose **B** &mdash; fix the faults AND match the look &mdash; and **the
+picture came first** (rule 1c): five slide kinds at full size, today beside the
+proposal, published as an artifact and signed off before a source was touched.
+**ONE CLAIM WAS CORRECTED BEFORE PUBLISHING RATHER THAN LEFT TO STAND** &mdash;
+*"content stops a third of the way down"* is not a fault, because the deck
+leaves whitespace under a short table too; what is wrong is the SIZE. **IT IS
+STILL A CONVERTER, WHICH IS THE WHOLE ARGUMENT** (&sect;305 measured the case
+against a second builder): every fix reads something the deck ALREADY MARKS ON
+ITSELF, so a table added tomorrow arrives right with no edit. **THE MARK IS THE
+ONE CHANGE THE FILE FORMAT HAD TO GROW FOR**, drawn as a dashed box in the mockup
+so the cost was agreed rather than discovered. **AND THE TYPEFACE IS THE ONE
+THING FROM THE MOCKUP NOT DELIVERED, SAID RATHER THAN QUIETLY DROPPED**: a
+PowerPoint run names ONE face with no fallback list, so naming the platform's own
+would substitute to something arbitrary on any machine that lacks it. **FOUR
+FAULTS WERE FOUND BY LOOKING AT A RENDERED PAGE AND NONE BY READING THE XML**
+(&sect;296.1). **AND &sect;310 IS HIS ANSWER TO WHERE THE PDF BELONGS** &mdash;
+***"the pdf in the contiengcy back is like the master presentation a full pdf
+with all slides there"*** &mdash; which dissolves the obstacle rather than
+working around it: a PDF here is the BROWSER printing, so nineteen files would
+have been nineteen dialogs, and a flow is ONE deck, so it is one dialog and one
+file. It closes &sect;305's own recorded gap. **Nothing is stamped by it**,
+because `afterprint` fires on Cancel too and a mark would be a claim the platform
+cannot see. `checks/review-pptx.py` **builds the file and reads it back**, proved
+able to fail five ways from the SOURCES (**1 / 3 / 4 / 3 / 2 red**) &mdash; and
+its own first run was wrong three times, while **the check found a real fault in
+my own fix** (the leaf fallback sweeping the headline pair up a second time).
+`checks/contingency.py` gains a &sect;310 block, **2 / 4 red**, with one
+assertion of mine REWRITTEN for comparing an attached slide count with a DETACHED
+one (&sect;69, &sect;113.8) and two more rewritten rather than loosened
+(&sect;218). Nothing stored moves, nothing is migrated, no `api/`, `lib/` or
+`db/` file is touched. 588/0 authoriser &middot; 136/0 differ &middot; full
+`qa.py` ERRORS none &middot; twelve neighbouring checks green. **On the branch,
+not merged.***
+
+*Earlier: 2026-09-07 &mdash; **&sect;308: the planning period, and the
 review cycle inside it.** Islam, with `Covers from` empty and the strip reading
 *"reported as of Aug 2026 &middot; 8 of 12 months"* &mdash; ***"how is it
 reading 8 or 12 months while I didn't add the covers from?"*** &mdash; and the

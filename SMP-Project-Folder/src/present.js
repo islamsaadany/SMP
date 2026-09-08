@@ -1136,11 +1136,17 @@ function openDeckFor(target, from){
    cancelling cost nothing; a browser that never fires it leaves the deck
    open on screen, with Exit where Exit always is — a nuisance and not a trap
    (§61). */
-function deckToPdf(target){
+/* ONE PRINTER, TWO WAYS IN (§53.5, §310). §305 wrote all of this against a
+   single subject and §310 needed the same act over a FLOW; a second copy
+   would be a second answer to "what does the platform do to make a PDF",
+   and the fit-pass handling and the put-back are exactly the parts that
+   would drift. What differs between the two is which deck is opened, so
+   that is the argument. */
+function deckPrint(open){
   var root = document.getElementById("deckroot");
   var wasFit = root.classList.contains("fitwin");
   root.classList.remove("fitwin");
-  openDeckFor(target);
+  open();
   var done = function(){
     window.removeEventListener("afterprint", done);
     closeDeck();
@@ -1150,6 +1156,48 @@ function deckToPdf(target){
   /* One tick, so the paint that `openDeckWith()` just asked for has happened
      before the browser is asked to lay the same thing out for paper. */
   setTimeout(function(){ window.print(); }, 50);
+}
+
+function deckToPdf(target){
+  deckPrint(function(){ openDeckFor(target); });
+}
+
+/* ── EVERY SUBJECT, ONE PDF (§310) ────────────────────────────────────
+   Islam, of the contingency pack: *"the pdf in the contiengcy back is like
+   the master presentation a full pdf with all slides there."*
+
+   THAT SENTENCE DISSOLVES THE OBSTACLE RATHER THAN WORKING AROUND IT. A PDF
+   here is the BROWSER printing (§305) — the platform never holds PDF bytes,
+   which is exactly why the file cannot differ from the projector — so a
+   folder of nineteen PDFs would have been nineteen print dialogs answered
+   one at a time. A flow is ONE deck, so it is one dialog and one file.
+
+   EVERY SUBJECT, IN THE FLOW'S ORDER WHERE ONE IS SET. `masterOrder()` is
+   the running order and is allowed to be a SELECTION — the office may tick
+   three of eighteen for a board meeting — and a backup of some of the
+   subjects is not a backup (the card above says so about the picker). So the
+   order is the flow's and the membership is everything, which answers both
+   halves of what he asked for rather than one.
+
+   RECORDED, NOT STAMPED. A print dialog's outcome cannot be known — the
+   browser fires `afterprint` on Save and on Cancel alike (§305) — so marking
+   this person as holding the file would be a claim the platform cannot see
+   (§124). §306's reminders go on ending when the two DOWNLOADS are taken. */
+function contFlowTargets(){
+  var all = masterSubjects();
+  var first = SMPRules.masterFlow(GROUP).filter(function(t){
+    return all.indexOf(t) >= 0;
+  });
+  return first.concat(all.filter(function(t){ return first.indexOf(t) < 0; }));
+}
+
+function flowToPdf(){
+  var list = contFlowTargets();
+  if (!list.length) return false;
+  deckPrint(function(){
+    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+  });
+  return true;
 }
 
 /* ══ THE MASTER PRESENTATION (§266) ═══════════════════════════════════

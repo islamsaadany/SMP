@@ -39019,3 +39019,85 @@ to print one subject's from the pack, because the Presentation menu already has
 that entry and a second door to it would be §32's door behind a door. And a
 tenant with eighteen subjects prints some four hundred slides in one press,
 which is what he asked for and is worth knowing before the first time.
+
+---
+
+## §313 — CLAUDE.md IS THE RULES, NOT THE RECORD (2026-09-08)
+
+Islam, of the sessions themselves — *"the context of the sessions became ending
+very quickly is that relevant to any of them"*, asked of the skills that had just
+been listed.
+
+**IT WAS NOT THE SKILLS, AND MEASURING SAID SO BEFORE ANYTHING WAS PROPOSED.**
+The 39 repo skills cost **13.5 KB** of description at session start, the account
+skills and built-ins perhaps 5 KB more. `CLAUDE.md` was **1,014,641 bytes —
+149,726 words — loaded verbatim into every session before a word is typed**, so
+it was about **98% of the startup cost** and the skills about 1.5%. The 43 MB of
+skill *bodies* on disk load only when a skill is invoked and cost nothing. *The
+thing that was suspected was the one thing that was cheap.*
+
+**AND THE TWO SECTIONS CARRYING THE WORKING RULES WERE 25 KB OF THE 934.** The
+breakdown at the time of the first measurement: Project Context 482 KB, Common
+Tasks 360 KB, Configuration 67 KB, Working Guidelines 24 KB, Steering Documents
+1 KB. Project Context had become a prose summary of every § section; Common Tasks
+carried a paragraph of commentary per check plus a running release trailer.
+
+**IT WAS A SECOND COPY, NOT THE ONLY COPY, AND THAT IS WHAT MADE THE CUT SAFE.**
+Every § summarised in the removed material was checked against this log by
+matching each § number against every heading in it: **191 named, 191 covered, 0
+missing.** The claim is a measurement, not a reassurance — and it is why the work
+is a deletion rather than a migration.
+
+**THE FILE'S OWN STEERING SECTION HAD ALREADY SAID WHERE THIS BELONGS**:
+`CLAUDE.md` is *"how to work, conventions, house rules"* and this log is *"every
+decision with its reasoning — the rebuild contract."* Principle II (reversals
+recorded, never overwritten) is a rule about THIS file; applied to the file that
+loads on every session it produced a document that grew by a paragraph per merge
+and was paid for on every session that never touched the feature — **894 KB on 6
+September, 934 KB on 7 September, 1,014 KB on 8 September**, three measurements
+two days apart.
+
+**WHAT IS KEPT IS WHAT A SESSION CANNOT WORK WITHOUT**: the Working Guidelines
+and the Git Workflow rules verbatim (not one rule reworded — they are the
+operative instructions and rule 1b forbids restructuring what was not asked
+for); the standing architectural facts (16 of the Repository section's 294
+bullets — GitHub, deployment, database, the pooled-connection rule, identity,
+the two datasets, plan import, companies, authorisation, PWA, the clean URL,
+multi-tenant, screen preferences, Setup's shape, searchable dropdowns, the
+version-bump list); the directory layout; the build and check commands; and
+Common Tasks.
+
+**AND A NEW SECTION, "TRAPS THAT BITE", IS WHAT PAYS FOR THE REMOVAL.** The
+long-form lessons were load-bearing — §158's yielding floor, §53.5's two sides
+of the switch, §56.7's colliding `var`s, §94.5's unfalsifiable check, §51.11's
+quietly-passing selector — and a cut that simply dropped them would trade
+context for repeated mistakes. They become **one line each with the § pointer
+and no reasoning**, grouped by where they bite (layout, JavaScript, server,
+checks, product): the cheap warning stays resident, the argument moves to the
+log. **~6 KB for about fifty traps.**
+
+**THE CHECKS LIST KEEPS EVERY CHECK AND LOSES ITS COMMENTARY** — 884 lines of
+paragraph-per-check became **106 lines**, each naming its file and the § it
+guards, so nothing is unrunnable and nothing is unfindable.
+
+**THE CUT IS ANCHOR-BASED, NEVER LINE-BASED** (§214's rule, applied to a
+document): the script finds its boundaries by heading text and bullet prefix and
+**exits if an anchor matches nothing**, so it survives `main` moving under it —
+which it did, twice, mid-change.
+
+**1,014,641 → 51,207 bytes, about 95%.** Roughly 200,000 tokens back per session.
+
+**AND THE MERGE WAS PART OF THE WORK** (§94.12's family, third face): the first
+build was cut against the 934 KB file, and `git fetch origin main` before
+committing found **37 commits** and **§302–§312** already taken — including a
+`#### A BOX CAN BE CENTRED…(§302)` block inside the very section being trimmed.
+So the local edit was reverted, `main` merged first, and the cut re-run against
+the merged file; this section is §313 rather than §302 for exactly the reason
+§287 and §312 are renumbered. *A cut planned against a file somebody else is
+still writing has to be re-planned, not re-applied.*
+
+**RECORDED, NOT DONE**: `SMP-Project-Folder/CLAUDE-RULES.md` (13 KB) and
+`README.md` (36 KB) are not loaded at session start and are untouched; and
+nothing enforces the new discipline — a future session can still write a
+paragraph per merge into `CLAUDE.md`, so the Steering Documents section now says
+the size is a running cost and names this section.

@@ -21,15 +21,19 @@ own word for its clock mid-sentence, and had no way back. The panel also now
 says it is asking rather than reporting an empty history while the answer is
 in flight. **11 red** on the build before, green after.
 
-**Waiting on Islam:** the questions history is being widened, from his own
-words — *"the history of questions is about what has been asked, answered
-through the bot or throu the smo team."* Drawn and signed off (shape A, one
-pane, the two histories behind a switch:
-`design-mockups/questions-history/2026-09-08_two-histories.html`), with his
-rule for the office half: **collected as it happens and never marked**, because
-the platform can say whether the bot answered — the bot says so — and cannot
-judge a human reply. Unanswered questions will show, in three states, including
-the one that never reached the assistant at all. Not built yet.
+**And with it, §303 — both halves of the history.** From his own words:
+*"the history of questions is about what has been asked, answered through the
+bot or throu the smo team."* Two histories behind one switch (shape A, from two
+drawn: `design-mockups/questions-history/2026-09-08_two-histories.html`) — what
+the assistant was asked, and what the office answered by hand. **The office's
+half is collected as it happens and carries no verdict**, which is his rule and
+the better one: the platform can say whether the bot answered, because the bot
+reports what it did, and it cannot judge a human reply — so no marking, no
+unanswered filter, nothing to remember. And a question that never reached the
+assistant is now kept and named as its own third state, where before it left no
+trace at all; that reverses §299 at his word, with its point intact — such a row
+is not a gap in the knowledge base and is counted as one nowhere. **16 red** on
+the build before.
 
 **Before it: §300 — a yes or a no that can be under way — merged to
 `main` 2026-09-06 on Islam's word**, carrying §298 and §299 in with it from two

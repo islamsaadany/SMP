@@ -3816,8 +3816,13 @@ function kbAudPick(id, w){
    `null` IS NOT AN EMPTY LIST (§93, §231.4). Until the server answers, the
    page says it is asking; a failure says so and says nothing was lost. An
    empty list is the only one of the three that means nothing has been asked. */
-var ASKS = null;        /* { days, rows } once asked; {__error} on a refusal */
+var ASKS = null;        /* { days, rows, asked } once asked; {__error} on a refusal */
 var ASKMISS = false;    /* the filter: unanswered only */
+/* WHICH HISTORY IS BEING READ (§303). State on the page and not a stored
+   preference, for the filter's own reason: the other half is one press away
+   and somebody arriving to read this wants the assistant's, which is the one
+   with something to close. */
+var ASKSIDE = "assistant";
 
 /* WHETHER AN ENTRY HAS ALREADY BEEN MINTED FOR THIS ROW, matched on the
    question it was minted FROM through the SHARED normaliser (§42) — never a
@@ -3834,15 +3839,34 @@ function askEntry(qkey){
   })[0] || null;
 }
 
+/* WHICH OF THE THREE THINGS A ROW CAN SAY (§303). Asked in ONE place, because
+   the ground the row wears, the words in the answer column, whether it offers
+   an answer to write and whether it joins the unanswered count are four
+   readings of one fact, and four tests would drift the first time a fourth
+   state arrived (§53.5).
+
+   `reached` IS ONLY EVER FALSE ON THE ASSISTANT'S HALF — the office half is
+   written by a person who was plainly there — so the office's rows fall
+   through to `told` and carry no verdict at all, which is his rule. */
+function askState(r){
+  if (r.answered_by === "office") return "told";
+  if (r.reached === false) return "lost";
+  return r.answered ? "told" : "gap";
+}
+
 function askRowHtml(r){
-  var miss = !r.answered;
+  var state = askState(r);
   var mine = askEntry(r.qkey);
   var done = !!(mine && String(mine.a || "").trim());
   var who = r.office_only ? "Office" : (r.by_office ? "Office and others" : "");
   var groups = RECIPES.map(function(g){
     return '<option value="' + esc(g.g) + '">' + esc(g.g) + '</option>';
   }).join("");
-  return '<tr' + (miss && !mine ? ' class="askmiss"' : '') + '>' +
+  /* THE MARK IS THE GAP'S ALONE. A row nobody could reach is not a gap in the
+     knowledge base (nothing was asked of it), and a question the office
+     answered by hand carries no verdict at all — so neither wears the ground
+     that means "you can close this" (§145.14, §168). */
+  return '<tr' + (state === "gap" && !mine ? ' class="askmiss"' : '') + '>' +
     '<td><div class="askq">' + esc(r.question) + '</div>' +
       '<div class="askby">' +
         (who ? '<span class="chip kind askwho">' + esc(who) + '</span>' : "") +
@@ -3851,10 +3875,16 @@ function askRowHtml(r){
       '</div></td>' +
     '<td class="asktimes">' + (r.times | 0) + '×</td>' +
     '<td class="askans">' +
-      (r.answered
+      (state === "told"
         ? esc(oneLine160(r.answer || ""))
-        : '<b class="askno">No answer — the assistant said it could not ' +
-          'answer this</b>') +
+        : state === "gap"
+          ? '<b class="askno">No answer — the assistant said it could not ' +
+            'answer this</b>'
+          /* AND UNREACHED SAYS WHAT HAPPENED, NOT WHAT WAS DECIDED (§123,
+             §124). It never saw the question, so there is nothing it could
+             have answered and nothing here to write. */
+          : '<b class="asklost">The assistant was never reached — it did not ' +
+            'see this question</b>') +
       (mine
         ? '<div class="askdone' + (done ? "" : " part") + '">' +
           (done ? "An answer has been written here" : "An answer is being written here") +
@@ -3868,7 +3898,25 @@ function askRowHtml(r){
          entry is named by the assistant itself, in `source`; where it did not
          name one the row carries nothing rather than a control that would land
          nowhere (§61). */
-      (mine ? ""
+      /* AND A ROW NOBODY REACHED OFFERS NEITHER (§303). There is no entry to
+         open, because nothing answered it, and nothing to write, because the
+         knowledge base was never asked — the errand is the connection, and it
+         is a page away rather than a control here (§61: a button lands
+         somewhere, or it is not a button). */
+      (state === "lost"
+        ? '<button type="button" class="mini" data-askdiag="1">' +
+          "Test the assistant</button>"
+        : mine ? ""
+        : r.answered_by === "office"
+          /* THE OFFICE'S HALF OFFERS, AND NEVER JUDGES. A question answered by
+             hand six times is the best candidate in the tenant for an entry —
+             which is an offer about the FUTURE, not a verdict on the reply
+             (§303: the platform cannot tell a good answer from a holding line,
+             so it does not try). */
+          ? '<select class="askgrp" aria-label="Which group the answer belongs in">' +
+              groups + '</select>' +
+            '<button type="button" class="mini go" data-askadd="' + esc(r.qkey) +
+            '">Add an answer</button>'
         : r.answered
           ? (r.source
               ? '<button type="button" class="mini" data-askopen="' + esc(r.source) +
@@ -3933,27 +3981,67 @@ function askListHtml(){
   if (!ASKS || ASKS.asking) {
     return head("") + '<div class="asknone">Asking…</div></div>';
   }
-  var rows = ASKS.rows || [];
-  var miss = rows.filter(function(r){ return !r.answered; });
-  var shown = ASKMISS ? miss : rows;
-  var seg = '<span class="seg askseg">' +
-    '<button type="button" data-askfilter="all" aria-pressed="' + (!ASKMISS) +
-      '">All ' + rows.length + "</button>" +
-    '<button type="button" data-askfilter="miss" aria-pressed="' + (!!ASKMISS) +
-      '">Unanswered ' + miss.length + "</button></span>";
+  /* ── TWO HISTORIES, ONE PANE (§303) ────────────────────────────────
+     Islam: *"we can widen it but a differetn history frfom the ai so we can
+     analyze them later."* One store read two ways (§53.5) and split here, so
+     the switch is a press rather than a request — the rows for both halves
+     came back together.
+
+     THE FILTER IS THE ASSISTANT'S ALONE, and that is his rule rather than a
+     saving: *"you can't mark what is answered and not this is only viable in
+     case of the bot."* The assistant reports what it did, so a row on that
+     half can honestly say a gap needs closing; a person's reply is always an
+     answer of some kind and nothing here can tell a good one from a holding
+     line. Drawing an Unanswered filter over the office's half would be the
+     platform claiming a judgement it cannot make. */
+  var all = ASKS.rows || [];
+  var side = ASKSIDE === "office" ? "office" : "assistant";
+  var rows = all.filter(function(r){
+    return (r.answered_by === "office" ? "office" : "assistant") === side;
+  });
+  var asked = ASKS.asked || {};
+  var sides = '<span class="seg askseg">' +
+    '<button type="button" data-askside="assistant" aria-pressed="' +
+      (side === "assistant") + '">Asked the assistant ' + (asked.assistant | 0) + "</button>" +
+    '<button type="button" data-askside="office" aria-pressed="' +
+      (side === "office") + '">Answered by the office ' + (asked.office | 0) + "</button></span>";
+
+  /* A ROW NOBODY REACHED IS NOT A GAP IN THE CORPUS (§299's own point, kept
+     while its refusal is reversed): it is counted nowhere and offers nothing
+     to write, because the knowledge base was never asked. */
+  var miss = rows.filter(function(r){ return askState(r) === "gap"; });
+  var shown = (side === "assistant" && ASKMISS) ? miss : rows;
+  var seg = side === "assistant"
+    ? '<span class="seg askseg tailseg">' +
+      '<button type="button" data-askfilter="all" aria-pressed="' + (!ASKMISS) +
+        '">All ' + rows.length + "</button>" +
+      '<button type="button" data-askfilter="miss" aria-pressed="' + (!!ASKMISS) +
+        '">Needs an answer ' + miss.length + "</button></span>"
+    : "";
   var body = shown.length
     ? '<div class="tblscroll"><table class="asktable"><thead><tr>' +
-        "<th>Question</th><th>Asked</th><th>What the assistant said</th><th></th>" +
+        "<th>Question</th><th>Asked</th><th>What the " +
+        (side === "office" ? "office" : "assistant") + " said</th><th></th>" +
       "</tr></thead><tbody>" +
       shown.map(askRowHtml).join("") + "</tbody></table></div>"
-    /* AND THE EMPTY CASE DESCRIBES THIS FILTER, never the whole product
-       (§113's lesson on the inbox's own tabs). */
-    : '<div class="asknone">' + (ASKMISS
-        ? "Every question asked has been answered."
-        : "Nothing has been asked yet. This fills up as people use the " +
-          "assistant.") + "</div>";
-  return head('<span class="askwin">Last ' + (ASKS.days | 0) + " days</span>" + seg) +
-    body + "</div>";
+    /* AND THE EMPTY CASE DESCRIBES THIS HALF AND THIS FILTER, never the whole
+       product (§113's lesson on the inbox's own tabs). */
+    : '<div class="asknone">' + (
+        side === "office"
+          ? "Nothing has been answered by hand yet. This fills up as the " +
+            "office replies to people."
+          : ASKMISS
+            ? "Every question the assistant read has been answered."
+            : "Nothing has been asked yet. This fills up as people use the " +
+              "assistant.") + "</div>";
+  /* THE WINDOW SAYS WHICH HALF IT IS COUNTING, because the two are different
+     numbers under one heading and a bare "Last 90 days" beside a switch reads
+     as the total of both (§108.1). It takes the right-hand end itself where
+     the filter is not drawn, or the head reads as one run of controls with a
+     gap at the end (§296's own margin fault, one panel over). */
+  var win = '<span class="askwin' + (seg ? "" : " tail") + '">Last ' +
+    (ASKS.days | 0) + " days · " + plural(rows.length, "question") + "</span>";
+  return head(sides + seg + win) + body + "</div>";
 }
 
 function kbEdCard(id, q, a, mark, aud){

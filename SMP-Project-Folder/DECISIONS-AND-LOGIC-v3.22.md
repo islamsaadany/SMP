@@ -36885,3 +36885,137 @@ serverless function may kill), so a stuck provider still costs one request ten
 seconds once a minute. The ceiling makes that survivable; moving the sweep off
 the request path is a change to how anything is sent at all, and it has not been
 put to Islam.
+
+---
+
+## §303 — BOTH HALVES OF THE HISTORY (2026-09-08)
+
+Asked to align on what the questions history is, Islam:
+
+> my understand is the history of questions is about what has been asked,
+> answered through the bot or throu the smo team to have an overview of the
+> questoins and answers. align with me on that.
+
+He is describing something wider than §299 built, and measuring said exactly
+how much wider: `assistant_asks` held only what the **assistant** read, so a
+question the office answered by hand was nowhere on it, and a question the
+assistant never received was nowhere either — including his own, which is how
+this whole thread started. Told which half was already true and which was not,
+he answered both open questions in one line:
+
+> we can widen it but a differetn history frfom the ai so we can analyze them
+> later … the smo doesn't mark anything the list is collected and then later is
+> verified for the list answered by the smo you can just collect the history
+> that needs analyzing later but you can't mark what is answered and not this
+> is only viable in case of the bot.
+
+**HIS SECOND SENTENCE IS THE BETTER RULE AND IT IS THE WHOLE DESIGN OF THIS
+HALF.** I had recommended a *Record this as a question* control in the reply
+box, on the reasoning that a chat thread is a conversation and something has to
+say which exchange was a question. He refused the press and gave the reason:
+**the platform can say whether the BOT answered, because the bot reports what
+it did — it answered from an entry, or it declined — and it cannot judge a human
+reply.** So the office's half carries no verdict at all: collected as it
+happens, no unanswered filter, no marked rows, nothing to remember. It is a
+record to read and verify later, not a queue to clear. That removes a control,
+a decision and a habit nobody would have kept.
+
+**SHAPE A, FROM TWO DRAWN** (rule 1c,
+`design-mockups/questions-history/2026-09-08_two-histories.html`): one pane, the
+two histories behind a switch. B drew them as two panes both open, and its
+argument — nothing to press to compare — was mine; his is the smaller page.
+
+### One store, two readings
+
+**A SECOND TABLE WOULD BE A SECOND ANSWER TO "WHAT HAS BEEN ASKED"** (§53.5,
+§299's own argument unchanged), and it is also what makes his reason work: the
+point of keeping the halves apart is to read them against each other later, and
+a comparison across two tables is a join somebody has to remember to write. So
+it is one column — `answered_by` — and the read is `GROUP BY answered_by, qkey`
+in **one query**, split on the page, because a switch that waits on a server is
+a press that looks broken (§35).
+
+**`answered_by` IS WHO ANSWERED, AND `office` IS WHO ASKED.** Two facts that
+look like one: a user's question answered by hand is `office = false,
+answered_by = 'office'`. Reading either off the other is how the two halves
+would drift.
+
+**THE QUESTION IS THE EXCHANGE, NOT ITS LAST LINE** — everything the person
+said since the office last spoke, joined oldest first — because the last line is
+as often *"and it says 2%"* as it is the question. **The cost is stated on the
+mockup where it shows**: collected raw, it groups only where two people word a
+question identically, so the counts on that half read low and the reading of it
+is the office's. Anything looser would be the platform deciding in front of them
+that two questions are the same, which §299 refused when the first half was
+drawn.
+
+**AND NOTHING IS RECORDED WHERE THERE IS NO QUESTION** — the office starting a
+conversation (§247), or writing twice in a row — or the list would carry a row
+with an answer and nothing it answers.
+
+### The third state, reversing §299 at his word
+
+§299 wrote **nothing** when the assistant could not be reached, on the stated
+reasoning that such a row would fill the office's list with something no answer
+can close. Recorded as a reversal rather than overwritten (Principle II), and
+the reason he is right is his own case: he asked, nothing came back, and
+**nothing anywhere said it had happened**.
+
+**WHAT KEEPS §299'S POINT INTACT IS THE STATE, NOT SILENCE.** A row nobody
+reached is not a gap in the corpus — the knowledge base was never asked — so it
+joins no unanswered count, wears no warning ground, and offers no answer to
+write. It says what happened and points at the diagnostic (§123). Three states,
+asked in **one place** (`askState`), because the ground, the words, the control
+and the count are four readings of one fact and four tests would drift the first
+time a fourth state arrived.
+
+**AND THE CORNER HAD TO LEARN IT TOO.** The office's own Ask history is the same
+rows read the other way (§299), and it could only ever hold two states because
+the third was never stored — so an unreached row would have been drawn with the
+decline's words, telling the office the assistant had READ the question and had
+nothing. §124's fault one surface over from where it was first written.
+`askRows` selects `reached` now and the panel says *did not get through*.
+
+**BOTH CALL SITES ARE ALREADY BEHIND THE SWITCH**, which is what makes recording
+a null safe: reaching `recordAsk` at all means the assistant was supposed to
+answer, so null means TRIED AND FAILED and never "there is no assistant here".
+Asserted: with Ask off, nothing is written, not even a failure.
+
+### §303.1 — a field the plumbing did not forward
+
+The switch printed **0 and 0** over a tenant with a real history. `CHAT.questions`
+returned the totals and the shell's callback builds `ASKS` field by field —
+`{ days: j.days, rows: j.rows }` — so `asked` was dropped in silence. §135's own
+fault (`SYNC.mailSend()` naming every field it forwards, and greet not among
+them), and **found by the check rather than by reading**.
+
+### §303.2 — and the check walked into §215 twice in one sitting
+
+`checks/office-ask.py` §11 reported **8** failures against the build it exists
+to reject, because the first missing control threw after Playwright's 30
+seconds. Every press degrades now, and the honest count is **16**. Three more of
+its own first failures were the CHECK: it leaned on state §9 had left (the only
+declined row had been answered, so *a gap still offers an answer* was measuring
+an earlier section — §94.2), it compared a column heading in sentence case
+against text the stylesheet uppercases, and it counted declines across the whole
+table where the rule is about **one row** — an assertion that moves the moment a
+fixture gains a row is one that gets rewritten rather than one that guards
+anything (§94.8).
+
+**Two assertions in `scripts/test-ask.js` state the rule this reverses and were
+REWRITTEN, never deleted** (§218): *"and NOTHING was recorded"* became *"and it
+IS recorded now, as its own state"* with the unreached-versus-declined
+distinction beside it, and the corner's own history moved 4 → 5.
+
+**No migration risk and it is measured, not claimed**: two `ADD COLUMN IF NOT
+EXISTS` with defaults that are correct for every row already stored, because
+§299 only ever wrote reached assistant rows. Nothing is backfilled. Round trip,
+clean slate, clean parity and `test-ask` all green on **virgin** Postgres
+databases; `test-authorize` 534/0, `test-graph-diff` 131/0 — the server needed
+no new rule, because `assistant_asks` sits outside the state graph.
+
+**RECORDED, NOT DONE**: the office's half groups only on an exact spelling, so
+the same question typed two ways is two rows — visible on the mockup and left
+there deliberately, because his own plan is that the list is verified by a
+person; and the Knowledge base page still opens on *How it works* rather than on
+the tab this list is on (§299's own standing note).

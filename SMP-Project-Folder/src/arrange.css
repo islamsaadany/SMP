@@ -1963,10 +1963,19 @@
            background:var(--surface-2); }
 .askhead h3 { margin:0; font-size:var(--fs-body); font-weight:650; }
 .askwin { font-size:var(--fs-small); color:var(--ink-3); }
+/* On the office's half there is no filter to push the row's tail right, so the
+   window takes that end itself (§303). */
+.askwin.tail { margin-left:auto; }
 /* THE FILTER IS TWO EQUALLY LIKELY CHOICES, so its halves are equal — the 2:1
    next door is the corner's switch, where they are not (§299). */
-.askseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
+.askseg { display:inline-flex; border:1px solid var(--line);
           border-radius:var(--r-sm); overflow:hidden; }
+/* THE SWITCH BETWEEN THE TWO HISTORIES SITS BESIDE THE TITLE and the filter
+   takes the far end (§303). `margin-left:auto` was on `.askseg` itself, which
+   was right while there was one of them and would push BOTH to the right the
+   moment there were two — leaving the heading alone on an empty half of the
+   row. */
+.askseg.tailseg { margin-left:auto; }
 .askseg button { font:inherit; font-size:var(--fs-small); font-weight:650;
                  color:var(--ink-2); background:var(--surface); border:0;
                  padding:5px 11px; cursor:pointer; white-space:nowrap; }
@@ -2001,6 +2010,11 @@
             white-space:nowrap; }
 .askans { color:var(--ink-2); max-width:56ch; }
 .askno { color:var(--attn-tx); font-weight:650; }
+/* UNREACHED IS QUIET, NEVER AMBER (§303, §168). The warning ink means "you can
+   close this", and nothing about a connection that failed is the office's to
+   answer in the knowledge base — the row says what happened and points a page
+   away. */
+.asklost { color:var(--ink-3); font-weight:600; }
 .askdone { margin-top:4px; font-size:var(--fs-micro); color:var(--good-tx);
            font-weight:650; }
 /* AN ENTRY WITH NOTHING TYPED INTO IT YET IS NOT AN ANSWER (§35), so it does

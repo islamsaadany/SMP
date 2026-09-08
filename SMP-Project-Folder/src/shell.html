@@ -4537,6 +4537,30 @@
         ASKMISS = b.dataset.askfilter === "miss"; paint();
       });
     });
+    /* ── THE TWO HISTORIES (§303) ───────────────────────────────────
+       Both halves came back in one answer, so the switch is a press and
+       nothing is asked of the server. The unanswered filter belongs to the
+       assistant's half alone and is CLEARED on the way over, or the office's
+       half would be drawn under a filter it does not have and the press back
+       would land on a narrowed list nobody chose (§113.8's blind spot: the
+       state left behind is the one nothing on screen names). */
+    document.querySelectorAll("[data-askside]").forEach(function(b){
+      b.addEventListener("click", function(){
+        ASKSIDE = b.dataset.askside === "office" ? "office" : "assistant";
+        if (ASKSIDE === "office") ASKMISS = false;
+        paint();
+      });
+    });
+    /* A ROW NOBODY REACHED IS A CONNECTION TO CHECK, and the diagnostic lives
+       where the chat's settings do (§123). The button GOES THERE rather than
+       running the test from here: a second copy of that walk would be a second
+       answer to "is the bot working" (§53.5), and the panel it lives in is the
+       Inbox's own. */
+    document.querySelectorAll("[data-askdiag]").forEach(function(b){
+      b.addEventListener("click", function(){
+        currentSub = "chat"; paint();
+      });
+    });
     /* TRYING AGAIN IS FORGETTING THE ANSWER, never a second fetch written here
        (§302). `null` is what the block below `paint()` waits for, so putting it
        back sends the request through the one door that already knows how to
@@ -6679,8 +6703,13 @@
         typeof CHAT !== "undefined" && CHAT.questions) {
       ASKS = { asking: true };
       CHAT.questions(function(err, j){
+        /* NAMED, OR IT NEVER ARRIVES (§135, §303). This object is built field
+           by field, so a value the endpoint sends and this line does not
+           mention is dropped in silence — the switch printed 0 and 0 over a
+           tenant with a real history, which is the one thing the panel above
+           it exists not to do. Found by the check, not by reading. */
         ASKS = (err || !j) ? { __error: String((err && err.message) || err || "no answer") }
-                           : { days: j.days, rows: j.rows };
+                           : { days: j.days, rows: j.rows, asked: j.asked };
         paint();
       });
     }

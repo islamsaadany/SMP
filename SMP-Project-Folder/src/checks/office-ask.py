@@ -96,13 +96,18 @@ class H(http.server.BaseHTTPRequestHandler):
         # the list pass.
         if a == "ask":
             q = body.get("body") or ""
-            if STUB["reached"]:
-                answered = "?" not in q or "reopen" not in q.lower()
-                STUB["asks"].append({
-                    "id": len(STUB["asks"]) + 1, "at": "2026-09-06T09:0%d:00Z" % len(STUB["asks"]),
-                    "question": q, "answered": answered,
-                    "answer": ("A measure that adds up over the year is compared with the "
-                               "share of its target due by the review point.") if answered else None})
+            # §303: an ask that never reached the model is KEPT now, as its
+            # own state — §299 wrote nothing at all, so this history could only
+            # ever hold two states and a build drawing all three the same way
+            # would have gone green.
+            answered = "?" not in q or "reopen" not in q.lower()
+            STUB["asks"].append({
+                "id": len(STUB["asks"]) + 1, "at": "2026-09-06T09:0%d:00Z" % len(STUB["asks"]),
+                "question": q, "reached": STUB["reached"],
+                "answered": bool(STUB["reached"]) and answered,
+                "answer": ("A measure that adds up over the year is compared with the "
+                           "share of its target due by the review point.")
+                          if (STUB["reached"] and answered) else None})
             self._send(200, json.dumps({"ok": True, "reached": STUB["reached"],
                                         "rows": STUB["asks"]}).encode(), "application/json")
             return
@@ -120,8 +125,12 @@ class H(http.server.BaseHTTPRequestHandler):
                 time.sleep(STUB["asksHold"])
             if STUB["asksFail"]:
                 self._send(500, b'{"ok":false,"error":"nope"}', "application/json"); return
-            self._send(200, json.dumps({"ok": True, "days": 90,
-                                        "rows": STUB["questions"]}).encode(),
+            rows = STUB["questions"]
+            asked = {"assistant": 0, "office": 0}
+            for r in rows:
+                asked[r.get("answered_by", "assistant")] += int(r.get("times") or 0)
+            self._send(200, json.dumps({"ok": True, "days": 90, "rows": rows,
+                                        "asked": asked}).encode(),
                        "application/json"); return
         if a == "queue":
             self._send(200, json.dumps({"ok": True, "office": True, "threads": QUEUE,
@@ -247,6 +256,16 @@ with sync_playwright() as p:
        "could not be reached" in pg.inner_text("#chatbody"))
     ck("...and pointed at the diagnostic",
        "Test the assistant" in pg.inner_text("#chatbody"))
+    # AND THE ROW IT LEAVES BEHIND SAYS THE SAME THING (§303). §299 kept no row
+    # at all for an unreachable ask, so the history could only hold two states;
+    # now that the question is kept, drawing it with the decline's words would
+    # tell the office the assistant had READ it and had nothing — §124's fault
+    # one surface over from where it was first written.
+    said = pg.inner_text("#chatbody")
+    ck("...and the question it kept is not called a decline",
+       "did not get through" in said and
+       "It has been added to" not in said.split("did not get through")[1][:200],
+       said[-260:])
     STUB["reached"] = True
 
     # ── 7 · BACK TO WAITING, AND THE SWITCH GOING OFF ────────────────────
@@ -281,6 +300,30 @@ with sync_playwright() as p:
          "times": 7, "people": 4, "last_at": "2026-09-06T09:02:00Z",
          "by_office": True, "office_only": True, "answered": False, "answer": None,
          "source": None}]
+    for _r in STUB["questions"]:
+        _r.setdefault("answered_by", "assistant"); _r.setdefault("reached", True)
+    # §303: the third state on the assistant's half, and the office's own half.
+    # Made here rather than waited for — nothing in the demo carries either, so
+    # every assertion in §11 would pass on a build that lost the feature.
+    ASK_LOST = {"qkey": "what does the count compile rule do",
+                "question": "What does the Count compile rule do?",
+                "times": 1, "people": 1, "last_at": "2026-09-06T09:20:00Z",
+                "by_office": True, "office_only": True, "answered": False,
+                "reached": False, "answer": None, "source": None,
+                "answered_by": "assistant"}
+    ASK_OFFICE = [
+        {"qkey": "can you change my unit's weight",
+         "question": "Hi — can you change my unit's weight?",
+         "times": 6, "people": 4, "last_at": "2026-09-06T09:30:00Z",
+         "by_office": False, "office_only": False, "answered": True,
+         "reached": True, "answered_by": "office", "source": None,
+         "answer": "Weights are the office's — they are set on Setup › Weighting."},
+        {"qkey": "who can reopen a closed cycle",
+         "question": "Who can reopen a closed cycle?",
+         "times": 2, "people": 2, "last_at": "2026-09-06T09:25:00Z",
+         "by_office": False, "office_only": False, "answered": True,
+         "reached": True, "answered_by": "office", "source": None,
+         "answer": "The office, from the pen on the cycle strip."}]
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_timeout(600)
     pg.click('[data-md="setup"]')
@@ -470,6 +513,126 @@ with sync_playwright() as p:
     done = pg.inner_text(".askpane") if pg.query_selector(".askpane") else ""
     ck("...and the list arrives", "less than the full target" in done, done[:200])
     STUB["asksHold"] = 0
+
+    # ── 11 · TWO HISTORIES, ONE PANE (§303) ──────────────────────────────
+    # Islam, asked to align on what this list is: "the history of questions is
+    # about what has been asked, answered through the bot or throu the smo
+    # team" — and, of how the office's half is gathered: "the smo doesn't mark
+    # anything the list is collected and then later is verified ... you can't
+    # mark what is answered and not this is only viable in case of the bot."
+    print("\n11 · the two histories")
+    # ITS OWN GAP ROW. §9 answered the one this file starts with, so leaning on
+    # it would make this section's "a gap still offers an answer" assertion a
+    # measurement of what an earlier section happened to leave (§94.2).
+    ASK_GAP = {"qkey": "how do i hide a slide from the presentation",
+               "question": "How do I hide a slide from the presentation?",
+               "times": 2, "people": 2, "last_at": "2026-09-06T09:18:00Z",
+               "by_office": False, "office_only": False, "answered": False,
+               "reached": True, "answer": None, "source": None,
+               "answered_by": "assistant"}
+    STUB["questions"] = STUB["questions"] + [ASK_GAP, ASK_LOST] + ASK_OFFICE
+    pg.evaluate("() => { ASKS = null; ASKMISS = false; ASKSIDE = 'assistant'; paint(); }")
+    pg.wait_for_timeout(700)
+    head = pg.inner_text(".askhead") if pg.query_selector(".askhead") else ""
+    ck("the switch names both histories",
+       "Asked the assistant" in head and "Answered by the office" in head, head[:160])
+    # THE TOTALS ARE ASKS, NOT ROWS — 14 + 7 + 1 on one side, 6 + 2 on the
+    # other — and they come from the same result the rows do, so the switch can
+    # never disagree with what it opens (§108.1).
+    ck("...with the count of each", "24" in head and "8" in head, head[:160])
+
+    # ── the assistant's half ─────────────────────────────────────────────
+    txt = pg.inner_text(".askpane")
+    ck("the assistant's half is what opens", "less than the full target" in txt)
+    ck("...and the office's rows are not in it",
+       "change my unit's weight" not in txt, txt[:200])
+    # THE THIRD STATE, AND IT IS NOT THE SECOND. A build that drew "could not
+    # answer" for both would satisfy any assertion that merely looked for a
+    # mark, so both wordings are asserted and the row is found by its own text.
+    ck("a question nobody reached says so",
+       "never reached" in txt and "did not see this question" in txt, txt[:300])
+    # ASKED OF THE ROW, NEVER OF THE PANE. A count of declines across the
+    # table says nothing about which row wears which word — and it moves the
+    # moment the fixture gains another gap, which is a check that has to be
+    # rewritten rather than one that guards the rule (§94.8).
+    lostrow = pg.evaluate("""() => { const r = [...document.querySelectorAll('.asktable tbody tr')]
+        .find(r => /Count compile/.test(r.innerText));
+        return r ? { text: r.innerText, cls: r.className } : null; }""")
+    ck("...and is not called a decline",
+       bool(lostrow) and "could not answer this" not in lostrow["text"],
+       lostrow and lostrow["text"][:120])
+    # AND IT IS NOT A GAP IN THE CORPUS (§299's point, kept while its refusal is
+    # reversed): it joins no unanswered count, wears no warning ground, and
+    # offers no answer to write, because nothing was ever asked of it.
+    ck("...counted as a gap nowhere", "Needs an answer 2" in head, head[:160])
+    ck("...and wears no warning ground",
+       bool(lostrow) and "askmiss" not in lostrow["cls"], lostrow and lostrow["cls"])
+    ck("...and offers nothing to write, but a place to look",
+       len(pg.query_selector_all("[data-askdiag]")) == 1 and
+       len(pg.query_selector_all("[data-askadd]")) == 1,
+       [len(pg.query_selector_all("[data-askdiag]")),
+        len(pg.query_selector_all("[data-askadd]"))])
+
+    # ── the office's half ────────────────────────────────────────────────
+    def side(name):
+        """Press one half of the switch, or say it is not there and carry on."""
+        if pg.query_selector('[data-askside="%s"]' % name):
+            pg.click('[data-askside="%s"]' % name)
+            pg.wait_for_timeout(450)
+            return True
+        ck("the %s half can be opened" % name, False, "no [data-askside] drawn")
+        return False
+
+    side("office")
+    head = pg.inner_text(".askhead")
+    txt = pg.inner_text(".askpane")
+    ck("the office's half opens on a press", "change my unit's weight" in txt, txt[:200])
+    ck("...and the assistant's rows are not in it",
+       "less than the full target" not in txt, txt[:200])
+    ck("...with what the office said", "Setup › Weighting" in txt, txt[:300])
+    heads = [h.lower() for h in pg.eval_on_selector_all(
+        ".asktable thead th", "es => es.map(e => e.innerText)")]
+    ck("...and the column named for that side",
+       "what the office said" in heads and "what the assistant said" not in heads, heads)
+    # HIS RULE, AND THE ONE THING THIS HALF MUST NEVER DO. The platform can say
+    # whether the bot answered because the bot says so; it cannot tell a good
+    # human reply from a holding line, so there is no verdict here at all — no
+    # unanswered filter, no marked rows.
+    ck("no unanswered filter over a half nothing can judge",
+       "Needs an answer" not in head, head[:160])
+    ck("...and no row is marked as owing anything",
+       pg.evaluate("""() => [...document.querySelectorAll('.asktable tbody tr')]
+           .every(r => !r.classList.contains('askmiss'))"""))
+    # AND IT STILL OFFERS, because a question answered by hand six times is the
+    # best candidate in the tenant for an entry — an offer about the future,
+    # never a judgement on the reply.
+    ck("...but a repeated one can still be answered for next time",
+       len(pg.query_selector_all("[data-askadd]")) == 2,
+       len(pg.query_selector_all("[data-askadd]")))
+
+    # THE FILTER IS CLEARED ON THE WAY OVER, or the press back lands on a
+    # narrowed list nobody chose and nothing on screen names it (§113.8).
+    side("assistant")
+    if pg.query_selector('[data-askfilter="miss"]'):
+        pg.click('[data-askfilter="miss"]')
+        pg.wait_for_timeout(300)
+    side("office")
+    side("assistant")
+    ck("crossing to the other half and back leaves no filter behind",
+       pg.evaluate("() => ASKMISS") is False and
+       "less than the full target" in pg.inner_text(".askpane"),
+       pg.evaluate("() => ASKMISS"))
+
+    # AND THE HEAD HOLDS ONE LINE with both switches on it (§88, §122.4: one
+    # row is not one `top`, so the boxes are clustered by their middles).
+    for w in (1500, 1280):
+        pg.set_viewport_size({"width": w, "height": 950})
+        pg.wait_for_timeout(300)
+        mids = pg.evaluate("""() => [...document.querySelectorAll('.askhead > *')]
+            .map(e => { const b = e.getBoundingClientRect(); return Math.round(b.top + b.height / 2); })""")
+        rows_ = len({round(m / 12) for m in mids})
+        ck("the head is one line at %d" % w, rows_ == 1, mids)
+    pg.set_viewport_size({"width": 1400, "height": 950})
 
     b.close()
 

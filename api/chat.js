@@ -274,28 +274,89 @@ async function assistantAnswer(client, me, question, given) {
    asking however many times it is answered. */
 function askKey(q) { return Rules.askKey(q); }
 
-/* ONLY WHAT THE ASSISTANT ACTUALLY READ (§299). `a` is null whenever it could
-   not be reached at all — no key, no corpus, a refusal, a timeout — and every
-   one of those is a plumbing fault with its own diagnostic (§123). A row here
-   means the model saw the question and either answered it or declined, which
-   is the only pair the office can act on: write the answer, or fix the screen
-   that keeps producing the question.
+/* WHAT THE ASSISTANT WAS ASKED, IN THREE STATES (§299, widened by §303).
+   `a` is null whenever the model could not be reached at all — no key, no
+   corpus, a refusal, a timeout — and §299 wrote nothing for that case, so a
+   question that vanished left no trace anywhere. Islam asked for it back, on
+   the strength of his own: he asked, nothing came back, and nothing on the
+   platform said so.
+
+   THE THIRD STATE IS NOT A FOURTH KIND OF GAP. Answered and declined are both
+   things the office can act on — read the answer, or write one — and unreached
+   is a plumbing fault with its own diagnostic (§123). It is stored, shown and
+   named, and it joins no unanswered count and offers no answer to write,
+   because the knowledge base was never asked.
+
+   BOTH CALL SITES ARE ALREADY BEHIND THE SWITCH (`cfg.assistant`, `cfg.ask`),
+   which is what makes recording a null safe: reaching here at all means the
+   assistant was supposed to answer, so null means TRIED AND FAILED and never
+   "there is no assistant on this platform".
 
    AND IT NEVER COSTS THE ANSWER. The answer is already stored and on its way
    back by the time this runs, so a table that is missing, locked or slow
    leaves the chat exactly as it was (§104's ordering, one layer out). */
 async function recordAsk(client, me, question, a, isOffice) {
-  if (!a || !question) return;
+  if (!question) return;
   try {
     await client.query(
       "INSERT INTO assistant_asks (asker_key, asker_name, office, question, qkey, " +
-      "                            answer, answered, source) " +
-      "VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+      "                            answer, answered, source, answered_by, reached) " +
+      "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'assistant',$9)",
       [me.key, me.name || null, !!isOffice, question, askKey(question),
-       a.answered ? (a.reply || null) : null, !!a.answered,
-       a.answered ? (a.source || null) : null]);
+       (a && a.answered) ? (a.reply || null) : null, !!(a && a.answered),
+       (a && a.answered) ? (a.source || null) : null, !!a]);
   } catch (e) {
     console.error("assistant ask not recorded:", (e && e.message) || e);
+  }
+}
+
+/* ── AND WHAT THE OFFICE ANSWERED BY HAND (§303) ───────────────────────
+   Islam: "the smo doesn't mark anything the list is collected and then later
+   is verified ... you can't mark what is answered and not this is only viable
+   in case of the bot."
+
+   HIS RULE IS THE BETTER ONE AND IT IS WHY THIS TAKES NO PRESS. The assistant
+   REPORTS what it did — it answered from an entry, or it declined — so a row on
+   that half can honestly say a gap needs closing. A person's reply is always an
+   answer of some kind and the platform cannot tell a good one from a holding
+   line, so this half carries no verdict at all: no unanswered state, no amber,
+   nothing marked. It is a record to read, not a queue to clear.
+
+   THE QUESTION IS EVERYTHING THEY SAID SINCE THE OFFICE LAST SPOKE, joined
+   oldest first — the exchange this reply is answering, rather than the last
+   line of it, which is as often "and it says 2%" as it is the question. The
+   cost is stated where it shows: collected raw, it groups only when two people
+   word a question identically, so the counts on this half read low and the
+   reading of it is the office's.
+
+   NOTHING IS RECORDED WHEN THERE IS NOTHING TO ANSWER — the office starting a
+   conversation (§247), or writing twice in a row — so the list can never carry
+   a row with an answer and no question.
+
+   AND IT NEVER COSTS THE REPLY, for `recordAsk`'s reason exactly: the message
+   is stored and the thread already marked answered by the time this runs. */
+async function recordOfficeAnswer(client, me, personKey, answer) {
+  try {
+    const rows = (await client.query(
+      "SELECT m.body FROM chat_messages m " +
+      " WHERE m.person_key = $1 AND NOT m.from_office " +
+      "   AND m.at > COALESCE((SELECT max(o.at) FROM chat_messages o " +
+      "                         WHERE o.person_key = $1 AND o.from_office " +
+      "                           AND o.id <> $2), '-infinity'::timestamptz) " +
+      " ORDER BY m.at, m.id", [personKey, answer.id])).rows;
+    const q = rows.map(r => String(r.body || "").trim()).filter(Boolean).join(" ").slice(0, 1000);
+    if (!q) return;
+    const who = (await client.query(
+      "SELECT COALESCE(p.name, t.person_name, t.person_key) AS name " +
+      "  FROM chat_threads t LEFT JOIN people p ON p.key = t.person_key " +
+      " WHERE t.person_key = $1", [personKey])).rows[0];
+    await client.query(
+      "INSERT INTO assistant_asks (asker_key, asker_name, office, question, qkey, " +
+      "                            answer, answered, source, answered_by, reached) " +
+      "VALUES ($1,$2,false,$3,$4,$5,true,NULL,'office',true)",
+      [personKey, (who && who.name) || null, q, askKey(q), answer.body]);
+  } catch (e) {
+    console.error("office answer not recorded:", (e && e.message) || e);
   }
 }
 
@@ -309,7 +370,7 @@ const ASK_WINDOW_DAYS = 90;
    whole of it is on the Knowledge base page. */
 async function askRows(client, me) {
   const rows = (await client.query(
-    "SELECT id, at, question, answer, answered, source FROM assistant_asks " +
+    "SELECT id, at, question, answer, answered, source, reached FROM assistant_asks " +
     " WHERE asker_key = $1 AND office ORDER BY at DESC, id DESC LIMIT 40",
     [me.key])).rows;
   return rows.reverse();
@@ -1326,9 +1387,21 @@ module.exports = async function handler(req, res) {
        secret and it's fine to be seen by the rest of the team"* — which is the
        gate this whole half of the file already sits behind. */
     if (action === "askQuestions") {
+      /* TWO HISTORIES, ONE QUERY (§303). Islam asked for the office's half to
+         be kept apart from the assistant's so the two can be read against each
+         other later — which is a grouping, not a second store, so it is
+         `GROUP BY answered_by, qkey` and the page splits what comes back.
+
+         ONE ROUND TRIP, because the switch between them is a press and a press
+         that waits on a server is a press that looks broken (§35). Both halves
+         are bounded by the same window and the same cap.
+
+         `reached` COMES BACK PER GROUP, and it is `bool_or` for the same reason
+         `answered` is: a question the assistant reached once is not a question
+         it could not be reached for, whatever happened the other times. */
       const days = Math.max(1, Math.min(730, Math.round(Number(body.days) || ASK_WINDOW_DAYS)));
       const rows = (await client.query(
-        "SELECT qkey, " +
+        "SELECT qkey, answered_by, " +
         "       (array_agg(question ORDER BY at DESC, id DESC))[1] AS question, " +
         "       count(*)::int AS times, " +
         "       count(DISTINCT asker_key)::int AS people, " +
@@ -1336,16 +1409,25 @@ module.exports = async function handler(req, res) {
         "       bool_or(office) AS by_office, " +
         "       bool_and(office) AS office_only, " +
         "       bool_or(answered) AS answered, " +
+        "       bool_or(reached) AS reached, " +
         "       (array_agg(answer ORDER BY at DESC, id DESC) " +
         "          FILTER (WHERE answer IS NOT NULL))[1] AS answer, " +
         "       (array_agg(source ORDER BY at DESC, id DESC) " +
         "          FILTER (WHERE source IS NOT NULL))[1] AS source " +
         "  FROM assistant_asks " +
         " WHERE at > now() - make_interval(days => $1) " +
-        " GROUP BY qkey " +
+        " GROUP BY answered_by, qkey " +
         " ORDER BY count(*) DESC, max(at) DESC " +
-        " LIMIT 300", [days])).rows;
-      return send(res, 200, { ok: true, days: days, rows: rows });
+        " LIMIT 600", [days])).rows;
+      /* THE TOTALS ARE ASKS, NOT ROWS, and they are what the switch prints:
+         "19 asked the assistant" is a count of times somebody asked, where the
+         list beneath it is a count of distinct questions. Taken from the same
+         result so the two can never disagree (§108.1). */
+      const asked = { assistant: 0, office: 0 };
+      rows.forEach(function (r) {
+        if (asked[r.answered_by] != null) asked[r.answered_by] += (r.times | 0);
+      });
+      return send(res, 200, { ok: true, days: days, rows: rows, asked: asked });
     }
 
     /* ── IS THE BOT WORKING? (§123) ───────────────────────────────────
@@ -1778,6 +1860,12 @@ module.exports = async function handler(req, res) {
       await client.query(
         "UPDATE chat_threads SET waiting = false, last_at = now(), seen_by_us = now() " +
         "WHERE person_key = $1", [who]);
+
+      /* AND THE EXCHANGE JOINS THE HISTORY (§303), collected here because this
+         is where the office answers and where every other consequence of a
+         reply is already written once (§247's own argument for putting the
+         start on this flag rather than beside it). */
+      await recordOfficeAnswer(client, me, who, { id: said.id, body: text });
 
       /* ── AND THE ONE THING THAT LEAVES THE PLATFORM (§97.5) ────────
          Only if they are not here. The decision is made HERE and reported

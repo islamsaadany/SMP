@@ -7059,7 +7059,25 @@ python3 checks/office-ask.py    # Waiting and Ask, and the list the questions
                                 # count the 500 the check itself asks for (§128), and
                                 # the harness OWNS ITS PID — killing by port through
                                 # a tool this image lacks measured the old process
-                                # and called the fix broken (§105.6)
+                                # and called the fix broken (§105.6).
+                                # §11 adds the two histories (§303): the switch
+                                # naming both with a total per half that AGREES
+                                # with the rows it opens; the assistant's three
+                                # states told apart by asking the ROW rather than
+                                # counting declines across the table; the
+                                # unreached one asserted to wear no warning
+                                # ground, join no gap count and offer the
+                                # diagnostic rather than an answer to write; the
+                                # office's half asserted to carry NO verdict —
+                                # no filter, no marked row — while still offering
+                                # to answer a repeated question for next time;
+                                # the filter cleared on the way across, or the
+                                # press back lands on a narrowed list nobody
+                                # chose (§113.8); and the head one line at 1500
+                                # and 1280 with both switches on it. It MAKES its
+                                # rows: nothing in the demo carries either half's
+                                # new states. 16 red on the build before —
+                                # reported as 8 until every press degraded
 node scripts/test-ask.js        # ...and the server half on a real Postgres with a
                                 # stand-in for the model (§100.3): off is a refusal
                                 # ON THE SERVER; an Ask writes no chat message, moves
@@ -7303,7 +7321,46 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-08 &mdash; **&sect;302: the list did not fail, it hung.**
+*Last Updated: 2026-09-08 &mdash; **&sect;303: both halves of the history.**
+Asked to align on what the questions list is, Islam: *"my understand is the
+history of questions is about what has been asked, answered through the bot or
+throu the smo team."* Wider than &sect;299 built &mdash; a question the office
+answered by hand was nowhere on it, and one the assistant never received was
+nowhere either, including his own. **HIS OWN RULE IS THE BETTER ONE AND IT IS
+THE WHOLE DESIGN OF THE SECOND HALF**: I proposed a *Record this as a question*
+press in the reply box and he refused it with the reason &mdash; *"you can't
+mark what is answered and not this is only viable in case of the bot."* The
+platform can say whether the BOT answered, because the bot reports what it did;
+it cannot judge a human reply. So the office's half is collected as it happens
+and carries **no verdict at all** &mdash; no marking, no unanswered filter, no
+amber rows &mdash; a record to read and verify later rather than a queue to
+clear. That removed a control, a decision and a habit nobody would have kept.
+**SHAPE A FROM TWO DRAWN** (rule 1c): one pane, the two histories behind a
+switch. **ONE STORE, TWO READINGS** &mdash; a second table would be a second
+answer to *what has been asked* (&sect;53.5, &sect;299's own argument) and it is
+what makes his reason work, since comparing them later across two tables is a
+join somebody has to remember. `answered_by` is WHO ANSWERED and `office` is WHO
+ASKED: two facts that look like one. **THE QUESTION IS THE EXCHANGE, NOT ITS
+LAST LINE**, with its cost stated on the mockup &mdash; collected raw, it groups
+only on an exact spelling, so those counts read low. **THE THIRD STATE REVERSES
+&sect;299 AT HIS WORD** and keeps its point: a question nobody reached is stored
+and named, and is a gap in the corpus NOWHERE &mdash; no count, no warning
+ground, no answer to write, just the diagnostic. Asked in ONE place, because the
+ground, the words, the control and the count are four readings of one fact.
+**AND THE CORNER HAD TO LEARN IT TOO**, or its own history would draw an
+unreached ask in the decline's words (&sect;124, one surface over).
+**&sect;303.1**: the switch printed **0 and 0** over a real history &mdash; the
+shell builds `ASKS` field by field and dropped the totals in silence (&sect;135's
+own fault), found by the check rather than by reading. **&sect;303.2**: the check
+reported **8** failures against the build it exists to reject because it died at
+the first missing control (&sect;215, twice in one sitting), and three more of
+its own first failures were the CHECK; honest count **16**. Two assertions in
+`test-ask.js` REWRITTEN, never deleted (&sect;218). Two `ADD COLUMN IF NOT
+EXISTS` with defaults correct for every stored row; nothing backfilled; round
+trip, clean slate, clean parity and 49/0 on **virgin** databases; 534/0 and
+131/0, the server needing no new rule. **On the branch, not merged.***
+
+*Earlier the same day: **&sect;302: the list did not fail, it hung.**
 Islam, of the Knowledge base's Questions &amp; answers tab: a garbled card reading
 *"These could not be loaded. no answer Nothing has been lost&hellip;"* while his own
 Ask answered normally beside it. **"NO ANSWER" IS THE BROWSER'S OWN 25-SECOND

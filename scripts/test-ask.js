@@ -179,9 +179,27 @@ async function main() {
   check("an unreachable model still answers the office", r.code === 200, r.code);
   check("...and says it was NOT reached", r.body && r.body.reached === false, r.body);
   check("...and the model was genuinely tried", model.calls > callsBefore);
-  check("...and NOTHING was recorded",
-        (await count("SELECT count(*)::int n FROM assistant_asks")) === 2,
+  /* REVERSED BY §303, AT ISLAM'S WORD, AND REWRITTEN RATHER THAN DELETED
+     (§218). §299 wrote NOTHING here — an unreached ask left no trace at all —
+     on the reasoning that such a row would fill the office's list with
+     something no answer can close. He asked for it back on the strength of his
+     own case: he asked, nothing came back, and the platform said nothing had
+     happened. What keeps §299's point intact is not silence but the STATE: it
+     is recorded, and recorded as unreached rather than declined, so it joins
+     no gap count and offers no answer to write. Asserted as that distinction
+     rather than as a total, which is what a count of rows could never say. */
+  check("...and it IS recorded now, as its own state",
+        (await count("SELECT count(*)::int n FROM assistant_asks")) === 3,
         await count("SELECT count(*)::int n FROM assistant_asks"));
+  const notReached = (await client.query(
+    "SELECT reached, answered, answer FROM assistant_asks " +
+    " WHERE question = 'this one never reaches the model'")).rows[0];
+  check("...as unreached, which is not declined",
+        !!notReached && notReached.reached === false && notReached.answered === false &&
+        notReached.answer === null, notReached);
+  check("...while the declined one stays reached",
+        (await count("SELECT count(*)::int n FROM assistant_asks " +
+                     " WHERE NOT answered AND reached")) === 1);
   model.mode = "answer";
 
   /* ── 4 · A USER'S QUESTION LANDS ON THE SAME LIST ─────────────────── */
@@ -232,7 +250,11 @@ async function main() {
   r = await call(sidOther, { action: "ask", body: "and cannot ask" });
   check("...and cannot use the Ask box", r.code === 403, r);
   r = await call(sidOffice, { action: "askMine" });
-  check("the office reads its own history", r.code === 200 && (r.body.rows || []).length === 4,
+  /* FIVE, NOT FOUR, SINCE §303: the ask that never reached the model is one of
+     them. Rewritten rather than loosened (§218) — the number is the point, and
+     the corner showing the question that vanished is the whole of what he
+     asked for. */
+  check("the office reads its own history", r.code === 200 && (r.body.rows || []).length === 5,
         r.body && (r.body.rows || []).length);
   check("...oldest first, as a conversation reads",
         (r.body.rows || []).length > 1 &&
@@ -245,6 +267,119 @@ async function main() {
   await io.writeState(client, state);
   check("a full save leaves every question standing",
         (await count("SELECT count(*)::int n FROM assistant_asks")) === kept, kept);
+
+  /* ── 8 · THE THIRD STATE, AND THE OFFICE'S OWN HALF (§303) ────────── */
+  console.log("\n8 · both halves of the history");
+  await setting("ask", true);
+  await client.query("TRUNCATE assistant_asks");
+
+  /* THE QUESTION THAT VANISHED. §299 wrote nothing when the model could not be
+     reached, so a question asked into a broken connection left no trace
+     anywhere — which is exactly what Islam met. Recorded now, and recorded as
+     its OWN state: not answered, not declined, NOT REACHED. */
+  model.mode = "down";
+  const lost = await call(sidOffice, { action: "ask", body: "Does an unreachable ask leave a trace?" });
+  check("an ask nobody could reach still answers the corner honestly",
+        lost.code === 200 && lost.body && lost.body.reached === false, lost.body && lost.body.reached);
+  const lostRow = (await client.query(
+    "SELECT answered_by, reached, answered, answer FROM assistant_asks " +
+    " WHERE question = $1", ["Does an unreachable ask leave a trace?"])).rows[0];
+  check("...and is written down", !!lostRow, lostRow);
+  check("...as unreached rather than declined",
+        !!lostRow && lostRow.reached === false && lostRow.answered === false &&
+        lostRow.answer === null, lostRow);
+  check("...on the assistant's half",
+        !!lostRow && lostRow.answered_by === "assistant", lostRow && lostRow.answered_by);
+
+  /* BOTH ENDS (§94.2): a build that recorded EVERYTHING as unreached would
+     satisfy every line above. */
+  model.mode = "answer";
+  await call(sidOffice, { action: "ask", body: "And a reachable one?" });
+  const gotRow = (await client.query(
+    "SELECT reached, answered FROM assistant_asks WHERE question = $1",
+    ["And a reachable one?"])).rows[0];
+  check("...while a reachable one is still marked reached",
+        !!gotRow && gotRow.reached === true && gotRow.answered === true, gotRow);
+
+  /* WITH THE SWITCH OFF NOTHING IS WRITTEN AT ALL, unreached included — the
+     guard is in front of the recorder, so "the assistant failed" and "there is
+     no assistant on this platform" can never be confused (§303). */
+  await setting("ask", false);
+  const beforeOff = await count("SELECT count(*)::int n FROM assistant_asks");
+  model.mode = "down";
+  await call(sidOffice, { action: "ask", body: "With the switch off?" });
+  check("with Ask off nothing is recorded, not even a failure",
+        (await count("SELECT count(*)::int n FROM assistant_asks")) === beforeOff, beforeOff);
+  await setting("ask", true);
+  model.mode = "answer";
+
+  /* ── THE OFFICE'S HALF IS COLLECTED, NEVER MARKED ─────────────────── */
+  await client.query("DELETE FROM chat_messages WHERE person_key = $1", [outsider.key]);
+  await client.query(
+    "INSERT INTO chat_threads (person_key, person_name, waiting) VALUES ($1,$2,true) " +
+    "ON CONFLICT (person_key) DO UPDATE SET waiting = true", [outsider.key, "Tester"]);
+  await client.query(
+    "INSERT INTO chat_messages (person_key, by_key, from_office, body, at) VALUES " +
+    "($1,$1,false,'Hi', now() - interval '20 minutes'), " +
+    "($1,$1,false,'Can you change my weight?', now() - interval '19 minutes')",
+    [outsider.key]);
+  const nOffice0 = await count(
+    "SELECT count(*)::int n FROM assistant_asks WHERE answered_by = 'office'");
+  await call(sidOffice, { action: "reply", person: outsider.key,
+                          body: "Weights are set on Setup › Weighting." });
+  const offRow = (await client.query(
+    "SELECT question, answer, answered, reached, office, answered_by " +
+    "  FROM assistant_asks WHERE answered_by = 'office' ORDER BY id DESC LIMIT 1")).rows[0];
+  check("a reply records the exchange, with no press", !!offRow, offRow);
+  /* THE QUESTION IS EVERYTHING THEY SAID SINCE THE OFFICE LAST SPOKE — the
+     exchange, not its last line, which is as often a detail as the question. */
+  check("...the whole exchange as the question",
+        !!offRow && offRow.question === "Hi Can you change my weight?", offRow && offRow.question);
+  check("...and the reply as the answer",
+        !!offRow && offRow.answer === "Weights are set on Setup › Weighting.", offRow && offRow.answer);
+  /* WHICH SIDE ASKED AND WHO ANSWERED ARE TWO FACTS. A user asked; the office
+     answered. Reading either off the other is how the two halves drift. */
+  check("...asked by them and answered by the office",
+        !!offRow && offRow.office === false && offRow.answered_by === "office", offRow);
+
+  /* AND NOTHING IS RECORDED WHERE THERE IS NO QUESTION, or the list carries a
+     row with an answer and nothing it answers. */
+  const n1 = await count("SELECT count(*)::int n FROM assistant_asks WHERE answered_by = 'office'");
+  await call(sidOffice, { action: "reply", person: outsider.key, body: "Let me know." });
+  check("a second reply with nothing new from them records nothing",
+        (await count("SELECT count(*)::int n FROM assistant_asks WHERE answered_by = 'office'")) === n1,
+        n1);
+  await client.query("DELETE FROM chat_threads WHERE person_key = $1", ["nobodyyet"]);
+  await client.query(
+    "INSERT INTO people (key, name, idx) VALUES ('nobodyyet','Nobody Yet',997) " +
+    "ON CONFLICT (key) DO NOTHING");
+  await call(sidOffice, { action: "reply", person: "nobodyyet", start: true,
+                          body: "Could you send me your Q3 figures?" });
+  check("...and the office starting a conversation records nothing",
+        (await count("SELECT count(*)::int n FROM assistant_asks WHERE answered_by = 'office'")) === n1,
+        n1);
+  check("...while the one real exchange is there", n1 === nOffice0 + 1, [nOffice0, n1]);
+
+  /* ── AND THE LIST COMES BACK AS TWO HISTORIES ─────────────────────── */
+  const list = await call(sidOffice, { action: "askQuestions" });
+  const both = (list.body && list.body.rows) || [];
+  check("the list carries both halves, told apart",
+        both.some(function (r) { return r.answered_by === "office"; }) &&
+        both.some(function (r) { return r.answered_by === "assistant"; }),
+        both.map(function (r) { return r.answered_by; }));
+  check("...and the third state survives the grouping",
+        both.some(function (r) { return r.reached === false; }),
+        both.map(function (r) { return r.reached; }));
+  /* THE TOTALS ARE ASKS AND THEY COME FROM THE SAME RESULT, so the switch can
+     never print a number the list it opens disagrees with (§108.1). */
+  const asked = (list.body && list.body.asked) || {};
+  const sum = function (side) {
+    return both.filter(function (r) { return r.answered_by === side; })
+               .reduce(function (a, r) { return a + (r.times | 0); }, 0);
+  };
+  check("...with a total per half that agrees with the rows",
+        asked.assistant === sum("assistant") && asked.office === sum("office"),
+        [asked, sum("assistant"), sum("office")]);
 
   client.release();
   await pool.end();

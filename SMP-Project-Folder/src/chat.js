@@ -491,6 +491,15 @@ var CHAT = (function(){
   var ASK_NONE = "I don\u2019t have an answer for that one. It has been added to " +
     "Questions asked, on the Knowledge base page, so it can be answered once " +
     "and for everyone.";
+  /* AND A QUESTION THAT NEVER GOT THERE SAYS SO INSTEAD (§303). §299 wrote no
+     row at all for an unreachable ask, so this history could only ever hold
+     the two states above; now that the question is kept, drawing it with
+     ASK_NONE would tell the office the assistant had READ it and had nothing —
+     §124's fault, one surface over from where it was first written. Nothing
+     was added to anything, so it does not say it was. */
+  var ASK_LOST = "This one did not get through \u2014 the assistant was never " +
+    "reached, so it has not been answered by anybody. Settings \u203a Test the " +
+    "assistant says where it stopped.";
 
   /* THE ASK HISTORY AS A CONVERSATION READS, through the SAME builder every
      other message in this panel goes through (§53.5) — so an assistant answer
@@ -511,7 +520,8 @@ var CHAT = (function(){
         ? { id: "a" + r.id, at: r.at, from_office: true, bot: true,
             by_key: "assistant", by_name: "Assistant", body: r.answer || "" }
         : { id: "a" + r.id, at: r.at, from_office: true, bot: true, handoff: true,
-            by_key: "assistant", by_name: "Assistant", body: ASK_NONE });
+            by_key: "assistant", by_name: "Assistant",
+            body: r.reached === false ? ASK_LOST : ASK_NONE });
     });
     if (cq.pending) {
       out.push({ id: "qecho", at: new Date().toISOString(), from_office: false,
@@ -3510,7 +3520,8 @@ var CHAT = (function(){
       if (!servable()) return cb(null, null);
       post({ action:"askQuestions" }, function(err, j){
         if (err || !j) return cb(err || new Error("no answer"), null);
-        cb(null, { days: j.days | 0, rows: j.rows || [] });
+        cb(null, { days: j.days | 0, rows: j.rows || [],
+                   asked: j.asked || { assistant: 0, office: 0 } });
       });
     },
     officeQueue: function(cb){

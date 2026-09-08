@@ -1,0 +1,376 @@
+<title>SMP Question History</title>
+<style>
+  /* THE PLATFORM'S OWN TOKENS, copied from src/_shared.css (forefront light /
+     forefront dark) rather than invented — this is a drawing of a Setup pane,
+     not a new kind of thing. */
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0;
+    --fs-micro:10px; --fs-small:12px; --fs-note:13px; --fs-body:14px;
+    --r-sm:6px; --r-md:12px;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+      --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83;
+      --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A;
+  }
+
+  body{ margin:0; background:var(--ground); color:var(--ink);
+        font-family:var(--sans); font-size:var(--fs-body); line-height:1.5; }
+  .sheet{ max-width:1180px; margin:0 auto; padding:34px 22px 70px;
+          display:flex; flex-direction:column; gap:30px; }
+
+  h1{ margin:0; font-size:23px; font-weight:700; letter-spacing:-.01em;
+      text-wrap:balance; }
+  .lede{ margin:0; max-width:66ch; color:var(--ink-2); font-size:var(--fs-body); }
+  .shot{ display:flex; flex-direction:column; gap:11px; }
+  .shotkey{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .shotkey b{ font-size:var(--fs-micro); letter-spacing:.11em;
+              text-transform:uppercase; color:var(--gold-deep); }
+  .shotkey span{ font-size:var(--fs-note); color:var(--ink-3); }
+  .stage{ background:var(--ground); border:1px solid var(--line);
+          border-radius:var(--r-md); padding:20px; overflow-x:auto; }
+
+  /* ── the pane, as the product draws it ─────────────────────────── */
+  .askpane{ border:1px solid var(--line); border-radius:var(--r-md);
+            background:var(--surface); overflow:hidden; min-width:900px; }
+  .askpane + .askpane{ margin-top:18px; }
+  .askhead{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+            padding:11px 15px; border-bottom:1px solid var(--line);
+            background:var(--surface-2); }
+  .askhead h3{ margin:0; font-size:var(--fs-body); font-weight:650; }
+  .askwin{ font-size:var(--fs-small); color:var(--ink-3); }
+  .seg{ display:inline-flex; border:1px solid var(--line);
+        border-radius:var(--r-sm); overflow:hidden; }
+  .seg.right{ margin-left:auto; }
+  .seg button{ font:inherit; font-size:var(--fs-small); font-weight:650;
+               color:var(--ink-2); background:var(--surface); border:0;
+               padding:5px 11px; cursor:pointer; white-space:nowrap; }
+  .seg button + button{ box-shadow:inset 1px 0 0 var(--line); }
+  .seg button[aria-pressed="true"]{ background:var(--panel); color:var(--panel-ink); }
+  .seg button:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; }
+
+  table.ask{ width:100%; border-collapse:collapse; }
+  table.ask th{ text-align:left; font-size:var(--fs-micro); letter-spacing:.09em;
+                text-transform:uppercase; color:var(--ink-3); font-weight:700;
+                padding:8px 15px; border-bottom:1px solid var(--line);
+                background:var(--surface); white-space:nowrap; }
+  table.ask td{ padding:11px 15px; border-bottom:1px solid var(--line-soft);
+                font-size:var(--fs-note); vertical-align:top; }
+  table.ask tr:last-child td{ border-bottom:0; }
+  tr.askmiss td{ background:var(--attn-bg); }
+  .askq{ font-weight:600; color:var(--ink); }
+  .askby{ display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+          margin-top:3px; font-size:var(--fs-micro); color:var(--ink-3); }
+  .chip{ display:inline-block; border:1px solid var(--line); border-radius:999px;
+         padding:1px 7px; font-size:var(--fs-micro); font-weight:700;
+         letter-spacing:.05em; text-transform:uppercase; }
+  .chip.who{ border-color:var(--gold); color:var(--gold-deep);
+             background:var(--attn-bg); }
+  .asktimes{ font-variant-numeric:tabular-nums; font-weight:700;
+             color:var(--ink-2); white-space:nowrap; }
+  .askans{ color:var(--ink-2); max-width:56ch; }
+  .askno{ color:var(--attn-tx); font-weight:650; }
+  .asklost{ color:var(--ink-3); font-weight:600; font-style:normal; }
+  .askdone{ margin-top:4px; font-size:var(--fs-micro); color:var(--good-tx);
+            font-weight:650; }
+  .askact{ white-space:nowrap; }
+  select.grp{ font:inherit; font-size:var(--fs-small); color:var(--ink);
+              background:var(--surface); border:1px solid var(--line);
+              border-radius:var(--r-sm); padding:4px 7px; margin-right:7px;
+              max-width:150px; }
+  .mini{ font:inherit; font-size:var(--fs-small); font-weight:600;
+         color:var(--ink-2); background:var(--surface);
+         border:1px solid var(--line); border-radius:var(--r-sm);
+         padding:5px 10px; cursor:pointer; white-space:nowrap; }
+  .mini.go{ border-color:var(--gold); color:var(--gold-deep); }
+  .mini:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  /* ── the notes beside the drawings ─────────────────────────────── */
+  .note{ border-left:3px solid var(--gold); background:var(--surface);
+         border-radius:0 var(--r-sm) var(--r-sm) 0; padding:13px 16px;
+         display:flex; flex-direction:column; gap:7px; }
+  .note h2{ margin:0; font-size:var(--fs-body); font-weight:700; }
+  .note p{ margin:0; color:var(--ink-2); font-size:var(--fs-note);
+           max-width:72ch; }
+  .note ul{ margin:0; padding-left:19px; color:var(--ink-2);
+            font-size:var(--fs-note); display:flex; flex-direction:column;
+            gap:5px; }
+  .note b.pick{ color:var(--gold-deep); }
+  .states{ display:grid; gap:12px;
+           grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+  .state{ background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r-sm); padding:12px 14px;
+          display:flex; flex-direction:column; gap:5px; }
+  .state h4{ margin:0; font-size:var(--fs-note); font-weight:700; }
+  .state p{ margin:0; font-size:var(--fs-small); color:var(--ink-3); }
+  .state .tag{ align-self:flex-start; }
+  .tag.ok{ color:var(--good-tx); border-color:var(--good-tx);
+           background:var(--good-bg); }
+  .tag.gap{ color:var(--attn-tx); border-color:var(--attn-tx);
+            background:var(--attn-bg); }
+  .tag.lost{ color:var(--ink-3); }
+</style>
+
+<div class="sheet">
+
+  <header style="display:flex;flex-direction:column;gap:9px">
+    <h1>Questions asked — widening the history</h1>
+    <p class="lede">Two histories kept apart: what the assistant was asked, and
+      what the office answered by hand. Same window, same grouping, so the two
+      counts on one question can be compared. Drawn in the platform's own
+      tokens at a Setup pane's width.</p>
+  </header>
+
+  <section class="shot">
+    <div class="shotkey"><b>Shape A</b><span>One pane. The history is the
+      choice at the top; the filter stays on the right.</span></div>
+    <div class="stage">
+      <div class="askpane">
+        <div class="askhead">
+          <h3>Questions asked</h3>
+          <span class="seg">
+            <button type="button" aria-pressed="true">Asked the assistant 19</button>
+            <button type="button" aria-pressed="false">Answered by the office 11</button>
+          </span>
+          <span class="seg right">
+            <button type="button" aria-pressed="true">All 5</button>
+            <button type="button" aria-pressed="false">Needs an answer 2</button>
+          </span>
+          <span class="askwin">Last 90 days</span>
+        </div>
+        <table class="ask">
+          <thead><tr>
+            <th>Question</th><th>Asked</th><th>What the assistant said</th><th></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="askq">How do I reopen my report?</div>
+                <div class="askby"><span>6 people</span><span>Last today</span></div></td>
+              <td class="asktimes">9×</td>
+              <td class="askans">The unit's head or its strategy custodian
+                reopens it from the Reporting tab — Reopen sits beside the
+                state word.</td>
+              <td class="askact"><button class="mini" type="button">Open the answer</button></td>
+            </tr>
+            <tr class="askmiss">
+              <td><div class="askq">Why does my YTD read 2% when I entered 2?</div>
+                <div class="askby"><span class="chip who">Office</span><span>3 people</span><span>Last yesterday</span></div></td>
+              <td class="asktimes">4×</td>
+              <td class="askans"><b class="askno">No answer — the assistant said
+                it could not answer this</b></td>
+              <td class="askact">
+                <select class="grp" aria-label="Which group the answer belongs in">
+                  <option>Reporting</option></select>
+                <button class="mini go" type="button">Add an answer</button></td>
+            </tr>
+            <tr>
+              <td><div class="askq">Where do I upload my unit's plan?</div>
+                <div class="askby"><span>3 people</span><span>Last 4 Sep</span></div></td>
+              <td class="asktimes">3×</td>
+              <td class="askans">Setup › Import &amp; storage. Uploading a plan
+                authors it and archives the one it replaces.
+                <div class="askdone">An answer has been written here</div></td>
+              <td class="askact"></td>
+            </tr>
+            <tr class="askmiss">
+              <td><div class="askq">How do I hide a slide from the presentation?</div>
+                <div class="askby"><span>2 people</span><span>Last 2 Sep</span></div></td>
+              <td class="asktimes">2×</td>
+              <td class="askans"><b class="askno">No answer — the assistant said
+                it could not answer this</b></td>
+              <td class="askact">
+                <select class="grp" aria-label="Which group the answer belongs in">
+                  <option>Presentation</option></select>
+                <button class="mini go" type="button">Add an answer</button></td>
+            </tr>
+            <tr>
+              <td><div class="askq">What does the Count compile rule do?</div>
+                <div class="askby"><span class="chip who">Office</span><span>1 person</span><span>Last today</span></div></td>
+              <td class="asktimes">1×</td>
+              <td class="askans"><b class="asklost">The assistant was never
+                reached — it did not see this question</b></td>
+              <td class="askact"><button class="mini" type="button">Test the assistant</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="shot">
+    <div class="shotkey"><b>Shape B</b><span>Two panes, both open. Nothing to
+      press to compare them.</span></div>
+    <div class="stage">
+      <div class="askpane">
+        <div class="askhead">
+          <h3>Asked the assistant</h3>
+          <span class="seg right">
+            <button type="button" aria-pressed="true">All 5</button>
+            <button type="button" aria-pressed="false">Needs an answer 2</button>
+          </span>
+          <span class="askwin">Last 90 days · 19 asks</span>
+        </div>
+        <table class="ask">
+          <thead><tr>
+            <th>Question</th><th>Asked</th><th>What the assistant said</th><th></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="askq">How do I reopen my report?</div>
+                <div class="askby"><span>6 people</span><span>Last today</span></div></td>
+              <td class="asktimes">9×</td>
+              <td class="askans">The unit's head or its strategy custodian
+                reopens it from the Reporting tab.</td>
+              <td class="askact"><button class="mini" type="button">Open the answer</button></td>
+            </tr>
+            <tr class="askmiss">
+              <td><div class="askq">Why does my YTD read 2% when I entered 2?</div>
+                <div class="askby"><span class="chip who">Office</span><span>3 people</span><span>Last yesterday</span></div></td>
+              <td class="asktimes">4×</td>
+              <td class="askans"><b class="askno">No answer — the assistant said
+                it could not answer this</b></td>
+              <td class="askact">
+                <select class="grp" aria-label="Which group the answer belongs in">
+                  <option>Reporting</option></select>
+                <button class="mini go" type="button">Add an answer</button></td>
+            </tr>
+            <tr>
+              <td><div class="askq">What does the Count compile rule do?</div>
+                <div class="askby"><span class="chip who">Office</span><span>1 person</span><span>Last today</span></div></td>
+              <td class="asktimes">1×</td>
+              <td class="askans"><b class="asklost">The assistant was never
+                reached — it did not see this question</b></td>
+              <td class="askact"><button class="mini" type="button">Test the assistant</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="askpane">
+        <div class="askhead">
+          <h3>Answered by the office</h3>
+          <span class="seg right">
+            <button type="button" aria-pressed="true">All 3</button>
+            <button type="button" aria-pressed="false">No entry yet 2</button>
+          </span>
+          <span class="askwin">Last 90 days · 11 answered</span>
+        </div>
+        <table class="ask">
+          <thead><tr>
+            <th>Question</th><th>Asked</th><th>What the office said</th><th></th>
+          </tr></thead>
+          <tbody>
+            <tr class="askmiss">
+              <td><div class="askq">Can you change my unit's weight?</div>
+                <div class="askby"><span>4 people</span><span>Last today</span></div></td>
+              <td class="asktimes">6×</td>
+              <td class="askans">Weights are the office's — they are set on
+                Setup › Weighting and apply to the whole group.</td>
+              <td class="askact">
+                <select class="grp" aria-label="Which group the answer belongs in">
+                  <option>Scoring</option></select>
+                <button class="mini go" type="button">Add an answer</button></td>
+            </tr>
+            <tr class="askmiss">
+              <td><div class="askq">My collaborators column is empty — is that missing?</div>
+                <div class="askby"><span>2 people</span><span>Last 3 Sep</span></div></td>
+              <td class="asktimes">3×</td>
+              <td class="askans">No. A tactic one person owns is a complete
+                line, so nothing is owed there.</td>
+              <td class="askact">
+                <select class="grp" aria-label="Which group the answer belongs in">
+                  <option>Planning</option></select>
+                <button class="mini go" type="button">Add an answer</button></td>
+            </tr>
+            <tr>
+              <td><div class="askq">Who can reopen a closed cycle?</div>
+                <div class="askby"><span>2 people</span><span>Last 1 Sep</span></div></td>
+              <td class="asktimes">2×</td>
+              <td class="askans">The office, from the pen on the cycle strip.
+                <div class="askdone">An answer has been written here</div></td>
+              <td class="askact"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="shot">
+    <div class="shotkey"><b>The three states</b><span>What a row can say about
+      an answer, and what each one asks the office to do.</span></div>
+    <div class="states">
+      <div class="state">
+        <span class="chip tag ok">Answered</span>
+        <h4>The assistant answered it</h4>
+        <p>Shows what it said. The row opens the entry it answered from —
+          never offers to write a second one beside it.</p>
+      </div>
+      <div class="state">
+        <span class="chip tag gap">Needs an answer</span>
+        <h4>It read the question and declined</h4>
+        <p>A gap in the knowledge base, and the only state that offers
+          <em>Add an answer</em>. Warning ground, never red.</p>
+      </div>
+      <div class="state">
+        <span class="chip tag lost">Never reached</span>
+        <h4>It did not see the question at all</h4>
+        <p><b>New.</b> No key, a refusal, a timeout. Nothing to write — the row
+          points at <em>Test the assistant</em>, and joins no gap count.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="note">
+    <h2>The one thing left to decide</h2>
+    <p>A chat thread is a conversation, not a list of questions — so something
+      has to say which exchange was a question worth recording.</p>
+    <ul>
+      <li><b class="pick">Recommended — the office marks it while replying.</b>
+        One control in the Inbox reply box: <em>Record this as a question</em>.
+        The person's message becomes the question, the reply becomes the
+        answer. It is one press at the moment the office has both halves in
+        front of them, and it keeps "thanks", "ok" and half-conversations off a
+        list whose whole purpose is analysis.</li>
+      <li><b>The alternative — record every thread automatically</b> (first
+        message in, first reply out) and let the office delete the rows that
+        are not questions. Nothing to remember, and a list that fills with
+        noise faster than anyone clears it.</li>
+    </ul>
+  </section>
+
+  <section class="note">
+    <h2>What this does not change</h2>
+    <ul>
+      <li>One store, one grouping — so the same question can be counted on both
+        sides and compared. The two histories are two readings of it, not two
+        tables that will drift.</li>
+      <li>Nothing new is exposed. Both halves are already readable by the
+        office in the Platform Inbox.</li>
+      <li>The window stays 90 days, and nothing is backfilled.</li>
+    </ul>
+  </section>
+
+</div>

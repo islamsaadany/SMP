@@ -25,6 +25,16 @@ const PEOPLE = [
 async function main() {
   await P.withPlatform(pg, async function (c) {
     await P.ensurePlatformReady(c);
+    /* A CHECK MUST ANSWER IN WORDS (rule 2b): the seats below name clients the
+       registry has to hold already, and on a database nobody has migrated the
+       only thing Postgres says is a foreign-key error naming a constraint.
+       Say what is missing and what makes it — the same sentence every time. */
+    const reg = await c.query("SELECT key FROM clients WHERE key = $1", ["raya-trade"]);
+    if (!reg.rows.length) {
+      throw new Error("the registry holds no 'raya-trade' client. This fixture is additive and " +
+        "assumes a rehearsal database: seed a tenant in public, then run " +
+        "scripts/migrate-to-multi-client.js against it, then this fixture.");
+    }
     for (const [email, name, kind, admin, pw, client, seat, key] of PEOPLE) {
       const hash = auth.hashPassword(pw);
       await c.query(
@@ -50,7 +60,7 @@ async function main() {
     await c.query("DELETE FROM platform_access");
   });
 
-  /* ── AND THE ROWS THOSE MAPPINGS NAME (§303.32) ────────────────────
+  /* ── AND THE ROWS THOSE MAPPINGS NAME (§313.32) ────────────────────
      This mapped the two office accounts to `ff_islam` and `ff_omar` and never
      created either row — which was survivable only while a key naming nobody
      silently INVENTED a person. It does not any more: on a client whose
@@ -71,7 +81,7 @@ async function main() {
   const live = await P.withPlatform(pg, function (c) {
     return c.query("SELECT schema_name FROM clients WHERE key = $1", ["raya-trade"]);
   });
-  /* ── AND RAYA HAS A MARK (§303.36) ──────────────────────────────
+  /* ── AND RAYA HAS A MARK (§313.36) ──────────────────────────────
      A client's door wears the mark on its row, and the rehearsal database
      carries none — so every assertion about the dressed door would pass
      vacuously on a build that lost it (§94.2). A 4×2 PNG, the smallest

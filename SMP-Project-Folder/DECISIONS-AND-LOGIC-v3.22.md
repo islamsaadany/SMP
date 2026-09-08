@@ -35235,6 +35235,8 @@ the same moment still both start collections, because the memory is per
 conversation and not per sender; and **§283's `chase_html` column and migration
 stay in the database**, read by nothing.
 
+---
+
 ## §294 — THE SETTINGS PANEL SCROLLS INSIDE ITSELF (2026-09-05)
 
 Islam, of the chat settings dropdown on the Platform Inbox: *"there is no
@@ -37495,15 +37497,1542 @@ up is a look decision and not only an arithmetic one.
 §202's four gaps still read equal — they assert opposite gaps AGREE and never
 what they are (§94.8), so they survived 21 &rarr; 20 &rarr; 24 untouched. Box
 offset at 24px: **+0.000 across, +0.125 down**, at 1500, 1280 and 1000 alike.
-## §303 — RENUMBERED TWICE: §147 → §288 → §303, AND THE SPEC FROM 024 TO 030
 
-This work was built as **§147 / spec 024** and is now **§303 / spec 030**,
-renumbered twice, both times on a catch-up merge and both times for the same
+---
+
+## §303 — THE TEMPLATE CARRIES WHAT THE PLATFORM HOLDS (2026-09-05)
+
+> **RENUMBERED AT THE MERGE, §294–§299 → §303–§308 (2026-09-07).** These six
+> sections were built on one branch while five other sessions were numbering on
+> `main`, which took §294 through §302 first — so the numbers collide and the
+> ones on `main` are the ones production has already served. Renumbered here
+> rather than on `main`, which is the precedent §287 and §301 both set, and
+> recorded rather than silently overwritten (Principle II): every citation
+> INSIDE these six was moved with them, and every citation of a section below
+> §294 is untouched. What §304 calls **Import & archives** is called
+> **Import & storage** in the product, because `main`'s §261.9 renamed the page
+> to hold video storage beside the files; the two decisions are compatible and
+> the merge kept both (four tabs, not three).
+>
+> **AND ONE FUNCTION WAS DECLARED TWICE BY THE MERGE ITSELF** (§281, §56.7):
+> §305 wrote `openDeckTarget()` and `main`'s §295 wrote `openDeckFor()`, the
+> same six lines under two names, each because its own section had found §224's
+> branch copied out at another call site. Git merged both with no conflict in
+> `present.js` and a conflict only where the Present button chose between them.
+> `main`'s is the one kept — it takes the `from` argument Play needs — and the
+> PDF entry asks it; mine is DELETED by name rather than left standing (§24),
+> because two answers to *which deck does this target get* is the very fault
+> both sections exist to close.
+>
+> **AND TWO CHECKS HELD A LITERAL THE OTHER SIDE MOVED — ONE EACH WAY** (§274,
+> §214.3, §218). `import-page.py` asserted the page's tabs are exactly
+> *Download · Upload · Archived plans*, which `main`'s §261.9 legitimately makes
+> four; `video-slides.py` asserted they are exactly *Import a plan · Archived
+> plans · Video storage*, which §304 legitimately makes four the other way.
+> **Both were REWRITTEN to the claim their own section actually makes** — the
+> three ways in and out LEAD the page, in order; Video storage is the LAST tab,
+> after them — never loosened, and never deleted. That is the shape §274
+> predicts: a merge hands each side checks written against the world as it was
+> on the other, and both are red on a build behaving exactly as two correct
+> decisions decided.
+>
+> **AND `scripts/test-clean-parity.js` IS GREEN ON THE MERGED RESULT.** §308
+> recorded it red on `origin/main`, reproduced there on a virgin database before
+> anything on this branch was blamed; it passes here on a virgin Postgres 16
+> (10 units, 8 functions, 2 companies, 8 capabilities, 1 person), so whatever
+> put it right came in with `main`'s own 21 commits or with §303's sweep of the
+> templates. Recorded as measured, not claimed as fixed by this.
+
+Islam, asking for a way to export every plan at once, and putting the
+precondition first: *"mka esure that the plans templates for upload and download
+are matching all what we have on the platform now and then let's think how to
+have this download all build."*
+
+He is right that it is a precondition, and the reason is §22's contract. **An
+upload AUTHORS a plan**, so a column the file does not carry is a column the
+plan LOSES on a download-and-re-upload — and a bulk export built on files that
+drop things is not a backup, it is a complete-looking archive that cannot be
+restored. So the audit came first and the button waits.
+
+### What was measured, and how
+
+Not read — **measured**. Each subject's workbook was built with the platform's
+own builder, zipped with `buildXlsx`, read back with `readXlsx` +
+`planFromWorkbook`, applied through the REAL replace path, and compared field by
+field against what was stored. The maximal state was MADE first (§255): the
+worked example carries no monthly plan, no hidden row, no repeat mark, no tactic
+outcome and no weight on a unit's objectives, so **every one of these faults is
+invisible on the demo data** and a probe that merely walked the tenant would have
+reported the templates clean.
+
+**Five gaps, and a sixth found on the way.**
+
+### §303.1 — A unit's objectives lost their weight
+
+§243 gave a unit's objectives an editable **Weight** column at Islam's own
+instruction (*"there is no weighting on the objectives in units it needs to be
+added"*), and the workbook was left behind — a capability's and a supporting
+function's sheets have both asked for "Weight %" since §213, and only a unit's
+did not. So a download and an untouched re-upload dropped every weight, and
+`koWeights()` then read the unit's headline objectives score back at **equal
+weight**: a number on the front page moving for a reason nothing on any screen
+states.
+
+**The reader needed nothing.** It keys on the header name, and
+`createFromPlan` has read `x.weight` since §213 — the column was the whole of
+the missing half, which is what made it a one-line fix and a five-year-old-shaped
+bug.
+
+**A VALIDATION RANGE IS A POSITION (§65).** Weight takes H and Hidden moves
+H → I, so the range moves in the same edit as the head. Getting that wrong
+validates the wrong cells in silence — and the falsification proved it: removing
+the header shifted all twelve month columns by one and the monthly-plan check
+caught it, which is §65 demonstrating itself.
+
+### §303.2 — A capability's objectives: a column written and never read
+
+That sheet has WRITTEN `Hidden` since §233 and `capPlanFromWorkbook` never read
+it, so a hidden objective travelled out marked and came home **counted** — and
+§233's whole rule is that a hidden row leaves every score. Every other sheet in
+that workbook already read it; this was the one left out (§53.5).
+
+*A write-only column is the quietest kind of fault, because the file looks
+right.*
+
+### §303.3 — A project's repeat mark had no column
+
+§115 made *Repeats* an editable fact in a project's front matter, and the file
+never carried it. That is not a label: at the next cycle a marked project is
+**archived, cleared and date-shifted** where an unmarked one keeps its figures —
+so a round trip silently changed what happens to the numbers.
+
+**The conversion is named once.** The pen spelled label → value inline and the
+file reader would have been the second copy, so `repeatFromLabel()` sits beside
+`repeatLabel()` and both ask it (§53.5). It answers **null** for the default and
+the caller DELETES the key (§50.6), because a project the file left as "No" and
+one nobody ever asked must be byte-identical or every save carries a phantom
+change (§42). Appended, so Timeline stays at E and no range above it moves.
+
+### §303.4 — A capability's progress upload could not report a deliverable at all
+
+The worst of the six, and it was not the one reported. Measured end to end with
+a file saying **"In progress, 63%"**:
+
+- **The deliverable stayed Not started.** `diffCapProgress` read `hit.obj.actual`
+  and `hit.obj.kind` — *both removed by §104 and §53.4* — so "In progress" fell
+  down the binary branch, was coerced to `"no"`, and was written to `actual`, a
+  field nothing reads. The row went on saying Not started on every screen while
+  the upload looked accepted.
+- **The milestone took its status and dropped its per-cent.** "New %" has been on
+  that sheet since §104 and the reader took the first of the two columns and
+  stopped — so the reporter typed the very figure §104.10 REQUIRES before the row
+  counts, and it was discarded on the way in.
+- **And `m.pct` was written under "New %"** — the box the reporter fills — so the
+  sheet handed the stored figure back as though somebody had just typed it. It
+  reads under "Current %" now, beside the current status.
+
+**The screen's two rules move into one place.** Leaving *In progress* clears the
+per-cent, and a typed figure is clamped rather than refused — the page has done
+both since §104 and the file path had neither. `setRowStatus()`/`setRowPct()` are
+what the reporting handlers and the workbook reader now both ask, because two
+answers to *what does reporting this row mean* is exactly how this drifted.
+
+### §303.5 — A unit's progress file could not finish a report
+
+Two things, one consequence. **No Note column anywhere** — and §105 holds Submit
+while a figure at risk carries no explanation, so a unit reporting entirely by
+file filled the workbook, uploaded it, and still had to open every row on the
+page to type the sentence that unlocks Submit. **And no outcome figure**: since
+§248 a tactic whose outcome carries a target is reported by that OUTCOME's
+figure, in the outcome's own unit, and the sheet went on asking for a per-cent —
+so the number landed in `actual`, which has always meant "% delivered", clamped
+to 0–100, with the status pill moved on the strength of it. One row, two fields,
+depending on which door the answer came through.
+
+**The sheet asks what the screen asks.** A "Measured by" column says per row
+which question is being put, decided by `outcomeOf` — the same function the
+reporting box asks, never a second reading of *has it a target* (§42). "New %"
+becomes "New value" and **both are read** (§58), so a workbook downloaded before
+today still uploads.
+
+**A note is a change of its own**, on both routes: a row whose figure is already
+right and whose note is owed had nothing for the file to carry, which is the case
+Submit is actually waiting on.
+
+### §303.6 — The CSV route came too
+
+A plan may only arrive as a workbook (§22: its Read me sheet is what says whose
+plan it is), but **reporting still takes a CSV**, so the same facts land through
+that door or the product has two answers depending on which file somebody chose.
+`PROG_COLS` gains `new_note`, `CAPPROG_COLS` gains `new_pct` and `new_note`, and
+the deliverable's `current` column — which read the field migration 024 removed,
+and had therefore been **empty on every deliverable row since** — reads its
+status.
+
+### What is recorded and deliberately NOT done
+
+- **`diffPlan`, `applyPlan`, `diffCapPlan` and `applyCapPlan` are callerless.**
+  Every plan upload goes through the REPLACE path (§22), so the diff-driven
+  half has had no caller since. Flagged rather than deleted (§24 says it should
+  go; doing it here would ride on a change about something else — rule 1b).
+- **The CSV *plan* templates are download-only.** `loadCSV` refuses a plan
+  outright, so `planTemplate`/`capPlanTemplate` produce a file nothing can read
+  back. They are kept in step where it was free and named here as the larger
+  question.
+- **A measure's `target3y` and `horizon`, a pillar's `sub`, a deliverable's
+  `kind`, and `notes` on any plan row** are stored and nothing on any screen
+  writes them, so the file is right not to ask. Checked, not assumed.
+
+### The check
+
+`checks/template-round-trip.py` asserts **a fixed point, never a list of
+columns** (§94.8): the plan goes out through the platform's own builder and
+comes back through its own reader, and every field a person can author has to
+survive. Add a field to the pen tomorrow and this goes red until the file
+carries it, which a list of expected headers could never do. Both ends every
+time (§94.2) — a row the file says nothing about must be untouched — and every
+probe degrades rather than throwing (§215).
+
+**19 red** on the shipped build. **Proved able to fail one fix at a time**
+afterwards: 3 / 1 / 1 / 3 / 4 red with each taken back out, on both doors for
+the outcome routing.
+
+**AND TWO OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK** — it required the
+pillars function to carry key objectives, which §214.2 says such a function
+legitimately has none of, and it picked `items[0]` for the pillar when that
+function's first pillar has no measures. Both reported a healthy tenant as
+having nothing to measure.
+
+### Three neighbouring checks were stale, and one had been red on `main`
+
+- **`checks/tactic-outcome.py` — 13 red on `main`, and it is the check.** §268
+  moved the strategy pen onto the section line (`.secpen`) and deleted
+  `editBar()`; this file still hunted `.penbtn`, so the pen never opened and
+  every assertion after the first section died on an undefined cell. §51.11, and
+  §274's rule exactly — *grep for the CONTROL on both sides of a merge, and a
+  control that moved has more than one class*. Repaired here rather than left,
+  because it covers the very fields §303 changes and a red neighbour masks a
+  regression. **47/0** after.
+- **`checks/monthly-plan.py` and `checks/fn-pillars.py` held literal column
+  positions** that this decision moves — §214.3, and for `fn-pillars` it is the
+  **third** time on that one line (§281.2 recorded the second). **REWRITTEN, never
+  loosened** (§218): `monthly-plan` now asserts the property §65 actually
+  guarantees — the twelve are last, in order, after Hidden — so the next column
+  added does not break it while a month moved into the middle still does; and
+  `fn-pillars` asserts the two sheets' **difference** rather than two literals
+  sitting apart in one file agreeing by accident. Both proved still able to fail.
+
+### What was run
+
+`checks/template-round-trip.py` 19 red → all green &middot; full `qa.py` sweep
+**ERRORS: none** &middot; `test-authorize` **527/0** &middot; `test-graph-diff`
+**131/0** &middot; round trip, clean parity, two tabs (24/0) and eight concurrent
+saves all green on a virgin Postgres 16 &middot; `tactic-outcome` 47/0,
+`fn-pillars`, `monthly-plan`, `project-tables`, `repeat-project`,
+`project-row-type`, `plan-fields`, `gap-fill`, `plan-builder`,
+`upload-duplicates`, `one-line-titles`, `plan-tail-fold`, `submit-gate`,
+`objectives-table`, `hide-element`, `objective-unit`, `unit-before-number`,
+`yn-target`, `count-compile` all clean.
+
+**Nothing is stored that was not stored before, and nothing is migrated.**
+
+### Next
+
+The export-all itself, which Islam has already settled: **plans + progress +
+archives**, in one zip, from the download dropdown that already holds the
+templates. The one piece of new machinery is that `zipStore()` encodes its
+members with `TextEncoder`, so it must accept a `Uint8Array` before a zip can
+hold `.xlsx` files.
+
+---
+
+## §304 — Import & archives is three tabs: files out, files in, and the record
+
+Islam, of the page §303's audit had just been done for: ***"I need a mockup to
+refine this page and the buttons inside it as it's too clumsy."*** Then, of
+three tidier drawings of the same page: ***"I don't like any of the options. we
+need to rethink the page."***
+
+**HE WAS RIGHT TO REJECT ALL THREE AND THE REASON IS NAMEABLE.** Every one of
+them kept the shape and straightened it. **The shape is the fault: the page was
+a tutorial — 1, 2, 3 — for something nobody does in one sitting.** You take a
+file, it goes away for a week, somebody sends it back. Numbering those as
+consecutive steps makes the whole page furniture for anybody who has done it
+once, and it forces one question to be answered **twice** — *which kind of
+file?* on the way out and again on the way back.
+
+**THE OLD PAGE'S FAULT WAS MEASURED BEFORE ANYTHING WAS PROPOSED, and it was
+one declaration.** `.minisw { margin-left:auto }` — the first auto margin in a
+flex row eats the free space — so step 1's sentence ended at **x 898** and its
+controls began at **x 1180**, on a row starting at **x 286**: 894px of empty
+row before the first control, and **a different number at every window size**
+(1180 / 860 / 680 at 1600 / 1280 / 1100). Nothing else on the page moved like
+that. `arrange.css` already recorded that trap at line 237, about a different
+row. Progress mode put **six controls in five treatments** on it; the control
+that governed the whole page was **42×21px** and hung off the download button;
+the one control that does the work was the browser's raw `Choose File`.
+
+### The page
+
+**THREE TABS — Download · Upload · Archived plans.** The steps go, and with
+them the mode switch, **deleted rather than restyled** (§24): on the way out you
+press the button for the file you want, and on the way back you press the kind
+you are uploading. Download is **435px at rest** against **727** for the one
+crowded page.
+
+**DOWNLOAD IS TWO CARDS.** The blank template stands alone because it is the one
+file with nothing to choose — §22 makes it generic and the subject is picked on
+its Read me sheet. Everything else is **one ticked list of subjects and three
+buttons over whoever is ticked: Plans · Progress · Archives**, each carrying its
+count. One subject is one workbook; several arrive as a zip.
+
+**AND THE THREE BUTTONS ARE ISLAM'S ANSWER TO A QUESTION I HAD ANSWERED WORSE.**
+Asked whether the export should carry sub-options, I argued for one button with
+folders inside the zip, on the grounds that a folder is the filter applied
+afterwards at no cost. He said ***"3 buttons in this case download plans,
+progress and archives"***, and he is right: it is not one act with a filter, it
+is **three acts over a set the person chooses**, and a set somebody picks cannot
+be expressed by a folder. Recorded as a reversal of my recommendation.
+
+**§304.1 — THE PICKER IS THE PLATFORM'S OWN, AND TWO LABEL RULES ARE PER
+CONTROL.** It took three rounds to read him, and the third round stopped
+rephrasing and **drew** the candidates (§266's own lesson: *a question the
+reader cannot parse is answered by drawing it*). He chose **A**, the searchable
+dropdown — which is `SEARCHSEL`, already in the product and already ticking
+(§45.5, §130.1). What is new is asked for **by attribute and nowhere else**:
+
+* **`data-sslabel="count"`** — of nineteen names run together in the closed box
+  Islam asked ***"why is the drop down contain all the names in the box
+  itself?"***. Because that is `textOf()`'s rule **and it is right where it was
+  written**: the only multiple select in the product until now is a tactic's
+  **collaborators**, where the answer is two or three names and printing them IS
+  the answer. At nineteen it says nothing and truncates mid-word. So this one
+  reads *19 of 19 subjects* and the collaborators picker keeps its names.
+* **`data-ssall`** — Select all / Select none, in the popup, **on this control
+  alone**. A tactic's collaborators are two names off a register of thirty-three
+  and *select all* there is a control with no meaning (§53.5, rule 1b).
+
+Both are asserted **at both ends** (§94.2): present here, absent on the
+collaborators picker — a build that gave them to every ticking list would pass
+the first half alone.
+
+**§304.2 — WHERE BUILDING STARTS.** Islam: ***"we need to remove build a plan
+from here as its already a function that is working inside the function
+itself"***, and then ***"it should be in the bu or function when navigated to
+this page not burried in the setup page."***
+
+He is right that authoring already works where the plan lives — the pen and the
+*+ Add a row* buttons write it directly. But **measured, `data-buildplan`
+appeared exactly once in the whole product** and `openBuilderChooser()` had no
+other caller: taking the band off stranded spec 020's guided builder entirely
+(§61, §24). Told this, he said ***"keep the builder"***, and the door moved.
+
+**AND THE PAGE ALREADY ANSWERED WHERE.** Emptied of everything, a subject's Plan
+page already drew an empty state offering **two** routes — *Add the first one*,
+or upload a plan — so the guided build is the **third route in a sentence that
+already existed**, not a new control on a line §268 spent a whole section
+getting down to one. Drawn against the alternative (a permanent control on the
+section line, which already carries a count, four chips, a red button and the
+pen) and Islam chose **A**.
+
+**FOUND ON THE WAY**: that sentence pointed at *"Setup → Import & plans"* and
+the page has been called **Import & archives** for as long as it has existed
+(§104.8 — prose describing something the product no longer calls that).
+Corrected in the same edit.
+
+**RECORDED, NOT DONE**: with the door knowing its subject, `openBuilderChooser`,
+`BCHOOSE`, `builderChooserHtml`, `wireBuilderChooser` and `builderStartFresh`
+are callerless. §24 says dead code goes — and deleting five functions in the
+same change that MOVES a door is how a restoration and a removal get confused
+with one another. It is its own edit, with its own run of the checks.
+
+**§304.3 — WHICH CYCLE.** Islam: ***"we need first to know what cycle are we
+downloading."*** Three facts, measured rather than assumed:
+
+* A **figures archive is already named after its cycle** (`archiveFigures` files
+  it under `REVIEW.name`), so the list of cycles a download can come from is
+  **read rather than invented**.
+* A **plan archive stores no cycle** — the subject's name and the date it was
+  archived. That is the one part of the question that cannot be answered for
+  what is already stored, and it is stated rather than discovered.
+* **No workbook named a cycle at all** — measured, `xlsx.js` never read
+  `REVIEW.name`. So a progress file taken this cycle and one taken next were
+  **identical in their headings**, and two of them on a disk could not be told
+  apart. Every Read me sheet carries the cycle now, and so does every filename.
+
+**§304.4 — UPLOAD IS TWO BUTTONS, AND THE FILE CONFIRMS THE ONE YOU PRESSED.**
+Islam: ***"make the upload of plan or progress 2 buttons like what we did in the
+download of templates"***, so one press replaces set-a-mode-then-choose-a-file;
+each button is a `<label>` over its own hidden input, because a file picker
+cannot be opened from script without a gesture (§90).
+
+**And the cycle is not asked on this tab**, which is his correction of his own
+earlier answer and the cheaper of the two: ***"the upload only makes sense for
+new cycles not closed ones."*** A closed cycle takes no figures **from anyone**,
+office included — `canReport()` and `canReportFn()` both open with
+`REVIEW.state !== "open"` — and reopening one is its own deliberate control
+(§273.2). So the tab **states** which cycle it writes into, and neither the
+reporting rules nor the archive change.
+
+**THE KIND IS CHECKED, NEVER TRUSTED.** Every workbook the platform writes opens
+its Read me sheet with *"Plan workbook"* or *"Progress workbook"*, so pressing
+the wrong button is **refused by name** — *"this is a plan workbook and you
+pressed Progress"* — rather than read as something it is not (§32, §16.7). A
+workbook with neither word is left alone: one rebuilt by hand is not wrong, it
+simply cannot confirm anything, and refusing it would turn a helpful check into
+a wall.
+
+**§304.5 — NO CSV LEAVES, AND A CSV IS STILL READ.** Islam: ***"we should always
+download properly designed templates not csvs"***, then ***"we can accept the
+csv but nobody builds in csv."*** Both CSV links go, and `csvFor()` and
+`fileName()` with them (§24). `loadCSV` is untouched. The four CSV builders in
+`templates.js` are callerless from today and **deliberately not deleted in the
+same breath** — they are §22's other half and removing them is its own sweep.
+
+**§304.6 — A ZIP MAY HOLD BYTES.** One line, and the whole export rests on it:
+`zipStore()` encoded every member with `TextEncoder` because every caller until
+now handed it XML. A zip of **workbooks** holds files that are themselves zips,
+and running a `Uint8Array` through `TextEncoder` mangles every byte above 0x7F
+**silently** — the archive builds, downloads, and refuses to open. Falsified:
+with the line reverted, **0 of 19 workbooks open** and the zip still passes
+`testzip`.
+
+**AND ONE FAULT WAS FOUND BY DOWNLOADING TWO FILES AND READING THEIR NAMES.**
+A single subject is sent as one file and `sendFilesZip` drops the folder when it
+does — so a leaf name that leaned on `plans/` gave the plan and the progress
+file for one subject **the same name on disk**. The kind is in the leaf now.
+
+### Verification
+
+`checks/import-page.py`, proved able to fail twice from the **sources** (§276 —
+§238's hashed CSP silences an edited built file): the zip's binary members
+reverted, **1 red** printing *0 of 19*; the kind confirmation removed, **2 red**.
+Full `qa.py` sweep **ERRORS none** · `test-authorize` **527/0** ·
+`test-graph-diff` **131/0** · `node --check sw.js` · `template-round-trip`,
+`plan-builder`, `owner-picker`, `master-picker`, `setup-pages`, `setup-search`,
+`repeat-project`, `one-line-titles`, `fn-pillars`, `monthly-plan` and
+`project-row-type` all green.
+
+**`checks/plan-builder.py` was REWRITTEN, never loosened** (§218, §51.11): its
+§1 asserted *"the SMO finds Build a plan beside Import"*, and what it was really
+asserting — that the SMO can start a build — is asserted from the subject's own
+page now, with the absence from Import beside it (§94.2). Its sections 2 and 3
+open the chooser **from script** and say out loud that it has no door in the
+product today, so the day it is deleted or given one back, that is what reports
+it. And the section **puts its state back**: it empties a unit to reach the
+empty state, and §10 needs that unit to have a plan.
+
+**THREE OF THE NEW CHECK'S OWN FIRST FAILURES WERE THE CHECK.** It **died rather
+than reporting** on Python slice syntax inside an `evaluate` — §215, in the file
+whose own docstring promises every probe degrades; it hunted the collaborators
+picker by a class that is on the SELECT while `SEARCHSEL` puts its button
+BEFORE it (§34); and it **assigned** `EDIT_PAGE = ['plan']` where §269 made that
+a map keyed by page, so it set a shape nothing reads and opened nothing (§96 —
+a probe that models the state instead of pressing the control measures a page
+the product never draws).
+
+**STILL OPEN, AND ASKED**: Islam has asked for the **presentation** to be
+downloadable here as well as the workbook. SMP has two artefacts that answer to
+that word — the **plan as slides** (`buildPlanPptx()`, which exists and is a
+fourth button for almost nothing) and the **review deck** with its figures,
+which is HTML only and which `pptx.js`'s own comment calls *"a different
+artefact for a different meeting"*. Which one has been put to him and is not
+built.
+
+---
+
+## §305 — The deck on paper
+
+Islam, answering §304's open question: ***"I mean the performance deck. the one
+the units present from."*** Then, of the two ways of building it: ***"let's go
+with the pdf for now."***
+
+**THE QUESTION MATTERED BECAUSE SMP HAS TWO THINGS CALLED "THE PRESENTATION"**
+and only one of them had a file. `buildPlanPptx()` (§117) writes the PLAN as
+editable slides and has been an entry in this menu since §252.2. The **review
+deck** — the one with the figures on it, the one a unit stands up and presents
+from — is HTML and has never left the browser in any form. That is the one he
+meant, and `pptx.js`'s own comment had already named the difference: *"a
+different artefact for a different meeting."*
+
+### The two ways, and why B was the honest recommendation
+
+**A — a second `.pptx` builder.** Editable, native, matches what the plan
+download already does. About a day, and it carries a permanent cost.
+
+**B — the deck printed to a PDF.** Not editable, and faithful by construction.
+
+**THE RECOMMENDATION WAS MEASURED, NOT PREFERRED.** `deckSlides` is **473
+lines** and `deckSlidesFn` **166**, covering some twenty-one kinds of slide;
+`pptxUnitSlides`, which does the same job for the plan, is **79** and covers
+about five. A second builder is a second answer to *what is on this slide*
+(§53.5) — and **this deck has moved four times in a fortnight**: §243 reshaped
+the aim slide and the headline numbers, §253 stopped drawing a table with no
+rows, §254 put the benchmark on every figure, §259 gave it section dividers.
+Every one of those would have had to be made twice, and the copy that drifts is
+the one nobody is standing in front of a room looking at. Islam took B, and
+*"for now"* leaves A on the table.
+
+### What was built
+
+**IT PRINTS THE REAL DECK, WHICH IS THE WHOLE ARGUMENT.** The entry presses the
+same `openDeckTarget()` the Present button presses, then asks the browser to
+print. There is no second assembly, no second list of slides, no second idea of
+what a pillar slide holds — so the file cannot be a different deck from the one
+the projector shows, in the way that a second builder eventually is.
+
+**THE DECK MUST BE ATTACHED WHEN IT IS MEASURED.** §69 recorded that
+`scrollHeight` and `clientHeight` are both **0** on a detached element, so
+`deckFitPass()` — which splits a long table across continuation slides by
+measuring whether it fits — silently does nothing on a deck rendered off-page.
+That is why this opens the deck for real rather than rendering one into a
+fragment: the artefact has to be produced by the same pass that produced what
+was rehearsed. **Proved rather than reasoned**: the generated PDF splits tables
+across slides 13/14, 20/21 and 24/25.
+
+**FIT-TO-WINDOW IS TURNED OFF FIRST, AND PUT BACK.** `.deckroot.fitwin` swaps
+`.deck` from its authored 1600×900 to `100%/100%` and **persists between
+openings** (§69.7) — so a presenter who had it on would have got a PDF whose
+tables broke in different places from the deck they rehearsed. Off before the
+fit pass runs, restored after.
+
+**`@page { size: 1600px 900px }` IS NOT A PREFERENCE.** It is the box every
+slide was authored in and the box `deckFitPass()` splits against; any other page
+size re-asks a question that has already been answered. The PDF comes out at a
+MediaBox of `[0 0 1200 675.12]` — 1600×900 CSS pixels at 96dpi exactly.
+
+**THE COLOURS HAVE TO SURVIVE.** Browsers drop backgrounds when printing unless
+told otherwise, and this deck is navy table headers, scoring colours and §259's
+blue section dividers — a review deck printed in outline is not the deck.
+`print-color-adjust:exact`, asserted rather than assumed.
+
+**THE DECK CLOSES WHEN THE DIALOG DOES**, on `afterprint`. A browser that never
+fires it leaves the deck open on screen with Exit where Exit always is — a
+nuisance and not a trap (§61).
+
+### The two decisions inside it
+
+**NO GATE, AND THAT IS THE DECISION.** §252.2's plan download is the office's
+because a `.pptx` of the plan is the plan leaving the platform in an **editable**
+form. This is a picture of a review that anybody standing on this page may
+already project — Present has never had a gate — so gating it would refuse on
+paper what the button directly above it grants on a screen (§61). What can be
+projected can be taken away.
+
+**THE WORD PDF IS ON THE LABEL**, for two reasons and not for tidiness: the file
+cannot be edited, which is a thing to know before you press rather than after;
+and the press opens the browser's own print dialog rather than downloading at
+once, which is a surprise the word takes away.
+
+### One thing was tidied because it had already failed once
+
+**`openDeckTarget()` IS THE RESOLUTION MOVED, NOT WRITTEN TWICE.** §224 settled
+that the FORMAT decides which deck a target opens and never the `fn:` prefix —
+and that answer lived **inside the Present button's own click handler**. §253.3
+then found the same fault again, one surface at a time, on `slidesAssemble()`
+and `deckAnchors()`. The PDF entry is a second door onto the same act, so the
+resolution moved into a function both doors ask rather than becoming the fourth
+copy.
+
+### Proof
+
+`checks/deck-pdf.py` — **0 failures**, and **proved able to fail twice from the
+SOURCES** (§276: §238's hashed CSP silences an edited built file, so a broken
+build is made by editing `src/` and running `build.py`): **6 red** with the print
+stylesheet removed, **2 red** with the fit-to-window handling removed. Its nine
+sections assert the two new readers by name first (§215, so a build without them
+reports rather than dies), the entry beside Present on **all three deck shapes**
+(a unit, a capability function, a pillars function), the press opening the deck
+and asking to print **exactly once**, every slide taking one page at 1600×900
+with the transform gone, neither the deck bar nor the platform printing, the
+colours surviving, and **both ends** — on a screen exactly one slide shows
+(§94.2).
+
+**THE CHECK WAS WRONG TWICE BEFORE IT WAS TRUSTED, AND BOTH ARE WORTH KEEPING.**
+It measured `getBoundingClientRect()` and failed at **1490×838** on a correct
+build: `.deck` is scaled into the window by a transform, so the rect is the
+**fit** and `clientWidth`/`clientHeight` is the box the slides were authored and
+fitted in — which is the one that has to be the page. And its
+fit-to-window assertion compared **slide counts** (31 against 31): at a
+1600×900 viewport `fitwin` changes the deck's height by 62px and happened to
+change no split, so the assertion passed on coincidence and would have passed on
+a build that ignored `fitwin` entirely (§113.8). It asserts the property
+directly now — the pages are laid out in a 1600×900 box — with a prior assertion
+that the toggle really does move that box, or the first one proves nothing.
+
+**TWO NEIGHBOURS WERE REPAIRED, AND ONE OF THEM WAS RED ON `main`.**
+`checks/strategy-split.py` had been asking `.pane .paneact [data-page]` since
+**§268 moved the strategy pen onto the section line** (§51.11, §274) — and
+**both halves were stale while only one said so**: its absence assertion passed
+for the wrong reason, because nothing is ever drawn in that corner now, so it
+was true of every build (§113.8), while its opened twin failed on a product
+behaving exactly as decided. **Established as not mine before it was touched**:
+a pre-change baseline was built from the `ui-versions/` snapshots and reproduced
+the identical failure. Repaired here rather than left, because it covers the
+very menu and pen this change touches and **a red neighbour masks a regression**
+(§303). `checks/fn-perf-controls.py` held the bare word `"download"`, which this
+decision moves — **REWRITTEN, never loosened** (§214.3, §218): it names the PLAN
+now, with the PDF's presence asserted in the same breath and both ends, so a
+viewer the plan rule refuses is proved still to get the presentation.
+
+**Screen only.** No `api/`, `lib/` or `db/` file touched, read off the diff and
+asserted: `test-authorize` **527/0**, `test-graph-diff` **131/0**, full `qa.py`
+sweep **ERRORS none**. Deck neighbours green: `deck-blank-slides`,
+`deck-figures`, `deck-outcome`, `deck-dividers`, `notes-slide`, `hide-slide`
+42/0, `master-presentation` 44/0.
+
+**RECORDED, NOT DONE**: the editable `.pptx` of the review deck is Islam's
+*"for now"* left open, and a **master flow** (§266) cannot be downloaded — the
+entry is per subject, because a flow is several decks and printing one would be
+one file holding a room's whole morning.
+
+---
+
+## §306 — The contingency files: a working copy, the slides, and four reminders
+
+Islam, over five messages, arriving at a requirement none of the first four
+stated: ***"if the platform all is down we need to have a substitue action. so
+before the review day I will download all the presnetations with a time stamp.
+so in case if things are down I have a backup to adjust to and present from."***
+
+**THE ASK MOVED TWICE AND BOTH TURNS CHANGED THE ANSWER.** It opened as *where
+is the presentation download*, became *"for mass keeping and documentation"* —
+for which a fixed record is enough — then *"in case something needs fixing"*,
+for which it is not, and finally the sentence above. **A PDF cannot be
+adjusted**, so on his own terms the format he first asked for answers the
+errand he first described and not the one he arrived at. It was said plainly
+rather than built quietly, and he then dropped the collective PDF himself
+(*"pdf is not needed"*), leaving §305's per-subject print standing.
+
+**THE OFFER THAT REPLACED IT WAS SPIKED BEFORE IT WAS QUOTED**, because *"about
+a day"* on an unproven mechanism is a guess with a number on it. One hour: the
+built file plus the tenant's graph in a `<script type="application/json">`
+block, opened from disk with nothing running, hydrating and holding a renamed
+unit — and then **the real `checks/deck-pdf.py` run against that offline file,
+0 failures on all three subject shapes**. Two things nearly stopped it and
+neither does: the build's script policy hashes only BARE `<script>` tags, so a
+data block is not silenced by it (asserted at both ends — the untouched file
+logs no complaint, the file with the block logs no complaint, a naively edited
+one logs one immediately); and **the block must sit ABOVE the platform's own
+scripts**, which was found by putting it at the end and watching the copy come
+up on the baked worked example with no error anywhere. *A backup showing
+another company's figures is worse than no backup, and it renders perfectly.*
+
+**TWO CORRECTIONS OF THE FIRST DRAWING, EACH KILLING AN OPTION RATHER THAN
+ADJUSTING IT.** The whole feature is the SMO team's: the mockup had hung the
+reminder on the welcome screen's *Waiting on you* list — a screen EVERY viewer
+opens — so it was drawn beside a unit head's own row. A unit head has nothing
+to download, so the card, the banner and the list are ABSENT for them rather
+than drawn and refused (§61's trap is a control somebody needs being
+unreachable; this is the opposite). And ***"the cycle is about the time we
+cover and what we report already and how we preorate more dates will create
+confusion. push back if you want."***
+
+**HE IS RIGHT AND IT MOVED RATHER THAN WENT.** The three fields under *This
+cycle* answer one question in three parts — what stretch of the year, when the
+units hand figures in, and which month the figures are MEASURED against (§239)
+— so a fourth box among them reads as a fourth thing the arithmetic consults.
+It consults nothing. Its own block, under the two columns, behind a rule, with
+the reminder times beside it; and **that it changes no figure is asserted
+rather than promised** — every score, benchmark, elapsed-month count and review
+point read before and after, byte-identical. **AND IT COULD NOT RIDE ON
+`Reports due`**, measured before a field was proposed: thirteen days earlier in
+the worked example, and free text carrying no time of day at all.
+
+**THE SLIDES ARE CONVERTED, NEVER DESCRIBED A SECOND TIME.** §305's refusal to
+write the review deck as a `.pptx` was measured — 639 lines over twenty-one
+slide kinds, four moves in a fortnight — and Islam overruled the conclusion
+(*"we need the ppt downloads the final presentations reported according to the
+last performance at the moment of download"*) rather than the reasoning, so
+the reasoning had to be answered instead of set aside. `deckHtmlFor()`
+assembles the REAL deck and the converter walks the slides it produced, turning
+headings, prose and TABLES into shapes: it knows nothing about a pillar's
+measures or a project's milestones, so a slide kind added tomorrow arrives with
+no edit. **The existing button is a different document and that is measured,
+not asserted** — its own cover slide reads *"as agreed, no reported figures"*
+and its tables are Measure · Dir. · Target · Compiles and Tactic · Owner ·
+Collaborators · Q1–Q4.
+
+**THREE CONVERSION FAULTS, ALL FOUND BY READING THE FILE AND NOT THE CODE**
+(§96's family): a heading came out `…OperationsKey measures`, one word made of
+two, because the deck puts the name and its sub-label in one `<h2>` and CSS
+separates them; a quarters cell read **`1234`**, which says a tactic runs all
+year when it runs in two; and the pillars roll-call converted to a heading over
+an empty page, because it is a grid of cards and matched no prose selector.
+*An empty slide in a file taken as a backup is the one thing this exists to
+prevent*, so the lead falls back to LEAF TEXT and a card kind added later lands
+rather than vanishing.
+
+**THE REMINDER IS §258's OWN BANNER IN THREE VOICES** (Islam's option B, from
+two drawn): quiet at 24 and 12 on the attention ground, where nothing has gone
+wrong yet (§168, §190); the alarm at 6 and 3; and the last drops *Later*,
+because at three hours there is no later. **Each person's reminders end when
+THAT person has both files** — not when somebody else has — or it is four nags
+whatever anybody does and people learn to dismiss it (§190). The moments are
+one field, not four boxes, per review rather than per tenant, with no settings
+page for one line (§32). **THE LIMIT IS ON THE PAGE, NOT DISCOVERED ON THE
+NIGHT**: nothing wakes this platform up (§97.5, §283, §293), so a reminder
+appears the next time that person opens it.
+
+**AND THE RECORD IS WHAT MAKES "ALL THE SMO TEAM WILL DOWNLOAD" A FACT.**
+Without it the banner tells each person about their own files and nothing about
+anybody else's, so *covered* would be a hope. The register's own list through
+the same rule; drawn only while there is a review day, because a table of *Not
+yet* against a deadline that does not exist is an alarm about nothing.
+
+**NO MIGRATION, PROVED RATHER THAN CLAIMED** (§172): all three ride
+`review.extra` and round trip on a virgin Postgres 16, keys DELETED again
+(§50.6). **THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY** (§172 again,
+which is the record of four layers agreeing about a value the database had
+never been offered): they classify as `cycle`, the office allowed and a unit
+head and a strategy custodian refused, both ways — **including the stamp**,
+because a map keyed by PERSON reads as *everybody's own* and it is not.
+
+**TWO COSTS NAMED RATHER THAN FOUND OUT.** The working copy has no sign-in in
+front of it — whoever holds the file sees everything in it — which comes with
+any backup and is therefore said on the card. And the `taken` map travels
+whole, so two of the office pressing inside one save window can lose a stamp
+(§234's shape, one map over); the cost of losing one is one extra reminder
+rather than a lost file, which is why it is recorded instead of split per
+person, a change the differ and the authoriser would have to be taught
+together.
+
+`checks/contingency.py` **63 assertions, 0 failures**, over HTTP because the
+banner does not exist over `file://` (§94.11) — and it **OPENS** the working
+copy rather than only building it. Falsified from the SOURCES (§276): the block
+appended at the end **3 red**, printing `Mobile`; the reminder never ending
+**1 red**; the slides built by the plan builder **5 red**. **AND ONE OF ITS OWN
+FIRST FAILURES WAS THE CHECK** — §237 rebases on the server's graph when the
+viewer switches, so the section after the both-ends test was measuring a review
+day it had itself destroyed. Beside it: 534/0 authoriser, 131/0 differ, round
+trip and clean parity on a virgin database, two tabs 24/0, eight concurrent
+saves none lost, the incremental writer byte-identical, the full `qa.py` sweep
+ERRORS none, and the banner measured 5.36–10.18:1 in both themes at three
+widths with no sideways scroll.
+
+**AND `cycle-edit.py` WAS REWRITTEN, NEVER LOOSENED** (§214.3, §218): it held
+every box in the pen as ONE FLAT LIST, which this decision deliberately splits.
+Widening the literal to eight would have made it pass and stopped it guarding
+anything; it asserts the two blocks SEPARATELY now — the cycle's own fields are
+exactly those five and the review day is asserted NOT to be among them — which
+is the decision itself turned into a check.
+
+**RECORDED, NOT DONE**: a flow (§266) still cannot be downloaded, the slides
+being one file per subject; nothing carries a PDF of every subject, Islam
+having dropped it once the working copy existed; and with nobody signed in
+anywhere an overnight reminder waits for the morning.
+
+---
+
+## §307 — One month, one meaning: the cycle's end IS the review point
+
+Islam, with the Reporting cycle pen open on his own tenant and five boxes
+wrapping onto two rows:
+
+> *"all the dates should be date selector like the reporting as of. and why do
+> we still have the reporting as of? didn't we say that the cycle end will be
+> the reporting as of the reports due is the only 1 with a day date as it's a
+> cutt off dates. and if we set that they will be only 4 boxes can be in 1
+> line"*
+
+Then, deciding the question underneath it himself:
+
+> *"the cycle ending is the reporting as of so that's what the proration depend
+> on this is a critical change so take care what you will remove and what to
+> adjust. so take care if you are using reporting as of then this should
+> replace the cover to."*
+
+**WE NEVER SAID IT, AND SAYING SO CAME FIRST.** §239.1 established that an
+*unset* review point falls back to the last month of `REVIEW.endsQuarter` —
+the cycle's end QUARTER — and the field exists precisely because two fields
+were found disagreeing. So the honest answer to *"didn't we say"* is no, and
+the honest answer to what he was proposing is that it is right anyway.
+
+**HIS POINT IS STRONGER THAN HE PUT IT, AND IT IS A MEASUREMENT.** `REVIEW.to`
+already decided which rows are ASKED for — `cycleMonth()` → `dueThisCycle()` —
+while `REVIEW.asOfMonth` decided what they are MEASURED against —
+`reviewAsOf()` → `elapsedShare()` → `measureDue()`. Two fields, two answers,
+one question. So the platform could ask a unit for work due to June and judge
+that work against August, which is exactly the state his screenshot is in: a
+cycle covering to **Jun 2027**, reporting as of **Aug 26**. **On the worked
+example the two read the same month** (`to` = Jun 2026, `endsQuarter` = 2 →
+Jun 2026), which is why it has never been seen here and why every sweep for
+four versions walked past it.
+
+**ONE FUNCTION NOW, NOT TWO.** `cycleMonth()` delegates to `reviewAsOf()` and
+`reviewAsOf()` reads `to`. The fallbacks are the UNION of the two it replaces,
+most specific first: `to`, then the cycle's NAME read as a period (`cycleMonth`
+always kept that — "H1 2026" names a period even where `to` was never filled
+in), then `cycleYear()` + `endsQuarter`. **`endsQuarter` is kept and is not a
+live field**: nothing in the product has minted one since §47.8, and it is a
+real column on a real tenant, so it stays as the floor rather than being
+deleted out from under a deployment that still holds one.
+
+**THE HEAL RUNS THIS WAY ROUND AND THAT IS THE WHOLE SAFETY ARGUMENT.** Every
+score on the platform is computed from the review point TODAY, so carrying that
+month into `to` **moves no score** — asserted rather than reasoned about, by
+reading the review point before the heal and after it and requiring the same
+month. Healing the other way — leaving `to` alone and calling it the review
+point — would have re-measured every figure in the tenant against a different
+month, silently. What DOES change is which work is asked for: anything dated
+between the old `to` and the new one moves in or out of this cycle's reporting.
+That cost was stated on the mockup before he agreed to it, and it is stated on
+the handover.
+
+**AND A TENANT WHERE THEY DISAGREED WILL SHOW A CONTRADICTION IT ALREADY
+HAD.** On his cycle the heal writes `from` Jan 2027 and `to` Aug 2026 — a
+period that ends before it starts. That contradiction is not made by this
+change; it is the two fields' disagreement becoming visible in one line, and
+it is one press of the `Covers from` picker to correct. Inventing a start date
+to tidy it would be the platform deciding something nobody said (§96.2), and
+`clearForNewCycle()` already falls back to six months for a span it cannot
+read, exactly as it did before.
+
+**EVERY DATE IS PICKED (§177, one field along).** `Covers from` and `to` are
+the platform's own month picker; `Reports due` is a **day** picker, which is
+Islam's *"the only 1 with a day date as it's a cutt off dates"*. §177's refusal
+of days stands where it was made — every comparison the platform makes about a
+PLAN date is monthly, so a day there was precision it could not use — and
+`Reports due` is the one date **nothing measures anything against**: grepped,
+not assumed, it is printed on the strip, on the tab row and in one hover, and
+read by nothing else. A day there costs the arithmetic nothing and is what the
+field means.
+
+**FOUR DIGITS, AND IT IS NOT A STYLE.** `cycleYear()` scrapes a four-digit year
+out of `to`, `name` and `due`. With `to` now the review point, a two-digit
+"Jun 27" there would take `to` OUT of that scrape and land §239.3's own fault
+(a cycle whose year cannot be read stops prorating entirely, and every tactic
+reads 100%) on the very field this section makes load-bearing. `SMPRules.
+monthLabel()` is the one writer, shared by the browser and the heal (§42); a
+MILESTONE's picker still writes two digits, which is the shape those plans
+carry, so §177's own reason is untouched. And `reviewYear()` was rewritten to
+read the review point rather than `cycleYear()`, so a `to` carrying a two-digit
+year still prorates — asserted, because that is the last place the old fault
+could come back.
+
+**ONE POPUP, TWO BODIES** (§53.5). The day panel is the month panel's sibling:
+same box, same placement, same Escape, same Clear, same write through `FIELDS`
+— a header that steps MONTHS and a seven-column grid under a weekday strip.
+The lit day belongs to the month it was set in, which is `monthPopHtml`'s own
+rule for the year kept rather than re-decided, and the origin is remembered at
+OPEN time rather than read off the button, whose `data-mi` walks as the header
+is stepped (§15.1: otherwise the 15th lights in every month you pass).
+
+**FOUR BOXES, ONE LINE — AND THE MEASUREMENT CAME FIRST.** The pen's field area
+is **641px at 1280**, which is Islam's own window, and five boxes at
+160/160/160/160/121 wrapped. The three dates take a fixed 150px and the NAME
+takes what is left, because a date needs the width of a date and the name is
+the only box here holding words — so the row holds at 641px and a wide screen
+gives its extra width to the name rather than to three controls that cannot use
+it. `flex-wrap:nowrap` is the assertion rather than an optimisation: a wrap
+here would be this section's fault coming back silently at some width nobody
+measured.
+
+**THE NEW-CYCLE PANEL TAKES THE SAME FOUR CONTROLS.** It typed its three dates
+and picked a fourth month that no longer exists, so it was the one place in the
+product where a cycle could be opened with an end its own arithmetic could not
+read. Its refusal moves with it: *"Pick the month this cycle covers to"* — the
+same refusal §239 wrote, one box earlier. Only the NAME is still typed, so only
+the name is still read by id.
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY (§172).** `to` is a review
+field outside `REVIEW_PER_TARGET`, so it classifies as `cycle` exactly as
+`asOfMonth` did — the office's. §8a of `test-authorize.js` was REWRITTEN rather
+than deleted (§218): it asserted a field that no longer exists and would have
+gone green over nothing; it asks about `to` now, and is deliberately kept beside
+§273's date test because what it asserts is not "the office may edit a date" but
+"the office alone may move what every score is measured against". 534/0.
+
+**THE CHECKS WERE REWRITTEN, NEVER LOOSENED (§214.3, §218).** Eight files set
+the old field to make state. Three of the rewrites are the section itself:
+
+* `cycle-edit.py` held a literal list of **five** labels — it could have been
+  shortened to four and gone on guarding nothing, so it asserts the four in
+  order AND asserts *Reporting as of* absent **by name**, because a build
+  drawing a fifth box under any other wording satisfies a bare count of four
+  (§94.2). It presses the three real pickers and reads the CYCLE back (§96: a
+  picker wired to nothing renders identically), asserts the day survives on
+  `Reports due`, and asserts that picking the END moved what everything is
+  measured against — §307 in one assertion.
+* `ytd-proration.py` §8 pressed *"the month picker in the pen"*, a selector that
+  still MATCHES and now points at `Covers from` — §51.11's own fault, passing
+  quietly while measuring a control that moves no score. Its clearing assertion
+  asked whether a KEY was deleted, which was the right question while the field
+  rode `extra`; `to` is a real column, so it asks the question that now matters
+  and is worse: **with no end month, does the year silently become whole?** It
+  does not — the name answers — and that is the assertion. Its §9 (§239.3's
+  year fault) is impossible by construction now, so rather than leave an
+  assertion that cannot fail (§113.8) it asserts the same fault one step along:
+  a `to` with a TWO-DIGIT year, invisible to `cycleYear()`, must prorate
+  identically to one with four.
+* `repeat-project.py` filled `#nc-to`, a box the panel no longer draws; it picks
+  through the real control and asserts the draft carries the month.
+
+**AND ONE ASSERTION IN `cycle-edit.py` FAILED ON A CORRECT BUILD BEFORE IT WAS
+FIXED**: it counted distinct `top` values to decide how many rows the boxes are
+on, and the four controls are bottom-aligned at three different heights — one
+row is not one `top` (§122.4, already written down once). They are on one line
+when every box overlaps every other one vertically.
+
+**MEASURED, NOT CLAIMED.** `checks/cycle-edit.py` ALL GREEN (5 red on the build
+before, every one of them a five-box assertion); `ytd-proration`,
+`tactic-proration`, `tactic-outcome`, `count-compile`, `unit-follows`,
+`repeat-project` all green; 534/0 on the authoriser; round trip, clean slate,
+grant values, pending marks, monthly plan and the contingency record all PASS
+on a virgin Postgres 16; `scripts/test-review-month-heal.js` **9/0**, proved
+able to fail twice from the sources — the heal stubbed out goes **4 red**, and
+writing a two-digit year goes **2 red**. The seed is byte-identical, because
+the worked example's two fields already agreed.
+
+**AND `tactic-proration.py` REPORTED NOTHING RATHER THAN PASSING**: run through
+the container's wrapper it printed Playwright's own install banner, which is
+§279.3's lesson — a check that cannot launch reports no failures. It takes
+`SMP_CHROME` itself and was re-run directly.
+
+**RECORDED, NOT DONE**: the cycle's dates are drawn uppercase inside the pen,
+which is `.cfg`'s own treatment of a button and is what the old *Reporting as
+of* control already wore — consistent, and not asked about; and a tenant whose
+`from` now sits after its `to` is told nothing on the page beyond the two
+months reading oddly beside each other, which is the contradiction it already
+had rather than one this made.
+
+---
+
+## §308 — The planning period, and the review cycle inside it
+
+Islam, from his own tenant with `Covers from` empty and the strip reading
+*"reported as of Aug 2026 · 8 of 12 months"*: **"how is it reading 8 or 12
+months while I didn't add the covers from?"** Then, when the readings were put
+to him, the model itself:
+
+> *"the cycle of planning is yearly so that's the full time start and end
+> dates. and then we have a review cycle that has a cycle start and end. was
+> that what you meant ealier? the issue is sometimes we start planning mid
+> year. the main planning yccle is not a year maybe 6 month but the review
+> cycle might have the same start date but will have a closer end date."*
+
+**HE WAS RIGHT AND THE PLATFORM WAS READING NEITHER OF HIS DATES.** The share
+of a target due by now was *months of the calendar year* over *twelve* — so
+January was assumed on a plan that may have started in July, and `Covers from`
+was consulted by nothing. The number he was looking at came out of the review
+point's own year and nowhere else.
+
+**TWO PERIODS, AND ONLY ONE WAS STORED.** `REVIEW.from`/`to` are the REVIEW's;
+what a target belongs to had nowhere to live at all. `GROUP.planFrom` /
+`planTo` is that period — **one for the tenant**, his answer, so a cycle
+closing cannot take it with it (§50); **set beside the cycle**, his answer
+again, because that is the page somebody already opens to say what period is
+being reported.
+
+**THE ARITHMETIC IS HIS SENTENCE:** the share due is how much of the planning
+period has passed by the month the cycle covers to, over the planning period's
+own length. On Mobile's Non‑Samsung revenue (4B EGP, 1.6B reported):
+
+| Plan | Covers to | Share | Owed | Reads |
+|---|---|---|---|---|
+| Jan – Dec 2026 | Jun 2026 | 6 of 12 | 2.00B | 80% — today's answer |
+| Jul – Dec 2026 | Aug 2026 | 2 of 6 | 1.33B | 120% |
+| Jul – Dec 2026 | Dec 2026 | 6 of 6 | 4.00B | 40% |
+
+**NOTHING MOVES UNTIL A PERIOD IS SET, AND THE STRIP NAMES THE ASSUMPTION.**
+With none, `planLength()` is twelve and `elapsedMonths()` is the month of the
+year — the expression this replaces, asserted as an AGREEMENT rather than as a
+number — so no figure in any live tenant moves on the day this ships, and the
+line reads *"8 of 12 months, taken from the calendar year"* instead of letting
+the assumption pass for a fact (§35, §124). **Refusing to prorate at all was
+offered and is not what shipped**: a unit compared with a whole year's target
+reads as behind, which is the fault §239 was written to remove.
+
+**ONE FUNCTION WAS ANSWERING TWO QUESTIONS, AND THAT IS WHY JANUARY WAS AN
+ASSUMPTION NOBODY MADE ON PURPOSE.** `monthOfYear()` — the review point's
+position in its own year — is what a **monthly plan** (twelve boxes LABELLED
+Jan to Dec, §278) and a tactic's **calendar quarters** want; `elapsedMonths()`
+is a fact about the PLAN. Asking the plan's count for the monthly boxes would
+have compiled a July‑to‑December plan's August cell as its **second** month —
+falsified from the sources, 2 red, printing exactly that.
+
+**THE EDGES ARE THE PART THE OLD ARITHMETIC COULD NOT REACH.** A review point
+BEFORE the plan starts owes nothing and is **not scored** rather than divided
+by nought (`measureScore`'s existing `!due` guard, §278's own). An end before
+its start is a contradiction somebody typed rather than a length to divide by,
+so it falls back to the year — never a negative one.
+
+**`Not set` IS NOT `Missing`.** The month picker drew a red italic *Missing*
+for every empty date, which is right where the platform NEEDS one (a cycle
+cannot be opened without the month it covers to, §307) and wrong for a field
+with a working fallback — §214.4's fault, and beside a status chip already
+saying *"not set — the calendar year is used"* it would have been two
+statements about one fact with one of them alarmed. `monthBtnHtml` takes the
+empty word from its caller now, and **both ends are asserted**, or a build that
+quietened every picker in the product satisfies half of it and loses §177's red
+word everywhere.
+
+**AND THE CLASS `tobtn` CARRIES NO STYLE AT ALL** — it is the NAME the checks
+address the cycle's end month by. The new block's end wore it for one build and
+`.newcycle .tobtn` started pointing at whichever was drawn first: **5 red in
+`ytd-proration.py`**, on a picker this section never touched (§65.9, and
+§51.11 from the product's side rather than the check's). `.planper` scopes the
+block; the handle stays the cycle's.
+
+**THE SERVER NEEDED TWO EDITS AND THEY GO TOGETHER** (§259.2): the pair is
+classified `cycle` — the same grant that governs the cycle's own dates, because
+asking a different one for the two halves of one pen is §42's drift — **and**
+the two keys join the group's known list. Falsified separately: with the
+classification out and the keys still known, the change is INVISIBLE and a
+custodian's save is **ALLOWED** (5 red); with the keys out and the
+classification kept, it lands twice (1 red). **ONE SENTENCE FOR THE PAIR**,
+because half a period is not a second decision (§184). No migration and no
+schema change — it rides `org.extra`, **measured on a real Postgres 16 rather
+than claimed** (§172), written, read back and taken away again with the keys
+DELETED (§50.6).
+
+**Proved able to fail from the SOURCES** (§276, because §238's hashed CSP
+silences an edited built file): the length forced to twelve goes **4 red**, the
+monthly plan put back on the plan's count goes **2 red**.
+`checks/planning-period.py` 33 assertions, 0 failures — **and one of its own
+first failures was the CHECK**, a fixture writing `extra.monthly` where the
+product reads `row.monthly`, so it reported a correct build broken (§215's
+family). **Two neighbours held a selector this block moved and were REWRITTEN,
+never loosened** (§218): `cycle-edit.py` measured the pen's first `.nc-1line`,
+first `.monthbtn` and a flat list of `.nc-h` — all of which the new block now
+leads — and `contingency.py` asked for a bare `.cyc2-r`, which the period
+satisfies, so its assertion could no longer fail for its own reason (§113.8).
+
+534 → **541/0** on the authoriser · 131/0 on the differ · round trip, two tabs
+and eight concurrent saves green on a virgin Postgres 16 · `ytd-proration`,
+`cycle-edit`, `count-compile`, `monthly-plan`, `tactic-proration`,
+`tactic-outcome`, `unit-follows`, `contingency`, `repeat-project` all green.
+
+**RECORDED, NOT DONE.** The monthly plan is twelve boxes labelled Jan to Dec;
+on a six‑month plan six of them mean nothing, and what they should be is its
+own decision. The block is in the OPEN cycle's pen, so a tenant between cycles
+sets the period when the next one opens — stated on the mockup before it was
+signed off rather than discovered. And `Covers from` now measures nothing at
+all: it writes the strip's line and sets how far a repeating project's dates
+shift at the next cycle, which is what makes an empty one harmless.
+
+**AND `scripts/test-clean-parity.js` IS RED ON `origin/main`, NOT ON THIS.**
+Established by reproducing it on a worktree of main against a virgin database
+before anything here was blamed (§303): migration 004 leaves a unit's pillars,
+SWOT, objectives and `perf` standing where `clearedGraph()` clears them — so
+the platform's Clear Project view and what a new client's database actually
+gets have drifted apart, which is precisely the pair §67 wrote that test to
+keep in step. Its own decision, and not this one's to make in passing.
+
+
+---
+
+## §309 — A PROJECT SAVED AS A DRAFT (2026-09-07)
+
+*(Built as §302 and renumbered at the merge on 2026-09-08: `main` had taken
+that number while this was in flight, so this side moved and every citation of
+it moved with it — mine line by line, never swept, and `main`'s own §302
+citations left exactly where they were (§264.3). The precedent is §287 and
+§301.)*
+
+
+Islam: *"can we make the project owner save on the project level that is
+similar to the save for the submit of the whole cabaiblity."* Then, of three
+shapes drawn: *"we can go with B but make the mark done as Save that freeze
+the project and reopen to open it for editing. what do you think?"* And of two
+words drawn in the band: *"ok with save draft."*
+
+**MEASURING NARROWED THE ASK BEFORE ANYTHING WAS PROPOSED, AND THAT
+MEASUREMENT IS MOST OF THE SECTION.** The capability's *Save draft* is not a
+save. Every figure in this product is written the moment the box is left
+(§35) and posted by the autosave (§170), so what that button does is push
+what is already almost certainly there, say so, and **CLOSE the report until
+Reopen** (§220). Against it, a project owner had two of the three already:
+§301's mark put the state on the band and in the bar (`Your 2 projects · 1 of
+2 done`), and nothing was ever unsaved. What was missing was **a press that
+pushes it there and then and says whether it landed, and a freeze.**
+
+So the ask is a two-line gap, not a feature — which is why three shapes could
+be drawn in the platform's own pixels and each one's cost stated on the panel
+beside it (rule 1c, §41.9, `design-mockups/project-level-save/`):
+
+  * **A** — the press pushes and confirms; nothing freezes. Cost: nothing is
+    protected, so a project can read *finished* over a number changed after.
+  * **B** — A, plus the project goes read-only until Reopen.
+  * **C** — a second button, *Save my project*, beside the mark. Cost: two
+    controls on a small band, one of them doing what the platform already
+    does by itself — so it reads as though the numbers were **not** being
+    kept until it was pressed, which is the opposite of the truth.
+
+**HE TOOK B AND WAS RIGHT ABOUT THE WORD**: once the press freezes, *Mark
+done* stops describing it. What was put back to him was WHICH word, and it
+was **drawn rather than argued** (§266: a question the reader cannot parse is
+answered by drawing it) — a bare *Save* against *Save draft*, both in the
+band, in both states.
+
+**"SAVE DRAFT" IS THE BAR'S OWN WORD FOR THE BAR'S OWN ACT.** A bare *Save*
+promises something that has been happening all along, and the bar one row
+above already carries a *Save draft* of its own — two Saves of different
+widths on one page is §87's twins, and the one people press is the one nearer
+the thing they were looking at. With the word matched, the state it leaves
+behind (**Draft saved · Reopen**) is word for word what that bar shows, so
+there is nothing new to learn on either side.
+
+**THE MARK IS THE LOCK, WHICH IS WHY IT COSTS NOTHING TO STORE.**
+`review.done[<container id>]` already exists, already travels per container
+(§301's own decision, which is what stops two owners in one function
+colliding), and already classifies as `rowDone` on the server. **No
+migration, no schema change, no new field, and no server rule** — asserted
+rather than assumed (§172): 574/0 and 136/0 unchanged, and the authoriser
+still accepts the owner's figures exactly as before.
+
+**AND IT IS A SCREEN LOCK, AT EXACTLY §220'S STRENGTH.** The server does not
+refuse a figure while a report is parked either — `parked` and `submitted`
+shut the controls, not the endpoint — so this is the same promise at the same
+strength. Widening one without the other would be two answers to what a
+closed report means (§53.5). Stated rather than discovered.
+
+**ONE READER, ASKED AT THE TWO ROW GATES AND NOWHERE ELSE.**
+`ownDraftShut(target, id)` is `doneMark(id) && boundedHere(target)`, asked
+inside `canReportRow()` and `canReportFnRow()` — the two functions every
+figure, picker and note cell on both sides of the switch already passes
+through. Asking it at the twenty cells they feed is how one cell comes to be
+the one the server accepts and the screen refuses (§42).
+
+**BOTH HALVES OF THE PREDICATE ARE THE WHOLE RULE.** The container, because
+this closes ONE project and never the report around it. The viewer, because
+the lock is the owner's own act: the custodian and the office hold the bar's
+Save draft for the whole function, and a second lock inside it would be two
+ways to close one report.
+
+**`cid` TRAVELS ON THE ROW, ON BOTH BUILDERS.** The row gate is handed a row,
+not a page, so the container it sits in comes with it — for the same reason
+`owner` does (§301.5), and in `reportItems()` as well as in the reporting
+pane's own list, or the two pages disagree about whether a row is shut. **A
+unit's key objectives carry none, deliberately**: they are the unit's
+headline and belong to no pillar, so nobody's draft can close them.
+
+**THE CUSTODIAN'S CONTROL HAD TO GO, AND THE WORD STAYED.** §301 drew the
+mark for anybody `mayMarkDone` allows, which is every unbounded role — right
+while it was a signal, and wrong the moment the press closed something,
+because `ownDraftShut()` asks `boundedHere()` and a custodian would have
+watched the word change and nothing freeze. A control that means two things
+by role is what §295 refused to build. The answer is not to freeze them too:
+they **SEE the state and get no button** (§256's own pattern), which keeps
+the signal this control exists for — the person who submits still reads,
+project by project, which are finished. Drawn only when it is SET, because
+"not saved yet" is the ordinary state and a word for it on every band is
+furniture (§94.15).
+
+**SAVE, THEN CLOSE, AND ONLY ON SUCCESS** — §220's own corrected ordering,
+and it matters more here: marking first would draw a tidy *Draft saved ·
+Reopen* over work that never left the browser, **with the boxes read-only
+behind it**. Reopening is deliberately NOT a save: it takes a lock off, there
+is nothing new to push, and asking the server first would make the way out of
+a closed project depend on the connection that closed it.
+
+**AND THE REFUSAL IS SAID WHERE THE PRESS WAS.** The first build used
+`alert()`, which is a dialog for something the bar says in a row (§63.2) and
+which stops every check dead at the one press they all have to make (§215).
+The word is written into the button, which is the one element on this path
+guaranteed to survive, because nothing repaints when a save fails.
+
+**THE CHECK MOVED TO HTTP, AND SINCE THIS SECTION IT HAS TO** (§94.11): the
+press goes through `SYNC.saveNow` and marks only if the save landed, and over
+`file://` SYNC is never live, so every press answers *offline* and nothing is
+ever closed — `checks/project-done.py` would have reported the whole feature
+missing on a build carrying it perfectly.
+
+**AND MOVING IT EXPOSED A FIXTURE THAT COULD NOT HAVE WORKED**: §237 rebases
+the tab from the server on every view-as switch, so every *set it as the SMO,
+then look as them* fixture in that file was thrown away in the hop. Invisible
+while it opened the built HTML over `file://`, where there is no server to
+rebase from. The standing fixture is in the SEED the stub serves; the mid-run
+ones are written while already viewing as the person they are about.
+
+**§309.1 — TWO OF THE NEW ASSERTIONS COULD NOT FAIL AS FIRST WRITTEN**, both
+found by falsifying rather than by reading (§94.5):
+
+  * *the custodian's controls stay live* counted every control in the pane,
+    and a function draws EVERY capability at once — so it can never reach
+    zero while any other project is open, and it went green on a build that
+    froze the custodian too, which is the one thing it exists to tell apart.
+    It walks from the band bearing the project's CODE to the next band now,
+    and addresses by the code the band SHOWS, because the custodian is drawn
+    no `data-rowdone` to address by.
+  * *their own project's boxes are shut* asserted no live controls, and **a
+    shut cell draws a read-only value rather than a disabled control** — so
+    it is also true of a band that has no controls at all (§113.8). It
+    compares against what the band held BEFORE the press.
+
+**§309.2 — AND THE REFUSED-SAVE CASE WAS UNREACHABLE UNTIL THE GRAPH WAS
+DIRTY.** `save()` answers *clean* when nothing has changed since the last
+successful post, so pressing twice with no edit in between never reaches the
+server and the press is right to close — the product behaving correctly, and
+not the case the assertion is about. The stub refuses on demand and the check
+makes something unsaved first. **4 red** on the build before, one per
+decision: the freeze removed, the freeze widened to everybody, the mark
+written without waiting for the save, and the custodian offered the button.
+
+**RECORDED, NOT DONE**: the lock is per person, so two people who both own
+the same project can each close it for themselves — true of §220 for a
+whole report as well, and not a state this tenant can reach; and the deck
+still says nothing about a project saved as a draft.
+
+---
+
+## §310 — THEIRS IS THE CAPABILITY THAT LEADS (2026-09-08)
+
+*(Built as §303 and renumbered at the merge on 2026-09-08: `main` had taken
+that number while this was in flight, so this side moved and every citation of
+it moved with it — mine line by line, never swept, and `main`'s own §303
+citations left exactly where they were (§264.3). The precedent is §287 and
+§301.)*
+
+
+Islam, using what §301 shipped: *"the porject owner should open the capability
+by defaut on his project."*
+
+**MEASURED IN HIS SHAPE BEFORE ANYTHING WAS PROPOSED (rule 3a).** A project
+owner whose only project sits in the SECOND of a function's two capabilities,
+on Marketing › Reporting at 1500×900:
+
+| | |
+|---|---|
+| where he lands | scroll 0, on **Brand Positioning** — not his |
+| controls on that first screen | **0**, correctly (§147.7: a bounded role reaches its own rows and nothing beside them) |
+| his own capability | starts **705px** down |
+| his own project's band | **783px** down, its twelve boxes below the fold |
+| the rail INSIDE his capability | already picks his project |
+
+**SO §301.4 CHOSE THE RIGHT PROJECT INSIDE EACH CAPABILITY AND NEVER CHOSE
+WHICH CAPABILITY LEADS.** A function draws every capability at once, top to
+bottom, in the tenant's stored order — so that section's own reasoning stopped
+one level short of the page. **And it made the two sides of the switch
+disagree**: a UNIT draws one pillar at a time through a rail, and §301.4 opens
+his there, so a unit was already right and a function was not (§53.5, A15).
+
+**THREE SHAPES WERE PUT TO HIM WITH THE COST OF EACH** and he chose **A**:
+
+* **A — his capability first**, the rest below it. He sees a different order
+  from everybody else; nothing hidden, nothing stored.
+* **B — the page scrolls to his capability.** The order stays the same for
+  everyone and the page jumps when it opens.
+* **C — only his capability is drawn.** Refused: he could not see the rest of
+  the function at all, and Islam had already closed the equivalent idea one
+  level down (*"no need to hide other projects. that's a stretch"*, §301.4).
+
+**AND THE MOCKUP FOUND THE COST THAT DECIDES THE IMPLEMENTATION.** Drawn out
+of the running platform (rule 1c, §41.9) by reordering `GROUP.capabilities`
+and repainting — and his project's code changed from **MKT03 to MKT01** on his
+own screen, measured, while the deck, the workbook and everybody else went on
+saying MKT03. `projCode()` is the project's **POSITION across the whole
+function** (`fnProjects()` → `capsOfFunction()`), so **a code is a position and
+a per-viewer order renames every project for that viewer** — §48 exactly. So
+only the DRAWING order moves: `capsShown()` reorders what the three pages map
+over and `capsOfFunction()` stays the stored order the codes go on asking. The
+mockup was re-shot moving nothing but the drawing, and the check asserts that
+he reads the same codes the office does.
+
+**IT IS §301.4's OWN SHAPE ONE LEVEL UP, AND ASKS §301.4's OWN QUESTION**:
+`capsShown()` calls `railMine()` — the same test the rail asks — so the page
+and the rail cannot disagree about whose a project is (§53.5). `boundedHere()`
+is the gate, so **nothing moves for anybody unbounded**: the office and the
+custodian reach every row, so *theirs* names nothing, and their page is
+byte-for-byte what it was. A function with one capability, and an owner whose
+project is already in the first, are both the identity case and are asserted
+as such — a *put mine first* rule that disturbed those would be a change nobody
+asked for.
+
+**THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION** (§53.5: where the two
+halves differ we say which and why). Projects, Reporting and Performance all
+draw a project, so a page reordering on one and not the others would answer
+differently depending on which tab you came in on. The **Overview** draws a
+capability's definition and its key objectives, which belong to no project and
+are nobody's own lines — there is nothing there to open on, so it keeps the
+tenant's order for everybody, and the check asserts it, or a build that swept
+all four pages would quietly widen the change.
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED RATHER THAN CLAIMED** (§172):
+no `api/`, `lib/` or `db/` file is touched, read off the diff; 574/0 authoriser
+and 136/0 differ unchanged; nothing stored, nothing migrated, no export moved.
+
+`checks/capability-first.py` — **proved able to fail three ways, one per
+decision**: the three pages reading the stored order again (**3 red**, the
+reported fault whole), the Overview swept in with them (**1 red**), and the
+codes made to follow the drawing (**6 red**, printing the rename verbatim —
+`his ['MKT01','MKT02'] / the office ['MKT01','MKT03']`). The state is MADE, and
+his capability is deliberately NOT the one stored first: if *his* and *the
+first one* coincide the whole file proves nothing (§113.8).
+
+**§310.1 — AND FOUR OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK.** It
+read the capability's name off `.capname`, which does not exist (`.capnm`), so
+every order assertion compared a name against *"CapabilityBrand Positioning2 /
+2 reported"*; it asked `#subtabs` for the **Overview**, which is a SECTION of
+the Strategy tab addressed by KEY (`found` / `proj`) and not a page tab, so a
+page plainly on screen was reported missing twice; and it measured his live
+controls **after** a loop that had left the browser on Performance, reading 0
+on a build where they are all there (§50.6's family — measure the page you
+opened, not the one you were last on).
+
+**RECORDED, NOT DONE**: with two owners in one function each holding a project
+in a different capability, each sees their own first — which is the feature —
+but nothing on the page SAYS the order is theirs rather than the tenant's; and
+a capability holding two projects still opens on whichever of them §301.4
+picks, which is right, and unremarked on the band.
+
+## §311 — The review deck as a PowerPoint, made to read like the deck
+
+*(Built as §309 and renumbered at the merge on 2026-09-08: `main`
+took both numbers while this was in flight — §287's precedent, and §94.12's
+family one artefact along.)*
+
+Islam, with a file downloaded from his own tenant attached — `Care — Cycle
+2.pptx` — *"the presentations design look bad is there a way to make it look
+better? matching what we present?"*
+
+**THE FILE WAS MEASURED BEFORE ANYTHING WAS PROPOSED**, and the first thing it
+settled is that the tenant's brand was already in it correctly: the cover is a
+full bleed of Raya's own `#001780` with the amber kicker on it, from
+`branding()`, exactly as designed. Colour was not the fault. What was wrong was
+six things that are FAULTS and four that are only UNMATCHED, and separating
+those two is most of what made the round tractable.
+
+**THE SIX FAULTS.** *Where the unit stands* — the slide the whole review builds
+to — printed **three headings with all three figures missing**, then the
+footnote explaining readings that were not there. A pillar's name ran into its
+own grey sub-line: `…Scale RAYA Smart CareDirection · · Mahmoud`. Every SWOT
+item on all four slides read `1Long-standing presence`. Column headings broke
+mid-word into `Progres s` and `Quarter s`. A pillar's two headline figures
+arrived as **four naked lines of lead prose** — MEASURES, 117%, EXECUTION, 81%
+— stacked top left where the deck draws them large top right. And the pillars
+roll-call, four cards on the screen, converted to eight lines of flat text.
+
+**THE FOUR UNMATCHED.** Every figure hard left in plain black, with no scoring
+colour on the one column a room runs its eye down; the benchmark behind the
+slash carrying the same weight as the figure it judges; no unit mark in the
+footer; and the whole file set in Calibri where the deck is set in the
+platform's own face.
+
+**ISLAM CHOSE B** — fix the faults AND match the look — from three put to him
+with the cost of each. **AND THE PICTURE CAME FIRST** (rule 1c): five slide
+kinds drawn at full size, today's output beside the proposal, published as an
+artifact and signed off (*"mockup is right"*) before a source was touched. The
+mockup is `design-mockups/review-pptx-design/2026-09-08_slide-kinds.html`.
+
+**ONE CLAIM WAS CORRECTED BEFORE PUBLISHING RATHER THAN LEFT TO STAND.** The
+first draft called *"content stops a third of the way down"* a fault; it is
+not, because the deck leaves whitespace under a short table too. What is
+actually wrong there is the SIZE — 11pt with tight rows — so a three-row table
+reads as small print on the page rather than as the thing on it. §124 with the
+sign reversed: a complaint claiming more than the measurement supports.
+
+**IT IS STILL A CONVERTER AND THAT IS THE WHOLE ARGUMENT.** §305 measured the
+case against a second builder — `deckSlides` + `deckSlidesFn` are 639 lines
+over twenty-one slide kinds, and this deck moved four times in a fortnight — so
+every fix here reads something the deck ALREADY MARKS ON ITSELF rather than
+naming a slide kind: `.num` for a figure, `.final` plus its band key for a
+score, `.duehalf` for the benchmark, `.missing` for a gap, `.dsub` for a second
+line, `.headgrid`, `.dstats` and `.pcards` for the three shapes that are laid
+out rather than written. **A table added to the deck tomorrow marks its own
+columns the same way and arrives here already right**, and a fourth laid-out
+kind still falls back to the leaf text rather than vanishing.
+
+**TWO THINGS THE SCREEN SEPARATES AND A FLAT READ DOES NOT.** `textContent` is
+the concatenation of the descendants and the deck relies on layout for the gaps
+between them, which is one cause behind both the pillar names and the SWOT
+items. `deckPieces()` joins the direct children with ONE space and then
+collapses — so it can only ever add a separator where the document had none,
+and a value already carrying its own spacing is untouched.
+
+**A BAND IS READ BACK, NEVER RE-DERIVED.** `dBand()` writes the band's own key
+onto the cell and the deck's stylesheet turns it into a colour; reading the
+class means the file and the projector cannot disagree about a number they both
+got from `bandOf()` (§53.5). The five colours are literals for the reason every
+colour in this file is one: **a slide is white whatever theme the person
+downloading it is sitting in**, so the light palette's bands are the right ones
+on it — reading the live tokens would put dark mode's mint green on a white
+page.
+
+**A HEADING MUST FIT ITS OWN COLUMN.** Shares alone gave a numeric column half
+a prose one whatever it was called, which is what broke `Progress` in half.
+Each column now starts at the room its own heading needs and the shares divide
+what is left, so a longer heading takes its width from the table rather than
+from itself — and a table whose headings alone overflow keeps its proportions
+rather than running off the edge (§158's rule, one artefact along).
+
+**THE ROW AND THE TYPE GROW TOGETHER, AND THE ROWS A SLIDE HOLDS ARE DERIVED.**
+`deckRowsPerSlide()` works the count out from the row height rather than
+restating it, so changing one number cannot leave a table running off the
+bottom (§122.5). A table that used to fit on one slide at eleven rows now
+splits at eight — the honest consequence of type somebody can read, and the
+arithmetic is asserted rather than assumed.
+
+**THE MARK IS THE ONE CHANGE THE FILE FORMAT HAD TO GROW FOR**, which is why it
+was drawn as a dashed box in the mockup with a cheaper alternative named beside
+it: the zip gains a `ppt/media` member, `[Content_Types].xml` a png default,
+and every slide's relationships a link. **One media part for the whole file**,
+so a twenty-slide deck carries the mark once. It is ASKED FOR rather than
+parsed out of the HTML, because the deck this walks is `deckHtmlFor()`, which
+runs before `deckFootMarks()` — asking `deckMark()` is asking the same question
+that pass asks rather than depending on the order two passes happen to run in.
+It is sized from its OWN PIXELS, read out of the PNG's IHDR header
+synchronously, because an `Image` answers asynchronously and everything here is
+synchronous — a mark whose shape arrives after the file is written is a mark
+stretched to whatever box was guessed for it.
+
+**THE TYPEFACE IS THE ONE THING FROM THE MOCKUP THAT IS NOT DELIVERED, AND IT
+IS SAID RATHER THAN QUIETLY DROPPED.** DrawingML names ONE face per run with no
+fallback list, so naming the platform's own would substitute to something
+arbitrary on any machine that lacks it — worse than Calibri, not better. The
+honest alternatives are embedding the font (PowerPoint wants an obfuscated TTF
+and the platform ships a latin-subset woff2) or leaving it. It is left, and the
+PDF (§305) is where the real face already comes across.
+
+**FOUR THINGS WERE FOUND BY LOOKING AT A RENDERED PAGE AND NONE BY READING THE
+XML** (§296.1's rule paid). The cards' text sat at the top of a 3.4-inch panel,
+because a PowerPoint text box needs `anchor="ctr"` and nothing else says so.
+The footer band was a guessed constant — 685800 — and a full table and the
+cards were both drawn straight over the lockup; it is the mark's own margin,
+its own height and a gap now, so a change to any of the three moves it. The
+SWOT slides set their items at 13pt at the top of an otherwise empty page, so
+prose with no table under it is now set at the size of the thing somebody is
+being shown rather than the size of an introduction. And the bold red `Missing`
+was right-aligned outright, so a tactic with no outcome read as a figure —
+it follows its column like every other value in it.
+
+**`checks/review-pptx.py` BUILDS THE FILE AND READS IT BACK**, which is the
+only way a converter can be checked at all: it drives the real
+`buildReviewPptx()`, unzips what comes out and reads the slide XML, comparing
+against what the deck's own HTML holds rather than against numbers typed into
+the check (§94.8). **Proved able to fail five ways from the SOURCES** (§276,
+because §238's hashed CSP silences a script block whose bytes changed): the
+whole file reverted **1 red** and it stops there by design (§215); the
+`.headgrid` branch out **3 red**; a cell's alignment, band and benchmark out
+**4 red**; the media left out of the package **3 red**; the headline pair back
+in the lead **2 red**.
+
+**AND THE CHECK'S OWN FIRST RUN WAS WRONG THREE TIMES.** It searched for *"where
+we stand"*, which is the deck's phrasing for TWO slides (§254.5's own note about
+them being named apart), so it measured the objectives table and reported a
+correct build broken. It read `.dstats > span` across the WHOLE deck and got all
+eight — two pillars, two tables each — so a per-slide count could never match.
+And it asked whether the glued form appeared in every run JOINED, which it does
+on any correct file, since the two halves are consecutive `<a:t>` elements — an
+assertion that could only ever fail (§94.5 with the sign reversed).
+
+**AND THE CHECK FOUND A REAL FAULT IN MY OWN FIX**: with the laid-out shapes
+excluded from the lead's selector pass, a pillar's tables carry no prose at all,
+so the pass came back empty and the LEAF FALLBACK then swept the headline pair
+up a second time — drawn once in the head and once as two stray lines above the
+table, which is the fault this section removes wearing a different hat. The
+fallback obeys the same exclusion now.
+
+**ONE ASSERTION WAS REWRITTEN, NEVER LOOSENED** (§218, §214.3): it asked for a
+SWOT item's number and words as one run with a space between them, which was
+the first build's shape before the number was given its own run in the accent
+as the mockup drew it. The claim is unchanged — the item is there and it is
+numbered — and it is asserted of the two runs rather than of one spelling.
+
+**THE PLAN DOWNLOAD IS UNTOUCHED AND IT IS ASSERTED** (§94.2). It shares every
+primitive changed here, so a build that moved its row height, its type size or
+its head would have passed everything else and silently altered a second
+artefact nobody asked about: its rows are still 335280, its cells still 11pt,
+and it carries no media part.
+
+Nothing stored moves, nothing is migrated, no `api/`, `lib/` or `db/` file is
+touched. 588/0 authoriser · 136/0 differ · full `qa.py` ERRORS none ·
+`deck-pdf`, `strategy-split`, `fn-perf-controls`, `deck-blank-slides`,
+`deck-figures`, `deck-strip`, `master-presentation`, `import-page`,
+`present-loop`, `deck-fullscreen`, `video-keys`, `setup-pages` all green.
+
+---
+
+## §312 — One PDF of the whole flow, in the contingency pack
+
+*(Built as §310 and renumbered at the merge on 2026-09-08: `main`
+took both numbers while this was in flight — §287's precedent, and §94.12's
+family one artefact along.)*
+
+Islam, answering where the PDF belongs — *"the pdf in the contiengcy back is
+like the master presentation a full pdf with all slides there."*
+
+**THAT SENTENCE DISSOLVES THE OBSTACLE RATHER THAN WORKING AROUND IT.** The
+three ways out put to him were: leave the pack as it is and take a PDF per
+subject from the Presentation menu; have the pack walk the subjects and open
+the print dialog once each; or build a PDF writer into the platform. His answer
+is none of them. A PDF here is the BROWSER printing (§305) — the platform never
+holds PDF bytes, which is exactly why the file cannot differ from the projector
+— so nineteen PDFs would have been nineteen dialogs answered one at a time. **A
+flow is ONE deck, so it is one dialog and one file**, and §266 already
+assembles one.
+
+**AND IT CLOSES §305'S OWN RECORDED GAP**: *"a master flow cannot be
+downloaded, the entry being per subject."*
+
+**EVERY SUBJECT, IN THE FLOW'S ORDER WHERE ONE IS SET.** `masterOrder()` is the
+running order and is allowed to be a SELECTION — the office may tick three of
+eighteen for a board meeting — and **a backup of some of the subjects is not a
+backup**, which is what the card above it already says about the picker. So
+`contFlowTargets()` takes the flow's order first and appends everything else:
+the membership is everything and the order is the flow's, which answers both
+halves of his sentence rather than one.
+
+**ONE PRINTER, TWO WAYS IN** (§53.5). §305 wrote the fit-pass handling, the
+put-back and the close-on-`afterprint` against a single subject; a second copy
+would be a second answer to *what does the platform do to make a PDF*, and
+those are exactly the parts that would drift. What differs between the two is
+which deck is opened, so that is the argument `deckPrint()` takes.
+
+**IT IS NOT A DOWNLOAD AND IS NOT IN `takeBoth`.** A print opens a dialog and
+waits for a person, which is right for a button somebody presses and wrong for
+the banner's one press, whose whole promise is that it hands the files over
+without asking anything. The banner keeps its two; the card gains a third.
+Asserted at both ends, or a build that folded it in would hang that press on a
+dialog nobody pressing it expects.
+
+**NOTHING IS STAMPED, AND THAT IS A DECISION.** `afterprint` fires on Save and
+on Cancel alike (§305), so marking this person as holding the PDF would be a
+claim the platform cannot see (§124) — and it would move when §306's reminders
+stop, which nobody asked for. The reminders go on ending when the two DOWNLOADS
+are taken.
+
+**AND IT DOES NOT REPAINT.** Nothing was stamped, so there is no state for the
+page to follow — and a `paint()` under an open print dialog would rebuild the
+very deck the browser is laying out. The outcome is written into the button
+(§63), and the word is *Opening…* rather than *Taking…*, because that is what
+the press does.
+
+**THE WORD PDF IS ON THE LABEL**, for §305's own two reasons met again here:
+the file cannot be edited, and the press opens the browser's print dialog
+rather than downloading at once.
+
+`checks/contingency.py` gains a §312 block, proved able to fail twice: the flow
+opened as one subject **2 red** (naming both the subject count and the two ends
+of the deck), the button removed **4 red**. **One assertion of mine was
+rewritten rather than kept** (§113.8): it compared the flow's slide count
+against one subject's deck built DETACHED, and §69 records that `deckFitPass()`
+measures nothing on a detached element — so the single deck came back short and
+the comparison passed for the wrong reason even on a build that opened one
+subject. It asks the SUBJECTS instead: a flow ends on a different subject from
+the one it opens on, which one deck can never do. **And one assertion was
+rewritten, never loosened** (§218, §214.3): the card's button list grew from two
+to three, so the claim — the card carries every way of taking the files — is
+unchanged and the list it is asserted against grew by one.
+
+**RECORDED, NOT DONE.** The PDF is the whole flow or nothing; there is no way
+to print one subject's from the pack, because the Presentation menu already has
+that entry and a second door to it would be §32's door behind a door. And a
+tenant with eighteen subjects prints some four hundred slides in one press,
+which is what he asked for and is worth knowing before the first time.
+## §313 — RENUMBERED THREE TIMES: §147 → §288 → §303 → §313, AND THE SPEC FROM 024 TO 030 TO 042
+
+This work was built as **§147 / spec 024** and is now **§313 / spec 042**,
+renumbered three times — the third on 2026-09-08, when main had taken §303–§312
+and a second `specs/030-*` folder (§294–§312 from five other sessions) while
+§303.36 was being built, so §303 → §313 and `specs/030-multi-client` →
+`specs/042-multi-client`, applied only to the lines this branch wrote (§264.3)
+— every time on a catch-up merge and every time for the same
 reason. Main moved **452 commits** under the branch while it waited for a word —
 §148 through §287 — and took BOTH names it had been built under: §147 is *A
 custodian per project* on main, and `specs/024-` is that feature's folder. It
-was renumbered to §288 / spec 030; main then moved **103 more** and took §288
-too, for *A save stops shutting everybody else out*. So §288 → **§303**.
+was renumbered to §288 / spec 042; main then moved **103 more** and took §288
+too, for *A save stops shutting everybody else out*. So §288 → **§313**.
 
 The house rule is the one already written down three times in this file
 (§142–§144, §280, §287): **main takes the number first and mine is renumbered on
@@ -37520,19 +39049,150 @@ references to main's own section. It is a blanket rename in the files only this
 branch has, and our-added-lines-only everywhere else — asserted after the fact
 by grepping for main's five citations and finding all five intact.
 
-## §303.36 — EVERY CLIENT HAS A DOOR OF ITS OWN (2026-09-08)
+## §313.37 — THE MERGE REHEARSED, AND WHAT READING THE MERGED TREE FOUND (2026-09-08)
+
+Islam: *"fetch the merge and check the code and do a final sweep if anything
+might cause errors or issues or unneded code before the final merge
+confirmation."* So `origin/main` was merged INTO the branch locally and not
+pushed anywhere (§91: the merge commit's SHA must reach `main` first), the
+built file was REBUILT from the sources rather than trusted from git (§91),
+`sw.js` was rebuilt from main's copy with the branch's name block re-applied
+and parsed (§146.2), and the merged tree was read — by hand and by a
+read-only review of every file this branch changed — before any check was
+believed.
+
+### What the merge itself brought
+
+**Seven conflicts, three of them code.** `sync.js` twice, `lib/state-io.js`
+once — all additive, each side having added a different thing at the same
+spot (this branch's `withClient` export and `pickDbUrl` beside main's
+`graph`/`isOffline` export and `mergeReviewMonth`), so the resolution is both
+together. **One line rode in that must not**: main's hunk in `boot()` carries
+`DEMO = clone(graph())`, which was at the merge base and only came back
+because both sides edited that hunk — and §313.8 deleted `DEMO` with demo
+mode. `sync.js` is not strict, so it would have minted a silent global on
+every live boot rather than throwing; dropped, and `DEMO` now appears in that
+file only in the comment recording its removal. **Main took §303–§312 and a
+second `specs/030-*` folder** while §313.36 was built, so this work is
+renumbered a third time — §303 → §313, `specs/030-multi-client` →
+`specs/042-multi-client` — **applied only to the lines this branch wrote**,
+matched against the branch's own diff (§264.3: after a merge the sources are
+not all yours; main's own `spec 030` is the contingency files and its §303 is
+the template, and both are untouched). `sw.js` goes to
+`smp-shell-v4.86-client-doors`, past main's `v4.85-review-pptx`, to be
+confirmed again immediately before any push (§94.16). **And the built file had
+the wrong `<title>` of a merge in it until rebuilt**: seven §303 citations in
+the stale generated copy are the reason the rebuild is a rule and not a habit.
+
+### What the review found in this branch's own code
+
+Four faults, none of them a merge's and none caught by a check — every one
+found by READING, which is why the review was worth its cost.
+
+1. **Every video and store call threw over HTTP.** `blobLive()` read
+   `enabled && !isDemoMode()`, and §313.8 had deleted `isDemoMode()` with the
+   button — so on a live page the guard itself threw a `ReferenceError` before
+   any request left. Invisible to the whole sweep, because over `file://`
+   `enabled` is false and the second half is never reached (§94.11's family
+   with a short circuit in front of it). It reads `enabled` now.
+2. **The store's requests named their client where the server does not
+   look.** `blobPost()` put the slug in the BODY; `api/blob.js` reads it off
+   the ADDRESS before it reads the body, because the piece upload posts raw
+   bytes and the play address is a GET. So every store action from a client
+   other than the default landed on the default's schema (and would then have
+   been refused by that client's badge, §313.35 — the fence held, the feature
+   did not). The slug rides the query through the one `withClient()` helper.
+3. **Dismissing a declaration was refused for everybody.** `dismissWhere`
+   asked `getSession()` without the client key, the only client action that
+   did; without it the session resolves to the account shape whose role is
+   nobody's, and the gate said *"The register is the SMO's"* to the SMO.
+4. **A notification press opened Raya's platform on every client.** `sw.js`
+   opened `/raya-trade` when the payload named nowhere, and no payload ever
+   did — pre-existing, made wrong by multi-client. The three push payloads in
+   `api/chat.js` carry `open: "/<client>"` and the worker falls back to the
+   root door.
+
+**Both ends asserted and falsified.** `scripts/test-platform.js` presses
+`dismissWhere` through the door with the subject made and put back — its own
+`smo` row on t-http carries no role, so the first draft was refused for the
+right reason and proved nothing (§94.5); 1 red on the build before, the 403
+printed verbatim, 93/0 after);
+`checks/multi-client.py` §18 calls `SYNC.videoList` from a live page and reads
+the request it makes (2 red on the build before: the throw, and the address
+without a client). The notification path has no stand-in service in this
+sandbox beyond `test-push.js`, which still passes with the field added.
+
+**Unneeded code, removed** (rule 2b, on Islam's word to sweep for it): a
+byte-identical twin of `slugFor()` in `lib/platform-io.js` (§281's shape,
+exported twice); a dead local `getPool()` in all five `api/*.js` files, left
+behind when every connection moved to `lib/platform-io.js`; `CLIENT_PATHS`
+in `scripts/dev-server.js`, declared *"filled below"* and filled nowhere, with
+`PLATFORM_FILE` typed a second time beside it — it is read from the same
+`vercel.json` rewrite as `CLIENT_RE` now, so the versioned filename is spelt
+once (§35.6); `emailOf()` in `lib/auth.js`, exported and called by nobody; an
+unused `state-io` require in the migration script; and the `--client-flag`
+token in `index.html`, defined in three palettes and painted nowhere. **Stale
+comments corrected** rather than left to mislead the next reader (§104.8):
+`api/auth.js`'s header still said usernames are person keys; `index.html`
+cited spec 024 for the slug; `lib/platform-rules.js` claimed to run on both
+sides when no page loads it; four comments in `sync.js` still placed controls
+*"beside Demo data"*; `lib/auth.js` still called authorisation *"Phase 2"*.
+`sw.js` also caches `/raya-trade/sign-in`, the address a signed-out person is
+now sent to.
+
+**And the fixture said the wrong thing.** `checks/fixture-platform.js` is
+additive and assumes a rehearsal database the migration has registered
+clients in; on a fresh database it failed with a foreign-key error naming a
+constraint — which on first reading looked like a merge fault. It says in
+words what is missing and what makes it (rule 2b), and the two checks that
+sit on it were run the way they are meant to be: a fresh database, a
+v2.0-shaped tenant seeded in `public`, `migrate-to-multi-client.js` run twice
+(the second a no-op), the fixture, then the checks.
+
+### What is recorded and not fixed
+
+- `checks/csp-net.py` is red on this tree, on the branch before the merge,
+  **and on main's own tree**, identically — somebody else's, or the check's
+  environment; not this merge's.
+- `scripts/test-concurrent-saves.js` is red on the branch (it mints a session
+  with a person key against `platform.sessions`, which since spec 042 wants an
+  email and a seat): the harness predates the split. The lock it exists to
+  prove is in `api/state.js` untouched by this branch, and `test-two-tabs`
+  and the badge suite cover the database layer. Bringing the harness to the
+  new shape is its own small job.
+- `test-clean-parity.js` went red once on a database `test-roundtrip.js` had
+  just used, and is green on a fresh one on all three trees: the two share
+  nothing but a database, and neither resets it.
+- `scripts/test-push.js` is red on the branch before this merge and after it,
+  on the same line: it runs `ensureReady` on a raw connection and then reads
+  `push_keys` unqualified, which since spec 042 is a client-schema table
+  reached through `search_path`. Another harness predating the split; the
+  payload change here (`open`) is behind the line it dies on.
+- `scripts/test-video-endpoint.js` cannot run here at all: it requires
+  `@vercel/blob`, which this sandbox does not hold. Its subject was exercised
+  the other way round instead — the browser's request read on the wire by
+  `multi-client.py` §18.
+
+### What this merge is
+
+**It does not change how a save is judged**, so no forced sign-out of its own
+— but the live migration moves `sessions` into the platform schema anyway, so
+everybody signs in once more after the move, as §313 already says. The built
+file's bytes change (§91's trigger), hence the shell bump.
+
+## §313.36 — EVERY CLIENT HAS A DOOR OF ITS OWN (2026-09-08)
 
 Islam, verifying the move before it happens: *"just to verify, now the raya
 users will need another link right? to access the platform and their window
 opens the login window that has the raya trade logo and their credentials?"*
 Answered from the record first — the link does not change, the sign-in is by
-email and password, and **the shared door shows no client's logo** (§303.15
+email and password, and **the shared door shows no client's logo** (§313.15
 took Raya's lockup off it, because a picture of one client on a page every
 client's people stand at tells them all whose door it is). Then his decision,
 in five words: *"yes every client needs his door."*
 
 **THE TWO SENTENCES ARE BOTH RIGHT, AND THE DOOR IS WHAT RECONCILES THEM.**
-§303.15's argument is about a SHARED door and holds for it: the root still
+§313.15's argument is about a SHARED door and holds for it: the root still
 draws no client. What Islam is asking for is not a client's mark on that door
 but a door that is the client's — and at a client's own address the mark is
 not a leak, it is the answer to *whose platform is this*. So §52's placement is
@@ -37564,7 +39224,7 @@ nobody lands where the root would have sent them. The door is a place to
 stand, never a right.
 
 **THE MARK IS SET ON THE CLIENT'S CARD, AND THE CARD WEARS IT TOO.** The
-registry row has carried a `mark` column since spec 030 and nothing in the
+registry row has carried a `mark` column since spec 042 and nothing in the
 product could write it — §61's trap, found by looking for the control the
 mockup promised. The client's configuration gains *Mark on this client's
 door*: PNG only (§52 — an SVG is executable content, a JPEG paints its own
@@ -37600,10 +39260,10 @@ root-relative, the root and an unknown slug plain, a consultant landing in
 Raya from Raya's door, a signed-out person at `/raya-trade` sent to
 `/raya-trade/sign-in`, a client's person at another door landing in their
 own, and the mark set, refused (JPEG, SVG), cleared and set again from the
-card — **10 red** with the three halves broken at once. **§303.36.1 — and
+card — **10 red** with the three halves broken at once. **§313.36.1 — and
 its own first red run DIED rather than reporting** (§215, in the file whose
 neighbours already say so): a probe read a box off an element the broken
-build does not draw. **§303.36.2 — `checks/boot-skeleton.py`'s stub served
+build does not draw. **§313.36.2 — `checks/boot-skeleton.py`'s stub served
 the platform at the door path**, so its 401 case looped for ever — the stub
 has to model the deployment (§100.3), and its assertion was REWRITTEN to the
 client's own door, never loosened (§218). 92/0 · 123/0 · boot-skeleton,
@@ -37618,9 +39278,9 @@ sends them on to their door first, and nothing should until somebody asks.
 And **this changes the built file**, so a merge still owes the `sw.js`
 shell bump (§91).
 
-## §303.35 — A CLIENT'S CONNECTION WEARS THAT CLIENT'S BADGE (2026-09-08)
+## §313.35 — A CLIENT'S CONNECTION WEARS THAT CLIENT'S BADGE (2026-09-08)
 
-Islam, the morning after §303.34: *"you told me earlier that every client needs
+Islam, the morning after §313.34: *"you told me earlier that every client needs
 to have his access code"* — then, told what a key per client would take and
 what it would cost, *"we are building already why can't we build this now? not
 to face complications in the future"*, then *"do we always need separate keys in
@@ -37630,7 +39290,7 @@ the same purpose"*, and, of the three levels laid out for him, *"go with the
 badge, check neon and build it."*
 
 **THE FIRST ANSWER GIVEN WAS WRONG ABOUT WHAT WAS IN THE RECORD, AND SAID SO.**
-Nothing in this log or in spec 030 says every client needs an access code; what
+Nothing in this log or in spec 042 says every client needs an access code; what
 was on the shelf was *a database key per client*, deferred by agreement until
 after the move. That was put to him plainly rather than remembered into
 existence, and his reply was the better question: not *when* but *what is the
@@ -37710,7 +39370,7 @@ Neon's version is theirs to choose.
 
 **THE SECOND SESSION-LEVEL STATEMENT IN THE PRODUCT, ARGUED FOR BY THE SAME
 PARAGRAPH AS THE FIRST.** `SET ROLE` is session state exactly as `search_path`
-is, and §303.34's answer — the direct connection is asked for first, where a
+is, and §313.34's answer — the direct connection is asked for first, where a
 checked-out client is one backend for the life of the checkout — is what makes
 it safe, with `RESET ROLE` beside the `RESET search_path` that was already
 there. `scripts/test-session-state.js` learned the word: a `SET ROLE` has
@@ -37725,7 +39385,7 @@ the connection served it wearing the owner's rights. It goes through the same
 door as the other four now and wears the badge; the browser names the client
 on all three of its calls (the piece upload posts raw bytes and the play address
 is a GET, so the slug rides the query there — through the one helper `sync.js`
-already had, exported rather than copied, §53.5). §303's own drift: four
+already had, exported rather than copied, §53.5). §313's own drift: four
 endpoints were routed and the fifth was not, and no check asked the fifth.
 
 **AND THE MIGRATION SCRIPT'S FIRST BUILD PUT THE BADGE BEFORE THE ROOM IT
@@ -37764,9 +39424,9 @@ fails identically at the commit before this one; and `checks/csp-net.py`
 reports the shipped build's scripts blocked while the 26 hashes in its meta
 match its 26 script blocks byte for byte — also identical on the build before.
 Both are the checks, not the product, and both are somebody else's to look at
-rather than rewritten during the verification of an unrelated change (§303.34a).
+rather than rewritten during the verification of an unrelated change (§313.34a).
 
-**§303.35a — THE THREE LEVELS, FOR THE RECORD.** One: one key, rooms kept apart
+**§313.35a — THE THREE LEVELS, FOR THE RECORD.** One: one key, rooms kept apart
 by our code (before this section). Two: the badge — same key, the database
 enforces the room (this section). Three: a password on each badge, stored
 encrypted under a master key, so a client can be opened without the owner at
@@ -37776,9 +39436,9 @@ their own. Not before, because none of the three protects against the owner's
 key leaking, and that is a different job: who at Forefront can see the Vercel
 settings, and rotating the key.
 
-## §303.34 — THE DIRECT CONNECTION IS ASKED FOR FIRST (2026-09-07)
+## §313.34 — THE DIRECT CONNECTION IS ASKED FOR FIRST (2026-09-07)
 
-§303.33 left the one open question of the whole merge and put both answers to
+§313.33 left the one open question of the whole merge and put both answers to
 Islam. He came back with *"I can't choose between the 2 options"* — **and he was
 right to, because handing over two and asking somebody to pick is exactly what
 rule 2b forbids** (*"Deliver ONE thing. Never hand over alternatives … Pick the
@@ -37833,12 +39493,12 @@ in a `finally`, or it would decide the answer for whatever ran after it.
 `scripts/test-session-state.js` is main's §289.2 rule made executable and it is
 right about `pointAt()` in general, so the line is not contorted to slip past it
 and the rule is not loosened. It gains a marker that must **name a section**
-(`/* session-state-ok: §303.34 … */`) and every honoured exception is **printed
+(`/* session-state-ok: §313.34 … */`) and every honoured exception is **printed
 on every run** — `ALLOWED …`, above the count — so the cost stays visible rather
 than disappearing into a green tick (§302's own argument for printing a figure
 beside an assertion). A marker with no section does not excuse anything.
 
-**AND ITS SET RULE WAS NARROWED, NOT LOOSENED** (§218). §303.33 recorded
+**AND ITS SET RULE WAS NARROWED, NOT LOOSENED** (§218). §313.33 recorded
 `lib/auth.js`'s `UPDATE … SET person_key = $3 WHERE …` as the check's own blind
 spot and left it: a table name interpolated into the middle breaks the run of
 literals, so the fragment the check reads genuinely begins with the word SET. The
@@ -37857,7 +39517,7 @@ differently**; the whole change is which address the process dials, one comment,
 one warning and two test files.
 
 **AND ONE CHECK WENT RED FOR A REASON THAT IS NEITHER THE PRODUCT NOR THIS
-CHANGE** (§303.34a): run against the database `scripts/test-platform.js` had
+CHANGE** (§313.34a): run against the database `scripts/test-platform.js` had
 already used, `multi-client.py` fails *"…and nobody who belongs to a client"*
 naming `a@ff.example` and `o@ff.example` — rows that suite **deliberately
 inserts into `accounts` and never removes**. 101/0 on a database migrated in the
@@ -37872,7 +39532,7 @@ assert. **Recorded and deliberately not changed here**: it is somebody else's
 check, it is test-only, it blocks nothing, and rewriting an assertion during the
 verification of an unrelated change is how a green run stops meaning anything.
 
-## §303.33 — MAIN'S NEW CHECK WENT RED ON THIS BRANCH'S OWN CODE (2026-09-07)
+## §313.33 — MAIN'S NEW CHECK WENT RED ON THIS BRANCH'S OWN CODE (2026-09-07)
 
 The second catch-up merge brought in `scripts/test-session-state.js`, main's
 §289.2 rule made executable: **nothing session-level on a pooled connection.**
@@ -37924,11 +39584,11 @@ green one that hides it.
 
 **HE ANSWERED BY REFUSING THE MENU, AND HE WAS RIGHT TO** — *"I can't choose
 between the 2 options"*. Putting two costed answers to somebody and asking them
-to pick is rule 2b's own fault, not diligence; **§303.34 is the one answer**,
+to pick is rule 2b's own fault, not diligence; **§313.34 is the one answer**,
 and the paragraph above is left standing as the record of the question rather
 than rewritten to look as though it was never open (Principle II).
 
-## §303.32 — THE ADDRESS IS WHAT PLACES SOMEBODY ON A REGISTER THE PLATFORM DID NOT BUILD (2026-09-07)
+## §313.32 — THE ADDRESS IS WHAT PLACES SOMEBODY ON A REGISTER THE PLATFORM DID NOT BUILD (2026-09-07)
 
 Islam, opening Raya Trade from the cards: *"when I open raya from the platform I
 open as a user named forefront - the group .. that's not supposed to happen I
@@ -37947,7 +39607,7 @@ mapping was broken.
 **THE MAPPING WAS WRONG FROM THE MOMENT IT WAS WRITTEN, AND NOT BY DRIFTING
 LATER.** `migrate-to-multi-client.js` wrote `person_key = ff_islam` (and
 `ff_essam`, `ff_omar`) for every office account, and on a client whose register
-the platform did NOT build **nothing ever creates those rows** (§303.30). So the
+the platform did NOT build **nothing ever creates those rows** (§313.30). So the
 key named nobody on the day the migration ran, on every client that predates the
 platform — reproduced by running the migration on a production-shaped copy and
 reading the mapping back.
@@ -38004,7 +39664,7 @@ platform's own Clients tab. It could not be reproduced — that endpoint never
 resolves a person on a register, so it is not this — and the real error is in the
 deployment's own log by design (§43: raw errors do not reach the browser).
 
-## §303 — ONE PLATFORM, MANY CLIENTS (v3.57–v3.59, spec 030)
+## §313 — ONE PLATFORM, MANY CLIENTS (v3.57–v3.59, spec 042)
 
 Islam: *"Let's work together on splitting this platform to be multitenant. We
 have an external access for the SMO office and then they pick the client from
@@ -38177,7 +39837,7 @@ units, the people and every mention of them renamed to invented ones —
 **Meridian Group**, and a register of thirty-three people who do not exist.
 
 **THIS REVERSES §21's "never put invented content in the database", for one
-client and deliberately.** What replaces §21's guard is the boundary §303.1
+client and deliberately.** What replaces §21's guard is the boundary §313.1
 builds: Demo is its own schema, on Forefront's cards only, and no client can
 reach it. It is a client in every other respect and **it saves**, which is the
 whole reason it exists — the button it replaces could not be added to.
@@ -38299,7 +39959,7 @@ half-copied** — which is why the move is a single statement per table rather
 than a dump and a load.
 
 **THE WAY BACK IS THE SAME MECHANISM POINTED THE OTHER WAY**, and it was
-exercised rather than only written down (`specs/030-multi-client/rollback.md`):
+exercised rather than only written down (`specs/042-multi-client/rollback.md`):
 44 tables back into `public`, all five schemas dropped, and the platform reads
 it as a v2.0 deployment again — Raya Trade, ten units, thirty-three people,
 Mobile's four pillars. **A rollback nobody has run is a paragraph, not a plan.**
@@ -38402,7 +40062,7 @@ Settled from a mockup drawn in `platform.html`'s **own stylesheet** (§41.9,
 rule 1c) with three options and the cost of each stated. Islam picked **B**.
 The one it beat is worth recording: putting the role into the read-only *Roles
 and seats* list is tersest and puts a **settable** thing inside the one column
-that is read-only by design, so either §303.4's *one place writes a seat* rule
+that is read-only by design, so either §313.4's *one place writes a seat* rule
 breaks or the platform role becomes visible where it cannot be changed.
 
 **THE KEY DOES NOT MOVE**: `is_admin`, `canSetAdmin` and `saveConsultant` keep
@@ -38411,7 +40071,7 @@ nobody reads (§30.2, §58). **And the chrome says the same word** — leaving
 *Admin* in the top line after renaming the column is exactly the twins this
 rename avoided.
 
-**THE NAME IS READ OFF THE ADDRESS, NOT WRITTEN INTO THE CODE.** §303.14's
+**THE NAME IS READ OFF THE ADDRESS, NOT WRITTEN INTO THE CODE.** §313.14's
 bootstrap called its account *"Forefront"*, which is the company rather than
 the person and reads on the consultants list as a row belonging to nobody.
 `islam.saadany@…` gives *Islam Saadany*, and no person is named in a source
@@ -38450,7 +40110,7 @@ correctness.
 **`must_change` IS TRUE, which is the one place this differs from §43.8.** That
 one cleared the flag because Islam asked for a working password on a prototype;
 this is the door to **every client Forefront runs**, so 1234 gets somebody in
-and nowhere else until they have chosen their own — §303.14's trade, in the
+and nowhere else until they have chosen their own — §313.14's trade, in the
 same words: one screen, once.
 
 **IT NAMES ONE ADDRESS.** Every other account is untouched, or an explicit
@@ -38566,9 +40226,9 @@ Adoption worked and the page still said **"Islam Saadany is signed in but is
 not on this register"** over a plan that was sitting right there. `api/state.js`
 asked `seatIn()` **again** to find who this person is inside the client — and
 that returns nothing for an office account with no row on it, which is exactly
-the case §303.20 had just made reachable.
+the case §313.20 had just made reachable.
 
-§303.20's fault one layer on, and the same shape: **`getSession()` has already
+§313.20's fault one layer on, and the same shape: **`getSession()` has already
 answered this**, including the seat the rule gives somebody arriving without
 one, so asking the database a second way could only ever disagree with it. It
 uses the session's own answer.
@@ -38614,14 +40274,14 @@ correctly on the data you have.
 hold one client, they have no platform at all, and a card page in front of them
 would be a door to a room with one door.
 
-**This also removes §303.23's fault at its root** rather than only at the
+**This also removes §313.23's fault at its root** rather than only at the
 control: the way back could loop because the door disagreed with it about where
 somebody belongs. Both now say the same thing.
 
 ### 147.25 · 1234, and no prompt
 
 Islam: *"keep my password islam.saadany@forefront.consulting and 1234 without
-changing passwords."* §303.14 and §303.17 both set `must_change`, so 1234 got
+changing passwords."* §313.14 and §313.17 both set `must_change`, so 1234 got
 him in and nowhere else; he asked for the **password**, not for a way in to
 choose another. **§43.8 cleared the flag for the same reason** and this is the
 same answer.
@@ -38651,7 +40311,7 @@ keeps this a one-off rather than a standing backdoor.
 
 ### 147.26 · A client may have more than one super user
 
-Islam: *"a project might have 2 super users."* §303.4 enforced one with a
+Islam: *"a project might have 2 super users."* §313.4 enforced one with a
 **unique index**, on the reasoning that a client with two is a client where
 nobody can say who holds the access matrix. That is a tidy thought about a
 table and wrong about the work: an engagement is run by a pair often enough
@@ -38659,7 +40319,7 @@ that the database refusing it is **the database arguing with the practice**.
 
 **WHAT THE CONSTRAINT WAS REALLY PROTECTING IS UNAFFECTED** — that *somebody*
 holds it. A client with none is still a client nobody can configure, and the
-platform's own super user reaches every client by right (§303.20), so no client
+platform's own super user reaches every client by right (§313.20), so no client
 can become unreachable.
 
 The index goes, migration `005` drops it on a platform that already has it
@@ -38827,7 +40487,7 @@ Islam: *"a client created from the multitenant platform will have its own
 registry, and on the settings of this client we will add the consultants and
 roles and accordingly they will be added to the registry automatically."*
 
-The mirror of §303.30, and together they are one rule with two sides:
+The mirror of §313.30, and together they are one rule with two sides:
 
 | | Its register | Adding somebody to its team |
 |---|---|---|
@@ -38835,7 +40495,7 @@ The mirror of §303.30, and together they are one rule with two sides:
 | **Brought its own** (Raya Trade) | 33 people, written before the platform existed | **adds nobody** — each account says which existing row it is |
 
 **IT IS A FACT ABOUT THE CLIENT, NOT ABOUT THE REGISTER'S SIZE**, and that is
-the correction §303.30 needed. Asked as *is the register empty*, it was right
+the correction §313.30 needed. Asked as *is the register empty*, it was right
 for the first consultant and wrong for the second, who would arrive to find the
 register no longer empty and get **no row at all**. `clients.made_here` is set
 when the platform creates the schema and false for a tenant it adopted;

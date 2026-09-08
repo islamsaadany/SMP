@@ -65,7 +65,6 @@ function escHtml(t) {
 }
 const { ensureReady } = io;
 const P = require("../lib/platform-io.js");
-function getPool() { return io.getPool(pg); }
 
 /* §71's caps, unchanged: the client already shrinks a picture to 1600px and
    keeps the smaller of PNG and JPEG, so this is the backstop for a client that
@@ -692,7 +691,7 @@ async function collectForPeople(client, cfg, req) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    /* WHICH CLIENT IS THIS FOR (spec 030). The browser sends the slug it was
+    /* WHICH CLIENT IS THIS FOR (spec 042). The browser sends the slug it was
        served at; the schema comes from the registry row, never from the
        request (§36.4). An unknown client and one this account may not open are
        the same refusal, so trying slugs tells nobody anything.
@@ -1009,7 +1008,8 @@ module.exports = async function handler(req, res) {
       const out = await push.sendTo(client, await push.subsOf(client, me.key), {
         title: "Strategy Office",
         body: "This is a test. Notifications are working on this device.",
-        tag: "reply"
+        tag: "reply",
+        open: "/" + client._smpClient.key
       });
       if (out.sent) {
         step("A box on your screen", "ok",
@@ -1212,7 +1212,12 @@ module.exports = async function handler(req, res) {
           await push.sendTo(client, await push.officeSubs(client, me.key), {
             title: me.name || me.key,
             body: firstLine(text || "(a screenshot)"),
-            tag: "office"
+            tag: "office",
+            /* WHERE A PRESS LANDS (§313.37): the worker used to open
+               /raya-trade whatever the client, which on any other client is
+               a 404. The client this message belongs to is named on the
+               payload; the worker falls back to the root door. */
+            open: "/" + client._smpClient.key
           });
         } catch (e) { /* a notification never costs the message it is about */ }
       }
@@ -1788,7 +1793,8 @@ module.exports = async function handler(req, res) {
           await push.sendTo(client, await push.subsOf(client, who), {
             title: me.name || "Strategy Office",
             body: firstLine(text),
-            tag: "reply"
+            tag: "reply",
+            open: "/" + client._smpClient.key
           });
         } catch (e) { /* a notification never costs the reply it is about */ }
       }

@@ -48,7 +48,7 @@ that is a separate decision, and `rollback.md` is the way back.
 - **Nothing.** This branch has taken nothing from another session since it
   started; if that changes before the merge, it belongs on this list.
 
-## §303.35 — the badge (nothing to see, one thing to read)
+## §313.35 — the badge (nothing to see, one thing to read)
 
 - Nothing on any screen moves. The badge is a database role a client's
   connection wears; it has no page.
@@ -59,7 +59,7 @@ that is a separate decision, and `rollback.md` is the way back.
 - **Videos**, on any client: Manage slides › a video slide still plays, and an
   upload still lands. That endpoint had never been routed by client and is now.
 
-## §303.36 — every client's own door
+## §313.36 — every client's own door
 
 - **Clients › Raya Trade › Settings**: a row *Mark on this client's door* —
   choose the Raya PNG (`clients/raya-trade/brand/raya-trade-group-mark.png`),

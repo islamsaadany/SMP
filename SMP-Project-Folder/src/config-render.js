@@ -1212,8 +1212,15 @@ function rowDialogHtml(){
    the other is whose finished plan makes the clearest example. Sharing the
    field would move a selection somebody made on one control by pressing the
    other. Screen state, never saved (§25.2). */
+/* `pick` is which subjects the DOWNLOAD is for and `cycle` which cycle it
+   comes from (§304). `pick` is null for "all of them", stored as an absence so
+   a subject created tomorrow joins the selection rather than being silently
+   left out of a list written before it existed (§50.6's rule, in screen
+   state). `unit` remains what an UPLOAD resolved to — the two are chosen for
+   opposite reasons and sharing one field would move a selection somebody made
+   on one control by pressing another. Screen state, never saved (§25.2). */
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
-            read:"", check:null, done:null, filled:"" };
+            read:"", check:null, done:null, filled:"", pick:null, cycle:"" };
 
 /* WHICH OF THE TWO PLANS A SUBJECT KEEPS (§61). A business unit and a function
    that plans in pillars take the PILLARS workbook; a capability and the
@@ -1776,7 +1783,7 @@ function renderPeople(){
      a parameter again — passed false by the row, true by the dialog — and there
      are exactly two callers, both in this file, both named. */
   function roleCell(p, editable){
-    /* ── A FOREFRONT ROW IS SET SOMEWHERE ELSE (spec 030 §6) ──────
+    /* ── A FOREFRONT ROW IS SET SOMEWHERE ELSE (spec 042 §6) ──────
        Their seat comes from this client's configuration on the Forefront
        platform, and the next time they open the client it is written again —
        so a picker here would accept a change and silently un-make it, which
@@ -4374,7 +4381,7 @@ function renderKB(){
      ABSENT, NEVER DISABLED, when this viewer's roles match no story: a
      button that explains it cannot help you is worse than no button, and
      there is nothing the person could do to earn it. */
-  /* AND SAYING WHY IS NOT THE SAME AS BEING ABSENT (spec 030 §6.2, §61).
+  /* AND SAYING WHY IS NOT THE SAME AS BEING ABSENT (spec 042 §6.2, §61).
      The tour walks the person's OWN plan now — the worked example it used to
      borrow is a client of its own — so there is a second reason it may not
      run: the plan is not written yet. That is a state somebody can LEAVE, and
@@ -5211,171 +5218,300 @@ function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
 function impUnit(){ return unitLike(IMP.unit); }
 function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
 
-function renderImport(){
-  /* The second of three gates, and it is not belt-and-braces for its own sake:
-     the rail's `when` decides whether the ROW is drawn, this decides whether
-     the PAGE renders, and the two handlers decide whether the file is applied.
-     A destination can be reached with a stale `currentSub` after a role
-     changes under the viewer, so the page checks for itself. */
-  if (grant("c_import") !== "edit") {
-    return '<div class="note"><b>Importing is the SMO\u2019s.</b> A plan arrives by ' +
-      'upload and is authored by it \u2014 codes are minted, the outgoing plan is ' +
-      'archived \u2014 so it is not something a unit does for itself. Ask the SMO, or ' +
-      'report figures on your unit\u2019s own <b>Report</b> page.</div>';
+/* ── SETUP · IMPORT & ARCHIVES (§304) ────────────────────────────────
+   Islam: *"I need a mockup to refine this page and the buttons inside it as
+   it's too clumsy"*, then, of three tidier drawings of the same page, *"I
+   don't like any of the options. we need to rethink the page."*
+
+   HE WAS RIGHT AND THE FAULT WAS THE SHAPE. The page was a tutorial — 1, 2,
+   3 — for something nobody does in one sitting: you take a file, it goes away
+   for a week, somebody sends it back. Numbering those as consecutive steps
+   makes the page furniture for anyone who has done it once, and it forced one
+   question to be answered twice — WHICH KIND OF FILE, on the way out and again
+   on the way back — through a 42x21px switch that governed both steps, every
+   sentence on the page, and what the upload would accept.
+
+   So the steps go and the page becomes what it is: files out, files in, and
+   the record of what a returning file displaced. THREE TABS.
+
+   AND THE MODE SWITCH IS DELETED RATHER THAN RESTYLED (§24). On the way out
+   you press the button for the file you want; on the way back you press the
+   kind you are uploading, which the file then CONFIRMS — every workbook the
+   platform writes carries a Read me sheet whose first cell reads "Plan
+   workbook" or "Progress workbook".
+
+   NO CSV LEAVES (Islam: *"we should always download properly designed
+   templates not csvs"*), and a CSV is still READ — *"we can accept the csv but
+   nobody builds in csv"*. So `csvFor()` and its two links go from the page and
+   `loadCSV` is untouched.
+
+   BUILD A PLAN LEAVES (§304.2): *"its already a function that is working
+   inside the function itself"*. It is not on a page about files; it is on the
+   subject's own empty Plan page, where the empty state already offered two
+   routes and now offers three. */
+
+/* Every subject a plan or a progress file can be written for, grouped the way
+   the navigation groups them. One list, so the picker, the counts and the
+   download all walk the same subjects (§53.5). */
+/* A subject's name, made safe to put in a filename. MODULE SCOPE since §304 —
+   it was inside the shell's wiring closure, and the download tab needs it from
+   a renderer as well; two copies of "how do we spell this in a filename" is
+   two answers waiting to differ. */
+function safeFileBit(name){
+  return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "plan";
+}
+
+function impPlanSubjects(){
+  var out = [];
+  UNIT_KEYS.forEach(function(k){
+    if (UNITS[k].active === false) return;
+    out.push({ v:k, label:UNITS[k].name, grp:"Business units" });
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    var f = FUNCTIONS[k];
+    if (f.active === false || !fnPlansInPillars(f)) return;
+    out.push({ v:"fn:" + k, label:f.name, grp:"Supporting functions" });
+  });
+  (GROUP.capabilities || []).forEach(function(c){
+    var f = c.fn ? FUNCTIONS[c.fn] : null;
+    out.push({ v:"cap:" + c.id, label:c.name, hint:f ? f.name : "", grp:"Capabilities" });
+  });
+  return out;
+}
+
+/* WHICH ARE TICKED. `null` means every one of them, which is what the page
+   opens on — and it is stored as an absence so a subject added tomorrow joins
+   the selection rather than being silently left out of it (§50.6's shape, in
+   screen state). A key the tenant no longer holds falls out here rather than
+   reaching a builder. */
+function impPicked(){
+  var all = impPlanSubjects();
+  if (IMP.pick == null) return all;
+  return all.filter(function(o){ return IMP.pick.indexOf(o.v) > -1; });
+}
+
+/* THE CYCLES A DOWNLOAD CAN COME FROM (§304.3). Islam: *"we need first to
+   select the cycle we are downloading from or uploading to."*
+
+   The one running, and every cycle a figures archive was taken for — and that
+   archive is ALREADY NAMED AFTER ITS CYCLE (`archiveFigures` files it under
+   `REVIEW.name`), so this list is read rather than invented.
+
+   Uploading has no such list, deliberately: *"the upload only makes sense for
+   new cycles not closed ones"*. A closed cycle takes no figures from anyone,
+   office included — `canReport()` and `canReportFn()` both open with
+   `REVIEW.state !== "open"` — and reopening one is its own deliberate control
+   on Setup › Reporting cycle (§273.2). So the Upload tab STATES its cycle. */
+function impCycles(){
+  var out = [{ v:"", label:(REVIEW.name || "This cycle") + " — open" }];
+  (ARCHIVES || []).forEach(function(a){
+    if (a.kind === "figures") out.push({ v:a.id, label:a.name + " — closed " + a.at });
+  });
+  return out;
+}
+/* The cycle's name, made safe for a filename — what tells one download from
+   the next once both are sitting in somebody's Downloads folder. */
+function impCycleStamp(){
+  var c = impCycles().filter(function(o){ return o.v === (IMP.cycle || ""); })[0];
+  var name = c ? String(c.label).split(" — ")[0] : (REVIEW.name || "cycle");
+  return safeFileBit(name);
+}
+function impCycleLabel(){
+  var c = impCycles().filter(function(o){ return o.v === (IMP.cycle || ""); })[0];
+  return c ? c.label : (REVIEW.name || "this cycle");
+}
+
+/* The archives that belong to the ticked subjects — plan archives only. A
+   cycle's FIGURES archive belongs to no subject, so it is not reachable from a
+   tick and rides with the cycle instead (§304.3). */
+function impArchivesFor(keys){
+  return (ARCHIVES || []).filter(function(a){
+    if (a.kind === "figures") return false;
+    var v = a.kind === "unit" ? a.key : "cap:" + a.key;
+    return keys.indexOf(v) > -1;
+  });
+}
+
+function impRefusal(){
+  return '<div class="note"><b>Importing is the SMO’s.</b> A plan arrives by ' +
+    'upload and is authored by it — codes are minted, the outgoing plan is ' +
+    'archived — so it is not something a unit does for itself. Ask the SMO, or ' +
+    'report figures on your unit’s own <b>Report</b> page.</div>';
+}
+
+/* ── The Download tab ─────────────────────────────────────────────── */
+function renderImportDownload(){
+  if (grant("c_import") !== "edit") return impRefusal();
+
+  var subs = impPlanSubjects(), picked = impPicked();
+  var keys = picked.map(function(o){ return o.v; });
+  var nArch = impArchivesFor(keys).length;
+
+  /* ONE CONTROL, TICKED, SEARCHABLE — and it is the platform's own (§45.5,
+     §130.1): a `<select multiple>` past five options becomes SEARCHSEL's list.
+     What is new is asked for by attribute and nowhere else: the closed control
+     says a COUNT rather than nineteen names run together, and the popup gets
+     Select all / Select none (§304.1). */
+  var pick = '<select multiple class="fld" id="imp-pick" data-sslabel="count" ' +
+    'data-ssnoun="subject|subjects" data-ssall="1" aria-label="Which subjects">' +
+    ["Business units", "Supporting functions", "Capabilities"].map(function(g){
+      var rows = subs.filter(function(o){ return o.grp === g; });
+      if (!rows.length) return "";
+      return '<optgroup label="' + esc(g) + '">' + rows.map(function(o){
+        return '<option value="' + esc(o.v) + '"' +
+          (keys.indexOf(o.v) > -1 ? " selected" : "") +
+          (o.hint ? ' data-hint="' + esc(o.hint) + '"' : '') + '>' +
+          esc(o.label) + '</option>';
+      }).join("") + '</optgroup>';
+    }).join("") + '</select>';
+
+  var cyc = '<select class="fld" id="imp-cycle" aria-label="Which cycle">' +
+    impCycles().map(function(o){
+      return '<option value="' + esc(o.v) + '"' +
+        (o.v === (IMP.cycle || "") ? " selected" : "") + '>' + esc(o.label) + '</option>';
+    }).join("") + '</select>';
+
+  /* A COUNT ON THE BUTTON, and nought is said rather than drawn as a live
+     control that does nothing (§221, §163): held with `aria-disabled` and a
+     reason, never `disabled`, so the reason can be reached. */
+  function dlBtn(kind, word, n){
+    var off = !n;
+    return '<button class="editbtn"' + (off ? ' aria-disabled="true"' : '') +
+      ' data-dlpick="' + kind + '"' +
+      (off ? ' data-tip="Nothing is ticked that has one."' : '') + '>' +
+      word + ' <span class="cnt">(' + n + ')</span></button>';
   }
+
+  var blank =
+    '<div class="fkey">A blank template to fill in</div>' +
+    '<div class="fcard"><div class="fbody"><p>The same file whoever it is for &mdash; the ' +
+      'subject is chosen on its Read me sheet, and the platform mints every code on ' +
+      'arrival.</p></div>' +
+    '<div class="ffoot"><span class="why">Two formats, because a capability plans in ' +
+      'projects and everything else in pillars.</span>' +
+      '<button class="editbtn" data-dlblank="pillars">Pillars</button>' +
+      '<button class="editbtn" data-dlblank="projects">Projects</button></div></div>';
+
+  var files =
+    '<div class="fkey">Files from the platform</div>' +
+    '<div class="fcard"><div class="pickrow">' +
+      '<span class="lab">For</span>' + pick +
+      '<span class="lab">from</span>' + cyc +
+    '</div>' +
+    '<div class="ffoot"><span class="why">One subject is one workbook; several arrive as a ' +
+      'zip. Always the designed workbook.</span>' +
+      dlBtn("plans", "Plans", keys.length) +
+      dlBtn("progress", "Progress", keys.length) +
+      dlBtn("archives", "Archives", nArch) +
+    '</div></div>';
+
+  return cfgHead("Import & storage", null, null, false) + blank + files + contCard();
+}
+
+/* ── THE CONTINGENCY FILES (spec 030) ────────────────────────────────────
+   Islam: *"if the platform all is down we need to have a substitue action ...
+   so in case if things are down I have a backup to adjust to and present
+   from."*
+
+   THE THIRD CARD, IN THE SHAPE OF THE TWO ABOVE IT — this is the page where
+   files leave the platform, and a fourth vocabulary for "press this and a file
+   arrives" would be a second answer to a settled question (§53.5).
+
+   DRAWN FOR THE SMO TEAM AND NOBODY ELSE, which is Islam's own correction of
+   the first drawing: it had put the reminder on the welcome screen, which
+   EVERY viewer opens, so it appeared beside a unit head's own row. A unit head
+   has nothing to take. Absent rather than drawn and refused — §61's trap is
+   about a control somebody NEEDS being unreachable, and this is the opposite:
+   a control nobody outside the office has any use for.
+
+   THE PICKER ABOVE DOES NOT APPLY AND THE CARD SAYS SO. A backup of some of
+   the subjects is not a backup; the argument for ticking a few is that you
+   want a few workbooks, and there is no such argument for the day the
+   platform is down.
+
+   IT SAYS WHAT THE WORKING COPY IS. There is no sign-in in front of it —
+   whoever holds the file sees everything in it — and that comes with any
+   backup, which is exactly why it is said on the card rather than discovered
+   (§124, and rule A14's "what the solution costs"). */
+function contCard(){
+  if (typeof CONT === "undefined" || !CONT.mayTake()) return "";
+  var t = CONT.taken() || {}, n = 0;
+  try { n = CONT.subjects().length; } catch (e) {}
+  /* WHAT THIS PERSON ALREADY HAS, said on the buttons' own line rather than
+     as a chip beside each: two ticks in a row of two buttons is a table
+     nobody asked for, and the sentence answers "am I covered" in one read. */
+  var got = (t.copy && t.slides) ? "You have both, taken " + esc(contWhen(t.slides > t.copy ? t.slides : t.copy)) + "."
+          : t.copy   ? "You have the working copy \u2014 the slides are still missing."
+          : t.slides ? "You have the slides \u2014 the working copy is still missing."
+          : "";
+  return '<div class="fkey contkey">Contingency files</div>' +
+    '<div class="fcard contcard"><div class="fbody">' +
+      '<p>Take these before a review. If the platform cannot be reached on the day, the ' +
+        '<b>working copy</b> opens from your laptop with no connection at all \u2014 every ' +
+        'plan, every figure, every deck \u2014 and the <b>slides</b> can be presented from ' +
+        'PowerPoint.</p>' +
+      '<p>And <b>one PDF</b> holds every subject back to back, in the order the ' +
+        'master presentation runs them — a single file to present from with nothing ' +
+        'to open it but a PDF reader. It opens your browser’s print dialog rather ' +
+        'than downloading, because it is the deck itself being printed.</p>' +
+      '<p class="why contwhy">The two downloads carry the date and time you took them in ' +
+        'their name, and hold everything as it stood at that moment. The working copy has ' +
+        'no sign-in in front of it: whoever holds the file sees everything in it.</p>' +
+      (got ? '<p class="contgot">' + got + '</p>' : '') +
+    '</div>' +
+    '<div class="ffoot"><span class="why">Everything, not a selection \u2014 the picker above ' +
+      'does not apply here.</span>' +
+      '<button class="editbtn" data-conttake="copy">Working copy</button>' +
+      '<button class="editbtn" data-conttake="slides">Slides <span class="cnt">(' + n +
+        ')</span></button>' +
+      /* THE WORD PDF IS ON THE LABEL, for §305's own two reasons met here as
+         well: the file cannot be edited, and the press opens the browser's
+         print dialog rather than downloading at once. */
+      '<button class="editbtn" data-conttake="pdf">One PDF</button>' +
+    '</div></div>';
+}
+
+function contWhen(iso){
+  var d = new Date(iso);
+  return isFinite(d.getTime())
+    ? d.toLocaleString(undefined, { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
+    : "";
+}
+
+/* ── The Upload tab ───────────────────────────────────────────────── */
+function renderImportUpload(){
+  if (grant("c_import") !== "edit") return impRefusal();
+
   var isCap = impIsCap();
   var u = isCap ? impCap() : impUnit();
   var isPlan = IMP.kind === "plan";
   var d = IMP.diff;
 
-  /* Narrowed to the chosen format, not units-and-capabilities in one list
-     (§61) — the list is the subjects that keep THAT plan, so choosing the
-     format above it is what makes the two agree. */
-  var unitPick = '<select class="fld" id="imp-unit">' +
-    impSubjects(impFmtOf(IMP.unit)).map(function(o){
-      return '<option value="' + esc(o.v) + '"' + (o.v === IMP.unit ? " selected" : "") + '>' +
-        esc(o.label) + '</option>';
-    }).join("") + '</select>';
-
-  /* ONE BUTTON, TWO ENTRIES. `<details>` rather than a button and a flag:
-     a menu's action fires before the menu closes (§47.2), and a `<details>`
-     that is closed from inside its own click has not unmounted the button the
-     click is still in — it hides it. Keyboard and screen reader come free. */
-  function dlMenu(label, act){
-    return '<details class="dlmenu"><summary class="editbtn">' + label +
-      '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-      '<div class="menu" role="menu">' +
-        '<button role="menuitem" data-' + act + '="pillars">Pillars template' +
-          '<span class="dlsub">Business units and the functions that plan in pillars</span></button>' +
-        '<button role="menuitem" data-' + act + '="projects">Projects template' +
-          '<span class="dlsub">Capabilities and the functions that improve them</span></button>' +
-      '</div></details>';
-  }
-
-  var kindPick = '<span class="minisw">' +
-    '<button data-impkind="plan" aria-pressed="' + isPlan + '">Plan</button>' +
-    '<button data-impkind="progress" aria-pressed="' + !isPlan + '">Progress</button></span>';
-
-  /* ── A FILLED ONE, TO EXPLAIN THE BLANK ONE (§69.12) ───────────────
-     Islam: "add a button for me to download a prefilled template, and an
-     option for any unit and one for projects for any function, so I can
-     explain using them."
-
-     Which the blank template cannot do. §22's plan file is deliberately
-     generic — one file whoever it is for, no codes, the subject chosen on the
-     Read me sheet — and that is right for AUTHORING and useless for showing
-     somebody what a finished one looks like. An empty grid with a Read me is
-     not an example (§45.2, from the other side: a feature that renders nothing
-     looks like a feature that was not built).
-
-     ONE SELECT AND ONE BUTTON, and THE FORMAT IS READ OFF THE SUBJECT rather
-     than chosen beside it — §61's rule, and the reason it is a rule: a format
-     stored next to a subject is a second fact that can disagree with the
-     first. Picking Mobile downloads the pillars workbook; picking a capability
-     downloads the projects one; nothing else has to be answered.
-
-     Both halves in one list under their own headings, because "any unit" and
-     "projects for any function" are the two things he asked for and putting
-     them in two controls would ask which one first. A capability is labelled
-     with the FUNCTION that improves it, or "projects for any function" cannot
-     be answered from a list of capability names. */
-  var filledOpts = impSubjects("pillars").filter(function(o){
-    var u = unitLike(o.v);
-    return u && u.items && u.items.length;
-  });
-  var filledCaps = impSubjects("projects").filter(function(o){
-    var c = capById(o.v.slice(4));
-    return c && c.projects && c.projects.length;
-  }).map(function(o){
-    var c = capById(o.v.slice(4)), f = c && c.fn ? FUNCTIONS[c.fn] : null;
-    return { v:o.v, label:o.label + (f ? " \u2014 " + f.name : "") };
-  });
-  var filledAll = filledOpts.concat(filledCaps);
-  /* NOTHING FILLED IN, NOTHING TO OFFER. On a clean tenant (§67) there is no
-     plan anywhere, so the control would be a dropdown of nothing beside a
-     button that downloads an empty file — which is the blank template, badly.
-     It is absent, and the sentence says why rather than leaving a gap. */
-  var filled = !isPlan ? "" :
-    '<div class="imp-sub">' +
-      (filledAll.length
-        ? '<p class="sub" style="margin:0 0 8px"><b>Or take one already filled in.</b> ' +
-            'The same file, carrying a real plan &mdash; for showing somebody what a ' +
-            'finished one looks like before they start their own. The format follows ' +
-            'the subject, so there is nothing else to choose.</p>' +
-          '<div class="imp-row">' +
-            '<select class="fld" id="imp-filled" aria-label="Which plan to fill it with">' +
-              (filledOpts.length ? '<optgroup label="Pillars">' + filledOpts.map(function(o){
-                return '<option value="' + esc(o.v) + '"' +
-                  (o.v === IMP.filled ? " selected" : "") + '>' + esc(o.label) + '</option>';
-              }).join("") + '</optgroup>' : '') +
-              (filledCaps.length ? '<optgroup label="Projects">' + filledCaps.map(function(o){
-                return '<option value="' + esc(o.v) + '"' +
-                  (o.v === IMP.filled ? " selected" : "") + '>' + esc(o.label) + '</option>';
-              }).join("") + '</optgroup>' : '') +
-            '</select>' +
-            '<button class="editbtn" data-dlfilled="1">Download it filled in</button>' +
-          '</div>'
-        : '<p class="sub" style="margin:0">Nothing is planned yet, so there is no ' +
-          'filled example to take. Once a plan has been uploaded, the same file comes ' +
-          'back down carrying it.</p>') +
-    '</div>';
-
-  var counts;
-  if (isCap) {
-    var nd = 0, no = 0, nm = 0;
-    u.projects.forEach(function(p){
-      nd += p.deliverables.length; no += p.outcomes.length; nm += p.milestones.length;
-    });
-    counts = isPlan
-      ? u.keyObjectives.length + " objectives &middot; " + u.projects.length + " projects &middot; " +
-        nd + " deliverables &middot; " + no + " outcomes &middot; " + nm + " milestones"
-      : capReported(u).total + " reportable rows";
-  } else {
-    counts = isPlan
-      ? u.clauses.length + " clauses &middot; " + u.keyObjectives.length + " objectives &middot; " +
-        u.items.length + " pillars &middot; " +
-        u.items.reduce(function(a,p){ return a + p.measures.length; }, 0) + " measures &middot; " +
-        u.items.reduce(function(a,p){ return a + p.tactics.length; }, 0) + " tactics"
-      : u.items.reduce(function(a,p){ return a + p.measures.length + p.tactics.length; }, 0) + " reportable rows";
-  }
-
-  /* The plan template is GENERIC (§22): one file, whichever unit is being
-     planned, with the unit chosen on its own Read me sheet. So the picker is
-     not part of downloading a plan — it belongs to reporting, which is per
-     unit and amends rows that already exist. */
-  var step1 =
-    '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
-      '<h4>Download the template</h4>' +
-      '<p class="sub">' + (isPlan
-        ? "Two formats: <b>pillars</b> for a business unit or a function that plans like one, <b>projects</b> for a capability. Each is the same file whoever it is for &mdash; choose the subject on its Read me sheet, fill it in Excel, and the platform assigns every code itself."
-        : "One row per reportable item, with its target and what is currently recorded. Only the New value column is typed.") +
-      '</p>' +
-      '<div class="imp-row">' + kindPick +
-        (isPlan
-          ? dlMenu("Download plan template", "dlplan")
-          : dlMenu("Download progress template", "dlprog") + unitPick +
-            '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
-            '<button class="linkbu" data-showcsv="1">View the CSV</button>') +
-      '</div>' +
-      '<p class="sub" style="margin-top:8px">' + (isPlan
-        ? planSubjectNames().length + " business units and functions, " +
-          GROUP.capabilities.length + " capabilities and " +
-          GROUP.themes.length + " themes are in its dropdowns"
-        : counts) + '</p>' +
-      filled +
-    '</div></div>';
-
-  var step2 =
-    '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
-      '<h4>Upload the filled file</h4>' +
-      '<p class="sub">' + (isPlan
-        ? "The file says which unit, function or capability it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and nothing else is touched."
-        : "Fill the new_value column only where a figure changed. Blank rows are ignored.") + '</p>' +
-      '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv" ' +
-        'aria-label="Choose a template file to upload">' +
-        (isPlan ? "" : '<button class="linkbu" data-paste="1">or paste the file</button>') +
-        (IMP.read ? '<span class="pill quiet">Read &middot; ' + esc(IMP.read) + '</span>' : '') +
-      '</div>' +
+  /* TWO BUTTONS, THE SHAPE THE TEMPLATE CARD ALREADY USES (Islam: *"make the
+     upload of plan or progress 2 buttons like what we did in the download of
+     templates"*). Pressing one records the kind and opens the file chooser, so
+     one press replaces set-a-mode-then-choose-a-file. The input is real and
+     hidden BEHIND the label rather than drawn: a picker cannot be opened from
+     script without a gesture (§90). */
+  var ask =
+    '<div class="fkey">Upload a filled file</div>' +
+    '<div class="fcard"><div class="fbody"><p>The file names its own subject on its Read me ' +
+      'sheet, so there is nothing else to pick &mdash; and it says which kind it is, so ' +
+      'pressing the wrong one is refused rather than read wrong. An upload <b>authors</b> a ' +
+      'plan: the outgoing one is archived, never destroyed.</p>' +
+      '<p class="sub" style="margin-top:8px">Reporting into <b>' +
+        esc(REVIEW.name || "this cycle") + '</b>' +
+        (REVIEW.state === "open" ? "" :
+          ' &mdash; which is closed. Reopen it on <b>Setup &rsaquo; Reporting cycle</b> before ' +
+          'a progress file can land.') + '</p></div>' +
+    '<div class="ffoot"><span class="why">A <code>.csv</code> is still read, though nothing ' +
+      'hands one out.</span>' +
+      '<label class="editbtn upbtn" data-upkind="plan">A plan' +
+        '<input type="file" id="imp-file-plan" accept=".xlsx,.csv" hidden></label>' +
+      '<label class="editbtn upbtn" data-upkind="progress">Progress' +
+        '<input type="file" id="imp-file-progress" accept=".xlsx,.csv" hidden></label>' +
+      (IMP.read ? '<span class="pill quiet">Read &middot; ' + esc(IMP.read) + '</span>' : '') +
     '</div></div>';
 
   var chk = IMP.check;
@@ -5396,8 +5532,7 @@ function renderImport(){
     : '';
 
   /* The receipt. An apply that just makes the review vanish leaves the SMO
-     with no proof anything happened except going to look \u2014 so the result is
-     stated, with the way there. */
+     with no proof anything happened except going to look. */
   var receipt = IMP.done
     ? '<div class="applied"><b>Applied to ' + esc(IMP.done.unit) + '.</b> ' + IMP.done.what +
       (IMP.done.fn
@@ -5407,27 +5542,14 @@ function renderImport(){
       '</div>'
     : '';
 
-  /* A FILE THAT FAILS TO READ HAS TO SAY SO (§48.8). `impFail()` writes the
-     reason into IMP.check and clears IMP.summary and IMP.diff — but checkBlock
-     was only ever concatenated INSIDE step3, and step3 is only built when
-     there is a summary or a diff to review. So the one case where the message
-     matters most, the file that could not be read at all, was the one case
-     where it had nowhere to render: upload the wrong template and the page did
-     not move. The sentence existed the whole time.
-
-     §32's rule, which this codebase states outright: a blocked save must say
-     why, where the save is. An unreadable upload is the same thing one step
-     earlier. */
-  var step3 = receipt;
-  if (!step3 && chk && chk.problems.length) {
-    step3 = '<div class="imp-step"><div class="imp-n">!</div><div class="imp-b">' +
-      '<h4>This file could not be read</h4>' + checkBlock + '</div></div>';
+  /* A FILE THAT FAILS TO READ HAS TO SAY SO (§48.8), and on this tab it has
+     somewhere to say it whether or not there is anything to review. */
+  var body = receipt;
+  if (!body && chk && chk.problems.length) {
+    body = '<div class="readbar bad"><b>This file could not be read</b></div>' + checkBlock;
   }
 
-  /* A plan upload is not a diff any more (§22). What is shown is the exchange:
-     what the file holds, what it displaces, and what of that was reported —
-     and then the one button that makes it happen. */
-  if (isPlan && IMP.summary) {
+  if (isPlan && IMP.summary && u) {
     var sm = IMP.summary, inc = sm.incoming, cur = sm.current;
     var line = isCap
       ? inc.objectives + " objectives &middot; " + inc.projects + " projects &middot; " +
@@ -5444,44 +5566,39 @@ function renderImport(){
         cur.measures + " measures &middot; " + cur.tactics + " tactics";
     var hasPlan = !planIsEmpty(cur);
 
-    step3 =
-      '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
-        '<h4>Review, then apply</h4>' + checkBlock +
-        '<div class="imp-tally">' +
-          '<span class="pill kind">' + esc(u.name) + '</span>' +
-          (hasPlan
-            ? '<span class="pill attn">Replacing &mdash; the old plan is archived</span>'
-            : '<span class="pill good">First plan &mdash; nothing to lose</span>') +
-        '</div>' +
-        '<div class="scroll"><table><thead><tr><th>What</th><th>Holds</th></tr></thead><tbody>' +
-          '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
-          '<tr><td>' + (hasPlan ? "Recorded now" : "Recorded now") + '</td><td>' +
-            (hasPlan ? had : "nothing yet") + '</td></tr>' +
-        '</tbody></table></div>' +
+    body =
+      '<div class="readbar"><b>Plan workbook &middot; ' + esc(u.name) + '</b>' +
+        '<span class="why">' + line + '</span>' +
+        '<button class="linkbu" data-cancel="1">Choose a different file</button></div>' +
+      checkBlock +
+      '<div class="imp-tally">' +
         (hasPlan
-          ? '<div class="note"><b>' + esc(u.name) + '\u2019s current plan' +
-            (cur.reported
-              ? ' and its ' + cur.reported + ' reported figure' + (cur.reported === 1 ? '' : 's')
-              : '') +
-            ' come off the screen.</b> ' +
-            (cur.reported
-              ? 'They are kept as an archive dated today and can be restored from Archived plans at any time. '
-              : 'It is kept as an archive dated today and can be restored from Archived plans at any time. ') +
-            'Nothing is destroyed.</div>'
-          : '') +
-        '<div class="imp-row" style="margin-top:14px">' +
-          (blocked
-            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
-            : '<button class="editbtn apply" data-apply="1">' +
-              (hasPlan ? "Replace " : "Write ") + esc(u.name) + '\u2019s plan</button>') +
-          '<button class="linkbu" data-cancel="1">Discard</button></div>' +
-      '</div></div>';
-  } else if (d) {
-    /* Reporting is unchanged: it amends figures that already exist, so it is
-       still a difference against what is recorded. */
+          ? '<span class="pill attn">Replacing &mdash; the old plan is archived</span>'
+          : '<span class="pill good">First plan &mdash; nothing to lose</span>') +
+      '</div>' +
+      '<div class="scroll"><table><thead><tr><th>What</th><th>Holds</th></tr></thead><tbody>' +
+        '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
+        '<tr><td>Recorded now</td><td>' + (hasPlan ? had : "nothing yet") + '</td></tr>' +
+      '</tbody></table></div>' +
+      (hasPlan
+        ? '<div class="note"><b>' + esc(u.name) + '’s current plan' +
+          (cur.reported
+            ? ' and its ' + cur.reported + ' reported figure' + (cur.reported === 1 ? '' : 's')
+            : '') +
+          ' come off the screen.</b> ' +
+          'Kept as an archive dated today and restorable from <b>Archived plans</b> at any ' +
+          'time. Nothing is destroyed.</div>'
+        : '') +
+      '<div class="imp-row" style="margin-top:14px">' +
+        (blocked
+          ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
+          : '<button class="editbtn apply" data-apply="1">' +
+            (hasPlan ? "Replace " : "Write ") + esc(u.name) + '’s plan</button>') +
+        '<button class="linkbu" data-cancel="1">Discard</button></div>';
+  } else if (d && u) {
     var changed = d.rows.filter(function(r){ return r.status === "changed"; });
     var unknown = d.rows.filter(function(r){ return r.status === "unknown"; });
-    var body = changed.length
+    var rowsHtml = changed.length
         ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? "Project" : L("pillar","bu")) + '</th><th>Item</th>' +
             '<th class="cc">Type</th><th class="cc">Recorded</th><th class="cc">In the file</th></tr></thead><tbody>' +
           changed.map(function(r){
@@ -5491,37 +5608,23 @@ function renderImport(){
           }).join("") + '</tbody></table></div>'
         : '<div class="note">No reported figure differs from what is recorded.</div>';
 
-    step3 =
-      '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
-        '<h4>Review, then apply</h4>' + checkBlock +
-        '<div class="imp-tally">' +
-          '<span class="pill attn">' + changed.length + ' changed</span>' +
-          (unknown.length ? '<span class="pill bad">' + unknown.length + ' unrecognised id</span>' : '') +
-        '</div>' + body +
-        (changed.length
-          ? '<div class="imp-row" style="margin-top:14px">' +
-            (blocked
-              ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
-              : '<button class="editbtn apply" data-apply="1">Apply to ' + esc(u.name) + '</button>') +
-            '<button class="linkbu" data-cancel="1">Discard</button></div>'
-          : '') +
-      '</div></div>';
+    body =
+      '<div class="readbar"><b>Progress workbook &middot; ' + esc(u.name) + '</b>' +
+        '<span class="why">' + changed.length + ' figure' + (changed.length === 1 ? '' : 's') +
+        ' differ from what is recorded' +
+        (unknown.length ? ' &middot; ' + unknown.length + ' unrecognised id' : '') + '</span>' +
+        '<button class="linkbu" data-cancel="1">Choose a different file</button></div>' +
+      checkBlock + rowsHtml +
+      (changed.length
+        ? '<div class="imp-row" style="margin-top:14px">' +
+          (blocked
+            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
+            : '<button class="editbtn apply" data-apply="1">Apply to ' + esc(u.name) + '</button>') +
+          '<button class="linkbu" data-cancel="1">Discard</button></div>'
+        : '');
   }
 
-  return cfgHead("Import & storage",
-      ['<span class="pill kind">' + (isPlan
-        ? "One generic template &middot; one unit per file"
-        : "One file per unit or capability") + '</span>'],
-      null, false) +
-    /* THE SECOND DOOR (§129, spec 020): a plan can be BUILT here as well as
-       uploaded — the two are siblings on the page where plans arrive, and
-       building over a standing plan archives it exactly as an upload does. */
-    '<div class="bdoor"><b>Build it here</b>' +
-      '<span class="bwhy">A guided flow through the plan’s own pages &mdash; pick a unit or a ' +
-      'function, or create one, and author the plan directly. No file needed.</span>' +
-      '<button class="bprim" data-buildplan="1">Build a plan</button></div>' +
-    section("", (isPlan ? "Plan" : "Progress") + " import", null,
-      '<div class="imp">' + step1 + step2 + step3 + '</div>');
+  return cfgHead("Import & storage", null, null, false) + ask + body;
 }
 
 /* ── Manage · Archived plans (§22) ───────────────────────────────────
@@ -5755,7 +5858,140 @@ function renderOverview(){
    `data-fld` handler writes it on `change` — which is on blur (§35), and is
    what makes Save and Cancel unnecessary. Written once because five callers is
    four more than the project's extract-at-three rule allows (§3b). */
-function cycleField(label, value, placeholder, setter){
+/* ── THE REVIEW DAY, AND WHEN TO REMIND THE OFFICE (spec 030) ────────────
+   Islam, of the first drawing, which put this among the cycle's other dates:
+   *"the cycle is about the time we cover and what we report already and how
+   we preorate more dates will create confusion. push back if you want."*
+
+   HE IS RIGHT, AND IT MOVED RATHER THAN WENT. The three fields under *This
+   cycle* answer ONE question in three parts — what stretch of the year, when
+   the units hand figures in, and which month the figures are MEASURED against
+   (§239) — so a fourth box among them reads as a fourth thing the arithmetic
+   consults. It consults nothing: the review day changes no score, no
+   benchmark and no proration. It says when the meeting is, so a countdown has
+   something to count from. Its own block, under the two columns, with the
+   thing it drives beside it.
+
+   AND IT COULD NOT RIDE ON `Reports due`, measured before a field was
+   proposed: that is thirteen days earlier in the worked example, and it is
+   free text carrying no time of day at all.
+
+   BOTH ARE PICKED, NOT TYPED — §177's rule, for §177's reason: a countdown
+   cannot read "15 Jul 2027", and the platform's own answer to that is a
+   control that can only produce a date. Cleared, the keys are DELETED
+   (§50.6), so a cycle that never named a day and one whose day was taken
+   away are byte-identical and neither reminds anybody. */
+/* The review day the way the strip says it: the day, and the time when one
+   was given. Empty when no day is set, which is what keeps the strip from
+   carrying a line about something nobody has answered. */
+/* ── WHO ON THE TEAM HAS TAKEN THE FILES (spec 030) ──────────────────────
+   Islam: *"all the smo team will download the conteignecy files."* Without a
+   list that cannot be established — the banner tells each person about their
+   own files and says nothing about anybody else's, so "the team is covered"
+   would be a hope. Here, under the cycle it is about.
+
+   IT IS THE REGISTER'S OWN LIST, NOT A SECOND ONE (§53.5): everybody the
+   shared rule says may take them, in the register's order, so a new SMO team
+   member appears the day they are given the seat rather than the day somebody
+   remembers this page.
+
+   DRAWN ONLY WHILE THERE IS A REVIEW DAY. With no day nothing is being
+   counted down to, so a table of "not yet" against a deadline that does not
+   exist is an alarm about nothing (§45.2, §177 with the sign reversed).
+
+   TWO MARKS AND A TIME, never a tick and a cross: those say right and wrong,
+   and this is only done or not yet (§15.1's vocabulary). */
+function contTakenSection(){
+  if (typeof SMPRules === "undefined" || !SMPRules.reviewMoment(REVIEW)) return "";
+  var w = world();
+  var team = (PEOPLE || []).filter(function(p){
+    return personActive(p) && SMPRules.mayTakeContingency(w, p);
+  });
+  if (!team.length) return "";
+  /* The register's own short name (§93.8), never `p.name`: this list sits
+     beside every other table on the page and one of them reading a full legal
+     name where the others read two would look like a different person. */
+  var names = displayNames();
+  var both = 0;
+  var rows = team.map(function(p){
+    var t = SMPRules.contingencyTaken(REVIEW, p.key) || {};
+    if (t.copy && t.slides) both++;
+    var last = (t.copy && t.slides) ? (t.slides > t.copy ? t.slides : t.copy) : (t.copy || t.slides);
+    function pill(v){
+      return '<span class="pill ' + (v ? "p-yes" : "p-no") + '">' +
+        (v ? "Taken" : "Not yet") + '</span>';
+    }
+    return '<tr><td>' + esc((names[p.key] || {}).label || p.name) + '</td>' +
+      '<td class="cc">' + pill(t.copy) + '</td>' +
+      '<td class="cc">' + pill(t.slides) + '</td>' +
+      '<td class="contat">' + (last ? esc(contWhen(last)) : "\u2014") + '</td></tr>';
+  }).join("");
+  return section("", "Contingency files", null,
+    '<div class="cfg contlist"><table><thead><tr><th>SMO team</th>' +
+      '<th class="cc" style="width:16%">Working copy</th>' +
+      '<th class="cc" style="width:16%">Slides</th>' +
+      '<th style="width:22%">Taken</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="note"><b>' + both + ' of ' + team.length + '</b> ' +
+      (both === team.length
+        ? 'have both files for ' + esc(REVIEW.name || "this cycle") + '.'
+        : 'have both. The platform records that a file was taken and when \u2014 never the ' +
+          'file itself.') +
+      ' Take yours on <b>Import &amp; archives</b>.</div>');
+}
+
+function reviewDayWord(){
+  var w = SMPRules.reviewMoment(REVIEW);
+  if (!w) return "";
+  var day = w.toLocaleDateString(undefined, { day:"numeric", month:"short" });
+  return REVIEW.reviewAt
+    ? day + ", " + w.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" })
+    : day;
+}
+
+function reviewDayBlock(){
+  var hrs = SMPRules.remindHours(REVIEW);
+  var dayI = FIELDS.length;
+  FIELDS.push(function(v){
+    var t = String(v || "").trim();
+    if (t) REVIEW.reviewDay = t; else { delete REVIEW.reviewDay; delete REVIEW.reviewAt; }
+  });
+  var atI = FIELDS.length;
+  FIELDS.push(function(v){
+    var t = String(v || "").trim();
+    if (t) REVIEW.reviewAt = t; else delete REVIEW.reviewAt;
+  });
+  /* THE MOMENTS ARE ONE FIELD, NOT FOUR BOXES. Islam: *"we need to set the
+     moments somehwer"* — and four boxes for four numbers is a form for
+     something nobody changes twice a year. Typed as a list, read through the
+     shared rule, and put back into the box in the rule's own spelling so
+     what is stored and what is shown cannot differ (§124). */
+  var remI = FIELDS.length;
+  FIELDS.push(function(v){
+    var raw = String(v || "").split(/[^0-9]+/).filter(Boolean).map(Number);
+    if (!String(v || "").trim()) REVIEW.remindAt = [];
+    else REVIEW.remindAt = raw;
+    var el = document.querySelector('.newcycle [data-fld="' + remI + '"]');
+    if (el) el.value = SMPRules.remindHours(REVIEW).join(" · ");
+  });
+  return '<div class="cyc2-r">' +
+    '<div class="nc-h">The review</div>' +
+    '<div class="nc-grid">' +
+      '<label><span>Review day</span><input type="date" class="fld" data-fld="' + dayI +
+        '" value="' + esc(REVIEW.reviewDay || "") + '" aria-label="Review day"></label>' +
+      '<label><span>at</span><input type="time" class="fld nc-time" data-fld="' + atI +
+        '" value="' + esc(REVIEW.reviewAt || "") + '" aria-label="Time of the review"></label>' +
+      '<label><span>Remind the SMO team</span><input class="fld nc-rem" data-fld="' + remI +
+        '" value="' + esc(hrs.join(" \u00b7 ")) + '" placeholder="24 \u00b7 12 \u00b7 6 \u00b7 3" ' +
+        'aria-label="Hours before the review to remind the SMO team"></label>' +
+      '<span class="nc-unit">hours before</span>' +
+    '</div>' +
+    '<div class="nc-why">The day the units present, and when to remind the office to take ' +
+      'the contingency files. <b>Not a measuring date</b> \u2014 it changes no score and no ' +
+      'figure. Leave the day empty and nothing is ever sent.</div>' +
+  '</div>';
+}
+
+function cycleField(label, value, placeholder, setter, cls){
   /* A REFUSAL PUTS THE VALUE BACK IN THE BOX (§124). With no Save there is no
      press to refuse at, so a setter that declines — by returning false — would
      otherwise leave the field showing what was NOT stored, which is §96 with
@@ -5768,9 +6004,78 @@ function cycleField(label, value, placeholder, setter){
       if (el) el.value = value;
     }
   });
-  return '<label><span>' + esc(label) + '</span>' +
+  return '<label class="' + esc(cls || "") + '"><span>' + esc(label) + '</span>' +
     '<input class="fld" data-fld="' + i + '" value="' + esc(value || "") +
     '" placeholder="' + esc(placeholder) + '" aria-label="' + esc(label) + '"></label>';
+}
+/* ── A DATE IN THE CYCLE'S OWN ROW (§307) ─────────────────────────────
+   `cycleField`'s sibling, and deliberately not a flag on it: one draws a box
+   somebody types into and this draws a control somebody presses, and the
+   difference is the whole of what Islam asked for. Both the pen and the
+   new-cycle panel call it, so the two can never disagree about what a cycle's
+   date looks like (§53.5) — which they did, the panel typing three dates while
+   the pen typed three and picked a fourth.
+
+   THE LABEL WRAPS THE BUTTON, exactly as "Reporting as of" did: a `<button>`
+   is a labelable element, so the uppercase key above it is its accessible name
+   and no second one is written (§87's twins, in a form). */
+function cyclePick(label, value, setter, opts){
+  var o = opts || {};
+  return '<label class="dt"><span>' + esc(label) + '</span>' +
+    monthBtnHtml(value || "", "cycbtn " + (o.cls || ""), setter, o) + '</label>';
+}
+
+/* ── THE PLANNING PERIOD (§308) ──────────────────────────
+   FIRST IN THE PEN, because it is the frame the cycle sits inside: a strip
+   reading "2 of 6 months of the plan" is answered by the block above the one
+   that sets the cycle, not below it.
+
+   IT IS THE PEN'S, NOT THE NEW-CYCLE PANEL'S, and that is the decision rather
+   than an omission: the period is not a property of a cycle and must not be
+   re-asked every time one opens (§50). The cost is stated — with no cycle
+   open there is no pen, so a tenant between cycles sets it when the next one
+   opens.
+
+   THE SAME `cyclePick` THE DATES USE. A second kind of month control on one
+   screen is two answers to "what does a date look like here" (§53.5), and
+   this one is picked for §177's reason as well: with no box there is nothing
+   to mistype, and a period the arithmetic cannot read would silently go back
+   to being a calendar year. */
+function planPeriodBlock(){
+  return '<div class="cyc2-r planper">' +
+    '<div class="nc-h">The planning period</div>' +
+    '<div class="nc-grid nc-1line">' +
+      cyclePick("Plan starts", GROUP[SMPRules.PLAN_FROM], function(v){
+        /* CLEARED IS DELETED, never an empty string left behind: a tenant
+           that set a period and took it back must be byte-identical to one
+           that never set one, or every save carries a phantom key (§50.6). */
+        var t = String(v).trim();
+        if (t) GROUP[SMPRules.PLAN_FROM] = t; else delete GROUP[SMPRules.PLAN_FROM];
+      }, { wide:true, none:"Not set" }) +
+      cyclePick("and ends", GROUP[SMPRules.PLAN_TO], function(v){
+        var t = String(v).trim();
+        if (t) GROUP[SMPRules.PLAN_TO] = t; else delete GROUP[SMPRules.PLAN_TO];
+      /* NEVER `tobtn` (§65.9): that class carries no style at all — it is the
+         NAME the checks address the CYCLE's end month by, and a second control
+         wearing it makes `.newcycle .tobtn` point at whichever is drawn first.
+         Found by `checks/ytd-proration.py` going red on five assertions about
+         a picker this block had quietly taken the handle from. `.planper`
+         scopes everything here already. */
+      }, { wide:true, none:"Not set" }) +
+      /* A STATUS, NOT A DESCRIPTION (§127's own line, 1b-ii): the length is
+         the thing the office is actually setting, and "not set" is a fact
+         about right now that nothing else on the page states \u2014 without it
+         somebody picks one month, nothing happens, and there is no way to
+         tell whether the platform took it. */
+      '<span class="nc-unit">' + (planSet()
+        ? planLength() + ' months'
+        : 'not set \u2014 the calendar year is used') + '</span>' +
+    '</div>' +
+    '<div class="nc-why">The period the targets belong to \u2014 usually a year, and shorter ' +
+      'where a plan started mid-year. <b>Set once for the whole business</b>, and it does ' +
+      'not change when a cycle closes. Every figure is measured against the share of it ' +
+      'that has passed by the month the cycle covers to.</div>' +
+  '</div>';
 }
 
 /* ── Setup · Reporting cycle ────────────────────────────────────────
@@ -5955,7 +6260,11 @@ function renderCycle(){
            can be pressed by accident. One control for one fact (§53.5): a
            picker here AND a picker in the panel is two, and they would have to
            be kept in step. */
-        '<b>' + esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b>' +
+        /* §307: ONE SOURCE. This read the stored month and fell back to the
+           derived one, which is exactly the pair that could disagree with the
+           `Jan 2027 to Jun 2027` printed six pixels to its left. It reads the
+           cycle's end now, through the one function every score reads. */
+        '<b>' + esc(reviewAsOfLabel()) + '</b>' +
         /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
            whether the month he picked had taken -- "can you check if the cycle
            adjustment is saved" -- because the strip showed the value and
@@ -5970,12 +6279,31 @@ function renderCycle(){
            true of the review point, which is what this strip is about; the
            clause is here so the next reader is not told something the code
            stopped doing (§104.8). */
-        (elapsedMonths() != null
-          ? ' <span class="why" style="margin:0">&middot; ' + elapsedMonths() +
-            ' of 12 months' + (REVIEW.asOfMonth ? '' : ', taken from the cycle\u2019s end') +
-            '</span>'
-          : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
-            'figure is measured against a whole one</span>') + '</span>' +
+        /* §308: OF THE PLAN, AND IT SAYS WHICH PLAN. The denominator was a
+           hard-coded twelve and the count was months of the calendar year, so
+           a cycle covering July to August read "8 of 12" — a number taken
+           from neither of its own dates. It is the planning period now, and
+           where nobody has set one the line NAMES the assumption instead of
+           printing it as a fact (§35, §124). */
+        (function(){
+          var em = elapsedMonths();
+          if (em == null)
+            return ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
+              'figure is measured against a whole one</span>';
+          var why = [];
+          if (!planSet()) why.push('taken from the calendar year');
+          if (reviewAsOfDerived()) why.push('the month is from the cycle\u2019s name');
+          return ' <span class="why" style="margin:0">&middot; ' + em + ' of ' +
+            planLength() + ' months' + (planSet() ? ' of the plan' : '') +
+            (why.length ? ', ' + why.join(', ') : '') + '</span>';
+        })() + '</span>' +
+      /* THE REVIEW DAY IS ON THE STRIP, so the day is readable without
+         opening the pen — and only when there is one, because a line reading
+         "not set" over a thing nobody has to set is furniture (§45.2, §94.15).
+         Drawn for everybody: the day of the review is not a secret, and only
+         TAKING the files is the office's. */
+      (reviewDayWord() ? '<span class="fstrip-meta">presents <b>' +
+        esc(reviewDayWord()) + '</b></span>' : '') +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
          Islam: "keep the close cycle inside the edit. as it's a critical
@@ -6029,23 +6357,29 @@ function renderCycle(){
        yet, and nothing reaches REVIEW until Open is pressed. */
     (NEWCYCLE
       ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        '<div class="nc-grid">' +
-          '<label><span>Name</span><input class="fld" id="nc-name" value="' +
+        /* §307: THE SAME FOUR CONTROLS THE PEN DRAWS. This panel typed its
+           three dates and picked a fourth month that no longer exists, so it
+           was the one place in the product where a cycle could be opened with
+           an end its own arithmetic could not read. The dates go through
+           `cyclePick` and write into the draft through FIELDS; only the NAME
+           is still typed, so only the name is still read by id. */
+        '<div class="nc-grid nc-1line">' +
+          '<label class="nm-lab"><span>Name</span><input class="fld" id="nc-name" value="' +
             esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          '<label><span>Covers from</span><input class="fld" id="nc-from" value="' +
-            esc(NEWCYCLE.from) + '" placeholder="Jan 2027"></label>' +
-          '<label><span>to</span><input class="fld" id="nc-to" value="' +
-            esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
-          '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
-            esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
-          '<label><span>Reporting as of</span>' +
-            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
-              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
-            }) + '</label>' +
+          cyclePick("Covers from", NEWCYCLE.from, function(v){
+            NEWCYCLE.from = String(v).trim();
+          }, { wide:true }) +
+          cyclePick("to", NEWCYCLE.to, function(v){
+            NEWCYCLE.to = String(v).trim();
+          }, { wide:true, cls:"tobtn" }) +
+          cyclePick("Reports due", NEWCYCLE.due, function(v){
+            NEWCYCLE.due = String(v).trim();
+          }, { day:true }) +
         '</div>' +
-        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
-          'A target that adds up across the year is compared with the share of it due by then, ' +
-          'and a tactic whose span has not started yet is not asked for.</div>' +
+        '<div class="nc-why"><b>The month it covers to decides what every figure is ' +
+          'measured against.</b> A target that adds up across the year is compared with ' +
+          'the share of it due by then, and a tactic whose span has not started yet is ' +
+          'not asked for.</div>' +
         '<div class="nc-act">' +
           '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
           '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
@@ -6070,10 +6404,10 @@ function renderCycle(){
        in. The cost was measured before he chose — pressing Edit moves the page
        below by 156px here against 12px for the in-place shape. */
     (CYCLEEDIT && open
-      ? '<div class="cfg newcycle"><div class="cyc2">' +
+      ? '<div class="cfg newcycle">' + planPeriodBlock() + '<div class="cyc2">' +
           '<div class="cyc2-f">' +
             '<div class="nc-h">This cycle</div>' +
-            '<div class="nc-grid">' +
+            '<div class="nc-grid nc-1line">' +
               cycleField("Name", REVIEW.name, "H1 2027", function(v){
                 /* TRIMMED, and an empty name is REFUSED rather than stored:
                    it is what every snapshot and archived plan is filed under
@@ -6083,27 +6417,42 @@ function renderCycle(){
                 var t = String(v).trim();
                 if (!t) return false;
                 REVIEW.name = t;
-              }) +
-              cycleField("Covers from", REVIEW.from, "Jan 2027", function(v){
+              }, "nm-lab") +
+              /* ── EVERY DATE IS PICKED, AND THERE ARE THREE (§307) ────
+                 Islam: "all the dates should be date selector like the
+                 reporting as of. and why do we still have the reporting as
+                 of? ... the reports due is the only 1 with a day date as it's
+                 a cutt off dates. and if we set that they will be only 4 boxes
+                 can be in 1 line" — and then, deciding the question underneath
+                 it himself: "the cycle ending is the reporting as of so that's
+                 what the proration depend on ... if you are using reporting as
+                 of then this should replace the cover to."
+
+                 THE REPORTING AS OF BOX IS GONE, and its meaning is in `to`.
+                 Nothing keeps a second copy, so the two can never disagree
+                 again — which they could, and on his own tenant did: a cycle
+                 covering to Jun 2027 reporting as of Aug 2026, asking for work
+                 due to June and judging it against August.
+
+                 PICKED, NEVER TYPED, for §177's reason one field along: with
+                 no box there is nothing to mistype, and a cycle whose end
+                 cannot be read falls back — silently, until now — to a quarter
+                 nobody chose. `wide` because `cycleYear()` scrapes these
+                 strings for a four-digit year. */
+              cyclePick("Covers from", REVIEW.from, function(v){
                 REVIEW.from = String(v).trim();
-              }) +
-              cycleField("to", REVIEW.to, "Jun 2027", function(v){
+              }, { wide:true }) +
+              cyclePick("to", REVIEW.to, function(v){
                 REVIEW.to = String(v).trim();
-              }) +
-              cycleField("Reports due", REVIEW.due, "15 Jul 2027", function(v){
+              }, { wide:true, cls:"tobtn" }) +
+              cyclePick("Reports due", REVIEW.due, function(v){
                 REVIEW.due = String(v).trim();
-              }) +
-              '<label><span>Reporting as of</span>' +
-                monthBtnHtml(REVIEW.asOfMonth || "", "asofbtn", function(v){
-                  /* Stored as an ABSENCE when cleared (§50.6), so a cycle that
-                     never picked one and one whose month was taken away are
-                     byte-identical. */
-                  if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
-                }) + '</label>' +
+              }, { day:true }) +
             '</div>' +
-            '<div class="nc-why"><b>The month decides what every figure is measured ' +
-              'against.</b> A target that adds up across the year is compared with the ' +
-              'share of it due by then. Changes are kept as you type.</div>' +
+            '<div class="nc-why"><b>The month it covers to decides what every figure ' +
+              'is measured against.</b> A target that adds up across the year is compared ' +
+              'with the share of it due by then, and work dated after it is not asked for. ' +
+              'Changes are kept as you type.</div>' +
           '</div>' +
           '<div class="cyc2-d">' +
             '<div class="nc-h">Ending it</div>' +
@@ -6111,7 +6460,7 @@ function renderCycle(){
               'the units reporting.</p>' +
             '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>' +
           '</div>' +
-        '</div></div>'
+        '</div>' + reviewDayBlock() + '</div>'
       : '') +
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
@@ -6145,7 +6494,7 @@ function renderCycle(){
       ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
         claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
           (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + head +
+      null, false) + head + contTakenSection() +
     (claims.length
       ? section("", "Claim requests", null,
           '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +

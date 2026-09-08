@@ -180,7 +180,7 @@ with sync_playwright() as p:
     ck("...with the way out beside it",
        pg.evaluate("()=>!!document.getElementById('refused-undo')"))
 
-    # ── 6 · THE DEMO BANNER IS GONE, AND SO IS WHAT IT SAID (spec 030) ───
+    # ── 6 · THE DEMO BANNER IS GONE, AND SO IS WHAT IT SAID (spec 042) ───
     #    §136 gave the failure-neutral bar three outcomes and one of them was
     #    "this is demo data" — a real sentence for a real mode, and the mode
     #    went with the Demo data button when the worked example became a

@@ -6,7 +6,74 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§301 — a project owner reports, and the bar said
+**Latest version:** **§309 and §310 — a project saved as a draft, and theirs
+is the capability that leads — merged to `main` 2026-09-08 on Islam's word**,
+from `claude/project-owner-reporting-access-uzze9s`, carrying `main`'s
+§303–§308 in with it; built as §302 and §303 and renumbered at the merge,
+because `main` took both numbers while this was in flight (the precedent §287
+and §301 both set).
+
+**§310 — theirs is the capability that leads.** Islam:
+*"the porject owner should open the capability by defaut on his project."*
+Measured in his shape first: a project owner whose only project sits in the
+**second** of a function's two capabilities lands on somebody else's — 0
+controls for him there — with his own starting 705px down and his twelve boxes
+below the fold. §301.4 picked the right project inside each capability's rail
+and never picked which capability leads, which also left a unit (one pillar at
+a time) right and a function wrong. Three shapes were put to him with the cost
+of each (`design-mockups/project-owner-capability-first/`); he took **A**: his
+capability first, the rest below it, nothing hidden. **The mockup found the
+cost that decides it** — reordering the stored list renamed his project
+**MKT03 → MKT01** on his own screen while the deck and everybody else still
+said MKT03, because a code is a POSITION — so only the drawing order moves and
+the codes are asserted identical to the office's. Nothing stored, nothing
+migrated, the server unchanged (574/0, 136/0), the office and the custodian
+untouched, and the **Overview** deliberately keeps the tenant's order. Proved
+able to fail three ways: 3 / 1 / 6 red.
+
+**§309 — a project saved as a draft.** Islam: *"can we
+make the project owner save on the project level that is similar to the save
+for the submit of the whole cabaiblity."* Measured first, and the measurement
+narrowed it: the capability's *Save draft* is not a save (every figure is
+already written on blur and posted by the autosave) — it pushes, says so, and
+**closes the report until Reopen**. A project owner already had the state on
+his band and in the bar since §301, so the gap was a press that pushes and
+confirms, and a freeze. Three shapes were drawn in the platform's own pixels
+with each cost stated (`design-mockups/project-level-save/`); he took **B**,
+and the button's word was drawn both ways before he settled it: **Save draft**,
+the bar's own word for the bar's own act, leaving **Draft saved · Reopen** —
+word for word what that bar shows. The mark §301 already stores per project
+IS the lock, so nothing new is stored, nothing is migrated and the server is
+unchanged (asserted: 574/0, 136/0). The custodian and the office are untouched
+and keep every control on that project; they see the word and get no button.
+4 red on the build before, one per decision.
+
+**Before it:** **§303–§308 — the export round — merged to `main`
+2026-09-07 on Islam's word**, from `claude/data-export-import-archive-ot4vl8`,
+carrying `main`'s §294–§302 from five other sessions in with it. Built as
+§294–§299 and **renumbered at the merge**, because `main` took those numbers
+first while this was in flight — the precedent §287 and §301 both set.
+
+**What the six are.** §303 audited the plan and progress templates against what
+the platform actually holds and closed five gaps plus one found on the way — an
+upload AUTHORS, so a column the file does not carry is a column the plan loses.
+§304 rebuilt Import as tabs — Download · Upload · Archived plans — after Islam
+turned down three tidier drawings of the old three-step page (*"we need to
+rethink the page"*); the merge adds `main`'s Video storage as a fourth and takes
+its name for the page, **Import & storage**. §305 downloads the review deck as a
+PDF, printing the real deck rather than rebuilding it. §306 is the contingency
+files: a working copy of the platform with the tenant's data baked in, the decks
+beside it, and a reminder before the review day. §307 made the cycle's END the
+review point, retiring a second date that could disagree with it. §308 stores
+the **planning period** beside the cycle, so proration counts the plan's own
+months instead of assuming January.
+
+**One function was declared twice by the merge itself** — §305's
+`openDeckTarget()` and `main`'s §295 `openDeckFor()`, the same six lines under
+two names. `main`'s is kept and mine deleted by name (§24, §281).
+
+
+**Before it:** **§301 — a project owner reports, and the bar said
 View only — merged to `main` 2026-09-07 on Islam's word**, from
 `claude/project-owner-reporting-access-uzze9s`, carrying §285–§300 from
 several other sessions in with it; built as §287 and renumbered at the
@@ -40,12 +107,93 @@ asserted byte-identical** so nothing was silently undone. §294 went with it: th
 chat settings dropdown scrolls inside itself instead of pushing a scroll onto the
 page behind it.
 
+**Before that: §303–§308 — the export round** (see above).
+
+**What §304 is.** Islam, of the page §303's audit was done for: *"I need a
+mockup to refine this page and the buttons inside it as it's too clumsy"*, then,
+of three tidier drawings of it, *"I don't like any of the options. we need to
+rethink the page."* He was right, and the reason is nameable: **the page was a
+tutorial — 1, 2, 3 — for something nobody does in one sitting.** You take a
+file, it goes away for a week, somebody sends it back. Numbering those as
+consecutive steps makes the page furniture for anyone who has done it once, and
+it forced *which kind of file* to be answered twice.
+
+Measured before anything was proposed, and it was one CSS declaration:
+`.minisw { margin-left:auto }` put step 1's controls **894px along an empty
+row**, at a distance that changed with the window (1180 / 860 / 680 at 1600 /
+1280 / 1100). Three tabs now — **Download · Upload · Archived plans** — the mode
+switch deleted rather than restyled, and the page **435px at rest against 727**.
+
+Download is a blank template card and one **ticked, searchable list of subjects**
+with **three buttons over whoever is ticked: Plans · Progress · Archives**, each
+carrying its count; one subject is one workbook, several are a zip. Upload is
+**two buttons**, and the file confirms the one you pressed — every workbook
+opens its Read me with *"Plan workbook"* or *"Progress workbook"*, so the wrong
+button is refused by name rather than read wrong. **No CSV leaves; a CSV is
+still read.** Every file now names its cycle — measured, no workbook named one
+at all, so two progress files taken a cycle apart were identical in their
+headings.
+
+**The builder's door moved** to the subject's own empty Plan page, where the
+empty state already offered two routes: `data-buildplan` appeared exactly once
+in the whole product, so taking the band off Import would have stranded spec 020
+entirely. Told that, Islam said *"keep the builder"*.
+
+**One line the whole export rests on:** `zipStore()` encoded every member with
+`TextEncoder`, and a workbook through that is mangled silently — the archive
+builds, downloads and refuses to open. Falsified: **0 of 19 workbooks open**
+without it, with `testzip` still passing.
+
+**Verified.** `checks/import-page.py` (1 red / 2 red on two falsifications, from
+the sources) · full `qa.py` ERRORS none · `test-authorize` 527/0 ·
+`test-graph-diff` 131/0 · `node --check sw.js` · eleven neighbouring checks
+green. `plan-builder.py` rewritten, never loosened.
+
+**Earlier on this branch — what §303 is.** Islam asked for a button that exports every plan at once, and
+put the precondition first: *"mka esure that the plans templates for upload and
+download are matching all what we have on the platform now and then let's think
+how to have this download all build."* That ordering is right, and §22 is why —
+an upload AUTHORS a plan, so a column the file does not carry is a column the
+plan loses on a download-and-re-upload, and a bulk export built on such files is
+a complete-looking archive that cannot be restored.
+
+Measured rather than read: each subject's workbook built with the platform's own
+builder, zipped, read back with its own reader, applied through the real replace
+path, compared field by field. **Five gaps, and a sixth found on the way — and
+every one of them is invisible on the demo data**, so the state had to be made
+first. A unit's objectives lost the Weight §243 gave them, so a round trip read
+the headline back at equal weight. A capability's `Hidden` was written and never
+read, so a hidden objective came home counted. A project's repeat mark had no
+column, which changes what happens to its figures at the next cycle. A
+capability's progress upload **could not report a deliverable at all** — the
+reader asked two fields §104 removed, so "In progress" became `"no"` in a field
+nothing reads and the row went on saying Not started while the upload looked
+accepted — and a milestone dropped the per-cent §104.10 requires while its
+stored figure was written into the box the reporter fills. And a unit's progress
+file had no Note column at all, so a report filed entirely by file could never
+satisfy §105 and never submit; nor could it carry a tactic's outcome figure,
+which §248 made the question that row is actually asked.
+
+Nothing stored moves and nothing is migrated. `checks/template-round-trip.py`
+asserts a fixed point rather than a list of columns, so a field added to the pen
+turns it red until the file carries it: **19 red** on the shipped build, proved
+able to fail one fix at a time. Full `qa.py` ERRORS none, 527/0 on the
+authoriser, 131/0 on the differ, and round trip, clean parity, two tabs and eight
+concurrent saves green on a virgin Postgres 16. Three neighbouring checks were
+stale — one of them **13 red on `main`** since §268 moved the strategy pen — and
+were repaired or rewritten rather than loosened (§218).
+
+**Next, already settled with Islam:** the export-all itself — plans + progress +
+archives in one zip, from the download dropdown that already holds the
+templates. The one piece of new machinery is that `zipStore()` encodes its
+members as text, so it must accept bytes before a zip can hold `.xlsx` files.
+
 **Before that: §278.3 — the objectives table — merged to `main`
 2026-09-04 on Islam's word**, from
 `claude/seasonal-targets-monthly-proration-5clvu3`, on top of §279–§287 from
 other sessions.
 
-**What §278.3 is.** Four reports from the live product, two causes. The monthly
+**What §278.3 was.** Four reports from the live product, two causes. The monthly
 drawer spanned every column except the first, and a table shares a spanning
 cell's width across the columns it covers — so on the objectives tables, whose
 first column was the prose one, Objective went 242px → 97px the instant the
@@ -153,12 +301,12 @@ not only before it.*
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
 
-**On the multi-client branch, not merged to `main`:** §303 (one platform, many
-clients — spec 030), over v3.56, now merged with main at §278.3. Both numbers
-were renumbered on that merge: main had taken §303 and `specs/024-` first while
+**On the multi-client branch, not merged to `main`:** §313 (one platform, many
+clients — spec 042), over v3.56, now merged with main at §278.3. Both numbers
+were renumbered on that merge: main had taken §313 and `specs/024-` first while
 this branch waited 452 commits for a word.
 
-**Sign in with your EMAIL** (§303.2, spec 030): the person-key path is gone.
+**Sign in with your EMAIL** (§313.2, spec 042): the person-key path is gone.
 The first office accounts are `islam.saadany@`, `mohamed.essam@` and
 `omar.alaa@forefront.consulting`, with temporary passwords the migration says
 once — a change is forced at first use (§43.1, reversing §19.4).
@@ -174,6 +322,15 @@ it on the office's side. The existing away setting is repurposed as the
 collecting time and ships at 10 — no new control. The send rides the platform's
 own traffic, so no scheduler. **It supersedes §283's chase**, at Islam's
 decision: `chaseDue()` and `chase_html` are gone, the column stays unread.
+
+**Also in this round: §305 — the deck on paper.** The review deck — the one a unit
+presents from — downloads as a PDF from the Presentation menu, beside Present.
+It prints the real deck rather than rebuilding it, which is the whole argument:
+one builder, so the file cannot drift from what the projector shows. Fit-to-
+window is turned off first and put back, or the tables break in different places
+from the deck that was rehearsed. No gate — what can be projected can be taken
+away. Screen only: 527/0, 131/0, sweep clean. The editable `.pptx` of that deck
+is Islam's *"for now"* left open.
 
 ---
 
@@ -315,7 +472,6 @@ with 13 assertions in its plan-pen section, reproduced identically on the build
 before this change and left alone.
 
 ---
-
 ## Waiting on Islam
 
 Nothing proceeds past this line without an answer.
@@ -359,7 +515,7 @@ Nothing proceeds past this line without an answer.
 
 ## Agreed and specified, not built
 
-- **Multi-client — one door, many clients (`specs/030-multi-client/spec.md`,
+- **Multi-client — one door, many clients (`specs/042-multi-client/spec.md`,
   2026-08-28).** Every decision settled with Islam in session: one door, cards
   for Forefront only, **one Postgres schema per client** (§36.2), RHI and
   El Abd real and empty, an office-only page that creates a client, **email-only
@@ -1987,9 +2143,9 @@ took v3.52–v3.57 from four other sessions while they were being built.*
 - Proof: `checks/welcome.py` (three viewers, made state, doors pressed and
   read back, absences, proved to fail on the pre-§148 build) + full `qa.py`.
 
-### v3.57 — a custodian per project: two roles, not one (§303, spec 030)
+### v3.57 — a custodian per project: two roles, not one (§313, spec 042)
 
-- **Three bounded roles, all derived from being named** (§303.7, Islam's
+- **Three bounded roles, all derived from being named** (§313.7, Islam's
   correction of the first build): **Project owner** from a project's Owner
   row; **Pillar owner** from a pillar's, on a unit or a pillars function;
   **Contributor** for everyone else the plan names — collaborators,
@@ -4270,7 +4426,7 @@ walk → `DATABASE_URL=… node scripts/test-roundtrip.js` (clean slate, round t
 fixed point and the archived-plan round trip must all print PASS) →
 `node scripts/dev-server.js` and drive it in a browser.
 
-**Since §303 there are TWO more halves to that loop**, because neither of the
+**Since §313 there are TWO more halves to that loop**, because neither of the
 product's sweeps reaches them: the boundary and the seats on the server
 (`node scripts/test-platform.js`, `node scripts/test-platform-rules.js`) and
 Forefront's own two pages on screen (`checks/multi-client.py`,
@@ -4279,7 +4435,7 @@ demo switch — the worked example is a CLIENT now, at `/demo`.
 
 ---
 
-## Multi-client (§303, spec 030) — where it stands
+## Multi-client (§313, spec 042) — where it stands
 
 | Slice | What it is | State |
 |---|---|---|
@@ -4289,10 +4445,35 @@ demo switch — the worked example is a CLIENT now, at `/demo`.
 | US2b | The door is a door — Forefront's shell at `/platform` (Islam's correction) | **Built** |
 | US3b | A role is a seat on a client (Islam's correction; retires the four platform roles) | **Built** |
 | US4 | The Demo client, and the retirement of the Demo-data button and demo mode | **Built** |
-| Phase 7 | Byte-identical rebuild, the two sweeps, §303, the steering files | **Built** |
+| Phase 7 | Byte-identical rebuild, the two sweeps, §313, the steering files | **Built** |
 | — | **The live migration** | **Not run.** Rehearsed only. |
 
 **The one thing left, and it is Islam's call:** `scripts/migrate-to-multi-client.js`
 has been run end to end against a copy of a v2.0-shaped deployment and against a
 seeded one, twice each, and is idempotent — but it has **not** been run against
 production, and nothing merges to `main` without the word (rule 4).
+
+**2026-09-08 — the merge rehearsed (§313.37).** `origin/main` (§294–§312 from
+five other sessions) merged INTO the branch locally and pushed nowhere; seven
+conflicts resolved, the built file rebuilt, `sw.js` at
+`smp-shell-v4.86-client-doors` pending the last-second confirmation (§94.16),
+§303 → §313 and spec 030 → 042 on the branch's own lines only. Four faults in
+the branch's own code found by reading and fixed (store calls throwing over
+HTTP, the store's slug in the wrong place, a dismissal always refused, a
+notification press landing on Raya for everyone), asserted and falsified; dead
+code and stale comments swept. Every suite green on the merged tree except the
+four recorded reds (`csp-net.py` red on main too; `test-concurrent-saves.js`
+and `test-push.js` harnesses predating the split; `test-video-endpoint.js`
+needs `@vercel/blob`, absent here). **Waiting on Islam's word to merge.**
+
+**§296 — the editable `.pptx` of the review deck.** He chose the PDF *"for
+now"*, which leaves the other one open. It is about a day, and the cost is
+permanent rather than one-off: a second builder is a second answer to *what is
+on this slide*, and this deck has moved four times in a fortnight, so every such
+change would have to be made twice from then on.
+
+**§295 / §296 — the merge.** The branch is built, checked and pushed; `main` is
+Islam's call on that merge (rule 4). Neither section changes how a save is
+judged, so no forced sign-out — but both change the built file, so `SHELL` in
+`sw.js` needs bumping at the merge, to a name `origin/main` does not already
+hold, confirmed again immediately before the push (§91, §94.12, §94.16).

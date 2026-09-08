@@ -1,0 +1,588 @@
+<title>Contingency Files</title>
+<style>
+  :root{
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px;
+    --fs-body:14px; --fs-lead:17px; --fs-title:20px; --track:.12em;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#A9BBD8; --panel-accent:#E6C65C;
+    --zebra:#F5F7FA; --on-fill:#FFFFFF;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+      --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+      --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+      --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+      --zebra:#212630; --on-fill:#14161A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --zebra:#212630; --on-fill:#14161A;
+  }
+
+  body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
+        font-size:var(--fs-body); line-height:1.5; margin:0; }
+  .page{ max-width:1120px; margin:0 auto; padding:32px 24px 96px;
+         display:flex; flex-direction:column; gap:38px; }
+
+  .lede{ display:flex; flex-direction:column; gap:10px; }
+  .lede h1{ font-size:28px; margin:0; letter-spacing:-.01em; text-wrap:balance; }
+  .lede p{ margin:0; color:var(--ink-2); max-width:66ch; }
+  .stamp{ display:inline-flex; align-self:flex-start; gap:8px; align-items:center;
+          font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:var(--track);
+          font-weight:800; color:var(--attn-tx); background:var(--attn-bg);
+          border:1px solid var(--attn); border-radius:999px; padding:5px 11px; }
+
+  section{ display:flex; flex-direction:column; gap:14px; }
+  h2{ font-size:var(--fs-lead); margin:0; display:flex; align-items:baseline; gap:10px; }
+  h2 .n{ font-family:var(--mono); font-size:var(--fs-small); color:var(--gold-deep);
+         font-weight:700; letter-spacing:.06em; }
+  section > p{ margin:0; color:var(--ink-2); max-width:70ch; }
+  section > p b{ color:var(--ink); }
+
+  .frame{ border:1px solid var(--line); border-radius:12px; overflow:hidden;
+          background:var(--surface); }
+  .frame > .cap{ font-size:var(--fs-micro); text-transform:uppercase;
+        letter-spacing:var(--track); font-weight:800; color:var(--ink-3);
+        background:var(--surface-2); padding:7px 14px; border-bottom:1px solid var(--line); }
+  .shot{ padding:0; overflow-x:auto; }
+  .shot > .inner{ min-width:940px; }
+
+  /* ── the platform's chrome, reproduced ─────────────────────────── */
+  .nav{ background:var(--panel); color:var(--panel-ink); display:flex; gap:22px;
+        align-items:center; padding:11px 20px; font-size:var(--fs-note); }
+  .nav .t{ color:var(--panel-quiet); }
+  .nav .on{ font-weight:700; box-shadow:inset 0 -2px 0 var(--panel-accent); padding-bottom:3px; }
+  .body{ padding:18px 22px 22px; background:var(--ground); }
+  .ptitle{ font-size:var(--fs-title); font-weight:800; margin:0 0 14px; }
+
+  .tabs{ display:flex; gap:20px; border-bottom:1px solid var(--line);
+         margin:0 0 18px; font-size:var(--fs-note); }
+  .tabs span{ padding:0 0 8px; color:var(--ink-3); }
+  .tabs span.on{ color:var(--ink); font-weight:700; box-shadow:inset 0 -2px 0 var(--gold); }
+
+  .fkey{ font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:var(--track);
+         font-weight:800; color:var(--ink-3); margin:0 0 7px; }
+  .fcard{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+          overflow:hidden; margin:0 0 18px; }
+  .fbody{ padding:14px 16px; color:var(--ink-2); font-size:var(--fs-note); }
+  .fbody p{ margin:0; }
+  .ffoot{ background:var(--surface-2); border-top:1px solid var(--line);
+          padding:11px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .why{ flex:1; min-width:220px; font-size:var(--fs-small); color:var(--ink-3); }
+  .editbtn{ font:inherit; font-size:var(--fs-small); font-weight:800;
+            text-transform:uppercase; letter-spacing:.08em;
+            border:1px solid var(--gold); color:var(--gold-deep);
+            background:transparent; border-radius:999px; padding:7px 15px;
+            white-space:nowrap; cursor:default; }
+  .editbtn .cnt{ font-weight:600; opacity:.75; letter-spacing:0; }
+  .pickrow{ display:flex; align-items:center; gap:10px; padding:14px 16px; flex-wrap:wrap; }
+  .lab{ font-size:var(--fs-note); color:var(--ink-2); }
+  .fld{ font:inherit; font-size:var(--fs-note); border:1px solid var(--line);
+        border-radius:7px; padding:7px 10px; background:var(--surface); color:var(--ink);
+        min-width:150px; }
+  .fld.sel::after{ content:"▾"; }
+
+  /* ── the reminder banner (option B) ────────────────────────────── */
+  .banner{ padding:9px 24px; font-size:var(--fs-small); display:flex; gap:12px;
+           align-items:center; text-align:left; }
+  .banner.safety{ background:var(--attn-bg); color:var(--attn-tx);
+                  border-bottom:2px solid var(--attn); }
+  .banner.safety.loud{ background:var(--bad-bg); color:var(--bad-tx);
+                       border-bottom-color:var(--bad); }
+  .banner.safety.done{ background:var(--good-bg); color:var(--good-tx);
+                       border-bottom-color:var(--good); }
+  .safety-ic{ flex:none; width:20px; height:20px; }
+  .safety-msg{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .safety-msg strong{ display:block; font-weight:700; color:inherit; }
+  .safety-msg span{ opacity:.9; }
+  .safety-acts{ flex:none; display:flex; align-items:center; gap:8px; }
+  .safety-btn{ font:inherit; font-size:var(--fs-small); font-weight:700;
+        border-radius:7px; padding:6px 13px; white-space:nowrap; cursor:default;
+        background:var(--attn-tx); color:var(--surface); border:1px solid var(--attn-tx); }
+  .loud .safety-btn{ background:var(--bad-tx); border-color:var(--bad-tx); }
+  .done .safety-btn{ background:var(--good-tx); border-color:var(--good-tx); }
+  .safety-btn.ghost{ background:transparent; color:inherit; border-color:currentColor; }
+
+  /* ── the cycle strip and its pen ───────────────────────────────── */
+  .fstrip{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+           overflow:hidden; }
+  .fstrip-head{ display:flex; align-items:center; gap:18px; padding:12px 16px;
+                background:var(--surface-2); border-bottom:1px solid var(--line);
+                font-size:var(--fs-note); }
+  .fstrip-head .nm{ font-weight:800; letter-spacing:.02em; }
+  .fstrip-head .mt{ color:var(--ink-3); }
+  .fstrip-head .sp{ margin-left:auto; }
+  .goldbtn{ font:inherit; font-size:var(--fs-small); font-weight:800;
+            text-transform:uppercase; letter-spacing:.08em; border:1px solid var(--gold);
+            background:var(--gold); color:var(--on-fill); border-radius:999px;
+            padding:7px 15px; cursor:default; }
+  .pen{ display:grid; grid-template-columns:1fr 260px; gap:26px; padding:16px; }
+  .pen .col > .fkey{ margin-bottom:10px; }
+  .fields{ display:flex; flex-wrap:wrap; gap:14px 18px; }
+  .f{ display:flex; flex-direction:column; gap:5px; }
+  .f label{ font-size:var(--fs-micro); text-transform:uppercase;
+            letter-spacing:var(--track); font-weight:800; color:var(--ink-3); }
+  .f .fld{ min-width:130px; }
+  .f.new .fld{ border-color:var(--gold); box-shadow:0 0 0 3px rgb(201 162 77 / .18); }
+  .newtag{ font-size:var(--fs-micro); font-weight:800; letter-spacing:var(--track);
+           text-transform:uppercase; color:var(--gold-deep); }
+  .penrow{ border-top:1px solid var(--line); padding:16px; }
+  .penrow .fkey{ margin-bottom:10px; }
+  .pennote{ margin:14px 0 0; font-size:var(--fs-note); color:var(--ink-2); max-width:60ch; }
+  .pennote b{ color:var(--ink); }
+  .redbtn{ font:inherit; font-size:var(--fs-small); font-weight:800;
+           text-transform:uppercase; letter-spacing:.08em; border:1px solid var(--bad);
+           color:var(--bad-tx); background:transparent; border-radius:999px;
+           padding:7px 15px; cursor:default; }
+
+  /* ── the four dates ───────────────────────────────────────────── */
+  .dates{ display:grid; gap:0; }
+  .drow{ display:grid; grid-template-columns:170px 128px 1fr;
+         gap:14px; align-items:start; padding:13px 0; border-top:1px solid var(--line-soft); }
+  .drow:first-child{ border-top:0; }
+  .dname{ font-weight:700; }
+  .dname .tag{ display:block; font-size:var(--fs-micro); font-weight:800;
+               letter-spacing:var(--track); text-transform:uppercase; margin-top:3px; }
+  .tag.has{ color:var(--good-tx); }
+  .tag.new{ color:var(--gold-deep); }
+  .dval{ font-family:var(--mono); font-size:var(--fs-note); color:var(--ink); }
+  .dsay{ color:var(--ink-2); font-size:var(--fs-note); }
+
+  .line{ margin-top:6px; border:1px solid var(--line); border-radius:10px;
+         background:var(--surface); padding:22px 18px 16px; overflow-x:auto; }
+  .line .inner{ min-width:820px; position:relative; }
+  .rail{ height:3px; background:var(--line); border-radius:2px; margin:34px 0 0; position:relative; }
+  .fill{ position:absolute; left:0; top:0; bottom:0; width:52%;
+         background:var(--gold); border-radius:2px; }
+  .pin{ position:absolute; transform:translateX(-50%); text-align:center; width:150px; }
+  .pin i{ display:block; width:11px; height:11px; border-radius:50%;
+          background:var(--surface); border:2.5px solid var(--ink-3); margin:0 auto; }
+  .pin.g i{ border-color:var(--gold); }
+  .pin.r i{ border-color:var(--bad); }
+  .pin b{ display:block; font-size:var(--fs-small); margin-top:7px; }
+  .pin span{ display:block; font-family:var(--mono); font-size:var(--fs-micro);
+             color:var(--ink-3); }
+  .pin.up{ bottom:100%; margin-bottom:8px; }
+
+  /* ── who has downloaded ───────────────────────────────────────── */
+  table{ width:100%; border-collapse:collapse; font-size:var(--fs-note); }
+  thead th{ background:var(--panel); color:var(--panel-ink); text-align:left;
+            font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:var(--track);
+            padding:9px 12px; font-weight:800; white-space:nowrap; }
+  tbody td{ padding:9px 12px; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  tbody tr:nth-child(even) td{ background:var(--zebra); }
+  .pill{ display:inline-block; font-size:var(--fs-micro); font-weight:800;
+         letter-spacing:var(--track); text-transform:uppercase;
+         padding:3px 9px; border-radius:999px; }
+  .pill.ok{ background:var(--good-bg); color:var(--good-tx); }
+  .pill.no{ background:var(--attn-bg); color:var(--attn-tx); }
+  .stamp-t{ font-family:var(--mono); font-size:var(--fs-small); color:var(--ink-3); }
+
+  .ask{ border:1px solid var(--gold); border-radius:12px; background:var(--surface);
+        padding:18px 20px; }
+  .ask h2{ margin-bottom:10px; }
+  .ask ol{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:9px;
+           color:var(--ink-2); }
+  .ask ol b{ color:var(--ink); }
+
+  .flag{ border-left:3px solid var(--attn); background:var(--attn-bg);
+         color:var(--attn-tx); padding:11px 14px; border-radius:0 8px 8px 0;
+         font-size:var(--fs-note); }
+  .flag b{ color:inherit; }
+  ul.plain{ margin:0; padding-left:20px; color:var(--ink-2);
+            display:flex; flex-direction:column; gap:7px; }
+  ul.plain b{ color:var(--ink); }
+  @media (max-width:760px){
+    .pen{ grid-template-columns:1fr; }
+    .drow{ grid-template-columns:1fr; gap:4px; }
+  }
+</style>
+
+<div class="page">
+
+  <div class="lede">
+    <span class="stamp">Drawn for sign-off · nothing built</span>
+    <h1>Contingency files</h1>
+    <p>Two files taken before a review so that a platform outage on the day does not
+      stop it: the offline working copy, and the slides. This shows where they are
+      downloaded from, who sees them, and what the reminders look like.</p>
+    <p><b>The whole of this is the SMO team's.</b> Nobody outside the office sees
+      the card, the reminders or the list — corrected from yesterday's drawing,
+      which put a reminder on a screen every unit head opens.</p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="n">1</span> The four dates a cycle has</h2>
+    <p>You asked what <b>Reporting as of</b> means. It is not a deadline at all — it is
+      the month the figures are <b>measured against</b>. Three of these already exist;
+      one would be new.</p>
+
+    <div class="dates">
+      <div class="drow">
+        <div class="dname">Covers from / to<span class="tag has">Already there</span></div>
+        <div class="dval">Jan 2026 → Jun 2026</div>
+        <div class="dsay">The stretch of the year this cycle is about.</div>
+      </div>
+      <div class="drow">
+        <div class="dname">Reports due<span class="tag has">Already there</span></div>
+        <div class="dval">15 Jul 2026</div>
+        <div class="dsay">When the units must have their figures in. A deadline for
+          <em>them</em>, and the only date on the cycle that is one today.</div>
+      </div>
+      <div class="drow">
+        <div class="dname">Reporting as of<span class="tag has">Already there</span></div>
+        <div class="dval">Jun 26 · 6 of 12</div>
+        <div class="dsay"><b>The measuring point.</b> A target of 12 stores for the year
+          is not judged against 12 in June — it is judged against the 6 due by then.
+          Move this month and every score on the platform moves with it. It is not
+          about deadlines; it is about arithmetic.</div>
+      </div>
+      <div class="drow">
+        <div class="dname">Review day<span class="tag new">Would be new</span></div>
+        <div class="dval">28 Jul 2026 · 10:00</div>
+        <div class="dsay">The day the units stand up and present. Nothing on the
+          platform knows this date today — and it is the one the reminders count
+          back from.</div>
+      </div>
+    </div>
+
+    <div class="line">
+      <div class="inner">
+        <div class="rail">
+          <div class="fill"></div>
+          <div class="pin up" style="left:2%"><i></i><b>Covers from</b><span>Jan 2026</span></div>
+          <div class="pin" style="left:40%"><i></i><b>Reporting as of</b><span>Jun 26</span></div>
+          <div class="pin up" style="left:52%"><i></i><b>Covers to</b><span>Jun 2026</span></div>
+          <div class="pin g" style="left:70%"><i></i><b>Reports due</b><span>15 Jul</span></div>
+          <div class="pin r up" style="left:92%"><i></i><b>Review day</b><span>28 Jul 10:00</span></div>
+        </div>
+        <div style="height:56px"></div>
+      </div>
+    </div>
+
+    <div class="flag"><b>Why it cannot ride on Reports due.</b> That is thirteen days
+      earlier here, and it is stored as free text — <span class="stamp-t">15 Jul 2026</span> —
+      with no time of day at all. "Three hours before" has nothing to count back from.</div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="n">2</span> Where the day is set</h2>
+    <p>Setup › Reporting cycle, inside the pen that already holds the other four.
+      One new field, and it is picked from a calendar rather than typed, so the
+      countdown can read it.</p>
+
+    <div class="frame">
+      <div class="cap">Setup › Reporting cycle — the pen, open</div>
+      <div class="shot"><div class="inner" style="padding:16px;background:var(--ground)">
+        <div class="fstrip">
+          <div class="fstrip-head">
+            <span class="nm">H1 2026</span>
+            <span class="mt">Jan 2026 to Jun 2026 · due 15 Jul 2026</span>
+            <span class="mt">reported as of <b style="color:var(--ink)">Jun 26</b></span>
+            <span class="mt">· presents 28 Jul, 10:00</span>
+            <span class="sp"></span>
+            <span style="font-size:var(--fs-small);font-weight:800;letter-spacing:.08em">OPEN</span>
+            <button class="goldbtn" type="button">Done editing</button>
+          </div>
+          <div class="pen">
+            <div class="col">
+              <p class="fkey">This cycle</p>
+              <div class="fields">
+                <div class="f"><label>Name</label><input class="fld" value="H1 2026" readonly></div>
+                <div class="f"><label>Covers from</label><input class="fld" value="Jan 2026" readonly></div>
+                <div class="f"><label>to</label><input class="fld" value="Jun 2026" readonly></div>
+                <div class="f"><label>Reports due</label><input class="fld" value="15 Jul 2026" readonly></div>
+                <div class="f"><label>Reporting as of</label><input class="fld" value="Jun 26" readonly></div>
+              </div>
+              <p class="pennote">Three dates, one subject: <b>what the cycle covers</b>,
+                <b>when figures are due</b>, and <b>the month they are measured against</b>.
+                Nothing else belongs here.</p>
+            </div>
+            <div class="col">
+              <p class="fkey">Ending it</p>
+              <p style="font-size:var(--fs-note);color:var(--ink-2);margin:0 0 12px">
+                Closing files every figure under this name and stops the units reporting.</p>
+              <button class="redbtn" type="button">Close the cycle</button>
+            </div>
+          </div>
+          <div class="penrow">
+            <p class="fkey" style="color:var(--gold-deep)">The review &nbsp;·&nbsp; new</p>
+            <div class="fields">
+              <div class="f new"><label>Review day</label>
+                <input class="fld" value="28 Jul 2026" readonly></div>
+              <div class="f new"><label>at</label>
+                <input class="fld" style="min-width:92px" value="10:00" readonly></div>
+              <div class="f new"><label>Remind the SMO team</label>
+                <input class="fld" style="min-width:210px" value="24 · 12 · 6 · 3 hours before" readonly></div>
+            </div>
+            <p class="pennote">The day the units present, and when to remind the office
+              to take the contingency files. <b>Not a measuring date</b> — it changes no
+              score and no figure. Leave the day empty and nothing is ever sent.</p>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <ul class="plain">
+      <li><b>Picked, not typed.</b> A date box and a time box, the way a milestone's due date is
+        already picked. Typed text cannot be counted back from.</li>
+      <li><b>Empty is a real answer.</b> No review day, no reminders — nothing starts
+        nagging anybody who never set one.</li>
+      <li><b>It goes on the strip</b> beside the other facts, so the day is visible
+        without opening the pen.</li>
+    </ul>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="n">3</span> Where the files are downloaded</h2>
+    <p>A third card on <b>Import &amp; archives › Download</b>, under the two already
+      there and in the same shape. Drawn for the SMO team only — for anybody else the
+      card is simply not there, no greyed button and no refusal to read.</p>
+
+    <div class="frame">
+      <div class="cap">Import &amp; archives › Download — as the SMO team sees it</div>
+      <div class="shot"><div class="inner">
+        <div class="body">
+          <p class="ptitle">Import &amp; archives</p>
+          <div class="tabs"><span class="on">Download</span><span>Upload</span><span>Archived plans</span></div>
+
+          <p class="fkey">A blank template to fill in</p>
+          <div class="fcard">
+            <div class="fbody"><p>The same file whoever it is for — the subject is chosen
+              on its Read me sheet, and the platform mints every code on arrival.</p></div>
+            <div class="ffoot">
+              <span class="why">Two formats, because a capability plans in projects and
+                everything else in pillars.</span>
+              <button class="editbtn" type="button">Pillars</button>
+              <button class="editbtn" type="button">Projects</button>
+            </div>
+          </div>
+
+          <p class="fkey">Files from the platform</p>
+          <div class="fcard">
+            <div class="pickrow">
+              <span class="lab">For</span>
+              <span class="fld">19 of 19 subjects &nbsp;▾</span>
+              <span class="lab">from</span>
+              <span class="fld">H1 2026 — open &nbsp;▾</span>
+            </div>
+            <div class="ffoot">
+              <span class="why">One subject is one workbook; several arrive as a zip.
+                Always the designed workbook.</span>
+              <button class="editbtn" type="button">Plans <span class="cnt">(19)</span></button>
+              <button class="editbtn" type="button">Progress <span class="cnt">(19)</span></button>
+              <button class="editbtn" type="button">Archives <span class="cnt">(0)</span></button>
+            </div>
+          </div>
+
+          <p class="fkey" style="color:var(--gold-deep)">Contingency files &nbsp;·&nbsp; new</p>
+          <div class="fcard" style="border-color:var(--gold)">
+            <div class="fbody">
+              <p>Take these before a review. If the platform cannot be reached on the
+                day, the working copy opens from your laptop with no connection at all —
+                every plan, every figure, every deck — and the slides can be presented
+                from PowerPoint.</p>
+              <p style="margin-top:9px;color:var(--ink-3);font-size:var(--fs-small)">
+                Both files carry the date and time you took them in their name, and hold
+                everything as it stood at that moment.</p>
+            </div>
+            <div class="ffoot">
+              <span class="why">Everything, not a selection — the picker above does
+                not apply here.</span>
+              <button class="editbtn" type="button">Working copy</button>
+              <button class="editbtn" type="button">Slides</button>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="flag"><b>Say plainly what the working copy is.</b> It is the platform
+      with your strategy and figures inside it, and there is no sign-in in front of it —
+      whoever holds the file sees everything in it. That comes with any backup, and
+      it is why the card is the office's and why the sentence says so.</div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="n">4</span> The reminders</h2>
+    <p>Option B, as you chose: a banner across the top of the page, in the slot the
+      platform already uses to warn somebody before work is lost. <b>Seen by the SMO
+      team only</b>, and each person is asked separately.</p>
+
+    <div class="frame">
+      <div class="cap">24 hours before — quiet</div>
+      <div class="shot"><div class="inner">
+        <div class="banner safety">
+          <svg class="safety-ic" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+               stroke-width="1.7" aria-hidden="true">
+            <circle cx="10" cy="10" r="7.5"></circle>
+            <path d="M10 6v4.4l2.8 1.7" stroke-linecap="round"></path></svg>
+          <div class="safety-msg">
+            <strong>The H1 2026 review is tomorrow at 10:00</strong>
+            <span>Take the contingency files while there is time — if the platform
+              cannot be reached on the day you can still present from them.</span>
+          </div>
+          <div class="safety-acts">
+            <button class="safety-btn" type="button">Take them now</button>
+            <button class="safety-btn ghost" type="button">Later</button>
+          </div>
+        </div>
+        <div class="nav"><span class="t">Raya Trade</span><span class="on">Setup</span>
+          <span class="t">Mobile</span><span class="t">Retail Stores</span>
+          <span class="t">Care</span></div>
+        <div class="body" style="height:64px"></div>
+      </div></div>
+    </div>
+
+    <div class="frame">
+      <div class="cap">3 hours before — loud, and only if they still have not</div>
+      <div class="shot"><div class="inner">
+        <div class="banner safety loud">
+          <svg class="safety-ic" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+               stroke-width="1.7" aria-hidden="true">
+            <path d="M10 2.6 18.4 17H1.6L10 2.6Z" stroke-linejoin="round"></path>
+            <path d="M10 8v3.6" stroke-linecap="round"></path>
+            <circle cx="10" cy="14.2" r=".9" fill="currentColor" stroke="none"></circle></svg>
+          <div class="safety-msg">
+            <strong>3 hours to the H1 2026 review, and you have no contingency files</strong>
+            <span>Two downloads. If the platform is down at 10:00 this is the only way
+              the review still happens.</span>
+          </div>
+          <div class="safety-acts">
+            <button class="safety-btn" type="button">Take them now</button>
+          </div>
+        </div>
+        <div class="nav"><span class="t">Raya Trade</span><span class="on">Setup</span>
+          <span class="t">Mobile</span><span class="t">Retail Stores</span>
+          <span class="t">Care</span></div>
+        <div class="body" style="height:64px"></div>
+      </div></div>
+    </div>
+
+    <div class="frame">
+      <div class="cap">Once you have taken them — and it does not come back</div>
+      <div class="shot"><div class="inner">
+        <div class="banner safety done">
+          <svg class="safety-ic" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+               stroke-width="1.9" aria-hidden="true">
+            <circle cx="10" cy="10" r="7.5"></circle>
+            <path d="m6.6 10.2 2.3 2.3 4.5-4.7" stroke-linecap="round"
+                  stroke-linejoin="round"></path></svg>
+          <div class="safety-msg">
+            <strong>Contingency files taken · 7 Sep, 09:41</strong>
+            <span>Both are on this computer. This is the last you will hear about it
+              for H1 2026.</span>
+          </div>
+          <div class="safety-acts">
+            <button class="safety-btn ghost" type="button">Dismiss</button>
+          </div>
+        </div>
+        <div class="nav"><span class="t">Raya Trade</span><span class="on">Setup</span>
+          <span class="t">Mobile</span><span class="t">Retail Stores</span>
+          <span class="t">Care</span></div>
+        <div class="body" style="height:64px"></div>
+      </div></div>
+    </div>
+
+    <ul class="plain">
+      <li><b>Four moments, two voices.</b> 24 and 12 hours in the amber the platform
+        uses when nothing has gone wrong yet; 6 and 3 hours in the alarm colour, and
+        the last one drops <em>Later</em>, because at three hours there is no later.</li>
+      <li><b>Each person's reminders end when that person has downloaded.</b> Not when
+        somebody else has. Four is the most anybody who ignores it ever sees, and
+        nought after the first download.</li>
+      <li><b>Dismiss silences that one moment, not the next.</b> Pressing <em>Later</em>
+        at 24 hours does not buy silence at 12.</li>
+      <li><b>Nobody outside the SMO team ever sees it.</b> A unit head has nothing to
+        download and cannot open the card.</li>
+    </ul>
+
+    <div class="flag"><b>The limit, said here rather than discovered on the night.</b>
+      Nothing wakes this platform up — there is no clock running on the server. A
+      reminder appears <em>the next time that person opens the platform</em>. At three
+      hours before, if it is 7am and nobody has a tab open, nobody is reminded. An
+      email would have the same floor. If that matters, the honest answer is to take
+      the files at 24 hours and treat the later ones as a safety net.</div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="n">5</span> Who has taken them</h2>
+    <p>Without this you cannot establish that the team is covered — which is the whole
+      of "all the SMO team will download". It sits on Setup › Reporting cycle, under
+      the cycle it is about.</p>
+
+    <div class="frame">
+      <div class="cap">Setup › Reporting cycle — under the strip</div>
+      <div class="shot"><div class="inner" style="padding:16px;background:var(--ground)">
+        <p class="fkey">Contingency files · H1 2026 · presents 28 Jul, 10:00</p>
+        <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)">
+          <table>
+            <thead><tr><th>SMO team</th><th>Working copy</th><th>Slides</th><th>Taken</th></tr></thead>
+            <tbody>
+              <tr><td>Mohamed Essam</td><td><span class="pill ok">Taken</span></td>
+                  <td><span class="pill ok">Taken</span></td>
+                  <td class="stamp-t">27 Jul, 16:02</td></tr>
+              <tr><td>Hossam Abuelenen</td><td><span class="pill ok">Taken</span></td>
+                  <td><span class="pill no">Not yet</span></td>
+                  <td class="stamp-t">27 Jul, 18:20</td></tr>
+              <tr><td>Noran Adel</td><td><span class="pill no">Not yet</span></td>
+                  <td><span class="pill no">Not yet</span></td>
+                  <td class="stamp-t">—</td></tr>
+            </tbody>
+          </table>
+          <div class="ffoot"><span class="why">1 of 3 has both. The platform records that
+            a file was taken and when — never the file itself.</span></div>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <div class="ask">
+    <h2>Settled, and the one cost worth restating</h2>
+    <ol>
+      <li><b>The review day is not a fourth measuring date.</b> You were right, so it
+        moved rather than went: the three dates under <em>This cycle</em> stay exactly
+        as they are, and the review day sits in its own block with the thing it drives.
+        It changes no score and no figure anywhere.</li>
+      <li><b>The reminder times sit with it</b> — one line,
+        <span class="stamp-t">24 · 12 · 6 · 3 hours before</span> — because they belong
+        to that review. No settings page for one line.</li>
+      <li><b>The slides will be the presentation with the figures in it</b>, as they
+        stand at the moment you press the button. This means the platform will draw
+        those slides twice — once for the screen, once for the file — so I will also
+        add a test that compares the two every time we build. If somebody ever changes
+        one and forgets the other, that test goes red before the file reaches
+        anybody.</li>
+    </ol>
+  </div>
+
+</div>
+
+</div>

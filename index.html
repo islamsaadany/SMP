@@ -11,7 +11,7 @@
      installs from and the page the installed app opens on. -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<!-- SERVED AT A CLIENT'S DOOR (§303.36) the page lives at /<client>/sign-in,
+<!-- SERVED AT A CLIENT'S DOOR (§313.36) the page lives at /<client>/sign-in,
      and a relative href would then look for /<client>/favicon.svg, which is
      nothing. Root-relative when there is a server, relative on disk — decided
      once here for every link above rather than by rewriting each one, and
@@ -140,7 +140,6 @@
     --icon: #8894a8;
     /* The tenant's own mark. Its two brand colours, read off the vector
        artwork in the client's brand manual, not sampled from a screenshot. */
-    --client-flag: #3a67b1;
     /* A PNG cannot be recoloured (§52), so on a dark card the client's mark
        sits on a light plate; on a light card the plate is the card. */
     --mark-plate: transparent;
@@ -194,7 +193,6 @@
       --btn-shadow: rgba(0, 0, 0, 0.45);
       --icon: #7f8b9d;
       /* Reversed on a dark ground, which is how the client supplies it. */
-      --client-flag: #ffffff;
       --mark-plate: #ffffff;
       --mark-pad: 6px 12px;
     }
@@ -244,7 +242,6 @@
     --btn-shadow: rgba(0, 0, 0, 0.45);
     --icon: #7f8b9d;
     /* Reversed on a dark ground, which is how the client supplies it. */
-    --client-flag: #ffffff;
     --mark-plate: #ffffff;
     --mark-pad: 6px 12px;
   }
@@ -398,7 +395,7 @@
   }
   .card h2 { font-size: 22px; font-weight: 700; text-align: center; color: var(--label); letter-spacing: -0.01em; }
   .card h2 + p { margin-top: 6px; text-align: center; font-size: 13.5px; color: var(--muted); }
-  /* ── THE CLIENT'S OWN MARK, ON THE CLIENT'S OWN DOOR (§303.36) ──
+  /* ── THE CLIENT'S OWN MARK, ON THE CLIENT'S OWN DOOR (§313.36) ──
      Whose platform this is, on the thing you actually touch — §52's placement,
      given back now that every client has a door of its own: Forefront's
      temple stays on the wall, the client's lockup sits on the card, and the
@@ -606,7 +603,7 @@
 </head>
 <body>
 
-<!-- THE CLIENT-MARK SPRITE IS GONE WITH THE MARK IT DREW (§303.15, §24).
+<!-- THE CLIENT-MARK SPRITE IS GONE WITH THE MARK IT DREW (§313.15, §24).
      It was 23 lines of path data for one client's lockup on a door that
      belongs to no client. `.clientmark`, `--client-mark` and the sprite
      rules go with it — leftover CSS is what a later reader takes for
@@ -717,7 +714,7 @@
       <!-- Sign in -->
       <div class="card" id="login">
         <!-- THE MARK IS THE DOOR'S CLIENT'S, AND THE ROOT DOOR HAS NONE
-             (§303.36, narrowing §303.15). §303.15 took Raya Trade's lockup
+             (§313.36, narrowing §313.15). §313.15 took Raya Trade's lockup
              off this card because the door was SHARED: a picture of one client
              on a page every client's people stand at tells them all whose
              door it is. That argument is about the shared door and holds for
@@ -950,7 +947,7 @@
 
      When the platform becomes multi-tenant (§36) this is the seam: the slug is
      already the tenant's, and it is already in the URL. */
-  /* SINCE SPEC 024 THE SLUG IS THE CLIENT'S, and the seam §36 predicted is
+  /* SINCE SPEC 042 THE SLUG IS THE CLIENT'S, and the seam §36 predicted is
      the one this uses: one path per client, and the door itself carries no
      client's name. Offline there is no server to rewrite anything, so the
      real relative path stands and there is only ever the one file. */
@@ -993,7 +990,7 @@
     });
   });
 
-  /* ── WHICH CLIENT'S DOOR THIS IS (§303.36) ────────────────────────
+  /* ── WHICH CLIENT'S DOOR THIS IS (§313.36) ────────────────────────
      Read off the address and nowhere else: /<client>/sign-in is that client's
      door, / is Forefront's. Sent to the server on the session check and on
      sign-in, and the server answers two things — what the door wears (name
@@ -1054,7 +1051,7 @@
     goOn();
   }
 
-  /* WHERE SOMEBODY GOES AFTER THE DOOR — decided by the SERVER (spec 030).
+  /* WHERE SOMEBODY GOES AFTER THE DOOR — decided by the SERVER (spec 042).
      A client's own person, and anybody at Forefront who can open exactly one
      client, goes straight there: a page whose only content is a button to the
      page you just asked for is a door behind a door (§32). Everybody else is
@@ -1189,7 +1186,7 @@
          somebody their first sign-in. */
       var wrap = document.getElementById("whereWrap");
       var at = wrap && !wrap.hidden ? document.getElementById("whereSel").value : "";
-      /* THE SAME ROUTING AS THE DOOR (spec 030): whoever holds one client
+      /* THE SAME ROUTING AS THE DOOR (spec 042): whoever holds one client
          opens it, and everybody else gets the cards. Choosing a password must
          not land somebody somewhere the sign-in would not have. */
       var go = function () { goOn(); };

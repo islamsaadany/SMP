@@ -204,6 +204,33 @@ async function main() {
     const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
     check("a person signs in by email, against the platform's accounts", (await login.json()).ok === true);
 
+    /* AN OFFICE ACTION THROUGH THE DOOR IS JUDGED ON THIS CLIENT'S REGISTER
+       (§313.37): `dismissWhere` asked getSession without the client key, got
+       the account shape whose role is nobody's, and refused every dismissal
+       with "The register is the SMO's" — found by reading, never by a check,
+       because none had pressed it over HTTP. The seed's `smo` is this
+       client's super user, so the gate opens. Nobody here has declared
+       anything, and an unknown key is answered with a 404 that says so
+       rather than an invented row (§15.1) — which is the proof the gate was
+       passed: on the build before, the same press was a 403. */
+    /* The subject is made and put back: this file's `smo` row on t-http is
+       inserted with NO role, so without this the gate refuses for the right
+       reason and proves nothing about the fix (§94.5). */
+    const hadRole = await P.withSchema(pg, "t_http", async function (c) {
+      const r = (await c.query("SELECT role FROM people WHERE key = 'smo'")).rows[0];
+      await c.query("UPDATE people SET role = 'super' WHERE key = 'smo'");
+      return r ? r.role : null;
+    });
+    const dm = await fetch(BASE + "/api/auth", { method:"POST",
+      headers:{ "Content-Type":"application/json", cookie: cookie },
+      body: JSON.stringify({ action:"dismissWhere", person:"nobody-declared", client:"t-http" }) });
+    const dismissed = await dm.json();
+    check("the office's dismissal through the door is judged on this client's register (past the gate, to the 404 for an unknown key)",
+      dm.status === 404 && /not said/.test(dismissed.error || ""), dm.status + " " + JSON.stringify(dismissed));
+    await P.withSchema(pg, "t_http", function (c) {
+      return c.query("UPDATE people SET role = $1 WHERE key = 'smo'", [hadRole]);
+    });
+
     const get = (q) => fetch(BASE + "/api/state" + q, { headers: cookie ? { cookie: cookie } : {} });
 
     const mine = await (await get("?client=t-http")).json();
@@ -254,7 +281,7 @@ async function main() {
       await sc.query("UPDATE people SET role = 'super' WHERE key = 'smo'");
     });
 
-    /* ── NOBODY IS CREATED ON A CLIENT THAT HAS A REGISTER (§303.30) ──
+    /* ── NOBODY IS CREATED ON A CLIENT THAT HAS A REGISTER (§313.30) ──
        Islam: "make the access from the platform match the raya registry
        without creating new people." Asserted HERE rather than through the
        screen, and that is the finding: with the mapping REQUIRED, the create
@@ -285,7 +312,7 @@ async function main() {
       await sc.query("INSERT INTO people SELECT * FROM kept");
     });
 
-    /* ── AND A CLIENT MADE HERE HAS ITS TEAM ON ITS REGISTER (§303.31) ──
+    /* ── AND A CLIENT MADE HERE HAS ITS TEAM ON ITS REGISTER (§313.31) ──
        Islam: "a client created from the multitenant platform will have its own
        registry, and on the settings of this client we will add the consultants
        and roles and accordingly they will be added to the registry
@@ -303,7 +330,7 @@ async function main() {
       await sc.query("DELETE FROM people WHERE key = 'ff_made_here'");
     });
 
-    /* ── THE LOG SAYS WHO SIGNED IN, NOT ONLY WHICH ROW (§303.30) ──
+    /* ── THE LOG SAYS WHO SIGNED IN, NOT ONLY WHICH ROW (§313.30) ──
        Several of Forefront's people may act as ONE row on a client whose
        register predates the platform, so the row alone no longer says who did
        something. Islam saw that the address was already known and simply not
@@ -332,7 +359,7 @@ async function main() {
         r.rowCount > 0 && !!r.rows[0].person_key, r.rows[0]);
     });
 
-    /* ── EVERY CLIENT HAS A DOOR, AND THE DOOR ASKS THE SERVER (§303.36) ──
+    /* ── EVERY CLIENT HAS A DOOR, AND THE DOOR ASKS THE SERVER (§313.36) ──
        What a door wears is readable by anybody (the address already names
        the client); where a sign-in lands is the server's, and the door's
        client wins only when this account may open it. BOTH ENDS each time. */
@@ -442,7 +469,7 @@ async function main() {
       FF.mayIssuePasswordTo(world, admin, { email:"o@ff.example", is_admin:false }));
     check("nobody changes their own admin rights", !FF.maySetAdmin(world, admin, admin));
 
-    /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§303.26, Islam: "a project
+    /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§313.26, Islam: "a project
        might have 2 super users"). This asserted the OPPOSITE — a unique index
        refusing a second — and the reasoning behind it was tidy about a table
        and wrong about the work. Asked of the database, because that is where
@@ -473,7 +500,7 @@ async function main() {
     const team = await P.teamOf(c, "t-team");
     /* ASSERTED AS THE RULE, NOT AS A COUNT. It read `team.length === 1`, which
        is a fact about the fixture rather than about the filter — and the
-       moment §303.26 let a second super user sit on this client, a correct
+       moment §313.26 let a second super user sit on this client, a correct
        reading of `kind = 'office'` failed. The question is whether a CLIENT'S
        OWN person can appear here, and that is what is asked. */
     check("a client's team holds Forefront's people", team.length > 0, team.length);
@@ -487,7 +514,7 @@ async function main() {
     eq("…carrying the seat, not a boolean", held && held.seat, "super");
   });
 
-  /* ── 10 · a way in (§303.14) ──────────────────────────────────
+  /* ── 10 · a way in (§313.14) ──────────────────────────────────
      A PLATFORM WITH NO ACCOUNTS IS A PLATFORM NOBODY CAN OPEN, and there is
      nothing inside it that could grant the first one — the consultants page
      is behind the sign-in it would create. This is §43.1's own answer one
@@ -501,7 +528,7 @@ async function main() {
       /* THE FIRST THING IT CAN DO IS STOP BEING THIS. A known password that
          did not force a change is a back door, which is §43.1's whole
          reversal of §19.4. */
-      /* NOT FORCED, at Islam's explicit direction (§303.25) — and the
+      /* NOT FORCED, at Islam's explicit direction (§313.25) — and the
          machinery is untouched: a password ISSUED to a consultant still has
          to be replaced before they can go anywhere, which section 9 above
          exercises. */
@@ -522,7 +549,7 @@ async function main() {
     check("…and never re-made once any account exists", again && again.must_change === false, again);
   });
 
-  /* ── 11 · an explicit reset, once (§303.17) ───────────────────
+  /* ── 11 · an explicit reset, once (§313.17) ───────────────────
      Islam asked for 1234 back. The whole risk in granting that is a step that
      runs on EVERY deploy, which would put the password back to 1234 every time
      a real one was chosen — a permanent backdoor wearing a one-off's clothes,
@@ -547,7 +574,7 @@ async function main() {
     const me = (await c.query("SELECT password_hash, must_change FROM accounts WHERE email = $1",
       [EMAIL])).rows[0];
     check("…putting 1234 back over a real password", auth3.verifyPassword("1234", me.password_hash));
-    /* AND IT IS NOT TEMPORARY (§303.25). Islam asked for the PASSWORD, not
+    /* AND IT IS NOT TEMPORARY (§313.25). Islam asked for the PASSWORD, not
        for a way in to choose another, and reaffirmed it after the cost was
        stated. The forced change still means what it means for everybody else,
        which is what the next assertion is really about. */
@@ -572,7 +599,7 @@ async function main() {
       !auth3.verifyPassword("1234", now.password_hash));
   });
 
-  /* ── 12 · the tenant that was already here (§303.21) ──────────
+  /* ── 12 · the tenant that was already here (§313.21) ──────────
      A deployment carrying this code and an unmigrated database has a real
      client in it and no row saying so. Adoption registers it WHERE IT ALREADY
      LIVES — no table moves — which is what lets the code ship without the
@@ -591,7 +618,7 @@ async function main() {
   });
 
   /* ── 13 · the address is what places somebody on a register the
-        platform did not build (§303.32) ────────────────────────────
+        platform did not build (§313.32) ────────────────────────────
      Islam, opening Raya from the cards: *"I open as a user named forefront —
      the group .. that's not supposed to happen I already have an email access
      inside the raya platform that supposedly matches my email."*
@@ -683,7 +710,7 @@ async function main() {
     twice.refused && twice.refused.indexOf("more than one") > -1, twice);
 
   /* THE EXCEPTION IS NOT WEAKENED: on a client the platform DID build there is
-     nobody to match and inventing is the row's first draft (§303.30). */
+     nobody to match and inventing is the row's first draft (§313.30). */
   await P.withPlatform(pg, async function (c) {
     await c.query(
       "INSERT INTO account_clients (email, client_key, person_key, seat) " +

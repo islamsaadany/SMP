@@ -654,17 +654,25 @@ console.log("\n7 · a retired person");
 
 /* ── 8 · Picture slides are the unit's, not a row's (§50.5) ────── */
 /* ── §239: THE REVIEW POINT IS THE OFFICE'S ──────────────────────────────
-   It is a new field (`review.asOfMonth`, riding the review row's `extra`) and
-   it decides what EVERY figure in the tenant is measured against -- a target
+   It decides what EVERY figure in the tenant is measured against -- a target
    that adds up is compared with the share of it due by then, and a tactic
    whose span has not started is not asked at all. So it must be the office's,
    and asserted BOTH WAYS: a rule that refuses everybody is not a rule that
    protects anything, and a new value the authoriser has never been offered is
-   exactly what §172 records going wrong four layers down. */
-console.log("\n8a · the review point (§239)");
+   exactly what §172 records going wrong four layers down.
+
+   §307: REWRITTEN, NOT DELETED (§218). This asserted `review.asOfMonth`, which
+   no longer exists — the review point IS the cycle's end now — so the
+   assertion that would have gone green over a field nothing writes asks about
+   `to` instead. It is deliberately kept as its own section beside §273's
+   dates: what is being asserted here is not "the office may edit a date" but
+   "the office alone may move what every score is measured against", and those
+   are now the same field answering two questions. A build that opened `to` to
+   a unit head would pass §8b's rename and fail here. */
+console.log("\n8a · the review point (§239, §307)");
 (function () {
   const setAsOf = function (s) {
-    s.review = Object.assign({}, s.review, { asOfMonth: "Aug 26" });
+    s.review = Object.assign({}, s.review, { to: "Aug 2026" });
   };
   allows("smo", setAsOf, "the SMO moves the review point");
   refuses(headKey, setAsOf, "a unit's head cannot move it");
@@ -698,6 +706,47 @@ console.log("\n8b · the cycle's name and dates (§273)");
   refuses(headKey, rename, "a unit's head cannot rename it");
   refuses(custKey, rename, "nor can a strategy custodian");
   refuses(headKey, redate, "a unit's head cannot move its dates");
+})();
+
+/* ── spec 030: THE REVIEW DAY, THE REMINDER TIMES AND THE RECORD OF WHO
+   HAS TAKEN THE CONTINGENCY FILES ─────────────────────────────────────────
+   THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY (§172). All three are
+   review fields outside `REVIEW_PER_TARGET`, so they fall to `cycle` by the
+   rule that has classified the cycle's own facts all along — and §172 is the
+   record of exactly this going wrong four layers down, where every layer
+   agreed about a value the database had never been offered.
+
+   BOTH WAYS, or a rule that refuses everybody protects nothing (§94.2).
+
+   AND THE STAMP IS THE ONE WORTH ASSERTING. It is written by each member of
+   the office about themselves, so it has to be ACCEPTED from them — a rule
+   that quietly refused it would leave the reminder firing for ever on a
+   person who had taken both files, with nothing on any screen saying why. */
+console.log("\n8b2 · the review day and the contingency record (spec 030)");
+(function () {
+  const setDay = function (s) {
+    s.review = Object.assign({}, s.review,
+      { reviewDay: "2026-07-28", reviewAt: "10:00" });
+  };
+  const setMoments = function (s) {
+    s.review = Object.assign({}, s.review, { remindAt: [48, 12] });
+  };
+  const stamp = function (s) {
+    s.review = Object.assign({}, s.review,
+      { taken: { smo: { copy: "2026-07-27T10:00:00.000Z",
+                        slides: "2026-07-27T10:01:00.000Z" } } });
+  };
+  allows("smo", setDay, "the SMO sets the review day");
+  allows("smo", setMoments, "and when the team is reminded");
+  allows("smo", stamp, "and records having taken the files");
+  refuses(headKey, setDay, "a unit's head cannot set the review day");
+  refuses(custKey, setDay, "nor can a strategy custodian");
+  refuses(headKey, setMoments, "a unit's head cannot change the reminder times");
+  /* THE STAMP IS NOT A BACK DOOR INTO THE CYCLE. It is stored on the review
+     like everything else there, so somebody who cannot touch the cycle cannot
+     write one either — asserted, because a map keyed by PERSON reads as
+     "everybody's own" and it is not. */
+  refuses(headKey, stamp, "and cannot record one either");
 })();
 
 /* ── §273.2: AND REOPENING A CLOSED CYCLE IS THE OFFICE'S TOO ────────────
@@ -3399,6 +3448,69 @@ console.log("\n34 · a saved draft is the owner's to reopen (§301.6)");
   const lk = clone(parked);
   lk.cycle = Object.assign({}, lk.cycle, { locked: true });
   not("a locked cycle takes no reopen from them", run(lk, "t287u", unpark));
+})();
+
+console.log("\n35 · the planning period (§308)");
+(function () {
+  /* Islam: *"the cycle of planning is yearly so that's the full time start and
+     end dates ... sometimes we start planning mid year."* The two months
+     decide what share of every target is due by now, so a unit that could set
+     them could decide what it is measured against — §94's rule on a field
+     that did not exist when it was written.
+
+     BOTH ENDS, AND THE PAIR TOGETHER (§259.2): a build that classified the
+     field and left it out of the group's known list — or the reverse — makes
+     the change INVISIBLE, which does not refuse the save, it allows it to
+     everybody (§191). So the office's yes is asserted beside the refusal, and
+     the kind is asserted rather than merely the outcome. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units || {})[0];
+  const CUST = (SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian) || "own_mobile";
+  let r = fromStored(SEED, "smo", function (i) {
+    i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
+  });
+  check("§308: the office sets the planning period", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) {
+    i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
+  });
+  check("§308 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§308: and the refusal NAMES the planning period",
+        !r.ok && /planning period/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* CLEARING IT IS THE SAME ACT, and the key is DELETED rather than emptied
+     (§50.6) — a build reading only the write would let anybody throw away a
+     period only the office could set. */
+  const set = clone(SEED);
+  set.group[R.PLAN_FROM] = "Jul 2026"; set.group[R.PLAN_TO] = "Dec 2026";
+  r = fromStored(set, CUST, function (i) {
+    delete i.group[R.PLAN_FROM]; delete i.group[R.PLAN_TO];
+  });
+  check("§308 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) {
+    delete i.group[R.PLAN_FROM]; delete i.group[R.PLAN_TO];
+  });
+  check("§308: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE FOR THE PAIR, not one per month: half a period is not a
+     second decision, and two refusals for one press is §184 with the volume
+     doubled. */
+  r = fromStored(SEED, CUST, function (i) {
+    i.group[R.PLAN_FROM] = "Jul 2026"; i.group[R.PLAN_TO] = "Dec 2026";
+  });
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§308: it classifies as `cycle`, once, and nothing else",
+        kinds.length === 1 && kinds[0] === "cycle", kinds.join(",") || "(nothing)");
+
+  /* AND MOVING ONE END ALONE IS STILL SEEN. A build testing only `planFrom`
+     would leave the end of the period unguarded, which is the half that sets
+     the denominator. */
+  r = fromStored(set, CUST, function (i) { i.group[R.PLAN_TO] = "Mar 2027"; });
+  check("§308 REFUSED: moving the end alone is judged too", !r.ok, "was ALLOWED");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

@@ -467,8 +467,16 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(400)
     tabs = pg.eval_on_selector_all(".setuppane .secrow button",
                                    "e => e.map(x => x.textContent.trim())") or []
-    check("Import & storage carries three sections",
-          ["Import a plan", "Archived plans", "Video storage"] == tabs, tabs)
+    # WHAT THIS SECTION IS ABOUT IS THE LAST TAB, NOT THE WHOLE LIST (§218,
+    # §214.3, §274): §304 from another session split *Import a plan* into
+    # **Download** and **Upload** — two acts a week apart, not one sitting — so
+    # a flat comparison calls a build behaving exactly as two decisions decided
+    # it broken. Video storage is asserted to be the LAST section and the ways
+    # in to come before it, which is the claim §261.9 actually makes: what the
+    # platform is HOLDING sits after the ways in and out.
+    check("Import & storage ends on Video storage, after the ways in",
+          len(tabs) >= 2 and tabs[-1] == "Video storage"
+          and "Archived plans" in tabs[:-1], tabs)
     vid = [b for b in pg.query_selector_all(".setuppane .secrow button")
            if (b.text_content() or "").strip() == "Video storage"]
     check("...and Video storage is one of them", len(vid) == 1, len(vid))

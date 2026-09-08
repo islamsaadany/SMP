@@ -17,12 +17,11 @@ const blobHandler = require("../api/blob.js");
 const ROOT = path.join(__dirname, "..");
 const PORT = parseInt(process.argv[2], 10) || 3999;
 /* Mirrors vercel.json's rewrites: a client's own name in the URL, and the
-   versioned filename behind every one of them (§35.6, spec 030). The list is
+   versioned filename behind every one of them (§35.6, spec 042). Both are
    READ FROM vercel.json rather than typed again — the same rule the security
    headers below follow, and the one §35.6 asks for: three files carry this
-   mapping and they must stay in step. */
-const CLIENT_PATHS = null;   /* filled below, from vercel.json's rewrites */
-const PLATFORM_FILE = "SMP-Project-Folder/strategy-management-platform-v3.22.html";
+   mapping and they must stay in step. `PLATFORM_FILE` is set beside
+   `CLIENT_RE` below, from the same rewrite's destination. */
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
                 ".css": "text/css", ".json": "application/json", ".ico": "image/x-icon",
                 /* The PWA's three: a manifest served as octet-stream is ignored,
@@ -39,7 +38,7 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
    production: sending it from http://localhost would pin the browser to https
    for localhost, which breaks every other local server on the machine. */
 const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
-/* ── A CLIENT'S PATH IS A PATTERN, NOT A LIST (§303.19) ────────────
+/* ── A CLIENT'S PATH IS A PATTERN, NOT A LIST (§313.19) ────────────
    It was four named paths, and the product can CREATE a client — so making
    one produced a card that opened a page the server had never heard of. The
    platform could make something it could not serve, and nothing said so: the
@@ -54,15 +53,19 @@ const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"
    Read from vercel.json as before — three files carry this mapping and they
    must stay in step (§35.6) — but as a REGEX now, so what runs locally is
    what Vercel will do. */
+const PLATFORM_RW = (VERCEL.rewrites || [])
+  .filter(function (x) { return x.destination && /strategy-management-platform/.test(x.destination); })[0];
+/* The versioned filename, spelt ONCE — in vercel.json's rewrite. It was typed
+   here a second time until the pre-merge review of 2026-09-08 (§313.37). */
+const PLATFORM_FILE = PLATFORM_RW ? PLATFORM_RW.destination.replace(/^\//, "") : null;
 const CLIENT_RE = (function () {
-  const r = (VERCEL.rewrites || [])
-    .filter(function (x) { return x.destination && /strategy-management-platform/.test(x.destination); })[0];
+  const r = PLATFORM_RW;
   if (!r) return null;
   /* `/:name(pattern)` is Vercel's own spelling; a plain path is taken whole. */
   const m = /^\/:[A-Za-z0-9_]+\((.*)\)$/.exec(r.source);
   return new RegExp("^/" + (m ? m[1] : r.source.replace(/^\//, "")) + "$");
 })();
-/* A CLIENT'S OWN DOOR (§303.36): /<client>/sign-in is the gate, dressed
+/* A CLIENT'S OWN DOOR (§313.36): /<client>/sign-in is the gate, dressed
    with that client's mark. Read from vercel.json like the client paths, so
    the local server and the deployment agree about where a door is. */
 const DOOR_RE = (function () {

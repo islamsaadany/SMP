@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The door, the platform, and a seat held on a client (spec 030, US2-US3b).
+"""The door, the platform, and a seat held on a client (spec 042, US2-US3b).
 
 WHY THIS CANNOT LIVE IN qa.py: every screen check opens the built file over
 file://, where there is no server, no session and no client — so the whole
@@ -76,7 +76,7 @@ def main():
             #    It arrived while this branch waited, and it is drawn over the
             #    platform on a first sign-in — so a click on the chrome behind
             #    it is intercepted rather than refused, which is exactly what
-            #    §303's way-back button hit. Suppressed the way every one of
+            #    §313's way-back button hit. Suppressed the way every one of
             #    main's own checks suppresses it, because what is under test
             #    here is the CHROME and not the greeting: a check that had to
             #    dismiss a dialog first would be measuring two things and
@@ -95,7 +95,7 @@ def main():
             pg.goto(BASE + "/", wait_until="networkidle")
             check("the door asks for an email", "Email" in pg.inner_text("#accessLabel"),
                   pg.inner_text("#accessLabel"))
-            # A MARK IS NOT TEXT, AND THIS ASSERTION ONLY READ TEXT (§303.15).
+            # A MARK IS NOT TEXT, AND THIS ASSERTION ONLY READ TEXT (§313.15).
             # It passed for as long as the door carried Raya Trade's lockup —
             # a <use href="#raya-trade"> says nothing to inner_text — so the
             # one client whose door it was NOT went on being named on it, in
@@ -134,7 +134,7 @@ def main():
                 check("the door does not name '%s'" % w, w not in words)
 
             # AND THE DOOR ANSWERS ON A DEPLOYMENT THAT IS NOT SET UP YET
-            # (§303.13). Signing in is not about a client — identity is shared
+            # (§313.13). Signing in is not about a client — identity is shared
             # — so the door's own four questions must never be refused for a
             # client reason. Asked of a client that certainly is not in the
             # registry: the answer must be about the SIGN-IN, never about a
@@ -223,7 +223,7 @@ def main():
             pg2 = page(viewport={"width": 1200, "height": 800})
             sign_in(pg2, CONSULT)
             pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(1500)
-            # ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§303.24) ──
+            # ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§313.24) ──
             # This asserted the opposite until Islam signed in: "the access
             # opens directly in raya trade! what are you doing?" §32's rule —
             # one destination is not a question — is about a door in front of a
@@ -242,7 +242,7 @@ def main():
                 pg2.click(".ccard[data-client='raya-trade']")
                 pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(2500)
                 check("…and pressing it opens the client", pg2.url.endswith("/raya-trade"), pg2.url)
-            # AND THE WAY BACK IS NOT A LOOP (§303.23). It went to "/", and the
+            # AND THE WAY BACK IS NOT A LOOP (§313.23). It went to "/", and the
             # door hands somebody over to what they can OPEN — so for exactly
             # this person, holding one client, the way back walked out of the
             # client and straight back into it. INVISIBLE on the admin above,
@@ -293,7 +293,7 @@ def main():
             # AND NOBODY ELSE'S: account_clients maps a client's own people too —
             # that is how their account knows which client it is — so a list read
             # without `kind = 'office'` offers to make Raya's SMO its super user.
-            # A CELL'S WORDS MAY LIVE IN A FIELD (§303.27). The name and the
+            # A CELL'S WORDS MAY LIVE IN A FIELD (§313.27). The name and the
             # address are editable now, so `textContent` on those two columns
             # is empty — the check has to read what a person would read, which
             # is the input's value where there is one.
@@ -430,7 +430,7 @@ def main():
             editable = pg.eval_on_selector_all(".teamrow .cell button", "els => els.length")
             check("…and the seat IS written here", editable >= 2, editable)
 
-            # A CLIENT MAY HOLD TWO SUPER USERS (§303.26, Islam: "a project might
+            # A CLIENT MAY HOLD TWO SUPER USERS (§313.26, Islam: "a project might
             # have 2 super users"). This asserted the opposite — a second MOVED
             # the seat off the first, enforced by a unique index — which was
             # tidy about a table and wrong about the work.
@@ -459,7 +459,7 @@ def main():
                   all(p["role"] in ("super", "smoteam") for p in reg), reg)
 
             # ── 11 · the Demo client, and the button that went ──────
-            # THE DEMO DATA BUTTON IS GONE FOR EVERY VIEWER (spec 030 §6.1):
+            # THE DEMO DATA BUTTON IS GONE FOR EVERY VIEWER (spec 042 §6.1):
             # the worked example is a CLIENT now, with its own schema and its
             # own address, and it saves — which is the whole reason Islam
             # asked for it. Asserted as an ABSENCE on the client's own
@@ -479,7 +479,7 @@ def main():
                 check("…and there is no way to switch datasets at all, for " + who,
                       not gone["mode"], gone)
 
-            # ── 12 · a client nobody has been put on (§303.20) ──────
+            # ── 12 · a client nobody has been put on (§313.20) ──────
             # THE ADMIN REACHES EVERY CLIENT, and `seatFor()` says so in as
             # many words — "somebody has to be able to open a client nobody is
             # on yet — the one they just created". `getSession` asked for a
@@ -503,7 +503,7 @@ def main():
                 # SEAT — the rule's answer, not a row that does not exist.
                 check("…holding the seat the rule gives them", got["seat"] == "super", got)
 
-            # ── 13 · nothing yet is not a dead end (§303.18, §61) ───
+            # ── 13 · nothing yet is not a dead end (§313.18, §61) ───
             # The Add card was appended AFTER the empty-state returned, so the
             # one person who can create a client was the one shown a dead end
             # — and told to ask the platform's super user, which is who they
@@ -527,7 +527,7 @@ def main():
                   "Ask the platform" not in empty["words"], empty["words"][:140])
             pg.unroute("**/api/platform")
 
-            # ── 14 · editing a consultant, and a silent refresh (§303.27–28) ──
+            # ── 14 · editing a consultant, and a silent refresh (§313.27–28) ──
             pg.click("#nav button[data-tab='consultants']")
             pg.wait_for_selector("table tbody tr", timeout=9000)
             # THE NAME AND THE ADDRESS ARE FIELDS, and they COMMIT — asked of
@@ -539,7 +539,7 @@ def main():
             check("a consultant's row carries editable fields", idx >= 0, idx)
             if idx >= 0:
                 row = "table tbody tr:nth-child(%d)" % (idx + 1)
-                # A SILENT REFRESH (§303.28): the pane must not blank or say
+                # A SILENT REFRESH (§313.28): the pane must not blank or say
                 # "Reading…" while it updates — the fault Islam reported.
                 blanked = pg.evaluate("""(sel) => new Promise(resolve => {
                   let sawEmpty = false;
@@ -560,7 +560,7 @@ def main():
                       who and who[0]["name"] == "Omar A. Alaa", who[:1])
                 api(pg, {"action": "saveConsultant", "email": CONSULT[0], "name": "Omar Alaa"})
 
-            # ── 15 · who they already are on this register (§303.29) ──
+            # ── 15 · who they already are on this register (§313.29) ──
             # Raya's register was built before the platform, so Forefront's own
             # people are on it under Raya addresses — Mohamed Essam is `smo`.
             # Adding him mints a second row for one human (§87). The
@@ -613,7 +613,7 @@ def main():
                 api(pg, {"action": "setTeam", "key": "raya-trade", "email": CONSULT[0], "seat": "smoteam"})
 
             # ── 16 · nobody is created on a client that has a register ──
-            #        (§303.30, Islam: "make the access from the platform match
+            #        (§313.30, Islam: "make the access from the platform match
             #        the raya registry without creating new people")
             before = pg.evaluate("""async () => {
               const r = await fetch('/api/state?client=raya-trade', { cache: 'no-store' });
@@ -649,7 +649,7 @@ def main():
             api(pg, {"action": "setTeam", "key": "raya-trade", "email": OFFICE[0],
                      "seat": "super", "personKey": "smo"})
 
-            # ── 17 · every client has its own door (§303.36) ───────
+            # ── 17 · every client has its own door (§313.36) ───────
             #    The door at /<client>/sign-in wears that client's mark, the
             #    root wears none, a sign-in at a client's door lands in that
             #    client, and a signed-out person is sent to their own door.
@@ -734,6 +734,34 @@ def main():
             check("…and the card carries the same picture as the door", card == (told or {}).get("mark"))
             pd.goto(BASE + "/raya-trade/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1200)
             check("…which the door wears again", pd.query_selector("#login img.clientmark") is not None)
+
+            # ── §18: A STORE ACTION FROM A LIVE PAGE (§313.37) ─────────────
+            # blobLive() read `enabled && !isDemoMode()` after §313.8 had deleted
+            # isDemoMode() — so over HTTP every video/store call threw inside its
+            # own guard, invisible to a sweep over file:// where `enabled` is
+            # false and the second half is never reached. And the slug rode the
+            # BODY while api/blob.js reads it off the ADDRESS before the body,
+            # so a client other than the default landed on the default's schema.
+            # Both ends: the call returns rather than throws, and the request
+            # names the client where the server reads it. 2 red on the build
+            # before. No store token is set here, so the server's answer is
+            # "no video store" — a refusal in words, which is the point.
+            pd.goto(BASE + "/raya-trade/sign-in", wait_until="networkidle"); pd.wait_for_timeout(1200)
+            pd.fill("#user", OFFICE[0]); pd.fill("#password", OFFICE[1])
+            pd.click("#loginForm button[type=submit]")
+            pd.wait_for_load_state("networkidle"); pd.wait_for_timeout(2600)
+            blobs = []
+            pd.on("request", lambda r: blobs.append(r.url) if "/api/blob" in r.url else None)
+            store = pd.evaluate("""() => new Promise(r => {
+              try { SYNC.videoList(function (err, j) { r({threw: false, err: err, ok: !!(j && j.ok)}); }); }
+              catch (e) { r({threw: String(e)}); } })""")
+            check("a store action from a live page reaches the server rather than throwing in its guard",
+                  store.get("threw") is False, store)
+            check("...and its request names the client in the address, where api/blob.js reads it",
+                  any("client=raya-trade" in u for u in blobs), blobs)
+            pd.evaluate("""() => fetch('/api/auth', {method:'POST', headers:{'Content-Type':'application/json'},
+                                     body:'{"action":"logout"}'})""")
+            pd.wait_for_timeout(600)
 
             check("no page errors anywhere", not errs, errs)
             b.close()

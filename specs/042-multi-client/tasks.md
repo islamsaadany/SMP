@@ -1,10 +1,10 @@
 ---
-description: "Task list for 030-multi-client — one door, many clients"
+description: "Task list for 042-multi-client — one door, many clients"
 ---
 
 # Tasks: One door, many clients
 
-**Input**: `specs/030-multi-client/` — spec.md, plan.md, research.md, data-model.md, contracts/platform-api.md, quickstart.md
+**Input**: `specs/042-multi-client/` — spec.md, plan.md, research.md, data-model.md, contracts/platform-api.md, quickstart.md
 **Mockup**: signed off 2026-08-28 · **Tests**: required (Principle IV and XVI — every check proved by breaking what it guards)
 
 ## Format: `[ID] [P?] [Story] Description`
@@ -21,7 +21,7 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 
 ## Phase 1 · Setup
 
-- [x] T001 Create `db/platform-schema.sql` with `clients`, `accounts`, `account_clients`, `platform_access`, `sessions`, `login_attempts`, `client_log` per specs/030-multi-client/data-model.md, idempotent (`CREATE TABLE IF NOT EXISTS`) and with the partial unique index for one super user per client
+- [x] T001 Create `db/platform-schema.sql` with `clients`, `accounts`, `account_clients`, `platform_access`, `sessions`, `login_attempts`, `client_log` per specs/042-multi-client/data-model.md, idempotent (`CREATE TABLE IF NOT EXISTS`) and with the partial unique index for one super user per client
 - [x] T002 [P] Create `db/platform-migrations/` with its own `_sql_migrations` registry, mirroring the convention in `lib/state-io.js` (numbered files, `-- @phase:` honoured)
 - [x] T003 [P] Create `lib/platform-rules.js` — `OFFICE_ROLES` (admin·lead·consultant·observer), `AREAS` (my_clients·other_clients·client_config·consultants·create_client·demo), `ACCESS_DEFAULTS` from spec §7.3, `grantIn()` merging stored over defaults (§30.2), and `mayOpenClient` / `mayEditClient` / `mayConfigureClient` / `mayManageConsultants` / `mayCreateClient` / `mayEditAccess` — pure functions, no I/O
 - [x] T004 **NOT DONE, AND THAT IS THE ANSWER.** `platform.html` asks the
@@ -173,10 +173,10 @@ platform admin alone adds clients and consultants.
 - [x] T053 Rebuild with `python3 build.py` and confirm the shipped file is reproduced byte-identically (Principle III)
 - [x] T054 [P] Run the contrast sweep over the new outer-platform pages in both themes and both palettes, and record the numbers (Principle XIII)
 - [x] T055 [P] Sweep the door, the cards and the configuration page at 1920 / 1500 / 1280 / 1000 px asserting no sideways scroll (§27.1, §27.2)
-- [x] T056 Write §303 in `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.22.md` — the decisions, and the two reversals: §21's "no invented content in the database" for the Demo client, and the Demo-data button's retirement
+- [x] T056 Write §313 in `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.22.md` — the decisions, and the two reversals: §21's "no invented content in the database" for the Demo client, and the Demo-data button's retirement
 - [x] T057 [P] Update `CLAUDE.md` (the multi-client facts, the new commands) and `IMPLEMENTATION_PROGRESS.md` in the same commit as the work (steering currency)
 - [x] T058 Rehearse `scripts/migrate-to-multi-client.js` against a **copy of production**, with the rollback written down first, and report what it found before it is run for real
-- [x] T059 End the merge with what to go and check — the screens, in the navigation's own words (rule A16) — `specs/030-multi-client/what-to-check.md`
+- [x] T059 End the merge with what to go and check — the screens, in the navigation's own words (rule A16) — `specs/042-multi-client/what-to-check.md`
 
 ---
 

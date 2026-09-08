@@ -1,6 +1,6 @@
 # Implementation Plan: One door, many clients
 
-**Branch**: `claude/multitenant-platform-split-5468e9` (feature `030-multi-client`)
+**Branch**: `claude/multitenant-platform-split-5468e9` (feature `042-multi-client`)
 **Date**: 2026-08-28 | **Spec**: [spec.md](./spec.md)
 **Mockup**: `design-mockups/multi-client/2026-08-28_outer-platform.html` — signed off 2026-08-28
 
@@ -12,7 +12,7 @@ platform exactly as it is today, named after that client and holding only that
 client's data. Isolation is **one Postgres schema per client** (§36.2), so
 `readState`, `writeState`, `lib/rules.js` and `lib/authorize.js` are untouched
 and the boundary is `SET search_path` on a connection, worn under a per-client
-database role since §303.35 (the badge). A new **platform schema**
+database role since §313.35 (the badge). A new **platform schema**
 holds the client registry, the office's accounts, their per-client teams and the
 office's own access matrix.
 
@@ -42,7 +42,7 @@ registers. Five new screens; ~30 existing tables per client, unchanged.
 | Principle | How this plan satisfies it |
 |---|---|
 | **I · Align before building** | Every decision was put to Islam and answered (spec §2); the mockup was published and signed off before any source is touched. |
-| **II · The decisions document is the contract** | §303 is written in the same commit as the first code, and records the two reversals this carries: §21's "no invented content in the database" (for the Demo client) and the Demo-data button's retirement. |
+| **II · The decisions document is the contract** | §313 is written in the same commit as the first code, and records the two reversals this carries: §21's "no invented content in the database" (for the Demo client) and the Demo-data button's retirement. |
 | **III · Edit the sources, never the built file** | All screen work in `SMP-Project-Folder/src/`; `build.py` must reproduce byte-identically; `sw.js` `SHELL` bumped on every content change (§91). |
 | **IV · Verify by walking** | `qa.py` runs against a **blank** client as well as a full one; new checks under `src/checks/`. |
 | **V · Derived, never stored** | Untouched — no scoring surface changes. "My clients" is **derived** from the client's team, never a second stored list. |
@@ -66,7 +66,7 @@ second way of expressing permission, and its rules live in one shared file.
 ### Documentation (this feature)
 
 ```text
-specs/030-multi-client/
+specs/042-multi-client/
 ├── spec.md
 ├── plan.md              # this file
 ├── research.md          # the four questions the code had to answer first
@@ -130,7 +130,7 @@ needed to prove an earlier one.
    request; `ensureReady` memoised per schema; the client resolved from the
    registry and authorised. Raya moves from `public` to `raya_trade`. The
    product looks identical and every existing check still passes. Since
-   §303.35 the request also wears the client's badge (`SET ROLE smp_<schema>`),
+   §313.35 the request also wears the client's badge (`SET ROLE smp_<schema>`),
    made by the platform with the room — the database refuses a cross-client
    query where before only the code declined to make one.
 2. **The door and the cards.** Email-only sign-in against `platform.accounts`;

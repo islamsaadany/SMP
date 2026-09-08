@@ -90,7 +90,7 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/auth"):
             body = json.loads(raw or b"{}")
             if body.get("action") == "login":
-                # A SIGN-IN NAMES THE CLIENT IT LANDS ON (spec 030). The door
+                # A SIGN-IN NAMES THE CLIENT IT LANDS ON (spec 042). The door
                 # hands somebody over to what they can OPEN, and with exactly
                 # one client that is a straight replace to it — so a stub that
                 # answers no client models a person with NO client, who is sent

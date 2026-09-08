@@ -1,0 +1,656 @@
+<title>The Review Deck as PowerPoint</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap">
+<style>
+  /* ---------------------------------------------------------------
+     THE PAGE is theme-aware. THE SLIDES ARE NOT, deliberately:
+     they are drawings of a PowerPoint, and a PowerPoint has no dark
+     mode. Every colour inside a .slide is that file's own.
+     --------------------------------------------------------------- */
+  :root{
+    --ground:#EDF1F7; --surface:#FFFFFF; --sunk:#E3E9F2;
+    --ink:#12203A; --ink-2:#3B4B69; --quiet:#61708C;
+    --line:#D3DCE8; --hair:#E4EAF3;
+    --gold:#9A7A2E; --gold-fill:#C9A24D;
+    --bad-tx:#A03A2B; --good-tx:#1C6340;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+    --shadow:0 1px 2px rgba(18,32,58,.06), 0 8px 24px rgba(18,32,58,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0D1421; --surface:#151E30; --sunk:#101827;
+      --ink:#E6ECF6; --ink-2:#B9C6DA; --quiet:#8E9DB7;
+      --line:#26314A; --hair:#1E2739;
+      --gold:#D7B463; --gold-fill:#C9A24D;
+      --bad-tx:#E48273; --good-tx:#6FBF95;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0D1421; --surface:#151E30; --sunk:#101827;
+    --ink:#E6ECF6; --ink-2:#B9C6DA; --quiet:#8E9DB7;
+    --line:#26314A; --hair:#1E2739;
+    --gold:#D7B463; --gold-fill:#C9A24D;
+    --bad-tx:#E48273; --good-tx:#6FBF95;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45);
+  }
+
+  body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
+        font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1100px; margin:0 auto; padding:44px 24px 90px; }
+
+  /* ---- masthead ---- */
+  .mast{ border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:30px; }
+  .kick{ font-family:var(--mono); font-size:11px; letter-spacing:.13em;
+         text-transform:uppercase; color:var(--gold); margin:0 0 8px; }
+  h1{ font-size:35px; font-weight:700; letter-spacing:-.015em; line-height:1.12;
+      margin:0 0 10px; text-wrap:balance; }
+  .stand{ font-size:17px; color:var(--ink-2); max-width:62ch; margin:0; }
+  .stand b{ font-weight:600; color:var(--ink); }
+
+  /* ---- the argument, before the pictures ---- */
+  .sum{ margin:30px 0 44px; border:1px solid var(--line); border-radius:3px;
+        background:var(--surface); box-shadow:var(--shadow); overflow:hidden; }
+  .sum h2{ margin:0; font-size:12px; font-family:var(--mono); letter-spacing:.11em;
+           text-transform:uppercase; color:#fff; background:var(--ink);
+           padding:9px 16px; font-weight:400; }
+  .sumscroll{ overflow-x:auto; }
+  table.sum-t{ border-collapse:collapse; width:100%; font-size:14.5px; min-width:640px; }
+  table.sum-t th{ text-align:left; font-weight:600; font-size:11px; font-family:var(--mono);
+        letter-spacing:.09em; text-transform:uppercase; color:var(--quiet);
+        padding:11px 16px 7px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  table.sum-t td{ padding:9px 16px; border-bottom:1px solid var(--hair);
+                  vertical-align:top; color:var(--ink-2); }
+  table.sum-t tr:last-child td{ border-bottom:0; }
+  table.sum-t td:first-child{ color:var(--ink); font-weight:600; white-space:nowrap; }
+  .tag{ font-family:var(--mono); font-size:10.5px; letter-spacing:.06em;
+        text-transform:uppercase; padding:2px 6px; border-radius:2px; white-space:nowrap;
+        border:1px solid currentColor; }
+  .tag.fault{ color:var(--bad-tx); }
+  .tag.look{ color:var(--gold); }
+
+  /* ---- sections ---- */
+  section{ margin:0 0 60px; }
+  .sechead{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+            border-bottom:1px solid var(--line); padding-bottom:9px; margin-bottom:6px; }
+  .secno{ font-family:var(--mono); font-size:12px; color:var(--gold); letter-spacing:.08em; }
+  h2.st{ font-size:23px; font-weight:700; margin:0; letter-spacing:-.01em; }
+  .whichslide{ font-family:var(--mono); font-size:11.5px; color:var(--quiet);
+               margin-left:auto; letter-spacing:.04em; }
+  .lede{ font-size:15.5px; color:var(--ink-2); max-width:70ch; margin:12px 0 22px; }
+  .lede b{ color:var(--ink); font-weight:600; }
+
+  .pair{ display:flex; flex-direction:column; gap:26px; }
+  .frame{ }
+  .fhead{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .flab{ font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+         text-transform:uppercase; padding:3px 9px; border-radius:2px; }
+  .flab.now{ background:var(--sunk); color:var(--quiet); border:1px solid var(--line); }
+  .flab.next{ background:var(--gold-fill); color:#241B00; border:1px solid var(--gold-fill); }
+  .fnote{ font-size:13.5px; color:var(--quiet); }
+  .stage{ overflow-x:auto; }
+
+  /* =========== THE SLIDE. 960x540 = 13.333in x 7.5in, so 1pt = 1px. ======= */
+  .slide{ position:relative; width:960px; height:540px; background:#fff;
+          color:#1B2740; border:1px solid var(--line); box-shadow:var(--shadow);
+          font-family:var(--sans); overflow:hidden; }
+  .slide.calibri{ font-family:Carlito, Calibri, 'Liberation Sans', Arial, sans-serif; }
+
+  /* head: kicker y=21.6, title y=42.5, rule y=92.4 (from the EMU constants) */
+  .s-kick{ position:absolute; left:50.4px; top:21.6px; font-size:10px; font-weight:700;
+           letter-spacing:.08em; color:#5E6E88; }
+  .s-title{ position:absolute; left:50.4px; top:42.5px; font-size:24px; font-weight:700;
+            color:#001780; letter-spacing:-.01em; }
+  .s-rule{ position:absolute; left:50.4px; top:92.4px; width:144px; height:3.6px;
+           background:#DD8E44; }
+  .s-body{ position:absolute; left:50.4px; right:50.4px; }
+
+  /* proposed head: name in the deck's own three weights, pair top right */
+  .p-title{ position:absolute; left:50.4px; top:40px; right:300px; }
+  .p-code{ font-family:var(--mono); font-size:17px; color:#7A879E; letter-spacing:.02em; }
+  .p-name{ font-size:26px; font-weight:700; color:#12203A; letter-spacing:-.015em; }
+  .p-which{ font-size:14px; font-weight:600; color:#7A879E; letter-spacing:.06em;
+            text-transform:uppercase; }
+  .p-pair{ position:absolute; right:50.4px; top:36px; display:flex; gap:26px; }
+  .p-pair div{ text-align:right; }
+  .p-pk{ font-size:10.5px; font-weight:700; letter-spacing:.1em; color:#5E6E88; }
+  .p-pv{ font-size:32px; font-weight:700; line-height:1.05; letter-spacing:-.02em;
+         font-variant-numeric:tabular-nums; }
+  .p-hair{ position:absolute; left:50.4px; right:50.4px; top:100px; height:1px;
+           background:#DCE3ED; }
+
+  /* tables inside a slide */
+  table.st{ border-collapse:collapse; width:100%; font-size:11px; }
+  table.st th{ background:#001780; color:#fff; font-weight:700; font-size:11px;
+               padding:7px 9px; text-align:left; vertical-align:middle; }
+  table.st td{ padding:7px 9px; border-bottom:1px solid #DCE3ED; vertical-align:top; }
+  table.st tr.z td{ background:#F2F5F9; }
+  .num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .bench{ color:#7A879E; font-style:italic; }
+  .good{ color:#1F6B45; } .warn{ color:#B07A17; } .bad{ color:#B04434; }
+  .b{ font-weight:700; }
+
+  /* proposed table: taller rows so the table reaches the foot of the slide */
+  table.st.tall td{ padding:13px 10px; font-size:12.5px; }
+  table.st.tall th{ padding:9px 10px; font-size:10.5px; letter-spacing:.07em; }
+  .rowname{ font-size:13.5px; color:#12203A; }
+  .rowsub{ font-size:11px; color:#7A879E; margin-top:2px; }
+
+  /* footer mark */
+  .s-foot{ position:absolute; left:50.4px; right:50.4px; bottom:22px;
+           border-top:1px solid #E4EAF3; padding-top:9px;
+           display:flex; align-items:center; gap:9px; }
+  .markbox{ width:118px; height:24px; border:1px dashed #B9C4D6; border-radius:2px;
+            display:flex; align-items:center; justify-content:center;
+            font-family:var(--mono); font-size:8.5px; letter-spacing:.08em;
+            color:#8E9AB0; text-transform:uppercase; }
+
+  /* the pillars roll-call, proposed */
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .pcard{ background:#F2F5F9; border-top:3px solid #DD8E44; padding:18px 20px 22px; }
+  .pcard .c{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:#9A7A2E; }
+  .pcard .n{ font-size:20px; font-weight:700; line-height:1.2; margin-top:8px;
+             color:#12203A; letter-spacing:-.01em; }
+
+  /* the SWOT list, proposed */
+  ol.swot{ list-style:none; margin:0; padding:0; }
+  ol.swot li{ display:flex; gap:14px; padding:9px 0; border-bottom:1px solid #EDF1F7; }
+  ol.swot li:last-child{ border-bottom:0; }
+  ol.swot .i{ font-family:var(--mono); font-size:12px; color:#B08A3E; flex:none;
+              width:20px; padding-top:2px; }
+  ol.swot .t{ font-size:14px; line-height:1.5; }
+  ol.swot .t b{ font-weight:600; }
+
+  /* where the unit stands, proposed */
+  .three{ display:grid; grid-template-columns:repeat(3,1fr); gap:34px; }
+  .three .k{ font-size:10.5px; font-weight:700; letter-spacing:.11em; color:#5E6E88; }
+  .three .v{ font-size:64px; font-weight:700; line-height:1.02; letter-spacing:-.03em;
+             font-variant-numeric:tabular-nums; margin:6px 0 4px; }
+  .three .c{ font-size:13px; color:#4A5A76; }
+  .foot-note{ position:absolute; left:50.4px; right:50.4px; bottom:64px;
+              border-top:1px solid #E4EAF3; padding-top:10px;
+              font-size:12px; color:#4A5A76; line-height:1.5; }
+
+  /* today's plain lead paragraphs */
+  .lead-k{ font-size:10px; font-weight:700; letter-spacing:.06em; color:#5E6E88; }
+  .lead-v{ font-size:13px; color:#1B2740; }
+
+  /* ---- closing notes ---- */
+  .notes{ border:1px solid var(--line); border-left:3px solid var(--gold-fill);
+          background:var(--surface); border-radius:0 3px 3px 0; padding:22px 26px;
+          box-shadow:var(--shadow); }
+  .notes h2{ font-size:19px; margin:0 0 4px; font-weight:700; }
+  .notes h3{ font-size:14px; margin:20px 0 4px; font-weight:600; color:var(--ink); }
+  .notes p{ margin:6px 0; font-size:15px; color:var(--ink-2); max-width:72ch; }
+  .notes p b{ color:var(--ink); font-weight:600; }
+  .ask{ margin-top:34px; padding:20px 24px; background:var(--ink); color:#fff;
+        border-radius:3px; }
+  .ask p{ margin:0; font-size:16px; line-height:1.6; }
+  .ask b{ color:var(--gold-fill); }
+  @media (prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth; } }
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="kick">Design mockup &middot; 8 September 2026 &middot; awaiting sign-off</p>
+    <h1>The review deck, as a PowerPoint</h1>
+    <p class="stand">Drawn from <b>Care &mdash; Cycle 2.pptx</b>, the file you sent. Each slide kind
+      is shown at full size twice: what the download gives today, and what I propose it gives.
+      Nothing in the platform has been changed &mdash; this is the picture first.</p>
+  </header>
+
+  <div class="sum">
+    <h2>What is wrong, and what is only unmatched</h2>
+    <div class="sumscroll">
+      <table class="sum-t">
+        <thead>
+          <tr><th>Slide kind</th><th>What happens</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Where the unit stands</td>
+            <td>Three labels print with <b>all three figures missing</b>, over an empty page.</td>
+            <td><span class="tag fault">fault</span></td>
+          </tr>
+          <tr>
+            <td>Pillars &mdash; where we stand</td>
+            <td>The name and its sub-line run together: <b>&ldquo;&hellip;Scale RAYA Smart CareDirection &middot; &middot; Mahmoud&rdquo;</b>.</td>
+            <td><span class="tag fault">fault</span></td>
+          </tr>
+          <tr>
+            <td>Strengths / Weaknesses / &hellip;</td>
+            <td>The number sticks to the words: <b>&ldquo;1Long-standing presence&rdquo;</b>, on all four.</td>
+            <td><span class="tag fault">fault</span></td>
+          </tr>
+          <tr>
+            <td>Every table slide</td>
+            <td>Headings break mid-word &mdash; <b>&ldquo;Progres s&rdquo;</b>, <b>&ldquo;Quarter s&rdquo;</b>.</td>
+            <td><span class="tag fault">fault</span></td>
+          </tr>
+          <tr>
+            <td>A pillar's measures</td>
+            <td>The two headline figures land as four naked lines of text, top left.</td>
+            <td><span class="tag fault">fault</span></td>
+          </tr>
+          <tr>
+            <td>Pillars roll-call</td>
+            <td>Four cards become eight lines of plain text.</td>
+            <td><span class="tag fault">fault</span></td>
+          </tr>
+          <tr>
+            <td>Most slides</td>
+            <td>Set at 11pt with tight rows, so a table reads as a footnote on the page rather than
+              the content of it. The deck leaves whitespace under a short table too &mdash; at a size
+              that reads from the back of the room.</td>
+            <td><span class="tag look">unmatched</span></td>
+          </tr>
+          <tr>
+            <td>Every figure</td>
+            <td>Left-aligned, all in black &mdash; no scoring colour, no benchmark behind the slash.</td>
+            <td><span class="tag look">unmatched</span></td>
+          </tr>
+          <tr>
+            <td>Every slide</td>
+            <td>Set in Calibri; the deck is set in the platform's own face.</td>
+            <td><span class="tag look">unmatched</span></td>
+          </tr>
+          <tr>
+            <td>Every content slide</td>
+            <td>No unit mark in the footer.</td>
+            <td><span class="tag look">unmatched</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================ 1 ============================ -->
+  <section>
+    <div class="sechead">
+      <span class="secno">01</span>
+      <h2 class="st">A pillar's measures</h2>
+      <span class="whichslide">slide 13 of your file</span>
+    </div>
+    <p class="lede">The two figures the room reads first &mdash; Measures and Execution &mdash;
+      arrive as <b>four naked lines of text in the top left</b>, where the deck draws them large
+      in the top right in their scoring colour. Under them every number is left-aligned, the
+      benchmark (&ldquo;17% <i>/ 10%</i>&rdquo;) carries the same weight as the figure it is
+      measured against, and the whole table is set at 11pt &mdash; small enough that it reads as a
+      footnote on the page rather than the thing on it.</p>
+
+    <div class="pair">
+      <div class="frame">
+        <div class="fhead"><span class="flab now">Today</span>
+          <span class="fnote">11pt throughout, everything hard left, nothing coloured</span></div>
+        <div class="stage"><div class="slide calibri">
+          <div class="s-kick">CARE</div>
+          <div class="s-title">CA01 Scale RAYA Smart Care &mdash; Key measures</div>
+          <div class="s-rule"></div>
+          <div class="s-body" style="top:108.75px;">
+            <div class="lead-k">MEASURES</div>
+            <div class="lead-v">117%</div>
+            <div class="lead-k" style="margin-top:6px;">EXECUTION</div>
+            <div class="lead-v">81%</div>
+          </div>
+          <div class="s-body" style="top:195px;">
+            <table class="st">
+              <tr><th style="width:26px;">#</th><th>Measure</th><th style="width:78px;">Annual target</th><th style="width:70px;">Actual</th><th style="width:56px;">Progres s</th><th>Note</th></tr>
+              <tr><td>1</td><td>Non-warranty walk-in repair volume growth</td><td>10%</td><td>17% / 10%</td><td>150%</td><td>1590/1855 YOY 26 vs 25</td></tr>
+              <tr class="z"><td>2</td><td>Gross profit growth</td><td>10%</td><td>19% / 10%</td><td>150%</td><td>&mdash;</td></tr>
+              <tr><td>3</td><td>Leads conversion rate</td><td>10%</td><td>5% / 10%</td><td>50%</td><td>In Progress</td></tr>
+            </table>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="frame">
+        <div class="fhead"><span class="flab next">Proposed</span>
+          <span class="fnote">the pair top right, figures aligned and coloured, the table filling the slide</span></div>
+        <div class="stage"><div class="slide">
+          <div class="s-kick">CARE</div>
+          <div class="p-title">
+            <span class="p-code">CA01</span>
+            <span class="p-name">Scale RAYA Smart Care</span>
+            <span class="p-which">Key measures</span>
+          </div>
+          <div class="p-pair">
+            <div><div class="p-pk">MEASURES</div><div class="p-pv good">117%</div></div>
+            <div><div class="p-pk">EXECUTION</div><div class="p-pv warn">81%</div></div>
+          </div>
+          <div class="p-hair"></div>
+          <div class="s-body" style="top:120px;">
+            <table class="st tall">
+              <tr>
+                <th style="width:30px;">#</th><th>Measure</th>
+                <th class="num" style="width:110px;">Annual target</th>
+                <th class="num" style="width:130px;">Actual</th>
+                <th class="num" style="width:92px;">Progress</th>
+                <th style="width:210px;">Note</th>
+              </tr>
+              <tr>
+                <td class="num" style="color:#8E9AB0;">1</td>
+                <td class="rowname">Non-warranty walk-in repair volume growth</td>
+                <td class="num">10%</td>
+                <td class="num">17% <span class="bench">/ 10%</span></td>
+                <td class="num b good">150%</td>
+                <td style="color:#4A5A76;">1590/1855 YOY 26 vs 25</td>
+              </tr>
+              <tr class="z">
+                <td class="num" style="color:#8E9AB0;">2</td>
+                <td class="rowname">Gross profit growth</td>
+                <td class="num">10%</td>
+                <td class="num">19% <span class="bench">/ 10%</span></td>
+                <td class="num b good">150%</td>
+                <td style="color:#8E9AB0;">&mdash;</td>
+              </tr>
+              <tr>
+                <td class="num" style="color:#8E9AB0;">3</td>
+                <td class="rowname">Leads conversion rate</td>
+                <td class="num">10%</td>
+                <td class="num">5% <span class="bench">/ 10%</span></td>
+                <td class="num b bad">50%</td>
+                <td style="color:#4A5A76;">In Progress</td>
+              </tr>
+            </table>
+          </div>
+          <div class="s-foot"><div class="markbox">unit mark</div></div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 2 ============================ -->
+  <section>
+    <div class="sechead">
+      <span class="secno">02</span>
+      <h2 class="st">Pillars &mdash; where we stand</h2>
+      <span class="whichslide">slide 25 of your file</span>
+    </div>
+    <p class="lede">The pillar's name and the grey line beneath it are <b>two lines on the screen
+      and one run of letters in the file</b>: <i>Scale RAYA Smart Care<b>Direction</b></i>. The two
+      scores sit hard left in plain black, where the whole point of the slide is running your eye
+      down two columns of figures. A second, smaller thing shows here too &mdash; your sub-lines
+      read <i>Direction &middot; &middot; Mahmoud</i>, because the middle field is empty and the
+      separator prints anyway.</p>
+
+    <div class="pair">
+      <div class="frame">
+        <div class="fhead"><span class="flab now">Today</span></div>
+        <div class="stage"><div class="slide calibri">
+          <div class="s-kick">CARE</div>
+          <div class="s-title">Pillars &mdash; where we stand</div>
+          <div class="s-rule"></div>
+          <div class="s-body" style="top:108.75px;">
+            <table class="st">
+              <tr><th style="width:26px;">#</th><th>Pillar</th><th style="width:76px;">Measures</th><th style="width:76px;">Execution</th></tr>
+              <tr><td>1</td><td>CA01 Scale RAYA Smart CareDirection &middot; &middot; Mahmoud</td><td>117%</td><td>81%</td></tr>
+              <tr class="z"><td>2</td><td>CA02 Build &amp; Scale B2B Managed ServicesDirection &middot; &middot; Mahmoud</td><td>72%</td><td>54%</td></tr>
+              <tr><td>3</td><td>CA03 Drive High-Margin Lifecycle ServicesDirection &middot; &middot; Nabil</td><td>100%</td><td>78%</td></tr>
+              <tr class="z"><td>4</td><td>CA04 Transform Customer Experience ExcellenceCapability &middot; &middot;</td><td>90%</td><td>89%</td></tr>
+            </table>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="frame">
+        <div class="fhead"><span class="flab next">Proposed</span>
+          <span class="fnote">two lines in the cell, scores right-aligned in their band's colour</span></div>
+        <div class="stage"><div class="slide">
+          <div class="s-kick">CARE</div>
+          <div class="p-title" style="right:50.4px;">
+            <span class="p-name">Pillars</span>
+            <span class="p-which">where we stand</span>
+          </div>
+          <div class="p-hair"></div>
+          <div class="s-body" style="top:120px;">
+            <table class="st tall">
+              <tr>
+                <th style="width:30px;">#</th><th>Pillar</th>
+                <th class="num" style="width:130px;">Measures</th>
+                <th class="num" style="width:130px;">Execution</th>
+              </tr>
+              <tr>
+                <td class="num" style="color:#8E9AB0;">1</td>
+                <td><div><span class="p-code" style="font-size:12px;">CA01</span>
+                    <span class="rowname" style="font-size:15px;">Scale RAYA Smart Care</span></div>
+                    <div class="rowsub">Direction &middot; Mahmoud</div></td>
+                <td class="num b good" style="font-size:17px;">117%</td>
+                <td class="num b warn" style="font-size:17px;">81%</td>
+              </tr>
+              <tr class="z">
+                <td class="num" style="color:#8E9AB0;">2</td>
+                <td><div><span class="p-code" style="font-size:12px;">CA02</span>
+                    <span class="rowname" style="font-size:15px;">Build &amp; Scale B2B Managed Services</span></div>
+                    <div class="rowsub">Direction &middot; Mahmoud</div></td>
+                <td class="num b warn" style="font-size:17px;">72%</td>
+                <td class="num b bad" style="font-size:17px;">54%</td>
+              </tr>
+              <tr>
+                <td class="num" style="color:#8E9AB0;">3</td>
+                <td><div><span class="p-code" style="font-size:12px;">CA03</span>
+                    <span class="rowname" style="font-size:15px;">Drive High-Margin Lifecycle Services</span></div>
+                    <div class="rowsub">Direction &middot; Nabil</div></td>
+                <td class="num b good" style="font-size:17px;">100%</td>
+                <td class="num b warn" style="font-size:17px;">78%</td>
+              </tr>
+              <tr class="z">
+                <td class="num" style="color:#8E9AB0;">4</td>
+                <td><div><span class="p-code" style="font-size:12px;">CA04</span>
+                    <span class="rowname" style="font-size:15px;">Transform Customer Experience Excellence</span></div>
+                    <div class="rowsub">Capability</div></td>
+                <td class="num b good" style="font-size:17px;">90%</td>
+                <td class="num b good" style="font-size:17px;">89%</td>
+              </tr>
+            </table>
+          </div>
+          <div class="s-foot"><div class="markbox">unit mark</div></div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 3 ============================ -->
+  <section>
+    <div class="sechead">
+      <span class="secno">03</span>
+      <h2 class="st">Where the unit stands</h2>
+      <span class="whichslide">slide 26 of your file</span>
+    </div>
+    <p class="lede">This is the worst of them, and it is a fault rather than a look: the slide prints
+      <b>three headings with all three figures missing</b>, then the footnote explaining figures
+      that are not there. On screen it is the three big numbers the whole review builds to.</p>
+
+    <div class="pair">
+      <div class="frame">
+        <div class="fhead"><span class="flab now">Today</span>
+          <span class="fnote">three labels, no numbers</span></div>
+        <div class="stage"><div class="slide calibri">
+          <div class="s-kick">CARE</div>
+          <div class="s-title">Where the unit stands</div>
+          <div class="s-rule"></div>
+          <div class="s-body" style="top:108.75px;">
+            <div class="lead-k">KEY OBJECTIVES PERFORMANCE</div>
+            <div class="lead-k" style="margin-top:6px;">PILLARS PERFORMANCE</div>
+            <div class="lead-k" style="margin-top:6px;">EXECUTION PERFORMANCE</div>
+            <div class="lead-v" style="margin-top:10px;">Objectives measure what was committed to.
+              Pillars measure how the work set against them is going. Execution measures whether
+              that work is landing on time.</div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="frame">
+        <div class="fhead"><span class="flab next">Proposed</span>
+          <span class="fnote">the deck's own three-up, each figure in its band's colour</span></div>
+        <div class="stage"><div class="slide">
+          <div class="s-kick">CARE</div>
+          <div class="p-title" style="right:50.4px;">
+            <span class="p-name">Where the unit stands</span>
+          </div>
+          <div class="p-hair"></div>
+          <div class="s-body" style="top:180px;">
+            <div class="three">
+              <div>
+                <div class="k">KEY OBJECTIVES PERFORMANCE</div>
+                <div class="v warn">90%</div>
+                <div class="c">against the last cycle</div>
+              </div>
+              <div>
+                <div class="k">PILLARS PERFORMANCE</div>
+                <div class="v good">95%</div>
+                <div class="c">4 pillars, by their measures</div>
+              </div>
+              <div>
+                <div class="k">EXECUTION PERFORMANCE</div>
+                <div class="v warn">76%</div>
+                <div class="c">delivered against planned</div>
+              </div>
+            </div>
+          </div>
+          <div class="foot-note">Objectives measure what was committed to. Pillars measure how the
+            work set against them is going. Execution measures whether that work is landing on time.</div>
+          <div class="s-foot"><div class="markbox">unit mark</div></div>
+        </div></div>
+      </div>
+      <p class="fnote" style="margin:0;">The three figures above are averaged from the pillar table
+        in your own file, to show the shape. The platform computes them properly &mdash; what it
+        does not do today is put them in the download.</p>
+    </div>
+  </section>
+
+  <!-- ============================ 4 ============================ -->
+  <section>
+    <div class="sechead">
+      <span class="secno">04</span>
+      <h2 class="st">The pillars roll-call</h2>
+      <span class="whichslide">slide 11 of your file</span>
+    </div>
+    <p class="lede">On screen this is four cards. In the file it is <b>eight lines of plain text</b>
+      &mdash; code, name, code, name &mdash; because the converter cannot see a table there and
+      falls back to reading whatever text it finds.</p>
+
+    <div class="pair">
+      <div class="frame">
+        <div class="fhead"><span class="flab now">Today</span></div>
+        <div class="stage"><div class="slide calibri">
+          <div class="s-kick">CARE</div>
+          <div class="s-title">Pillars</div>
+          <div class="s-rule"></div>
+          <div class="s-body" style="top:108.75px;">
+            <div class="lead-v">CA01</div>
+            <div class="lead-v">Scale RAYA Smart Care</div>
+            <div class="lead-v">CA02</div>
+            <div class="lead-v">Build &amp; Scale B2B Managed Services</div>
+            <div class="lead-v">CA03</div>
+            <div class="lead-v">Drive High-Margin Lifecycle Services</div>
+            <div class="lead-v">CA04</div>
+            <div class="lead-v">Transform Customer Experience Excellence</div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="frame">
+        <div class="fhead"><span class="flab next">Proposed</span>
+          <span class="fnote">the deck's own cards, as PowerPoint shapes you can still edit</span></div>
+        <div class="stage"><div class="slide">
+          <div class="s-kick">CARE</div>
+          <div class="p-title" style="right:50.4px;"><span class="p-name">Pillars</span></div>
+          <div class="p-hair"></div>
+          <div class="s-body" style="top:132px;">
+            <div class="cards">
+              <div class="pcard"><div class="c">CA01</div><div class="n">Scale RAYA Smart Care</div></div>
+              <div class="pcard"><div class="c">CA02</div><div class="n">Build &amp; Scale B2B Managed Services</div></div>
+              <div class="pcard"><div class="c">CA03</div><div class="n">Drive High-Margin Lifecycle Services</div></div>
+              <div class="pcard"><div class="c">CA04</div><div class="n">Transform Customer Experience Excellence</div></div>
+            </div>
+          </div>
+          <div class="s-foot"><div class="markbox">unit mark</div></div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 5 ============================ -->
+  <section>
+    <div class="sechead">
+      <span class="secno">05</span>
+      <h2 class="st">Strengths, weaknesses, opportunities, threats</h2>
+      <span class="whichslide">slides 6&ndash;9 of your file</span>
+    </div>
+    <p class="lede">All four SWOT slides read <b>&ldquo;1Long-standing presence&rdquo;</b> &mdash;
+      the item's number and its first word with nothing between them. Same cause as the pillar
+      names running together, so one fix answers both.</p>
+
+    <div class="pair">
+      <div class="frame">
+        <div class="fhead"><span class="flab now">Today</span></div>
+        <div class="stage"><div class="slide calibri">
+          <div class="s-kick">CARE</div>
+          <div class="s-title">Strengths</div>
+          <div class="s-rule"></div>
+          <div class="s-body" style="top:108.75px;">
+            <div class="lead-v">1Long-standing presence: a strong historical existence in the market supported by high technical experience</div>
+            <div class="lead-v">2Wide after-sales network coverage: extensive geographic coverage with premium locations</div>
+            <div class="lead-v">3Diverse product range: a wide variety of products is served</div>
+            <div class="lead-v">4Strong vendor relationships: solid relationships with key vendors and suppliers</div>
+            <div class="lead-v">5Excellent after-sales service: premium after-sales (Raya Care) service enhances customer satisfaction</div>
+            <div class="lead-v">6Strong financial capabilities</div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="frame">
+        <div class="fhead"><span class="flab next">Proposed</span>
+          <span class="fnote">the number in its own column, the first phrase carrying the weight</span></div>
+        <div class="stage"><div class="slide">
+          <div class="s-kick">CARE</div>
+          <div class="p-title" style="right:50.4px;"><span class="p-name">Strengths</span></div>
+          <div class="p-hair"></div>
+          <div class="s-body" style="top:124px;">
+            <ol class="swot">
+              <li><span class="i">1</span><span class="t"><b>Long-standing presence:</b> a strong historical existence in the market supported by high technical experience</span></li>
+              <li><span class="i">2</span><span class="t"><b>Wide after-sales network coverage:</b> extensive geographic coverage with premium locations</span></li>
+              <li><span class="i">3</span><span class="t"><b>Diverse product range:</b> a wide variety of products is served</span></li>
+              <li><span class="i">4</span><span class="t"><b>Strong vendor relationships:</b> solid relationships with key vendors and suppliers</span></li>
+              <li><span class="i">5</span><span class="t"><b>Excellent after-sales service:</b> premium after-sales (Raya Care) service enhances customer satisfaction</span></li>
+              <li><span class="i">6</span><span class="t"><b>Strong financial capabilities</b></span></li>
+            </ol>
+          </div>
+          <div class="s-foot"><div class="markbox">unit mark</div></div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ notes ============================ -->
+  <div class="notes">
+    <h2>Three things worth saying before you decide</h2>
+
+    <h3>A PowerPoint is shapes, not a picture</h3>
+    <p>The reason this file exists rather than the PDF is that you can edit it in the room. So the
+      gauges and pills on screen cannot come across as themselves &mdash; they would have to become
+      images, and an image is not editable. Everything above is text, tables and rectangles:
+      alignment, colour, italics, weight, the card, the mark. That is the whole of what a
+      <b>.pptx</b> will honestly carry, and it is enough to make it read like the deck.</p>
+
+    <h3>The footer mark is the one thing with a real cost</h3>
+    <p>Every other change is text and geometry, inside the file that already builds these slides.
+      The unit's mark is a picture, so the package needs a media part and a link from each slide
+      &mdash; plumbing the download has never had. It is drawn above as a dashed box so you can see
+      what it costs. If you would rather not spend it, say so and the footer becomes the unit's name
+      in small grey type instead.</p>
+
+    <h3>Nothing about the deck on screen changes</h3>
+    <p>This is the converter that turns the deck you present into a file. The deck itself, the PDF,
+      the plan download and every figure in the platform stay exactly as they are &mdash; and I will
+      prove that rather than promise it, by reading every figure before and after.</p>
+
+    <div class="ask">
+      <p><b>What I need from you:</b> a yes to this shape, or a note on any slide above.
+        Then I build it against the sources and check it &mdash; including running the current
+        build to watch the check fail first, so the green run means something.</p>
+    </div>
+  </div>
+
+</div>

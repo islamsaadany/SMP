@@ -17,7 +17,6 @@
 
 const pg = require("pg");
 const crypto = require("crypto");
-const io = require("../lib/state-io.js");
 const P = require("../lib/platform-io.js");
 const auth = require("../lib/auth.js");
 
@@ -35,7 +34,7 @@ const NEW_CLIENTS = [
   { key: "el-abd", name: "El Abd",  schema: "el_abd", industry: "Food & beverage" },
   { key: "demo",   name: "Demo",    schema: "demo",   industry: "Worked example", kind: "demo" }
 ];
-/* ONE PLATFORM ADMIN, AND A SEAT ON EACH CLIENT (spec 030 §7.0a, revision 3).
+/* ONE PLATFORM ADMIN, AND A SEAT ON EACH CLIENT (spec 042 §7.0a, revision 3).
    The four platform roles are gone: `admin` is a flag on the account, and what
    somebody may do about a client is the seat they hold on it. */
 const OFFICE = [
@@ -115,7 +114,7 @@ async function main() {
   /* ── 3 · the platform ─────────────────────────────────────────── */
   await P.withPlatform(pg, async function (pc) {
     await P.ensurePlatformReady(pc);
-    /* THE MOVED CLIENT'S BADGE IS MADE WITH ITS ROOM (§303.35), as
+    /* THE MOVED CLIENT'S BADGE IS MADE WITH ITS ROOM (§313.35), as
        createClientSchema does for a new one — so the first request after the
        move is already fenced rather than waiting for a cold start to notice.
        HERE and not in step 2: a badge is granted the shared platform tables
@@ -128,7 +127,7 @@ async function main() {
 
     for (const cl of [LIVE].concat(NEW_CLIENTS)) {
       await pc.query(
-        /* THE SCHEMA IS UPDATED, NOT LEFT ALONE (§303.21). A deployment may
+        /* THE SCHEMA IS UPDATED, NOT LEFT ALONE (§313.21). A deployment may
            already have ADOPTED this client — one row saying it lives in
            `public`, which is what lets the code ship before this script runs.
            `DO NOTHING` would then leave the row pointing at a schema this
@@ -139,7 +138,7 @@ async function main() {
         /* `made_here` is FALSE for the live client — it brought its own
            register of 33 people and the platform adds nobody to it — and TRUE
            for the empty ones this script creates, whose registers are the
-           platform's to build (§303.31). */
+           platform's to build (§313.31). */
         "INSERT INTO clients (key, name, schema_name, industry, kind, made_here) VALUES ($1,$2,$3,$4,$5,$6) " +
         "ON CONFLICT (key) DO UPDATE SET schema_name = EXCLUDED.schema_name, " +
         "  name = CASE WHEN clients.name = '' THEN EXCLUDED.name ELSE clients.name END, " +
@@ -165,10 +164,10 @@ async function main() {
        Islam holding its super seat — his own answer, and the only shape that
        lets anybody open it on day one.
 
-       ── AND WHICH ROW THEY ARE IS READ OFF THE REGISTER (§303.32) ──────
+       ── AND WHICH ROW THEY ARE IS READ OFF THE REGISTER (§313.32) ──────
        This wrote `o.person` — `ff_islam`, `ff_essam`, `ff_omar` — and on a
        client whose register the platform did NOT build, nothing ever creates
-       those rows (§303.30). So the mapping named nobody from the moment this
+       those rows (§313.30). So the mapping named nobody from the moment this
        script ran, and the sign-in fell through to inventing a person: the
        account's own name over the client's Super user seat.
 

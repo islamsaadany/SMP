@@ -24,7 +24,7 @@ const DIRS = ["api", "lib"];
 const BAD = [
   [/\bpg_advisory_lock\s*\(/i,        "pg_advisory_lock — a SESSION lock; use pg_advisory_xact_lock inside a transaction"],
   [/\bpg_advisory_unlock(_all)?\s*\(/i,"pg_advisory_unlock — pairs with a session lock that cannot be held"],
-  /* A SESSION `SET` NEVER HAS A `WHERE` (§303.34). An interpolated table name
+  /* A SESSION `SET` NEVER HAS A `WHERE` (§313.34). An interpolated table name
      breaks a run of literals, so `"UPDATE " + T + " SET x = $1 " + "WHERE …"`
      hands this rule a fragment that genuinely BEGINS with the word SET while
      the statement does not — a false positive that would be answered by
@@ -34,7 +34,7 @@ const BAD = [
      the safe way to be wrong. */
   [/^\s*SET\s+(?!LOCAL\b)[\w.]+\s*(=|\bTO\b)(?![\s\S]*\bWHERE\b)/i, "SET — a session setting that stays on the backend; use SET LOCAL inside a transaction"],
   /* A `SET ROLE` has neither `=` nor `TO`, so the rule above walks past it —
-     and it is session state exactly as search_path is (§303.35). Named here
+     and it is session state exactly as search_path is (§313.35). Named here
      so the one line that wears a badge has to carry a named exception. */
   [/^\s*SET\s+ROLE\b/i,                "SET ROLE — a session role that stays on the backend; only on a direct connection, and reset at release"],
   [/^\s*LISTEN\b/i,                    "LISTEN — session-level, never reaches the right backend"],
@@ -73,9 +73,9 @@ for (const dir of DIRS) {
     }
   }
 }
-/* ── A DELIBERATE EXCEPTION IS NAMED AT THE LINE, AND PRINTED (§303.34) ──
+/* ── A DELIBERATE EXCEPTION IS NAMED AT THE LINE, AND PRINTED (§313.34) ──
    One statement in the product is session-level ON PURPOSE and argued for:
-   `pointAt()` selects a client's schema, and §303.34 answers it by pointing the
+   `pointAt()` selects a client's schema, and §313.34 answers it by pointing the
    pool at the DIRECT connection, where a checked-out client is one backend for
    the life of the checkout and the hazard does not exist. This file reads
    source and cannot see which endpoint a deployment is configured with, so the

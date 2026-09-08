@@ -1,4 +1,4 @@
-/* A CLIENT'S CONNECTION WEARS THAT CLIENT'S BADGE (§303.35, spec 030).
+/* A CLIENT'S CONNECTION WEARS THAT CLIENT'S BADGE (§313.35, spec 042).
 
    The boundary between two clients was our own code being right: a slug
    looked up in the registry, a schema set on a checked-out connection, and a

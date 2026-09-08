@@ -6,7 +6,7 @@ reading the running code, not by preference.
 ## 1 · Where the tenant boundary goes
 
 **Decision:** one Postgres **schema** per client; `SET search_path` on each
-checked-out connection, reset on release; never on the pool. **Amended §303.35:**
+checked-out connection, reset on release; never on the pool. **Amended §313.35:**
 and `SET ROLE smp_<schema>` on that same connection — one no-login role per
 client, made by the platform with the room, so the database itself refuses a
 query that reaches another client's schema. Chosen over a key per client

@@ -38,10 +38,10 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       because with no Save there is no press to refuse at and a field left
       showing what was not stored is §96 with the sign reversed.
 
-  7 · THE MONTH IS PICKED IN THE PEN and lands on `REVIEW.asOfMonth`, and
-      CLEARING it DELETES the key rather than storing an empty one (§50.6) —
-      the difference between a cycle nobody asked and one whose month was
-      taken away is a phantom change in every later save.
+  7 · THE CYCLE'S END IS THE REVIEW POINT (§307) — picked in the pen, and
+      CLEARING it empties the box without inventing a month, with the cycle's
+      NAME as the fallback, so a plan whose end is not set does not silently go
+      back to being measured against a whole year.
 
   8 · IT IS THE OFFICE'S, AND ONLY WHILE THE CYCLE IS OPEN. Both ends: a
       custodian gets no Edit, and a closed cycle offers "Open a new cycle"
@@ -49,7 +49,7 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       control at all.
 
   9 · REOPENING A CLOSED CYCLE (§273.2). Islam picked the pen over a button on
-      the strip, so the closed cycle's pen is asserted to hold the five facts
+      the strip, so the closed cycle's pen is asserted to hold the facts
       as VALUES and Reopen at its far end — with the strip asserted to carry NO
       Reopen, or a build that put one there passes every "you can reopen"
       assertion while reversing the decision. The press is driven for real and
@@ -177,12 +177,30 @@ def pen_state(pg):
         word: word,
         lit: !!(t && t.classList.contains("penon")),
         cols: !!p.querySelector(".cyc2-f") && !!p.querySelector(".cyc2-d"),
-        heads: [...p.querySelectorAll(".nc-h")].map(h => h.textContent.trim()),
+        /* §308: THE CYCLE'S OWN BLOCKS, asked apart from the planning
+           period's. That block is `.cyc2-r.planper` and leads the pen, so a
+           flat `.nc-h` sweep reports four headings and every positional
+           assertion below it shifts by one — §214.3 with a heading rather
+           than a column. Scoped rather than loosened (§218): what this file
+           owns is the CYCLE, and `checks/planning-period.py` owns the frame
+           it sits in. */
+        heads: [...p.querySelectorAll(".cyc2-f .nc-h, .cyc2-d .nc-h, .cyc2-r:not(.planper) .nc-h")]
+                  .map(h => h.textContent.trim()),
         labels: [...p.querySelectorAll(".nc-grid label > span:first-child")]
+                  .map(s => s.textContent.trim()),
+        /* spec 030: THE CYCLE'S OWN FIELDS, asked apart from the review
+           block's. Islam's decision was that the review day must NOT join
+           these — *"the cycle is about the time we cover and what we report
+           already and how we preorate more dates will create confusion"* —
+           so the assertion below reads this list and not every box in the
+           pen, which is what makes it able to catch the drift back. */
+        cycleLabels: [...p.querySelectorAll(".cyc2-f .nc-grid label > span:first-child")]
+                  .map(s => s.textContent.trim()),
+        reviewLabels: [...p.querySelectorAll(".cyc2-r:not(.planper) .nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
         fields: [...p.querySelectorAll(".nc-grid input")].map(i => i.value),
         bound: [...p.querySelectorAll(".nc-grid input")].every(i => i.hasAttribute("data-fld")),
-        month: (p.querySelector(".monthbtn .mval") || {}).textContent || "",
+        month: (p.querySelector(".cyc2-f .monthbtn .mval") || {}).textContent || "",
         close: !!btn,
         closeInDanger: !!(btn && btn.closest(".cyc2-d")),
         save: !!p.querySelector("[data-ce-save]"),
@@ -194,9 +212,14 @@ def pen_state(pg):
 
 def review(pg):
     return js(pg, """() => ({name:REVIEW.name, from:REVIEW.from, to:REVIEW.to,
-                            due:REVIEW.due, asOf:REVIEW.asOfMonth,
-                            hasAsOf:Object.prototype.hasOwnProperty.call(REVIEW,'asOfMonth'),
-                            state:REVIEW.state})""")
+                            due:REVIEW.due, state:REVIEW.state,
+                            /* §307: the review point is no longer a field of
+                               its own. `asOf` is what the arithmetic actually
+                               answers, so a build that kept a second month
+                               somewhere would be caught by the two
+                               disagreeing rather than by a key existing. */
+                            asOf:reviewAsOfLabel(), months:elapsedMonths(),
+                            hasAsOf:Object.prototype.hasOwnProperty.call(REVIEW,'asOfMonth')})""")
 
 
 def go_cycle(pg, who):
@@ -209,6 +232,40 @@ def go_cycle(pg, who):
     # it arrived measures whatever page it happens to be on (§50.6).
     js(pg, "() => { current = 'setup'; currentSub = 'cycle'; paint(); }")
     pg.wait_for_timeout(360)
+
+
+def pick_month(pg, sel, word):
+    """§307: A DATE IS PRESSED, NEVER TYPED. Through the real popup, because a
+    picker that writes nothing renders exactly like one that works (§96) — and
+    every probe degrades rather than throwing (§215)."""
+    if not press(pg, sel, "the month picker at " + sel):
+        return False
+    got = js(pg, """(w) => {
+      const b = [...document.querySelectorAll(".monthpop [data-mpick]")]
+        .find(x => x.textContent.trim() === w);
+      if (!b) return false;
+      b.click(); return true;
+    }""", word)
+    pg.wait_for_timeout(320)
+    return got is True
+
+
+def pick_day(pg, sel, day):
+    """The day panel is the month panel's sibling and is asserted as its own
+    control: a build that gave `Reports due` a MONTH picker would pass every
+    "the dates are picked" assertion and quietly lose the cut-off."""
+    if not press(pg, sel, "the day picker at " + sel):
+        return False
+    got = js(pg, """(d) => {
+      const pop = document.querySelector(".monthpop");
+      if (!pop || !pop.classList.contains("daypop")) return "not a day panel";
+      const b = [...pop.querySelectorAll("[data-dpick]")]
+        .find(x => x.textContent.trim() === String(d));
+      if (!b) return "no such day";
+      b.click(); return true;
+    }""", day)
+    pg.wait_for_timeout(320)
+    return got is True
 
 
 def press(pg, sel, what=None, force=False):
@@ -303,9 +360,51 @@ with sync_playwright() as p:
     ok("...and no Cancel", pen.get("cancel") is False, pen)
     ok("every field is BOUND, which is what makes those unnecessary",
        pen.get("bound") is True, pen)
-    ok("it asks for all five facts",
-       [x.lower() for x in (pen.get("labels") or [])] ==
-       ["name", "covers from", "to", "reports due", "reporting as of"], pen.get("labels"))
+    # REWRITTEN, NEVER LOOSENED (§214.3, §218), for the second time. It held
+    # every box in the pen as one flat list, which spec 030 moved: the review
+    # day and its reminder times are in the pen and are deliberately NOT among
+    # the cycle's own fields, so the two lists are asserted separately.
+    #
+    # §307 takes one of those fields AWAY, which is the harder rewrite: the
+    # literal could have been shortened to four and gone on passing while
+    # guarding nothing. What is asserted is Islam's decision — "if you are
+    # using reporting as of then this should replace the cover to" — so the
+    # NAMES are asserted in order AND `reporting as of` is asserted absent by
+    # name, because a build that drew a fifth box under any other wording would
+    # satisfy a bare count of four (§94.2, both ends).
+    ok("the cycle's own block asks for exactly its four facts, and no more",
+       [x.lower() for x in (pen.get("cycleLabels") or [])] ==
+       ["name", "covers from", "to", "reports due"],
+       pen.get("cycleLabels"))
+    ok("...and Reporting as of is gone by name — the cycle's end IS the review point",
+       not any("reporting as of" in x.lower() for x in (pen.get("cycleLabels") or [])),
+       pen.get("cycleLabels"))
+    # AND THE FOUR ARE ON ONE LINE, which is the other half of what he asked
+    # for and the thing a check must hold: measured as ONE ROW at his own
+    # window, never as a pixel count (§94.8). At 1280 the pen's field area is
+    # 641px, which is where the five boxes wrapped.
+    row = js(pg, """() => {
+      /* §308: THE CYCLE'S ROW. The planning period draws a `.nc-1line` of
+         its own and draws it FIRST, so an unscoped query measures three boxes
+         and calls a correct build broken (§51.11: a selector that still
+         matches and points at another control). */
+      const g = document.querySelector(".newcycle .cyc2-f .nc-1line");
+      if (!g) return {no:"no cycle row"};
+      const kids = [...g.children], r = kids.map(k => k.getBoundingClientRect());
+      const gr = g.getBoundingClientRect();
+      /* ONE ROW IS NOT ONE `top` (§122.4). The boxes are bottom-aligned and of
+         three different heights, so counting distinct tops reports two rows on
+         a row that is plainly one. They are on one line when every box overlaps
+         every other one vertically. */
+      return { oneRow: Math.max(...r.map(x => x.top)) < Math.min(...r.map(x => x.bottom)),
+               n: kids.length, h: Math.round(gr.height),
+               fits: r.every(x => x.right <= gr.right + 1) };
+    }""")
+    ok("the four boxes are on ONE line", row.get("oneRow") is True and row.get("n") == 4, row)
+    ok("...and none of them runs past the row it is in (§158)", row.get("fits") is True, row)
+    ok("and the review day is NOT among them — it changes no figure (spec 030)",
+       not any("review" in x.lower() for x in (pen.get("cycleLabels") or [])),
+       pen.get("cycleLabels"))
     # The month's label is the panel's own since §273 and is deliberately NOT
     # the strip's wording: the strip states a fact ("reported as of Jun 26"),
     # the field asks for one. Asserted so a later build cannot drift them into
@@ -313,8 +412,15 @@ with sync_playwright() as p:
     ok("filled from the cycle, not empty",
        (pen.get("fields") or [None])[0] == r0.get("name"), pen.get("fields"))
     ok("two columns, headed", pen.get("cols") is True and
-       [h.lower() for h in (pen.get("heads") or [])] == ["this cycle", "ending it"],
+       [h.lower() for h in (pen.get("heads") or [])][:2] == ["this cycle", "ending it"],
        pen.get("heads"))
+    # spec 030: and the review sits UNDER them in a block of its own, which is
+    # the whole of how it is kept out of the arithmetic. Asserted at both ends
+    # — present as its own block, and its fields absent from the cycle's.
+    ok("with the review under them, in a block of its own",
+       [h.lower() for h in (pen.get("heads") or [])][2:] == ["the review"] and
+       len(pen.get("reviewLabels") or []) == 3,
+       [pen.get("heads"), pen.get("reviewLabels")])
     ok("Close the cycle is in the ENDING IT column, not among the fields",
        pen.get("close") is True and pen.get("closeInDanger") is True, pen)
     ok("...and it is live, because nothing can be unsaved",
@@ -333,16 +439,30 @@ with sync_playwright() as p:
 
     # ── 3 · every date reaches the cycle, and Done editing closes ────
     print("\n── 3 · every field writes, and Done editing collapses the pen ──")
-    flds = pg.query_selector_all(".newcycle .nc-grid input.fld")
-    for el, val in zip(flds[1:4], ("Feb 2026", "Jul 2026", "20 Aug 2026")):
-        el.click(); pg.keyboard.press("Control+A"); pg.keyboard.type(val, delay=6)
-        pg.evaluate("()=>document.activeElement && document.activeElement.blur()")
-        pg.wait_for_timeout(140)
+    # §307: REWRITTEN, NEVER LOOSENED (§218). These three were typed into
+    # boxes; Islam: "all the dates should be date selector like the reporting
+    # as of." Typing into a box the pen no longer draws would have thrown, and
+    # narrowing this to the name alone would have left the three dates — one of
+    # which now decides every score in the tenant — unasserted.
+    #
+    # PRESSED THROUGH THE REAL CONTROLS and read back off the CYCLE, because a
+    # picker wired to nothing renders identically to one that works (§96).
+    pick_month(pg, ".newcycle .cyc2-f label:nth-child(2) .monthbtn", "Feb")
+    pick_month(pg, ".newcycle .tobtn", "Jul")
+    pick_day(pg, ".newcycle .cyc2-f label:nth-child(4) .monthbtn", 20)
     saved = review(pg)
     ok("the name landed", saved.get("name") == "H2 2026 renamed", saved)
-    ok("Covers from landed", saved.get("from") == "Feb 2026", saved)
-    ok("to landed", saved.get("to") == "Jul 2026", saved)
-    ok("Reports due landed", saved.get("due") == "20 Aug 2026", saved)
+    # FOUR DIGITS, and that is not a style: `cycleYear()` scrapes a four-digit
+    # year out of these strings, and since §307 `to` is the review point — so a
+    # two-digit one here would take `to` out of that scrape and land §239.3's
+    # fault on the field this change made load-bearing.
+    ok("Covers from landed, with a four-digit year", saved.get("from") == "Feb 2026", saved)
+    ok("to landed, with a four-digit year", saved.get("to") == "Jul 2026", saved)
+    ok("Reports due landed, WITH A DAY on it", saved.get("due") == "20 Jul 2026", saved)
+    # AND PICKING THE END MOVED WHAT EVERYTHING IS MEASURED AGAINST. This is the
+    # whole of §307 in one assertion: one field, two jobs, no second copy.
+    ok("...and the cycle's end IS the review point, with no second field to set",
+       saved.get("asOf") == "Jul 2026" and saved.get("months") == 7, saved)
     press(pg, "[data-editcycle]", "Done editing")
     ok("the pen collapsed", pen_state(pg).get("none") is True, pen_state(pg))
     ok("...and the button says Edit again", pen_state(pg).get("word") == "Edit",
@@ -400,31 +520,42 @@ with sync_playwright() as p:
     ok("a name with space around it is trimmed, not refused",
        review(pg).get("name") == "H2 2026 renamed", review(pg))
 
-    # ── 7 · the month, picked in the pen, and CLEARED to an absence ──
-    print("\n── 7 · the month is picked in the pen, and clearing it deletes the key ──")
-    press(pg, ".newcycle .monthbtn", "the month picker in the pen")
-    picked = js(pg, """() => {
-      const pop = document.querySelector(".monthpop");
-      if (!pop) return {threw:"no month panel"};
-      const m = pop.querySelectorAll("[data-mpick]")[2];   /* Mar */
-      m.click();
-      return {picked:true};
-    }""")
-    pg.wait_for_timeout(320)
-    ok("a month can be picked", picked.get("picked") is True, picked)
+    # ── 7 · the end is the review point, and clearing it falls back ──
+    print("\n── 7 · the cycle's end is the review point, and clearing it falls back ──")
+    # §307: REWRITTEN, NEVER LOOSENED (§218). This pressed "the month picker in
+    # the pen" — a selector that still MATCHES and now points at Covers from,
+    # which is §51.11's own fault: it would have gone on passing while
+    # measuring a control that moves no score at all.
+    ok("a month can be picked", pick_month(pg, ".newcycle .tobtn", "Mar"), None)
     got = review(pg)
-    ok("and it lands on the cycle", (got.get("asOf") or "").startswith("Mar"), got)
+    ok("and it lands on the cycle", (got.get("to") or "").startswith("Mar"), got)
+    ok("...and moves what every figure is measured against, with nothing else set",
+       got.get("asOf") == "Mar 2026" and got.get("months") == 3, got)
     # NO Edit press between the two — §273 needed one because Save closed the
     # pen, and pressing it now would SHUT the pen that is already open (which
     # is the toggle behaving, and cost the second half of this section on its
     # first run against the build that behaves).
-    press(pg, ".newcycle .monthbtn", "the month picker in the pen")
-    js(pg, """() => { document.querySelector(".monthpop [data-mclear]").click(); }""")
+    press(pg, ".newcycle .tobtn", "the end-month picker in the pen")
+    js(pg, """() => { const b = document.querySelector(".monthpop [data-mclear]");
+                      if (b) b.click(); }""")
     pg.wait_for_timeout(320)
     cleared = review(pg)
-    ok("cleared, the key is DELETED and not emptied", cleared.get("hasAsOf") is False, cleared)
+    # REWRITTEN (§218). It asserted that clearing DELETED a key, which was the
+    # right question while the review point rode `extra` and an empty key would
+    # have put a phantom change into every save. `to` is a real column, so the
+    # question becomes the one that now matters and is worse: with no end
+    # month, does the platform silently go back to measuring against a whole
+    # year? It must not — the cycle's NAME is the fallback `cycleMonth()` has
+    # always kept — and no month is ever stored that nobody picked.
+    ok("cleared, the box is empty and no month is invented", cleared.get("to") == "", cleared)
+    ok("...and nothing is left behind under the old name either (§307)",
+       cleared.get("hasAsOf") is False, cleared)
+    ok("...and the year does NOT become whole — the name answers", cleared.get("months") == 6, cleared)
     ok("and the strip falls back rather than reading Missing",
        "Missing" not in (strip_state(pg).get("asof") or ""), strip_state(pg).get("asof"))
+    ok("...saying where the number came from", "name" in (strip_state(pg).get("asof") or ""),
+       strip_state(pg).get("asof"))
+    pick_month(pg, ".newcycle .tobtn", "Jul")
 
     # ── 5b · with nothing unsaved, Close WORKS ───────────────────────
     print("\n── 5b · and with nothing unsaved the same press closes the cycle ──")

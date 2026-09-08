@@ -390,7 +390,7 @@ var VID_NO_HOSTS = Object.freeze([]);
    pasted for that host start playing (§42). */
 function videoPlay(vid){
   if (!vid) return null;
-  /* The play address names its client (§303.35) — through SYNC's one helper,
+  /* The play address names its client (§313.35) — through SYNC's one helper,
      and untouched where there is no SYNC (a deck built for a check) or no
      server (file://), where the address is never fetched anyway. */
   if (vid.path) {

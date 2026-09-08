@@ -185,7 +185,7 @@ module.exports = async function handler(req, res) {
             "UPDATE accounts SET name = COALESCE($2, name), status = COALESCE($3, status), " +
             "updated_at = now() WHERE email = $1", [email, body.name || null, body.status || null]);
 
-          /* ── AND THE ADDRESS ITSELF CAN CHANGE (§303.27) ─────────────
+          /* ── AND THE ADDRESS ITSELF CAN CHANGE (§313.27) ─────────────
              Islam: "I need to edit the consultants names and emails as well."
              The name was already editable; the address was not, because it is
              what everything here is keyed by — the account, the seats, the
@@ -290,7 +290,7 @@ module.exports = async function handler(req, res) {
       if (action === "client") {
         const row = await P.clientByKey(c, body.key);
         if (!row.key || !FF.mayReadConfig(world, account, row)) throw P.noSuchClient();
-        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§303.29) ─────────
+        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§313.29) ─────────
            Raya Trade's register was built before the platform existed, so
            Forefront's own people are already on it — Mohamed Essam is `smo`,
            under a Raya address. Adding him to the team mints `ff_essam` and he
@@ -329,7 +329,7 @@ module.exports = async function handler(req, res) {
         if (!FF.mayConfigureClient(world, account, row)) {
           return send(res, 403, { ok: false, error: "This client's configuration is not yours to change." });
         }
-        /* ── THE MARK IS A PNG, OR IT IS NOTHING (§303.36, §52) ─────
+        /* ── THE MARK IS A PNG, OR IT IS NOTHING (§313.36, §52) ─────
            It is drawn on the client's own door before anybody has signed in,
            so what is stored here is served to whoever opens that address. An
            SVG is executable content (§52) and a JPEG carries an opaque ground
@@ -375,7 +375,7 @@ module.exports = async function handler(req, res) {
         await P.createClientSchema(pg, schema, name);
         await c.query(
           /* MADE HERE, so its register is the platform's to write into
-             (§303.31): putting somebody on this client's team adds them to it,
+             (§313.31): putting somebody on this client's team adds them to it,
              seat and all. */
           "INSERT INTO clients (key, name, schema_name, industry, notes, made_here) " +
           "VALUES ($1,$2,$3,$4,$5,true)",
@@ -429,7 +429,7 @@ module.exports = async function handler(req, res) {
         }
         /* The person key this account IS inside that client — minted once from
            the address, and never from the name, which changes. */
-        /* THE ROW THEY ALREADY ARE, if the configuration says so (§303.29);
+        /* THE ROW THEY ALREADY ARE, if the configuration says so (§313.29);
            otherwise minted from the address, which is what a client created
            since the platform always gets.
 
@@ -439,12 +439,12 @@ module.exports = async function handler(req, res) {
         let personKey = P.officePersonKey(email);
         const asKey = String(body.personKey || "").trim();
         /* AND ON A CLIENT THAT HAS A REGISTER, SAYING WHO THEY ARE IS
-           REQUIRED (§303.30). Nothing is created there any more, so an account
+           REQUIRED (§313.30). Nothing is created there any more, so an account
            added without an answer would hold a seat and be nobody — a team row
            that opens a client showing nothing. A register with nobody in it is
            the one case that needs no answer, because there is nobody to be. */
         if (body.on !== false && !asKey && !row.made_here) {
-          /* ASKED ONLY OF A REGISTER THE PLATFORM DID NOT BUILD (§303.31).
+          /* ASKED ONLY OF A REGISTER THE PLATFORM DID NOT BUILD (§313.31).
              On a client created here the answer is the act itself — adding
              somebody to the team adds them to the register — so asking would
              be asking a question the platform has already answered (§93.13).
@@ -465,7 +465,7 @@ module.exports = async function handler(req, res) {
           }
         }
         if (asKey && asKey !== personKey) {
-          /* SEVERAL ACCOUNTS MAY BE ONE ROW (§303.30, Islam's option B). On a
+          /* SEVERAL ACCOUNTS MAY BE ONE ROW (§313.30, Islam's option B). On a
              client whose register predates this platform there is nobody for
              most of Forefront to be — Raya's register holds Mohamed Essam and
              not the others — so the honest answer is that they ACT AS that
@@ -489,7 +489,7 @@ module.exports = async function handler(req, res) {
           personKey = asKey;
         }
         const seat = FF.SEAT_KEYS.indexOf(String(body.seat)) > -1 ? String(body.seat) : "smoteam";
-        /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§303.26). This MOVED
+        /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§313.26). This MOVED
            the seat — demote whoever held it, then write the new one — because
            a unique index refused a second. Islam: "a project might have 2
            super users", so the index is gone and so is the move: giving
@@ -523,7 +523,7 @@ module.exports = async function handler(req, res) {
            lib/rules.js reads it. Without this the configuration would say one
            thing and the client's platform another until their next visit.
 
-           ONLY ON A ROW THE PLATFORM CREATED (§303.29). This wrote the role
+           ONLY ON A ROW THE PLATFORM CREATED (§313.29). This wrote the role
            unconditionally and went straight past `ensureOfficeRow`'s adoption
            rule — so pointing an account at a row that was already there, and
            then touching the seat, DEMOTED Raya's own SMO from `super` to
@@ -546,14 +546,14 @@ module.exports = async function handler(req, res) {
           "SELECT person_key FROM account_clients WHERE email = $1 AND client_key = $2",
           [email, row.key])).rows[0];
         /* ── AND A ROW THIS LEAVES BEHIND IS RETIRED, NEVER DELETED
-              (§303.30, Islam: "should be retired for now until we verify the
+              (§313.30, Islam: "should be retired for now until we verify the
               other flow working and I will delete them myself") ──────────
            Pointing an account at somebody who is already on the register
            orphans the row the platform minted for them. Retiring says the true
            thing — nobody works here as that person any more — and leaves
            anything that ever pointed at it intact (§35, §62). Only rows the
            PLATFORM created are touched: `ffrow` is the mark, never
-           `forefront`, which is a fact about the person (§303.29). */
+           `forefront`, which is a fact about the person (§313.29). */
         try {
           await P.withSchema(pg, row.schema_name, async function (sc) {
             await sc.query(
@@ -563,7 +563,7 @@ module.exports = async function handler(req, res) {
                               [row.key])).rows.map(function (x) { return x.person_key; })]);
           });
         } catch (e) { console.error("retiring in " + row.key + ":", e.message); }
-        /* ── AND ON A CLIENT MADE HERE, THE TEAM IS THE REGISTER (§303.31) ──
+        /* ── AND ON A CLIENT MADE HERE, THE TEAM IS THE REGISTER (§313.31) ──
            Islam: "a client created from the multitenant platform will have its
            own registry, and on the settings of this client we will add the
            consultants and roles and accordingly they will be added to the

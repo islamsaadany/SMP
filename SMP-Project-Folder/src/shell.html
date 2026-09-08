@@ -36,7 +36,7 @@
   </div>
 </div>
 
-<!-- THE DEMO BANNER IS GONE WITH THE BUTTON IT LABELLED (spec 030 §6.1).
+<!-- THE DEMO BANNER IS GONE WITH THE BUTTON IT LABELLED (spec 042 §6.1).
      It said "nothing here is saved" over a dataset nobody can switch into any
      more: the worked example is a CLIENT now, on Forefront's own cards, with
      its own schema and its own address — and it saves. `.banner` itself stays,
@@ -70,7 +70,7 @@
            never innerHTML - the org name is typed in Labels. -->
       <span class="orgname" id="orgname"></span>
     </div>
-    <!-- THE WAY BACK TO THE CARDS (spec 030). The client's name, pressed,
+    <!-- THE WAY BACK TO THE CARDS (spec 042). The client's name, pressed,
          returns to the door — Islam's own choice over a dropdown, and the
          reason is worth keeping: a list of every client on every page of a
          client's own platform is one mis-gate away from being read by that
@@ -211,6 +211,7 @@
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
 <script src="SAFETY"></script>
+<script src="CONTINGENCY"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -605,7 +606,7 @@
          section is refused, so a view-only holder of c_import sees Archived
          plans alone and somebody with neither sees no entry — exactly what the
          two separate rows did, in one row. */
-      /* ── AND VIDEO STORAGE IS ITS THIRD SECTION (§261.9, Islam) ───────
+      /* ── AND VIDEO STORAGE IS A SECTION OF IT (§261.9, Islam) ─────────
          §261 gave it a rail entry of its own under *Running the cycle*, and
          he questioned it: *"the import and archive has 2 subtabs now. I'm not
          sure that this is the right place to store the videos."* He is right,
@@ -613,8 +614,8 @@
          **"What you do while a cycle is open"**, and clearing storage is
          exactly what you do when one is NOT.
 
-         WHAT THE THREE SHARE IS THE PAGE'S NAME: what the platform is
-         holding, one way in and two things held. An archived plan and a
+         WHAT THEY SHARE IS THE PAGE'S NAME: what the platform is
+         holding, the ways in and the things held. An archived plan and a
          stored clip are the same errand — *what has piled up, and how do I
          clear it* — which is why the label moves to **Import & storage**
          rather than the section being bolted under a name describing the
@@ -623,13 +624,24 @@
          held, not a third meaning.
 
          EACH SECTION KEEPS ITS OWN GATE (§130.4), which is what lets Video
-         storage be the office's while the other two follow `c_import` — and
+         storage be the office's while the others follow `c_import` — and
          it is why this could not simply inherit the page's key. */
       { k:"import",   ac:"c_import", grp:"cycle", label:"Import & storage", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace video clips storage space delete clear mb size presentation",
         sections: function(){
-          return [{ k:"in",   ac:"c_import", label:"Import a plan",
+          /* FOUR: what leaves, what arrives, the record of what an arrival
+             displaced, and what the platform is holding. §304 split the one
+             import section into Download and Upload — a file goes away for a
+             week and somebody sends it back, so the two halves are not one
+             sitting — and §261.9's Video storage is the fourth. The two import
+             sections keep the SAME gate they had — §48.2 closed importing to
+             anybody without `edit` because there is nothing to READ on it — so
+             a view-only holder of c_import still sees Archived plans alone. */
+          return [{ k:"dl",   ac:"c_import", label:"Download",
                     when: function(){ return grant("c_import") === "edit"; },
-                                                                        render:renderImport },
+                                                                        render:renderImportDownload },
+                  { k:"up",   ac:"c_import", label:"Upload",
+                    when: function(){ return grant("c_import") === "edit"; },
+                                                                        render:renderImportUpload },
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives },
                   { k:"vids", ac:"c_import", label:"Video storage",
                     when: function(){ return inOffice(); },             render:renderVideoStore }];
@@ -2463,6 +2475,7 @@
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
     if (typeof SAFETY !== "undefined") SAFETY.onPaint();
+    if (typeof CONT !== "undefined") CONT.onPaint();
     if (typeof TRAIL !== "undefined") TRAIL.onPaint();
     /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
        The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
@@ -3081,9 +3094,20 @@
       var draw = function(btn){
         var mi = btn.dataset.mi === "" ? null : +btn.dataset.mi;
         var yr = +btn.dataset.yr;
-        /* The lit month belongs to the year it was set in: step to 2027 and
-           nothing is lit, step back and Jul lights again. */
-        open.pop.innerHTML = monthPopHtml(mi, yr, yr === open.setYear);
+        /* §307: ONE POPUP, TWO BODIES. A day picker steps months and lights a
+           day; a month picker steps years and lights a month. Everything
+           around them — placing, dismissing, Escape, the write through FIELDS
+           — is the same machinery, because it is the same control (§53.5). */
+        if (btn.dataset.day) {
+          var o = open.dayOrigin;
+          var lit = (o && o.mi === mi && o.year === yr) ? o.day : null;
+          open.pop.classList.add("daypop");
+          open.pop.innerHTML = dayPopHtml(lit, mi == null ? 0 : mi, yr);
+        } else {
+          /* The lit month belongs to the year it was set in: step to 2027 and
+             nothing is lit, step back and Jul lights again. */
+          open.pop.innerHTML = monthPopHtml(mi, yr, yr === open.setYear);
+        }
         place(btn, open.pop);
       };
       var write = function(value){
@@ -3112,7 +3136,14 @@
           var onKey = function(e){ if (e.key === "Escape") { shut(); btn.focus(); } };
           var onGone = function(e){ if (!pop.contains(e.target)) shut(); };
           open = { btn: btn, pop: pop, onDoc: onDoc, onKey: onKey, onGone: onGone,
-                   setYear: +btn.dataset.yr };
+                   setYear: +btn.dataset.yr,
+                   /* Where the stored day actually sits, remembered at OPEN
+                      time: the button's own `data-mi` walks as the header is
+                      stepped, so lighting off it would light the 15th of every
+                      month somebody walks past (§15.1). */
+                   dayOrigin: (btn.dataset.day && btn.dataset.dv !== "")
+                     ? { day: +btn.dataset.dv, mi: +btn.dataset.mi, year: +btn.dataset.yr }
+                     : null };
           /* Nothing is lit until a month has been set: an empty cell must not
              open with July already looking chosen (§15.1, absent never zero). */
           if (btn.dataset.mi === "") open.setYear = null;
@@ -3132,9 +3163,23 @@
           draw(open.btn);
           return;
         }
+        /* Stepping a MONTH rolls the year with it, or December has no next. */
+        var mstep = ev.target.closest("[data-mstep]");
+        if (mstep && open.pop.contains(mstep)) {
+          var t = (+open.btn.dataset.yr) * 12 + (+open.btn.dataset.mi || 0) + (+mstep.dataset.mstep);
+          open.btn.dataset.mi = ((t % 12) + 12) % 12;
+          open.btn.dataset.yr = Math.floor(t / 12);
+          draw(open.btn);
+          return;
+        }
+        var dpick = ev.target.closest("[data-dpick]");
+        if (dpick && open.pop.contains(dpick))
+          return write(dayValue(+dpick.dataset.dpick, +open.btn.dataset.mi || 0,
+                                +open.btn.dataset.yr));
         var pick = ev.target.closest("[data-mpick]");
         if (pick && open.pop.contains(pick))
-          return write(monthValue(+pick.dataset.mpick, +open.btn.dataset.yr));
+          return write(monthValue(+pick.dataset.mpick, +open.btn.dataset.yr,
+                                  open.btn.dataset.yw === "1"));
         if (ev.target.closest("[data-mclear]") && open.pop.contains(ev.target))
           return write("");
       });
@@ -3361,13 +3406,26 @@
            function and wrong for the other format. §59's rule in the one
            place still asking by prefix: a pillars function's plan is
            unit-shaped, so it takes the unit deck through `unitLike()`, which
-           resolves both kinds of key in one place. */
-        /* ONE OPENER FOR THE TWO DOORS (§295). The branch below used to be
-           written out here and nowhere else, and Play needs the same answer —
-           so it moved into `openDeckFor()` rather than being copied, which is
-           how §224 and §253.3 each came to be fixed on one surface and left
-           broken on another. */
+           resolves both kinds of key in one place.
+
+           ONE OPENER FOR EVERY DOOR (§295, and the PDF entry with it). The
+           branch below used to be written out here and nowhere else; Play
+           needs the same answer, and so does the PDF, which is a second door
+           onto the very act this button performs — so it lives in
+           `openDeckFor()` rather than being copied, which is how §224 and
+           §253.3 each came to be fixed on one surface and left broken on
+           another. Two functions answering it was found and closed AT THE
+           MERGE that brought both here (§281). */
         openDeckFor(this.dataset.present);
+      });
+    });
+    /* The same deck, taken away as a PDF. Beside Present and through the same
+       resolver, so the file can never be a different deck from the one that
+       press opens. */
+    document.querySelectorAll("[data-deckpdf]").forEach(function(b){
+      b.addEventListener("click", function(){
+        closeDlMenu(this);
+        deckToPdf(this.dataset.deckpdf);
       });
     });
     /* The master presentation (§266) — beside Present, because a flow is
@@ -3441,8 +3499,10 @@
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        hit.obj.status = el.value || null;
-        if (hit.obj.status !== "wip") hit.obj.pct = null;
+        /* §303: ASKED OF `setRowStatus`, which the workbook reader now asks
+           too. These two lines and the file's were two answers to one
+           question, and the file's had been wrong since §104 (§53.5). */
+        setRowStatus(hit.obj, el.value || null);
         paint();
       });
     });
@@ -3454,9 +3514,7 @@
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpct);
         if (!hit) return;
-        var v = el.value.trim();
-        if (v === "" || isNaN(Number(v))) hit.obj.pct = null;
-        else hit.obj.pct = Math.max(0, Math.min(100, Math.round(Number(v))));
+        setRowPct(hit.obj, el.value);
         paint();
       });
     });
@@ -3686,7 +3744,7 @@
             '<div class="kv"><span class="k">Closed at</span><span><b>' +
               scored + '%</b></span></div>') +
           '<div class="kv"><span class="k">Reported as of</span><span><b>' +
-            esc(REVIEW.asOfMonth || reviewAsOfLabel()) + '</b></span></div>' +
+            esc(reviewAsOfLabel()) + '</b></span></div>' +
           '<div class="kv"><span class="k">Covers</span><span>' +
             esc(covers) + '</span></div>' +
           '<div class="kv"><span class="k">What happens</span><span>Its figures ' +
@@ -3732,8 +3790,12 @@
     });
     /* `nc-q` is GONE with its select (§239): the review point is a month now
        and is picked, not typed, so it writes through FIELDS like every other
-       month in the product rather than through an id read here. */
-    ["nc-name","nc-from","nc-to","nc-due"].forEach(function(id){
+       month in the product rather than through an id read here.
+
+       §307: AND SO ARE THE THREE DATES. They are pickers writing into the
+       draft through FIELDS, so the only thing still read by id is the NAME,
+       which is the only thing still typed. */
+    ["nc-name"].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
       /* `input`, not `change`: the draft has to be current when Open is
@@ -3762,10 +3824,13 @@
          by then, and a tactic whose span has not started is not asked at all.
          §47.8 removed a hard-coded end quarter because "a wrong guess silently
          changes every unit's execution score"; defaulting this would put that
-         guess straight back. */
-      if (!String(d.asOfMonth || "").trim()) {
-        alert("Pick the month this cycle reports as of \u2014 it decides what every " +
-              "figure is measured against.");
+         guess straight back.
+
+         §307: IT IS `to` THAT IS ASKED FOR NOW — the same refusal, one box
+         earlier, because the cycle's end IS the review point. */
+      if (!String(d.to || "").trim()) {
+        alert("Pick the month this cycle covers to \u2014 it decides what every " +
+              "figure is measured against, and what is asked for at all.");
         return;
       }
       /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
@@ -3794,10 +3859,8 @@
       REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
                  due:d.due || "", state:"open", note:{}, submitted:{},
                  cadence:REVIEW.cadence };
-      /* Stored as an ABSENCE when it was not picked (§50.6), so an unasked
-         cycle and one whose month was cleared are byte-identical and neither
-         puts a phantom change into the next save. */
-      if (d.asOfMonth) REVIEW.asOfMonth = d.asOfMonth;
+      /* §307: nothing else to carry. The review point travelled as a field of
+         its own here; it is `to`, which the line above already wrote. */
       NEWCYCLE = null;
       paint();
     });
@@ -3981,8 +4044,42 @@
       b.addEventListener("click", function(){
         var a = String(b.dataset.rowdone).split("|");
         if (a.length < 2) return;
-        setDoneMark(a[0], a[1] === "1");
-        paint();
+        /* ── §309: SAVE, THEN CLOSE, AND ONLY ON SUCCESS ────────────────
+           The button says "Save draft" now and it closes the container it
+           sits on, so the order is the one §220's own bar was corrected to
+           use: push first, and mark only if it landed. Marking first and
+           saving afterwards would draw a tidy "Draft saved · Reopen" over
+           work that never left the browser — the worse half of that
+           section's first build, and worse here, because the boxes go
+           read-only behind it.
+
+           REOPENING IS NOT A SAVE. It takes a lock off; there is nothing
+           new to push, and asking the server first would make the way out
+           of a closed project depend on the connection that closed it. */
+        if (a[1] !== "1") { setDoneMark(a[0], false); paint(); return; }
+        SYNC.saveNow(function(state){
+          if (state === "saved" || state === "clean") {
+            setDoneMark(a[0], true);
+            /* No word on success: the band itself becomes "Draft saved ·
+               Reopen", which says it and does not vanish a frame later
+               (§63.2 — a repaint replaces the very button pressed). */
+            paint();
+            return;
+          }
+          /* A REFUSAL IS SAID WHERE THE PRESS WAS, NOT IN A DIALOG. The
+             report bar's own Save draft writes its outcome into the row it
+             sits in (§63.2) and this does the same — into the button, which
+             is the one element here guaranteed to survive, because nothing
+             repaints on this path. An `alert()` would also stop every check
+             dead at the one press they all have to make (§215). */
+          var was = b.textContent;
+          b.textContent = state === "offline"
+            ? "No server here" : "Not saved — see above";
+          b.classList.add("saybad");
+          setTimeout(function(){
+            b.textContent = was; b.classList.remove("saybad");
+          }, 3200);
+        });
       });
     });
     /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the
@@ -7475,8 +7572,23 @@
       });
     });
     /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
+    /* ── THE DOOR KNOWS ITS SUBJECT (§304.2) ─────────────────────────
+       It used to be one amber band on a page about files, so the first thing
+       it had to ask was "whose plan is this?". The door is now on the
+       subject's OWN empty Plan page, so the answer is the page you are
+       standing on and `builderStart()` takes it directly.
+
+       RECORDED, NOT DONE: `openBuilderChooser()`, `BCHOOSE`,
+       `builderChooserHtml()`, `wireBuilderChooser()` and `builderStartFresh()`
+       are callerless from today. §24 says dead code goes, and deleting five
+       functions in the same change that moves the door is how a restoration
+       and a removal get confused with one another — it is its own edit, with
+       its own run of the checks. */
     document.querySelectorAll("[data-buildplan]").forEach(function(b){
-      b.addEventListener("click", function(){ openBuilderChooser(); });
+      b.addEventListener("click", function(){
+        var t = b.dataset.buildplan;
+        if (t && t !== "1") builderStart(t); else openBuilderChooser();
+      });
     });
     /* Scoped to the band: the review dialog carries data-bnav rows of its
        own, wired by its own painter — a page-wide query here would bind
@@ -7555,29 +7667,21 @@
     });
   }
 
-  /* Import. Downloading is attempted as a file and always offered as text,
-     because a sandboxed frame may refuse the download and leaving the SMO with
-     nothing would be worse than a copy box. */
-  function csvFor(){
-    if (impIsCap()) {
-      var c = impCap();
-      return IMP.kind === "plan" ? capPlanTemplate(c) : capProgressTemplate(c);
-    }
-    var u = impUnit();
-    return IMP.kind === "plan" ? planTemplate(u) : progressTemplate(u);
-  }
-  /* A subject's name, made safe to put in a filename. Extracted from
-     fileName() below, which was the only caller until the filled example
-     needed the same thing — two copies of "how do we spell this in a
-     filename" is two answers waiting to differ. */
-  function safeFileBit(name){
-    return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "plan";
-  }
-  function fileName(){
-    var name = impIsCap() ? impCap().name : impUnit().name;
-    return safeFileBit(name) + "-" + IMP.kind + "-template.csv";
-  }
+  /* ── THE CSV WRITERS LOSE THEIR LAST CALLER (§304) ────────────────
+     Islam: *"we can accept the csv but nobody builds in csv."* So the two
+     links that handed one out — the raw download and the copy box — go, and
+     with them `csvFor()` and `fileName()`, which had no other caller.
+
+     `safeFileBit` MOVES TO MODULE SCOPE rather than dying with them: it is how
+     this platform spells a name in a filename, and the download tab now needs
+     it from a renderer as well as from a handler. It lives beside the import
+     state in config-render.js.
+
+     THE READER IS UNTOUCHED. `loadCSV` still takes a progress file, because a
+     file that arrives as one is still read — what has gone is the platform
+     producing one. The four CSV builders in templates.js are callerless from
+     today and are deliberately NOT deleted in the same breath: they are §22's
+     other half and removing them is its own sweep, with its own checks. */
   /* A plan file is READ into a summary, not diffed: it authors the plan, so
      what matters is what it holds and what that displaces (§22). Reporting is
      still a difference against what is recorded. */
@@ -7673,103 +7777,173 @@
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   }
 
-  function wireImport(){
-    var us = document.getElementById("imp-unit");
-    if (us) us.addEventListener("change", function(){ IMP.unit = us.value; IMP.diff = null; paint(); });
+  /* THE COUNTS ARE REWRITTEN IN PLACE (§71.2, §130.1). A ticking list stays
+     open and commits per tick, so a `paint()` here would destroy the popup
+     under the pointer — the three buttons are found by their own attribute and
+     their number written into the span that holds it. */
+  function impCounts(){
+    var subs = impPicked(), n = subs.length;
+    var nArch = impArchivesFor(subs.map(function(o){ return o.v; })).length;
+    document.querySelectorAll("[data-dlpick]").forEach(function(b){
+      var k = b.dataset.dlpick, want = k === "archives" ? nArch : n;
+      var c = b.querySelector(".cnt");
+      if (c) c.textContent = "(" + want + ")";
+      if (want) b.removeAttribute("aria-disabled");
+      else b.setAttribute("aria-disabled", "true");
+    });
+  }
 
-    document.querySelectorAll("[data-impkind]").forEach(function(b){
-      b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
+  function wireImport(){
+    /* ── THE DOWNLOAD TAB (§304) ─────────────────────────────────────
+       Two controls and five buttons, and every one of them reads its answer
+       off the page at the moment it is pressed rather than off a mode set
+       earlier. `IMP.pick` and `IMP.cycle` exist only so a repaint caused by
+       something else does not throw a selection away (§35). */
+    var ps = document.getElementById("imp-pick");
+    if (ps) ps.addEventListener("change", function(){
+      IMP.pick = Array.prototype.filter.call(ps.options, function(o){ return o.selected; })
+                   .map(function(o){ return o.value; });
+      /* NOTHING REPAINTS UNDER A TICKING HAND (§130.1): the counts on the
+         buttons are rewritten in place instead, or the popup dies under the
+         pointer on the first tick. */
+      impCounts();
     });
 
-    /* THE PLAN TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
+    var cs = document.getElementById("imp-cycle");
+    if (cs) cs.addEventListener("change", function(){ IMP.cycle = cs.value; impCounts(); });
+
+    /* THE BLANK TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
        an empty shape rather than a chosen subject's content, with the subject
-       named on the Read me sheet. Two files, one menu. */
-    document.querySelectorAll("[data-dlplan]").forEach(function(b){
+       named on the Read me sheet. */
+    document.querySelectorAll("[data-dlblank]").forEach(function(b){
       b.addEventListener("click", function(){
-        closeDlMenu(this);
-        if (this.dataset.dlplan === "projects")
+        if (this.dataset.dlblank === "projects")
           sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - projects plan template.xlsx");
         else
           sendXlsx(planWorkbook(blankUnitShape()), "SMP - pillars plan template.xlsx");
       });
     });
 
-    /* A PROGRESS FILE IS NOT GENERIC — it is one subject's current rows, so
-       the subject travels with the format. Choosing a format the selected
-       subject does not keep moves the selection to the first that does AND
-       repaints, so the select shows exactly what was downloaded rather than
-       leaving a file arriving from a list that says something else. */
-    document.querySelectorAll("[data-dlprog]").forEach(function(b){
+    /* ── PLANS · PROGRESS · ARCHIVES, OVER WHOEVER IS TICKED ──────────
+       One builder per kind, one file per subject, and `sendFilesZip` decides
+       whether that is a workbook or a zip — one subject is one file, because
+       an archive holding one file is a chore rather than a download.
+
+       THE REFUSAL IS ASKED AGAIN AT PRESS TIME (§48.2), never trusted from the
+       render that drew the button: the tick list writes without repainting, so
+       a count drawn a moment ago can be a press behind. */
+    document.querySelectorAll("[data-dlpick]").forEach(function(b){
       b.addEventListener("click", function(){
-        closeDlMenu(this);
-        var want = this.dataset.dlprog;
-        if (impFmtOf(IMP.unit) !== want) {
-          var first = impSubjects(want)[0];
-          if (!first) {
-            alert(want === "projects"
-              ? "There are no capabilities yet, so there is no projects file to download."
-              : "There are no business units yet, so there is no pillars file to download.");
+        if (grant("c_import") !== "edit") return;
+        var kind = this.dataset.dlpick;
+        var subs = impPicked();
+        var files = [], stamp = impCycleStamp();
+        /* THE LEAF NAMES THE KIND, not only the folder (§304). One subject is
+           sent as ONE FILE, and `sendFilesZip` drops the folder when it does —
+           so a name that leaned on `plans/` gave the plan and the progress file
+           for one subject the SAME name on disk. Found by downloading both and
+           reading the two filenames, not by reading the code. */
+        var word = kind === "plans" ? "plan" : kind === "progress" ? "progress" : "archive";
+        if (kind === "archives") {
+          var arcs = impArchivesFor(subs.map(function(o){ return o.v; }));
+          if (!arcs.length) return;
+          arcs.forEach(function(a){
+            var w = archiveWorkbook(a);
+            if (w) files.push({ name:"archives/" + safeFileBit(a.name) + " - " + word +
+                                      " - " + safeFileBit(a.at) + ".xlsx", data:buildXlsx(w) });
+          });
+        } else {
+          if (!subs.length) return;
+          subs.forEach(function(o){
+            var w = kind === "plans" ? impPlanWorkbookFor(o.v) : impProgressWorkbookFor(o.v, IMP.cycle);
+            if (w) files.push({ name:kind + "/" + safeFileBit(o.label) + " - " + word +
+                                      " - " + stamp + ".xlsx", data:buildXlsx(w) });
+          });
+        }
+        sendFilesZip(files, "SMP - " + kind + " - " + stamp + ".zip");
+      });
+    });
+
+    /* ── THE CONTINGENCY FILES (spec 030) ────────────────────────────
+       ASKED AGAIN AT PRESS TIME (§48.2, §42), never trusted from the render
+       that drew the card: the viewer switcher can change who this is between
+       the paint and the click, and this is the one download that hands over
+       the whole graph in one file.
+
+       THE OUTCOME IS WRITTEN INTO THE BUTTON, not said by a repaint (§63):
+       building the copy is a request and a three-megabyte string, so a press
+       with no acknowledgement reads as a dead control — and `paint()` would
+       replace the very button that was pressed. */
+    document.querySelectorAll("[data-conttake]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (typeof CONT === "undefined" || !CONT.mayTake()) return;
+        var btn = this, kind = btn.dataset.conttake, was = btn.innerHTML;
+        if (btn.dataset.busy) return;
+        btn.dataset.busy = "1";
+        /* THE PDF IS OPENED, NOT TAKEN (§312), so it says so: it hands the
+           deck to the browser's print dialog and there is nothing to wait
+           for afterwards. */
+        btn.innerHTML = kind === "pdf" ? "Opening\u2026" : "Taking\u2026";
+        var go = kind === "pdf" ? CONT.takeFlowPdf
+               : kind === "slides" ? CONT.takeSlides : CONT.takeCopy;
+        go(function(err){
+          delete btn.dataset.busy;
+          if (err) {
+            btn.innerHTML = "Could not";
+            btn.title = String((err && err.message) || err);
+            setTimeout(function(){ btn.innerHTML = was; btn.title = ""; }, 4000);
             return;
           }
-          IMP.unit = first.v; IMP.diff = null; IMP.summary = null; IMP.read = "";
-        }
-        var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(impUnit());
-        sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
-        paint();
+          /* AND IT DOES NOT REPAINT. Nothing was stamped, so there is no
+             state for the page to follow — and a paint under an open print
+             dialog would rebuild the deck the browser is laying out. */
+          if (kind === "pdf") { btn.innerHTML = was; return; }
+          /* The stamp is state, so the page follows it: the card's own line
+             and the cycle page's list both read it. */
+          paint();
+        });
       });
     });
 
-    /* ── THE FILLED EXAMPLE (§69.12) ─────────────────────────────────
-       The FORMAT IS READ OFF THE SUBJECT, here as everywhere (§61): the
-       select's value is a unit key, `fn:<key>` or `cap:<id>`, and that is
-       already the whole answer. Nothing stores which workbook to build.
+    /* ── TWO BUTTONS, ONE READER (§304) ──────────────────────────────
+       Islam: *"make the upload of plan or progress 2 buttons like what we did
+       in the download of templates."* Each button is a <label> over its own
+       hidden input, so one press both says WHICH KIND and opens the chooser —
+       a file picker cannot be opened from script without a gesture (§90).
 
-       The selection is read off the control at the moment of pressing rather
-       than tracked on `change`, because nothing here repaints — the only
-       reason IMP.filled exists at all is so a repaint caused by something ELSE
-       on this page does not throw the choice away (§35). */
-    var fsel = document.getElementById("imp-filled");
-    if (fsel) fsel.addEventListener("change", function(){ IMP.filled = fsel.value; });
-    document.querySelectorAll("[data-dlfilled]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var sel = document.getElementById("imp-filled");
-        var v = sel ? sel.value : IMP.filled;
-        if (!v) return;
-        IMP.filled = v;
-        if (v.indexOf("cap:") === 0) {
-          var c = capById(v.slice(4));
-          if (!c) return;
-          sendXlsx(capPlanWorkbook(c),
-            "SMP - projects plan - " + safeFileBit(c.name) + ".xlsx");
-          return;
-        }
-        /* unitLike(), not UNITS[...] — a function that plans in pillars is one
-           of these and its key carries the "fn:" prefix (§59). */
-        var u = unitLike(v);
-        if (!u) return;
-        sendXlsx(planWorkbook(u), "SMP - pillars plan - " + safeFileBit(u.name) + ".xlsx");
-      });
-    });
-
-    var dl = document.querySelector("[data-dl]");
-    if (dl) dl.addEventListener("click", function(){
-      sendFileBytes(csvFor(), fileName(), "text/csv;charset=utf-8");
-    });
-
-    var show = document.querySelector("[data-showcsv]");
-    if (show) show.addEventListener("click", function(){
-      openModalHtml(esc(fileName()), "Select all and copy, if the download is blocked",
-        '<textarea class="csvbox" readonly>' + csvFor().replace(/</g, "&lt;") + '</textarea>');
-    });
-
-    var f = document.getElementById("imp-file");
+       The kind is recorded from the input that fired, never from a mode set
+       earlier, and the FILE then confirms it: every workbook the platform
+       writes says "Plan workbook" or "Progress workbook" in the first cell of
+       its Read me sheet, so pressing the wrong one is refused BY NAME instead
+       of read wrong (§304.4). */
+    ["plan", "progress"].forEach(function(kind){
+    var f = document.getElementById("imp-file-" + kind);
     if (f) f.addEventListener("change", function(){
       if (grant("c_import") !== "edit") return;
       var file = f.files && f.files[0]; if (!file) return;
+      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null;
       if (/\.xlsx$/i.test(file.name)) {
         var rx = new FileReader();
         rx.onload = function(){
           readXlsx(rx.result).then(function(sheets){
+            /* ── THE FILE CONFIRMS THE BUTTON (§304.4) ───────────────
+               Every workbook this platform writes opens its Read me sheet
+               with "Plan workbook" or "Progress workbook", so the kind the
+               person pressed is CHECKED rather than trusted — press the wrong
+               one and the file is refused BY NAME instead of read as something
+               it is not, which is a refusal somebody can act on (§32, §16.7).
+
+               A file with neither word is left alone: a workbook rebuilt by
+               hand is not wrong, it simply cannot confirm anything, and
+               refusing it would turn a helpful check into a wall. */
+            var says = readmeKind(sheets);
+            if (says && says !== IMP.kind) {
+              impFail("this is a " + says + " workbook and you pressed " +
+                (IMP.kind === "plan" ? "A plan" : "Progress") +
+                ". Press " + (says === "plan" ? "A plan" : "Progress") +
+                " and choose it again.");
+              return;
+            }
             /* The template is generic, so the file itself says whose plan it
                is: one cell on the Read me sheet. Nothing else in the workbook
                names a unit, and with the codes gone nothing else could. */
@@ -7866,6 +8040,7 @@
       var rd = new FileReader();
       rd.onload = function(){ loadCSV(String(rd.result)); };
       rd.readAsText(file);
+    });
     });
 
     var paste = document.querySelector("[data-paste]");
@@ -8878,7 +9053,7 @@
       var dn = displayNames();
       sel.innerHTML = PEOPLE.map(function(p){
         var where = placeLabel(personAt(p));
-        /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 030). Every
+        /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 042). Every
            person on this register carried one until the office's own row
            arrived from the client's configuration with none, and the hover
            read "Islam Saadany — undefined". The dash belongs to the title, so

@@ -3,11 +3,11 @@
    passwords in bulk. One endpoint, action-shaped, because the operations
    share every line of plumbing.
 
-   Usernames are person keys — the same keys the platform uses everywhere
-   (§4: stable ids are the contract). The SMO sees each person's key beside
-   the Set-password control on Levels & access and hands credentials over
-   outside the platform; self-service recovery is a later decision (§16.9),
-   so a forgotten password is reset by the SMO. */
+   Since spec 042 (§313) a person signs in by EMAIL against the platform's
+   accounts, and the request names which client's door they came through;
+   the person key is what places them on that client's register. Self-service
+   recovery is a later decision (§16.9), so a forgotten password is reset by
+   the office. */
 
 const pg = require("pg");
 const io = require("../lib/state-io.js");
@@ -23,11 +23,6 @@ const Rules = require("../lib/rules.js");
    a third office role would otherwise have to be remembered in this file. */
 function isOffice(row) { return Rules.isOfficeRole(String((row && row.role) || "")); }
 
-/* The six env-var spellings Neon and Vercel use between them live in ONE
-   place now (lib/state-io.js): this was copied here and into the other
-   endpoint identically, and what is copied is the list — a third copy would
-   be a third place to forget one the day the integration renames something. */
-function getPool() { return io.getPool(pg); }
 
 function readBody(req) {
   if (req.body !== undefined && req.body !== null) {
@@ -70,7 +65,7 @@ function send(res, code, obj) {
 }
 
 
-/* WHERE AN ACCOUNT LANDS AFTER THE DOOR (spec 030).
+/* WHERE AN ACCOUNT LANDS AFTER THE DOOR (spec 042).
    ONE DESTINATION IS NOT A QUESTION (§32), and the destinations are what this
    account can OPEN — not the clients it is on the team of. An Admin is on one
    team and can open every client, so counting team rows would land them in one
@@ -87,7 +82,7 @@ async function landingFor(client, account, door) {
   const world = { mine: mine, access: access };
   const all = (await client.query(
     "SELECT key, kind, status FROM platform.clients ORDER BY kind, name")).rows;
-  /* ── SIGNED IN AT A CLIENT'S OWN DOOR, THEY LAND IN THAT CLIENT (§303.36) ──
+  /* ── SIGNED IN AT A CLIENT'S OWN DOOR, THEY LAND IN THAT CLIENT (§313.36) ──
      Every client has a door at /<client>/sign-in. Somebody who signs in
      there was trying to open THAT client, so it wins over the rules below —
      but only if this account may open it: the door is a place to stand, not
@@ -105,7 +100,7 @@ async function landingFor(client, account, door) {
     /* Their one client, always — and never a card. */
     return { land: mine.length ? mine[0].client_key : null, list: null };
   }
-  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§303.24) ──
+  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§313.24) ──
      This used to send anybody with exactly ONE openable client straight into
      it, on §32's rule that one destination is not a question. Islam, signing
      in: *"the access opens directly in raya trade! what are you doing?"*
@@ -129,7 +124,7 @@ async function landingFor(client, account, door) {
   return { land: null, list: listed };
 }
 
-/* ── WHAT A CLIENT'S DOOR WEARS (§303.36) ──────────────────────────
+/* ── WHAT A CLIENT'S DOOR WEARS (§313.36) ──────────────────────────
    The client's name and its mark, and nothing else — the two things the door
    shows before anybody has signed in, so they are readable by anybody, and
    everything else about a client (industry, notes, status, who is on it)
@@ -154,14 +149,14 @@ function doorSlugFrom(req, body) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    /* WHICH CLIENT IS THIS FOR (spec 030). The browser sends the slug it was
+    /* WHICH CLIENT IS THIS FOR (spec 042). The browser sends the slug it was
        served at; the schema comes from the registry row, never from the
        request (§36.4). An unknown client and one this account may not open are
        the same refusal, so trying slugs tells nobody anything. */
     const body = req.method === "POST" ? await readBody(req) : {};
     const action = body.action || (req.method === "GET" ? "me" : "");
 
-    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§303.13) ────
+    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§313.13) ────
        Identity is `platform.accounts`, which is shared: is anyone signed in,
        sign in, sign out, change the password. Every query in all four is
        platform-qualified already — the client was resolved purely to hand
@@ -185,7 +180,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "me") {
-      /* ASKED WITHOUT A CLIENT (spec 030). This is the door's own question —
+      /* ASKED WITHOUT A CLIENT (spec 042). This is the door's own question —
          "is there a live session, and where does it land" — and asking it
          against a client would refuse anybody whose client is not the default
          one, which from the door reads as "your session expired". */
@@ -220,7 +215,7 @@ module.exports = async function handler(req, res) {
         return send(res, 401, { ok: false, error: WRONG_SIGNIN });
       }
 
-      /* ── EMAIL, AND NOTHING ELSE (spec 030) ────────────────────────
+      /* ── EMAIL, AND NOTHING ELSE (spec 042) ────────────────────────
          Islam, 2026-08-28: "access only through email ... no access through
          user name SMO in any place." The person-key path is gone, and with it
          §69.23's two-rows-one-address refusal — an address is the PRIMARY KEY
@@ -327,7 +322,7 @@ module.exports = async function handler(req, res) {
          own on first sign-in. Their existing sessions end — a reset is
          usually a lockout or a handover, and either way old sessions die. */
       /* A PASSWORD IS ISSUED TO AN ADDRESS, because that is what the door
-         takes (spec 030). Somebody on the register with no address cannot be
+         takes (spec 042). Somebody on the register with no address cannot be
          given one — said plainly, with the thing to go and do, rather than
          refused as "not allowed" (§16.7). */
       const addr = String((await client.query(
@@ -586,7 +581,12 @@ module.exports = async function handler(req, res) {
        screen (§42), because a control that only hides is decoration. It
        touches nothing but this table, so it moves nobody's access. */
     if (action === "dismissWhere") {
-      const person = await auth.getSession(client, req);
+      /* WITH THE CLIENT KEY, like every other client action here: without it
+         getSession answers the account shape, whose role is nobody's, and this
+         gate refused every dismissal with "The register is the SMO's" — found
+         by the pre-merge review (§313.37), never by a check, because none
+         pressed it over HTTP. */
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       if (!person || person.role !== "super") {
         return send(res, 403, { ok: false, error: "The register is the SMO's." });
       }
@@ -607,7 +607,7 @@ module.exports = async function handler(req, res) {
       if (!person || !isOffice(person)) {
         return send(res, 403, { ok: false, error: "Passwords are the SMO's." });
       }
-      /* THE STATE IS THE ACCOUNT'S, READ THROUGH THIS CLIENT (spec 030).
+      /* THE STATE IS THE ACCOUNT'S, READ THROUGH THIS CLIENT (spec 042).
          A person with no account has no password — which is the same dash the
          column has always drawn for "we never asked" (§35) — and a person with
          no ADDRESS can never have one, which is why the register names them in
@@ -670,7 +670,7 @@ module.exports = async function handler(req, res) {
       const all = body.scope === "all";
 
       /* THE SERVER STILL DECIDES WHO IS IN THE SET — the client sends a scope,
-         never a list. What changed with spec 030 is only WHERE the password
+         never a list. What changed with spec 042 is only WHERE the password
          lands: platform.accounts, keyed by the address on the register, with
          the row that ties that account to this client written beside it.
 

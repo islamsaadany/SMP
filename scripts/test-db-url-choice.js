@@ -1,4 +1,4 @@
-/* THE DIRECT CONNECTION IS PREFERRED, AND NOTHING ELSE ASSERTS THAT (§303.34).
+/* THE DIRECT CONNECTION IS PREFERRED, AND NOTHING ELSE ASSERTS THAT (§313.34).
 
    Every client's tables live in a schema of their own and a request is pointed
    at one with `SET search_path`. A transaction pooler does not keep a session

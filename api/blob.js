@@ -35,7 +35,6 @@ const auth = require("../lib/auth.js");
 const P = require("../lib/platform-io.js");
 const R = require("../lib/rules.js");
 const { ensureReady, readState } = io;
-function getPool() { return io.getPool(pg); }
 
 /* Loaded once, inside a try. A deployment with no blob store never installed
    the package or never set the token, and neither is a reason for the chat,
@@ -144,7 +143,7 @@ module.exports = async function handler(req, res) {
     const url = new URL(req.url, "http://x");
     const play = url.searchParams.get("play");
 
-    /* WHICH CLIENT THIS IS (spec 030, §303.35). This endpoint was the one of
+    /* WHICH CLIENT THIS IS (spec 042, §313.35). This endpoint was the one of
        five that never asked: it checked out a raw connection and read
        `public`, which after the move holds no client at all — so every clip
        would have looked lost on every client, and the connection served it

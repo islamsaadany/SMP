@@ -4134,10 +4134,12 @@ function cycleYear(){
                          " " + String(REVIEW.due || ""));
   return m ? +m[1] : null;
 }
-function cycleMonth(){
-  var t = monthsOf(REVIEW.to);
-  return t != null ? t : monthsOf(REVIEW.name, true);
-}
+/* ONE MONTH, ONE MEANING (§307). This used to be its own reader and
+   `reviewAsOf()` was another, so the platform could ASK for work due to June
+   and JUDGE it against August — two fields answering one question, which is
+   the fault §239.1 was written to remove and then left half-removed. They are
+   one function now, and this is the alias the reporting side reads by. */
+function cycleMonth(){ return reviewAsOf(); }
 /* IS THIS ROW ASKED FOR THIS CYCLE? A row with no date is always asked: the
    plan did not say when, so the platform does not get to decide it is early.
    A row whose date cannot be read is also asked, for the same reason -- the
@@ -4573,6 +4575,13 @@ function canReport(unitKey){
    leans on its pillar's owner), `x.pown` is the pillar's own Owner. */
 function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
+  /* §309: their own saved draft shuts their own pillar. `x.cid` is the
+     container the row sits in, carried on the row by both builders for the
+     same reason `owner` is (§301.5) — walking back up to the pillar from
+     here would mean this gate knowing the shape of the page above it. A
+     unit's key objectives carry none, deliberately: they are the unit's
+     headline and belong to no pillar, so nobody's draft can close them. */
+  if (ownDraftShut(unitKey, x && x.cid)) return false;
   var area = String(unitKey).indexOf("fn:") === 0 ? "fn" : "unit";
   return SMPRules.mayReportRow(world(), viewer(), area, unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
@@ -4595,6 +4604,10 @@ function canReportFn(fk){
 }
 function canReportFnRow(fk, project, rowObj){
   if (!canReportFn(fk)) return false;
+  /* §309: the project's own saved draft, asked here because this gate is
+     already handed the project — every deliverable, outcome, milestone and
+     note on that band goes through it. */
+  if (ownDraftShut("fn:" + fk, project && project.id)) return false;
   return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk,
                                { row: rowObj, project: project });
 }
@@ -4826,15 +4839,18 @@ function reportItems(u){
     /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
        (§147.7) — carried beside §55's `owner` lean rather than replacing it,
        so nothing a contributor could reach before the role existed moves. */
+    /* `cid` is the pillar this row sits in, for §309's per-container draft —
+       carried for the same reason `owner` is, and on BOTH builders or the two
+       pages disagree about whether a row is shut. */
     SMPRules.shown(p.measures).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
-                 owner:p.owner, pown:p.owner, place:place });
+                 owner:p.owner, pown:p.owner, cid:p.id, place:place });
     });
     SMPRules.shown(p.tactics).forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                 place:place });
+                 cid:p.id, place:place });
     });
   });
   return out;
@@ -5004,9 +5020,25 @@ function reportClosed(target){
    Nothing clears it on a new cycle because nothing has to: the shell replaces
    REVIEW wholesale, so an unmarked cycle and a fresh one are the same object.
 
-   It is a SIGNAL, never a lock: a project marked done still takes figures
-   until the report itself is closed (§220). What it does is tell the person
-   who submits which projects are ready. */
+   §309 — IT IS A LOCK NOW, AND THE WORD MOVED WITH IT. Islam, of the shape
+   drawn for him: *"we can go with B but make the mark done as Save that
+   freeze the project and reopen to open it for editing"*, and then, of the
+   two words drawn: *"ok with save draft."* So the same mark that told the
+   custodian a project was ready now CLOSES that project to the person who
+   pressed it, and Reopen is the way back — which is the capability bar's own
+   pair (§220, §263), one project wide instead of the whole function.
+
+   THE MARK IS THE LOCK, so nothing new is stored and nothing is migrated:
+   `review.done[<id>]` already travels per container (which is what stops two
+   owners in one function colliding, above) and already classifies as
+   `rowDone` on the server. What changed is what the screen does with it.
+
+   AND IT IS A SCREEN LOCK, EXACTLY AS §220'S IS. The server does not refuse
+   a figure while a report is parked either — `parked` and `submitted` shut
+   the controls, they do not shut the endpoint — so this is the same promise
+   at the same strength, and widening one without the other would be a second
+   answer to what a closed report means (§53.5). Asserted rather than assumed
+   (§172): the authoriser is unchanged and still accepts the owner's figures. */
 function doneMark(id){
   return (REVIEW.done || {})[String(id)] || null;
 }
@@ -5024,6 +5056,22 @@ function setDoneMark(id, on){
      it looked for puts a phantom change into every save from then on (§42,
      §50.6). */
   if (!Object.keys(REVIEW.done).length) delete REVIEW.done;
+}
+/* ── A SAVED DRAFT SHUTS THE PROJECT IT IS ABOUT (§309) ──────────────────
+   Asked of the CONTAINER and of the VIEWER, and both halves are the whole
+   rule. The container, because this closes one project and never the report
+   around it — the custodian and the office go on editing every row of it,
+   which is what makes a per-project draft different from §220's. The viewer,
+   because the lock is the owner's own act: somebody unbounded here has
+   Submit and Save draft on the bar, and freezing them out of a project they
+   may still have to correct would be a second lock nobody asked for.
+
+   One reader for both sides of the switch (§53.5), asked by the two row
+   gates rather than at the twenty cells they feed — a cell that forgot it is
+   a cell the server would accept and the screen refuses, or the reverse. */
+function ownDraftShut(target, id){
+  if (!id) return false;
+  return !!doneMark(id) && boundedHere(target);
 }
 /* Whose mark it is, asked of the SHARED rule so the screen draws exactly what
    the server accepts (§42). `owner` is the container's Owner as STORED. */
@@ -5935,21 +5983,43 @@ function quartersOf(t){
    WRITES: a reader that creates the field it looked for puts a phantom change
    into every save (§42, §50.6). */
 function reviewAsOf(){
-  var m = REVIEW.asOfMonth ? monthsOf(REVIEW.asOfMonth) : null;
-  if (m != null) return m;
+  /* §307: THE CYCLE'S END IS THE REVIEW POINT, and there is no second field.
+     `to` has always decided which rows are ASKED for; it now also decides what
+     they are MEASURED against, which is Islam's own ruling — "the cycle ending
+     is the reporting as of so that's what the proration depend on". */
+  var t = monthsOf(REVIEW.to);
+  if (t != null) return t;
+  /* The name is the fallback `cycleMonth()` has always kept: "H1 2026" names a
+     period even where `to` was never filled in. `last` because a cycle called
+     H1 covers TO June, not FROM January. */
+  t = monthsOf(REVIEW.name, true);
+  if (t != null) return t;
+  /* And the last resort is §239.1's own: a cycle whose end cannot be read at
+     all still has the quarter it was opened with. `endsQuarter` is written by
+     nothing in the product any more — no control has minted one since §47.8 —
+     and it is a real column on a real tenant, so it is kept as the floor
+     rather than deleted out from under a deployment that still holds one. */
   var y = cycleYear();
   if (y == null) return null;
   var q = Number(REVIEW.endsQuarter);
   if (!q || q < 1 || q > 4) q = 4;
   return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
 }
+/* Did the month come from the cycle's own end, or from one of the fallbacks
+   above? The strip says which, because a review point nobody set is a guess
+   the page must not print as a fact (§35, §177). */
+function reviewAsOfDerived(){ return monthsOf(REVIEW.to) == null; }
 /* The review point written the way a month is written everywhere else. Falls
    back to the derived quarter-end so a tenant that has never set one still
    reads a true sentence rather than a dash. */
 function reviewAsOfLabel(){
   var t = reviewAsOf();
   if (t == null) return "\u2014";
-  return monthValue(((t % 12) + 12) % 12, Math.floor(t / 12));
+  /* FOUR DIGITS, because this is the same month the strip prints beside it as
+     "Jan 2027 to Jun 2027" — a line reading "Jun 2027 ... reported as of
+     Jun 27" would look like two different months (§307). One writer, shared
+     with the heal that merged the fields (§42). */
+  return SMPRules.monthLabel(t);
 }
 /* WHICH YEAR THE REVIEW POINT IS IN (§239.3).
 
@@ -5970,18 +6040,68 @@ function reviewAsOfLabel(){
    The review point is now the authority on its own year and `cycleYear()` is
    only the fallback for a cycle where nobody has picked a month yet. */
 function reviewYear(){
-  if (REVIEW.asOfMonth) {
-    var t = monthsOf(REVIEW.asOfMonth);
-    if (t != null) return Math.floor(t / 12);
-  }
-  return cycleYear();
+  /* §307: the review point is the cycle's END, and it carries its own year —
+     `cycleYear()` remains the fallback for a cycle whose end cannot be read at
+     all, which is the only case `reviewAsOf()` derives one for. */
+  var t = reviewAsOf();
+  return t == null ? cycleYear() : Math.floor(t / 12);
 }
-/* Months of the plan year already passed, 1 to 12. The plan year runs January
-   to December (Islam, asked outright), so the count is from the cycle's year. */
-function elapsedMonths(){
+/* ── WHICH MONTH OF ITS OWN YEAR THE REVIEW POINT IS IN ──────────────
+   1 to 12, January to December.
+
+   §308 SEPARATED THIS FROM "HOW MUCH OF THE PLAN HAS PASSED", which were one
+   function and are two questions. A monthly plan is twelve boxes LABELLED Jan
+   to Dec (§278) and a tactic's quarters are calendar quarters, so both want a
+   month's position in its year whatever period the plan itself runs over —
+   while the share a target is owed by now is a fact about the PLAN's period,
+   which may start in July. One function answering both is how "the year
+   starts in January" came to be an assumption nobody had made on purpose. */
+function monthOfYear(){
   var a = reviewAsOf(), y = reviewYear();
   if (a == null || y == null) return null;
   return Math.max(0, Math.min(12, a - y * 12 + 1));
+}
+/* ── THE PLANNING PERIOD (§308) ──────────────────────────────────────
+   Islam: *"the cycle of planning is yearly so that's the full time start and
+   end dates. and then we have a review cycle that has a cycle start and end
+   ... the issue is sometimes we start planning mid year. the main planning
+   cycle is not a year maybe 6 month but the review cycle might have the same
+   start date but will have a closer end date."*
+
+   TWO PERIODS, AND ONLY ONE OF THEM WAS STORED. `REVIEW.from`/`to` are the
+   REVIEW's; what a target belongs to had nowhere to live at all, so the share
+   due was months-of-the-calendar-year over twelve — January assumed on a plan
+   that may have started in July, and printed on the strip as a number nobody
+   had given it. His own report: *"how is it reading 8 or 12 months while I
+   didn't add the covers from?"* — and it was reading neither of his dates.
+
+   ONE FOR THE TENANT, his answer, so it rides GROUP and not REVIEW: a cycle
+   closing must not take the period its targets belong to with it (§50). It
+   rides `extra`, so no migration and no schema change (§266's own road), and
+   it is stored as an ABSENCE — a tenant that has never set one is
+   byte-identical to one that never will (§50.6). */
+function planFrom(){ return monthsOf(GROUP[SMPRules.PLAN_FROM]); }
+function planTo(){ return monthsOf(GROUP[SMPRules.PLAN_TO]); }
+/* BOTH ENDS, AND IN ORDER. Half a period says nothing, and an end before its
+   start is a contradiction somebody typed rather than a period to divide by —
+   both fall back rather than producing a length of nought or a negative one. */
+function planSet(){
+  var a = planFrom(), b = planTo();
+  return a != null && b != null && b >= a;
+}
+/* HOW LONG THE PLAN RUNS, in months. TWELVE where nobody has said, which is
+   what makes this safe on a live tenant: every figure reads exactly as it did
+   until the office sets a period, and the strip SAYS the year was assumed
+   rather than letting it pass for a fact (§35, §124). */
+function planLength(){ return planSet() ? planTo() - planFrom() + 1 : 12; }
+/* HOW MUCH OF THE PLAN HAS PASSED by the month the cycle covers to. Clamped at
+   both ends: a review point before the plan starts owes nothing, and one after
+   it ends owes the whole target rather than more than it. */
+function elapsedMonths(){
+  if (!planSet()) return monthOfYear();
+  var a = reviewAsOf();
+  if (a == null) return null;
+  return Math.max(0, Math.min(planLength(), a - planFrom() + 1));
 }
 /* Is this quarter behind us? A quarter counts as passed when its LAST month
    has, which is what `asOfQuarter` meant before it became a month (H1 means Q1
@@ -5992,9 +6112,12 @@ function quarterPast(i){
   if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
   return y * 12 + i * 3 + 2 <= a;
 }
+/* §308: OVER THE PLAN'S OWN LENGTH, never a hard-coded twelve. On a tenant
+   with no planning period `planLength()` is twelve and this is the expression
+   it has always been. */
 function elapsedShare(){
   var m = elapsedMonths();
-  return m == null ? null : m / 12;
+  return m == null ? null : m / planLength();
 }
 /* WHICH MEASURES PRORATE, and the plan already answers it. `compile` says what
    kind of number this is: "Sum" adds up across the period, so six months of
@@ -6055,7 +6178,11 @@ function measureDue(m, share){
      readable review point there is no month to compile to, so the row falls
      through to the flat path and reads exactly as it does today: a plan
      nobody can date must not become a plan nobody can score. */
-  var mp = elapsedMonths();
+  /* §308: THE MONTH OF THE YEAR, not the share of the plan. These twelve
+     boxes are labelled January to December, so a plan running July to
+     December still reports its August cell as the eighth — asking the plan's
+     elapsed count here would have summed January to February instead. */
+  var mp = monthOfYear();
   if (mp != null) {
     var md = SMPRules.monthlyDue(m, mp);
     if (md != null) return md;
@@ -7551,6 +7678,24 @@ function repeatLabel(v){
   return n > 0 ? "Every " + plural(n, "month") : "No";
 }
 function repeatsOn(p){ return !!p && (p.repeats === "cycle" || Number(p.repeats) > 0); }
+/* AND BACK THE OTHER WAY (§303). `repeatLabel` turns what is stored into the
+   word on the screen; this turns the word back into what is stored, and it is
+   named here rather than spelled out at each call site because there are two
+   of them now — the pen's dropdown and the projects workbook — and two
+   readings of "Every 6 months" is how a file comes to store something the
+   screen would not (§53.5, §42).
+
+   ANSWERS `null` FOR THE DEFAULT, never 0 or "": the caller DELETES the key on
+   a null (§50.6), because a project unmarked and one never asked must be
+   byte-identical or every save carries a phantom change (§42). */
+function repeatFromLabel(v){
+  var w = String(v == null ? "" : v).trim();
+  if (!w) return null;
+  var n = REPEAT_MONTHS.filter(function(m){ return repeatLabel(m) === w; })[0];
+  if (n) return n;
+  if (/^each cycle$/i.test(w)) return "cycle";
+  return null;
+}
 
 /* HOW FAR THE DATES MOVE when a cycle opens.
 
@@ -7829,7 +7974,7 @@ function clearUnitPlan(u, why){
    the globals, so it is a pure function and the test can call it with nothing
    loaded.
 
-   IT HAD TWO JOBS AND HAS ONE (spec 030 §6.1). It drew §67's "Clear project"
+   IT HAD TWO JOBS AND HAS ONE (spec 042 §6.1). It drew §67's "Clear project"
    demo — what a client's deployment looks like on day one — and that button is
    gone with the whole Demo-data switch, because the worked example is a CLIENT
    now. What remains is the job it was written for: being the thing

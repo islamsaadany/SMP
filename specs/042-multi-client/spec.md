@@ -75,7 +75,7 @@ One Neon database. **One schema per client**, plus one shared schema.
 That is the whole argument for schemas over a tenant column (§36.2): the
 boundary is `SET search_path`, so no query, insert, migration or uniqueness
 constraint changes, and one forgotten `WHERE` cannot show one client another's
-plan — and since §303.35 the connection also wears a per-client database role,
+plan — and since §313.35 the connection also wears a per-client database role,
 so a query that names another client's schema is refused by Postgres itself. §36.3's trap disappears with it — every client wants a person keyed
 `smo`, and under separate schemas that is simply a different table.
 
@@ -91,7 +91,7 @@ so a query that names another client's schema is refused by Postgres itself. §3
    must not be told apart, or the door lists Forefront's client book.
 4. `SET search_path TO <schema>` on the checked-out connection, reset on
    release. Never on the pool.
-5. **The connection wears the client's badge (§303.35).** `ensureReady` runs as
+5. **The connection wears the client's badge (§313.35).** `ensureReady` runs as
    the owner, then `SET ROLE smp_<schema>` — a role the platform made with the
    room, that can see that schema and the shared platform tables sign-in reads,
    and nothing else. `RESET ROLE` at release. Another client's schema is then
@@ -311,10 +311,10 @@ Mockup: `design-mockups/multi-client/2026-08-29_forefront-platform.html`.
 **The pages themselves are unchanged from the ones signed off on 28 August**;
 what moves is where they live.
 
-## 7.0.1 · Every client has a door of its own (§303.36, Islam 2026-09-08)
+## 7.0.1 · Every client has a door of its own (§313.36, Islam 2026-09-08)
 
 *"yes every client needs his door."* §7.0's door is Forefront's and shows no
-client (§303.15); a CLIENT's people sign in at `/<client>/sign-in`, the same
+client (§313.15); a CLIENT's people sign in at `/<client>/sign-in`, the same
 page dressed with that client's mark from its registry row — §52's placement,
 given back where the mark is the answer rather than a leak.
 

@@ -76,7 +76,7 @@ class H(http.server.BaseHTTPRequestHandler):
             body = json.dumps({"ok": True, "state": STATE, "person": PERSON}).encode()
             self._send(200, body, "application/json")
             return
-        # A CLIENT'S OWN DOOR (§303.36): /raya-trade/sign-in is the gate,
+        # A CLIENT'S OWN DOOR (§313.36): /raya-trade/sign-in is the gate,
         # dressed as Raya's. Modelled BEFORE the platform's prefix match, or
         # the refusal below lands on the platform again and loops — the
         # stub has to model the deployment (§100.3), and this is the path
@@ -318,7 +318,7 @@ with sync_playwright() as p:
     pg.goto(URL, wait_until="domcontentloaded")
     pg.wait_for_selector("#gate", timeout=15000)
     # REWRITTEN, NOT LOOSENED (§218): the refusal used to land on the root,
-    # and since §303.36 lands on the door of the client this page was served
+    # and since §313.36 lands on the door of the client this page was served
     # at — the one they were trying to open, wearing that client's mark.
     ck("the browser is sent to this client's own door",
        pg.url.rstrip("/") == BASE + "/raya-trade/sign-in", pg.url)

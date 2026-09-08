@@ -31,7 +31,6 @@ const Audience = require("../lib/audience.js");
 const mailer = require("../lib/mailer.js");
 const { ensureReady, readState } = io;
 const P = require("../lib/platform-io.js");
-function getPool() { return io.getPool(pg); }
 
 const RESEND = mailer.RESEND;
 
@@ -114,7 +113,7 @@ const resendSend  = mailer.resendSend;
 module.exports = async function handler(req, res) {
   let client;
   try {
-    /* WHICH CLIENT IS THIS FOR (spec 030). The browser sends the slug it was
+    /* WHICH CLIENT IS THIS FOR (spec 042). The browser sends the slug it was
        served at; the schema comes from the registry row, never from the
        request (§36.4). An unknown client and one this account may not open are
        the same refusal, so trying slugs tells nobody anything. */

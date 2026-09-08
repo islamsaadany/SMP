@@ -204,16 +204,26 @@ with sync_playwright() as p:
     pg.click(".newcycle [data-closecycle]"); pg.wait_for_timeout(600)
     pg.click("[data-opencycle]"); pg.wait_for_timeout(400)
     pg.fill("#nc-name", "H2 2026")
-    pg.fill("#nc-from", "Jul 2026"); pg.fill("#nc-to", "Dec 2026")
     # §239: A CYCLE IS NOW OPENED WITH A REVIEW POINT, and it is picked rather
     # than typed -- the whole feature exists because a review point nobody
     # chose was deciding every score. Pressed through the real picker, because
-    # writing NEWCYCLE.asOfMonth directly would test a door nobody can open.
-    pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(250)
-    pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
-        .find(x=>/Dec/.test(x.textContent)); if(b)b.click();}""")
-    pg.wait_for_timeout(300)
-    pg.wait_for_timeout(200)
+    # writing the draft directly would test a door nobody can open.
+    #
+    # §307: AND THE REVIEW POINT IS THE CYCLE'S END, so there is no fourth
+    # control to press: `Covers from` and `to` are pickers themselves now, and
+    # picking `to` IS picking what everything is measured against. REWRITTEN,
+    # never loosened (§218) — `pg.fill("#nc-to", ...)` would have gone on
+    # passing against a box the panel no longer draws (§51.11).
+    def pick_month(sel, word):
+        pg.click(sel); pg.wait_for_timeout(250)
+        pg.evaluate("""(w)=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
+            .find(x=>x.textContent.trim()===w); if(b)b.click();}""", word)
+        pg.wait_for_timeout(300)
+    pick_month(".newcycle label:nth-child(2) .monthbtn", "Jul")   # Covers from
+    pick_month(".newcycle .tobtn", "Dec")                          # to
+    ck("the new cycle carries the month it covers to",
+       pg.evaluate("()=>NEWCYCLE && NEWCYCLE.to") == "Dec 2026",
+       pg.evaluate("()=>NEWCYCLE && NEWCYCLE.to"))
     pg.click("[data-nc-go]"); pg.wait_for_timeout(800)
 
     after = pg.evaluate("""(ids) => {

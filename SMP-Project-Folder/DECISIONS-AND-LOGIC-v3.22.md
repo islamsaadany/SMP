@@ -4712,6 +4712,169 @@ nobody requests and leave the platform unavailable offline.
 
 ---
 
+## 303 · Setting a client up (spec 042)
+
+Islam: *"any Consultant who gets into the platform and adds a new client to set
+up this client he needs to go through a series of questions … is the company a
+multi business company or a single business company … will it include the
+functions … are they planning projects or planning in pillars or would be
+showing functional objectives and tactics … what are the names that are used in
+this company … there needs to be a buildup of some sort of wizard that builds
+with the Consultant showing him some sort of visuals so he can see what this
+means and what this looks like."*
+
+Drawn first and signed off from
+`design-mockups/onboarding-wizard/2026-09-07_set-up-a-client.html`, published as
+an artifact (rule 1c). **A march of seven steps and a summary**, each openable
+from the rail at any time, with the client's shape building up beside them.
+
+### 303.1 · What the round found before anything was built
+
+**NOTHING MULTI-TENANT EXISTS**, and §36's assessment is unchanged and unbuilt:
+no `search_path`, no tenant resolution, one database is one client.
+
+**AND A FRESH DEPLOYMENT IS NOT EMPTY.** `db/migrations/004-clean-slate.sql`
+seeds the worked example and then deletes the invented content — but keeps the
+ten business units, the supporting functions, the companies, the three group
+themes and the eight capability names, because when it was written this
+database *was* Raya's. A second client set up today would arrive holding Raya's
+org chart. **That is the thing the wizard replaces**, and it is why the wizard
+is not an extra screen but a different start.
+
+**AND `GROUP.org` HAD NO EDITOR ANYWHERE IN THE PRODUCT.** The field is stored
+(`state-io` maps it to `org_name`) and read by the chrome, the deck and every
+email, and nothing could write it — it arrived with the seed. The wizard's
+first step is the first control the platform has ever had for it. Checked
+before it was offered (§172): the authoriser classifies `org` as `group`, which
+is the office's, so the screen and the save agree.
+
+### 303.2 · The scope, and two reversals recorded as reversals
+
+**MULTI-TENANCY LEFT THE SCOPE.** Islam: *"this is a fix I will do in the
+tenant management platform let's just build the wizard and the flow."* This
+reverses his own choice earlier in the same round to build the thin plumbing
+first. It cost nothing, because the wizard never depended on it: the client's
+name is data, so the wizard shapes a deployment from empty with nothing new
+underneath it.
+
+**AND WHAT THE PLATFORM CANNOT DO YET IS DRAWN AND DULLED.** *"don't build
+things that doesn't exist now in the platform … i will take it to another
+discussion to build what's missing"*, and *"keep the mockup as is but kepe the
+non existing parts dull for now."* So the capabilities step and the third plan
+type are drawn, inert, and each says **Later**. That is a deliberate exception
+to §61 and §94.15 — a control with nothing behind it is normally furniture —
+taken on his instruction, **with its cost stated: the consultant meets two
+greyed choices**. Every one of them names itself, which is the one thing a
+greyed control must do or it reads as broken. The single-business shape
+(`SINGLE_COMPANY`, in §4 of the model document and never built) is left out
+entirely, because neither client is one.
+
+### 303.3 · It builds up rather than interrogates
+
+Islam, mid-round: *"the wizard should be dynamic in a way that accepts a build
+up of these different setups, allocation, naming type of plans for each."* So
+units, functions and a function's capabilities are lists you add to, and every
+function carries its own plan type — one client runs both at once.
+
+**NOTHING WRITES THROUGH A SECOND DOOR (§53.5).** Rows are minted by
+`addBusinessUnit`, `addCompany`, `addFunction` and `addCapability` — the same
+minters Setup and the plan builder use — and every FIELD carries the attribute
+the platform's own `wireSetupFields(document)` already looks for (`data-uname`,
+`data-coname`, `data-fname`, `data-fnformat`) or is an `input.lbl` wired by the
+Terminology page's own handler. The wizard changed where the question is asked
+and nothing about how the answer is stored.
+
+**AND THE FIRST BUILD BROKE THAT RULE IN THE ONE PLACE IT MATTERED.** It wrote
+its own plan-type `<select>` and dropped what `planFormatCell` carries: the
+tenant's own word for a pillar, and **the guard**. A function holding
+capabilities cannot become a pillars one and a function holding pillars cannot
+go back — switching would not delete the work, it would stop DRAWING it, which
+is worse: the plan is still in the save and nothing shows it. Mine would have
+offered that switch. It calls `planFormatCell` now, and the third plan type is
+therefore not an option on the control at all — an answer that cannot be taken
+does not belong on the control that takes them (§61); it is drawn and named in
+the choice cards instead, which is where the explanation lives.
+
+**LIVE IMMEDIATELY, NOTHING STORED** (§129 one level up). `WIZ` holds which
+step is open and nothing else — a screen mode, never state-graph content (§25,
+§47.1) — and progress is DERIVED: the ticks read the graph, the shape reads the
+graph, so the drawing cannot fall out of step with the answers because there is
+no second copy of them. The optional steps (companies, functions, the words,
+the office) fall back to *you have been here*, because a client may legitimately
+have none and an eternally unticked step reads as unfinished work that does not
+exist.
+
+**THE WORDS STEP IS THE TERMINOLOGY PAGE'S OWN TABLE**, asked once here with a
+third column saying which part of THIS client's shape uses each word. Free
+text, no presets — Islam: *"this needs to be dynamic as each client has it's own
+naming."*
+
+### 303.4 · Where it lives, and where it ends
+
+Islam's placement: **a rail entry under *The organisation*** — first in that
+group, because it is where a client's shape begins and every other page in the
+group edits one part of what it sets — **plus a loud door on Setup › Overview
+while nothing has been shaped yet**, and only then: once there are units the
+rail entry is the way in, and a second shouting door on the landing page would
+compete with the queue it sits above (§94.15). It is the plan builder's own
+`.bdoor`, because it is the same kind of thing in the same kind of place.
+
+**GATED ON `inOffice()`**, the shape `c_send`, `c_chat` and the Knowledge base
+already use (§97, §119) — not a matrix cell. This one page writes across five
+Setup areas AND the group's own name and horizon, so no single cell names it,
+and a cell that half-covered it would offer a wizard whose middle steps the
+server refuses (§172).
+
+**It ends on a summary with two doors** (his): *Start the plans*, which opens
+the plan builder through `openBuilderChooser()` — the same opener the Import
+page's door calls, never a second one (§53.5, §253.3's lesson) — and *Bring the
+people in*, which is `data-setupgo="people"`, the platform's own navigation.
+The office step lists who holds a seat and sends them to the register rather
+than growing a second person-adder: who a row IS is asked in one place (§87).
+
+### 303.5 · What the check asserts, and what it found
+
+`checks/client-setup.py`, proved able to fail four ways (**2 / 1 / 2 / 2 red**)
+from the SOURCES, because an edited built file is silenced by §238's hashed CSP
+(§276). Every answer is driven through its REAL control and read back off the
+**stored graph** — a wizard wired to nothing renders perfectly (§96) — the shape
+is asserted as AGREEMENT with the data rather than as a count (§94.8), the page
+is asserted drawn for the office and absent for a unit head, and the Overview's
+door is asserted present on a bare tenant and gone on a shaped one, which needs
+the bare state MADE and put back (§94.2).
+
+**AND FOUR OF THE CHECK'S OWN FAILURES WERE THE CHECK.** It **died rather than
+reporting**, twice (§215, in a file whose docstring promises it does not),
+because a handler that ends in `paint()` detaches the node and a held handle is
+stale (§222). It **reported a correct build as broken**, asserting the raw
+`FUNCTIONS[k].format` when the platform stores *projects* as an ABSENCE
+(§50.6) — `fnFormat()` is the reader that answers. And two assertions **passed
+vacuously over an empty list** (§113.8: `every([])` is true, `some([])` is
+false), so a build that deleted the dulled choice outright satisfied *they all
+say Later* and *none is a button* while proving nothing — found by falsifying
+rather than by reading, and both are guarded on there being one now.
+
+**AND THE PAGE ERROR WAS THE PROBE'S METHOD, MEASURED RATHER THAN ASSUMED.**
+Dispatching `change` while the box still has focus makes `paint()` remove a
+FOCUSED node, whose blur then fires inside the innerHTML assignment. The
+platform's own Terminology field — whose handler has ended in `paint()` since
+long before this round — throws the identical error under a dispatched change
+and none under a real blur. §219's rule, earned again: **blur, never a
+synthesised change.**
+
+### 303.6 · Recorded, not done
+
+The three shapes drawn and dulled are spec 042 §2's list, with the decisions
+already taken written down for the round that builds them: a function that
+plans in **objectives, actions and requirements** (two headline numbers side by
+side, and a requirement raised on the raiser's own page and drawn at both ends,
+scoring nothing); a **capability as its own strategic entry** beside the units,
+owned by a function head; and the **single-business** shape. And which company
+a unit belongs to is still set on Setup › Business units rather than in the
+wizard's companies step — one field, one place (§130.6).
+
+---
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

@@ -6,7 +6,23 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§301 — a project owner reports, and the bar said
+**Latest version:** **§303 — setting a client up: the wizard — built on
+`claude/multitenant-onboarding-wizard-kvyfcc`, NOT merged.** A guided flow that
+shapes a client from nothing: its name, its year, its business units, its
+companies, its supporting functions and how each plans, the words it uses, and
+who runs the office — ending on a summary with two doors into the plan builder
+and the register. Drawn and signed off first
+(`design-mockups/onboarding-wizard/2026-09-07_set-up-a-client.html`, published
+as an artifact). Multi-tenancy is deliberately NOT in it — Islam is doing that
+in the tenant management platform — and the three shapes the platform cannot do
+yet (a function planning in objectives and actions, a capability as its own
+strategic entry, the single-business shape) are drawn, inert, and each says
+*Later*, at his instruction. `checks/client-setup.py` 30/0, proved able to fail
+four ways; `qa.py` ERRORS none; setup-pages, setup-rail, setup-search,
+setup-header, setup-overview, no-jump, table-fit, plan-builder and
+people-dialog all green; 574/0 authoriser, 136/0 differ.
+
+**Before it:** **§301 — a project owner reports, and the bar said
 View only — merged to `main` 2026-09-07 on Islam's word**, from
 `claude/project-owner-reporting-access-uzze9s`, carrying §285–§300 from
 several other sessions in with it; built as §287 and renumbered at the

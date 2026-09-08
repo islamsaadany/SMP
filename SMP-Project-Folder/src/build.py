@@ -6,7 +6,7 @@ css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
        + "\n" + open('config.css').read() + "\n" + open('arrange.css').read()
        + "\n" + open('present.css').read() + "\n" + open('chat.css').read()
        + "\n" + open('tour.css').read() + "\n" + open('welcome.css').read()
-       + "\n" + open('builder.css').read())
+       + "\n" + open('builder.css').read() + "\n" + open('wizard.css').read())
 shell = open('shell.html').read()
 
 # lib/rules.js is the SHARED one — the same file api/state.js requires. It is
@@ -19,7 +19,7 @@ for tag, f in [("RULES","../../lib/rules.js"), ("DIFF","../../lib/graph-diff.js"
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("RECIPES","recipes.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
                ("PPTX","pptx.js"),
                ("MAIL","../../lib/mail-html.js"),
-               ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
+               ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("WIZARD","wizard.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
                ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("HISTORY","history.js"), ("SAFETY","safety.js"), ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')
 # The icon travels INSIDE the built file, as a data URI, because the file has

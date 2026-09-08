@@ -1,6 +1,6 @@
 # 042 · Setting a client up, and a function that plans in objectives
 
-**Version:** unbuilt · **Decisions:** §303 (to be written) · **Status:** drawn, awaiting sign-off
+**Version:** v4.81 · **Decisions:** §303 · **Status:** answered; built
 
 Islam: *"any Consultant who gets into the platform and adds a new client to set
 up this client he needs to go through a series of questions … is the company a

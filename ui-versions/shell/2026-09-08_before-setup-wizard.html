@@ -211,7 +211,6 @@
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
 <script src="BUILDER"></script>
-<script src="WIZARD"></script>
 <script src="PRESENT"></script>
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
@@ -418,21 +417,6 @@
       { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
       { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
-      /* ── SETTING A CLIENT UP (§303, spec 042) ────────────────────────
-         Islam picked the placement: a rail entry under *The organisation*,
-         plus a loud door on the Overview while nothing has been shaped yet.
-         FIRST in its group, because it is where a client's shape begins and
-         every other page in the group edits one part of what it sets.
-
-         GATED ON `inOffice()`, the shape `c_send`, `c_chat` and the Knowledge
-         base already use (§97, §119) — NOT a matrix cell. This one page writes
-         across five Setup areas AND the group's own name and horizon, so no
-         single cell names it, and a cell that half-covered it would offer a
-         wizard whose middle steps the server refuses (§172). `c_units` stays
-         its grant key so the rail's machinery is untouched; every control
-         inside still asks the real grant it needs. */
-      { k:"wizard", ac:"c_units",  grp:"run", label:"Set-up", glyph:"◲", find:"wizard set up setup new client onboarding shape units functions terminology start first time",
-        when: function(){ return inOffice(); },                          render:renderWizard },
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
@@ -7493,80 +7477,6 @@
         fieldSaved(); paint();
       });
     });
-    /* ── THE CLIENT SET-UP WIZARD (§303, spec 042) ─────────────────
-       Every write here goes through a minter or a field the platform already
-       wires: `data-uname`, `data-coname`, `data-fname` and `data-fnformat`
-       are picked up by wireSetupFields(document) a few hundred lines above,
-       and the words step's cells are `input.lbl`, wired with the Terminology
-       page's own handler. What is left is navigation and the four adds. */
-    document.querySelectorAll("[data-wgo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!WIZ) WIZ = { at:0, seen:[] };
-        /* THE STEP YOU ARE LEAVING IS THE ONE YOU HAVE SEEN. Marked on the way
-           OUT rather than on the way in, so a step opened and abandoned by
-           pressing Back does not tick — and `seen` is the only thing an
-           optional step has to read, there being nothing in the graph to say
-           "this client has no companies" (spec 042 §3). */
-        if (WIZ.seen.indexOf(WIZ.at) < 0) WIZ.seen.push(WIZ.at);
-        WIZ.at = Math.max(0, Math.min(WIZ_LAST, +b.dataset.wgo));
-        paint(); window.scrollTo(0,0);
-      });
-    });
-    document.querySelectorAll("[data-wdone]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* CLOSING IS LEAVING THE PAGE, never a stored "finished" flag: the
-           wizard is derived from the data, so there is nothing to finish. */
-        WIZ = null;
-        currentSub = "overview";
-        leaveModes(); paint(); window.scrollTo(0,0);
-      });
-    });
-    document.querySelectorAll("input[data-worg]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* THE ONE FIELD THE PLATFORM HAD NO CONTROL FOR. `org` is stored
-           (state-io maps it to `org_name`) and read by the chrome, the deck
-           and every email, and nothing in the product could write it — it
-           arrived with the seed. The server classifies it as `group`, which
-           is the office's, so the screen and the save agree (§42, §172). */
-        GROUP.org = inp.value.trim() || GROUP.org;
-        paint();
-      });
-    });
-    document.querySelectorAll("input[data-wyear]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* Trimmed, and an emptied box CLEARS it rather than storing a space:
-           horizonSet() tests for a non-blank string, so " " would read as set
-           and print a dangling "by" (§50.6's shape, one field over). */
-        GROUP.horizon = inp.value.trim();
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        wizAdd(b.dataset.wadd, b.dataset.wfn || null);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wnoco]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* IT WRITES NOTHING, AND THAT IS THE ANSWER. "No companies" is the
-           absence of companies; the press records only that the question was
-           reached, so the step can tick (spec 042 §3). It is refused while a
-           company exists rather than deleting one behind the SMO's back. */
-        if (activeCompanyKeys().length) return;
-        if (!WIZ) WIZ = { at:0, seen:[] };
-        if (WIZ.seen.indexOf(WIZ.at) < 0) WIZ.seen.push(WIZ.at);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wdoor]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* ONE OPENER FOR THE PLAN BUILDER (§53.5, §253.3's lesson): the
-           wizard's door calls the chooser the Import page's door calls. */
-        if (b.dataset.wdoor === "plan") openBuilderChooser();
-      });
-    });
-
     /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
     document.querySelectorAll("[data-buildplan]").forEach(function(b){
       b.addEventListener("click", function(){ openBuilderChooser(); });

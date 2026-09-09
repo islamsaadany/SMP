@@ -107,6 +107,38 @@ with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={"width":1400,"height":1000})
     pg.on("pageerror", lambda e: errs.append("PAGEERROR: "+str(e)))
     pg.on("console", lambda m: errs.append(m.text) if m.type=="error" else None)
+    if BASE:
+        # A REFUSED SAVE SAYS WHICH AND WHY (§124): a bare "403 (Forbidden)"
+        # console line names nothing. Every failed /api/ answer is recorded
+        # with the viewer it was judged as and the server's own sentence.
+        def _refused(r):
+            if "/api/" not in r.url or r.status < 400: return
+            try: body = r.text()[:300]
+            except Exception: body = "?"
+            try: who = pg.evaluate("window.VIEWER")
+            except Exception: who = "?"
+            errs.append("REFUSED %s %s -> %d as %r: %s"
+                        % (r.request.method, r.url.replace(BASE, ""), r.status, who, body))
+        pg.on("response", _refused)
+        # AND A VIEWER SWITCH IS ASYNCHRONOUS OVER HTTP (§237): it flushes,
+        # rebases on the server's graph, then switches — or, refused, does
+        # not switch at all and puts the select back. A probe that reads the
+        # page 300ms after picking measures whoever happened to be there. So
+        # a pick waits until the select and VIEWER agree, and says so when
+        # the switch never took rather than measuring the wrong person.
+        _sel = pg.select_option
+        def _pick(selector, value, *a, **k):
+            r = _sel(selector, value, *a, **k)
+            if selector == "#asWho":
+                pg.wait_for_function(
+                    "() => document.getElementById('asWho').value === window.VIEWER",
+                    timeout=20000)
+                if pg.evaluate("window.VIEWER") != value:
+                    errs.append("SWITCH: viewing as %r never took (VIEWER stays %r) \u2014 "
+                                "the flush before it was refused" % (value, pg.evaluate("window.VIEWER")))
+                pg.wait_for_timeout(200)
+            return r
+        pg.select_option = _pick
     open_platform(pg)
     people = pg.eval_on_selector_all("#asWho option","els=>els.map(e=>e.value)")
     for v in people:

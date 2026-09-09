@@ -95,12 +95,17 @@ await section("2 · the address names the page, and the page names the address",
   check(p[1] === "performance", "…/performance opens Performance", JSON.stringify(p));
   await page.click('#subtabs button[data-s="strategy"]'); await page.waitForTimeout(400);
   check(/^\/raya-trade\/mobile\/strategy/.test(path()), "pressing a tab writes the address", path());
+  await page.reload({ waitUntil: "networkidle" }); await booted(); p = await place();
+  check(p[0] === "mobile" && p[1] === "strategy", "a refresh stays where you are (§173, by address)", JSON.stringify(p));
+  /* AND THE SECOND DOOR NEEDS SOMEBODY WHO HOLDS TWO. A unit head reaches
+     one destination, so pressing another unit and walking Back are asserted
+     as the office — the person who has more than one place to be (§94.6). */
+  await fresh(); await signIn("office@forefront.example");
+  await open("/raya-trade/mobile/strategy");
   await page.click('#units button[data-u="retailstores"]'); await page.waitForTimeout(400);
   check(/^\/raya-trade\/retailstores\//.test(path()), "pressing a unit writes the address", path());
   await page.goBack(); await page.waitForTimeout(600); p = await place();
   check(p[0] === "mobile" && /^\/raya-trade\/mobile\//.test(path()), "Back returns to the place before it", JSON.stringify(p) + " " + path());
-  await page.reload({ waitUntil: "networkidle" }); await booted(); p = await place();
-  check(p[0] === "mobile" && p[1] === "strategy", "a refresh stays where you are (§173, by address)", JSON.stringify(p));
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
 });
 

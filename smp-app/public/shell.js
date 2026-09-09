@@ -57324,6 +57324,7 @@ var SYNC = (function () {
   "use strict";
   var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,48})(?:\/(.*))?$/);
   if (!m) return;
+  if (document.documentElement.getAttribute("data-break") === "no-route") return;   /* the check's break */
   var SLUG = m[1];
   /* tab words in the address ↔ tab keys in SUBS; a function's Strategy and
      Performance keys are its own (fnstrat, fnperf), the group's and a
@@ -57367,6 +57368,18 @@ var SYNC = (function () {
       var rem = { d: here.d, s: here.s };
       if (here.c && here.s) rem.c = here.c;
       sessionStorage.setItem("smp.where", JSON.stringify(rem));
+      /* AND AN ADDRESS IS NOT A TOUR. The intro round navigates by pressing
+         the platform's own controls (§107), so offered over a page somebody
+         asked for by address it walks them off it — measured: a unit head
+         opening /<client>/mobile/performance landed on Strategy › Plan, the
+         tour's own first stop, with the address rewritten under them. The
+         landing carries the offer (§159's intro-round card, `/<client>/tour`)
+         and Continue is the answer to it, so a deep address is somebody who
+         has already chosen a page. Stood down for THIS SESSION ONLY, through
+         the tour's own "Skip for now" mark rather than a second memory beside
+         it (§53.5): "Don't show again" is untouched, `/<client>/tour` still
+         offers, and the Knowledge base's replay button still starts one. */
+      sessionStorage.setItem("smp.tour.later", "1");
     }
   } catch (e) { /* a store that refuses: the shell opens where it would have */ }
   /* ── after every paint: the place is the address ── */

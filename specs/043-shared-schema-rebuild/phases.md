@@ -119,7 +119,7 @@ begins.
 
 - [x] A0 Plan approved by Islam (2026-09-09: *"agreed ... proceed"*, with the Neon constraint below).
 - [x] A The state API — read, save, peek, history; harnesses green red-first (§315.2, 2026-09-09: `check:state` 87/0, six red runs).
-- [ ] B The shell on the new stack — build-shell, sync.ts, routing, CSP, /platform; `qa.py` at Next green.
+- [x] B The shell on the new stack — build-shell, the frozen `sync.js` carried rather than rewritten, routing, CSP, /platform (§315.3, 2026-09-09: `check:shell` 36/0 with two red runs; `qa.py` at Next 33 viewers, 229 destinations, ERRORS none; door 44/0, state 87/0).
 - [ ] C Strategy checks green against Next.
 - [ ] D Performance and Reporting checks green against Next.
 - [ ] E Setup checks green against Next; blob route ported.

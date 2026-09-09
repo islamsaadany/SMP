@@ -485,6 +485,23 @@ the office row by the frozen rules with no membership written for a seat
 held by rule, a malformed change list a 400, and the lock's remaining job
 under the row writer named — the maps on one row — with `checks/state-api.mjs`
 87/0 and six red runs (`npm run check:state`, `check:state:red`).
+**Phase B is built (§315.3)**: the frozen shell is SERVED, all of it —
+`scripts/build-shell.mjs` concatenates build.py's own list plus the shell's
+inline block into one `public/shell.js` and `lib/shell.ts` serves it as a
+document under `script-src 'self'` (no hash to go stale), with `sync.js`
+CARRIED rather than rewritten (its boot, wall, save, refusal banner and
+chrome are all screen decisions) and the new app answering the frozen
+spellings `/api/state`, `/api/auth`, `/api/chat|mail|blob`. `shell/route.js`
+is the one piece of new browser code: the address IS §173's remembered place,
+the place becomes the address after every paint, and a deep address stands the
+intro round down for that session through the tour's own *Skip for now* mark —
+the landing carries the offer (`/<client>/tour`) and *Continue* is the answer
+to it. Forefront's own pages are `platform.html` over `lib/platform-api.ts`.
+`checks/shell.mjs` 36/0 with two red runs; `qa.py` against the served app
+(`SMP_BASE`) 33 viewers, 229 destinations, ERRORS none — and its own first
+three runs found the HARNESS, not the product (the register probes wrote the
+office's own row, which §313.29 marks and the authoriser refuses, and a
+refused flush blocks every viewer switch after it).
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

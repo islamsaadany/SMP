@@ -25,6 +25,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
 import pg from "pg";
+import { devTenant } from "../scripts/dev-tenant.mjs";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
 const CHROME = process.env.SMP_CHROME || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -41,6 +42,12 @@ const check = (c, l, m) => (c ? ok(l) : fail(l, m));
 const MARK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
 const owner = new pg.Pool({ connectionString: URL_, max: 2 });
+/* THE STATE IS MADE, NEVER INHERITED (§255, §94.2). This read whatever the
+   last run happened to leave in the dev tenant, and a landing row asserted as
+   AGREEMENT with the frozen reader passes vacuously when the reader answers
+   none — which is what a sweep's own saves had left it answering, so "a row's
+   door" had nothing to press (§113.8). The tenant is remade first. */
+await devTenant({ url: URL_, log: () => {} });
 const tenant = (await owner.query("SELECT id FROM tenants WHERE key = 'raya-trade'")).rows[0];
 if (!tenant) { console.log("FAIL  no dev tenant — run scripts/dev-tenant.mjs first"); process.exit(1); }
 await owner.query("UPDATE tenants SET mark = $1 WHERE id = $2", [MARK, tenant.id]);
@@ -153,9 +160,14 @@ await section("3 · sign in and land", async () => {
   if (await firstBtn.count()) {
     const href = await firstBtn.getAttribute("href");
     await firstBtn.click(); await page.waitForLoadState("networkidle");
-    check(page.url() === BASE + href, "a row's door opens its address", page.url());
-    const h1 = (await page.locator(".holder h1").textContent()).trim();
-    check(h1.startsWith(frozen.placeLabel(graph, "mobile")) && (await page.locator(".holder p").first().textContent()).includes("not built"), "…which says in words what it is and that it is not built yet", h1);
+    check(page.url().startsWith(BASE + href), "a row's door opens its address", page.url());
+    /* REWRITTEN, never loosened (§218): behind that door was a holder saying
+       "not built"; Phase B put the product there, so what is asserted is that
+       it opened THE PLACE THE ROW NAMES — the shell's own place, which then
+       becomes the address (§173). */
+    await page.waitForFunction(() => !document.documentElement.classList.contains("booting"));
+    const at = await page.evaluate(() => [current, currentSub]);
+    check(at[0] === "mobile" && !!at[1], "…and the shell opens on the place it names", JSON.stringify(at) + " " + page.url());
   } else fail("a row's door opens its address", "no row to press");
   /* the door bounces a live session straight through (§32) */
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
@@ -164,7 +176,11 @@ await section("3 · sign in and land", async () => {
   await page.goto(BASE + "/somebody-else", { waitUntil: "networkidle" });
   check(page.url() === BASE + "/raya-trade", "a client user at another slug lands on their own (§313.36)", page.url());
   await page.goto(BASE + "/raya-trade/mobile/strategy", { waitUntil: "networkidle" });
-  await Promise.all([page.waitForURL(BASE + "/"), page.click(".holder form button")]);
+  await page.waitForFunction(() => !document.documentElement.classList.contains("booting"));
+  /* The holder's form is gone; sign out is the shell's own control, drawn by
+     sync.js into the chrome, and it lands on the CLIENT's door (§313.36). */
+  await Promise.all([page.waitForURL(BASE + "/raya-trade/sign-in"),
+                     page.click('button:has-text("Sign out")')]);
   check((await page.locator("#login").count()) === 1, "sign out returns to the door");
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
   check(page.url() === BASE + "/raya-trade/sign-in", "signed out, a client's address sends you to that client's door (§313.36)", page.url());
@@ -223,7 +239,10 @@ await section("5 · the office", async () => {
   await signIn(page, "office@forefront.example", "Raya-2026!");
   await page.waitForURL(BASE + "/platform");
   check(page.url() === BASE + "/platform", "the office lands on the platform's own address (contracts §2)");
-  check((await text(page, ".holder li a")).includes("Raya Trade"), "…which lists the clients they may open");
+  /* REWRITTEN (§218): a holder listed them; Phase B serves Forefront's own
+     page, so the clients are its cards. */
+  await page.waitForSelector(".ccard", { timeout: 15000 }).catch(() => {});
+  check((await text(page, ".ccard h2")).includes("Raya Trade"), "…which lists the clients they may open");
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
   const officeWant = frozen.landing(graph, "smo");
   check((await page.locator(".welcomeover h2").textContent()).trim() === "Welcome, " + officeWant.name, "the office's landing on a client is theirs", await page.locator(".welcomeover h2").textContent());

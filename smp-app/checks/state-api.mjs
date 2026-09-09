@@ -129,8 +129,14 @@ await section("1 · the graph, the person, and the office on the register", asyn
   const adm = (await signIn("ffadmin@raya.example")).cookie;
   let a = await get(adm);
   const row = (await owner.query("SELECT key, role, extra FROM people WHERE tenant_id = $1 AND key = $2", [tenantId, "ff_ffadmin"])).rows[0];
-  check(a.status === 200 && a.j.person.key === "ff_ffadmin" && a.j.person.role === "super" && row && row.role === "smoteam" && row.extra.ffrow === true && row.extra.forefront === true,
-    "an admin holding no seat acts as the Super user and is given a TEAM row (the client already has its super), minted and marked as the platform's (§313.30)", a.status + " " + JSON.stringify(a.j && a.j.person) + " " + JSON.stringify(row));
+  /* REWRITTEN, never loosened (§218). This asserted a TEAM row, because a
+     client could hold only one super user — and §313.26 (two super users)
+     was put back on the frozen product before the schema heard: the unique
+     index is dropped (migration 001), so the row a minted office person gets
+     FOLLOWS THE SEAT, and an admin holding none is the Super user by rule
+     (door.ts's seatFor). The marks are asserted exactly as before. */
+  check(a.status === 200 && a.j.person.key === "ff_ffadmin" && a.j.person.role === "super" && row && row.role === "super" && row.extra.ffrow === true && row.extra.forefront === true,
+    "an admin holding no seat acts as the Super user and the row minted for them says so — marked as the platform's (§313.30, §313.26)", a.status + " " + JSON.stringify(a.j && a.j.person) + " " + JSON.stringify(row));
   const m = (await owner.query("SELECT 1 FROM tenant_users m JOIN users u ON u.id = m.user_id WHERE u.email = 'ffadmin@raya.example' AND m.tenant_id = $1", [tenantId])).rowCount;
   check(!m, "…and NO membership is written — the seat is the door's rule, and the client keeps ONE super (§313.4)", m);
   a = await get(adm);

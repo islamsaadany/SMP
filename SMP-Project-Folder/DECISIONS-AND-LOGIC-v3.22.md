@@ -41009,3 +41009,138 @@ reads the new word; nothing seeds on a first request (`seeded` is gone,
 untouched.
 
 ---
+
+
+### §315.3 — Phase B: the shell on the new stack, all of it verbatim (2026-09-09)
+
+**THE CLIENT IS CARRIED TOO, WHICH THE PLAN HAD NOT SAID.** phases.md §1
+carried the renderers and the shell script verbatim and named a *new*
+`sync.ts` as the client. Reading `sync.js` end to end before writing one
+changed that: its boot, skeleton, wall, save, refusal banner, put-back, chrome
+and flush are all SCREEN (§94.10, §201, §184, §185, §138) — a rewrite would
+have been a second copy of every one of those decisions — and every
+transport line in it is an ADDRESS. So the whole shell goes across as
+built: `scripts/build-shell.mjs` reads build.py's own list out of build.py
+(§53.5), concatenates the twenty-eight parts in build.py's own order — its scripts,
+the shell's inline block and `route.js` — into ONE file, `public/shell.js`, and
+writes the body markup to
+`shell/body.html`; `lib/shell.ts` serves it in a document of its own
+(`app/(platform)/[slug]/[...rest]/route.ts` — a route handler, because the
+shell is a document and React has nothing to do inside it). Nothing under
+`SMP-Project-Folder/src` is edited. **The new app answers the frozen
+spellings**: `/api/state` (with `?client=`, `client` in a body, or — for
+history.js and safety.js, which name none — the page the request came from,
+under the shell's own `Referrer-Policy: same-origin`, nothing leaving the
+origin) is `app/api/state/route.ts` calling the same `lib/state-api.ts` as
+the canonical `/api/<slug>/state`, never a copy; `/api/auth {action}` answers
+`logout` and refuses the register's five actions IN WORDS until Phase E;
+`/api/chat`, `/api/mail`, `/api/blob` answer `{ok:false}` in words at 200
+until their phases — at 200, because the shell reads `ok` and a browser
+prints a console error for every non-2xx, which `qa.py` counts as the
+product's.
+
+**THE ONE PIECE OF NEW BROWSER CODE IS SMALL BECAUSE §173 BUILT IT.**
+`shell/route.js` turns `/<client>/<target>/<tab>[/<section>]` into §173's own
+remembered place before the shell's first paint, so `restoreWhere()` lands
+there with no second opener — the address a person pressed wins over where
+they were, because a door pressed is what they asked for; after every paint
+the place becomes the address (pushState), Back walks the places visited,
+and a refresh stays put by address. `fn/<key>` and `co/<key>` are the
+landing's own spelling (`doorHref`). The shell's welcome overlay is stood
+down: the landing at `/<client>` IS the welcome (§315), and two greetings
+for one arrival is §87's twins in the doorway.
+
+**§238's NET WITHOUT A HASH.** Every script is a FILE, so the served
+document carries `script-src 'self'` — no `unsafe-inline`, no hash to go
+stale (§91's "a stale hash is a page that does not load" cannot arise) — and
+the rest of the policy is vercel.json's word for word. Proved by injecting an
+inline handler into the served page and watching it NOT run; and it cost the
+checks their own eval: Playwright's Python `evaluate(<string>)` is refused by
+that policy, so `qa-run.py` lets every context bypass it under `SMP_BASE`
+(the checks are not the product; the policy is asserted by
+`checks/shell.mjs`, which does not bypass it).
+
+**FOREFRONT'S OWN PAGES, VERBATIM OVER A PORTED API.** `platform.html` is
+served as it is (`/platform`, its inline script moved to `/platform-page.js`
+for the same reason) and `api/platform.js`'s eleven actions are
+`lib/platform-api.ts` over `tenants` · `users` · `tenant_users` ·
+`platform_access`, answering from the frozen `lib/platform-rules.cjs` byte
+for byte. Two departures, both recorded: **§313.26 stands** — a client may
+hold more than one super user, so the `tenant_users_one_super` index the
+first cut of the schema carried is dropped (migration 001; §313.4's seat move
+was reversed on the frozen product and the schema had not heard) — and **a
+client created from the cards starts with §67's cleared graph under its own
+name and NOBODY on its register**: the bootstrap SMO existed because a
+deployment with no way in is not a deployment (§21), and on the shared
+schema the platform's admin opens a client by rule (door.ts's `seatFor`) and
+the team is added on the card, which writes the register (§313.31). A client
+whose graph fails to load is deleted with the failure rather than left as a
+row nobody can open.
+
+**AND THE SWEEP'S FIRST RUN FOUND THE HARNESS, NOT THE PRODUCT.** `qa.py`
+against the app ended with three console lines reading `403 (Forbidden)` and
+two role findings — a company CEO reaching the other company, a unit head
+offered the plan pen — and all five were one fact, found in three steps
+because the first two answers were incomplete: the register probes WRITE
+`PEOPLE` — a number minted onto every row, an Official BU on `PEOPLE[0]`, an
+identity on `PEOPLE[0]` — and on file:// every row is anybody's, while on this
+stack `PEOPLE[0]` is the signed-in office person's row, marked `forefront` by
+§313.29 and refused to the register by the frozen authoriser (§313.31's rule,
+carried verbatim). A refused flush blocks every switch away from home
+(§209), so the probes that followed measured the office while the select read
+somebody else. The instrumented run said so on the second attempt and the
+refused change list — dumped by a trimmed copy that stops at the first
+refusal — named the third write on the third. All of it is the check's, and
+fixed there: under `SMP_BASE` a refused answer is recorded with the server's
+own sentence and the viewer it was judged as (§124 — a bare 403 names
+nothing), a pick of `#asWho` waits until the select and `VIEWER` agree and
+says so when the switch never took, and the register probes index and number
+the rows the client owns, expecting the office's unnumbered row to be set
+aside by its own reader. Under file:// no row is the office's, so the run is
+byte-for-byte what it was.
+
+**AND AN ADDRESS IS NOT A TOUR.** With the harness honest, one address still
+opened the wrong page: a unit head asking for `/<client>/mobile/performance`
+landed on Strategy › Plan with the address rewritten under them. The shell
+was right and so was the tour — `TOUR.offer` fires on a first sign-in and the
+intro round NAVIGATES by pressing the platform's own controls (§107), so
+offered over a page somebody asked for by name it walks them off it. The
+landing already carries the offer (§159's intro-round card, `/<client>/tour`,
+which `route.js` deliberately leaves placeless so the tour opens where the
+person works), and *Continue* is the answer to it — so a deep address is
+somebody who has already chosen a page. `route.js` stands the round down for
+THAT SESSION through the tour's own *Skip for now* mark rather than a second
+memory beside it (§53.5): "Don't show again" is untouched, `/<client>/tour`
+still offers, and the Knowledge base's replay button still starts one. Found
+by a stack trace on the one line that writes the remembered place; every
+assertion in the file was green.
+
+**FOUND BY DRIVING IT, NONE BY READING**: the served page's title was
+build.py's literal; `createClient` read the seed from the wrong directory
+and left a tenant with no graph behind (the compensation above); the first
+draft of Phase A's office row wrote a membership and 500'd on the very index
+this phase removes.
+
+`checks/shell.mjs` (`npm run check:shell`): **36 assertions, 0 failures** —
+the document and its policy, the address ↔ the place on a unit, a function,
+the group and a Setup page, a tab and a unit pressed, Back, a refresh, a
+change reaching the database through the frozen client, and Forefront's pages
+end to end including a client made and opened. Proved able to fail two ways
+(`check:shell:red`): `no-route` **6 red**, `open-csp` **2 red**.
+**`qa.py` against the app** (`SMP_BASE`, signing in at the client's own door):
+**33 viewers, 229 destinations, ERRORS none**, with every extra probe green —
+the template round trip, the empty function, delete, performance/report/
+arrange on both sides, the three numbers, unit/function parity, the pin
+clearance, the people file's fixed point, identity and merge, the objectives
+toggle, both plan editors, the company page, the clear project, the workbook's
+dropdowns and the Unit column. The door check **44/0** (2 red) and the state
+check **87/0** (6 red) re-run on the built app; one assertion in each was
+REWRITTEN, never loosened (§218) — the landing's holder is the product now,
+and a minted office row follows the seat since §313.26 went back.
+
+**RECORDED, NOT DONE:** the React pages (the door, the landing, the holders)
+carry no CSP yet — Next's own hydration script is inline, so theirs needs a
+nonce, Phase J's hardening; the `manifest` and worker are not served (J);
+the frozen `api/platform` `client_log` is not written. `main` untouched.
+
+---

@@ -113,7 +113,606 @@ CREATE TABLE push_keys (
 );
 
 -- ── The tenant-owned tables (42) ────────────────────────────────────────
--- (added in the schema phase, data-model.md, group by group)
+-- Every row: tenant_id uuid NOT NULL → tenants ON DELETE CASCADE, and the
+-- key it has today with tenant_id in front of it (data-model.md). The
+-- singletons (org, cycle, review, prior_cycle) are one row per tenant keyed
+-- by tenant_id alone; the bigserial tables keep `id` and add UNIQUE
+-- (tenant_id, id) so a child's FK can carry the tenant (S5 rule 4). Every FK
+-- between tenant tables is (tenant_id, …) → (tenant_id, …) ON DELETE CASCADE.
+-- The `extra jsonb` columns are untouched; nothing inside them names a tenant.
+-- Column shapes are the frozen product's as they stand after migration 043,
+-- read off a real database rather than off 44 migration files.
+
+CREATE TABLE org (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  org_name text NOT NULL,
+  horizon text NOT NULL DEFAULT '',
+  as_of_quarter integer NOT NULL DEFAULT 2,
+  aspiration text NOT NULL DEFAULT '',
+  end_in_mind text NOT NULL DEFAULT '',
+  mission text NOT NULL DEFAULT '',
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id)
+);
+
+CREATE TABLE cycle (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  name text NOT NULL DEFAULT '',
+  reward_at numeric NOT NULL DEFAULT 100,
+  locked boolean NOT NULL DEFAULT false,
+  focus jsonb NOT NULL DEFAULT '{}'::jsonb,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id)
+);
+
+CREATE TABLE review (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  name text NOT NULL DEFAULT '',
+  from_label text NOT NULL DEFAULT '',
+  to_label text NOT NULL DEFAULT '',
+  due_label text NOT NULL DEFAULT '',
+  ends_quarter integer NOT NULL DEFAULT 2,
+  state text NOT NULL DEFAULT 'open',
+  cadence text,
+  notes jsonb NOT NULL DEFAULT '{}'::jsonb,
+  submitted jsonb NOT NULL DEFAULT '{}'::jsonb,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id)
+);
+
+CREATE TABLE prior_cycle (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  data jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id)
+);
+
+CREATE TABLE group_clauses (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  idx integer NOT NULL,
+  label text NOT NULL DEFAULT '',
+  text_ text NOT NULL DEFAULT '',
+  cid text,
+  PRIMARY KEY (tenant_id, idx)
+);
+
+CREATE TABLE group_key_objectives (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  idx integer NOT NULL,
+  id text,
+  name text NOT NULL DEFAULT '',
+  grp text,
+  dir text NOT NULL DEFAULT '≥',
+  target3y text,
+  target text,
+  compile text,
+  actual text,
+  progress numeric,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, idx)
+);
+
+CREATE TABLE themes (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  idx integer NOT NULL,
+  ab text NOT NULL,
+  name text NOT NULL DEFAULT '',
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, idx)
+);
+
+CREATE TABLE bands (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  idx integer NOT NULL,
+  key text NOT NULL,
+  floor integer NOT NULL,
+  label text NOT NULL DEFAULT '',
+  PRIMARY KEY (tenant_id, idx)
+);
+
+CREATE TABLE history (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  group_score numeric,
+  units jsonb NOT NULL DEFAULT '{}'::jsonb,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, idx)
+);
+
+CREATE TABLE companies (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  key text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  ceo text,
+  see_others boolean NOT NULL DEFAULT false,
+  see_group boolean NOT NULL DEFAULT true,
+  active boolean NOT NULL DEFAULT true,
+  PRIMARY KEY (tenant_id, key)
+);
+
+CREATE TABLE units (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  key text NOT NULL,
+  idx integer NOT NULL,
+  company text,
+  name text NOT NULL DEFAULT '',
+  nav_name text,
+  code_prefix text NOT NULL DEFAULT '',
+  active boolean NOT NULL DEFAULT true,
+  real boolean NOT NULL DEFAULT false,
+  aspiration text NOT NULL DEFAULT '',
+  end_in_mind text NOT NULL DEFAULT '',
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, key)
+);
+
+CREATE TABLE functions (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  key text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  nav_name text,
+  code_prefix text,
+  head text,
+  custodian text,
+  active boolean NOT NULL DEFAULT true,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, key)
+);
+
+CREATE TABLE people (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  key text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  role text NOT NULL DEFAULT '',
+  unit_key text,
+  fn_key text,
+  title text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, key)
+);
+
+CREATE TABLE labels (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  key text NOT NULL,
+  idx integer NOT NULL,
+  internal text NOT NULL DEFAULT '',
+  grp text,
+  bu text,
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, key)
+);
+
+CREATE TABLE weighting_factors (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  key text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  kind text NOT NULL DEFAULT 'judgement',
+  basis text,
+  weight numeric NOT NULL DEFAULT 0,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, key)
+);
+
+CREATE TABLE capabilities (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  def text NOT NULL DEFAULT '',
+  fn_key text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id)
+);
+
+CREATE TABLE projects (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  cap_id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  brief text NOT NULL DEFAULT '',
+  owner text NOT NULL DEFAULT '',
+  timeline text NOT NULL DEFAULT 'quarter',
+  start_label text NOT NULL DEFAULT '',
+  end_label text NOT NULL DEFAULT '',
+  stakeholders jsonb,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT projects_cap_id_fkey FOREIGN KEY (tenant_id, cap_id) REFERENCES capabilities (tenant_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE deliverables (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  project_id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  status text,
+  pct numeric,
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  due text,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT deliverables_project_id_fkey FOREIGN KEY (tenant_id, project_id) REFERENCES projects (tenant_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE outcomes (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  project_id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  dir text NOT NULL DEFAULT '≥',
+  target text,
+  measure_at text,
+  actual text,
+  progress numeric,
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT outcomes_project_id_fkey FOREIGN KEY (tenant_id, project_id) REFERENCES projects (tenant_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE milestones (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  project_id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  covers text,
+  owner text,
+  finish text,
+  status text,
+  pct numeric,
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT milestones_project_id_fkey FOREIGN KEY (tenant_id, project_id) REFERENCES projects (tenant_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE cap_key_objectives (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  cap_id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  dir text NOT NULL DEFAULT '≥',
+  target text,
+  compile text,
+  weight numeric,
+  actual text,
+  progress numeric,
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT cap_key_objectives_cap_id_fkey FOREIGN KEY (tenant_id, cap_id) REFERENCES capabilities (tenant_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE unit_key_objectives (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  unit_key text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  dir text NOT NULL DEFAULT '≥',
+  target3y text,
+  target text,
+  compile text,
+  actual text,
+  progress numeric,
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT unit_key_objectives_unit_key_fkey FOREIGN KEY (tenant_id, unit_key) REFERENCES units (tenant_id, key) ON DELETE CASCADE
+);
+
+CREATE TABLE pillars (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  unit_key text,
+  idx integer NOT NULL,
+  code text,
+  name text NOT NULL DEFAULT '',
+  sub text,
+  kind text NOT NULL DEFAULT 'Direction',
+  theme text,
+  owner text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  fn_key text,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT pillars_one_owner CHECK (((unit_key IS NULL) <> (fn_key IS NULL))),
+  CONSTRAINT pillars_fn_key_fkey FOREIGN KEY (tenant_id, fn_key) REFERENCES functions (tenant_id, key) ON DELETE CASCADE,
+  CONSTRAINT pillars_unit_key_fkey FOREIGN KEY (tenant_id, unit_key) REFERENCES units (tenant_id, key) ON DELETE CASCADE
+);
+CREATE INDEX pillars_fn_key_idx ON pillars (tenant_id, fn_key);
+
+CREATE TABLE measures (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  pillar_id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  dir text NOT NULL DEFAULT '≥',
+  target text,
+  target3y text,
+  compile text,
+  actual text,
+  progress numeric,
+  note text,
+  horizon text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT measures_pillar_id_fkey FOREIGN KEY (tenant_id, pillar_id) REFERENCES pillars (tenant_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE tactics (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  pillar_id text NOT NULL,
+  idx integer NOT NULL,
+  name text NOT NULL DEFAULT '',
+  owner text,
+  collaborators jsonb,
+  q1 boolean NOT NULL DEFAULT false,
+  q2 boolean NOT NULL DEFAULT false,
+  q3 boolean NOT NULL DEFAULT false,
+  q4 boolean NOT NULL DEFAULT false,
+  status text,
+  actual numeric,
+  note text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT tactics_pillar_id_fkey FOREIGN KEY (tenant_id, pillar_id) REFERENCES pillars (tenant_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE plan_archives (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id text NOT NULL,
+  idx integer NOT NULL,
+  kind text NOT NULL,
+  key text NOT NULL,
+  name text NOT NULL,
+  at_label text,
+  by_name text,
+  why text,
+  counts jsonb,
+  plan jsonb,
+  figures jsonb,
+  PRIMARY KEY (tenant_id, id)
+);
+
+CREATE TABLE unit_clauses (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  unit_key text NOT NULL,
+  idx integer NOT NULL,
+  label text NOT NULL DEFAULT '',
+  text_ text NOT NULL DEFAULT '',
+  cid text,
+  PRIMARY KEY (tenant_id, unit_key, idx),
+  CONSTRAINT unit_clauses_unit_key_fkey FOREIGN KEY (tenant_id, unit_key) REFERENCES units (tenant_id, key) ON DELETE CASCADE
+);
+
+CREATE TABLE swot_items (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  unit_key text NOT NULL,
+  cat text NOT NULL,
+  idx integer NOT NULL,
+  text_ text NOT NULL DEFAULT '',
+  PRIMARY KEY (tenant_id, unit_key, cat, idx),
+  CONSTRAINT swot_items_cat_check CHECK ((cat = ANY (ARRAY['s'::text, 'w'::text, 'o'::text, 't'::text]))),
+  CONSTRAINT swot_items_unit_key_fkey FOREIGN KEY (tenant_id, unit_key) REFERENCES units (tenant_id, key) ON DELETE CASCADE
+);
+
+CREATE TABLE unit_roles (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  unit_key text NOT NULL,
+  head text,
+  custodian text,
+  PRIMARY KEY (tenant_id, unit_key)
+);
+
+CREATE TABLE weighting_rows (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  unit_key text NOT NULL,
+  idx integer NOT NULL,
+  unit_name text,
+  why text,
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, unit_key)
+);
+
+CREATE TABLE ko_weights (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  unit_key text NOT NULL,
+  weights jsonb NOT NULL,
+  PRIMARY KEY (tenant_id, unit_key)
+);
+
+CREATE TABLE weighting_values (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  unit_key text NOT NULL,
+  factor_key text NOT NULL,
+  value numeric,
+  PRIMARY KEY (tenant_id, unit_key, factor_key)
+);
+
+CREATE TABLE access_grants (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  role_key text NOT NULL,
+  page_key text NOT NULL,
+  grant_ text NOT NULL,
+  PRIMARY KEY (tenant_id, role_key, page_key),
+  CONSTRAINT access_grants_grant__check CHECK ((grant_ = ANY (ARRAY['none'::text, 'view'::text, 'fill'::text, 'edit'::text])))
+);
+
+CREATE TABLE bu_declarations (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  person_key text NOT NULL,
+  at text NOT NULL,
+  declared_on timestamptz NOT NULL DEFAULT now(),
+  dismissed_on timestamptz,
+  dismissed_by text,
+  PRIMARY KEY (tenant_id, person_key)
+);
+
+CREATE TABLE change_log (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  at timestamptz NOT NULL DEFAULT now(),
+  person_key text NOT NULL,
+  person_name text,
+  kind text NOT NULL,
+  target text,
+  what text,
+  rows_ jsonb,
+  email text,
+  PRIMARY KEY (id),
+  UNIQUE (tenant_id, id)
+);
+CREATE INDEX change_log_at ON change_log (tenant_id, at DESC);
+CREATE INDEX change_log_target ON change_log (tenant_id, target, at DESC);
+CREATE INDEX change_log_person ON change_log (tenant_id, person_key, at DESC);
+CREATE INDEX change_log_email ON change_log (tenant_id, email, at DESC);
+
+CREATE TABLE chat_threads (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  person_key text NOT NULL,
+  person_name text,
+  started_at timestamptz NOT NULL DEFAULT now(),
+  last_at timestamptz NOT NULL DEFAULT now(),
+  waiting boolean NOT NULL DEFAULT true,
+  seen_by_them timestamptz,
+  seen_by_us timestamptz,
+  here_at timestamptz,
+  chased_at timestamptz,
+  chased_them_at timestamptz,
+  PRIMARY KEY (tenant_id, person_key)
+);
+CREATE INDEX chat_threads_waiting ON chat_threads (tenant_id, waiting, last_at DESC);
+CREATE INDEX chat_threads_last ON chat_threads (tenant_id, last_at DESC);
+
+CREATE TABLE chat_messages (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  person_key text NOT NULL,
+  at timestamptz NOT NULL DEFAULT now(),
+  from_office boolean NOT NULL DEFAULT false,
+  by_key text NOT NULL,
+  by_name text,
+  body text NOT NULL,
+  shot text,
+  flag text,
+  emailed_to text,
+  bot boolean NOT NULL DEFAULT false,
+  source text,
+  handoff boolean NOT NULL DEFAULT false,
+  chase_html text,
+  PRIMARY KEY (id),
+  UNIQUE (tenant_id, id),
+  CONSTRAINT chat_messages_person_key_fkey FOREIGN KEY (tenant_id, person_key) REFERENCES chat_threads (tenant_id, person_key) ON DELETE CASCADE
+);
+CREATE INDEX chat_messages_thread ON chat_messages (tenant_id, person_key, at);
+CREATE INDEX chat_messages_flag ON chat_messages (tenant_id, flag, at DESC) WHERE (flag IS NOT NULL);
+CREATE INDEX chat_messages_chase ON chat_messages (tenant_id, at) WHERE ((chase_html IS NOT NULL) AND (emailed_to IS NULL));
+
+CREATE TABLE messages (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  sent_at timestamptz NOT NULL DEFAULT now(),
+  by_key text NOT NULL,
+  by_name text,
+  subject text NOT NULL,
+  body text NOT NULL,
+  cta_label text,
+  cta_href text,
+  audience jsonb,
+  total integer NOT NULL DEFAULT 0,
+  sent integer NOT NULL DEFAULT 0,
+  failed integer NOT NULL DEFAULT 0,
+  greet text,
+  kind text,
+  PRIMARY KEY (id),
+  UNIQUE (tenant_id, id)
+);
+CREATE INDEX messages_sent_at ON messages (tenant_id, sent_at DESC);
+
+CREATE TABLE message_drafts (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  by_key text NOT NULL,
+  by_name text,
+  subject text NOT NULL DEFAULT '',
+  body text NOT NULL DEFAULT '',
+  cta_label text,
+  cta_href text,
+  audience jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  greet text,
+  PRIMARY KEY (id),
+  UNIQUE (tenant_id, id)
+);
+CREATE INDEX message_drafts_updated ON message_drafts (tenant_id, updated_at DESC);
+
+CREATE TABLE message_recipients (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  message_id bigint NOT NULL,
+  person_key text,
+  person_name text,
+  address text NOT NULL,
+  ok boolean NOT NULL DEFAULT false,
+  error text,
+  provider_id text,
+  PRIMARY KEY (id),
+  UNIQUE (tenant_id, id),
+  CONSTRAINT message_recipients_message_id_fkey FOREIGN KEY (tenant_id, message_id) REFERENCES messages (tenant_id, id) ON DELETE CASCADE
+);
+CREATE INDEX message_recipients_msg ON message_recipients (tenant_id, message_id);
+
+CREATE TABLE push_subscriptions (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  endpoint text NOT NULL,
+  person_key text NOT NULL,
+  p256dh text NOT NULL,
+  auth text NOT NULL,
+  made_at timestamptz NOT NULL DEFAULT now(),
+  seen_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, person_key, endpoint)
+);
+CREATE INDEX push_subscriptions_person ON push_subscriptions (tenant_id, person_key);
+
+CREATE TABLE assistant_asks (
+  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  at timestamptz NOT NULL DEFAULT now(),
+  asker_key text NOT NULL,
+  asker_name text,
+  office boolean NOT NULL DEFAULT false,
+  question text NOT NULL,
+  qkey text NOT NULL,
+  answer text,
+  answered boolean NOT NULL DEFAULT false,
+  source text,
+  PRIMARY KEY (id),
+  UNIQUE (tenant_id, id)
+);
+CREATE INDEX assistant_asks_at_idx ON assistant_asks (tenant_id, at DESC);
+CREATE INDEX assistant_asks_qkey_idx ON assistant_asks (tenant_id, qkey);
+CREATE INDEX assistant_asks_asker_idx ON assistant_asks (tenant_id, asker_key, at);
+
+-- An office login may be placed on a register that does not exist yet
+-- (§313.32), so the membership's pointer at the person is checked at COMMIT.
+ALTER TABLE tenant_users
+  ADD CONSTRAINT tenant_users_person_fkey
+  FOREIGN KEY (tenant_id, person_key) REFERENCES people (tenant_id, key)
+  ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
 
 -- ── Row-level security: one loop from the catalogue ─────────────────────
 -- Every table in public that is not on the platform list carries tenant_id

@@ -34,3 +34,32 @@ green → 5 ok: a bare SET reads 0 on the next statement · withTenant(A) reads 
 ### S5 · the schema check (2026-09-09, platform half only)
 `--break=add-table` → RED: *"stray: no tenant_id column (rule 1)"*.
 green → *"0 tenant tables pass the four rules"* — vacuous by design until the schema phase; re-run over the 42 with `--break=no-force:<table>` there.
+
+### The schema (2026-09-09)
+The 42 tenant tables' columns were read off a real database (`smp_v20`,
+seeded by the frozen `scripts/test-roundtrip.js`, migrations 001–043 applied)
+rather than off 44 migration files; the generator ran once and the SQL is
+the source from then on. S5 over the 42: **green**; `--break=no-force:tactics`
+→ RED naming `tactics`; `--break=bare-fk` → RED *"deliverables: FK … does not
+carry tenant_id on both sides (rule 4)"* — **and that break exists because
+rule 4 passed on a build it should have failed**: `array_agg(attname)` came
+back as a `name[]` string, and `"{tenant_id,cap_id}".includes("tenant_id")`
+is true of a string (§94.5). Cast to `text[]` on both sides. `prisma db pull`
+regenerated `schema.prisma` (51 models, every tenant model with `tenant_id`
+and a composite `@@id`); Prisma introspects, never migrates.
+
+### S2 · isolation (2026-09-09)
+`--break=no-policy:tactics` → RED 41 ok, 3 failed: with FORCE on and no
+policy the table is empty to the app role, so the read returns 0 of A's 1 and
+the DELETE removes nothing — reported as FAIL, not as "isolated" (§113.8).
+`--break=owner` → RED 0 ok, 127 failed — every table leaks on every verb.
+green → 43 ok: 42 tables × read-with-no-WHERE · INSERT-under-B refused 42501 ·
+DELETE-with-no-WHERE inside A, B's counts untouched. Tables walked children
+first, or one table's DELETE cascades the next table's A rows away before it
+is measured.
+
+### S4 · deletion (2026-09-09)
+`--break=no-cascade:measures` → RED: the DELETE is refused by the RESTRICT
+FK and every table keeps its rows (45 failed, named).
+green → 4 ok: the delete ran · 0 rows for A in every one of 42 tables · B's
+counts unchanged · the tenants row gone.

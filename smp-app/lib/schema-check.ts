@@ -49,8 +49,8 @@ export async function schemaCheck(c: Pool | PoolClient): Promise<SchemaReport> {
     /* 4 · FKs between tenant tables carry tenant_id on both sides */
     const fks = (await c.query(
       "SELECT f.conname, f.confrelid, " +
-      " (SELECT array_agg(attname ORDER BY k.ord) FROM unnest(f.conkey) WITH ORDINALITY k(attnum, ord) JOIN pg_attribute a ON a.attrelid = f.conrelid AND a.attnum = k.attnum) AS cols, " +
-      " (SELECT array_agg(attname ORDER BY k.ord) FROM unnest(f.confkey) WITH ORDINALITY k(attnum, ord) JOIN pg_attribute a ON a.attrelid = f.confrelid AND a.attnum = k.attnum) AS refcols " +
+      " (SELECT array_agg(attname::text ORDER BY k.ord) FROM unnest(f.conkey) WITH ORDINALITY k(attnum, ord) JOIN pg_attribute a ON a.attrelid = f.conrelid AND a.attnum = k.attnum) AS cols, " +
+      " (SELECT array_agg(attname::text ORDER BY k.ord) FROM unnest(f.confkey) WITH ORDINALITY k(attnum, ord) JOIN pg_attribute a ON a.attrelid = f.confrelid AND a.attnum = k.attnum) AS refcols " +
       "FROM pg_constraint f WHERE f.conrelid = $1 AND f.contype = 'f' AND f.confrelid <> $2", [tb.oid, tenantsOid])).rows as
       { conname: string; confrelid: number; cols: string[]; refcols: string[] }[];
     for (const f of fks) {

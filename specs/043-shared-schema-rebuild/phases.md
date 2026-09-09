@@ -106,7 +106,7 @@ decided by what the frozen product already does.
 | **B** | **A visible departure** | Any phase | A screen that cannot be carried verbatim — because the new stack forces a change, or because a frozen behaviour is unreachable without one — gets a mockup published as an artifact, with the cost, before it is built (rule 1c). Expected rarely; none is known today. |
 | **C** | **A product question the record does not answer** | Any phase | Named in the phase's record with the default taken (today's behaviour) and the question; the work continues on the default. |
 | **D** | **A client-blocking defect on the frozen build** | Any time | Asked about before it is touched (§314: the single file takes no new features; a correction is asked first). |
-| **E** | **Phase I — the real data** | After H | The migration script is run from Islam's own shell against the real database, as S1 was answered through Neon's SQL editor — never a connection string in chat. He runs it; I read the printed results. The demo tenant's names are seed-demo-client.js's own, already his (§313.8). |
+| **E** | **Phase I — the real data** | After H | Islam can run database work ONLY through Neon's SQL editor (his word, 2026-09-09) — never a connection string in chat, and no Node script from his shell. So every step he runs is handed as SQL to paste there; where a step cannot be said in SQL (S8's `migrate-raya.mjs` walks JSON), it runs at deploy from Vercel's own environment (`db/apply.mjs`), and the choice is recorded at Phase I with its cost. A step that fits neither is SAID, not assumed. He runs it; I read the printed results. The demo tenant's names are seed-demo-client.js's own, already his (§313.8). |
 | **F** | **Phase J — where it is served, and the merge** | After I | The Vercel project and its environment variables (the database, `GEMINI_*`, `RESEND_*`/`SMP_MAIL_FROM`, the store token — each named, none pasted), the address the clients open, the day everybody signs in again, and the merge to `main` — his word on that merge, every time. |
 
 Nothing else asks. A phase that finishes reports in one message — what was
@@ -117,7 +117,7 @@ begins.
 
 ## 4 · The boxes
 
-- [ ] A0 Plan approved by Islam.
+- [x] A0 Plan approved by Islam (2026-09-09: *"agreed ... proceed"*, with the Neon constraint below).
 - [ ] A The state API — read, save, peek, history; harnesses green red-first.
 - [ ] B The shell on the new stack — build-shell, sync.ts, routing, CSP, /platform; `qa.py` at Next green.
 - [ ] C Strategy checks green against Next.

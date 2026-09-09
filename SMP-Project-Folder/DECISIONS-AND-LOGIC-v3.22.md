@@ -40912,3 +40912,35 @@ here, the chat being its own group; `lib/frozen.cjs` reads the frozen
 sources from the repository at runtime, which the cutover packs
 (`outputFileTracingIncludes`); and where the app is served from is D4's
 cutover decision, not this group's. `main` untouched.
+
+### §315.1 — The plan is approved, and the database steps are SQL (2026-09-09)
+
+Islam, of `specs/043-shared-schema-rebuild/phases.md`: *"agreed noting
+that for the data base scripts I can only use neon sql editors if that's
+not enough tell me what todo ok? proceed."*
+
+**THE DECISION THE PLAN RESTS ON IS HIS NOW, WITH ITS COST.** The frozen
+product's own render functions and shell script are the screens, carried
+verbatim over a new API, a new `sync.ts` and `/<client>/<target>/<tab>`
+routing (phases.md §1). What it buys: no visible departure anywhere, so
+rule 1c is never triggered by the rebuild itself, and every check's
+assertion survives. What it costs, stated before he chose: two kinds of
+page in one app (the React door and landing beside the carried shell), the
+whole shell downloaded on every page, the bare-id reader rewrite landing in
+the API and the save rather than in the renderers, and no service worker
+or offline copy until J.
+
+**THE ONE CONSTRAINT IS ABOUT WHO CAN RUN WHAT.** S1 was answered through
+Neon's SQL editor with no connection string (§314.4), and that is the only
+door Islam holds to the real database. So a step he runs is handed as SQL
+to paste there. Two of the plan's steps are not SQL: S8's Raya migration
+(`scripts/migrate-raya.mjs`, which walks a JSON graph) and the deploy's
+`db/apply.mjs`. Those run at deploy time from Vercel's own environment,
+where the connection string already lives and nobody types it — the same
+place the first request against an empty database has applied the schema
+since v2.0. Which of the two each Phase I step takes is decided at Phase I
+and recorded with its cost; **a step that fits neither is said** rather
+than dressed up as one that does. `main` untouched; the phases run without
+stopping except at B–F.
+
+---

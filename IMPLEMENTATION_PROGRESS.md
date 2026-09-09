@@ -50,7 +50,7 @@ screen is not a design change, so no mockup; any departure is a stop
 point), and six named stop points (the plan itself, a visible departure, a
 question the record does not answer, a client-blocking defect on the frozen
 build, running Raya's migration on the real data, and the cutover and the
-merge). **Waiting on Islam:** approval of that plan (A0).
+merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping except at the plan's own stop points B–F. Islam's one constraint: database work he runs goes through **Neon's SQL editor only**, so Phase I and J hand him SQL to paste (or run at deploy from Vercel's environment), and anything that fits neither is said rather than assumed. **In flight:** Phase A, the state API.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.

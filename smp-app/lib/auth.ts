@@ -141,6 +141,14 @@ export async function signOut(c: Q, token: string | null): Promise<void> {
   if (token) await c.query("DELETE FROM sessions WHERE token_hash = $1", [tokenHash(token)]);
 }
 
+/* Does this password open this account today? Asked by the password change
+   when the account is NOT on a temporary password (contracts §2: `current`) —
+   a settled password is changed only by somebody who knows it. */
+export async function verifyCurrent(c: Q, userId: string, current: string): Promise<boolean> {
+  const r = await c.query("SELECT password_hash FROM users WHERE id = $1", [userId]);
+  return !!r.rowCount && verifyPassword(current, r.rows[0].password_hash);
+}
+
 /* A new password: the policy, the hash, must_change cleared, and every OTHER
    session of this user ended (§43.7) — never the one asking. */
 export async function changePassword(c: Q, userId: string, keepToken: string | null, next: string): Promise<string | null> {

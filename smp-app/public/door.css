@@ -1,0 +1,532 @@
+/* GENERATED from index.html's own <style> block by scripts/sync-css.mjs — the
+   door's stylesheet, carried verbatim (D4, §20). Edit index.html, re-run. */
+  /* ------------------------------------------------------------------
+     TOKENS
+
+     Light is the definition; dark redefines the same names and nothing else.
+     Every colour on this page is one of these — a hardcoded #fff or #d8dee8
+     left in a rule is a light value that survives into dark, which is exactly
+     how a "dark mode" ends up with one white box in it.
+
+     The values track the platform's own dark palette (_shared.css) so signing
+     in is not a change of scheme, and the three blocks below are the same
+     three the platform uses: bare :root, the device preference, and the
+     explicit choice. Change one, change all three.
+     ------------------------------------------------------------------ */
+  :root {
+    color-scheme: light;
+    /* FOREFRONT'S OWN COLOURS (Islam, 2026-08-28). This door is Forefront's
+       surface, not a client's — inside a client the colours are the client's,
+       from Setup › Branding. #F5A623 carries near-black at 9.04:1 and is a
+       FILL: as type on white it measures 2.03:1, so words take --gold-deep
+       (#9C5D08, 5.27:1). Constitution XIII, measured before use. */
+    --navy: #0F2C69;
+    --navy-light: #1b3f86;
+    --gold: #F5A623;
+    --gold-light: #ffc25c;
+    --gold-deep: #9C5D08;
+    /* The cards sit on the WHITE card, not on the navy wall — written first
+       in white-alpha, which is invisible on white and was only visible in a
+       screenshot. Constitution XIII's neighbour: a colour is measured against
+       the ground it actually sits on. */
+    --cardline: rgba(15,44,105,.18);
+    --cardfill: rgba(15,44,105,.03);
+    --bg: #f4f6f9;
+    --danger: #b3261e;
+    --card: #ffffff;
+    --field: #ffffff;
+    --line: #d8dee8;
+    --ink: #171b22;
+    --muted: #45536a;
+    --label: #0f2544;
+    --on-navy: #ffffff;
+    --on-navy-soft: #c8d3e2;
+    --on-gold: #0f2544;
+    --shadow: rgba(15, 37, 68, 0.15);
+    --danger-bg: #fdecea;
+    /* The brand wall on the left: three stops, not one flat fill, so the
+       panel has a direction of light instead of reading as a block of paint. */
+    --brand-a: #0a1c36;
+    --brand-b: #16325c;
+    --brand-c: #1f4478;
+    --halo: rgba(255, 255, 255, 0.03);
+    --halo-line: rgba(255, 255, 255, 0.07);
+    --tile: rgba(255, 255, 255, 0.06);
+    --tile-line: rgba(255, 255, 255, 0.10);
+    --tile-icon: rgba(230, 198, 92, 0.16);
+    /* The field the card floats on. */
+    --stage-a: #f7f9fc;
+    --stage-b: #eaeff6;
+    --dot: rgba(15, 37, 68, 0.16);
+    --glass: rgba(255, 255, 255, 0.82);
+    --glass-line: rgba(255, 255, 255, 0.92);
+    --card-shadow:
+      0 1px 3px rgba(15, 37, 68, 0.05),
+      0 8px 24px rgba(15, 37, 68, 0.07),
+      0 20px 48px rgba(15, 37, 68, 0.05);
+    --ring: rgba(201, 162, 39, 0.22);
+    --btn-a: #1b3a63;
+    --btn-b: #0f2544;
+    --btn-shadow: rgba(15, 37, 68, 0.28);
+    --icon: #8894a8;
+    /* The tenant's own mark. Its two brand colours, read off the vector
+       artwork in the client's brand manual, not sampled from a screenshot. */
+    /* A PNG cannot be recoloured (§52), so on a dark card the client's mark
+       sits on a light plate; on a light card the plate is the card. */
+    --mark-plate: transparent;
+    --mark-pad: 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --navy: #1B4183;
+      --navy-light: #25529f;
+      --gold: #F5A623;
+      --gold-light: #ffc25c;
+      --gold-deep: #F5A623;   /* on a dark ground the bright one reads at 8.15:1 */
+    --cardline: rgba(255,255,255,.16);
+    --cardfill: rgba(255,255,255,.04);
+      --cardline: rgba(255,255,255,.16);
+      --cardfill: rgba(255,255,255,.04);
+      --bg: #14161a;
+      --danger: #d97066;
+      --card: #1c2027;
+      --field: #242932;
+      --line: #333a45;
+      --ink: #e9ecf1;
+      --muted: #b4bcc8;
+      --label: #c3cedc;
+      --on-navy: #eaf0fa;
+      --on-navy-soft: #b9c8de;
+      --on-gold: #14161a;
+      --shadow: rgba(0, 0, 0, 0.45);
+      --danger-bg: #33201e;
+      --brand-a: #070a10;
+      --brand-b: #111a2a;
+      --brand-c: #18273e;
+      --halo: rgba(255, 255, 255, 0.025);
+      --halo-line: rgba(255, 255, 255, 0.05);
+      --tile: rgba(255, 255, 255, 0.05);
+      --tile-line: rgba(255, 255, 255, 0.08);
+      --tile-icon: rgba(217, 182, 101, 0.14);
+      --stage-a: #14161a;
+      --stage-b: #0e1015;
+      --dot: rgba(233, 236, 241, 0.09);
+      --glass: rgba(28, 32, 39, 0.82);
+      --glass-line: rgba(255, 255, 255, 0.07);
+      --card-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.40),
+        0 8px 24px rgba(0, 0, 0, 0.45),
+        0 20px 48px rgba(0, 0, 0, 0.35);
+      --ring: rgba(217, 182, 101, 0.22);
+      --btn-a: #2e5794;
+      --btn-b: #24487a;
+      --btn-shadow: rgba(0, 0, 0, 0.45);
+      --icon: #7f8b9d;
+      /* Reversed on a dark ground, which is how the client supplies it. */
+      --mark-plate: #ffffff;
+      --mark-pad: 6px 12px;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --navy: #1B4183;
+    --navy-light: #25529f;
+    --gold: #F5A623;
+    --gold-light: #ffc25c;
+    --gold-deep: #F5A623;   /* on a dark ground the bright one reads at 8.15:1 */
+    --cardline: rgba(255,255,255,.16);
+    --cardfill: rgba(255,255,255,.04);
+    --bg: #14161a;
+    --danger: #d97066;
+    --card: #1c2027;
+    --field: #242932;
+    --line: #333a45;
+    --ink: #e9ecf1;
+    --muted: #b4bcc8;
+    --label: #c3cedc;
+    --on-navy: #eaf0fa;
+    --on-navy-soft: #b9c8de;
+    --on-gold: #14161a;
+    --shadow: rgba(0, 0, 0, 0.45);
+    --danger-bg: #33201e;
+    --brand-a: #070a10;
+    --brand-b: #111a2a;
+    --brand-c: #18273e;
+    --halo: rgba(255, 255, 255, 0.025);
+    --halo-line: rgba(255, 255, 255, 0.05);
+    --tile: rgba(255, 255, 255, 0.05);
+    --tile-line: rgba(255, 255, 255, 0.08);
+    --tile-icon: rgba(217, 182, 101, 0.14);
+    --stage-a: #14161a;
+    --stage-b: #0e1015;
+    --dot: rgba(233, 236, 241, 0.09);
+    --glass: rgba(28, 32, 39, 0.82);
+    --glass-line: rgba(255, 255, 255, 0.07);
+    --card-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.40),
+      0 8px 24px rgba(0, 0, 0, 0.45),
+      0 20px 48px rgba(0, 0, 0, 0.35);
+    --ring: rgba(217, 182, 101, 0.22);
+    --btn-a: #2e5794;
+    --btn-b: #24487a;
+    --btn-shadow: rgba(0, 0, 0, 0.45);
+    --icon: #7f8b9d;
+    /* Reversed on a dark ground, which is how the client supplies it. */
+    --mark-plate: #ffffff;
+    --mark-pad: 6px 12px;
+  }
+
+  /* ---------------------------------------------------------------
+     THE TENANT'S OWN MARK
+
+     Whose platform this is, on the thing you actually touch. Forefront's
+     temple stays on the wall to the left; the client's lockup sits on the
+     card, because the person at this door works for the client and the two
+     marks then never compete for the same corner. It is on the card rather
+     than the wall for a second reason: below 980px the wall is gone and the
+     card is all there is, so a mark on the wall would vanish on a phone.
+
+     Inlined as a symbol and referenced twice, never written twice: the
+     sign-in card and the choose-a-password card are two doors into the same
+     tenant, and one definition cannot disagree with itself.
+
+     Drawn from the VECTOR artwork in the client's own brand manual
+     (Chapter 03, Sub-brands - Online, which is the version the manual
+     specifies for screens). The supplied JPEGs are the record of what was
+     handed over, not the asset: they carry an opaque grey ground and would
+     paint a rectangle around themselves here.
+     --------------------------------------------------------------- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--stage-a);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* NOTHING IS SHOWN UNTIL THE ANSWER IS KNOWN — see show() below. The whole
+     gate, not just the card: a brand wall that paints and is then replaced by
+     the platform half a second later is the same flash the old three-state
+     door had, moved to a bigger element. */
+  .gate { opacity: 0; transition: opacity .18s ease; display: flex; min-height: 100vh; }
+  body.ready .gate { opacity: 1; }
+
+  /* ---------------------------------------------------------------
+     LEFT — the brand wall
+     --------------------------------------------------------------- */
+  .brand {
+    width: 43%;
+    flex: none;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 44px 34px;
+    color: var(--on-navy);
+    background: linear-gradient(160deg, var(--brand-a) 0%, var(--brand-b) 42%, var(--brand-c) 100%);
+  }
+  /* Three faint rings bleeding off the edges. Geometry, not decoration for its
+     own sake — the mark is a temple, and a circle is what a pediment is drawn
+     against. pointer-events:none so they never eat a click. */
+  .halo { position: absolute; border-radius: 50%; pointer-events: none; background: var(--halo); border: 1px solid var(--halo-line); }
+  .halo-a { top: -90px; right: -90px; width: 340px; height: 340px; }
+  .halo-b { bottom: -140px; left: -70px; width: 440px; height: 440px; }
+  .halo-c { top: 44%; right: -50px; width: 190px; height: 190px; background: none; }
+
+  /* Centred rather than top-aligned: the wall is taller than its content on
+     every real screen, and a block pinned to the top leaves the gap between
+     it and the quote — which is the one thing a reader's eye lands on. */
+  .brand-in {
+    position: relative; z-index: 1; flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .mark-row { display: flex; align-items: center; gap: 13px; margin-bottom: 38px; }
+  .mark {
+    flex: none; width: 44px; height: 44px; border-radius: 12px;
+    background: var(--on-navy); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+  .mark svg { width: 30px; height: 30px; display: block; }
+  .mark-row h1 { font-size: 13px; font-weight: 700; letter-spacing: 0.13em; line-height: 1.3; }
+  .mark-row p { font-size: 11.5px; margin-top: 3px; color: var(--on-navy-soft); letter-spacing: 0.02em; }
+
+  .hero { margin-bottom: 30px; }
+  .hero h2 { font-size: 29px; font-weight: 700; line-height: 1.18; letter-spacing: -0.01em; }
+  /* The half of the sentence that carries the idea, in gold. background-clip
+     needs a colour behind it for browsers that ignore it, hence the fallback
+     declaration first. */
+  .hero em {
+    font-style: normal;
+    color: var(--gold-light);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { margin-top: 12px; font-size: 14px; line-height: 1.6; max-width: 350px; color: var(--on-navy-soft); }
+
+  .props { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .props li {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; border-radius: 12px;
+    background: var(--tile); border: 1px solid var(--tile-line);
+    transition: transform .25s ease, background .25s ease;
+  }
+  .props li:hover { transform: translateX(4px); background: var(--tile-line); }
+  .props .ic {
+    flex: none; width: 36px; height: 36px; border-radius: 10px;
+    background: var(--tile-icon); display: flex; align-items: center; justify-content: center;
+    color: var(--gold-light);
+  }
+  .props b { display: block; font-size: 13.5px; font-weight: 600; }
+  .props span { display: block; font-size: 11.5px; margin-top: 2px; color: var(--on-navy-soft); }
+
+  .quote {
+    position: relative; z-index: 1; margin-top: auto; padding: 22px 0 0 16px;
+    border-left: 3px solid var(--gold); margin-left: 1px;
+    font-size: 13.5px; font-style: italic; line-height: 1.55; color: var(--on-navy-soft);
+  }
+
+  /* ---------------------------------------------------------------
+     RIGHT — the stage the card floats on
+     --------------------------------------------------------------- */
+  .stage {
+    flex: 1 1 auto;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px;
+    background: linear-gradient(180deg, var(--stage-a) 0%, var(--stage-b) 100%);
+  }
+  /* A dot grid, not a texture image: it is three lines of CSS, it scales, and
+     it costs nothing offline. */
+  .dots {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, var(--dot) 0.8px, transparent 0.8px);
+    background-size: 24px 24px;
+  }
+  .frame { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+
+  /* The brand bar for narrow screens. Full-bleed to the top edge so the
+     window chrome's declared navy is the navy actually there. */
+  .mobrand { display: none; }
+
+  /* ---------------------------------------------------------------
+     The card
+     --------------------------------------------------------------- */
+  .card {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-line);
+    border-radius: 20px;
+    padding: 38px 34px 34px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 22px; font-weight: 700; text-align: center; color: var(--label); letter-spacing: -0.01em; }
+  .card h2 + p { margin-top: 6px; text-align: center; font-size: 13.5px; color: var(--muted); }
+  /* ── THE CLIENT'S OWN MARK, ON THE CLIENT'S OWN DOOR (§313.36) ──
+     Whose platform this is, on the thing you actually touch — §52's placement,
+     given back now that every client has a door of its own: Forefront's
+     temple stays on the wall, the client's lockup sits on the card, and the
+     two never compete for a corner. Below 980px the wall is gone and the card
+     is all there is, which is the second reason it lives here. It is an <img>
+     read from the client's own row on the platform, so no client's artwork is
+     baked into this page and the root door draws none at all. Sized by
+     HEIGHT and left to find its own width: a lockup is wide, a crest is
+     square, and the door cannot know which it was handed. */
+  .clientmark {
+    display: block; height: 34px; width: auto; max-width: 190px; margin: 0 auto 18px;
+    object-fit: contain; background: var(--mark-plate); padding: var(--mark-pad); border-radius: 8px;
+    box-sizing: content-box;
+  }
+  /* Separates whose platform this is from the greeting. Without it the lockup
+     reads as a picture inside the greeting rather than a letterhead over it. */
+  .clientmark + hr { border: 0; border-top: 1px solid var(--line); margin: 0 0 20px; }
+  .card form { margin-top: 26px; }
+
+  label {
+    display: block; font-size: 12.5px; font-weight: 600; color: var(--label);
+    margin-bottom: 7px; letter-spacing: 0.01em;
+  }
+  /* Icon inside the box rather than a label doing all the work: at a glance
+     the shape of the field says what belongs in it. */
+  .field { position: relative; margin-bottom: 18px; }
+  .field > svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--icon); pointer-events: none;
+  }
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 14px 13px 44px;
+    font-size: 14.5px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    /* Both stated, or the field keeps the user agent's white-on-black and
+       the one box on the page that takes typing is the one that ignores the
+       theme. */
+    background: var(--field);
+    color: var(--ink);
+  }
+  input[type="password"] { padding-right: 44px; }
+  /* THE SELECT WEARS THE SAME FIELD AS THE INPUTS (§56). It sits in the same
+     `.field`, so it needs the same 44px of room for the icon beside it and the
+     same ground — a bare user-agent select next to two styled boxes reads as a
+     control somebody forgot. `appearance:none` and a drawn caret, because the
+     platform's own selects do the same and a native arrow would be the one
+     piece of chrome on the card. */
+  .field select {
+    width: 100%;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 38px 13px 44px;
+    font-size: 14.5px;
+    font-family: inherit;
+    outline: none;
+    background: var(--field);
+    color: var(--ink);
+    appearance: none; -webkit-appearance: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field::after {
+    /* Only where a select is: a caret over an input would be a lie. */
+    content: none;
+  }
+  .field:has(select)::after {
+    content: ""; position: absolute; right: 16px; top: 50%; pointer-events: none;
+    width: 8px; height: 8px; margin-top: -6px;
+    border-right: 1.5px solid var(--icon); border-bottom: 1.5px solid var(--icon);
+    transform: rotate(45deg);
+  }
+  input:focus, .field select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--ring); }
+  /* A password you cannot read back is a password you mistype twice. */
+  .eye {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; padding: 5px; cursor: pointer;
+    color: var(--icon); line-height: 0; border-radius: 8px;
+  }
+  .eye:hover { color: var(--label); }
+  .eye svg { width: 18px; height: 18px; display: block; }
+  .eye .i-shut, .eye.revealed .i-open { display: none; }
+  .eye.revealed .i-shut { display: block; }
+
+  /* Legacy mode has no account to type — it names the one access there is. */
+  .access-name {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--field); border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 13px 14px; font-size: 14.5px; font-weight: 600; color: var(--label);
+    margin-bottom: 18px;
+  }
+  .access-name svg { width: 18px; height: 18px; color: var(--icon); flex: none; }
+
+  button[type="submit"] {
+    width: 100%;
+    background: linear-gradient(135deg, var(--btn-a) 0%, var(--btn-b) 100%);
+    color: var(--on-navy);
+    border: none; border-radius: 12px;
+    padding: 14px; font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--btn-shadow);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  button[type="submit"]:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--btn-shadow); }
+  button[type="submit"]:active { transform: translateY(0); }
+
+  .error {
+    color: var(--danger); background: var(--danger-bg);
+    border: 1px solid var(--danger); border-radius: 12px;
+    padding: 11px 13px; font-size: 13px; line-height: 1.45;
+    margin-bottom: 16px; display: none;
+  }
+  .hint { color: var(--muted); font-size: 12px; line-height: 1.5; margin: -10px 0 16px; }
+  .foot { margin-top: 20px; text-align: center; font-size: 11.5px; color: var(--muted); }
+  .copy { margin-top: 26px; text-align: center; font-size: 11px; color: var(--muted); opacity: .8; }
+
+  #change { display: none; }
+
+  /* ---------------------------------------------------------------
+     Entrance. Declared under body.ready so the stagger runs when the gate
+     is revealed, not while it is still hidden and nobody can see it.
+     --------------------------------------------------------------- */
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  body.ready .mark-row { animation: rise .5s ease-out both; }
+  body.ready .hero    { animation: rise .5s ease-out .08s both; }
+  body.ready .props li:nth-child(1) { animation: rise .5s ease-out .16s both; }
+  body.ready .props li:nth-child(2) { animation: rise .5s ease-out .22s both; }
+  body.ready .props li:nth-child(3) { animation: rise .5s ease-out .28s both; }
+  body.ready .props li:nth-child(4) { animation: rise .5s ease-out .34s both; }
+  body.ready .quote   { animation: rise .5s ease-out .40s both; }
+  body.ready .frame   { animation: rise .5s ease-out .10s both; }
+
+  /* ---------------------------------------------------------------
+     Widths. Verified by sweep, not by the one width that passes (§27.1):
+     the split holds down to 980px — Islam's laptop is 1000 — and below that
+     the wall becomes a bar rather than being squeezed into a column too
+     narrow to read.
+     --------------------------------------------------------------- */
+  @media (max-width: 1180px) {
+    .brand { padding: 34px 32px 28px; }
+    .hero h2 { font-size: 25px; }
+    .props li { padding: 10px 13px; gap: 11px; }
+  }
+  @media (max-width: 980px) {
+    .brand { display: none; }
+    .stage { padding: 0 20px 32px; justify-content: flex-start; }
+    .mobrand {
+      display: flex; align-items: center; gap: 12px;
+      align-self: stretch; margin: 0 -20px 30px; padding: 20px;
+      background: linear-gradient(135deg, var(--brand-b), var(--brand-c));
+      color: var(--on-navy); position: relative; z-index: 1;
+    }
+    .mobrand h1 { font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; }
+    .mobrand p { font-size: 11px; margin-top: 2px; color: var(--on-navy-soft); }
+    .frame { margin: 0 auto; }
+    body.ready .frame { animation: rise .5s ease-out both; }
+  }
+  @media (max-width: 460px) {
+    .card { padding: 30px 22px 26px; border-radius: 16px; }
+    /* Same reason as the short-window block: the mark's ~49px was 2px more
+       than a 320x640 phone had left. Measured at 320, not assumed from 390. */
+    .clientmark { height: 28px; margin-bottom: 12px; }
+    .clientmark + hr { margin-bottom: 14px; }
+  }
+  /* SHORT windows, not narrow ones. Measured: the wall's content needs about
+     600px of height, so on a 1024x560 laptop the quote fell below the fold and
+     the whole page grew a scrollbar to reach a decorative line. Width was never
+     the constraint here — height was, and a max-width query cannot see it. */
+  @media (max-height: 700px) and (min-width: 981px) {
+    .brand { padding: 26px 32px 22px; }
+    .mark-row { margin-bottom: 22px; }
+    .hero { margin-bottom: 20px; }
+    .hero h2 { font-size: 23px; }
+    .hero p { margin-top: 9px; font-size: 13px; }
+    .props { gap: 8px; }
+    .props li { padding: 9px 13px; }
+    .quote { padding-top: 14px; font-size: 12.5px; }
+  }
+  /* The mark condenses on a SHORT window at ANY width, which is why it is not
+     in the block above: that one is gated on min-width because the WALL only
+     exists above 980px, but the card carries the mark at every width. Gating
+     the two together left 461-980px wide and short - a small laptop window,
+     a split screen - drawing the mark full size with no room for it.
+
+     Adding the mark cost the card ~70px, and at 1024x560 that was enough to
+     push the page past the fold and grow a scrollbar: the exact fault the
+     block above exists to prevent, and one no width query can see (§35).
+     Last in the file deliberately, so on a screen that is both short and
+     narrow the SHORTER answer wins on source order.
+
+     Measured at every size, not estimated from one that passed. */
+  @media (max-height: 700px) {
+    .clientmark { height: 28px; margin-bottom: 12px; }
+    .clientmark + hr { margin-bottom: 14px; }
+  }
+  /* An entrance is a courtesy; for anyone who has asked for less motion it is
+     an obstacle. Nothing here depends on an animation to become visible. */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }

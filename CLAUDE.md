@@ -462,8 +462,17 @@ them. `tenant_id` DEFAULTS to the request's setting and the policy is
 as `''` on a reused connection. **S1's Neon answer is in (§314.4)**: through
 Neon's SQL editor, no connection string — `neondb_owner · rolcreaterole t ·
 rolsuper f · rolbypassrls t`, the key makes the role and §P5's stop does not
-fire; the sign-in-as-`smp_app` half runs on Neon at the first deploy. Next:
-the first screen group, behind its mockup, published as an artifact.
+fire; the sign-in-as-`smp_app` half runs on Neon at the first deploy.
+**The first screen group is built (§315)**: the door (`/`, `/<client>/sign-in`,
+the password card) and the landing (`/<client>`, the welcome screen), behind
+the mockup Islam signed off with his own fourth wall line. **The landing's
+rows are the frozen readers' own** — `smp-app/lib/frozen.cjs` runs the four
+source files in a vm and asks them in one synchronous call, never a second
+copy (§53.5). **The stylesheets are verbatim and LINKED from `public/`,
+never bundled** (`scripts/sync-css.mjs`; the bundler refuses §272.8's stray
+close-comment mark). `npm run check:door` drives the built app in headless
+Chromium (44/0, red first). Every page behind *Continue* is a holder that
+says it is the next group's. Next: the next screen group, mockup first.
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

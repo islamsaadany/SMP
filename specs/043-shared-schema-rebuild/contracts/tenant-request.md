@@ -35,6 +35,17 @@ empty page.
 | `POST /api/auth/password` | `{ current, next }` | clears `must_change`; ends every **other** session of this user (§43.7). |
 | `POST /api/auth/sign-out` | — | deletes the session row. |
 | `GET /api/auth/me` | — | `{ email, name, kind, isAdmin, mustChange, tenants: [{key, name, seat}] }`. |
+| `GET /api/auth/where` | — | the door's own question (§56, §57, §93.13): `{ units, functions, near, mainbu, mine, settled }` under the client user's one tenant — `settled` when the register has already placed them, so the card asks nothing; an office login answers `settled`. |
+| `POST /api/auth/where` | `{ at }` | stores the declaration (`bu_declarations`, grants nothing); refused unless `at` is on the list above. |
+
+**Added by §315:** `sign-in` also takes `door` (the client whose door the
+person stood at, §313.36) and narrows `landing` to that client only if
+they may open it; `password` takes `current` only when `must_change` is
+NOT set — a temporary password is replaced without it, because the door
+has just checked it and the card has no box for it. Both forms post to
+these routes themselves before the page's script is live: a form post
+(urlencoded) is answered with a **303** — to the landing, to the door for
+`must_change`, or to the door with `?refused=1` — never with JSON.
 
 Sessions: `token_hash` of a random token, 30 days (`SESSION_DAYS`), pruned on
 sign-in (§43). Passwords: scrypt, per-password salt, `lib/auth.js`'s `hash`

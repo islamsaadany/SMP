@@ -33,8 +33,16 @@ and the row-addressed save (one box → one row, 795 swept). `main` untouched.
 string involved — `neondb_owner · rolcreaterole t · rolsuper f · rolbypassrls
 t`, so the key makes the role and research §P5's stop does not fire; the
 sign-in-as-`smp_app` half is proved locally and runs on Neon at the first
-deploy. **Waiting on Islam:** nothing on this slice. Next: the first screen
-group, beginning with its mockup, published as an artifact for sign-off.
+deploy. **The first screen group is built (§315):** the door at `/` and
+`/<client>/sign-in`, the password card, and the landing at `/<client>` —
+the welcome screen whose rows are the frozen readers' own, run in a vm
+(`lib/frozen.cjs`) so the landing cannot disagree with the pages behind it;
+the mockup signed off with Islam's own fourth line (*Presented from the
+same place*). 44 browser assertions green, red first (3 / 15), `tsc`,
+`next build`, S7. Every page behind *Continue* answers with a holder saying
+it is the next group's. **Waiting on Islam:** what the next screen group is
+— the office's landing (`/platform` cards) or the unit's Plan page behind
+*Continue*; its mockup comes first either way.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
@@ -566,7 +574,8 @@ Nothing proceeds past this line without an answer.
   corrected). **§P1–P7 answered 2026-09-09** — the save enhanced to write
   only the rows a change list names (§314.2, S9). `tasks.md` and the spike
   both landed 2026-09-09: nine proofs green, each red first (§314.3). Next
-  Islam's Neon run of S1, then the first screen group behind its mockup.
+  Islam's Neon run of S1 (in, §314.4), then the first screen group behind
+  its mockup — built 2026-09-09 (§315, `tasks-door-landing.md`).
 - **Multi-client — one door, many clients (`specs/042-multi-client/spec.md`,
   2026-08-28).** Every decision settled with Islam in session: one door, cards
   for Forefront only, **one Postgres schema per client** (§36.2), RHI and

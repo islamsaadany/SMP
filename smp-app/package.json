@@ -11,7 +11,11 @@
     "spike": "for s in s1-neon-role s3-pooler s5-schema-check s2-isolation s6-prisma-wrapper s4-delete s7-door s8-raya-migration s9-row-write; do node spike/$s.mjs || exit 1; done",
     "spike:red": "for b in 's1-neon-role --break=no-force' 's1-neon-role --break=bypass' 's3-pooler --break=bare-set' 's5-schema-check --break=add-table' 's5-schema-check --break=no-force:tactics' 's5-schema-check --break=bare-fk' 's2-isolation --break=no-policy:tactics' 's2-isolation --break=owner' 's6-prisma-wrapper --break=escape' 's4-delete --break=no-cascade:measures' 's7-door --break=follow-slug' 's7-door --break=two-refusals' 's8-raya-migration --break=short:people' 's8-raya-migration --break=wrong-tenant' 's9-row-write --break=full-write' 's9-row-write --break=silent-fallback'; do node spike/$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "db:apply": "node db/apply.mjs",
-    "test:rules": "node tests/graph-diff.cjs && node tests/authorize.cjs"
+    "test:rules": "node tests/graph-diff.cjs && node tests/authorize.cjs",
+    "dev:tenant": "node scripts/dev-tenant.mjs",
+    "check:door": "node checks/door-landing.mjs",
+    "check:door:red": "for b in no-rows first-person; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "sync:css": "node scripts/sync-css.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
@@ -25,6 +29,7 @@
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
+    "playwright-core": "^1.56.1",
     "prisma": "^7.9.1",
     "typescript": "^7.0.2"
   }

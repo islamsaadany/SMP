@@ -40806,3 +40806,109 @@ editor involved no connection string at all, which is the constraint every
 Neon instruction in this project carries, and it is the cheaper door for
 the one question that could stop the plan. Quickstart §4 says so now, and
 T072 is closed.
+
+## §315 — THE DOOR AND THE LANDING: THE FIRST SCREEN GROUP OF THE REBUILD (2026-09-09, spec 043)
+
+Islam: *"ok go ahead"* to the door and the landing as the first screen
+group, the mockup published as an artifact first (rule 1c,
+`design-mockups/rebuild-door-landing/2026-09-09_door-and-landing.html`) and
+signed off with two marked changes and one correction of his own. **The
+correction is the decision worth keeping.** The wall's fourth line said
+*"Installs, and opens offline"*, which the new app cannot keep (§34: the
+wall may only claim what the product does), and the first replacement
+drawn — *every client in its own room* — he sent back: *"every client in
+it's pwn room is not relvant we are not selling the porducts it's just an
+intro."* Then, asked what the fourth should be: *"the 4th we can make it
+about presenting from the same place."* So it reads **Presented from the
+same place — the review is presented from the page it was reported on,
+never from a copy**, which is §305's own refusal of a second deck builder
+said to the person at the door. The other three cards are untouched. The
+second marked change is the email box always shown and the only name the
+door takes (§313.2, already decided).
+
+**BUILT ON THE SPIKE'S OWN PIECES, NOT BESIDE THEM.** `lib/auth.ts` is the
+door, `lib/door.ts` resolves the tenant (with `landingAt()` and
+`doorDress()` added — §313.36's two answers, ported from `api/auth.js`),
+and every tenant read goes through `withTenant()` as `smp_app`. The routes
+are contracts §2's four plus one: `GET/POST /api/auth/where` is the door's
+own question (§56, §57, §93.13 — `whereList` and `declareWhere` ported,
+the short list narrowed on the server and the question NOT asked of
+somebody the register has placed). `POST /api/auth/password` takes
+`current` only for a settled password; a temporary one is replaced without
+it, because the door has just checked it and the card has no box for it.
+
+**THE LANDING IS THE WELCOME SCREEN, AND ITS ROWS ARE THE PRODUCT'S OWN.**
+What is waiting on somebody is decided by `reportPending`,
+`subjectReported`, `submitBlockers`, `seesGaps`, `gapMap`, `cycleTotals`,
+`attentionRows`, `personRoles` and `placeLabel` — and those live in the
+frozen browser sources, not in `lib/rules.cjs`. A second copy of any of
+them for one page is §53.5's drift with a landing on the end of it, so
+**`lib/frozen.cjs` runs the four source files in a vm context**, the way
+`scripts/extract-state.js` has since §103.4: loaded once per process
+(≈40ms), the graph hydrated onto its globals per request exactly as
+`sync.js`'s `hydrate()` does, and every reader asked in ONE synchronous
+call — synchronous because the context is shared, and a request that
+awaited mid-read would read another tenant's graph. Measured: the landing
+for Mobile's head says *Submit Mobile's H1 2026 report · Every figure is
+entered · 6 need a note*, which is what the frozen welcome says of the same
+graph; the check asserts AGREEMENT with the readers' own answer, never a
+literal (§94.8), and the one literal it does hold is the fourth line Islam
+chose. **`viewer()` falls to `PEOPLE[0]` when the key names nobody**, which
+in a browser is the harmless first-person default and on a server is
+somebody else's screen — so a login the register does not hold is answered
+in words (*"You are not on Raya Trade's register yet — the SMO places you
+from People"*, §313.32) and never by that fallback; `--break=first-person`
+is exactly that fault, 15 red.
+
+**THE STYLESHEETS ARE VERBATIM, AND THAT FORCED WHERE THEY LIVE.**
+`scripts/sync-css.mjs` now concatenates all nine of `build.py`'s sheets
+and extracts `index.html`'s own `<style>` block for the door — and the
+bundler refused the platform's sheet at a comment carrying a stray
+close-comment mark (§272.8's own fault, still in the sources; a browser
+parses past it, a CSS parser will not). Verbatim means the browser reads
+the product's bytes as the product's page does, so both sheets are written
+under `public/` and LINKED from their route group's layout, never bundled
+— the door's routes wear Forefront's tokens (`--gold #F5A623`) and the
+platform's wear the tenant's (`#C9A24D`), and a route group's stylesheet
+reaches that group's routes and no other. `#change { display:none }` is
+the door's own rule, shown inline as `index.html`'s `show()` does — found
+by the check going red on a card that was in the document and not visible.
+
+**EVERY DOOR GOES SOMEWHERE THAT SAYS WHAT IT IS.** The pages behind the
+landing are the next screen group's, so their addresses
+(`/<slug>/<target>/<tab>`, a function spelt `fn/<key>`) answer with a
+holder naming the page and saying it is not built yet — behind the same
+tenant rule as the landing, with a sign-out on it (§61: a door to nowhere
+is a trap; a page that says *not yet* in words is not). Forefront's own
+landing at `/platform` is the same holder listing the clients the person
+may open, as plain links — the cards' facts without the cards' design,
+which waits on its own mockup. **The forms post to the API themselves
+before the script is live** (method and action), so a press in the first
+few hundred milliseconds never puts a password in the address bar; the API
+answers a form post with a redirect and the door reads `?refused=1` as the
+one sentence.
+
+**PROVED IN A BROWSER, RED FIRST.** `checks/door-landing.mjs` starts the
+BUILT app on its own port against `scripts/dev-tenant.mjs`'s tenant (the
+worked example loaded through the app's own `loadGraph()`, four logins,
+one on a temporary password) and drives headless Chromium through
+`playwright-core` (a dev dependency; the image's Python has no Playwright):
+**44 assertions, 0 failures**, falsified from the server twice
+(`--break=no-rows` 3 red, `--break=first-person` 15 red), green–red–green.
+**Four of its own first failures were the CHECK** (§215): its spawned
+server's stdout was piped and never drained, so the server blocked once
+the pipe filled and every later section timed out looking healthy; killing
+`npx` left `next-server` holding the port, so the next run drove the
+previous build; the temporary-password login was never put back after
+section 4 replaced it, so the check passed once; and `waitForSelector`
+waits for VISIBLE, which is how `#change` was found in the document and not
+on the screen. S7 still green (15/0), `tsc` clean, `next build` green with
+every route dynamic.
+
+**RECORDED, NOT DONE:** the office's landing (the cards, §313.3) and every
+page behind *Continue*; the intro round's *Start* opens the holder, because
+`tour.js` is a later group's; the reply row (§97's corner) draws nothing
+here, the chat being its own group; `lib/frozen.cjs` reads the frozen
+sources from the repository at runtime, which the cutover packs
+(`outputFileTracingIncludes`); and where the app is served from is D4's
+cutover decision, not this group's. `main` untouched.

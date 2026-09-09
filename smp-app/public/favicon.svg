@@ -1,0 +1,14 @@
+<!-- SMP. The Strategy Temple, the platform's own drawing: pediment,
+     architrave, three pillars, stylobate — house navy and gold.
+     Also inlined as a data URI by SMP-Project-Folder/src/build.py, so the
+     single-file platform carries its own mark offline. Change one, run
+     build.py, and re-export favicon.png at 32x32. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#16325C"/>
+  <path d="M16 5.2 27.4 12H4.6z" fill="#C9A24D"/>
+  <rect x="5.2" y="13.2" width="21.6" height="2.4" fill="#C9A24D"/>
+  <rect x="7.2"  y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+  <rect x="14.4" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+  <rect x="21.6" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+  <rect x="4.4" y="25.6" width="23.2" height="2.8" rx="0.6" fill="#C9A24D"/>
+</svg>

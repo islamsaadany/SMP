@@ -22,7 +22,7 @@ type Q = Pool | PoolClient;
 export const NO_SUCH_TENANT = "That client is not available.";
 export const NO_SUCH_STATUS = 404;
 
-export type Tenant = { id: string; key: string; name: string; kind: "client" | "demo"; status: string; made_here: boolean };
+export type Tenant = { id: string; key: string; name: string; kind: "client" | "demo"; status: string; made_here: boolean; mark: string | null };
 export type Membership = { tenant_id: string; person_key: string; seat: "super" | "smoteam" | "none" };
 export type DoorAnswer =
   | { ok: true; tenant: Tenant; seat: Membership["seat"] | null; personKey: string | null }
@@ -59,7 +59,7 @@ async function platformAccess(c: Q): Promise<Record<string, Record<string, strin
   return rows.reduce((m, r) => { (m[r.role_key] ||= {})[r.area_key] = r.grant_; return m; }, {} as Record<string, Record<string, string>>);
 }
 export async function tenantByKey(c: Q, slug: string): Promise<Tenant | null> {
-  const r = await c.query("SELECT id, key, name, kind, status, made_here FROM tenants WHERE key = $1 AND status = 'active'", [String(slug || "")]);
+  const r = await c.query("SELECT id, key, name, kind, status, made_here, mark FROM tenants WHERE key = $1 AND status = 'active'", [String(slug || "")]);
   return r.rowCount ? r.rows[0] : null;
 }
 
@@ -71,6 +71,31 @@ export async function landingFor(c: Q, user: SessionUser): Promise<string> {
   if (mine.length !== 1) return "/";
   const t = (await c.query("SELECT key FROM tenants WHERE id = $1 AND status = 'active'", [mine[0].tenant_id])).rows[0];
   return t ? "/" + t.key : "/";
+}
+
+/* WHERE SOMEBODY LANDS FROM A CLIENT'S DOOR (§313.36, api/auth.js's
+   landingFor ported): the door's own client if this user may open it,
+   otherwise where the root would have sent them. A door for a client they
+   may not open — or one that does not exist — answers exactly as the root
+   does, so trying doors tells nobody anything the root would not. */
+export async function landingAt(c: Q, user: SessionUser, doorSlug: string | null | undefined): Promise<string> {
+  if (doorSlug) {
+    const t = await tenantByKey(c, doorSlug);
+    if (t) {
+      const mine = await memberships(c, user.id);
+      if (user.kind === "client" ? mine.some((m) => m.tenant_id === t.id) : mayOpen(user, mine, await platformAccess(c), t)) return "/" + t.key;
+    }
+  }
+  return landingFor(c, user);
+}
+
+/* What a door WEARS (§313.36): the client's name and mark, public — the
+   address already names the client. An unknown, retired or misspelt slug
+   answers null, and the door draws itself plain. */
+export async function doorDress(c: Q, slug: string | null | undefined): Promise<{ name: string; mark: string | null } | null> {
+  if (!slug) return null;
+  const t = await tenantByKey(c, slug);
+  return t ? { name: t.name, mark: t.mark || null } : null;
 }
 
 export async function resolveTenant(c: Q, user: SessionUser | null, slug: string, opts: { passwordRoute?: boolean } = {}): Promise<DoorAnswer> {

@@ -93,5 +93,22 @@ proved locally (§2) and runs against Neon when `db/apply.mjs` first applies
 S1–S9 green, each having been red under its `--break`, is the data layer
 settled — **reached 2026-09-09 on the sandbox's Postgres 16** (§314.3,
 `smp-app/spike/README.md`). Nothing is served; the frozen build keeps every
-client. S1's Neon answer is in (§4, §314.4). Next is `tasks.md`
-for the first screen group, which starts with its mockup.
+client. S1's Neon answer is in (§4, §314.4). The first screen group — the
+door and the landing — is built (§315, `tasks-door-landing.md`); §6 opens it.
+
+## 6 · The door and the landing, locally (§315)
+
+```
+cd smp-app
+export DATABASE_URL_UNPOOLED=postgres://postgres:postgres@localhost:5432/smp_dev   # sandbox only
+createdb -h localhost -U postgres smp_dev 2>/dev/null; npm run dev:tenant           # raya-trade + four logins
+npm run build && npm run check:door        # 44 assertions in headless Chromium, GREEN
+npm run check:door:red                     # both breaks RED
+npm run start                              # then open http://localhost:3000/
+```
+
+`scripts/dev-tenant.mjs` prints the four emails; the passwords are in that
+file (development only, never a deployment). `/` is Forefront's door,
+`/raya-trade/sign-in` the client's; a client login lands on `/raya-trade`,
+the office on `/platform`. Every page behind the landing answers with a
+holder that says it is the next group's.

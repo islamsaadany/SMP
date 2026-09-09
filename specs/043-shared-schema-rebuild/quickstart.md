@@ -33,7 +33,13 @@ node spike/s4-delete.mjs --break=no-cascade:measures
 node spike/s4-delete.mjs
 node spike/s7-door.mjs --break=two-refusals
 node spike/s7-door.mjs
+node spike/s9-row-write.mjs --break=full-write     # S9 needs no copy; S8 (§3) does
+node spike/s9-row-write.mjs
 ```
+
+Or all of it: `npm run spike` (the nine green runs, in order, stopping at the
+first red) and `npm run spike:red` (every documented break, asserting each
+exits non-zero — a break that goes green is the finding, §94.5).
 
 Expected on every unbroken run: every line `ok`, exit 0. Expected on every
 `--break`: at least one `FAIL` naming the property, exit 1. **A red run that
@@ -70,5 +76,7 @@ forward and neither is taken without a decision.
 ## 5 · What green means
 
 S1–S9 green, each having been red under its `--break`, is the data layer
-settled. Nothing is served; the frozen build keeps every client. Next is
-`tasks.md` for the first screen group, which starts with its mockup.
+settled — **reached 2026-09-09 on the sandbox's Postgres 16** (§314.3,
+`smp-app/spike/README.md`). Nothing is served; the frozen build keeps every
+client. S1 against Neon (§4) is the one run still owed. Next is `tasks.md`
+for the first screen group, which starts with its mockup.

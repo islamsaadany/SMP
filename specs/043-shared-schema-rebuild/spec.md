@@ -6,8 +6,11 @@ question, on his own written decision record); **signed off the same day**
 §P1–P7) **answered by Islam the same day** — three as written, and the save
 enhanced: every box still saves itself, and the server writes only the rows
 the change list names (§314.2, research §P3, spike S9). `tasks.md` written the same
-day (72 tasks, nine proofs). Next: the spike, red first. **Nothing built**, and no source is touched before then
-(constitution I).
+day (72 tasks, nine proofs), **and the spike built and green the same day,
+each proof red first** (§314.3; `smp-app/spike/README.md`). The data layer is
+settled on the local Postgres; **S1 against Neon waits on Islam** (quickstart
+§4). No screen is built, and the frozen product is untouched (constitution
+I, III).
 
 **Reverses:** §36 (schema per tenant, recommended 2026-08-20) and §313 / spec
 042 (schema per tenant, built and merged 2026-09-08). Recorded as a reversal in

@@ -224,7 +224,7 @@ def review(pg):
 
 def go_cycle(pg, who):
     pg.select_option("#asWho", who); pg.wait_for_timeout(320)
-    btn = pg.query_selector(".navmenu-btn")
+    btn = pg.query_selector('[data-md="setup"]')
     if btn:
         btn.click(); pg.wait_for_timeout(600)
     # BOTH, not just the page: over HTTP the gear press can land differently,

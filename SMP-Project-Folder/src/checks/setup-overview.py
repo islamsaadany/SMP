@@ -43,7 +43,7 @@ def ck(name, ok, extra=""):
 def open_setup(pg, who="smo"):
     pg.select_option("#asWho", who)
     pg.wait_for_timeout(300)
-    pg.query_selector(".navmenu-btn").click()
+    pg.query_selector('[data-md="setup"]').click()
     pg.wait_for_timeout(500)
 
 
@@ -286,7 +286,7 @@ with sync_playwright() as p:
     for w in other:
         pg.select_option("#asWho", w)
         pg.wait_for_timeout(250)
-        btn = pg.query_selector(".navmenu-btn")
+        btn = pg.query_selector('[data-md="setup"]')
         if not btn or not btn.is_visible():
             continue
         btn.click()

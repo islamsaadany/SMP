@@ -171,7 +171,13 @@ with sync_playwright() as pw:
     pg.click('[data-s="strategy"]'); pg.wait_for_timeout(300)
     pg.click('[data-sub2="found"]'); pg.wait_for_timeout(600)
     # §243: there is one layout now, so nothing selects it.
-    pg.evaluate("() => { SHOW_KO_THIS_YEAR = true; paint(); }")
+    # THROUGH THE SETTER, NOT THE GLOBAL. `SHOW_KO_THIS_YEAR` is a remembered
+    # screen preference (§66), so a bare assignment lasts only until something
+    # repaints from the store — which over a server happens on every autosave
+    # and poll, and never on `file://` (spec 043 Phase C). The product's own
+    # setter is what the sweep uses.
+    pg.evaluate("() => { if (typeof setKoThisYear === 'function') setKoThisYear(true);"
+                " else SHOW_KO_THIS_YEAR = true; paint(); }")
     pg.wait_for_timeout(500)
     v = pg.evaluate("""() => {
       const h = document.querySelector('.ohead');
@@ -294,36 +300,56 @@ with sync_playwright() as pw:
 
     # AND THE WHOLE FLOW, through the real controls, on a row emptied first
     # (§94.2 — the demo has no blank objective to walk).
-    pg.evaluate("() => { EDIT_PAGE['foundation'] = true; paint(); }")
+    # AND THE SECTION IS ASKED FOR, NOT INHERITED. §28 opens a unit on its
+    # PLAN once there is a session to read (`entrySub`), and on `file://`
+    # there is none — so the objectives band this section measures was on
+    # screen by luck rather than by asking (spec 043 Phase C).
+    pg.evaluate("() => { CURSEC.strategy = 'found'; EDIT_PAGE['foundation'] = true; paint(); }")
     pg.wait_for_timeout(500)
+    # THE CELL IS FOUND BY ITS HEADING, NEVER BY ITS POSITION (§48, §218).
+    # These three read `td[3]`, `td[2]` and `td[4]`, and §278.3 put a `#`
+    # column at the front of this table — so every one of them moved one to
+    # the right and this file has been red on its own baseline since that
+    # merge (§214.3, the fourth time a position-keyed probe has outlived the
+    # column it counted from). It rewrote three neighbours and missed this
+    # one. A heading survives the next column.
+    CELL = """(h) => {
+      const tbl = document.querySelector('.koband table') ||
+                  document.querySelector('.koband');
+      const heads = [...tbl.querySelectorAll('thead th')].map(t => t.textContent.trim());
+      const i = heads.indexOf(h);
+      if (i < 0) return null;
+      const r = tbl.querySelectorAll('tbody tr')[0];
+      return r ? r.querySelectorAll('td')[i] : null;
+    }"""
     step = {}
     step["empty"] = pg.evaluate("""() => { const m = UNITS.logistics.keyObjectives[0];
       m.target = ""; m.target3y = ""; paint(); return [m.target3y, m.target]; }""")
     pg.wait_for_timeout(400)
-    step["typed30"] = pg.evaluate("""() => {
+    step["typed30"] = pg.evaluate("""(CELLSRC) => {
+      const CELL = eval("(" + CELLSRC + ")");
       const m = UNITS.logistics.keyObjectives[0];
-      const i = document.querySelectorAll('.koband tbody tr')[0]
-                  .querySelectorAll('td')[3].querySelector('input');
+      const i = CELL("3-year").querySelector('input');
       i.value = "30"; i.dispatchEvent(new Event('change',{bubbles:true}));
-      return [m.target3y, m.target]; }""")
+      return [m.target3y, m.target]; }""", CELL)
     # A FIELD WRITES WITHOUT REPAINTING (§71.2), so on a row that had NO target
     # the Unit picker appears at the next paint rather than instantly. Stated
     # here rather than worked around: repainting under a typing hand is the
     # fault that rule exists to prevent.
     pg.evaluate("() => paint()"); pg.wait_for_timeout(500)
-    step["pickedPct"] = pg.evaluate("""() => {
+    step["pickedPct"] = pg.evaluate("""(CELLSRC) => {
+      const CELL = eval("(" + CELLSRC + ")");
       const m = UNITS.logistics.keyObjectives[0];
-      const s = document.querySelectorAll('.koband tbody tr')[0]
-                  .querySelectorAll('td')[2].querySelector('select');
+      const s = CELL("Unit").querySelector('select');
       s.value = "%"; s.dispatchEvent(new Event('change',{bubbles:true}));
-      return [m.target3y, m.target]; }""")
+      return [m.target3y, m.target]; }""", CELL)
     pg.wait_for_timeout(400)
-    step["typed50"] = pg.evaluate("""() => {
+    step["typed50"] = pg.evaluate("""(CELLSRC) => {
+      const CELL = eval("(" + CELLSRC + ")");
       const m = UNITS.logistics.keyObjectives[0];
-      const i = document.querySelectorAll('.koband tbody tr')[0]
-                  .querySelectorAll('td')[4].querySelector('input');
+      const i = CELL("This year").querySelector('input');
       i.value = "50"; i.dispatchEvent(new Event('change',{bubbles:true}));
-      return [m.target3y, m.target]; }""")
+      return [m.target3y, m.target]; }""", CELL)
     ck("typing 30 into an empty row stores it bare", step["typed30"] == ["30", ""], step)
     ck("...picking % then reaches the value already there",
        step["pickedPct"] == ["30%", ""], step)
@@ -403,12 +429,19 @@ with sync_playwright() as pw:
       const kos = UNITS[u].keyObjectives;
       kos[0].target3y = "30"; kos[0].target = ""; delete kos[0].pend;
       kos[1].target3y = "50%"; kos[1].target = "40%"; delete kos[1].pend;
-      const cust = (UNIT_ROLES[u] || {}).custodian;
-      VIEWER = cust; leaveModes();
-      current = u; currentSub = "strategy"; CURSEC.strategy = "foundation";
-      paint();
-      return { unit: u, cust: cust };
+      return { unit: u, cust: (UNIT_ROLES[u] || {}).custodian };
     }""")
+    # AND THE FIXTURE IS MADE BY SOMEBODY WHO MAY MAKE IT (§204, §185). The
+    # access cell and the two targets are the OFFICE's to write; setting
+    # `VIEWER` in the same breath left them to be saved as the custodian, who
+    # may not touch the matrix — so the server refused the lot (spec 043
+    # Phase C). `switchViewer`'s own order is flush, then switch, and the
+    # wrapper flushes between these two evaluates.
+    pg.evaluate("""(a) => {
+      VIEWER = a.cust; leaveModes();
+      current = a.unit; currentSub = "strategy"; CURSEC.strategy = "found";
+      paint();
+    }""", setup)
     pg.wait_for_timeout(450)
     ck("the custodian holds a fill way in", setup["cust"] is not None
        and pg.query_selector('[data-fillcta="foundation"]') is not None)
@@ -419,14 +452,20 @@ with sync_playwright() as pw:
       const rows = [...document.querySelectorAll('#panel table tbody tr')];
       const row = rows.find(r => (r.textContent||"").indexOf(kos[0].name) >= 0);
       const row2 = rows.find(r => (r.textContent||"").indexOf(kos[1].name) >= 0);
-      const cell = row ? row.children[2] : null;
+      const HEAD = (r, h) => {
+        const tbl = r.closest('table');
+        const heads = [...tbl.querySelectorAll('thead th')].map(t => t.textContent.trim());
+        const i = heads.indexOf(h);
+        return i < 0 ? null : r.children[i];
+      };
+      const cell = row ? HEAD(row, "Unit") : null;
       const sel = cell ? cell.querySelector('select') : null;
       const before = gapTotal(a.unit);
       if (sel) { sel.value = "%"; sel.dispatchEvent(new Event('change',{bubbles:true})); }
       const m = kos[0];
       return { picker: !!sel,
                opts: sel ? [...sel.options].map(o=>o.value) : null,
-               noPicker2: !!(row2 && !row2.children[2].querySelector('select')),
+               noPicker2: !!(row2 && !HEAD(row2, "Unit").querySelector('select')),
                t3: m.target3y, pend3: !!(m.pend && m.pend.target3y),
                t: m.target, pendT: !!(m.pend && m.pend.target),
                before: before, after: gapTotal(a.unit) };
@@ -448,13 +487,19 @@ with sync_playwright() as pw:
         const kos = UNITS[a.unit].keyObjectives;
         const rows = [...document.querySelectorAll('#panel table tbody tr')];
         const row = rows.find(r => (r.textContent||"").indexOf(kos[0].name) >= 0);
-        const inp = row ? row.children[4].querySelector('input') : null;
+      const HEAD = (r, h) => {
+        const tbl = r.closest('table');
+        const heads = [...tbl.querySelectorAll('thead th')].map(t => t.textContent.trim());
+        const i = heads.indexOf(h);
+        return i < 0 ? null : r.children[i];
+      };
+        const inp = row ? HEAD(row, "This year").querySelector('input') : null;
         if (!inp) { res({no:"this-year input"}); return; }
         inp.value = "25"; inp.dispatchEvent(new Event('change',{bubbles:true}));
-        const pickerGone = !row.children[2].querySelector('select');
+        const pickerGone = !HEAD(row, "Unit").querySelector('select');
         res({ t: kos[0].target, pendT: !!(kos[0].pend && kos[0].pend.target),
               pickerGone: pickerGone,
-              plain: row.children[2].textContent.trim() });
+              plain: HEAD(row, "Unit").textContent.trim() });
       }, 400));
     }""", setup)
     ck("a bare 25 typed after inherits it — 25%, pending",

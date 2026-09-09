@@ -168,7 +168,11 @@ with sync_playwright() as p:
     # Setup is still reachable and still drawing its table at this width — the
     # cheap way this fix could go wrong is by reaching a pane it was scoped out
     # of, and a Setup page that renders nothing would hide that.
-    g = pg.query_selector('.navmenu-solo')
+    # The gear by its OWN attribute, never by a class it shares: `.navmenu-btn
+    # navmenu-solo` is also the HOUSE (§193.2), which is drawn only where there
+    # is a server — so over `file://` the first match was the gear and against
+    # the app it is the house, and Setup never opened (spec 043 Phase C).
+    g = pg.query_selector('[data-md="setup"]')
     if g and g.is_visible():
         g.click(); pg.wait_for_timeout(600)
         it = pg.query_selector('.ritem:has-text("People register")')

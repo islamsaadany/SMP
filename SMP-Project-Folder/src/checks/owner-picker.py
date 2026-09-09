@@ -357,7 +357,12 @@ with sync_playwright() as p:
     # one of the two looks identical. This is the tenant Islam is on.
     print("\n10 · a register with long names (made)")
     pg.evaluate("""()=>{
-      const a=PEOPLE.filter(p=>personActive(p))[0], b=PEOPLE.filter(p=>personActive(p))[1];
+      /* THE CLIENT'S ROWS, NEVER THE OFFICE'S (§313.29). The register may not
+         edit a row the outer platform set — it carries `forefront` and the
+         save is refused (§313.31) — and on `file://` no row is marked, so
+         this list IS the register and nothing here changes. */
+      const act=PEOPLE.filter(p=>personActive(p) && !p.forefront);
+      const a=act[0], b=act[1];
       window.__A=a.key; window.__B=b.key;
       a.__was=a.name; b.__was=b.name; b.__wasKnown=b.known;
       a.name="Abd El Moniem Mohamed Abd El Moniem Mahmoud"; delete a.known;

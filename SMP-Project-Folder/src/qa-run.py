@@ -36,6 +36,114 @@ if os.environ.get("SMP_BASE"):
     def new_context(self, **kw): kw.setdefault("bypass_csp", True); return _new_context(self, **kw)
     Browser.new_page, Browser.new_context = new_page, new_context
 
+# ── AND A CHECK OPENS THE PRODUCT WHEREVER THE PRODUCT IS (spec 043, Phase C)
+# Every check names the built file — `file://…/strategy-management-platform.html`
+# — because until now that WAS the product. On the new stack the product is a
+# page a person signs in to, and re-pointing 158 checks one at a time is 158
+# chances to point one at something else (§53.5). So the wrapper answers it
+# once: under SMP_BASE a goto of the built file signs in at the client's own
+# door and opens a real page instead, and the frozen sources are untouched.
+#
+# The sign-in happens ONCE per browser context: a check that opens the file
+# twice is navigating, not signing in again, and doing it per goto would cost
+# a round trip on every navigation and lose whatever the check had set up.
+if os.environ.get("SMP_BASE"):
+    import re as _re
+    from playwright.sync_api import Page
+    _BASE = os.environ["SMP_BASE"].rstrip("/")
+    _EMAIL = os.environ.get("SMP_QA_EMAIL", "office@forefront.example")
+    _PW = os.environ.get("SMP_QA_PASSWORD", "")
+    _HOME = os.environ.get("SMP_QA_HOME", "/raya-trade/mobile/strategy")
+    _FILE = _re.compile(r"strategy-management-platform[^/]*\.html")
+    _STUB = _re.compile(r"^https?://(127\.0\.0\.1|localhost):\d+/raya-trade/?$")
+    _goto = Page.goto
+    _signed = set()
+    def _open(self, **kw):
+        ctx = self.context
+        if id(ctx) not in _signed:
+            _goto(self, _BASE + "/raya-trade/sign-in", wait_until="networkidle")
+            self.wait_for_selector(".gate[data-hydrated]", state="attached", timeout=20000)
+            self.fill("#user", _EMAIL); self.fill("#password", _PW)
+            self.click("#loginForm button[type=submit]")
+            self.wait_for_url("**/raya-trade", timeout=20000)
+            _signed.add(id(ctx))
+        r = _goto(self, _BASE + _HOME, **kw)
+        # The boot is a fetch now, not a parse: wait for the shell to have
+        # painted the tenant rather than for a guessed number of milliseconds.
+        self.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=25000)
+        return r
+    def goto(self, url, **kw):
+        if _FILE.search(url or "") or _STUB.match(url or ""):
+            return _open(self, **kw)
+        return _goto(self, url, **kw)
+    Page.goto = goto
+
+    # ── A VIEWER SWITCH IS ASYNCHRONOUS OVER HTTP (§237) ─────────────────
+    # `switchViewer` flushes, rebases the tab on the server's graph and only
+    # then switches — or, refused, does not switch at all and puts the select
+    # back (§209). A check that reads the page a few hundred milliseconds
+    # after picking measures whoever happened to be there. So a pick of the
+    # viewer settles first, and says on stderr when the switch never took.
+    _sel = Page.select_option
+    def select_option(self, selector, value=None, **kw):
+        r = _sel(self, selector, value, **kw)
+        if selector in ("#asWho", "select#asWho"):
+            want = value if isinstance(value, str) else None
+            try:
+                self.wait_for_function(
+                    "() => document.getElementById('asWho').value === window.VIEWER",
+                    timeout=20000)
+            except Exception:
+                pass
+            if want is not None and self.evaluate("window.VIEWER") != want:
+                print("  (switch to %r never took — the flush before it was refused)" % want,
+                      file=sys.stderr)
+        return r
+    Page.select_option = select_option
+
+    # ── AND A REFUSAL SAYS WHICH AND WHY (§124) ─────────────────────────
+    # A browser reports a refused save as "403 (Forbidden)" and nothing more,
+    # and a check that collects console errors collects exactly that. The
+    # server's own sentence is printed beside it, with the viewer it was
+    # judged as, so a refusal names where it belongs rather than a number.
+    def _said(r):
+        if "/api/" not in r.url or r.status < 400: return
+        # The BODY SENT, not the answer: the sync API drains these events when
+        # the run ends, by which time the page is closed and a response body
+        # can no longer be read — while what was asked for is on the request
+        # and says which change the server refused.
+        try: sent = (r.request.post_data or "")
+        except Exception: sent = "?"
+        if os.environ.get("SMP_DUMP"):
+            open(os.environ["SMP_DUMP"], "w").write(sent)
+        print("  (%s %s -> %d, sent %s)" % (r.request.method, r.url.split("/api/")[-1], r.status, sent[:300]),
+              file=sys.stderr, flush=True)
+    _newpage = Browser.new_page
+    def new_page_said(self, **kw):
+        pg = _newpage(self, **kw); pg.on("response", _said); return pg
+    Browser.new_page = new_page_said
+    _ctxpage = None
+
+    # ── AND A CHECK THAT SETS `VIEWER` BY HAND FLUSHES FIRST (§204) ──────
+    # Thirty-one checks change who they are looking as by assigning `VIEWER`
+    # rather than by pressing the switcher. Over `file://` that is harmless,
+    # because nothing is ever saved; against a server it is §204's own hazard
+    # — the office's unsaved work rides into the next save and is judged as
+    # the person now being simulated (§185), which for a custodian correcting
+    # a plan is a refusal (§94), reported as a bare 403 on the console.
+    # `switchViewer`'s FIRST act is that flush; the wrapper puts it back where
+    # a check goes round the control. Nothing about any assertion moves.
+    _eval = Page.evaluate
+    _VSET = _re.compile(r"\bVIEWER\s*=[^=]")
+    _FLUSH = ("() => new Promise(function (r) { try { (window.SYNC && SYNC.saveNow)"
+              " ? SYNC.saveNow(function () { r(1); }) : r(0); } catch (e) { r(0); } })")
+    def evaluate(self, expression, *a, **kw):
+        if isinstance(expression, str) and _VSET.search(expression):
+            try: _eval(self, _FLUSH)
+            except Exception: pass
+        return _eval(self, expression, *a, **kw)
+    Page.evaluate = evaluate
+
 target = sys.argv[1] if len(sys.argv) > 1 else "qa.py"
 sys.argv = [target] + sys.argv[2:]
 runpy.run_path(target, run_name="__main__")

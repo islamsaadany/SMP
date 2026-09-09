@@ -85,7 +85,7 @@ with sync_playwright() as p:
        bool(door) and door.get_attribute("data-buildplan") == pg.evaluate("UNIT_KEYS[0]"),
        door and door.get_attribute("data-buildplan"))
     # BOTH ENDS (§94.2): it is on the plan page AND off the files page.
-    pg.query_selector(".navmenu-btn").click(); pg.wait_for_timeout(300)
+    pg.query_selector('[data-md="setup"]').click(); pg.wait_for_timeout(300)
     pg.query_selector('[data-setupgo="import"]').click(); pg.wait_for_timeout(300)
     ck("and it is gone from Import & storage",
        not pg.query_selector("[data-buildplan]"))

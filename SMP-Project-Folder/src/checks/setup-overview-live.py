@@ -147,7 +147,7 @@ BASE = "http://127.0.0.1:%d" % PORT
 def open_overview(pg):
     pg.goto(BASE + "/raya-trade")
     pg.wait_for_timeout(1200)
-    pg.query_selector(".navmenu-btn").click()
+    pg.query_selector('[data-md="setup"]').click()
     pg.wait_for_timeout(900)
 
 

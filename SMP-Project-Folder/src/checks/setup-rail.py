@@ -46,7 +46,7 @@ def ck(name, ok, extra=""):
 def open_setup(pg):
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(300)
-    btn = pg.query_selector(".navmenu-btn")
+    btn = pg.query_selector('[data-md="setup"]')
     assert btn, "no Setup control in the navigation row"
     btn.click()
     pg.wait_for_timeout(500)

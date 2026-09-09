@@ -10,7 +10,7 @@ const path = require("path");
 const A = require("../lib/authorize.cjs");
 const R = require("../lib/rules.cjs");
 
-const SEED = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+const SEED = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "db", "seed-state.json"), "utf8"));
 const clone = function (x) { return JSON.parse(JSON.stringify(x)); };
 const personOf = function (state, key) {
   return state.people.filter(function (p) { return p.key === key; })[0];

@@ -102,3 +102,52 @@ sent home · the admin opens B holding `super` · must_change blocks the tenant
 route and not the password route · a change clears it and keeps THIS
 session · the 9th attempt refused with the right password · a success clears
 the failures · no session → the same refusal, no default tenant.
+
+### S8 · Raya Trade carried across (2026-09-09)
+Against the copy (`smp_v20`, seeded by the frozen round trip and moved by
+`scripts/migrate-to-multi-client.js` into `raya_trade` + `platform`):
+`scripts/migrate-raya.mjs` reads through the FROZEN reader and loads through
+`loadGraph` under Raya's tenant; the nine outside tables row for row; the
+accounts with their hashes. The three office memberships name nobody on
+Raya's register (`ff_islam`, §313.32) and are skipped and said, exactly as
+the frozen door refuses them.
+`--break=short:people` → RED 4 ok, 4 failed: *"people: 32 under Raya, 33 in
+the copy"*, the graph no longer byte-identical, and the save refused because
+the first person dropped was the SMO.
+`--break=wrong-tenant` → RED 4 ok, 5 failed: *"labels: 0 under Raya, 8 in the
+copy"* AND *"labels: B 0 → 8"* — both named. **Its first shape went green**:
+it moved `chat_threads`, which the copy holds none of (§113.8); it moves a
+graph table with rows now.
+green → 7 ok: 42 counts equal · the whole graph byte-identical (normalised)
+through `state-io.ts` · mobile's plan on its own · a change-list save
+round-trips · a migrated account signs in with its OLD hash, `must_change`
+intact · the door answers for raya-trade · B untouched.
+
+### S9 · the row-addressed save (2026-09-09) — the enhancement (§314.2)
+The save is `lib/save.ts` (lock per tenant · read · actingFor · applyChanges
+· authorize · `writeChanges` · change_log · COMMIT) and the writer is
+`lib/state-io.ts`: the two graphs' rows are built by the SAME builders the
+loader uses and only the rows that differ are written. Every change list is
+made by the differ's own `graphChanges()`.
+**The sweep had to count a vanished ctid as a rewrite**: an UPDATE gives its
+row a new ctid, so a "changed xmin at the same ctid" test walked past every
+update — including a clear-and-reinsert of 795 rows (§94.5). It counts a row
+as rewritten when its xmin changed OR its ctid is gone, and asserts EXACTLY
+the rows named.
+`--break=full-write` → RED 1 ok, 7 failed: the first *"every OTHER row's xmin
+is what it was — 795 rows rewritten"*, the reported fault.
+`--break=silent-fallback` → RED 11 ok, 2 failed: *"a row with no id is refused
+… — code 200 {wrote: full-fallback}, rewritten 795"*.
+green → 13 ok: one field → 1 UPDATE, 795 rows swept, one measures row moved ·
+the save reports 1 row · change_log carries it · add → 1 INSERT · remove → 1
+DELETE · a reorder → exactly the 2 pillar rows whose idx moved · a row with
+no id → 400 naming `measures`, nothing written · a group setting → 1 UPDATE on
+`org` · a register edit → 1 people row · a whole-graph body → 400 · B
+untouched · no TRUNCATE and no keyless DELETE in the writer.
+
+### Also run (2026-09-09)
+`tests/graph-diff.cjs` 136/0 and `tests/authorize.cjs` 588/0 against the
+carried-across copies (`lib/graph-diff.cjs`, `lib/authorize.cjs`,
+`lib/rules.cjs`); `npx tsc --noEmit` clean; the frozen product's own
+`test-authorize`, `test-graph-diff` and `test-session-state` green and
+`git diff` on `lib/ db/ api/ SMP-Project-Folder/` empty — nothing in it moved.

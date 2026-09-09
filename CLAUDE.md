@@ -449,8 +449,18 @@ spec's first 44 — `push_keys` is per deployment), two contracts and a
 server **writes only the rows the list names** — §241's row-addressed writer
 is the only writer, the wipe-and-rewrite `writeState` is not carried over, an
 unaddressable shape is a 400 and never a silent full rewrite (spike S9).
-`tasks.md` written 2026-09-09 (72 tasks, one phase per proof). Next: the nine
-proofs, red first.
+`tasks.md` written 2026-09-09 (72 tasks, one phase per proof) **and the spike
+is green** (§314.3): nine proofs under `smp-app/spike/`, each red first —
+`npm run spike` and `npm run spike:red` from `smp-app/` with the sandbox
+Postgres up (`smp-app/spike/README.md` holds every first run). The shared
+schema is `smp-app/db/schema.sql` (the source; Prisma introspects it), the
+tenant is set only in `lib/tenant.ts`, the save is `lib/save.ts` over
+`lib/state-io.ts`'s row-addressed writer, and the frozen reader and rule
+modules are carried across as `.cjs` with the frozen tests green against
+them. `tenant_id` DEFAULTS to the request's setting and the policy is
+`NULLIF(current_setting(…, true), '')::uuid` — a once-set setting reads back
+as `''` on a reused connection. **Waiting on Islam: S1 against Neon from his
+own shell** (quickstart §4). Next: the first screen group, behind its mockup.
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

@@ -40690,3 +40690,75 @@ nothing. Nine proofs now. `contracts/tenant-request.md` §3 and
 
 **Still nothing built.** Next is `tasks.md`, then the spike; `main` untouched
 until Islam says merge, on that merge.
+
+## §314.3 — THE SPIKE IS GREEN: NINE PROOFS, EACH RED FIRST (2026-09-09)
+
+Built the same day the plan and the task list were written, on the branch,
+`main` untouched. Every proof under `smp-app/spike/` was run under its
+named break and watched go red before its green run was believed
+(constitution XVI); the outputs are in `smp-app/spike/README.md`. What the
+running found, in the order it was found:
+
+- **S1 · the role and FORCE hold** (LOCAL key only — the Neon run is Islam's,
+  quickstart §4, and nothing that follows depends on it until a screen
+  does). The owner reads every row with nothing set; `smp_app` reads none —
+  which is the whole reason the app must never be the owner.
+- **S3 · the pooler model is a fresh connection per statement.** The first
+  model reset the session with `RESET ALL`, and a custom setting reset that
+  way reads back as `''`, not NULL — a different fault from the one being
+  modelled. It is the same fault S6 then found on a REUSED connection.
+- **S5 · rule 4 passed on a build it should have failed.** `array_agg(attname)`
+  came back as a `name[]` STRING and `"{tenant_id,cap_id}".includes("tenant_id")`
+  is true of a string (§94.5); cast to `text[]` on both sides and a `bare-fk`
+  break added so it cannot happen again unseen.
+- **The schema: the 42 tables' columns were read off a real database**
+  (the frozen round trip seeded, 43 migrations applied), never off 44
+  migration files; the generator ran once and `db/schema.sql` is the source.
+  One loop over the catalogue gives every tenant table its policy, so a
+  table added later is covered on the next apply.
+- **S6 · Prisma stays, with a wrapper — and the policy takes `NULLIF`.** The
+  extension is Prisma's own documented RLS shape (every operation the second
+  statement of a batch transaction whose first sets the tenant); an escaped
+  operation silently writes nothing, which is the blank page the proof
+  exists to catch. **The finding:** on a reused connection a custom setting
+  that has EVER been set reads back as `''` once its transaction ends, so an
+  escaped query errored `22P02` rather than reading an empty world. Both
+  fail closed; a safe failure should be ONE thing, so the policy is
+  `NULLIF(current_setting('app.tenant_id', true), '')::uuid` on every table
+  (data-model.md corrected in the same commit). **What Prisma does not give
+  is said in the file**: several operations in one transaction — the save,
+  with its lock, goes through `withTenant()` on pg.
+- **`tenant_id` DEFAULTS to the request's own setting**, so no row builder
+  names it: inside `withTenant()` a row lands under the tenant the request is
+  for and under nothing else (the policy's `WITH CHECK` refuses anything
+  else). That is what let the frozen reader and row builders carry across
+  with four edits (`smp-app/lib/graph-io.cjs`) rather than a rewrite.
+- **S9 · the enhancement is built the way §314.2 asked** — and the shape is
+  simpler than the task list expected: rather than an interpreter over the
+  change list's dozen path shapes, `writeChanges()` builds both graphs' rows
+  with the loader's own builders and writes ONLY the rows that differ. Every
+  shape the differ can produce is covered by construction; a one-box save is
+  one UPDATE of one row (795 rows swept, one moved); a reorder moves exactly
+  the two `idx` values that changed; a row with no id is a 400 naming the
+  table and nothing is written. **The check's own first sweep was blind**: an
+  UPDATE gives its row a new ctid, so "changed xmin at the same ctid" walked
+  past every update — a clear-and-reinsert of 795 rows included. It counts a
+  vanished ctid as a rewrite now and asserts exactly the rows named.
+- **S8 · Raya carries across on the copy**: 42 counts equal, the whole graph
+  byte-identical through the new reader (normalised as the frozen round trip
+  normalises), a save round-trips, a migrated account signs in on its OLD
+  hash with `must_change` intact. The three office memberships name nobody on
+  Raya's register (`ff_islam`, §313.32) and are skipped and said. **The
+  `wrong-tenant` break went green first** — it moved `chat_threads`, which the
+  copy holds none of (§113.8); it moves a graph table with rows now.
+- **The frozen product is untouched and it is measured**: `git diff` on
+  `lib/ db/ api/ SMP-Project-Folder/` empty; its own `test-authorize` 588/0,
+  `test-graph-diff` 136/0, `test-session-state` green. The three rule modules
+  are carried across VERBATIM as `.cjs` and the frozen tests pass against the
+  copies (constitution IX).
+
+**Still open, and whose:** the Neon run of S1 (Islam's, from his own shell —
+if `rolcreaterole f`, research §P5, stop); the export step of deletion
+(§304's workbooks, the caller's, named in `tenant-delete.ts`); the demo seed
+under the shared schema (`seed-demo.mjs`, next slice); and every screen. The
+first screen group is a new `tasks.md`, and it starts with its mockup.

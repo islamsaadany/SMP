@@ -23,9 +23,15 @@ Next) are in `research.md` §P1–P7 — **answered by Islam 2026-09-09**: three
 written, and the save **enhanced** at his word (§314.2): every box still saves
 itself, and the server writes only the rows the change list names — the
 wipe-and-rewrite writer is not carried over (spike S9, nine proofs now).
-`tasks.md` written 2026-09-09 (72 tasks, one phase per proof). Next: the
-spike, red first — S1 locally, then Islam runs S1 against Neon from his own
-shell (never a pasted URL).
+`tasks.md` written 2026-09-09 (72 tasks, one phase per proof) **and the spike
+built and green the same day** — nine proofs under `smp-app/spike/`, each red
+first under its named break (§314.3): the role and FORCE, the pooler, the
+schema check over 42 tables, isolation on every table, Prisma with a wrapper
+(the policy took `NULLIF`), deletion, the door, Raya's migration on a copy,
+and the row-addressed save (one box → one row, 795 swept). `main` untouched.
+**Waiting on Islam:** the S1 run against Neon from his own shell (quickstart
+§4; never a pasted URL) — the one proof that must be real before a screen
+relies on it. Next: the first screen group, beginning with its mockup.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
@@ -555,8 +561,9 @@ Nothing proceeds past this line without an answer.
   first, benchmarking role and region names deferred. `plan.md` written
   2026-09-09 (research §P1–P7 hold the plan-stage choices; 44 → 42 tables
   corrected). **§P1–P7 answered 2026-09-09** — the save enhanced to write
-  only the rows a change list names (§314.2, S9). Next `tasks.md`, then a
-  spike of nine proofs before any screen.
+  only the rows a change list names (§314.2, S9). `tasks.md` and the spike
+  both landed 2026-09-09: nine proofs green, each red first (§314.3). Next
+  Islam's Neon run of S1, then the first screen group behind its mockup.
 - **Multi-client — one door, many clients (`specs/042-multi-client/spec.md`,
   2026-08-28).** Every decision settled with Islam in session: one door, cards
   for Forefront only, **one Postgres schema per client** (§36.2), RHI and

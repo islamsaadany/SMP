@@ -63,8 +63,8 @@ CREATE TABLE tenant_users (
   CONSTRAINT tenant_users_seat CHECK (seat IN ('super','smoteam','none'))
 );
 CREATE INDEX tenant_users_user ON tenant_users (user_id);
--- One super user per tenant (§313.4): naming a second MOVES the seat.
-CREATE UNIQUE INDEX tenant_users_one_super ON tenant_users (tenant_id) WHERE seat = 'super';
+-- A tenant may have more than one super user (§313.26, reversing §313.4's
+-- seat move): giving somebody the seat takes nothing from anybody.
 
 -- The door (§43), keyed on the login.
 CREATE TABLE sessions (

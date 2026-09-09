@@ -150,6 +150,10 @@ function __smpLanding(state, personKey) {
            acts: acts, pages: pages, tour: tour, home: home, continueWord: word };
 }
 function __smpPlaceLabel(state, target) { __smpHydrate(state); try { return placeLabel(target); } catch (e) { return String(target); } }
+/* §67's clearedGraph(), the platform's own mirror of migration 004: what a
+   client's deployment holds on day one. Hydrated first so clone() and the
+   graph's own invariants are the product's. */
+function __smpCleared(state) { __smpHydrate(state); return clearedGraph(state); }
 `;
 
 let ctx = null;
@@ -175,4 +179,11 @@ function placeLabel(graph, target) {
   const c = context();
   return String(c.__smpPlaceLabel(graph, target));
 }
-module.exports = { landing, placeLabel, FILES };
+/* The graph a NEW client starts with (§67, §313.31): the seed cleared by the
+   product's own clearedGraph() — unit and function names kept, every plan
+   line, figure, role and person but the bootstrap SMO gone. */
+function cleared(graph) {
+  const c = context();
+  return detach(c.__smpCleared(graph));
+}
+module.exports = { landing, placeLabel, cleared, FILES };

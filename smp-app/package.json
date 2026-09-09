@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && node scripts/sync-css.mjs && node scripts/build-shell.mjs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "db:pull": "prisma db pull && prisma generate",
@@ -17,7 +17,10 @@
     "check:door:red": "for b in no-rows first-person; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "sync:css": "node scripts/sync-css.mjs",
     "check:state": "node checks/state-api.mjs",
-    "check:state:red": "for b in apply-on-base no-save-lock bare-refusal viewas-widens log-for-all peek-includes-me; do node checks/state-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
+    "check:state:red": "for b in apply-on-base no-save-lock bare-refusal viewas-widens log-for-all peek-includes-me; do node checks/state-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "build:shell": "node scripts/build-shell.mjs",
+    "check:shell": "node checks/shell.mjs",
+    "check:shell:red": "for b in no-route open-csp; do SMP_BREAK=$b node checks/shell.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

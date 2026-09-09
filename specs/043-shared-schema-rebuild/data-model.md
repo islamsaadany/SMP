@@ -12,7 +12,7 @@ file names every table and what happens to its key.
 |---|---|---|
 | `tenants` | `id uuid` | `key text UNIQUE` (the slug) · `name` · `region` (one value, unread, §4.5) · `kind` client/demo · `status` active/retired · `mark` (PNG data URI) · `colors jsonb` · `made_here bool` · `created_at`. No `schema_name`. |
 | `users` | `id uuid` | `email text UNIQUE` lower-cased · `name` · `password_hash` (scrypt) · `must_change bool` · `is_admin bool` · `kind` office/client · `status` · `created_at`, `updated_at`. **No tenant column.** |
-| `tenant_users` | `(tenant_id, user_id)` | `person_key text` (the `people` row this login *is* inside the tenant; FK `(tenant_id, person_key) → people`, deferrable, because an office login may be placed after the register exists — §313.32) · `seat` super/smoteam/none. **Rule on the server:** a `client`-kind user holds exactly one row; one `super` per tenant (partial unique index, §313.4's seat move). |
+| `tenant_users` | `(tenant_id, user_id)` | `person_key text` (the `people` row this login *is* inside the tenant; FK `(tenant_id, person_key) → people`, deferrable, because an office login may be placed after the register exists — §313.32) · `seat` super/smoteam/none. **Rule on the server:** a `client`-kind user holds exactly one row; a tenant may hold more than one `super` (§313.26, reversing §313.4 — migration 001 drops the index the first cut of this schema carried). |
 | `sessions` | `token_hash text` | `user_id → users ON DELETE CASCADE` · `expires_at` · `created_at`. One door (§313.2). |
 | `login_attempts` | `id bigserial` | `key` (email or address) · `at`. §43's two windows, unchanged. |
 | `platform_access` | `(role_key, area_key)` | §37's matrix one level up, as §313 built it. |

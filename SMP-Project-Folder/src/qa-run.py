@@ -24,6 +24,18 @@ def launch(self, **kw):
 
 BrowserType.launch = launch
 
+# THE SERVED SHELL CARRIES `script-src 'self'` AND NOTHING ELSE (spec 043
+# Phase B) — which refuses the eval Playwright's Python `evaluate(<string>)`
+# runs the checks' probes through. The checks are not the product, so under
+# SMP_BASE every context bypasses the page's policy for its own probes; the
+# policy itself is asserted by smp-app/checks/shell.mjs, which does not.
+if os.environ.get("SMP_BASE"):
+    from playwright.sync_api import Browser
+    _new_page, _new_context = Browser.new_page, Browser.new_context
+    def new_page(self, **kw): kw.setdefault("bypass_csp", True); return _new_page(self, **kw)
+    def new_context(self, **kw): kw.setdefault("bypass_csp", True); return _new_context(self, **kw)
+    Browser.new_page, Browser.new_context = new_page, new_context
+
 target = sys.argv[1] if len(sys.argv) > 1 else "qa.py"
 sys.argv = [target] + sys.argv[2:]
 runpy.run_path(target, run_name="__main__")

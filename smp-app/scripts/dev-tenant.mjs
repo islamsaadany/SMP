@@ -30,8 +30,11 @@ export async function devTenant({ url = OWNER_URL, log = (s) => console.log(s) }
   await applyAll(url, { appPassword: process.env.SMP_APP_PASSWORD || "smp_app", log: () => {} });
   const owner = new pg.Client({ connectionString: url });
   await owner.connect();
-  await owner.query("DELETE FROM tenants WHERE key = 'raya-trade'");
-  await owner.query("DELETE FROM users WHERE email LIKE '%@raya.example' OR email = 'office@forefront.example'");
+  /* everything a run of the checks may have made: the tenant, its logins, a
+     client created through Forefront's pages, and the office's own table */
+  await owner.query("DELETE FROM tenants WHERE key = 'raya-trade' OR made_here");
+  await owner.query("DELETE FROM users WHERE email LIKE '%@raya.example' OR email LIKE '%@forefront.example'");
+  await owner.query("DELETE FROM platform_access");
   const t = (await owner.query("INSERT INTO tenants (key, name, made_here) VALUES ('raya-trade', 'Raya Trade', true) RETURNING id")).rows[0];
   const graph = JSON.parse(readFileSync(join(here, "..", "..", "db", "seed-state.json"), "utf8"));
   await withTenant(t.id, (c) => loadGraph(c, graph));

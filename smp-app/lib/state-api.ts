@@ -67,10 +67,7 @@ export async function officeRow(c: PoolClient, user: SessionUser, tenant: Tenant
   const anybody = await c.query("SELECT 1 FROM people LIMIT 1");
   if (!tenant.made_here && anybody.rowCount) throw new NoPerson("You are signed in, but you are not on this client's register. Ask the SMO to place you.");
   const key = personKey || mintKey(user.email);
-  /* one Super user per client (§313.4): where the register already holds
-     one, the minted row is the team's */
-  const hasSuper = (await c.query("SELECT 1 FROM people WHERE role = 'super' LIMIT 1")).rowCount;
-  const rowRole = role === "super" && hasSuper ? "smoteam" : role;
+  const rowRole = role;
   const idx = (await c.query("SELECT COALESCE(MAX(idx),0) + 1 AS n FROM people")).rows[0].n;
   await c.query("INSERT INTO people (key, idx, name, role, extra) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (tenant_id, key) DO NOTHING",
     [key, idx, user.name || user.email, rowRole, JSON.stringify({ forefront: true, ffrow: true, email: user.email })]);
@@ -84,10 +81,10 @@ export async function personFor(r: Resolved): Promise<Person> {
   let key = r.personKey;
   if (r.user.kind !== "client") {
     /* No membership is written here: an admin with no seat holds the
-       client's Super user seat BY RULE at the door (door.ts), and a seat row
-       would be a second super on a client that has one (tenant_users_one_super,
-       §313.4). The row minted below carries the address, so the next request
-       finds them by it (§313.32) — idempotent, one row. */
+       client's Super user seat BY RULE at the door (door.ts, seatFor), and
+       the team is set on the client's own configuration (api/platform setTeam)
+       and nowhere else (§53.5). The row minted below carries the address, so
+       the next request finds them by it (§313.32) — idempotent, one row. */
     key = await withTenant(r.tenant.id, (c) => officeRow(c, r.user, r.tenant, r.seat, r.personKey));
   }
   if (!key) throw new NoPerson("You are signed in, but you are not on this client's register. Ask the SMO to place you.");

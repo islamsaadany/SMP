@@ -1,6 +1,24 @@
 from playwright.sync_api import sync_playwright
-import pathlib
+import pathlib, os
 url="file://"+str(pathlib.Path("strategy-management-platform.html").resolve())
+# THE SAME SWEEP, POINTED AT THE NEW APP (spec 043, research §P4): with
+# SMP_BASE set the walk signs in at the client's own door and opens the
+# served shell instead of the file; the assertions are untouched, because the
+# assertions are the contract and the harness is not. The password is read
+# from the environment and appears nowhere in this file.
+BASE=os.environ.get("SMP_BASE")
+def open_platform(pg):
+    if not BASE:
+        pg.goto(url); pg.wait_for_timeout(600); return
+    pg.goto(BASE+"/raya-trade/sign-in")
+    pg.wait_for_selector(".gate[data-hydrated]", state="attached", timeout=15000)
+    pg.fill("#user", os.environ.get("SMP_QA_EMAIL","office@forefront.example"))
+    pg.fill("#password", os.environ["SMP_QA_PASSWORD"])
+    pg.click("#loginForm button[type=submit]")
+    pg.wait_for_url("**/raya-trade", timeout=15000)
+    pg.goto(BASE+"/raya-trade/mobile/strategy")
+    pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
+    pg.wait_for_timeout(600)
 errs=[]
 
 def walk_destinations(pg):
@@ -89,10 +107,11 @@ with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={"width":1400,"height":1000})
     pg.on("pageerror", lambda e: errs.append("PAGEERROR: "+str(e)))
     pg.on("console", lambda m: errs.append(m.text) if m.type=="error" else None)
-    pg.goto(url); pg.wait_for_timeout(600)
+    open_platform(pg)
     people = pg.eval_on_selector_all("#asWho option","els=>els.map(e=>e.value)")
     for v in people:
-        pg.select_option("#asWho", v); pg.wait_for_timeout(200)
+        # over HTTP a switch rebases the tab on the server's graph (§237), one fetch
+        pg.select_option("#asWho", v); pg.wait_for_timeout(700 if BASE else 200)
         # Destinations only. #units also holds the fold buttons, which go
         # nowhere, and — since 2.9 — the Manage menu's entries, which are not
         # visible until it is opened. Each is walked in its own way.

@@ -20,7 +20,13 @@ const ORDER = ["_shared.css", "group-extra.css", "config.css", "arrange.css", "p
    CSS parser refuses the file outright. Verbatim (D4) means the browser
    reads the same bytes the product serves, so both sheets are written under
    public/ and linked from their route group's layout. */
-const css = ORDER.map((f) => readFileSync(join(SRC, f), "utf8")).join("\n");
+/* THE TYPEFACE (build.py §157): one embedded face, Source Sans 3, which
+   build.py carries as a data URI so the single file works from a memory
+   stick. Served, it is a file beside the stylesheet (public/fonts, copied by
+   scripts/build-shell.mjs) — the same bytes, font-display:swap for the same
+   reason. */
+const FACE = "@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}\n";
+const css = FACE + ORDER.map((f) => readFileSync(join(SRC, f), "utf8")).join("\n");
 mkdirSync(join(here, "..", "public"), { recursive: true });
 const out = join(here, "..", "public", "platform.css");
 writeFileSync(out,

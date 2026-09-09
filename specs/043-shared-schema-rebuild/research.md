@@ -139,3 +139,127 @@ Bootstrap, per schema:
   corrected by it: *per connection* becomes *per request*, and *from their user
   record* is true of a client user and becomes *checked against their
   memberships* for a consultant.
+
+---
+
+# Phase 0 (plan stage) · The choices spec §6 left to the plan
+
+Each is written as a decision with its reasoning and the road not taken, so
+Islam can strike one in a sentence (constitution I). None touches a screen.
+
+## P1 · The auth library — none; the platform's own door, ported
+
+- **Decision:** no `next-auth` (the skeleton's v4 is the previous major line
+  and leaves `package.json`). `lib/auth.js` is ported to `smp-app/lib/auth.ts`
+  as it stands: scrypt with a per-password salt (§43), an httpOnly cookie, a
+  30-day row in `sessions` keyed on `user_id`, `must_change` enforced before
+  any tenant data is served (§43.2), the 8-per-key / 25-per-address rate limit
+  checked **before** the password is verified (§43's timing-oracle rule), a
+  password change ending every other session (§43.7).
+- **Rationale:** every one of those rules is already decided and already in
+  production; a library would re-decide them (its own session shape, its own
+  cookie, its own throttling or none) and constitution VI says follow what the
+  platform does. Email + password against our own table needs no OAuth, no
+  providers and no adapter. §72 and §97.5's dependency rule: a package is
+  taken when it does something we cannot test ourselves (push crypto), not to
+  replace fifty lines whose behaviour is specified.
+- **Alternatives considered:** Auth.js v5 (still beta across its own major
+  line for two years; would carry the same rules on top of it anyway);
+  `next-auth` v4 with a Credentials provider (a JWT session by default, which
+  cannot be ended from the server — §43.7's guarantee lost).
+
+## P2 · Prisma or `pg` for the tenant layer — Prisma with a wrapper, `pg` if S6 fails
+
+- **Decision:** the platform tables (`tenants`, `users`, `tenant_users`,
+  `sessions`, `login_attempts`, `platform_access`, `tenant_log`) are Prisma
+  models. Tenant-owned rows are reached through **one** Prisma client whose
+  extension runs every operation inside `withTenant()` (BEGIN · `SET LOCAL
+  app.tenant_id` · op · COMMIT) on the **direct** pool as `smp_app`. The
+  schema is written in SQL and applied by `db/apply.mjs`; Prisma
+  **introspects** it (`prisma db pull`) and never migrates it.
+- **Rationale:** RLS policies, `FORCE`, roles and grants are SQL whatever
+  runs the queries, and Prisma's migrate cannot express them without raw
+  blocks — so the SQL is the source and Prisma is the typed reader. D1 chose
+  Prisma for the stack; §4.3 chose per-request `SET LOCAL`; the extension is
+  the only place the two meet, and S6 is what proves it meets them for
+  **every** operation. A query that escapes the extension runs with no
+  setting and sees nothing, which is the safe failure — but "sees nothing" is
+  a bug that renders as an empty page, so S6 asserts both sides.
+- **If S6 cannot pass:** the tenant layer becomes a small `pg` module
+  (`withTenant(id, client => …)` with hand-written queries — the shape
+  `lib/state-io.js` already has), and Prisma keeps the platform tables only.
+  Named here so it is a planned fallback and not a surprise.
+- **Alternatives considered:** Prisma's `$extends` with a `WHERE tenant_id`
+  injected into every query (an application filter — spec §4.3 forbids it
+  being the guarantee); one Prisma client per tenant (a pool per tenant does
+  not scale to a hundred and re-creates §36's per-schema cost).
+
+## P3 · The shape of the save — the change list stays
+
+- **Decision:** the API keeps §210/§215's contract: the client posts the list
+  of changes it made and the server **applies it onto the stored graph** under
+  the tenant's transaction, authorises the diff against the stored world
+  (constitution X), and writes. `POST /api/state` becomes a route handler
+  with the same body. §240's lock becomes **per tenant**:
+  `pg_advisory_xact_lock(420043, hashtext($tenantId))` — today's single
+  constant would serialise every client's saves behind each other.
+- **Rationale:** `lib/graph-diff.js` and `lib/authorize.js` carry over
+  (spec §4.8); the browser code that produces the list is what the ported
+  screens will run at first; a per-row API is a screen-by-screen rewrite that
+  D4 says happens page group by page group. §288's non-blocking clear is kept
+  by construction: the clear is `DELETE … WHERE tenant_id = $1` on the 33
+  graph tables, ROW EXCLUSIVE, inside the same transaction.
+- **Alternatives considered:** per-row endpoints from day one (every ported
+  screen would need its own before it could save anything; the change list
+  lets a screen port with its save intact). Recorded for later: a screen may
+  gain a per-row endpoint when it is ported, and the change list retires when
+  the last one has.
+
+## P4 · What the checks become — the same two kinds, pointed at Next
+
+- **Decision:** server proofs stay Node scripts against a real Postgres
+  (`smp-app/spike/*.mjs` now; `smp-app/tests/*.mjs` after), exactly
+  `scripts/test-*.js`'s shape and exit discipline. Screen checks stay
+  Playwright in Python (`checks/*.py`), pointed at `next start` on a throwaway
+  database instead of at a file; each ported screen takes the frozen build's
+  assertions for that screen as its acceptance list (spec §8). `qa.py` walks
+  the new app when the first screen group exists.
+- **Rationale:** constitution VI and XVI — the checks' *assertions* are the
+  contract; changing the harness and the assertions at once is how a green
+  run stops meaning anything.
+- **Alternatives considered:** Vitest/Playwright-in-TS from scratch (loses
+  every existing assertion and the wrappers that find Chromium here).
+
+## P5 · Where S1 runs, and what if the key cannot make a role
+
+- **Decision:** S1 runs twice — here on Postgres 16 (proves the SQL), and by
+  **Islam from his own shell** with `DATABASE_URL_UNPOOLED` exported (proves
+  the key). The script prints one line per property and never the URL. If
+  Neon's key lacks `CREATEROLE`, the plan **stops for a decision**: the two
+  candidates are Neon's console (a role made once by hand, recorded in §314.2)
+  or a Neon plan that grants it; §313.35's silent degrade to owner rights is
+  **not** carried over, because under a shared schema "owner rights" means
+  every tenant.
+- **Rationale:** §313.35 proved role creation on three shapes of key including
+  one like Neon's, so the expected answer is yes; the spec makes it the one
+  proof that must be real before anything relies on it.
+
+## P6 · The migration set runs at deploy, never per request
+
+- **Decision:** `db/apply.mjs` is run once per deploy as the owner (a build
+  step or a one-off command), under `pg_advisory_xact_lock` in one transaction
+  (§289's shape). `smp_app` cannot run it — it owns nothing. There is no
+  `ensureReady()` on the request path.
+- **Rationale:** §98 measured what per-request bootstrap costs; §289 measured
+  what a per-request bootstrap does under a burst; a shared schema is
+  migrated once, which is half of why §314 chose it.
+
+## P7 · The local database for the spike
+
+- **Decision:** the sandbox's Postgres 16 cluster (`/usr/lib/postgresql/16`,
+  present and down) is started for the spike; `_harness.mjs` creates a fresh
+  database per run and drops it after. Two tenants are seeded (A and B) with
+  every tenant table holding at least one row of each — S2 and S4 are vacuous
+  otherwise (§113.8).
+- **Rationale:** every server proof in the product's history ran this way;
+  a proof against an empty table passes on a build that lost the feature.

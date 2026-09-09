@@ -1,9 +1,10 @@
 # Spec 043 — One schema, every client: the rebuild's data layer
 
 **Status:** decisions agreed 2026-09-09 (Islam, in session, question by
-question, on his own written decision record). **Nothing built.** This spec is
-the alignment document: it goes back to Islam for sign-off before `plan.md`
-and `tasks.md` exist, and no source is touched before then (constitution I).
+question, on his own written decision record); **signed off the same day**
+(§314.1); `plan.md` written 2026-09-09 with its four plan-stage choices in
+`research.md` §P1–P7, which go back to Islam before `tasks.md`. **Nothing
+built**, and no source is touched before then (constitution I).
 
 **Reverses:** §36 (schema per tenant, recommended 2026-08-20) and §313 / spec
 042 (schema per tenant, built and merged 2026-09-08). Recorded as a reversal in
@@ -116,7 +117,10 @@ not for a consultant — §4.4).
 Every table a client owns today — the 33 the save clears plus `change_log`,
 `bu_declarations`, the chat, messages, drafts, push and assistant tables: 47
 live tables across `schema.sql` and the migrations, less `credentials`,
-`sessions` and `login_attempts`, which move to the platform side, so **44** —
+`sessions` and `login_attempts`, which move to the platform side — and
+`push_keys`, one VAPID pair per deployment (§231), which moves there too — so
+**42** (the spec first said 44 by counting `push_keys` and `_sql_migrations`;
+corrected at plan stage, `data-model.md`) —
 gains
 `tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE`.
 
@@ -224,7 +228,7 @@ recorded as his reversal of his own plan. What that settles:
   `raya_trade` schema on the day of the cutover and writes every row into the
   shared schema under Raya's `tenant_id`: the register, the plans, the
   figures, the closed cycles and their snapshots, the archives, the messages
-  and the questions, the settings — every one of the 44 tenant-owned tables
+  and the questions, the settings — every one of the 42 tenant-owned tables
   (§4.2). Nothing is re-entered and nothing is re-keyed by hand: the table
   gains the tenant and keeps its own keys, which is exactly what the
   composite key in §4.2 exists for.

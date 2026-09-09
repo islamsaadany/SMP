@@ -40636,3 +40636,9 @@ confused by the long spec"* — Islam answered all four the same day:
 
 **Still nothing built.** What follows is `plan.md`, then `tasks.md`, then the
 spike; `main` untouched until Islam says merge, on that merge.
+
+*Corrected at plan stage, 2026-09-09:* the spec's count of tenant-owned tables
+was 44 and is **42** — `push_keys` holds one VAPID pair per deployment (§231)
+and belongs with the door on the platform side, and `_sql_migrations` is a
+registry, not data. The count is in `specs/043-shared-schema-rebuild/data-model.md`
+table by table; nothing decided here moves.

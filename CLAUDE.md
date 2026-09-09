@@ -439,7 +439,13 @@ first. `smp-app/` is replaced on the branch; `main` is untouched until Islam
 says merge. **Spec 043 was signed off 2026-09-09** with one change to the
 plan: Raya Trade's data is carried across by a one-off migration proved by
 running it (§314.1); RHI and El Abd start empty, the demo is seeded. The
-first slice is a spike of eight database proofs, not a screen; `plan.md` next.
+first slice is a spike of eight database proofs, not a screen. **`plan.md`
+was written 2026-09-09** with `data-model.md` (42 tenant-owned tables, not the
+spec's first 44 — `push_keys` is per deployment), two contracts and a
+`quickstart.md`; four plan-stage choices wait on Islam's word in `research.md`
+§P1–P7 (no auth library; Prisma with a wrapper, `pg` if S6 fails; the
+change-list save kept, §240's lock per tenant; the checks pointed at Next)
+before `tasks.md`.
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

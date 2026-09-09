@@ -15,7 +15,12 @@ today**; a client-blocking defect is a correction and is asked about first.
 **Nothing built** — `specs/043-shared-schema-rebuild/spec.md` is the
 alignment document, **signed off 2026-09-09 with one change** (Raya Trade's
 data is carried across by a one-off migration, §314.1); the first slice after
-it is a spike of eight proofs on a real Postgres, not a screen. Next: `plan.md`.
+it is a spike of eight proofs on a real Postgres, not a screen. `plan.md`,
+`data-model.md`, the two contracts and `quickstart.md` were written 2026-09-09;
+four plan-stage choices (no auth library, Prisma with a wrapper and `pg` if S6
+fails, the change-list save kept with a per-tenant lock, the checks pointed at
+Next) are in `research.md` §P1–P7 for Islam to strike. Next: his word on those,
+then `tasks.md`.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
@@ -542,7 +547,9 @@ Nothing proceeds past this line without an answer.
   catalogue count. Raya Trade's data is carried across by a one-off
   migration proved by running it (S8); RHI and El Abd empty, the demo seeded.
   **D10 answered 2026-09-09** (§314.1): isolation approved as written, spike
-  first, benchmarking role and region names deferred. Next `plan.md`, then a
+  first, benchmarking role and region names deferred. `plan.md` written
+  2026-09-09 (research §P1–P7 hold the plan-stage choices; 44 → 42 tables
+  corrected). Next his word on §P1–P4, then `tasks.md`, then a
   spike of eight proofs before any screen.
 - **Multi-client — one door, many clients (`specs/042-multi-client/spec.md`,
   2026-08-28).** Every decision settled with Islam in session: one door, cards

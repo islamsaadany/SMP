@@ -684,6 +684,12 @@ with sync_playwright() as p:
     # given employee numbers first, because without one every row is skipped
     # and the fixed point would hold by measuring nothing (51.11).
     pf = pg.evaluate("""() => {
+      /* THE CLIENT'S ROWS, NEVER THE OFFICE'S (§313.29, and Phase B of spec
+         043): over HTTP the signed-in office person's row carries `forefront`
+         and the register may not edit it — a save touching it is refused and
+         every later switch away from home with it. Under file:// no row is
+         marked, so this list IS the register and nothing here changes. */
+      const CP = PEOPLE.filter(p => !p.forefront);
       const asExcel = sheets => {
         const out = {};
         Object.keys(sheets).forEach(k => {
@@ -704,9 +710,9 @@ with sync_playwright() as p:
          is the shape every row saved before 57 still holds. */
       GROUP.mainbus = [{ name: "Retail", at: UNIT_KEYS[1] }, { name: "Risk", at: null },
                        { name: "Distribution", at: [UNIT_KEYS[0], UNIT_KEYS[2]] }];
-      PEOPLE[0].mainbu = "Retail";
-      PEOPLE[1].mainbu = "Risk";
-      PEOPLE[3].mainbu = "Distribution";
+      CP[0].mainbu = "Retail";
+      CP[1].mainbu = "Risk";
+      CP[3].mainbu = "Distribution";
 
       /* ── THE FIXED POINT IS MEASURED WITH EVERYTHING TAKEN (87.6) ──
          Since a difference is an OFFER rather than an instruction, a plan
@@ -746,12 +752,12 @@ with sync_playwright() as p:
            nothing at all: the download carried the new value too, so both
            sides agreed and the check reported zero changes while passing.
            Measuring the wrong thing passes (50.6). */
-        const target = rows.filter(r => r["Emp ID"] === PEOPLE[2].empId)[0];
+        const target = rows.filter(r => r["Emp ID"] === CP[2].empId)[0];
         target["Job title"] = "Something else entirely";
         const untaken = planPeopleFile(rows);
-        const untakenRow = untaken.rows.filter(r => r.id === PEOPLE[2].empId)[0] || null;
+        const untakenRow = untaken.rows.filter(r => r.id === CP[2].empId)[0] || null;
         const moved = takeAll(planPeopleFile(rows));
-        const movedRow = moved.rows.filter(r => r.id === PEOPLE[2].empId)[0] || null;
+        const movedRow = moved.rows.filter(r => r.id === CP[2].empId)[0] || null;
         target["Job title"] = "";
 
         /* And the case the whole feature exists for: somebody the register has
@@ -776,9 +782,9 @@ with sync_playwright() as p:
           fixedSkipped: fixed.notices.length,
           rows: fixed.rows.length,
           people: PEOPLE.length,
-          mappedAt: (mapped.rows.filter(r => r.key === PEOPLE[0].key)[0] || {}).where || null,
-          unmappedAt: (mapped.rows.filter(r => r.key === PEOPLE[1].key)[0] || {}).where || null,
-          severalAt: (mapped.rows.filter(r => r.key === PEOPLE[3].key)[0] || {}).where || null,
+          mappedAt: (mapped.rows.filter(r => r.key === CP[0].key)[0] || {}).where || null,
+          unmappedAt: (mapped.rows.filter(r => r.key === CP[1].key)[0] || {}).where || null,
+          severalAt: (mapped.rows.filter(r => r.key === CP[3].key)[0] || {}).where || null,
           severalChoices: (SMPRules && mainbuChoices("Distribution")) || [],
           movedRows: movingRows(moved).length,
           movedWhat: movedRow ? peopleRowChanges(movedRow).join(",") : "(row missing)",
@@ -807,16 +813,16 @@ with sync_playwright() as p:
           unitHead: PEOPLE_FILE_COLS.indexOf("Unit") > -1,
           unitWritten: rows.filter(r => String(r.Unit || "").trim() !== "").length,
           unitReadsBack: (() => {
-            const t = rows.filter(r => r["Emp ID"] === PEOPLE[4].empId)[0];
+            const t = rows.filter(r => r["Emp ID"] === CP[4].empId)[0];
             return t ? planPeopleFile([t]).rows[0].where : "(row missing)";
           })(),
-          unitWasAt: personAt(PEOPLE[4]),
-          /* PEOPLE[1] is on "Risk", which points at nothing — so the mapping
+          unitWasAt: personAt(CP[4]),
+          /* CP[1] is on "Risk", which points at nothing — so the mapping
              leaves them unplaced and the column is the only thing that can
              move them. The strongest case for the feature, so it is the one
              asserted. */
           unitOverrides: (() => {
-            const t = rows.filter(r => r["Emp ID"] === PEOPLE[1].empId)[0];
+            const t = rows.filter(r => r["Emp ID"] === CP[1].empId)[0];
             if (!t) return "(row missing)";
             const was = t.Unit; t.Unit = "Treasury (function)";
             const r = planPeopleFile([t]).rows[0];
@@ -824,7 +830,7 @@ with sync_playwright() as p:
             return r ? r.where : "(no row)";
           })(),
           unitRefuses: (() => {
-            const t = rows.filter(r => r["Emp ID"] === PEOPLE[1].empId)[0];
+            const t = rows.filter(r => r["Emp ID"] === CP[1].empId)[0];
             const was = t.Unit; t.Unit = "Nowhere At All";
             const n = planPeopleFile([t]).problems.length;
             t.Unit = was;
@@ -899,10 +905,16 @@ with sync_playwright() as p:
     # Four things are asserted, and the first is the one the old code got
     # wrong: A NAME IS NEVER AN IDENTIFIER, so nothing here matches on one.
     ident = pg.evaluate("""() => {
+      /* THE CLIENT'S ROWS, NEVER THE OFFICE'S (§313.29, and Phase B of spec
+         043): over HTTP the signed-in office person's row carries `forefront`
+         and the register may not edit it — a save touching it is refused and
+         every later switch away from home with it. Under file:// no row is
+         marked, so this list IS the register and nothing here changes. */
+      const CP = PEOPLE.filter(p => !p.forefront);
       const before = PEOPLE.length;
-      const anchor = PEOPLE[0];
+      const anchor = CP[0];
       anchor.empId = "IDENT-1"; anchor.email = "ident.one@example.com";
-      const other = PEOPLE[1];
+      const other = CP[1];
       other.empId = "IDENT-2"; other.email = "ident.two@example.com";
 
       /* 1. THE LADDER. A row with no employee number and a known address is

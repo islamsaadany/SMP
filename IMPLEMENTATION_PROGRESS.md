@@ -40,9 +40,17 @@ the welcome screen whose rows are the frozen readers' own, run in a vm
 the mockup signed off with Islam's own fourth line (*Presented from the
 same place*). 44 browser assertions green, red first (3 / 15), `tsc`,
 `next build`, S7. Every page behind *Continue* answers with a holder saying
-it is the next group's. **Waiting on Islam:** what the next screen group is
-— the office's landing (`/platform` cards) or the unit's Plan page behind
-*Continue*; its mockup comes first either way.
+it is the next group's. **The rest of the rebuild is drawn as ten phases
+(`specs/043-shared-schema-rebuild/phases.md`, 2026-09-09)** at Islam's word
+— *"build a full plan with phases and let's approve it so you don't stop
+until you really need my input"* — with one recommendation and its cost:
+the frozen product's own renderers and shell are the screens, carried
+verbatim over the new API, the new client and the new routing (a verbatim
+screen is not a design change, so no mockup; any departure is a stop
+point), and six named stop points (the plan itself, a visible departure, a
+question the record does not answer, a client-blocking defect on the frozen
+build, running Raya's migration on the real data, and the cutover and the
+merge). **Waiting on Islam:** approval of that plan (A0).
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.

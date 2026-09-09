@@ -472,7 +472,11 @@ copy (§53.5). **The stylesheets are verbatim and LINKED from `public/`,
 never bundled** (`scripts/sync-css.mjs`; the bundler refuses §272.8's stray
 close-comment mark). `npm run check:door` drives the built app in headless
 Chromium (44/0, red first). Every page behind *Continue* is a holder that
-says it is the next group's. Next: the next screen group, mockup first.
+says it is the next group's. **The rest is drawn as ten phases in
+`specs/043-shared-schema-rebuild/phases.md`** (2026-09-09) — the frozen
+renderers and shell carried verbatim over the new API, client and routing,
+six named stop points — **waiting on Islam's approval (A0)**; once approved
+the phases run without stopping except at those points.
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

@@ -40514,3 +40514,86 @@ client made here, adding somebody to the team *is* adding them to the register,
 so the "who are they" list is not drawn at all — it belongs to a register the
 platform did not build, and disappears on its own as those clients stop being
 the common case.
+
+## §314 — ONE SCHEMA, EVERY CLIENT: THE REBUILD'S DATA LAYER (2026-09-09, spec 043, reversing §36 and §313)
+
+Islam, with a written decision record: *"SMP moves from a single-file HTML
+build with schema-per-tenant to Next.js with a shared schema and Postgres
+row-level security (RLS). Both changes happen together, in one rebuild."* His
+six factors, verbatim in spec 043 §1: tens of tenants approaching a hundred, no
+custom fields per client, cross-client benchmarking wanted, a possible KSA
+residency answered by a regional deployment, weekly schema change before
+launch, and deletion as a routine. On the reversal itself, in session: *"This
+choice was changed upon a discussion with Claude saying that a shared database
+will be better ... with nothing to lose from the security of the different
+schemas, given that having the users in check all the time so there is no one
+called `smo` — always people access through emails and passwords."*
+
+**THIS REVERSES §36 AND §313, AND IT IS RECORDED AS A REVERSAL** (Principle
+II). §36 recommended one schema per client on 2026-08-20; §313 built it and
+merged it on 2026-09-08; `db/platform-schema.sql`'s own header argues against a
+tenant column. None of that is deleted. What §36 did not weigh — because Islam
+had not yet said it — is cross-client reporting and a hundred tenants, and on
+those two the column wins: one query where a hundred schemas is a hundred
+queries stitched, one migration where `ensureReady` runs the set a hundred
+times on a cold start.
+
+**THE COST IS §36.3'S TRAP, PAID ON PURPOSE.** Inside a client the keys are
+short and global — `smo`, `mobile`, a capability's id, the single `org` row —
+and every client has the same ones. In one shared schema each carries the
+tenant as a composite key, and everything that finds a row by its bare id
+(`lib/rules.js`, `lib/authorize.js`, `lib/graph-diff.js`, `lib/state-io.js`) is
+**rewritten rather than copied**. The data is throwaway, so there is no
+migration; the rewrite is the price and it is stated before it is paid. Islam's
+point that sign-in is by email is right and was already true (§313.2); the
+collision he was answering is not the door's, it is the register's, and that is
+where the composite key goes.
+
+**THE PLAN AS WRITTEN WAS CORRECTED IN TWO PLACES BY THE CODE** (spec 043 §3),
+and both corrections were put to Islam before they were written down:
+
+- *"The application sets the tenant once, per connection"* cannot hold on
+  Neon. §289 and §313.34 recorded why: behind the transaction pooler a `SET`
+  lands on one backend and the next statement may run on another. The tenant
+  is set **per request**, `SET LOCAL` inside a transaction on the direct
+  connection, and dies with it. **And the database must be made to refuse
+  its own owner**: Postgres bypasses every policy for the table owner unless
+  `FORCE ROW LEVEL SECURITY` is set and the app connects as a non-owner role —
+  without both, a shared schema is *weaker* than the schemas it replaces. That
+  is the one thing proved on the real Neon key before a screen is built (spec
+  043 §5, S1). Islam's answer — *"we will work with postgres right?"* — is
+  yes, and the three mechanics are written as the design he can strike.
+- *"A user's tenant must come from their user record"* is true of a client
+  user and cannot be true of a consultant, who is on several clients. The
+  address names the tenant, the server checks the signed-in user may open it
+  (`mayOpenClient()`'s question, §313.36), and only then names it to the
+  database. **`clientSlugFrom()`'s fallback to `raya-trade` goes**: a request
+  naming no tenant is refused, never served the live one.
+
+**TWO TABLES, NOT ONE** — Islam: *"these are normally two different tables,
+one for the overall platform and the other is client based."* `users` is
+logins, platform-wide, keyed by email; `people` is a client's register,
+tenant-scoped; `tenant_users` links them with the seat, exactly as
+`account_clients.person_key` does today. Folding the register into the logins
+would give every one of Raya's 33 register rows a password state and every
+login a place on an org chart.
+
+**THE SINGLE FILE TAKES NO NEW FEATURES FROM TODAY** — *"rebuild only, I will
+pause the new features until we make the shift."* This closes the question §20
+left open on 2026-08-20 and that three weeks of §21–§313 answered the other
+way. A client-blocking defect is a correction and is asked about first.
+
+**THE CONSOLIDATION WAITS** — *"for now we need to alter the SMP then we can
+talk about the consolidation later."* ClientPlus and the Strategy Management
+System are not read for this spec; the `users` table is designed so that
+joining them later adds memberships and never columns.
+
+**WHERE, AND UNDER WHOSE RULES**: `smp-app/` is replaced on the branch,
+`main` untouched until Islam says merge on that merge; mockup sign-off per
+screen and the CSS carried verbatim (§20, D4) are unchanged — *"the rules are
+about how we interact, right?"* Yes.
+
+**NOTHING BUILT.** Spec 043 is the alignment document and goes back to Islam
+for sign-off before `plan.md`, `tasks.md` or any source exists. What comes
+first when it does is a **spike, not a page**: seven proofs on a real
+Postgres (spec 043 §5), each red before it is green.

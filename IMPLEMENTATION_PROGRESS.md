@@ -4,6 +4,18 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**Direction, 2026-09-09 — the rebuild is the work now (spec 043, §314).**
+Islam's decision record, verified against the code and aligned question by
+question: SMP moves to **Next.js with one shared Postgres schema and row-level
+security**, reversing §36 and §313's schema-per-client eight days after it
+merged. Two tables (`users` platform-wide, `people` per client), the tenant
+set per request on the direct connection, a non-owner database role, the URL
+an address the server checks. **The single file takes no new features from
+today**; a client-blocking defect is a correction and is asked about first.
+**Nothing built** — `specs/043-shared-schema-rebuild/spec.md` is the
+alignment document and waits on Islam's sign-off (D10 below); the first slice
+after it is a spike of seven proofs on a real Postgres, not a screen.
+
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** **§309 and §310 — a project saved as a draft, and theirs
@@ -478,11 +490,14 @@ Nothing proceeds past this line without an answer.
 
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
-| **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
+| **D10** | **Sign-off on spec 043** — the shared-schema data model, the isolation mechanics (per request, non-owner role, Prisma with a wrapper) and the two-table identity model, as written. | The plan and the spike are built against it; a struck line changes the schema before it exists rather than after. | spec 043, §314 |
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
 
 **Answered:**
 
+- **D5 · Go-ahead for R2 — ANSWERED 2026-09-09: rebuild only.** *"I will
+  pause the new features until we make the shift."* The single file is
+  frozen; the new app replaces `smp-app/` on the branch (§314, spec 043).
 - **D9 · The hide-from-presentation mockup — ANSWERED 2026-09-01: approved**,
   and built the same day as §233.
 
@@ -515,6 +530,16 @@ Nothing proceeds past this line without an answer.
 
 ## Agreed and specified, not built
 
+- **The rebuild's data layer — one schema, every client
+  (`specs/043-shared-schema-rebuild/spec.md`, 2026-09-09).** Reverses
+  spec 042's schema-per-client, recorded as §314. Every tenant-owned table
+  carries `tenant_id`; RLS with `FORCE` is the guarantee and no app-code
+  filter ever is; the tenant is set per request inside a transaction on the
+  direct connection; the app connects as a non-owner role; `users` and
+  `people` stay two tables linked by tenant and person; `tenants.region`
+  exists and routes nothing; deletion is one cascading statement plus a
+  catalogue count. Data is throwaway. **Waiting on D10**; then `plan.md`, then
+  a spike of seven proofs before any screen.
 - **Multi-client — one door, many clients (`specs/042-multi-client/spec.md`,
   2026-08-28).** Every decision settled with Islam in session: one door, cards
   for Forefront only, **one Postgres schema per client** (§36.2), RHI and

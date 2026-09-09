@@ -423,6 +423,22 @@ focus measures, capabilities with enhancement projects, import/export, and prese
 The prototype's demo tenant is Raya Trade (group shape); only Mobile's plan content is real,
 everything else is labelled invented.
 
+**DIRECTION SINCE 2026-09-09 (spec 043, §314): THE REBUILD IS THE WORK.**
+Islam's decision record, verified against the code and aligned question by
+question: SMP moves to **Next.js with ONE shared Postgres schema and row-level
+security**, reversing §36 and §313's schema-per-client eight days after that
+merged. `users` (platform-wide logins) and `people` (a client's register) are
+two tables linked by tenant and person; the tenant is set **per request**
+inside a transaction on the direct connection, never per connection (§289's
+lesson); the app connects as a **non-owner** role with `FORCE ROW LEVEL
+SECURITY`, or the shared schema is weaker than the schemas it replaces; the
+URL is an address the server checks, never the authority, and the
+`raya-trade` fallback goes. **The single file takes no new features from
+2026-09-09** — a client-blocking defect is a correction and is asked about
+first. `smp-app/` is replaced on the branch; `main` is untouched until Islam
+says merge. Nothing is built until spec 043 is signed off; the first slice
+after it is a spike of seven database proofs, not a screen.
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 

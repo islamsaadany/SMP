@@ -6,13 +6,13 @@
 
 ## Summary
 
-The first slice of the rebuild is **eight proofs on a real Postgres and no
+The first slice of the rebuild is **nine proofs on a real Postgres and no
 screen**. It builds the shared schema (`tenants`, `users`, `tenant_users`, and
 every tenant-owned table carrying `tenant_id` under `FORCE ROW LEVEL
 SECURITY`), the non-owner app role, the per-request tenant transaction, the
 deletion routine, the door's landing rule, and the one-off script that carries
 Raya Trade's schema across — and proves each by breaking it first (constitution
-XVI). When S1–S8 are green the data layer is settled and the screens follow,
+XVI). When S1–S9 are green the data layer is settled and the screens follow,
 page group by page group (D4), each behind a mockup. Nothing in this slice is
 served to anybody; `main` is untouched until Islam says merge, on that merge.
 
@@ -63,14 +63,14 @@ Trade's 33-person register and its closed cycles carried across.
 | **III · Edit the sources, never the built file** | The frozen single file is not touched. The shared schema is written as `smp-app/db/schema.sql` + numbered migrations, applied by a script — never by hand, never through Prisma's own migrate (research §P2). |
 | **IV · Verify by walking** | This slice has no page to walk. Every proof is a script that measures and prints; `qa.py` stays green on the frozen build throughout, because nothing in it changes. |
 | **V · Derived, never stored** | Untouched — no scoring surface. The graph readers are ported later, with the same arithmetic. |
-| **VI · Follow what the platform already does** | The door is `lib/auth.js` ported (scrypt, httpOnly cookie, 30-day session, §43's rate limits); the spike scripts are `scripts/test-*.js`'s shape; the pooler is modelled the way `test-cold-starts.js` models it; the save keeps §210's change-list contract. |
+| **VI · Follow what the platform already does** | The door is `lib/auth.js` ported (scrypt, httpOnly cookie, 30-day session, §43's rate limits); the spike scripts are `scripts/test-*.js`'s shape; the pooler is modelled the way `test-cold-starts.js` models it; the save keeps §210's change-list contract and §241's row-addressed writer becomes its only writer (§314.2). |
 | **VIII · Islam decides content** | No content in this slice. `tenants.region` holds one value he has not yet named (spec §4.5). |
 | **IX · One copy of a rule** | `lib/rules.js` is ported as one TypeScript module both sides import; row addressing gains `tenantId`. The spike touches only its tenant-addressing seam. |
 | **X · The server decides** | The tenant is resolved from the session's memberships on the server (contracts/tenant-request.md); the slug never reaches SQL; the database refuses cross-tenant rows whatever the app asks (S2). |
-| **XI · A record a save can erase is not a record** | The save's clear becomes `DELETE … WHERE tenant_id = $1` on the 33 graph tables **only** (data-model.md); `change_log`, chat, messages, drafts, push, asks and declarations are outside the clear, as today. |
+| **XI · A record a save can erase is not a record** | A save writes only the rows its change list names — no statement clears a table (research §P3, §314.2); `change_log`, chat, messages, drafts, push, asks and declarations are outside the clear, as today. |
 | **XII · A reader never creates** | The spike's readers return frozen empties; `readState()`'s port keeps that contract. |
 | **XIII / XIV / XV** | No screen in this slice; re-checked when the first one is drawn. |
-| **XVI · Prove a check by breaking it** | Each of S1–S8 has a named break in contracts/spike.md (`--break=<name>`) that must turn it red before the green run counts; the schema check S5 is run against a table added without `tenant_id` on purpose. |
+| **XVI · Prove a check by breaking it** | Each of S1–S9 has a named break in contracts/spike.md (`--break=<name>`) that must turn it red before the green run counts; the schema check S5 is run against a table added without `tenant_id` on purpose. |
 
 **No violations to justify.** One cost accepted and recorded rather than
 argued away: **the rewrite of every bare-id reader** (§314's stated price) —
@@ -89,7 +89,7 @@ specs/043-shared-schema-rebuild/
 ├── data-model.md        # the shared schema: platform tables, the 42 tenant-owned tables, keys
 ├── contracts/
 │   ├── tenant-request.md   # how a request learns its tenant; the door; the save
-│   └── spike.md            # the eight proofs: script, arguments, what it prints, its break
+│   └── spike.md            # the nine proofs: script, arguments, what it prints, its break
 ├── quickstart.md        # running the spike locally, and S1 against Neon
 └── tasks.md             # /speckit-tasks — not created here
 ```
@@ -137,7 +137,7 @@ it (research §P2).
 
 ## Delivery order
 
-One slice, eight proofs, in the order each depends on the one before. Nothing
+One slice, nine proofs, in the order each depends on the one before. Nothing
 is a screen.
 
 1. **S1 · the role and `FORCE`** — `db/roles.sql` and one tenant table with the
@@ -164,8 +164,13 @@ is a screen.
 9. **S8 · Raya** — `scripts/migrate-raya.mjs` against a copy of `raya_trade`;
    counts, a plan byte-identical through `state-io.ts`, a save round-tripping, a
    migrated sign-in still working.
+10. **S9 · the row-addressed save** — `lib/state-io.ts`'s write side: a
+    one-field change list leaves every other row's `xmin` untouched; add,
+    remove and reorder write only their rows; an unaddressable shape is a 400.
+    (§314.2 — the enhancement Islam asked for; the wipe-and-rewrite writer is
+    not carried over.)
 
-After 9: `tasks.md` for the first screen group, which begins with its mockup.
+After 10: `tasks.md` for the first screen group, which begins with its mockup.
 
 ## Complexity Tracking
 

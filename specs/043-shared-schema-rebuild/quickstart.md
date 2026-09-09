@@ -69,6 +69,6 @@ forward and neither is taken without a decision.
 
 ## 5 · What green means
 
-S1–S8 green, each having been red under its `--break`, is the data layer
+S1–S9 green, each having been red under its `--break`, is the data layer
 settled. Nothing is served; the frozen build keeps every client. Next is
 `tasks.md` for the first screen group, which starts with its mockup.

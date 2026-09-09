@@ -2,9 +2,12 @@
 
 **Status:** decisions agreed 2026-09-09 (Islam, in session, question by
 question, on his own written decision record); **signed off the same day**
-(§314.1); `plan.md` written 2026-09-09 with its four plan-stage choices in
-`research.md` §P1–P7, which go back to Islam before `tasks.md`. **Nothing
-built**, and no source is touched before then (constitution I).
+(§314.1); `plan.md` written 2026-09-09; its four plan-stage choices (`research.md`
+§P1–P7) **answered by Islam the same day** — three as written, and the save
+enhanced: every box still saves itself, and the server writes only the rows
+the change list names (§314.2, research §P3, spike S9). Next: `tasks.md`, then
+the spike. **Nothing built**, and no source is touched before then
+(constitution I).
 
 **Reverses:** §36 (schema per tenant, recommended 2026-08-20) and §313 / spec
 042 (schema per tenant, built and merged 2026-09-08). Recorded as a reversal in

@@ -194,26 +194,55 @@ Islam can strike one in a sentence (constitution I). None touches a screen.
   being the guarantee); one Prisma client per tenant (a pool per tenant does
   not scale to a hundred and re-creates §36's per-schema cost).
 
-## P3 · The shape of the save — the change list stays
+## P3 · The shape of the save — the change list stays, and it writes only its rows
 
-- **Decision:** the API keeps §210/§215's contract: the client posts the list
-  of changes it made and the server **applies it onto the stored graph** under
-  the tenant's transaction, authorises the diff against the stored world
-  (constitution X), and writes. `POST /api/state` becomes a route handler
-  with the same body. §240's lock becomes **per tenant**:
-  `pg_advisory_xact_lock(420043, hashtext($tenantId))` — today's single
-  constant would serialise every client's saves behind each other.
-- **Rationale:** `lib/graph-diff.js` and `lib/authorize.js` carry over
-  (spec §4.8); the browser code that produces the list is what the ported
-  screens will run at first; a per-row API is a screen-by-screen rewrite that
-  D4 says happens page group by page group. §288's non-blocking clear is kept
-  by construction: the clear is `DELETE … WHERE tenant_id = $1` on the 33
-  graph tables, ROW EXCLUSIVE, inside the same transaction.
-- **Alternatives considered:** per-row endpoints from day one (every ported
-  screen would need its own before it could save anything; the change list
-  lets a screen port with its save intact). Recorded for later: a screen may
-  gain a per-row endpoint when it is ported, and the change list retires when
-  the last one has.
+*Islam, 2026-09-09, asked in plain words whether "enhanced" saving meant each
+box going on saving itself with the server writing only the rows those boxes
+belong to, or a Save button per page: "yes that's what I mean by enhanced."
+Recorded as §314.2. The first draft of this section kept today's wipe-and-
+rewrite as the writer; that half is reversed here and the reversal is kept
+(constitution II).*
+
+- **Decision:** the wire contract is §210/§215's: every box saves on `change`
+  (blur), and the client posts the list of changes it made. The server applies
+  it onto the stored graph under the tenant's transaction and authorises the
+  diff against the stored world (constitution X) exactly as today. **What
+  changes is the writer**: the save writes **only the rows the change list
+  names** — §241's incremental writer is the *only* writer, extended to every
+  change shape the differ can produce, and the whole-tenant `DELETE …` then
+  re-insert (`writeState`) is **not carried over** as a save path. A change
+  shape the writer cannot address row by row is a 400 with the shape named,
+  never a silent fallback to a full rewrite. §240's lock becomes **per
+  tenant**: `pg_advisory_xact_lock(420043, hashtext($tenantId))` — today's
+  single constant would serialise every client's saves behind each other —
+  and it is kept because two saves naming the SAME row still read-modify-write
+  the graph they are authorised against.
+- **Rationale:** the delays and the "somebody else's save undid mine" faults
+  (§240, §282, §288) all come from the writer, not the wire: a save of one
+  target rewriting 33 tables is where a colleague's row in another table can
+  be lost to a stale tab, and where the clear's lock reaches readers. Writing
+  the named rows alone makes a one-box save touch one row, take milliseconds,
+  and never collide with a colleague's box in another row; two people on the
+  SAME box stay last-write-wins and §258's peek goes on warning about it.
+  `lib/graph-diff.js` and `lib/authorize.js` carry over unchanged (spec §4.8);
+  what is rewritten is `lib/state-io.js`'s write side, once, in the data
+  layer — no screen is touched, which is what keeps D4's page-group cutover
+  intact. §288's argument holds by construction: no statement in a save takes
+  more than ROW EXCLUSIVE.
+- **Cost, stated:** §241 today falls back to the full writer for settings, the
+  register, reorders and add/remove; every one of those shapes now needs a
+  row-addressed write before the first screen that makes it can save. That is
+  the spike's S8 plus one proof (S9, contracts/spike.md): a change list naming
+  one field is proved to leave every other row's `xmin` untouched.
+- **Alternatives considered:** keep the full rewrite as the fallback (Islam's
+  own reading of today's fault — rejected, because a fallback that rewrites
+  everything is exactly the path that loses work under a stale tab, and it is
+  the common path, not the rare one); per-row endpoints from day one (every
+  ported screen would need its own before it could save anything; the change
+  list lets a screen port with its save intact — recorded for later, when a
+  screen is ported it may gain one); a Save button per page (offered to Islam
+  as the alternative and not taken: a box that only saves on a press is typed
+  work that can be lost, §219, §170).
 
 ## P4 · What the checks become — the same two kinds, pointed at Next
 

@@ -54,9 +54,20 @@ Inside `withTenant`:
 3. `applyChanges(stored, changes)` → the incoming world (§210/§215).
 4. `authorize(stored, incoming, actor)` → allowed, or **403** with the same
    verdict shape as today (`{ refused: [{why, kind, target, rows}] }`, §184).
-5. `writeState(incoming)`: `DELETE … WHERE tenant_id = $1` on the 33 graph
-   tables, then the inserts; `change_log` written from the diff (§42).
-6. COMMIT. Response `{ ok, wrote, at }`.
+5. `writeChanges(stored, incoming, changes)`: **only the rows the change list
+   names** are written — an `UPDATE` of the field on its row, an `INSERT` for
+   a row that appeared, a `DELETE … WHERE tenant_id = $1 AND <key>` for one
+   that went, a row's `idx` rewritten for a reorder (§241 as the only writer,
+   research §P3, §314.2). No statement in a save clears a table; a change
+   shape the writer cannot address is a **400** naming it, never a full
+   rewrite. `change_log` written from the diff (§42).
+6. COMMIT. Response `{ ok, wrote: "rows", rows: <n>, at }`.
+
+A save of one field therefore holds one row lock for one transaction; two
+saves naming different rows never wait on each other beyond the per-tenant
+advisory lock, and a reader never waits on a save (§288, now by construction).
+S9 proves it: after a one-field save, every other row of the tenant carries
+the `xmin` it had before.
 
 `GET /api/<slug>/state` reads the graph; `?since=&target=` keeps §258's peek
 as one indexed query on `change_log (tenant_id, at)`.

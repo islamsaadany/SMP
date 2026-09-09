@@ -40642,3 +40642,51 @@ was 44 and is **42** — `push_keys` holds one VAPID pair per deployment (§231)
 and belongs with the door on the platform side, and `_sql_migrations` is a
 registry, not data. The count is in `specs/043-shared-schema-rebuild/data-model.md`
 table by table; nothing decided here moves.
+
+## §314.2 — THE SAVE IS ENHANCED: EVERY BOX STILL SAVES ITSELF, AND THE SERVER WRITES ONLY ITS ROWS (2026-09-09)
+
+The four plan-stage choices (`research.md` §P1–P7) went back to Islam in
+plain words. Three came back as written — no sign-in library, Prisma with a
+wrapper and `pg` if S6 fails, the checks pointed at Next. On the second he
+asked *"aren't we moving to postgres?"*, and the answer is yes and nothing
+moves: Postgres on Neon is the database, Prisma is only the code the app uses
+to talk to it, and the choice was library, never database.
+
+The third is a decision: *"saving should be nehanced I bleieve as it now saves
+not by page but by cell or box."* Asked whether he meant each box going on
+saving itself with the server writing only the rows those boxes belong to, or
+a Save button per page — *"yes that's what I mean by enhanced."*
+
+**HE IS DESCRIBING THE WRITER, NOT THE WIRE, AND THAT IS WHERE THE FAULTS
+HAVE BEEN.** Today every box saves the moment it is left (§35, §219) and the
+browser posts only what changed (§210); then the server clears the tenant's
+33 graph tables and writes the whole graph back for most kinds of change —
+§240 had to lock it, §282 and §288 had to stop the clear blocking readers,
+and a stale tab's full rewrite is how a colleague's row in another table was
+lost. §241 built the row-addressed writer and left the full rewrite as its
+fallback for settings, the register, reorders and add/remove — the common
+shapes, not the rare ones.
+
+**So research §P3 is reversed in its second half and the reversal is kept**
+(Principle II): the change list stays the contract, and **the row-addressed
+writer becomes the only writer**, extended to every shape the differ can
+produce. A one-box save touches one row, holds one row lock for one
+transaction, and cannot collide with a colleague's box in another row; two
+people on the same box stay last-write-wins and §258's peek goes on saying
+so. No statement in a save clears a table, so §288 holds by construction. A
+shape the writer cannot address is a **400 naming it**, never a silent full
+rewrite — the silent fallback is the fault, and a refusal that names its shape
+is the finding a check can see.
+
+**The alternative was offered and not taken**: a Save button per page is
+typed work that can be lost (§219, §170), and it is not what he meant.
+
+**The cost is stated**: every shape §241 falls back on today must be written
+row by row before the first screen that makes it can save, which is one more
+proof in the spike — **S9**, a one-field change list proved to leave every
+other row's `xmin` untouched, and an unaddressable shape proved to write
+nothing. Nine proofs now. `contracts/tenant-request.md` §3 and
+`contracts/spike.md` carry it; `plan.md`'s delivery order ends on it.
+
+**Still nothing built.** Next is `tasks.md`, then the spike; `main` untouched
+until Islam says merge, on that merge.

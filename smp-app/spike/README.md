@@ -84,3 +84,21 @@ page this proof exists to catch.
 green → 11 ok: findMany · $queryRaw reads A · create under A · create under
 B refused · updateMany · deleteMany · two at once · $executeRaw · the
 unextended client reads no setting · sees an EMPTY table · B untouched.
+
+### S7 · the door (2026-09-09)
+`lib/auth.ts` is `lib/auth.js` rule for rule (scrypt `s1:` hashes verify
+unchanged, 30-day sessions on `users.id`, 8/25 in 15 minutes checked before
+the password, failures only, cleared on success, a change ending the OTHER
+sessions); `lib/door.ts` is `platform-rules.js`'s `clientState`/`mayOpenClient`
+ported with `landingFor`.
+`--break=follow-slug` → RED 14 ok, 1 failed: the client user at B's slug is
+let into B.
+`--break=two-refusals` → RED 13 ok, 2 failed: refused answers 403 *"You are
+not on that client"* where nonexistent answers 404 — the two can be told apart.
+green → 15 ok: sign-in · the wrong password's one sentence · the token
+resolves · client user at B → 302 /a-co · at their own slug in · office user
+not on B refused · nonexistent byte-identical · client user at nonexistent
+sent home · the admin opens B holding `super` · must_change blocks the tenant
+route and not the password route · a change clears it and keeps THIS
+session · the 9th attempt refused with the right password · a success clears
+the failures · no session → the same refusal, no default tenant.

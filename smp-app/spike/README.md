@@ -63,3 +63,24 @@ is measured.
 FK and every table keeps its rows (45 failed, named).
 green → 4 ok: the delete ran · 0 rows for A in every one of 42 tables · B's
 counts unchanged · the tenants row gone.
+
+### S6 · the Prisma wrapper (2026-09-09) — Prisma stays; two findings
+The extension is Prisma's own documented RLS shape: every model operation
+AND every raw query runs as the second statement of a batch `$transaction`
+whose first is `set_config('app.tenant_id', $1, true)`. An interactive
+transaction does not bind `query(args)` (the first build tried it and read
+0 rows); a batch does. **What it does not give**: several operations in ONE
+transaction — the save with its lock goes through `withTenant()` on pg, said
+in `lib/prisma.ts`.
+**Finding, and a correction to the policy (§314.3):** on a reused connection
+a custom setting that has ever been set reads back as `''` after its
+transaction ends, not NULL — so the unextended client errored `22P02` rather
+than reading an empty world. Both fail closed; a safe failure should be one
+thing, so the policy is `NULLIF(current_setting(…, true), '')::uuid` on
+every table, data-model.md corrected, S1–S5 re-run green on it.
+`--break=escape` → RED 10 ok, 1 failed: *"updateMany writes A's row — count 0"*
+— the escaped operation silently wrote nothing, which is exactly the blank
+page this proof exists to catch.
+green → 11 ok: findMany · $queryRaw reads A · create under A · create under
+B refused · updateMany · deleteMany · two at once · $executeRaw · the
+unextended client reads no setting · sees an EMPTY table · B untouched.

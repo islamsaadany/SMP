@@ -718,6 +718,13 @@ ALTER TABLE tenant_users
 -- Every table in public that is not on the platform list carries tenant_id
 -- and gets ENABLE, FORCE, an index and the one policy. A table added later is
 -- covered on the next apply. S5 (lib/schema-check.ts) asserts nothing slipped.
+--
+-- NULLIF(…, ''): a custom setting that has EVER been set on a backend reads
+-- back as '' once its transaction ends, not as NULL — so on a reused
+-- connection a query outside withTenant would error 22P02 instead of reading
+-- an empty world (found by S6, and by S3's first pooler model). Both fail
+-- closed; one of them is a blank page and the other a 500, and a safe failure
+-- should be one thing. NULLIF makes '' and unset the same: nothing visible.
 DO $$
 DECLARE
   t text;
@@ -736,8 +743,8 @@ BEGIN
                    WHERE c.relname = t AND p.polname = 'tenant_rows') THEN
       EXECUTE format(
         'CREATE POLICY tenant_rows ON %I FOR ALL ' ||
-        'USING (tenant_id = current_setting(''app.tenant_id'', true)::uuid) ' ||
-        'WITH CHECK (tenant_id = current_setting(''app.tenant_id'', true)::uuid)', t);
+        'USING (tenant_id = NULLIF(current_setting(''app.tenant_id'', true), '''')::uuid) ' ||
+        'WITH CHECK (tenant_id = NULLIF(current_setting(''app.tenant_id'', true), '''')::uuid)', t);
     END IF;
   END LOOP;
 END $$;

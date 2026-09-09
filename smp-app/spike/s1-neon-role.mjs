@@ -72,8 +72,8 @@ await owner.query("CREATE TABLE " + T + " (tenant_id uuid NOT NULL, v text NOT N
 await owner.query("ALTER TABLE " + T + " ENABLE ROW LEVEL SECURITY");
 if (!noForce) await owner.query("ALTER TABLE " + T + " FORCE ROW LEVEL SECURITY");
 await owner.query("CREATE POLICY tenant_rows ON " + T + " FOR ALL " +
-  "USING (tenant_id = current_setting('app.tenant_id', true)::uuid) " +
-  "WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid)");
+  "USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) " +
+  "WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)");
 await owner.query("GRANT SELECT, INSERT, UPDATE, DELETE ON " + T + " TO smp_app");
 await owner.query("INSERT INTO " + T + " VALUES ($1, 'a'), ($2, 'b')", [A, B]);
 

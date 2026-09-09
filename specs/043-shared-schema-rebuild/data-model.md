@@ -31,13 +31,22 @@ SECURITY`, and one policy for all four verbs:
 
 ```sql
 CREATE POLICY tenant_rows ON <t>
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 ```
 
 With no setting `current_setting(…, true)` is null, the comparison is null,
 and the table is empty to the caller. That is the safe failure spec §4.3
 relies on, and S6 asserts it rather than assuming it.
+
+*Corrected at the spike, 2026-09-09 (§314.3):* the spec's text compared
+against `current_setting(…, true)::uuid` alone. A custom setting that has
+ever been set on a backend reads back as **`''`, not NULL**, once its
+transaction ends — so on a reused connection a query outside `withTenant`
+errored `22P02` instead of reading an empty world (S6 found it; S3's first
+pooler model, built on `RESET ALL`, had met the same `''`). Both fail closed,
+but one is a blank page and the other a 500; `NULLIF(…, '')` makes unset and
+`''` the same thing: nothing visible.
 
 **The spec's count was 44; it is 42.** The 47 live tables less `credentials`,
 `sessions` and `login_attempts` (the door, platform-side) is 44 only if

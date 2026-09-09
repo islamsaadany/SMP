@@ -16,7 +16,7 @@ const db = await makeDb();
 try {
   await db.owner.query("CREATE TABLE " + T + " (tenant_id uuid NOT NULL, v text NOT NULL)");
   await db.owner.query("ALTER TABLE " + T + " ENABLE ROW LEVEL SECURITY; ALTER TABLE " + T + " FORCE ROW LEVEL SECURITY");
-  await db.owner.query("CREATE POLICY tenant_rows ON " + T + " FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid) WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid)");
+  await db.owner.query("CREATE POLICY tenant_rows ON " + T + " FOR ALL USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)");
   await db.owner.query("GRANT SELECT, INSERT, UPDATE, DELETE ON " + T + " TO smp_app");
   await db.owner.query("INSERT INTO " + T + " VALUES ($1, 'a'), ($2, 'b')", [A, B]);
 

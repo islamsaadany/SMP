@@ -91,7 +91,7 @@ specs/043-shared-schema-rebuild/
 │   ├── tenant-request.md   # how a request learns its tenant; the door; the save
 │   └── spike.md            # the nine proofs: script, arguments, what it prints, its break
 ├── quickstart.md        # running the spike locally, and S1 against Neon
-└── tasks.md             # /speckit-tasks — not created here
+└── tasks.md             # 72 tasks, one phase per proof in the delivery order below (2026-09-09)
 ```
 
 ### Source code (repository root)

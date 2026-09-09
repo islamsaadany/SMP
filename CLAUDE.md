@@ -448,8 +448,9 @@ spec's first 44 — `push_keys` is per deployment), two contracts and a
 (§314.2)**: every box still saves on blur and posts §210's change list, but the
 server **writes only the rows the list names** — §241's row-addressed writer
 is the only writer, the wipe-and-rewrite `writeState` is not carried over, an
-unaddressable shape is a 400 and never a silent full rewrite (spike S9). Next:
-`tasks.md`, then nine proofs.
+unaddressable shape is a 400 and never a silent full rewrite (spike S9).
+`tasks.md` written 2026-09-09 (72 tasks, one phase per proof). Next: the nine
+proofs, red first.
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

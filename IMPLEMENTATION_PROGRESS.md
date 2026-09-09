@@ -22,8 +22,10 @@ fails, the change-list save with a per-tenant lock, the checks pointed at
 Next) are in `research.md` §P1–P7 — **answered by Islam 2026-09-09**: three as
 written, and the save **enhanced** at his word (§314.2): every box still saves
 itself, and the server writes only the rows the change list names — the
-wipe-and-rewrite writer is not carried over (spike S9, nine proofs now). Next:
-`tasks.md`, then the spike.
+wipe-and-rewrite writer is not carried over (spike S9, nine proofs now).
+`tasks.md` written 2026-09-09 (72 tasks, one phase per proof). Next: the
+spike, red first — S1 locally, then Islam runs S1 against Neon from his own
+shell (never a pasted URL).
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.

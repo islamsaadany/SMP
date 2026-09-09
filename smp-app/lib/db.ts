@@ -14,6 +14,10 @@
    stay as the fallback (a project holding only those must still start) and
    one line names which was used, never its value. */
 import pg from "pg";
+import { createRequire } from "node:module";
+/* numeric comes back as a Number, not a string — the frozen product's own
+   type tuning, applied once per process (lib/state-io.js tuneTypes). */
+createRequire(import.meta.url)("./graph-io.cjs").tuneTypes(pg);
 
 const DIRECT = ["DATABASE_URL_UNPOOLED", "POSTGRES_URL_NON_POOLING"];
 const POOLED = ["DATABASE_URL", "POSTGRES_URL", "POSTGRES_PRISMA_URL", "NEON_DATABASE_URL"];

@@ -124,7 +124,7 @@ CREATE TABLE push_keys (
 -- read off a real database rather than off 44 migration files.
 
 CREATE TABLE org (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   org_name text NOT NULL,
   horizon text NOT NULL DEFAULT '',
   as_of_quarter integer NOT NULL DEFAULT 2,
@@ -136,7 +136,7 @@ CREATE TABLE org (
 );
 
 CREATE TABLE cycle (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   name text NOT NULL DEFAULT '',
   reward_at numeric NOT NULL DEFAULT 100,
   locked boolean NOT NULL DEFAULT false,
@@ -146,7 +146,7 @@ CREATE TABLE cycle (
 );
 
 CREATE TABLE review (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   name text NOT NULL DEFAULT '',
   from_label text NOT NULL DEFAULT '',
   to_label text NOT NULL DEFAULT '',
@@ -161,13 +161,13 @@ CREATE TABLE review (
 );
 
 CREATE TABLE prior_cycle (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   data jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id)
 );
 
 CREATE TABLE group_clauses (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   idx integer NOT NULL,
   label text NOT NULL DEFAULT '',
   text_ text NOT NULL DEFAULT '',
@@ -176,7 +176,7 @@ CREATE TABLE group_clauses (
 );
 
 CREATE TABLE group_key_objectives (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   idx integer NOT NULL,
   id text,
   name text NOT NULL DEFAULT '',
@@ -192,7 +192,7 @@ CREATE TABLE group_key_objectives (
 );
 
 CREATE TABLE themes (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   idx integer NOT NULL,
   ab text NOT NULL,
   name text NOT NULL DEFAULT '',
@@ -202,7 +202,7 @@ CREATE TABLE themes (
 );
 
 CREATE TABLE bands (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   idx integer NOT NULL,
   key text NOT NULL,
   floor integer NOT NULL,
@@ -211,7 +211,7 @@ CREATE TABLE bands (
 );
 
 CREATE TABLE history (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   idx integer NOT NULL,
   name text NOT NULL DEFAULT '',
   group_score numeric,
@@ -221,7 +221,7 @@ CREATE TABLE history (
 );
 
 CREATE TABLE companies (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   key text NOT NULL,
   idx integer NOT NULL,
   name text NOT NULL DEFAULT '',
@@ -233,7 +233,7 @@ CREATE TABLE companies (
 );
 
 CREATE TABLE units (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   key text NOT NULL,
   idx integer NOT NULL,
   company text,
@@ -249,7 +249,7 @@ CREATE TABLE units (
 );
 
 CREATE TABLE functions (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   key text NOT NULL,
   idx integer NOT NULL,
   name text NOT NULL DEFAULT '',
@@ -263,7 +263,7 @@ CREATE TABLE functions (
 );
 
 CREATE TABLE people (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   key text NOT NULL,
   idx integer NOT NULL,
   name text NOT NULL DEFAULT '',
@@ -276,7 +276,7 @@ CREATE TABLE people (
 );
 
 CREATE TABLE labels (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   key text NOT NULL,
   idx integer NOT NULL,
   internal text NOT NULL DEFAULT '',
@@ -288,7 +288,7 @@ CREATE TABLE labels (
 );
 
 CREATE TABLE weighting_factors (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   key text NOT NULL,
   idx integer NOT NULL,
   name text NOT NULL DEFAULT '',
@@ -300,7 +300,7 @@ CREATE TABLE weighting_factors (
 );
 
 CREATE TABLE capabilities (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   idx integer NOT NULL,
   name text NOT NULL DEFAULT '',
@@ -311,7 +311,7 @@ CREATE TABLE capabilities (
 );
 
 CREATE TABLE projects (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   cap_id text NOT NULL,
   idx integer NOT NULL,
@@ -328,7 +328,7 @@ CREATE TABLE projects (
 );
 
 CREATE TABLE deliverables (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   project_id text NOT NULL,
   idx integer NOT NULL,
@@ -343,7 +343,7 @@ CREATE TABLE deliverables (
 );
 
 CREATE TABLE outcomes (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   project_id text NOT NULL,
   idx integer NOT NULL,
@@ -360,7 +360,7 @@ CREATE TABLE outcomes (
 );
 
 CREATE TABLE milestones (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   project_id text NOT NULL,
   idx integer NOT NULL,
@@ -377,7 +377,7 @@ CREATE TABLE milestones (
 );
 
 CREATE TABLE cap_key_objectives (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   cap_id text NOT NULL,
   idx integer NOT NULL,
@@ -395,7 +395,7 @@ CREATE TABLE cap_key_objectives (
 );
 
 CREATE TABLE unit_key_objectives (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   unit_key text NOT NULL,
   idx integer NOT NULL,
@@ -413,7 +413,7 @@ CREATE TABLE unit_key_objectives (
 );
 
 CREATE TABLE pillars (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   unit_key text,
   idx integer NOT NULL,
@@ -433,7 +433,7 @@ CREATE TABLE pillars (
 CREATE INDEX pillars_fn_key_idx ON pillars (tenant_id, fn_key);
 
 CREATE TABLE measures (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   pillar_id text NOT NULL,
   idx integer NOT NULL,
@@ -452,7 +452,7 @@ CREATE TABLE measures (
 );
 
 CREATE TABLE tactics (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   pillar_id text NOT NULL,
   idx integer NOT NULL,
@@ -472,7 +472,7 @@ CREATE TABLE tactics (
 );
 
 CREATE TABLE plan_archives (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id text NOT NULL,
   idx integer NOT NULL,
   kind text NOT NULL,
@@ -488,7 +488,7 @@ CREATE TABLE plan_archives (
 );
 
 CREATE TABLE unit_clauses (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   unit_key text NOT NULL,
   idx integer NOT NULL,
   label text NOT NULL DEFAULT '',
@@ -499,7 +499,7 @@ CREATE TABLE unit_clauses (
 );
 
 CREATE TABLE swot_items (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   unit_key text NOT NULL,
   cat text NOT NULL,
   idx integer NOT NULL,
@@ -510,7 +510,7 @@ CREATE TABLE swot_items (
 );
 
 CREATE TABLE unit_roles (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   unit_key text NOT NULL,
   head text,
   custodian text,
@@ -518,7 +518,7 @@ CREATE TABLE unit_roles (
 );
 
 CREATE TABLE weighting_rows (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   unit_key text NOT NULL,
   idx integer NOT NULL,
   unit_name text,
@@ -528,14 +528,14 @@ CREATE TABLE weighting_rows (
 );
 
 CREATE TABLE ko_weights (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   unit_key text NOT NULL,
   weights jsonb NOT NULL,
   PRIMARY KEY (tenant_id, unit_key)
 );
 
 CREATE TABLE weighting_values (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   unit_key text NOT NULL,
   factor_key text NOT NULL,
   value numeric,
@@ -543,7 +543,7 @@ CREATE TABLE weighting_values (
 );
 
 CREATE TABLE access_grants (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   role_key text NOT NULL,
   page_key text NOT NULL,
   grant_ text NOT NULL,
@@ -552,7 +552,7 @@ CREATE TABLE access_grants (
 );
 
 CREATE TABLE bu_declarations (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   person_key text NOT NULL,
   at text NOT NULL,
   declared_on timestamptz NOT NULL DEFAULT now(),
@@ -562,7 +562,7 @@ CREATE TABLE bu_declarations (
 );
 
 CREATE TABLE change_log (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
   at timestamptz NOT NULL DEFAULT now(),
   person_key text NOT NULL,
@@ -581,7 +581,7 @@ CREATE INDEX change_log_person ON change_log (tenant_id, person_key, at DESC);
 CREATE INDEX change_log_email ON change_log (tenant_id, email, at DESC);
 
 CREATE TABLE chat_threads (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   person_key text NOT NULL,
   person_name text,
   started_at timestamptz NOT NULL DEFAULT now(),
@@ -598,7 +598,7 @@ CREATE INDEX chat_threads_waiting ON chat_threads (tenant_id, waiting, last_at D
 CREATE INDEX chat_threads_last ON chat_threads (tenant_id, last_at DESC);
 
 CREATE TABLE chat_messages (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
   person_key text NOT NULL,
   at timestamptz NOT NULL DEFAULT now(),
@@ -622,7 +622,7 @@ CREATE INDEX chat_messages_flag ON chat_messages (tenant_id, flag, at DESC) WHER
 CREATE INDEX chat_messages_chase ON chat_messages (tenant_id, at) WHERE ((chase_html IS NOT NULL) AND (emailed_to IS NULL));
 
 CREATE TABLE messages (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
   sent_at timestamptz NOT NULL DEFAULT now(),
   by_key text NOT NULL,
@@ -643,7 +643,7 @@ CREATE TABLE messages (
 CREATE INDEX messages_sent_at ON messages (tenant_id, sent_at DESC);
 
 CREATE TABLE message_drafts (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
   by_key text NOT NULL,
   by_name text,
@@ -660,7 +660,7 @@ CREATE TABLE message_drafts (
 CREATE INDEX message_drafts_updated ON message_drafts (tenant_id, updated_at DESC);
 
 CREATE TABLE message_recipients (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
   message_id bigint NOT NULL,
   person_key text,
@@ -676,7 +676,7 @@ CREATE TABLE message_recipients (
 CREATE INDEX message_recipients_msg ON message_recipients (tenant_id, message_id);
 
 CREATE TABLE push_subscriptions (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   endpoint text NOT NULL,
   person_key text NOT NULL,
   p256dh text NOT NULL,
@@ -688,7 +688,7 @@ CREATE TABLE push_subscriptions (
 CREATE INDEX push_subscriptions_person ON push_subscriptions (tenant_id, person_key);
 
 CREATE TABLE assistant_asks (
-  tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
   at timestamptz NOT NULL DEFAULT now(),
   asker_key text NOT NULL,

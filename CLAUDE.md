@@ -479,8 +479,12 @@ six named stop points — **approved by Islam 2026-09-09 (A0)** with one
 constraint: database work he runs goes through **Neon's SQL editor only**,
 so every such step is handed as SQL to paste or runs at deploy from Vercel's
 own environment, and one that fits neither is said rather than assumed
-(§315.1). The phases run without stopping except at those points, Phase A
-first.
+(§315.1). The phases run without stopping except at those points. **Phase A is
+built (§315.2)**: `smp-app/lib/state-api.ts` behind `app/api/[slug]/state`,
+the office row by the frozen rules with no membership written for a seat
+held by rule, a malformed change list a 400, and the lock's remaining job
+under the row writer named — the maps on one row — with `checks/state-api.mjs`
+87/0 and six red runs (`npm run check:state`, `check:state:red`).
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

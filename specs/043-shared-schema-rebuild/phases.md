@@ -118,7 +118,7 @@ begins.
 ## 4 · The boxes
 
 - [x] A0 Plan approved by Islam (2026-09-09: *"agreed ... proceed"*, with the Neon constraint below).
-- [ ] A The state API — read, save, peek, history; harnesses green red-first.
+- [x] A The state API — read, save, peek, history; harnesses green red-first (§315.2, 2026-09-09: `check:state` 87/0, six red runs).
 - [ ] B The shell on the new stack — build-shell, sync.ts, routing, CSP, /platform; `qa.py` at Next green.
 - [ ] C Strategy checks green against Next.
 - [ ] D Performance and Reporting checks green against Next.

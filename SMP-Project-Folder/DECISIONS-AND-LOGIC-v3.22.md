@@ -40944,3 +40944,68 @@ than dressed up as one that does. `main` untouched; the phases run without
 stopping except at B–F.
 
 ---
+
+### §315.2 — Phase A: the state API on the shared schema (2026-09-09)
+
+`api/state.js` carried onto the new stack as `smp-app/lib/state-api.ts`
+behind `app/api/[slug]/state/route.ts`: `GET` the graph for the door's tenant
+with §258's `?since` peek and §262's `?log` read, `POST` the change list
+through S9's save (`lib/save.ts` — §240's per-tenant lock, §210's apply onto
+the STORED graph, the carried authoriser, the row-addressed writer, the
+record from the same diff). The route is thin and the check drives the same
+module through it over HTTP, never a copy.
+
+**THE OFFICE ARRIVES ON THE REGISTER BY THE FROZEN RULES, WITH ONE
+DEPARTURE.** `ensureOfficeRow` is ported in order — a row the membership
+names is adopted and never rewritten (§313.29); no membership, and the
+register is asked by address, exactly one active row or refused (§313.32);
+nobody by address, and a row is minted only where the platform built the
+register or it is empty (§313.30/31), otherwise the person is told they are
+not on it rather than invented. The departure: **no membership row is
+written for an admin who holds the seat by rule.** The door already answers
+that (door.ts's seatFor), and `tenant_users_one_super` (§313.4) refuses a
+second super on a client that has one — the first build wrote the row and
+the second request 500'd on that index, found by the check. The minted row
+is the TEAM's where the register already holds a super, for the same
+reason; the address on it is what finds them next time, so one row, ever.
+
+**THE LOCK'S JOB CHANGED UNDER THE ROW WRITER, AND THE RED RUN SAYS WHAT
+IT IS NOW.** With S9 writing only the rows that differ, eight saves on eight
+different rows lose nothing with or without §240's lock — that is the
+writer's own guarantee (contracts §3). What the lock still protects is a
+MAP on one row: the review's notes and submissions (§234 travels them per
+target and they land in one jsonb column), and a fill's `pend` mark in a
+row's `extra`. `--break=no-save-lock` runs eight submissions-of-a-note at
+once and **3 of 8 survive** — the deadline scenario §240 was written for,
+with the loss now on the review row rather than on every table.
+
+**A LIST THAT IS NOT §210'S SHAPE IS REFUSED, NOT APPLIED AS NOTHING**: the
+carried `applyChanges` answers `ok` for an array it does not understand, so
+a malformed post reported success and wrote nought — the save asks for
+`{set, del, rows}` first (400 otherwise). Found by the check asking for a
+400 and getting a 200.
+
+`checks/state-api.mjs` (`npm run check:state`): 87 assertions over HTTP on
+the sandbox Postgres against the dev tenant, remade every run — the guards
+(401, `mustChange` 403, one identical 404 for a client that is not theirs
+and one that does not exist, a whole graph refused), the graph asserted
+byte-identical to `readState`'s, the office row's four rules, two tabs
+(§210 · §215 · §216 · §234), eight at once (§240), a refusal naming its
+rows and costing only them (§184, with the fill STAMPED as the browser
+stamps it — §249.2's own lesson), view-as judged as the viewed person and
+recorded as the signer (§185), the history read's filters and refusals
+(§262), and the peek (§258). **Proved able to fail six ways, one per
+decision** (`check:state:red`): `apply-on-base` 5 red — and its first
+failure prints §204's reported symptom verbatim, the stale tab refused
+naming a register rename nobody made; `no-save-lock` 1 red at 3/8;
+`bare-refusal` 2; `viewas-widens` 4; `log-for-all` 3; `peek-includes-me`
+1. S9 13/0 and its red, `test:rules` 588/0, the door check 44/0, `tsc` and
+`next build` clean.
+
+**RECORDED, NOT DONE:** the response says `wrote: "rows"` where the frozen
+shell's §241 diagnostic read `incremental`/`full` — Phase B's `sync.ts`
+reads the new word; nothing seeds on a first request (`seeded` is gone,
+§314's design), and Phase I is where a tenant's graph arrives. `main`
+untouched.
+
+---

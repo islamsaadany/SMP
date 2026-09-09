@@ -15,7 +15,9 @@
     "dev:tenant": "node scripts/dev-tenant.mjs",
     "check:door": "node checks/door-landing.mjs",
     "check:door:red": "for b in no-rows first-person; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
-    "sync:css": "node scripts/sync-css.mjs"
+    "sync:css": "node scripts/sync-css.mjs",
+    "check:state": "node checks/state-api.mjs",
+    "check:state:red": "for b in apply-on-base no-save-lock bare-refusal viewas-widens log-for-all peek-includes-me; do node checks/state-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

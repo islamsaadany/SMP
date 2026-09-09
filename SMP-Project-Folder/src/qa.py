@@ -701,7 +701,7 @@ with sync_playwright() as p:
 
       /* Numbers on everybody, and one department that maps and one that does
          not — the two cases the BU column has to tell apart. */
-      PEOPLE.forEach((p, i) => { p.empId = "E" + (1000 + i); });
+      CP.forEach((p, i) => { p.empId = "E" + (1000 + i); });
       /* Three rows, three answers: a name that means ONE place, a name that
          means NOTHING, and — since 57 — a name that holds SEVERAL. The third
          must not be resolved: a Main BU covering three units cannot say which
@@ -781,7 +781,11 @@ with sync_playwright() as p:
           fixedProblems: fixed.problems.length,
           fixedSkipped: fixed.notices.length,
           rows: fixed.rows.length,
-          people: PEOPLE.length,
+          /* The file carries the client's rows: the office's own row has no
+             number (it is not the register's to edit, §313.29) and the reader
+             sets it aside by design — one notice, never a problem. */
+          people: CP.length,
+          expectSkipped: PEOPLE.length - CP.length,
           mappedAt: (mapped.rows.filter(r => r.key === CP[0].key)[0] || {}).where || null,
           unmappedAt: (mapped.rows.filter(r => r.key === CP[1].key)[0] || {}).where || null,
           severalAt: (mapped.rows.filter(r => r.key === CP[3].key)[0] || {}).where || null,
@@ -811,7 +815,7 @@ with sync_playwright() as p:
              column. And the OLD header still reads (58's rule, applied
              forward: "BU" was this column's header for one build). */
           unitHead: PEOPLE_FILE_COLS.indexOf("Unit") > -1,
-          unitWritten: rows.filter(r => String(r.Unit || "").trim() !== "").length,
+          unitWritten: rows.filter(r => r["Emp ID"] && String(r.Unit || "").trim() !== "").length,
           unitReadsBack: (() => {
             const t = rows.filter(r => r["Emp ID"] === CP[4].empId)[0];
             return t ? planPeopleFile([t]).rows[0].where : "(row missing)";
@@ -844,7 +848,7 @@ with sync_playwright() as p:
     if pf["rows"] != pf["people"]:
         errs.append("PEOPLE FILE: %d of %d people came back through the file"
                     % (pf["rows"], pf["people"]))
-    if pf["fixedProblems"] or pf["fixedSkipped"]:
+    if pf["fixedProblems"] or pf["fixedSkipped"] != pf["expectSkipped"]:
         errs.append("PEOPLE FILE: its own download does not read cleanly (%d problems, %d skipped)"
                     % (pf["fixedProblems"], pf["fixedSkipped"]))
     if pf["fixedMoving"]:

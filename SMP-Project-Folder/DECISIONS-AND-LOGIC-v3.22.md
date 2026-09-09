@@ -40597,3 +40597,42 @@ about how we interact, right?"* Yes.
 for sign-off before `plan.md`, `tasks.md` or any source exists. What comes
 first when it does is a **spike, not a page**: seven proofs on a real
 Postgres (spec 043 §5), each red before it is green.
+
+## §314.1 — SIGNED OFF, WITH ONE REVERSAL OF HIS OWN PLAN (2026-09-09)
+
+Asked to be given the four questions that decide the spec rather than the
+spec — *"ask me what you feel I need to make a decision here not to get
+confused by the long spec"* — Islam answered all four the same day:
+
+- **The isolation shape is approved as written** (spec 043 §4.3): tenant set
+  per request with `SET LOCAL` inside a transaction on the direct connection;
+  the app connects as a non-owner role under `FORCE ROW LEVEL SECURITY`;
+  Prisma with a wrapper, `pg` if S6 cannot be made to pass. None of the three
+  was struck.
+- **The first slice is the spike** (spec 043 §5), not a screen — now eight
+  proofs, each red before it is green.
+- **The benchmarking role and the region names wait.** `tenants.region`
+  exists and routes nothing; cross-client reporting is a second policy on a
+  second role, designed when it is asked for.
+- **Raya Trade's data is carried across** — *"No, carry Raya's data
+  across."* **THIS REVERSES HIS OWN PLAN AND §314'S "THE DATA IS THROWAWAY, SO
+  THERE IS NO MIGRATION"**, and it is recorded as a reversal rather than
+  overwritten (Principle II): the plan was written before the record showed
+  what Raya's tenant holds — a live register, closed cycles with their
+  snapshots, archived plans, the office's conversations — and re-entering
+  that by hand is not a saving. **One tenant, one script, once**: it reads
+  the `raya_trade` schema on cutover day and writes every row into the shared
+  schema under Raya's `tenant_id`, keeping every key (that is what the
+  composite key is for); the passwords travel with the accounts, because
+  sign-in has lived on the platform side since §313.2, so **nobody is issued
+  a new one**. RHI and El Abd stay empty, the demo is seeded as before.
+  **The cost is one more thing that must be right on the day**, and it is
+  proved by running it (S8): counts equal per table, a plan byte-identical
+  through the new reader, a save round-tripping, every migrated sign-in still
+  working — against a copy first, then the live schema with the frozen build
+  still serving. The script is written for Raya's shape as it stands and
+  deleted once the cutover is done, because a one-off left in the tree is a
+  second reader of the old schema somebody will trust.
+
+**Still nothing built.** What follows is `plan.md`, then `tasks.md`, then the
+spike; `main` untouched until Islam says merge, on that merge.

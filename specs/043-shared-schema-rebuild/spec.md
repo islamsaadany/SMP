@@ -40,11 +40,16 @@ compliance driver that requires it.
 ## 2 · The decisions, and why
 
 Every one was put to Islam on 2026-09-09 and answered. The number is the
-question as it was asked.
+question as it was asked. **Signed off the same day, with one change**: asked
+four closing questions — the live data, the isolation shape (§4.3), the first
+slice, and the two deferred items (the benchmarking role, the region names) —
+he approved the isolation as written, chose the spike first, deferred both,
+and **reversed the plan's "existing data is throwaway" for Raya Trade** (§4.7,
+row 1, S8). Recorded as §314.1.
 
 | # | Decision | Islam's answer, and what it settles |
 |---|---|---|
-| 1 | The tenancy model | **One shared schema, a `tenant_id` on every tenant-owned row, RLS as the guarantee.** A reversal of §36 and §313, recorded as one. The cost he accepted: inside a client the keys are short and global (`smo`, `mobile`, a capability's id, the single `org` row), so every one carries the tenant as well, and the rules and save code that find rows by those keys are **rewritten, not copied**. Data is throwaway, so no migration. |
+| 1 | The tenancy model | **One shared schema, a `tenant_id` on every tenant-owned row, RLS as the guarantee.** A reversal of §36 and §313, recorded as one. The cost he accepted: inside a client the keys are short and global (`smo`, `mobile`, a capability's id, the single `org` row), so every one carries the tenant as well, and the rules and save code that find rows by those keys are **rewritten, not copied**. Raya Trade's data is **carried across** by a one-off migration (§4.7, his answer at sign-off); RHI, El Abd and the demo are built clean. |
 | 2 | Where a consultant's tenant comes from | **Agreed:** a client user's tenant is on their user record; a consultant's is the client they opened, and the address names it. The URL is an **address the server checks**, never the authority (§4.4). |
 | 3 | One user table or two | **Two.** *"These are normally two different tables, one for the overall platform and the other is client based."* `users` is logins, platform-wide; `people` is a client's register, tenant-scoped; linked by tenant and person. |
 | 4 | How the database learns the tenant | *"We will work with postgres right?"* — yes, Postgres on Neon, unchanged. The three points under it are how the app talks to Postgres and are written here as the design: **per request** inside a transaction, never per connection; the app connects as a **non-owner** role; **Prisma with a wrapper** on the direct connection. Any of the three can be struck at sign-off. |
@@ -208,15 +213,39 @@ query over the catalogue for every table carrying `tenant_id` asserting zero
 rows for that tenant. Built and tested now (§5, S4), with the office-only,
 asked-twice confirmation §146 gives the Super user's destructive acts.
 
-### 4.7 The data — throwaway, built clean
+### 4.7 The data — Raya Trade carried across, the rest built clean
 
-No migration scripts for the current register. The new schema is authored
-fresh; the single seed is the **demo tenant**, built from the worked example
-under the invented names `scripts/seed-demo-client.js` already produces (its
-refuse-if-any-real-name-survives scan carries over). Raya Trade, RHI and
-El Abd are created empty as tenants, and every person gets a new temporary
-password from the office (§43's `must_change`). Whatever the live register
-holds on cutover day is re-entered, and Islam is told so before that day.
+The plan as written said *"existing data is throwaway; write no migration
+scripts"*, and the spec's first draft said the same. **At sign-off Islam
+reversed it for one tenant** — *"No, carry Raya's data across"* — and it is
+recorded as his reversal of his own plan. What that settles:
+
+- **Raya Trade's tenant is migrated, once**, by a script that reads the
+  `raya_trade` schema on the day of the cutover and writes every row into the
+  shared schema under Raya's `tenant_id`: the register, the plans, the
+  figures, the closed cycles and their snapshots, the archives, the messages
+  and the questions, the settings — every one of the 44 tenant-owned tables
+  (§4.2). Nothing is re-entered and nothing is re-keyed by hand: the table
+  gains the tenant and keeps its own keys, which is exactly what the
+  composite key in §4.2 exists for.
+- **Nobody gets a new password.** Sign-in already lives on the platform side
+  (`platform.accounts.password_hash`, scrypt, §313.2), and `users` carries
+  the same column; the accounts are copied as they are, `must_change`
+  included. The one thing a person notices on cutover day is a new address.
+- **RHI and El Abd are created empty**, as today; the **demo tenant** is
+  seeded from the worked example under `scripts/seed-demo-client.js`'s
+  invented names, its refuse-if-any-real-name-survives scan carried over.
+- **The cost, stated before it is paid:** the migration is one more thing
+  that has to be right on cutover day, and it is proved the only way a
+  migration can be — by running it (S8, §5): every Raya table's row count
+  equal on both sides, a spot read of a unit's plan byte-identical through
+  the new app's reader, and a save on the migrated tenant round-tripping.
+  It runs against a copy first, then against the live schema with the
+  frozen build still serving, so a failed run costs a re-run and nothing
+  else. It is written for Raya's schema shape as it stands on that day
+  (the 44 migrations already applied) and for no other, and is deleted
+  from the tree once the cutover is done — a one-off that stays in the
+  repository is a second reader of the old schema somebody will trust.
 
 ### 4.8 What carries over, and what is thrown away
 
@@ -259,6 +288,7 @@ is proved able to fail by breaking what it guards (constitution XVI).
 | S5 | A schema check: every table with `tenant_id` has the policy and `FORCE`; a table with tenant data and no `tenant_id` is named | a table is added without either |
 | S6 | Every Prisma operation runs inside the per-request transaction — asserted by reading `current_setting('app.tenant_id')` from inside a query the extension wrapped, and from one that escaped it (which must see nothing) | an operation reaches the database outside the wrapper and sees rows |
 | S7 | The door: a client user at another client's slug lands on their own; a consultant not on a tenant is refused identically to a slug that does not exist | the two refusals differ, or the landing follows the slug |
+| S8 | The Raya migration (§4.7), run against a copy of the `raya_trade` schema: every tenant-owned table's row count equal on both sides under Raya's `tenant_id`, one unit's plan byte-identical through the new reader, a save on the migrated tenant round-tripping, and every migrated password still signing in | a table is short, a row lands under another tenant, a plan reads differently, or a sign-in that worked stops |
 
 ## 6 · Deliberately not decided here
 

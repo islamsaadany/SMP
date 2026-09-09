@@ -13,8 +13,9 @@ set per request on the direct connection, a non-owner database role, the URL
 an address the server checks. **The single file takes no new features from
 today**; a client-blocking defect is a correction and is asked about first.
 **Nothing built** — `specs/043-shared-schema-rebuild/spec.md` is the
-alignment document and waits on Islam's sign-off (D10 below); the first slice
-after it is a spike of seven proofs on a real Postgres, not a screen.
+alignment document, **signed off 2026-09-09 with one change** (Raya Trade's
+data is carried across by a one-off migration, §314.1); the first slice after
+it is a spike of eight proofs on a real Postgres, not a screen. Next: `plan.md`.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
@@ -490,7 +491,7 @@ Nothing proceeds past this line without an answer.
 
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
-| **D10** | **Sign-off on spec 043** — the shared-schema data model, the isolation mechanics (per request, non-owner role, Prisma with a wrapper) and the two-table identity model, as written. | The plan and the spike are built against it; a struck line changes the schema before it exists rather than after. | spec 043, §314 |
+| **D10** | **Sign-off on spec 043** — **answered 2026-09-09**: the isolation mechanics approved as written, the spike first, the benchmarking role and region names deferred, and one reversal of his own plan — Raya Trade's data is carried across rather than thrown away (§314.1, spec 043 §4.7, S8). | The plan and the spike are built against it. | spec 043, §314, §314.1 |
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
 
 **Answered:**
@@ -538,8 +539,11 @@ Nothing proceeds past this line without an answer.
   direct connection; the app connects as a non-owner role; `users` and
   `people` stay two tables linked by tenant and person; `tenants.region`
   exists and routes nothing; deletion is one cascading statement plus a
-  catalogue count. Data is throwaway. **Waiting on D10**; then `plan.md`, then
-  a spike of seven proofs before any screen.
+  catalogue count. Raya Trade's data is carried across by a one-off
+  migration proved by running it (S8); RHI and El Abd empty, the demo seeded.
+  **D10 answered 2026-09-09** (§314.1): isolation approved as written, spike
+  first, benchmarking role and region names deferred. Next `plan.md`, then a
+  spike of eight proofs before any screen.
 - **Multi-client — one door, many clients (`specs/042-multi-client/spec.md`,
   2026-08-28).** Every decision settled with Islam in session: one door, cards
   for Forefront only, **one Postgres schema per client** (§36.2), RHI and

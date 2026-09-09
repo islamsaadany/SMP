@@ -436,8 +436,10 @@ URL is an address the server checks, never the authority, and the
 `raya-trade` fallback goes. **The single file takes no new features from
 2026-09-09** — a client-blocking defect is a correction and is asked about
 first. `smp-app/` is replaced on the branch; `main` is untouched until Islam
-says merge. Nothing is built until spec 043 is signed off; the first slice
-after it is a spike of seven database proofs, not a screen.
+says merge. **Spec 043 was signed off 2026-09-09** with one change to the
+plan: Raya Trade's data is carried across by a one-off migration proved by
+running it (§314.1); RHI and El Abd start empty, the demo is seeded. The
+first slice is a spike of eight database proofs, not a screen; `plan.md` next.
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

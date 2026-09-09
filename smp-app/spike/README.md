@@ -20,7 +20,7 @@ the harness dying, not a failure (§215).
 `--break=no-force` → RED 5 ok, 1 failed: *"with no tenant set the app role reads 0 rows — 2 rows visible"* (the owner, FORCE off, sees every row).
 `--break=bypass` → RED 1 ok, 5 failed, the first *"smp_app exists: LOGIN, NOBYPASSRLS — rolbypassrls: true"*.
 green → 6 ok: role LOGIN NOBYPASSRLS · owns no table · 0 rows with nothing set · A's one row inside withTenant(A) · an INSERT under B refused 42501 · the OWNER reads every row (why the app is not the owner).
-**The Neon run is Islam's** (quickstart §4); its lines go here when he sends them.
+**The Neon key, from Islam via Neon's SQL editor (§314.4):** `rolname neondb_owner · rolcreaterole t · rolsuper f · rolbypassrls t` — the key makes the role, §P5's stop does not fire. The editor runs as the owner, so steps 3–4 (signing in AS `smp_app`) did not run on Neon; they run when `db/apply.mjs` first applies `roles.sql` at a deploy.
 
 ### S3 · the pooler (2026-09-09)
 The model is a fresh connection per statement outside a transaction (a

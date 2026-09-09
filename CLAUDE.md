@@ -459,8 +459,11 @@ tenant is set only in `lib/tenant.ts`, the save is `lib/save.ts` over
 modules are carried across as `.cjs` with the frozen tests green against
 them. `tenant_id` DEFAULTS to the request's setting and the policy is
 `NULLIF(current_setting(…, true), '')::uuid` — a once-set setting reads back
-as `''` on a reused connection. **Waiting on Islam: S1 against Neon from his
-own shell** (quickstart §4). Next: the first screen group, behind its mockup.
+as `''` on a reused connection. **S1's Neon answer is in (§314.4)**: through
+Neon's SQL editor, no connection string — `neondb_owner · rolcreaterole t ·
+rolsuper f · rolbypassrls t`, the key makes the role and §P5's stop does not
+fire; the sign-in-as-`smp_app` half runs on Neon at the first deploy. Next:
+the first screen group, behind its mockup, published as an artifact.
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

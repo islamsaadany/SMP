@@ -29,9 +29,12 @@ first under its named break (§314.3): the role and FORCE, the pooler, the
 schema check over 42 tables, isolation on every table, Prisma with a wrapper
 (the policy took `NULLIF`), deletion, the door, Raya's migration on a copy,
 and the row-addressed save (one box → one row, 795 swept). `main` untouched.
-**Waiting on Islam:** the S1 run against Neon from his own shell (quickstart
-§4; never a pasted URL) — the one proof that must be real before a screen
-relies on it. Next: the first screen group, beginning with its mockup.
+**S1's Neon answer is in (§314.4):** through Neon's SQL editor, no connection
+string involved — `neondb_owner · rolcreaterole t · rolsuper f · rolbypassrls
+t`, so the key makes the role and research §P5's stop does not fire; the
+sign-in-as-`smp_app` half is proved locally and runs on Neon at the first
+deploy. **Waiting on Islam:** nothing on this slice. Next: the first screen
+group, beginning with its mockup, published as an artifact for sign-off.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.

@@ -73,10 +73,25 @@ the scratch table. It prints the key's `rolcreaterole` / `rolsuper`, five
 `rolcreaterole f`, stop and say so** — research.md §P5 names the two ways
 forward and neither is taken without a decision.
 
+**The gating line alone can be answered in Neon's SQL editor** — it runs as
+the owner, which is what the script's first step is — with no connection
+string involved at all:
+
+```sql
+SELECT rolname, rolcreaterole, rolsuper, rolbypassrls
+FROM pg_roles WHERE rolname = current_user;
+```
+
+**Answered 2026-09-09 (§314.4):** `neondb_owner · rolcreaterole t · rolsuper f
+· rolbypassrls t` — the key makes the role; §P5's stop does not fire. The
+editor cannot run the rest (it cannot sign in AS `smp_app`); that half is
+proved locally (§2) and runs against Neon when `db/apply.mjs` first applies
+`roles.sql` at a deploy.
+
 ## 5 · What green means
 
 S1–S9 green, each having been red under its `--break`, is the data layer
 settled — **reached 2026-09-09 on the sandbox's Postgres 16** (§314.3,
 `smp-app/spike/README.md`). Nothing is served; the frozen build keeps every
-client. S1 against Neon (§4) is the one run still owed. Next is `tasks.md`
+client. S1's Neon answer is in (§4, §314.4). Next is `tasks.md`
 for the first screen group, which starts with its mockup.

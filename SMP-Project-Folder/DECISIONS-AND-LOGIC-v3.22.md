@@ -40758,7 +40758,51 @@ running found, in the order it was found:
   copies (constitution IX).
 
 **Still open, and whose:** the Neon run of S1 (Islam's, from his own shell —
-if `rolcreaterole f`, research §P5, stop); the export step of deletion
+if `rolcreaterole f`, research §P5, stop — **answered in §314.4**); the export step of deletion
 (§304's workbooks, the caller's, named in `tenant-delete.ts`); the demo seed
 under the shared schema (`seed-demo.mjs`, next slice); and every screen. The
 first screen group is a new `tasks.md`, and it starts with its mockup.
+
+## §314.4 — NEON'S KEY CAN MAKE THE ROLE, AND THE SQL EDITOR ANSWERED IT (2026-09-09)
+
+Islam, of the one command quickstart §4 handed him: *"Ican run this in the
+sql editor?"* — and the honest answer is half of it, which turned out to be
+the half that matters. **The proof asks two things.** The first is a
+question about the KEY: can it create roles? That is the only thing in the
+whole plan that could stop it (research §P5), and it is one `SELECT`
+against `pg_roles`, which Neon's SQL editor answers as the owner exactly as
+the script would. The second is a question about the ROLE: made, does
+`FORCE ROW LEVEL SECURITY` hold against it? That needs a second sign-in AS
+`smp_app` with its own password, and the editor always runs as the owner,
+so it cannot play that part — a password typed into it would also sit in
+the editor's history. So the one line was asked for through the editor and
+the rest was not.
+
+**His row, from Neon's SQL editor on the database the Vercel project points
+at:**
+
+```
+rolname neondb_owner · rolcreaterole t · rolsuper f · rolbypassrls t
+```
+
+**What it settles.** `rolcreaterole t`: the key makes `smp_app`, so §P5's
+stop does not fire and neither of its two ways forward is needed. `rolsuper
+f` with `rolbypassrls t` is precisely the shape §313.35 proved role creation
+on (*"one shaped like Neon's"*) and precisely why §314 refuses to let the
+app connect as the owner: on Neon the owner bypasses every policy twice
+over — as the table's owner and by the attribute — so a build that reached
+the database with this key would see every tenant, and S1 step 5 is that
+sentence measured. `rolsuper f` also means `roles.sql`'s `ALTER DEFAULT
+PRIVILEGES` is scoped to `neondb_owner`, the role that runs every migration
+(§P6), which is where it needs to be.
+
+**What it does not settle, said rather than assumed.** The second half —
+`smp_app` made on Neon, signed in as, and reading one tenant's rows and
+nothing else — has not run against Neon. It has run locally, red first
+(§314.3), and it runs against Neon the first time `db/apply.mjs` applies
+`roles.sql` at a deploy and the first save goes through `smp_app`; nothing
+before the first screen depends on it. **The route is the record**: the
+editor involved no connection string at all, which is the constraint every
+Neon instruction in this project carries, and it is the cheaper door for
+the one question that could stop the plan. Quickstart §4 says so now, and
+T072 is closed.

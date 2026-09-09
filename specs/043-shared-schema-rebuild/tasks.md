@@ -226,7 +226,7 @@ folders the proofs live in; the local database is up.
 - [x] T069 Update `IMPLEMENTATION_PROGRESS.md` (built / in flight / next / waiting on Islam) and the direction paragraph in `CLAUDE.md` in that same commit: nine proofs green, the data layer settled, the first screen group next and it begins with a mockup
 - [x] T070 Update `specs/043-shared-schema-rebuild/spec.md`'s status line and `quickstart.md` §5 with the date the spike went green and the S6 outcome
 - [x] T071 Commit on `claude/smp-tenancy-stack-decision-l5aoo5` with a message naming the proofs and their red counts; push with `git push -u origin claude/smp-tenancy-stack-decision-l5aoo5`; **do not merge** — `main` is Islam's call, on that merge
-- [ ] T072 **Waiting on Islam**: hand him the one command from quickstart §4 (`export DATABASE_URL_UNPOOLED='…'` from the Vercel project's settings, then `node smp-app/spike/s1-neon-role.mjs --neon`) to run from his own shell, and ask for the printed lines only — never the URL. If the first line is `rolcreaterole f`, stop: research §P5 names the two ways forward and neither is taken without his decision. Record his answer in §314.3 (or §314.4 if §314.3 has landed)
+- [x] T072 **Answered 2026-09-09 through Neon's SQL editor, recorded as §314.4** (`neondb_owner · rolcreaterole t · rolsuper f · rolbypassrls t`; the sign-in-as-`smp_app` half stays local until the first deploy applies `roles.sql`). The ask as it stood: hand him the one command from quickstart §4 (`export DATABASE_URL_UNPOOLED='…'` from the Vercel project's settings, then `node smp-app/spike/s1-neon-role.mjs --neon`) to run from his own shell, and ask for the printed lines only — never the URL. If the first line is `rolcreaterole f`, stop: research §P5 names the two ways forward and neither is taken without his decision. Record his answer in §314.3 (or §314.4 if §314.3 has landed)
 
 ---
 
@@ -259,7 +259,7 @@ folders the proofs live in; the local database is up.
 
 ## Status (2026-09-09)
 
-T001–T071 done the same day the list was written; every proof green and red first (§314.3, `smp-app/spike/README.md`). **T072 waits on Islam.** Departures from the plan, recorded: the writer is a table-level row diff rather than a path interpreter (T058 — simpler, and it covers every shape by construction); the policy took `NULLIF` and `tenant_id` a default (§314.3); `app/page.tsx` is a compile placeholder, not a screen.
+T001–T071 done the same day the list was written; every proof green and red first (§314.3, `smp-app/spike/README.md`). **T072 answered (§314.4).** Departures from the plan, recorded: the writer is a table-level row diff rather than a path interpreter (T058 — simpler, and it covers every shape by construction); the policy took `NULLIF` and `tenant_id` a default (§314.3); `app/page.tsx` is a compile placeholder, not a screen.
 
 ## Task count
 

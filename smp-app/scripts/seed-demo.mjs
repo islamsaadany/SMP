@@ -24,7 +24,7 @@
 
    Re-running without --replace is refused: a demo somebody has practised in
    is not something to overwrite by typing a command twice. */
-import { createRequire } from "node:module";
+import Module, { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,6 +35,17 @@ import { loadGraph, readState } from "../lib/state-io.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
+/* THE FROZEN SCRIPT RUNS ON THE APP'S OWN PACKAGES (§317.10). It lives at the
+   repository root and does `require("pg")` from there — which on a laptop
+   finds the root's node_modules and on Vercel finds nothing, because only
+   smp-app/ is installed: "Cannot find module 'pg'", one line after the carry
+   had correctly stood down. It is REQUIRED rather than copied on purpose
+   (§316.9: the renaming table and its refusal are the frozen product's, and a
+   second copy is the drift §53.5 names), so the app's node_modules is put on
+   the resolution path before it is loaded. `pg` is the one package the chain
+   needs and the app already depends on it. */
+process.env.NODE_PATH = [join(here, "..", "node_modules"), process.env.NODE_PATH].filter(Boolean).join(":");
+Module._initPaths();
 const D = require("../../scripts/seed-demo-client.js");   /* the frozen renamer AND its refusal */
 
 export async function seedDemo({ url, replace = false, brk = null, log = (s) => console.log(s) } = {}) {

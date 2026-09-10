@@ -37,8 +37,12 @@
 /clients/
 /.github/
 /.claude/
-/scripts/
 /SMP-Project-Folder/mockups/
+# NOT `/scripts/` (§317.9): the demo seed requires the frozen renaming script
+# scripts/seed-demo-client.js from the repository root, and excluding the
+# folder failed the cutover build one line AFTER Raya Trade had been carried
+# across — "Cannot find module '../../scripts/seed-demo-client.js'". On this
+# stack nothing under it is ever served, so there is nothing to keep out.
 
 # The in-repo checks are Python and Playwright, run from a laptop, and are
 # the largest thing under src/ — the one part of it nothing at build or run

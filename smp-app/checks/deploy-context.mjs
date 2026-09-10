@@ -30,7 +30,7 @@
      node checks/deploy-context.mjs
      node checks/deploy-context.mjs --break=ignore-app   # must go red     */
 import { execFileSync } from "node:child_process";
-import { readFileSync, existsSync, writeFileSync, unlinkSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, unlinkSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -62,7 +62,28 @@ const css = arrayOf(join(APP, "scripts", "sync-css.mjs"), "ORDER");
 const stat = arrayOf(join(APP, "scripts", "sync-static.mjs"), "FILES");
 const frozen = arrayOf(join(APP, "lib", "frozen.cjs"), "FILES");
 
+/* AND EVERY `../../` THE APP'S OWN CODE REACHES FOR, READ OUT OF THAT CODE
+   (§317.9). The first version of this list was typed, and it was typed
+   short: scripts/seed-demo.mjs requires the frozen renaming script at the
+   repository root and `/scripts/` was excluded, so the cutover build failed
+   one line AFTER the carry had completed — the check that exists for exactly
+   this had been green over it. A list kept beside the code is what §53.5
+   warns about; this is the code asked instead. */
+const reaches = [];
+for (const dir of ["scripts", "lib"]) {
+  for (const f of readdirSync(join(APP, dir))) {
+    if (!/\.(mjs|cjs|ts)$/.test(f)) continue;
+    const text = readFileSync(join(APP, dir, f), "utf8");
+    for (const m of text.matchAll(/["']\.\.\/\.\.\/([^"']+)["']/g)) {
+      const rel = m[1];
+      if (rel.startsWith("SMP-Project-Folder/src")) continue;   /* covered file by file above */
+      reaches.push(rel);
+    }
+  }
+}
+
 const NEEDED = [
+  ...reaches,
   ...scripts.map((f) => "SMP-Project-Folder/src/" + f),
   ...css.map((f) => "SMP-Project-Folder/src/" + f),
   ...frozen.map((f) => "SMP-Project-Folder/src/" + f),
@@ -83,8 +104,16 @@ if (BREAK === "ignore-app") {
   writeFileSync(IGNORE, restore + "\nsmp-app/\n");
 }
 if (BREAK === "unanchored") {
+  /* The trap as it was: a bare `scripts/` matches at any depth, so it eats
+     smp-app/scripts/ — the build scripts themselves. */
   restore = readFileSync(IGNORE, "utf8");
-  writeFileSync(IGNORE, restore.replace("\n/scripts/", "\nscripts/"));
+  writeFileSync(IGNORE, restore + "\nscripts/\n");
+}
+if (BREAK === "ignore-scripts") {
+  /* §317.9 as it happened: the ROOT scripts folder excluded, taking the
+     frozen renaming script the demo seed requires with it. */
+  restore = readFileSync(IGNORE, "utf8");
+  writeFileSync(IGNORE, restore + "\n/scripts/\n");
 }
 let removed;
 try {

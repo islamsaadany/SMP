@@ -33,7 +33,7 @@
     "check:room": "node checks/schema-room.mjs",
     "check:room:red": "node checks/schema-room.mjs --break=public >/dev/null 2>&1 && { echo \"NOT RED: public\"; exit 1; }; echo \"red: public\"",
     "check:deploy": "node checks/deploy-context.mjs",
-    "check:deploy:red": "for b in ignore-app unanchored; do node checks/deploy-context.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:deploy:red": "for b in ignore-app unanchored ignore-scripts; do node checks/deploy-context.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:demo": "node checks/demo-seed.mjs",
     "check:demo:red": "for b in raw-names keep-marks; do node checks/demo-seed.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
   },

@@ -78,8 +78,19 @@ if (asked("SMP_CARRY_RAYA")) {
   if (!production) console.log("deploy: SMP_CARRY_RAYA is set but this is a preview — the carry does not run here");
   else {
     const { migrateRaya } = await import("./migrate-raya.mjs");
-    await migrateRaya({ from: url, to: url });
-    console.log("deploy: Raya Trade carried across — turn SMP_CARRY_RAYA off; it refuses itself from here on");
+    /* A SWITCH LEFT ON IS A LINE IN THE LOG, NOT A FAILED BUILD (§317.9). The
+       runbook has always said so and the code threw: the carry refuses
+       itself once the tenant exists, and an uncaught refusal here failed the
+       build that was completing the cutover — the one AFTER the carry had
+       run, so the site stayed down until somebody found the switch. Only the
+       refusal is caught; anything else in the carry still fails the build. */
+    try {
+      await migrateRaya({ from: url, to: url });
+      console.log("deploy: Raya Trade carried across — turn SMP_CARRY_RAYA off; it refuses itself from here on");
+    } catch (e) {
+      if (!/already exists — this runs once/.test(String(e.message))) throw e;
+      console.log("deploy: SMP_CARRY_RAYA is still on and the carry has already run — nothing done; turn it off");
+    }
   }
 }
 
@@ -87,7 +98,12 @@ if (asked("SMP_SEED_DEMO")) {
   if (!production) console.log("deploy: SMP_SEED_DEMO is set but this is a preview — the demo is not seeded here");
   else {
     const { seedDemo } = await import("./seed-demo.mjs");
-    await seedDemo({ url });
-    console.log("deploy: the demo is seeded — turn SMP_SEED_DEMO off");
+    try {
+      await seedDemo({ url });
+      console.log("deploy: the demo is seeded — turn SMP_SEED_DEMO off");
+    } catch (e) {
+      if (!/already|practised|--replace/.test(String(e.message))) throw e;
+      console.log("deploy: SMP_SEED_DEMO is still on and the demo is already seeded — nothing done; turn it off");
+    }
   }
 }

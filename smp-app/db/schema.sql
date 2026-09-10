@@ -683,7 +683,14 @@ CREATE TABLE push_subscriptions (
   auth text NOT NULL,
   made_at timestamptz NOT NULL DEFAULT now(),
   seen_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (tenant_id, person_key, endpoint)
+  -- ONE ENDPOINT, ONE SUBSCRIPTION (§231, corrected at §316.7). The frozen
+  -- table keys on `endpoint` alone, and `pushOn` upserts on it so a device
+  -- signed in to by somebody else MOVES rather than gaining a second row —
+  -- which is what stops the previous person's notifications arriving on it.
+  -- Keyed by person as well, this was not "the key it has today with
+  -- tenant_id in front of it": migration 003 carries it for a database made
+  -- before this line.
+  PRIMARY KEY (tenant_id, endpoint)
 );
 CREATE INDEX push_subscriptions_person ON push_subscriptions (tenant_id, person_key);
 

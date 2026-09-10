@@ -1,5 +1,11 @@
 """THE CONTINGENCY FILES (spec 030).
 
+qa-run: own-server — this check SERVES the built file and its own /api/state, and
+the state is the subject: a review day set to each of the moments the reminder
+speaks at, and a working copy fetched back from `location.pathname`. The served
+app cannot be moved through those moments, and `sync.js` is carried into it
+verbatim, so the client under test is the same either way (§316.1).
+
 Islam: *"if the platform all is down we need to have a substitue action. so
 before the review day I will download all the presnetations with a time stamp.
 so in case if things are down I have a backup to adjust to and present from."*

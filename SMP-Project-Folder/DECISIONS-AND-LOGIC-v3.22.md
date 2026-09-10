@@ -41559,6 +41559,26 @@ rides the QUERY, because a piece upload posts raw bytes and play is a GET
 (§313.37, where a slug in the body sent every client's clips to the default's
 schema).
 
+**RECORDED, NOT DONE — and named here as the plan's stop point C rather than
+its D, because the default is today's behaviour and it blocks nobody.** A
+Forefront person's register row is refused WHOLESALE by the authoriser
+(`officeRow`) and the DIALOG still draws all nine of its fields as editable:
+§313.29 closed the role cell and said in its own comment that *"a control that
+only hides itself is decoration"*, and stopped there. So an SMO team member
+correcting their own job title is accepted on screen and refused on save — with
+the right sentence, naming where the row is set, and §184's put-back offering to
+keep the rest — which is §42's drift with a loud and accurate ending. Measured,
+not reasoned: the refused body carries `"title":"Chief Strategy Officer II"` and
+`personBy('smo').title` reads the new value. The question is whether those
+fields should read as not-editable there the way the role cell does; the work
+continues on the default (§314: the frozen file takes no new features, and a
+correction is asked first).
+
+**And a save on the Overview leaves the rail's pill one paint stale** — §93
+drops the password cache on every save and re-asks only when the register is
+drawn, while the pill is `attentionByPage()` computed AT PAINT TIME. Any
+navigation puts it right. Recorded rather than changed for the same reason.
+
 **RETIRED BY NAME: none.**
 
 ---

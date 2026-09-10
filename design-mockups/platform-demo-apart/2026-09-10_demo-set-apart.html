@@ -1,0 +1,284 @@
+<title>The Demo, Set Apart</title>
+<style>
+  /* ══ FOREFRONT'S OWN TOKENS, COPIED FROM platform.html VERBATIM ══
+     This is a mockup of that page, so it wears that page's palette rather
+     than one chosen here (§53.5: one vocabulary, not two). Complete blocks
+     per theme, never a base plus overrides — platform.html records why. */
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+    --mk-ground:#E9ECF2; --mk-ink:#3E4A60;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+      --mk-ground:#0C0E13; --mk-ink:#9AA5B8;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    --mk-ground:#0C0E13; --mk-ink:#9AA5B8;
+  }
+
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--mk-ground); color:var(--mk-ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased; padding:0 16px 56px }
+
+  /* ══ the mockup's own chrome — not the product's ══════════════ */
+  .sheet{ max-width:1180px; margin:0 auto }
+  .lede{ padding-block:34px 6px }
+  .lede h1{ margin:0 0 8px; font-size:23px; font-weight:600; color:var(--mk-ink);
+    letter-spacing:-.01em; text-wrap:balance }
+  .lede p{ margin:0; max-width:64ch; font-size:14.5px; line-height:1.6 }
+  .lede b{ color:var(--mk-ink); font-weight:600 }
+  .key{ font:600 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--mk-ink); opacity:.72 }
+  .panel{ margin-top:26px }
+  .panel > .key{ display:block; margin-bottom:9px }
+  /* THE PRODUCT'S OWN PAGE, INSIDE A FRAME THAT IS NOT ITS OWN — so the
+     frame carries the page's ground and border and nothing else. */
+  .page{ background:var(--ground); color:var(--ink); border:1px solid var(--line);
+    border-radius:12px; padding:20px 18px 24px; overflow:hidden }
+  .note{ margin:9px 2px 0; font-size:13.5px; line-height:1.55; max-width:70ch }
+  .note.bad::before{ content:"✕ "; color:#B23025; font-weight:700 }
+  .note.good::before{ content:"✓ "; color:#1B6E4E; font-weight:700 }
+  :root[data-theme="dark"] .note.bad::before,
+  :root:not([data-theme="light"]) .note.bad::before{ color:#E8776B }
+  :root[data-theme="dark"] .note.good::before,
+  :root:not([data-theme="light"]) .note.good::before{ color:#63BE96 }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .note.bad::before{ color:#E8776B }
+    :root:not([data-theme="light"]) .note.good::before{ color:#63BE96 }
+  }
+
+  /* ══ platform.html's own rules, copied ════════════════════════ */
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
+  .ptitle h2{ font-size:20px; margin:0; font-weight:600; color:var(--ink) }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+  .fld{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit; width:190px }
+  .fld::placeholder{ color:var(--ink-3) }
+
+  .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
+    background:var(--surface); padding:15px; display:flex; flex-direction:column; gap:7px;
+    min-height:152px; font:inherit; color:var(--ink); box-shadow:var(--shadow) }
+  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
+    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  .ccard h3{ margin:0; font-size:17px; font-weight:600 }
+  .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
+  .ccard .foot{ margin-top:auto; display:flex; gap:6px; flex-wrap:wrap }
+  .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
+  .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
+    color:var(--ink-3); box-shadow:none }
+  .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface) }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2) }
+  .tag.open{ color:var(--good); background:var(--good-bg); border-color:var(--good) }
+  .tag.none{ color:var(--warn); background:var(--warn-bg); border-color:var(--warn) }
+  .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
+  .tag.seat{ color:var(--ff); border-color:var(--ff) }
+  :root[data-theme="dark"] .tag.seat, :root:not([data-theme="light"]) .tag.seat{ color:var(--ff-quiet) }
+
+  /* ══ WHAT IS PROPOSED — one band, one rule, one card ══════════
+     The demo leaves the grid. What sets it apart is the platform's own
+     section device: a hairline with an uppercase key on it, which is how
+     every other page here separates one kind of thing from another. No new
+     colour, no new box — the card is the card it already was. */
+  .apart{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line) }
+  .apart > .akey{ display:block; margin-bottom:12px;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  /* IT KEEPS THE GRID'S OWN TRACK WIDTH rather than running the page — a
+     card that grew to 1140px would read as more important than the clients
+     above it, which is the opposite of what setting it apart says. */
+  .apart .cards{ grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+
+  @media (max-width:520px){
+    .page{ padding:16px 13px 18px }
+    .fld{ width:100% }
+    .ptitle .right{ width:100% }
+  }
+</style>
+
+<div class="sheet">
+
+  <div class="lede">
+    <h1>The demo, set apart from the clients</h1>
+    <p>Forefront's own page, <b>/platform</b>. Today the worked example sits in the
+       client grid wearing an amber card and a <b>Demo</b> tag. Below it is the same
+       page with the demo out of that grid and standing on its own beneath it.
+       Both drawn in the page's own colours, type and card.</p>
+  </div>
+
+  <div class="panel">
+    <span class="key">Today</span>
+    <div class="page">
+      <div class="ptitle">
+        <h2>Clients</h2>
+        <div class="right"><input class="fld" id="s-today" placeholder="Search clients" readonly></div>
+      </div>
+      <div class="cards">
+
+        <div class="ccard">
+          <span class="ccfg">Set up</span>
+          <div class="cmark">RT</div>
+          <h3>Raya Trade</h3>
+          <p class="ind">Trade &amp; distribution</p>
+          <div class="foot">
+            <span class="tag seat">Super user</span>
+            <span class="tag open">Cycle open</span>
+            <span class="tag">10 units</span>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Set up</span>
+          <div class="cmark">RH</div>
+          <h3>RHI</h3>
+          <div class="foot">
+            <span class="tag seat">Super user</span>
+            <span class="tag none">No plan yet</span>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Set up</span>
+          <div class="cmark">EA</div>
+          <h3>El Abd</h3>
+          <div class="foot">
+            <span class="tag seat">Super user</span>
+            <span class="tag none">No plan yet</span>
+          </div>
+        </div>
+
+        <div class="ccard demo">
+          <span class="ccfg">Set up</span>
+          <div class="cmark">DE</div>
+          <h3>Demo</h3>
+          <p class="ind">The worked example</p>
+          <div class="foot">
+            <span class="tag demo">Demo</span>
+            <span class="tag open">Cycle open</span>
+            <span class="tag">10 units</span>
+          </div>
+        </div>
+
+        <div class="ccard add">+ Add a client</div>
+
+      </div>
+    </div>
+    <p class="note bad">It is in the client list, so it is counted as one: four cards
+       across, the demo third in the row and the way to add a client fourth. On a
+       platform with no clients yet, the demo is the only card there is — and the
+       line that says <i>“No clients yet. Add the first one”</i> never draws, because
+       the count it reads includes the demo.</p>
+  </div>
+
+  <div class="panel">
+    <span class="key">Proposed</span>
+    <div class="page">
+      <div class="ptitle">
+        <h2>Clients</h2>
+        <div class="right"><input class="fld" id="s-prop" placeholder="Search clients" readonly></div>
+      </div>
+      <div class="cards">
+
+        <div class="ccard">
+          <span class="ccfg">Set up</span>
+          <div class="cmark">RT</div>
+          <h3>Raya Trade</h3>
+          <p class="ind">Trade &amp; distribution</p>
+          <div class="foot">
+            <span class="tag seat">Super user</span>
+            <span class="tag open">Cycle open</span>
+            <span class="tag">10 units</span>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Set up</span>
+          <div class="cmark">RH</div>
+          <h3>RHI</h3>
+          <div class="foot">
+            <span class="tag seat">Super user</span>
+            <span class="tag none">No plan yet</span>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Set up</span>
+          <div class="cmark">EA</div>
+          <h3>El Abd</h3>
+          <div class="foot">
+            <span class="tag seat">Super user</span>
+            <span class="tag none">No plan yet</span>
+          </div>
+        </div>
+
+        <div class="ccard add">+ Add a client</div>
+
+      </div>
+
+      <div class="apart">
+        <span class="akey">The worked example</span>
+        <div class="cards">
+          <div class="ccard demo">
+            <span class="ccfg">Set up</span>
+            <div class="cmark">DE</div>
+            <h3>Demo</h3>
+            <p class="ind">Nobody real in it</p>
+            <div class="foot">
+              <span class="tag demo">Demo</span>
+              <span class="tag open">Cycle open</span>
+              <span class="tag">10 units</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="note good">Out of the grid and below it, under the page's own hairline
+       and key. The client list is the clients and nothing else, so <i>Add a client</i>
+       follows the last real one, the count is a count of clients, and a search for a
+       client cannot turn up the demo.</p>
+  </div>
+
+  <div class="panel">
+    <span class="key">What it costs, and what it does not</span>
+    <div class="page">
+      <p class="note" style="margin:0 0 10px">Nothing about the demo itself moves. It stays
+         a tenant of its own at <b>/demo</b>, seeded by the same switch, opened by the same
+         card, with the same amber and the same <b>Demo</b> tag. What changes is where the
+         card is drawn.</p>
+      <p class="note" style="margin:0 0 10px">The search box stops reaching it. It says
+         <i>Search clients</i>, so that is the honest behaviour — and it is a change: today
+         typing “demo” finds it.</p>
+      <p class="note" style="margin:0">Below about 520px the page is one column either way,
+         and the demo simply follows the clients, which is what it does today.</p>
+    </div>
+  </div>
+
+</div>

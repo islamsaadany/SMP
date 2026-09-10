@@ -502,6 +502,28 @@ to it. Forefront's own pages are `platform.html` over `lib/platform-api.ts`.
 three runs found the HARNESS, not the product (the register probes wrote the
 office's own row, which §313.29 marks and the authoriser refuses, and a
 refused flush blocks every viewer switch after it).
+**Phase C is accepted (§316, §316.1)**: **39 frozen checks re-pointed at the
+served app, 0 failures**, each on a freshly seeded tenant — the plan's named
+group, the fifteen its trailing "…" leaves unnamed, and the three that judge
+who may open the Strategy tab at all — with `qa.py` at Next 33 viewers / 229
+destinations / ERRORS none, state 87/0, door 44/0, shell 36/0, 588/0, 136/0
+and `tsc` clean. **ONE PRODUCT FAULT, THE FIRST CORRECTION THE FREEZE HAS
+TAKEN**: the plan builder minted a capability key objective with **no id**, so
+the row rendered, scored and reported and could NOT be written — §314.2's
+row-addressed writer refuses the whole save by name
+(`cap_key_objectives - a row has no id`), measured — and the check had asked a
+UNIT's objective for its id one screenful above and never a capability's
+(§94.2). Asked of Islam first (§314), then minted from the MAXIMUM
+(`mintRowId`) and never with `renumberCapability()`, whose positional renumber
+would have silently re-addressed every project, deliverable, outcome and
+milestone under the capability, which figures and snapshots are keyed on
+(§48) — *a fix that reaches further than the fault is a second fault with a
+green check over it*. **EVERYTHING ELSE IT FOUND WAS THE HARNESS**: a check
+that stands up its own `/raya-trade` to answer with a POISONED graph is no
+longer re-pointed (`reorder-integrity` — the poisoned graph IS its subject,
+and the served app cannot be made to hold that state), and it **says so in its
+own first lines** rather than qa-run.py keeping a list of names (§104.7),
+asserted at both ends. **Nothing retired.**
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:

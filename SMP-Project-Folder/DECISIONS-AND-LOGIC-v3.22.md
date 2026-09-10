@@ -41199,3 +41199,60 @@ saved at all on the new stack — so it was put to Islam in one line with the
 fix named, and built on his word.
 
 ---
+
+### §316.1 — Phase C: the Strategy pages accepted on the new stack (2026-09-10)
+
+**PHASE C WRITES NO SCREEN**, which is why its record is short and its
+numbers are the whole of it: **39 frozen checks re-pointed at the served
+app**, each on a freshly seeded tenant, **0 failures** — the plan's own named
+group (plan-edit-line · plan-fields · plan-tail-fold · gap-fill · gap-walk ·
+empty-not-missing · one-line-titles · monthly-plan · objectives-table ·
+unit-before-number · yn-target · count-compile · tactic-outcome · fn-pillars ·
+fn-ko-edit · plan-builder · project-row-type · hide-element ·
+pillar-project-remove · table-fit · plan-wrap), the fifteen its trailing "…"
+leaves unnamed (foundation-objectives · objective-unit · owner-picker ·
+project-header · project-tables · project-dates · milestone-fill ·
+plan-arrange · plan-columns · plan-edit-head · rail-standard ·
+reorder-integrity · render-fail · table-standard · table-widths) and the three
+that judge who may open the tab at all (setup-arrange · strategy-split ·
+strategy-office). Beside them, on the rebuilt shell: `qa.py` against the app
+**33 viewers, 229 destinations, ERRORS none**, `check:state` **87/0**,
+`check:door` **44/0**, `check:shell` **36/0**, `test-authorize` **588/0**,
+`test-graph-diff` **136/0**, `tsc --noEmit` clean, and the `file://` sweep
+**ERRORS none** with every extra probe green.
+
+**ONE FAULT IN THE PRODUCT, AND IT IS §316** — the builder's id-less
+capability objective, the first correction §314's freeze has taken.
+**EVERYTHING ELSE THIS PHASE FOUND WAS THE HARNESS**, which is what an
+acceptance run is for and is worth saying plainly: the port did not break a
+Strategy page.
+
+**A CHECK THAT SERVES ITS OWN APP IS NOT RE-POINTED.** `reorder-integrity`
+went red on *"hydration healed the stored null"* and the product was right —
+run on its own terms it passes. That check stands up its **own** `/raya-trade`
+answering `/api/state` with a graph **poisoned with a null**, which is its
+entire subject (§118's heal at the hydration door), and the wrapper's
+re-pointing hijacked that goto and sent it to the served app, which cannot be
+made to hold that state and must not be. **Forty-odd checks are built this
+way** — a poisoned graph, a 500, a slow answer, a dataset that moves mid-run —
+and their subject is the CLIENT judged against a controlled server, so what
+the served app cannot give them is the server half; `sync.js` is carried into
+the app verbatim, so the code under test is the same code either way.
+`SMP_BASE` stands down for a check that **says so in its own first lines**,
+never a list of names in `qa-run.py` (§104.7: a list of exceptions is a list
+somebody forgets to add to). **Asserted at both ends** (§94.2) — the marked
+check prints the stand-down and passes, an unmarked one is still re-pointed
+and opens the served app.
+
+**RETIRED BY NAME: none.** Every check in the group has a subject on the new
+stack, `reorder-integrity` included — it is stood down from the RE-POINTING,
+not from the run, and it is green.
+
+**NOT PART OF PHASE C, AND SAID RATHER THAN LEFT AMBIGUOUS**: the forty-odd
+own-server checks in the later phases will each meet this question when their
+phase runs, and the marker is the answer wherever the poisoned or slow server
+IS the subject — a check whose stub merely stands in for an ordinary answer is
+re-pointed like any other, and the difference is stated per file. `main`
+untouched.
+
+---

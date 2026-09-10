@@ -657,6 +657,42 @@ sweeping again**, which is also why E and F were clean: their chat route was a
 HOLDER answering with no `chat` key at all. Put to Islam, not decided here.
 **Nothing retired.**
 
+**Phase H is accepted, and nothing was ported for it (§316.8)**: the workbook
+builders and readers are client-side and travel with the shell BY
+CONSTRUCTION — `build-shell.mjs` reads build.py's own list and asserts the
+assembly byte-identical, so a file gained tomorrow turns the build red rather
+than being missed. `template-round-trip` 0 failures at Next; `import-page` and
+`kb-file` 1 each, and **both are the ONE recorded worker 404**, established as
+not this group's by running all three green over `file://` first (§303).
+**AND VERIFYING THE ROW FOUND HALF OF IT COVERED BY NOTHING**: the round trip
+is proved IN THE BROWSER and never saves, so *"the upload's replace path and
+the archive land through A's save"* had no check on either stack — and it is
+the half most likely to fail here, because §314.2's writer is ROW-ADDRESSED and
+a replace is precisely the shape that ADDS and REMOVES rows.
+`checks/upload-seam.mjs` 9/9, RED both ways, drives the platform's own
+workbook in a real browser on the served app and reads the plan back out of
+Postgres THROUGH the tenant — an update, an INSERT, a DELETE, the archive
+written once by the replace path itself, and none of it in the other client.
+**AND THE FALSIFICATION FOUND THE CHECK'S OWN FIXTURE CLAIMING THREE THINGS AND
+MAKING ONE**: a plan row's id is minted BY POSITION (§22), so dropping the last
+pillar and appending a new one leaves the id set `mobile-P1…P4` either way —
+every row an UPDATE — and `--break=no-inserts` went green on both pillar claims
+and red on the ARCHIVE, which was the only insert that fixture made (§94.5).
+**Two faults in my own probe, each an old rule in a new place**: it called
+`archiveUnitPlan` itself and then read two archives back (§100.3 — a probe that
+makes the thing it measures is measuring itself), and it read the database with
+**stderr thrown away**, asking for a bare `name` across a join where two tables
+have one, so *column reference "name" is ambiguous* came back as an empty
+string and read as *the value is not there* (§93) — calling a CORRECT build
+broken. `qa.py` at Next 33 viewers / 229 destinations, ERRORS the ONE recorded 404 and nothing else; the `file://` sweep ERRORS none; door
+44/0, state 91/0, shell 36/0, blob 23/23, comms 47/47,
+588/0, 136/0, `tsc` clean. **AND STOP POINT C IS NARROWED, NOT ANSWERED**:
+the worker gap now reddens ANY re-pointed check that asserts no console errors,
+not merely a sweep's ERRORS line — and Phase J's own row already serves a
+self-destructing `sw.js`, so a file at that address is in the plan already;
+what is genuinely open, and Islam's, is **whether it also carries `push`**.
+**Nothing retired.**
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 

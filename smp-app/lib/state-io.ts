@@ -129,7 +129,14 @@ export async function writeChanges(c: PoolClient, stored: any, incoming: any): P
       del.push({ sql: "DELETE FROM " + t + where, params: ks.map((k2) => old[k2]) });
       touched.add(t);
     }
-    inserts.push({ table: t, ops: ins }); deletes.push({ table: t, ops: del });
+    /* THE CHECK'S BREAKS (constitution XVI, checks/upload-seam.mjs). An
+       upload is the shape that ADDS and REMOVES rows, so these two model
+       half a written upload — the new rows never landing, and the removed
+       ones staying behind — each of which reads on screen as a save that
+       worked. Never set on a deployment. */
+    const brk = process.env.SMP_BREAK || "";
+    inserts.push({ table: t, ops: brk === "no-inserts" ? [] : ins });
+    deletes.push({ table: t, ops: brk === "no-deletes" ? [] : del });
   }
   /* deletes children-first (reverse table order), then updates, then inserts
      parents-first — every FK satisfied inside the one transaction */

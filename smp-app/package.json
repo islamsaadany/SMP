@@ -24,7 +24,9 @@
     "check:blob": "node checks/blob-api.mjs",
     "check:blob:red": "for b in store-first watch-truthy; do node checks/blob-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:comms": "node checks/comms-api.mjs",
-    "check:comms:red": "for b in no-boundary chat-on; do node checks/comms-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
+    "check:comms:red": "for b in no-boundary chat-on; do node checks/comms-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:upload": "node checks/upload-seam.mjs",
+    "check:upload:red": "for b in no-inserts no-deletes; do node checks/upload-seam.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

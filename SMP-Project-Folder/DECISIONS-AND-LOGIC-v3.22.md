@@ -41844,3 +41844,93 @@ lines.
 **RETIRED BY NAME: none.**
 
 ---
+
+### §316.8 — Phase H: files in and out, and the seam nobody had measured (2026-09-10)
+
+**NOTHING IS PORTED FOR THIS GROUP, AND THAT IS THE PLAN'S OWN ROW** — the
+workbook builders and readers are client-side and travel with the shell — **so
+the deliverable is the verification, and verifying it found that half of the
+row was covered by nothing.** `template-round-trip` proves the plan and
+progress workbooks are a FIXED POINT, and proves it **in the browser**: it
+calls `buildXlsx`, `readXlsx`, `planFromWorkbook` and `applyPlanReplace`
+directly and **never saves**. The row's other half — *"the upload's replace
+path and the archive land through A's save"* — had no check anywhere, on
+either stack. And it is the half most likely to fail here: §314.2's writer is
+ROW-ADDRESSED and refuses an unaddressable shape with a 400 rather than a
+silent full rewrite, while a replace is precisely the shape that ADDS and
+REMOVES rows.
+
+**`checks/upload-seam.mjs` IS THAT SEAM, 9/9 AND RED BOTH WAYS.** A real
+browser on the served app: the platform's own workbook built from a unit's
+plan, read back by the reader it ships, applied by the replace an upload
+applies, flushed through `SYNC.saveNow`, and then read back out of Postgres
+THROUGH THE TENANT — the renamed row an UPDATE, a fifth pillar an INSERT, a
+dropped measure a DELETE, the archive written once by the replace path itself
+naming the upload, and none of it in the other client. Nothing here re-proves
+the round trip (`template-round-trip`'s subject) or the writer's contract
+(`state-api`'s); the subject is the seam between them, which is §316.7's
+section 8 one phase along.
+
+**AND THE FALSIFICATION FOUND THE CHECK'S OWN FIXTURE CLAIMING THREE THINGS
+AND MAKING ONE.** The first version dropped the last pillar and appended a new
+one, and read as an insert and a delete. **A plan row's id is minted BY
+POSITION on arrival** (§22), so four pillars in and four out is the id set
+`mobile-P1…P4` either way: every row an UPDATE, no insert, no delete, under two
+labels saying otherwise. `--break=no-inserts` said so — **green on both pillar
+claims and red on the ARCHIVE**, which is the only insert that fixture made
+(§94.5, and exactly why a break is written before a green run is believed).
+What moves the row set is the COUNT, so the plan carries a fifth pillar and one
+fewer measure now, and the two breaks redden 4 and 1.
+
+**TWO FAULTS IN MY OWN PROBE, EACH AN OLD RULE IN A NEW PLACE.** It called
+`archiveUnitPlan` ITSELF and then read TWO archive rows back — `applyPlanReplace`
+goes through `clearUnitPlan`, which archives (§49.2) — so **a probe that makes
+the thing it is measuring is measuring itself** (§100.3); the call is gone and
+the count is the replace path's alone. And it read the database through `psql`
+with **stderr thrown away**, asking for a bare `name` across a join where two
+tables have one: Postgres answered *column reference "name" is ambiguous*, the
+probe read an empty string, and an ERROR came back as *the value is not there*
+— §93's fault wearing a measurement's clothes, and it called a CORRECT build
+broken. The check reads through `withTenant` now, where a refusal throws.
+
+**THE THREE NAMED CHECKS: `template-round-trip` 0 failures at Next; `import-page`
+and `kb-file` 1 each, and both are the ONE recorded 404.** Established as not
+this group's the way §303 requires — all three run over `file://` on the frozen
+build first, where all three are green — and the failing assertion in each is
+`no console errors`, holding a single-element list naming the missing worker.
+
+**WHICH ESCALATES STOP POINT C, AND THAT IS NEW SINCE §316.7 (an hour old).**
+That section recorded the gap as one line in a sweep's ERRORS. It is more than
+that: **any re-pointed check that asserts no console errors now goes red**, on
+work that has nothing to do with the worker — two of the three in this group,
+and every future group's. A red neighbour masks a regression (§274), so the
+cost of leaving it is not cosmetic.
+
+**AND READING THE PLAN AGAIN NARROWS THE QUESTION TO ONE THING.** Line 47's
+cost is *"no service worker and no offline copy"*, argued from CACHING and
+§91's name trap — and **Phase J's own row already says a self-destructing
+`sw.js` is served at cutover**, so that the returning browsers drop the cached
+shell. A file at `/sw.js` is therefore not a departure from the plan: it is
+already in it. What is genuinely open, and Islam's, is **whether that file also
+carries `push`** — that is, whether notifications survive the rebuild at all.
+Not built here: Phase J's row owns the worker, and serving one early would make
+`navigator.serviceWorker.ready` resolve and send `pushSync` on to
+`pushManager.subscribe`, which in this sandbox reaches no push service — a
+different error in place of this one. The default stands (§316.7): today's
+behaviour, and the work continues on it.
+
+**THE BUILDERS TRAVEL BY CONSTRUCTION, WHICH IS BETTER THAN TRAVELLING**:
+`templates.js` and `xlsx.js` are in build.py's own list, and
+`scripts/build-shell.mjs` reads THAT list rather than keeping one, asserting
+the assembly byte-identical — so a file build.py gains tomorrow turns the build
+red rather than being missed. `buildXlsx`, `planFromWorkbook`, `zipStore`,
+`loadCSV` and `applyProgress` are each in `public/shell.js` exactly once.
+
+**RECORDED, NOT FOLDED IN** (rule 1b): the neighbouring app checks pass objects
+to `String()` in their `fail`, so a detail prints `[object Object]` — this
+file's own red run printed exactly that twice, with the numbers that would have
+named the bad fixture inside the object. Fixed here, left for their own edit.
+
+**RETIRED BY NAME: none.**
+
+---

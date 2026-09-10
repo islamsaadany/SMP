@@ -133,12 +133,26 @@ export async function writeChanges(c: PoolClient, stored: any, incoming: any): P
   }
   /* deletes children-first (reverse table order), then updates, then inserts
      parents-first — every FK satisfied inside the one transaction */
+  /* A STATEMENT THAT THE DATABASE REFUSES SAYS WHICH ONE (§316.2). Postgres
+     answers a bad value with the TYPE and not the column — "invalid input
+     syntax for type numeric" over thirty tables sends somebody to look at
+     everything, which is §123's fault at the far end of a save. The statement
+     and its parameters are carried onto the error here, at the one place that
+     still knows them, and nothing about what is written changes. */
+  const run = async (sql: string, params: unknown[]) => {
+    try { return (await c.query(sql, params)).rowCount || 0; }
+    catch (e: any) {
+      e.message = e.message + " — while running: " + sql.slice(0, 160) +
+        " with " + JSON.stringify(params).slice(0, 300);
+      throw e;
+    }
+  };
   let n = 0;
-  for (const d of deletes.slice().reverse()) for (const op of d.ops) { n += (await c.query(op.sql, op.params)).rowCount || 0; }
+  for (const d of deletes.slice().reverse()) for (const op of d.ops) { n += await run(op.sql, op.params); }
   const deleted = n; n = 0;
-  for (const op of updates) { n += (await c.query(op.sql, op.params)).rowCount || 0; }
+  for (const op of updates) { n += await run(op.sql, op.params); }
   const updated = n; n = 0;
-  for (const i of inserts) for (const op of i.ops) { n += (await c.query(op.sql, op.params)).rowCount || 0; }
+  for (const i of inserts) for (const op of i.ops) { n += await run(op.sql, op.params); }
   const inserted = n;
   return { updated, inserted, deleted, rows: updated + inserted + deleted, tables: [...touched] };
 }

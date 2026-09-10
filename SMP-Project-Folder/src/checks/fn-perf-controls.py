@@ -234,7 +234,19 @@ with sync_playwright() as p:
       const row=document.getElementById('subtabs');
       if(!row) return {err:'no row'};
       const kids=[...row.children].map(e=>e.getBoundingClientRect());
-      const tops=[...new Set(kids.map(r=>Math.round(r.top/6)))];
+      /* ONE ROW IS NOT ONE `top` (§122.4, §316.2). Controls of different
+         heights on one line sit at different tops, and BUCKETING those
+         (round(top/6)) turns a 1px difference into two lines whenever the two
+         values fall either side of a bucket edge — measured on the served app,
+         the three tabs at 87 and the actions span at 86, which is round(14.5)=15
+         against round(14.33)=14: a correct row reported as two. Clustered by
+         PROXIMITY instead, within half a control's height, which is what "one
+         line" means and does not depend on where a boundary happens to fall. */
+      const sorted=kids.map(r=>r.top).sort((a,b)=>a-b);
+      const near=Math.max(8, Math.round(Math.max(...kids.map(r=>r.height))/2));
+      let lines=sorted.length?1:0;
+      for(let i=1;i<sorted.length;i++) if(sorted[i]-sorted[i-1]>near) lines++;
+      const tops=new Array(lines);
       const acts=row.querySelector('.tabacts');
       return { lines: tops.length,
         overflow: Math.round(row.scrollWidth - row.clientWidth),

@@ -233,16 +233,26 @@ with sync_playwright() as p:
     # 4 - SAVE DRAFT CLOSES THE REPORT
     print("\n4 · Save draft parks it, and Reopen brings it back (§220)")
     before = bar_state(pg)
-    # A SAVE THAT DID NOT HAPPEN MUST NOT CLOSE THE REPORT (§220). Opened from
-    # a file there is no server, so Save draft answers "offline" and parks
-    # NOTHING — asserted here rather than worked around, because parking on a
-    # failed save is the worse half of the fault this ordering exists to
-    # avoid: a tidy "Draft saved" over work that never left the browser.
+    # THE PARK FOLLOWS THE SAVE'S OUTCOME (§220), and that is the assertion on
+    # BOTH stacks — §218: REWRITTEN, never loosened. This read "with no server,
+    # Save draft parks nothing", which is the same decision seen from one side
+    # only: opened from a file there is no server, so the answer is "offline"
+    # and NOTHING parks, because parking on a failed save is the worse half of
+    # the fault this ordering exists to avoid — a tidy "Draft saved" over work
+    # that never left the browser. Served over HTTP the save happens, so the
+    # report parks and the bar says so. Asking which world this is (SYNC.isLive)
+    # is what lets one assertion carry the whole rule rather than each stack
+    # carrying half of it.
+    live = pg.evaluate("() => !!(window.SYNC && SYNC.isLive && SYNC.isLive())")
     pg.evaluate("() => { const b = document.querySelector('[data-repsave]'); if (b) b.click(); }")
-    pg.wait_for_timeout(700)
+    pg.wait_for_timeout(1200)
     off = bar_state(pg)
-    ck("with no server, Save draft parks nothing", off["editable"] == before["editable"], off)
-    ck("...and says so", "no server" in off["words"], off["words"])
+    if live:
+        ck("the save happened, so the report is parked", off["editable"] == 0, off)
+        ck("...and the bar says Draft saved", "Draft saved" in off["state"], off["state"])
+    else:
+        ck("with no server, Save draft parks nothing", off["editable"] == before["editable"], off)
+        ck("...and says so", "no server" in off["words"], off["words"])
     # THE LOCK ITSELF IS THEN DRIVEN THROUGH THE STATE, because the button
     # cannot reach it over file:// (§94.11) — what is under test here is the
     # closed report, not the save.
@@ -311,7 +321,15 @@ with sync_playwright() as p:
     pg.evaluate("""() => {
       delete REVIEW.submitted[current];
       const t = UNITS[current].items[0].tactics[0];
-      t.actual = ""; t.outActual = "";
+      /* THE STATE THE PRODUCT ITSELF MAKES, never one it cannot reach (§316.2).
+         This read `t.actual = ""`, and no path in the platform writes that: the
+         reporting box stores `v === "" ? null : ...` and the upload leaves the
+         field alone. Harmless over file://, where nothing saves — and served
+         over HTTP it reaches the writer, and `tactics.actual` is the one
+         `actual` column in the schema that is numeric, so the save 500s on a
+         value nobody could have entered. A fixture that models something the
+         product does not do is testing something else (§100.3). */
+      t.actual = null; delete t.outActual;
       REVIEW.parked = REVIEW.parked || {}; REVIEW.parked[current] = true;
       paint();
     }""")

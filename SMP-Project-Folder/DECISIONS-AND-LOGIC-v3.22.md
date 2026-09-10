@@ -41325,3 +41325,83 @@ a tenant. `scripts/test-clean-parity.js` is still red on a virgin database,
 reproduced identically before this change and recorded at §308.
 
 ---
+
+### §316.4 — Phase D: Performance and Reporting accepted (2026-09-10)
+
+**22 frozen checks re-pointed at the served app, 0 failures**, each on a
+freshly seeded tenant — the plan's sixteen named (ytd-proration ·
+measure-score-spread · submit-gate · report-blockers · report-saves ·
+report-note-wrap · reported-note · project-done · capability-first ·
+cycle-edit · planning-period · unit-follows · scoring-bands · perf-line ·
+fn-perf-controls · focus-switch) and six more that belong to this group and
+its list does not name (report-chrome · fn-report-gate · project-custodian ·
+tactic-proration · repeat-project · cycle-board). Beside them: `qa.py`
+against the app **33 viewers, 229 destinations, ERRORS none**, the `file://`
+sweep **ERRORS none**, `check:state` **91/0**, the nine spike proofs green,
+`test-authorize` **588/0**, `test-graph-diff` **136/0**, `tsc` clean.
+
+**ONE FAULT IN THE PRODUCT AND IT IS §316.3** — a cycle that could not be
+opened, live on `main`, found because §316.2 made a refused statement name
+itself. **EVERY OTHER FINDING WAS A CHECK**, and each one is worth its line
+because the same shapes will recur in E–H:
+
+  * **A CHECK THAT SERVES ITS OWN STATE IS NOT RE-POINTED** (§316.1, four
+    more times). `report-saves` and `cycle-edit` count POSTs arriving at
+    their own stub, which is the subject — *that a change schedules a save at
+    all* — and the served app cannot be observed by the check's own counter.
+    `capability-first` and `project-done` BUILD the graph they measure: two
+    invented people and a capability ordering chosen so "his" and "the first
+    one" cannot coincide, without which the file proves nothing (§113.8).
+    Three of the four already said so in their own docstrings. That a save
+    LANDS on the shared schema is proved beside them, in `check:state` and in
+    `check:shell`'s change reaching the database through this same frozen
+    client.
+
+  * **A FILE-ONLY ASSERTION IS HALF A RULE.** `submit-gate` asserted *"with
+    no server, Save draft parks nothing"* — the same decision seen from one
+    side only. §220's rule is that the park follows the SAVE'S OUTCOME:
+    nothing parks when the save could not happen, the report closes when it
+    did. REWRITTEN to carry the whole rule on both stacks (§218), asking
+    `SYNC.isLive` which world it is in; the offline half is asserted exactly
+    as before.
+
+  * **AND ITS FIXTURE WROTE A STATE THE PRODUCT CANNOT MAKE**: `t.actual =
+    ""`, where every path in the platform stores `null` for *no figure* —
+    the reporting box is literally `v === "" ? null : …` and the upload
+    leaves the field alone. Harmless over `file://`, where nothing saves; over
+    HTTP it reaches the writer, and `tactics.actual` is the ONE `actual`
+    column in the schema that is numeric, so the save 500s on a value nobody
+    could have entered (§100.3). *A fixture that models something the product
+    does not do is testing something else.*
+
+  * **ONE ROW IS NOT ONE `top`, AND BUCKETING MAKES IT WORSE** (§122.4 with a
+    second edge). `fn-perf-controls` bucketed tops as `round(top/6)`, so a
+    1px difference became two lines whenever the values fell either side of a
+    bucket edge — measured on the served app, the three tabs at 87 and the
+    actions span at 86, which is `round(14.5)=15` against `round(14.33)=14`:
+    a correct row reported as two, at 1920, 1500 AND 1280. Clustered by
+    proximity now, within half a control's height.
+
+  * **A REPAINT DETACHES WHAT YOU ARE HOLDING** (§222, §215). `report-chrome`
+    slept 500ms for the save's answer — instant over `file://`, a real round
+    trip over HTTP — and once the save lands §220 parks the report and
+    `paint()` rebuilds the bar, so the handle taken before it was detached by
+    the time it was pressed and the check DIED rather than reporting. It
+    waits for the answer and re-resolves the press.
+
+  * **ASSIGNING `.value` FIRES NOTHING.** `report-note-wrap` measured the
+    box's height after setting `el.value`, so `growBox` — which sizes on
+    `input` — had never run and the "before" was whatever the box was DRAWN
+    at from the tenant's stored note. Where that note is long the box appears
+    to SHRINK: 89 then 52, on a build whose box grows perfectly.
+
+**AND MY OWN RUNNER LIED IN THE WAY §298.3 NAMES.** It reported a check's
+failures by grepping `^  FAIL`, and the checks do not all spell a failure
+that way — `capability-first` printed *"6 failed"* under a count of **0** —
+while `project-done`'s tail read *"- waiting 500ms"*, which is a run that
+STOPPED rather than one that passed. The tail is the verdict; the count is
+not. Every verdict in the closing run was read as a sentence.
+
+**RETIRED BY NAME: none.**
+
+---

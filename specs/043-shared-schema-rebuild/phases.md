@@ -121,7 +121,7 @@ begins.
 - [x] A The state API — read, save, peek, history; harnesses green red-first (§315.2, 2026-09-09: `check:state` 87/0, six red runs).
 - [x] B The shell on the new stack — build-shell, the frozen `sync.js` carried rather than rewritten, routing, CSP, /platform (§315.3, 2026-09-09: `check:shell` 36/0 with two red runs; `qa.py` at Next 33 viewers, 229 destinations, ERRORS none; door 44/0, state 87/0).
 - [x] C Strategy checks green against Next (§316/§316.1, 2026-09-10: 39 checks, 0 failures; `qa.py` at Next 33 viewers / 229 destinations / ERRORS none; state 87/0, door 44/0, shell 36/0; one product fault found and corrected — the builder's id-less capability objective, §316 — and nothing retired).
-- [ ] D Performance and Reporting checks green against Next.
+- [x] D Performance and Reporting checks green against Next (§316.3/§316.4, 2026-09-10: 22 checks, 0 failures; `qa.py` at Next 33 viewers / 229 destinations / ERRORS none; state 91/0, spike 9/9, 588/0, 136/0; one product fault found and fixed on Islam's word — opening a new cycle could not be saved, §316.3, live on `main` and proved on the frozen writer — and nothing retired).
 - [ ] E Setup checks green against Next; blob route ported.
 - [ ] F Presentation checks green against Next.
 - [ ] G Communication routes ported; server and browser checks green.

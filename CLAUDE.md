@@ -549,6 +549,25 @@ both ends, or a build that stopped storing the field passes half. Migration
 putting the constraint back: the frozen round trip prints the refusal
 verbatim and `check:state` §8 goes 3 red on the person's own sentence.
 
+**Phase D is accepted (§316.4)**: **22 frozen checks at the served app, 0
+failures**, `qa.py` 33 viewers / 229 destinations / ERRORS none, state 91/0,
+the nine spike proofs, 588/0, 136/0. **ONE PRODUCT FAULT (§316.3) AND EVERY
+OTHER FINDING A CHECK** — four that SERVE THEIR OWN STATE and must not be
+re-pointed (§316.1, and three said so in their own docstrings); one asserting
+half a rule (*"with no server, Save draft parks nothing"* is §220's decision
+from one side — REWRITTEN to *the park follows the save's outcome*, true on
+both stacks, §218); one fixture writing `t.actual = ""` where the product
+stores `null`, harmless over `file://` and a 500 over HTTP on the one `actual`
+column that is numeric (§100.3); one BUCKETING pixel tops so a 1px difference
+read as two lines (§122.4 — 87 against 86 is `round(14.5)` against
+`round(14.33)`); one holding a handle across the repaint its own save caused
+(§222, §215); and one measuring a box before `growBox` had seen it, so a long
+stored note made it appear to SHRINK. **AND MY OWN RUNNER LIED THE WAY §298.3
+NAMES**: it counted `^  FAIL` lines, which the checks do not all spell that
+way — one printed *"6 failed"* under a count of 0 — while another's tail read
+*"- waiting 500ms"*, a run that STOPPED rather than passed. *The tail is the
+verdict; the count is not.*
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 

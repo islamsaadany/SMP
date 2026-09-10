@@ -1,5 +1,12 @@
 """A PROJECT OWNER REPORTS, AND THE BAR STOPS SAYING VIEW ONLY (S287).
 
+qa-run: own-server — this check BUILDS the state it measures and serves it from
+a stub of its own: people the register does not hold, a capability ordering
+chosen so "his" and "the first one" cannot coincide. The served app cannot be
+made to hold that graph, and its subject is what the CLIENT draws given a
+stored one — carried into the app verbatim, so the code under test is the same
+either way (§316.1).
+
 Islam, from the running platform: "a project owner is not able to report,
 despite being the project owner and in the roles and access I allowed this."
 

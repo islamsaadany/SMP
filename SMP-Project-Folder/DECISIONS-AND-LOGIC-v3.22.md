@@ -41582,3 +41582,59 @@ navigation puts it right. Recorded rather than changed for the same reason.
 **RETIRED BY NAME: none.**
 
 ---
+
+### §316.6 — Phase F: the Presentation accepted (2026-09-10)
+
+**18 frozen checks re-pointed at the served app, 0 failures**, each on a
+freshly seeded tenant — contingency · deck-and-weights · deck-blank-slides ·
+deck-dividers · deck-figures · deck-fullscreen · deck-outcome · deck-pdf ·
+deck-strip · hide-slide · master-picker · master-presentation · notes-slide ·
+present-loop · review-pptx · slide-move · video-keys · video-slides. Beside
+them: `qa.py` at Next **33 viewers, 229 destinations, ERRORS none**, the
+`file://` sweep **ERRORS none**, `check:door` **44/0**, `check:state`
+**91/0**, `check:shell` **36/0**, `check:blob` **23/23**, `test-authorize`
+**588/0**, `test-graph-diff` **136/0**.
+
+**NOTHING WAS PORTED FOR THIS GROUP AND NOTHING NEEDED TO BE**, which is worth
+saying rather than leaving as an absence: a deck is assembled in the BROWSER
+from the graph on the press (§51.8, §253.3), the `.pptx` and the print are
+built there too (§296, §311), and the one thing that ever leaves is a clip,
+whose endpoint was ported at §316.5. So the only thing the new stack changes
+for the whole Presentation is where the graph came from — and the group still
+found two checks, which is the argument for running it rather than reasoning
+about it.
+
+**NO PRODUCT FAULT. BOTH FINDINGS WERE CHECKS, and both are shapes this
+rebuild has now met three times each:**
+
+  * **A FILE-ONLY ASSERTION IS HALF A RULE** (§316.4, §316.5, and twice more
+    here). `video-slides` asserted the WORDS of one stack for a decision that
+    holds on both: *"an upload with no server is refused, and answers"* is
+    §32's rule — say so rather than hang — and over `file://` `sync.js`
+    refuses before anything leaves (*"no server here"*), while served against
+    a deployment with no store the ENDPOINT refuses in its own words (*"no
+    video store here"*). Its neighbour asserted the same thing about the
+    storage section: from a file there is nobody to ask and *"Asking…"* would
+    stand for ever, and served with no store the honest answer is that none is
+    set up — the product's own THREE answers (§93, §108.10), of which the
+    check knew one. Both REWRITTEN to carry the rule and ask `SYNC.isLive()`
+    which world they are in (§218).
+
+  * **A VIEWER SWITCH IS ASYNCHRONOUS OVER HTTP** (§237). `hide-slide` called
+    `switchViewer()` from script and read the rail on the next line —
+    instant over `file://`, where nothing is flushed and nothing is fetched,
+    and over HTTP a flush, a rebase on the server's graph and only then the
+    switch. So *"the custodian has neither"* measured the OFFICE and its
+    thirty-one eyes. `qa-run.py` already settles a switch made through the
+    control (§316.1's wrapper); this one went round it, so it waits on
+    `VIEWER` itself. *The wrapper can only cover the door people use.*
+
+  * **AND `contingency.py` JOINS THE OWN-SERVER LIST** (§316.1): it serves the
+    built file AND its own `/api/state`, and the STATE is its subject — a
+    review day set to each of the moments the reminder speaks at, and a
+    working copy fetched back from `location.pathname`. The served app cannot
+    be moved through those moments.
+
+**RETIRED BY NAME: none.**
+
+---

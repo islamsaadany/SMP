@@ -604,6 +604,26 @@ RETIRES the row and section 6 presses a picker correctly no longer drawn, so the
 file DIED rather than reporting (§215). The state is snapshotted on the first
 landing and PUT BACK on every one after (§94.2). **Nothing retired.**
 
+**Phase F is accepted (§316.6)**: **18 frozen Presentation checks at the served
+app, 0 failures** — `qa.py` at Next 33 viewers / 229 destinations / ERRORS
+none, the `file://` sweep ERRORS none, door 44/0, state 91/0, shell 36/0, blob
+23/23, 588/0, 136/0. **NOTHING WAS PORTED FOR THIS GROUP AND NOTHING NEEDED TO
+BE**, which is worth saying rather than leaving as an absence: a deck is
+assembled in the BROWSER from the graph on the press (§51.8, §253.3), the
+`.pptx` and the print are built there too (§296, §311), and the one thing that
+ever leaves is a clip — ported at §316.5. So the only thing the new stack
+changes for the whole Presentation is where the graph came from, and the group
+still found two checks, which is the argument for running it rather than
+reasoning about it. **NO PRODUCT FAULT**; both findings were shapes met before
+— `video-slides` asserting the WORDS of one stack for a rule that holds on both
+(over `file://` `sync.js` refuses before anything leaves, served the ENDPOINT
+refuses in its own words, and the storage section has THREE honest answers of
+which the check knew one), and `hide-slide` reading the rail on the line after
+`switchViewer()`, which §237 made asynchronous over HTTP — so *"the custodian
+has neither"* measured the office and its thirty-one eyes. `qa-run.py` already
+settles a switch made through the CONTROL; that one went round it. **Nothing
+retired.**
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 

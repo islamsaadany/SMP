@@ -37,6 +37,11 @@ import { clipPath, targetOfPath, mayWatch, maySpeakFor } from "../lib/blob-api.t
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
 const PORT = 3977, BASE = "http://localhost:" + PORT, SLUG = "raya-trade";
 const brk = (process.argv.find((a) => a.startsWith("--break=")) || "").slice(8);
+/* THE BREAK REACHES THIS PROCESS TOO. `mayWatch` and `maySpeakFor` are
+   asked HERE, in-process, so a break set only on the spawned server's
+   environment leaves them behaving perfectly and the falsification
+   reports NOT RED — a proof that proves nothing (§94.5). */
+if (brk) process.env.SMP_BREAK = brk;
 const R = createRequire(import.meta.url)("../lib/rules.cjs");
 let oks = 0, fails = 0;
 const ok = (l) => { oks++; console.log("ok    " + l); };
@@ -55,7 +60,7 @@ const mint = async (key, kind, isAdmin, seat) => {
   await owner.query("INSERT INTO tenant_users (tenant_id, user_id, person_key, seat) VALUES ($1,$2,$3,$4)", [tenantId, u.id, key, seat]);
   return email;
 };
-const smoteam = await mint("ceo", "client", false, "smoteam");
+const smoteamEmail = await mint("ceo", "client", false, "smoteam");
 await owner.query("DELETE FROM login_attempts");
 
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
@@ -90,6 +95,7 @@ const get = async (cookie, q, slug = SLUG) => {
 
 const office = await signIn("office@forefront.example");
 const head = await signIn("mobhead@raya.example");
+const smoteam = await signIn(smoteamEmail);
 
 try {
   /* ── 1 · the door is in front of it ─────────────────────────────────── */
@@ -117,7 +123,8 @@ try {
     "the office is told there is no store — never an empty table with nothing read (§231.4)", r.j);
   r = await post(smoteam, { action: "drop", path: "videos/mobile/x.mp4" });
   check(r.status === 403 && /Super user/.test((r.j && r.j.error) || ""),
-    "clearing storage is the Super user's, not merely the office's (§89)", r.j);
+    "clearing storage is the Super user's, not merely the office's (§89)",
+    r.status + " " + JSON.stringify(r.j));
   r = await post(office, { action: "drop", path: "videos/mobile/x.mp4" });
   check(r.status === 503 && /no video store/.test((r.j && r.j.error) || ""),
     "...and the Super user is then told there is no store", r.j);
@@ -130,16 +137,26 @@ try {
     check(r.status === 503 && /no video store/.test((r.j && r.j.error) || ""),
       "`" + body.action + "` says there is no store", r.status + " " + JSON.stringify(r.j));
   }
-  r = await get(office, "action=play&path=videos/mobile/x.mp4");
-  check(r.status === 503, "play says it too, rather than hanging or redirecting nowhere", r.status);
+  /* `?play=<path>`, WHICH IS WHAT slides.js ASKS FOR (§261.14). A spelling of
+     my own here would have tested a door the product does not knock on. */
+  r = await get(office, "play=" + encodeURIComponent("videos/mobile/x.mp4"));
+  check(r.status === 503, "play says it too, rather than hanging or redirecting nowhere",
+    r.status + " " + JSON.stringify(r.j));
+  r = await get(office, "");
+  check(r.status === 400, "...and a GET naming no clip is refused", r.status);
   r = await post(office, { action: "nonsense" });
   check(r.status === 400, "an action the endpoint does not have is refused", r.status);
 
   /* ── 5 · a path names its subject, and the rules are the shared ones ── */
   console.log("\n5 · the path, and the two gates");
+  /* THE COLON SURVIVES, because a supporting function's target IS `fn:<key>`
+     and the path has to read back to it — `safe()` keeps `A-Za-z0-9._:-` and
+     nothing else, byte for byte what the frozen endpoint kept. */
   const p = clipPath("fn:finance", "v1abc", "clip.MP4");
-  check(p === "videos/fn-finance/v1abc.mp4", "a path is made of the target and the id, both made safe", p);
-  check(targetOfPath(p) === "fn-finance", "...and reads back to the target it was made from", targetOfPath(p));
+  check(p === "videos/fn:finance/v1abc.mp4", "a path is made of the target and the id", p);
+  check(targetOfPath(p) === "fn:finance", "...and reads back to the target it was made from", targetOfPath(p));
+  check(clipPath("a/b/../c", "x y", "z.mp4") === "videos/a-b-..-c/x-y.mp4",
+    "...with anything else in either part made safe", clipPath("a/b/../c", "x y", "z.mp4"));
   check(targetOfPath("etc/passwd") === "" && targetOfPath(null) === "",
     "...while anything that is not one names nothing", targetOfPath("etc/passwd"));
 

@@ -1,5 +1,11 @@
 """A DISMISS FOR EVERY ATTENTION ITEM, ON THE BOX IT IS ABOUT (§190).
 
+qa-run: own-server — §316.1. This check INVENTS the two server facts the page
+draws from: a declaration by a person the register does not hold ("saidguy"),
+and a password state per row. Neither can be made to exist on the served app —
+a declaration is written at somebody's first sign-in (§56) — and the subject is
+what the REGISTER does with them, which is client code carried verbatim.
+
 Islam: "attention items that stays attention item is a problem — always give me
 the option to dismiss, and make generally the dismiss under the box with the
 issue and mark the issue box with some sort of surrounding outline to make sure

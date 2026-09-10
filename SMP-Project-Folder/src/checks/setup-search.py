@@ -64,7 +64,12 @@ with sync_playwright() as p:
     pg.wait_for_timeout(800)
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(300)
-    pg.query_selector(".navmenu-btn").click()
+    # THE GEAR BY ITS OWN ATTRIBUTE, never by a class it shares (§316.8, the
+    # third file to need this): `.navmenu-btn` is worn by the HOUSE too since
+    # §193.2 put the way home at the head of that row, so the first one is the
+    # house and this click went home rather than into Setup — the rail never
+    # opened and every assertion below it read a page that is not this one.
+    pg.query_selector('[data-md="setup"]').click()
     pg.wait_for_timeout(600)
 
     print("\n── 1 · the box is there, and above the list it filters ──")

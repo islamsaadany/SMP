@@ -1,5 +1,13 @@
 """REPORTING SAVES — ON A UNIT AND ON BOTH SHAPES OF FUNCTION (§183).
 
+qa-run: own-server — this check COUNTS THE POSTS at a stub of its own, which
+is the subject: that a change schedules a save at all. The served app cannot
+be observed by the check's own counter, and `sync.js` is carried into it
+verbatim, so the client under test is the same client either way — that a
+save LANDS on the shared schema is proved beside this, in Phase A's
+`check:state` and in `check:shell`'s change reaching the database through
+this same frozen client (§316.1).
+
 Islam: *"for the supporting functions the reporting doesn't autosave."*
 
 He was right, and the fault was total: on a function that plans in PILLARS the

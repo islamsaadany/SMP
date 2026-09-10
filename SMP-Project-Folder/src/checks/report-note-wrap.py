@@ -178,6 +178,15 @@ with sync_playwright() as pw:
           const el = document.querySelector('#panel [data-note], #panel [data-cnote]');
           if (!el) return null;
           el.value = 'First line.'; el.focus();
+          /* MEASURED AFTER THE GROWER HAS SEEN IT (§316.2). `growBox` sizes the
+             box on `input`, and assigning `.value` fires nothing — so the height
+             read here was the one the box was DRAWN at, from whatever note the
+             tenant already holds. Where that stored note is long the "before" is
+             taller than the two lines typed next and the box appears to SHRINK:
+             measured on the served app, 89 before and 52 after, on a build whose
+             box grows perfectly. The event is dispatched so the two heights are
+             one line against two, which is what the assertion is about. */
+          el.dispatchEvent(new Event('input', { bubbles: true }));
           return { id: el.dataset.note || el.dataset.cnote,
                    hook: el.dataset.note ? 'data-note' : 'data-cnote',
                    h: Math.round(el.getBoundingClientRect().height) };}""")

@@ -1,5 +1,13 @@
 """EDITING THE CYCLE THAT IS RUNNING (§273).
 
+qa-run: own-server — this check COUNTS THE POSTS at a stub of its own, which
+is the subject: that a change schedules a save at all. The served app cannot
+be observed by the check's own counter, and `sync.js` is carried into it
+verbatim, so the client under test is the same client either way — that a
+save LANDS on the shared schema is proved beside this, in Phase A's
+`check:state` and in `check:shell`'s change reaching the database through
+this same frozen client (§316.1).
+
 Islam: *"allow me to edit the cycle name. give me an edit button the cycle to
 edit the date as you already built and the cycel name edit as well"* — and then,
 of the two shapes drawn for him: *"keep the close cycle inside the edit. as it's

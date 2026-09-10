@@ -129,20 +129,35 @@
     } catch (e) { /* no storage is simply no sentence */ }
     if (why) say(why, true);
 
+    /* Made here and appended after the title, so the search's own handler
+       closes over the element it filters rather than over a hoisted blank.
+
+       AND IT IS NAMED. The band below it is a card grid too and rightly wears
+       the same `.cards` rule (§53.5), so a selector reading `.cards` reaches
+       both — which is how something written later comes to mean "the client
+       grid" and quietly include the worked example. `data-grid` is what a
+       check or a rule addresses; the class stays about the layout. The new
+       check's own first run found this, by going red on it. */
+    var grid = el("div", "cards");
+    grid.dataset.grid = "clients";
+
     var right = el("div");
     var search = el("input", "fld");
     search.placeholder = "Search clients"; search.style.width = "190px";
-    /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place. */
+    /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place.
+       SCOPED TO THE CLIENT GRID (§317): the box says "Search clients", so with
+       the worked example out of that grid it is no longer among the things it
+       searches. That is a change and it is the honest one — today typing
+       "demo" finds it. */
     search.addEventListener("input", function () {
       var q = search.value.trim().toLowerCase();
-      Array.prototype.forEach.call(page.querySelectorAll(".ccard[data-name]"), function (c) {
+      Array.prototype.forEach.call(grid.querySelectorAll(".ccard[data-name]"), function (c) {
         c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
       });
     });
     right.appendChild(search);
     title("Clients", right);
 
-    var grid = el("div", "cards");
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
 
@@ -161,12 +176,37 @@
          who may add one is told to; somebody who may not is told who to ask.
          A refusal names the place that can fix it (§16.7), and for these two
          people that is not the same place. */
-      j.cards.forEach(function (c) { grid.appendChild(cardFor(c)); });
+      /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ────────
+         Split by what the tenant IS, never by its name: `kind` is the
+         column the server already sorts on, and a key spelled "demo" is a
+         client's key like any other. Everything else about it is unchanged
+         — same card, same amber, same Demo tag, same door. */
+      var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
+      var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
+
+      clients.forEach(function (c) { grid.appendChild(cardFor(c)); });
       if (j.canAdd) grid.appendChild(addCard());
-      if (!j.cards.length) {
+      /* AND THE COUNT IS A COUNT OF CLIENTS. It read `j.cards.length`, which
+         includes the demo — so on a platform seeded with the worked example
+         and no clients, the sentence below never drew and the one person who
+         could add one was shown a single amber card and no way in: §61's
+         trap the empty state was written to close, by a road it did not
+         cover. */
+      if (!clients.length) {
         say(j.canAdd
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
+      }
+
+      /* Drawn only when there is one (§61): a heading over an empty band is
+         furniture, and a platform with no demo seeded has nothing to say. */
+      if (demos.length) {
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "The worked example"));
+        var dgrid = el("div", "cards");
+        demos.forEach(function (c) { dgrid.appendChild(cardFor(c)); });
+        apart.appendChild(dgrid);
+        page.appendChild(apart);
       }
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;

@@ -133,7 +133,9 @@ client's name and mark on it, and the password you already had. Then:
 9. **Forefront's own page** (`/platform`) — the client cards, and
    **Add a client** twice: *RHI*, then *El Abd*. Each opens on its own name
    with an empty plan and the builder as the way in.
-10. **The demo** (`/demo`) — the worked example, with nobody real in it.
+10. **The demo** — its card is not in the client grid; it stands on its own
+    beneath it, under *The worked example* (§317). Open it: the worked example,
+    with nobody real in it.
 
 And one that is not a screen: on any page, the browser's console should log
 **no 404 for `/sw.js`** — that file is served now, it carries the

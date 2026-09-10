@@ -42155,3 +42155,85 @@ part of it.
 
 
 ---
+
+## §317 — THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (2026-09-10, spec 043)
+
+Islam, of Forefront's own page, in the same message as three questions about
+the cutover: ***"the demo should be a separate client on hte platform outside
+beside the clients."***
+
+**IT WAS ALREADY A CLIENT AND IT WAS NOT SET APART, WHICH IS THE WHOLE OF THE
+ASK.** §313.8 made the worked example a tenant of its own — its own schema,
+its own address, its own card, amber, tagged *Demo* — and drew that card **in
+the client grid**, third across with the way to add a client after it, because
+`cards` returns it in one list (`ORDER BY kind, name`, so it merely sorts
+last). Nothing about the demo itself is wrong; where its card is drawn is.
+
+**DRAWN BEFORE IT WAS BUILT** (rule 1c), out of `platform.html`'s own tokens,
+type and card rules rather than a palette chosen for the mockup, today beside
+the proposal at the page's own proportions, and **published as an artifact**
+(a mockup is looked at, never downloaded). Islam: *"ok for the demo."*
+
+**THE DEVICE IS THE PAGE'S OWN AND NOTHING HERE IS NEW**: a hairline with an
+uppercase key on it — how every other surface separates one kind of thing from
+another — so there is no second card style, no new colour and no new box
+(§53.5). The card keeps the amber wash and the *Demo* tag it already wore, and
+**it keeps the grid's own track width**: a card grown to the full page would
+read as MORE important than the clients above it, which is the opposite of
+what setting it apart says. Drawn only when there is one (§61) — a heading
+over an empty band is furniture.
+
+**AND THE COUNT WAS A COUNT OF CARDS, NOT OF CLIENTS.** The empty state read
+`j.cards.length`, which included the demo — so on a platform seeded with the
+worked example and **no clients yet**, the sentence *"No clients yet. Add the
+first one"* never drew and the one person who could add a client was shown a
+single amber card and no way in. **§61's trap that empty state was written to
+close** (§313.18 closed it for an empty list and could not see this road,
+because the demo did not exist yet). Invisible on any deployment that has a
+client, which is every deployment anybody has looked at.
+
+**THE SEARCH SAYS "SEARCH CLIENTS" AND NOW MEANS IT** — scoped to the client
+grid. **That is a change and it is stated rather than discovered**: today
+typing *demo* finds it, and after this it does not.
+
+**SPLIT BY WHAT THE TENANT IS, NEVER BY ITS NAME**: `kind` is the column the
+server already sorts on, and a key spelled `demo` is a client's key like any
+other (§48's family — a name is never an identifier, §87).
+
+**AND THE CHECK'S OWN FIRST RUN FOUND A TRAP IN THE MARKUP, BY GOING RED ON
+IT** (§317.1). The band below the grid is a card grid too and rightly wears the
+same `.cards` rule, so `.cards .ccard` reaches BOTH — which is how something
+written later comes to mean *the client grid* and quietly include the worked
+example again. The client grid is **named** (`data-grid="clients"`): that is
+what a check or a rule addresses, and the class stays about the layout.
+
+**MEASURED, NOT ASSUMED** (§38.5, walked into by number in this file more than
+once): the band's key is `--ink-3` on `--ground` — **4.80:1 light, 5.67:1
+dark**, read off the page in both palettes rather than argued from the token's
+own comment (§40: a token cleared elsewhere is not thereby cleared here).
+
+**`checks/platform-cards.py` — 19 assertions, 0 failures, red 11 ways.** It
+needs **no database**: `platform.html` is served as it is by both stacks, so
+the page is driven against a stub — which is also the only way to MAKE the
+state that matters, a platform holding the worked example and no clients,
+which no real deployment can be made to show (§94.11, §255). **Both ends every
+time** (§94.2): a build that simply DELETED the demo card satisfies *"it is
+not in the grid"* perfectly, so every absence is asserted beside the presence
+that makes it mean something — the card drawn, its ground, its tag, its door.
+**And what the break cannot reach is said rather than left as a gap**: the
+falsification moves the card in the DOM after the page has drawn, so it cannot
+put the old count back; that half is proved by the made state instead.
+
+**RUN AGAINST BOTH COPIES, 19/0 EACH** — the page as written and the new
+stack's generated `smp-app/shell/platform.html`, because both stacks serve it
+and a generated copy is exactly where a drift hides (§53.5, A15).
+
+**Screen only**: no `api/`, `lib/`, `db/` or `smp-app/lib` file touched, read
+off the diff; nothing stored moves, nothing is migrated, and the demo tenant,
+its seed switch and its address are untouched.
+
+**RECORDED, NOT DONE**: at phone width the page is one column either way and
+the band simply follows the clients, which is what the grid already did.
+
+
+---

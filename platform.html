@@ -140,6 +140,24 @@
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
     color:var(--ink-3) }
+  /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
+     Islam: "the demo should be a separate client on the platform outside
+     beside the clients." It was IN the grid — third across, with the way to
+     add a client after it — so the page counted it as one, and two things
+     followed that nobody chose: the empty-state line reads a count that
+     included it, and the box saying "Search clients" found it.
+
+     THE DEVICE IS THE PAGE'S OWN and nothing here is new: a hairline with an
+     uppercase key on it, which is how every other surface separates one kind
+     of thing from another (§53.5). The card keeps the amber wash and the Demo
+     tag it already wore — what changed is where it is drawn. AND IT KEEPS THE
+     GRID'S OWN TRACK WIDTH: a card grown to the full page would read as more
+     important than the clients above it, which is the opposite of what
+     setting it apart says. */
+  .apart{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line) }
+  .apart > .akey{ display:block; margin-bottom:12px;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
   .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
     letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
     border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface) }
@@ -351,20 +369,35 @@
     } catch (e) { /* no storage is simply no sentence */ }
     if (why) say(why, true);
 
+    /* Made here and appended after the title, so the search's own handler
+       closes over the element it filters rather than over a hoisted blank.
+
+       AND IT IS NAMED. The band below it is a card grid too and rightly wears
+       the same `.cards` rule (§53.5), so a selector reading `.cards` reaches
+       both — which is how something written later comes to mean "the client
+       grid" and quietly include the worked example. `data-grid` is what a
+       check or a rule addresses; the class stays about the layout. The new
+       check's own first run found this, by going red on it. */
+    var grid = el("div", "cards");
+    grid.dataset.grid = "clients";
+
     var right = el("div");
     var search = el("input", "fld");
     search.placeholder = "Search clients"; search.style.width = "190px";
-    /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place. */
+    /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place.
+       SCOPED TO THE CLIENT GRID (§317): the box says "Search clients", so with
+       the worked example out of that grid it is no longer among the things it
+       searches. That is a change and it is the honest one — today typing
+       "demo" finds it. */
     search.addEventListener("input", function () {
       var q = search.value.trim().toLowerCase();
-      Array.prototype.forEach.call(page.querySelectorAll(".ccard[data-name]"), function (c) {
+      Array.prototype.forEach.call(grid.querySelectorAll(".ccard[data-name]"), function (c) {
         c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
       });
     });
     right.appendChild(search);
     title("Clients", right);
 
-    var grid = el("div", "cards");
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
 
@@ -383,12 +416,37 @@
          who may add one is told to; somebody who may not is told who to ask.
          A refusal names the place that can fix it (§16.7), and for these two
          people that is not the same place. */
-      j.cards.forEach(function (c) { grid.appendChild(cardFor(c)); });
+      /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ────────
+         Split by what the tenant IS, never by its name: `kind` is the
+         column the server already sorts on, and a key spelled "demo" is a
+         client's key like any other. Everything else about it is unchanged
+         — same card, same amber, same Demo tag, same door. */
+      var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
+      var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
+
+      clients.forEach(function (c) { grid.appendChild(cardFor(c)); });
       if (j.canAdd) grid.appendChild(addCard());
-      if (!j.cards.length) {
+      /* AND THE COUNT IS A COUNT OF CLIENTS. It read `j.cards.length`, which
+         includes the demo — so on a platform seeded with the worked example
+         and no clients, the sentence below never drew and the one person who
+         could add one was shown a single amber card and no way in: §61's
+         trap the empty state was written to close, by a road it did not
+         cover. */
+      if (!clients.length) {
         say(j.canAdd
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
+      }
+
+      /* Drawn only when there is one (§61): a heading over an empty band is
+         furniture, and a platform with no demo seeded has nothing to say. */
+      if (demos.length) {
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "The worked example"));
+        var dgrid = el("div", "cards");
+        demos.forEach(function (c) { dgrid.appendChild(cardFor(c)); });
+        apart.appendChild(dgrid);
+        page.appendChild(apart);
       }
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;

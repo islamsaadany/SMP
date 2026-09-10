@@ -8597,6 +8597,33 @@ DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-l
                                 # Forefront's own two pages: contrast in both themes
                                 # and no sideways scroll at four widths — neither of
                                 # the two product sweeps ever reaches them (§313.11)
+SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-cards.py
+                                # the worked example is not one of the clients
+                                # (§317) — out of the client grid and below it,
+                                # under the page's own hairline and key; the
+                                # count is a count of CLIENTS (it read
+                                # `j.cards.length`, so on a platform seeded with
+                                # the demo and no clients the "No clients yet"
+                                # line never drew — §61's trap the empty state
+                                # was written to close); and the box saying
+                                # "Search clients" no longer reaches it. BOTH
+                                # ENDS every time (§94.2 — a build that DELETED
+                                # the demo card satisfies every absence here),
+                                # the key's contrast measured in both palettes
+                                # rather than argued from its token (§38.5,
+                                # §40), and it needs NO DATABASE: the page is
+                                # served as it is by both stacks, so a stub
+                                # drives it — which is also the only way to MAKE
+                                # the state that matters (§94.11, §255). 19/0,
+                                # red 11 ways (`--break=in-grid`), and run
+                                # against the new stack's generated copy too
+                                # (`SMP_PAGE=smp-app/shell/platform.html`),
+                                # because a generated copy is where a drift
+                                # hides (§53.5). Its own first run found the
+                                # trap in the markup by going red on it: the
+                                # band is a card grid too, so `.cards` reached
+                                # both — the client grid is NAMED now
+                                # (`data-grid="clients"`)
 DATABASE_URL=… node scripts/seed-demo-client.js --dry-run   # what the Demo client would hold
 DATABASE_URL=… node scripts/migrate-to-multi-client.js --dry-run
 ```
@@ -8640,7 +8667,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-10 &mdash; **&sect;316.10: Phase J built &mdash; the
+*Last Updated: 2026-09-10 &mdash; **&sect;317: the worked example is not one
+of the clients.** Islam, of Forefront's own page: *"the demo should be a
+separate client on hte platform outside beside the clients."* **IT WAS ALREADY
+A CLIENT AND IT WAS NOT SET APART**, which is the whole of the ask &mdash;
+&sect;313.8 made it a tenant of its own and drew its card IN the client grid,
+third across with the way to add a client after it. Drawn before it was built
+(rule 1c) out of the page's own tokens and cards, today beside the proposal,
+published as an artifact; *"ok for the demo."* **THE DEVICE IS THE PAGE'S
+OWN** &mdash; a hairline with an uppercase key on it &mdash; so no second card
+style, no new colour, no new box, and the card keeps the amber and the *Demo*
+tag it already wore, **at the grid's own track width**, because a card grown
+to the page would read as more important than the clients above it.
+**AND THE COUNT WAS A COUNT OF CARDS**: the empty state read
+`j.cards.length`, which included the demo, so on a platform seeded with the
+worked example and no clients the line *"No clients yet. Add the first one"*
+never drew and the one person who could add one was shown a single amber card
+and no way in &mdash; **&sect;61's trap that empty state exists to close**,
+invisible on any deployment that has a client. **The search says "Search
+clients" and now means it**, which is a change and is stated rather than
+discovered. **Split by `kind`, never by the name** (&sect;87). **And the
+check's own first run found a trap in the markup by going red on it**: the
+band is a card grid too and rightly wears the same rule, so `.cards` reached
+both &mdash; the client grid is NAMED now (`data-grid="clients"`), which is
+what a check addresses while the class stays about the layout. **Measured, not
+assumed** (&sect;38.5, &sect;40): the key is 4.80:1 light and 5.67:1 dark, read
+off the page in both palettes. `checks/platform-cards.py` **19/0, red 11
+ways**, needing **no database** &mdash; a stub drives the page, which is also
+the only way to MAKE the state that matters (&sect;94.11, &sect;255) &mdash;
+**both ends every time** (a build that DELETED the demo card satisfies every
+absence here), **and run against the new stack's generated copy too**, because
+a generated copy is where a drift hides (&sect;53.5). Screen only: nothing
+stored moves, nothing is migrated, and the demo tenant, its seed switch and its
+address are untouched.*
+
+*Earlier the same day: **&sect;316.10: Phase J built &mdash; the
 worker Islam asked for, the headers nobody had missed, and the deploy step.**
 Stop point C answered in two words (*"1. ok"*), and **the plan said both things
 and was right about its own half each time**: line 47's *no service worker* is

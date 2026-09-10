@@ -1,0 +1,796 @@
+<title>HeroUI Read-Across</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   DOCUMENT TOKENS — the memo's own skin, theme-aware.
+   Neutrals are biased toward the platform's navy so the page and
+   the product it discusses sit in one family.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --surface-2:#EAEEF3; --surface-3:#E1E6ED;
+  --ink:#141922; --ink-2:#4A5464; --ink-3:#737D8C;
+  --rule:#DCE1E8; --rule-soft:#E9EDF2;
+  --accent:#16325C; --accent-soft:#E7ECF4;
+  --gold:#8A6B22; --gold-soft:#F5EFDF;
+  --yes:#1F6248; --no:#8C3327; --maybe:#7A5D1C;
+  --shadow:0 1px 2px rgb(20 25 34/.05), 0 8px 24px -12px rgb(20 25 34/.18);
+  --ff-display:'Newsreader', Georgia, 'Times New Roman', serif;
+  --ff-body:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ff-mono:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1218; --surface:#161B23; --surface-2:#1D242E; --surface-3:#252D39;
+    --ink:#E9EDF3; --ink-2:#AAB4C2; --ink-3:#7E8896;
+    --rule:#2A313D; --rule-soft:#222933;
+    --accent:#A3BAE0; --accent-soft:#1B2432;
+    --gold:#D9B65F; --gold-soft:#2A2415;
+    --yes:#5FBF95; --no:#E08877; --maybe:#D0AC55;
+    --shadow:0 1px 2px rgb(0 0 0/.4), 0 8px 24px -12px rgb(0 0 0/.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1218; --surface:#161B23; --surface-2:#1D242E; --surface-3:#252D39;
+  --ink:#E9EDF3; --ink-2:#AAB4C2; --ink-3:#7E8896;
+  --rule:#2A313D; --rule-soft:#222933;
+  --accent:#A3BAE0; --accent-soft:#1B2432;
+  --gold:#D9B65F; --gold-soft:#2A2415;
+  --yes:#5FBF95; --no:#E08877; --maybe:#D0AC55;
+  --shadow:0 1px 2px rgb(0 0 0/.4), 0 8px 24px -12px rgb(0 0 0/.6);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--ff-body); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:1180px; margin:0 auto; padding:0 24px 96px}
+.col{max-width:70ch}
+
+/* ── type ─────────────────────────────────────────────── */
+h1,h2,h3{font-family:var(--ff-display); font-weight:500; text-wrap:balance; margin:0}
+h1{font-size:clamp(34px,5vw,52px); line-height:1.08; letter-spacing:-.015em}
+h2{font-size:clamp(24px,3vw,31px); line-height:1.2; letter-spacing:-.01em}
+h3{font-size:19px; line-height:1.3}
+p{margin:0 0 1em}
+strong{font-weight:700}
+em{font-style:italic}
+a{color:var(--accent)}
+.key{
+  font-size:11px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); font-family:var(--ff-body);
+}
+.lead{font-family:var(--ff-display); font-size:20px; line-height:1.5; color:var(--ink-2)}
+.quiet{color:var(--ink-3)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── masthead ─────────────────────────────────────────── */
+header.top{padding:64px 0 40px; border-bottom:1px solid var(--rule)}
+header.top .key{display:block; margin-bottom:18px}
+header.top h1{margin-bottom:20px; max-width:16ch}
+header.top .lead{max-width:60ch}
+.meta{
+  display:flex; flex-wrap:wrap; gap:8px 28px; margin-top:26px;
+  font-size:13px; color:var(--ink-3);
+}
+.meta b{color:var(--ink-2); font-weight:600}
+
+section{padding:52px 0 0}
+section > .col > h2{margin-bottom:14px}
+.rule-h{display:flex; align-items:baseline; gap:14px; margin-bottom:22px}
+.rule-h .n{
+  font-family:var(--ff-mono); font-size:12px; color:var(--gold);
+  border:1px solid var(--rule); border-radius:4px; padding:2px 7px; flex:none;
+}
+
+/* ── callout ──────────────────────────────────────────── */
+.call{
+  background:var(--surface); border:1px solid var(--rule);
+  border-left:3px solid var(--accent); border-radius:0 8px 8px 0;
+  padding:18px 22px; margin:22px 0;
+}
+.call p:last-child{margin:0}
+.call.gold{border-left-color:var(--gold)}
+
+/* ── measured facts ───────────────────────────────────── */
+.facts{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+  border-radius:10px; overflow:hidden; margin:26px 0 8px;
+}
+.fact{background:var(--surface); padding:16px 18px}
+.fact .v{
+  font-family:var(--ff-display); font-size:32px; line-height:1;
+  font-variant-numeric:tabular-nums; margin-bottom:7px;
+}
+.fact .l{font-size:13px; color:var(--ink-3); line-height:1.35}
+
+/* ── audit table ──────────────────────────────────────── */
+.audit-wrap{overflow-x:auto; margin:26px 0 0; border:1px solid var(--rule); border-radius:10px; background:var(--surface)}
+table.audit{border-collapse:collapse; width:100%; min-width:720px; font-size:14px}
+table.audit th{
+  text-align:left; padding:11px 16px; background:var(--surface-2);
+  font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-2); border-bottom:1px solid var(--rule);
+}
+table.audit td{padding:12px 16px; border-bottom:1px solid var(--rule-soft); vertical-align:top}
+table.audit tr:last-child td{border-bottom:0}
+table.audit td:first-child{font-weight:600; white-space:nowrap}
+.verdict{
+  display:inline-block; font-size:11px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; padding:3px 9px; border-radius:999px; white-space:nowrap;
+}
+.v-take{color:var(--yes); background:color-mix(in srgb, var(--yes) 12%, transparent); border:1px solid color-mix(in srgb, var(--yes) 30%, transparent)}
+.v-have{color:var(--ink-3); background:var(--surface-2); border:1px solid var(--rule)}
+.v-no{color:var(--no); background:color-mix(in srgb, var(--no) 10%, transparent); border:1px solid color-mix(in srgb, var(--no) 28%, transparent)}
+.v-later{color:var(--maybe); background:color-mix(in srgb, var(--maybe) 12%, transparent); border:1px solid color-mix(in srgb, var(--maybe) 30%, transparent)}
+
+/* ═══════════════════════════════════════════════════════
+   THE DRAWN SCREENS
+   Everything below .screen is the PRODUCT's own palette,
+   fixed to its light theme. A slide is white whatever theme
+   the reader sits in — and so is this.
+   ═══════════════════════════════════════════════════════ */
+.dir{margin-top:44px}
+.dir-head{display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 16px; margin-bottom:6px}
+.dir-head h3{font-size:25px}
+.dir-tag{
+  font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 10px; border-radius:999px; background:var(--gold-soft); color:var(--gold);
+  border:1px solid color-mix(in srgb, var(--gold) 34%, transparent);
+}
+.dir-bet{max-width:74ch; color:var(--ink-2); margin:0 0 20px; font-size:16.5px}
+
+.frame{
+  border:1px solid var(--rule); border-radius:12px; overflow:hidden;
+  box-shadow:var(--shadow); background:#F7F8FA;
+}
+.frame-cap{
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  padding:9px 14px; background:var(--surface-2); border-bottom:1px solid var(--rule);
+  font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+}
+.frame-cap .sm{letter-spacing:.04em; text-transform:none; font-weight:400; font-size:12px}
+.scroller{overflow-x:auto}
+
+.screen{
+  /* the product's forefront palette, light — literal on purpose */
+  --p-panel:#16325C; --p-panel-ink:#FFFFFF; --p-panel-quiet:#B7C4D8;
+  --p-gold:#C9A24D; --p-gold-deep:#8A6B22;
+  --p-ground:#F7F8FA; --p-surface:#FFFFFF; --p-surface-2:#EFF2F6;
+  --p-line:#D6DCE5; --p-line-soft:#E6EAF0;
+  --p-ink:#171B22; --p-ink-2:#414A58; --p-ink-3:#636C79;
+  --p-good:#2E7D5B; --p-attn:#B8860B; --p-bad:#B04434;
+  --p-good-tx:#1F6248; --p-attn-tx:#7A5D1C; --p-bad-tx:#8C3327;
+  --p-good-bg:#E4F0EA; --p-attn-bg:#F7EFD6; --p-bad-bg:#F7E3E0;
+  --p-cta:#A4512C;
+  min-width:1080px;
+  background:var(--p-ground); color:var(--p-ink);
+  font-family:'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+  font-size:14px; line-height:1.45;
+}
+.screen *{box-sizing:border-box}
+
+/* chrome */
+.s-bar{
+  background:var(--p-panel); color:var(--p-panel-ink);
+  display:flex; align-items:center; gap:22px; padding:0 16px; height:44px;
+  font-size:13.5px;
+}
+.s-bar .u{opacity:.72}
+.s-bar .u.on{opacity:1; font-weight:700; box-shadow:inset 0 -3px 0 var(--p-gold); padding:12px 2px}
+.s-seg{display:flex; border:1px solid rgb(255 255 255/.28); border-radius:6px; overflow:hidden; font-size:11.5px; font-weight:700; letter-spacing:.06em}
+.s-seg span{padding:4px 10px}
+.s-seg .on{background:rgb(255 255 255/.16)}
+.s-tabs{
+  display:flex; align-items:center; gap:8px; padding:10px 16px;
+  background:var(--p-surface); border-bottom:1px solid var(--p-line);
+}
+.s-tab{font-size:13.5px; color:var(--p-ink-3); padding:5px 11px; border-radius:6px}
+.s-tab.on{background:var(--p-surface-2); color:var(--p-ink); font-weight:700}
+.s-tab.cta{background:var(--p-cta); color:#fff; font-weight:700}
+.s-body{padding:16px}
+
+/* headline cards — today */
+.s-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.s-card{
+  background:var(--p-surface); border:1px solid var(--p-line);
+  border-radius:10px; padding:14px 16px;
+}
+.s-card .ch{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:6px}
+.s-card .ct{font-size:15px; font-weight:700}
+.s-pill{
+  font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; white-space:nowrap;
+}
+.p-good{background:var(--p-good-bg); color:var(--p-good-tx)}
+.p-attn{background:var(--p-attn-bg); color:var(--p-attn-tx)}
+.p-bad{background:var(--p-bad-bg); color:var(--p-bad-tx)}
+.s-fig{font-size:34px; font-weight:700; line-height:1.05; font-variant-numeric:tabular-nums}
+.s-fig .pc{font-size:16px; font-weight:600; color:var(--p-ink-3)}
+.f-good{color:var(--p-good-tx)} .f-attn{color:var(--p-gold-deep)} .f-bad{color:var(--p-bad-tx)}
+.s-link{font-size:12.5px; color:var(--p-ink-2); text-decoration:underline; text-underline-offset:2px}
+.s-figrow{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.s-stats{display:flex; gap:26px; margin-top:12px; padding-top:10px; border-top:1px solid var(--p-line-soft)}
+.s-stat .k{font-size:10px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--p-ink-3)}
+.s-stat .v{font-size:14px; font-weight:700; font-variant-numeric:tabular-nums}
+
+/* tables */
+.s-sec{font-size:11px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--p-ink-3); margin:20px 0 8px}
+table.s-t{width:100%; border-collapse:collapse; background:var(--p-surface); font-size:13.5px}
+table.s-t th{
+  background:var(--p-panel); color:var(--p-panel-ink); text-align:left;
+  font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+  padding:9px 12px; white-space:nowrap;
+}
+table.s-t th:first-child{border-radius:8px 0 0 0} table.s-t th:last-child{border-radius:0 8px 0 0}
+table.s-t td{padding:9px 12px; border-bottom:1px solid var(--p-line-soft); vertical-align:middle}
+table.s-t tbody tr:last-child td{border-bottom:1px solid var(--p-line)}
+table.s-t .c{text-align:center} table.s-t .r{text-align:right}
+.s-t .num{font-variant-numeric:tabular-nums; font-weight:700}
+.s-t .ben{color:var(--p-ink-3); font-weight:400; font-size:12px}
+.s-note{
+  display:block; font-size:12px; color:var(--p-ink-3); margin-top:3px;
+  padding-left:8px; border-left:2px solid var(--p-line);
+}
+.s-note b{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--p-ink-3)}
+
+/* ── DIRECTION A · the meter ──────────────────────────── */
+.meter{position:relative; height:6px; border-radius:999px; background:var(--p-surface-2); overflow:hidden}
+.meter i{position:absolute; inset:0 auto 0 0; border-radius:999px; display:block}
+.meter b{position:absolute; top:0; bottom:0; width:2px; background:var(--p-ink-2); border-radius:1px}
+.cardmeter{margin-top:12px}
+.cardmeter .meter{height:8px}
+.m-good i{background:var(--p-good)} .m-attn i{background:var(--p-attn)} .m-bad i{background:var(--p-bad)}
+.range{position:relative; height:8px; margin-top:12px}
+.range .track{position:absolute; inset:3px 0; border-radius:999px; background:var(--p-surface-2)}
+.range .span{position:absolute; top:3px; bottom:3px; border-radius:999px; opacity:.34}
+.range .avg{position:absolute; top:0; bottom:0; width:3px; border-radius:2px}
+.r-good .span{background:var(--p-good)} .r-good .avg{background:var(--p-good-tx)}
+.r-attn .span{background:var(--p-attn)} .r-attn .avg{background:var(--p-gold-deep)}
+.r-bad .span{background:var(--p-bad)}  .r-bad .avg{background:var(--p-bad-tx)}
+.range-k{display:flex; justify-content:space-between; font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--p-ink-3); margin-top:5px}
+.cellmeter{display:flex; align-items:center; gap:9px; justify-content:flex-end}
+.cellmeter .meter{width:60px; flex:none}
+
+/* ── DIRECTION B · flat tint ──────────────────────────── */
+.b .s-card{border-radius:14px; border-color:transparent; box-shadow:none}
+.b .card-good{background:var(--p-good-bg)}
+.b .card-attn{background:var(--p-attn-bg)}
+.b .card-bad{background:var(--p-bad-bg)}
+.b .s-stats{border-top-color:rgb(23 27 34/.10)}
+.b table.s-t{border:1px solid var(--p-line); border-radius:12px; overflow:hidden}
+.b table.s-t th{
+  background:var(--p-surface-2); color:var(--p-ink-2);
+  border-bottom:2px solid var(--p-gold);
+}
+.b table.s-t th:first-child{border-radius:0} .b table.s-t th:last-child{border-radius:0}
+.b .s-pill{background:rgb(255 255 255/.62)}
+.b .s-tab.on{border-radius:999px}
+.b .s-tab.cta{border-radius:999px}
+
+/* ── DIRECTION C · density ────────────────────────────── */
+.c .s-bar{height:38px; font-size:13px}
+.c .s-strip{
+  display:flex; align-items:stretch; background:var(--p-surface);
+  border:1px solid var(--p-line); border-radius:10px; overflow:hidden;
+}
+.c .s-cell{flex:1; padding:9px 14px; border-right:1px solid var(--p-line-soft)}
+.c .s-cell:last-child{border-right:0}
+.c .s-cell .ct{font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--p-ink-3)}
+.c .s-cell .row{display:flex; align-items:baseline; gap:9px; margin-top:2px}
+.c .s-cell .f{font-size:24px; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums}
+.c .s-cell .sub{font-size:11.5px; color:var(--p-ink-3); font-variant-numeric:tabular-nums}
+.c table.s-t{font-size:13px}
+.c table.s-t th{padding:6px 10px}
+.c table.s-t td{padding:5px 10px}
+.c .s-sec{margin:14px 0 6px}
+.c .s-body{padding:12px}
+.dsw{display:flex; gap:0; border:1px solid var(--p-line); border-radius:6px; overflow:hidden; font-size:11px; font-weight:700; letter-spacing:.06em; background:var(--p-surface)}
+.dsw span{padding:4px 10px; color:var(--p-ink-3)}
+.dsw .on{background:var(--p-panel); color:#fff}
+
+/* ── cost panel ───────────────────────────────────────── */
+.cost{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-top:0;
+  border-radius:0 0 12px 12px; overflow:hidden; margin-top:-12px; padding-top:12px;
+}
+.cost-wrap{margin-top:18px; border:1px solid var(--rule); border-radius:12px; overflow:hidden; background:var(--surface)}
+.cost-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1px; background:var(--rule)}
+.cost-c{background:var(--surface); padding:15px 18px}
+.cost-c .key{display:block; margin-bottom:7px}
+.cost-c p{margin:0; font-size:14.5px; color:var(--ink-2); line-height:1.5}
+.cost-c.warn .key{color:var(--no)}
+
+/* ── close ────────────────────────────────────────────── */
+.ask{
+  margin-top:52px; padding:30px 32px; border-radius:14px;
+  background:var(--surface); border:1px solid var(--rule);
+  border-top:3px solid var(--gold);
+}
+.ask h2{margin-bottom:12px}
+ol.q{margin:18px 0 0; padding-left:0; list-style:none; counter-reset:q}
+ol.q li{
+  counter-increment:q; position:relative; padding:0 0 0 40px; margin-bottom:14px;
+  font-size:16px; color:var(--ink-2);
+}
+ol.q li::before{
+  content:counter(q); position:absolute; left:0; top:1px;
+  width:26px; height:26px; border-radius:999px; background:var(--accent-soft); color:var(--accent);
+  font-size:12px; font-weight:700; display:grid; place-items:center; font-family:var(--ff-mono);
+}
+ol.q li b{color:var(--ink)}
+footer{margin-top:56px; padding-top:22px; border-top:1px solid var(--rule); font-size:13px; color:var(--ink-3)}
+
+@media (max-width:640px){
+  .page{padding:0 16px 64px}
+  header.top{padding:40px 0 28px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<div class="page">
+
+<header class="top">
+  <span class="key">Design read-across · 9 September 2026</span>
+  <h1>You do not need HeroUI. You need its vocabulary.</h1>
+  <p class="lead">HeroUI cannot be installed in SMP — but reading its catalogue against ours answers a question nobody has asked out loud: which parts of a component library have we already built one class at a time, and which are genuinely missing?</p>
+  <div class="meta">
+    <span><b>Subject</b> heroui-inc/heroui · React 19 + Tailwind v4 + React Aria</span>
+    <span><b>Measured against</b> SMP v3.22, Mobile · Performance</span>
+    <span><b>Status</b> proposal — nothing built</span>
+  </div>
+</header>
+
+<!-- ══════════════ 1 · THE CONSTRAINT ══════════════ -->
+<section>
+  <div class="col">
+    <div class="rule-h"><span class="n">01</span><h2>The library will not fit, and it is worth saying why first</h2></div>
+    <p>HeroUI is a React component library. It needs React 19, Tailwind v4 and a build step, and it ships as npm packages — <span class="quiet">@heroui/button, @heroui/modal</span> — that a bundler tree-shakes into an application.</p>
+    <p>SMP is <strong>one self-contained HTML file</strong>. No React, no Tailwind, no bundler, no npm — <span class="quiet">package.json deliberately has no build script</span>. It is assembled by concatenating sources with Python, it runs offline from a memory stick, and since the security pass its script blocks are locked to their exact bytes. Every one of those is a decision we made on purpose, and adopting HeroUI would reverse all of them at once.</p>
+    <div class="call">
+      <p><strong>So this is a read-across, not an adoption.</strong> Three things travel without the code: a checklist of what a mature component library carries, three primitives we are genuinely missing, and a naming vocabulary that would tidy something the numbers below say is worth tidying.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 · MEASURED ══════════════ -->
+<section>
+  <div class="col">
+    <div class="rule-h"><span class="n">02</span><h2>What our own sources say</h2></div>
+    <p>Counted this morning across the nine stylesheets, before anything was proposed:</p>
+  </div>
+
+  <div class="facts">
+    <div class="fact"><div class="v num">57</div><div class="l">distinct class names ending in <em>btn</em>, <em>cta</em>, <em>chip</em> or <em>pill</em></div></div>
+    <div class="fact"><div class="v num">19</div><div class="l">of those are chips and pills alone — nineteen ways to draw one small rounded label</div></div>
+    <div class="fact"><div class="v num">116</div><div class="l">focus rules across ten files, and no check anywhere measures a single one</div></div>
+    <div class="fact"><div class="v num">3</div><div class="l">files that hand-write the same “this box scrolls” fade</div></div>
+    <div class="fact"><div class="v num">9,545</div><div class="l">lines of CSS carrying all of it</div></div>
+  </div>
+  <p class="quiet col" style="font-size:13.5px; margin-top:12px">Every one of those class names was the right call on the day it was written. The cost is not any single one — it is that a new control has fifty-seven precedents to choose between, and the person choosing is usually me at two in the morning.</p>
+</section>
+
+<!-- ══════════════ 3 · THE AUDIT ══════════════ -->
+<section>
+  <div class="col">
+    <div class="rule-h"><span class="n">03</span><h2>Their catalogue against ours</h2></div>
+    <p>HeroUI ships about seventy-five components. Here is every one that touches something SMP actually does — and the honest verdict is that we have most of them already. That is the finding, not a disappointment.</p>
+  </div>
+
+  <div class="audit-wrap">
+    <table class="audit">
+      <thead><tr>
+        <th style="width:22%">They ship</th><th style="width:40%">What we have today</th><th style="width:38%">Verdict</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>Meter · Progress</td>
+          <td>One gauge, on the company page. Everywhere else a figure is read against a benchmark as text — <span class="num">48% / 90%</span>.</td>
+          <td><span class="verdict v-take">Take it</span> The only real reading gain on the list. Direction A below.</td>
+        </tr>
+        <tr>
+          <td>ScrollShadow</td>
+          <td>Written by hand three times — the Setup rail, the settings panel, the plan tables.</td>
+          <td><span class="verdict v-take">Take it</span> One primitive replacing three. Invisible to you; three fewer places to get it wrong.</td>
+        </tr>
+        <tr>
+          <td>Button <span class="quiet">(variant × tone × size)</span></td>
+          <td>57 class names, no shared vocabulary. Two of them have already collided by accident.</td>
+          <td><span class="verdict v-take">Take the naming</span> Not the code. One button, a few axes. Nothing on screen moves.</td>
+        </tr>
+        <tr>
+          <td>Kbd</td>
+          <td>Nothing. The presentation's arrows, Escape and page keys are undiscoverable — we removed the on-screen bar on purpose.</td>
+          <td><span class="verdict v-take">Take it</span> Small: one key-hints card behind “?” while presenting.</td>
+        </tr>
+        <tr>
+          <td>Drawer</td>
+          <td>Nothing. Editing happens in the table, which is where every cramped-column complaint has come from.</td>
+          <td><span class="verdict v-later">Later</span> Real, but it changes how the pen works. Its own round, not this one.</td>
+        </tr>
+        <tr>
+          <td>Autocomplete · ComboBox</td>
+          <td>Our searchable select, on every dropdown past five options.</td>
+          <td><span class="verdict v-have">Built</span></td>
+        </tr>
+        <tr>
+          <td>DatePicker · Calendar</td>
+          <td>The month picker and the day picker, both written to our own rule that a day is precision we cannot use.</td>
+          <td><span class="verdict v-have">Built</span></td>
+        </tr>
+        <tr>
+          <td>Tooltip · Popover</td>
+          <td>Our own bubble, opening on hover <em>and</em> focus <em>and</em> tap.</td>
+          <td><span class="verdict v-have">Built</span></td>
+        </tr>
+        <tr>
+          <td>Accordion · Disclosure</td>
+          <td>Real <span class="quiet">&lt;details&gt;</span>, so a repaint can never lose the state.</td>
+          <td><span class="verdict v-have">Built</span></td>
+        </tr>
+        <tr>
+          <td>Skeleton</td>
+          <td>The boot skeleton, in grey tokens no branding can touch.</td>
+          <td><span class="verdict v-have">Built</span></td>
+        </tr>
+        <tr>
+          <td>Modal · AlertDialog</td>
+          <td>Our modal, with the page made inert and focus returned.</td>
+          <td><span class="verdict v-have">Built</span></td>
+        </tr>
+        <tr>
+          <td>Alert</td>
+          <td>Four banner kinds already — refused save, newer version, someone else edited, what is missing.</td>
+          <td><span class="verdict v-have">Built</span> <span class="quiet">Their four tones are a useful audit of ours; nothing to add.</span></td>
+        </tr>
+        <tr>
+          <td>Toast</td>
+          <td>Nothing — deliberately. Outcomes are written into the control that was pressed.</td>
+          <td><span class="verdict v-no">Refuse</span> A message that floats away is one a presenter misses. Our rule is better here.</td>
+        </tr>
+        <tr>
+          <td>Breadcrumbs</td>
+          <td>Removed in v2.9 — the navigation already said where you were, five times over.</td>
+          <td><span class="verdict v-no">Refuse</span></td>
+        </tr>
+        <tr>
+          <td>Avatar · Pagination</td>
+          <td>No photos in the register; a plan is never paginated.</td>
+          <td><span class="verdict v-no">Refuse</span> Nothing to show.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════ 4 · TODAY ══════════════ -->
+<section>
+  <div class="col">
+    <div class="rule-h"><span class="n">04</span><h2>Today, so the three have something to be compared against</h2></div>
+    <p>Mobile · Performance, drawn in the platform's own colours and type. Everything below this line is the product, not the memo.</p>
+  </div>
+
+  <div class="frame">
+    <div class="frame-cap"><span>Today · v3.22</span><span class="sm">Mobile — Performance, at 1440</span></div>
+    <div class="scroller"><div class="screen">
+      <div class="s-bar">
+        <span style="font-weight:700">Group ▾</span>
+        <span class="s-seg"><span class="on">UNITS</span><span>FUNCTIONS</span></span>
+        <span class="u on">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Care</span>
+      </div>
+      <div class="s-tabs">
+        <span class="s-tab">Strategy</span><span class="s-tab on">Performance</span><span class="s-tab cta">Reporting</span>
+      </div>
+      <div class="s-body">
+        <div class="s-cards">
+          <div class="s-card">
+            <div class="ch"><span class="ct">Key Objectives performance</span><span class="s-pill p-attn">Needs attention</span></div>
+            <div class="s-figrow"><span class="s-fig f-attn">78<span class="pc">%</span></span><span class="s-link">See the key objectives →</span></div>
+            <div class="s-stats">
+              <span class="s-stat"><span class="k">Objectives</span><br><span class="v">4</span></span>
+              <span class="s-stat"><span class="k">Highest</span><br><span class="v">88%</span></span>
+              <span class="s-stat"><span class="k">Lowest</span><br><span class="v">44%</span></span>
+            </div>
+          </div>
+          <div class="s-card">
+            <div class="ch"><span class="ct">Pillars performance</span><span class="s-pill p-bad">Off track</span></div>
+            <div class="s-figrow"><span class="s-fig f-bad">67<span class="pc">%</span></span><span class="s-link">See the pillars →</span></div>
+            <div class="s-stats">
+              <span class="s-stat"><span class="k">Pillars</span><br><span class="v">4</span></span>
+              <span class="s-stat"><span class="k">Highest</span><br><span class="v">89%</span></span>
+              <span class="s-stat"><span class="k">Lowest</span><br><span class="v">44%</span></span>
+            </div>
+          </div>
+          <div class="s-card">
+            <div class="ch"><span class="ct">Execution performance</span><span class="s-pill p-good">On track</span></div>
+            <div class="s-figrow"><span class="s-fig f-good">107<span class="pc">% of plan</span></span><span class="s-link">See the breakdown →</span></div>
+            <div class="s-stats">
+              <span class="s-stat"><span class="k">Delivered</span><br><span class="v">47%</span></span>
+              <span class="s-stat"><span class="k">Planned</span><br><span class="v">44%</span></span>
+              <span class="s-stat"><span class="k">Variance</span><br><span class="v">+3</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="s-sec">MB01 · Key measures</div>
+        <table class="s-t">
+          <thead><tr>
+            <th style="width:34px">#</th><th>Measure</th><th class="c" style="width:60px">Dir.</th>
+            <th class="c" style="width:110px">Annual target</th><th class="c" style="width:90px">Compile</th>
+            <th class="c" style="width:120px">YTD actual</th><th class="r" style="width:100px">Progress</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Data duplicate rate</td><td class="c">≤</td><td class="c num">1%</td><td class="c quiet">Latest</td><td class="c"><span class="num">1.4%</span> <span class="ben">/ 1%</span></td><td class="r num" style="color:var(--p-gold-deep)">71%</td></tr>
+            <tr><td>2</td><td>Orders processed digitally<span class="s-note"><b>Reported</b> ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.</span></td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">48%</span> <span class="ben">/ 90%</span></td><td class="r num" style="color:var(--p-bad-tx)">53%</td></tr>
+            <tr><td>3</td><td>App coverage rate ◆</td><td class="c">≥</td><td class="c num">50%</td><td class="c quiet">Latest</td><td class="c"><span class="num">22%</span> <span class="ben">/ 50%</span></td><td class="r num" style="color:var(--p-bad-tx)">44%</td></tr>
+            <tr><td>4</td><td>Dependency on automated reports</td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">58%</span> <span class="ben">/ 90%</span></td><td class="r num" style="color:var(--p-gold-deep)">64%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+  </div>
+  <p class="quiet col" style="font-size:13.5px; margin-top:14px">Three cards, each printing a Highest and a Lowest with nothing showing the distance between them; a Progress column where four numbers have to be compared by reading them.</p>
+</section>
+
+<!-- ══════════════ 5 · DIRECTION A ══════════════ -->
+<section>
+  <div class="col">
+    <div class="rule-h"><span class="n">05</span><h2>Three directions</h2></div>
+    <p>Each is drawn on the same screen so they can be compared. Each is a different bet about what is wrong. Only one of them should be built.</p>
+  </div>
+
+  <div class="dir">
+    <div class="dir-head"><h3>A · Pace</h3><span class="dir-tag">Recommended</span></div>
+    <p class="dir-bet"><strong>The bet: the numbers are right and shapeless.</strong> Nothing is added to the data and nothing is recalculated — the figures already on the card gain a shape, so a row is judged by looking rather than by reading. This is HeroUI's Meter, and nothing else from it.</p>
+
+    <div class="frame">
+      <div class="frame-cap"><span>Direction A · Pace</span><span class="sm">same figures, same words, one new primitive</span></div>
+      <div class="scroller"><div class="screen">
+        <div class="s-bar">
+          <span style="font-weight:700">Group ▾</span>
+          <span class="s-seg"><span class="on">UNITS</span><span>FUNCTIONS</span></span>
+          <span class="u on">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Care</span>
+        </div>
+        <div class="s-tabs">
+          <span class="s-tab">Strategy</span><span class="s-tab on">Performance</span><span class="s-tab cta">Reporting</span>
+        </div>
+        <div class="s-body">
+          <div class="s-cards">
+            <div class="s-card">
+              <div class="ch"><span class="ct">Key Objectives performance</span><span class="s-pill p-attn">Needs attention</span></div>
+              <div class="s-figrow"><span class="s-fig f-attn">78<span class="pc">%</span></span><span class="s-link">See the key objectives →</span></div>
+              <div class="range r-attn">
+                <span class="track"></span><span class="span" style="left:44%; right:12%"></span><span class="avg" style="left:78%"></span>
+              </div>
+              <div class="range-k"><span>Lowest 44%</span><span>4 objectives</span><span>Highest 88%</span></div>
+              <div class="s-stats">
+                <span class="s-stat"><span class="k">Objectives</span><br><span class="v">4</span></span>
+                <span class="s-stat"><span class="k">Highest</span><br><span class="v">88%</span></span>
+                <span class="s-stat"><span class="k">Lowest</span><br><span class="v">44%</span></span>
+              </div>
+            </div>
+            <div class="s-card">
+              <div class="ch"><span class="ct">Pillars performance</span><span class="s-pill p-bad">Off track</span></div>
+              <div class="s-figrow"><span class="s-fig f-bad">67<span class="pc">%</span></span><span class="s-link">See the pillars →</span></div>
+              <div class="range r-bad">
+                <span class="track"></span><span class="span" style="left:44%; right:11%"></span><span class="avg" style="left:67%"></span>
+              </div>
+              <div class="range-k"><span>Lowest 44%</span><span>4 pillars</span><span>Highest 89%</span></div>
+              <div class="s-stats">
+                <span class="s-stat"><span class="k">Pillars</span><br><span class="v">4</span></span>
+                <span class="s-stat"><span class="k">Highest</span><br><span class="v">89%</span></span>
+                <span class="s-stat"><span class="k">Lowest</span><br><span class="v">44%</span></span>
+              </div>
+            </div>
+            <div class="s-card">
+              <div class="ch"><span class="ct">Execution performance</span><span class="s-pill p-good">On track</span></div>
+              <div class="s-figrow"><span class="s-fig f-good">107<span class="pc">% of plan</span></span><span class="s-link">See the breakdown →</span></div>
+              <div class="cardmeter"><span class="meter m-good"><i style="width:47%"></i><b style="left:44%"></b></span></div>
+              <div class="range-k"><span>Delivered 47%</span><span>+3 ahead</span><span>Planned 44% ▏</span></div>
+              <div class="s-stats">
+                <span class="s-stat"><span class="k">Delivered</span><br><span class="v">47%</span></span>
+                <span class="s-stat"><span class="k">Planned</span><br><span class="v">44%</span></span>
+                <span class="s-stat"><span class="k">Variance</span><br><span class="v">+3</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="s-sec">MB01 · Key measures</div>
+          <table class="s-t">
+            <thead><tr>
+              <th style="width:34px">#</th><th>Measure</th><th class="c" style="width:60px">Dir.</th>
+              <th class="c" style="width:110px">Annual target</th><th class="c" style="width:90px">Compile</th>
+              <th class="c" style="width:120px">YTD actual</th><th class="r" style="width:150px">Progress</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Data duplicate rate</td><td class="c">≤</td><td class="c num">1%</td><td class="c quiet">Latest</td><td class="c"><span class="num">1.4%</span> <span class="ben">/ 1%</span></td>
+                <td class="r"><span class="cellmeter"><span class="num" style="color:var(--p-gold-deep)">71%</span><span class="meter m-attn"><i style="width:71%"></i></span></span></td></tr>
+              <tr><td>2</td><td>Orders processed digitally<span class="s-note"><b>Reported</b> ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.</span></td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">48%</span> <span class="ben">/ 90%</span></td>
+                <td class="r"><span class="cellmeter"><span class="num" style="color:var(--p-bad-tx)">53%</span><span class="meter m-bad"><i style="width:53%"></i></span></span></td></tr>
+              <tr><td>3</td><td>App coverage rate ◆</td><td class="c">≥</td><td class="c num">50%</td><td class="c quiet">Latest</td><td class="c"><span class="num">22%</span> <span class="ben">/ 50%</span></td>
+                <td class="r"><span class="cellmeter"><span class="num" style="color:var(--p-bad-tx)">44%</span><span class="meter m-bad"><i style="width:44%"></i></span></span></td></tr>
+              <tr><td>4</td><td>Dependency on automated reports</td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">58%</span> <span class="ben">/ 90%</span></td>
+                <td class="r"><span class="cellmeter"><span class="num" style="color:var(--p-gold-deep)">64%</span><span class="meter m-attn"><i style="width:64%"></i></span></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="cost-wrap"><div class="cost-grid">
+      <div class="cost-c"><span class="key">What it buys</span><p>The spread on a card stops being two numbers you subtract in your head. Four rows in a column become one shape you run your eye down. Nothing is recalculated — the bar on a card is the Lowest and Highest already printed under it.</p></div>
+      <div class="cost-c"><span class="key">What it costs</span><p>One new primitive to maintain, and 40px of card height — measured, the table starts 367px down instead of 327px. The Progress column widens from 100 to 150px, which the measures table has spare and the tactics table does not — so the bar goes on measures and objectives only, and I would say so rather than squeeze it in.</p></div>
+      <div class="cost-c warn"><span class="key">The part to watch</span><p>The projector must learn it too. A slide that prints the number while the page shows a bar means the room and the laptop disagree, which is the one thing a review cannot afford.</p></div>
+    </div></div>
+  </div>
+
+  <!-- ══════════════ DIRECTION B ══════════════ -->
+  <div class="dir">
+    <div class="dir-head"><h3>B · Flat tint</h3><span class="dir-tag" style="background:var(--accent-soft); color:var(--accent); border-color:color-mix(in srgb, var(--accent) 30%, transparent)">HeroUI's own look</span></div>
+    <p class="dir-bet"><strong>The bet: state should be carried by the surface, not by a label in the corner.</strong> This is what HeroUI actually looks like — soft tinted grounds, larger radii, no dark furniture. The card <em>is</em> the status; the pill becomes a caption rather than the message.</p>
+
+    <div class="frame">
+      <div class="frame-cap"><span>Direction B · Flat tint</span><span class="sm">tinted cards, light table head, softer shapes</span></div>
+      <div class="scroller"><div class="screen b">
+        <div class="s-bar">
+          <span style="font-weight:700">Group ▾</span>
+          <span class="s-seg"><span class="on">UNITS</span><span>FUNCTIONS</span></span>
+          <span class="u on">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Care</span>
+        </div>
+        <div class="s-tabs">
+          <span class="s-tab">Strategy</span><span class="s-tab on">Performance</span><span class="s-tab cta">Reporting</span>
+        </div>
+        <div class="s-body">
+          <div class="s-cards">
+            <div class="s-card card-attn">
+              <div class="ch"><span class="ct">Key Objectives performance</span><span class="s-pill p-attn">Needs attention</span></div>
+              <div class="s-figrow"><span class="s-fig f-attn">78<span class="pc">%</span></span><span class="s-link">See the key objectives →</span></div>
+              <div class="s-stats">
+                <span class="s-stat"><span class="k">Objectives</span><br><span class="v">4</span></span>
+                <span class="s-stat"><span class="k">Highest</span><br><span class="v">88%</span></span>
+                <span class="s-stat"><span class="k">Lowest</span><br><span class="v">44%</span></span>
+              </div>
+            </div>
+            <div class="s-card card-bad">
+              <div class="ch"><span class="ct">Pillars performance</span><span class="s-pill p-bad">Off track</span></div>
+              <div class="s-figrow"><span class="s-fig f-bad">67<span class="pc">%</span></span><span class="s-link">See the pillars →</span></div>
+              <div class="s-stats">
+                <span class="s-stat"><span class="k">Pillars</span><br><span class="v">4</span></span>
+                <span class="s-stat"><span class="k">Highest</span><br><span class="v">89%</span></span>
+                <span class="s-stat"><span class="k">Lowest</span><br><span class="v">44%</span></span>
+              </div>
+            </div>
+            <div class="s-card card-good">
+              <div class="ch"><span class="ct">Execution performance</span><span class="s-pill p-good">On track</span></div>
+              <div class="s-figrow"><span class="s-fig f-good">107<span class="pc">% of plan</span></span><span class="s-link">See the breakdown →</span></div>
+              <div class="s-stats">
+                <span class="s-stat"><span class="k">Delivered</span><br><span class="v">47%</span></span>
+                <span class="s-stat"><span class="k">Planned</span><br><span class="v">44%</span></span>
+                <span class="s-stat"><span class="k">Variance</span><br><span class="v">+3</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="s-sec">MB01 · Key measures</div>
+          <table class="s-t">
+            <thead><tr>
+              <th style="width:34px">#</th><th>Measure</th><th class="c" style="width:60px">Dir.</th>
+              <th class="c" style="width:110px">Annual target</th><th class="c" style="width:90px">Compile</th>
+              <th class="c" style="width:120px">YTD actual</th><th class="r" style="width:100px">Progress</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Data duplicate rate</td><td class="c">≤</td><td class="c num">1%</td><td class="c quiet">Latest</td><td class="c"><span class="num">1.4%</span> <span class="ben">/ 1%</span></td><td class="r num" style="color:var(--p-gold-deep)">71%</td></tr>
+              <tr><td>2</td><td>Orders processed digitally<span class="s-note"><b>Reported</b> ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.</span></td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">48%</span> <span class="ben">/ 90%</span></td><td class="r num" style="color:var(--p-bad-tx)">53%</td></tr>
+              <tr><td>3</td><td>App coverage rate ◆</td><td class="c">≥</td><td class="c num">50%</td><td class="c quiet">Latest</td><td class="c"><span class="num">22%</span> <span class="ben">/ 50%</span></td><td class="r num" style="color:var(--p-bad-tx)">44%</td></tr>
+              <tr><td>4</td><td>Dependency on automated reports</td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">58%</span> <span class="ben">/ 90%</span></td><td class="r num" style="color:var(--p-gold-deep)">64%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="cost-wrap"><div class="cost-grid">
+      <div class="cost-c"><span class="key">What it buys</span><p>The page reads softer and more current, and a card's state is legible from further away than a pill is — useful on a projector at the back of a room.</p></div>
+      <div class="cost-c warn"><span class="key">What it reverses</span><p>The navy table head is not decoration: it is the one surface that wears the client's brand colour, so a light head means a tenant's colours survive only in the top bar. We settled that once already, in the other direction.</p></div>
+      <div class="cost-c warn"><span class="key">What it spends</span><p>Three tinted cards in a row spend most of the colour budget the scoring bands live on. When everything is tinted, a tint stops meaning “look here” — and the amber card and the amber <em>Fill in what is empty</em> button start arguing.</p></div>
+    </div></div>
+  </div>
+
+  <!-- ══════════════ DIRECTION C ══════════════ -->
+  <div class="dir">
+    <div class="dir-head"><h3>C · Density</h3><span class="dir-tag" style="background:var(--surface-2); color:var(--ink-2); border-color:var(--rule)">HeroUI's size axis</span></div>
+    <p class="dir-bet"><strong>The bet: one size does not serve both jobs.</strong> The office scans tables on a laptop all day; a unit head presents the same page to a room. HeroUI carries a size on every component; here it becomes one switch per person — <em>Compact</em> or <em>Comfortable</em> — and Compact is what you would work in.</p>
+
+    <div class="frame">
+      <div class="frame-cap"><span>Direction C · Density, set to Compact</span><span class="sm">measured: the table starts 202px down instead of 327px, rows 35px → 26px</span></div>
+      <div class="scroller"><div class="screen c">
+        <div class="s-bar">
+          <span style="font-weight:700">Group ▾</span>
+          <span class="s-seg"><span class="on">UNITS</span><span>FUNCTIONS</span></span>
+          <span class="u on">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Care</span>
+        </div>
+        <div class="s-tabs">
+          <span class="s-tab">Strategy</span><span class="s-tab on">Performance</span><span class="s-tab cta">Reporting</span>
+          <span style="margin-left:auto"></span>
+          <span class="dsw"><span class="on">COMPACT</span><span>COMFORTABLE</span></span>
+        </div>
+        <div class="s-body">
+          <div class="s-strip">
+            <div class="s-cell">
+              <div class="ct">Key objectives</div>
+              <div class="row"><span class="f" style="color:var(--p-gold-deep)">78%</span><span class="s-pill p-attn">Needs attention</span><span class="sub">4 · 44–88</span></div>
+            </div>
+            <div class="s-cell">
+              <div class="ct">Pillars</div>
+              <div class="row"><span class="f" style="color:var(--p-bad-tx)">67%</span><span class="s-pill p-bad">Off track</span><span class="sub">4 · 44–89</span></div>
+            </div>
+            <div class="s-cell">
+              <div class="ct">Execution</div>
+              <div class="row"><span class="f" style="color:var(--p-good-tx)">107%</span><span class="s-pill p-good">On track</span><span class="sub">47 vs 44 · +3</span></div>
+            </div>
+          </div>
+
+          <div class="s-sec">MB01 · Key measures</div>
+          <table class="s-t">
+            <thead><tr>
+              <th style="width:30px">#</th><th>Measure</th><th class="c" style="width:52px">Dir.</th>
+              <th class="c" style="width:96px">Annual target</th><th class="c" style="width:80px">Compile</th>
+              <th class="c" style="width:112px">YTD actual</th><th class="r" style="width:88px">Progress</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Data duplicate rate</td><td class="c">≤</td><td class="c num">1%</td><td class="c quiet">Latest</td><td class="c"><span class="num">1.4%</span> <span class="ben">/ 1%</span></td><td class="r num" style="color:var(--p-gold-deep)">71%</td></tr>
+              <tr><td>2</td><td>Orders processed digitally<span class="s-note"><b>Reported</b> ERP cutover moved to Q3 with the principal.</span></td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">48%</span> <span class="ben">/ 90%</span></td><td class="r num" style="color:var(--p-bad-tx)">53%</td></tr>
+              <tr><td>3</td><td>App coverage rate ◆</td><td class="c">≥</td><td class="c num">50%</td><td class="c quiet">Latest</td><td class="c"><span class="num">22%</span> <span class="ben">/ 50%</span></td><td class="r num" style="color:var(--p-bad-tx)">44%</td></tr>
+              <tr><td>4</td><td>Dependency on automated reports</td><td class="c">≥</td><td class="c num">90%</td><td class="c quiet">Latest</td><td class="c"><span class="num">58%</span> <span class="ben">/ 90%</span></td><td class="r num" style="color:var(--p-gold-deep)">64%</td></tr>
+            </tbody>
+          </table>
+
+          <div class="s-sec">MB01 · Tactics</div>
+          <table class="s-t">
+            <thead><tr>
+              <th style="width:30px">#</th><th>Tactic</th><th style="width:150px">Outcome</th>
+              <th class="c" style="width:96px">Target</th><th style="width:130px">Owner</th><th class="c" style="width:96px">Quarters</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Clean and standardize customer and SKU base</td><td class="quiet">Duplicate records</td><td class="c num">≤ 1%</td><td>Ramy Behairy</td><td class="c quiet">1 2 <b>3</b> 4</td></tr>
+              <tr><td>2</td><td>End-to-end order-to-cash digitization</td><td class="quiet">Orders digital</td><td class="c num">90%</td><td>Mohamed Rizk</td><td class="c quiet">1 <b>2 3</b> 4</td></tr>
+              <tr><td>3</td><td>Digitize sales reporting via Power BI</td><td class="quiet">Reports automated</td><td class="c num">90%</td><td>Ramy Behairy</td><td class="c quiet">1 2 <b>3</b> 4</td></tr>
+              <tr><td>4</td><td>Scale Mobile Digital App across merchants</td><td class="quiet">App coverage</td><td class="c num">50%</td><td>Ashraf Laithy</td><td class="c quiet">1 <b>2 3 4</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="cost-wrap"><div class="cost-grid">
+      <div class="cost-c"><span class="key">What it buys</span><p>Measured on these two drawings: the table starts <strong>202px</strong> down where today it starts at <strong>327</strong>, and a row is <strong>26px</strong> where today it is <strong>35</strong>. In the same height that holds one table today, Compact holds the measures <em>and</em> the tactics — which is the pair you actually read together.</p></div>
+      <div class="cost-c"><span class="key">What it costs</span><p>A second layout to test on every page, on both sides of the units-and-functions switch. Every table-fits-its-pane measurement doubles. That is real work, and it is the honest reason to build it last rather than first.</p></div>
+      <div class="cost-c warn"><span class="key">The part to watch</span><p>Compact is wrong on a projector. If it is remembered per person and somebody presents from their own laptop, the room gets the dense view — so it would have to stand itself down while presenting, which is one more rule.</p></div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ══════════════ 6 · ASK ══════════════ -->
+<section>
+  <div class="ask">
+    <h2>What I would do, and what I need from you</h2>
+    <p style="max-width:70ch"><strong>Take A, and take the three invisible ones beside it.</strong> A is the only direction that makes a number easier to read without reopening a decision we have already argued once. The scroll fade, the button naming and the key hints change nothing on screen and cost a day between them.</p>
+    <p style="max-width:70ch"><strong>B is a real look and the wrong trade.</strong> It is what HeroUI is for, and it spends the two things this product is short of — the client's brand colour on the table head, and the colour budget the bands need. If you want the softer look, the honest version is to take it on the cards <em>only</em> and leave the tables alone.</p>
+    <p style="max-width:70ch"><strong>C is right and not yet.</strong> Every complaint about a squeezed column is really this, and it is the largest of the three to test properly. Worth doing after a reporting round, not during one.</p>
+    <ol class="q">
+      <li><b>Which direction</b> — A, B, C, or a piece of one? Nothing is built either way.</li>
+      <li><b>If A: does the bar go on the tactics table too?</b> I have left it off because that table is already the widest thing in the product, and I would rather say so than squeeze it.</li>
+      <li><b>The three invisible ones</b> — scroll fade, button naming, key hints while presenting. May I take those regardless of which direction you pick?</li>
+    </ol>
+  </div>
+  <footer>
+    Drawn in the platform's own colours and type at 1440. The screens above are HTML, not screenshots — the product itself is untouched, and nothing in <span class="quiet">src/</span> has been edited. Source: <span class="quiet">github.com/heroui-inc/heroui</span> · React 19, Tailwind v4, React Aria · ~75 components.
+  </footer>
+</section>
+
+</div>

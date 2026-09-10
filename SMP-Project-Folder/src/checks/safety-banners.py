@@ -1,5 +1,11 @@
 """THE PAGE WARNS BEFORE A SAVE CAN BE LOST (§258).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 Islam, after a reporting round in which people lost work twice over: *"can we
 have some sort of mid page warning like the error and network issue in case
 the person is saving with someone opening the same thing … with clear action

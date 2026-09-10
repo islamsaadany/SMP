@@ -1,5 +1,11 @@
 """A SETUP PAGE THAT FITS DOES NOT SCROLL, AND THE RAIL'S HEAD STAYS PUT (§167).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 Islam, using the Platform Inbox: *"on scrolling up the messaging header is
 lost, the side rail of the messages header is lost as well, and the setup rail
 header and search are lost — all of this is supposed to be sticky."*

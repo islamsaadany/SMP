@@ -365,12 +365,30 @@ with sync_playwright() as p:
     # §96 is the whole reason this is asked: an editor wired to nothing renders
     # perfectly and discards every keystroke.
     print("\n6. the fields still write")
-    pg.fill('#modal-b [data-ptitle="smo"]', "Chief Strategy Officer II")
+    # ASKED OF A ROW THE PRODUCT LETS ANYBODY EDIT (§313.29). This was the
+    # SMO's own row, and since spec 042 that row carries `forefront` — set on
+    # the client's configuration in the outer platform, so the authoriser
+    # refuses a change to it WHOLESALE (kind `officeRow`) and the save comes
+    # back 403. The assertion is unchanged and its SUBJECT was wrong: §96 asks
+    # whether a bound field reaches the data, which is true of every row and
+    # has to be asked on one the save will take. REWRITTEN, never loosened
+    # (§218) — the office's own dialog is still opened and read above.
+    pg.evaluate("()=>{const b=document.querySelector('[data-pdlg-close]'); if(b) b.click();}")
+    pg.wait_for_timeout(400)
+    mine = pg.evaluate("()=>{var c=PEOPLE.filter(function(p){"
+                       "return personActive(p) && !p.forefront; });"
+                       "return c.length ? c[0].key : null;}")
+    ck("there is a row this client owns", bool(mine), mine)
+    pg.evaluate("(k)=>document.querySelector('[data-pmenu=\"'+k+'\"]').click()", mine)
+    pg.wait_for_timeout(250)
+    pg.evaluate("(k)=>document.querySelector('[data-pedit=\"'+k+'\"]').click()", mine)
+    pg.wait_for_timeout(700)
+    pg.fill('#modal-b [data-ptitle="%s"]' % mine, "Chief Strategy Officer II")
     pg.evaluate("()=>document.activeElement.blur()")
     pg.wait_for_timeout(300)
     ck("a field typed into reaches the data",
-       pg.evaluate("()=>personBy('smo').title") == "Chief Strategy Officer II",
-       pg.evaluate("()=>personBy('smo').title"))
+       pg.evaluate("(k)=>personBy(k).title", mine) == "Chief Strategy Officer II",
+       pg.evaluate("(k)=>personBy(k).title", mine))
     pg.evaluate("()=>{const b=document.querySelector('[data-pdlg-close]'); if(b) b.click();}")
     pg.wait_for_timeout(500)
     ck("and the width mark comes off when it closes",

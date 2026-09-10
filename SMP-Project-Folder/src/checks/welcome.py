@@ -1,5 +1,11 @@
 """THE WELCOME SCREEN (§148, spec 025).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 NOT PART OF qa.py, for §94.11's reason: the screen exists only over http(s)
 with a signed-in person — over file:// WELCOME.offer declines before drawing
 anything, so a build that had lost the whole feature would go green in every

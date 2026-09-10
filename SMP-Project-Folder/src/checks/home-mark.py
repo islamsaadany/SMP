@@ -1,5 +1,11 @@
 """THE HOME MARK: QUIET, GOLD, AND CENTRED (§197.2).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 Islam, twice. First *"the home button is damaged"* — measured: the row is
 `align-items:stretch`, every sibling is its full 46px, and the mark asks for
 a fixed height, so it sat at the row's TOP EDGE with twelve pixels of nothing

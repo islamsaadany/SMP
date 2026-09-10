@@ -44,9 +44,41 @@ def ck(what, ok, x=""):
     print(("  ok      " if ok else "  FAIL    ") + what + (("  — " + str(x)) if not ok and x else ""))
 
 
+SNAP = {}
+
+# WHAT THIS FILE GRANTS, IT PUTS BACK (§94.2). Every section starts by landing
+# again and assumes the row it works on holds nothing — which was true for as
+# long as landing meant reading the BAKED file, where a reload restores the
+# worked example and a grant cannot outlive it. Served from a database it does:
+# section 2's four grants accumulate, section 5 RETIRES the row and section 6
+# then presses a picker that is correctly no longer drawn, so the file dies
+# rather than reporting (§215). The assertions are unchanged; what is added is
+# the state being MADE and PUT BACK, which is what the reload was standing in
+# for. Snapshotted on the first landing rather than written out here, so a
+# tenant whose CFO legitimately holds something is restored to what IT had.
+_SNAP_JS = """()=>JSON.stringify({
+  people: PEOPLE, unitRoles: UNIT_ROLES,
+  fnHeads: Object.keys(FUNCTIONS).reduce(function(o,k){o[k]=FUNCTIONS[k].head||null;return o;},{}),
+  coCeos: Object.keys(COMPANIES||{}).reduce(function(o,k){o[k]=COMPANIES[k].ceo||null;return o;},{})})"""
+_PUT_BACK_JS = """(j)=>{const s=JSON.parse(j);
+  PEOPLE.length=0; s.people.forEach(function(p){PEOPLE.push(p);});
+  Object.keys(UNIT_ROLES).forEach(function(k){delete UNIT_ROLES[k];});
+  Object.keys(s.unitRoles).forEach(function(k){UNIT_ROLES[k]=s.unitRoles[k];});
+  Object.keys(s.fnHeads).forEach(function(k){
+    if (FUNCTIONS[k]) { if (s.fnHeads[k]) FUNCTIONS[k].head=s.fnHeads[k]; else delete FUNCTIONS[k].head; }});
+  Object.keys(s.coCeos).forEach(function(k){
+    if (COMPANIES[k]) { if (s.coCeos[k]) COMPANIES[k].ceo=s.coCeos[k]; else delete COMPANIES[k].ceo; }});
+  paint();}"""
+
+
 def people(pg):
     pg.goto(URL)
     pg.wait_for_timeout(700)
+    if "j" not in SNAP:
+        SNAP["j"] = pg.evaluate(_SNAP_JS)
+    else:
+        pg.evaluate(_PUT_BACK_JS, SNAP["j"])
+        pg.wait_for_timeout(300)
     pg.click("[data-md='setup']")
     pg.wait_for_timeout(300)
     pg.click("[data-setupgo='people']")
@@ -138,7 +170,8 @@ with sync_playwright() as p:
     print("\n1. one dropdown, not two")
     people(pg)
     open_row(pg, "cfo")
-    pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
     pg.wait_for_timeout(300)
     ck("the role picker is there",
        pg.evaluate("!!document.querySelector('[data-prole-pick]')"))
@@ -155,7 +188,8 @@ with sync_playwright() as p:
         people(pg)
         open_row(pg, "cfo")
         set_unit(pg, "cfo", at)
-        pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+        pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
         pg.wait_for_timeout(300)
         ck(role + ": the option is in the list", pick_role(pg, "cfo", role))
         # §186: A SEAT ASKS FIRST, and Company CEO is one. The other three in
@@ -197,7 +231,8 @@ with sync_playwright() as p:
         people(pg)
         open_row(pg, "cfo")
         set_unit(pg, "cfo", "mobile")
-        pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+        pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
         pg.wait_for_timeout(300)
         pick_role(pg, "cfo", role)
         # NOTHING YET — an ask that grants anyway is a notice, not a question.
@@ -223,7 +258,8 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "")
-    pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
     pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     said = stop_text(pg) or ""
@@ -233,7 +269,8 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "mobile")
-    pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
     pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "Company CEO")
     said = stop_text(pg) or ""
@@ -256,7 +293,8 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "")
-    pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
     pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     ck("refused first", roles_of(pg, "cfo") == [], roles_of(pg, "cfo"))
@@ -280,7 +318,8 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "")
-    pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
     pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     ck("refused", stop_text(pg) is not None)
@@ -316,7 +355,8 @@ with sync_playwright() as p:
         "[JSON.stringify(UNIT_ROLES.nigeria), personBy('cfo').unit||null]")
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "nigeria")
-    pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
+    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
+                "if(b) b.click();}")
     pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     mid = pg.evaluate("[JSON.stringify(UNIT_ROLES.nigeria), personBy('cfo').unit||null]")

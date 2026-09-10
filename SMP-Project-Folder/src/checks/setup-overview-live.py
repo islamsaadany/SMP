@@ -1,5 +1,11 @@
 """Setup · Overview: the three rows that only exist when there is a server (§108.10).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 `checks/setup-overview.py` covers the two attention rows that live in the state
 graph, and asserts the other three ABSENT — which is the right assertion over
 `file://` and is the whole of what that file can say about them. Absent is also

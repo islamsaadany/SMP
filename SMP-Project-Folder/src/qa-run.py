@@ -32,8 +32,38 @@ BrowserType.launch = launch
 if os.environ.get("SMP_BASE"):
     from playwright.sync_api import Browser
     _new_page, _new_context = Browser.new_page, Browser.new_context
-    def new_page(self, **kw): kw.setdefault("bypass_csp", True); return _new_page(self, **kw)
-    def new_context(self, **kw): kw.setdefault("bypass_csp", True); return _new_context(self, **kw)
+    # AND THE CHAT CORNER TAKES CLICKS THAT ARE NOT ITS OWN (§97, §167.2).
+    # The corner is deliberately NOT DRAWN over `file://` — there is no server
+    # to answer it — so every screen check ever written has been written on a
+    # page that does not have one, and against the served app a fixed 60px
+    # bubble now sits over the bottom-right corner of every page: Playwright
+    # clicks an element's CENTRE, so a control whose centre lands under it is
+    # reported as unreachable and the file dies retrying (§215). §167.2's own
+    # finding, with the welcome overlay swapped for the chat dock.
+    #
+    # POINTER-EVENTS, NEVER `display:none`: hiding it would change what a
+    # contrast or layout probe measures, and the corner is a real part of the
+    # served page. A check whose SUBJECT is the corner presses it, so it says
+    # so in its own first lines and keeps it live — the same shape as the
+    # own-server mark above, and never a list of names here (§104.7).
+    _CHAT_STAND_DOWN = """(() => { const put = () => {
+        const s = document.createElement('style');
+        s.textContent = '#chatdock{pointer-events:none !important}';
+        (document.head || document.documentElement).appendChild(s); };
+      if (document.head) put(); else document.addEventListener('DOMContentLoaded', put); })()"""
+    _chat_live = False
+    try:
+        with open(sys.argv[1] if len(sys.argv) > 1 else "qa.py") as _f:
+            _chat_live = "qa-run: chat-live" in _f.read(4000)
+    except OSError:
+        pass
+    def _stand_down(o):
+        if not _chat_live:
+            try: o.add_init_script(_CHAT_STAND_DOWN)
+            except Exception: pass
+        return o
+    def new_page(self, **kw): kw.setdefault("bypass_csp", True); return _stand_down(_new_page(self, **kw))
+    def new_context(self, **kw): kw.setdefault("bypass_csp", True); return _stand_down(_new_context(self, **kw))
     Browser.new_page, Browser.new_context = new_page, new_context
 
 # ── AND A CHECK OPENS THE PRODUCT WHEREVER THE PRODUCT IS (spec 043, Phase C)

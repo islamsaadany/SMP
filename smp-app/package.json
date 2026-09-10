@@ -20,7 +20,9 @@
     "check:state:red": "for b in apply-on-base no-save-lock bare-refusal viewas-widens log-for-all peek-includes-me; do node checks/state-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "build:shell": "node scripts/build-shell.mjs",
     "check:shell": "node checks/shell.mjs",
-    "check:shell:red": "for b in no-route open-csp; do SMP_BREAK=$b node checks/shell.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
+    "check:shell:red": "for b in no-route open-csp; do SMP_BREAK=$b node checks/shell.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:blob": "node checks/blob-api.mjs",
+    "check:blob:red": "for b in store-first watch-truthy; do node checks/blob-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

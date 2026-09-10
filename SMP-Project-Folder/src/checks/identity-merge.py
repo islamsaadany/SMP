@@ -237,11 +237,21 @@ with sync_playwright() as p:
     pg.wait_for_timeout(700)
     pg.click('.setuprail [data-setupgo="units"]')
     pg.wait_for_timeout(800)
-    # A UNIT IS EDITED ON ITS ROW NOW (§85, landed on main mid-branch). The
-    # whole-table pen this used to press is gone, so the route in is the row's
-    # own — §51.11: when a control changes shape, the checks keyed on the old
-    # one break, and the ones that do not break are the ones to worry about.
-    pg.click('[data-rowedit^="units|"]')
+    # A UNIT IS EDITED IN A DIALOG NOW (§261, and §85 before it). The row pen
+    # this pressed went with the three-dots menu that replaced it, so the route
+    # in is Edit details — §51.11 for the second time on this one line: when a
+    # control changes shape the checks keyed on the old one break, and the ones
+    # that do not break are the ones to worry about. Opened from SCRIPT, like
+    # `setup-arrange.py` does, because the menu has to be opened first and a
+    # real click on the pen is not what is under test here.
+    # THE MENU IS OPENED FIRST, or Edit details is not in the document to
+    # press: §261 put a unit's actions behind the three dots, and the entry is
+    # rendered only while that row's menu is open.
+    pg.evaluate("""() => { var b = document.querySelector('[data-umenu]');
+        if (b) b.click(); }""")
+    pg.wait_for_timeout(350)
+    pg.evaluate("""() => { var b = document.querySelector('[data-rowdlg^="units|"]');
+        if (b) b.click(); }""")
     pg.wait_for_timeout(700)
     pg.click(".pickbtn")
     pg.wait_for_timeout(500)
@@ -275,7 +285,16 @@ with sync_playwright() as p:
     # THE LONGEST NAME IS PUT IN ON PURPOSE. The demo's longest is 25
     # characters and the client's register holds 43 — measuring the demo would
     # have proved nothing about the case the change exists for (§45.2).
+    # AND THE DIALOG IS CLOSED BEFORE ANYTHING IS NAVIGATED TO. §261 put the
+    # unit's fields inside the platform's own modal, whose overlay covers the
+    # page — so the next click landed on it rather than on the rail, and the
+    # file waited thirty seconds for a control that was never going to be
+    # reachable (§215, §93.4's family with a dialog in the way).
     print("── name, full name, and copying an address")
+    pg.evaluate("""() => { var b = document.querySelector('[data-rowdlg-cancel]')
+        || document.querySelector('[data-rowdlg-close]');
+        if (b) b.click(); }""")
+    pg.wait_for_timeout(400)
     people_page(pg)
     LONG = "Abd El Moniem Mohamed Abd El Moniem Mahmoud"
     pg.evaluate("""(n) => { PEOPLE[0].name = n; delete PEOPLE[0].known;

@@ -66,9 +66,10 @@ export function targetOfPath(p: unknown): string {
    the reading grant rather than the reporting one — but "none" is a WORD, and
    §261.5 records what testing the answer for TRUTH rather than for its VALUE
    cost: everybody could watch everything. */
-function mayWatch(world: any, person: any, target: string): boolean {
+export function mayWatch(world: any, person: any, target: string): boolean {
   const isFn = String(target || "").indexOf("fn:") === 0;
   const g = R.grantIn(world, person, isFn ? "fn" : "unit", target);
+  if (process.env.SMP_BREAK === "watch-truthy") return !!g;   /* §261.5's fault, on purpose */
   return !!g && g !== "none";
 }
 /* MAY THIS PERSON PUT A CLIP ON THIS DECK. The same question `reportState`
@@ -76,7 +77,7 @@ function mayWatch(world: any, person: any, target: string): boolean {
    the cycle note and Submit all speak for the whole unit in front of the
    board, so one rule serves all four (§50, §53.5). Somebody who edits only
    through a bounded role does none of them. */
-function maySpeakFor(world: any, person: any, target: string): boolean {
+export function maySpeakFor(world: any, person: any, target: string): boolean {
   const isFn = String(target || "").indexOf("fn:") === 0;
   const area = isFn ? "fn" : "unit";
   if (R.grantIn(world, person, area, target) !== "edit") return false;
@@ -201,6 +202,11 @@ export async function postAnswer(tenantId: string, person: Person, body: any): P
 
   /* ── The storage page (Islam's #3) ────────────────────────────────────── */
   if (what === "list") {
+    /* THE PERSON FIRST, THE STORE SECOND. Reversed, a unit head and the office
+       are told the same thing — "no video store here" — and a refusal that
+       names the wrong cause sends somebody to the wrong page (§16.7, §124). */
+    if (process.env.SMP_BREAK === "store-first" && !ready())
+      return { code: 503, body: { ok: false, error: "no video store here" } };
     if (!R.isOfficeRole(person.role)) return { code: 403, body: { ok: false, error: "Video storage is the SMO's." } };
     if (!ready()) return { code: 200, body: { ok: true, ready: false, clips: [] } };
     const got = await blob().list({ prefix: "videos/", token: token() });
@@ -212,6 +218,8 @@ export async function postAnswer(tenantId: string, person: Person, body: any): P
     /* CLEARING STORAGE IS DESTRUCTION, so it is the Super user's and not merely
        the office's (§89, §146): two questions with the same answer today, and
        §94's drift the day the first is widened. */
+    if (process.env.SMP_BREAK === "store-first" && !ready())
+      return { code: 503, body: { ok: false, error: "no video store here" } };
     if (!R.isSuperRole(person.role)) return { code: 403, body: { ok: false, error: "Deleting a clip is the Super user's." } };
     if (!ready()) return { code: 503, body: { ok: false, error: "no video store here" } };
     const paths = (Array.isArray(body.paths) ? body.paths : [body.path]).map(String).filter((p: string) => p.indexOf("videos/") === 0);

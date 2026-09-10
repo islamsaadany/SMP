@@ -39,7 +39,13 @@ from playwright.sync_api import sync_playwright
 # the tour has its own check, and a suppression that reached into its
 # internals would be this file quietly asserting the tour away.
 def _no_tour(pg):
-    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    # AND THE WELCOME SCREEN COVERS THE VIEWPORT (§167.2). It exists over
+    # http(s) only, which is what this file serves — so it is stood down as a
+    # RETURNING viewer does, in an init script: setting the flag after `goto`
+    # is too late, and the overlay then takes every click on the page behind
+    # it (§148, §159). The screen has its own check.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]

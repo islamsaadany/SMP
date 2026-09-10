@@ -403,6 +403,41 @@ const CLIENT_ARG = (function () {
     ppcOk ? "" : JSON.stringify(Object.keys(ppClean.group).filter(k => k.indexOf("plan") === 0)));
   if (!ppcOk) process.exitCode = 1;
 
+  /* ── OPENING A NEW CYCLE, WHICH CARRIES NO QUARTER (§316.3) ──────────
+     Islam, in his own words: pressing "Open a new cycle" looked like it
+     worked and the change never saved. §307 took the review point off that
+     panel, so the mint carries NO `endsQuarter` — and the column was NOT
+     NULL, so the save was refused, the cycle never left the browser, and a
+     refresh brought the old one back.
+
+     ASSERTED AS THE MINT'S OWN SHAPE, never as a column's nullability: what
+     must hold is that the review shell.html produces is one this writer
+     accepts and hands back. Put the constraint back and this goes red. */
+  const ncState = await io.readState(client);
+  ncState.review = { name: "H2 2026", from: "Jul 2026", to: "Dec 2026", due: "",
+                     state: "open", note: {}, submitted: {},
+                     cadence: ncState.review.cadence };
+  let ncOk = true, ncSaid = "";
+  try { await io.writeState(client, ncState); }
+  catch (e) { ncOk = false; ncSaid = String(e.message).split("\n")[0]; }
+  const ncBack = ncOk ? await io.readState(client) : null;
+  ncOk = ncOk && ncBack.review.name === "H2 2026" && ncBack.review.endsQuarter == null;
+  console.log("a new cycle with no endsQuarter saves:", ncOk ? "PASS" : "FAIL",
+    ncOk ? "[the quarter stays ABSENT, never invented]"
+         : (ncSaid || JSON.stringify({ name: ncBack && ncBack.review.name,
+                                       q: ncBack && ncBack.review.endsQuarter })));
+  if (!ncOk) process.exitCode = 1;
+  /* BOTH ENDS (§94.2): a tenant that HOLDS a quarter keeps it — the DEFAULT
+     stays, so this is a value the platform may still carry. */
+  const ncSet = await io.readState(client);
+  ncSet.review.endsQuarter = 3;
+  await io.writeState(client, ncSet);
+  const ncKept = await io.readState(client);
+  const nckOk = ncKept.review.endsQuarter === 3;
+  console.log("  ...and a quarter that IS set still round-trips:", nckOk ? "PASS" : "FAIL",
+    nckOk ? "" : JSON.stringify(ncKept.review.endsQuarter));
+  if (!nckOk) process.exitCode = 1;
+
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 

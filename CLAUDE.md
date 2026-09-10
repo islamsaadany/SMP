@@ -525,6 +525,30 @@ and the served app cannot be made to hold that state), and it **says so in its
 own first lines** rather than qa-run.py keeping a list of names (§104.7),
 asserted at both ends. **Nothing retired.**
 
+**AND OPENING A NEW CYCLE COULD NOT BE SAVED (§316.3)** — found in Phase D
+and fixed on Islam's word (*"yes fix it"*, after he sent the first version of
+the question back as too technical, which is rule 1b). `openNewCycle`
+replaces `REVIEW` with what the panel collected, and **§307 took the review
+point off that panel**, so the new review carries no `endsQuarter` at all
+while `review.ends_quarter` was `NOT NULL` — the save was refused, the cycle
+existed on screen and nowhere else, and a refresh brought the old one back.
+**A LIVE DEFECT ON `main`, established on the FROZEN writer rather than
+inferred from the port** (§303): *"null value in column ends_quarter ...
+violates not-null constraint"*, with `endsQuarter` deleted exactly as the
+mint deletes it. What the rebuild changed is that a refused statement now
+NAMES ITSELF (§316.2) — Postgres answers a bad value with the type and not
+the column, so "invalid input syntax for type numeric" over thirty tables
+sends somebody to look at everything (§123) — which is the only reason it was
+found. **THE COLUMN MOVES, NOT THE MINT**: nothing has written that value
+since §47.8, `reviewAsOf()` already reads an absent one as Q4, so it is
+stored as an ABSENCE (§50.6); having the mint choose a quarter would put a
+value on the record nobody picked, which is what §307 removed the picker to
+stop. The `DEFAULT` stays, so a tenant holding one keeps it — asserted at
+both ends, or a build that stopped storing the field passes half. Migration
+044 (`@phase: pre`) and `smp-app/db/migrations/002`, both **red first** by
+putting the constraint back: the frozen round trip prints the refusal
+verbatim and `check:state` §8 goes 3 red on the person's own sentence.
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 

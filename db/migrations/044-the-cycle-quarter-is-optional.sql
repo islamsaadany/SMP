@@ -1,0 +1,32 @@
+-- @phase: pre
+-- ── OPENING A NEW CYCLE COULD NOT BE SAVED (§316.3) ────────────────────
+-- Islam, asked in plain words and answered "yes fix it".
+--
+-- Pressing "Open a new cycle" replaces REVIEW with what the panel collected
+-- — a name, the three dates, the state — and §307 deliberately removed the
+-- review point from that panel, so the new review carries NO `endsQuarter`
+-- at all. The column was still NOT NULL, so the save was refused and the
+-- cycle never left the browser: the screen moved on, a refresh brought the
+-- old cycle back, and nothing said why.
+--
+-- ESTABLISHED ON THE FROZEN WRITER, NOT INFERRED FROM THE PORT (§303) —
+-- lib/state-io.js against a frozen-schema database, with `endsQuarter`
+-- deleted exactly as the mint deletes it:
+--   seeded endsQuarter: 4
+--   FROZEN REFUSES: null value in column "ends_quarter" of relation
+--                   "review" violates not-null constraint
+-- so this is a live defect on main and not something the rebuild caused.
+-- What the rebuild changed is that the save now names the statement it was
+-- refused on (§316.2), which is how it was found at all (§123).
+--
+-- THE ABSENCE IS THE TRUTH, so the column is what moves. Nothing has minted
+-- this value since §47.8; it survives only as the last fallback inside
+-- reviewAsOf(), which already reads an absent one as Q4 (`if (!q ...) q = 4`).
+-- Storing it as an absence is §50.6, and it is the reading every screen
+-- already takes. The alternative — having the mint choose a quarter — would
+-- put a value on the record that nobody picked, which is exactly what §307
+-- removed the picker to stop.
+--
+-- NOTHING STORED MOVES: the DEFAULT stays, so every tenant holding a quarter
+-- keeps it, and no row is rewritten.
+ALTER TABLE review ALTER COLUMN ends_quarter DROP NOT NULL;

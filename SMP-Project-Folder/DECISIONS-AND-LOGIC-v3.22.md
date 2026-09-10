@@ -41256,3 +41256,72 @@ re-pointed like any other, and the difference is stated per file. `main`
 untouched.
 
 ---
+
+### §316.3 — Opening a new cycle could not be saved (2026-09-10)
+
+**ISLAM ASKED THE QUESTION BACK BEFORE HE ANSWERED IT** — *"I don't
+understand you question too technical"* — which was fair and is rule 1b: the
+first version of the ask was written in column names. Said plainly (pressing
+*Open a new cycle* looks like it works, the screen moves on, and a refresh
+brings the old cycle back), the answer was **"yes fix it"**.
+
+**THE MINT CARRIES NO QUARTER, AND THE COLUMN STILL INSISTED ON ONE.**
+`openNewCycle` replaces `REVIEW` with what the panel collected — a name, the
+three dates, the state, the cadence — and **§307 deliberately took the review
+point off that panel**, so the new review has no `endsQuarter` at all. The
+column was `NOT NULL`, so the save was refused: the browser had already
+repainted, the cycle existed on screen and nowhere else, and nothing said
+why. **The office cannot open a cycle at all** — which is the one act the
+whole reporting round hangs off.
+
+**ESTABLISHED ON THE FROZEN WRITER, NEVER INFERRED FROM THE PORT** (§303).
+`lib/state-io.js` against a frozen-schema database, with `endsQuarter`
+deleted exactly as the mint deletes it:
+
+    seeded endsQuarter: 4
+    FROZEN REFUSES: null value in column "ends_quarter" of relation
+                    "review" violates not-null constraint
+
+So this is a **live defect on `main`**, not something the rebuild caused, and
+saying so first was most of the work. **What the rebuild changed is that a
+refused statement now names itself** (§316.2) — the old save answered
+*"Something went wrong"* and the new one prints the UPDATE and its
+parameters, which is the only reason it was found at all (§123, at the far
+end of a save).
+
+**THE COLUMN MOVES, NOT THE MINT.** Nothing has written this value since
+§47.8; it survives only as the last fallback inside `reviewAsOf()`, which
+**already reads an absent one as Q4** (`if (!q || q < 1 || q > 4) q = 4;`) —
+so the readers were checked before the schema was touched and cope
+unchanged. Storing it as an absence is §50.6, and it is the reading every
+screen already takes. **The alternative was drawn and refused**: having the
+mint choose a quarter would put a value on the record nobody picked, which is
+exactly what §307 removed the picker to stop.
+
+**NOTHING STORED MOVES**: the `DEFAULT` stays, so a tenant already holding a
+quarter keeps it, and no row is rewritten — asserted at BOTH ENDS (§94.2), a
+review with no quarter accepted and one WITH a quarter still round-tripping,
+or a build that simply stopped storing the field would pass half of this.
+
+**BOTH STACKS, BOTH RED FIRST.** The frozen side is migration
+`044-the-cycle-quarter-is-optional.sql` (`@phase: pre` — a schema shape
+change runs before the seed, §33.5) plus `db/schema.sql` for a database made
+from scratch; the new side is `smp-app/db/migrations/002-…` plus
+`smp-app/db/schema.sql`. Proved able to fail by putting the constraint back:
+`scripts/test-roundtrip.js` prints the refusal verbatim, and
+`checks/state-api.mjs` §8 goes **3 red** with the person's own sentence on it
+— *"Something went wrong saving. Nothing was changed — try again."*
+Green after: **91/0** on the state check, the frozen round trip green on the
+existing database AND on a virgin one, `db/apply.mjs` green on a virgin one,
+the nine spike proofs green, 588/0 and 136/0 unchanged, and `cycle-edit`,
+`cycle-board`, `planning-period` and `repeat-project` all green against the
+served app — that last one being where the 500 was first seen.
+
+**RECORDED, NOT DONE**: `tacticShare()`'s deepest fallback reads an absent
+quarter as NOTHING elapsed where `reviewAsOf()` reads it as Q4 — two answers
+to one question (§53.5) — but that branch is reached only for a cycle whose
+year cannot be read at all, and straightening it would move a number on such
+a tenant. `scripts/test-clean-parity.js` is still red on a virgin database,
+reproduced identically before this change and recorded at §308.
+
+---

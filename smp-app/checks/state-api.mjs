@@ -355,6 +355,36 @@ await section("7 · the page asks who else landed a change on it (§258)", async
   r = await get("", "?since=" + encodeURIComponent(t0) + "&target=mobile"); check(r.status === 401, "no session, no peek (401)", r.status);
 });
 
+await section("8 · a new cycle carries no quarter, and saves (§316.3)", async () => {
+  /* Islam, in his own words: "Open a new cycle" looked like it worked and the
+     change never saved. §307 took the review point off that panel, so the mint
+     carries NO `endsQuarter` at all — and the column was NOT NULL, so the save
+     was refused and the cycle never left the browser. Proved on the FROZEN
+     writer first (§303), so it is a live defect on main rather than the port's.
+
+     ASSERTED AS THE MINT'S OWN SHAPE, never as a column's nullability: what
+     must hold is that the review openNewCycle produces is one this server
+     accepts and hands back. A build that put the constraint back fails here. */
+  const base = await graph(smo);
+  const e = changed(base, (m) => {
+    const rv = { name: "H2 2026", from: "Jul 2026", to: "Dec 2026", due: "",
+                 state: "open", note: {}, submitted: {}, cadence: m.review.cadence };
+    m.review = rv;                       /* exactly what shell.html mints */
+  });
+  let r = await post(smo, { changes: e.changes });
+  check(r.status === 200, "a review with no endsQuarter is accepted", r.status + " " + JSON.stringify(r.j).slice(0, 160));
+  const back = await graph(smo);
+  check(back.review.name === "H2 2026", "…and the new cycle is what comes back", back.review && back.review.name);
+  check(back.review.endsQuarter == null, "…with the quarter ABSENT, not invented (§50.6)", JSON.stringify(back.review.endsQuarter));
+  /* BOTH ENDS (§94.2): a tenant that HOLDS a quarter keeps it — the DEFAULT
+     stays, so this is a value the platform may still carry, never one it
+     rewrites. */
+  const e2 = changed(back, (m) => { m.review.endsQuarter = 3; });
+  r = await post(smo, { changes: e2.changes });
+  const back2 = await graph(smo);
+  check(r.status === 200 && back2.review.endsQuarter === 3, "…and a quarter that IS set still round-trips", r.status + " " + JSON.stringify(back2.review.endsQuarter));
+});
+
 try { process.kill(-server.pid); } catch {}
 await owner.end();
 console.log((fails ? "RED   " : "GREEN ") + oks + " ok, " + fails + " failed" + (brk ? "  (--break=" + brk + ")" : ""));

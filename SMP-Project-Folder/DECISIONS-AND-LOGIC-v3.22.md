@@ -42237,3 +42237,95 @@ the band simply follows the clients, which is what the grid already did.
 
 
 ---
+
+## §317.3–.6 — THE CUTOVER'S FOUR REAL FAULTS, EACH THE NEXT ONE DOWN (2026-09-10, spec 043)
+
+Four failed builds, and **not one of them was the same fault wearing
+different clothes** — each was the next real step, and the build got
+measurably further every time. Recorded together because the shape they share
+is the finding: *everything here was proved against a database and a build
+context that were not production's, and every one of these was invisible
+until the real one was asked.*
+
+**§317.3 — `.vercelignore` deleted the app the Root Directory pointed at.**
+§238 wrote that file for the FROZEN deployment, which served the whole
+repository as static files, so `smp-app/` was listed as *"a separate Next.js
+app skeleton, not part of the live platform"* — true on the day. Vercel
+cloned, removed 2046 files, deleted the app and built nothing: *"Build output
+contains no functions, static, or services directory"*, **13ms**, an empty
+deployment marked **Ready** that answered **404 on every address**. **Nothing
+in a build log says *you excluded the thing you asked me to build***; it says
+the output is empty, which is why two project settings were suspected first.
+Rewritten with every pattern anchored — a bare `scripts/` matches at any depth
+and would have deleted `smp-app/scripts/` next, measured before it could —
+and `checks/deploy-context.mjs` refuses if the file swallows anything the app
+reaches for, **derived from build.py's own list** rather than kept beside it.
+
+**§317.4 — `public` is a client, and the shared schema was about to be laid
+over it.** When spec 042 split the clients into a schema each, the one that
+already existed **stayed where it stood**: `public` holds Raya Trade's 47 live
+tables and `platform.clients` says `raya-trade → public` in a column. There is
+no `raya_trade` schema and never was. **Every rehearsal ran against a `public`
+that was empty**, which is the one shape that cannot show it (§113.7 from the
+other side). The build stopped one table in — `relation "sessions" already
+exists` — inside a transaction that rolled back, so nothing was written.
+**What it was about to do is why this is a section**: schema.sql's
+row-level-security loop reads the catalogue and then ALTERs whatever it finds,
+and `WHERE n.nspname = 'public'` would have enumerated a client's live tables
+and attached policies to each. It failed politely by luck. Now: a room of its
+own, named ONCE in `db/schema-name.mjs` and read by the applier, the grants,
+both pools, Prisma's adapter, the carry, the demo seed and the harness;
+`public` **deliberately not left in the path behind it**, because a fallback
+there resolves a missing table silently to live data; and the search path set
+as a **connection option, never `ALTER ROLE`**, since the owner role is the
+one the FROZEN site still connects as. **The carry is aimed by the registry**
+— it said `raya_trade`, and *a carry that finds no graph carries nothing*,
+which is a cutover onto an empty platform rather than an error anybody
+notices. Proved on a rehearsal built to production's shape: red first with
+production's own error, then `smp` holding 51 tables with **42 RLS-forced and
+a policy each**, `public`'s table list **byte-identical**, 0 policies added to
+it, `smp_app` able to read none of it, and the carry moving **33 people, 10
+units, 78 tactics** across with `public` untouched.
+
+**§317.5 — the app's own password was refused by Neon, not by us.** Unset,
+`SMP_APP_PASSWORD` falls back to the literal word `smp_app`, so the role
+creation carried a password the database is right to refuse — at COMMIT, in
+the control plane's words, three files into a transaction with a `pg` stack
+trace behind it. Correct, and **it names neither the variable nor the place to
+set it** (§124, §171). The same refusal one step earlier and in the product's
+own words, **only where a deployment is being built**.
+
+**§317.6 — the config read a file that had moved.** `next.config.ts` read the
+frozen `vercel.json` at `../vercel.json` relative to its own file — right on a
+laptop, wrong on Vercel, because **Next compiles the config into a different
+directory before running it**. It found a vercel.json with no `headers` key
+and fell over on `Cannot read properties of undefined`. The block is CARRIED
+into the app now, beside the manifest and the icons and for the same reason:
+*a file the build needs is a file the build writes, never one it reaches out
+of the folder for at a moment it does not control.* §43.6's rule intact — the
+headers are still the frozen file's, read once, never retyped — with the eight
+asserted BY NAME where the failure can name itself. **AND FOUR FILES OPENED
+THEIR OWN CONNECTIONS IN `public`**, each failing differently and none
+obviously (*"relation tenants does not exist"* reads like a missing
+migration): `checks/schema-room.mjs` §5 greps for it and found eight more the
+moment it was written.
+
+**PROVED, END TO END, ON A DATABASE SHAPED LIKE PRODUCTION'S**: the whole
+build completes locally for the first time; served, the door, `/platform`,
+`/sw.js`, the manifest and the shell all answer with **all eight security
+headers**; **door 49/0, state 91/0, shell 60/0**, the nine spike proofs green
+with all sixteen falsifications still red, `check:room` 10/0 red on
+`--break=public`, `check:deploy` 5/0 red both ways, 588/0, 136/0, `tsc` clean.
+
+**AND THREE OF THE FAILURES ON THE WAY WERE THE HARNESS** (§100.3, §215): the
+spike's own pools, its pooler model and s1's direct run of `roles.sql` each
+opened in `public`; and two red door runs were a server of mine squatting on
+the port the check starts its own on — *a check driving the wrong build reports
+the product broken just as loudly.*
+
+**STILL ISLAM'S, UNCHANGED**: the Vercel settings, the two switches, the
+address, the two presses of *Add a client*, and the merge — his word on that
+merge every time.
+
+
+---

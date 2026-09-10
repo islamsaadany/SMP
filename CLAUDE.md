@@ -8597,6 +8597,34 @@ DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-l
                                 # Forefront's own two pages: contrast in both themes
                                 # and no sideways scroll at four widths — neither of
                                 # the two product sweeps ever reaches them (§313.11)
+DATABASE_URL_UNPOOLED=… node smp-app/checks/schema-room.mjs
+                                # the shared schema has a room of its own, and
+                                # `public` is a CLIENT (§317.4) — it BUILDS the
+                                # real database's shape (a frozen client in
+                                # public, the registry pointing at it) and
+                                # asserts the apply never reaches it: public's
+                                # table list identical, no RLS switched on, no
+                                # policy attached, smp_app able to read none of
+                                # it — with the shared schema asserted to hold
+                                # its own tables RLS-FORCED beside it, because
+                                # an apply that created nothing would satisfy
+                                # every "public is untouched" assertion (§94.2).
+                                # §5 greps every pg connection in the app: each
+                                # either carries the search_path option or says
+                                # SET search_path in its own file, and it found
+                                # eight the moment it was written. 10/0, red
+                                # under --break=public
+node smp-app/checks/deploy-context.mjs
+                                # what reaches the build (§317.3): .vercelignore
+                                # excluded smp-app/ itself, so Vercel deleted the
+                                # app and published an empty deployment that
+                                # answered 404 everywhere while marked Ready.
+                                # The needed list is DERIVED from build.py's own
+                                # script list, sync-css's ORDER, sync-static's
+                                # FILES and frozen.cjs's FILES (§53.5); every
+                                # pattern asserted anchored, because a bare
+                                # `scripts/` matches at any depth and would eat
+                                # smp-app/scripts next. 5/0, red both ways
 SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-cards.py
                                 # the worked example is not one of the clients
                                 # (§317) — out of the client grid and below it,

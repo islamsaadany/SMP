@@ -15,6 +15,7 @@
    it stops (exit 2) — research §P5 names the two ways forward. Nothing here
    prints the URL. */
 import pg from "pg";
+import { SCHEMA } from "../db/schema-name.mjs";
 import { readFileSync } from "node:fs";
 import { OWNER_URL, APP_PASSWORD, makeDb, ok, fail, check, finish, brk } from "./_harness.mjs";
 import { withTenant } from "../lib/tenant.ts";
@@ -25,7 +26,7 @@ const A = "11111111-1111-4111-8111-111111111111", B = "22222222-2222-4222-8222-2
 
 let db, owner, app;
 if (NEON) {
-  owner = new pg.Pool({ connectionString: OWNER_URL, max: 2 });
+  owner = new pg.Pool({ connectionString: OWNER_URL, max: 2, options: "-c search_path=" + SCHEMA });
 } else {
   db = await makeDb({ bare: true });
   owner = db.owner;
@@ -55,6 +56,12 @@ try {
         "ELSE EXECUTE 'ALTER ROLE smp_app BYPASSRLS'; END IF; END $$; GRANT USAGE ON SCHEMA public TO smp_app; " +
         "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO smp_app;");
     } else {
+      /* roles.sql grants on the schema `smp.schema` names and REFUSES without
+         it (§317.4) — db/apply.mjs sets it in its own transaction, so a
+         harness running the file directly sets it too, or the refusal it
+         meets is its own rather than the product's. */
+      await c.query("CREATE SCHEMA IF NOT EXISTS " + SCHEMA);
+      await c.query("SELECT set_config('smp.schema', $1, true)", [SCHEMA]);
       await c.query(readFileSync(new URL("../db/roles.sql", import.meta.url), "utf8"));
     }
     await c.query("COMMIT");
@@ -82,7 +89,7 @@ check(owned === 0, "smp_app owns no table", owned + " owned");
 
 /* 3–4 · as smp_app: nothing with no setting, A's row inside withTenant(A) */
 const appUrl = (() => { const u = new URL(NEON ? OWNER_URL : db.ownerUrl); u.username = "smp_app"; u.password = APP_PASSWORD; return u.toString(); })();
-app = new pg.Pool({ connectionString: appUrl, max: 2 });
+app = new pg.Pool({ connectionString: appUrl, max: 2, options: "-c search_path=" + SCHEMA });
 const { usePools } = await import("../lib/db.ts");
 usePools(owner, app);
 try {

@@ -93,6 +93,41 @@ deleted nothing would be ceremony (§24).
 
 ---
 
+## 3b · The room the shared schema lives in (§317.4)
+
+**`public` on the real database is a CLIENT.** When spec 042 split the clients
+into a schema each, the one that already existed stayed where it stood — so
+`public` holds Raya Trade's 47 live tables and `platform.clients` says
+`raya-trade → public` in a column. `elabd` is the second client; there is no
+`raya_trade` schema and never was.
+
+Everything here was built and proved against databases whose `public` was
+empty, which is the one shape that cannot show this. The first real build
+stopped one table in — `relation "sessions" already exists` — inside a
+transaction that rolled back, so nothing was written. **What it was about to
+do is the reason this is written down**: schema.sql's row-level-security loop
+reads the catalogue and then ALTERs whatever it finds, and pointed at `public`
+it would have enumerated a client's live tables and attached policies to them.
+
+So the shared schema has a room of its own, `smp`, named once in
+`db/schema-name.mjs` and read by the applier, the grants, both pools, Prisma's
+adapter, the carry and the demo seed. **`public` is deliberately not left in
+the search path behind it** — a fallback there resolves a missing table
+silently to a client's live one. `npm run check:room` builds the real
+database's shape and refuses if an apply reaches it; `--break=public` is red.
+
+**And the carry is aimed by the registry, never by a constant.** It said
+`raya_trade`, which does not exist: a carry that finds no graph carries
+nothing, and that is a cutover onto an empty platform rather than an error
+anybody notices in time. It reads `platform.clients.schema_name` now and says
+which room it found.
+
+**One thing to know if the carry ever fails halfway.** It writes the tenant's
+registry row and commits it before copying the tables, so that a second run
+refuses itself. A run that fails AFTER that leaves the row behind and the
+retry refuses — the way out is one line in Neon's SQL editor,
+`DELETE FROM smp.tenants WHERE key = 'raya-trade';`, and then deploy again.
+
 ## 4 · The project setting
 
 **Root Directory → `smp-app`**, and **“Include source files outside of the

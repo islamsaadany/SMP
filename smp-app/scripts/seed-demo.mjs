@@ -29,6 +29,7 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import { schemaIdent } from "../db/schema-name.mjs";
 import { withTenant } from "../lib/tenant.ts";
 import { loadGraph, readState } from "../lib/state-io.ts";
 
@@ -58,6 +59,9 @@ export async function seedDemo({ url, replace = false, brk = null, log = (s) => 
 
   const owner = new pg.Client({ connectionString: url });
   await owner.connect();
+  /* The shared schema, said out loud (§317.4): a connection with no path of
+     its own opens in `public`, which on the real database is a client. */
+  await owner.query("SET search_path TO " + schemaIdent());
   try {
     let row = (await owner.query("SELECT id FROM tenants WHERE key = $1", [D.CLIENT_KEY])).rows[0];
     if (row && !replace) throw new Error("the '" + D.CLIENT_KEY + "' tenant already exists — pass --replace to overwrite it");

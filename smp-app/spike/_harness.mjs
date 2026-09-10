@@ -11,6 +11,7 @@
      DATABASE_URL_UNPOOLED=postgres://postgres:postgres@localhost:5432/postgres */
 import pg from "pg";
 import { applyAll } from "../db/apply.mjs";
+import { SCHEMA } from "../db/schema-name.mjs";
 
 export const OWNER_URL = process.env.DATABASE_URL_UNPOOLED || process.env.POSTGRES_URL_NON_POOLING
   || "postgres://postgres:postgres@localhost:5432/postgres";
@@ -53,8 +54,13 @@ export async function makeDb(opts = {}) {
   const ownerUrl = withDb(OWNER_URL, name);
   const appUrl = asApp(ownerUrl);
   if (!opts.bare) await applyAll(ownerUrl, { appPassword: APP_PASSWORD, log: () => {} });
-  const owner = new pg.Pool({ connectionString: ownerUrl, max: 4 });
-  const app = new pg.Pool({ connectionString: appUrl, max: 4 });
+  /* THE SHARED SCHEMA IS NOT `public` (§317.4), so the harness's own pools
+     open where lib/db.ts's do — a pool without the option lands in `public`
+     and every proof reports "relation tenants does not exist", which is the
+     harness testing something the product does not do (§100.3). */
+  const OPTS = "-c search_path=" + SCHEMA;
+  const owner = new pg.Pool({ connectionString: ownerUrl, max: 4, options: OPTS });
+  const app = new pg.Pool({ connectionString: appUrl, max: 4, options: OPTS });
   /* Point lib/db.ts at this database for anything that imports it. */
   const { usePools } = await import("../lib/db.ts");
   usePools(owner, app);
@@ -86,7 +92,10 @@ export function poolerModel(url) {
         if (word === "COMMIT" || word === "ROLLBACK") { await held.end(); held = null; }
         return r;
       }
-      const c = new pg.Client({ connectionString: url });
+      /* Every connection this model opens lives in the shared schema, exactly
+         as lib/db.ts's pools do (§317.4) — a fresh backend per statement is
+         the whole point of the model, so each one has to be told. */
+      const c = new pg.Client({ connectionString: url, options: "-c search_path=" + SCHEMA });
       await c.connect();
       if (word === "BEGIN") { held = c; return c.query(sql, params); }
       try { return await c.query(sql, params); } finally { await c.end(); }
@@ -101,7 +110,7 @@ export const PLATFORM_TABLES = ["tenants", "users", "tenant_users", "sessions", 
 export async function tenantTables(client) {
   const r = await client.query(
     "SELECT c.relname AS t FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace " +
-    "WHERE n.nspname = 'public' AND c.relkind = 'r' AND NOT (c.relname = ANY($1)) ORDER BY 1", [PLATFORM_TABLES]);
+    "WHERE n.nspname = current_schema() AND c.relkind = 'r' AND NOT (c.relname = ANY($1)) ORDER BY 1", [PLATFORM_TABLES]);
   return r.rows.map((x) => x.t);
 }
 

@@ -22,13 +22,34 @@ BEGIN
   END IF;
 END $$;
 
-GRANT USAGE ON SCHEMA public TO smp_app;
--- No CREATE on the schema: smp_app cannot make a table it would then own.
-REVOKE CREATE ON SCHEMA public FROM smp_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO smp_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO smp_app;
--- Tables and sequences made LATER by the owner (a migration) are reachable
--- the day they are made, so a table added next month needs no grant somebody
--- remembers to write. Scoped to the owner running this file.
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO smp_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO smp_app;
+-- THE GRANTS ARE ON THE SHARED SCHEMA, NOT ON `public` (§317.4). Its name
+-- rides the same transaction-local setting the password does, because on the
+-- real database `public` belongs to a CLIENT and granting smp_app anything
+-- there would hand the runtime role a way into live data the shared schema
+-- knows nothing about. Dynamic, so the name stays declared in exactly one
+-- place (db/schema-name.mjs).
+DO $$
+DECLARE s text := current_setting('smp.schema', true);
+BEGIN
+  IF s IS NULL OR s = '' THEN RAISE EXCEPTION 'roles.sql: smp.schema is not set — db/apply.mjs sets it'; END IF;
+  EXECUTE format('GRANT USAGE ON SCHEMA %I TO smp_app', s);
+  -- No CREATE on the schema: smp_app cannot make a table it would then own.
+  EXECUTE format('REVOKE CREATE ON SCHEMA %I FROM smp_app', s);
+  EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %I TO smp_app', s);
+  EXECUTE format('GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA %I TO smp_app', s);
+  -- Tables and sequences made LATER by the owner (a migration) are reachable
+  -- the day they are made, so a table added next month needs no grant somebody
+  -- remembers to write. Scoped to the owner running this file.
+  EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO smp_app', s);
+  EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT USAGE, SELECT ON SEQUENCES TO smp_app', s);
+  -- AND ANY GRANT THIS ROLE WAS EVER GIVEN IN `public` IS TAKEN BACK, because
+  -- on the real database that schema is a CLIENT's live data. WHAT THIS DOES
+  -- NOT DO, said rather than implied (§124): USAGE on `public` is granted to
+  -- PUBLIC by Postgres itself and a revoke from one role does not remove it,
+  -- so `has_schema_privilege` goes on answering true. That is not a way in —
+  -- reaching a TABLE needs a table privilege, and this role holds none there
+  -- (asserted: has_table_privilege(smp_app, public.people, SELECT) is false).
+  -- Revoking the PUBLIC grant instead would reach the frozen site's own role,
+  -- which is not this file's to touch.
+  EXECUTE 'REVOKE ALL ON SCHEMA public FROM smp_app';
+END $$;

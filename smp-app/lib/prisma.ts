@@ -24,6 +24,7 @@
 import prismaPkg from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { appPool } from "./db.ts";
+import { SCHEMA } from "../db/schema-name.mjs";
 
 const { PrismaClient } = prismaPkg;
 type Client = InstanceType<typeof PrismaClient>;
@@ -32,7 +33,13 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 
 const g = globalThis as unknown as { __smpPrisma?: Client };
 function base(): Client {
-  return (g.__smpPrisma ??= new PrismaClient({ adapter: new PrismaPg(appPool()) }));
+  /* THE SCHEMA IS NAMED TO THE ADAPTER (§317.4). Prisma QUALIFIES every table
+     with the schema it introspected — `public` — and the connection's own
+     search_path does not move it, so without this the client asks for
+     `public.units`, which on the real database is a CLIENT's table and is
+     exactly what must never be reachable from here. Same name as everything
+     else (db/schema-name.mjs), so there is one place to change it. */
+  return (g.__smpPrisma ??= new PrismaClient({ adapter: new PrismaPg(appPool(), { schema: SCHEMA }) }));
 }
 export function resetPrisma(): void { g.__smpPrisma = undefined; }
 

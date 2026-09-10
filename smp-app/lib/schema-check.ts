@@ -20,10 +20,10 @@ export async function schemaCheck(c: Pool | PoolClient): Promise<SchemaReport> {
   const tables = (await c.query(
     "SELECT c.oid, c.relname AS t, c.relrowsecurity AS rls, c.relforcerowsecurity AS force " +
     "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace " +
-    "WHERE n.nspname = 'public' AND c.relkind = 'r' AND NOT (c.relname = ANY($1)) ORDER BY c.relname",
+    "WHERE n.nspname = current_schema() AND c.relkind = 'r' AND NOT (c.relname = ANY($1)) ORDER BY c.relname",
     [PLATFORM_TABLES])).rows as { oid: number; t: string; rls: boolean; force: boolean }[];
   const tenantTables = tables.map((x) => x.t);
-  const tenantsOid = (await c.query("SELECT oid FROM pg_class WHERE relname = 'tenants' AND relnamespace = 'public'::regnamespace")).rows[0]?.oid;
+  const tenantsOid = (await c.query("SELECT oid FROM pg_class WHERE relname = 'tenants' AND relnamespace = current_schema()::regnamespace")).rows[0]?.oid;
 
   for (const tb of tables) {
     /* 1 · tenant_id uuid NOT NULL → tenants ON DELETE CASCADE */

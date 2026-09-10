@@ -14,6 +14,7 @@
    stay as the fallback (a project holding only those must still start) and
    one line names which was used, never its value. */
 import pg from "pg";
+import { schemaIdent } from "../db/schema-name.mjs";
 import { createRequire } from "node:module";
 /* numeric comes back as a Number, not a string — the frozen product's own
    type tuning, applied once per process (lib/state-io.js tuneTypes). */
@@ -50,11 +51,24 @@ function appUrl(): string {
 
 const g = globalThis as unknown as { __smpOwner?: pg.Pool; __smpApp?: pg.Pool };
 
+/* EVERY CONNECTION OPENS IN THE SHARED SCHEMA AND NOWHERE ELSE (§317.4).
+   `public` on the real database is a CLIENT — Raya Trade, left where it stood
+   when the clients were split — so an unqualified name must never be able to
+   fall through to it: `public` is left OUT of the path, not put after ours,
+   because a fallback there resolves a missing table silently to live data.
+
+   AS A CONNECTION OPTION, NEVER `ALTER ROLE`. The owner role here is the
+   database's owner, which the FROZEN site still connects as and which relies
+   on `public` being in its path — setting a default on the role would take
+   the live site down in a way nothing on this side would show. A per-pool
+   option touches only the connections this app opens. */
+const OPTS = "-c search_path=" + schemaIdent();
+
 export function ownerPool(): pg.Pool {
-  return (g.__smpOwner ??= new pg.Pool({ connectionString: ownerUrl(), max: 4 }));
+  return (g.__smpOwner ??= new pg.Pool({ connectionString: ownerUrl(), max: 4, options: OPTS }));
 }
 export function appPool(): pg.Pool {
-  return (g.__smpApp ??= new pg.Pool({ connectionString: appUrl(), max: 10 }));
+  return (g.__smpApp ??= new pg.Pool({ connectionString: appUrl(), max: 10, options: OPTS }));
 }
 /* The spike points both pools at a throwaway database per run. */
 export function usePools(owner: pg.Pool, app: pg.Pool): void {

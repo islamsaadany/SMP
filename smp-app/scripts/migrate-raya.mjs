@@ -17,6 +17,7 @@
    S8 and do nothing without the switch. */
 import { createRequire } from "node:module";
 import pg from "pg";
+import { schemaIdent } from "../db/schema-name.mjs";
 import { withTenant } from "../lib/tenant.ts";
 import { loadGraph } from "../lib/state-io.ts";
 
@@ -27,16 +28,34 @@ frozen.tuneTypes(pg);
 const OUTSIDE = ["bu_declarations", "change_log", "chat_threads", "chat_messages", "messages",
   "message_drafts", "message_recipients", "push_subscriptions", "assistant_asks"];
 
-export async function migrateRaya({ from, to, schema = "raya_trade", tenantKey = "raya-trade", tenantName = "Raya Trade",
+export async function migrateRaya({ from, to, schema = null, tenantKey = "raya-trade", tenantName = "Raya Trade",
   brk = null, log = (s) => console.log(s), appPools = null }) {
   const src = new pg.Client({ connectionString: from });
   await src.connect();
-  await src.query("SET search_path TO " + schema + ", platform");
+  /* WHICH ROOM THE FROZEN CLIENT IS IN IS THE REGISTRY'S ANSWER, NEVER A
+     CONSTANT HERE (§317.4). This said `raya_trade` — the name spec 042's
+     migration script would have used — and on the real database there is no
+     such schema: the client that already existed STAYED IN `public` and the
+     registry says so. A constant that is wrong finds no graph, and a carry
+     that finds no graph carries nothing, which is a cutover onto an empty
+     platform rather than an error anybody would notice in time. */
+  if (!schema) {
+    const r = await src.query("SELECT schema_name FROM platform.clients WHERE key = $1", [tenantKey]);
+    if (!r.rows[0]) throw new Error("migrate-raya: " + tenantKey + " is not in platform.clients — nothing is guessed at");
+    schema = r.rows[0].schema_name;
+    log("migrate-raya: the registry says " + tenantKey + " is in " + schema);
+  }
+  await src.query("SET search_path TO " + schemaIdent(schema) + ", platform");
   const graph = await frozen.readState(src);
   if (!graph) throw new Error("migrate-raya: no graph in " + schema);
 
   const dst = new pg.Client({ connectionString: to });
   await dst.connect();
+  /* AND THE DESTINATION IS THE SHARED SCHEMA, SAID OUT LOUD. Both ends can be
+     the same database here, so a destination with no search_path of its own
+     opens in `public` — which on the real database is the very client being
+     read (§317.4). */
+  await dst.query("SET search_path TO " + schemaIdent());
   const counts = {};
   try {
     await dst.query("BEGIN");
@@ -125,6 +144,6 @@ if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop()
   const a = (n) => { const x = process.argv.find((s) => s.startsWith("--" + n + "=")); return x ? x.slice(n.length + 3) : null; };
   const from = a("from"), to = a("to") || process.env.DATABASE_URL_UNPOOLED;
   if (!from || !to) { console.error("migrate-raya: --from=<copy url> and --to (or DATABASE_URL_UNPOOLED) are required"); process.exit(2); }
-  migrateRaya({ from, to, schema: a("schema") || "raya_trade", brk: a("break") })
+  migrateRaya({ from, to, schema: a("schema") || null, brk: a("break") })
     .then((r) => console.log("done — tenant " + r.tenantId), (e) => { console.error("FAILED " + e.message); process.exit(1); });
 }

@@ -17,9 +17,12 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import { SCHEMA, schemaIdent } from "./schema-name.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const LOCK_NS = 420043;   /* the platform's advisory-lock namespace (contracts/tenant-request.md) */
+
+export { SCHEMA };
 
 export async function applyAll(url, opts = {}) {
   const log = opts.log || ((s) => console.log(s));
@@ -29,6 +32,17 @@ export async function applyAll(url, opts = {}) {
   try {
     await client.query("BEGIN");
     await client.query("SELECT pg_advisory_xact_lock($1, 0)", [LOCK_NS]);
+    /* THE SHARED SCHEMA HAS A ROOM OF ITS OWN AND IT IS NOT `public` (§317.4):
+       on the real database `public` is a CLIENT — Raya Trade, left where it
+       stood when spec 042 gave the others a schema each — so applying here
+       would lay this schema over live data, which is what the first real
+       build stopped one table into. `public` is deliberately NOT left in the
+       path behind it: a fallback there resolves a missing table SILENTLY to
+       that client's own. SET LOCAL, so it dies with the COMMIT (§289). */
+    const sch = schemaIdent();
+    await client.query("CREATE SCHEMA IF NOT EXISTS " + sch);
+    await client.query("SET LOCAL search_path TO " + sch);
+    await client.query("SELECT set_config('smp.schema', $1, true)", [sch]);
     await client.query(
       "CREATE TABLE IF NOT EXISTS _migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())");
     /* The role's password rides a transaction-local setting so roles.sql never

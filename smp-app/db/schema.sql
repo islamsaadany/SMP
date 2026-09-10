@@ -722,7 +722,7 @@ ALTER TABLE tenant_users
 
 
 -- ── Row-level security: one loop from the catalogue ─────────────────────
--- Every table in public that is not on the platform list carries tenant_id
+-- Every table in THIS schema that is not on the platform list carries tenant_id
 -- and gets ENABLE, FORCE, an index and the one policy. A table added later is
 -- covered on the next apply. S5 (lib/schema-check.ts) asserts nothing slipped.
 --
@@ -732,6 +732,15 @@ ALTER TABLE tenant_users
 -- an empty world (found by S6, and by S3's first pooler model). Both fail
 -- closed; one of them is a blank page and the other a 500, and a safe failure
 -- should be one thing. NULLIF makes '' and unset the same: nothing visible.
+-- `current_schema()`, NEVER THE LITERAL `public` (§317.4). This loop reads the
+-- catalogue and then ALTERs whatever it finds, so pointed at the wrong schema
+-- it does not fail politely — on the real database `public` is a CLIENT, and
+-- this would have enumerated Raya Trade's 46 live tables and tried to enable
+-- row-level security, add an index and attach a policy to each. It stopped
+-- only because the unqualified ALTER resolved in THIS schema and found
+-- nothing: `relation "credentials" does not exist`, which reads like a missing
+-- table and was a loop pointed at somebody else's data. The path is set by
+-- db/apply.mjs and holds this schema alone.
 DO $$
 DECLARE
   t text;
@@ -739,7 +748,7 @@ BEGIN
   FOR t IN
     SELECT c.relname FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public' AND c.relkind = 'r'
+    WHERE n.nspname = current_schema() AND c.relkind = 'r'
       AND c.relname NOT IN ('tenants','users','tenant_users','sessions','login_attempts',
                             'platform_access','tenant_log','push_keys','_migrations')
   LOOP
@@ -747,7 +756,8 @@ BEGIN
     EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);
     EXECUTE format('CREATE INDEX IF NOT EXISTS %I ON %I (tenant_id)', t || '_tenant', t);
     IF NOT EXISTS (SELECT 1 FROM pg_policy p JOIN pg_class c ON c.oid = p.polrelid
-                   WHERE c.relname = t AND p.polname = 'tenant_rows') THEN
+                   JOIN pg_namespace n ON n.oid = c.relnamespace
+                   WHERE n.nspname = current_schema() AND c.relname = t AND p.polname = 'tenant_rows') THEN
       EXECUTE format(
         'CREATE POLICY tenant_rows ON %I FOR ALL ' ||
         'USING (tenant_id = NULLIF(current_setting(''app.tenant_id'', true), '''')::uuid) ' ||

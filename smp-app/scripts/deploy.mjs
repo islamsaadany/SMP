@@ -52,6 +52,25 @@ if (!url) {
   process.exit(0);
 }
 
+/* THE APP'S OWN PASSWORD IS REFUSED HERE, NOT BY THE DATABASE (§317.5).
+   Unset, `SMP_APP_PASSWORD` falls back to the literal word `smp_app` — fine
+   on a laptop, a password on a production database — and Neon says so at
+   COMMIT, in its control plane's words, three files into a transaction and
+   with a stack trace from `pg`: "insecure password, try including more
+   special characters…". Correct, and it names neither the variable nor the
+   place to set it. This is the same refusal one step earlier and in the
+   product's own words (§124, §171: a failure that cannot be acted on is a
+   failure reported twice). Only where a deployment is being built — the
+   spike and a laptop pass their own password to applyAll and never come
+   through here. */
+const pw = process.env.SMP_APP_PASSWORD || "";
+if (onVercel && (pw.length < 12 || !/[a-z]/.test(pw) || !/[A-Z0-9]/.test(pw))) {
+  console.error("deploy: SMP_APP_PASSWORD is " + (pw ? "too weak" : "not set") +
+    " — the app signs in to the database with it on every request, and the database refuses a weak one.");
+  console.error("deploy: set it in the Vercel project's environment variables to something long, with upper and lower case and a digit, then deploy again.");
+  process.exit(2);
+}
+
 const applied = await applyAll(url);
 console.log("deploy: schema and migrations up to date" + (applied.length ? " — applied " + applied.join(", ") : " (nothing new)"));
 

@@ -27,6 +27,10 @@ export function shellDocument(tenantName: string): string {
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(tenantName) + " — Strategy Management Platform</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">\n' +
+    /* §26: the manifest and the touch icon, as the frozen platform file and
+       the gate both carry them — what lets somebody add SMP to a home
+       screen, and on an iPhone the only way a notification is delivered. */
+    '<link rel="manifest" href="/manifest.webmanifest">\n<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">\n' +
     '<meta name="theme-color" content="#16325C" media="(prefers-color-scheme: light)">\n' +
     '<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">\n' +
     '<link rel="stylesheet" href="/platform.css">\n' +
@@ -46,16 +50,17 @@ export function shellHeaders(): Record<string, string> {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store",
     ...(process.env.SMP_BREAK === "open-csp" ? {} : { "Content-Security-Policy": SHELL_CSP }),
-    "X-Frame-Options": "DENY",
-    "X-Content-Type-Options": "nosniff",
-    /* same-origin: the frozen site said no-referrer everywhere and the shell's
-       own scripts spell /api/state with no client on it (history.js,
+    /* ONLY WHAT DIFFERS FROM THE REST OF THE SITE (Phase J). The other six —
+       X-Frame-Options, nosniff, HSTS, Permissions-Policy, COOP and the
+       prefetch switch — are set for every path by next.config.ts, read out
+       of the frozen vercel.json; repeating them here would send each twice,
+       and a second copy of a header is not an override.
+
+       same-origin: the frozen site said no-referrer everywhere and the
+       shell's own scripts spell /api/state with no client on it (history.js,
        safety.js) — the referrer is how the server learns which client's page
-       is asking (app/api/state/route.ts), and nothing leaves the origin */
+       is asking (app/api/state/route.ts), and nothing leaves the origin. */
     "Referrer-Policy": "same-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
-    "Cross-Origin-Opener-Policy": "same-origin",
-    "X-DNS-Prefetch-Control": "off",
   };
 }
 

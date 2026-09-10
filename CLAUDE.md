@@ -731,6 +731,77 @@ construction, and its cost is a SEQUENCE rather than a guard (after the frozen
 site stops taking writes, or a figure entered in between is carried and then
 lost). **Nothing retired.**
 
+**PHASE J IS BUILT AND NOT RUN (§316.10)** — the cutover itself is Islam's,
+and everything that could be built and proved here is. **STOP POINT C IS
+ANSWERED AND IT IS HIS** (*"1. ok"*): `/sw.js` is served again. **The plan
+said both things and was right about its own half each time** — line 47's *no
+service worker and no offline copy* reasons entirely about CACHING, and that
+argument is STRONGER on the new stack, because the platform document is
+server-rendered and per person, so a cached copy is one person's page served
+to the next on that device; Phase G's row says *carry notifications*, and
+`push` lives in that one file. So the caching half is DROPPED and the
+notification half is CARRIED — `scripts/build-sw.mjs` generates it from the
+frozen worker rather than copying (§53.5, `build-shell.mjs`'s discipline),
+splitting at §231's own marker with **both ends asserted** (the dropped half
+must hold `SHELL`, a fetch handler and a cache; the carried half must hold
+`push` and `notificationclick` and name none of them), proved able to fail
+three ways from a doctored source. **There is no `fetch` handler at all**,
+which is what *stores nothing* means when it is measured. **AND IT IS WHAT
+CLEARS THE FROZEN CACHES**, which is why Phase J's row asked for a file here:
+every cache deleted on activate and the clients claimed, so §91's returning
+browser cannot be served the old platform out of its own disk — it destroys
+the old CACHES, not itself, because staying resident is how a push arrives
+with no tab open. **A side effect named rather than discovered**: claiming a
+tab that already had a controller fires `controllerchange`, which is what
+§258 watches, so a tab left open on the frozen build is offered *"A newer
+version of the platform is ready"* at the cutover. **THE 404 EVERY PAGE LOAD
+LOGGED IS GONE** — `qa.py` at Next ERRORS **none** for the first time since
+Phase G, with `import-page` and `kb-file` (1 red each for exactly it) green
+there too. **AND THE MANIFEST HAD TO CROSS WITH IT**, or the answer is true on
+a laptop and nowhere else: on an iPhone a push is only ever delivered to a
+platform ADDED TO A HOME SCREEN, and the new app served and linked none —
+`scripts/sync-static.mjs` carries it and the four icons from the repository
+root verbatim (it needed no editing: `start_url` and `scope` were already
+"/"), both surfaces link them, and the check asserts every icon the manifest
+NAMES answers. **The offline copy does not come back** and that is line 47
+standing. **AND MEASURING THE DEPLOYMENT FOUND WHAT NOTHING LOOKS AT**: the
+frozen `vercel.json` sets **eight** security headers on every path (§43.6) and
+the only surface on the new stack setting any was the shell's own route — the
+door, the landing, `/sw.js` and every stylesheet came back with NONE, so a
+cutover would have dropped HSTS and the policy from the sign-in page as a
+deployment detail. `next.config.ts` reads them **out of that same file**,
+which is the rule that came with them, in **two sets kept DISJOINT**: the six
+that are the same everywhere on `/(.*)` with the shell no longer repeating
+them, and `Content-Security-Policy`/`Referrer-Policy` on the DOOR and the
+LANDING alone, the React surfaces with no route handler of their own. **WHICH
+WINS WHEN BOTH SET ONE IS NOT RELIED ON** — measured, a config header replaced
+a route's and did not read the same way for every key, and a POLICY is the
+wrong place to lean on an internal precedence — so the "exactly once"
+assertion is **the control rather than the alarm and says so** (§113.8).
+**AND THE `DELETE FROM sessions` THE ROW ASKED FOR IS NOT WRITTEN**, which
+reading the carry decided: `migrate-raya.mjs` copies the password hashes
+verbatim and **not one session**, so everybody signs in once by construction
+and a migration deleting nothing would be ceremony (§24) — said rather than
+quietly dropped. **WHAT RUNS AT DEPLOY IS ONE FILE AND TWO SWITCHES**
+(`scripts/deploy.mjs`, called by `npm run build` before `next build`, because
+a bootstrap on a request path is what §98 measured and §289 found failing
+under a burst): the schema and the migrations EVERY build, Raya's carry and
+the demo seed only under `SMP_CARRY_RAYA` / `SMP_SEED_DEMO`, **neither ever on
+a preview**. Both refuse themselves once run, so **the switch decides WHEN
+rather than whether — and when is the whole cost**, because the carry reads
+the frozen schema while the frozen site may still be taking writes; a sequence
+Islam controls and not something that can be turned into a guard.
+**`SMP_APP_PASSWORD` is named in the runbook** rather than left at its default,
+which is the word `smp_app`. `qa.py` at Next 33 viewers / 229 destinations /
+ERRORS none, `file://` ERRORS none, door 49/0, state 91/0, **shell 60/0** with
+five red runs, blob 23/23, comms 47/47, upload 9/9, demo 7/7, 588/0, 136/0,
+the nine spike proofs, `tsc` clean. The runbook is
+`specs/043-shared-schema-rebuild/phase-j-runbook.md`. **STILL ISLAM'S**: the
+Vercel settings, the two switches, the address, **the two presses of *Add a
+client*** — he made them on the FROZEN platform, so they are owed again on the
+new one — and **the merge, his word on that merge every time**. **Nothing
+retired.**
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 
@@ -8569,7 +8640,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-08 &mdash; **&sect;313.37: the merge rehearsed, and
+*Last Updated: 2026-09-10 &mdash; **&sect;316.10: Phase J built &mdash; the
+worker Islam asked for, the headers nobody had missed, and the deploy step.**
+Stop point C answered in two words (*"1. ok"*), and **the plan said both things
+and was right about its own half each time**: line 47's *no service worker* is
+reasoned entirely about CACHING &mdash; an argument that is STRONGER on the new
+stack, because the platform document is server-rendered and per person, so a
+cached copy is one person's page served to the next &mdash; while Phase G's row
+says *carry notifications*, and `push` lives in that one file. The caching half
+is dropped, the notification half CARRIED (generated from the frozen worker,
+both ends asserted, three refusals proved), **no `fetch` handler at all**, and
+every cache deleted on activate with the clients claimed, which is the §91
+reason Phase J asked for a file there: no returning browser is served the frozen
+platform off its own disk, and a tab left open on it is offered §258's reload.
+**The 404 every page load had logged since Phase G is gone** &mdash; `qa.py` at
+Next ERRORS none for the first time, with the two frozen checks that were 1 red
+for it green. **The manifest crossed with it**, because on an iPhone a push is
+only delivered to a platform added to a home screen; the offline copy did not.
+**And measuring the deployment found what nothing looks at**: eight security
+headers on every path in the frozen `vercel.json`, and the new app serving none
+outside the shell's own route &mdash; read from that same file now, in two sets
+kept disjoint, with the *exactly once* assertion named as the control rather
+than the alarm. **The `DELETE FROM sessions` the row asked for is not written
+and it is said why**: the carry copies no session, so everybody signs in once by
+construction. The cutover itself &mdash; the settings, the switches, the
+address, the two presses, the merge &mdash; is Islam's.*
+
+*Earlier: 2026-09-08 &mdash; **&sect;313.37: the merge rehearsed, and
 what reading the merged tree found.** Islam: *"fetch the merge and check the
 code and do a final sweep if anything might cause errors or issues or unneded
 code before the final merge confirmation."* `origin/main` merged INTO the

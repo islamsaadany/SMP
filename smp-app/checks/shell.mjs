@@ -22,6 +22,7 @@
 
    Needs `npm run build` first and the chromium this image carries. */
 import { spawn } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
 import pg from "pg";
@@ -35,6 +36,17 @@ let oks = 0, fails = 0;
 const ok = (l) => { oks++; console.log("ok    " + l); };
 const fail = (l, m) => { fails++; console.log("FAIL  " + l + (m === undefined ? "" : " — " + String(m).slice(0, 220))); };
 const check = (c, l, m) => (c ? ok(l) : fail(l, m));
+
+/* THE WORKER IS A BUILD ARTEFACT, so its two falsifications are edits to the
+   bytes the browser is actually served, written before `next start` reads
+   them and put back on the way out however this process ends (§94.2 — the
+   good path is asserted in the same run, so a build that lost the file
+   entirely cannot pass). */
+const SWFILE = join(import.meta.dirname, "..", "public", "sw.js");
+const SWWAS = readFileSync(SWFILE, "utf8");
+process.on("exit", () => { try { writeFileSync(SWFILE, SWWAS); } catch {} });
+if (brk === "keep-caches") writeFileSync(SWFILE, SWWAS.replace(/caches\.keys\(\)[\s\S]*?\.then\(\(ks\) => Promise\.all\(ks\.map\(\(k\) => caches\.delete\(k\)\)\)\)/, "Promise.resolve()"));
+if (brk === "serve-from-disk") writeFileSync(SWFILE, SWWAS + '\nself.addEventListener("fetch", (e) => { if (e.request.method === "GET") e.respondWith(caches.open("smp-shell-again").then((c) => fetch(e.request).then((r) => { if (r.ok && r.type === "basic") c.put(e.request, r.clone()); return r; }))); });\n');
 
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
 const owner = new pg.Pool({ connectionString: URL_, max: 2 });
@@ -152,6 +164,127 @@ await section("4 · Forefront's own pages", async () => {
   await ctx.close(); await fresh();
   const r2 = await fetch(BASE + "/raya-trade/mobile/strategy", { redirect: "manual" });
   check(r2.status === 302 && /\/raya-trade\/sign-in$/.test(r2.headers.get("location") || ""), "signed out, the shell's address sends you to the client's own door", r2.status + " " + r2.headers.get("location"));
+});
+
+await section("9 · the worker carries the notifications and stores nothing (Phase J, stop point C)", async () => {
+  /* WHAT IS SERVED, first, because a worker answered as text/html is refused
+     by the browser and reads exactly like a worker that does nothing
+     (§231.5's own trap, in a check this time). */
+  const r = await fetch(BASE + "/sw.js");
+  const body = await r.text();
+  check(r.status === 200, "/sw.js is served at all — the 404 every page load logged (§316.7) is gone", r.status);
+  check(/javascript|ecmascript/i.test(r.headers.get("content-type") || ""), "…as JavaScript, or the browser refuses it", r.headers.get("content-type"));
+  check(body.includes('addEventListener("push"') && body.includes('addEventListener("notificationclick"'),
+        "…and it carries the notification half (Phase G's row: a push cannot arrive without it)");
+  check(!/addEventListener\("fetch"/.test(body),
+        "…and NO fetch handler: nothing here is served from disk (the plan's line 47, kept)");
+
+  /* THE BOTH-ENDS HALF (§94.2): it is not enough that the frozen caches are
+     gone — a build that served no worker at all would satisfy that. So the
+     cache is MADE first, and the clearing is watched. */
+  await fresh();
+  await page.goto(BASE + "/raya-trade/sign-in", { waitUntil: "domcontentloaded" });
+  const before = await page.evaluate(async () => {
+    await (await caches.open("smp-shell-v4.86-client-doors")).put("/frozen-shell", new Response("the platform, as it was"));
+    return (await caches.keys());
+  });
+  check(before.length === 1 && before[0].startsWith("smp-shell-"), "a returning browser's frozen cache, made on purpose", JSON.stringify(before));
+
+  const reg = await page.evaluate(async () => {
+    /* A HANG IS NOT A FAILURE (§231.5), so the wait races a clock rather
+       than being the only thing the outcome depends on. */
+    const clock = new Promise((d) => setTimeout(() => d("slow"), 15000));
+    const mine = navigator.serviceWorker.register("/sw.js")
+      .then(() => navigator.serviceWorker.ready)
+      .then(async (r) => {
+        for (let i = 0; i < 100 && !navigator.serviceWorker.controller; i++) await new Promise((d) => setTimeout(d, 100));
+        return { state: r.active && r.active.state, controlled: !!navigator.serviceWorker.controller, keys: await caches.keys() };
+      })
+      .catch((e) => ({ threw: String(e && e.message || e) }));
+    return Promise.race([mine, clock]);
+  });
+  check(reg && reg.state === "activated", "it registers and activates in a real browser", JSON.stringify(reg));
+  check(reg && reg.controlled === true, "…and claims the tab, so §258's 'a newer version is ready' fires at the cutover", JSON.stringify(reg && reg.keys));
+  check(reg && Array.isArray(reg.keys) && reg.keys.length === 0, "…and every frozen cache is gone (§91: nobody is served the old platform off their own disk)", JSON.stringify(reg && reg.keys));
+
+  /* AND IT STORES NOTHING AFTERWARDS — a fetch handler that cached would
+     satisfy every assertion above and put the shell back on disk. */
+  await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
+  const after = await page.evaluate(() => caches.keys());
+  check(after.length === 0, "…and a navigation under it stores nothing", JSON.stringify(after));
+
+  /* AND THE HALF THE WORKER IS FOR ON AN IPHONE (§26): a push is only ever
+     delivered to a platform that has been ADDED TO A HOME SCREEN, which
+     needs a manifest — so the manifest crosses with the worker or Islam's
+     "notifications keep working" is true on a laptop and nowhere else. */
+  const mr = await fetch(BASE + "/manifest.webmanifest");
+  check(mr.status === 200 && /manifest\+json/.test(mr.headers.get("content-type") || ""), "the manifest is served, as a manifest", mr.status + " " + mr.headers.get("content-type"));
+  const man = await mr.json();
+  const icons = await Promise.all((man.icons || []).map((i) => fetch(BASE + i.src).then((x) => x.status)));
+  check(icons.length === 3 && icons.every((s) => s === 200), "…and every icon it names answers", JSON.stringify(icons));
+  check((await fetch(BASE + "/icons/apple-touch-icon.png")).status === 200, "…and the touch icon the door and the shell link");
+  const doorHtml = await (await fetch(BASE + "/raya-trade/sign-in")).text();
+  check(/rel="manifest"/.test(doorHtml), "the door links it (index.html does)");
+
+  /* THE REPORTED SYMPTOM, in its own words. */
+  await ctx.close(); await fresh(); await signIn("office@forefront.example");
+  await open("/raya-trade/mobile/strategy");
+  check(!errs.some((e) => /404/.test(e) && /script/i.test(e)), "an ordinary page load logs no bad-response error for a script", JSON.stringify(errs.slice(0, 3)));
+  check(await page.evaluate(() => !!document.querySelector('link[rel="manifest"]')), "…and the shell links the manifest too (the frozen platform file does)");
+});
+
+await section("10 · the security headers cross with it, read from vercel.json (§43.6)", async () => {
+  /* AGREEMENT WITH THE FROZEN FILE, never a list typed here (§94.8): the
+     rule that came with these headers is that they are written once and read
+     from there, so a check holding its own copy would be the third. */
+  const froz = JSON.parse(readFileSync(join(import.meta.dirname, "..", "..", "vercel.json"), "utf8"));
+  const all = froz.headers.find((h) => h.source === "/(.*)").headers;
+  const want = all.map((h) => h.key.toLowerCase());
+  const got = async (p) => {
+    const r = await fetch(BASE + p, { redirect: "manual" });
+    const out = {};
+    for (const [k, v] of r.headers) out[k.toLowerCase()] = (out[k.toLowerCase()] === undefined ? v : out[k.toLowerCase()] + " ⧺ " + v);
+    return out;
+  };
+  const door = await got("/raya-trade/sign-in");
+  const missing = want.filter((k) => door[k] === undefined);
+  check(missing.length === 0, "the door carries every header the frozen site sets — " + want.length + " of them", JSON.stringify(missing));
+  /* EXACTLY ONCE is the control rather than the alarm, and it says so
+     (§113.8): next.config.ts and the routes are kept disjoint, so nothing in
+     the product can send one twice today. It is here because the day they
+     overlap is the day a policy is quietly replaced or intersected, and that
+     is the one fault a header set in two places produces. */
+  const twice = want.filter((k) => (door[k] || "").includes("⧺"));
+  check(twice.length === 0, "…each exactly once — the control: the config and the routes are disjoint", JSON.stringify(twice));
+
+  /* A STATIC FILE IS A SURFACE TOO — nosniff on a stylesheet is the one that
+     matters, and before this it carried nothing at all. */
+  const asset = await got("/platform.css");
+  const six = want.filter((k) => k !== "content-security-policy" && k !== "referrer-policy");
+  check(six.every((k) => asset[k] !== undefined), "…and so does a served stylesheet (the six that are the same everywhere)", JSON.stringify(six.filter((k) => asset[k] === undefined)));
+  check(asset["content-security-policy"] === undefined, "…while the two that are per surface are not put on files", asset["content-security-policy"]);
+
+  /* BOTH ENDS OF THE ONE THAT DIFFERS (§94.2): the door needs Next's own
+     inline bootstrap, the shell forbids inline outright (§315.3), and each
+     must carry ONE policy or the browser enforces the intersection. */
+  await fresh(); await signIn("office@forefront.example");
+  const cook = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
+  const shell = await (async () => {
+    const r = await fetch(BASE + "/raya-trade/mobile/strategy", { headers: { cookie: cook }, redirect: "manual" });
+    const out = {}; for (const [k, v] of r.headers) out[k.toLowerCase()] = (out[k.toLowerCase()] === undefined ? v : out[k.toLowerCase()] + " ⧺ " + v);
+    return out;
+  })();
+  check(/'unsafe-inline'/.test(door["content-security-policy"] || ""), "the door's policy admits Next's own bootstrap script", (door["content-security-policy"] || "").slice(0, 60));
+  const sc = /script-src ([^;]+)/.exec(shell["content-security-policy"] || "");
+  check(sc && sc[1].trim() === "'self'" && !/⧺/.test(shell["content-security-policy"] || ""), "…and the shell's ONE policy still forbids it (§315.3)", JSON.stringify(sc && sc[1]));
+  check(door["referrer-policy"] === "no-referrer" && shell["referrer-policy"] === "same-origin", "…and each says its own referrer rule, once", door["referrer-policy"] + " / " + shell["referrer-policy"]);
+  /* AND THE SHELL IS THE SURFACE THAT SETS ITS OWN, so it is the one that
+     can send a header twice — the six it stopped repeating are the whole
+     point of the trim (--break=double-headers puts them back). */
+  const smiss = want.filter((k) => shell[k] === undefined);
+  check(smiss.length === 0, "the shell document carries all " + want.length + " too", JSON.stringify(smiss));
+  const sdup = want.filter((k) => (shell[k] || "").includes("⧺"));
+  check(sdup.length === 0, "…and repeats not one of them", JSON.stringify(sdup));
 });
 
 try { process.kill(-server.pid); } catch {}

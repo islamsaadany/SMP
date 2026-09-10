@@ -4,7 +4,11 @@ export const metadata: Metadata = {
   /* The organisation's name is data, not a literal — the title is set per page
      from what the database holds. */
   title: "Strategy Management Platform",
-  icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.png", sizes: "32x32" }] },
+  icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.png", sizes: "32x32" }], apple: "/icons/apple-touch-icon.png" },
+  /* §26, carried at Phase J: index.html links this and so does the platform
+     file, and it is what lets the platform be added to a home screen — which
+     on an iPhone is the only place a push notification is ever delivered. */
+  manifest: "/manifest.webmanifest",
 };
 
 /* THE THEME IS READ BEFORE THE FIRST PAINT (index.html's own head script,

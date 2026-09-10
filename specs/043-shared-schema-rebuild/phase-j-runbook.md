@@ -105,6 +105,32 @@ silently at build rather than loudly at runtime.
 
 The domain follows the project, so nothing about DNS changes.
 
+### Two switches on that same settings page, and one of them takes the site down
+
+Both were met on the day (2026-09-10) and neither is guessable from the
+outside, so they are written down here rather than rediscovered.
+
+**"Skip deployments when there are no changes to the root directory or its
+dependencies" MUST BE OFF.** It tells Vercel to build only when something
+inside `smp-app/` changed — and this app deliberately reads files from OUTSIDE
+its own folder: the frozen product's sources, `platform.html`, `sw.js`, and
+`vercel.json` for the security headers (§316.10). So a commit touching only
+those genuinely changes what the app serves and Vercel would skip it: §317 was
+a change to `platform.html` alone and would never have deployed. **And a
+skipped deployment is marked Ready with NO OUTPUT** — promote one to
+production and the domain answers 404 on every address, which is what
+happened: not the old site, not the new one, `x-vercel-error: NOT_FOUND` on
+`/`, `/platform`, `/raya-trade` and `/demo` alike. The way back is one press:
+Deployments → the last good Production row → **Promote to Production**.
+
+**AND "REDEPLOY" IS NOT A WAY TO PICK UP A SETTING.** Redeploying an existing
+deployment reuses what that deployment was built with, so a redeploy of a
+commit that was built as the OLD static site rebuilds it as the old static
+site — 10 and 28 seconds against the minutes a real build of this app takes.
+**The build time is the tell, and it is readable before the build finishes.**
+A setting change is picked up by a NEW deployment, which means a new commit
+(or Deploy Hook), never a redeploy of an old one.
+
 **The way back** is the same setting: put the Root Directory back and the
 frozen site returns exactly as it was — the carry READS the frozen schemas and
 writes nothing to them. What a revert costs is anything typed into the NEW

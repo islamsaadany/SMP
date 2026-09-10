@@ -8695,7 +8695,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-10 &mdash; **&sect;317: the worked example is not one
+*Last Updated: 2026-09-10 &mdash; **&sect;317.3&ndash;.8: the cutover, and the
+six things between the merge and a site that serves.** Six failed or empty
+deployments in a row, and **not one of them the same fault twice**: the
+`.vercelignore` &sect;238 wrote for the frozen static site excluded `smp-app/`
+itself, so Vercel deleted the app and published an empty deployment marked
+Ready that answered 404 everywhere (&sect;317.3); **`public` is a CLIENT**
+&mdash; when spec 042 split the clients into a schema each, the one that
+already existed stayed where it stood, so the shared schema was one table into
+being laid over Raya Trade's live tables when `relation "sessions" already
+exists` stopped it, and schema.sql's RLS loop pointed at `'public'` would have
+attached policies to a client's data next; a room of its own now, named once,
+`public` deliberately NOT in the path behind it, the carry aimed by the
+registry instead of a `raya_trade` that never existed (&sect;317.4); the app's
+password refused by Neon in the control plane's words and now refused one step
+earlier in ours (&sect;317.5); the frozen `vercel.json` unreadable during a
+Vercel build &mdash; the file at the build root is Vercel's own resolved config
+&mdash; so the security headers are carried into the app and committed
+(&sect;317.6, .7); and the Framework Preset left at **Other** from the static
+days, which builds Next and then serves `public/` as files (&sect;317.8).
+**The shape they share is the finding**: everything was proved against a
+database and a build context that were not production's. Proved after on a
+rehearsal built to production's shape &mdash; door 49/0, state 91/0, shell
+60/0 against a real build, the nine spike proofs green with sixteen
+falsifications red, `check:room` 10/0 and `check:deploy` 5/0 each red when
+broken, 588/0, 136/0, `tsc` clean &mdash; and the preview served the door
+before `main` was touched. Two rules for the next person: **a `Redeploy`
+reuses what that deployment was built with, so a changed setting needs a new
+commit**, and **preview deployments answer 302 to anyone not signed in to
+Vercel**, so a preview is read in a browser, never with `curl`.*
+
+*Earlier the same day: **&sect;317: the worked example is not one
 of the clients.** Islam, of Forefront's own page: *"the demo should be a
 separate client on hte platform outside beside the clients."* **IT WAS ALREADY
 A CLIENT AND IT WAS NOT SET APART**, which is the whole of the ask &mdash;

@@ -123,6 +123,20 @@ happened: not the old site, not the new one, `x-vercel-error: NOT_FOUND` on
 `/`, `/platform`, `/raya-trade` and `/demo` alike. The way back is one press:
 Deployments → the last good Production row → **Promote to Production**.
 
+**AND `.vercelignore` DECIDED IT BEFORE EITHER OF THEM.** §238 wrote that
+file for the FROZEN deployment, which served the whole repository as static
+files, so everything internal had to be named in it — **`smp-app/` among
+them**. With the Root Directory pointed at the app, Vercel cloned, removed
+2046 ignored files, deleted the app, and built nothing: *"Build output
+contains no functions, static, or services directory"*, **13ms**, an empty
+deployment marked **Ready** that answered **404 on every address**. Nothing
+in a build log says *you excluded the thing you asked me to build*; it says
+the output is empty, which reads like a hundred other faults. Rewritten at
+§317.3, with every pattern anchored — a bare `scripts/` matches at any depth
+and would have deleted `smp-app/scripts/` next — and
+`npm run check:deploy` refuses if the file swallows anything the app reaches
+for, derived from build.py's own list rather than kept beside it.
+
 **AND "REDEPLOY" IS NOT A WAY TO PICK UP A SETTING.** Redeploying an existing
 deployment reuses what that deployment was built with, so a redeploy of a
 commit that was built as the OLD static site rebuilds it as the old static

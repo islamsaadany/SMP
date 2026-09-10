@@ -1,29 +1,51 @@
-# Keep internal / dev-only files out of the public deployment (2026-09-01
-# security sweep). None of these are needed by the running site: the platform
-# is the single built HTML plus the api/* serverless functions, and those
-# functions read only lib/*.js and db/** — which are deliberately NOT listed
-# here so they keep working. Everything below is source, tests, docs, mockups
-# or a separate app skeleton, and only ever leaked implementation detail when
-# served. (Excluding a file removes it from BOTH static serving and the
-# function bundle, so nothing the runtime requires may appear here.)
+# WHAT IS NOT UPLOADED TO THE BUILD (§238, rewritten for the cutover — §317.3)
+#
+# §238 wrote this file for the FROZEN deployment, which served the whole
+# repository as static files: everything internal had to be named here or it
+# was fetchable. That is not how the new stack works — Next serves `public/`
+# and its own build output and nothing else, so a source file is not reachable
+# whatever this file says. What this file still decides is what reaches the
+# BUILD, and excluding something the build reads is not a smaller deployment,
+# it is no deployment at all.
+#
+# THAT IS NOT A THEORY. `smp-app/` was listed here, so with the Root Directory
+# pointed at it Vercel cloned the repository, deleted the app, found nothing to
+# build — "Build output contains no functions, static, or services directory",
+# 13ms — and published an empty deployment that answered 404 on every address:
+# the door, /platform, every client and the demo. Marked Ready throughout.
+#
+# EVERY PATTERN IS ANCHORED WITH A LEADING SLASH, AND THAT IS LOAD-BEARING.
+# .gitignore syntax matches a bare `scripts/` at ANY depth, so the previous
+# file's `scripts/` would have deleted `smp-app/scripts/` — the build scripts
+# themselves — the moment `smp-app/` stopped being excluded, producing the
+# same empty output one log line further on. Measured before it could:
+# `git ls-files -ci --exclude-from=…` named all six of them.
+#
+# NOTHING THE BUILD OR THE RUNTIME READS MAY APPEAR HERE, and what that is
+# is asserted rather than remembered — `smp-app/checks/deploy-context.mjs`
+# reads this file and refuses if it swallows anything the app reaches for.
+#
+# The app reads these from outside its own folder: SMP-Project-Folder/src
+# (the frozen sources — at build time AND at runtime through lib/frozen.cjs),
+# platform.html, sw.js, index.html, vercel.json, the manifest and the icons.
 
-# Sources and in-repo test/checks (the built HTML is committed separately and
-# is what production serves — src/ is not needed at runtime).
-SMP-Project-Folder/src/
-SMP-Project-Folder/mockups/
+# ── Dev tooling and material that is nobody's dependency ──────────────
+/design-mockups/
+/ui-versions/
+/specs/
+/.specify/
+/clients/
+/.github/
+/.claude/
+/scripts/
+/SMP-Project-Folder/mockups/
 
-# Dev tooling, snapshots, mockups, specs, brand references.
-scripts/
-design-mockups/
-ui-versions/
-specs/
-.specify/
-clients/
+# The in-repo checks are Python and Playwright, run from a laptop, and are
+# the largest thing under src/ — the one part of it nothing at build or run
+# time reaches for.
+/SMP-Project-Folder/src/checks/
+/SMP-Project-Folder/src/__pycache__/
 
-# A separate Next.js app skeleton, not part of the live platform.
-smp-app/
-
-# Documentation.
-*.md
-SMP-Project-Folder/*.md
-.github/
+# ── Documentation ─────────────────────────────────────────────────────
+/*.md
+/SMP-Project-Folder/*.md

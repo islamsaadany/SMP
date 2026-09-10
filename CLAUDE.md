@@ -8613,8 +8613,18 @@ DATABASE_URL_UNPOOLED=… node smp-app/checks/schema-room.mjs
                                 # §5 greps every pg connection in the app: each
                                 # either carries the search_path option or says
                                 # SET search_path in its own file, and it found
-                                # eight the moment it was written. 10/0, red
-                                # under --break=public
+                                # eight the moment it was written. §6 greps for
+                                # the other half (§317.11): a query naming
+                                # `public` in its own TEXT, which no connection
+                                # option can reach — demo-seed.mjs had been
+                                # given the option and still asked the catalogue
+                                # `WHERE n.nspname = 'public'`, so it scanned a
+                                # client's schema, found no tenant-owned table
+                                # and ran the demo's privacy scan over an empty
+                                # list; this file is the one exemption and is
+                                # NAMED, since `public` is its subject. 11/0,
+                                # red under --break=public and red with the
+                                # literal put back
 node smp-app/checks/deploy-context.mjs
                                 # what reaches the build (§317.3): .vercelignore
                                 # excluded smp-app/ itself, so Vercel deleted the

@@ -137,6 +137,31 @@ try {
     }
   }
   check("no connection is opened without a search_path", scan.length === 0, [...new Set(scan)].join(", "));
+
+  /* ── 6 · and nothing names the schema in the text of a query ────────
+     §5 looks at CONNECTIONS, and that is not the whole of it: `demo-seed.mjs`
+     had been given the search_path option by that same sweep and the very
+     next line still asked the catalogue `WHERE n.nspname = 'public'`. An
+     option cannot reach inside a string. So it enumerated a CLIENT'S schema,
+     found no tenant-owned table, and scanned an empty list — passing its
+     privacy assertion over nothing, which only §113.8's control beside it
+     caught (§317.11).
+
+     THE ONE EXEMPTION IS THIS FILE, and it is named rather than pattern-matched:
+     `public` is exactly what this check is about, so it must say the word. */
+  console.log("\n6 · and no query names the schema in its own text");
+  const named = [];
+  for (const dir of ["lib", "scripts", "spike", "checks", "db"]) {
+    let names = [];
+    try { names = rd(join(APP, dir)); } catch { continue; }
+    for (const f of names) {
+      if (!/\.(ts|mjs|cjs)$/.test(f)) continue;
+      if (dir === "checks" && f === "schema-room.mjs") continue;   /* its subject IS public */
+      const text = rf(join(APP, dir, f), "utf8");
+      if (/(?:nspname|table_schema|schemaname|schema_name)\s*=\s*'public'/.test(text)) named.push(dir + "/" + f);
+    }
+  }
+  check("no file asks the catalogue for `public` by name", named.length === 0, named.join(", "));
 } finally {
   await c.end();
   const a2 = new pg.Client({ connectionString: ADMIN });

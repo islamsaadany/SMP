@@ -350,28 +350,35 @@ try {
     check(q.status === 200 && mine.length === 1 && mine[0].waiting,
       "...and the office's queue is waiting on them (§71)", q.j && q.j.threads);
     check(errs.length === 0, "no page errors in any of that", errs.slice(0, 2));
-    /* NAMED, never a blanket exemption: the one console error this build is
-       allowed is the browser refusing to register a worker that is not
-       served. Anything else fails, and when the worker question is answered
-       this line goes red and is rewritten (§218) rather than quietly passing. */
+    /* THE EXEMPTION IS GONE, WHICH IS WHAT ITS OWN COMMENT ASKED FOR (§317.12).
+       It read: "the one console error this build is allowed is the browser
+       refusing to register a worker that is not served … when the worker
+       question is answered this line goes red and is rewritten (§218)". The
+       question WAS answered — §316.10, Islam's "1. ok" — and the line did not
+       go red, because an exemption written as a FILTER cannot: with the worker
+       served there is nothing for it to match, so it passed in silence and the
+       promise was kept by nobody. A console error about the worker is a fault
+       here now, like any other. */
     /* NOT `other` — that is this file's second tenant, forty lines up
        (§56.7, and the section reported it rather than dying). */
-    const unexpected = cons.filter((m) => !/fetching the script|sw\.js|ServiceWorker|service worker/i.test(m));
-    check(unexpected.length === 0, "no console errors either, beyond the missing worker below", unexpected.slice(0, 2));
+    check(cons.length === 0, "no console errors either", cons.slice(0, 2));
 
-    /* PRINTED, NOT ASSERTED (§302's own move). The new stack serves no
-       `/sw.js`, which the plan states as a cost — "no service worker and no
-       offline copy" — reasoned about CACHING and §91's name trap. But that
-       one file also carries `push` and `notificationclick`, and `chat.js`
-       waits on `navigator.serviceWorker.ready` before it subscribes, so with
-       no worker NO DEVICE CAN EVER REGISTER and §231's box cannot arrive —
-       while Phase G's own row in the plan says to carry notifications. The
-       two lines cannot both hold. Asserting either way would be choosing,
-       and that choice is Islam's (§316.7, stop point C), so the state is
-       PRINTED on every run and the cost stays visible rather than
-       disappearing into a green tick. */
+    /* ASSERTED, BECAUSE THE QUESTION IS ANSWERED (§317.12, rewriting §316.7).
+       This was PRINTED rather than asserted for a stated reason: the plan said
+       both "no service worker and no offline copy" — reasoned about CACHING —
+       and, in Phase G's own row, "carry notifications", and that one file
+       carries `push`; asserting either way would have been choosing, and the
+       choice was Islam's. **He chose** (§316.10, "1. ok"): the caching half is
+       dropped, the notification half carried, and `/sw.js` is served again.
+       So the reason for printing has expired (§94.15) — and the note went on
+       printing "with no worker no device can register" beside a value reading
+       **200**, a sentence arguing with the number it carries (§124).
+
+       It guards the thing that was 404 for four phases: `chat.js` waits on
+       `navigator.serviceWorker.ready` before it subscribes, so a worker that
+       stops being served takes every notification with it, silently. */
     const sw = await fetch(BASE + "/sw.js").then((x) => x.status).catch(() => "unreachable");
-    console.log("      · /sw.js answers " + sw + " — with no worker no device can register (§316.7, awaiting Islam)");
+    check(sw === 200, "/sw.js is served — no worker, and no device can ever register (§316.10)", sw);
     await ctx.close();
   })(); }
   /* §215: a section that DIES reports nothing, and this one drives a browser,

@@ -45,11 +45,20 @@ try {
   check(row && row.name === "Meridian Group", "wearing the invented name, not the client's", row && row.name);
 
   /* EVERY TENANT-OWNED TABLE, asked of the catalogue rather than listed here —
-     a list in a check is a list somebody forgets to add to (§104.7). */
+     a list in a check is a list somebody forgets to add to (§104.7).
+
+     AND ASKED OF `current_schema()`, NEVER OF THE WORD (§317.11). This line
+     said `'public'` and was right until §317.4 moved the shared schema into a
+     room of its own — after which it enumerated a CLIENT'S schema, found no
+     tenant-owned table there, and scanned an empty list. The connection above
+     had already been given the search_path option by §317.6's sweep, which is
+     the whole lesson: that sweep looked for CONNECTIONS, and a query naming
+     the schema in its own text is invisible to it. Caught by §113.8's control
+     three lines down and by nothing else. */
   const tables = (await owner.query(
     "SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace " +
     "JOIN pg_attribute a ON a.attrelid = c.oid AND a.attname = 'tenant_id' " +
-    "WHERE n.nspname = 'public' AND c.relkind = 'r' ORDER BY c.relname")).rows.map((x) => x.relname);
+    "WHERE n.nspname = current_schema() AND c.relkind = 'r' ORDER BY c.relname")).rows.map((x) => x.relname);
   check(tables.length > 25, "and there are tenant-owned tables to scan at all", tables.length);
 
   /* THE MATCHING RULE IS THE FROZEN SCRIPT'S, ASKED AND NOT REWRITTEN

@@ -42426,3 +42426,76 @@ gap. **And it must not be made safe to delete**: `deploy.mjs` imports it only
 inside the `SMP_CARRY_RAYA` branch, so catching a missing module there would
 turn §317.9's loud fault into a quiet one in the exact place that just cost
 four builds.
+
+## §317.11 — AN OPTION CANNOT REACH INSIDE A STRING (2026-09-10, spec 043)
+
+Found by running the suite after the cutover rather than by reading anything.
+`checks/demo-seed.mjs` was **red, and had been since §317.4**, on the one
+assertion that matters most in that file: *"and there are tenant-owned tables
+to scan at all — **0**"*.
+
+**THE CONNECTION HAD BEEN FIXED AND THE QUERY HAD NOT.** §317.6's sweep gave
+every `new pg.Client`/`new pg.Pool` in the app a `search_path` option, this
+pool among them — and the very next statement asks the catalogue
+`WHERE n.nspname = 'public'`, which no connection option can reach. So it
+enumerated a **client's** schema, found no table there carrying `tenant_id`,
+and ran the demo's privacy scan over an **empty list**. *A scan that finds
+nothing passes every assertion about what it did not find.*
+
+**IT WAS CAUGHT BY THE CONTROL AND BY NOTHING ELSE** (§113.8): that file
+carries `raya-trade`'s rows beside the demo's precisely so the scan has to be
+shown finding a real name before its silence about the demo means anything,
+and it is the control that went red — *"the same scan DOES find them next
+door, so it can see one — `{found: 0, first: []}`"*. Without it the file would
+have printed six green lines over a scan of nothing.
+
+**AND §316.10 LISTED IT AS `demo 7/7`, WHICH WAS TRUE WHEN IT WAS WRITTEN**:
+the shared schema was `public` then. §317.4 moved the room and re-ran door,
+state, shell, room and deploy; this one was not among them (§51.11's family —
+a check keyed on something that moved, failing in the direction nobody looks).
+
+`current_schema()`, exactly as §317.4 did for `schema.sql` and
+`schema-check.ts`. **AND THE SWEEP IS WIDENED RATHER THAN THE ONE LINE
+FIXED**: `checks/schema-room.mjs` gains a §6 that refuses any file naming
+`public` in the TEXT of a query — `nspname`, `table_schema`, `schemaname`,
+`schema_name` — with **one exemption, named rather than pattern-matched**,
+which is `schema-room.mjs` itself, whose whole subject is that `public` is a
+client and must therefore say the word. Proved able to fail: the literal put
+back, **1 red naming the file**; restored, `check:room` **11/0** and
+`check:demo` **7/0**.
+
+## §317.12 — A NOTE THAT ARGUED WITH THE NUMBER IT CARRIED (2026-09-10, spec 043)
+
+`checks/comms-api.mjs` printed, on every run and in green:
+
+> `· /sw.js answers 200 — with no worker no device can register (§316.7, awaiting Islam)`
+
+**Both halves of that sentence had been false since §316.10**, and the value
+beside them said so: the worker IS served, and the question stopped awaiting
+anybody the moment Islam answered it — *"1. ok"*. §124 in a check rather than
+on a screen, which is the harder place to see it, because nothing goes red.
+
+**IT WAS PRINTED RATHER THAN ASSERTED FOR A REASON, AND THE REASON EXPIRED**
+(§94.15). Phase G left stop point C genuinely open — the plan said *"no
+service worker"*, reasoning about caching, and Phase G's own row said *"carry
+notifications"*, and that one file carries `push` — so asserting either way
+would have been choosing, and the choice was his. He chose. The caching half
+is dropped, the notification half carried (§316.10). So it is an assertion
+now, and it guards **the thing that was 404 for four phases**: `chat.js` waits
+on `navigator.serviceWorker.ready` before it subscribes, so a worker that
+quietly stops being served takes every notification with it.
+
+**AND THE EXEMPTION BESIDE IT COULD NOT KEEP ITS OWN PROMISE.** The console
+errors were filtered — *"the one console error this build is allowed is the
+browser refusing to register a worker that is not served"* — with a comment
+saying *"when the worker question is answered this line goes red and is
+rewritten (§218)"*. It did not go red and it could not: **an exemption written
+as a FILTER matches nothing once the fault is gone**, so it passed in silence
+and the promise was kept by nobody. *A predicted red is not a red; only an
+assertion is.* Gone, and a console error about the worker is a fault here now
+like any other.
+
+**Proved able to fail, and the pair is the point**: `public/sw.js` moved
+aside, **2 of 48 red** — the direct assertion at 404 AND the console-error one
+naming the browser's own words — where the build before this passed both in
+green. 48/48 restored.

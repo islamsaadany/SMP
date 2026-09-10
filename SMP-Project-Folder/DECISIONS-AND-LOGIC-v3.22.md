@@ -41144,3 +41144,58 @@ nonce, Phase J's hardening; the `manifest` and worker are not served (J);
 the frozen `api/platform` `client_log` is not written. `main` untouched.
 
 ---
+
+## §316 — A ROW WITH NO ID IS NOBODY'S TO MINT (2026-09-10, spec 043, Phase C)
+
+Phase C writes no screen — it is the **acceptance run** phases.md calls it,
+the checks that walk Foundation, SWOT and the Plan re-pointed at the served
+app. It found one PRODUCT fault, and it is the first correction §314's freeze
+has taken.
+
+Building a capability's first key
+objective through the plan builder (§129) pushed a bare object —
+`{name, dir, target, compile, weight, actual, progress}` — with **no id**.
+It rendered perfectly, scored, reported and could not be **written**:
+§314.2's row-addressed writer is the only writer now, so the save comes back
+**400** naming it, measured against the running app —
+`"This change cannot be written row by row: cap_key_objectives - a row has no
+id (§191)"` — and the same change with an id lands `200 · rows 1 ·
+cap_key_objectives`. **Every other minter in the file was already right**: the
+unit branch two lines above numbers its plan through `renumberUnit()`, a
+pillar comes from `addPillar()`, a project from `addProject()`, and
+builder.js's own header states the rule — *rows are minted by the SAME
+add\*()/koMint() the pen uses*. The capability's objective is the one row
+that had no such minter to call.
+
+**IT SURVIVED BECAUSE THE CHECK ASKED THE UNIT AND NEVER THE CAPABILITY.**
+`plan-builder.py` asserts *"the objective landed with a minted id"* of a
+unit's, one screenful above, and of the capability's asks only that it
+*"carries its weight as a number"* — §94.2 in its plainest form, an assertion
+made on one side of a pair and not the other. The assertion is there now, in
+the CAPABILITY's own spelling rather than the unit's, and it is **1 red** on
+the build before this and green after.
+
+**MINTED FROM THE MAXIMUM, NEVER RENUMBERED — AND THE FIRST BUILD OF THE FIX
+WAS THE WRONG ONE.** `renumberCapability(c)` is what the upload path and the
+archive restore call after pushing, and it is what a capability's ids are
+numbered by at load, so it looked like the answer and shipped for one build.
+It renumbers **positionally, and it renumbers the capability's PROJECTS too**
+— while `addProject`/`addDeliverable`/`addMeasure` mint from the MAXIMUM
+(`mintRowId`, §96.2). On a capability whose projects were minted after a
+removal the two disagree — `mintRowId` on `[P2]` answers `P3` (its `n` starts
+at the count and STEPS OVER what is taken), and `renumberCapability` then
+rewrites `[P2, P3]` as `[P1, P2]` — so a call
+made to give one objective an id would silently re-address every project,
+deliverable, outcome and milestone under it — and a figure, a focus mark and
+a snapshot are keyed on those ids and never on position (§48). *A fix that
+reaches further than the fault is a second fault with a green check over it.*
+`mintRowId(c.keyObjectives, c.id + "-KO")` touches the row being added and
+nothing else.
+
+**ASKED FIRST, AS §314 REQUIRES.** The freeze says the single file takes no
+new features from 2026-09-09 and that a client-blocking defect is a
+correction asked about before it is made. This is one — the row cannot be
+saved at all on the new stack — so it was put to Islam in one line with the
+fix named, and built on his word.
+
+---

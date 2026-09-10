@@ -249,6 +249,14 @@ with sync_playwright() as p:
     pg.query_selector('[data-bfadd="one"]').click(); pg.wait_for_timeout(400)
     ck("…and it carries its weight as a number",
        pg.evaluate("capsOfFunction('%s')[0].keyObjectives[0].weight === 60" % FK))
+    # §316: a row with no id is nobody's to change (§191) — the unit's objective
+    # asserts this one line up (§6) and the capability's never did, which is how
+    # the builder came to mint an id-less row that renders perfectly and cannot
+    # be written row by row. Asked of the CAPABILITY's own spelling, never the
+    # unit's: a capability numbers positionally through renumberCapability().
+    ck("…and it landed with a minted id, in the capability's own spelling",
+       pg.evaluate("capsOfFunction('%s')[0].keyObjectives[0].id === capsOfFunction('%s')[0].id + '-KO1'" % (FK, FK)),
+       pg.evaluate("capsOfFunction('%s')[0].keyObjectives[0].id" % FK))
     pg.query_selector('#buildband [data-bnav="proj"]').click(); pg.wait_for_timeout(400)
     pg.query_selector('[data-rowadd^="project"]').click(); pg.wait_for_timeout(200)
     pg.fill('[data-bf="name"]', "Supplier audit programme")

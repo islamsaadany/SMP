@@ -1,5 +1,10 @@
 """TALKING TO THE STRATEGY OFFICE (§97).
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 TWO REASONS THIS CANNOT BE PART OF `qa.py`, and they are the two lessons the
 suite has already learned the hard way.
 

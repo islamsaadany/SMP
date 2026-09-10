@@ -1,5 +1,10 @@
 """NO COMPOSER OVER A LIST OF PEOPLE, AND A TEST THAT SAYS WHAT IT CANNOT SEE (§298).
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 Islam, as the office: *"After sending the reply message as an sMO the message
 didn't appear in the box and when it appeard it appeard above the message of ht
 employee which is wrong"*, then *"and the message never reached the user."*

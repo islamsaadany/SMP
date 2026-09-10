@@ -31,8 +31,24 @@
      … --break=no-boundary   (RED: the tenant setting is ignored — one office reads another client's chat)
      … --break=chat-on       (RED: the chat's OFF switch stops being enforced on the server)
 
+   HOW `chat-on` IS MADE, and why not the way the others are. Every other break
+   in this app is an `if (process.env.SMP_BREAK …)` in code I wrote. This one's
+   subject is three lines INSIDE `lib/chat-api.cjs`, which is the frozen
+   endpoint carried across and whose header promises every line below it is the
+   frozen file's byte for byte — so a test hook there would be a second code
+   path shipping to production in exactly the file that must not have one
+   (§142.6, §100.3). It is made from the SOURCE instead (§276): the file is
+   copied aside, `if (!cfg.on)` becomes `if (false)`, the app is REBUILT — the
+   carried module is bundled, so an edited source reaches nothing without one,
+   measured rather than assumed — and both the file and the build are put back
+   in the `finally`. That is what `qa.py` does to falsify the platform, and it
+   leaves the shipped bytes clean. If a run is killed between the two, what is
+   left behind is a BROKEN BUILD over a GOOD source, so the next ordinary run
+   goes red on the switch rather than quietly passing (§113.8's direction).
+
    Needs `next build` first. Re-runnable: the dev tenant is REMADE at the start. */
 import { spawn } from "node:child_process";
+import { chromium } from "playwright-core";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 import pg from "pg";
@@ -41,9 +57,30 @@ import { hashPassword } from "../lib/auth.ts";
 import { withTenant } from "../lib/tenant.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
+const CHROME = process.env.SMP_CHROME || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const PORT = 3976, BASE = "http://localhost:" + PORT, SLUG = "raya-trade";
 const brk = (process.argv.find((a) => a.startsWith("--break=")) || "").slice(8);
 if (brk) process.env.SMP_BREAK = brk;
+/* `chat-on` is broken in the CARRIED FILE, from its source, and put back —
+   see the note above. Restored in the outer `finally`, and asserted restored,
+   because leaving that file edited would be worse than any check. */
+const { readFileSync, writeFileSync } = await import("node:fs");
+const CARRIED = join(import.meta.dirname, "..", "lib", "chat-api.cjs");
+const carriedWas = brk === "chat-on" ? readFileSync(CARRIED, "utf8") : null;
+const rebuild = () => new Promise((res, rej) => {
+  const b = spawn("npx", ["next", "build"], {
+    cwd: join(import.meta.dirname, ".."),
+    env: { ...process.env, SMP_BREAK: "", DATABASE_URL: URL_, DATABASE_URL_UNPOOLED: URL_ },
+    stdio: "ignore",
+  });
+  b.on("exit", (c) => (c === 0 ? res() : rej(new Error("next build exited " + c))));
+});
+if (carriedWas) {
+  const off = carriedWas.replaceAll("if (!cfg.on) {", 'if (false) { /* --break=chat-on */');
+  if (off === carriedWas) { console.log("FAIL  the chat-on break found nothing to break"); process.exit(1); }
+  writeFileSync(CARRIED, off);
+  await rebuild();
+}
 const R = createRequire(import.meta.url)("../lib/rules.cjs");
 let oks = 0, fails = 0;
 const ok = (l) => { oks++; console.log("ok    " + l); };
@@ -228,7 +265,124 @@ try {
     "...and deleted", r.status);
   const drafts = await rows(other, "SELECT id FROM message_drafts");
   check(drafts.length === 0, "and El Abd never saw the draft", drafts.length);
+
+  /* ── 8 · THE SEAM: the frozen corner meets this endpoint ─────────────────
+     EVERY ONE of the twelve frozen browser checks for this surface serves its
+     own stub, and it has to: the chat does not exist over `file://` at all
+     (§94.11), so each one stands its own server up. That is right for what
+     they measure — the CLIENT — and it means not one of them has ever spoken
+     to the endpoint this phase ported. Sections 1-7 above are the other half:
+     they speak to the endpoint and never draw a pixel. So the seam between
+     them is measured by nobody, and a corner that never came up, or a Send
+     that answers 500, would pass all nineteen files.
+
+     What is asked here is ONLY the seam — the shipped chat.js, served by
+     `lib/shell.ts`, against `app/api/chat`. Everything about how the corner
+     behaves is the stub checks', and everything about what the endpoint
+     decides is sections 1-7's; neither is re-proved. */
+  console.log("\n8 · the frozen corner, in a browser, against this endpoint");
+  const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
+  try { await (async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage();
+    /* TWO KINDS, KEPT APART. A `pageerror` is an exception the product threw
+       and is a fault whatever else is true; a console error may be the
+       browser reporting the missing worker below, which is a RECORDED gap
+       awaiting Islam rather than something this port broke. Lumping them
+       together would either fail on a known state for ever or excuse a real
+       throw. */
+    const errs = [], cons = [];
+    page.on("pageerror", (e) => errs.push(String(e)));
+    page.on("console", (m) => { if (m.type() === "error") cons.push(m.text()); });
+    /* §167.2: the welcome screen covers the viewport, in an init script
+       because setting the flag after `goto` is too late. */
+    await page.addInitScript(() => { try {
+      sessionStorage.setItem("smp.tour.later", "1");
+      sessionStorage.setItem("smp.welcome.done", "1");
+    } catch (e) {} });
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    await page.waitForSelector(".gate[data-hydrated]", { state: "attached", timeout: 15000 });
+    await page.fill("#user", "mobhead@raya.example");
+    await page.fill("#password", DEV_PASSWORD);
+    await Promise.all([page.waitForURL(BASE + "/" + SLUG), page.click("#loginForm button[type=submit]")]);
+    /* `/<client>` is the LANDING (§315), not the platform — a React page with
+       no shell on it, so no corner and no `SYNC`. The platform is behind
+       *Continue*, and that is where this section's subject lives. */
+    await page.goto(BASE + "/" + SLUG + "/mobile", { waitUntil: "networkidle" });
+    await page.waitForSelector("nav.units", { timeout: 20000 });
+    /* MEASURE THE BOX AND PRESS THE POINT, never the class (§68.10, §70) —
+       present-and-unreachable is this project's recurring fault. */
+    await page.waitForFunction(() => {
+      const d = document.getElementById("chatdock");
+      return !!(d && !d.hidden && d.getBoundingClientRect().width > 0);
+    }, null, { timeout: 20000 }).catch(() => {});
+    const seen = await page.evaluate(() => {
+      const d = document.getElementById("chatdock");
+      if (!d) return { there: false, why: "no dock" };
+      if (d.hidden || d.getBoundingClientRect().width <= 0) return { there: false, why: "hidden" };
+      const b = d.querySelector(".chatbtn"), q = b && b.getBoundingClientRect();
+      const hit = q ? document.elementFromPoint(q.x + q.width / 2, q.y + q.height / 2) : null;
+      return { there: true, reaches: !!(hit && b && b.contains(hit)) };
+    });
+    check(seen.there && seen.reaches, "the corner is drawn against the real endpoint, and a click reaches it", seen);
+
+    const WORD = "seam " + Date.now();
+    await page.click("#chatbtn");
+    await page.waitForSelector("#chatsay", { state: "visible", timeout: 10000 });
+    await page.fill("#chatsay", WORD);
+    await page.click("#chatsend");
+    /* The row, read through the TENANT — so this also asserts the write
+       landed under the tenant the door resolved, from a real browser. */
+    let landed = [];
+    for (let i = 0; i < 40 && !landed.length; i++) {
+      await new Promise((r) => setTimeout(r, 250));
+      landed = await rows(tenantId, "SELECT person_key, body FROM chat_messages WHERE body = $1", [WORD]);
+    }
+    check(landed.length === 1 && landed[0].person_key === "mobhead",
+      "a message typed into the corner lands in the database, under this tenant", landed);
+    const elsewhere = await rows(other, "SELECT id FROM chat_messages WHERE body = $1", [WORD]);
+    check(elsewhere.length === 0, "...and nowhere else", elsewhere.length);
+    /* THE OFFICE'S SIDE OF THE SAME MESSAGE, through the endpoint the office
+       reads — the seam closed at both ends rather than half of it. */
+    const q = await chat(office, { action: "queue" });
+    const mine = ((q.j && q.j.threads) || []).filter((x) => x.person_key === "mobhead");
+    check(q.status === 200 && mine.length === 1 && mine[0].waiting,
+      "...and the office's queue is waiting on them (§71)", q.j && q.j.threads);
+    check(errs.length === 0, "no page errors in any of that", errs.slice(0, 2));
+    /* NAMED, never a blanket exemption: the one console error this build is
+       allowed is the browser refusing to register a worker that is not
+       served. Anything else fails, and when the worker question is answered
+       this line goes red and is rewritten (§218) rather than quietly passing. */
+    /* NOT `other` — that is this file's second tenant, forty lines up
+       (§56.7, and the section reported it rather than dying). */
+    const unexpected = cons.filter((m) => !/fetching the script|sw\.js|ServiceWorker|service worker/i.test(m));
+    check(unexpected.length === 0, "no console errors either, beyond the missing worker below", unexpected.slice(0, 2));
+
+    /* PRINTED, NOT ASSERTED (§302's own move). The new stack serves no
+       `/sw.js`, which the plan states as a cost — "no service worker and no
+       offline copy" — reasoned about CACHING and §91's name trap. But that
+       one file also carries `push` and `notificationclick`, and `chat.js`
+       waits on `navigator.serviceWorker.ready` before it subscribes, so with
+       no worker NO DEVICE CAN EVER REGISTER and §231's box cannot arrive —
+       while Phase G's own row in the plan says to carry notifications. The
+       two lines cannot both hold. Asserting either way would be choosing,
+       and that choice is Islam's (§316.7, stop point C), so the state is
+       PRINTED on every run and the cost stays visible rather than
+       disappearing into a green tick. */
+    const sw = await fetch(BASE + "/sw.js").then((x) => x.status).catch(() => "unreachable");
+    console.log("      · /sw.js answers " + sw + " — with no worker no device can register (§316.7, awaiting Islam)");
+    await ctx.close();
+  })(); }
+  /* §215: a section that DIES reports nothing, and this one drives a browser,
+     where every wait can throw. It reports instead. */
+  catch (e) { fail("8 · the seam — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e)); }
+  finally { await browser.close(); }
 } finally {
+  if (carriedWas) {
+    writeFileSync(CARRIED, carriedWas);
+    if (readFileSync(CARRIED, "utf8") !== carriedWas) console.log("FAIL  the carried file was NOT put back");
+    await rebuild().catch(() => console.log("FAIL  the build was NOT put back — run `npx next build`"));
+  }
   try { process.kill(-server.pid); } catch {}
   await owner.query("DELETE FROM tenants WHERE key = 'el-abd'").catch(() => {});
   await owner.end();

@@ -41638,3 +41638,209 @@ rebuild has now met three times each:**
 **RETIRED BY NAME: none.**
 
 ---
+
+### §316.7 — Phase G: the chat and the mail ported (2026-09-10)
+
+**`api/chat.js` (1883 lines) and `api/mail.js` (462) CARRIED ACROSS** as
+`lib/chat-api.cjs` and `lib/mail-api.cjs`, with `lib/{mailer, push, assistant,
+mail-html, audience}.cjs` beside them — every decision, every query and every
+sentence byte for byte, and **the plumbing replaced in exactly ten named
+ways**, listed in the carried file's own header so the next reader can check
+the claim rather than take it: the client and the person handed in by the
+route, `send()` RETURNING its answer instead of writing it (so all sixty call
+sites are untouched), `readBody` gone, `req` a two-field shim, the slug a
+parameter, the emails stated as going out inside the transaction, `FROM org
+WHERE id = 1` losing its WHERE, two `ON CONFLICT` targets gaining `tenant_id`,
+and two nested transactions becoming SAVEPOINTs.
+
+**THE SIX FROZEN NODE SCRIPTS ARE NOT RE-POINTED, AND SAYING SO IS BETTER
+THAN THE ALTERNATIVE.** Phase G's row in the plan names `test-chat`,
+`test-ask`, `test-chat-chase`, `test-push`, `test-email-greeting` and
+`test-test-copies` as re-pointed. They come in two shapes and neither moves
+cheaply: three drive an HTTP dev-server whose door is not this app's, and three
+`require("../api/chat.js")` IN PROCESS and call `handler(req, res)`, where the
+carried module is `handler(client, me, body, req, slug)`. Bridging that means
+editing a frozen script to fit a shim. **What those scripts prove is the
+DECISIONS, and the decisions are the same lines** — so fidelity is established
+by the DIFF instead, which covers every line rather than the paths a test
+happens to walk: the whole code-only difference of both files was read hunk by
+hunk against the header's list, and it is exactly the ten (and, for mail, six)
+named edits and nothing else. `api/` and `lib/` are asserted untouched by
+`git status`. The scripts stay pointed at the frozen stack, where they still
+belong until it is retired at Phase J.
+
+**THE TWO FAULTS WERE FOUND BY PRESSING THE ENDPOINTS, NOT BY READING THEM.**
+
+  * **`FROM org WHERE id = 1` NAMED A COLUMN THAT DOES NOT EXIST.** `org` is a
+    singleton, and the shared schema keys a singleton by `tenant_id` ALONE
+    (§314's data-model) where the frozen schema keyed it by a constant `id = 1`
+    inside each client's own schema. So the settings read threw and **every
+    chat request answered *Something went wrong***, in four places. The WHERE
+    was not redundant — the row-level policy is what narrows it now, which is
+    the model.
+
+  * **AND THE SECOND FOUND A FAULT IN THE SHARED SCHEMA RATHER THAN IN THE
+    CARRIED FILE.** `push_subscriptions` had been keyed `(tenant_id,
+    person_key, endpoint)`, which is not *"the key it has today with
+    `tenant_id` in front of it"* — migration 038 makes `endpoint` the primary
+    key on its own, because an endpoint IS a device and a device has one owner. Keyed the wrong way, a
+    device signed in to by somebody else gains a SECOND row instead of moving,
+    so the previous person goes on being notified on a phone that is no longer
+    theirs — §231's own rule, silently reversed by a primary key. Corrected in
+    `db/schema.sql` with migration 003 beside it, which de-duplicates by
+    `seen_at` before it adds the key.
+
+**A SAVEPOINT, BECAUSE THE REQUEST IS ALREADY IN A TRANSACTION.** §293's
+collection sweep and §282's register read each opened one of their own, and
+`withTenant` is already inside one — which is where `app.tenant_id` lives, and
+it is transaction-local — so a `COMMIT` there would end the REQUEST's
+transaction and leave every tenant row invisible to everything after it. Both
+keep exactly what they were written for: `pg_try_advisory_xact_lock` still dies
+with the transaction (§289), and a sweep that throws still leaves the chat as
+it was rather than poisoning the poll that carried it.
+
+**AND EVERY TABLE THIS GROUP TOUCHES CARRIES ITS OWN POLICY, MEASURED RATHER
+THAN ASSUMED.** The plan's row says S5 already covers them, which is true by
+construction — the schema's loop enables and FORCES row-level security on
+every table in `public` that is not one of the nine named platform tables — and
+"true by construction" is a claim until somebody reads the catalogue. Read:
+`chat_threads`, `chat_messages`, `messages`, `message_drafts`,
+`push_subscriptions` and `assistant_asks` each come back `relrowsecurity` AND
+`relforcerowsecurity` with one `tenant_rows` policy, and `push_keys` correctly
+comes back with none — it is one VAPID pair per DEPLOYMENT and belongs to no
+tenant (data-model.md).
+
+**AND THE BREAK CAME BACK OUT OF THE CARRIED FILE.** Falsifying the OFF switch
+first put three `process.env.SMP_BREAK` conditions INSIDE `chat-api.cjs` — a
+test hook in the one file whose header promises every line is the frozen file's
+(§142.6: a double behind an `if` is a second code path shipping to production).
+The break is made from the SOURCE now (§276) — the file copied aside, `if
+(!cfg.on)` becoming `if (false)`, the app REBUILT because the carried module is
+bundled and an edited source reaches nothing without one (measured, not
+assumed: the first attempt read NOT RED), and both the file and the build put
+back. A run killed between the two leaves a broken BUILD over a good SOURCE, so
+the next ordinary run goes red rather than quietly passing.
+
+**`checks/comms-api.mjs` 47/47, RED both ways** — eight sections: the door, the
+actions reaching their rows at all, the refusals asked of somebody the rules
+actually refuse, THE TENANT BOUNDARY, the OFF switch enforced on the SERVER
+(§98.2), one-endpoint-one-subscription, the mail endpoint, and the seam.
+
+**THE SEAM WAS MEASURED BY NOBODY, SO IT IS SECTION 8.** All twelve frozen
+browser checks for this surface serve their OWN stub, and they have to — the
+chat does not exist over `file://` at all (§94.11) — which is right for what
+they measure, the CLIENT, and means **not one of them has ever spoken to the
+endpoint this phase ported**; sections 1–7 speak to the endpoint and never draw
+a pixel. So a corner that never came up, or a Send that answered 500, would
+have passed all twelve browser checks AND all seven server sections. Section 8 opens the served platform in a real
+browser, presses the corner, types, sends, and reads the row back THROUGH THE
+TENANT — and `--break=no-boundary` reddens it exactly where it should, the
+message landing under the other client.
+
+**AND THE SERVICE WORKER IS A QUESTION THE RECORD DOES NOT ANSWER (stop point
+C).** `/sw.js` answers **404** on the new stack, which the plan states as a
+cost — *"no service worker and no offline copy"* — reasoned about CACHING and
+§91's name trap. But that one file also carries `push` and `notificationclick`,
+and `chat.js` waits on `navigator.serviceWorker.ready` before it subscribes —
+so with no worker **no device can ever register and §231's box cannot arrive**,
+while Phase G's own row in the plan says to carry notifications. The two lines
+cannot both hold, and choosing is Islam's. The endpoint's half is built and
+proved (`pushOn`, `pushOff`, one row per endpoint); what is missing is the file
+that receives. **Printed on every run rather than asserted** (§302's move),
+because asserting either way is choosing.
+
+**AND IT IS AN ERROR ON EVERY PAGE, FOR EVERYBODY, WITH NOBODY HAVING TURNED
+ANYTHING ON — WHICH IS NOT WHAT I FIRST WROTE DOWN.** The chain I reasoned was
+that §231 mints the VAPID pair on first use, `chatSettings()` reports it from
+then on, and the first poll sees `cfg.vapid` move and calls `pushSync()`.
+Plausible, and **refuted by measuring it**: the pair was deleted and the sweep
+run again, and it carries the SAME one error — 33 viewers, 229 destinations,
+that 404 and nothing else, identical with the pair and without it. What
+actually happens is simpler and worse. **`pushSync()` registers the worker
+BEFORE it looks at whether this device WANTS a subscription**, deliberately
+(§282.4: a device must be able to be UN-subscribed, and that needs a
+registration too) — so no switch anywhere prevents it, and the path is closed
+by construction rather than by inference: **one `register` in the whole bundle,
+one caller of `swReady()`, and on a plain page load only the first poll's
+`if (cfg.popup !== wasPop || cfg.vapid !== wasKey)` can reach it**, with
+`register` wrapped before any product script runs so the call is read off a
+STACK (`shell.js:41890`) rather than off a grep. One per page load, per viewer,
+for ever. **AND THAT IS WHY PHASES E AND F READ ERRORS NONE**, also measured
+rather than assumed: at Phase F the chat route was a HOLDER answering
+`{ok:false, error:"This part is not in the new platform yet."}` with **no
+`chat` key at all**, so `if (j.chat)` never ran and nothing was ever
+registered. The error did not arrive with a key — it arrived with the
+ENDPOINT.
+
+**AND NOBODY IS PROMISED A BOX THAT CANNOT COME, WHICH IS §231.5 EARNING ITS
+PLACE** — measured on the served app rather than reasoned about, **and the
+first measurement was of the wrong state**: headless Chromium DENIES
+notifications by default, so the bell first read *"Notifications are blocked by
+this browser"*, which is §231.2's REFUSED state and answers a question nobody
+asked (§94.5). With permission granted — the state the worker question is
+actually about — the bell wears
+`belloff`, its label reads *"Notifications are not set up on this device"* and
+its hover *"This browser refused to set up notifications. Press to try again."*
+So the fifth state that section added catches this exactly, and the one thing
+wrong is the ATTRIBUTION: the browser refused nothing, it asked for a file the
+deployment does not serve (§124 — a sentence claiming more than the thing
+measuring it can see). Which sentence is right depends on the answer above, so
+it is left alone until there is one.
+
+**THE TWELVE BROWSER CHECKS ARE OWN-SERVER, ALL OF THEM** (§316.1) — and
+running them found three:
+
+  * **TWO HAD BEEN DYING RATHER THAN REPORTING SINCE §148 SHIPPED** (§215).
+    `email-greeting` and `send-message` were written before the welcome screen
+    and never re-run served, so the overlay intercepted their first press and
+    each spent thirty seconds retrying a click and printed nothing at all.
+    §167.2's rule, in the two files that never got it. **Both reproduce on
+    `origin/main`'s own build** — the product, the check and the stub are all
+    `main`'s — so they are recorded as not this work's and repaired anyway
+    (§274: a red neighbour masks a regression). **And the rest of the
+    own-server list was swept rather than assumed** (§51.11): three others
+    carry no such line either — `attention-dismiss`, `kb-pen` and `save-flush`
+    — and all three pass under exactly these conditions, so the line goes where
+    it was NEEDED and not as a blanket over a group.
+
+  * **AND `chat-corner` WAS ASSERTING A RULE §290 REVERSED.** Two of its
+    assertions carried §197's *nothing is drawn until a successful answer*,
+    which §290 deliberately reversed for a hydrated page and says so in place:
+    *"THIS IS NOT A GUESS"*. REWRITTEN to the reversal, never deleted or
+    loosened (§218) — and each now claims MORE than it did: the old line was
+    satisfied by a build with no corner at all, where the new one asserts the
+    corner is there through a failed first answer and **never flickered away**,
+    measured at two moments, which the single late reading could not see. **4
+    red** with §290 put back, and exactly those four.
+
+**AND MY OWN CHAT STAND-DOWN WOULD HAVE KILLED ALL TWELVE, FOUND BY ASKING
+WHO USES ITS ESCAPE HATCH.** §316.5 added a rule making the served corner
+unclickable, because it sits over the bottom-right of every page and Playwright
+clicks an element's CENTRE — with an escape hatch (`qa-run: chat-live`) for a
+check whose SUBJECT is the corner. **Nothing carries that mark, and nothing
+can**: §94.11 forces such a check to serve its own stub, so it is already
+own-server. Worse, the two stand-downs are in the wrong ORDER — the wrappers
+install while `SMP_BASE` is still set and only then is it popped — so an
+own-server check run through a runner that sets `SMP_BASE` would have the
+corner in ITS OWN stub made unclickable and die retrying (§215), looking
+exactly like a product fault. Latent, because the twelve were run with
+`SMP_BASE` unset. **The condition is own-server now and the hatch is deleted
+rather than left for somebody to maintain** (§24, §104.7) — falsified by
+forcing the old behaviour, where `paste-picture` dies on *"intercepts pointer
+events"*.
+
+**TWO HARNESS FAULTS OF MY OWN, BOTH INVALIDATING A SWEEP RATHER THAN
+FAILING IT.** A check that REMAKES the tenant cannot run beside a sweep that
+walks it: running `comms-api.mjs` while `qa.py` was walking the same tenant read
+**8 viewers and 90 destinations** against the true 33 and 229, with no ERRORS
+line at all — a sweep that looks merely SMALL rather than broken, which is the
+dangerous shape. And **a shell script must never be edited while it is
+running**: bash reads a script by BYTE OFFSET, so adding that very warning to
+the runner mid-run made it resume in the middle of a line, print half a path as
+a command and re-enter its own `file://` stage. Both discarded; the sweep is
+run from a frozen COPY now, alone, and the runner says both things in its first
+lines.
+
+**RETIRED BY NAME: none.**
+
+---

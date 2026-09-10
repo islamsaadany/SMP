@@ -43,22 +43,32 @@ if os.environ.get("SMP_BASE"):
     #
     # POINTER-EVENTS, NEVER `display:none`: hiding it would change what a
     # contrast or layout probe measures, and the corner is a real part of the
-    # served page. A check whose SUBJECT is the corner presses it, so it says
-    # so in its own first lines and keeps it live — the same shape as the
-    # own-server mark above, and never a list of names here (§104.7).
+    # served page.
+    #
+    # AND NEVER FOR A CHECK THAT SERVES ITS OWN APP. That stand-down happens
+    # BELOW this block — the wrappers are installed while SMP_BASE is still
+    # set, and only then is it popped — so without this an own-server check run
+    # through a runner that sets SMP_BASE would have the corner in ITS OWN stub
+    # made unclickable, and every one of the twelve whose subject IS the corner
+    # would die retrying a press (§215) looking exactly like a product fault.
+    # Latent rather than seen, because those twelve were run with SMP_BASE
+    # unset; found by asking who uses the escape hatch this once had, and the
+    # answer is that nobody can — §94.11 forces a chat check to serve its own
+    # stub, so own-server IS the condition and a second mark was one more thing
+    # to forget (§24, §104.7).
     _CHAT_STAND_DOWN = """(() => { const put = () => {
         const s = document.createElement('style');
         s.textContent = '#chatdock{pointer-events:none !important}';
         (document.head || document.documentElement).appendChild(s); };
       if (document.head) put(); else document.addEventListener('DOMContentLoaded', put); })()"""
-    _chat_live = False
+    _serves_own = False
     try:
         with open(sys.argv[1] if len(sys.argv) > 1 else "qa.py") as _f:
-            _chat_live = "qa-run: chat-live" in _f.read(4000)
+            _serves_own = "qa-run: own-server" in _f.read(4000)
     except OSError:
         pass
     def _stand_down(o):
-        if not _chat_live:
+        if not _serves_own:
             try: o.add_init_script(_CHAT_STAND_DOWN)
             except Exception: pass
         return o

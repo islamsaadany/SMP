@@ -1,5 +1,10 @@
 """THE OFFICE'S CORNER CARRIES THE QUEUE (§285), AND SURVIVES THE WALK (§284).
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 Islam: "the chat bubble of the SMO team shouldn't be something to be sent to
 the smo, that is redundancy" — for the office it was a conversation with
 themselves — and "we need the chat to sustain the navigation so it's open

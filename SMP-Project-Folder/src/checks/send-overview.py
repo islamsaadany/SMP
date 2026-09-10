@@ -1,5 +1,10 @@
 """SEND A MESSAGE OPENS ON WHAT WENT (§144).
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 Islam: "The opening page of Send a message should be a dashboard of what was
 sent, to whom, how many people ... and when I say create a message it takes me
 to another tab ... and when I finish and send it it should take me back to the

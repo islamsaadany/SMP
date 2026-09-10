@@ -624,6 +624,39 @@ has neither"* measured the office and its thirty-one eyes. `qa-run.py` already
 settles a switch made through the CONTROL; that one went round it. **Nothing
 retired.**
 
+**Phase G is accepted, and the two Communication endpoints are ported (§316.7)**:
+`api/chat.js` (1883 lines) and `api/mail.js` (462) **carried across** as
+`lib/chat-api.cjs` and `lib/mail-api.cjs`, with `lib/{mailer,push,assistant,
+mail-html,audience}.cjs` beside them — every decision, query and sentence byte
+for byte, and **the plumbing replaced in exactly ten named ways** listed in the
+carried file's own header, checked by reading the whole code-only diff hunk by
+hunk against that list. `checks/comms-api.mjs` 47/47 with a browser SEAM
+section, RED both ways; the twelve frozen browser checks own-server and green;
+`qa.py` at Next 33 viewers / 229 destinations, ERRORS the ONE named 404 and
+nothing else; the `file://` sweep ERRORS none; door 44/0, state 91/0, shell
+36/0, blob 23/23, 588/0, 136/0, `tsc` clean.
+**TWO PRODUCT FAULTS, BOTH FOUND BY PRESSING THE ENDPOINTS**: `FROM org WHERE
+id = 1` named a column the shared schema does not have (a singleton is keyed by
+`tenant_id` ALONE), so every chat request answered *Something went wrong*; and
+`push_subscriptions` was mis-keyed in the NEW schema, so a device signed in to
+by somebody else would MULTIPLY rather than move and the previous person would
+go on being notified — migration 003. **Two nested transactions became
+SAVEPOINTs**, because the request is already inside `withTenant`'s and a COMMIT
+there would take `app.tenant_id` with it. **THE SEAM WAS MEASURED BY NOBODY**:
+all twelve browser checks serve their own stub and must (§94.11), so not one
+had ever spoken to the ported endpoint — section 8 drives the real corner
+against the real route and reads the row back THROUGH the tenant.
+**AND `/sw.js` IS 404, WHICH IS STOP POINT C**: the plan says both *"no service
+worker"* (reasoned about caching) and *"carry notifications"* — and that one
+file carries `push`, so no device can register; worse, **every page load logs
+that 404 for every viewer, with nobody having turned anything on** —
+`pushSync()` registers the worker BEFORE it asks whether this
+device wants a subscription (§282.4), so no switch prevents it. **The chain I
+first reasoned — a VAPID pair moving — was REFUTED by deleting the pair and
+sweeping again**, which is also why E and F were clean: their chat route was a
+HOLDER answering with no `chat` key at all. Put to Islam, not decided here.
+**Nothing retired.**
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 

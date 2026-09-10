@@ -1,5 +1,10 @@
 """WAITING AND ASK (§299) — the office's corner, and the list it fills.
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 WHY THIS IS ITS OWN FILE AND NOT PART OF `qa.py`, for §94.11's reason twice
 over: the corner does not exist over `file://` at all, so a build that had lost
 this whole half would go green every time; and the office's side needs a server

@@ -970,7 +970,7 @@ module.exports = async function handler(client, me, body, req, slug) {
         steps.push({ name: name, state: state, detail: detail || null, word: word || null });
       };
 
-      if (!cfg.on && process.env.SMP_BREAK !== "chat-on") {
+      if (!cfg.on) {
         step("The chat", "off", "The whole chat is switched off, so nothing is sent.");
         return send(res, 200, { ok: true, steps: steps });
       }
@@ -1147,7 +1147,7 @@ module.exports = async function handler(client, me, body, req, slug) {
          not drawn at all, so nothing in the product can reach this — which is
          exactly why it has to be here: the browser is not the thing being
          guarded against (§42). */
-      if (!cfg.on && process.env.SMP_BREAK !== "chat-on") {
+      if (!cfg.on) {
         return send(res, 403, { ok: false, error: "The chat is off at the moment." });
       }
       const text = str(body.body);
@@ -1775,7 +1775,7 @@ module.exports = async function handler(client, me, body, req, slug) {
          be written into a room with no door, and a reply that also EMAILED
          would point somebody at a platform they cannot answer from. Reading
          the history stays open; writing into it does not. */
-      if (!cfg.on && process.env.SMP_BREAK !== "chat-on") {
+      if (!cfg.on) {
         return send(res, 403, { ok: false, error: "The chat is off, so nobody would see a reply." });
       }
       const who = str(body.person, 120);

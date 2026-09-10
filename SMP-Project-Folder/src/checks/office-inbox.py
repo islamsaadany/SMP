@@ -1,5 +1,10 @@
 """THE OFFICE INBOX: THE CARET, THE BOX, THE PILL AND THE TAG (§188).
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 Four things Islam hit using the inbox, and three of them are the same
 omission: §97 built the CORNER panel carefully against exactly these faults,
 and the office's inbox — the surface the office actually lives in — got a

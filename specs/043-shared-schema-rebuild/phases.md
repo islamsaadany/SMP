@@ -122,7 +122,7 @@ begins.
 - [x] B The shell on the new stack — build-shell, the frozen `sync.js` carried rather than rewritten, routing, CSP, /platform (§315.3, 2026-09-09: `check:shell` 36/0 with two red runs; `qa.py` at Next 33 viewers, 229 destinations, ERRORS none; door 44/0, state 87/0).
 - [x] C Strategy checks green against Next (§316/§316.1, 2026-09-10: 39 checks, 0 failures; `qa.py` at Next 33 viewers / 229 destinations / ERRORS none; state 87/0, door 44/0, shell 36/0; one product fault found and corrected — the builder's id-less capability objective, §316 — and nothing retired).
 - [x] D Performance and Reporting checks green against Next (§316.3/§316.4, 2026-09-10: 22 checks, 0 failures; `qa.py` at Next 33 viewers / 229 destinations / ERRORS none; state 91/0, spike 9/9, 588/0, 136/0; one product fault found and fixed on Islam's word — opening a new cycle could not be saved, §316.3, live on `main` and proved on the frozen writer — and nothing retired).
-- [ ] E Setup checks green against Next; blob route ported.
+- [x] E Setup checks green against Next; blob route ported (§316.5, 2026-09-10: 38 checks, 0 failures except four reds established as NOT this work's — `history-page` 10, `band-corner` 6 and `tour` 15 reproduced identically on `origin/main`'s OWN build, and `table-scroll`'s 4px label squeeze measured on both stacks and served-only; `api/blob.js` ported with `check:blob` 23/23 and RED both ways; `qa.py` at Next 33 viewers / 229 destinations / ERRORS none, `file://` ERRORS none; door 44/0, state 91/0, shell 36/0, 588/0, 136/0; nothing retired).
 - [ ] F Presentation checks green against Next.
 - [ ] G Communication routes ported; server and browser checks green.
 - [ ] H Files in and out verified.

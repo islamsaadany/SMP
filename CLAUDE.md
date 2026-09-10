@@ -568,6 +568,42 @@ way — one printed *"6 failed"* under a count of 0 — while another's tail rea
 *"- waiting 500ms"*, a run that STOPPED rather than passed. *The tail is the
 verdict; the count is not.*
 
+**Phase E is accepted, and the clip endpoint is ported (§316.5)**: **38 frozen
+Setup checks at the served app** and `api/blob.js` PORTED — the fifth and last
+endpoint, over `lib/blob-api.ts` — with `checks/blob-api.mjs` **23/23** and RED
+both ways; `qa.py` at Next 33 viewers / 229 destinations / ERRORS none, the
+`file://` sweep ERRORS none, door 44/0, state 91/0, shell 36/0, 588/0, 136/0.
+**NO NEW PRODUCT FAULT IN THIS GROUP** — four reds were established as NOT this
+work's by reproducing them on **`origin/main`'s OWN BUILD** before anything here
+was blamed (§303), and all four are recorded rather than fixed, because the
+frozen file takes no new work (§314) and none blocks a client: `history-page`
+10 and `tour` 15 (its step 9 points at a control §252.2 made the office's, so a
+custodian is shown a hole with nothing in it); **`band-corner` 6, where the
+check is right** — at 1440×900 the Plan page does not scroll AT ALL, so the band
+sits exactly at its own sticky offset (`bandTop 191 == top 191`) and
+`pinWatch()` cannot tell *satisfied its offset* from *pinned*, so the corner
+fill paints at rest and the card's rounded corners read square, which is
+§130.6's complaint live, **and three of that file's six passing assertions pass
+for the wrong reason with it** (§94.5); and `table-scroll`'s **4px** squeeze of
+the viewer label at 1100px, measured on both stacks — `brand 301 · clientback 0
+· viewer 608` over `file://` against `brand 184 · clientback 122 · viewer 523`
+served — so it is the CLIENT-BACK control a served deployment draws for a
+Forefront consultant (§313.36) and never for a client's own staff, on a label
+§178 already puts on a hover. **EVERY OTHER FINDING WAS A CHECK**, and the two
+worth carrying into F–H: **THE CHAT CORNER TAKES CLICKS THAT ARE NOT ITS OWN**
+— it is deliberately not drawn over `file://` (§97), so no screen check has ever
+had to dodge a fixed 60px bubble over the bottom-right of every page, and
+Playwright presses an element's CENTRE; stood down for CLICKS ONLY
+(`pointer-events`, never hidden, or a contrast probe measures something else),
+with a check whose subject IS the corner saying so in its own first lines
+(§167.2's finding, §104.7's rule). And **A CHECK THAT RELIES ON A RELOAD TO
+RESET IS RELYING ON `file://`**: `role-picker` lands again at the top of every
+section and assumes the row holds nothing — true while landing meant re-reading
+the baked file, and served from a database its four grants accumulate, section 5
+RETIRES the row and section 6 presses a picker correctly no longer drawn, so the
+file DIED rather than reporting (§215). The state is snapshotted on the first
+landing and PUT BACK on every one after (§94.2). **Nothing retired.**
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 
@@ -7403,6 +7439,18 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/blob-api.mjs     # (in smp-app: `npm run check:blob`) the clip endpoint
+                                # on the new stack (§316.5): the door in front of it, a
+                                # client that does not exist and a schema NAME refused
+                                # identically, the store's absence answered in WORDS at
+                                # every door rather than hung on — and the ORDER, the
+                                # person before the store, or a unit head and the office
+                                # are told the same thing and a refusal names the wrong
+                                # cause. `mayWatch` asked of somebody whose grant is the
+                                # WORD "none" (§261.5), and of the office beside them.
+                                # 23/23, RED both ways (`check:blob:red`); three of its
+                                # own first failures were spellings it invented rather
+                                # than read (§100.3)
 python3 checks/deck-pdf.py      # the deck on paper (§296): the entry beside Present
                                 # on all three deck shapes with the word PDF on it;
                                 # the press opening the deck and asking to print

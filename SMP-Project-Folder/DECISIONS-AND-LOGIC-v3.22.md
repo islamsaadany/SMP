@@ -41405,3 +41405,160 @@ not. Every verdict in the closing run was read as a sentence.
 **RETIRED BY NAME: none.**
 
 ---
+
+### §316.5 — Phase E: Setup accepted, and the clip endpoint ported (2026-09-10)
+
+**38 frozen checks re-pointed at the served app**, each on a freshly seeded
+tenant, and **`api/blob.js` ported** — the fifth and last endpoint, over
+`lib/blob-api.ts` and `app/api/blob/route.ts`, with `checks/blob-api.mjs`
+**23/23** and RED both ways. Beside them: `check:door` **44/0**,
+`check:state` **91/0**, `check:shell` **36/0**, `qa.py` against the app
+**33 viewers, 229 destinations, ERRORS none**, the `file://` sweep **ERRORS none**, `test-authorize` **588/0**,
+`test-graph-diff` **136/0**, `tsc` clean.
+
+**NO NEW PRODUCT FAULT WAS FOUND IN THIS GROUP.** Three reds were established
+as **PRE-EXISTING** by reproducing them on `origin/main`'s OWN BUILD before
+anything here was blamed (§303), and one is a served-only fit measured for the
+first time. They are recorded rather than fixed, because the frozen file takes
+no new work from 2026-09-09 and none of the four blocks a client (§314):
+
+  * **`band-corner` — 6 red on `main`, and the check is right.** At
+    1440&times;900 Mobile's Plan page **does not scroll at all**, so the band
+    sits exactly at its own sticky offset (`bandTop 191 == top 191`) with
+    nothing above it to travel past — and `pinWatch()`'s observer cannot tell
+    *satisfied its offset* from *pinned*, so the corner fill paints at rest and
+    the card's rounded corners read square: §130.6's own complaint, live.
+    **THREE OF ITS SIX PASSING ASSERTIONS PASS FOR THE WRONG REASON** with it,
+    because `scrollTo(0,420)` moves nothing and the "pinned" case measures the
+    at-rest state (§94.5).
+
+  * **`tour` — 15 red on `main`.** Step 9 points at `.dlmenu`, which §252.2
+    moved into the Presentation menu and made the office's, so a custodian and
+    a unit owner have no such control: a tour step lighting a target that is
+    not there for the person being toured.
+
+  * **`history-page` — 27 red on `main`**, recorded at §316.1 and unchanged.
+
+  * **`table-scroll` — the viewer label clips by 4px at 1100, served only.**
+    Measured on both stacks: over `file://` the chrome row is
+    `brand 301 · clientback 0 · viewer 608` and the label needs 165 of 165 —
+    exactly fitting; served it is `brand 184 · clientback 122 · viewer 523` and
+    the label gets 161 of 165. The difference is the CLIENT-BACK control, drawn
+    only for a Forefront consultant on a served deployment (§313.36), so it is
+    the office's own people at a narrow window and never a client's staff
+    (measured: a unit head's row carries `clientback 0`). §178 already puts the
+    whole line on a hover, so nothing is unreachable.
+
+**EVERY OTHER FINDING WAS A CHECK**, and each is worth its line because the
+shapes recur:
+
+  * **THE CHAT CORNER TAKES CLICKS THAT ARE NOT ITS OWN.** It is deliberately
+    NOT drawn over `file://` (§97), so every screen check ever written was
+    written on a page that does not have one — and against the served app a
+    fixed 60px bubble sits over the bottom-right corner of every page.
+    Playwright presses an element's CENTRE, so a control whose centre lands
+    under it is reported unreachable and the file dies retrying (§215).
+    §167.2's finding with the welcome overlay swapped for the dock. Stood down
+    for CLICKS ONLY (`pointer-events`) rather than hidden, because a hidden
+    dock changes what a contrast or layout probe measures; a check whose
+    SUBJECT is the corner says so in its own first lines (`qa-run: chat-live`),
+    never a list of names in the wrapper (§104.7).
+
+  * **A CHECK MAY NOT WRITE ON THE OFFICE'S OWN REGISTER ROW** (§313.29, five
+    times in this group). `register-header` asked §96's question — does a bound
+    field reach the data — of the SMO, whose row carries `forefront`: the
+    authoriser refuses a change to it WHOLESALE (kind `officeRow`) and the save
+    comes back 403. The assertion is unchanged and its SUBJECT was wrong.
+
+  * **TWO CHECKS WERE ARGUING AND THE STALE ONE WAS THE ONE THAT HAD NOT
+    MOVED** (§51.11). `smo-team` asserted §92's shape — a seat granted ON THE
+    PICK — and §186 made a seat ASK first; `role-picker` moved with that
+    decision and this one never did. REWRITTEN, never loosened (§218): the ask
+    is asserted DRAWN, then answered, so a build that granted on the pick and
+    drew no ask now fails.
+
+  * **A DECISION EXEMPTED A TABLE AND THE SWEEP DID NOT KNOW.** `no-wrap`
+    measured the History table against §88's one-line rule, which §262.2
+    exempts in its own words — *"this page exists to SHOW values, so a cell
+    takes the height it needs"*. **IT HAD NEVER BEEN MEASURED**: over `file://`
+    a tenant has no history at all, so the table draws no rows and the sweep
+    walked past it.
+
+  * **A CHECK THAT RELIES ON A RELOAD TO RESET IS RELYING ON `file://`.**
+    `role-picker` lands again at the top of every section and assumes the row
+    holds nothing — true for as long as landing meant re-reading the baked
+    file. Served from a database it is not: section 2's four grants
+    accumulate, section 5 RETIRES the row, and section 6 then presses a picker
+    that is correctly no longer drawn, so the file DIED rather than reporting
+    (§215). The state is snapshotted on the first landing and PUT BACK on every
+    one after (§94.2), never written out in the check, so a tenant whose CFO
+    legitimately holds something is restored to what IT had.
+
+  * **A CONTROL THAT MOVED, AND A CHECK KEYED ON THE OLD ONE — TWICE IN ONE
+    FILE.** `identity-merge` pressed the units row pen §261 replaced with a
+    three-dots menu and a dialog; its own comment quotes §51.11 about the
+    PREVIOUS time that line moved. The menu is opened first, and the dialog is
+    CLOSED before the next navigation, or its overlay takes the click and the
+    file waits thirty seconds for a control that was never going to be
+    reachable. And `setup-search` clicked `.navmenu-btn`, a class the HOUSE has
+    also worn since §193.2 — the third file to need that repair.
+
+  * **THE SERVED SHELL HAS NO INLINE SCRIPT, AND ONE FILE READ THE PAGE'S.**
+    `tour` scanned `document.scripts`' text for its own source; the new stack
+    serves it as one document under `script-src 'self'` (§315.3), so the read
+    called a correct build sourceless. An external script is FETCHED now — and
+    because the shell is ONE document holding every module, scanning it
+    reported the whole platform's calls under the tour's name, so the tour's
+    own block is asserted VERBATIM in what the page runs and scanned alone.
+    Its other half asserted ONE SIDE of a rule — *"the tour must never offer
+    itself over `file://`, where nobody signed in"* — which is a fact about the
+    protocol standing in for a fact about signing in; asked of the page
+    (`SYNC.isLive`) now, with the live side asserting the half that is true on
+    both stacks.
+
+  * **AND `setup-overview-live` MET THE WELCOME SCREEN** (§167.2, verbatim): it
+    serves its own app over http, where that overlay exists, and the flag has
+    to be set in an `add_init_script` — after `goto` is too late.
+
+  * **AND TWO MORE IN ONE FILE, BOTH OF THEM THE SAME SHAPE.**
+    `setup-overview` read *"with the demo as shipped, nothing is waiting"* —
+    true only because over `file://` three of those sources cannot be asked at
+    all, which its own comment says. Served, the password state IS asked and
+    answers honestly: a dev tenant mints four logins, so thirty people on the
+    register have never been issued one. That is a real row and the point of
+    the row. REWRITTEN to carry the rule on both stacks (§218): a source that
+    could not be asked draws no row and no zero; one that was asked draws a row
+    that agrees with it. **AND THE RAIL'S PILL IS `attentionByPage()` COMPUTED
+    AT PAINT TIME** (`shell.html`'s `ATT`), while §93 drops the password cache
+    on every save and re-asks only when the register is drawn — so after a
+    write on the Overview the rail carries the number it was painted with and a
+    fresh call answers a smaller one, and the check compared across that gap
+    and reported a product that agrees with itself as one that does not. Read
+    from a fresh paint now, **with the observed cost recorded**: a save on the
+    Overview leaves the rail's pill one paint stale, and any navigation puts it
+    right.
+
+**AND THREE OF THE BLOB CHECK'S OWN FIRST FAILURES WERE THE CHECK** (§100.3),
+each a spelling I invented rather than read: the play address is `?play=<path>`,
+which is what `slides.js` asks for; `safe()` keeps the colon, so a supporting
+function's clip is `videos/fn:finance/…` and reads back to `fn:finance`; and
+the SMO-team person was never signed in, so a 401 was reported as a missing
+refusal. **AND ITS FALSIFICATION PROVED NOTHING AT FIRST**: the two gates are
+asked IN-PROCESS, so a break set only on the spawned server's environment left
+them behaving perfectly and the run reported NOT RED (§94.5).
+
+**WHAT THE PORT KEEPS, NAMED**: `mayWatch` tests the WORD and not truthiness
+(§261.5 — `grantIn` answers `"none"`, which is truthy, and a plain truth test
+let anybody signed in watch any unit's clips); the read address is TWO steps
+and never `getDownloadUrl` (§261.10); the ceiling is counted from the STORED
+slides and never the incoming ones (§42); `list` is the office's and `drop` the
+Super user's, **both asked BEFORE the store is consulted** — reversed, a unit
+head and the office are told the same thing and a refusal names the wrong cause
+(§16.7, §124); and the package is loaded inside a `try` (§231.3). The slug
+rides the QUERY, because a piece upload posts raw bytes and play is a GET
+(§313.37, where a slug in the body sent every client's clips to the default's
+schema).
+
+**RETIRED BY NAME: none.**
+
+---

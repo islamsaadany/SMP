@@ -454,8 +454,15 @@ with sync_playwright() as pw:
       SYNC.videoSign({ target:'mobile', name:'x.mp4', bytes:10 }, (err) => r(err || 'accepted'));
       setTimeout(() => r('(never answered)'), 3000);
     })""")
+    # THE RULE IS "IT ANSWERS", AND THE ANSWER DEPENDS ON WHERE IT IS ASKED
+    # (§218, spec 043). Over `file://` there is nobody to ask, so `sync.js`
+    # refuses with "no server here" before anything leaves; served from a
+    # deployment with no store, the ENDPOINT refuses in its own words. Both
+    # are the decision — say so rather than hang — and asserting only the
+    # first makes a fact about the protocol stand in for the rule.
+    live = ev(pg, "()=>!!(window.SYNC && SYNC.isLive && SYNC.isLive())")
     check("an upload with no server is refused, and answers",
-          said == "no server here", said)
+          said == ("no video store here" if live else "no server here"), said)
 
     # ── 8. Setup › Video storage ───────────────────────────────────────────
     print("8. the section the office clears from")
@@ -492,8 +499,14 @@ with sync_playwright() as pw:
     # two doors to one page is how a rename becomes a duplicate.
     check("...and there is no second Video storage entry in the rail",
           rail.count("Video storage") == 0, rail[:200])
-    check("...and from a file it says there is nothing to ask, rather than asking for ever",
-          "opened from a file" in (pane or "").lower(), (pane or "(no pane)")[:200])
+    # THREE ANSWERS, NOT TWO (§93, §108.10), AND WHICH ONE IS HONEST DEPENDS ON
+    # THE STACK. From a file there is nobody to ask and "Asking…" would stand
+    # for ever; served against a deployment with no store, the honest answer is
+    # that none is set up. What must never be true either way is that the page
+    # is still ASKING once the answer is in.
+    want = ("no video store is set up" if live else "opened from a file")
+    check("...it says which of the three it is, rather than asking for ever",
+          want in (pane or "").lower(), (pane or "(no pane)")[:200])
 
     # BOTH ENDS, DRIVEN RATHER THAN READ. The page defs are a closure, not a
     # global, so an earlier draft of this reached for them, threw, and skipped

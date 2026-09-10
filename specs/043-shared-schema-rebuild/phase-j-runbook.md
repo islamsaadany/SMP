@@ -93,6 +93,22 @@ deleted nothing would be ceremony (§24).
 
 ---
 
+### And the Framework Preset must say Next.js (§317.8)
+
+The frozen site had no framework, so the project's preset was **Other** — and
+with Other, Vercel runs the build and then serves `public/` as plain files.
+For the new app that is a folder of scripts and icons with no page at `/`:
+**a build with no errors and a 404 on every address**, Vercel's own
+`NOT_FOUND`, with Next's real output built and never looked at. Settings →
+Build and Deployment → **Framework Preset → Next.js**, the four overrides
+left off. A changed build setting is picked up by a NEW deployment (a push),
+not a redeploy.
+
+**And preview deployments are protected** — every address answers 302 to a
+Vercel sign-in unless the browser is signed in to Vercel — so a preview
+cannot be read from outside by `curl`; what it serves is read in the
+browser, or on production once promoted.
+
 ## 3b · The room the shared schema lives in (§317.4)
 
 **`public` on the real database is a CLIENT.** When spec 042 split the clients

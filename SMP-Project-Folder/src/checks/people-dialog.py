@@ -103,7 +103,14 @@ ALL_ON = {"fullname": True, "empid": True, "key": True, "title": True, "mainbu":
 # REAL-SHAPED VALUES. Over file:// the demo has no addresses at all, and an
 # empty column never overflows — which is how the Email column stayed 43% cut
 # for as long as it did without a check noticing (§116.5).
-REAL = """()=>{PEOPLE.forEach((p,i)=>{
+REAL = """()=>{/* THE CLIENT'S OWN ROWS, NEVER THE OFFICE'S (§316.6). An office person's
+     register row carries `forefront` and the platform owns it — §313.29 marks
+     it and the authoriser refuses a change to it wholesale, so filling every
+     row here made every save 403 and a refused flush then blocks everything
+     after it. Over file:// nothing saves and it never showed. The row is the
+     platform's, not this client's; leaving it out fills every column just the
+     same, which is what this fixture is for. */
+  PEOPLE.filter(p=>!p.forefront).forEach((p,i)=>{
   p.email = p.name.toLowerCase().replace(/[^a-z ]/g,'').trim()
             .split(/ +/).slice(0,2).join('.') + '@rayatrade.com';
   p.phone = '+20 100 1234567';

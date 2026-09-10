@@ -41934,3 +41934,99 @@ named the bad fixture inside the object. Fixed here, left for their own edit.
 **RETIRED BY NAME: none.**
 
 ---
+
+### §316.9 — Phase I prepared: the demo, the two empty clients, and a landing that told the office they were not there (2026-09-10)
+
+**PHASE I IS PREPARED AND NOT RUN, WHICH IS WHAT ITS ROW SAYS** — *"1 +
+Islam"*, behind stop point E: database work he runs goes through Neon's SQL
+editor only. So the deliverable is everything that can be built and proved
+here, plus **`specs/043-shared-schema-rebuild/phase-i-runbook.md`**, which
+names each step and who does it. **What he is asked for came out at TWO
+PRESSES and no SQL at all** — and that is a finding rather than a
+simplification.
+
+**A CLIENT MADE BY HAND CANNOT BE OPENED.** The plan's row says *"RHI and El
+Abd created empty"*, which reads like two `INSERT`s. Measured: a tenant row
+with no graph makes `/api/<slug>/state` answer **404 "This client holds no
+plan yet."**, the shell's boot sends whoever tried to `/platform`, and the
+client is unreachable by everybody including the person who could fix it
+(§61). **The app already does it correctly and says so in its own comment**:
+Forefront's *Add a client* writes the row AND loads **§67's cleared graph** —
+the product's own `clearedGraph()` over the seed, the shape every fresh
+deployment has started from — with the client's name on the group, an empty
+register and `made_here` set, and it **deletes the row if that load fails**,
+because a client that cannot be opened is worse than one never made. So the
+instruction changes from *paste this* to *press this*, which suits his
+constraint better than the SQL would have. Measured on one made that way: the
+platform opens on Strategy › Plan with `1 Missing` and the builder as the way
+in.
+
+**AND OPENING ONE FOUND A LANDING THAT TOLD THE OFFICE THEY WERE NOT ON THE
+REGISTER — FOR EVER, ON EVERY CLIENT.** A Forefront admin opens a client BY
+RULE and holds no `tenant_users` row (`door.ts`'s `seatFor`); the landing
+resolved the person from that membership, so it drew *"You are not on RHI's
+register yet — The SMO places you from People"* — **while `people` held their
+row**, measured as `ff_office · Mohamed Essam · super`, placed by the state
+API the moment they opened the platform (§313.32). **It survived opening the
+platform**, so it was not staleness; the two halves were asking different
+questions by construction (§53.5) and the sentence sent the only person who
+could act to do something already done (§124, §16.7). `registerKeyFor()` is
+the one read-only answer both use — the by-email rule extracted so there is
+ONE copy — **and it is deliberately its own function rather than `officeRow`
+called from a page**: opening a landing is not a placement, and a reader that
+creates what it looked for is how a phantom change reaches every save (§42).
+**BOTH ENDS, AND THEY ARE TWO DIFFERENT CLIENTS ON PURPOSE**: on one nobody
+has opened, the register really is empty and the sentence is TRUE; on one
+opened once, it is gone. `--break=membership-key` puts the fault back and
+reddens exactly one assertion, printing it verbatim. Door **44 → 49/0**.
+
+**`scripts/seed-demo.mjs`: THE NAMES AND THE REFUSAL ARE THE FROZEN SCRIPT'S,
+REQUIRED AND NOT COPIED** (§53.5) — the renaming table Islam approved and the
+scan that THROWS on any real name that survived it. **It refuses twice**: on
+the graph it builds and on the graph POSTGRES HANDS BACK, because a write that
+half-lands is a demo with a plan and no people and the round trip through
+jsonb is where a string could survive a check made in memory. Re-running is
+refused without `--replace`. Proved on a **virgin database** as well as the
+dev one, which is the shape production is.
+
+**`checks/demo-seed.mjs` SCANS THE COLUMNS, NOT THE GRAPH.** The frozen
+refusal walks what a READER surfaces; on this stack the graph is thirty-odd
+tables, and a string in a column no reader reaches is invisible to it and
+perfectly visible to anybody with the database. So every tenant-owned table is
+read — asked of the catalogue, never listed here (§104.7) — under the demo
+tenant, where row-level security is what narrows it. **And Raya's is scanned
+the same way as the CONTROL**, because a scan that finds nothing proves
+nothing until it has been shown finding something (§113.8). 7/7, RED both ways
+— `raw-names` (the demo seeded from the UNRENAMED example) 3 red, `keep-marks`
+2.
+
+**AND THE CHECK'S FIRST RUN CALLED A CORRECT DEMO BROKEN, FIVE TIMES.** It
+tested `includes` on a row's JSON, and the forbidden list holds the bare token
+**`Nour`** from a real *Nour Selim* while the demo has an invented **Noura
+Ghanem** — a substring, not a name. The frozen refusal was green throughout,
+because **it splits on non-letters and matches WHOLE WORDS**. So the fix was
+not a better regular expression: it was to ask the frozen matcher per ROW
+rather than write a second rule (§53.5) — which brings its picture rule with
+it, so a `data:` URI in any column is refused outright, a lockup hiding in
+`extra` included.
+
+**THE RAYA CARRY RUNS AT DEPLOY, AND NEEDS NO SECOND DATABASE** — the choice
+stop point E asks to be recorded. `migrate-raya.mjs` reads the frozen schema
+through the frozen product's OWN reader and walks JSON, so it cannot be said in
+SQL; and the frozen schemas (`raya_trade`, `platform`) and the shared schema
+are in ONE Neon database, so `--from` and `--to` are the connection string
+Vercel already holds and there is nothing to paste. **It runs once by
+construction** (it refuses if a `raya-trade` tenant exists) inside one
+transaction. **The cost is a SEQUENCE, not a guard**: it must run after the
+frozen site stops taking writes, or a figure entered between the read and the
+switch is carried and then lost — Phase J's order, said here rather than
+discovered there.
+
+`qa.py` at Next 33 viewers / 229 destinations with the one recorded 404 and
+nothing else; the `file://` sweep ERRORS none; door 49/0, state 91/0, shell
+36/0, blob 23/23, comms 47/47, upload 9/9, demo 7/7, 588/0, 136/0, the nine
+spike proofs green (the Raya carry is S8), `tsc` clean.
+
+**RETIRED BY NAME: none.**
+
+---

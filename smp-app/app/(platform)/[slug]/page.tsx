@@ -31,6 +31,6 @@ export default async function Page({ params }: P) {
     if (ans.status === 403) redirect("/" + slug + "/sign-in");
     notFound();
   }
-  const data = await landingFor(ans.tenant.id, ans.personKey);
+  const data = await landingFor(ans.tenant.id, ans.personKey, user.email);
   return <Welcome slug={slug} tenant={ans.tenant} user={user} data={data} />;
 }

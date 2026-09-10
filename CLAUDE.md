@@ -693,6 +693,44 @@ self-destructing `sw.js`, so a file at that address is in the plan already;
 what is genuinely open, and Islam's, is **whether it also carries `push`**.
 **Nothing retired.**
 
+**Phase I is PREPARED and not run (§316.9)** — its row is *1 + Islam* behind
+stop point E — and **what he is asked for came out at TWO PRESSES and no SQL,
+which is a finding rather than a tidy-up**: a tenant created with an `INSERT`
+holds no graph, and a tenant with no graph answers **404 at the state API**, so
+the client cannot be opened by anybody including the person who could fix it
+(§61) — while Forefront's own *Add a client* writes the row AND loads **§67's
+cleared graph**, deleting the row if that load fails. The runbook is
+`specs/043-shared-schema-rebuild/phase-i-runbook.md`.
+**`scripts/seed-demo.mjs`** carries the demo under the demo TENANT with the
+frozen renaming table and its refusal **required, never copied**, refusing
+twice — on the graph it builds and on the graph Postgres hands back — proved on
+a virgin database; **`checks/demo-seed.mjs` 7/7, RED both ways**, scans the
+COLUMNS of every tenant-owned table rather than the graph (a reader only
+surfaces what it knows about) with Raya's scanned as the CONTROL (§113.8).
+**Its own first run called a correct demo broken five times**, matching the
+token `Nour` inside the invented *Noura Ghanem*: the frozen refusal splits on
+non-letters and matches WHOLE WORDS, so the answer was to ask IT per row rather
+than write a second rule (§53.5) — which brings its picture rule along, so a
+`data:` URI in any column is refused outright.
+**AND OPENING AN EMPTY CLIENT FOUND A LIVE DEFECT**: the landing resolved the
+person from the MEMBERSHIP while the state API places them on the REGISTER, so
+a Forefront admin opening a client BY RULE (`door.ts`'s `seatFor`, no
+`tenant_users` row) was told *"You are not on this client's register yet — the
+SMO places you from People"* **for ever, on every client**, with their row
+plainly in `people` — §53.5's drift with §124's sign, sending the only person
+who could act to do something already done. `registerKeyFor()` is the one
+read-only answer both halves ask, and it is **deliberately not `officeRow`
+called from a page**: opening a landing is not a placement, and a reader that
+creates what it looked for is how a phantom change reaches every save (§42).
+Both ends asserted on two different clients; door 44 → **49/0**, with
+`--break=membership-key` reddening exactly one.
+**THE RAYA CARRY'S ROUTE IS RECORDED, as stop point E asks**: at deploy from
+Vercel's own environment, with **no second database** — the frozen schemas and
+the shared schema are one Neon database, so nothing is pasted — running once by
+construction, and its cost is a SEQUENCE rather than a guard (after the frozen
+site stops taking writes, or a figure entered in between is carried and then
+lost). **Nothing retired.**
+
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
 

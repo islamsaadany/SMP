@@ -14,7 +14,7 @@
     "test:rules": "node tests/graph-diff.cjs && node tests/authorize.cjs",
     "dev:tenant": "node scripts/dev-tenant.mjs",
     "check:door": "node checks/door-landing.mjs",
-    "check:door:red": "for b in no-rows first-person; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:door:red": "for b in no-rows first-person membership-key; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "sync:css": "node scripts/sync-css.mjs",
     "check:state": "node checks/state-api.mjs",
     "check:state:red": "for b in apply-on-base no-save-lock bare-refusal viewas-widens log-for-all peek-includes-me; do node checks/state-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
@@ -26,7 +26,9 @@
     "check:comms": "node checks/comms-api.mjs",
     "check:comms:red": "for b in no-boundary chat-on; do node checks/comms-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:upload": "node checks/upload-seam.mjs",
-    "check:upload:red": "for b in no-inserts no-deletes; do node checks/upload-seam.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
+    "check:upload:red": "for b in no-inserts no-deletes; do node checks/upload-seam.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:demo": "node checks/demo-seed.mjs",
+    "check:demo:red": "for b in raw-names keep-marks; do node checks/demo-seed.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

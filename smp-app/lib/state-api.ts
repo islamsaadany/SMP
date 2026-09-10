@@ -45,6 +45,41 @@ function mintKey(email: string): string {
   const local = String(email || "").split("@")[0].toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   return "ff_" + (local || "office");
 }
+/* by email, on the stored register (§313.32) — `active` is an absence, so a
+   retired row carries extra.active = 'false' (§247's own test). ONE COPY,
+   because two things ask it: the state API, which may then MINT a row, and
+   the landing, which may not (§53.5). */
+async function byEmailRows(c: PoolClient, email: string): Promise<string[]> {
+  const r = await c.query(
+    "SELECT key FROM people WHERE lower(COALESCE(extra->>'email','')) = lower($1) AND COALESCE(extra->>'active','') <> 'false'", [email]);
+  return r.rows.map((x: { key: string }) => x.key);
+}
+
+/* WHO THIS LOGIN IS ON THE REGISTER, WITHOUT WRITING ANYTHING. The landing
+   asked the MEMBERSHIP and the state API places somebody on the REGISTER, so
+   the two disagreed by construction: a Forefront admin opening a client by
+   rule (door.ts's seatFor) holds no membership, so the landing told them
+   *"You are not on X's register yet — the SMO places you from People"*
+   for ever, on every client, while `people` held their row — measured on a
+   client made through Forefront's own page, and it survives opening the
+   platform, which is what places them. §53.5's drift with §124's sign: a
+   sentence claiming more than the thing measuring it can see, sending the
+   only person who could act to do something already done.
+
+   IT MUST NOT MINT, WHICH IS WHY IT IS ITS OWN FUNCTION rather than
+   `officeRow` called from a page: opening a landing is not a placement, and
+   a reader that creates what it looked for is how a phantom change reaches
+   every save (§42). Nobody, on the first visit, is still `null` and the
+   sentence is then TRUE. */
+export async function registerKeyFor(c: PoolClient, email: string, personKey: string | null): Promise<string | null> {
+  if (personKey) {
+    const found = await c.query("SELECT key FROM people WHERE key = $1", [personKey]);
+    if (found.rowCount) return personKey;
+  }
+  const byMail = await byEmailRows(c, email);
+  return byMail.length === 1 ? byMail[0] : null;
+}
+
 export async function officeRow(c: PoolClient, user: SessionUser, tenant: Tenant, seat: Membership["seat"] | null, personKey: string | null): Promise<string> {
   const role = seat === "super" || seat === "smoteam" ? seat : "smoteam";
   if (personKey) {
@@ -58,12 +93,9 @@ export async function officeRow(c: PoolClient, user: SessionUser, tenant: Tenant
       return personKey;
     }
   }
-  /* by email, on the stored register (§313.32) — `active` is an absence, so
-     a retired row carries extra.active = 'false' (§247's own test) */
-  const byMail = await c.query(
-    "SELECT key FROM people WHERE lower(COALESCE(extra->>'email','')) = lower($1) AND COALESCE(extra->>'active','') <> 'false'", [user.email]);
-  if (byMail.rowCount === 1) return byMail.rows[0].key;
-  if ((byMail.rowCount || 0) > 1) throw new NoPerson("Two people on this register carry your address, so the platform cannot say which you are. Ask the SMO to settle it.");
+  const byMail = await byEmailRows(c, user.email);
+  if (byMail.length === 1) return byMail[0];
+  if (byMail.length > 1) throw new NoPerson("Two people on this register carry your address, so the platform cannot say which you are. Ask the SMO to settle it.");
   const anybody = await c.query("SELECT 1 FROM people LIMIT 1");
   if (!tenant.made_here && anybody.rowCount) throw new NoPerson("You are signed in, but you are not on this client's register. Ask the SMO to place you.");
   const key = personKey || mintKey(user.email);

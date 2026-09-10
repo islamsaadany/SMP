@@ -6,6 +6,7 @@
 import { createRequire } from "node:module";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
+import { registerKeyFor } from "./state-api.ts";
 
 const frozen = createRequire(import.meta.url)("./frozen.cjs") as {
   landing: (graph: unknown, personKey: string) => Landing;
@@ -24,10 +25,19 @@ export type Landing = {
 };
 
 /* null when the tenant holds no graph yet (a client made and never seeded). */
-export async function landingFor(tenantId: string, personKey: string | null): Promise<Landing | null> {
-  const graph = await withTenant(tenantId, (c) => readState(c));
+export async function landingFor(tenantId: string, personKey: string | null, email?: string | null): Promise<Landing | null> {
+  /* THE REGISTER, NOT THE MEMBERSHIP. A Forefront admin opens a client BY
+     RULE and holds no membership row (door.ts's seatFor), so asking the
+     membership told them they were not on the register while `people` held
+     their row — see registerKeyFor's own note. Resolved read-only, inside
+     the one transaction that reads the graph. */
+  const read = await withTenant(tenantId, async (c) => ({
+    graph: await readState(c),
+    key: email ? await registerKeyFor(c, email, personKey) : personKey,
+  }));
+  const graph = read.graph;
   if (!graph) return null;
-  const out = frozen.landing(graph, personKey || "");
+  const out = frozen.landing(graph, read.key || "");
   /* THE CHECK'S BREAKS (constitution XVI, the spike's --break shape, here as
      an environment switch because the page runs in a server): a build that
      lost the rows or the doors must turn checks/door-landing.mjs red before
@@ -35,6 +45,9 @@ export async function landingFor(tenantId: string, personKey: string | null): Pr
   const brk = process.env.SMP_BREAK || "";
   if (brk === "no-rows") out.acts = [];
   if (brk === "first-person") return frozen.landing(graph, "");
+  /* the fault registerKeyFor closed: the landing asking the MEMBERSHIP,
+     which a Forefront admin opening a client by rule does not have */
+  if (brk === "membership-key") return frozen.landing(graph, personKey || "");
   return out;
 }
 

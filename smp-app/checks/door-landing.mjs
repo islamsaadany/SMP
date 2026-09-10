@@ -260,6 +260,46 @@ await section("5 · the office", async () => {
   await owner.query("UPDATE users SET is_admin = true WHERE email = 'office@forefront.example'");
   await owner.query("DELETE FROM tenants WHERE key = 'other-co'");
 });
+await section("6 · a client made here, opened by rule", async () => {
+  /* THE LANDING ASKS THE REGISTER, NOT THE MEMBERSHIP. A Forefront admin
+     opens a client BY RULE and holds no `tenant_users` row, and the landing
+     read that row — so it told them *"You are not on X's register yet — the
+     SMO places you from People"* on every such client, for ever, while
+     `people` already held the row the state API places. Found by making the
+     two empty clients Phase I asks for and OPENING one.
+
+     THE CLIENT IS MADE THE PRODUCT'S OWN WAY, through Forefront's page,
+     which is the other half of the same finding: a tenant INSERTed by hand
+     holds no graph, and a tenant with no graph answers 404 at the state API
+     and cannot be opened at all (`createClient` says so in its own comment
+     and deletes the row if the load fails).
+
+     BOTH ENDS (§94.2): before it is opened nobody IS on the register and the
+     sentence is TRUE, and a check asserting only the second half would pass
+     on a build that never draws it. */
+  ({ ctx, page } = await fresh());
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  await signIn(page, "office@forefront.example", "Raya-2026!");
+  await page.waitForURL(BASE + "/platform");
+  const key = "phase-i-" + Date.now().toString(36);
+  const mk = await page.request.post(BASE + "/api/platform", { data: { action: "createClient", name: "Phase I " + key } });
+  const made = (await mk.json()).key;
+  check(mk.status() === 200 && made, "a client is made through Forefront's own page", mk.status());
+  await page.goto(BASE + "/" + made, { waitUntil: "networkidle" });
+  const first = await text(page, ".wact.wempty b");
+  check(first.some((s) => /not on/.test(s)), "nobody on its register yet, and the landing says so", first);
+  const r = await page.request.get(BASE + "/api/" + made + "/state");
+  check(r.status() === 200, "…and it OPENS, because a made client starts on the cleared graph (§67)", r.status());
+  const tid = (await owner.query("SELECT id FROM tenants WHERE key = $1", [made])).rows[0].id;
+  const who = await withTenant(tid, async (c) => (await c.query("SELECT key FROM people")).rows.map((x) => x.key));
+  check(who.length === 1, "…placing the office as exactly one row on the register (§313.32)", who);
+  await page.goto(BASE + "/" + made, { waitUntil: "networkidle" });
+  const again = await text(page, ".wact.wempty b");
+  check(!again.some((s) => /not on/.test(s)), "…so the landing stops saying they are not on it", again);
+  await owner.query("DELETE FROM tenants WHERE key = $1", [made]);
+});
+
+
 {
   await browser.close();
   try { process.kill(-server.pid, "SIGTERM"); } catch { server.kill(); }

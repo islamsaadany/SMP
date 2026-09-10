@@ -22,6 +22,7 @@
 
    Needs `npm run build` first and the chromium this image carries. */
 import { spawn } from "node:child_process";
+import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
@@ -49,7 +50,7 @@ if (brk === "keep-caches") writeFileSync(SWFILE, SWWAS.replace(/caches\.keys\(\)
 if (brk === "serve-from-disk") writeFileSync(SWFILE, SWWAS + '\nself.addEventListener("fetch", (e) => { if (e.request.method === "GET") e.respondWith(caches.open("smp-shell-again").then((c) => fetch(e.request).then((r) => { if (r.ok && r.type === "basic") c.put(e.request, r.clone()); return r; }))); });\n');
 
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
-const owner = new pg.Pool({ connectionString: URL_, max: 2 });
+const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: join(import.meta.dirname, ".."), env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, SMP_BREAK: brk }, stdio: ["ignore", "pipe", "pipe"], detached: true });
 server.stdout.on("data", () => {}); server.stderr.on("data", (d) => process.stderr.write(d));
 let up = false;

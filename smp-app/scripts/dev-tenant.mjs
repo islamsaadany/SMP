@@ -16,6 +16,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { applyAll } from "../db/apply.mjs";
+import { SCHEMA } from "../db/schema-name.mjs";
 import { hashPassword } from "../lib/auth.ts";
 import { withTenant } from "../lib/tenant.ts";
 import { loadGraph } from "../lib/state-io.ts";
@@ -28,7 +29,9 @@ export const TEMP_PASSWORD = "Temp-2026!";
 
 export async function devTenant({ url = OWNER_URL, log = (s) => console.log(s) } = {}) {
   await applyAll(url, { appPassword: process.env.SMP_APP_PASSWORD || "smp_app", log: () => {} });
-  const owner = new pg.Client({ connectionString: url });
+  /* The shared schema (§317.4) — a client without it opens in `public`,
+     which on the real database is somebody's live data. */
+  const owner = new pg.Client({ connectionString: url, options: "-c search_path=" + SCHEMA });
   await owner.connect();
   /* everything a run of the checks may have made: the tenant, its logins, a
      client created through Forefront's pages, and the office's own table */

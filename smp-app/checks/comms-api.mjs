@@ -48,6 +48,7 @@
 
    Needs `next build` first. Re-runnable: the dev tenant is REMADE at the start. */
 import { spawn } from "node:child_process";
+import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { chromium } from "playwright-core";
 import { join } from "node:path";
 import { createRequire } from "node:module";
@@ -89,7 +90,7 @@ const check = (c, l, m) => (c ? ok(l) : fail(l, m));
 
 /* ── the tenant, remade, plus a SECOND client so the boundary can be asked ── */
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
-const owner = new pg.Pool({ connectionString: URL_, max: 3 });
+const owner = new pg.Pool({ connectionString: URL_, max: 3, options: "-c search_path=" + SCHEMA });
 const other = (await owner.query(
   "INSERT INTO tenants (key, name, made_here) VALUES ('el-abd', 'El Abd', true) RETURNING id")).rows[0].id;
 /* Its office, and a second person on THIS client who holds no seat at all. */

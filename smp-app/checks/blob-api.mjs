@@ -25,6 +25,7 @@
 
    Needs `next build` first. Re-runnable: the dev tenant is REMADE at the start. */
 import { spawn } from "node:child_process";
+import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { join } from "node:path";
 import { createRequire } from "node:module";
 import pg from "pg";
@@ -49,7 +50,7 @@ const fail = (l, m) => { fails++; console.log("FAIL  " + l + (m === undefined ? 
 const check = (c, l, m) => (c ? ok(l) : fail(l, m));
 
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
-const owner = new pg.Pool({ connectionString: URL_, max: 2 });
+const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
 const graph0 = await withTenant(tenantId, (c) => readState(c));
 const mint = async (key, kind, isAdmin, seat) => {
   const p = graph0.people.find((x) => x.key === key);

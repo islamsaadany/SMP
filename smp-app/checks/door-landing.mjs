@@ -21,6 +21,7 @@
 
    Needs `next build` first and the chromium this image carries. */
 import { spawn } from "node:child_process";
+import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
@@ -41,7 +42,7 @@ const check = (c, l, m) => (c ? ok(l) : fail(l, m));
 /* a 1x1 navy PNG for the client's mark */
 const MARK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
-const owner = new pg.Pool({ connectionString: URL_, max: 2 });
+const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
 /* THE STATE IS MADE, NEVER INHERITED (§255, §94.2). This read whatever the
    last run happened to leave in the dev tenant, and a landing row asserted as
    AGREEMENT with the frozen reader passes vacuously when the reader answers

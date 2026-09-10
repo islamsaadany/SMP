@@ -108,6 +108,35 @@ try {
     "FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname=$1 AND c.relkind='r'", [SCHEMA]);
   check("the shared schema holds the platform's tables", mine.rows[0].n > 30, mine.rows[0].n);
   check("…with row-level security FORCED on the tenant ones", mine.rows[0].forced >= 40, mine.rows[0].forced + " forced");
+  /* ── 5 · and nothing opens a connection without saying where ───────
+     Four files had their own `new pg.Client`/`new pg.Pool` and every one of
+     them opened in `public` until it was told otherwise — the harness's
+     pools, its pooler model, s1's direct run and the dev fixture. Each
+     failed differently and none of them failed obviously ("relation tenants
+     does not exist" reads like a missing migration). Grepped, because a
+     connection that forgets is the one shape this whole section is about
+     and the next one will be written by somebody who was not here. */
+  console.log("\n5 · every connection says which schema it opens in");
+  const { readdirSync: rd, readFileSync: rf } = await import("node:fs");
+  const scan = [];
+  for (const dir of ["lib", "scripts", "spike", "checks", "db"]) {
+    let names = [];
+    try { names = rd(join(APP, dir)); } catch { continue; }
+    for (const f of names) {
+      if (!/\.(ts|mjs|cjs)$/.test(f)) continue;
+      const text = rf(join(APP, dir, f), "utf8");
+      for (const m of text.matchAll(/new pg\.(?:Client|Pool)\(\{([^}]*)\}/g)) {
+        /* db/apply.mjs sets the path with SET LOCAL inside its own
+           transaction — it CREATES the schema, so it cannot open in one. */
+        if (dir === "db" && f === "apply.mjs") continue;
+        /* Either way of saying it counts: the connection option, or an
+           explicit `SET search_path` in the same file — migrate-raya and
+           this check both open somewhere on purpose and say so in SQL. */
+        if (!/options/.test(m[1]) && !/SET search_path/.test(text)) scan.push(dir + "/" + f);
+      }
+    }
+  }
+  check("no connection is opened without a search_path", scan.length === 0, [...new Set(scan)].join(", "));
 } finally {
   await c.end();
   const a2 = new pg.Client({ connectionString: ADMIN });

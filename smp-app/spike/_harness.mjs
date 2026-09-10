@@ -47,7 +47,7 @@ function asApp(url) { const u = new URL(url); u.username = "smp_app"; u.password
 /* A throwaway database per run. */
 export async function makeDb(opts = {}) {
   const name = "smp_spike_" + process.pid + "_" + Date.now().toString(36);
-  const admin = new pg.Client({ connectionString: OWNER_URL });
+  const admin = new pg.Client({ connectionString: OWNER_URL, options: "-c search_path=" + SCHEMA });
   await admin.connect();
   await admin.query('CREATE DATABASE "' + name + '"');
   await admin.end();
@@ -67,7 +67,7 @@ export async function makeDb(opts = {}) {
   async function drop() {
     const wait = (p) => Promise.race([p, new Promise((r) => setTimeout(r, 3000))]);
     await wait(owner.end()); await wait(app.end());
-    const a = new pg.Client({ connectionString: OWNER_URL });
+    const a = new pg.Client({ connectionString: OWNER_URL, options: "-c search_path=" + SCHEMA });
     await a.connect();
     await a.query('DROP DATABASE IF EXISTS "' + name + '" WITH (FORCE)');
     await a.end();

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { readFileSync } from "node:fs";
+type Block = { source: string; headers: { key: string; value: string }[] };
 import { join } from "node:path";
 
 /* THE SECURITY HEADERS CROSS TO THE NEW STACK, READ AND NEVER RETYPED
@@ -35,9 +36,23 @@ import { join } from "node:path";
    and the RIGHT policy.
    The slug pattern is the frozen file's, with `platform` excluded by name,
    because that path is a route handler with a policy of its own. */
-const frozen = JSON.parse(readFileSync(join(import.meta.dirname, "..", "vercel.json"), "utf8"));
-const all = frozen.headers.find((h: { source: string }) => h.source === "/(.*)");
-if (!all) throw new Error("next.config: vercel.json no longer carries the /(.*) header block — nothing is guessed at");
+/* CARRIED INTO THE APP BY scripts/sync-static.mjs, NEVER REACHED FOR OUTSIDE
+   IT (§317.6). This read `../vercel.json` relative to its own file, which is
+   right on a laptop and wrong on Vercel: Next compiles this config into a
+   different directory before running it, so "one above" moved and it found a
+   vercel.json with no `headers` key — `Cannot read properties of undefined
+   (reading 'find')`, and a build that had just applied the schema stopped on
+   a path resolution. The headers are still the frozen file's; what changed is
+   who reads it and when (§43.6's rule intact). */
+const HEADERS_FILE = join(process.cwd(), "security-headers.json");
+let frozen: { all: Block; sw: Block; manifest: Block };
+try {
+  frozen = JSON.parse(readFileSync(HEADERS_FILE, "utf8"));
+} catch (e) {
+  throw new Error("next.config: " + HEADERS_FILE + " is not there — scripts/sync-static.mjs writes it from the repository root's vercel.json, and `npm run build` runs it before this (§317.6). " + (e as Error).message);
+}
+const all = frozen.all;
+if (!all || !all.headers) throw new Error("next.config: the carried header block is empty — nothing is guessed at");
 const named = (k: string) => {
   const h = all.headers.find((x: { key: string }) => x.key.toLowerCase() === k.toLowerCase());
   if (!h) throw new Error("next.config: vercel.json no longer sets " + k);
@@ -50,13 +65,13 @@ const SLUG = "/:slug((?!platform$)[a-z0-9][a-z0-9-]{0,48})";
 /* The worker is revalidated on every navigation or it is the cache-by-name
    trap wearing a different hat (§91); the frozen file says so and this reads
    it from there too. */
-const sw = frozen.headers.find((h: { source: string }) => h.source === "/sw.js");
-if (!sw) throw new Error("next.config: vercel.json no longer carries the /sw.js block");
+const sw = frozen.sw;
+if (!sw) throw new Error("next.config: the carried /sw.js block is missing");
 /* And the manifest's own type, from the same file: a manifest served as
    something else is ignored, and a page that links one and is not installable
    looks exactly like a page that never linked it (§26, Phase J). */
-const man = frozen.headers.find((h: { source: string }) => h.source === "/manifest.webmanifest");
-if (!man) throw new Error("next.config: vercel.json no longer carries the /manifest.webmanifest block");
+const man = frozen.manifest;
+if (!man) throw new Error("next.config: the carried /manifest.webmanifest block is missing");
 
 const nextConfig: NextConfig = {
   /* The Prisma client and the pg driver must stay server-side. */

@@ -17,6 +17,7 @@
 
    Re-runnable: it seeds the demo tenant each time, with --replace. */
 import { createRequire } from "node:module";
+import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
@@ -33,7 +34,7 @@ const ok = (l) => { oks++; console.log("ok    " + l); };
 const fail = (l, m) => { fails++; console.log("FAIL  " + l + (m === undefined ? "" : " — " + say(m).slice(0, 220))); };
 const check = (c, l, m) => (c ? ok(l) : fail(l, m));
 
-const owner = new pg.Pool({ connectionString: URL_, max: 2 });
+const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
 try {
   const real = D.realNames(JSON.parse(readFileSync(join(import.meta.dirname, "..", "..", "db", "seed-state.json"), "utf8")));
 

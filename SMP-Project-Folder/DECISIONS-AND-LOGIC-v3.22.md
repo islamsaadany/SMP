@@ -42329,3 +42329,100 @@ merge every time.
 
 
 ---
+
+## §317.7–.10 — REACHING OUTSIDE THE FOLDER, FOUR TIMES (2026-09-10, spec 043)
+
+Four more builds after §317.3–.6, and **three of them are one fault wearing
+three depths**: the app reaching outside its own folder and finding something
+different from what a laptop finds. A Root Directory is a boundary a
+laptop does not have — above it the file may be somebody else's file, may not
+have been uploaded at all, or may sit beside packages nobody installed — and
+each of the three found out one layer further down. **The fourth is the one
+that is not code at all, and it produced the most misleading symptom in the
+whole cutover: a build with no errors and a 404 on every address.**
+
+**§317.7 — the frozen `vercel.json` is not readable during a Vercel build.**
+§317.6 carried the header block into the app and the next build failed one
+step EARLIER on the same fact: *"sync-static: vercel.json no longer carries
+the /(.*) header block"*. **With a Root Directory set, the `vercel.json` at
+the build root is VERCEL'S OWN RESOLVED CONFIG**, and it has no `headers` key
+— so §317.6's read and this one had opened a file of that name carrying
+nothing, and moving the read earlier could not have helped, because it is the
+same file. A fact about the host rather than a bug to route around. So the
+carry happens **where the source exists** and the result is COMMITTED, the way
+`public/platform-page.js` already is: on a laptop `sync-static` regenerates
+`smp-app/security-headers.json` from the frozen file and any drift lands in
+the diff, and on Vercel the source is absent and the committed file is used as
+it stands, said in one log line. **§43.6's rule is intact either way** — the
+headers are the frozen file's and are never retyped; what moved is WHEN they
+are read. **And a missing or short file still refuses the build**, because a
+deployment with no policy on it is what §316.10 measured and what the block
+exists for. Proved all three ways: source present → regenerated; source hidden
+as on Vercel → the committed copy carried; both gone → refused with the
+instruction.
+
+**§317.8 — the Framework Preset was still `Other`.** A build with no errors,
+and Vercel's own **NOT_FOUND on every address**. The project was created for
+the frozen site, which had no framework, so the preset said *Other* — and with
+Other, Vercel runs the build command and then **serves `public/` as plain
+files**: Next's real output was built, every time, and never looked at.
+**Nothing about the symptom points at it** — a 404 from the platform's own
+routing and a 404 from the host are the same three digits — which is why this
+one cost a whole round of reading the app for a routing fault that was not
+there. Written down beside the other settings in the runbook so the page is
+never met blind again, together with the other thing that wasted a round:
+**preview deployments answer 302 to anything not signed in to Vercel**, so a
+preview is read in a browser and never with `curl`.
+
+**§317.9 — the carry COMPLETED and the build failed one line later.** On the
+push that was the cutover, Raya Trade was carried across in full —
+`bu_declarations` 15, `change_log` 7287, `chat_messages` 172, `accounts` 3 —
+and then the demo seed died on *"Cannot find module
+'../../scripts/seed-demo-client.js'"*: the frozen renaming script lives in the
+repository's root `scripts/` and `.vercelignore` excluded that folder.
+Production stayed on the promoted build and the shared schema held the client,
+so the cost was a build rather than the data. **AND THE CHECK WRITTEN FOR
+EXACTLY THIS WAS GREEN OVER IT** — `deploy-context.mjs` exists to refuse an
+ignore file that swallows something the app reaches for, and its list of what
+the app reaches for was **TYPED, and typed short**: §53.5's warning, in the
+file that quotes §53.5. It reads every `../../` reach out of the app's own
+`scripts` and `lib` now and adds them itself, with a new falsification
+(`--break=ignore-scripts`) that reproduces the night's fault. **AND THE
+RUNBOOK'S PROMISE IS KEPT BY THE CODE RATHER THAN BY THE PROSE**: it told
+Islam that a switch left on *"costs nothing but a refusal in every build
+log"*, and that was false — the refusal THREW, and would have failed the very
+next build, the one completing the cutover, until somebody found the switch
+(§104.8's family: a recorded intention nothing compares with the code). Only
+the two self-refusals are caught and printed; anything else in the carry or
+the seed still fails the build.
+
+**§317.10 — the frozen seed script runs on the app's own packages.** One line
+further again: the carry stood down correctly, in its own words in the log,
+and the seed died on *"Cannot find module 'pg'"* — from the frozen renaming
+script at the repository root, which requires `pg` from where IT lives. On a
+laptop that finds the root's `node_modules`; **on Vercel only `smp-app/` is
+installed**, so it finds nothing. It is REQUIRED rather than copied on purpose
+(§316.9, §53.5 — the refusal must be the frozen one and not a second copy of
+it), so the app's `node_modules` is put on the resolution path before the
+frozen script is loaded. `pg` is the one package the chain needs, grepped
+across the frozen files it pulls in, and the app already depends on it. Proved
+the way it fails on the host: the root's `node_modules` moved aside, the seed
+script loads.
+
+**AND THE CUTOVER COMPLETED ON THAT BUILD.** Production serves the new stack:
+the door, `/platform`, `/raya-trade`, `/demo`, `/sw.js` (4.1KB, `push` and
+`notificationclick`, no `fetch` and no cache), the manifest and its three
+icons, and **the eight security headers on every one of them**. Raya Trade
+carried at **20:53**, which is the data cut and is stated as one rather than
+left to be discovered. `/api/state` with no client named answers 404 by design
+(§4.4: there is no default client), which is a thing to know before reading it
+as a fault.
+
+**WHAT IS DELIBERATELY NOT DONE YET, AND WHY**: `scripts/migrate-raya.mjs`
+says in its own header that it is deleted once the cutover is done, and it
+stays until the question above it is answered — *was anything entered on the
+frozen site after 20:53* — because it is the only tool that would close such a
+gap. **And it must not be made safe to delete**: `deploy.mjs` imports it only
+inside the `SMP_CARRY_RAYA` branch, so catching a missing module there would
+turn §317.9's loud fault into a quiet one in the exact place that just cost
+four builds.

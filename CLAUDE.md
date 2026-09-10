@@ -435,8 +435,8 @@ SECURITY`, or the shared schema is weaker than the schemas it replaces; the
 URL is an address the server checks, never the authority, and the
 `raya-trade` fallback goes. **The single file takes no new features from
 2026-09-09** — a client-blocking defect is a correction and is asked about
-first. `smp-app/` is replaced on the branch; `main` is untouched until Islam
-says merge. **Spec 043 was signed off 2026-09-09** with one change to the
+first. `smp-app/` replaced the branch's app and **`main` carries it since the
+cutover of 2026-09-10 (§317.3–.10): production serves the new stack.** **Spec 043 was signed off 2026-09-09** with one change to the
 plan: Raya Trade's data is carried across by a one-off migration proved by
 running it (§314.1); RHI and El Abd start empty, the demo is seeded. The
 first slice is a spike of nine database proofs, not a screen. **`plan.md`
@@ -731,7 +731,7 @@ construction, and its cost is a SEQUENCE rather than a guard (after the frozen
 site stops taking writes, or a figure entered in between is carried and then
 lost). **Nothing retired.**
 
-**PHASE J IS BUILT AND NOT RUN (§316.10)** — the cutover itself is Islam's,
+**PHASE J WAS BUILT HERE AND RUN ON 2026-09-10 (§316.10, cut over at §317.3–.10)** — the cutover itself is Islam's,
 and everything that could be built and proved here is. **STOP POINT C IS
 ANSWERED AND IT IS HIS** (*"1. ok"*): `/sw.js` is served again. **The plan
 said both things and was right about its own half each time** — line 47's *no
@@ -796,11 +796,12 @@ which is the word `smp_app`. `qa.py` at Next 33 viewers / 229 destinations /
 ERRORS none, `file://` ERRORS none, door 49/0, state 91/0, **shell 60/0** with
 five red runs, blob 23/23, comms 47/47, upload 9/9, demo 7/7, 588/0, 136/0,
 the nine spike proofs, `tsc` clean. The runbook is
-`specs/043-shared-schema-rebuild/phase-j-runbook.md`. **STILL ISLAM'S**: the
-Vercel settings, the two switches, the address, **the two presses of *Add a
-client*** — he made them on the FROZEN platform, so they are owed again on the
-new one — and **the merge, his word on that merge every time**. **Nothing
-retired.**
+`specs/043-shared-schema-rebuild/phase-j-runbook.md`. **WAS STILL ISLAM'S, AND IS NOW MOSTLY DONE**: the
+Vercel settings and the address are set, the merge was his word on the day
+(§317), and **the carry ran at 20:53 on 2026-09-10** — what is left to him is
+turning the two switches off and **the two presses of *Add a client*** (RHI,
+El Abd), which he made on the FROZEN platform and are owed again on the new
+one. **Nothing retired.**
 
 The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
 repo as a zip and brings back — treat that folder as the product. Read, in order:
@@ -8695,9 +8696,10 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-10 &mdash; **&sect;317.3&ndash;.8: the cutover, and the
-six things between the merge and a site that serves.** Six failed or empty
-deployments in a row, and **not one of them the same fault twice**: the
+*Last Updated: 2026-09-10 &mdash; **THE CUTOVER IS DONE, AND &sect;317.3&ndash;.10
+is what stood between the merge and a site that serves.** Ten failed or empty
+deployments, and **not one of them the same fault twice** &mdash; each was the
+next real step and the build got measurably further every time. The
 `.vercelignore` &sect;238 wrote for the frozen static site excluded `smp-app/`
 itself, so Vercel deleted the app and published an empty deployment marked
 Ready that answered 404 everywhere (&sect;317.3); **`public` is a CLIENT**
@@ -8710,20 +8712,44 @@ attached policies to a client's data next; a room of its own now, named once,
 registry instead of a `raya_trade` that never existed (&sect;317.4); the app's
 password refused by Neon in the control plane's words and now refused one step
 earlier in ours (&sect;317.5); the frozen `vercel.json` unreadable during a
-Vercel build &mdash; the file at the build root is Vercel's own resolved config
-&mdash; so the security headers are carried into the app and committed
-(&sect;317.6, .7); and the Framework Preset left at **Other** from the static
-days, which builds Next and then serves `public/` as files (&sect;317.8).
-**The shape they share is the finding**: everything was proved against a
-database and a build context that were not production's. Proved after on a
-rehearsal built to production's shape &mdash; door 49/0, state 91/0, shell
-60/0 against a real build, the nine spike proofs green with sixteen
-falsifications red, `check:room` 10/0 and `check:deploy` 5/0 each red when
-broken, 588/0, 136/0, `tsc` clean &mdash; and the preview served the door
-before `main` was touched. Two rules for the next person: **a `Redeploy`
-reuses what that deployment was built with, so a changed setting needs a new
-commit**, and **preview deployments answer 302 to anyone not signed in to
-Vercel**, so a preview is read in a browser, never with `curl`.*
+Vercel build &mdash; **the file at the build root is Vercel's own resolved
+config** &mdash; so the security headers are carried into the app and
+COMMITTED (&sect;317.6, .7); the Framework Preset left at **Other** from the
+static days, which builds Next and then serves `public/` as files, giving a
+clean build and a 404 on every address (&sect;317.8); and then, on the cutover
+push itself, **the carry COMPLETED and the build failed one line later** on
+the demo seed &mdash; the frozen renaming script sits in the repository's root
+`scripts/`, which was excluded (&sect;317.9), and then requires `pg` from
+where IT lives, which on Vercel is a folder nobody installed (&sect;317.10).
+**TWO SHAPES ARE THE FINDING.** &sect;317.3&ndash;.6: everything was proved
+against a database and a build context that were not production's.
+&sect;317.7, .9 and .10: **a Root Directory is a boundary a laptop does not
+have** &mdash; above it the file may be somebody else's file, may not have
+been uploaded, or may sit beside packages nobody installed. **AND THE CHECK
+WRITTEN FOR &sect;317.9 WAS GREEN OVER IT**, because its list of what the app
+reaches for was TYPED and typed short (&sect;53.5, in the file that quotes
+&sect;53.5); it reads every `../../` reach out of the app's own code now.
+**AND THE RUNBOOK TOLD ISLAM SOMETHING FALSE** &mdash; that a switch left on
+*"costs nothing but a refusal in every build log"* &mdash; when the refusal
+THREW and would have failed the next build; the code keeps the promise now,
+and only the two self-refusals are caught (&sect;104.8's family). Production
+serves the new stack: the door, `/platform`, `/raya-trade`, `/demo`, `/sw.js`
+(4.1KB, `push`, no `fetch` and no cache), the manifest and its three icons,
+**with the eight security headers on every one**. Raya Trade carried at
+**20:53, which is the data cut and is said rather than left to be
+discovered**. Proved on a rehearsal built to production's shape &mdash; door
+49/0, state 91/0, shell 60/0 against a real build, the nine spike proofs
+105/0 with sixteen falsifications red, `check:room` 10/0 and `check:deploy`
+5/0 each red when broken, 588/0, 136/0, `tsc` clean. **Three rules for the
+next person**: a `Redeploy` reuses what that deployment was built with, so a
+changed setting needs a new commit; preview deployments answer 302 to anyone
+not signed in to Vercel, so a preview is read in a browser and never with
+`curl`; and `/api/state` with no client named answers 404 **by design**
+(&sect;4.4: there is no default client), which is a thing to know before
+reading it as a fault. **STILL OPEN AND ISLAM'S**: the two switches off, the
+two presses of *Add a client*, and whether anything was entered on the frozen
+site after 20:53 &mdash; `scripts/migrate-raya.mjs` stays in the tree until
+that is answered, because it is the only thing that would close such a gap.*
 
 *Earlier the same day: **&sect;317: the worked example is not one
 of the clients.** Islam, of Forefront's own page: *"the demo should be a

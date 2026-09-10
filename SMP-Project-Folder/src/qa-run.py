@@ -47,6 +47,24 @@ if os.environ.get("SMP_BASE"):
 # The sign-in happens ONCE per browser context: a check that opens the file
 # twice is navigating, not signing in again, and doing it per goto would cost
 # a round trip on every navigation and lose whatever the check had set up.
+# A CHECK THAT STANDS UP ITS OWN SERVER IS NOT RE-POINTED (§316.1). Forty-odd
+# checks serve the built file themselves so they can answer /api/state with a
+# state the running app cannot be made to hold — a graph poisoned with a null,
+# a 500, a slow answer, a dataset that moves mid-run. Their subject is the
+# CLIENT judged against a controlled server, and `sync.js` is carried into the
+# app verbatim, so they exercise the same code either way; what the served app
+# cannot give them is the server half. Such a check says so in its own first
+# lines and SMP_BASE is stood down for it — never a list of names in this file,
+# which is a list somebody forgets to add to (§104.7).
+_OWN_SERVER = "qa-run: own-server"
+if os.environ.get("SMP_BASE"):
+    try:
+        with open(sys.argv[1] if len(sys.argv) > 1 else "qa.py") as _f:
+            if _OWN_SERVER in _f.read(4000):
+                print("(SMP_BASE stood down: this check serves its own app — %s)" % _OWN_SERVER)
+                os.environ.pop("SMP_BASE", None)
+    except OSError:
+        pass
 if os.environ.get("SMP_BASE"):
     import re as _re
     from playwright.sync_api import Page

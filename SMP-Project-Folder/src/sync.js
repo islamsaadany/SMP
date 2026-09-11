@@ -29,6 +29,10 @@ var SYNC = (function () {
      for a cold serverless function and a sleeping Neon branch, short enough
      that nobody is left looking at grey wondering whether it is broken. */
   var BOOT_FLOOR = 180, BOOT_GIVEUP = 8000;
+  /* True only in a contingency copy: the page is running on data baked
+     into the file rather than on the baked EXAMPLE, and the date it was
+     taken is what matters. */
+  var OFFLINE = false;
   function bootNow() { return Date.now(); }
   /* Takes the skeleton down. Idempotent, and the ONLY thing that does it —
      theme.js puts the class on and never removes it, so there is one place to
@@ -110,19 +114,24 @@ var SYNC = (function () {
      cannot be right until the save that created the person has landed. */
   var repaint = null;
 
-  /* Two datasets, one product.
+  /* ONE DATASET NOW (spec 042 §6.1, retiring §21 and §67).
 
-     DEMO is the full worked example baked into this file — Raya Trade with
-     every unit, capability, figure and person. LIVE is what the database
-     holds, which after a clean slate is the client's own and mostly empty.
+     The Demo data button switched this page between the database's content
+     and the worked example baked into the file. With a DEMO CLIENT on the
+     cards — its own schema, its own address, and editable — that button is a
+     second and weaker home for the same material: it cannot be added to,
+     which is the whole reason Islam asked for the Demo client.
 
-     The Demo button switches between them so the platform can be EXPLAINED
-     with a complete example without that example ever being mistaken for, or
-     written into, the real thing. Demo mode never saves (§B3: invented data
-     is labelled every time, and it must not leak into a client's tenant). */
-  var DEMO = null;
-  var LIVE = null;
-  var mode = "live";
+     THE BAKED DATASET ITSELF STAYS. Opened as a file with no server the
+     platform IS the example — that is where the offline handover file gets
+     its content — so the bake is data of last resort rather than a mode
+     anybody switches into, and nothing here has to tell the two apart.
+
+     What went with the button: `DEMO`, `LIVE`, `mode`, `isDemoMode()`,
+     `datasetFor`, `setMode`, `markMode`, the banner, `showDemoBlocked()` and
+     §67's Filled/Clear pair. `LIVE` held a copy of the client's own data to
+     restore on the way BACK from the demo, and with nowhere to come back
+     from it was a second copy of the graph kept in step with nothing. */
   /* `clone` is the platform's own, defined once beside the archive model. */
 
   function graph() {
@@ -272,7 +281,14 @@ var SYNC = (function () {
      erasing somebody else's work — that is in `api/state.js`, not here. */
   function bodyFor(state) {
     var who = actingAs();
-    var tail = who ? ',"viewAs":' + JSON.stringify(who) : "";
+    /* WHICH CLIENT THIS IS, ON EVERY BODY (spec 042). The server resolves the
+       schema from this name and never from the request's own idea of one, so
+       a body with no client is a body no client endpoint will answer. It goes
+       through `bodyFor` because that is the ONE place a state POST is built —
+       the flush on the way out uses it too, and two builders is how one of
+       them comes to forget (§53.5). */
+    var tail = (clientSlug() ? ',"client":' + JSON.stringify(clientSlug()) : "") +
+               (who ? ',"viewAs":' + JSON.stringify(who) : "");
     var base = null;
     if (lastSaved) { try { base = JSON.parse(lastSaved); } catch (e) { base = null; } }
     if (base && typeof SMPDiff !== "undefined" && SMPDiff.graphChanges) {
@@ -331,8 +347,7 @@ var SYNC = (function () {
      (the change is on screen and the only honest recovery is to throw it
      away). Failed says the status, because "500" sends somebody to the server
      and "could not reach" sends them to the network — §123's argument, one
-     endpoint out. Demo mode says the thing the standing banner says generally,
-     at the moment somebody changes something and expects it to stick.
+     endpoint out.
 
      NOT A NEW COMPONENT: the element, the styling and the clearing on success
      are all §32's, and this only stops two of the three ways past it being
@@ -365,12 +380,6 @@ var SYNC = (function () {
       "<span>Keep this tab open \u2014 it tries again by itself every few seconds, and " +
       "this bar clears the moment your change goes through. If it stays for more " +
       "than a minute, tell the Strategy Office.</span>");
-  }
-
-  function showDemoBlocked() {
-    notSaved("<span><strong>Not saved \u2014 this is demo data.</strong></span>" +
-      "<span>Nothing changed here is written anywhere. Leave demo data from the " +
-      "menu in the top bar to work on your own tenant.</span>");
   }
 
   /* ── PUTTING BACK ONLY WHAT WAS REFUSED (§184) ───────────────────
@@ -569,11 +578,6 @@ var SYNC = (function () {
         save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
       }, 0);
     };
-    /* The guard that matters: demo data must never reach the database. */
-    /* SAID ONLY FOR DEMO DATA. Opened from `file://` there is no server at
-       all and the prototype banner already says so; a second sentence per
-       change would be noise about something nobody expected to save. */
-    if (isDemoMode()) { showDemoBlocked(); return say("offline"); }
     if (!live) return say("offline");
     /* ── ASKED WHILE ONE IS ALREADY IN FLIGHT (§183) ────────────────────
        Islam: *"the reporting then saving to draft keep saying saving and
@@ -631,12 +635,12 @@ var SYNC = (function () {
          tried normally. */
       /* Signed out, or signed in on a password that still has to be changed:
          the door, not a banner. */
-      if (r.status === 401) { location.replace("/"); return; }
+      if (r.status === 401) { location.replace(doorUrl()); return; }
       if (r.status === 403) {
         refusedBody = now; refusedAs = actingAs();
         say("refused");
         return r.json().then(function (j) {
-          if (j && j.mustChange) { location.replace("/"); return; }
+          if (j && j.mustChange) { location.replace(doorUrl()); return; }
           refusedWhy = (j && j.refusals) || null;
           refusedRows = (j && j.refusedChanges) || null;
           refusedUndoable = !!(j && j.undoable);
@@ -696,12 +700,12 @@ var SYNC = (function () {
      always was. */
   var person = null;
   /* ── WHO MAY SEE THE CONTROLS THAT LEAVE YOUR OWN VIEW (§69.15) ────
-     The viewer switcher and Demo data are the SMO's, and Tarek — a contributor
-     with no role at all — was served both, with the switcher showing SOMEBODY
-     ELSE'S NAME as the person signed in.
+     The viewer switcher (and, until §313.8 retired it, Demo data) is the
+     SMO's, and Tarek — a contributor with no role at all — was served it,
+     with the switcher showing SOMEBODY ELSE'S NAME as the person signed in.
 
-     THE FAULT IS THE DIRECTION OF THE GATE, not the test. Both controls sit in
-     the markup and were CORRECTED afterwards: shown by default, hidden by a
+     THE FAULT IS THE DIRECTION OF THE GATE, not the test. The control sits in
+     the markup and was CORRECTED afterwards: shown by default, hidden by a
      step that runs later. Anything that stops that step — an exception above
      it, an early return, a person the register does not hold — leaves them
      standing, for everybody. A control that is dangerous when wrong must fail
@@ -724,6 +728,42 @@ var SYNC = (function () {
        not a reason to leave a blank page when it does — the same sentence the
        note below this one already makes. */
     if (!box || !sel) { paint(); return; }
+    /* ── THE WAY BACK TO THE CARDS (spec 042) ─────────────────────
+       Drawn only for somebody who HAS cards. The server says so — it is the
+       only side that knows — and a client's own person never sees it, because
+       for them there is nothing behind it (§32: a door to one place is not a
+       choice, and a door to none is a dead end). */
+    var back = document.getElementById("clientback");
+    if (back && person && person.cards) {
+      var nameEl = document.getElementById("clientbackname");
+      /* textContent, never innerHTML: a client's name is typed by a person. */
+      if (nameEl) nameEl.textContent = person.clientName || clientSlug();
+      back.hidden = false;
+      back.title = "Back to your clients";
+      /* AND THE ORG NAME BESIDE IT GOES. Both say "Raya Trade" — one as a
+         label, one as a door — and two copies of a fact on one line is what
+         §120 took off the register's header. The control is the one that also
+         does something, so it is the one that stays. Where there is no way
+         back (a client's own person) the label is untouched. */
+      var org = document.getElementById("orgname");
+      if (org) org.hidden = true;
+      /* STRAIGHT TO THE PLATFORM, NOT THROUGH THE DOOR (§313.23). It went to
+         "/", and the door hands somebody over to what they can OPEN — so on a
+         deployment where this person has exactly one client, the way back to
+         the cards walked out of the client and straight back into it. A loop,
+         and the only route to Forefront's own pages, so the platform's super
+         user could not reach Consultants or Who sees what at all.
+
+         §32 is not in tension with this: "one destination is not a question"
+         is about where a SIGN-IN lands, and this control is somebody asking
+         for the list on purpose. The two answers differ because the questions
+         do. */
+      back.addEventListener("click", function () { location.assign("/platform"); });
+    }
+    /* DRAWN BEFORE ANYTHING CAN RETURN. The branch below stops the whole
+       chrome when the signed-in person is not on this client's register — and
+       that is exactly the screen somebody most needs a way off (§61). */
+
     var known = PEOPLE.some(function (p) { return p.key === person.key; });
     /* §206: VIEWER IS SET EITHER WAY, AND NEVER LEFT AT ITS DEFAULT.
        `var VIEWER = "smo"` is the file:// demo's starting point and it is a
@@ -804,96 +844,55 @@ var SYNC = (function () {
       fetch("/api/auth", { method: "POST",
         headers: { "Content-Type": "application/json" },
         body: '{"action":"logout"}'
-      }).finally(function () { location.replace("/"); });
+      }).finally(function () { location.replace(doorUrl()); });
     });
-    /* Far right of the first line, beside Demo data — the two controls that
-       leave the product sit together, away from the one that changes what you
-       are looking at. Falls back to the viewer box if the group is missing. */
+    /* Far right of the first line, away from the one control that changes
+       what you are looking at. Falls back to the viewer box if the group is
+       missing. */
     (document.getElementById("topacts") || box).appendChild(out);
     paint();
   }
 
-  /* Switching datasets. Leaving live remembers where the client's data was,
-     so returning restores it exactly rather than the snapshot taken at boot —
-     otherwise an edit made before opening the demo would vanish from the
-     screen. Anything typed while in demo is discarded, by design. */
-  /* THREE DATASETS, NOT TWO (§67). Islam: "Filled Project & Clear Project …
-     the new clear project is a project with the same setup but with no
-     uploaded data at all." So "demo" became two modes, and everything that
-     asked `mode === "demo"` has to ask `isDemoMode()` instead — the save guard
-     above most of all, because a Clear Project that could be saved would write
-     an EMPTY tenant over a real one, which is worse than writing an invented
-     one over it.
+  /* ── WHICH CLIENT THIS PAGE IS (spec 042) ────────────────────────
+     Read from the path it was SERVED at — /raya-trade, /rhi, /demo — and
+     never stored, so two tabs on two clients cannot cross: each one sends
+     the client it is. The server takes this as a name to look up and never
+     as a schema (§36.4), and answers a client it does not know exactly as it
+     answers one this person may not open.
 
-     The cleared graph is derived on switch rather than baked at boot: it costs
-     a clone of a graph the browser already holds, and a second stored copy is
-     a second thing to keep in step. */
-  function isDemoMode() { return mode === "demo" || mode === "demoClear"; }
-  function datasetFor(m) {
-    if (m === "demo") return clone(DEMO);
-    if (m === "demoClear") return clearedGraph(DEMO);
-    return clone(LIVE);
+     Empty from file://, where there is no server to ask. */
+  function clientSlug() {
+    if (location.protocol === "file:") return "";
+    var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,47})/);
+    return m ? m[1] : "";
   }
-  function setMode(next, paint) {
-    if (!DEMO || next === mode) return;
-    if (mode === "live") LIVE = clone(graph());
-    mode = next;
-    hydrate(datasetFor(mode));
-    markMode();
-    paint();
-    if (mode === "live") lastSaved = serialize();
+  function withClient(url) {
+    var c = clientSlug();
+    if (!c) return url;
+    return url + (url.indexOf("?") > -1 ? "&" : "?") + "client=" + encodeURIComponent(c);
   }
-
-  /* Demo data is labelled the whole time it is on screen. The banner is the
-     platform's own — it carries the invented-data notice, which is true of the
-     example and NOT true of the client's own tenant, so it shows in demo mode
-     and is hidden in live. */
-  function markMode() {
-    var btn = document.getElementById("demobtn");
-    if (btn) btn.textContent = mode === "demoClear" ? "Exit clear project" : "Exit demo";
-    /* One or the other, never both and never neither — and only once boot()
-       has found a live dataset, which is what `live` says.
-
-       AND ONLY FOR THE SMO (Islam, 2026-08-24: "the demo data button shouldn't
-       appear to anyone but the SMO"). It is not decoration: pressing it
-       replaces every page with invented content (§21), and the person most
-       likely to press it by accident is the one who has never seen it before.
-       Asked through isSMOSession() so the switcher and this cannot disagree
-       about who the SMO is.
-
-       Served from a FILE there is no session and no `live`, so both are hidden
-       by the first clause anyway — the whole product is the example there and
-       there is nothing to switch to. */
-    var menu = document.getElementById("demomenu");
-    if (menu) menu.hidden = !live || !isSMOSession() || isDemoMode();
-    if (btn) btn.hidden = !live || !isSMOSession() || !isDemoMode();
-    var ban = document.getElementById("banner");
-    if (ban) {
-      ban.hidden = !isDemoMode();
-      /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
-         is saved.
-
-         THE FILLED EXAMPLE'S SECOND LINE IS GONE (§162, Islam's call). It read
-         "Only Mobile's plan is real — every other unit, every capability's
-         content and every reported figure is invented", and it was §21's
-         labelling of invented content. The cost is stated rather than hidden:
-         nothing on this screen now says which parts were made up, so anybody
-         shown the worked example has to be told. The first line still says
-         it is the demo and that nothing is saved, which is what stops somebody
-         mistaking it for their own tenant — the part that could do damage. */
-      if (mode === "demo") {
-        ban.innerHTML =
-          '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
-          'example, for explaining how the platform works.</span>';
-      } else if (mode === "demoClear") {
-        ban.innerHTML =
-          '<span><strong>Clear project \u00b7 nothing here is saved.</strong> The same ' +
-          'organisation with nothing filled in \u2014 what a new deployment looks like on ' +
-          'day one.</span>' +
-          '<span>Every plan, figure and reported number is gone; the companies, business ' +
-          'units, supporting functions and settings stay.</span>';
-      }
-    }
+  /* ── A SIGNED-OUT PERSON IS SENT TO THEIR OWN CLIENT'S DOOR (§313.36) ──
+     Every client has a door of its own at /<client>/sign-in, wearing that
+     client's mark; the root is Forefront's door and shows no client at all.
+     So the six places that used to send somebody to "/" — signed out, a
+     password still to be chosen, a sign-out — go to the door of the client
+     this page was served at, which is the one they were trying to open and
+     the one they will land back in. Nobody's rights move: the door still
+     asks the server where a sign-in lands, and the server still refuses a
+     client this person may not open. With no client in the address (file://,
+     or Forefront's own shell) the root is the door, exactly as before. ONE
+     function, or a seventh redirect written later goes back to the root and
+     a Raya person is greeted by Forefront (§53.5). */
+  function doorUrl() {
+    var c = clientSlug();
+    return c ? "/" + c + "/sign-in" : "/";
+  }
+  /* Posted bodies carry it as a field rather than a query, because that is
+     what the endpoints read first and because a body survives a redirect. */
+  function withClientBody(obj) {
+    var c = clientSlug();
+    if (c) obj.client = c;
+    return obj;
   }
 
   /* THE TRAILING HALF OF THE DEBOUNCE (§170).
@@ -920,7 +919,7 @@ var SYNC = (function () {
   function authPost(body, done) {
     fetch("/api/auth", { method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(withClientBody(body))
     }).then(function (r) { return r.json(); })
       .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
       .catch(function (e) { done(String(e.message || e), null); });
@@ -928,14 +927,25 @@ var SYNC = (function () {
 
   /* One shape for every /api/blob call, and ONE guard in front of all of them
      (§97.9's rule, learned when `qa.py` walked the platform over file://):
-     opened from a file there is no server to ask, and demo data writes nothing
-     at all (§67), so a clip must not be able to reach the store from either.
-     Refused HERE rather than at each call site, because a call site added
-     later would be the one that forgot. */
-  function blobLive() { return enabled && !isDemoMode(); }
+     opened from a file there is no server to ask, so a clip must not be able
+     to reach the store from there. Refused HERE rather than at each call site,
+     because a call site added later would be the one that forgot.
+
+     It used to read `enabled && !isDemoMode()`, and §313.8 deleted demo mode
+     with its function — so over HTTP every blob call threw a ReferenceError
+     inside this guard, invisible to a sweep that walks the platform over
+     file:// (where `enabled` is false and the second half is never reached).
+     Found by the pre-merge review of 2026-09-08 (§313.37), not by a check.
+
+     THE SLUG RIDES THE QUERY, never the body: api/blob.js reads its client off
+     the address BEFORE it reads the body (the piece upload posts raw bytes and
+     the play address is a GET, so the query is the one place all of its calls
+     share), and a slug in the body was read by nobody — every store action
+     from a client other than the default landed on the default's schema. */
+  function blobLive() { return enabled; }
   function blobPost(body, done) {
     if (!blobLive()) return done("no server here", null);
-    fetch("/api/blob", { method: "POST",
+    fetch(withClient("/api/blob"), { method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
     }).then(function (r) { return r.json(); })
@@ -946,7 +956,7 @@ var SYNC = (function () {
   function mailPost(body, done) {
     fetch("/api/mail", { method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(withClientBody(body))
     }).then(function (r) { return r.json(); })
       .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
       .catch(function (e) { done(String(e.message || e), null); });
@@ -1003,7 +1013,7 @@ var SYNC = (function () {
   }
   function flushLeave() {
     commitFocus();
-    if (!live || isDemoMode() || saving) return;
+    if (!live || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved) return;
@@ -1035,27 +1045,24 @@ var SYNC = (function () {
      simulated session sees is what the server holds at that moment.
 
      REUSES THE BOOT'S OWN `hydrate` — a second way of applying a fetched
-     graph is §53.5's drift. `LIVE` is refreshed too, or leaving demo data
-     after a rebase would put the boot-time snapshot back on screen.
+     graph is §53.5's drift.
 
-     ONLY WHERE THERE IS A SERVER AND ONLY IN LIVE MODE: `file://` has
-     nothing to fetch and demo data is deliberately not the server's. A
+     ONLY WHERE THERE IS A SERVER: `file://` has nothing to fetch. A
      fetch that fails leaves the tab exactly as it was and answers false —
      the switch still happens, judged correctly (§185), on the old
      baseline: the honest fallback, never a blocked way home (§209). */
   function rebase(done) {
     done = done || function () {};
-    if (!live || isDemoMode() || saving) return done(false);
-    fetch("/api/state", { cache: "no-store" })
+    if (!live || saving) return done(false);
+    fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
-        if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+        if (r.status === 401 || r.status === 403) { location.replace(doorUrl()); throw new Error("sign in"); }
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
       .then(function (data) {
         if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
         hydrate(data.state);
-        LIVE = clone(data.state);
         lastSaved = serialize();
         done(true);
       })
@@ -1064,18 +1071,23 @@ var SYNC = (function () {
 
   return {
     isLive: function () { return live; },
+    /* An address with this client's name on it (spec 042, §313.35). The play
+       address for a clip is built in slides.js, outside this module, and a
+       GET has no body to carry the slug in — so the one helper that knows the
+       slug is exported rather than copied (§53.5). */
+    withClient: function (url) { return withClient(url); },
+    /* THE GRAPH, FOR THE ONE THING THAT WRITES A FILE OUT OF IT (spec 030).
+       Exposed rather than rebuilt: a contingency copy that carried a second
+       idea of what the state is would be a backup of something the platform
+       never held. */
+    graph: function () { return graph(); },
+    isOffline: function () { return OFFLINE; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
-    isDemo: function () { return isDemoMode(); },
-    /* Which of the two, for anything that needs to tell them apart. */
-    demoMode: function () { return isDemoMode() ? mode : null; },
-    /* `repaint` is the paint function boot() kept — the same one every other
-       caller in here uses, so a menu item does not have to be handed one. */
-    setMode: function (next) { setMode(next, repaint || function(){}); },
     person: function () { return person; },
     /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
        the viewer switcher too, and the note above isSMOSession() is explicit
@@ -1183,9 +1195,9 @@ var SYNC = (function () {
                             uploadId: o.uploadId, parts: parts }, done);
         }
         var slice = o.file.slice((n - 1) * PIECE, n * PIECE);
-        fetch("/api/blob?action=part&path=" + encodeURIComponent(o.path) +
+        fetch(withClient("/api/blob?action=part&path=" + encodeURIComponent(o.path) +
               "&key=" + encodeURIComponent(o.key) +
-              "&uploadId=" + encodeURIComponent(o.uploadId) + "&n=" + n,
+              "&uploadId=" + encodeURIComponent(o.uploadId) + "&n=" + n),
               { method: "POST", headers: { "Content-Type": "application/octet-stream" },
                 body: slice })
           .then(function (r) { return r.json(); })
@@ -1247,10 +1259,26 @@ var SYNC = (function () {
          No fetch, so nothing arrives late and there is nothing for a
          skeleton to cover. theme.js does not stamp `booting` here either;
          bootLand() is called anyway so the two can never disagree. */
-      if (!enabled) { bootLand(); paint(); return; }
-      /* Taken before hydration, while the globals still hold the baked-in
-         example — after hydration it is gone from memory. */
-      DEMO = clone(graph());
+      /* ── AN OFFLINE COPY BRINGS ITS OWN DATA (spec 030) ──────────────
+         A contingency copy is this same file with the tenant's graph parked
+         in a `<script type="application/json">` block, and it is opened from
+         a laptop with nothing running anywhere — so this is the one place it
+         can be read. It sits ABOVE every other script in the file, or it is
+         not in the document yet when this runs (measured: the element was
+         simply absent, and the platform booted happily on the baked example
+         — a backup that silently shows Raya Trade instead of the client).
+
+         The block is NOT executable and is not hashed by the build's script
+         policy, which is why a copy made after the build still runs. Wrapped,
+         because a corrupted block must land on the baked data rather than a
+         page that will not paint. */
+      if (!enabled) {
+        try {
+          var isl = document.getElementById("smp-offline");
+          if (isl) { hydrate(JSON.parse(isl.textContent)); OFFLINE = true; }
+        } catch (e) { try { console.warn("[offline] " + e.message); } catch (e2) {} }
+        bootLand(); paint(); return;
+      }
       /* ── THE PAINT THAT USED TO BE HERE (§94.10) ─────────────────
          `paint()` ran first, unconditionally, and that single line was the
          whole of the fault: it drew the page from the BAKED file — the wrong
@@ -1317,12 +1345,45 @@ var SYNC = (function () {
                      (BOOT_GIVEUP / 1000) + "s — showing the baked-in data");
         land();
       }, BOOT_GIVEUP);
-      fetch("/api/state", { cache: "no-store" })
+      fetch(withClient("/api/state"), { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. A TEMPORARY
              password now gets the same answer — the server refuses the state
              until a real one is chosen, and the gate is where that happens. */
-          if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+          if (r.status === 401 || r.status === 403) { location.replace(doorUrl()); throw new Error("sign in"); }
+          /* ── AN ADDRESS THAT NAMES NO CLIENT (§313.19) ──────────────
+             Since a client's path became a PATTERN rather than four named
+             ones, any single-segment address reaches this file — so a typo,
+             or a client that has been retired, now lands here instead of
+             404ing at the edge. And the catch below falls back to the BAKED
+             worked example, which would put Raya Trade's units and figures on
+             screen under somebody else's address: §94.10's fault, made
+             reachable by the fix for §313.19.
+
+             The platform's own cards are where somebody with a bad client
+             address should be, and it is the one page that can tell them
+             which clients they actually have. */
+          if (r.status === 404) {
+            /* ── AND A REFUSAL CARRIES ITS REASON WITH IT (§313.32) ───
+               Two different things answer 404 here and only one of them has
+               anything to say: a slug naming no client (nothing to explain —
+               the cards ARE the explanation), and an account this client's
+               register cannot place, which is answered on that client's
+               configuration and is invisible from the cards.
+
+               Landing on /platform with no sentence would send somebody
+               straight back to the card they just pressed, which is §61's
+               dead end wearing a redirect. The sentence is carried in
+               sessionStorage — the shortest thing that survives a navigation
+               — read once by the platform's own page and cleared there. */
+            return r.json().catch(function () { return null; }).then(function (j) {
+              try {
+                if (j && j.error) sessionStorage.setItem("smp.client.why", j.error);
+              } catch (e) { /* a browser refusing storage still gets the cards */ }
+              location.replace("/platform");
+              throw new Error("sign in");
+            });
+          }
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
         })
@@ -1332,9 +1393,8 @@ var SYNC = (function () {
              paint a page the browser is already navigating away from, and
              the skeleton stays up until it does — which is right: the gate
              is where this person is going. */
-          if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace("/"); return; }
+          if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace(doorUrl()); return; }
           hydrate(data.state);
-          LIVE = clone(data.state);
           live = true;
           person = data.person || null;
           land(function () {
@@ -1359,28 +1419,6 @@ var SYNC = (function () {
           });
           lastSaved = serialize();
           setInterval(save, 5000);
-
-          /* The Demo controls exist only where there is a live dataset to
-             tell the example apart from. Opened as a file the whole product IS
-             the example, so they would mean nothing.
-
-             Wired ONCE, here, and never repainted — they live in the chrome
-             rather than in the page, so paint() does not replace them and
-             markMode() only has to show and hide the right one (§67). */
-          var menu = document.getElementById("demomenu");
-          if (menu) {
-            menu.querySelectorAll("[data-demomode]").forEach(function (b) {
-              b.addEventListener("click", function () {
-                menu.open = false;
-                setMode(this.dataset.demomode, paint);
-              });
-            });
-          }
-          var btn = document.getElementById("demobtn");
-          if (btn) {
-            btn.addEventListener("click", function () { setMode("live", paint); });
-          }
-          markMode();
         })
         .catch(function (e) {
           /* "sign in" is the 401/403 above, which has already sent the

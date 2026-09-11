@@ -24,13 +24,21 @@
    there. The reversal is recorded in spec 017's decisions table rather than
    quietly overwritten (Constitution II).
 
-   ── IT RUNS ON DEMO DATA, AND THAT IS WHAT MAKES IT SAFE ──────────────────
-   A fresh tenant is EMPTY: a spotlight on an empty table teaches nothing. So
-   the tour switches to the worked example for its duration and puts the
-   platform back exactly as it found it. It needs no save guard of its own —
-   demo mode already refuses every write (§21, §67) — and the demo BUTTON being
-   the SMO's (§69.15) is about that control, not about the mode: this is its
-   own door into the same read-only view.
+   ── IT RUNS ON THE PERSON'S OWN PLAN (spec 042 §6.2) ──────────────────────
+   It used to switch the platform to the baked worked example for its duration
+   and put it back afterwards, which is what made it safe: demo mode refused
+   every write (§21, §67). That switch went with the Demo data button, and the
+   safety is now structural rather than borrowed — the tour NARRATES and
+   presses only the platform's own navigation (§107, reversing its first
+   interactive build), so there is nothing for it to write and nothing to put
+   back.
+
+   WHAT REPLACES THE WORKED EXAMPLE'S FULLNESS: `SMPRules.tourReady()`. A fresh
+   tenant is EMPTY and a spotlight on an empty table teaches nothing, so the
+   tour is not OFFERED until the person's own place carries at least one pillar
+   or capability and one key objective — the replay button is absent where no
+   story fits and explained where the plan is bare (§61: a control that opens
+   nothing).
 
    ── AND IT IS NOT DRAWN WHERE IT WOULD BE A LIE ───────────────────────────
    Never on a projector (CSS, off the class present.js already sets — no second
@@ -403,10 +411,11 @@ var TOUR = (function(){
 
   /* ── RUNTIME STATE ────────────────────────────────────────────────────
      Private. `at` is -1 when nothing is running, which is what every guard
-     asks. `prevMode` is the platform's mode before Start and is what every
-     exit path puts back — there is no other way out of demo. */
+     asks. `prevMode` was here until spec 042: it held the platform's dataset
+     before Start so every exit could put it back, and with the tour walking
+     the person's own plan there is nothing to put back. */
   var story = null, steps = [], at = -1, asking = false,
-      prevMode = null, own = null, navigating = false, dock = null,
+      own = null, navigating = false, dock = null,
       docked = false;
 
   function el(id){ return document.getElementById(id); }
@@ -657,17 +666,15 @@ var TOUR = (function(){
     if (card) card.focus && card.focus();
   }
 
-  /* EVERY EXIT PUTS THE WORLD BACK. Finish, both answers to the ×, and the
-     Escape that leads to them all come through here — one door, because a
-     tour that left somebody in demo mode would leave them looking at a
-     worked example wearing their own tenant's name. */
+  /* EVERY EXIT COMES THROUGH HERE — Finish, both answers to the ×, and the
+     Escape that leads to them. It used to have a second job, putting the
+     platform back into the client's own data after the tour had switched it
+     to the baked worked example; there is nothing to put back now, because
+     the tour walks the person's OWN plan (spec 042 §6.2). */
   function end(){
     at = -1; asking = false; docked = false;
     if (dock) dock.hidden = true;
-    if (prevMode && window.SYNC && SYNC.setMode) {
-      try { SYNC.setMode(prevMode); } catch(e){}
-    }
-    prevMode = null; story = null; steps = [];
+    story = null; steps = [];
   }
 
   function start(key){
@@ -676,40 +683,21 @@ var TOUR = (function(){
     if (!dock) return;
     story = key;
 
-    /* ── THE ORDER OF THESE FOUR LINES IS THE WHOLE FIX ───────────────
-       Islam, replaying from the Knowledge base: "make it take me by
-       default to the main page rather than in the knowledge base so the
-       tour can actually happen."
+    /* ── THE TOUR WALKS THE PERSON'S OWN PLAN (spec 042 §6.2) ────────
+       It used to switch the platform to the baked worked example first, and
+       §107.14's fix was about the ORDER of that switch — swap the dataset,
+       THEN read who and where, because `setMode("demo")` replaces PEOPLE,
+       UNITS and the whole register, so a key from the client's own tenant was
+       being looked up in the demo's navigation.
 
-       TWO FAULTS, ONE ROOT — the tour used to decide WHERE it was touring
-       before the world it would tour had arrived.
-
-       1. The mode was swapped AFTER `own` was resolved. `setMode("demo")`
-          replaces PEOPLE, UNITS and the whole register, so `own` was a key
-          from the CLIENT'S OWN tenant being looked up in the DEMO tenant's
-          navigation. On this deployment the two happen to match, because
-          the client IS the worked example — on any real client they share
-          no keys at all, `destBtn()` would find nothing, and the tour would
-          light nothing while cheerfully reporting nine steps. Invisible to
-          a file:// check, where there is no live dataset to swap away from
-          (§94.11's trap, exactly).
-
-       2. Nothing moved the platform off the page you replayed FROM. The
-          welcome card was drawn over Setup › Knowledge base, and only the
-          first Next left it — so the tour opened by explaining "this row is
-          the business" over a page that has no business row in view.
-
-       So: switch first, then read who and where from the world that is now
-       on screen, then CHECK that place is actually reachable, and only then
-       walk — the welcome step carries the same destination as step one, so
-       the platform is on the main page before the first card is read. */
-    prevMode = (window.SYNC && SYNC.demoMode) ? (SYNC.demoMode() || "live") : null;
-    if (prevMode && prevMode !== "demo" && SYNC.setMode) {
-      try { SYNC.setMode("demo"); } catch(e){}
-    }
+       The switch is gone with the Demo-data button, so that ordering trap goes
+       with it — and the half of §107.14 that was never about the demo STAYS:
+       the welcome step carries the same destination as step one, so the
+       platform is on the main page before the first card is read, rather
+       than drawing "this row is the business" over the Knowledge base you
+       replayed from. */
     /* `viewer()` is the platform's own answer to "who is this", and it
-       RESOLVES rather than returning a maybe — including after the swap
-       above has just moved the register under us. */
+       RESOLVES rather than returning a maybe. */
     own = ownPlace(viewer()) || firstDest();
     /* AND IT MUST BE SOMEWHERE THIS NAVIGATION CAN GO. A place that is not
        on the row is a place nothing can press, and a tour pressing nothing
@@ -737,12 +725,26 @@ var TOUR = (function(){
 
      Six conditions, and every one of them is a reason somebody should not be
      interrupted. It declines in silence: declining is the common case. */
+  /* IS THERE ANYTHING TO TOUR (spec 042 §6.2). Asked of the place the story
+     would be told on, through the shared rule — never a second reading of
+     "does this client have a plan" (constitution IX). A tour of an empty
+     screen teaches nothing, and it is worse than that: every step lights a
+     selector, so on a blank plan the spotlight has nothing to sit on and the
+     dock covers the page while pointing at nothing (§61). */
+  function ready(person){
+    var at = ownPlace(person) || firstDest();
+    if (!at) return false;
+    if (typeof SMPRules === "undefined" || !SMPRules.tourReady) return true;
+    try { return SMPRules.tourReady(world(), at); } catch(e){ return false; }
+  }
+
   function offer(person){
     if (!person) return;                                   /* no session: no "first sign-in" */
     if (location.protocol === "file:") return;             /* nothing to sign into */
     if (document.body && document.body.classList.contains("presenting")) return;
     var key = storyFor(person);
     if (!key) return;                                      /* no story fits their roles */
+    if (!ready(person)) return;                            /* nothing to tour yet */
     if (seen(key) || skippedThisSession()) return;
     start(key);
   }
@@ -758,6 +760,9 @@ var TOUR = (function(){
   return {
     onPaint: onPaint,
     offer: offer,
+    /* For the Knowledge base's replay button, which must say WHY rather
+       than starting something that lights nothing (§61). */
+    ready: ready,
     start: start,
     storyFor: storyFor,
     /* Read-only, for checks/tour.py. A check that had to read the card's

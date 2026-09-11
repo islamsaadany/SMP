@@ -1,5 +1,12 @@
 """A REORDER COMMIT ACCOUNTS FOR EVERY ROW EXACTLY ONCE (§118).
 
+qa-run: own-server — §4 stands up its own /raya-trade answering /api/state with
+a graph POISONED with a null, which is the whole subject: the hydration heal.
+The running app cannot be made to hold that state and must not be, so SMP_BASE
+is stood down here and the check keeps its own server on both stacks. What it
+exercises — sync.js's fnPruneNulls at the hydration door — is carried into the
+app verbatim, so the code under test is the same code either way.
+
 Islam: "the CF tab is not showing anything while it was showing it a minute
 ago." The tab was fine; the PAGE could no longer be drawn. Reordering a
 measure or tactic row with the pen on counted the "+ Add" row — a <tr> in the

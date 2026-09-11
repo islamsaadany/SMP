@@ -78,7 +78,22 @@ MEASURE = r"""() => {
        text node returns ONE RECT PER LINE BOX it occupies — the direct
        measurement of the thing being asserted, and it cannot be confused by
        anything around it (§50.6, caught inside an hour this time). */
+    /* THE HISTORY TABLE WRAPS ON PURPOSE (§262.2). Islam: "date and time
+       needs to wrap as well" — §88's clip is the REGISTER's answer to a row
+       that must stay one line, and that page exists to SHOW values, so a cell
+       takes the height it needs and a word longer than its column breaks
+       rather than being cut. It is named here rather than left out of the
+       sweep, because everything else this file measures still applies to it:
+       the box it has to fit in is asserted above, before this line.
+
+       IT HAD NEVER BEEN MEASURED. Over `file://` a tenant has no history at
+       all, so the table draws no rows and the sweep walked past it; served
+       from a database it has some, and §88's rule met a table §262.2 had
+       already exempted from it (§51.11, with the CHECK stale). */
+    const wraps = t.classList.contains('hist');
+
     rows.forEach((r, ri) => {
+      if (wraps) return;
       /* A BAND IS A HEADING, NOT A DATA ROW (§105.2). §88's rule exists so a
          row's height cannot depend on how long somebody's email is — that is
          about CELLS. The cycle board's "Supporting functions" band spans the

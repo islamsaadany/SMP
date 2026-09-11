@@ -486,7 +486,22 @@ function bApply(kind, ctx, d){
   }
   if (kind === "capko") {
     var c = capById(ctx.capId); if (!c) return false;
-    c.keyObjectives.push({ name:v("name"), dir:d.dir || "≥", target:v("target"),
+    /* §316: A ROW WITH NO ID IS NOBODY'S TO CHANGE (§191). This branch pushed
+       a bare object, so the row rendered perfectly, scored, reported — and
+       could not be WRITTEN: §241's row-addressed writer refuses the whole save
+       by name ("cap_key_objectives - a row has no id"), measured. The unit
+       branch above numbers its plan through renumberUnit() and this one had
+       nothing, which is why the check one assertion up asks a unit's objective
+       for its id and never asked a capability's (§94.2).
+
+       MINTED FROM THE MAXIMUM, NEVER RENUMBERED (§96.2): renumberCapability()
+       is positional and rewrites every PROJECT id in the capability too, so on
+       a capability whose projects were minted max-based after a removal it
+       would silently re-address rows figures and snapshots are keyed on
+       (§48). mintRowId is what addProject/addMeasure already use, and it
+       touches only the row being added. */
+    c.keyObjectives.push({ id:mintRowId(c.keyObjectives, c.id + "-KO"),
+      name:v("name"), dir:d.dir || "≥", target:v("target"),
       compile:d.compile || "Latest",
       weight:v("weight") !== "" && isFinite(+v("weight")) ? +v("weight") : null,
       actual:"", progress:null });

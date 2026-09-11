@@ -43,7 +43,7 @@ def ck(name, ok, extra=""):
 def open_setup(pg, who="smo"):
     pg.select_option("#asWho", who)
     pg.wait_for_timeout(300)
-    pg.query_selector(".navmenu-btn").click()
+    pg.query_selector('[data-md="setup"]').click()
     pg.wait_for_timeout(500)
 
 
@@ -113,18 +113,34 @@ with sync_playwright() as p:
        pg.eval_on_selector(".ovcyc-go", "e=>e.dataset.setupgo") == "cycle")
 
     print("\n── 3 · with the demo as shipped, it says so rather than showing nothing ──")
-    ck("no attention rows on the clean tenant",
-       pg.eval_on_selector_all(".ovrow", "e=>e.length") == 0)
-    ck("and the page SAYS nothing is waiting",
-       pg.eval_on_selector_all(".ovquiet", "e=>e.length") == 1)
-    # A NULL IS NOT A ZERO (§93, §108.10). Over file:// three sources cannot be
-    # asked; the row must be gone, and no "0 ..." may be printed in its place.
-    ck("an unasked count draws no row and no zero",
-       pg.evaluate("""()=>{
-         const q=document.querySelector('.ovquiet');
-         return noPasswordCount()===null && saidWhereCount()===null && !!q
-                && !/\\b0 /.test(document.querySelector('.ovlist')?
-                                 document.querySelector('.ovlist').textContent : '');}"""))
+    # A NULL IS NOT A ZERO (§93, §108.10), AND IT IS NOT A FACT ABOUT THE
+    # PROTOCOL EITHER (spec 043). Over `file://` three of these sources cannot
+    # be asked at all, so the shipped demo has nothing waiting and the page
+    # must say so; served, the password state IS asked and answers honestly —
+    # a dev tenant mints four logins, so thirty people on the register have
+    # never been issued one, which is a real row and the point of the row.
+    # The RULE is what is asserted on both stacks (§218, §316.4's own shape):
+    # a source that could not be asked draws no row and no zero; one that was
+    # asked draws a row that agrees with it.
+    clean = pg.evaluate("""()=>{
+      const q = document.querySelector('.ovquiet');
+      const list = document.querySelector('.ovlist');
+      return { pw: noPasswordCount(), said: saidWhereCount(),
+               rows: [...document.querySelectorAll('.ovrow')]
+                       .map(x => ({ k: x.dataset.setupgo, t: x.textContent.trim() })),
+               quiet: !!q,
+               zero: /\\b0 /.test(list ? list.textContent : "") };}""")
+    asked = [c for c in (clean["pw"], clean["said"]) if c not in (None, 0)]
+    if not asked:
+        ck("no attention rows on the clean tenant", len(clean["rows"]) == 0, clean["rows"])
+        ck("and the page SAYS nothing is waiting", clean["quiet"], clean)
+    else:
+        ck("the only rows are the ones a source actually answered",
+           len(clean["rows"]) == len(asked), clean["rows"])
+        ck("...and the count on the row is that source's own",
+           all(str(n) in " ".join(r["t"] for r in clean["rows"]) for n in asked), clean)
+        ck("...so the page does not also say nothing is waiting", not clean["quiet"], clean)
+    ck("an unasked count draws no row and no zero", not clean["zero"], clean)
 
     print("\n── 4 · seed the faults: every row appears, and agrees with its source ──")
     # MADE, NOT WAITED FOR. Two units lose their custodian and one open claim is
@@ -139,7 +155,13 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     rows = pg.eval_on_selector_all(".ovrow",
                                    "e=>e.map(x=>({k:x.dataset.setupgo,t:x.textContent.trim()}))")
-    ck("both seeded rows are drawn", len(rows) == 2, [r["t"] for r in rows])
+    # THE TWO SEEDED ROWS, BESIDE WHATEVER WAS ALREADY WAITING. Asserting the
+    # LIST's length made the check's subject the whole page rather than the two
+    # rows it seeds, which is only the same thing on a stack where nothing else
+    # can answer (§113.8).
+    ck("both seeded rows are drawn",
+       len([r for r in rows if r["k"] == "cycle"]) == 1 and
+       len(rows) == 2 + len(asked), [r["t"] for r in rows])
     src2 = pg.evaluate("()=>({cust:unitsWithoutCustodian().length, claims:openClaimsList().length})")
     txt = " | ".join(r["t"] for r in rows)
     ck("the custodian row agrees with unitsWithoutCustodian()",
@@ -149,7 +171,7 @@ with sync_playwright() as p:
     ck("the quiet panel is gone while something waits",
        pg.eval_on_selector_all(".ovquiet", "e=>e.length") == 0)
     ck("each row goes to the page that FIXES it",
-       sorted(r["k"] for r in rows) == ["cycle", "people"],
+       sorted(set(r["k"] for r in rows)) == ["cycle", "people"],
        sorted(r["k"] for r in rows))
     # The destination's name comes off the rail's own list, so a rename follows.
     ck("the row names its destination as the rail names it",
@@ -160,10 +182,26 @@ with sync_playwright() as p:
     # be its own arithmetic: it is the Overview's own rows summed by
     # destination, so a rail badge can never disagree with the page it points
     # at — which is the one place nobody would ever catch it.
-    pills = pg.eval_on_selector_all(".setuprail .ritem",
-        "e=>e.map(x=>({k:x.dataset.setupgo,"
-        " n:(x.querySelector('.riwait')||{}).textContent||null}))")
-    byp = pg.evaluate("attentionByPage()")
+    # READ IN ONE BREATH, because §93 DROPS the password cache on every save
+    # and the next paint asks again: two evaluates either side of that gap
+    # compare a pill drawn before it with a map computed after it, and report a
+    # product that agrees with itself as a product that does not.
+    # AND THE PILL IS READ FROM A FRESH PAINT. The rail's number is
+    # `attentionByPage()` computed AT PAINT TIME (shell.html's `ATT`), and §93
+    # drops the password cache on every save — re-asked only when the register
+    # is drawn — so after the write above the rail carries the number it was
+    # painted with while a call answers a smaller one. They are one arithmetic,
+    # which is §108.15's rule; comparing across a paint measures the gap.
+    # OBSERVED AND RECORDED (§316.5): a save on the Overview leaves the rail's
+    # pill one paint stale, and any navigation puts it right.
+    pg.evaluate("()=>paint()")
+    pg.wait_for_timeout(300)
+    both = pg.evaluate("""()=>({
+      pills: [...document.querySelectorAll('.setuprail .ritem')].map(x=>({
+        k: x.dataset.setupgo,
+        n: (x.querySelector('.riwait') || {}).textContent || null })),
+      byPage: attentionByPage() })""")
+    pills, byp = both["pills"], both["byPage"]
     drawn = dict((r["k"], r["n"]) for r in pills if r["n"])
     ck("every pill equals attentionByPage()",
        drawn == dict((k, str(v)) for k, v in byp.items() if v), (drawn, byp))
@@ -204,7 +242,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     left = pg.eval_on_selector_all(".ovrow", "e=>e.map(x=>x.dataset.setupgo)")
     ck("the answered claim's row is gone, the custodian row stays",
-       left == ["people"], left)
+       left == ["people"] * (1 + len(asked)), left)
 
     # PUT THE TENANT BACK, or every later block in a combined run measures a
     # tenant this one broke (§51.11's cousin: a check that leaves state behind).
@@ -214,7 +252,11 @@ with sync_playwright() as p:
       GROUP.claims = JSON.parse(k.claims);
       currentSub='overview'; paint();}""")
     pg.wait_for_timeout(300)
-    ck("the tenant is put back", pg.eval_on_selector_all(".ovrow", "e=>e.length") == 0)
+    # PUT BACK MEANS "what it was", not "empty" — on a served tenant the
+    # password row was there before this file touched anything.
+    ck("the tenant is put back",
+       pg.eval_on_selector_all(".ovrow", "e=>e.length") == len(asked),
+       pg.eval_on_selector_all(".ovrow", "e=>e.map(x=>x.textContent.trim())"))
 
     print("\n── 6b · a cycle with no dates SAYS so (§120.1) ──")
     # Islam's own screenshot: a client tenant whose cycle carries no dates read
@@ -286,7 +328,7 @@ with sync_playwright() as p:
     for w in other:
         pg.select_option("#asWho", w)
         pg.wait_for_timeout(250)
-        btn = pg.query_selector(".navmenu-btn")
+        btn = pg.query_selector('[data-md="setup"]')
         if not btn or not btn.is_visible():
             continue
         btn.click()

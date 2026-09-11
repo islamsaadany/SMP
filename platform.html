@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forefront — Strategy Management Platform</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.png" sizes="32x32">
+<!--
+  FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
+  "the page you are showing should be just for login ... and the rest should be
+  inside the platform").
+
+  index.html is the DOOR and does one thing. This is what it hands you to: a
+  platform with its own chrome and its own navigation, holding the three pages
+  that are Forefront's rather than a client's.
+
+  IT IS NOT BUILT FROM src/. Neither is the door — both are hand-written pages
+  served as they are, and only the CLIENT's platform is assembled by build.py.
+  Its stylesheet is its own for the same reason: the door is a wall and a card,
+  this is a chrome and tables, and copying 25KB of the one into the other
+  carries rules neither needs (constitution VI: follow what the product does,
+  and the product has two kinds of page here).
+-->
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    /* --ink-3 IS SET AGAINST THE QUIETEST GROUND IT SITS ON, not the whitest
+       (§38.5, and _shared.css records the same lesson): #6E7A90 cleared
+       nothing — 4.33 on white, 4.01 on the page's own ground and 3.79 on
+       --surface-2 — and it is the colour of the card's industry line, the
+       name in the top row, every note and every unlit chip. #5E6E85 is the
+       client platform's own value, so this is one vocabulary rather than two
+       greys a shade apart (§53.5): 5.19 / 4.80 / 4.54. */
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    /* Forefront's own, measured before use (constitution XIII):
+       #0F2C69 carries white at 13.25:1 · #F5A623 carries #231500 at 9.04:1
+       and is 2.03:1 as TYPE on white, so words take #9C5D08 (5.27:1). */
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --bad:#B23025; --bad-bg:#FBEDEB;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --bad:#E8776B; --bad-bg:#33211F;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  /* THE SAME BLOCK AGAIN, DELIBERATELY, AND IT IS WHY --ff-tx WAS ADDED
+     TWICE AND STILL DID NOTHING HERE: a token defined only in the media query
+     is absent the moment somebody chooses a theme explicitly, which is exactly
+     what this check does. Complete blocks, never a base plus overrides —
+     _shared.css records the same rule, and v3.0's zebra stripe is what
+     happens without it. */
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --bad:#E8776B; --bad-bg:#33211F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased }
+  /* NOTHING IS DRAWN UNTIL THE SERVER HAS ANSWERED (§94.10's rule): a platform
+     that paints a page and then corrects it has shown somebody a screen that
+     was not theirs. */
+  body:not(.ready) .wrap{ visibility:hidden }
+
+  /* ── the chrome: two lines, as a client's platform has (§2.9) ── */
+  .top{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 18px }
+  /* THE MARK IS TYPE, AND --ff IS A FILL (§38.4, the seventh time). It was
+     `color:var(--ff)`, which is right in light — #0F2C69 on white is 13.25 —
+     and in dark that token becomes the navy the NAVIGATION BAR is painted in:
+     #0D2350 on #1A1F29 is 1.08, so Forefront's own name was invisible on
+     Forefront's own platform. A fill and a word need two tokens, declared
+     together (§94.8's --cta/--cta-ink). --ff-tx is 6.94 dark. */
+  .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.16em; color:var(--ff-tx) }
+  .top .nm{ font-weight:600; font-size:14px }
+  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
+    color:var(--ink-3); font-size:12.5px }
+  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
+  .nav button{ background:transparent; border:0; color:var(--ff-quiet);
+    font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
+    border-bottom:3px solid transparent }
+  .nav button:hover{ color:var(--ff-ink) }
+  .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 70px }
+
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
+  .ptitle h1{ font-size:20px; margin:0; font-weight:600 }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
+  .btn:hover:not(:disabled){ border-color:var(--amber-tx) }
+  .btn:disabled{ opacity:.45; cursor:default }
+  .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
+  .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px }
+
+  /* ── client cards ─────────────────────────────────────────── */
+  .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
+    background:var(--surface); padding:15px; display:flex; flex-direction:column; gap:7px;
+    min-height:152px; font:inherit; color:inherit; cursor:pointer; box-shadow:var(--shadow) }
+  .ccard:hover:not(:disabled), .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard:disabled{ cursor:default; opacity:.72 }
+  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
+    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  /* A client that has a mark wears it on its card — the same picture its
+     door wears (§313.36), so the two cannot disagree; a light plate under it
+     because a PNG cannot be recoloured (§52). Initials until then. */
+  .ccard img.cmark{ width:auto; max-width:120px; height:36px; object-fit:contain; background:#fff; padding:4px 8px; box-sizing:content-box }
+  .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+  .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
+  .markrow .none{ font-size:13px; color:var(--ink-3) }
+  .ccard h2{ margin:0; font-size:17px; font-weight:600 }
+  .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
+  .ccard .foot{ margin-top:auto; display:flex; gap:6px; flex-wrap:wrap }
+  .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
+  .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
+    color:var(--ink-3) }
+  /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
+     Islam: "the demo should be a separate client on the platform outside
+     beside the clients." It was IN the grid — third across, with the way to
+     add a client after it — so the page counted it as one, and two things
+     followed that nobody chose: the empty-state line reads a count that
+     included it, and the box saying "Search clients" found it.
+
+     THE DEVICE IS THE PAGE'S OWN and nothing here is new: a hairline with an
+     uppercase key on it, which is how every other surface separates one kind
+     of thing from another (§53.5). The card keeps the amber wash and the Demo
+     tag it already wore — what changed is where it is drawn. AND IT KEEPS THE
+     GRID'S OWN TRACK WIDTH: a card grown to the full page would read as more
+     important than the clients above it, which is the opposite of what
+     setting it apart says. */
+  .apart{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line) }
+  .apart > .akey{ display:block; margin-bottom:12px;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface) }
+  .ccfg:hover, .ccfg:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2) }
+  .tag.open{ color:var(--good); background:var(--good-bg); border-color:var(--good) }
+  .tag.none{ color:var(--warn); background:var(--warn-bg); border-color:var(--warn) }
+  .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
+  .tag.seat{ color:var(--ff); border-color:var(--ff) }
+  :root[data-theme="dark"] .tag.seat, :root:not([data-theme="light"]) .tag.seat{ color:var(--ff-quiet) }
+
+  /* ── tables ───────────────────────────────────────────────── */
+  table{ border-collapse:collapse; width:100%; font-size:14px }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap }
+  thead th{ background:var(--ff); color:var(--ff-ink);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.09em;
+    text-transform:uppercase; border-bottom:0 }
+  thead th:first-child{ border-top-left-radius:8px } thead th:last-child{ border-top-right-radius:8px }
+  tbody tr:nth-child(even) td{ background:var(--surface-2) }
+  .tscroll{ overflow-x:auto }
+  /* The seats cell is the one that wraps: it holds a list that grows with the
+     clients somebody is on, and clipping it hides the fact the column is for. */
+  td.seats{ white-space:normal; min-width:250px }
+  /* A FIELD IN A TABLE CELL NEEDS A DEFINITE WIDTH AND min-width:0 (§110.8).
+     `max-width:100%` resolves against a containing block an auto-layout table
+     has not settled, so the browser treats it as none and the box grows the
+     column; a px cap does nothing either. These two are what stop the row
+     widening the moment the page is drawn. */
+  table .fld{ width:100%; min-width:0; padding:5px 7px; font-size:13px }
+  table td:first-child .fld{ min-width:120px }
+  table .fld.mono{ font-family:ui-monospace, SFMono-Regular, monospace; font-size:12.5px;
+    min-width:210px }
+  td.seats .tag{ display:inline-block; margin:2px 3px 2px 0 }
+  .mono{ font:400 13px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2) }
+  .muted{ color:var(--ink-3) }
+
+  /* a cell of two or three states, as §37's matrix has */
+  .cell{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .cell button{ border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; padding:5px 9px; cursor:pointer }
+  .cell button:last-child{ border-right:0 }
+  .cell button.on{ background:var(--ff); color:var(--ff-ink) }
+  .cell button.on.hi{ background:var(--amber); color:var(--amber-ink) }
+  .cell.locked button{ cursor:default }
+
+  .row{ display:flex; gap:9px; margin-top:14px; flex-wrap:wrap; align-items:center }
+  .row .fld{ flex:1 1 170px; min-width:0 }
+  .cfg{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px }
+  .rowset{ display:grid; gap:13px }
+  .teamrow{ display:flex; align-items:center; gap:10px; padding:9px 0;
+    border-bottom:1px solid var(--line-soft) }
+  .teamrow .who .nm{ font-weight:600; font-size:14px }
+  .teamrow .who .em{ color:var(--ink-3); font-size:12.5px }
+  .teamrow .sp{ flex-wrap:wrap; justify-content:flex-end }
+  .asrow{ display:inline-flex; align-items:center; gap:6px }
+  .asrow .aslab{ font:600 9.5px/1.4 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap }
+  .asrow .fld{ width:auto; max-width:230px; padding:4px 6px; font-size:12px }
+  .teamrow .sp{ margin-left:auto; display:flex; gap:7px; align-items:center }
+  .said{ margin:12px 0 0; font-size:13.5px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:9px 11px }
+  .said b{ font-family:ui-monospace, SFMono-Regular, monospace }
+  .err{ margin:12px 0 0; font-size:13.5px; color:var(--bad); background:var(--bad-bg);
+    border:1px solid var(--bad); border-radius:8px; padding:9px 11px }
+  .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
+  @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+  <span class="right"><span id="who"></span>
+    <button class="btn" id="signout" type="button">Sign out</button></span>
+</div>
+<nav class="nav" id="nav"></nav>
+<div class="wrap" id="page"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── One shape for every request (§71's rule: three callers with the same
+     six lines is where a typo lives in exactly one of them). ───────── */
+  function post(body) {
+    return fetch("/api/platform", { method: "POST", cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body) })
+      .then(function (r) {
+        /* NOT SIGNED IN IS NOT AN ERROR MESSAGE, it is the door. */
+        if (r.status === 401 || r.status === 403) {
+          return r.json().then(function (j) {
+            if (j && j.auth) { location.replace("/"); throw new Error("sign in"); }
+            return j;
+          });
+        }
+        return r.json();
+      });
+  }
+
+  var page = document.getElementById("page");
+  var nav = document.getElementById("nav");
+  var TAB = "clients";
+  var ME = null;
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    /* textContent, never innerHTML: every name here is typed by a person. */
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function clear() { page.textContent = ""; }
+  function say(msg, bad) {
+    var p = el("p", bad ? "err" : "said", msg);
+    page.appendChild(p);
+    return p;
+  }
+  function title(text, right) {
+    var h = el("div", "ptitle");
+    h.appendChild(el("h1", null, text));
+    if (right) { right.className = "right"; h.appendChild(right); }
+    page.appendChild(h);
+    return h;
+  }
+  function initials(name) {
+    var w = String(name || "?").trim().split(/\s+/);
+    return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : w[0].slice(0, 2)).toUpperCase();
+  }
+
+  /* ── The navigation is drawn from what this account may open ─────
+     A tab that always refuses is worse than no tab (§45.2), so the row is
+     built after `me` answers rather than written into the markup. */
+  function drawNav() {
+    nav.textContent = "";
+    var tabs = [["clients", "Clients", true],
+                ["consultants", "Consultants", ME.canConsultants],
+                ["access", "Who sees what", ME.canAccess]];
+    tabs.forEach(function (t) {
+      if (!t[2]) return;
+      var b = el("button", TAB === t[0] ? "on" : null, t[1]);
+      b.type = "button";
+      b.setAttribute("data-tab", t[0]);
+      b.addEventListener("click", function () { go(t[0]); });
+      nav.appendChild(b);
+    });
+  }
+
+  function go(tab) {
+    TAB = tab;
+    drawNav();
+    clear();
+    return redraw();
+  }
+
+  /* ── A SILENT REFRESH (§313.28) ───────────────────────────────────
+     Islam: "this page needs silent refresh." Every control here ended in a
+     full redraw that CLEARED the page first and put "Reading…" in its place,
+     so pressing a seat blanked the whole pane and rebuilt it — a flash, a
+     scroll jump, and the row you were working on gone from under the pointer.
+
+     The page is built into a DETACHED node and swapped in when it is ready,
+     so nothing empty is ever on screen; the scroll position is put back
+     because a swap is not a navigation. §71.2's rule — never a repaint under
+     a working hand — applied to the one page that had no other way to update
+     itself. */
+  function redraw() {
+    if (TAB === "clients") return drawClients();
+    if (TAB === "consultants") return drawConsultants();
+    if (TAB === "access") return drawAccess();
+  }
+
+  /* `quiet` is passed by every control that is UPDATING what is already on
+     screen, as opposed to arriving at it. Arriving still says "Reading…",
+     because then there is nothing to keep. */
+  function lead(quiet, msg) {
+    if (quiet) return;
+    clear();
+    page.appendChild(el("p", "muted", msg));
+  }
+
+  /* Built detached, swapped in one move, scroll restored — so the page never
+     holds an empty frame and the row under the pointer does not move. */
+  function settle(build) {
+    var y = window.scrollY;
+    var next = document.createElement("div");
+    var was = page;
+    page = next;
+    try { build(); } finally { page = was; }
+    page.textContent = "";
+    while (next.firstChild) page.appendChild(next.firstChild);
+    window.scrollTo(0, y);
+  }
+
+  /* ── Clients ─────────────────────────────────────────────────── */
+  function drawClients() {
+    /* ── WHY A CLIENT SENT THEM BACK HERE (§313.32) ──────────────────
+       A client whose register cannot place this account refuses and lands
+       them on the cards, because the cards are beside the configuration that
+       answers it. Said BEFORE the title, so it is the first thing read rather
+       than a line under a grid of cards; taken once and cleared, or it would
+       reappear on every visit long after the mapping was corrected. */
+    var why = null;
+    try {
+      why = sessionStorage.getItem("smp.client.why");
+      if (why) sessionStorage.removeItem("smp.client.why");
+    } catch (e) { /* no storage is simply no sentence */ }
+    if (why) say(why, true);
+
+    /* Made here and appended after the title, so the search's own handler
+       closes over the element it filters rather than over a hoisted blank.
+
+       AND IT IS NAMED. The band below it is a card grid too and rightly wears
+       the same `.cards` rule (§53.5), so a selector reading `.cards` reaches
+       both — which is how something written later comes to mean "the client
+       grid" and quietly include the worked example. `data-grid` is what a
+       check or a rule addresses; the class stays about the layout. The new
+       check's own first run found this, by going red on it. */
+    var grid = el("div", "cards");
+    grid.dataset.grid = "clients";
+
+    var right = el("div");
+    var search = el("input", "fld");
+    search.placeholder = "Search clients"; search.style.width = "190px";
+    /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place.
+       SCOPED TO THE CLIENT GRID (§317): the box says "Search clients", so with
+       the worked example out of that grid it is no longer among the things it
+       searches. That is a change and it is the honest one — today typing
+       "demo" finds it. */
+    search.addEventListener("input", function () {
+      var q = search.value.trim().toLowerCase();
+      Array.prototype.forEach.call(grid.querySelectorAll(".ccard[data-name]"), function (c) {
+        c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
+      });
+    });
+    right.appendChild(search);
+    title("Clients", right);
+
+    page.appendChild(grid);
+    grid.appendChild(el("p", "muted", "Reading your clients…"));
+
+    post({ action: "cards" }).then(function (j) {
+      grid.textContent = "";
+      if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
+      /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§313.18, §61) ──
+         This RETURNED on an empty list, before the Add card was appended — so
+         the one person who can create a client was the one shown a dead end,
+         and the sentence it showed them said to ask the platform's super
+         user, which is who they are. §61's trap in its purest form: the only
+         way to get a client is to add one, and the control that adds one was
+         hidden precisely when there were none.
+
+         AND THE EMPTY STATE SAYS WHAT THIS READER CAN DO ABOUT IT. Somebody
+         who may add one is told to; somebody who may not is told who to ask.
+         A refusal names the place that can fix it (§16.7), and for these two
+         people that is not the same place. */
+      /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ────────
+         Split by what the tenant IS, never by its name: `kind` is the
+         column the server already sorts on, and a key spelled "demo" is a
+         client's key like any other. Everything else about it is unchanged
+         — same card, same amber, same Demo tag, same door. */
+      var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
+      var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
+
+      clients.forEach(function (c) { grid.appendChild(cardFor(c)); });
+      if (j.canAdd) grid.appendChild(addCard());
+      /* AND THE COUNT IS A COUNT OF CLIENTS. It read `j.cards.length`, which
+         includes the demo — so on a platform seeded with the worked example
+         and no clients, the sentence below never drew and the one person who
+         could add one was shown a single amber card and no way in: §61's
+         trap the empty state was written to close, by a road it did not
+         cover. */
+      if (!clients.length) {
+        say(j.canAdd
+          ? "No clients yet. Add the first one — it is created with its own name and nothing else."
+          : "No client has been given to this account yet. Ask the platform's super user.");
+      }
+
+      /* Drawn only when there is one (§61): a heading over an empty band is
+         furniture, and a platform with no demo seeded has nothing to say. */
+      if (demos.length) {
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "The worked example"));
+        var dgrid = el("div", "cards");
+        demos.forEach(function (c) { dgrid.appendChild(cardFor(c)); });
+        apart.appendChild(dgrid);
+        page.appendChild(apart);
+      }
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      grid.textContent = ""; say("Could not reach the server.", true);
+    });
+  }
+
+  function cardFor(c) {
+    var b = el("button", "ccard" + (c.kind === "demo" ? " demo" : ""));
+    b.type = "button";
+    b.dataset.client = c.key;
+    b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    if (c.mark) {
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+    } else {
+      b.appendChild(el("div", "cmark", initials(c.name)));
+    }
+    b.appendChild(el("h2", null, c.name));
+    if (c.industry) b.appendChild(el("p", "ind", c.industry));
+    var foot = el("div", "foot");
+    var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
+    if (c.kind === "demo") tag("Demo", "demo");
+    /* THE SEAT IS WHAT THIS CARD SAYS ABOUT THIS PERSON — the thing they came
+       to know, and the thing that decides what they can do when they arrive. */
+    if (c.seat) tag(c.seat === "super" ? "Super user" : "SMO team", "seat");
+    if (c.unreadable) tag("Not answering");
+    else if (c.cycleOpen) tag("Cycle open", "open");
+    else if (!c.planned) tag("No plan yet", "none");
+    if (c.units != null && c.units > 0) tag(c.units + (c.units === 1 ? " unit" : " units"));
+    if (!c.canOpen) tag("Listed only");
+    b.appendChild(foot);
+
+    if (c.canOpen) b.addEventListener("click", function () { location.assign("/" + c.key); });
+    else b.disabled = true;
+
+    if (c.canConfig) {
+      var cog = el("span", "ccfg", "Settings");
+      cog.setAttribute("role", "button"); cog.tabIndex = 0;
+      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawClient(c.key); };
+      cog.addEventListener("click", open);
+      cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+      b.appendChild(cog);
+    }
+    return b;
+  }
+
+  function addCard() {
+    var b = el("button", "ccard add", "+ Add a client");
+    b.type = "button";
+    b.addEventListener("click", function () { drawNewClient(); });
+    return b;
+  }
+
+  /* ── Adding a client ─────────────────────────────────────────── */
+  function drawNewClient() {
+    clear();
+    title("Add a client");
+    var box = el("div", "rowset");
+    var fields = {};
+    [["Client name", "name", "input"], ["Industry", "industry", "input"], ["Notes", "notes", "textarea"]]
+      .forEach(function (f) {
+        var wrap = el("div");
+        wrap.appendChild(el("span", "lab", f[0]));
+        var i = el(f[2], "fld");
+        fields[f[1]] = i;
+        wrap.appendChild(i);
+        box.appendChild(wrap);
+      });
+    page.appendChild(box);
+    var row = el("div", "row");
+    var make = el("button", "btn amber", "Create the client");
+    make.type = "button";
+    make.addEventListener("click", function () {
+      make.disabled = true;
+      post({ action: "createClient", name: fields.name.value.trim(),
+             industry: fields.industry.value.trim(), notes: fields.notes.value })
+        .then(function (r) {
+          make.disabled = false;
+          if (!r.ok) { say(r.error || "Not created.", true); return; }
+          /* Straight to its configuration: a client created and then left on a
+             list is one nobody has put a team on. */
+          drawClient(r.key);
+        }).catch(function () { make.disabled = false; say("Could not reach the server.", true); });
+    });
+    var back = el("button", "btn", "Cancel");
+    back.type = "button";
+    back.addEventListener("click", function () { go("clients"); });
+    row.appendChild(make); row.appendChild(back);
+    page.appendChild(row);
+    page.appendChild(el("p", "note",
+      "It is created with its own name and nothing else — no units, no people, " +
+      "no plan. The address is made from the name."));
+  }
+
+  /* ── A client's configuration ────────────────────────────────── */
+  function drawClient(key, quiet) {
+    lead(quiet, "Reading…");
+    return post({ action: "client", key: key }).then(function (j) {
+      if (!j.ok) { clear(); say(j.error || "Could not open that client.", true); return; }
+      settle(function () {
+      var c = j.client;
+
+      var right = el("div");
+      var open = el("button", "btn", "Open the platform");
+      open.type = "button";
+      open.addEventListener("click", function () { location.assign("/" + c.key); });
+      var back = el("button", "btn", "Back to clients");
+      back.type = "button";
+      back.addEventListener("click", function () { go("clients"); });
+      right.appendChild(open); right.appendChild(back);
+      if (j.canEdit) {
+        var save = el("button", "btn solid", "Save");
+        save.type = "button";
+        right.appendChild(save);
+      }
+      title(c.name, right);
+
+      var grid = el("div", "cfg");
+      var left = el("div", "rowset");
+      var inputs = {};
+      [["Client name", "name", "input", c.name],
+       ["Industry", "industry", "input", c.industry || ""],
+       ["Notes", "notes", "textarea", c.notes || ""]].forEach(function (f) {
+        var wrap = el("div");
+        wrap.appendChild(el("span", "lab", f[0]));
+        var i = el(f[2], "fld");
+        i.value = f[3];
+        if (!j.canEdit) i.readOnly = true;
+        inputs[f[1]] = i;
+        wrap.appendChild(i);
+        left.appendChild(wrap);
+      });
+      /* THE ADDRESS IS SHOWN AND NEVER EDITED: a link that has been sent must
+         keep working, and the schema behind it is decided once (spec §7.2). */
+      var addr = el("div");
+      addr.appendChild(el("span", "lab", "Address"));
+      var a = el("input", "fld");
+      a.value = location.origin + "/" + c.key;
+      a.readOnly = true;
+      addr.appendChild(a);
+      addr.appendChild(el("p", "note", "Set once from the name, so a link that has been sent keeps working."));
+      left.appendChild(addr);
+
+      /* ── THE MARK ON THE CLIENT'S DOOR (§313.36) ───────────────────
+         PNG only (§52: an SVG is executable content, a JPEG paints its own
+         ground). Shrunk here to what a door needs — 640px across is four
+         times the height it is drawn at — on a TRANSPARENT canvas, never a
+         white one: the platform's own picture intake paints white first
+         (right for a slide, fatal for a mark, §52.3). Held in `markState`
+         until Save: undefined leaves it alone, "" clears it, a data URI sets
+         it — the three answers the server takes. */
+      var markState;
+      var mk = el("div");
+      mk.appendChild(el("span", "lab", "Mark on this client's door"));
+      var mrow = el("div", "markrow");
+      var preview = el("img"); preview.alt = "";
+      var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
+      function showMark(src) {
+        if (src) { preview.src = src; preview.hidden = false; noneNote.hidden = true; }
+        else { preview.removeAttribute("src"); preview.hidden = true; noneNote.hidden = false; }
+      }
+      mrow.appendChild(preview); mrow.appendChild(noneNote);
+      showMark(c.mark);
+      if (j.canEdit) {
+        var pick = el("input"); pick.type = "file"; pick.accept = "image/png"; pick.hidden = true;
+        var choose = el("button", "btn", "Choose a PNG"); choose.type = "button";
+        choose.addEventListener("click", function () { pick.click(); });
+        var drop = el("button", "btn", "Remove"); drop.type = "button";
+        drop.addEventListener("click", function () { markState = ""; showMark(null); pick.value = ""; });
+        pick.addEventListener("change", function () {
+          var f = pick.files && pick.files[0];
+          if (!f) return;
+          if (f.type !== "image/png") { say("The mark must be a PNG.", true); pick.value = ""; return; }
+          var url = URL.createObjectURL(f);
+          var img = new Image();
+          img.onload = function () {
+            URL.revokeObjectURL(url);
+            var scale = Math.min(1, 640 / img.naturalWidth, 200 / img.naturalHeight);
+            var cv = document.createElement("canvas");
+            cv.width = Math.max(1, Math.round(img.naturalWidth * scale));
+            cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
+            cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+            var out = cv.toDataURL("image/png");
+            if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
+            markState = out; showMark(out);
+          };
+          img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
+          img.src = url;
+        });
+        mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(pick);
+      }
+      mk.appendChild(mrow);
+      mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + c.key + "/sign-in, the door this client's people sign in at."));
+      left.appendChild(mk);
+      grid.appendChild(left);
+
+      var rightCol = el("div");
+      rightCol.appendChild(el("span", "lab", "Strategy office for this client"));
+      j.team.forEach(function (m) {
+        var tr = el("div", "teamrow");
+        var who = el("div", "who");
+        who.appendChild(el("div", "nm", m.name || m.email));
+        who.appendChild(el("div", "em", m.email));
+        tr.appendChild(who);
+        var sp = el("div", "sp");
+        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§313.29) ──────────
+           Drawn only where the client's register has somebody it could be —
+           which after the platform becomes the entry point is nobody, and this
+           control quietly stops appearing rather than having to be removed. */
+        if (j.canEdit && !c.made_here && (j.register || []).length) {
+          sp.appendChild(registerCell(c.key, m, j.register));
+        }
+        /* THE SEAT IS SET HERE — this is the one place it is written (§53.5),
+           and the consultants page reads it. */
+        sp.appendChild(seatCell(c.key, m, j.seats, j.canEdit));
+        if (j.canEdit) {
+          var rm = el("button", "btn", "Remove");
+          rm.type = "button";
+          rm.addEventListener("click", function () {
+            post({ action: "setTeam", key: c.key, email: m.email, on: false })
+              .then(function (r) { r.ok ? drawClient(c.key, true) : say(r.error || "Not removed.", true); });
+          });
+          sp.appendChild(rm);
+        }
+        tr.appendChild(sp);
+        rightCol.appendChild(tr);
+      });
+
+      if (j.canEdit) {
+        var addRow = el("div", "row");
+        var pick = el("select", "fld");
+        var p0 = el("option", null, "Add somebody from Forefront"); p0.value = "";
+        pick.appendChild(p0);
+        j.office.forEach(function (o) {
+          if (j.team.some(function (m) { return m.email === o.email; })) return;
+          var op = el("option", null, (o.name || o.email) + " — " + o.email);
+          op.value = o.email;
+          pick.appendChild(op);
+        });
+        /* ── AND WHO THEY ARE ON THIS REGISTER (§313.30) ─────────────
+           Nothing is created on a client that already has a register, so
+           adding somebody without saying who they are would give them a seat
+           and no row — a team member who opens the client and is shown
+           nothing. The second list is the answer, and several people may give
+           the same one: on Raya, Forefront works as `smo`. */
+        var asWho = el("select", "fld");
+        var a0 = el("option", null, "…as who on this client's register?");
+        a0.value = "";
+        asWho.appendChild(a0);
+        (j.register || []).forEach(function (r) {
+          var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
+          o.value = r.key;
+          asWho.appendChild(o);
+        });
+        var add = el("button", "btn", "Add");
+        add.type = "button";
+        add.addEventListener("click", function () {
+          if (!pick.value) return;
+          post({ action: "setTeam", key: c.key, email: pick.value, seat: "smoteam",
+                 personKey: asWho.value })
+            .then(function (r) {
+              drawClient(c.key, true).then(function () {
+                if (!r.ok) say(r.error || "Not added.", true);
+              });
+            });
+        });
+        addRow.appendChild(pick);
+        /* NOT ASKED ON A CLIENT MADE HERE (§313.31): adding somebody to the
+           team IS adding them to its register, so the question has already
+           been answered by the act (§93.13). */
+        if (!c.made_here && (j.register || []).length) addRow.appendChild(asWho);
+        addRow.appendChild(add);
+        rightCol.appendChild(addRow);
+      }
+      rightCol.appendChild(el("p", "note",
+        (c.made_here
+          ? "This client's register is built here: adding somebody to the team " +
+            "adds them to it, with their seat. "
+          : "This client brought its own register, so nobody is created on it — " +
+            "each account says which person on it they are, and several may say " +
+            "the same one. The change log records the address they signed in " +
+            "with. ") +
+        "A seat is held on THIS client: Super user holds its access matrix, " +
+        "retiring people and issuing passwords; SMO team runs cycles and " +
+        "corrects plans. A client may have more than one super user. Removing " +
+        "somebody retires their row on this client's register rather than " +
+        "deleting it."));
+      grid.appendChild(rightCol);
+      page.appendChild(grid);
+
+      if (j.canEdit) {
+        save.addEventListener("click", function () {
+          var body = { action: "saveClient", key: c.key, name: inputs.name.value.trim(),
+                       industry: inputs.industry.value.trim(), notes: inputs.notes.value };
+          if (markState !== undefined) body.mark = markState;
+          post(body)
+            .then(function (r) {
+              say(r.ok ? "Saved." : (r.error || "Not saved."), !r.ok);
+              if (r.ok && markState !== undefined) { c.mark = markState || null; markState = undefined; }
+            });
+        });
+      }
+      });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  /* A LIST, NOT A MATCH (§87: a name is never an identifier). The register is
+     offered and a person answers — the same shape as the role picker, which
+     suggests before it creates. The option a row is ALREADY on is shown as it
+     is, so this reads as a fact about them rather than a question every time. */
+  function registerCell(clientKey, member, register) {
+    var wrap = el("span", "asrow");
+    wrap.appendChild(el("span", "aslab", "on this register as"));
+    var sel = el("select", "fld");
+    var own = el("option", null, "a row of their own");
+    own.value = "";
+    sel.appendChild(own);
+    register.forEach(function (r) {
+      var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
+      o.value = r.key;
+      if (r.key === member.person_key) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener("change", function () {
+      post({ action: "setTeam", key: clientKey, email: member.email,
+             seat: member.seat, personKey: sel.value })
+        .then(function (r) {
+          /* SAID AFTER THE REDRAW THAT REPORTS IT (§63, and I wrote it the
+             wrong way round again in the same file): `settle()` replaces the
+             page, so a refusal said before it is wiped a moment later and the
+             control simply springs back with no explanation. */
+          drawClient(clientKey, true).then(function () {
+            if (!r.ok) say(r.error || "Not changed.", true);
+          });
+        });
+    });
+    wrap.appendChild(sel);
+    return wrap;
+  }
+
+  function seatCell(clientKey, member, seats, editable) {
+    var wrap = el("span", "cell" + (editable ? "" : " locked"));
+    seats.forEach(function (s) {
+      var b = el("button", null, s.name);
+      b.type = "button";
+      b.title = s.note;
+      if (member.seat === s.key) b.className = "on" + (s.key === "super" ? " hi" : "");
+      if (editable && member.seat !== s.key) {
+        b.addEventListener("click", function () {
+          post({ action: "setTeam", key: clientKey, email: member.email, seat: s.key })
+            .then(function (r) { r.ok ? drawClient(clientKey, true)
+                                      : say(r.error || "Not changed.", true); });
+        });
+      }
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  /* ── Consultants ─────────────────────────────────────────────── */
+  function drawConsultants(quiet) {
+    lead(quiet, "Reading…");
+    return post({ action: "consultants" }).then(function (j) {
+      if (!j.ok) { clear(); say(j.error || "Could not read the list.", true); return; }
+      settle(function () {
+      title("Consultants");
+
+      var box = el("div", "tscroll");
+      var t = el("table");
+      var head = el("tr");
+      ["Name", "Email", "Platform", "Clients and seats", "Password", ""].forEach(function (h) {
+        head.appendChild(el("th", null, h));
+      });
+      var thead = el("thead"); thead.appendChild(head); t.appendChild(thead);
+      var body = el("tbody");
+      j.people.forEach(function (p) { body.appendChild(consultantRow(p, j)); });
+      t.appendChild(body);
+      box.appendChild(t);
+      page.appendChild(box);
+
+      if (j.canEdit) {
+        var row = el("div", "row");
+        var name = el("input", "fld"); name.placeholder = "Name";
+        var mail = el("input", "fld"); mail.placeholder = "name@forefront.consulting";
+        var add = el("button", "btn amber", "Add a consultant");
+        add.type = "button";
+        add.addEventListener("click", function () {
+          post({ action: "saveConsultant", email: mail.value.trim(), name: name.value.trim() })
+            .then(function (r) {
+              if (!r.ok) { say(r.error || "Not added.", true); return; }
+              drawConsultants(true);
+              if (r.password) {
+                var s = say("");
+                s.appendChild(document.createTextNode("Temporary password for " + mail.value.trim() + ": "));
+                s.appendChild(el("b", null, r.password));
+                s.appendChild(document.createTextNode(" — they must change it on first use."));
+              }
+            });
+        });
+        row.appendChild(name); row.appendChild(mail); row.appendChild(add);
+        page.appendChild(row);
+      }
+      page.appendChild(el("p", "note",
+        "The seats are read here and set on each client's own configuration — " +
+        "one place writes them. Somebody on no client can sign in and has " +
+        "nothing to open, which is what a new joiner looks like."));
+      });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  function consultantRow(p, j) {
+    var tr = el("tr");
+
+    /* ── THE NAME AND THE ADDRESS ARE EDITABLE (§313.27) ────────────
+       Islam: "I need to edit the consultants names and emails as well." Two
+       fields on the row rather than a dialog, because there are two of them
+       and one row is not a form (§116's argument runs the other way at this
+       size: the register moved to a dialog because NINE fields in a 158px
+       cell collided; two do not).
+
+       COMMITTED ON `change`, which for a text box means on blur — so the
+       value is written by moving away from it, and there is no Save to
+       forget. The row updates quietly afterwards, or the field being typed
+       into would be replaced under the hand (§35, §71.2).
+
+       AND THE ADDRESS IS THE SIGN-IN, so changing it ends that person's
+       sessions and is said on the page rather than left to be discovered. */
+    var edit = j.canEdit;
+    var nameTd = el("td");
+    if (edit) {
+      var nm = el("input", "fld");
+      nm.value = p.name || "";
+      nm.placeholder = "Name";
+      nm.addEventListener("change", function () {
+        var v = nm.value.trim();
+        if (v === (p.name || "")) return;
+        post({ action: "saveConsultant", email: p.email, name: v })
+          .then(function (r) { r.ok ? drawConsultants(true)
+                                    : say(r.error || "Not changed.", true); });
+      });
+      nameTd.appendChild(nm);
+    } else {
+      nameTd.textContent = p.name || "—";
+    }
+    tr.appendChild(nameTd);
+
+    var mailTd = el("td", "mono");
+    if (edit) {
+      var em = el("input", "fld mono");
+      em.value = p.email;
+      em.addEventListener("change", function () {
+        var v = em.value.trim().toLowerCase();
+        if (!v || v === p.email) { em.value = p.email; return; }
+        post({ action: "saveConsultant", email: p.email, newEmail: v })
+          .then(function (r) {
+            if (!r.ok) { em.value = p.email; say(r.error || "Not changed.", true); return; }
+            /* SAID AFTER THE REDRAW THAT REPORTS IT (§63). Said before, the
+               sentence is appended to a page `settle()` is about to replace —
+               so the rename lands, the outcome is written, and a moment later
+               it is gone, which reads exactly like nothing happened. */
+            drawConsultants(true).then(function () {
+              say(v + " signs in with that address now. Any tab they had open " +
+                  "has been signed out — the old address no longer exists.");
+            });
+          });
+      });
+      mailTd.appendChild(em);
+    } else {
+      mailTd.textContent = p.email;
+    }
+    tr.appendChild(mailTd);
+
+    /* ── SUPER USER, IN A COLUMN THAT SAYS WHERE (Islam, option B) ──
+       The role was always here and read "Platform admin: Yes", which is not
+       the word Islam uses for it: "I'm the super user of the platform."
+
+       AND THE WORD ALONE WOULD HAVE COLLIDED. `Super user` already means the
+       top seat on a CLIENT (§89), and the column immediately to the right of
+       this one reads "Raya Trade · Super user" — so the column carries the
+       WHERE and the chip carries the WHAT, and the row reads across as
+       Platform · Super user, Raya Trade · Super user. One word for one
+       standing, qualified by where it is held (§87's twins, avoided rather
+       than discovered).
+
+       THE KEY DOES NOT MOVE: `is_admin`, `canSetAdmin` and `saveConsultant`
+       keep their spelling, because renaming a stored field is a migration for
+       a word nobody reads (§30.2, §58). */
+    var adminTd = el("td");
+    var cell = el("span", "cell" + (j.canSetAdmin && p.email !== j.me ? "" : " locked"));
+    var yes = el("button", null, "Super user");
+    yes.type = "button";
+    if (p.isAdmin) yes.className = "on hi";
+    if (j.canSetAdmin && p.email !== j.me) {
+      yes.title = "Adding clients and consultants, and setting Who sees what";
+      yes.addEventListener("click", function () {
+        post({ action: "saveConsultant", email: p.email, isAdmin: !p.isAdmin })
+          .then(function (r) { r.ok ? drawConsultants(true) : say(r.error || "Not changed.", true); });
+      });
+    } else if (p.email === j.me) {
+      /* NOBODY CHANGES THEIR OWN STANDING, which is also what stops the
+         platform's last super user locking themselves out of it. */
+      yes.title = "You cannot change your own standing — somebody else with this role does it.";
+    }
+    cell.appendChild(yes);
+    adminTd.appendChild(cell);
+    tr.appendChild(adminTd);
+
+    var seatsTd = el("td", "seats");
+    if (!p.seats || !p.seats.length) seatsTd.appendChild(el("span", "muted", "On no client yet"));
+    else p.seats.forEach(function (s) {
+      seatsTd.appendChild(el("span", "tag",
+        s.client + " · " + (s.seat === "super" ? "Super user" : "SMO team")));
+    });
+    tr.appendChild(seatsTd);
+
+    tr.appendChild(el("td", null, p.password === "none" ? "—"
+      : p.password === "temporary" ? "Temporary" : "Set"));
+
+    var act = el("td");
+    if (j.canEdit && p.email !== j.me && !p.isAdmin) {
+      var b = el("button", "btn", "Issue password");
+      b.type = "button";
+      b.addEventListener("click", function () {
+        b.disabled = true;
+        post({ action: "issuePassword", email: p.email }).then(function (r) {
+          b.disabled = false;
+          if (!r.ok) { say(r.error || "Not issued.", true); return; }
+          var s = say("");
+          s.appendChild(document.createTextNode("Temporary password for " + p.email + ": "));
+          s.appendChild(el("b", null, r.password));
+          s.appendChild(document.createTextNode(" — said once, and stored nowhere in the clear."));
+        });
+      });
+      act.appendChild(b);
+    }
+    tr.appendChild(act);
+    return tr;
+  }
+
+  /* ── Who sees what ───────────────────────────────────────────── */
+  function drawAccess() {
+    page.appendChild(el("p", "muted", "Reading…"));
+    post({ action: "access" }).then(function (j) {
+      clear();
+      if (!j.ok) { say(j.error || "Could not read the table.", true); return; }
+      title("Who sees what");
+      page.appendChild(el("p", "note",
+        "What somebody may do INSIDE a client is the seat they hold on it, set " +
+        "on that client's configuration. What is here is the rest — and it is " +
+        "asked of everybody who is not the platform's super user."));
+
+      var box = el("div", "tscroll");
+      var t = el("table");
+      var thead = el("thead"), head = el("tr");
+      head.appendChild(el("th", null, "Everybody who is not the super user"));
+      j.areas.forEach(function (a) { head.appendChild(el("th", null, a.name)); });
+      thead.appendChild(head); t.appendChild(thead);
+
+      var body = el("tbody"), tr = el("tr");
+      tr.appendChild(el("td", null, "Every consultant, whatever seats they hold"));
+      j.areas.forEach(function (a) {
+        var td = el("td");
+        var now = Object.prototype.hasOwnProperty.call(j.stored, a.key) ? j.stored[a.key] : j.defaults[a.key];
+        var cell = el("span", "cell" + (j.canEdit ? "" : " locked"));
+        a.states.forEach(function (st) {
+          if (st === "none" && a.states.length > 2) return;   /* nothing lit IS none (§37) */
+          var b = el("button", null, st === "yes" ? "Yes" : st.charAt(0).toUpperCase() + st.slice(1));
+          b.type = "button";
+          b.title = a.note;
+          if (now === st) b.className = "on" + (st === "edit" || st === "open" || st === "yes" ? " hi" : "");
+          if (j.canEdit) {
+            b.addEventListener("click", function () {
+              /* Pressing the lit one puts the cell back to nothing: the third
+                 state is the absence of the others (§37). */
+              var next = now === st ? (a.states[0] === "hidden" ? "hidden" : "none") : st;
+              post({ action: "saveAccess", area: a.key, grant: next })
+                .then(function (r) { r.ok ? drawAccess() : say(r.error || "Not saved.", true); });
+            });
+          }
+          cell.appendChild(b);
+        });
+        td.appendChild(cell);
+        tr.appendChild(td);
+      });
+      body.appendChild(tr); t.appendChild(body);
+      box.appendChild(t);
+      page.appendChild(box);
+      page.appendChild(el("p", "note", "Nothing lit means nothing at all."));
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  document.getElementById("signout").addEventListener("click", function () {
+    fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
+  });
+
+  /* ── Boot ────────────────────────────────────────────────────── */
+  post({ action: "me" }).then(function (j) {
+    if (!j || !j.ok) { location.replace("/"); return; }
+    ME = { email: j.account.email, name: j.account.name, isAdmin: j.account.isAdmin,
+           canConsultants: true, canAccess: !!j.account.isAdmin };
+    /* What the navigation may show is asked of the same rules the pages ask —
+       `cards` answers it for this account, so the row cannot offer a page the
+       next request refuses. */
+    return post({ action: "cards" }).then(function (c) {
+      if (c && c.ok) {
+        ME.canConsultants = !!c.canConsultants;
+        ME.canAccess = !!c.canAccess;
+      }
+      /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
+         after renaming the column is exactly the twins this rename avoided. */
+      document.getElementById("who").textContent =
+        ME.name + (ME.isAdmin ? " · Super user" : "");
+      document.body.classList.add("ready");
+      go("clients");
+    });
+  }).catch(function (e) {
+    if (String(e.message) === "sign in") return;
+    document.body.classList.add("ready");
+    say("Could not reach the server.", true);
+  });
+})();
+</script>
+</body>
+</html>

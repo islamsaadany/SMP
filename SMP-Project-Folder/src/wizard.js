@@ -1,4 +1,4 @@
-/* ══ SETTING A CLIENT UP (§303, spec 042) ═══════════════════════════════
+/* ══ SETTING A CLIENT UP (§318, spec 044) ═══════════════════════════════
 
    Islam: *"any Consultant who gets into the platform and adds a new client to
    set up this client he needs to go through a series of questions … there

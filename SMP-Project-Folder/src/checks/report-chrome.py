@@ -197,14 +197,28 @@ with sync_playwright() as p:
     d = pg.query_selector(".rc-draft")
     if d:
         d.click()
-        pg.wait_for_timeout(500)
-        said = pg.evaluate("(document.querySelector('[data-savesay]')||{}).textContent || ''")
+        # WAITED FOR, NEVER SLEPT AT (§316.2). Over file:// the answer is
+        # immediate — there is no server, so Save draft says so at once — and
+        # served over HTTP it is a real round trip, so a fixed 500ms reads the
+        # word before it has been written and calls a correct build broken.
+        # The assertion is unchanged: it answers IN WORDS.
+        said = ""
+        for _ in range(40):
+            said = pg.evaluate("(document.querySelector('[data-savesay]')||{}).textContent || ''")
+            if said.strip():
+                break
+            pg.wait_for_timeout(150)
         ck("Save draft answers in words", bool(said.strip()), repr(said))
     else:
         ck("Save draft is present to press", False)
+    # RE-RESOLVED, NEVER HELD (§222, §316.2). Served over HTTP the Save draft
+    # above actually SAVES, so §220 parks the report and paint() rebuilds this
+    # bar — a handle taken before that is detached by the time it is pressed,
+    # and the check DIES rather than reporting (§215). Over file:// nothing
+    # saves, nothing repaints, and the stale handle worked by luck.
     c = pg.query_selector("[data-repcancel]")
     if c:
-        c.click()
+        pg.click("[data-repcancel]")
         pg.wait_for_timeout(500)
         ck("Cancel leaves reporting mode and the box goes with it",
            not pg.query_selector(".repchrome"))

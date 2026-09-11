@@ -390,7 +390,14 @@ var VID_NO_HOSTS = Object.freeze([]);
    pasted for that host start playing (§42). */
 function videoPlay(vid){
   if (!vid) return null;
-  if (vid.path) return { kind:"file", play:"/api/blob?play=" + encodeURIComponent(vid.path) };
+  /* The play address names its client (§313.35) — through SYNC's one helper,
+     and untouched where there is no SYNC (a deck built for a check) or no
+     server (file://), where the address is never fetched anyway. */
+  if (vid.path) {
+    var u = "/api/blob?play=" + encodeURIComponent(vid.path);
+    if (typeof SYNC !== "undefined" && SYNC.withClient) u = SYNC.withClient(u);
+    return { kind:"file", play:u };
+  }
   var r = SMPRules.videoLink(vid.url, videoHosts());
   return r.kind ? r : null;
 }

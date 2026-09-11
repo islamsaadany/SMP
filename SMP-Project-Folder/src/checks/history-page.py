@@ -1,5 +1,12 @@
 """HISTORY: WHO CHANGED WHAT, AND A WAY BACK (§262).
 
+qa-run: own-server — §316.1. Its stub serves a fixed log AND RECORDS THE ASKS,
+which is half the subject: that the page asks the server for today with a cap
+and never for the graph (§262). The served app cannot be interrogated by the
+check's own recorder, and the reading it produces is what this file measures.
+That the history READ works against the shared schema is proved beside it, in
+checks/state-api.mjs §6.
+
 Islam: *"how about a history saving and recovery feature to track the changes
 per user and per unit and function to ensure nothing is lost?"* — agreed from
 a mockup drawn out of real log rows.

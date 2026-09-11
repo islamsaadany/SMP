@@ -1,6 +1,24 @@
 from playwright.sync_api import sync_playwright
-import pathlib
+import pathlib, os
 url="file://"+str(pathlib.Path("strategy-management-platform.html").resolve())
+# THE SAME SWEEP, POINTED AT THE NEW APP (spec 043, research §P4): with
+# SMP_BASE set the walk signs in at the client's own door and opens the
+# served shell instead of the file; the assertions are untouched, because the
+# assertions are the contract and the harness is not. The password is read
+# from the environment and appears nowhere in this file.
+BASE=os.environ.get("SMP_BASE")
+def open_platform(pg):
+    if not BASE:
+        pg.goto(url); pg.wait_for_timeout(600); return
+    pg.goto(BASE+"/raya-trade/sign-in")
+    pg.wait_for_selector(".gate[data-hydrated]", state="attached", timeout=15000)
+    pg.fill("#user", os.environ.get("SMP_QA_EMAIL","office@forefront.example"))
+    pg.fill("#password", os.environ["SMP_QA_PASSWORD"])
+    pg.click("#loginForm button[type=submit]")
+    pg.wait_for_url("**/raya-trade", timeout=15000)
+    pg.goto(BASE+"/raya-trade/mobile/strategy")
+    pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
+    pg.wait_for_timeout(600)
 errs=[]
 
 def walk_destinations(pg):
@@ -89,10 +107,43 @@ with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={"width":1400,"height":1000})
     pg.on("pageerror", lambda e: errs.append("PAGEERROR: "+str(e)))
     pg.on("console", lambda m: errs.append(m.text) if m.type=="error" else None)
-    pg.goto(url); pg.wait_for_timeout(600)
+    if BASE:
+        # A REFUSED SAVE SAYS WHICH AND WHY (§124): a bare "403 (Forbidden)"
+        # console line names nothing. Every failed /api/ answer is recorded
+        # with the viewer it was judged as and the server's own sentence.
+        def _refused(r):
+            if "/api/" not in r.url or r.status < 400: return
+            try: body = r.text()[:300]
+            except Exception: body = "?"
+            try: who = pg.evaluate("window.VIEWER")
+            except Exception: who = "?"
+            errs.append("REFUSED %s %s -> %d as %r: %s"
+                        % (r.request.method, r.url.replace(BASE, ""), r.status, who, body))
+        pg.on("response", _refused)
+        # AND A VIEWER SWITCH IS ASYNCHRONOUS OVER HTTP (§237): it flushes,
+        # rebases on the server's graph, then switches — or, refused, does
+        # not switch at all and puts the select back. A probe that reads the
+        # page 300ms after picking measures whoever happened to be there. So
+        # a pick waits until the select and VIEWER agree, and says so when
+        # the switch never took rather than measuring the wrong person.
+        _sel = pg.select_option
+        def _pick(selector, value, *a, **k):
+            r = _sel(selector, value, *a, **k)
+            if selector == "#asWho":
+                pg.wait_for_function(
+                    "() => document.getElementById('asWho').value === window.VIEWER",
+                    timeout=20000)
+                if pg.evaluate("window.VIEWER") != value:
+                    errs.append("SWITCH: viewing as %r never took (VIEWER stays %r) \u2014 "
+                                "the flush before it was refused" % (value, pg.evaluate("window.VIEWER")))
+                pg.wait_for_timeout(200)
+            return r
+        pg.select_option = _pick
+    open_platform(pg)
     people = pg.eval_on_selector_all("#asWho option","els=>els.map(e=>e.value)")
     for v in people:
-        pg.select_option("#asWho", v); pg.wait_for_timeout(200)
+        # over HTTP a switch rebases the tab on the server's graph (§237), one fetch
+        pg.select_option("#asWho", v); pg.wait_for_timeout(700 if BASE else 200)
         # Destinations only. #units also holds the fold buttons, which go
         # nowhere, and — since 2.9 — the Manage menu's entries, which are not
         # visible until it is opened. Each is walked in its own way.
@@ -633,6 +684,12 @@ with sync_playwright() as p:
     # given employee numbers first, because without one every row is skipped
     # and the fixed point would hold by measuring nothing (51.11).
     pf = pg.evaluate("""() => {
+      /* THE CLIENT'S ROWS, NEVER THE OFFICE'S (§313.29, and Phase B of spec
+         043): over HTTP the signed-in office person's row carries `forefront`
+         and the register may not edit it — a save touching it is refused and
+         every later switch away from home with it. Under file:// no row is
+         marked, so this list IS the register and nothing here changes. */
+      const CP = PEOPLE.filter(p => !p.forefront);
       const asExcel = sheets => {
         const out = {};
         Object.keys(sheets).forEach(k => {
@@ -644,7 +701,7 @@ with sync_playwright() as p:
 
       /* Numbers on everybody, and one department that maps and one that does
          not — the two cases the BU column has to tell apart. */
-      PEOPLE.forEach((p, i) => { p.empId = "E" + (1000 + i); });
+      CP.forEach((p, i) => { p.empId = "E" + (1000 + i); });
       /* Three rows, three answers: a name that means ONE place, a name that
          means NOTHING, and — since 57 — a name that holds SEVERAL. The third
          must not be resolved: a Main BU covering three units cannot say which
@@ -653,9 +710,9 @@ with sync_playwright() as p:
          is the shape every row saved before 57 still holds. */
       GROUP.mainbus = [{ name: "Retail", at: UNIT_KEYS[1] }, { name: "Risk", at: null },
                        { name: "Distribution", at: [UNIT_KEYS[0], UNIT_KEYS[2]] }];
-      PEOPLE[0].mainbu = "Retail";
-      PEOPLE[1].mainbu = "Risk";
-      PEOPLE[3].mainbu = "Distribution";
+      CP[0].mainbu = "Retail";
+      CP[1].mainbu = "Risk";
+      CP[3].mainbu = "Distribution";
 
       /* ── THE FIXED POINT IS MEASURED WITH EVERYTHING TAKEN (87.6) ──
          Since a difference is an OFFER rather than an instruction, a plan
@@ -695,12 +752,12 @@ with sync_playwright() as p:
            nothing at all: the download carried the new value too, so both
            sides agreed and the check reported zero changes while passing.
            Measuring the wrong thing passes (50.6). */
-        const target = rows.filter(r => r["Emp ID"] === PEOPLE[2].empId)[0];
+        const target = rows.filter(r => r["Emp ID"] === CP[2].empId)[0];
         target["Job title"] = "Something else entirely";
         const untaken = planPeopleFile(rows);
-        const untakenRow = untaken.rows.filter(r => r.id === PEOPLE[2].empId)[0] || null;
+        const untakenRow = untaken.rows.filter(r => r.id === CP[2].empId)[0] || null;
         const moved = takeAll(planPeopleFile(rows));
-        const movedRow = moved.rows.filter(r => r.id === PEOPLE[2].empId)[0] || null;
+        const movedRow = moved.rows.filter(r => r.id === CP[2].empId)[0] || null;
         target["Job title"] = "";
 
         /* And the case the whole feature exists for: somebody the register has
@@ -724,10 +781,14 @@ with sync_playwright() as p:
           fixedProblems: fixed.problems.length,
           fixedSkipped: fixed.notices.length,
           rows: fixed.rows.length,
-          people: PEOPLE.length,
-          mappedAt: (mapped.rows.filter(r => r.key === PEOPLE[0].key)[0] || {}).where || null,
-          unmappedAt: (mapped.rows.filter(r => r.key === PEOPLE[1].key)[0] || {}).where || null,
-          severalAt: (mapped.rows.filter(r => r.key === PEOPLE[3].key)[0] || {}).where || null,
+          /* The file carries the client's rows: the office's own row has no
+             number (it is not the register's to edit, §313.29) and the reader
+             sets it aside by design — one notice, never a problem. */
+          people: CP.length,
+          expectSkipped: PEOPLE.length - CP.length,
+          mappedAt: (mapped.rows.filter(r => r.key === CP[0].key)[0] || {}).where || null,
+          unmappedAt: (mapped.rows.filter(r => r.key === CP[1].key)[0] || {}).where || null,
+          severalAt: (mapped.rows.filter(r => r.key === CP[3].key)[0] || {}).where || null,
           severalChoices: (SMPRules && mainbuChoices("Distribution")) || [],
           movedRows: movingRows(moved).length,
           movedWhat: movedRow ? peopleRowChanges(movedRow).join(",") : "(row missing)",
@@ -754,18 +815,18 @@ with sync_playwright() as p:
              column. And the OLD header still reads (58's rule, applied
              forward: "BU" was this column's header for one build). */
           unitHead: PEOPLE_FILE_COLS.indexOf("Unit") > -1,
-          unitWritten: rows.filter(r => String(r.Unit || "").trim() !== "").length,
+          unitWritten: rows.filter(r => r["Emp ID"] && String(r.Unit || "").trim() !== "").length,
           unitReadsBack: (() => {
-            const t = rows.filter(r => r["Emp ID"] === PEOPLE[4].empId)[0];
+            const t = rows.filter(r => r["Emp ID"] === CP[4].empId)[0];
             return t ? planPeopleFile([t]).rows[0].where : "(row missing)";
           })(),
-          unitWasAt: personAt(PEOPLE[4]),
-          /* PEOPLE[1] is on "Risk", which points at nothing — so the mapping
+          unitWasAt: personAt(CP[4]),
+          /* CP[1] is on "Risk", which points at nothing — so the mapping
              leaves them unplaced and the column is the only thing that can
              move them. The strongest case for the feature, so it is the one
              asserted. */
           unitOverrides: (() => {
-            const t = rows.filter(r => r["Emp ID"] === PEOPLE[1].empId)[0];
+            const t = rows.filter(r => r["Emp ID"] === CP[1].empId)[0];
             if (!t) return "(row missing)";
             const was = t.Unit; t.Unit = "Treasury (function)";
             const r = planPeopleFile([t]).rows[0];
@@ -773,7 +834,7 @@ with sync_playwright() as p:
             return r ? r.where : "(no row)";
           })(),
           unitRefuses: (() => {
-            const t = rows.filter(r => r["Emp ID"] === PEOPLE[1].empId)[0];
+            const t = rows.filter(r => r["Emp ID"] === CP[1].empId)[0];
             const was = t.Unit; t.Unit = "Nowhere At All";
             const n = planPeopleFile([t]).problems.length;
             t.Unit = was;
@@ -787,7 +848,7 @@ with sync_playwright() as p:
     if pf["rows"] != pf["people"]:
         errs.append("PEOPLE FILE: %d of %d people came back through the file"
                     % (pf["rows"], pf["people"]))
-    if pf["fixedProblems"] or pf["fixedSkipped"]:
+    if pf["fixedProblems"] or pf["fixedSkipped"] != pf["expectSkipped"]:
         errs.append("PEOPLE FILE: its own download does not read cleanly (%d problems, %d skipped)"
                     % (pf["fixedProblems"], pf["fixedSkipped"]))
     if pf["fixedMoving"]:
@@ -848,10 +909,16 @@ with sync_playwright() as p:
     # Four things are asserted, and the first is the one the old code got
     # wrong: A NAME IS NEVER AN IDENTIFIER, so nothing here matches on one.
     ident = pg.evaluate("""() => {
+      /* THE CLIENT'S ROWS, NEVER THE OFFICE'S (§313.29, and Phase B of spec
+         043): over HTTP the signed-in office person's row carries `forefront`
+         and the register may not edit it — a save touching it is refused and
+         every later switch away from home with it. Under file:// no row is
+         marked, so this list IS the register and nothing here changes. */
+      const CP = PEOPLE.filter(p => !p.forefront);
       const before = PEOPLE.length;
-      const anchor = PEOPLE[0];
+      const anchor = CP[0];
       anchor.empId = "IDENT-1"; anchor.email = "ident.one@example.com";
-      const other = PEOPLE[1];
+      const other = CP[1];
       other.empId = "IDENT-2"; other.email = "ident.two@example.com";
 
       /* 1. THE LADDER. A row with no employee number and a known address is

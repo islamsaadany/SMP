@@ -11,6 +11,19 @@
      installs from and the page the installed app opens on. -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- SERVED AT A CLIENT'S DOOR (§313.36) the page lives at /<client>/sign-in,
+     and a relative href would then look for /<client>/favicon.svg, which is
+     nothing. Root-relative when there is a server, relative on disk — decided
+     once here for every link above rather than by rewriting each one, and
+     never with <base>: the policy says base-uri 'none' on purpose (§43.6). -->
+<script>
+  if (location.protocol.indexOf("http") === 0) {
+    Array.prototype.forEach.call(document.querySelectorAll("link[href]"), function (l) {
+      var h = l.getAttribute("href");
+      if (h && h.charAt(0) !== "/" && h.indexOf(":") < 0) l.setAttribute("href", "/" + h);
+    });
+  }
+</script>
 <!-- The window chrome around an installed app follows the theme too, or the
      title bar stays navy-on-white while the page underneath went dark. Two
      tags, because theme-color takes a media query but not a class.
@@ -71,10 +84,22 @@
      ------------------------------------------------------------------ */
   :root {
     color-scheme: light;
-    --navy: #0f2544;
-    --navy-light: #1b3a63;
-    --gold: #c9a227;
-    --gold-light: #e6c65c;
+    /* FOREFRONT'S OWN COLOURS (Islam, 2026-08-28). This door is Forefront's
+       surface, not a client's — inside a client the colours are the client's,
+       from Setup › Branding. #F5A623 carries near-black at 9.04:1 and is a
+       FILL: as type on white it measures 2.03:1, so words take --gold-deep
+       (#9C5D08, 5.27:1). Constitution XIII, measured before use. */
+    --navy: #0F2C69;
+    --navy-light: #1b3f86;
+    --gold: #F5A623;
+    --gold-light: #ffc25c;
+    --gold-deep: #9C5D08;
+    /* The cards sit on the WHITE card, not on the navy wall — written first
+       in white-alpha, which is invisible on white and was only visible in a
+       screenshot. Constitution XIII's neighbour: a colour is measured against
+       the ground it actually sits on. */
+    --cardline: rgba(15,44,105,.18);
+    --cardfill: rgba(15,44,105,.03);
     --bg: #f4f6f9;
     --danger: #b3261e;
     --card: #ffffff;
@@ -115,16 +140,23 @@
     --icon: #8894a8;
     /* The tenant's own mark. Its two brand colours, read off the vector
        artwork in the client's brand manual, not sampled from a screenshot. */
-    --client-mark: #282e76;
-    --client-flag: #3a67b1;
+    /* A PNG cannot be recoloured (§52), so on a dark card the client's mark
+       sits on a light plate; on a light card the plate is the card. */
+    --mark-plate: transparent;
+    --mark-pad: 0;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --navy: #24487a;
-      --navy-light: #2e5794;
-      --gold: #d9b665;
-      --gold-light: #e6c65c;
+      --navy: #1B4183;
+      --navy-light: #25529f;
+      --gold: #F5A623;
+      --gold-light: #ffc25c;
+      --gold-deep: #F5A623;   /* on a dark ground the bright one reads at 8.15:1 */
+    --cardline: rgba(255,255,255,.16);
+    --cardfill: rgba(255,255,255,.04);
+      --cardline: rgba(255,255,255,.16);
+      --cardfill: rgba(255,255,255,.04);
       --bg: #14161a;
       --danger: #d97066;
       --card: #1c2027;
@@ -161,16 +193,19 @@
       --btn-shadow: rgba(0, 0, 0, 0.45);
       --icon: #7f8b9d;
       /* Reversed on a dark ground, which is how the client supplies it. */
-      --client-mark: #ffffff;
-      --client-flag: #ffffff;
+      --mark-plate: #ffffff;
+      --mark-pad: 6px 12px;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --navy: #24487a;
-    --navy-light: #2e5794;
-    --gold: #d9b665;
-    --gold-light: #e6c65c;
+    --navy: #1B4183;
+    --navy-light: #25529f;
+    --gold: #F5A623;
+    --gold-light: #ffc25c;
+    --gold-deep: #F5A623;   /* on a dark ground the bright one reads at 8.15:1 */
+    --cardline: rgba(255,255,255,.16);
+    --cardfill: rgba(255,255,255,.04);
     --bg: #14161a;
     --danger: #d97066;
     --card: #1c2027;
@@ -207,8 +242,8 @@
     --btn-shadow: rgba(0, 0, 0, 0.45);
     --icon: #7f8b9d;
     /* Reversed on a dark ground, which is how the client supplies it. */
-    --client-mark: #ffffff;
-    --client-flag: #ffffff;
+    --mark-plate: #ffffff;
+    --mark-pad: 6px 12px;
   }
 
   /* ---------------------------------------------------------------
@@ -231,18 +266,6 @@
      handed over, not the asset: they carry an opaque grey ground and would
      paint a rectangle around themselves here.
      --------------------------------------------------------------- */
-  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
-  .clientmark {
-    display: block; width: 150px; height: 31.2px; margin: 0 auto 18px;
-  }
-  /* The fills are declared INLINE inside the symbol, not here: a <use>
-     clones into a shadow tree that a document selector cannot reach.
-     Custom properties cross that boundary, so the tokens still theme it. */
-  /* Separates whose platform this is from the greeting. Without it the
-     lockup reads as a picture inside the greeting rather than a letterhead
-     over it. */
-  .clientmark + hr { border: 0; border-top: 1px solid var(--line); margin: 0 0 20px; }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
   [hidden] { display: none !important; }
   body {
@@ -372,6 +395,24 @@
   }
   .card h2 { font-size: 22px; font-weight: 700; text-align: center; color: var(--label); letter-spacing: -0.01em; }
   .card h2 + p { margin-top: 6px; text-align: center; font-size: 13.5px; color: var(--muted); }
+  /* ── THE CLIENT'S OWN MARK, ON THE CLIENT'S OWN DOOR (§313.36) ──
+     Whose platform this is, on the thing you actually touch — §52's placement,
+     given back now that every client has a door of its own: Forefront's
+     temple stays on the wall, the client's lockup sits on the card, and the
+     two never compete for a corner. Below 980px the wall is gone and the card
+     is all there is, which is the second reason it lives here. It is an <img>
+     read from the client's own row on the platform, so no client's artwork is
+     baked into this page and the root door draws none at all. Sized by
+     HEIGHT and left to find its own width: a lockup is wide, a crest is
+     square, and the door cannot know which it was handed. */
+  .clientmark {
+    display: block; height: 34px; width: auto; max-width: 190px; margin: 0 auto 18px;
+    object-fit: contain; background: var(--mark-plate); padding: var(--mark-pad); border-radius: 8px;
+    box-sizing: content-box;
+  }
+  /* Separates whose platform this is from the greeting. Without it the lockup
+     reads as a picture inside the greeting rather than a letterhead over it. */
+  .clientmark + hr { border: 0; border-top: 1px solid var(--line); margin: 0 0 20px; }
   .card form { margin-top: 26px; }
 
   label {
@@ -519,8 +560,8 @@
     .card { padding: 30px 22px 26px; border-radius: 16px; }
     /* Same reason as the short-window block: the mark's ~49px was 2px more
        than a 320x640 phone had left. Measured at 320, not assumed from 390. */
-    .clientmark { width: 132px; height: 27.5px; margin-bottom: 14px; }
-    .clientmark + hr { margin-bottom: 16px; }
+    .clientmark { height: 28px; margin-bottom: 12px; }
+    .clientmark + hr { margin-bottom: 14px; }
   }
   /* SHORT windows, not narrow ones. Measured: the wall's content needs about
      600px of height, so on a 1024x560 laptop the quote fell below the fold and
@@ -550,8 +591,8 @@
 
      Measured at every size, not estimated from one that passed. */
   @media (max-height: 700px) {
-    .clientmark { width: 120px; height: 25px; margin-bottom: 10px; }
-    .clientmark + hr { margin-bottom: 12px; }
+    .clientmark { height: 28px; margin-bottom: 12px; }
+    .clientmark + hr { margin-bottom: 14px; }
   }
   /* An entrance is a courtesy; for anyone who has asked for less motion it is
      an obstacle. Nothing here depends on an animation to become visible. */
@@ -562,31 +603,11 @@
 </head>
 <body>
 
-<svg class="sprite" aria-hidden="true" focusable="false">
-<defs>
-  <path id="rt_5_1" d="M.042999269 0 .2290039 .7299957H.3710022L.55700686 0H.44799806L.40400697 .18499756H.19700623L.15299988 0H.042999269M.21699524 .27400209H.3829956L.33299256 .4850006C.32433573 .5223338 .3171692 .5548299 .31149293 .582489 .3058268 .61015829 .30199687 .6289978 .30000306 .63900759 .29799906 .6289978 .29433189 .61015829 .28900147 .582489 .28367106 .5548299 .27633668 .52266439 .2669983 .48599244L.21699524 .27400209Z"/>
-  <path id="rt_5_124" d="M.083999637 0V.7299957H.31300355C.3590037 .7299957 .39900209 .7211609 .43299867 .7034912 .46699525 .6858317 .49349467 .66100057 .51249697 .6289978 .5314992 .59699508 .54100039 .55933126 .54100039 .51600649 .54100039 .46733094 .52849838 .42516075 .50349429 .38949586 .47850038 .35383097 .44466654 .32866416 .4019928 .31399537L.5509949 0H.42799378L.29499818 .30000306H.19200135V0H.083999637M.19200135 .39500428H.31300355C.34900413 .39500428 .3776703 .405838 .39900209 .4275055 .42033387 .44917298 .43099977 .478007 .43099977 .51400759 .43099977 .55134078 .42033387 .5806732 .39900209 .602005 .3776703 .6233368 .34900413 .6340027 .31300355 .6340027H.19200135V.39500428Z"/>
-  <path id="rt_5_136" d="M.2460022 0V.6309967H.050994874V.7310028H.548996V.6309967H.3540039V0H.2460022Z"/>
-  <path id="rt_5_33" d="M.08299255 0V.7299957H.28700257C.33499656 .7299957 .3766581 .72083029 .4119873 .7024994 .44732667 .6841685 .4748281 .6583354 .49449159 .625 .5141652 .5916646 .5240021 .5523326 .5240021 .5070038V.22399903C.5240021 .17933147 .5141652 .13999431 .49449159 .10598755 .4748281 .07199097 .44732667 .04582723 .4119873 .027496338 .3766581 .009165446 .33499656 0 .28700257 0H.08299255M.19099427 .0980072H.28700257C.32700096 .0980072 .35850016 .10917155 .38150025 .13150025 .40450035 .15382894 .41600038 .18466187 .41600038 .22399903V.5070038C.41600038 .54566958 .40450035 .5761668 .38150025 .5984955 .35850016 .62083438 .32700096 .6320038 .28700257 .6320038H.19099427V.0980072Z"/>
-  <path id="rt_5_37" d="M.09399414 0V.7299957H.522995V.6340027H.19999695V.42700196H.4880066V.33200074H.19999695V.09599304H.522995V0H.09399414Z"/>
-</defs>
-<symbol id="raya-trade" viewBox="0 0 157.66 32.82">
-  <g style="fill:var(--client-mark)">
-    <path transform="matrix(1,0,0,-1,54.995805,7.5039064)" d="M0 0-3.68-7.406-7.36 0"/>
-    <path transform="matrix(1,0,0,-1,18.16771,15.65329)" d="M0 0H-4.194V3.552H0C3.133 3.552 3.171 0 0 0M29.972-5.399 24.067 8.079H16.954L9.949-7.474C9.949-4.627 8.903-1.567 6.53-1.567 11.793 .027 10.263 8.079 3.445 8.079H-10.725V-9.686H-4.089V-4.014C1.351-4.014 2.718-2.996 2.718-8.376 2.718-9.486 3.174-9.686 4.086-9.686H15.722L20.726 2.246 24.864-9.686 26.638-9.673 25.379-5.944C25.379-5.944 29.504-5.933 29.76-5.923 30.068-5.825 30.024-5.536 29.972-5.399"/>
-    <path transform="matrix(1,0,0,-1,50.988405,25.338898)" d="M0 0 .286 .012C.955 .012 1.384 .937 1.744 1.64 2.044 2.211 2.278 2.678 2.303 2.729L9.291 17.765H15.763L23.523 0H16.957L12.587 11.932 7.755 0H.359"/>
-    <use data-text="T" xlink:href="#rt_5_136" transform="matrix(14.6443,0,0,-14.6443,108.45041,22.3219)"/>
-    <use data-text="R" xlink:href="#rt_5_124" transform="matrix(14.6443,0,0,-14.6443,118.55498,22.3219)"/>
-    <use data-text="A" xlink:href="#rt_5_1" transform="matrix(14.6443,0,0,-14.6443,128.65955,22.3219)"/>
-    <use data-text="D" xlink:href="#rt_5_33" transform="matrix(14.6443,0,0,-14.6443,138.76412,22.3219)"/>
-    <use data-text="E" xlink:href="#rt_5_37" transform="matrix(14.6443,0,0,-14.6443,148.86867,22.3219)"/>
-  </g>
-  <g style="fill:var(--client-flag)">
-    <path transform="matrix(1,0,0,-1,91.19791,22.0112)" d="M0 0-7.406 3.68 0 7.36"/>
-    <path transform="matrix(1,0,0,-1,92.3763,10.97171)" d="M0 0 7.406-3.68 0-7.36"/>
-  </g>
-</symbol>
-</svg>
+<!-- THE CLIENT-MARK SPRITE IS GONE WITH THE MARK IT DREW (§313.15, §24).
+     It was 23 lines of path data for one client's lockup on a door that
+     belongs to no client. `.clientmark`, `--client-mark` and the sprite
+     rules go with it — leftover CSS is what a later reader takes for
+     load-bearing, which is the whole of §24. -->
 
 <div class="gate">
 
@@ -692,8 +713,18 @@
 
       <!-- Sign in -->
       <div class="card" id="login">
-        <svg class="clientmark" role="img" aria-label="Raya Trade"><use href="#raya-trade"/></svg>
-        <hr>
+        <!-- THE MARK IS THE DOOR'S CLIENT'S, AND THE ROOT DOOR HAS NONE
+             (§313.36, narrowing §313.15). §313.15 took Raya Trade's lockup
+             off this card because the door was SHARED: a picture of one client
+             on a page every client's people stand at tells them all whose
+             door it is. That argument is about the shared door and holds for
+             it — the root still draws no client. What changed is that every
+             client now has a door of its own at /<client>/sign-in, and there
+             the mark is not a leak but the answer to "whose platform is this"
+             — §52's own placement, given back. dressDoor() below inserts it,
+             read from the client's row on the platform, on both cards; nothing
+             is written here, because the root and a client's door are ONE file
+             and the difference is what the server answers for the address. -->
         <h2>Welcome back</h2>
         <p>Sign in to continue</p>
         <form id="loginForm">
@@ -750,8 +781,6 @@
 
       <!-- First sign-in: the issued password is temporary -->
       <div class="card" id="change">
-        <svg class="clientmark" role="img" aria-label="Raya Trade"><use href="#raya-trade"/></svg>
-        <hr>
         <h2>Choose your own password</h2>
         <p>The one you were issued is temporary</p>
         <form id="changeForm">
@@ -846,6 +875,7 @@
 
   var loginCard = document.getElementById("login");
   var changeCard = document.getElementById("change");
+
   var errorEl = document.getElementById("error");
   var changeErrorEl = document.getElementById("changeError");
   var userEl = document.getElementById("user");
@@ -917,20 +947,31 @@
 
      When the platform becomes multi-tenant (§36) this is the seam: the slug is
      already the tenant's, and it is already in the URL. */
-  var TENANT = "raya-trade";
+  /* SINCE SPEC 042 THE SLUG IS THE CLIENT'S, and the seam §36 predicted is
+     the one this uses: one path per client, and the door itself carries no
+     client's name. Offline there is no server to rewrite anything, so the
+     real relative path stands and there is only ever the one file. */
   var HOSTED = location.protocol === "http:" || location.protocol === "https:";
-  var PLATFORM = HOSTED
-    ? "/" + TENANT
-    : "SMP-Project-Folder/strategy-management-platform-v3.22.html";
-  /* The one door into the platform, so it is where the welcome screen's memory
-     is cleared (§179). The KEY IS SPELT ONCE HERE and once in welcome.js, which
-     is one copy too many and is still the smaller evil: the gate is a separate
-     document that shares no code with the platform, and the alternative is a
-     third file existing only to hold a string. A wrong key here fails visibly —
-     you are greeted every time — rather than silently. */
-  function openPlatform() {
+  var OFFLINE_FILE = "SMP-Project-Folder/strategy-management-platform-v3.22.html";
+  /* AND THE FALLBACK IS NOT A CLIENT'S NAME. It read `clientKey ||
+     "raya-trade"`, so anybody the server did not hand a client to was sent to
+     one particular client's address — which on a deployment where that client
+     is not theirs is a refusal, and on one where it is not registered is a
+     dead end. Nobody to open means Forefront's own platform, which is where
+     the cards are and where a person with no client is told so.
+
+     THE ONE DOOR INTO THE PLATFORM, so it is also where the welcome screen's
+     memory is cleared (§179). The KEY IS SPELT ONCE HERE and once in
+     welcome.js, which is one copy too many and is still the smaller evil: the
+     gate is a separate document that shares no code with the platform, and the
+     alternative is a third file existing only to hold a string. A wrong key
+     here fails visibly — you are greeted every time — rather than silently.
+     Cleared on EVERY way through, the offline one included: which client is
+     being opened has nothing to do with whether a credential was asked for. */
+  function openPlatform(clientKey) {
     if (ASKED) { try { sessionStorage.removeItem("smp.welcome.done"); } catch (e) {} }
-    location.replace(PLATFORM);
+    if (!HOSTED) { location.replace(OFFLINE_FILE); return; }
+    location.replace(clientKey ? "/" + clientKey : "/platform");
   }
   function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
   function clearFail(el) { el.style.display = "none"; }
@@ -949,7 +990,38 @@
     });
   });
 
+  /* ── WHICH CLIENT'S DOOR THIS IS (§313.36) ────────────────────────
+     Read off the address and nowhere else: /<client>/sign-in is that client's
+     door, / is Forefront's. Sent to the server on the session check and on
+     sign-in, and the server answers two things — what the door wears (name
+     and mark, readable by anybody, since the address already names the
+     client) and where THIS person lands, which is the door's client only if
+     they may open it (mayOpenClient, the same rule as every card and endpoint).
+     A slug the server does not know answers a plain door, so a misspelt link
+     still signs somebody in and still lands them where the root would. */
+  var DOOR = (function () {
+    var m = /^\/([a-z0-9][a-z0-9-]{0,48})\/sign-in\/?$/.exec(location.pathname || "");
+    return m ? m[1] : "";
+  })();
+  function dressDoor(door) {
+    if (!door || !door.mark) return;
+    Array.prototype.forEach.call(document.querySelectorAll(".card"), function (card) {
+      if (card.querySelector(".clientmark")) return;
+      var h2 = card.querySelector("h2");
+      if (!h2) return;
+      var img = document.createElement("img");
+      img.className = "clientmark";
+      img.src = door.mark;
+      img.alt = door.name || "";
+      var hr = document.createElement("hr");
+      card.insertBefore(img, h2);
+      card.insertBefore(hr, h2);
+    });
+    if (door.name) document.title = door.name + " — Strategy Management Platform";
+  }
+
   function api(body) {
+    if (DOOR) body.door = DOOR;
     return fetch("/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -970,15 +1042,44 @@
     lab.setAttribute("for", "user");
     lab.textContent = "Email";
   }
-  function signedIn(person) {
+  function signedIn(person, landing) {
     PERSON = person;
+    LANDING = landing || null;
     /* A temporary password is the one thing that stands between signing in and
-       being in: it has to be replaced before the session is any use. Anything
-       else goes straight through. */
-    if (person && person.mustChange) show("change");
-    else openPlatform();
+       being in: it has to be replaced before the session is any use. */
+    if (person && person.mustChange) { show("change"); return; }
+    goOn();
   }
 
+  /* WHERE SOMEBODY GOES AFTER THE DOOR — decided by the SERVER (spec 042).
+     A client's own person, and anybody at Forefront who can open exactly one
+     client, goes straight there: a page whose only content is a button to the
+     page you just asked for is a door behind a door (§32). Everybody else is
+     handed to Forefront's own platform.
+
+     THE DOOR DOES NOTHING ELSE (revision 2, Islam 2026-08-29: "the page you
+     are showing should be just for login ... and the rest should be inside
+     the platform"). It signs somebody in and hands them over; the clients,
+     the consultants and the table live at /platform. */
+  var LANDING = null;
+  /* EVERY WAY THROUGH IS `openPlatform()` (§179, on the merge). This had grown
+     three exits — a client, the offline file, and a bare replace to /platform
+     — and only the first two went through the one function, so the third never
+     cleared the welcome screen's memory and signing in again after a sign-out
+     landed silently on the platform with no greeting. §179's own sentence says
+     why that matters: this is THE ONE DOOR into the platform, which is the
+     whole reason the clearing lives in it, and a second door past it is how
+     the two come to disagree (§53.5).
+
+     `openPlatform()` with no client already answers both of the cases this
+     dropped: offline it opens the file, hosted it goes to /platform. */
+  function goOn() {
+    openPlatform(LANDING);
+  }
+
+  /* The door's whole job, and the whole file after this point: take an
+     address and a password, and hand over. A comment left here describing the
+     cards would describe something this page stopped doing (§104.8). */
   document.getElementById("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();
     clearFail(errorEl);
@@ -986,7 +1087,7 @@
       api({ action: "login", user: userEl.value.trim(), password: passwordEl.value })
         .then(function (j) {
           passwordEl.value = "";
-          if (j.ok) signedIn(j.person);
+          if (j.ok) signedIn(j.person, j.client);
           else fail(errorEl, j.error || "Sign-in failed.");
         })
         .catch(function () { fail(errorEl, "Could not reach the server."); });
@@ -1085,7 +1186,10 @@
          somebody their first sign-in. */
       var wrap = document.getElementById("whereWrap");
       var at = wrap && !wrap.hidden ? document.getElementById("whereSel").value : "";
-      var go = function () { openPlatform(); };
+      /* THE SAME ROUTING AS THE DOOR (spec 042): whoever holds one client
+         opens it, and everybody else gets the cards. Choosing a password must
+         not land somebody somewhere the sign-in would not have. */
+      var go = function () { goOn(); };
       if (!at) return go();
       api({ action: "declareWhere", at: at }).then(go).catch(go);
     }).catch(function () { fail(changeErrorEl, "Could not reach the server."); });
@@ -1103,14 +1207,15 @@
     else show("login");
   }
   if (location.protocol === "http:" || location.protocol === "https:") {
-    fetch("/api/auth", { cache: "no-store" })
+    fetch("/api/auth" + (DOOR ? "?door=" + encodeURIComponent(DOOR) : ""), { cache: "no-store" })
       .then(function (r) {
         if (r.status === 503) throw new Error("no db");
         return r.json();
       })
       .then(function (j) {
         enterServerMode();
-        if (j.ok && j.person) signedIn(j.person);
+        dressDoor(j.door);
+        if (j.ok && j.person) signedIn(j.person, j.client);
         else show("login");
       })
       .catch(legacyStart);

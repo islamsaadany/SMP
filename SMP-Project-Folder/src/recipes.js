@@ -396,9 +396,11 @@ var RECIPES = [
   { id: "take-the-tour", q: "Can I see the introduction again?",
     a: "Yes. The welcome screen offers <b>Take an intro round</b>, and it appears " +
        "the next time you sign in — so if you have already moved past it today, " +
-       "you will see it again on your next sign-in.|The introduction uses a worked " +
-       "example rather than your own data, so you can explore the platform without " +
-       "changing or saving anything." },
+       "you will see it again on your next sign-in.|The introduction walks your own " +
+       "plan and only points things out \u2014 it presses nothing and changes nothing, " +
+       "so there is nothing to undo afterwards.|It is offered once there is a plan " +
+       "to walk: on a place with nothing in it yet, there would be nothing for it " +
+       "to show you." },
   { id: "password", q: "How do I change my password?",
     a: "If you're already signed in, ask the Strategy Office here and they can " +
        "issue a temporary password. You'll be asked to choose a new password when " +

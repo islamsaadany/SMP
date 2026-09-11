@@ -185,8 +185,24 @@ with sync_playwright() as p:
     pg.wait_for_timeout(350)
     pg.select_option('[data-prole-pick="%s"]' % floor, "smoteam")
     pg.wait_for_timeout(600)
+    # A SEAT IS ASKED ABOUT (§186), AND THIS FILE STILL ASSERTED §92's SHAPE.
+    # That section granted a one-destination role ON THE PICK, which made the
+    # most powerful grant in the product one `change` event with nothing in
+    # between — Islam, from the deployment: "hussein khaled is a custodian and
+    # getting the super user." SMO team is a seat, so it asks, and the second
+    # question is the DECISION rather than the fault this line was written
+    # against. Two checks were arguing and `role-picker.py` §3 is the one that
+    # moved with it (§51.11, with the CHECK stale). REWRITTEN, never loosened
+    # (§218): the ask is asserted DRAWN, then answered, and the grant is still
+    # read off the graph afterwards — a build that granted on the pick and drew
+    # no ask now fails, which is the behaviour this file exists to refuse.
+    asked = pg.query_selector('#modal-b [data-seatyes]') is not None
+    ck("picking SMO team asks first, because it is a seat (§186)", asked)
+    pg.evaluate("""()=>{const b=document.querySelector('#modal-b [data-seatyes]');
+        if(b) b.click();}""")
+    pg.wait_for_timeout(500)
     now = pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role).join(',')", floor)
-    ck("picking SMO team gives it, with no second question", now == "smoteam", now)
+    ck("...and answering it gives the seat", now == "smoteam", now)
     ck("...and no floor role is left beside it", "employee" not in now, now)
     ck("...and no where control was left waiting",
        pg.query_selector('[data-prole-where="%s"]' % floor) is None)

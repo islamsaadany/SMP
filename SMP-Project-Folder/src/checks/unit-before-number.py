@@ -438,10 +438,20 @@ with sync_playwright() as pw:
       const kos = UNITS[u].keyObjectives;
       kos[0].target = ""; delete kos[0].target3y; delete kos[0].pend;
       kos[1].target3y = "30"; kos[1].target = ""; delete kos[1].pend;
+      return { blank: kos[0].name, hasOne: kos[1].name };
+    }""")
+    # AND THE FIXTURE IS MADE BY SOMEBODY WHO MAY MAKE IT (§204, §185). The
+    # two acts were one script: the access cell and the two targets are the
+    # OFFICE's to write, and setting `VIEWER` in the same breath left them to
+    # be saved as the custodian — who may not touch the matrix, so the server
+    # refused the lot and the browser reported a bare 403. `switchViewer`'s
+    # own order is flush, then switch; the two evaluates are that order, and
+    # the wrapper flushes between them (qa-run.py, spec 043 Phase C).
+    pg.evaluate("""() => {
+      const u = "mobile";
       VIEWER = (UNIT_ROLES[u] || {}).custodian; leaveModes();
       current = u; currentSub = "strategy"; CURSEC.strategy = "foundation";
       paint();
-      return { blank: kos[0].name, hasOne: kos[1].name };
     }""")
     pg.wait_for_timeout(500)
     door = pg.query_selector('[data-fillcta="foundation"]')

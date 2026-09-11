@@ -71,8 +71,8 @@ def main():
         # outcome in %, its first measure a % target; both are put back at
         # the end (§113.8).
         pg.evaluate("""()=>{
-          window.__keep = JSON.stringify({t: UNITS.mobile.items[0].tactics[0], m: UNITS.mobile.items[0].measures[0], as: REVIEW.asOfMonth || null});
-          REVIEW.asOfMonth = "Aug 26";
+          window.__keep = JSON.stringify({t: UNITS.mobile.items[0].tactics[0], m: UNITS.mobile.items[0].measures[0], as: REVIEW.to || null});
+          REVIEW.to = "Aug 2026";
           var t = UNITS.mobile.items[0].tactics[0];
           t.outcome = "Store program successful application (check)";
           t.outTarget = "3%"; t.outDir = "\\u2265"; t.outCompile = "Sum"; delete t.outActual;
@@ -178,7 +178,7 @@ def main():
           var k = JSON.parse(window.__keep);
           var u = UNITS.mobile.items[0];
           u.tactics[0] = k.t; u.measures[0] = k.m;
-          if (k.as == null) delete REVIEW.asOfMonth; else REVIEW.asOfMonth = k.as;
+          REVIEW.to = k.as;
           paint();
           return !document.body.textContent.match(/\\(check\\)/);
         }""")

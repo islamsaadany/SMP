@@ -24,7 +24,19 @@ const DIRS = ["api", "lib"];
 const BAD = [
   [/\bpg_advisory_lock\s*\(/i,        "pg_advisory_lock — a SESSION lock; use pg_advisory_xact_lock inside a transaction"],
   [/\bpg_advisory_unlock(_all)?\s*\(/i,"pg_advisory_unlock — pairs with a session lock that cannot be held"],
-  [/^\s*SET\s+(?!LOCAL\b)[\w.]+\s*(=|\bTO\b)/i, "SET — a session setting that stays on the backend; use SET LOCAL inside a transaction"],
+  /* A SESSION `SET` NEVER HAS A `WHERE` (§313.34). An interpolated table name
+     breaks a run of literals, so `"UPDATE " + T + " SET x = $1 " + "WHERE …"`
+     hands this rule a fragment that genuinely BEGINS with the word SET while
+     the statement does not — a false positive that would be answered by
+     contorting the SQL, which leaves the blind spot for the next person.
+     Narrowed rather than loosened (§218): what it stops matching is an UPDATE's
+     SET clause, and an UPDATE with no WHERE at all is still flagged, which is
+     the safe way to be wrong. */
+  [/^\s*SET\s+(?!LOCAL\b)[\w.]+\s*(=|\bTO\b)(?![\s\S]*\bWHERE\b)/i, "SET — a session setting that stays on the backend; use SET LOCAL inside a transaction"],
+  /* A `SET ROLE` has neither `=` nor `TO`, so the rule above walks past it —
+     and it is session state exactly as search_path is (§313.35). Named here
+     so the one line that wears a badge has to carry a named exception. */
+  [/^\s*SET\s+ROLE\b/i,                "SET ROLE — a session role that stays on the backend; only on a direct connection, and reset at release"],
   [/^\s*LISTEN\b/i,                    "LISTEN — session-level, never reaches the right backend"],
   [/^\s*PREPARE\b/i,                   "PREPARE — a session-level statement; use parameterised queries"],
   [/\bCREATE\s+(GLOBAL\s+|LOCAL\s+)?TEMP(ORARY)?\s+TABLE\b/i, "a temp table — lives on one backend"],
@@ -42,10 +54,13 @@ function literalText(tok) {
   return tok.replace(/\s*\+\s*/g, "").replace(/["'`]/g, " ");
 }
 let findings = [];
+const rawLines = {};
 for (const dir of DIRS) {
   for (const f of fs.readdirSync(path.join(ROOT, dir)).filter(function (f) { return /\.js$/.test(f); })) {
     const file = dir + "/" + f;
-    const src = stripComments(fs.readFileSync(path.join(ROOT, file), "utf8"));
+    const raw = fs.readFileSync(path.join(ROOT, file), "utf8");
+    rawLines[file] = raw.split("\n");
+    const src = stripComments(raw);
     let m;
     while ((m = RUN.exec(src))) {
       const sql = literalText(m[0]);
@@ -58,6 +73,32 @@ for (const dir of DIRS) {
     }
   }
 }
-for (const x of findings) console.log("FAIL " + x);
-console.log(findings.length ? findings.length + " FAILED" : "ok   nothing session-level on the pooled connection (" + DIRS.join(", ") + ")");
-process.exit(findings.length ? 1 : 0);
+/* ── A DELIBERATE EXCEPTION IS NAMED AT THE LINE, AND PRINTED (§313.34) ──
+   One statement in the product is session-level ON PURPOSE and argued for:
+   `pointAt()` selects a client's schema, and §313.34 answers it by pointing the
+   pool at the DIRECT connection, where a checked-out client is one backend for
+   the life of the checkout and the hazard does not exist. This file reads
+   source and cannot see which endpoint a deployment is configured with, so the
+   exception has to be declared where the statement is.
+
+   IT IS NOT A WAY TO SILENCE A FINDING. The marker must NAME a section, it sits
+   on the line itself so it is read by whoever edits it, and every exception
+   honoured is PRINTED on every run — a check that quietly forgives is worse
+   than one that is red (§280.1: a check that can never go green is one people
+   learn to scroll past, and it takes the honest ones with it). */
+const OKMARK = /\/\*\s*session-state-ok:\s*(§[\d.]+[^*]*?)\*\//;
+const excused = [];
+const real = [];
+for (const f of findings) {
+  const m = /^([^:]+):(\d+)/.exec(f);
+  const line = m ? (rawLines[m[1]] || [])[Number(m[2]) - 1] || "" : "";
+  const mark = OKMARK.exec(line);
+  if (mark) excused.push(f + "\n       allowed: " + mark[1].trim());
+  else real.push(f);
+}
+for (const x of excused) console.log("ALLOWED " + x);
+for (const x of real) console.log("FAIL " + x);
+console.log(real.length ? real.length + " FAILED"
+  : "ok   nothing session-level on the pooled connection (" + DIRS.join(", ") + ")"
+    + (excused.length ? ", " + excused.length + " named exception" + (excused.length > 1 ? "s" : "") : ""));
+process.exit(real.length ? 1 : 0);

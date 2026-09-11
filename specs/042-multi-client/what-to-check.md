@@ -1,0 +1,76 @@
+# What to go and check (rule A16)
+
+For the merge that brings the multi-client split to `main`. One line each: what
+to open, what to do there, what should happen. **Nothing here can be checked
+until `scripts/migrate-to-multi-client.js` has been run against production** —
+that is a separate decision, and `rollback.md` is the way back.
+
+## The door
+
+- **Open the main address.** One sign-in card, and nothing else — no cards, no
+  tabs, no tables. It asks for an **email**, not a name.
+- **Sign in with your email** and the temporary password the migration printed.
+  It forces a password change at once, then lands you on **/platform**.
+
+## Forefront's platform
+
+- **Clients.** Four cards — Raya Trade, RHI, El Abd, Demo. Each says its
+  industry and **your seat on it**; Demo is marked as the demo.
+- **Press Raya Trade.** It opens the platform you know, at `/raya-trade`, with
+  everything exactly where it was.
+- **The client's name in the top line.** Press it: back to the cards.
+- **Consultants.** Three people, their seats listed **read-only**, and a
+  password to issue. The seats are set on a client, not here.
+- **Press Settings on a card.** The client's name, industry, notes, its
+  address (shown, never editable), and its team with a **Super user / SMO
+  team** pair per person. Give somebody else Super user: the previous holder
+  becomes SMO team in the same press.
+- **Who sees what.** One row — everybody who is not the platform admin — and
+  four columns. Press a lit half to put a cell back to nothing.
+
+## The clients
+
+- **Open RHI.** Empty, and it opens: no units, no plan, no invented content,
+  and no console error.
+- **Open Demo.** A full worked example under invented names — **Meridian
+  Group**, ten units, thirty-three people — and it **saves**, which is the
+  whole point of it.
+
+## What has gone
+
+- **The Demo data button is not there**, on any page, for anyone. The worked
+  example is the Demo client now.
+- **The tour** offers itself on a plan that has something in it, and the
+  Knowledge base's replay button **says why** on one that does not.
+
+## From other branches, in this merge
+
+- **Nothing.** This branch has taken nothing from another session since it
+  started; if that changes before the merge, it belongs on this list.
+
+## §313.35 — the badge (nothing to see, one thing to read)
+
+- Nothing on any screen moves. The badge is a database role a client's
+  connection wears; it has no page.
+- **Runtime log, after the first request to any client**: no line reading
+  `[db] the database key cannot create roles` — if that line is there, the host
+  refused to make the badge and requests are being served as the owner, which is
+  exactly how they were served before; give the key CREATEROLE.
+- **Videos**, on any client: Manage slides › a video slide still plays, and an
+  upload still lands. That endpoint had never been routed by client and is now.
+
+## §313.36 — every client's own door
+
+- **Clients › Raya Trade › Settings**: a row *Mark on this client's door* —
+  choose the Raya PNG (`clients/raya-trade/brand/raya-trade-group-mark.png`),
+  Save, and the card wears it.
+- **Signed out, open `<domain>/raya-trade`**: you are sent to
+  `<domain>/raya-trade/sign-in`, which shows Raya's mark above *Welcome back*;
+  the tab reads *Raya Trade — Strategy Management Platform*. Sign in as a
+  Raya person and you land in Raya Trade.
+- **Open `<domain>/`**: Forefront's door, no client's mark, as before.
+- **Open `<domain>/rhi/sign-in`** before a mark is set there: a plain door
+  that still signs you in.
+- **Dark theme** on the door: the mark sits on a white plate.
+- Not from a screen: the refusal of a JPEG or an SVG as a mark is the
+  server's, asserted in `checks/multi-client.py` §17.

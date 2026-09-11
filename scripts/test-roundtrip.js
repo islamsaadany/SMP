@@ -51,14 +51,31 @@ function firstDiff(a, b, at) {
   return null;
 }
 
+/* `--client <schema>` runs the whole round trip inside ONE CLIENT's schema
+   (spec 042). Worth having as a flag rather than a separate script: §113.7 is
+   a migration that read a column schema.sql no longer creates — perfect on
+   every database that already existed and broken on every fresh one — and the
+   only way to see that class of fault is to run this against a client created
+   today. */
+const CLIENT_ARG = (function () {
+  const i = process.argv.indexOf("--client");
+  return i > -1 ? process.argv[i + 1] : "";
+})();
+
 (async function () {
   io.tuneTypes(pg);
   const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
   const client = await pool.connect();
+  if (CLIENT_ARG) {
+    if (!/^[a-z][a-z0-9_]{0,48}$/.test(CLIENT_ARG)) throw new Error("not a schema name: " + CLIENT_ARG);
+    await client.query("CREATE SCHEMA IF NOT EXISTS " + CLIENT_ARG);
+    await client.query("SET search_path TO " + CLIENT_ARG);
+    console.log("running inside client schema: " + CLIENT_ARG);
+  }
 
-  const r1 = await io.ensureReady(client);
+  const r1 = await io.ensureReady(client, CLIENT_ARG || undefined);
   console.log("first ensureReady seeded:", r1.seeded);
-  const r2 = await io.ensureReady(client);
+  const r2 = await io.ensureReady(client, CLIENT_ARG || undefined);
   console.log("second ensureReady seeded:", r2.seeded, "(must be false)");
 
   /* What a first deployment actually gets: seeded, then cleared. */
@@ -92,14 +109,29 @@ function firstDiff(a, b, at) {
   /* EIGHT functions since spec 010 — Merchandising, which plans in pillars and
      sits under Retail. Like the ten units and the seven before it, the
      FUNCTION survives the clean slate and its invented CONTENT does not (§21). */
-  const slateOk = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
+  /* A CLIENT SCHEMA AND `public` ARE TWO DIFFERENT CLEAN SLATES, and asserting
+     one of them of both reported FAIL on a perfectly correct empty client
+     (spec 042). `public` is seeded and then cleared by migration 004, so it
+     keeps the SETUP — ten units, eight functions, two companies — and loses
+     every invented figure. A client created since the split is made with
+     `seed: false` and never had any of it: the right expectation there is
+     NOTHING AT ALL, and a check that cries wolf on the ordinary case is one
+     somebody learns to scroll past. */
+  const empty = Object.keys(slate).every(function (k) { return slate[k] === 0; });
+  const seeded = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
     slate.capabilities === 8 && slate.people === 1 && slate.pillars === 0 &&
     slate.measures === 0 && slate.tactics === 0 && slate.unitKOs === 0 &&
     slate.groupKOs === 0 && slate.projects === 0 && slate.history === 0 &&
     slate.wFactors === 4 && slate.wRows === 10 && slate.wValues === 0 &&
     slate.priorCycle === 0 && slate.companies === 2 && slate.inCompany === 6 &&
     slate.horizonSet === 0;
-  console.log("clean slate after first deploy:", slateOk ? "PASS" : "FAIL", JSON.stringify(slate));
+  /* AND A CLIENT SOMEBODY HAS ALREADY FILLED IN IS NEITHER — the Demo client
+     is seeded from the worked example on purpose, so this says so rather than
+     failing (it is the round trip below that has something to prove there). */
+  const slateOk = CLIENT_ARG ? (empty || (!seeded && slate.units > 0)) : seeded;
+  const word = CLIENT_ARG && !empty && slateOk ? "n/a — this client holds content"
+             : slateOk ? "PASS" : "FAIL";
+  console.log("clean slate after first deploy:", word, JSON.stringify(slate));
 
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
   /* Fidelity is the writer's and the reader's business, not the migration's. */
@@ -208,6 +240,7 @@ function firstDiff(a, b, at) {
      round trip has never offered the database is a value nobody has tested).
      Written on the FIRST project that has both kinds of row, so this says
      nothing about which project it is. */
+  const R = require("../lib/rules.js");
   const pState = await io.readState(client);
   const pCap = (pState.group.capabilities || []).filter(function (c) {
     return (c.projects || []).some(function (pr) {
@@ -305,6 +338,105 @@ function firstDiff(a, b, at) {
     console.log("monthly plan round trip: SKIPPED — no measure/tactic/objective in the seed");
     process.exitCode = 1;
   }
+
+  /* ── spec 030: THE REVIEW DAY, THE MOMENTS AND THE RECORD ──────────────
+     THE CLAIM IS "NO MIGRATION", AND §172 IS WHY IT IS NOT LEFT AS A CLAIM:
+     four layers agreed about a value the database had never once been offered,
+     and the column refused it. These three ride the review row's `extra`, so
+     the assertion is that they come back exactly — a list of numbers through
+     jsonb, and a map keyed by person, both of which are where a silent
+     reshaping would hide. */
+  const rState = await io.readState(client);
+  rState.review = Object.assign({}, rState.review, {
+    reviewDay: "2026-07-28", reviewAt: "10:00", remindAt: [24, 12, 6, 3],
+    taken: { smo: { copy: "2026-07-27T09:00:00.000Z",
+                    slides: "2026-07-27T09:01:00.000Z" },
+             other: { slides: "2026-07-27T11:00:00.000Z" } }
+  });
+  await io.writeState(client, rState);
+  const rBack = await io.readState(client);
+  const rSame = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const rOk = rBack.review.reviewDay === "2026-07-28" &&
+              rBack.review.reviewAt === "10:00" &&
+              rSame(rBack.review.remindAt, [24, 12, 6, 3]) &&
+              rSame(rBack.review.taken, rState.review.taken);
+  console.log("contingency: review day, moments and record round trip:",
+    rOk ? "PASS" : "FAIL",
+    rOk ? "[no migration — review.extra]"
+        : JSON.stringify({ day: rBack.review.reviewDay, at: rBack.review.reviewAt,
+                           moments: rBack.review.remindAt, taken: rBack.review.taken }));
+  if (!rOk) process.exitCode = 1;
+  /* AND THEY LEAVE AGAIN (§50.6), or a cycle that never named a day and one
+     whose day was taken away are not the same row, and every save after a
+     clear carries a change nobody made. */
+  delete rBack.review.reviewDay; delete rBack.review.reviewAt;
+  delete rBack.review.remindAt; delete rBack.review.taken;
+  await io.writeState(client, rBack);
+  const rClean = await io.readState(client);
+  const rcOk = !("reviewDay" in rClean.review) && !("reviewAt" in rClean.review) &&
+               !("remindAt" in rClean.review) && !("taken" in rClean.review);
+  console.log("  ...and clear again, keys DELETED:", rcOk ? "PASS" : "FAIL",
+    rcOk ? "" : JSON.stringify(Object.keys(rClean.review)));
+  if (!rcOk) process.exitCode = 1;
+
+  /* ── THE PLANNING PERIOD (§308) ────────────────────────────────
+     §172 IS WHY THIS IS MEASURED RATHER THAN CLAIMED: "it rides `extra`, so
+     there is no migration" is exactly the shape of claim that shipped a
+     CHECK constraint refusing a value four layers had agreed on. Two months
+     on the GROUP, written, read back, and taken away again. */
+  const ppState = await io.readState(client);
+  ppState.group[R.PLAN_FROM] = "Jul 2026";
+  ppState.group[R.PLAN_TO]   = "Dec 2026";
+  await io.writeState(client, ppState);
+  const ppBack = await io.readState(client);
+  const ppOk = ppBack.group[R.PLAN_FROM] === "Jul 2026" &&
+              ppBack.group[R.PLAN_TO]   === "Dec 2026";
+  console.log("planning period round trip:", ppOk ? "PASS" : "FAIL",
+    ppOk ? "[no migration — org.extra]"
+        : JSON.stringify({ from: ppBack.group[R.PLAN_FROM], to: ppBack.group[R.PLAN_TO] }));
+  if (!ppOk) process.exitCode = 1;
+  delete ppBack.group[R.PLAN_FROM]; delete ppBack.group[R.PLAN_TO];
+  await io.writeState(client, ppBack);
+  const ppClean = await io.readState(client);
+  const ppcOk = !(R.PLAN_FROM in ppClean.group) && !(R.PLAN_TO in ppClean.group);
+  console.log("  ...and clear again, keys DELETED:", ppcOk ? "PASS" : "FAIL",
+    ppcOk ? "" : JSON.stringify(Object.keys(ppClean.group).filter(k => k.indexOf("plan") === 0)));
+  if (!ppcOk) process.exitCode = 1;
+
+  /* ── OPENING A NEW CYCLE, WHICH CARRIES NO QUARTER (§316.3) ──────────
+     Islam, in his own words: pressing "Open a new cycle" looked like it
+     worked and the change never saved. §307 took the review point off that
+     panel, so the mint carries NO `endsQuarter` — and the column was NOT
+     NULL, so the save was refused, the cycle never left the browser, and a
+     refresh brought the old one back.
+
+     ASSERTED AS THE MINT'S OWN SHAPE, never as a column's nullability: what
+     must hold is that the review shell.html produces is one this writer
+     accepts and hands back. Put the constraint back and this goes red. */
+  const ncState = await io.readState(client);
+  ncState.review = { name: "H2 2026", from: "Jul 2026", to: "Dec 2026", due: "",
+                     state: "open", note: {}, submitted: {},
+                     cadence: ncState.review.cadence };
+  let ncOk = true, ncSaid = "";
+  try { await io.writeState(client, ncState); }
+  catch (e) { ncOk = false; ncSaid = String(e.message).split("\n")[0]; }
+  const ncBack = ncOk ? await io.readState(client) : null;
+  ncOk = ncOk && ncBack.review.name === "H2 2026" && ncBack.review.endsQuarter == null;
+  console.log("a new cycle with no endsQuarter saves:", ncOk ? "PASS" : "FAIL",
+    ncOk ? "[the quarter stays ABSENT, never invented]"
+         : (ncSaid || JSON.stringify({ name: ncBack && ncBack.review.name,
+                                       q: ncBack && ncBack.review.endsQuarter })));
+  if (!ncOk) process.exitCode = 1;
+  /* BOTH ENDS (§94.2): a tenant that HOLDS a quarter keeps it — the DEFAULT
+     stays, so this is a value the platform may still carry. */
+  const ncSet = await io.readState(client);
+  ncSet.review.endsQuarter = 3;
+  await io.writeState(client, ncSet);
+  const ncKept = await io.readState(client);
+  const nckOk = ncKept.review.endsQuarter === 3;
+  console.log("  ...and a quarter that IS set still round-trips:", nckOk ? "PASS" : "FAIL",
+    nckOk ? "" : JSON.stringify(ncKept.review.endsQuarter));
+  if (!nckOk) process.exitCode = 1;
 
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);

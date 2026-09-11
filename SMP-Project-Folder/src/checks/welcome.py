@@ -1,5 +1,11 @@
 """THE WELCOME SCREEN (§148, spec 025).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 NOT PART OF qa.py, for §94.11's reason: the screen exists only over http(s)
 with a signed-in person — over file:// WELCOME.offer declines before drawing
 anything, so a build that had lost the whole feature would go green in every
@@ -90,7 +96,15 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/auth"):
             body = json.loads(raw or b"{}")
             if body.get("action") == "login":
-                self._send(200, json.dumps({"ok": True, "person": PERSON}).encode(),
+                # A SIGN-IN NAMES THE CLIENT IT LANDS ON (spec 042). The door
+                # hands somebody over to what they can OPEN, and with exactly
+                # one client that is a straight replace to it — so a stub that
+                # answers no client models a person with NO client, who is sent
+                # to Forefront's cards instead and never reaches the platform
+                # this section is about. §100.3: a stub has to MODEL the
+                # server, not merely answer it.
+                self._send(200, json.dumps({"ok": True, "person": PERSON,
+                                            "client": "raya-trade"}).encode(),
                            "application/json")
             else:
                 self._send(200, b'{"ok":true}', "application/json")

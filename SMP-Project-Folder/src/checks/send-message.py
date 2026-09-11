@@ -1,5 +1,10 @@
 """THE COMPOSER STAYS ONE SCREEN (§95).
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 Islam: "the send message needs a reform for a better user experience."
 
 The page grew a chip per recipient, so the audience — the one part of it that
@@ -32,7 +37,14 @@ from playwright.sync_api import sync_playwright
 # the tour has its own check, and a suppression that reached into its
 # internals would be this file quietly asserting the tour away.
 def _no_tour(pg):
-    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    # §167.2: the welcome screen (§148) covers the viewport and intercepts every
+    # click, so a check written BEFORE it dies on the first press rather than
+    # reporting (§215) — which is what this one has been doing since §148
+    # shipped, unseen because nothing re-ran it. Suppressed as a returning
+    # viewer has it, in an init script because setting it after `goto` is too
+    # late. Every sibling that serves its own app already carries this line.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]

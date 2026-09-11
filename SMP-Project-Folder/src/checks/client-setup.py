@@ -1,4 +1,4 @@
-"""Setting a client up — the wizard writes the graph, and what is not built is inert (§303, spec 042).
+"""Setting a client up — the wizard writes the graph, and what is not built is inert (§318, spec 044).
 
 WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
 
@@ -19,7 +19,7 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
 
 · THE DULLED PARTS ARE INERT, NOT MERELY GREY. Islam asked for what the
   platform cannot do yet to be drawn and dulled; a mockup's dulling is a
-  drawing and a product's has to be enforced (spec 042 §7). So the third plan
+  drawing and a product's has to be enforced (spec 044 §7). So the third plan
   type is asserted `disabled`, the dull choice asserted to have no press, and
   each asserted to SAY *Later* — a greyed control that does not say why reads
   as broken (§61).

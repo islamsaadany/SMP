@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS review (
   from_label    text NOT NULL DEFAULT '',
   to_label      text NOT NULL DEFAULT '',
   due_label     text NOT NULL DEFAULT '',
-  ends_quarter  int  NOT NULL DEFAULT 2,
+  ends_quarter  int  DEFAULT 2,          -- §316.3: absent since §307 took it off the pen
   state         text NOT NULL DEFAULT 'open',
   cadence       text,
   notes         jsonb NOT NULL DEFAULT '{}',

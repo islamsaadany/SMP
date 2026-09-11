@@ -1113,6 +1113,93 @@ function openDeckFor(target, from){
   else openDeck(unitLike(t), from);
 }
 
+/* ── THE DECK AS A PDF (§305) ─────────────────────────────────────────
+   Islam asked for the presentation to be downloadable beside the plan, and
+   chose the PDF over an editable .pptx for now.
+
+   IT PRINTS THE REAL DECK, WHICH IS THE WHOLE ARGUMENT. The deck is
+   assembled fresh on the press (§253.3) and then MEASURED — `deckFitPass()`
+   splits a long table across slides by reading heights off the attached
+   page, and §69 records what happens to that pass on a detached element:
+   `scrollHeight` and `clientHeight` are both 0, so every slide reports as
+   fitting and the pass silently does nothing. So the deck is opened for
+   real, exactly as Present opens it, and the browser prints what is there.
+
+   FIT-TO-WINDOW IS TURNED OFF FIRST, AND PUT BACK. It is a toggle that
+   persists on the root between openings (§69.7), and it changes `.deck` to
+   the window's size — so the fit pass would split the tables against a box
+   that is not the page, and the presenter would get a PDF whose slides break
+   in different places from the one they rehearsed.
+
+   THE DECK CLOSES WHEN THE DIALOG DOES, so the press ends where it started.
+   `afterprint` fires on Save and on Cancel alike, which is what makes
+   cancelling cost nothing; a browser that never fires it leaves the deck
+   open on screen, with Exit where Exit always is — a nuisance and not a trap
+   (§61). */
+/* ONE PRINTER, TWO WAYS IN (§53.5, §312). §305 wrote all of this against a
+   single subject and §312 needed the same act over a FLOW; a second copy
+   would be a second answer to "what does the platform do to make a PDF",
+   and the fit-pass handling and the put-back are exactly the parts that
+   would drift. What differs between the two is which deck is opened, so
+   that is the argument. */
+function deckPrint(open){
+  var root = document.getElementById("deckroot");
+  var wasFit = root.classList.contains("fitwin");
+  root.classList.remove("fitwin");
+  open();
+  var done = function(){
+    window.removeEventListener("afterprint", done);
+    closeDeck();
+    if (wasFit) root.classList.add("fitwin");
+  };
+  window.addEventListener("afterprint", done);
+  /* One tick, so the paint that `openDeckWith()` just asked for has happened
+     before the browser is asked to lay the same thing out for paper. */
+  setTimeout(function(){ window.print(); }, 50);
+}
+
+function deckToPdf(target){
+  deckPrint(function(){ openDeckFor(target); });
+}
+
+/* ── EVERY SUBJECT, ONE PDF (§312) ────────────────────────────────────
+   Islam, of the contingency pack: *"the pdf in the contiengcy back is like
+   the master presentation a full pdf with all slides there."*
+
+   THAT SENTENCE DISSOLVES THE OBSTACLE RATHER THAN WORKING AROUND IT. A PDF
+   here is the BROWSER printing (§305) — the platform never holds PDF bytes,
+   which is exactly why the file cannot differ from the projector — so a
+   folder of nineteen PDFs would have been nineteen print dialogs answered
+   one at a time. A flow is ONE deck, so it is one dialog and one file.
+
+   EVERY SUBJECT, IN THE FLOW'S ORDER WHERE ONE IS SET. `masterOrder()` is
+   the running order and is allowed to be a SELECTION — the office may tick
+   three of eighteen for a board meeting — and a backup of some of the
+   subjects is not a backup (the card above says so about the picker). So the
+   order is the flow's and the membership is everything, which answers both
+   halves of what he asked for rather than one.
+
+   RECORDED, NOT STAMPED. A print dialog's outcome cannot be known — the
+   browser fires `afterprint` on Save and on Cancel alike (§305) — so marking
+   this person as holding the file would be a claim the platform cannot see
+   (§124). §306's reminders go on ending when the two DOWNLOADS are taken. */
+function contFlowTargets(){
+  var all = masterSubjects();
+  var first = SMPRules.masterFlow(GROUP).filter(function(t){
+    return all.indexOf(t) >= 0;
+  });
+  return first.concat(all.filter(function(t){ return first.indexOf(t) < 0; }));
+}
+
+function flowToPdf(){
+  var list = contFlowTargets();
+  if (!list.length) return false;
+  deckPrint(function(){
+    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+  });
+  return true;
+}
+
 /* ══ THE MASTER PRESENTATION (§266) ═══════════════════════════════════
    Islam: *"give an option for the SMO from the presentation list to do master
    presentation which is a flow of presentations in a flow and he is just asked

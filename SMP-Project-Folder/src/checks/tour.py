@@ -424,28 +424,54 @@ def contrast(pg):
 
 def writes_nothing(pg):
     """THE TOUR HAS NO WRITE PATH AT ALL, which is a stronger thing to know
-    than that one round trip happened to leave the state alone. Demo mode
-    refusing every save (§21, §67) is the backstop; this asserts the tour
-    never even reaches for one.
+    than that one round trip happened to leave the state alone — and since
+    spec 042 it is the ONLY thing standing between the tour and the client's
+    own data. It used to walk the baked worked example, which refused every
+    save (§21, §67); it walks the person's own plan now, so the backstop is
+    gone and this assertion is carrying the whole weight.
 
     Read out of the SHIPPED source rather than off the disk, so what is
     measured is what a client would actually run."""
-    src = pg.evaluate("""() => {
-      const s = [...document.scripts].map(x => x.textContent)
+    # INLINE OR SERVED, WHICHEVER THE STACK USES (spec 043 Phase B). The
+    # built file carries the shell as inline blocks; the served app carries
+    # the SAME bytes as one document under `script-src 'self'` (§238's net
+    # without a hash), so `textContent` is empty there and this read called a
+    # correct build sourceless. What the assertion is about is unchanged —
+    # "what a client would actually run" — so an external script is FETCHED
+    # rather than assumed, and a stack that served neither still fails.
+    src = pg.evaluate("""async () => {
+      const inline = [...document.scripts].map(x => x.textContent)
         .filter(t => t.indexOf('var TOUR = (function()') > -1)[0];
-      return s || null;
+      if (inline) return inline;
+      for (const x of [...document.scripts].filter(x => x.src)) {
+        const t = await fetch(x.src).then(r => r.text()).catch(() => "");
+        if (t.indexOf('var TOUR = (function()') > -1) return t;
+      }
+      return null;
     }""")
     if not check(src is not None, "the tour's source is not in the built file"):
         return
-    # `setMode` is the ONE call it makes into SYNC, and setMode itself writes
-    # nothing — it swaps which dataset is hydrated. Anything else that could
-    # reach the server or the state graph is a fault.
+    # AND THE SCAN BELOW READS THE TOUR'S OWN BLOCK. The built file emits one
+    # <script> per source, so `src` WAS the tour and nothing else; the served
+    # shell is one document holding every module, so scanning it reports the
+    # whole platform's calls under the tour's name. The disk copy is asserted
+    # to appear VERBATIM in what the page runs — which is the same claim this
+    # function was making — and the scan is then of that block alone.
+    disk = (ROOT / "SMP-Project-Folder/src/tour.js").read_text()
+    if not check(disk.strip() in src,
+                 "the shipped tour is not what the page runs, byte for byte"):
+        return
+    src = disk
+    # Anything that could reach the server or the state graph is a fault.
     for banned in ["fetch(", "saveNow", "afterPaint", "XMLHttpRequest",
                    "navigator.sendBeacon"]:
         check(banned not in src, f"the tour reaches for {banned!r} — it must write nothing")
+    # AND IT CALLS NOTHING IN SYNC AT ALL NOW. `demoMode` and `setMode` were
+    # the two it was allowed, and both went with the dataset switch (spec 042
+    # §6.1) — so the allow-list is empty, which is the strongest form this
+    # assertion has ever had.
     calls = sorted(set(re.findall(r"SYNC\.([A-Za-z]+)", src)))
-    check(calls == ["demoMode", "setMode"],
-          f"the tour calls SYNC.{calls} — only demoMode and setMode are allowed")
+    check(calls == [], f"the tour calls SYNC.{calls} — it must call nothing")
 
 
 def not_on_a_projector(pg):
@@ -478,16 +504,70 @@ def not_on_a_projector(pg):
     pg.evaluate("localStorage.clear(); sessionStorage.clear()")
 
 
-def no_offer_from_file(pg):
-    """Over file:// there is no sign-in, so there is no 'first sign-in' and
-    the tour must never offer itself — while the Knowledge base entry still
-    works, because the demo dataset is baked into the file. BOTH ENDS (§90):
-    knowledge_base() above is the other half of this assertion."""
+def nothing_to_tour(pg):
+    """AND A TOUR OF AN EMPTY SCREEN TEACHES NOTHING (spec 042 §6.2). With the
+    demo dataset no longer borrowed, the tour walks the person's OWN plan — so
+    it is not offered until there is one, and the Knowledge base says WHY
+    rather than drawing a button that lights nothing (§61).
+
+    BOTH ENDS, because a build that never offered the tour at all would pass
+    half of this: the filled plan must still offer it."""
     pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+    # The rule itself, asked of the shared module — one definition for the
+    # screen and the check (constitution IX).
+    ready = pg.evaluate("""() => {
+      const w = world();
+      const filled = SMPRules.tourReady(w, 'mobile');
+      const kept = JSON.parse(JSON.stringify(UNITS.mobile.items || []));
+      UNITS.mobile.items = [];
+      const empty = SMPRules.tourReady(w, 'mobile');
+      UNITS.mobile.items = kept;
+      return { filled, empty, missing: SMPRules.tourReady(w, 'no_such_unit') }; }""")
+    check(ready["filled"] is True, "a filled unit is not tour-ready")
+    check(ready["empty"] is False, "a unit with no pillars is still called tour-ready")
+    check(ready["missing"] is False, "a place that does not exist is called tour-ready")
+
+    # And the offer follows it — the same person, the same story, the plan
+    # emptied under them.
     ran = pg.evaluate("""() => {
       const p = PEOPLE.filter(x => TOUR.storyFor(x) === 'custodian')[0];
+      const at = p && (p.unit || 'mobile');
+      const kept = JSON.parse(JSON.stringify((UNITS[at] || {}).items || []));
+      if (UNITS[at]) UNITS[at].items = [];
+      const before = TOUR.ready(p);
+      if (UNITS[at]) UNITS[at].items = kept;
+      const after = TOUR.ready(p);
+      return { before, after }; }""")
+    check(ran["before"] is False, "the tour offers itself on a plan with nothing in it")
+    check(ran["after"] is True, "the tour refuses a plan that IS filled in")
+
+
+def no_offer_from_file(pg):
+    """The tour offers itself on a FIRST SIGN-IN and nowhere else. Over
+    file:// there is no sign-in at all, so it must never offer — while the
+    Knowledge base entry still works, because the file's own baked dataset is
+    the worked example. BOTH ENDS (§90): knowledge_base() above is the other
+    half of this assertion.
+
+    ASKED OF THE PAGE, NOT OF THE PROTOCOL (spec 043). Served from the new
+    stack a person HAS signed in, so "it must never offer" is one side of a
+    rule rather than the rule — the page is asked whether it is live, and the
+    live side asserts the other half that is true on both stacks: somebody the
+    stories do not fit is offered nothing (§119.4's own cost, and §61)."""
+    pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+    live = pg.evaluate("()=>!!(window.SYNC && SYNC.isLive && SYNC.isLive())")
+    if not live:
+        ran = pg.evaluate("""() => {
+          const p = PEOPLE.filter(x => TOUR.storyFor(x) === 'custodian')[0];
+          TOUR.offer(p); return TOUR.state().running; }""")
+        check(not ran, "the tour offered itself over file://, where nobody signed in")
+        return
+    ran = pg.evaluate("""() => {
+      const p = PEOPLE.filter(x => TOUR.storyFor(x) === null)[0];
+      if (!p) return null;
       TOUR.offer(p); return TOUR.state().running; }""")
-    check(not ran, "the tour offered itself over file://, where nobody signed in")
+    check(ran is False,
+          "the tour offered itself to somebody no story fits")
 
 
 def run(page_break_sec=None, break_target=False):
@@ -532,6 +612,7 @@ def run(page_break_sec=None, break_target=False):
         contrast(pg)
         writes_nothing(pg)
         not_on_a_projector(pg)
+        nothing_to_tour(pg)
         no_offer_from_file(pg)
 
         # THE TOUR NEVER OPENS THE PRESENTATION MENU (rev 4). The step

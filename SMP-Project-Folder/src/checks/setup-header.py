@@ -143,14 +143,19 @@ with sync_playwright() as p:
     # AND THE ALARM STILL WORKS. The demo has no stray name, so the state is
     # MADE — otherwise this ships unexercised (§94.2).
     go(pg, "mainbu")
-    pg.evaluate("""()=>{ const p=PEOPLE[0];
+    # THE CLIENT'S OWN ROW, NEVER THE OFFICE'S (§316.6). PEOPLE[0] is the
+    # office's own row, which carries `forefront` and which the platform owns
+    # (§313.29) — the authoriser refuses a change to it wholesale, so this
+    # made every save 403 and the refused flush blocked what came after. Over
+    # file:// nothing saves and it never showed.
+    pg.evaluate("""()=>{ const p=PEOPLE.filter(x=>!x.forefront)[0];
       p.mainbu='A department nobody listed'; paint(); }""")
     pg.wait_for_timeout(300)
     said = pg.eval_on_selector_all(".setuphead .chip", "e=>e.map(x=>x.textContent.trim())")
     ck("...on the header line, where the page's own marks now live",
        any("not on this list" in c for c in said), said)
     ck("an outstanding thing still gets a chip", any("not on this list" in c for c in said), said)
-    pg.evaluate("()=>{ PEOPLE[0].mainbu=''; paint(); }")
+    pg.evaluate("()=>{ PEOPLE.filter(x=>!x.forefront)[0].mainbu=''; paint(); }")
     pg.wait_for_timeout(250)
 
     # ── 3 · IT IS ONE ROW, AND THE TABLE FOLLOWS IT ──────────────────

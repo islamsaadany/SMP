@@ -86,12 +86,12 @@ def main():
 
         print("\n── 2 · Islam's own example, made (§94.2) ──")
         ex = pg.evaluate("""()=>{
-          var keep = REVIEW.asOfMonth; REVIEW.asOfMonth = "Aug 26";
+          var keep = REVIEW.to; REVIEW.to = "Aug 2026";
           var mk = c => ({name:"Shops opened", dir:"\\u2265", target:"2 #", compile:c, actual:"1"});
           var out = {months: elapsedMonths(),
             count:{due:measureDue(mk("Count")), lab:measureDueLabel(mk("Count")), score:measureScore(mk("Count"))},
             sum:  {due:measureDue(mk("Sum")),   lab:measureDueLabel(mk("Sum")),   score:measureScore(mk("Sum"))}};
-          if (keep === undefined) delete REVIEW.asOfMonth; else REVIEW.asOfMonth = keep;
+          REVIEW.to = keep;
           return out;
         }""")
         ck("the review point is month 8", ex["months"] == 8, ex)
@@ -107,14 +107,14 @@ def main():
         # The agreement, not a table of literals: the check floors for itself.
         MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
         sweep = pg.evaluate("""(months)=>{
-          var keep = REVIEW.asOfMonth, out = {};
+          var keep = REVIEW.to, out = {};
           [2, 3, 7, 12].forEach(function(t){
             out[t] = months.map(function(mo){
-              REVIEW.asOfMonth = mo + " 26";
+              REVIEW.to = mo + " 2026";
               return measureDue({dir:"\\u2265", target:String(t), compile:"Count", actual:""});
             });
           });
-          if (keep === undefined) delete REVIEW.asOfMonth; else REVIEW.asOfMonth = keep;
+          REVIEW.to = keep;
           return out;
         }""", MONTHS)
         import math
@@ -129,7 +129,7 @@ def main():
 
         print("\n── 4 · nothing due yet is not 'not scored' ──")
         nd = pg.evaluate("""()=>{
-          var keep = REVIEW.asOfMonth; REVIEW.asOfMonth = "Apr 26";
+          var keep = REVIEW.to; REVIEW.to = "Apr 2026";
           var row = {dir:"\\u2265", target:"2 #", compile:"Count", actual:"1"};
           var none = {dir:"\\u2265", target:"2 #", compile:"Count", actual:""};
           var lat = {dir:"\\u2265", target:"2 #", compile:"Latest", actual:""};
@@ -137,7 +137,7 @@ def main():
                      ndy:nothingDueYet(row), ndyNone:nothingDueYet(none),
                      latNdy:nothingDueYet(lat), latScore:measureScore(lat),
                      yn:nothingDueYet({dir:"\\u2265", target:"Y/N", compile:"Count", actual:""})};
-          if (keep === undefined) delete REVIEW.asOfMonth; else REVIEW.asOfMonth = keep;
+          REVIEW.to = keep;
           return out;
         }""")
         ck("at April 2 shops owe nought", nd["due"] == 0, nd)
@@ -154,7 +154,7 @@ def main():
         pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(300)
         pg.click('[data-s="performance"]'); pg.wait_for_timeout(500)
         pills = pg.evaluate("""()=>{
-          var keep = REVIEW.asOfMonth; REVIEW.asOfMonth = "Apr 26";
+          var keep = REVIEW.to; REVIEW.to = "Apr 2026";
           var p = UNITS.mobile.items[0];
           var a = {id:"CK-CNT", name:"Shops opened (check)", dir:"\\u2265", target:"2 #", compile:"Count", actual:"1"};
           var b = {id:"CK-LAT", name:"Rate (check)", dir:"\\u2265", target:"2 #", compile:"Latest", actual:""};
@@ -165,7 +165,7 @@ def main():
                      aPill: ra ? (ra.querySelector('.pill') || {}).className : null,
                      bPill: rb ? (rb.querySelector('.pill') || {}).className : null};
           p.measures.pop(); p.measures.pop();
-          if (keep === undefined) delete REVIEW.asOfMonth; else REVIEW.asOfMonth = keep;
+          REVIEW.to = keep;
           paint();
           return out;
         }""")

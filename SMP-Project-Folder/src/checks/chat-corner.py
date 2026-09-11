@@ -1,5 +1,10 @@
 """THE CORNER AFTER AN ANSWER THAT NEVER CAME (§197).
 
+qa-run: own-server — §316.1. It stands up its own server with its own stub,
+for the reason this file argues below: the surface is gated on a server
+(§94.11), so the stub IS half the subject. Pointing it at a served app would
+be pointing it at somebody else's answers.
+
 Islam: *"I didn't see the icon on login and when I sent to myself a message
 it appeared again"* — and, correcting my first diagnosis, *"the chat wasn't
 off."* He was right, and the cause is one missing branch.
@@ -94,9 +99,12 @@ threading.Thread(target=srv.serve_forever, daemon=True).start()
 BASE = "http://127.0.0.1:%d" % srv.server_address[1]
 
 
-def look(fail_first, wait, status=500, on=True):
+def look(fail_first, wait, status=500, on=True, early=None):
     """Open the platform with the first `fail_first` polls failing, wait, and
-    report whether the corner is on screen and how many times it asked."""
+    report whether the corner is on screen and how many times it asked.
+
+    `early` samples a SECOND, earlier moment (§290's bubble is only honest if
+    it never appears and then goes away again), reported as `early_there`."""
     CHAT.update(fail_first=fail_first, polls=0, status=status, on=on)
     with sync_playwright() as pw:
         b = pw.chromium.launch()
@@ -109,7 +117,14 @@ def look(fail_first, wait, status=500, on=True):
         pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
                            "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
         pg.goto(BASE + "/raya-trade")
-        pg.wait_for_timeout(wait)
+        early_there = None
+        if early is not None:
+            pg.wait_for_timeout(early)
+            early_there = pg.evaluate("() => { const d = document.getElementById('chatdock');"
+                                      "return !!(d && !d.hidden && d.getBoundingClientRect().width > 0); }")
+            pg.wait_for_timeout(max(0, wait - early))
+        else:
+            pg.wait_for_timeout(wait)
         # MEASURE THE BOX, never the class list (§68.10) — and press the point,
         # because present-and-unreachable is this project's recurring fault
         # (§70, §93.4, §110).
@@ -128,7 +143,7 @@ def look(fail_first, wait, status=500, on=True):
             const hit = q ? document.elementFromPoint(q.x + q.width/2, q.y + q.height/2) : null;
             return { there:true, reaches: !!(hit && bub && bub.contains(hit)) };
         }""")
-        out = dict(seen, polls=CHAT["polls"], errs=errs[:2])
+        out = dict(seen, polls=CHAT["polls"], errs=errs[:2], early_there=early_there)
         b.close()
     return out
 
@@ -141,8 +156,19 @@ ck("...on one poll", r["polls"] == 1, r)
 ck("no page errors", not r["errs"], r["errs"])
 
 print("\n── 2 · the FIRST answer fails — the corner must still arrive")
+# §290 REVERSED §197's rule here, and this assertion is REWRITTEN to the
+# reversal rather than deleted (§218). §197 drew nothing until a successful
+# answer, on the grounds that an optimistic bubble that vanishes is a control
+# that lied; §290's is NOT a guess — the switch lives in `org.extra.chat`, the
+# browser holds it as `GROUP.chat` before the page draws, and the server reads
+# that same value from that same row — so a failed FIRST answer must not take
+# the corner away from a tenant whose switch says on. That is Islam's own
+# report ("the chat icon didn't apperar on the reload"), and it is a STRONGER
+# claim than the one it replaces: the old line was satisfied by a build with
+# no corner at all.
 r = look(1, 2500)
-ck("it is not there yet at 2.5s (nothing is guessed)", not r["there"], r)
+ck("it is ALREADY there at 2.5s, first answer failed (§290)", r["there"], r)
+ck("...and a click at its centre reaches it", r.get("reaches"), r)
 r = look(1, 8000)
 ck("it IS there by 8s", r["there"], r)
 ck("...because it asked again", r["polls"] >= 2, r)
@@ -153,8 +179,13 @@ ck("the corner is drawn", r["there"], r)
 ck("...and reachable", r.get("reaches"), r)
 
 print("\n── 4 · a server that never answers must not poll for ever (§98.1)")
-r = look(9999, 20000)
-ck("nothing is drawn — a bubble that lied would be worse", not r["there"], r)
+# REWRITTEN to §290 with the same subject (§218). What §197 was protecting is
+# a bubble that appears and then goes away; that is asserted DIRECTLY now, at
+# two moments, which the single late reading could never see — and the bound
+# on the asking, which is the half §197 was right about, is untouched.
+r = look(9999, 20000, early=2000)
+ck("it is drawn, because the switch is known (§290)", r["there"], r)
+ck("...and it never flickered away — there at 2s AND at 20s", r["early_there"] and r["there"], r)
 ck("...and the asking is BOUNDED", 2 <= r["polls"] <= 8, r["polls"])
 
 print("\n── 5 · not signed in still takes it away, and stops")

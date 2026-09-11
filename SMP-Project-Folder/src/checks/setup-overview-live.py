@@ -1,5 +1,11 @@
 """Setup · Overview: the three rows that only exist when there is a server (§108.10).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 `checks/setup-overview.py` covers the two attention rows that live in the state
 graph, and asserts the other three ABSENT — which is the right assertion over
 `file://` and is the whole of what that file can say about them. Absent is also
@@ -33,7 +39,13 @@ from playwright.sync_api import sync_playwright
 # the tour has its own check, and a suppression that reached into its
 # internals would be this file quietly asserting the tour away.
 def _no_tour(pg):
-    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    # AND THE WELCOME SCREEN COVERS THE VIEWPORT (§167.2). It exists over
+    # http(s) only, which is what this file serves — so it is stood down as a
+    # RETURNING viewer does, in an init script: setting the flag after `goto`
+    # is too late, and the overlay then takes every click on the page behind
+    # it (§148, §159). The screen has its own check.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -147,7 +159,7 @@ BASE = "http://127.0.0.1:%d" % PORT
 def open_overview(pg):
     pg.goto(BASE + "/raya-trade")
     pg.wait_for_timeout(1200)
-    pg.query_selector(".navmenu-btn").click()
+    pg.query_selector('[data-md="setup"]').click()
     pg.wait_for_timeout(900)
 
 

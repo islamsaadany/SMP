@@ -1,0 +1,541 @@
+<title>Project owner save — three shapes</title>
+<style>
+/* ── SMP's own tokens, copied verbatim from src/_shared.css (Forefront) ──
+   This is a mockup of the running platform, so it borrows the product's
+   palette rather than inventing one. Light is the bare :root; dark is
+   redefined for both the OS setting and an explicit choice. */
+:root{
+  --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+  --fs-label:11px; --fs-micro:10.5px;
+  --r-sm:6px; --r:8px; --r-pill:999px;
+
+  --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+  --good-tx:#1F6248; --attn-tx:#7A5D1C; --bad-tx:#8C3327;
+  --stone:#16325C;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --attn:#B8860B; --bad:#B04434; --none:#676C73;
+  --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --bad-bg:#F7E3E0;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --zebra:#F5F7FA;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+    --stone:#7FA3D8;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
+    --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --zebra:#212630;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+  --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+  --stone:#7FA3D8;
+  --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
+  --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --zebra:#212630;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 80px;
+  display:flex;flex-direction:column;gap:30px}
+
+/* page chrome ---------------------------------------------------------- */
+.top{display:flex;flex-direction:column;gap:8px;padding-bottom:6px;
+  border-bottom:1px solid var(--line)}
+.kick{font:700 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--stone)}
+h1{margin:0;font:650 27px/1.25 var(--sans);letter-spacing:-.015em;text-wrap:balance}
+.lede{margin:0;max-width:62ch;color:var(--ink-2)}
+
+/* the explainer block --------------------------------------------------- */
+.today{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.today h2{margin:0;font:650 18px/1.3 var(--sans)}
+.does{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0;
+  border:1px solid var(--line-soft);border-radius:var(--r-sm);overflow:hidden}
+.does>div{padding:12px 14px;border-right:1px solid var(--line-soft)}
+.does>div:last-child{border-right:0}
+.does .k{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.does .yes{color:var(--good-tx);font-weight:650}
+.does .no{color:var(--bad-tx);font-weight:650}
+
+/* option panels --------------------------------------------------------- */
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden}
+.opt>header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  padding:16px 22px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.opt .tag{font:700 13px/1 var(--mono);letter-spacing:.06em;color:var(--stone)}
+.opt h2{margin:0;font:650 19px/1.3 var(--sans);letter-spacing:-.012em}
+.opt.settled{border-color:var(--gold)}
+.opt.settled>header{background:var(--attn-bg);border-bottom-color:var(--gold)}
+.opt.settled .stage .pband + .pband{margin-top:2px}
+.opt .pick{margin-left:auto;font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold-deep);border:1px solid var(--gold);
+  border-radius:var(--r-pill);padding:4px 11px}
+.opt .body{padding:20px 22px;display:flex;flex-direction:column;gap:18px}
+.plain{margin:0;max-width:66ch;color:var(--ink-2)}
+.cost{margin:0;max-width:66ch;font-size:13px;color:var(--ink-3);
+  border-left:2px solid var(--line);padding-left:12px}
+.cost b{color:var(--ink-2);font-weight:650}
+
+/* the two drawn states -------------------------------------------------- */
+.states{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:920px){.states{grid-template-columns:1fr 1fr}}
+.state{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;
+  background:var(--ground)}
+.state>.cap{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);padding:9px 12px;
+  background:var(--surface-2);border-bottom:1px solid var(--line)}
+.stage{padding:14px 12px;display:flex;flex-direction:column;gap:12px}
+
+/* ── the platform's own pieces, rules copied from src/*.css ── */
+.tabrow{display:flex;align-items:center;gap:14px;padding:0 2px}
+.tabrow .tab{font-size:13.5px;color:var(--ink-3)}
+.tabrow .tab.on{color:var(--ink);font-weight:650;
+  box-shadow:inset 0 -2px 0 var(--gold)}
+.repchrome{display:flex;align-items:center;gap:12px;margin-left:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:5px 12px}
+.repchrome .rc-n{font-weight:700;font-size:15px}
+.repchrome .rc-of{font-size:11.5px;color:var(--ink-3)}
+.repchrome .rc-bar{width:80px;height:6px;background:var(--surface-2);
+  border-radius:20px;overflow:hidden}
+.repchrome .rc-bar i{display:block;height:100%;background:var(--attn)}
+.repchrome .rc-own{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.repchrome .rc-own b{color:var(--ink-2);font-weight:650}
+.repchrome .linkbu{font:inherit;background:none;border:0;padding:0;cursor:default;
+  color:var(--stone);font-size:12.5px}
+
+.pband{display:flex;align-items:center;gap:11px;background:var(--surface-2);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;box-shadow:inset 3px 0 0 var(--gold);
+  margin:0;padding:12px 12px 12px 15px}
+.pband-code{font:600 13px/1 var(--mono);color:var(--stone);letter-spacing:.05em;flex:none}
+.pband-name{font:650 19px/1.3 var(--sans);color:var(--ink);letter-spacing:-.012em}
+.pband-r{margin-left:auto;display:inline-flex;align-items:center;gap:10px;flex:none;
+  flex-wrap:wrap;justify-content:flex-end}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-label);
+  font-weight:600;padding:3px 10px;border-radius:var(--r-pill);white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+.editbtn{font:inherit;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;color:var(--gold-deep);background:none;border:1px solid var(--gold);
+  border-radius:99px;padding:6px 15px;cursor:default}
+.editbtn.cta{color:var(--cta);border-color:var(--cta)}
+.linkbu{font:inherit;background:none;border:0;padding:0;cursor:default;
+  color:var(--stone);font-size:12.5px;text-decoration:underline;
+  text-underline-offset:2px}
+.said{font-size:11.5px;color:var(--good-tx);font-weight:600;white-space:nowrap}
+.said.bad{color:var(--bad-tx)}
+
+h4.mini{margin:2px 0 -4px;font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+table.mini{width:100%;border-collapse:collapse;font-size:13px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm)}
+table.mini th{background:var(--panel);color:var(--panel-ink);text-align:left;
+  font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;
+  padding:8px 9px}
+table.mini td{padding:7px 9px;border-top:1px solid var(--line-soft);color:var(--ink-2)}
+table.mini tr:nth-child(even) td{background:var(--zebra)}
+table.mini td.cc{text-align:center}
+.fld{display:inline-block;font:inherit;font-size:12.5px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:4px 7px;
+  min-width:64px;color:var(--ink)}
+.locked .fld{opacity:.45}
+.locked table.mini{opacity:.72}
+.frozen{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+
+.note{margin:0;font-size:12.5px;color:var(--ink-3);max-width:66ch}
+.note b{color:var(--ink-2);font-weight:650}
+footer{border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;
+  color:var(--ink-3);max-width:66ch}
+</style>
+
+<div class="wrap">
+
+  <div class="top">
+    <div class="kick">SMP · mockup for sign-off · 7 Sep 2026</div>
+    <h1>A save on the project, for the project owner</h1>
+    <p class="lede">Three shapes, drawn in the platform's own pixels. Each is shown
+      before the press and after it, because that is the only place they differ.
+      Nothing is built yet.</p>
+  </div>
+
+  <!-- SETTLED: B. WHAT TO CALL THE BUTTON ------------------------------- -->
+  <section class="opt settled">
+    <header>
+      <span class="tag">B</span>
+      <h2>Settled — one question left: what the button says</h2>
+      <span class="pick">built · Save draft</span>
+    </header>
+    <div class="body">
+      <p class="plain">B is the shape: the press pushes it, freezes his project, and
+        <b>Reopen</b> is the way back. Once it freezes, <em>Mark done</em> is the
+        wrong word for it. Two candidates were drawn in both states — the only
+        difference is the word — and <b>Save draft</b> is what shipped.</p>
+
+      <div class="states">
+        <div class="state">
+          <div class="cap">"Save" — your word</div>
+          <div class="stage">
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <button class="editbtn">Save</button>
+              </span>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <span class="frozen">Saved · closed</span>
+                <button class="editbtn cta">Reopen</button>
+              </span>
+            </div>
+            <p class="note">Short and plain. But every number is already kept, so
+              the word promises something that has been happening all along — and
+              the bar above says <b>Save draft</b> for the whole function, so the
+              screen carries two Saves of different widths.</p>
+          </div>
+        </div>
+
+        <div class="state">
+          <div class="cap">"Save draft" — chosen, and built</div>
+          <div class="stage">
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <button class="editbtn">Save draft</button>
+              </span>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <span class="frozen">Draft saved</span>
+                <button class="editbtn cta">Reopen</button>
+              </span>
+            </div>
+            <p class="note">The same two words the bar already uses for the same two
+              acts, one project wide instead of the whole function — and the state it
+              leaves behind, <b>Draft saved · Reopen</b>, is word for word what the
+              bar shows. Nothing new to learn.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="cost"><b>Either way nothing is lost:</b> a frozen project <em>is</em>
+        the finished declaration, so the bar still reads <b>Your 2 projects · 1 of 2
+        done</b> and whoever submits still sees which are ready.</p>
+    </div>
+  </section>
+
+  <!-- WHAT MARK DONE DOES TODAY ---------------------------------------- -->
+  <section class="today">
+    <h2>First: what <em>Mark done</em> does today</h2>
+    <p class="plain">It is a <b>signal</b>, not a save and not a lock. Pressing it
+      writes one small mark against that project and puts the word <b>Done</b> on
+      its band, so whoever submits the whole function can see which projects are
+      finished. That is all it does.</p>
+    <div class="does">
+      <div><div class="k">Does it save?</div>
+        <span class="no">No</span> — but nothing is lost. Every number is already
+        sent the moment you leave the box.</div>
+      <div><div class="k">Does it freeze anything?</div>
+        <span class="no">No</span> — the boxes stay open. You can keep typing after
+        pressing it.</div>
+      <div><div class="k">Does it tell the office?</div>
+        <span class="yes">Yes</span> — the bar reads <b>Your 2 projects · 1 of 2
+        done</b>, and the band reads <b>Done</b>.</div>
+    </div>
+    <p class="note"><b>So the gap is small.</b> Against the capability's
+      <em>Save draft</em>, what is missing is (1) a press that pushes it there and
+      then and says whether it landed, and (2) a freeze.</p>
+  </section>
+
+  <!-- OPTION A ---------------------------------------------------------- -->
+  <section class="opt">
+    <header>
+      <span class="tag">A</span>
+      <h2>Mark done also pushes it, and says so</h2>
+    </header>
+    <div class="body">
+      <p class="plain">Same button, same place. Pressing it sends everything to the
+        server right then and answers you — <b>Saved</b>, or a plain sentence if it
+        did not go. Nothing freezes.</p>
+
+      <div class="states">
+        <div class="state">
+          <div class="cap">Before</div>
+          <div class="stage">
+            <div class="tabrow">
+              <span class="tab">Strategy</span><span class="tab on">Reporting</span>
+              <span class="tab">Performance</span>
+              <div class="repchrome">
+                <span><span class="rc-n">7</span> <span class="rc-of">of 12</span></span>
+                <span class="rc-bar"><i style="width:58%"></i></span>
+                <span class="rc-own">Your 2 projects · <b>0 of 2 done</b></span>
+                <button class="linkbu">Close</button>
+              </div>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <button class="editbtn">Mark done</button>
+              </span>
+            </div>
+            <h4 class="mini">Milestones</h4>
+            <table class="mini">
+              <tr><th>#</th><th>Milestone</th><th>Status</th><th>Progress</th></tr>
+              <tr><td>1</td><td>Tooling chosen</td><td class="cc"><span class="fld">Done</span></td><td class="cc"><span class="fld">100</span></td></tr>
+              <tr><td>2</td><td>Pilot desk live</td><td class="cc"><span class="fld">In progress</span></td><td class="cc"><span class="fld">60</span></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="state">
+          <div class="cap">After the press</div>
+          <div class="stage">
+            <div class="tabrow">
+              <span class="tab">Strategy</span><span class="tab on">Reporting</span>
+              <span class="tab">Performance</span>
+              <div class="repchrome">
+                <span><span class="rc-n">7</span> <span class="rc-of">of 12</span></span>
+                <span class="rc-bar"><i style="width:58%"></i></span>
+                <span class="rc-own">Your 2 projects · <b>1 of 2 done</b></span>
+                <button class="linkbu">Close</button>
+              </div>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <span class="said">Saved</span>
+                <span class="pill good">Done</span>
+                <button class="linkbu">Undo</button>
+              </span>
+            </div>
+            <h4 class="mini">Milestones</h4>
+            <table class="mini">
+              <tr><th>#</th><th>Milestone</th><th>Status</th><th>Progress</th></tr>
+              <tr><td>1</td><td>Tooling chosen</td><td class="cc"><span class="fld">Done</span></td><td class="cc"><span class="fld">100</span></td></tr>
+              <tr><td>2</td><td>Pilot desk live</td><td class="cc"><span class="fld">In progress</span></td><td class="cc"><span class="fld">60</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <p class="cost"><b>Cost:</b> nothing is protected. He can mark it done and then
+        change a number, and the mark still says done. Same as today, plus the
+        confirmation.</p>
+    </div>
+  </section>
+
+  <!-- OPTION B ---------------------------------------------------------- -->
+  <section class="opt">
+    <header>
+      <span class="tag">B</span>
+      <h2>Mark done pushes it <em>and</em> freezes his project</h2>
+      <span class="pick">my pick</span>
+    </header>
+    <div class="body">
+      <p class="plain">Everything in A, and then his own project goes read-only —
+        the same thing <em>Save draft</em> does to the whole function, one project
+        wide. <b>Undo</b> is the way back, exactly as <b>Reopen</b> is on the bar.
+        The custodian and the office can still edit.</p>
+
+      <div class="states">
+        <div class="state">
+          <div class="cap">Before</div>
+          <div class="stage">
+            <div class="tabrow">
+              <span class="tab">Strategy</span><span class="tab on">Reporting</span>
+              <span class="tab">Performance</span>
+              <div class="repchrome">
+                <span><span class="rc-n">7</span> <span class="rc-of">of 12</span></span>
+                <span class="rc-bar"><i style="width:58%"></i></span>
+                <span class="rc-own">Your 2 projects · <b>0 of 2 done</b></span>
+                <button class="linkbu">Close</button>
+              </div>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <button class="editbtn">Mark done</button>
+              </span>
+            </div>
+            <h4 class="mini">Milestones</h4>
+            <table class="mini">
+              <tr><th>#</th><th>Milestone</th><th>Status</th><th>Progress</th></tr>
+              <tr><td>1</td><td>Tooling chosen</td><td class="cc"><span class="fld">Done</span></td><td class="cc"><span class="fld">100</span></td></tr>
+              <tr><td>2</td><td>Pilot desk live</td><td class="cc"><span class="fld">In progress</span></td><td class="cc"><span class="fld">60</span></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="state">
+          <div class="cap">After the press — his project is closed</div>
+          <div class="stage locked">
+            <div class="tabrow">
+              <span class="tab">Strategy</span><span class="tab on">Reporting</span>
+              <span class="tab">Performance</span>
+              <div class="repchrome">
+                <span><span class="rc-n">7</span> <span class="rc-of">of 12</span></span>
+                <span class="rc-bar"><i style="width:58%"></i></span>
+                <span class="rc-own">Your 2 projects · <b>1 of 2 done</b></span>
+                <button class="linkbu">Close</button>
+              </div>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <span class="frozen">Done · closed</span>
+                <button class="editbtn cta">Reopen</button>
+              </span>
+            </div>
+            <h4 class="mini">Milestones</h4>
+            <table class="mini">
+              <tr><th>#</th><th>Milestone</th><th>Status</th><th>Progress</th></tr>
+              <tr><td>1</td><td>Tooling chosen</td><td class="cc"><span class="fld">Done</span></td><td class="cc"><span class="fld">100</span></td></tr>
+              <tr><td>2</td><td>Pilot desk live</td><td class="cc"><span class="fld">In progress</span></td><td class="cc"><span class="fld">60</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <p class="cost"><b>Cost:</b> to correct one number he must press <b>Reopen</b>
+        first. And the word on the button changes meaning — it stops being "tell
+        them I'm finished" and becomes "finish and close", which is a bigger press
+        than it is today.</p>
+    </div>
+  </section>
+
+  <!-- OPTION C ---------------------------------------------------------- -->
+  <section class="opt">
+    <header>
+      <span class="tag">C</span>
+      <h2>A separate <em>Save my project</em> button beside it</h2>
+    </header>
+    <div class="body">
+      <p class="plain">Two controls. <b>Save my project</b> pushes it there and then
+        and answers you, any number of times. <b>Mark done</b> stays exactly what it
+        is today. Nothing freezes.</p>
+
+      <div class="states">
+        <div class="state">
+          <div class="cap">Before</div>
+          <div class="stage">
+            <div class="tabrow">
+              <span class="tab">Strategy</span><span class="tab on">Reporting</span>
+              <span class="tab">Performance</span>
+              <div class="repchrome">
+                <span><span class="rc-n">7</span> <span class="rc-of">of 12</span></span>
+                <span class="rc-bar"><i style="width:58%"></i></span>
+                <span class="rc-own">Your 2 projects · <b>0 of 2 done</b></span>
+                <button class="linkbu">Close</button>
+              </div>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <button class="linkbu">Save my project</button>
+                <button class="editbtn">Mark done</button>
+              </span>
+            </div>
+            <h4 class="mini">Milestones</h4>
+            <table class="mini">
+              <tr><th>#</th><th>Milestone</th><th>Status</th><th>Progress</th></tr>
+              <tr><td>1</td><td>Tooling chosen</td><td class="cc"><span class="fld">Done</span></td><td class="cc"><span class="fld">100</span></td></tr>
+              <tr><td>2</td><td>Pilot desk live</td><td class="cc"><span class="fld">In progress</span></td><td class="cc"><span class="fld">60</span></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="state">
+          <div class="cap">After pressing Save my project</div>
+          <div class="stage">
+            <div class="tabrow">
+              <span class="tab">Strategy</span><span class="tab on">Reporting</span>
+              <span class="tab">Performance</span>
+              <div class="repchrome">
+                <span><span class="rc-n">7</span> <span class="rc-of">of 12</span></span>
+                <span class="rc-bar"><i style="width:58%"></i></span>
+                <span class="rc-own">Your 2 projects · <b>0 of 2 done</b></span>
+                <button class="linkbu">Close</button>
+              </div>
+            </div>
+            <div class="pband">
+              <span class="pband-code">ADM02</span>
+              <span class="pband-name">Service desk rollout</span>
+              <span class="pband-r">
+                <span class="pill attn">2 / 3</span>
+                <span class="said">Saved</span>
+                <button class="editbtn">Mark done</button>
+              </span>
+            </div>
+            <h4 class="mini">Milestones</h4>
+            <table class="mini">
+              <tr><th>#</th><th>Milestone</th><th>Status</th><th>Progress</th></tr>
+              <tr><td>1</td><td>Tooling chosen</td><td class="cc"><span class="fld">Done</span></td><td class="cc"><span class="fld">100</span></td></tr>
+              <tr><td>2</td><td>Pilot desk live</td><td class="cc"><span class="fld">In progress</span></td><td class="cc"><span class="fld">60</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <p class="cost"><b>Cost:</b> two buttons on a small band, and one of them does
+        what the platform already does on its own every time he leaves a box — so it
+        may read as though the numbers were <em>not</em> being kept until he pressed
+        it, which is the opposite of the truth.</p>
+    </div>
+  </section>
+
+  <footer>
+    <b>B with "Save draft" is built</b> (§302). It needed nothing new stored — the
+    mark was already kept per project, so it carries the closed state too, and two
+    owners in one function still never collide. One thing that is not in the
+    drawings and is worth knowing: the custodian and the office are untouched —
+    they keep every control on a project its owner has closed, and they see the
+    words <b>Draft saved</b> on its band with no button, because the lock is the
+    owner's own act and they already hold Save draft for the whole function.
+  </footer>
+
+</div>

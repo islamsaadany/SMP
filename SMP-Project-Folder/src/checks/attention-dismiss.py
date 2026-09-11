@@ -1,5 +1,11 @@
 """A DISMISS FOR EVERY ATTENTION ITEM, ON THE BOX IT IS ABOUT (§190).
 
+qa-run: own-server — §316.1. This check INVENTS the two server facts the page
+draws from: a declaration by a person the register does not hold ("saidguy"),
+and a password state per row. Neither can be made to exist on the served app —
+a declaration is written at somebody's first sign-in (§56) — and the subject is
+what the REGISTER does with them, which is client code carried verbatim.
+
 Islam: "attention items that stays attention item is a problem — always give me
 the option to dismiss, and make generally the dismiss under the box with the
 issue and mark the issue box with some sort of surrounding outline to make sure
@@ -113,7 +119,14 @@ URL = "http://127.0.0.1:%d/raya-trade" % PORT
 # so without this every one of the 33 is in the queue for `noident` and no
 # assertion about a SINGLE kind could be made. Then one row per kind.
 MAKE = """()=>{
-  PEOPLE.forEach(function(p,i){
+  /* THE CLIENT'S OWN ROWS, NEVER THE OFFICE'S (§316.6). An office person's
+     register row carries `forefront` and the platform owns it — §313.29 marks
+     it and the authoriser refuses a change to it wholesale, so filling every
+     row here made every save 403 and a refused flush then blocks everything
+     after it. Over file:// nothing saves and it never showed. The row is the
+     platform's, not this client's; leaving it out fills every column just the
+     same, which is what this fixture is for. */
+  PEOPLE.filter(function(p){ return !p.forefront; }).forEach(function(p,i){
     p.empId = 'E' + (1000+i);
     p.email = 'p' + i + '@rayatrade.com';
     delete p.attnOff;

@@ -3,16 +3,18 @@
    passwords in bulk. One endpoint, action-shaped, because the operations
    share every line of plumbing.
 
-   Usernames are person keys — the same keys the platform uses everywhere
-   (§4: stable ids are the contract). The SMO sees each person's key beside
-   the Set-password control on Levels & access and hands credentials over
-   outside the platform; self-service recovery is a later decision (§16.9),
-   so a forgotten password is reset by the SMO. */
+   Since spec 042 (§313) a person signs in by EMAIL against the platform's
+   accounts, and the request names which client's door they came through;
+   the person key is what places them on that client's register. Self-service
+   recovery is a later decision (§16.9), so a forgotten password is reset by
+   the office. */
 
 const pg = require("pg");
 const io = require("../lib/state-io.js");
 const { ensureReady } = io;
+const P = require("../lib/platform-io.js");
 const auth = require("../lib/auth.js");
+const FF = require("../lib/platform-rules.js");
 const Rules = require("../lib/rules.js");
 
 /* THE OFFICE, READ OFF THE STORED SEAT (§89). `people.role` holds the seat and
@@ -21,11 +23,6 @@ const Rules = require("../lib/rules.js");
    a third office role would otherwise have to be remembered in this file. */
 function isOffice(row) { return Rules.isOfficeRole(String((row && row.role) || "")); }
 
-/* The six env-var spellings Neon and Vercel use between them live in ONE
-   place now (lib/state-io.js): this was copied here and into the other
-   endpoint identically, and what is copied is the list — a third copy would
-   be a third place to forget one the day the integration renames something. */
-function getPool() { return io.getPool(pg); }
 
 function readBody(req) {
   if (req.body !== undefined && req.body !== null) {
@@ -46,7 +43,7 @@ function readBody(req) {
    it means nothing to the person who hit it. The real error goes to the
    function's own log, where it is visible to us and to nobody else. */
 function safeError(e) {
-  if (e && e.code === "NO_DB") return String(e.message);
+  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT" || e.code === "NO_PERSON")) return String(e.message);
   console.error("api/auth:", e && (e.stack || e.message || e));
   return "Something went wrong. Try again, and tell the SMO if it keeps happening.";
 }
@@ -67,36 +64,135 @@ function send(res, code, obj) {
   res.end(JSON.stringify(obj));
 }
 
+
+/* WHERE AN ACCOUNT LANDS AFTER THE DOOR (spec 042).
+   ONE DESTINATION IS NOT A QUESTION (§32), and the destinations are what this
+   account can OPEN — not the clients it is on the team of. An Admin is on one
+   team and can open every client, so counting team rows would land them in one
+   client and they would never see the cards their own row entitles them to.
+   Asked through the shared rules, so the answer and the cards agree. */
+async function landingFor(client, account, door) {
+  if (!account || !account.email) return { land: null, list: [] };
+  const mine = (await client.query(
+    "SELECT client_key, person_key, seat FROM platform.account_clients WHERE email = $1",
+    [account.email])).rows;
+  const access = (await client.query(
+    "SELECT role_key, area_key, grant_ FROM platform.platform_access")).rows
+    .reduce(function (m, r) { (m[r.role_key] = m[r.role_key] || {})[r.area_key] = r.grant_; return m; }, {});
+  const world = { mine: mine, access: access };
+  const all = (await client.query(
+    "SELECT key, kind, status FROM platform.clients ORDER BY kind, name")).rows;
+  /* ── SIGNED IN AT A CLIENT'S OWN DOOR, THEY LAND IN THAT CLIENT (§313.36) ──
+     Every client has a door at /<client>/sign-in. Somebody who signs in
+     there was trying to open THAT client, so it wins over the rules below —
+     but only if this account may open it: the door is a place to stand, not
+     a right, and the same `mayOpenClient` the cards and every endpoint ask
+     decides. A door for a client they may not open (or one that does not
+     exist) falls through to exactly the landing they would get at the root,
+     so trying doors tells nobody anything the root would not. */
+  const doorRow = door ? all.filter(function (c) { return c.key === door && c.status === "active"; })[0] : null;
+  if (doorRow && FF.mayOpenClient(world, account, doorRow)) {
+    return { land: doorRow.key,
+             list: account.kind === "client" ? null
+                 : FF.visibleClients(world, account, all).map(function (c) { return c.key; }) };
+  }
+  if (account.kind === "client") {
+    /* Their one client, always — and never a card. */
+    return { land: mine.length ? mine[0].client_key : null, list: null };
+  }
+  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§313.24) ──
+     This used to send anybody with exactly ONE openable client straight into
+     it, on §32's rule that one destination is not a question. Islam, signing
+     in: *"the access opens directly in raya trade! what are you doing?"*
+
+     §32 IS ABOUT A DOOR IN FRONT OF A DESTINATION, and that is the wrong
+     reading of this screen. The platform is not a chooser standing in front of
+     a client — it IS where Forefront's work lives: the clients they run,
+     Consultants, Who sees what. Somebody at Forefront does not sign in to open
+     a client; they sign in to run the practice, and which client is a decision
+     they make afterwards, if at all.
+
+     The rule that made it look reasonable is the counting: with one client
+     today, the office would have been dropped into it — and the day a second
+     client is created, the same sign-in would start behaving differently. A
+     landing that changes with the number of rows in a table is not a design.
+
+     A CLIENT'S OWN PERSON IS UNCHANGED, and is the case §32 really covers:
+     they hold one client, they have no platform at all, and a card page would
+     be a door to a room with one door. */
+  const listed = FF.visibleClients(world, account, all).map(function (c) { return c.key; });
+  return { land: null, list: listed };
+}
+
+/* ── WHAT A CLIENT'S DOOR WEARS (§313.36) ──────────────────────────
+   The client's name and its mark, and nothing else — the two things the door
+   shows before anybody has signed in, so they are readable by anybody, and
+   everything else about a client (industry, notes, status, who is on it)
+   stays behind sign-in. An unknown, retired or misspelt slug answers null and
+   the door draws itself plain: the slug is already in the address bar, so a
+   name for it gives nothing away that the address did not. A SCHEMA name
+   answers null too — the door is addressed by the slug alone (§36.4). */
+const DOOR_SLUG = /^[a-z0-9][a-z0-9-]{0,48}$/;
+async function doorFor(client, slug) {
+  const key = String(slug || "").trim().toLowerCase();
+  if (!DOOR_SLUG.test(key)) return null;
+  const row = (await client.query(
+    "SELECT key, name, mark FROM platform.clients WHERE key = $1 AND status = 'active'", [key])).rows[0];
+  return row ? { key: row.key, name: row.name, mark: row.mark || null } : null;
+}
+function doorSlugFrom(req, body) {
+  if (body && typeof body.door === "string") return body.door;
+  try { return new URL(req.url, "http://x").searchParams.get("door") || ""; }
+  catch (e) { return ""; }
+}
+
 module.exports = async function handler(req, res) {
   let client;
   try {
-    client = await getPool().connect();
-    await ensureReady(client);
+    /* WHICH CLIENT IS THIS FOR (spec 042). The browser sends the slug it was
+       served at; the schema comes from the registry row, never from the
+       request (§36.4). An unknown client and one this account may not open are
+       the same refusal, so trying slugs tells nobody anything. */
     const body = req.method === "POST" ? await readBody(req) : {};
     const action = body.action || (req.method === "GET" ? "me" : "");
 
-    if (action === "me") {
-      const person = await auth.getSession(client, req);
-      return send(res, 200, { ok: true, person: person });
+    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§313.13) ────
+       Identity is `platform.accounts`, which is shared: is anyone signed in,
+       sign in, sign out, change the password. Every query in all four is
+       platform-qualified already — the client was resolved purely to hand
+       back a connection, and on a deployment whose registry is not filled in
+       that turned the door itself into a dead end.
+
+       Everything below them really is about one client — a register's people,
+       their password states, where somebody says they work — and resolves one
+       exactly as before. */
+    const DOOR = ["me", "login", "logout", "change"];
+    const atDoor = DOOR.indexOf(action) > -1;
+    let CLIENT_KEY = null;
+    if (atDoor) {
+      client = await P.connectPlatform(pg);
+    } else {
+      client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+      await ensureReady(client, client._smpClient.schema_name);
+      /* Which client this request is about — the sessions are the platform's,
+         the people are this client's, and every lookup below needs both. */
+      CLIENT_KEY = client._smpClient.key;
     }
 
-    /* ── SIGN IN WITH AN EMAIL ADDRESS (§69.11) ─────────────────────
-       It took a PERSON KEY, and a person key is minted from the name
-       (mintPersonKey) and shown in exactly two places: the Set-a-password
-       prompt and a row's hover title. So the one string the door accepts was
-       the one string nobody had. Islam, locked out of his own deployment with
-       a password he had just issued himself: "it should ask for my email and
-       the emails were uploaded in the sheet to the people registry."
+    if (action === "me") {
+      /* ASKED WITHOUT A CLIENT (spec 042). This is the door's own question —
+         "is there a live session, and where does it land" — and asking it
+         against a client would refuse anybody whose client is not the default
+         one, which from the door reads as "your session expired". */
+      const doorSlug = doorSlugFrom(req, body);
+      const door = doorSlug ? await doorFor(client, doorSlug) : null;
+      const person = await auth.getSession(client, req, null);
+      if (!person) return send(res, 200, { ok: true, person: null, door: door });
+      const where = await landingFor(client, { email: person.email, kind: person.kind,
+                                               is_admin: person.isAdmin, status: "active" }, doorSlug);
+      return send(res, 200, { ok: true, person: person, client: where.land, clients: where.list, door: door });
+    }
 
-       THE KEY STILL WORKS, and that is not tidiness. The bootstrap SMO has no
-       email at all (§43.8 keeps `SMO` / `1234` with must_change so a fresh
-       deployment has a way in), and so does anybody whose Email cell is blank
-       — which today is every row of the demo seed. A door that only takes an
-       email locks all of them out, and a deployment nobody can enter is not a
-       deployment.
-
-       Resolved on the SERVER, from one query, because the two identifiers have
-       to be answered by the same lookup or they are two doors. */
     if (action === "login") {
       const typed = String(body.user || "").trim().toLowerCase();
       const ip = auth.clientIp(req);
@@ -113,65 +209,49 @@ module.exports = async function handler(req, res) {
       const slow = await auth.tooManyAttempts(client, typed, ip);
       if (slow) return send(res, 429, { ok: false, error: slow });
 
-      /* An empty box matches nothing. Without this guard `trim(email) = ''`
-         is true of every person who has no address, so pressing Enter on a
-         blank field would report the whole register as an ambiguous match. */
+      /* An empty box matches nothing. */
       if (!typed) {
         await auth.recordFailure(client, typed, ip);
         return send(res, 401, { ok: false, error: WRONG_SIGNIN });
       }
-      const who = (await client.query(
-        "SELECT key FROM people " +
-        "WHERE lower(key) = $1 OR lower(trim(COALESCE(extra->>'email',''))) = $1 " +
-        "ORDER BY idx", [typed])).rows;
 
-      /* TWO ROWS, ONE ADDRESS — a shared inbox, or somebody imported twice.
-         Nothing has ever enforced uniqueness here, so it is a real state and
-         it needs an answer that is not "sign one of them in": signing somebody
-         in as a colleague is the worst outcome available, and nothing on the
-         screen would say which of the two they had become.
+      /* ── EMAIL, AND NOTHING ELSE (spec 042) ────────────────────────
+         Islam, 2026-08-28: "access only through email ... no access through
+         user name SMO in any place." The person-key path is gone, and with it
+         §69.23's two-rows-one-address refusal — an address is the PRIMARY KEY
+         of platform.accounts now, so the ambiguity it existed to name cannot
+         occur. Somebody on a register with no address simply has no account,
+         which the Attention queue already names. */
+      const acct = (await client.query(
+        "SELECT email, name, kind, is_admin, password_hash, must_change, status " +
+        "FROM platform.accounts WHERE email = $1", [typed])).rows[0];
 
-         IT SAYS SO AT THE DOOR, at Islam's direction, and that is a
-         deliberate trade against §43.3's rule that a refusal must not confirm
-         which names exist. The person stuck cannot fix it themselves and has
-         no way to know who to ask otherwise.
-
-         IT RECORDS A FAILURE, and it is worth being precise about which limit
-         that buys. Somebody probing addresses uses a DIFFERENT string every
-         time, so the 8-per-key threshold never trips for them — the thing that
-         bounds enumeration here is the 25-per-ADDRESS-in-15-minutes limit, and
-         it only bounds it because this branch records a failure like every
-         other refusal. Take the recordFailure out and the oracle is
-         unlimited. */
-      if (who.length > 1) {
-        await auth.recordFailure(client, typed, ip);
-        return send(res, 401, { ok: false, error:
-          "That address is on more than one row of the register, so it does " +
-          "not say who you are. Ask the SMO." });
-      }
-      const key = who.length ? who[0].key : typed;
-      const cred = (await client.query(
-        "SELECT c.password_hash, c.must_change, p.name, p.role, " +
-        "       COALESCE(p.extra->>'active', 'true') <> 'false' AS active " +
-        "FROM credentials c JOIN people p ON p.key = c.person_key WHERE c.person_key = $1", [key])).rows[0];
-      /* One message for a wrong name and a wrong password — a login screen
-         should not confirm which usernames exist. A RETIRED person gets the
-         same one: they are refused here, on the server, and not only by a
-         client that stops offering them roles. Retirement is what happens when
-         somebody leaves, so it has to close the door, not just the menu. */
-      if (!cred || !cred.active || !auth.verifyPassword(body.password, cred.password_hash)) {
+      /* ONE MESSAGE for an address nobody has and a password that is wrong —
+         a door should not confirm which addresses exist. A RETIRED account
+         gets the same one: retirement closes the door, not just the menu. */
+      if (!acct || acct.status === "retired" ||
+          !auth.verifyPassword(body.password, acct.password_hash)) {
         await auth.recordFailure(client, typed, ip);
         return send(res, 401, { ok: false, error: WRONG_SIGNIN });
       }
-      /* Getting in clears the failures: the threshold is there to slow a
-         guess, and a guess that succeeded is not what it is counting. BOTH
-         strings, because somebody who tried their key a few times and then
-         their address has failures recorded under each. */
+      /* Getting in clears the failures: the threshold slows a guess, and a
+         guess that succeeded is not what it counts. */
       await auth.clearFailures(client, typed);
-      if (key !== typed) await auth.clearFailures(client, key);
-      const token = await auth.createSession(client, key);
+      const token = await auth.createSession(client, acct.email);
       res.setHeader("Set-Cookie", auth.cookieHeader(req, token));
-      return send(res, 200, { ok: true, person: { key: key, name: cred.name, role: cred.role, mustChange: cred.must_change } });
+
+      /* WHERE THIS PERSON LANDS. A client's own person holds exactly one
+         client and goes straight into it — they never see a card, and never
+         learn another client exists. Somebody at Forefront gets the cards.
+         Answered HERE, on the server, because the browser asking would have
+         to be told the list first. */
+      const where = await landingFor(client, { email: acct.email, kind: acct.kind,
+                                               is_admin: acct.is_admin, status: acct.status },
+                                     doorSlugFrom(req, body));
+      return send(res, 200, { ok: true, person: {
+        key: acct.email, email: acct.email, name: acct.name, kind: acct.kind,
+        isAdmin: !!acct.is_admin, mustChange: acct.must_change
+      }, client: where.land, clients: where.list });
     }
 
     if (action === "logout") {
@@ -181,24 +261,30 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "change") {
-      const person = await auth.getSession(client, req);
+      /* ASKED WITHOUT A CLIENT, for `me`'s reason and one more: this is the
+         forced change after a temporary password, and refusing it because the
+         session belongs to a client other than the default would strand
+         somebody at the one screen they cannot get past. */
+      const person = await auth.getSession(client, req, null);
       if (!person) return send(res, 401, { ok: false, error: "sign in first" });
       const why = auth.passwordPolicy(body.password);
       if (why) return send(res, 400, { ok: false, error: "The password needs " + why + "." });
+      /* The password belongs to the ACCOUNT, not to a row on one client's
+         register: one person, one password, whichever client they are in. */
       await client.query(
-        "UPDATE credentials SET password_hash = $1, must_change = false, updated_at = now() WHERE person_key = $2",
-        [auth.hashPassword(body.password), person.key]);
+        "UPDATE platform.accounts SET password_hash = $1, must_change = false, updated_at = now() " +
+        "WHERE email = $2", [auth.hashPassword(body.password), person.email]);
       /* The old password may be exactly why they are changing it, so every
          other session it opened ends here. Their own stays: being signed out
          of the tab you just used to choose a password is not security, it is
          a bug that looks like one. */
-      await auth.destroyOtherSessions(client, req, person.key);
+      await auth.destroyOtherSessions(client, req, person.email);
       await auth.clearFailures(client, person.key);
       return send(res, 200, { ok: true });
     }
 
     if (action === "setPassword") {
-      const person = await auth.getSession(client, req);
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       /* ── THE SERVER'S OWN CHECK, AND IT IS ABOUT THE TARGET (§89) ──
          Was `person.role !== "super"` — one column, which is all the question
          needed while the office was one person. It is two roles now, and the
@@ -235,11 +321,31 @@ module.exports = async function handler(req, res) {
       /* Admin-issued passwords are temporary: the person must choose their
          own on first sign-in. Their existing sessions end — a reset is
          usually a lockout or a handover, and either way old sessions die. */
+      /* A PASSWORD IS ISSUED TO AN ADDRESS, because that is what the door
+         takes (spec 042). Somebody on the register with no address cannot be
+         given one — said plainly, with the thing to go and do, rather than
+         refused as "not allowed" (§16.7). */
+      const addr = String((await client.query(
+        "SELECT COALESCE(extra->>'email','') AS email FROM people WHERE key = $1", [key]
+      )).rows[0].email || "").trim().toLowerCase();
+      if (!addr) {
+        return send(res, 400, { ok: false, error:
+          "That person has no email address on the register, and people sign in " +
+          "by email. Add their address first, then issue the password." });
+      }
+      const nameOf = (await client.query("SELECT name FROM people WHERE key = $1", [key])).rows[0].name;
       await client.query(
-        "INSERT INTO credentials (person_key, password_hash, must_change) VALUES ($1, $2, true) " +
-        "ON CONFLICT (person_key) DO UPDATE SET password_hash = $2, must_change = true, updated_at = now()",
-        [key, auth.hashPassword(body.password)]);
-      await client.query("DELETE FROM sessions WHERE person_key = $1", [key]);
+        "INSERT INTO platform.accounts (email, name, kind, password_hash, must_change) " +
+        "VALUES ($1,$2,'client',$3,true) " +
+        "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, " +
+        "  must_change = true, updated_at = now()",
+        [addr, nameOf || "", auth.hashPassword(body.password)]);
+      /* And the account is tied to THIS client, as this person. Without the
+         row they would have a password and nowhere to use it. */
+      await client.query(
+        "INSERT INTO platform.account_clients (email, client_key, person_key) VALUES ($1,$2,$3) " +
+        "ON CONFLICT (email, client_key) DO NOTHING", [addr, CLIENT_KEY, key]);
+      await auth.destroySessionsFor(client, [addr]);
       return send(res, 200, { ok: true });
     }
 
@@ -257,7 +363,7 @@ module.exports = async function handler(req, res) {
        Readable by anybody signed in, and it holds nothing confidential: the
        units and supporting functions are the navigation bar. */
     if (action === "whereList") {
-      const person = await auth.getSession(client, req);
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       if (!person) return send(res, 401, { ok: false, error: "sign in first" });
       /* `active` IS A COLUMN ON BOTH, NOT A KEY IN `extra` (§69.14). These read
          `extra->>'active'`, which is never set on a unit or a function — only
@@ -408,7 +514,7 @@ module.exports = async function handler(req, res) {
        guards. Validated against the same list `whereList` builds, so a crafted
        request can only store something that exists. */
     if (action === "declareWhere") {
-      const person = await auth.getSession(client, req);
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       if (!person) return send(res, 401, { ok: false, error: "sign in first" });
       const at = String(body.at || "").trim();
       if (!at) {
@@ -439,7 +545,7 @@ module.exports = async function handler(req, res) {
     /* What everybody said, for the SMO to act on. The same shape and the same
        gate as passwordStates, which the People page already reads. */
     if (action === "declarations") {
-      const person = await auth.getSession(client, req);
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       if (!person || person.role !== "super") {
         return send(res, 403, { ok: false, error: "The register is the SMO's." });
       }
@@ -475,7 +581,12 @@ module.exports = async function handler(req, res) {
        screen (§42), because a control that only hides is decoration. It
        touches nothing but this table, so it moves nobody's access. */
     if (action === "dismissWhere") {
-      const person = await auth.getSession(client, req);
+      /* WITH THE CLIENT KEY, like every other client action here: without it
+         getSession answers the account shape, whose role is nobody's, and this
+         gate refused every dismissal with "The register is the SMO's" — found
+         by the pre-merge review (§313.37), never by a check, because none
+         pressed it over HTTP. */
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       if (!person || person.role !== "super") {
         return send(res, 403, { ok: false, error: "The register is the SMO's." });
       }
@@ -492,12 +603,19 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "passwordStates") {
-      const person = await auth.getSession(client, req);
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       if (!person || !isOffice(person)) {
         return send(res, 403, { ok: false, error: "Passwords are the SMO's." });
       }
+      /* THE STATE IS THE ACCOUNT'S, READ THROUGH THIS CLIENT (spec 042).
+         A person with no account has no password — which is the same dash the
+         column has always drawn for "we never asked" (§35) — and a person with
+         no ADDRESS can never have one, which is why the register names them in
+         its Attention queue rather than leaving the dash to be interpreted. */
       const rows = (await client.query(
-        "SELECT p.key, c.must_change FROM people p LEFT JOIN credentials c ON c.person_key = p.key")).rows;
+        "SELECT p.key, a.must_change FROM people p " +
+        "LEFT JOIN platform.account_clients ac ON ac.person_key = p.key AND ac.client_key = $1 " +
+        "LEFT JOIN platform.accounts a ON a.email = ac.email", [CLIENT_KEY])).rows;
       const states = {};
       rows.forEach(function (r) {
         states[r.key] = r.must_change == null ? "none" : (r.must_change ? "temporary" : "set");
@@ -518,7 +636,7 @@ module.exports = async function handler(req, res) {
        by the query itself. Nobody's existing password is ever overwritten
        here; resetting one person is the per-row action, deliberately. */
     if (action === "issueTemporary") {
-      const person = await auth.getSession(client, req);
+      const person = await auth.getSession(client, req, CLIENT_KEY);
       if (!person || !isOffice(person)) {
         return send(res, 403, { ok: false, error: "Issuing passwords is the SMO's." });
       }
@@ -550,34 +668,54 @@ module.exports = async function handler(req, res) {
       const officeOnly = person.role !== "super"
         ? " AND COALESCE(p.role,'') NOT IN ('super','smoteam')" : "";
       const all = body.scope === "all";
-      const done = await client.query(
-        all
-          ? "INSERT INTO credentials (person_key, password_hash, must_change) " +
-            "SELECT p.key, $1, true FROM people p " +
-            "WHERE COALESCE(p.extra->>'active','true') <> 'false' AND p.key <> $2 " +
-            officeOnly +
-            "ON CONFLICT (person_key) DO UPDATE " +
-            "  SET password_hash = EXCLUDED.password_hash, must_change = true, " +
-            "      updated_at = now() " +
-            "RETURNING person_key"
-          : "INSERT INTO credentials (person_key, password_hash, must_change) " +
-            "SELECT p.key, $1, true FROM people p " +
-            "WHERE COALESCE(p.extra->>'active','true') <> 'false' AND p.key <> $2 " +
-            officeOnly +
-            "  AND NOT EXISTS (SELECT 1 FROM credentials c WHERE c.person_key = p.key) " +
-            "RETURNING person_key",
-        [hash, person.key]);
-      const issued = done.rows.map(function (r) { return r.person_key; });
-      if (all && issued.length) {
-        await client.query("DELETE FROM sessions WHERE person_key = ANY($1)", [issued]);
+
+      /* THE SERVER STILL DECIDES WHO IS IN THE SET — the client sends a scope,
+         never a list. What changed with spec 042 is only WHERE the password
+         lands: platform.accounts, keyed by the address on the register, with
+         the row that ties that account to this client written beside it.
+
+         PEOPLE WITH NO ADDRESS ARE NOT IN THE SET, and they are COUNTED
+         rather than passed over in silence — "12 issued" when the register
+         holds 20 people is a number somebody has to explain. */
+      const rows = (await client.query(
+        "SELECT p.key, p.name, lower(trim(COALESCE(p.extra->>'email',''))) AS email " +
+        "FROM people p " +
+        "WHERE COALESCE(p.extra->>'active','true') <> 'false' AND p.key <> $1" + officeOnly,
+        [person.key])).rows;
+
+      const withAddress = rows.filter(function (r) { return !!r.email; });
+      const noAddress = rows.filter(function (r) { return !r.email; }).map(function (r) { return r.name || r.key; });
+
+      const held = (await client.query(
+        "SELECT ac.person_key FROM platform.account_clients ac " +
+        "JOIN platform.accounts a ON a.email = ac.email " +
+        "WHERE ac.client_key = $1", [CLIENT_KEY])).rows.map(function (r) { return r.person_key; });
+
+      const set = all ? withAddress
+                      : withAddress.filter(function (r) { return held.indexOf(r.key) < 0; });
+
+      const issued = [];
+      for (const r of set) {
+        await client.query(
+          "INSERT INTO platform.accounts (email, name, kind, password_hash, must_change) " +
+          "VALUES ($1,$2,'client',$3,true) " +
+          "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, " +
+          "  must_change = true, updated_at = now()", [r.email, r.name || "", hash]);
+        await client.query(
+          "INSERT INTO platform.account_clients (email, client_key, person_key) VALUES ($1,$2,$3) " +
+          "ON CONFLICT (email, client_key) DO NOTHING", [r.email, CLIENT_KEY, r.key]);
+        issued.push(r.key);
       }
-      return send(res, 200, { ok: true, issued: issued });
+      if (all && issued.length) {
+        await auth.destroySessionsFor(client, set.map(function (r) { return r.email; }));
+      }
+      return send(res, 200, { ok: true, issued: issued, noAddress: noAddress });
     }
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: safeError(e) });
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500, { ok: false, error: safeError(e) });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };

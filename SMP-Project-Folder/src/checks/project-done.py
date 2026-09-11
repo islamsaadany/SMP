@@ -1,5 +1,12 @@
 """A PROJECT OWNER REPORTS, AND THE BAR STOPS SAYING VIEW ONLY (S287).
 
+qa-run: own-server — this check BUILDS the state it measures and serves it from
+a stub of its own: people the register does not hold, a capability ordering
+chosen so "his" and "the first one" cannot coincide. The served app cannot be
+made to hold that graph, and its subject is what the CLIENT draws given a
+stored one — carried into the app verbatim, so the code under test is the same
+either way (§316.1).
+
 Islam, from the running platform: "a project owner is not able to report,
 despite being the project owner and in the roles and access I allowed this."
 
@@ -36,15 +43,122 @@ WHAT THIS ASSERTS, both ends each time (S94.2, S42):
 THE STATE IS MADE, not found: no demo person is named as a project's Owner
 while attached to nothing else, so waiting for one means shipping this
 unexercised (S94.2).
+
+AND SINCE S309 THE MARK IS A LOCK: pressing it saves, closes the container to
+the person who pressed it, and Reopen is the way back -- so this also asserts
+that their own rows really do go read-only, that the neighbouring container
+does not, and that the CUSTODIAN keeps every one of theirs (a build that
+froze the pane would pass every "it is shut" assertion and be a second lock
+nobody asked for).
+
+SERVED OVER HTTP, AND SINCE S309 IT HAS TO BE (S94.11). The button says
+"Save draft" now and CLOSES the container, so the press goes through
+SYNC.saveNow and marks only if the save landed -- and over file:// SYNC is
+never live, so every press answers "offline" and nothing is ever closed. A
+check that opened the file would report the whole feature missing on a build
+that carries it perfectly. The stub is report-saves.py's, three routes wide.
 """
-import os
+import json, os, pathlib, threading, http.server, socketserver
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FILE = os.path.join(HERE, "..", "strategy-management-platform.html")
-URL = "file://" + os.path.abspath(FILE)
+ROOT = pathlib.Path(HERE).resolve().parents[2]
+HTML = pathlib.Path(os.environ.get("SMP_BUILT") or
+                    (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html")).read_bytes()
+SW = (ROOT / "sw.js").read_bytes()
+BASE = json.loads((ROOT / "db/seed-state.json").read_text())
+PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
+REFUSE = {"on": False}
 FN, FDEST = "it", "fn:it"
 UNIT = "mobile"
+
+# ── THE STATE IS MADE, IN THE SEED THE STUB SERVES (S94.2) ───────────────
+# No demo person is named as a project's Owner while attached to nothing
+# else, so waiting for one means shipping this unexercised. It is done here
+# rather than in the page because S237 rebases the tab from the server on
+# every view-as switch and would throw a page-side fixture away.
+BASE["access"]["powner"] = dict(BASE["access"].get("powner") or {}, a_fn_own="edit")
+BASE["access"]["plowner"] = dict(BASE["access"].get("plowner") or {}, a_unit_own="edit")
+# A GENUINE READER, and the demo has none: this tenant's floor is `none` on a
+# unit, so somebody holding nothing has no Reporting tab at all and never
+# meets the pill. Opened to VIEW, which is a real tenant's configuration and
+# the one state "View only" describes.
+BASE["access"]["employee"] = dict(BASE["access"].get("employee") or {}, a_unit_own="view")
+BASE["people"] += [
+    {"key": "t287p", "name": "Project Owner 287", "active": True},
+    {"key": "t287l", "name": "Pillar Owner 287", "active": True},
+    {"key": "t287r", "name": "Plain Reader 287", "active": True, "unit": UNIT},
+]
+_cap = [c for c in BASE["group"]["capabilities"] if c.get("fn") == FN][0]
+_cap["projects"][0]["owner"] = "Project Owner 287"
+BASE["units"][UNIT]["items"][0]["owner"] = "Pillar Owner 287"
+
+
+class H(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *a): pass
+    def _s(self, body, ctype="application/json"):
+        self.send_response(200); self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body))); self.end_headers()
+        self.wfile.write(body)
+    def do_GET(self):
+        if self.path.startswith("/api/state"):
+            self._s(json.dumps({"ok": True, "state": BASE, "person": PERSON}).encode()); return
+        if self.path.startswith("/api/auth"):
+            self._s(json.dumps({"ok": True, "person": PERSON}).encode()); return
+        # S231.5: served as the gate serves it, or register() rejects on the
+        # content type and this file's own listener counts it as the product
+        # throwing.
+        if self.path.startswith("/sw.js"):
+            self._s(SW, "application/javascript"); return
+        if self.path.startswith("/raya-trade"):
+            self._s(HTML, "text/html; charset=utf-8"); return
+        self._s(b"<!doctype html><title>gate</title>", "text/html; charset=utf-8")
+    def do_POST(self):
+        n = int(self.headers.get("Content-Length") or 0)
+        self.rfile.read(n)
+        if self.path.startswith("/api/state"):
+            # REFUSABLE ON PURPOSE (§309): the press saves and closes only if
+            # the save LANDED, and a stub that always says yes cannot tell
+            # that ordering from the other one.
+            if REFUSE["on"]:
+                self.send_response(500); self.send_header("Content-Length", "2")
+                self.end_headers(); self.wfile.write(b"{}"); return
+            self._s(b'{"ok":true}'); return
+        self._s(b'{"ok":true,"unread":0,"threads":[],"chat":{"on":false},"states":{},"said":{}}')
+
+
+class S(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+
+
+srv = S(("127.0.0.1", 0), H)
+URL = "http://127.0.0.1:%d/raya-trade" % srv.server_address[1]
+threading.Thread(target=srv.serve_forever, daemon=True).start()
+
+# ── LIVE CONTROLS INSIDE ONE PROJECT'S BAND (§309) ───────────────────────
+# Scoped by walking from the band bearing the project's CODE to the next
+# band. The first draft of this counted every control in the pane, which on
+# a function drawing EVERY capability at once can never reach zero while any
+# other project is open — so it passed on a build that froze the custodian
+# too, which is the one thing these two assertions exist to tell apart
+# (§94.5, §113.8). Addressed by the code the band SHOWS, because the
+# custodian is drawn no `data-rowdone` to address by.
+INBAND = """(code)=>{
+  var band = [...document.querySelectorAll('.pane .pband')].find(function(e){
+    var c = e.querySelector('.pband-code');
+    return c && c.textContent.trim() === code;
+  });
+  if (!band) return { found:false };
+  var live = 0, all = 0, n = band.nextElementSibling;
+  while (n && !n.classList.contains('pband')) {
+    n.querySelectorAll('[data-crep],[data-cpick],[data-cnote],[data-rep],[data-note]')
+     .forEach(function(e){ all++; if (!e.disabled) live++; });
+    n = n.nextElementSibling;
+  }
+  return { found:true, live:live, all:all,
+           state:[...band.querySelectorAll('.pbdone')].map(e=>e.textContent.trim()),
+           buttons:band.querySelectorAll('[data-rowdone]').length };
+}"""
 
 bad = 0
 def ck(what, ok, x=""):
@@ -92,7 +206,13 @@ BAR = """()=>{
                ? box.querySelector('.rc-state').textContent.trim() : null,
     submit: !!document.querySelector('[data-submit]'),
     marks: [...document.querySelectorAll('[data-rowdone]')].map(e=>e.dataset.rowdone),
-    donePills: [...document.querySelectorAll('.pband .pill.good')].map(e=>e.textContent.trim())
+    /* §309: THE WORD MOVED AND THE ASSERTION IS REWRITTEN, NOT DELETED
+       (§218). It was a `.pill.good` reading "Done" while the mark was a
+       signal; the mark is a LOCK now and the band says the bar's own word,
+       `Draft saved`, beside a Reopen. Both are read, so a build that drew
+       neither fails here rather than quietly satisfying a looser test. */
+    bandState: [...document.querySelectorAll('.pband .pbdone')].map(e=>e.textContent.trim()),
+    bandReopen: [...document.querySelectorAll('.pband .editbtn.reopen')].map(e=>e.textContent.trim())
   };
 }"""
 
@@ -103,31 +223,30 @@ with sync_playwright() as pw:
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
-    pg.goto(URL); pg.wait_for_timeout(1300)
+    # S167.2: the welcome overlay covers the viewport and eats every click,
+    # and it must be suppressed BEFORE goto, not after.
+    pg.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1');"
+                       "sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    pg.goto(URL); pg.wait_for_timeout(2600)
+    ck("the stub is live, so a save can be seen at all", pg.evaluate("SYNC.isLive()"))
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
 
+    # THE FIXTURE IS IN THE SERVED STATE, NOT INJECTED INTO THE PAGE. S237
+    # rebases the tab on every view-as switch — one GET, hydrate(), the
+    # server's graph becomes the tab's truth — so anything written into
+    # ACCESS or PEOPLE here is thrown away by the very first `#asWho`. It
+    # went unnoticed while this file opened the built HTML over file://,
+    # where there is no server to rebase from. So the state is made in the
+    # SEED the stub serves, and survives every switch.
     ids = pg.evaluate("""() => {
-      ACCESS.powner = Object.assign({}, ACCESS.powner, { a_fn_own: "edit" });
-      ACCESS.plowner = Object.assign({}, ACCESS.plowner, { a_unit_own: "edit" });
-      /* A GENUINE READER, and the demo has none: this tenant's floor is
-         `none` on a unit, so somebody holding nothing has no Reporting tab
-         at all and never meets the pill. Opened to VIEW, which is a real
-         tenant's configuration and the one state "View only" describes. */
-      ACCESS.employee = Object.assign({}, ACCESS.employee, { a_unit_own: "view" });
-      PEOPLE.push({ key:"t287p", name:"Project Owner 287", active:true });
-      PEOPLE.push({ key:"t287l", name:"Pillar Owner 287",  active:true });
-      PEOPLE.push({ key:"t287r", name:"Plain Reader 287",  active:true, unit:"%s" });
       var cap = capsOfFunction("%s")[0];
-      cap.projects[0].owner = "Project Owner 287";
       var u = UNITS["%s"];
-      u.items[0].owner = "Pillar Owner 287";
-      paint();
       return { own: cap.projects[0].id, other: cap.projects[1].id,
                ownCode: projCode("%s", cap.projects[0]),
                otherCode: projCode("%s", cap.projects[1]),
                pillar: u.items[0].id, pillarCode: pillarCode(u, 0),
                cust: FUNCTIONS["%s"].custodian };
-    }""" % (UNIT, FN, UNIT, FN, FN, FN))
+    }""" % (FN, UNIT, FN, FN, FN))
     print("  fixture: project %(own)s (%(ownCode)s) · beside it %(other)s (%(otherCode)s) · "
           "pillar %(pillar)s (%(pillarCode)s) · custodian %(cust)s" % ids)
 
@@ -154,7 +273,13 @@ with sync_playwright() as pw:
     # below depends on a control that build does not draw, so each is reported
     # as failing rather than allowed to raise.
     def press(addr):
-        pg.click('[data-rowdone="%s"]' % addr); pg.wait_for_timeout(350)
+        # §215: EVERY PRESS DEGRADES. A control that is not there raises after
+        # thirty seconds and takes every assertion below it with it — which is
+        # how this file's first run against the pre-§301 build reported three
+        # failures where there are eight.
+        el = pg.query_selector('[data-rowdone="%s"]' % addr)
+        if not el: return False
+        el.click(); pg.wait_for_timeout(500); return True
 
     if not mine:
         for w in ["pressing it WRITES the mark against this function",
@@ -165,6 +290,7 @@ with sync_playwright() as pw:
             ck(w, False, "no mark control is drawn")
     else:
         before = pg.evaluate("()=>JSON.stringify(REVIEW.done||null)")
+        open_all = (pg.evaluate(INBAND, ids["ownCode"]) or {}).get("all", 0)
         press(mine[0])
         after = pg.evaluate("""(id)=>({ mark: JSON.parse(JSON.stringify(
             (REVIEW.done||{})[id] || null)),
@@ -178,15 +304,62 @@ with sync_playwright() as pw:
         st2 = pg.evaluate(BAR)
         ck("the bar now reads Done for that project",
            "Done" in (st2["ownChip"] or ""), st2["ownChip"])
-        ck("the band shows the Done pill and a way back",
-           "Done" in st2["donePills"] and
+        ck("the band says a draft was saved, and offers the way back",
+           "Draft saved" in st2["bandState"] and "Reopen" in st2["bandReopen"] and
            any(m.endswith("|0") for m in st2["marks"]), st2)
+        # §309: AND THE PROJECT IS REALLY SHUT — to them, and to them only.
+        # A build that merely changed the word passes every assertion above.
+        frz = pg.evaluate(INBAND, ids["ownCode"])
+        locked = pg.evaluate("()=>!!document.querySelector('#panel.replocked')")
+        # AGAINST WHAT THE BAND HELD BEFORE THE PRESS, never against zero: a
+        # shut cell draws a READ-ONLY value rather than a disabled control,
+        # so "no live controls" is also true of a band that has none — the
+        # assertion would pass on a build that lost the whole table (§113.8).
+        ck("their own project's boxes are shut — that is what the press does",
+           frz.get("found") and open_all > 0 and frz["all"] == 0, 
+           "before=%s after=%s" % (open_all, frz))
+        ck("...and the report around it is NOT closed (§220 is the bar's, not this)",
+           not locked, locked)
 
-        # UNDO deletes the key rather than storing a false (§50.6)
-        back = [m for m in st2["marks"] if m.split("|")[0] == ids["own"]]
-        if back: press(back[0])
+        # ── A SAVE THAT DID NOT LAND CLOSES NOTHING (§309) ───────────
+        # §220's own first build parked before it knew, and drew a tidy
+        # "Draft saved" over work that never left the browser. Worse here,
+        # because the boxes go read-only behind it. Reopen first, refuse the
+        # next save, and press.
+        back0 = [m for m in pg.evaluate(BAR)["marks"] if m.split("|")[0] == ids["own"]]
+        if back0: press(back0[0])
+        REFUSE["on"] = True
+        # AND THERE HAS TO BE SOMETHING TO SAVE, or `save()` answers "clean"
+        # before it ever reaches the server and the press is right to close.
+        # That is the product behaving correctly and it is not this case.
+        pg.evaluate("()=>{ REVIEW.note = Object.assign({}, REVIEW.note);"
+                    "  REVIEW.note['t302dirt'] = 'unsaved'; }")
+        again = [m for m in pg.evaluate(BAR)["marks"] if m.split("|")[0] == ids["own"]]
+        if again: press(again[0])
+        pg.wait_for_timeout(900)
+        ref = pg.evaluate(INBAND, ids["ownCode"])
+        ck("a save that did not land closes nothing, and says so",
+           pg.evaluate("()=>REVIEW.done===undefined") is True and
+           ref.get("all", 0) > 0 and ref.get("buttons") == 1,
+           ref)
+        REFUSE["on"] = False
+        # The 500 this section asked for is not the product throwing (§128).
+        errs[:] = [e for e in errs if "500" not in e]
+        pg.evaluate("()=>{ delete REVIEW.note['t302dirt']; }")
+
+        # UNDO deletes the key rather than storing a false (§50.6). The
+        # marks are RE-READ here: the refused press above deliberately left
+        # the project open, so a list captured before it names a control that
+        # is no longer on the page.
+        st3 = pg.evaluate(BAR)
+        if not any(m.endswith("|0") for m in st3["marks"]):
+            m0 = [m for m in st3["marks"] if m.split("|")[0] == ids["own"]]
+            if m0: press(m0[0])
+            st3 = pg.evaluate(BAR)
+        back = [m for m in st3["marks"] if m.split("|")[0] == ids["own"] and m.endswith("|0")]
         ck("undoing DELETES the mark — the key goes, and the map with it",
-           bool(back) and pg.evaluate("()=>REVIEW.done===undefined") is True,
+           bool(back) and press(back[0]) and
+           pg.evaluate("()=>REVIEW.done===undefined") is True,
            pg.evaluate("()=>JSON.stringify(REVIEW.done||null)"))
 
     # ── 2 · BOTH ENDS: the shared rule ───────────────────────────────────
@@ -220,6 +393,21 @@ with sync_playwright() as pw:
     ck("Submit is still drawn for them", st["submit"], st["text"])
     ck("no View only pill, and no own-project chip either",
        not st["viewOnly"] and st["ownChip"] is None, st["text"])
+    # ── §309: AN OWNER'S DRAFT DOES NOT SHUT THE CUSTODIAN OUT ───────────
+    # The lock is the owner's own act. The custodian holds the bar's Save
+    # draft for the whole function, and a second lock inside it would be two
+    # ways to close one report (§53.5) — so they keep every control on that
+    # project. And they SEE the state, because the signal this control exists
+    # for is exactly "which projects are finished": the word, no button.
+    pg.evaluate("""(id)=>{ REVIEW.done = {}; REVIEW.done[id] = {by:"t287p", at:"2026-09-07"};
+        paint(); }""", ids["own"])
+    pg.wait_for_timeout(300)
+    cst = pg.evaluate(INBAND, ids["ownCode"])
+    ck("the owner's saved draft leaves every one of the custodian's controls live",
+       cst.get("found") and cst["all"] > 0 and cst["live"] == cst["all"], cst)
+    ck("...and they SEE it said, with no button to press",
+       "Draft saved" in cst["state"] and cst["buttons"] == 0, cst)
+    pg.evaluate("()=>{ REVIEW.done = undefined; paint(); }"); pg.wait_for_timeout(250)
 
     # ── 4 · A PLAIN READER still reads View only ─────────────────────────
     print("-- a plain reader")
@@ -253,11 +441,17 @@ with sync_playwright() as pw:
     # word explaining it lives in the branch a bounded role never reaches —
     # so the page went grey with nothing saying why. Asserted with the LOCK,
     # or a build that said "Submitted" over live boxes would pass.
+    # THE STATE IS MADE AFTER THE SWITCH, NEVER BEFORE IT. S237 rebases the
+    # tab on the switch -- the server's graph becomes the tab's truth -- so a
+    # "set it as the SMO, then look as them" fixture is thrown away in the
+    # hop. It went unnoticed while this file opened the built HTML over
+    # file://, where there is no server to rebase from. Every mid-run fixture
+    # below is written while ALREADY viewing as the person it is about; none
+    # needs the SMO's rights to write, because they are plain globals.
     print("-- the project owner, once the custodian has submitted")
-    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     pg.evaluate("""()=>{ REVIEW.submitted = Object.assign({}, REVIEW.submitted);
         REVIEW.submitted["%s"] = true; paint(); }""" % FDEST)
-    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     to_fn_reporting(pg)
     st = pg.evaluate(BAR)
     shut = pg.evaluate("""()=>({
@@ -280,12 +474,12 @@ with sync_playwright() as pw:
     # BOTH ENDS, or a build that simply deleted the bar would pass: with a
     # real gap made, the door must still be there.
     print("-- the fill door, on a plan that owes nothing")
-    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     pg.evaluate("""()=>{
       ACCESS.powner = Object.assign({}, ACCESS.powner, { a_fn_own_strat:"fill" });
       REVIEW.submitted = {};              /* §6 closed it; reopen for this */
+      REVIEW.done = undefined;            /* §309: and its own draft too */
       paint(); }""")
-    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
+    pg.wait_for_timeout(300)
     for _ in range(3):
         if not pg.query_selector("#units .navswitch"): break
         on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
@@ -323,17 +517,19 @@ with sync_playwright() as pw:
     # why. THE FIXTURE PUTS HIS SECOND, or "his" and "the first" coincide and
     # the assertion proves nothing (§113.8).
     print("-- landing: the project that opens")
-    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     second = pg.evaluate("""()=>{
       var cap = capsOfFunction("%s")[0];
       cap.projects[0].owner = "Somebody Else";        /* first is NOT his */
       cap.projects[1].owner = "Project Owner 287";    /* his is second */
       REVIEW.submitted = {};
+      /* WHAT A FRESH SIGN-IN IS: nothing picked. §301.4's fallback only
+         decides where the pane opens when the rail holds nothing, so a rail
+         an earlier section left set would make this assertion vacuous. */
+      RAIL = {};
       paint();
       return { id: cap.projects[1].id, code: projCode("%s", cap.projects[1]),
                firstCode: projCode("%s", cap.projects[0]) };
     }""" % (FN, FN, FN))
-    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     to_fn_reporting(pg)
     land = pg.evaluate("""()=>({
       pane: (document.querySelector('.pane .pband')||{}).innerText || null,
@@ -388,11 +584,10 @@ with sync_playwright() as pw:
     # way out but the custodian. Nothing was sent, so nothing is retracted.
     # BOTH ENDS: a submission is deliberately NOT offered to them.
     print("-- a saved draft, and the way out of it")
-    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     pg.evaluate("""()=>{ REVIEW.submitted = {};
         REVIEW.parked = Object.assign({}, REVIEW.parked); REVIEW.parked["%s"] = true;
         paint(); }""" % FDEST)
-    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
     to_fn_reporting(pg)
     shut = pg.evaluate("""()=>({
       bar: (document.querySelector('.repchrome')||{}).innerText.replace(/\\n/g,' | '),
@@ -417,11 +612,10 @@ with sync_playwright() as pw:
        shut["reopen"] and not opened["parked"] and not opened["locked"] and
        opened["live"] > 0, opened)
     # THE OTHER END: a SUBMITTED report offers them no way back.
-    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     pg.evaluate("""()=>{ REVIEW.parked = {};
         REVIEW.submitted = Object.assign({}, REVIEW.submitted); REVIEW.submitted["%s"] = true;
         paint(); }""" % FDEST)
-    pg.select_option("#asWho", "t287p"); pg.wait_for_timeout(400)
+    pg.wait_for_timeout(300)
     to_fn_reporting(pg)
     sent = pg.evaluate("""()=>({
       bar: (document.querySelector('.repchrome')||{}).innerText.replace(/\\n/g,' | '),

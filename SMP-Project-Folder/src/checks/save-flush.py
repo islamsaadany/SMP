@@ -1,5 +1,11 @@
 """THE LAST EDIT SURVIVES LEAVING THE PAGE (§138, closing §126.1).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 WHAT WAS BROKEN, recorded not fixed since §126.1: the autosave is debounced
 800ms (`afterPaint()` in sync.js), so an edit made and the tab closed or
 hidden inside that window was never sent — the screen showed the new value,

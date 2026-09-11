@@ -169,6 +169,13 @@ var CHAT = (function(){
        goes through is the only place this cannot be forgotten. Found by
        qa.py, which walks every Setup page over file:// as the SMO. */
     if (!servable()) { done("There is no server behind this file.", null); return; }
+    /* THE CLIENT RIDES EVERY REQUEST (spec 042), and it is added HERE for the
+       same reason the refusal above is: this is the one place every chat
+       request goes through, so it is the only place it cannot be forgotten.
+       Read from the path the page was served at — never stored, so two tabs
+       on two clients cannot cross. */
+    var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,47})/);
+    if (m) body = Object.assign({}, body, { client: m[1] });
     /* ── AND A REQUEST THAT NEVER ANSWERS MUST STILL ANSWER (§193) ─────
        Islam: *"the messages are sent in the box but still there is
        sending.."* — with the reply plainly THERE in the thread above it. The

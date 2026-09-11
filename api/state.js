@@ -18,13 +18,14 @@ const auth = require("../lib/auth.js");
 const { authorize } = require("../lib/authorize.js");
 const R = require("../lib/rules.js");
 const D = require("../lib/graph-diff.js");
+const P = require("../lib/platform-io.js");
 
 /* The six env-var spellings Neon and Vercel use between them live in ONE
    place now (lib/state-io.js): this was copied here and into api/auth.js
    identically, and what is copied is the LIST — a third copy, which
    api/feedback.js would have been, is a third place to forget one the day the
-   integration renames something. */
-function getPool() { return io.getPool(pg); }
+   integration renames something. Since spec 042 every connection here comes
+   through lib/platform-io.js, which asks that one place. */
 
 function readBody(req) {
   if (req.body !== undefined && req.body !== null) {
@@ -44,7 +45,7 @@ function readBody(req) {
    the schema to anyone probing, and meaningless to the person who hit it. The
    real one goes to the function's log. */
 function safeError(e) {
-  if (e && e.code === "NO_DB") return String(e.message);
+  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT" || e.code === "NO_PERSON")) return String(e.message);
   console.error("api/state:", e && (e.stack || e.message || e));
   return "Something went wrong saving. Nothing was changed — try again, and tell the SMO if it keeps happening.";
 }
@@ -103,7 +104,14 @@ const USE_SAVE_LOCK = process.env.SMP_NO_SAVE_LOCK !== "1";
    flip the env var to test on a real deployment, after a cycle closes. */
 const USE_INCREMENTAL = process.env.SMP_INCREMENTAL_WRITE === "1";
 
-async function logChanges(client, person, changes) {
+/* `person` is the REGISTER ROW — what the stored graph knows, which is what
+   decides authorisation — and `email` is who actually signed in. On a client
+   whose register predates the platform those are deliberately different
+   things: several of Forefront's people act as one row (§313.30), so the row
+   says what may be done and the address says who did it. Written first as
+   `person.email`, which is the register's own address and empty for a row the
+   client wrote — so the column landed and stayed blank. */
+async function logChanges(client, person, changes, email) {
   if (!changes || !changes.length) return;
   /* ONE STATEMENT, NOT ONE PER CHANGE (§195). A save's whole cost is the
      number of times it has to wait for the database, and a plan import
@@ -115,13 +123,18 @@ async function logChanges(client, person, changes) {
       const rows = ch.rows && ch.rows.length
         ? { count: ch.rows.length, moved: ch.rows.slice(0, LOG_ROW_CAP) }
         : null;
-      const b = i * 6;
-      vals.push("($" + (b+1) + ",$" + (b+2) + ",$" + (b+3) + ",$" + (b+4) + ",$" + (b+5) + ",$" + (b+6) + ")");
-      params.push(person.key, person.name || null, ch.kind, ch.target, ch.what,
+      /* AND THE ADDRESS THEY SIGNED IN WITH (§313.30). Several of Forefront's
+         people may act as one row on a client's register, so the row alone no
+         longer says who did it — the session has always known the address and
+         it simply was not written down. */
+      const b = i * 7;
+      vals.push("($" + (b+1) + ",$" + (b+2) + ",$" + (b+3) + ",$" + (b+4) + ",$" + (b+5) + ",$" + (b+6) + ",$" + (b+7) + ")");
+      params.push(person.key, person.name || null, email || person.email || null,
+                  ch.kind, ch.target, ch.what,
                   rows ? JSON.stringify(rows) : null);
     });
     await client.query(
-      "INSERT INTO change_log (person_key, person_name, kind, target, what, rows_) VALUES " +
+      "INSERT INTO change_log (person_key, person_name, email, kind, target, what, rows_) VALUES " +
       vals.join(","), params);
   } catch (e) {
     /* A log that cannot be written must not lose a save that already landed.
@@ -133,13 +146,18 @@ async function logChanges(client, person, changes) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    client = await getPool().connect();
-    const ready = await ensureReady(client);
+    /* WHICH CLIENT IS THIS FOR (spec 042). Read BEFORE the connection,
+       because the connection is what gets pointed at the client's schema —
+       which is also why a POST's body is read here rather than in its own
+       branch below. */
+    const body = req.method === "POST" ? await readBody(req) : null;
+    client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+    const ready = await ensureReady(client, client._smpClient.schema_name);
 
     /* Since v2.1 the state is for signed-in people only (§19). Phase 1
        enforces WHO at the door; per-action WHAT enforcement is Phase 2 and
        recorded as such. */
-    const person = await auth.getSession(client, req);
+    const person = await auth.getSession(client, req, client._smpClient.key);
     if (!person) return send(res, 401, { ok: false, auth: true, error: "sign in required" });
     /* A TEMPORARY password is not a password yet. The gate has always sent
        people to the change screen, but the SERVER did not care whether they
@@ -152,6 +170,28 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "GET") {
+      /* THE OFFICE ARRIVES ON THE REGISTER (spec 042 §6). Done on the way in
+         rather than when somebody is added to a team, because a client created
+         later, or a team changed while nobody was looking, would otherwise
+         leave a person signed in and holding nothing. */
+      if (person.kind !== "client") {
+        /* THE SEAT THE SESSION ALREADY RESOLVED, not a second lookup (§313.22).
+           This asked `seatIn()` again — which returns nothing for an office
+           account with no row on this client — so the platform's super user
+           opening a client nobody has been put on got NO register row, and the
+           page told them they were "signed in but not on this register" over a
+           plan that was sitting right there.
+
+           §313.20's fault one layer on, and the same shape: getSession() has
+           already answered this, including the seat the RULE gives somebody
+           arriving without one, so asking the database a second way could only
+           ever disagree with it. */
+        await P.ensureOfficeRow(client, { person_key: person.key, seat: person.seat },
+          { name: person.name, email: person.email, kind: person.kind },
+          /* WHOSE REGISTER IT IS (§313.31) — the registry row says, and the
+             endpoint has it already. */
+          !!client._smpClient.made_here);
+      }
       /* §258: A LIGHT LOOK AT change_log, for the save-safety banner. While a
          tab is open on a page the platform asks whether anybody ELSE landed a
          change on that page since it loaded — never the whole graph (§98: a
@@ -215,10 +255,17 @@ module.exports = async function handler(req, res) {
           return { by: x.by || x.by_key, at: x.at }; }) });
       }
       const state = await readState(client);
-      return send(res, 200, { ok: true, seeded: ready.seeded, person: person, state: state });
+      /* WHAT THE CHROME NEEDS TO DRAW THE WAY BACK (spec 042): the client's
+         own name, and whether this person has cards to go back TO. Only the
+         server knows the second — a client's own person holds one client and
+         has no outer platform at all. */
+      const who = Object.assign({}, person, {
+        clientName: client._smpClient.name,
+        cards: person.kind !== "client"
+      });
+      return send(res, 200, { ok: true, seeded: ready.seeded, person: who, state: state });
     }
     if (req.method === "POST") {
-      const body = await readBody(req);
       /* ── WHAT CHANGED, APPLIED ONTO OUR OWN COPY (§210) ──────────────
          Islam: *"why is the whole plan is sent, why don't we just send the
          changed element only not to cause this issue?"*
@@ -336,7 +383,7 @@ module.exports = async function handler(req, res) {
       /* Logged AFTER the commit, outside the transaction on purpose (§185): a
          log entry for a save that did not land is worse than a missing one,
          and it names who SIGNED IN, never the simulation. */
-      await logChanges(client, logWho, logList);
+      await logChanges(client, logWho, logList, person.email);
       /* Diagnostic (§241): report which writer ran, so a save can be seen to
          have gone bit-by-bit (incremental) or the full rewrite (full) — read in
          the browser Network tab's Response, and in Vercel's runtime logs. */
@@ -346,8 +393,8 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { ok: false, error: "method not allowed" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: safeError(e) });
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500, { ok: false, error: safeError(e) });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };

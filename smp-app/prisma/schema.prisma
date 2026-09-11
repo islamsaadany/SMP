@@ -1,36 +1,39 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model sql_migrations {
-  name       String   @id
-  applied_at DateTime @default(now()) @db.Timestamptz(6)
-
-  @@map("_sql_migrations")
-}
-
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model access_grants {
-  level_key String
+  tenant_id String  @db.Uuid
+  role_key  String
   page_key  String
   grant_    String
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@id([level_key, page_key])
+  @@id([tenant_id, role_key, page_key])
+  @@index([tenant_id], map: "access_grants_tenant")
 }
 
 model bands {
-  idx   Int    @id
-  key   String
-  floor Int
-  label String @default("")
+  tenant_id String  @db.Uuid
+  idx       Int
+  key       String
+  floor     Int
+  label     String  @default("")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, idx])
+  @@index([tenant_id], map: "bands_tenant")
 }
 
 model cap_key_objectives {
-  id           String       @id
+  tenant_id    String       @db.Uuid
+  id           String
   cap_id       String
   idx          Int
   name         String       @default("")
@@ -42,118 +45,150 @@ model cap_key_objectives {
   progress     Decimal?     @db.Decimal
   note         String?
   extra        Json         @default("{}")
-  capabilities capabilities @relation(fields: [cap_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  capabilities capabilities @relation(fields: [tenant_id, cap_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "cap_key_objectives_cap_id_fkey")
+  tenants      tenants      @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "cap_key_objectives_tenant")
 }
 
 model capabilities {
-  id                 String               @id
+  tenant_id          String               @db.Uuid
+  id                 String
   idx                Int
   name               String               @default("")
   def                String               @default("")
   fn_key             String?
   extra              Json                 @default("{}")
   cap_key_objectives cap_key_objectives[]
+  tenants            tenants              @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   projects           projects[]
-}
 
-model credentials {
-  person_key    String   @id
-  password_hash String
-  must_change   Boolean  @default(true)
-  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "capabilities_tenant")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model cycle {
-  id        Int     @id @default(1)
+  tenant_id String  @id @db.Uuid
   name      String  @default("")
   reward_at Decimal @default(100) @db.Decimal
   locked    Boolean @default(false)
   focus     Json    @default("{}")
   extra     Json    @default("{}")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([tenant_id], map: "cycle_tenant")
 }
 
 model deliverables {
-  id         String   @id
+  tenant_id  String   @db.Uuid
+  id         String
   project_id String
   idx        Int
   name       String   @default("")
-  kind       String   @default("binary")
-  due        String?
-  owner      String?
-  actual     String?
+  status     String?
+  pct        Decimal? @db.Decimal
   note       String?
   extra      Json     @default("{}")
-  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  due        String?
+  projects   projects @relation(fields: [tenant_id, project_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "deliverables_project_id_fkey")
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "deliverables_tenant")
 }
 
 model functions {
-  key         String  @id
+  tenant_id   String    @db.Uuid
+  key         String
   idx         Int
-  name        String  @default("")
+  name        String    @default("")
   nav_name    String?
   code_prefix String?
   head        String?
   custodian   String?
-  active      Boolean @default(true)
-  extra       Json    @default("{}")
+  active      Boolean   @default(true)
+  extra       Json      @default("{}")
+  tenants     tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pillars     pillars[]
+
+  @@id([tenant_id, key])
+  @@index([tenant_id], map: "functions_tenant")
 }
 
 model group_clauses {
-  idx   Int     @id
-  label String  @default("")
-  text_ String  @default("")
-  cid   String?
+  tenant_id String  @db.Uuid
+  idx       Int
+  label     String  @default("")
+  text_     String  @default("")
+  cid       String?
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, idx])
+  @@index([tenant_id], map: "group_clauses_tenant")
 }
 
 model group_key_objectives {
-  idx      Int      @id
-  id       String?
-  name     String   @default("")
-  grp      String?
-  dir      String   @default("≥")
-  target3y String?
-  target   String?
-  compile  String?
-  actual   String?
-  progress Decimal? @db.Decimal
-  extra    Json     @default("{}")
+  tenant_id String   @db.Uuid
+  idx       Int
+  id        String?
+  name      String   @default("")
+  grp       String?
+  dir       String   @default("≥")
+  target3y  String?
+  target    String?
+  compile   String?
+  actual    String?
+  progress  Decimal? @db.Decimal
+  extra     Json     @default("{}")
+  tenants   tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, idx])
+  @@index([tenant_id], map: "group_key_objectives_tenant")
 }
 
 model history {
-  idx         Int      @id
+  tenant_id   String   @db.Uuid
+  idx         Int
   name        String   @default("")
   group_score Decimal? @db.Decimal
   units       Json     @default("{}")
   extra       Json     @default("{}")
+  tenants     tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, idx])
+  @@index([tenant_id], map: "history_tenant")
 }
 
 model ko_weights {
-  unit_key String @id
-  weights  Json
+  tenant_id String  @db.Uuid
+  unit_key  String
+  weights   Json
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, unit_key])
+  @@index([tenant_id], map: "ko_weights_tenant")
 }
 
 model labels {
-  key      String  @id
-  idx      Int
-  internal String  @default("")
-  grp      String?
-  bu       String?
-  note     String?
-  extra    Json    @default("{}")
-}
+  tenant_id String  @db.Uuid
+  key       String
+  idx       Int
+  internal  String  @default("")
+  grp       String?
+  bu        String?
+  note      String?
+  extra     Json    @default("{}")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-model levels {
-  key    String  @id
-  idx    Int
-  name   String  @default("")
-  titles String?
-  note   String?
-  extra  Json    @default("{}")
+  @@id([tenant_id, key])
+  @@index([tenant_id], map: "labels_tenant")
 }
 
 model measures {
-  id        String   @id
+  tenant_id String   @db.Uuid
+  id        String
   pillar_id String
   idx       Int
   name      String   @default("")
@@ -166,11 +201,16 @@ model measures {
   note      String?
   horizon   String?
   extra     Json     @default("{}")
-  pillars   pillars  @relation(fields: [pillar_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pillars   pillars  @relation(fields: [tenant_id, pillar_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "measures_pillar_id_fkey")
+  tenants   tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "measures_tenant")
 }
 
 model milestones {
-  id         String   @id
+  tenant_id  String   @db.Uuid
+  id         String
   project_id String
   idx        Int
   name       String   @default("")
@@ -178,25 +218,34 @@ model milestones {
   owner      String?
   finish     String?
   status     String?
+  pct        Decimal? @db.Decimal
   note       String?
   extra      Json     @default("{}")
-  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  projects   projects @relation(fields: [tenant_id, project_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "milestones_project_id_fkey")
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "milestones_tenant")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model org {
-  id            Int    @id @default(1)
+  tenant_id     String  @id @db.Uuid
   org_name      String
-  horizon       String @default("")
-  as_of_quarter Int    @default(2)
-  aspiration    String @default("")
-  end_in_mind   String @default("")
-  mission       String @default("")
-  extra         Json   @default("{}")
+  horizon       String  @default("")
+  as_of_quarter Int     @default(2)
+  aspiration    String  @default("")
+  end_in_mind   String  @default("")
+  mission       String  @default("")
+  extra         Json    @default("{}")
+  tenants       tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([tenant_id], map: "org_tenant")
 }
 
 model outcomes {
-  id         String   @id
+  tenant_id  String   @db.Uuid
+  id         String
   project_id String
   idx        Int
   name       String   @default("")
@@ -207,44 +256,66 @@ model outcomes {
   progress   Decimal? @db.Decimal
   note       String?
   extra      Json     @default("{}")
-  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  projects   projects @relation(fields: [tenant_id, project_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "outcomes_project_id_fkey")
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "outcomes_tenant")
 }
 
 model people {
-  key      String  @id
-  idx      Int
-  name     String  @default("")
-  level    String  @default("")
-  unit_key String?
-  fn_key   String?
-  title    String?
-  extra    Json    @default("{}")
+  tenant_id    String        @db.Uuid
+  key          String
+  idx          Int
+  name         String        @default("")
+  role         String        @default("")
+  unit_key     String?
+  fn_key       String?
+  title        String?
+  extra        Json          @default("{}")
+  tenants      tenants       @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tenant_users tenant_users[]
+
+  @@id([tenant_id, key])
+  @@index([tenant_id], map: "people_tenant")
 }
 
 model pillars {
-  id       String     @id
-  unit_key String
-  idx      Int
-  code     String?
-  name     String     @default("")
-  sub      String?
-  kind     String     @default("Direction")
-  theme    String?
-  owner    String?
-  extra    Json       @default("{}")
-  measures measures[]
-  units    units      @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
-  tactics  tactics[]
+  tenant_id String     @db.Uuid
+  id        String
+  unit_key  String?
+  idx       Int
+  code      String?
+  name      String     @default("")
+  sub       String?
+  kind      String     @default("Direction")
+  theme     String?
+  owner     String?
+  extra     Json       @default("{}")
+  fn_key    String?
+  measures  measures[]
+  functions functions? @relation(fields: [tenant_id, fn_key], references: [tenant_id, key], onDelete: Cascade, onUpdate: NoAction, map: "pillars_fn_key_fkey")
+  tenants   tenants    @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  units     units?     @relation(fields: [tenant_id, unit_key], references: [tenant_id, key], onDelete: Cascade, onUpdate: NoAction, map: "pillars_unit_key_fkey")
+  tactics   tactics[]
+
+  @@id([tenant_id, id])
+  @@index([tenant_id, fn_key], map: "pillars_fn_key_idx")
+  @@index([tenant_id], map: "pillars_tenant")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model prior_cycle {
-  id   Int  @id @default(1)
-  data Json @default("{}")
+  tenant_id String  @id @db.Uuid
+  data      Json    @default("{}")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([tenant_id], map: "prior_cycle_tenant")
 }
 
 model projects {
-  id           String         @id
+  tenant_id    String         @db.Uuid
+  id           String
   cap_id       String
   idx          Int
   name         String         @default("")
@@ -258,12 +329,16 @@ model projects {
   deliverables deliverables[]
   milestones   milestones[]
   outcomes     outcomes[]
-  capabilities capabilities   @relation(fields: [cap_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  capabilities capabilities   @relation(fields: [tenant_id, cap_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "projects_cap_id_fkey")
+  tenants      tenants        @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "projects_tenant")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model review {
-  id           Int     @id @default(1)
+  tenant_id    String  @id @db.Uuid
   name         String  @default("")
   from_label   String  @default("")
   to_label     String  @default("")
@@ -274,30 +349,38 @@ model review {
   notes        Json    @default("{}")
   submitted    Json    @default("{}")
   extra        Json    @default("{}")
+  tenants      tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([tenant_id], map: "review_tenant")
 }
 
 model sessions {
   token_hash String   @id
-  person_key String
+  user_id    String   @db.Uuid
   created_at DateTime @default(now()) @db.Timestamptz(6)
   expires_at DateTime @db.Timestamptz(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([person_key], map: "sessions_person")
+  @@index([user_id], map: "sessions_user")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model swot_items {
-  unit_key String
-  cat      String
-  idx      Int
-  text_    String @default("")
-  units    units  @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
+  tenant_id String  @db.Uuid
+  unit_key  String
+  cat       String
+  idx       Int
+  text_     String  @default("")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  units     units   @relation(fields: [tenant_id, unit_key], references: [tenant_id, key], onDelete: Cascade, onUpdate: NoAction, map: "swot_items_unit_key_fkey")
 
-  @@id([unit_key, cat, idx])
+  @@id([tenant_id, unit_key, cat, idx])
+  @@index([tenant_id], map: "swot_items_tenant")
 }
 
 model tactics {
-  id            String   @id
+  tenant_id     String   @db.Uuid
+  id            String
   pillar_id     String
   idx           Int
   name          String   @default("")
@@ -311,53 +394,77 @@ model tactics {
   actual        Decimal? @db.Decimal
   note          String?
   extra         Json     @default("{}")
-  pillars       pillars  @relation(fields: [pillar_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pillars       pillars  @relation(fields: [tenant_id, pillar_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "tactics_pillar_id_fkey")
+  tenants       tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "tactics_tenant")
 }
 
 model themes {
-  idx   Int     @id
-  ab    String
-  name  String  @default("")
-  note  String?
-  extra Json    @default("{}")
+  tenant_id String  @db.Uuid
+  idx       Int
+  ab        String
+  name      String  @default("")
+  note      String?
+  extra     Json    @default("{}")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, idx])
+  @@index([tenant_id], map: "themes_tenant")
 }
 
 model unit_clauses {
-  unit_key String
-  idx      Int
-  label    String  @default("")
-  text_    String  @default("")
-  cid      String?
-  units    units   @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
+  tenant_id String  @db.Uuid
+  unit_key  String
+  idx       Int
+  label     String  @default("")
+  text_     String  @default("")
+  cid       String?
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  units     units   @relation(fields: [tenant_id, unit_key], references: [tenant_id, key], onDelete: Cascade, onUpdate: NoAction, map: "unit_clauses_unit_key_fkey")
 
-  @@id([unit_key, idx])
+  @@id([tenant_id, unit_key, idx])
+  @@index([tenant_id], map: "unit_clauses_tenant")
 }
 
 model unit_key_objectives {
-  id       String   @id
-  unit_key String
-  idx      Int
-  name     String   @default("")
-  dir      String   @default("≥")
-  target3y String?
-  target   String?
-  compile  String?
-  actual   String?
-  progress Decimal? @db.Decimal
-  note     String?
-  extra    Json     @default("{}")
-  units    units    @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
+  tenant_id String   @db.Uuid
+  id        String
+  unit_key  String
+  idx       Int
+  name      String   @default("")
+  dir       String   @default("≥")
+  target3y  String?
+  target    String?
+  compile   String?
+  actual    String?
+  progress  Decimal? @db.Decimal
+  note      String?
+  extra     Json     @default("{}")
+  tenants   tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  units     units    @relation(fields: [tenant_id, unit_key], references: [tenant_id, key], onDelete: Cascade, onUpdate: NoAction, map: "unit_key_objectives_unit_key_fkey")
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "unit_key_objectives_tenant")
 }
 
 model unit_roles {
-  unit_key  String  @id
+  tenant_id String  @db.Uuid
+  unit_key  String
   head      String?
   custodian String?
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, unit_key])
+  @@index([tenant_id], map: "unit_roles_tenant")
 }
 
 model units {
-  key                 String                @id
+  tenant_id           String                @db.Uuid
+  key                 String
   idx                 Int
+  company             String?
   name                String                @default("")
   nav_name            String?
   code_prefix         String                @default("")
@@ -370,30 +477,409 @@ model units {
   swot_items          swot_items[]
   unit_clauses        unit_clauses[]
   unit_key_objectives unit_key_objectives[]
+  tenants             tenants               @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, key])
+  @@index([tenant_id], map: "units_tenant")
 }
 
 model weighting_factors {
-  key    String  @id
-  idx    Int
-  name   String  @default("")
-  kind   String  @default("judgement")
-  basis  String?
-  weight Decimal @default(0) @db.Decimal
-  extra  Json    @default("{}")
+  tenant_id String  @db.Uuid
+  key       String
+  idx       Int
+  name      String  @default("")
+  kind      String  @default("judgement")
+  basis     String?
+  weight    Decimal @default(0) @db.Decimal
+  extra     Json    @default("{}")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, key])
+  @@index([tenant_id], map: "weighting_factors_tenant")
 }
 
 model weighting_rows {
-  unit_key  String  @id
+  tenant_id String  @db.Uuid
+  unit_key  String
   idx       Int
   unit_name String?
   why       String?
   extra     Json    @default("{}")
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, unit_key])
+  @@index([tenant_id], map: "weighting_rows_tenant")
 }
 
 model weighting_values {
+  tenant_id  String   @db.Uuid
   unit_key   String
   factor_key String
   value      Decimal? @db.Decimal
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@id([unit_key, factor_key])
+  @@id([tenant_id, unit_key, factor_key])
+  @@index([tenant_id], map: "weighting_values_tenant")
+}
+
+model migrations {
+  name       String   @id
+  applied_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("_migrations")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assistant_asks {
+  tenant_id  String   @db.Uuid
+  id         BigInt   @id @default(autoincrement())
+  at         DateTime @default(now()) @db.Timestamptz(6)
+  asker_key  String
+  asker_name String?
+  office     Boolean  @default(false)
+  question   String
+  qkey       String
+  answer     String?
+  answered   Boolean  @default(false)
+  source     String?
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, id])
+  @@index([tenant_id, asker_key, at], map: "assistant_asks_asker_idx")
+  @@index([tenant_id, at(sort: Desc)], map: "assistant_asks_at_idx")
+  @@index([tenant_id, qkey], map: "assistant_asks_qkey_idx")
+  @@index([tenant_id], map: "assistant_asks_tenant")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bu_declarations {
+  tenant_id    String    @db.Uuid
+  person_key   String
+  at           String
+  declared_on  DateTime  @default(now()) @db.Timestamptz(6)
+  dismissed_on DateTime? @db.Timestamptz(6)
+  dismissed_by String?
+  tenants      tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, person_key])
+  @@index([tenant_id], map: "bu_declarations_tenant")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model change_log {
+  tenant_id   String   @db.Uuid
+  id          BigInt   @id @default(autoincrement())
+  at          DateTime @default(now()) @db.Timestamptz(6)
+  person_key  String
+  person_name String?
+  kind        String
+  target      String?
+  what        String?
+  rows_       Json?
+  email       String?
+  tenants     tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, id])
+  @@index([tenant_id, at(sort: Desc)], map: "change_log_at")
+  @@index([tenant_id, email, at(sort: Desc)], map: "change_log_email")
+  @@index([tenant_id, person_key, at(sort: Desc)], map: "change_log_person")
+  @@index([tenant_id, target, at(sort: Desc)], map: "change_log_target")
+  @@index([tenant_id], map: "change_log_tenant")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model chat_messages {
+  tenant_id    String       @db.Uuid
+  id           BigInt       @id @default(autoincrement())
+  person_key   String
+  at           DateTime     @default(now()) @db.Timestamptz(6)
+  from_office  Boolean      @default(false)
+  by_key       String
+  by_name      String?
+  body         String
+  shot         String?
+  flag         String?
+  emailed_to   String?
+  bot          Boolean      @default(false)
+  source       String?
+  handoff      Boolean      @default(false)
+  chase_html   String?
+  chat_threads chat_threads @relation(fields: [tenant_id, person_key], references: [tenant_id, person_key], onDelete: Cascade, onUpdate: NoAction, map: "chat_messages_person_key_fkey")
+  tenants      tenants      @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, id])
+  @@index([tenant_id, at], map: "chat_messages_chase", where: raw("((chase_html IS NOT NULL) AND (emailed_to IS NULL))"))
+  @@index([tenant_id, flag, at(sort: Desc)], map: "chat_messages_flag", where: raw("(flag IS NOT NULL)"))
+  @@index([tenant_id], map: "chat_messages_tenant")
+  @@index([tenant_id, person_key, at], map: "chat_messages_thread")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model chat_threads {
+  tenant_id      String          @db.Uuid
+  person_key     String
+  person_name    String?
+  started_at     DateTime        @default(now()) @db.Timestamptz(6)
+  last_at        DateTime        @default(now()) @db.Timestamptz(6)
+  waiting        Boolean         @default(true)
+  seen_by_them   DateTime?       @db.Timestamptz(6)
+  seen_by_us     DateTime?       @db.Timestamptz(6)
+  here_at        DateTime?       @db.Timestamptz(6)
+  chased_at      DateTime?       @db.Timestamptz(6)
+  chased_them_at DateTime?       @db.Timestamptz(6)
+  chat_messages  chat_messages[]
+  tenants        tenants         @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, person_key])
+  @@index([tenant_id, last_at(sort: Desc)], map: "chat_threads_last")
+  @@index([tenant_id], map: "chat_threads_tenant")
+  @@index([tenant_id, waiting, last_at(sort: Desc)], map: "chat_threads_waiting")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model companies {
+  tenant_id  String  @db.Uuid
+  key        String
+  idx        Int
+  name       String  @default("")
+  ceo        String?
+  see_others Boolean @default(false)
+  see_group  Boolean @default(true)
+  active     Boolean @default(true)
+  tenants    tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, key])
+  @@index([tenant_id], map: "companies_tenant")
+}
+
+model login_attempts {
+  id        BigInt   @id @default(autoincrement())
+  at        DateTime @default(now()) @db.Timestamptz(6)
+  key_tried String?
+  ip        String?
+
+  @@index([at(sort: Desc)], map: "login_attempts_at")
+  @@index([ip, at(sort: Desc)], map: "login_attempts_ip")
+  @@index([key_tried, at(sort: Desc)], map: "login_attempts_key")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model message_drafts {
+  tenant_id  String   @db.Uuid
+  id         BigInt   @id @default(autoincrement())
+  by_key     String
+  by_name    String?
+  subject    String   @default("")
+  body       String   @default("")
+  cta_label  String?
+  cta_href   String?
+  audience   Json?
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  greet      String?
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, id])
+  @@index([tenant_id], map: "message_drafts_tenant")
+  @@index([tenant_id, updated_at(sort: Desc)], map: "message_drafts_updated")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model message_recipients {
+  tenant_id   String   @db.Uuid
+  id          BigInt   @id @default(autoincrement())
+  message_id  BigInt
+  person_key  String?
+  person_name String?
+  address     String
+  ok          Boolean  @default(false)
+  error       String?
+  provider_id String?
+  messages    messages @relation(fields: [tenant_id, message_id], references: [tenant_id, id], onDelete: Cascade, onUpdate: NoAction, map: "message_recipients_message_id_fkey")
+  tenants     tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, id])
+  @@index([tenant_id, message_id], map: "message_recipients_msg")
+  @@index([tenant_id], map: "message_recipients_tenant")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model messages {
+  tenant_id          String               @db.Uuid
+  id                 BigInt               @id @default(autoincrement())
+  sent_at            DateTime             @default(now()) @db.Timestamptz(6)
+  by_key             String
+  by_name            String?
+  subject            String
+  body               String
+  cta_label          String?
+  cta_href           String?
+  audience           Json?
+  total              Int                  @default(0)
+  sent               Int                  @default(0)
+  failed             Int                  @default(0)
+  greet              String?
+  kind               String?
+  message_recipients message_recipients[]
+  tenants            tenants              @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tenant_id, id])
+  @@index([tenant_id, sent_at(sort: Desc)], map: "messages_sent_at")
+  @@index([tenant_id], map: "messages_tenant")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model plan_archives {
+  tenant_id String  @db.Uuid
+  id        String
+  idx       Int
+  kind      String
+  key       String
+  name      String
+  at_label  String?
+  by_name   String?
+  why       String?
+  counts    Json?
+  plan      Json?
+  figures   Json?
+  tenants   tenants @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, id])
+  @@index([tenant_id], map: "plan_archives_tenant")
+}
+
+model platform_access {
+  role_key String
+  area_key String
+  grant_   String
+
+  @@id([role_key, area_key])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model push_keys {
+  id          Int      @id @default(1)
+  public_key  String
+  private_key String
+  made_at     DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model push_subscriptions {
+  tenant_id  String   @db.Uuid
+  endpoint   String
+  person_key String
+  p256dh     String
+  auth       String
+  made_at    DateTime @default(now()) @db.Timestamptz(6)
+  seen_at    DateTime @default(now()) @db.Timestamptz(6)
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, person_key, endpoint])
+  @@index([tenant_id, person_key], map: "push_subscriptions_person")
+  @@index([tenant_id], map: "push_subscriptions_tenant")
+}
+
+model tenant_log {
+  id        BigInt   @id @default(autoincrement())
+  at        DateTime @default(now()) @db.Timestamptz(6)
+  user_id   String?  @db.Uuid
+  tenant_id String?  @db.Uuid
+  what      String   @default("open")
+  tenants   tenants? @relation(fields: [tenant_id], references: [id], onUpdate: NoAction)
+  users     users?   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([tenant_id, at(sort: Desc)], map: "tenant_log_tenant")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model tenant_users {
+  tenant_id  String   @unique(map: "tenant_users_one_super", where: raw("(seat = 'super'::text)")) @db.Uuid
+  user_id    String   @db.Uuid
+  person_key String
+  seat       String   @default("none")
+  added_at   DateTime @default(now()) @db.Timestamptz(6)
+  people     people   @relation(fields: [tenant_id, person_key], references: [tenant_id, key], onDelete: Cascade, onUpdate: NoAction, map: "tenant_users_person_fkey")
+  tenants    tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tenant_id, user_id])
+  @@index([user_id], map: "tenant_users_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tenants {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key                  String                 @unique
+  name                 String
+  region               String                 @default("default")
+  kind                 String                 @default("client")
+  status               String                 @default("active")
+  mark                 String?
+  colors               Json                   @default("{}")
+  industry             String                 @default("")
+  notes                String                 @default("")
+  made_here            Boolean                @default(false)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  access_grants        access_grants[]
+  assistant_asks       assistant_asks[]
+  bands                bands[]
+  bu_declarations      bu_declarations[]
+  cap_key_objectives   cap_key_objectives[]
+  capabilities         capabilities[]
+  change_log           change_log[]
+  chat_messages        chat_messages[]
+  chat_threads         chat_threads[]
+  companies            companies[]
+  cycle                cycle?
+  deliverables         deliverables[]
+  functions            functions[]
+  group_clauses        group_clauses[]
+  group_key_objectives group_key_objectives[]
+  history              history[]
+  ko_weights           ko_weights[]
+  labels               labels[]
+  measures             measures[]
+  message_drafts       message_drafts[]
+  message_recipients   message_recipients[]
+  messages             messages[]
+  milestones           milestones[]
+  org                  org?
+  outcomes             outcomes[]
+  people               people[]
+  pillars              pillars[]
+  plan_archives        plan_archives[]
+  prior_cycle          prior_cycle?
+  projects             projects[]
+  push_subscriptions   push_subscriptions[]
+  review               review?
+  swot_items           swot_items[]
+  tactics              tactics[]
+  tenant_log           tenant_log[]
+  tenant_users         tenant_users[]
+  themes               themes[]
+  unit_clauses         unit_clauses[]
+  unit_key_objectives  unit_key_objectives[]
+  unit_roles           unit_roles[]
+  units                units[]
+  weighting_factors    weighting_factors[]
+  weighting_rows       weighting_rows[]
+  weighting_values     weighting_values[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String         @unique
+  name          String         @default("")
+  password_hash String
+  must_change   Boolean        @default(true)
+  is_admin      Boolean        @default(false)
+  kind          String         @default("client")
+  status        String         @default("active")
+  created_at    DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime       @default(now()) @db.Timestamptz(6)
+  sessions      sessions[]
+  tenant_log    tenant_log[]
+  tenant_users  tenant_users[]
 }

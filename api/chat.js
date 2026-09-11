@@ -64,7 +64,7 @@ function escHtml(t) {
   });
 }
 const { ensureReady } = io;
-function getPool() { return io.getPool(pg); }
+const P = require("../lib/platform-io.js");
 
 /* §71's caps, unchanged: the client already shrinks a picture to 1600px and
    keeps the smaller of PNG and JPEG, so this is the backstop for a client that
@@ -691,52 +691,42 @@ async function collectForPeople(client, cfg, req) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    client = await getPool().connect();
+    /* WHICH CLIENT IS THIS FOR (spec 042). The browser sends the slug it was
+       served at; the schema comes from the registry row, never from the
+       request (§36.4). An unknown client and one this account may not open are
+       the same refusal, so trying slugs tells nobody anything.
 
-    /* ── NOTHING IN THE CHAT MAY WAIT ON A SAVE (§282) ─────────────────
+       ── AND NOTHING IN THE CHAT MAY WAIT ON A SAVE (§282) ─────────────
        Islam, twice in two days: "all conversations are gone!!", and then
        "before the fix all the chats disappeared", with §231.4's card reading
-       "The server did not answer (no answer)" — which is this file's own
-       25-second clock giving up, not a crash and not a 500.
+       "The server did not answer (no answer)" — this file's own 25-second
+       clock giving up, not a crash and not a 500.
 
        MEASURED RATHER THAN GUESSED, on a real Postgres. A save clears and
-       rewrites the state graph's 33 tables with `TRUNCATE ... CASCADE`, and
-       TRUNCATE takes an ACCESS EXCLUSIVE lock on `people` for the whole of
-       §240's transaction. The queue LEFT JOINs `people` for a live name. So
-       while ANY save is running, anywhere in the tenant, the conversation
-       list is not slow — it is FROZEN, indefinitely:
+       rewrites the state graph's tables with `TRUNCATE ... CASCADE`, which
+       takes an ACCESS EXCLUSIVE lock on `people` for the whole of §240's
+       transaction. The queue LEFT JOINed `people` for a live name, so while
+       ANY save was running the conversation list was not slow — it was
+       FROZEN, indefinitely. Only the join was ever blocked, and it was worst
+       exactly when somebody was looking: a new build reloads every browser,
+       the platform hydrates and autosaves, and Neon has usually gone to
+       sleep. That is why it read as "every new build loses the chats".
 
-         a save in flight, the queue as it was  : still frozen after 8s
-         the same queue reading its stored name : 2ms
-         the messages in a conversation         : 1ms
-
-       Only the join was ever blocked. And it is worst exactly when somebody
-       is looking: a new build reloads every browser, the platform hydrates
-       and autosaves, and Neon has usually gone to sleep — so the slowest save
-       of the day lands the moment the person opens the corner. That is why
-       this reads as "every new build loses the chats".
-
-       THE READER IS FIXED, NOT THE WRITER. Changing how a save clears its
-       tables is the right eventual fix and it is the one file in the product
-       where a mistake costs real data — so it is its own staged piece of
-       work, not something done while chasing a chat symptom. Nothing below
-       touches the save path.
-
-       The backstop under that is a two-second lock timeout on the register
-       read — and it is scoped to THAT READ, in `readUnderLockTimeout()` below,
-       since §289.2. It was one `SET lock_timeout` here, at the top of every
-       request, outside any transaction: on the pooled connection a session
-       setting stays on whichever backend took it and is handed to the next
-       request (§289's fault, one word over) — and this endpoint is asked every
-       few seconds by every open tab, so within minutes most backends would
-       carry it, and a SAVE queued behind another save (§240) or a cold start
-       waiting at the bootstrap's lock (§289) would be cancelled after two
-       seconds and read as the red save bar or the sign-in sentence. */
-
-    await ensureReady(client);
+       THE READER WAS FIXED, NOT THE WRITER — changing how a save clears its
+       tables is the one place in the product where a mistake costs real data,
+       so it is its own staged work. The backstop under it is a two-second
+       lock timeout scoped to THAT READ, in `readUnderLockTimeout()` above,
+       and scoped is the whole point (§289.2): as one `SET lock_timeout` at
+       the top of every request it stayed on whichever pooled backend took it
+       and was handed to the next request, so within minutes a SAVE queued
+       behind another save would be cancelled after two seconds and read as
+       the red save bar. */
     const body = req.method === "POST" ? await readBody(req) : {};
+    client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+    await ensureReady(client, client._smpClient.schema_name);
+
     const action = body.action || (req.method === "GET" ? "mine" : "");
-    const me = await auth.getSession(client, req);
+    const me = await auth.getSession(client, req, client._smpClient.key);
     if (!me) return send(res, 401, { ok: false, error: "sign in first" });
     /* IDENTITY BEFORE ANYTHING ELSE (§43.2). A temporary password buys a
        session and nothing a session is for; the chat is no exception. */
@@ -1018,7 +1008,8 @@ module.exports = async function handler(req, res) {
       const out = await push.sendTo(client, await push.subsOf(client, me.key), {
         title: "Strategy Office",
         body: "This is a test. Notifications are working on this device.",
-        tag: "reply"
+        tag: "reply",
+        open: "/" + client._smpClient.key
       });
       if (out.sent) {
         step("A box on your screen", "ok",
@@ -1221,7 +1212,12 @@ module.exports = async function handler(req, res) {
           await push.sendTo(client, await push.officeSubs(client, me.key), {
             title: me.name || me.key,
             body: firstLine(text || "(a screenshot)"),
-            tag: "office"
+            tag: "office",
+            /* WHERE A PRESS LANDS (§313.37): the worker used to open
+               /raya-trade whatever the client, which on any other client is
+               a 404. The client this message belongs to is named on the
+               payload; the worker falls back to the root door. */
+            open: "/" + client._smpClient.key
           });
         } catch (e) { /* a notification never costs the message it is about */ }
       }
@@ -1797,7 +1793,8 @@ module.exports = async function handler(req, res) {
           await push.sendTo(client, await push.subsOf(client, who), {
             title: me.name || "Strategy Office",
             body: firstLine(text),
-            tag: "reply"
+            tag: "reply",
+            open: "/" + client._smpClient.key
           });
         } catch (e) { /* a notification never costs the reply it is about */ }
       }
@@ -1866,10 +1863,10 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500,
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500,
                 { ok: false, error: e.message === "too large" ? "Too large." : "Something went wrong." });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };
 

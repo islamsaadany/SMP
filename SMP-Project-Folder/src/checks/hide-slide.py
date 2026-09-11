@@ -316,6 +316,13 @@ with sync_playwright() as pw:
     }""", UNIT, None)
     check("the seed holds a custodian to switch to", bool(cust), cust)
     if cust:
+        # A VIEWER SWITCH IS ASYNCHRONOUS OVER HTTP (§237): `switchViewer`
+        # flushes, rebases the tab on the server's graph and only THEN
+        # switches — so reading the rail straight after the call measures
+        # whoever was there before it, which for this file is the office and
+        # its thirty-one eyes. Instant over `file://`, where nothing is
+        # flushed and nothing is fetched, which is why it never showed.
+        pg.wait_for_function("(k) => window.VIEWER === k", arg=cust, timeout=20000)
         ev(pg, "slidesOpen('unit', %s)" % json.dumps(UNIT))
         pg.wait_for_timeout(700)
         theirs = {"eyes": len(pg.query_selector_all("#slidelist .slhide")),

@@ -479,7 +479,7 @@ var WELCOME = (function(){
                 '<span class="wtcar" aria-hidden="true">›</span>' +
               "</button>" +
               '<div class="wtourbody" data-wtourbody hidden>' +
-                "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
+                "<p>A short walk of the platform on your own plan — about two minutes.</p>" +
                 '<div class="wtourbtns">' +
                   '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
                   '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +

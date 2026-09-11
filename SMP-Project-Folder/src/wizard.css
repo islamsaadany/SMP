@@ -1,4 +1,4 @@
-/* ══ THE CLIENT SET-UP WIZARD (§303, spec 042) ═══════════════════════════
+/* ══ THE CLIENT SET-UP WIZARD (§318, spec 044) ═══════════════════════════
    Every class is prefixed `wz`. That is not tidiness — §65.9 records a
    one-word modifier meeting a one-word component and silently wearing its
    rules, and this feature's own mockup walked into it a second time when a
@@ -64,7 +64,7 @@
 .wzm.row > i.on { background:var(--gold); }
 .wzm.thin { height:5px; }
 
-/* ── WHAT IS DRAWN AND NOT BUILT (Islam's call, spec 042 §2) ──────────
+/* ── WHAT IS DRAWN AND NOT BUILT (Islam's call, spec 044 §2) ──────────
    Dulled, inert, and always carrying its own word: a greyed control that does
    not say why reads as broken. */
 .wzlater { opacity:.5; }

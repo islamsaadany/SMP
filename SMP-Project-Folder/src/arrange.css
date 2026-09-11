@@ -1241,10 +1241,19 @@
      34px square leaves THIRTEEN pixels of slack, so each side wants 6.5 and
      the browser snaps the drawing half a pixel sideways — measured +0.50px
      right, identical at 1500/1280/1100 and at 100/125/150%, which is what
-     says it is arithmetic rather than layout. 20px leaves 14, and 7 a side
-     is a whole number. The mark is 5% smaller; at this size that is not a
-     size anybody can see, and it is the only way to a whole-pixel answer. */
-  .units .navmenu-btn.homemark .navmenusvg{ width:20px; height:20px; }
+     says it is arithmetic rather than layout. It is the SQUARE MINUS THE
+     MARK that must be even; the mark's own size is neither here nor there,
+     which is why this is a constraint on the pair and not a magic number.
+
+     SO THE MARK GROWS IN TWOS (§302.4). Islam: *"let's make the home icon
+     bigger a bit but keep the box with teh same size"*, then, of the three
+     sizes drawn for him at real size and at 16×, *"24px"*. The box is 34,
+     so 24 leaves 10 and sits 5 a side. 23 leaves 11 and brings the snap
+     straight back — an odd size here is not a slightly different look, it
+     is the reported fault again (proved: 3 red, slack 5.5, box 0.5 across).
+     The next size up would be 26, at 4 a side, which is where the drawing
+     starts meeting the corners of a 5px radius rather than sitting in it. */
+  .units .navmenu-btn.homemark .navmenusvg{ width:24px; height:24px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }
   /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so
@@ -2134,6 +2143,26 @@
            font-weight:600; }
 .mp-foot { display:flex; justify-content:flex-end; padding-top:8px; margin-top:6px;
            border-top:1px solid var(--line); }
+/* ── THE DAY PANEL (§307) ──────────────────────────────────────────────
+   The month panel's own vocabulary — same box, same header, same Clear — with
+   a seven-column grid under a weekday strip. It is WIDER because seven columns
+   of two digits do not fit in three columns' width; everything else is
+   inherited rather than re-decided (§53.5). */
+.monthpop.daypop { width:236px; }
+.mp-wk { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; padding:0 0 4px; }
+.mp-wk span { text-align:center; font:700 9.5px/1 var(--sans); letter-spacing:.06em;
+              color:var(--ink-3); }
+.mp-days { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.mp-d { padding:5px 0; border:1px solid transparent; border-radius:5px; background:none;
+        color:var(--ink); font:inherit; font-size:var(--fs-small);
+        font-variant-numeric:tabular-nums; cursor:pointer; }
+.mp-d:hover { background:var(--surface-2); border-color:var(--line); }
+.mp-d.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel);
+           font-weight:600; }
+/* The blanks before the first of the month are not buttons and must not look
+   like one under a pointer. */
+.mp-x { cursor:default; }
+.mp-x:hover { background:none; border-color:transparent; }
 
   /* ── THE SERVER DID NOT ANSWER (§201) ─────────────────────────────────
      Over everything, deliberately: the page behind it is the worked example
@@ -2382,3 +2411,43 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 @media (max-width: 700px) {
   .mpm, .mpm input.fld { width:64px !important; }
 }
+
+/* ── SETUP · IMPORT & ARCHIVES (§304) ─────────────────────────────────
+   Two cards on the Download tab and one on Upload, all the same object: a
+   body that explains, and a foot that acts. The foot is the page's second
+   surface, so a control sits somewhere that is ITS place rather than at the
+   far end of a row from the sentence about it (which is what the old page
+   did — 894px of empty row before the first control, at a distance that
+   changed with the window). */
+.fkey { font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:600;
+  color:var(--ink-3); margin:22px 0 8px; }
+.fcard { border:1px solid var(--line); border-radius:10px; background:var(--surface);
+  max-width:1080px; }
+.fcard .fbody { padding:15px 18px; }
+.fcard .fbody p { margin:0; font-size:13px; color:var(--ink-3); max-width:64ch; }
+.fcard .fbody p.sub { font-size:12.5px; }
+.fcard .ffoot { padding:12px 18px; background:var(--surface-2);
+  border-top:1px solid var(--line); display:flex; align-items:center; gap:12px;
+  flex-wrap:wrap; border-radius:0 0 10px 10px; }
+.fcard .ffoot .why { color:var(--ink-3); font-size:12.5px; margin-right:auto; max-width:56ch; }
+.fcard .pickrow { display:flex; align-items:center; gap:14px; padding:15px 18px;
+  flex-wrap:wrap; }
+.fcard .pickrow .lab { font-size:13px; color:var(--ink-2); }
+.fcard .pickrow .ssbtn { min-width:250px; }
+.fcard .pickrow select.fld { width:auto; min-width:190px; max-width:none; }
+.fcard .cnt { font-variant-numeric:tabular-nums; }
+/* HELD, NOT DISABLED (§221, §163): a button with nothing to give says so and
+   keeps its focus, so the reason on it can be reached. */
+.fcard .ffoot [aria-disabled="true"] { opacity:.5; }
+/* A LABEL IS THE CONTROL (§304): the file input cannot be opened from script
+   without a gesture, so the press target is its own <label> wearing the
+   button's dress, with the input hidden inside it. */
+.upbtn { cursor:pointer; display:inline-flex; align-items:center; }
+/* What the platform read, above the review it produced. */
+.readbar { max-width:1080px; border:1px solid var(--line); border-left:3px solid var(--good);
+  border-radius:8px; background:var(--surface); padding:12px 16px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:18px 0 12px; }
+.readbar.bad { border-left-color:var(--bad); }
+.readbar b { font-size:14px; }
+.readbar .why { color:var(--ink-3); font-size:12.5px; }
+.readbar .linkbu { margin-left:auto; }

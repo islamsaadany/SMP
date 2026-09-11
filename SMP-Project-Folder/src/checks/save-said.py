@@ -1,5 +1,11 @@
 """A SAVE THAT FAILS SAYS SO ON THE PAGE (§171).
 
+qa-run: own-server — this check SERVES the built file itself, with a stub it
+programs (a failing save, a stale build, a second person landing). The served
+app cannot be told to fail on demand, so re-pointing it would measure something
+else; the client under test is `sync.js`, carried into the new app verbatim, and
+the new app's own end is asserted in smp-app/checks (§316.1).
+
 Islam, twice: *"the roles and access are not saving."* It saves in every
 configuration this repository can build — the demo tenant, a CLEARED tenant
 (what a real deployment is, §67), and a refresh 150ms after the press — read
@@ -180,16 +186,22 @@ with sync_playwright() as p:
     ck("...with the way out beside it",
        pg.evaluate("()=>!!document.getElementById('refused-undo')"))
 
-    # ── 6 · DEMO DATA SAYS SO WHEN SOMETHING CHANGES ─────────────────────
-    print("\n6 · demo data")
-    POST["status"] = 200
-    POST["refusals"] = None
-    pg.evaluate("()=>SYNC.setMode('demo')")
-    pg.wait_for_timeout(1500)
-    change(pg, "demo-1")
-    said = banner(pg)
-    ck("changing demo data says it is not saved", "demo data" in said.lower(),
-       said or "(nothing)")
+    # ── 6 · THE DEMO BANNER IS GONE, AND SO IS WHAT IT SAID (spec 042) ───
+    #    §136 gave the failure-neutral bar three outcomes and one of them was
+    #    "this is demo data" — a real sentence for a real mode, and the mode
+    #    went with the Demo data button when the worked example became a
+    #    CLIENT of its own. So the assertion goes rather than being loosened
+    #    into something that passes whatever happens (§24: a check keyed on
+    #    markup that no longer exists does not fail, it passes quietly).
+    #    ASSERTED AS AN ABSENCE, both ends, or a build that quietly kept the
+    #    switch would go unnoticed.
+    print("\n6 · the demo switch is gone")
+    ck("SYNC no longer offers a demo mode",
+       pg.evaluate("()=>!(window.SYNC && (SYNC.setMode || SYNC.isDemo || SYNC.demoMode))"))
+    ck("...and the page carries no demo banner or button",
+       pg.evaluate("()=>!document.getElementById('demomenu') && "
+                   "!document.getElementById('demobtn') && "
+                   "!document.getElementById('banner')"))
 
     # ── 7 · AND `file://` SAYS NOTHING, BECAUSE NOTHING WAS EXPECTED TO ──
     print("\n7 · no server behind the page")

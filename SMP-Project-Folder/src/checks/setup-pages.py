@@ -40,7 +40,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(900)
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(300)
-    pg.query_selector(".navmenu-btn").click()
+    pg.query_selector('[data-md="setup"]').click()
     pg.wait_for_timeout(700)
     for _ in range(12):
         g = pg.query_selector(".setuprail .rgroup.shut")

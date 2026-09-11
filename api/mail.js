@@ -30,7 +30,7 @@ const Audience = require("../lib/audience.js");
    was a second copy of it. */
 const mailer = require("../lib/mailer.js");
 const { ensureReady, readState } = io;
-function getPool() { return io.getPool(pg); }
+const P = require("../lib/platform-io.js");
 
 const RESEND = mailer.RESEND;
 
@@ -113,11 +113,16 @@ const resendSend  = mailer.resendSend;
 module.exports = async function handler(req, res) {
   let client;
   try {
-    client = await getPool().connect();
-    await ensureReady(client);
+    /* WHICH CLIENT IS THIS FOR (spec 042). The browser sends the slug it was
+       served at; the schema comes from the registry row, never from the
+       request (§36.4). An unknown client and one this account may not open are
+       the same refusal, so trying slugs tells nobody anything. */
     const body = req.method === "POST" ? await readBody(req) : {};
+    client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+    await ensureReady(client, client._smpClient.schema_name);
+
     const action = body.action || (req.method === "GET" ? "status" : "");
-    const me = await auth.getSession(client, req);
+    const me = await auth.getSession(client, req, client._smpClient.key);
     if (!me) return send(res, 401, { ok: false, error: "sign in first" });
     /* Mail goes out over the organisation's name. That is the SMO's. */
     if (me.role !== "super") {
@@ -449,9 +454,9 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500,
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" || e.code === "NO_PERSON" ? 404 : 500,
                 { ok: false, error: "Something went wrong." });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };

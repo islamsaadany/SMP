@@ -379,7 +379,25 @@
    "smp-shell-v4.71-yn-citations" at the moment of this merge, so the name goes
    PAST it rather than beside it (§94.12) — confirmed once more immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v4.80-home-mark-centre";
+/* v4.86-client-doors — §303.36 and the multi-client split (spec 030): every
+   client has a door of its own at /<client>/sign-in wearing its mark, an
+   office account is placed on a client's register by its ADDRESS and never
+   invented, /platform is Forefront's own shell, and a client is resolved from
+   the slug the browser was served at. The built file's bytes changed, which is
+   the whole trigger (§91).
+
+   REBUILT FROM MAIN'S COPY AND THE BRANCH'S TWO LINES RE-APPLIED (§146.2): a
+   textual merge of this file splices the two name blocks together and leaves
+   two `const SHELL` declarations with loose prose between them — a
+   SyntaxError, so the worker never installs and every returning browser goes
+   on serving itself the old shell.
+
+   Main moved 30 more commits under this branch while §303.36 was built —
+   §294 through §312 — and was serving "smp-shell-v4.85-review-pptx" when this
+   merge was made, so the name goes PAST it rather than beside it (§94.12);
+   confirm once more immediately before any push to main (§94.16).
+   `node --check sw.js` run after the merge. */
+const SHELL = "smp-shell-v4.87-shared-schema";
 const ASSETS = [
   "/",
   "/index.html",
@@ -387,8 +405,20 @@ const ASSETS = [
      REQUEST URL, and the gate asks for /raya-trade. Caching the versioned
      filename instead would fill the cache with something nobody requests
      and leave the platform unavailable offline. Both still resolve to the
-     same file on the server (vercel.json rewrites). */
+     same file on the server (vercel.json rewrites).
+
+     AND FOREFRONT'S OWN SHELL (spec 042), which is where somebody with more
+     than one client lands and the only route to Consultants and Who sees
+     what. A client's own path is still cached by name: since §313 that path
+     is a PATTERN rather than four fixed ones, so only the clients this
+     deployment actually serves can be listed, and /raya-trade is the one
+     this deployment has. */
+  "/platform",
   "/raya-trade",
+  /* And that client's own door (§313.36): a signed-out person is sent to
+     /raya-trade/sign-in, so offline it must resolve to the cached gate by
+     the address the browser actually asks for. */
+  "/raya-trade/sign-in",
   "/manifest.webmanifest",
   "/favicon.svg",
   "/favicon.png",
@@ -475,7 +505,9 @@ self.addEventListener("push", (e) => {
     tag: tag,
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
-    data: { open: d.open || "/raya-trade" }
+    /* The payload names the client it belongs to (§313.37); an older payload
+       with no `open` lands on the root door rather than on one client. */
+    data: { open: d.open || "/" }
   }));
 });
 
@@ -485,7 +517,7 @@ self.addEventListener("push", (e) => {
    (§170: the last change of a burst is not durable until the save lands). */
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
-  const go = (e.notification.data && e.notification.data.open) || "/raya-trade";
+  const go = (e.notification.data && e.notification.data.open) || "/";
   e.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((cs) => {
       for (const c of cs) {

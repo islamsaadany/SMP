@@ -184,7 +184,12 @@ with sync_playwright() as p:
            any(e.lower().startswith("present") for e in fn["entries"]), fn["entries"])
         may = pg.evaluate("()=>{try{return !!SMPRules.mayDownloadPlan(world(), viewer(),"
                           " current);}catch(e){return 'ERR '+e;}}")
-        has = any("download" in e.lower() for e in fn["entries"])
+        # THE PLAN, BY NAME. §305 put a second download in this menu — the
+        # review deck as a PDF — and it is deliberately ungated (anybody who
+        # may Present may take a picture of what they may project), so the
+        # bare word "download" stopped saying which entry this is about.
+        # Rewritten, never loosened (§218, §214.3).
+        has = any(e.lower().startswith("download the plan") for e in fn["entries"])
         ck("...and Download the plan is drawn exactly when the rule allows it",
            may is True and has, (may, fn["entries"]))
 
@@ -200,9 +205,19 @@ with sync_playwright() as p:
             pg.evaluate("(k)=>{VIEWER=k; paint();}", who[0])
             pg.wait_for_timeout(650)
             r = pg.evaluate(WHERE)
-            ck("...and their menu does not offer the download",
+            ck("...and their menu does not offer the PLAN",
                r["entries"] is not None
-               and not any("download" in e.lower() for e in r["entries"]),
+               and not any(e.lower().startswith("download the plan")
+                           for e in r["entries"]),
+               (who[0], r["entries"]))
+            # AND STILL OFFERS THE DECK (§305). Both ends in one breath: a
+            # build that gated the PDF with the plan would satisfy the
+            # absence above and quietly refuse on paper what Present grants
+            # on a screen (§61).
+            ck("...and still offers the presentation, which has no gate",
+               r["entries"] is not None
+               and any(e.lower().startswith("download the presentation")
+                       for e in r["entries"]),
                (who[0], r["entries"]))
             pg.evaluate("()=>{VIEWER=PEOPLE.filter(x=>SMPRules.mayEditAccess(world(),x))[0].key;"
                         " paint();}")
@@ -219,7 +234,19 @@ with sync_playwright() as p:
       const row=document.getElementById('subtabs');
       if(!row) return {err:'no row'};
       const kids=[...row.children].map(e=>e.getBoundingClientRect());
-      const tops=[...new Set(kids.map(r=>Math.round(r.top/6)))];
+      /* ONE ROW IS NOT ONE `top` (§122.4, §316.2). Controls of different
+         heights on one line sit at different tops, and BUCKETING those
+         (round(top/6)) turns a 1px difference into two lines whenever the two
+         values fall either side of a bucket edge — measured on the served app,
+         the three tabs at 87 and the actions span at 86, which is round(14.5)=15
+         against round(14.33)=14: a correct row reported as two. Clustered by
+         PROXIMITY instead, within half a control's height, which is what "one
+         line" means and does not depend on where a boundary happens to fall. */
+      const sorted=kids.map(r=>r.top).sort((a,b)=>a-b);
+      const near=Math.max(8, Math.round(Math.max(...kids.map(r=>r.height))/2));
+      let lines=sorted.length?1:0;
+      for(let i=1;i<sorted.length;i++) if(sorted[i]-sorted[i-1]>near) lines++;
+      const tops=new Array(lines);
       const acts=row.querySelector('.tabacts');
       return { lines: tops.length,
         overflow: Math.round(row.scrollWidth - row.clientWidth),

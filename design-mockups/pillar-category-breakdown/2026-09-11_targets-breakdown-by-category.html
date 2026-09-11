@@ -7290,8 +7290,10 @@ body { margin: 0; font-family: var(--sans); }
    page instead and paints straight over the row beneath it — and its ::before
    fills the gap above with the page's ground, over whatever it lands on.
    Both are stood down here: this is a picture of a pane, not a running page. */
-.mkframe .pane > .pband { position: static; }
-.mkframe .pane > .pband::before { display: none; }
+.mkframe .pane > .pband,
+.mkframe .pane > .ptitle { position: static; }
+.mkframe .pane > .pband::before,
+.mkframe .pane > .ptitle::before { display: none; }
 .mknote { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); margin: 12px 2px 0; max-width: 72ch; }
 .mkwhy, .mkcost { border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
                   padding: 18px 20px; margin-top: 16px; }
@@ -7306,6 +7308,24 @@ body { margin: 0; font-family: var(--sans); }
 .mkpair i { font-style: normal; color: var(--ink-3); font-size: .9em; }
 .mkask { margin: 14px 0 0; padding-top: 13px; border-top: 1px solid var(--line);
          font-size: 14px; line-height: 1.6; color: var(--ink); }
+
+
+/* ── The one control that does not exist in the product yet: naming a
+   table's columns. Drawn on the navy header the product already paints,
+   so what is being proposed is visible as a proposal. ───────────────── */
+.mkheadfld { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.mkname { width: 150px; }
+.mkhcell { display: inline-flex; align-items: center; gap: 4px; }
+.mkhin { width: 74px; background: rgba(255,255,255,.1); border: 0; border-bottom: 1px dashed rgba(255,255,255,.5);
+         color: #fff; font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 2px 4px; border-radius: 3px; }
+.mkhin:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.mkhx, .mkhadd { background: none; border: 0; color: rgba(255,255,255,.65); cursor: pointer;
+                 font-size: 13px; line-height: 1; padding: 2px 3px; border-radius: 3px; }
+.mkhx:hover, .mkhadd:hover { color: #fff; background: rgba(255,255,255,.16); }
+.mkaddcol { width: 30px; }
+.mkhadd { font-size: 16px; }
+.mkvs { display: block; font-style: normal; font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
+.mkmono { font-family: var(--mono, ui-monospace, monospace); font-size: .92em; color: var(--ink-2); }
 
 @media (max-width: 620px) {
   .mk { padding: 20px 16px 60px; }
@@ -7340,8 +7360,8 @@ body { margin: 0; font-family: var(--sans); }
     <div class="mkeyebrow">Mockup &middot; for sign-off</div>
     <h1>A breakdown of a pillar&rsquo;s targets</h1>
     <p class="mklede">Their &ldquo;Maximizing Current Stores&rdquo; pillar has its targets broken down by category.
-       This is where that would sit, drawn in the platform&rsquo;s own pages with their own numbers.
-       Only the pillars that need one have one.</p>
+       This is where that would sit &mdash; on the plan, on the reporting page and on performance &mdash;
+       drawn in the platform&rsquo;s own pages with their own numbers. Only the pillars that need one have one.</p>
   </header>
 
   <!-- ═══════════════════ TODAY ═══════════════════ -->
@@ -7602,6 +7622,167 @@ body { margin: 0; font-family: var(--sans); }
        anything else in the platform reads, and a fourth metric makes it scroll sideways.</p>
   </section>
 
+  <!-- ═══════════════════ PLAN · READING ═══════════════════ -->
+  <section class="mksec">
+    <div class="mklabel"><span class="mktag">The plan</span> Targets only &mdash; you are right</div>
+
+    <div class="mkframe">
+      <div class="pane">
+        <div class="pband"><span class="pband-code">RS02</span><span class="pband-name">Maximizing Current Stores</span></div>
+
+        <h4 class="mini">Key measures <em>&mdash; as planned: this year&rsquo;s target, and how it compiles</em></h4>
+        <div class="scroll"><div class="tblscroll">
+          <table>
+            <thead><tr><th>#</th><th>Measure</th><th>Dir.</th><th>Target</th><th>Compiled</th></tr></thead>
+            <tbody>
+              <tr><td class="idx"><span class="idx-n">1</span></td><td>Same-store sales growth</td>
+                <td class="cc"><span>&ge;</span></td><td class="num">14%</td>
+                <td class="cc"><span class="cdefault">Latest</span></td></tr>
+              <tr><td class="idx"><span class="idx-n">2</span></td><td>Average transaction value</td>
+                <td class="cc"><span>&ge;</span></td><td class="num">300 EGP</td>
+                <td class="cc"><span class="cdefault">Latest</span></td></tr>
+              <tr><td class="idx"><span class="idx-n">3</span></td><td>Store operating profitability</td>
+                <td class="cc"><span>&ge;</span></td><td class="num">17%</td>
+                <td class="cc"><span class="cdefault">Latest</span></td></tr>
+              <tr><td class="idx"><span class="idx-n">4</span></td><td>Categories mix</td>
+                <td class="cc"><span>&ge;</span></td><td class="num">100%</td>
+                <td class="cc"><span class="cdefault">Latest</span></td></tr>
+            </tbody>
+          </table>
+        </div></div>
+
+        <h4 class="mini">Categories <em>&mdash; as planned: this year&rsquo;s target for each</em></h4>
+        <div class="scroll"><div class="tblscroll">
+          <table>
+            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth</th><th class="cc">CM</th><th class="cc">Mix</th></tr></thead>
+            <tbody>
+              <tr><td class="idx"><span class="idx-n">1</span></td><td>Bakery</td>
+                <td class="num">7%</td><td class="num">69%</td><td class="num">13%</td></tr>
+              <tr><td class="idx"><span class="idx-n">2</span></td><td>Barista</td>
+                <td class="num">22%</td><td class="num">59%</td><td class="num">5%</td></tr>
+              <tr><td class="idx"><span class="idx-n">3</span></td><td>Western</td>
+                <td class="num">4%</td><td class="num">65%</td><td class="num">15%</td></tr>
+              <tr><td class="idx"><span class="idx-n">4</span></td><td>Oriental</td>
+                <td class="num">12%</td><td class="num">65%</td><td class="num">14%</td></tr>
+              <tr><td class="idx"><span class="idx-n">5</span></td><td>Ice cream</td>
+                <td class="num">32%</td><td class="num">82%</td><td class="num">12%</td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+    </div>
+
+    <p class="mknote">Fifteen targets and nothing else. The plan page has never carried a reported figure &mdash;
+       its measures table is <span class="mkmono">Measure &middot; Dir. &middot; Target &middot; Compiled</span>
+       and the breakdown follows it exactly.</p>
+  </section>
+
+  <!-- ═══════════════════ PLAN · PEN OPEN ═══════════════════ -->
+  <section class="mksec">
+    <div class="mklabel"><span class="mktag">The plan</span> Setting one up, with the pen open</div>
+
+    <div class="mkframe">
+      <div class="pane">
+        <div class="ptitle edhead"><div class="pthead"><h3>
+          <span class="ptcode">RS02</span>
+          <textarea class="fld grow ptname" rows="1">Maximizing Current Stores</textarea>
+        </h3><div class="pmeta">theme GR</div></div></div>
+
+        <h4 class="mini mkheadfld">
+          <input class="fld mkname" value="Categories">
+          <em>&mdash; name the breakdown, its columns, and its rows</em>
+        </h4>
+        <div class="scroll"><div class="tblscroll">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Category</th>
+              <th class="cc"><span class="mkhcell"><input class="mkhin" value="Growth"><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
+              <th class="cc"><span class="mkhcell"><input class="mkhin" value="CM"><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
+              <th class="cc"><span class="mkhcell"><input class="mkhin" value="Mix"><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
+              <th class="cc mkaddcol"><button class="mkhadd" title="Add a column">+</button></th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">1</span></td>
+                <td><textarea class="fld grow" rows="1">Bakery</textarea><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
+                <td class="num"><input class="fld mono" value="7%"></td>
+                <td class="num"><input class="fld mono" value="69%"></td>
+                <td class="num"><input class="fld mono" value="13%"></td><td></td></tr>
+              <tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">2</span></td>
+                <td><textarea class="fld grow" rows="1">Barista</textarea><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
+                <td class="num"><input class="fld mono" value="22%"></td>
+                <td class="num"><input class="fld mono" value="59%"></td>
+                <td class="num"><input class="fld mono" value="5%"></td><td></td></tr>
+              <tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">3</span></td>
+                <td><textarea class="fld grow" rows="1">Western</textarea><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
+                <td class="num"><input class="fld mono" value="4%"></td>
+                <td class="num"><input class="fld mono" value="65%"></td>
+                <td class="num"><input class="fld mono" value="15%"></td><td></td></tr>
+              <tr class="newrow"><td class="idx">+</td><td colspan="5"><button class="linkbu">Add a category</button></td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+    </div>
+
+    <p class="mknote">Everything on this row already exists elsewhere in the platform &mdash; the drag grip, the
+       growing name box, the &times;, the Add row. <b>One control is new:</b> naming the columns, because no
+       table here has ever let anybody do that. It is what keeps the feature from being about categories:
+       another client types Region, or Channel, or Brand.</p>
+  </section>
+
+  <!-- ═══════════════════ REPORTING ═══════════════════ -->
+  <section class="mksec">
+    <div class="mklabel"><span class="mktag">Reporting</span> Where the fifteen figures are typed</div>
+
+    <div class="mkframe">
+      <div class="pane">
+        <div class="pband"><span class="pband-code">RS02</span><span class="pband-name">Maximizing Current Stores</span>
+          <span class="pband-r"><span class="pband-n">4 measures &middot; 5 categories</span><span class="rtally full">19/19</span></span>
+        </div>
+
+        <h4 class="mini">Categories</h4>
+        <div class="scroll"><div class="tblscroll">
+          <table>
+            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth</th><th class="cc">CM</th><th class="cc">Mix</th><th>Note</th></tr></thead>
+            <tbody>
+              <tr><td class="idx">1</td><td>Bakery</td>
+                <td class="cc"><span class="entry filled"><input class="field" value="4"><span class="unitsuf">%</span></span><i class="mkvs">/ 7%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="66"><span class="unitsuf">%</span></span><i class="mkvs">/ 69%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="9"><span class="unitsuf">%</span></span><i class="mkvs">/ 13%</i></td>
+                <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one">Ramadan shifted the bread mix.</textarea></td></tr>
+              <tr><td class="idx">2</td><td>Barista</td>
+                <td class="cc"><span class="entry filled"><input class="field" value="27"><span class="unitsuf">%</span></span><i class="mkvs">/ 22%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="62"><span class="unitsuf">%</span></span><i class="mkvs">/ 59%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="5"><span class="unitsuf">%</span></span><i class="mkvs">/ 5%</i></td>
+                <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one"></textarea></td></tr>
+              <tr><td class="idx">3</td><td>Western</td>
+                <td class="cc"><span class="entry filled"><input class="field" value="5"><span class="unitsuf">%</span></span><i class="mkvs">/ 4%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="62"><span class="unitsuf">%</span></span><i class="mkvs">/ 65%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="16"><span class="unitsuf">%</span></span><i class="mkvs">/ 15%</i></td>
+                <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one"></textarea></td></tr>
+              <tr><td class="idx">4</td><td>Oriental</td>
+                <td class="cc"><span class="entry filled"><input class="field" value="12"><span class="unitsuf">%</span></span><i class="mkvs">/ 12%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="65"><span class="unitsuf">%</span></span><i class="mkvs">/ 65%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="14"><span class="unitsuf">%</span></span><i class="mkvs">/ 14%</i></td>
+                <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one"></textarea></td></tr>
+              <tr><td class="idx">5</td><td>Ice cream</td>
+                <td class="cc"><span class="entry filled"><input class="field" value="28"><span class="unitsuf">%</span></span><i class="mkvs">/ 32%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="84"><span class="unitsuf">%</span></span><i class="mkvs">/ 82%</i></td>
+                <td class="cc"><span class="entry filled"><input class="field" value="8"><span class="unitsuf">%</span></span><i class="mkvs">/ 12%</i></td>
+                <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one"></textarea></td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+    </div>
+
+    <p class="mknote">The target sits behind each box so nobody has to remember it. These are <b>asked for like
+       any other figure</b> &mdash; the tally counts them and Submit waits for all nineteen. What they do not do
+       is <b>score</b>, and that has one consequence worth knowing: the platform demands an explanation when a
+       figure is at risk, and a figure with no score can never be at risk, so a note here is always offered and
+       never required.</p>
+  </section>
+
   <!-- ═══════════════════ NO BREAKDOWN ═══════════════════ -->
   <section class="mksec">
     <div class="mklabel"><span class="mktag">Either way</span> A pillar that does not need one is untouched</div>
@@ -7651,14 +7832,15 @@ body { margin: 0; font-family: var(--sans); }
   <section class="mksec mkcost">
     <h3>What it costs, before you say yes</h3>
     <ul>
-      <li><b>More to enter each cycle.</b> This pillar goes from four figures to nineteen. The fifteen
-          are typed on the reporting page in the same table shape you see here.</li>
+      <li><b>More to enter each cycle, and Submit waits for it.</b> This pillar goes from four figures to
+          nineteen, and a cycle cannot be submitted with any of them blank. Say so and they can be optional
+          instead &mdash; but then a breakdown quietly half-filled is a breakdown nobody can trust.</li>
       <li><b>It does not change the pillar&rsquo;s score</b>, and I think that is right: the breakdown explains
           the targets above it. If it scored as well, one pillar would have two different numbers and
           people would argue about which one counts. Say the word and it scores &mdash; but that is a
           bigger piece of work and a decision about how performance is read, not a column.</li>
-      <li><b>It is set up per pillar</b>, on the plan side, in the same table with boxes instead of figures:
-          name the breakdown, name its columns, list the rows.</li>
+      <li><b>One control does not exist anywhere in the platform yet</b> &mdash; naming a table&rsquo;s columns.
+          It is what stops this being a feature about categories.</li>
       <li><b>It goes on the review slides too</b>, as its own slide after that pillar&rsquo;s targets.</li>
     </ul>
     <p class="mkask"><b>What I need from you:</b> A or B &mdash; and whether &ldquo;it does not score&rdquo; is right.</p>

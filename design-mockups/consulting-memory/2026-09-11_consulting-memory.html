@@ -172,6 +172,35 @@
     white-space:pre-wrap }
   .wacts{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px }
 
+  /* ── THE PERIOD DEBRIEF, AND WHAT COMES BACK ──────────────────
+     The usual way in (Islam, 2026-09-11: "it will not be case by case
+     usually it would be a period of time to share"). One conversation, several
+     insights — so the paste box is the wide one and the form is three fields
+     above it, not the other way round. */
+  .pastebox{ min-height:150px; resize:vertical;
+    font:400 13px/1.6 ui-monospace, SFMono-Regular, monospace }
+  .found{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    background:var(--good-bg); border:1px solid var(--good); border-radius:8px;
+    padding:10px 13px; margin-bottom:18px; font-size:13.5px; color:var(--ink-2) }
+  .found b{ color:var(--good) }
+  .found .sp{ margin-left:auto; display:flex; gap:8px }
+  .drafts{ display:flex; flex-direction:column; gap:14px; max-width:760px }
+  .dcard{ border:1px solid var(--line); border-radius:12px; background:var(--surface);
+    box-shadow:var(--shadow); padding:15px 17px }
+  .dhead{ display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:11px }
+  .dhead .fld{ flex:1 1 240px; min-width:0; font-weight:600 }
+  .dhead select.fld{ flex:0 0 auto; width:auto; font-weight:400 }
+  .dhead .drop{ margin-left:auto; border-color:var(--line); color:var(--ink-3) }
+  .dhead .drop:hover{ border-color:var(--bad); color:var(--bad) }
+  .dq{ margin-bottom:11px }
+  .dq:last-child{ margin-bottom:0 }
+  .dq textarea.fld{ min-height:56px; resize:vertical; font-size:13.5px }
+  /* A BLOCK THAT COULD NOT BE READ IS SHOWN, NEVER DROPPED (§184): what came
+     back is somebody's own words, so the one thing the platform may not do
+     with it is lose it quietly. */
+  .dcard.raw{ border-color:var(--warn); background:var(--warn-bg) }
+  .dcard.raw .rawnote{ font-size:13px; color:var(--warn); margin:0 0 10px }
+
   .empty{ border:1px dashed var(--line); border-radius:12px; padding:34px 24px;
     text-align:center; color:var(--ink-3); background:var(--surface) }
   .empty b{ display:block; color:var(--ink); font-size:16px; margin-bottom:6px }
@@ -211,6 +240,8 @@
   <span class="sp">
     <button type="button" data-go="list" class="on">The list</button>
     <button type="button" data-go="read">Reading one</button>
+    <button type="button" data-go="deb">A period debrief</button>
+    <button type="button" data-go="drafts">What came back</button>
     <button type="button" data-go="wiz">Adding one</button>
     <button type="button" data-go="empty">Nothing yet</button>
     <button type="button" id="themebtn">Dark</button>
@@ -238,7 +269,8 @@
     <div class="ptitle">
       <h1>Memory</h1>
       <span class="right">
-        <button class="btn amber" type="button" data-go="wiz">Add an insight</button>
+        <button class="btn" type="button" data-go="wiz">Add one insight</button>
+        <button class="btn amber" type="button" data-go="deb">Write up a period</button>
       </span>
     </div>
 
@@ -379,6 +411,198 @@
     </article>
   </section>
 
+  <!-- ═══ A PERIOD DEBRIEF ═══════════════════════════════════════ -->
+  <section data-state="deb" hidden>
+    <div class="ptitle">
+      <h1>Write up a period</h1>
+      <span class="right">
+        <button class="btn" type="button" data-go="list">Cancel</button>
+      </span>
+    </div>
+
+    <div class="wiz">
+      <div class="wpair">
+        <div>
+          <label class="lab" for="d-client">Client</label>
+          <select class="fld" id="d-client">
+            <option>Raya Trade</option>
+            <option>RHI</option>
+            <option>El Abd</option>
+          </select>
+        </div>
+        <div>
+          <label class="lab" for="d-from">From</label>
+          <input class="fld" id="d-from" type="text" value="1 August 2026">
+        </div>
+        <div>
+          <label class="lab" for="d-to">To</label>
+          <input class="fld" id="d-to" type="text" value="11 September 2026">
+        </div>
+      </div>
+
+      <span class="lab">Take this to your assistant and talk it through</span>
+      <pre class="prompt" id="debbox">I have just finished a period of work at Raya Trade (distribution &amp; retail),
+covering 1 August to 11 September 2026. Help me write up what we learned from
+it, for my firm's consulting memory.
+
+Interview me. Ask ONE question at a time and wait for my answer before asking
+the next one.
+
+Start by asking me to walk you through the period — what we worked on and what
+stands out. Then draw out, one at a time:
+
+  · what went better than we expected, and why
+  · what went wrong, or cost us time
+  · what I know now that I did not know at the start
+  · anything I would warn the next consultant about
+
+For each thing I raise, ask me what happened, what we did, what came of it, and
+what the next person should know. Push back when my answer is vague, and do not
+move on until it would make sense to somebody who was not there.
+
+When I say I am done, write every item back in exactly this shape, and nothing
+else — no summary, no preamble:
+
+===
+KIND: hiccup | practice | lesson
+TITLE: one line, the thing itself
+WHEN: 1 August to 11 September 2026
+WHAT HAPPENED: ...
+WHAT WE DID: ...
+WHAT CAME OF IT: ...
+WHAT THE NEXT PERSON SHOULD KNOW: ...
+===
+
+Repeat that block for each item. Use my words, not yours. If I only half
+answered something, leave that line out rather than filling it in.</pre>
+      <div class="wacts">
+        <button class="btn solid" type="button" data-copy="debbox">Copy the prompt</button>
+      </div>
+
+      <div class="apart">
+        <span class="akey">Then paste what came back</span>
+        <textarea class="fld pastebox" id="d-paste"
+          placeholder="Paste the whole answer here — every block at once."></textarea>
+        <div class="wacts">
+          <button class="btn amber" type="button" data-go="drafts">Read what came back</button>
+          <span class="muted" style="font-size:13px">Nothing is saved until you have read them.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ WHAT CAME BACK ═════════════════════════════════════════ -->
+  <section data-state="drafts" hidden>
+    <div class="ptitle">
+      <h1>What came back</h1>
+      <span class="right">
+        <button class="btn" type="button" data-go="deb">Back</button>
+        <button class="btn amber" type="button" data-go="list">Save all 4</button>
+      </span>
+    </div>
+
+    <!-- THE COUNT AND THE ROWS ARE ONE LIST (§108.1): three blocks were read
+         and one was not, so it says both rather than calling all four found. -->
+    <p class="found">
+      <b>3 insights read</b>, and one block it could not · Raya Trade ·
+      1 August to 11 September 2026
+      <span class="sp"><span class="tag hiccup">1 hiccup</span>
+        <span class="tag practice">1 practice</span>
+        <span class="tag lesson">1 lesson</span></span>
+    </p>
+
+    <div class="drafts">
+      <article class="dcard">
+        <div class="dhead">
+          <select class="fld" aria-label="Kind"><option>Hiccup</option><option>Practice</option><option>Lesson</option></select>
+          <input class="fld" type="text" aria-label="Title"
+                 value="The weighting workshop ran twice because the CEO was not in the first one">
+          <button class="btn drop" type="button">Drop</button>
+        </div>
+        <div class="dq">
+          <label class="lab">What happened</label>
+          <textarea class="fld">We ran the weighting session with the ten unit heads over a full morning and came out with a set everybody had argued for and signed. We took the outcome to the group CEO the same week as a read-out rather than a decision.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What we did</label>
+          <textarea class="fld">He moved three weights inside ten minutes. We went back to the heads individually rather than reconvening them, which took four days and two of them heard it from a colleague first.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What came of it</label>
+          <textarea class="fld">The weights are right and the room is not. Two heads have since described the workshop as "the one that got overruled".</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What the next person should know</label>
+          <textarea class="fld">Either the owner is in the room, or the session is run as a recommendation and everybody is told that at the start.</textarea>
+        </div>
+      </article>
+
+      <article class="dcard">
+        <div class="dhead">
+          <select class="fld" aria-label="Kind"><option selected>Practice</option><option>Hiccup</option><option>Lesson</option></select>
+          <input class="fld" type="text" aria-label="Title"
+                 value="Run the first review as a rehearsal, with nobody senior in the room">
+          <button class="btn drop" type="button">Drop</button>
+        </div>
+        <div class="dq">
+          <label class="lab">What happened</label>
+          <textarea class="fld">Nothing exposes a half-filled plan like presenting it. We put an hour in the diary a week before the real review and walked the deck with the custodians only.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What we did</label>
+          <textarea class="fld">Eleven gaps came out of that hour — four missing targets, an owner nobody had agreed, and six tactics with no quarters on them.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What came of it</label>
+          <textarea class="fld">The real review ran on a complete plan and took forty minutes instead of the two hours we had booked.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What the next person should know</label>
+          <textarea class="fld">Book the rehearsal at the same time as the review, or it is the thing that gets dropped when the week gets tight.</textarea>
+        </div>
+      </article>
+
+      <article class="dcard">
+        <div class="dhead">
+          <select class="fld" aria-label="Kind"><option>Hiccup</option><option>Practice</option><option selected>Lesson</option></select>
+          <input class="fld" type="text" aria-label="Title"
+                 value="Nobody reads a 40-page strategy document, but everybody reads their own page">
+          <button class="btn drop" type="button">Drop</button>
+        </div>
+        <div class="dq">
+          <label class="lab">What happened</label>
+          <textarea class="fld">We sent the consolidated plan to all ten units for comment and had three replies in two weeks.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What we did</label>
+          <textarea class="fld">Sent each head only their own unit's pages, with the group aim on top.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What came of it</label>
+          <textarea class="fld">Nine of ten replied within four days, and six of them corrected something.</textarea>
+        </div>
+        <div class="dq">
+          <label class="lab">What the next person should know</label>
+          <textarea class="fld"></textarea>
+        </div>
+      </article>
+
+      <article class="dcard raw">
+        <p class="rawnote">This one did not come back in the shape the prompt asked for — check it, or save
+          it as it stands.</p>
+        <div class="dhead">
+          <select class="fld" aria-label="Kind"><option>Hiccup</option><option>Practice</option><option>Lesson</option></select>
+          <input class="fld" type="text" aria-label="Title" placeholder="Give it a title" value="">
+          <button class="btn drop" type="button">Drop</button>
+        </div>
+        <div class="dq">
+          <label class="lab">What happened</label>
+          <textarea class="fld">Also worth saying — the finance team were much faster once they had a named contact on our side rather than the shared inbox.</textarea>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- ═══ ADDING ONE ═════════════════════════════════════════════ -->
   <section data-state="wiz" hidden>
     <div class="ptitle">
@@ -450,7 +674,7 @@ before asking the next:
 Then write my answers back as four short paragraphs under those four
 headings, in my own words, and nothing else.</pre>
         <div class="wacts">
-          <button class="btn solid" type="button" id="copybtn">Copy the prompt</button>
+          <button class="btn solid" type="button" data-copy="promptbox">Copy the prompt</button>
           <span class="muted" style="font-size:13px">Paste it back into the boxes above.</span>
         </div>
       </div>
@@ -462,7 +686,8 @@ headings, in my own words, and nothing else.</pre>
     <div class="ptitle">
       <h1>Memory</h1>
       <span class="right">
-        <button class="btn amber" type="button" data-go="wiz">Add an insight</button>
+        <button class="btn" type="button" data-go="wiz">Add one insight</button>
+        <button class="btn amber" type="button" data-go="deb">Write up a period</button>
       </span>
     </div>
     <div class="empty">
@@ -500,6 +725,28 @@ headings, in my own words, and nothing else.</pre>
     <li><b>Copy the prompt sits under a rule, not in the flow.</b> It is not step five of the form,
       it is an alternative to filling the form in at all — so it takes the page's own
       hairline-and-key device rather than looking like the next thing to do.</li>
+    <li><b>The period debrief is the main door, and the single insight is the exception.</b> Islam:
+      <i>&ldquo;it will not be case by case usually, it would be a period of time to share.&rdquo;</i>
+      So <i>Write up a period</i> takes the loud button and <i>Add one insight</i> stands beside it
+      quietly — the form is for the day something happens, the debrief is for the month you have
+      just had.</li>
+    <li><b>One conversation, several insights.</b> The debrief prompt interviews, then writes every
+      item back in a fixed block, and the platform splits the paste into drafts. Storing the whole
+      conversation as one entry would lose the filter, the search and the kinds — which is most of
+      what the memory is for.</li>
+    <li><b>The prompt asks one question at a time and pushes back on a vague answer.</b> That
+      sentence is the difference between a debrief and a transcript; without it the assistant asks
+      five things at once and gets five half-answers.</li>
+    <li><b>It forbids invention — and the review screen exists because that cannot be enforced.</b>
+      <i>&ldquo;Use my words, not yours. If I only half answered something, leave that line out
+      rather than filling it in.&rdquo;</i> The platform cannot tell a paragraph somebody said from
+      one a model completed, so a person reads every draft before it is saved. That is why nothing
+      lands straight in the list, and it is not politeness.</li>
+    <li><b>A block it could not read is shown, never dropped</b> (§184). It comes back in the warning
+      ground with its text intact, so the one thing the platform never does with somebody's own
+      words is lose them quietly.</li>
+    <li><b>The count and the rows are one list</b> (§108.1) — <i>three read, and one it could
+      not</i>, rather than four found over three that parsed.</li>
   </ul>
 
   <h2>What it costs</h2>
@@ -511,6 +758,13 @@ headings, in my own words, and nothing else.</pre>
       <i>Retail</i> and <i>retail &amp; distribution</i> typed on two cards make two industries, and
       this filter then answers half the question. Cheap to settle now, expensive in a year — flagged
       in the spec, and not done, because it touches the client card.</li>
+    <li class="cost"><b>There is a screen between talking and saving, and it is deliberate.</b> Six
+      write-ups about real client situations, drafted by a model from a conversation, going straight
+      into a memory the whole firm reads is the one thing worth a step. The cost is that a debrief
+      is never one press.</li>
+    <li class="cost"><b>The block shape depends on the assistant doing as it is told.</b> Every
+      assistant gets this right most of the time and none gets it right every time — which is what
+      the amber block is: the honest outcome rather than a failure, still editable, still saveable.</li>
     <li class="cost"><b>The words on this page are placeholders.</b> <i>Insight</i>,
       <i>practice · hiccup · lesson</i>, <i>Add an insight</i> — this is the drawing where they get
       read in place and settled, rather than argued in prose.</li>
@@ -541,12 +795,18 @@ headings, in my own words, and nothing else.</pre>
       tb.textContent = dark ? "Dark" : "Light";
     });
 
-    var cb = document.getElementById("copybtn");
-    cb.addEventListener("click", function () {
-      var txt = document.getElementById("promptbox").textContent;
-      var done = function () { cb.textContent = "Copied"; setTimeout(function () {
-        cb.textContent = "Copy the prompt"; }, 1600); };
-      if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(done, done); }
+    /* ONE COPY HANDLER FOR BOTH PROMPTS (§53.5) — the button names the box it
+       copies, so a third prompt needs no second handler. */
+    document.addEventListener("click", function (e) {
+      var cb = e.target.closest("[data-copy]");
+      if (!cb) return;
+      var box = document.getElementById(cb.getAttribute("data-copy"));
+      if (!box) return;
+      var done = function () {
+        cb.textContent = "Copied";
+        setTimeout(function () { cb.textContent = "Copy the prompt"; }, 1600);
+      };
+      if (navigator.clipboard) { navigator.clipboard.writeText(box.textContent).then(done, done); }
       else { done(); }
     });
   }());

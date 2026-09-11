@@ -1,8 +1,12 @@
 # 044 — The consulting memory
 
 **Status:** written 2026-09-11, awaiting Islam's sign-off. Nothing built.
-**Asked for by Islam, 2026-09-11.** Four of its decisions are already his
-(below), including the two settled the same day on who reads and who is named.
+**Asked for by Islam, 2026-09-11.** Five of its decisions are already his
+(below), including the two settled the same day on who reads and who is named,
+and the correction that made the **period debrief** the main way in rather than
+the one-at-a-time form.
+**Mockup:** `design-mockups/consulting-memory/2026-09-11_consulting-memory.html`
+— six states, drawn in the platform's own tokens.
 
 ## The question
 
@@ -52,8 +56,14 @@ platform carries nothing.
 | **kind** | one word: *practice* · *hiccup* · *lesson* |
 | **title** | one line (§260: one line, and the box says so) |
 | **body** | prose — what happened, what we did, what came of it, what the next person should know |
+| **when** | optional — the period it is about, filled in by the debrief and typed by nobody |
 | **author** | the account that wrote it |
 | **written / updated** | timestamps |
+
+**`when` and `written` are two different facts** and the entry carries both: one
+is when the thing happened, the other is when somebody got round to writing it
+down, and on a period debrief they are weeks apart. Absent is absent — an entry
+with no period says nothing rather than borrowing its write-up date (§35).
 
 **Prose, not twenty fields.** Twenty fields is what nobody fills in after an
 engagement, and prose is what both a person and the assistant read. The
@@ -96,30 +106,93 @@ a Y/N row.
    stop opening. **No open count, no named log, no `client_log` row.** Written
    down so a later reader does not take it for something that was forgotten
    (§35: an absence is only trustworthy when somebody said it).
+5. **A period is the usual unit, not a single event.** *"It will not be case by
+   case usually, it would be a period of time to share."* The debrief takes the
+   loud button and the one-at-a-time form stands beside it quietly. **Cost:**
+   two doors onto one store, which is two things to keep in step — paid
+   deliberately, because the four questions and everything downstream are
+   shared and only the harvesting differs.
 
-## The way in
+## The way in — two doors, and the second is the usual one
 
-**One page of questions, and two ways to finish it.** The questions are the
-after-action shape and there are four:
+The four questions are the after-action shape and they are the same on both
+doors:
 
 1. What happened?
 2. What did we do?
 3. What came of it?
 4. What should the next person know?
 
-At the foot: type the answers in, **or press *Copy the prompt*** — the same four
-questions with the client's name and industry already in them — paste it into
-whatever assistant they use, speak the answer, and paste the result back into
-one box. **This is Islam's own proposal and it is the right one**: SMP has no
-audio anywhere in it (verified — no `MediaRecorder`, no `getUserMedia`, no
-`SpeechRecognition`), and it needs none, because every consultant already
-carries a device that dictates.
+### Add one insight — for the day it happens
+
+One page of those four questions, and two ways to finish it: type the answers
+in, **or press *Copy the prompt*** — the same four questions with the client's
+name and industry already in them — take it to whatever assistant they use,
+speak the answer, paste the result back.
 
 **A title and a client are enough to save.** Everything else may be empty and
 filled in later. This is the one rule that decides whether the memory survives:
 the standard failure of a consulting memory is that it is written at the end of
 an engagement, which means never — so it has to be possible to drop one line on
 the day the hiccup happens, and finish it on the plane.
+
+### Write up a period — for the month you have just had
+
+**This is the main door, and it is Islam's correction of the first drawing**
+(2026-09-11): *"we need a starting add insight prompt for voice chat to capture
+all the lessons in general for a case or a client … it will not be case by case
+usually it would be a period of time to share."* He is right, and it changes
+which button is loud: a consultant comes back from a period with six things in
+their head, not one.
+
+**One conversation, several insights.** Pick the client and the period; the
+platform writes a prompt with both in it; the consultant talks it through with
+an assistant and pastes the whole answer back **in one box**. The platform
+splits it into drafts.
+
+**The prompt interviews rather than collects** — that is the whole of why it is
+worth writing rather than leaving people to ask their own:
+
+- **one question at a time, waiting for the answer**, or the assistant asks five
+  things at once and gets five half-answers;
+- it draws out **what went better than expected · what cost us time · what I
+  know now that I did not at the start · what I would warn the next consultant
+  about**, which is where several insights come from where one question gets
+  one;
+- **it pushes back on a vague answer** and does not move on until the answer
+  would make sense to somebody who was not there;
+- it writes every item back in **one fixed block** — `KIND · TITLE · WHEN` and
+  the four answers, between `===` rules, and nothing else — which is what makes
+  a paste splittable.
+
+**Storing the conversation whole was considered and refused.** One long entry
+per period loses the kind, the search and the filter — most of what the memory
+is for — and buries five insights inside a sixth.
+
+**The prompt forbids invention, and the review screen exists because that
+cannot be enforced.** It ends *"use my words, not yours; if I only half answered
+something, leave that line out rather than filling it in"* — and the platform
+**cannot tell a paragraph somebody said from one a model completed**. So a
+paste never lands in the list: it lands as **drafts somebody reads**, each
+editable, each droppable, saved together. The cost is that a debrief is never
+one press, and it is worth it — several write-ups about real client situations,
+drafted from a conversation, going straight into a memory the whole firm reads
+is the one thing worth a step in front of.
+
+**A block that could not be read is shown, never dropped** (§184): it comes back
+in the warning ground with its text intact and a title to give it. The count
+says **three read, and one it could not** rather than four found (§108.1: the
+count and the rows are one list).
+
+**SMP still has no audio and needs none** — verified: no `MediaRecorder`, no
+`getUserMedia`, no `SpeechRecognition` anywhere in the product. Every consultant
+already carries a device that dictates, and the platform's part is the prompt
+and the paste.
+
+**The period rides onto every insight it produced** (`when`) — one optional
+line, filled in by the debrief and typed by nobody, which answers the question a
+reader has about an old entry: *was this during the plan build, or during
+reporting?*
 
 ## The way out
 
@@ -166,6 +239,15 @@ which was not part of the ask** (rule 1b).
   client required and the refusal saying so; a title-only entry saved and
   reopened; **the author's name drawn on the entry** (decision 3, and the
   reason anybody can act on what they read). Red first.
+- `checks/memory-debrief.mjs` — **the split, which is the one piece with a
+  wrong answer available to it.** A paste of four blocks becomes four drafts
+  with their kinds and titles read off them; **nothing is saved until the drafts
+  are saved** (the table counted after the paste and asserted empty, §94.2); a
+  block in the wrong shape comes back **with its text intact** and is saveable;
+  a paste of pure prose produces **one draft holding all of it and never
+  nought**, because losing what somebody dictated is the only unacceptable
+  outcome. Red first, and falsified by feeding it a paste the splitter mangles
+  rather than by feeding it a clean one.
 - **Decision 4 is asserted as an absence, at both ends**: opening an entry
   writes **no row anywhere** — the table counted before and after, because
   *nothing was logged* and *nothing reached the page* look identical from
@@ -183,9 +265,15 @@ which was not part of the ask** (rule 1b).
 
 ## Recorded, not done
 
-- **No phase-of-engagement field.** *When* in an engagement something happened
-  is real and is one more thing to fill in; it can be said in the prose until
-  somebody misses it.
+- **`when` is free text, not a named engagement.** *"1 August to 11 September"*
+  is what the debrief knows; a client Forefront runs two distinct engagements
+  for is told apart by its periods today, and giving an engagement a name of its
+  own is a second decision.
+- **The debrief does not remember where it got to.** Talk it through, paste, and
+  the drafts are in front of you; close the tab in between and the conversation
+  is in the assistant, not here. Holding a half-finished debrief would mean
+  storing what somebody said before they have read it, which is the one thing
+  the review screen exists to prevent.
 - **No attachments.** A screenshot of the slide that caused the row is exactly
   what somebody will want; the store exists (§261's blob endpoint) and it is a
   second decision.

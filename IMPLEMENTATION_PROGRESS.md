@@ -4569,6 +4569,22 @@ was not part of the ask (rule 1b). **Two more settled the same day**:
 the entry **names its author** (*"the entry is for the team and identified by
 who added this lesson or insight"*), and **nothing records who READ one** — a
 readership log was offered and refused, written down as a decision rather than
-left as an omission, and asserted as an absence at both ends. **Waiting on
-Islam**: sign-off on the spec, then the mockup (rule 1c), where the wording is
-settled by being read in place rather than argued in prose.
+left as an omission, and asserted as an absence at both ends. **AND THE MAIN DOOR IS A PERIOD DEBRIEF, WHICH IS HIS CORRECTION OF THE FIRST
+DRAWING**: *"it will not be case by case usually it would be a period of time to
+share."* Right, and it changes which button is loud — a consultant comes back
+from a month with six things in their head, not one. One conversation, several
+insights: the platform writes a prompt carrying the client and the period, the
+prompt **interviews** (one question at a time, pushing back on a vague answer,
+drawing out what went better / what cost time / what I know now / what I would
+warn the next person about) and writes every item back in one fixed block, and
+the paste is **split into drafts somebody reads before anything is saved**.
+**The prompt forbids invention and the review screen exists because that cannot
+be enforced** — the platform cannot tell a paragraph somebody said from one a
+model completed. **A block it could not read is shown with its text intact,
+never dropped** (§184), and the count says *three read and one it could not*
+rather than four found (§108.1). Storing the conversation whole was refused: it
+buries five insights inside a sixth and loses the kind, the search and the
+filter. The mockup is six states in the platform's own tokens
+(`design-mockups/consulting-memory/2026-09-11_consulting-memory.html`).
+**Waiting on Islam**: the four questions, the words (*insight*, *practice ·
+hiccup · lesson*), and sign-off — then the plan.

@@ -4928,15 +4928,27 @@ built, because widening the test would change a screen he has not seen in that
 state, and changing the cleared graph would change `main`'s own feature from
 inside a merge (rule 1b).
 
-**THE FROZEN WORKER'S CACHE NAME IS BUMPED ANYWAY, AND THE REASON IS THAT THE
-CUTOVER HAS NOT RUN.** `main`'s Phase J generates the new stack's worker from
-this file with the caching half **dropped** — no `fetch` handler, every cache
-deleted on activate — so on the served app §91's trap is closed by construction.
-But that phase is built and not run: production still tracks the repository root,
-where the frozen `sw.js` caches the built platform BY NAME, and the built file's
-bytes changed today. `smp-shell-v4.87-shared-schema` → `smp-shell-v4.88-setup-wizard`,
-confirmed against `origin/main` immediately before the push (§94.12, §94.16), and
-`node --check sw.js` after the merge (§146.2).
+**THE FROZEN WORKER'S CACHE NAME IS BUMPED, AND READING THE LIVE SITE CORRECTED
+WHY.** The first draft of this paragraph said the bump was load-bearing because
+the cutover had not run. **It has** — measured rather than assumed (§91.5, whose
+whole instruction is to read the live site and never the dashboard):
+`/sw.js` in production is the GENERATED worker, whose first line names
+`scripts/build-sw.mjs`, and `/strategy-management-platform-v3.22.html` answers
+**404**. Production is the served app, so the frozen `sw.js`'s caching half
+reaches nobody and §91's cache-by-name trap is closed by construction —
+`build-sw.mjs` carries only the push half, asserted, and regenerating it after
+the bump produces a byte-identical file. The name is bumped anyway, because the
+frozen file's bytes changed and a shell name left standing over changed bytes is
+a trap armed for whoever serves that file next: `smp-shell-v4.87-shared-schema`
+→ `smp-shell-v4.88-setup-wizard`, confirmed against `origin/main` immediately
+before the push (§94.12, §94.16), with `node --check sw.js` after the merge
+(§146.2). *A rule can be obeyed for a reason that has expired, and the only way
+to find out is to read the thing itself.*
+
+**AND THE CUTOVER HAVING RUN MAKES THE DOOR FINDING ABOVE PRESSING RATHER THAN
+LATENT**: *Add a client* is not a future arrival path, it is the only one, so
+every client set up from today starts with Raya's unit and function names in it
+and never sees the set-up door on its Overview.
 
 ---
 

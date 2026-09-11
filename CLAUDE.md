@@ -8744,7 +8744,13 @@ changed**: a client created through the new stack's *Add a client* starts from
 their content &mdash; so `wizTenantBare()` is false and the Overview's set-up
 door does not draw for it; the wizard is still Setup's first entry, so nothing
 is unreachable, and whether a new client should start with no units at all is
-main's decision to reverse rather than a merge's.*
+main's decision to reverse rather than a merge's. **AND READING THE LIVE SITE
+CORRECTED THE OTHER HALF** (&sect;91.5): the first draft called the frozen
+`sw.js` bump load-bearing because the cutover had not run &mdash; production
+already serves the GENERATED worker and answers **404** for the frozen file, so
+that trap is closed by construction and the bump is hygiene rather than a fix;
+what the same measurement makes PRESSING is the door, because *Add a client* is
+now the only way a client arrives.*
 
 *Earlier: 2026-09-10 &mdash; **&sect;317.3&ndash;.8: the cutover, and the
 six things between the merge and a site that serves.** Six failed or empty

@@ -86,7 +86,10 @@ NOT changed (§318.7):** a client created through the new stack's *Add a client*
 keeps Raya's unit and function names with their content emptied (§67's own
 decision), so the Overview's set-up door does not draw for it — the wizard is
 still Setup's first entry, so nothing is unreachable, and whether a new client
-should start with no units at all is Islam's.
+should start with no units at all is Islam's &mdash; **pressing rather than
+latent, because reading the live site (§91.5) showed the cutover has already
+run**: production serves the generated worker and answers 404 for the frozen
+file, so *Add a client* is the only way a client arrives now.
 
 **Before it:** **§309 and §310 — a project saved as a draft, and theirs
 is the capability that leads — merged to `main` 2026-09-08 on Islam's word**,

@@ -195,7 +195,10 @@ its surroundings did, and one is an open question for him:
    wizard would serve with its behaviour and none of its design.
 2. **Renumbered** §303 → §318 and spec 042 → spec 044, `main` having taken
    both. Scoped to the lines this branch wrote (§264.3).
-3. **OPEN, for Islam.** A client created through Forefront's *Add a client*
+3. **OPEN, for Islam — and pressing, because the cutover has run** (measured:
+   production serves the generated worker and answers 404 for the frozen file,
+   so *Add a client* is the only way a client arrives now). A client created
+   through Forefront's *Add a client*
    starts from §67's cleared graph, which **keeps Raya's unit and function
    names** and empties their content — so `wizTenantBare()` is false, the
    Overview's *Set this client up* door does not draw for it, and the wizard's

@@ -7331,9 +7331,6 @@ body { margin: 0; font-family: var(--sans); }
 .mkdir { font-family: var(--mono, ui-monospace, monospace); opacity: .75; margin-left: 2px; }
 .mkhdir { background: rgba(255,255,255,.1); border: 0; color: #fff; font: inherit;
           border-radius: 3px; padding: 1px 2px; }
-tr.mkfoot > td { border-top: 2px solid var(--line); font-weight: 700; background: var(--surface-2); }
-tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
-.mkind { font-size: 10.5px; color: var(--ink-3); font-weight: 400; white-space: nowrap; }
 
 @media (max-width: 620px) {
   .mk { padding: 20px 16px 60px; }
@@ -7545,12 +7542,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
               <tr><td class="idx"><span class="idx-n">3</span></td><td>Western</td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">5%</b> <i>/ 4%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">62%</b> <i>/ 65%</i></span></td><td class="num"><span class="pair"><b>16%</b> <i>/ 15%</i></span></td></tr>
               <tr><td class="idx"><span class="idx-n">4</span></td><td>Oriental</td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">12%</b> <i>/ 12%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">65%</b> <i>/ 65%</i></span></td><td class="num"><span class="pair"><b>14%</b> <i>/ 14%</i></span></td></tr>
               <tr><td class="idx"><span class="idx-n">5</span></td><td>Ice cream</td><td class="num"><span class="pair"><b style="color:var(--attn-tx, var(--attn))">28%</b> <i>/ 32%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">84%</b> <i>/ 82%</i></span></td><td class="num"><span class="pair"><b>8%</b> <i>/ 12%</i></span></td></tr>
-              <tr class="mkfoot">
-                <td class="idx"></td><td>Scores into the pillar</td>
-                <td class="num final" style="color:var(--good-tx, var(--good))">99%</td>
-                <td class="num final" style="color:var(--good-tx, var(--good))">100%</td>
-                <td class="num"><span class="mkind">Indicator &mdash; not scored</span></td></tr>
-            </tbody>
+                          </tbody>
           </table>
         </div></div>
 
@@ -7591,7 +7583,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
             performance measure &mdash; the five add up to the revenue mix, so one category beating its share
             forces another to miss. It is drawn plain while Growth and CM wear their band, which is the same
             rule the platform already uses two tables up: coloured means a score, plain with a target behind it
-            means a reported fact.</li>
+            means a reported fact. With no total row under the table, that colour and the direction in the heading are what say which columns count.</li>
         <li><b>The direction is the column&rsquo;s, and the column with none is the indicator.</b> Growth is
             higher-is-better and so is CM, Mix is neither and is marked with nothing. No extra
             switch: the absence is the signal.</li>

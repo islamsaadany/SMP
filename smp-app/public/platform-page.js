@@ -952,33 +952,58 @@
     });
   }
 
+  /* ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a). Islam, of two behaviours
+     drawn side by side: "2" — the card's name is not pressable and every way
+     into a client names a module, so there is never a question of which one
+     the top would open. The card is a DIV holding two things: the identity
+     block, and a button per module this client has.
+
+     THE MODULE'S OWN STATE MOVED OUT OF THE FOOT WITH IT. `cycle open`,
+     `no plan yet` and `not answering` are all Strategy's answers about this
+     client, so with a Strategy row to carry them the foot would have said
+     each twice (§87). The seat, the unit count and Demo stay: they are the
+     client's and the spine's, not a module's.
+
+     The rows come from the server (lib/modules.ts moduleRows), so the console
+     cannot spell a module differently from the switch or from Setup. */
   function cardFor(c) {
-    var b = el("button", "ccard" + (c.kind === "demo" ? " demo" : ""));
-    b.type = "button";
+    var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    var top = el("div", "ctop");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
     } else {
-      b.appendChild(el("div", "cmark", initials(c.name)));
+      top.appendChild(el("div", "cmark", initials(c.name)));
     }
-    b.appendChild(el("h2", null, c.name));
-    if (c.industry) b.appendChild(el("p", "ind", c.industry));
+    top.appendChild(el("h2", null, c.name));
+    if (c.industry) top.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
     if (c.kind === "demo") tag("Demo", "demo");
     /* THE SEAT IS WHAT THIS CARD SAYS ABOUT THIS PERSON — the thing they came
        to know, and the thing that decides what they can do when they arrive. */
     if (c.seat) tag(c.seat === "super" ? "Super user" : "SMO team", "seat");
-    if (c.unreadable) tag("Not answering");
-    else if (c.cycleOpen) tag("Cycle open", "open");
-    else if (!c.planned) tag("No plan yet", "none");
     if (c.units != null && c.units > 0) tag(c.units + (c.units === 1 ? " unit" : " units"));
     if (!c.canOpen) tag("Listed only");
-    b.appendChild(foot);
+    top.appendChild(foot);
+    b.appendChild(top);
 
-    if (c.canOpen) b.addEventListener("click", function () { location.assign("/" + c.key); });
-    else b.disabled = true;
+    /* A CLIENT THIS PERSON MAY NOT OPEN GETS NO ROWS AT ALL — there is no way
+       in, so there is nothing to draw (§61); "Listed only" already says it. */
+    if (c.canOpen && c.modules && c.modules.length) {
+      var mods = el("div", "mods");
+      c.modules.forEach(function (m) {
+        var r = el("button", "mrow");
+        r.type = "button";
+        r.dataset.module = m.key;
+        r.appendChild(document.createTextNode(m.label));
+        if (m.state) r.appendChild(el("i", null, m.state));
+        r.addEventListener("click", function () { location.assign("/" + c.key + "/" + m.key); });
+        mods.appendChild(r);
+      });
+      b.appendChild(mods);
+    }
 
     if (c.canConfig) {
       var cog = el("span", "ccfg", "Settings");

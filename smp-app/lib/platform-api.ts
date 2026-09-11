@@ -19,6 +19,7 @@ import type { Tenant } from "./door.ts";
 import { withTenant } from "./tenant.ts";
 import { loadGraph } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
+import { moduleRows } from "./modules.ts";
 
 const require = createRequire(import.meta.url);
 /* the worked example the product generates (scripts/extract-state.js), at the
@@ -99,7 +100,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       const facts = await factsFor(row);
       cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, mine: FF.isMine(world, row.key),
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
-        canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable });
+        canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable,
+        /* THE CARD'S DOORS (spec 046 §4.6a): one row per module this client
+           has, each with the one line that module says about it. Worked out
+           HERE and never on the page, so the console cannot spell a module
+           differently from the switch or from Setup (§53.5). */
+        modules: moduleRows(facts) });
     }
     return ok({ cards, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
   }

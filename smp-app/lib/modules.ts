@@ -60,3 +60,35 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
   const tail = String(rest || "").replace(/^\/+/, "");
   return "/" + slug + (module ? "/" + module : "") + (tail ? "/" + tail : "");
 }
+
+/* THE NAME A PERSON READS. Kept beside the keys, because a label invented at
+   a call site is how two screens come to spell one module differently
+   (§53.5). */
+export const MODULE_LABEL: Record<ModuleKey, string> = {
+  strategy: "Strategy", portfolio: "Portfolio", insights: "Insights", processes: "Processes",
+};
+
+/* WHICH MODULES A CLIENT HAS. Every client has Strategy and nothing else
+   today — spec 046 §4.5 says a module switched off REMOVES its Setup group
+   rather than leaving pages with nothing behind them (§61), so this becomes
+   a stored per-client answer the day the second module exists. One function,
+   so the card, the switch and Setup cannot disagree about it. */
+export function modulesFor(_client: unknown): ModuleKey[] {
+  return [DEFAULT_MODULE];
+}
+
+/* The one line a module says about a client on its card (spec 046 §4.6a).
+   Strategy's is what the card already reads; a module with nothing to say
+   draws its name alone, which is `""` and never a placeholder. */
+export type ModuleRow = { key: ModuleKey; label: string; state: string };
+export function moduleRows(facts: { unreadable?: boolean; cycleOpen?: boolean | null; planned?: boolean | null }): ModuleRow[] {
+  return modulesFor(null).map((k) => ({
+    key: k,
+    label: MODULE_LABEL[k],
+    state: k !== "strategy" ? ""
+      : facts.unreadable ? "not answering"
+      : facts.cycleOpen ? "cycle open"
+      : facts.planned === false ? "no plan yet"
+      : "",
+  }));
+}

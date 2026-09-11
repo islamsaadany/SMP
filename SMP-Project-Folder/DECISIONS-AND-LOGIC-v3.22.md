@@ -43025,3 +43025,91 @@ person lands on, while a consultant pressing a row arrives at
 `/<client>/<module>/…`.
 
 ---
+
+## §320.4 — THE CARD'S ROWS, BUILT (2026-09-11, spec 046 §4.6a)
+
+Islam, looking at the console on the live site: ***"no modules appearing."***
+He is right, and the first honest answer is WHY: §320.3 recorded the decision
+and deliberately did not build it, on the grounds that with one module the card
+draws ONE row — a door behind a door (§32) and a smaller press target than the
+whole card it replaces. **He went to look for it, which settles the timing**,
+so it is built; the ergonomic cost stands and is his to carry.
+
+**AND HIS SCREENSHOT WAS OF SOMETHING ELSE AGAIN**: `main` had moved **416
+commits** under this branch — the CUTOVER itself (§317.3–.10, production is the
+new stack now), §318's client set-up wizard and §319's consulting memory — so
+what he was looking at could not have shown this work whether or not it was
+built. Merged before anything was touched, because building a card on a
+`platform.html` that had moved **850 lines** underneath it is a merge conflict
+dressed as a feature.
+
+**AND THE NUMBERS COLLIDED TWICE.** `main` took **§318** (the wizard) and
+**spec 044** (the same), then **§319** and **spec 045** (the memory), while this
+was being built — so this round is renumbered **§318 → §320** and **spec 044 →
+046**, the fourth time this file has recorded that shape (§287, §94.12, §264.3,
+§99). Scoped to the lines THIS BRANCH wrote (§264.3's rule): the fifteen files
+it authored, and in the decisions log the block from its own first heading
+down — `main`'s five surviving mentions of §318 and spec 044 are its own and
+were left where they stand.
+
+**THE CARD STOPPED BEING A `<button>`, WHICH IS THE WHOLE BUILD**: a button
+cannot hold buttons, so the identity block and the rows are its two children
+and the padding moved onto them. `.ctop` is not pressable; a `.mrow` per module
+is, and goes to `/<client>/<module>` — §320.2's address, which is why the two
+land together.
+
+**THE MODULE'S STATE MOVED OUT OF THE FOOT WITH IT.** *Cycle open*, *no plan
+yet* and *not answering* are all STRATEGY's answers about a client, so with a
+Strategy row to carry them the foot would have said each twice (§87) — the
+mockup drew it that way and it was a fault of the drawing, corrected in the
+build rather than copied. The seat, the unit count and *Demo* stay: they are
+the client's and the spine's, not a module's. **Asserted as "once on the whole
+card"**, which is what makes the correction visible to a check rather than a
+matter of taste.
+
+**THE ROWS COME FROM THE SERVER** (`lib/modules.ts` `moduleRows`, read by
+`lib/platform-api.ts`), so the console cannot spell a module differently from
+the switch or from Setup (§53.5) — and `modulesFor()` is the one place that
+will answer *which modules has this client* the day the answer stops being
+"Strategy, and nothing else".
+
+**A CLIENT NOBODY MAY OPEN DRAWS NO ROWS** — there is no way in, so there is
+nothing to draw (§61); *Listed only* already says it. **A module with nothing
+to say draws its name alone**, never a placeholder (§35).
+
+**THE ROW IS A REAL `<button>` AND THE CHECK FOCUSES IT**: a `<div>` with a
+click handler renders identically and cannot be reached from a keyboard, which
+is the kind of fault that ships looking perfect.
+
+**AND THE FROZEN HARNESS HAD TO LEARN THE ADDRESS, OR IT STOPS BEING ONE.**
+`checks/multi-client.py` drives `scripts/dev-server.js`, which reads its client
+paths out of `vercel.json` — now that file's only job, since §317.7 established
+Vercel no longer reads it. One rewrite added and one derived regex beside the
+door's, **with the bare client rule kept FIRST**: `CLIENT_RE` is built from the
+first rewrite pointing at the platform file and parses `/:name(pattern)` alone,
+so putting the module rule ahead of it silently breaks every client path
+locally — found by reading that derivation rather than by running it.
+
+**PROVED**: `checks/client-card-modules.py` **15/0** against BOTH copies of the
+page (the root file and the app's generated one, §53.5), red both ways —
+`--break=card-is-door` **1 red**, `--break=no-rows` **4 red**, the second
+printing a card with no *cycle open* anywhere, which is the "moved it out and
+forgot to draw it" failure this exists to catch. `platform-cards.py` 19/0 on
+both copies with its stub taught the new field (§100.3). On the merged tree:
+shell **72/0**, door 50/0, state 91/0, blob 23/23, comms 47/47, upload 9/9,
+room 10/0, deploy 5/0, rules 588/0, and `main`'s own five consulting-memory
+checks 36/42/21/12/16 all green.
+
+**TWO FAULTS IN MY OWN CHECK, BOTH OLD LESSONS**: its stub answered EVERY GET
+with HTML, so the page's own script came back as a document and the run
+reported three page errors that were the stub's (§100.3); and
+`allow_reuse_address` was set on the instance AFTER the bind, which does
+nothing — the file could not be run twice in a row, and `platform-cards.py`
+carries a comment about exactly that one line.
+
+**NOT RUN HERE AND SAID SO**: `checks/multi-client.py` (rewritten to press the
+row, both ends) and `main`'s `checks/client-setup.py` both need the frozen
+harness, which needs `pg` at the repository root and is not installed in this
+sandbox. The regex derivation they depend on was verified on its own instead.
+
+---

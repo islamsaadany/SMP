@@ -228,11 +228,26 @@ Costs, stated rather than discovered:
   what a client's own person lands on, and what a consultant reaches by
   pressing a row is `/<client>/<module>/…`.
 
-**Not built with §7's address change**, deliberately: with one module the card
-would draw one row, which is a door behind a door (§32) and a smaller target
-than the card it replaced. It lands with the second module, which is item 2 of
-§5 — and the card is right today, because it opens `/<client>`, the landing,
-which is correct under either behaviour.
+**BUILT — 2026-09-11 (§320.4).** It was deliberately deferred on the grounds
+above; Islam went to look for it (*"no modules appearing"*), which settles the
+timing. The ergonomic cost stands: with one module the card carries one row,
+and it is a smaller press target than the whole card was.
+
+What the build settled beyond the drawing:
+
+- The card is a `<div>` now, because a button cannot hold buttons. `.ctop`
+  holds the identity and is not pressable; a `.mrow` per module is.
+- **The module's own state moved out of the foot with it.** *Cycle open*, *no
+  plan yet* and *not answering* are Strategy's answers about a client, so the
+  foot would otherwise have said each twice (§87) — the mockup drew it that
+  way and it was a fault of the drawing. The seat, the unit count and *Demo*
+  stay: they are the client's, not a module's.
+- The rows come from the server (`lib/modules.ts` `moduleRows`), so the
+  console cannot spell a module differently from the switch or Setup (§53.5).
+  `modulesFor()` is the one place that will answer *which modules has this
+  client* when the answer stops being "Strategy, and nothing else".
+- A client nobody may open draws **no rows** — there is no way in (§61) — and
+  a module with nothing to say draws its name alone, never a placeholder.
 
 ### 4.7 Time — every module keeps its own rhythm
 

@@ -120,11 +120,27 @@
 
   /* ── client cards ─────────────────────────────────────────── */
   .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  /* ── ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a) ──────────────────
+     Islam, of two behaviours drawn side by side: "2". The card's name is
+     not pressable; every way into a client names a module, so nothing has
+     to decide which one the top would open. The card stopped being a
+     <button> for it — a button cannot hold buttons — so the identity block
+     and the rows are its two children and the padding moved onto them. */
   .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
-    background:var(--surface); padding:15px; display:flex; flex-direction:column; gap:7px;
-    min-height:152px; font:inherit; color:inherit; cursor:pointer; box-shadow:var(--shadow) }
-  .ccard:hover:not(:disabled), .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
-  .ccard:disabled{ cursor:default; opacity:.72 }
+    background:var(--surface); display:flex; flex-direction:column;
+    min-height:152px; font:inherit; color:inherit; box-shadow:var(--shadow) }
+  .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard.listed{ opacity:.72 }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:7px; padding:15px }
+  .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:9px 15px;
+    font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
+    border:0; border-bottom:1px solid var(--line); cursor:pointer }
+  .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto }
+  .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
+  .ccard.add{ cursor:pointer }
+  .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
   .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
     font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
   /* A client that has a mark wears it on its card — the same picture its
@@ -136,10 +152,10 @@
   .markrow .none{ font-size:13px; color:var(--ink-3) }
   .ccard h2{ margin:0; font-size:17px; font-weight:600 }
   .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
-  .ccard .foot{ margin-top:auto; display:flex; gap:6px; flex-wrap:wrap }
+  .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
-    color:var(--ink-3) }
+    padding:15px; color:var(--ink-3) }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -1298,33 +1314,58 @@
     });
   }
 
+  /* ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a). Islam, of two behaviours
+     drawn side by side: "2" — the card's name is not pressable and every way
+     into a client names a module, so there is never a question of which one
+     the top would open. The card is a DIV holding two things: the identity
+     block, and a button per module this client has.
+
+     THE MODULE'S OWN STATE MOVED OUT OF THE FOOT WITH IT. `cycle open`,
+     `no plan yet` and `not answering` are all Strategy's answers about this
+     client, so with a Strategy row to carry them the foot would have said
+     each twice (§87). The seat, the unit count and Demo stay: they are the
+     client's and the spine's, not a module's.
+
+     The rows come from the server (lib/modules.ts moduleRows), so the console
+     cannot spell a module differently from the switch or from Setup. */
   function cardFor(c) {
-    var b = el("button", "ccard" + (c.kind === "demo" ? " demo" : ""));
-    b.type = "button";
+    var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    var top = el("div", "ctop");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
     } else {
-      b.appendChild(el("div", "cmark", initials(c.name)));
+      top.appendChild(el("div", "cmark", initials(c.name)));
     }
-    b.appendChild(el("h2", null, c.name));
-    if (c.industry) b.appendChild(el("p", "ind", c.industry));
+    top.appendChild(el("h2", null, c.name));
+    if (c.industry) top.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
     if (c.kind === "demo") tag("Demo", "demo");
     /* THE SEAT IS WHAT THIS CARD SAYS ABOUT THIS PERSON — the thing they came
        to know, and the thing that decides what they can do when they arrive. */
     if (c.seat) tag(c.seat === "super" ? "Super user" : "SMO team", "seat");
-    if (c.unreadable) tag("Not answering");
-    else if (c.cycleOpen) tag("Cycle open", "open");
-    else if (!c.planned) tag("No plan yet", "none");
     if (c.units != null && c.units > 0) tag(c.units + (c.units === 1 ? " unit" : " units"));
     if (!c.canOpen) tag("Listed only");
-    b.appendChild(foot);
+    top.appendChild(foot);
+    b.appendChild(top);
 
-    if (c.canOpen) b.addEventListener("click", function () { location.assign("/" + c.key); });
-    else b.disabled = true;
+    /* A CLIENT THIS PERSON MAY NOT OPEN GETS NO ROWS AT ALL — there is no way
+       in, so there is nothing to draw (§61); "Listed only" already says it. */
+    if (c.canOpen && c.modules && c.modules.length) {
+      var mods = el("div", "mods");
+      c.modules.forEach(function (m) {
+        var r = el("button", "mrow");
+        r.type = "button";
+        r.dataset.module = m.key;
+        r.appendChild(document.createTextNode(m.label));
+        if (m.state) r.appendChild(el("i", null, m.state));
+        r.addEventListener("click", function () { location.assign("/" + c.key + "/" + m.key); });
+        mods.appendChild(r);
+      });
+      b.appendChild(mods);
+    }
 
     if (c.canConfig) {
       var cog = el("span", "ccfg", "Settings");

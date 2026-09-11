@@ -121,11 +121,27 @@
 
   /* ── client cards ─────────────────────────────────────────── */
   .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  /* ── ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a) ──────────────────
+     Islam, of two behaviours drawn side by side: "2". The card's name is
+     not pressable; every way into a client names a module, so nothing has
+     to decide which one the top would open. The card stopped being a
+     <button> for it — a button cannot hold buttons — so the identity block
+     and the rows are its two children and the padding moved onto them. */
   .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
-    background:var(--surface); padding:15px; display:flex; flex-direction:column; gap:7px;
-    min-height:152px; font:inherit; color:inherit; cursor:pointer; box-shadow:var(--shadow) }
-  .ccard:hover:not(:disabled), .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
-  .ccard:disabled{ cursor:default; opacity:.72 }
+    background:var(--surface); display:flex; flex-direction:column;
+    min-height:152px; font:inherit; color:inherit; box-shadow:var(--shadow) }
+  .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard.listed{ opacity:.72 }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:7px; padding:15px }
+  .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:9px 15px;
+    font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
+    border:0; border-bottom:1px solid var(--line); cursor:pointer }
+  .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto }
+  .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
+  .ccard.add{ cursor:pointer }
+  .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
   .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
     font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
   /* A client that has a mark wears it on its card — the same picture its
@@ -137,10 +153,10 @@
   .markrow .none{ font-size:13px; color:var(--ink-3) }
   .ccard h2{ margin:0; font-size:17px; font-weight:600 }
   .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
-  .ccard .foot{ margin-top:auto; display:flex; gap:6px; flex-wrap:wrap }
+  .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
-    color:var(--ink-3) }
+    padding:15px; color:var(--ink-3) }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to

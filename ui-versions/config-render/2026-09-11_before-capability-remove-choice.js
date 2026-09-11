@@ -6932,7 +6932,7 @@ function renderCaps(){
       '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
       '<td class="num">' + (c.projects || []).length + '</td>' +
       rowActions("caps", String(i), editable,
-        mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + esc(c.id) + '">Remove</button>' : '') +
+        mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + i + '">Remove</button>' : '') +
       '</tr>';
   }).join("");
 

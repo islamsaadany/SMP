@@ -54,7 +54,56 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§319 — a pillar says which kind of thing it is — built
+**Latest version:** **§320 — removing a capability: the box, or the box and
+its work — built on `claude/inspiring-lamport-pm0ki2`.** Islam, with the
+browser's own dialog open in front of him: *"when I try to remove the
+capability it will remove the projects with it."* **It did** — a project lives
+INSIDE a capability, and `projects.cap_id` is NOT NULL with ON DELETE CASCADE,
+so the screen's splice and Postgres destroyed it independently: three projects
+with their deliverables, outcomes, milestones and every figure reported against
+them. **And it was the one removal in the product with no way back** — a pillar
+and a project have both archived and been restorable since §232 — while being
+the last destructive act still behind a *browser* dialog rather than the
+platform's own.
+
+**One word was doing two jobs**: *this box is in my way* is a move, *this work
+is finished* is a delete, and the button only ever did the second. It now opens
+the platform's own dialog with **two answers** — *Keep the projects*, which
+moves them to the function and drops the wrapper, and *Remove everything*,
+which takes them — each saying what it does, with the plan archived first
+either way. The mockup was signed off before a source moved
+(`design-mockups/capability-remove/`) and Islam picked that shape over two
+buttons on one line.
+
+**The box stops being drawn rather than being taken out of the data** (his
+choice of two, with the cost of each stated): no schema change, no migration,
+nothing moving between tables — and it is the first half of the migration
+rather than something to undo, because after it every function has exactly one
+wrapper. It also keeps the door open, which was his own question: hiding the
+box leaves the whole model alive, so a named grouping can come back later as a
+drawing decision rather than a migration.
+
+**The codes must not move, and the first build moved them** — a project's code
+is its position across the whole function (§310), so appending renumbered
+`MKT01 · MKT02 · MKT03` into `MKT02 · MKT03 · MKT01`: the dialog promises in
+words that the projects keep their codes, and the promise went quietly false.
+Ids are never renumbered, and the second door — the Temple's own Remove, which
+would have been left destroying projects — opens the same dialog.
+
+**Verified:** `checks/capability-remove.py` **0 failures over 30 assertions**,
+proved able to fail five ways from the sources (21 / 1 / 2 / 4 / 2);
+`scripts/test-capability-move.js` **12/12 against a real Postgres 16**, both
+ends, proved able to fail twice — with the move made a no-op the cascade eats
+two projects and the save still reports success, which is the reported fault at
+the storage layer. 595/0 authoriser · 136/0 differ · round trip PASS on a
+virgin database · nine neighbouring checks green.
+
+**Recorded, not done:** moving a project *into* a capability has no control in
+either direction (this builds the hard half); the screen half of "the box goes";
+and whether a capability can be built on the pillars or the projects method —
+Islam's own question, which belongs with *Objectives & actions*.
+
+**Before it:** **§319 — a pillar says which kind of thing it is — built
 on `claude/inspiring-lamport-pm0ki2`.** Islam, of a client whose supporting
 functions plan the way a business unit does: *"the capability is a strategic
 concept and we need to differentiate between having a capbility as a strategic
@@ -104,7 +153,7 @@ Submit waits for it, equal weight, and the mix column is an indicator that is
 never scored, all his), and the pillar's description, the pillar committee and
 the next-cycle focus box with its switch at cycle open.
 
-**Before it:** **§318 — setting a client up: the wizard — built on
+**And before that:** **§318 — setting a client up: the wizard — built on
 `claude/multitenant-onboarding-wizard-kvyfcc`.** A guided flow that shapes a
 client from nothing: its name, its year, its business units, its companies, its
 supporting functions and how each plans, the words it uses, and who runs the
@@ -141,7 +190,7 @@ latent, because reading the live site (§91.5) showed the cutover has already
 run**: production serves the generated worker and answers 404 for the frozen
 file, so *Add a client* is the only way a client arrives now.
 
-**And before that:** **§309 and §310 — a project saved as a draft, and theirs
+**Earlier:** **§309 and §310 — a project saved as a draft, and theirs
 is the capability that leads — merged to `main` 2026-09-08 on Islam's word**,
 from `claude/project-owner-reporting-access-uzze9s`, carrying `main`'s
 §303–§308 in with it; built as §302 and §303 and renumbered at the merge,

@@ -13219,16 +13219,92 @@ function addCapability(fnKey){
   renumberCapability(made);
   return made;
 }
-/* What removing one would destroy, in words, or "" when it is an empty row
-   somebody added a moment ago. Read from the fields a capability ACTUALLY has
-   — the old check read `measures` and `tactics` and threw on every real one,
-   so the confirmation never appeared and the removal never happened. */
-function capabilityHolds(c){
-  if (!c) return "";
-  var k = (c.keyObjectives || []).length, p = (c.projects || []).length;
-  if (!k && !p) return "";
-  return '"' + (c.name || "this capability") + '" with ' +
-    plural(k, "key objective") + " and " + plural(p, "project") + " under it";
+/* ── REMOVING A CAPABILITY: the box, or the box and its work (§320) ──────
+   Islam, trying to take a wrapper off one of his own functions: "when I try
+   to remove the capability it will remove the projects with it." It did, and
+   the database agreed — `projects.cap_id` is NOT NULL and CASCADEs, so a
+   project cannot outlive its capability. One word was doing two jobs: "this
+   box is in my way" and "this work is finished", and the button only ever
+   did the second — with no archive behind it, which made the capability the
+   one removal in the product with no way back (a pillar and a project have
+   archived since §232).
+
+   THE MOVE LIVES HERE RATHER THAN IN THE DIALOG, because it must never be
+   re-derived from a screen: the projects keep their ids, their figures and
+   their history, and only their holder changes. NEVER renumber — §232's own
+   rule, and §316's finding that `renumberCapability()` re-addresses every
+   project, deliverable, outcome and milestone under it, which is what every
+   reported figure, focus mark and cycle snapshot is keyed on. The CODES need
+   no help: a project's code has always been its position across the whole
+   FUNCTION and not inside its box (§310), so they close up on their own and
+   nothing a person reads is renamed. */
+function capSiblings(c){
+  if (!c || !c.fn) return [];
+  return GROUP.capabilities.filter(function(x){
+    return x && x.id !== c.id && x.fn === c.fn;
+  });
+}
+/* What removing it would move, so the dialog can say so: its own key
+   objectives, and every figure inside every project it holds. */
+function capReportedCount(c){
+  var n = 0;
+  if (!c) return 0;
+  (c.keyObjectives || []).forEach(function(m){
+    if (m && m.actual != null && m.actual !== "") n++; });
+  (c.projects || []).forEach(function(p){
+    (p.deliverables || []).forEach(function(d){ if (d && d.status) n++; });
+    (p.outcomes    || []).forEach(function(o){
+      if (o && o.actual != null && o.actual !== "") n++; });
+    (p.milestones  || []).forEach(function(m){
+      if (m && (m.status || (m.pct != null && m.pct !== ""))) n++; });
+  });
+  return n;
+}
+/* THE MOVED ROWS KEEP THE ORDER THE FUNCTION READS THEM IN, and that is not
+   a tidiness: a project's CODE is its position across the whole function
+   (§310), `capsOfFunction()` hands them over in GROUP.capabilities order, so
+   appending would renumber MKT01 and MKT02 into MKT02 and MKT03 the moment
+   they landed in a capability drawn after theirs. Measured on Marketing, whose
+   two capabilities are the only pair in the worked example. So the side the
+   source sat on decides which end they join, and every code is what it was —
+   which is the promise the dialog makes in words.
+
+   `capId` follows the row because the builders address a project's holder by
+   it; the stored column is derived from the parent on the way back
+   (`lib/state-io.js` drops it on write), so this is the browser's own copy
+   being told the truth. */
+function moveCapProjects(from, to){
+  if (!from || !to || from === to) return 0;
+  var list = (from.projects || []).slice();
+  if (!list.length) return 0;
+  if (!Array.isArray(to.projects)) to.projects = [];
+  list.forEach(function(p){ if (p) p.capId = to.id; });
+  var fi = GROUP.capabilities.indexOf(from), ti = GROUP.capabilities.indexOf(to);
+  to.projects = (fi > -1 && ti > -1 && fi < ti)
+    ? list.concat(to.projects)
+    : to.projects.concat(list);
+  from.projects = [];
+  return list.length;
+}
+/* ONE DOOR FOR BOTH ANSWERS (§53.5): `moveToId` null removes everything, a
+   sibling's id moves the projects there first. THE ARCHIVE IS TAKEN BEFORE
+   THE MOVE EITHER WAY — it is the record of the grouping, which is the one
+   thing genuinely lost when the box goes, and §49.2's rule takes a fourth
+   caller. A destination on another FUNCTION is refused rather than trusted:
+   the dialog only ever offers siblings, and a rule that reads the id back
+   cannot be talked round by a stale screen (§48.2). */
+function removeCapability(id, moveToId){
+  var i = -1;
+  GROUP.capabilities.forEach(function(c, ci){ if (c && c.id === id) i = ci; });
+  if (i < 0) return false;
+  var c = GROUP.capabilities[i];
+  var to = moveToId ? capById(moveToId) : null;
+  if (to && (to.id === c.id || to.fn !== c.fn)) return false;
+  archiveCapPlan(c, "before \u201c" + (c.name || "a capability") +
+    "\u201d was removed");
+  if (to) moveCapProjects(c, to);
+  GROUP.capabilities.splice(i, 1);
+  return true;
 }
 
 /* Address any row inside a capability by its id: a key objective, or a
@@ -34638,7 +34714,7 @@ function renderCaps(){
       '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
       '<td class="num">' + (c.projects || []).length + '</td>' +
       rowActions("caps", String(i), editable,
-        mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + i + '">Remove</button>' : '') +
+        mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + esc(c.id) + '">Remove</button>' : '') +
       '</tr>';
   }).join("");
 
@@ -52985,10 +53061,10 @@ var SYNC = (function () {
     document.querySelectorAll("[data-caprm]").forEach(function(b){
       b.addEventListener("click", function(){
         if (grant("c_caps") !== "edit") return;
-        var i = +b.dataset.caprm, held = capabilityHolds(GROUP.capabilities[i]);
-        if (held && !confirm("Remove " + held + "? This cannot be undone here.")) return;
-        GROUP.capabilities.splice(i, 1);
-        paint();
+        /* §320: the button carries the capability's ID, never its position —
+           the row being removed and the row the button was drawn for are a
+           dialog apart (§48, §48.2). */
+        capRemoveOpen(b.dataset.caprm);
       });
     });
     /* Choosing from the menu closes it and raises the confirmation, so the
@@ -53059,9 +53135,9 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var p = b.dataset.trm.split("|"), i = +p[1];
         /* Removal asks once when the row carries anything \u2014 a reported
-           objective or a capability with work under it is history, and units
-           get a confirm for far less. A row added a moment ago and still
-           empty goes without ceremony. */
+           objective is history, and units get a confirm for far less. A row
+           added a moment ago and still empty goes without ceremony. A
+           capability is its own question and takes its own dialog below. */
         var what = null;
         if (p[0] === "ko") {
           var m = GROUP.keyObjectives[i];
@@ -53072,11 +53148,20 @@ var SYNC = (function () {
            `measures.length` on an object that has not carried `measures` since
            §15, so it threw before it could confirm anything and the removal
            never ran (§51.11). */
-        if (p[0] === "cap") what = capabilityHolds(GROUP.capabilities[i]) || null;
+        /* §320: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
+           second door onto it — the Temple's own table. Reaching only the
+           Setup page would leave a way to destroy three projects with a
+           browser dialog and no archive, which is §272.7's fault exactly:
+           the control is drawn twice and a fix that reaches one copy leaves
+           the other. Both doors open the same dialog now. */
+        if (p[0] === "cap") {
+          var cc = GROUP.capabilities[i];
+          if (cc) capRemoveOpen(cc.id);
+          return;
+        }
         if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
-        if (p[0] === "cap")   GROUP.capabilities.splice(i, 1);
         paint();
       });
     });
@@ -57676,6 +57761,107 @@ var SYNC = (function () {
     if (no) no.addEventListener("click", function(){ closeModal(); });
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
+  }
+  /* ── REMOVING A CAPABILITY: two answers, not one (§320) ───────────────
+     The mockup Islam signed off (design-mockups/capability-remove/) draws the
+     two acts as two rows, each saying what it does, rather than as two
+     buttons on one line — because they are not two flavours of one act. One
+     keeps the work and drops the grouping; the other destroys both, and a
+     pair at the same weight is how the second gets pressed for the first.
+
+     THE DESTINATION IS NAMED, NEVER IMPLIED. With one sibling the sentence
+     says where the projects land; with several it carries the platform's own
+     select, so the move is chosen rather than guessed at. With none there is
+     nowhere to go and the row SAYS so with its button held — hidden, it would
+     leave somebody wondering whether the option exists at all (§45.2, §61).
+
+     READ THE DESTINATION BEFORE CLOSING: `closeModal()` empties the overlay's
+     body (§116.6), so a value read after it is read off a node that is no
+     longer there. */
+  function capRemoveOpen(id){
+    var c = capById(id);
+    if (!c) return;
+    var f = functionOf(c.fn), fname = f ? f.name : "the function";
+    var sibs = capSiblings(c), np = (c.projects || []).length,
+        nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
+    var keepable = np > 0 && sibs.length > 0;
+    var dest = sibs.length === 1
+      ? '<b>' + esc(sibs[0].name || "the other capability") + '</b>'
+      : '<select class="fld" data-capdest="1" aria-label="Where the projects go">' +
+          sibs.map(function(x){
+            return '<option value="' + esc(x.id) + '">' + esc(x.name || x.id) + '</option>';
+          }).join("") + '</select>';
+    var koNote = nko
+      ? ' Its ' + plural(nko, "key objective") + (nko === 1 ? ' goes' : ' go') +
+        ' with the box.'
+      : '';
+    var whyNot = !np
+      ? 'It holds no projects, so there is nothing to move.'
+      : 'There is nowhere for them to go \u2014 this is the only capability ' +
+        esc(fname) + ' has, so its projects already belong to the function.';
+    var keepRow =
+      '<div class="pick' + (keepable ? ' safe' : '') + '">' +
+        '<div class="txt"><p class="t">Keep the projects</p><p class="d">' +
+          (keepable
+            ? plural(np, "project") + ' move to ' + dest + ' and keep their codes, ' +
+              'their figures and their history. Only the grouping goes.' + koNote
+            : whyNot) +
+        '</p></div>' +
+        '<button class="keepbtn" data-capkeep="1"' +
+          (keepable ? '' : ' aria-disabled="true"') + '>Keep them</button>' +
+      '</div>';
+    var rmRow =
+      '<div class="pick">' +
+        '<div class="txt"><p class="t">Remove everything</p><p class="d">' +
+          (np
+            ? plural(np, "project") + ' go too, with their deliverables, outcomes ' +
+              'and milestones.' + (rep ? ' The ' + rep + ' reported figures go with them.' : '')
+            : 'The capability' + (nko ? ' and its ' + plural(nko, "key objective") : '') +
+              ' goes.') +
+        '</p></div>' +
+        '<button class="danger" data-caprmall="1">' +
+          (np ? 'Remove all' : 'Remove it') + '</button>' +
+      '</div>';
+    openModalHtml(esc("Remove this capability?"),
+      esc((c.name || "Untitled") + (f ? " \u2014 " + f.name : "")),
+      '<div class="rmconfirm">' +
+        '<p><b>' + esc(c.name || "This capability") + '</b> holds ' +
+          plural(nko, "key objective") + ' and ' + plural(np, "project") + '.' +
+          (rep ? '' : ' Nothing has been reported against it this cycle.') + '</p>' +
+        (rep ? '<div class="repline">' +
+          plural(rep, "of its figures has been", "of its figures have been") +
+          ' reported this cycle \u2014 removing them moves the function\u2019s ' +
+          'scores.</div>' : '') +
+        keepRow + rmRow +
+        '<p class="archline">The plan as it stands is archived first either way. ' +
+          '<b>Setup \u203a Import &amp; storage</b> holds the way back.</p>' +
+        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rmno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var keep = box.querySelector("[data-capkeep]");
+    if (keep && keepable) keep.addEventListener("click", function(){
+      var sel = box.querySelector("[data-capdest]");
+      var to = sel ? sel.value : sibs[0].id;
+      closeModal(); doCapRemove(id, to);
+    });
+    var all = box.querySelector("[data-caprmall]");
+    if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
+  }
+  /* The rail may be holding a project of the capability that has just gone
+     (§48.2's stale pointer) \u2014 dropped rather than repointed, exactly as
+     removing a project does, because the rail's own pick falls back on its
+     own. The destination's rail is left alone: what it was showing is still
+     showing. */
+  function doCapRemove(id, destId){
+    var c = capById(id);
+    if (!c) return;
+    var key = railKeyFor(c);
+    if (!removeCapability(id, destId)) return;
+    if (RAIL[key]) delete RAIL[key];
+    paint();
   }
   function confirmRemovePillar(ukey, id){
     var u = unitLikeWritable(ukey);

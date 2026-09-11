@@ -5167,6 +5167,163 @@ decisions as Islam gave them:
 
 ---
 
+## 320 · Removing a capability: the box, or the box and its work
+
+Islam, trying to take a wrapper off one of his own functions, with the
+browser's dialog open in front of him:
+
+> *"when I try to remove the capability it will remove the projects with it."*
+
+It did.
+
+### 320.1 · The press destroyed three projects and nothing said so
+
+`Remove` on Setup › Capabilities spliced the capability out of the list —
+whole. A project is not a row pointed at by a capability; it lives INSIDE one,
+so its deliverables, outcomes, milestones and every figure reported against
+them went with the box. **And the database agreed:**
+
+```sql
+cap_id text NOT NULL REFERENCES capabilities(id) ON DELETE CASCADE
+```
+
+A project cannot outlive its capability. Screen and storage destroyed it
+independently, which is why the fault reproduces at both layers.
+
+**IT WAS THE ONE REMOVAL IN THE PRODUCT WITH NO WAY BACK.** Measured in the
+same file: removing a pillar archives first and can be restored, removing a
+project archives first and can be restored (§232) — and the capability, which
+holds both kinds of work, did neither. It was also the last destructive act
+still behind a **browser** `confirm()`, which §95 argued against for exactly
+this class and §273.3 removed from the cycle panel. *The most destructive of
+the three ended up the least guarded.*
+
+### 320.2 · One word was doing two jobs
+
+- *"This box is in my way"* — a **move**.
+- *"This work is finished"* — a **delete**.
+
+The button only ever did the second. Separating them is the whole change, and
+it is why the answer is two rows rather than a better sentence on one button.
+
+### 320.3 · The box stops being drawn; it is not taken out of the data
+
+Two ways to make a project belong to the function were put to Islam with the
+cost of each, and he took **A**:
+
+- **A — the wrapper stays in the data and stops being drawn.** Each function
+  ends with one capability; removing a box moves its projects into it. No
+  schema change, no migration, nothing moves between tables.
+- **B — the wrapper genuinely goes.** `projects` hangs off the function, the
+  required parent is dropped, the save path re-taught. A real migration on
+  live client data.
+
+**A IS NOT A STOPGAP, IT IS B'S FIRST HALF.** After it every function has
+exactly one wrapper, so B — if it is ever wanted — is a one-to-one mapping
+with no judgement calls, where doing it first would force a decision about
+the grouping on live data. What A leaves behind is stated rather than
+discovered: a row per function nobody sees, and an upload workbook still
+addressed to a capability — which mostly resolves itself, because with one
+box per function that picker becomes one entry per function.
+
+**AND IT KEEPS THE DOOR OPEN**, which was Islam's own question: because A
+hides the box rather than destroying it, the whole model survives — the
+table, the definition, the key objectives, the projects with their timelines.
+Giving a named grouping back later is re-drawing a strip, not a migration.
+What is genuinely lost is the specific box removed — its name, and which
+projects sat together under it — and that is what the archive is for.
+
+### 320.4 · The codes must not move, and the first build moved them
+
+A project's code is its **position across the whole function** (§310), and
+`capsOfFunction()` hands them over in `GROUP.capabilities` order — so
+appending the moved projects to a capability drawn AFTER theirs renumbers
+them. Measured on Marketing, the only function in the worked example with two
+capabilities: `MKT01 · MKT02 · MKT03` came back as `MKT02 · MKT03 · MKT01`.
+
+*The dialog promises in words that the projects keep their codes, and the
+first build broke that promise silently.* The side the source sat on decides
+which end they join, and every code is what it was — asserted as the
+agreement, and **1 red** with the append put back.
+
+**IDS ARE NEVER RENUMBERED**, §232's own rule with §316's finding behind it:
+`renumberCapability()` re-addresses every project, deliverable, outcome and
+milestone under a capability, which is what every reported figure, focus mark
+and cycle snapshot is keyed on. A moved project keeps `cap1-P1` inside `cap2`,
+and no collision is possible because `mintRowId` mints from the list's own
+prefix.
+
+### 320.5 · Two answers, and the row that cannot be taken
+
+The mockup was signed off first (`design-mockups/capability-remove/`), drawn
+in the platform's own dialog, and Islam picked **B** of two treatments: the
+two acts as two rows each saying what it does, rather than two buttons on one
+line. The reason is the one the drawing made visible — a pair at the same
+weight is how the destructive one gets pressed for the tidy one.
+
+- **The destination is named, never implied.** One sibling and the sentence
+  says where they land; several and it carries the platform's own select, so
+  the move is chosen rather than guessed at.
+- **With nowhere to move them the row SAYS so** and holds its button with
+  `aria-disabled`, never `disabled` — hidden, it would leave somebody
+  wondering whether the option exists (§45.2, §61); hard-disabled, the reason
+  beside it could not be reached (§221, §163).
+- **The archive is taken before the move either way** (§49.2's rule, fourth
+  caller), because the grouping is the one thing genuinely lost.
+- **The destination is read BEFORE the dialog closes**, since `closeModal()`
+  empties the overlay's body (§116.6).
+
+### 320.6 · The second door
+
+`data-trm="cap|<i>"` on the Temple's own table removes a capability too, with
+the same browser dialog and the same splice. **Reaching only the Setup page
+would have left a way to destroy three projects untouched** — §272.7 exactly,
+where a control is drawn twice and a fix reaches one copy. Both doors open the
+same dialog now, and the check drives the Temple's through the product's own
+navigation and pen rather than by assigning `EDIT_PAGE` (§266). `Remove` is
+addressed by the capability's **id** rather than its position, because the row
+and the button are a dialog apart (§48, §48.2).
+
+`capabilityHolds()` lost its last caller and is **deleted by name, never by
+line range** (§24, §214).
+
+### 320.7 · Verified
+
+- `checks/capability-remove.py` **0 failures over 30 assertions**, proved able
+  to fail **five ways from the SOURCES** (§276): **21** with the old behaviour
+  whole, **1** with the append, **2** with no archive, **4** with the held row
+  hidden, **2** with the Temple's door left behind.
+- `scripts/test-capability-move.js` **12/12 against a real Postgres 16** — the
+  half the browser check cannot see. Both ends: a removal WITHOUT the move
+  still takes its projects, or "they survived" would be true of a build that
+  removes nothing. Proved able to fail twice: **5 red** with the move made a
+  no-op, where the middle failure is the reported fault at the storage layer
+  (*was 3 projects, now 1* — the cascade ate them and the save reported
+  success), and **1 red** with the append.
+- `test-authorize.js` **595/0** and `test-graph-diff.js` **136/0** — the server
+  needed nothing and it is asserted rather than claimed (§172). A move changes
+  the project id lists on both capabilities, which the differ already reads as
+  structural, so the part travels whole and the existing path carries it.
+- `test-roundtrip.js` PASS on a virgin database; nine neighbouring checks
+  green, including `pillar-project-remove`, whose dialog shares the styling
+  this broadened.
+
+### 320.8 · Recorded, not done
+
+- **Moving a project INTO a capability** has no control, in either direction —
+  a project is born inside one and removed from it. The machinery this builds
+  is the hard half of it; the picker is the same act with a chosen
+  destination.
+- **The screen half of "the box goes"** — stop drawing the capability band
+  once a function is down to one — is the rest of that piece.
+- **Whether a capability can be built on the pillars method or the projects
+  method** is Islam's question and is recorded rather than answered: today the
+  choice sits on the FUNCTION and a function plans one way. It belongs with
+  *Objectives & actions*, the round where that question stops having one
+  answer per function anyway.
+
+---
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

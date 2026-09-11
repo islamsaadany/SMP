@@ -4289,10 +4289,10 @@
     document.querySelectorAll("[data-caprm]").forEach(function(b){
       b.addEventListener("click", function(){
         if (grant("c_caps") !== "edit") return;
-        /* §320: the button carries the capability's ID, never its position —
-           the row being removed and the row the button was drawn for are a
-           dialog apart (§48, §48.2). */
-        capRemoveOpen(b.dataset.caprm);
+        var i = +b.dataset.caprm, held = capabilityHolds(GROUP.capabilities[i]);
+        if (held && !confirm("Remove " + held + "? This cannot be undone here.")) return;
+        GROUP.capabilities.splice(i, 1);
+        paint();
       });
     });
     /* Choosing from the menu closes it and raises the confirmation, so the
@@ -4363,9 +4363,9 @@
       b.addEventListener("click", function(){
         var p = b.dataset.trm.split("|"), i = +p[1];
         /* Removal asks once when the row carries anything \u2014 a reported
-           objective is history, and units get a confirm for far less. A row
-           added a moment ago and still empty goes without ceremony. A
-           capability is its own question and takes its own dialog below. */
+           objective or a capability with work under it is history, and units
+           get a confirm for far less. A row added a moment ago and still
+           empty goes without ceremony. */
         var what = null;
         if (p[0] === "ko") {
           var m = GROUP.keyObjectives[i];
@@ -4376,20 +4376,11 @@
            `measures.length` on an object that has not carried `measures` since
            §15, so it threw before it could confirm anything and the removal
            never ran (§51.11). */
-        /* §320: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
-           second door onto it — the Temple's own table. Reaching only the
-           Setup page would leave a way to destroy three projects with a
-           browser dialog and no archive, which is §272.7's fault exactly:
-           the control is drawn twice and a fix that reaches one copy leaves
-           the other. Both doors open the same dialog now. */
-        if (p[0] === "cap") {
-          var cc = GROUP.capabilities[i];
-          if (cc) capRemoveOpen(cc.id);
-          return;
-        }
+        if (p[0] === "cap") what = capabilityHolds(GROUP.capabilities[i]) || null;
         if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
+        if (p[0] === "cap")   GROUP.capabilities.splice(i, 1);
         paint();
       });
     });
@@ -8989,107 +8980,6 @@
     if (no) no.addEventListener("click", function(){ closeModal(); });
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
-  }
-  /* ── REMOVING A CAPABILITY: two answers, not one (§320) ───────────────
-     The mockup Islam signed off (design-mockups/capability-remove/) draws the
-     two acts as two rows, each saying what it does, rather than as two
-     buttons on one line — because they are not two flavours of one act. One
-     keeps the work and drops the grouping; the other destroys both, and a
-     pair at the same weight is how the second gets pressed for the first.
-
-     THE DESTINATION IS NAMED, NEVER IMPLIED. With one sibling the sentence
-     says where the projects land; with several it carries the platform's own
-     select, so the move is chosen rather than guessed at. With none there is
-     nowhere to go and the row SAYS so with its button held — hidden, it would
-     leave somebody wondering whether the option exists at all (§45.2, §61).
-
-     READ THE DESTINATION BEFORE CLOSING: `closeModal()` empties the overlay's
-     body (§116.6), so a value read after it is read off a node that is no
-     longer there. */
-  function capRemoveOpen(id){
-    var c = capById(id);
-    if (!c) return;
-    var f = functionOf(c.fn), fname = f ? f.name : "the function";
-    var sibs = capSiblings(c), np = (c.projects || []).length,
-        nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
-    var keepable = np > 0 && sibs.length > 0;
-    var dest = sibs.length === 1
-      ? '<b>' + esc(sibs[0].name || "the other capability") + '</b>'
-      : '<select class="fld" data-capdest="1" aria-label="Where the projects go">' +
-          sibs.map(function(x){
-            return '<option value="' + esc(x.id) + '">' + esc(x.name || x.id) + '</option>';
-          }).join("") + '</select>';
-    var koNote = nko
-      ? ' Its ' + plural(nko, "key objective") + (nko === 1 ? ' goes' : ' go') +
-        ' with the box.'
-      : '';
-    var whyNot = !np
-      ? 'It holds no projects, so there is nothing to move.'
-      : 'There is nowhere for them to go \u2014 this is the only capability ' +
-        esc(fname) + ' has, so its projects already belong to the function.';
-    var keepRow =
-      '<div class="pick' + (keepable ? ' safe' : '') + '">' +
-        '<div class="txt"><p class="t">Keep the projects</p><p class="d">' +
-          (keepable
-            ? plural(np, "project") + ' move to ' + dest + ' and keep their codes, ' +
-              'their figures and their history. Only the grouping goes.' + koNote
-            : whyNot) +
-        '</p></div>' +
-        '<button class="keepbtn" data-capkeep="1"' +
-          (keepable ? '' : ' aria-disabled="true"') + '>Keep them</button>' +
-      '</div>';
-    var rmRow =
-      '<div class="pick">' +
-        '<div class="txt"><p class="t">Remove everything</p><p class="d">' +
-          (np
-            ? plural(np, "project") + ' go too, with their deliverables, outcomes ' +
-              'and milestones.' + (rep ? ' The ' + rep + ' reported figures go with them.' : '')
-            : 'The capability' + (nko ? ' and its ' + plural(nko, "key objective") : '') +
-              ' goes.') +
-        '</p></div>' +
-        '<button class="danger" data-caprmall="1">' +
-          (np ? 'Remove all' : 'Remove it') + '</button>' +
-      '</div>';
-    openModalHtml(esc("Remove this capability?"),
-      esc((c.name || "Untitled") + (f ? " \u2014 " + f.name : "")),
-      '<div class="rmconfirm">' +
-        '<p><b>' + esc(c.name || "This capability") + '</b> holds ' +
-          plural(nko, "key objective") + ' and ' + plural(np, "project") + '.' +
-          (rep ? '' : ' Nothing has been reported against it this cycle.') + '</p>' +
-        (rep ? '<div class="repline">' +
-          plural(rep, "of its figures has been", "of its figures have been") +
-          ' reported this cycle \u2014 removing them moves the function\u2019s ' +
-          'scores.</div>' : '') +
-        keepRow + rmRow +
-        '<p class="archline">The plan as it stands is archived first either way. ' +
-          '<b>Setup \u203a Import &amp; storage</b> holds the way back.</p>' +
-        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button></div>' +
-      '</div>');
-    var box = document.getElementById("modal-b");
-    if (!box) return;
-    var no = box.querySelector("[data-rmno]");
-    if (no) no.addEventListener("click", function(){ closeModal(); });
-    var keep = box.querySelector("[data-capkeep]");
-    if (keep && keepable) keep.addEventListener("click", function(){
-      var sel = box.querySelector("[data-capdest]");
-      var to = sel ? sel.value : sibs[0].id;
-      closeModal(); doCapRemove(id, to);
-    });
-    var all = box.querySelector("[data-caprmall]");
-    if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
-  }
-  /* The rail may be holding a project of the capability that has just gone
-     (§48.2's stale pointer) \u2014 dropped rather than repointed, exactly as
-     removing a project does, because the rail's own pick falls back on its
-     own. The destination's rail is left alone: what it was showing is still
-     showing. */
-  function doCapRemove(id, destId){
-    var c = capById(id);
-    if (!c) return;
-    var key = railKeyFor(c);
-    if (!removeCapability(id, destId)) return;
-    if (RAIL[key]) delete RAIL[key];
-    paint();
   }
   function confirmRemovePillar(ukey, id){
     var u = unitLikeWritable(ukey);

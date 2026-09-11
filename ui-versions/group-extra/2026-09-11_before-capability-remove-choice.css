@@ -422,48 +422,16 @@
     border-radius:8px; padding:9px 12px; font-size:13px; margin:0 0 10px; }
   .rmconfirm .archline { font-size:12.5px; color:var(--ink-3); margin:0 0 16px; }
   .rmconfirm .mrow { display:flex; justify-content:flex-end; gap:10px; }
-  /* SCOPED TO THE DIALOG RATHER THAN TO ITS BUTTON ROW (§320): the capability's
-     dialog answers in two rows and the pillar's in one, and a button has to
-     look like a button in both. Nothing else inside .rmconfirm is a button. */
-  .rmconfirm button { font:600 13px/1 var(--sans); border-radius:8px;
+  .rmconfirm .mrow button { font:600 13px/1 var(--sans); border-radius:8px;
     padding:10px 14px; cursor:pointer; }
-  .rmconfirm .quiet { background:none; border:1px solid var(--line);
+  .rmconfirm .mrow .quiet { background:none; border:1px solid var(--line);
     color:var(--ink-2); }
-  .rmconfirm .quiet:hover { background:var(--surface-2); color:var(--ink); }
+  .rmconfirm .mrow .quiet:hover { background:var(--surface-2); color:var(--ink); }
   /* The fill is --bad and the ink --surface: red as a FILL carries the
      page's lightest surface, never white literal (§25, §38.4). */
-  .rmconfirm .danger { background:var(--bad); border:1px solid var(--bad);
+  .rmconfirm .mrow .danger { background:var(--bad); border:1px solid var(--bad);
     color:var(--surface); }
-  .rmconfirm .danger:hover { filter:brightness(1.08); }
-
-  /* ── TWO ANSWERS, EACH SAYING WHAT IT DOES (§320) ──────────────────────
-     Keeping the projects and destroying them are not two flavours of one act,
-     so they are two rows rather than two buttons on one line \u2014 a pair at the
-     same weight is how the destructive one gets pressed for the tidy one.
-
-     THE SAFE ROW TAKES THE OUTLINE AND THE OTHER STAYS PLAIN: the danger is
-     already on its own button, and a red box round a red button is the alarm
-     said twice (§41's budget). */
-  .rmconfirm .pick { border:1px solid var(--line-soft); border-radius:10px;
-    padding:13px 14px; display:flex; gap:14px; align-items:center; margin:0 0 10px; }
-  .rmconfirm .pick.safe { border-color:var(--stone); }
-  .rmconfirm .pick .txt { flex:1; min-width:0; }
-  .rmconfirm .pick .t { font:600 13.5px/1.3 var(--sans); margin:0 0 3px; color:var(--ink); }
-  .rmconfirm .pick .d { font-size:12.5px; color:var(--ink-3); margin:0; line-height:1.45; }
-  .rmconfirm .pick .d select.fld { margin:0 2px; }
-  .rmconfirm .pick button { white-space:nowrap; }
-  .rmconfirm .pick .keepbtn { background:var(--surface); border:1px solid var(--stone);
-    color:var(--stone); }
-  .rmconfirm .pick .keepbtn:hover { background:var(--surface-2); }
-  /* Held, never hidden, and never `disabled` alone \u2014 the sentence beside it
-     is the reason, and a control the keyboard walks past cannot be read
-     (§221, §163). */
-  .rmconfirm .pick button[aria-disabled="true"] { opacity:.55; cursor:not-allowed; }
-  .rmconfirm .pick button[aria-disabled="true"]:hover { background:var(--surface); }
-  @media (max-width:520px) {
-    .rmconfirm .pick { flex-direction:column; align-items:stretch; }
-    .rmconfirm .pick button { width:100%; }
-  }
+  .rmconfirm .mrow .danger:hover { filter:brightness(1.08); }
 
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }

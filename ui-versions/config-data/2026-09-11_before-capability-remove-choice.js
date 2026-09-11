@@ -8102,92 +8102,16 @@ function addCapability(fnKey){
   renumberCapability(made);
   return made;
 }
-/* ── REMOVING A CAPABILITY: the box, or the box and its work (§320) ──────
-   Islam, trying to take a wrapper off one of his own functions: "when I try
-   to remove the capability it will remove the projects with it." It did, and
-   the database agreed — `projects.cap_id` is NOT NULL and CASCADEs, so a
-   project cannot outlive its capability. One word was doing two jobs: "this
-   box is in my way" and "this work is finished", and the button only ever
-   did the second — with no archive behind it, which made the capability the
-   one removal in the product with no way back (a pillar and a project have
-   archived since §232).
-
-   THE MOVE LIVES HERE RATHER THAN IN THE DIALOG, because it must never be
-   re-derived from a screen: the projects keep their ids, their figures and
-   their history, and only their holder changes. NEVER renumber — §232's own
-   rule, and §316's finding that `renumberCapability()` re-addresses every
-   project, deliverable, outcome and milestone under it, which is what every
-   reported figure, focus mark and cycle snapshot is keyed on. The CODES need
-   no help: a project's code has always been its position across the whole
-   FUNCTION and not inside its box (§310), so they close up on their own and
-   nothing a person reads is renamed. */
-function capSiblings(c){
-  if (!c || !c.fn) return [];
-  return GROUP.capabilities.filter(function(x){
-    return x && x.id !== c.id && x.fn === c.fn;
-  });
-}
-/* What removing it would move, so the dialog can say so: its own key
-   objectives, and every figure inside every project it holds. */
-function capReportedCount(c){
-  var n = 0;
-  if (!c) return 0;
-  (c.keyObjectives || []).forEach(function(m){
-    if (m && m.actual != null && m.actual !== "") n++; });
-  (c.projects || []).forEach(function(p){
-    (p.deliverables || []).forEach(function(d){ if (d && d.status) n++; });
-    (p.outcomes    || []).forEach(function(o){
-      if (o && o.actual != null && o.actual !== "") n++; });
-    (p.milestones  || []).forEach(function(m){
-      if (m && (m.status || (m.pct != null && m.pct !== ""))) n++; });
-  });
-  return n;
-}
-/* THE MOVED ROWS KEEP THE ORDER THE FUNCTION READS THEM IN, and that is not
-   a tidiness: a project's CODE is its position across the whole function
-   (§310), `capsOfFunction()` hands them over in GROUP.capabilities order, so
-   appending would renumber MKT01 and MKT02 into MKT02 and MKT03 the moment
-   they landed in a capability drawn after theirs. Measured on Marketing, whose
-   two capabilities are the only pair in the worked example. So the side the
-   source sat on decides which end they join, and every code is what it was —
-   which is the promise the dialog makes in words.
-
-   `capId` follows the row because the builders address a project's holder by
-   it; the stored column is derived from the parent on the way back
-   (`lib/state-io.js` drops it on write), so this is the browser's own copy
-   being told the truth. */
-function moveCapProjects(from, to){
-  if (!from || !to || from === to) return 0;
-  var list = (from.projects || []).slice();
-  if (!list.length) return 0;
-  if (!Array.isArray(to.projects)) to.projects = [];
-  list.forEach(function(p){ if (p) p.capId = to.id; });
-  var fi = GROUP.capabilities.indexOf(from), ti = GROUP.capabilities.indexOf(to);
-  to.projects = (fi > -1 && ti > -1 && fi < ti)
-    ? list.concat(to.projects)
-    : to.projects.concat(list);
-  from.projects = [];
-  return list.length;
-}
-/* ONE DOOR FOR BOTH ANSWERS (§53.5): `moveToId` null removes everything, a
-   sibling's id moves the projects there first. THE ARCHIVE IS TAKEN BEFORE
-   THE MOVE EITHER WAY — it is the record of the grouping, which is the one
-   thing genuinely lost when the box goes, and §49.2's rule takes a fourth
-   caller. A destination on another FUNCTION is refused rather than trusted:
-   the dialog only ever offers siblings, and a rule that reads the id back
-   cannot be talked round by a stale screen (§48.2). */
-function removeCapability(id, moveToId){
-  var i = -1;
-  GROUP.capabilities.forEach(function(c, ci){ if (c && c.id === id) i = ci; });
-  if (i < 0) return false;
-  var c = GROUP.capabilities[i];
-  var to = moveToId ? capById(moveToId) : null;
-  if (to && (to.id === c.id || to.fn !== c.fn)) return false;
-  archiveCapPlan(c, "before \u201c" + (c.name || "a capability") +
-    "\u201d was removed");
-  if (to) moveCapProjects(c, to);
-  GROUP.capabilities.splice(i, 1);
-  return true;
+/* What removing one would destroy, in words, or "" when it is an empty row
+   somebody added a moment ago. Read from the fields a capability ACTUALLY has
+   — the old check read `measures` and `tactics` and threw on every real one,
+   so the confirmation never appeared and the removal never happened. */
+function capabilityHolds(c){
+  if (!c) return "";
+  var k = (c.keyObjectives || []).length, p = (c.projects || []).length;
+  if (!k && !p) return "";
+  return '"' + (c.name || "this capability") + '" with ' +
+    plural(k, "key objective") + " and " + plural(p, "project") + " under it";
 }
 
 /* Address any row inside a capability by its id: a key objective, or a

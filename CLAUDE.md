@@ -7830,6 +7830,34 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/capability-remove.py # removing a capability: two answers,
+                                # not one (§320). Islam: "when I try to remove
+                                # the capability it will remove the projects
+                                # with it" — it did, behind the BROWSER's own
+                                # dialog and with no archive, while a pillar
+                                # and a project have both archived since §232.
+                                # The browser's dialog is asserted GONE as well
+                                # as the platform's own asserted drawn (a check
+                                # that only looked for the new one passes on a
+                                # build raising both); Keep the projects moves
+                                # them and keeps their ids AND THEIR CODES —
+                                # a code is a POSITION across the whole
+                                # function (§310), so a naive append renumbers
+                                # them and the dialog's promise in words goes
+                                # quietly false; the figures inside the moved
+                                # rows read back from the DATA (§96); the
+                                # only-capability case SAYS why it cannot move
+                                # them and holds its button with aria-disabled
+                                # so the reason stays reachable (§45.2, §221);
+                                # and the TEMPLE's own Remove — the second door
+                                # onto the same act — opens the same dialog,
+                                # driven through the product's own navigation
+                                # and pen rather than by assigning EDIT_PAGE
+                                # (§266, §272.7). Every probe degrades (§215).
+                                # 0 failures over 30 assertions, proved able to
+                                # fail FIVE ways from the SOURCES (§276):
+                                # 21 / 1 / 2 / 4 / 2. SMP_BUILT points it at
+                                # another build
 python3 checks/pillar-kind.py     # a pillar says which kind of thing it is
                                 # (§319): the mark DRAWN on the Plan rail and
                                 # band, the Performance pane, the Reporting band
@@ -8595,6 +8623,15 @@ unexercised):
 `DATABASE_URL=… node scripts/test-video-endpoint.js` (§261.5 — the file that found
 the truthy `"none"`)
 
+A project changing hands survives a save (§320) — the half the browser check
+cannot see, because `projects.cap_id` is NOT NULL and CASCADEs, so a move that
+did not land lets the database delete three projects while the save reports
+success. The move is READ OUT of `config-data.js` rather than copied (§283),
+and both ends are asserted: a removal WITHOUT the move still takes its
+projects. Needs a throwaway Postgres; 12/12, proved able to fail twice (5 red
+with the move a no-op, 1 red with the append):
+`DATABASE_URL=… node scripts/test-capability-move.js`
+
 Two people, one database — the scenario that was destroying work before §210
 (needs a throwaway Postgres; `SMP_WHOLE_GRAPH=1` restores the old behaviour and
 it must go red):
@@ -8716,7 +8753,92 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-11 &mdash; **&sect;319: a pillar says which kind of
+*Last Updated: 2026-09-11 &mdash; **&sect;320: removing a capability &mdash;
+the box, or the box and its work.** Islam, with the browser's own dialog open
+in front of him: *"when I try to remove the capability it will remove the
+projects with it."* **IT DID, AND THE DATABASE AGREED**: a project lives INSIDE
+a capability and `projects.cap_id` is NOT NULL with ON DELETE CASCADE, so the
+screen's splice and Postgres destroyed it independently &mdash; three projects
+with their deliverables, outcomes, milestones and every figure reported against
+them. **AND IT WAS THE ONE REMOVAL IN THE PRODUCT WITH NO WAY BACK**, measured
+in the same file: a pillar archives first and can be restored, a project
+archives first and can be restored (&sect;232), and the capability, which holds
+both kinds of work, did neither &mdash; while being the last destructive act
+still behind a BROWSER `confirm()`, which &sect;95 argued against for exactly
+this class and &sect;273.3 removed from the cycle panel. *The most destructive
+of the three ended up the least guarded.* **ONE WORD WAS DOING TWO JOBS**
+&mdash; *this box is in my way* is a MOVE and *this work is finished* is a
+DELETE &mdash; and separating them is the whole change, which is why the answer
+is two rows rather than a better sentence on one button. **THE BOX STOPS BEING
+DRAWN AND IS NOT TAKEN OUT OF THE DATA** (Islam's A of two, with the cost of
+each stated): each function ends with one capability, removing a box moves its
+projects into it, and there is no schema change, no migration and nothing
+moving between tables. **A IS NOT A STOPGAP, IT IS B'S FIRST HALF** &mdash;
+after it every function has exactly one wrapper, so the migration that drops
+the wrapper is a one-to-one mapping with no judgement calls, where doing it
+first would force a decision about the grouping on live client data; what it
+leaves behind is stated rather than discovered (a row per function nobody sees,
+and an upload workbook still addressed to a capability, which mostly resolves
+itself once that picker is one entry per function). **AND IT KEEPS THE DOOR
+OPEN**, which was his own question: hiding the box rather than destroying it
+leaves the whole model alive, so giving a named grouping back later is
+re-drawing a strip and not a migration. **THE CODES MUST NOT MOVE, AND THE
+FIRST BUILD MOVED THEM**: a project's code is its POSITION across the whole
+function (&sect;310) and `capsOfFunction()` hands them over in
+`GROUP.capabilities` order, so appending into a capability drawn after theirs
+renumbered `MKT01 &middot; MKT02 &middot; MKT03` to `MKT02 &middot; MKT03
+&middot; MKT01` &mdash; *the dialog promises in words that the projects keep
+their codes, and the first build broke that promise silently*; the side the
+source sat on decides which end they join, asserted as the agreement and
+**1 red** with the append put back. **IDS ARE NEVER RENUMBERED** (&sect;232's
+rule, &sect;316's finding): `renumberCapability()` re-addresses every project,
+deliverable, outcome and milestone, which is what every reported figure, focus
+mark and cycle snapshot is keyed on, so a moved project keeps `cap1-P1` inside
+`cap2`. **THE MOCKUP WAS SIGNED OFF FIRST** (`design-mockups/capability-remove/`,
+rule 1c) and Islam picked B of two treatments &mdash; two rows each saying what
+it does, because a pair at the same weight is how the destructive one gets
+pressed for the tidy one. **THE DESTINATION IS NAMED, NEVER IMPLIED** (one
+sibling and the sentence says where they land; several and it carries the
+platform's own select), **with nowhere to move them the row SAYS so** and holds
+its button with `aria-disabled` rather than `disabled`, or the reason beside it
+cannot be reached (&sect;45.2, &sect;61, &sect;221, &sect;163), **the archive is
+taken before the move either way** (&sect;49.2, fourth caller), and **the
+destination is read BEFORE the dialog closes**, since `closeModal()` empties the
+overlay's body (&sect;116.6). **AND THE SECOND DOOR WOULD HAVE BEEN LEFT
+BEHIND**: the Temple's own table removes a capability too, with the same browser
+dialog and the same splice &mdash; &sect;272.7 exactly &mdash; so both doors open
+the same dialog now, the check drives the Temple's through the product's own
+navigation and pen rather than by assigning `EDIT_PAGE` (&sect;266), and Remove
+is addressed by the capability's ID rather than its position (&sect;48,
+&sect;48.2). `capabilityHolds()` lost its last caller and is **deleted by name,
+never by line range** (&sect;24, &sect;214). **THE SERVER NEEDED NOTHING AND IT
+IS ASSERTED** (&sect;172): a move changes the project id lists on both
+capabilities, which the differ already reads as structural, so the part travels
+whole down the path that already exists &mdash; 595/0 and 136/0.
+`checks/capability-remove.py` **0 failures over 30 assertions**, proved able to
+fail **five ways from the SOURCES** (&sect;276): **21 / 1 / 2 / 4 / 2**.
+`scripts/test-capability-move.js` **12/12 against a real Postgres 16**, both
+ends (a removal WITHOUT the move still takes its projects, or "they survived"
+is true of a build that removes nothing), proved able to fail twice &mdash;
+**5 red** with the move a no-op, whose middle failure is the reported fault at
+the storage layer (*was 3 projects, now 1*: the cascade ate them and the save
+reported success), and **1 red** with the append. **TWO OF MY OWN FIRST
+FAILURES WERE MINE AND NOT THE PRODUCT'S**: the check ran against a build made
+BEFORE the ordering fix (&sect;105.6 &mdash; a fix tested against the wrong
+bytes looks exactly like a fix that does not work), and one assertion compared a
+capability's figures before with the DESTINATION's total after, which is
+comparing unlike things (&sect;100.3). **AND ONE FALSIFICATION DID NOT
+FALSIFY** &mdash; the no-archive tree came back green because the doctoring
+never matched the file's bytes, and a green falsification run is
+indistinguishable from a working guard (&sect;54.5); redone, it is 2 red.
+**RECORDED, NOT DONE**: moving a project INTO a capability has no control in
+either direction (this builds the hard half of it); the screen half of "the box
+goes" &mdash; stop drawing the band once a function is down to one; and whether
+a capability can be built on the pillars method or the projects method, which
+is Islam's own question and belongs with **Objectives & actions**, the round
+where "how does this plan?" stops having one answer per function.*
+
+*Earlier the same day: **&sect;319: a pillar says which kind of
 thing it is.** Islam, of a client whose supporting functions plan the way a
 business unit does: *"the capability is a strategic concept and we need to
 differentiate between having a capbility as a strategic element to focus on or

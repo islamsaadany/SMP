@@ -7536,7 +7536,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
             <thead><tr>
               <th class="idx">#</th><th>Category</th>
               <th class="cc">Growth <span class="mkdir">&ge;</span></th>
-              <th class="cc">CM <span class="mkdir">&le;</span></th>
+              <th class="cc">CM <span class="mkdir">&ge;</span></th>
               <th class="cc">Mix</th>
             </tr></thead>
             <tbody>
@@ -7548,7 +7548,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
               <tr class="mkfoot">
                 <td class="idx"></td><td>Scores into the pillar</td>
                 <td class="num final" style="color:var(--good-tx, var(--good))">99%</td>
-                <td class="num final" style="color:var(--good-tx, var(--good))">101%</td>
+                <td class="num final" style="color:var(--good-tx, var(--good))">100%</td>
                 <td class="num"><span class="mkind">Indicator &mdash; not scored</span></td></tr>
             </tbody>
           </table>
@@ -7593,7 +7593,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
             rule the platform already uses two tables up: coloured means a score, plain with a target behind it
             means a reported fact.</li>
         <li><b>The direction is the column&rsquo;s, and the column with none is the indicator.</b> Growth is
-            higher-is-better, CM is lower-is-better, Mix is neither and is marked with nothing. No extra
+            higher-is-better and so is CM, Mix is neither and is marked with nothing. No extra
             switch: the absence is the signal.</li>
         <li><b>Every figure still reads against its own target</b> &mdash; <span class="mkpair"><b>4%</b>
             <i>/ 7%</i></span> &mdash; exactly as every reported figure on this page already does.</li>
@@ -7632,7 +7632,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
         <h4 class="mini">Categories <em>&mdash; as planned: this year&rsquo;s target for each</em></h4>
         <div class="scroll"><div class="tblscroll">
           <table>
-            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth <span class="mkdir">&ge;</span></th><th class="cc">CM <span class="mkdir">&le;</span></th><th class="cc">Mix</th></tr></thead>
+            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth <span class="mkdir">&ge;</span></th><th class="cc">CM <span class="mkdir">&ge;</span></th><th class="cc">Mix</th></tr></thead>
             <tbody>
               <tr><td class="idx"><span class="idx-n">1</span></td><td>Bakery</td>
                 <td class="num">7%</td><td class="num">69%</td><td class="num">13%</td></tr>
@@ -7676,7 +7676,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
             <thead><tr>
               <th>#</th><th>Category</th>
               <th class="cc"><span class="mkhcell"><input class="mkhin" value="Growth"><select class="mkhdir" aria-label="How Growth is judged"><option selected>&ge;</option><option>&le;</option><option>&mdash;</option></select><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
-              <th class="cc"><span class="mkhcell"><input class="mkhin" value="CM"><select class="mkhdir" aria-label="How CM is judged"><option>&ge;</option><option selected>&le;</option><option>&mdash;</option></select><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
+              <th class="cc"><span class="mkhcell"><input class="mkhin" value="CM"><select class="mkhdir" aria-label="How CM is judged"><option selected>&ge;</option><option>&le;</option><option>&mdash;</option></select><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
               <th class="cc"><span class="mkhcell"><input class="mkhin" value="Mix"><select class="mkhdir" aria-label="How Mix is judged"><option>&ge;</option><option>&le;</option><option selected>&mdash;</option></select><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
               <th class="cc mkaddcol"><button class="mkhadd" title="Add a column">+</button></th>
             </tr></thead>
@@ -7725,7 +7725,7 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
         <h4 class="mini">Categories</h4>
         <div class="scroll"><div class="tblscroll">
           <table>
-            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth <span class="mkdir">&ge;</span></th><th class="cc">CM <span class="mkdir">&le;</span></th><th class="cc">Mix</th><th>Note</th></tr></thead>
+            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth <span class="mkdir">&ge;</span></th><th class="cc">CM <span class="mkdir">&ge;</span></th><th class="cc">Mix</th><th>Note</th></tr></thead>
             <tbody>
               <tr class="wantnote"><td class="idx">1</td><td>Bakery</td>
                 <td class="cc"><span class="entry filled"><input class="field" value="4"><span class="unitsuf">%</span></span><i class="mkvs">/ 7%</i></td>
@@ -7827,6 +7827,6 @@ tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
       <li><b>It goes on the review slides</b>, as its own slide after that pillar&rsquo;s targets.</li>
     </ul>
     <p class="mkask"><b>Settled:</b> this shape &middot; every category counts equally &middot; Growth is
-      higher-is-better and CM lower-is-better, both scored &middot; Mix is reported and never scored
+      and CM are both higher-is-better and both scored &middot; Mix is reported and never scored
       &middot; Submit waits for every one of them.</p>
   </section>

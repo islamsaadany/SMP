@@ -42476,3 +42476,66 @@ spec of its own; and a fifth module, for which nothing is reserved — the
 contract is the test.
 
 ---
+
+## §318.1 — THE MODULE MARK, AND WHERE IT SITS (2026-09-11, spec 044)
+
+Settled over three mockup rounds, each drawn in the platform's own chrome — the
+markup captured from the built file, every stylesheet build.py concatenates
+inlined in build.py's own order (§41.9).
+
+**THE MARK IS `.homemark`'S TREATMENT, LIFTED AND NOT COPIED.** Islam: *"make
+the button without a rounded frame and center it vertically and horizontally in
+it's place."* The product already draws exactly that shape once — frameless,
+square, centred both ways, the mark inside it — and §200.3 and §302.4 are the
+two rounds that got it there. The first drawing wore `.navmenu-btn`'s base,
+which is the GEAR's treatment: a filled, bordered, word-shaped pill, aligned
+like a word because that is what it holds. So the frameless centred square
+**gets a name of its own** and `.homemark` keeps only what is its own, the gold
+*something is waiting* fill; copying the five declarations instead is how the
+two drift the next time somebody measures one of them (§53.5).
+
+**AND IT SITS BEFORE THE PRODUCT'S NAME, WHICH IS ISLAM'S OWN PLACEMENT**
+(*"how about we place the ark as a small icon beside the startegy management
+platformon the very top left?"*). It reads in the true order — modules, then
+the product, then the client, then where in the client — and it is the only
+placement where the outermost thing in the platform is the first thing on the
+page. The destination row is left exactly as it is.
+
+**HE ALSO PROPOSED THE FAR RIGHT, BESIDE THE GEAR, AND THAT IS WHERE THE HOME
+MARK WAS MOVED FROM.** His reasoning was that a client's own person has no gear
+there, so the corner is free — and that is the same observation §193.2 acted on
+when it moved the house to the left: *"Setup is the office's, so the way back
+to your own starting page was keeping company with a control most of the
+register never sees."* Drawn for BOTH audiences rather than argued: with no
+gear the mark is alone at the end of a row it does not belong to, and the
+reading order inverts.
+
+**THE SIZE IS 24px AND IT WAS SWEPT, NOT CHOSEN.** At a real 1500px window a
+30px box grows the top row 31 → 36px, 28 → 34, 26 → 32, and **24 costs it
+nothing at all** — 31px with the mark and 31px without, no clipping. §302.4's
+arithmetic holds at that size too: 24 less a 16px mark leaves eight, four a
+side, so the size that is free is also the size that does not snap half a pixel.
+Below about 1300px the row already wraps without it and the mark takes a little
+more of the product's name.
+
+**AND TWO OF THE THREE ROUNDS MEASURED THE WRONG THING FIRST, BOTH TIMES ON THE
+NUMBER BEING DECIDED.** Rounds one and two reported that the top row cannot take
+a control — 46px against 31, the name clipped — measured through frames capped
+at the mockup's own reading width, about 200px narrower than the chrome, which
+has been full-window since §94.13. *A frame that squeezes the thing under test
+answers a question nobody asked.* Then the lean rebuild reported the same 46px
+again, from a `.pg h1` rule of my own reaching INSIDE the frames: the chrome's
+`.brand h1` is a descendant of the mockup page, so the product's name was set at
+22px, the brand went 409 → 559px and the client chip wrapped. Caught by
+measuring the committed file beside the new one — same width, same drawing,
+different answer — and scoped with `>` rather than loosened.
+
+**AND THE MOCKUP WAS TOO LONG, WHICH IS ITS OWN LESSON.** Islam: *"the mockup is
+too confusing we already removed some old options and full of writing."* Both
+halves true: it still carried the option his own decision had superseded, and a
+paragraph of cost prose under every drawing. **A mockup exists to be LOOKED AT**
+— the reasoning belongs here and in the handover, never on the page somebody
+opens to choose between two pictures. Rebuilt as two drawings, one open state,
+one card and the question.
+
+---

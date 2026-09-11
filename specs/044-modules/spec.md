@@ -297,6 +297,35 @@ address list and the push payload's open address.
 materially more expensive by waiting, and the only reason to interrupt the
 cutover sequence.
 
+### 7.1 BUILT — 2026-09-11 (§318.2)
+
+*"for the address ok add it now."* Built on the branch, not merged.
+
+What it turned out to be, against the recommendation above:
+
+- **Three addresses stay on the spine and carry no module**: `/<client>` (the
+  landing reports across every module), `/<client>/setup/<page>` (§4.5 rejected
+  a Setup page per module) and `/<client>/tour`. Everything else is
+  `/<client>/strategy/…`.
+- **The list lives on the server** — `lib/modules.ts`, named once — and the
+  document is stamped `data-module`, so the browser writes the word back
+  without holding a second copy (§53.5).
+- **The redirect is the server's**, and runs *after* the door has answered: an
+  old address reaching a signed-out person goes to the door, not through the
+  redirect.
+- **The service worker and the push payload needed nothing.** Phase J's worker
+  has no fetch handler and no cache, so it holds no address list, and the push
+  payload opens `/<client>` — the landing, which is spine. Two of the four
+  places §7 predicted were not places at all.
+- **The one ambiguity is named rather than guarded**: a business unit keyed
+  exactly as a module reads correctly at its new address and is
+  indistinguishable at its old one — back-compat only.
+
+Proof: `check:shell` 71/0 with a new section 2b, `check:door` 50/0,
+`check:state` 91/0, and three falsifications — the browser not writing the
+module (7 red), the redirect removed (2 red), the module put on the spine too
+(3 red).
+
 ---
 
 ## 8 · Deliberately not decided here

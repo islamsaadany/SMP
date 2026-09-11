@@ -42539,3 +42539,76 @@ opens to choose between two pictures. Rebuilt as two drawings, one open state,
 one card and the question.
 
 ---
+
+## §318.2 — THE MODULE IS IN THE ADDRESS (2026-09-11, spec 044 §7)
+
+Islam, of the one part of spec 044 that gets more expensive by waiting:
+***"for the address ok add it now."*** The new app's addresses are
+`/<client>/…`; with modules they become `/<client>/<module>/…`. Adding the
+segment **now** — while only Strategy exists and nobody holds a bookmark — is a
+small change to work that is already built and green. Adding it after the
+cutover means either breaking every saved link or special-casing Strategy for
+ever.
+
+**THE SPINE CARRIES NO MODULE, AND THAT IS THE DECISION INSIDE THE CHANGE.**
+Three addresses stay where they are: `/<client>` (the landing, which shows what
+is waiting across every module), `/<client>/setup/<page>` (one Setup page for
+the whole client — spec 044 §4.5 REJECTED a Setup page per module, because an
+administrator sets several up in one sitting and the spine has to live
+somewhere inside no module) and `/<client>/tour`, which the landing offers.
+Everything else takes `/<client>/strategy/…`. **Both ends are asserted**
+(§94.2): the word present where it belongs AND absent on the spine, or a build
+that prefixed everything passes half of it — measured, `--break=module-on-setup`
+goes **3 red** and nothing else moves.
+
+**THE LIST IS ON THE SERVER AND THE BROWSER IS TOLD.** `lib/modules.ts` names
+the four words and the default once; the document is stamped `data-module` and
+`shell/route.js` writes that word back into every address it pushes, so a module
+added tomorrow needs no edit in the browser (§53.5). What IS the browser's own
+vocabulary is `setup` and `tour` — `kindOf()` and `placeOf()` already had to
+name both, so nothing is copied.
+
+**THE REDIRECT IS THE SERVER'S, AND ITS ORDER IS THE SECURITY ARGUMENT.** An old
+address is corrected **before a page is drawn at it**, so there is one address
+per page and Back never walks through a shape the product no longer writes —
+and it happens **after the door has answered**, or a stranger would be told
+which addresses a client has. Asserted directly: signed out, `/raya-trade/mobile
+/strategy` 302s to the DOOR and not to the module.
+
+**THE ONE AMBIGUITY IS NAMED RATHER THAN GIVEN MACHINERY.** The first segment
+decides by POSITION and never by the word, so a business unit keyed `strategy`
+sits at `/<client>/strategy/strategy/plan` and reads correctly; what cannot be
+told apart is that unit's OLD address, `/<client>/strategy/plan`. It is the
+back-compat redirect alone, for links made before today, and a supporting
+function is safe either way (it carries its own `fn/` prefix). Said in
+`lib/modules.ts` rather than guarded.
+
+**PROVED ABLE TO FAIL THREE WAYS, EACH ON ITS OWN ASSERTIONS**: the browser
+stopping writing the module **7 red**, the redirect removed **2 red**, the
+module put on the spine too **3 red**. `check:shell` 60 → **71/0** with a new
+section 2b, `check:door` 49 → **50/0**, `check:state` 91/0, blob 23/23, comms
+47/47, upload 9/9, room 10/0, deploy 5/0, rules 588/0, every `:red` variant
+still red, `tsc` clean but for a pre-existing Prisma-generate error reproduced
+on the untouched tree (§303).
+
+**AND ONE CHECK HELD A LITERAL THIS MOVED** (§214.3, again): `door-landing`
+asserted the way out is `/raya-trade/mobile`. **REWRITTEN, never loosened**
+(§218) — it agrees with `doorHref()` now, the product's own builder (§94.8),
+**with the module asserted present beside it**, or a build that dropped it from
+the page and the builder alike agrees with itself perfectly (§113.8).
+
+**AND MY OWN FALSIFICATION HARNESS PUT BACK LESS THAN IT BROKE.** The third
+break edited three files and the restore covered two, so the next green run
+read **shell 68/2 and door 48/1** on a tree I believed clean — §100.3 in the
+harness, and the thing that makes it dangerous is that it looks exactly like a
+regression in the work. *A probe restores everything it touched, or the run
+after it is measuring the probe.*
+
+**RECORDED, NOT DONE**: `targetOf()` and `subjectLabel()` in `lib/landing.ts`
+are callerless since Phase B replaced the holder pages, left alone because
+deleting them is a tidy-up and not this change (§24 against §2b) — with a note
+saying they must be handed the rest INSIDE the module if they ever gain one.
+`check:demo` is red in this sandbox for a missing `SMP_APP_PASSWORD`,
+reproduced identically on the untouched tree before anything here was blamed.
+
+---

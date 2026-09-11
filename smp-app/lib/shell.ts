@@ -18,12 +18,23 @@ export function shellBody(): string {
 }
 function esc(s: string): string { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 
-export function shellDocument(tenantName: string): string {
+/* `module` is the module word this document's addresses are written with.
+   It is stamped on the root element so the browser is TOLD its module rather
+   than keeping a second copy of the list (§53.5): shell/route.js reads
+   `data-module` and writes it back into every address it pushes.
+
+   A SPINE PAGE IS STAMPED TOO, with the module its neighbours use, because
+   somebody walks from Setup to a unit without the document being served
+   again — and the browser already knows which destinations are the spine's
+   (`setup` and `tour` are its own vocabulary in shell/route.js, not a list
+   copied from here). */
+export function shellDocument(tenantName: string, module: string | null = null): string {
   /* THE CHECK'S BREAKS (constitution XVI, checks/shell.mjs): `no-route`
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
   const brk = process.env.SMP_BREAK || "";
-  return "<!doctype html>\n<html lang='en'" + (brk === "no-route" ? " data-break='no-route'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
+  return "<!doctype html>\n<html lang='en'" + (brk === "no-route" ? " data-break='no-route'" : "") +
+    (module ? " data-module='" + esc(module) + "'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(tenantName) + " — Strategy Management Platform</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">\n' +

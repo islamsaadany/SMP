@@ -57315,9 +57315,17 @@ var SYNC = (function () {
    The frozen shell has no addresses: it opens where the person works
    (§94.6) and remembers where they were across a refresh in sessionStorage
    (§173's `smp.where`, a destination · a tab · a section). On the new stack a
-   page IS an address — /<client>/<target>/<tab>[/<section>] — because the
-   landing's doors point at one (§315) and a link somebody sends has to open
-   the page it names.
+   page IS an address — /<client>/<module>/<target>/<tab>[/<section>] —
+   because the landing's doors point at one (§315) and a link somebody sends
+   has to open the page it names.
+
+   THE MODULE IS NOT A LIST HELD HERE (spec 044 §7). The document is stamped
+   `data-module` by the server, which owns the list (lib/modules.ts), and this
+   writes that word back into every address it pushes — so a module added
+   tomorrow needs no edit in the browser. What IS this file's own vocabulary
+   is which destinations belong to the SPINE and carry no module: `setup`,
+   one page for the whole client (spec 044 §4.5), and the intro round, both
+   of which kindOf() and placeOf() already had to name.
 
    So this does two things and nothing else:
      · on arrival, the address becomes §173's remembered place, so the
@@ -57341,6 +57349,7 @@ var SYNC = (function () {
   if (!m) return;
   if (document.documentElement.getAttribute("data-break") === "no-route") return;   /* the check's break */
   var SLUG = m[1];
+  var MODULE = document.documentElement.getAttribute("data-module") || "";
   /* tab words in the address ↔ tab keys in SUBS; a function's Strategy and
      Performance keys are its own (fnstrat, fnperf), the group's and a
      company's are `performance` and their own pages */
@@ -57348,8 +57357,13 @@ var SYNC = (function () {
                  reporting: { unit: "report", fn: "report" } };
   var TAB_OUT = { strategy: "strategy", fnstrat: "strategy", performance: "performance", fnperf: "performance", report: "reporting" };
   function kindOf(d) { return d === "group" ? "group" : d === "setup" ? "setup" : /^fn:/.test(d) ? "fn" : /^co:/.test(d) ? "co" : "unit"; }
+  /* The path after the client's slug, whichever address this is asked of. */
+  function restOf(path) { return String(path || "").replace(/^\/[^/]+\/?/, ""); }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
+    /* the module leads every address but the spine's; `setup` and `tour` are
+       the spine's own words and are read where they stand */
+    if (MODULE && seg[0] === MODULE) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
@@ -57370,13 +57384,15 @@ var SYNC = (function () {
   function addressOf(d, s, c) {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
-    var out = "/" + SLUG + "/" + seg;
+    /* Setup is the client's, not a module's (spec 044 §4.5), so it is the one
+       destination whose address carries no module word. */
+    var out = "/" + SLUG + (MODULE && kind !== "setup" ? "/" + MODULE : "") + "/" + seg;
     if (s) out += "/" + (kind === "setup" || kind === "group" ? s : (TAB_OUT[s] || s));
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
   /* ── on arrival: the address is the place ── */
-  var here = placeOf(m[2]);
+  var here = placeOf(m[2] || "");
   try {
     sessionStorage.setItem("smp.welcome.done", "1");
     if (here && !here.tour && here.d) {
@@ -57415,7 +57431,7 @@ var SYNC = (function () {
     paint = function () { var r = painted.apply(this, arguments); try { sync(true); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
-    var st = ev.state || placeOf(String(location.pathname).replace(/^\/[^/]+\/?/, ""));
+    var st = ev.state || placeOf(restOf(location.pathname));
     if (!st || !st.d || typeof current === "undefined") return;
     last = location.pathname;
     current = st.d; currentSub = st.s || null;

@@ -7830,6 +7830,27 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/pillar-kind.py     # a pillar says which kind of thing it is
+                                # (§319): the mark DRAWN on the Plan rail and
+                                # band, the Performance pane, the Reporting band
+                                # and both sides of the navigation switch — and
+                                # SETTABLE, read back off the stored plan rather
+                                # than off the screen (§96), picking the value
+                                # the row does NOT hold, because Mobile's first
+                                # pillar is already a Capability and a fixture
+                                # writing that word goes green on a build with
+                                # no picker at all (§94.5). An unsaid kind draws
+                                # nothing — no empty pill, no separator pointing
+                                # at nothing (§15.1) — and the band's pill is
+                                # asserted to be the KIND rather than the
+                                # "Not yet due" pill that wears the same class
+                                # (§65.9). Every probe degrades (§215). 0
+                                # failures, proved able to fail FIVE ways from
+                                # the SOURCES (§276): 6 red with the flag false,
+                                # 3 with the picker gone, 3 with the band's
+                                # argument dropped, 1 with the reporting band's,
+                                # 1 with the cleared blank deleting the key.
+                                # SMP_BUILT points it at another build
 python3 checks/objectives-table.py # the objectives table with the monthly drawer
                                 # in it (§278.3): opening the drawer moves NO column
                                 # (the squeeze was the column left outside the span,
@@ -8695,7 +8716,94 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-11 &mdash; **&sect;318: setting a client up &mdash; the
+*Last Updated: 2026-09-11 &mdash; **&sect;319: a pillar says which kind of
+thing it is.** Islam, of a client whose supporting functions plan the way a
+business unit does: *"the capability is a strategic concept and we need to
+differentiate between having a capbility as a strategic element to focus on or
+it's ajust a functional obecjtives and actions"*, and of three of his own
+functions, *"they are planning somehow in a capability format."* **NOTHING IS
+INVENTED HERE AND SAYING SO FIRST IS MOST OF THE SECTION**: a pillar has carried
+`kind` since the model was written, the upload template's Pillars sheet has had
+a validated column for it the whole time, and &sect;29 turned it off at Islam's
+own instruction &mdash; *"it will be brought later not now"* &mdash; **writing a
+flag rather than deleting five call sites precisely so the distinction could
+come back without being reconstructed from a git log**. It has; the flag goes
+true, recorded as a reversal rather than overwritten (Principle II), because
+&sect;29's reasoning was right for the eighteen versions in between and what
+changed is the client rather than the argument. **AND THE ONE-CHARACTER CHANGE
+RESTORED ALMOST NOTHING, WHICH IS THE FINDING** &mdash; measured on a build with
+the flag flipped and nothing else changed, the mark came back in exactly three
+places (the pen's head, the Performance rail, a column in the group's unit-card
+dialog) and the Plan page, the band beside a pillar's name and the Reporting
+page showed none of it: *a flag left as a door back is only a door for as long
+as the rooms behind it are still there.* **TWO SITES NEEDED A GUARD ON THE VALUE
+BEFORE THE FLAG COULD GO TRUE** &mdash; `addPillar` mints no kind, so an unsaid
+one drew an EMPTY pill and a rail line opening *" &middot; execution 45%"*, a
+separator pointing at nothing (&sect;15.1, latent in the flag rather than
+introduced by turning it on). **AND THE FIELD WAS WRITABLE ON NO SCREEN AT
+ALL**, which is the half that makes showing it safe: four surfaces now say it
+and until today the only way to change one was to re-upload the subject's whole
+plan (&sect;61's trap exactly), so the pillar's pen gains a **Kind** row beside
+its Owner &mdash; **the list read from the workbook's own `KINDS`** rather than
+written out again (&sect;53.5), with **the blank a real option**, or the first
+pillar anybody adds becomes silently a Direction (&sect;35, &sect;96.2) &mdash;
+**and clearing it writes `""` rather than deleting the key, which is
+&sect;50.6 READ rather than recited**: that rule says a value put back to its
+DEFAULT loses its key, and the default here is the empty string and not an
+absence, because `addPillar` writes `kind: ""` and the workbook reader
+normalises a missing cell to the same. **It was built the other way round
+first**, and deleting would have left a cleared pillar spelling its blank a
+second way &mdash; differing from every added and every uploaded row, a real
+difference to `same()` and a change the authoriser then has to judge
+(&sect;249.3 with the sign reversed). *Reading the minter is what caught it;
+reciting the rule is what would have shipped it.* The assertion is an
+AGREEMENT with `addPillar`'s own output rather than a literal (&sect;94.8).
+**THE BAND TAKES AN ARGUMENT, NOT AN OBJECT** (three of its six callers draw a
+PROJECT, which has no kind and never will) and the mark sits **beside the
+name**, because that end of the band carries counts, tallies and &sect;301's
+finished mark &mdash; things about how the pillar is GOING &mdash; while the
+kind is a fact about what it IS, like the code two inches left. **THE GROUP'S
+UNIT CARDS GAIN A COLUMN AND IT IS MEASURED, NOT ASSUMED** (&sect;158): 888px in
+an 890px box at 1920/1440/1280/1100 and 877 in 879 at 1000, nothing over.
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED ANYWAY** (&sect;172: four layers
+once agreed about a fourth value the database had never been offered, and this
+is exactly that shape &mdash; a field the workbook could write and no screen
+could, so the day the picker ships is the first day the authoriser is ever asked
+about it): `test-authorize.js` &sect;36, both ends, **3 red** with `kind` added
+to the classifier's omit list &mdash; and the three are the REFUSALS, the
+dangerous direction, a custodian silently re-labelling somebody else's pillar.
+595/0. `checks/pillar-kind.py` **0 failures**, proved able to fail **five ways
+from the SOURCES** (&sect;276) &mdash; 6 / 3 / 3 / 1 / 1 red &mdash; on both sides of
+the navigation switch, where section 4 is not a formality because a supporting
+function planning in pillars **is the subject the whole piece is for**.
+**AND TWO OF THE CHECK'S OWN FAULTS**: its first falsification run **DIED rather
+than reporting** (&sect;215, in a file written a day after that rule was quoted)
+&mdash; `select_option` waits thirty seconds for a control the broken build does
+not draw, so it printed one failure of four and never reached two whole
+sections; and **one assertion could not fail**, picking *"Capability"* outright
+when Mobile's first pillar IS a Capability in the worked example, so with the
+picker deleted it read the seed's own value back and went green on exactly the
+build it exists to catch (&sect;94.5, its own recorded example). **`band-corner`
+is 6 red and it is NOT this work's** &mdash; established by reproducing the
+identical six on a baseline built from HEAD before anything here was blamed
+(&sect;303), and it is the failure &sect;316.5 already records. **AND THE NEW STACK'S GENERATED SHELL IS REBUILT WITH IT**:
+`smp-app/public/shell.js` is TRACKED and is `build-shell.mjs`'s assembly of
+build.py's own script list, so a change to a frozen source that stops there
+leaves the Next app serving the old shell &mdash; &sect;91's failure by a
+different road, and silent, because nothing on either stack compares the two;
+`build-sw.mjs` re-run and **byte-identical**, which is &sect;316.10 working as
+designed, since `SHELL` lives in the CACHING half and that is the half the
+generator drops. **RECORDED, NOT
+DONE**, the other four things the round settled: the capability box goes (its
+own piece, because it moves live client data and that wants a rehearsal on a
+copy first), **Objectives & actions** as a third way a function plans (drawn and
+signed off, and big enough to want a written spec first), **targets broken down
+by category** under a pillar (drawn and signed off; it scores, Submit waits for
+it, equal weight, and the mix column is an indicator that is never scored, all
+his), and the pillar's description, the pillar committee and the next-cycle
+focus box with its switch at cycle open.*
+
+*Earlier the same day: **&sect;318: setting a client up &mdash; the
 wizard (spec 044).** Islam: *"any Consultant who gets into the platform and adds
 a new client to set up this client he needs to go through a series of
 questions."* A guided flow through Setup: the client's name, its year, its

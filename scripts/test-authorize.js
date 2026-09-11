@@ -3513,5 +3513,70 @@ console.log("\n35 · the planning period (§308)");
   check("§308 REFUSED: moving the end alone is judged too", !r.ok, "was ALLOWED");
 })();
 
+/* ══ 36 · A PILLAR'S KIND IS PART OF ITS PLAN (§319) ════════════════════
+   §319 brings back the Direction / Capability mark §29 hid, and gives it the
+   first control it has ever had — a picker in the pillar's own pen. The claim
+   made in that section is that the SERVER needed nothing: `kind` has been
+   stored on every pillar since the model existed and rides inside `items`,
+   which the classifier compares wholesale, so a change to it has always been
+   the unit's plan.
+
+   §172's lesson is why that is asserted rather than stated: four layers
+   agreed about a fourth value the database had never been offered, because
+   until that day nothing in the product could send one. This is exactly that
+   shape — a field the workbook could write and NO SCREEN could — so the first
+   time the picker ships is the first time the authoriser is asked about it.
+
+   BOTH ENDS (§94.2): the office writes it and the unit's own custodian is
+   refused. A build that classified it as nothing at all would let a
+   view-only head re-label somebody else's pillar, and a build that split it
+   off as its own kind would refuse with a sentence naming Setup for a field
+   that lives on the plan (§16.7). */
+console.log("\n36 · a pillar's kind is part of its plan (§319)");
+(function () {
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  check("§319: the seed holds a unit with a pillar and a custodian",
+        !!(UK && SEED.units[UK].items && SEED.units[UK].items[0] && CUST), UK + " / " + CUST);
+  if (!UK || !CUST || !SEED.units[UK].items || !SEED.units[UK].items[0]) return;
+
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  /* THE VALUE WRITTEN IS THE ONE THE ROW DOES NOT HOLD. Mobile's first pillar
+     is already a Capability in the worked example, so a fixture writing that
+     word would set a value to what it already was — no change, no
+     classification, and every assertion below green on a build that refuses
+     nothing (§94.5, its own recorded example). */
+  const had = SEED.units[UK].items[0].kind || "";
+  const want = had === "Direction" ? "Capability" : "Direction";
+  check("§319: and the fixture moves it, rather than re-writing what is there",
+        had !== want, JSON.stringify([had, want]));
+
+  let r = fromStored(SEED, "smo", function (i) { i.units[UK].items[0].kind = want; });
+  check("§319: the office marks a pillar a Direction or a Capability", r.ok,
+        (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.units[UK].items[0].kind = want; });
+  check("§319 REFUSED: the unit's own custodian cannot re-label its pillars",
+        !r.ok, "was ALLOWED");
+
+  /* CLEARING IT IS THE SAME ACT, and the blank is a real option in the picker
+     (§35: `addPillar` mints none, and inventing one would have the platform
+     decide whether somebody's pillar is a direction or a capability). */
+  r = fromStored(SEED, CUST, function (i) { i.units[UK].items[0].kind = ""; });
+  check("§319 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(SEED, "smo", function (i) { i.units[UK].items[0].kind = ""; });
+  check("§319: the office clears one", r.ok, (r.refusals || []).join(" / "));
+
+  /* ONE SENTENCE, and it is the plan's. */
+  const inc = clone(SEED); inc.units[UK].items[0].kind = want;
+  const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+                 .map(function (c) { return c.kind; });
+  check("§319: it classifies as the unit's PLAN and nothing else",
+        kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

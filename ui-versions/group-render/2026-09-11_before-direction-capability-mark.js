@@ -1351,56 +1351,9 @@ function capsTable(){
    Note what is NOT touched: the "Direction" COLUMN in a key-objective table
    means the direction of travel - whether higher is better - and has nothing
    to do with this. Same word, different thing. */
-
-/* ── AND "LATER" IS NOW (§319) ──────────────────────────────────────────
-   Islam, of a client whose supporting functions plan the way a unit does:
-   *"a capability might have targets and tactics like the pillar but it's
-   mostly an internal thing as well"*, and of three of his own functions,
-   *"they are planning somehow in a capability format"*.
-
-   THAT IS THIS MARK, and the whole of §319's first piece is the one line
-   below going true. §29 wrote the flag rather than deleting five call sites
-   precisely so the distinction could come back without being reconstructed
-   from a git log, and it has. Recorded as a reversal rather than overwritten
-   (Principle II): §29's reasoning was right for the eighteen versions in
-   between, and what changed is not the argument but the client.
-
-   AND THE ONE-CHARACTER CHANGE RESTORED ALMOST NOTHING, WHICH IS THE FINDING.
-   Measured on a build with this line flipped and nothing else changed, the
-   mark came back in exactly three places — the pen's head, the Performance
-   rail, and a column in the group's unit-card dialog — while the Plan page,
-   the band beside a pillar's name and the Reporting page showed none of it.
-   *A flag left as a door back is only a door for as long as the rooms behind
-   it are still there*, and eighteen versions of other work had moved several
-   of them, so the three surfaces below are edits rather than revivals.
-
-   TWO OF THE FIVE SITES ALSO NEEDED A GUARD ON THE VALUE FIRST. `addPillar`
-   mints `kind: ""` — there is no default WORD, and inventing one would have
-   the platform decide whether somebody's pillar is a direction or a
-   capability — so an unsaid kind drew an EMPTY pill here and a rail line
-   opening " · execution 45%", a separator pointing at nothing. An absent
-   value draws nothing (§15.1); `pillarMeta` below had that guard from the day
-   it was written and the other two did not, so the fault was latent in the
-   flag rather than introduced by turning it on. */
-var SHOW_KIND = true;
-/* The picker's options: the blank, then the workbook's own vocabulary. Built
-   rather than written out, so `KINDS` stays the single list (§53.5) — and the
-   template's own B2:B60 validation is generated from that same constant, so a
-   third value added there arrives in this picker the same day.
-
-   NO `typeof` GUARD AROUND IT. `xlsx.js` is inlined BEFORE this file by
-   build.py's own list — and `build-shell.mjs` reads that same list, so the
-   order holds on both stacks (§315.3) — which makes a guard here a branch for
-   a case that cannot occur (§24). It would also be the WORSE failure: a
-   fallback to `[]` leaves a picker offering nothing but the blank, silently,
-   where an absent vocabulary ought to be loud. */
-function kindChoices(){
-  return [{ v:"", label:"\u2014" }].concat(KINDS.map(function(k){
-    return { v:k, label:k }; }));
-}
+var SHOW_KIND = false;
 function kindPill(it){
-  return SHOW_KIND && it && it.kind
-    ? '<span class="pill kind">' + esc(it.kind) + '</span>' : '';
+  return SHOW_KIND ? '<span class="pill kind">' + esc(it.kind) + '</span>' : '';
 }
 /* The meta line, built from the parts that actually have a value. It used to
    concatenate kind, theme and owner with fixed separators, so a pillar with no
@@ -5131,7 +5084,7 @@ function renderReport(u){
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
-        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi)), p.kind) +
+        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi))) +
       mTable + tTable;
   };
 
@@ -6836,13 +6789,7 @@ function unitRailFor(u, sel){
            the right - two numbers, one of them unlabelled, and nothing saying
            which was which. The bare number went with the footer that tried to
            explain it (§29.6). */
-        /* §319: the kind leads, as it does on the performance rail one
-           function along — the two rails are onto the same list and a mark on
-           one of them only is how a unit comes to be fine differently on two
-           of its own pages (§53.5). Guarded on the VALUE: a pillar nobody has
-           marked yet says nothing rather than opening with a separator. */
-        railSub((SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
-          plural(it.measures.length, "measure") +
+        railSub(plural(it.measures.length, "measure") +
           ' &middot; ' + plural(it.tactics.length, "tactic") +
           (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
       '</button>';
@@ -7047,20 +6994,9 @@ function ownStateChip(target, list, word){
     ' · ' + n + ' of ' + mine.length + ' done</span>';
 }
 
-/* ── AND THE BAND SAYS WHICH KIND OF PILLAR IT IS (§319) ────────────────
-   `kind` is an OPTIONAL fourth argument because three of this function's six
-   callers draw a PROJECT, which has no kind and never will — passing the
-   pillar object instead would put a field on the signature that half the
-   callers must ignore.
-
-   IT SITS BESIDE THE NAME, not in the right slot. That end carries counts,
-   tallies and the finished mark — things about how the pillar is GOING — and
-   the kind is a fact about what the pillar IS, which is the same kind of fact
-   as the code two inches to its left. */
-function pillarBand(code, name, right, kind){
+function pillarBand(code, name, right){
   return '<div class="pband"><span class="pband-code">' + esc(code) + '</span>' +
     '<span class="pband-name">' + esc(name) + '</span>' +
-    (kind ? kindPill({ kind: kind }) : '') +
     (right ? '<span class="pband-r">' + right + '</span>' : '') + '</div>';
 }
 function unitPlanBody(it, u, railed){
@@ -7403,7 +7339,7 @@ function unitPlanBody(it, u, railed){
            section changes and there is only ever one of it. The head keeps
            what is the PILLAR'S — its code, its name field and Remove. */
         '</div>'
-    : pillarBand(code, it.name, "", it.kind) + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
@@ -7422,50 +7358,11 @@ function unitPlanBody(it, u, railed){
        component: a project's Owner row and a pillar's are the same fact in
        the same place on the same kind of pane, and drawing them two ways is
        how a unit and a function come to be fine differently (§53.5). */
-    /* ── AND THE KIND, SETTABLE AT LAST (§319) ───────────────────────────
-       The mark has been stored on every pillar since the model existed, has
-       ridden in the upload template's Pillars sheet the whole time, and was
-       WRITABLE ON NO SCREEN AT ALL — so bringing it back into view (§319's
-       first half) without this would have been §61's trap exactly: a word a
-       reader meets on every surface a pillar is read on and can change nowhere
-       but by re-uploading the subject's whole plan.
-
-       THE LIST IS THE WORKBOOK'S OWN (`KINDS`), read rather than repeated. Two
-       spellings of one vocabulary is how the file and the picker come to offer
-       different words (§53.5, §276's four compile rules) — and a validation
-       range in the template is generated from that same constant, so a third
-       value added there arrives in this picker the same day.
-
-       THE BLANK IS AN OPTION AND NOT AN OVERSIGHT. `addPillar` mints `kind: ""`
-       and the workbook reader normalises a missing cell to the same thing, so
-       a picker without an empty entry would make the first pillar somebody
-       adds silently a Direction — the platform deciding something nobody said
-       (§35, §96.2). Unsaid draws nothing anywhere.
-
-       AND CLEARING IT WRITES `""` RATHER THAN DELETING THE KEY, which is
-       §50.6 read rather than recited: that rule says a value put back to its
-       DEFAULT loses its key, and the default here is the empty string, not an
-       absence — BOTH minters write it. A build that deleted instead would
-       leave a cleared pillar spelling its blank a second way, differing from
-       every added and every uploaded row, which is a real difference to
-       `same()` and a change the authoriser then has to judge (§249.3's shape,
-       with the sign reversed). It was built the other way round first and
-       reading `addPillar` is what caught it.
-
-       BESIDE THE OWNER, in the front matter the pen already draws, one column
-       wide (§109, §130.1): a pillar's kind and its owner are two facts about
-       the pillar itself, and a second block for the second fact is a component
-       nobody needed. */
     (ed
-      ? '<div class="pfront one"><div class="pfcol">' +
-          '<div class="pfrow"><em>Owner</em><div class="pfval">' +
-            ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
-          '</div></div>' +
-          '<div class="pfrow"><em>Kind</em><div class="pfval">' +
-            selectOr("plan", it.kind || "", kindChoices(), "kindsel",
-                     function(v){ it.kind = v; }) +
-          '</div></div>' +
-        '</div></div>'
+      ? '<div class="pfront one"><div class="pfcol"><div class="pfrow"><em>Owner</em>' +
+          '<div class="pfval">' +
+          ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
+        '</div></div></div></div>'
       : '') +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
@@ -8044,12 +7941,7 @@ function unitPerfRail(u){
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
-      /* §319: guarded on the VALUE and not only on the flag. A pillar added
-         on the platform has no kind until somebody picks one, and the bare
-         flag test printed " &middot; execution 45%" — a separator pointing at
-         nothing, which is the fault `pillarMeta` was already written to avoid
-         one screen over. */
-      railSub((SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
+      railSub((SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
         'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
       '</button>';
   }).join("");
@@ -8086,7 +7978,7 @@ function unitPerfPane(it, u, railed){
      scorePair below that made the OLD header redundant — a 19px name, a meta
      line and a score pill above two scores stated again at the size they
      deserve — not the fact of naming the pillar at all. */
-  return (railed ? pillarBand(pillarCode(u, u.items.indexOf(it)), it.name, "", it.kind) :
+  return (railed ? pillarBand(pillarCode(u, u.items.indexOf(it)), it.name) :
     '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +

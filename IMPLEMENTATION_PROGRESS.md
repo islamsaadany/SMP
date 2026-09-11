@@ -54,7 +54,57 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§318 — setting a client up: the wizard — built on
+**Latest version:** **§319 — a pillar says which kind of thing it is — built
+on `claude/inspiring-lamport-pm0ki2`.** Islam, of a client whose supporting
+functions plan the way a business unit does: *"the capability is a strategic
+concept and we need to differentiate between having a capbility as a strategic
+element to focus on or it's ajust a functional obecjtives and actions"*, and of
+three of his own functions, *"they are planning somehow in a capability
+format."* **Nothing is invented**: a pillar has carried `kind` since the model
+was written, the upload template's Pillars sheet has had a validated column for
+it the whole time, and §29 turned it off at Islam's own instruction — *"it will
+be brought later not now"* — writing a flag rather than deleting the call sites
+so the distinction could come back. It has. **The one-character change restored
+almost nothing, which is the finding**: measured on a build with the flag
+flipped and nothing else changed, the mark came back in three places only (the
+pen's head, the Performance rail, a column in the group's unit-card dialog),
+while the Plan page, the band beside a pillar's name and the Reporting page
+showed none of it — *a flag left as a door back is only a door for as long as
+the rooms behind it are still there.* **Two sites needed a guard on the VALUE**
+before the flag could go true, because `addPillar` mints no kind and an unsaid
+one drew an empty pill and a separator pointing at nothing (§15.1). **And the
+field was writable on no screen at all** — four surfaces say it and the only
+way to change one was to re-upload the whole plan (§61) — so the pillar's pen
+gains a **Kind** row beside its Owner, its list read from the workbook's own
+`KINDS` rather than written out again (§53.5), with the blank a real option or
+the first pillar anybody adds becomes silently a Direction (§35) — and clearing
+it writes `""` rather than deleting the key, which is §50.6 READ rather than
+recited: the default here is the empty string and not an absence, because
+`addPillar` writes it and the workbook reader normalises a missing cell to the
+same. It was built the other way round first; *reading the minter is what
+caught it.* The group's
+unit cards gain a column and it is **measured, not assumed** (§158): 888px in an
+890px box at 1920/1440/1280/1100. **The server needed nothing and it is asserted
+anyway** (§172) — `test-authorize.js` §36, both ends, **3 red** with `kind`
+added to the classifier's omit list, and the three are the REFUSALS, the
+dangerous direction. `checks/pillar-kind.py` 0 failures, proved able to fail
+**five ways from the sources** (6 / 3 / 3 / 1 / 1 red), on both sides of the
+navigation switch — where the function side is not a formality, being the
+subject the whole piece is for. Two of the check's own faults are recorded: it
+**died rather than reporting** on its first falsification run (§215) and one
+assertion **could not fail**, writing the value the seed already held (§94.5).
+Thirteen neighbouring checks green, and the new stack's generated `smp-app/public/shell.js` rebuilt with it — it is tracked and assembled from build.py's own script list, so a change that stopped at the frozen source would have left the Next app serving the old shell, silently (§91 by a different road); the generated worker came back byte-identical, which is §316.10 working as designed. `band-corner` is 6 red and **not this work's**, established by reproducing the
+identical six on a baseline built from HEAD (§303) — the failure §316.5 already
+records. **Recorded, not done** — the other four things the round settled: the
+capability box goes (its own piece, because it moves live client data and wants
+a rehearsal on a copy first), **Objectives & actions** as a third way a function
+plans (drawn and signed off, big enough to want a written spec), **targets
+broken down by category** under a pillar (drawn and signed off; it scores,
+Submit waits for it, equal weight, and the mix column is an indicator that is
+never scored, all his), and the pillar's description, the pillar committee and
+the next-cycle focus box with its switch at cycle open.
+
+**Before it:** **§318 — setting a client up: the wizard — built on
 `claude/multitenant-onboarding-wizard-kvyfcc`.** A guided flow that shapes a
 client from nothing: its name, its year, its business units, its companies, its
 supporting functions and how each plans, the words it uses, and who runs the
@@ -91,7 +141,7 @@ latent, because reading the live site (§91.5) showed the cutover has already
 run**: production serves the generated worker and answers 404 for the frozen
 file, so *Add a client* is the only way a client arrives now.
 
-**Before it:** **§309 and §310 — a project saved as a draft, and theirs
+**And before that:** **§309 and §310 — a project saved as a draft, and theirs
 is the capability that leads — merged to `main` 2026-09-08 on Islam's word**,
 from `claude/project-owner-reporting-access-uzze9s`, carrying `main`'s
 §303–§308 in with it; built as §302 and §303 and renumbered at the merge,

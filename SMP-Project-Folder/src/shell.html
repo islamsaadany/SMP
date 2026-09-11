@@ -7791,13 +7791,14 @@
   }
   function impFail(msg){
     IMP.check = { problems:[{ at:"the whole file", msg:msg }], notices:[] };
-    IMP.summary = null; IMP.diff = null; IMP.read = "";
+    IMP.summary = null; IMP.diff = null; IMP.read = ""; IMP.horizon = null;
     paint();
   }
 
   function loadCSV(text){
     IMP.done = null;
     IMP.text = text;
+    IMP.horizon = null;                       /* a CSV carries no Aspiration sheet */
     /* A plan arrives as a workbook, because a workbook has a Read me sheet and
        a plan file has to say which unit it is for. A flat CSV cannot say it,
        and guessing would write one unit's plan into another \u2014 the worst
@@ -8011,7 +8012,7 @@
     if (f) f.addEventListener("change", function(){
       if (grant("c_import") !== "edit") return;
       var file = f.files && f.files[0]; if (!file) return;
-      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null;
+      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null; IMP.horizon = null;
       if (/\.xlsx$/i.test(file.name)) {
         var rx = new FileReader();
         rx.onload = function(){
@@ -8097,6 +8098,11 @@
               } else {
                 var pu = impUnit();
                 var pRows = planFromWorkbook(pu, sheets);
+                /* READ HERE AND NOWHERE ELSE (§319): the reader attaches it to
+                   the array it returns, and it is lifted off immediately —
+                   an array property is a fragile channel and this is the only
+                   line that has to carry it. */
+                IMP.horizon = pRows.horizon;
                 readPlanRows(pRows, pu.name + " \u00b7 " + pRows.length + " rows");
               }
               return;
@@ -8120,7 +8126,7 @@
             paint();
           }).catch(function(e){
             IMP.check = { problems:[{ at:file.name, msg:"could not be read as a workbook \u2014 " + e.message }], notices:[] };
-            IMP.diff = null; IMP.summary = null; IMP.read = "";
+            IMP.diff = null; IMP.summary = null; IMP.read = ""; IMP.horizon = null;
             paint();
           });
         };
@@ -8176,6 +8182,17 @@
           what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
                  plural(inc.measures, "measure") + ", " +
                  plural(inc.tactics, "tactic") + " written.";
+          /* THE HORIZON IS APPLIED WITH THE PLAN AND NAMED WHEN IT MOVES
+             (§319). It is one year for the whole client, so a file that
+             changes it changes every other unit's "by <year>" — which is
+             exactly why it is said out loud rather than done quietly. A blank
+             or absent value leaves the stored one alone. */
+          if (horizonMoves(IMP.horizon)) {
+            var hWas = String(GROUP.horizon == null ? "" : GROUP.horizon).trim();
+            GROUP.horizon = String(IMP.horizon).trim();
+            what += " Horizon " + (hWas ? esc(hWas) + " \u2192 " : "set to ") +
+                    esc(GROUP.horizon) + ", across the whole client.";
+          }
           IMP.done = { unit:uu.name, key:uu.ukey, what:what, archived:arch };
         }
       } else {
@@ -8192,6 +8209,7 @@
         }
       }
       IMP.diff = null; IMP.summary = null; IMP.text = ""; IMP.check = null; IMP.read = "";
+      IMP.horizon = null;
       paint();
     });
 

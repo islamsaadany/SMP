@@ -5580,6 +5580,21 @@ function renderImportUpload(){
         '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
         '<tr><td>Recorded now</td><td>' + (hasPlan ? had : "nothing yet") + '</td></tr>' +
       '</tbody></table></div>' +
+      /* ── THE ONE THING IN THE FILE THAT IS NOT THIS UNIT'S (§319) ─────
+         Said before Apply, in the warning ground, because it is the only
+         value in a plan workbook that reaches OUTSIDE the unit the file is
+         for: one horizon, group-wide, so this file moves what every other
+         unit's "by <year>" reads from. Drawn only when it actually moves —
+         a file carrying the year already stored says nothing, which is the
+         normal round trip and must not nag (§41). */
+      (horizonMoves(IMP.horizon)
+        ? '<div class="note attn-note"><b>This file also moves the horizon &mdash; ' +
+          (horizonSet() ? esc(String(GROUP.horizon)) + ' &rarr; ' : 'to ') +
+          esc(String(IMP.horizon).trim()) + '.</b> ' +
+          'There is one horizon for the whole client, so every &ldquo;by &lt;year&gt;&rdquo; ' +
+          'on every other ' + esc(L("pillar", "bu").toLowerCase()) + ' page moves with it. ' +
+          'Leave the Horizon cell on the Aspiration sheet empty and the stored year is kept.</div>'
+        : '') +
       (hasPlan
         ? '<div class="note"><b>' + esc(u.name) + '’s current plan' +
           (cur.reported

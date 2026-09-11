@@ -900,8 +900,18 @@ function yes(v){ return /^(y|yes|1|true|x|\u2713)$/i.test(String(v || "").trim()
    minted code is looked up by that name — and because a file holds exactly one
    unit, every pillar in the file is one of that unit's, so there is nothing to
    get wrong. */
+/* ── THE HORIZON IS READ HERE AND WRITTEN NOWHERE (§319) ───────────────
+   It used to be assigned straight to GROUP.horizon inside this function, and
+   this function runs the moment a FILE IS PICKED — before the preview is
+   read and before Apply is pressed. So opening a plan file to look at it
+   already moved the year, cancelling did not put it back, and nothing on any
+   screen said so; and there is ONE horizon for the whole client, so one
+   unit's file changed what every other unit's "by <year>" reads from.
+   It travels on the returned rows now (a property, read at the one call site
+   into IMP.horizon) and is written by the Apply press with everything else.
+   A blank still means "leave it alone", which is the rule it always had. */
 function planFromWorkbook(u, sheets){
-  var rows = [], pillarId = {}, n = 0;
+  var rows = [], pillarId = {}, n = 0, horizon = null;
   var mint = function(suffix){ return u.ukey + "-" + suffix; };
 
   sheetObjects(sheets["Pillars"]).forEach(function(r){
@@ -924,7 +934,7 @@ function planFromWorkbook(u, sheets){
 
   var aN = 0;
   sheetObjects(sheets["Aspiration"]).forEach(function(r){
-    if (/horizon/i.test(r["Field"] || "")) { GROUP.horizon = r["Text"] || GROUP.horizon; return; }
+    if (/horizon/i.test(r["Field"] || "")) { horizon = r["Text"] || ""; return; }
     if (!r["Text"]) return;
     rows.push({ id:mint("ASP" + (++aN)), type:"ASPIRATION",
                 name:r["Field"], description:r["Text"] });
@@ -986,12 +996,19 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
-  return rows.map(function(r){
+  var out = rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
      "theme","kind","notes","group","hidden","monthly"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
+  /* NOT A ROW: every row here is a plan line the builder creates, and the
+     horizon is a fact about the whole client. It rides beside them and is
+     read at the one call site (shell.html) into IMP.horizon — never further,
+     so no later filter or copy can silently drop it. `null` is "the file did
+     not say"; "" is "the file said nothing"; both leave the stored one. */
+  out.horizon = horizon;
+  return out;
 }
 
 function progressFromWorkbook(u, sheets){

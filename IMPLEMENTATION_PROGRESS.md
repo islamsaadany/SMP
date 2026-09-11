@@ -4565,6 +4565,10 @@ industry instead. **The industry is not a field on the entry**, because every
 client card already carries one. **Flagged, not done:** `clients.industry` is
 free text, so two spellings of one industry make the memory answer half a
 question — cheap now, expensive in a year, and it touches the client card, which
-was not part of the ask (rule 1b). **Waiting on Islam**: sign-off, and one
-sentence of his I can read two ways (whether the platform should record who
-*opened* which entry, or only that each entry names its author).
+was not part of the ask (rule 1b). **Two more settled the same day**:
+the entry **names its author** (*"the entry is for the team and identified by
+who added this lesson or insight"*), and **nothing records who READ one** — a
+readership log was offered and refused, written down as a decision rather than
+left as an omission, and asserted as an absence at both ends. **Waiting on
+Islam**: sign-off on the spec, then the mockup (rule 1c), where the wording is
+settled by being read in place rather than argued in prose.

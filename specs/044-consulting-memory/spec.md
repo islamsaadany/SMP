@@ -1,7 +1,8 @@
 # 044 — The consulting memory
 
 **Status:** written 2026-09-11, awaiting Islam's sign-off. Nothing built.
-**Asked for by Islam, 2026-09-11.** Two of its decisions are already his (below).
+**Asked for by Islam, 2026-09-11.** Four of its decisions are already his
+(below), including the two settled the same day on who reads and who is named.
 
 ## The question
 
@@ -83,10 +84,18 @@ a Y/N row.
    because the generalisation arrives anyway — through the client's industry,
    which is what makes *"show me the hiccups on distribution clients"* a
    question the memory can answer without a second kind of entry.
-3. **The entry names its author, so the reader knows who to go and ask.** The
-   most valuable thing in a consulting memory is not the write-up, it is the
-   person it points at. (See *Open* below — I am not certain this is all he
-   meant by that sentence.)
+3. **The entry names its author, so the reader knows who to go and ask.**
+   Islam, asked which of two readings he meant: *"the entry is for the team and
+   identified by who added this lesson or insight."* The most valuable thing in
+   a consulting memory is not the write-up, it is the person it points at — a
+   reader who cannot tell who wrote it has a document, not a memory.
+4. **Nothing records who READ an entry**, and that is a decision rather than an
+   omission. A readership log was offered with the same sentence and refused:
+   *"the Consulting team can read the insights and search it."* Reading is the
+   team's, freely, and a memory that watches who opens it is a memory people
+   stop opening. **No open count, no named log, no `client_log` row.** Written
+   down so a later reader does not take it for something that was forgotten
+   (§35: an absence is only trustworthy when somebody said it).
 
 ## The way in
 
@@ -155,7 +164,13 @@ which was not part of the ask** (rule 1b).
 - `checks/memory-page.mjs` — the tab drawn for every consultant and gated for
   nobody; an entry written and read back **through the platform API**; the
   client required and the refusal saying so; a title-only entry saved and
-  reopened. Red first.
+  reopened; **the author's name drawn on the entry** (decision 3, and the
+  reason anybody can act on what they read). Red first.
+- **Decision 4 is asserted as an absence, at both ends**: opening an entry
+  writes **no row anywhere** — the table counted before and after, because
+  *nothing was logged* and *nothing reached the page* look identical from
+  outside (§113.8) — while a write of the entry itself is asserted to land in
+  the same run, or a build that stored nothing at all would pass it.
 - `checks/memory-boundary.mjs` — **the assertion the whole spec rests on**: a
   client's own shell draws no entry anywhere, and the memory's tables are
   refused to the tenant role. Both ends (§94.2), or a build that dropped the
@@ -181,18 +196,12 @@ which was not part of the ask** (rule 1b).
 - **Nothing is imported.** Every engagement before today is in somebody's head
   and in old decks, and backfilling it is a decision about effort, not code.
 
-## Open — one question for Islam
+## Open — to settle on the mockup, not here
 
-*"Everyone can read the lesson of course, but we can identify who read what to
-find."* I can read that two ways and they are different features:
-
-- **(a) the entry names its author**, so a reader knows **who to find** and go
-  and ask. This is in the spec as decision 3 — it is needed either way.
-- **(b) the platform records who OPENED which entry.** `client_log` already
-  logs opens, so it is cheap. **A count on the entry** — *read by 7 people* —
-  is genuinely useful and names nobody: it tells you which lessons are worth
-  writing. **A named readership log** is a different decision with a
-  surveillance flavour, and it is yours to take rather than mine to assume.
-
-Which of those did you mean? And I could not parse *"I'm very very input"* —
-if it carries a decision, it has not been recorded here.
+**What one of these is called.** Islam writes *"this lesson or insight"*, and
+uses *good practices*, *lessons learned* and *hiccups* for the three kinds. The
+spec calls the row an **entry** and the kinds *practice · hiccup · lesson*,
+which is placeholder wording: what the tab, the button and the empty state
+actually say is settled when the words are on a screen and can be read in place
+(§124, §266 — a wording question is answered by drawing it, not by listing the
+candidates in prose).

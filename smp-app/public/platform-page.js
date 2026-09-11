@@ -19,7 +19,7 @@
         return r.json();
       });
   }
-  /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 044) and the
+  /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 045) and the
      401-is-the-door rule above is not written twice for it. */
   function post(body) { return send("/api/platform", body); }
   function mpost(body) { return send("/api/memory", body); }
@@ -60,7 +60,7 @@
   function drawNav() {
     nav.textContent = "";
     /* MEMORY IS THE FIRST TAB HERE WITH NO GATE, and that is decision 1 of
-       spec 044 rather than an oversight: every consultant reads every
+       spec 045 rather than an oversight: every consultant reads every
        insight, which is what makes it a memory rather than a filing cabinet.
        The boundary it does keep is on the server — a client's own account
        never reaches /api/memory — and it is checked there. */
@@ -126,7 +126,7 @@
     window.scrollTo(0, y);
   }
 
-  /* ════ The consulting memory (spec 044) ══════════════════════════════
+  /* ════ The consulting memory (spec 045) ══════════════════════════════
      Forefront's own, never a client's: an insight from one client is worth
      having BECAUSE it helps on the next, which is the one place on this
      platform where crossing clients is the point. Four states — the list,

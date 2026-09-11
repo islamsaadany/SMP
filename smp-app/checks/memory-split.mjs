@@ -1,4 +1,4 @@
-/* The debrief splitter (spec 044, phase B) — pure, no browser, no database.
+/* The debrief splitter (spec 045, phase B) — pure, no browser, no database.
  *
  * This is the one piece of the memory with a WRONG ANSWER available to it:
  * everything else either works or throws, and this can quietly hand back four

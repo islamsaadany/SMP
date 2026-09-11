@@ -1,4 +1,4 @@
-/* The Memory tab, driven in a real browser against the built app (spec 044).
+/* The Memory tab, driven in a real browser against the built app (spec 045).
  *
  * WHAT IT IS FOR, beyond "the page renders": a page wired to nothing looks
  * identical to one that works (§96), so every press here is read back THROUGH
@@ -221,7 +221,7 @@ await section("8 · a period debrief, end to end", async () => {
      dependency that silently does not load is a button that throws (§96). */
   const loaded = await pg_.evaluate(() => ({ t: typeof window.MemorySplit, n: document.scripts.length,
     srcs: Array.from(document.scripts).map((s) => s.getAttribute("src")) }));
-  check(loaded.t === "object", "the splitter the page loads is THERE (spec 044: its own file, so node and the browser run the same bytes)", JSON.stringify(loaded));
+  check(loaded.t === "object", "the splitter the page loads is THERE (spec 045: its own file, so node and the browser run the same bytes)", JSON.stringify(loaded));
   await pg_.click('.ptitle .right button:has-text("Write up a period")');
   await pg_.waitForSelector("#d-paste", { timeout: 10000 });
   await pg_.fill("#d-from", "1 August 2026");

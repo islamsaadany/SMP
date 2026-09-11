@@ -1,4 +1,4 @@
-/* Asking the consulting memory (spec 044, phase C), against a STAND-IN for the
+/* Asking the consulting memory (spec 045, phase C), against a STAND-IN for the
    model (§100.3, §142.6): a check that calls Google proves nothing about this
    code and fails when somebody else's service has a bad afternoon. The
    stand-in speaks the provider's own shape, so what is measured is our half —

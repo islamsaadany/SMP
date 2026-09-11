@@ -6,7 +6,7 @@ import { memoryAction } from "../../../lib/memory-api.ts";
 export const dynamic = "force-dynamic";
 const json = (code: number, body: unknown) => NextResponse.json(body, { status: code, headers: { "Cache-Control": "no-store" } });
 
-/* /api/memory — the consulting memory (spec 044). Its own route rather than a
+/* /api/memory — the consulting memory (spec 045). Its own route rather than a
    fourth action on /api/platform, which carries the frozen endpoint byte for
    byte (lib/memory-api.ts's header). The door in front of it is this file's:
    a session, and a password that is no longer temporary. */

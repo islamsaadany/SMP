@@ -1,4 +1,4 @@
-/* THE DEBRIEF SPLITTER (spec 044, phase B) — the one piece of this feature
+/* THE DEBRIEF SPLITTER (spec 045, phase B) — the one piece of this feature
  * with a wrong answer available to it, so it is its own module: node can
  * require it with no browser and no database, and the page loads the same
  * bytes with a script tag. UMD, like lib/platform-rules.cjs.

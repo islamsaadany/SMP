@@ -1,6 +1,8 @@
-# 044 — Tasks
+# 045 — Tasks
 
-Written 2026-09-11 from `plan.md`. **Built 2026-09-11, all three phases** — Islam: *"go on with all the phases in sequence."* Every box below is done except where noted. Paths are from the
+Written 2026-09-11 from `plan.md`. **Built 2026-09-11, all three phases, and
+MERGED to `main` the same day on Islam's word** — renumbered spec 044 → **045**
+and §318 → **§319** at that merge, `main` having taken both (§287's precedent). — Islam: *"go on with all the phases in sequence."* Every box below is done except where noted. Paths are from the
 repository root; `smp-app/` is the new stack.
 
 Every check is written **red first** — run it against the build before the
@@ -115,7 +117,7 @@ Useful on its own. Ends at **stop point 1**: Islam puts a real insight in.
   `check:room` 10/0, `check:deploy` 5/0, `check:shell` 61/0, `check:state`
   91/0, `check:door` 49/0, `test:rules` 588/0, `tsc` clean,
   `platform-cards.py` 19/0 on BOTH copies of the page (§317).
-- [ ] **Not run here, and said rather than implied:** `qa.py` at Next and the
+- [x] **Not run here, and said rather than implied:** `qa.py` at Next and the
   nine spike proofs (untouched by this — no `lib/state*`, no tenant table, no
   save path); `check:demo`, **red on the build before this work too**
   (reproduced with the change stashed, §303) because this sandbox has no
@@ -125,17 +127,21 @@ Useful on its own. Ends at **stop point 1**: Islam puts a real insight in.
   palettes.
 - [x] `IMPLEMENTATION_PROGRESS.md` and `DECISIONS-AND-LOGIC` updated **in the
   same commit as the work** (rule A7/A8).
-- [ ] `SHELL` in `sw.js` bumped to a name `origin/main` does not hold —
-  confirmed **again immediately before the push** (§91, §94.12, §94.16).
-  **NOT DONE, and it belongs to the merge**: the name must be chosen from
-  `origin/main` as it stands at that moment, not from it as it stands now
-  (§94.16 — the window between reading main and pushing is as long as running
-  the checks). Measured meanwhile: `public/shell.js` is **byte-identical to
-  HEAD**, so the client's shell has not moved at all.
+- [x] `SHELL` in `sw.js` — **no bump owed, measured rather than skipped.**
+  §91's trigger is *the built file's bytes changed*, and they did not:
+  `build.py` reproduced the frozen file byte-identical to the merged one, and
+  `build-shell.mjs` reproduced `public/shell.js` — what the new stack actually
+  serves — byte-identical to `main`'s. `main` had already bumped it to
+  `v4.88-setup-wizard` for its **own** change to the frozen sources; confirmed
+  against `origin/main` immediately before the push (§94.16). And since §316.10
+  split the caching half off, `public/sw.js` carries **no `SHELL` at all**, so
+  nothing in the new stack caches by that name.
 - [x] **No forced sign-out**: this changes no save path, no authoriser and no
   tenant table, so spec 029's migration is not owed — asserted rather than
   assumed (`check:state` 91/0, `test:rules` 588/0 untouched).
-- [ ] **The what-to-check list** (rule A16) — written when the merge is, and
-  not before: it names what to open on the deployment that merge produces.
+- [x] **The what-to-check list** (rule A16) — written with the merge, naming
+  the screens to open on the deployment it produces, and **naming the wizard as
+  somebody else's**, because it is in the product now and not knowing where it
+  came from is exactly why it needs pointing at.
 
 > **STOP — Islam.** The merge, on that merge, every time (rule 4).

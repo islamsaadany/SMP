@@ -54,7 +54,73 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§309 and §310 — a project saved as a draft, and theirs
+**Latest version:** **§319 — the consulting memory — merged to `main`
+2026-09-11 on Islam's word**, from `claude/blissful-brown-fxlait`. Forefront's
+own record of what worked, what went wrong and what was learned with a client:
+a fourth tab on the platform page, open to **every** signed-in consultant with
+no gate (his decision, with its cost stated — a Raya write-up is readable by
+somebody who never worked on Raya), every entry **naming its client and its
+author** and **nothing anywhere recording who read one**. Three phases: the
+record, the **period debrief** (a prompt taken to a voice conversation, the
+answer pasted back, split into drafts you read before `Save all` lands them in
+**one transaction**), and an assistant over the entries that **names its
+sources** and declines rather than invents. **The trap was the RLS loop**:
+`schema.sql` makes every table tenant-owned *by exclusion*, so a column called
+`tenant_id` would have given the memory a policy meaning *only this client's
+people may read this* — the whole feature dead, with no error, and **perfect on
+our deployment and broken on every fresh one**, because `schema.sql` runs once.
+The column is `about_tenant_id`, which is a different fact and, more to the
+point, a different failure mode: forget the exclusion list on a later memory
+table and the loop's `CREATE INDEX … (tenant_id)` **fails the apply outright**
+rather than quietly emptying the page. Both halves proved on a database before
+the fix was written. 127 assertions over five checks, 0 failures, **all ten
+falsifications red**; `check:room` 10/0, `check:deploy` 5/0, `check:shell`
+61/0, `check:state` 91/0, `check:door` 49/0, `test:rules` 588/0, `tsc` clean,
+`platform-cards.py` 19/0 on both copies of the page. Built as spec 044 / §318
+and **renumbered at the merge**, because `main` took both while this was in
+flight (the precedent §287, §301, §310 and §318 itself all set). **The words**
+(*insight*, *practice · hiccup · lesson*) are placeholders, settled on use
+rather than here — Islam waived the after-phase-A stop point (*"don't stop
+until you need me for a decision"*).
+
+**Before it:** **§318 — setting a client up: the wizard — built on
+`claude/multitenant-onboarding-wizard-kvyfcc`.** A guided flow that shapes a
+client from nothing: its name, its year, its business units, its companies, its
+supporting functions and how each plans, the words it uses, and who runs the
+office — ending on a summary with two doors into the plan builder and the
+register. Drawn and signed off first
+(`design-mockups/onboarding-wizard/2026-09-07_set-up-a-client.html`, published
+as an artifact). Multi-tenancy is deliberately NOT in it — Islam is doing that
+in the tenant management platform, and `main`'s own §313–§317 rebuild has since
+answered it a different way — and the three shapes the platform cannot do yet
+(a function planning in objectives and actions, a capability as its own
+strategic entry, the single-business shape) are drawn, inert, and each says
+*Later*, at his instruction. Built as §303 and **renumbered at the merge**,
+because `main` took that number while this was in flight (the precedent §287,
+§301 and §310 all set); spec 042 became **spec 044** for the same reason, `main`
+having taken 042 for multi-client. `checks/client-setup.py` 30/0, proved able
+to fail four ways; `qa.py` ERRORS none; setup-pages, setup-rail, setup-search,
+setup-header, setup-overview, no-jump, table-fit, plan-builder and
+people-dialog all green; 574/0 authoriser, 136/0 differ. **Merged with
+`main`'s 583 commits** — the Next.js rebuild on a shared schema (spec 043,
+§313–§317) — and re-run against the merged result: `client-setup` 33/0,
+`qa.py` ERRORS none, the nine neighbours green, 588/0 and 136/0. Three
+conflicts, all resolved by hand: `build.py`'s script list, where this branch's
+`WIZARD` and `main`'s `CONTINGENCY` sit on the SAME line and taking either side
+whole drops a feature with no conflict left to show for it; the progress prose;
+and the built file, REBUILT from the merged sources rather than merged (§91).
+`wizard.css` added to the app's hand-written stylesheet order, without which
+the wizard crosses with its behaviour and none of its design. **Recorded and
+NOT changed (§318.7):** a client created through the new stack's *Add a client*
+keeps Raya's unit and function names with their content emptied (§67's own
+decision), so the Overview's set-up door does not draw for it — the wizard is
+still Setup's first entry, so nothing is unreachable, and whether a new client
+should start with no units at all is Islam's &mdash; **pressing rather than
+latent, because reading the live site (§91.5) showed the cutover has already
+run**: production serves the generated worker and answers 404 for the frozen
+file, so *Add a client* is the only way a client arrives now.
+
+**Before it:** **§309 and §310 — a project saved as a draft, and theirs
 is the capability that leads — merged to `main` 2026-09-08 on Islam's word**,
 from `claude/project-owner-reporting-access-uzze9s`, carrying `main`'s
 §303–§308 in with it; built as §302 and §303 and renumbered at the merge,
@@ -4547,10 +4613,10 @@ judged, so no forced sign-out — but both change the built file, so `SHELL` in
 `sw.js` needs bumping at the merge, to a name `origin/main` does not already
 hold, confirmed again immediately before the push (§91, §94.12, §94.16).
 
-**2026-09-11 — spec 044, the consulting memory: written, nothing built.** Islam
+**2026-09-11 — spec 045, the consulting memory: written, nothing built.** Islam
 asked for somewhere consultants record good practices, lessons learned and the
 hiccups they met with a client, with a wizard to collect one and eventually an
-assistant to ask *"we have hit this before, what happened?"*. `specs/044-consulting-memory/spec.md`.
+assistant to ask *"we have hit this before, what happened?"*. `specs/045-consulting-memory/spec.md`.
 **It is three things built in one order** — the record, the way in, the
 assistant — because an assistant over an empty memory answers confidently from
 nothing. **It cannot be a tenant table**: specs 042 and 043 exist to stop one
@@ -4611,7 +4677,7 @@ the assistant), **four checks each red first**, and **two stop points that are
 Islam's**: after phase A, on use rather than on a drawing, and the merge.
 
 
-**2026-09-11 — spec 044 BUILT, all three phases (§318).** Islam: *"go on with
+**2026-09-11 — spec 045 BUILT, all three phases (§319).** Islam: *"go on with
 all the phases in sequence and don't stop until you need me for a decision"* —
 so stop point 1 is **waived by him** and the words (*insight*, *practice ·
 hiccup · lesson*) stay placeholders to be settled on use. **The record, the
@@ -4670,3 +4736,39 @@ than the product claims (any office account may read the consultants list); a
 assertion asking for something the product deliberately does not do (ordinary
 spacing is untouched); and a break that was a no-op. **Waiting on Islam**: the
 words, on use — and the merge, on that merge (rule 4).
+
+**§319.1 — the merge, and the check that was wrong in a way only the merge run
+exposed.** `main` moved **409 commits** under this branch (§318's client set-up
+wizard, and §317's last cutover corrections) and the merge was **textually
+clean, which is not the same as safe** (§313.37). Read rather than believed:
+the two sides touched **disjoint code** — `main`'s work is on the frozen side,
+this is the new stack plus Forefront's own `platform.html`, and the only shared
+file is this one, which auto-merged — so none of §56.7's shared-scope
+collisions was available here, measured rather than assumed. **Everything
+generated was rebuilt rather than trusted** (§91): `build.py`, `build-shell`,
+`build-sw`, `sync-css` and `sync-static` each reproduced their artefact
+**byte-identical** to the merged one, and only `shell/platform.html` and
+`public/platform-page.js` moved, which is this branch's own renumber
+propagating — the proof the generator ran at all. `node --check sw.js` parses.
+**No `SHELL` bump is owed and that is measured**: §91's trigger is *the built
+file's bytes changed* and they did not, `main` having already bumped it for its
+own frozen change — and since §316.10 split the caching half off, the worker
+the new stack serves carries no `SHELL` at all. **`main`'s own
+`client-setup.py` is green on the merged result**, because a merge that quietly
+breaks somebody else's work is the merge's fault and not theirs.
+**AND MY OWN BOUNDARY CHECK DEFAULTED THE APP ROLE'S PASSWORD TO A WORD THE
+PRODUCT DOES NOT USE** — `smp_app_pw`, where `lib/db.ts`, `db/apply.mjs` and
+`scripts/dev-tenant.mjs` all fall back to the literal `smp_app` — so section 4,
+*the read that IS the feature*, **died on a failed sign-in and reported the
+boundary broken when what was broken was the check** (§100.3, §53.5, §215). It
+passed on every earlier run only because the variable happened to be set in
+that shell: *a fixture that invents its own spelling of the product's own
+default is green exactly until somebody runs it the way the product runs.* It
+takes the product's default now — 12/0, with the section that matters actually
+running. **Re-run against the merged result**: memory 21 / 12 / 36 / 42 / 16 =
+**127 assertions, 0 failures**, all ten falsifications red; room 10/0, deploy
+5/0, shell 61/0, state 91/0, door 49/0, 588/0, `tsc` clean, `platform-cards.py`
+19/0 on **both** copies of the page. The frozen `qa.py` sweep is **not re-run
+and it is said why**: not one byte of the frozen build changes here, proved by
+rebuilding it, so `main`'s own sweep carries over rather than being
+re-measured for the sake of a number.

@@ -299,7 +299,7 @@ async function ask(opts) {
   if (sentThink) cfg.thinkingConfig = { thinkingBudget: 0 };
   const body = {
     systemInstruction: { parts: [
-      /* AN INSTRUCTION MAY BE SUPPLIED (spec 044). A second corpus arrived —
+      /* AN INSTRUCTION MAY BE SUPPLIED (spec 045). A second corpus arrived —
          Forefront's consulting memory — which is answered under different
          rules from the product's manual: it must NAME which insight and whose
          it was, because the errand there is "go and ask that person". Optional

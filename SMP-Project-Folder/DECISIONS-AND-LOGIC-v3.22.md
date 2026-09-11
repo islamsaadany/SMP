@@ -4712,6 +4712,246 @@ nobody requests and leave the platform unavailable offline.
 
 ---
 
+## 318 · Setting a client up (spec 044)
+
+Islam: *"any Consultant who gets into the platform and adds a new client to set
+up this client he needs to go through a series of questions … is the company a
+multi business company or a single business company … will it include the
+functions … are they planning projects or planning in pillars or would be
+showing functional objectives and tactics … what are the names that are used in
+this company … there needs to be a buildup of some sort of wizard that builds
+with the Consultant showing him some sort of visuals so he can see what this
+means and what this looks like."*
+
+Drawn first and signed off from
+`design-mockups/onboarding-wizard/2026-09-07_set-up-a-client.html`, published as
+an artifact (rule 1c). **A march of seven steps and a summary**, each openable
+from the rail at any time, with the client's shape building up beside them.
+
+### 318.1 · What the round found before anything was built
+
+**NOTHING MULTI-TENANT EXISTS**, and §36's assessment is unchanged and unbuilt:
+no `search_path`, no tenant resolution, one database is one client.
+
+**AND A FRESH DEPLOYMENT IS NOT EMPTY.** `db/migrations/004-clean-slate.sql`
+seeds the worked example and then deletes the invented content — but keeps the
+ten business units, the supporting functions, the companies, the three group
+themes and the eight capability names, because when it was written this
+database *was* Raya's. A second client set up today would arrive holding Raya's
+org chart. **That is the thing the wizard replaces**, and it is why the wizard
+is not an extra screen but a different start.
+
+**AND `GROUP.org` HAD NO EDITOR ANYWHERE IN THE PRODUCT.** The field is stored
+(`state-io` maps it to `org_name`) and read by the chrome, the deck and every
+email, and nothing could write it — it arrived with the seed. The wizard's
+first step is the first control the platform has ever had for it. Checked
+before it was offered (§172): the authoriser classifies `org` as `group`, which
+is the office's, so the screen and the save agree.
+
+### 318.2 · The scope, and two reversals recorded as reversals
+
+**MULTI-TENANCY LEFT THE SCOPE.** Islam: *"this is a fix I will do in the
+tenant management platform let's just build the wizard and the flow."* This
+reverses his own choice earlier in the same round to build the thin plumbing
+first. It cost nothing, because the wizard never depended on it: the client's
+name is data, so the wizard shapes a deployment from empty with nothing new
+underneath it.
+
+**AND WHAT THE PLATFORM CANNOT DO YET IS DRAWN AND DULLED.** *"don't build
+things that doesn't exist now in the platform … i will take it to another
+discussion to build what's missing"*, and *"keep the mockup as is but kepe the
+non existing parts dull for now."* So the capabilities step and the third plan
+type are drawn, inert, and each says **Later**. That is a deliberate exception
+to §61 and §94.15 — a control with nothing behind it is normally furniture —
+taken on his instruction, **with its cost stated: the consultant meets two
+greyed choices**. Every one of them names itself, which is the one thing a
+greyed control must do or it reads as broken. The single-business shape
+(`SINGLE_COMPANY`, in §4 of the model document and never built) is left out
+entirely, because neither client is one.
+
+### 318.3 · It builds up rather than interrogates
+
+Islam, mid-round: *"the wizard should be dynamic in a way that accepts a build
+up of these different setups, allocation, naming type of plans for each."* So
+units, functions and a function's capabilities are lists you add to, and every
+function carries its own plan type — one client runs both at once.
+
+**NOTHING WRITES THROUGH A SECOND DOOR (§53.5).** Rows are minted by
+`addBusinessUnit`, `addCompany`, `addFunction` and `addCapability` — the same
+minters Setup and the plan builder use — and every FIELD carries the attribute
+the platform's own `wireSetupFields(document)` already looks for (`data-uname`,
+`data-coname`, `data-fname`, `data-fnformat`) or is an `input.lbl` wired by the
+Terminology page's own handler. The wizard changed where the question is asked
+and nothing about how the answer is stored.
+
+**AND THE FIRST BUILD BROKE THAT RULE IN THE ONE PLACE IT MATTERED.** It wrote
+its own plan-type `<select>` and dropped what `planFormatCell` carries: the
+tenant's own word for a pillar, and **the guard**. A function holding
+capabilities cannot become a pillars one and a function holding pillars cannot
+go back — switching would not delete the work, it would stop DRAWING it, which
+is worse: the plan is still in the save and nothing shows it. Mine would have
+offered that switch. It calls `planFormatCell` now, and the third plan type is
+therefore not an option on the control at all — an answer that cannot be taken
+does not belong on the control that takes them (§61); it is drawn and named in
+the choice cards instead, which is where the explanation lives.
+
+**LIVE IMMEDIATELY, NOTHING STORED** (§129 one level up). `WIZ` holds which
+step is open and nothing else — a screen mode, never state-graph content (§25,
+§47.1) — and progress is DERIVED: the ticks read the graph, the shape reads the
+graph, so the drawing cannot fall out of step with the answers because there is
+no second copy of them. The optional steps (companies, functions, the words,
+the office) fall back to *you have been here*, because a client may legitimately
+have none and an eternally unticked step reads as unfinished work that does not
+exist.
+
+**THE WORDS STEP IS THE TERMINOLOGY PAGE'S OWN TABLE**, asked once here with a
+third column saying which part of THIS client's shape uses each word. Free
+text, no presets — Islam: *"this needs to be dynamic as each client has it's own
+naming."*
+
+### 318.4 · Where it lives, and where it ends
+
+Islam's placement: **a rail entry under *The organisation*** — first in that
+group, because it is where a client's shape begins and every other page in the
+group edits one part of what it sets — **plus a loud door on Setup › Overview
+while nothing has been shaped yet**, and only then: once there are units the
+rail entry is the way in, and a second shouting door on the landing page would
+compete with the queue it sits above (§94.15). It is the plan builder's own
+`.bdoor`, because it is the same kind of thing in the same kind of place.
+
+**GATED ON `inOffice()`**, the shape `c_send`, `c_chat` and the Knowledge base
+already use (§97, §119) — not a matrix cell. This one page writes across five
+Setup areas AND the group's own name and horizon, so no single cell names it,
+and a cell that half-covered it would offer a wizard whose middle steps the
+server refuses (§172).
+
+**It ends on a summary with two doors** (his): *Start the plans*, which opens
+the plan builder through `openBuilderChooser()` — the same opener the Import
+page's door calls, never a second one (§53.5, §253.3's lesson) — and *Bring the
+people in*, which is `data-setupgo="people"`, the platform's own navigation.
+The office step lists who holds a seat and sends them to the register rather
+than growing a second person-adder: who a row IS is asked in one place (§87).
+
+### 318.5 · What the check asserts, and what it found
+
+`checks/client-setup.py`, proved able to fail four ways (**2 / 1 / 2 / 2 red**)
+from the SOURCES, because an edited built file is silenced by §238's hashed CSP
+(§276). Every answer is driven through its REAL control and read back off the
+**stored graph** — a wizard wired to nothing renders perfectly (§96) — the shape
+is asserted as AGREEMENT with the data rather than as a count (§94.8), the page
+is asserted drawn for the office and absent for a unit head, and the Overview's
+door is asserted present on a bare tenant and gone on a shaped one, which needs
+the bare state MADE and put back (§94.2).
+
+**AND FOUR OF THE CHECK'S OWN FAILURES WERE THE CHECK.** It **died rather than
+reporting**, twice (§215, in a file whose docstring promises it does not),
+because a handler that ends in `paint()` detaches the node and a held handle is
+stale (§222). It **reported a correct build as broken**, asserting the raw
+`FUNCTIONS[k].format` when the platform stores *projects* as an ABSENCE
+(§50.6) — `fnFormat()` is the reader that answers. And two assertions **passed
+vacuously over an empty list** (§113.8: `every([])` is true, `some([])` is
+false), so a build that deleted the dulled choice outright satisfied *they all
+say Later* and *none is a button* while proving nothing — found by falsifying
+rather than by reading, and both are guarded on there being one now.
+
+**AND THE PAGE ERROR WAS THE PROBE'S METHOD, MEASURED RATHER THAN ASSUMED.**
+Dispatching `change` while the box still has focus makes `paint()` remove a
+FOCUSED node, whose blur then fires inside the innerHTML assignment. The
+platform's own Terminology field — whose handler has ended in `paint()` since
+long before this round — throws the identical error under a dispatched change
+and none under a real blur. §219's rule, earned again: **blur, never a
+synthesised change.**
+
+### 318.6 · Recorded, not done
+
+The three shapes drawn and dulled are spec 044 §2's list, with the decisions
+already taken written down for the round that builds them: a function that
+plans in **objectives, actions and requirements** (two headline numbers side by
+side, and a requirement raised on the raiser's own page and drawn at both ends,
+scoring nothing); a **capability as its own strategic entry** beside the units,
+owned by a function head; and the **single-business** shape. And which company
+a unit belongs to is still set on Setup › Business units rather than in the
+wizard's companies step — one field, one place (§130.6).
+
+### 318.7 · The merge, and the two things it changed about the answer
+
+`main` moved **583 commits** under this branch while it was being built — the
+Next.js rebuild on a shared schema (spec 043, §313–§317) — so the merge was not
+a formality, and two of its findings belong to this section rather than to that
+one.
+
+**THE BUILT FILE IS REBUILT, AND THE THING THAT NEARLY WENT MISSING WAS A
+SCRIPT.** Three files conflicted. `build.py`'s script list was one of them:
+this branch adds `("WIZARD","wizard.js")` and `main` adds
+`("CONTINGENCY","contingency.js")`, on the same line — so taking either side
+whole drops a whole feature's code with **no conflict left to show for it**,
+which is §146.2's own failure by a shorter road. Both kept, and the built file
+rebuilt from the merged sources rather than merged (§91), asserted
+byte-identical to `build.py`'s own output.
+
+**THE RENUMBER IS SCOPED TO THE LINES THIS BRANCH WROTE, AND §264.3 IS WHY THAT
+MATTERS HERE MORE THAN USUAL.** `main` took §303 (the template audit) and spec
+042 (multi-client) while this was in flight, so this became **§318 / spec 044**
+— the precedent §287, §301 and §310 all set. But `shell.html` and
+`config-render.js` now hold citations of BOTH: five written by this branch and
+six written by `main`, in the same two files. A blanket sweep would have taken
+all eleven and pointed six comments at a section whose subject is not theirs —
+**silently**, because the number it produces is a real section. Renamed by
+matched text, one assertion per string, never by line range (§214).
+
+**THE STYLESHEET LIST IS HAND-WRITTEN AND THE SCRIPT LIST IS NOT.**
+`smp-app/scripts/build-shell.mjs` reads `build.py`'s own list, so `wizard.js`
+crossed to the new stack by itself; `sync-css.mjs` keeps an `ORDER` array typed
+out by hand, so `wizard.css` did not. Without one line there the wizard ships
+with all of its behaviour and none of its design — which renders, and renders
+wrong. Added; `platform.css` 10 stylesheets, `shell.js` 29 scripts, both
+carrying the wizard.
+
+**AND THE OVERVIEW DOOR IS NOW RIGHT FOR ONE ARRIVAL AND SILENT FOR THE OTHER,
+RECORDED AND NOT CHANGED.** `wizTenantBare()` draws the *Set this client up*
+door only where the tenant has no units and no functions at all. On the frozen
+deployment that is the clean slate, which is what it was written for. On
+`main`'s new stack a client created through Forefront's own *Add a client*
+starts from §67's cleared graph — whose own comment says it plainly: *"The unit
+and function names stay, as §67 left them, for Setup to rename."* So a new
+client arrives holding **Raya's ten unit names and eight function names with
+their content emptied**, `wizTenantBare()` is false, and the door does not draw.
+**Nothing is unreachable** — *Set-up* is the first entry in Setup's *Running the
+cycle* group and is found by the rail's own search — so what is lost is the
+prompt, not the page, and the wizard's units step then lists somebody else's
+names to rename rather than an empty list to build. Two questions sit underneath
+it and both are Islam's: whether a client added on the new stack should start
+with **no units at all** (which is §54's *a client must never inherit Raya's*
+applied to the names, and is `main`'s decision to reverse, not this branch's),
+and whether the door should ask a looser question than *bare*. Left exactly as
+built, because widening the test would change a screen he has not seen in that
+state, and changing the cleared graph would change `main`'s own feature from
+inside a merge (rule 1b).
+
+**THE FROZEN WORKER'S CACHE NAME IS BUMPED, AND READING THE LIVE SITE CORRECTED
+WHY.** The first draft of this paragraph said the bump was load-bearing because
+the cutover had not run. **It has** — measured rather than assumed (§91.5, whose
+whole instruction is to read the live site and never the dashboard):
+`/sw.js` in production is the GENERATED worker, whose first line names
+`scripts/build-sw.mjs`, and `/strategy-management-platform-v3.22.html` answers
+**404**. Production is the served app, so the frozen `sw.js`'s caching half
+reaches nobody and §91's cache-by-name trap is closed by construction —
+`build-sw.mjs` carries only the push half, asserted, and regenerating it after
+the bump produces a byte-identical file. The name is bumped anyway, because the
+frozen file's bytes changed and a shell name left standing over changed bytes is
+a trap armed for whoever serves that file next: `smp-shell-v4.87-shared-schema`
+→ `smp-shell-v4.88-setup-wizard`, confirmed against `origin/main` immediately
+before the push (§94.12, §94.16), with `node --check sw.js` after the merge
+(§146.2). *A rule can be obeyed for a reason that has expired, and the only way
+to find out is to read the thing itself.*
+
+**AND THE CUTOVER HAVING RUN MAKES THE DOOR FINDING ABOVE PRESSING RATHER THAN
+LATENT**: *Add a client* is not a future arrival path, it is the only one, so
+every client set up from today starts with Raya's unit and function names in it
+and never sees the set-up door on its Overview.
+
+---
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will
@@ -42329,3 +42569,145 @@ merge every time.
 
 
 ---
+
+---
+
+## §319 — THE CONSULTING MEMORY (2026-09-11, spec 045)
+
+Islam: *"We need to have somewhere a consulting memory where the consultants
+put all their good practices and lessons learned and hickups they faces with
+the client to have a memory of what happened and we can get back later &hellip;
+and eventually we will need a helpful bot to ask about previous experience or a
+problem we are facing."*
+
+**FIVE DECISIONS ARE HIS, AND TWO OF THEM OVERRULE A RECOMMENDATION.**
+*Every consultant reads every insight* — with the cost stated before he took it,
+that a Raya write-up is readable by somebody who never worked on Raya; *an
+insight always names its client*, against my proposal that a client-less one be
+allowed (**"the relevance of the input is relevant to this specific client with
+its own dynamics"**); *the entry names its author*, **"the entry is for the team
+and identified by who added this lesson or insight"**; **nothing records who
+READ one** — a readership log was offered and refused; and **the period debrief
+is the main door**, his correction of a one-at-a-time form: *"it will not be
+case by case usually it would be a period of time to share."* That last one
+reshaped the feature rather than adding to it &mdash; the wizard stops being the
+way in and becomes the way to fix one line.
+
+**THE TRAP WAS THE RLS LOOP, AND IT WOULD HAVE KILLED THIS IN SILENCE.**
+`smp-app/db/schema.sql` ends in one loop over the catalogue that gives every
+table row-level security, a `tenant_rows` policy and a `(tenant_id)` index **by
+EXCLUSION** — so a new table is tenant-owned unless somebody says otherwise.
+A `memory_entries` carrying the obvious column name `tenant_id` would have been
+handed a policy meaning *only this client's people may read this row*, and **a
+consultant on RHI could never read a Raya insight**: the whole feature, dead,
+with no error anywhere. **AND THE TWO DEPLOYMENTS WOULD HAVE DISAGREED**
+(§113.7's mirror): `schema.sql` runs ONCE, recorded as `schema` in
+`_migrations`, so on the deployment that has already run it the loop never
+re-runs and the table is fine — **perfect on ours and broken on every new
+client's**. Both halves were demonstrated with SQL on a real database *before*
+the fix was written, which is the only reason the second one was known at all.
+
+**THE COLUMN IS `about_tenant_id`, AND THE NAMING IS THE WHOLE DECISION.** It
+means *which client this insight is about*, which is genuinely not *which tenant
+owns this row* — and the gain is the FAILURE MODE: add a fourth memory table
+later and forget the exclusion list, and the loop's own
+`CREATE INDEX … (tenant_id)` **fails the apply outright** rather than quietly
+attaching a policy that empties the page. *A loud failure in place of a quiet
+one is what the name buys.* `checks/memory-boundary.mjs` asserts both ends — no
+policy on the table, and an insight written under one tenant setting **read back
+under another**, which is the feature expressed as the one assertion that fails
+if any of this is got wrong — with a TENANT table read the same way beside it as
+the control (§113.8).
+
+**AND THE FRESH DEPLOYMENT AND THE EXISTING ONE HAD TO BE MADE TO AGREE.**
+`schema.sql` creates the table and migration 004 creates it again, so on a
+VIRGIN database the migration hit `42P07` and **rolled back the whole apply** —
+every new deployment failing to start, found only by applying to an empty
+database rather than to the one already in front of me (§113.7 from the other
+side). Guarded with `IF NOT EXISTS`, and both paths then measured identical.
+
+**A ROUTE OF ITS OWN, NOT A FOURTH ACTION ON THE CARRIED ENDPOINT.**
+`lib/platform-api.ts` was carried across byte for byte and its whole discipline
+is that it still answers what the frozen page asked; adding a feature's actions
+into it ends that property and makes a future diff against the original
+impossible. **AND NO NEW RULE IN `platform-rules.cjs`** — measured, because the
+page loads **no rules module in the browser at all**, so *may I edit this entry*
+is answered once on the server and sent as `mine` on the row (§53.5), **and
+asked again at press time** (§48.2).
+
+**THE SPLITTER IS ITS OWN MODULE BECAUSE IT IS THE ONE PIECE WITH A WRONG
+ANSWER AVAILABLE TO IT** — a UMD, so `node` and the browser run the same bytes,
+checkable with no browser and no database. **A PASTE WITH NO RULES IN IT
+BECOMES ONE ENTRY, NEVER NOUGHT** (§184): every assistant follows a block format
+most of the time and none follows it always, so the degenerate case is the safe
+one — losing what somebody has just dictated is the single unacceptable
+outcome. A block it cannot read comes back **whole**, and an unknown kind falls
+back and **says it was guessed** rather than refusing the write-up.
+
+**`saveMany` IS ONE TRANSACTION ON PURPOSE**: six insights half-saved after a
+long conversation is the outcome nobody can tell apart from a bug, and the
+person has already read them all. Falsified by making one of six rows invalid
+and asserting **nought** are stored.
+
+**THE ASSISTANT NAMES ITS SOURCES, AND DECLINES IN THE PRODUCT'S OWN WORDS.**
+§125 blanks the model's reply on a decline deliberately, so *"nothing happened
+at all"* was available here too — the memory supplies its own sentence
+(*"Nobody has written that one up yet. If you know the answer, it is worth
+adding."*), and the check proves the sentence is OURS by making the stand-in
+model say something arbitrary and asserting the page does not print it.
+**Sources are resolved against the rows actually sent**, so an id the model
+invents is dropped rather than drawn.
+
+**ON DELETE RESTRICT ON BOTH ENDS, AND IT IS A DECISION RATHER THAN CAUTION**:
+deleting a client that holds insights is REFUSED, naming them (§62's shape),
+because *the memory outlives the engagement* — when Forefront stops working with
+somebody, what was learned there is worth more and not less. A consultant who
+leaves keeps their insights, and keeps them attributed.
+
+**THE WORDS ARE PLACEHOLDERS AND ARE SAID TO BE.** *Insight*, *practice ·
+hiccup · lesson*, *Add one insight*, *Write up a period* — Islam waived the
+after-phase-A stop point (*"go on with all the phases in sequence and don't stop
+until you need me for a decision"*), so what the tab and the buttons say is
+settled **on use** rather than in prose (§266: a wording question is answered by
+reading it in place). The four questions and the decline sentence are NOT
+placeholders.
+
+**127 assertions over five checks, 0 failures, all ten falsifications red**;
+room 10/0, deploy 5/0, shell 61/0, state 91/0, door 49/0, 588/0, `tsc` clean,
+`platform-cards.py` 19/0 on both copies of the page. **The client's own shell
+carries none of it** — `public/shell.js` holds nought references to the route,
+the table or the splitter, asserted. **No forced sign-out** (spec 029's test):
+no save path, no authoriser and no tenant table moves, asserted rather than
+assumed. **Recorded, not built**: full-text search, attachments, editing
+somebody else's entry, and the root's `lib/platform-rules.js` duplicated against
+`smp-app/lib/platform-rules.cjs` with nothing syncing them — a live drift named
+here and not this feature's to fix.
+
+### §319.1 · The merge, and the check that was wrong in a way only it exposed
+
+`main` moved **409 commits** under this branch — §318's client set-up wizard and
+§317's last cutover corrections — and the merge was **textually clean, which is
+not the same as safe** (§313.37). The two sides touched **disjoint code**:
+`main`'s work is on the frozen side, this is the new stack plus Forefront's own
+`platform.html`, and the only shared file is the progress tracker, which
+auto-merged — so none of §56.7's shared-scope collisions was available here,
+**measured rather than assumed**. Everything generated was REBUILT rather than
+trusted (§91) and each artefact came back byte-identical; `node --check sw.js`
+parses; **no `SHELL` bump is owed**, because §91's trigger is *the built file's
+bytes changed* and they did not, `main` having already bumped it for its own
+frozen change — and since §316.10 split the caching half off, the worker the new
+stack serves carries no `SHELL` at all. **`main`'s own `client-setup.py` is
+green on the merged result**, because a merge that quietly breaks somebody
+else's work is the merge's fault and not theirs. Renumbered **spec 044 → 045**
+and **§318 → §319** at the merge, scoped to the lines this branch wrote
+(§264.3), `main` having taken both while this was in flight.
+
+**AND MY OWN BOUNDARY CHECK DEFAULTED THE APP ROLE'S PASSWORD TO A WORD THE
+PRODUCT DOES NOT USE** — `smp_app_pw`, where `lib/db.ts`, `db/apply.mjs` and
+`scripts/dev-tenant.mjs` all fall back to the literal `smp_app` — so section 4,
+*the read that IS the feature*, **died on a failed sign-in and reported the
+boundary broken when what was broken was the check** (§100.3, §53.5, §215). It
+passed on every earlier run only because the variable happened to be set in that
+shell: *a fixture that invents its own spelling of the product's own default is
+green exactly until somebody runs it the way the product runs.* It takes the
+product's default now, and the section that matters actually runs — 12/0.

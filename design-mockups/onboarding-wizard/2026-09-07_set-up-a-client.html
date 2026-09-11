@@ -1,0 +1,573 @@
+<title>Set up a client</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700&display=swap">
+<style>
+/* ══ THE PLATFORM'S OWN TOKENS ═════════════════════════════════════════
+   Taken from src/_shared.css, the "forefront" palette, light and dark.
+   Nothing here invents a colour: a mockup drawn in its own palette is a
+   mockup of a product that does not exist (rule 1c, §41.9). */
+:root{
+  --sans:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --focus:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327;
+  --none:#676C73;
+  --shadow:0 1px 2px rgb(23 27 34/.06), 0 4px 14px rgb(23 27 34/.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93;
+    --none:#8E97A3;
+    --shadow:0 1px 2px rgb(0 0 0/.4), 0 4px 14px rgb(0 0 0/.3);
+  }
+}
+:root[data-theme="dark"]{
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93;
+  --none:#8E97A3;
+  --shadow:0 1px 2px rgb(0 0 0/.4), 0 4px 14px rgb(0 0 0/.3);
+}
+
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+      font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
+
+.wrap{ max-width:1240px; margin:0 auto; padding:0 20px 56px; }
+
+/* ── The note that says this is a mockup ─────────────────────────── */
+.mocknote{ background:var(--attn-bg); border-bottom:1px solid var(--line);
+           padding:9px 20px; font-size:12.5px; color:var(--attn-tx); }
+.mocknote b{ font-weight:600; }
+.mocknote .in{ max-width:1240px; margin:0 auto; }
+
+/* ── The chrome, as the platform draws it ────────────────────────── */
+.chrome{ background:var(--panel); color:var(--panel-ink); }
+.chrome .in{ max-width:1240px; margin:0 auto; padding:0 20px;
+             display:flex; align-items:center; gap:14px; height:46px; }
+.mark{ width:34px; height:34px; border-radius:7px; display:grid; place-items:center;
+       background:var(--gold); color:var(--on-accent); font-weight:700; font-size:13px;
+       letter-spacing:.02em; flex:none; }
+.chrome .org{ font-weight:600; font-size:15px; }
+.chrome .sep{ width:1px; height:20px; background:rgb(255 255 255/.18); }
+.chrome .who{ margin-left:auto; color:var(--panel-quiet); font-size:12.5px; }
+
+/* ── The page's own title line ───────────────────────────────────── */
+.head{ display:flex; align-items:flex-end; gap:16px; padding:22px 0 14px; flex-wrap:wrap; }
+h1{ font-size:22px; line-height:1.2; margin:0; font-weight:700; text-wrap:balance; }
+.head .sub{ color:var(--ink-3); font-size:13px; margin-left:auto; }
+
+/* ── The step rail ───────────────────────────────────────────────── */
+.rail{ display:flex; gap:6px; flex-wrap:wrap; padding-bottom:16px;
+       border-bottom:1px solid var(--line); margin-bottom:20px; }
+.step{ display:flex; align-items:center; gap:7px; padding:6px 11px 6px 8px;
+       border:1px solid var(--line); border-radius:999px; background:var(--surface);
+       color:var(--ink-2); font:inherit; font-size:12.5px; cursor:pointer;
+       transition:background .12s, border-color .12s; }
+.step:hover{ border-color:var(--gold); }
+.step .n{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
+          background:var(--surface-2); color:var(--ink-3); font-size:11px; font-weight:600;
+          flex:none; font-variant-numeric:tabular-nums; }
+.step[aria-current="step"]{ background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+.step[aria-current="step"] .n{ background:var(--gold); color:var(--on-accent); }
+.step.done .n{ background:var(--good-bg); color:var(--good-tx); }
+.step.done{ color:var(--ink-3); }
+
+/* ── Two columns: the question, and the shape ────────────────────── */
+.grid{ display:grid; grid-template-columns:minmax(0,1.32fr) minmax(0,1fr); gap:26px; align-items:start; }
+@media (max-width:940px){ .grid{ grid-template-columns:1fr; } }
+
+.key{ font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+      color:var(--ink-3); font-weight:600; }
+
+.q{ font-size:19px; font-weight:700; margin:6px 0 4px; text-wrap:balance; }
+.qwhy{ color:var(--ink-3); font-size:13px; margin:0 0 18px; max-width:62ch; }
+
+/* ── A choice, with its own small drawing ────────────────────────── */
+.choices{ display:flex; flex-direction:column; gap:10px; }
+.choice{ display:grid; grid-template-columns:106px minmax(0,1fr); gap:14px;
+         width:100%; text-align:left; padding:13px 14px; border-radius:9px;
+         border:1px solid var(--line); background:var(--surface); color:inherit;
+         font:inherit; cursor:pointer; transition:border-color .12s, box-shadow .12s; }
+.choice:hover{ border-color:var(--gold); }
+.choice[aria-pressed="true"]{ border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold); }
+.choice .cname{ font-weight:600; font-size:14.5px; display:flex; align-items:center; gap:8px; }
+.choice .cwhy{ color:var(--ink-3); font-size:12.5px; margin-top:3px; }
+.choice .pic{ background:var(--surface-2); border:1px solid var(--line-soft);
+              border-radius:6px; padding:7px 6px; display:flex; flex-direction:column;
+              gap:3px; justify-content:center; align-self:start; }
+.tick{ width:16px; height:16px; border-radius:50%; background:var(--good-bg);
+       color:var(--good-tx); display:none; place-items:center; font-size:10px; flex:none; }
+.choice[aria-pressed="true"] .tick{ display:grid; }
+
+/* the little rows inside a choice's drawing */
+.mini{ height:9px; border-radius:2px; background:var(--line); }
+.mini.gold{ background:var(--gold); }
+.mini.navy{ background:var(--panel); }
+.mini.row{ display:flex; gap:3px; }
+.mini.row > i{ flex:1; height:9px; border-radius:2px; background:var(--line); display:block; }
+.mini.row > i.on{ background:var(--gold); }
+.mini.thin{ height:5px; }
+
+/* ── Fields ──────────────────────────────────────────────────────── */
+.fields{ display:flex; flex-direction:column; gap:14px; }
+.field{ display:flex; flex-direction:column; gap:5px; }
+.field label{ font-size:12.5px; color:var(--ink-2); font-weight:600; }
+.field .hint{ font-size:12px; color:var(--ink-3); }
+input[type=text]{ font:inherit; font-size:14px; padding:8px 10px; border-radius:7px;
+                  border:1px solid var(--line); background:var(--surface); color:var(--ink); width:100%; }
+input[type=text]:focus{ border-color:var(--gold); outline:none; box-shadow:0 0 0 3px var(--attn-bg); }
+
+.listrows{ display:flex; flex-direction:column; gap:6px; }
+.listrow{ display:flex; align-items:center; gap:9px; padding:8px 10px; border:1px solid var(--line);
+          border-radius:7px; background:var(--surface); font-size:13.5px; }
+.listrow .grab{ color:var(--ink-3); font-size:12px; cursor:grab; letter-spacing:-1px; }
+.listrow .nm{ font-weight:600; }
+.listrow .rt{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+.addrow{ border:1px dashed var(--line); border-radius:7px; padding:8px 10px; color:var(--ink-3);
+         background:transparent; font:inherit; font-size:13px; text-align:left; cursor:pointer; width:100%; }
+.addrow:hover{ border-color:var(--gold); color:var(--ink-2); }
+
+select{ font:inherit; font-size:12.5px; padding:5px 8px; border-radius:6px;
+        border:1px solid var(--line); background:var(--surface); color:var(--ink); }
+
+/* ── The words table (generated from the answers) ────────────────── */
+table{ border-collapse:collapse; width:100%; font-size:13px; }
+th{ text-align:left; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--panel-quiet); font-weight:600; background:var(--panel); padding:7px 10px; }
+th:first-child{ border-radius:6px 0 0 0; } th:last-child{ border-radius:0 6px 0 0; }
+td{ padding:6px 10px; border-bottom:1px solid var(--line-soft); vertical-align:middle; }
+tbody tr:nth-child(even){ background:var(--surface-2); }
+td .ours{ color:var(--ink-3); font-size:12.5px; }
+td input[type=text]{ padding:5px 8px; font-size:13px; }
+.tblwrap{ overflow-x:auto; border:1px solid var(--line); border-radius:7px; background:var(--surface); }
+
+/* ── The shape, building up ──────────────────────────────────────── */
+.shape{ position:sticky; top:16px; background:var(--surface); border:1px solid var(--line);
+        border-radius:10px; padding:16px; box-shadow:var(--shadow); }
+.shape h2{ font-size:13px; margin:0 0 2px; font-weight:700; }
+.shape .cap{ color:var(--ink-3); font-size:12px; margin:0 0 14px; }
+
+.shorg{ border:1px solid var(--gold); border-radius:8px; padding:9px 11px; background:var(--attn-bg);
+      display:flex; align-items:center; gap:9px; }
+.shorg .nm{ font-weight:700; font-size:14px; }
+.shorg .yr{ margin-left:auto; font-size:12px; color:var(--attn-tx); font-variant-numeric:tabular-nums; }
+
+.stem{ width:1px; height:14px; background:var(--line); margin:0 auto; }
+
+/* the navigation switch, drawn as the product draws it */
+.switch{ display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; font-size:12px; }
+.switch span{ flex:1; text-align:center; padding:5px 6px; color:var(--ink-3); }
+.switch span.on{ background:var(--panel); color:var(--panel-ink); font-weight:600; }
+
+.side{ margin-top:10px; }
+.side + .side{ margin-top:14px; }
+.sidekey{ font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+          font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:7px; }
+.sidekey .ct{ background:var(--surface-2); border-radius:999px; padding:0 7px; font-size:10.5px;
+              color:var(--ink-3); letter-spacing:0; font-variant-numeric:tabular-nums; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.chip{ border:1px solid var(--line); border-radius:6px; padding:5px 9px; font-size:12.5px;
+       background:var(--surface-2); display:flex; align-items:center; gap:7px; }
+.chip.unit{ border-left:3px solid var(--panel); }
+.chip.cap{ border-left:3px solid var(--gold); }
+.chip.fn{ border-left:3px solid var(--good); }
+.chip .fmt{ font-size:10.5px; color:var(--ink-3); letter-spacing:.04em; text-transform:uppercase; }
+.chip .own{ font-size:11.5px; color:var(--ink-3); }
+.empty{ color:var(--none); font-size:12.5px; font-style:italic; padding:4px 0; }
+
+.beneath{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft); }
+.beneath .row{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-2); padding:2px 0; }
+.beneath .row .b{ width:7px; height:7px; border-radius:2px; flex:none; }
+
+
+/* ── WHAT THE PLATFORM CANNOT DO YET IS DRAWN AND DULLED ──────────────
+   Islam: "keep the mockup as is but keep the non existing parts dull for
+   now." So the intended shape stays visible and nothing pretends to be
+   ready: every dulled control is inert and says LATER, which is the one
+   thing a greyed control must do or it reads as broken (§61). */
+.later{ opacity:.5; }
+.later, .later *{ cursor:not-allowed !important; }
+.later input, .later select{ pointer-events:none; }
+.tag{ font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+      color:var(--ink-3); border:1px solid var(--line); border-radius:999px;
+      padding:1px 6px; background:var(--surface-2); flex:none; }
+.step.later{ border-style:dashed; }
+.laterline{ margin-top:10px; font-size:12.5px; color:var(--ink-3); border-left:2px solid var(--line);
+            padding-left:10px; }
+
+/* ── Foot: back / next ───────────────────────────────────────────── */
+.foot{ display:flex; align-items:center; gap:10px; margin-top:22px; padding-top:16px;
+       border-top:1px solid var(--line); }
+.btn{ font:inherit; font-size:13.5px; font-weight:600; padding:8px 15px; border-radius:7px;
+      border:1px solid var(--line); background:var(--surface); color:var(--ink-2); cursor:pointer; }
+.btn:hover{ border-color:var(--gold); color:var(--ink); }
+.btn.go{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+.btn.go:hover{ background:var(--gold-deep); border-color:var(--gold-deep); color:#FFF; }
+.foot .note{ margin-left:auto; color:var(--ink-3); font-size:12.5px; }
+
+/* ── The summary's two doors ─────────────────────────────────────── */
+.doors{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px; }
+@media (max-width:620px){ .doors{ grid-template-columns:1fr; } }
+.door{ border:1px solid var(--line); border-radius:9px; padding:14px; background:var(--surface);
+       display:flex; flex-direction:column; gap:5px; cursor:pointer; text-align:left; font:inherit;
+       color:inherit; }
+.door:hover{ border-color:var(--gold); }
+.door .dn{ font-weight:700; font-size:14.5px; }
+.door .dw{ color:var(--ink-3); font-size:12.5px; }
+.summ{ display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+.sline{ display:flex; gap:10px; align-items:baseline; font-size:13.5px;
+        padding:7px 11px; border:1px solid var(--line-soft); border-radius:7px; background:var(--surface); }
+.sline .sk{ color:var(--ink-3); font-size:12.5px; min-width:132px; }
+.sline .sv{ font-weight:600; }
+.sline .ed{ margin-left:auto; color:var(--gold-deep); font-size:12.5px; }
+
+.legend{ margin-top:26px; padding:14px 16px; border:1px solid var(--line); border-radius:9px;
+         background:var(--surface); font-size:12.5px; color:var(--ink-2); }
+.legend b{ color:var(--ink); }
+.legend ul{ margin:8px 0 0; padding-left:18px; }
+.legend li{ margin:3px 0; }
+</style>
+
+<div class="mocknote"><div class="in"><b>Mockup — not built.</b> Click the numbered steps, or Next, to walk it; the shape on the right builds up as you answer. Unit and function names are placeholders until Elabd's real ones are typed in.</div></div>
+
+<div class="chrome"><div class="in">
+  <div class="mark">EL</div>
+  <div class="org">Elabd</div>
+  <div class="sep"></div>
+  <div style="font-size:12.5px;color:var(--panel-quiet)">Client set-up</div>
+  <div class="who">Islam Saadany · Forefront</div>
+</div></div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>Set up a client</h1>
+    <div class="sub" id="progress">Step 6 of 8</div>
+  </div>
+
+  <nav class="rail" id="rail" aria-label="Set-up steps"></nav>
+
+  <div class="grid">
+    <section class="stepcol">
+      <div class="key" id="stepkey">The organisation</div>
+      <div class="q" id="stepq"></div>
+      <p class="qwhy" id="stepwhy"></p>
+      <div id="stepbody"></div>
+      <div class="foot">
+        <button class="btn" id="back" type="button">Back</button>
+        <button class="btn go" id="next" type="button">Next</button>
+        <span class="note">Nothing is final — every answer stays editable in Setup afterwards.</span>
+      </div>
+    </section>
+
+    <aside class="shape" aria-label="What you are building">
+      <h2>What you are building</h2>
+      <p class="cap" id="shapecap">It fills in as you answer.</p>
+      <div id="shapebody"></div>
+    </aside>
+  </div>
+
+  <div class="legend">
+    <b>What this mockup is asking you to sign off:</b>
+    <ul>
+      <li>The <b>march</b> — eight steps in this order, each one openable from the rail at any time.</li>
+      <li>The <b>shape on the right</b>, growing as he answers, and drawn with the platform's own navigation switch so it reads as the thing he is building.</li>
+      <li>Each choice carrying <b>its own small drawing</b> rather than a paragraph explaining it.</li>
+      <li>The <b>words step generated from the answers</b> — it asks about objectives, actions and requirements because he said his functions plan that way, and never asks what he calls a capability if he has none.</li>
+      <li>The <b>summary with both doors</b>, and every line on it a way back.</li>
+      <li><b>Dull means drawn and not built yet</b> — the capabilities step, the objectives plan type
+          and the three words under it. Every one is inert and says <i>Later</i>, so nothing on this
+          screen offers a choice that would open an empty page. They light up the day the shape behind
+          them exists, and that is your separate discussion.</li>
+      <li><b>It builds up rather than interrogates.</b> Units, capabilities and functions are lists you add to,
+          and every thing you add carries its own <b>owner</b> and its own <b>plan type</b> — change one on the
+          right and the shape redraws. One client can run all three plan types at once.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* ── The model the diagram reads ──────────────────────────────────────
+   The mockup keeps one object and draws everything from it, which is
+   how the real wizard should work too: the chips are DERIVED, so there
+   is no second copy of the answers to fall out of step. */
+var M = {
+  name:"Elabd", slug:"elabd", year:"2027",
+  units:[{n:"Trading",f:"pillars"},{n:"Retail",f:"pillars"},{n:"Projects",f:"pillars"}],
+  companies:"none",
+  caps:[{n:"Digital & Data", by:"IT", f:"pillars"},{n:"Customer Experience", by:"Marketing", f:"pillars"}],
+  fns:[{n:"Finance", f:"objectives"},{n:"Human Resources", f:"objectives"},{n:"Supply Chain", f:"projects"}],
+  words:{ unit:"Business Unit", cap:"Capability", pillar:"Pillar", measure:"Key Measure",
+          obj:"Functional Objective", act:"Action", req:"Requirement" },
+  office:"Islam Saadany"
+};
+
+var STEPS = [
+  { key:"The organisation", label:"The client",     q:"Which client are you setting up?" },
+  { key:"The organisation", label:"The year",       q:"Which year is this plan for?" },
+  { key:"The organisation", label:"Business units", q:"What are the business units?" },
+  { key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
+  { key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?", later:1 },
+  { key:"Strategy",         label:"Functions",      q:"How does each supporting function plan?" },
+  { key:"Language",         label:"The words",      q:"What does Elabd call these things?" },
+  { key:"People",           label:"The office",     q:"Who runs the strategy office?" },
+  { key:"Done",             label:"Summary",        q:"Elabd is set up." }
+];
+
+var at = 5;            /* opens on the functions step — the one carrying the new thinking */
+var seen = [0,1,2,3,4]; /* steps already answered, for the rail's ticks */
+
+/* ONE plan-type control, wherever a thing is listed. The wizard does not
+   ask "how do functions plan" — it asks it of each thing it holds, which is
+   what lets one client mix all three. */
+var FORMATS = [["pillars","Pillars",1],["projects","Projects",1],["objectives","Objectives &amp; actions",0]];
+var LATER = "Not built yet — a separate discussion.";
+function fmtSel(kind, n, val){
+  return '<select data-kind="' + kind + '" data-n="' + n + '">' + FORMATS.map(function(f){
+    return '<option value="' + f[0] + '"' + (val === f[0] ? " selected" : "") +
+           (f[2] ? "" : " disabled") + '>' + f[1] + (f[2] ? "" : " (later)") + '</option>';
+  }).join("") + '</select>';
+}
+var esc = function(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); };
+
+/* ── The rail ─────────────────────────────────────────────────────── */
+function drawRail(){
+  document.getElementById("rail").innerHTML = STEPS.map(function(s, i){
+    var cls = "step" + (seen.indexOf(i) >= 0 && i !== at ? " done" : "");
+    var cur = i === at ? ' aria-current="step"' : "";
+    var n = (seen.indexOf(i) >= 0 && i !== at) ? "✓" : (i + 1);
+    return '<button type="button" class="' + cls + (s.later ? " later" : "") + '" data-go="' + i + '"' + cur + '>' +
+           '<span class="n">' + n + '</span>' + esc(s.label) + '</button>';
+  }).join("");
+  document.getElementById("progress").textContent =
+    at === 8 ? "Finished" : ("Step " + (at + 1) + " of 8");
+}
+
+/* ── A choice card ────────────────────────────────────────────────── */
+function choice(on, name, why, pic){
+  return '<button type="button" class="choice" aria-pressed="' + (on ? "true" : "false") + '">' +
+    '<span class="pic">' + pic + '</span>' +
+    '<span><span class="cname">' + esc(name) + '<span class="tick">✓</span></span>' +
+    '<span class="cwhy">' + why + '</span></span></button>';
+}
+function choiceLater(name, why, pic){
+  return '<div class="choice later" aria-disabled="true">' +
+    '<span class="pic">' + pic + '</span>' +
+    '<span><span class="cname">' + name + '<span class="tag">Later</span></span>' +
+    '<span class="cwhy">' + why + '</span></span></div>';
+}
+var PIC = {
+  pillars: '<span class="mini navy"></span><span class="mini row"><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="mini thin"></span><span class="mini thin"></span>',
+  projects:'<span class="mini navy"></span><span class="mini gold"></span><span class="mini row"><i></i><i></i></span><span class="mini row"><i></i><i></i><i></i></span>',
+  objs:    '<span class="mini navy"></span><span class="mini row"><i class="on"></i><i class="on"></i></span><span class="mini thin"></span><span class="mini row"><i></i><i></i><i></i></span>',
+  one:     '<span class="mini navy"></span><span class="mini row"><i class="on"></i></span>',
+  many:    '<span class="mini navy"></span><span class="mini row"><i class="on"></i><i class="on"></i><i class="on"></i></span>',
+  none:    '<span class="mini thin"></span><span class="mini row"><i></i><i></i><i></i></span>',
+  co:      '<span class="mini gold"></span><span class="mini row"><i class="on"></i><i class="on"></i></span><span class="mini row"><i></i><i></i><i></i></span>'
+};
+
+/* ── Each step's body ─────────────────────────────────────────────── */
+function body(i){
+  if (i === 0) return '<div class="fields">' +
+    '<div class="field"><label for="f1">The client\'s name</label>' +
+    '<input id="f1" type="text" value="Elabd"><span class="hint">This is what the platform is named after, everywhere.</span></div>' +
+    '<div class="field"><label for="f2">Its address here</label>' +
+    '<input id="f2" type="text" value="elabd"><span class="hint">smp.forefront.consulting/<b>elabd</b> — set once, never changed.</span></div></div>';
+
+  if (i === 1) return '<div class="fields"><div class="field"><label for="f3">The plan runs to</label>' +
+    '<input id="f3" type="text" value="2027"><span class="hint">The horizon every 3-year target is measured against.</span></div></div>';
+
+  if (i === 2) return '<div class="listrows">' + M.units.map(function(u, n){
+      return '<div class="listrow"><span class="grab">∷</span><span class="nm">' + esc(u.n) + '</span>' +
+             '<span class="rt"><span style="font-size:12px;color:var(--ink-3)">plans in</span>' +
+             fmtSel("u", n, u.f) + '</span></div>'; }).join("") +
+    '</div><button class="addrow" type="button" style="margin-top:8px">+ Add a business unit</button>' +
+    '<p class="qwhy" style="margin-top:12px">Every thing you add here carries its own plan type. A unit almost always plans in pillars — it does not have to.</p>';
+
+  if (i === 3) return '<div class="choices">' +
+    choice(M.companies === "none", "No — the units sit directly under Elabd",
+      "One less layer to explain. You can add companies later without touching the plans.", PIC.many) +
+    choice(M.companies !== "none", "Yes — group them into companies",
+      "A company holds several units and decides who can see across them. It carries no plan of its own.", PIC.co) +
+    '</div>';
+
+  if (i === 4) return '<p class="qwhy" style="margin-top:-8px">A capability is strategic work that sits beside the business units, planned in pillars, and owned by a function head.</p>' +
+    '<div class="laterline"><b>' + LATER + '</b> The platform has capabilities today only underneath a function that plans in projects — not as their own entry on the strategic side. Drawn here so the whole shape is visible.</div>' +
+    '<div class="listrows later" style="margin-top:12px">' + M.caps.map(function(c, n){
+      return '<div class="listrow"><span class="grab">∷</span><span class="nm">' + esc(c.n) + '</span>' +
+             '<span class="rt"><span style="font-size:12px;color:var(--ink-3)">owned by</span>' +
+             '<select><option>' + esc(c.by) + '</option></select>' +
+             fmtSel("c", n, c.f) + '</span></div>'; }).join("") +
+    '</div><button class="addrow later" type="button" style="margin-top:8px">+ Add a capability</button>';
+
+  if (i === 5) return '<div class="listrows">' + M.fns.map(function(f, n){
+      var soon = f.f === "objectives";
+      return '<div class="listrow' + (soon ? " later" : "") + '"><span class="grab">∷</span>' +
+        '<span class="nm">' + esc(f.n) + '</span>' + (soon ? '<span class="tag">Later</span>' : "") +
+        '<span class="rt"><span style="font-size:12px;color:var(--ink-3)">plans in</span>' +
+        fmtSel("f", n, f.f) + '</span></div>'; }).join("") +
+    '</div><button class="addrow" type="button" style="margin-top:8px">+ Add a supporting function</button>' +
+    '<div style="margin-top:18px" class="key">What each one means</div>' +
+    '<div class="choices" style="margin-top:8px">' +
+    choiceLater("Objectives &amp; actions",
+      "Objectives measured like a key measure, actions under them with a due date, and requirements raised on other functions. <b>Elabd’s shape — not built yet.</b>", PIC.objs) +
+    choice(true, "Pillars",
+      "The same shape a business unit has: pillars, key measures and tactics.", PIC.pillars) +
+    choice(false, "Projects",
+      "Capabilities held by the function, each with projects, deliverables and milestones.", PIC.projects) +
+    '</div>';
+
+  if (i === 6){
+    var rows = [
+      ["Business unit","Business Unit","Every client has these"],
+      ["Capability","Capability","Because you added capabilities"],
+      ["Pillar","Pillar","Units plan in pillars"],
+      ["Key measure","Key Measure","Under a pillar"],
+      ["Functional objective","Functional Objective","Because two functions plan in objectives", 1],
+      ["Action","Action","Under a functional objective", 1],
+      ["Requirement","Requirement","Raised on another function", 1]
+    ];
+    return '<div class="tblwrap"><table><thead><tr><th style="width:34%">What it is</th>' +
+      '<th style="width:33%">What Elabd calls it</th><th style="width:33%">Why we ask</th></tr></thead><tbody>' +
+      rows.map(function(r){
+        return '<tr' + (r[3] ? ' class="later"' : "") + '><td><b>' + esc(r[0]) + '</b>' +
+               (r[3] ? ' <span class="tag">Later</span>' : "") + '</td>' +
+               '<td><input type="text" value="' + esc(r[1]) + '"' + (r[3] ? " readonly" : "") + '></td>' +
+               '<td class="ours">' + esc(r[2]) + '</td></tr>'; }).join("") +
+      '</tbody></table></div>' +
+      '<p class="qwhy" style="margin-top:12px">Seven rows, not the platform’s full list — nothing here asks what Elabd calls a thing Elabd does not have.</p>';
+  }
+
+  if (i === 7) return '<div class="fields">' +
+    '<div class="field"><label for="f8">Who runs the strategy office</label>' +
+    '<input id="f8" type="text" value="Islam Saadany"><span class="hint">They hold the office’s own seat and can add the rest of the team afterwards.</span></div></div>' +
+    '<div class="listrows" style="margin-top:14px">' +
+    '<div class="listrow"><span class="nm">Islam Saadany</span><span class="rt"><span style="font-size:12px;color:var(--ink-3)">Super user</span></span></div>' +
+    '</div><button class="addrow" type="button" style="margin-top:8px">+ Add somebody to the office</button>';
+
+  /* the summary */
+  var lines = [
+    ["The client", "Elabd · /elabd"],
+    ["The year", "2027"],
+    ["Business units", M.units.map(function(u){ return u.n; }).join(" · ")],
+    ["Companies", "None — units sit under Elabd"],
+    ["Capabilities", M.caps.map(function(c){ return c.n; }).join(" · ") + "  — waiting on the shape"],
+    ["Functions", M.fns.map(function(f){ return f.n + " (" + fmtWord(f.f) + ")"; }).join(" · ")],
+    ["The words", "7 set"],
+    ["The office", "Islam Saadany"]
+  ];
+  return '<div class="summ">' + lines.map(function(l, n){
+      return '<div class="sline"><span class="sk">' + esc(l[0]) + '</span>' +
+             '<span class="sv">' + esc(l[1]) + '</span><span class="ed" data-go="' + n + '">Change</span></div>'; }).join("") +
+    '</div>' +
+    '<div class="key">Where to now</div>' +
+    '<div class="doors">' +
+    '<button class="door" type="button"><span class="dn">Start the plans</span>' +
+    '<span class="dw">Open the plan builder on Trading and author the first pillar.</span></button>' +
+    '<button class="door" type="button"><span class="dn">Bring the people in</span>' +
+    '<span class="dw">Open the register, add the heads and custodians, and issue their passwords.</span></button>' +
+    '</div>';
+}
+
+/* ── The shape ────────────────────────────────────────────────────── */
+function fmtWord(f){ return f === "objectives" ? "obj" : f === "projects" ? "proj" : "pillars"; }
+function shape(){
+  var k = at;                            /* what is known by this step */
+  var h = '<div class="shorg"><span class="nm">' + esc(k >= 1 ? M.name : "The client") + '</span>' +
+          (k >= 2 ? '<span class="yr">to ' + esc(M.year) + '</span>' : "") + '</div>';
+  if (k < 3) { h += '<div class="stem"></div><div class="empty">Its units come next.</div>';
+               document.getElementById("shapebody").innerHTML = h; return; }
+
+  h += '<div class="stem"></div><div class="switch"><span class="on">Strategic</span><span>Functions</span></div>';
+
+  h += '<div class="side"><div class="sidekey">Business units <span class="ct">' + M.units.length + '</span></div>' +
+       '<div class="chips">' + M.units.map(function(u){
+         return '<span class="chip unit">' + esc(u.n) + '<span class="fmt">' + fmtWord(u.f) + '</span></span>'; }).join("") + '</div></div>';
+
+  if (k >= 5) h += '<div class="side later"><div class="sidekey">Capabilities <span class="tag">Later</span> <span class="ct">' + M.caps.length + '</span></div>' +
+       '<div class="chips">' + M.caps.map(function(c){
+         return '<span class="chip cap">' + esc(c.n) + '<span class="own">' + esc(c.by) + '</span>' +
+                '<span class="fmt">' + fmtWord(c.f) + '</span></span>'; }).join("") +
+       '</div></div>';
+
+  if (k >= 6) h += '<div class="side"><div class="sidekey">Supporting functions <span class="ct">' + M.fns.length + '</span></div>' +
+       '<div class="chips">' + M.fns.map(function(f){
+         return '<span class="chip fn' + (f.f === "objectives" ? " later" : "") + '">' + esc(f.n) +
+                '<span class="fmt">' + fmtWord(f.f) + '</span></span>'; }).join("") +
+       '</div></div>';
+
+  if (k >= 6) h += '<div class="beneath">' +
+    '<div class="row"><span class="b" style="background:var(--panel)"></span>A unit holds pillars, key measures and tactics</div>' +
+    '<div class="row"><span class="b" style="background:var(--gold)"></span>A capability holds pillars, and a function head owns it</div>' +
+    '<div class="row"><span class="b" style="background:var(--good)"></span>A function holds objectives, actions and requirements</div>' +
+    '</div>';
+
+  document.getElementById("shapebody").innerHTML = h;
+  document.getElementById("shapecap").textContent =
+    k >= 6 ? "Elabd, as answered so far." : "It fills in as you answer.";
+}
+
+/* ── Paint ────────────────────────────────────────────────────────── */
+function paint(){
+  var s = STEPS[at];
+  document.getElementById("stepkey").textContent = s.key;
+  document.getElementById("stepq").textContent = s.q;
+  document.getElementById("stepwhy").textContent =
+    at === 5 ? "Each function can plan a different way. Whatever you pick here decides what that function's pages hold — and it stays changeable until the function has a plan in it."
+  : at === 4 ? "Elabd has these; many clients do not. Leave the list empty if there are none."
+  : at === 8 ? "Everything below stays editable in Setup. Nothing here is locked."
+  : "";
+  document.getElementById("stepwhy").style.display =
+    document.getElementById("stepwhy").textContent ? "" : "none";
+  document.getElementById("stepbody").innerHTML = body(at);
+  document.getElementById("next").textContent = at === 8 ? "Finish" : "Next";
+  document.getElementById("back").style.visibility = at === 0 ? "hidden" : "";
+  drawRail(); shape();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function go(i){
+  if (i < 0 || i > 8) return;
+  if (seen.indexOf(at) < 0) seen.push(at);
+  at = i; paint();
+}
+document.addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]");
+  if (g){ go(parseInt(g.getAttribute("data-go"), 10)); return; }
+  if (e.target.closest("#next")) { go(at + 1); return; }
+  if (e.target.closest("#back")) { go(at - 1); return; }
+  var c = e.target.closest(".choice");
+  if (c){
+    var box = c.parentNode;
+    Array.prototype.forEach.call(box.querySelectorAll(".choice"), function(x){
+      x.setAttribute("aria-pressed", x === c ? "true" : "false"); });
+  }
+});
+document.addEventListener("change", function(e){
+  var f = e.target.closest("[data-kind]");
+  if (!f) return;
+  var n = parseInt(f.getAttribute("data-n"), 10);
+  var k = f.getAttribute("data-kind");
+  (k === "u" ? M.units : k === "c" ? M.caps : M.fns)[n].f = f.value;
+  shape();
+});
+paint();
+</script>

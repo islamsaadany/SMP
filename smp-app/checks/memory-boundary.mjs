@@ -1,4 +1,4 @@
-/* THE ASSERTION THE CONSULTING MEMORY RESTS ON (spec 044).
+/* THE ASSERTION THE CONSULTING MEMORY RESTS ON (spec 045).
  *
  * Specs 042 and 043 spent two weeks making sure one client's data can never
  * reach another. This feature is deliberately the opposite — an insight from
@@ -34,7 +34,11 @@ import pg from "pg";
 import { SCHEMA } from "../db/schema-name.mjs";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
-const APP_PW = process.env.SMP_APP_PASSWORD || "smp_app_pw";
+/* THE SAME DEFAULT THE PRODUCT TAKES, never a second one: `lib/db.ts`,
+   `db/apply.mjs` and `scripts/dev-tenant.mjs` all fall back to the literal
+   word, so a check inventing its own reads as the boundary being broken
+   when what is broken is the check (§100.3, §53.5). */
+const APP_PW = process.env.SMP_APP_PASSWORD || "smp_app";
 const brk = (process.argv.find((a) => a.startsWith("--break=")) || "").slice(8);
 const here = import.meta.dirname;
 let oks = 0, fails = 0;

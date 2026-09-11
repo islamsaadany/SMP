@@ -228,7 +228,7 @@
   .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
   @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
 
-  /* ── The consulting memory (spec 044) ────────────────────────────
+  /* ── The consulting memory (spec 045) ────────────────────────────
      FOUR SHAPES, and each is an existing one put to a new use rather than a
      new look: the filter row is .ptitle's own flex row, an entry row is
      .teamrow one level richer, the reading view is the card border and radius
@@ -338,7 +338,7 @@
 <nav class="nav" id="nav"></nav>
 <div class="wrap" id="page"></div>
 
-<!-- The debrief splitter (spec 044). Its own file, because node's own check
+<!-- The debrief splitter (spec 045). Its own file, because node's own check
      requires the SAME BYTES this page runs (checks/memory-split.mjs) rather
      than a second copy that could drift — it is the one piece of the memory
      with a wrong answer available to it. scripts/build-shell.mjs puts it at
@@ -365,7 +365,7 @@
         return r.json();
       });
   }
-  /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 044) and the
+  /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 045) and the
      401-is-the-door rule above is not written twice for it. */
   function post(body) { return send("/api/platform", body); }
   function mpost(body) { return send("/api/memory", body); }
@@ -406,7 +406,7 @@
   function drawNav() {
     nav.textContent = "";
     /* MEMORY IS THE FIRST TAB HERE WITH NO GATE, and that is decision 1 of
-       spec 044 rather than an oversight: every consultant reads every
+       spec 045 rather than an oversight: every consultant reads every
        insight, which is what makes it a memory rather than a filing cabinet.
        The boundary it does keep is on the server — a client's own account
        never reaches /api/memory — and it is checked there. */
@@ -472,7 +472,7 @@
     window.scrollTo(0, y);
   }
 
-  /* ════ The consulting memory (spec 044) ══════════════════════════════
+  /* ════ The consulting memory (spec 045) ══════════════════════════════
      Forefront's own, never a client's: an insight from one client is worth
      having BECAUSE it helps on the next, which is the one place on this
      platform where crossing clients is the point. Four states — the list,

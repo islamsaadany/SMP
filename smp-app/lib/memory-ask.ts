@@ -1,4 +1,4 @@
-/* Asking the consulting memory (spec 044, phase C).
+/* Asking the consulting memory (spec 045, phase C).
  *
  * NOT A SECOND ASSISTANT. lib/assistant.cjs already answers from a corpus,
  * declines rather than inventing, hands over to a person (§104) and caps its

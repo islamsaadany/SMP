@@ -1,4 +1,4 @@
-/* The consulting memory (spec 044)
+/* The consulting memory (spec 045)
 
    schema.sql runs ONCE and is recorded as `schema` in _migrations, so a
    deployment that has already applied it never sees a table added there

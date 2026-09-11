@@ -35,7 +35,7 @@ export async function devTenant({ url = OWNER_URL, log = (s) => console.log(s) }
   await owner.connect();
   /* everything a run of the checks may have made: the tenant, its logins, a
      client created through Forefront's pages, and the office's own table */
-  /* THE CONSULTING MEMORY HOLDS THESE TENANTS (spec 044): memory_entries is
+  /* THE CONSULTING MEMORY HOLDS THESE TENANTS (spec 045): memory_entries is
      `ON DELETE RESTRICT` on its client, so remaking the dev tenant would fail
      on a developer's own insights. This is a dev script that already destroys
      the whole tenant, so it destroys those too — said here rather than left

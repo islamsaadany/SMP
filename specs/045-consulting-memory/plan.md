@@ -1,4 +1,4 @@
-# 044 — Plan
+# 045 — Plan
 
 **Written 2026-09-11**, after Islam signed off `spec.md` and the mockup
 (*"the questions are good, go ahead with the plan"*). Nothing built.

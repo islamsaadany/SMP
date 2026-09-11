@@ -1,8 +1,11 @@
-# 044 — The consulting memory
+# 045 — The consulting memory
 
-**Status:** signed off and **BUILT 2026-09-11, all three phases**, on
-`claude/blissful-brown-fxlait`. Not merged — `main` is Islam's word, on that
-merge (rule 4).
+**Status:** signed off, **BUILT 2026-09-11, all three phases**, and **MERGED
+to `main` 2026-09-11 on Islam's word** (*"merge"*). Built as **spec 044 / §318**
+and renumbered at the merge: `main` had taken both for the client set-up wizard
+while this was in flight, which is the precedent §287, §301, §310 and §318
+itself all set — **a gap is harmless where a collision is not**. The renumber is
+scoped to the lines this branch wrote (§264.3).
 **Asked for by Islam, 2026-09-11.** Five of its decisions are already his
 (below), including the two settled the same day on who reads and who is named,
 and the correction that made the **period debrief** the main way in rather than
@@ -295,3 +298,55 @@ which is placeholder wording: what the tab, the button and the empty state
 actually say is settled when the words are on a screen and can be read in place
 (§124, §266 — a wording question is answered by drawing it, not by listing the
 candidates in prose).
+
+
+## What the merge with `main` found (§319.1)
+
+`main` moved **409 commits** under this branch — the client set-up wizard
+(§318, spec 044) and the §317 cutover's last corrections. **The merge was
+textually clean and that is not the same as safe** (§313.37), so the result was
+read rather than believed:
+
+- **The two sides touched disjoint code.** The only file both changed is
+  `IMPLEMENTATION_PROGRESS.md`, and it auto-merged. `main`'s work is on the
+  **frozen** side (`SMP-Project-Folder/src/shell.html`, `wizard.js`,
+  `wizard.css`, the built v3.22 file) and this is entirely the new stack plus
+  Forefront's own `platform.html` — so none of §56.7's shared-scope collisions
+  is available here, measured rather than assumed.
+- **Everything generated was REBUILT rather than trusted** (§91): `build.py`
+  reproduced the frozen file **byte-identical** to the merged one;
+  `build-shell.mjs`, `build-sw.mjs`, `sync-css.mjs` and `sync-static.mjs` each
+  reproduced `public/shell.js`, `public/sw.js`, `public/platform.css` and
+  `public/door.css` byte-identical to `main`'s. Only `shell/platform.html` and
+  `public/platform-page.js` moved, which is this branch's own renumber
+  propagating — the proof that the generator ran at all.
+- **`node --check sw.js` parses** (§146.2).
+- **No `SHELL` bump is owed by this merge, and that is measured rather than
+  skipped.** §91's trigger is *the built file's bytes changed*, and they did
+  not: `build.py`'s output is byte-identical, and `public/shell.js` — what the
+  new stack actually serves — regenerates byte-identical to `main`'s. `main`
+  bumped it to `v4.88-setup-wizard` for its **own** change to the frozen
+  sources. Confirmed against `origin/main` immediately before the push
+  (§94.16), and **`public/sw.js` carries no `SHELL` at all** since §316.10
+  split the caching half off, so nothing in the new stack caches by that name.
+- **`main`'s own new check passes on the merged result** —
+  `checks/client-setup.py`, all green — because a merge that quietly breaks
+  somebody else's work is the merge's fault, not theirs.
+
+**And one of my own checks was wrong in a way that only the merge run
+exposed.** `checks/memory-boundary.mjs` defaulted the app role's password to
+`smp_app_pw` where `lib/db.ts`, `db/apply.mjs` and `scripts/dev-tenant.mjs` all
+default to the literal word `smp_app` — so section 4, *the read that IS the
+feature*, died on a failed sign-in and reported the boundary broken when what
+was broken was the check (§100.3, §53.5). It passed before only because the
+variable happened to be set in that shell. It takes the product's own default
+now: **12/0**, and the section that matters runs.
+
+**Re-run against the merged result:** memory 21 / 12 / 36 / 42 / 16 =
+**127 assertions, 0 failures**, **all ten falsifications red**; `check:room`
+10/0, `check:deploy` 5/0, `check:shell` 61/0, `check:state` 91/0, `check:door`
+49/0, `test:rules` 588/0, `tsc` clean, `platform-cards.py` 19/0 on **both**
+copies of the page, and `main`'s `client-setup.py` green. The frozen `qa.py`
+sweep is **not re-run and it is said why**: this branch changes not one byte of
+the frozen build — proved by rebuilding it — so `main`'s own sweep result
+carries over unchanged rather than being re-measured for the sake of a number.

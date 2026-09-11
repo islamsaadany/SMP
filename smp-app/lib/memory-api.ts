@@ -1,4 +1,4 @@
-/* The consulting memory (spec 044) — Forefront's own, never a client's.
+/* The consulting memory (spec 045) — Forefront's own, never a client's.
  *
  * A ROUTE OF ITS OWN, NOT A FOURTH ACTION ON platform-api.ts. That file is the
  * frozen endpoint carried across byte for byte, and its discipline is that it

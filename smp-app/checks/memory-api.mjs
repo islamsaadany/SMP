@@ -1,5 +1,5 @@
 /* The consulting memory's endpoint, driven over HTTP against the built app
-   (spec 044). Every action, and BOTH ENDS of every rule (§94.2) — who may
+   (spec 045). Every action, and BOTH ENDS of every rule (§94.2) — who may
    read it, who may change somebody else's, what a half-valid debrief does,
    and what happens to a client that somebody has learned something from.
 

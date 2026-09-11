@@ -12,7 +12,7 @@ export async function deleteTenant(owner: Pool, tenantId: string): Promise<{ cou
   try {
     await c.query("BEGIN");
     const { tenantTables } = await schemaCheck(c);
-    /* THE MEMORY OUTLIVES THE ENGAGEMENT (spec 044). memory_entries is a
+    /* THE MEMORY OUTLIVES THE ENGAGEMENT (spec 045). memory_entries is a
        PLATFORM table holding what Forefront learned on this client, and it is
        `ON DELETE RESTRICT` on purpose: when we stop working with somebody,
        what was learned there is worth more, not less. Counted and NAMED here

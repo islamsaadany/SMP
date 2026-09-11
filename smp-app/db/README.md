@@ -10,7 +10,7 @@ the catalogue at the end of `schema.sql`, so a table added later is covered
 on the next apply.
 
 **The loop works by EXCLUSION, so a table added later is tenant-owned unless
-it is named in that list.** `memory_entries` (spec 044) is Forefront's own
+it is named in that list.** `memory_entries` (spec 045) is Forefront's own
 and deliberately crosses every client, which is why it is on the list — and
 why its client column is `about_tenant_id` rather than `tenant_id`: with that
 name, forgetting the list fails the apply outright at the loop's own

@@ -17,7 +17,7 @@ import type { SessionUser } from "./auth.ts";
 import { hashPassword } from "./auth.ts";
 import type { Tenant } from "./door.ts";
 import { withTenant } from "./tenant.ts";
-import { loadGraph } from "./state-io.ts";
+import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
 
 const require = createRequire(import.meta.url);
@@ -25,7 +25,12 @@ const require = createRequire(import.meta.url);
    repository's root beside the frozen sources it is made from */
 const SEED = join(process.cwd(), "..", "db", "seed-state.json");
 const FF = require("./platform-rules.cjs");
-const frozen = require("./frozen.cjs") as { cleared: (g: unknown) => unknown };
+const frozen = require("./frozen.cjs") as {
+  cleared: (g: unknown) => unknown;
+  bare: (g: unknown) => any;
+  shape: (g: unknown, a: unknown) => any;
+  holds: (g: unknown) => { plans: number; capabilities: number; units: number; functions: number };
+};
 
 type Q = Pool | PoolClient;
 export type Answer = { code: number; body: Record<string, unknown> };
@@ -35,9 +40,9 @@ const NO_CLIENT = "That client is not available.";
 
 type Account = { id: string; email: string; name: string; is_admin: boolean; kind: string; status: string };
 type World = { mine: { client_key: string; person_key: string; seat: string; tenant_id: string }[]; access: Record<string, Record<string, string>> };
-type ClientRow = Tenant & { industry: string; notes: string };
+type ClientRow = Tenant & { industry: string; notes: string; size: string };
 
-const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, made_here";
+const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here";
 async function clientByKey(c: Q, key: unknown): Promise<ClientRow | null> {
   if (!key) return null;
   const r = await c.query("SELECT " + CLIENT_COLS + " FROM tenants WHERE key = $1", [String(key)]);
@@ -171,8 +176,31 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       register = await withTenant(row.id, async (c) => (await c.query(
         "SELECT key, name, role, extra->>'email' AS email, extra->>'forefront' AS ff FROM people WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows);
     } catch (e) { console.error("reading " + row.key + "'s register:", (e as Error).message); }
+    /* ── THE SHAPE THE SET-UP FLOW OPENS WITH (§320) ──────────────────
+       Read from the stored graph, so opening a client afterwards shows the
+       answers that are actually in it rather than what somebody typed last
+       time — there is no draft, and the data IS the progress (§129). Read
+       beside the register in the same transaction, and allowed to fail the
+       same way: a client whose graph cannot be read still opens its card. */
+    let shape: unknown = null, holds: unknown = null;
+    try {
+      const g = await withTenant(row.id, (c) => readState(c));
+      holds = frozen.holds(g);
+      shape = {
+        companies: (g.companyKeys || []).map((k: string) => ({ name: g.companies[k].name })),
+        units: (g.unitKeys || []).map((k: string) => ({
+          name: g.units[k].name,
+          company: g.units[k].company && g.companies[g.units[k].company]
+            ? g.companies[g.units[k].company].name : "" })),
+        functions: (g.functionKeys || []).map((k: string) => ({
+          name: g.functions[k].name, format: g.functions[k].format === "pillars" ? "pillars" : "projects" })),
+        words: (g.labels || []).reduce((o: Record<string, string>, e: { key: string; bu: string }) => {
+          o[e.key] = e.bu; return o; }, {})
+      };
+    } catch (e) { console.error("reading " + row.key + "'s shape:", (e as Error).message); }
     const { id: _id, ...client } = row;
     return ok({ client, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
+      shape, holds,
       office: (await pool.query("SELECT email, name, is_admin FROM users WHERE kind = 'office' AND status = 'active' ORDER BY name")).rows });
   }
 
@@ -188,8 +216,57 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     }
     await pool.query(
       "UPDATE tenants SET name = COALESCE($2,name), industry = COALESCE($3,industry), notes = COALESCE($4,notes), " +
+      "size = COALESCE($6,size), " +
       "mark = CASE WHEN $5::text IS NULL THEN mark WHEN $5 = '' THEN NULL ELSE $5 END WHERE id = $1",
-      [row.id, body.name || null, body.industry == null ? null : String(body.industry), body.notes == null ? null : String(body.notes), mark]);
+      [row.id, body.name || null, body.industry == null ? null : String(body.industry), body.notes == null ? null : String(body.notes), mark,
+       body.size == null ? null : String(body.size)]);
+    return ok({});
+  }
+
+  /* ── SETTING A CLIENT UP, FROM THE OUTSIDE (§320) ────────────────────
+     Islam: "the setup should happen on the external creatoin not inside ...
+     the wizard should start on the outside window so the people after the
+     setup can get intop the platform ready." So the shape a client has —
+     its companies, its business units, its supporting functions and how
+     each plans, and the words it uses — is written from Forefront's own
+     page, before anybody from the client has signed in.
+
+     EVERY ROW IS MINTED BY THE PLATFORM'S OWN MINTER (frozen.shape, running
+     addCompany · addBusinessUnit · addFunction in the frozen sources): a
+     unit created out here is byte for byte a unit created on Setup's own
+     page, and there is no second answer to what a unit is shaped like
+     (§53.5).
+
+     AND IT REFUSES A CLIENT THAT HAS ALREADY BEEN PLANNED. The answers ARE
+     the list, so this replaces the shapes — safe while a client is being
+     set up, and a way to lose real work once anybody has authored a pillar.
+     Asked of the STORED graph (§42), never of what the browser believes. */
+  if (action === "shapeClient") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's set-up is not yours to change.");
+    const a = (body.shape || {}) as Record<string, unknown>;
+    const list = (k: string) => Array.isArray(a[k]) ? (a[k] as unknown[]).slice(0, 200) : [];
+    const answers = {
+      companies: list("companies"), units: list("units"), functions: list("functions"),
+      words: (a.words && typeof a.words === "object") ? a.words : {}
+    };
+    let held: { plans: number; capabilities: number } | null = null;
+    await withTenant(row.id, async (c) => {
+      const g = await readState(c);
+      held = frozen.holds(g);
+      if (held.plans || held.capabilities) return;
+      await loadGraph(c, frozen.shape(g, answers));
+    });
+    const h = held as { plans: number; capabilities: number } | null;
+    if (h && (h.plans || h.capabilities)) {
+      return no(409, "This client already has a plan in it — " +
+        (h.plans ? h.plans + " authored " + (h.plans === 1 ? "line" : "lines") : "") +
+        (h.plans && h.capabilities ? " and " : "") +
+        (h.capabilities ? h.capabilities + " " + (h.capabilities === 1 ? "capability" : "capabilities") : "") +
+        ". Set-up rewrites the units and functions, so it stops here rather than " +
+        "losing that. Change them on the client's own Setup pages instead.");
+    }
     return ok({});
   }
 
@@ -200,13 +277,18 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const key = slugFor(body.key || name);
     if (!key) return no(400, "That name does not make an address.");
     if (await clientByKey(pool, key)) return no(400, "There is already a client at /" + key + ".");
-    /* THE ROW, THEN THE GRAPH IT STARTS WITH: a client's day one is §67's
-       cleared graph — the product's own clearedGraph() over the seed, loaded
-       into the new tenant by the loader (never the save). MADE HERE, so its
+    /* THE ROW, THEN THE GRAPH IT STARTS WITH — AND IT IS EMPTY (§320).
+       It used to be §67's cleared graph, which keeps the unit and function
+       NAMES and empties their content: right for migration 004, which clears
+       a deployment that is already this client's, and wrong for one that has
+       never existed. Islam: "the default create it's own units and functions
+       that's wrong there is not default. it should open blank if they want."
+       So `frozen.bare()` — the same clear with the shapes emptied too — and
+       the set-up flow writes what the client actually has. MADE HERE, so its
        register is the platform's to write into (§313.31). */
     const seed = JSON.parse(readFileSync(SEED, "utf8"));
-    const t = (await pool.query("INSERT INTO tenants (key, name, industry, notes, made_here) VALUES ($1,$2,$3,$4,true) RETURNING id",
-      [key, name, String(body.industry || ""), String(body.notes || "")])).rows[0];
+    const t = (await pool.query("INSERT INTO tenants (key, name, industry, notes, size, made_here) VALUES ($1,$2,$3,$4,$5,true) RETURNING id",
+      [key, name, String(body.industry || ""), String(body.notes || ""), String(body.size || "")])).rows[0];
     /* THE CLIENT'S OWN NAME, AND NOBODY ON ITS REGISTER. §67's cleared
        graph keeps the bootstrap SMO because a deployment with no way in is
        not a deployment (§21); on the shared schema the platform's admin
@@ -214,7 +296,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        card (setTeam) — so the register starts EMPTY, and the org is the
        client's. The unit and function names stay, as §67 left them, for
        Setup to rename. */
-    const g: any = frozen.cleared(seed);
+    const g: any = frozen.bare(seed);
     g.group.org = name;
     g.people = [];
     for (const k of g.functionKeys || []) if (g.functions[k]) g.functions[k].head = null;

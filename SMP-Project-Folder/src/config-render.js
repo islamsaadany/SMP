@@ -5856,24 +5856,14 @@ function renderOverview(){
      empty state says it in words one line down (§108.10). */
   var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
 
-  /* ── THE DOOR ON THE LANDING PAGE (§318, spec 044) ────────────────────
-     Islam's placement, with the rail entry: a loud door here as well, and
-     ONLY while nothing has been shaped yet. Once the client has units the
-     rail entry is the way in, and a second shouting door on the page the gear
-     lands on would be a control competing with the queue it sits above
-     (§94.15). It is the plan builder's own `.bdoor`, because it is the same
-     kind of thing in the same kind of place (§53.5) — a guided flow offered
-     beside the page's ordinary work. */
-  var setupdoor = wizTenantBare()
-    ? '<div class="bdoor wzdoorbig"><b>Set this client up</b>' +
-        '<span class="bwhy">Nothing has been shaped yet. A guided flow through the ' +
-        'client&rsquo;s name, its year, its business units, its supporting functions and ' +
-        'the words it uses &mdash; then straight into the plans.</span>' +
-        '<button class="bprim" data-setupgo="wizard">Start set-up</button></div>'
-    : "";
-
+  /* ── AND THE DOOR WENT WITH IT (§320) ──────────────────────────────
+     §318 put a "Set this client up" door here, drawn only while the client
+     was bare. The flow it opened lives on Forefront's own platform page now
+     (Islam: "the wizard should start on the outside window"), where a client
+     is shaped BEFORE anybody from it signs in — so by the time somebody is
+     reading this Overview there is nothing left for that door to offer, and
+     a door to a page that no longer exists is worse than none (§61). */
   return cfgHead("Overview", [], null, false, null, null, "") +
-    setupdoor +
     '<div class="ovcols">' +
       '<div class="ovmain">' +
         '<div class="ovh">Waiting on the office' +

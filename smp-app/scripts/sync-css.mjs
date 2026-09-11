@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const SRC = join(here, "..", "..", "SMP-Project-Folder", "src");
 const ORDER = ["_shared.css", "group-extra.css", "config.css", "arrange.css", "present.css",
-               "chat.css", "tour.css", "welcome.css", "builder.css", "wizard.css"];
+               "chat.css", "tour.css", "welcome.css", "builder.css"];
 
 /* SERVED AS FILES, NEVER BUNDLED. The product's own CSS carries a comment
    with a stray close-comment mark in it (§272.8 records the fault and what it eats); a

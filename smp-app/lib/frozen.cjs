@@ -26,7 +26,13 @@ const vm = require("node:vm");
 
 const SRC = path.join(process.cwd(), "..", "SMP-Project-Folder", "src");
 const RULES = path.join(process.cwd(), "lib", "rules.cjs");
-const FILES = ["group-data.js", "config-data.js", "group-render.js", "config-render.js"];
+/* builder.js joins the four for §320: `addFunction` is declared there while
+   `addBusinessUnit` and `addCompany` are in config-data — three minters in
+   two files, and the set-up flow must call the PRODUCT'S, never a second
+   copy of what a unit or a function is shaped like (§53.5). Proved to
+   evaluate in this context before it was relied on, not assumed. */
+const FILES = ["group-data.js", "config-data.js", "group-render.js", "config-render.js",
+               "builder.js"];
 
 /* sync.js's hydrate(), line for line, plus the landing's own builder — ES5,
    because it runs in the frozen sources' world. */
@@ -154,6 +160,118 @@ function __smpPlaceLabel(state, target) { __smpHydrate(state); try { return plac
    client's deployment holds on day one. Hydrated first so clone() and the
    graph's own invariants are the product's. */
 function __smpCleared(state) { __smpHydrate(state); return clearedGraph(state); }
+
+/* ── WHAT A CLIENT IS BORN AS (§320) ──────────────────────────────────
+   Islam: "the default create it's own units and functions that's wrong there
+   is not default. it should open blank if they want." §67's cleared graph
+   keeps the unit and function NAMES and empties their content — right for
+   migration 004, which clears a deployment that is already this client's,
+   and wrong for a client that has never existed: it arrived wearing Raya's
+   ten units and eight functions with nothing in them, so the set-up flow's
+   first list was somebody else's names to rename and wizTenantBare() was
+   false, which is why no set-up invitation ever appeared.
+
+   Cleared FIRST and then emptied, rather than built from nothing: the clear
+   is what removes the figures, the roles, the people, the cycle and the
+   archives, and re-deciding that list here would be a second answer to what
+   day one holds (§53.5). What this adds is only that the shapes go too. */
+function __smpBare(state) {
+  var g = clearedGraph(__smpHydrateAnd(state));
+  g.unitKeys = []; g.units = {};
+  g.functionKeys = []; g.functions = {};
+  g.companyKeys = []; g.companies = {};
+  g.unitRoles = {}; g.koWeights = {};
+  if (g.group) g.group.capabilities = [];
+  return g;
+}
+function __smpHydrateAnd(state) { __smpHydrate(state); return state; }
+
+/* ── AND WHAT THE SET-UP FLOW WRITES INTO IT (§320) ───────────────────
+   Every row is minted by the platform's OWN minter — addCompany then its
+   rename, addBusinessUnit, addFunction — so a unit created out here is byte
+   for byte a unit created on Setup's own page. Companies first, because a
+   unit names the company it belongs to; the words last, because they are a
+   fact about the whole client rather than about any row.
+
+   IT IS A REPLACE, NOT AN AMEND. The flow shows the whole list every time
+   and the answers it posts ARE the list, so a name removed there has to
+   disappear here — and a client being set up has no figures to lose, which
+   is what makes replacing safe at all. The caller hands in a BARE graph each
+   time for that reason, so nothing minted on a previous pass survives to be
+   minted twice.
+
+   AND NO BACKTICK MAY APPEAR IN THIS BLOCK: it lives inside the GLUE raw
+   template literal, so one closes the string and the module stops parsing —
+   which is how this comment first shipped. */
+/* WHAT THIS CLIENT ALREADY HOLDS, so the caller can refuse rather than
+   overwrite it. The flow REPLACES the shapes, which is safe on a client
+   being set up and is not safe on one with plans in it — a pillar, an
+   objective, a SWOT point or a capability all mean somebody has authored
+   something, and the set-up flow is not the place to lose it. Counted by
+   walking the graph rather than by asking whether the lists are empty: a
+   client can legitimately hold three units and no plan, and that must not
+   be refused. */
+function __smpHolds(state) {
+  __smpHydrate(state);
+  var plans = 0, caps = ((GROUP && GROUP.capabilities) || []).length;
+  (UNIT_KEYS || []).concat((FUNCTION_KEYS || []).map(function (k) { return "fn:" + k; }))
+    .forEach(function (t) {
+      var u = String(t).indexOf("fn:") === 0 ? FUNCTIONS[String(t).slice(3)] : UNITS[t];
+      if (!u) return;
+      plans += ((u.items || []).length) + ((u.keyObjectives || []).length);
+      var sw = u.swot || {};
+      plans += ["s", "w", "o", "t"].reduce(function (n, q) { return n + ((sw[q] || []).length); }, 0);
+    });
+  return { plans: plans, capabilities: caps,
+           units: (UNIT_KEYS || []).length, functions: (FUNCTION_KEYS || []).length };
+}
+
+function __smpShape(state, a) {
+  /* THE ANSWERS ARE THE LIST, so the shapes are replaced rather than added
+     to: a unit taken off the flow's list has to disappear here, or walking
+     the flow a second time leaves rows nobody can see any more. Everything
+     that is NOT a shape — the register the team has been added to, the
+     cycle, the group's own words — is left exactly where it is, which is
+     why this empties four lists rather than starting from a bare graph. */
+  state.unitKeys = []; state.units = {};
+  state.functionKeys = []; state.functions = {};
+  state.companyKeys = []; state.companies = {};
+  state.unitRoles = {};
+  __smpHydrate(state);
+  a = a || {};
+  var byName = {};
+  (a.companies || []).forEach(function (c) {
+    var nm = String((c && c.name) || "").trim();
+    if (!nm) return;
+    var k = addCompany();
+    COMPANIES[k].name = nm;
+    byName[nm.toLowerCase()] = k;
+  });
+  (a.units || []).forEach(function (u) {
+    var nm = String((u && u.name) || "").trim();
+    if (!nm) return;
+    var co = byName[String((u && u.company) || "").trim().toLowerCase()] || null;
+    addBusinessUnit(nm, (u && u.prefix) || "", co);
+  });
+  (a.functions || []).forEach(function (f) {
+    var nm = String((f && f.name) || "").trim();
+    if (!nm) return;
+    addFunction(nm, (f && f.format) === "pillars" ? "pillars" : "projects");
+  });
+  /* THE TENANT'S OWN WORDS, through the registry's own entries: the label a
+     client uses is the bu column, which is what every heading reads
+     (L of the key against "bu"). A word left blank leaves the shipped one — a set-up that
+     wrote an empty string would take the word away rather than decline to change it. */
+  var words = a.words || {};
+  (LABELS.entries || []).forEach(function (e) {
+    var v = words[e.key];
+    if (v == null) return;
+    v = String(v).trim();
+    if (v) e.bu = v;
+  });
+  state.labels = LABELS.entries;
+  return state;
+}
 `;
 
 let ctx = null;
@@ -186,4 +304,21 @@ function cleared(graph) {
   const c = context();
   return detach(c.__smpCleared(graph));
 }
-module.exports = { landing, placeLabel, cleared, FILES };
+/* The graph a client is born as when nobody has answered anything: §67's
+   clear with the shapes emptied too (§320). */
+function bare(graph) {
+  const c = context();
+  return detach(c.__smpBare(graph));
+}
+/* What a client already holds, so a set-up cannot overwrite real work
+   (§320). */
+function holds(graph) {
+  const c = context();
+  return detach(c.__smpHolds(graph));
+}
+/* The set-up flow's answers written in by the product's own minters (§320). */
+function shape(graph, answers) {
+  const c = context();
+  return detach(c.__smpShape(graph, answers));
+}
+module.exports = { landing, placeLabel, cleared, bare, shape, holds, FILES };

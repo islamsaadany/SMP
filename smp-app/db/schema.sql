@@ -25,7 +25,8 @@ CREATE TABLE tenants (
   status      text NOT NULL DEFAULT 'active',
   mark        text,                            -- PNG data URI only (§52)
   colors      jsonb NOT NULL DEFAULT '{}'::jsonb,
-  industry    text NOT NULL DEFAULT '',
+  industry    text NOT NULL DEFAULT '',       -- the standard GICS list (§320)
+  size        text NOT NULL DEFAULT '',       -- a band, never a headcount (§320)
   notes       text NOT NULL DEFAULT '',
   made_here   boolean NOT NULL DEFAULT false,  -- §313.31
   created_at  timestamptz NOT NULL DEFAULT now(),

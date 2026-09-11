@@ -227,6 +227,141 @@
     border:1px solid var(--bad); border-radius:8px; padding:9px 11px }
   .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
   @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
+
+  /* ── SETTING A CLIENT UP (§320) ───────────────────────────────────
+     The flow's own dress, in this page's tokens and nothing else — it is
+     the same chrome, the same buttons and the same fields the rest of the
+     platform page uses, with a step rail and a panel beside it. */
+  .wzrail{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px }
+  .wzstep{ display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
+    border:1px solid var(--line); border-radius:999px; background:var(--surface);
+    color:var(--ink-2); font:600 12.5px/1.5 inherit; cursor:pointer }
+  .wzstep:hover:not(:disabled){ border-color:var(--amber-tx) }
+  .wzstep .n{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
+    background:var(--surface-2); color:var(--ink-3);
+    font:600 11px/1 ui-monospace, SFMono-Regular, monospace; flex:none;
+    font-variant-numeric:tabular-nums }
+  .wzstep[aria-current="step"]{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .wzstep[aria-current="step"] .n{ background:var(--amber); color:var(--amber-ink) }
+  .wzstep.done{ color:var(--ink-3) }
+  .wzstep.done .n{ background:var(--good-bg); color:var(--good) }
+  /* DULLED MEANS INERT AND SAYING SO — never merely grey (§61). */
+  .wzstep.later{ border-style:dashed; opacity:.55; cursor:not-allowed }
+
+  .wzgrid{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px; align-items:start }
+  @media (max-width:900px){ .wzgrid{ grid-template-columns:1fr } }
+  .wzq{ font-size:20px; font-weight:600; margin:7px 0 4px; text-wrap:balance }
+  .wzwhy{ color:var(--ink-3); font-size:13.5px; margin:14px 0 0; max-width:62ch }
+  .wzempty{ color:var(--ink-3); font-size:13.5px; font-style:italic; margin:0 }
+  .wzfoot{ display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
+    border-top:1px solid var(--line); flex-wrap:wrap }
+  .wzfnote{ margin-left:auto; color:var(--ink-3); font-size:12.5px }
+
+  /* lists you add to */
+  .wzrows{ display:flex; flex-direction:column; gap:6px }
+  .wzrow{ display:flex; align-items:center; gap:9px }
+  .wzrow .fld{ flex:1 1 160px; min-width:0 }
+  .wzrow .wzname{ flex:1 1 160px; font-weight:600; font-size:14px }
+  .wzrt{ display:flex; align-items:center; gap:7px; flex:none }
+  .wzrt .fld{ width:auto }
+  .wzsub{ font-size:12px; color:var(--ink-3); white-space:nowrap }
+  .wzx{ border:0; background:transparent; color:var(--ink-3); cursor:pointer;
+    font-size:17px; line-height:1; padding:2px 5px; flex:none }
+  .wzx:hover{ color:var(--bad) }
+  .wzadd{ border:1px dashed var(--line); border-radius:8px; padding:8px 11px; color:var(--ink-3);
+    background:transparent; font:600 13px/1.5 inherit; text-align:left; cursor:pointer;
+    width:100%; margin-top:8px }
+  .wzadd:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
+
+  /* a choice */
+  .wzchoices{ display:flex; flex-direction:column; gap:10px }
+  .wzchoice{ display:block; width:100%; text-align:left; padding:12px 13px; border-radius:9px;
+    border:1px solid var(--line); background:var(--surface); color:inherit; font:inherit;
+    cursor:pointer }
+  .wzchoice:hover{ border-color:var(--amber-tx) }
+  .wzchoice[aria-pressed="true"]{ border-color:var(--amber); box-shadow:inset 0 0 0 1px var(--amber) }
+  .wzchoice .cname{ display:block; font-weight:600; font-size:14.5px }
+  .wzchoice .cwhy{ display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px }
+  .wzlaterline{ margin-top:12px; font-size:13px; color:var(--ink-3);
+    border-left:2px solid var(--line); padding-left:11px }
+
+  /* the searchable standard list */
+  .wzpick{ position:relative }
+  .wzpanel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    box-shadow:var(--shadow); max-height:270px; overflow-y:auto; padding:5px }
+  .wzpanel .gp{ font:600 10px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); padding:9px 9px 5px }
+  .wzpanel .opt{ display:block; width:100%; text-align:left; border:0; background:transparent;
+    color:var(--ink); font:inherit; font-size:13.5px; padding:6px 9px; border-radius:6px;
+    cursor:pointer }
+  .wzpanel .opt:hover, .wzpanel .opt:focus-visible{ background:var(--surface-2); outline:none }
+  .wzpanel .opt[aria-selected="true"]{ background:var(--amber-wash); color:var(--amber-tx);
+    font-weight:600 }
+  .wzpanel .nohit{ padding:10px 9px; color:var(--ink-3); font-size:13px; font-style:italic }
+
+  /* the size band */
+  .wzband{ display:flex; flex-wrap:wrap; gap:6px }
+  .wzband button{ border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; padding:6px 11px; font:600 12.5px/1.5 inherit; cursor:pointer;
+    display:flex; flex-direction:column; gap:1px; align-items:flex-start }
+  .wzband button:hover{ border-color:var(--amber-tx) }
+  .wzband button[aria-pressed="true"]{ border-color:var(--amber); background:var(--amber-wash);
+    color:var(--ink) }
+  .wzband .ppl{ font:400 11px/1.3 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3);
+    font-variant-numeric:tabular-nums }
+  .wzband button[aria-pressed="true"] .ppl{ color:var(--amber-tx) }
+
+  /* the words table */
+  .wztbl{ overflow-x:auto; border:1px solid var(--line); border-radius:9px; background:var(--surface) }
+  .wztbl table{ min-width:520px }
+  .wztbl td{ white-space:normal }
+
+  /* what you are building */
+  .wzshape{ position:sticky; top:14px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:15px; box-shadow:var(--shadow) }
+  .wzshape h2{ font-size:13.5px; margin:0 0 2px; font-weight:600 }
+  .wzshape .cap{ color:var(--ink-3); font-size:12.5px; margin:0 0 14px }
+  .wzorg{ border:1px solid var(--amber); border-radius:9px; padding:9px 11px;
+    background:var(--amber-wash); display:flex; align-items:center; gap:9px }
+  .wzorg .nm{ font-weight:700; font-size:14.5px; color:var(--ink) }
+  .wzwho{ margin:6px 0 0; font-size:12px; color:var(--ink-3) }
+  .wzswitch{ display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden;
+    font-size:12px; margin-top:13px }
+  .wzswitch span{ flex:1; text-align:center; padding:5px 6px; color:var(--ink-3) }
+  .wzswitch span.on{ background:var(--ff); color:var(--ff-ink); font-weight:600 }
+  .wzside{ margin-top:13px }
+  .wzsidekey{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); margin-bottom:7px; display:flex;
+    align-items:center; gap:7px }
+  .wzsidekey .ct{ background:var(--surface-2); border-radius:999px; padding:1px 7px;
+    font-size:10.5px; letter-spacing:0; font-variant-numeric:tabular-nums }
+  .wzchips{ display:flex; flex-wrap:wrap; gap:6px }
+  .wzchip{ border:1px solid var(--line); border-radius:6px; padding:4px 9px; font-size:12.5px;
+    background:var(--surface-2); display:flex; align-items:center; gap:7px }
+  .wzchip.unit{ border-left:3px solid var(--ff) }
+  .wzchip.fn{ border-left:3px solid var(--good) }
+  .wzchip .fmt{ font:600 10px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .wznone{ color:var(--ink-3); font-size:12.5px; font-style:italic; padding:3px 0 }
+
+  /* the summary */
+  .wzsumm{ display:flex; flex-direction:column; gap:7px; margin-bottom:18px }
+  .wzline{ display:flex; gap:10px; align-items:baseline; font-size:14px; padding:7px 11px;
+    border:1px solid var(--line-soft); border-radius:8px; background:var(--surface); flex-wrap:wrap }
+  .wzline .sk{ color:var(--ink-3); font-size:12.5px; min-width:136px }
+  .wzline .sv{ font-weight:600 }
+  .wzed{ margin-left:auto; color:var(--amber-tx); font-size:12.5px; border:0;
+    background:transparent; cursor:pointer; font-weight:600 }
+  .wzdoors{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:9px }
+  @media (max-width:620px){ .wzdoors{ grid-template-columns:1fr } }
+  .wzdoor{ border:1px solid var(--line); border-radius:10px; padding:14px; background:var(--surface);
+    display:flex; flex-direction:column; gap:5px; cursor:pointer; text-align:left; font:inherit;
+    color:inherit }
+  .wzdoor:hover{ border-color:var(--amber-tx) }
+  .wzdoor.go{ border-color:var(--amber); background:var(--amber-wash) }
+  .wzdoor .dn{ font-weight:700; font-size:14.5px }
+  .wzdoor .dw{ color:var(--ink-3); font-size:12.5px }
 </style>
 </head>
 <body>
@@ -485,7 +620,9 @@
     if (c.canConfig) {
       var cog = el("span", "ccfg", "Settings");
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
-      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawClient(c.key); };
+      /* THE SAME FLOW, WITH ITS ANSWERS IN IT (§320): there is no second
+         screen for a client, so Settings opens set-up rather than a card. */
+      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawSetup(c.key); };
       cog.addEventListener("click", open);
       cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
       b.appendChild(cog);
@@ -500,260 +637,795 @@
     return b;
   }
 
-  /* ── Adding a client ─────────────────────────────────────────── */
-  function drawNewClient() {
-    clear();
-    title("Add a client");
-    var box = el("div", "rowset");
-    var fields = {};
-    [["Client name", "name", "input"], ["Industry", "industry", "input"], ["Notes", "notes", "textarea"]]
-      .forEach(function (f) {
-        var wrap = el("div");
-        wrap.appendChild(el("span", "lab", f[0]));
-        var i = el(f[2], "fld");
-        fields[f[1]] = i;
-        wrap.appendChild(i);
-        box.appendChild(wrap);
-      });
-    page.appendChild(box);
-    var row = el("div", "row");
-    var make = el("button", "btn amber", "Create the client");
-    make.type = "button";
-    make.addEventListener("click", function () {
-      make.disabled = true;
-      post({ action: "createClient", name: fields.name.value.trim(),
-             industry: fields.industry.value.trim(), notes: fields.notes.value })
-        .then(function (r) {
-          make.disabled = false;
-          if (!r.ok) { say(r.error || "Not created.", true); return; }
-          /* Straight to its configuration: a client created and then left on a
-             list is one nobody has put a team on. */
-          drawClient(r.key);
-        }).catch(function () { make.disabled = false; say("Could not reach the server.", true); });
-    });
-    var back = el("button", "btn", "Cancel");
-    back.type = "button";
-    back.addEventListener("click", function () { go("clients"); });
-    row.appendChild(make); row.appendChild(back);
-    page.appendChild(row);
-    page.appendChild(el("p", "note",
-      "It is created with its own name and nothing else — no units, no people, " +
-      "no plan. The address is made from the name."));
+  /* ── SETTING A CLIENT UP, OUT HERE (§320, spec 044) ──────────────────
+     Islam: "the setup should happen on the external creatoin not inside ..
+     the default create it's own units and functions that's wrong there is
+     not default. it should open blank if they want bu the wizard should
+     start on the outside window so the people after the setup can get intop
+     the platform ready." And, of the card that used to sit beside it: "the
+     wizard should go like the setting one up I don't know what is the
+     chaning it later?"
+
+     So there is ONE screen for a client, and it is this flow. Adding a
+     client opens it at step 1; the Settings mark on a card opens the same
+     flow with the client's own answers already in it, and the rail is how
+     you reach the one thing you came to change. The card that asked for
+     name, industry and notes a second time is gone.
+
+     NOTHING IS DRAFTED. Every step commits when you leave it, and what the
+     flow shows is read back from the server — the data IS the progress
+     (§129), so there is no second copy of the answers to fall out of step
+     and walking away costs nothing.
+
+     EVERY STEP IS ADDRESSED BY ITS KEY, NEVER ITS NUMBER: the mockup's first
+     build read the index in four places and every one was off by one the
+     moment a step moved. */
+  var STEPS = [
+    { k:"client", key:"The client",       label:"The client",     q:"Which client are you setting up?" },
+    { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
+    { k:"cos",    key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
+    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?", later:1 },
+    { k:"fns",    key:"Strategy",         label:"Functions",      q:"What supporting functions are there?" },
+    { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
+    { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" },
+    { k:"done",   key:"Done",             label:"Summary",        q:"" }
+  ];
+  function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
+
+  /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own
+     lib/constants/industries.ts, 45 entries on GICS in its eleven groupings
+     (they are section comments there). Islam: "the industry should be a
+     serachable drop down check the strategy formulation repo we build that
+     list there so you can have a standard list." Carried here as the one
+     list this page offers, so a client reads the same in both products. */
+  var INDUSTRIES = [
+    ["Technology & Communications", ["Technology & Software", "Telecommunications", "Media & Entertainment"]],
+    ["Financial", ["Banking & Finance", "Insurance", "Investment & Asset Management"]],
+    ["Healthcare & Life Sciences", ["Healthcare & Hospitals", "Pharmaceuticals & Biotech", "Medical Devices & Equipment"]],
+    ["Consumer", ["Retail & E-commerce", "Consumer Goods & FMCG", "Food & Beverage", "Hospitality & Tourism", "Restaurants & Food Service"]],
+    ["Industrial", ["Manufacturing", "Automotive", "Aerospace & Defense", "Chemicals", "Industrial Equipment & Machinery"]],
+    ["Energy & Utilities", ["Oil & Gas", "Renewable Energy", "Utilities (Electric, Water, Gas)"]],
+    ["Real Estate & Construction", ["Real Estate & Property", "Construction & Engineering", "Architecture & Design"]],
+    ["Services", ["Professional Services & Consulting", "Legal Services", "Accounting & Audit", "Marketing & Advertising", "HR & Recruitment"]],
+    ["Transportation & Logistics", ["Transportation & Logistics", "Shipping & Maritime", "Aviation & Airlines"]],
+    ["Other Sectors", ["Education & Training", "Agriculture & Farming", "Mining & Metals", "Government & Public Sector", "Non-Profit & NGO", "Sports & Recreation", "Fashion & Apparel", "Printing & Publishing"]],
+    ["", ["Other"]]
+  ];
+  /* A BAND, NEVER A HEADCOUNT, and the same five that product asks for: a
+     number typed once is stale within the year and nobody comes back to
+     correct it, while a band still reads true. */
+  var SIZES = [["startup","Startup","1–10"], ["small","Small","11–50"],
+               ["medium","Medium","51–200"], ["large","Large","201–1000"],
+               ["enterprise","Enterprise","1000+"]];
+  function sizeWord(v){
+    for (var i = 0; i < SIZES.length; i++) if (SIZES[i][0] === v) return SIZES[i][1] + " · " + SIZES[i][2] + " people";
+    return "Not set";
   }
+  /* THE TWO PLAN TYPES THE PLATFORM HAS, and the one it does not — drawn and
+     dulled, Islam's own instruction, so the intended shape stays visible and
+     nothing offers a choice that would open an empty page (§61). */
+  var FORMATS = [["pillars","Pillars",1], ["projects","Capabilities & projects",1],
+                 ["objectives","Objectives & actions",0]];
+  function fmtWord(f){ return f === "objectives" ? "obj" : f === "projects" ? "proj" : "pillars"; }
 
-  /* ── A client's configuration ────────────────────────────────── */
-  function drawClient(key, quiet) {
-    lead(quiet, "Reading…");
-    return post({ action: "client", key: key }).then(function (j) {
+  /* The flow's own state: which client, which step, what has been answered,
+     and what is not yet posted. `S.shape` is the server's answer, edited in
+     place and posted back whole — the answers ARE the list (§320). */
+  var S = null;
+
+  function drawNewClient(){ drawSetup(null); }
+
+  function drawSetup(key){
+    if (!key) {
+      S = { key:null, at:0, seen:[], canEdit:true, dirty:false, shapeDirty:false,
+            client:{ name:"", industry:"", size:"", notes:"", mark:null },
+            shape:{ companies:[], units:[], functions:[], words:{} },
+            team:[], office:[], register:[], seats:null, holds:null };
+      paintSetup();
+      return Promise.resolve();
+    }
+    lead(false, "Reading…");
+    return post({ action:"client", key:key }).then(function (j) {
       if (!j.ok) { clear(); say(j.error || "Could not open that client.", true); return; }
-      settle(function () {
-      var c = j.client;
-
-      var right = el("div");
-      var open = el("button", "btn", "Open the platform");
-      open.type = "button";
-      open.addEventListener("click", function () { location.assign("/" + c.key); });
-      var back = el("button", "btn", "Back to clients");
-      back.type = "button";
-      back.addEventListener("click", function () { go("clients"); });
-      right.appendChild(open); right.appendChild(back);
-      if (j.canEdit) {
-        var save = el("button", "btn solid", "Save");
-        save.type = "button";
-        right.appendChild(save);
-      }
-      title(c.name, right);
-
-      var grid = el("div", "cfg");
-      var left = el("div", "rowset");
-      var inputs = {};
-      [["Client name", "name", "input", c.name],
-       ["Industry", "industry", "input", c.industry || ""],
-       ["Notes", "notes", "textarea", c.notes || ""]].forEach(function (f) {
-        var wrap = el("div");
-        wrap.appendChild(el("span", "lab", f[0]));
-        var i = el(f[2], "fld");
-        i.value = f[3];
-        if (!j.canEdit) i.readOnly = true;
-        inputs[f[1]] = i;
-        wrap.appendChild(i);
-        left.appendChild(wrap);
-      });
-      /* THE ADDRESS IS SHOWN AND NEVER EDITED: a link that has been sent must
-         keep working, and the schema behind it is decided once (spec §7.2). */
-      var addr = el("div");
-      addr.appendChild(el("span", "lab", "Address"));
-      var a = el("input", "fld");
-      a.value = location.origin + "/" + c.key;
-      a.readOnly = true;
-      addr.appendChild(a);
-      addr.appendChild(el("p", "note", "Set once from the name, so a link that has been sent keeps working."));
-      left.appendChild(addr);
-
-      /* ── THE MARK ON THE CLIENT'S DOOR (§313.36) ───────────────────
-         PNG only (§52: an SVG is executable content, a JPEG paints its own
-         ground). Shrunk here to what a door needs — 640px across is four
-         times the height it is drawn at — on a TRANSPARENT canvas, never a
-         white one: the platform's own picture intake paints white first
-         (right for a slide, fatal for a mark, §52.3). Held in `markState`
-         until Save: undefined leaves it alone, "" clears it, a data URI sets
-         it — the three answers the server takes. */
-      var markState;
-      var mk = el("div");
-      mk.appendChild(el("span", "lab", "Mark on this client's door"));
-      var mrow = el("div", "markrow");
-      var preview = el("img"); preview.alt = "";
-      var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
-      function showMark(src) {
-        if (src) { preview.src = src; preview.hidden = false; noneNote.hidden = true; }
-        else { preview.removeAttribute("src"); preview.hidden = true; noneNote.hidden = false; }
-      }
-      mrow.appendChild(preview); mrow.appendChild(noneNote);
-      showMark(c.mark);
-      if (j.canEdit) {
-        var pick = el("input"); pick.type = "file"; pick.accept = "image/png"; pick.hidden = true;
-        var choose = el("button", "btn", "Choose a PNG"); choose.type = "button";
-        choose.addEventListener("click", function () { pick.click(); });
-        var drop = el("button", "btn", "Remove"); drop.type = "button";
-        drop.addEventListener("click", function () { markState = ""; showMark(null); pick.value = ""; });
-        pick.addEventListener("change", function () {
-          var f = pick.files && pick.files[0];
-          if (!f) return;
-          if (f.type !== "image/png") { say("The mark must be a PNG.", true); pick.value = ""; return; }
-          var url = URL.createObjectURL(f);
-          var img = new Image();
-          img.onload = function () {
-            URL.revokeObjectURL(url);
-            var scale = Math.min(1, 640 / img.naturalWidth, 200 / img.naturalHeight);
-            var cv = document.createElement("canvas");
-            cv.width = Math.max(1, Math.round(img.naturalWidth * scale));
-            cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
-            cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
-            var out = cv.toDataURL("image/png");
-            if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
-            markState = out; showMark(out);
-          };
-          img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
-          img.src = url;
-        });
-        mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(pick);
-      }
-      mk.appendChild(mrow);
-      mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + c.key + "/sign-in, the door this client's people sign in at."));
-      left.appendChild(mk);
-      grid.appendChild(left);
-
-      var rightCol = el("div");
-      rightCol.appendChild(el("span", "lab", "Strategy office for this client"));
-      j.team.forEach(function (m) {
-        var tr = el("div", "teamrow");
-        var who = el("div", "who");
-        who.appendChild(el("div", "nm", m.name || m.email));
-        who.appendChild(el("div", "em", m.email));
-        tr.appendChild(who);
-        var sp = el("div", "sp");
-        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§313.29) ──────────
-           Drawn only where the client's register has somebody it could be —
-           which after the platform becomes the entry point is nobody, and this
-           control quietly stops appearing rather than having to be removed. */
-        if (j.canEdit && !c.made_here && (j.register || []).length) {
-          sp.appendChild(registerCell(c.key, m, j.register));
-        }
-        /* THE SEAT IS SET HERE — this is the one place it is written (§53.5),
-           and the consultants page reads it. */
-        sp.appendChild(seatCell(c.key, m, j.seats, j.canEdit));
-        if (j.canEdit) {
-          var rm = el("button", "btn", "Remove");
-          rm.type = "button";
-          rm.addEventListener("click", function () {
-            post({ action: "setTeam", key: c.key, email: m.email, on: false })
-              .then(function (r) { r.ok ? drawClient(c.key, true) : say(r.error || "Not removed.", true); });
-          });
-          sp.appendChild(rm);
-        }
-        tr.appendChild(sp);
-        rightCol.appendChild(tr);
-      });
-
-      if (j.canEdit) {
-        var addRow = el("div", "row");
-        var pick = el("select", "fld");
-        var p0 = el("option", null, "Add somebody from Forefront"); p0.value = "";
-        pick.appendChild(p0);
-        j.office.forEach(function (o) {
-          if (j.team.some(function (m) { return m.email === o.email; })) return;
-          var op = el("option", null, (o.name || o.email) + " — " + o.email);
-          op.value = o.email;
-          pick.appendChild(op);
-        });
-        /* ── AND WHO THEY ARE ON THIS REGISTER (§313.30) ─────────────
-           Nothing is created on a client that already has a register, so
-           adding somebody without saying who they are would give them a seat
-           and no row — a team member who opens the client and is shown
-           nothing. The second list is the answer, and several people may give
-           the same one: on Raya, Forefront works as `smo`. */
-        var asWho = el("select", "fld");
-        var a0 = el("option", null, "…as who on this client's register?");
-        a0.value = "";
-        asWho.appendChild(a0);
-        (j.register || []).forEach(function (r) {
-          var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
-          o.value = r.key;
-          asWho.appendChild(o);
-        });
-        var add = el("button", "btn", "Add");
-        add.type = "button";
-        add.addEventListener("click", function () {
-          if (!pick.value) return;
-          post({ action: "setTeam", key: c.key, email: pick.value, seat: "smoteam",
-                 personKey: asWho.value })
-            .then(function (r) {
-              drawClient(c.key, true).then(function () {
-                if (!r.ok) say(r.error || "Not added.", true);
-              });
-            });
-        });
-        addRow.appendChild(pick);
-        /* NOT ASKED ON A CLIENT MADE HERE (§313.31): adding somebody to the
-           team IS adding them to its register, so the question has already
-           been answered by the act (§93.13). */
-        if (!c.made_here && (j.register || []).length) addRow.appendChild(asWho);
-        addRow.appendChild(add);
-        rightCol.appendChild(addRow);
-      }
-      rightCol.appendChild(el("p", "note",
-        (c.made_here
-          ? "This client's register is built here: adding somebody to the team " +
-            "adds them to it, with their seat. "
-          : "This client brought its own register, so nobody is created on it — " +
-            "each account says which person on it they are, and several may say " +
-            "the same one. The change log records the address they signed in " +
-            "with. ") +
-        "A seat is held on THIS client: Super user holds its access matrix, " +
-        "retiring people and issuing passwords; SMO team runs cycles and " +
-        "corrects plans. A client may have more than one super user. Removing " +
-        "somebody retires their row on this client's register rather than " +
-        "deleting it."));
-      grid.appendChild(rightCol);
-      page.appendChild(grid);
-
-      if (j.canEdit) {
-        save.addEventListener("click", function () {
-          var body = { action: "saveClient", key: c.key, name: inputs.name.value.trim(),
-                       industry: inputs.industry.value.trim(), notes: inputs.notes.value };
-          if (markState !== undefined) body.mark = markState;
-          post(body)
-            .then(function (r) {
-              say(r.ok ? "Saved." : (r.error || "Not saved."), !r.ok);
-              if (r.ok && markState !== undefined) { c.mark = markState || null; markState = undefined; }
-            });
-        });
-      }
-      });
+      S = { key:key, at:0, seen:[], canEdit:!!j.canEdit, dirty:false, shapeDirty:false,
+            client:{ name:j.client.name, industry:j.client.industry || "",
+                     size:j.client.size || "", notes:j.client.notes || "", mark:j.client.mark || null },
+            shape:j.shape || { companies:[], units:[], functions:[], words:{} },
+            team:j.team || [], office:j.office || [], register:j.register || [],
+            seats:j.seats, holds:j.holds, made_here:j.client.made_here };
+      S.shape.companies = S.shape.companies || [];
+      S.shape.units = S.shape.units || [];
+      S.shape.functions = S.shape.functions || [];
+      S.shape.words = S.shape.words || {};
+      paintSetup();
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
     });
+  }
+
+  /* ── Committing ──────────────────────────────────────────────────────
+     Two posts, because they are two things: the client's own record, and
+     the shape of what it holds. Each goes only when it has changed, and a
+     refusal is SAID rather than swallowed — the shape's refusal is the one
+     that matters (a client with a plan in it is not re-shaped, §320). */
+  function commitSetup(){
+    if (!S || !S.key || !S.canEdit) return Promise.resolve(true);
+    var chain = Promise.resolve(true);
+    if (S.dirty) {
+      var b = { action:"saveClient", key:S.key, name:S.client.name,
+                industry:S.client.industry, size:S.client.size, notes:S.client.notes };
+      if (S.markState !== undefined) b.mark = S.markState;
+      chain = chain.then(function (okSoFar) {
+        return post(b).then(function (r) {
+          if (r.ok) { S.dirty = false; if (S.markState !== undefined) { S.client.mark = S.markState || null; S.markState = undefined; } }
+          else setupSay(r.error || "Not saved.", true);
+          return okSoFar && !!r.ok;
+        });
+      });
+    }
+    if (S.shapeDirty) {
+      chain = chain.then(function (okSoFar) {
+        return post({ action:"shapeClient", key:S.key, shape:S.shape }).then(function (r) {
+          if (r.ok) S.shapeDirty = false;
+          else setupSay(r.error || "The set-up was not saved.", true);
+          return okSoFar && !!r.ok;
+        });
+      });
+    }
+    return chain.catch(function () { setupSay("Could not reach the server.", true); return false; });
+  }
+
+  /* ONE NOTICE, REPLACED — never a pile of them. `say()` appends, which is
+     right for a page that is drawn once and wrong for a screen you press
+     Save on repeatedly: that is how two "Saved." lines ended up stacked. */
+  function setupSay(msg, bad){
+    var n = document.getElementById("setupsaid");
+    if (!n) return;
+    n.textContent = msg || "";
+    n.className = msg ? (bad ? "err" : "said") : "";
+    n.hidden = !msg;
+  }
+
+  function goStep(i){
+    if (i < 0 || i > STEPS.length - 1 || STEPS[i].later) return;
+    if (S.seen.indexOf(S.at) < 0) S.seen.push(S.at);
+    commitSetup().then(function () { S.at = i; paintSetup(); window.scrollTo({ top:0 }); });
+  }
+
+  /* ── The flow ────────────────────────────────────────────────────── */
+  function paintSetup(){
+    clear();
+    var s = STEPS[S.at];
+    var right = el("div");
+    if (S.key) {
+      var closeb = el("button", "btn solid", "Save and close");
+      closeb.type = "button";
+      closeb.addEventListener("click", function () {
+        commitSetup().then(function (good) { if (good) go("clients"); });
+      });
+      right.appendChild(closeb);
+    }
+    var leave = el("button", "btn", S.key ? "Back to clients" : "Cancel");
+    leave.type = "button";
+    leave.addEventListener("click", function () { go("clients"); });
+    right.appendChild(leave);
+    title(S.key ? "Set up " + S.client.name : "Add a client", right);
+
+    /* the rail */
+    var rail = el("nav", "wzrail");
+    rail.setAttribute("aria-label", "Set-up steps");
+    STEPS.forEach(function (st, i) {
+      var done = S.seen.indexOf(i) >= 0 && i !== S.at;
+      var b = el("button", "wzstep" + (done ? " done" : "") + (st.later ? " later" : ""));
+      b.type = "button";
+      if (i === S.at) b.setAttribute("aria-current", "step");
+      if (st.later) b.disabled = true;
+      var n = el("span", "n", done ? "✓" : String(i + 1));
+      b.appendChild(n);
+      b.appendChild(document.createTextNode(st.label));
+      if (!st.later) b.addEventListener("click", function () { goStep(i); });
+      rail.appendChild(b);
+    });
+    page.appendChild(rail);
+
+    var grid = el("div", "wzgrid");
+    var col = el("div");
+    col.appendChild(el("span", "lab", s.key));
+    col.appendChild(el("h2", "wzq", s.q || (S.client.name + " is set up.")));
+    var why = s.k === "units"
+        ? "Add as many as this client has. Leave it empty and it opens blank — nothing is put here that nobody asked for."
+      : s.k === "fns"
+        ? "Each function can plan its own way, and that decides what its pages hold. It stays changeable until the function has a plan in it."
+      : s.k === "done"
+        ? "Everything here stays editable afterwards. Nothing is locked."
+      : "";
+    if (why) col.appendChild(el("p", "wzwhy", why));
+    var bodyBox = el("div");
+    bodyBox.appendChild(setupBody(s.k));
+    col.appendChild(bodyBox);
+
+    var foot = el("div", "wzfoot");
+    var back = el("button", "btn", "Back");
+    back.type = "button"; back.disabled = S.at === 0;
+    back.addEventListener("click", function () { goStep(S.at - 1); });
+    foot.appendChild(back);
+    if (S.at < STEPS.length - 1) {
+      var next = el("button", "btn amber", "Next");
+      next.type = "button";
+      next.addEventListener("click", function () {
+        if (!S.key) { createThenGo(); return; }
+        goStep(S.at + 1 + (STEPS[S.at + 1] && STEPS[S.at + 1].later ? 1 : 0));
+      });
+      foot.appendChild(next);
+    }
+    var fn = el("span", "wzfnote", "Nothing is final — every answer stays editable afterwards.");
+    foot.appendChild(fn);
+    col.appendChild(foot);
+    var said = el("p"); said.id = "setupsaid"; said.hidden = true;
+    col.appendChild(said);
+    grid.appendChild(col);
+
+    grid.appendChild(setupShapePanel());
+    page.appendChild(grid);
+  }
+
+  /* THE FIRST STEP IS WHAT CREATES THE CLIENT: the address is minted from
+     the name and set once, so it has to exist before anything else can be
+     written against it — and that is also what lets somebody walk away
+     half-way and come back. */
+  function createThenGo(){
+    var nm = String(S.client.name || "").trim();
+    if (!nm) { setupSay("A client needs a name before anything else can be set up.", true); return; }
+    setupSay("Creating…");
+    post({ action:"createClient", name:nm, industry:S.client.industry, size:S.client.size, notes:S.client.notes })
+      .then(function (r) {
+        if (!r.ok) { setupSay(r.error || "Not created.", true); return; }
+        var mark = S.markState, at = S.at;
+        drawSetup(r.key).then(function () {
+          if (!S) return;
+          if (mark !== undefined) { S.markState = mark; S.dirty = true; }
+          S.seen = [at];
+          S.at = at + 1;
+          commitSetup().then(function () { paintSetup(); });
+        });
+      }).catch(function () { setupSay("Could not reach the server.", true); });
+  }
+
+  /* ── What you are building ───────────────────────────────────────── */
+  function setupShapePanel(){
+    var a = el("aside", "wzshape");
+    a.setAttribute("aria-label", "What you are building");
+    a.appendChild(el("h2", null, "What you are building"));
+    a.appendChild(el("p", "cap", S.at >= stepIdx("fns")
+      ? (S.client.name || "This client") + ", as answered so far."
+      : "It fills in as you answer."));
+    var org = el("div", "wzorg");
+    org.appendChild(el("span", "nm", S.client.name || "The client"));
+    a.appendChild(org);
+    if (S.client.industry || S.client.size) {
+      a.appendChild(el("p", "wzwho",
+        [S.client.industry, S.client.size ? sizeWord(S.client.size) : ""].filter(Boolean).join(" · ")));
+    }
+    if (S.at < stepIdx("units")) {
+      a.appendChild(el("p", "wznone", "Its business units come next."));
+      return a;
+    }
+    var sw = el("div", "wzswitch");
+    var s1 = el("span", "on", "Strategic"), s2 = el("span", null, "Functions");
+    sw.appendChild(s1); sw.appendChild(s2);
+    a.appendChild(sw);
+    a.appendChild(chipBlock("Business units", S.shape.units, "unit", "None — this client can open blank."));
+    if (S.at >= stepIdx("fns")) a.appendChild(chipBlock("Supporting functions", S.shape.functions, "fn", "None."));
+    return a;
+  }
+  function chipBlock(label, list, cls, empty){
+    var d = el("div", "wzside");
+    var k = el("div", "wzsidekey", label);
+    var ct = el("span", "ct", String(list.length));
+    k.appendChild(ct);
+    d.appendChild(k);
+    if (!list.length) { d.appendChild(el("div", "wznone", empty)); return d; }
+    var chips = el("div", "wzchips");
+    list.forEach(function (x) {
+      var c = el("span", "wzchip " + cls, x.name);
+      if (cls === "fn") c.appendChild(el("span", "fmt", fmtWord(x.format)));
+      chips.appendChild(c);
+    });
+    d.appendChild(chips);
+    return d;
+  }
+
+  /* ── Each step ───────────────────────────────────────────────────── */
+  function setupBody(k){
+    var box = el("div");
+    if (k === "client") return clientStep(box);
+    if (k === "units") return listStep(box, S.shape.units, "unit");
+    if (k === "cos") return companiesStep(box);
+    if (k === "caps") return capsStep(box);
+    if (k === "fns") return listStep(box, S.shape.functions, "fn");
+    if (k === "words") return wordsStep(box);
+    if (k === "office") return officeStep(box);
+    return summaryStep(box);
+  }
+
+  function field(box, label, value, set, note){
+    var w = el("div");
+    w.appendChild(el("span", "lab", label));
+    var i = el("input", "fld");
+    i.type = "text"; i.value = value || "";
+    if (!S.canEdit) i.readOnly = true;
+    i.addEventListener("input", function () { set(i.value); S.dirty = true; });
+    w.appendChild(i);
+    if (note) w.appendChild(el("p", "note", note));
+    box.appendChild(w);
+    return i;
+  }
+
+  function clientStep(box){
+    var rs = el("div", "rowset");
+    field(rs, "The client's name", S.client.name, function (v) {
+      S.client.name = v;
+      var o = document.querySelector(".wzorg .nm");
+      if (o) o.textContent = v || "The client";
+    }, "What the platform is named after, everywhere — the chrome, the review deck and every email that leaves.");
+
+    /* the searchable standard list */
+    var iw = el("div");
+    iw.appendChild(el("span", "lab", "Industry"));
+    var pick = el("div", "wzpick");
+    var inp = el("input", "fld");
+    inp.type = "text"; inp.value = S.client.industry || "";
+    inp.setAttribute("placeholder", "Type to search the list…");
+    inp.setAttribute("autocomplete", "off");
+    if (!S.canEdit) inp.readOnly = true;
+    var panel = el("div", "wzpanel");
+    panel.setAttribute("role", "listbox");
+    panel.hidden = true;
+    function fill(q){
+      panel.textContent = "";
+      var needle = String(q || "").trim().toLowerCase(), hits = 0;
+      INDUSTRIES.forEach(function (g) {
+        var keep = g[1].filter(function (n) { return !needle || n.toLowerCase().indexOf(needle) > -1; });
+        if (!keep.length) return;
+        hits += keep.length;
+        if (g[0]) panel.appendChild(el("div", "gp", g[0]));
+        keep.forEach(function (n) {
+          var b = el("button", "opt", n);
+          b.type = "button";
+          if (n === S.client.industry) b.setAttribute("aria-selected", "true");
+          b.addEventListener("click", function () {
+            S.client.industry = n; S.dirty = true; inp.value = n; panel.hidden = true;
+            var w = document.querySelector(".wzshape .wzwho");
+            if (w) w.textContent = [n, S.client.size ? sizeWord(S.client.size) : ""].filter(Boolean).join(" · ");
+          });
+          panel.appendChild(b);
+        });
+      });
+      if (!hits) panel.appendChild(el("div", "nohit", "Nothing matches that — pick Other if none of it fits."));
+    }
+    inp.addEventListener("focus", function () { fill(""); panel.hidden = false; });
+    inp.addEventListener("input", function () { fill(inp.value); panel.hidden = false; });
+    pick.appendChild(inp); pick.appendChild(panel);
+    iw.appendChild(pick);
+    iw.appendChild(el("p", "note", "The standard list — the same one Strategy Formulation uses, so a client reads the same in both."));
+    rs.appendChild(iw);
+
+    /* the size band */
+    var zw = el("div");
+    zw.appendChild(el("span", "lab", "Size"));
+    var band = el("div", "wzband");
+    band.setAttribute("role", "group");
+    SIZES.forEach(function (z) {
+      var b = el("button", null, z[1]);
+      b.type = "button";
+      b.setAttribute("aria-pressed", S.client.size === z[0] ? "true" : "false");
+      b.appendChild(el("span", "ppl", z[2] + " people"));
+      b.addEventListener("click", function () {
+        if (!S.canEdit) return;
+        S.client.size = z[0]; S.dirty = true;
+        Array.prototype.forEach.call(band.children, function (o) {
+          o.setAttribute("aria-pressed", o === b ? "true" : "false");
+        });
+      });
+      band.appendChild(b);
+    });
+    zw.appendChild(band);
+    rs.appendChild(zw);
+
+    var nw = el("div");
+    nw.appendChild(el("span", "lab", "Notes"));
+    var ta = el("textarea", "fld");
+    ta.rows = 2; ta.value = S.client.notes || "";
+    if (!S.canEdit) ta.readOnly = true;
+    ta.addEventListener("input", function () { S.client.notes = ta.value; S.dirty = true; });
+    nw.appendChild(ta);
+    rs.appendChild(nw);
+
+    var aw = el("div");
+    aw.appendChild(el("span", "lab", "Its address here"));
+    var a = el("input", "fld");
+    a.value = S.key ? location.origin + "/" + S.key : location.origin + "/…";
+    a.readOnly = true;
+    aw.appendChild(a);
+    aw.appendChild(el("p", "note", S.key
+      ? "Made from the name and set once, so a link that has been sent keeps working."
+      : "Made from the name when the client is created, and never changed after that."));
+    rs.appendChild(aw);
+
+    rs.appendChild(markBlock());
+    box.appendChild(rs);
+    return box;
+  }
+
+  /* ── THE MARK ON THE CLIENT'S DOOR (§313.36) ───────────────────────
+     PNG only (§52: an SVG is executable content, a JPEG paints its own
+     ground). Shrunk here to what a door needs, on a TRANSPARENT canvas.
+
+     AND THE BUTTON IS WIRED TO THE FILE INPUT, which it was not: `var file`
+     is `var pick` no longer — the old card declared `var pick` for this
+     input AND again sixty lines later for the "add somebody" select, and
+     `var` is function-scoped, so pressing Choose a PNG called .click() on a
+     dropdown and opened nothing (§56.7, and Islam pressed it). */
+  function markBlock(){
+    var mk = el("div");
+    mk.appendChild(el("span", "lab", "Mark on this client's door"));
+    var mrow = el("div", "markrow");
+    var preview = el("img"); preview.alt = "";
+    var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
+    function show(src){
+      if (src) { preview.src = src; preview.hidden = false; noneNote.hidden = true; }
+      else { preview.removeAttribute("src"); preview.hidden = true; noneNote.hidden = false; }
+    }
+    mrow.appendChild(preview); mrow.appendChild(noneNote);
+    show(S.markState !== undefined ? S.markState : S.client.mark);
+    if (S.canEdit) {
+      var file = el("input"); file.type = "file"; file.accept = "image/png"; file.hidden = true;
+      var choose = el("button", "btn", "Choose a PNG"); choose.type = "button";
+      choose.addEventListener("click", function () { file.click(); });
+      var drop = el("button", "btn", "Remove"); drop.type = "button";
+      drop.addEventListener("click", function () { S.markState = ""; S.dirty = true; show(null); file.value = ""; });
+      file.addEventListener("change", function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        if (f.type !== "image/png") { setupSay("The mark must be a PNG.", true); file.value = ""; return; }
+        var url = URL.createObjectURL(f);
+        var img = new Image();
+        img.onload = function () {
+          URL.revokeObjectURL(url);
+          var scale = Math.min(1, 640 / img.naturalWidth, 200 / img.naturalHeight);
+          var cv = document.createElement("canvas");
+          cv.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+          var out = cv.toDataURL("image/png");
+          if (out.length > 400000) { setupSay("That picture is too large even shrunk — try a simpler PNG.", true); return; }
+          S.markState = out; S.dirty = true; show(out);
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); setupSay("That file could not be read as a picture.", true); };
+        img.src = url;
+      });
+      mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(file);
+    }
+    mk.appendChild(mrow);
+    mk.appendChild(el("p", "note", "Shown on " + (S.key ? location.origin + "/" + S.key : "the client") +
+      "/sign-in, the door this client's people sign in at."));
+    return mk;
+  }
+
+  /* A list you add to — units and functions are the same control, and the
+     only difference is whether the row carries a plan type. */
+  function listStep(box, list, kind){
+    if (!list.length) {
+      box.appendChild(el("p", "wzempty",
+        kind === "unit" ? "No business units yet." : "No supporting functions yet."));
+    } else {
+      var rows = el("div", "wzrows");
+      list.forEach(function (row, n) {
+        var r = el("div", "wzrow");
+        var nm = el("input", "fld");
+        nm.type = "text"; nm.value = row.name;
+        if (!S.canEdit) nm.readOnly = true;
+        nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
+        r.appendChild(nm);
+        if (kind === "fn") {
+          var tail = el("span", "wzrt");
+          tail.appendChild(el("span", "wzsub", "plans in"));
+          var sel = el("select", "fld");
+          FORMATS.forEach(function (f) {
+            var o = el("option", null, f[1] + (f[2] ? "" : " (later)"));
+            o.value = f[0];
+            if (!f[2]) o.disabled = true;
+            if (row.format === f[0]) o.selected = true;
+            sel.appendChild(o);
+          });
+          if (!S.canEdit) sel.disabled = true;
+          sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; paintSetup(); });
+          tail.appendChild(sel);
+          r.appendChild(tail);
+        }
+        if (S.canEdit) {
+          var x = el("button", "wzx", "×");
+          x.type = "button";
+          x.setAttribute("aria-label", "Remove " + row.name);
+          x.addEventListener("click", function () { list.splice(n, 1); S.shapeDirty = true; paintSetup(); });
+          r.appendChild(x);
+        }
+        rows.appendChild(r);
+      });
+      box.appendChild(rows);
+    }
+    if (S.canEdit) {
+      var add = el("button", "wzadd", kind === "unit" ? "+ Add a business unit" : "+ Add a supporting function");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:"pillars" });
+        S.shapeDirty = true;
+        paintSetup();
+        var boxes = document.querySelectorAll(".wzrow .fld");
+        if (boxes.length) boxes[boxes.length - 1].focus();
+      });
+      box.appendChild(add);
+    }
+    box.appendChild(el("p", "wzwhy", kind === "unit"
+      ? "A unit plans in pillars, with key measures and tactics under each. Its code is made from the name and prefixes every pillar on it."
+      : "A function's plan type decides what its pages hold, and it stays changeable until the function has a plan in it."));
+    return box;
+  }
+
+  function companiesStep(box){
+    var has = S.shape.companies.length > 0;
+    var ch = el("div", "wzchoices");
+    [[false, "No — the units sit directly under " + (S.client.name || "this client"),
+      "One less layer to explain. Companies can be added later without touching the plans."],
+     [true, "Yes — group them into companies",
+      "A company holds several units and decides who sees across them. It carries no plan of its own."]]
+      .forEach(function (c) {
+        var b = el("button", "wzchoice");
+        b.type = "button";
+        b.setAttribute("aria-pressed", c[0] === has ? "true" : "false");
+        b.appendChild(el("span", "cname", c[1]));
+        b.appendChild(el("span", "cwhy", c[2]));
+        b.addEventListener("click", function () {
+          if (!S.canEdit) return;
+          if (!c[0]) { S.shape.companies = []; S.shape.units.forEach(function (u) { u.company = ""; }); }
+          else if (!S.shape.companies.length) S.shape.companies.push({ name:"" });
+          S.shapeDirty = true;
+          paintSetup();
+        });
+        ch.appendChild(b);
+      });
+    box.appendChild(ch);
+    if (!has) return box;
+
+    var rows = el("div", "wzrows");
+    S.shape.companies.forEach(function (co, n) {
+      var r = el("div", "wzrow");
+      var nm = el("input", "fld");
+      nm.type = "text"; nm.value = co.name;
+      nm.setAttribute("placeholder", "The company's name");
+      nm.addEventListener("input", function () { co.name = nm.value; S.shapeDirty = true; });
+      r.appendChild(nm);
+      var x = el("button", "wzx", "×");
+      x.type = "button"; x.setAttribute("aria-label", "Remove");
+      x.addEventListener("click", function () {
+        var gone = co.name;
+        S.shape.companies.splice(n, 1);
+        S.shape.units.forEach(function (u) { if (u.company === gone) u.company = ""; });
+        S.shapeDirty = true; paintSetup();
+      });
+      r.appendChild(x);
+      rows.appendChild(r);
+    });
+    box.appendChild(rows);
+    var add = el("button", "wzadd", "+ Add a company");
+    add.type = "button";
+    add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); S.shapeDirty = true; paintSetup(); });
+    box.appendChild(add);
+
+    if (S.shape.units.length) {
+      box.appendChild(el("div", "lab", "Which company each unit belongs to"));
+      var ur = el("div", "wzrows");
+      S.shape.units.forEach(function (u) {
+        var r = el("div", "wzrow");
+        r.appendChild(el("span", "wzname", u.name || "(unnamed)"));
+        var tail = el("span", "wzrt");
+        var sel = el("select", "fld");
+        var none = el("option", null, "Its own — no company");
+        none.value = "";
+        sel.appendChild(none);
+        S.shape.companies.forEach(function (co) {
+          if (!co.name) return;
+          var o = el("option", null, co.name);
+          o.value = co.name;
+          if (u.company === co.name) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.addEventListener("change", function () { u.company = sel.value; S.shapeDirty = true; });
+        tail.appendChild(sel);
+        r.appendChild(tail);
+        ur.appendChild(r);
+      });
+      box.appendChild(ur);
+    }
+    return box;
+  }
+
+  /* DRAWN AND DULLED, and it says which half is dulled: capabilities are
+     LIVE in the platform — held by a function that plans in Capabilities &
+     projects, which the Functions step offers — and what does not exist is a
+     capability standing on its own beside the business units. */
+  function capsStep(box){
+    box.appendChild(el("p", "wzwhy",
+      "A capability is strategic work sitting beside the business units, planned in pillars and owned by a function head."));
+    var l = el("div", "wzlaterline");
+    l.appendChild(el("b", null, "Not this step — a build of its own. "));
+    l.appendChild(document.createTextNode(
+      "Capabilities are live in the platform, but they are held by a function that plans in " +
+      "Capabilities & projects — set that on the Functions step and they work today. What does not " +
+      "exist is a capability standing on its own beside the business units, which is what this step " +
+      "asks for."));
+    box.appendChild(l);
+    return box;
+  }
+
+  /* THE WORDS THE CLIENT USES, and only the ones it has: nothing here asks
+     what a client calls a thing the client does not have. */
+  function wordsStep(box){
+    var WORDS = [
+      ["unitword", "Business unit", "Business Unit", "Every client has these", true],
+      ["pillar", "Pillar", "Pillar", "Units plan in pillars", true],
+      ["measure", "Key measure", "Key Measure", "Under a pillar", true],
+      ["tactic", "Tactic", "Tactic", "Under a pillar", true],
+      ["keyobj", "Key objectives", "Key Objectives", "A subject's own scorecard", true]
+    ];
+    var wrap = el("div", "wztbl");
+    var t = el("table");
+    var thead = el("thead"), hr = el("tr");
+    ["What it is", "What this client calls it", "Why we ask"].forEach(function (h) {
+      hr.appendChild(el("th", null, h));
+    });
+    thead.appendChild(hr); t.appendChild(thead);
+    var tb = el("tbody");
+    WORDS.forEach(function (w) {
+      var tr = el("tr");
+      var c1 = el("td"); c1.appendChild(el("b", null, w[1])); tr.appendChild(c1);
+      var c2 = el("td");
+      var i = el("input", "fld");
+      i.type = "text";
+      i.value = S.shape.words[w[0]] != null ? S.shape.words[w[0]] : w[2];
+      if (!S.canEdit) i.readOnly = true;
+      i.addEventListener("input", function () { S.shape.words[w[0]] = i.value; S.shapeDirty = true; });
+      c2.appendChild(i); tr.appendChild(c2);
+      tr.appendChild(el("td", "muted", w[3]));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); wrap.appendChild(t);
+    box.appendChild(wrap);
+    box.appendChild(el("p", "wzwhy",
+      "Only the words this client actually has. A box left as it is keeps the platform's own word."));
+    return box;
+  }
+
+  /* The office step is the card's team half, unchanged: these controls each
+     write on the press, because adding somebody to a client IS an act and
+     never a draft (§320). */
+  function officeStep(box){
+    if (!S.key) { box.appendChild(el("p", "wzempty", "The client is created on the first step.")); return box; }
+    (S.team || []).forEach(function (m) {
+      var tr = el("div", "teamrow");
+      var who = el("div", "who");
+      who.appendChild(el("div", "nm", m.name || m.email));
+      who.appendChild(el("div", "em", m.email));
+      tr.appendChild(who);
+      var sp = el("div", "sp");
+      if (S.canEdit && !S.made_here && (S.register || []).length) sp.appendChild(registerCell(S.key, m, S.register));
+      sp.appendChild(seatCell(S.key, m, S.seats, S.canEdit));
+      if (S.canEdit) {
+        var rm = el("button", "btn", "Remove");
+        rm.type = "button";
+        rm.addEventListener("click", function () {
+          post({ action:"setTeam", key:S.key, email:m.email, on:false })
+            .then(function (r) { r.ok ? refreshTeam() : setupSay(r.error || "Not removed.", true); });
+        });
+        sp.appendChild(rm);
+      }
+      tr.appendChild(sp);
+      box.appendChild(tr);
+    });
+    if (S.canEdit) {
+      var row = el("div", "row");
+      var who = el("select", "fld");
+      var p0 = el("option", null, "Add somebody from Forefront"); p0.value = "";
+      who.appendChild(p0);
+      (S.office || []).forEach(function (o) {
+        if ((S.team || []).some(function (m) { return m.email === o.email; })) return;
+        var op = el("option", null, (o.name || o.email) + " — " + o.email);
+        op.value = o.email;
+        who.appendChild(op);
+      });
+      var asWho = el("select", "fld");
+      var a0 = el("option", null, "…as who on this client's register?");
+      a0.value = "";
+      asWho.appendChild(a0);
+      (S.register || []).forEach(function (r) {
+        var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
+        o.value = r.key;
+        asWho.appendChild(o);
+      });
+      var add = el("button", "btn", "Add");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        if (!who.value) return;
+        post({ action:"setTeam", key:S.key, email:who.value, seat:"smoteam", personKey:asWho.value })
+          .then(function (r) { r.ok ? refreshTeam() : setupSay(r.error || "Not added.", true); });
+      });
+      row.appendChild(who);
+      if (!S.made_here && (S.register || []).length) row.appendChild(asWho);
+      row.appendChild(add);
+      box.appendChild(row);
+    }
+    box.appendChild(el("p", "wzwhy",
+      "These are Forefront's people, not the client's. A seat is held on THIS client: " +
+      "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
+      "cycles and corrects plans. The client's own register — its heads, custodians and their " +
+      "passwords — is built inside the platform once it opens."));
+    return box;
+  }
+  /* The team controls write at once, so the flow re-reads rather than
+     guessing what the server now holds. */
+  function refreshTeam(){
+    var at = S.at, seen = S.seen.slice();
+    drawSetup(S.key).then(function () { if (S) { S.at = at; S.seen = seen; paintSetup(); } });
+  }
+
+  function summaryStep(box){
+    var lines = [
+      ["The client", (S.client.name || "—") + (S.key ? " · /" + S.key : ""), "client"],
+      ["Industry", S.client.industry || "Not set", "client"],
+      ["Size", sizeWord(S.client.size), "client"],
+      ["Business units", S.shape.units.length
+        ? S.shape.units.map(function (u) { return u.name || "(unnamed)"; }).join(" · ") : "None yet", "units"],
+      ["Companies", S.shape.companies.length
+        ? S.shape.companies.map(function (c) { return c.name || "(unnamed)"; }).join(" · ")
+        : "None — units sit under " + (S.client.name || "the client"), "cos"],
+      ["Supporting functions", S.shape.functions.length
+        ? S.shape.functions.map(function (f) { return f.name + " (" + fmtWord(f.format) + ")"; }).join(" · ")
+        : "None yet", "fns"],
+      ["The office", (S.team || []).length
+        ? S.team.map(function (m) { return m.name || m.email; }).join(" · ") : "Nobody yet", "office"]
+    ];
+    var summ = el("div", "wzsumm");
+    lines.forEach(function (l) {
+      var r = el("div", "wzline");
+      r.appendChild(el("span", "sk", l[0]));
+      r.appendChild(el("span", "sv", l[1]));
+      var b = el("button", "wzed", "Change");
+      b.type = "button";
+      b.addEventListener("click", function () { goStep(stepIdx(l[2])); });
+      r.appendChild(b);
+      summ.appendChild(r);
+    });
+    box.appendChild(summ);
+    box.appendChild(el("div", "lab", "Where to now"));
+    var doors = el("div", "wzdoors");
+    var d1 = el("button", "wzdoor go");
+    d1.type = "button";
+    d1.appendChild(el("span", "dn", "Open the platform"));
+    d1.appendChild(el("span", "dw", "Go into " + (S.client.name || "the client") + " and start the plans."));
+    d1.addEventListener("click", function () {
+      commitSetup().then(function (good) { if (good && S.key) location.assign("/" + S.key); });
+    });
+    var d2 = el("button", "wzdoor");
+    d2.type = "button";
+    d2.appendChild(el("span", "dn", "Back to clients"));
+    d2.appendChild(el("span", "dw", "Leave it here. Everything is saved, and the card is where you pick it up."));
+    d2.addEventListener("click", function () {
+      commitSetup().then(function (good) { if (good) go("clients"); });
+    });
+    doors.appendChild(d1); doors.appendChild(d2);
+    box.appendChild(doors);
+    return box;
   }
 
   /* A LIST, NOT A MATCH (§87: a name is never an identifier). The register is
@@ -781,9 +1453,8 @@
              wrong way round again in the same file): `settle()` replaces the
              page, so a refusal said before it is wiped a moment later and the
              control simply springs back with no explanation. */
-          drawClient(clientKey, true).then(function () {
-            if (!r.ok) say(r.error || "Not changed.", true);
-          });
+          refreshTeam();
+          if (!r.ok) setupSay(r.error || "Not changed.", true);
         });
     });
     wrap.appendChild(sel);
@@ -800,8 +1471,8 @@
       if (editable && member.seat !== s.key) {
         b.addEventListener("click", function () {
           post({ action: "setTeam", key: clientKey, email: member.email, seat: s.key })
-            .then(function (r) { r.ok ? drawClient(clientKey, true)
-                                      : say(r.error || "Not changed.", true); });
+            .then(function (r) { r.ok ? refreshTeam()
+                                      : setupSay(r.error || "Not changed.", true); });
         });
       }
       wrap.appendChild(b);

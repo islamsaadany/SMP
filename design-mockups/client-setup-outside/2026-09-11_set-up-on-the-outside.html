@@ -303,7 +303,7 @@
   <div class="ptitle">
     <h1 id="ptitle">Set up a client</h1>
     <span class="right">
-      <span class="note" style="margin:0" id="progress">Step 1 of 9</span>
+      <span class="note" style="margin:0" id="progress">Step 1 of 8</span>
       <button class="btn" type="button">Save and close</button>
     </span>
   </div>
@@ -338,7 +338,7 @@
     <li><b>Set-up happens out here, before anybody from the client signs in.</b> Press <i>Add a client</i> and you walk the whole thing on Forefront's own page. Their people then open a platform that is already shaped.</li>
     <li><b>The client's details are step 1, not a screen of their own.</b> Name, industry, notes and the mark were being asked twice — once to create, once on the card. Asked once, here, and the client is created the moment the name is answered so the address exists and you can leave and come back.</li>
     <li><b>The client is described from the standard list.</b> Industry is Strategy Formulation&rsquo;s own 45 entries on GICS, searched rather than scrolled, so a client reads the same in both products &mdash; one list, read from one place, not retyped here. Size is that product&rsquo;s five bands rather than a headcount: a number typed once is stale within the year and nobody comes back to it.</li>
-    <li><b>The horizon is not the reporting cycle.</b> It is the one far year long-term targets are measured by, set once for the client &mdash; the platform prints <i>Target by 2029</i> beside them. When a cycle covers from and to, when figures are due and which month it is measured at are set inside the platform each time a cycle opens, and the step says so.</li>
+    <li><b>Nothing here asks for a date.</b> Set-up is what the client IS; every year in the platform arrives with the work. The long-term horizon comes in on the plan workbook&rsquo;s own Aspiration sheet, and the reporting cycle&rsquo;s dates are set inside the platform each time a cycle opens.</li>
     <li><b>There is no default.</b> A client is born as whatever you answered — and blank if you answer nothing. No inherited units, no inherited functions, nothing to rename.</li>
     <li><b>The set-up flow inside the client goes away.</b> One flow in one place. Adding a unit later is still the ordinary Business units page.</li>
     <li><b>There is no second screen.</b> Opening a client afterwards opens this same flow with its answers already in it — press any step in the rail to change that one thing. <i>Save and close</i>, top right, writes and takes you back to the clients list; the summary&rsquo;s first door opens the platform.</li>
@@ -354,24 +354,29 @@
 
   var M = {
     name: "ElAbd Foods", slug: "elabd-foods",
-    industry: "Food & Beverage", size: "large", horizon: "2029",
+    industry: "Food & Beverage", size: "large",
     units: [{ n: "Bakery", f: "pillars" }, { n: "Dairy", f: "pillars" }, { n: "Retail", f: "pillars" }],
     companies: "none",
     fns: [{ n: "Finance", f: "projects" }, { n: "Human Resources", f: "pillars" }],
     office: "Islam Saadany"
   };
 
+  /* ── EVERY STEP IS ADDRESSED BY ITS KEY, NEVER BY ITS NUMBER ─────────
+     The wizard's own WIZ_STEPS do this, and the first build of this mockup
+     did not: the shape panel read the step index in four places and every
+     one of them was off by one the moment a step moved. A step removed
+     should cost one line, not five. */
   var STEPS = [
-    { key: "The client",      label: "The client",     q: "Which client are you setting up?" },
-    { key: "Strategy",        label: "The horizon",   q: "How far out do the long-term targets look?" },
-    { key: "The organisation", label: "Business units", q: "What are the business units?" },
-    { key: "The organisation", label: "Companies",      q: "Are the units grouped into companies?" },
-    { key: "Strategy",        label: "Capabilities",   q: "Are there capabilities beside the units?", later: 1 },
-    { key: "Strategy",        label: "Functions",      q: "What supporting functions are there?" },
-    { key: "Language",        label: "The words",      q: "What does ElAbd Foods call these things?" },
-    { key: "People",          label: "The office",     q: "Who runs the strategy office?" },
-    { key: "Done",            label: "Summary",        q: "ElAbd Foods is set up." }
+    { k: "client", key: "The client",       label: "The client",     q: "Which client are you setting up?" },
+    { k: "units",  key: "The organisation", label: "Business units", q: "What are the business units?" },
+    { k: "cos",    key: "The organisation", label: "Companies",      q: "Are the units grouped into companies?" },
+    { k: "caps",   key: "Strategy",         label: "Capabilities",   q: "Are there capabilities beside the units?", later: 1 },
+    { k: "fns",    key: "Strategy",         label: "Functions",      q: "What supporting functions are there?" },
+    { k: "words",  key: "Language",         label: "The words",      q: "What does ElAbd Foods call these things?" },
+    { k: "office", key: "People",           label: "The office",     q: "Who runs the strategy office?" },
+    { k: "done",   key: "Done",             label: "Summary",        q: "ElAbd Foods is set up." }
   ];
+  function idx(k) { for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return -1; }
 
   var at = 0, seen = [];
   var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
@@ -471,8 +476,8 @@
     }).join("") + "</div>";
   }
 
-  function body(i) {
-    if (i === 0) return '<div class="rowset">' +
+  function body(k) {
+    if (k === "client") return '<div class="rowset">' +
       '<div><span class="lab">The client\'s name</span><input class="fld" type="text" value="' + esc(M.name) + '" id="w-name">' +
       '<p class="note">What the platform is named after, everywhere — the chrome, the review deck and every email that leaves.</p></div>' +
       /* THE INDUSTRY IS A LIST, AND IT IS NOT A NEW ONE (§53.5): the 45 entries
@@ -493,29 +498,19 @@
       '<span class="none">No mark yet — the door opens plain until one is set.</span>' +
       '<button class="btn" type="button">Choose a PNG</button></div></div></div>';
 
-    if (i === 1) return '<div class="rowset"><div><span class="lab">Long-term targets are measured by</span>' +
-      '<input class="fld mono" type="text" value="' + esc(M.horizon) + '" style="max-width:160px" id="w-yr">' +
-      '<p class="note">One year, for the whole client. A key measure can carry a target for this year and a target ' +
-      'for the horizon; this is what the second one is measured by, and it is what the platform prints beside it — ' +
-      '<i>Target by ' + esc(M.horizon || "2029") + '</i>. Leave it blank and the column simply reads <i>3-year target</i>.</p></div></div>' +
-      '<div class="laterline" style="margin-top:16px"><b>This is not the reporting cycle.</b> ' +
-      'When a cycle covers from and to, when figures are due and which month it is measured at are ' +
-      'set inside the platform on <i>Reporting cycle</i>, each time a cycle is opened — they change every ' +
-      'few months and this does not.</div>';
-
-    if (i === 2) return rowsOf(M.units, "u", "business units") +
+    if (k === "units") return rowsOf(M.units, "u", "business units") +
       '<button class="addrow" type="button" data-add="u">+ Add a business unit</button>' +
       '<p class="qwhy" style="margin-top:14px">A unit plans in pillars, with key measures and tactics under each. ' +
       'Its code is made from the name and prefixes every pillar on it.</p>';
 
-    if (i === 3) return '<div class="choices">' +
+    if (k === "cos") return '<div class="choices">' +
       choice(M.companies === "none", "No — the units sit directly under ElAbd Foods",
         "One less layer to explain. Companies can be added later without touching the plans.", PIC.flat) +
       choice(M.companies !== "none", "Yes — group them into companies",
         "A company holds several units and decides who sees across them. It carries no plan of its own.", PIC.co) +
       "</div>";
 
-    if (i === 4) return '<p class="qwhy" style="margin-top:-6px">A capability is strategic work sitting beside the business units, planned in pillars and owned by a function head.</p>' +
+    if (k === "caps") return '<p class="qwhy" style="margin-top:-6px">A capability is strategic work sitting beside the business units, planned in pillars and owned by a function head.</p>' +
       '<div class="laterline"><b>Not this step &mdash; a build of its own.</b> Capabilities are live in the platform, but they are held by a <b>function</b> that plans in <i>Capabilities &amp; projects</i> &mdash; set that on the Functions step and they work today. What does not exist is a capability standing on its own beside the business units, which is what this step asks for. Drawn so the whole shape is visible.</div>' +
       '<div class="listrows later" style="margin-top:14px">' +
       '<div class="listrow"><span class="grab" aria-hidden="true">∷</span><span class="nm">Digital &amp; Data</span>' +
@@ -523,7 +518,7 @@
       '<select><option>IT</option></select></span></div></div>' +
       '<button class="addrow later" type="button">+ Add a capability</button>';
 
-    if (i === 5) return rowsOf(M.fns, "f", "supporting functions") +
+    if (k === "fns") return rowsOf(M.fns, "f", "supporting functions") +
       '<button class="addrow" type="button" data-add="f">+ Add a supporting function</button>' +
       '<div class="qkey" style="margin-top:20px">What each plan type means</div>' +
       '<div class="choices" style="margin-top:9px">' +
@@ -532,7 +527,7 @@
       choiceLater("Objectives &amp; actions", "Objectives measured like a key measure, actions under them with a due date, and requirements raised on other functions.", PIC.objs) +
       "</div>";
 
-    if (i === 6) {
+    if (k === "words") {
       var rows = [
         ["Business unit", "Business Unit", "Every client has these"],
         ["Pillar", "Pillar", "Units plan in pillars"],
@@ -550,7 +545,7 @@
         '<p class="qwhy" style="margin-top:14px">Only the words this client actually has. Nothing here asks what ElAbd Foods calls a thing ElAbd Foods does not have.</p>';
     }
 
-    if (i === 7) return '<div class="teamrow"><span><span class="nm">Islam Saadany</span><br>' +
+    if (k === "office") return '<div class="teamrow"><span><span class="nm">Islam Saadany</span><br>' +
       '<span class="em">islam.saadany@forefront.consulting</span></span><span class="sp">' +
       '<span class="cell"><span class="on">Super user</span><span>SMO team</span></span>' +
       '<button class="btn" type="button">Remove</button></span></div>' +
@@ -561,19 +556,18 @@
       'The client\'s own register — its heads, custodians and their passwords — is built inside the platform once it opens.</p>';
 
     var lines = [
-      ["The client", M.name + " · /" + M.slug, 0],
-      ["Industry", M.industry || "Not set", 0],
-      ["Size", sizeLabel(M.size), 0],
-      ["The horizon", M.horizon ? "Long-term targets by " + M.horizon : "Not set", 1],
-      ["Business units", M.units.length ? M.units.map(function (u) { return u.n; }).join(" · ") : "None yet", 2],
-      ["Companies", M.companies === "none" ? "None — units sit under ElAbd Foods" : "Grouped", 3],
-      ["Supporting functions", M.fns.length ? M.fns.map(function (f) { return f.n + " (" + fmtWord(f.f) + ")"; }).join(" · ") : "None yet", 5],
-      ["The words", "6 set", 6],
-      ["The office", M.office + " · Super user", 7]
+      ["The client", M.name + " · /" + M.slug, "client"],
+      ["Industry", M.industry || "Not set", "client"],
+      ["Size", sizeLabel(M.size), "client"],
+      ["Business units", M.units.length ? M.units.map(function (u) { return u.n; }).join(" · ") : "None yet", "units"],
+      ["Companies", M.companies === "none" ? "None — units sit under " + M.name : "Grouped", "cos"],
+      ["Supporting functions", M.fns.length ? M.fns.map(function (f) { return f.n + " (" + fmtWord(f.f) + ")"; }).join(" · ") : "None yet", "fns"],
+      ["The words", "6 set", "words"],
+      ["The office", M.office + " · Super user", "office"]
     ];
     return '<div class="summ">' + lines.map(function (l) {
       return '<div class="sline"><span class="sk">' + esc(l[0]) + '</span><span class="sv">' +
-        esc(l[1]) + '</span><button class="ed" type="button" data-go="' + l[2] + '">Change</button></div>';
+        esc(l[1]) + '</span><button class="ed" type="button" data-go="' + idx(l[2]) + '">Change</button></div>';
     }).join("") + "</div>" +
       '<div class="qkey" style="margin-bottom:9px">Where to now</div>' +
       '<div class="doors">' +
@@ -600,11 +594,10 @@
     /* EACH PART APPEARS ON THE STEP THAT ANSWERS IT, never the step after:
        the first build was off by one everywhere, so the panel still read
        "its business units come next" with three units listed beside it. */
-    var h = '<div class="shorg"><span class="nm">' + esc(M.name || "The client") + "</span>" +
-      (at >= 1 && M.horizon ? '<span class="yr">horizon ' + esc(M.horizon) + "</span>" : "") + "</div>";
+    var h = '<div class="shorg"><span class="nm">' + esc(M.name || "The client") + "</span></div>";
     if (M.industry || M.size) h += '<p class="shwho">' +
       esc([M.industry, M.size ? sizeLabel(M.size) : ""].filter(Boolean).join(" · ")) + "</p>";
-    if (at < 2) {
+    if (at < idx("units")) {
       h += '<div class="stem"></div><div class="none">Its business units come next.</div>';
     } else {
       h += '<div class="stem"></div><div class="switch"><span class="on">Strategic</span><span>Functions</span></div>';
@@ -614,7 +607,7 @@
               return '<span class="chip unit">' + esc(u.n) + '<span class="fmt">' + fmtWord(u.f) + "</span></span>";
             }).join("") + "</div>"
           : '<div class="none">None — this client can open blank.</div>') + "</div>";
-      if (at >= 5) h += '<div class="side"><div class="sidekey">Supporting functions <span class="ct">' + M.fns.length + "</span></div>" +
+      if (at >= idx("fns")) h += '<div class="side"><div class="sidekey">Supporting functions <span class="ct">' + M.fns.length + "</span></div>" +
         (M.fns.length
           ? '<div class="chips">' + M.fns.map(function (f) {
               return '<span class="chip fn">' + esc(f.n) + '<span class="fmt">' + fmtWord(f.f) + "</span></span>";
@@ -623,23 +616,23 @@
     }
     document.getElementById("shapebody").innerHTML = h;
     document.getElementById("shapecap").textContent =
-      at >= 5 ? esc(M.name) + ", as answered so far." : "It fills in as you answer.";
+      at >= idx("fns") ? esc(M.name) + ", as answered so far." : "It fills in as you answer.";
   }
 
   function paint() {
     var s = STEPS[at];
     document.getElementById("qkey").textContent = s.key;
     document.getElementById("q").textContent = s.q;
-    var why = at === 2 ? "Add as many as ElAbd Foods has. Leave it empty and the client opens blank — nothing is put here that nobody asked for."
-      : at === 5 ? "Each function can plan its own way, and that decides what its pages hold. It stays changeable until the function has a plan in it."
-      : at === 8 ? "Everything below stays editable afterwards. Nothing here is locked."
+    var why = s.k === "units" ? "Add as many as " + M.name + " has. Leave it empty and the client opens blank — nothing is put here that nobody asked for."
+      : s.k === "fns" ? "Each function can plan its own way, and that decides what its pages hold. It stays changeable until the function has a plan in it."
+      : s.k === "done" ? "Everything below stays editable afterwards. Nothing here is locked."
       : "";
     var w = document.getElementById("qwhy");
     w.textContent = why; w.hidden = !why;
-    document.getElementById("qbody").innerHTML = body(at);
+    document.getElementById("qbody").innerHTML = body(s.k);
     document.getElementById("next").textContent = at === STEPS.length - 1 ? "Finish" : "Next";
     document.getElementById("back").disabled = at === 0;
-    document.getElementById("ptitle").textContent = at === 0 ? "Add a client" : "Set up " + M.name;
+    document.getElementById("ptitle").textContent = s.k === "client" ? "Add a client" : "Set up " + M.name;
     drawRail(); shape();
   }
 
@@ -669,7 +662,7 @@
       var row = x.closest(".listrow");
       var box = row.parentNode;
       var n = Array.prototype.indexOf.call(box.children, row);
-      (at === 2 ? M.units : M.fns).splice(n, 1);
+      (STEPS[at].k === "units" ? M.units : M.fns).splice(n, 1);
       paint(); return;
     }
     var o = t.closest("[data-ind]");
@@ -698,7 +691,7 @@
       Array.prototype.forEach.call(siblings, function (o) {
         if (o.hasAttribute("aria-pressed")) o.setAttribute("aria-pressed", o === c ? "true" : "false");
       });
-      if (at === 3) { M.companies = c === siblings[0] ? "none" : "some"; shape(); }
+      if (STEPS[at].k === "cos") { M.companies = c === siblings[0] ? "none" : "some"; shape(); }
       return;
     }
   });
@@ -713,7 +706,6 @@
   });
   document.addEventListener("input", function (e) {
     if (e.target.id === "w-name") { M.name = e.target.value || "The client"; shape(); }
-    if (e.target.id === "w-yr") { M.horizon = e.target.value; shape(); }
     if (e.target.id === "w-ind") {
       var panel = document.getElementById("indpanel");
       panel.innerHTML = industryPanel(e.target.value);

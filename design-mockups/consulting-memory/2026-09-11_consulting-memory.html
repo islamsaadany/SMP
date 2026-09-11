@@ -1,0 +1,553 @@
+<title>Consulting Memory</title>
+<!--
+  SPEC 044 — THE CONSULTING MEMORY. Mockup for sign-off, 2026-09-11.
+
+  DRAWN IN THE PLATFORM'S OWN TOKENS AND CLASSES (rule 1c, §41.9). Every
+  colour, type size, radius and component below is copied verbatim out of
+  platform.html — .top, .nav, .wrap, .ptitle, .btn, .fld, .lab, .tag, .cell,
+  .teamrow, .note. Nothing here proposes a new colour or a new typeface: what
+  is being proposed is a PAGE, and a mockup that also restyles the product
+  asks two questions at once.
+
+  The three palette blocks are complete rather than a base plus overrides —
+  platform.html's own comment records why (a token defined only inside the
+  media query is absent the moment somebody chooses a theme explicitly).
+
+  Example entries. The clients are real; the write-ups are invented for this
+  drawing and are nobody's actual record (§245: drawn on realistic content,
+  because a layout drawn on flattering content is drawn on the one state it
+  survives — two of these five are deliberately short).
+-->
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --bad:#B23025; --bad-bg:#FBEDEB;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --bad:#E8776B; --bad-bg:#33211F;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --bad:#E8776B; --bad-bg:#33211F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased }
+
+  /* ── the product's chrome, verbatim ─────────────────────────── */
+  .top{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 18px }
+  .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.16em; color:var(--ff-tx) }
+  .top .nm{ font-weight:600; font-size:14px }
+  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
+    color:var(--ink-3); font-size:12.5px }
+  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px; flex-wrap:wrap }
+  .nav button{ background:transparent; border:0; color:var(--ff-quiet);
+    font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
+    border-bottom:3px solid transparent }
+  .nav button:hover{ color:var(--ff-ink) }
+  .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 40px }
+
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
+  .ptitle h1{ font-size:20px; margin:0; font-weight:600 }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
+  .btn:hover:not(:disabled){ border-color:var(--amber-tx) }
+  .btn:disabled{ opacity:.45; cursor:default }
+  .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  .btn:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:2px }
+  .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
+  .fld:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:1px; border-color:var(--amber-tx) }
+  .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2); white-space:nowrap }
+  .tag.hiccup{ color:var(--bad); background:var(--bad-bg); border-color:var(--bad) }
+  .tag.practice{ color:var(--good); background:var(--good-bg); border-color:var(--good) }
+  .tag.lesson{ color:var(--amber-tx); background:var(--amber-wash); border-color:var(--amber) }
+  .cell{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .cell button{ border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; padding:6px 10px; cursor:pointer }
+  .cell button:last-child{ border-right:0 }
+  .cell button.on{ background:var(--ff); color:var(--ff-ink) }
+  .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
+  .muted{ color:var(--ink-3) }
+
+  /* ── NEW TO THIS PAGE ────────────────────────────────────────
+     Four classes, and each is an existing shape put to a new use rather than
+     a new look: the filter row is .ptitle's own flex row, an entry row is
+     .teamrow one level richer, the reading view is the platform's own card
+     border and radius, and the wizard is .lab over .fld like every other
+     form on this platform. */
+  .filters{ display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-bottom:16px }
+  .filters .fld{ width:auto; flex:0 1 230px; min-width:0 }
+  .filters .fld.search{ flex:1 1 280px }
+  .count{ margin-left:auto; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3) }
+
+  .elist{ display:flex; flex-direction:column;
+    border-top:1px solid var(--line); }
+  .erow{ display:flex; gap:14px; align-items:flex-start; width:100%; text-align:left;
+    padding:13px 10px; border:0; border-bottom:1px solid var(--line-soft);
+    background:transparent; color:inherit; font:inherit; cursor:pointer }
+  .erow:hover, .erow:focus-visible{ background:var(--surface-2); outline:none }
+  .erow .body{ min-width:0; flex:1 1 auto; display:flex; flex-direction:column; gap:3px }
+  .erow h3{ margin:0; font-size:15px; font-weight:600; line-height:1.35 }
+  .erow .snip{ margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }
+  /* THE FACT LINE IS ONE LINE OF KEYS, not a sentence: client · industry ·
+     author · when. It is what a reader scans down, so the separators are a
+     BORDER-free middot and the whole line is one size and one colour, or the
+     eye has to decide which half is more important on every row (§88). */
+  .erow .facts{ font:400 12px/1.5 ui-monospace, SFMono-Regular, monospace;
+    color:var(--ink-3); overflow-wrap:anywhere }
+  .erow .facts b{ font-weight:600; color:var(--ink-2) }
+
+  .ecard{ border:1px solid var(--line); border-radius:12px; background:var(--surface);
+    box-shadow:var(--shadow); padding:20px 22px; max-width:760px }
+  .ecard h2{ margin:0 0 4px; font-size:21px; font-weight:600; line-height:1.3; text-wrap:balance }
+  .ecard .facts{ font:400 12.5px/1.6 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
+  .ecard .facts b{ font-weight:600; color:var(--ink-2) }
+  .qa{ margin-top:22px; display:flex; flex-direction:column; gap:18px }
+  .qa h3{ margin:0 0 5px; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  .qa p{ margin:0; font-size:14.5px; line-height:1.62; color:var(--ink); max-width:62ch }
+  /* THE AUTHOR IS THE POINT OF THE PAGE (decision 3), so it is a block and
+     not a byline: what a reader does with an entry is go and ask the person
+     who wrote it. */
+  .byline{ margin-top:24px; padding-top:15px; border-top:1px solid var(--line);
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+  .byline .who{ display:flex; flex-direction:column; gap:1px; min-width:0 }
+  .byline .who .nm{ font-weight:600; font-size:14.5px }
+  .byline .who .em{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
+  .byline .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
+
+  .wiz{ max-width:720px }
+  .wq{ margin-bottom:17px }
+  .wq textarea.fld{ min-height:74px; resize:vertical; font-size:14px }
+  .wpair{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:17px }
+  .wpair > div{ flex:1 1 220px; min-width:0 }
+  /* THE OTHER WAY TO FINISH IT (Islam's own proposal). A hairline with an
+     uppercase key on it — the page's own device for separating one kind of
+     thing from another (§317's .apart) — because this is not a step of the
+     form, it is an alternative to filling the form in at all. */
+  .apart{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line) }
+  .apart > .akey{ display:block; margin-bottom:12px;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  .prompt{ margin:0; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:13px 15px; overflow-x:auto;
+    font:400 12.5px/1.65 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2);
+    white-space:pre-wrap }
+  .wacts{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px }
+
+  .empty{ border:1px dashed var(--line); border-radius:12px; padding:34px 24px;
+    text-align:center; color:var(--ink-3); background:var(--surface) }
+  .empty b{ display:block; color:var(--ink); font-size:16px; margin-bottom:6px }
+  .empty .btn{ margin-top:16px }
+
+  /* ── the review strip: NOT the product ──────────────────────── */
+  .mk-bar{ background:var(--ink); color:#fff; padding:9px 18px; display:flex;
+    gap:10px; align-items:center; flex-wrap:wrap;
+    font:600 11px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.08em;
+    text-transform:uppercase }
+  .mk-bar .sp{ margin-left:auto; display:flex; gap:6px; flex-wrap:wrap }
+  .mk-bar button{ background:transparent; color:#fff; border:1px solid rgba(255,255,255,.35);
+    border-radius:6px; padding:5px 10px; font:inherit; cursor:pointer }
+  .mk-bar button.on{ background:var(--amber); color:var(--amber-ink); border-color:var(--amber) }
+  .mk-bar button:hover{ border-color:var(--amber) }
+  .mk-notes{ max-width:1180px; margin:0 auto; padding:0 18px 64px }
+  .mk-notes h2{ font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); margin:34px 0 12px; padding-top:18px; border-top:2px solid var(--line);
+    font-family:ui-monospace, SFMono-Regular, monospace }
+  .mk-notes ul{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:11px }
+  .mk-notes li{ font-size:14px; line-height:1.6; color:var(--ink-2); max-width:76ch }
+  .mk-notes li b{ color:var(--ink) }
+  .mk-notes .cost{ color:var(--bad) }
+  :root[data-theme="dark"] .mk-notes .cost, :root:not([data-theme="light"]) .mk-notes .cost{ color:var(--bad) }
+
+  [hidden]{ display:none !important }
+  @media (max-width:700px){
+    .erow{ flex-direction:column; gap:8px }
+    .ecard{ padding:16px }
+    .count{ margin-left:0 }
+  }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important } }
+</style>
+
+<div class="mk-bar">
+  <span>Mockup · Spec 044 · 11 Sep 2026</span>
+  <span class="sp">
+    <button type="button" data-go="list" class="on">The list</button>
+    <button type="button" data-go="read">Reading one</button>
+    <button type="button" data-go="wiz">Adding one</button>
+    <button type="button" data-go="empty">Nothing yet</button>
+    <button type="button" id="themebtn">Dark</button>
+  </span>
+</div>
+
+<div class="top">
+  <span class="mk">FOREFRONT</span>
+  <span class="nm">Strategy Management Platform</span>
+  <span class="right"><span>Islam Saadany</span>
+    <button class="btn" type="button">Sign out</button></span>
+</div>
+
+<nav class="nav">
+  <button type="button">Clients</button>
+  <button type="button">Consultants</button>
+  <button type="button">Who sees what</button>
+  <button type="button" class="on">Memory</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- ═══ THE LIST ═══════════════════════════════════════════════ -->
+  <section data-state="list">
+    <div class="ptitle">
+      <h1>Memory</h1>
+      <span class="right">
+        <button class="btn amber" type="button" data-go="wiz">Add an insight</button>
+      </span>
+    </div>
+
+    <div class="filters">
+      <input class="fld search" type="search" id="f-search"
+             placeholder="Search insights — title, body, client">
+      <select class="fld" id="f-client" aria-label="Client">
+        <option>Every client</option>
+        <option>Raya Trade</option>
+        <option>RHI</option>
+        <option>El Abd</option>
+      </select>
+      <select class="fld" id="f-ind" aria-label="Industry">
+        <option>Every industry</option>
+        <option>Distribution &amp; retail</option>
+        <option>Healthcare</option>
+        <option>Food retail</option>
+      </select>
+      <span class="cell" role="group" aria-label="Kind">
+        <button type="button" class="on">All</button>
+        <button type="button">Practice</button>
+        <button type="button">Hiccup</button>
+        <button type="button">Lesson</button>
+      </span>
+      <span class="count">5 insights</span>
+    </div>
+
+    <div class="elist">
+      <button class="erow" type="button" data-go="read">
+        <span class="tag hiccup">Hiccup</span>
+        <span class="body">
+          <h3>The weighting workshop ran twice because the CEO was not in the first one</h3>
+          <p class="snip">We ran the weighting session with the heads and brought the group CEO the
+            outcome. He moved three weights the same afternoon, so the units had agreed something
+            that no longer held and we had to go back to them.</p>
+          <span class="facts"><b>Raya Trade</b> · Distribution &amp; retail · Islam · 12 Aug 2026</span>
+        </span>
+      </button>
+
+      <button class="erow" type="button" data-go="read">
+        <span class="tag practice">Practice</span>
+        <span class="body">
+          <h3>Ask for the org chart and the payroll export in the same email</h3>
+          <p class="snip">The register needs an employee ID and an email on every row. HR sends the
+            org chart first because it is the presentable one, and the file with the identifiers in it
+            takes another week.</p>
+          <span class="facts"><b>Raya Trade</b> · Distribution &amp; retail · Essam · 29 Jul 2026</span>
+        </span>
+      </button>
+
+      <button class="erow" type="button" data-go="read">
+        <span class="tag lesson">Lesson</span>
+        <span class="body">
+          <h3>In a family-owned group, &ldquo;accountability&rdquo; is heard as blame</h3>
+          <p class="snip">Every owner in the room read the owner column as a list of who gets called
+            when a number is red. Naming it the same thing in the workshop and on the page cost us
+            most of a session.</p>
+          <span class="facts"><b>RHI</b> · Healthcare · Omar · 3 Aug 2026</span>
+        </span>
+      </button>
+
+      <button class="erow" type="button" data-go="read">
+        <span class="tag hiccup">Hiccup</span>
+        <span class="body">
+          <h3>Q1 figures came back in three different units of measure</h3>
+          <p class="snip">Cartons, kilos and EGP, against one target.</p>
+          <span class="facts"><b>El Abd</b> · Food retail · Omar · 18 Aug 2026</span>
+        </span>
+      </button>
+
+      <button class="erow" type="button" data-go="read">
+        <span class="tag practice">Practice</span>
+        <span class="body">
+          <h3>Run the first review as a rehearsal, with nobody senior in the room</h3>
+          <p class="snip">Nothing exposes a half-filled plan like presenting it.</p>
+          <span class="facts"><b>Raya Trade</b> · Distribution &amp; retail · Islam · 5 Sep 2026</span>
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ═══ READING ONE ════════════════════════════════════════════ -->
+  <section data-state="read" hidden>
+    <div class="ptitle">
+      <h1>Memory</h1>
+      <span class="right">
+        <button class="btn" type="button" data-go="list">Back to the list</button>
+      </span>
+    </div>
+
+    <article class="ecard">
+      <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:11px">
+        <span class="tag hiccup">Hiccup</span>
+        <span class="tag">Raya Trade</span>
+        <span class="tag">Distribution &amp; retail</span>
+      </div>
+      <h2>The weighting workshop ran twice because the CEO was not in the first one</h2>
+      <p class="facts"><b>12 August 2026</b> · during the plan build</p>
+
+      <div class="qa">
+        <div>
+          <h3>What happened</h3>
+          <p>We ran the weighting session with the ten unit heads over a full morning and came out
+            with a set everybody had argued for and signed. We took the outcome to the group CEO the
+            same week as a read-out rather than a decision.</p>
+        </div>
+        <div>
+          <h3>What we did</h3>
+          <p>He moved three weights inside ten minutes — Mobile up, two of the smaller units down.
+            We went back to the heads individually rather than reconvening them, which took four days
+            and two of them heard it from a colleague first.</p>
+        </div>
+        <div>
+          <h3>What came of it</h3>
+          <p>The weights are right and the room is not. Two heads have since described the workshop
+            as &ldquo;the one that got overruled&rdquo;, and it comes up whenever we ask them to agree
+            anything else.</p>
+        </div>
+        <div>
+          <h3>What the next person should know</h3>
+          <p>The weighting is the owner's decision, not the heads' — so either he is in the room, or
+            the session is run as a recommendation and everybody is told that at the start. The cost
+            is not the four days, it is that the next workshop starts from a room that has been
+            overruled once.</p>
+        </div>
+      </div>
+
+      <div class="byline">
+        <span class="who">
+          <span class="nm">Islam Saadany</span>
+          <span class="em">islam.saadany@forefront.consulting</span>
+        </span>
+        <span class="sp">
+          <button class="btn" type="button">Ask Islam</button>
+          <button class="btn" type="button">Edit</button>
+        </span>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ ADDING ONE ═════════════════════════════════════════════ -->
+  <section data-state="wiz" hidden>
+    <div class="ptitle">
+      <h1>Add an insight</h1>
+      <span class="right">
+        <button class="btn" type="button" data-go="list">Cancel</button>
+        <button class="btn amber" type="button" data-go="list">Save</button>
+      </span>
+    </div>
+
+    <div class="wiz">
+      <div class="wpair">
+        <div>
+          <label class="lab" for="w-client">Client</label>
+          <select class="fld" id="w-client">
+            <option>Raya Trade</option>
+            <option>RHI</option>
+            <option>El Abd</option>
+          </select>
+        </div>
+        <div>
+          <label class="lab" for="w-kind">Kind</label>
+          <select class="fld" id="w-kind">
+            <option>Hiccup</option>
+            <option>Practice</option>
+            <option>Lesson</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="wq">
+        <label class="lab" for="w-title">Title</label>
+        <input class="fld" id="w-title" type="text"
+               value="The weighting workshop ran twice because the CEO was not in the first one">
+      </div>
+
+      <div class="wq">
+        <label class="lab" for="w-1">What happened</label>
+        <textarea class="fld" id="w-1"></textarea>
+      </div>
+      <div class="wq">
+        <label class="lab" for="w-2">What we did</label>
+        <textarea class="fld" id="w-2"></textarea>
+      </div>
+      <div class="wq">
+        <label class="lab" for="w-3">What came of it</label>
+        <textarea class="fld" id="w-3"></textarea>
+      </div>
+      <div class="wq">
+        <label class="lab" for="w-4">What the next person should know</label>
+        <textarea class="fld" id="w-4"></textarea>
+      </div>
+
+      <p class="note">A title and a client are enough to save. The rest can wait.</p>
+
+      <div class="apart">
+        <span class="akey">Or answer it out loud</span>
+        <pre class="prompt" id="promptbox">I am writing up a consulting insight for Forefront's memory, about
+Raya Trade (distribution &amp; retail).
+
+Ask me these four questions, one at a time, and wait for my answer
+before asking the next:
+
+  1. What happened?
+  2. What did we do?
+  3. What came of it?
+  4. What should the next person know?
+
+Then write my answers back as four short paragraphs under those four
+headings, in my own words, and nothing else.</pre>
+        <div class="wacts">
+          <button class="btn solid" type="button" id="copybtn">Copy the prompt</button>
+          <span class="muted" style="font-size:13px">Paste it back into the boxes above.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NOTHING YET ════════════════════════════════════════════ -->
+  <section data-state="empty" hidden>
+    <div class="ptitle">
+      <h1>Memory</h1>
+      <span class="right">
+        <button class="btn amber" type="button" data-go="wiz">Add an insight</button>
+      </span>
+    </div>
+    <div class="empty">
+      <b>Nothing here yet</b>
+      Every insight names the client it came from and the person who wrote it.
+      <br>
+      <button class="btn amber" type="button" data-go="wiz">Add the first one</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="mk-notes">
+  <h2>What this drawing decides</h2>
+  <ul>
+    <li><b>A list, not cards.</b> The client cards on the Clients tab are for choosing between ten
+      things you already know. This is for finding one of eventually several hundred you do not, so
+      it is a list you scan down with the fact line — <b>client · industry · author · when</b> — in
+      one size and one colour on every row.</li>
+    <li><b>Two of the five example entries are deliberately short</b> (§245). A layout drawn only on
+      full write-ups is drawn on the one state it survives — a one-line insight has to look like a
+      finished row, not like a broken one, or nobody writes the quick ones.</li>
+    <li><b>The author is a block, not a byline.</b> Decision 3: what a reader does with an insight is
+      go and ask the person who wrote it, so the name, the address and <i>Ask&nbsp;…</i> sit together
+      at the foot with a rule above them, rather than being set in grey under the title.</li>
+    <li><b>Nothing counts or names who READ one</b> (decision 4) — so there is nothing on this page
+      for it, and that is the drawing being faithful rather than incomplete.</li>
+    <li><b>No description under any heading</b> (rule 1b&#8209;ii). The search box says what it
+      searches in its own placeholder; the only sentence on the empty page is a fact the screen does
+      not otherwise state.</li>
+    <li><b>The industry is drawn but never typed</b> — it is the client's, read from the client's own
+      card, so it is a filter and a chip and never a field on this form.</li>
+    <li><b>The four questions are the structure.</b> Stored as prose under four headings, not as
+      twenty fields — twenty fields is what nobody fills in once the engagement is over.</li>
+    <li><b>Copy the prompt sits under a rule, not in the flow.</b> It is not step five of the form,
+      it is an alternative to filling the form in at all — so it takes the page's own
+      hairline-and-key device rather than looking like the next thing to do.</li>
+  </ul>
+
+  <h2>What it costs</h2>
+  <ul>
+    <li class="cost"><b>Every consultant reads every insight, including about clients they have
+      never worked on.</b> That is decision 1 and it is the feature working — it is also why the tab
+      exists only behind Forefront's door and is never drawn inside a client's platform.</li>
+    <li class="cost"><b>The industry filter is only as good as the client cards.</b>
+      <i>Retail</i> and <i>retail &amp; distribution</i> typed on two cards make two industries, and
+      this filter then answers half the question. Cheap to settle now, expensive in a year — flagged
+      in the spec, and not done, because it touches the client card.</li>
+    <li class="cost"><b>The words on this page are placeholders.</b> <i>Insight</i>,
+      <i>practice · hiccup · lesson</i>, <i>Add an insight</i> — this is the drawing where they get
+      read in place and settled, rather than argued in prose.</li>
+  </ul>
+</div>
+
+<script>
+  (function () {
+    var panes = Array.prototype.slice.call(document.querySelectorAll("[data-state]"));
+    var bar = Array.prototype.slice.call(document.querySelectorAll(".mk-bar [data-go]"));
+
+    function show(name) {
+      panes.forEach(function (p) { p.hidden = p.getAttribute("data-state") !== name; });
+      bar.forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-go") === name); });
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+    document.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-go]");
+      if (b) { show(b.getAttribute("data-go")); }
+    });
+
+    /* The platform reads the viewer's theme; the strip carries a toggle so
+       both can be looked at here without changing the machine's setting. */
+    var tb = document.getElementById("themebtn");
+    tb.addEventListener("click", function () {
+      var dark = document.documentElement.getAttribute("data-theme") === "dark";
+      document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+      tb.textContent = dark ? "Dark" : "Light";
+    });
+
+    var cb = document.getElementById("copybtn");
+    cb.addEventListener("click", function () {
+      var txt = document.getElementById("promptbox").textContent;
+      var done = function () { cb.textContent = "Copied"; setTimeout(function () {
+        cb.textContent = "Copy the prompt"; }, 1600); };
+      if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(done, done); }
+      else { done(); }
+    });
+  }());
+</script>

@@ -4586,5 +4586,26 @@ rather than four found (§108.1). Storing the conversation whole was refused: it
 buries five insights inside a sixth and loses the kind, the search and the
 filter. The mockup is six states in the platform's own tokens
 (`design-mockups/consulting-memory/2026-09-11_consulting-memory.html`).
-**Waiting on Islam**: the four questions, the words (*insight*, *practice ·
-hiccup · lesson*), and sign-off — then the plan.
+**SIGNED OFF 2026-09-11** (*"the questions are good, go ahead with the plan"*);
+`plan.md` and `tasks.md` written, nothing built. **AND READING THE NEW STACK
+FOUND THE TRAP THAT WOULD HAVE KILLED IT IN SILENCE**: `smp-app/db/schema.sql`
+ends in one loop that gives every table row-level security and a `tenant_rows`
+policy **by EXCLUSION**, so a memory table carrying the obvious column name
+`tenant_id` would be handed a policy reading *this row belongs to the current
+tenant* — and a consultant on RHI could never read a Raya insight, which is the
+entire feature, gone, with no error anywhere. **Worse, the two deployments would
+disagree** (§113.7's mirror): `schema.sql` runs ONCE and is recorded, so ours
+would be fine and every fresh deployment dead. Answered twice over — the table
+joins the exclusion list, **and the column is `about_tenant_id`**, so that if a
+later table forgets the list the loop's `CREATE INDEX … (tenant_id)` fails the
+apply outright instead of quietly emptying the page. **Three more decisions from
+reading rather than assuming**: a route of its own rather than a fourth action on
+the carried `platform-api.ts`, which is frozen byte for byte; **no new rule in
+`platform-rules.cjs`**, because `platform.html` loads no rules module in the
+browser at all and reads flags the server computed (§53.5) — which also avoids a
+live drift, that file being byte-identical at the root with nothing syncing them,
+recorded and not touched; and the splitter as its own UMD module, being the one
+piece with a wrong answer available to it, so it is checkable with no browser and
+no database. **Three phases, A usable alone** (the record, then the debrief, then
+the assistant), **four checks each red first**, and **two stop points that are
+Islam's**: after phase A, on use rather than on a drawing, and the merge.

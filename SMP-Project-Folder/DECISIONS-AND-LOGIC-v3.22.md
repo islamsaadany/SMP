@@ -42329,3 +42329,150 @@ merge every time.
 
 
 ---
+
+## §318 — FOUR MODULES ON ONE SPINE (2026-09-11, spec 044)
+
+Islam, opening the subject rather than reporting a fault: *"for each client we
+will need to have mutliple modules one for the Strategy & Functions we need a
+name for this and one for the project management and one for the resources and
+one for the process and we are open for more modules ... whether we will have
+one acess & roles page or by module and wther we have different setup pages on
+one main. let's tahink together ask me what you need."*
+
+Fifteen decisions, taken question by question over two rounds, **written down
+before anything was drawn or built** (spec 044). Nothing is built. Nothing is
+drawn. The chrome carrying the module switch wants a mockup first (rule 1c).
+
+**THE SPINE IS A LINE THE PRODUCT ALREADY DRAWS AND HAS NEVER NAMED.** The
+Setup rail's *People & access* and *The organisation* groups are not Strategy's
+— they are the client's; *Running the cycle* and *Measurement* are Strategy's
+and nothing else's. Three of the five groups are already the spine and two are
+already one module. So the question *"one access page or by module"* was never
+open in the way it looked: there is a client, and there are modules on it, and
+the rail has been saying so for twelve versions.
+
+**THE FINDING UNDER THE ANSWERS IS THAT THE FOUR ARE NOT FOUR OF A KIND**, and
+it is most of what this spec saves. Strategy and **Portfolio** are
+planning-and-reporting worlds — objects, owners, a rhythm, figures going in.
+**Insights** and **Processes** are LIBRARIES: *"they download the available
+resources"* and *"a bank of processes that they can search and look up how
+things go"*, both published by Forefront and read-only for the client. As
+described they are **the same machine with different content** — an item with a
+name, a category, a date, a version and something to open; one with a file on
+the end, one with steps. Built once, instantiated twice. Which decides the
+ORDER of the work, and that is the practical payoff: the spine and the switch,
+then Insights, then Processes, then Portfolio — *the libraries prove the module
+frame at small cost before the expensive module is built into it*, and a frame
+with one tenant in it is not a frame that has been proved.
+
+**AND THE CORRECTION ON THE LIBRARY SETTLED MORE THAN IT LOOKED LIKE IT DID.**
+Asked whether the bank is shared across clients or per client, he answered by
+describing the content: *"At the library are more of researches and the
+analytics and Market reports relevant to the client so it's a client document
+documents and researches."* So there is no shared bank and no cross-client
+read — **which removes the one part of this whole design that would have
+reached into the tenant isolation being built right now** (§314, RLS). Each
+client's library is material about that client, behind the same boundary as
+their plan. Nothing here changes the rebuild.
+
+**FOREFRONT-ONLY PUBLISHING MOVES WHERE THE WORK LANDS**, which is worth
+stating because it is the opposite of where it looks: those two modules have no
+authoring surface in the client app at all, so the client side is thin and
+**`/platform` grows a document room on each client's card** — upload,
+categorise, retire, see what is there. The client side is search, open,
+download, **refused on the SERVER and not only undrawn** (§42, §44).
+
+**TWO NAME COLLISIONS SETTLED BEFORE ANYTHING WAS DRAWN** (§87's twins, which
+this product has paid for four times). The project management module is
+**Portfolio**, because a capability already has *projects* inside Strategy and
+two lists one word apart is the fault; renaming Strategy's was offered with its
+cost — every screen, the workbook, the deck, stored data — and not taken. The
+research module is **Insights**, because standing beside a project management
+module the word *Resources* reads as **people and capacity**, which is the one
+thing it is not. And *"Strategy & Functions"* is just **Strategy**: a
+supporting function is a PLACE in the org, like a business unit, and every
+module will address it — it is not a module, and naming it in the module would
+have promised a second thing behind that door.
+
+**A MODULE IS A CONTRACT, NOT A PAGE WITH A NEW NAME.** To be one it must bring
+all five: its own navigation, its own roles and areas, its own Setup group, its
+own rhythm or none, and a landing. Anything that cannot supply all five is a
+page inside a module. This is the test that keeps *"we are open for more
+modules"* from turning the switcher into a second tab row — and it is the thing
+to apply the day a fifth is proposed.
+
+**THE ACCESS ANSWER IS §37's ANSWER ONE LEVEL OUT.** Measured: `AREAS` holds
+nine areas and `ACCESS_DEFAULTS` eleven rows — **99 cells on one page** — so
+four modules multiplied out naively is **396**, and §37 exists precisely
+because 525 controls was not a question anybody asks. So the module is a
+DIMENSION rather than a multiplier: one page, a **Client** tab holding the
+seats and where each person sits, then one tab per module holding that module's
+roles against that module's own areas. A module costs the areas it actually has.
+**HOLDING A ROLE IN A MODULE IS WHAT MAKES THE MODULE APPEAR** — there is no
+per-person module tick, because no role means no module in the switcher (§61: a
+control with nothing behind it is not a choice); which modules a CLIENT has is a
+row in the platform registry and Forefront's press. Two levels, and neither is a
+list somebody maintains by hand. Two areas move with it: **`a_setup` SPLITS**
+(client setup is the client-wide Super user's, module setup is a grant in the
+module's own tab — which is what lets a module have an admin who is not the
+client's, Islam's answer), and **`a_cycle` stops being a platform area** and
+becomes Strategy's.
+
+**SETUP STAYS ONE PAGE** — a Client group first, then one group per module the
+client has, with a module switched off REMOVING its group rather than leaving
+pages with nothing behind them (§61). The cost is stated rather than
+discovered: the rail gets long, which is what the folds (§47.3) and the keyword
+search (§108.13) already exist for. **The tidier-looking alternative was drawn
+and refused**: a Setup page per module reached from inside that module fails
+twice — an administrator sets several modules up in one sitting, and the spine
+has to live somewhere that is not inside any module.
+
+**THE MODULE IS THE OUTERMOST SWITCH**, above the destination row, because
+everything below it happens inside a module; somebody with one module sees a
+plain label and not a dropdown (§32). **Never two on screen** — his own answer,
+*"I don't think they need to screen at the same time"* — so a module owns the
+whole viewport, and **the place is remembered PER MODULE**, which is §173 one
+level out.
+
+**AND THERE HAS NEVER BEEN A PLATFORM-WIDE CYCLE.** There has been Strategy's,
+standing in for one because nothing else existed — `REVIEW` is read by scoring,
+reporting, the deck, the cycle board and the archives, and all of it is one
+module's. It goes back to Strategy: *"they don't have the same cycle ... the
+process is a continuous work and the project management is maybe a weekly or a
+monthly checkpoints."* Portfolio has checkpoints, Processes is continuous,
+Insights has versions and no time at all, and **no module may borrow another's
+clock**.
+
+**EACH MODULE DECIDES HOW MUCH OF THE SPINE IT USES**, which is the difference
+between a spine and a frame: Strategy addresses every unit and function, and a
+Portfolio project may belong to none of them. The spine OFFERS structure; it
+does not require a module to be shaped by it. Terminology splits the same way —
+*business unit*, *supporting function* and *company* are the client's words and
+stay client-wide; *pillar*, *aspiration* and *tactic* are Strategy's and move
+into its group.
+
+**ONE COST LANDS BEFORE THE CUTOVER AND IT IS THE ONLY REASON TO INTERRUPT
+SPEC 043's SEQUENCE**: the new app's addresses are `/<client>/…` and with
+modules they become `/<client>/<module>/…`. Adding the segment now — while only
+Strategy exists and nobody holds a bookmark — is a small change to work already
+built and green, touching the four places spec 043 names as carrying the slug
+(the shell's route, the door's landing, the worker's address list, the push
+payload's open address). Adding it after the cutover means breaking every saved
+link or special-casing Strategy for ever. Recommended as
+`/<client>/strategy/…` with `/<client>/…` redirecting and nothing else changed
+— **Islam's call, on that change**, and open at the time of writing.
+
+**DELIBERATELY NOT DECIDED, EACH RECORDED SO IT CANNOT BE ADDED QUIETLY**: a
+Portfolio project pointing at a Strategy project (*"No PM project is more of a
+detailed project ... not like the Strategy project"* — different things, so the
+link is an optional field later and not a redesign); per-category or per-item
+visibility inside a library (whole module for now, his answer, and a market
+report that must not reach unit staff is the case that reopens it); owners and
+review dates on a process (*"a bank, for now"* — the stored item keeps room for
+both and **draws neither**, so teeth later are an addition rather than a
+rebuild); whether the office is the same team in every module (one inbox, one
+conversation per person, §97); what Portfolio actually contains, which needs a
+spec of its own; and a fifth module, for which nothing is reserved — the
+contract is the test.
+
+---

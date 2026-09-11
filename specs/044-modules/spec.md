@@ -1,9 +1,9 @@
 # Spec 044 — Four modules on one spine
 
 **Status:** decisions taken in session 2026-09-11 (Islam, question by question,
-two rounds). **Nothing is built and nothing is drawn** — the chrome carrying the
-module switch wants a mockup before a line of it is written (rule 1c). To be
-recorded as §318 in the decisions document.
+two rounds) and **recorded as §318** in the decisions document the same day.
+**Nothing is built and nothing is drawn** — the chrome carrying the module
+switch wants a mockup before a line of it is written (rule 1c).
 
 **Depends on:** spec 042 / §313 (one door, many clients) and spec 043 / §314
 (the shared-schema rebuild). This work lands **after** the cutover, with one

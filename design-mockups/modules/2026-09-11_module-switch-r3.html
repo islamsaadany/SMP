@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The mark at the top left, and the card that asks</title>
+<title>The module mark</title>
 <style>
   /* ══════════════════════════════════════════════════════════════════
      TWO LAYERS, AND THE LINE BETWEEN THEM IS THE POINT (§38)
@@ -9547,148 +9547,58 @@ body.presenting #buildband { display:none; }
 :root{ --chrome-h:168px; --rail-gap:20px; }
 html, body{ overflow-x:clip; }
 body{ margin:0; background:var(--ground); color:var(--ink-1); }
-/* NO `overflow-x:clip` HERE. It was right while the frames sat inside the
-   page's measure, and it CUTS the full-bleed ones — measured, the left edge of
-   every chrome was sliced off. The root still clips (html, body above), and the
-   frame contains the chrome's out-of-flow parts itself by being a containing
-   block with `overflow:auto`. */
-.mock-page{ max-width:1340px; margin:0 auto; padding:36px 20px 90px; }
-.mock-head h1{ font-size:24px; margin:0 0 6px; letter-spacing:-.01em; }
-.mock-lede{ font-size:14px; color:var(--ink-2); margin:0 0 6px; max-width:72ch; line-height:1.55; }
-.mock-rule{ height:1px; background:var(--line); margin:26px 0; border:0; }
-.mock-key{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
-           color:var(--ink-3); margin:0 0 8px; }
-.mock-panel{ margin:0 0 30px; }
-.mock-panel h2{ font-size:16px; margin:0 0 4px; }
-.mock-why{ font-size:13px; color:var(--ink-2); margin:0 0 12px; max-width:78ch; line-height:1.55; }
-/* THE FRAME RUNS FULL-BLEED, AND THIS QUESTION IS WHY. The prose keeps a
-   readable measure, but the chrome has been full-window since §94.13 — so a
-   frame capped at the page's 1340px was showing the top row about 200px
-   narrower than the real one, and the top row is precisely what is being
-   measured. A frame that squeezes the thing under test answers a question
-   nobody asked. */
-.mock-frame{ border:1px solid var(--line); border-radius:10px; overflow:auto;
-             position:relative; background:var(--surface);
-             width:calc(100vw - 40px); margin-left:calc(50% - 50vw + 20px); }
-.mock-frame > .chrome{ min-width:1040px; }
-.mock-frame .chrome{ position:static !important; }
-.mock-frame-open{ padding-bottom:252px; }
-.mock-note{ font-size:12px; color:var(--ink-3); margin:8px 0 0; line-height:1.5; max-width:78ch; }
-.mock-cost{ border-left:3px solid var(--attn); background:var(--attn-bg);
-            padding:10px 14px; margin:12px 0 0; border-radius:0 6px 6px 0; }
-.mock-cost p{ margin:0; font-size:13px; color:var(--ink-1); line-height:1.55; }
-.mock-pick{ border-left-color:var(--good); background:var(--good-bg); }
-.mock-was{ border-left-color:var(--bad); background:var(--bad-bg); }
-.mock-q{ border:1px solid var(--line); border-left:3px solid var(--gold);
-         border-radius:0 8px 8px 0; padding:12px 16px; margin:14px 0 0; background:var(--surface); }
-.mock-q p{ margin:0 0 6px; font-size:13px; line-height:1.55; } .mock-q p:last-child{ margin:0; }
-.mock-measwrap{ overflow-x:auto; }
-.mock-meas{ border-collapse:collapse; font-size:13px; margin:4px 0 0; min-width:520px; }
-.mock-meas th{ text-align:left; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
-               color:var(--ink-3); font-weight:600; padding:6px 18px 6px 0;
-               border-bottom:1px solid var(--line); }
-.mock-meas td{ padding:7px 18px 7px 0; border-bottom:1px solid var(--line); color:var(--ink-2);
-               font-variant-numeric:tabular-nums; }
-.mock-meas td:first-child{ color:var(--ink-1); font-weight:600; }
-.mock-meas .bad{ color:var(--bad-tx); font-weight:600; }
-.mock-cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(258px,1fr)); gap:14px;
-             padding:18px; background:var(--surface-2); align-items:start; }
-.mock-card{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
-            overflow:hidden; }
-.mock-card .ch{ padding:14px 16px 12px; }
-.mock-card h4{ margin:0 0 3px; font-size:14px; }
-.mock-card p{ margin:0; font-size:12px; color:var(--ink-3); line-height:1.45; }
-.mock-mods{ border-top:1px solid var(--line); }
-.mock-mods button{ display:flex; width:100%; align-items:baseline; gap:8px; background:none;
-  border:0; border-bottom:1px solid var(--line); padding:9px 16px; font:inherit; font-size:13px;
+.pg{ max-width:900px; margin:0 auto; padding:40px 20px 80px; }
+/* SCOPED WITH `>` AND NOTHING LESS. `.pg h1` reaches INSIDE the frames — the
+   chrome's own `.brand h1` is a descendant of this page — so it set the
+   product's name at 22px, took the brand from 409px to 559, tipped the client
+   chip onto two lines and grew the top row 31 → 46px. The page was then
+   reporting a cost that was its own stylesheet's, on the one number being
+   decided. */
+.pg > h1{ font-size:22px; margin:0 0 8px; letter-spacing:-.01em; }
+.pg > .pglede{ font-size:14px; color:var(--ink-2); margin:0 0 4px; line-height:1.55; }
+.pg > section > h2{ font-size:15px; margin:0 0 10px; }
+.pg > section > h2 em{ font-style:normal; color:var(--ink-3); font-weight:400; }
+.pg > section{ margin:34px 0 0; }
+.frame{ border:1px solid var(--line); border-radius:10px; overflow:auto; position:relative;
+        background:var(--surface); width:calc(100vw - 40px); margin-left:calc(50% - 50vw + 20px); }
+.frame > .chrome{ min-width:1040px; }
+.frame .chrome{ position:static !important; }
+.frame.tall{ padding-bottom:104px; }
+.ask{ border-left:3px solid var(--gold); padding:12px 0 12px 16px; margin:40px 0 0; }
+.ask p{ margin:0 0 8px; font-size:14px; line-height:1.6; } .ask p:last-child{ margin:0; }
+.cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(258px,1fr)); gap:14px;
+        padding:18px; background:var(--surface-2); align-items:start;
+        border:1px solid var(--line); border-radius:10px; }
+.card{ border:1px solid var(--line); border-radius:10px; background:var(--surface); overflow:hidden; }
+.card .ch{ padding:14px 16px 12px; }
+.card h4{ margin:0 0 3px; font-size:14px; } .card p{ margin:0; font-size:12px; color:var(--ink-3); }
+.mods button{ display:flex; width:100%; align-items:baseline; gap:8px; background:none; border:0;
+  border-top:1px solid var(--line); padding:9px 16px; font:inherit; font-size:13px;
   color:var(--ink-1); text-align:left; cursor:pointer; }
-.mock-mods button:last-child{ border-bottom:0; }
-.mock-mods button:hover{ background:var(--surface-2); }
-.mock-mods span{ font-size:11.5px; color:var(--ink-3); margin-left:auto; }
-
-/* The mark on the TOP row. `.homemark`'s ink is rgba(255,255,255,.86), which is
-   right on the navy destination row and 1.00:1 on this white one — the same
-   trap this mockup has now hit twice (§38.4/§38.5), so the ink comes from the
-   row it sits on. Everything else is `.homemark`'s geometry: frameless, square,
-   centred both ways, an even slack either side of the mark (§302.4). It is 30px
-   here rather than 34 for a measured reason: swept at a real 1500px window, a
-   30px box grows the top row 31 → 36px, 28 → 34, 26 → 32, and 24 costs it
-   NOTHING. §302.4's arithmetic still holds — 24 minus a 16px mark leaves 8,
-   four a side — so the size that is free is also the size that does not snap. */
-.top-in .topmark > summary{ list-style:none; cursor:pointer; display:flex;
-  align-items:center; justify-content:center; width:24px; height:24px;
-  border-radius:5px; color:var(--ink-2); background:none; border:0; flex:none; }
+.mods button:hover{ background:var(--surface-2); }
+.mods span{ font-size:11.5px; color:var(--ink-3); margin-left:auto; }
+/* the mark: `.homemark`'s geometry on the top row's ink, at the size that costs
+   the row nothing (24, less a 16px glyph — eight of slack, four a side) */
+.top-in .topmark > summary{ list-style:none; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; width:24px; height:24px; border-radius:5px; color:var(--ink-2);
+  background:none; border:0; flex:none; }
 .top-in .topmark > summary::-webkit-details-marker{ display:none; }
 .top-in .topmark > summary:hover{ background:var(--surface-2); color:var(--ink-1); }
 .top-in .topmark .navmenusvg{ width:16px; height:16px; }
 .top-in .topmark .menu{ top:100%; left:0; }
 .top-in .topmark{ margin-right:8px; }
-/* E2 puts it after the name rather than before it */
 .top-in .brand + .topmark{ margin:0 0 0 6px; }
-/* the destination-row mark, unchanged from round two */
-.units .navmenu-btn.modmark{ background:none; border-color:transparent;
-  color:rgba(255,255,255,.86); border-radius:5px; padding:0;
-  width:34px; height:34px; flex:none; align-self:center; justify-content:center; }
-.units .navmenu-btn.modmark .navmenusvg{ width:24px; height:24px; }
-.units .navmenu-btn.modmark:hover{ background:rgba(255,255,255,.16);
-  border-color:transparent; color:#fff; }
-.modlauncher > summary{ list-style:none; }
-.modlauncher > summary::-webkit-details-marker{ display:none; }
 details.dlmenu > .menu button[aria-current="true"]{ font-weight:700; }
-.modgap{ margin:0 10px; }
 .modhere{ font-weight:600; color:var(--ink-2); }
 
 </style>
 </head>
 <body>
-<div class="mock-page"><header class="mock-head">
-<h1>The mark at the top left, and the card that asks</h1>
-<p class="mock-lede">Round three. The mark’s treatment is settled — frameless, centred, the shape named rather than copied. Two things left: whether it belongs beside the product’s own name at the very top left, and what happens when a consultant presses a client card.</p>
-</header><hr class="mock-rule">
-<p class="mock-key">1 · The mark beside the product name</p>
-<p class="mock-why" style="max-width:78ch">The top left is the outermost position on the page, which is the true one: a module contains everything on every row below it. The worry is the row — round one ruled out putting the switch on the top row because that row was cut to one line with real effort (§122), and round two measured D4 growing it from 31px to 46. <b>But D4’s control is a word with padding; a bare mark is not</b>, so the question is whether this one costs the row anything at all. The table below is the page measuring it.</p>
-<section class="mock-panel"><h2>D3 — round two’s answer, for comparison</h2><p class="mock-why">The mark on the destination row, separated from the home mark.</p><div class="mock-frame"><div class="chrome">
-
-<header class="top">
-  <div class="top-in">
-    <div class="brand">
-      <h1>Strategy Management Platform</h1>
-      
-      <span class="orgname" id="orgname">· Raya Trade <b class="modhere">› Strategy</b></span>
-    </div>
-    
-    <button class="clientback" id="clientback" type="button">
-      <span id="clientbackname">Raya Trade</span><i>change</i>
-    </button>
-    <div class="viewer">
-      <label for="asWho">Viewing as</label>
-      <button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Mohamed Essam — the group" aria-label="Viewing as"><span class="sslabel">Mohamed Essam — the group</span><span class="sscar" aria-hidden="true">▾</span></button><select id="asWho" data-ss="1" class="ss-native" tabindex="-1" aria-hidden="true"><option value="smo" title="Mohamed Essam — Head of the Strategy Management Office">Mohamed Essam — the group</option><option value="ceo" title="Group CEO — Chief Executive">Group CEO — the group</option><option value="mobhead" title="Ashraf Laithy — Head of Mobile">Ashraf Laithy — Mobile</option><option value="loghead" title="Hazem Roushdy — Head of Logistics">Hazem Roushdy — Logistics</option><option value="rethead" title="Hossam Farid — Head of Retail Stores">Hossam Farid — Retail Stores</option><option value="cfo" title="Group CFO — Chief Financial Officer">Group CFO — the group</option><option value="b2bhead" title="Nour Selim — Head of B2B Ecomm">Nour Selim — B2B Ecomm</option><option value="cehead" title="Tarek Nassar — Head of Consumer Electronics">Tarek Nassar — Consumer Electronics</option><option value="oshead" title="Sherif Adel — Head of Online Shop">Sherif Adel — Online Shop</option><option value="cohead" title="Amr Bakr — Head of Corporate">Amr Bakr — Corporate</option><option value="cahead" title="Mostafa Deif — Head of Care">Mostafa Deif — Care</option><option value="ithead" title="Yasser Kamal — Head of IT">Yasser Kamal — IT Dist.</option><option value="nghead" title="Chidi Okafor — Head of Nigeria">Chidi Okafor — Nigeria</option><option value="own_mob" title="Mennah Farouk — Strategy custodian, Mobile">Mennah Farouk — Mobile</option><option value="own_ret" title="Dalia Sabry — Strategy custodian, Retail Stores">Dalia Sabry — Retail Stores</option><option value="own_b2b" title="Kareem Hafez — Strategy custodian, B2B Ecomm">Kareem Hafez — B2B Ecomm</option><option value="own_ce" title="Heba Salem — Strategy custodian, Consumer Electronics">Heba Salem — Consumer Electronics</option><option value="own_os" title="Nadia Fouad — Strategy custodian, Online Shop">Nadia Fouad — Online Shop</option><option value="own_co" title="Laila Zaki — Strategy custodian, Corporate">Laila Zaki — Corporate</option><option value="own_ca" title="Rania Fahmy — Strategy custodian, Care">Rania Fahmy — Care</option><option value="own_it" title="Dina Shawky — Strategy custodian, IT">Dina Shawky — IT Dist.</option><option value="own_lg" title="Mai Sobhy — Strategy custodian, Logistics">Mai Sobhy — Logistics</option><option value="own_ng" title="Amaka Eze — Strategy custodian, Nigeria">Amaka Eze — Nigeria</option><option value="mrchead" title="Sara Helmy — Head of Merchandising">Sara Helmy — Merchandising</option><option value="own_mrc" title="Tamer Fouad — Strategy custodian, Merchandising">Tamer Fouad — Merchandising</option><option value="fn_fin" title="Hossam Abuelenien — Head of Finance">Hossam Abuelenien — Finance</option><option value="fn_hr" title="Noran Adel — Head of HR">Noran Adel — HR</option><option value="fn_tre" title="Fayad Sobhy — Head of Treasury">Fayad Sobhy — Treasury</option><option value="fn_mkt" title="Yara Kamal — Head of Marketing">Yara Kamal — Marketing</option><option value="fn_mkt2" title="Tarek Nour — Strategy custodian, Marketing">Tarek Nour — Marketing</option><option value="dir" title="Ramy Behairy — Director, Digital Operations">Ramy Behairy — Mobile</option><option value="co_dist" title="Company CEO, Distribution — CEO, Distribution">Company CEO, Distribution — Distribution</option><option value="co_b2c" title="Company CEO, B2C — CEO, B2C">Company CEO, B2C — B2C</option></select>
-      <span class="viewer-note" id="viewerNote" title="Super user · Function head, Strategy Management Office">Super user · Function head, Strategy Management Office</span>
-    </div>
-    
-    <div class="topacts" id="topacts">
-      
-      <button class="infobtn themebtn" id="themebtn" type="button" title="Theme: light — click for dark" aria-label="Theme: light — click for dark"><svg viewBox="0 0 20 20" class="themesvg" aria-hidden="true"><circle cx="10" cy="10" r="3.7" fill="currentColor"></circle><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"></path><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"></path></g></svg></button>
-      
-      
-      <button class="infobtn fontbtn" id="fontbtn" type="button" title="Typeface: System — click for Source Sans" aria-label="Typeface: System — click for Source Sans" style="font-family: var(--sans);">System</button>
-    </div>
-  </div>
-</header>
-
-<nav class="units">
-  <div class="units-in folded" role="tablist" id="units"><details class="dlmenu modlauncher"><summary class="navmenu-btn navmenu-solo modmark" title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary><div class="menu" role="menu"><button role="menuitem" aria-current="true">Strategy<span class="dlsub">Plans, measures, reporting and the review</span></button><button role="menuitem">Portfolio<span class="dlsub">Detailed projects, timelines and checkpoints</span></button><button role="menuitem">Insights<span class="dlsub">Research, analytics and market reports</span></button><button role="menuitem">Processes<span class="dlsub">How things are done here</span></button></div></details><span class="sep pinsep modgap"></span><button type="button" class="navmenu-btn navmenu-solo homemark" title="What is waiting on me" aria-label="What is waiting on me"><svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M3 8.6 10 3.2l7 5.4V16a1 1 0 0 1-1 1h-3.4v-4.6H7.4V17H4a1 1 0 0 1-1-1Z"/></g></svg></button><span class="sep pinsep"></span><details class="dlmenu topsel" id="topsel"><summary role="tab" aria-selected="false">Group<span class="dlcar" aria-hidden="true">▾</span></summary><div class="menu" role="menu"><button role="menuitem" data-u="group">Group</button><button role="menuitem" data-u="co:distribution">Distribution<span class="dlsub">3 business units</span></button><button role="menuitem" data-u="co:b2c">B2C<span class="dlsub">3 business units</span></button></div></details><span class="sep"></span><button class="navswitch" data-fold="caps" aria-label="Showing units. Press to show functions."><span class="nsw on">Units</span><span class="nsw">Functions</span></button><div class="navclip"><div class="navscroll" id="navscroll"><button role="tab" aria-selected="true" data-u="mobile">Mobile</button><button role="tab" aria-selected="false" data-u="retailstores">Retail Stores</button><button role="tab" aria-selected="false" data-u="b2becomm">B2B Ecomm</button><button role="tab" aria-selected="false" data-u="consumerelectronics">Consumer Electronics</button><button role="tab" aria-selected="false" data-u="onlineshop">Online Shop</button><button role="tab" aria-selected="false" data-u="corporate">Corporate</button><button role="tab" aria-selected="false" data-u="care">Care</button><button role="tab" aria-selected="false" data-u="it">IT Dist.</button><button role="tab" aria-selected="false" data-u="logistics">Logistics</button><button role="tab" aria-selected="false" data-u="nigeria">Nigeria</button></div><div class="navfade l" hidden=""></div><div class="navfade r" hidden=""></div></div><span class="sep pinsep"></span><button type="button" class="navmenu-btn navmenu-ico navmenu-solo" data-md="setup" data-ms="overview" title="Setup" aria-label="Setup"><svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"></path><circle cx="13.6" cy="6.5" r="2.1"></circle><circle cx="8.6" cy="13.5" r="2.1"></circle></g></svg></button></div>
-</nav>
-
-<nav class="tabs" id="tabrow">
-  <div class="tabs-in" role="tablist" id="subtabs"><button role="tab" data-s="strategy" aria-selected="true">Strategy</button><button role="tab" data-s="performance" class="primary" aria-selected="false">Performance</button><button role="tab" data-s="report" class="cta dot" aria-selected="false">Reporting<i class="tabdot" aria-hidden="true"></i><span class="vh"> — not submitted yet</span></button></div>
-</nav>
-
-<nav class="tabs sectionrow" id="secrow">
-  <div class="tabs-in" role="tablist" id="secrow-in"><button role="tab" data-sub2="found" aria-selected="false">Foundation</button><button role="tab" data-sub2="swot" aria-selected="false">SWOT</button><button role="tab" data-sub2="plan" aria-selected="true">Plan</button><span class="secttail"><div class="missbar" data-gapband="1"><span class="secmiss" data-gapcount="1">44 Missing</span><button type="button" class="mchip" data-gkey="p:01" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="01" title="10 missing elements — press to go">MB01 <b>10</b></button><button type="button" class="mchip" data-gkey="p:02" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="02" title="8 missing elements — press to go">MB02 <b>8</b></button><button type="button" class="mchip" data-gkey="p:03" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="03" title="14 missing elements — press to go">MB03 <b>14</b></button><button type="button" class="mchip" data-gkey="p:04" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="04" title="12 missing elements — press to go">MB04 <b>12</b></button><span class="gaptail"><button type="button" class="fillcta" data-fillcta="plan">Fill in missing elements</button></span></div><span class="sectsep" aria-hidden="true"></span><button class="secpen" data-page="plan" data-pageset="foundation|analysis|plan">Edit</button></span></div>
-</nav>
-</div></div></section>
-<section class="mock-panel"><h2>E1 — the mark leads the page</h2><p class="mock-why">Before “Strategy Management Platform”, so it is the first thing on the first row. The module’s name stays on the client’s line.</p><div class="mock-frame"><div class="chrome">
+<div class="pg">
+<h1>The module mark</h1>
+<p class="pglede">Two placements for it, and what a client card does. Drawn in the platform’s own chrome.</p>
+<section><h2>E1 <em>— before the product’s name</em></h2>
+<div class="frame"><div class="chrome">
 
 <header class="top">
   <div class="top-in">
@@ -9728,8 +9638,9 @@ details.dlmenu > .menu button[aria-current="true"]{ font-weight:700; }
 <nav class="tabs sectionrow" id="secrow">
   <div class="tabs-in" role="tablist" id="secrow-in"><button role="tab" data-sub2="found" aria-selected="false">Foundation</button><button role="tab" data-sub2="swot" aria-selected="false">SWOT</button><button role="tab" data-sub2="plan" aria-selected="true">Plan</button><span class="secttail"><div class="missbar" data-gapband="1"><span class="secmiss" data-gapcount="1">44 Missing</span><button type="button" class="mchip" data-gkey="p:01" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="01" title="10 missing elements — press to go">MB01 <b>10</b></button><button type="button" class="mchip" data-gkey="p:02" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="02" title="8 missing elements — press to go">MB02 <b>8</b></button><button type="button" class="mchip" data-gkey="p:03" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="03" title="14 missing elements — press to go">MB03 <b>14</b></button><button type="button" class="mchip" data-gkey="p:04" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="04" title="12 missing elements — press to go">MB04 <b>12</b></button><span class="gaptail"><button type="button" class="fillcta" data-fillcta="plan">Fill in missing elements</button></span></div><span class="sectsep" aria-hidden="true"></span><button class="secpen" data-page="plan" data-pageset="foundation|analysis|plan">Edit</button></span></div>
 </nav>
-</div></div><div class="mock-cost mock-pick"><p><b>Recommended, and it costs nothing.</b> It reads in the right order — modules, then the product, then the client, then where in the client — and it is the only placement where the outermost thing in the platform is the first thing on the page. It leaves the destination row exactly as it is today, and at 24px square it leaves the top row exactly as it is too. The one cost is below ~1300px, where that row already wraps without it (§122) and the mark takes a little more of the product’s name with it.</p></div></section>
-<section class="mock-panel"><h2>E1, open</h2><div class="mock-frame mock-frame-open"><div class="chrome">
+</div></div></section>
+<section><h2>Open</h2>
+<div class="frame tall"><div class="chrome">
 
 <header class="top">
   <div class="top-in">
@@ -9770,7 +9681,8 @@ details.dlmenu > .menu button[aria-current="true"]{ font-weight:700; }
   <div class="tabs-in" role="tablist" id="secrow-in"><button role="tab" data-sub2="found" aria-selected="false">Foundation</button><button role="tab" data-sub2="swot" aria-selected="false">SWOT</button><button role="tab" data-sub2="plan" aria-selected="true">Plan</button><span class="secttail"><div class="missbar" data-gapband="1"><span class="secmiss" data-gapcount="1">44 Missing</span><button type="button" class="mchip" data-gkey="p:01" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="01" title="10 missing elements — press to go">MB01 <b>10</b></button><button type="button" class="mchip" data-gkey="p:02" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="02" title="8 missing elements — press to go">MB02 <b>8</b></button><button type="button" class="mchip" data-gkey="p:03" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="03" title="14 missing elements — press to go">MB03 <b>14</b></button><button type="button" class="mchip" data-gkey="p:04" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="04" title="12 missing elements — press to go">MB04 <b>12</b></button><span class="gaptail"><button type="button" class="fillcta" data-fillcta="plan">Fill in missing elements</button></span></div><span class="sectsep" aria-hidden="true"></span><button class="secpen" data-page="plan" data-pageset="foundation|analysis|plan">Edit</button></span></div>
 </nav>
 </div></div></section>
-<section class="mock-panel"><h2>E2 — the mark follows the module’s name</h2><p class="mock-why">· Raya Trade › Strategy ▦ — the name and the way to change it in one place, which is the cost D recorded against itself in round one.</p><div class="mock-frame"><div class="chrome">
+<section><h2>E2 <em>— after the module’s name</em></h2>
+<div class="frame"><div class="chrome">
 
 <header class="top">
   <div class="top-in">
@@ -9810,43 +9722,10 @@ details.dlmenu > .menu button[aria-current="true"]{ font-weight:700; }
 <nav class="tabs sectionrow" id="secrow">
   <div class="tabs-in" role="tablist" id="secrow-in"><button role="tab" data-sub2="found" aria-selected="false">Foundation</button><button role="tab" data-sub2="swot" aria-selected="false">SWOT</button><button role="tab" data-sub2="plan" aria-selected="true">Plan</button><span class="secttail"><div class="missbar" data-gapband="1"><span class="secmiss" data-gapcount="1">44 Missing</span><button type="button" class="mchip" data-gkey="p:01" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="01" title="10 missing elements — press to go">MB01 <b>10</b></button><button type="button" class="mchip" data-gkey="p:02" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="02" title="8 missing elements — press to go">MB02 <b>8</b></button><button type="button" class="mchip" data-gkey="p:03" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="03" title="14 missing elements — press to go">MB03 <b>14</b></button><button type="button" class="mchip" data-gkey="p:04" data-gpage="plan" data-gsec="plan" data-grail="unit:mobile" data-gcode="04" title="12 missing elements — press to go">MB04 <b>12</b></button><span class="gaptail"><button type="button" class="fillcta" data-fillcta="plan">Fill in missing elements</button></span></div><span class="sectsep" aria-hidden="true"></span><button class="secpen" data-page="plan" data-pageset="foundation|analysis|plan">Edit</button></span></div>
 </nav>
-</div></div><div class="mock-cost "><p>Pairs the name with its control, and gives up the reading order: the module now sits after the client it contains. It also puts the mark in the middle of a line rather than at an edge, which is a harder target to find twice.</p></div></section>
-<section class="mock-panel"><p class="mock-key">What it costs the row</p><h2>Measured, not guessed</h2><p class="mock-why"><b>And the first run of this table was wrong, through my own instrument.</b> The frames were capped at this page’s reading width, about 200px narrower than the real chrome — which has been full-window since §94.13 — so they reported a squeezed row and said the mark cost 15px and clipped the name. At the real width it costs 5px at 30px square, and a <b>24px mark costs nothing at all</b>: swept at 1500, the row is 31px with it and 31px without. §302.4’s arithmetic still holds — 24 minus a 16px mark leaves eight, four a side.</p><div class="mock-measwrap"><table class="mock-meas"><thead><tr><th>Option</th><th>Top row</th><th>Name cut</th><th>Row scrolls</th></tr></thead><tbody id="measrows"></tbody></table></div><p class="mock-note" id="measw"></p></section>
-<hr class="mock-rule">
-<p class="mock-key">2 · Pressing a client card</p>
-<p class="mock-why" style="max-width:78ch"><b>This is a different audience from the one I argued against, and that changes the answer.</b> Round two’s objection to “ask which module” was about a <i>client’s own person</i>: most of a client’s register will hold one module, and they arrive with a thing to do rather than a place to go. A consultant pressing a client card is the opposite — they work across four modules and several clients, they have not been in this one for a fortnight, and “where you were” is a weak memory. So: <b>the card asks, and the client’s own landing does not.</b></p>
-<section class="mock-panel"><h2>The card opens into its modules</h2><p class="mock-why">One press on the client, one on the module. Nothing to remember.</p><div class="mock-cards"><div class="mock-card"><div class="ch"><h4>Raya Trade</h4><p>10 business units · 8 supporting functions</p></div><div class="mock-mods"><button>Strategy<span>cycle open</span></button><button>Portfolio<span>12 running</span></button><button>Insights<span>3 new</span></button><button>Processes<span></span></button></div></div><div class="mock-card"><div class="ch"><h4>RHI</h4><p>Not yet set up</p></div><div class="mock-mods"><button>Strategy<span></span></button></div></div></div><p class="mock-note">Illustrative: the card’s own frame is the platform’s, the module list is new.</p><div class="mock-cost mock-pick"><p><b>And the list earns its place by saying something.</b> A list of four names is two presses for one; the same list carrying <i>cycle open</i>, <i>12 running</i>, <i>3 new</i> is where a consultant decides which module to open. A client with one module shows one line and behaves as it does today — and whether pressing the client’s NAME still goes straight in, or the card is only ever a list, is the one thing left to settle here.</p></div></section>
-<div class="mock-q"><p><b>1 · The mark:</b> E1 (leading the page) or E2 (after the module’s name) — or D3, the destination row, if the measurement below changes your mind.</p><p><b>2 · The card:</b> as drawn. One thing to settle: does pressing the client’s name still open it straight, or is the card only ever a list?</p></div>
+</div></div></section>
+<section><h2>The client card, pressed</h2>
+<div class="cards"><div class="card"><div class="ch"><h4>Raya Trade</h4><p>10 business units · 8 supporting functions</p></div><div class="mods"><button>Strategy<span>cycle open</span></button><button>Portfolio<span>12 running</span></button><button>Insights<span>3 new</span></button><button>Processes<span></span></button></div></div><div class="card"><div class="ch"><h4>RHI</h4><p>Not yet set up</p></div><div class="mods"><button>Strategy<span></span></button></div></div></div></section>
+<div class="ask"><p><b>E1 or E2?</b> Neither costs the row anything at this size.</p><p><b>On the card</b> — does pressing the client’s name still open it straight, or is the card only ever a list?</p></div>
 </div>
-<script>
-(function(){
-  /* frames: 0 D3 | 1 E1 | 2 E1 open | 3 E2 */
-  var PICK = [[0,"D3 \u2014 destination row"],[1,"E1 \u2014 mark leads the page"],
-              [3,"E2 \u2014 mark after the name"]];
-  function draw(){
-    var fr = [].slice.call(document.querySelectorAll(".mock-frame")), out = "", base = null;
-    PICK.forEach(function(p, i){
-      var f = fr[p[0]]; if (!f) return;
-      var h1 = f.querySelector(".brand h1"), top = f.querySelector(".top-in"),
-          sc = f.querySelector(".navscroll");
-      var row = top ? Math.round(top.getBoundingClientRect().height) : 0,
-          cut = h1 ? Math.round(h1.scrollWidth - h1.clientWidth) : 0,
-          ovr = sc ? Math.round(sc.scrollWidth - sc.clientWidth) : 0;
-      if (i === 0) base = { row: row, cut: cut };
-      var warn = (base && (row > base.row || cut > base.cut)) ? "bad" : "";
-      out += "<tr><td>" + p[1] + "</td><td class='" + warn + "'>" + row + "px</td>"
-           + "<td class='" + warn + "'>" + (cut ? cut + "px" : "\u2014") + "</td>"
-           + "<td>" + (ovr ? ovr + "px" : "\u2014") + "</td></tr>";
-    });
-    var b = document.getElementById("measrows"); if (b) b.innerHTML = out;
-    var w = document.getElementById("measw");
-    if (w) w.textContent = "Window " + window.innerWidth + "px wide; the frames run the "
-      + "full width of it, as the real chrome does (\u00a794.13). D3 is the baseline \u2014 it "
-      + "puts nothing on the top row at all.";
-  }
-  addEventListener("resize", draw); addEventListener("load", draw); draw();
-})();
-</script>
-
 </body>
 </html>

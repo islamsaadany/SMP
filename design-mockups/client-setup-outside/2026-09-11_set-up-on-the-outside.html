@@ -136,6 +136,34 @@
   .addrow:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
   .emptyline{ color:var(--ink-3); font-size:13.5px; font-style:italic }
 
+  /* ── the searchable industry list ────────────────────────────── */
+  .pick{ position:relative }
+  .pick .panel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    box-shadow:var(--shadow); max-height:270px; overflow-y:auto; padding:5px }
+  .pick .panel[hidden]{ display:none }
+  .pick .gp{ font:600 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); padding:9px 9px 5px }
+  .pick .opt{ display:block; width:100%; text-align:left; border:0; background:transparent;
+    color:var(--ink); font:inherit; font-size:13.5px; padding:6px 9px; border-radius:6px;
+    cursor:pointer }
+  .pick .opt:hover, .pick .opt:focus-visible{ background:var(--surface-2); outline:none }
+  .pick .opt[aria-selected="true"]{ background:var(--amber-wash); color:var(--amber-tx);
+    font-weight:600 }
+  .pick .nohit{ padding:10px 9px; color:var(--ink-3); font-size:13px; font-style:italic }
+
+  /* ── the size band ───────────────────────────────────────────── */
+  .band{ display:flex; flex-wrap:wrap; gap:6px }
+  .band button{ border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; padding:6px 11px; font:600 12.5px/1.5 inherit; cursor:pointer;
+    display:flex; flex-direction:column; gap:1px; align-items:flex-start }
+  .band button:hover{ border-color:var(--amber-tx) }
+  .band button[aria-pressed="true"]{ border-color:var(--amber); background:var(--amber-wash);
+    color:var(--ink) }
+  .band button .ppl{ font:400 11px/1.3 var(--mono); color:var(--ink-3);
+    font-variant-numeric:tabular-nums }
+  .band button[aria-pressed="true"] .ppl{ color:var(--amber-tx) }
+
   /* ── a choice with its own small drawing ─────────────────────── */
   .choices{ display:flex; flex-direction:column; gap:10px }
   .choice{ display:grid; grid-template-columns:92px minmax(0,1fr); gap:14px; width:100%;
@@ -165,6 +193,7 @@
   .shorg .nm{ font-weight:700; font-size:14.5px; color:var(--ink) }
   .shorg .yr{ margin-left:auto; font-size:12px; color:var(--amber-tx);
     font-variant-numeric:tabular-nums }
+  .shape .shwho{ margin:6px 0 0; font-size:12px; color:var(--ink-3) }
   .stem{ width:1px; height:13px; background:var(--line); margin:0 auto }
   .switch{ display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden;
     font-size:12px }
@@ -308,6 +337,8 @@
   <ul>
     <li><b>Set-up happens out here, before anybody from the client signs in.</b> Press <i>Add a client</i> and you walk the whole thing on Forefront's own page. Their people then open a platform that is already shaped.</li>
     <li><b>The client's details are step 1, not a screen of their own.</b> Name, industry, notes and the mark were being asked twice — once to create, once on the card. Asked once, here, and the client is created the moment the name is answered so the address exists and you can leave and come back.</li>
+    <li><b>The client is described from the standard list.</b> Industry is Strategy Formulation&rsquo;s own 45 entries on GICS, searched rather than scrolled, so a client reads the same in both products &mdash; one list, read from one place, not retyped here. Size is that product&rsquo;s five bands rather than a headcount: a number typed once is stale within the year and nobody comes back to it.</li>
+    <li><b>The horizon is not the reporting cycle.</b> It is the one far year long-term targets are measured by, set once for the client &mdash; the platform prints <i>Target by 2029</i> beside them. When a cycle covers from and to, when figures are due and which month it is measured at are set inside the platform each time a cycle opens, and the step says so.</li>
     <li><b>There is no default.</b> A client is born as whatever you answered — and blank if you answer nothing. No inherited units, no inherited functions, nothing to rename.</li>
     <li><b>The set-up flow inside the client goes away.</b> One flow in one place. Adding a unit later is still the ordinary Business units page.</li>
     <li><b>There is no second screen.</b> Opening a client afterwards opens this same flow with its answers already in it — press any step in the rail to change that one thing. <i>Save and close</i>, top right, writes and takes you back to the clients list; the summary&rsquo;s first door opens the platform.</li>
@@ -322,7 +353,8 @@
   "use strict";
 
   var M = {
-    name: "ElAbd Foods", slug: "elabd-foods", industry: "F&B", year: "2027",
+    name: "ElAbd Foods", slug: "elabd-foods",
+    industry: "Food & Beverage", size: "large", horizon: "2029",
     units: [{ n: "Bakery", f: "pillars" }, { n: "Dairy", f: "pillars" }, { n: "Retail", f: "pillars" }],
     companies: "none",
     fns: [{ n: "Finance", f: "projects" }, { n: "Human Resources", f: "pillars" }],
@@ -331,7 +363,7 @@
 
   var STEPS = [
     { key: "The client",      label: "The client",     q: "Which client are you setting up?" },
-    { key: "The organisation", label: "The year",       q: "Which year is this plan for?" },
+    { key: "Strategy",        label: "The horizon",   q: "How far out do the long-term targets look?" },
     { key: "The organisation", label: "Business units", q: "What are the business units?" },
     { key: "The organisation", label: "Companies",      q: "Are the units grouped into companies?" },
     { key: "Strategy",        label: "Capabilities",   q: "Are there capabilities beside the units?", later: 1 },
@@ -373,6 +405,62 @@
       '<span class="cwhy">' + why + "</span></span></div>";
   }
 
+  /* ── THE STANDARD INDUSTRY LIST ──────────────────────────────────────
+     Strategy-Formulation's lib/constants/industries.ts, verbatim, with its
+     own eleven groupings (they are section comments there). 45 entries on
+     GICS. Not retyped into a second list in a second product: when this is
+     built it is READ from one place, so a client reads the same in both. */
+  var INDUSTRIES = [
+    ["Technology & Communications", ["Technology & Software", "Telecommunications", "Media & Entertainment"]],
+    ["Financial", ["Banking & Finance", "Insurance", "Investment & Asset Management"]],
+    ["Healthcare & Life Sciences", ["Healthcare & Hospitals", "Pharmaceuticals & Biotech", "Medical Devices & Equipment"]],
+    ["Consumer", ["Retail & E-commerce", "Consumer Goods & FMCG", "Food & Beverage", "Hospitality & Tourism", "Restaurants & Food Service"]],
+    ["Industrial", ["Manufacturing", "Automotive", "Aerospace & Defense", "Chemicals", "Industrial Equipment & Machinery"]],
+    ["Energy & Utilities", ["Oil & Gas", "Renewable Energy", "Utilities (Electric, Water, Gas)"]],
+    ["Real Estate & Construction", ["Real Estate & Property", "Construction & Engineering", "Architecture & Design"]],
+    ["Services", ["Professional Services & Consulting", "Legal Services", "Accounting & Audit", "Marketing & Advertising", "HR & Recruitment"]],
+    ["Transportation & Logistics", ["Transportation & Logistics", "Shipping & Maritime", "Aviation & Airlines"]],
+    ["Other Sectors", ["Education & Training", "Agriculture & Farming", "Mining & Metals", "Government & Public Sector", "Non-Profit & NGO", "Sports & Recreation", "Fashion & Apparel", "Printing & Publishing"]],
+    ["", ["Other"]]
+  ];
+  var SIZES = [["startup", "Startup", "1–10"], ["small", "Small", "11–50"],
+               ["medium", "Medium", "51–200"], ["large", "Large", "201–1000"],
+               ["enterprise", "Enterprise", "1000+"]];
+  function sizeLabel(v) {
+    for (var i = 0; i < SIZES.length; i++) if (SIZES[i][0] === v) return SIZES[i][1] + " · " + SIZES[i][2] + " people";
+    return "Not set";
+  }
+
+  function industryPanel(q) {
+    var needle = String(q || "").trim().toLowerCase(), out = "", hits = 0;
+    INDUSTRIES.forEach(function (g) {
+      var keep = g[1].filter(function (n) { return !needle || n.toLowerCase().indexOf(needle) > -1; });
+      if (!keep.length) return;
+      hits += keep.length;
+      if (g[0]) out += '<div class="gp">' + esc(g[0]) + "</div>";
+      out += keep.map(function (n) {
+        return '<button type="button" class="opt" data-ind="' + esc(n) + '"' +
+          (n === M.industry ? ' aria-selected="true"' : "") + ">" + esc(n) + "</button>";
+      }).join("");
+    });
+    return hits ? out : '<div class="nohit">Nothing matches that. The list is the standard one — ' +
+      "pick <b>Other</b> if none of it fits.</div>";
+  }
+  function industryPicker() {
+    return '<div class="pick" id="indpick">' +
+      '<input class="fld" type="text" id="w-ind" autocomplete="off" placeholder="Type to search the list…" value="' +
+      esc(M.industry) + '">' +
+      '<div class="panel" id="indpanel" role="listbox" aria-label="Industry" hidden>' +
+      industryPanel("") + "</div></div>";
+  }
+  function sizePicker() {
+    return '<div class="band" role="group" aria-label="Size">' + SIZES.map(function (z) {
+      return '<button type="button" data-size="' + z[0] + '" aria-pressed="' +
+        (M.size === z[0] ? "true" : "false") + '">' + esc(z[1]) +
+        '<span class="ppl">' + esc(z[2]) + " people</span></button>";
+    }).join("") + "</div>";
+  }
+
   function rowsOf(list, kind, what) {
     if (!list.length) return '<p class="emptyline">No ' + what + " yet.</p>";
     return '<div class="listrows">' + list.map(function (u, n) {
@@ -387,7 +475,17 @@
     if (i === 0) return '<div class="rowset">' +
       '<div><span class="lab">The client\'s name</span><input class="fld" type="text" value="' + esc(M.name) + '" id="w-name">' +
       '<p class="note">What the platform is named after, everywhere — the chrome, the review deck and every email that leaves.</p></div>' +
-      '<div><span class="lab">Industry</span><input class="fld" type="text" value="' + esc(M.industry) + '" id="w-ind"></div>' +
+      /* THE INDUSTRY IS A LIST, AND IT IS NOT A NEW ONE (§53.5): the 45 entries
+         and their eleven groupings are Strategy-Formulation's own
+         lib/constants/industries.ts, built on GICS, so a client described in
+         one product is described the same way in the other. Typed to search,
+         because forty-five in a plain dropdown is a scroll. */
+      '<div><span class="lab">Industry</span>' + industryPicker() +
+      '<p class="note">The standard list — the same one Strategy Formulation uses, so a client reads the same in both.</p></div>' +
+      /* SIZE IS A BAND, NOT A HEADCOUNT: the same five Strategy Formulation
+         asks for. A number typed once is out of date within the year and
+         nobody comes back to it; a band still reads true. */
+      '<div><span class="lab">Size</span>' + sizePicker() + '</div>' +
       '<div><span class="lab">Notes</span><textarea class="fld" rows="2" id="w-notes"></textarea></div>' +
       '<div><span class="lab">Its address here</span><input class="fld" type="text" value="smp.forefront.consulting/' + esc(M.slug) + '" readonly id="w-addr">' +
       '<p class="note">Made from the name and set once, so a link that has been sent keeps working.</p></div>' +
@@ -395,9 +493,15 @@
       '<span class="none">No mark yet — the door opens plain until one is set.</span>' +
       '<button class="btn" type="button">Choose a PNG</button></div></div></div>';
 
-    if (i === 1) return '<div class="rowset"><div><span class="lab">The plan runs to</span>' +
-      '<input class="fld" type="text" value="' + esc(M.year) + '" style="max-width:160px" id="w-yr">' +
-      '<p class="note">The horizon every three-year target is measured against.</p></div></div>';
+    if (i === 1) return '<div class="rowset"><div><span class="lab">Long-term targets are measured by</span>' +
+      '<input class="fld mono" type="text" value="' + esc(M.horizon) + '" style="max-width:160px" id="w-yr">' +
+      '<p class="note">One year, for the whole client. A key measure can carry a target for this year and a target ' +
+      'for the horizon; this is what the second one is measured by, and it is what the platform prints beside it — ' +
+      '<i>Target by ' + esc(M.horizon || "2029") + '</i>. Leave it blank and the column simply reads <i>3-year target</i>.</p></div></div>' +
+      '<div class="laterline" style="margin-top:16px"><b>This is not the reporting cycle.</b> ' +
+      'When a cycle covers from and to, when figures are due and which month it is measured at are ' +
+      'set inside the platform on <i>Reporting cycle</i>, each time a cycle is opened — they change every ' +
+      'few months and this does not.</div>';
 
     if (i === 2) return rowsOf(M.units, "u", "business units") +
       '<button class="addrow" type="button" data-add="u">+ Add a business unit</button>' +
@@ -458,7 +562,9 @@
 
     var lines = [
       ["The client", M.name + " · /" + M.slug, 0],
-      ["The year", M.year, 1],
+      ["Industry", M.industry || "Not set", 0],
+      ["Size", sizeLabel(M.size), 0],
+      ["The horizon", M.horizon ? "Long-term targets by " + M.horizon : "Not set", 1],
       ["Business units", M.units.length ? M.units.map(function (u) { return u.n; }).join(" · ") : "None yet", 2],
       ["Companies", M.companies === "none" ? "None — units sit under ElAbd Foods" : "Grouped", 3],
       ["Supporting functions", M.fns.length ? M.fns.map(function (f) { return f.n + " (" + fmtWord(f.f) + ")"; }).join(" · ") : "None yet", 5],
@@ -495,7 +601,9 @@
        the first build was off by one everywhere, so the panel still read
        "its business units come next" with three units listed beside it. */
     var h = '<div class="shorg"><span class="nm">' + esc(M.name || "The client") + "</span>" +
-      (at >= 1 ? '<span class="yr">to ' + esc(M.year) + "</span>" : "") + "</div>";
+      (at >= 1 && M.horizon ? '<span class="yr">horizon ' + esc(M.horizon) + "</span>" : "") + "</div>";
+    if (M.industry || M.size) h += '<p class="shwho">' +
+      esc([M.industry, M.size ? sizeLabel(M.size) : ""].filter(Boolean).join(" · ")) + "</p>";
     if (at < 2) {
       h += '<div class="stem"></div><div class="none">Its business units come next.</div>';
     } else {
@@ -564,6 +672,26 @@
       (at === 2 ? M.units : M.fns).splice(n, 1);
       paint(); return;
     }
+    var o = t.closest("[data-ind]");
+    if (o) {
+      M.industry = o.getAttribute("data-ind");
+      document.getElementById("w-ind").value = M.industry;
+      document.getElementById("indpanel").hidden = true;
+      shape(); return;
+    }
+    var z = t.closest("[data-size]");
+    if (z) {
+      M.size = z.getAttribute("data-size");
+      Array.prototype.forEach.call(z.parentNode.children, function (b) {
+        b.setAttribute("aria-pressed", b === z ? "true" : "false");
+      });
+      shape(); return;
+    }
+    /* OUTSIDE THE PICKER CLOSES IT — on the click rather than on blur, or
+       choosing from the panel would close it before the choice lands. */
+    var panel = document.getElementById("indpanel");
+    if (panel && !t.closest("#indpick")) panel.hidden = true;
+
     var c = t.closest(".choice");
     if (c && !c.classList.contains("later")) {
       var siblings = c.parentNode.querySelectorAll(".choice");
@@ -585,7 +713,19 @@
   });
   document.addEventListener("input", function (e) {
     if (e.target.id === "w-name") { M.name = e.target.value || "The client"; shape(); }
-    if (e.target.id === "w-yr") { M.year = e.target.value; shape(); }
+    if (e.target.id === "w-yr") { M.horizon = e.target.value; shape(); }
+    if (e.target.id === "w-ind") {
+      var panel = document.getElementById("indpanel");
+      panel.innerHTML = industryPanel(e.target.value);
+      panel.hidden = false;
+    }
+  });
+  document.addEventListener("focusin", function (e) {
+    if (e.target.id === "w-ind") {
+      var panel = document.getElementById("indpanel");
+      panel.innerHTML = industryPanel("");
+      panel.hidden = false;
+    }
   });
 
   paint();

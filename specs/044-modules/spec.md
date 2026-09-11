@@ -206,6 +206,34 @@ The second row belongs to the module: Strategy's destinations are the group, the
 companies, the units and the functions; Portfolio's is its own list; a library's
 are its categories.
 
+### 4.6a The way in from the console — the card's rows, and nothing else
+
+Settled from a mockup of the real card, two behaviours drawn side by side
+(2026-09-11). **Islam picked 2: only the rows open.**
+
+A client's card in `/platform` lists the modules that client has, each row a
+door straight into it, each carrying its own one-line state — *cycle open*,
+*12 running*, *3 new*. **The card's name is not pressable**, so every way in
+names a module and there is never a question of which one the top would open.
+
+Costs, stated rather than discovered:
+
+- The target shrinks. Today the whole card is one button; under this, a
+  consultant presses a row. With one module that is strictly a smaller target
+  than today — which is why it is **not built yet** (below).
+- It needs each module to answer a short state for that client. Strategy's is
+  the cycle, which the card already reads; a module with nothing to say draws
+  its name alone.
+- **The landing stops being the way in from the console.** `/<client>` remains
+  what a client's own person lands on, and what a consultant reaches by
+  pressing a row is `/<client>/<module>/…`.
+
+**Not built with §7's address change**, deliberately: with one module the card
+would draw one row, which is a door behind a door (§32) and a smaller target
+than the card it replaced. It lands with the second module, which is item 2 of
+§5 — and the card is right today, because it opens `/<client>`, the landing,
+which is correct under either behaviour.
+
 ### 4.7 Time — every module keeps its own rhythm
 
 Strategy keeps the reporting cycle. Portfolio has checkpoints. Processes is

@@ -42612,3 +42612,34 @@ saying they must be handed the rest INSIDE the module if they ever gain one.
 reproduced identically on the untouched tree before anything here was blamed.
 
 ---
+
+## §318.3 — ONLY THE ROWS OPEN (2026-09-11, spec 044 §4.6a)
+
+Islam, of the client card drawn two ways: ***"2"*** — **only the rows open, the
+card's name is not pressable.** Every way into a client from Forefront's console
+names a module, so there is never a question of which one the top would open —
+which is the question option 1 would have had to answer with a remembered
+per-client module that does not exist.
+
+**HE ASKED FOR A PICTURE AND NOT AN ARGUMENT** — *"for the card show me a mockup
+dont' talk to me about visuals"* — and both behaviours were drawn in the card's
+own markup, at rest and pressed, with a one-module client beside them (rule 1c).
+The difference is one press target and it is not describable: option 1's top row
+and option 2's absence of one look identical in words.
+
+**IT IS NOT BUILT WITH §318.2's ADDRESS CHANGE, AND THE REASON IS THE PRODUCT
+RATHER THAN THE SCHEDULE.** With one module the card draws ONE row — a door
+behind a door (§32) and a **smaller** target than the whole card it replaces, so
+building it today would make the console worse in order to be ready for a
+feature that does not exist. And there is nothing to correct meanwhile: the card
+opens `/<client>`, the landing, which is right under either behaviour. It lands
+with the second module, which is spec 044 §5's own item 2.
+
+**THREE COSTS NAMED NOW rather than found later**: the press target shrinks from
+a card to a row; every module has to answer a short state for that client (*cycle
+open*, *12 running*, *3 new*) or draw its name alone; and **the landing stops
+being the way in from the console** — `/<client>` stays what a client's own
+person lands on, while a consultant pressing a row arrives at
+`/<client>/<module>/…`.
+
+---

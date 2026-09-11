@@ -4546,3 +4546,25 @@ Islam's call on that merge (rule 4). Neither section changes how a save is
 judged, so no forced sign-out — but both change the built file, so `SHELL` in
 `sw.js` needs bumping at the merge, to a name `origin/main` does not already
 hold, confirmed again immediately before the push (§91, §94.12, §94.16).
+
+**2026-09-11 — spec 044, the consulting memory: written, nothing built.** Islam
+asked for somewhere consultants record good practices, lessons learned and the
+hiccups they met with a client, with a wizard to collect one and eventually an
+assistant to ask *"we have hit this before, what happened?"*. `specs/044-consulting-memory/spec.md`.
+**It is three things built in one order** — the record, the way in, the
+assistant — because an assistant over an empty memory answers confidently from
+nothing. **It cannot be a tenant table**: specs 042 and 043 exist to stop one
+client's data reaching another, and this is deliberately cross-client, so it
+lives in the **platform schema** on Forefront's own side of the door and is
+**never drawn inside a client's shell** (asserted at both ends). Two decisions
+are Islam's: **everyone at Forefront reads every entry** (cost stated — a lesson
+naming Raya's figures reaches a consultant who never worked on Raya), and **an
+entry always names its client**, overruling my own recommendation that a
+client-less one be allowed — the generalisation arrives through the client's
+industry instead. **The industry is not a field on the entry**, because every
+client card already carries one. **Flagged, not done:** `clients.industry` is
+free text, so two spellings of one industry make the memory answer half a
+question — cheap now, expensive in a year, and it touches the client card, which
+was not part of the ask (rule 1b). **Waiting on Islam**: sign-off, and one
+sentence of his I can read two ways (whether the platform should record who
+*opened* which entry, or only that each entry names its author).

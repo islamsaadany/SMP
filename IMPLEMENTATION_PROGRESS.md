@@ -4609,3 +4609,64 @@ piece with a wrong answer available to it, so it is checkable with no browser an
 no database. **Three phases, A usable alone** (the record, then the debrief, then
 the assistant), **four checks each red first**, and **two stop points that are
 Islam's**: after phase A, on use rather than on a drawing, and the merge.
+
+
+**2026-09-11 — spec 044 BUILT, all three phases (§318).** Islam: *"go on with
+all the phases in sequence and don't stop until you need me for a decision"* —
+so stop point 1 is **waived by him** and the words (*insight*, *practice ·
+hiccup · lesson*) stay placeholders to be settled on use. **The record, the
+period debrief and the assistant**, on the new stack: `memory_entries` in the
+platform half of `smp-app/db/schema.sql` + migration 004, `lib/memory-api.ts`
+behind `app/api/memory`, `lib/memory-split.cjs`, `lib/memory-ask.ts`, and a
+fourth tab in `platform.html`.
+
+**THE TRAP WAS REAL AND WAS PROVED ON A DATABASE BEFORE THE FIX WAS WRITTEN.**
+schema.sql's closing loop gives every table RLS and a `tenant_rows` policy **by
+exclusion**: a `tenant_id` column here takes the policy **silently** (measured —
+`THE TRAP IS REAL — policy attached: tenant_rows`), and `about_tenant_id` with
+the list forgotten **fails the apply outright** (`column "tenant_id" does not
+exist`). So the naming is a decision about the FAILURE MODE, measured rather
+than argued. **AND THE FRESH-APPLY PATH FOUND WHAT THE EXISTING ONE COULD NOT**
+(§113.7's mirror, §33.5): on a new deployment schema.sql and migration 004 run
+in ONE transaction, so the migration met its own table — `42P07`, the whole
+apply rolled back, **every new deployment failing to start** — invisible on the
+database to hand. Guarded, and both paths then measured side by side: 0
+policies, RLS off, 12 columns, identical.
+
+**THREE MORE FAULTS FOUND BY DRIVING IT AND NONE BY READING**: `deleteTenant`
+would have surfaced the new RESTRICT as a raw foreign-key error, so it **names
+what is in the way** (§62, §184) — it has no callers yet, established rather
+than assumed; `dev-tenant.mjs` could no longer remake the dev tenant; and the
+debrief prompt **went stale in the one way that matters** — `change` fires on
+blur, so somebody filling in the end date and reaching straight for *Copy the
+prompt* copied a prompt with no end date (measured: *"covering 1 August 2026"*
+with 11 September in the box beside it). It follows `input` now, which repaints
+nothing — it writes into one `<pre>` (§63, §193).
+
+**AND THE CHECK LIED TO ME FOR HALF AN HOUR, WHICH IS THE LESSON WORTH KEEPING**
+(§105.6's family): a `next start` from an earlier run held the check's port
+**from before a script tag existed**, so every later run bound-failed silently
+and measured a four-minute-old DOCUMENT with a current page script — and
+reported a product fault that was not there. Both HTTP checks now **refuse to
+run if anything is already listening**, and wait for the port after. My own
+probe then compounded it by measuring `window.MemorySplit` on the **door**,
+because the platform page 401s and redirects there (§50.6).
+
+**FIVE CHECKS, 127 ASSERTIONS, ALL TEN FALSIFICATIONS RED** — split 21/0,
+boundary 12/0 (`--break=policy` reddening exactly the four the real fault would,
+printing `rows seen: 0`), api 36/0, page 42/0 (contrast measured in BOTH
+palettes, §38.5), ask 16/0 against a stand-in for the model (§100.3).
+`check:room` 10/0 · `check:deploy` 5/0 · `check:shell` 61/0 · `check:state`
+91/0 · `check:door` 49/0 · `test:rules` 588/0 · `tsc` clean ·
+`platform-cards.py` 19/0 on **both** copies of the page (§317). **One check
+REWRITTEN, never loosened** (§218, §214.3): `checks/shell.mjs` held the literal
+*"Clients|Consultants|Who sees what"*, so a fourth page read as a regression.
+**`check:demo` is red on the build BEFORE this work**, reproduced with the
+change stashed (§303) — this sandbox has no seeded demo tenant.
+
+**FOUR OF MY OWN CHECK'S FAILURES WERE THE CHECK**: a control asserting more
+than the product claims (any office account may read the consultants list); a
+`textContent` read of a **textarea's value**, which it cannot see; a §260
+assertion asking for something the product deliberately does not do (ordinary
+spacing is untouched); and a break that was a no-op. **Waiting on Islam**: the
+words, on use — and the merge, on that merge (rule 4).

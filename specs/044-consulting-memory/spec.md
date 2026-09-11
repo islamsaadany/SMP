@@ -1,6 +1,8 @@
 # 044 — The consulting memory
 
-**Status:** written 2026-09-11, awaiting Islam's sign-off. Nothing built.
+**Status:** signed off and **BUILT 2026-09-11, all three phases**, on
+`claude/blissful-brown-fxlait`. Not merged — `main` is Islam's word, on that
+merge (rule 4).
 **Asked for by Islam, 2026-09-11.** Five of its decisions are already his
 (below), including the two settled the same day on who reads and who is named,
 and the correction that made the **period debrief** the main way in rather than

@@ -63,12 +63,6 @@
   .mocknote .in{ max-width:1180px; margin:0 auto; display:flex; gap:14px;
     align-items:baseline; flex-wrap:wrap }
   .mocknote b{ font-weight:700 }
-  .mocknote .sw{ margin-left:auto; display:flex; border:1px solid var(--amber);
-    border-radius:7px; overflow:hidden; flex:none }
-  .mocknote .sw button{ border:0; background:transparent; color:var(--amber-tx);
-    font:600 11.5px/1.4 var(--mono); letter-spacing:.05em; text-transform:uppercase;
-    padding:5px 10px; cursor:pointer }
-  .mocknote .sw button.on{ background:var(--amber); color:var(--amber-ink) }
 
   /* ── the platform's own chrome ───────────────────────────────── */
   .top{ background:var(--surface); border-bottom:1px solid var(--line);
@@ -262,10 +256,6 @@
 
 <div class="mocknote"><div class="in">
   <span><b>Mockup — not built.</b> Walk it with the steps or Next; the shape on the right fills in as you answer. Unit and function names are stand-ins until ElAbd's own are typed.</span>
-  <span class="sw" role="group" aria-label="Which screen">
-    <button type="button" id="tab-new" class="on">Setting one up</button>
-    <button type="button" id="tab-after">Changing it later</button>
-  </span>
 </div></div>
 
 <div class="top">
@@ -312,74 +302,6 @@
   </div>
 </div>
 
-<!-- ══ CHANGING IT LATER ═══════════════════════════════════════════ -->
-<div class="wrap" id="view-after" hidden>
-  <div class="ptitle">
-    <h1>ElAbd Foods</h1>
-    <span class="right">
-      <button class="btn" type="button">Back to clients</button>
-      <button class="btn" type="button">Save and open</button>
-      <button class="btn solid" type="button">Save</button>
-    </span>
-  </div>
-
-  <div class="cfg">
-    <div class="rowset">
-      <div><span class="lab">Client name</span><input class="fld" type="text" value="ElAbd Foods" id="a-name"></div>
-      <div><span class="lab">Industry</span><input class="fld" type="text" value="F&amp;B" id="a-ind"></div>
-      <div><span class="lab">Notes</span><textarea class="fld" rows="3" id="a-notes"></textarea></div>
-      <div>
-        <span class="lab">Address</span>
-        <input class="fld" type="text" value="smp.forefront.consulting/elabd-foods" readonly id="a-addr">
-        <p class="note">Set once from the name, so a link that has been sent keeps working.</p>
-      </div>
-      <div>
-        <span class="lab">Mark on this client's door</span>
-        <div class="markrow">
-          <span class="none">No mark yet — the door opens plain until one is set.</span>
-          <button class="btn" type="button">Choose a PNG</button>
-          <button class="btn" type="button">Remove</button>
-        </div>
-        <p class="note">Shown on smp.forefront.consulting/elabd-foods/sign-in, the door this client's people sign in at.</p>
-      </div>
-      <div>
-        <span class="lab">Set-up</span>
-        <p class="note" style="margin:0">Three business units, two supporting functions, the words set.
-          <button class="btn" type="button" style="margin-left:8px">Walk the set-up again</button>
-        </p>
-      </div>
-    </div>
-
-    <div>
-      <span class="lab">Strategy office for this client</span>
-      <div class="teamrow">
-        <span><span class="nm">Islam Saadany</span><br><span class="em">islam.saadany@forefront.consulting</span></span>
-        <span class="sp">
-          <span class="cell"><span class="on">Super user</span><span>SMO team</span></span>
-          <button class="btn" type="button">Remove</button>
-        </span>
-      </div>
-      <div class="foot" style="margin-top:12px; padding-top:0; border:0">
-        <select class="fld" style="flex:1 1 200px"><option>Add somebody from Forefront</option></select>
-        <button class="btn" type="button">Add</button>
-      </div>
-      <p class="note">A seat is held on THIS client: Super user holds its access matrix,
-        retiring people and issuing passwords; SMO team runs cycles and corrects plans.
-        Removing somebody retires their row on this client's register rather than deleting it.</p>
-    </div>
-  </div>
-
-  <div class="legend">
-    <h3>The three buttons</h3>
-    <ul>
-      <li><b>Save</b> writes the change and takes you back to the clients list — the common case, and what you expected it to do.</li>
-      <li><b>Save and open</b> writes it and opens the client's own platform.</li>
-      <li><b>Back to clients</b> leaves without writing, and asks first if anything is unsaved.</li>
-      <li>The team on the right still saves the moment you press it — adding somebody is an act, not a draft — so <b>Save</b> covers the boxes on the left and says so by sitting beside them.</li>
-    </ul>
-  </div>
-</div>
-
 <div class="wrap" style="padding-top:0">
 <div class="legend">
   <h3>What this is asking you to sign off</h3>
@@ -388,8 +310,9 @@
     <li><b>The client's details are step 1, not a screen of their own.</b> Name, industry, notes and the mark were being asked twice — once to create, once on the card. Asked once, here, and the client is created the moment the name is answered so the address exists and you can leave and come back.</li>
     <li><b>There is no default.</b> A client is born as whatever you answered — and blank if you answer nothing. No inherited units, no inherited functions, nothing to rename.</li>
     <li><b>The set-up flow inside the client goes away.</b> One flow in one place. Adding a unit later is still the ordinary Business units page.</li>
+    <li><b>There is no second screen.</b> Opening a client afterwards opens this same flow with its answers already in it — press any step in the rail to change that one thing. <i>Save and close</i>, top right, writes and takes you back to the clients list; the summary&rsquo;s first door opens the platform.</li>
     <li><b>It ends on two doors</b> — open the platform, or back to the clients list — and every line of the summary is a way back to the step that wrote it.</li>
-    <li><b>Dull means drawn and not built yet.</b> Capabilities as their own entry, and the objectives-and-actions plan type: both inert, both saying <i>Later</i>, so nothing offers a choice that would open an empty page. That stays your separate discussion.</li>
+    <li><b>Dull means drawn and not built yet.</b> Two things, and only two. Capabilities exist in the platform today &mdash; held by a function that plans in <i>Capabilities &amp; projects</i>, which the Functions step offers and which is fully live. What is dulled is a capability standing on its <b>own</b>, beside the business units, which the platform has no place for; and the <i>objectives &amp; actions</i> plan type. Both inert, both saying <i>Later</i>, so nothing here offers a choice that would open an empty page. Lighting either is a build of its own.</li>
   </ul>
 </div>
 </div>
@@ -489,7 +412,7 @@
       "</div>";
 
     if (i === 4) return '<p class="qwhy" style="margin-top:-6px">A capability is strategic work sitting beside the business units, planned in pillars and owned by a function head.</p>' +
-      '<div class="laterline"><b>Not built yet — a separate discussion.</b> Today the platform has capabilities only underneath a function that plans in projects, never as their own entry beside the units. Drawn here so the whole shape is visible.</div>' +
+      '<div class="laterline"><b>Not this step &mdash; a build of its own.</b> Capabilities are live in the platform, but they are held by a <b>function</b> that plans in <i>Capabilities &amp; projects</i> &mdash; set that on the Functions step and they work today. What does not exist is a capability standing on its own beside the business units, which is what this step asks for. Drawn so the whole shape is visible.</div>' +
       '<div class="listrows later" style="margin-top:14px">' +
       '<div class="listrow"><span class="grab" aria-hidden="true">∷</span><span class="nm">Digital &amp; Data</span>' +
       '<span class="rt"><span style="font-size:12px;color:var(--ink-3)">owned by</span>' +
@@ -568,9 +491,12 @@
   }
 
   function shape() {
-    var h = '<div class="shorg"><span class="nm">' + esc(at >= 1 ? M.name : "The client") + "</span>" +
-      (at >= 2 ? '<span class="yr">to ' + esc(M.year) + "</span>" : "") + "</div>";
-    if (at < 3) {
+    /* EACH PART APPEARS ON THE STEP THAT ANSWERS IT, never the step after:
+       the first build was off by one everywhere, so the panel still read
+       "its business units come next" with three units listed beside it. */
+    var h = '<div class="shorg"><span class="nm">' + esc(M.name || "The client") + "</span>" +
+      (at >= 1 ? '<span class="yr">to ' + esc(M.year) + "</span>" : "") + "</div>";
+    if (at < 2) {
       h += '<div class="stem"></div><div class="none">Its business units come next.</div>';
     } else {
       h += '<div class="stem"></div><div class="switch"><span class="on">Strategic</span><span>Functions</span></div>';
@@ -580,7 +506,7 @@
               return '<span class="chip unit">' + esc(u.n) + '<span class="fmt">' + fmtWord(u.f) + "</span></span>";
             }).join("") + "</div>"
           : '<div class="none">None — this client can open blank.</div>') + "</div>";
-      if (at >= 6) h += '<div class="side"><div class="sidekey">Supporting functions <span class="ct">' + M.fns.length + "</span></div>" +
+      if (at >= 5) h += '<div class="side"><div class="sidekey">Supporting functions <span class="ct">' + M.fns.length + "</span></div>" +
         (M.fns.length
           ? '<div class="chips">' + M.fns.map(function (f) {
               return '<span class="chip fn">' + esc(f.n) + '<span class="fmt">' + fmtWord(f.f) + "</span></span>";
@@ -589,7 +515,7 @@
     }
     document.getElementById("shapebody").innerHTML = h;
     document.getElementById("shapecap").textContent =
-      at >= 6 ? "ElAbd Foods, as answered so far." : "It fills in as you answer.";
+      at >= 5 ? esc(M.name) + ", as answered so far." : "It fills in as you answer.";
   }
 
   function paint() {
@@ -646,14 +572,6 @@
       });
       if (at === 3) { M.companies = c === siblings[0] ? "none" : "some"; shape(); }
       return;
-    }
-    if (t.closest("#tab-new") || t.closest("#tab-after")) {
-      var isNew = !!t.closest("#tab-new");
-      document.getElementById("tab-new").classList.toggle("on", isNew);
-      document.getElementById("tab-after").classList.toggle("on", !isNew);
-      document.getElementById("view-new").hidden = !isNew;
-      document.getElementById("view-after").hidden = isNew;
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   });
 

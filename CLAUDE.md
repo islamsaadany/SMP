@@ -8695,7 +8695,58 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-10 &mdash; **&sect;317.3&ndash;.8: the cutover, and the
+*Last Updated: 2026-09-11 &mdash; **&sect;318: setting a client up &mdash; the
+wizard (spec 044).** Islam: *"any Consultant who gets into the platform and adds
+a new client to set up this client he needs to go through a series of
+questions."* A guided flow through Setup: the client's name, its year, its
+business units, its companies, its supporting functions and how each plans, the
+words it uses, and who runs the office &mdash; ending on a summary with two
+doors, into the plan builder and into the register. Drawn and signed off first
+(rule 1c, published as an artifact). **IT IS A WAY THROUGH SETUP, NEVER A SECOND
+STORE**: every row is minted through the platform's own minter
+(`addBusinessUnit`, `addCompany`, `addFunction`, `addCapability`) and every
+field written by the field writer that already owns it, so there is **no draft,
+nothing kept beside the answers, and progress DERIVED from the data** exactly as
+the plan builder's chips are (&sect;129) &mdash; a wizard with a draft is a
+second copy of Setup that can disagree with it. **THE PLAN-TYPE CONTROL IS
+`planFormatCell()`, AND MY FIRST BUILD WROTE ITS OWN** &mdash; which dropped the
+tenant's own word for a pillar AND the guard refusing a switch while the
+function holds a plan; found by reading the handler rather than by a check
+(&sect;53.5). **WHAT THE PLATFORM CANNOT DO IS DRAWN, DULLED AND INERT**, at
+Islam's instruction (*"keep the mockup as is but kepe the non existing parts
+dull for now"*): a function planning in objectives and actions, a capability as
+its own strategic entry, the single-business shape &mdash; each saying *Later*,
+each a `<div>` rather than a disabled button, so it is inert **by construction**
+rather than by a rule somebody could relax; and **two of the check's assertions
+passed vacuously** until they were guarded, because `every([])` is true and a
+build deleting the dulled choice satisfied both (&sect;113.8). **MULTI-TENANCY
+IS DELIBERATELY NOT IN IT** &mdash; his reversal of his own earlier answer,
+recorded as one: *"this is a fix I will do in the tenant management platform."*
+`checks/client-setup.py` **33/0**, proved able to fail four ways from the
+SOURCES; its own probe **died rather than reporting twice** (&sect;215, on a
+node `paint()` had replaced) and **called a correct build broken once**, asking
+for a stored `"projects"` the platform keeps as an ABSENCE (&sect;50.6); and the
+page errors it reported were the PROBE's method &mdash; the platform's own
+Terminology field throws the same under a dispatched `change` and none under a
+real blur (&sect;219). **&sect;318.7 &mdash; THE MERGE IS PART OF THE RECORD**:
+`main` moved 583 commits underneath this (the Next.js rebuild, spec 043), and
+`build.py`'s script list conflicted with this branch's `WIZARD` and main's
+`CONTINGENCY` **on the same line**, where taking either side whole drops a whole
+feature with no conflict left to show for it; the built file was REBUILT from
+the merged sources, never merged (&sect;91); the renumber (&sect;303 &rarr;
+&sect;318, spec 042 &rarr; 044) was scoped by matched text to the five citations
+this branch wrote, leaving main's six alone (&sect;264.3); and **the app's
+stylesheet order is hand-written where its script list is read out of
+`build.py`**, so `wizard.css` had to be added to `sync-css.mjs` or the wizard
+would serve with all of its behaviour and none of its design. **Recorded and not
+changed**: a client created through the new stack's *Add a client* starts from
+&sect;67's cleared graph, which KEEPS Raya's unit and function names and empties
+their content &mdash; so `wizTenantBare()` is false and the Overview's set-up
+door does not draw for it; the wizard is still Setup's first entry, so nothing
+is unreachable, and whether a new client should start with no units at all is
+main's decision to reverse rather than a merge's.*
+
+*Earlier: 2026-09-10 &mdash; **&sect;317.3&ndash;.8: the cutover, and the
 six things between the merge and a site that serves.** Six failed or empty
 deployments in a row, and **not one of them the same fault twice**: the
 `.vercelignore` &sect;238 wrote for the frozen static site excluded `smp-app/`

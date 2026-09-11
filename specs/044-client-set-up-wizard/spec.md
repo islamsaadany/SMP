@@ -1,6 +1,6 @@
 # 044 · Setting a client up, and a function that plans in objectives
 
-**Version:** v4.81 · **Decisions:** §318 · **Status:** answered; built
+**Version:** v4.88 · **Decisions:** §318 · **Status:** answered; built; merged with `main`'s rebuild
 
 Islam: *"any Consultant who gets into the platform and adds a new client to set
 up this client he needs to go through a series of questions … is the company a
@@ -181,3 +181,26 @@ requirement is raised from.)*
   a product's has to be enforced.
 - Nothing new stored outside what Setup already holds — no draft, no progress
   flag (§25, §47.1).
+
+## 8 · What the merge with `main`'s rebuild changed (§318.7)
+
+Built against the frozen single file; `main` moved 583 commits underneath it
+(the Next.js rebuild on a shared schema, spec 043). Merged 2026-09-11 on
+Islam's word. Nothing about the wizard's behaviour moved. Three things about
+its surroundings did, and one is an open question for him:
+
+1. **It crosses to the new stack whole.** `build-shell.mjs` reads `build.py`'s
+   own script list, so `wizard.js` needed nothing; `sync-css.mjs` keeps its
+   stylesheet order by hand, so `wizard.css` had to be added there or the
+   wizard would serve with its behaviour and none of its design.
+2. **Renumbered** §303 → §318 and spec 042 → spec 044, `main` having taken
+   both. Scoped to the lines this branch wrote (§264.3).
+3. **OPEN, for Islam.** A client created through Forefront's *Add a client*
+   starts from §67's cleared graph, which **keeps Raya's unit and function
+   names** and empties their content — so `wizTenantBare()` is false, the
+   Overview's *Set this client up* door does not draw for it, and the wizard's
+   units step offers somebody else's names to rename rather than an empty list
+   to build. The wizard itself is still the first entry in Setup, so nothing is
+   unreachable. Two decisions sit here: whether a new client should start with
+   no units at all (§54's rule applied to the names), and whether the door
+   should ask a looser question than *bare*.

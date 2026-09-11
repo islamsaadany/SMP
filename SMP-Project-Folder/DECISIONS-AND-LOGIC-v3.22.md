@@ -4873,6 +4873,71 @@ owned by a function head; and the **single-business** shape. And which company
 a unit belongs to is still set on Setup › Business units rather than in the
 wizard's companies step — one field, one place (§130.6).
 
+### 318.7 · The merge, and the two things it changed about the answer
+
+`main` moved **583 commits** under this branch while it was being built — the
+Next.js rebuild on a shared schema (spec 043, §313–§317) — so the merge was not
+a formality, and two of its findings belong to this section rather than to that
+one.
+
+**THE BUILT FILE IS REBUILT, AND THE THING THAT NEARLY WENT MISSING WAS A
+SCRIPT.** Three files conflicted. `build.py`'s script list was one of them:
+this branch adds `("WIZARD","wizard.js")` and `main` adds
+`("CONTINGENCY","contingency.js")`, on the same line — so taking either side
+whole drops a whole feature's code with **no conflict left to show for it**,
+which is §146.2's own failure by a shorter road. Both kept, and the built file
+rebuilt from the merged sources rather than merged (§91), asserted
+byte-identical to `build.py`'s own output.
+
+**THE RENUMBER IS SCOPED TO THE LINES THIS BRANCH WROTE, AND §264.3 IS WHY THAT
+MATTERS HERE MORE THAN USUAL.** `main` took §303 (the template audit) and spec
+042 (multi-client) while this was in flight, so this became **§318 / spec 044**
+— the precedent §287, §301 and §310 all set. But `shell.html` and
+`config-render.js` now hold citations of BOTH: five written by this branch and
+six written by `main`, in the same two files. A blanket sweep would have taken
+all eleven and pointed six comments at a section whose subject is not theirs —
+**silently**, because the number it produces is a real section. Renamed by
+matched text, one assertion per string, never by line range (§214).
+
+**THE STYLESHEET LIST IS HAND-WRITTEN AND THE SCRIPT LIST IS NOT.**
+`smp-app/scripts/build-shell.mjs` reads `build.py`'s own list, so `wizard.js`
+crossed to the new stack by itself; `sync-css.mjs` keeps an `ORDER` array typed
+out by hand, so `wizard.css` did not. Without one line there the wizard ships
+with all of its behaviour and none of its design — which renders, and renders
+wrong. Added; `platform.css` 10 stylesheets, `shell.js` 29 scripts, both
+carrying the wizard.
+
+**AND THE OVERVIEW DOOR IS NOW RIGHT FOR ONE ARRIVAL AND SILENT FOR THE OTHER,
+RECORDED AND NOT CHANGED.** `wizTenantBare()` draws the *Set this client up*
+door only where the tenant has no units and no functions at all. On the frozen
+deployment that is the clean slate, which is what it was written for. On
+`main`'s new stack a client created through Forefront's own *Add a client*
+starts from §67's cleared graph — whose own comment says it plainly: *"The unit
+and function names stay, as §67 left them, for Setup to rename."* So a new
+client arrives holding **Raya's ten unit names and eight function names with
+their content emptied**, `wizTenantBare()` is false, and the door does not draw.
+**Nothing is unreachable** — *Set-up* is the first entry in Setup's *Running the
+cycle* group and is found by the rail's own search — so what is lost is the
+prompt, not the page, and the wizard's units step then lists somebody else's
+names to rename rather than an empty list to build. Two questions sit underneath
+it and both are Islam's: whether a client added on the new stack should start
+with **no units at all** (which is §54's *a client must never inherit Raya's*
+applied to the names, and is `main`'s decision to reverse, not this branch's),
+and whether the door should ask a looser question than *bare*. Left exactly as
+built, because widening the test would change a screen he has not seen in that
+state, and changing the cleared graph would change `main`'s own feature from
+inside a merge (rule 1b).
+
+**THE FROZEN WORKER'S CACHE NAME IS BUMPED ANYWAY, AND THE REASON IS THAT THE
+CUTOVER HAS NOT RUN.** `main`'s Phase J generates the new stack's worker from
+this file with the caching half **dropped** — no `fetch` handler, every cache
+deleted on activate — so on the served app §91's trap is closed by construction.
+But that phase is built and not run: production still tracks the repository root,
+where the frozen `sw.js` caches the built platform BY NAME, and the built file's
+bytes changed today. `smp-shell-v4.87-shared-schema` → `smp-shell-v4.88-setup-wizard`,
+confirmed against `origin/main` immediately before the push (§94.12, §94.16), and
+`node --check sw.js` after the merge (§146.2).
+
 ---
 
 ## 36 · Multi-tenant — what to do when the time comes

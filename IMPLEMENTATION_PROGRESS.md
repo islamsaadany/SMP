@@ -72,7 +72,21 @@ because `main` took that number while this was in flight (the precedent §287,
 having taken 042 for multi-client. `checks/client-setup.py` 30/0, proved able
 to fail four ways; `qa.py` ERRORS none; setup-pages, setup-rail, setup-search,
 setup-header, setup-overview, no-jump, table-fit, plan-builder and
-people-dialog all green; 574/0 authoriser, 136/0 differ.
+people-dialog all green; 574/0 authoriser, 136/0 differ. **Merged with
+`main`'s 583 commits** — the Next.js rebuild on a shared schema (spec 043,
+§313–§317) — and re-run against the merged result: `client-setup` 33/0,
+`qa.py` ERRORS none, the nine neighbours green, 588/0 and 136/0. Three
+conflicts, all resolved by hand: `build.py`'s script list, where this branch's
+`WIZARD` and `main`'s `CONTINGENCY` sit on the SAME line and taking either side
+whole drops a feature with no conflict left to show for it; the progress prose;
+and the built file, REBUILT from the merged sources rather than merged (§91).
+`wizard.css` added to the app's hand-written stylesheet order, without which
+the wizard crosses with its behaviour and none of its design. **Recorded and
+NOT changed (§318.7):** a client created through the new stack's *Add a client*
+keeps Raya's unit and function names with their content emptied (§67's own
+decision), so the Overview's set-up door does not draw for it — the wizard is
+still Setup's first entry, so nothing is unreachable, and whether a new client
+should start with no units at all is Islam's.
 
 **Before it:** **§309 and §310 — a project saved as a draft, and theirs
 is the capability that leads — merged to `main` 2026-09-08 on Islam's word**,

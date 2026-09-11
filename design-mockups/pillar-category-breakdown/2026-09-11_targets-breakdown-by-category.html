@@ -7327,6 +7327,14 @@ body { margin: 0; font-family: var(--sans); }
 .mkvs { display: block; font-style: normal; font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
 .mkmono { font-family: var(--mono, ui-monospace, monospace); font-size: .92em; color: var(--ink-2); }
 
+
+.mkdir { font-family: var(--mono, ui-monospace, monospace); opacity: .75; margin-left: 2px; }
+.mkhdir { background: rgba(255,255,255,.1); border: 0; color: #fff; font: inherit;
+          border-radius: 3px; padding: 1px 2px; }
+tr.mkfoot > td { border-top: 2px solid var(--line); font-weight: 700; background: var(--surface-2); }
+tr.mkfoot > td:nth-child(2) { font-weight: 600; color: var(--ink-2); }
+.mkind { font-size: 10.5px; color: var(--ink-3); font-weight: 400; white-space: nowrap; }
+
 @media (max-width: 620px) {
   .mk { padding: 20px 16px 60px; }
   .mk h1 { font-size: 24px; }
@@ -7361,7 +7369,8 @@ body { margin: 0; font-family: var(--sans); }
     <h1>A breakdown of a pillar&rsquo;s targets</h1>
     <p class="mklede">Their &ldquo;Maximizing Current Stores&rdquo; pillar has its targets broken down by category.
        This is where that would sit &mdash; on the plan, on the reporting page and on performance &mdash;
-       drawn in the platform&rsquo;s own pages with their own numbers. Only the pillars that need one have one.</p>
+       drawn in the platform&rsquo;s own pages with their own numbers and its own arithmetic. Only the pillars
+       that need one have one.</p>
   </header>
 
   <!-- ═══════════════════ TODAY ═══════════════════ -->
@@ -7374,12 +7383,12 @@ body { margin: 0; font-family: var(--sans); }
 
         <div class="scores">
           <div class="card tight primary">
-            <div class="score-h"><h4>Key measures performance</h4><span class="pill attn">Needs attention</span></div>
-            <div class="headline"><span class="big" style="color:var(--attn-tx, var(--attn))">86<small>%</small></span></div>
+            <div class="score-h"><h4>Key measures performance</h4><span class="pill good">On track</span></div>
+            <div class="headline"><span class="big" style="color:var(--good-tx, var(--good))">91<small>%</small></span></div>
             <div class="minirow">
               <div><em>Measures</em><b>4</b></div>
               <div><em>Highest</em><b style="color:var(--good-tx, var(--good))">104%</b></div>
-              <div><em>Lowest</em><b style="color:var(--bad-tx, var(--bad))">71%</b></div>
+              <div><em>Lowest</em><b style="color:var(--attn-tx, var(--attn))">71%</b></div>
             </div>
           </div>
           <div class="card tight">
@@ -7419,7 +7428,7 @@ body { margin: 0; font-family: var(--sans); }
                 <td class="num"><span>&ge;</span></td><td class="num">17%</td>
                 <td class="cc"><span class="cdefault">Latest</span></td>
                 <td class="num"><span class="pair"><b>12%</b> <i>/ 17%</i></span></td>
-                <td class="num final" style="color:var(--bad-tx, var(--bad))">71%</td></tr>
+                <td class="num final" style="color:var(--attn-tx, var(--attn))">71%</td></tr>
               <tr><td class="idx"><span class="idx-n">4</span></td>
                 <td>Categories mix
                   <span class="repnote notetext"><span class="repkey">Reported</span>Five categories, each with its own growth, margin and mix. Nowhere on this page to put them.</span></td>
@@ -7458,16 +7467,37 @@ body { margin: 0; font-family: var(--sans); }
     </div>
 
     <p class="mknote">The five categories have nowhere to go. Written as five more measures they stop being a
-       breakdown &mdash; they become fifteen separate rows and the pillar reads as though it has nineteen targets.</p>
+       breakdown &mdash; they become fifteen separate rows and the pillar reads as though it has nineteen headline targets.</p>
   </section>
 
   <!-- ═══════════════════ A ═══════════════════ -->
   <section class="mksec">
-    <div class="mklabel"><span class="mktag mkrec">A &mdash; recommended</span> The breakdown, read the way every other figure is read</div>
+    <div class="mklabel"><span class="mktag mkrec">Confirmed</span> The breakdown, scoring</div>
 
     <div class="mkframe">
       <div class="pane">
         <div class="pband"><span class="pband-code">RS02</span><span class="pband-name">Maximizing Current Stores</span></div>
+
+        <div class="scores">
+          <div class="card tight primary">
+            <div class="score-h"><h4>Key measures performance</h4><span class="pill good">On track</span></div>
+            <div class="headline"><span class="big" style="color:var(--good-tx, var(--good))">95<small>%</small></span></div>
+            <div class="minirow">
+              <div><em>Measures</em><b>5</b></div>
+              <div><em>Highest</em><b style="color:var(--good-tx, var(--good))">104%</b></div>
+              <div><em>Lowest</em><b style="color:var(--attn-tx, var(--attn))">71%</b></div>
+            </div>
+          </div>
+          <div class="card tight">
+            <div class="score-h"><h4>Execution performance</h4><span class="pill good">On track</span></div>
+            <div class="headline"><span class="big" style="color:var(--good-tx, var(--good))">92<small>%</small></span><span class="ofplan">of plan</span></div>
+            <div class="minirow">
+              <div><em>Delivered</em><b>69%</b></div>
+              <div><em>Planned</em><b>75%</b></div>
+              <div><em>Variance</em><b><span style="color:var(--bad-tx)">&minus;6</span></b></div>
+            </div>
+          </div>
+        </div>
 
         <h5 class="mini">Key measures</h5>
         <div class="scroll"><div class="tblscroll">
@@ -7495,13 +7525,7 @@ body { margin: 0; font-family: var(--sans); }
                 <td class="num"><span>&ge;</span></td><td class="num">17%</td>
                 <td class="cc"><span class="cdefault">Latest</span></td>
                 <td class="num"><span class="pair"><b>12%</b> <i>/ 17%</i></span></td>
-                <td class="num final" style="color:var(--bad-tx, var(--bad))">71%</td></tr>
-              <tr><td class="idx"><span class="idx-n">4</span></td>
-                <td>Categories mix</td>
-                <td class="num"><span>&ge;</span></td><td class="num">100%</td>
-                <td class="cc"><span class="cdefault">Latest</span></td>
-                <td class="num"><span class="pair"><b>96%</b> <i>/ 100%</i></span></td>
-                <td class="num final" style="color:var(--good-tx, var(--good))">96%</td></tr>
+                <td class="num final" style="color:var(--attn-tx, var(--attn))">71%</td></tr>
             </tbody>
           </table>
         </div></div>
@@ -7511,29 +7535,21 @@ body { margin: 0; font-family: var(--sans); }
           <table>
             <thead><tr>
               <th class="idx">#</th><th>Category</th>
-              <th class="cc">Growth</th><th class="cc">CM</th><th class="cc">Mix</th>
+              <th class="cc">Growth <span class="mkdir">&ge;</span></th>
+              <th class="cc">CM <span class="mkdir">&le;</span></th>
+              <th class="cc">Mix</th>
             </tr></thead>
             <tbody>
-              <tr><td class="idx"><span class="idx-n">1</span></td><td>Bakery</td>
-                <td class="num"><span class="pair"><b>4%</b> <i>/ 7%</i></span></td>
-                <td class="num"><span class="pair"><b>66%</b> <i>/ 69%</i></span></td>
-                <td class="num"><span class="pair"><b>9%</b> <i>/ 13%</i></span></td></tr>
-              <tr><td class="idx"><span class="idx-n">2</span></td><td>Barista</td>
-                <td class="num"><span class="pair"><b>27%</b> <i>/ 22%</i></span></td>
-                <td class="num"><span class="pair"><b>62%</b> <i>/ 59%</i></span></td>
-                <td class="num"><span class="pair"><b>5%</b> <i>/ 5%</i></span></td></tr>
-              <tr><td class="idx"><span class="idx-n">3</span></td><td>Western</td>
-                <td class="num"><span class="pair"><b>5%</b> <i>/ 4%</i></span></td>
-                <td class="num"><span class="pair"><b>62%</b> <i>/ 65%</i></span></td>
-                <td class="num"><span class="pair"><b>16%</b> <i>/ 15%</i></span></td></tr>
-              <tr><td class="idx"><span class="idx-n">4</span></td><td>Oriental</td>
-                <td class="num"><span class="pair"><b>12%</b> <i>/ 12%</i></span></td>
-                <td class="num"><span class="pair"><b>65%</b> <i>/ 65%</i></span></td>
-                <td class="num"><span class="pair"><b>14%</b> <i>/ 14%</i></span></td></tr>
-              <tr><td class="idx"><span class="idx-n">5</span></td><td>Ice cream</td>
-                <td class="num"><span class="pair"><b>28%</b> <i>/ 32%</i></span></td>
-                <td class="num"><span class="pair"><b>84%</b> <i>/ 82%</i></span></td>
-                <td class="num"><span class="pair"><b>8%</b> <i>/ 12%</i></span></td></tr>
+              <tr><td class="idx"><span class="idx-n">1</span></td><td>Bakery</td><td class="num"><span class="pair"><b style="color:var(--bad-tx, var(--bad))">4%</b> <i>/ 7%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">66%</b> <i>/ 69%</i></span></td><td class="num"><span class="pair"><b>9%</b> <i>/ 13%</i></span></td></tr>
+              <tr><td class="idx"><span class="idx-n">2</span></td><td>Barista</td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">27%</b> <i>/ 22%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">62%</b> <i>/ 59%</i></span></td><td class="num"><span class="pair"><b>5%</b> <i>/ 5%</i></span></td></tr>
+              <tr><td class="idx"><span class="idx-n">3</span></td><td>Western</td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">5%</b> <i>/ 4%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">62%</b> <i>/ 65%</i></span></td><td class="num"><span class="pair"><b>16%</b> <i>/ 15%</i></span></td></tr>
+              <tr><td class="idx"><span class="idx-n">4</span></td><td>Oriental</td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">12%</b> <i>/ 12%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">65%</b> <i>/ 65%</i></span></td><td class="num"><span class="pair"><b>14%</b> <i>/ 14%</i></span></td></tr>
+              <tr><td class="idx"><span class="idx-n">5</span></td><td>Ice cream</td><td class="num"><span class="pair"><b style="color:var(--attn-tx, var(--attn))">28%</b> <i>/ 32%</i></span></td><td class="num"><span class="pair"><b style="color:var(--good-tx, var(--good))">84%</b> <i>/ 82%</i></span></td><td class="num"><span class="pair"><b>8%</b> <i>/ 12%</i></span></td></tr>
+              <tr class="mkfoot">
+                <td class="idx"></td><td>Scores into the pillar</td>
+                <td class="num final" style="color:var(--good-tx, var(--good))">99%</td>
+                <td class="num final" style="color:var(--good-tx, var(--good))">101%</td>
+                <td class="num"><span class="mkind">Indicator &mdash; not scored</span></td></tr>
             </tbody>
           </table>
         </div></div>
@@ -7552,6 +7568,12 @@ body { margin: 0; font-family: var(--sans); }
                 <td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i>4</i></span></td>
                 <td class="cc"><span class="pill warn">WIP</span></td>
                 <td class="num final" style="color:var(--attn-tx, var(--attn))">75%</td></tr>
+              <tr><td class="idx"><span class="idx-n">2</span></td>
+                <td><b class="tacname">Self-serve dine-in experience</b></td>
+                <td>Aliaa</td>
+                <td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i>3</i><i>4</i></span></td>
+                <td class="cc"><span class="pill good">Done</span></td>
+                <td class="num final" style="color:var(--good-tx, var(--good))">100%</td></tr>
             </tbody>
           </table>
         </div></div>
@@ -7559,67 +7581,26 @@ body { margin: 0; font-family: var(--sans); }
     </div>
 
     <div class="mkwhy">
-      <h3>Why this shape</h3>
+      <h3>How it scores</h3>
       <ul>
-        <li><b>Each cell is the actual, then the target behind it</b> &mdash; <span class="mkpair"><b>4%</b> <i>/ 7%</i></span> &mdash;
-            which is exactly how every reported figure in the platform already reads, two tables up.
-            Their sheet spends two columns on each; this spends one, so three metrics fit where three would not.</li>
-        <li><b>None of these numbers is coloured.</b> That is not a styling choice &mdash; in this platform
-            a coloured figure means a score, and an uncoloured one with its target behind it means a
-            reported fact. Drawn this way, the breakdown says &ldquo;this explains the targets above&rdquo;
-            without anybody having to be told.</li>
-        <li><b>It sits under Key measures and above Tactics</b>, because it explains the targets, not the work.</li>
-        <li><b>The client names it.</b> &ldquo;Categories&rdquo;, &ldquo;Growth&rdquo;, &ldquo;CM&rdquo;,
-            &ldquo;Mix&rdquo; are all typed in &mdash; so another client breaks down by region, or by channel,
-            with nothing rebuilt.</li>
+        <li><b>A column is a key measure with five values instead of one.</b> Growth is one score &mdash; the
+            average of the five categories against their five targets &mdash; and CM is another. Those two join
+            the pillar&rsquo;s three measures, so it is judged on five numbers and each carries the same weight.
+            All five categories count equally.</li>
+        <li><b>Mix is reported and never scored</b>, because a deviation either way is worth knowing and is not a
+            performance measure &mdash; the five add up to the revenue mix, so one category beating its share
+            forces another to miss. It is drawn plain while Growth and CM wear their band, which is the same
+            rule the platform already uses two tables up: coloured means a score, plain with a target behind it
+            means a reported fact.</li>
+        <li><b>The direction is the column&rsquo;s, and the column with none is the indicator.</b> Growth is
+            higher-is-better, CM is lower-is-better, Mix is neither and is marked with nothing. No extra
+            switch: the absence is the signal.</li>
+        <li><b>Every figure still reads against its own target</b> &mdash; <span class="mkpair"><b>4%</b>
+            <i>/ 7%</i></span> &mdash; exactly as every reported figure on this page already does.</li>
+        <li><b>The three measures are three, not four.</b> Their &ldquo;Categories mix&rdquo; row was a measure
+            nobody could fill; the breakdown is what fills it, so the row goes.</li>
       </ul>
     </div>
-  </section>
-
-  <!-- ═══════════════════ B ═══════════════════ -->
-  <section class="mksec">
-    <div class="mklabel"><span class="mktag">B</span> The shape of their sheet, kept as it is</div>
-
-    <div class="mkframe">
-      <div class="pane">
-        <h5 class="mini">Categories</h5>
-        <div class="scroll"><div class="tblscroll">
-          <table>
-            <thead>
-              <tr><th class="idx">#</th><th>Category</th>
-                  <th class="cc">Target growth</th><th class="cc">Actual growth</th>
-                  <th class="cc">Target CM</th><th class="cc">Actual CM</th>
-                  <th class="cc">Target mix</th><th class="cc">Actual mix</th></tr>
-            </thead>
-            <tbody>
-              <tr><td class="idx"><span class="idx-n">1</span></td><td>Bakery</td>
-                <td class="num">7%</td><td class="num">4%</td>
-                <td class="num">69%</td><td class="num">66%</td>
-                <td class="num">13%</td><td class="num">9%</td></tr>
-              <tr><td class="idx"><span class="idx-n">2</span></td><td>Barista</td>
-                <td class="num">22%</td><td class="num">27%</td>
-                <td class="num">59%</td><td class="num">62%</td>
-                <td class="num">5%</td><td class="num">5%</td></tr>
-              <tr><td class="idx"><span class="idx-n">3</span></td><td>Western</td>
-                <td class="num">4%</td><td class="num">5%</td>
-                <td class="num">65%</td><td class="num">62%</td>
-                <td class="num">15%</td><td class="num">16%</td></tr>
-              <tr><td class="idx"><span class="idx-n">4</span></td><td>Oriental</td>
-                <td class="num">12%</td><td class="num">12%</td>
-                <td class="num">65%</td><td class="num">65%</td>
-                <td class="num">14%</td><td class="num">14%</td></tr>
-              <tr><td class="idx"><span class="idx-n">5</span></td><td>Ice cream</td>
-                <td class="num">32%</td><td class="num">28%</td>
-                <td class="num">82%</td><td class="num">84%</td>
-                <td class="num">12%</td><td class="num">8%</td></tr>
-            </tbody>
-          </table>
-        </div></div>
-      </div>
-    </div>
-
-    <p class="mknote">Familiar, because it is their file. It costs three extra columns, it does not read the way
-       anything else in the platform reads, and a fourth metric makes it scroll sideways.</p>
   </section>
 
   <!-- ═══════════════════ PLAN · READING ═══════════════════ -->
@@ -7644,9 +7625,6 @@ body { margin: 0; font-family: var(--sans); }
               <tr><td class="idx"><span class="idx-n">3</span></td><td>Store operating profitability</td>
                 <td class="cc"><span>&ge;</span></td><td class="num">17%</td>
                 <td class="cc"><span class="cdefault">Latest</span></td></tr>
-              <tr><td class="idx"><span class="idx-n">4</span></td><td>Categories mix</td>
-                <td class="cc"><span>&ge;</span></td><td class="num">100%</td>
-                <td class="cc"><span class="cdefault">Latest</span></td></tr>
             </tbody>
           </table>
         </div></div>
@@ -7654,7 +7632,7 @@ body { margin: 0; font-family: var(--sans); }
         <h4 class="mini">Categories <em>&mdash; as planned: this year&rsquo;s target for each</em></h4>
         <div class="scroll"><div class="tblscroll">
           <table>
-            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth</th><th class="cc">CM</th><th class="cc">Mix</th></tr></thead>
+            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth <span class="mkdir">&ge;</span></th><th class="cc">CM <span class="mkdir">&le;</span></th><th class="cc">Mix</th></tr></thead>
             <tbody>
               <tr><td class="idx"><span class="idx-n">1</span></td><td>Bakery</td>
                 <td class="num">7%</td><td class="num">69%</td><td class="num">13%</td></tr>
@@ -7674,7 +7652,8 @@ body { margin: 0; font-family: var(--sans); }
 
     <p class="mknote">Fifteen targets and nothing else. The plan page has never carried a reported figure &mdash;
        its measures table is <span class="mkmono">Measure &middot; Dir. &middot; Target &middot; Compiled</span>
-       and the breakdown follows it exactly.</p>
+       and the breakdown follows it exactly. Each column shows the direction it will be judged by; Mix shows
+       none, which is what marks it as the indicator.</p>
   </section>
 
   <!-- ═══════════════════ PLAN · PEN OPEN ═══════════════════ -->
@@ -7696,9 +7675,9 @@ body { margin: 0; font-family: var(--sans); }
           <table>
             <thead><tr>
               <th>#</th><th>Category</th>
-              <th class="cc"><span class="mkhcell"><input class="mkhin" value="Growth"><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
-              <th class="cc"><span class="mkhcell"><input class="mkhin" value="CM"><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
-              <th class="cc"><span class="mkhcell"><input class="mkhin" value="Mix"><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
+              <th class="cc"><span class="mkhcell"><input class="mkhin" value="Growth"><select class="mkhdir" aria-label="How Growth is judged"><option selected>&ge;</option><option>&le;</option><option>&mdash;</option></select><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
+              <th class="cc"><span class="mkhcell"><input class="mkhin" value="CM"><select class="mkhdir" aria-label="How CM is judged"><option>&ge;</option><option selected>&le;</option><option>&mdash;</option></select><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
+              <th class="cc"><span class="mkhcell"><input class="mkhin" value="Mix"><select class="mkhdir" aria-label="How Mix is judged"><option>&ge;</option><option>&le;</option><option selected>&mdash;</option></select><button class="mkhx" title="Remove this column" aria-label="Remove this column">&times;</button></span></th>
               <th class="cc mkaddcol"><button class="mkhadd" title="Add a column">+</button></th>
             </tr></thead>
             <tbody>
@@ -7725,9 +7704,12 @@ body { margin: 0; font-family: var(--sans); }
     </div>
 
     <p class="mknote">Everything on this row already exists elsewhere in the platform &mdash; the drag grip, the
-       growing name box, the &times;, the Add row. <b>One control is new:</b> naming the columns, because no
+       growing name box, the &times;, the Add row. <b>One control is new:</b> naming a table&rsquo;s columns, because no
        table here has ever let anybody do that. It is what keeps the feature from being about categories:
-       another client types Region, or Channel, or Brand.</p>
+       another client types Region, or Channel, or Brand.<br><br>
+       Each column also picks how it is judged &mdash; higher is better, lower is better, or <b>&mdash;</b>,
+       which means it is an indicator and is never scored. One control with three answers, rather than a
+       direction and a separate switch beside it.</p>
   </section>
 
   <!-- ═══════════════════ REPORTING ═══════════════════ -->
@@ -7737,19 +7719,19 @@ body { margin: 0; font-family: var(--sans); }
     <div class="mkframe">
       <div class="pane">
         <div class="pband"><span class="pband-code">RS02</span><span class="pband-name">Maximizing Current Stores</span>
-          <span class="pband-r"><span class="pband-n">4 measures &middot; 5 categories</span><span class="rtally full">19/19</span></span>
+          <span class="pband-r"><span class="pband-n">3 measures &middot; 15 category figures &middot; 2 tactics</span><span class="rtally full">20/20</span></span>
         </div>
 
         <h4 class="mini">Categories</h4>
         <div class="scroll"><div class="tblscroll">
           <table>
-            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth</th><th class="cc">CM</th><th class="cc">Mix</th><th>Note</th></tr></thead>
+            <thead><tr><th>#</th><th>Category</th><th class="cc">Growth <span class="mkdir">&ge;</span></th><th class="cc">CM <span class="mkdir">&le;</span></th><th class="cc">Mix</th><th>Note</th></tr></thead>
             <tbody>
-              <tr><td class="idx">1</td><td>Bakery</td>
+              <tr class="wantnote"><td class="idx">1</td><td>Bakery</td>
                 <td class="cc"><span class="entry filled"><input class="field" value="4"><span class="unitsuf">%</span></span><i class="mkvs">/ 7%</i></td>
                 <td class="cc"><span class="entry filled"><input class="field" value="66"><span class="unitsuf">%</span></span><i class="mkvs">/ 69%</i></td>
                 <td class="cc"><span class="entry filled"><input class="field" value="9"><span class="unitsuf">%</span></span><i class="mkvs">/ 13%</i></td>
-                <td class="notecol"><textarea class="fld grow notefld" rows="1" placeholder="Note, if there is one">Ramadan shifted the bread mix.</textarea></td></tr>
+                <td class="notecol"><textarea class="fld grow notefld needed" rows="2" style="height:52px" placeholder="Why, and what is being done">Ramadan shifted the bread mix; the range is being rebuilt for H2.</textarea></td></tr>
               <tr><td class="idx">2</td><td>Barista</td>
                 <td class="cc"><span class="entry filled"><input class="field" value="27"><span class="unitsuf">%</span></span><i class="mkvs">/ 22%</i></td>
                 <td class="cc"><span class="entry filled"><input class="field" value="62"><span class="unitsuf">%</span></span><i class="mkvs">/ 59%</i></td>
@@ -7776,11 +7758,11 @@ body { margin: 0; font-family: var(--sans); }
       </div>
     </div>
 
-    <p class="mknote">The target sits behind each box so nobody has to remember it. These are <b>asked for like
-       any other figure</b> &mdash; the tally counts them and Submit waits for all nineteen. What they do not do
-       is <b>score</b>, and that has one consequence worth knowing: the platform demands an explanation when a
-       figure is at risk, and a figure with no score can never be at risk, so a note here is always offered and
-       never required.</p>
+    <p class="mknote">The target sits behind each box so nobody has to remember it, and Submit waits for all
+       twenty. <b>Bakery&rsquo;s growth is rung in red because it has to be:</b> 4% against 7% scores 57, which
+       is off track, and the platform has never let a figure at risk be submitted without an explanation &mdash;
+       a rule that now reaches ten more cells. A <b>Mix</b> figure never can be at risk, because it is not
+       scored, so its note is offered and never required.</p>
   </section>
 
   <!-- ═══════════════════ NO BREAKDOWN ═══════════════════ -->
@@ -7830,20 +7812,21 @@ body { margin: 0; font-family: var(--sans); }
 
   <!-- ═══════════════════ COST ═══════════════════ -->
   <section class="mksec mkcost">
-    <h3>What it costs, before you say yes</h3>
+    <h3>What it costs, now that it counts</h3>
     <ul>
-      <li><b>More to enter each cycle, and Submit waits for it.</b> This pillar goes from four figures to
-          nineteen, and a cycle cannot be submitted with any of them blank. Say so and they can be optional
-          instead &mdash; but then a breakdown quietly half-filled is a breakdown nobody can trust.</li>
-      <li><b>It does not change the pillar&rsquo;s score</b>, and I think that is right: the breakdown explains
-          the targets above it. If it scored as well, one pillar would have two different numbers and
-          people would argue about which one counts. Say the word and it scores &mdash; but that is a
-          bigger piece of work and a decision about how performance is read, not a column.</li>
-      <li><b>One control does not exist anywhere in the platform yet</b> &mdash; naming a table&rsquo;s columns.
-          It is what stops this being a feature about categories.</li>
-      <li><b>It goes on the review slides too</b>, as its own slide after that pillar&rsquo;s targets.</li>
+      <li><b>More to enter, and Submit waits for it.</b> This pillar is asked for fifteen more figures
+          than it was, and a cycle cannot be submitted with any of them blank.</li>
+      <li><b>Ten of them can demand an explanation.</b> Growth and CM are scored, so a figure landing off
+          track is refused without a note &mdash; the rule that already governs every measure, reaching
+          ten more cells. The five Mix figures never can.</li>
+      <li><b>The breakdown moves the pillar&rsquo;s number.</b> Here it takes it from 91% to 95%, because
+          Growth and CM are both running near plan. On a pillar whose categories are struggling it moves
+          the other way, and by the same weight as any headline measure.</li>
+      <li><b>One control does not exist in the platform yet</b> &mdash; naming a table&rsquo;s columns, and
+          picking whether each one is judged or only watched.</li>
+      <li><b>It goes on the review slides</b>, as its own slide after that pillar&rsquo;s targets.</li>
     </ul>
-    <p class="mkask"><b>What I need from you:</b> A or B &mdash; and whether &ldquo;it does not score&rdquo; is right.</p>
+    <p class="mkask"><b>Settled:</b> this shape &middot; every category counts equally &middot; Growth is
+      higher-is-better and CM lower-is-better, both scored &middot; Mix is reported and never scored
+      &middot; Submit waits for every one of them.</p>
   </section>
-
-</div>

@@ -122,7 +122,7 @@ await section("2 · the address names the page, and the page names the address",
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
 });
 
-/* THE MODULE IN THE ADDRESS (spec 044 §7). Both ends every time (§94.2): the
+/* THE MODULE IN THE ADDRESS (spec 046 §7). Both ends every time (§94.2): the
    word is there where it belongs AND absent on the spine, or a build that
    prefixed everything — Setup included — passes half of this. */
 await section("2b · the module leads the address, and the spine carries none", async () => {
@@ -133,13 +133,13 @@ await section("2b · the module leads the address, and the spine carries none", 
   /* the shape a link made before today has */
   let r = await hit("/raya-trade/mobile/strategy/plan");
   check(r.status === 302 && (r.headers.get("location") || "").endsWith("/raya-trade/strategy/mobile/strategy/plan"),
-    "an address with no module 302s to the default one, whole (spec 044 §7)", r.status + " " + r.headers.get("location"));
+    "an address with no module 302s to the default one, whole (spec 046 §7)", r.status + " " + r.headers.get("location"));
   r = await hit("/raya-trade/fn/finance/strategy");
   check(r.status === 302 && (r.headers.get("location") || "").endsWith("/raya-trade/strategy/fn/finance/strategy"),
     "…a function's too, its own two segments intact", r.status + " " + r.headers.get("location"));
 
   /* …and the spine is served where it stands rather than being pushed under
-     a module it does not belong to (spec 044 §4.5) */
+     a module it does not belong to (spec 046 §4.5) */
   r = await hit("/raya-trade/setup/people");
   check(r.status === 200, "Setup is NOT redirected — it is the client's page, in no module", r.status + " " + (r.headers.get("location") || ""));
   r = await hit("/raya-trade/tour");
@@ -203,7 +203,16 @@ await section("4 · Forefront's own pages", async () => {
   await fresh(); await signIn("office@forefront.example");
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });
   check((await page.locator("#who").textContent()) === "Mohamed Essam · Super user", "the platform's chrome names the admin");
-  check((await page.locator("#nav button, #nav a").allTextContents()).join("|") === "Clients|Consultants|Who sees what", "three pages", await page.locator("#nav").textContent());
+  /* REWRITTEN, NOT LOOSENED (§218, §214.3): this held the literal
+     "Clients|Consultants|Who sees what" and spec 045 added a fourth page, so
+     a deliberate decision read as a regression. What it is FOR is that an
+     admin gets Forefront's own pages and that the gated one is among them —
+     asserted as the set, with the gated page named, so a build that dropped
+     `Who sees what` still fails and a page added next month does not. */
+  const ffTabs = await page.locator("#nav button, #nav a").allTextContents();
+  check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
+    "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
+  check(ffTabs.includes("Memory"), "…and the consulting memory, which every consultant reaches (spec 045)", ffTabs.join("|"));
   check((await page.locator("#page").textContent()).includes("Raya Trade") && (await page.locator("#page").textContent()).includes("Add a client"), "the cards: Raya Trade, and Add a client");
   const post = (body) => page.evaluate(async (b) => (await (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) })).json()), body);
   let j = await post({ action: "consultants" });

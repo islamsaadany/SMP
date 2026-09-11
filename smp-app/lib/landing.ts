@@ -56,10 +56,10 @@ export async function landingFor(tenantId: string, personKey: string | null, ema
    function spelt `fn/<key>` because a colon in a path segment is nobody's
    friend. Every door on the landing opens a STRATEGY page today, which is
    why the module is the default one rather than a parameter — when a second
-   module puts a row on this screen, that row brings its own (spec 044 §7).
+   module puts a row on this screen, that row brings its own (spec 046 §7).
 
    SETUP CARRIES NO MODULE: it is one page for the whole client, a Client
-   group and a group per module (spec 044 §4.5). */
+   group and a group per module (spec 046 §4.5). */
 export function doorHref(slug: string, go: Door): string {
   if (go.setup) return clientHref(slug, null, "setup/" + go.setup);
   const t = String(go.target || "group");

@@ -1,7 +1,7 @@
-# Spec 044 — Four modules on one spine
+# Spec 046 — Four modules on one spine
 
 **Status:** decisions taken in session 2026-09-11 (Islam, question by question,
-two rounds) and **recorded as §318** in the decisions document the same day.
+two rounds) and **recorded as §320** in the decisions document the same day.
 **Nothing is built and nothing is drawn** — the chrome carrying the module
 switch wants a mockup before a line of it is written (rule 1c).
 
@@ -325,7 +325,7 @@ address list and the push payload's open address.
 materially more expensive by waiting, and the only reason to interrupt the
 cutover sequence.
 
-### 7.1 BUILT — 2026-09-11 (§318.2)
+### 7.1 BUILT — 2026-09-11 (§320.2)
 
 *"for the address ok add it now."* Built on the branch, not merged.
 

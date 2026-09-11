@@ -9,12 +9,12 @@
    because the landing's doors point at one (§315) and a link somebody sends
    has to open the page it names.
 
-   THE MODULE IS NOT A LIST HELD HERE (spec 044 §7). The document is stamped
+   THE MODULE IS NOT A LIST HELD HERE (spec 046 §7). The document is stamped
    `data-module` by the server, which owns the list (lib/modules.ts), and this
    writes that word back into every address it pushes — so a module added
    tomorrow needs no edit in the browser. What IS this file's own vocabulary
    is which destinations belong to the SPINE and carry no module: `setup`,
-   one page for the whole client (spec 044 §4.5), and the intro round, both
+   one page for the whole client (spec 046 §4.5), and the intro round, both
    of which kindOf() and placeOf() already had to name.
 
    So this does two things and nothing else:
@@ -74,7 +74,7 @@
   function addressOf(d, s, c) {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
-    /* Setup is the client's, not a module's (spec 044 §4.5), so it is the one
+    /* Setup is the client's, not a module's (spec 046 §4.5), so it is the one
        destination whose address carries no module word. */
     var out = "/" + SLUG + (MODULE && kind !== "setup" ? "/" + MODULE : "") + "/" + seg;
     if (s) out += "/" + (kind === "setup" || kind === "group" ? s : (TAB_OUT[s] || s));

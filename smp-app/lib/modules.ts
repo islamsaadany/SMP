@@ -1,14 +1,14 @@
-/* THE MODULE IN THE ADDRESS (spec 044 §7, landed before the cutover).
+/* THE MODULE IN THE ADDRESS (spec 046 §7, landed before the cutover).
 
    A client's pages become `/<client>/<module>/<target>/<tab>[/<section>]`.
    Only Strategy exists today, so this changes nothing anybody can see — it
    is here now because nobody holds a bookmark yet, and after the cutover the
    same change means either breaking every saved link or special-casing
-   Strategy for ever (spec 044 §7, Islam's call on 2026-09-11).
+   Strategy for ever (spec 046 §7, Islam's call on 2026-09-11).
 
    TWO SEGMENTS STAY ON THE SPINE and are not a module's:
      · `setup`  — one Setup page for the whole client, a Client group and a
-                  group per module (spec 044 §4.5, which REJECTS a Setup page
+                  group per module (spec 046 §4.5, which REJECTS a Setup page
                   per module: an administrator sets several up in one sitting,
                   and the spine has to live somewhere inside no module);
      · `tour`   — the intro round, offered by the landing, which is spine too.

@@ -155,13 +155,13 @@ await section("3 · sign in and land", async () => {
   check(pages.length === want.pages.length && want.pages.every((p, i) => pages[i].startsWith(p.label)), "Your pages are the reader's pages", pages.join(" | "));
   check((await page.locator(".wexit .wexlab").textContent()).trim() === want.continueWord, "the way out names where it goes (§202)");
   /* REWRITTEN, NEVER LOOSENED (§218): it held the literal `/raya-trade/mobile`,
-     which spec 044 §7 moved under the module. Asserted as AGREEMENT with the
+     which spec 046 §7 moved under the module. Asserted as AGREEMENT with the
      product's own builder (§94.8), so a later module change stays green — and
      the module asserted PRESENT beside it (§113.8), or a build that dropped it
      from the page and the builder alike agrees with itself perfectly. */
   const exit = await page.locator(".wexit").getAttribute("href");
   check(exit === doorHref("raya-trade", { target: want.home }), "…and goes there", exit + " ⟂ " + doorHref("raya-trade", { target: want.home }));
-  check(exit.startsWith("/raya-trade/" + DEFAULT_MODULE + "/"), "…inside a module, which every page but the spine's carries (spec 044 §7)", exit);
+  check(exit.startsWith("/raya-trade/" + DEFAULT_MODULE + "/"), "…inside a module, which every page but the spine's carries (spec 046 §7)", exit);
   check((await page.locator(".wcycle").count()) === (want.review.open && !want.cycle ? 1 : 0), "the cycle chip is drawn exactly when the block is not (§200)");
   check((await page.locator(".wtour").count()) === (want.tour ? 1 : 0) && !(await page.locator(".wtour").getAttribute("open")), "the intro round is offered folded (§202)");
   await shot(page, "landing");

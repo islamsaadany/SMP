@@ -17,7 +17,7 @@ type P = { params: Promise<{ slug: string; rest: string[] }> };
    page, because the shell is a document of its own and React has nothing to
    do inside it.
 
-   THE MODULE SEGMENT (spec 044 §7) is read by lib/modules.ts and is settled
+   THE MODULE SEGMENT (spec 046 §7) is read by lib/modules.ts and is settled
    HERE rather than in the browser, because an old address must be corrected
    before a page is drawn at it: a link made before today — /<client>/mobile
    /strategy — 302s to /<client>/strategy/mobile/strategy, so there is one

@@ -104,9 +104,15 @@ export function poolerModel(url) {
   };
 }
 
-/* Every tenant-owned table, from the catalogue and never a literal. */
-export const PLATFORM_TABLES = ["tenants", "users", "tenant_users", "sessions", "login_attempts",
-  "platform_access", "tenant_log", "push_keys", "_migrations"];
+/* Every tenant-owned table, from the catalogue and never a literal — and the
+   EXCLUSION list is imported rather than typed (§327). It was a literal here,
+   which is the third copy of one fact: `db/schema.sql`'s RLS loop, this, and
+   `lib/schema-check.ts`. Two of the three had not been told about
+   `memory_entries`, so this harness tried to SEED a platform table and S4 died
+   in its own fixture before it could measure anything. The comment above this
+   line already said "never a literal" and the line under it was one. */
+export { PLATFORM_TABLES } from "../lib/schema-check.ts";
+import { PLATFORM_TABLES } from "../lib/schema-check.ts";
 export async function tenantTables(client) {
   const r = await client.query(
     "SELECT c.relname AS t FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace " +

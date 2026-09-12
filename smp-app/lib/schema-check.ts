@@ -10,8 +10,20 @@
    4. every FK between two tenant tables carries tenant_id on both sides. */
 import type { Pool, PoolClient } from "pg";
 
+/* THE SECOND COPY OF ONE FACT, AND IT DRIFTED (§327). `db/schema.sql` ends in
+   a loop that gives every table RLS and the `tenant_rows` policy BY EXCLUSION,
+   and its `NOT IN (…)` names these same tables — so this list and that one must
+   hold exactly the same names or the two disagree about what a tenant owns.
+   `memory_entries` was added to the SQL and not to this, which made the schema
+   check report a CORRECT schema as broken and would have made `deleteTenant`
+   ask a platform table for a `tenant_id` it does not have.
+
+   They cannot share a constant: one runs in Postgres and one in the app. So
+   `checks/memory-boundary.mjs` asserts the two lists AGREE, reading both —
+   which is the guard, and is why adding a name here without adding it there
+   (or the other way round) is now loud. */
 export const PLATFORM_TABLES = ["tenants", "users", "tenant_users", "sessions", "login_attempts",
-  "platform_access", "tenant_log", "push_keys", "_migrations"];
+  "platform_access", "tenant_log", "push_keys", "memory_entries", "_migrations"];
 
 export type SchemaReport = { ok: boolean; problems: string[]; tenantTables: string[] };
 

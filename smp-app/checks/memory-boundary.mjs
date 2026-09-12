@@ -96,6 +96,25 @@ await section("2 · the column is named so that forgetting the list is LOUD", as
   const schema = readFileSync(join(here, "..", "db", "schema.sql"), "utf8");
   const loop = schema.slice(schema.indexOf("c.relname NOT IN ("));
   check(/'memory_entries'/.test(loop.slice(0, 400)), "…and the table is named in schema.sql's exclusion list", loop.slice(0, 200));
+
+  /* AND THE OTHER COPY OF THAT LIST AGREES (§327). Which tables are the
+     platform's own is written TWICE — in the SQL loop above, which cannot
+     import anything, and in `lib/schema-check.ts`, which runs in the app — and
+     they cannot share a constant. So the guard is that they name the same set.
+     `memory_entries` was added to the SQL and not to the TypeScript, and the
+     two then disagreed about what a tenant owns: the schema check reported a
+     CORRECT schema as broken, and `deleteTenant` would have asked a platform
+     table for a `tenant_id` it does not have. Asserted as the SET, never as a
+     count — two lists of ten can differ by two names (§94.8). */
+  const sqlList = (loop.slice(0, loop.indexOf(")")).match(/'([a-z_]+)'/g) || [])
+    .map((x) => x.slice(1, -1)).sort();
+  const { PLATFORM_TABLES } = await import("../lib/schema-check.ts");
+  const tsList = [...PLATFORM_TABLES].sort();
+  const only = (a, b) => a.filter((x) => !b.includes(x));
+  check(sqlList.length > 5, "schema.sql's exclusion list was parsed at all", sqlList.length + " names");
+  check(only(sqlList, tsList).length === 0 && only(tsList, sqlList).length === 0,
+    "…and PLATFORM_TABLES names exactly the same tables — the two copies agree",
+    "only in the SQL: [" + only(sqlList, tsList) + "]  only in the TypeScript: [" + only(tsList, sqlList) + "]");
 });
 
 await section("3 · a client's own platform carries none of it", async () => {

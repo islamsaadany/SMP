@@ -6496,6 +6496,38 @@ has ever been in front of a client — which is what this sweep is for.
   still the signed-off ones. It also takes three permanent false reds out of
   every future sweep.
 
+- **§330.15 · Seven functions could not download their own plan.** The sixth
+  product fault, and the oldest — §322's, inherited. Measured on this branch:
+  **seven supporting functions own eighteen projects between them and not one
+  of them appeared on Import & storage's Download list**, which offered the
+  PILLARS functions and the capabilities alone. That was the whole truth while
+  a projects function's work lived inside a capability and every capability was
+  listed; it stopped being it the day stage 1 gave the function projects of its
+  own. **§22 is why it matters**: an upload AUTHORS, so a plan that cannot
+  leave cannot come back, and this is the ordinary way a client edits one.
+  **AND THE BUILDER WAS THERE THE WHOLE TIME** — `impHolderFor()` has resolved
+  `fn:<key>` to the function's own holder since §322 and says so in its own
+  comment, and `projectSubjectNames()` already offers that function BY NAME on
+  the upload — so the two ends were built and the list between them was not
+  (§96, §61: built and unreachable). One clause, and every active function is
+  offered in its own format. Asserted in `import-page.py` §8b as the AGREEMENT
+  between what the page offers and what the builder can make, never as a count
+  of subjects (§94.8), with both ends (§94.2): the file really carries that
+  function's own projects, so a build that listed the subject and shipped an
+  empty sheet fails. **1 red** falsified from the SOURCES — *and the first
+  falsification went GREEN*, because `import-page.py` did not honour
+  `SMP_BUILT` and ran against the very build it was falsifying (§54.5, and
+  §330.13's lesson within the hour). It honours it now.
+- **AND THE POINTING IS A CLASS, NOT TWO FILES.** §330.13 fixed the
+  twenty-one checks that named an ABSOLUTE path, which is the worst spelling
+  because a worktree's own copy cannot even be run. **116 more resolve their
+  build relative to `__file__` and ignore `SMP_BUILT`** — which is enough for
+  §303 (copy the repo, run that copy's check) and not enough for §276, where a
+  falsification quietly measures the file it was falsifying and reports the
+  reassuring answer. Recorded rather than swept: 116 mechanical edits in
+  varied spellings do not belong in a round about capabilities (§2b), and it
+  is exactly the shape §324 was as a round of its own.
+
 ### What the checks found, and what had to be rewritten rather than loosened
 
 `checks/capability-entry.py` is new and 43/0 — the demo's one capability, the

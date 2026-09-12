@@ -37,11 +37,15 @@ Run: SMP_CHROME=... python3 qa-run.py checks/import-page.py
 import io
 import pathlib
 import zipfile
+import os
 from playwright.sync_api import sync_playwright
 
-URL = "file://" + str(pathlib.Path(
+# SMP_BUILT points it at another build, which is how a falsification is made
+# (§276) and how a red is established as somebody else's (§303). Without it a
+# falsification runs against the file it was falsifying and goes green.
+URL = "file://" + str(pathlib.Path(os.environ.get("SMP_BUILT") or pathlib.Path(
     pathlib.Path(__file__).resolve().parent.parent,
-    "strategy-management-platform.html").resolve())
+    "strategy-management-platform.html")).resolve())
 DL = pathlib.Path("/tmp/smp-import-check")
 DL.mkdir(exist_ok=True)
 
@@ -272,6 +276,33 @@ with sync_playwright() as p:
         ck("no CSV control on the %s tab" % sec,
            pg.eval_on_selector_all("[data-dl], [data-showcsv]", "e => e.length") == 0)
     ck("…and the reader is untouched", pg.evaluate("typeof loadCSV === 'function'"))
+
+    print("\n§8b every subject the page offers can actually be built (§330.15)")
+    setup(pg, "dl")
+    offered = pg.evaluate("() => impPlanSubjects().map(o => o.v)")
+    # THE LIST AND THE BUILDER MUST AGREE. §322 taught `impHolderFor()` to
+    # resolve `fn:<key>` to a projects function's own holder and taught the
+    # upload to offer that function BY NAME — and left this list offering the
+    # PILLARS functions alone, so seven functions owning eighteen projects
+    # between them could not download a plan at all: built and unreachable
+    # (§61, §96), and a plan that cannot leave cannot come back (§22).
+    # Asserted as the AGREEMENT rather than as a count of subjects (§94.8),
+    # so a tenant with different functions cannot make it wrong.
+    owns = pg.evaluate("() => FUNCTION_KEYS.filter(k => fnOwnProjects(k).length)"
+                       ".map(k => 'fn:' + k)")
+    ck("every function that owns projects is offered", owns and
+       all(v in offered for v in owns), {"owns": owns, "offered": offered})
+    built = pg.evaluate("(vs) => vs.map(v => { try { const w = impPlanWorkbookFor(v);"
+                        " return w && w.length ? null : v; } catch (e) { return v; } })"
+                        ".filter(Boolean)", offered)
+    ck("…and every subject on the list builds a workbook", built == [], built)
+    # BOTH ENDS (§94.2): the file really carries that function's own projects,
+    # so a build that offered the subject and shipped an empty sheet fails.
+    rows = pg.evaluate("""(v) => {
+      const w = impPlanWorkbookFor(v) || [];
+      const sh = w.filter(s => /project/i.test(s.name || ""))[0];
+      return sh ? (sh.rows || []).length : -1; }""", owns[0] if owns else "")
+    ck("…and the file carries that function's own projects", rows > 0, rows)
 
     print("\n§9  console")
     ck("no console errors", not errs, errs[:3])

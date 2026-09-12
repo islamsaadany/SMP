@@ -34018,9 +34018,19 @@ function impPlanSubjects(){
     if (UNITS[k].active === false) return;
     out.push({ v:k, label:UNITS[k].name, grp:"Business units" });
   });
+  /* §330.15: EVERY ACTIVE FUNCTION, IN ITS OWN FORMAT. This listed the
+     PILLARS ones alone, which was the whole truth while a projects function's
+     work lived in capabilities and the capabilities are listed below — and
+     stopped being it the day §322 gave such a function projects of its own:
+     measured on this branch, seven functions owned eighteen projects between
+     them and not one of them could be downloaded, so their plans could not
+     leave and therefore could not come back (§22 — an upload AUTHORS; §61 —
+     built and unreachable). `impHolderFor()` has resolved `fn:<key>` to the
+     function's own holder since §322 and says so in its own comment, so the
+     builder was there the whole time and only the list was not (§96). */
   FUNCTION_KEYS.forEach(function(k){
     var f = FUNCTIONS[k];
-    if (f.active === false || !fnPlansInPillars(f)) return;
+    if (f.active === false) return;
     out.push({ v:"fn:" + k, label:f.name, grp:"Supporting functions" });
   });
   (GROUP.capabilities || []).forEach(function(c){

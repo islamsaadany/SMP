@@ -6253,6 +6253,167 @@ harness, having run a first-deploy assertion twice against the same database
   should not ride on a round about the demo (§2b); what it wants is either a
   refusal to overwrite, or a home outside `checks/` so a sweep cannot reach it.
 
+## 330 · A capability is a strategic entry of its own
+
+Islam, of what §322 left: **"capability is something Strategic"** — and, on the
+mockup drawn for stage 2, four answers and a go-ahead:
+
+> 1. for the marketing - the marketing now is a normal funcitonal plan with
+>    pillars no capabilities for it I removed all the capabilities if you mean
+>    on raya .. for the demo do what you want
+> 2. yes for all
+> 3. yes the capability can be built in pillars what. ok with the promirting
+>    mockup
+> 4. for my still mines are all done
+>
+> shall we proceed?
+
+### What that settles, question by question
+
+- **The office creates, renames and removes a capability; a function HOLDS
+  one** ("yes for all"). Setup › Capabilities is its home and the promote
+  control on the function's Projects page is the second door — one act, two
+  ways in (§53.5), never two answers.
+- **It gets its own row on the cycle board** (the same "yes for all"), which is
+  what makes it a subject rather than a label: the office can see whether it
+  has reported.
+- **It can be planned in PILLARS** — so the FORM belongs to the thing and not
+  to the subject, which is §213's decision one kind of container further out.
+- **His own tenant needs nothing**: Raya's Marketing plans in pillars and holds
+  no capabilities, so the recommendation in §329 was only ever about the worked
+  example, and *"for the demo do what you want"* is what let §330 keep exactly
+  one (Product Mindset) rather than argue about it.
+
+### The model, and the one line the whole boundary rests on
+
+A capability is a DESTINATION — `cap:<id>` — with the function's own three
+tabs, because it is planned the same two ways and the pages are the same pages.
+Drawing it a second set would be the drift §211 and §213 each cost a day to
+undo.
+
+**WHERE ITS ACCESS COMES FROM IS THE FUNCTION THAT HOLDS IT**, named once in
+the shared rules as `capHolderTarget()` and asked at the top of `roleOwns` and
+`companyAllows`. That is why Roles & access needs no new column: a capability
+is judged in the FUNCTION area, and nobody's rights move.
+
+### The four things that were live and silent, all found by driving it
+
+None of these threw, none reached a console, and every one of them rendered
+perfectly (§96's family). `origin/main` carries neither §322 nor §330, so none
+has ever been in front of a client — which is what this sweep is for.
+
+- **§330.4 · The resolver that answers *whose project is this* was blind to a
+  function's own.** `capOfProjectId` walked `GROUP.capabilities` and §322 had
+  just given a supporting function projects of its own; both its callers open
+  `if (!it) return;`. Measured: Finance holds three projects, pressing the
+  second in the rail moved nothing, and *Remove this project* opened no dialog
+  at all. `eachProject` hands the holder over — §322 built that walk precisely
+  because four copies of *walk the capabilities* would drift the day a function
+  became a holder, and this was the fifth copy nobody carried across.
+  **AND THE WAY BACK WAS SHUT WITH IT**: `restoreArchive` resolved a `kind:"cap"`
+  archive with `capById`, and a projects function's is keyed `fn:<key>`, so
+  every archive such a function ever took answered *cannot be restored* for a
+  function still on the platform — §232's own fault arriving on the other
+  branch. A function's holder is a WRAPPER, so the restore writes back, and
+  `renumberCapability` is never run on one: a restore that re-addresses every
+  project, deliverable, outcome and milestone is the one thing it may not do.
+- **§330.5 · A project owner could not be recognised as one, twice over.**
+  `boundedHere` had been taught that a capability is judged in the FUNCTION
+  column — its own comment says why — and `mayMarkDoneOn` one function above it
+  still read `"unit"`, so `railMine` answered false for a capability whose
+  project names them, `capForBounded` never opened it, and §301's mark was not
+  drawn: §310's whole promise dead on the one page it is about. `areaOfTarget()`
+  names the answer once and both ask it. **AND `personRoles` DERIVED NOTHING AT
+  ALL** for the owner of a project a FUNCTION holds — the walk read the
+  capabilities alone — so they reached nothing, the function was not in their
+  navigation, and the server refused them, because it is the shared rule both
+  sides ask (§42).
+- **§330.6 · The tab said nothing while the board asked for the report.**
+  `reportPending` decided *is this a real subject* by asking for a unit key or
+  an `fn:` one, so a capability answered false: its Reporting tab never said
+  *not submitted yet* and its Performance tab never wore the dot (§69), while
+  the cycle board counted it and `canSpeakFor` said somebody could submit it.
+  **AND THE SUBMIT BUTTON CARRIED `fn:cap:cap6`** — `renderFnReport` rebuilt a
+  key `holderTarget()` two lines above had already normalised, so the
+  submission would have been filed where nothing reads it: sent, with the tab
+  still saying *not submitted yet* and the board still asking (§48). Driven end
+  to end after the fix, and **the server needed nothing and it is asserted
+  rather than assumed** (§172): the office and the function's head are allowed,
+  somebody else is refused **by the capability's name**.
+- **§330.7 · The strip named nothing for the whole middle of a function's
+  deck.** §322 stopped drawing the holder's cover for a function's OWN work —
+  rightly, a slide headed *Capability · Finance* over the word Finance says the
+  name twice (§87, on a projector) — and the section stamp rode on that slide.
+  Measured: thirteen slides under a navigation bar reading **COVER · END**. It
+  is §266.12's own recorded gap closed: each project stamps its own title slide
+  with the code the page, the rail and the workbook already show (§48, §310), so
+  a deck reads `COVER · FIN01 · FIN02 · FIN03 · END`, a unit's strip is
+  byte-identical, and a capability keeps §266.9's two-letter fallback for its
+  own divider.
+
+### What the checks found, and what had to be rewritten rather than loosened
+
+`checks/capability-entry.py` is new and 43/0 — the demo's one capability, the
+third side of the navigation at both ends, the tabs and sections agreeing with
+a function's, the Overview's own three keys, codes by holder, no band on the
+function's four pages with its projects still DRAWN, the cycle board's band and
+row and totals, the promote dialog naming the new codes BEFORE the press, the
+demote round trip, and the pillars form. **AND ITS OWN SUMMARY LIED** (§298.3):
+`"%d passed, %d failed" % (0, bad) if bad else "…"` binds the ternary looser
+than the `%`, so a clean run printed *0 passed, 1 failed* over forty-one lines
+saying ok.
+
+Four neighbours were REWRITTEN, never loosened (§218), because §330 moves what
+they are about rather than what they assert:
+
+- **`capability-first.py`** — §310 answered *whose capability leads* by SORTING
+  the list a function's pages drew; a capability is a destination now, so the
+  sort is dead code and the answer lives in `entryDest`. Every claim is
+  asserted where §330 keeps it. **AND IT PASSED FOR THE WRONG REASON UNTIL THE
+  LANDING WAS MADE FRESH** (§113.8): `current` survives a viewer switch whenever
+  the new viewer can reach where the old one stood, so reading it after the
+  office had navigated to his capability answered *his capability* on a build
+  deciding nothing at all.
+- **`functional-projects.py`** — §2 inverted: a box used to paint a band across
+  the function's four pages and now draws nowhere near them, so what must hold
+  is that those pages carry no band AND still hold the function's own work,
+  asserted on the PAGE and not only in the list.
+- **`cycle-board.py`** — §245's rule is Islam's own and is about the two
+  FORMATS of a function; §330 adds a band for a different KIND of subject, so
+  the rule is asserted as what it says. Its probe split the board at the FIRST
+  band, sweeping a capability's row into the function list.
+- **`deck-strip.py`** — §266.12 asserted a function's pills were its
+  capabilities and wrote down that they ought to be its projects.
+
+Three more had fixtures that asked the worked example for a capability §329
+removed and were made to MAKE their state (§255): `measure-score-spread.py`,
+`fn-report-gate.py` and `master-presentation.py`.
+
+**FALSIFIED FROM THE SOURCES** (§276, because §238's hashed CSP silences an
+edited built file): the resolver blind **5 red** with the first failure naming
+the cause, the restore blind **1 red** printing `ok: False`, the area reverted
+**9 red**, `capsShown` concatenating the boxes back in **2 red**, and the
+`powner` derivation removed **1 red** on the server.
+
+**AND THE SEED WAS STALE, FOR THE THIRD TIME IN THIS REPOSITORY** (§259, and
+§325's rule one artefact over): `db/seed-state.json` is generated by
+`scripts/extract-state.js` and is TRACKED, and §329 regenerated it before
+§330's keep-one line existed — so it carried NO capability while the sources
+carried one, and `test-authorize.js` §38 short-circuits on a seed with none.
+Its 620/0 had been measured against a seed that could not exercise it.
+
+### Recorded, not done
+
+- **The demo shows a capability in ONE of its two forms.** Product Mindset is
+  planned in overview and projects, so a capability planned in PILLARS renders
+  nowhere in the worked example and is exercised by the checks alone. A second
+  demo capability would show it and nobody asked for one (§2b).
+- **The two mockup generators still live in `checks/`** (§329's own finding):
+  `objectives-table-doc.py` and `objectives-table-mockup.py` rewrite
+  `design-mockups/objectives-table/shots/` on every full sweep, so a sweep
+  silently replaces a signed-off picture with today's build. What it wants is
+  either a refusal to overwrite or a home outside `checks/`.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

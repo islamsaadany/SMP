@@ -1,6 +1,6 @@
 # 046 · A capability is a strategic entry, and a function's projects are its own
 
-**Version:** v3.22 · **Decisions:** §322 · **Renumbered:** built as spec 045 · §319–§321 and moved at the merge — `main` had taken both while this was in flight (§287, §301, §310, §318 and main’s own §319.1 all set the precedent: a gap is harmless where a collision is not). The heal keeps its `045-` registry name, because that name is a key and not a label (§30.2, §65). · **Status:** model agreed with Islam; **stage 1 BUILT** (§322) and **the demo finished** (§329, his *"finish the demo data yes"*); stage 2 not started
+**Version:** v3.22 · **Decisions:** §322 · **Renumbered:** built as spec 045 · §319–§321 and moved at the merge — `main` had taken both while this was in flight (§287, §301, §310, §318 and main’s own §319.1 all set the precedent: a gap is harmless where a collision is not). The heal keeps its `045-` registry name, because that name is a key and not a label (§30.2, §65). · **Status:** model agreed with Islam; **stage 1 BUILT** (§322), **the demo finished** (§329, his *"finish the demo data yes"*) and **stage 2 BUILT** (§330, his four answers on the mockup and *"shall we proceed?"*). Every question in §10 is answered below.
 
 Islam, 2026-09-12, correcting a proposal of mine that would have hidden the
 problem rather than fixed it:
@@ -296,22 +296,32 @@ Each is its own decisions section, its own checks, its own merge.
   and moved back, or a build that silently kept the function's numbering passes
   the half that matters least.
 
-## 10 · Still to settle, before Stage 2 is written
+## 10 · Settled before Stage 2 was written — Islam's four answers (§330)
 
-1. **Who authors a capability.** It is strategic, so the office's alone
-   (§94's strategy pages) is the obvious answer, and it is a decision rather
-   than a deduction — a function head holds the capability.
-2. **How a capability is created**, and from where: Setup, the plan builder
-   (§129), or the client wizard's step 5 (§318), which already draws it.
-3. **Whether a capability reports on the cycle board** as a subject of its own
-   (§244's rule: every subject that reports has a row).
-4. **The demo's one real capability** — which, and planned in which form.
-   **RECOMMENDED, §329**: *Product Mindset*, held by Marketing, in overview +
-   projects. The data chose it — it is the one definition the dissolve had
-   nowhere to put, because Marketing is the one function that carried two, and
-   it reads as a strategic intent rather than a description of the function's
-   ordinary work. Islam's to confirm.
-5. **Whether a promoted project's code changing is accepted** (§6). It is the
-   honest answer — a code says where a project lives — and it moves a label
-   that is on every screen, the deck and the workbook, so it is Islam's to
-   take rather than mine.
+Four were put to him on the stage-2 mockup and answered in one message
+(**"yes for all"** to 1–3 as the mockup numbered them, the demo *"do what you
+want"*, and **"ok with the promirting mockup"**). What each now says:
+
+1. **ANSWERED — the office authors, a function head HOLDS.** Creating,
+   renaming and removing a capability is the office's (§94's strategy pages);
+   the function that holds it is where its access comes from, named once in the
+   shared rules as `capHolderTarget()` and asked by `roleOwns` and
+   `companyAllows`. No new column on Roles & access, and nobody's rights move.
+2. **ANSWERED — Setup › Capabilities is the home, and the function's Projects
+   page is the second door.** One act, two ways in (§53.5) — the promote panel
+   there names the new codes before the press. The plan builder and the client
+   wizard are deliberately NOT third doors.
+3. **ANSWERED — yes, its own row on the cycle board.** That is what makes it a
+   subject rather than a label (§244), and it is why §330 had to teach
+   `reportPending` and the Submit button: the board asked for a report while
+   the tab above it said nothing.
+4. **ANSWERED — *Product Mindset*, held by Marketing, in overview + projects**,
+   the recommendation §329 derived from the data. Islam: *"for the demo do what
+   you want"*; Raya's Marketing plans in pillars and holds none, so the
+   recommendation was only ever about the worked example. **The cost is stated
+   in §330**: the demo therefore shows a capability in ONE of its two forms.
+5. **ANSWERED — taken.** *"ok with the promirting mockup"*, which is the panel
+   that names the new codes. A code says where a project lives, so it moving is
+   the code telling the truth rather than a cost to hide.
+
+**AND HIS OWN TENANT NEEDS NOTHING** — *"for my still mines are all done"*.

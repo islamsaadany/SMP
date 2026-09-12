@@ -8876,7 +8876,82 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;329: the worked example holds no
+*Last Updated: 2026-09-12 &mdash; **&sect;330: a capability is a strategic
+entry of its own (spec 046, stage 2).** Islam, on the mockup drawn for it, four
+answers and a go-ahead: *"yes for all"* (the office creates it, a function head
+HOLDS it; Setup &rsaquo; Capabilities is its home with the promote control on
+the function's Projects page as the second door; it gets its own row on the
+cycle board), *"yes the capability can be built in pillars ... ok with the
+promirting mockup"*, *"for the demo do what you want"* and *"for my still mines
+are all done"*. **IT IS A DESTINATION WITH THE FUNCTION'S OWN THREE TABS**,
+because it is planned the same two ways and the pages are the same pages
+&mdash; a second set would be the drift &sect;211 and &sect;213 each cost a day
+to undo &mdash; and **the one line the whole boundary rests on is that its
+access comes from the function that holds it**: `capHolderTarget()` in the
+shared rules, asked at the top of `roleOwns` and `companyAllows`, which is why
+Roles &amp; access needs no new column and nobody's rights move. **THE DEMO
+KEEPS EXACTLY ONE** (*Product Mindset*, Marketing, overview + projects) by
+SKIPPING the dissolve rather than promoting it back, so its name, its
+definition, its project and every id stay the seed's (&sect;232).
+**FOUR THINGS WERE LIVE AND SILENT, ALL FOUND BY DRIVING IT AND NONE BY
+READING IT** &mdash; every one rendered perfectly and reached no console
+(&sect;96's family), and `origin/main` carries neither &sect;322 nor &sect;330,
+so none has been in front of a client. **&sect;330.4** &mdash;
+`capOfProjectId` walked the capabilities alone and both its callers open
+`if (!it) return;`, so on Finance's three projects the rail moved nothing and
+*Remove this project* opened no dialog at all; `eachProject` hands the holder
+over, which is the walk &sect;322 built for exactly this and the fifth copy
+nobody carried across (&sect;53.5). **And the way back was shut with it**: a
+projects function's archive is `kind:"cap"` keyed `fn:<key>` and the restore
+resolved it with `capById`, so every archive such a function ever took answered
+*cannot be restored* &mdash; &sect;232's own fault on the other branch, with
+`renumberCapability` never run on a function holder, because a restore that
+re-addresses every row is the one thing it may not do. **&sect;330.5** &mdash;
+`boundedHere` knew a capability is judged in the FUNCTION column and
+`mayMarkDoneOn` one function above it still said `"unit"`, so `railMine`
+answered false for a capability whose project names them and &sect;310's whole
+promise was dead on the one page it is about; `areaOfTarget()` names the answer
+once and both ask it. **And `personRoles` derived NOTHING** for the owner of a
+project a FUNCTION holds, so they reached nothing and the server refused them,
+because it is the shared rule both sides ask (&sect;42). **&sect;330.6** &mdash;
+`reportPending` answered *not a real subject* for a capability, so its tab never
+said *not submitted yet* while the cycle board counted it; **and the Submit
+button carried `fn:cap:cap6`**, a key nothing else reads, so the report would
+have been sent with the tab still asking (&sect;48). Driven end to end after
+the fix, and **the server needed nothing and it is asserted** (&sect;172): the
+office and the head allowed, somebody else refused **by the capability's
+name**. **&sect;330.7** &mdash; &sect;322 stopped drawing the holder's cover for
+a function's own work (rightly: *Capability &middot; Finance* over the word
+Finance says the name twice, &sect;87) and the section stamp rode on that slide,
+so a thirteen-slide deck had a navigation strip reading **COVER &middot; END**;
+each project stamps its own title slide with the code the page already shows, so
+a deck reads `COVER &middot; FIN01 &middot; FIN02 &middot; FIN03 &middot; END`
+&mdash; &sect;266.12's own recorded gap closed, with a unit's strip
+byte-identical. **CHECKS**: `capability-entry.py` NEW at 43/0, and **its own
+summary lied** (`"%d passed, %d failed" % (0, bad) if bad else …` binds the
+ternary looser than the `%`, so a clean run printed *0 passed, 1 failed* over
+forty-one lines saying ok &mdash; &sect;298.3). Four neighbours REWRITTEN, never
+loosened (&sect;218), because &sect;330 moves what they are ABOUT rather than
+what they assert: `capability-first.py` (&sect;310's sort is dead code; the
+answer lives in `entryDest` &mdash; **and it passed for the wrong reason until
+the landing was made fresh**, because `current` survives a viewer switch,
+&sect;113.8), `functional-projects.py` (&sect;2 inverted: no band AND the
+function's own work still drawn, asserted on the PAGE), `cycle-board.py`
+(&sect;245's rule is about the two FORMATS of a function and survives whole
+beside a band for a different KIND of subject) and `deck-strip.py`. Three more
+had fixtures asking the worked example for a capability &sect;329 removed and
+now MAKE their state (&sect;255). **Falsified from the SOURCES** (&sect;276):
+5 / 1 / 9 / 2 red on the screen and 1 red on the server, one per decision.
+**AND THE SEED WAS STALE FOR THE THIRD TIME** (&sect;259, &sect;325 one artefact
+over): `db/seed-state.json` is GENERATED and TRACKED, and &sect;329 regenerated
+it before &sect;330's keep-one line existed, so `test-authorize.js` &sect;38's
+620/0 had been measured against a seed that could not exercise it. 624/0 after.
+**RECORDED, NOT DONE**: the demo shows a capability in ONE of its two forms, so
+the pillars form is exercised by the checks alone; and the two mockup
+GENERATORS still live in `checks/`, so a full sweep rewrites signed-off
+pictures (&sect;329's own finding).*
+
+*Earlier the same day &mdash; **&sect;329: the worked example holds no
 capabilities.** Islam: *"finish the demo data yes."* **STAGE 1 WAS LIVE AND
 INVISIBLE, WHICH IS THE FINDING RATHER THAN THE TIDY-UP** &mdash; &sect;322 gave
 a supporting function its own projects and left the demo shipping its eight

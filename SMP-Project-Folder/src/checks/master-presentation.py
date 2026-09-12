@@ -43,6 +43,10 @@ FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 CHROME = "/opt/pw-browsers/chromium"
 
 ok = bad = 0
+# §330: EVERY SUBJECT THAT REPORTS, and a CAPABILITY is one since stage 2 —
+# its own row on the cycle board (§244) and its own place in the flow. The
+# three groups are composed here in the board's own order rather than asked
+# of `masterSubjects()`, which is the thing under test (§94.8).
 def check(what, cond, got=""):
     global ok, bad
     if cond:
@@ -250,7 +254,7 @@ with sync_playwright() as p:
     # getter, because two would let the halves drift. The `.on` class went with
     # the rows; being in the flow is now being in the second column's tbody.
     listed = ev(pg, """() => {
-      const want = boardUnitTargets().concat(boardFunctionTargets());
+      const want = boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
       const col = (i) => [...document.querySelectorAll(
         '#modal-b .mfcol:nth-of-type(' + i + ') tbody tr')];
       const name = r => r.cells[1].textContent.trim();
@@ -296,7 +300,7 @@ with sync_playwright() as p:
           r => r.cells[1].textContent.trim());
       return { waiting: col(1), flow: col(2),
                want: MFLOW.pick.map(t => placeLabel(t)),
-               out: boardUnitTargets().concat(boardFunctionTargets())
+               out: boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets())
                       .filter(t => MFLOW.pick.indexOf(t) < 0).map(t => placeLabel(t)) };
     }""", None, THREW)
     check("a subject taken out moves to the waiting column, and only there",
@@ -329,7 +333,7 @@ with sync_playwright() as p:
           moved)
 
     back = ev(pg, """() => {
-      const all = boardUnitTargets().concat(boardFunctionTargets());
+      const all = boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
       MFLOW.pick = [];
       masterWrite(MFLOW.pick);
       masterPaint();
@@ -502,7 +506,7 @@ with sync_playwright() as p:
     # flow's: the pills are its own SECTIONS, and the title bar is left alone.
     codes = ev(pg, """() => [...document.querySelectorAll('#deckroot .ddot')]
       .map(d => d.textContent)""", None, [])
-    subjects = ev(pg, """() => boardUnitTargets().concat(boardFunctionTargets())
+    subjects = ev(pg, """() => boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets())
       .map(t => deckCode(t, placeLabel(t)))""", None, [])
     check("a single subject's strip is its own sections, never subjects",
           bool(codes) and not any(c in (subjects or []) for c in codes if c),

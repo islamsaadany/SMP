@@ -54,8 +54,66 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§329 — the demo no longer shows a capability that is not
-one. Built on the branch, not merged.**
+**Latest version:** **§330 — a capability is a strategic entry of its own.
+Built on the branch, not merged.**
+
+You answered the four questions on the mockup and said *"shall we proceed?"*,
+so this is stage 2 built to those answers.
+
+**A capability is now a place you go to, not a band on somebody else's page.**
+It sits in the navigation beside Units and Functions — the switch has three
+sides where a tenant has one — and it has the same three pages a supporting
+function has: its plan, its performance and its reporting. It is planned either
+way, in pillars or in overview and projects, so the shape belongs to the
+capability rather than to the function holding it.
+
+**Where it gets its permissions from is the function that holds it.** That is
+one line in the shared rules, and it is why Roles & access needs no new column
+and nobody's access changes.
+
+**It reports on its own.** It has a row on the cycle board, its own Submit, and
+its Reporting tab says when a report is owed — so you can see whether it has
+reported without opening it.
+
+**Two doors to create one, and they are the same act.** Setup › Capabilities is
+its home, and the function's own Projects page has a control that promotes some
+of its projects into one. The panel tells you the new codes before you press,
+because a project's code says where it lives and moving it changes that on
+every screen.
+
+**The demo keeps exactly one.** *Product Mindset*, held by Marketing, planned
+in overview and projects — the one you left to me. It keeps its name, its
+definition, its project and every number: nothing was re-made.
+
+**Four things were live and doing nothing, and driving the pages is what found
+them.** None of them made an error appear anywhere.
+
+- **The button to remove a project did nothing at all** on a function's own
+  projects, and clicking a project in the side list did not move to it. The
+  same blind spot meant a function's archived plan said *cannot be restored*
+  for a function still on the platform.
+- **A project owner was invisible on their own capability** — no mark, and the
+  platform opened them somewhere else — and the owner of a project a function
+  holds outright had no role at all, so the function was not even in their
+  navigation.
+- **A capability's Reporting tab said nothing while the cycle board asked it
+  for a report**, and its Submit button was addressed wrongly, so a report
+  would have been sent and the board would still have been asking for it.
+- **A function's presentation had a navigation bar naming nothing** — thirteen
+  slides between *Cover* and *Thank you* with no marks in between. It now names
+  each project by its code, which is what that bar was always meant to do.
+
+All four were introduced by the last two rounds and none has ever been on the
+live platform. Every fix was proved by putting the fault back and watching the
+check fail.
+
+**What is not done:** the demo shows a capability in one of its two shapes, so
+the pillars shape is exercised only by the checks. A second demo capability
+would show it, and nobody asked for one.
+
+---
+
+### Earlier: §329 — the demo no longer shows a capability that is not one
 
 Islam: *"finish the demo data yes."*
 

@@ -5967,6 +5967,62 @@ nothing tells a runner what it is. Recorded rather than renamed: the name is in
 the decisions record and in commit messages, and moving it to fix a runner
 nobody has written yet is the wrong way round.
 
+## 325 · The served copies are in step with the frozen sources
+
+**§319 wrote this trap down in its own words and §324 fell into it one section
+later.** That section's note reads: *"`smp-app/public/shell.js` is TRACKED and
+is `build-shell.mjs`'s assembly of build.py's own script list, so a change to a
+frozen source that stops there leaves the Next app serving the old shell —
+§91's failure by a different road, and silent, because nothing on either stack
+compares the two."* §324.1 deleted the dead `.bands-act` rules from
+`arrange.css`, ran the frozen build, and did not run `sync-css.mjs` — so
+`smp-app/public/platform.css` went on carrying them and the two stacks'
+stylesheets disagreed by three lines.
+
+**BEHAVIOUR-NEUTRAL THIS TIME, AND SAYING SO IS THE POINT**: nothing had worn
+that class since §275, which is exactly why it was deleted. The next one need
+not be. And this is not a hypothetical margin — **production serves the new
+stack**, measured rather than assumed: `/sw.js` comes back as
+`build-sw.mjs`'s generated worker, so what `smp-app/public/` holds IS what a
+client's browser receives.
+
+**IT WAS FOUND BY HAND, WHICH IS NOT A METHOD.** Running the four generators
+and reading `git status` is a habit, and a habit is exactly what goes missing
+on the afternoon it matters. So `checks/generated-in-step.mjs`:
+
+- **It runs the REAL generators and compares** (§53.5) — never a second
+  assembly of its own, or a drift in the generator and a drift in the check
+  cancel out. A generator that legitimately changes what it emits stays green;
+  a source edited without re-running one goes red. That is the fault, and the
+  only one it can report.
+- **Its subject is DERIVED from `git ls-files`, never typed.** A list written
+  into the check would be the fifth place to edit the day a generator gains a
+  file — which is this section's own fault wearing a hat — and worse, a typed
+  list cannot notice a file that STOPPED being generated.
+- **The tree is put back in a `finally`**, whatever happens (§94.2). A check
+  that finds a stale copy, rewrites it and exits has fixed the tree and told
+  nobody; the next run is then green and the commit never happened.
+- **A dirty tree in those paths is its own assertion, with its own words**,
+  because *the copies are stale* and *you have edits in flight* are two
+  different answers and a check that merges them sends somebody to the wrong
+  place (§123).
+- **It exits non-zero**, which §324.8 is about: twenty-two checks in the frozen
+  suite cannot tell a runner they failed, and a new one joining them would be a
+  poor answer to a section complaining about it.
+
+**Proved able to fail twice, one per generator family** (§276): the stale
+`platform.css` put back — red, naming the file and both byte counts — and a
+frozen `.js` source edited without regenerating, which reddens `shell.js` and
+`platform.css` together and prints them both in one line. Green after each,
+with the tree restored both times.
+
+**AND MEASURING IT SETTLED WHAT §91'S BUMP IS NOW WORTH.** The frozen `sw.js`
+keys its cache on `SHELL`, and `build-sw.mjs` drops the whole caching half —
+so the served worker contains the string **nought** times, and bumping the
+frozen name reaches no client's browser. §319.1 said the bump is hygiene
+rather than a fix; this is the measurement behind that sentence. It is kept,
+because the frozen file is still what an offline handover runs on.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

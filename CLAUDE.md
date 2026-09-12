@@ -8746,6 +8746,25 @@ DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-l
                                 # Forefront's own two pages: contrast in both themes
                                 # and no sideways scroll at four widths — neither of
                                 # the two product sweeps ever reaches them (§313.11)
+node smp-app/checks/generated-in-step.mjs
+                                # the served copies are in step with the frozen
+                                # sources (§325): `smp-app/public/` is generated
+                                # by four scripts and TRACKED, so a frozen source
+                                # edited without re-running one leaves the Next
+                                # app — which is PRODUCTION — serving the old
+                                # bytes, silently. §319 wrote the trap down and
+                                # §324 fell into it one section later. It runs
+                                # the REAL generators and compares (§53.5, never
+                                # a second assembly), derives its subject from
+                                # `git ls-files` rather than a typed list (which
+                                # could not notice a file that STOPPED being
+                                # generated), puts the tree back in a `finally`
+                                # (§94.2 — a check that silently fixes what it
+                                # measures has told nobody), keeps "stale" and
+                                # "you have edits in flight" as two different
+                                # answers (§123), and EXITS NON-ZERO (§324.8).
+                                # Proved able to fail twice, one per generator
+                                # family (§276). Run it from `smp-app/`
 DATABASE_URL_UNPOOLED=… node smp-app/checks/schema-room.mjs
                                 # the shared schema has a room of its own, and
                                 # `public` is a CLIENT (§317.4) — it BUILDS the
@@ -8844,7 +8863,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;324: ten checks that had stopped
+*Last Updated: 2026-09-12 &mdash; **&sect;325: the served copies are in step
+with the frozen sources.** **&sect;319 WROTE THIS TRAP DOWN IN ITS OWN WORDS AND
+&sect;324 FELL INTO IT ONE SECTION LATER**: `smp-app/public/` is generated from
+the frozen product by four scripts and every output is TRACKED, so a source
+edited without re-running one leaves the Next app serving the old bytes, and it
+is silent because nothing on either stack compared the two. &sect;324.1 deleted
+the dead `.bands-act` rules from `arrange.css` and left `platform.css` carrying
+them. **Behaviour-neutral this time, and saying so is the point** &mdash; nothing
+had worn that class since &sect;275, which is why it was deleted &mdash; and it
+is not a hypothetical margin, because **production serves the new stack**,
+measured rather than assumed: `/sw.js` comes back as the GENERATED worker, so
+what `smp-app/public/` holds is what a client's browser receives. **IT WAS FOUND
+BY HAND, WHICH IS NOT A METHOD** &mdash; running the generators and reading `git
+status` is a habit, and a habit is what goes missing on the afternoon it matters.
+`checks/generated-in-step.mjs` **runs the REAL generators and compares**
+(&sect;53.5 &mdash; never a second assembly, or a drift in the generator and a
+drift in the check cancel out), **derives its subject from `git ls-files`**
+rather than a typed list (which would be the fifth place to edit the day a
+generator gains a file, and could not notice one that STOPPED being generated),
+**puts the tree back in a `finally`** (&sect;94.2: a check that finds a stale copy
+and rewrites it has fixed the tree and told nobody), keeps *stale* and *you have
+edits in flight* as two different answers with two different sentences
+(&sect;123), and **exits non-zero**, since joining &sect;324.8's twenty-two would
+be a poor answer to a section complaining about them. **Proved able to fail
+twice, one per generator family** (&sect;276). **AND MEASURING IT SETTLED WHAT
+&sect;91'S BUMP IS NOW WORTH**: `build-sw.mjs` drops the whole caching half, so
+the served worker holds the string `SHELL` **nought** times and bumping the
+frozen name reaches no client &mdash; kept, because the frozen file is what an
+offline handover runs on.*
+
+*Earlier the same day &mdash; **&sect;324: ten checks that had stopped
 checking.** Running the NEIGHBOURS after the merge rather than only the files
 that were edited (&sect;214) turned up two reds and seven harnesses that cannot
 run at all; running **all 152** turned up eight more checks and one file that

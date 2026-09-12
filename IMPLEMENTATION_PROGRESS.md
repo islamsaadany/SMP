@@ -54,7 +54,32 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§324 — ten checks that had stopped checking — built on
+**Latest version:** **§325 — the served copies are in step with the frozen
+sources — built on the branch, not merged.**
+
+`smp-app/public/` is not written by hand. Four scripts read the frozen product
+and produce what the Next app serves — the shell, the stylesheets, the manifest,
+the service worker — and every one of those files is committed. So a change to a
+frozen source that stops there leaves production serving the old bytes, with
+nothing to say so. §319 wrote that down in its own words, and §324 walked into it
+one section later: deleting a dead CSS rule left the served stylesheet still
+carrying it. Harmless that time, because nothing used the rule — which is why it
+was deleted. It need not be harmless next time, and **production is the new stack
+now**, measured rather than assumed.
+
+It was found by running the four scripts and looking at what changed, which is a
+habit rather than a method. `checks/generated-in-step.mjs` makes it a check: it
+runs the real scripts and compares, works out what to compare from what git
+already tracks rather than a list somebody has to remember to update, puts the
+tree back exactly as it found it, and fails an automated run properly by exiting
+non-zero. Proved able to fail twice, once for each kind of generator.
+
+**Verified.** The stale stylesheet repaired · the check green · both
+falsifications red and the tree restored after each.
+
+---
+
+**Before it:** **§324 — ten checks that had stopped checking — built on
 the branch, not merged.**
 
 Running the neighbours after the merge turned up two reds and seven harnesses

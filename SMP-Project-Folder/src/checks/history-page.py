@@ -33,7 +33,7 @@ OVER HTTP WITH A STUB whose log rows were produced by the REAL save path
 
 Run: SMP_CHROME=... python3 qa-run.py checks/history-page.py
 """
-import json, os, pathlib, threading, http.server, socketserver, urllib.parse
+import datetime, json, os, pathlib, threading, http.server, socketserver, urllib.parse
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -44,20 +44,37 @@ PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 GATE = b"<!doctype html><title>Sign in</title><h1 id='gate'>Sign in</h1>"
 
 # Rows in the exact shape the real save path writes (see scripts/test-history-read.js).
+# ── THE FIXTURE IS DATED TODAY, AND IT WAS NOT (§324) ────────────────────
+# Written 2026-09-03 with its seven entries stamped that morning and the stub
+# emptying anything asked for after 06:00 that day. The page's DEFAULT window
+# is TODAY — so from 2026-09-04 onwards the first ask came back empty, the
+# table drew nothing, and ten assertions in §2 and §3 failed every single day.
+# It went red the day after it was written and stayed red, and §316.5 read it
+# as a product fault worth recording rather than as a clock.
+#
+# A FIXTURE THAT DEPENDS ON THE WALL CLOCK IS A CHECK WITH ONE GOOD DAY IN IT.
+# The stamps and the stub's cut-off are derived from the same `TODAY` now, so
+# the RELATIONSHIP is what is asserted — entries inside the default window, a
+# cut-off after them — rather than two literals that agreed once.
+TODAY = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+def _at(sec):
+    return "%sT05:16:%02d.000Z" % (TODAY, sec)
+CUTOFF = TODAY + "T06:00:00"
+
 LOG = [
-  {"id": 7, "at": "2026-09-03T05:16:07.000Z", "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitFoundation", "target": "mobile", "what": "the unit's own words",
+  {"id": 7, "at": _at(7), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitFoundation", "target": "mobile", "what": "the unit's own words",
    "rows_": {"count": 1, "moved": [{"id": "mobile", "to": "The words the plan holds today", "had": True, "from": "The words before the edit", "name": "Mobile", "field": "aspiration"}]}},
-  {"id": 6, "at": "2026-09-03T05:16:06.000Z", "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan",
+  {"id": 6, "at": _at(6), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan",
    "rows_": {"count": 1, "moved": [{"id": "mobile-P1-T2", "to": [False, True, True, False], "had": False, "from": None, "name": "End-to-end order-to-cash digitization", "field": "quarters"}]}},
-  {"id": 5, "at": "2026-09-03T05:16:06.000Z", "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "retailstores", "what": "the unit's plan",
+  {"id": 5, "at": _at(6), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "retailstores", "what": "the unit's plan",
    "rows_": {"count": 1, "moved": [{"id": "retailstores-P2-M1", "to": "Latest", "had": True, "from": "Sum", "name": "E-store revenue", "field": "compile"}]}},
-  {"id": 4, "at": "2026-09-03T05:16:06.000Z", "person_key": "fn_mkt", "person_name": "Yara Kamal", "kind": "capReporting", "target": "fn:marketing", "what": "project milestones",
+  {"id": 4, "at": _at(6), "person_key": "fn_mkt", "person_name": "Yara Kamal", "kind": "capReporting", "target": "fn:marketing", "what": "project milestones",
    "rows_": {"count": 1, "moved": [{"id": "cap4-P1-M1", "to": 100, "had": False, "from": None, "name": "Perception study fielded", "field": "pct"}]}},
-  {"id": 3, "at": "2026-09-03T05:16:05.000Z", "person_key": "mobhead", "person_name": "Ashraf Laithy", "kind": "reportState", "target": "mobile", "what": "submitting the report", "rows_": None},
-  {"id": 2, "at": "2026-09-03T05:16:05.000Z", "person_key": "own_mob", "person_name": "Mennah Farouk", "kind": "unitReporting", "target": "mobile", "what": "reported figures",
+  {"id": 3, "at": _at(5), "person_key": "mobhead", "person_name": "Ashraf Laithy", "kind": "reportState", "target": "mobile", "what": "submitting the report", "rows_": None},
+  {"id": 2, "at": _at(5), "person_key": "own_mob", "person_name": "Mennah Farouk", "kind": "unitReporting", "target": "mobile", "what": "reported figures",
    "rows_": {"count": 2, "moved": [{"id": "mobile-P1-T1", "to": 60, "had": True, "from": 45, "name": "Clean and standardize customer and SKU base", "field": "actual"},
                                     {"id": "mobile-P1-T1", "to": "Two stores opened in Q2, the third slipped to July", "had": True, "from": "", "name": "Clean and standardize customer and SKU base", "field": "note"}]}},
-  {"id": 1, "at": "2026-09-03T05:16:05.000Z", "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan",
+  {"id": 1, "at": _at(5), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan",
    "rows_": {"count": 1, "moved": [{"id": "mobile-P1-M1", "to": "1%", "had": True, "from": "0.8%", "name": "Data duplicate rate", "field": "target"}]}},
 ]
 SEEN = {"asks": [], "posts": [], "office": True}
@@ -91,13 +108,13 @@ class H(http.server.BaseHTTPRequestHandler):
                 rows = [r for r in LOG if (not f.get("target") or r["target"] == f["target"])
                         and (not f.get("person") or r["person_key"] == f["person"])
                         and (not f.get("kind") or r["kind"] == f["kind"])]
-                if f.get("from") and f["from"] > "2026-09-03T06:00:00":
+                if f.get("from") and f["from"] > CUTOFF:
                     rows = []
                 rows = rows[: int(f.get("limit") or 200)]
                 self._s(200, json.dumps({"ok": True, "office": SEEN["office"], "log": rows}).encode(), "application/json")
                 return
             if "since" in q:
-                self._s(200, json.dumps({"ok": True, "changed": [], "now": "2026-09-03T05:00:00.000Z"}).encode(), "application/json")
+                self._s(200, json.dumps({"ok": True, "changed": [], "now": _at(0)}).encode(), "application/json")
                 return
             self._s(200, json.dumps({"ok": True, "state": SEED, "person": PERSON}).encode(), "application/json")
             return

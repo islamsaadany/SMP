@@ -5692,6 +5692,96 @@ Screen only: no `api/`, `lib/` or `db/` file touched, read off the diff; nothing
 stored, nothing migrated, no rule moved. `qa.py` ERRORS none; `no-jump`,
 `plan-edit-head`, `plan-edit-line`, `table-fit` and `setup-sticky` green.
 
+## 324 · Three checks that had stopped checking
+
+Running the whole suite after the merge rather than the files that were edited
+(§214's rule) turned up three reds, and none of them was this branch's — all
+three were reproduced on a build made from `origin/main`'s own sources first
+(§303). Two are fixed here. The third is diagnosed and deliberately not, and
+the reason is the section.
+
+### 324.1 · The tour pointed at a control that had moved
+
+`checks/tour.py` was **15 red**, and it is one step: the slides step in both
+stories, across five viewer-and-place pairs. Its targets were
+`#panel .pageact .dlmenu, #panel .bands-act .dlmenu`, and **§275 took the
+Performance page's controls out of the page body and hung them on the TAB ROW**
+— `perfActs()` writes them into `REPORT_CHROME` and the shell inserts them into
+`#subtabs` as `.tabacts`. So the step lit nothing: shade with no hole, and a
+card pointing at a hole that is not there.
+
+**§51.11 FROM THE PRODUCT'S SIDE**, which is the half that rule keeps being
+learnt on: a selector that stops matching does not throw. And here a grep would
+not have found it either — **`.pageact` is alive and well**, as the Temple's
+edit row (§46), so the class exists; on a page this step never opens.
+`.bands-act` was the one that had gone, and it had gone to a stylesheet with no
+markup left, which is why it is DELETED with this (§24): a rule nobody wears is
+a rule the next reader takes for load-bearing, and this time one did.
+
+Re-pointed at `#subtabs .tabacts .dlmenu:not(.bandsmenu)` — the row carries two
+dropdowns and this step is about the Presentation one (§65.9). 15 red on
+`origin/main`'s own build, 0 here.
+
+### 324.2 · The history check had one good day in it
+
+`checks/history-page.py` was **10 red**, all in its §2 and §3, and the first
+failure printed no value at all — because `ck()` prints its detail only when it
+is truthy and the detail was `len(rows)`, which was **0**. *A count of nothing
+is the one failure a check reports as bare.*
+
+The cause: its seven log entries are stamped `2026-09-03T05:16`, its stub
+empties anything asked for after `2026-09-03T06:00`, and **the page's default
+window is TODAY**. So it passed on the day it was written and has been red
+every day since — nine days, read at §316.5 as a product fault worth recording
+rather than as a clock. Everything from §4 on passed throughout, because the
+check picks *All time* at the end of §3 and the rows come back.
+
+**A FIXTURE THAT DEPENDS ON THE WALL CLOCK IS A CHECK WITH ONE GOOD DAY IN
+IT.** The stamps and the cut-off are derived from the same `TODAY` now, so what
+is asserted is the RELATIONSHIP — the entries inside the default window, the
+cut-off after them — rather than two literals that agreed once. The cut-off is
+KEPT rather than dropped: it is what would fail loudly if the page ever asked
+for a window later than the rows it is drawing.
+
+### 324.3 · Seven server harnesses have not been runnable since §313
+
+Diagnosed, **not fixed**, and the diagnosis is worth more than a partial fix
+would have been. `scripts/test-history-read.js`, `test-safety-peek.js`,
+`test-ask.js`, `test-chat-chase.js`, `test-concurrent-saves.js`,
+`test-mail-send.js` and `test-video-endpoint.js` all drive `api/state.js`
+against a real Postgres, and on a virgin database every one of them now dies.
+**Three layers, found by pushing through each in turn:**
+
+1. `relation "platform.sessions" does not exist` — §313 moved sessions out of
+   the client's schema into `platform`, and these harnesses bootstrap the
+   CLIENT only;
+2. past that, `{"ok":false,"error":"That client is not available."}` — the
+   endpoint resolves a CLIENT from the request and falls back to `raya-trade`,
+   which is not in a registry nothing has written;
+3. past that, `{"ok":false,"auth":true,"error":"sign in required"}` — because
+   **identity is an email now** (§313.2) and `createSession(client, email)` is
+   being handed a person key, so the seat lookup finds nobody.
+
+**THE THIRD LAYER IS WHY THIS IS NOT A PATCH.** Making them run means giving
+each an account, a seat on a client and a session made from an address — which
+is exactly what `checks/fixture-platform.js` already builds, and what §313.37
+recorded as its unstated prerequisite. Porting seven harnesses to that fixture
+is a round, with a real question in it (*which client does a test session
+belong to*), and a branch on its way to a merge is the wrong place for it.
+
+A first patch WAS written and is **reverted**: `ensurePlatformReady` in all
+seven, which is correct and necessary and gets them exactly one layer further
+on, to a different error. *A change that moves a failure without removing it is
+a diagnostic wearing a fix's clothes* (§171), and seven files of it on a merge
+branch is churn. What ships instead is this section and one line in CLAUDE.md's
+command list, so the next person is told BEFORE they run it rather than by a
+stack trace — §313.37's own rule, which is where this was already written down
+once for one script.
+
+**AND NOTHING IN THE PRODUCT IS IMPLICATED**, which is the part to be clear
+about: `api/state.js` refusing a request that names no client and carries no
+seat is the boundary working. What stopped was the harnesses' ability to ask.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

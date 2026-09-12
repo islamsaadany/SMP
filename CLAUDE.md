@@ -8293,6 +8293,19 @@ python3 checks/history-page.py  # History (§262): the page in the rail for the 
                                 # group's fields and a capability's definition carry
                                 # before and after and go back
 node scripts/test-history-read.js # ...and the server half on a real Postgres: real saves
+                                # NEEDS A REHEARSAL DATABASE (§324.3), and so do
+                                # test-safety-peek, test-ask, test-chat-chase,
+                                # test-concurrent-saves, test-mail-send and
+                                # test-video-endpoint: since §313 a session is an
+                                # ACCOUNT's (an email, in `platform.sessions`) and
+                                # every request names a CLIENT, so on a virgin
+                                # database these die three ways in a row —
+                                # `relation "platform.sessions" does not exist`,
+                                # then *"That client is not available."*, then
+                                # *"sign in required"*. Prepare the world the way
+                                # `checks/fixture-platform.js` does first. Nothing
+                                # in the product is implicated; what stopped is the
+                                # harnesses' ability to ask
                                 # by three people, every filter, the cap, a custodian's own
                                 # place allowed and another refused, no session refused
 python3 checks/safety-banners.py # the page warns BEFORE a save can be lost (§258):
@@ -8806,7 +8819,48 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;323: at its offset is not pinned.**
+*Last Updated: 2026-09-12 &mdash; **&sect;324: three checks that had stopped
+checking.** Running the WHOLE suite after the merge rather than the files that
+were edited (&sect;214) turned up three reds, none of them this branch's &mdash;
+all three reproduced on a build made from `origin/main`'s own sources first
+(&sect;303). **THE TOUR POINTED AT A CONTROL THAT HAD MOVED** (15 red, one step,
+five viewer-and-place pairs): &sect;275 took the Performance page's controls out
+of the page body and hung them on the TAB ROW, and the step still named
+`.pageact` and `.bands-act` inside `#panel` &mdash; so it lit nothing, shade with
+no hole. **&sect;51.11 from the PRODUCT's side**, and a grep would not have found
+it: `.pageact` is alive and well as the TEMPLE's edit row, so the class exists,
+on a page this step never opens; `.bands-act` was the one that had gone, to a
+stylesheet with no markup left, which is why it is DELETED with this
+(&sect;24) &mdash; *a rule nobody wears is a rule the next reader takes for
+load-bearing, and this time one did*. **THE HISTORY CHECK HAD ONE GOOD DAY IN
+IT** (10 red): its seven log entries are stamped 2026-09-03 and the page's
+default window is TODAY, so it passed the day it was written and has been red
+every day since &mdash; read at &sect;316.5 as a product fault worth recording
+rather than as a clock. Its first failure printed NO VALUE, because `ck()`
+prints its detail only when truthy and the detail was a count of **0**: *a count
+of nothing is the one failure a check reports as bare.* The stamps and the stub's
+cut-off derive from one `TODAY` now, so the RELATIONSHIP is asserted rather than
+two literals that agreed once; the cut-off is KEPT, being what fails loudly if
+the page ever asks for a window later than the rows it draws. **AND SEVEN SERVER
+HARNESSES HAVE NOT BEEN RUNNABLE SINCE &sect;313** &mdash; diagnosed and
+deliberately NOT fixed: they die three layers deep (`platform.sessions` missing,
+then *"That client is not available."*, then *"sign in required"*, because
+identity is an EMAIL now and they hand `createSession` a person key), so making
+them run means giving each an account, a seat and a session from an address
+&mdash; which is what `checks/fixture-platform.js` already builds and what
+&sect;313.37 recorded as its unstated prerequisite. **A first patch was written
+and REVERTED**: `ensurePlatformReady` in all seven is correct, necessary, and
+gets them exactly one layer on to a different error &mdash; *a change that moves
+a failure without removing it is a diagnostic wearing a fix's clothes*
+(&sect;171), and seven files of it on a merge branch is churn. What ships is the
+record and one line in the command list, so the next person is told before they
+run it rather than by a stack trace. **Nothing in the product is implicated**:
+`api/state.js` refusing a request that names no client and carries no seat is
+the boundary working. `tour` 15 &rarr; 0, `history-page` 10 &rarr; 0,
+`table-scroll` green over `file://` (its 4px is a SERVED deployment's own
+control, &sect;316.5); `qa.py` ERRORS none.*
+
+*Earlier the same day: **&sect;323: at its offset is not pinned.**
 Found by running the suite after the merge, and live for as long as the fill has
 existed: `checks/band-corner.py` is **six red on `origin/main`'s own build**,
 reproduced in a worktree before anything here was blamed (&sect;303), and

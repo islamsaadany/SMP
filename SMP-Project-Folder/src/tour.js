@@ -294,7 +294,22 @@ var TOUR = (function(){
             (isFnPlace(at) ? "function" : "unit") + "."; } },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel .pageact .dlmenu, #panel .bands-act .dlmenu"],
+          /* THE CONTROL MOVED AND THE STEP DID NOT (§324). §275 took the
+             Performance page's controls out of the page body and hung them on
+             the TAB ROW through `perfActs()` → `REPORT_CHROME` → `.tabacts`,
+             so this step lit NOTHING for five of the stories'
+             viewer-and-place pairs: shade with no hole, and a card pointing at
+             a hole that is not there. §51.11 from the PRODUCT's side, failing
+             in the safe-looking direction, which is why four versions of green
+             sweeps walked past it.
+             AND A GREP FOR THE CLASS WOULD NOT HAVE FOUND IT: `.pageact` is
+             alive and well — it is the TEMPLE's edit row (§46) — so the class
+             exists, on a page this step never opens. `.bands-act` was the one
+             that had gone, and it had gone to a stylesheet with no markup
+             left, which is why it is deleted with this (§24).
+             `:not(.bandsmenu)` because the row carries two dropdowns and this
+             step is about the Presentation one (§65.9). */
+          targets:["#subtabs .tabacts .dlmenu:not(.bandsmenu)"],
           title:function(at){ return isFnPlace(at) ? "The function's story, as slides"
                                                   : "The unit's story, as slides"; },
           body:"<b>Presentation</b> turns this page into the review deck — <b>Present</b> " +
@@ -394,7 +409,22 @@ var TOUR = (function(){
                "sits with you and your custodian." },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel .pageact .dlmenu, #panel .bands-act .dlmenu"],
+          /* THE CONTROL MOVED AND THE STEP DID NOT (§324). §275 took the
+             Performance page's controls out of the page body and hung them on
+             the TAB ROW through `perfActs()` → `REPORT_CHROME` → `.tabacts`,
+             so this step lit NOTHING for five of the stories'
+             viewer-and-place pairs: shade with no hole, and a card pointing at
+             a hole that is not there. §51.11 from the PRODUCT's side, failing
+             in the safe-looking direction, which is why four versions of green
+             sweeps walked past it.
+             AND A GREP FOR THE CLASS WOULD NOT HAVE FOUND IT: `.pageact` is
+             alive and well — it is the TEMPLE's edit row (§46) — so the class
+             exists, on a page this step never opens. `.bands-act` was the one
+             that had gone, and it had gone to a stylesheet with no markup
+             left, which is why it is deleted with this (§24).
+             `:not(.bandsmenu)` because the row carries two dropdowns and this
+             step is about the Presentation one (§65.9). */
+          targets:["#subtabs .tabacts .dlmenu:not(.bandsmenu)"],
           title:"Your story, as slides",
           body:"<b>Presentation</b> turns this page into the review deck — <b>Present</b> " +
                "plays it full-screen, and <b>Manage slides</b> lets you arrange it first. " +

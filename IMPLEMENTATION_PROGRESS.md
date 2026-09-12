@@ -54,7 +54,43 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§323 — at its offset is not pinned — built on the branch,
+**Latest version:** **§324 — three checks that had stopped checking — built on
+the branch, not merged.**
+
+Running the whole suite after the merge, rather than the files that were edited,
+turned up three reds. None of them was this branch's: all three reproduce on a
+build made from `origin/main`'s own sources.
+
+**The tour pointed at a control that had moved** (15 red). §275 took the
+Performance page's controls out of the page body and onto the tab row, and the
+slides step still named the old place — so for five viewer-and-place pairs it
+shaded the page and cut no hole in it. A grep would not have found it: the class
+it named still exists, on a page that step never opens. The one that had really
+gone survived as a stylesheet rule with no markup left, and is deleted with this.
+
+**The history check had one good day in it** (10 red). Its log entries are
+stamped 3 September and the page's default window is *today*, so it passed on
+the day it was written and has been red every day since — read nine days ago as
+a product fault worth recording rather than as a clock. The dates derive from
+today now, so what is asserted is the relationship rather than two numbers that
+agreed once.
+
+**And seven server harnesses have not been runnable since the multi-client
+split** — diagnosed, deliberately not fixed. They die three layers deep, and the
+third is that identity is an email now, so making them run means giving each an
+account, a seat and a session from an address: a round of its own, with a real
+question in it. A first patch was written and reverted, because a change that
+moves a failure without removing it is a diagnostic wearing a fix's clothes.
+What ships is the record and a line in the command list, so the next person is
+told before they run it rather than by a stack trace. Nothing in the product is
+implicated.
+
+**Verified.** `tour` 15 → 0 · `history-page` 10 → 0 · `table-scroll` green ·
+`qa.py` ERRORS none.
+
+---
+
+**Before it:** **§323 — at its offset is not pinned — built on the branch,
 not merged.**
 
 Found by running the suite after the merge, and live for as long as the fill has

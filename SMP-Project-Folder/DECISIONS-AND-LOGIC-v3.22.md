@@ -6394,6 +6394,30 @@ has ever been in front of a client — which is what this sweep is for.
   copy is brought up to the build on the BRANCH rather than at the merge, since
   that is the rule the repository already states.
 
+- **§330.11 · A code follows its holder, and §321's check was agreeing with
+  itself about it.** Found by the full sweep, not by reading:
+  `capability-remove.py` went **1 red** on *"Marketing's project codes read
+  before the move"*, answering `{}`. Two causes, and the second is the one
+  worth the space. **Its fixture drew from `FUNCTIONS[fk].projects`**, which
+  stopped being the whole of what a function holds the moment §330 took
+  capabilities off `fnHolders()` — so on the finished demo, where Marketing
+  owns two of its three projects and a capability holds the third, it built one
+  box of two and one of NOTHING and then measured a capability with no work in
+  it (§214.3, eighth time; the pool is gathered from every holder now, BEFORE
+  the line that empties the list). **And both sides of its central assertion
+  read `fnProjects()`**, which for a capability's rows answers an empty map —
+  so *"AND EVERY CODE IS WHAT IT WAS"* was comparing `{}` with `{}` and passing
+  for the wrong reason (§113.8), on the one claim §330 deliberately REVERSES:
+  a code is a position in its HOLDER now, so a project that changes holder
+  changes code, which is this section's own *"FIN02 becoming PM01 is the code
+  telling the truth"* and is what Islam took with the promote control in front
+  of him. **REWRITTEN, NEVER LOOSENED** (§218) into the pair that is true and
+  falsifiable: the destination's codes are its own run, 01 upwards under one
+  prefix derived from the product rather than typed, and a moved project reads
+  a NEW code while its id is unmoved (§232). **2 red** with the pre-§330 rule
+  put back from the SOURCES (§276), printing three empty codes and a moved
+  project reading what it read before.
+
 ### What the checks found, and what had to be rewritten rather than loosened
 
 `checks/capability-entry.py` is new and 43/0 — the demo's one capability, the

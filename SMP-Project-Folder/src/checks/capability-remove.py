@@ -63,10 +63,27 @@ BOXES = """() => {
      already owns and the PRODUCT decides what to draw over them and what
      Remove does with them. Re-made after every reload, or the sections that
      put the state back measure a page holding nothing. */
+  /* THE POOL IS EVERY PROJECT THE FUNCTION HOLDS, not the array on the
+     function (§330). Stage 2 took capabilities off `fnHolders`, so a function
+     that holds one has projects in two places and `f.projects` stopped being
+     the whole of what it owns — the fixture drew from that array alone, and on
+     the finished demo Marketing owns two of its three, so it built one box of
+     two and one of NOTHING and the section measured a capability with no work
+     in it. Gathered BEFORE the list is cleared, or cap6's own project is
+     thrown away by the line that empties it. */
+  const pool = {};
+  ["marketing", "finance", "smo"].forEach((fk) => {
+    let ps = ((FUNCTIONS[fk] || {}).projects || []).slice();
+    (GROUP.capabilities || []).forEach((c) => {
+      if (c && c.fn === fk) ps = ps.concat(c.projects || []);
+    });
+    pool[fk] = ps;
+    if (FUNCTIONS[fk]) FUNCTIONS[fk].projects = [];
+  });
   GROUP.capabilities.length = 0;
   const wrap = (id, fk, name, take) => {
     const f = FUNCTIONS[fk];
-    const ps = (f.projects || []).splice(0, take);
+    const ps = (pool[fk] || []).splice(0, take);
     ps.forEach(p => { p.capId = id; });
     GROUP.capabilities.push({ id: id, fn: fk, name: name,
       def: f.def || '', keyObjectives: (f.keyObjectives || []).slice(),
@@ -117,12 +134,27 @@ with sync_playwright() as p:
     ck("Marketing carries two — the pair this file needs, made rather than waited for",
        isinstance(start, dict) and start.get("mkt") == ["cap4", "cap6"], start)
 
-    # the codes BEFORE, read off the product's own reader
+    # THE CODES BEFORE, READ PER HOLDER (§330). `fnProjects(fk)` is the
+    # FUNCTION's own list now — a capability is a destination with a code
+    # sequence of its own — so reading marketing's three through it answered
+    # an empty map, and the "every code is what it was" assertion below then
+    # compared {} with {} and passed for the wrong reason (§113.8). Asserted
+    # as an AGREEMENT with what the fixture distributed, never as a literal
+    # (§94.8), or the next move of the demo breaks it again (§214.3).
     codes0 = ev(pg, """() => {
       const o = {};
-      fnProjects('marketing').forEach(p => { o[p.id] = projCode('marketing', p); });
+      (GROUP.capabilities || []).forEach(c => {
+        if (c && c.fn === 'marketing')
+          (c.projects || []).forEach(p => { o[p.id] = projCode('cap:' + c.id, p); });
+      });
+      fnOwnProjects('marketing').forEach(p => { o[p.id] = projCode('marketing', p); });
       return o; }""", {})
-    ck("Marketing's project codes read before the move", len(codes0) == 3, codes0)
+    held0 = ev(pg, """() => (GROUP.capabilities || [])
+      .filter(c => c && c.fn === 'marketing')
+      .reduce((n, c) => n + (c.projects || []).length, 0)
+      + fnOwnProjects('marketing').length""", -1)
+    ck("Marketing's project codes read before the move, one per project it holds",
+       held0 > 0 and len(codes0) == held0, {"codes": codes0, "held": held0})
 
     try:
         pg.click('[data-caprm="cap4"]', timeout=3000); pg.wait_for_timeout(400)
@@ -199,8 +231,13 @@ with sync_playwright() as p:
     kept = ev(pg, """() => {
       const gone = !capById('cap4'), to = capById('cap6');
       const o = {};
-      fnProjects('marketing').forEach(p => { o[p.id] = projCode('marketing', p); });
+      (GROUP.capabilities || []).forEach(c => {
+        if (c && c.fn === 'marketing')
+          (c.projects || []).forEach(p => { o[p.id] = projCode('cap:' + c.id, p); });
+      });
+      fnOwnProjects('marketing').forEach(p => { o[p.id] = projCode('marketing', p); });
       return { gone: gone,
+               seq: to ? (to.projects||[]).map(p => projCode('cap:' + to.id, p)) : null,
                held: to ? (to.projects||[]).map(p => p.id) : null,
                capIds: to ? (to.projects||[]).map(p => p.capId) : null,
                codes: o,
@@ -215,8 +252,29 @@ with sync_playwright() as p:
     ck("...each moved project now names its new holder",
        kept.get("capIds") is not None and len(set(kept["capIds"])) == 1
        and kept["capIds"][0] == "cap6", kept)
-    ck("...AND EVERY CODE IS WHAT IT WAS (§310 — a code is a position)",
-       kept.get("codes") == codes0, {"was": codes0, "now": kept.get("codes")})
+    # REWRITTEN, NEVER LOOSENED (§218). §321 asserted *every code is what it
+    # was*, which was true while a code was a position across the whole
+    # FUNCTION — and §330 made a capability a holder with a sequence of its
+    # own, so a project that changes holder changes code, deliberately: that
+    # section's own words are "a code says WHERE a project lives, so FIN02
+    # becoming PM01 is the code telling the truth rather than a cost to hide",
+    # and Islam took it with the promote control in front of him. The old
+    # assertion did not go red on that — both sides read `fnProjects`, which
+    # answers an empty map for a capability's rows, so it compared {} with {}
+    # (§113.8). What is asserted now is the pair that is actually true and
+    # actually falsifiable: the IDS never move (above), and the codes are the
+    # DESTINATION's own run, derived from the product rather than typed.
+    seq = kept.get("seq") or []
+    pre = seq[0][:-2] if seq and len(seq[0]) > 2 else None
+    ck("...and the codes are the destination's own run, 01 upwards, one prefix",
+       bool(pre) and seq == [pre + ("%02d" % (i + 1)) for i in range(len(seq))],
+       {"seq": seq, "prefix": pre})
+    ck("...so a project that changed holder reads a new code (§330), ids unmoved",
+       bool(before.get("ids")) and all(
+         kept.get("codes", {}).get(i) not in (None, codes0.get(i))
+         for i in (before.get("ids") or [])),
+       {"was": {i: codes0.get(i) for i in (before.get("ids") or [])},
+        "now": {i: kept.get("codes", {}).get(i) for i in (before.get("ids") or [])}})
     ck("...the figures inside them survive",
        kept.get("figs") == before.get("figs"), {"was": before.get("figs"), "now": kept.get("figs")})
     ck("...and the grouping is archived, so the way back exists",

@@ -1,0 +1,337 @@
+<title>Capability ownership</title>
+<style>
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --good:#2E7D5B; --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --attn:#B8860B; --attn-bg:#F7EFD6; --attn-tx:#7A5D1C;
+    --bad:#B04434;  --bad-bg:#F7E3E0;  --bad-tx:#8C3327;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --navy:#0E1014; --navy-ink:#EAF0FA;
+      --gold:#D9B665; --gold-deep:#E6C65C;
+      --good:#5FB68C; --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --attn:#D9B23C; --attn-bg:#332C16; --attn-tx:#E8CA6A;
+      --bad:#D97066;  --bad-bg:#33201E;  --bad-tx:#E79A93;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C;
+    --good:#5FB68C; --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --attn:#D9B23C; --attn-bg:#332C16; --attn-tx:#E8CA6A;
+    --bad:#D97066;  --bad-bg:#33201E;  --bad-tx:#E79A93;
+  }
+
+  body{ background:var(--ground); color:var(--ink); font:15px/1.62 var(--sans);
+        padding-block:0 64px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 20px; }
+  .prose{ max-width:66ch; }
+
+  header.top{ background:var(--navy); color:var(--navy-ink); padding-block:30px 26px;
+              margin-bottom:34px; }
+  header.top .wrap{ display:flex; flex-wrap:wrap; gap:18px 30px; align-items:flex-end;
+                    justify-content:space-between; }
+  .eyebrow{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+            color:var(--gold); margin-bottom:10px; }
+  h1{ font:700 30px/1.15 var(--sans); margin:0; text-wrap:balance; letter-spacing:-.01em; }
+  header.top p{ margin:8px 0 0; color:#B7C4D8; font-size:14px; max-width:60ch; }
+  .stamp{ font:11px/1.5 var(--mono); color:#9AA6B8; text-align:right; }
+
+  section{ margin:0 0 42px; }
+  h2{ font:700 19px/1.3 var(--sans); margin:0 0 4px; letter-spacing:-.005em; }
+  h2 .n{ font:600 11px/1 var(--mono); color:var(--gold-deep); margin-right:9px;
+         vertical-align:2px; }
+  .lede{ color:var(--ink-2); margin:0 0 18px; }
+  p{ margin:0 0 12px; }
+  b,strong{ font-weight:650; }
+
+  .quote{ border-left:3px solid var(--gold); background:var(--surface);
+          padding:14px 18px; margin:0 0 18px; border-radius:0 8px 8px 0;
+          box-shadow:0 1px 0 var(--line); }
+  .quote p{ margin:0 0 8px; }
+  .quote p:last-child{ margin:0; }
+  .quote .who{ font:600 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+               color:var(--ink-3); margin-bottom:9px; }
+
+  .fig{ margin:22px 0 0; }
+  .fig + .fig{ margin-top:26px; }
+  .figlab{ display:flex; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .figlab .k{ font:600 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; }
+  .k.today{ color:var(--ink-3); }
+  .k.prop{ color:var(--gold-deep); }
+  .figlab .note{ font-size:13px; color:var(--ink-3); }
+  .shot{ border:1px solid var(--line); border-radius:8px; overflow:hidden;
+         background:var(--surface); }
+  .shot img{ display:block; width:100%; height:auto; }
+  .shot.scroll{ overflow-x:auto; }
+
+  table.facts{ width:100%; border-collapse:collapse; font-size:14px;
+               background:var(--surface); border:1px solid var(--line);
+               border-radius:8px; overflow:hidden; }
+  table.facts th, table.facts td{ text-align:left; padding:9px 13px;
+                                  border-bottom:1px solid var(--line-soft);
+                                  vertical-align:top; }
+  table.facts thead th{ background:var(--navy); color:var(--navy-ink);
+                        font:600 10.5px/1.4 var(--sans); letter-spacing:.1em;
+                        text-transform:uppercase; border-bottom:0; }
+  table.facts tbody tr:last-child td{ border-bottom:0; }
+  table.facts tbody tr:nth-child(even){ background:var(--surface-2); }
+  table.facts code{ font:12.5px/1.5 var(--mono); color:var(--ink-2); }
+  .yes{ color:var(--good-tx); font-weight:650; }
+  .chg{ color:var(--gold-deep); font-weight:650; }
+  .tblbox{ overflow-x:auto; }
+
+  .num{ display:flex; flex-wrap:wrap; gap:12px; margin:18px 0 0; padding:0; list-style:none; }
+  .num li{ flex:1 1 190px; background:var(--surface); border:1px solid var(--line);
+           border-radius:8px; padding:13px 15px; }
+  .num .v{ font:650 20px/1.2 var(--mono); letter-spacing:-.01em; }
+  .num .v small{ font:600 12px/1 var(--mono); color:var(--ink-3); }
+  .num .l{ font-size:13px; color:var(--ink-3); margin-top:4px; }
+
+  .call{ border-radius:8px; padding:15px 18px; margin:18px 0 0;
+         border:1px solid var(--line); background:var(--surface); }
+  .call.warn{ background:var(--attn-bg); border-color:var(--attn); }
+  .call.ask{ background:var(--good-bg); border-color:var(--good); }
+  .call .h{ font:650 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+            margin-bottom:9px; }
+  .call.warn .h{ color:var(--attn-tx); }
+  .call.ask .h{ color:var(--good-tx); }
+  .call p:last-child{ margin:0; }
+
+  ol.steps{ margin:16px 0 0; padding:0; list-style:none; counter-reset:s; }
+  ol.steps li{ counter-increment:s; position:relative; padding:0 0 14px 40px;
+               border-left:1px solid var(--line); margin-left:12px; }
+  ol.steps li:last-child{ border-left-color:transparent; padding-bottom:0; }
+  ol.steps li::before{ content:counter(s); position:absolute; left:-12px; top:0;
+    width:24px; height:24px; border-radius:50%; background:var(--surface);
+    border:1px solid var(--line); color:var(--ink-3);
+    font:650 11px/22px var(--mono); text-align:center; }
+  ol.steps b{ display:block; }
+  ol.steps span{ color:var(--ink-2); font-size:14px; }
+
+  hr.rule{ border:0; border-top:1px solid var(--line); margin:0 0 34px; }
+  .foot{ color:var(--ink-3); font-size:13px; }
+  @media (max-width:620px){ h1{ font-size:25px; } .stamp{ text-align:left; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Design proposal &middot; for sign-off</div>
+      <h1>A capability is owned like a unit</h1>
+      <p>An owner and a strategy custodian on the capability itself, and the plan
+         builder able to build one. Drawn out of the running platform.</p>
+    </div>
+    <div class="stamp">12 Sep 2026<br>branch: inspiring-lamport<br>nothing built yet</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2><span class="n">01</span>What you asked for</h2>
+    <div class="quote prose">
+      <div class="who">Islam</div>
+      <p>“yes plan builder should be able to build a capability”</p>
+      <p>“a capability has it's ownership structure and if someone is set on a
+         capability with the new concept of it the person shall see the capability”</p>
+      <p>“The capability is owned like a unit it has an owner and custodian.”</p>
+    </div>
+    <p class="prose">A business unit has two named people: an owner and a strategy
+       custodian. A capability has neither — it borrows whoever runs the function
+       that holds it. This gives a capability its own two, and lets somebody build
+       one from scratch.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">02</span>Most of it is already there</h2>
+    <p class="lede prose">This is small, and it is worth showing why before showing
+       the pictures. Almost every piece exists and is pointed the right way.</p>
+    <div class="tblbox">
+      <table class="facts">
+        <thead><tr><th>The piece</th><th>Today</th><th>What changes</th></tr></thead>
+        <tbody>
+          <tr><td>The picker that names somebody</td>
+              <td>One picker serves units and functions</td>
+              <td class="yes">Nothing — it already takes a capability’s address</td></tr>
+          <tr><td>Naming the place on screen</td>
+              <td>A capability already has a name everywhere</td>
+              <td class="yes">Nothing</td></tr>
+          <tr><td>Which column on Roles &amp; access judges it</td>
+              <td>The supporting-function column</td>
+              <td class="yes">Nothing — no new column, nobody’s rights move</td></tr>
+          <tr><td>Where the two names are kept</td>
+              <td>A unit keeps its pair; a capability keeps none</td>
+              <td class="chg">The capability row keeps its own pair — no database change</td></tr>
+          <tr><td>Working out what somebody holds</td>
+              <td>Reads the units and the functions</td>
+              <td class="chg">Reads the capabilities too</td></tr>
+          <tr><td>What a person may open</td>
+              <td>A capability hands the question to its function</td>
+              <td class="chg">Its own two people answer first, the function still answers after</td></tr>
+          <tr><td>The Capabilities page</td>
+              <td>Shows the function’s head, read only</td>
+              <td class="chg">Shows the capability’s own owner and custodian, settable</td></tr>
+          <tr><td>The plan builder</td>
+              <td>Business units and supporting functions</td>
+              <td class="chg">Capabilities as a third kind</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">03</span>Setup &rsaquo; Capabilities</h2>
+    <p class="lede prose">The <b>Head</b> column today is borrowed — it prints whoever
+       runs the function, and there is no way to change it here. It becomes the
+       capability’s own <b>Owner</b>, with a <b>Custodian</b> beside it. Both are the
+       same two words a business unit uses, set with the same control.</p>
+
+    <div class="fig">
+      <div class="figlab"><span class="k today">Today</span>
+        <span class="note">Head is the function’s, and read only</span></div>
+      <div class="shot scroll"><img src="caps-today.png" alt="The Capabilities table today"></div>
+    </div>
+
+    <div class="fig">
+      <div class="figlab"><span class="k prop">Proposed</span>
+        <span class="note">Owner and Custodian, the capability’s own</span></div>
+      <div class="shot scroll"><img src="caps-proposed.png" alt="The Capabilities table with an owner and a custodian"></div>
+    </div>
+
+    <div class="fig">
+      <div class="figlab"><span class="k prop">Proposed, with a row open</span>
+        <span class="note">Both open the platform’s own people picker</span></div>
+      <div class="shot scroll"><img src="caps-proposed-open.png" alt="A capability row open, showing the two people pickers"></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">04</span>Building a plan</h2>
+    <p class="lede prose">The builder asks whose plan this is and offers two kinds.
+       A capability now has its own pages, so it is a third kind — and it says who
+       holds it and how it plans, the way a function already says how it plans.</p>
+
+    <div class="fig">
+      <div class="figlab"><span class="k today">Today</span>
+        <span class="note">Two kinds; a capability cannot be built</span></div>
+      <div class="shot"><img src="builder-today.png" alt="The plan builder today, offering business units and supporting functions"></div>
+    </div>
+
+    <div class="fig">
+      <div class="figlab"><span class="k prop">Proposed</span>
+        <span class="note">A third kind, in the same shape</span></div>
+      <div class="shot"><img src="builder-proposed.png" alt="The plan builder with capabilities as a third kind"></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">05</span>What it costs, measured</h2>
+    <p class="lede prose">A new column usually costs the others their width. Here it
+       costs nothing, and the reason is a small fault on that page that this pays
+       for on the way past.</p>
+
+    <ul class="num">
+      <li><div class="v">1165<small> / 1165px</small></div>
+          <div class="l">The table still fits its pane exactly. Nothing scrolls sideways.</div></li>
+      <li><div class="v">136<small>px</small></div>
+          <div class="l">Every content column, before and after. None of them narrows.</div></li>
+      <li><div class="v">175 &rarr; 38<small>px</small></div>
+          <div class="l">The <code>#</code> column, which holds one digit. That is what pays for the new column.</div></li>
+      <li><div class="v">0</div>
+          <div class="l">Database changes. The two names ride a column the table already has.</div></li>
+    </ul>
+
+    <div class="call warn">
+      <div class="h">Two things found by looking, not by measuring</div>
+      <p>The <code>#</code> column is 175px wide on this page and 38px on the
+         Functions page next door, which already pins it. Nobody had noticed,
+         because until now there was nothing competing for the room.</p>
+      <p>Narrowing it alone paints the name column on top of its neighbour — the
+         second column is frozen at an offset written as the old width. Two lines,
+         not one. Both are in the picture above; neither was in the first drawing.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">06</span>The one thing I need you to confirm</h2>
+    <p class="prose">Naming an owner on a capability must <b>add</b> to who can reach
+       it, never replace. A unit’s owner does not lock the group out of their unit,
+       and “owned like a unit” reads the same way here: the function’s head and
+       custodian keep everything they have today, and the capability’s own two are
+       added beside them.</p>
+    <div class="call ask">
+      <div class="h">If you meant the other way</div>
+      <p>Say so and I will build it instead — but the cost is real: the moment one
+         capability is given an owner, the person running the function is locked out
+         of it, and nothing on the screen would say why.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">07</span>The platform currently says the opposite</h2>
+    <p class="prose">Two places — the note under this very table, and the knowledge
+       base — say a custodian is named after the function and
+       <b>never after a capability</b>, and give the reason: a function may hold
+       several, so naming somebody after one breaks when a second arrives.</p>
+    <p class="prose">That was true when a capability had no identity of its own. It
+       has one now — its own pages, its own row on the cycle board — so a function
+       with two capabilities gets two custodians, which is finer rather than broken.
+       Both sentences get corrected in the same change, or the product goes on
+       telling people the opposite of what it does.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">08</span>What I would build, in order</h2>
+    <ol class="steps">
+      <li><b>The two names on the capability</b>
+          <span>Kept on the capability’s own row, the way a unit keeps its pair.
+                Proved on a real database before anything says “no migration”.</span></li>
+      <li><b>Who holds what</b>
+          <span>The one place that works out a person’s roles learns to read the
+                capabilities, so both screens and the server answer together.</span></li>
+      <li><b>What they can reach</b>
+          <span>Their own capability first, the holding function still answering
+                after. Both directions tested: allowed and refused.</span></li>
+      <li><b>The Capabilities page</b>
+          <span>The two columns above, the <code>#</code> column pinned, the frozen column’s
+                offset moved with it.</span></li>
+      <li><b>The builder’s third kind</b>
+          <span>Capabilities in the chooser, and a new one can be made there.</span></li>
+      <li><b>The two sentences corrected</b>
+          <span>The page note and the knowledge base, in the same change.</span></li>
+      <li><b>A check that fails first</b>
+          <span>Run against today’s build to watch it go red before it is trusted.</span></li>
+    </ol>
+    <p class="foot" style="margin-top:22px">Nothing above is built. Every picture is
+       the real platform with the proposal drawn into it — same build, both sides.</p>
+  </section>
+
+</div>

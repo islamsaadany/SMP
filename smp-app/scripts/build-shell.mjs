@@ -21,7 +21,7 @@
    with no hash and no unsafe-inline (§238's net, tighter).
 
      node scripts/build-shell.mjs */
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -85,4 +85,5 @@ parts.push("/* platform.html (inline) */\n" + pm[1]);
 /* THE PAGE HAS TO PARSE (§69.22): every script is run through new Function,
    which parses without executing — build.py's own refusal. */
 for (const p of parts) { try { new Function(p); } catch (e) { throw new Error("build-shell: a script does not parse — " + p.slice(0, 40) + ": " + e.message); } }
-console.log("wrote public/shell.js —", parts.length, "scripts,", parts.reduce((n, p) => n + p.length, 0), "bytes; shell/body.html", body.length, "bytes");
+console.log("wrote public/shell.js —", parts.length, "scripts,", statSync(join(here, "..", "public", "shell.js")).size,
+            "bytes; shell/body.html", statSync(join(here, "..", "shell", "body.html")).size, "bytes");

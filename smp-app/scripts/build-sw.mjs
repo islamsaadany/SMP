@@ -44,7 +44,7 @@
 
      node scripts/build-sw.mjs        (re-run if ../sw.js changes)
 */
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -101,4 +101,4 @@ const head =
 mkdirSync(join(here, "..", "public"), { recursive: true });
 const out = join(here, "..", "public", "sw.js");
 writeFileSync(out, head + carried);
-console.log("wrote public/sw.js —", (head + carried).length, "bytes;", carried.split("\n").length, "lines carried verbatim from sw.js, the caching half dropped");
+console.log("wrote public/sw.js —", statSync(out).size, "bytes;", carried.split("\n").length, "lines carried verbatim from sw.js, the caching half dropped");

@@ -57,12 +57,20 @@ def ck(w, ok, x=""):
 
 def go_project(pg):
     """The one walk to a capability's Projects pane."""
-    # §330: the navigation switch has a THIRD side once a capability exists, so pressing the control no longer means "go to the other one" — press the side you want. `[data-fold="fns"]` is absent exactly when Functions is already lit, which is why the press is guarded rather than asserted.
-    pg.evaluate("()=>{const b = document.querySelector('#units [data-fold="fns"]'); if (b) b.click();}"); pg.wait_for_timeout(260)
+    side(pg, 'fns'); pg.wait_for_timeout(260)
     pg.click('[data-u="fn:%s"]' % FN); pg.wait_for_timeout(360)
     pg.click('[data-s="fnstrat"]'); pg.wait_for_timeout(260)
     pg.click('[data-sub2="proj"]'); pg.wait_for_timeout(560)
 
+
+
+def side(pg, s):
+    """§330.17: press the SIDE you want. The switch is two segments on a
+       tenant with no capability and THREE once there is one, and
+       `[data-fold]` is absent exactly when that side is already lit."""
+    b = pg.query_selector('#units [data-fold="%s"]' % s)
+    if b:
+        b.click(); pg.wait_for_timeout(260)
 
 with sync_playwright() as pw:
     b = pw.chromium.launch()

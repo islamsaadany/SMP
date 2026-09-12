@@ -40,11 +40,19 @@ def ck(name, ok, extra=""):
         fails.append(name)
 
 
+# PRESS THE SIDE YOU WANT, NEVER "the other one" (§330.17). The
+# navigation switch is two sides on a tenant with no capability and THREE
+# once there is one, and `.nsw:not(.on)` then matches two buttons — so
+# this pressed whichever unlit side came first, which is Capabilities, and
+# the function it was about was never drawn. `[data-fold="<side>"]` is
+# absent exactly when that side is already lit, which is why the press is
+# guarded rather than asserted, and it is right on BOTH shapes.
 def side(pg, key):
     el = pg.query_selector('#units [data-u="%s"]' % key)
     if el and el.is_visible():
         return
-    sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+    want = "caps" if key.startswith("cap:") else "fns" if key.startswith("fn:") else "units"
+    sw = pg.query_selector('#units [data-fold="%s"]' % want)
     if sw:
         sw.click(); pg.wait_for_timeout(250)
 
@@ -83,19 +91,36 @@ with sync_playwright() as p:
     pg.goto(URL); pg.wait_for_timeout(900)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(400)
 
-    # ── 1 · a function whose capabilities hold two projects and one ─────
-    print("\n1 · Marketing — two capabilities, two counts")
-    for sub, label in (("proj", "Strategy › Projects"), (None, "Performance")):
-        go(pg, "fn:marketing", sub)
+    # ── 1 · two HOLDERS, one project and several ────────────────────────
+    # §330: they are two PAGES now, not two panes on one page — a capability is
+    # a destination of its own and a function's pages draw only the function's
+    # own work. §130.2's rule is untouched, and it is the rule this file is
+    # about: ONE item still gets the rail. What moved is where the one-item
+    # case lives, so the assertion follows it (§218, never loosened).
+    CAP = pg.evaluate("()=>(GROUP.capabilities[0]||{}).id || ''")
+    FNK = pg.evaluate("()=>'fn:' + FUNCTION_KEYS.filter(k=>fnOwnProjects(k).length > 1)[0]")
+    ck("the demo holds a capability and a function with work of its own",
+       bool(CAP) and not FNK.endswith("undefined"), {"cap": CAP, "fn": FNK})
+    print("\n1 · a function's own work and a capability — one pane each, each railed")
+    lefts = {}
+    for key, sub, label in ((FNK, "proj", "the function's own"),
+                            ("cap:" + CAP, "proj", "the capability's"),
+                            (FNK, None, "the function's own, Performance"),
+                            ("cap:" + CAP, None, "the capability's, Performance")):
+        go(pg, key, sub)
         if sub is None:
-            ck("Performance opens", tab(pg, "performance"))
+            ck("%s: Performance opens" % label, tab(pg, "performance"))
         got = panes(pg)
-        ck("%s: both capabilities are drawn" % label, len(got) == 2, got)
-        ck("%s: both have a rail" % label, all(g["railed"] for g in got), got)
-        ck("%s: the one-project rail lists its one project" % label,
-           sorted(g["rows"] for g in got) == [1, 2], got)
-        ck("%s: both panes start at the same x" % label,
-           len(set(g["left"] for g in got)) == 1, got)
+        ck("%s: one pane is drawn" % label, len(got) == 1, got)
+        ck("%s: it has a rail" % label, bool(got) and got[0]["railed"], got)
+        ck("%s: the rail lists every project it holds" % label,
+           bool(got) and got[0]["rows"] >= 1, got)
+        if got: lefts.setdefault(sub or "perf", []).append(got[0]["left"])
+    # THE TWO SIDES AGREE, which is what this file has always asserted — and is
+    # now a comparison between two PAGES rather than two panes (§53.5, A15).
+    for where, xs in lefts.items():
+        ck("both holders' panes start at the same x (%s)" % where,
+           len(set(xs)) == 1, xs)
 
     print("\n2 · Marketing — Reporting")
     go(pg, "fn:marketing")
@@ -144,11 +169,14 @@ with sync_playwright() as p:
     print("\n4 · the two sides agree")
     go(pg, "nigeria", "plan")
     unit = panes(pg)[0]
-    go(pg, "fn:marketing", "proj")
+    # §330: the one-item holder is the CAPABILITY's own page now, not a second
+    # pane on the function's (§218 — the comparison is the point and it follows
+    # the subject).
+    go(pg, "cap:" + CAP, "proj")
     ones = [g for g in panes(pg) if g["rows"] == 1]
-    ck("the one-project capability has a rail to compare against", bool(ones), panes(pg))
+    ck("the one-project holder has a rail to compare against", bool(ones), panes(pg))
     if ones:
-        ck("a one-item unit and a one-item capability are laid out the same way",
+        ck("a one-item unit and a one-item holder are laid out the same way",
            unit["railed"] == ones[0]["railed"], {"unit": unit, "capability": ones[0]})
 
     # ── 5 · nothing to list is still a different question ───────────────

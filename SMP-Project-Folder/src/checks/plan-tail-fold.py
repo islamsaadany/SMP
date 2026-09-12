@@ -155,7 +155,9 @@ STORED = """(k) => {
 def open_plan(pg, kind, key):
     """Land on a subject's plan with the pen open, or say so."""
     if kind == "fn":
-        sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+        # §330.17: press the SIDE, never "the other one" — three sides once a
+        # capability exists, and `.nsw:not(.on)` then matches two.
+        sw = pg.query_selector('#units [data-fold="fns"]')
         if sw and sw.is_visible():
             sw.click(); pg.wait_for_timeout(420)
     sel = '#units [data-u="%s"]' % (("fn:" + key) if kind == "fn" else key)

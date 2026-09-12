@@ -38,22 +38,25 @@ def ck(name, ok, extra=""):
         fails.append(name)
 
 
-def show_units(pg):
-    el = pg.query_selector('#units [data-u="mobile"]')
-    if el and el.is_visible():
-        return
-    sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+# PRESS THE SIDE YOU WANT, NEVER "the other one" (§330.17). The
+# navigation switch is two sides on a tenant with no capability and THREE
+# once there is one, and `.nsw:not(.on)` then matches two buttons — so
+# this pressed whichever unlit side came first, which is Capabilities, and
+# the function it was about was never drawn. `[data-fold="<side>"]` is
+# absent exactly when that side is already lit, which is why the press is
+# guarded rather than asserted, and it is right on BOTH shapes.
+def side(pg, s):
+    sw = pg.query_selector('#units [data-fold="%s"]' % s)
     if sw:
         sw.click(); pg.wait_for_timeout(250)
+
+
+def show_units(pg):
+    side(pg, "units")
 
 
 def show_fns(pg):
-    el = pg.query_selector('#units [data-u="fn:marketing"]')
-    if el and el.is_visible():
-        return
-    sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
-    if sw:
-        sw.click(); pg.wait_for_timeout(250)
+    side(pg, "fns")
 
 
 def open_plan(pg):
@@ -293,7 +296,13 @@ with sync_playwright() as p:
         pass
 
     # ── 8 · the function's side: a project and its milestones ───────────
-    print("\n8 · a capability's projects")
+    # THE PAGE IT OPENS IS THE FUNCTION'S OWN (§322, §330). This navigated to
+    # `fn:marketing` and then read `GROUP.capabilities`, which was the same
+    # rows while a capability was drawn INSIDE the function's pages and stopped
+    # being them the day stage 2 gave it a page of its own — so the picker was
+    # driven on one project and the assertion read another (§214.3). A
+    # capability's own pickers are asserted in `capability-entry.py`.
+    print("\n8 · a function's own projects")
     try:
         show_fns(pg)
         pg.click('#units [data-u="fn:marketing"]'); pg.wait_for_timeout(400)
@@ -308,12 +317,12 @@ with sync_playwright() as p:
         ck("a project's owner is a list", f["front"] >= 1, f)
         ck("every milestone's owner is a list", f["ms"] >= 1, f)
         psel2 = ".pane .pfront select.ownersel"
-        pid = pg.evaluate("()=>{const c=GROUP.capabilities.find(c=>c.fn==='marketing');return c.projects[0].id;}")
+        pid = pg.evaluate("()=>fnOwnProjects('marketing')[0].id")
         press(pg, btn_for(pg, psel2), "the project owner picker")
         pg.keyboard.type("Dina"); pg.wait_for_timeout(250)
         pg.click(".sspop .ssrow:not([hidden])"); pg.wait_for_timeout(350)
         ck("picking a project's owner writes it",
-           pg.evaluate("(id)=>GROUP.capabilities.find(c=>c.fn==='marketing').projects.find(p=>p.id===id).owner", pid)
+           pg.evaluate("(id)=>fnOwnProjects('marketing').find(p=>p.id===id).owner", pid)
            == "Dina Shawky")
 
         # §227: COLLABORATORS BESIDE THE OWNER — the tactic's ticking list on
@@ -335,15 +344,15 @@ with sync_playwright() as p:
           const nm=r=>r.childNodes[0].textContent;
           rs[0].click(); rs[2].click(); return [nm(rs[0]), nm(rs[2])];}""")
         pg.wait_for_timeout(300)
-        mgot = pg.evaluate("""(id)=>{const c=GROUP.capabilities.find(c=>c.fn==='marketing');
-          const p=c.projects.find(p=>p.id===id); return p.milestones[0].collaborators;}""", pid)
+        mgot = pg.evaluate("""(id)=>{const p=fnOwnProjects('marketing')
+          .find(p=>p.id===id); return p.milestones[0].collaborators;}""", pid)
         ck("two ticks write two milestone collaborators", mgot == mnames,
            {"ticked": mnames, "stored": mgot})
         pg.evaluate("()=>{const rs=[...document.querySelectorAll('.sspop .ssrow')];rs[0].click();rs[2].click();}")
         pg.wait_for_timeout(300)
         ck("unticking everything DELETES the milestone's key (§50.6)",
-           pg.evaluate("""(id)=>{const c=GROUP.capabilities.find(c=>c.fn==='marketing');
-             const p=c.projects.find(p=>p.id===id);
+           pg.evaluate("""(id)=>{const p=fnOwnProjects('marketing')
+             .find(p=>p.id===id);
              return 'collaborators' in p.milestones[0];}""", pid) is False)
         pg.keyboard.press("Escape"); pg.wait_for_timeout(250)
 

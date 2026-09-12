@@ -110,13 +110,19 @@ def side(pg, want):
     lit = pg.query_selector("#units .navswitch .nsw.on")
     if lit and want.lower() in (lit.text_content() or "").lower():
         return
-    other = pg.query_selector("#units .navswitch .nsw:not(.on)")
+    # §330.17: press the SIDE by name. With a capability in the tenant the
+    # switch has THREE and "the unlit one" is whichever comes first, which is
+    # Capabilities — so both destinations this walks went missing.
+    w = want.lower()
+    want = "units" if w.startswith("unit") else "caps" if w.startswith("cap") else "fns"
+    other = pg.query_selector('#units [data-fold="%s"]' % want)
     if other and other.is_visible():
         other.click(); pg.wait_for_timeout(430)
 
 
 def units(pg): side(pg, "Units")
 def fns(pg):   side(pg, "Functions")
+def caps(pg):  side(pg, "Capabilities")
 
 
 def dest(pg, key):
@@ -397,17 +403,30 @@ with sync_playwright() as pw:
     press(pg)
 
     # ── 2 · IT IS THE ONLY ONE, where there used to be several ────────
-    print("\n2 · a function with two projects carries one control, not two")
+    # §330: THE COUNT OF PANES IS NO LONGER THE POINT, because a capability is
+    # a page of its own and a function's Projects page draws one holder — so
+    # `panes >= 2`, which is how this file used to reach the "one control, not
+    # one per pane" case, describes a screen the product no longer draws
+    # (§214.3). What it was ever asserting is untouched and is asserted
+    # directly: **the control is on the section line and the page body carries
+    # none**, whatever is drawn below (§218, never loosened), on BOTH holders,
+    # which is the pair a projects function now has (§53.5, A15).
+    print("\n2 · one control, on the line, on both holders")
     fns(pg)
-    if dest(pg, "fn:marketing"):
+    CAP = pg.evaluate("()=>(GROUP.capabilities[0]||{}).id || ''")
+    for key, what in (("fn:marketing", "the function's own work"),
+                      ("cap:" + CAP, "the capability it holds")):
+        caps(pg) if key.startswith("cap:") else fns(pg)
+        if not dest(pg, key):
+            ck("%s is reachable" % what, False, key); continue
         tab(pg, "fnstrat"); sec(pg, "proj")
         d = pg.evaluate("""() => ({
           panes: document.querySelectorAll('#panel .pane').length,
           pens:  document.querySelectorAll('#panel .penbtn[data-page]').length,
           line:  document.querySelectorAll('#secrow-in .secpen').length })""")
-        ck("more than one project pane is on screen", d["panes"] >= 2, d)
-        ck("...and they carry no pen between them", d["pens"] == 0, d)
-        ck("...while the line carries exactly one", d["line"] == 1, d)
+        ck("%s: a project pane is on screen" % what, d["panes"] >= 1, d)
+        ck("%s: the page body carries no pen" % what, d["pens"] == 0, d)
+        ck("%s: the line carries exactly one" % what, d["line"] == 1, d)
 
     # ── 3 · THE MAP IS ONE MAP (§213, and what §268 corrected) ────────
     print("\n3 · a pillars function's Overview names the page it actually reads")

@@ -245,7 +245,8 @@ with sync_playwright() as p:
                         "localStorage.setItem('smp.tour.done','1')}catch(e){}")
     fpg.goto("file://" + str(SRC)); fpg.wait_for_timeout(1300)
     fpg.evaluate("var o=document.querySelector('.welcomeover'); if(o) o.remove();")
-    sw = fpg.query_selector("#units .navswitch .nsw:not(.on)")
+    # §330.17: press the SIDE, never "the other one".
+    sw = fpg.query_selector('#units [data-fold="fns"]')
     if sw: sw.click(); fpg.wait_for_timeout(300)
     pill = fpg.evaluate("()=>Object.keys(FUNCTIONS)"
                         ".filter(function(k){return FUNCTIONS[k].format==='pillars';})[0]")

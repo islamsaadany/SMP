@@ -161,7 +161,9 @@ with sync_playwright() as p:
         pg.select_option("#asWho", "smo"); pg.wait_for_timeout(400)
         el = pg.query_selector('#units [data-u="mobile"]')
         if not (el and el.is_visible()):
-            sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+            # §330.17: press the SIDE, never "the other one" — three sides once
+            # a capability exists, and `.nsw:not(.on)` then matches two.
+            sw = pg.query_selector('#units [data-fold="units"]')
             if sw:
                 sw.click(); pg.wait_for_timeout(250)
         pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(350)

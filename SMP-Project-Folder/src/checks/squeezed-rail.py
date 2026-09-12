@@ -74,7 +74,9 @@ def open_unit(pg):
 
 
 def open_fn(pg):
-    sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+    # §330.17: press the SIDE, never "the other one" (three sides once a
+    # capability exists, and `.nsw:not(.on)` then matches two).
+    sw = pg.query_selector('#units [data-fold="fns"]')
     if sw and sw.is_visible():
         sw.click(); pg.wait_for_timeout(430)
     el = pg.query_selector('#units [data-u="fn:finance"]')

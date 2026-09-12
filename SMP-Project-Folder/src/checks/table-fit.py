@@ -80,10 +80,12 @@ def go_unit(pg, key):
 
 
 def go_fn(pg, key):
-    # The switch is one segmented control (§47.5); its unlit half is the way
-    # across. Spelled the way qa.py spells it — a second spelling is how the
-    # two sides come to be walked differently (§51.11).
-    sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+    # §330.17: PRESS THE SIDE YOU WANT. The switch is two segments on a
+    # tenant with no capability and THREE once there is one, so "its unlit
+    # half" stopped being a way across and became whichever unlit side comes
+    # first — Capabilities. `[data-fold]` is absent exactly when that side is
+    # already lit, and is right on both shapes.
+    sw = pg.query_selector('#units [data-fold="fns"]')
     if sw and sw.is_visible():
         sw.click(); pg.wait_for_timeout(450)
     el = pg.query_selector('#units [data-u="fn:%s"]' % key)

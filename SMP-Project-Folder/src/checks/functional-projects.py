@@ -6,10 +6,16 @@ capability hidden in the functional plans is confusing for the whole
 structure"*, and of his own tenant, *"they caapbilities in raya trade are not
 capabilities they are just projecst under functions."*
 
-BOTH ENDS, EVERY TIME (§94.2). The demo still carries capabilities, so each
-section measures the function WITH its box and then again after the product's
-own dissolve — a build that deleted the band outright, or one that never drew
-it, satisfies exactly half of this file and fails the other.
+BOTH ENDS, EVERY TIME (§94.2) — and §330 MOVED WHICH TWO ENDS THEY ARE.
+Stage 1 measured the function with a box and again after the dissolve, and a
+box then drew a navy band over the function's own four pages. Stage 2 made a
+capability a DESTINATION of its own, so those pages draw the function's work
+and nothing else whatever boxes exist beside it. The assertions are inverted
+rather than dropped (§218): with a box made under Finance the function's pages
+are asserted UNTOUCHED and the box's own pages asserted to hold what left, and
+after the dissolve the rows are asserted home with their ids. A build that
+brought the band back fails the first half; one that lost the projects
+altogether fails the second.
 
 WHAT IS ASSERTED IS AGREEMENT, NEVER A LITERAL (§94.8): the Overview a
 function with no box draws is the one a function that plans in PILLARS already
@@ -104,45 +110,77 @@ def main():
           fin: (FUNCTIONS.finance.projects||[]).map(p=>p.id),
           mkt: (FUNCTIONS.marketing.projects||[]).map(p=>p.id),
           def: FUNCTIONS.finance.def || '',
-          kos: (FUNCTIONS.finance.keyObjectives||[]).map(m=>m.id)
+          kos: (FUNCTIONS.finance.keyObjectives||[]).map(m=>m.id),
+          finCodes: (FUNCTIONS.finance.projects||[])
+                      .map(p=>projCode('fn:finance', p)),
+          demo: (GROUP.capabilities||[]).map(c=>c.id)
         })""")
+        # THE FIGURES ARE READ BEFORE ANYTHING MOVES, so the assertion after the
+        # dissolve is about the rows this file moved rather than about whatever
+        # the demo happens to ship (§94.8).
+        figs_before = ev(pg, """()=>{const o={};
+          (FUNCTIONS.finance.projects||[]).forEach(p=>{(p.milestones||[]).forEach(m=>{
+            o[m.id]=(m.status||'')+'|'+(m.pct==null?'':m.pct);});});
+          return o;}""")
+        # §330: A PARTIAL WRAP, AND FROM THE END. Stage 1 took every project
+        # into the box, which left the function with nothing — so "the pages are
+        # untouched" would have been asserted over an empty page and passed on a
+        # build drawing nothing at all (§113.8). Taking ONE leaves the function
+        # holding work of its own beside a box holding work of its own, which is
+        # the shape stage 2 is about. From the END because the dissolve pushes
+        # what it moves onto the end of the function's list, so a round trip
+        # that takes from the front comes home in a different ORDER and section
+        # 9 would report a reordering as a loss.
         made = ev(pg, """() => {
           const wrap = (fk, name, take) => {
             const f = FUNCTIONS[fk];
             const id = 'probe-' + fk + '-' + (GROUP.capabilities.length + 1);
-            const ps = (f.projects || []).splice(0, take);
+            const ps = (f.projects || []).splice((f.projects || []).length - take, take);
             ps.forEach(p => { p.capId = id; });
             GROUP.capabilities.push({ id: id, fn: fk, name: name,
               def: f.def || '', keyObjectives: (f.keyObjectives || []).slice(),
               projects: ps });
             f.def = ''; f.keyObjectives = [];
-            return name;
+            return { id: id, name: name, fn: fk,
+                     projects: ps.map(p => p.id) };
           };
-          const out = [wrap('finance', 'Financial Infrastructure', 99),
-                       wrap('marketing', 'Brand Positioning', 2),
-                       wrap('marketing', 'Product Mindset', 99)];
+          const out = [wrap('finance', 'Financial Infrastructure', 1),
+                       wrap('marketing', 'Brand Positioning', 1)];
           paint();
           return out;
         }""")
-        ok(isinstance(made, list) and len(made) == 3, "three boxes made", made)
+        ok(isinstance(made, list) and len(made) == 2, "two boxes made", made)
+        MADE = [m["id"] for m in made] if isinstance(made, list) else []
+        BOXED = made[0]["projects"] if isinstance(made, list) and made else []
         st = ev(pg, "()=>({caps:GROUP.capabilities.length,"
                     " fin:capsOfFunction('finance').length,"
                     " mkt:capsOfFunction('marketing').length,"
+                    " finOwn:fnOwnProjects('finance').length,"
                     " pillars:fnPlansInPillars(FUNCTIONS.merchandising)})")
-        ok(st.get("caps", 0) > 0, "the worked example now holds capabilities", st)
-        ok(st.get("fin") == 1 and st.get("mkt") == 2,
-           "Finance carries one and Marketing two — one box and several", st)
+        ok(st.get("caps", 0) == len(start.get("demo") or []) + 2,
+           "the tenant now holds its own boxes and the two this file made", st)
+        ok(st.get("fin") == 1 and st.get("finOwn") == len(start.get("fin") or []) - 1,
+           "Finance carries ONE box and still owns the rest of its projects — "
+           "a function and a capability side by side, which is the shape", st)
         ok(st.get("pillars") is True, "and Merchandising plans in pillars, as the control", st)
-        # AND THE DEMO ITSELF HOLDS NONE (§329), asserted here rather than left
-        # as an absence somewhere else: it is the whole of what stage 1 promised
-        # and could not show, and a build that started shipping boxes again
-        # would satisfy every other assertion in this file.
-        ok(start.get("fin") and start.get("mkt"),
-           "…and before they were made the functions owned their projects "
-           "outright — the worked example carries no box", start)
+        # AND THE DEMO ITSELF HOLDS ONE (§329, §330). Stage 1 dissolved all
+        # eight; stage 2 kept exactly one as the real capability, so this is the
+        # number and not "none" — asserted here rather than left as an absence,
+        # because a build that started shipping boxes again would satisfy every
+        # other assertion in this file.
+        ok(len(start.get("demo") or []) == 1 and start.get("fin") and start.get("mkt"),
+           "…and before they were made the tenant held ONE box and the "
+           "functions owned their projects outright", start)
 
-        # ── 2 · WITH the box: the band is drawn on all four pages ─────────────
-        print("\n2 · with a box, the band is drawn — all four pages")
+        # ── 2 · WITH a box beside it, the FUNCTION's pages are its own ────────
+        # §330 INVERTS STAGE 1'S ASSERTION RATHER THAN DROPPING IT (§218). A box
+        # under Finance used to paint a navy band across these four pages and
+        # put its projects on them; it is a destination of its own now, so what
+        # must be true here is that the function's pages carry no band at all
+        # and still hold the function's OWN work. Both halves are asserted,
+        # because "no band" is an absence and an absence passes perfectly on a
+        # build that draws nothing (§113.8).
+        print("\n2 · with a box beside it, the function's four pages are its own")
         go_fn(pg, "finance")
         before = {}
         for tab, sec in [("fnstrat", "found"), ("fnstrat", "proj"),
@@ -151,16 +189,38 @@ def main():
                 ok(False, "reach %s/%s" % (tab, sec or "")); continue
             before[tab + "/" + (sec or "")] = ev(pg, SHAPE)
         for k, v in before.items():
-            ok(v.get("bands") == 1, "the band is drawn on " + k, v.get("bands"))
-        ok(before.get("fnstrat/found", {}).get("keys", [])[:2] == ["Capability", "Carried by"],
-           "and the Overview names the capability",
+            ok(v.get("bands") == 0, "no band on " + k + " — the box is a page "
+               "of its own now", v.get("bands"))
+        ok(before.get("fnstrat/found", {}).get("keys", [])[:2] == ["Function", "Led by"],
+           "and the Overview still names the FUNCTION, not the box",
            before.get("fnstrat/found", {}).get("keys"))
+        own_now = ev(pg, "()=>fnProjects('finance').map(p=>p.id)")
+        ok(own_now == [i for i in (start.get("fin") or []) if i not in BOXED],
+           "the function's page holds its own projects and not the boxed one",
+           [own_now, BOXED])
 
-        codes_before = ev(pg, "()=>fnProjects('finance').map(p=>projCode('finance',p))")
-        figs_before = ev(pg, """()=>{const o={};
-          fnProjects('finance').forEach(p=>{(p.milestones||[]).forEach(m=>{o[m.id]=(m.status||'')+'|'+(m.pct==null?'':m.pct);});});
-          return o;}""")
-        ids_before = ev(pg, "()=>fnProjects('finance').map(p=>p.id)")
+        # AND THE BOX HOLDS WHAT LEFT, on its own destination (§330). Without
+        # this the projects could have gone nowhere and every assertion above
+        # would still pass.
+        box = ev(pg, "(id)=>{const c = capById(id); return c ? "
+                     "{n:(c.projects||[]).length, ids:(c.projects||[]).map(p=>p.id)}"
+                     " : {none:true};}", MADE[0] if MADE else "")
+        ok(not box.get("none") and box.get("ids") == BOXED,
+           "and the box holds exactly what left the function", [box, BOXED])
+        # REACHED THROUGH THE NAVIGATION, never by reading the DOM while
+        # another side is lit: the destinations are drawn one side at a time,
+        # so asking for the button with Functions showing answers "not there"
+        # on a build that draws it perfectly (§51.11's shape, in a probe).
+        pg.evaluate("()=>{const b=document.querySelector('#units [data-fold=\"caps\"]');"
+                    " if (b) b.click();}")
+        pg.wait_for_timeout(260)
+        dest = ev(pg, "(id)=>!!document.querySelector('#units [data-u=\"cap:'+id+'\"]')",
+                  MADE[0] if MADE else "")
+        ok(dest is True, "…and is reachable as a destination of its own", dest)
+        go_fn(pg, "finance")
+
+        codes_before = start.get("finCodes")
+        ids_before = start.get("fin")
 
         # ── 3 · a PILLARS function's Overview, the shape to agree with ────────
         print("\n3 · what a function that plans in pillars already draws")
@@ -173,30 +233,43 @@ def main():
 
         # ── 4 · the dissolve, through the product's own control ───────────────
         print("\n4 · the dissolve — the product's own, never a hand-moved graph")
-        done = ev(pg, "()=>dissolveAllCapabilities().map(x=>x.name+'/'+x.projects)")
-        ok(isinstance(done, list) and len(done) == st.get("caps"),
-           "every box is dissolved", done)
+        # ONLY WHAT THIS FILE MADE (§330). `dissolveAllCapabilities()` is the
+        # one-off that moves a whole tenant, and running it here would take the
+        # demo's own capability with it — so section 9's round trip would report
+        # a box the worked example ships as a project the function gained.
+        # `dissolveCapability` is the same act one box at a time and is what
+        # that loop calls, so nothing about the machinery under test is dodged
+        # (§53.5); the whole-tenant door is asserted below on its own terms.
+        done = ev(pg, "(ids)=>ids.map(id=>{const c=capById(id);"
+                      " const n=c?(c.projects||[]).length:0;"
+                      " return dissolveCapability(id) ? (c.name+'/'+n) : null;})", MADE)
+        ok(isinstance(done, list) and len(done) == len(MADE)
+           and all(x for x in done), "every box this file made is dissolved", done)
         left = ev(pg, "()=>({caps:GROUP.capabilities.length,"
                       " fin:fnOwnProjects('finance').length,"
                       " mkt:fnOwnProjects('marketing').length,"
                       " arch:(ARCHIVES||[]).length})")
-        ok(left.get("caps") == 0, "no capability is left", left)
+        ok(left.get("caps") == len(start.get("demo") or []),
+           "the boxes this file made are gone and the demo's own is untouched",
+           [left, start.get("demo")])
         ok(left.get("fin") == len(ids_before or []),
            "Finance holds its projects directly", left)
-        ok(left.get("mkt") == 3,
-           "and two boxes on ONE function both land — the second does not "
-           "throw the first away", left)
-        ok(ev(pg, "()=>fnProjects('finance').map(p=>p.id)") == ids_before,
-           "every project keeps its id (§232, §316)")
-        ok(ev(pg, "()=>fnProjects('finance').map(p=>projCode('finance',p))") == codes_before,
+        ok(left.get("mkt") == len(start.get("mkt") or []),
+           "and Marketing's come home beside the ones it kept — the dissolve "
+           "pushes onto the list rather than replacing it", left)
+        ok(ev(pg, "()=>fnOwnProjects('finance').map(p=>p.id)") == ids_before,
+           "every project keeps its id (§232, §316)",
+           [ev(pg, "()=>fnOwnProjects('finance').map(p=>p.id)"), ids_before])
+        ok(ev(pg, "()=>fnOwnProjects('finance')"
+                  ".map(p=>projCode('fn:finance',p))") == codes_before,
            "and its CODE — the promise the dialog makes in words", codes_before)
         ok(ev(pg, """()=>{const o={};
-             fnProjects('finance').forEach(p=>{(p.milestones||[]).forEach(m=>{o[m.id]=(m.status||'')+'|'+(m.pct==null?'':m.pct);});});
+             fnOwnProjects('finance').forEach(p=>{(p.milestones||[]).forEach(m=>{o[m.id]=(m.status||'')+'|'+(m.pct==null?'':m.pct);});});
              return o;}""") == figs_before,
            "and every reported figure is still against the row it was entered on")
 
         # ── 5 · WITHOUT the box: no band anywhere, and the shared Overview ────
-        print("\n5 · with no box, the band is gone — all four pages")
+        print("\n5 · with the box gone, the work is on the function's own pages")
         ev(pg, "()=>paint()"); pg.wait_for_timeout(400)
         go_fn(pg, "finance")
         after = {}
@@ -291,8 +364,10 @@ def main():
           def: FUNCTIONS.finance.def || '',
           kos: (FUNCTIONS.finance.keyObjectives||[]).map(m=>m.id)
         })""")
-        ok(end == start, "every project, the definition and the objectives are "
-                         "back exactly where the demo ships them", [start, end])
+        ok(end.get("fin") == start.get("fin") and end.get("mkt") == start.get("mkt")
+           and end.get("def") == start.get("def") and end.get("kos") == start.get("kos"),
+           "every project, the definition and the objectives are "
+           "back exactly where the demo ships them", [start, end])
 
         b.close()
     ok(not errs, "no page error anywhere in the run", errs[:3])

@@ -187,7 +187,84 @@
     "note": "Standing"
    }
   ],
-  "capabilities": [],
+  "capabilities": [
+   {
+    "name": "Product Mindset",
+    "def": "Treat what we sell as a portfolio to be shaped, not a catalogue to be carried.",
+    "keyObjectives": [],
+    "projects": [
+     {
+      "name": "Portfolio review cadence",
+      "owner": "Tarek Nour",
+      "brief": "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
+      "stakeholders": [
+       "Marketing",
+       "Unit heads"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Review framework and evidence pack",
+        "due": "Mar 26",
+        "status": "done",
+        "id": "cap6-P1-D1"
+       },
+       {
+        "name": "Quarterly reviews held",
+        "due": "Feb 26",
+        "status": "wip",
+        "pct": 50,
+        "id": "cap6-P1-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Revenue from lines added in the last two years",
+        "dir": "≥",
+        "target": "25%",
+        "measureAt": "Q4 2026",
+        "actual": "11%",
+        "progress": 44,
+        "id": "cap6-P1-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Framework agreed",
+        "covers": "What evidence a line is judged on",
+        "owner": "Tarek Nour",
+        "finish": "April 2026",
+        "status": "done",
+        "id": "cap6-P1-M1"
+       },
+       {
+        "name": "First two reviews",
+        "covers": "Q2 and Q3 reviews held with decisions recorded",
+        "owner": "Tarek Nour",
+        "finish": "July 2026",
+        "status": "wip",
+        "pct": 25,
+        "id": "cap6-P1-M2"
+       },
+       {
+        "name": "Second-half reviews",
+        "covers": "Q4 review held",
+        "owner": "Tarek Nour",
+        "finish": "December 2026",
+        "status": "todo",
+        "id": "cap6-P1-M3"
+       }
+      ],
+      "id": "cap6-P1",
+      "capId": "cap6"
+     }
+    ],
+    "fn": "marketing",
+    "id": "cap6"
+   }
+  ],
   "portfolio": {
    "objectives": 66,
    "exec": 51
@@ -4477,73 +4554,6 @@
       }
      ],
      "id": "cap4-P2",
-     "capId": "fn:marketing"
-    },
-    {
-     "name": "Portfolio review cadence",
-     "owner": "Tarek Nour",
-     "brief": "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
-     "stakeholders": [
-      "Marketing",
-      "Unit heads"
-     ],
-     "timeline": "quarter",
-     "start": "Q1 2026",
-     "end": "Q4 2026",
-     "deliverables": [
-      {
-       "name": "Review framework and evidence pack",
-       "due": "Mar 26",
-       "status": "done",
-       "id": "cap6-P1-D1"
-      },
-      {
-       "name": "Quarterly reviews held",
-       "due": "Feb 26",
-       "status": "wip",
-       "pct": 50,
-       "id": "cap6-P1-D2"
-      }
-     ],
-     "outcomes": [
-      {
-       "name": "Revenue from lines added in the last two years",
-       "dir": "≥",
-       "target": "25%",
-       "measureAt": "Q4 2026",
-       "actual": "11%",
-       "progress": 44,
-       "id": "cap6-P1-O1"
-      }
-     ],
-     "milestones": [
-      {
-       "name": "Framework agreed",
-       "covers": "What evidence a line is judged on",
-       "owner": "Tarek Nour",
-       "finish": "April 2026",
-       "status": "done",
-       "id": "cap6-P1-M1"
-      },
-      {
-       "name": "First two reviews",
-       "covers": "Q2 and Q3 reviews held with decisions recorded",
-       "owner": "Tarek Nour",
-       "finish": "July 2026",
-       "status": "wip",
-       "pct": 25,
-       "id": "cap6-P1-M2"
-      },
-      {
-       "name": "Second-half reviews",
-       "covers": "Q4 review held",
-       "owner": "Tarek Nour",
-       "finish": "December 2026",
-       "status": "todo",
-       "id": "cap6-P1-M3"
-      }
-     ],
-     "id": "cap6-P1",
      "capId": "fn:marketing"
     }
    ],

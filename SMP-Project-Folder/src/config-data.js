@@ -8006,13 +8006,30 @@ function restoreArchive(id){
     var restFk = fnKeyOfTarget(a.key);
     if (restFk) fnWriteBack(restFk, u);
   } else {
-    var c = capById(a.key);
+    /* holderByIdWritable, never capById (§330, and §232's own note one branch
+       up wearing a different hat): since §322 a supporting function holds its
+       projects itself and archives them under `kind:"cap"` keyed `fn:<key>`,
+       which capById cannot resolve — so every archive a projects function has
+       ever taken said "cannot be restored" for a function still on the
+       platform. Measured on the build before this. */
+    var c = holderByIdWritable(a.key);
     if (!c) return false;
     archiveCapPlan(c, "replaced by restoring the " + a.at + " archive");
     c.def = a.plan.def;
     c.keyObjectives = clone(a.plan.keyObjectives);
     c.projects = clone(a.plan.projects);
-    renumberCapability(c);
+    /* THE VIEW'S ARRAYS ARE ASSIGNED, so a function's holder is a WRAPPER and
+       what was just written is thrown away one line later without this —
+       exactly the pair the unit branch above carries, and the trap §322
+       recorded when `moveCapProjects` assigned rather than mutated. */
+    holderWriteBack(a.key, c);
+    /* AND NEVER RENUMBER A FUNCTION'S OWN WORK: `renumberCapability` mints
+       `cap<N>-P<M>` off the holder's id, so on `fn:finance` it would re-address
+       every project, deliverable, outcome and milestone under it — which is
+       the one thing a restore may not do (§232, §316), and what every figure,
+       focus mark and cycle snapshot is keyed on. A capability's own restore is
+       unchanged. */
+    if (!c.own) renumberCapability(c);
   }
   ARCHIVES = ARCHIVES.filter(function(x){ return x.id !== id; });
   window.ARCHIVES = ARCHIVES;
@@ -8756,6 +8773,18 @@ function holderByIdWritable(id){
   if (s.indexOf("fn:") === 0) return fnOwnHolderWritable(s.slice(3));
   return capById(s.indexOf("cap:") === 0 ? s.slice(4) : s);
 }
+/* The other half of that pair, and a no-op for a capability, which IS the
+   stored object. A function's holder is a fresh wrapper on every call, so
+   anything a caller ASSIGNS (rather than splices) has to be handed back —
+   `fnWriteBack` is the same rule for the pillars format (§129, §61). */
+function holderWriteBack(id, h){
+  var s = String(id || "");
+  if (!h || s.indexOf("fn:") !== 0) return;
+  var f = FUNCTIONS[s.slice(3)];
+  if (!f) return;
+  f.projects = h.projects;
+  f.keyObjectives = h.keyObjectives;
+}
 
 /* ── DISSOLVING A BOX (§322) ───────────────────────────────────────────────
    The other half of Islam's *"and vice versa"*, and the migration that puts a
@@ -8839,11 +8868,25 @@ function capItemById(id){
   });
   return hit;
 }
-function capOfProjectId(id){
+/* WHICH HOLDER A PROJECT BELONGS TO (§330, correcting §322).
+   IT WALKED THE CAPABILITIES AND NOTHING ELSE, and §322 had just given a
+   supporting function projects of its own — so on the page where most of the
+   tenant's projects now live this answered null, and BOTH its callers open
+   `if (!it) return;`. Measured on the build before this: Finance holds three
+   projects, pressing the second in the rail moved nothing, and *Remove this
+   project* opened no dialog at all. No console error, nothing on the screen
+   — §96's family, and the second time this round a control has rendered
+   perfectly and done nothing (§123.4).
+
+   `eachProject` HANDS THE HOLDER OVER, which is the whole repair: that walk
+   was built by §322 precisely because four copies of *walk the capabilities*
+   would drift the day a function became a holder, and this was the fifth copy
+   nobody carried across (§53.5). Renamed with it, because all three call
+   sites mean *the holder* — the band's own comment already said so — and a
+   function is not a capability (`holderById` keeps the same line). */
+function holderOfProjectId(id){
   var hit = null;
-  GROUP.capabilities.forEach(function(c){
-    (c.projects || []).forEach(function(p){ if (p.id === id) hit = c; });
-  });
+  eachProject(function(p, h){ if (p.id === id) hit = h; });
   return hit;
 }
 

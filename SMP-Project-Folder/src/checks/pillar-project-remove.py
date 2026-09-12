@@ -23,8 +23,13 @@ for something present cannot see a control that should not be drawn):
 import os
 from playwright.sync_api import sync_playwright
 
-URL = "file://" + os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
-      "strategy-management-platform.html"))
+# SMP_BUILT points this at another build, because a broken one is made from
+# the SOURCES — §238's hashed CSP silences a script block whose bytes were
+# edited, so every function vanishes and the check reports "cannot continue"
+# rather than failing (§276).
+URL = "file://" + os.path.abspath(os.environ.get("SMP_BUILT") or
+      os.path.join(os.path.dirname(__file__), "..",
+                   "strategy-management-platform.html"))
 bad = 0
 def ck(w, ok, x=""):
     global bad
@@ -37,18 +42,19 @@ def press(pg, sel):
     ck("press " + sel, False, "not drawn"); return False
 
 def to_functions(pg):
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on",
-                                     "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions": return
-        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    # §330: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+    # the switch has three sides and pressing it no longer toggles, so cycling
+    # it hangs for thirty seconds on a build behaving exactly as decided
+    # (§214.3). `data-fold` names the side in BOTH shapes and is absent
+    # exactly when that side is already lit.
+    pg.evaluate("(s)=>{const b=document.querySelector('#units [data-fold=\"'+s+'\"]');"
+                " if (b) b.click();}", "fns")
+    pg.wait_for_timeout(240)
 
 def to_units(pg):
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on",
-                                     "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Units": return
-        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    pg.evaluate("(s)=>{const b=document.querySelector('#units [data-fold=\"'+s+'\"]');"
+                " if (b) b.click();}", "units")
+    pg.wait_for_timeout(240)
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium",
@@ -171,7 +177,18 @@ with sync_playwright() as p:
       const r = btn.getBoundingClientRect();
       const hit = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
       const id = btn.dataset.rmrow.split('|')[1];
-      const c = capOfProjectId(id);
+      /* §330: THE HOLDER, and on Finance that is the FUNCTION ITSELF (§322).
+         This read is the check's own resolver and it is deliberately the
+         product's — the reader it names was blind to a function's own
+         projects, so both of the control's callers opened `if (!it) return`
+         and the button rendered perfectly and did nothing. */
+      const c = holderOfProjectId(id);
+      /* EVERY PROBE DEGRADES (§215): on the build this fix was made against
+         the resolver answers null for a function's own project, and reading
+         `.id` off it kills the run — which reports three failures where the
+         truth is five and reads as a weaker falsification than it is. */
+      if (!c) return { word: btn.textContent.trim(), id, noHolder: true,
+                       hittable: hit === btn || btn.contains(hit) };
       return { word: btn.textContent.trim(), id, capId: c.id,
                n: c.projects.length, ids: c.projects.map(x => x.id),
                rail: RAIL[railKeyFor(c)] || null,
@@ -181,6 +198,11 @@ with sync_playwright() as p:
     ck("the project band carries its own worded control, hittable",
        not pb.get("none") and pb["word"] == "Remove this project"
        and pb["hittable"], pb)
+    # §330: AND THE PRODUCT CAN SAY WHOSE PROJECT IT IS. The control addresses
+    # the row by id alone and resolves the holder at press time, so a resolver
+    # blind to a function's own projects makes every one of the presses below
+    # a no-op with nothing on the screen and nothing on the console.
+    ck("...and the product resolves its holder", not pb.get("noHolder"), pb)
     press(pg, '.pband.edband .rmplan'); pg.wait_for_timeout(400)
     pdlg = pg.evaluate("""() => {
       const ov = document.querySelector('.overlay.on .rmconfirm');
@@ -192,17 +214,37 @@ with sync_playwright() as p:
        and "outcome" in pdlg["holds"] and "milestone" in pdlg["holds"], pdlg)
     press(pg, '.rmconfirm [data-rmyes]'); pg.wait_for_timeout(500)
     pafter = pg.evaluate("""(spec) => {
-      const cap = GROUP.capabilities.filter(x => x.id === spec.capId)[0];
+      const cap = holderById(spec.capId);
+      if (!cap) return { none: true, n: null, ids: null, rail: null,
+                         arch: ARCHIVES.length, top: null };
       return { n: cap.projects.length, ids: cap.projects.map(x => x.id),
                rail: RAIL[railKeyFor(cap)] || null,
                arch: ARCHIVES.length,
                top: ARCHIVES[0] ? { kind: ARCHIVES[0].kind } : null };
     }""", pb)
     ck("Confirm: the project is gone, id-stable, archive taken",
-       pafter["n"] == pb["n"] - 1 and pafter["ids"] == [i for i in pb["ids"] if i != pb["id"]]
+       not pafter.get("none") and not pb.get("noHolder")
+       and pafter["n"] == pb["n"] - 1 and pafter["ids"] == [i for i in pb["ids"] if i != pb["id"]]
        and pafter["arch"] == pb["arch"] + 1 and pafter["top"]["kind"] == "cap", (pb, pafter))
     ck("...and the rail is not holding the removed project",
        pafter["rail"] != pb["id"], pafter)
+    # §330: AND THE WAY BACK, which is what the archive is FOR (§232). On a
+    # projects FUNCTION the archive is keyed `fn:<key>` under kind "cap", and
+    # the restore resolved it with capById — so every archive such a function
+    # ever took answered "cannot be restored" for a function still on the
+    # platform, which is the fault §232 fixed one branch up, arriving on the
+    # other branch by way of §322. The ids are asserted BACK UNCHANGED,
+    # because a restore that renumbers is the one thing it may never do
+    # (§316): every figure and focus mark is keyed on them.
+    prest = pg.evaluate("""(spec) => {
+      const a = ARCHIVES[0]; if (!a) return { none: true };
+      const ok = restoreArchive(a.id);
+      const h = holderById(spec.capId);
+      return { ok, ids: h ? h.projects.map(x => x.id) : null };
+    }""", pb)
+    ck("...and the archive restores it, ids unchanged",
+       not prest.get("none") and not pb.get("noHolder") and prest["ok"]
+       and prest["ids"] == pb["ids"], (pb.get("ids"), prest))
 
     # ── 7 · a pillars FUNCTION: the archive §232 made restorable ────────
     pk = pg.evaluate("""() => FUNCTION_KEYS.filter(k =>

@@ -3722,5 +3722,109 @@ console.log("\n37 · a function's own projects are judged as a capability's are 
   }
 })();
 
+/* ── 38 · A CAPABILITY IS A SUBJECT OF ITS OWN (§330, spec 046 stage 2) ──
+   The server had never been asked about a `cap:` target, because until today
+   nothing in the product could send one — which is §172's own lesson and why
+   this section exists at all: four layers once agreed about a value the
+   database had never been offered.
+
+   BOTH ENDS EVERY TIME (§94.2). A section that only checks the head CAN
+   report their capability passes on a build that allows everybody. */
+console.log("\n38 · a capability is a subject of its own (§330)");
+(function () {
+  const CAP = (SEED.group.capabilities || []).filter(function (c) {
+    return c && c.fn && (c.projects || []).length; })[0];
+  check("§330: the seed holds a capability with projects", !!CAP,
+        CAP && CAP.id + " / " + CAP.fn);
+  if (!CAP) return;
+  const T = "cap:" + CAP.id, FK = CAP.fn;
+  const f = SEED.functions[FK] || {};
+  const HEAD = f.head, CUST = f.custodian;
+
+  /* A ROW THE FIXTURE ACTUALLY MOVES (§94.5, its own recorded example). */
+  let PI = -1, MI = -1;
+  (CAP.projects || []).forEach(function (pr, pi) {
+    (pr.milestones || []).forEach(function (m, mi) {
+      if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; }
+    });
+  });
+  check("§330: and a milestone whose status the fixture moves", PI > -1, PI + "/" + MI);
+  if (PI < 0) return;
+
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  function kinds(mutate) {
+    const inc = clone(SEED);
+    mutate(inc.group.capabilities.filter(function (c) { return c.id === CAP.id; })[0]);
+    return (A.collect(SEED, inc, W(SEED)) || []);
+  }
+  const fig = kinds(function (c) { c.projects[PI].milestones[MI].status = "todo"; });
+  check("§330: a figure inside a capability is classified against the CAPABILITY",
+        fig.length > 0 && fig.every(function (c) { return c.target === T; }),
+        fig.map(function (c) { return c.kind + "@" + c.target; }).join(","));
+  check("§330: ...and it is REPORTING, so a reporter may make it",
+        fig.some(function (c) { return c.kind === "capReporting"; }),
+        fig.map(function (c) { return c.kind; }).join(","));
+  const brief = kinds(function (c) { c.projects[PI].brief = "rewritten by the fixture"; });
+  check("§330: a brief is the PLAN, and still the capability's target",
+        brief.some(function (c) { return c.kind === "capPlan"; }) &&
+        brief.every(function (c) { return c.target === T; }),
+        brief.map(function (c) { return c.kind + "@" + c.target; }).join(","));
+  check("§330: and NOTHING about a capability reaches the unknown sweep (§191)",
+        !fig.concat(brief).some(function (c) { return c.kind === "unknown"; }),
+        fig.concat(brief).map(function (c) { return c.kind; }).join(","));
+
+  function from(who, mutate) {
+    const inc = clone(SEED);
+    mutate(inc.group.capabilities.filter(function (c) { return c.id === CAP.id; })[0]);
+    return A.authorize(SEED, inc, personOf(SEED, who));
+  }
+  /* THE HOLDING FUNCTION'S PEOPLE REACH IT, because a capability's access IS
+     that function's (§330 in lib/rules.js) — the whole reason the matrix
+     needed no new column. */
+  if (HEAD) {
+    let r = from(HEAD, function (c) { c.projects[PI].milestones[MI].status = "todo"; });
+    check("§330: the holding function's head reports on their capability",
+          r.ok, (r.refusals || []).join(" / "));
+    r = from(HEAD, function (c) { c.projects[PI].brief = "the head rewrote this"; });
+    check("§330 REFUSED: and cannot rewrite its brief (§94)",
+          !r.ok, "was ALLOWED");
+  }
+  if (CUST) {
+    const r = from(CUST, function (c) { c.projects[PI].milestones[MI].status = "todo"; });
+    check("§330: the function's custodian reports on it too", r.ok,
+          (r.refusals || []).join(" / "));
+  }
+  /* AND SOMEBODY ELSE'S FUNCTION HEAD DOES NOT — the end that can fail
+     silently, because a capability resolving to "group" or to nothing would
+     hand it to everybody. */
+  const OTHERFK = Object.keys(SEED.functions || {}).filter(function (k) {
+    return k !== FK && SEED.functions[k].head; })[0];
+  if (OTHERFK) {
+    const r = from(SEED.functions[OTHERFK].head, function (c) {
+      c.projects[PI].milestones[MI].status = "todo"; });
+    check("§330 REFUSED: another function's head does not report this capability",
+          !r.ok, "was ALLOWED");
+  }
+  /* A UNIT HEAD NEVER, whatever the function columns say. */
+  check("§330 REFUSED: a unit head does not report a capability",
+        !from(headKey, function (c) {
+          c.projects[PI].milestones[MI].status = "todo"; }).ok, "was ALLOWED");
+
+  /* SUBMITTING IS THE SUBJECT'S OWN (§330: its own row on the board), so the
+     key is the capability's and the head may write it while a bounded role
+     may not — asserted as a PAIR, or a build that refused everybody passes
+     the refusal half (§94.2). */
+  function submit(who) {
+    const inc = clone(SEED);
+    inc.review = inc.review || {};
+    inc.review.submitted = Object.assign({}, inc.review.submitted || {});
+    inc.review.submitted[T] = { at: "now", by: who };
+    return A.authorize(SEED, inc, personOf(SEED, who));
+  }
+  if (HEAD) check("§330: the head submits the capability's own report",
+                  submit(HEAD).ok, (submit(HEAD).refusals || []).join(" / "));
+  check("§330 REFUSED: a unit head does not submit it", !submit(headKey).ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

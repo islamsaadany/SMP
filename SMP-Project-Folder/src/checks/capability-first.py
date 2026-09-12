@@ -146,12 +146,14 @@ WANT = """(who)=>{
 
 
 def to_fn(pg):
-    for _ in range(3):
-        if not pg.query_selector("#units .navswitch"): break
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on",
-                                     "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions": break
-        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    # §330: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+    # the switch has three sides and pressing it no longer toggles, so cycling
+    # it hangs for thirty seconds on a build behaving exactly as decided
+    # (§214.3). `data-fold` names the side in BOTH shapes and is absent
+    # exactly when that side is already lit.
+    pg.evaluate("(s)=>{const b=document.querySelector('#units [data-fold=\"'+s+'\"]');"
+                " if (b) b.click();}", "fns")
+    pg.wait_for_timeout(240)
     d = pg.query_selector('#units button[data-u="%s"]' % FDEST)
     if d: d.click()
     pg.wait_for_timeout(500)

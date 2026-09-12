@@ -6456,7 +6456,7 @@ function projPlanBody(p, subject){
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
         /* The pillar head's own control on the project's band (§232, §53.5:
            a unit and a function are the same product). The id alone is the
-           address — capOfProjectId() resolves the holder at press time. */
+           address — holderOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
           '">Remove this project</button>' +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'

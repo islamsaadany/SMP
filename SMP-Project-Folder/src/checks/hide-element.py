@@ -169,17 +169,26 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
 
     # ── 6 · a milestone on a function, and the project band has no eye ──
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on",
-                                     "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions": break
-        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    # §330: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+    # the switch has three sides and pressing it no longer toggles, so cycling
+    # it hangs for thirty seconds on a build behaving exactly as decided
+    # (§214.3). `data-fold` names the side in BOTH shapes and is absent
+    # exactly when that side is already lit.
+    pg.evaluate("(s)=>{const b=document.querySelector('#units [data-fold=\"'+s+'\"]');"
+                " if (b) b.click();}", "fns")
+    pg.wait_for_timeout(240)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
     press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     fn = pg.evaluate("""() => {
       const onBand = document.querySelectorAll('.pband.edband .eyebtn').length;
-      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
+      /* §330: A HOLDER, NOT A CAPABILITY. §322 gave a supporting function its
+         own projects and §329 dissolved the demo's boxes, so asking the
+         tenant for a capability under Finance answers `undefined` and the
+         probe dies rather than reporting (§215, §214.3). `holderById` is
+         the product's own reader and answers for either kind, which is
+         what keeps this file's subject — a MILESTONE row — the same. */
+      const c = holderById("fn:finance");
       const p = c.projects[0], m = p.milestones[0];
       const btn = document.querySelector('.eyebtn[data-hiderow="' + m.id + '"]');
       return { onBand, id: m.id, there: !!btn,
@@ -190,7 +199,13 @@ with sync_playwright() as p:
     ck("a milestone row carries one", fn["there"], fn)
     press(pg, '.eyebtn[data-hiderow="%s"]' % fn["id"]); pg.wait_for_timeout(400)
     fna = pg.evaluate("""(spec) => {
-      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
+      /* §330: A HOLDER, NOT A CAPABILITY. §322 gave a supporting function its
+         own projects and §329 dissolved the demo's boxes, so asking the
+         tenant for a capability under Finance answers `undefined` and the
+         probe dies rather than reporting (§215, §214.3). `holderById` is
+         the product's own reader and answers for either kind, which is
+         what keeps this file's subject — a MILESTONE row — the same. */
+      const c = holderById("fn:finance");
       const m = c.projects[0].milestones.filter(x => x.id === spec.id)[0];
       const deck = String(deckSlidesFn("finance"));
       return { hide: m.hide === true, total: capExec(c).total,
@@ -204,7 +219,13 @@ with sync_playwright() as p:
     press(pg, '.eyebtn[data-hiderow="%s"]' % fn["id"]); pg.wait_for_timeout(400)
     ck("...and shows again clean",
        pg.evaluate("""(id) => {
-         const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
+         /* §330: A HOLDER, NOT A CAPABILITY. §322 gave a supporting function its
+         own projects and §329 dissolved the demo's boxes, so asking the
+         tenant for a capability under Finance answers `undefined` and the
+         probe dies rather than reporting (§215, §214.3). `holderById` is
+         the product's own reader and answers for either kind, which is
+         what keeps this file's subject — a MILESTONE row — the same. */
+      const c = holderById("fn:finance");
          return !("hide" in c.projects[0].milestones.filter(x => x.id === id)[0]);
        }""", fn["id"]))
 

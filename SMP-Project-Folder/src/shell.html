@@ -3731,7 +3731,7 @@
     });
     document.querySelectorAll("[data-rail]").forEach(function(b){
       b.addEventListener("click", function(){
-        var c = capOfProjectId(b.dataset.rail);
+        var c = holderOfProjectId(b.dataset.rail);
         if (c) { RAIL[railKeyFor(c)] = b.dataset.rail; paint(); }
       });
     });
@@ -9516,7 +9516,7 @@
       });
   }
   function confirmRemoveProject(id){
-    var c = capOfProjectId(id), p = projById(id);
+    var c = holderOfProjectId(id), p = projById(id);
     if (!c || !p) return;
     var code = projCode(holderCodeOwner(c), p);
     rmConfirmOpen("Remove this project?",
@@ -9527,7 +9527,7 @@
         plural((p.milestones  || []).length, "milestone") + '.',
       rmReportedInProject(p), "the function's scores", "Remove the project",
       function(){
-        var c2 = capOfProjectId(id);
+        var c2 = holderOfProjectId(id);
         if (!c2 || !Array.isArray(c2.projects)) return;
         var i = -1;
         c2.projects.forEach(function(x, xi){ if (x && x.id === id) i = xi; });

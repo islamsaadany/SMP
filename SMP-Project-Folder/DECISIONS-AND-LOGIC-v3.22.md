@@ -6241,6 +6241,17 @@ harness, having run a first-deploy assertion twice against the same database
 - **A capability is unreachable from any screen in the meantime.** Nothing in
   the product creates one (stage 2's job), so §321's Remove dialog and the band
   are both correct and both currently unexercised outside a check.
+- **AND A FULL SWEEP REWRITES THE RECORD OF A PAST SIGN-OFF.** Found by the
+  tree going dirty during this round's sweep with nothing of mine in it:
+  `checks/objectives-table-doc.py` and `checks/objectives-table-mockup.py` are
+  mockup GENERATORS that live in `checks/` and write six PNGs into
+  `design-mockups/objectives-table/shots/` on every run — so running the suite
+  silently replaces §278.3's signed-off pictures with today's build. **Principle
+  II says a mockup is the record of what was signed off, not of what was
+  built**, so the six were restored rather than committed. Not fixed here,
+  because moving a generator out of the check suite is its own small change and
+  should not ride on a round about the demo (§2b); what it wants is either a
+  refusal to overwrite, or a home outside `checks/` so a sweep cannot reach it.
 
 ## 36 · Multi-tenant — what to do when the time comes
 

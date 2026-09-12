@@ -47991,8 +47991,26 @@ var TRAIL = (function(){
         if (f && f.swot) return { __swot: f.swot };
         if (f && f.obj) return f.obj;
       }
-      (GROUP.capabilities || []).forEach(function(c){
-        if (String(t) !== "fn:" + c.fn) return;
+      /* §330.18: THE SUBJECT'S OWN HOLDERS, asked of the product rather than
+         walked here — the SEVENTH copy of "walk the capabilities", and the
+         only one left outside the shared readers. Since §322 a supporting
+         function's projects are the FUNCTION's, so neither route above found
+         them (`unitLikeWritable` answers the PILLARS view and is null on this
+         format) and neither did this walk: measured, `cap7-P1-M1` on
+         `fn:finance` is found by `capsShown` and by nothing here. Restore on
+         the page where most of a tenant's projects now live could put nothing
+         back, and it fails the way every one of these fails — quietly, in the
+         direction that looks like the button doing nothing (§96).
+
+         WIDENED, NEVER NARROWED (§330.18's own rule one file over): a log row
+         written before §330 names the FUNCTION for a capability's project, so
+         that function's capabilities are still walked beside its own work or
+         a restore that used to work stops. */
+      var holders = (typeof capsShown === "function" ? capsShown(t) : []).slice();
+      if (String(t).indexOf("fn:") === 0)
+        (GROUP.capabilities || []).forEach(function(c){
+          if ("fn:" + c.fn === String(t) && holders.indexOf(c) === -1) holders.push(c); });
+      holders.forEach(function(c){
         if (c.id === id) hit = c;
         (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = m; });
         (c.projects || []).forEach(function(p){

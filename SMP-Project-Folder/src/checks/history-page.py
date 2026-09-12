@@ -61,6 +61,14 @@ def _at(sec):
     return "%sT05:16:%02d.000Z" % (TODAY, sec)
 CUTOFF = TODAY + "T06:00:00"
 
+# The function's own project row this file restores, read from the seed so it
+# cannot drift from the demo (§48: a row is addressed by id, never by position).
+_SEED = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    "..", "..", "..", "db", "seed-state.json")))
+_OWN_P = _SEED["functions"]["finance"]["projects"][0]
+OWN_MS = _OWN_P["milestones"][0]["id"]
+OWN_MS_NAME = _OWN_P["milestones"][0]["name"]
+
 LOG = [
   {"id": 7, "at": _at(7), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitFoundation", "target": "mobile", "what": "the unit's own words",
    "rows_": {"count": 1, "moved": [{"id": "mobile", "to": "The words the plan holds today", "had": True, "from": "The words before the edit", "name": "Mobile", "field": "aspiration"}]}},
@@ -70,6 +78,18 @@ LOG = [
    "rows_": {"count": 1, "moved": [{"id": "retailstores-P2-M1", "to": "Latest", "had": True, "from": "Sum", "name": "E-store revenue", "field": "compile"}]}},
   {"id": 4, "at": _at(6), "person_key": "fn_mkt", "person_name": "Yara Kamal", "kind": "capReporting", "target": "fn:marketing", "what": "project milestones",
    "rows_": {"count": 1, "moved": [{"id": "cap4-P1-M1", "to": 100, "had": False, "from": None, "name": "Perception study fielded", "field": "pct"}]}},
+  # §330.18: A FUNCTION'S OWN PROJECT — the row `locate()` could not find.
+  # Since §322 a supporting function's projects are the FUNCTION's, and that
+  # resolver asked `unitLikeWritable` (the PILLARS view, null on this format)
+  # and then walked `GROUP.capabilities`: neither route reaches the page where
+  # most of a tenant's projects now live, so Restore put nothing back and did
+  # it the way every one of these fails — quietly (§96). Read out of the seed
+  # rather than typed, or it goes stale the day the demo's ids move (§48).
+  {"id": 8, "at": _at(4), "person_key": "fn_fin", "person_name": "Hossam Abuelenien",
+   "kind": "capReporting", "target": "fn:finance", "what": "project milestones",
+   "rows_": {"count": 1, "moved": [{"id": OWN_MS, "to": "done", "had": True,
+                                    "from": "wip", "name": OWN_MS_NAME,
+                                    "field": "status"}]}},
   {"id": 3, "at": _at(5), "person_key": "mobhead", "person_name": "Ashraf Laithy", "kind": "reportState", "target": "mobile", "what": "submitting the report", "rows_": None},
   {"id": 2, "at": _at(5), "person_key": "own_mob", "person_name": "Mennah Farouk", "kind": "unitReporting", "target": "mobile", "what": "reported figures",
    "rows_": {"count": 2, "moved": [{"id": "mobile-P1-T1", "to": 60, "had": True, "from": 45, "name": "Clean and standardize customer and SKU base", "field": "actual"},
@@ -203,8 +223,20 @@ with sync_playwright() as p:
     ck("the page asked the server", len(asks) >= 1, SEEN["asks"])
     ck("...for today, with a cap, never the graph", asks and asks[-1].get("from") and asks[-1].get("limit"), asks[-1] if asks else None)
     r = rows(pg)
-    ck("one line per changed field: 8 lines from 7 entries", len(r) == 8, len(r))
-    ck("...each naming who and where", all(("Mohamed Essam" in x["text"] or "Mennah Farouk" in x["text"] or "Yara Kamal" in x["text"] or "Ashraf Laithy" in x["text"]) and ("Mobile" in x["text"] or "Retail" in x["text"] or "Marketing" in x["text"]) for x in r), [x["text"][:60] for x in r])
+    # §330.18: REWRITTEN, NEVER LOOSENED (§218). This held the literal pair
+    # "8 lines from 7 entries", so adding an entry to the fixture reads as a
+    # regression in the product. It asserts the RELATIONSHIP the section is
+    # named after — one line per changed FIELD — worked out from the fixture
+    # itself, so the two can never disagree (§94.8).
+    want = sum(len((e["rows_"] or {}).get("moved") or []) or 1 for e in LOG)
+    ck("one line per changed field: %d lines from %d entries" % (want, len(LOG)),
+       len(r) == want, (len(r), want))
+    WHO = [e["person_name"] for e in LOG]
+    ck("...each naming who and where",
+       all(any(w in x["text"] for w in WHO) and
+           ("Mobile" in x["text"] or "Retail" in x["text"] or
+            "Marketing" in x["text"] or "Finance" in x["text"]) for x in r),
+       [x["text"][:60] for x in r])
     ck("...the target's before and after", any("0.8%" in x["text"] and "1%" in x["text"] for x in r), [x["text"] for x in r][-1:])
     ck("...and the field in words, never a key", any("Compile rule" in x["text"] for x in r) and not any("compile " in x["text"] for x in r))
     ck("the quarters draw as four boxes", pg.evaluate("()=>document.querySelectorAll('[data-hist-page] i.hist-q').length===4 && document.querySelectorAll('[data-hist-page] i.hist-q.on').length===2"))
@@ -282,6 +314,31 @@ with sync_playwright() as p:
     pg.evaluate("i=>{const tr=document.querySelectorAll('[data-hist-page] table.hist tbody tr')[i];const b=tr&&tr.querySelector('[data-hist-restore]');if(b)b.click()}", qi[0] if qi else -1); pg.wait_for_timeout(300)
     press(pg, "[data-hist-ok]"); pg.wait_for_timeout(1200)
     ck("a field that was absent before goes back to absent", pg.evaluate("()=>!('quarters' in UNITS.mobile.items[0].tactics[1])"), pg.evaluate("()=>JSON.stringify(UNITS.mobile.items[0].tactics[1].quarters)"))
+
+    # §330.18: AND A SUPPORTING FUNCTION'S OWN PROJECT GOES BACK TOO. Every
+    # restore above is a UNIT's, which is why the seventh copy of "walk the
+    # capabilities" sat in `locate()` unmeasured — the page where most of a
+    # tenant's projects now live could put nothing back at all. Both ends: the
+    # row is found AND the old value reaches the plan (§94.2), read from the
+    # DATA rather than off the screen (§96).
+    pg.wait_for_timeout(2200)
+    now0 = pg.evaluate("()=>fnOwnProjects('finance')[0].milestones[0].status")
+    ck("the fixture's own-project row holds the current value first", now0 == "done", now0)
+    r = rows(pg)
+    oi = [i for i, x in enumerate(r) if OWN_MS_NAME in x["text"]]
+    ck("a function's own project has a line, and its Restore is live",
+       bool(oi) and r[oi[0]]["rst"] and not r[oi[0]]["rst"]["disabled"],
+       [x["text"][:70] for x in r if OWN_MS_NAME in x["text"]] or "(no such line)")
+    if oi:
+        pg.evaluate("i=>{const tr=document.querySelectorAll('[data-hist-page] table.hist tbody tr')[i];const b=tr&&tr.querySelector('[data-hist-restore]');if(b)b.click()}", oi[0])
+        pg.wait_for_timeout(300)
+        conf = pg.evaluate("()=>{const c=document.querySelector('.hist-confirm');return c?c.textContent.replace(/\\s+/g,' ').trim():''}")
+        ck("...the confirmation names the row rather than refusing to find it",
+           OWN_MS_NAME in conf, conf[:160] or "(nothing)")
+        press(pg, "[data-hist-ok]"); pg.wait_for_timeout(1400)
+        ck("Put it back reaches the function's own project",
+           pg.evaluate("()=>fnOwnProjects('finance')[0].milestones[0].status") == "wip",
+           pg.evaluate("()=>fnOwnProjects('finance')[0].milestones[0].status"))
 
     # ── 5 · THE UNIT'S OWN LINE, AND THE DOOR ────────────────────────────
     print("\n5 · the unit's own page: the last change, and a door")

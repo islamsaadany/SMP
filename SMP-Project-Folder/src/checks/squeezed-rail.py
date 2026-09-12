@@ -22,9 +22,17 @@ AND ABOVE 1200 NOTHING MOVES (§94.2): the two-column rail is a vertical list an
 must stay one, or a fix for a squeezed window would have rewritten the page
 everybody actually uses.
 
-THE BANNER. The filled demo's second line is gone. Asserted at BOTH ENDS: the
-sentence is absent, and the first line — the one that says nothing is saved —
-is still there, or a build that emptied the banner entirely would pass.
+THE BANNER OUTLIVED ITS SUBJECT (§324.10). §162 took one sentence out of the
+demo banner and this asserted BOTH ENDS of that — the sentence gone, and the
+one saying nothing is saved still there — which was right, and then §313.8
+deleted DEMO MODE ENTIRELY. So there is no banner: the removal assertion
+passes because everything is gone, and the two that guarded it fail. §113.8
+from both sides at once, in one block.
+
+REWRITTEN, NEVER DELETED (§218). What is asserted now is the decision that
+holds: demo mode is gone, so every sentence it carried is gone, and the button
+and the mode test that drew them are gone too. §162's own removal survives
+inside a stricter claim rather than a looser one.
 
 Run: SMP_CHROME=... python3 qa-run.py checks/squeezed-rail.py
 """
@@ -141,22 +149,31 @@ raw = pathlib.Path("strategy-management-platform.html").read_text(errors="ignore
 # file holds `capability\\u2019s`, and the assertion passed on the very build
 # it was written to reject (§94.5). Both forms are tested now, and the check
 # was re-run against that build to watch it fail.
-gone_esc = "capability\\u2019s content and every reported figure is invented"
-gone_lit = "capability’s content and every reported figure is invented"
+# THE BUILT FILE HOLDS THE SOURCE'S ESCAPE, NOT THE CHARACTER, so every phrase
+# is asked in both forms — the first version of this wrote the apostrophe in
+# Python and so tested the rendered form twice, passing on the very build it
+# was written to reject (§94.5).
+def absent(*phrases):
+    return all(p not in raw for p in phrases)
+
 ck("the invented-content line is gone from the demo banner",
-   gone_esc not in raw and gone_lit not in raw)
-# BOTH ENDS (§94.2): a build that deleted the whole banner would pass the line
-# above. The sentence that stops somebody mistaking the demo for their own
-# tenant has to survive.
-# The built file carries the SOURCE's escape sequence, not the character it
-# stands for: `Demo data \\u00b7 nothing here is saved.` Matching the rendered
-# middot here finds nothing and calls a correct build broken — the same class
-# of mistake as reading the wrong banner above, one layer down.
-ck("...and the line saying nothing is saved is still there",
-   "Demo data \\u00b7 nothing here is saved." in raw
-   or "Demo data \u00b7 nothing here is saved." in raw)
-ck("...and the Clear project banner is untouched",
-   "Clear project" in raw and "what a new deployment looks like on" in raw)
+   absent("capability\\u2019s content and every reported figure is invented",
+          "capability’s content and every reported figure is invented"))
+# §313.8 TOOK THE WHOLE THING, so the rest of the banner has to be gone too: a
+# build still drawing "nothing here is saved" is one that kept half a feature
+# whose switch no longer exists.
+ck("...and so is the rest of it, because demo mode went with it (§313.8)",
+   absent("Demo data \\u00b7 nothing here is saved.",
+          "Demo data · nothing here is saved.",
+          "what a new deployment looks like on"))
+# AND THE DOOR IS GONE, NOT ONLY THE WORDS (§24): the button and the mode test
+# that drew them are what make this a removal rather than a hidden feature.
+# ASKED AS A DECLARATION, NEVER AS THE NAME — `isDemoMode()` appears twice in
+# the built file and both are COMMENTS recording that it was deleted, so a
+# bare-name search fails on a build that is right (§93's family: a phrase in
+# prose is not the thing the prose is about).
+ck("...and neither the Demo data button nor a demo-mode test is in the product",
+   absent(">Demo data<", "function isDemoMode", "var isDemoMode"))
 
 print("squeezed-rail: %s" % ("OK" if bad == 0 else "%d FAILURES" % bad))
 raise SystemExit(1 if bad else 0)

@@ -5880,6 +5880,77 @@ for whoever automates, not a failure hiding behind a green tick. Twenty-two
 files, each with its own name for the count it keeps (`bad`, `fails`, `fail`),
 is a round of its own and a poor passenger on a branch going to a merge.
 
+### 324.9 · A stub that models a server we no longer have
+
+`checks/reply-said.py` failed on *"upgrades to the emailed sentence when the
+server answers"* — the word stayed at **Sent.** The product is right and the
+stub is nine days out of date: §293 made the platform COLLECT replies and send
+one email a few minutes later, so `/api/chat` answers `{pending, mins, to}`
+where it used to answer `{sent, to}`, and `chat.js` reads `j.mailed.pending`.
+Reading a shape that is not there, it correctly falls through to a plain
+*"Sent."* — and the check asserted the upgrade it had just prevented.
+**§100.3, in its most expensive direction: the stub failed the product for
+being right.** Moved to §293's shape; green.
+
+**AND `office-chat.py` CARRIED THE SAME STALE SHAPE AND PASSED**, because
+nothing in it asserts that sentence — which is exactly how a stub comes to
+model a server that no longer exists. Aligned too, and its own run is
+unchanged (ALL CLEAR both before and after).
+
+### 324.10 · A banner check that outlived demo mode
+
+`checks/squeezed-rail.py` asserted §162's removal at BOTH ENDS — one sentence
+gone from the demo banner, the other still there — which was right, and then
+**§313.8 deleted demo mode entirely**. So there is no banner: the removal
+assertion passed because everything is gone, and the two guarding it failed.
+**§113.8 from both sides at once, in one block.**
+
+REWRITTEN, never deleted (§218), into the decision that holds: demo mode is
+gone, so every sentence it carried is gone, **and so are the button and the
+mode test that drew them** (§24 — that is what makes it a removal rather than
+a hidden feature). §162's own claim survives inside a stricter one.
+**AND IT IS ASKED AS A DECLARATION, NEVER AS THE NAME**: `isDemoMode()` appears
+twice in the built file and both are COMMENTS recording that it was deleted, so
+a bare-name search fails on a build that is right — *a phrase in prose is not
+the thing the prose is about* (§93's family).
+
+### 324.11 · The check that named its own trap and then fell into it
+
+`checks/row-edit.py` asked all six Setup tables for a pen on the row, found
+**nought of ten** on the first, and then **died on the empty list** rather than
+reporting the other five (§215) — so it read as one failure and was four.
+
+Its own comment had predicted this: *"written as a property of the table rather
+than a special case inside the loop, so the next table to move its actions into
+a menu is one word here."* §261 moved **Business units and Companies** into
+kebabs, and the one word was never changed. **AND A BOOLEAN COULD NOT HAVE
+CARRIED IT ANYWAY**, which is the part worth keeping: the three menus are
+`data-umenu`, `data-comenu` and `data-fnmenu`, so the flag had to become the
+attribute — *a boolean outlives its subject by being true of things it was
+never asked about.*
+
+**AND THE SHAPE ITSELF HAD MOVED**: those three do not edit on the row at all
+now, they open `ROWDLG`. So they have a block that ends where their shape ends
+— every row offers a kebab, the kebab offers exactly ONE way in, it opens a
+dialog with fields and Save and Cancel, **no row opens in place** (§94.2: a
+build doing both would satisfy every other line), and Cancel closes it. The
+dialog's own behaviour is deliberately NOT re-asserted, because
+`people-dialog.py` drives it end to end (§116) and a second copy is a second
+answer to what it does (§53.5). `open_row`'s kebab branch is DELETED with it
+(§24): nothing reaches it now, and a branch nothing reaches is the next
+reader's idea of how menus work. Six tables measured, ALL GREEN.
+
+### 324.12 · And one "check" is a camera
+
+`checks/sendsaid-fullshot.py` takes a platform file and a tag on the command
+line and shoots a before-and-after pair (§143). Run with no arguments by a
+runner walking `checks/*.py` it hangs on §167.2's welcome overlay and its last
+line is *"waiting 500ms"* — **a run that STOPPED, reported by a count as a
+pass** (§298.3's own example, met in the wild). It is not named `-mockup`, so
+nothing tells a runner what it is. Recorded rather than renamed: the name is in
+the decisions record and in commit messages, and moving it to fix a runner
+nobody has written yet is the wrong way round.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

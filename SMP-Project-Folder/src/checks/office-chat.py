@@ -177,7 +177,13 @@ class H(http.server.BaseHTTPRequestHandler):
         if body.get("action") == "reply":
             CHAT["said"].append(body)
             self._send(200, json.dumps({"ok": True, "here": False,
-                "mailed": {"sent": True, "to": "someone@example.com"}}).encode(),
+                # §293's SHAPE (§324.9): a reply is COLLECTED and emailed a few
+                # minutes later, so the endpoint answers {pending, mins, to}
+                # and not the {sent, to} it answered while the request itself
+                # did the emailing. Nothing here asserts the sentence, so this
+                # stub passed either way — which is exactly how it came to be
+                # modelling a server that no longer exists (§100.3).
+                "mailed": {"pending": True, "mins": 10, "to": "someone@example.com"}}).encode(),
                 "application/json")
             return
         if body.get("action") == "pushTest":

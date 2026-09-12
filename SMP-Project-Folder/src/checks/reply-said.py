@@ -14,7 +14,9 @@ TWO SENTENCES IN THE RIGHT ORDER, not one stale one:
 
   · the thread is asked once, soon, and the moment it comes back holding the
     message the word becomes **Sent.** — the screen stops waiting on the email;
-  · when the request finally answers, that upgrades to **Sent, and emailed
+  · when the request finally answers, that upgrades to the sentence naming
+    the address — since §293 *"Sent. If they have not opened the platform in
+    N minutes, it is emailed to …"*, where it used to read **Sent, and emailed
     to …**, which is the sentence the office actually wants.
 
 AND A REQUEST THAT NEVER ANSWERS STILL ANSWERS. `post()` had no timeout at all,
@@ -90,7 +92,16 @@ class H(http.server.BaseHTTPRequestHandler):
             THREAD["waiting"] = False
             import time
             time.sleep(20 if HANG["on"] else SLOW)
-            self._s(json.dumps({"ok": True, "mailed": {"sent": True,
+            # §293's SHAPE, AND IT HAD BEEN THE ONE BEFORE IT (§324.9). This
+            # stub answered `{sent, to}`, which is what the endpoint returned
+            # while a reply was emailed by the request that carried it. §293
+            # made the platform COLLECT for a few minutes and send one email,
+            # so the answer became `{pending, mins, to}` — and the product,
+            # reading `j.mailed.pending`, correctly fell through to a plain
+            # *"Sent."* while this check asserted the upgrade. A stub that does
+            # not model the server is testing something the product does not do
+            # (§100.3), and here it failed the product for being right.
+            self._s(json.dumps({"ok": True, "mailed": {"pending": True, "mins": 10,
                                 "to": "mohamed_walid@rayatrade.com"}}).encode()); return
         self._s(b'{"ok":true,"unread":0,"threads":[],"chat":{"on":true},"states":{},"said":{}}')
 

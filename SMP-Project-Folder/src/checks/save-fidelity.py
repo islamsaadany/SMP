@@ -49,6 +49,13 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/state"):
             self._s(200,json.dumps({"ok":True,"state":STORED[0],"person":PERSON}).encode(),"application/json");return
+        # A WORKER IS SERVED AS JAVASCRIPT OR THE REGISTRATION REJECTS (§231.5,
+        # §324.7): without this the stub answered `/sw.js` with the gate page,
+        # Chromium refused it, and the refusal reached this check's page-error
+        # listener — so it printed "0 FAILED" and exited NON-ZERO, which is the
+        # one combination a reader takes at face value and should not (§298.3).
+        if self.path.startswith("/sw.js"):
+            self._s(200,b"/* stub */","application/javascript");return
         if self.path.startswith("/raya-trade"):
             self._s(200,HTML,"text/html; charset=utf-8");return
         self._s(200,b"<h1 id=gate>g</h1>","text/html; charset=utf-8")

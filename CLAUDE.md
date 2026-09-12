@@ -9003,7 +9003,27 @@ LARGER FINDING**: twenty-one checks spell their subject as the ABSOLUTE path
 silently measures the branch &mdash; two reds recorded earlier the same day as
 *"not this branch's"* were measured that way and were wrong (&sect;105.6 wearing
 the reassuring face). All twenty-one honour `SMP_BUILT` now, and three stale
-fixtures are REWRITTEN, never loosened (&sect;218).*
+fixtures are REWRITTEN, never loosened (&sect;218). **&sect;330.14** &mdash;
+&sect;329 found that two mockup GENERATORS live in `checks/` and rewrite
+signed-off pictures on every sweep, named them and left it; the full suite
+found **thirteen**, three of them harmless only because they were stale and
+failed early. The refusal goes in `qa-run.py`, ONE place, and **what is refused
+is the SWEEP, never the file** &mdash; a direct run is a deliberate re-make and
+still works; the set is READ from the source rather than listed by name, and
+`SMP_WRITE_MOCKUPS=1` lifts it, re-making the document byte-identical.
+**&sect;330.15** &mdash; the sixth product fault and the oldest, &sect;322's
+inherited: **seven supporting functions own eighteen projects between them and
+not one could download its own plan**, because Import &amp; storage's Download
+list offered the PILLARS functions and the capabilities alone &mdash; the whole
+truth while a projects function's work lived inside a capability, and untrue
+since stage 1. A plan that cannot leave cannot come back (&sect;22), and **the
+builder was there the whole time**: `impHolderFor()` has resolved `fn:<key>`
+since &sect;322 and the upload already offers that function by name, so the two
+ends were built and the list between them was not (&sect;96, &sect;61). One
+clause; asserted as the AGREEMENT between what the page offers and what the
+builder can make. **And the first falsification of it went GREEN**, because
+that check did not honour `SMP_BUILT` and ran against the build it was
+falsifying &mdash; &sect;330.13's own lesson inside the hour (&sect;54.5).*
 
 *Earlier the same day &mdash; **&sect;329: the worked example holds no
 capabilities.** Islam: *"finish the demo data yes."* **STAGE 1 WAS LIVE AND

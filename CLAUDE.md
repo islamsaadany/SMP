@@ -8946,10 +8946,50 @@ now MAKE their state (&sect;255). **Falsified from the SOURCES** (&sect;276):
 over): `db/seed-state.json` is GENERATED and TRACKED, and &sect;329 regenerated
 it before &sect;330's keep-one line existed, so `test-authorize.js` &sect;38's
 620/0 had been measured against a seed that could not exercise it. 624/0 after.
-**RECORDED, NOT DONE**: the demo shows a capability in ONE of its two forms, so
-the pillars form is exercised by the checks alone; and the two mockup
-GENERATORS still live in `checks/`, so a full sweep rewrites signed-off
-pictures (&sect;329's own finding).*
+**AND RUNNING THE WHOLE SUITE AND THE DEPLOYMENT FOUND FOUR MORE, NONE OF THEM
+IN THE PRODUCT** &mdash; which is the argument for running the whole thing
+rather than the files that were edited (&sect;214). **&sect;330.9** &mdash;
+`smp-app/public/` is GENERATED and TRACKED and is what production SERVES, and
+the four generators had not been re-run since &sect;330 moved the frozen
+sources; &sect;325's guard caught it, which is the whole of why that section
+exists. **And it found the generators mis-reporting their own artefacts**: five
+*"bytes"* figures across three scripts were `String.length` &mdash; UTF-16 code
+units &mdash; and none counted the header the script itself prepends, so
+`platform.css` announced **621947** for a file of **641249** while `shell.js`
+over-reported by 2,880 the other way. Harmless until the neighbouring check
+began reporting that quantity honestly: two numbers for one file on two lines of
+one terminal (&sect;124, &sect;298.3). Measured off the file just written now.
+**&sect;330.10** &mdash; `deck-dividers.py` and `slide-move.py` named the
+SHIPPED versioned file where all 165 of their neighbours read the BUILD, and the
+shipped copy is what the merge copies over &mdash; so for the whole of a round
+they measure the previous release: **55,020 bytes behind here**, with a
+different CSP hash. Both read the build now, and the shipped copy is brought up
+to it on the BRANCH. **&sect;330.11** &mdash; `capability-remove.py` went red on
+a probe answering `{}`: its fixture drew from `FUNCTIONS[fk].projects`, which
+stopped being the whole of what a function holds when &sect;330 took
+capabilities off `fnHolders()`, and **both sides of its central assertion read
+`fnProjects()`**, which answers an empty map for a capability's rows &mdash; so
+*"every code is what it was"* compared `{}` with `{}` and passed for the wrong
+reason (&sect;113.8), on the one claim &sect;330 deliberately REVERSES. Rewritten,
+never loosened (&sect;218), into the pair that is true: the destination's codes
+are its own run, and a moved project reads a NEW code with its id unmoved; **2
+red** with the pre-&sect;330 rule put back. **&sect;330.12** &mdash;
+`objectives-table-mockup.py` would not PARSE (a &sect;330 edit put
+`[data-fold="fns"]` inside a double-quoted Python string), so it never ran at
+all &mdash; and fixing that re-armed &sect;329's own recorded not-done, because
+it is a mockup GENERATOR in `checks/` that a sweep runs and that replaces
+signed-off shots with today's build. It had been harmless only because it was
+broken. Both generators refuse to write unless asked by name now, **proved at
+both ends**: the guard writes nothing, and lifted, the document regenerates
+byte-identical. **THE SUITE**: 167 checks walked; the six that are red or
+decline reproduce identically on `origin/main`'s OWN build (&sect;303) or need a
+rehearsal database. **RECORDED, NOT DONE**: the demo shows a capability in ONE
+of its two forms, so the pillars form is exercised by the checks alone;
+`SMPRules.unitLikeOf()` is the one resolver a `cap:` target is still invisible
+to, and its only caller reads a ROLE's place, which can never be a capability
+&mdash; unreachable today, and stated rather than guessed at later; and
+`gap-walk.py` is **5 red on `origin/main`** with its function side finding no
+gaps to walk.*
 
 *Earlier the same day &mdash; **&sect;329: the worked example holds no
 capabilities.** Islam: *"finish the demo data yes."* **STAGE 1 WAS LIVE AND

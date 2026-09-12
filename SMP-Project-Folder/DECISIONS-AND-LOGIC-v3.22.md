@@ -6507,11 +6507,19 @@ Its 620/0 had been measured against a seed that could not exercise it.
   planned in overview and projects, so a capability planned in PILLARS renders
   nowhere in the worked example and is exercised by the checks alone. A second
   demo capability would show it and nobody asked for one (§2b).
-- **The two mockup generators still live in `checks/`** (§329's own finding):
-  `objectives-table-doc.py` and `objectives-table-mockup.py` rewrite
-  `design-mockups/objectives-table/shots/` on every full sweep, so a sweep
-  silently replaces a signed-off picture with today's build. What it wants is
-  either a refusal to overwrite or a home outside `checks/`.
+- **The two mockup generators still live in `checks/` and no longer WRITE from
+  a sweep** (§330.12 closing §329's own finding): both refuse unless asked by
+  name with `SMP_WRITE_MOCKUPS=1`, which is the smaller of the two remedies
+  that section named. Moving them out of `checks/` altogether is still the
+  tidier answer and is still not done.
+- **`gap-walk.py` is 5 red and it is not this branch's.** Its function side
+  finds nothing to walk — established by reproducing the identical five on
+  `origin/main`'s OWN build and on §329's (§303), so it arrived before this
+  round and belongs with the stale-neighbour sweep §324 was, rather than riding
+  a section about capabilities (§2b). `milestone-fill.py` declines the same way
+  on main, honestly and in words (§54.5), and `multi-client.py` needs the
+  three-step rehearsal database §313.37 describes, which this session did not
+  stand up.
 - **`SMPRules.unitLikeOf()` does not know a capability, and today nothing asks
   it to.** It is the one resolver in the shared rules §330 did not teach —
   measured, `unitLikeOf(w, "cap:cap6")` answers null — and its only caller is

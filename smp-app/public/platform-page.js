@@ -4,8 +4,8 @@
 
   /* ── One shape for every request (§71's rule: three callers with the same
      six lines is where a typo lives in exactly one of them). ───────── */
-  function post(body) {
-    return fetch("/api/platform", { method: "POST", cache: "no-store",
+  function send(path, body) {
+    return fetch(path, { method: "POST", cache: "no-store",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body) })
       .then(function (r) {
@@ -19,6 +19,10 @@
         return r.json();
       });
   }
+  /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 045) and the
+     401-is-the-door rule above is not written twice for it. */
+  function post(body) { return send("/api/platform", body); }
+  function mpost(body) { return send("/api/memory", body); }
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
@@ -55,9 +59,15 @@
      built after `me` answers rather than written into the markup. */
   function drawNav() {
     nav.textContent = "";
+    /* MEMORY IS THE FIRST TAB HERE WITH NO GATE, and that is decision 1 of
+       spec 045 rather than an oversight: every consultant reads every
+       insight, which is what makes it a memory rather than a filing cabinet.
+       The boundary it does keep is on the server — a client's own account
+       never reaches /api/memory — and it is checked there. */
     var tabs = [["clients", "Clients", true],
                 ["consultants", "Consultants", ME.canConsultants],
-                ["access", "Who sees what", ME.canAccess]];
+                ["access", "Who sees what", ME.canAccess],
+                ["memory", "Memory", true]];
     tabs.forEach(function (t) {
       if (!t[2]) return;
       var b = el("button", TAB === t[0] ? "on" : null, t[1]);
@@ -70,6 +80,7 @@
 
   function go(tab) {
     TAB = tab;
+    MEM.view = "list";
     drawNav();
     clear();
     return redraw();
@@ -90,6 +101,7 @@
     if (TAB === "clients") return drawClients();
     if (TAB === "consultants") return drawConsultants();
     if (TAB === "access") return drawAccess();
+    if (TAB === "memory") return drawMemory();
   }
 
   /* `quiet` is passed by every control that is UPDATING what is already on
@@ -112,6 +124,732 @@
     page.textContent = "";
     while (next.firstChild) page.appendChild(next.firstChild);
     window.scrollTo(0, y);
+  }
+
+  /* ════ The consulting memory (spec 045) ══════════════════════════════
+     Forefront's own, never a client's: an insight from one client is worth
+     having BECAUSE it helps on the next, which is the one place on this
+     platform where crossing clients is the point. Four states — the list,
+     reading one, adding one, and a period debrief with the drafts it
+     produces — drawn in the page's own classes.
+
+     THE PAGE DERIVES NO RULE. `mine` arrives on every row, computed by the
+     server, exactly as `mine` on a client card already is: one answer, not
+     two (§53.5), and the server asks again when the press lands (§48.2). */
+  var MEM = { view: "list", entry: null, filters: { q: "", client: "", industry: "", kind: "" },
+              draft: null, deb: null, drafts: null };
+  var KINDS = [["practice", "Practice"], ["hiccup", "Hiccup"], ["lesson", "Lesson"]];
+  /* The four questions, named ONCE — the form, the reading view and the
+     debrief's drafts all walk this list (§104.7). */
+  var QS = [["happened", "What happened"], ["did", "What we did"],
+            ["came_of_it", "What came of it"], ["next_person", "What the next person should know"]];
+  var kindWord = function (k) {
+    for (var i = 0; i < KINDS.length; i++) if (KINDS[i][0] === k) return KINDS[i][1];
+    return "Lesson";
+  };
+  var whenWord = function (iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  function memGo(view, extra) {
+    MEM.view = view;
+    if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) MEM[k] = extra[k];
+    return drawMemory();
+  }
+
+  function drawMemory() {
+    if (MEM.view === "entry") return drawMemEntry();
+    if (MEM.view === "wiz") return drawMemForm();
+    if (MEM.view === "deb") return drawDebrief();
+    if (MEM.view === "drafts") return drawDrafts();
+    return drawMemList();
+  }
+
+  /* ── The list ──────────────────────────────────────────────────── */
+  function drawMemList(quiet) {
+    lead(quiet, "Reading…");
+    var f = MEM.filters;
+    return mpost({ action: "list", q: f.q, client: f.client, industry: f.industry, kind: f.kind })
+      .then(function (j) {
+        if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the memory.", true); return; }
+        MEM.clientNames = {};
+        (j.clients || []).forEach(function (c) { MEM.clientNames[c.key] = c.name; });
+        settle(function () {
+          var right = el("span");
+          var add = el("button", "btn", "Add one insight");
+          add.type = "button";
+          add.addEventListener("click", function () { memGo("wiz", { draft: null }); });
+          var deb = el("button", "btn amber", "Write up a period");
+          deb.type = "button";
+          deb.addEventListener("click", function () { memGo("deb", { deb: null }); });
+          right.appendChild(add); right.appendChild(deb);
+          title("Memory", right);
+
+          /* NOTHING YET — the one sentence on the page, and it is a fact the
+             screen does not otherwise state rather than a description of
+             itself (rule 1b-ii, §45.2). Drawn only when the memory is empty
+             and nothing is being filtered, or "no insights match" would read
+             as "there are none". */
+          var filtering = !!(f.q || f.client || f.industry || f.kind);
+          if (!j.entries.length && !filtering) {
+            var box = el("div", "empty");
+            box.appendChild(el("b", null, "Nothing here yet"));
+            box.appendChild(document.createTextNode(
+              "Every insight names the client it came from and the person who wrote it."));
+            var first = el("button", "btn amber", "Write up a period");
+            first.type = "button";
+            first.addEventListener("click", function () { memGo("deb", { deb: null }); });
+            box.appendChild(first);
+            page.appendChild(box);
+            return;
+          }
+
+          page.appendChild(memAskBox());
+          page.appendChild(memFilters(j));
+          if (!j.entries.length) { page.appendChild(el("p", "muted", "Nothing matches that.")); return; }
+          var list = el("div", "elist");
+          j.entries.forEach(function (e) { list.appendChild(memRow(e)); });
+          page.appendChild(list);
+        });
+      });
+  }
+
+  /* ASK IT — on the page the insights are on, never a corner of its own
+     (§32: a door behind a door). It writes nothing: what somebody went looking
+     for is not part of the record. */
+  function memAskBox() {
+    var box = el("div", "askbox");
+    var row = el("div", "askrow");
+    var q = el("input", "fld");
+    q.type = "text";
+    q.id = "m-ask";
+    q.placeholder = "Ask the memory — “we have hit this before, what happened?”";
+    var go = el("button", "btn solid", "Ask");
+    go.type = "button";
+    var out = el("div", "askout");
+    out.hidden = true;
+    function run() {
+      var text = q.value.trim();
+      if (!text) return;
+      go.disabled = true;
+      out.hidden = false;
+      out.textContent = "";
+      out.appendChild(el("p", "muted", "Reading the memory…"));
+      mpost({ action: "ask", question: text }).then(function (r) {
+        go.disabled = false;
+        out.textContent = "";
+        if (!r || !r.ok) { out.appendChild(el("p", "muted", (r && r.error) || "The memory could not be asked.")); return; }
+        if (r.why) { out.appendChild(el("p", "muted", r.why)); return; }
+        out.appendChild(el("p", "askreply", r.reply));
+        /* EVERY ANSWER NAMES ITS SOURCES, and they are DOORS: the next step is
+           to open the insight and go and ask whoever wrote it. */
+        if ((r.sources || []).length) {
+          var sp = el("div", "asksrc");
+          sp.appendChild(el("span", "lab", "From"));
+          r.sources.forEach(function (src) {
+            var b = el("button", "tag", src.title + " · " + src.author);
+            b.type = "button";
+            b.addEventListener("click", function () { memGo("entry", { entry: src.id }); });
+            sp.appendChild(b);
+          });
+          out.appendChild(sp);
+        } else if (r.answered) {
+          /* An answer that cites nothing is one nobody can act on — said,
+             rather than drawn as though it were sourced (§124). */
+          out.appendChild(el("p", "muted", "It named no insight for that — treat it carefully."));
+        }
+      });
+    }
+    go.addEventListener("click", run);
+    q.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
+    row.appendChild(q); row.appendChild(go);
+    box.appendChild(row); box.appendChild(out);
+    return box;
+  }
+
+  function memFilters(j) {
+    var f = MEM.filters, row = el("div", "filters");
+    var q = el("input", "fld search");
+    q.type = "search"; q.value = f.q;
+    q.placeholder = "Search insights — title, body, client";
+    /* TYPING NEVER REPAINTS (§35). The search runs when the box is left or
+       Enter is pressed, so the field being typed into is never replaced. */
+    q.addEventListener("change", function () { f.q = q.value.trim(); drawMemList(true); });
+    row.appendChild(q);
+
+    row.appendChild(memPick(j.clients.map(function (c) { return [c.key, c.name]; }),
+      "Every client", f.client, function (v) { f.client = v; drawMemList(true); }));
+    row.appendChild(memPick(j.industries.map(function (i) { return [i, i]; }),
+      "Every industry", f.industry, function (v) { f.industry = v; drawMemList(true); }));
+
+    var cell = el("span", "cell");
+    cell.setAttribute("role", "group");
+    cell.setAttribute("aria-label", "Kind");
+    [["", "All"]].concat(KINDS).forEach(function (k) {
+      var b = el("button", f.kind === k[0] ? "on" : null, k[1]);
+      b.type = "button";
+      b.addEventListener("click", function () { f.kind = k[0]; drawMemList(true); });
+      cell.appendChild(b);
+    });
+    row.appendChild(cell);
+    row.appendChild(el("span", "count", j.entries.length + (j.entries.length === 1 ? " insight" : " insights")));
+    return row;
+  }
+
+  /* The filters offer what the MEMORY holds, never every client on the
+     platform: a picker whose every option empties the page is not a choice
+     (§61). */
+  function memPick(pairs, all, value, onPick) {
+    var sel = el("select", "fld");
+    sel.setAttribute("aria-label", all);
+    var opts = [["", all]].concat(pairs);
+    opts.forEach(function (o) {
+      var op = el("option", null, o[1]);
+      op.value = o[0];
+      if (o[0] === value) op.selected = true;
+      sel.appendChild(op);
+    });
+    sel.addEventListener("change", function () { onPick(sel.value); });
+    return sel;
+  }
+
+  function memRow(e) {
+    var b = el("button", "erow");
+    b.type = "button";
+    b.appendChild(el("span", "tag " + e.kind, kindWord(e.kind)));
+    var body = el("span", "body");
+    body.appendChild(el("h3", null, e.title));
+    var snip = memSnip(e);
+    if (snip) body.appendChild(el("p", "snip", snip));
+    var facts = el("span", "facts");
+    facts.appendChild(el("b", null, e.clientName));
+    facts.appendChild(document.createTextNode(
+      (e.industry ? " · " + e.industry : "") + " · " + e.author + " · " + whenWord(e.when)));
+    body.appendChild(facts);
+    b.appendChild(body);
+    b.addEventListener("click", function () { memGo("entry", { entry: e.id }); });
+    return b;
+  }
+  /* The snippet is the first answer that has anything in it — a one-line
+     insight has to look like a finished row, not a broken one (§245). */
+  function memSnip(e) {
+    for (var i = 0; i < QS.length; i++) if (String(e[QS[i][0]] || "").trim()) return e[QS[i][0]];
+    return "";
+  }
+
+  /* ── Reading one ───────────────────────────────────────────────── */
+  function drawMemEntry() {
+    lead(false, "Reading…");
+    return mpost({ action: "one", id: MEM.entry }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "That insight is no longer here.", true); return; }
+      var e = j.entry;
+      settle(function () {
+        var back = el("button", "btn", "Back to the list");
+        back.type = "button";
+        back.addEventListener("click", function () { memGo("list"); });
+        title("Memory", (function () { var r = el("span"); r.appendChild(back); return r; }()));
+
+        var card = el("article", "ecard");
+        var tags = el("div", "etags");
+        tags.appendChild(el("span", "tag " + e.kind, kindWord(e.kind)));
+        tags.appendChild(el("span", "tag", e.clientName));
+        if (e.industry) tags.appendChild(el("span", "tag", e.industry));
+        card.appendChild(tags);
+        card.appendChild(el("h2", null, e.title));
+        var facts = el("p", "facts");
+        facts.appendChild(el("b", null, whenWord(e.when)));
+        if (e.occurred) facts.appendChild(document.createTextNode(" · " + e.occurred));
+        card.appendChild(facts);
+
+        var qa = el("div", "qa");
+        var any = false;
+        QS.forEach(function (q) {
+          var v = String(e[q[0]] || "").trim();
+          if (!v) return;             /* an unanswered question is not a heading over nothing */
+          any = true;
+          var d = el("div");
+          d.appendChild(el("h3", null, q[1]));
+          d.appendChild(el("p", null, v));
+          qa.appendChild(d);
+        });
+        if (any) card.appendChild(qa);
+
+        /* THE AUTHOR IS WHAT A READER ACTS ON (decision 3): the name, the
+           address, and a way to write to them. */
+        var by = el("div", "byline");
+        var who = el("span", "who");
+        who.appendChild(el("span", "nm", e.author));
+        who.appendChild(el("span", "em", e.authorEmail));
+        by.appendChild(who);
+        var sp = el("span", "sp");
+        var ask = el("a", "btn", "Ask " + String(e.author || "").split(/\s+/)[0]);
+        ask.href = "mailto:" + e.authorEmail + "?subject=" + encodeURIComponent(e.title);
+        sp.appendChild(ask);
+        if (e.mine) {
+          var ed = el("button", "btn", "Edit");
+          ed.type = "button";
+          ed.addEventListener("click", function () { memGo("wiz", { draft: e }); });
+          sp.appendChild(ed);
+          var rm = el("button", "btn", "Remove");
+          rm.type = "button";
+          rm.addEventListener("click", function () { memDrop(rm, e); });
+          sp.appendChild(rm);
+        }
+        by.appendChild(sp);
+        card.appendChild(by);
+        page.appendChild(card);
+      });
+    });
+  }
+
+  /* REMOVING ONE IS THE ONE IRREVERSIBLE ACT HERE, and it asks twice.
+     NOT `confirm()` — a browser dialog can be silenced permanently on some
+     other site and this is the press that must not go through unseen (§95) —
+     and not a modal either, because this page has no dialog machinery at all
+     and building some for one button is furniture (§2b). The button says what
+     the second press does, which is the smallest thing that works and cannot
+     be switched off. */
+  function memDrop(btn, e) {
+    if (btn.dataset.armed !== "1") {
+      btn.dataset.armed = "1";
+      btn.textContent = "Remove it — this cannot be undone";
+      btn.classList.add("amber");
+      return;
+    }
+    btn.disabled = true;
+    mpost({ action: "drop", id: e.id }).then(function (j) {
+      if (!j || !j.ok) { btn.disabled = false; say((j && j.error) || "It could not be removed.", true); return; }
+      memGo("list");
+    });
+  }
+
+  /* The prompt for ONE insight: the four questions with the client already in
+     them. Built here rather than on the server because it is made of what the
+     page already holds, and asking for it would be a request to learn nothing
+     new (§98). */
+  function onePrompt(csel, clients) {
+    var c = clientPhrase(clientNamed(clients, csel.value));
+    return "I am writing up one consulting insight for my firm's memory, about\n" +
+      c + ".\n\n" +
+      "Ask me these four questions, one at a time, and wait for my answer\n" +
+      "before asking the next:\n\n" +
+      "  1. What happened?\n" +
+      "  2. What did we do?\n" +
+      "  3. What came of it?\n" +
+      "  4. What should the next person know?\n\n" +
+      "Then write my answers back as four short paragraphs under those four\n" +
+      "headings, in my own words, and nothing else.";
+  }
+
+  /* ── Adding or correcting one ──────────────────────────────────── */
+  function drawMemForm() {
+    var e = MEM.draft || {};
+    var editing = !!e.id;
+    lead(false, "Reading…");
+    /* THE CLIENT LIST IS THE CARDS' OWN, not the memory's: this is the one
+       picker that must offer a client nothing has been written about yet, so
+       it cannot come from the list endpoint like the filters do. `cards` has
+       already dropped the retired ones (visibleClients); the worked example is
+       dropped here, because it is not an engagement anybody learned anything
+       on (§317). */
+    return post({ action: "cards" }).then(function (j) {
+      var clients = ((j && j.cards) || []).filter(function (c) { return c.kind !== "demo"; });
+      settle(function () {
+        var right = el("span");
+        var cancel = el("button", "btn", "Cancel");
+        cancel.type = "button";
+        cancel.addEventListener("click", function () { memGo(editing ? "entry" : "list"); });
+        var save = el("button", "btn amber", "Save");
+        save.type = "button";
+        right.appendChild(cancel); right.appendChild(save);
+        title(editing ? "Edit an insight" : "Add an insight", right);
+
+        var wiz = el("div", "wiz");
+        var fields = {};
+
+        var pair = el("div", "wpair");
+        var cbox = el("div");
+        cbox.appendChild(labFor("m-client", "Client"));
+        var csel = el("select", "fld");
+        csel.id = "m-client";
+        if (editing) { csel.disabled = true; }
+        clients.forEach(function (c) {
+          var op = el("option", null, c.name);
+          op.value = c.key;
+          if (c.key === (e.client || "")) op.selected = true;
+          csel.appendChild(op);
+        });
+        cbox.appendChild(csel); pair.appendChild(cbox);
+
+        var kbox = el("div");
+        kbox.appendChild(labFor("m-kind", "Kind"));
+        var ksel = el("select", "fld");
+        ksel.id = "m-kind";
+        KINDS.forEach(function (k) {
+          var op = el("option", null, k[1]);
+          op.value = k[0];
+          if (k[0] === (e.kind || "lesson")) op.selected = true;
+          ksel.appendChild(op);
+        });
+        kbox.appendChild(ksel); pair.appendChild(kbox);
+
+        var wbox = el("div");
+        wbox.appendChild(labFor("m-when", "When it happened"));
+        var wfld = el("input", "fld");
+        wfld.id = "m-when"; wfld.type = "text"; wfld.value = e.occurred || "";
+        wbox.appendChild(wfld); pair.appendChild(wbox);
+        wiz.appendChild(pair);
+
+        var tq = el("div", "wq");
+        tq.appendChild(labFor("m-title", "Title"));
+        var tfld = el("input", "fld");
+        tfld.id = "m-title"; tfld.type = "text"; tfld.value = e.title || "";
+        tq.appendChild(tfld); wiz.appendChild(tq);
+
+        QS.forEach(function (q) {
+          var box = el("div", "wq");
+          box.appendChild(labFor("m-" + q[0], q[1]));
+          var ta = el("textarea", "fld");
+          ta.id = "m-" + q[0];
+          ta.value = e[q[0]] || "";
+          box.appendChild(ta);
+          fields[q[0]] = ta;
+          wiz.appendChild(box);
+        });
+
+        wiz.appendChild(el("p", "note", "A title and a client are enough to save. The rest can wait."));
+
+        /* The other way to finish it — under a rule, because it is not the
+           next step of the form but an alternative to filling it in (§317's
+           own .apart device). */
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "Or answer it out loud"));
+        var pre = el("pre", "prompt", onePrompt(csel, clients));
+        apart.appendChild(pre);
+        var acts = el("div", "wacts");
+        acts.appendChild(copyBtn(function () { return pre.textContent; }));
+        acts.appendChild(el("span", "muted", "Paste it back into the boxes above."));
+        apart.appendChild(acts);
+        /* the same, one screen over (§53.5) */
+        var follow1 = function () { pre.textContent = onePrompt(csel, clients); };
+        csel.addEventListener("input", follow1);
+        csel.addEventListener("change", follow1);
+        wiz.appendChild(apart);
+        page.appendChild(wiz);
+
+        save.addEventListener("click", function () {
+          var body = { action: "save", client: csel.value, kind: ksel.value,
+                       title: tfld.value, occurred: wfld.value };
+          if (editing) body.id = e.id;
+          QS.forEach(function (q) { body[q[0]] = fields[q[0]].value; });
+          save.disabled = true;
+          mpost(body).then(function (r) {
+            save.disabled = false;
+            if (!r || !r.ok) { say((r && r.error) || "It could not be saved.", true); return; }
+            memGo(editing ? "entry" : "list", { entry: r.id });
+          });
+        });
+      });
+    });
+  }
+
+  function labFor(id, text) {
+    var l = el("label", "lab", text);
+    l.setAttribute("for", id);
+    return l;
+  }
+  function copyBtn(text) {
+    var b = el("button", "btn solid", "Copy the prompt");
+    b.type = "button";
+    b.addEventListener("click", function () {
+      var done = function () {
+        b.textContent = "Copied";
+        setTimeout(function () { b.textContent = "Copy the prompt"; }, 1600);
+      };
+      /* execCommand is the path that actually runs from a plain http origin
+         (§93.6): navigator.clipboard needs a secure context. */
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text()).then(done, done);
+      else {
+        var ta = document.createElement("textarea");
+        ta.value = text();
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch (err) { /* nothing to do */ }
+        document.body.removeChild(ta);
+        done();
+      }
+    });
+    return b;
+  }
+  function clientNamed(clients, key) {
+    for (var i = 0; i < clients.length; i++) if (clients[i].key === key) return clients[i];
+    return null;
+  }
+  function clientPhrase(c) {
+    if (!c) return "this client";
+    return c.name + (c.industry ? " (" + c.industry + ")" : "");
+  }
+
+  /* ── A period debrief, and what comes back ─────────────────────
+     THE MAIN DOOR (Islam: "it will not be case by case usually it would be a
+     period of time to share"). One conversation, several insights: the page
+     writes a prompt carrying the client and the period, the consultant talks
+     it through with whatever assistant they use, and pastes the whole answer
+     back in one box.
+
+     NOTHING IS STORED UNTIL SOMEBODY HAS READ IT. The prompt forbids
+     invention — "use my words, not yours; if I only half answered, leave that
+     line out" — and the platform CANNOT TELL a paragraph somebody said from
+     one a model completed, so the drafts screen is not politeness: it is the
+     only place that judgement can happen. */
+  function drawDebrief() {
+    lead(false, "Reading…");
+    return post({ action: "cards" }).then(function (j) {
+      var clients = ((j && j.cards) || []).filter(function (c) { return c.kind !== "demo"; });
+      var d = MEM.deb || { client: (clients[0] || {}).key || "", from: "", to: "", paste: "" };
+      settle(function () {
+        var right = el("span");
+        var cancel = el("button", "btn", "Cancel");
+        cancel.type = "button";
+        cancel.addEventListener("click", function () { memGo("list", { deb: null }); });
+        right.appendChild(cancel);
+        title("Write up a period", right);
+
+        var wiz = el("div", "wiz");
+        var pair = el("div", "wpair");
+        var csel = el("select", "fld");
+        csel.id = "d-client";
+        clients.forEach(function (c) {
+          var op = el("option", null, c.name);
+          op.value = c.key;
+          if (c.key === d.client) op.selected = true;
+          csel.appendChild(op);
+        });
+        pair.appendChild(boxed("d-client", "Client", csel));
+        var from = el("input", "fld"); from.id = "d-from"; from.type = "text"; from.value = d.from;
+        from.placeholder = "1 August 2026";
+        pair.appendChild(boxed("d-from", "From", from));
+        var to = el("input", "fld"); to.id = "d-to"; to.type = "text"; to.value = d.to;
+        to.placeholder = "11 September 2026";
+        pair.appendChild(boxed("d-to", "To", to));
+        wiz.appendChild(pair);
+
+        wiz.appendChild(el("span", "lab", "Take this to your assistant and talk it through"));
+        var pre = el("pre", "prompt", debPrompt(csel, clients, from, to));
+        wiz.appendChild(pre);
+        var acts = el("div", "wacts");
+        acts.appendChild(copyBtn(function () { return pre.textContent; }));
+        wiz.appendChild(acts);
+        /* THE PROMPT FOLLOWS AS YOU TYPE, and `input` is right here where it
+           would be wrong almost anywhere else in this product: §35's rule is
+           that typing must not REPAINT, and this repaints nothing — it writes
+           into one <pre> that nobody is typing into, which is the
+           write-into-the-node pattern §63 and §193 already use.
+
+           On `change` it went stale in the one way that matters: `change`
+           fires on BLUR, so somebody who filled in the end date and reached
+           straight for Copy the prompt would have copied a prompt with no end
+           date in it. Measured — the period read "covering 1 August 2026"
+           with 11 September plainly in the box beside it. */
+        [csel, from, to].forEach(function (f) {
+          var follow = function () { pre.textContent = debPrompt(csel, clients, from, to); };
+          f.addEventListener("input", follow);
+          f.addEventListener("change", follow);
+        });
+
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "Then paste what came back"));
+        var paste = el("textarea", "fld pastebox");
+        paste.id = "d-paste";
+        paste.value = d.paste;
+        paste.placeholder = "Paste the whole answer here — every block at once.";
+        apart.appendChild(paste);
+        var pacts = el("div", "wacts");
+        var read = el("button", "btn amber", "Read what came back");
+        read.type = "button";
+        read.addEventListener("click", function () {
+          var text = paste.value;
+          if (!text.trim()) { say("There is nothing pasted in yet.", true); return; }
+          var out = window.MemorySplit.split(text);
+          if (!out.entries.length && !out.unread.length) { say("There is nothing pasted in yet.", true); return; }
+          memGo("drafts", {
+            /* the NAME is carried with the key: on a first debrief the list
+               endpoint has never heard of this client, so MEM.clientNames is
+               empty and the strip would read a slug (§124) */
+            deb: { client: csel.value, clientName: csel.options[csel.selectedIndex].textContent,
+                   from: from.value, to: to.value, paste: text },
+            drafts: out.entries.map(function (e) { return e; })
+              .concat(out.unread.map(function (t) { return rawDraft(t); }))
+          });
+        });
+        pacts.appendChild(read);
+        pacts.appendChild(el("span", "muted", "Nothing is saved until you have read them."));
+        apart.appendChild(pacts);
+        wiz.appendChild(apart);
+        page.appendChild(wiz);
+      });
+    });
+  }
+
+  function boxed(id, label, control) {
+    var d = el("div");
+    d.appendChild(labFor(id, label));
+    d.appendChild(control);
+    return d;
+  }
+  function rawDraft(text) {
+    /* A BLOCK IT COULD NOT READ COMES BACK WHOLE (§184). It has no title —
+       which is the one thing a person can add — so it is shown in the warning
+       ground with its words in the first box rather than dropped. */
+    return { kind: "lesson", kindGuessed: true, title: "", occurred: "",
+             happened: text, did: "", came_of_it: "", next_person: "", raw: true };
+  }
+  function periodWord(from, to) {
+    var f = String(from.value || "").trim(), t = String(to.value || "").trim();
+    if (f && t) return f + " to " + t;
+    return f || t || "";
+  }
+  function debPrompt(csel, clients, from, to) {
+    var c = clientPhrase(clientNamed(clients, csel.value));
+    var p = periodWord(from, to);
+    return "I have just finished a period of work at " + c + (p ? ",\ncovering " + p : "") + ". Help me write up what we learned\n" +
+      "from it, for my firm's consulting memory.\n\n" +
+      "Interview me. Ask ONE question at a time and wait for my answer before\n" +
+      "asking the next one.\n\n" +
+      "Start by asking me to walk you through the period — what we worked on and\n" +
+      "what stands out. Then draw out, one at a time:\n\n" +
+      "  · what went better than we expected, and why\n" +
+      "  · what went wrong, or cost us time\n" +
+      "  · what I know now that I did not know at the start\n" +
+      "  · anything I would warn the next consultant about\n\n" +
+      "For each thing I raise, ask me what happened, what we did, what came of\n" +
+      "it, and what the next person should know. Push back when my answer is\n" +
+      "vague, and do not move on until it would make sense to somebody who was\n" +
+      "not there.\n\n" +
+      "When I say I am done, write every item back in exactly this shape, and\n" +
+      "nothing else — no summary, no preamble:\n\n" +
+      "===\n" +
+      "KIND: hiccup | practice | lesson\n" +
+      "TITLE: one line, the thing itself\n" +
+      (p ? "WHEN: " + p + "\n" : "") +
+      "WHAT HAPPENED: ...\n" +
+      "WHAT WE DID: ...\n" +
+      "WHAT CAME OF IT: ...\n" +
+      "WHAT THE NEXT PERSON SHOULD KNOW: ...\n" +
+      "===\n\n" +
+      "Repeat that block for each item. Use my words, not yours. If I only half\n" +
+      "answered something, leave that line out rather than filling it in.";
+  }
+
+  /* ── What came back ────────────────────────────────────────────── */
+  function drawDrafts() {
+    var d = MEM.deb || {}, drafts = MEM.drafts || [];
+    settle(function () {
+      var right = el("span");
+      var back = el("button", "btn", "Back");
+      back.type = "button";
+      back.addEventListener("click", function () { memGo("deb"); });
+      var save = el("button", "btn amber", "Save all " + drafts.length);
+      save.type = "button";
+      right.appendChild(back); right.appendChild(save);
+      title("What came back", right);
+
+      if (!drafts.length) {
+        page.appendChild(el("p", "muted", "Nothing left to save — go back and paste it again."));
+        return;
+      }
+
+      /* THE COUNT AND THE ROWS ARE ONE LIST (§108.1): what was read and what
+         was not are said separately, because four found over three that
+         parsed is the badge people report as a bug. */
+      var read = drafts.filter(function (x) { return !x.raw; }).length;
+      var raw = drafts.length - read;
+      var found = el("p", "found");
+      var b = el("b", null, read + (read === 1 ? " insight read" : " insights read"));
+      found.appendChild(b);
+      found.appendChild(document.createTextNode(
+        (raw ? ", and " + raw + (raw === 1 ? " block it could not" : " blocks it could not") : "") +
+        " · " + (clientNameOf(d.client) || d.client) + (periodOf(d) ? " · " + periodOf(d) : "")));
+      var sp = el("span", "sp");
+      KINDS.forEach(function (k) {
+        var n = drafts.filter(function (x) { return !x.raw && x.kind === k[0]; }).length;
+        if (n) sp.appendChild(el("span", "tag " + k[0], n + " " + (n === 1 ? k[1].toLowerCase() : k[1].toLowerCase() + "s")));
+      });
+      found.appendChild(sp);
+      page.appendChild(found);
+
+      var list = el("div", "drafts");
+      drafts.forEach(function (dr) { list.appendChild(draftCard(dr, drafts, list)); });
+      page.appendChild(list);
+
+      save.addEventListener("click", function () {
+        var missing = -1;
+        for (var i = 0; i < drafts.length; i++) if (!String(drafts[i].title || "").trim()) { missing = i; break; }
+        if (missing >= 0) { say("Give number " + (missing + 1) + " a title before saving.", true); return; }
+        save.disabled = true;
+        mpost({ action: "saveMany", client: d.client, entries: drafts }).then(function (r) {
+          save.disabled = false;
+          if (!r || !r.ok) { say((r && r.error) || "They could not be saved.", true); return; }
+          memGo("list", { deb: null, drafts: null });
+        });
+      });
+    });
+  }
+
+  function clientNameOf(key) {
+    return (MEM.deb && MEM.deb.client === key && MEM.deb.clientName) || (MEM.clientNames || {})[key] || key;
+  }
+  function periodOf(d) {
+    var f = String(d.from || "").trim(), t = String(d.to || "").trim();
+    return f && t ? f + " to " + t : (f || t || "");
+  }
+
+  /* A DRAFT EDITS IN PLACE AND NOTHING REPAINTS (§71.2): these boxes are being
+     read and corrected, and a repaint under a working hand is how half a
+     correction disappears. Only DROP redraws, because a row leaving changes
+     the count above it. */
+  function draftCard(dr, drafts, list) {
+    var card = el("article", "dcard" + (dr.raw ? " raw" : ""));
+    if (dr.raw) card.appendChild(el("p", "rawnote",
+      "This one did not come back in the shape the prompt asked for — check it, or save it as it stands."));
+    var head = el("div", "dhead");
+    var ksel = el("select", "fld");
+    ksel.setAttribute("aria-label", "Kind");
+    KINDS.forEach(function (k) {
+      var op = el("option", null, k[1]);
+      op.value = k[0];
+      if (k[0] === dr.kind) op.selected = true;
+      ksel.appendChild(op);
+    });
+    ksel.addEventListener("change", function () { dr.kind = ksel.value; });
+    head.appendChild(ksel);
+    var tfld = el("input", "fld");
+    tfld.type = "text";
+    tfld.setAttribute("aria-label", "Title");
+    tfld.value = dr.title || "";
+    if (!dr.title) tfld.placeholder = "Give it a title";
+    tfld.addEventListener("change", function () { dr.title = tfld.value; });
+    head.appendChild(tfld);
+    var drop = el("button", "btn drop", "Drop");
+    drop.type = "button";
+    drop.addEventListener("click", function () {
+      var at = drafts.indexOf(dr);
+      if (at >= 0) drafts.splice(at, 1);
+      drawDrafts();
+    });
+    head.appendChild(drop);
+    card.appendChild(head);
+
+    QS.forEach(function (q) {
+      var box = el("div", "dq");
+      box.appendChild(el("label", "lab", q[1]));
+      var ta = el("textarea", "fld");
+      ta.value = dr[q[0]] || "";
+      ta.addEventListener("change", function () { dr[q[0]] = ta.value; });
+      box.appendChild(ta);
+      card.appendChild(box);
+    });
+    return card;
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */

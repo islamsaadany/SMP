@@ -43131,3 +43131,145 @@ merge every time.
 
 
 ---
+
+---
+
+## §319 — THE CONSULTING MEMORY (2026-09-11, spec 045)
+
+Islam: *"We need to have somewhere a consulting memory where the consultants
+put all their good practices and lessons learned and hickups they faces with
+the client to have a memory of what happened and we can get back later &hellip;
+and eventually we will need a helpful bot to ask about previous experience or a
+problem we are facing."*
+
+**FIVE DECISIONS ARE HIS, AND TWO OF THEM OVERRULE A RECOMMENDATION.**
+*Every consultant reads every insight* — with the cost stated before he took it,
+that a Raya write-up is readable by somebody who never worked on Raya; *an
+insight always names its client*, against my proposal that a client-less one be
+allowed (**"the relevance of the input is relevant to this specific client with
+its own dynamics"**); *the entry names its author*, **"the entry is for the team
+and identified by who added this lesson or insight"**; **nothing records who
+READ one** — a readership log was offered and refused; and **the period debrief
+is the main door**, his correction of a one-at-a-time form: *"it will not be
+case by case usually it would be a period of time to share."* That last one
+reshaped the feature rather than adding to it &mdash; the wizard stops being the
+way in and becomes the way to fix one line.
+
+**THE TRAP WAS THE RLS LOOP, AND IT WOULD HAVE KILLED THIS IN SILENCE.**
+`smp-app/db/schema.sql` ends in one loop over the catalogue that gives every
+table row-level security, a `tenant_rows` policy and a `(tenant_id)` index **by
+EXCLUSION** — so a new table is tenant-owned unless somebody says otherwise.
+A `memory_entries` carrying the obvious column name `tenant_id` would have been
+handed a policy meaning *only this client's people may read this row*, and **a
+consultant on RHI could never read a Raya insight**: the whole feature, dead,
+with no error anywhere. **AND THE TWO DEPLOYMENTS WOULD HAVE DISAGREED**
+(§113.7's mirror): `schema.sql` runs ONCE, recorded as `schema` in
+`_migrations`, so on the deployment that has already run it the loop never
+re-runs and the table is fine — **perfect on ours and broken on every new
+client's**. Both halves were demonstrated with SQL on a real database *before*
+the fix was written, which is the only reason the second one was known at all.
+
+**THE COLUMN IS `about_tenant_id`, AND THE NAMING IS THE WHOLE DECISION.** It
+means *which client this insight is about*, which is genuinely not *which tenant
+owns this row* — and the gain is the FAILURE MODE: add a fourth memory table
+later and forget the exclusion list, and the loop's own
+`CREATE INDEX … (tenant_id)` **fails the apply outright** rather than quietly
+attaching a policy that empties the page. *A loud failure in place of a quiet
+one is what the name buys.* `checks/memory-boundary.mjs` asserts both ends — no
+policy on the table, and an insight written under one tenant setting **read back
+under another**, which is the feature expressed as the one assertion that fails
+if any of this is got wrong — with a TENANT table read the same way beside it as
+the control (§113.8).
+
+**AND THE FRESH DEPLOYMENT AND THE EXISTING ONE HAD TO BE MADE TO AGREE.**
+`schema.sql` creates the table and migration 004 creates it again, so on a
+VIRGIN database the migration hit `42P07` and **rolled back the whole apply** —
+every new deployment failing to start, found only by applying to an empty
+database rather than to the one already in front of me (§113.7 from the other
+side). Guarded with `IF NOT EXISTS`, and both paths then measured identical.
+
+**A ROUTE OF ITS OWN, NOT A FOURTH ACTION ON THE CARRIED ENDPOINT.**
+`lib/platform-api.ts` was carried across byte for byte and its whole discipline
+is that it still answers what the frozen page asked; adding a feature's actions
+into it ends that property and makes a future diff against the original
+impossible. **AND NO NEW RULE IN `platform-rules.cjs`** — measured, because the
+page loads **no rules module in the browser at all**, so *may I edit this entry*
+is answered once on the server and sent as `mine` on the row (§53.5), **and
+asked again at press time** (§48.2).
+
+**THE SPLITTER IS ITS OWN MODULE BECAUSE IT IS THE ONE PIECE WITH A WRONG
+ANSWER AVAILABLE TO IT** — a UMD, so `node` and the browser run the same bytes,
+checkable with no browser and no database. **A PASTE WITH NO RULES IN IT
+BECOMES ONE ENTRY, NEVER NOUGHT** (§184): every assistant follows a block format
+most of the time and none follows it always, so the degenerate case is the safe
+one — losing what somebody has just dictated is the single unacceptable
+outcome. A block it cannot read comes back **whole**, and an unknown kind falls
+back and **says it was guessed** rather than refusing the write-up.
+
+**`saveMany` IS ONE TRANSACTION ON PURPOSE**: six insights half-saved after a
+long conversation is the outcome nobody can tell apart from a bug, and the
+person has already read them all. Falsified by making one of six rows invalid
+and asserting **nought** are stored.
+
+**THE ASSISTANT NAMES ITS SOURCES, AND DECLINES IN THE PRODUCT'S OWN WORDS.**
+§125 blanks the model's reply on a decline deliberately, so *"nothing happened
+at all"* was available here too — the memory supplies its own sentence
+(*"Nobody has written that one up yet. If you know the answer, it is worth
+adding."*), and the check proves the sentence is OURS by making the stand-in
+model say something arbitrary and asserting the page does not print it.
+**Sources are resolved against the rows actually sent**, so an id the model
+invents is dropped rather than drawn.
+
+**ON DELETE RESTRICT ON BOTH ENDS, AND IT IS A DECISION RATHER THAN CAUTION**:
+deleting a client that holds insights is REFUSED, naming them (§62's shape),
+because *the memory outlives the engagement* — when Forefront stops working with
+somebody, what was learned there is worth more and not less. A consultant who
+leaves keeps their insights, and keeps them attributed.
+
+**THE WORDS ARE PLACEHOLDERS AND ARE SAID TO BE.** *Insight*, *practice ·
+hiccup · lesson*, *Add one insight*, *Write up a period* — Islam waived the
+after-phase-A stop point (*"go on with all the phases in sequence and don't stop
+until you need me for a decision"*), so what the tab and the buttons say is
+settled **on use** rather than in prose (§266: a wording question is answered by
+reading it in place). The four questions and the decline sentence are NOT
+placeholders.
+
+**127 assertions over five checks, 0 failures, all ten falsifications red**;
+room 10/0, deploy 5/0, shell 61/0, state 91/0, door 49/0, 588/0, `tsc` clean,
+`platform-cards.py` 19/0 on both copies of the page. **The client's own shell
+carries none of it** — `public/shell.js` holds nought references to the route,
+the table or the splitter, asserted. **No forced sign-out** (spec 029's test):
+no save path, no authoriser and no tenant table moves, asserted rather than
+assumed. **Recorded, not built**: full-text search, attachments, editing
+somebody else's entry, and the root's `lib/platform-rules.js` duplicated against
+`smp-app/lib/platform-rules.cjs` with nothing syncing them — a live drift named
+here and not this feature's to fix.
+
+### §319.1 · The merge, and the check that was wrong in a way only it exposed
+
+`main` moved **409 commits** under this branch — §318's client set-up wizard and
+§317's last cutover corrections — and the merge was **textually clean, which is
+not the same as safe** (§313.37). The two sides touched **disjoint code**:
+`main`'s work is on the frozen side, this is the new stack plus Forefront's own
+`platform.html`, and the only shared file is the progress tracker, which
+auto-merged — so none of §56.7's shared-scope collisions was available here,
+**measured rather than assumed**. Everything generated was REBUILT rather than
+trusted (§91) and each artefact came back byte-identical; `node --check sw.js`
+parses; **no `SHELL` bump is owed**, because §91's trigger is *the built file's
+bytes changed* and they did not, `main` having already bumped it for its own
+frozen change — and since §316.10 split the caching half off, the worker the new
+stack serves carries no `SHELL` at all. **`main`'s own `client-setup.py` is
+green on the merged result**, because a merge that quietly breaks somebody
+else's work is the merge's fault and not theirs. Renumbered **spec 044 → 045**
+and **§318 → §319** at the merge, scoped to the lines this branch wrote
+(§264.3), `main` having taken both while this was in flight.
+
+**AND MY OWN BOUNDARY CHECK DEFAULTED THE APP ROLE'S PASSWORD TO A WORD THE
+PRODUCT DOES NOT USE** — `smp_app_pw`, where `lib/db.ts`, `db/apply.mjs` and
+`scripts/dev-tenant.mjs` all fall back to the literal `smp_app` — so section 4,
+*the read that IS the feature*, **died on a failed sign-in and reported the
+boundary broken when what was broken was the check** (§100.3, §53.5, §215). It
+passed on every earlier run only because the variable happened to be set in that
+shell: *a fixture that invents its own spelling of the product's own default is
+green exactly until somebody runs it the way the product runs.* It takes the
+product's default now, and the section that matters actually runs — 12/0.

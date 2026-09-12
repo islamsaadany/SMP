@@ -145,7 +145,16 @@ await section("4 · Forefront's own pages", async () => {
   await fresh(); await signIn("office@forefront.example");
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });
   check((await page.locator("#who").textContent()) === "Mohamed Essam · Super user", "the platform's chrome names the admin");
-  check((await page.locator("#nav button, #nav a").allTextContents()).join("|") === "Clients|Consultants|Who sees what", "three pages", await page.locator("#nav").textContent());
+  /* REWRITTEN, NOT LOOSENED (§218, §214.3): this held the literal
+     "Clients|Consultants|Who sees what" and spec 045 added a fourth page, so
+     a deliberate decision read as a regression. What it is FOR is that an
+     admin gets Forefront's own pages and that the gated one is among them —
+     asserted as the set, with the gated page named, so a build that dropped
+     `Who sees what` still fails and a page added next month does not. */
+  const ffTabs = await page.locator("#nav button, #nav a").allTextContents();
+  check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
+    "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
+  check(ffTabs.includes("Memory"), "…and the consulting memory, which every consultant reaches (spec 045)", ffTabs.join("|"));
   check((await page.locator("#page").textContent()).includes("Raya Trade") && (await page.locator("#page").textContent()).includes("Add a client"), "the cards: Raya Trade, and Add a client");
   const post = (body) => page.evaluate(async (b) => (await (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) })).json()), body);
   let j = await post({ action: "consultants" });

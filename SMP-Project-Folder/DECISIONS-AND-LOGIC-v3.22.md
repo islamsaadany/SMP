@@ -6772,6 +6772,104 @@ fixture never named is absent from every list (§113.8).
   planned in pillars that genuinely has a plan to walk. Stated here rather than
   guessed at later.
 
+## 331 · The rules the new stack runs are a COPY, and nobody was comparing them
+
+Islam, with a screenshot of Next's own error page — *"on checking the branch I
+got this message when I tried to open a client noting that on another branch
+called sharp pesture I was adjsuting the acheicture and access of the clients
+on different modules that was my only change check if that was the [cause]"*.
+
+**IT WAS NOT THE MODULE WORK, AND ESTABLISHING THAT FIRST WAS MOST OF THE
+ANSWER.** `origin/main` had moved ten commits under this branch and every one
+of them is that work (§318.1–.3, §320.4–.6), so his reading was the obvious
+one; the only new failure surface it puts on `/<client>` is `tenantByKey`
+gaining `, modules`, and the console's own client list selects that same column
+— so a missing column would have emptied the cards he was clicking on rather
+than letting him click one. **The fault is this branch's, and it is mine.**
+
+**RUN, NEVER READ.** `frozen.landing()` asked for all 33 people of the worked
+example: **33 threw, `SMPRules.dissolvePlan is not a function`** — his page,
+exactly, for every person in every client. §322 put `dissolvePlan` in the
+SHARED rules module and §330 put `capHolderTarget` beside it, and the new
+stack does not run `lib/rules.js`: it runs **`smp-app/lib/rules.cjs`, a
+CARRIED COPY**, which was 151 lines behind.
+
+**THE SAME TRAP §325 CLOSED, ONE DIRECTORY OVER, AND THAT IS THE FINDING.**
+That section built `generated-in-step.mjs` because `smp-app/public/` is
+generated from the frozen product and TRACKED, so a frozen source edited
+without re-running a generator leaves the Next app — which is PRODUCTION —
+serving the old bytes. `smp-app/lib/*.cjs` are the same relationship with no
+generator at all: `lib/frozen.cjs` runs the four frozen SOURCE files straight
+out of `SMP-Project-Folder/src`, so those are always fresh, and the rule
+modules beside them are copies. **That asymmetry is exactly how this hid** —
+every §330 check walks the frozen product and is green, because the frozen
+product is right.
+
+**THREE WERE STALE AND ALL THREE MATTER.** `rules.cjs` (the landing, and every
+authorisation the new stack makes); `authorize.cjs` (§330.18's `ctxOfFn`, so a
+function's project owner would have been refused every figure they entered);
+and `graph-diff.cjs`, missing §322's one line teaching `treeFor("functions")`
+about `projects` — **which is §216's fault reborn, predicted by name in that
+line's own comment**: without it a supporting function's whole plan travels on
+every figure, worst in the live case of a function head and a project owner
+reporting in the same minutes.
+
+**THE CARRY IS MECHANICAL AND IT IS ASSERTED AS ONE.** Diffed against their
+frozen twins, the only deliberate difference in any of them is a
+`require("./x.js")` between two carried siblings becoming `require("./x.cjs")`
+— nothing else, in any file. So the check applies THAT RULE rather than
+holding a list of files (§104.7): every `.cjs` with a frozen twin must equal
+it after the transform. **Two are genuinely rewritten** for this stack
+(`assistant.cjs`, `push.cjs`, §316.7's named plumbing changes) and they are
+**named, printed on every run, and asserted to be the only ones** — both ends,
+or an exception grows quietly and a third file joins it unnoticed (§113.8).
+A `.cjs` with no twin is outside the rule and is counted rather than passed
+over (§54.5). Proved able to fail both ways: the three stale copies put back,
+**1 FAILED naming all three by name and byte count**, with the landing throwing
+his sentence again in the same run; and `assistant.cjs` made a plain carry,
+**1 FAILED** on the exception half.
+
+**§331.1 — AND THREE OF THE FOUR FIRST FAILURES WERE A STALE BUILD, WHICH
+NEARLY COST A SECOND WRONG DIAGNOSIS.** `checks/state-api.mjs` runs `next
+start` against `.next`, and `next build` bundles the `.cjs` — so the first run
+after the re-carry was measuring the copies I had just replaced, and reported a
+400 (*"a row edit path this server does not apply: projects/cap7-P1/milestones"*)
+that looked like a real gap between §322's differ and §314.2's row-addressed
+writer. **§105.6 exactly**, and the tell was that the same change list applied
+cleanly in a bare `node -e`. Rebuilt: 4 red → 1.
+
+**§331.2 — AND THE ONE THAT SURVIVED WAS THE CHECK.** §216's *"her change list
+names her function and no other"* tested `/"care"/` against the stringified
+list, and §322 moved her report from a capability under the group to the
+FUNCTION, where the address reads `functions.care` — **so the quote before the
+word is not there and that assertion could never match on any build**. It was
+rewritten here for §322/§329 and the spelling was not, and the file was failing
+for the stale-copy reasons above, so it was never seen alone. **REWRITTEN,
+never loosened** (§218, §94.8): it asks the ADDRESSES now — every row at
+`functions.care`, and no whole-part `set` or `del` at all, which is what §216
+is actually about. Separated against all four shapes it must tell apart,
+including the empty list and the whole-part send that is §216 itself.
+
+**§331.3 — AND ONE RED WAS THE ENVIRONMENT.** `memory-boundary.mjs` builds its
+second pool from `u.hostname`/`u.port`, so a socket-in-the-query-string
+connection string resolved to `127.0.0.1:5432` and section 4 died rather than
+reporting (§215). Given a TCP URL it is **14/0**. Nothing in the product, and
+recorded rather than left to be rediscovered.
+
+**VERIFIED on a virgin Postgres 16 over TCP, the whole app suite**: state 91/0,
+door 49/0, shell 61/0, blob 23/23, comms 47/47, upload 9/9, demo 7/7, room
+10/0, deploy 5/0, memory 21/0 · 14/0 · 16/0, generated-in-step all clear, `tsc`
+clean with the cache removed first (§320.5a) — and **every one of the nine red
+variants still red** (`check:state:red` six, `check:door:red` three), which is
+what says the rewritten assertion did not weaken the file it lives in.
+
+**RECORDED, NOT DONE**: `graph-io.cjs` is the frozen `lib/state-io.js` carried
+with FOUR named edits rather than one, so the rule above cannot reach it and it
+is not under the check — it is in step today (measured), and putting it under
+the rule means declaring those four edits as a transform, which is its own
+piece of work.
+
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

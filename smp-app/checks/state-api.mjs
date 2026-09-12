@@ -210,8 +210,18 @@ await section("2 · two tabs, one database (§210 · §215 · §216 · §234)", 
   r = await post(smo, { changes: e.changes });
   check(r.status === 200, "§216: the office edits another function's definition", r.status);
   e = changed(hers, (m) => { m.functions.care.projects[0].milestones[0].status = "wip"; m.functions.care.projects[0].milestones[0].pct = 40; });
+  /* THE ADDRESSES, NOT A QUOTED SPELLING (§94.8). This asked `/"care"/` of the
+     stringified list, and §322 moved her report from a capability under the
+     group to the FUNCTION — where the address reads `functions.care`, so the
+     quote before the word is not there and the assertion could never match.
+     The claim is unchanged and is now asked of the thing it is about: every
+     row addressed at her function, and NO whole-part set or del, which is
+     what §216 is for — a stale tab must not carry another function's plan. */
   const named = JSON.stringify(e.changes);
-  check(/"care"/.test(named) && !/"finance"/.test(named) && !/"units"/.test(named), "§216: her change list names her function and no other", named.slice(0, 200));
+  const rowsAt = (e.changes.rows || []).map((x) => x.at);
+  check(rowsAt.length > 0 && rowsAt.every((a) => a === "functions.care")
+        && Object.keys(e.changes.set || {}).length === 0 && (e.changes.del || []).length === 0,
+        "§216: her change list names her function and no other", named.slice(0, 200));
   r = await post(smo, { base: hers, changes: e.changes });
   after = await graph(smo);
   check(r.status === 200 && after.functions.care.projects[0].milestones[0].pct === 40, "§216: her report landed", r.status);

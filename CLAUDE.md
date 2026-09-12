@@ -8777,7 +8777,30 @@ node smp-app/checks/generated-in-step.mjs
                                 # "you have edits in flight" as two different
                                 # answers (§123), and EXITS NON-ZERO (§324.8).
                                 # Proved able to fail twice, one per generator
-                                # family (§276). Run it from `smp-app/`
+                                # family (§276). Run it from `smp-app/`.
+                                # AND SINCE §331 IT COVERS THE CARRIED RULE
+                                # MODULES, which have no generator at all:
+                                # `smp-app/lib/*.cjs` are the frozen product's
+                                # own pure modules copied across for Node, and
+                                # §322/§330 changed `lib/rules.js`,
+                                # `lib/authorize.js` and `lib/graph-diff.js`
+                                # while the copies stayed put — so the new
+                                # stack's landing threw `SMPRules.dissolvePlan
+                                # is not a function` for EVERY person in EVERY
+                                # client, and its change list sent a supporting
+                                # function's whole plan on every figure
+                                # (§216's fault reborn, named in that line's
+                                # own comment). It applies the RULE rather than
+                                # holding a list (§104.7) — every `.cjs` with a
+                                # frozen twin must equal it after ONE declared
+                                # transform, a `require("./x.js")` between two
+                                # carried siblings becoming `./x.cjs` — with
+                                # `assistant.cjs` and `push.cjs` NAMED as
+                                # genuinely rewritten (§316.7), printed on every
+                                # run and asserted to be the only ones (§113.8).
+                                # Red both ways: the three stale copies put back
+                                # names all three; a rewritten one made a plain
+                                # carry reddens the exception half
 DATABASE_URL_UNPOOLED=… node smp-app/checks/schema-room.mjs
                                 # the shared schema has a room of its own, and
                                 # `public` is a CLIENT (§317.4) — it BUILDS the
@@ -8876,7 +8899,67 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;330: a capability is a strategic
+*Last Updated: 2026-09-12 &mdash; **&sect;331: the rules the new stack runs
+are a COPY, and nobody was comparing them.** Islam, with Next's own error page
+&mdash; *"on checking the branch I got this message when I tried to open a
+client &hellip; on another branch called sharp pesture I was adjsuting the
+acheicture and access of the clients on different modules &hellip; check if that
+was the [cause]"*. **IT WAS NOT THE MODULE WORK, AND ESTABLISHING THAT FIRST WAS
+MOST OF THE ANSWER**: `main` had moved ten commits under this branch and every
+one is that work, but the only new failure surface it puts on `/<client>` is
+`tenantByKey` gaining `, modules` &mdash; and the console's own client list
+selects that same column, so a missing column would have emptied the cards he
+was clicking rather than letting him click one. **The fault is this branch's.**
+**RUN, NEVER READ**: `frozen.landing()` asked for all 33 people of the worked
+example threw **33 times**, `SMPRules.dissolvePlan is not a function` &mdash;
+his page exactly, for every person in every client. &sect;322 put that function
+in the SHARED rules and &sect;330 put `capHolderTarget` beside it, and the new
+stack does not run `lib/rules.js`: it runs **`smp-app/lib/rules.cjs`, a CARRIED
+COPY**, 151 lines behind. **&sect;325'S TRAP ONE DIRECTORY OVER, AND THAT IS THE
+FINDING** &mdash; that section built a check because `smp-app/public/` is
+generated and TRACKED and production serves it; `smp-app/lib/*.cjs` are the same
+relationship **with no generator at all**, while `frozen.cjs` runs the four
+frozen SOURCE files straight out of `SMP-Project-Folder/src`, so those are always
+fresh. *That asymmetry is how it hid*: every &sect;330 check walks the frozen
+product and is green, because the frozen product is right. **THREE WERE STALE
+AND ALL THREE MATTER**: `rules.cjs` (the landing, and every authorisation the
+new stack makes), `authorize.cjs` (&sect;330.18's `ctxOfFn`, so a function's
+project owner would have been refused every figure), and `graph-diff.cjs`,
+missing &sect;322's one line teaching `treeFor("functions")` about `projects`
+&mdash; **&sect;216's fault reborn, predicted by name in that line's own
+comment**. **THE CARRY IS MECHANICAL AND IS ASSERTED AS ONE**: diffed against
+their twins the only deliberate difference in any file is a `require("./x.js")`
+between two carried siblings becoming `./x.cjs`, so the check applies THAT RULE
+rather than holding a list (&sect;104.7), with `assistant.cjs` and `push.cjs`
+NAMED as genuinely rewritten (&sect;316.7), printed every run and asserted to be
+the only ones (&sect;113.8). Red both ways. **&sect;331.1 &mdash; THREE OF THE
+FOUR FIRST FAILURES WERE A STALE BUILD**: `checks/state-api.mjs` runs `next
+start` against `.next` and `next build` bundles the `.cjs`, so the first run
+after the re-carry measured the copies just replaced and reported a 400 that
+looked like a real gap between &sect;322's differ and &sect;314.2's writer
+&mdash; **&sect;105.6 exactly**, the tell being that the same change list
+applied cleanly in a bare `node -e`. Rebuilt: 4 red &rarr; 1. **&sect;331.2
+&mdash; AND THE ONE THAT SURVIVED WAS THE CHECK**: &sect;216's *"her change list
+names her function and no other"* tested `/"care"/` against the stringified
+list, and &sect;322 moved her report to the FUNCTION, where the address reads
+`functions.care` &mdash; **so the quote before the word is not there and it
+could never match on any build**. REWRITTEN, never loosened (&sect;218,
+&sect;94.8): it asks the ADDRESSES now, and no whole-part `set` or `del` at all,
+which is what &sect;216 is about &mdash; separated against all four shapes
+including the whole-part send that IS &sect;216. **&sect;331.3 &mdash; and one
+red was the environment**, `memory-boundary.mjs` building its second pool from
+`u.hostname`/`u.port` so a socket-in-the-query-string URL resolved to port 5432;
+given a TCP one it is 14/0. **VERIFIED on a virgin Postgres 16**: state 91/0,
+door 49/0, shell 61/0, blob 23/23, comms 47/47, upload 9/9, demo 7/7, room 10/0,
+deploy 5/0, memory 21/0 &middot; 14/0 &middot; 16/0, generated-in-step all clear,
+`tsc` clean with the cache removed first &mdash; and **every one of the nine red
+variants still red**, which is what says the rewritten assertion did not weaken
+the file it lives in. **RECORDED, NOT DONE**: `graph-io.cjs` is carried with
+FOUR named edits rather than one, so the rule cannot reach it and it is not
+under the check &mdash; in step today, measured, and putting it under the rule
+means declaring those four as a transform.*
+
+*Earlier the same day: **&sect;330: a capability is a strategic
 entry of its own (spec 046, stage 2).** Islam, on the mockup drawn for it, four
 answers and a go-ahead: *"yes for all"* (the office creates it, a function head
 HOLDS it; Setup &rsaquo; Capabilities is its home with the promote control on

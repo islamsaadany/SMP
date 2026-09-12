@@ -29,6 +29,27 @@
  * check that leaves the thing it measures rewritten has fixed the tree and
  * told nobody.
  *
+ * ══ AND THE CARRIED RULE MODULES, WHICH HAVE NO GENERATOR (§326) ═══════
+ * `smp-app/lib/*.cjs` are the frozen product's own pure modules carried across
+ * for Node, and the carry is MECHANICAL: byte for byte, with one declared
+ * transform — a `require("./x.js")` between two carried siblings becomes
+ * `require("./x.cjs")`. Nothing generates them, so nothing compared them, and
+ * that is the same trap one directory over from the four above: §322 and
+ * §330 changed `lib/rules.js`, `lib/authorize.js` and `lib/graph-diff.js`
+ * and the carried copies stayed where they were — so the new stack's landing
+ * page threw `SMPRules.dissolvePlan is not a function` for every person in
+ * every client, and its change list sent a supporting function's whole plan on
+ * every figure (§216's fault reborn, which `graph-diff.js`'s own comment
+ * predicts by name).
+ *
+ * THE RULE IS APPLIED, NEVER A LIST OF FILES: every `.cjs` here that has a
+ * frozen twin must match it after the transform. TWO ARE DELIBERATELY NOT
+ * CARRIES — `assistant.cjs` and `push.cjs` were REWRITTEN for this stack
+ * (§316.7's named plumbing changes) — and they are named, printed on every
+ * run and asserted to be the ONLY ones, so an exception cannot grow quietly
+ * (§104.7, §113.8). A `.cjs` with no twin (the ported endpoints, the vm
+ * bridge) is outside the rule and is listed rather than passed over (§54.5).
+ *
  * Run: node checks/generated-in-step.mjs   (from smp-app/)
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -99,6 +120,61 @@ try {
     catch (e) { console.log("  !!   could not restore " + p.replace(repo + "/", "") + ": " + e.message); }
   }
 }
+
+/* ══ THE CARRIED MODULES ════════════════════════════════════════════════
+   Deliberately AFTER the restore above: this section reads files and writes
+   none, so it can never leave the tree rewritten. */
+console.log("\n── the carried rule modules (§326)");
+
+/* Rewritten for this stack rather than carried — §316.7. Named here so the
+   cost is visible on every run, never a silent skip. */
+const REWRITTEN = ["assistant.cjs", "push.cjs"];
+
+const carried = execFileSync("git", ["ls-files", "--", "smp-app/lib"], { cwd: repo, encoding: "utf8" })
+  .trim().split("\n").filter((p) => p.endsWith(".cjs")).map((p) => p.split("/").pop());
+const twinOf = (name) => {
+  const base = name.replace(/\.cjs$/, "") + ".js";
+  for (const dir of [join(repo, "lib"), join(repo, "SMP-Project-Folder", "src")]) {
+    const p = join(dir, base);
+    if (existsSync(p)) return p;
+  }
+  return null;
+};
+const names = new Set(carried.map((n) => n.replace(/\.cjs$/, "")));
+/* THE ONE DECLARED TRANSFORM. */
+const carry = (text) => text.replace(/require\("\.\/([\w-]+)\.js"\)/g,
+  (m, n) => (names.has(n) ? 'require("./' + n + '.cjs")' : m));
+
+const twins = carried.filter((n) => twinOf(n));
+const orphans = carried.filter((n) => !twinOf(n));
+check(twins.length >= 6, "the carried modules are found beside their frozen twins",
+  twins.length + " twinned, " + orphans.length + " with no twin: " + orphans.join(" "));
+
+const stale = [];
+for (const n of twins) {
+  if (REWRITTEN.includes(n)) continue;
+  const want = carry(readFileSync(twinOf(n), "utf8"));
+  const have = readFileSync(join(app, "lib", n), "utf8");
+  if (want !== have) stale.push(n + " (frozen " + want.length + " bytes, carried " + have.length + ")");
+}
+check(stale.length === 0,
+  "every carried module is its frozen twin, transform applied", stale.join("; "));
+if (stale.length) {
+  console.log("\n       Re-carry from smp-app/ — the transform is the only edit:");
+  console.log("         cp ../lib/<name>.js lib/<name>.cjs   (then .js → .cjs on any require of a sibling)");
+}
+
+/* BOTH ENDS (§94.2): the two exceptions must still BE exceptions. One that
+   has quietly become a plain carry belongs back under the rule, and one whose
+   twin has gone is a name nobody is checking. */
+const notReally = REWRITTEN.filter((n) => {
+  const t = twinOf(n);
+  return !t || carry(readFileSync(t, "utf8")) === readFileSync(join(app, "lib", n), "utf8");
+});
+check(notReally.length === 0,
+  "the two rewritten modules are still rewritten, so the exception is earned",
+  notReally.join(" "));
+console.log("       rewritten for this stack, not carried: " + REWRITTEN.join(", ") + " (§316.7)");
 
 console.log("\n" + (bad ? bad + " FAILED" : "generated-in-step: all clear"));
 process.exit(bad ? 1 : 0);

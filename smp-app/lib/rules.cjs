@@ -468,6 +468,20 @@
       if (!c || !c.fn) return;
       if ((c.projects || []).some(owns)) once("powner", "fn:" + c.fn);
     });
+    /* AND A FUNCTION'S OWN PROJECTS (§330, closing §322). That section gave a
+       supporting function projects of its own and this walk went on reading
+       the capabilities alone — so the owner of a project on the page where
+       most of a tenant's projects now live derived NO ROLE AT ALL: they
+       reached nothing, the function did not appear in their navigation, and
+       the server refused them for the same reason, because this is the shared
+       rule both sides ask (§42). Measured on the build before this, with the
+       Owner plainly on the row. The place is the FUNCTION either way, which is
+       why it is the same `once` call and not a second kind of role. */
+    w.functionKeys.forEach(function (k) {
+      var f = w.functions[k] || {};
+      if (String(f.format) === "pillars") return;
+      if ((f.projects || []).some(owns)) once("powner", "fn:" + k);
+    });
     w.unitKeys.forEach(function (k) {
       if ((((w.units || {})[k] || {}).items || []).some(owns)) once("plowner", k);
     });
@@ -541,7 +555,37 @@
   var OWNS_EVERY_PLACE = ["super", "gceo", "smoteam"];
   function ownsEveryPlace(roleKey) { return OWNS_EVERY_PLACE.indexOf(roleKey) > -1; }
 
+  /* ── A CAPABILITY'S ACCESS IS ITS HOLDER'S (§330) ────────────────────
+     A capability is a destination of its own — `cap:<id>` — and it is NOT a
+     column on the access matrix. It could have been, and it would have been
+     wrong twice over: §37 settled that matrix at seven roles by five areas on
+     the argument that a column whose every cell holds one answer is a question
+     with no second answer, and "may this person open the capability their own
+     function holds" has exactly one. And the second reason is the decision
+     itself — Islam: the office creates it, *a function head HOLDS it and runs
+     it, exactly as they run their function's own plan.* So it resolves to that
+     function and every existing grant answers for it unchanged: their own
+     column for the head, the other-function column for everybody else.
+
+     A capability naming no holder resolves to the GROUP, which is the office's
+     alone — the model admits a business unit holding one later (§7 of the
+     spec) and there is no control that makes one today, so the safe answer is
+     the one that refuses rather than the one that guesses (§42).
+
+     IT IS IDEMPOTENT ON PURPOSE: `companyAllows` calls `roleOwns`, so the
+     mapping runs twice on one question and a `fn:` target has to map to
+     itself. */
+  function capHolderTarget(w, target) {
+    var s = String(target || "");
+    if (s.indexOf("cap:") !== 0) return s;
+    var id = s.slice(4), cs = (w && w.capabilities) || [];
+    for (var i = 0; i < cs.length; i++)
+      if (cs[i] && cs[i].id === id) return cs[i].fn ? "fn:" + cs[i].fn : "group";
+    return "group";
+  }
+
   function roleOwns(w, r, target) {
+    target = capHolderTarget(w, target);
     if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
     if (String(target).indexOf("fn:") === 0) return at === target;
@@ -564,6 +608,7 @@
   /* The company's own two flags (§23) can only ever NARROW. */
   function companyAllows(w, r, target) {
     if (r.role !== "cceo") return true;
+    target = capHolderTarget(w, target);
     var co = w.companies[String(r.at || "").replace(/^co:/, "")] || {};
     if (target === "group") return co.seeGroup !== false;
     if (String(target).indexOf("fn:") === 0) return true;
@@ -1732,7 +1777,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      A NO-OP FOR EVERY EXISTING CALLER — all four pass a key that is in the
      table — and the server's own tests hold it to that. */
   function strategyPageOf(target, unitPage) {
-    return String(target).indexOf("fn:") === 0
+    /* §330: A CAPABILITY TAKES THE FUNCTION'S PAGES, because it IS drawn by
+       them — same three tabs, same access keys, same Overview. Asked as a
+       unit it would consult `u_plan` and `u_found`, which are a business
+       unit's columns, and a function head filling a gap on their own
+       capability would be refused by the wrong column entirely. */
+    var t = String(target);
+    return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
       ? (STRATEGY_PAIR[unitPage] || unitPage) : unitPage;
   }
   /* A unit arranges its Plan; a supporting function arranges its Projects.
@@ -1742,7 +1793,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   /* The same pairing for the Reporting half (§117). */
   function reportPageOf(target) {
-    return String(target).indexOf("fn:") === 0 ? "k_report" : "u_report";
+    var t = String(target);
+    return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
+      ? "k_report" : "u_report";
   }
 
   /* ── THE PLAN LEAVES AS SLIDES (§117) ────────────────────────────
@@ -2995,8 +3048,29 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      what "a custodian per project" means. Capability projects only: a pillars
      function's plan is classified with the units and has no per-project
      owner; its floor is deliberately not derived here (flagged in §147.5). */
+  /* §330.18: AND THE FUNCTION'S OWN WORK IS ONE OF THEM. This read the
+     capabilities alone, and §322 had just moved most of a tenant's projects
+     onto the functions themselves — so both callers answered about an empty
+     list: nobody named on a function's own project derived the Contributor
+     floor (a milestone's owner, a stakeholder, a collaborator — §147.8's
+     whole feature, dead since §322), and `capProjectOf` could not say which
+     project a reporting row belonged to, which is what `boundedReach` asks
+     before letting a bounded role write it. The derivation forty lines above
+     was carried across at §330 and this was not; it is the same sentence, so
+     it carries the same correction.
+
+     WIDENED, NEVER NARROWED. A capability is its own destination since §330,
+     so a case could be made that being named on one should grant at `cap:<id>`
+     rather than at the function — that would TAKE a role away from somebody
+     who holds it today, and whose call that is is Islam's, not a repair's. */
   function capsOfFn(w, fnKey) {
-    return (w.capabilities || []).filter(function (c) { return c && c.fn === fnKey; });
+    var own = ((w || {}).functions || {})[fnKey] || {};
+    var mine = (String(own.format) !== "pillars" && Array.isArray(own.projects))
+      ? [{ id: "fn:" + fnKey, fn: fnKey, own: true, projects: own.projects,
+           keyObjectives: own.keyObjectives || [] }]
+      : [];
+    return mine.concat(
+      (w.capabilities || []).filter(function (c) { return c && c.fn === fnKey; }));
   }
   function namedInFn(w, p, fnKey) {
     if (!p || !fnKey) return false;
@@ -3183,6 +3257,71 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      employee file and the People page, which must never GRANT either. */
   function isOwnLinesRole(roleKey) { return OWN_LINES_ONLY.indexOf(roleKey) > -1; }
 
+  /* ── WHAT DISSOLVING A BOX MOVES (§322) ─────────────────────────────────
+     Islam: *"they caapbilities in raya trade are not capabilities they are
+     just projecst under functions"*, and *"the ability to turn functional
+     projects to a capability and vice versa."*
+
+     THE SAME QUESTION IS ASKED TWICE — by the control a person presses and by
+     the one-off that moves a tenant onto the model — so it is answered ONCE,
+     here, where both can reach it. Two copies of *what does giving the work
+     back to the function mean* is how they drift the first time either is
+     corrected (§42, §53.5), and the drift would be invisible: both would run.
+
+     THE RULE. The projects always travel. The definition and the key
+     objectives travel ONLY where the function has none of its own — a
+     function that has already written either keeps what it wrote, and the
+     box's copy stays in the archive rather than overwriting it (§96.2: the
+     platform never rewrites what somebody typed). The NAME travels nowhere: a
+     container's name has no honest home on the function, and inventing one is
+     the confusion this removes.
+
+     It returns what to move and moves nothing: the two callers write into
+     different shapes — a live graph in the browser, a state object on the
+     server — and a rule that wrote would have to know which. */
+  function dissolvePlan(cap, fn) {
+    if (!cap || !fn) return null;
+    var out = { projects: (cap.projects || []).slice(), def: null, keyObjectives: null };
+    if (!String(fn.def || "").trim() && String(cap.def || "").trim()) out.def = cap.def;
+    if (!((fn.keyObjectives || []).length) && (cap.keyObjectives || []).length)
+      out.keyObjectives = (cap.keyObjectives || []).slice();
+    return out;
+  }
+
+  /* ── AND THE OTHER DIRECTION (§330, spec 046 §6) ────────────────────────
+     Islam: *"one more thing is the ability to turn functional projects to a
+     capability and vice versa."* `dissolvePlan` above is the vice versa; this
+     is the way in. A function starts three projects and a year later two of
+     them turn out to be one strategic thing — that should cost a press, not a
+     re-upload.
+
+     IT ANSWERS WHAT MOVES AND NOTHING ELSE, exactly as its twin does: the
+     caller mints the capability, writes the archive and does the removing, so
+     the screen's control and the server's judgement ask ONE rule rather than
+     each carrying a copy of what promoting means (§42, §53.5).
+
+     THE DEFINITION AND THE KEY OBJECTIVES STAY WITH THE FUNCTION. They
+     describe the function — its definition is what the function IS — and a
+     capability starts with none, written on it afterwards (spec 046 §6). That
+     is not symmetry with `dissolvePlan`, which hands them over only where the
+     function has none: a box being dissolved has nowhere to put them, and a
+     function being promoted FROM still needs its own.
+
+     PROMOTING NOTHING IS REFUSED, because a capability with no projects and
+     no pillars has nothing to be — and promoting EVERYTHING is allowed, since
+     a function may legitimately turn out to be doing one strategic thing. The
+     ids never travel (§232, §316); the CODES do, which is the thing the
+     control says before the press. */
+  function promotePlan(fn, ids) {
+    if (!fn) return null;
+    var want = {}, n = 0;
+    (ids || []).forEach(function (id) { if (id != null) { want[String(id)] = 1; n++; } });
+    if (!n) return null;
+    var take = (fn.projects || []).filter(function (p) { return p && want[String(p.id)]; });
+    if (!take.length) return null;
+    return { projects: take };
+  }
+
   return {
     ROLES: ROLES, ROLE_KEYS: ROLE_KEYS,
     AREAS: AREAS, AREA_KEYS: AREA_KEYS,
@@ -3192,6 +3331,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     personActive: personActive, personRoles: personRoles, personRoleKeys: personRoleKeys,
     unitsOfCompany: unitsOfCompany, grantFor: grantFor,
     roleOwns: roleOwns, companyAllows: companyAllows, areaFor: areaFor,
+    capHolderTarget: capHolderTarget, promotePlan: promotePlan,
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
@@ -3229,6 +3369,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     gapEmptyFields: gapEmptyFields,
     namedOn: namedOn, namedInUnit: namedInUnit,
     namedInFn: namedInFn, capProjectOf: capProjectOf,
+    /* §330.18: WHICH HOLDERS A SUBJECT DRAWS, exported because the authoriser
+       was keeping a third copy of the same walk (`ctxOfFn`) and it had the
+       same gap — a function's own projects were in none of them. */
+    holdersOfFn: capsOfFn,
     NAME_PARTICLES: NAME_PARTICLES, KNOWN_NAME_WORDS: KNOWN_NAME_WORDS,
     nameWords: nameWords, knownGuess: knownGuess, nameRuns: nameRuns,
     firstName: firstName,
@@ -3269,6 +3413,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     KB_AUDIENCES: KB_AUDIENCES, KB_AUDIENCE_LABEL: KB_AUDIENCE_LABEL,
     kbAudienceWord: kbAudienceWord, kbAudience: kbAudience, kbSees: kbSees,
     kbParas: kbParas, kbSame: kbSame,
+    dissolvePlan: dissolvePlan,
     oneLine: oneLine, ONE_LINE_FIELDS: ONE_LINE_FIELDS,
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER
   };

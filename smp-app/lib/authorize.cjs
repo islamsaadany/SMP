@@ -942,7 +942,12 @@ const FN_SETUP = ["name", "navName", "codePrefix", "active", "head", "custodian"
    function that is in neither list is unknown and falls to the SMO — the
    fall-through §42 exists for. */
 const FN_KNOWN = FN_SETUP.concat(UNIT_FOUNDATION,
-  ["key", "items", "keyObjectives", "swot", "perf", "exec", "pend"]);
+  ["key", "items", "keyObjectives", "swot", "perf", "exec", "pend",
+   /* §322: a supporting function holds its own projects now. It is in the
+      list so a change to them is not swept up as "a supporting function" —
+      Setup, the office's — the way any unnamed field is; what they ARE is
+      classified below by exactly the rules a capability's projects get. */
+   "projects"]);
 /* §256: everything FN_KNOWN speaks for, plus the field classified on its own.
    It is a SECOND list because the two questions genuinely differ — FN_KNOWN
    decides what the projects-branch compare calls "a supporting function's
@@ -950,6 +955,39 @@ const FN_KNOWN = FN_SETUP.concat(UNIT_FOUNDATION,
    must still not report it. Without the split it would produce two sentences
    for one press, or one that names the wrong screen. */
 const FN_SEEN = FN_KNOWN.concat(HIDE_SLIDES);
+
+/* ── A FUNCTION'S OWN PLAN (§322) ─────────────────────────────────────────
+   Its projects and its key objectives, judged by the SAME rules a
+   capability's are — one page since §213, and now one plan model too, so a
+   project owner reporting a figure, a custodian filling a gap and the office
+   rewriting a brief each mean here exactly what they mean there.
+
+   It returns whether it spoke, because the caller's fallback classifies every
+   OTHER known field as Setup and a plan change must not be swept into that
+   (§191: a change seen by nothing is a change allowed to everybody, and one
+   seen by the wrong pass is refused to the person who may make it).
+
+   §278.3's third callback is here too: reordering a function's own objectives
+   is `arrange`, exactly as it is on a unit and on a capability. */
+function fnOwnWork(sf2, iff, target, add) {
+  let spoke = false;
+  const say = function (kind, t, why, rows) { spoke = true; add(kind, t, why, rows); };
+  /* Absent and empty are the same word to every reader here, and a function
+     that has never been given either list holds neither key — so both sides
+     are read through a default rather than passed on raw (§104.10's family:
+     an undefined list is not a list of nought). */
+  const sko = sf2.keyObjectives || [], iko = iff.keyObjectives || [];
+  const spr = sf2.projects || [], ipr = iff.projects || [];
+  if (!same(sko, iko)) {
+    gapRows("capko", sko, iko, target, say, "a function key objective");
+    splitRows(sko, iko, REPORT.capKO,
+      function (rows) { say("capReporting", target, "function key objective figures", rows); },
+      function (rows) { say("capPlan", target, "a function's key objectives", rows); },
+      function () { say("arrange", target, "the order of a function's key objectives"); });
+  }
+  if (!same(spr, ipr)) collectProjects(spr, ipr, target, say);
+  return spoke;
+}
 
 function collectFunction(key, sf, iff, add, w) {
   if (!sf || !iff) { add("setup", null, "a supporting function was added or removed"); return; }
@@ -983,6 +1021,9 @@ function collectFunction(key, sf, iff, add, w) {
 
   if (String(sf.format) === "pillars") {
     collectUnit(target, asUnit(sf2, target), asUnit(iff, target), add, w);
+  } else if (fnOwnWork(sf2, iff, target, add)) {
+    /* §322 classified the function's own plan; anything else FN_KNOWN speaks
+       for is still the office's, below. */
   } else if (!same(pick(sf2, FN_KNOWN), pick(iff, FN_KNOWN))) {
     /* Pillars on a projects function are not its plan — nothing renders them —
        so a change to them is not reporting; it is the SMO's. */
@@ -1014,6 +1055,86 @@ function asUnit(f, ukey) {
 const CAP_SETUP = ["id", "name", "fn"];
 const CAP_KNOWN = CAP_SETUP.concat(["def", "keyObjectives", "projects", "perf", "exec"]);
 
+/* ── A LIST OF PROJECTS, CLASSIFIED (§322) ────────────────────────────────
+   Lifted out of collectCapabilities unchanged, because a supporting function
+   holds projects of its own now and the two lists must be judged by exactly
+   the same rules — a fill, a figure, a reorder and an authoring edit mean the
+   same thing whether the projects sit in a capability or on the function.
+   Copying this instead is how §217 and §270 happened: one question, two
+   answers, and the screen offering a pen the server then refuses. */
+function collectProjects(aP, bP, target, add) {
+  gapRows("project", aP, bP, target, add, "a project's front matter",
+          function (pr) { return { project: pr }; });
+  (function () {
+    const sp = byId(aP), ip = byId(bP);
+    Object.keys(sp).forEach(function (pid) {
+      if (!ip[pid]) return;
+      const pctx = function (row) { return { project: sp[pid], row: row }; };
+      gapRows("outcome", sp[pid].outcomes, ip[pid].outcomes, target, add,
+              "a project outcome's target", pctx);
+      gapRows("milestone", sp[pid].milestones, ip[pid].milestones, target, add,
+              "a project milestone", pctx);
+    });
+  })();
+  /* Projects: the brief is plan, the outcomes and milestones carry figures. */
+  /* §191: THE THIRD LIST THAT BUILDS ITS OWN MAP. The sweep that found the
+     pillar walk found this one too — with the project ids stripped, the
+     front matter (owner, brief, stakeholders, Start and End) was writable
+     by anybody, while the deliverables, outcomes and milestones INSIDE
+     those same projects were correctly refused, because those go through
+     `splitRows`. Three walks, one question, asked in all three now. */
+  if (!identified(aP) || !identified(bP)) {
+    if (!same(aP, bP)) add("capPlan", target, "a capability's projects");
+  } else if (!same(idsOf(aP), idsOf(bP))) {
+    add("capPlan", target, "a capability's projects");
+  } else {
+    const sp = byId(aP), ip = byId(bP);
+    Object.keys(sp).forEach(function (pid) {
+      const pa = sp[pid], pb = ip[pid];
+      /* The project's own front matter — owner, brief, stakeholders and
+         §179's Start and End. Named row by row (§184) so a refusal here
+         can say WHICH field it would not take and put that one back. */
+      const pFields = ["deliverables", "outcomes", "milestones"];
+      if (!same(omit(pa, pFields), omit(pb, pFields))) {
+        const pRows = [];
+        uniq(Object.keys(pa).concat(Object.keys(pb))).forEach(function (k) {
+          if (pFields.indexOf(k) > -1 || same(pa[k], pb[k])) return;
+          pRows.push({ id: pid, name: pa.name || null, field: k,
+                       had: pa[k] !== undefined,
+                       from: pa[k] === undefined ? null : pa[k],
+                       to: pb[k] === undefined ? null : pb[k] });
+        });
+        add("capPlan", target, "a project", pRows.length ? pRows : null);
+      }
+      splitRows(pa.deliverables, pb.deliverables, REPORT.deliverable,
+        function (rows) { add("capReporting", target, "project deliverables", rows); },
+        function (rows) { add("capPlan", target, "a project's deliverables", rows); });
+      splitRows(pa.outcomes, pb.outcomes, REPORT.outcome,
+        function (rows) { add("capReporting", target, "project outcome figures", rows); },
+        function (rows) { add("capPlan", target, "a project's outcomes", rows); });
+      splitRows(pa.milestones, pb.milestones, REPORT.milestone,
+        function (rows) { add("capReporting", target, "project milestones", rows); },
+        function (rows) { add("capPlan", target, "a project's milestones", rows); });
+    });
+  }
+}
+
+/* §330: WHAT A REFUSAL CALLS THE THING. Four sentences stripped `fn:` and
+   printed the key, which for a capability would print a bare `cap:cap6` — a
+   refusal that names something nobody has seen on a screen sends them nowhere
+   (§16.7, §123). It is the stored NAME where there is one, because the world a
+   verdict is built from is the stored one (§42). */
+function targetWord(w, t) {
+  const s = String(t || "");
+  if (s.indexOf("cap:") === 0) {
+    const id = s.slice(4);
+    const hit = ((w && w.capabilities) || []).filter(function (c) {
+      return c && c.id === id; })[0];
+    return hit && hit.name ? hit.name : id;
+  }
+  return s.replace(/^fn:/, "");
+}
+
 function collectCapabilities(sList, iList, add) {
   if (same(sList, iList)) return;
   if (!same(idsOf(sList), idsOf(iList))) { add("setup", null, "the list of capabilities"); return; }
@@ -1023,7 +1144,15 @@ function collectCapabilities(sList, iList, add) {
     const b = im[id];
     if (same(a, b)) return;
     if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name or function");
-    const target = "fn:" + (a.fn || "");
+    /* §330: THE CAPABILITY'S OWN TARGET. It is a destination now, with its own
+       pages, its own submission and its own row on the cycle board — so a fill
+       inside it is judged against the capability rather than against the
+       function that holds it, and the refusal names the thing somebody was
+       actually looking at (§16.7). The ACCESS behind it is the holding
+       function's, resolved once in lib/rules.js (§330), so nobody's grant
+       moves: the head's own column answers for their capability exactly as it
+       answers for their function. */
+    const target = "cap:" + id;
     /* §145: the gap pass, on a clone, exactly as collectUnit runs it — a
        capability's key objectives and its projects' front matter are the
        fillable rows on this side of the product. */
@@ -1035,8 +1164,6 @@ function collectCapabilities(sList, iList, add) {
        cleared clone and stays the office's for every other kind of edit. */
     gapFieldPass("cap", a, b, target, add, "what a capability is");
     gapRows("capko", a.keyObjectives, b.keyObjectives, target, add, "a capability key objective");
-    gapRows("project", a.projects, b.projects, target, add, "a project's front matter",
-            function (pr) { return { project: pr }; });
     /* §177: AND THE ROWS INSIDE A PROJECT. An outcome's target and a
        milestone's owner and due date are gaps now, so the pass has to reach
        them BEFORE splitRows compares the same lists below — a fill left
@@ -1044,17 +1171,6 @@ function collectCapabilities(sList, iList, add) {
        filler had rewritten the plan. Matched by id against the stored project,
        and each row carries its project as context, which is what bounds a
        project owner to their own. */
-    (function () {
-      const sp = byId(a.projects), ip = byId(b.projects);
-      Object.keys(sp).forEach(function (pid) {
-        if (!ip[pid]) return;
-        const pctx = function (row) { return { project: sp[pid], row: row }; };
-        gapRows("outcome", sp[pid].outcomes, ip[pid].outcomes, target, add,
-                "a project outcome's target", pctx);
-        gapRows("milestone", sp[pid].milestones, ip[pid].milestones, target, add,
-                "a project milestone", pctx);
-      });
-    })();
     if (!same(a.def, b.def)) add("capPlan", target, "what a capability is", fieldRows(a.id, a.name, a, b, ["def"]));
     if (!same(pick(a, ["perf", "exec"]), pick(b, ["perf", "exec"]))) add("capReporting", target, "a capability's figures");
 
@@ -1070,47 +1186,7 @@ function collectCapabilities(sList, iList, add) {
       function (rows) { add("capPlan", target, "a capability's key objectives", rows); },
       function () { add("arrange", target, "the order of a capability's key objectives"); });
 
-    /* Projects: the brief is plan, the outcomes and milestones carry figures. */
-    /* §191: THE THIRD LIST THAT BUILDS ITS OWN MAP. The sweep that found the
-       pillar walk found this one too — with the project ids stripped, the
-       front matter (owner, brief, stakeholders, Start and End) was writable
-       by anybody, while the deliverables, outcomes and milestones INSIDE
-       those same projects were correctly refused, because those go through
-       `splitRows`. Three walks, one question, asked in all three now. */
-    if (!identified(a.projects) || !identified(b.projects)) {
-      if (!same(a.projects, b.projects)) add("capPlan", target, "a capability's projects");
-    } else if (!same(idsOf(a.projects), idsOf(b.projects))) {
-      add("capPlan", target, "a capability's projects");
-    } else {
-      const sp = byId(a.projects), ip = byId(b.projects);
-      Object.keys(sp).forEach(function (pid) {
-        const pa = sp[pid], pb = ip[pid];
-        /* The project's own front matter — owner, brief, stakeholders and
-           §179's Start and End. Named row by row (§184) so a refusal here
-           can say WHICH field it would not take and put that one back. */
-        const pFields = ["deliverables", "outcomes", "milestones"];
-        if (!same(omit(pa, pFields), omit(pb, pFields))) {
-          const pRows = [];
-          uniq(Object.keys(pa).concat(Object.keys(pb))).forEach(function (k) {
-            if (pFields.indexOf(k) > -1 || same(pa[k], pb[k])) return;
-            pRows.push({ id: pid, name: pa.name || null, field: k,
-                         had: pa[k] !== undefined,
-                         from: pa[k] === undefined ? null : pa[k],
-                         to: pb[k] === undefined ? null : pb[k] });
-          });
-          add("capPlan", target, "a project", pRows.length ? pRows : null);
-        }
-        splitRows(pa.deliverables, pb.deliverables, REPORT.deliverable,
-          function (rows) { add("capReporting", target, "project deliverables", rows); },
-          function (rows) { add("capPlan", target, "a project's deliverables", rows); });
-        splitRows(pa.outcomes, pb.outcomes, REPORT.outcome,
-          function (rows) { add("capReporting", target, "project outcome figures", rows); },
-          function (rows) { add("capPlan", target, "a project's outcomes", rows); });
-        splitRows(pa.milestones, pb.milestones, REPORT.milestone,
-          function (rows) { add("capReporting", target, "project milestones", rows); },
-          function (rows) { add("capPlan", target, "a project's milestones", rows); });
-      });
-    }
+    collectProjects(a.projects, b.projects, target, add);
     if (!same(omit(a, CAP_KNOWN), omit(b, CAP_KNOWN))) add("unknown", target, "a capability");
   });
 }
@@ -1149,10 +1225,28 @@ function ctxOfUnit(u) {
 }
 /* The same map for a function's capabilities: each reporting row with the
    project it sits inside. */
-function ctxOfFn(w, fnKey) {
+/* §330: BY FUNCTION, OR BY THE CAPABILITY ITSELF. A capability is a subject
+   of its own now, so a change inside one is classified against `cap:<id>` and
+   the rows have to be found the same way — asking by function would collect
+   every capability that function holds, which is a wider answer than the
+   target names (§42: the narrowest true answer, never the convenient one). */
+function ctxOfFn(w, subject) {
   const out = {};
-  (w.capabilities || []).forEach(function (c) {
-    if (!c || c.fn !== fnKey) return;
+  const s = String(subject || "");
+  const capId = s.indexOf("cap:") === 0 ? s.slice(4) : null;
+  const fnKey = capId ? null : s.replace(/^fn:/, "");
+  /* §330.18: THE HOLDERS THIS SUBJECT DRAWS, asked of the shared rule. This
+     walked `w.capabilities` alone, so since §322 not one row of a supporting
+     function's OWN projects was in the index — and every id missing from the
+     index is refused by the caller below, whoever the person is. Measured:
+     the owner of a function's own project, whose role §330 had just carried
+     across, was refused every figure they entered. The third copy of that
+     walk this round (§53.5), and the last one. */
+  const holders = capId
+    ? (w.capabilities || []).filter(function (c) { return c && c.id === capId; })
+    : R.holdersOfFn(w, fnKey);
+  holders.forEach(function (c) {
+    if (!c) return;
     (c.keyObjectives || []).forEach(function (x) { out[x.id] = { row: x }; });
     (c.projects || []).forEach(function (pr) {
       (pr.deliverables || []).concat(pr.outcomes || [], pr.milestones || [])
@@ -1195,8 +1289,10 @@ function containerIndex(stored) {
   Object.keys(stored.functions || {}).forEach(function (fk) {
     take((stored.functions[fk] || {}).items, "fn:" + fk);
   });
+  /* §330: a capability's projects are reported on the CAPABILITY's page, so
+     that is the target a bounded role's reach is judged against. */
   ((stored.group || {}).capabilities || []).forEach(function (c) {
-    if (c && c.fn) take(c.projects, "fn:" + c.fn);
+    if (c && c.id) take(c.projects, "cap:" + c.id);
   });
   return out;
 }
@@ -1432,9 +1528,13 @@ function authorize(stored, incoming, person) {
       case "unitReporting":
       case "reportState": {
         const t = String(ch.target || "");
-        const isFn = t.indexOf("fn:") === 0;
+        /* §330: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
+           where its access comes from — the function that holds it. Read as a
+           unit it would consult the wrong column entirely, and a function head
+           reporting their own capability would be refused. */
+        const isFn = t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0;
         if (!edits(w, person, isFn ? "fn" : "unit", t)) {
-          no("You cannot report for " + t.replace(/^fn:/, "") + ".");
+          no("You cannot report for " + targetWord(w, t) + ".");
           return;
         }
         if (locked && !office) {
@@ -1460,10 +1560,14 @@ function authorize(stored, incoming, person) {
            the old `isFn` skip existed because no bounded role could reach an
            fn: target, and a pillar owner can. */
         if (!R.onlyOwnLines(w, person, isFn ? "fn" : "unit", t)) return;
-        const uStored = isFn
-          ? asUnit((stored.functions || {})[t.slice(3)] || {}, t)
-          : (stored.units || {})[t];
-        const ctxs = ctxOfUnit(uStored);
+        /* §330: a CAPABILITY's rows are found through the capabilities, not
+           through `stored.functions` — `t.slice(3)` on a `cap:` target is
+           nonsense and would have handed every row "not yours". */
+        const ctxs = t.indexOf("cap:") === 0
+          ? ctxOfFn(w, t)
+          : ctxOfUnit(isFn
+              ? asUnit((stored.functions || {})[t.slice(3)] || {}, t)
+              : (stored.units || {})[t]);
         const notMine = ch.ids.filter(function (id) {
           const ctx = ctxs[id];
           return !ctx || !R.mayReportRow(w, person, isFn ? "fn" : "unit", t, ctx);
@@ -1471,7 +1575,7 @@ function authorize(stored, incoming, person) {
         if (notMine.length)
           no("Your role reports only its own rows — " + notMine.length +
              (notMine.length === 1 ? " figure" : " figures") + " in " +
-             t.replace(/^fn:/, "") + " is not yours.");
+             targetWord(w, t) + " is not yours.");
         return;
       }
 
@@ -1483,9 +1587,13 @@ function authorize(stored, incoming, person) {
          untouched and stay `reportState` above. */
       case "reportUnpark": {
         const t = String(ch.target || "");
-        const isFn = t.indexOf("fn:") === 0;
+        /* §330: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
+           where its access comes from — the function that holds it. Read as a
+           unit it would consult the wrong column entirely, and a function head
+           reporting their own capability would be refused. */
+        const isFn = t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0;
         if (!edits(w, person, isFn ? "fn" : "unit", t)) {
-          no("You cannot report for " + t.replace(/^fn:/, "") + ".");
+          no("You cannot report for " + targetWord(w, t) + ".");
           return;
         }
         if (locked && !office)
@@ -1507,9 +1615,13 @@ function authorize(stored, incoming, person) {
           return;
         }
         const t = String(c.target || "");
-        const isFn = t.indexOf("fn:") === 0;
+        /* §330: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
+           where its access comes from — the function that holds it. Read as a
+           unit it would consult the wrong column entirely, and a function head
+           reporting their own capability would be refused. */
+        const isFn = t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0;
         if (!edits(w, person, isFn ? "fn" : "unit", t)) {
-          no("You cannot report for " + t.replace(/^fn:/, "") + ".");
+          no("You cannot report for " + targetWord(w, t) + ".");
           return;
         }
         if (locked && !office) {
@@ -1680,20 +1792,21 @@ function authorize(stored, incoming, person) {
            capabilities (§42.2), through the same reach rule the screen asks
            (mayReportRow, §147.7). */
         if (!R.onlyOwnLines(w, person, "fn", ch.target)) return;
-        const fk = String(ch.target || "").replace(/^fn:/, "");
         if (!ch.ids) {
           no("Your role reports its own rows — " + ch.what + where +
-             " is the function's.");
+             " is the " + (String(ch.target || "").indexOf("cap:") === 0
+                            ? "capability's." : "function's."));
           return;
         }
-        const ctxs = ctxOfFn(w, fk);
+        const ctxs = ctxOfFn(w, ch.target);
         const notMine = ch.ids.filter(function (id) {
           const ctx = ctxs[id];
           return !ctx || !R.mayReportRow(w, person, "fn", ch.target, ctx);
         });
         if (notMine.length)
           no("Your role reports only its own rows — " + notMine.length +
-             (notMine.length === 1 ? " row" : " rows") + " in " + fk + " is not yours.");
+             (notMine.length === 1 ? " row" : " rows") + " in " +
+             targetWord(w, ch.target) + " is not yours.");
         return;
       }
 

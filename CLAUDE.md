@@ -584,7 +584,7 @@ sits exactly at its own sticky offset (`bandTop 191 == top 191`) and
 `pinWatch()` cannot tell *satisfied its offset* from *pinned*, so the corner
 fill paints at rest and the card's rounded corners read square, which is
 §130.6's complaint live, **and three of that file's six passing assertions pass
-for the wrong reason with it** (§94.5); and `table-scroll`'s **4px** squeeze of
+for the wrong reason with it** (FIXED at §323) (§94.5); and `table-scroll`'s **4px** squeeze of
 the viewer label at 1100px, measured on both stacks — `brand 301 · clientback 0
 · viewer 608` over `file://` against `brand 184 · clientback 122 · viewer 523`
 served — so it is the CLIENT-BACK control a served deployment draws for a
@@ -8243,6 +8243,18 @@ python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a 
                                 # it MAKES the one-pillar unit, the demo has none (§130.2)
 python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS because a
                                 # DOM probe calls the broken build clean (§130.3, §53.7)
+                                # — and since §323 the case the fill exists for: a
+                                # window where the page does NOT scroll, reached by
+                                # RESIZING so the answer's own resize path is
+                                # exercised, asserting there is nothing to scroll,
+                                # that the band is sitting exactly AT its offset (the
+                                # fact the section turns on), that nothing is pinned,
+                                # and that both corners still draw the card's. The
+                                # scroll is asserted to have HAPPENED before the
+                                # pinned corners are measured, because three of the
+                                # six assertions here passed for the wrong reason on
+                                # the build before (§113.8). 12 red reverted, from the
+                                # SOURCES (§276)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/plan-edit-line.py # the strategy pen is ON the section line (§268): every
@@ -8794,7 +8806,56 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;322: a function's projects are its
+*Last Updated: 2026-09-12 &mdash; **&sect;323: at its offset is not pinned.**
+Found by running the suite after the merge, and live for as long as the fill has
+existed: `checks/band-corner.py` is **six red on `origin/main`'s own build**,
+reproduced in a worktree before anything here was blamed (&sect;303), and
+&sect;316.5 recorded it during the rebuild's Phase E and left it because the
+frozen file was taking no new work then &mdash; a freeze &sect;318&ndash;&sect;322
+have since reversed in practice, so the reason to leave it has expired.
+**MEASURED FIRST, AND THE ARITHMETIC IS NOT WRONG**: on a unit's Plan at
+1440&times;900, `--chrome-h` 168 + `--rail-gap` 22 puts the pane's border box at
+190, the pane's own 1px border puts the band's FLOW position at 191, and the
+band's sticky offset computes to **191 &mdash; the same pixel**; and that page
+has **nothing to scroll** (`scrollHeight - innerHeight` is 0), so it sits there
+for ever. **AN OBSERVER CANNOT TELL *AT ITS OFFSET* FROM *PUSHED TO IT***, which
+is the whole section: a shrunk root answers *has this reached the line*, and the
+two readings are the same whenever the element STARTS on the line &mdash; so the
+ratio was under 1 from the first frame, the band was marked pinned before
+anything had scrolled, and **it never fired again**, because the ratio never
+crossed back. The fill painted at rest and the card's two rounded corners read
+square: **&sect;130.6's complaint alive again**, on the build that section wrote
+to answer it. **AND THE +1 COULD NOT BE TUNED AWAY** &mdash; shrink the root by
+the offset alone and it never fires at all, because sticky clamps the band AT
+the offset; at the instant the old margin does fire, the flow position is within
+a pixel either way. *The information is not in the ratio, whatever number is put
+in front of it.* **THE TEST IS WHETHER THE BAND HAS LEFT ITS OWN FLOW
+POSITION** &mdash; what "pinned" means, needing no threshold to be guessed, and
+the same question the check asks from the outside; the band is its pane's first
+child in the flow (`.paneact` is absolute and takes no space), so the flow top is
+three numbers read ONCE PER PAINT and two rectangles per frame. **A SCROLL
+LISTENER, AND v3.3's RULE IS READ RATHER THAN QUOTED**: it forbids sizing
+anything against a measurement the size itself can change, and this sets a class
+and paints a background inside a corner &mdash; which is what the observer's own
+note already said. Armed once (&sect;24, &sect;47.2), throttled to one frame;
+`PINSEE` and the observer DELETED rather than left disconnected, and the stale
+call-site comment corrected in the same edit (&sect;104.8). **THE RESIZE LISTENER
+IS UNPROVEN AND SAYS SO** (&sect;298.2's rule): removing it leaves the check
+green, because every resize that could change the answer there also clamps the
+scroll; it is kept for the case the check cannot reach, `--chrome-h` changing
+when the chrome row wraps. **AND THREE ASSERTIONS WERE PASSING FOR THE WRONG
+REASON** (&sect;113.8, &sect;316.5's own finding): the pinned block scrolls and
+measures, and at a window that does not scroll it was measuring a band nothing
+had pinned &mdash; so the scroll is now asserted to have HAPPENED first, and the
+never-scrolling window is a case of its own, reached by RESIZING so the answer's
+own resize path is exercised. Both are rewrites, never loosenings (&sect;218).
+**12 red** with *has it reached its offset* restored, from the SOURCES
+(&sect;276). Screen only &mdash; no `api/`, `lib/` or `db/` file touched, read
+off the diff &mdash; nothing stored, nothing migrated, no rule moved. `qa.py`
+ERRORS none; `no-jump`, `plan-edit-head`, `plan-edit-line`, `table-fit` and
+`setup-sticky` green.*
+
+*Earlier the same day: **&sect;322: a function's projects are its
 own (spec 046, stage 1).** Islam, correcting &sect;321.9's proposal outright:
 *"capability is something Strategic ... the problem with having the capability
 hidden in the functional plans is confusing for the whole structure aligned
@@ -8878,10 +8939,38 @@ and two tabs green on virgin databases &middot; **`capability-remove.py` 0
 failures with five assertions REWRITTEN, never loosened** (&sect;218) &mdash;
 the held-state block INVERTED rather than deleted, because the case it guarded
 is exactly the case this has to get right &middot; eleven neighbouring checks
-green &middot; full `qa.py` ERRORS none. **RECORDED, NOT DONE**: the worked
+green. **AND THE SWEEP LINE THAT FIRST STOOD HERE WAS MEASURED ON THE WRONG
+BYTES** (&sect;322.10): it read *"full `qa.py` ERRORS none"*, which was true of
+the build the sweep ran against and not of the build this shipped &mdash; the
+sweep went first and `clearedGraph()` was corrected after it. &sect;105.6, with
+the sign reversed: *a fix tested against the wrong bytes looks exactly like a
+fix that does not work*, and here it looked exactly like one that did.
+**THE ONE RED IS &sect;214.3 FOR THE SIXTH TIME**: `qa.py` holds two lists
+&mdash; what a *Clear project* KEEPS and what it EMPTIES &mdash; and `caps` was
+in the first, because a shell was part of the org's shape while it was the only
+container a function's projects had. **INVERTED, never deleted** (&sect;218),
+so it still fails on the build before this rather than passing on both; the
+`capContent` assertion beside it now passes for the wrong reason and is KEPT as
+the control and NAMED as one (&sect;113.8), with `fnOwn` added as the successor
+that is not trivially nought. Falsified on a build made from `origin/main`'s
+own sources. **AND THE MERGE**: `main` took &sect;319 and spec 045 for the
+consulting memory while this was in flight, so this branch's three sections
+shift by one (&sect;319&ndash;&sect;321 &rarr; &sect;320&ndash;&sect;322, spec
+045 &rarr; 046) &mdash; the renumber run BEFORE the merge, which is what makes
+it provably scoped to this branch's own lines (&sect;264.3). The heal keeps its
+`045-` registry name, because that is a key and not a label (&sect;30.2). Main
+changed **nothing** in the frozen product, measured rather than assumed, so
+&sect;56.7 had nowhere to happen; the built file, `shell.js`, `sw.js`,
+`platform.css` and the static carry were regenerated rather than trusted
+(&sect;91) &mdash; and that was not ceremony, since main's committed
+`platform.css` predated &sect;321's dialog rules and merged cleanly while
+stale. **RECORDED, NOT DONE**: the worked
 example still ships its eight containers, so which the demo should show is
-Islam's (spec 046 §10.4); making projects a capability is stage 2; and a
-promoted project's code changing is his to accept (§10.5).*
+Islam's (spec 046 §10.4); making projects a capability is stage 2; a
+promoted project's code changing is his to accept (§10.5). **`band-corner` was
+6 red and was NOT this branch's** &mdash; reproduced identically on a build from
+`origin/main`'s own sources (&sect;303) &mdash; and is FIXED as &sect;323
+below.*
 
 *Earlier: 2026-09-11 &mdash; **&sect;321: removing a capability &mdash;
 the box, or the box and its work.** Islam, with the browser's own dialog open
@@ -9038,7 +9127,8 @@ picker deleted it read the seed's own value back and went green on exactly the
 build it exists to catch (&sect;94.5, its own recorded example). **`band-corner`
 is 6 red and it is NOT this work's** &mdash; established by reproducing the
 identical six on a baseline built from HEAD before anything here was blamed
-(&sect;303), and it is the failure &sect;316.5 already records. **AND THE NEW STACK'S GENERATED SHELL IS REBUILT WITH IT**:
+(&sect;303), and it is the failure &sect;316.5 already records (FIXED at
+&sect;323). **AND THE NEW STACK'S GENERATED SHELL IS REBUILT WITH IT**:
 `smp-app/public/shell.js` is TRACKED and is `build-shell.mjs`'s assembly of
 build.py's own script list, so a change to a frozen source that stops there
 leaves the Next app serving the old shell &mdash; &sect;91's failure by a

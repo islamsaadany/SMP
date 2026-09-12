@@ -18,6 +18,16 @@ cannot ask whether a sticky element is pinned, and Islam looked at the result:
 *"the corner still has this squared corner."* So the rest assertion is written
 POSITIVELY, as the thing that has to be there, and it fails on that build.
 
+AND "AT ITS OFFSET" IS NOT "PINNED" (§323). The band's sticky offset and its
+flow position are the same pixel, and a unit's Plan page does not scroll at all
+in a tall window — so the observer that used to answer this said "pinned" from
+the first frame and never said anything else, the fill painted at rest, and the
+card's rounded corners read square: §130.6's complaint alive again. The answer
+is now whether the band has LEFT its own flow position, which is the same
+question this check asks from the outside. Three of the assertions here passed
+on that build and passed for the wrong reason, so the scroll is asserted to have
+happened before the pinned state is measured at all (§113.8).
+
 AND IT WATCHES FOR A THROW. The one thing CSS cannot ask is answered by an
 observer re-armed at the end of paint() — and the first version of that was
 declared inside wire(), so `paint()` threw on `pinWatch is not defined` every
@@ -177,6 +187,15 @@ with sync_playwright() as p:
             # leaves the second false while the first is true.
             ck("[%s] %s: the band says where it is" % (theme, state),
                where["says"] == where["slid"], where)
+            # AND THE SCROLL HAS TO HAVE HAPPENED (§113.8). Three of the six
+            # assertions below passed on the build §323 corrected, and they
+            # passed for the wrong reason: the band was wrongly pinned at rest,
+            # so a window where the page never scrolls measured "pinned" while
+            # nothing had moved. A layout change that takes the scroll away
+            # again would put them straight back to proving nothing, silently.
+            if state == "pinned":
+                ck("[%s] the page really scrolled, so 'pinned' is a state it "
+                   "reaches here" % theme, where["slid"], where)
             for side in ("left", "right"):
                 px = notch_pixels(pg, 2, side)
                 ck("[%s] %s, %s corner: there is a notch to measure"
@@ -203,6 +222,43 @@ with sync_playwright() as p:
                        % (theme, side), len(ink) >= 3,
                        "%d of %d notch pixels are something other than the page"
                        % (len(ink), len(px)))
+
+        # ── AND A WINDOW WHERE THE PAGE DOES NOT SCROLL AT ALL (§323) ────
+        # The case the fix exists for, and the one no viewport here reached.
+        # A unit's Plan at 1440×900 has nothing to scroll — measured,
+        # `scrollHeight - innerHeight` is 0 — and the band's flow position and
+        # its sticky offset are the SAME PIXEL, because `--chrome-h` +
+        # `--rail-gap` puts the pane's border box at 190 and the pane's own 1px
+        # border puts the band at 191, which is what `top` computes to. So the
+        # observer this replaced said "pinned" from the first frame and never
+        # said anything else, and the two rounded corners read square for as
+        # long as the tab was open. Driven by RESIZING rather than by opening a
+        # second page, because the answer is re-asked on resize and that path
+        # is worth exercising too.
+        pg.set_viewport_size({"width": 1440, "height": 900})
+        pg.wait_for_timeout(500)
+        room = pg.evaluate("""()=>{const b=document.querySelector('.pane > .pband');
+          return {can: document.documentElement.scrollHeight - innerHeight,
+                  says: b.classList.contains('pinned'),
+                  top: Math.round(b.getBoundingClientRect().top),
+                  sticky: Math.round(parseFloat(getComputedStyle(b).top))};}""")
+        ck("[%s] the tall window leaves this page nothing to scroll" % theme,
+           room["can"] <= 0, room)
+        # NAMED, because it is the whole reason the observer could not answer:
+        # sitting AT the offset is not the same fact as having been pushed to it.
+        ck("[%s] and the band is sitting exactly at its own offset" % theme,
+           abs(room["top"] - room["sticky"]) <= 1, room)
+        ck("[%s] nothing scrolled, so nothing is pinned" % theme,
+           room["says"] is False, room)
+        for side in ("left", "right"):
+            px = notch_pixels(pg, 2, side)
+            ink = [c for c in px if not near(c, ground, 10)]
+            ck("[%s] never scrolled, %s corner: the card's own corner is still "
+               "drawn" % (theme, side), len(ink) >= 3,
+               "%d of %d notch pixels are something other than the page"
+               % (len(ink), len(px)))
+        pg.set_viewport_size({"width": 1400, "height": 620})
+        pg.wait_for_timeout(400)
 
         # The fill must not become a lid over the control it sits beside: the
         # pen is in the same corner of the same pane (§93.4, §70). Measured AT

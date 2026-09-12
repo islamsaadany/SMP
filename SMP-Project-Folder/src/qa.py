@@ -1340,18 +1340,35 @@ with sync_playwright() as p:
         fnItems: (x.functionKeys || []).reduce((n, k) =>
           n + ((x.functions[k] || {}).items || []).length, 0),
         capContent: ((x.group || {}).capabilities || []).reduce((n, c2) =>
-          n + (c2.projects || []).length + (c2.keyObjectives || []).length, 0)
+          n + (c2.projects || []).length + (c2.keyObjectives || []).length, 0),
+        /* §322: a function's projects are the function's, so they are what a
+           clear has to empty now. capContent stays as the CONTROL — with no
+           capabilities left it is trivially 0 (§113.8), and it is the
+           assertion that catches a build where they come back holding work. */
+        fnOwn: (x.functionKeys || []).reduce((n, k) => {
+          const f = x.functions[k] || {};
+          return n + (f.projects || []).length + (f.keyObjectives || []).length
+                   + (String(f.def || "").trim() ? 1 : 0);
+        }, 0)
       });
       /* And it must not have touched the graph it was given. */
       const before = count(g), after = count(clearedGraph(g)), live = count(g);
       return { full: before, clear: after, unharmed: JSON.stringify(before) === JSON.stringify(live) };
     }""")
-    keep = ["units", "fns", "cos", "caps", "themes", "bands", "labels"]
+    # §322 MOVED `caps` FROM ONE LIST TO THE OTHER, and it is an inversion
+    # rather than a deletion (§218): a capability was the only container a
+    # supporting function's projects had, so the cleared graph carried eight
+    # empty shells as though they were part of the org's shape. They are not —
+    # a capability is a strategic entry somebody creates, and a client on day
+    # one has none. So it must GO, and this still fails on the build before
+    # §322 rather than quietly passing on both.
+    keep = ["units", "fns", "cos", "themes", "bands", "labels"]
     for k in keep:
         if cp["clear"][k] != cp["full"][k]:
             errs.append("CLEAR PROJECT: %s went from %r to %r — the setup must stay"
                         % (k, cp["full"][k], cp["clear"][k]))
-    gone = ["pillars", "gko", "history", "mainbus", "sets", "fnItems", "capContent"]
+    gone = ["pillars", "gko", "history", "mainbus", "sets", "fnItems",
+            "capContent", "caps", "fnOwn"]
     for k in gone:
         if cp["clear"][k]:
             errs.append("CLEAR PROJECT: %s still holds %r" % (k, cp["clear"][k]))
@@ -1362,11 +1379,11 @@ with sync_playwright() as p:
                     % cp["clear"]["people"])
     if not cp["unharmed"]:
         errs.append("CLEAR PROJECT: clearedGraph() mutated the graph it was given")
-    print("clear project: the setup stays (%d units, %d functions, %d companies, "
-          "%d capabilities) and everything filled in goes (%d pillars -> 0, "
+    print("clear project: the setup stays (%d units, %d functions, %d companies) "
+          "and everything filled in goes (%d pillars -> 0, %d capabilities -> 0, "
           "%d people -> 1)"
           % (cp["clear"]["units"], cp["clear"]["fns"], cp["clear"]["cos"],
-             cp["clear"]["caps"], cp["full"]["pillars"], cp["full"]["people"]))
+             cp["full"]["pillars"], cp["full"]["caps"], cp["full"]["people"]))
 
     # ── A DROPDOWN OVER 255 CHARACTERS IS AN EMPTY DROPDOWN (67.5) ────
     # Islam: "the drop down in the units in the people registry template is

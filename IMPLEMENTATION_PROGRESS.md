@@ -54,7 +54,39 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§322 — a function's projects are its own — built on the
+**Latest version:** **§323 — at its offset is not pinned — built on the branch,
+not merged.**
+
+Found by running the suite after the merge, and live for as long as the fill has
+existed. On a unit's Plan at 1440×900 the band's flow position and its sticky
+offset are the **same pixel** (168 + 22 + the pane's own 1px border = 191), and
+that page has nothing to scroll — so the observer that decided *pinned* said yes
+from the first frame and never said anything else. The fill painted at rest and
+the card's two rounded corners read square: §130.6's complaint alive again, on
+the build that section wrote to answer it.
+
+The test is now whether the band has **left its own flow position**, which is
+what the word means and needs no threshold to be guessed. A scroll listener
+rather than an observer, armed once and throttled to a frame — it sets a class
+and paints a corner, so v3.3's rule about sizing against a moving measurement
+does not reach it. The resize listener beside it is **kept and known to be
+unproven**, and its own comment says so.
+
+**Three of the check's assertions were passing for the wrong reason** (§316.5
+said so): its *pinned* block scrolls and measures, and at a window that does not
+scroll it was measuring a band nothing had pinned. The scroll is asserted to have
+happened first, and the never-scrolling window is a case of its own.
+
+**Verified.** `checks/band-corner.py` all passed, **12 red** with the old test
+restored from the sources; the same check on a build made from `origin/main`'s
+sources fails the **identical six** it has been failing (§303). `qa.py` ERRORS
+none · `no-jump`, `plan-edit-head`, `plan-edit-line`, `table-fit`,
+`setup-sticky` green. Screen only: nothing stored, nothing migrated, no rule
+moved.
+
+---
+
+**Before it:** **§322 — a function's projects are its own — built on the
 branch, not merged (spec 046, stage 1).**
 
 Islam, correcting §321.9's proposal outright: *"capability is something
@@ -93,11 +125,40 @@ a real Postgres 16, falsified twice · `test-authorize.js` 608/0 with a new §37
 asserting a function's own projects are judged as a capability's are ·
 136/0 differ · round trip, clean slate, clean parity, two tabs green on virgin
 databases · `capability-remove.py` 0 failures with five assertions rewritten,
-never loosened · eleven neighbouring checks green · full `qa.py` ERRORS none.
+never loosened · eleven neighbouring checks green.
+
+**Merged `main` in, and the number moved.** `main` took §319 and spec 045 for
+the consulting memory while this was in flight, so this branch's three sections
+shift by one (§319–§321 → §320–§322, spec 045 → 046) — the precedent §287,
+§301, §310, §318 and main's own §319.1 all set. The renumber ran BEFORE the
+merge, which is what makes it provably scoped to this branch's own lines
+(§264.3). Main changed **nothing** in the frozen product, measured rather than
+assumed; the built file, `shell.js`, `sw.js`, `platform.css` and the static
+carry were regenerated rather than trusted, and that was not ceremony — main's
+committed `platform.css` predated §321's dialog rules and had merged cleanly
+while stale.
+
+**And the sweep line first written here was measured on the wrong bytes.** It
+said *ERRORS none*, true of the build the sweep ran against and not of the
+build that shipped: the sweep went first and `clearedGraph()` was corrected
+after it (§105.6, with the sign reversed). Re-run, it reports **one** error,
+and it is this decision arriving at a check that had not been told — `qa.py`
+still counted the eight empty capability shells as part of the org's shape that
+a *Clear project* must keep. The entry is **inverted, never deleted** (§218),
+so the check still fails on the build before this rather than passing on both;
+falsified on a build made from `origin/main`'s own sources.
+
+**`band-corner` is 6 red and is not this branch's** — the identical six
+reproduce on a build from `origin/main`'s sources (§303). It is the live defect
+§316.5 named: a Plan page that does not scroll leaves the band already at its
+sticky offset, so `pinWatch()` cannot tell *satisfied its offset* from
+*pinned*, and the corner fill paints at rest. Recorded rather than fixed in
+passing — it is a visual behaviour with its own signed-off answer.
 
 **Waiting on Islam:** whether the worked example should dissolve its eight
 containers or keep one real capability so §321's feature renders something;
-and stage 2 — a capability as a strategic entry beside the business units.
+stage 2 — a capability as a strategic entry beside the business units; and the
+merge itself, which is his word on that merge.
 
 ---
 

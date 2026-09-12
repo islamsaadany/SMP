@@ -5499,8 +5499,17 @@ recorded example, walked into twice in two days).
 green on virgin databases · `capability-remove.py` **0 failures with five
 assertions REWRITTEN, never loosened** (§218) — the held-state block is
 INVERTED rather than deleted, because the case it guarded is exactly the case
-this has to get right · eleven neighbouring checks green · full `qa.py` ERRORS
-none.
+this has to get right · eleven neighbouring checks green.
+
+**AND THE SWEEP LINE THAT FIRST STOOD HERE WAS MEASURED ON THE WRONG BYTES.**
+It read *"full `qa.py` ERRORS none"*, and it was true of the build the sweep
+ran against and not of the build this section shipped: the sweep went first,
+`clearedGraph()` was corrected afterwards (§322.7, the clean-parity failure),
+and nothing re-ran it. **§105.6 exactly** — *a fix tested against the wrong
+bytes looks exactly like a fix that does not work*, and here it looked exactly
+like a fix that does. Re-run against the merged build the sweep reports **one**
+error, and it is this decision arriving at a check that had not been told:
+`CLEAR PROJECT: caps went from 8 to 0 — the setup must stay`. See §322.10.
 
 ### 322.9 · Recorded, not done
 
@@ -5513,6 +5522,175 @@ none.
   into.
 - **A project's code changes when it is promoted**, which is the honest answer
   and is recorded in spec 046 §10.5 as his to accept.
+
+### 322.10 · The merge, the renumber, and the check the decision had not reached
+
+**`main` took §319 and spec 045 while this was in flight** — the consulting
+memory, merged 2026-09-11 from another session — so this branch's three
+sections shift by one: §319→§320, §320→§321, §321→§322, and spec 045→046. That
+is the precedent §287, §301, §310, §318 and main's own §319.1 all set: **the
+number that merged first stands, and a gap is harmless where a collision is
+not.** The sweep is scoped to the lines this branch wrote (§264.3), and it is
+provably so because it ran BEFORE the merge — main's eight §319 citations were
+not in the tree yet, so a blanket replace could not have reached them. Counts
+before and after agree exactly (§322: 70, §321: 29, §320: 23, §319: 0).
+
+**THE HEAL KEEPS ITS `045-` NAME.** `045-a-functions-projects-are-its-own.js`
+is written into `_sql_migrations` the first time it runs, so it is a KEY and
+not a label (§30.2, §65): renaming it to match the spec would make it run again
+wherever it has already run. The spec says so in its own header rather than
+leaving a reader to wonder.
+
+**AND THE MERGE ITSELF WAS QUIET, WHICH IS WORTH MEASURING RATHER THAN
+ASSUMING**: `git diff` from the merge base to `origin/main` over
+`SMP-Project-Folder/src`, `lib`, `scripts`, `db`, `sw.js` and `vercel.json` is
+**empty** — the consulting memory is entirely new-stack. So §56.7's collision
+(two branches each adding a name to one shared scope, merged with no conflict
+at all) had nowhere to happen here, and the duplicate-declaration scan over the
+merged sources returns only §281.1's own recorded block and the module-scoped
+twins in `lib/`. One content conflict, in `IMPLEMENTATION_PROGRESS.md`, where
+both sides had written their own *Latest version* — resolved by keeping BOTH,
+newest first, rather than by picking (§147.4: read a merge before believing it).
+`node --check sw.js` passes; the built file, `public/shell.js`, `public/sw.js`,
+`platform.css` and the static carry were all REGENERATED rather than trusted
+(§91) — and that was not ceremony, because main's committed `platform.css`
+predated §321's dialog rules and the merge had spliced a stale copy through
+cleanly.
+
+**THE ONE RED WAS `qa.py`, AND IT IS §214.3 FOR THE SIXTH TIME**: that check
+holds two lists — what a *Clear project* must KEEP and what it must EMPTY — and
+`caps` was in the first, because a capability shell was part of the org's shape
+while it was the only container a supporting function's projects had. §322 made
+it a thing a function CARRIES, so a client on day one has none. **The entry is
+INVERTED rather than deleted** (§218): `caps` moves to the second list, so the
+check still fails on the build before §322 rather than quietly passing on both.
+**And the assertion beside it now passes for the wrong reason** (§113.8):
+`capContent` counts the work inside the capabilities, which with none left is
+trivially nought — it is KEPT as the control, and named as one in the check's
+own comment, with `fnOwn` added beside it as the successor that is not
+trivially nought: a function's own projects, key objectives and definition,
+which `clearedGraph()` has to go and empty. **Falsified before it was
+believed** — carried onto a build made from `origin/main`'s own sources, where
+it goes red on `caps` exactly as it must.
+
+**AND `band-corner` IS 6 RED AND IS NOT THIS BRANCH'S** — established by
+building `origin/main`'s sources in a worktree and running the same check
+against them, where the **identical six** fail (§303). It is the live defect
+§316.5 recorded and named: at 1440×900 a unit's Plan page does not scroll at
+all, so the band already sits at its own sticky offset and `pinWatch()` cannot
+tell *satisfied its offset* from *pinned* — the corner fill paints at rest and
+the card's rounded corners read square, which is §130.6's complaint alive
+again. Recorded here rather than fixed in passing, because it is a visual
+behaviour with its own signed-off answer and belongs in its own round.
+
+## 323 · At its offset is not pinned
+
+Found by running the suite after the merge, and it is a defect that has been
+live for as long as the fill has existed. `checks/band-corner.py` is **six red**
+on `origin/main`'s own build — reproduced there in a worktree before anything
+here was blamed (§303) — and §316.5 recorded it during the rebuild's Phase E
+and left it, because the frozen file was taking no new work then and it blocks
+no client. The freeze has since been reversed in practice (§318–§322 are all
+new work on this file), so the reason to leave it has expired.
+
+### 323.1 · The two numbers are the same pixel, and the page does not scroll
+
+**MEASURED BEFORE ANYTHING WAS TOUCHED.** On a unit's Plan at 1440×900:
+
+| | |
+|---|---|
+| `--chrome-h` | 168px |
+| `--rail-gap` | 22px |
+| the pane's border box | **190px** down the document |
+| the pane's own top border | 1px |
+| so the band's FLOW position | **191px** |
+| the band's sticky offset, `calc(--chrome-h + --rail-gap + 1px)` | **191px** |
+| `scrollHeight - innerHeight` | **0** |
+
+The arithmetic is not wrong — the `+ 1px` **is** the pane's border, and §29.4's
+rule (*one number, not two that happen to agree*) is kept rather than broken.
+What follows from it is that the band sits **exactly at** its own offset, and
+on that page it sits there for ever, because there is nothing to scroll.
+
+### 323.2 · An observer cannot tell "at its offset" from "pushed to it"
+
+`pinWatch()` shrank the root by the sticky offset plus a pixel and watched for
+the band to stop being wholly inside it. That is a good instrument for the
+question *has this reached the line* and the wrong one for *has this been
+pushed against the line*, and the two are the same reading whenever the element
+starts on the line. So the ratio was under 1 from the first frame; the band was
+marked `pinned` before anything had scrolled; and — worse — **the observer
+never fired again**, because the ratio never crossed back.
+
+So `.pane > .pband.pinned::after` painted the page's ground into both notches
+at rest, and the card's two rounded corners read square. **§130.6's complaint,
+alive again** — *"the corner still has this squared corner"* — on the build
+that section wrote to answer it.
+
+**AND THE +1 COULD NOT BE TUNED AWAY.** Shrink the root by the offset alone and
+the observer never fires at all, because sticky clamps the band AT the offset
+and it never goes above it. At the instant the old margin does fire, the band's
+flow position is within a pixel of the offset either way — *the information is
+not in the ratio*, whatever number is put in front of it.
+
+### 323.3 · The test is whether it has left its own flow position
+
+That is what "pinned" means, it needs no threshold to be guessed, and it is the
+same question `band-corner.py` asks from the outside (*the band's top against
+its pane's*). The band is its pane's first child in the flow — `.paneact` is
+absolute and takes no space — so the flow top is the pane's border box plus its
+border, its padding and the band's own negative top margin: **three numbers
+read once per paint** rather than per frame, with the two rectangles the only
+per-frame cost.
+
+**A SCROLL LISTENER, AND v3.3's RULE IS READ RATHER THAN QUOTED.** That rule
+forbids sizing anything against a measurement the size itself can change; this
+sets a class and paints a background inside a corner, so the loop it guards
+against cannot form — which is what the observer's own note already said. It is
+**armed once** (§24, §47.2) and throttled to one frame, because scroll fires per
+pixel; `pinWatch()` re-reads the bands after every paint, since the ones it was
+holding have just been replaced. `PINSEE` and the observer are **DELETED, not
+left disconnected** (§24), and the stale comment at the call site — which
+described the instrument rather than the answer — is corrected in the same edit
+(§104.8).
+
+**AND THE RESIZE LISTENER IS UNPROVEN, WHICH IS SAID RATHER THAN IMPLIED**
+(§298.2's rule): taking it out leaves the check GREEN, because every resize that
+could change the answer there also clamps the scroll and fires a scroll event.
+It is kept for the case the check cannot reach — `--chrome-h` changes when the
+chrome row wraps, which moves the offset AND the pane under a scroll position
+that does not move — and its own comment says it is not proved.
+
+### 323.4 · Three assertions were passing for the wrong reason
+
+§316.5 said so and this is what it meant. The check's *pinned* block scrolls to
+420 and measures; at a window where the page does not scroll, nothing moves and
+the band was `pinned` anyway, so **"the page's own ground, and nothing behind
+it" was true of a band that had never been pinned by anything**. §113.8 exactly.
+Two things close it, and both are rewrites rather than loosenings (§218):
+
+- **the scroll is asserted to have happened** before the pinned corners are
+  measured at all, so a layout change that takes the scroll away fails here
+  rather than quietly proving nothing;
+- **the window where the page does not scroll is a case of its own** — reached
+  by RESIZING rather than by opening a second page, because the answer is
+  re-asked on resize and that path is worth exercising — asserting that there
+  is nothing to scroll, that the band is sitting exactly at its offset (the
+  fact the whole section turns on), that nothing is pinned, and that both
+  corners still draw the card's.
+
+### 323.5 · Verified
+
+`checks/band-corner.py` **all passed**, and **proved able to fail from the
+SOURCES** (§276, since §238's hashed CSP silences an edited built file):
+restoring *has it reached its offset* goes **12 red** — the original six plus
+the six the new window adds — in both palettes. The baseline reproduction is
+the same check against a build made from `origin/main`'s own sources in a
+worktree, where the **identical six** fail.
+
+Screen only: no `api/`, `lib/` or `db/` file touched, read off the diff; nothing
+stored, nothing migrated, no rule moved. `qa.py` ERRORS none; `no-jump`,
+`plan-edit-head`, `plan-edit-line`, `table-fit` and `setup-sticky` green.
 
 ## 36 · Multi-tenant — what to do when the time comes
 

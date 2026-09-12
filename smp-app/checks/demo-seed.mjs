@@ -45,11 +45,16 @@ try {
   check(row && row.name === "Meridian Group", "wearing the invented name, not the client's", row && row.name);
 
   /* EVERY TENANT-OWNED TABLE, asked of the catalogue rather than listed here —
-     a list in a check is a list somebody forgets to add to (§104.7). */
+     a list in a check is a list somebody forgets to add to (§104.7).
+     AND ASKED OF `SCHEMA`, NEVER `public` (§326): the catalogue is asked by
+     NAME, which is the one kind of query a `search_path` cannot help — so
+     §317.4 correctly moved this pool's path at line 37 and left this query
+     naming the room the tables had just left. It then found nought tables and
+     scanned nothing, and a scan of nothing finds no forbidden name. */
   const tables = (await owner.query(
     "SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace " +
     "JOIN pg_attribute a ON a.attrelid = c.oid AND a.attname = 'tenant_id' " +
-    "WHERE n.nspname = 'public' AND c.relkind = 'r' ORDER BY c.relname")).rows.map((x) => x.relname);
+    "WHERE n.nspname = $1 AND c.relkind = 'r' ORDER BY c.relname", [SCHEMA])).rows.map((x) => x.relname);
   check(tables.length > 25, "and there are tenant-owned tables to scan at all", tables.length);
 
   /* THE MATCHING RULE IS THE FROZEN SCRIPT'S, ASKED AND NOT REWRITTEN

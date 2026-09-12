@@ -153,15 +153,49 @@ model. `format` would gain a third value beside `pillars` and `projects`:
   choice of three) — which is what keeps it small: no dispute rule, no
   arithmetic, no second definition of what a function is judged on.
 
-## 6 · Still to settle, for the round that builds the missing shapes
+## 6 · Settled by Islam, 2026-09-12
 
-1. **Whether a requirement is a counted gap** (§249) and whether it holds
-   Submit (§221). Recommendation: neither, matching its not-scored decision.
-2. **The workbook.** A plan is authored by upload (§22), so the three new row
-   kinds need sheets and a round trip, or a download-and-re-upload drops them.
-3. **What happens to a function already holding a plan** if its type is
-   changed to objectives — the switch is already refused while the other side
-   holds content (§59), and a third value needs the same guard.
+1. **A requirement is NEITHER a counted gap nor a hold on Submit** — his
+   *"missing item nither"*, confirming the recommendation. It follows from the
+   not-scored decision rather than being a second choice beside it: a thing
+   that moves no score and is owed by somebody else is not this function's
+   plan being incomplete. So `GAP_FIELDS` gains nothing, `submitBlockers()`
+   gains nothing, and a requirement raised and unanswered never stops a
+   function reporting.
+
+2. **Changing a function's plan type ARCHIVES the standing plan and starts the
+   new one** — his *"archvied when type changes and create the new apprach"*.
+   This REPLACES §59's refusal for this one transition rather than widening
+   it: today the switch is refused outright while the other side holds
+   content, which is right when there is nowhere for that content to go and
+   wrong once archiving is the answer. It is the path the import's replace and
+   Clear plan already take (§49.2, §22 — *nothing the platform does here is a
+   deletion*), so the archive is restorable from Archived plans and no second
+   archiving rule is written.
+
+3. **The workbook is still open**, and the question was not understood as
+   asked — restated for the round that builds this. A plan gets into the
+   platform by uploading a workbook, and an upload AUTHORS rather than amends
+   (§22), so a column the file does not carry is a column the plan LOSES on a
+   download-and-re-upload. Objectives, actions and requirements have no sheets
+   today. Either the template grows three, or a function planning this way
+   cannot use upload at all — and the second is not a neutral choice, because
+   §295's bulk export would then produce a complete-looking archive of such a
+   function that cannot be restored.
+
+### 6.1 · The extras are optional (Islam, 2026-09-12)
+
+Of §320.8's remaining four: *"for the extras like the targets broken down,
+that should be optional and same for the pillar description and committee and
+the next cycle focus box."*
+
+So **targets broken down by category**, the **pillar's description**, the
+**pillar committee** and the **next-cycle focus box** are all optional — not
+counted as missing, and none of them holds Submit. Same shape as point 1 above,
+and it narrows what §320.8 recorded: that section has the category breakdown
+scoring and Submit waiting for it, which is now **reversed for the waiting
+half** — it still scores where it is used, and a pillar that never uses one
+owes nothing and says nothing.
 
 *(Answered and recorded above: the two headline numbers, and where a
 requirement is raised from.)*

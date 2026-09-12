@@ -6418,6 +6418,26 @@ has ever been in front of a client — which is what this sweep is for.
   put back from the SOURCES (§276), printing three empty codes and a moved
   project reading what it read before.
 
+- **§330.12 · A check that would not parse, and the sweep that rewrites a
+  sign-off.** `checks/objectives-table-mockup.py` died on a **SyntaxError**:
+  a §330 edit of mine put `[data-fold="fns"]` inside a double-quoted Python
+  string, so the file could not be READ, let alone run — and `qa-run.py` reports
+  that as one more red line among 167, which is how a file that never executed
+  looks exactly like a file that failed (§54.5: *a check that did not run is not
+  a check that passed*, and this one could not even pretend). Established as
+  this branch's by parsing main's copy, which is clean. **AND FIXING IT RE-ARMED
+  THE FAULT §329 RECORDED AND LEFT**: it is a mockup GENERATOR living in
+  `checks/`, so a full sweep ran it and it replaced §278.3's signed-off shots
+  with today's build — silently, against Principle II, which says a mockup is
+  the record of what was AGREED and not of what was built. It had been harmless
+  only because it was broken. Both it and its sibling
+  `objectives-table-doc.py` now **refuse to write unless asked by name**
+  (`SMP_WRITE_MOCKUPS=1`), which is one of the two remedies §329 named and the
+  smaller of them; **both ends proved** (§94.2) — the guard declines and writes
+  nothing, and lifted, the document regenerates **byte-identical**, so the
+  shots it assembles are still the signed-off ones and a guard that had quietly
+  deleted the generator would have been caught.
+
 ### What the checks found, and what had to be rewritten rather than loosened
 
 `checks/capability-entry.py` is new and 43/0 — the demo's one capability, the

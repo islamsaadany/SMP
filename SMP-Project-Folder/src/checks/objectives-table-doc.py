@@ -11,6 +11,19 @@ SHOTS = ROOT / "design-mockups/objectives-table/shots"
 OUT = ROOT / "design-mockups/objectives-table/2026-09-04_the-objectives-table.html"
 STYLE = (pathlib.Path(__file__).resolve().parent / "_mockup-style.html")
 
+# A SWEEP MAY NOT REWRITE THE RECORD OF A SIGN-OFF (§330.12, closing §329's own
+# recorded not-done). This is a mockup GENERATOR living in `checks/`, so
+# `qa-run.py checks/*.py` ran it and it replaced a signed-off document with
+# today's build — and Principle II says a mockup is the record of what was
+# AGREED, not of what was built. It refuses to write unless asked by name; its
+# sibling `objectives-table-mockup.py` carries the same guard.
+import os
+if os.environ.get("SMP_WRITE_MOCKUPS") != "1":
+    print("objectives-table-doc: not writing — this rewrites a signed-off "
+          "mockup in design-mockups/objectives-table/.\n"
+          "  Re-make it deliberately with SMP_WRITE_MOCKUPS=1.")
+    raise SystemExit(0)
+
 
 def img(name, alt):
     b = base64.b64encode((SHOTS / (name + ".png")).read_bytes()).decode()

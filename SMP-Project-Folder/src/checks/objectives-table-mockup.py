@@ -34,13 +34,27 @@ Both shapes are shot, because a unit's objectives table has the same drawer.
 
 Writes PNGs into design-mockups/objectives-table/shots/ and prints the pixels.
 """
-import pathlib, json
+import os, pathlib, json
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 OUT = ROOT / "design-mockups/objectives-table/shots"
+
+# A SWEEP MAY NOT REWRITE THE RECORD OF A SIGN-OFF (§330.12, closing §329's
+# own recorded not-done). This file is a mockup GENERATOR living in `checks/`,
+# so `qa-run.py checks/*.py` ran it and it replaced §278.3's signed-off shots
+# with today's build — silently, and Principle II says a mockup is the record
+# of what was AGREED, not of what was built. It refuses to write unless it is
+# asked to by name. It was unreachable while it would not parse (§330.12), so
+# fixing that is what re-armed it and this had to cross with the fix.
+WRITE = os.environ.get("SMP_WRITE_MOCKUPS") == "1"
+if not WRITE:
+    print("objectives-table-mockup: not writing — this rewrites signed-off "
+          "shots in design-mockups/objectives-table/shots/.\n"
+          "  Re-make them deliberately with SMP_WRITE_MOCKUPS=1.")
+    raise SystemExit(0)
 OUT.mkdir(parents=True, exist_ok=True)
 CHROME = "/opt/pw-browsers/chromium"
 # The two close-ups are read pixel by pixel, so they are shot at a scale where
@@ -181,8 +195,14 @@ def land(pg, where):
     pg.goto("file://" + str(FILE)); pg.wait_for_timeout(1400)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     if where == "fn":
-        # §330: the navigation switch has a THIRD side once a capability exists, so pressing the control no longer means "go to the other one" — press the side you want. `[data-fold="fns"]` is absent exactly when Functions is already lit, which is why the press is guarded rather than asserted.
-        pg.evaluate("()=>{const b = document.querySelector('#units [data-fold="fns"]'); if (b) b.click();}")
+        # §330: the navigation switch has a THIRD side once a capability
+        # exists, so pressing the control no longer means "go to the other
+        # one" — press the side you want. `[data-fold]` is absent exactly when
+        # that side is already lit, which is why the press is guarded rather
+        # than asserted.
+        pg.evaluate("""()=>{const b =
+          document.querySelector('#units [data-fold=\"fns\"]');
+          if (b) b.click();}""")
         pg.wait_for_timeout(350)
         pg.evaluate("()=>{const b=document.querySelector('#units button[data-u=\"fn:finance\"]'); if(b)b.click();}")
         pg.wait_for_timeout(500)

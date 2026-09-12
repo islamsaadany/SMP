@@ -6468,6 +6468,18 @@ Its 620/0 had been measured against a seed that could not exercise it.
   `design-mockups/objectives-table/shots/` on every full sweep, so a sweep
   silently replaces a signed-off picture with today's build. What it wants is
   either a refusal to overwrite or a home outside `checks/`.
+- **`SMPRules.unitLikeOf()` does not know a capability, and today nothing asks
+  it to.** It is the one resolver in the shared rules §330 did not teach —
+  measured, `unitLikeOf(w, "cap:cap6")` answers null — and its only caller is
+  `tourReady()`, whose place comes from `ownPlace()`, which reads a ROLE's `at`
+  and can therefore only ever be a unit, a function, a company or the group
+  (a capability is held BY RULE through `capHolderTarget()`, never by a role
+  row). So the gap is unreachable and a branch for it would be a branch for a
+  path that cannot be taken (§24). **It becomes real the day a role can be held
+  at a capability**, and then it is silent and in the safe-looking direction:
+  the tour is simply not offered to the one person it is for, on a capability
+  planned in pillars that genuinely has a plan to walk. Stated here rather than
+  guessed at later.
 
 ## 36 · Multi-tenant — what to do when the time comes
 

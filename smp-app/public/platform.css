@@ -5133,8 +5133,9 @@
      slot on a unit's Performance page, so it needs a gap of its own — without
      one they touch, and a solid button touching an outlined one reads as a
      single split control. */
-  .bands-act { margin-left:auto; display:inline-flex; gap:8px; align-items:center; }
-  .bands-act .editbtn { padding:5px 14px; }
+  /* `.bands-act` DELETED (§324, §24). §275 moved the Performance page's
+     controls onto the tab row and nothing has worn this class since; it was
+     still here, which is how the onboarding tour came to be pointing at it. */
 
   /* The two buttons that leave hold the far right of the first line, grouped
      so nothing can wrap between them. */

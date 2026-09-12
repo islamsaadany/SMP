@@ -3722,6 +3722,68 @@ console.log("\n37 · a function's own projects are judged as a capability's are 
   }
 })();
 
+/* ── 37b · AND ITS OWNER IS A PROJECT OWNER (§330, closing §322) ─────────
+   The role is DERIVED off the plan's own Owner rows (§147.7) and the walk read
+   the capabilities alone — so once §322 gave a supporting function projects of
+   its own, the owner of a project on the page where most of a tenant's
+   projects now live derived NO ROLE AT ALL. It is the SHARED rule, so both
+   ends failed together: the function never appeared in their navigation and
+   the server refused the figure they could not have entered anyway.
+
+   BOTH ENDS (§94.2): the owner of a project the FUNCTION holds derives it, and
+   somebody the plan does not name does not — or a build that handed the role
+   to everybody attached would pass the first assertion perfectly. */
+console.log("\n37b · a function's own project owner is a Project owner (§330)");
+(function () {
+  const R = require("../lib/rules.js");
+  /* THE FIXTURE UNDOES THE HARNESS'S OWN WRAP, through the product's own
+     dissolve (§42, §37's own argument): this file boxes every function's
+     projects at the top so six hundred sections read the shape they were
+     written for, and the shape THIS section is about is the one after they
+     come home. A `projects` read straight off SEED here is empty, which is
+     the harness and not the seed — it said so in its own comment. */
+  const FK = Object.keys(SEED.functions || {}).filter(function (k) {
+    return String((SEED.functions[k] || {}).format) !== "pillars" &&
+      (SEED.group.capabilities || []).some(function (c) {
+        return c && c.fn === k && (c.projects || []).length; });
+  })[0];
+  check("§330: the seed holds a projects function with work under it", !!FK, FK);
+  if (!FK) return;
+  const w = clone(SEED);
+  const f = w.functions[FK];
+  f.projects = []; f.keyObjectives = f.keyObjectives || [];
+  (w.group.capabilities || []).filter(function (c) { return c.fn === FK; })
+    .forEach(function (c) {
+      const mv = R.dissolvePlan(c, f);
+      if (mv.def != null) f.def = mv.def;
+      if (mv.keyObjectives) f.keyObjectives = mv.keyObjectives;
+      f.projects.push.apply(f.projects, mv.projects);
+    });
+  w.group.capabilities = (w.group.capabilities || [])
+    .filter(function (c) { return c.fn !== FK; });
+  check("§330: and the function now owns them outright",
+        (f.projects || []).length > 0, (f.projects || []).length + " projects");
+  if (!(f.projects || []).length) return;
+  const OWNER = "Probe Project Owner 330";
+  f.projects[0].owner = OWNER;
+  w.people = (w.people || []).concat([
+    { key: "probe330own", name: OWNER, active: true, fn: FK },
+    { key: "probe330not", name: "Probe Nobody 330", active: true, fn: FK },
+  ]);
+  const world = A.worldOf ? A.worldOf(w) : w;
+  const rolesOf = function (key) {
+    const p = (w.people || []).filter(function (x) { return x.key === key; })[0];
+    return R.personRoles(world, p).map(function (r) { return r.role + "@" + r.at; });
+  };
+  check("§330: the owner of a function's own project derives Project owner "
+        + "at the FUNCTION",
+        rolesOf("probe330own").indexOf("powner@fn:" + FK) > -1,
+        rolesOf("probe330own").join(", "));
+  check("§330: and somebody the plan does not name does not",
+        rolesOf("probe330not").indexOf("powner@fn:" + FK) === -1,
+        rolesOf("probe330not").join(", "));
+})();
+
 /* ── 38 · A CAPABILITY IS A SUBJECT OF ITS OWN (§330, spec 046 stage 2) ──
    The server had never been asked about a `cap:` target, because until today
    nothing in the product could send one — which is §172's own lesson and why

@@ -5157,12 +5157,24 @@ function ownDraftShut(target, id){
 }
 /* Whose mark it is, asked of the SHARED rule so the screen draws exactly what
    the server accepts (§42). `owner` is the container's Owner as STORED. */
+/* WHICH ACCESS COLUMN A TARGET IS JUDGED IN. Named once, because the two
+   questions below must never answer it differently (§53.5) — and they did:
+   §330 taught `boundedHere` that a capability is judged in the FUNCTION area
+   and left this line reading `"unit"` one function above it. Measured: a
+   project owner on their own capability came out with no reach at all, so
+   `railMine` could not find their project, `capForBounded` never opened their
+   capability, and the mark §301 built for them was not drawn — the whole of
+   §310's promise silently dead on the one page it is about, with nothing on
+   the screen and nothing on the console (§96's family). */
+function areaOfTarget(target){
+  var t = String(target || "");
+  return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit";
+}
 function mayMarkDoneOn(target, owner){
   var t = String(target || "");
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
-  return SMPRules.mayMarkDone(world(), viewer(),
-                              t.indexOf("fn:") === 0 ? "fn" : "unit", t, owner);
+  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner);
 }
 /* Does this viewer report here through bounded roles ALONE — the person the
    control exists for. Anybody unbounded has Submit, which says more than a
@@ -5174,8 +5186,7 @@ function boundedHere(target){
      its access comes from — the function that holds it (lib/rules.js). Asked
      as "unit" it would read the wrong column and a bounded project owner
      would come out unbounded on the one page their own project is on. */
-  return SMPRules.onlyOwnLines(world(), viewer(),
-    (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit", t);
+  return SMPRules.onlyOwnLines(world(), viewer(), areaOfTarget(t), t);
 }
 /* Somebody who really does report here, and only their own. Both halves are
    load-bearing: without the first a plain READER — for whom "View only" is

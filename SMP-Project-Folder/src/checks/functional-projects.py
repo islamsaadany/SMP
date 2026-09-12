@@ -194,10 +194,35 @@ def main():
         ok(before.get("fnstrat/found", {}).get("keys", [])[:2] == ["Function", "Led by"],
            "and the Overview still names the FUNCTION, not the box",
            before.get("fnstrat/found", {}).get("keys"))
-        own_now = ev(pg, "()=>fnProjects('finance').map(p=>p.id)")
+        own_now = ids_now = ev(pg, "()=>fnProjects('finance').map(p=>p.id)")
         ok(own_now == [i for i in (start.get("fin") or []) if i not in BOXED],
-           "the function's page holds its own projects and not the boxed one",
+           "the function's own list holds its projects and not the boxed one",
            [own_now, BOXED])
+        # AND THE PAGE, NOT ONLY THE LIST. Everything above is an absence or a
+        # read of the DATA, and both pass on a build whose Projects page draws
+        # the box's work beside the function's — which is exactly what the
+        # falsification here does (§113.8, found by running it). The bands
+        # drawn are the codes the function owns and nothing else.
+        if page(pg, "fnstrat", "proj"):
+            drawn = ev(pg, "()=>[...document.querySelectorAll('#panel .pband-code')]"
+                           ".map(e=>e.textContent.trim())")
+            want = ev(pg, "()=>fnProjects('finance')"
+                          ".map(p=>projCode('fn:finance',p))")
+            # ONE BAND PER HOLDER, because the rail picks one project at a
+            # time (§130.2) — so the assertion is that every code the page
+            # draws is one of the function's, never that it draws them all.
+            # On a build whose Projects page draws the box beside the function
+            # a second band appears carrying the BOX's numbering (measured:
+            # ['FIN01', 'FI01']), which is what this catches.
+            ok(isinstance(drawn, list) and drawn
+               and all(c in (want or []) for c in drawn),
+               "and every project band the page draws is the function's own",
+               [drawn, want])
+            rail = ev(pg, "()=>[...document.querySelectorAll('.rail [data-rail]')]"
+                          ".map(b=>b.dataset.rail)")
+            ok(isinstance(rail, list) and rail == (ids_now or []),
+               "and its rail lists exactly the function's own projects",
+               [rail, ids_now])
 
         # AND THE BOX HOLDS WHAT LEFT, on its own destination (§330). Without
         # this the projects could have gone nowhere and every assertion above

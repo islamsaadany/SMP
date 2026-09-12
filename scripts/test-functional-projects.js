@@ -46,14 +46,39 @@ const eq = (a, b, m) => ok(J(a) === J(b),
    here (§100.3, §255): a hand-built state models what I think the shape is,
    and the one thing this file exists to prove is what the shape really does. */
 const SEED = require("../db/seed-state.json");
-function base() {
-  const s = JSON.parse(JSON.stringify(SEED));
-  /* Two capabilities on ONE function, so the walk has to append rather than
-     assign — a second box arriving onto a list the first already filled is
-     the case a fresh array silently empties. */
-  const caps = s.group.capabilities.filter(c => c.fn === "finance" || c.fn === "marketing");
+/* THE FIXTURE MAKES ITS OWN BOXES (§255, §329). The seed carried eight until
+   the worked example was finished, and this file's whole subject is what the
+   one-off does to one — so with none it did not go red, it THREW on the first
+   `undefined` and left every later section unmade (§215). Each function's own
+   projects are wrapped back into a box here, which is the exact inverse of the
+   dissolve under test; MARKETING GETS TWO, because a second box arriving onto
+   a list the first already filled is the case a fresh array silently empties,
+   and that is the fixture's own reason for existing. */
+function withBoxes(s) {
+  const caps = [];
+  ["finance", "marketing"].forEach(function (fk) {
+    const f = s.functions[fk];
+    if (!f || !(f.projects || []).length) return;
+    /* Marketing's are split in two so ONE function carries a pair. */
+    const parts = fk === "marketing" && f.projects.length > 1
+      ? [f.projects.slice(0, f.projects.length - 1), f.projects.slice(-1)]
+      : [f.projects.slice()];
+    parts.forEach(function (ps, i) {
+      const id = "box-" + fk + (parts.length > 1 ? "-" + (i + 1) : "");
+      ps.forEach(function (p) { p.capId = id; });
+      caps.push({ id: id, fn: fk, name: (f.name || fk) + " work" + (parts.length > 1 ? " " + (i + 1) : ""),
+                  def: i === 0 ? (f.def || "") : "",
+                  keyObjectives: i === 0 ? (f.keyObjectives || []).slice() : [],
+                  projects: ps });
+    });
+    f.projects = []; f.def = ""; f.keyObjectives = [];
+  });
   s.group.capabilities = caps;
   return s;
+}
+
+function base() {
+  return withBoxes(JSON.parse(JSON.stringify(SEED)));
 }
 
 (async () => {

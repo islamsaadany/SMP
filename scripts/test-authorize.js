@@ -11,6 +11,35 @@ const A = require("../lib/authorize.js");
 const R = require("../lib/rules.js");
 
 const SEED = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+
+/* ── THE FIXTURE MAKES ITS OWN BOXES (§255, §329) ────────────────────────
+   The seed carried eight capabilities until the worked example was finished,
+   and some thirty assertions in this file reach into them by `fn` — so the
+   day the demo stopped shipping one, the file did not go red, it THREW on the
+   first `undefined` and reported nothing at all (§215). The SUBJECT has not
+   changed: what is authorised about a capability is a real question, stage 2
+   gives the product real ones again, and §37 below exists to prove that a
+   function's own projects are judged the same way — which needs a box to
+   dissolve. So each function's own projects are wrapped back into one here,
+   which is the exact inverse of the dissolve `lib/state-io.js` runs.
+
+   ONE LINE, AT THE SOURCE, rather than thirty edits: every section below
+   reads the shape it was written for and nothing else moves. The bare seed is
+   still what §37 ends up with, because it dissolves what this wraps. */
+(function () {
+  const caps = [];
+  Object.keys(SEED.functions || {}).forEach(function (fk) {
+    const f = SEED.functions[fk];
+    if (!f || String(f.format) === "pillars" || !(f.projects || []).length) return;
+    const id = "box-" + fk;
+    (f.projects || []).forEach(function (p) { p.capId = id; });
+    caps.push({ id: id, fn: fk, name: (f.name || fk) + " work",
+                def: f.def || "", keyObjectives: (f.keyObjectives || []).slice(),
+                projects: f.projects });
+    f.projects = []; f.def = ""; f.keyObjectives = [];
+  });
+  SEED.group.capabilities = caps;
+})();
 const clone = function (x) { return JSON.parse(JSON.stringify(x)); };
 const personOf = function (state, key) {
   return state.people.filter(function (p) { return p.key === key; })[0];

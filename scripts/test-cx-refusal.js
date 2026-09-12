@@ -26,6 +26,28 @@ const A = require("/home/user/SMP/lib/authorize.js");
 const SEED = JSON.parse(fs.readFileSync("/home/user/SMP/db/seed-state.json", "utf8"));
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
+/* THE FIXTURE MAKES ITS OWN BOXES (§255, §329). Hala's report is about a
+   CAPABILITY travelling as one part, and the seed carried eight until the
+   worked example was finished — so with none this threw rather than reporting
+   (§215). The subject stands: a capability is an array inside a part, which is
+   the shape §210's keyed-map split could not reach, and stage 2 gives the
+   product real ones again. Each function's own projects are wrapped back into
+   one, which is the exact inverse of the dissolve. */
+(function () {
+  const caps = [];
+  Object.keys(SEED.functions || {}).forEach(function (fk) {
+    const f = SEED.functions[fk];
+    if (!f || String(f.format) === "pillars" || !(f.projects || []).length) return;
+    const id = "box-" + fk;
+    (f.projects || []).forEach(function (p) { p.capId = id; });
+    caps.push({ id: id, fn: fk, name: (f.name || fk) + " work",
+                def: f.def || "", keyObjectives: (f.keyObjectives || []).slice(),
+                projects: f.projects });
+    f.projects = []; f.def = ""; f.keyObjectives = [];
+  });
+  SEED.group.capabilities = caps;
+})();
+
 function run(label, D) {
   const caps = SEED.group.capabilities;
   const HERS = 0;

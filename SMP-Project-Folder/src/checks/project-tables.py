@@ -25,6 +25,17 @@ It never asks where a column sits or how wide it is. It asks:
 That last one is the reason this file exists rather than a screenshot. The
 whole change was sold on "nobody's score moves", and a claim like that is
 either measured or it is a hope.
+
+   WHAT IT WALKS, AND WHY IT CHANGED (§329, §214.3). Every project in the
+   worked example used to sit inside a capability, so this file reached them
+   through `GROUP.capabilities` and `capsOfFunction("finance")[0]`. Since the
+   demo was finished it holds no box at all, and both spellings answered with
+   nothing — `capPlanWorkbook(undefined)` threw and the run died partway
+   (§215). It asks for HOLDERS now: `holderById("fn:finance")` for the one,
+   and every function's `fnHolders()` for the sweep, which is the one list the
+   product's own pages read (§53.5) and answers whichever way the projects are
+   held — so this file keeps working when stage 2 gives a capability a home
+   again.
 """
 from playwright.sync_api import sync_playwright
 import pathlib
@@ -171,7 +182,7 @@ with sync_playwright() as p:
       // fixture that strips per-cents and leaves the statuses is no longer
       // modelling the old formula at all -- it would report the deliberate
       // change as a regression, every run, for ever.
-      const rows = GROUP.capabilities.map(c => {
+      const rows = Object.keys(FUNCTIONS).reduce((a,k)=>a.concat(fnHolders(k)),[]).map(c => {
         const keep = [];
         (c.projects||[]).forEach(p => (p.milestones||[]).forEach(m => {
           keep.push([m, m.pct, m.status]);
@@ -188,7 +199,7 @@ with sync_playwright() as p:
       // moved no figure that exists. If a later edit leaves one blank, this
       // says so rather than the parity above going quietly red.
       let pend = 0, wip = 0;
-      GROUP.capabilities.forEach(c => {
+      Object.keys(FUNCTIONS).reduce((a,k)=>a.concat(fnHolders(k)),[]).forEach(c => {
         pend += capExec(c).pending;
         (c.projects||[]).forEach(p => {
           (p.milestones||[]).forEach(m => { if (m.status === "wip") wip++; });
@@ -279,7 +290,7 @@ with sync_playwright() as p:
     # ── THE WORKBOOKS, BOTH ENDS OF EVERY RENAME (§90) ───────────────────
     print("── the workbooks")
     wb = pg.evaluate("""() => {
-      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
+      const c = holderById("fn:finance");
       const head = (ws, n) => (ws.filter(s => s.name === n)[0] || {}).head || [];
       const plan = capPlanWorkbook(c), prog = capProgressWorkbook(c);
       // A workbook written BEFORE this version still uploads: its Kind column
@@ -329,7 +340,7 @@ with sync_playwright() as p:
     # milestone lock was back in place. Four rows, one per case: not due and
     # silent, not due and answered early, on each table.
     pg.evaluate("""() => {
-      const c = capsOfFunction("finance")[0], p = c.projects[0];
+      const c = holderById("fn:finance"), p = c.projects[0];
       const far = "Dec 27", d = p.deliverables, m = p.milestones;
       d[d.length - 2].due = far; d[d.length - 2].status = null;
       d[d.length - 1].due = far; d[d.length - 1].status = "done";
@@ -390,7 +401,7 @@ with sync_playwright() as p:
     # deliverable is due Dec 26 and delivered, so it must read 100%, not a dash
     # -- the score has always counted it and the screen used to hide it.
     early = pg.evaluate("""() => {
-      const c = FUNCTIONS.finance && capsOfFunction("finance")[0];
+      const c = FUNCTIONS.finance && holderById("fn:finance");
       const p = (c.projects || []).find(x => (x.deliverables || [])
         .some(d => d.status && !dueThisCycle(d.due)));
       if (!p) return null;
@@ -418,7 +429,7 @@ with sync_playwright() as p:
     # when nobody had said anything, so the assertion is the score.
     print("── an In progress with no number")
     sc = pg.evaluate("""() => {
-      const c = capsOfFunction("finance")[0], p = c.projects[0];
+      const c = holderById("fn:finance"), p = c.projects[0];
       const d = p.deliverables[0], m = p.milestones[0];
       const keep = { ds: d.status, dp: d.pct, ms: m.status, mp: m.pct };
       const before = { side: projDeliverySide(p), exec: capExec(c).pct,
@@ -456,7 +467,7 @@ with sync_playwright() as p:
     for label, rep in (("Performance", False), ("Reporting", True)):
         goto(pg, DEST, "Performance", None, rep)
         pg.evaluate("""() => {
-          const p = capsOfFunction("finance")[0].projects[0];
+          const p = holderById("fn:finance").projects[0];
           p.deliverables[0].status = "wip"; p.deliverables[0].pct = null;
           p.milestones[0].status = "wip"; p.milestones[0].pct = null;
           paint();
@@ -478,14 +489,14 @@ with sync_playwright() as p:
            set(m["lines"]) == {1} and m["fits"] and m["over"] == 0, m)
         # ...and goes when the number arrives
         pg.evaluate("""() => {
-          const p = capsOfFunction("finance")[0].projects[0];
+          const p = holderById("fn:finance").projects[0];
           p.deliverables[0].pct = 40; p.milestones[0].pct = 40; paint();
         }""")
         pg.wait_for_timeout(250)
         gone = pg.evaluate("() => document.querySelectorAll('.pctneed').length")
         ck("%s: and the mark goes when the number arrives" % label, gone == 0, gone)
         pg.evaluate("""() => {
-          const p = capsOfFunction("finance")[0].projects[0];
+          const p = holderById("fn:finance").projects[0];
           p.deliverables[0].status = "done"; p.deliverables[0].pct = null;
           p.milestones[0].status = "done"; p.milestones[0].pct = null; paint();
         }""")
@@ -523,7 +534,7 @@ with sync_playwright() as p:
     # 1 · a row that owes a per-cent stops it (§104.10 with teeth)
     pg.evaluate("""() => {
       fnMissingNotes("finance").forEach(x => x.obj.note = "Explained.");
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = holderById("fn:finance").projects[0];
       p.milestones[0].status = "wip"; p.milestones[0].pct = null; paint();
     }""")
     pg.wait_for_timeout(250)
@@ -533,7 +544,7 @@ with sync_playwright() as p:
 
     # 2 · a red figure with no note stops it, the same rule a unit has
     pg.evaluate("""() => {
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = holderById("fn:finance").projects[0];
       p.milestones[0].status = "todo"; p.milestones[0].pct = null;
       const o = p.outcomes[0]; o.progress = 20; o.actual = "1 h"; o.note = ""; paint();
     }""")
@@ -556,7 +567,7 @@ with sync_playwright() as p:
           if (!statusGiven(o)) { o.status = "done"; o.pct = 100; }
         } else if (o.actual == null || o.actual === "") o.actual = o.target || 1;
       });
-      capsOfFunction("finance").forEach(c => (c.projects || []).forEach(pr => {
+      fnHolders("finance").forEach(c => (c.projects || []).forEach(pr => {
         (pr.milestones || []).forEach(m => { if (!m.finish) m.finish = "Q4 26";
                                              if (!m.owner) m.owner = pr.owner || "Owner"; });
         (pr.outcomes || []).forEach(o => { if (!o.target) o.target = "1"; });
@@ -598,7 +609,7 @@ with sync_playwright() as p:
 
     # clean first, so "it appeared" means something
     pg.evaluate("""() => {
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = holderById("fn:finance").projects[0];
       p.milestones.forEach(m => { m.finish = "May 2026"; });
       p.end = "31 Dec 2026"; paint();
     }""")
@@ -611,7 +622,7 @@ with sync_playwright() as p:
 
     # now the shape a live tenant actually has
     pg.evaluate("""() => {
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = holderById("fn:finance").projects[0];
       p.milestones[0].finish = "Pending"; p.milestones[1].finish = "Done"; paint();
     }""")
     pg.wait_for_timeout(250)
@@ -629,8 +640,8 @@ with sync_playwright() as p:
 
     # THE LOOP CLOSES: correcting it through the pen makes the note go
     pg.evaluate("""() => {
-      capsOfFunction("finance")[0].projects[0].milestones[0].finish = "March 2026";
-      capsOfFunction("finance")[0].projects[0].milestones[1].finish = "April 2026";
+      holderById("fn:finance").projects[0].milestones[0].finish = "March 2026";
+      holderById("fn:finance").projects[0].milestones[1].finish = "April 2026";
       paint();
     }""")
     pg.wait_for_timeout(250)
@@ -640,7 +651,7 @@ with sync_playwright() as p:
     # ── AND THE FIGURE SAYS WHAT IT IS BUILT ON ──────────────────────────
     goto(pg, DEST, "Performance", None, False)
     pg.evaluate("""() => {
-      GROUP.capabilities.forEach(c => (c.projects||[]).forEach(p =>
+      Object.keys(FUNCTIONS).reduce((a,k)=>a.concat(fnHolders(k)),[]).forEach(c => (c.projects||[]).forEach(p =>
         (p.milestones||[]).forEach(m => { m.pct = null; })));
       paint();
     }""")
@@ -655,7 +666,7 @@ with sync_playwright() as p:
        card["mark"] and "not counted yet" in card["mark"][0], card)
     # and NOT when there is nothing outstanding
     pg.evaluate("""() => {
-      GROUP.capabilities.forEach(c => (c.projects||[]).forEach(p =>
+      Object.keys(FUNCTIONS).reduce((a,k)=>a.concat(fnHolders(k)),[]).forEach(c => (c.projects||[]).forEach(p =>
         (p.milestones||[]).forEach(m => { if (m.status === "wip") m.pct = 50; })));
       paint();
     }""")

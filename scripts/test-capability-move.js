@@ -62,6 +62,29 @@ function rowsOf(p) {
        written explicitly — this is about the writer, not about the seed. */
     const seed = JSON.parse(fs.readFileSync(
       path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+    /* THE FIXTURE MAKES ITS OWN PAIR (§255, §329). The seed carried eight
+       capabilities until the worked example was finished, and this file needs
+       a function holding TWO — a move between siblings is its whole subject,
+       and stage 2 gives the product real ones again. So one function's own
+       projects are split back into a pair, which is the inverse of the
+       dissolve; anything with fewer than two projects is left alone, because
+       a pair made of one project and none proves nothing about a move. */
+    (function () {
+      const caps = [];
+      Object.keys(seed.functions || {}).forEach(function (fk) {
+        const f = seed.functions[fk];
+        if (!f || String(f.format) === "pillars" || (f.projects || []).length < 2) return;
+        const cut = f.projects.length - 1;
+        [f.projects.slice(0, cut), f.projects.slice(cut)].forEach(function (ps, i) {
+          const id = "box-" + fk + "-" + (i + 1);
+          ps.forEach(function (p) { p.capId = id; });
+          caps.push({ id: id, fn: fk, name: (f.name || fk) + " work " + (i + 1),
+                      def: "", keyObjectives: [], projects: ps });
+        });
+        f.projects = [];
+      });
+      seed.group.capabilities = caps;
+    })();
     await io.writeState(client, seed);
     const graph = await io.readState(client);
 

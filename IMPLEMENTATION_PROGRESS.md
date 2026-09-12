@@ -54,8 +54,52 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§326 / §327 — two checks and one list, found by running
-the app's own suite — built on the branch, not merged.**
+**Latest version:** **§329 — the demo no longer shows a capability that is not
+one. Built on the branch, not merged.**
+
+Islam: *"finish the demo data yes."*
+
+**The last round gave a supporting function its own projects, and the worked
+example never showed it.** The demo still carried its eight boxes, so on the
+build that shipped, Finance's Projects page still had a navy **CAPABILITY ·
+Financial Infrastructure** band sitting over three projects already numbered
+FIN01, FIN02, FIN03. The thing he first complained about was still on the
+screen after the round that removed it. That is what this fixes.
+
+**The eight boxes are gone.** Every one of them was a set of one function's own
+projects wearing a container's name, so each one now opens into its function:
+Finance, HR, Treasury, Marketing, IT, Care and the Strategy Management Office
+own their projects directly. Merchandising plans a different way and is
+untouched. **Nothing moved and nothing was renumbered** — every project keeps
+its own number and its own code, so every figure ever reported against it still
+points at the same row.
+
+**One sentence had nowhere to go, and it answered an open question.** Marketing
+was the only function carrying two boxes, so the first one's description became
+Marketing's and the second's — *"Treat what we sell as a portfolio to be
+shaped, not a catalogue to be carried"* — had no home. That is a strategic
+intention rather than a description of what Marketing does day to day, so
+**Product Mindset is the recommendation for the one real capability** the next
+stage creates. Yours to confirm.
+
+**Two real faults turned up on the way, neither of them in this change.**
+Cleaning up pasted titles had quietly stopped reaching a function's projects
+when the last round moved them — invisible, because the text looks fine
+everywhere except in the edit box, which then opens far too tall. And one
+database test had started skipping itself rather than failing, which is a green
+run that measured nothing. Both fixed, both proved able to fail.
+
+**Eleven checks were leaning on the demo carrying boxes.** They make their own
+now, which is what a check about capabilities has to do from here.
+
+**What is not done:** the demo has no capability at all today, and that is the
+truth of the tenant. It gets its one real one when the next stage gives it
+somewhere to live.
+
+---
+
+**Before that:** **§326 / §327 — two checks and one list, found by running
+the app's own suite.**
 
 Everything before this was proved on the frozen build. But **production is the
 new stack now**, so the app's own fifteen checks and nine database proofs were

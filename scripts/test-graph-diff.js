@@ -343,12 +343,63 @@ console.log("\n§215 · row-level changes");
 console.log("\n§216 · a capability travels on its own");
 (function () {
   const seed = JSON.parse(fs.readFileSync("/home/user/SMP/db/seed-state.json", "utf8"));
-  const world = () => ({ group: clone(seed.group), units: clone(seed.units),
+  /* THE FIXTURE MAKES ITS OWN BOXES (§255, §329). The seed carried eight until
+     the worked example was finished and this block reached into them by index,
+     so it went twenty red the day the demo stopped shipping one — on a build
+     behaving exactly as decided (§214.3). The SUBJECT has not changed: a
+     capability is still an ARRAY INSIDE A PART, which is the one shape §210's
+     keyed-map split could not reach, and stage 2 gives the product real ones
+     again. So the fixture wraps each function's own projects back into a box,
+     which is the exact inverse of the dissolve, and every assertion below runs
+     against the shape it was written for.
+
+     IT IS DATA AND NEVER BEHAVIOUR (§100.3): nothing here calls the product's
+     dissolve or its differ to build the world it then measures. */
+  const withBoxes = (st) => {
+    const caps = [];
+    Object.keys(st.functions || {}).forEach(function (fk) {
+      const f = st.functions[fk];
+      if (!f || String(f.format) === "pillars" || !(f.projects || []).length) return;
+      const id = "box-" + fk;
+      (f.projects || []).forEach(function (p) { p.capId = id; });
+      caps.push({ id: id, fn: fk, name: f.name + " work",
+                  def: f.def || "", keyObjectives: (f.keyObjectives || []).slice(),
+                  projects: f.projects });
+      f.projects = []; f.def = ""; f.keyObjectives = [];
+    });
+    st.group.capabilities = caps;
+    return st;
+  };
+  const world = () => withBoxes({ group: clone(seed.group), units: clone(seed.units),
                          functions: clone(seed.functions), people: clone(seed.people) });
+  /* AND WHAT EVERY TENANT ACTUALLY HOLDS, measured beside it (§94.2): a
+     function's own projects, addressed through the subtree §322 added to
+     `treeFor("functions")`. If that addressing broke, nothing else in this
+     file would notice — every other section reads a capability. */
+  const bare = () => ({ group: clone(seed.group), units: clone(seed.units),
+                        functions: clone(seed.functions), people: clone(seed.people) });
   const caps = world().group.capabilities || [];
-  check("§216: the seed holds capabilities across several functions",
+  check("§216: the fixture holds capabilities across several functions",
         caps.length > 1 && new Set(caps.map(c => c.fn)).size > 1,
         caps.length + " caps, " + new Set(caps.map(c => c.fn)).size + " functions");
+  (function () {
+    const fk = Object.keys(seed.functions || {}).filter(function (k) {
+      const f = seed.functions[k];
+      return f && String(f.format) !== "pillars" && (f.projects || []).length;
+    })[0];
+    check("§329: the seed's own functions hold their projects outright", !!fk, fk);
+    if (!fk) return;
+    const b = bare(), n = bare();
+    n.functions[fk].projects[0].milestones[0].owner = "Hala";
+    const ch = D.graphChanges(b, n);
+    check("§329: a milestone inside a FUNCTION'S own project travels as ONE row",
+          (ch.rows || []).length === 1, JSON.stringify(ch).slice(0, 140));
+    check("§329: ...and the whole function does NOT",
+          !Object.keys(ch.set || {}).length, Object.keys(ch.set || {}).join(","));
+    const r = D.applyChanges(bare(), ch);
+    check("§329: ...and it lands exactly", r.ok && D.sameValue(r.state, n),
+          r.error || "the graph differs");
+  })();
 
   const edit = (f) => { const n = world(); f(n); return n; };
   const land = (f) => {

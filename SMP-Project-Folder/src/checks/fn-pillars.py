@@ -81,8 +81,15 @@ with sync_playwright() as p:
     pg.wait_for_timeout(900)
 
     fk = pg.evaluate("()=>Object.keys(FUNCTIONS).filter(k=>String(FUNCTIONS[k].format)==='pillars')[0]")
+    # REWRITTEN, NEVER LOOSENED (§218, §214.3 for the seventh time). This asked
+    # for a projects function whose first CAPABILITY carried key objectives —
+    # true while every such function had a box, and false since the worked
+    # example was finished (§329). The subject of this file has not changed:
+    # it compares the two formats' Overviews, and the objectives it needs are
+    # the FUNCTION'S own now (§213, §322), which is where a dissolved box put
+    # them. Asked of the function, so it keeps working whichever holds them.
     cap = pg.evaluate("()=>Object.keys(FUNCTIONS).filter(k=>String(FUNCTIONS[k].format)!=='pillars'"
-                      "&&capsOfFunction(k).length&&capsOfFunction(k)[0].keyObjectives.length)[0]")
+                      "&&(FUNCTIONS[k].keyObjectives||[]).length)[0]")
     T, TC = "fn:" + (fk or ""), "fn:" + (cap or "")
 
     print("\n── the fixture")
@@ -111,8 +118,19 @@ with sync_playwright() as p:
     ok("...and both end on the Definition",
        bool(a["labels"]) and a["labels"][-1] == c["labels"][-1] == "Definition",
        {"pillars": a["labels"], "projects": c["labels"]})
+    # REVERSED AND REWRITTEN, NEVER DELETED (§218). This pair asserted that the
+    # two formats named DIFFERENT things — the pillars one a Function and the
+    # projects one a Capability — which was true while a function's projects
+    # had to live in a box. §322 gives them to the function, so BOTH name the
+    # function, which is §213's decision finally true of both sides. Asserted
+    # per format and not only as the agreement above, or a build that drifted
+    # BOTH back to naming a capability would pass the whole section.
     ok("...the pillars one naming the FUNCTION", a["labels"][:1] == ["Function"], a["labels"])
-    ok("...the projects one naming the CAPABILITY", c["labels"][:1] == ["Capability"], c["labels"])
+    ok("...and the projects one naming the FUNCTION too (§322)",
+       c["labels"][:1] == ["Function"], c["labels"])
+    ok("...neither of them naming a capability (§329)",
+       "Capability" not in a["labels"] and "Capability" not in c["labels"],
+       {"pillars": a["labels"], "projects": c["labels"]})
 
     print("\n── 2b · and no explanatory line above either (§214.3)")
     # Islam: "remove the line that's talking about the Retail aspiration … I
@@ -223,8 +241,10 @@ with sync_playwright() as p:
     # mandatory; this takes it back — on BOTH formats, because the capability
     # side only ever counted it to keep the two Overviews one page (§53.5).
     # §94.2: MAKE the empty state — every demo capability has a definition.
-    pg.evaluate("""(a)=>{ delete FUNCTIONS[a.fk].def;
-      const c=capsOfFunction(a.cap)[0]; if (c) c.def='';
+    # The definition is the FUNCTION'S on both formats now (§213, §322), so
+    # both halves of this fixture clear the same field — where the projects
+    # side used to have to reach inside a box for it.
+    pg.evaluate("""(a)=>{ delete FUNCTIONS[a.fk].def; FUNCTIONS[a.cap].def = '';
       EDIT_PAGE.capfoundation=false; paint(); }""", {"fk": fk, "cap": cap})
     pg.wait_for_timeout(400)
     for t, what in ((T, "pillars"), (TC, "projects")):

@@ -250,8 +250,27 @@ const CLIENT_ARG = (function () {
      Written on the FIRST project that has both kinds of row, so this says
      nothing about which project it is. */
   const R = require("../lib/rules.js");
+  /* IT LOOKS WHEREVER THE PROJECTS ARE (§329). This asked `group.capabilities`
+     and nothing else, which was every project in the tenant until the worked
+     example was finished — and then it printed SKIPPED, which is a green run
+     that measured nothing (§54.5, and §215's shape: a check that cannot reach
+     its subject reports no failures). A project belongs to a capability OR to
+     a function now, the `pend` mark rides the SAME `outcomes` and `milestones`
+     rows either way, so the holder is looked up rather than assumed. */
+  const pHolders = function (st) {
+    const out = (st.group.capabilities || []).map(function (c) {
+      return { id: c.id, projects: c.projects || [] }; });
+    Object.keys(st.functions || {}).forEach(function (fk) {
+      const f = st.functions[fk];
+      if (f && (f.projects || []).length) out.push({ id: "fn:" + fk, projects: f.projects });
+    });
+    return out;
+  };
+  const pFind = function (st, hid) {
+    return pHolders(st).filter(function (h) { return h.id === hid; })[0] || { projects: [] };
+  };
   const pState = await io.readState(client);
-  const pCap = (pState.group.capabilities || []).filter(function (c) {
+  const pCap = pHolders(pState).filter(function (c) {
     return (c.projects || []).some(function (pr) {
       return (pr.outcomes || []).length && (pr.milestones || []).length; });
   })[0];
@@ -265,8 +284,7 @@ const CLIENT_ARG = (function () {
     pPr.milestones[0].pend = { finish: MARK, owner: MARK };
     await io.writeState(client, pState);
     const pBack = await io.readState(client);
-    const bCap = (pBack.group.capabilities || []).filter(function (c) { return c.id === pCap.id; })[0];
-    const bPr = ((bCap || {}).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
+    const bPr = (pFind(pBack, pCap.id).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
     const got = bPr && {
       outcome: JSON.stringify((bPr.outcomes[0].pend || {}).target),
       finish:  JSON.stringify((bPr.milestones[0].pend || {}).finish),
@@ -286,8 +304,7 @@ const CLIENT_ARG = (function () {
     delete bPr.milestones[0].pend;
     await io.writeState(client, pBack);
     const cleaned = await io.readState(client);
-    const cCap = (cleaned.group.capabilities || []).filter(function (c) { return c.id === pCap.id; })[0];
-    const cPr = ((cCap || {}).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
+    const cPr = (pFind(cleaned, pCap.id).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
     console.log("  ...and clears again:",
       (!cPr.outcomes[0].pend && !cPr.milestones[0].pend) ? "PASS" : "FAIL");
   }

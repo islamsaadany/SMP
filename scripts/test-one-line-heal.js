@@ -74,8 +74,21 @@ const words = (s) => String(s || "").split(/\s+/).filter(Boolean).join(" ");
     fn.items[0].tactics[0].name = "A function tactic\n\n";
     fn.keyObjectives = [{ id: "fnko-oneline", name: "A function objective\n\n", dir: "\u2265" }];
 
-    /* A capability's project, its two evidence halves and a milestone. */
-    const cap = s0.group.capabilities.find((c) => (c.projects || []).length);
+    /* A PROJECT, WHEREVER IT IS HELD (§329). This read `group.capabilities`
+       and nothing else — every project in the tenant until §322 gave them to
+       the function, and NONE of them once the worked example was finished, so
+       it threw on the first `undefined` rather than reporting (§215). It takes
+       a capability if the tenant has one and the FUNCTION'S own otherwise,
+       which is the shape every tenant is now in — and that is not a smaller
+       subject but a larger one: the heal did not walk a function's projects at
+       all, so this is the assertion that had nothing behind it. */
+    const capFk = s0.functionKeys.find((k) => (s0.functions[k].projects || []).length);
+    const cap = (s0.group.capabilities || []).find((c) => (c.projects || []).length)
+             || s0.functions[capFk];
+    const capAt = (st) => (st.group.capabilities || []).find((c) => c.id === cap.id)
+                       || st.functions[capFk];
+    ck("there is a project to heal — a capability's, or a function's own",
+       !!(cap && (cap.projects || []).length), capFk);
     const proj = cap.projects[0];
     proj.name = "Rebuild the month-end close\n\n";
     proj.brief = "What this project is for\nand what changes at the end of it.";
@@ -129,7 +142,7 @@ const words = (s) => String(s || "").split(/\s+/).filter(Boolean).join(" ");
     ck("a function's objective is one line",
       f.keyObjectives[0].name.indexOf("\n") === -1, f.keyObjectives[0].name);
 
-    const c2 = (s.group.capabilities || []).find((c) => c.id === cap.id);
+    const c2 = capAt(s);
     const p2 = c2.projects.find((p) => p.id === proj.id);
     ck("a project's name is one line", p2.name.indexOf("\n") === -1, p2.name);
     ck("a project's brief is one line", p2.brief.indexOf("\n") === -1, p2.brief);

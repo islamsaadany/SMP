@@ -49,6 +49,43 @@ def ev(pg, js, dflt=None):
     try: return pg.evaluate(js)
     except Exception as e: return dflt if dflt is not None else {"err": str(e)[:90]}
 
+BOXES = """() => {
+  /* THE CHECK MAKES ITS OWN BOXES (§255, §329). The worked example shipped
+     eight until the demo was finished, and this file leaned on four of them by
+     id — so it went thirty red the day the demo stopped carrying one, on a
+     build behaving exactly as decided (§214.3, seventh time). It rebuilds the
+     four it names, with those ids and in that order, because `moveCapProjects`
+     decides which END the moved rows join from the two boxes' positions in the
+     list (§310: a project's code is its position across the whole function),
+     so a fixture that reversed them would silently change what §3 asserts.
+
+     IT IS DATA AND NEVER BEHAVIOUR (§100.3): it wraps rows the function
+     already owns and the PRODUCT decides what to draw over them and what
+     Remove does with them. Re-made after every reload, or the sections that
+     put the state back measure a page holding nothing. */
+  GROUP.capabilities.length = 0;
+  const wrap = (id, fk, name, take) => {
+    const f = FUNCTIONS[fk];
+    const ps = (f.projects || []).splice(0, take);
+    ps.forEach(p => { p.capId = id; });
+    GROUP.capabilities.push({ id: id, fn: fk, name: name,
+      def: f.def || '', keyObjectives: (f.keyObjectives || []).slice(),
+      projects: ps });
+    f.def = ''; f.keyObjectives = [];
+  };
+  wrap('cap4', 'marketing', 'Brand Positioning', 2);
+  wrap('cap6', 'marketing', 'Product Mindset', 99);
+  wrap('cap7', 'finance',   'Financial Infrastructure', 99);
+  wrap('cap8', 'smo',       'Strategy', 99);
+  paint();
+  return GROUP.capabilities.map(c => c.id);
+}"""
+
+def boxes(pg):
+    made = ev(pg, BOXES, [])
+    pg.wait_for_timeout(250)
+    return made
+
 def to_caps(pg):
     """Setup › Capabilities, from wherever the page is."""
     try:
@@ -70,13 +107,14 @@ with sync_playwright() as p:
     pg.on("dialog", lambda d: (natives.append(d.message), d.dismiss()))
     pg.goto(URL); pg.wait_for_timeout(1500)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(300)
+    boxes(pg)
 
     print("\n§1 · the platform's own dialog, with two answers")
     ck("Setup › Capabilities opens", to_caps(pg))
     start = ev(pg, """() => ({
       caps: GROUP.capabilities.map(c => c.id),
       mkt:  GROUP.capabilities.filter(c => c.fn === 'marketing').map(c => c.id) })""")
-    ck("the worked example still holds Marketing's two capabilities (the only pair)",
+    ck("Marketing carries two — the pair this file needs, made rather than waited for",
        isinstance(start, dict) and start.get("mkt") == ["cap4", "cap6"], start)
 
     # the codes BEFORE, read off the product's own reader
@@ -187,6 +225,7 @@ with sync_playwright() as p:
     print("\n§4 · the only capability of its function")
     pg.reload(); pg.wait_for_timeout(1400)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    boxes(pg)
     to_caps(pg)
     try:
         pg.click('[data-caprm="cap7"]', timeout=3000); pg.wait_for_timeout(400)
@@ -257,6 +296,7 @@ with sync_playwright() as p:
     # capability that was not there and called a working Remove broken.
     pg.reload(); pg.wait_for_timeout(1400)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    boxes(pg)
     to_caps(pg)
     before2 = ev(pg, """() => ({
       pr: (capById('cap8')||{}).projects ? capById('cap8').projects.length : 0,
@@ -282,6 +322,7 @@ with sync_playwright() as p:
     print("\n\u00a77 \u00b7 the second door \u2014 the Temple's own Remove")
     pg.reload(); pg.wait_for_timeout(1400)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    boxes(pg)
     natives.clear()
     # Reached through the product's own navigation and its own pen, never by
     # assigning EDIT_PAGE \u2014 a control reached by setting a flag is a control

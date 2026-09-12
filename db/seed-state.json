@@ -187,1560 +187,7 @@
     "note": "Standing"
    }
   ],
-  "capabilities": [
-   {
-    "name": "Operational Excellence",
-    "def": "Run the core trading engine so reliably that scale stops costing us margin.",
-    "keyObjectives": [
-     {
-      "name": "Process cycle time",
-      "dir": "≤",
-      "target": "12 d",
-      "compile": "Latest",
-      "actual": "15 d",
-      "progress": 80,
-      "weight": 40,
-      "id": "cap1-KO1"
-     },
-     {
-      "name": "Cost-to-serve",
-      "dir": "≤",
-      "target": "4.2%",
-      "compile": "Latest",
-      "actual": "5.6%",
-      "progress": 75,
-      "weight": 60,
-      "id": "cap1-KO2"
-     }
-    ],
-    "projects": [
-     {
-      "name": "Standardise the core order process across units",
-      "owner": "Ashraf Abdelaty",
-      "brief": "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
-      "stakeholders": [
-       "Operations",
-       "IT"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Single documented order process",
-        "due": "Sep 26",
-        "status": "done",
-        "id": "cap1-P1-D1"
-       },
-       {
-        "name": "Unit-by-unit gap assessment",
-        "due": "Oct 26",
-        "status": "done",
-        "id": "cap1-P1-D2"
-       },
-       {
-        "name": "Process rolled out across the three units",
-        "due": "Sep 26",
-        "status": "wip",
-        "pct": 55,
-        "id": "cap1-P1-D3"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Order cycle time",
-        "dir": "≤",
-        "target": "12 d",
-        "measureAt": "Q3 2026",
-        "actual": "15 d",
-        "progress": 80,
-        "note": "Retail is on the new process; Mobile cuts over in Q3.",
-        "id": "cap1-P1-O1"
-       },
-       {
-        "name": "First-time-right rate",
-        "dir": "≥",
-        "target": "95%",
-        "measureAt": "Q4 2026",
-        "actual": null,
-        "progress": null,
-        "id": "cap1-P1-O2"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Process design and sign-off",
-        "covers": "The target process agreed with all three unit heads",
-        "owner": "Ashraf Abdelaty",
-        "finish": "March 2026",
-        "status": "done",
-        "id": "cap1-P1-M1"
-       },
-       {
-        "name": "Gap assessment per unit",
-        "covers": "What each unit has to change to reach it",
-        "owner": "Hala",
-        "finish": "May 2026",
-        "status": "done",
-        "id": "cap1-P1-M2"
-       },
-       {
-        "name": "Retail and Mazaya cutover",
-        "covers": "Both units running the standard process",
-        "owner": "Hala",
-        "finish": "July 2026",
-        "status": "wip",
-        "pct": 60,
-        "id": "cap1-P1-M3"
-       },
-       {
-        "name": "Mobile cutover",
-        "covers": "The last unit, gated on the ERP work",
-        "owner": "Ashraf Abdelaty",
-        "finish": "November 2026",
-        "status": "todo",
-        "id": "cap1-P1-M4"
-       }
-      ],
-      "id": "cap1-P1",
-      "capId": "cap1"
-     },
-     {
-      "name": "Cost-to-serve model and monthly review",
-      "owner": "Fayad Sobhy",
-      "brief": "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
-      "stakeholders": [
-       "Finance",
-       "Operations"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Cost-to-serve model built and validated",
-        "due": "Sep 26",
-        "status": "done",
-        "id": "cap1-P2-D1"
-       },
-       {
-        "name": "Monthly review running with all units",
-        "due": "Oct 26",
-        "status": "wip",
-        "pct": 60,
-        "id": "cap1-P2-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Cost-to-serve",
-        "dir": "≤",
-        "target": "4.2%",
-        "measureAt": "Q4 2026",
-        "actual": null,
-        "progress": null,
-        "id": "cap1-P2-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Cost driver mapping",
-        "covers": "Which activities carry the cost, by unit",
-        "owner": "Fayad Sobhy",
-        "finish": "January 2026",
-        "status": "done",
-        "id": "cap1-P2-M1"
-       },
-       {
-        "name": "Model build and validation",
-        "covers": "Model reconciled against two closed months",
-        "owner": "Fayad Sobhy",
-        "finish": "May 2026",
-        "status": "done",
-        "id": "cap1-P2-M2"
-       },
-       {
-        "name": "Review cadence embedded",
-        "covers": "A standing monthly session with each unit",
-        "owner": "Hala",
-        "finish": "August 2026",
-        "status": "wip",
-        "pct": 60,
-        "id": "cap1-P2-M3"
-       }
-      ],
-      "id": "cap1-P2",
-      "capId": "cap1"
-     },
-     {
-      "name": "First-time-right programme in distribution",
-      "owner": "Hala",
-      "brief": "Cut the rework in distribution by fixing the two failure points that produce most of it.",
-      "stakeholders": [
-       "Operations"
-      ],
-      "timeline": "quarter",
-      "start": "Q2 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Failure analysis on twelve months of orders",
-        "due": "Dec 26",
-        "status": "done",
-        "id": "cap1-P3-D1"
-       },
-       {
-        "name": "Corrective standard operating procedures",
-        "due": "May 26",
-        "status": "wip",
-        "pct": 40,
-        "id": "cap1-P3-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "First-time-right rate",
-        "dir": "≥",
-        "target": "95%",
-        "measureAt": "Q4 2026",
-        "actual": "82%",
-        "progress": 86,
-        "id": "cap1-P3-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Failure analysis",
-        "covers": "Where rework originates and what it costs",
-        "owner": "Hala",
-        "finish": "May 2026",
-        "status": "done",
-        "id": "cap1-P3-M1"
-       },
-       {
-        "name": "Procedure rewrite",
-        "covers": "New procedures for the two main failure points",
-        "owner": "Hala",
-        "finish": "September 2026",
-        "status": "wip",
-        "pct": 60,
-        "id": "cap1-P3-M2"
-       },
-       {
-        "name": "Team retraining",
-        "covers": "Distribution teams trained on the new procedures",
-        "owner": "Hala",
-        "finish": "October 2026",
-        "status": "todo",
-        "id": "cap1-P3-M3"
-       }
-      ],
-      "id": "cap1-P3",
-      "capId": "cap1"
-     }
-    ],
-    "fn": "treasury",
-    "id": "cap1"
-   },
-   {
-    "name": "People",
-    "def": "Have the right people in the right roles, and keep them.",
-    "keyObjectives": [
-     {
-      "name": "Key-role coverage",
-      "dir": "≥",
-      "target": "90%",
-      "compile": "Latest",
-      "actual": "62%",
-      "progress": 69,
-      "weight": 50,
-      "id": "cap2-KO1"
-     },
-     {
-      "name": "Voluntary attrition",
-      "dir": "≤",
-      "target": "12%",
-      "compile": "Latest",
-      "actual": "19%",
-      "progress": 63,
-      "weight": 50,
-      "id": "cap2-KO2"
-     }
-    ],
-    "projects": [
-     {
-      "name": "Key-role succession map for every unit",
-      "owner": "Noran Adel",
-      "brief": "Name a successor for every key role in every unit, and know which ones have nobody.",
-      "stakeholders": [
-       "HR",
-       "Unit heads"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q3 2026",
-      "deliverables": [
-       {
-        "name": "Key-role definition agreed group-wide",
-        "due": "Apr 26",
-        "status": "done",
-        "id": "cap2-P1-D1"
-       },
-       {
-        "name": "Succession map per unit",
-        "due": "Oct 26",
-        "status": "wip",
-        "pct": 70,
-        "id": "cap2-P1-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Key-role coverage",
-        "dir": "≥",
-        "target": "90%",
-        "measureAt": "Q3 2026",
-        "actual": "62%",
-        "progress": 69,
-        "note": "Six roles across Retail and Mazaya still have no named successor.",
-        "id": "cap2-P1-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Key-role definition",
-        "covers": "What counts as a key role, agreed with the units",
-        "owner": "Noran Adel",
-        "finish": "February 2026",
-        "status": "done",
-        "id": "cap2-P1-M1"
-       },
-       {
-        "name": "Unit-by-unit mapping",
-        "covers": "Successors named, gaps recorded",
-        "owner": "Noran Adel",
-        "finish": "June 2026",
-        "status": "done",
-        "id": "cap2-P1-M2"
-       },
-       {
-        "name": "Gap closure plans",
-        "covers": "A plan for every role with no successor",
-        "owner": "Noran Adel",
-        "finish": "September 2026",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap2-P1-M3"
-       }
-      ],
-      "id": "cap2-P1",
-      "capId": "cap2"
-     },
-     {
-      "name": "Retention plan for the top two attrition roles",
-      "owner": "Noran Adel",
-      "brief": "Two roles produce most of the voluntary attrition. Find out why, and change it.",
-      "stakeholders": [
-       "HR"
-      ],
-      "timeline": "quarter",
-      "start": "Q2 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Exit interview analysis",
-        "due": "Sep 26",
-        "status": "done",
-        "id": "cap2-P2-D1"
-       },
-       {
-        "name": "Revised package and progression for both roles",
-        "due": "Dec 26",
-        "status": "todo",
-        "note": "Held pending the compensation review.",
-        "id": "cap2-P2-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Voluntary attrition in the two roles",
-        "dir": "≤",
-        "target": "12%",
-        "measureAt": "Q1 2027",
-        "actual": null,
-        "progress": null,
-        "id": "cap2-P2-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Attrition analysis",
-        "covers": "Which roles, which reasons, which managers",
-        "owner": "Noran Adel",
-        "finish": "May 2026",
-        "status": "done",
-        "id": "cap2-P2-M1"
-       },
-       {
-        "name": "Package redesign",
-        "covers": "Pay and progression reworked for both roles",
-        "owner": "Noran Adel",
-        "finish": "August 2026",
-        "status": "wip",
-        "pct": 75,
-        "id": "cap2-P2-M2"
-       },
-       {
-        "name": "Rollout and communication",
-        "covers": "Both roles moved onto the new terms",
-        "owner": "Noran Adel",
-        "finish": "October 2026",
-        "status": "todo",
-        "id": "cap2-P2-M3"
-       }
-      ],
-      "id": "cap2-P2",
-      "capId": "cap2"
-     },
-     {
-      "name": "Group training calendar and delivery",
-      "owner": "Hala",
-      "brief": "One training calendar for the group, published ahead of the year and actually delivered.",
-      "stakeholders": [
-       "HR",
-       "Unit heads"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Annual training calendar published",
-        "due": "Apr 26",
-        "status": "done",
-        "id": "cap2-P3-D1"
-       },
-       {
-        "name": "Calendar delivered",
-        "due": "Mar 26",
-        "status": "wip",
-        "pct": 44,
-        "id": "cap2-P3-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Training hours per head",
-        "dir": "≥",
-        "target": "24",
-        "measureAt": "Q4 2026",
-        "actual": "5",
-        "progress": 21,
-        "note": "Two of nine planned sessions delivered. Q3 and Q4 carry the rest.",
-        "id": "cap2-P3-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Needs assessment",
-        "covers": "What each unit actually needs, not what it asks for",
-        "owner": "Hala",
-        "finish": "February 2026",
-        "status": "done",
-        "id": "cap2-P3-M1"
-       },
-       {
-        "name": "Calendar published",
-        "covers": "Dates, trainers and places confirmed for the year",
-        "owner": "Hala",
-        "finish": "February 2026",
-        "status": "done",
-        "id": "cap2-P3-M2"
-       },
-       {
-        "name": "First-half delivery",
-        "covers": "Sessions scheduled to Q2 delivered",
-        "owner": "Hala",
-        "finish": "June 2026",
-        "status": "wip",
-        "pct": 40,
-        "id": "cap2-P3-M3"
-       },
-       {
-        "name": "Second-half delivery",
-        "covers": "The remaining sessions",
-        "owner": "Hala",
-        "finish": "November 2026",
-        "status": "todo",
-        "id": "cap2-P3-M4"
-       }
-      ],
-      "id": "cap2-P3",
-      "capId": "cap2"
-     }
-    ],
-    "fn": "hr",
-    "id": "cap2"
-   },
-   {
-    "name": "Innovation and Tech",
-    "def": "Consolidate onto systems that let a decision be made from one number, not five.",
-    "keyObjectives": [
-     {
-      "name": "Systems consolidated",
-      "dir": "≥",
-      "target": "6",
-      "compile": "Sum",
-      "actual": "2",
-      "progress": 33,
-      "weight": 100,
-      "id": "cap3-KO1"
-     }
-    ],
-    "projects": [
-     {
-      "name": "Consolidate ERP instances across units",
-      "owner": "Abdelhamid",
-      "brief": "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
-      "stakeholders": [
-       "IT",
-       "Finance",
-       "Unit heads"
-      ],
-      "timeline": "quarter",
-      "start": "Q2 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Target instance design",
-        "due": "Sep 26",
-        "status": "done",
-        "id": "cap3-P1-D1"
-       },
-       {
-        "name": "Instances migrated",
-        "due": "Jun 26",
-        "status": "wip",
-        "pct": 33,
-        "note": "Two of six migrated. Mobile's cutover moved to Q3 with the principal.",
-        "id": "cap3-P1-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Systems consolidated",
-        "dir": "≥",
-        "target": "6",
-        "measureAt": "Q4 2026",
-        "actual": "2",
-        "progress": 33,
-        "id": "cap3-P1-O1"
-       },
-       {
-        "name": "Days to close month-end",
-        "dir": "≤",
-        "target": "5 d",
-        "measureAt": "Q1 2027",
-        "actual": null,
-        "progress": null,
-        "id": "cap3-P1-O2"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Instance audit",
-        "covers": "What is running where, and what depends on it",
-        "owner": "Abdelhamid",
-        "finish": "June 2026",
-        "status": "done",
-        "id": "cap3-P1-M1"
-       },
-       {
-        "name": "Target design and sequencing",
-        "covers": "One target instance, and the order units move in",
-        "owner": "Abdelhamid",
-        "finish": "April 2026",
-        "status": "done",
-        "id": "cap3-P1-M2"
-       },
-       {
-        "name": "First two migrations",
-        "covers": "Treasury and Care moved across",
-        "owner": "Abdelhamid",
-        "finish": "July 2026",
-        "status": "wip",
-        "pct": 60,
-        "id": "cap3-P1-M3"
-       },
-       {
-        "name": "Remaining migrations",
-        "covers": "Mobile, Retail, Mazaya and B2B",
-        "owner": "Abdelhamid",
-        "finish": "November 2026",
-        "status": "todo",
-        "id": "cap3-P1-M4"
-       }
-      ],
-      "id": "cap3-P1",
-      "capId": "cap3"
-     },
-     {
-      "name": "Group data warehouse and single reporting layer",
-      "owner": "Ramy Behairy",
-      "brief": "One warehouse and one reporting layer, so the same question gets the same answer in every room.",
-      "stakeholders": [
-       "IT",
-       "Finance"
-      ],
-      "timeline": "quarter",
-      "start": "Q2 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Warehouse built and loading nightly",
-        "due": "Apr 26",
-        "status": "todo",
-        "id": "cap3-P2-D1"
-       },
-       {
-        "name": "Reporting layer live for sales and finance",
-        "due": "Mar 26",
-        "status": "wip",
-        "pct": 36,
-        "id": "cap3-P2-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Dependency on automated reports",
-        "dir": "≥",
-        "target": "90%",
-        "measureAt": "Q4 2026",
-        "actual": "58%",
-        "progress": 64,
-        "note": "Power BI live for sales; finance stays manual until the warehouse lands.",
-        "id": "cap3-P2-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Model and source mapping",
-        "covers": "What the warehouse holds and where it comes from",
-        "owner": "Ramy Behairy",
-        "finish": "June 2026",
-        "status": "done",
-        "id": "cap3-P2-M1"
-       },
-       {
-        "name": "Warehouse build",
-        "covers": "Built, loading nightly, reconciled",
-        "owner": "Ramy Behairy",
-        "finish": "August 2026",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap3-P2-M2"
-       },
-       {
-        "name": "Reporting layer rollout",
-        "covers": "Sales and finance reporting moved onto it",
-        "owner": "Ramy Behairy",
-        "finish": "October 2026",
-        "status": "todo",
-        "id": "cap3-P2-M3"
-       }
-      ],
-      "id": "cap3-P2",
-      "capId": "cap3"
-     },
-     {
-      "name": "Automation backlog and delivery cadence",
-      "owner": "Ramy Behairy",
-      "brief": "A standing backlog of automation candidates, and a cadence that actually clears it.",
-      "stakeholders": [
-       "IT"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Backlog built and prioritised",
-        "due": "Oct 26",
-        "status": "done",
-        "id": "cap3-P3-D1"
-       },
-       {
-        "name": "Backlog delivered",
-        "due": "Feb 26",
-        "status": "wip",
-        "pct": 52,
-        "id": "cap3-P3-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Manual hours removed per month",
-        "dir": "≥",
-        "target": "300",
-        "measureAt": "Q4 2026",
-        "actual": "140",
-        "progress": 47,
-        "id": "cap3-P3-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Candidate assessment",
-        "covers": "Every manual process worth automating, sized",
-        "owner": "Ramy Behairy",
-        "finish": "February 2026",
-        "status": "done",
-        "id": "cap3-P3-M1"
-       },
-       {
-        "name": "Cadence established",
-        "covers": "A fortnightly release running",
-        "owner": "Ramy Behairy",
-        "finish": "June 2026",
-        "status": "done",
-        "id": "cap3-P3-M2"
-       },
-       {
-        "name": "Half the backlog delivered",
-        "covers": "The top half by hours removed",
-        "owner": "Ramy Behairy",
-        "finish": "August 2026",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap3-P3-M3"
-       }
-      ],
-      "id": "cap3-P3",
-      "capId": "cap3"
-     }
-    ],
-    "fn": "it",
-    "id": "cap3"
-   },
-   {
-    "name": "Brand Positioning",
-    "def": "Be known for something specific, by the people who decide.",
-    "keyObjectives": [],
-    "projects": [
-     {
-      "name": "Brand audit and positioning statement",
-      "owner": "Yara Kamal",
-      "brief": "Establish what the market currently believes about us, and agree what we want it to believe instead.",
-      "stakeholders": [
-       "Marketing"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q3 2026",
-      "deliverables": [
-       {
-        "name": "Market perception study",
-        "due": "Dec 26",
-        "status": "done",
-        "id": "cap4-P1-D1"
-       },
-       {
-        "name": "Positioning statement agreed by the board",
-        "due": "Jul 26",
-        "status": "todo",
-        "id": "cap4-P1-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Unaided brand awareness",
-        "dir": "≥",
-        "target": "45%",
-        "measureAt": "Q4 2026",
-        "actual": null,
-        "progress": null,
-        "id": "cap4-P1-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Perception study fielded",
-        "covers": "Study run with trade and end customers",
-        "owner": "Yara Kamal",
-        "finish": "April 2026",
-        "status": "done",
-        "id": "cap4-P1-M1"
-       },
-       {
-        "name": "Positioning workshop",
-        "covers": "Options developed and tested with the board",
-        "owner": "Yara Kamal",
-        "finish": "September 2026",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap4-P1-M2"
-       }
-      ],
-      "id": "cap4-P1",
-      "capId": "cap4"
-     },
-     {
-      "name": "Trade communication programme",
-      "owner": "Tarek Nour",
-      "brief": "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
-      "stakeholders": [
-       "Marketing",
-       "Sales"
-      ],
-      "timeline": "quarter",
-      "start": "Q2 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Twelve-month communication calendar",
-        "due": "Sep 26",
-        "status": "done",
-        "id": "cap4-P2-D1"
-       },
-       {
-        "name": "Calendar executed",
-        "due": "Dec 26",
-        "status": "wip",
-        "pct": 35,
-        "id": "cap4-P2-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Trade partner recall",
-        "dir": "≥",
-        "target": "70%",
-        "measureAt": "Q1 2027",
-        "actual": null,
-        "progress": null,
-        "id": "cap4-P2-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Calendar built",
-        "covers": "Twelve months of trade communication planned",
-        "owner": "Tarek Nour",
-        "finish": "April 2026",
-        "status": "done",
-        "id": "cap4-P2-M1"
-       },
-       {
-        "name": "First-half execution",
-        "covers": "Q2 and Q3 communication delivered",
-        "owner": "Tarek Nour",
-        "finish": "September 2026",
-        "status": "wip",
-        "pct": 25,
-        "id": "cap4-P2-M2"
-       },
-       {
-        "name": "Second-half execution",
-        "covers": "Q4 communication delivered",
-        "owner": "Tarek Nour",
-        "finish": "December 2026",
-        "status": "todo",
-        "id": "cap4-P2-M3"
-       }
-      ],
-      "id": "cap4-P2",
-      "capId": "cap4"
-     }
-    ],
-    "fn": "marketing",
-    "id": "cap4"
-   },
-   {
-    "name": "Customer Centric",
-    "def": "Decide from what the customer actually did, not what we assumed.",
-    "keyObjectives": [
-     {
-      "name": "Net promoter score",
-      "dir": "≥",
-      "target": "40",
-      "compile": "Latest",
-      "actual": "26",
-      "progress": 65,
-      "weight": 100,
-      "id": "cap5-KO1"
-     }
-    ],
-    "projects": [
-     {
-      "name": "Voice of customer loop across units",
-      "owner": "Mennah Farouk",
-      "brief": "One feedback loop, running continuously, whose output reaches the people who can act on it.",
-      "stakeholders": [
-       "Care",
-       "Unit heads"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Feedback instrument agreed across units",
-        "due": "Apr 26",
-        "status": "done",
-        "id": "cap5-P1-D1"
-       },
-       {
-        "name": "Loop running in all units",
-        "due": "Dec 26",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap5-P1-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Net promoter score",
-        "dir": "≥",
-        "target": "40",
-        "measureAt": "Q4 2026",
-        "actual": "26",
-        "progress": 65,
-        "id": "cap5-P1-O1"
-       },
-       {
-        "name": "Issues closed within SLA",
-        "dir": "≥",
-        "target": "90%",
-        "measureAt": "Q4 2026",
-        "actual": "71%",
-        "progress": 79,
-        "id": "cap5-P1-O2"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Instrument design",
-        "covers": "One question set used by every unit",
-        "owner": "Mennah Farouk",
-        "finish": "January 2026",
-        "status": "done",
-        "id": "cap5-P1-M1"
-       },
-       {
-        "name": "Pilot in two units",
-        "covers": "Retail and Care running the loop",
-        "owner": "Mennah Farouk",
-        "finish": "June 2026",
-        "status": "done",
-        "id": "cap5-P1-M2"
-       },
-       {
-        "name": "Rollout to remaining units",
-        "covers": "Mobile, Mazaya and B2B",
-        "owner": "Mennah Farouk",
-        "finish": "November 2026",
-        "status": "wip",
-        "pct": 25,
-        "id": "cap5-P1-M3"
-       }
-      ],
-      "id": "cap5-P1",
-      "capId": "cap5"
-     },
-     {
-      "name": "Service recovery standard",
-      "owner": "Dalia Sabry",
-      "brief": "A single standard for what happens when we get it wrong, and how quickly.",
-      "stakeholders": [
-       "Care"
-      ],
-      "timeline": "quarter",
-      "start": "Q2 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Recovery standard published",
-        "due": "Feb 26",
-        "status": "todo",
-        "id": "cap5-P2-D1"
-       },
-       {
-        "name": "Care teams trained",
-        "due": "Oct 26",
-        "status": "wip",
-        "pct": 20,
-        "id": "cap5-P2-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Repeat complaints",
-        "dir": "≤",
-        "target": "8%",
-        "measureAt": "Q1 2027",
-        "actual": null,
-        "progress": null,
-        "id": "cap5-P2-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Standard drafted",
-        "covers": "What we owe a customer when we fail, by failure type",
-        "owner": "Dalia Sabry",
-        "finish": "July 2026",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap5-P2-M1"
-       },
-       {
-        "name": "Training and rollout",
-        "covers": "Every care team working to the standard",
-        "owner": "Dalia Sabry",
-        "finish": "November 2026",
-        "status": "todo",
-        "id": "cap5-P2-M2"
-       }
-      ],
-      "id": "cap5-P2",
-      "capId": "cap5"
-     }
-    ],
-    "fn": "care",
-    "id": "cap5"
-   },
-   {
-    "name": "Product Mindset",
-    "def": "Treat what we sell as a portfolio to be shaped, not a catalogue to be carried.",
-    "keyObjectives": [],
-    "projects": [
-     {
-      "name": "Portfolio review cadence",
-      "owner": "Tarek Nour",
-      "brief": "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
-      "stakeholders": [
-       "Marketing",
-       "Unit heads"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Review framework and evidence pack",
-        "due": "Mar 26",
-        "status": "done",
-        "id": "cap6-P1-D1"
-       },
-       {
-        "name": "Quarterly reviews held",
-        "due": "Feb 26",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap6-P1-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Revenue from lines added in the last two years",
-        "dir": "≥",
-        "target": "25%",
-        "measureAt": "Q4 2026",
-        "actual": "11%",
-        "progress": 44,
-        "id": "cap6-P1-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Framework agreed",
-        "covers": "What evidence a line is judged on",
-        "owner": "Tarek Nour",
-        "finish": "April 2026",
-        "status": "done",
-        "id": "cap6-P1-M1"
-       },
-       {
-        "name": "First two reviews",
-        "covers": "Q2 and Q3 reviews held with decisions recorded",
-        "owner": "Tarek Nour",
-        "finish": "July 2026",
-        "status": "wip",
-        "pct": 25,
-        "id": "cap6-P1-M2"
-       },
-       {
-        "name": "Second-half reviews",
-        "covers": "Q4 review held",
-        "owner": "Tarek Nour",
-        "finish": "December 2026",
-        "status": "todo",
-        "id": "cap6-P1-M3"
-       }
-      ],
-      "id": "cap6-P1",
-      "capId": "cap6"
-     }
-    ],
-    "fn": "marketing",
-    "id": "cap6"
-   },
-   {
-    "name": "Financial Infrastructure",
-    "def": "Know the cash position, the cost of money and the exposure, on the day rather than after it.",
-    "keyObjectives": [
-     {
-      "name": "Days to close month-end",
-      "dir": "≤",
-      "target": "5 d",
-      "compile": "Latest",
-      "actual": "6 d",
-      "progress": 83,
-      "weight": 60,
-      "note": "One sister company closed late in June.",
-      "id": "cap7-KO1"
-     },
-     {
-      "name": "Days sales outstanding",
-      "dir": "≤",
-      "target": "65",
-      "compile": "Latest",
-      "actual": "72",
-      "progress": 90,
-      "weight": 40,
-      "id": "cap7-KO2"
-     }
-    ],
-    "projects": [
-     {
-      "name": "Average debt utilisation report automation",
-      "owner": "Hossam Abuelenien",
-      "real": true,
-      "brief": "Implementation of an automated debt utilisation report within Oracle, to streamline daily utilisation of debt in banks and factoring companies across sister companies.",
-      "stakeholders": [
-       "Finance Department",
-       "IT Department"
-      ],
-      "timeline": "date",
-      "start": "1 Jan 2026",
-      "end": "30 Apr 2026",
-      "deliverables": [
-       {
-        "name": "Oracle-based interest utilisation form",
-        "due": "Feb 26",
-        "status": "done",
-        "id": "cap7-P1-D1"
-       },
-       {
-        "name": "Tracking interest expense on a daily basis",
-        "due": "May 26",
-        "status": "done",
-        "id": "cap7-P1-D2"
-       },
-       {
-        "name": "Real-time data recalculation for corridor interest and pricing",
-        "due": "May 26",
-        "status": "todo",
-        "note": "Pricing corridor logic reopened with Treasury.",
-        "id": "cap7-P1-D3"
-       },
-       {
-        "name": "Daily treasury monitoring of debt balances",
-        "due": "Dec 26",
-        "status": "done",
-        "id": "cap7-P1-D4"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Reduction of manual work",
-        "dir": "≥",
-        "target": "40 h",
-        "measureAt": "Q2 2026",
-        "actual": "20 h",
-        "progress": 50,
-        "note": "Half the manual steps still run outside Oracle.",
-        "id": "cap7-P1-O1"
-       },
-       {
-        "name": "Improving financial accuracy",
-        "dir": "≥",
-        "target": "99%",
-        "measureAt": "Q4 2026",
-        "actual": null,
-        "progress": null,
-        "id": "cap7-P1-O2"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Solution design",
-        "covers": "Treasury requirements and the calculation approach",
-        "owner": "Finance",
-        "finish": "March 2026",
-        "status": "done",
-        "id": "cap7-P1-M1"
-       },
-       {
-        "name": "Oracle form development",
-        "covers": "Retrieval and calculation screens built",
-        "owner": "IT",
-        "finish": "April 2026",
-        "status": "done",
-        "id": "cap7-P1-M2"
-       },
-       {
-        "name": "Interest utilisation automation",
-        "covers": "Calculation methodology and finance approval",
-        "owner": "Finance",
-        "finish": "April 2026",
-        "status": "done",
-        "id": "cap7-P1-M3"
-       },
-       {
-        "name": "Stakeholder validation",
-        "covers": "Treasury validation of the outputs",
-        "owner": "Treasury",
-        "finish": "May 2026",
-        "status": "done",
-        "id": "cap7-P1-M4"
-       },
-       {
-        "name": "Reporting and analysis embedment",
-        "covers": "BI integration of the utilisation report",
-        "owner": "IT",
-        "finish": "May 2026",
-        "status": "wip",
-        "pct": 40,
-        "id": "cap7-P1-M5"
-       }
-      ],
-      "id": "cap7-P1",
-      "capId": "cap7"
-     },
-     {
-      "name": "Credit facility consolidation",
-      "owner": "Fayad Sobhy",
-      "brief": "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
-      "stakeholders": [
-       "Finance Department",
-       "Treasury"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Facility term sheet agreed with lead bank",
-        "due": "Feb 26",
-        "status": null,
-        "id": "cap7-P2-D1"
-       },
-       {
-        "name": "Covenant reporting pack rebuilt",
-        "due": "Sep 26",
-        "status": null,
-        "id": "cap7-P2-D2"
-       },
-       {
-        "name": "Legacy facilities closed",
-        "due": "Jun 26",
-        "status": null,
-        "id": "cap7-P2-D3"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Arrangement and commitment fees",
-        "dir": "≤",
-        "target": "-18%",
-        "measureAt": "Q1 2027",
-        "actual": null,
-        "progress": null,
-        "id": "cap7-P2-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Facility review and bank shortlist",
-        "covers": "Every facility held across the four banks, and a shortlist of candidate leads",
-        "owner": "Treasury",
-        "finish": "January 2026",
-        "status": "done",
-        "id": "cap7-P2-M1"
-       },
-       {
-        "name": "Term sheet negotiation",
-        "covers": "Commercial terms agreed with the appointed lead",
-        "owner": "Treasury",
-        "finish": "June 2026",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap7-P2-M2"
-       },
-       {
-        "name": "Legal documentation",
-        "covers": "Facility agreement and security package drafted and signed",
-        "owner": "Finance",
-        "finish": "July 2026",
-        "status": "todo",
-        "id": "cap7-P2-M3"
-       },
-       {
-        "name": "Drawdown and legacy closure",
-        "covers": "First drawdown, and the four legacy facilities closed",
-        "owner": "Treasury",
-        "finish": "December 2026",
-        "status": "todo",
-        "id": "cap7-P2-M4"
-       }
-      ],
-      "id": "cap7-P2",
-      "capId": "cap7"
-     },
-     {
-      "name": "Working capital programme across units",
-      "owner": "Hossam Abuelenien",
-      "brief": "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
-      "stakeholders": [
-       "Finance Department"
-      ],
-      "timeline": "quarter",
-      "start": "Q3 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Working capital baseline per unit",
-        "due": "Sep 26",
-        "status": null,
-        "id": "cap7-P3-D1"
-       },
-       {
-        "name": "Unit-level release plans agreed",
-        "due": "Dec 26",
-        "status": null,
-        "id": "cap7-P3-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Days sales outstanding",
-        "dir": "≤",
-        "target": "65",
-        "measureAt": "Q4 2026",
-        "actual": null,
-        "progress": null,
-        "id": "cap7-P3-O1"
-       },
-       {
-        "name": "Credit facility headroom",
-        "dir": "≥",
-        "target": "1.5B",
-        "measureAt": "Q4 2026",
-        "actual": null,
-        "progress": null,
-        "id": "cap7-P3-O2"
-       },
-       {
-        "name": "Stock cover",
-        "dir": "≤",
-        "target": "45 d",
-        "measureAt": "Q1 2027",
-        "actual": null,
-        "progress": null,
-        "id": "cap7-P3-O3"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Baseline per unit",
-        "covers": "Receivables and stock position established for each unit",
-        "owner": "Finance",
-        "finish": "September 2026",
-        "status": "todo",
-        "id": "cap7-P3-M1"
-       },
-       {
-        "name": "Release plans agreed",
-        "covers": "A target and a plan agreed with every unit head",
-        "owner": "Finance",
-        "finish": "November 2026",
-        "status": "todo",
-        "id": "cap7-P3-M2"
-       },
-       {
-        "name": "First review",
-        "covers": "Progress against plan reviewed with the CFO",
-        "owner": "Finance",
-        "finish": "December 2026",
-        "status": "todo",
-        "id": "cap7-P3-M3"
-       }
-      ],
-      "id": "cap7-P3",
-      "capId": "cap7"
-     }
-    ],
-    "fn": "finance",
-    "id": "cap7"
-   },
-   {
-    "name": "Strategy",
-    "def": "Run the cycle itself well — plan, review, adjust, on time and on evidence.",
-    "keyObjectives": [
-     {
-      "name": "Cycles reviewed on time",
-      "dir": "≥",
-      "target": "4",
-      "compile": "Sum",
-      "actual": "2",
-      "progress": 50,
-      "weight": 50,
-      "id": "cap8-KO1"
-     },
-     {
-      "name": "Plan adherence",
-      "dir": "≥",
-      "target": "80%",
-      "compile": "Latest",
-      "actual": "51%",
-      "progress": 64,
-      "weight": 50,
-      "id": "cap8-KO2"
-     }
-    ],
-    "projects": [
-     {
-      "name": "Quarterly review cadence with every unit",
-      "owner": "Islam Saadany",
-      "brief": "A review with every unit every quarter, on the same evidence, in the same shape.",
-      "stakeholders": [
-       "Strategy Management Office",
-       "Unit heads"
-      ],
-      "timeline": "quarter",
-      "start": "Q1 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "Review format and evidence pack",
-        "due": "May 26",
-        "status": "done",
-        "id": "cap8-P1-D1"
-       },
-       {
-        "name": "Reviews held with every unit",
-        "due": "Oct 26",
-        "status": "wip",
-        "pct": 66,
-        "id": "cap8-P1-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Cycles reviewed on time",
-        "dir": "≥",
-        "target": "4",
-        "measureAt": "Q4 2026",
-        "actual": "2",
-        "progress": 50,
-        "id": "cap8-P1-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Format agreed",
-        "covers": "One review shape used with every unit",
-        "owner": "Islam Saadany",
-        "finish": "January 2026",
-        "status": "done",
-        "id": "cap8-P1-M1"
-       },
-       {
-        "name": "First-half reviews",
-        "covers": "Q1 and Q2 reviews held with all units",
-        "owner": "Islam Saadany",
-        "finish": "May 2026",
-        "status": "done",
-        "id": "cap8-P1-M2"
-       },
-       {
-        "name": "Second-half reviews",
-        "covers": "Q3 and Q4 reviews",
-        "owner": "Islam Saadany",
-        "finish": "December 2026",
-        "status": "wip",
-        "pct": 50,
-        "id": "cap8-P1-M3"
-       }
-      ],
-      "id": "cap8-P1",
-      "capId": "cap8"
-     },
-     {
-      "name": "Plan and progress on the platform for all units",
-      "owner": "Islam Saadany",
-      "brief": "Every unit's plan and every unit's reporting on the platform, so the cycle stops running on spreadsheets.",
-      "stakeholders": [
-       "Strategy Management Office"
-      ],
-      "timeline": "quarter",
-      "start": "Q2 2026",
-      "end": "Q4 2026",
-      "deliverables": [
-       {
-        "name": "All units' plans loaded",
-        "due": "May 26",
-        "status": "wip",
-        "pct": 70,
-        "id": "cap8-P2-D1"
-       },
-       {
-        "name": "All units reporting through the platform",
-        "due": "Jun 26",
-        "status": "wip",
-        "pct": 40,
-        "id": "cap8-P2-D2"
-       }
-      ],
-      "outcomes": [
-       {
-        "name": "Plan adherence",
-        "dir": "≥",
-        "target": "80%",
-        "measureAt": "Q4 2026",
-        "actual": "51%",
-        "progress": 64,
-        "id": "cap8-P2-O1"
-       }
-      ],
-      "milestones": [
-       {
-        "name": "Plans loaded",
-        "covers": "Every unit's plan entered and checked",
-        "owner": "Islam Saadany",
-        "finish": "August 2026",
-        "status": "wip",
-        "pct": 60,
-        "id": "cap8-P2-M1"
-       },
-       {
-        "name": "First reporting cycle on the platform",
-        "covers": "A full cycle run without spreadsheets",
-        "owner": "Islam Saadany",
-        "finish": "October 2026",
-        "status": "todo",
-        "id": "cap8-P2-M2"
-       }
-      ],
-      "id": "cap8-P2",
-      "capId": "cap8"
-     }
-    ],
-    "fn": "smo",
-    "id": "cap8"
-   }
-  ],
+  "capabilities": [],
   "portfolio": {
    "objectives": 66,
    "exec": 51
@@ -5104,7 +3551,301 @@
    "codePrefix": "FIN",
    "head": "fn_fin",
    "custodian": null,
-   "active": true
+   "active": true,
+   "projects": [
+    {
+     "name": "Average debt utilisation report automation",
+     "owner": "Hossam Abuelenien",
+     "real": true,
+     "brief": "Implementation of an automated debt utilisation report within Oracle, to streamline daily utilisation of debt in banks and factoring companies across sister companies.",
+     "stakeholders": [
+      "Finance Department",
+      "IT Department"
+     ],
+     "timeline": "date",
+     "start": "1 Jan 2026",
+     "end": "30 Apr 2026",
+     "deliverables": [
+      {
+       "name": "Oracle-based interest utilisation form",
+       "due": "Feb 26",
+       "status": "done",
+       "id": "cap7-P1-D1"
+      },
+      {
+       "name": "Tracking interest expense on a daily basis",
+       "due": "May 26",
+       "status": "done",
+       "id": "cap7-P1-D2"
+      },
+      {
+       "name": "Real-time data recalculation for corridor interest and pricing",
+       "due": "May 26",
+       "status": "todo",
+       "note": "Pricing corridor logic reopened with Treasury.",
+       "id": "cap7-P1-D3"
+      },
+      {
+       "name": "Daily treasury monitoring of debt balances",
+       "due": "Dec 26",
+       "status": "done",
+       "id": "cap7-P1-D4"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Reduction of manual work",
+       "dir": "≥",
+       "target": "40 h",
+       "measureAt": "Q2 2026",
+       "actual": "20 h",
+       "progress": 50,
+       "note": "Half the manual steps still run outside Oracle.",
+       "id": "cap7-P1-O1"
+      },
+      {
+       "name": "Improving financial accuracy",
+       "dir": "≥",
+       "target": "99%",
+       "measureAt": "Q4 2026",
+       "actual": null,
+       "progress": null,
+       "id": "cap7-P1-O2"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Solution design",
+       "covers": "Treasury requirements and the calculation approach",
+       "owner": "Finance",
+       "finish": "March 2026",
+       "status": "done",
+       "id": "cap7-P1-M1"
+      },
+      {
+       "name": "Oracle form development",
+       "covers": "Retrieval and calculation screens built",
+       "owner": "IT",
+       "finish": "April 2026",
+       "status": "done",
+       "id": "cap7-P1-M2"
+      },
+      {
+       "name": "Interest utilisation automation",
+       "covers": "Calculation methodology and finance approval",
+       "owner": "Finance",
+       "finish": "April 2026",
+       "status": "done",
+       "id": "cap7-P1-M3"
+      },
+      {
+       "name": "Stakeholder validation",
+       "covers": "Treasury validation of the outputs",
+       "owner": "Treasury",
+       "finish": "May 2026",
+       "status": "done",
+       "id": "cap7-P1-M4"
+      },
+      {
+       "name": "Reporting and analysis embedment",
+       "covers": "BI integration of the utilisation report",
+       "owner": "IT",
+       "finish": "May 2026",
+       "status": "wip",
+       "pct": 40,
+       "id": "cap7-P1-M5"
+      }
+     ],
+     "id": "cap7-P1",
+     "capId": "fn:finance"
+    },
+    {
+     "name": "Credit facility consolidation",
+     "owner": "Fayad Sobhy",
+     "brief": "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
+     "stakeholders": [
+      "Finance Department",
+      "Treasury"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Facility term sheet agreed with lead bank",
+       "due": "Feb 26",
+       "status": null,
+       "id": "cap7-P2-D1"
+      },
+      {
+       "name": "Covenant reporting pack rebuilt",
+       "due": "Sep 26",
+       "status": null,
+       "id": "cap7-P2-D2"
+      },
+      {
+       "name": "Legacy facilities closed",
+       "due": "Jun 26",
+       "status": null,
+       "id": "cap7-P2-D3"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Arrangement and commitment fees",
+       "dir": "≤",
+       "target": "-18%",
+       "measureAt": "Q1 2027",
+       "actual": null,
+       "progress": null,
+       "id": "cap7-P2-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Facility review and bank shortlist",
+       "covers": "Every facility held across the four banks, and a shortlist of candidate leads",
+       "owner": "Treasury",
+       "finish": "January 2026",
+       "status": "done",
+       "id": "cap7-P2-M1"
+      },
+      {
+       "name": "Term sheet negotiation",
+       "covers": "Commercial terms agreed with the appointed lead",
+       "owner": "Treasury",
+       "finish": "June 2026",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap7-P2-M2"
+      },
+      {
+       "name": "Legal documentation",
+       "covers": "Facility agreement and security package drafted and signed",
+       "owner": "Finance",
+       "finish": "July 2026",
+       "status": "todo",
+       "id": "cap7-P2-M3"
+      },
+      {
+       "name": "Drawdown and legacy closure",
+       "covers": "First drawdown, and the four legacy facilities closed",
+       "owner": "Treasury",
+       "finish": "December 2026",
+       "status": "todo",
+       "id": "cap7-P2-M4"
+      }
+     ],
+     "id": "cap7-P2",
+     "capId": "fn:finance"
+    },
+    {
+     "name": "Working capital programme across units",
+     "owner": "Hossam Abuelenien",
+     "brief": "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
+     "stakeholders": [
+      "Finance Department"
+     ],
+     "timeline": "quarter",
+     "start": "Q3 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Working capital baseline per unit",
+       "due": "Sep 26",
+       "status": null,
+       "id": "cap7-P3-D1"
+      },
+      {
+       "name": "Unit-level release plans agreed",
+       "due": "Dec 26",
+       "status": null,
+       "id": "cap7-P3-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Days sales outstanding",
+       "dir": "≤",
+       "target": "65",
+       "measureAt": "Q4 2026",
+       "actual": null,
+       "progress": null,
+       "id": "cap7-P3-O1"
+      },
+      {
+       "name": "Credit facility headroom",
+       "dir": "≥",
+       "target": "1.5B",
+       "measureAt": "Q4 2026",
+       "actual": null,
+       "progress": null,
+       "id": "cap7-P3-O2"
+      },
+      {
+       "name": "Stock cover",
+       "dir": "≤",
+       "target": "45 d",
+       "measureAt": "Q1 2027",
+       "actual": null,
+       "progress": null,
+       "id": "cap7-P3-O3"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Baseline per unit",
+       "covers": "Receivables and stock position established for each unit",
+       "owner": "Finance",
+       "finish": "September 2026",
+       "status": "todo",
+       "id": "cap7-P3-M1"
+      },
+      {
+       "name": "Release plans agreed",
+       "covers": "A target and a plan agreed with every unit head",
+       "owner": "Finance",
+       "finish": "November 2026",
+       "status": "todo",
+       "id": "cap7-P3-M2"
+      },
+      {
+       "name": "First review",
+       "covers": "Progress against plan reviewed with the CFO",
+       "owner": "Finance",
+       "finish": "December 2026",
+       "status": "todo",
+       "id": "cap7-P3-M3"
+      }
+     ],
+     "id": "cap7-P3",
+     "capId": "fn:finance"
+    }
+   ],
+   "keyObjectives": [
+    {
+     "name": "Days to close month-end",
+     "dir": "≤",
+     "target": "5 d",
+     "compile": "Latest",
+     "actual": "6 d",
+     "progress": 83,
+     "weight": 60,
+     "note": "One sister company closed late in June.",
+     "id": "cap7-KO1"
+    },
+    {
+     "name": "Days sales outstanding",
+     "dir": "≤",
+     "target": "65",
+     "compile": "Latest",
+     "actual": "72",
+     "progress": 90,
+     "weight": 40,
+     "id": "cap7-KO2"
+    }
+   ],
+   "def": "Know the cash position, the cost of money and the exposure, on the day rather than after it."
   },
   "hr": {
    "name": "HR",
@@ -5112,7 +3853,242 @@
    "codePrefix": "HR",
    "head": "fn_hr",
    "custodian": null,
-   "active": true
+   "active": true,
+   "projects": [
+    {
+     "name": "Key-role succession map for every unit",
+     "owner": "Noran Adel",
+     "brief": "Name a successor for every key role in every unit, and know which ones have nobody.",
+     "stakeholders": [
+      "HR",
+      "Unit heads"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q3 2026",
+     "deliverables": [
+      {
+       "name": "Key-role definition agreed group-wide",
+       "due": "Apr 26",
+       "status": "done",
+       "id": "cap2-P1-D1"
+      },
+      {
+       "name": "Succession map per unit",
+       "due": "Oct 26",
+       "status": "wip",
+       "pct": 70,
+       "id": "cap2-P1-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Key-role coverage",
+       "dir": "≥",
+       "target": "90%",
+       "measureAt": "Q3 2026",
+       "actual": "62%",
+       "progress": 69,
+       "note": "Six roles across Retail and Mazaya still have no named successor.",
+       "id": "cap2-P1-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Key-role definition",
+       "covers": "What counts as a key role, agreed with the units",
+       "owner": "Noran Adel",
+       "finish": "February 2026",
+       "status": "done",
+       "id": "cap2-P1-M1"
+      },
+      {
+       "name": "Unit-by-unit mapping",
+       "covers": "Successors named, gaps recorded",
+       "owner": "Noran Adel",
+       "finish": "June 2026",
+       "status": "done",
+       "id": "cap2-P1-M2"
+      },
+      {
+       "name": "Gap closure plans",
+       "covers": "A plan for every role with no successor",
+       "owner": "Noran Adel",
+       "finish": "September 2026",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap2-P1-M3"
+      }
+     ],
+     "id": "cap2-P1",
+     "capId": "fn:hr"
+    },
+    {
+     "name": "Retention plan for the top two attrition roles",
+     "owner": "Noran Adel",
+     "brief": "Two roles produce most of the voluntary attrition. Find out why, and change it.",
+     "stakeholders": [
+      "HR"
+     ],
+     "timeline": "quarter",
+     "start": "Q2 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Exit interview analysis",
+       "due": "Sep 26",
+       "status": "done",
+       "id": "cap2-P2-D1"
+      },
+      {
+       "name": "Revised package and progression for both roles",
+       "due": "Dec 26",
+       "status": "todo",
+       "note": "Held pending the compensation review.",
+       "id": "cap2-P2-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Voluntary attrition in the two roles",
+       "dir": "≤",
+       "target": "12%",
+       "measureAt": "Q1 2027",
+       "actual": null,
+       "progress": null,
+       "id": "cap2-P2-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Attrition analysis",
+       "covers": "Which roles, which reasons, which managers",
+       "owner": "Noran Adel",
+       "finish": "May 2026",
+       "status": "done",
+       "id": "cap2-P2-M1"
+      },
+      {
+       "name": "Package redesign",
+       "covers": "Pay and progression reworked for both roles",
+       "owner": "Noran Adel",
+       "finish": "August 2026",
+       "status": "wip",
+       "pct": 75,
+       "id": "cap2-P2-M2"
+      },
+      {
+       "name": "Rollout and communication",
+       "covers": "Both roles moved onto the new terms",
+       "owner": "Noran Adel",
+       "finish": "October 2026",
+       "status": "todo",
+       "id": "cap2-P2-M3"
+      }
+     ],
+     "id": "cap2-P2",
+     "capId": "fn:hr"
+    },
+    {
+     "name": "Group training calendar and delivery",
+     "owner": "Hala",
+     "brief": "One training calendar for the group, published ahead of the year and actually delivered.",
+     "stakeholders": [
+      "HR",
+      "Unit heads"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Annual training calendar published",
+       "due": "Apr 26",
+       "status": "done",
+       "id": "cap2-P3-D1"
+      },
+      {
+       "name": "Calendar delivered",
+       "due": "Mar 26",
+       "status": "wip",
+       "pct": 44,
+       "id": "cap2-P3-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Training hours per head",
+       "dir": "≥",
+       "target": "24",
+       "measureAt": "Q4 2026",
+       "actual": "5",
+       "progress": 21,
+       "note": "Two of nine planned sessions delivered. Q3 and Q4 carry the rest.",
+       "id": "cap2-P3-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Needs assessment",
+       "covers": "What each unit actually needs, not what it asks for",
+       "owner": "Hala",
+       "finish": "February 2026",
+       "status": "done",
+       "id": "cap2-P3-M1"
+      },
+      {
+       "name": "Calendar published",
+       "covers": "Dates, trainers and places confirmed for the year",
+       "owner": "Hala",
+       "finish": "February 2026",
+       "status": "done",
+       "id": "cap2-P3-M2"
+      },
+      {
+       "name": "First-half delivery",
+       "covers": "Sessions scheduled to Q2 delivered",
+       "owner": "Hala",
+       "finish": "June 2026",
+       "status": "wip",
+       "pct": 40,
+       "id": "cap2-P3-M3"
+      },
+      {
+       "name": "Second-half delivery",
+       "covers": "The remaining sessions",
+       "owner": "Hala",
+       "finish": "November 2026",
+       "status": "todo",
+       "id": "cap2-P3-M4"
+      }
+     ],
+     "id": "cap2-P3",
+     "capId": "fn:hr"
+    }
+   ],
+   "keyObjectives": [
+    {
+     "name": "Key-role coverage",
+     "dir": "≥",
+     "target": "90%",
+     "compile": "Latest",
+     "actual": "62%",
+     "progress": 69,
+     "weight": 50,
+     "id": "cap2-KO1"
+    },
+    {
+     "name": "Voluntary attrition",
+     "dir": "≤",
+     "target": "12%",
+     "compile": "Latest",
+     "actual": "19%",
+     "progress": 63,
+     "weight": 50,
+     "id": "cap2-KO2"
+    }
+   ],
+   "def": "Have the right people in the right roles, and keep them."
   },
   "treasury": {
    "name": "Treasury",
@@ -5120,7 +4096,256 @@
    "codePrefix": "TRS",
    "head": "fn_tre",
    "custodian": null,
-   "active": true
+   "active": true,
+   "projects": [
+    {
+     "name": "Standardise the core order process across units",
+     "owner": "Ashraf Abdelaty",
+     "brief": "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
+     "stakeholders": [
+      "Operations",
+      "IT"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Single documented order process",
+       "due": "Sep 26",
+       "status": "done",
+       "id": "cap1-P1-D1"
+      },
+      {
+       "name": "Unit-by-unit gap assessment",
+       "due": "Oct 26",
+       "status": "done",
+       "id": "cap1-P1-D2"
+      },
+      {
+       "name": "Process rolled out across the three units",
+       "due": "Sep 26",
+       "status": "wip",
+       "pct": 55,
+       "id": "cap1-P1-D3"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Order cycle time",
+       "dir": "≤",
+       "target": "12 d",
+       "measureAt": "Q3 2026",
+       "actual": "15 d",
+       "progress": 80,
+       "note": "Retail is on the new process; Mobile cuts over in Q3.",
+       "id": "cap1-P1-O1"
+      },
+      {
+       "name": "First-time-right rate",
+       "dir": "≥",
+       "target": "95%",
+       "measureAt": "Q4 2026",
+       "actual": null,
+       "progress": null,
+       "id": "cap1-P1-O2"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Process design and sign-off",
+       "covers": "The target process agreed with all three unit heads",
+       "owner": "Ashraf Abdelaty",
+       "finish": "March 2026",
+       "status": "done",
+       "id": "cap1-P1-M1"
+      },
+      {
+       "name": "Gap assessment per unit",
+       "covers": "What each unit has to change to reach it",
+       "owner": "Hala",
+       "finish": "May 2026",
+       "status": "done",
+       "id": "cap1-P1-M2"
+      },
+      {
+       "name": "Retail and Mazaya cutover",
+       "covers": "Both units running the standard process",
+       "owner": "Hala",
+       "finish": "July 2026",
+       "status": "wip",
+       "pct": 60,
+       "id": "cap1-P1-M3"
+      },
+      {
+       "name": "Mobile cutover",
+       "covers": "The last unit, gated on the ERP work",
+       "owner": "Ashraf Abdelaty",
+       "finish": "November 2026",
+       "status": "todo",
+       "id": "cap1-P1-M4"
+      }
+     ],
+     "id": "cap1-P1",
+     "capId": "fn:treasury"
+    },
+    {
+     "name": "Cost-to-serve model and monthly review",
+     "owner": "Fayad Sobhy",
+     "brief": "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
+     "stakeholders": [
+      "Finance",
+      "Operations"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Cost-to-serve model built and validated",
+       "due": "Sep 26",
+       "status": "done",
+       "id": "cap1-P2-D1"
+      },
+      {
+       "name": "Monthly review running with all units",
+       "due": "Oct 26",
+       "status": "wip",
+       "pct": 60,
+       "id": "cap1-P2-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Cost-to-serve",
+       "dir": "≤",
+       "target": "4.2%",
+       "measureAt": "Q4 2026",
+       "actual": null,
+       "progress": null,
+       "id": "cap1-P2-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Cost driver mapping",
+       "covers": "Which activities carry the cost, by unit",
+       "owner": "Fayad Sobhy",
+       "finish": "January 2026",
+       "status": "done",
+       "id": "cap1-P2-M1"
+      },
+      {
+       "name": "Model build and validation",
+       "covers": "Model reconciled against two closed months",
+       "owner": "Fayad Sobhy",
+       "finish": "May 2026",
+       "status": "done",
+       "id": "cap1-P2-M2"
+      },
+      {
+       "name": "Review cadence embedded",
+       "covers": "A standing monthly session with each unit",
+       "owner": "Hala",
+       "finish": "August 2026",
+       "status": "wip",
+       "pct": 60,
+       "id": "cap1-P2-M3"
+      }
+     ],
+     "id": "cap1-P2",
+     "capId": "fn:treasury"
+    },
+    {
+     "name": "First-time-right programme in distribution",
+     "owner": "Hala",
+     "brief": "Cut the rework in distribution by fixing the two failure points that produce most of it.",
+     "stakeholders": [
+      "Operations"
+     ],
+     "timeline": "quarter",
+     "start": "Q2 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Failure analysis on twelve months of orders",
+       "due": "Dec 26",
+       "status": "done",
+       "id": "cap1-P3-D1"
+      },
+      {
+       "name": "Corrective standard operating procedures",
+       "due": "May 26",
+       "status": "wip",
+       "pct": 40,
+       "id": "cap1-P3-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "First-time-right rate",
+       "dir": "≥",
+       "target": "95%",
+       "measureAt": "Q4 2026",
+       "actual": "82%",
+       "progress": 86,
+       "id": "cap1-P3-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Failure analysis",
+       "covers": "Where rework originates and what it costs",
+       "owner": "Hala",
+       "finish": "May 2026",
+       "status": "done",
+       "id": "cap1-P3-M1"
+      },
+      {
+       "name": "Procedure rewrite",
+       "covers": "New procedures for the two main failure points",
+       "owner": "Hala",
+       "finish": "September 2026",
+       "status": "wip",
+       "pct": 60,
+       "id": "cap1-P3-M2"
+      },
+      {
+       "name": "Team retraining",
+       "covers": "Distribution teams trained on the new procedures",
+       "owner": "Hala",
+       "finish": "October 2026",
+       "status": "todo",
+       "id": "cap1-P3-M3"
+      }
+     ],
+     "id": "cap1-P3",
+     "capId": "fn:treasury"
+    }
+   ],
+   "keyObjectives": [
+    {
+     "name": "Process cycle time",
+     "dir": "≤",
+     "target": "12 d",
+     "compile": "Latest",
+     "actual": "15 d",
+     "progress": 80,
+     "weight": 40,
+     "id": "cap1-KO1"
+    },
+    {
+     "name": "Cost-to-serve",
+     "dir": "≤",
+     "target": "4.2%",
+     "compile": "Latest",
+     "actual": "5.6%",
+     "progress": 75,
+     "weight": 60,
+     "id": "cap1-KO2"
+    }
+   ],
+   "def": "Run the core trading engine so reliably that scale stops costing us margin."
   },
   "marketing": {
    "name": "Marketing",
@@ -5128,7 +4353,202 @@
    "codePrefix": "MKT",
    "head": "fn_mkt",
    "custodian": "fn_mkt2",
-   "active": true
+   "active": true,
+   "projects": [
+    {
+     "name": "Brand audit and positioning statement",
+     "owner": "Yara Kamal",
+     "brief": "Establish what the market currently believes about us, and agree what we want it to believe instead.",
+     "stakeholders": [
+      "Marketing"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q3 2026",
+     "deliverables": [
+      {
+       "name": "Market perception study",
+       "due": "Dec 26",
+       "status": "done",
+       "id": "cap4-P1-D1"
+      },
+      {
+       "name": "Positioning statement agreed by the board",
+       "due": "Jul 26",
+       "status": "todo",
+       "id": "cap4-P1-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Unaided brand awareness",
+       "dir": "≥",
+       "target": "45%",
+       "measureAt": "Q4 2026",
+       "actual": null,
+       "progress": null,
+       "id": "cap4-P1-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Perception study fielded",
+       "covers": "Study run with trade and end customers",
+       "owner": "Yara Kamal",
+       "finish": "April 2026",
+       "status": "done",
+       "id": "cap4-P1-M1"
+      },
+      {
+       "name": "Positioning workshop",
+       "covers": "Options developed and tested with the board",
+       "owner": "Yara Kamal",
+       "finish": "September 2026",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap4-P1-M2"
+      }
+     ],
+     "id": "cap4-P1",
+     "capId": "fn:marketing"
+    },
+    {
+     "name": "Trade communication programme",
+     "owner": "Tarek Nour",
+     "brief": "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
+     "stakeholders": [
+      "Marketing",
+      "Sales"
+     ],
+     "timeline": "quarter",
+     "start": "Q2 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Twelve-month communication calendar",
+       "due": "Sep 26",
+       "status": "done",
+       "id": "cap4-P2-D1"
+      },
+      {
+       "name": "Calendar executed",
+       "due": "Dec 26",
+       "status": "wip",
+       "pct": 35,
+       "id": "cap4-P2-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Trade partner recall",
+       "dir": "≥",
+       "target": "70%",
+       "measureAt": "Q1 2027",
+       "actual": null,
+       "progress": null,
+       "id": "cap4-P2-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Calendar built",
+       "covers": "Twelve months of trade communication planned",
+       "owner": "Tarek Nour",
+       "finish": "April 2026",
+       "status": "done",
+       "id": "cap4-P2-M1"
+      },
+      {
+       "name": "First-half execution",
+       "covers": "Q2 and Q3 communication delivered",
+       "owner": "Tarek Nour",
+       "finish": "September 2026",
+       "status": "wip",
+       "pct": 25,
+       "id": "cap4-P2-M2"
+      },
+      {
+       "name": "Second-half execution",
+       "covers": "Q4 communication delivered",
+       "owner": "Tarek Nour",
+       "finish": "December 2026",
+       "status": "todo",
+       "id": "cap4-P2-M3"
+      }
+     ],
+     "id": "cap4-P2",
+     "capId": "fn:marketing"
+    },
+    {
+     "name": "Portfolio review cadence",
+     "owner": "Tarek Nour",
+     "brief": "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
+     "stakeholders": [
+      "Marketing",
+      "Unit heads"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Review framework and evidence pack",
+       "due": "Mar 26",
+       "status": "done",
+       "id": "cap6-P1-D1"
+      },
+      {
+       "name": "Quarterly reviews held",
+       "due": "Feb 26",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap6-P1-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Revenue from lines added in the last two years",
+       "dir": "≥",
+       "target": "25%",
+       "measureAt": "Q4 2026",
+       "actual": "11%",
+       "progress": 44,
+       "id": "cap6-P1-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Framework agreed",
+       "covers": "What evidence a line is judged on",
+       "owner": "Tarek Nour",
+       "finish": "April 2026",
+       "status": "done",
+       "id": "cap6-P1-M1"
+      },
+      {
+       "name": "First two reviews",
+       "covers": "Q2 and Q3 reviews held with decisions recorded",
+       "owner": "Tarek Nour",
+       "finish": "July 2026",
+       "status": "wip",
+       "pct": 25,
+       "id": "cap6-P1-M2"
+      },
+      {
+       "name": "Second-half reviews",
+       "covers": "Q4 review held",
+       "owner": "Tarek Nour",
+       "finish": "December 2026",
+       "status": "todo",
+       "id": "cap6-P1-M3"
+      }
+     ],
+     "id": "cap6-P1",
+     "capId": "fn:marketing"
+    }
+   ],
+   "keyObjectives": [],
+   "def": "Be known for something specific, by the people who decide."
   },
   "it": {
    "name": "IT",
@@ -5136,7 +4556,242 @@
    "codePrefix": "ITF",
    "head": "ithead",
    "custodian": "own_it",
-   "active": true
+   "active": true,
+   "projects": [
+    {
+     "name": "Consolidate ERP instances across units",
+     "owner": "Abdelhamid",
+     "brief": "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
+     "stakeholders": [
+      "IT",
+      "Finance",
+      "Unit heads"
+     ],
+     "timeline": "quarter",
+     "start": "Q2 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Target instance design",
+       "due": "Sep 26",
+       "status": "done",
+       "id": "cap3-P1-D1"
+      },
+      {
+       "name": "Instances migrated",
+       "due": "Jun 26",
+       "status": "wip",
+       "pct": 33,
+       "note": "Two of six migrated. Mobile's cutover moved to Q3 with the principal.",
+       "id": "cap3-P1-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Systems consolidated",
+       "dir": "≥",
+       "target": "6",
+       "measureAt": "Q4 2026",
+       "actual": "2",
+       "progress": 33,
+       "id": "cap3-P1-O1"
+      },
+      {
+       "name": "Days to close month-end",
+       "dir": "≤",
+       "target": "5 d",
+       "measureAt": "Q1 2027",
+       "actual": null,
+       "progress": null,
+       "id": "cap3-P1-O2"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Instance audit",
+       "covers": "What is running where, and what depends on it",
+       "owner": "Abdelhamid",
+       "finish": "June 2026",
+       "status": "done",
+       "id": "cap3-P1-M1"
+      },
+      {
+       "name": "Target design and sequencing",
+       "covers": "One target instance, and the order units move in",
+       "owner": "Abdelhamid",
+       "finish": "April 2026",
+       "status": "done",
+       "id": "cap3-P1-M2"
+      },
+      {
+       "name": "First two migrations",
+       "covers": "Treasury and Care moved across",
+       "owner": "Abdelhamid",
+       "finish": "July 2026",
+       "status": "wip",
+       "pct": 60,
+       "id": "cap3-P1-M3"
+      },
+      {
+       "name": "Remaining migrations",
+       "covers": "Mobile, Retail, Mazaya and B2B",
+       "owner": "Abdelhamid",
+       "finish": "November 2026",
+       "status": "todo",
+       "id": "cap3-P1-M4"
+      }
+     ],
+     "id": "cap3-P1",
+     "capId": "fn:it"
+    },
+    {
+     "name": "Group data warehouse and single reporting layer",
+     "owner": "Ramy Behairy",
+     "brief": "One warehouse and one reporting layer, so the same question gets the same answer in every room.",
+     "stakeholders": [
+      "IT",
+      "Finance"
+     ],
+     "timeline": "quarter",
+     "start": "Q2 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Warehouse built and loading nightly",
+       "due": "Apr 26",
+       "status": "todo",
+       "id": "cap3-P2-D1"
+      },
+      {
+       "name": "Reporting layer live for sales and finance",
+       "due": "Mar 26",
+       "status": "wip",
+       "pct": 36,
+       "id": "cap3-P2-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Dependency on automated reports",
+       "dir": "≥",
+       "target": "90%",
+       "measureAt": "Q4 2026",
+       "actual": "58%",
+       "progress": 64,
+       "note": "Power BI live for sales; finance stays manual until the warehouse lands.",
+       "id": "cap3-P2-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Model and source mapping",
+       "covers": "What the warehouse holds and where it comes from",
+       "owner": "Ramy Behairy",
+       "finish": "June 2026",
+       "status": "done",
+       "id": "cap3-P2-M1"
+      },
+      {
+       "name": "Warehouse build",
+       "covers": "Built, loading nightly, reconciled",
+       "owner": "Ramy Behairy",
+       "finish": "August 2026",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap3-P2-M2"
+      },
+      {
+       "name": "Reporting layer rollout",
+       "covers": "Sales and finance reporting moved onto it",
+       "owner": "Ramy Behairy",
+       "finish": "October 2026",
+       "status": "todo",
+       "id": "cap3-P2-M3"
+      }
+     ],
+     "id": "cap3-P2",
+     "capId": "fn:it"
+    },
+    {
+     "name": "Automation backlog and delivery cadence",
+     "owner": "Ramy Behairy",
+     "brief": "A standing backlog of automation candidates, and a cadence that actually clears it.",
+     "stakeholders": [
+      "IT"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Backlog built and prioritised",
+       "due": "Oct 26",
+       "status": "done",
+       "id": "cap3-P3-D1"
+      },
+      {
+       "name": "Backlog delivered",
+       "due": "Feb 26",
+       "status": "wip",
+       "pct": 52,
+       "id": "cap3-P3-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Manual hours removed per month",
+       "dir": "≥",
+       "target": "300",
+       "measureAt": "Q4 2026",
+       "actual": "140",
+       "progress": 47,
+       "id": "cap3-P3-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Candidate assessment",
+       "covers": "Every manual process worth automating, sized",
+       "owner": "Ramy Behairy",
+       "finish": "February 2026",
+       "status": "done",
+       "id": "cap3-P3-M1"
+      },
+      {
+       "name": "Cadence established",
+       "covers": "A fortnightly release running",
+       "owner": "Ramy Behairy",
+       "finish": "June 2026",
+       "status": "done",
+       "id": "cap3-P3-M2"
+      },
+      {
+       "name": "Half the backlog delivered",
+       "covers": "The top half by hours removed",
+       "owner": "Ramy Behairy",
+       "finish": "August 2026",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap3-P3-M3"
+      }
+     ],
+     "id": "cap3-P3",
+     "capId": "fn:it"
+    }
+   ],
+   "keyObjectives": [
+    {
+     "name": "Systems consolidated",
+     "dir": "≥",
+     "target": "6",
+     "compile": "Sum",
+     "actual": "2",
+     "progress": 33,
+     "weight": 100,
+     "id": "cap3-KO1"
+    }
+   ],
+   "def": "Consolidate onto systems that let a decision be made from one number, not five."
   },
   "care": {
    "name": "Care",
@@ -5144,7 +4799,156 @@
    "codePrefix": "CAF",
    "head": "cahead",
    "custodian": "own_ca",
-   "active": true
+   "active": true,
+   "projects": [
+    {
+     "name": "Voice of customer loop across units",
+     "owner": "Mennah Farouk",
+     "brief": "One feedback loop, running continuously, whose output reaches the people who can act on it.",
+     "stakeholders": [
+      "Care",
+      "Unit heads"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Feedback instrument agreed across units",
+       "due": "Apr 26",
+       "status": "done",
+       "id": "cap5-P1-D1"
+      },
+      {
+       "name": "Loop running in all units",
+       "due": "Dec 26",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap5-P1-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Net promoter score",
+       "dir": "≥",
+       "target": "40",
+       "measureAt": "Q4 2026",
+       "actual": "26",
+       "progress": 65,
+       "id": "cap5-P1-O1"
+      },
+      {
+       "name": "Issues closed within SLA",
+       "dir": "≥",
+       "target": "90%",
+       "measureAt": "Q4 2026",
+       "actual": "71%",
+       "progress": 79,
+       "id": "cap5-P1-O2"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Instrument design",
+       "covers": "One question set used by every unit",
+       "owner": "Mennah Farouk",
+       "finish": "January 2026",
+       "status": "done",
+       "id": "cap5-P1-M1"
+      },
+      {
+       "name": "Pilot in two units",
+       "covers": "Retail and Care running the loop",
+       "owner": "Mennah Farouk",
+       "finish": "June 2026",
+       "status": "done",
+       "id": "cap5-P1-M2"
+      },
+      {
+       "name": "Rollout to remaining units",
+       "covers": "Mobile, Mazaya and B2B",
+       "owner": "Mennah Farouk",
+       "finish": "November 2026",
+       "status": "wip",
+       "pct": 25,
+       "id": "cap5-P1-M3"
+      }
+     ],
+     "id": "cap5-P1",
+     "capId": "fn:care"
+    },
+    {
+     "name": "Service recovery standard",
+     "owner": "Dalia Sabry",
+     "brief": "A single standard for what happens when we get it wrong, and how quickly.",
+     "stakeholders": [
+      "Care"
+     ],
+     "timeline": "quarter",
+     "start": "Q2 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Recovery standard published",
+       "due": "Feb 26",
+       "status": "todo",
+       "id": "cap5-P2-D1"
+      },
+      {
+       "name": "Care teams trained",
+       "due": "Oct 26",
+       "status": "wip",
+       "pct": 20,
+       "id": "cap5-P2-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Repeat complaints",
+       "dir": "≤",
+       "target": "8%",
+       "measureAt": "Q1 2027",
+       "actual": null,
+       "progress": null,
+       "id": "cap5-P2-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Standard drafted",
+       "covers": "What we owe a customer when we fail, by failure type",
+       "owner": "Dalia Sabry",
+       "finish": "July 2026",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap5-P2-M1"
+      },
+      {
+       "name": "Training and rollout",
+       "covers": "Every care team working to the standard",
+       "owner": "Dalia Sabry",
+       "finish": "November 2026",
+       "status": "todo",
+       "id": "cap5-P2-M2"
+      }
+     ],
+     "id": "cap5-P2",
+     "capId": "fn:care"
+    }
+   ],
+   "keyObjectives": [
+    {
+     "name": "Net promoter score",
+     "dir": "≥",
+     "target": "40",
+     "compile": "Latest",
+     "actual": "26",
+     "progress": 65,
+     "weight": 100,
+     "id": "cap5-KO1"
+    }
+   ],
+   "def": "Decide from what the customer actually did, not what we assumed."
   },
   "smo": {
    "name": "Strategy Management Office",
@@ -5152,7 +4956,158 @@
    "codePrefix": "SMO",
    "head": "smo",
    "custodian": null,
-   "active": true
+   "active": true,
+   "projects": [
+    {
+     "name": "Quarterly review cadence with every unit",
+     "owner": "Islam Saadany",
+     "brief": "A review with every unit every quarter, on the same evidence, in the same shape.",
+     "stakeholders": [
+      "Strategy Management Office",
+      "Unit heads"
+     ],
+     "timeline": "quarter",
+     "start": "Q1 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "Review format and evidence pack",
+       "due": "May 26",
+       "status": "done",
+       "id": "cap8-P1-D1"
+      },
+      {
+       "name": "Reviews held with every unit",
+       "due": "Oct 26",
+       "status": "wip",
+       "pct": 66,
+       "id": "cap8-P1-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Cycles reviewed on time",
+       "dir": "≥",
+       "target": "4",
+       "measureAt": "Q4 2026",
+       "actual": "2",
+       "progress": 50,
+       "id": "cap8-P1-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Format agreed",
+       "covers": "One review shape used with every unit",
+       "owner": "Islam Saadany",
+       "finish": "January 2026",
+       "status": "done",
+       "id": "cap8-P1-M1"
+      },
+      {
+       "name": "First-half reviews",
+       "covers": "Q1 and Q2 reviews held with all units",
+       "owner": "Islam Saadany",
+       "finish": "May 2026",
+       "status": "done",
+       "id": "cap8-P1-M2"
+      },
+      {
+       "name": "Second-half reviews",
+       "covers": "Q3 and Q4 reviews",
+       "owner": "Islam Saadany",
+       "finish": "December 2026",
+       "status": "wip",
+       "pct": 50,
+       "id": "cap8-P1-M3"
+      }
+     ],
+     "id": "cap8-P1",
+     "capId": "fn:smo"
+    },
+    {
+     "name": "Plan and progress on the platform for all units",
+     "owner": "Islam Saadany",
+     "brief": "Every unit's plan and every unit's reporting on the platform, so the cycle stops running on spreadsheets.",
+     "stakeholders": [
+      "Strategy Management Office"
+     ],
+     "timeline": "quarter",
+     "start": "Q2 2026",
+     "end": "Q4 2026",
+     "deliverables": [
+      {
+       "name": "All units' plans loaded",
+       "due": "May 26",
+       "status": "wip",
+       "pct": 70,
+       "id": "cap8-P2-D1"
+      },
+      {
+       "name": "All units reporting through the platform",
+       "due": "Jun 26",
+       "status": "wip",
+       "pct": 40,
+       "id": "cap8-P2-D2"
+      }
+     ],
+     "outcomes": [
+      {
+       "name": "Plan adherence",
+       "dir": "≥",
+       "target": "80%",
+       "measureAt": "Q4 2026",
+       "actual": "51%",
+       "progress": 64,
+       "id": "cap8-P2-O1"
+      }
+     ],
+     "milestones": [
+      {
+       "name": "Plans loaded",
+       "covers": "Every unit's plan entered and checked",
+       "owner": "Islam Saadany",
+       "finish": "August 2026",
+       "status": "wip",
+       "pct": 60,
+       "id": "cap8-P2-M1"
+      },
+      {
+       "name": "First reporting cycle on the platform",
+       "covers": "A full cycle run without spreadsheets",
+       "owner": "Islam Saadany",
+       "finish": "October 2026",
+       "status": "todo",
+       "id": "cap8-P2-M2"
+      }
+     ],
+     "id": "cap8-P2",
+     "capId": "fn:smo"
+    }
+   ],
+   "keyObjectives": [
+    {
+     "name": "Cycles reviewed on time",
+     "dir": "≥",
+     "target": "4",
+     "compile": "Sum",
+     "actual": "2",
+     "progress": 50,
+     "weight": 50,
+     "id": "cap8-KO1"
+    },
+    {
+     "name": "Plan adherence",
+     "dir": "≥",
+     "target": "80%",
+     "compile": "Latest",
+     "actual": "51%",
+     "progress": 64,
+     "weight": 50,
+     "id": "cap8-KO2"
+    }
+   ],
+   "def": "Run the cycle itself well — plan, review, adjust, on time and on evidence."
   },
   "merchandising": {
    "name": "Merchandising",

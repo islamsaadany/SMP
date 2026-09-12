@@ -8134,6 +8134,77 @@ GROUP.capabilities.forEach(function(c, ci){
   renumberCapability(c);
 });
 
+/* ── THE WORKED EXAMPLE HOLDS NO CAPABILITIES (§329, spec 046 §5) ───────
+   Islam, of what his own tenant holds: *"they caapbilities in raya trade are
+   not capabilities they are just projecst under functions"*, and then, of the
+   demo itself: *"finish the demo data yes."*
+
+   THE LIST ABOVE IS THE WORKED EXAMPLE'S RAW CONTENT AND IT IS NOT WHAT THE
+   PRODUCT SHOWS. Each of the eight is a set of one function's own projects
+   wearing a container's name, so each one dissolves — and §322 built every
+   half of that except this, so until today stage 1 was live and INVISIBLE on
+   the one tenant everybody looks at: Finance's Projects page went on drawing
+   a navy CAPABILITY band over projects already coded FIN01, FIN02, FIN03.
+   Measured on the shipped v3.22 build before this line existed.
+
+   IT IS DONE HERE, AFTER THE IDS ARE MINTED, rather than by rewriting the
+   data, and the two reasons are the whole of why this block exists:
+
+     · THE IDS ARE THE ONES A HEALED TENANT HOLDS. `cap7-P1` is minted three
+       lines above and travels untouched, which is §232's rule (a dissolve
+       never re-addresses a row, because every figure, focus mark and cycle
+       snapshot is keyed on it) and what makes the baked file and a deployment
+       that has run `045-a-functions-projects-are-its-own.js` agree about the
+       id of the same project. Rewriting the data by hand would have meant
+       either typing eighty ids out or minting new ones, and new ones are the
+       one thing §316 says a dissolve may never do.
+     · IT IS THE PRODUCT'S OWN RULE. `SMPRules.dissolvePlan` is what the
+       Remove dialog presses and what the one-off presses (§53.5, and §6 of the
+       spec argues it for the migration in the same words). A third answer to
+       *what does giving the work back to the function mean* is how all three
+       drift the first time one of them is corrected.
+
+   NO ARCHIVE, AND THAT IS THE DIFFERENCE BETWEEN THIS AND THE ONE-OFF. The
+   heal is moving somebody's live data, so the record of the grouping — the
+   one thing genuinely lost when a box goes — is filed first (§49.2). Nothing
+   is being taken from anybody here: the worked example is AUTHORED, and eight
+   archives nobody made would be the first thing a client saw on Setup ›
+   Import & storage.
+
+   MARKETING IS THE CASE THAT DECIDES A DETAIL. It is the only function
+   carrying two, so the first box's definition becomes Marketing's and the
+   second's has nowhere to go — which is the rule working rather than a loss:
+   a container's definition describes the container (§96.2 keeps what somebody
+   wrote, and nobody wrote this about Marketing). The sentence it drops,
+   *"Treat what we sell as a portfolio to be shaped, not a catalogue to be
+   carried"*, is the strongest candidate in the tenant for the one REAL
+   capability stage 2 creates — which is §10.4's open question answered by
+   the data rather than by taste.
+
+   A FUNCTION THAT PLANS IN PILLARS IS LEFT ALONE, exactly as the one-off
+   leaves it (Merchandising holds none), and so is a box whose function is
+   missing: dissolving it would be dissolving it into nothing (§96.2). */
+GROUP.capabilities = GROUP.capabilities.filter(function(c){
+  var f = c && c.fn ? FUNCTIONS[c.fn] : null;
+  if (!f || fnPlansInPillars(f)) return true;
+  if (!Array.isArray(f.projects)) f.projects = [];
+  if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
+  var mv = SMPRules.dissolvePlan(c, f);
+  if (mv.def != null) f.def = mv.def;
+  if (mv.keyObjectives) f.keyObjectives = mv.keyObjectives;
+  /* `capId` FOLLOWS THE ROW, because the builders address a project's holder
+     by it and the holder is the function now — `moveCapProjects` does exactly
+     this on the control's side (§322). The stored column is derived from the
+     parent on the way back, so this is the browser's own copy being told the
+     truth rather than a second store. */
+  mv.projects.forEach(function(p){ if (p) p.capId = "fn:" + c.fn; });
+  /* PUSHED, never assigned: Marketing's second box lands on an array its
+     first has already filled, and a fresh array would throw the first lot
+     away — the one-off carries the same note for the same reason. */
+  f.projects.push.apply(f.projects, mv.projects);
+  return false;
+});
+
 /* ── Minting a capability (§51.11) ────────────────────────────────────────
    THE ONE PLACE A CAPABILITY IS BORN. There was an add button on the Temple
    page that pushed `{ name, def, measures:[], tactics:[] }` — the shape a

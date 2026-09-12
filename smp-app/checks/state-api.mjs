@@ -197,19 +197,25 @@ await section("2 · two tabs, one database (§210 · §215 · §216 · §234)", 
   check(r1.status === 200 && r2.status === 200, "§215: both saves on the SAME unit were accepted", r1.status + "/" + r2.status);
   after = await graph(smo);
   check(after.units.mobile.items[0].measures[0].target === "2%" && after.units.mobile.items[0].measures[1].target === "91%", "§215: the first fill SURVIVES the second's save, and the second landed too");
-  /* §216: a capability travels on its own — a milestone reported on care's cap5 from a stale tab, finance's cap7 edited in between */
+  /* §216, ADDRESSED WHERE THE PROJECTS NOW ARE (§322, §329): a milestone
+     reported on CARE's own project from a stale tab, while FINANCE's
+     definition is edited in between. This named `cap5` and `cap7` — every
+     project in the tenant sat inside a capability until §322 gave them to the
+     function, and the worked example ships none since §329, so both lookups
+     answered `undefined`. The claim has not changed and is the stronger one
+     for being asked of the shape every client is actually in. */
   const hers = await graph(smo);
   base = await graph(smo);
-  e = changed(base, (m) => { m.group.capabilities.find((c) => c.id === "cap7").def = "FINANCE'S NEW DEFINITION"; });
+  e = changed(base, (m) => { m.functions.finance.def = "FINANCE'S NEW DEFINITION"; });
   r = await post(smo, { changes: e.changes });
-  check(r.status === 200, "§216: the office edits another function's capability", r.status);
-  e = changed(hers, (m) => { m.group.capabilities.find((c) => c.id === "cap5").projects[0].milestones[0].status = "wip"; m.group.capabilities.find((c) => c.id === "cap5").projects[0].milestones[0].pct = 40; });
+  check(r.status === 200, "§216: the office edits another function's definition", r.status);
+  e = changed(hers, (m) => { m.functions.care.projects[0].milestones[0].status = "wip"; m.functions.care.projects[0].milestones[0].pct = 40; });
   const named = JSON.stringify(e.changes);
-  check(/cap5/.test(named) && !/cap7/.test(named) && !/"units"/.test(named), "§216: her change list names her capability and no other", named.slice(0, 200));
+  check(/"care"/.test(named) && !/"finance"/.test(named) && !/"units"/.test(named), "§216: her change list names her function and no other", named.slice(0, 200));
   r = await post(smo, { base: hers, changes: e.changes });
   after = await graph(smo);
-  check(r.status === 200 && after.group.capabilities.find((c) => c.id === "cap5").projects[0].milestones[0].pct === 40, "§216: her report landed", r.status);
-  check(after.group.capabilities.find((c) => c.id === "cap7").def === "FINANCE'S NEW DEFINITION", "§216: …and the other function's work survives her stale tab", after.group.capabilities.find((c) => c.id === "cap7").def);
+  check(r.status === 200 && after.functions.care.projects[0].milestones[0].pct === 40, "§216: her report landed", r.status);
+  check(after.functions.finance.def === "FINANCE'S NEW DEFINITION", "§216: …and the other function's work survives her stale tab", after.functions.finance.def);
   /* §234: one unit's submit does not carry everybody's report state */
   const stale = await graph(smo);
   e = changed(await graph(smo), (m) => { delete m.review.submitted.retailstores; });
@@ -344,7 +350,7 @@ await section("7 · the page asks who else landed a change on it (§258)", async
   const t1 = (await owner.query("SELECT now() AS t")).rows[0].t.toISOString();
   r = await get(cust, "?since=" + encodeURIComponent(t1) + "&target=mobile");
   check(r.j.changed.length === 0, "asking from AFTER the landing is told nothing", JSON.stringify(r.j.changed));
-  const fb = await graph(fin), fe = changed(fb, (m) => { m.group.capabilities.find((c) => c.fn === "finance").projects[0].milestones[0].status = "wip"; m.group.capabilities.find((c) => c.fn === "finance").projects[0].milestones[0].pct = 25; });
+  const fb = await graph(fin), fe = changed(fb, (m) => { m.functions.finance.projects[0].milestones[0].status = "wip"; m.functions.finance.projects[0].milestones[0].pct = 25; });
   r = await post(fin, { changes: fe.changes }); check(r.status === 200, "a function's head reports on its own project", r.status + " " + JSON.stringify(r.j).slice(0, 120));
   r = await get(cust, "?since=" + encodeURIComponent(t0) + "&target=fn:finance");
   check(r.j.changed.length >= 1, "a peek on the function's page is told, as fn:<key>", JSON.stringify(r.j.changed));

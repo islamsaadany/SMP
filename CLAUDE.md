@@ -8876,7 +8876,55 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;328: the walk was run on the stack that
+*Last Updated: 2026-09-12 &mdash; **&sect;329: the worked example holds no
+capabilities.** Islam: *"finish the demo data yes."* **STAGE 1 WAS LIVE AND
+INVISIBLE, WHICH IS THE FINDING RATHER THAN THE TIDY-UP** &mdash; &sect;322 gave
+a supporting function its own projects and left the demo shipping its eight
+containers, so on the build that shipped it Finance's Projects page still drew a
+navy **CAPABILITY &middot; Financial Infrastructure** band over three projects
+already coded `FIN01`, `FIN02`, `FIN03`: *his original complaint was still on
+the screen after the round that removed it.* **DISSOLVED AT BOOT THROUGH THE
+PRODUCT'S OWN RULE**, right after the ids are minted, rather than by rewriting
+the data &mdash; **the ids are then the ones a healed tenant holds** (`cap7-P1`
+travels untouched, &sect;232: a dissolve never re-addresses a row, and every
+figure, focus mark and snapshot is keyed on it), and `SMPRules.dissolvePlan` is
+what the Remove dialog and the one-off already press, where a hand-rewrite would
+be a third answer to *what does giving the work back to the function mean*
+(&sect;53.5). **NO ARCHIVE, and that is the difference from the one-off**: the
+heal is moving somebody's live data, this is authored, and eight archives nobody
+made would be the first thing a client saw on Import & storage. **MARKETING
+DECIDED A DETAIL AND ANSWERED AN OPEN QUESTION** &mdash; it is the only function
+carrying two, so the first box's definition becomes Marketing's and the second's
+has nowhere to go, which is &sect;96.2 working rather than a loss; the sentence
+it drops is *"Treat what we sell as a portfolio to be shaped, not a catalogue to
+be carried"*, and **Product Mindset is now the recommendation for the one REAL
+capability stage 2 creates** (spec 046 &sect;10.4, answered by the data rather
+than by taste). Measured after: **0 capabilities, seven functions owning their
+projects, `FIN01/02/03` unchanged, `capId` following each row to `fn:<key>`,
+Merchandising untouched, the band gone.** **ELEVEN FIXTURES LEANED ON THE DEMO
+SHIPPING BOXES** (&sect;214.3, seventh time, and the scale is the point) &mdash;
+two of them THREW rather than reporting (&sect;215) &mdash; and every one MAKES
+its boxes now (&sect;255), the exact inverse of the dissolve; `functional-
+projects` became a **round trip** as a result and is stronger for it (34 &rarr;
+**37/0**). **TWO THINGS WERE NOT FIXTURES.** The one-line heal (&sect;260) had
+**stopped reaching a function's projects** the day &sect;322 moved them &mdash;
+silent, because the value renders on one line everywhere except the pen &mdash;
+**6 red** with the fix removed; and `test-roundtrip.js`'s pending-marks round
+trip was printing **SKIPPED**, which is a green run that measured nothing
+(&sect;54.5), found by comparing with `main` rather than by reading (&sect;303).
+**AND &sect;54.5 BIT IN MY OWN HANDS THE SAME HOUR**: a worktree of `origin/main`
+with no `node_modules` died on `Cannot find module 'pg'`, my grep for *fail*
+matched nothing, and I read it as *main is clean* &mdash; *a run that prints
+nothing matching your grep is not a run that passed* (&sect;298.3: the tail is
+the verdict, never the count), and the real cause was my own harness running a
+first-deploy assertion twice against one database (&sect;105.6). 608/0 authoriser
+&middot; 140/0 differ &middot; round trip, clean parity, two tabs, incremental
+write, cx-refusal, one-line heal, capability move and functional projects all
+green on virgin databases. **RECORDED, NOT DONE**: the demo's one real
+capability waits for stage 2, so the product holds none today &mdash; which is
+the spec's own *"the truth of his tenant"*.*
+
+*Earlier the same day &mdash; **&sect;328: the walk was run on the stack that
 actually serves it.** Every section before &sect;326 was verified on the frozen
 build over `file://`, which is the right subject for the frozen product and is no
 longer the whole of it &mdash; reading `/sw.js` off the live site returns

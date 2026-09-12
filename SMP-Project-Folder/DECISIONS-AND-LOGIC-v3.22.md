@@ -6129,6 +6129,119 @@ the extra one is the fixture.
 a sentence, and the cheap deterministic comparison is usually the one that
 settles it.*
 
+## 329 · The worked example holds no capabilities
+
+Islam, of the one thing §322 built and could not show: **"finish the demo data
+yes."**
+
+**STAGE 1 WAS LIVE AND INVISIBLE, AND THAT IS THE FINDING RATHER THAN THE
+TIDY-UP.** §322 gave a supporting function its own projects, took the band off
+all four of its pages, converged the Overview, carried the workbook and the
+deck, and left the worked example shipping its eight containers — so on the
+build that shipped it, Finance's Projects page still drew a navy
+**CAPABILITY · Financial Infrastructure** band over three projects already
+coded `FIN01`, `FIN02`, `FIN03`. Measured on `v3.22` before a line of this
+existed. *Islam's original complaint — the capability hidden in the functional
+plans — was still on the screen after the round that removed it, on the one
+tenant everybody looks at.*
+
+### What was done, and why it is thirteen lines rather than a rewritten data file
+
+The eight are dissolved **at boot, in `config-data.js`, immediately after the
+ids are minted**, through `SMPRules.dissolvePlan`. Two reasons, and they are
+the whole of why the big literal in `group-data.js` was not rewritten by hand:
+
+- **THE IDS ARE THE ONES A HEALED TENANT HOLDS.** `cap7-P1` is minted three
+  lines above and travels untouched — §232's rule that a dissolve never
+  re-addresses a row, because every figure, focus mark and cycle snapshot is
+  keyed on it (§48, §316). Rewriting the data meant either typing eighty ids
+  out or minting new ones from the function, and new ones are the one thing a
+  dissolve may not do. Measured after: `cap7-P1 · cap7-P2 · cap7-P3` on
+  Finance, `cap4-P1 · cap4-P2 · cap6-P1` on Marketing — the two boxes' rows in
+  the order the codes already read them (§310) — and `FIN01/02/03` unchanged.
+- **IT IS THE PRODUCT'S OWN RULE.** `dissolvePlan` is what §321's Remove dialog
+  presses and what `045-a-functions-projects-are-its-own.js` presses; spec 046
+  §6 argues exactly this for the migration in the same words. A third answer to
+  *what does giving the work back to the function mean* is how all three drift
+  the first time one is corrected (§42, §53.5).
+
+**NO ARCHIVE, AND THAT IS THE DIFFERENCE BETWEEN THIS AND THE ONE-OFF.** The
+heal is moving somebody's live data, so the record of the grouping — the one
+thing genuinely lost when a box goes — is filed first (§49.2). Nothing is taken
+from anybody here: the worked example is AUTHORED, and eight archives nobody
+made would be the first thing a client saw on Setup › Import & storage.
+
+**MARKETING IS THE CASE THAT DECIDED A DETAIL, AND IT ANSWERED AN OPEN
+QUESTION.** It is the only function carrying two, so the first box's definition
+becomes Marketing's and the second's has nowhere to go — the rule working
+rather than a loss, because a container's definition describes the container
+and nobody wrote it about Marketing (§96.2). The sentence it drops is *"Treat
+what we sell as a portfolio to be shaped, not a catalogue to be carried"*,
+which is the strongest candidate in the tenant for the one REAL capability
+stage 2 creates: **spec 046 §10.4 answered by the data rather than by taste.**
+
+**Measured after:** 0 capabilities, seven functions owning their own projects,
+`capId` following each row to `fn:<key>` (which is what `moveCapProjects` does
+on the control's side), Merchandising untouched, no console error, and the band
+gone from Finance's Projects page.
+
+### What the checks found, and the two that were not fixtures
+
+**EIGHT FIXTURES LEANED ON THE DEMO SHIPPING BOXES** — §214.3 for the seventh
+time, on a scale that is itself the point: `functional-projects` (7 red),
+`capability-remove` (30), `fn-pillars`, `project-tables` (it THREW rather than
+reporting, §215), `test-authorize.js` (it threw on the first `undefined` and
+printed nothing at all), `test-graph-diff.js` (20 red), `test-functional-
+projects.js`, `test-capability-move.js`, `test-cx-refusal.js`,
+`test-one-line-heal.js` and the new stack's `state-api.mjs`. Every one MAKES
+its boxes now (§255) — the exact inverse of the dissolve — rather than waiting
+for a tenant to carry one, which is what a check about a capability has to do
+from today and what it should arguably always have done.
+
+**AND `functional-projects` BECAME A ROUND TRIP.** It wrapped the functions'
+own projects in boxes and section 4 dissolves them again, so the end state must
+be the state the worked example ships — asserted as the ids, the definition and
+the objective ids TOGETHER, because a dissolve that moved the rows and dropped
+the definition satisfies every id assertion in the file (§94.2). 34 → 37
+assertions, 0 failures.
+
+**THE FIRST THING THAT WAS NOT A FIXTURE: THE ONE-LINE HEAL HAD STOPPED
+REACHING A FUNCTION'S PROJECTS.** `cleanOneLine` (§260) walks the units, the
+functions' pillars, the group and `g.capabilities` — and §322 moved every
+tenant's projects onto the FUNCTION, so from that version until this one a
+project's name, a deliverable's, an outcome's and a milestone's were no longer
+cleaned of the blank lines a paste leaves behind. Silent, because the value
+renders on one line everywhere except the pen, which draws a 643px box for one
+sentence and says nothing about why. One walk asked of both holders;
+**6 red with the fix removed.**
+
+**THE SECOND WAS A LOSS OF COVERAGE, FOUND BY COMPARING WITH `main` RATHER THAN
+BY READING** (§303): `test-roundtrip.js`'s pending-marks round trip printed
+**SKIPPED — no project with both an outcome and a milestone**, because it asked
+`group.capabilities` and nothing else. *A skip is a green run that measured
+nothing* (§54.5), and what it measures is §177's claim that a fill mark rides
+`extra` with no column — which is exactly the kind of claim that has been wrong
+here before (§172). It looks wherever the projects are now, and runs.
+
+**AND §54.5 BIT IN MY OWN HANDS IN THE SAME HOUR.** Establishing that a
+clean-slate failure was not mine, I ran `test-roundtrip.js` in a worktree of
+`origin/main`, grepped for `fail`, got nothing, and read it as *main is clean*.
+The worktree had no `node_modules`: it died on `Cannot find module 'pg'` before
+reaching a single assertion. **A run that prints nothing matching your grep is
+not a run that passed** — the honest reading was in the tail, not the count
+(§298.3), and the real answer was simpler still: the failure was my own
+harness, having run a first-deploy assertion twice against the same database
+(§105.6's family).
+
+### Recorded, not done
+
+- **The demo's one real capability waits for stage 2**, which is where a
+  capability gets a home of its own; the product holds none until then, which
+  is §8 of the spec exactly — *"the truth of his tenant"*.
+- **A capability is unreachable from any screen in the meantime.** Nothing in
+  the product creates one (stage 2's job), so §321's Remove dialog and the band
+  are both correct and both currently unexercised outside a check.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

@@ -84,15 +84,59 @@ def main():
         pg.goto("file://" + str(BUILT)); pg.wait_for_timeout(900)
 
         # ── 1 · the state this file measures, and that it is worth measuring ──
-        print("\n1 · the demo carries boxes, which is what makes both ends real")
+        # THE CHECK MAKES ITS OWN BOXES (§255, §329). Until the worked example
+        # was finished it shipped eight, and this file leaned on them — so it
+        # went seven red the day the demo stopped carrying one, on a build
+        # behaving exactly as decided (§214.3, for the seventh time). What it
+        # builds is the EXACT INVERSE of the dissolve, which makes the file a
+        # ROUND TRIP rather than a before-and-after: section 4 puts every one
+        # of them back, and section 9 asserts the function ends byte-identical
+        # to where it started. That is strictly stronger than what it replaced.
+        #
+        # THE FIXTURE IS DATA AND NEVER BEHAVIOUR (§100.3): it moves rows into
+        # a container and the PRODUCT decides what to draw over them, so a
+        # build that stopped drawing the band would still fail section 2.
+        print("\n1 · the boxes this file needs, made rather than waited for")
+        start = ev(pg, """() => ({
+          fin: (FUNCTIONS.finance.projects||[]).map(p=>p.id),
+          mkt: (FUNCTIONS.marketing.projects||[]).map(p=>p.id),
+          def: FUNCTIONS.finance.def || '',
+          kos: (FUNCTIONS.finance.keyObjectives||[]).map(m=>m.id)
+        })""")
+        made = ev(pg, """() => {
+          const wrap = (fk, name, take) => {
+            const f = FUNCTIONS[fk];
+            const id = 'probe-' + fk + '-' + (GROUP.capabilities.length + 1);
+            const ps = (f.projects || []).splice(0, take);
+            ps.forEach(p => { p.capId = id; });
+            GROUP.capabilities.push({ id: id, fn: fk, name: name,
+              def: f.def || '', keyObjectives: (f.keyObjectives || []).slice(),
+              projects: ps });
+            f.def = ''; f.keyObjectives = [];
+            return name;
+          };
+          const out = [wrap('finance', 'Financial Infrastructure', 99),
+                       wrap('marketing', 'Brand Positioning', 2),
+                       wrap('marketing', 'Product Mindset', 99)];
+          paint();
+          return out;
+        }""")
+        ok(isinstance(made, list) and len(made) == 3, "three boxes made", made)
         st = ev(pg, "()=>({caps:GROUP.capabilities.length,"
                     " fin:capsOfFunction('finance').length,"
                     " mkt:capsOfFunction('marketing').length,"
                     " pillars:fnPlansInPillars(FUNCTIONS.merchandising)})")
-        ok(st.get("caps", 0) > 0, "the worked example still holds capabilities", st)
+        ok(st.get("caps", 0) > 0, "the worked example now holds capabilities", st)
         ok(st.get("fin") == 1 and st.get("mkt") == 2,
            "Finance carries one and Marketing two — one box and several", st)
         ok(st.get("pillars") is True, "and Merchandising plans in pillars, as the control", st)
+        # AND THE DEMO ITSELF HOLDS NONE (§329), asserted here rather than left
+        # as an absence somewhere else: it is the whole of what stage 1 promised
+        # and could not show, and a build that started shipping boxes again
+        # would satisfy every other assertion in this file.
+        ok(start.get("fin") and start.get("mkt"),
+           "…and before they were made the functions owned their projects "
+           "outright — the worked example carries no box", start)
 
         # ── 2 · WITH the box: the band is drawn on all four pages ─────────────
         print("\n2 · with a box, the band is drawn — all four pages")
@@ -230,6 +274,22 @@ def main():
                     " return w ? w.map(s=>s.name) : null;}")
         ok(isinstance(wb, list) and "Projects" in wb,
            "and a projects workbook is built for it", wb)
+
+        # ── 9 · the round trip closes (§329) ─────────────────────────────────
+        # Section 1 wrapped the functions' own projects in boxes and section 4
+        # dissolved them again, so the end state must be the state the worked
+        # example ships. Asserted as the ids, the definition and the objective
+        # ids together: a dissolve that moved the rows and dropped the
+        # definition satisfies every id assertion above (§94.2).
+        print("\n9 · and the round trip closes where it started")
+        end = ev(pg, """() => ({
+          fin: (FUNCTIONS.finance.projects||[]).map(p=>p.id),
+          mkt: (FUNCTIONS.marketing.projects||[]).map(p=>p.id),
+          def: FUNCTIONS.finance.def || '',
+          kos: (FUNCTIONS.finance.keyObjectives||[]).map(m=>m.id)
+        })""")
+        ok(end == start, "every project, the definition and the objectives are "
+                         "back exactly where the demo ships them", [start, end])
 
         b.close()
     ok(not errs, "no page error anywhere in the run", errs[:3])

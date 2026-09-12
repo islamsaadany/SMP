@@ -1,6 +1,6 @@
 # 046 · A capability is a strategic entry, and a function's projects are its own
 
-**Version:** v3.22 · **Decisions:** §322 · **Renumbered:** built as spec 045 · §319–§321 and moved at the merge — `main` had taken both while this was in flight (§287, §301, §310, §318 and main’s own §319.1 all set the precedent: a gap is harmless where a collision is not). The heal keeps its `045-` registry name, because that name is a key and not a label (§30.2, §65). · **Status:** model agreed with Islam; **stage 1 BUILT**, stage 2 not started
+**Version:** v3.22 · **Decisions:** §322 · **Renumbered:** built as spec 045 · §319–§321 and moved at the merge — `main` had taken both while this was in flight (§287, §301, §310, §318 and main’s own §319.1 all set the precedent: a gap is harmless where a collision is not). The heal keeps its `045-` registry name, because that name is a key and not a label (§30.2, §65). · **Status:** model agreed with Islam; **stage 1 BUILT** (§322) and **the demo finished** (§329, his *"finish the demo data yes"*); stage 2 not started
 
 Islam, 2026-09-12, correcting a proposal of mine that would have hidden the
 problem rather than fixed it:
@@ -154,7 +154,24 @@ not land loses the projects while the save reports success.
 **The demo.** Its eight are the same containers wearing invented names, so they
 dissolve too — and then **one real capability is created** as a strategic
 entry, or the feature renders nothing and reads as one that was never built
-(§45.2). Proposed, for Islam.
+(§45.2). Proposed, for Islam — **and answered: *"finish the demo data yes."***
+
+**DONE, §329:** the eight dissolve at boot through `SMPRules.dissolvePlan`
+itself, so the ids are byte-identical to a healed tenant's and the rule is not
+written a third time. Until that landed, stage 1 was live and INVISIBLE:
+Finance's Projects page went on drawing a `CAPABILITY` band over `FIN01`,
+`FIN02`, `FIN03` on the shipped build. **The one real capability waits for
+stage 2**, which is where it has a home — so the product holds none today,
+which is §8's *"the truth of his tenant"*.
+
+**AND THE DATA ANSWERED §10.4 ON THE WAY.** Marketing is the only function
+carrying two, so the first box's definition becomes Marketing's and the
+second's has nowhere to go — *"Treat what we sell as a portfolio to be shaped,
+not a catalogue to be carried."* That is a strategic sentence about shaping a
+portfolio rather than a description of a function's ordinary work, and it is
+the demo's own: **Product Mindset, held by Marketing, is the recommendation
+for the one real capability**, planned in overview + projects (the form its
+one project is already in).
 
 ## 6 · Turning one into the other
 
@@ -289,6 +306,11 @@ Each is its own decisions section, its own checks, its own merge.
 3. **Whether a capability reports on the cycle board** as a subject of its own
    (§244's rule: every subject that reports has a row).
 4. **The demo's one real capability** — which, and planned in which form.
+   **RECOMMENDED, §329**: *Product Mindset*, held by Marketing, in overview +
+   projects. The data chose it — it is the one definition the dissolve had
+   nowhere to put, because Marketing is the one function that carried two, and
+   it reads as a strategic intent rather than a description of the function's
+   ordinary work. Islam's to confirm.
 5. **Whether a promoted project's code changing is accepted** (§6). It is the
    honest answer — a code says where a project lives — and it moves a label
    that is on every screen, the deck and the workbook, so it is Islam's to

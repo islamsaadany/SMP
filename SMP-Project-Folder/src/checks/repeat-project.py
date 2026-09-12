@@ -17,6 +17,13 @@ controls with their real confirm dialogs, and the archive is read back for the
 fields migration 024 renamed (§51.10 found them stale in the snapshot).
 """
 import os
+
+# §330: THE HOLDER OF A FUNCTION'S OWN WORK. `capsOfFunction(fk)[0]` was
+# that while a projects function's projects lived in a capability drawn on
+# its pages; since stage 1 they are the FUNCTION's, and since stage 2 a
+# capability is a page of its own — so this read a holder the page under
+# test no longer draws, and on the finished demo often none at all.
+# `fnOwnHolder(fk)` is the product's own reader for it (§53.5).
 from playwright.sync_api import sync_playwright
 
 URL = "file://" + os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
@@ -68,10 +75,12 @@ with sync_playwright() as p:
 
     # ── the mark, through the real control (§96: it must WRITE) ─────────
     print("── the mark, set from the pen")
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions": break
-        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
+    # which with three sides is a DIV of buttons rather than a button — so the
+    # press did nothing, the loop gave up, and the destination was never drawn.
+    sw = pg.query_selector('#units [data-fold="fns"]')
+    if sw:
+        sw.click(); pg.wait_for_timeout(260)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
     pg.click('#secrow-in .secpen[data-page="plan"]'); pg.wait_for_timeout(500)
     # §196: THE MARK IS A COUNT OF MONTHS. What is asserted is that every
@@ -79,7 +88,7 @@ with sync_playwright() as p:
     # list of literals here, or the check and the product each hold their own
     # idea of the vocabulary and only one of them is the product (§53.5).
     r = pg.evaluate("""() => {
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = fnOwnHolder("finance").projects[0];
       const row = [...document.querySelectorAll('.pfront .pfrow')]
         .find(x => x.querySelector('em').textContent.trim() === 'Repeats');
       const sel = row && row.querySelector('select');
@@ -105,7 +114,7 @@ with sync_playwright() as p:
     # word goes on being offered while it is the stored value — never quietly
     # rewritten to a number that might not mean the same thing.
     r = pg.evaluate("""() => {
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = fnOwnHolder("finance").projects[0];
       p.repeats = "cycle"; paint();
       const row = [...document.querySelectorAll('.pfront .pfrow')]
         .find(x => x.querySelector('em').textContent.trim() === 'Repeats');
@@ -137,11 +146,11 @@ with sync_playwright() as p:
        r["q_long"] == 12, r)
     ck("an unmarked project moves nothing at all", r["none"] == 0, r)
     pg.wait_for_timeout(200)
-    pg.evaluate("""() => { const p = capsOfFunction("finance")[0].projects[0];
+    pg.evaluate("""() => { const p = fnOwnHolder("finance").projects[0];
                            delete p.repeats; paint(); }""")
     pg.wait_for_timeout(300)
     r = pg.evaluate("""() => {
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = fnOwnHolder("finance").projects[0];
       const row = [...document.querySelectorAll('.pfront .pfrow')]
         .find(x => x.querySelector('em').textContent.trim() === 'Repeats');
       const sel = row && row.querySelector('select');
@@ -152,7 +161,7 @@ with sync_playwright() as p:
     ck("the Repeats select writes the mark", r.get("stored") == 6, r)
     pg.wait_for_timeout(300)
     r = pg.evaluate("""() => {
-      const p = capsOfFunction("finance")[0].projects[0];
+      const p = fnOwnHolder("finance").projects[0];
       const row = [...document.querySelectorAll('.pfront .pfrow')]
         .find(x => x.querySelector('em').textContent.trim() === 'Repeats');
       const sel = row && row.querySelector('select');
@@ -163,7 +172,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     # read mode: row absent when unmarked, present when marked
     pg.evaluate("""() => {
-      capsOfFunction("finance")[0].projects[0].repeats = 6;
+      fnOwnHolder("finance").projects[0].repeats = 6;
       EDIT_PAGE.plan = false; paint(); }""")
     pg.wait_for_timeout(300)
     r = pg.evaluate("""() => {
@@ -174,7 +183,7 @@ with sync_playwright() as p:
     # ── the cycle turns, through the real controls ──────────────────────
     print("── a new cycle: the repeat is re-asked, the build-once is left alone")
     before = pg.evaluate("""() => {
-      const caps = capsOfFunction("finance");
+      const caps = [fnOwnHolder("finance")];
       const p1 = caps[0].projects[0];            // marked above
       const p2 = caps[0].projects[1];            // build-once
       // make sure both carry figures and known dates
@@ -227,7 +236,7 @@ with sync_playwright() as p:
     pg.click("[data-nc-go]"); pg.wait_for_timeout(800)
 
     after = pg.evaluate("""(ids) => {
-      const caps = capsOfFunction("finance");
+      const caps = [fnOwnHolder("finance")];
       const p1 = caps[0].projects.find(p => p.id === ids.p1);
       const p2 = caps[0].projects.find(p => p.id === ids.p2);
       const arch = ARCHIVES[0];

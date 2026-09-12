@@ -69,13 +69,15 @@ def ck(what, ok, x=""):
 
 def goto(pg, key, tab, sec, report):
     """Open a destination, its tab and its section — and CHECK IT LANDED."""
-    want = "Functions" if key.startswith("fn:") else "Units"
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == want:
-            break
-        pg.click("#units .navswitch")
-        pg.wait_for_timeout(150)
+    want = ("caps" if key.startswith("cap:")
+            else "fns" if key.startswith("fn:") else "units")
+    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
+    # which with three sides is a DIV of buttons rather than a button — so
+    # the press did nothing, the loop gave up, and the destination was
+    # never drawn. `[data-fold]` is absent exactly when that side is lit.
+    sw = pg.query_selector('#units [data-fold="%s"]' % want)
+    if sw:
+        sw.click(); pg.wait_for_timeout(260)
     pg.click('#units button[data-u="%s"]' % key)
     pg.wait_for_timeout(250)
     for sel, t in (("#subtabs button", tab), ("#secrow button", sec)):

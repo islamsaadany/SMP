@@ -20,6 +20,13 @@ And both ends (§94.2): the band must have LOST the owner and the timeline
 pill, or the header says the same fact twice.
 """
 import os, sys
+
+# §330: THE HOLDER OF A FUNCTION'S OWN WORK. `capsOfFunction(fk)[0]` was
+# that while a projects function's projects lived in a capability drawn on
+# its pages; since stage 1 they are the FUNCTION's, and since stage 2 a
+# capability is a page of its own — so this read a holder the page under
+# test no longer draws, and on the finished demo often none at all.
+# `fnOwnHolder(fk)` is the product's own reader for it (§53.5).
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -36,10 +43,14 @@ def ck(what, ok, x=""):
 def open_project(pg, theme, w):
     pg.evaluate("t=>document.documentElement.setAttribute('data-theme',t)", theme)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(220)
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions": break
-        pg.click("#units .navswitch"); pg.wait_for_timeout(140)
+    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`
+    # until the lit segment said Functions — and with three sides that
+    # element is a DIV of buttons rather than a button, so the press did
+    # nothing, the loop gave up, and the destination was never drawn.
+    # `[data-fold]` is absent exactly when that side is already lit.
+    sw = pg.query_selector('#units [data-fold="fns"]')
+    if sw:
+        sw.click(); pg.wait_for_timeout(260)
     pg.click('#units button[data-u="%s"]' % DEST); pg.wait_for_timeout(500)
     pg.evaluate("() => window.scrollTo(0,0)"); pg.wait_for_timeout(150)
 
@@ -175,7 +186,7 @@ with sync_playwright() as pw:
             ck("%-13s opens a month panel" % label, opened == 1, opened)
             pg.click('.monthpop [data-mpick="%d"]' % mi)
             pg.wait_for_timeout(340)
-            stored = pg.evaluate("(f) => capsOfFunction('%s')[0].projects[0][f]" % FN, field)
+            stored = pg.evaluate("(f) => fnOwnHolder('%s').projects[0][f]" % FN, field)
             ck("%-13s is written as a month the platform reads" % label,
                stored == want_val, "picked %d, stored %r" % (mi, stored))
             # THE VALUE MUST READ BACK, which is the whole point of §179: the
@@ -206,12 +217,12 @@ with sync_playwright() as pw:
               el.dispatchEvent(new Event('change', { bubbles: true }));
             }""", [label, typed])
             pg.wait_for_timeout(320)
-            stored = pg.evaluate("(f) => capsOfFunction('%s')[0].projects[0][f]" % FN, field)
+            stored = pg.evaluate("(f) => fnOwnHolder('%s').projects[0][f]" % FN, field)
             want = ["Treasury", "Risk"] if field == "stakeholders" else typed
             ck("%-13s is written to the plan" % label, stored == want,
                "typed %r, stored %r" % (typed, stored))
         pg.evaluate("() => paint()"); pg.wait_for_timeout(400)
-        after = pg.evaluate("""() => { const p = capsOfFunction('%s')[0].projects[0];
+        after = pg.evaluate("""() => { const p = fnOwnHolder('%s').projects[0];
           return [p.owner, p.start, p.end]; }""" % FN)
         ck("and survives a repaint",
            after == ["Someone Else", "Feb 26", "Nov 26"], after)

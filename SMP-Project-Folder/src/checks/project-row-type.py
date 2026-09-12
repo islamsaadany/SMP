@@ -62,12 +62,13 @@ def open_pane(pg, edit=True):
     pg.goto(URL)
     pg.wait_for_timeout(800)
     pg.evaluate("()=>{var w=document.querySelector('.welcomeover'); if(w) w.remove();}")
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions":
-            break
-        pg.click("#units .navswitch")
-        pg.wait_for_timeout(150)
+    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
+    # which with three sides is a DIV of buttons rather than a button — so
+    # the press did nothing, the loop gave up, and the destination was
+    # never drawn. `[data-fold]` is absent exactly when that side is lit.
+    sw = pg.query_selector('#units [data-fold="fns"]')
+    if sw:
+        sw.click(); pg.wait_for_timeout(260)
     pg.click('#units button[data-u="%s"]' % DEST)
     pg.wait_for_timeout(300)
     pg.evaluate("""()=>{const b=[...document.querySelectorAll('#subtabs button')]

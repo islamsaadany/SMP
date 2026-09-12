@@ -28,6 +28,12 @@ CREATE TABLE tenants (
   industry    text NOT NULL DEFAULT '',
   notes       text NOT NULL DEFAULT '',
   made_here   boolean NOT NULL DEFAULT false,  -- §313.31
+  -- WHICH MODULES THIS CLIENT HAS (spec 046 §4.5). The whole list, in the
+  -- client's own words, read back through lib/modules.ts modulesFor() —
+  -- which drops a word the code no longer knows and always returns the
+  -- default, so a list written months ago can never make a client
+  -- unopenable. Everybody starts on Strategy alone.
+  modules     jsonb NOT NULL DEFAULT '["strategy"]'::jsonb,
   created_at  timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT tenants_kind   CHECK (kind IN ('client','demo')),
   CONSTRAINT tenants_status CHECK (status IN ('active','retired'))

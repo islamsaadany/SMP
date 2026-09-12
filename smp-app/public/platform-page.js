@@ -1087,6 +1087,67 @@
       }
       title(c.name, right);
 
+      /* ── WHICH MODULES THIS CLIENT HAS (spec 046 §4.5) ──────────────
+         A band under the client's name rather than a row in its left column
+         — Islam picked B of two drawn on 12 September. What a client can
+         OPEN is not a detail beside its industry, and in the column it
+         landed sixth, below the fold on a laptop: the one thing on this page
+         that decides what every other setting applies to was the last thing
+         you reached.
+
+         THE LIST COMES FROM THE SERVER (lib/modules.ts offerable/modulesFor),
+         never from a copy here, so the console cannot offer a door the
+         address refuses (§53.5) — and a module that is not BUILT is not
+         drawn at all, because a switch with nothing behind it opens the
+         Strategy platform wearing another name (§61).
+
+         THE DEFAULT GETS WORDS AND NOT A DEAD CONTROL (§94.15): it is where
+         a client lands when the address names no module, so it says "Always
+         on" — and the server refuses to switch it off however the request is
+         spelt, because a guard that only hides a control is decoration
+         (§42).
+
+         SEEING A STATE IS NOT SETTING IT (§256): somebody who may read this
+         client's configuration and not change it gets the words and no
+         button, never a blank right-hand side. */
+      var mods = el("div", "band");
+      mods.appendChild(el("span", "lab", "Modules this client has"));
+      var have = j.modules || [];
+      (j.offer || []).forEach(function (m) {
+        var mr = el("div", "teamrow");
+        var mwho = el("div", "who");
+        mwho.appendChild(el("div", "nm", m.label));
+        mwho.appendChild(el("div", "em", m.note));
+        mr.appendChild(mwho);
+        var msp = el("div", "sp");
+        var on = have.indexOf(m.key) >= 0;
+        if (m.always) msp.appendChild(el("span", "none", "Always on"));
+        else {
+          if (on) msp.appendChild(el("span", "tag open", "On"));
+          else if (!j.canEdit) msp.appendChild(el("span", "none", "Off"));
+          if (j.canEdit) {
+            var mb = el("button", "btn", on ? "Turn off" : "Turn on");
+            mb.type = "button";
+            mb.addEventListener("click", function () {
+              post({ action: "setModules", key: c.key, module: m.key, on: !on })
+                .then(function (r2) {
+                  drawClient(c.key, true).then(function () {
+                    if (!r2.ok) say(r2.error || "Not changed.", true);
+                  });
+                });
+            });
+            msp.appendChild(mb);
+          }
+        }
+        mr.appendChild(msp);
+        mods.appendChild(mr);
+      });
+      mods.appendChild(el("p", "note",
+        "Turning one on adds its group to this client's Setup page; turning it off takes the " +
+        "group away rather than leaving pages with nothing behind them. Nothing is deleted " +
+        "either way."));
+      page.appendChild(mods);
+
       var grid = el("div", "cfg");
       var left = el("div", "rowset");
       var inputs = {};

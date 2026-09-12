@@ -43113,3 +43113,125 @@ harness, which needs `pg` at the repository root and is not installed in this
 sandbox. The regex derivation they depend on was verified on its own instead.
 
 ---
+
+## §320.5 — ADDING A MODULE TO A CLIENT, AND A TRIAL THAT PROVES IT (2026-09-12, spec 046 §4.5)
+
+Islam: ***"how does we create a new module? let's create a very simple another
+module something even for the trial. to manage the flow of adding a new module
+to the client"***, and then, of the greeting, ***"make it a hello with the name
+of the client to show variance. and we need part in the client settings to add
+modules."***
+
+**THE FIRST ANSWER WAS A MEASUREMENT, NOT A PLAN.** Asked how a module is
+created, the honest reply is that today a module is **three things and no
+more**: a word in `MODULES`, an address segment `whereOf`/`clientHref`
+understand, and a row on the client's card. The *contract* §320 wrote down —
+own navigation, own roles, own Setup group, a landing — exists for **Strategy
+alone**. So `/<client>/portfolio` already resolved, and served the STRATEGY
+platform stamped with another word: not a feature waiting to be finished, a
+door onto the wrong room. That is what this closes.
+
+**WHICH MODULES A CLIENT HAS IS STORED, AND `modulesFor()` ALREADY SAID IT
+WOULD BE** — its own comment predicted "a stored per-client answer the day the
+second module exists". One column on the registry row, one migration, and the
+reader guarantees three things a stored list cannot: the order is `MODULES`'
+and never the order they were switched on, so a row cannot move under somebody
+because of when it was bought; an unknown or **unbuilt** word is dropped, so a
+list written in hope cannot open a door; and the **default is always in it**,
+because it is where an address naming no module lands and a client without it
+could not be opened at its own front door.
+
+**`built` IS NOT A PREFERENCE, IT IS WHAT STOPS THE DOOR OPENING ONTO THE WRONG
+ROOM.** Portfolio, Insights and Processes keep their entries — the words stay
+reserved, or a business unit keyed `portfolio` would quietly claim the address
+the day the module lands — and are **not offered to anybody**, because a switch
+for a module with nothing behind it is §61 with a plausible label on it.
+
+**A MODULE THE CLIENT DOES NOT HAVE FALLS THROUGH TO THE LEGACY BRANCH, NEVER
+TO A REFUSAL OF ITS OWN.** `/<client>/portfolio` is read exactly as any other
+word the client does not hold: redirected once, landed on the person's own
+first page. One behaviour for *that is not a thing here*, rather than a second
+refusal that would have to be worded, tested and kept in step with the first.
+`have` **defaults to the default alone**, never to every module — a caller that
+forgets to say gets the narrow answer, which is the safe direction (§42).
+
+**THE CONTROL IS A BAND UNDER THE CLIENT'S NAME — ISLAM PICKED B** of two drawn
+in the console's own stylesheet (`design-mockups/modules/2026-09-12_add-a-module.html`,
+published as an artifact per rule 1c). What a client can OPEN is not a detail
+beside its industry: in the left column it landed sixth, below the fold on a
+laptop, so the one thing on that page deciding what every other setting applies
+to was the last thing reached. **THE ROWS ARE THE TEAM LIST'S OWN, CLASS FOR
+CLASS** — `.teamrow`, `.who .nm/.em`, `.sp`, `.tag`, `.btn`, `.note` — so the
+section adds **no vocabulary** to that drawer (§53.5); the only new rule is the
+band itself.
+
+**OFF HIDES AND FORGETS NOTHING** (§44, three times in this project now: a
+switch that destroys data is a delete with a friendly label). What leaves with
+the module is its Setup group, which is the point — a group whose pages have
+nothing behind them is worse than no group (§61). **THE DEFAULT GETS WORDS AND
+NOT A DEAD CONTROL** (§94.15): it says *Always on*, and **the server refuses to
+switch it off however the request is spelt**, because a guard that only hides a
+control is decoration (§42, §44). Seeing a state is not setting it (§256): a
+reader gets the words and no button, never a blank right-hand side.
+
+**THE GREETING NAMES THE CLIENT, AND THAT IS THE WHOLE PROOF** — Islam's own
+instruction, and the argument for the page. A static *hello* would look
+identical on a build where the module resolved, the tenant was never opened and
+nothing was read. So the trial page makes **three claims, each able to fail
+visibly**: the NAME comes from the registry row the address resolved to; the
+COUNT comes from that client's own graph read under `withTenant` as `smp_app`,
+so it proves the module crossed the tenant boundary rather than merely that a
+route matched; and the BAR is in that client's colours, which a module gets for
+nothing because branding is the SPINE's. **AND A REGISTER IT COULD NOT READ IS
+SAID, NEVER COUNTED AS NOUGHT** (§35, §93) — measured with the tenant
+unreachable, it says so and the name is still there.
+
+**NO ROW OF UNITS, DELIBERATELY.** A module brings its own navigation or none
+(§320 §4.2), and this one has no subjects — so the Strategy platform's
+navigation not appearing is the contract holding rather than an omission.
+**AND NO INLINE SCRIPT**: the page is served under the shell's own policy,
+`script-src 'self'`, so the switcher is a `<details>` — which is what E1 draws
+anyway, and an inline handler here would have rendered perfectly and never run
+(§96's family).
+
+**THE ROAD RUNS ONE WAY AND THE RETURN IS ON THE TRIAL PAGE.** The way in is
+the client's card; the way back is the switcher, drawn here for the first time
+from **E1 as signed off on 11 September**. Strategy's own shell does not carry
+it yet — that is E1 in the FROZEN file and its own slice (§314: the single file
+takes no new features) — so this is stated rather than left to be discovered.
+
+**§320.5a — AND `tsc --noEmit` REPORTED A CLEAN TREE ON A BUILD THAT DOES NOT
+COMPILE.** `tsconfig.json` sets `incremental: true`, so the run reads
+`tsconfig.tsbuildinfo`; with a stale one it printed nothing and exited 0
+**twice** on a tree holding `Expected 2 arguments, but got 1`, and found the
+error the instant the cache file was removed. Reproduced deliberately before it
+was believed. **Every recent "`tsc` clean" in this project may have been
+measured against that cache** — §298.3's fault in the typechecker, where the
+count is not the verdict — so a cold run is the only one worth quoting, and
+`npm run typecheck` now removes the cache first.
+
+**PROVED ABLE TO FAIL THREE WAYS** (`checks/modules.mjs`, 47 assertions, no
+database): `any-module` **2 red** (an unbuilt module both kept in the list and
+reachable at an address), `open-address` **3 red** (a module the client does not
+hold read as one anyway), `static-hello` **2 red** — printing `Hello, there.`,
+which is exactly the fault the page exists to rule out. **The check says which
+of its assertions are DRIVEN and which are READ** (§100.3), because the
+difference is the strength of the claim. **AND ITS OWN FIRST RUN CALLED A
+CORRECT BUILD BROKEN**: `page.appendChild(grid)` appears twice in
+`platform.html` — the clients list builds one too — so an unscoped `indexOf`
+compared the band against ANOTHER page's grid and failed the one assertion that
+carries Islam's choice.
+
+**THE MIGRATION WAS PROVED ON THE PATH IT EXISTS FOR, NOT THE EASY ONE.** On a
+fresh database `schema.sql` has already made the column, so applying it there
+proves nothing; it was run against a database with the column **dropped** — the
+shape an existing deployment is in (§33.5) — and twice over, backfilling the
+row that predates it to `["strategy"]`. **No CHECK constraint names the
+modules**, deliberately: the names live in `MODULE_DEF` and a constraint would
+be a second copy of them, refusing an UPDATE the day a module is renamed rather
+than the day somebody looks.
+
+**RECORDED, NOT DONE**: the Strategy shell carries no switcher, so from inside
+Strategy there is no way to the trial module except the console; the landing
+shows no module row; and a module's Setup group is described by this control and
+not yet built, because Setup's groups are the frozen shell's.

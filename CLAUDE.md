@@ -100,6 +100,15 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Always verify before handing anything over.** With today's static-HTML stage, that means
   actually exercising the page (headless Chromium is available in-session). Once SMP gains a
   Node/TypeScript stack, run `npx tsc --noEmit` and `npm run build` before every handover.
+- **A CACHED TYPECHECK REPORTS A CLEAN TREE ON A BUILD THAT DOES NOT COMPILE
+  (&sect;320.5a).** `smp-app/tsconfig.json` sets `incremental: true`, so `tsc
+  --noEmit` reads `tsconfig.tsbuildinfo` &mdash; and with a stale one it printed
+  **nothing and exited 0 twice** on a tree holding `Expected 2 arguments, but got
+  1`, finding it the instant the cache file was removed. Reproduced deliberately
+  before it was believed. **Every recent "`tsc` clean" in this project may have
+  been measured against that cache**, which is &sect;298.3's fault in the
+  typechecker: *the count is not the verdict*. `npm run typecheck` deletes the
+  cache first, and that is the only run worth quoting.
 - **Fix type errors across the outcome** — don't leave TypeScript errors unresolved.
 - **Test implications of changes** — ensure changes don't break existing functionality.
 
@@ -7637,6 +7646,28 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+node smp-app/checks/modules.mjs # a module per client, and the trial that proves
+                                # one can be added (&sect;320.5) &mdash; `npm run
+                                # check:modules`, no database. The list a client has
+                                # (order is MODULES', an unknown or UNBUILT word
+                                # dropped, the default always present), what may be
+                                # offered, the address (a module the client does NOT
+                                # have falling through to the legacy branch exactly as
+                                # any other unknown word), the card's rows, and the
+                                # trial page RENDERED &mdash; the greeting naming this
+                                # client, a different client getting a different one,
+                                # a register it could not read SAID rather than counted
+                                # as nought (&sect;35, &sect;93), the way OUT back to
+                                # Strategy (&sect;61), no row of units, and nothing
+                                # inline needing a script the policy would silence.
+                                # It SAYS which assertions are driven and which are
+                                # read (&sect;100.3). 50/0, red three ways
+                                # (`check:modules:red`) &mdash; `static-hello` printing
+                                # `Hello, there.`, the fault the page exists to rule
+                                # out. Its own first run called a correct build broken:
+                                # `page.appendChild(grid)` appears twice in
+                                # platform.html, so an unscoped indexOf compared the
+                                # band against ANOTHER page's grid (&sect;100.3)
 python3 checks/blob-api.mjs     # (in smp-app: `npm run check:blob`) the clip endpoint
                                 # on the new stack (§316.5): the door in front of it, a
                                 # client that does not exist and a schema NAME refused
@@ -8695,7 +8726,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-11 &mdash; **&sect;318: setting a client up &mdash; the
+*Last Updated: 2026-09-12 &mdash; **&sect;320.5: adding a module to a client, and a
+trial that proves it (spec 046 &sect;4.5).** Islam: *"how does we create a new module?
+let's create a very simple another module something even for the trial. to manage the
+flow of adding a new module to the client"*, then *"make it a hello with the name of the
+client to show variance. and we need part in the client settings to add modules."*
+**THE FIRST ANSWER WAS A MEASUREMENT**: today a module is three things and no more
+&mdash; a word in `MODULES`, an address segment, and a row on the client's card &mdash;
+so `/<client>/portfolio` already resolved and served the STRATEGY platform under another
+word. Not a feature waiting to be finished; a door onto the wrong room. **WHICH MODULES
+A CLIENT HAS IS STORED NOW**, one column and one migration, and `modulesFor()` guarantees
+three things a stored list cannot: the order is `MODULES`' and never the order they were
+switched on, an unknown or **unbuilt** word is dropped, and the **default is always in
+it** (it is where an address naming no module lands). **`built` IS WHAT STOPS THE DOOR
+OPENING ONTO THE WRONG ROOM** &mdash; Portfolio, Insights and Processes keep their
+entries so the words stay reserved, and are offered to nobody. **A MODULE THE CLIENT DOES
+NOT HAVE FALLS THROUGH TO THE LEGACY BRANCH**, read as any other word it does not hold,
+rather than a second refusal to word and keep in step. **THE CONTROL IS A BAND UNDER THE
+CLIENT'S NAME &mdash; Islam picked B** of two drawn in the console's own stylesheet, and
+**its rows are the team list's own, class for class**, so the section adds no vocabulary
+(&sect;53.5). **OFF HIDES AND FORGETS NOTHING** (&sect;44) and **the default gets words,
+not a dead control** (&sect;94.15), with the server refusing both however the request is
+spelt (&sect;42). **THE GREETING NAMES THE CLIENT AND THAT IS THE WHOLE PROOF**: a static
+hello would look identical on a build that never opened the tenant, so the page makes
+three claims that can each fail visibly &mdash; the NAME from the registry row, the COUNT
+from the client's own graph under `withTenant` (so it proves the module crossed the tenant
+boundary), and the BAR in the client's colours, which it gets free because branding is the
+spine's. **RENDERING IT AGAINST A REAL TENANT FOUND "3 persons"**, a plural derived by
+adding an "s" (&sect;107.8's family) &mdash; fixed, and the sentence became a function of
+its own so the check can drive the one claim that needed a database. **THE MIGRATION WAS
+PROVED ON THE PATH IT EXISTS FOR**, not the easy one: run against a database with the
+column DROPPED (&sect;33.5) and twice over. 50/0 red three ways; `platform-cards` 19/0 on
+both copies; `check:deploy` 5/0; typecheck clean COLD. **Recorded, not done**: the
+Strategy shell carries no switcher, so the road runs one way and the return is on the
+trial page.*
+
+*Earlier: 2026-09-11 &mdash; **&sect;318: setting a client up &mdash; the
 wizard (spec 044).** Islam: *"any Consultant who gets into the platform and adds
 a new client to set up this client he needs to go through a series of
 questions."* A guided flow through Setup: the client's name, its year, its

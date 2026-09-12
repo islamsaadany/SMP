@@ -225,6 +225,14 @@
 
   .row{ display:flex; gap:9px; margin-top:14px; flex-wrap:wrap; align-items:center }
   .row .fld{ flex:1 1 170px; min-width:0 }
+  /* ── WHICH MODULES A CLIENT HAS (spec 046 §4.5) ────────────────────
+     The ROWS are the team list's own — .teamrow, .who .nm/.em, .sp, .tag,
+     .btn, .note — so this section adds no vocabulary to the drawer (§53.5).
+     All that is here is what puts them in a band of their own, which is the
+     only thing about it that is new. */
+  .band{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:14px 16px 4px; margin:0 0 20px }
+  .band .teamrow:last-of-type{ border-bottom:0 }
   .cfg{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px }
   .rowset{ display:grid; gap:13px }
   .teamrow{ display:flex; align-items:center; gap:10px; padding:9px 0;

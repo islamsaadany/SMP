@@ -6104,6 +6104,31 @@ not call it. So the promise that a table added next month is *"named the day it
 is added"* is true of a spike run and not of a deploy. Whether the deploy should
 call it is a decision about what a deploy may refuse, which is main's to take.
 
+## 328 · And the walk was run on the stack that actually serves it
+
+Every section above §326 was verified on the **frozen build over `file://`**,
+which is the right subject for the frozen product and is no longer the whole of
+it: reading `/sw.js` off the live site returns `build-sw.mjs`'s GENERATED
+worker, byte-identical to `smp-app/public/sw.js` — **production is the new
+stack**. So `qa.py` was pointed at the served app (`SMP_BASE`, the sweep's own
+seam since §315.3), signed in at the client's door, against a real Postgres:
+**33 viewers, 230 destinations, ERRORS none**, with the branch's own `shell.js`
+and `platform.css` being what the browser received.
+
+**AND THE COUNT DID NOT MATCH THE RECORD, SO IT WAS ACCOUNTED FOR RATHER THAN
+QUOTED.** §316.10's row says *33 viewers / 229 destinations*. A destination
+count is a fact about the DATA as much as the build — this database had been
+through the whole app suite, which seeds a demo tenant and adds clients — so
+the two numbers are not two builds. The decisive comparison is the frozen sweep,
+which is deterministic because it runs on baked data with no database at all:
+**this branch 228, `origin/main`'s own build 228**, measured by building main in
+a worktree rather than reasoned about (§303). The branch adds no destination;
+the extra one is the fixture.
+
+*A number that differs from the record is worth ten minutes before it is worth
+a sentence, and the cheap deterministic comparison is usually the one that
+settles it.*
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

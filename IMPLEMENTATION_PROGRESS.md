@@ -82,8 +82,23 @@ guarded by a check that the two agree. A number confirms it rather than an
 argument: the corrected list walks 42 client tables, which is exactly what the
 plan's own data model says.
 
+**And the whole platform was then walked on the stack that actually serves
+it.** Everything up to here had been checked on the offline file, which is the
+right thing to check for the offline product and is no longer the whole story:
+reading the service worker off the live site shows production is running the new
+platform. So the sweep was pointed at the running app, signed in at the client's
+door, against a real database — 33 people, 230 pages, no errors.
+
+One number did not match the record (it says 229), so it was accounted for
+rather than quoted: a page count depends on the data as much as on the build,
+and this database had been through the whole suite, which adds a demo client.
+The comparison that settles it is the offline sweep, which uses fixed data and
+no database: this branch 228, and `main`'s own build 228 — measured by building
+`main` beside it. The branch adds no page; the extra one is the test data.
+
 **Verified.** Nine database proofs green · five of their falsifications still
-red · the app's fifteen checks green · typecheck clean.
+red · the app's fifteen checks green · the whole platform walked on the served
+app with no errors · typecheck clean.
 
 ---
 

@@ -8876,7 +8876,26 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;326 / &sect;327: two checks and one
+*Last Updated: 2026-09-12 &mdash; **&sect;328: the walk was run on the stack that
+actually serves it.** Every section before &sect;326 was verified on the frozen
+build over `file://`, which is the right subject for the frozen product and is no
+longer the whole of it &mdash; reading `/sw.js` off the live site returns
+`build-sw.mjs`'s GENERATED worker, byte-identical to `smp-app/public/sw.js`, so
+**production is the new stack**. `qa.py` was pointed at the served app
+(`SMP_BASE`, its own seam since &sect;315.3) against a real Postgres: **33
+viewers, 230 destinations, ERRORS none**, with this branch's `shell.js` and
+`platform.css` being what the browser received. **AND THE COUNT DID NOT MATCH THE
+RECORD, SO IT WAS ACCOUNTED FOR RATHER THAN QUOTED** &mdash; &sect;316.10 says
+229, and a destination count is a fact about the DATA as much as the build, this
+database having been through the whole app suite (which seeds a demo tenant). The
+decisive comparison is the frozen sweep, deterministic because it runs on baked
+data with no database: **this branch 228, `origin/main`'s own build 228**,
+measured by building main in a worktree rather than reasoned about (&sect;303).
+The branch adds no destination; the extra one is the fixture. *A number that
+differs from the record is worth ten minutes before it is worth a sentence, and
+the cheap deterministic comparison is usually the one that settles it.*
+
+*Earlier the same day &mdash; **&sect;326 / &sect;327: two checks and one
 list, found by running the app's OWN suite.** Everything above was proved on the
 frozen build; **production is the new stack**, so the app's fifteen checks and
 nine spike proofs were built and run against a real Postgres &mdash; and that

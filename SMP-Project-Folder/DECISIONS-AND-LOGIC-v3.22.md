@@ -5797,6 +5797,51 @@ tried again on the next boot (§289's reason for keeping them outside the
 bootstrap's transaction). Making them independent would be a second decision
 riding a message fix.
 
+### 324.5 · The CSP check had been measuring a 404 page
+
+Found by running every check in the tree rather than the ones a change
+touched. `checks/csp-net.py` failed both its assertions — *the app's own
+scripts did not run* AND *an injected handler executed* — which cannot both be
+symptoms of one CSP: a policy strict enough to block the app is stricter than
+one that would let an injected handler through.
+
+**They are symptoms of there being no page.** Its stub served the built file at
+its own filename and 404'd everything else, and since §313 a 404 from the state
+API sends the platform to `/platform` — which the stub 404s too. So the
+document under measurement was the **404 page**: no meta element, no app, and
+an injected handler running because nothing was policing it. *A check that
+navigates away measures whatever it lands on, and reports it under the name of
+the page it meant to open.* §324.3's shape again, in a check rather than a
+harness, and it had been true since the multi-client split.
+
+**THE POLICY ITSELF WAS NEVER IN DOUBT, AND IT WAS PROVED SEPARATELY** before
+the stub was touched — by hashing the shipped file rather than by asking a
+browser: **28 inline blocks, 28 hashes, every one matching, no
+`'unsafe-inline'` and no `'unsafe-hashes'`.** Doing that first is what stopped
+this being read as a security regression and chased as one.
+
+The stub now answers `/api/state` and serves the platform at a CLIENT path, the
+way every other own-server check here does, and serves `/sw.js` as JavaScript
+(§231.5 — a registration that rejects is a console error that looks like the
+product). **A new assertion goes FIRST and by name**: *the platform is still the
+document, and it carries a policy* — because everything below it is true of a
+404 page (§113.8). Green, and **2 red with the policy stripped from the served
+bytes**, the new assertion among them.
+
+### 324.6 · Two checks need Pillow, and one deliberately does not
+
+`home-mark.py` and `chat-settings-scroll.py` read painted pixels through PIL
+and die with `ModuleNotFoundError` where it is absent — which reads exactly
+like a failure in a summary and is not one. Both pass with it installed
+(`pip install pillow`).
+
+Worth writing down because `band-corner.py` argues the other way in its own
+docstring — *"NO DEPENDENCY … forty lines of unfiltering read an 18-pixel
+square without adding one, which is cheaper than asking every laptop that runs
+these checks to install Pillow"* — and it is right, and two files went the
+other way anyway. Not reconciled here: rewriting two working checks to drop a
+dependency is a tidy-up, and they are the two that read the most pixels.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

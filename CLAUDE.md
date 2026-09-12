@@ -8261,6 +8261,11 @@ python3 checks/owner-picker.py  # an owner is picked from the register, not type
                                 # graph read back, both ends each time (§130.1)
 python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a function —
                                 # it MAKES the one-pillar unit, the demo has none (§130.2)
+# TWO CHECKS NEED PILLOW (§324.6): home-mark.py and chat-settings-scroll.py read
+# painted pixels through PIL and die with ModuleNotFoundError where it is absent,
+# which reads like a failure in a summary and is not one — `pip install pillow`.
+# band-corner.py argues the other way in its own docstring and unfilters the PNG
+# by hand; not reconciled, and said rather than left to be rediscovered.
 python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS because a
                                 # DOM probe calls the broken build clean (§130.3, §53.7)
                                 # — and since §323 the case the fill exists for: a

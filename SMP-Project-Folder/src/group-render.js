@@ -6806,7 +6806,16 @@ function renderFnReport(fnKey){
      The target is the `fn:<key>` string and not the bare key: it is what every
      one of those five already expects, and a second key shape would mean a
      second answer everywhere. */
-  var fnKeyTarget = "fn:" + fk;
+  /* §330: THE TARGET, NOT A KEY REBUILT FROM ONE. `holderTarget()` above has
+     already normalised this to `fn:<key>` or `cap:<id>`, and re-prefixing it
+     produced `fn:cap:cap6` on a capability — measured on the button's own
+     attribute. Everything else this subject is addressed by uses the plain
+     one (`CURRENT_REPORT_KEY`, the cycle board, `reportPending`), so the
+     submission would have been filed under a key nothing reads: the report
+     sent, the tab still saying *not submitted yet*, and the board still
+     asking (§48, §53.5 — the comment above is right that a second key shape
+     means a second answer everywhere, which is what this was). */
+  var fnKeyTarget = target;
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */

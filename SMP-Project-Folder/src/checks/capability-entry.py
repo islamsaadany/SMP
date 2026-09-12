@@ -55,10 +55,11 @@ BUILT = os.environ.get("SMP_BUILT") or os.path.join(
     os.path.dirname(__file__), "..", "strategy-management-platform.html")
 URL = "file://" + os.path.abspath(BUILT)
 
-bad = 0
+good = bad = 0
 def ck(w, ok, x=""):
-    global bad
-    if not ok: bad += 1
+    global good, bad
+    if ok: good += 1
+    else: bad += 1
     print(("  ok      " if ok else "  FAIL    ") + w + (("  — %s" % (x,)) if not ok and x != "" else ""))
 
 def ev(pg, js, dflt=None, arg=None):
@@ -83,8 +84,14 @@ def secs(pg):
                   ".map(x=>x.textContent.trim())", [])
 
 def tabs(pg):
+    """THE TAB KEYS, never the words on them. A Reporting tab wears its own
+    status (§69: *Reporting — not submitted yet*), which is a fact about the
+    SUBJECT and not about which tabs it has — so comparing the words made a
+    capability and a function differ for the one reason they must (a capability
+    reports, and §330 had to teach `reportPending` so, which is the fault this
+    assertion found). `data-s` is the key both sides are built from."""
     return ev(pg, "()=>[...document.querySelectorAll('#subtabs button')]"
-                  ".map(x=>x.textContent.trim().split('\\n')[0])", [])
+                  ".map(x=>x.dataset.s || x.textContent.trim().split('\\n')[0])", [])
 
 def go(pg, dest):
     side(pg, "caps" if dest.startswith("cap:") else
@@ -160,12 +167,30 @@ def main():
         print("\n3 · the same pages a supporting function has")
         ck("the capability is a destination", go(pg, "cap:" + CID))
         capTabs, capSecs = tabs(pg), secs(pg)
+        # AND IT REPORTS AS A SUBJECT (§69, §244) — measured HERE, standing on
+        # the capability, because the comparison below walks off to the
+        # function. The board asks it for a report, so the tab has to say one
+        # is owed; `reportPending` answered "not a real subject" for a
+        # capability, so the one page that is somebody's whole project said
+        # nothing while the board counted it.
+        ck("its Reporting tab says a submission is owed",
+           "not submitted yet" in (ev(pg,
+             "()=>{const b=[...document.querySelectorAll('#subtabs button')]"
+             ".find(x=>x.dataset.s==='report'); return b ? b.textContent : '';}",
+             "") or ""),
+           ev(pg, "()=>[...document.querySelectorAll('#subtabs button')]"
+                  ".map(x=>x.textContent.trim())", []))
         ck("it opens on its plan, as a function does",
            ev(pg, "()=>currentSub", "") == "fnstrat", ev(pg, "()=>currentSub", ""))
         ck("a projects function is reachable for the comparison", go(pg, "fn:" + FK))
         fnTabs, fnSecs = tabs(pg), secs(pg)
         ck("its three tabs AGREE with a function's (§53.5, §94.8)",
            capTabs == fnTabs and len(capTabs) >= 2, "%s / %s" % (capTabs, fnTabs))
+        # AND IT REPORTS AS A SUBJECT (§69, §244). The board asks it for a
+        # report, so the tab has to say one is owed — `reportPending` answered
+        # "not a real subject" for a capability, so the one page that is
+        # somebody's whole project said nothing while the board counted it.
+
         ck("...and so do its sections", capSecs == fnSecs and len(capSecs) == 2,
            "%s / %s" % (capSecs, fnSecs))
 
@@ -322,7 +347,11 @@ def main():
         print("\n── nothing threw")
         ck("no page error anywhere in the run", not errs, errs[:3])
         br.close()
-    print("\n%d passed, %d failed" % (0, bad) if bad else "\nall capability-entry checks passed")
+    # THE TAIL IS THE VERDICT (§298.3), so it says both numbers every time —
+    # the first draft of this line read `"..." % (0, bad) if bad else "..."`,
+    # where the ternary binds looser than `%`, so a clean run printed "0
+    # passed" with every line above it saying ok.
+    print("\n%d passed, %d failed" % (good, bad))
     return 1 if bad else 0
 
 if __name__ == "__main__":

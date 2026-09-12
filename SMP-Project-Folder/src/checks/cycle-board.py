@@ -94,7 +94,31 @@ BOARD = """() => {
     lines: r.getBoundingClientRect().height
   });
   const body = rows.filter(r => r.children.length > 3);
+  /* §330: SPLIT BY EVERY BAND, not at the first one. §245's board had one —
+     the functions — and stage 2 adds a Capabilities band beside it, so
+     "everything after the first band" swept a capability's row into the
+     function list and the assertions about that list read a correct board as
+     wrong (§214.3). Each band names the group under it. */
+  const groups = [];
+  let cur = { band: null, rows: [] };
+  rows.forEach(function (r) {
+    if (r.className.indexOf("dxband") > -1) {
+      groups.push(cur); cur = { band: r.textContent.trim(), rows: [] }; return;
+    }
+    if (r.children.length > 3) cur.rows.push(read(r));
+  });
+  groups.push(cur);
+  const groupNamed = function (word) {
+    const g = groups.filter(function (x) {
+      return x.band && x.band.indexOf(word) === 0; })[0];
+    return g ? g : { band: null, rows: [] };
+  };
   const out = {
+    groups:   groups.map(function (g) {
+                return { band: g.band, names: g.rows.map(function (r) { return r.name; }) }; }),
+    fnBand:   groupNamed("Supporting functions").band,
+    fnRows:   groupNamed("Supporting functions").rows.map(function (r) { return r.name; }),
+    capRows:  groupNamed("Capabilities").rows.map(function (r) { return r.name; }),
     unitHalf: rows.slice(0, cut).filter(r => r.children.length > 3).map(read),
     fnHalf:   rows.slice(cut).filter(r => r.children.length > 3).map(read),
     tallest:  Math.max.apply(null, body.map(r => r.getBoundingClientRect().height)),
@@ -140,7 +164,10 @@ with sync_playwright() as p:
     if board.get("err") or board.get("threw"):
         ok("the board renders at all", False, board); b.close(); sys.exit(1)
     unit_names = [r["name"] for r in board["unitHalf"]]
-    fn_names = [r["name"] for r in board["fnHalf"]]
+    # §330: the FUNCTIONS' own group, named by its band — `fnHalf` is
+    # everything after the first band and now sweeps the capabilities in.
+    fn_names = board.get("fnRows") or []
+    cap_names = board.get("capRows") or []
 
     # ── 1 · nobody who reports is missing ───────────────────────────────────
     print("\n── 1 · every subject the cycle can ask has a row")
@@ -165,8 +192,19 @@ with sync_playwright() as p:
     ok("the unit block is business units and nothing else",
        sorted(unit_names) == sorted(js(pg, "()=>activeKeys().map(k=>placeLabel(k))") or []),
        unit_names)
-    ok("...and there is exactly ONE band, so the formats are not grouped (§245)",
-       (board.get("bands") or 0) == 1, board.get("bands"))
+    # §218: REWRITTEN, NEVER LOOSENED. §245's rule is Islam's own — *"don't
+    # split functions planning in pillars from functions planning in projects
+    # they are functions reporting"* — and it is about the two FORMATS of a
+    # function. §330 adds a band for a different KIND of subject, so the rule
+    # survives whole and is asserted as what it actually says: the functions
+    # are ONE group whatever shape their plan is.
+    ok("the functions are ONE group, so the formats are not split (§245)",
+       len([g for g in (board.get("groups") or [])
+            if (g.get("band") or "").startswith("Supporting functions")]) == 1,
+       [g.get("band") for g in (board.get("groups") or [])])
+    ok("...and a capability is its own group beside them (§330)",
+       len(cap_names) > 0 and not set(cap_names) & set(fn_names),
+       {"caps": cap_names, "fns": fn_names})
     both = js(pg, """(l)=>{
       const want = boardFunctionKeys().map(k => placeLabel("fn:" + k));
       return { want: want, mixed: boardFunctionKeys()
@@ -196,7 +234,9 @@ with sync_playwright() as p:
 
     # ── 4 · counted once in the headline ────────────────────────────────────
     print("\n── 4 · the headline counts it exactly once")
-    n_rows = len(unit_names) + len(fn_names)
+    # §330: EVERY ROW, the capabilities included — §108.1's rule is that the
+    # parts and the divisor agree, and a capability is a row on this board now.
+    n_rows = len(unit_names) + len(fn_names) + len(cap_names)
     ok("`units` in the totals is the number of rows on the board",
        board["totals"]["units"] == n_rows,
        {"totals": board["totals"]["units"], "rows": n_rows})
@@ -206,7 +246,10 @@ with sync_playwright() as p:
 
     # ── 5 · the band claims only what is true of every row under it ─────────
     print("\n── 5 · the band says how many, not what one of the two shapes counts")
-    bt = " ".join(board.get("bandText") or [])
+    # §330: the FUNCTIONS' band alone. Joining every band's words made the
+    # Capabilities band's own name trip the vocabulary assertion below, which
+    # is that band saying exactly what it holds.
+    bt = board.get("fnBand") or ""
     ok("the band names the functions and their number", "Supporting functions" in bt, bt)
     ok("...and claims no single vocabulary over rows of two shapes (§35)",
        "capabilit" not in bt.lower() and "deliverable" not in bt.lower(), bt)

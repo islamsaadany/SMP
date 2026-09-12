@@ -4757,7 +4757,14 @@ function reportPending(target){
      resolved in ONE place. A function that plans in projects still submits —
      it is `unitLike()` that has nothing unit-shaped to return for it, not the
      cycle — so this checks the thing EXISTS rather than what shape it has. */
-  var real = t.indexOf("fn:") === 0 ? !!FUNCTIONS[t.slice(3)] : !!UNITS[t];
+  /* §330: AND A CAPABILITY IS A SUBJECT. It has a row on the cycle board
+     (§244), `canSpeakFor` answers for it and its report is filed under its own
+     key — and this line answered "not a real subject", so its Reporting tab
+     never said *not submitted yet* and its Performance tab never wore the dot
+     (§69), on the one subject whose whole page is somebody's project. The
+     board asked for the report and the tab above it said nothing. */
+  var real = t.indexOf("cap:") === 0 ? !!capOfTarget(t)
+           : t.indexOf("fn:") === 0 ? !!FUNCTIONS[t.slice(3)] : !!UNITS[t];
   if (!real) return false;
   if (REVIEW.submitted && REVIEW.submitted[t]) return false;
   return canSpeakFor(t);

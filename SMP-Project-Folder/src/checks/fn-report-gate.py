@@ -187,10 +187,16 @@ with sync_playwright() as p:
     print("\n── 4 · an objective added on the Overview can be reported against")
     pg.goto("file://" + FILE); pg.wait_for_timeout(900)
     for label, t in (("the pillars function", T), ("the projects function", TC)):
+        # §330: THE FUNCTION'S OWN HOLDER, both ways. Since §322 a projects
+        # function holds its key objectives itself and §329 left the worked
+        # example with no box under one, so reaching for
+        # `capsOfFunction(...)[0].id` threw and the probe reported a working
+        # Add control as adding nothing (§214.3, §215). `koHolderById` answers
+        # for an `fn:` target whichever way the function plans — that is
+        # §213's one page, and its own comment says so.
         before = js(pg, """(t)=>{
-          const h = koHolderById(t.indexOf('fn:')===0 && plansInPillars(t)
-                    ? t : capsOfFunction(String(t).slice(3))[0].id);
-          return (h.list||[]).length; }""", t)
+          const h = koHolderById(t);
+          return h ? (h.list||[]).length : null; }""", t)
         pg.evaluate("""(a)=>{ current=a.t; currentSub='fnstrat'; CURSEC.fnstrat='found';
                               EDIT_PAGE.capfoundation=true; paint(); }""", {"t": t})
         pg.wait_for_timeout(500)
@@ -201,9 +207,8 @@ with sync_playwright() as p:
             continue
         btn.click(); pg.wait_for_timeout(500)
         got = js(pg, """(a)=>{
-          const key = a.t.indexOf('fn:')===0 && plansInPillars(a.t)
-                    ? a.t : capsOfFunction(String(a.t).slice(3))[0].id;
-          const list = koHolderById(key).list || [];
+          const h = koHolderById(a.t);
+          const list = (h && h.list) || [];
           const row = list[list.length-1];
           return { n:list.length, id:(row && row.id) === undefined ? null : row.id,
                    dupes: list.filter(x=>x && x.id===(row&&row.id)).length }; }""",

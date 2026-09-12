@@ -394,11 +394,28 @@ def main():
             x = pg.query_selector("#modal-x")
             if x: x.click(); pg.wait_for_timeout(300)
 
+        # §330: THE STATE IS MADE, not waited for (§255). §329 left the worked
+        # example with ONE capability and its objectives do not happen to hold
+        # a row whose score differs from its stored ratio — so this section
+        # reported "no such capability" and stopped, on a build drawing the
+        # column perfectly (§214.3). The row is LIFTED from a unit that already
+        # has one, so it is the tenant's own arithmetic and not a graph typed
+        # here (§100.3).
         cap = ev(pg, """()=>{
-          var c = (GROUP.capabilities||[]).filter(function(x){
-            return (x.keyObjectives||[]).some(function(m){
-              return measureScore(m) != null && measureScore(m) !== m.progress; }); })[0];
-          if (!c) return null;
+          var pick = null;
+          Object.keys(UNITS).forEach(function(k){
+            (UNITS[k].keyObjectives||[]).forEach(function(m){
+              if (!pick && measureScore(m) != null && measureScore(m) !== m.progress)
+                pick = m; }); });
+          var c = (GROUP.capabilities||[])[0];
+          if (!c || !pick) return null;
+          if (!(c.keyObjectives||[]).some(function(m){
+                return measureScore(m) != null && measureScore(m) !== m.progress; })) {
+            var row = JSON.parse(JSON.stringify(pick));
+            row.id = c.id + "-KOprobe330";
+            c.keyObjectives = (c.keyObjectives||[]).concat([row]);
+            paint();
+          }
           return {fn: c.fn, id: c.id, name: c.name,
                   scores: c.keyObjectives.map(function(m){ return measureScore(m); }),
                   stored: c.keyObjectives.map(function(m){ return m.progress; })};
@@ -406,9 +423,17 @@ def main():
         ck("a capability holds an objective whose two figures differ",
            not err(cap) and cap is not None, cap)
         if cap and not err(cap):
-            show_fns(pg)
-            ck("the function carrying that capability opens",
-               open_unit(pg, "fn:" + cap["fn"]), cap["fn"])
+            # §330: ITS OWN DESTINATION, not the function that holds it — a
+            # capability is a page of its own now and its objectives are drawn
+            # there rather than on the function's Performance page.
+            ck("the capability opens as a destination of its own",
+               ev(pg, """(id)=>{
+                 var side = document.querySelector('#units [data-fold="caps"]');
+                 if (side) side.click();
+                 var b = document.querySelector('#units [data-u="cap:'+id+'"]');
+                 if (!b) return false; b.click(); return true; }""", cap["id"]),
+               cap["id"])
+            pg.wait_for_timeout(500)
             open_sub(pg, "performance")
             # Every Score column drawn on the page, so the capability's own is
             # found without the check keeping a copy of the page's layout.

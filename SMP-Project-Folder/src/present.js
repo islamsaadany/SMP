@@ -820,7 +820,17 @@ function deckSlidesFn(subject){
 
     c.projects.forEach(function(p){
       var mst = projMilestones(p);
+      /* §330: A PROJECT IS A SECTION OF THIS DECK. §322 stopped drawing the
+         holder's cover for a function's OWN work — rightly, a slide headed
+         "Capability · Finance" over the word Finance says the name twice
+         (§87) — and the `sec()` stamp rode on that slide, so a projects
+         function's strip came out COVER · END over thirteen slides: a
+         navigation bar naming nothing for the whole middle of the deck
+         (§266.12, whose own recorded gap this closes). The code is the one
+         the page, the rail and the workbook already show (§48, §310), so the
+         strip names what the audience is looking at and nothing is invented. */
       S.push('<section class="dslide d-cover"' + anch("prj" + p.id, "After " + p.name + " — title page") +
+        sec(projCode(holderCodeOwner(c), p), p.name) +
         '><span class="seclab">' + esc(c.name) +
           ' &middot; ' + esc(p.owner || "") + ' &middot; ' + esc(p.start) + ' &rarr; ' + esc(p.end) + '</span>' +
         '<h1 class="pillarname">' + esc(p.name) + '</h1>' +

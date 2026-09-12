@@ -226,15 +226,43 @@ with sync_playwright() as p:
     check("...and its groups are its own dividers, of which it has fewer",
           get(m, "groups") == get(m, "heads") and
           (get(m, "groups") or 0) < (get(u, "groups") or 0), m)
+    # §330: A PROJECTS FUNCTION NAMES ITS PROJECTS. §218 rewrites this rather
+    # than loosening it: §266.12 asserted a function's pills were its
+    # CAPABILITIES and recorded in its own words that they ought to be its
+    # projects — §322 gave the function the projects and §322 also stopped
+    # drawing the holder's cover for its own work, which is where the only
+    # section stamp sat, so the strip came out COVER · END over thirteen
+    # slides until §330 stamped them. The codes are the page's own (§48,
+    # §310), so this is agreement with `projCode` and not a list of literals.
     k = open_deck(pg, "fn:marketing")
-    check("a capability function is drawn the same way",
+    check("a projects function is drawn the same way",
           "bysub" in str(get(k, "cls")) and (get(k, "pills") or []), k)
-    check("...a capability has no code, so it falls back to two letters (§266.9)",
-          all(len(x) == 2 for x in (get(k, "pills") or [])
-              if x not in ("COVER", "END")) and
-          len(get(k, "pills") or []) >= 3, get(k, "pills"))
+    fpw = ev(pg, """() => fnProjects('marketing').map(p => projCode('fn:marketing', p))""", None, [])
+    check("...and its pills are its own projects, by the code the page shows",
+          bool(fpw) and all(c in (get(k, "pills") or []) for c in (fpw or []))
+          and len(get(k, "pills") or []) == len(fpw) + 2,
+          {"want": fpw, "got": get(k, "pills")})
     check("...and the full name is on the hover",
           all(len(h) > 3 for h in (get(k, "hovers") or [])), get(k, "hovers"))
+
+    # A CAPABILITY IS A DECK OF ITS OWN (§330), and it is where §266.9's
+    # two-letter fallback still lives: a capability carries no code, so its
+    # own divider is named from its words while the projects under it keep
+    # theirs.
+    cid = ev(pg, """() => (GROUP.capabilities[0]||{}).id""", None, "")
+    # `ev(pg, expr, arg, default)` — the ARG is third here, which is why the
+    # capability's project codes came back as the capability's own id: the
+    # value meant for the page landed in the default instead (§100.3, in a
+    # probe rather than a stub).
+    if cid:
+        cd = open_deck(pg, "cap:" + cid)
+        cpw = ev(pg, """(id) => (capById(id).projects||[]).map(p => projCode('cap:'+id, p))""", cid, [])
+        check("a capability's own deck names its projects too",
+              bool(cpw) and all(c in (get(cd, "pills") or []) for c in (cpw or [])),
+              {"want": cpw, "got": get(cd, "pills")})
+        check("...and it falls back to two letters for itself (§266.9)",
+              any(len(x) == 2 for x in (get(cd, "pills") or [])
+                  if x not in ("COVER", "END")), get(cd, "pills"))
 
     # ══ 5 · THE FLOW IS UNTOUCHED (§94.2) ══════════════════════════════
     head("5 · The master flow's strip is exactly what it was (§266)")

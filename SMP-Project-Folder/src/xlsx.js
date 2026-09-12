@@ -1100,12 +1100,23 @@ function readmePickFn(){ return ""; }
    reader that writes what it reads is §42's phantom change. Rows added since
    the cycle closed simply carry nothing, which is the truth about them. */
 function impPlanWorkbookFor(v){
-  if (String(v).indexOf("cap:") === 0) {
-    var c = capById(String(v).slice(4));
-    return c ? capPlanWorkbook(c) : null;
-  }
+  /* §321: a holder — a capability, or a supporting function holding its own
+     projects. `capPlanWorkbook` reads `{name, id, keyObjectives, projects}`
+     and a function's holder is exactly that shape, so the projects template is
+     built for both from one builder (§53.5). */
+  var h = impHolderFor(v);
+  if (h) return capPlanWorkbook(h);
   var u = unitLike(v);
   return u ? planWorkbook(u) : null;
+}
+/* The subject a download was asked for, resolved the same way the upload
+   resolves the one it was handed — or the two disagree about what `fn:finance`
+   means and a file downloads and will not come back (§22). */
+function impHolderFor(v){
+  var t = String(v || "");
+  if (t.indexOf("cap:") === 0) return capById(t.slice(4));
+  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? fnOwnHolder(fk) : null;
 }
 
 function impFiguresArchive(id){
@@ -1146,10 +1157,8 @@ function impAtCycle(subject, isCap, archiveId){
 }
 
 function impProgressWorkbookFor(v, cycleId){
-  if (String(v).indexOf("cap:") === 0) {
-    var c = capById(String(v).slice(4));
-    return c ? capProgressWorkbook(impAtCycle(c, true, cycleId)) : null;
-  }
+  var h = impHolderFor(v);
+  if (h) return capProgressWorkbook(impAtCycle(h, true, cycleId));
   var u = unitLike(v);
   return u ? progressWorkbook(impAtCycle(u, false, cycleId)) : null;
 }
@@ -1165,8 +1174,30 @@ function archiveWorkbook(a){
   return planWorkbook(snap);
 }
 
+/* WHO A PROJECTS WORKBOOK CAN BE FOR (§321). Every capability, and every
+   supporting function that holds its own projects — because since §321 a
+   function's plan IS the projects template's subject, and a dropdown that
+   still listed only capabilities would offer a tenant that has none nothing
+   at all: a plan that downloads and cannot come back (§22, §61).
+
+   NAMES, because that is what the Read me's cell holds and what the upload
+   matches on — the same road a unit's and a pillars function's names already
+   travel (§51.19: one naming in the file). Two subjects sharing a name are
+   refused BY NAME at the upload, which is where somebody can still act on it.
+
+   A function with neither projects nor a capability is offered too: it is the
+   one that most needs a plan, and `fnOwnsProjects` is exactly that question
+   (§61's trap — a subject unreachable until it already has content). */
+function projectSubjectNames(){
+  var out = [];
+  FUNCTION_KEYS.forEach(function(k){
+    var f = FUNCTIONS[k];
+    if (f && f.active !== false && !fnPlansInPillars(f) && fnOwnsProjects(k)) out.push(f.name);
+  });
+  return out.concat(GROUP.capabilities.map(function(x){ return x.name; }));
+}
 function capPlanWorkbook(c){
-  var names = GROUP.capabilities.map(function(x){ return x.name; });
+  var names = projectSubjectNames();
   var units = unitSuggestions();
   return [
     capReadme("plan", names, c ? c.name : ""),

@@ -1,6 +1,6 @@
 # 045 · A capability is a strategic entry, and a function's projects are its own
 
-**Version:** unbuilt · **Decisions:** §321 · **Status:** asked; model agreed with Islam; **not built**
+**Version:** v3.22 · **Decisions:** §321 · **Status:** model agreed with Islam; **stage 1 BUILT**, stage 2 not started
 
 Islam, 2026-09-12, correcting a proposal of mine that would have hidden the
 problem rather than fixed it:
@@ -244,9 +244,11 @@ says so before the press**, the way §320's dialog names its cost.
 Islam has **no real capabilities today**, so the two halves are not equally
 urgent and they do not depend on each other:
 
-**Stage 1 — a function's projects are its own.** The dissolve, the band gone,
-the Overview converged, the migration **through §320's own dialog** (§6), the
-workbook and the deck following.
+**Stage 1 — a function's projects are its own.** *BUILT, §321.* The dissolve,
+the band gone, the Overview converged, the migration **through §320's own
+dialog** (§6), the workbook and the deck following. No schema change and no
+SQL migration: a function's plan already rides in `functions.extra` (§118,
+§213), proved on a real Postgres rather than claimed (§172).
 This is the whole of what is confusing him now, and it leaves the product with
 no capabilities at all — which is the truth of his tenant.
 

@@ -5294,6 +5294,15 @@ function capHead(c){
    and that band is what says which one a section belongs to. */
 
 function capBand(c){
+  /* §321: NOT DRAWN OVER A FUNCTION'S OWN WORK. Islam: *"that will keep my
+     projects under a capability while there is not capability there ... these
+     are more of fucntional projects."* This band's own reason, written above,
+     is that "a function may carry several, and that band is what says which
+     one a section belongs to" — a function's own projects are not one of
+     several, so there is nothing for it to tell apart, and the word over them
+     names something that does not exist. §24's argument for removing the
+     function's nameplate, one level in. */
+  if (!c || c.own) return "";
   var r = capReported(c);
   return '<div class="capline"><span class="captag">Capability</span>' +
     '<span class="capnm">' + esc(c.name) + '</span>' +
@@ -5398,7 +5407,11 @@ function railPick(c){
    which is §301.4's own gate and the same `railMine()` test the rail asks, so
    the page and the rail cannot disagree about whose it is (§53.5). */
 function capsShown(fk) {
-  var caps = capsOfFunction(fk), target = "fn:" + fk;
+  /* §321: what the function's pages draw — its OWN projects first, then any
+     capability it carries. One door for Performance, Projects and Reporting,
+     which is why a function's own work reaches all three from one edit and
+     the three cannot disagree about what is on the function (§53.5). */
+  var caps = fnHolders(fk), target = "fn:" + fk;
   if (caps.length < 2 || !boundedHere(target)) return caps;
   var mine = [], rest = [];
   caps.forEach(function(c){
@@ -7636,7 +7649,12 @@ function renderUnitPlan(u){
 
    The third column is WEIGHT rather than a three-year target: a capability's
    objectives carry the optional weighting and have never had a horizon. */
-/* ── A PILLARS FUNCTION'S OVERVIEW (§213) ─────────────────────────────
+/* ── A SUPPORTING FUNCTION'S OWN OVERVIEW (§213, renamed §321) ───
+   It was `fnPillarsOverview` while only one of the two formats could reach
+   it. Since §321 a function that plans in PROJECTS draws it too — its
+   projects are its own, so there is no capability left to be described
+   instead — which is §213's own decision finally true of both sides: the two
+   formats draw ONE page, and nothing about this builder had to change for it.
    The capability function's two cards, carried by the function itself: what
    it is, and what it is judged on. No aspiration, no SWOT, no who-we-are —
    those belong to the unit it plans under — §214.3 removed the line that
@@ -7647,7 +7665,7 @@ function renderUnitPlan(u){
    `extra` (verified, the same route `format`, `under` and `items` already
    take). A capability has carried one since the model existed; this is the
    function finally being asked the same question. */
-function fnPillarsOverview(fk){
+function fnOwnOverview(fk){
   var f = FUNCTIONS[fk];
   if (!f) return "";
   var ed = authoring("capfoundation", "k_found");
@@ -7655,7 +7673,13 @@ function fnPillarsOverview(fk){
      SHARED frozen empty where `keyObjectives` does not exist, so a first
      objective added against the reading view would be pushed onto an empty
      every function shares. */
-  var list = (ed ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk)).keyObjectives || [];
+  /* §321: BOTH FORMATS REACH THIS PAGE NOW, and `unitLike("fn:…")` answers
+     only for the pillars one — it returns null for a function that plans in
+     projects, so asking it here would throw on the page this rename exists to
+     share. The holder answers for both, and its writing half mints the
+     container for the same reason the reading half must not (§50.6). */
+  var holder = ed ? fnKoHolderWritable(fk) : fnKoHolder(fk);
+  var list = (holder && holder.keyObjectives) || [];
   /* §226: WHILE IT IS BEING WRITTEN, THE TABLE GETS THE PAGE — §96.6's rule,
      which fixed exactly this squeeze on a unit's Foundation and never reached
      the function's Overview: inside the fgrid card the Objective box measured
@@ -7668,8 +7692,12 @@ function fnPillarsOverview(fk){
       ((ed || fl)
         ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
         : koReadBlock(list,
+            /* §321: and the sentence names what this function IS judged by,
+               which is its pillars on one format and its projects on the
+               other — one page, two true sentences, never one that is wrong
+               on half of it (§104.8). */
             "None. This function is judged by its " +
-            esc(L("pillar","bu").toLowerCase()) + "."));
+            (fnPlansInPillars(f) ? esc(L("pillar","bu").toLowerCase()) : "projects") + "."));
   /* §268: THE EDIT BAR IS ON THE SECTION LINE. It was the only WORDED edit
      control in the product's strategy pages while a unit's three were pen
      glyphs, so the two sides of the navigation switch said the same thing two
@@ -7719,6 +7747,17 @@ function fnPillarsOverview(fk){
 }
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  /* §321: A FUNCTION'S OWN OVERVIEW IS THE OVERVIEW §213 ALREADY BUILT. That
+     section decided the two formats draw ONE page — *What it is* (Function ·
+     Led by · Definition) beside its key objectives — and only the projects
+     side kept a capability's wording over it. With the box gone there is
+     nothing left to differ about, so this branch is a rename rather than a
+     second renderer: `fnOwnOverview` is `fnPillarsOverview` under a name that
+     is true of both.
+
+     A function still CARRYING a capability keeps today's rendering
+     underneath, which is the transitional state stage 2 removes when a
+     capability becomes an entry of its own. */
   /* A SUPPORTING FUNCTION'S OVERVIEW IS A SUPPORTING FUNCTION'S OVERVIEW,
      WHICHEVER WAY IT PLANS (§213). Islam: *"what if the overview of the
      functions that plan in pillars [were] like the overview of the functions
@@ -7740,7 +7779,8 @@ function renderFnFoundation(fnKey){
      A UNIT IS UNTOUCHED BY ALL OF THIS, deliberately and at Islam's
      instruction: `renderUnitFoundation()` is exactly what it always was, on
      `foundation`/`u_found`, and nothing here calls it. */
-  if (fnPlansInPillars(FUNCTIONS[fk])) return fnPillarsOverview(fk);
+  if (fnPlansInPillars(FUNCTIONS[fk])) return fnOwnOverview(fk);
+  if (!caps.length) return fnOwnOverview(fk);
   var ed = authoring("capfoundation", "k_found");
   /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */

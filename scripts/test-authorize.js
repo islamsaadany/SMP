@@ -3578,5 +3578,120 @@ console.log("\n36 · a pillar's kind is part of its plan (§319)");
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 })();
 
+/* ── 37 · A FUNCTION'S OWN PROJECTS ARE JUDGED AS A CAPABILITY'S ARE (§321) ──
+   Spec 045 stage 1: a supporting function holds its projects directly, so the
+   box is what a function CARRIES rather than where its work is kept.
+
+   THE SERVER IS THE HALF THAT DECIDES, and the half a screen check cannot
+   see. If a function's own projects fell to the unknown sweep — where any
+   unnamed field lands, which is the SAFE way round (§42) — every figure on
+   them would be the office's, and §147.7's project owner and §301's reporter
+   would watch a page take their number and the save come back refused
+   (§94.3's exact fault, one model on).
+
+   ASSERTED AS AGREEMENT, NEVER AS A LIST OF KINDS (§94.8). The claim is not
+   "a brief is capPlan" — it is "the same act means the same thing wherever
+   the projects sit". So every mutation is made TWICE, once on a capability's
+   projects and once on the same projects after the dissolve, and the two
+   verdicts must match. A later decision that changes how a project's brief is
+   classified then moves both sides and this stays green, while a build that
+   moved one of them goes red — which is what the file is for. */
+console.log("\n37 · a function's own projects are judged as a capability's are (§321)");
+(function () {
+  const R = require("../lib/rules.js");
+  const FK = Object.keys(SEED.functions || {}).filter(function (k) {
+    return String(SEED.functions[k].format) !== "pillars";
+  })[0];
+  const CAP = (SEED.group.capabilities || []).filter(function (c) { return c.fn === FK; })[0];
+  check("§321: the seed holds a projects function carrying a capability",
+        !!(FK && CAP && (CAP.projects || []).length), FK + " / " + (CAP && CAP.id));
+  if (!FK || !CAP || !(CAP.projects || []).length) return;
+
+  /* THE FIXTURE IS THE PRODUCT'S OWN DISSOLVE, through the shared rule both
+     the dialog and the migration press (§42) — a hand-moved graph would prove
+     the authoriser against a shape the platform never makes. */
+  const after = clone(SEED);
+  const f = after.functions[FK];
+  f.projects = []; f.keyObjectives = f.keyObjectives || [];
+  (after.group.capabilities || []).filter(function (c) { return c.fn === FK; })
+    .forEach(function (c) {
+      const mv = R.dissolvePlan(c, f);
+      if (mv.def != null) f.def = mv.def;
+      if (mv.keyObjectives) f.keyObjectives = mv.keyObjectives;
+      f.projects.push.apply(f.projects, mv.projects);
+    });
+  after.group.capabilities = (after.group.capabilities || [])
+    .filter(function (c) { return c.fn !== FK; });
+  check("§321: and the fixture is the product's own dissolve, not a hand-moved graph",
+        f.projects.length >= (CAP.projects || []).length, f.projects.length + " projects");
+
+  /* THE ROW IS PICKED BY WHAT IT DOES NOT ALREADY HOLD (§94.5, its own
+     recorded example — and the first draft of this section walked into it:
+     the seed's first milestone is already `done`, so setting it `done` was no
+     change at all and the assertion passed on an empty verdict). */
+  let PI = -1, MI = -1;
+  (CAP.projects || []).forEach(function (pr, pi) {
+    (pr.milestones || []).forEach(function (m, mi) {
+      if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; }
+    });
+  });
+  check("§321: and a milestone whose status the fixture actually moves",
+        PI > -1, PI + "/" + MI);
+  if (PI < 0) return;
+  const capPI = PI, ownPI = f.projects.map(function (p) { return p.id; })
+    .indexOf(CAP.projects[PI].id);
+  check("§321: the same project is findable on both sides", ownPI > -1, String(ownPI));
+  if (ownPI < 0) return;
+
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  function kindsCap(mutate) {
+    const inc = clone(SEED);
+    mutate(inc.group.capabilities.filter(function (c) { return c.id === CAP.id; })[0].projects[capPI]);
+    return (A.collect(SEED, inc, W(SEED)) || []).map(function (c) { return c.kind; }).sort();
+  }
+  function kindsOwn(mutate) {
+    const inc = clone(after);
+    mutate(inc.functions[FK].projects[ownPI]);
+    return (A.collect(after, inc, W(after)) || []).map(function (c) { return c.kind; }).sort();
+  }
+  function agree(what, mutate) {
+    const a = kindsCap(mutate), b = kindsOwn(mutate);
+    check("§321: " + what + " means the same on both", a.length > 0 && JSON.stringify(a) === JSON.stringify(b),
+          "capability " + a.join(",") + "  /  function " + b.join(","));
+    return b;
+  }
+
+  const figure = agree("a reported figure", function (pr) { pr.milestones[MI].status = "todo"; });
+  check("§321: and that figure is REPORTING, so a reporter may make it",
+        figure.indexOf("capReporting") > -1, figure.join(","));
+  const brief = agree("a rewritten brief", function (pr) { pr.brief = "rewritten by the fixture"; });
+  check("§321: and a brief is the PLAN, so a reporter may not",
+        brief.indexOf("capPlan") > -1, brief.join(","));
+  agree("a changed owner", function (pr) { pr.owner = "Somebody Else"; });
+
+  /* NOTHING FALLS TO THE UNKNOWN SWEEP — the failure this section exists for,
+     and the silent one: `unknown` is the office's, so the page would offer and
+     the save would refuse (§191). */
+  check("§321: and NOTHING about a function's own plan reaches the unknown sweep",
+        figure.indexOf("unknown") === -1 && brief.indexOf("unknown") === -1,
+        figure.concat(brief).join(","));
+
+  /* BOTH ENDS, over the people the seed holds — or a build that allowed
+     everything would satisfy every agreement above (§94.2). */
+  function from(who, mutate) {
+    const inc = clone(after); mutate(inc.functions[FK].projects[ownPI]);
+    return A.authorize(after, inc, personOf(after, who));
+  }
+  let r = from("smo", function (pr) { pr.brief = "the office wrote this"; });
+  check("§321: the office authors a function's own project", r.ok, (r.refusals || []).join(" / "));
+  const CUST = SEED.functions[FK].custodian || SEED.functions[FK].head;
+  if (CUST) {
+    r = from(CUST, function (pr) { pr.milestones[MI].status = "todo"; });
+    check("§321: the function's own custodian reports on it", r.ok, (r.refusals || []).join(" / "));
+    r = from(CUST, function (pr) { pr.brief = "the custodian rewrote this"; });
+    check("§321 REFUSED: and cannot rewrite its brief", !r.ok, "was ALLOWED");
+  }
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

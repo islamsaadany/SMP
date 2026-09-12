@@ -119,7 +119,16 @@ const CLIENT_ARG = (function () {
      somebody learns to scroll past. */
   const empty = Object.keys(slate).every(function (k) { return slate[k] === 0; });
   const seeded = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
-    slate.capabilities === 8 && slate.people === 1 && slate.pillars === 0 &&
+    /* REWRITTEN, NOT LOOSENED (§218). This read `capabilities === 8`: the
+       clean slate kept the SHELLS and cleared their content, which was right
+       while a capability was where a function's projects had to live. §321
+       makes the box a thing a function CARRIES, and the eight the worked
+       example ships are containers — Islam: "they caapbilities in raya trade
+       are not capabilities they are just projecst under functions" — so a
+       client starting fresh has NONE, and each function holds its own empty
+       list. Zero is the assertion now, and it is a stronger one: the old
+       number would go on passing on a build that never dissolved anything. */
+    slate.capabilities === 0 && slate.people === 1 && slate.pillars === 0 &&
     slate.measures === 0 && slate.tactics === 0 && slate.unitKOs === 0 &&
     slate.groupKOs === 0 && slate.projects === 0 && slate.history === 0 &&
     slate.wFactors === 4 && slate.wRows === 10 && slate.wValues === 0 &&

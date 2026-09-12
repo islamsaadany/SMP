@@ -103,7 +103,9 @@ with sync_playwright() as p:
                cancel: !!ov.querySelector('[data-rmno]'),
                dest: (ov.querySelector('[data-capkeep]')
                       ? ov.querySelector('.pick .d').textContent : ''),
-               sel: !!ov.querySelector('[data-capdest]') }; }""")
+               sel: !!ov.querySelector('[data-capdest]'),
+               dests: [...ov.querySelectorAll('[data-capdest] option')]
+                        .map(o => o.textContent) }; }""")
     ck("pressing Remove opens the platform's own confirmation",
        not dlg.get("none") and dlg.get("picks") == 2, dlg)
     ck("...with both answers and a Cancel",
@@ -112,8 +114,18 @@ with sync_playwright() as p:
        dlg.get("titles") == ["Keep the projects", "Remove everything"], dlg)
     ck("...exactly one of them is the safe one",
        dlg.get("safe") == 1, dlg)
-    ck("...and with ONE sibling the destination is NAMED, not a picker",
-       (not dlg.get("sel")) and "Product Mindset" in (dlg.get("dest") or ""), dlg)
+    # REWRITTEN, NOT LOOSENED (§218). This asserted that ONE sibling is NAMED
+    # rather than offered in a picker — true while a sibling was the only place
+    # projects could go. §321 makes the FUNCTION ITSELF a destination and the
+    # one that is always there, so a capability with one sibling now has two
+    # places to go and a picker is correct. What is asserted instead is the
+    # claim that survives: whatever the shape, the function is offered, and it
+    # is offered FIRST — a function's own work is where a dissolved box's
+    # projects belong; a sibling is the narrower answer.
+    ck("...the destination offers the FUNCTION ITSELF, first (§321)",
+       dlg.get("sel") is True and (dlg.get("dests") or [""])[0].endswith(" itself"), dlg)
+    ck("...and the sibling capability beside it",
+       "Product Mindset" in (dlg.get("dests") or []), dlg)
 
     print("\n§2 · Cancel costs nothing")
     try: pg.click('[data-rmno]', timeout=3000)
@@ -136,6 +148,11 @@ with sync_playwright() as p:
     moved_ids = before.get("ids") or []
     try:
         pg.click('[data-caprm="cap4"]', timeout=3000); pg.wait_for_timeout(350)
+        # §321: THE DESTINATION IS CHOSEN, not taken as the default. The
+        # function is first now, so a fixture that just presses Keep measures
+        # the dissolve while claiming to measure the move — and §3's whole
+        # subject is the move to a SIBLING.
+        pg.select_option('[data-capdest]', "cap6", timeout=3000); pg.wait_for_timeout(200)
         pg.click('[data-capkeep]', timeout=3000); pg.wait_for_timeout(600)
     except Exception as e:
         ck("Keep the projects can be pressed", False, str(e)[:80])
@@ -186,40 +203,79 @@ with sync_playwright() as p:
                why: row ? row.querySelector('.d').textContent : '',
                safe: row ? row.classList.contains('safe') : null,
                all: !!ov.querySelector('[data-caprmall]') }; }""")
+    # REVERSED AND REWRITTEN, NEVER DELETED (§218). This section asserted the
+    # HELD state: a capability that is the only one its function has had
+    # nowhere to move its projects, so Keep was drawn, greyed, and said so.
+    # §321 gives the projects somewhere to go — the function itself — so that
+    # state CANNOT OCCUR, and the branch that drew it is deleted (§24). The
+    # assertion is inverted rather than removed, because the case it guarded is
+    # exactly the case §321 has to get right: what used to be a dead end is now
+    # the ordinary answer, and a build that brought the held state back would
+    # pass a file with these lines simply taken out.
     ck("the row is DRAWN rather than hidden", lone.get("drawn") is True, lone)
-    ck("...and says why it cannot move them",
-       "only capability" in (lone.get("why") or ""), lone)
-    ck("...held with aria-disabled, never `disabled` (the reason stays reachable)",
-       lone.get("held") == "true" and lone.get("hard") is False, lone)
-    ck("...and it is not dressed as the safe answer", lone.get("safe") is False, lone)
+    ck("...and is LIVE now: the function is somewhere for them to go (§321)",
+       lone.get("held") is None and lone.get("hard") is False, lone)
+    ck("...it names the function as the destination",
+       "Finance itself" in (lone.get("why") or ""), lone)
+    ck("...and no longer says there is nowhere for them to go",
+       "nowhere for them" not in (lone.get("why") or ""), lone)
+    ck("...it IS the safe answer now", lone.get("safe") is True, lone)
     ck("...while Remove everything is still offered", lone.get("all") is True, lone)
 
-    print("\n§5 · pressing Keep there changes nothing")
-    was = ev(pg, "() => GROUP.capabilities.map(c => c.id)", [])
-    try: pg.click('[data-capkeep]', timeout=2000)
-    except Exception: pass
-    pg.wait_for_timeout(400)
-    ck("a held answer does nothing when pressed",
-       ev(pg, "() => GROUP.capabilities.map(c => c.id)", []) == was)
-    try: pg.click('[data-rmno]', timeout=2000)
-    except Exception: pass
-    pg.wait_for_timeout(250)
+    print("\n§5 · pressing Keep there gives the work to the function")
+    before5 = ev(pg, """() => ({ ids: ((capById('cap7')||{}).projects||[]).map(p => p.id),
+                                 own: fnOwnProjects('finance').length,
+                                 kos: (FUNCTIONS.finance.keyObjectives||[]).length,
+                                 arch: ARCHIVES.length })""")
+    try: pg.click('[data-capkeep]', timeout=3000)
+    except Exception as e: ck("Keep can be pressed there", False, str(e)[:80])
+    pg.wait_for_timeout(600)
+    gave = ev(pg, """() => ({ gone: !capById('cap7'),
+                              own: fnOwnProjects('finance').map(p => p.id),
+                              codes: fnProjects('finance').map(p => projCode('finance', p)),
+                              def: !!(FUNCTIONS.finance.def||'').trim(),
+                              kos: (FUNCTIONS.finance.keyObjectives||[]).length,
+                              arch: ARCHIVES.length })""")
+    ck("the box goes", gave.get("gone") is True, gave)
+    ck("...and every project is the FUNCTION'S, with its id",
+       all(i in (gave.get("own") or []) for i in (before5.get("ids") or [])), gave)
+    ck("...their codes unchanged (§310)",
+       gave.get("codes") == [c for c in ["FIN01", "FIN02", "FIN03"]
+                             if c in (gave.get("codes") or [])] and
+       len(gave.get("codes") or []) == len(before5.get("ids") or []), gave)
+    ck("...the definition came across, the function having none",
+       gave.get("def") is True, gave)
+    ck("...and so did its key objectives",
+       (gave.get("kos") or 0) > (before5.get("kos") or 0), gave)
+    ck("...archived first, so the box's name is still readable",
+       (gave.get("arch") or 0) > (before5.get("arch") or 0), gave)
 
     print("\n§6 · Remove everything, and the way back")
+    # THE STATE IS PUT BACK FIRST (§94.2). §5 now PRESSES Keep — where it used
+    # to press a held button that did nothing — so cap7 is already gone by the
+    # time this runs, and without the reload this section measured a
+    # capability that was not there and called a working Remove broken.
+    pg.reload(); pg.wait_for_timeout(1400)
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    to_caps(pg)
     before2 = ev(pg, """() => ({
-      pr: (capById('cap7')||{}).projects ? capById('cap7').projects.length : 0,
+      pr: (capById('cap8')||{}).projects ? capById('cap8').projects.length : 0,
       arch: ARCHIVES.length })""")
+    ck("the SMO's own capability holds projects to lose", (before2.get("pr") or 0) > 0, before2)
     try:
-        pg.click('[data-caprm="cap7"]', timeout=3000); pg.wait_for_timeout(350)
+        pg.click('[data-caprm="cap8"]', timeout=3000); pg.wait_for_timeout(350)
         pg.click('[data-caprmall]', timeout=3000); pg.wait_for_timeout(600)
     except Exception as e:
         ck("Remove everything can be pressed", False, str(e)[:80])
     gone = ev(pg, """() => ({
-      cap: !!capById('cap7'),
-      pr: fnProjects('finance').length,
+      cap: !!capById('cap8'),
+      pr: fnProjects('smo').length,
+      own: fnOwnProjects('smo').length,
       arch: ARCHIVES.length })""")
     ck("the capability is gone", gone.get("cap") is False, gone)
     ck("...and its projects with it", gone.get("pr") == 0, gone)
+    ck("...not quietly given to the function instead (§321's other answer)",
+       gone.get("own") == 0, gone)
     ck("...archived first, so it can be restored",
        (gone.get("arch") or 0) > (before2.get("arch") or 0), gone)
 

@@ -7830,6 +7830,33 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/functional-projects.py # a function's projects are its own
+                                # (§321, spec 045 stage 1). Islam: "the problem
+                                # with having the capability hidden in the
+                                # functional plans is confusing for the whole
+                                # structure." BOTH ENDS of every claim (§94.2):
+                                # the function measured WITH its box and again
+                                # after the product's own dissolve, because a
+                                # build that never drew the band and one that
+                                # always draws it each satisfy half of the file.
+                                # The Overview is asserted to AGREE, key for
+                                # key, with the one a pillars function already
+                                # draws (§213, §94.8) rather than against a list
+                                # of headings a wording change would falsify;
+                                # every id, every CODE and every reported figure
+                                # asserted unmoved across the dissolve (§232,
+                                # §310); the projects asserted DRAWN on each
+                                # page rather than merely un-banded, or every
+                                # absence passes on a build that draws nothing
+                                # (§113.8, which took that falsification from
+                                # 1 red to 4); a project and a key objective
+                                # PRESSED onto a function with no box and read
+                                # back off the stored plan (§96, §50.6); the
+                                # deck's cover; and the workbook still able to
+                                # address the function (§22). 34/0, proved able
+                                # to fail four ways from the SOURCES (§276):
+                                # 3 / 4 / 2 / 6 red. SMP_BUILT points it at
+                                # another build
 python3 checks/capability-remove.py # removing a capability: two answers,
                                 # not one (§320). Islam: "when I try to remove
                                 # the capability it will remove the projects
@@ -8630,7 +8657,21 @@ success. The move is READ OUT of `config-data.js` rather than copied (§283),
 and both ends are asserted: a removal WITHOUT the move still takes its
 projects. Needs a throwaway Postgres; 12/12, proved able to fail twice (5 red
 with the move a no-op, 1 red with the append):
-`DATABASE_URL=… node scripts/test-capability-move.js`
+`DATABASE_URL=… A function's projects need no column, and the one-off moves a tenant onto the
+model (§321) — the half the browser cannot see, and the half where being wrong
+is expensive: `projects.cap_id` is NOT NULL and CASCADEs. It asserts the round
+trip through `functions.extra` with NO schema change (§118, §213 — claimed
+wrongly once before in this file, §172), then every box dissolved with every
+project's id and figure intact, the definition and objectives carried only
+where the function had none, an archive left behind, and that it runs once.
+The fixture is the platform's OWN seed and its own dissolve rule, never a graph
+typed out in the check (§100.3, §255). 18/18; proved able to fail twice (4 red
+with the move a no-op, 1 red with it assigned rather than pushed) — and its own
+reporter DIED on the first falsification, `JSON.stringify(undefined)` not being
+a string, so "1 red" was a lie (§215). Needs a throwaway Postgres:
+`DATABASE_URL=… node scripts/test-functional-projects.js`
+
+node scripts/test-capability-move.js`
 
 Two people, one database — the scenario that was destroying work before §210
 (needs a throwaway Postgres; `SMP_WHOLE_GRAPH=1` restores the old behaviour and
@@ -8753,7 +8794,96 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-11 &mdash; **&sect;320: removing a capability &mdash;
+*Last Updated: 2026-09-12 &mdash; **&sect;321: a function's projects are its
+own (spec 045, stage 1).** Islam, correcting &sect;320.9's proposal outright:
+*"capability is something Strategic ... the problem with having the capability
+hidden in the functional plans is confusing for the whole structure aligned
+with me what you're understanding to fix this once and for old."* **HIDING THE
+BOX WAS TREATING THE SYMPTOM**, and that is the finding: the fault is not that
+the word is on the screen, it is that **the only container the platform owned
+for a supporting function's projects was called a capability** &mdash; so every
+function planning in projects appeared to hold a strategic capability whether
+it did or not, and a real one had nowhere of its own to live. &sect;320.9 is
+recorded as withdrawn rather than overwritten (Principle II); its measurement
+is still the evidence. **MEASURED FIRST**: six of the seven projects-format
+functions carry exactly one box, the navy band is drawn on all four of that
+function's pages, the Overview says it TWICE, and **no project code mentions it
+at all** &mdash; `FIN01`, `FIN02`, `FIN03` are the function's own letters
+(&sect;310), so the projects were already the function's everywhere the
+arithmetic touches them. **TWO PIECES ALREADY EXISTED**, which is what made it
+tractable: &sect;319 shipped a pillar's *kind* of Direction | Capability one day
+earlier &mdash; Islam's first form, live &mdash; and &sect;213 had already given
+a supporting function its own definition and key objectives, so a dissolved box
+has a home for everything it holds without inventing a field. **NO SCHEMA
+CHANGE AND NO SQL MIGRATION**: `functions` maps six columns and files every
+other key into `extra`, so `projects` travels the road `items`, `swot`,
+`format` and `def` already travel (&sect;118, &sect;213) &mdash; **proved on a
+real Postgres rather than claimed (&sect;172)**, that claim having been wrong
+here before. Its cost is named and paid: a function's plan is one blob, so
+`treeFor("functions")` gains `projects` or the whole function travels on every
+figure &mdash; &sect;216's fault reborn, worst in the live case of a function
+head and a project owner reporting in the same minutes &mdash; and it is **the
+same subtree a capability's projects are walked with**, never a second copy
+(&sect;53.5). **THE HOLDER IS TWO HALVES**, `fnAsUnit`/`fnWritable` one format
+over: the reading one hands out a shared frozen empty and the writing one mints
+the container (&sect;50.6, &sect;61), and its `projects` is the **function's own
+array, never a copy**. `fnHolders(fk)` is the ONE list the four pages, the deck,
+the gap walk, the reporting walk and the codes read, where each had its own
+`capsOfFunction` call &mdash; which is how the two sides of the switch drifted
+twice already (&sect;211, &sect;213). **AND THE MOVE MUTATES IN PLACE**:
+&sect;320's `moveCapProjects` reassigned `to.projects`, which lands on a WRAPPER
+and is thrown away one line later &mdash; `fnAsUnit`'s own recorded trap wearing
+a different hat. **THE BAND IS NOT DRAWN OVER A FUNCTION'S OWN WORK**, on
+`capBand`'s own stated reason (*"a function may carry several, and that band is
+what says which one a section belongs to"* &mdash; one is not several), and
+**the Overview is the one &sect;213 already built**: `fnPillarsOverview` renamed
+`fnOwnOverview` with nothing inside it changed, so that section's decision that
+the two formats draw ONE page is finally true of both &mdash; asserted as
+AGREEMENT key for key, never against a list of headings (&sect;94.8). The deck
+stops calling a function's own work a capability review and draws no second
+cover (&sect;87's twins, on a projector); the workbook still addresses the
+function by name, or a plan downloads and cannot come back (&sect;22, &sect;61).
+**AND THE DISSOLVE IS ONE ACT** &mdash; Islam: *"the ability to turn functional
+projects to a capability and vice versa"* &mdash; which was **one more entry in
+a list &sect;320's dialog already had**: the function itself is a destination,
+and the one always there, so the held state he photographed on 11 September
+(*"There is nowhere for them to go"*) **cannot occur and its branch is deleted**
+(&sect;24). `SMPRules.dissolvePlan` is in the shared module and is pressed by
+the browser's control AND the server's one-off (&sect;42): the projects always
+travel, the definition and objectives travel only where the function has none
+(&sect;96.2), the **name travels nowhere but the archive**, and **no id is ever
+renumbered** (&sect;232, &sect;316). **AND AN ARCHIVE OF NOTHING IS NOT A
+RECORD**: the first build wrote one per box on a FRESH deployment, migration
+004 having just emptied every one &mdash; `archiveCapPlan` already refuses an
+empty plan on the other side, so the heal follows it rather than deciding again
+(&sect;53.5). **TWO THINGS THE CHECKS FOUND, BOTH MINE**: `clearedGraph()` kept
+the eight shells, so the screen shown as *"what a client's deployment looks like
+on day one"* and the deployment they get had stopped agreeing (&sect;67)
+&mdash; **reproduced PASSING on the baseline first** (&sect;303), so it was known
+to be mine before anything moved; and **a run that prints "edits: 2" and then
+throws has written nothing**, which lost two of the deck's edits and was caught
+only by the one assertion that reads its cover (&sect;266.9's rule in a
+different tool). `checks/functional-projects.py` **34/0**, falsified four ways
+from the SOURCES (**3 / 4 / 2 / 6 red**) &mdash; and falsification B was **1 red
+until the projects were asserted DRAWN rather than merely un-banded**, every
+absence passing perfectly on a build that draws nothing (&sect;113.8).
+`scripts/test-functional-projects.js` **18/0** on a real Postgres 16, falsified
+twice &mdash; **and its own reporter DIED on the first attempt** (&sect;215), so
+"1 red" was a lie. `test-authorize.js` **608/0** with a &sect;37 asserting a
+function's own projects are judged **as a capability's are**, made twice and
+compared rather than listed (&sect;94.8), red 6 ways and 3 ways; *its first
+draft set a milestone to the status it already held* (&sect;94.5, walked into
+twice in two days). 136/0 differ &middot; round trip, clean slate, clean parity
+and two tabs green on virgin databases &middot; **`capability-remove.py` 0
+failures with five assertions REWRITTEN, never loosened** (&sect;218) &mdash;
+the held-state block INVERTED rather than deleted, because the case it guarded
+is exactly the case this has to get right &middot; eleven neighbouring checks
+green &middot; full `qa.py` ERRORS none. **RECORDED, NOT DONE**: the worked
+example still ships its eight containers, so which the demo should show is
+Islam's (spec 045 §10.4); making projects a capability is stage 2; and a
+promoted project's code changing is his to accept (§10.5).*
+
+*Earlier: 2026-09-11 &mdash; **&sect;320: removing a capability &mdash;
 the box, or the box and its work.** Islam, with the browser's own dialog open
 in front of him: *"when I try to remove the capability it will remove the
 projects with it."* **IT DID, AND THE DATABASE AGREED**: a project lives INSIDE

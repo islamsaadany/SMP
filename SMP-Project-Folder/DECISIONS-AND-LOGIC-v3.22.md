@@ -5324,6 +5324,196 @@ line range** (§24, §214).
 
 ---
 
+## 321 · A function's projects are its own
+
+**Islam, 2026-09-12**, correcting a proposal of mine that would have hidden the
+problem rather than fixed it:
+
+> *"capability is something Strategic and the capability is either planned in
+> the form of a pillar or in the form of an overview and projects like what
+> we're doing today and the functional plans might be in the form of projects
+> that they work on as functions and in the form of objectives and actions that
+> we discussed earlier so the problem with having the capability hidden in the
+> functional plans is confusing for the whole structure aligned with me what
+> you're understanding to fix this once and for old"*
+
+Spec 045 §8, **stage 1**. Stage 2 — a capability as a strategic entry beside
+the business units — is not built here.
+
+### 321.1 · The fault, and why hiding the box was the wrong answer
+
+**§320.9 PROPOSED NOT DRAWING THE BAND where a function carries one box, and
+that is treating the symptom.** Islam's correction is the whole of this
+section: the problem is not that the word is on the screen, it is that **the
+only container the platform owned for a supporting function's projects was
+called a capability** — so every function that plans in projects appeared to
+hold a strategic capability whether it held one or not, and a real capability
+had nowhere of its own to live. Recorded as withdrawn rather than overwritten
+(Principle II); the measurement in §320.9 is still the evidence for this.
+
+**MEASURED ON THE DEMO BEFORE ANYTHING WAS WRITTEN**: of the seven functions
+that plan in projects, **six carry exactly one capability** (only Marketing
+carries two); the navy `CAPABILITY` band is drawn on **all four** of that
+function's pages; the Overview says it **twice**, as a band and then as a row
+reading *Capability: Financial Infrastructure* directly above *Carried by:
+Finance*; and **no project code mentions it at all** — they already read
+`FIN01`, `FIN02`, `FIN03`, the function's own letters (§310). *The projects
+were already the function's everywhere the arithmetic touches them; the box was
+a layer of vocabulary over them.*
+
+### 321.2 · Two pieces already existed, which is what made it tractable
+
+- **A capability planned as a pillar is already there.** §319 shipped a
+  pillar's `kind` — *Direction* or *Capability* — drawn and settable, one day
+  earlier. That is Islam's first form, live.
+- **A function already holds everything a container holds.** §213 gave a
+  supporting function its own `def`, and `koHolderById("fn:<key>")` already
+  resolved to the function's own key objectives. So a dissolved box has a home
+  for its definition and its objectives without inventing a field.
+
+### 321.3 · No schema change, and no migration in SQL
+
+`functions` maps six columns in `lib/state-io.js` and files every other key
+into `extra`, so **`projects` on a function travels the road `items`,
+`keyObjectives`, `swot`, `format`, `under` and `def` already travel** (§118's
+blob, §213's definition). **Proved on a real Postgres rather than claimed
+(§172)** — that claim has been wrong in this product before, and it cost a
+production outage.
+
+What it costs is stated rather than discovered: a function's plan is one JSON
+blob, so **the differ had to learn it** or the whole function would travel on
+every figure — §216's fault reborn one model later, and worst in the live case
+of a function head and a project owner reporting in the same minutes (§147.7,
+§301). `treeFor("functions")` gains `projects`, **the same subtree a
+capability's projects are walked with** and never a second copy (§53.5).
+
+### 321.4 · The shape: a holder, in two halves
+
+`fnOwnHolder(fk)` / `fnOwnHolderWritable(fk)` are `fnAsUnit` / `fnWritable` one
+format over, and follow them exactly — **the reading half hands out a shared
+frozen empty and the writing half mints the container** (§50.6, §61: a reader
+that creates what it looked for is how a phantom change reaches every save).
+The holder's `projects` is the **function's own array, never a copy**, or an
+add reports the row it wrote and the function is still empty.
+
+`fnHolders(fk)` is the ONE list the four pages, the deck, the gap walk, the
+reporting walk and the codes all read — where each had its own
+`capsOfFunction` call before, which is how the two sides of the switch drifted
+twice already (§211, §213). And `eachHolder` is the one walk the snapshot, the
+restore, the new cycle and the id scanner share.
+
+**THE MOVE MUTATES IN PLACE AND NEVER REASSIGNS.** §320's `moveCapProjects`
+wrote `to.projects = …`, which lands on a holder WRAPPER and is thrown away one
+line later — `fnAsUnit`'s own recorded trap wearing a different hat. Splicing
+writes through either destination and keeps §320's ordering rule, which is what
+keeps the codes stable.
+
+### 321.5 · The screens
+
+- **The band is not drawn over a function's own work.** `capBand`'s own comment
+  states the rule it was failing: *"a function may carry several, and that band
+  is what says which one a section belongs to."* One is not several. §24's
+  argument for removing the function's nameplate, one level in.
+- **The Overview is the one §213 already built.** `fnPillarsOverview` is
+  renamed `fnOwnOverview` and **nothing in it changed**: a function with no box
+  draws *Function · Led by · Definition* beside its key objectives, which is
+  what a pillars function has drawn since §213 — that section's decision
+  finally true of both sides. The check asserts the two **agree, key for key**,
+  rather than asserting a list of headings (§94.8).
+- **The deck names what it holds.** A function whose projects are its own is
+  not presenting a capability review, and saying so on the first slide in front
+  of a room is the complaint at its loudest; there is no second cover slide
+  either, which would have said the function's name twice (§87's twins).
+- **The workbook can still address it** (§22, §61): `projectSubjectNames()`
+  offers a function by name in the Read me's dropdown, the upload resolves the
+  name it just offered, and the apply takes the **writing** holder.
+
+### 321.6 · The dissolve is one act, and the migration presses it
+
+Islam: *"one more thing is the ability to turn functional projects to a
+capability and vice versa."* **This is the vice versa, and it was one more
+entry in a list §320's dialog already had** — the function itself is a
+destination, and the one that is always there.
+
+**SO THE HELD STATE IS GONE.** The dialog Islam photographed on 11 September
+read *"There is nowhere for them to go — this is the only capability Finance
+has"*, which was true only while a function's projects HAD to live in a box. It
+cannot occur now, so the sentence and the branch that drew it are **deleted
+rather than left unreachable** (§24).
+
+**AND THE ONE-OFF PRESSES THE SAME RULE.** `SMPRules.dissolvePlan` is in the
+shared module and is asked by the browser's `removeCapability` and by the
+server's `healOwnProjects` alike (§42): the projects always travel, the
+definition and the key objectives travel **only where the function has none of
+its own** (§96.2 — the platform never rewrites what somebody typed), and the
+**name travels nowhere** but the archive. Two answers to *what does giving the
+work back to the function mean* is how a control and a migration drift, and the
+drift would be silent because both would run.
+
+**THE IDS ARE NEVER RENUMBERED** (§232, §316): `renumberCapability()` would
+re-address every project, deliverable, outcome and milestone, and those ids are
+what every reported figure, focus mark and cycle snapshot is keyed on.
+
+**AND AN ARCHIVE OF NOTHING IS NOT A RECORD.** The first build wrote one per
+box on a FRESH deployment, because migration 004's clean slate has just emptied
+every one of them — a brand-new client would have opened on eight archives of
+containers it never had. `archiveCapPlan` already refuses an empty plan on the
+other side, so the heal follows it (§53.5) rather than deciding it again.
+
+### 321.7 · Two things the checks found, both mine
+
+- **THE CLEAN SLATE AND THE DEMO'S "CLEAR PROJECT" MUST STILL AGREE (§67).**
+  `clearedGraph()` emptied the eight boxes and kept their names — right while a
+  capability was part of the SHAPE, like a unit or a company, and wrong now: a
+  client starting on day one has **none**. `scripts/test-clean-parity.js` went
+  red on the first build and was **reproduced PASSING on the baseline first**
+  (§303), so it was known to be mine before anything was changed.
+- **A RUN THAT PRINTS "edits: 2" AND THEN THROWS HAS WRITTEN NOTHING.** Two of
+  the deck's edits were lost that way and only the check caught it, on the one
+  assertion that reads the deck's cover. §266.9's rule — *a command that prints
+  something is not a command that did the thing* — in a different tool.
+
+### 321.8 · Verified
+
+`checks/functional-projects.py` **34/0**, both ends of every claim, proved able
+to fail **four ways from the SOURCES** (§276): **3 / 4 / 2 / 6 red**. Its
+falsification B was **1 red until the projects were asserted DRAWN** rather
+than merely un-banded — every "no band" assertion passes perfectly on a build
+that draws nothing at all (§113.8).
+
+`scripts/test-functional-projects.js` **18/0** against a real Postgres 16,
+proved able to fail twice (**4 red** with the move a no-op, **1 red** with it
+assigned rather than pushed) — **and its own reporter died on the first
+falsification** (§215): `JSON.stringify(undefined)` is not a string, so a
+failing assertion whose value was missing threw inside the reporter and "1 red"
+was a lie.
+
+`test-authorize.js` **608/0** with a new §37 asserting a function's own
+projects are judged **as a capability's are** — as AGREEMENT, made twice and
+compared, never as a list of kinds (§94.8) — red **6 ways** with the
+classifier out and **3** with `projects` out of `FN_KNOWN`. *And its first
+draft set a milestone's status to what it already held* (§94.5, its own
+recorded example, walked into twice in two days).
+
+`test-graph-diff.js` 136/0 · round trip, clean slate, clean parity and two tabs
+green on virgin databases · `capability-remove.py` **0 failures with five
+assertions REWRITTEN, never loosened** (§218) — the held-state block is
+INVERTED rather than deleted, because the case it guarded is exactly the case
+this has to get right · eleven neighbouring checks green · full `qa.py` ERRORS
+none.
+
+### 321.9 · Recorded, not done
+
+- **The worked example still ships its eight containers**, so the offline
+  `file://` build draws them and a deployment does not. That is the
+  transitional state this stage describes, and which the demo should show —
+  containers dissolved, or one real capability kept so §320's feature renders
+  something (§45.2) — is **Islam's**, and is spec 045 §10.4.
+- **Making projects a capability** is stage 2: it needs somewhere to promote
+  into.
+- **A project's code changes when it is promoted**, which is the honest answer
+  and is recorded in spec 045 §10.5 as his to accept.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

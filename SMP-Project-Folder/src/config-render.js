@@ -5208,7 +5208,20 @@ function renderUnitNaming(u){
    arrive the way a unit's plan does — same page, same three steps, same
    review — with their own sheets, because the thing being planned is a
    project with deliverables, outcomes and milestones. */
-function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
+/* §321: A SUPPORTING FUNCTION'S OWN PLAN HAS THE CAPABILITY SHAPE — key
+   objectives and projects — so it goes down the same half of the import, and
+   the subject that names it is `fn:<key>`. "isCap" is now "is a holder of
+   projects", which is what every caller actually asks; the name is left alone
+   because it is threaded through nine call sites and renaming a word nobody
+   reads is not what this round is for (§58's rule for a stored field, applied
+   to a local one). */
+function impHolderTarget(){
+  var t = String(IMP.unit || "");
+  if (t.indexOf("cap:") === 0) return t.slice(4);
+  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? t : "";
+}
+function impIsCap(){ return !!impHolderTarget(); }
 /* THE IMPORT'S SUBJECT, RESOLVED ONCE (§61). It was a unit key and eight
    places read `UNITS[IMP.unit]` directly; since a function that plans in
    pillars can be planned by file it may also be "fn:<key>", and eight direct
@@ -5216,7 +5229,11 @@ function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
    the first time a target was resolved that way. unitLike() already answers
    this for the whole platform, so this is only where the import asks it. */
 function impUnit(){ return unitLike(IMP.unit); }
-function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
+function impCap(){ return holderById(impHolderTarget()); }
+/* AND THE WRITING HALF, for the two places an upload APPLIES (§50.6, §61): a
+   reader hands out a shared frozen empty, so a plan replaced onto it would be
+   reported as written and the function would still be empty. */
+function impCapWritable(){ return holderByIdWritable(impHolderTarget()); }
 
 /* ── SETUP · IMPORT & ARCHIVES (§304) ────────────────────────────────
    Islam: *"I need a mockup to refine this page and the buttons inside it as

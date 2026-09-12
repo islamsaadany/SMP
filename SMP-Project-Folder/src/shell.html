@@ -7313,7 +7313,12 @@
           if (what === "measure") addMeasure(it); else addTactic(it);
         }
         else if (what === "project") {
-          var c = capById(a[1]);
+          /* §321: holderByIdWritable, not capById — a project may be added to
+             a CAPABILITY or straight to the function, and the writing half is
+             what mints the container. A reader hands out a shared frozen
+             empty, so the first project on a function would have been accepted
+             on screen and written nowhere (§50.6, §129's audit). */
+          var c = holderByIdWritable(a[1]);
           if (!c) return;
           var np = addProject(c);
           /* Select what was just made, or the new project is added to a rail
@@ -8083,9 +8088,26 @@
                  functions, rather than resolved by whichever came first in the
                  array. That was the silent wrong-plan §51.2 feared, and it is
                  now caught at the one moment somebody can still act on it. */
+              /* §321: A SUPPORTING FUNCTION THAT HOLDS ITS OWN PROJECTS IS A
+                 SUBJECT, listed in the file's own dropdown by projectSubjectNames()
+                 — so the upload has to resolve the name it just offered, the same
+                 rule §61 already wrote for a pillars function one branch up. It is
+                 searched BESIDE the capabilities rather than before them, so a name
+                 on both is caught by the refusal below instead of being resolved by
+                 whichever list was looked at first (§51.19's silent wrong-plan). */
               var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
-              var cp = caps[0];
-              if (!uk && !fk && caps.length > 1) {
+              var pfk = FUNCTION_KEYS.filter(function(k){
+                var f = FUNCTIONS[k];
+                return f && f.active !== false && !fnPlansInPillars(f) &&
+                       f.name === picked && fnOwnsProjects(k);
+              })[0];
+              if (!uk && !fk && pfk && caps.length) {
+                impFail('"' + esc(picked) + '" is both a supporting function and a ' +
+                  'capability. Rename one on Setup \u2192 Capabilities, then upload again.');
+                return;
+              }
+              var cp = pfk ? fnOwnHolderWritable(pfk) : caps[0];
+              if (!uk && !fk && !pfk && caps.length > 1) {
                 impFail('two capabilities are called "' + esc(picked) + '" \u2014 under ' +
                   caps.map(function(x){
                     var f = FUNCTIONS[x.fn];
@@ -8099,7 +8121,7 @@
                   '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
-              IMP.unit = uk ? uk : fk ? "fn:" + fk : "cap:" + cp.id;
+              IMP.unit = uk ? uk : fk ? "fn:" + fk : (pfk ? "fn:" + pfk : "cap:" + cp.id);
               if (!uk && !fk && cp) {
                 var cRows = capPlanFromWorkbook(cp, sheets);
                 readPlanRows(cRows, cp.name + " \u00b7 " + cRows.length + " rows");
@@ -8168,7 +8190,10 @@
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;
         if (impIsCap()) {
-          var cc = impCap();
+          /* §321: WRITABLE, for the reason the unit branch below already
+             states — a plan applied to a reading view is reported as written
+             and is not (§61). */
+          var cc = impCapWritable();
           arch = applyCapPlanReplace(cc, sm.rows);
           what = plural(inc.projects, "project") + ", " +
                  plural(inc.objectives, "objective") + " written.";
@@ -8191,7 +8216,7 @@
         var ch = IMP.diff.rows.filter(function(r){ return r.status === "changed"; }).length;
         what = ch + " figure" + (ch === 1 ? "" : "s") + " updated.";
         if (impIsCap()) {
-          var c = impCap();
+          var c = impCapWritable();
           applyCapProgress(c, IMP.diff);
           IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
         } else {
@@ -9010,28 +9035,55 @@
     var c = capById(id);
     if (!c) return;
     var f = functionOf(c.fn), fname = f ? f.name : "the function";
+    /* §321: THE FUNCTION ITSELF IS A DESTINATION, and it is the one that is
+       always there. Islam: *"one more thing is the ability to turn functional
+       projects to a capability and vice versa"* — this is the vice versa, and
+       it is one more entry in a list the dialog already had rather than a
+       second control (§53.5). It is offered FIRST, because a function's own
+       work is where a dissolved box's projects belong; a sibling capability is
+       the narrower answer.
+
+       AND THE HELD STATE IS GONE WITH IT. This dialog used to read "There is
+       nowhere for them to go — this is the only capability Finance has, so its
+       projects already belong to the function", which was true only while a
+       function's projects HAD to live in a box. It cannot occur now, so the
+       sentence and the branch that drew it are DELETED rather than left
+       unreachable (§24) — what remains is the one case that can still happen,
+       a box holding no projects at all. */
     var sibs = capSiblings(c), np = (c.projects || []).length,
         nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
-    var keepable = np > 0 && sibs.length > 0;
-    var dest = sibs.length === 1
-      ? '<b>' + esc(sibs[0].name || "the other capability") + '</b>'
+    var dests = [{ id: "fn:" + c.fn, label: fname + " itself", own: true }]
+      .concat(sibs.map(function(x){
+        return { id: x.id, label: x.name || x.id, own: false }; }));
+    var keepable = np > 0;
+    var dest = dests.length === 1
+      ? '<b>' + esc(dests[0].label) + '</b>'
       : '<select class="fld" data-capdest="1" aria-label="Where the projects go">' +
-          sibs.map(function(x){
-            return '<option value="' + esc(x.id) + '">' + esc(x.name || x.id) + '</option>';
+          dests.map(function(x){
+            return '<option value="' + esc(x.id) + '">' + esc(x.label) + '</option>';
           }).join("") + '</select>';
-    var koNote = nko
-      ? ' Its ' + plural(nko, "key objective") + (nko === 1 ? ' goes' : ' go') +
-        ' with the box.'
-      : '';
-    var whyNot = !np
-      ? 'It holds no projects, so there is nothing to move.'
-      : 'There is nowhere for them to go \u2014 this is the only capability ' +
-        esc(fname) + ' has, so its projects already belong to the function.';
+    /* §321: WHERE THE OBJECTIVES END UP DEPENDS ON WHERE THE PROJECTS GO, so
+       the note says which rather than one sentence that is false on half the
+       destinations (§104.8). They come across to the FUNCTION and only where
+       it has none of its own; a sibling capability takes the projects alone,
+       which is what this dialog has always said. */
+    var fnHasKo = !!((f && f.keyObjectives) || []).length;
+    var koNote = !nko ? ''
+      : (dests.length === 1
+          ? (fnHasKo
+              ? ' Its ' + plural(nko, "key objective") + ' stay in the archive \u2014 ' +
+                esc(fname) + ' already has its own.'
+              : ' Its ' + plural(nko, "key objective") + (nko === 1 ? ' comes' : ' come') +
+                ' across too.')
+          : ' Its ' + plural(nko, "key objective") +
+            (nko === 1 ? ' comes' : ' come') + ' across only to ' + esc(fname) +
+            '; a capability takes the projects alone.');
+    var whyNot = 'It holds no projects, so there is nothing to move.';
     var keepRow =
       '<div class="pick' + (keepable ? ' safe' : '') + '">' +
         '<div class="txt"><p class="t">Keep the projects</p><p class="d">' +
           (keepable
-            ? plural(np, "project") + ' move to ' + dest + ' and keep their codes, ' +
+            ? plural(np, "project") + ' move to ' + dest + ' and keep their ids, ' +
               'their figures and their history. Only the grouping goes.' + koNote
             : whyNot) +
         '</p></div>' +
@@ -9072,7 +9124,7 @@
     var keep = box.querySelector("[data-capkeep]");
     if (keep && keepable) keep.addEventListener("click", function(){
       var sel = box.querySelector("[data-capdest]");
-      var to = sel ? sel.value : sibs[0].id;
+      var to = sel ? sel.value : dests[0].id;
       closeModal(); doCapRemove(id, to);
     });
     var all = box.querySelector("[data-caprmall]");

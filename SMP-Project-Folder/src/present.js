@@ -714,7 +714,11 @@ function deckPillarHead(u, p, pi, which){
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
 function deckSlidesFn(fk){
-  var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
+  /* §321: the function's OWN work first, then any capability it carries — the
+     same list its four pages draw, so the projector cannot show a deck the
+     screen does not (§53.5). */
+  var f = FUNCTIONS[fk], caps = fnHolders(fk);
+  var realCaps = capsOfFunction(fk);
   var S = [];
 
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
@@ -723,8 +727,15 @@ function deckSlidesFn(fk){
         ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">Capability review &middot; ' + esc(REVIEW.name) +
-    ' &middot; ' + caps.length + (caps.length === 1 ? ' capability' : ' capabilities') + '</p></section>');
+    /* §321: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
+       are its own is not presenting a capability review, and saying so on the
+       first slide in front of a room is Islam's complaint at its loudest. The
+       capability wording survives for a function that really carries one. */
+    '<p class="coversub">' + (realCaps.length
+      ? 'Capability review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
+        realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
+      : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
+        plural(fnProjects(fk).length, "project")) + '</p></section>');
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -734,6 +745,12 @@ function deckSlidesFn(fk){
     /* §236.3's anchors, mirrored on the function's deck (§53.5): keyed on the
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
+    /* §321: NO SECOND COVER FOR THE FUNCTION'S OWN WORK. The deck has just
+       opened on the function's own name; a slide headed "Capability · Finance"
+       over the word "Finance" names a thing that does not exist and says the
+       name twice (§87's twins, on a projector). A capability it CARRIES still
+       gets one — telling one from another is what that slide is for. */
+    if (!c.own)
     S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
       sec(secTwo(c.name), c.name) +
       '><span class="seclab">Capability &middot; ' +

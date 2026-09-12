@@ -5842,6 +5842,44 @@ these checks to install Pillow"* — and it is right, and two files went the
 other way anyway. Not reconciled here: rewriting two working checks to drop a
 dependency is a tidy-up, and they are the two that read the most pixels.
 
+### 324.7 · A worker served as a page is a console error that looks like the product
+
+`checks/refusal-keeps-work.py` failed on **"nothing threw"**, and what it had
+caught was *"The script has an unsupported MIME type ('text/html')"* — its stub
+answered `/sw.js` with the gate page, Chromium refused the registration, and
+the refusal landed in the check's own page-error listener. Nothing about the
+product. **§250.2 recorded exactly this for `report-saves.py`** and §270 fixed
+it there; it was here as well and nobody looked. One line.
+
+**AND THE SWEEP FOR IT FOUND 31 MORE STUBS WITH NO `sw.js` BRANCH — AND ALL OF
+THEM PASS**, which is why they are recorded rather than patched: they either do
+not watch for page errors, or never reach the branch. It is a trap that springs
+the day one of them gains a "nothing threw" assertion, not a fault today.
+Blanket-editing thirty-one working checks to close a hazard is the churn §2b
+warns about; naming it is what makes the next one a minute's work.
+
+### 324.8 · Twenty-two checks can never fail an automated run
+
+Found by asking a different question of the tree — *which of these can tell a
+runner that they failed?* — after §298.3 recorded my own runner reading a count
+the checks do not all spell the same way. **22 of 152 never exit non-zero**:
+`capability-remove`, `cycle-edit`, `deck-pdf`, `deck-strip`, `duplicates`,
+`fold-caret`, `import-page`, `master-picker`, `monthly-plan`, `no-jump`,
+`plan-edit-line`, `plan-tail-fold`, `planning-period`, `project-row-type`,
+`row-edit`, `sendsaid-fullshot`, `table-standard`, `table-standard-all`,
+`table-widths`, `template-round-trip`, `upload-duplicates`, `yn-in-progress`.
+They print their failures and exit 0, so **any runner that reads the exit code
+reports them as passing whatever they say** — and reading the exit code is the
+CORRECT way round, which is what makes this worth writing down: §298.3's lesson
+sends you from counting lines to trusting the code, and for these twenty-two
+the code is a lie.
+
+**NOT FIXED, AND MEASURED BEFORE THAT WAS DECIDED**: every one of the 22 is
+green today, read off its own tail rather than its exit — so this is a hazard
+for whoever automates, not a failure hiding behind a green tick. Twenty-two
+files, each with its own name for the count it keeps (`bad`, `fails`, `fail`),
+is a round of its own and a poor passenger on a branch going to a merge.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

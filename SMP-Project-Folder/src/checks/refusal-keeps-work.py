@@ -144,6 +144,14 @@ class H(http.server.BaseHTTPRequestHandler):
             self._s(json.dumps({"ok": True, "state": STORED, "person": FILLER}).encode()); return
         if self.path.startswith("/api/auth"):
             self._s(json.dumps({"ok": True, "person": FILLER}).encode()); return
+        # A WORKER IS SERVED AS JAVASCRIPT OR THE REGISTRATION REJECTS (§231.5,
+        # §324.7). Without this the stub answered `/sw.js` with the gate page,
+        # Chromium refused it — *"The script has an unsupported MIME type
+        # ('text/html')"* — and the refusal reached this check's own page-error
+        # listener, so a clean run failed on "nothing threw". §250.2 recorded
+        # exactly this for report-saves.py; it was here too and nobody looked.
+        if self.path.startswith("/sw.js"):
+            self._s(b"/* stub */", 200, "application/javascript"); return
         if self.path.startswith("/raya-trade"):
             self._s(HTML, 200, "text/html; charset=utf-8"); return
         self._s(b"<!doctype html><title>gate</title>", 200, "text/html; charset=utf-8")

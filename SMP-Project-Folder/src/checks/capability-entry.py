@@ -304,31 +304,41 @@ def main():
                        " ownCodes:(FUNCTIONS.finance.projects||[]).map(x=>projCode('finance',x)),"
                        " arch:ARCHIVES.length} : null;}", None)
         ck("the capability is made", bool(after), after)
-        if after:
-            ck("the projects keep their IDS (§232, §316)",
-               after["p"] == before["own"][:2], "%s / %s" % (after["p"], before["own"]))
-            ck("...and take the capability's codes, as the dialog said",
-               after["codes"] == ["CD01", "CD02"], after["codes"])
-            ck("...and the function's remaining project closes up",
-               after["ownCodes"] == ["FIN01"], after["ownCodes"])
-            ck("an archive is written first (§49.2)",
-               after["arch"] > before.get("arch", 0),
-               "%s -> %s" % (before.get("arch"), after["arch"]))
+        # §215 IS ABOUT WHAT A CHECK REPORTS, NOT ONLY ABOUT WHAT IT SURVIVES.
+        # These eight sat behind `if after:` and were therefore SKIPPED on the
+        # one build they exist for: falsifying the promote path printed a single
+        # red where there are nine, which reads as a near miss rather than as a
+        # feature that is not there. They degrade instead, so the count is the
+        # truth (§298.3: the tail is the verdict, and the count has to match it).
+        a = after or {}
+        ck("the projects keep their IDS (§232, §316)",
+           a.get("p") == before.get("own", [])[:2],
+           "%s / %s" % (a.get("p"), before.get("own")))
+        ck("...and take the capability's codes, as the dialog said",
+           a.get("codes") == ["CD01", "CD02"], a.get("codes"))
+        ck("...and the function's remaining project closes up",
+           a.get("ownCodes") == ["FIN01"], a.get("ownCodes"))
+        ck("an archive is written first (§49.2)",
+           isinstance(a.get("arch"), int) and a["arch"] > before.get("arch", 0),
+           "%s -> %s" % (before.get("arch"), a.get("arch")))
 
-            # ── 9 · and giving them back ───────────────────────────────────
-            print("\n9 · the round trip closes where it started")
-            gave = ev(pg, "(id)=>{ removeCapability(id, 'fn:finance'); paint();"
-                          " return {own:(FUNCTIONS.finance.projects||[]).map(p=>p.id),"
-                          " codes:(FUNCTIONS.finance.projects||[]).map(p=>projCode('finance',p)),"
-                          " caps:GROUP.capabilities.map(c=>c.id)};}", {}, after["id"])
-            ck("every project is back with the function, ids unmoved",
-               sorted(gave.get("own", [])) == sorted(before.get("own", [])),
-               "%s / %s" % (gave.get("own"), before.get("own")))
-            ck("...and every code is back where it started",
-               gave.get("codes") == before.get("codes"),
-               "%s / %s" % (gave.get("codes"), before.get("codes")))
-            ck("...and the capability is gone",
-               after["id"] not in gave.get("caps", []), gave.get("caps"))
+        # ── 9 · and giving them back ───────────────────────────────────────
+        print("\n9 · the round trip closes where it started")
+        gave = ev(pg, "(id)=>{ if(!id) return {}; removeCapability(id, 'fn:finance');"
+                      " paint();"
+                      " return {own:(FUNCTIONS.finance.projects||[]).map(p=>p.id),"
+                      " codes:(FUNCTIONS.finance.projects||[]).map(p=>projCode('finance',p)),"
+                      " caps:GROUP.capabilities.map(c=>c.id)};}", {}, a.get("id") or "")
+        ck("every project is back with the function, ids unmoved",
+           bool(gave.get("own")) and
+           sorted(gave.get("own", [])) == sorted(before.get("own", [])),
+           "%s / %s" % (gave.get("own"), before.get("own")))
+        ck("...and every code is back where it started",
+           bool(gave.get("codes")) and gave.get("codes") == before.get("codes"),
+           "%s / %s" % (gave.get("codes"), before.get("codes")))
+        ck("...and the capability is gone",
+           bool(a.get("id")) and a["id"] not in gave.get("caps", []),
+           "%s / %s" % (a.get("id"), gave.get("caps")))
 
         # ── 10 · the other form ────────────────────────────────────────────
         print("\n10 · a capability can be planned in pillars (Islam's own answer)")

@@ -6361,7 +6361,19 @@ row and totals, the promote dialog naming the new codes BEFORE the press, the
 demote round trip, and the pillars form. **AND ITS OWN SUMMARY LIED** (§298.3):
 `"%d passed, %d failed" % (0, bad) if bad else "…"` binds the ternary looser
 than the `%`, so a clean run printed *0 passed, 1 failed* over forty-one lines
-saying ok.
+saying ok. **Proved able to fail twice from the SOURCES** (§276): **11 red**
+with the caps side taken out of `navSides()`, naming the switch, the
+destination, the Reporting tab, the tabs and sections and the Overview; **8
+red** with `promotePlan` neutered. **AND THE SECOND COUNT WAS 1 UNTIL §215 WAS
+READ PROPERLY**: eight of that section's assertions sat behind `if after:`, so
+on the one build they exist for they were SKIPPED rather than failed — the id,
+the codes, the close-up, the archive and the whole demote round trip simply did
+not appear in the output, and a falsification of the feature read as a near
+miss. *That rule is about what a check REPORTS, not only about what it
+survives*: a probe degrades so the next assertion can still be made, and a
+dependent assertion guarded behind *did the step work* has stopped being an
+assertion at all (§298.3 from the other side — there the count disagreed with
+the tail, here it agreed with a tail that was missing seven lines).
 
 Four neighbours were REWRITTEN, never loosened (§218), because §330 moves what
 they are about rather than what they assert:

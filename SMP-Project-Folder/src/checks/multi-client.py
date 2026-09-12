@@ -195,9 +195,18 @@ def main():
             check("…and the card says it in words", "super user" in seat_shown, seat_shown)
 
             # ── 3 · opening one, and the way back ───────────────────
-            pg.click(".ccard[data-client='raya-trade']")
+            # REWRITTEN, NEVER LOOSENED (§218, §51.11): it pressed the CARD,
+            # and §320.3 made the card's name un-pressable — every way in
+            # names a module now (spec 046 §4.6a). Both ends: the top does
+            # NOT navigate, and the row does.
+            pg.click(".ccard[data-client='raya-trade'] .ctop h2")
+            pg.wait_for_timeout(600)
+            check("the card's name is not a door — only the rows open (§320.3)",
+                  pg.url.rstrip("/").endswith("/platform"), pg.url)
+            pg.click(".ccard[data-client='raya-trade'] .mrow[data-module='strategy']")
             pg.wait_for_load_state("networkidle")
-            check("a card opens the client's own address", pg.url.endswith("/raya-trade"), pg.url)
+            check("a module row opens the client inside that module",
+                  pg.url.endswith("/raya-trade/strategy"), pg.url)
             pg.wait_for_timeout(2600)
             back = pg.query_selector("#clientback")
             check("the client's name is in the chrome", bool(back) and back.is_visible())
@@ -239,9 +248,10 @@ def main():
                 pg2.wait_for_selector(".ccard[data-client]", timeout=9000)
                 check("…with the client they hold on it",
                       "Raya Trade" in pg2.inner_text("#page"), pg2.inner_text("#page")[:120])
-                pg2.click(".ccard[data-client='raya-trade']")
+                pg2.click(".ccard[data-client='raya-trade'] .mrow[data-module='strategy']")
                 pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(2500)
-                check("…and pressing it opens the client", pg2.url.endswith("/raya-trade"), pg2.url)
+                check("…and pressing its module row opens the client",
+                      pg2.url.endswith("/raya-trade/strategy"), pg2.url)
             # AND THE WAY BACK IS NOT A LOOP (§313.23). It went to "/", and the
             # door hands somebody over to what they can OPEN — so for exactly
             # this person, holding one client, the way back walked out of the

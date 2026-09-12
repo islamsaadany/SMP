@@ -93,6 +93,10 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             with open(os.path.join(REPO, "smp-app", "public", "platform-page.js"), encoding="utf-8") as f:
                 self._send(f.read(), "application/javascript; charset=utf-8")
             return
+        if path == "/memory-split.js":
+            with open(os.path.join(REPO, "smp-app", "public", "memory-split.js"), encoding="utf-8") as f:
+                self._send(f.read(), "application/javascript; charset=utf-8")
+            return
         # the page links its own mark; a stub that does not serve it
         # reports a working build broken with two console 404s (§100.3)
         if path in ("/favicon.svg", "/favicon.png"):
@@ -128,8 +132,18 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                 {"key": "super", "name": "Super user", "note": "holds the access matrix"},
                 {"key": "smoteam", "name": "SMO team", "note": "runs cycles"}],
                 "canEdit": True, "register": [], "office": [], "shape": SHAPE,
-                "holds": {"plans": 0, "capabilities": 0, "units": 2, "functions": 1}}),
+                "holds": {"plans": 0, "capabilities": 0, "units": 2, "functions": 1},
+                # §322.1 carries §320.4's band onto this flow's first step, so
+                # the stub answers what that band reads — the whole offer and
+                # what this client holds, both from the server (§53.5).
+                "modules": ["strategy"], "offer": [
+                    {"key": "strategy", "label": "Strategy", "note": "Plans, cycles and reviews.", "always": True},
+                    {"key": "trial", "label": "Trial", "note": "A module with a page of its own.", "always": False}]}),
                 "application/json")
+        elif act == "setModules":
+            on = body.get("on") is True
+            self._send(json.dumps({"ok": True,
+                "modules": ["strategy", "trial"] if on else ["strategy"]}), "application/json")
         elif act == "createClient":
             self._send(json.dumps({"ok": True, "key": "elabd-foods"}), "application/json")
         else:
@@ -319,6 +333,50 @@ with sync_playwright() as p:
     held = pg.eval_on_selector_all(".wzrow .fld", "els => els.map(e => e.value)")
     ck("…including the shape it already holds",
        isinstance(held, list) and "Bakery" in held and "Dairy" in held, held)
+
+    # ── 8b · THE MODULES BAND, CARRIED ACROSS THE REWRITE (§322.1) ───────
+    #
+    # §320.4 built this band under the client's name on the settings page and
+    # §322 replaced that whole page with this flow — two sessions rewriting one
+    # screen, and the band survives or it does not, with nothing in between
+    # (§318.7). So it is asserted HERE rather than left to the card's own check,
+    # which walks the grid and never opens this step.
+    #
+    # BOTH ENDS EVERY TIME (§94.2): "the default has no button" is satisfied
+    # perfectly by a band with no buttons at all, so the row that CAN be
+    # switched is asserted beside it — and the press is read off what the page
+    # POSTED, never off the word on the button (§96).
+    print("\n§8b · the modules band")
+    pg.click(".wzstep >> text=The client")
+    pg.wait_for_timeout(400)
+    band = pg.query_selector(".band")
+    ck("the client step carries the modules band", bool(band))
+    labs = pg.eval_on_selector_all(".band .teamrow .nm", "els => els.map(e => e.textContent)")
+    ck("…with a row per module the SERVER offers", labs == ["Strategy", "Trial"], labs)
+    rows = pg.eval_on_selector_all(
+        ".band .teamrow", "els => els.map(e => [e.querySelector('.nm').textContent,"
+        " !!e.querySelector('button'), (e.querySelector('.sp') || {}).textContent || ''])")
+    ck("the default says Always on and carries no control (§94.15)",
+       any(r[0] == "Strategy" and r[1] is False and "Always on" in r[2] for r in rows), rows)
+    ck("…and a module that is not the default does carry one",
+       any(r[0] == "Trial" and r[1] is True for r in rows), rows)
+    # EVERY PROBE DEGRADES (§215, this file's own promise): a press on a
+    # control that is not there throws after 30s and takes the four assertions
+    # below with it, so the falsification reports nothing where it should
+    # report four — which is what the first run of this section did.
+    turn = pg.query_selector(".band .teamrow button")
+    if turn:
+        turn.click()
+        pg.wait_for_timeout(450)
+    sent = last("setModules")
+    ck("pressing it posts setModules for that module, on",
+       bool(sent) and sent.get("module") == "trial" and sent.get("on") is True, sent)
+    after = pg.eval_on_selector_all(".band .teamrow .sp", "els => els.map(e => e.textContent)")
+    ck("…and the row reads back what the SERVER answered, in place",
+       any("On" in x and "Always" not in x for x in after), after)
+    cur = pg.query_selector(".wzstep[aria-current='step']")
+    ck("…without repainting the step out from under it (§71.2)",
+       cur is not None and "The client" in cur.text_content())
 
     # ── 9 · nothing thrown ───────────────────────────────────────────────
     print("\n§9 · the console")

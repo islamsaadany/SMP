@@ -115,6 +115,10 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             with open(os.path.join(REPO, "smp-app", "public", "platform-page.js"), encoding="utf-8") as f:
                 self._send(f.read(), "application/javascript; charset=utf-8")
             return
+        if path == "/memory-split.js":
+            with open(os.path.join(REPO, "smp-app", "public", "memory-split.js"), encoding="utf-8") as f:
+                self._send(f.read(), "application/javascript; charset=utf-8")
+            return
         if path == "/__admin0":
             ADMIN[0] = False
             self._send("{}", "application/json"); return
@@ -166,7 +170,14 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                        "holds": {"plans": 0, "capabilities": 0, "units": 1, "functions": 1},
                        "canArchive": may_archive(row),
                        "canDelete": may_archive(row) and arch,
-                       "goes": dict(GOES) if (may_archive(row) and arch) else None}
+                       "goes": dict(GOES) if (may_archive(row) and arch) else None,
+                       # §322.1's band reads both of these off the server; it is
+                       # here so §12 can ask what an ARCHIVED client's copy of it
+                       # offers (§94.2 — "no buttons" means nothing unless the
+                       # live client's same band is asserted to have one).
+                       "modules": ["strategy"], "offer": [
+                           {"key": "strategy", "label": "Strategy", "note": "Plans, cycles and reviews.", "always": True},
+                           {"key": "trial", "label": "Trial", "note": "A module with a page of its own.", "always": False}]}
         elif act == "archiveClient":
             row = WORLD.get(body.get("key"))
             if not row or not may_archive(row):
@@ -450,6 +461,36 @@ with sync_playwright() as p:
                 ck("and it lands on the clients page", bool(q(pg, '[data-grid="clients"]')))
                 ck("…with the client gone from both bands",
                    q(pg, '.ccard[data-client="elabd-foods"]') is None)
+
+    # ── 11b · THE MODULES BAND ON AN ARCHIVED CLIENT (§322.1, §323) ─────
+    #
+    #  §322.1 carried §320.4's band onto this flow, and §323's rule is that an
+    #  archived client is READ and not edited — so the band has to obey it too,
+    #  or one screen says the client is closed while a control on it still
+    #  writes. The server refuses the same request (`setModules` names the
+    #  state), and this is the screen's half of that pair (§42).
+    #
+    #  BOTH ENDS (§94.2): "no buttons" is satisfied perfectly by a band that is
+    #  not drawn at all, so the LIVE client's same band is asserted to carry one
+    #  immediately before.
+    print("\n§11b · modules, once a client is archived")
+    WORLD["elabd-foods"] = copy.deepcopy(LIVE)
+    pg.goto(BASE + "/platform"); pg.wait_for_timeout(500)
+    if open_settings(pg, "elabd-foods"):
+        live_rows = pg.eval_on_selector_all(
+            ".band .teamrow", "els => els.map(e => !!e.querySelector('button'))")
+        ck("a live client's band offers a control",
+           isinstance(live_rows, list) and True in live_rows, live_rows)
+        press(pg, '[data-archive="ask"]')
+        press(pg, '[data-archive="do"]', 700)
+        pg.goto(BASE + "/platform"); pg.wait_for_timeout(500)
+        if open_settings(pg, "elabd-foods"):
+            arch_rows = pg.eval_on_selector_all(
+                ".band .teamrow", "els => els.map(e => !!e.querySelector('button'))")
+            ck("…and an archived one's band is still drawn",
+               isinstance(arch_rows, list) and len(arch_rows) == len(live_rows), arch_rows)
+            ck("…with no control on any row",
+               isinstance(arch_rows, list) and True not in arch_rows, arch_rows)
 
     # ── 11 · SOMEBODY WHO IS NOT THE PLATFORM'S ADMIN ───────────────────
     #  §94.2's other end, and the one that matters most here: adding a client

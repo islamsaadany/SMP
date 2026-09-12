@@ -55,17 +55,21 @@ def check(what, ok, detail=""):
 CLIENTS = [
     {"key": "raya-trade", "name": "Raya Trade", "industry": "Trade & distribution", "kind": "client",
      "mark": None, "mine": True, "seat": "super", "state": "open", "canOpen": True, "canConfig": True,
-     "units": 10, "planned": True, "cycleOpen": True, "unreadable": False},
+     "units": 10, "planned": True, "cycleOpen": True, "unreadable": False,
+     "modules": [{"key": "strategy", "label": "Strategy", "state": "cycle open"}]},
     {"key": "rhi", "name": "RHI", "industry": None, "kind": "client",
      "mark": None, "mine": True, "seat": "super", "state": "open", "canOpen": True, "canConfig": True,
-     "units": 0, "planned": False, "cycleOpen": False, "unreadable": False},
+     "units": 0, "planned": False, "cycleOpen": False, "unreadable": False,
+     "modules": [{"key": "strategy", "label": "Strategy", "state": "no plan yet"}]},
     {"key": "el-abd", "name": "El Abd", "industry": None, "kind": "client",
      "mark": None, "mine": True, "seat": "super", "state": "open", "canOpen": True, "canConfig": True,
-     "units": 0, "planned": False, "cycleOpen": False, "unreadable": False},
+     "units": 0, "planned": False, "cycleOpen": False, "unreadable": False,
+     "modules": [{"key": "strategy", "label": "Strategy", "state": "no plan yet"}]},
 ]
 DEMO = {"key": "demo", "name": "Demo", "industry": "The worked example", "kind": "demo",
         "mark": None, "mine": True, "seat": None, "state": "open", "canOpen": True, "canConfig": True,
-        "units": 10, "planned": True, "cycleOpen": True, "unreadable": False}
+        "units": 10, "planned": True, "cycleOpen": True, "unreadable": False,
+        "modules": [{"key": "strategy", "label": "Strategy", "state": "cycle open"}]}
 
 # The server sorts `ORDER BY kind, name`, so the demo arrives LAST — modelled
 # exactly, or the check would be measuring a list the product never receives

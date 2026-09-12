@@ -100,6 +100,15 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Always verify before handing anything over.** With today's static-HTML stage, that means
   actually exercising the page (headless Chromium is available in-session). Once SMP gains a
   Node/TypeScript stack, run `npx tsc --noEmit` and `npm run build` before every handover.
+- **A CACHED TYPECHECK REPORTS A CLEAN TREE ON A BUILD THAT DOES NOT COMPILE
+  (&sect;320.5a).** `smp-app/tsconfig.json` sets `incremental: true`, so `tsc
+  --noEmit` reads `tsconfig.tsbuildinfo` &mdash; and with a stale one it printed
+  **nothing and exited 0 twice** on a tree holding `Expected 2 arguments, but got
+  1`, finding it the instant the cache file was removed. Reproduced deliberately
+  before it was believed. **Every recent "`tsc` clean" in this project may have
+  been measured against that cache**, which is &sect;298.3's fault in the
+  typechecker: *the count is not the verdict*. `npm run typecheck` deletes the
+  cache first, and that is the only run worth quoting.
 - **Fix type errors across the outcome** — don't leave TypeScript errors unresolved.
 - **Test implications of changes** — ensure changes don't break existing functionality.
 
@@ -823,7 +832,11 @@ assembled from `SMP-Project-Folder/src/` by `python3 build.py`. The build must b
 **byte-identical** to the shipped `strategy-management-platform-vX.Y.html` — if it is not,
 something is out of step. `python3 qa.py` walks every page as every viewer and asserts no
 console errors (in this cloud environment, run it via a wrapper that points Playwright at
-`/opt/pw-browsers/chromium`). Edit the sources, never the built file.
+`/opt/pw-browsers/chromium`). **RUN IT THROUGH `qa-run.py`, NEVER DIRECTLY, AND READ THE
+TAIL** (&sect;320.6b, the third time &mdash; &sect;279.3, &sect;301.2): run directly it
+looks for a headless shell this image does not hold, prints Playwright's *"run playwright
+install"* banner and **exits 0**, so a whole-platform sweep that never launched a browser
+reads as a clean run. *A check that cannot launch reports no failures.* Edit the sources, never the built file.
 
 ### Repository
 - **GitHub:** `islamsaadany/SMP`
@@ -7637,6 +7650,28 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+node smp-app/checks/modules.mjs # a module per client, and the trial that proves
+                                # one can be added (&sect;320.5) &mdash; `npm run
+                                # check:modules`, no database. The list a client has
+                                # (order is MODULES', an unknown or UNBUILT word
+                                # dropped, the default always present), what may be
+                                # offered, the address (a module the client does NOT
+                                # have falling through to the legacy branch exactly as
+                                # any other unknown word), the card's rows, and the
+                                # trial page RENDERED &mdash; the greeting naming this
+                                # client, a different client getting a different one,
+                                # a register it could not read SAID rather than counted
+                                # as nought (&sect;35, &sect;93), the way OUT back to
+                                # Strategy (&sect;61), no row of units, and nothing
+                                # inline needing a script the policy would silence.
+                                # It SAYS which assertions are driven and which are
+                                # read (&sect;100.3). 50/0, red three ways
+                                # (`check:modules:red`) &mdash; `static-hello` printing
+                                # `Hello, there.`, the fault the page exists to rule
+                                # out. Its own first run called a correct build broken:
+                                # `page.appendChild(grid)` appears twice in
+                                # platform.html, so an unscoped indexOf compared the
+                                # band against ANOTHER page's grid (&sect;100.3)
 python3 checks/blob-api.mjs     # (in smp-app: `npm run check:blob`) the clip endpoint
                                 # on the new stack (§316.5): the door in front of it, a
                                 # client that does not exist and a schema NAME refused
@@ -8695,7 +8730,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;321: a client is archived, and only
+*Last Updated: 2026-09-12 &mdash; **&sect;323: a client is archived, and only
 then deleted (spec 047).** Islam: *"we need an option to remove the client"*,
 then *"both, demo client is not removable, and the name is Archive not put
 aside."* **MOST OF IT WAS BUILT AND HAD NO BUTTON** &mdash; `tenants.status`
@@ -8741,8 +8776,88 @@ client platform **byte-identical** &mdash; nothing in `src/` is touched.
 **NOT PROVED AND SAID**: the server half has never spoken to a database in this
 session. **RECORDED, NOT DONE**: the card carries no reason, the client's own
 people are told nothing, and the frozen `api/platform.js` learns neither action
-&mdash; it has been unreachable since the cutover (&sect;317.8, &sect;320's
+&mdash; it has been unreachable since the cutover (&sect;317.8, &sect;322's
 precedent).*
+
+*And at the merge (&sect;322.1): **two sessions rewrote one screen.**
+&sect;320.4 put the *Modules this client has* band under the client's name on
+the settings page and &sect;322 replaced that whole page with the set-up flow,
+so git offered one conflict where **either side taken whole drops a feature
+outright** (&sect;318.7's shape). The band is CARRIED rather than rebuilt &mdash;
+every rule, word and refusal is &sect;320.4's &mdash; onto **step one, the
+client's own details**, which is that section's own argument (it refused the
+left column for landing sixth and below the fold) applied to a step holding
+five fields. **Islam has not seen it in this place**, so it is on the
+what-to-check list rather than assumed. **And &sect;323's rule reached the
+third door**: `setModules` refuses an archived client by name, where
+`saveClient` and `shapeClient` already did &mdash; a rule kept at two doors of
+three is the drift this project keeps recording (&sect;53.5). Proved at both
+ends (`client-setup-outside` &sect;8b, falsified 6 red and 2 red;
+`client-archive` &sect;11b, 1 red) &mdash; **and the first falsification died
+rather than reporting** (&sect;215), because a `pg.click` waits thirty seconds
+on a control that is not there and took the four assertions after it with it.*
+
+*Earlier the same day, from another session: &mdash; **&sect;320.6: the switcher in the top bar, and a
+sentence that was ahead of the build (spec 046).** Islam, with a screenshot of his own
+Strategy page: *"where are the box of 4 in the top left that we build together?"* &mdash;
+then *"yes the square switcher in the top bar. and for the setup no need now."* **THE
+HONEST ANSWER CAME FIRST AND IT WAS NOT A DEFECT**: the mark appears **nought** times in
+the platform and six in the trial module's page &mdash; E1 was signed off on 11 September
+and built on the one surface that needed a way out of itself, never in the shell. His
+screenshot is a picture of the gap, not a fault to hunt. **THE MOCKUP COULD NOT BE COPIED
+AND RENDERING IT SAID SO**: E1 puts the mark INSIDE `.brand`, and that drawing's `.brand`
+was a flex ROW while the product's is a COLUMN &mdash; copied, it would have stranded the
+mark on a line of its own above the product's name. It goes BEFORE the brand block, where
+first-in-the-row is the top left and no existing rule moves. **BUILT IN THE NEW STACK'S
+OWN BROWSER FILE, NOT THE FROZEN SHELL**, because a module list only exists where a server
+says which ones a client has: the offline copy has none, so a switcher there could never
+open anything (&sect;61). Only the SHAPE goes in `arrange.css`, beside the family it
+belongs to. **DRAWN ONLY WHERE THERE IS A CHOICE** &mdash; the attribute is written for a
+client holding more than one and nobody else, so a menu of one is never built (&sect;32)
+and the ABSENT attribute says so (&sect;50.6). **ONE ANSWER TO WHAT THE SWITCHER LISTS**
+(`moduleMenu()`, read by both bars): a label worked out in the browser by capitalising a
+key is how two screens spell one module differently (&sect;53.5). **AND THE SENTENCE I
+SHIPPED WAS AHEAD OF THE BUILD** &mdash; the band promised *"turning one on adds its group
+to this client's Setup page"*, which the build does not and cannot do: &sect;104.8 exactly,
+shipped because the MOCKUP carried it and the mockup was drawing the destination. *A
+mockup describes where a thing is going; a shipped screen may only describe where it is.*
+62/0, red four ways, &sect;7 driving a real browser. **Recorded, not done**: Setup's
+sections still know nothing about modules, deferred on Islam's word.*
+
+*Earlier: 2026-09-12 &mdash; **&sect;320.5: adding a module to a client, and a
+trial that proves it (spec 046 &sect;4.5).** Islam: *"how does we create a new module?
+let's create a very simple another module something even for the trial. to manage the
+flow of adding a new module to the client"*, then *"make it a hello with the name of the
+client to show variance. and we need part in the client settings to add modules."*
+**THE FIRST ANSWER WAS A MEASUREMENT**: today a module is three things and no more
+&mdash; a word in `MODULES`, an address segment, and a row on the client's card &mdash;
+so `/<client>/portfolio` already resolved and served the STRATEGY platform under another
+word. Not a feature waiting to be finished; a door onto the wrong room. **WHICH MODULES
+A CLIENT HAS IS STORED NOW**, one column and one migration, and `modulesFor()` guarantees
+three things a stored list cannot: the order is `MODULES`' and never the order they were
+switched on, an unknown or **unbuilt** word is dropped, and the **default is always in
+it** (it is where an address naming no module lands). **`built` IS WHAT STOPS THE DOOR
+OPENING ONTO THE WRONG ROOM** &mdash; Portfolio, Insights and Processes keep their
+entries so the words stay reserved, and are offered to nobody. **A MODULE THE CLIENT DOES
+NOT HAVE FALLS THROUGH TO THE LEGACY BRANCH**, read as any other word it does not hold,
+rather than a second refusal to word and keep in step. **THE CONTROL IS A BAND UNDER THE
+CLIENT'S NAME &mdash; Islam picked B** of two drawn in the console's own stylesheet, and
+**its rows are the team list's own, class for class**, so the section adds no vocabulary
+(&sect;53.5). **OFF HIDES AND FORGETS NOTHING** (&sect;44) and **the default gets words,
+not a dead control** (&sect;94.15), with the server refusing both however the request is
+spelt (&sect;42). **THE GREETING NAMES THE CLIENT AND THAT IS THE WHOLE PROOF**: a static
+hello would look identical on a build that never opened the tenant, so the page makes
+three claims that can each fail visibly &mdash; the NAME from the registry row, the COUNT
+from the client's own graph under `withTenant` (so it proves the module crossed the tenant
+boundary), and the BAR in the client's colours, which it gets free because branding is the
+spine's. **RENDERING IT AGAINST A REAL TENANT FOUND "3 persons"**, a plural derived by
+adding an "s" (&sect;107.8's family) &mdash; fixed, and the sentence became a function of
+its own so the check can drive the one claim that needed a database. **THE MIGRATION WAS
+PROVED ON THE PATH IT EXISTS FOR**, not the easy one: run against a database with the
+column DROPPED (&sect;33.5) and twice over. 50/0 red three ways; `platform-cards` 19/0 on
+both copies; `check:deploy` 5/0; typecheck clean COLD. **Recorded, not done**: the
+Strategy shell carries no switcher, so the road runs one way and the return is on the
+trial page.*
 
 *Earlier: 2026-09-11 &mdash; **&sect;318: setting a client up &mdash; the
 wizard (spec 044).** Islam: *"any Consultant who gets into the platform and adds

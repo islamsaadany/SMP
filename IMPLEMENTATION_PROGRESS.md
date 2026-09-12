@@ -54,7 +54,69 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§318 — setting a client up: the wizard — built on
+**Latest version:** **§321, §322 and §323 — merged to `main` 2026-09-12 on
+Islam's word**, from `claude/multitenant-onboarding-wizard-kvyfcc`. Three
+decisions on the set-up flow §318 built: **the horizon leaves set-up** (§321 —
+Islam: *"why is the horizon is in the setup? time is not relevant in the setup.
+the plan we upload will need this not the setup"*, so it arrives with the plan);
+**set-up happens on the outside and a client is born empty** (§322 — the flow
+moved to Forefront's own page, every row still minted by the platform's own
+minter, and a new client no longer arrives wearing Raya Trade's units, because
+§67's *cleared* graph keeps the names and empties the content — right for a
+deployment that is already this client's and wrong for one that never existed);
+and **a client is archived, and only then deleted** (§323 — *"we need an option
+to remove the client"*, then *"both, demo client is not removable, and the name
+is Archive not put aside"*). **Most of §323 was built and had no button**:
+`tenants.status` has read `'active' | 'retired'` since the table was written,
+`visibleClients()` already keeps a retired client off the cards and `door.ts`
+already turns its address away identically to a client that never existed — and
+nothing had ever set it, while `lib/tenant-delete.ts` had no caller outside its
+spike. §61's trap twice over. Delete is reachable from an archived client and
+nowhere else, which is the guard rather than a second confirmation. **Four
+faults were found by measuring**: the confirming button at 2.90:1 with its
+dark-mode override written outside its media query (§38.4, the mockup caught
+it); an archived card with no route to Settings, so Delete was unreachable
+(§61); a second page painted under the first on the way back, because
+`drawClients()` does not clear; and `canEdit` false for the first time in this
+product's life, which drew the read-only path and found a size band that lit
+under the pointer and stored nothing. **Not proved and said**: the server half
+has never spoken to a database in this session, so one real round trip and one
+real cascade are still owed. Checks: `client-archive` 52/0 and
+`client-setup-outside` 0 failures on **both** copies of the page,
+`client-card-modules` 15/0, `platform-cards` 19/0, `test-platform-rules` 60/0,
+`plan-horizon` 0 failures, the frozen sweep clean, the built file byte-identical
+to its sources.
+
+**Earlier, from another session:** **§319 — the consulting memory — merged to
+`main` 2026-09-11 on Islam's word**, from `claude/blissful-brown-fxlait`. Forefront's
+own record of what worked, what went wrong and what was learned with a client:
+a fourth tab on the platform page, open to **every** signed-in consultant with
+no gate (his decision, with its cost stated — a Raya write-up is readable by
+somebody who never worked on Raya), every entry **naming its client and its
+author** and **nothing anywhere recording who read one**. Three phases: the
+record, the **period debrief** (a prompt taken to a voice conversation, the
+answer pasted back, split into drafts you read before `Save all` lands them in
+**one transaction**), and an assistant over the entries that **names its
+sources** and declines rather than invents. **The trap was the RLS loop**:
+`schema.sql` makes every table tenant-owned *by exclusion*, so a column called
+`tenant_id` would have given the memory a policy meaning *only this client's
+people may read this* — the whole feature dead, with no error, and **perfect on
+our deployment and broken on every fresh one**, because `schema.sql` runs once.
+The column is `about_tenant_id`, which is a different fact and, more to the
+point, a different failure mode: forget the exclusion list on a later memory
+table and the loop's `CREATE INDEX … (tenant_id)` **fails the apply outright**
+rather than quietly emptying the page. Both halves proved on a database before
+the fix was written. 127 assertions over five checks, 0 failures, **all ten
+falsifications red**; `check:room` 10/0, `check:deploy` 5/0, `check:shell`
+61/0, `check:state` 91/0, `check:door` 49/0, `test:rules` 588/0, `tsc` clean,
+`platform-cards.py` 19/0 on both copies of the page. Built as spec 044 / §318
+and **renumbered at the merge**, because `main` took both while this was in
+flight (the precedent §287, §301, §310 and §318 itself all set). **The words**
+(*insight*, *practice · hiccup · lesson*) are placeholders, settled on use
+rather than here — Islam waived the after-phase-A stop point (*"don't stop
+until you need me for a decision"*).
+
+**Before it:** **§318 — setting a client up: the wizard — built on
 `claude/multitenant-onboarding-wizard-kvyfcc`.** A guided flow that shapes a
 client from nothing: its name, its year, its business units, its companies, its
 supporting functions and how each plans, the words it uses, and who runs the
@@ -4583,3 +4645,163 @@ Islam's call on that merge (rule 4). Neither section changes how a save is
 judged, so no forced sign-out — but both change the built file, so `SHELL` in
 `sw.js` needs bumping at the merge, to a name `origin/main` does not already
 hold, confirmed again immediately before the push (§91, §94.12, §94.16).
+
+**2026-09-11 — spec 045, the consulting memory: written, nothing built.** Islam
+asked for somewhere consultants record good practices, lessons learned and the
+hiccups they met with a client, with a wizard to collect one and eventually an
+assistant to ask *"we have hit this before, what happened?"*. `specs/045-consulting-memory/spec.md`.
+**It is three things built in one order** — the record, the way in, the
+assistant — because an assistant over an empty memory answers confidently from
+nothing. **It cannot be a tenant table**: specs 042 and 043 exist to stop one
+client's data reaching another, and this is deliberately cross-client, so it
+lives in the **platform schema** on Forefront's own side of the door and is
+**never drawn inside a client's shell** (asserted at both ends). Two decisions
+are Islam's: **everyone at Forefront reads every entry** (cost stated — a lesson
+naming Raya's figures reaches a consultant who never worked on Raya), and **an
+entry always names its client**, overruling my own recommendation that a
+client-less one be allowed — the generalisation arrives through the client's
+industry instead. **The industry is not a field on the entry**, because every
+client card already carries one. **Flagged, not done:** `clients.industry` is
+free text, so two spellings of one industry make the memory answer half a
+question — cheap now, expensive in a year, and it touches the client card, which
+was not part of the ask (rule 1b). **Two more settled the same day**:
+the entry **names its author** (*"the entry is for the team and identified by
+who added this lesson or insight"*), and **nothing records who READ one** — a
+readership log was offered and refused, written down as a decision rather than
+left as an omission, and asserted as an absence at both ends. **AND THE MAIN DOOR IS A PERIOD DEBRIEF, WHICH IS HIS CORRECTION OF THE FIRST
+DRAWING**: *"it will not be case by case usually it would be a period of time to
+share."* Right, and it changes which button is loud — a consultant comes back
+from a month with six things in their head, not one. One conversation, several
+insights: the platform writes a prompt carrying the client and the period, the
+prompt **interviews** (one question at a time, pushing back on a vague answer,
+drawing out what went better / what cost time / what I know now / what I would
+warn the next person about) and writes every item back in one fixed block, and
+the paste is **split into drafts somebody reads before anything is saved**.
+**The prompt forbids invention and the review screen exists because that cannot
+be enforced** — the platform cannot tell a paragraph somebody said from one a
+model completed. **A block it could not read is shown with its text intact,
+never dropped** (§184), and the count says *three read and one it could not*
+rather than four found (§108.1). Storing the conversation whole was refused: it
+buries five insights inside a sixth and loses the kind, the search and the
+filter. The mockup is six states in the platform's own tokens
+(`design-mockups/consulting-memory/2026-09-11_consulting-memory.html`).
+**SIGNED OFF 2026-09-11** (*"the questions are good, go ahead with the plan"*);
+`plan.md` and `tasks.md` written, nothing built. **AND READING THE NEW STACK
+FOUND THE TRAP THAT WOULD HAVE KILLED IT IN SILENCE**: `smp-app/db/schema.sql`
+ends in one loop that gives every table row-level security and a `tenant_rows`
+policy **by EXCLUSION**, so a memory table carrying the obvious column name
+`tenant_id` would be handed a policy reading *this row belongs to the current
+tenant* — and a consultant on RHI could never read a Raya insight, which is the
+entire feature, gone, with no error anywhere. **Worse, the two deployments would
+disagree** (§113.7's mirror): `schema.sql` runs ONCE and is recorded, so ours
+would be fine and every fresh deployment dead. Answered twice over — the table
+joins the exclusion list, **and the column is `about_tenant_id`**, so that if a
+later table forgets the list the loop's `CREATE INDEX … (tenant_id)` fails the
+apply outright instead of quietly emptying the page. **Three more decisions from
+reading rather than assuming**: a route of its own rather than a fourth action on
+the carried `platform-api.ts`, which is frozen byte for byte; **no new rule in
+`platform-rules.cjs`**, because `platform.html` loads no rules module in the
+browser at all and reads flags the server computed (§53.5) — which also avoids a
+live drift, that file being byte-identical at the root with nothing syncing them,
+recorded and not touched; and the splitter as its own UMD module, being the one
+piece with a wrong answer available to it, so it is checkable with no browser and
+no database. **Three phases, A usable alone** (the record, then the debrief, then
+the assistant), **four checks each red first**, and **two stop points that are
+Islam's**: after phase A, on use rather than on a drawing, and the merge.
+
+
+**2026-09-11 — spec 045 BUILT, all three phases (§319).** Islam: *"go on with
+all the phases in sequence and don't stop until you need me for a decision"* —
+so stop point 1 is **waived by him** and the words (*insight*, *practice ·
+hiccup · lesson*) stay placeholders to be settled on use. **The record, the
+period debrief and the assistant**, on the new stack: `memory_entries` in the
+platform half of `smp-app/db/schema.sql` + migration 004, `lib/memory-api.ts`
+behind `app/api/memory`, `lib/memory-split.cjs`, `lib/memory-ask.ts`, and a
+fourth tab in `platform.html`.
+
+**THE TRAP WAS REAL AND WAS PROVED ON A DATABASE BEFORE THE FIX WAS WRITTEN.**
+schema.sql's closing loop gives every table RLS and a `tenant_rows` policy **by
+exclusion**: a `tenant_id` column here takes the policy **silently** (measured —
+`THE TRAP IS REAL — policy attached: tenant_rows`), and `about_tenant_id` with
+the list forgotten **fails the apply outright** (`column "tenant_id" does not
+exist`). So the naming is a decision about the FAILURE MODE, measured rather
+than argued. **AND THE FRESH-APPLY PATH FOUND WHAT THE EXISTING ONE COULD NOT**
+(§113.7's mirror, §33.5): on a new deployment schema.sql and migration 004 run
+in ONE transaction, so the migration met its own table — `42P07`, the whole
+apply rolled back, **every new deployment failing to start** — invisible on the
+database to hand. Guarded, and both paths then measured side by side: 0
+policies, RLS off, 12 columns, identical.
+
+**THREE MORE FAULTS FOUND BY DRIVING IT AND NONE BY READING**: `deleteTenant`
+would have surfaced the new RESTRICT as a raw foreign-key error, so it **names
+what is in the way** (§62, §184) — it has no callers yet, established rather
+than assumed; `dev-tenant.mjs` could no longer remake the dev tenant; and the
+debrief prompt **went stale in the one way that matters** — `change` fires on
+blur, so somebody filling in the end date and reaching straight for *Copy the
+prompt* copied a prompt with no end date (measured: *"covering 1 August 2026"*
+with 11 September in the box beside it). It follows `input` now, which repaints
+nothing — it writes into one `<pre>` (§63, §193).
+
+**AND THE CHECK LIED TO ME FOR HALF AN HOUR, WHICH IS THE LESSON WORTH KEEPING**
+(§105.6's family): a `next start` from an earlier run held the check's port
+**from before a script tag existed**, so every later run bound-failed silently
+and measured a four-minute-old DOCUMENT with a current page script — and
+reported a product fault that was not there. Both HTTP checks now **refuse to
+run if anything is already listening**, and wait for the port after. My own
+probe then compounded it by measuring `window.MemorySplit` on the **door**,
+because the platform page 401s and redirects there (§50.6).
+
+**FIVE CHECKS, 127 ASSERTIONS, ALL TEN FALSIFICATIONS RED** — split 21/0,
+boundary 12/0 (`--break=policy` reddening exactly the four the real fault would,
+printing `rows seen: 0`), api 36/0, page 42/0 (contrast measured in BOTH
+palettes, §38.5), ask 16/0 against a stand-in for the model (§100.3).
+`check:room` 10/0 · `check:deploy` 5/0 · `check:shell` 61/0 · `check:state`
+91/0 · `check:door` 49/0 · `test:rules` 588/0 · `tsc` clean ·
+`platform-cards.py` 19/0 on **both** copies of the page (§317). **One check
+REWRITTEN, never loosened** (§218, §214.3): `checks/shell.mjs` held the literal
+*"Clients|Consultants|Who sees what"*, so a fourth page read as a regression.
+**`check:demo` is red on the build BEFORE this work**, reproduced with the
+change stashed (§303) — this sandbox has no seeded demo tenant.
+
+**FOUR OF MY OWN CHECK'S FAILURES WERE THE CHECK**: a control asserting more
+than the product claims (any office account may read the consultants list); a
+`textContent` read of a **textarea's value**, which it cannot see; a §260
+assertion asking for something the product deliberately does not do (ordinary
+spacing is untouched); and a break that was a no-op. **Waiting on Islam**: the
+words, on use — and the merge, on that merge (rule 4).
+
+**§319.1 — the merge, and the check that was wrong in a way only the merge run
+exposed.** `main` moved **409 commits** under this branch (§318's client set-up
+wizard, and §317's last cutover corrections) and the merge was **textually
+clean, which is not the same as safe** (§313.37). Read rather than believed:
+the two sides touched **disjoint code** — `main`'s work is on the frozen side,
+this is the new stack plus Forefront's own `platform.html`, and the only shared
+file is this one, which auto-merged — so none of §56.7's shared-scope
+collisions was available here, measured rather than assumed. **Everything
+generated was rebuilt rather than trusted** (§91): `build.py`, `build-shell`,
+`build-sw`, `sync-css` and `sync-static` each reproduced their artefact
+**byte-identical** to the merged one, and only `shell/platform.html` and
+`public/platform-page.js` moved, which is this branch's own renumber
+propagating — the proof the generator ran at all. `node --check sw.js` parses.
+**No `SHELL` bump is owed and that is measured**: §91's trigger is *the built
+file's bytes changed* and they did not, `main` having already bumped it for its
+own frozen change — and since §316.10 split the caching half off, the worker
+the new stack serves carries no `SHELL` at all. **`main`'s own
+`client-setup.py` is green on the merged result**, because a merge that quietly
+breaks somebody else's work is the merge's fault and not theirs.
+**AND MY OWN BOUNDARY CHECK DEFAULTED THE APP ROLE'S PASSWORD TO A WORD THE
+PRODUCT DOES NOT USE** — `smp_app_pw`, where `lib/db.ts`, `db/apply.mjs` and
+`scripts/dev-tenant.mjs` all fall back to the literal `smp_app` — so section 4,
+*the read that IS the feature*, **died on a failed sign-in and reported the
+boundary broken when what was broken was the check** (§100.3, §53.5, §215). It
+passed on every earlier run only because the variable happened to be set in
+that shell: *a fixture that invents its own spelling of the product's own
+default is green exactly until somebody runs it the way the product runs.* It
+takes the product's default now — 12/0, with the section that matters actually
+running. **Re-run against the merged result**: memory 21 / 12 / 36 / 42 / 16 =
+**127 assertions, 0 failures**, all ten falsifications red; room 10/0, deploy
+5/0, shell 61/0, state 91/0, door 49/0, 588/0, `tsc` clean, `platform-cards.py`
+19/0 on **both** copies of the page. The frozen `qa.py` sweep is **not re-run
+and it is said why**: not one byte of the frozen build changes here, proved by
+rebuilding it, so `main`'s own sweep carries over rather than being
+re-measured for the sake of a number.

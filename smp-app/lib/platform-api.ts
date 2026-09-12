@@ -21,6 +21,7 @@ import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
+import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
 
 const require = createRequire(import.meta.url);
 /* the worked example the product generates (scripts/extract-state.js), at the
@@ -43,9 +44,9 @@ const NO_CLIENT = "That client is not available.";
 type Account = { id: string; email: string; name: string; is_admin: boolean; kind: string; status: string };
 type World = { mine: { client_key: string; person_key: string; seat: string; tenant_id: string }[]; access: Record<string, Record<string, string>> };
 type ClientRow = Tenant & { industry: string; notes: string; size: string;
-  archived_at: string | null; archived_by: string | null };
+  archived_at: string | null; archived_by: string | null; modules?: unknown };
 
-const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here, archived_at, archived_by";
+const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here, archived_at, archived_by, modules";
 async function clientByKey(c: Q, key: unknown): Promise<ClientRow | null> {
   if (!key) return null;
   const r = await c.query("SELECT " + CLIENT_COLS + " FROM tenants WHERE key = $1", [String(key)]);
@@ -107,7 +108,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       const facts = await factsFor(row);
       cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, mine: FF.isMine(world, row.key),
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
-        canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable });
+        canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable,
+        /* THE CARD'S DOORS (spec 046 §4.6a): one row per module this client
+           has, each with the one line that module says about it. Worked out
+           HERE and never on the page, so the console cannot spell a module
+           differently from the switch or from Setup (§53.5). */
+        modules: moduleRows(modulesFor(row.modules), facts) });
     }
     /* ── THE ARCHIVED BAND (§323) ────────────────────────────────────
        Its own list, not a flag on the grid's: `visibleClients` keeps a
@@ -239,9 +245,17 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       } catch (e) { console.error("counting " + row.key + "'s rows:", (e as Error).message); }
     }
     const { id: _id, ...client } = row;
+    /* WHAT THIS CLIENT HAS, AND WHAT IT COULD BE GIVEN (spec 046 §4.5) —
+       both worked out on the server from lib/modules.ts, so the drawer draws
+       the list rather than holding one: a module added to MODULE_DEF appears
+       in this list the day it is built, and one that is not built is not
+       offered at all, because a switch for a module with nothing behind it
+       opens the Strategy platform wearing another name (§61). */
     return ok({ client, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
       shape, holds, goes,
       canArchive: FF.mayArchiveClient(world, account, row), canDelete: FF.mayDeleteClient(world, account, row),
+      modules: modulesFor(row.modules),
+      offer: offerable().map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note, always: k === DEFAULT_MODULE })),
       office: (await pool.query("SELECT email, name, is_admin FROM users WHERE kind = 'office' AND status = 'active' ORDER BY name")).rows });
   }
 
@@ -394,6 +408,44 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     console.log("[platform] " + account.email + " deleted " + row.key + " (" + row.name + ") — " +
       Object.keys(counts).length + " tenant tables at zero");
     return ok({ deleted: row.key });
+  }
+
+  /* ── TURNING A MODULE ON OR OFF FOR ONE CLIENT (spec 046 §4.5) ──────
+     Its own action rather than a field on saveClient, because it is a switch
+     and not a box: it takes effect on the press, the way adding somebody to
+     the team does, and there is nothing half-typed for a Save to rescue.
+
+     OFF HIDES AND FORGETS NOTHING (§44, three times in this project now: a
+     switch that destroys data is a delete with a friendly label). All this
+     writes is the list; whatever the module held is still there when it comes
+     back, and what leaves with it is the module's Setup group, which is the
+     point — a group whose pages have nothing behind them is worse than no
+     group (§61).
+
+     THE REFUSALS ARE THE RULE, NOT THE SCREEN'S: the default module cannot be
+     switched off, because it is where an address naming no module lands and a
+     client without it could not be opened at its own front door; and a module
+     that is not built cannot be switched on however the request is spelt. The
+     drawer draws neither control, and the server refuses both anyway — a
+     guard that only hides a control is decoration (§42, §44). */
+  if (action === "setModules") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's configuration is not yours to change.");
+    /* AND AN ARCHIVED CLIENT IS READ, NOT EDITED (§323), here as well as on
+       saveClient and shapeClient — a rule kept at two of three doors is the
+       drift this project keeps recording (§53.5), and the third door is the
+       one somebody reaches with a console rather than with the drawer. */
+    if (row.status === "retired") return no(409, row.name + " is archived. Bring them back before changing anything.");
+    const key = String(body.module || "");
+    if (!isModule(key)) return no(400, "There is no such module.");
+    const on = body.on === true;
+    if (key === DEFAULT_MODULE) return no(400, MODULE_DEF[DEFAULT_MODULE].label + " is where a client lands, so it cannot be switched off.");
+    if (on && !MODULE_DEF[key].built) return no(400, MODULE_DEF[key].label + " is not built yet, so there is nothing to open.");
+    const have = modulesFor(row.modules).filter((k) => k !== key);
+    const next = on ? modulesFor([...have, key]) : have;
+    await pool.query("UPDATE tenants SET modules = $2::jsonb WHERE id = $1", [row.id, JSON.stringify(next)]);
+    return ok({ modules: next });
   }
 
   if (action === "createClient") {

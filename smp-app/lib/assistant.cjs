@@ -263,7 +263,7 @@ async function ask(opts) {
   const kb = opts.kb || {};
   if (!configured()) return { ok: false, why: "no " + KEY_NAME + " is set on this deployment" };
   if (!(kb.recipes || []).length && !(kb.sections || []).length) {
-    return { ok: false, why: "the knowledge base is empty" };
+    return { ok: false, why: opts.emptyWhy || "the knowledge base is empty" };
   }
 
   const turns = (opts.history || []).slice(-8).map(function (m) {
@@ -299,9 +299,15 @@ async function ask(opts) {
   if (sentThink) cfg.thinkingConfig = { thinkingBudget: 0 };
   const body = {
     systemInstruction: { parts: [
-      { text: instruction(opts.who) },
-      { text: "\n\n=== KNOWLEDGE BASE ===\n\n" +
-              corpusText(officeOnly(kb, !!opts.isOffice), opts.labels || {}) }
+      /* AN INSTRUCTION MAY BE SUPPLIED (spec 045). A second corpus arrived —
+         Forefront's consulting memory — which is answered under different
+         rules from the product's manual: it must NAME which insight and whose
+         it was, because the errand there is "go and ask that person". Optional
+         and defaulting to what it always did, so every existing caller is
+         byte-for-byte unchanged (§250's shape). */
+      { text: opts.instruction || instruction(opts.who) },
+      { text: "\n\n=== " + (opts.corpusName || "KNOWLEDGE BASE") + " ===\n\n" +
+              (opts.corpusText || corpusText(officeOnly(kb, !!opts.isOffice), opts.labels || {})) }
     ] },
     contents: turns,
     generationConfig: cfg

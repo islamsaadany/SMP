@@ -83,51 +83,109 @@ async function section(name, fn) {
 
 await section("1 · the document and its policy", async () => {
   await fresh(); await signIn("office@forefront.example");
-  const r = await fetch(BASE + "/raya-trade/mobile/strategy", { headers: { cookie: (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ") } });
+  const r = await fetch(BASE + "/raya-trade/strategy/mobile/strategy", { headers: { cookie: (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ") } });
   const html = await r.text(), csp = r.headers.get("content-security-policy") || "";
   check(r.status === 200 && /<script src="\/shell\.js"><\/script>/.test(html) && /<script src="\/theme\.js"><\/script>/.test(html), "the shell is served as its own document with the product's scripts as FILES", r.status);
   check(!/<script>/.test(html) && !/ on[a-z]+=/i.test(html.replace(/<!--[\s\S]*?-->/g, "")), "…and no inline script or handler anywhere in it");
   check(/script-src 'self';/.test(csp) && !/unsafe-inline'[^;]*;\s*style/.test(csp.split("script-src")[1] || "x"), "the policy is script-src 'self' — no hash, no unsafe-inline (§238's net, tighter)", csp.slice(0, 80));
   check(/<link rel="stylesheet" href="\/platform\.css">/.test(html) && /<title>Raya Trade — Strategy Management Platform<\/title>/.test(html), "the product's stylesheet is linked and the title is the tenant's");
-  await open("/raya-trade/mobile/strategy");
+  await open("/raya-trade/strategy/mobile/strategy");
   const pwned = await page.evaluate(async () => { window.__pwned = 0; const d = document.createElement("div"); d.innerHTML = '<img src="x" onerror="window.__pwned=1">'; document.body.appendChild(d); await new Promise((r) => setTimeout(r, 400)); return window.__pwned; });
   check(pwned === 0, "an injected inline handler does NOT run (§235's hole, closed by the policy)", pwned);
 });
 
 await section("2 · the address names the page, and the page names the address", async () => {
   await fresh(); await signIn("mobhead@raya.example");
-  await open("/raya-trade/mobile/strategy");
+  await open("/raya-trade/strategy/mobile/strategy");
   let p = await place();
-  check(p[0] === "mobile" && p[1] === "strategy", "/raya-trade/mobile/strategy opens Mobile's Strategy", JSON.stringify(p));
-  check(/^\/raya-trade\/mobile\/strategy\/[a-z]+$/.test(path()), "…and the address gains the section the shell opened (the place is the address)", path());
+  check(p[0] === "mobile" && p[1] === "strategy", "/raya-trade/strategy/mobile/strategy opens Mobile's Strategy", JSON.stringify(p));
+  check(/^\/raya-trade\/strategy\/mobile\/strategy\/[a-z]+$/.test(path()), "…and the address gains the section the shell opened (the place is the address)", path());
   check(await page.evaluate(() => !document.querySelector(".welcomeover")), "the shell's own welcome overlay is stood down — the landing is the welcome (§315)");
   check((await page.locator(".viewer-note b").textContent().catch(() => "")) === "Ashraf Laithy", "the chrome says who is signed in (a client's person has no switcher)");
-  await open("/raya-trade/mobile/strategy/plan"); p = await place();
+  await open("/raya-trade/strategy/mobile/strategy/plan"); p = await place();
   check(p[2] === "plan", "…/plan opens the Plan section", JSON.stringify(p));
-  await open("/raya-trade/mobile/performance"); p = await place();
+  await open("/raya-trade/strategy/mobile/performance"); p = await place();
   check(p[1] === "performance", "…/performance opens Performance", JSON.stringify(p));
   await page.click('#subtabs button[data-s="strategy"]'); await page.waitForTimeout(400);
-  check(/^\/raya-trade\/mobile\/strategy/.test(path()), "pressing a tab writes the address", path());
+  check(/^\/raya-trade\/strategy\/mobile\/strategy/.test(path()), "pressing a tab writes the address", path());
   await page.reload({ waitUntil: "networkidle" }); await booted(); p = await place();
   check(p[0] === "mobile" && p[1] === "strategy", "a refresh stays where you are (§173, by address)", JSON.stringify(p));
   /* AND THE SECOND DOOR NEEDS SOMEBODY WHO HOLDS TWO. A unit head reaches
      one destination, so pressing another unit and walking Back are asserted
      as the office — the person who has more than one place to be (§94.6). */
   await fresh(); await signIn("office@forefront.example");
-  await open("/raya-trade/mobile/strategy");
+  await open("/raya-trade/strategy/mobile/strategy");
   await page.click('#units button[data-u="retailstores"]'); await page.waitForTimeout(400);
-  check(/^\/raya-trade\/retailstores\//.test(path()), "pressing a unit writes the address", path());
+  check(/^\/raya-trade\/strategy\/retailstores\//.test(path()), "pressing a unit writes the address", path());
   await page.goBack(); await page.waitForTimeout(600); p = await place();
-  check(p[0] === "mobile" && /^\/raya-trade\/mobile\//.test(path()), "Back returns to the place before it", JSON.stringify(p) + " " + path());
+  check(p[0] === "mobile" && /^\/raya-trade\/strategy\/mobile\//.test(path()), "Back returns to the place before it", JSON.stringify(p) + " " + path());
+  check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
+});
+
+/* THE MODULE IN THE ADDRESS (spec 046 §7). Both ends every time (§94.2): the
+   word is there where it belongs AND absent on the spine, or a build that
+   prefixed everything — Setup included — passes half of this. */
+await section("2b · the module leads the address, and the spine carries none", async () => {
+  await fresh(); await signIn("office@forefront.example");
+  const cook = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
+  const hit = (path) => fetch(BASE + path, { headers: { cookie: cook }, redirect: "manual" });
+
+  /* the shape a link made before today has */
+  let r = await hit("/raya-trade/mobile/strategy/plan");
+  check(r.status === 302 && (r.headers.get("location") || "").endsWith("/raya-trade/strategy/mobile/strategy/plan"),
+    "an address with no module 302s to the default one, whole (spec 046 §7)", r.status + " " + r.headers.get("location"));
+  r = await hit("/raya-trade/fn/finance/strategy");
+  check(r.status === 302 && (r.headers.get("location") || "").endsWith("/raya-trade/strategy/fn/finance/strategy"),
+    "…a function's too, its own two segments intact", r.status + " " + r.headers.get("location"));
+
+  /* …and the spine is served where it stands rather than being pushed under
+     a module it does not belong to (spec 046 §4.5) */
+  r = await hit("/raya-trade/setup/people");
+  check(r.status === 200, "Setup is NOT redirected — it is the client's page, in no module", r.status + " " + (r.headers.get("location") || ""));
+  r = await hit("/raya-trade/tour");
+  check(r.status === 200, "…nor is the intro round, which the landing offers", r.status + " " + (r.headers.get("location") || ""));
+
+  /* THE ORDER, which is the reason the redirect is here and not in the
+     browser: signed out, an old address is answered by the DOOR and never by
+     the module — a redirect that ran first would tell a stranger which
+     addresses this client has. */
+  const anon = await fetch(BASE + "/raya-trade/mobile/strategy", { redirect: "manual" });
+  check(anon.status === 302 && /\/raya-trade\/sign-in$/.test(anon.headers.get("location") || ""),
+    "…and signed out, an old address goes to the door rather than through the redirect", anon.status + " " + anon.headers.get("location"));
+
+  r = await hit("/raya-trade/strategy/mobile/strategy");
+  const html = await r.text();
+  check(r.status === 200 && /<html[^>]* data-module='strategy'/.test(html),
+    "the document is stamped with its module, so the browser keeps no second list (§53.5)", r.status + " " + (html.match(/<html[^>]*>/) || [""])[0]);
+
+  /* the browser half: an old address opens the page it named, at the new one */
+  await open("/raya-trade/mobile/strategy/plan");
+  let pl = await place();
+  check(pl[0] === "mobile" && pl[1] === "strategy" && pl[2] === "plan" && path() === "/raya-trade/strategy/mobile/strategy/plan",
+    "…and opening an old address lands on the page it names, at the address the product now writes", JSON.stringify(pl) + " " + path());
+
+  /* a module with no target opens where the person works (§94.6) */
+  await open("/raya-trade/strategy");
+  pl = await place();
+  check(!!pl[0] && /^\/raya-trade\/strategy\//.test(path()), "the module alone opens where the person works, and says so in the address", JSON.stringify(pl) + " " + path());
+
+  /* the address the SHELL writes, on both sides of the spine line */
+  await open("/raya-trade/setup/people");
+  await page.click('#subtabs button[data-s="access"]').catch(() => {});
+  await page.waitForTimeout(400);
+  check(/^\/raya-trade\/setup\//.test(path()), "pressing inside Setup writes an address with no module in it", path());
+  await page.evaluate(() => { current = "mobile"; currentSub = "strategy"; paint(); });
+  await page.waitForTimeout(400);
+  check(/^\/raya-trade\/strategy\/mobile\//.test(path()), "…and walking from Setup to a unit writes the module back", path());
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
 });
 
 await section("3 · the office's addresses, and a change that reaches the server", async () => {
   await fresh(); await signIn("office@forefront.example");
-  await open("/raya-trade/fn/finance/strategy"); let p = await place();
-  check(p[0] === "fn:finance" && p[1] === "fnstrat", "/fn/finance/strategy opens Finance's Strategy", JSON.stringify(p));
-  await open("/raya-trade/group/performance"); p = await place();
-  check(p[0] === "group" && p[1] === "performance", "/group/performance opens the group", JSON.stringify(p));
+  await open("/raya-trade/strategy/fn/finance/strategy"); let p = await place();
+  check(p[0] === "fn:finance" && p[1] === "fnstrat", "/strategy/fn/finance/strategy opens Finance's Strategy", JSON.stringify(p));
+  await open("/raya-trade/strategy/group/performance"); p = await place();
+  check(p[0] === "group" && p[1] === "performance", "/strategy/group/performance opens the group", JSON.stringify(p));
   await open("/raya-trade/setup/people"); p = await place();
   check(p[0] === "setup" && p[1] === "people" && (await page.locator("#panel").textContent()).includes("People register"), "/setup/people opens the register", JSON.stringify(p));
   check(await page.evaluate(() => !document.getElementById("clientback").hidden && document.getElementById("clientbackname").textContent === "Raya Trade"), "the office sees the way back to the cards, named");
@@ -145,7 +203,16 @@ await section("4 · Forefront's own pages", async () => {
   await fresh(); await signIn("office@forefront.example");
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });
   check((await page.locator("#who").textContent()) === "Mohamed Essam · Super user", "the platform's chrome names the admin");
-  check((await page.locator("#nav button, #nav a").allTextContents()).join("|") === "Clients|Consultants|Who sees what", "three pages", await page.locator("#nav").textContent());
+  /* REWRITTEN, NOT LOOSENED (§218, §214.3): this held the literal
+     "Clients|Consultants|Who sees what" and spec 045 added a fourth page, so
+     a deliberate decision read as a regression. What it is FOR is that an
+     admin gets Forefront's own pages and that the gated one is among them —
+     asserted as the set, with the gated page named, so a build that dropped
+     `Who sees what` still fails and a page added next month does not. */
+  const ffTabs = await page.locator("#nav button, #nav a").allTextContents();
+  check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
+    "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
+  check(ffTabs.includes("Memory"), "…and the consulting memory, which every consultant reaches (spec 045)", ffTabs.join("|"));
   check((await page.locator("#page").textContent()).includes("Raya Trade") && (await page.locator("#page").textContent()).includes("Add a client"), "the cards: Raya Trade, and Add a client");
   const post = (body) => page.evaluate(async (b) => (await (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) })).json()), body);
   let j = await post({ action: "consultants" });
@@ -163,7 +230,7 @@ await section("4 · Forefront's own pages", async () => {
   const r = await fetch(BASE + "/rhi/mobile/strategy", { headers: { cookie: (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ") }, redirect: "manual" });
   check(r.status === 302 && /\/raya-trade$/.test(r.headers.get("location") || ""), "…and a client that is not theirs sends them to their own (§313.36)", r.status + " " + r.headers.get("location"));
   await ctx.close(); await fresh();
-  const r2 = await fetch(BASE + "/raya-trade/mobile/strategy", { redirect: "manual" });
+  const r2 = await fetch(BASE + "/raya-trade/strategy/mobile/strategy", { redirect: "manual" });
   check(r2.status === 302 && /\/raya-trade\/sign-in$/.test(r2.headers.get("location") || ""), "signed out, the shell's address sends you to the client's own door", r2.status + " " + r2.headers.get("location"));
 });
 
@@ -229,7 +296,7 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
 
   /* THE REPORTED SYMPTOM, in its own words. */
   await ctx.close(); await fresh(); await signIn("office@forefront.example");
-  await open("/raya-trade/mobile/strategy");
+  await open("/raya-trade/strategy/mobile/strategy");
   check(!errs.some((e) => /404/.test(e) && /script/i.test(e)), "an ordinary page load logs no bad-response error for a script", JSON.stringify(errs.slice(0, 3)));
   check(await page.evaluate(() => !!document.querySelector('link[rel="manifest"]')), "…and the shell links the manifest too (the frozen platform file does)");
 });
@@ -271,7 +338,7 @@ await section("10 · the security headers cross with it, read from vercel.json (
   await fresh(); await signIn("office@forefront.example");
   const cook = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
   const shell = await (async () => {
-    const r = await fetch(BASE + "/raya-trade/mobile/strategy", { headers: { cookie: cook }, redirect: "manual" });
+    const r = await fetch(BASE + "/raya-trade/strategy/mobile/strategy", { headers: { cookie: cook }, redirect: "manual" });
     const out = {}; for (const [k, v] of r.headers) out[k.toLowerCase()] = (out[k.toLowerCase()] === undefined ? v : out[k.toLowerCase()] + " ⧺ " + v);
     return out;
   })();

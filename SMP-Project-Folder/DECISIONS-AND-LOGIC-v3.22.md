@@ -42570,6 +42570,757 @@ merge every time.
 
 ---
 
+---
+
+## §319 — THE CONSULTING MEMORY (2026-09-11, spec 045)
+
+Islam: *"We need to have somewhere a consulting memory where the consultants
+put all their good practices and lessons learned and hickups they faces with
+the client to have a memory of what happened and we can get back later &hellip;
+and eventually we will need a helpful bot to ask about previous experience or a
+problem we are facing."*
+
+**FIVE DECISIONS ARE HIS, AND TWO OF THEM OVERRULE A RECOMMENDATION.**
+*Every consultant reads every insight* — with the cost stated before he took it,
+that a Raya write-up is readable by somebody who never worked on Raya; *an
+insight always names its client*, against my proposal that a client-less one be
+allowed (**"the relevance of the input is relevant to this specific client with
+its own dynamics"**); *the entry names its author*, **"the entry is for the team
+and identified by who added this lesson or insight"**; **nothing records who
+READ one** — a readership log was offered and refused; and **the period debrief
+is the main door**, his correction of a one-at-a-time form: *"it will not be
+case by case usually it would be a period of time to share."* That last one
+reshaped the feature rather than adding to it &mdash; the wizard stops being the
+way in and becomes the way to fix one line.
+
+**THE TRAP WAS THE RLS LOOP, AND IT WOULD HAVE KILLED THIS IN SILENCE.**
+`smp-app/db/schema.sql` ends in one loop over the catalogue that gives every
+table row-level security, a `tenant_rows` policy and a `(tenant_id)` index **by
+EXCLUSION** — so a new table is tenant-owned unless somebody says otherwise.
+A `memory_entries` carrying the obvious column name `tenant_id` would have been
+handed a policy meaning *only this client's people may read this row*, and **a
+consultant on RHI could never read a Raya insight**: the whole feature, dead,
+with no error anywhere. **AND THE TWO DEPLOYMENTS WOULD HAVE DISAGREED**
+(§113.7's mirror): `schema.sql` runs ONCE, recorded as `schema` in
+`_migrations`, so on the deployment that has already run it the loop never
+re-runs and the table is fine — **perfect on ours and broken on every new
+client's**. Both halves were demonstrated with SQL on a real database *before*
+the fix was written, which is the only reason the second one was known at all.
+
+**THE COLUMN IS `about_tenant_id`, AND THE NAMING IS THE WHOLE DECISION.** It
+means *which client this insight is about*, which is genuinely not *which tenant
+owns this row* — and the gain is the FAILURE MODE: add a fourth memory table
+later and forget the exclusion list, and the loop's own
+`CREATE INDEX … (tenant_id)` **fails the apply outright** rather than quietly
+attaching a policy that empties the page. *A loud failure in place of a quiet
+one is what the name buys.* `checks/memory-boundary.mjs` asserts both ends — no
+policy on the table, and an insight written under one tenant setting **read back
+under another**, which is the feature expressed as the one assertion that fails
+if any of this is got wrong — with a TENANT table read the same way beside it as
+the control (§113.8).
+
+**AND THE FRESH DEPLOYMENT AND THE EXISTING ONE HAD TO BE MADE TO AGREE.**
+`schema.sql` creates the table and migration 004 creates it again, so on a
+VIRGIN database the migration hit `42P07` and **rolled back the whole apply** —
+every new deployment failing to start, found only by applying to an empty
+database rather than to the one already in front of me (§113.7 from the other
+side). Guarded with `IF NOT EXISTS`, and both paths then measured identical.
+
+**A ROUTE OF ITS OWN, NOT A FOURTH ACTION ON THE CARRIED ENDPOINT.**
+`lib/platform-api.ts` was carried across byte for byte and its whole discipline
+is that it still answers what the frozen page asked; adding a feature's actions
+into it ends that property and makes a future diff against the original
+impossible. **AND NO NEW RULE IN `platform-rules.cjs`** — measured, because the
+page loads **no rules module in the browser at all**, so *may I edit this entry*
+is answered once on the server and sent as `mine` on the row (§53.5), **and
+asked again at press time** (§48.2).
+
+**THE SPLITTER IS ITS OWN MODULE BECAUSE IT IS THE ONE PIECE WITH A WRONG
+ANSWER AVAILABLE TO IT** — a UMD, so `node` and the browser run the same bytes,
+checkable with no browser and no database. **A PASTE WITH NO RULES IN IT
+BECOMES ONE ENTRY, NEVER NOUGHT** (§184): every assistant follows a block format
+most of the time and none follows it always, so the degenerate case is the safe
+one — losing what somebody has just dictated is the single unacceptable
+outcome. A block it cannot read comes back **whole**, and an unknown kind falls
+back and **says it was guessed** rather than refusing the write-up.
+
+**`saveMany` IS ONE TRANSACTION ON PURPOSE**: six insights half-saved after a
+long conversation is the outcome nobody can tell apart from a bug, and the
+person has already read them all. Falsified by making one of six rows invalid
+and asserting **nought** are stored.
+
+**THE ASSISTANT NAMES ITS SOURCES, AND DECLINES IN THE PRODUCT'S OWN WORDS.**
+§125 blanks the model's reply on a decline deliberately, so *"nothing happened
+at all"* was available here too — the memory supplies its own sentence
+(*"Nobody has written that one up yet. If you know the answer, it is worth
+adding."*), and the check proves the sentence is OURS by making the stand-in
+model say something arbitrary and asserting the page does not print it.
+**Sources are resolved against the rows actually sent**, so an id the model
+invents is dropped rather than drawn.
+
+**ON DELETE RESTRICT ON BOTH ENDS, AND IT IS A DECISION RATHER THAN CAUTION**:
+deleting a client that holds insights is REFUSED, naming them (§62's shape),
+because *the memory outlives the engagement* — when Forefront stops working with
+somebody, what was learned there is worth more and not less. A consultant who
+leaves keeps their insights, and keeps them attributed.
+
+**THE WORDS ARE PLACEHOLDERS AND ARE SAID TO BE.** *Insight*, *practice ·
+hiccup · lesson*, *Add one insight*, *Write up a period* — Islam waived the
+after-phase-A stop point (*"go on with all the phases in sequence and don't stop
+until you need me for a decision"*), so what the tab and the buttons say is
+settled **on use** rather than in prose (§266: a wording question is answered by
+reading it in place). The four questions and the decline sentence are NOT
+placeholders.
+
+**127 assertions over five checks, 0 failures, all ten falsifications red**;
+room 10/0, deploy 5/0, shell 61/0, state 91/0, door 49/0, 588/0, `tsc` clean,
+`platform-cards.py` 19/0 on both copies of the page. **The client's own shell
+carries none of it** — `public/shell.js` holds nought references to the route,
+the table or the splitter, asserted. **No forced sign-out** (spec 029's test):
+no save path, no authoriser and no tenant table moves, asserted rather than
+assumed. **Recorded, not built**: full-text search, attachments, editing
+somebody else's entry, and the root's `lib/platform-rules.js` duplicated against
+`smp-app/lib/platform-rules.cjs` with nothing syncing them — a live drift named
+here and not this feature's to fix.
+
+### §319.1 · The merge, and the check that was wrong in a way only it exposed
+
+`main` moved **409 commits** under this branch — §318's client set-up wizard and
+§317's last cutover corrections — and the merge was **textually clean, which is
+not the same as safe** (§313.37). The two sides touched **disjoint code**:
+`main`'s work is on the frozen side, this is the new stack plus Forefront's own
+`platform.html`, and the only shared file is the progress tracker, which
+auto-merged — so none of §56.7's shared-scope collisions was available here,
+**measured rather than assumed**. Everything generated was REBUILT rather than
+trusted (§91) and each artefact came back byte-identical; `node --check sw.js`
+parses; **no `SHELL` bump is owed**, because §91's trigger is *the built file's
+bytes changed* and they did not, `main` having already bumped it for its own
+frozen change — and since §316.10 split the caching half off, the worker the new
+stack serves carries no `SHELL` at all. **`main`'s own `client-setup.py` is
+green on the merged result**, because a merge that quietly breaks somebody
+else's work is the merge's fault and not theirs. Renumbered **spec 044 → 045**
+and **§318 → §319** at the merge, scoped to the lines this branch wrote
+(§264.3), `main` having taken both while this was in flight.
+
+**AND MY OWN BOUNDARY CHECK DEFAULTED THE APP ROLE'S PASSWORD TO A WORD THE
+PRODUCT DOES NOT USE** — `smp_app_pw`, where `lib/db.ts`, `db/apply.mjs` and
+`scripts/dev-tenant.mjs` all fall back to the literal `smp_app` — so section 4,
+*the read that IS the feature*, **died on a failed sign-in and reported the
+boundary broken when what was broken was the check** (§100.3, §53.5, §215). It
+passed on every earlier run only because the variable happened to be set in that
+shell: *a fixture that invents its own spelling of the product's own default is
+green exactly until somebody runs it the way the product runs.* It takes the
+product's default now, and the section that matters actually runs — 12/0.
+
+## §320 — FOUR MODULES ON ONE SPINE (2026-09-11, spec 046)
+
+Islam, opening the subject rather than reporting a fault: *"for each client we
+will need to have mutliple modules one for the Strategy & Functions we need a
+name for this and one for the project management and one for the resources and
+one for the process and we are open for more modules ... whether we will have
+one acess & roles page or by module and wther we have different setup pages on
+one main. let's tahink together ask me what you need."*
+
+Fifteen decisions, taken question by question over two rounds, **written down
+before anything was drawn or built** (spec 046). Nothing is built. Nothing is
+drawn. The chrome carrying the module switch wants a mockup first (rule 1c).
+
+**THE SPINE IS A LINE THE PRODUCT ALREADY DRAWS AND HAS NEVER NAMED.** The
+Setup rail's *People & access* and *The organisation* groups are not Strategy's
+— they are the client's; *Running the cycle* and *Measurement* are Strategy's
+and nothing else's. Three of the five groups are already the spine and two are
+already one module. So the question *"one access page or by module"* was never
+open in the way it looked: there is a client, and there are modules on it, and
+the rail has been saying so for twelve versions.
+
+**THE FINDING UNDER THE ANSWERS IS THAT THE FOUR ARE NOT FOUR OF A KIND**, and
+it is most of what this spec saves. Strategy and **Portfolio** are
+planning-and-reporting worlds — objects, owners, a rhythm, figures going in.
+**Insights** and **Processes** are LIBRARIES: *"they download the available
+resources"* and *"a bank of processes that they can search and look up how
+things go"*, both published by Forefront and read-only for the client. As
+described they are **the same machine with different content** — an item with a
+name, a category, a date, a version and something to open; one with a file on
+the end, one with steps. Built once, instantiated twice. Which decides the
+ORDER of the work, and that is the practical payoff: the spine and the switch,
+then Insights, then Processes, then Portfolio — *the libraries prove the module
+frame at small cost before the expensive module is built into it*, and a frame
+with one tenant in it is not a frame that has been proved.
+
+**AND THE CORRECTION ON THE LIBRARY SETTLED MORE THAN IT LOOKED LIKE IT DID.**
+Asked whether the bank is shared across clients or per client, he answered by
+describing the content: *"At the library are more of researches and the
+analytics and Market reports relevant to the client so it's a client document
+documents and researches."* So there is no shared bank and no cross-client
+read — **which removes the one part of this whole design that would have
+reached into the tenant isolation being built right now** (§314, RLS). Each
+client's library is material about that client, behind the same boundary as
+their plan. Nothing here changes the rebuild.
+
+**FOREFRONT-ONLY PUBLISHING MOVES WHERE THE WORK LANDS**, which is worth
+stating because it is the opposite of where it looks: those two modules have no
+authoring surface in the client app at all, so the client side is thin and
+**`/platform` grows a document room on each client's card** — upload,
+categorise, retire, see what is there. The client side is search, open,
+download, **refused on the SERVER and not only undrawn** (§42, §44).
+
+**TWO NAME COLLISIONS SETTLED BEFORE ANYTHING WAS DRAWN** (§87's twins, which
+this product has paid for four times). The project management module is
+**Portfolio**, because a capability already has *projects* inside Strategy and
+two lists one word apart is the fault; renaming Strategy's was offered with its
+cost — every screen, the workbook, the deck, stored data — and not taken. The
+research module is **Insights**, because standing beside a project management
+module the word *Resources* reads as **people and capacity**, which is the one
+thing it is not. And *"Strategy & Functions"* is just **Strategy**: a
+supporting function is a PLACE in the org, like a business unit, and every
+module will address it — it is not a module, and naming it in the module would
+have promised a second thing behind that door.
+
+**A MODULE IS A CONTRACT, NOT A PAGE WITH A NEW NAME.** To be one it must bring
+all five: its own navigation, its own roles and areas, its own Setup group, its
+own rhythm or none, and a landing. Anything that cannot supply all five is a
+page inside a module. This is the test that keeps *"we are open for more
+modules"* from turning the switcher into a second tab row — and it is the thing
+to apply the day a fifth is proposed.
+
+**THE ACCESS ANSWER IS §37's ANSWER ONE LEVEL OUT.** Measured: `AREAS` holds
+nine areas and `ACCESS_DEFAULTS` eleven rows — **99 cells on one page** — so
+four modules multiplied out naively is **396**, and §37 exists precisely
+because 525 controls was not a question anybody asks. So the module is a
+DIMENSION rather than a multiplier: one page, a **Client** tab holding the
+seats and where each person sits, then one tab per module holding that module's
+roles against that module's own areas. A module costs the areas it actually has.
+**HOLDING A ROLE IN A MODULE IS WHAT MAKES THE MODULE APPEAR** — there is no
+per-person module tick, because no role means no module in the switcher (§61: a
+control with nothing behind it is not a choice); which modules a CLIENT has is a
+row in the platform registry and Forefront's press. Two levels, and neither is a
+list somebody maintains by hand. Two areas move with it: **`a_setup` SPLITS**
+(client setup is the client-wide Super user's, module setup is a grant in the
+module's own tab — which is what lets a module have an admin who is not the
+client's, Islam's answer), and **`a_cycle` stops being a platform area** and
+becomes Strategy's.
+
+**SETUP STAYS ONE PAGE** — a Client group first, then one group per module the
+client has, with a module switched off REMOVING its group rather than leaving
+pages with nothing behind them (§61). The cost is stated rather than
+discovered: the rail gets long, which is what the folds (§47.3) and the keyword
+search (§108.13) already exist for. **The tidier-looking alternative was drawn
+and refused**: a Setup page per module reached from inside that module fails
+twice — an administrator sets several modules up in one sitting, and the spine
+has to live somewhere that is not inside any module.
+
+**THE MODULE IS THE OUTERMOST SWITCH**, above the destination row, because
+everything below it happens inside a module; somebody with one module sees a
+plain label and not a dropdown (§32). **Never two on screen** — his own answer,
+*"I don't think they need to screen at the same time"* — so a module owns the
+whole viewport, and **the place is remembered PER MODULE**, which is §173 one
+level out.
+
+**AND THERE HAS NEVER BEEN A PLATFORM-WIDE CYCLE.** There has been Strategy's,
+standing in for one because nothing else existed — `REVIEW` is read by scoring,
+reporting, the deck, the cycle board and the archives, and all of it is one
+module's. It goes back to Strategy: *"they don't have the same cycle ... the
+process is a continuous work and the project management is maybe a weekly or a
+monthly checkpoints."* Portfolio has checkpoints, Processes is continuous,
+Insights has versions and no time at all, and **no module may borrow another's
+clock**.
+
+**EACH MODULE DECIDES HOW MUCH OF THE SPINE IT USES**, which is the difference
+between a spine and a frame: Strategy addresses every unit and function, and a
+Portfolio project may belong to none of them. The spine OFFERS structure; it
+does not require a module to be shaped by it. Terminology splits the same way —
+*business unit*, *supporting function* and *company* are the client's words and
+stay client-wide; *pillar*, *aspiration* and *tactic* are Strategy's and move
+into its group.
+
+**ONE COST LANDS BEFORE THE CUTOVER AND IT IS THE ONLY REASON TO INTERRUPT
+SPEC 043's SEQUENCE**: the new app's addresses are `/<client>/…` and with
+modules they become `/<client>/<module>/…`. Adding the segment now — while only
+Strategy exists and nobody holds a bookmark — is a small change to work already
+built and green, touching the four places spec 043 names as carrying the slug
+(the shell's route, the door's landing, the worker's address list, the push
+payload's open address). Adding it after the cutover means breaking every saved
+link or special-casing Strategy for ever. Recommended as
+`/<client>/strategy/…` with `/<client>/…` redirecting and nothing else changed
+— **Islam's call, on that change**, and open at the time of writing.
+
+**DELIBERATELY NOT DECIDED, EACH RECORDED SO IT CANNOT BE ADDED QUIETLY**: a
+Portfolio project pointing at a Strategy project (*"No PM project is more of a
+detailed project ... not like the Strategy project"* — different things, so the
+link is an optional field later and not a redesign); per-category or per-item
+visibility inside a library (whole module for now, his answer, and a market
+report that must not reach unit staff is the case that reopens it); owners and
+review dates on a process (*"a bank, for now"* — the stored item keeps room for
+both and **draws neither**, so teeth later are an addition rather than a
+rebuild); whether the office is the same team in every module (one inbox, one
+conversation per person, §97); what Portfolio actually contains, which needs a
+spec of its own; and a fifth module, for which nothing is reserved — the
+contract is the test.
+
+---
+
+## §320.1 — THE MODULE MARK, AND WHERE IT SITS (2026-09-11, spec 046)
+
+Settled over three mockup rounds, each drawn in the platform's own chrome — the
+markup captured from the built file, every stylesheet build.py concatenates
+inlined in build.py's own order (§41.9).
+
+**THE MARK IS `.homemark`'S TREATMENT, LIFTED AND NOT COPIED.** Islam: *"make
+the button without a rounded frame and center it vertically and horizontally in
+it's place."* The product already draws exactly that shape once — frameless,
+square, centred both ways, the mark inside it — and §200.3 and §302.4 are the
+two rounds that got it there. The first drawing wore `.navmenu-btn`'s base,
+which is the GEAR's treatment: a filled, bordered, word-shaped pill, aligned
+like a word because that is what it holds. So the frameless centred square
+**gets a name of its own** and `.homemark` keeps only what is its own, the gold
+*something is waiting* fill; copying the five declarations instead is how the
+two drift the next time somebody measures one of them (§53.5).
+
+**AND IT SITS BEFORE THE PRODUCT'S NAME, WHICH IS ISLAM'S OWN PLACEMENT**
+(*"how about we place the ark as a small icon beside the startegy management
+platformon the very top left?"*). It reads in the true order — modules, then
+the product, then the client, then where in the client — and it is the only
+placement where the outermost thing in the platform is the first thing on the
+page. The destination row is left exactly as it is.
+
+**HE ALSO PROPOSED THE FAR RIGHT, BESIDE THE GEAR, AND THAT IS WHERE THE HOME
+MARK WAS MOVED FROM.** His reasoning was that a client's own person has no gear
+there, so the corner is free — and that is the same observation §193.2 acted on
+when it moved the house to the left: *"Setup is the office's, so the way back
+to your own starting page was keeping company with a control most of the
+register never sees."* Drawn for BOTH audiences rather than argued: with no
+gear the mark is alone at the end of a row it does not belong to, and the
+reading order inverts.
+
+**THE SIZE IS 24px AND IT WAS SWEPT, NOT CHOSEN.** At a real 1500px window a
+30px box grows the top row 31 → 36px, 28 → 34, 26 → 32, and **24 costs it
+nothing at all** — 31px with the mark and 31px without, no clipping. §302.4's
+arithmetic holds at that size too: 24 less a 16px mark leaves eight, four a
+side, so the size that is free is also the size that does not snap half a pixel.
+Below about 1300px the row already wraps without it and the mark takes a little
+more of the product's name.
+
+**AND TWO OF THE THREE ROUNDS MEASURED THE WRONG THING FIRST, BOTH TIMES ON THE
+NUMBER BEING DECIDED.** Rounds one and two reported that the top row cannot take
+a control — 46px against 31, the name clipped — measured through frames capped
+at the mockup's own reading width, about 200px narrower than the chrome, which
+has been full-window since §94.13. *A frame that squeezes the thing under test
+answers a question nobody asked.* Then the lean rebuild reported the same 46px
+again, from a `.pg h1` rule of my own reaching INSIDE the frames: the chrome's
+`.brand h1` is a descendant of the mockup page, so the product's name was set at
+22px, the brand went 409 → 559px and the client chip wrapped. Caught by
+measuring the committed file beside the new one — same width, same drawing,
+different answer — and scoped with `>` rather than loosened.
+
+**AND THE MOCKUP WAS TOO LONG, WHICH IS ITS OWN LESSON.** Islam: *"the mockup is
+too confusing we already removed some old options and full of writing."* Both
+halves true: it still carried the option his own decision had superseded, and a
+paragraph of cost prose under every drawing. **A mockup exists to be LOOKED AT**
+— the reasoning belongs here and in the handover, never on the page somebody
+opens to choose between two pictures. Rebuilt as two drawings, one open state,
+one card and the question.
+
+---
+
+## §320.2 — THE MODULE IS IN THE ADDRESS (2026-09-11, spec 046 §7)
+
+Islam, of the one part of spec 046 that gets more expensive by waiting:
+***"for the address ok add it now."*** The new app's addresses are
+`/<client>/…`; with modules they become `/<client>/<module>/…`. Adding the
+segment **now** — while only Strategy exists and nobody holds a bookmark — is a
+small change to work that is already built and green. Adding it after the
+cutover means either breaking every saved link or special-casing Strategy for
+ever.
+
+**THE SPINE CARRIES NO MODULE, AND THAT IS THE DECISION INSIDE THE CHANGE.**
+Three addresses stay where they are: `/<client>` (the landing, which shows what
+is waiting across every module), `/<client>/setup/<page>` (one Setup page for
+the whole client — spec 046 §4.5 REJECTED a Setup page per module, because an
+administrator sets several up in one sitting and the spine has to live
+somewhere inside no module) and `/<client>/tour`, which the landing offers.
+Everything else takes `/<client>/strategy/…`. **Both ends are asserted**
+(§94.2): the word present where it belongs AND absent on the spine, or a build
+that prefixed everything passes half of it — measured, `--break=module-on-setup`
+goes **3 red** and nothing else moves.
+
+**THE LIST IS ON THE SERVER AND THE BROWSER IS TOLD.** `lib/modules.ts` names
+the four words and the default once; the document is stamped `data-module` and
+`shell/route.js` writes that word back into every address it pushes, so a module
+added tomorrow needs no edit in the browser (§53.5). What IS the browser's own
+vocabulary is `setup` and `tour` — `kindOf()` and `placeOf()` already had to
+name both, so nothing is copied.
+
+**THE REDIRECT IS THE SERVER'S, AND ITS ORDER IS THE SECURITY ARGUMENT.** An old
+address is corrected **before a page is drawn at it**, so there is one address
+per page and Back never walks through a shape the product no longer writes —
+and it happens **after the door has answered**, or a stranger would be told
+which addresses a client has. Asserted directly: signed out, `/raya-trade/mobile
+/strategy` 302s to the DOOR and not to the module.
+
+**THE ONE AMBIGUITY IS NAMED RATHER THAN GIVEN MACHINERY.** The first segment
+decides by POSITION and never by the word, so a business unit keyed `strategy`
+sits at `/<client>/strategy/strategy/plan` and reads correctly; what cannot be
+told apart is that unit's OLD address, `/<client>/strategy/plan`. It is the
+back-compat redirect alone, for links made before today, and a supporting
+function is safe either way (it carries its own `fn/` prefix). Said in
+`lib/modules.ts` rather than guarded.
+
+**PROVED ABLE TO FAIL THREE WAYS, EACH ON ITS OWN ASSERTIONS**: the browser
+stopping writing the module **7 red**, the redirect removed **2 red**, the
+module put on the spine too **3 red**. `check:shell` 60 → **71/0** with a new
+section 2b, `check:door` 49 → **50/0**, `check:state` 91/0, blob 23/23, comms
+47/47, upload 9/9, room 10/0, deploy 5/0, rules 588/0, every `:red` variant
+still red, `tsc` clean but for a pre-existing Prisma-generate error reproduced
+on the untouched tree (§303).
+
+**AND ONE CHECK HELD A LITERAL THIS MOVED** (§214.3, again): `door-landing`
+asserted the way out is `/raya-trade/mobile`. **REWRITTEN, never loosened**
+(§218) — it agrees with `doorHref()` now, the product's own builder (§94.8),
+**with the module asserted present beside it**, or a build that dropped it from
+the page and the builder alike agrees with itself perfectly (§113.8).
+
+**AND MY OWN FALSIFICATION HARNESS PUT BACK LESS THAN IT BROKE.** The third
+break edited three files and the restore covered two, so the next green run
+read **shell 68/2 and door 48/1** on a tree I believed clean — §100.3 in the
+harness, and the thing that makes it dangerous is that it looks exactly like a
+regression in the work. *A probe restores everything it touched, or the run
+after it is measuring the probe.*
+
+**RECORDED, NOT DONE**: `targetOf()` and `subjectLabel()` in `lib/landing.ts`
+are callerless since Phase B replaced the holder pages, left alone because
+deleting them is a tidy-up and not this change (§24 against §2b) — with a note
+saying they must be handed the rest INSIDE the module if they ever gain one.
+`check:demo` is red in this sandbox for a missing `SMP_APP_PASSWORD`,
+reproduced identically on the untouched tree before anything here was blamed.
+
+---
+
+## §320.3 — ONLY THE ROWS OPEN (2026-09-11, spec 046 §4.6a)
+
+Islam, of the client card drawn two ways: ***"2"*** — **only the rows open, the
+card's name is not pressable.** Every way into a client from Forefront's console
+names a module, so there is never a question of which one the top would open —
+which is the question option 1 would have had to answer with a remembered
+per-client module that does not exist.
+
+**HE ASKED FOR A PICTURE AND NOT AN ARGUMENT** — *"for the card show me a mockup
+dont' talk to me about visuals"* — and both behaviours were drawn in the card's
+own markup, at rest and pressed, with a one-module client beside them (rule 1c).
+The difference is one press target and it is not describable: option 1's top row
+and option 2's absence of one look identical in words.
+
+**IT IS NOT BUILT WITH §320.2's ADDRESS CHANGE, AND THE REASON IS THE PRODUCT
+RATHER THAN THE SCHEDULE.** With one module the card draws ONE row — a door
+behind a door (§32) and a **smaller** target than the whole card it replaces, so
+building it today would make the console worse in order to be ready for a
+feature that does not exist. And there is nothing to correct meanwhile: the card
+opens `/<client>`, the landing, which is right under either behaviour. It lands
+with the second module, which is spec 046 §5's own item 2.
+
+**THREE COSTS NAMED NOW rather than found later**: the press target shrinks from
+a card to a row; every module has to answer a short state for that client (*cycle
+open*, *12 running*, *3 new*) or draw its name alone; and **the landing stops
+being the way in from the console** — `/<client>` stays what a client's own
+person lands on, while a consultant pressing a row arrives at
+`/<client>/<module>/…`.
+
+---
+
+## §320.4 — THE CARD'S ROWS, BUILT (2026-09-11, spec 046 §4.6a)
+
+Islam, looking at the console on the live site: ***"no modules appearing."***
+He is right, and the first honest answer is WHY: §320.3 recorded the decision
+and deliberately did not build it, on the grounds that with one module the card
+draws ONE row — a door behind a door (§32) and a smaller press target than the
+whole card it replaces. **He went to look for it, which settles the timing**,
+so it is built; the ergonomic cost stands and is his to carry.
+
+**AND HIS SCREENSHOT WAS OF SOMETHING ELSE AGAIN**: `main` had moved **416
+commits** under this branch — the CUTOVER itself (§317.3–.10, production is the
+new stack now), §318's client set-up wizard and §319's consulting memory — so
+what he was looking at could not have shown this work whether or not it was
+built. Merged before anything was touched, because building a card on a
+`platform.html` that had moved **850 lines** underneath it is a merge conflict
+dressed as a feature.
+
+**AND THE NUMBERS COLLIDED TWICE.** `main` took **§318** (the wizard) and
+**spec 044** (the same), then **§319** and **spec 045** (the memory), while this
+was being built — so this round is renumbered **§318 → §320** and **spec 044 →
+046**, the fourth time this file has recorded that shape (§287, §94.12, §264.3,
+§99). Scoped to the lines THIS BRANCH wrote (§264.3's rule): the fifteen files
+it authored, and in the decisions log the block from its own first heading
+down — `main`'s five surviving mentions of §318 and spec 044 are its own and
+were left where they stand.
+
+**THE CARD STOPPED BEING A `<button>`, WHICH IS THE WHOLE BUILD**: a button
+cannot hold buttons, so the identity block and the rows are its two children
+and the padding moved onto them. `.ctop` is not pressable; a `.mrow` per module
+is, and goes to `/<client>/<module>` — §320.2's address, which is why the two
+land together.
+
+**THE MODULE'S STATE MOVED OUT OF THE FOOT WITH IT.** *Cycle open*, *no plan
+yet* and *not answering* are all STRATEGY's answers about a client, so with a
+Strategy row to carry them the foot would have said each twice (§87) — the
+mockup drew it that way and it was a fault of the drawing, corrected in the
+build rather than copied. The seat, the unit count and *Demo* stay: they are
+the client's and the spine's, not a module's. **Asserted as "once on the whole
+card"**, which is what makes the correction visible to a check rather than a
+matter of taste.
+
+**THE ROWS COME FROM THE SERVER** (`lib/modules.ts` `moduleRows`, read by
+`lib/platform-api.ts`), so the console cannot spell a module differently from
+the switch or from Setup (§53.5) — and `modulesFor()` is the one place that
+will answer *which modules has this client* the day the answer stops being
+"Strategy, and nothing else".
+
+**A CLIENT NOBODY MAY OPEN DRAWS NO ROWS** — there is no way in, so there is
+nothing to draw (§61); *Listed only* already says it. **A module with nothing
+to say draws its name alone**, never a placeholder (§35).
+
+**THE ROW IS A REAL `<button>` AND THE CHECK FOCUSES IT**: a `<div>` with a
+click handler renders identically and cannot be reached from a keyboard, which
+is the kind of fault that ships looking perfect.
+
+**AND THE FROZEN HARNESS HAD TO LEARN THE ADDRESS, OR IT STOPS BEING ONE.**
+`checks/multi-client.py` drives `scripts/dev-server.js`, which reads its client
+paths out of `vercel.json` — now that file's only job, since §317.7 established
+Vercel no longer reads it. One rewrite added and one derived regex beside the
+door's, **with the bare client rule kept FIRST**: `CLIENT_RE` is built from the
+first rewrite pointing at the platform file and parses `/:name(pattern)` alone,
+so putting the module rule ahead of it silently breaks every client path
+locally — found by reading that derivation rather than by running it.
+
+**PROVED**: `checks/client-card-modules.py` **15/0** against BOTH copies of the
+page (the root file and the app's generated one, §53.5), red both ways —
+`--break=card-is-door` **1 red**, `--break=no-rows` **4 red**, the second
+printing a card with no *cycle open* anywhere, which is the "moved it out and
+forgot to draw it" failure this exists to catch. `platform-cards.py` 19/0 on
+both copies with its stub taught the new field (§100.3). On the merged tree:
+shell **72/0**, door 50/0, state 91/0, blob 23/23, comms 47/47, upload 9/9,
+room 10/0, deploy 5/0, rules 588/0, and `main`'s own five consulting-memory
+checks 36/42/21/12/16 all green.
+
+**TWO FAULTS IN MY OWN CHECK, BOTH OLD LESSONS**: its stub answered EVERY GET
+with HTML, so the page's own script came back as a document and the run
+reported three page errors that were the stub's (§100.3); and
+`allow_reuse_address` was set on the instance AFTER the bind, which does
+nothing — the file could not be run twice in a row, and `platform-cards.py`
+carries a comment about exactly that one line.
+
+**NOT RUN HERE AND SAID SO**: `checks/multi-client.py` (rewritten to press the
+row, both ends) and `main`'s `checks/client-setup.py` both need the frozen
+harness, which needs `pg` at the repository root and is not installed in this
+sandbox. The regex derivation they depend on was verified on its own instead.
+
+---
+
+## §320.5 — ADDING A MODULE TO A CLIENT, AND A TRIAL THAT PROVES IT (2026-09-12, spec 046 §4.5)
+
+Islam: ***"how does we create a new module? let's create a very simple another
+module something even for the trial. to manage the flow of adding a new module
+to the client"***, and then, of the greeting, ***"make it a hello with the name
+of the client to show variance. and we need part in the client settings to add
+modules."***
+
+**THE FIRST ANSWER WAS A MEASUREMENT, NOT A PLAN.** Asked how a module is
+created, the honest reply is that today a module is **three things and no
+more**: a word in `MODULES`, an address segment `whereOf`/`clientHref`
+understand, and a row on the client's card. The *contract* §320 wrote down —
+own navigation, own roles, own Setup group, a landing — exists for **Strategy
+alone**. So `/<client>/portfolio` already resolved, and served the STRATEGY
+platform stamped with another word: not a feature waiting to be finished, a
+door onto the wrong room. That is what this closes.
+
+**WHICH MODULES A CLIENT HAS IS STORED, AND `modulesFor()` ALREADY SAID IT
+WOULD BE** — its own comment predicted "a stored per-client answer the day the
+second module exists". One column on the registry row, one migration, and the
+reader guarantees three things a stored list cannot: the order is `MODULES`'
+and never the order they were switched on, so a row cannot move under somebody
+because of when it was bought; an unknown or **unbuilt** word is dropped, so a
+list written in hope cannot open a door; and the **default is always in it**,
+because it is where an address naming no module lands and a client without it
+could not be opened at its own front door.
+
+**`built` IS NOT A PREFERENCE, IT IS WHAT STOPS THE DOOR OPENING ONTO THE WRONG
+ROOM.** Portfolio, Insights and Processes keep their entries — the words stay
+reserved, or a business unit keyed `portfolio` would quietly claim the address
+the day the module lands — and are **not offered to anybody**, because a switch
+for a module with nothing behind it is §61 with a plausible label on it.
+
+**A MODULE THE CLIENT DOES NOT HAVE FALLS THROUGH TO THE LEGACY BRANCH, NEVER
+TO A REFUSAL OF ITS OWN.** `/<client>/portfolio` is read exactly as any other
+word the client does not hold: redirected once, landed on the person's own
+first page. One behaviour for *that is not a thing here*, rather than a second
+refusal that would have to be worded, tested and kept in step with the first.
+`have` **defaults to the default alone**, never to every module — a caller that
+forgets to say gets the narrow answer, which is the safe direction (§42).
+
+**THE CONTROL IS A BAND UNDER THE CLIENT'S NAME — ISLAM PICKED B** of two drawn
+in the console's own stylesheet (`design-mockups/modules/2026-09-12_add-a-module.html`,
+published as an artifact per rule 1c). What a client can OPEN is not a detail
+beside its industry: in the left column it landed sixth, below the fold on a
+laptop, so the one thing on that page deciding what every other setting applies
+to was the last thing reached. **THE ROWS ARE THE TEAM LIST'S OWN, CLASS FOR
+CLASS** — `.teamrow`, `.who .nm/.em`, `.sp`, `.tag`, `.btn`, `.note` — so the
+section adds **no vocabulary** to that drawer (§53.5); the only new rule is the
+band itself.
+
+**OFF HIDES AND FORGETS NOTHING** (§44, three times in this project now: a
+switch that destroys data is a delete with a friendly label). What leaves with
+the module is its Setup group, which is the point — a group whose pages have
+nothing behind them is worse than no group (§61). **THE DEFAULT GETS WORDS AND
+NOT A DEAD CONTROL** (§94.15): it says *Always on*, and **the server refuses to
+switch it off however the request is spelt**, because a guard that only hides a
+control is decoration (§42, §44). Seeing a state is not setting it (§256): a
+reader gets the words and no button, never a blank right-hand side.
+
+**THE GREETING NAMES THE CLIENT, AND THAT IS THE WHOLE PROOF** — Islam's own
+instruction, and the argument for the page. A static *hello* would look
+identical on a build where the module resolved, the tenant was never opened and
+nothing was read. So the trial page makes **three claims, each able to fail
+visibly**: the NAME comes from the registry row the address resolved to; the
+COUNT comes from that client's own graph read under `withTenant` as `smp_app`,
+so it proves the module crossed the tenant boundary rather than merely that a
+route matched; and the BAR is in that client's colours, which a module gets for
+nothing because branding is the SPINE's. **AND A REGISTER IT COULD NOT READ IS
+SAID, NEVER COUNTED AS NOUGHT** (§35, §93) — measured with the tenant
+unreachable, it says so and the name is still there.
+
+**NO ROW OF UNITS, DELIBERATELY.** A module brings its own navigation or none
+(§320 §4.2), and this one has no subjects — so the Strategy platform's
+navigation not appearing is the contract holding rather than an omission.
+**AND NO INLINE SCRIPT**: the page is served under the shell's own policy,
+`script-src 'self'`, so the switcher is a `<details>` — which is what E1 draws
+anyway, and an inline handler here would have rendered perfectly and never run
+(§96's family).
+
+**THE ROAD RUNS ONE WAY AND THE RETURN IS ON THE TRIAL PAGE.** The way in is
+the client's card; the way back is the switcher, drawn here for the first time
+from **E1 as signed off on 11 September**. Strategy's own shell does not carry
+it yet — that is E1 in the FROZEN file and its own slice (§314: the single file
+takes no new features) — so this is stated rather than left to be discovered.
+
+**§320.5a — AND `tsc --noEmit` REPORTED A CLEAN TREE ON A BUILD THAT DOES NOT
+COMPILE.** `tsconfig.json` sets `incremental: true`, so the run reads
+`tsconfig.tsbuildinfo`; with a stale one it printed nothing and exited 0
+**twice** on a tree holding `Expected 2 arguments, but got 1`, and found the
+error the instant the cache file was removed. Reproduced deliberately before it
+was believed. **Every recent "`tsc` clean" in this project may have been
+measured against that cache** — §298.3's fault in the typechecker, where the
+count is not the verdict — so a cold run is the only one worth quoting, and
+`npm run typecheck` now removes the cache first.
+
+**PROVED ABLE TO FAIL THREE WAYS** (`checks/modules.mjs`, 47 assertions, no
+database): `any-module` **2 red** (an unbuilt module both kept in the list and
+reachable at an address), `open-address` **3 red** (a module the client does not
+hold read as one anyway), `static-hello` **2 red** — printing `Hello, there.`,
+which is exactly the fault the page exists to rule out. **The check says which
+of its assertions are DRIVEN and which are READ** (§100.3), because the
+difference is the strength of the claim. **AND ITS OWN FIRST RUN CALLED A
+CORRECT BUILD BROKEN**: `page.appendChild(grid)` appears twice in
+`platform.html` — the clients list builds one too — so an unscoped `indexOf`
+compared the band against ANOTHER page's grid and failed the one assertion that
+carries Islam's choice.
+
+**THE MIGRATION WAS PROVED ON THE PATH IT EXISTS FOR, NOT THE EASY ONE.** On a
+fresh database `schema.sql` has already made the column, so applying it there
+proves nothing; it was run against a database with the column **dropped** — the
+shape an existing deployment is in (§33.5) — and twice over, backfilling the
+row that predates it to `["strategy"]`. **No CHECK constraint names the
+modules**, deliberately: the names live in `MODULE_DEF` and a constraint would
+be a second copy of them, refusing an UPDATE the day a module is renamed rather
+than the day somebody looks.
+
+**RECORDED, NOT DONE**: the Strategy shell carries no switcher, so from inside
+Strategy there is no way to the trial module except the console; the landing
+shows no module row; and a module's Setup group is described by this control and
+not yet built, because Setup's groups are the frozen shell's.
+
+## §320.6 — THE SWITCHER IN THE TOP BAR, AND A SENTENCE THAT WAS AHEAD OF THE BUILD (2026-09-12, spec 046)
+
+Islam, with a screenshot of his own Strategy page: ***"where are the box of 4 in
+the top left that we build together? that already navigates the modules?"***
+&mdash; then, told it was never there, ***"yes the square switcher in the top
+bar. and for the setup no need now."***
+
+**THE HONEST ANSWER CAME FIRST AND IT WAS NOT A DEFECT**: the mark appears
+**nought** times in the platform and **six** in the trial module's page. E1 was
+designed and signed off on 11 September and built on ONE surface &mdash; the
+page that needed a way out of itself (&sect;61) &mdash; and never in the shell.
+His screenshot is a picture of the gap &sect;320.5 recorded, which is the answer
+to *where is it* rather than a fault to go hunting for.
+
+**THE MOCKUP COULD NOT BE COPIED, AND RENDERING IT IS WHAT SAID SO.** E1's
+markup puts the `<details>` INSIDE `.brand` &mdash; and that drawing's `.brand`
+was a flex ROW while the product's is a flex COLUMN (`_shared.css`), so copying
+it would have stranded the mark on a line of its own above the product's name.
+Measured by shooting the mockup's own frame (mark at y=176, title at y=186, one
+row) rather than read off the markup. `.top-in` is already a row and `.brand`
+carries `margin-right:auto`, so **first in the row IS the top left** and no
+existing rule moves (&sect;296.1: a mockup made from another build's stylesheet
+is a picture of what the product could look like, not of what it does).
+
+**IT IS BUILT IN THE NEW STACK'S OWN BROWSER FILE, NOT IN THE FROZEN SHELL, and
+the reason decides whether it may be drawn at all**: a module list only exists
+where there is a server to say which ones a client has, and the offline
+contingency copy (&sect;306) is the built file with one tenant's graph baked in
+and nothing behind it &mdash; a switcher there would be a control that could
+never open anything (&sect;61). So the markup and the behaviour live in
+`smp-app/shell/route.js`, which already owns everything the browser knows about
+modules, and only the SHAPE goes in `arrange.css`, beside the `details.dlmenu`
+family it belongs to, because a stylesheet is inert either way.
+
+**DRAWN ONLY WHERE THERE IS A CHOICE.** `data-modules` is written by the server
+for a client holding more than one, and for nobody else &mdash; so a menu of
+one is never built, which is a door behind a door (&sect;32), and **the ABSENT
+attribute is what says so** rather than a flag beside it (&sect;50.6). Asserted
+at both ends, or a build that always drew it passes everything else.
+
+**THE NAMES COME FROM THE SERVER AND THERE IS ONE ANSWER TO WHAT THE SWITCHER
+LISTS.** `moduleMenu()` is read by the shell's bar and by the trial module's own
+&mdash; a label worked out in the browser by capitalising a key is exactly how
+two screens come to spell one module differently (&sect;53.5). The summary's
+mark is DRAWN and not a font character (&sect;52): it has no word beside it to
+recover from a blank box.
+
+**ONE LISTENER, BUILT ONCE.** `paintUnits()` replaces the row BELOW this one and
+nothing rewrites `.top-in`, so the markup is made and wired at load and never on
+a paint (&sect;24, &sect;47.2); a press navigates, so the menu never has to be
+closed afterwards; **and the module you are already in does nothing** rather
+than reloading the page under somebody.
+
+**&sect;320.6a &mdash; AND THE SENTENCE I SHIPPED WAS AHEAD OF THE BUILD.**
+&sect;320.5's band promised *"turning one on adds its group to this client's
+Setup page"*. Spec 046 &sect;4.5 says it will; the build does not, and cannot
+&mdash; Setup's five sections are the frozen shell's and know nothing about
+modules. **&sect;104.8 exactly**, a recorded intention nothing compares with the
+code, and it shipped because the MOCKUP carried it and the mockup was drawing
+the destination rather than the state. With Setup deferred on Islam's word the
+words now say today's truth and the promise goes back to the spec, where nobody
+reads it as a fact. *A mockup describes where a thing is going; a shipped
+screen may only describe where it is.*
+
+**&sect;320.6b &mdash; AND THE SWEEP EXITED 0 WITHOUT LAUNCHING A BROWSER.**
+`qa.py` run directly printed Playwright's *"run playwright install"* banner,
+found no headless shell, and **returned success** &mdash; &sect;279.3 and
+&sect;301.2's fault, third time in this file: *a check that cannot launch
+reports no failures*, and reading the exit code would have called a whole
+platform sweep clean. It needs `qa-run.py`, which points Playwright at the
+Chromium this image actually holds.
+
+**PROVED ABLE TO FAIL FOUR WAYS** (`checks/modules.mjs`, now 62 assertions,
+&sect;7 driving a real browser against the shell's own body and stylesheet
+&mdash; because whether a control is DRAWN is not a question the source can
+answer, &sect;96): `any-module` 2 red, `open-address` 3, `static-hello` 2,
+`switch-always` 1. **The check's stub honours the same break as the server**,
+or the falsification would break the product and leave the check measuring an
+unbroken stub (&sect;100.3). And it **fails rather than skips** when there is no
+browser, because a check that quietly does not run is a green tick over nothing
+(&sect;54.5) &mdash; which is the same lesson &sect;320.6b had just taught from
+the other side.
+
+---
+
 ## §321 — THE HORIZON ARRIVES WITH THE PLAN, AND NOT BEFORE IT (2026-09-11, spec 044)
 
 Islam, of the set-up flow: ***"why is the horizon is in the setup? time is not
@@ -42678,6 +43429,63 @@ able to fail **1 red** (the PNG button unwired) and **4 red** (the shape never
 posted). Its own probe **died rather than reporting twice** (§215) and **called
 a correct build broken once**, asking for a stored `"projects"` the platform
 keeps as an ABSENCE (§50.6).
+
+---
+
+## §322.1 — TWO SESSIONS REWROTE ONE SCREEN, AND THE BAND WAS CARRIED (2026-09-12, at the merge)
+
+**THE MODULES BAND AND THIS FLOW ARE THE SAME SCREEN, WRITTEN TWICE.** §320.4
+put *"Modules this client has"* under the client's name on the settings page;
+§322, in another session and on the same days, REPLACED that whole page with
+the set-up flow. Git merged the two sides of `platform.html` with one conflict
+and **either side taken whole drops a feature outright** — main's takes the
+flow away, the branch's takes module switching away — which is §318.7's own
+shape (`build.py`'s script list, where `WIZARD` and `CONTINGENCY` landed on one
+line) and §56.7's with a longer fuse.
+
+**CARRIED, NEVER REBUILT.** Every rule, every word and every refusal in
+`modulesBlock()` is §320.4's, unchanged: the list comes from the server
+(`lib/modules.ts`), a module that is not BUILT is not drawn at all (§61), the
+default gets words and not a dead control (§94.15), and somebody who may read
+this client's configuration and not change it gets the words and no button
+(§256). What moved is where it is drawn.
+
+**AND §320.4's OWN ARGUMENT DECIDED WHERE.** It refused the left column because
+there the band landed sixth and below the fold on a laptop. Here **step one IS
+the client's own details** and holds five fields, so the band is on screen one
+press from the card, and it sits on the step that is about the CLIENT rather
+than about its organisation — which is what a module is a fact about.
+**Islam has not seen it in this place**, so it is on the merge's what-to-check
+list rather than assumed; moving it is one line.
+
+**IT REWRITES ITS OWN ROWS AND NEVER `paintSetup()`** (§71.2), which is the
+rule the ending block below it already follows: a repaint would throw away
+whatever is half typed on that step. §320.4 could call `drawClient(key, true)`
+because that page had nothing half-typed to lose.
+
+**AND §323's RULE REACHED THE THIRD DOOR.** An archived client is read, not
+edited — asserted on `saveClient` and `shapeClient` when §323 was built, and
+`setModules` is the same kind of act, so it refuses one by name too. **A rule
+kept at two doors of three is the drift this project keeps recording** (§53.5),
+and the third is the one somebody reaches with a console rather than with the
+drawer.
+
+**PROVED, BECAUSE A CARRIED FEATURE WITH NO ASSERTION IS HOW IT GOES MISSING
+NEXT TIME.** `client-setup-outside.py` §8b asserts the band on step one, a row
+per module the SERVER offers, the default with no control BESIDE a module that
+has one (§94.2 — "no buttons" is satisfied by a band with none at all), the
+press read off what the page POSTED rather than off the word on the button
+(§96), and the step still current afterwards. Falsified **6 red** with the band
+removed and **2 red** with the always-on rule broken. `client-archive.py` §11b
+asserts the other end: a live client's band offers a control, the same band on
+an archived one is still DRAWN and offers none — **1 red** with the `canEdit`
+gate removed.
+
+**AND THE FIRST FALSIFICATION DIED RATHER THAN REPORTING** (§215, in a file
+whose own docstring promises every probe degrades): the press was a
+`pg.click`, which waits 30 seconds on a control that is not there and took the
+four assertions after it down with it, so the run that was meant to show six
+failures showed none. It asks for the control first now.
 
 ---
 

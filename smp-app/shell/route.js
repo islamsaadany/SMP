@@ -5,9 +5,17 @@
    The frozen shell has no addresses: it opens where the person works
    (§94.6) and remembers where they were across a refresh in sessionStorage
    (§173's `smp.where`, a destination · a tab · a section). On the new stack a
-   page IS an address — /<client>/<target>/<tab>[/<section>] — because the
-   landing's doors point at one (§315) and a link somebody sends has to open
-   the page it names.
+   page IS an address — /<client>/<module>/<target>/<tab>[/<section>] —
+   because the landing's doors point at one (§315) and a link somebody sends
+   has to open the page it names.
+
+   THE MODULE IS NOT A LIST HELD HERE (spec 046 §7). The document is stamped
+   `data-module` by the server, which owns the list (lib/modules.ts), and this
+   writes that word back into every address it pushes — so a module added
+   tomorrow needs no edit in the browser. What IS this file's own vocabulary
+   is which destinations belong to the SPINE and carry no module: `setup`,
+   one page for the whole client (spec 046 §4.5), and the intro round, both
+   of which kindOf() and placeOf() already had to name.
 
    So this does two things and nothing else:
      · on arrival, the address becomes §173's remembered place, so the
@@ -31,6 +39,7 @@
   if (!m) return;
   if (document.documentElement.getAttribute("data-break") === "no-route") return;   /* the check's break */
   var SLUG = m[1];
+  var MODULE = document.documentElement.getAttribute("data-module") || "";
   /* tab words in the address ↔ tab keys in SUBS; a function's Strategy and
      Performance keys are its own (fnstrat, fnperf), the group's and a
      company's are `performance` and their own pages */
@@ -38,8 +47,13 @@
                  reporting: { unit: "report", fn: "report" } };
   var TAB_OUT = { strategy: "strategy", fnstrat: "strategy", performance: "performance", fnperf: "performance", report: "reporting" };
   function kindOf(d) { return d === "group" ? "group" : d === "setup" ? "setup" : /^fn:/.test(d) ? "fn" : /^co:/.test(d) ? "co" : "unit"; }
+  /* The path after the client's slug, whichever address this is asked of. */
+  function restOf(path) { return String(path || "").replace(/^\/[^/]+\/?/, ""); }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
+    /* the module leads every address but the spine's; `setup` and `tour` are
+       the spine's own words and are read where they stand */
+    if (MODULE && seg[0] === MODULE) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
@@ -60,13 +74,104 @@
   function addressOf(d, s, c) {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
-    var out = "/" + SLUG + "/" + seg;
+    /* Setup is the client's, not a module's (spec 046 §4.5), so it is the one
+       destination whose address carries no module word. */
+    var out = "/" + SLUG + (MODULE && kind !== "setup" ? "/" + MODULE : "") + "/" + seg;
     if (s) out += "/" + (kind === "setup" || kind === "group" ? s : (TAB_OUT[s] || s));
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
+  /* ── THE MODULE SWITCHER (spec 046, E1 — signed off 2026-09-11) ──────
+     The four-square mark at the far left of the top bar, opening the list of
+     modules this client has with the one you are in marked.
+
+     IT IS BUILT HERE AND NOT IN THE FROZEN SHELL, for the reason that decides
+     whether it is drawn at all: a module list only exists where there is a
+     server to say which ones a client has. The offline copy (§306) is the
+     built file with one tenant's graph baked in and no server behind it, so a
+     switcher in the frozen shell would be a control that could never open
+     anything (§61). Its SHAPE is in arrange.css beside the family it belongs
+     to (`details.dlmenu`), because a stylesheet is inert either way.
+
+     DRAWN ONLY WHERE THERE IS A CHOICE. `data-modules` is written by the
+     server only for a client holding more than one (lib/shell.ts), so a menu
+     of one is never built — that is a door behind a door (§32) — and the
+     ABSENT attribute is what says so, rather than a flag beside it (§50.6).
+
+     THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
+     one answer to what the switcher lists, read by this and by the trial
+     module's own bar (§53.5): a label worked out here by capitalising a key
+     is how two screens come to spell one module differently.
+
+     IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
+     inside, and that drawing's `.brand` was a flex ROW while the product's is
+     a COLUMN — copying the markup would have stranded the mark on a line of
+     its own above the product's name. `.top-in` is already a row and
+     `.brand` carries `margin-right:auto`, so first-in-the-row is the top left
+     (§296.1: measure the paint, never the cascade).
+
+     NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
+     BELOW this one and nothing rewrites `.top-in`, so the markup is built and
+     wired exactly once, at load — no second handler on a repaint (§24, §47.2).
+     A press navigates, so the menu never has to be closed afterwards. */
+  (function modules() {
+    var raw = document.documentElement.getAttribute("data-modules");
+    if (!raw) return;                               /* one module: no choice to offer */
+    var list;
+    try { list = JSON.parse(raw); } catch (e) { return; }
+    if (!Array.isArray(list) || list.length < 2) return;
+    var bar = document.querySelector(".top .top-in");
+    if (!bar || bar.querySelector(".topmark")) return;
+
+    var d = document.createElement("details");
+    d.className = "dlmenu topmark";
+    var here = list.filter(function (m) { return m && m.key === MODULE; })[0];
+    var sum = document.createElement("summary");
+    sum.setAttribute("title", here ? "Modules — you are in " + here.label : "Modules");
+    sum.setAttribute("aria-label", sum.getAttribute("title"));
+    /* DRAWN, NEVER A FONT CHARACTER (§52): a glyph the subset does not carry
+       ships as a blank box, and this mark has no word beside it to recover
+       from that. */
+    sum.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+      '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
+      '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
+      '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
+      "</g></svg>";
+    d.appendChild(sum);
+
+    var menu = document.createElement("div");
+    menu.className = "menu";
+    menu.setAttribute("role", "menu");
+    list.forEach(function (m) {
+      if (!m || !m.key) return;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("role", "menuitem");
+      b.dataset.module = m.key;
+      if (m.key === MODULE) b.setAttribute("aria-current", "true");
+      b.appendChild(document.createTextNode(m.label || m.key));
+      if (m.note) {
+        var sub = document.createElement("span");
+        sub.className = "dlsub";
+        sub.appendChild(document.createTextNode(m.note));
+        b.appendChild(sub);
+      }
+      menu.appendChild(b);
+    });
+    /* ONE LISTENER ON THE MENU, not one per item — and the module you are
+       ALREADY in does nothing rather than reloading the page under somebody
+       (§61's other half: a control that appears to act and does not). */
+    menu.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-module]") : null;
+      if (!b || b.dataset.module === MODULE) return;
+      location.assign("/" + SLUG + "/" + b.dataset.module);
+    });
+    d.appendChild(menu);
+    bar.insertBefore(d, bar.firstChild);
+  })();
+
   /* ── on arrival: the address is the place ── */
-  var here = placeOf(m[2]);
+  var here = placeOf(m[2] || "");
   try {
     sessionStorage.setItem("smp.welcome.done", "1");
     if (here && !here.tour && here.d) {
@@ -105,7 +210,7 @@
     paint = function () { var r = painted.apply(this, arguments); try { sync(true); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
-    var st = ev.state || placeOf(String(location.pathname).replace(/^\/[^/]+\/?/, ""));
+    var st = ev.state || placeOf(restOf(location.pathname));
     if (!st || !st.d || typeof current === "undefined") return;
     last = location.pathname;
     current = st.d; currentSub = st.s || null;

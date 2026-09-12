@@ -352,6 +352,40 @@ def main():
         ev(pg, "()=>{FUNCTIONS.finance.keyObjectives = (FUNCTIONS.finance.keyObjectives||[])"
                ".filter(m=>m.id!=='probe-KO'); FUNCTIONS.finance.projects.pop(); paint();}")
 
+        # ── 6b · and deleting the function would take them (§62, §330) ────────
+        # §62 refuses a delete while anything still points at the function, and
+        # a capability held here has always been one of those things. Since
+        # §322 the projects are stored ON the function, so they are not pointed
+        # at but CARRIED — and a delete files no archive. Measured before the
+        # blocker existed: `qa.py` reported IT, Care and the SMO as deletable
+        # with three projects apiece.
+        #
+        # BOTH ENDS (§94.2): the function is blocked BY ITS PROJECTS, named,
+        # and a spare function with nothing at all still deletes — or a build
+        # that blocked everything would pass the first half perfectly.
+        print("\n6b · a function holding its own projects cannot be deleted")
+        blk = ev(pg, """() => {
+          const own = (FUNCTIONS.finance.projects || []).map(p => p.name);
+          const shorts = fnDeleteBlockers('finance').map(b => b.short);
+          // `fnBlock(short, full)` — the sentence is `full`, not `long`; the
+          // first draft read a key that does not exist and reported the
+          // refusal as nameless on a build that names it (§100.3).
+          const longs = fnDeleteBlockers('finance').map(b => b.full).join(' | ');
+          FUNCTIONS.qaspare330 = { name:"QA Spare 330", navName:null,
+            codePrefix:"QS3", head:null, custodian:null, active:true };
+          FUNCTION_KEYS.push("qaspare330");
+          const spare = fnDeleteBlockers('qaspare330').length;
+          FUNCTION_KEYS.pop(); delete FUNCTIONS.qaspare330;
+          return { own, shorts, longs, spare };
+        }""")
+        ok(any("project" in x for x in (blk.get("shorts") or [])),
+           "its own projects block the delete", blk.get("shorts"))
+        ok(all(n in (blk.get("longs") or "") for n in (blk.get("own") or []))
+           and blk.get("own"),
+           "...and the refusal NAMES them, so it is answerable (§62)", blk)
+        ok(blk.get("spare") == 0,
+           "...while a function with nothing at all still deletes", blk)
+
         # ── 7 · the deck names what it holds ──────────────────────────────────
         print("\n7 · the deck")
         deck = ev(pg, """()=>{const h = deckHtmlFor ? deckHtmlFor('fn:finance') : null;

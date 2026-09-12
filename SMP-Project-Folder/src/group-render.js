@@ -6828,7 +6828,11 @@ function renderFnReport(fnKey){
   caps.forEach(function(c){
     (c.projects || []).forEach(function(p){
       var r = projReported(p);
-      ownList.push({ id:p.id, code:projCode(fk, p), owner:p.owner,
+      /* §330: THE HOLDER'S OWN OWNER, never the page's key. `fk` is right
+         while a page draws one holder and is an assumption rather than an
+         answer — `holderCodeOwner()` is what every other code on the
+         product's screens is derived from (§48, §310). */
+      ownList.push({ id:p.id, code:projCode(holderCodeOwner(c), p), owner:p.owner,
                      done:r.done, total:r.total });
     });
   });

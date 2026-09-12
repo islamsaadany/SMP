@@ -4359,6 +4359,26 @@ function fnDeleteBlockers(fk){
     " improved here (" + caps.map(function(c){ return c.name; }).join(", ") +
     ") \u2014 reallocate them on Setup \u2192 Capabilities"));
 
+  /* §330, CLOSING §322: ITS OWN PROJECTS ARE ITS OWN WORK. A capability held
+     here has always blocked the delete, for the reason §62 gives — a function
+     key is written into things that would be orphaned by it — and since §322 a
+     supporting function holds projects DIRECTLY, which are not merely pointed
+     at but stored on the function itself. So deleting it takes the plan with
+     it and no archive is filed, because a delete files none. Measured before
+     this line existed: `qa.py` reported IT, Care and the SMO as deletable with
+     three projects apiece, which is the one error the sweep raised.
+
+     THE WAY OUT IS THE ONE THE PRODUCT HAS: the band's own Remove control on
+     each project (§232, which archives first), or Retire, which is what §62
+     says to reach for when something is a record. */
+  var own = fnOwnProjects(fk);
+  if (own.length) out.push(fnBlock(
+    plural(own.length, "project") + " of its own",
+    plural(own.length, "project") + " of its own (" +
+    own.map(function(p){ return p.name; }).join(", ") +
+    ") \u2014 remove them on its Projects page, or retire the function instead " +
+    "of deleting it"));
+
   /* A pillar anywhere in the tenant that reads its score from this function.
      Over units AND pillars functions, because a function that plans in
      pillars carries pillars that can name a carrier too (§59). */

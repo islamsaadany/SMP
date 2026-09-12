@@ -39,6 +39,26 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Stick to exactly what was requested — no extra "improvements" or visual changes.**
 - **If a fix requires touching something the user didn't mention, flag it and ask first.**
 
+### 1b-iii. PLAIN WORDS ALWAYS, NOT ONLY BEFORE A CHANGE (2026-09-12)
+- **Islam: *"plain words"*, twice in one session, and then: *"plain words
+  ALWAYS is that rule on claudemd?"*** It was not. 1b above says it about the
+  moment BEFORE a change — *explain what you plan to do in simple,
+  non-technical words* — and said nothing about the message after it, which is
+  where most of the words are.
+- **So it is the default for everything said to Islam**: what was found, what
+  was built, what is left, what went wrong. Say the thing, then the reason. A
+  section number is a reference, never an explanation — if a sentence only
+  makes sense to somebody who has read §313, it is not written yet.
+- **The words that carry weight stay**: a control's own name, a page's name, a
+  figure. Those are the product's vocabulary and using a different one to
+  sound simpler is worse than the jargon it replaced.
+- **WHAT THIS DOES NOT REACH, said so it is not quietly widened**: the
+  decisions document, the code comments, the commit messages and the checks'
+  own prose. Those are the record, and the record is written for whoever has
+  to change this in six months — it carries the reasoning, the measurements
+  and the section numbers on purpose. The rule is about what is said to a
+  person, not about what is written down for the next one.
+
 ### 1b-ii. NO GREY DESCRIPTIONS UNDER PAGE AND SECTION HEADINGS (2026-08-27)
 - **Islam: *"remove the grey descriptions and stop adding descriptions to
   pages."*** A heading names the thing; a paragraph under it in grey saying the

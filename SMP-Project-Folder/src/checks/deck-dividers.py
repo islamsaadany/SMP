@@ -33,7 +33,15 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-FILE = ROOT / "strategy-management-platform-v3.22.html"
+# THE BUILD, NEVER THE SHIPPED COPY (§330.10). This file named
+# `strategy-management-platform-v3.22.html` where all 165 of its neighbours
+# read `src/strategy-management-platform.html`, so on any branch whose build
+# has moved and whose shipped copy has not — which is every branch until the
+# merge copies it over — it measured the PREVIOUS RELEASE and reported green
+# on a regression it could not see (§105.6, §51.11). SMP_BUILT still points it
+# at another build, which is how a falsification is made (§276).
+FILE = pathlib.Path(os.environ.get("SMP_BUILT") or
+                    (ROOT / "src" / "strategy-management-platform.html"))
 MARK = ROOT.parent / "clients/raya-trade/brand/raya-trade-group-mark.png"
 CHROME = os.environ.get("SMP_CHROME")
 

@@ -6379,6 +6379,21 @@ has ever been in front of a client — which is what this sweep is for.
   minutes and nearly put the wrong figure into this record. Measured off the
   file that was just written, so it cannot drift from it again.
 
+- **§330.10 · Two checks were reading the previous release.** 165 of the 167
+  read `src/strategy-management-platform.html`, the build; `deck-dividers.py`
+  and `slide-move.py` named `strategy-management-platform-v3.22.html`, the
+  SHIPPED copy — which the merge copies over and which therefore sits a whole
+  round behind for the entire time a round is being built. Measured on this
+  branch: **55,020 bytes behind**, with §238's CSP hash differing, so those two
+  were measuring §329's product while the other 165 measured §330's, and a
+  regression in anything they cover would have been invisible to them and
+  reported green (§105.6 — the wrong bytes look exactly like a fix that does
+  not work; §51.11 — a check pointed at something that moved fails silently and
+  in the safe-looking direction). Both read the build now and both honour
+  `SMP_BUILT`, which is how a falsification is made (§276), and the shipped
+  copy is brought up to the build on the BRANCH rather than at the merge, since
+  that is the rule the repository already states.
+
 ### What the checks found, and what had to be rewritten rather than loosened
 
 `checks/capability-entry.py` is new and 43/0 — the demo's one capability, the

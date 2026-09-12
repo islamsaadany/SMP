@@ -20,8 +20,15 @@
 import os, sys
 from playwright.sync_api import sync_playwright
 
-FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
-  "..", "strategy-management-platform-v3.22.html"))
+# THE BUILD, NEVER THE SHIPPED COPY (§330.10). This file named
+# `strategy-management-platform-v3.22.html` where all 165 of its neighbours
+# read `src/strategy-management-platform.html`, so on any branch whose build
+# has moved and whose shipped copy has not — which is every branch until the
+# merge copies it over — it measured the PREVIOUS RELEASE and reported green
+# on a regression it could not see (§105.6, §51.11). SMP_BUILT still points it
+# at another build, which is how a falsification is made (§276).
+FILE = os.environ.get("SMP_BUILT") or os.path.abspath(os.path.join(
+  os.path.dirname(__file__), "..", "strategy-management-platform.html"))
 fails = []
 def ok(name, cond, extra=""):
     print(("ok   " if cond else "FAIL ") + name + ("" if cond else " — " + str(extra)))

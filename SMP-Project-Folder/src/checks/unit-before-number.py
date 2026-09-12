@@ -347,8 +347,19 @@ with sync_playwright() as pw:
             list = unitLikeWritable("fn:" + fk).keyObjectives;
             if (!list.length) list.push({ id: "fn-" + fk + "-KO1",
               name: "Made for the check \u00b7 " + fk, dir: "\u2265", compile: "Latest" });
-          } else { const c = (GROUP.capabilities || []).find(c => c.fn === fk);
-                   list = c ? c.keyObjectives : null; }
+          } else {
+            /* §330.18: THE FUNCTION'S OWN, which is where a projects
+               function's objectives live since §322 — and the page this
+               drives (`fn:<k>`) draws exactly those. Asking for a capability
+               found one function in eight, so this surface reported itself
+               unmeasurable while asserting nothing (§54.5, the fault the
+               comment above already names). The state is MADE here too, for
+               the same reason the pillars branch makes it. */
+            const h = fnOwnHolderWritable(fk);
+            list = h ? h.keyObjectives : null;
+            if (list && !list.length) list.push({ id: "fn-" + fk + "-KO1",
+              name: "Made for the check \u00b7 " + fk, dir: "\u2265", compile: "Latest" });
+          }
           if (!list || !list.length) return null;
           const m = list[0];
           m.target = ""; delete m.target3y; delete m.pend;
@@ -369,7 +380,7 @@ with sync_playwright() as pw:
           const f = FUNCTIONS[fk];
           const list = f.format === "pillars"
             ? unitLikeWritable("fn:" + fk).keyObjectives
-            : ((GROUP.capabilities || []).find(c => c.fn === fk) || {}).keyObjectives;
+            : (fnOwnHolderWritable(fk) || {}).keyObjectives;   /* §330.18 */
           return { t: list[0].target, has3: ('target3y' in list[0]) };
         }""", fk)
         ck("...held alone on the %s format too" % shape, fs["t"] == "#", fs)

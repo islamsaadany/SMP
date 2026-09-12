@@ -67,7 +67,11 @@ STORED["functions"][FN]["custodian"] = FILLER["key"]
 STORED["people"].append({"key": FILLER["key"], "name": FILLER["name"], "active": True})
 STORED["access"]["custodian"] = dict(STORED["access"].get("custodian") or {},
                                      a_fn_own_strat="fill")
-CAP = [c for c in STORED["group"]["capabilities"] if c.get("fn") == FN][0]
+# §330.18: THE FUNCTION'S OWN WORK. This asked the seed for a capability of
+# `it`, which since §322 holds the function's projects itself and since §329
+# ships with none at all — so the file died on an empty list before it had
+# made anything (§215).
+CAP = {"id": "fn:" + FN, "projects": STORED["functions"][FN]["projects"]}
 PROJ = CAP["projects"][0]
 MS = PROJ["milestones"]
 assert len(MS) >= 3, "the fixture needs a project with three milestones"
@@ -178,7 +182,7 @@ URL = "http://127.0.0.1:%d/raya-trade" % srv.server_address[1]
 # product becomes a save (§170) — so this is the real save path, not a fetch
 # aimed at the endpoint.
 MUTATE = """(f) => {
-  const cap = (GROUP.capabilities||[]).filter(c => c.id === f.cap)[0];
+  const cap = holderById(f.cap);   /* §330.18 */
   const p = cap.projects.filter(x => x.id === f.proj)[0];
   const by = (id) => p.milestones.filter(m => m.id === id)[0];
   const mark = { by: "t184_fill", at: "2026-08-30T09:00:00Z" };
@@ -190,7 +194,7 @@ MUTATE = """(f) => {
   SYNC.afterPaint();
 }"""
 READ = """(f) => {
-  const cap = (GROUP.capabilities||[]).filter(c => c.id === f.cap)[0];
+  const cap = holderById(f.cap);   /* §330.18 */
   const p = cap.projects.filter(x => x.id === f.proj)[0];
   const by = (id) => p.milestones.filter(m => m.id === id)[0];
   const one = (id) => ({ finish: by(id).finish,
@@ -282,9 +286,16 @@ with sync_playwright() as pw:
     print("\n── a refusal nothing can put back")
     errs.clear()
     POSTS.clear()
+    # §330.18: SPLICED, NEVER REASSIGNED. A function's holder is a fresh
+    # wrapper on every call and its `projects` is the function's own array —
+    # so assigning a filtered copy writes to the wrapper and is thrown away,
+    # the removal never happens, and the save this section exists to see
+    # refused is ACCEPTED. `fnOwnHolder`'s own comment names the trap; the
+    # product's Remove splices, so this does too.
     pg.evaluate("""(f)=>{
-      const cap = (GROUP.capabilities||[]).filter(c => c.id === f.cap)[0];
-      cap.projects = cap.projects.filter(x => x.id !== f.proj);
+      const cap = holderById(f.cap);   /* §330.18 */
+      const i = cap.projects.findIndex(x => x.id === f.proj);
+      if (i > -1) cap.projects.splice(i, 1);
       SYNC.afterPaint();}""", FIX)
     pg.wait_for_timeout(2600)
     ck("removing a project is refused", 403 in POSTS, POSTS)

@@ -216,7 +216,7 @@ with sync_playwright() as pw:
         stored = pg.evaluate("""(id)=>{
           const subj = unitLike(current);
           let hit = subj ? findById(subj, id) : null;
-          if (!hit && typeof capItemById === 'function') hit = capItemById(id);
+          if (!hit && typeof holderItemById === 'function') hit = holderItemById(id);
           return hit ? (hit.obj.note || "") : null;}""", hook["id"])
         ck("%s: both lines reach the row (%s)" % (label, hook["hook"]),
            stored is not None and "\n" in stored, repr(stored))

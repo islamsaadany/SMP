@@ -99,14 +99,22 @@ with sync_playwright() as p:
     # membership (the comment above records the first). It asks the PRODUCT
     # which subjects are on the board now, rather than rebuilding the answer
     # from a list of parts that keeps changing.
-    ck("and the board counts every subject on it, functions of both shapes too",
-       src["units"] == pg.evaluate("boardUnitTargets().length + boardFunctionKeys().length")
+    # §330.18: THE THIRD TIME THIS LINE HAS HELD A STALE COPY OF THE BOARD'S
+    # MEMBERSHIP (the two comments above record the first two), and §330 gave
+    # the board a CAPABILITY half — Islam's *"yes for all"*: a capability has
+    # its own score and its own submission, so it is a subject. It asks the
+    # board for the WHOLE list now rather than adding up the halves it happens
+    # to know about, so a fourth half joins without this going quietly wrong.
+    ck("and the board counts every subject on it, every kind of subject too",
+       src["units"] == pg.evaluate("boardUnitTargets().concat(boardCapTargets())"
+                                   ".concat(boardFunctionTargets()).length")
        and src["units"] > pg.evaluate("activeKeys().length"), src)
     # §245 moved those rows to the function list; the ASSERTION is unchanged in
     # substance — a function that plans in pillars is counted — and asks the
     # product where it lives rather than naming a half (§94.8).
     ck("...including a function that plans in pillars, wherever the board lists it",
-       pg.evaluate("boardUnitTargets().concat(boardFunctionTargets())"
+       pg.evaluate("boardUnitTargets().concat(boardCapTargets())"
+                   ".concat(boardFunctionTargets())"
                    ".filter(t=>{const k=fnKeyOfTarget(t);"
                    "return k && fnPlansInPillars(FUNCTIONS[k]||{});}).length") > 0)
     ck("the strip is a way through, not a control",

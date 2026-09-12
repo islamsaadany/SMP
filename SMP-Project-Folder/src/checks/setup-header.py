@@ -283,7 +283,17 @@ with sync_playwright() as p:
     ck("the switch is On|Off and on the pinned line", st["inHead"] and st["segs"] == ["On", "Off"], st)
     ck("...and the old worded button and dropdown are gone", not st["dropdown"], st)
     ck("the destinations are a row, not a select", len(st["dests"]) >= 5, st["dests"])
-    ck("with both sides offered", sorted(st["sides"]) == ["fns", "units"], st["sides"])
+    # §330.18: REWRITTEN, NEVER LOOSENED (§218). This held the literal pair
+    # ["fns","units"], and §330 gave the board a CAPABILITIES side, because a
+    # capability carries key objectives and a mark stored where nobody can see
+    # it is §61's trap (§130.5's own reason for reaching functions at all). It
+    # asserts the AGREEMENT now, never a list (§94.8): the board offers exactly
+    # the sides that have something behind them, so a tenant with no capability
+    # meets the two-part control it has today and this stays green either way.
+    want = pg.evaluate("""()=>{const s=focusSubjects();
+      return ['units','caps','fns'].filter(k=>(s[k]||[]).length);}""")
+    ck("the sides offered are the sides with something behind them",
+       st["sides"] == want and len(want) > 1, (st["sides"], want))
     ck("and it is a real table with a real head",
        st["thead"] and st["thead"][0].lower() == "measure" and st["bands"] > 0, st)
     hits = pg.evaluate(HITS, ".setuphead [data-focusswitch], [data-fsetside], [data-fsetgo]")

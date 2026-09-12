@@ -306,10 +306,22 @@ with sync_playwright() as pw:
 
     print("\n── 8 · both sides of the switch")
     c6 = ev(pg, """() => {
-      const fk = Object.keys(FUNCTIONS).find(k => (FUNCTIONS[k].format || '') !== 'pillars');
-      const f = FUNCTIONS[fk], caps = capsOfFunction ? capsOfFunction(fk) : null;
-      const cap = (caps && caps[0]) || (GROUP.capabilities || []).find(c => c.fn === fk);
-      if (!cap) return { none: 'no capability' };
+      /* §330.18: THE HOLDER, which since §322 is a function's OWN work and
+         only sometimes a capability — this asked for a capability outright
+         and the worked example has one, on one function, so on every other
+         it reported the check's own subject as missing (§215). */
+      const fk = Object.keys(FUNCTIONS).find(k => (FUNCTIONS[k].format || '') !== 'pillars'
+                                              && fnHolders(k).length);
+      const cap = fk ? fnHolders(fk)[0] : null;
+      if (!cap) return { none: 'no holder' };
+      /* AND THE STATE IS MADE (§255): a holder with no objective of its own is
+         a plan nobody has written yet, not a build without the feature. */
+      if (!(cap.keyObjectives || []).length) {
+        const h = fnOwnHolderWritable(fk);
+        h.keyObjectives.push({ id: fk + '-KO1', name: 'Made for this check',
+                               dir: '≥', target: '6 #', compile: 'Latest',
+                               actual: '', progress: null });
+      }
       const ko = (cap.keyObjectives || [])[0];
       if (!ko) return { none: 'no key objective' };
       const was = ko.target;

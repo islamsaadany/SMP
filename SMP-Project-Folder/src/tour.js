@@ -55,6 +55,33 @@ var TOUR = (function(){
      control changes shape, this is the file to grep, and checks/tour.py
      fails the build rather than the tour quietly lighting nothing. */
   function destBtn(k){ return document.querySelector('#units [data-u="' + k + '"]'); }
+  /* §330.18: AND A DESTINATION MAY BE BEHIND A FOLD. The navigation shows one
+     side at a time, and §330 gave a third side — so somebody who reaches a
+     capability AND their own function now meets a switch where before they
+     met a plain row. `destBtn()` then answers null for the person's own
+     subject, `start()` reads that as "a place that is not on the row" and
+     falls back to the first destination, and the whole story walks somebody
+     else's page: measured on Marketing's own strategy custodian, who was
+     toured round the GROUP.
+
+     It presses the fold, which is what a person does — `[data-fold="<side>"]`
+     is absent exactly when that side is already lit, so this is a no-op on the
+     one-sided navigation every viewer had before §330. The side is read from
+     `navSides()` rather than guessed from the key's prefix, because which
+     sides exist at all is that function's answer and a second copy would drift
+     (§53.5). */
+  function revealDest(k){
+    if (destBtn(k)) return destBtn(k);
+    if (typeof navSides !== "function") return null;
+    var side = null;
+    (navSides() || []).forEach(function(s){
+      if (!side && (s.keys || []).indexOf(k) > -1) side = s.fold;
+    });
+    if (!side) return null;
+    var f = document.querySelector('#units [data-fold="' + side + '"]');
+    if (f) f.click();
+    return destBtn(k);
+  }
   function tabBtn(k){  return document.querySelector('#subtabs [data-s="' + k + '"]'); }
   function secBtn(k){  return document.querySelector('#secrow-in [data-sub2="' + k + '"]'); }
 
@@ -524,7 +551,7 @@ var TOUR = (function(){
     navigating = true;
     try {
       if (s.dest) {
-        var d = destBtn(s.dest === "$own" ? own : s.dest);
+        var d = revealDest(s.dest === "$own" ? own : s.dest);   /* §330.18 */
         if (d && d.getAttribute("aria-selected") !== "true") d.click();
       }
       if (s.tab) {
@@ -733,7 +760,7 @@ var TOUR = (function(){
        on the row is a place nothing can press, and a tour pressing nothing
        is the fault above wearing a different hat — so it falls back to the
        first real destination rather than touring a key that is not there. */
-    if (!destBtn(own)) own = firstDest();
+    if (!revealDest(own)) own = firstDest();   /* §330.18: behind a fold is still on the row */
     steps = resolve(STORIES[key].steps, own);
     dock.hidden = false;
     go(0);

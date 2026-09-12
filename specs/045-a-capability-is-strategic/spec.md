@@ -156,7 +156,79 @@ dissolve too — and then **one real capability is created** as a strategic
 entry, or the feature renders nothing and reads as one that was never built
 (§45.2). Proposed, for Islam.
 
-## 6 · What is NOT in this round, and why
+## 6 · Turning one into the other
+
+Islam, 2026-09-12: *"one more thing is the ability to turn functional projects
+to a capability and vice versa."*
+
+Which is the decision that makes the model hold over time rather than only on
+the day a client is set up. A function starts three projects; a year later two
+of them turn out to be one strategic thing. Nothing about that should cost a
+re-upload.
+
+### Giving the projects back — and it is stage 1's migration, not a second one
+
+**This already exists.** §320's Remove dialog offers *Keep the projects* and
+picks a destination from the capability's siblings. Once a function can own
+projects, **the function itself is one more destination in that list** — and it
+is then the destination that is always there, so the held state disappears:
+
+> The dialog Islam photographed on 11 September reads *"There is nowhere for
+> them to go — this is the only capability Finance has, so its projects already
+> belong to the function."* That sentence was true only while a function's
+> projects had to live in a box. After stage 1 it is false, the button is live,
+> and the case it was written for cannot occur.
+
+**And stage 1's migration goes through that same control** (§53.5), rather than
+being a one-off written beside it. Two answers to *what does dissolving a box
+mean* is exactly how the two drift the first time either is corrected — and it
+means the migration is proved by driving the product's own dialog, which is a
+better proof than a script that agrees with itself.
+
+### Making projects a capability
+
+New, and stage 2, because it needs somewhere to promote **into**:
+
+- On a function's Projects page, **pick the projects** — not all of them, or a
+  function whose five projects contain one capability cannot say so.
+- **Name it.** The capability is a strategic entry from that moment: its own
+  place beside the business units, its own definition and key objectives,
+  written on it afterwards.
+- It is created in the **overview + projects** form. Projects cannot promote
+  into a capability planned as pillars, because a pillar is not a project —
+  said here rather than discovered at the control.
+
+### What travels, and what does not
+
+| | Goes | Stays |
+|---|---|---|
+| The projects picked | with their **ids**, their deliverables, outcomes, milestones and every reported figure | |
+| The function's definition | | the function's — it describes the function |
+| The function's key objectives | | the function's. The capability starts with none and they are written on it |
+| The reporting tally | it moves: the capability becomes a subject that reports | |
+
+**The ids never change** (§232, §316), which is what keeps every figure, focus
+mark and cycle snapshot pointing at the row it was entered against.
+
+**The CODES do change, and that is right rather than a cost to hide.** A
+project's code is its position in the thing that holds it (§310), so `FIN02`
+becomes the capability's own code the moment it stops being Finance's second
+project. It is a derived label, not a stored identifier — nothing keys on it —
+but it is on every screen, in the deck and in the workbook, so **the control
+says so before the press**, the way §320's dialog names its cost.
+
+### The edges
+
+- **Promoting nothing** is refused — a capability with no projects and no
+  pillars has nothing to be.
+- **Demoting everything** empties the capability, which is §320's Remove: one
+  act, not two, and the same dialog.
+- **Both directions archive first** (§49.2, §232 — a fifth caller), so the way
+  back is Setup › Import & storage.
+- **The office's**, both ways: creating a strategic entry and destroying one
+  are the same kind of act as authoring a plan (§94).
+
+## 7 · What is NOT in this round, and why
 
 - **Objectives and actions**, the third form. §318 §5 holds its whole model —
   objective, action with a due date, requirement drawn at both ends, moving
@@ -167,22 +239,24 @@ entry, or the feature renders nothing and reads as one that was never built
 - **Renaming anything.** The word *capability* stays the word; what changes is
   where it is true.
 
-## 7 · Staging
+## 8 · Staging
 
 Islam has **no real capabilities today**, so the two halves are not equally
 urgent and they do not depend on each other:
 
 **Stage 1 — a function's projects are its own.** The dissolve, the band gone,
-the Overview converged, the migration, the workbook and the deck following.
+the Overview converged, the migration **through §320's own dialog** (§6), the
+workbook and the deck following.
 This is the whole of what is confusing him now, and it leaves the product with
 no capabilities at all — which is the truth of his tenant.
 
 **Stage 2 — a capability is a strategic entry.** Its place in the navigation,
-its pages, its two forms, who may author it, and how it is created.
+its pages, its two forms, who may author it, how it is created, and
+**making projects a capability** (§6).
 
 Each is its own decisions section, its own checks, its own merge.
 
-## 8 · What the checks must assert
+## 9 · What the checks must assert
 
 - The dissolve read back **off the stored graph and out of Postgres**, never
   off the screen (§96): the projects present, their **ids and codes identical**,
@@ -197,8 +271,13 @@ Each is its own decisions section, its own checks, its own merge.
   save reports success.
 - The workbook a **fixed point** (§22, §294): downloaded, uploaded untouched,
   nothing changed.
+- **The round trip between the two** (§6): projects made a capability and given
+  back, with every **id** asserted identical at the end and every figure still
+  against the row it was entered on — and the **codes** asserted to have moved
+  and moved back, or a build that silently kept the function's numbering passes
+  the half that matters least.
 
-## 9 · Still to settle, before Stage 2 is written
+## 10 · Still to settle, before Stage 2 is written
 
 1. **Who authors a capability.** It is strategic, so the office's alone
    (§94's strategy pages) is the obvious answer, and it is a decision rather
@@ -208,3 +287,7 @@ Each is its own decisions section, its own checks, its own merge.
 3. **Whether a capability reports on the cycle board** as a subject of its own
    (§244's rule: every subject that reports has a row).
 4. **The demo's one real capability** — which, and planned in which form.
+5. **Whether a promoted project's code changing is accepted** (§6). It is the
+   honest answer — a code says where a project lives — and it moves a label
+   that is on every screen, the deck and the workbook, so it is Islam's to
+   take rather than mine.

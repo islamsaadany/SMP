@@ -91,7 +91,8 @@ def land(pg, where, viewer="smo"):
     key = "fn:finance" if where == "fn" else "mobile"
     ev(pg, """(k)=>{
       if (document.querySelector('#units button[data-u="' + k + '"]')) return;
-      const f = document.querySelector('#units [data-fold]'); if (f) f.click();
+      /* §330: the navigation switch has a THIRD side once a capability exists, so pressing the control no longer means "go to the other one" — press the side you want. `[data-fold="fns"]` is absent exactly when Functions is already lit, which is why the press is guarded rather than asserted. */
+      const b = document.querySelector('#units [data-fold="fns"]'); if (b) b.click();
     }""", key)
     pg.wait_for_timeout(320)
     ev(pg, "(k)=>{const b=document.querySelector('#units button[data-u=\"'+k+'\"]'); if(b)b.click();}", key)

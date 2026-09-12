@@ -1095,6 +1095,22 @@
      unreadable exactly when somebody was looking at it. */
   .units .navswitch:hover{background:rgba(255,255,255,.15)}
   .units .navswitch:hover .nsw:not(.on){color:rgba(255,255,255,.8)}
+  /* ── THREE SIDES (§330) ────────────────────────────────────────────────
+     A segmented control of real buttons rather than one button of words, for
+     the reason the shell states: with three sides "press to switch" has no
+     answer, so each segment is its own target. The container stops being the
+     thing you press, and the hover lights the segment under the pointer —
+     which is what a segmented control means, and the opposite of the
+     two-sided one's rule (§41.8), where lighting the other half made the
+     state unreadable. */
+  .units .navswitch.multi{cursor:default}
+  .units .navswitch.multi .nsw{border:0;background:transparent;font:inherit;
+    cursor:pointer;letter-spacing:-.005em}
+  .units .navswitch.multi:hover{background:rgba(255,255,255,.08)}
+  .units .navswitch.multi:hover .nsw:not(.on){color:rgba(255,255,255,.62)}
+  .units .navswitch.multi .nsw:not(.on):hover{color:#fff;background:rgba(255,255,255,.1)}
+  .units .navswitch.multi .nsw:focus-visible{outline:2px solid var(--gold);
+    outline-offset:-2px;border-radius:7px}
   .units-in.folded .navswitch{margin:0 3px}
   .units-in.folded .navswitch .nsw{padding:7px 11px;font-size:12.5px}
 

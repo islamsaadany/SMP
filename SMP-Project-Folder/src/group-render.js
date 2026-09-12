@@ -1188,7 +1188,9 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, ow
    (§47.2). "Present" starts the deck; "Manage slides" is the editor, and it
    keeps the name §51.8 settled on rather than gaining a second one. */
 function presentMenu(kind, key){
-  var target = kind === "fn" ? "fn:" + key : key;
+  /* §330: three kinds now — a unit, a supporting function, and a capability,
+     which presents its own review exactly as they do. */
+  var target = kind === "fn" ? "fn:" + key : kind === "cap" ? "cap:" + key : key;
   var slides = canSpeakFor(target)
     ? '<button role="menuitem" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) + '">' +
         'Manage slides' + (pslidesOf(target).length
@@ -5290,24 +5292,26 @@ function capHead(c){
    like. A line that has to be defended by a fallback for the ordinary case is
    a line nobody needed.
 
-   The capability's own band (`capBand`) stays: a function may carry several,
-   and that band is what says which one a section belongs to. */
+   The capability's own band stayed, on the reason below — and that reason
+   expired twice over (§322, §330), which the next block records. */
 
-function capBand(c){
-  /* §322: NOT DRAWN OVER A FUNCTION'S OWN WORK. Islam: *"that will keep my
-     projects under a capability while there is not capability there ... these
-     are more of fucntional projects."* This band's own reason, written above,
-     is that "a function may carry several, and that band is what says which
-     one a section belongs to" — a function's own projects are not one of
-     several, so there is nothing for it to tell apart, and the word over them
-     names something that does not exist. §24's argument for removing the
-     function's nameplate, one level in. */
-  if (!c || c.own) return "";
-  var r = capReported(c);
-  return '<div class="capline"><span class="captag">Capability</span>' +
-    '<span class="capnm">' + esc(c.name) + '</span>' +
-    '<span class="captally">' + r.done + ' / ' + r.total + ' reported</span></div>';
-}
+/* ── THE BAND IS GONE (§330; §322 took half of it, this takes the rest) ────
+   `capBand()` drew a navy CAPABILITY strip over a section, and its own reason
+   — written when it was right — was that *"a function may carry several, and
+   that band is what says which one a section belongs to."* §322 stopped
+   drawing it over a function's OWN projects, because those are not one of
+   several. Stage 2 finishes the argument from the other end: a capability is
+   a destination now, so its pages draw exactly one holder and the navigation
+   above them already says which. A band there is the page saying its own name
+   a second time (§87's twins), over a tally a PLAN page has no business
+   carrying at all (§29.6).
+
+   So it is DELETED rather than guarded (§24) — a builder that can only ever
+   return "" is one the next reader takes for load-bearing — and with it the
+   §310 reordering inside `capsShown`, which sorted a list that is now always
+   one long. §310's own subject moves rather than dying: *theirs is the
+   capability that leads* is answered by the NAVIGATION now (see `entryDest`),
+   because the thing it ordered has become a place you open. */
 
 /* ── The rail ────────────────────────────────────────────────────────
    Which project is open is held by the capability, not by the page, so it
@@ -5376,7 +5380,10 @@ function railPick(c){
   for (var i = 0; i < list.length; i++)
     if (list[i].id === want) { railShow(k, list[i].id); return list[i]; }
   /* §301.4: theirs opens, not the first one. */
-  var mine = railMine("fn:" + c.fn, list, function(p){ return p.owner; });
+  /* §330: the HOLDER's own target — a capability answers for itself, and a
+     function's own work for the function. `"fn:" + c.fn` was right while every
+     project sat in a box a function carried. */
+  var mine = railMine(holderTarget(holderCodeOwner(c)), list, function(p){ return p.owner; });
   var pick = mine || list[0];
   railShow(k, pick.id);
   return pick;
@@ -5406,19 +5413,29 @@ function railPick(c){
    — the office and the custodian reach every row, so "theirs" names nothing,
    which is §301.4's own gate and the same `railMine()` test the rail asks, so
    the page and the rail cannot disagree about whose it is (§53.5). */
-function capsShown(fk) {
-  /* §322: what the function's pages draw — its OWN projects first, then any
-     capability it carries. One door for Performance, Projects and Reporting,
-     which is why a function's own work reaches all three from one edit and
-     the three cannot disagree about what is on the function (§53.5). */
-  var caps = fnHolders(fk), target = "fn:" + fk;
-  if (caps.length < 2 || !boundedHere(target)) return caps;
-  var mine = [], rest = [];
-  caps.forEach(function(c){
-    (railMine(target, c.projects || [], function(p){ return p.owner; })
-      ? mine : rest).push(c);
-  });
-  return mine.length ? mine.concat(rest) : caps;
+function capsShown(subject) {
+  /* §322: what the function's pages draw — its own projects. §330: or a
+     CAPABILITY'S, because a capability is a destination of its own now and is
+     drawn by these same four renderers rather than by a second set of them
+     that would have to be kept in step for ever (§53.5, the argument spec 010
+     already made for a pillars function).
+
+     One door for Performance, Projects and Reporting, which is why a holder's
+     work reaches all three from one edit and the three cannot disagree about
+     what is on it. */
+  var target = holderTarget(subject);
+  if (isCapTarget(target)) {
+    var one = capById(capKeyOf(target));
+    return one ? [one] : [];
+  }
+  /* §330: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
+     list so a project owner met their own capability first; since §322 a
+     function's pages draw its own work alone and since §330 a capability is a
+     page of its own, so the list is one long on both sides of the switch and
+     the sort is dead code (§24). What §310 was for is answered where the
+     answer now belongs — in `entryDest`, which opens the capability holding
+     their project rather than a function page with nothing of theirs on it. */
+  return fnHolders(target.slice(3));
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
    halves differ we say which and why). Projects, Reporting and Performance
@@ -5569,7 +5586,18 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   return '<div class="rail' + (opts.arranging ? ' arranging' : '') + '">' +
     railHead("Projects", list.length) + body +
     (opts.add ? '<div class="railadd"><button class="linkbu" data-rowadd="project|' +
-      esc(opts.capId) + '">+ Add a project</button></div>' : '') +
+      esc(opts.capId) + '">+ Add a project</button>' +
+      /* §330: AND THE SECOND DOOR TO A CAPABILITY, where the projects are.
+         Islam: *"the ability to turn functional projects to a capability."*
+         Setup › Capabilities is the home he chose; this is the door beside the
+         work, *"because that is where somebody realises it"* (the mockup's own
+         words, signed off). Drawn only on a FUNCTION's own list — a capability
+         cannot promote out of itself — and only where there is something to
+         promote. */
+      (opts.promote
+        ? '<button class="linkbu" data-cappromo="' + esc(opts.promote) +
+          '">Make a capability\u2026</button>' : '') +
+      '</div>' : '') +
     (footNote ? '<div class="rfoot">' + footNote + '</div>' : '') + '</div>';
 }
 function splitOrPane(list, sel, rail, pane){
@@ -5997,28 +6025,57 @@ function projPerformanceBody(p, fk){
 
    Named once, because it is the same sentence three times and the third copy
    is the one that gets left behind (§59). */
-function fnNothingBehind(fk){
-  var f = FUNCTIONS[fk];
-  /* And the person who could give it one is offered the act, not only the
-     directions (\u00a7118's audit, \u00a761's rule): the button re-asks the shared
-     rule on the click, because this note has no pen to gate it. */
+function fnNothingBehind(subject){
+  /* §330: A CAPABILITY CAN BE EMPTY TOO, and what it needs said is not what a
+     function needs said — the way to fill a capability is to add its first
+     project or to promote one into it, never to "allocate a capability". */
+  var t = holderTarget(subject);
+  if (isCapTarget(t)) {
+    var c = capById(capKeyOf(t));
+    return '<div class="note">' + esc(c ? c.name : "This capability") +
+      ' has nothing in it yet.' + (mayAuthor("k_found", t)
+        ? ' <button class="linkbu" data-rowadd="project|' + esc(c ? c.id : "") +
+          '">Add its first project</button> &mdash; or make one of a function\u2019s ' +
+          'own projects a capability from that function\u2019s Projects page.'
+        : '') + '</div>';
+  }
+  var fk = t.slice(3), f = FUNCTIONS[fk];
+  /* §330: WHAT THIS STATE MEANS CHANGED, SO THE SENTENCE DID. It used to be
+     "this function improves no capability yet", which was the only way a
+     projects function could be empty while every project had to sit in a box.
+     Since §322 a function owns its projects, so the only way to reach this
+     note is a function with none of its own that DOES hold a capability — and
+     the honest thing to say is where that work went, not to offer to create
+     another box (§124: a note that names the wrong absence sends somebody to
+     the wrong screen).
+
+     And the person who could fill it is offered the act, not only the
+     directions (§118's audit, §61's rule): the button re-asks the shared rule
+     on the click, because this note has no pen to gate it. */
+  var held = capsOfFunction(fk);
   return '<div class="note">' + esc(f ? f.name : "This function") +
-    ' improves no capability yet, so there is nothing here to plan or report. ' +
+    ' has no projects of its own yet. ' +
+    (held.length
+      ? 'Its work sits in ' + (held.length === 1
+          ? esc(held[0].name) + ', which has an entry of its own on <b>Capabilities</b>.'
+          : plural(held.length, "capability", "capabilities") +
+            ', each with an entry of its own on <b>Capabilities</b>.') + ' '
+      : '') +
     (mayAuthor("k_found", "fn:" + fk)
-      ? '<button class="linkbu" data-fncapadd="' + esc(fk) + '">Add its first capability</button> &mdash; ' +
-        'or allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan in ' +
-        L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.'
-      : 'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
-        'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.') + '</div>';
+      ? '<button class="linkbu" data-rowadd="project|fn:' + esc(fk) +
+        '">Add its first project</button> &mdash; or set this function to plan in ' +
+        L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Supporting functions</b>.'
+      : 'Set this function to plan in ' + L("pillar", "bu").toLowerCase() +
+        ' on <b>Setup \u2192 Supporting functions</b>.') + '</div>';
 }
 
 function renderFnPerformance(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
+  var target = holderTarget(fnKey), fk = fnKeyOf(fnKey), caps = capsShown(target);
   /* A FUNCTION THAT PLANS IN PILLARS IS DRAWN BY THE UNIT'S PAGE (spec 010).
      One branch at the top of each of the four function pages, and nothing
      below it changes — the alternative was four more renderers that would have
      to be kept in step with the unit's for ever. */
-  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPerformance(fnAsUnit(fk));
+  if (plansInPillars(target)) return renderUnitPerformance(unitLike(target));
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment.
@@ -6049,11 +6106,12 @@ function renderFnPerformance(fnKey){
      everything under it with it, while the two controls land on x 1206 and
      1372 — a unit's pixels exactly, which is the assertion the check makes
      (AGREEMENT, never a coordinate — §94.8, §53.5). */
-  if (!caps.length) return fnNothingBehind(fk);
-  return perfActs(presentMenu("fn", fk)) +
+  if (!caps.length) return fnNothingBehind(target);
+  return perfActs(presentMenu(isCapTarget(target) ? "cap" : "fn",
+                              isCapTarget(target) ? capKeyOf(target) : fk)) +
     caps.map(function(c){
     var sel = railPick(c);
-    if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
+    if (!sel) return '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
     /* And the same rail a unit's Performance page carries: the score on the
        right, execution and the owner underneath, and a footer that STATES the
@@ -6070,12 +6128,12 @@ function renderFnPerformance(fnKey){
           (p.owner ? ' &middot; ' + esc(p.owner) : ''); },
       null, pct(capPerf(c)) + ' across ' + plural(c.projects.length, "project") +
         ' &middot; execution ' + pct(ce.pct),
-      function(p){ return projCode(fk, p); });
-    return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
+      function(p){ return projCode(holderCodeOwner(c), p); });
+    return '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       /* NO HEADING OVER THE RAIL. The rail's own head says "Projects 3" two
          lines below it, and a unit's Performance page puts no heading over
          its pillars either (§53.2). */
-      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel, fk)) + '</div>';
+      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel, holderCodeOwner(c))) + '</div>';
   }).join("");
 }
 
@@ -6106,8 +6164,8 @@ function projEditing(){
    FUNCTION, so the scope is the function's key — `canArrange("unit", "fn:x")`
    asks grantAt("u_plan", …) against it, which is the same question the unit
    side asks about a unit. */
-function projArranging(fk){
-  return arranging("unit", "fn:" + fk) || projEditing();
+function projArranging(subject){
+  return arranging("unit", holderTarget(subject)) || projEditing();
 }
 /* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────────
    Islam: "any project needs 3 things at its starting part which are the brief,
@@ -6228,7 +6286,10 @@ function projFrontMatter(p, ed){
   '</div>';
 }
 
-function projPlanBody(p, fk){
+function projPlanBody(p, subject){
+  /* §330: a TARGET, not a function key — this body draws a project belonging
+     to whichever holder is open, and a capability is one. */
+  var fk = holderTarget(subject);
   /* NO DUE AND NO OWNER (§53.4). Islam: a deliverable is delivered when the
      project ends, so a date of its own was a second answer to a question the
      project had already answered; and the department carries it, not a named
@@ -6248,7 +6309,7 @@ function projPlanBody(p, fk){
      caller left and is gone rather than left lying about (§24). */
   var sortAttr = function(kind){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
-      '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
+      '" data-pid="' + esc(p.id) + '"' : '';
   };
   /* ONE ROW SHAPE (§104). A deliverable's direction and target are written
      for it; only its due date is its own to choose. An outcome carries all
@@ -6432,10 +6493,14 @@ function projPlanBody(p, fk){
    RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
    function's pages now says its strategy is the parent unit's. */
 function renderFnProjects(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
-  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
-  if (!caps.length) return fnNothingBehind(fk);
-  var ed = projEditing(), on = projArranging(fk);
+  /* §330: the argument the pillars branch below already makes, one kind of
+     thing further out — this page draws a HOLDER's projects, and a capability
+     is one. `plansInPillars()` answers for a function and a capability alike,
+     so the branch is unchanged in shape. */
+  var target = holderTarget(fnKey), caps = capsShown(target);
+  if (plansInPillars(target)) return renderUnitPlan(unitLike(target));
+  if (!caps.length) return fnNothingBehind(target);
+  var ed = projEditing(), on = projArranging(target);
   /* Gone here for the same reason and in the same breath (§94.15, §53.5):
      a unit and a function are the same product, and a button removed from one
      side of the navigation switch and left on the other is exactly the drift
@@ -6451,7 +6516,7 @@ function renderFnProjects(fnKey){
        only way to get a project was to upload a whole plan. With the pen on it
        carries the Add button instead — an empty state that says what would
        fill it AND lets you fill it. */
-    if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
+    if (!sel) return '<div class="capbody"><div class="note">' +
       'No projects yet.' + (ed
         ? ' <button class="linkbu" data-rowadd="project|' + esc(c.id) +
           '">Add the first one</button>'
@@ -6469,8 +6534,11 @@ function renderFnProjects(fnKey){
           plural(p.outcomes.length, "outcome") + ' &middot; ' +
           plural(p.milestones.length, "milestone"); },
       null, null,
-      function(p){ return projCode(fk, p); },
+      function(p){ return projCode(holderCodeOwner(c), p); },
       { arranging: on, add: ed, capId: c.id,
+        /* The office's, and only on the function's own projects (§330). */
+        promote: (ed && c.own && !isCapTarget(target) && (c.projects || []).length
+                    && mayAuthor("k_found", target)) ? c.fn : null,
         /* Appended to the SUB line, never passed as `numOf`: that argument
            puts a `.rnum` on EVERY row and an empty one still takes its column
            in the grid (the note on railFor says so). */
@@ -6483,8 +6551,8 @@ function renderFnProjects(fnKey){
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
-    var pane = projPlanBody(sel, fk);
-    return capBand(c) + '<div class="capbody"' +
+    var pane = projPlanBody(sel, holderCodeOwner(c));
+    return '<div class="capbody"' +
         gapPlaceAttr(railKeyFor(c), sel.id) + '>' +
       ((ed || on)
         ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
@@ -6588,7 +6656,8 @@ function capPickBox(x, may, opts, val){
    that row is opened) reaches their milestone and nothing beside it — so one
    `may` for the pane would either over-offer or under-offer. Each control
    asks canReportFnRow(), which is the server's own reach rule (§42). */
-function projReportBody(p, fk){
+function projReportBody(p, subject){
+  var fk = holderTarget(subject);
   var r = projReported(p);
   var mayRow = function(o){ return canReportFnRow(fk, p, o); };
   /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, and the widest table in
@@ -6648,7 +6717,7 @@ function projReportBody(p, fk){
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
       /* §301: the finished mark, on the project it is about. */
-      doneCtl("fn:" + fk, p.id, p.owner, projCode(fk, p))) +
+      doneCtl(fk, p.id, p.owner, projCode(fk, p))) +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
     '<h4 class="mini">Milestones</h4>' +
@@ -6700,18 +6769,18 @@ function capReportBody(c){
       return r.total === 0 ? 'Not asked this cycle'
         : (r.done >= r.total ? 'Complete' : (r.total - r.done) + ' still to enter'); },
     null, 'Tally is entries given of asked',
-    function(p){ return projCode(c.fn, p); },
+    function(p){ return projCode(holderCodeOwner(c), p); },
     { alarmOf: function(p){
         var e = owesPr(p);
         return e ? '<span class="missing">' + esc(blockWords(e)) + '</span>' : ""; } });
   return koBlock +
-    splitOrPane(c.projects, sel, rail, projReportBody(sel, c.fn));
+    splitOrPane(c.projects, sel, rail, projReportBody(sel, holderCodeOwner(c)));
 }
 
 function renderFnReport(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsShown(fk);
-  if (fnPlansInPillars(FUNCTIONS[fk])) return renderReport(fnAsUnit(fk));
-  if (!caps.length) return fnNothingBehind(fk);
+  var target = holderTarget(fnKey), fk = fnKeyOf(fnKey), caps = capsShown(target);
+  if (plansInPillars(target)) return renderReport(unitLike(target));
+  if (!caps.length) return fnNothingBehind(target);
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
@@ -6766,7 +6835,7 @@ function renderFnReport(fnKey){
      and §279's run on the unit. */
   var bar = reportBar(fnKeyTarget);
   return bar + caps.map(function(c){
-    return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
+    return '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");
 }
 
@@ -7665,79 +7734,99 @@ function renderUnitPlan(u){
    `extra` (verified, the same route `format`, `under` and `items` already
    take). A capability has carried one since the model existed; this is the
    function finally being asked the same question. */
-function fnOwnOverview(fk){
+/* ── ONE OVERVIEW, FOR A FUNCTION OR A CAPABILITY (§213, §322, §330) ──────
+   §213 decided the two function formats draw ONE page — *What it is* beside
+   its key objectives — and §322 finished the job by taking the box off a
+   function's own work. Stage 2 hands the same page to a CAPABILITY, which is
+   the one thing that page was ever really describing: a name, who runs it, a
+   definition, and what it is judged by.
+
+   THREE WORDS CHANGE AND NOTHING ELSE DOES. The key reads *Function* or
+   *Capability*; the second row reads *Led by* or *Held by*; and the empty
+   objectives line names what THIS thing is judged by. A second renderer for
+   the second kind is exactly how the two formats drifted twice already
+   (§211, §213), so there is one.
+
+   WHO IT IS HELD BY IS READ, NEVER SET HERE. A function's head is a fact the
+   register holds and Setup's own picker writes (§33, §226). A capability is
+   held by the function that carries it, so its holder is that function's head
+   — one fact, one door, and no second control that could disagree with the
+   first. Changing which function holds a capability is Setup › Capabilities',
+   because it is a Setup change and the server classifies it as one (§42). */
+function holderOverview(subject){
+  var t = holderTarget(subject), isCap = isCapTarget(t);
+  var c = isCap ? capById(capKeyOf(t)) : null;
+  var fk = isCap ? (c && c.fn) : t.slice(3);
   var f = FUNCTIONS[fk];
-  if (!f) return "";
+  if (isCap ? !c : !f) return "";
   var ed = authoring("capfoundation", "k_found");
-  /* THE WRITING VIEW MINTS THE CONTAINER (§50.6). `fnAsUnit()` hands out a
+  /* THE WRITING VIEW MINTS THE CONTAINER (§50.6). The reading half hands out a
      SHARED frozen empty where `keyObjectives` does not exist, so a first
-     objective added against the reading view would be pushed onto an empty
-     every function shares. */
-  /* §322: BOTH FORMATS REACH THIS PAGE NOW, and `unitLike("fn:…")` answers
-     only for the pillars one — it returns null for a function that plans in
-     projects, so asking it here would throw on the page this rename exists to
-     share. The holder answers for both, and its writing half mints the
-     container for the same reason the reading half must not (§50.6). */
-  var holder = ed ? fnKoHolderWritable(fk) : fnKoHolder(fk);
+     objective added against it would be pushed onto an empty every holder
+     shares. */
+  var holder = isCap ? c : (ed ? fnKoHolderWritable(fk) : fnKoHolder(fk));
   var list = (holder && holder.keyObjectives) || [];
+  if (isCap && ed && !Array.isArray(c.keyObjectives)) { c.keyObjectives = []; list = c.keyObjectives; }
   /* §226: WHILE IT IS BEING WRITTEN, THE TABLE GETS THE PAGE — §96.6's rule,
      which fixed exactly this squeeze on a unit's Foundation and never reached
      the function's Overview: inside the fgrid card the Objective box measured
      101px and the Dir. select 34px at a 1500px window, which is a select whose
      value cannot be seen. Reading mode keeps the card, because the objectives
-     belong beside what the function is when you are READING it. */
+     belong beside what the thing is when you are READING it. */
   var fl = filling("capfoundation", "k_found");
+  var judged = isCap
+    ? (capPlansInPillars(c) ? esc(L("pillar","bu").toLowerCase()) : "projects")
+    : (fnPlansInPillars(f) ? esc(L("pillar","bu").toLowerCase()) : "projects");
   var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
       '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
       ((ed || fl)
-        ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
+        ? capKoEdit({ id:(isCap ? c.id : "fn:" + fk), keyObjectives:list })
         : koReadBlock(list,
-            /* §322: and the sentence names what this function IS judged by,
-               which is its pillars on one format and its projects on the
-               other — one page, two true sentences, never one that is wrong
-               on half of it (§104.8). */
-            "None. This function is judged by its " +
-            (fnPlansInPillars(f) ? esc(L("pillar","bu").toLowerCase()) : "projects") + "."));
-  /* §268: THE EDIT BAR IS ON THE SECTION LINE. It was the only WORDED edit
-     control in the product's strategy pages while a unit's three were pen
-     glyphs, so the two sides of the navigation switch said the same thing two
-     ways (§53.5); one slot answers for both now. */
+            /* §322, §330: the sentence names what this thing IS judged by —
+               its pillars on one format and its projects on the other, and a
+               capability rather than a function where it is one. One page,
+               true sentences, never one that is wrong on half of it
+               (§104.8). */
+            "None. This " + (isCap ? "capability" : "function") +
+            " is judged by its " + judged + "."));
+  /* §268: THE EDIT BAR IS ON THE SECTION LINE. */
   return fillBarOr("capfoundation", "k_found",
       list.reduce(function(a, m){
         return a + SMPRules.gapMissing("capko", m).length; }, 0),
       "the overview") +
     '<div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
-        '<div class="clause"><dt>Function</dt><dd>' + esc(f.name) + '</dd></div>' +
+        '<div class="clause"><dt>' + (isCap ? 'Capability' : 'Function') + '</dt><dd>' +
+          esc(isCap ? c.name : f.name) + '</dd></div>' +
         /* §226: LED BY OPENS, FOR THE OFFICE (Islam: "led by by office ok").
            The picker is Setup's own assignPicker writing the SAME head pointer
            through grantPersonRole — one fact, one door (§33), so this and
            Setup › Supporting functions can never disagree. Office-only because
            the server classifies a head change as Setup (FN_SETUP), and a pen
            held by anybody else would be the screen offering what the save
-           refuses (§42). The sentence is a hover, never a printed line (1b-ii). */
-        '<div class="clause"><dt>Led by</dt><dd' +
-          (ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
-          (ed && inOffice()
-            ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
-            : (f.head ? esc(personName(f.head)) : "&mdash;")) + '</dd></div>' +
+           refuses (§42). The sentence is a hover, never a printed line (1b-ii).
+
+           ON A CAPABILITY IT IS READ AND NAMES THE FUNCTION TOO, because
+           "Rana Fouad" alone does not say which desk holds this work — and
+           editing it here would be a second control writing the FUNCTION's
+           head from a capability's page (§53.5). */
+        '<div class="clause"><dt>' + (isCap ? 'Held by' : 'Led by') + '</dt><dd' +
+          (!isCap && ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
+          (isCap
+            ? (f && f.head
+                ? esc(personName(f.head)) + ' <span class="why">' + esc(f.name) + '</span>'
+                : (f ? esc(f.name) : "&mdash;"))
+            : (ed && inOffice()
+                ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
+                : (f.head ? esc(personName(f.head)) : "&mdash;"))) + '</dd></div>' +
         '<div class="clause"><dt>Definition</dt><dd>' +
           /* §214: THROUGH `gapCell`, NOT `fieldOr`. The definition is a gap
              now, and a counted gap has to be typable by whoever the count is
              shown to — a fill-grant holder seeing it in the band and finding
              a read-only line is §61 exactly, and their save would be refused
-             (§184). `area`, because it is a sentence.
-
-             `gapCell` reads `row[field]`, so it never renders the word
-             "undefined" the way `fieldOr(page, f.def, …)` did — that third
-             argument is a CLASS, not a placeholder (§213.1, found in a
-             screenshot). */
-          /* §214.4: AN EM-DASH, NOT THE RED WORD. The definition stopped
-             being counted, and a page printing `Missing` over a count of
-             nought is the product arguing with itself (§177, sign reversed).
-             `readEmpty` is the hook gapCell already carries for exactly this.
-             It stays FILLABLE — the box still opens and still saves. */
-          gapCell("capfoundation", "k_found", f, "def",
+             (§184). `area`, because it is a sentence. */
+          /* §214.4: AN EM-DASH, NOT THE RED WORD. */
+          gapCell("capfoundation", "k_found", (isCap ? c : f), "def",
                   { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) +
         '</dd></div>' +
       '</dl></div>' +
@@ -7745,95 +7834,17 @@ function fnOwnOverview(fk){
     '</div>' +
     ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '');
 }
+/* §330: AND THE TRANSITIONAL BRANCH IS GONE. §322's own comment named it —
+   *"a function still CARRYING a capability keeps today's rendering underneath,
+   which is the transitional state stage 2 removes when a capability becomes an
+   entry of its own"* — and this is that removal: a capability is a destination
+   now, so a function's Overview describes the function and nothing else. The
+   `caps.map(...)` block that drew one card per box, and the *+ Add a
+   capability* row under it, are DELETED rather than left unreachable (§24);
+   a capability is created on Setup › Capabilities, which is where Islam put
+   it (*"yes for all"*), and promoted from a function's Projects page. */
 function renderFnFoundation(fnKey){
-  var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  /* §322: A FUNCTION'S OWN OVERVIEW IS THE OVERVIEW §213 ALREADY BUILT. That
-     section decided the two formats draw ONE page — *What it is* (Function ·
-     Led by · Definition) beside its key objectives — and only the projects
-     side kept a capability's wording over it. With the box gone there is
-     nothing left to differ about, so this branch is a rename rather than a
-     second renderer: `fnOwnOverview` is `fnPillarsOverview` under a name that
-     is true of both.
-
-     A function still CARRYING a capability keeps today's rendering
-     underneath, which is the transitional state stage 2 removes when a
-     capability becomes an entry of its own. */
-  /* A SUPPORTING FUNCTION'S OVERVIEW IS A SUPPORTING FUNCTION'S OVERVIEW,
-     WHICHEVER WAY IT PLANS (§213). Islam: *"what if the overview of the
-     functions that plan in pillars [were] like the overview of the functions
-     that plan as projects … because the function will never have an
-     aspiration, will never have a foundation, but they will have maybe key
-     objectives."*
-
-     Right, and §212 had reached for the wrong neighbour: it gave this format
-     a UNIT's foundation — who we are, a winning aspiration, an end in mind —
-     which is the strategy the function INHERITS from the unit it plans under
-     and never authors itself. What it does have is what a capability has: a
-     definition, and some key objectives.
-
-     So both formats draw the same two cards, and the only difference is what
-     carries them — a capability each on one side, the function itself on the
-     other. Same page key (`capfoundation`), same access key (`k_found`), same
-     builder for the objectives (§53.5).
-
-     A UNIT IS UNTOUCHED BY ALL OF THIS, deliberately and at Islam's
-     instruction: `renderUnitFoundation()` is exactly what it always was, on
-     `foundation`/`u_found`, and nothing here calls it. */
-  if (fnPlansInPillars(FUNCTIONS[fk])) return fnOwnOverview(fk);
-  if (!caps.length) return fnOwnOverview(fk);
-  var ed = authoring("capfoundation", "k_found");
-  /* §145: the fill grant opens the same editor, whose gap cells then draw
-     only the blanks — Add and Remove stay the author's. */
-  var fl = filling("capfoundation", "k_found");
-  /* §268: THE EDIT BAR IS ON THE SECTION LINE. It was the only WORDED edit
-     control in the product's strategy pages while a unit's three were pen
-     glyphs, so the two sides of the navigation switch said the same thing two
-     ways (§53.5); one slot answers for both now. */
-  return fillBarOr("capfoundation", "k_found",
-      caps.reduce(function(a, c){
-        return a + (c.keyObjectives || []).reduce(function(b, m){
-          return b + SMPRules.gapMissing("capko", m).length; }, 0); }, 0),
-      "the overview") +
-    caps.map(function(c){
-    var f = functionOf(c.fn);
-    /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).
-       They could arrive in a projects file and be READ on this page, and no
-       surface in the product could write the first one — the same
-       import-only trap as the SWOT and the clauses. Behind the page's own
-       pen; a row minted empty carries the same shape the seed's rows have. */
-    var koBlock = (ed || fl)
-      ? capKoEdit(c)
-      : koReadBlock(c.keyObjectives,
-          "None. This capability is judged by its projects.");
-    /* §226: WHILE IT IS BEING WRITTEN, THE TABLE GETS THE PAGE — the same
-       band the pillars format takes, because the two formats draw ONE page
-       (§53.5) and a squeeze fixed on one side of it is §211's drift back. */
-    var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
-        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
-        koBlock;
-    return capBand(c) + '<div class="capbody"><div class="fgrid">' +
-      '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
-        '<div class="clause"><dt>Capability</dt><dd>' + esc(c.name) + '</dd></div>' +
-        '<div class="clause"><dt>Carried by</dt><dd>' +
-          esc(f ? f.name : "\u2014") +
-          (f && f.head ? " \u2014 " + esc(personName(f.head)) : "") + '</dd></div>' +
-        /* §214: the same fillable cell the other format's Overview draws —
-           one page, one answer (§53.5), or a fill grant would reach a
-           function's definition and not a capability's. */
-        '<div class="clause"><dt>Definition</dt><dd>' +
-          gapCell("capfoundation", "k_found", c, "def",
-                  { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) + '</dd></div>' +
-      '</dl></div>' +
-      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
-    '</div>' +
-    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '') +
-    '</div>';
-  }).join("") +
-  /* A second capability for the same function, added where the first is
-     described. addCapability() is the ONE minter (§51.11) — the Temple's
-     add and this one cannot drift. */
-  (ed ? '<div class="addrow"><button class="editbtn" data-fncapadd="' + esc(fk) +
-    '">+ Add a capability</button></div>' : '');
+  return holderOverview(fnKey);
 }
 
 /* ── A SUPPORTING FUNCTION'S KEY OBJECTIVES, READ (§213) ──────────────

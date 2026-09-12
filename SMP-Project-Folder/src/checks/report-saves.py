@@ -133,7 +133,7 @@ with sync_playwright() as pw:
         if folded:
             # The fold only exists where both lists are worth offering; a viewer
             # who sees one side has no switch to press.
-            pg.evaluate("""(t)=>{const f=document.querySelector('#units [data-fold]');
+            pg.evaluate("""(t)=>{const f=document.querySelector('#units [data-fold="fns"]');
                 if(f && !document.querySelector('[data-u="'+t+'"]')) f.click();}""", target)
             pg.wait_for_timeout(400)
         pg.click('[data-u="%s"]' % target); pg.wait_for_timeout(500)

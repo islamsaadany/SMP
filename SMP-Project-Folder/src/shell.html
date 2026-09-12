@@ -1001,10 +1001,24 @@
 
      It starts on Units, because a business unit is what the platform is mostly
      about and every viewer who holds any unit holds one here. */
+  /* §330: THREE SIDES, AND THE FUNCTIONS SIDE IS SPELT `fns` AT LAST. It was
+     `caps` — a name left over from when a capability WAS the functions side —
+     and this is the round that makes the word mean one thing, so a key reading
+     `caps` beside a real capabilities side would be a trap for whoever reads
+     this next. Nothing stored holds it (it is a plain var, re-initialised on
+     every load), so the rename costs no tenant anything. */
   var NAVFOLD = "units";
 
   function myUnits(){
     return activeKeys().filter(function(k){ return allowed(SUBS.unit, k).length; });
+  }
+  /* Which capabilities this viewer reaches, asked of the RULE (§42): a
+     capability resolves to the function that holds it, so the office and the
+     CEO see every one and a function head sees theirs. */
+  function myCaps(){
+    return capsReachable().filter(function(c){
+      return allowed(SUBS.fn, "cap:" + c.id).length;
+    }).map(function(c){ return c.id; });
   }
   function myFns(){
     return FUNCTION_KEYS.filter(function(k){
@@ -1016,8 +1030,48 @@
   /* The folds appear only for someone who reaches more than one unit AND more
      than one capability — today the SMO and the CEO. Everyone else sees the row
      exactly as it has always been, and never meets the concept. */
-  function foldsNeeded(){ return myUnits().length > 1 && myFns().length > 1; }
+  /* §330: EACH SIDE THAT HAS SOMETHING BEHIND IT, in the order a page is read
+     — what the business runs, what it is building, what supports both. The
+     list is built once and the switch, the destinations and the reset below
+     all read it, so the control and the row it governs cannot disagree about
+     how many sides there are (§53.5). */
+  function navSides(){
+    var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
+    if (us.length) out.push({ fold:"units", label:"Units",
+      keys:us });
+    if (cs.length) out.push({ fold:"caps",  label:"Capabilities",
+      keys:cs.map(function(id){ return "cap:" + id; }) });
+    if (fs.length) out.push({ fold:"fns",   label:"Functions",
+      keys:fs.map(function(k){ return "fn:" + k; }) });
+    return out;
+  }
+  /* A TENANT WITH NO CAPABILITIES SEES EXACTLY THE SWITCH IT HAS TODAY, which
+     is every tenant until somebody creates one — so the old rule is kept
+     whole rather than folded into the new one: more than one unit AND more
+     than one function, and everybody else meets no switch at all.
 
+     WITH A CAPABILITY THERE IS A THIRD SIDE, and then any two sides are worth
+     separating: the row is one list at a time, so it stays the length of
+     whichever list you are in. Measured on the demo at 1500px, the ten units
+     already use 1424px of a 1485px row — 61px left — so a third kind of thing
+     sharing that line overflows on an ordinary laptop the day a second
+     capability is created. */
+  function foldsNeeded(){
+    var sides = navSides();
+    if (sides.length < 2) return false;
+    return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
+  }
+
+  /* ONE LABEL FUNCTION FOR THE THREE KINDS (§330, §51.7's own lesson): a
+     unit's and a function's navName are read through `navName()`, and a
+     capability's through the same one, so a short name given to a capability
+     in Setup shows in the navigation the day it is set rather than being
+     stored and read by nothing. */
+  function navLabelFor(k){
+    if (String(k).indexOf("cap:") === 0) return navName(capOfTarget(k));
+    if (String(k).indexOf("fn:") === 0)  return navName(FUNCTIONS[String(k).slice(3)]);
+    return navName(UNITS[k]);
+  }
   function unitTabs(){
     var out = [];
     /* ── THE GROUP BUTTON BECOMES A DROPDOWN (§68) ────────────────────
@@ -1067,13 +1121,15 @@
          the same kind of thing. The opened list follows BOTH of them. */
       /* A switch cannot rest on a side that has nothing behind it: a viewer who
          holds functions but no units would otherwise land on an empty Units
-         list with no way to see that Functions has anything. */
-      if (NAVFOLD === "units" && !us.length) NAVFOLD = "caps";
-      if (NAVFOLD === "caps"  && !cs.length) NAVFOLD = "units";
-      out.push({ folds: [
-        { fold:"units", label:"Units",     open:NAVFOLD === "units" },
-        { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
-      ] });
+         list with no way to see that Functions has anything. §330: asked of
+         the sides that exist rather than of two named lists, so a capability
+         created this morning is a side the switch can rest on by tonight. */
+      var sides = navSides();
+      if (!sides.some(function(x){ return x.fold === NAVFOLD; }))
+        NAVFOLD = sides.length ? sides[0].fold : "units";
+      out.push({ folds: sides.map(function(x){
+        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold };
+      }) });
       /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
          (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
          name — so a function's navName was stored, printed in the Setup
@@ -1086,13 +1142,16 @@
          silently, and it fails looking like the feature was never built. The
          same one-argument helper answers for both now, so a third kind of
          thing added later cannot get this wrong on its own. */
-      if (NAVFOLD === "units")
-        us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      else
-        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
+      (sides.filter(function(x){ return x.fold === NAVFOLD; })[0] || { keys:[] })
+        .keys.forEach(function(k){ out.push({ k:k, label:navLabelFor(k) }); });
     } else {
-      us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
+      /* NO SWITCH: every side's destinations, in the same order, on one line.
+         A viewer who reaches one unit and two functions has always seen them
+         like this and still does (§330: nothing moves until a capability
+         exists). */
+      navSides().forEach(function(x){
+        x.keys.forEach(function(k){ out.push({ k:k, label:navLabelFor(k) }); });
+      });
     }
     /* Manage and Setup used to be two glyph buttons here. They are now one
        worded button with a menu, rendered separately (paintMenu) so it can sit
@@ -1423,7 +1482,7 @@
        §28's rule — a unit opens on what was AGREED, not on the score — is about
        plans, and a company has none: its page IS the reading (§68). */
     if (k !== "group" && k !== "manage" && k !== "setup" && !isCo(k)) {
-      var fn = isFn(k);
+      var fn = isFn(k) || isCapDest(k);
       var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
       var strat = d.filter(function(x){ return x.k === tab; })[0];
       if (strat) {
@@ -1466,13 +1525,47 @@
      built of every destination this viewer can actually open; somebody
      attached to a unit their roles no longer reach falls back to the first
      door in the navigation, which is what happened before this existed. */
+  /* ── §310's RULE, WHERE IT LIVES NOW (§330) ───────────────────────────
+     Islam, of a project owner: *"the porject owner should open the capability
+     by defaut on his project."* §310 answered it by ordering the list of
+     capabilities a function's page drew; stage 2 makes a capability a place
+     you OPEN, so the same need is answered one level up — otherwise the fix
+     would have been lost to the change that made it unnecessary, which is a
+     regression wearing a refactor's clothes.
+
+     NARROW ON PURPOSE, AND IT ONLY EVER NARROWS. It fires for somebody BOUNDED
+     (§147.7 — the office and a custodian reach every row, so "theirs" names
+     nothing), whose own function page holds no project of theirs, and where
+     EXACTLY ONE capability that function holds does. Two would make the choice
+     arbitrary, and landing on the function is the honest answer there: the
+     switch is one press away and both are in the list. */
+  function capForBounded(at, reach){
+    if (String(at).indexOf("fn:") !== 0 || !boundedHere(at)) return null;
+    var fk = String(at).slice(3), own = fnOwnHolder(fk);
+    var mineOf = function(c){
+      return !!railMine(holderTarget(holderCodeOwner(c)), c.projects || [],
+                        function(p){ return p.owner; });
+    };
+    if (own && mineOf(own)) return null;
+    var hits = capsOfFunction(fk).filter(function(c){
+      return reach.indexOf("cap:" + c.id) > -1 && mineOf(c);
+    });
+    return hits.length === 1 ? "cap:" + hits[0].id : null;
+  }
   function entryDest(reach, dests){
     var at = personAt(viewer());
-    if (at && reach.indexOf(at) > -1) return at;
+    if (at && reach.indexOf(at) > -1) return capForBounded(at, reach) || at;
     return dests.length ? dests[0].k : null;
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  /* §330: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
+     tabs, because it is planned the same two ways and the pages are the same
+     pages (spec 046 §4). Drawing a second tab list for it would be the drift
+     §211 and §213 each cost a day to undo. */
+  function isCapDest(k){
+    return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
+  }
   function isCo(k){
     return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
   }
@@ -1483,7 +1576,7 @@
             somewhere real rather than on the unit branch. */
          : k === "manage" || k === "setup" ? setupDefs()
          : isCo(k) ? SUBS.co
-         : isFn(k) ? SUBS.fn
+         : isFn(k) || isCapDest(k) ? SUBS.fn
          : SUBS.unit;
   }
 
@@ -1495,6 +1588,7 @@
        fold navigate \u2014 which is exactly what a fold must not do. Only reset when
        the destination is genuinely unreachable for this viewer. */
     var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }))
+      .concat(myCaps().map(function(id){ return "cap:" + id; }))
       .concat(companiesReachable().map(function(ck){ return "co:" + ck; }));
     if (allowed(SUBS.group, "group").length) everything.push("group");
     if (allowed(SUBS.setup, "group").length) everything.push("setup");
@@ -1537,6 +1631,30 @@
            is neither: it is two named sides. The label says what pressing it
            will DO, because the visible words already say where you are. */
         var lit = t.folds.filter(function(f){ return f.open; })[0] || t.folds[0];
+        /* ── TWO SIDES PRESS TO SWITCH; THREE PRESS THE ONE YOU WANT (§330) ──
+           §41.8 is Islam's own instruction — *"I want it a switching button
+           where the 2 words stay on 1 button but on clicking the selection
+           switches"* — and it is a complete instruction for TWO sides and not
+           for three: "press to go to the other" has no answer once there are
+           two others. So the control keeps its shape exactly while there are
+           two, which is every tenant until a capability is created, and
+           becomes a segmented control of three when there are.
+
+           It is a DIV of buttons rather than one button of spans, because a
+           button inside a button is not markup a browser will keep — and the
+           hover then lights the segment under the pointer, which is what a
+           segmented control means and the opposite of what §41.8 decided for
+           the two-sided one (there, lighting the other half made the state
+           unreadable exactly when somebody was looking at it). */
+        if (t.folds.length > 2) {
+          return '<span class="sep"></span>' +
+            '<div class="navswitch multi" role="group" aria-label="Which list to show">' +
+            t.folds.map(function(f){
+              return '<button class="nsw' + (f.open ? " on" : "") + '"' +
+                ' data-fold="' + f.fold + '" aria-pressed="' + (f.open ? "true" : "false") +
+                '">' + f.label + '</button>';
+            }).join("") + '</div>';
+        }
         var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
         return '<span class="sep"></span>' +
           '<button class="navswitch" data-fold="' + other.fold + '"' +
@@ -2097,10 +2215,13 @@
        the third row carries its pages. A tab without them renders directly, as
        every group and setup tab still does. */
     var arg = (current === "group" || current === "setup" || current === "manage") ? null
-            : isFn(current) ? current : UNITS[current];
-    /* Submission is per unit; a function's capabilities are not submitted
-       individually, so the whole function counts as one. */
-    CURRENT_REPORT_KEY = isFn(current) ? current : (UNITS[current] ? UNITS[current].ukey : null);
+            : isFn(current) || isCapDest(current) ? current : UNITS[current];
+    /* Submission is per unit, per function, and — since §330 — per capability:
+       Islam's *"yes for all"* to the cycle-board question makes a capability a
+       subject that reports, so it submits on its own rather than through the
+       function that holds it. */
+    CURRENT_REPORT_KEY = isFn(current) || isCapDest(current)
+      ? current : (UNITS[current] ? UNITS[current].ukey : null);
     var defs = reachable(defsFor(current), TARGET, arg);
     /* NO FALLBACK ONTO THE UNFILTERED LIST. It used to re-add every allowed def
        when the reachable set came out empty, which put back exactly the defs
@@ -2229,7 +2350,11 @@
            UNITS[...] to hand it and inventing a unit-shaped object for something
            that carries no plan would be a lie about what it is (§68). */
         : isCo(current) ? def.render(current)
-        : isFn(current) ? def.render(current) : def.render(UNITS[current]);
+        /* §330: a capability is passed its target for the same reason a
+           function is — there is no UNITS[...] to hand it, and the four
+           renderers behind SUBS.fn take a holder target. */
+        : isFn(current) || isCapDest(current) ? def.render(current)
+        : def.render(UNITS[current]);
     } catch (renderErr) {
       /* Still said to the console, verbatim — the card is FOR the person, the
          console line is for whoever is diagnosing with the lid off. */
@@ -3687,6 +3812,24 @@
     document.querySelectorAll("[data-capfn]").forEach(function(el){
       el.addEventListener("change", function(){
         GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
+        paint();
+      });
+    });
+    /* §330: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
+       — Islam's *"yes the capability can be built in pillars."* Addressed by
+       ID rather than by position, because this control can change which side
+       of the navigation the row belongs to and a repaint sits between the
+       draw and the press (§48).
+
+       DELETED WHEN IT IS THE DEFAULT (§50.6): "projects" is what every
+       capability that exists today already is, so storing the word would put a
+       change into the save on a row nobody touched. */
+    document.querySelectorAll("[data-capformat]").forEach(function(el){
+      el.addEventListener("change", function(){
+        if (grant("c_caps") !== "edit") return;
+        var c = capById(el.dataset.capformat);
+        if (!c) return;
+        if (el.value === "pillars") c.format = "pillars"; else delete c.format;
         paint();
       });
     });
@@ -7635,6 +7778,14 @@
         fieldSaved(); paint();
       });
     });
+    /* §330: the second door to a capability, beside the projects. */
+    document.querySelectorAll("[data-cappromo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var fk = b.dataset.cappromo;
+        if (!mayAuthor("k_found", "fn:" + fk)) return;
+        promoOpen(fk);
+      });
+    });
     document.querySelectorAll("[data-fncapadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var fk = b.dataset.fncapadd;
@@ -9173,6 +9324,158 @@
     var all = box.querySelector("[data-caprmall]");
     if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
   }
+  /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§330, spec 046 §6) ───────
+     Islam signed off the drawing with the cost on it: *"ok with the promirting
+     mockup."* The mockup showed it as two steps; it is ONE dialog carrying
+     both, because the cost line depends on which projects are ticked and a
+     panel that names the codes it will change has to be looking at the ticks
+     while somebody changes them.
+
+     THE BODY IS REWRITTEN, NEVER `paint()` (§90, §116.6's own rule): a repaint
+     would rebuild the page behind the dialog and take the half-filled name
+     with it. The state lives in PROMO for exactly as long as the dialog does.
+
+     NOT ALL OF THEM IS THE DEFAULT, and it is a decision rather than a
+     convenience: a function whose five projects contain one capability cannot
+     say so if the control takes the lot, and promoting everything is still
+     allowed because a function may turn out to be doing one strategic thing.
+     What is refused is promoting NOTHING (spec 046 §6's own edge). */
+  var PROMO = null;
+  function promoOpen(fk){
+    var f = FUNCTIONS[fk];
+    if (!f || fnPlansInPillars(f) || !(f.projects || []).length) return;
+    PROMO = { fk: fk, pick: {}, name: "" };
+    openModalHtml(esc("Make these projects a capability"),
+      esc(f.name), '<div class="rmconfirm" id="promo-b"></div>');
+    promoPaint();
+  }
+  function promoBody(){
+    var f = FUNCTIONS[PROMO.fk], ps = f.projects || [];
+    var picked = ps.filter(function(p){ return PROMO.pick[p.id]; });
+    var name = String(PROMO.name || "").trim();
+    /* THE COST, IN THE CODES THEMSELVES (§310, §321's habit of naming what a
+       press will change before the press). A project's code is its position
+       in the thing that HOLDS it, so the ones that move take the capability's
+       letters and the ones left behind close up — and both halves are shown,
+       because "their codes change" without saying to what is a warning nobody
+       can check. The ids never move and the line says so. */
+    var made = { id:"", name:name || "New capability", codePrefix:null };
+    var newCodes = picked.map(function(p, i){
+      return esc(projCode(PROMO.fk, p)) + ' \u2192 ' +
+        esc(capPrefix(made) + String(i + 1).padStart(2, "0")); });
+    var left = ps.filter(function(p){ return !PROMO.pick[p.id]; });
+    var moved = left.map(function(p, i){
+      var was = projCode(PROMO.fk, p),
+          now = (f.codePrefix || "") + String(i + 1).padStart(2, "0");
+      return was === now ? null : esc(was) + ' \u2192 ' + esc(now);
+    }).filter(Boolean);
+    return ps.map(function(p){
+        var on = !!PROMO.pick[p.id];
+        return '<div class="pick' + (on ? ' safe' : '') + '">' +
+          '<div class="txt"><p class="t">' + esc(projCode(PROMO.fk, p)) +
+            ' \u00b7 ' + esc(p.name || "Untitled") + '</p>' +
+            '<p class="d">' + esc(plural((p.deliverables || []).length, "deliverable") +
+              " \u00b7 " + plural((p.outcomes || []).length, "outcome") +
+              " \u00b7 " + plural((p.milestones || []).length, "milestone")) +
+              (on ? '' : ' \u2014 stays with ' + esc(f.name)) + '</p></div>' +
+          '<button class="keepbtn" data-promotick="' + esc(p.id) + '"' +
+            ' aria-pressed="' + (on ? "true" : "false") + '">' +
+            (on ? 'Chosen' : 'Choose') + '</button>' +
+        '</div>';
+      }).join("") +
+      '<div class="mrow" style="margin-top:14px">' +
+        '<input class="fld" id="promo-name" value="' + esc(PROMO.name) +
+          '" placeholder="Name the capability" aria-label="Name the capability">' +
+      '</div>' +
+      '<div id="promo-cost">' + promoCost() + '</div>' +
+      '<p class="archline">The plan as it stands is archived first. ' +
+        '<b>Setup \u203a Import &amp; storage</b> holds the way back.</p>' +
+      '<div class="mrow"><button class="quiet" data-promono="1">Cancel</button>' +
+        '<button class="keepbtn" data-promogo="1"' +
+          (promoReady() ? '' : ' aria-disabled="true"') + '>' +
+          'Make it a capability</button></div>';
+  }
+  function promoReady(){
+    return !!(PROMO && Object.keys(PROMO.pick).length &&
+              String(PROMO.name || "").trim());
+  }
+  /* THE COST, IN THE CODES THEMSELVES (§310, and §321's habit of naming what a
+     press will change before the press). A project's code is its position in
+     the thing that HOLDS it, so the ones that move take the capability's own
+     letters and the ones left behind close up — and BOTH halves are shown,
+     because "their codes change" without saying to what is a warning nobody
+     can check. The ids never move and the line says so.
+
+     IT IS ITS OWN NODE because the letters come from the NAME as it is typed,
+     and rewriting the whole body on every keystroke would replace the box
+     being typed into (§35, §71.2) — the fault §116 records about the register
+     and §97 about the chat composer. */
+  function promoCost(){
+    var f = FUNCTIONS[PROMO.fk], ps = f.projects || [];
+    var picked = ps.filter(function(p){ return PROMO.pick[p.id]; });
+    if (!picked.length)
+      return '<div class="repline">Choose at least one project. A capability ' +
+             'with nothing in it has nothing to be.</div>';
+    var made = { name: String(PROMO.name || "").trim() || "New capability" };
+    var newCodes = picked.map(function(p, i){
+      return esc(projCode(PROMO.fk, p)) + ' \u2192 ' +
+        esc(capPrefix(made) + String(i + 1).padStart(2, "0")); });
+    var left = ps.filter(function(p){ return !PROMO.pick[p.id]; });
+    var moved = left.map(function(p, i){
+      var was = projCode(PROMO.fk, p),
+          now = (f.codePrefix || "") + String(i + 1).padStart(2, "0");
+      return was === now ? null : esc(was) + ' \u2192 ' + esc(now);
+    }).filter(Boolean);
+    return '<div class="repline"><b>' + esc(plural(picked.length, "project")) +
+      ' move, and their codes change.</b> ' + newCodes.join(', ') +
+      (moved.length ? '; ' + esc(f.name) + '\u2019s remaining ' +
+        (moved.length === 1 ? 'project becomes ' : 'projects become ') +
+        moved.join(', ') : '') +
+      '. A code says where a project lives, so it follows the project. ' +
+      'Every figure, every milestone and every reported number stays exactly ' +
+      'where it is \u2014 nothing is renumbered underneath.</div>';
+  }
+  function promoPaint(){
+    var box = document.getElementById("promo-b");
+    if (!box || !PROMO) return;
+    box.innerHTML = promoBody();
+    box.querySelectorAll("[data-promotick]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var id = b.dataset.promotick;
+        if (PROMO.pick[id]) delete PROMO.pick[id]; else PROMO.pick[id] = true;
+        promoPaint();
+      });
+    });
+    var nm = box.querySelector("#promo-name");
+    /* `input`, not `change`: the button's own held state depends on the name,
+       and waiting for a blur would leave it shut under a filled box (§221). */
+    if (nm) nm.addEventListener("input", function(){
+      PROMO.name = nm.value;
+      /* The cost line and the button, written IN PLACE — the letters in the
+         line are derived from this very box, so it has to follow the typing,
+         and a repaint would take the box with it. */
+      var cost = box.querySelector("#promo-cost");
+      if (cost) cost.innerHTML = promoCost();
+      var go = box.querySelector("[data-promogo]");
+      if (go) go.setAttribute("aria-disabled", promoReady() ? "false" : "true");
+    });
+    var no = box.querySelector("[data-promono]");
+    if (no) no.addEventListener("click", function(){ PROMO = null; closeModal(); });
+    var go = box.querySelector("[data-promogo]");
+    if (go) go.addEventListener("click", function(){
+      /* ASKED AGAIN AT PRESS TIME (§48.2): the name is typed without a
+         repaint, so the drawn state can be a keystroke behind. */
+      var ids = Object.keys(PROMO.pick), nmv = String(PROMO.name || "").trim();
+      if (!promoReady()) return;
+      if (grantAt("k_found", "fn:" + PROMO.fk) !== "edit" ||
+          !mayAuthor("k_found", "fn:" + PROMO.fk)) return;
+      var made = promoteToCapability(PROMO.fk, ids, nmv);
+      PROMO = null; closeModal();
+      if (made) { NAVFOLD = "caps"; current = "cap:" + made.id; currentSub = null; }
+      paint();
+    });
+  }
+
   /* The rail may be holding a project of the capability that has just gone
      (§48.2's stale pointer) \u2014 dropped rather than repointed, exactly as
      removing a project does, because the rail's own pick falls back on its
@@ -9215,7 +9518,7 @@
   function confirmRemoveProject(id){
     var c = capOfProjectId(id), p = projById(id);
     if (!c || !p) return;
-    var code = projCode(c.fn, p);
+    var code = projCode(holderCodeOwner(c), p);
     rmConfirmOpen("Remove this project?",
       (code ? code + " — " : "") + (p.name || "Untitled"),
       '<b>' + esc(p.name || "This project") + '</b> holds ' +

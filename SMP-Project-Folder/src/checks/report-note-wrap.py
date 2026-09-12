@@ -110,7 +110,7 @@ SHAPES = [("a unit", "mobile", "performance", False),
 def open_reporting(pg, target, tab, folded):
     pg.goto(URL); pg.wait_for_timeout(2400)
     if folded:
-        pg.evaluate("""(t)=>{const f=document.querySelector('#units [data-fold]');
+        pg.evaluate("""(t)=>{const f=document.querySelector('#units [data-fold="fns"]');
             if(f && !document.querySelector('[data-u="'+t+'"]')) f.click();}""", target)
         pg.wait_for_timeout(400)
     pg.click('[data-u="%s"]' % target); pg.wait_for_timeout(500)

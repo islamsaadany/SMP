@@ -76,8 +76,23 @@ def show_units(pg):
     running. Pressing the switch is cheap; assuming the side is not."""
     el = pg.query_selector('#units [data-u="mobile"]')
     if el and el.is_visible(): return
-    sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
-    if sw: sw.click(); pg.wait_for_timeout(250)
+    show_side(pg, "units")
+
+def nav_sides(pg):
+    """§330: WHICH SIDES THE SWITCH HAS. Two until a capability exists, three
+       after — so nothing may assume two, and the sweep that walked "both" has
+       to walk however many there are or it reports ok having missed a third
+       of the destinations (the fault §51.7 records, with a new cause)."""
+    return pg.eval_on_selector_all("#units [data-fold]",
+        "e=>e.map(x=>x.dataset.fold)") or []
+
+def show_side(pg, side):
+    """§330: PRESS THE SIDE, NEVER THE CONTROL. With three sides the switch is
+       a group of buttons and pressing it no longer toggles — and `data-fold`
+       is absent exactly when that side is already lit, which is why this is
+       guarded rather than asserted."""
+    b = pg.query_selector('#units [data-fold="%s"]' % side)
+    if b: b.click(); pg.wait_for_timeout(250)
 
 def walk_subtabs(pg):
     m=len(pg.query_selector_all("#subtabs button"))
@@ -157,11 +172,13 @@ with sync_playwright() as p:
         # failed: `.navfold` simply stops matching, the loop iterates nothing,
         # and the sweep reports "ok" having walked half the product. Third time
         # in one session that a check quietly measured less than it claimed.
-        if pg.query_selector("#units .navswitch"):
-            for _ in range(2):
+        # §330: EVERY SIDE, not two. `nav_sides()` reports what is actually
+        # there, so a capability created tomorrow is swept the day it exists.
+        sides = nav_sides(pg)
+        if sides:
+            for sd in sides:
+                show_side(pg, sd)
                 seen+=walk_destinations(pg)
-                sw=pg.query_selector("#units .navswitch")
-                if sw: sw.click(); pg.wait_for_timeout(150)
         else:
             seen+=walk_destinations(pg)
         # The Manage menu: reopened before each entry, because choosing one
@@ -388,9 +405,7 @@ with sync_playwright() as p:
     for label, dest, sec in [("unit", "mobile", "plan"),
                              ("function", "fn:merchandising", "plan")]:
         if dest.startswith("fn:"):
-            if not pg.query_selector('#units [data-u="%s"]' % dest):
-                sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
-                if sw: sw.click(); pg.wait_for_timeout(250)
+            show_side(pg, "fns")
         else:
             show_units(pg)
         pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(250)
@@ -563,11 +578,7 @@ with sync_playwright() as p:
         }""")
 
     def goto(pg, key, tab, sec):
-        want = "Functions" if key.startswith("fn:") else "Units"
-        for _ in range(3):
-            on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
-            if on and on[0] == want: break
-            pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+        show_side(pg, "fns" if key.startswith("fn:") else "units")
         pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(250)
         pg.evaluate("""(t)=>{const b=[...document.querySelectorAll('#subtabs button')]
             .find(x=>x.textContent.trim()===t); if(b)b.click()}""", tab)
@@ -652,11 +663,7 @@ with sync_playwright() as p:
 
     # A FUNCTION OPENS ON ITS PROJECTS, as a unit opens on its Plan (53.1).
     for key, want in (("mobile", "Strategy / Plan"), ("fn:finance", "Strategy / Projects")):
-        w = "Functions" if key.startswith("fn:") else "Units"
-        for _ in range(3):
-            on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
-            if on and on[0] == w: break
-            pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+        show_side(pg, "fns" if key.startswith("fn:") else "units")
         go_top(pg, "group")
         pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(350)
         # THE NAME, NOT ITS ANNOTATIONS (132.12, 51.11's drill): the tab
@@ -1242,9 +1249,7 @@ with sync_playwright() as p:
                                   ("mobile", "Plan", "unit",
                                    ["pillar", "measure", "tactic"])]:
         if dest.startswith("fn:"):
-            if not pg.query_selector('#units [data-u="%s"]' % dest):
-                sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
-                if sw: sw.click(); pg.wait_for_timeout(250)
+            show_side(pg, "fns")
         else:
             show_units(pg)
         pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(300)

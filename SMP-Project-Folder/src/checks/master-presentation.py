@@ -121,10 +121,16 @@ def go(pg, dest, sub):
     screen means the other side is open — press the switch and look again,
     rather than assigning `current` and testing a page nobody navigated to."""
     if not pg.query_selector('[data-u="%s"]' % dest):
-        sw = pg.query_selector(".navswitch[data-fold]")
-        if sw:
-            sw.click()
-            pg.wait_for_timeout(420)
+        # §330: THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+        # the switch has three sides and pressing it no longer means "go to
+        # the other one" — so the side is named. A destination that is still
+        # not there after this is genuinely out of reach, which is what the
+        # click below then reports.
+        side = ("caps" if str(dest).startswith("cap:")
+                else "fns" if str(dest).startswith("fn:") else "units")
+        pg.evaluate("(s)=>{const b=document.querySelector('#units [data-fold=\"'+s+'\"]');"
+                    " if (b) b.click();}", side)
+        pg.wait_for_timeout(420)
     pg.click('[data-u="%s"]' % dest)
     pg.wait_for_timeout(360)
     pg.click('[data-s="%s"]' % sub)
@@ -163,8 +169,10 @@ with sync_playwright() as p:
     # check that proves the page can be assigned to, not that it can be
     # reached (§70).
     onfn = ev(pg, """() => {
-      const sw = document.querySelector('.navswitch[data-fold]');
-      if (sw) sw.click();
+      /* §330: the Functions side by name — absent exactly when it is already
+         lit, which is why this reports true either way. */
+      const b = document.querySelector('#units [data-fold="fns"]');
+      if (b) b.click();
       return true;
     }""", None, False)
     pg.wait_for_timeout(420)

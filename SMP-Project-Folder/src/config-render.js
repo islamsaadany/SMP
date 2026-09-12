@@ -6185,19 +6185,23 @@ function renderCycle(){
      under it, and a sentence that is true of some of the rows beneath it is
      worse than none (§35). What it names is the count -- and the mapped
      columns keep the per-cell hovers that already explained them (§124). */
-  var fnKeys = boardFunctionKeys();
-  var fnRows = fnKeys.map(function(fk){
-    /* §245: a function that plans in pillars is READ like a unit and LISTED
-       like a function -- `boardRow()` is that reading, already written and
+  /* §330: ONE ROW BUILDER, FOR A FUNCTION OR A CAPABILITY. A capability
+     reports on its own — Islam's *"yes for all"* — and it is read with exactly
+     the counters a projects function is read with, so the row is widened to
+     take a TARGET rather than copied. Two builders over one question is how a
+     board comes to say something a Reporting page does not (§53.5). */
+  var holderRow = function(target){
+    /* §245: a subject that plans in pillars is READ like a unit and LISTED
+       where it belongs -- `boardRow()` is that reading, already written and
        already agreeing with its own Reporting page (§53.5, §59). */
-    if (fnPlansInPillars(FUNCTIONS[fk] || {})) return boardRow("fn:" + fk);
-    var c = fnReportedCount(fk), st = fnState(fk);
-    var f = FUNCTIONS[fk] || {};
+    if (boardPlansLikeUnit(target)) return boardRow(target);
+    var c = fnReportedCount(target), st = fnState(target);
     /* Custodian first, head second -- the same order the unit row asks in, so
-       the board names the same kind of person on both halves (§53.5). */
-    var who = personName(f.custodian) || personName(f.head) || "\u2014";
+       the board names the same kind of person on every half (§53.5), and a
+       capability names the people of the function that holds it. */
+    var who = boardWho(target);
     var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
-    var miss = fnMissingNotes(fk).length;
+    var miss = fnMissingNotes(target).length;
     /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§105.2).
        The first drawing gave the function half its own column strip and it
        COLLIDED: the strip's widths come from the table's own <thead> -- a
@@ -6216,7 +6220,7 @@ function renderCycle(){
        the band above where nothing can collide. */
     var by = { ko:[0,0], mea:[0,0], tac:[0,0] };
     var deliv = 0, mile = 0;
-    fnAskedItems(fk).forEach(function(x){
+    fnAskedItems(target).forEach(function(x){
       var slot = x.kind === "objective" ? "ko" : x.kind === "outcome" ? "mea" : "tac";
       if (x.kind === "deliverable") deliv++;
       if (x.kind === "milestone") mile++;
@@ -6231,7 +6235,7 @@ function renderCycle(){
        nothing to tell the two rows apart, on the page the office uses to chase
        people. `placeLabel()` adds the suffix only where the clash is real
        (§65, §93.12) and is what the unit half beside it now uses (§53.5). */
-    return '<tr><td><b>' + esc(placeLabel("fn:" + fk)) + '</b></td>' +
+    return '<tr><td><b>' + esc(placeLabel(target)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -6241,7 +6245,11 @@ function renderCycle(){
       '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
-  }).join("");
+  };
+  var capTargets = boardCapTargets();
+  var capRows = capTargets.map(holderRow).join("");
+  var fnKeys = boardFunctionKeys();
+  var fnRows = fnKeys.map(function(fk){ return holderRow("fn:" + fk); }).join("");
   if (fnRows) {
     /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
        used it (§24 would have had it deleted). It is the right shape for
@@ -6257,6 +6265,16 @@ function renderCycle(){
        mapping is not obvious, on the cells' own hovers (§124). */
     fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
         '<em>' + plural(fnKeys.length, "function") + ' reporting</em></th></tr>' + fnRows;
+  }
+  /* §330: A GROUP OF ITS OWN, BESIDE THE UNITS AND THE FUNCTIONS — Islam's
+     own words for what he wanted to see at a glance. Above the functions
+     because a capability is strategic and a function's own plan is the work
+     that supports it, which is the order the navigation switch reads in too
+     (§53.5). Drawn only when there is one, like the functions band. */
+  if (capRows) {
+    capRows = '<tr class="dxband"><th colspan="8">Capabilities' +
+        '<em>' + plural(capTargets.length, "capability", "capabilities") +
+        ' reporting</em></th></tr>' + capRows;
   }
 
   /* ONE ANSWER, TWO PAGES (§108.1). The totals were computed inline here and
@@ -6545,7 +6563,7 @@ function renderCycle(){
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
         '<th class="cc">Tactics</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + fnRows + '</tbody></table></div>' +
+        '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
       (open
         ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
           'means never closing, and a cycle that never closes writes no history. Whatever is ' +
@@ -6605,6 +6623,34 @@ function planFormatCell(fk, f, editable){
      true thing: this is settable, once the row is cleared. */
   return '<select class="fld" data-fnformat="' + esc(fk) + '"' +
       (blocked ? ' disabled title="Clear the plan on this row first"' : '') + '>' +
+    '<option value="projects"' + (pillars ? "" : " selected") + '>Projects</option>' +
+    '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
+    '</select>' +
+    (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
+}
+/* ── AND A CAPABILITY CARRIES ITS OWN FORM (§330, spec 046 §3) ─────────────
+   Islam: *"yes the capability can be built in pillars."* So the form belongs
+   to the THING rather than to the subject: a function that plans in projects
+   may hold a capability planned in pillars, and neither page does two jobs.
+
+   THE SAME CONTROL AS A FUNCTION'S, and the same refusal behind it — switching
+   would not delete the work, it would stop DRAWING it, which is worse than
+   refusing (the plan is still in the save and nothing shows it). It is a
+   separate builder rather than one taking either kind, because the two read
+   DIFFERENT fields for what is in the way and folding that into one function
+   would mean a branch per line inside it (§53.5 is about one ANSWER, not one
+   function whatever the question). */
+function capFormatCell(c, editable){
+  var pillars = capPlansInPillars(c);
+  var word = pillars ? L("pillar","bu") : "Projects";
+  if (!editable) return '<span class="pill kind">' + esc(word) + '</span>';
+  var blocked = pillars
+    ? (capItems(c).length ? "its plan" : "")
+    : ((c.projects || []).length
+        ? plural((c.projects || []).length, "project") : "");
+  return '<select class="fld" data-capformat="' + esc(c.id) + '"' +
+      (blocked ? ' disabled title="Clear the plan on this row first"' : '') +
+      ' aria-label="How ' + esc(c.name) + ' is planned">' +
     '<option value="projects"' + (pillars ? "" : " selected") + '>Projects</option>' +
     '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
     '</select>' +
@@ -6942,6 +6988,7 @@ function renderCaps(){
             }).join("") + '</select>'
         : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
       '<td class="nowrapcell">' + esc(f ? (personName(f.head) || "\u2014") : "\u2014") + '</td>' +
+      '<td>' + capFormatCell(c, editable) + '</td>' +
       /* Defensive on purpose: a capability minted by an older build carries
          neither list, and a Setup page that throws takes the whole screen with
          it. The minting is fixed (§51.11); this is so a graph saved before the
@@ -6971,7 +7018,8 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the capabilities\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h("Capability") + h("Owned by") + h("Head") +
+          return h("#", "idx", false) + h("Capability") + h("Held by") + h("Head") +
+                 h("Plans in") +
                  h("Key objectives", "cc") + h("Projects", "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +

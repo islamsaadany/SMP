@@ -49,12 +49,15 @@ def ev(pg, js, arg=None):
         return {"__err": str(e)[:160]}
 
 def go_fn(pg, key):
-    for _ in range(3):
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on",
-                                     "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions":
-            break
-        pg.click("#units .navswitch"); pg.wait_for_timeout(180)
+    """§330: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+       the switch has three sides and is a group of buttons rather than one
+       button that toggles — so cycling it does nothing at all and this check
+       hung for thirty seconds on a build behaving exactly as decided (§214.3).
+       `[data-fold="fns"]` addresses the Functions side in BOTH shapes, and is
+       absent exactly when Functions is already lit."""
+    pg.evaluate("()=>{const b=document.querySelector('#units [data-fold=\"fns\"]');"
+                " if (b) b.click();}")
+    pg.wait_for_timeout(220)
     pg.click('#units button[data-u="fn:%s"]' % key); pg.wait_for_timeout(500)
 
 def page(pg, tab, sec=None):

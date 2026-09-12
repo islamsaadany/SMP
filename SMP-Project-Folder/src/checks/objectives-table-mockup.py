@@ -181,7 +181,8 @@ def land(pg, where):
     pg.goto("file://" + str(FILE)); pg.wait_for_timeout(1400)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     if where == "fn":
-        pg.evaluate("()=>{const f=document.querySelector('#units [data-fold]'); if(f)f.click();}")
+        # §330: the navigation switch has a THIRD side once a capability exists, so pressing the control no longer means "go to the other one" — press the side you want. `[data-fold="fns"]` is absent exactly when Functions is already lit, which is why the press is guarded rather than asserted.
+        pg.evaluate("()=>{const b = document.querySelector('#units [data-fold="fns"]'); if (b) b.click();}")
         pg.wait_for_timeout(350)
         pg.evaluate("()=>{const b=document.querySelector('#units button[data-u=\"fn:finance\"]'); if(b)b.click();}")
         pg.wait_for_timeout(500)

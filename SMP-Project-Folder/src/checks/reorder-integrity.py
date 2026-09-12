@@ -78,7 +78,8 @@ LIST = ("(w) => FUNCTIONS['cfx'].items[0][w].map(" +
         "x => x === undefined ? '<<undefined>>' : (x === null ? '<<null>>' : x.id))")
 
 def open_cfx(pg):
-    fold = pg.query_selector('#units [data-fold="caps"]')
+    # §330: the navigation switch has a THIRD side once a capability exists, so pressing the control no longer means "go to the other one" — press the side you want. `[data-fold="fns"]` is absent exactly when Functions is already lit, which is why the press is guarded rather than asserted.
+    fold = pg.query_selector('#units [data-fold="fns"]')
     if fold: fold.click(); pg.wait_for_timeout(200)
     pg.evaluate("document.querySelector('#units [data-u=\"fn:cfx\"]').click()")
     pg.wait_for_timeout(400)
@@ -228,7 +229,8 @@ with sync_playwright() as p:
     pg.goto(base + "/raya-trade"); pg.wait_for_timeout(2500)
     healed = pg.evaluate("(FUNCTIONS['cfx'].items[0].tactics || []).map(x => x === null ? '<<null>>' : x.id)")
     ck("hydration healed the stored null", healed == ["fn:cfx-P1-T1"], healed)
-    fold = pg.query_selector('#units [data-fold="caps"]')
+    # §330: the navigation switch has a THIRD side once a capability exists, so pressing the control no longer means "go to the other one" — press the side you want. `[data-fold="fns"]` is absent exactly when Functions is already lit, which is why the press is guarded rather than asserted.
+    fold = pg.query_selector('#units [data-fold="fns"]')
     if fold: fold.click(); pg.wait_for_timeout(250)
     pg.evaluate("var x=document.querySelector('#units [data-u=\"fn:cfx\"]'); x && x.click()")
     pg.wait_for_timeout(500)

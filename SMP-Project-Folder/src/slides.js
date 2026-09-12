@@ -651,7 +651,10 @@ function slidesMineWord(sl){
 }
 
 function slidesOpen(kind, key){
-  var target = kind === "fn" ? "fn:" + key : key;
+  /* §330: three kinds — a unit, a supporting function and a capability, which
+     carries its own picture slides for its own review. */
+  var target = kind === "fn" ? "fn:" + key
+             : kind === "cap" ? "cap:" + key : key;
   if (!canSpeakFor(target)) return;
   SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
   var root = document.getElementById("slideroot");
@@ -666,8 +669,9 @@ function slidesOpen(kind, key){
   root.focus();
 }
 function picTargetName(kind, key){
-  return kind === "fn" ? (FUNCTIONS[key] || {}).name || key
-                       : (UNITS[key] || {}).name || key;
+  return kind === "fn"  ? (FUNCTIONS[key] || {}).name || key
+       : kind === "cap" ? ((capById(key) || {}).name || key)
+                        : (UNITS[key] || {}).name || key;
 }
 /* ── PLAY, AND COMING BACK (§295) ────────────────────────────────────────
    Islam: *"if they exit the presentation mood thye get back to the manage ppt

@@ -559,6 +559,10 @@ function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
    if it has one, the group's otherwise — so a tenant that uploads one
    mark has a marked deck everywhere, and a supporting function, which
    can never have a mark of its own, has one for the first time. */
+/* §330: A CAPABILITY WEARS THE GROUP'S MARK. A unit may carry its own
+   (§52.9) and a supporting function never could, so nothing here changes for
+   either — and a capability is not a unit, so `unitLogo` answers nothing for
+   one and the group's is the honest fallback (§259.2's own reader). */
 function deckMark(u){ return unitLogo(u) || groupLogo(); }
 
 function logoIntake(file){
@@ -1591,6 +1595,16 @@ function roleWhereLabel(at){
        rule: disambiguate the pair that clashes, leave everybody else alone. */
 function placeLabel(at){
   if (!at || at === "group") return "the group";
+  /* §330: a capability is a place now — it has an entry, pages and a row on
+     the cycle board, and `placeLabel` is what every one of those names it by.
+     Its own name, with no suffix: a capability and a unit sharing a name is
+     not the clash §65 guards (a unit and a FUNCTION of one name are two
+     things a person is attached TO, and this is not), and adding the word
+     everywhere would spend it on a case nobody has met. */
+  if (String(at).indexOf("cap:") === 0) {
+    var cc = capById(String(at).slice(4));
+    return cc ? navName(cc) : String(at).slice(4);
+  }
   if (String(at).indexOf("co:") === 0) {
     var c = COMPANIES[String(at).slice(3)];
     return c ? navName(c) : String(at).slice(3);
@@ -3525,6 +3539,18 @@ function unitBands(u){
 }
 function focusBands(key){
   if (!key) return [];
+  /* §330: A CAPABILITY IS A SUBJECT OF ITS OWN, so its key objectives are
+     markable where they are — they left the function's bands with the box
+     (§322, §330), and a mark stored where nobody can see it is §61's trap
+     (§130.5's own reason for reaching supporting functions in the first
+     place). Both forms: pillars through the unit-shaped view, an overview and
+     projects as one band of its own objectives. */
+  if (String(key).indexOf("cap:") === 0) {
+    var cc = capOfTarget(key);
+    if (!cc) return [];
+    if (capPlansInPillars(cc)) return unitBands(capAsUnit(cc.id));
+    return [{ band:cc.name, src:cc.name, items:cc.keyObjectives || [] }];
+  }
   /* The prefix test rather than `isFn()`, which is the shell's own local
      helper and not in scope here. */
   if (String(key).indexOf("fn:") === 0) {
@@ -3546,6 +3572,10 @@ function focusBands(key){
 function focusSubjects(){
   return { units: activeKeys().map(function(k){
              return { key:k, name:UNITS[k].name }; }),
+           /* §330: beside the units and the functions, in the order the
+              navigation switch reads (§53.5). */
+           caps: GROUP.capabilities.map(function(c){
+             return { key:"cap:" + c.id, name:c.name }; }),
            fns: activeFunctionKeys().filter(function(k){ return fnShows(k); })
                   .map(function(k){
              return { key:"fn:" + k, name:FUNCTIONS[k].name }; }) };

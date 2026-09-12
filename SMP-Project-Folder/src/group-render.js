@@ -4782,7 +4782,10 @@ function renderFocusBoard(){
      group's score and never has (§59), so the cell says the name alone rather
      than inventing a number to keep the column tidy. */
   var subs = focusSubjects();
-  var all = subs.units.concat(subs.fns);
+  /* §330: the capabilities between them, in the navigation's own order — a
+     board that lists what is marked and leaves out a whole kind of subject is
+     a board nobody can trust (§130.5). */
+  var all = subs.units.concat(subs.caps).concat(subs.fns);
   var live = all.filter(function(x){ return focusIn(x.key).length; });
   var totals = { over:0, met:0, short:0, none:0, total:0 };
 
@@ -4794,7 +4797,9 @@ function renderFocusBoard(){
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
-                      : '<span class="why" style="margin:3px 0 0">supporting function</span>') +
+                      : '<span class="why" style="margin:3px 0 0">' +
+                        (String(sub.key).indexOf("cap:") === 0
+                          ? 'capability' : 'supporting function') + '</span>') +
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +

@@ -4613,18 +4613,25 @@ function focusSwitch(){
    learn. `FSET.side` is screen state and is corrected rather than trusted: a
    side with nothing reachable behind it must not leave the page blank. */
 function focusNav(){
+  /* §330: THREE SIDES, AND THE NAVIGATION'S OWN WORDS AGAIN — a capability is
+     a subject that carries key objectives, so it is markable, and a mark
+     stored where nobody can see it is §61's trap (§130.5's own reason for
+     reaching supporting functions at all). Built from whichever sides have
+     something behind them, so a tenant with no capabilities meets exactly the
+     two-part control it has today and never learns the concept. */
   var subs = focusSubjects();
-  var side = FSET.side === "fns" ? "fns" : "units";
-  if (!subs[side].length) side = side === "fns" ? "units" : "fns";
-  var list = subs[side];
-  var both = subs.units.length && subs.fns.length;
+  var sides = [["units", "Units"], ["caps", "Capabilities"], ["fns", "Functions"]]
+    .filter(function(x){ return (subs[x[0]] || []).length; });
+  var side = (subs[FSET.side] || []).length ? FSET.side
+           : (sides.length ? sides[0][0] : "units");
+  var list = subs[side] || [];
   return '<div class="fnav">' +
-    (both
-      ? '<span class="segsw" role="group" aria-label="Units or supporting functions">' +
-          '<button type="button" class="seg' + (side === "units" ? ' on' : '') +
-            '" data-fsetside="units">Units</button>' +
-          '<button type="button" class="seg' + (side === "fns" ? ' on' : '') +
-            '" data-fsetside="fns">Functions</button></span>'
+    (sides.length > 1
+      ? '<span class="segsw" role="group" aria-label="Which list to show">' +
+          sides.map(function(x){
+            return '<button type="button" class="seg' + (side === x[0] ? ' on' : '') +
+              '" data-fsetside="' + x[0] + '">' + x[1] + '</button>';
+          }).join("") + '</span>'
       : '') +
     '<div class="fnav-dests" role="tablist">' +
       list.map(function(x){
@@ -4645,7 +4652,8 @@ function renderFocusSetup(){
      leaves the page pointing at nothing — corrected here rather than left to
      render an empty table under a name nobody can select. */
   if (!bands.length) {
-    var subs = focusSubjects(), first = (subs.units[0] || subs.fns[0]);
+    var subs = focusSubjects(),
+        first = (subs.units[0] || subs.caps[0] || subs.fns[0]);
     if (first && first.key !== FSET.unit) { FSET.unit = first.key; bands = focusBands(FSET.unit); }
   }
 

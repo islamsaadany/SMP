@@ -128,15 +128,22 @@ function anch(key, label, where){
    done since §224. */
 function deckHtmlFor(target){
   var t = String(target || "");
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
-  if (fk && !fnPlansInPillars(FUNCTIONS[fk])) return deckSlidesFn(fk);
+  /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
+     button, the slide editor and the anchors alike. §330: and the FORM
+     decides, never the prefix — `plansInPillars` answers for a unit, a
+     function and a capability, which is the fault §253.3 fixed on one surface
+     of three arriving as a third kind of subject. */
+  if (t.indexOf("cap:") === 0 || t.indexOf("fn:") === 0)
+    return plansInPillars(t) ? (unitLike(t) ? deckSlides(unitLike(t)) : "")
+                             : deckSlidesFn(t);
   var u = unitLike(t);
   return u ? deckSlides(u) : "";
 }
 
 function deckAnchors(kind, key){
   var box = document.createElement("div");
-  box.innerHTML = deckHtmlFor(kind === "fn" ? "fn:" + key : key);
+  box.innerHTML = deckHtmlFor(kind === "fn" ? "fn:" + key
+                            : kind === "cap" ? "cap:" + key : key);
   var seen = {}, out = [];
   [].forEach.call(box.querySelectorAll("[data-anchor]"), function(el){
     var a = el.dataset.anchor;
@@ -713,12 +720,20 @@ function deckPillarHead(u, p, pi, which){
    tactics. One system — a function's review must read as the same product as
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
-function deckSlidesFn(fk){
-  /* §322: the function's OWN work first, then any capability it carries — the
-     same list its four pages draw, so the projector cannot show a deck the
-     screen does not (§53.5). */
-  var f = FUNCTIONS[fk], caps = fnHolders(fk);
-  var realCaps = capsOfFunction(fk);
+function deckSlidesFn(subject){
+  /* §322: the function's OWN work — the same list its four pages draw, so the
+     projector cannot show a deck the screen does not (§53.5).
+
+     §330: OR A CAPABILITY'S, because a capability presents its own review and
+     it is planned exactly the same way. The builder takes a TARGET and reads
+     the holder from it; a second deck builder for the second kind is what
+     §296 and §305 each measured the cost of and refused. */
+  var target = holderTarget(subject), isCap = isCapTarget(target);
+  var cap = isCap ? capById(capKeyOf(target)) : null;
+  var fk = isCap ? (cap && cap.fn) : fnKeyOf(target);
+  var f = isCap ? cap : FUNCTIONS[fk];
+  var caps = capsShown(target);
+  var realCaps = isCap ? [] : capsOfFunction(fk);
   var S = [];
 
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
@@ -735,7 +750,8 @@ function deckSlidesFn(fk){
       ? 'Capability review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
-        plural(fnProjects(fk).length, "project")) + '</p></section>');
+        plural(caps.reduce(function(n, c){
+          return n + ((c.projects || []).length); }, 0), "project")) + '</p></section>');
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -1108,9 +1124,14 @@ function openDeckWith(titleHtml, targets, from){
 function openDeck(u, from){
   openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
 }
-function openDeckFn(fk, from){
-  openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
-    ["fn:" + fk], from);
+function openDeckFn(subject, from){
+  /* §330: a TARGET, so a capability opens its own review with its own name on
+     the bar. `holderTarget` takes the bare function key every existing caller
+     hands it. */
+  var t = holderTarget(subject);
+  var h = isCapTarget(t) ? capById(capKeyOf(t)) : FUNCTIONS[fnKeyOf(t)];
+  openDeckWith("<b>" + esc(h ? h.name : "") + "</b> &middot; " + esc(REVIEW.name),
+    [t], from);
 }
 /* ── WHICH DECK A TARGET GETS, ASKED ONCE (§295) ──────────────────────────
    §224 fixed this branch on the Present button and §253.3 fixed it again on
@@ -1125,9 +1146,15 @@ function openDeckFn(fk, from){
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
   var t = String(target);
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
-  if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk, from);
-  else openDeck(unitLike(t), from);
+  /* §330: a capability joins the same branch — the FORM decides, so one
+     planned in pillars takes the unit deck exactly as a pillars function
+     does, and one planned in projects takes the holder deck. */
+  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
+    if (plansInPillars(t)) openDeck(unitLike(t), from);
+    else openDeckFn(t, from);
+    return;
+  }
+  openDeck(unitLike(t), from);
 }
 
 /* ── THE DECK AS A PDF (§305) ─────────────────────────────────────────
@@ -1240,7 +1267,9 @@ function flowToPdf(){
    the SAME pair of lists the cycle board is built from (§245), so the picker
    and the page the office watches can never disagree about who reports. */
 function masterSubjects(){
-  return boardUnitTargets().concat(boardFunctionTargets());
+  /* §330: the capabilities between them, in the board's own order — the flow
+     and the board must never disagree about who presents (§245). */
+  return boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
 }
 /* The running order to open the picker on: the stored one, filtered to
    subjects that still report, and the whole list in board order when nothing

@@ -5782,6 +5782,21 @@ once for one script.
 about: `api/state.js` refusing a request that names no client and carries no
 seat is the boundary working. What stopped was the harnesses' ability to ask.
 
+### 324.4 · And the heal's own log line had stopped being true
+
+Found reading the branch's diff back rather than by a check. `ensureReadyOnce`
+runs the one-off heals inside one `try`, and its `catch` said
+*"[heal] one-line titles did not run"* — written when there was one of them.
+There are three now, so a failure in the newest sent whoever read the runtime
+log to the oldest. §104.8: *a message can describe an intention the code no
+longer carries out, and nothing in a build compares the two.*
+
+Each is NAMED as it runs. The control flow is deliberately unchanged — they
+still stop at the first failure, which is what leaves the rest unrecorded and
+tried again on the next boot (§289's reason for keeping them outside the
+bootstrap's transaction). Making them independent would be a second decision
+riding a message fix.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

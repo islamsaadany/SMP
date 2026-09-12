@@ -1,4 +1,4 @@
-/* ARCHIVING A CLIENT — WHEN, AND BY WHOM (§321)
+/* ARCHIVING A CLIENT — WHEN, AND BY WHOM (§323)
 
    Islam: "we need an option to remove the client", then "both, demo client is
    not removable, and the name is Archive not put aside".

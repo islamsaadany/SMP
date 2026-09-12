@@ -8696,7 +8696,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-09-12 &mdash; **&sect;321: a client is archived, and only
-then deleted (spec 045).** Islam: *"we need an option to remove the client"*,
+then deleted (spec 047).** Islam: *"we need an option to remove the client"*,
 then *"both, demo client is not removable, and the name is Archive not put
 aside."* **MOST OF IT WAS BUILT AND HAD NO BUTTON** &mdash; `tenants.status`
 has read `'active' | 'retired'` since the table was written, `visibleClients()`

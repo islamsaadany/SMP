@@ -12889,7 +12889,7 @@ function plural(n, word, many){
    leans on it has to read as though it were not there, rather than trailing a
    dangling "by". */
 function horizonSet(){ return !!String(GROUP.horizon == null ? "" : GROUP.horizon).trim(); }
-/* ── WHAT AN UPLOADED FILE SAYS ABOUT THE HORIZON (§319) ───────────────
+/* ── WHAT AN UPLOADED FILE SAYS ABOUT THE HORIZON (§321) ───────────────
    Three answers, not two: the file did not carry the row (null), it carried
    it empty (""), or it carried a year. The first two both mean LEAVE THE
    STORED ONE ALONE, which is the rule the import has always had — what is
@@ -17237,7 +17237,7 @@ function yes(v){ return /^(y|yes|1|true|x|\u2713)$/i.test(String(v || "").trim()
    minted code is looked up by that name — and because a file holds exactly one
    unit, every pillar in the file is one of that unit's, so there is nothing to
    get wrong. */
-/* ── THE HORIZON IS READ HERE AND WRITTEN NOWHERE (§319) ───────────────
+/* ── THE HORIZON IS READ HERE AND WRITTEN NOWHERE (§321) ───────────────
    It used to be assigned straight to GROUP.horizon inside this function, and
    this function runs the moment a FILE IS PICKED — before the preview is
    read and before Apply is pressed. So opening a plan file to look at it
@@ -33207,7 +33207,7 @@ function renderImportUpload(){
         '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
         '<tr><td>Recorded now</td><td>' + (hasPlan ? had : "nothing yet") + '</td></tr>' +
       '</tbody></table></div>' +
-      /* ── THE ONE THING IN THE FILE THAT IS NOT THIS UNIT'S (§319) ─────
+      /* ── THE ONE THING IN THE FILE THAT IS NOT THIS UNIT'S (§321) ─────
          Said before Apply, in the warning ground, because it is the only
          value in a plan workbook that reaches OUTSIDE the unit the file is
          for: one horizon, group-wide, so this file moves what every other
@@ -33483,7 +33483,7 @@ function renderOverview(){
      empty state says it in words one line down (§108.10). */
   var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
 
-  /* ── AND THE DOOR WENT WITH IT (§320) ──────────────────────────────
+  /* ── AND THE DOOR WENT WITH IT (§322) ──────────────────────────────
      §318 put a "Set this client up" door here, drawn only while the client
      was bare. The flow it opened lives on Forefront's own platform page now
      (Islam: "the wizard should start on the outside window"), where a client
@@ -55735,7 +55735,7 @@ var SYNC = (function () {
         fieldSaved(); paint();
       });
     });
-    /* ── THE SET-UP FLOW LEFT (§320) ────────────────────────────────
+    /* ── THE SET-UP FLOW LEFT (§322) ────────────────────────────────
        §318 put it here, inside a client's Setup. Islam moved it out:
        "the setup should happen on the external creatoin not inside ..
        the wizard should start on the outside window so the people after
@@ -56183,7 +56183,7 @@ var SYNC = (function () {
               } else {
                 var pu = impUnit();
                 var pRows = planFromWorkbook(pu, sheets);
-                /* READ HERE AND NOWHERE ELSE (§319): the reader attaches it to
+                /* READ HERE AND NOWHERE ELSE (§321): the reader attaches it to
                    the array it returns, and it is lifted off immediately —
                    an array property is a fragile channel and this is the only
                    line that has to carry it. */
@@ -56268,7 +56268,7 @@ var SYNC = (function () {
                  plural(inc.measures, "measure") + ", " +
                  plural(inc.tactics, "tactic") + " written.";
           /* THE HORIZON IS APPLIED WITH THE PLAN AND NAMED WHEN IT MOVES
-             (§319). It is one year for the whole client, so a file that
+             (§321). It is one year for the whole client, so a file that
              changes it changes every other unit's "by <year>" — which is
              exactly why it is said out loud rather than done quietly. A blank
              or absent value leaves the stored one alone. */

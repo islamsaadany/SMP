@@ -1,4 +1,4 @@
-"""Setting a client up from the outside (§320, spec 044 revision 2).
+"""Setting a client up from the outside (§322, spec 044 revision 2).
 
 Islam: "the setup should happen on the external creatoin not inside .. the
 default create it's own units and functions that's wrong there is not default.
@@ -176,7 +176,7 @@ with sync_playwright() as p:
     ck("…beginning with the client", bool(names) and names[0].strip() == "The client", names)
     ck("…and ending on the summary", bool(names) and names[-1].strip() == "Summary", names)
 
-    # NOTHING ASKS FOR A DATE (§320): the horizon comes in on the plan, and
+    # NOTHING ASKS FOR A DATE (§322): the horizon comes in on the plan, and
     # the cycle's dates are set inside the platform.
     date_words = ["year", "horizon", "date", "quarter", "cycle covers"]
     rail_text = " ".join(names).lower()

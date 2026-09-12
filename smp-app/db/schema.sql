@@ -25,11 +25,11 @@ CREATE TABLE tenants (
   status      text NOT NULL DEFAULT 'active',
   mark        text,                            -- PNG data URI only (§52)
   colors      jsonb NOT NULL DEFAULT '{}'::jsonb,
-  industry    text NOT NULL DEFAULT '',       -- the standard GICS list (§320)
-  size        text NOT NULL DEFAULT '',       -- a band, never a headcount (§320)
+  industry    text NOT NULL DEFAULT '',       -- the standard GICS list (§322)
+  size        text NOT NULL DEFAULT '',       -- a band, never a headcount (§322)
   notes       text NOT NULL DEFAULT '',
   made_here   boolean NOT NULL DEFAULT false,  -- §313.31
-  -- §321: read beside status='retired', which is what "archived" is stored as.
+  -- §323: read beside status='retired', which is what "archived" is stored as.
   -- NULL on a live client, and cleared again when one is brought back.
   archived_at timestamptz,
   archived_by text,                            -- the account's email, printed

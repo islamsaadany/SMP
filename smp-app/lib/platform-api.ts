@@ -109,7 +109,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
         canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable });
     }
-    /* ── THE ARCHIVED BAND (§321) ────────────────────────────────────
+    /* ── THE ARCHIVED BAND (§323) ────────────────────────────────────
        Its own list, not a flag on the grid's: `visibleClients` keeps a
        retired client off the cards and every other caller depends on that,
        so widening it would change what "visible" means for all of them.
@@ -193,7 +193,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       register = await withTenant(row.id, async (c) => (await c.query(
         "SELECT key, name, role, extra->>'email' AS email, extra->>'forefront' AS ff FROM people WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows);
     } catch (e) { console.error("reading " + row.key + "'s register:", (e as Error).message); }
-    /* ── THE SHAPE THE SET-UP FLOW OPENS WITH (§320) ──────────────────
+    /* ── THE SHAPE THE SET-UP FLOW OPENS WITH (§322) ──────────────────
        Read from the stored graph, so opening a client afterwards shows the
        answers that are actually in it rather than what somebody typed last
        time — there is no draft, and the data IS the progress (§129). Read
@@ -215,7 +215,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
           o[e.key] = e.bu; return o; }, {})
       };
     } catch (e) { console.error("reading " + row.key + "'s shape:", (e as Error).message); }
-    /* ── WHAT A DELETE WOULD TAKE (§321) ──────────────────────────────
+    /* ── WHAT A DELETE WOULD TAKE (§323) ──────────────────────────────
        Counted from the client's own rows at the moment of asking, never
        written from memory, so the sentence in front of the one irreversible
        press names what is actually there. Read ONLY for a client that is
@@ -249,7 +249,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const row = await clientByKey(pool, body.key);
     if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
     if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's configuration is not yours to change.");
-    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§321, §42). The flow draws its
+    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§323, §42). The flow draws its
        fields read-only; without this the promise is the screen's alone and a
        console walks past it. Refused BY NAME, so the answer names the state
        rather than the permission — they are not the same errand. */
@@ -269,7 +269,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return ok({});
   }
 
-  /* ── SETTING A CLIENT UP, FROM THE OUTSIDE (§320) ────────────────────
+  /* ── SETTING A CLIENT UP, FROM THE OUTSIDE (§322) ────────────────────
      Islam: "the setup should happen on the external creatoin not inside ...
      the wizard should start on the outside window so the people after the
      setup can get intop the platform ready." So the shape a client has —
@@ -291,7 +291,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const row = await clientByKey(pool, body.key);
     if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
     if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's set-up is not yours to change.");
-    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§321, §42). The flow draws its
+    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§323, §42). The flow draws its
        fields read-only; without this the promise is the screen's alone and a
        console walks past it. Refused BY NAME, so the answer names the state
        rather than the permission — they are not the same errand. */
@@ -321,7 +321,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return ok({});
   }
 
-  /* ── ARCHIVING A CLIENT, AND BRINGING ONE BACK (§321) ────────────────
+  /* ── ARCHIVING A CLIENT, AND BRINGING ONE BACK (§323) ────────────────
      Islam: "we need an option to remove the client" — "both, demo client is
      not removable, and the name is Archive not put aside".
 
@@ -403,7 +403,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const key = slugFor(body.key || name);
     if (!key) return no(400, "That name does not make an address.");
     if (await clientByKey(pool, key)) return no(400, "There is already a client at /" + key + ".");
-    /* THE ROW, THEN THE GRAPH IT STARTS WITH — AND IT IS EMPTY (§320).
+    /* THE ROW, THEN THE GRAPH IT STARTS WITH — AND IT IS EMPTY (§322).
        It used to be §67's cleared graph, which keeps the unit and function
        NAMES and empties their content: right for migration 004, which clears
        a deployment that is already this client's, and wrong for one that has

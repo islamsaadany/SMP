@@ -7772,7 +7772,7 @@ function plural(n, word, many){
    leans on it has to read as though it were not there, rather than trailing a
    dangling "by". */
 function horizonSet(){ return !!String(GROUP.horizon == null ? "" : GROUP.horizon).trim(); }
-/* ── WHAT AN UPLOADED FILE SAYS ABOUT THE HORIZON (§319) ───────────────
+/* ── WHAT AN UPLOADED FILE SAYS ABOUT THE HORIZON (§321) ───────────────
    Three answers, not two: the file did not carry the row (null), it carried
    it empty (""), or it carried a year. The first two both mean LEAVE THE
    STORED ONE ALONE, which is the rule the import has always had — what is

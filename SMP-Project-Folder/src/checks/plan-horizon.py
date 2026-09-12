@@ -1,4 +1,4 @@
-"""The horizon arrives with the plan, and not before it (§319).
+"""The horizon arrives with the plan, and not before it (§321).
 
 WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
 

@@ -900,7 +900,7 @@ function yes(v){ return /^(y|yes|1|true|x|\u2713)$/i.test(String(v || "").trim()
    minted code is looked up by that name — and because a file holds exactly one
    unit, every pillar in the file is one of that unit's, so there is nothing to
    get wrong. */
-/* ── THE HORIZON IS READ HERE AND WRITTEN NOWHERE (§319) ───────────────
+/* ── THE HORIZON IS READ HERE AND WRITTEN NOWHERE (§321) ───────────────
    It used to be assigned straight to GROUP.horizon inside this function, and
    this function runs the moment a FILE IS PICKED — before the preview is
    read and before Apply is pressed. So opening a plan file to look at it

@@ -26,7 +26,7 @@ const vm = require("node:vm");
 
 const SRC = path.join(process.cwd(), "..", "SMP-Project-Folder", "src");
 const RULES = path.join(process.cwd(), "lib", "rules.cjs");
-/* builder.js joins the four for §320: `addFunction` is declared there while
+/* builder.js joins the four for §322: `addFunction` is declared there while
    `addBusinessUnit` and `addCompany` are in config-data — three minters in
    two files, and the set-up flow must call the PRODUCT'S, never a second
    copy of what a unit or a function is shaped like (§53.5). Proved to
@@ -161,7 +161,7 @@ function __smpPlaceLabel(state, target) { __smpHydrate(state); try { return plac
    graph's own invariants are the product's. */
 function __smpCleared(state) { __smpHydrate(state); return clearedGraph(state); }
 
-/* ── WHAT A CLIENT IS BORN AS (§320) ──────────────────────────────────
+/* ── WHAT A CLIENT IS BORN AS (§322) ──────────────────────────────────
    Islam: "the default create it's own units and functions that's wrong there
    is not default. it should open blank if they want." §67's cleared graph
    keeps the unit and function NAMES and empties their content — right for
@@ -186,7 +186,7 @@ function __smpBare(state) {
 }
 function __smpHydrateAnd(state) { __smpHydrate(state); return state; }
 
-/* ── AND WHAT THE SET-UP FLOW WRITES INTO IT (§320) ───────────────────
+/* ── AND WHAT THE SET-UP FLOW WRITES INTO IT (§322) ───────────────────
    Every row is minted by the platform's OWN minter — addCompany then its
    rename, addBusinessUnit, addFunction — so a unit created out here is byte
    for byte a unit created on Setup's own page. Companies first, because a
@@ -305,18 +305,18 @@ function cleared(graph) {
   return detach(c.__smpCleared(graph));
 }
 /* The graph a client is born as when nobody has answered anything: §67's
-   clear with the shapes emptied too (§320). */
+   clear with the shapes emptied too (§322). */
 function bare(graph) {
   const c = context();
   return detach(c.__smpBare(graph));
 }
 /* What a client already holds, so a set-up cannot overwrite real work
-   (§320). */
+   (§322). */
 function holds(graph) {
   const c = context();
   return detach(c.__smpHolds(graph));
 }
-/* The set-up flow's answers written in by the product's own minters (§320). */
+/* The set-up flow's answers written in by the product's own minters (§322). */
 function shape(graph, answers) {
   const c = context();
   return detach(c.__smpShape(graph, answers));

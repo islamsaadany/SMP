@@ -125,7 +125,7 @@ eq("a consultant sees their seats and whatever the table lists", seen.join(","),
 eq("hidden takes the rest away",
   F.visibleClients(wHidden, lead, ALL).map(c => c.key).join(","), "raya-trade,rhi,demo");
 
-console.log("── 11 · archiving a client, and deleting one (§321) ──────");
+console.log("── 11 · archiving a client, and deleting one (§323) ──────");
 /* BOTH ENDS EVERY TIME (§94.2). Asserting only who MAY passes on a build
    that lets everybody; asserting only who may not passes on one that lets
    nobody, and this control has to exist for exactly one person. */
@@ -156,7 +156,7 @@ console.log("── 12 · one module, two files ──────────�
 /* THE NEW STACK RUNS ITS OWN COPY of this file and its header says it is
    "the frozen module byte for byte" — which nothing compared, so a rule added
    to one and not the other drifts in silence and the screen and the server
-   answer differently (§53.5, §42). §321 made them differ for an hour, and
+   answer differently (§53.5, §42). §323 made them differ for an hour, and
    this is what would have said so. */
 const fs = require("fs"), path = require("path");
 const here = fs.readFileSync(path.join(__dirname, "..", "lib", "platform-rules.js"), "utf8");

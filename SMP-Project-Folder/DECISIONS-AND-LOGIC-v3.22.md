@@ -42570,7 +42570,7 @@ merge every time.
 
 ---
 
-## §319 — THE HORIZON ARRIVES WITH THE PLAN, AND NOT BEFORE IT (2026-09-11, spec 044)
+## §321 — THE HORIZON ARRIVES WITH THE PLAN, AND NOT BEFORE IT (2026-09-11, spec 044)
 
 Islam, of the set-up flow: ***"why is the horizon is in the setup? time is not
 relevant in the setup. the plan we upload will need this not the setup."***
@@ -42613,7 +42613,7 @@ fixture it failed to doctor now, rather than shipping a lie.
 
 ---
 
-## §320 — SETTING A CLIENT UP HAPPENS ON THE OUTSIDE, AND A CLIENT IS BORN EMPTY (2026-09-11, spec 044 revision 2)
+## §322 — SETTING A CLIENT UP HAPPENS ON THE OUTSIDE, AND A CLIENT IS BORN EMPTY (2026-09-11, spec 044 revision 2)
 
 Islam, after creating ElAbd Foods and finding four things wrong with the card
 that made it: ***"the setup should happen on the external creatoin not inside
@@ -42661,7 +42661,7 @@ industry twice; and pressing Save said *saved* and went nowhere.
 
 **AND TWO ANSWERS ARE HIS, NOT MINE.** The industry is Strategy Formulation's
 own 45-entry GICS list rather than a free text box, with a size BAND beside it
-(migration 004) — *"for the client we will need data like the number of
+(migration 006) — *"for the client we will need data like the number of
 employees"*. And the parts the platform cannot do yet are **drawn, dulled and
 INERT** — *"keep the mockup as is but kepe the non existing parts dull for
 now"* — as plain `<div>`s rather than disabled buttons, so they are inert by
@@ -42681,7 +42681,7 @@ keeps as an ABSENCE (§50.6).
 
 ---
 
-## §321 — A CLIENT IS ARCHIVED, AND ONLY THEN DELETED (2026-09-12, spec 045)
+## §323 — A CLIENT IS ARCHIVED, AND ONLY THEN DELETED (2026-09-12, spec 047)
 
 Islam: ***"we need an option to remove the client"*** — then, of the two acts
 drawn for him, ***"both, demo client is not removable, and the name is Archive
@@ -42823,6 +42823,6 @@ through Postgres, and one real cascade, are not.
 reason; an archived client's own people are not told anything, because nothing
 in this platform reaches out to them; and the frozen `api/platform.js` does not
 learn either action — it has been unreachable since the cutover put Next in
-front of it (§317.8), which is §320's own precedent.
+front of it (§317.8), which is §322's own precedent.
 
 ---

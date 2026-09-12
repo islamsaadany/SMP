@@ -1,4 +1,4 @@
-"""Archiving a client, and deleting one (§321, spec 045).
+"""Archiving a client, and deleting one (§323, spec 047).
 
 Islam: "we need an option to remove the client" — then, of the two acts drawn
 for him, "both, demo client is not removable, and the name is Archive not put
@@ -257,7 +257,7 @@ with sync_playwright() as p:
     ck("the client's Settings opens the flow", open_settings(pg, "elabd-foods") and bool(q(pg, ".wzrail")))
     ck("the Archiving block is at the foot of the first step", bool(q(pg, '[data-archive="ask"]')))
     ck("…and Delete is NOT offered on a live client", q(pg, '[data-delete="ask"]') is None,
-       "archiving first is the guard (§321)")
+       "archiving first is the guard (§323)")
     ck("…nor is a way back, because it is not away", q(pg, "[data-unarchive]") is None)
     ck("the flow does not say it is archived", q(pg, ".wzarched") is None)
     kws = pg.eval_on_selector_all(".wzendkey", "e => e.map(x => x.textContent.trim())")

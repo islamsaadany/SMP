@@ -5580,7 +5580,7 @@ function renderImportUpload(){
         '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
         '<tr><td>Recorded now</td><td>' + (hasPlan ? had : "nothing yet") + '</td></tr>' +
       '</tbody></table></div>' +
-      /* ── THE ONE THING IN THE FILE THAT IS NOT THIS UNIT'S (§319) ─────
+      /* ── THE ONE THING IN THE FILE THAT IS NOT THIS UNIT'S (§321) ─────
          Said before Apply, in the warning ground, because it is the only
          value in a plan workbook that reaches OUTSIDE the unit the file is
          for: one horizon, group-wide, so this file moves what every other
@@ -5856,7 +5856,7 @@ function renderOverview(){
      empty state says it in words one line down (§108.10). */
   var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
 
-  /* ── AND THE DOOR WENT WITH IT (§320) ──────────────────────────────
+  /* ── AND THE DOOR WENT WITH IT (§322) ──────────────────────────────
      §318 put a "Set this client up" door here, drawn only while the client
      was bare. The flow it opened lives on Forefront's own platform page now
      (Islam: "the wizard should start on the outside window"), where a client

@@ -1,4 +1,4 @@
-/* A CLIENT IS DESCRIBED BY MORE THAN ITS NAME (§320)
+/* A CLIENT IS DESCRIBED BY MORE THAN ITS NAME (§322)
 
    Islam, setting up ElAbd Foods: "for the client we will need data like the
    number of employees and the industry should be a serachable drop down check

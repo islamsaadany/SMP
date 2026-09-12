@@ -11,7 +11,7 @@ So the launch is patched, not the sweep: qa.py stays the file that runs on a
 laptop unchanged, and this wrapper supplies `executable_path` and the sandbox
 flags a container needs. Usage: python3 qa-run.py [qa.py|scripts/....py]
 """
-import os, sys, runpy
+import io, os, sys, runpy
 from playwright.sync_api import BrowserType
 
 CHROME = os.environ.get("SMP_CHROME", "/opt/pw-browsers/chromium")
@@ -203,5 +203,37 @@ if os.environ.get("SMP_BASE"):
     Page.evaluate = evaluate
 
 target = sys.argv[1] if len(sys.argv) > 1 else "qa.py"
+
+# ── A SWEEP MAY NOT REWRITE THE RECORD OF A SIGN-OFF (§330.12, §330.14) ──────
+# THIRTEEN files under `checks/` are mockup GENERATORS: they drive the product
+# and write PNGs and documents into `design-mockups/`, which is where a
+# signed-off picture LIVES. `python3 qa-run.py checks/*.py` therefore replaced
+# the record of what Islam AGREED with a rendering of today's build — silently,
+# and against Principle II, which is the rule that keeps a mockup evidence
+# rather than a screenshot. §329 found it by the tree going dirty with nothing
+# of that round's in it, named two files and left it; the full sweep found
+# eleven more, so this is answered ONCE here rather than thirteen times in
+# thirteen files (§53.5) and cannot be forgotten by a fourteenth.
+#
+# IT IS THE SWEEP THAT IS REFUSED, NEVER THE FILE. Every one of these says in
+# its own docstring how to run it, and somebody typing `python3 checks/x.py`
+# is re-making that mockup ON PURPOSE — which still works, exactly as before.
+# What is refused is the run nobody aimed at it. `SMP_WRITE_MOCKUPS=1` lifts
+# it for a deliberate re-make through this wrapper.
+def _is_generator(path):
+    """Does this file WRITE into design-mockups? Read rather than listed by
+       name, or the list is the fourteenth thing to remember (§104.7)."""
+    try: src = io.open(path, encoding="utf8", errors="replace").read()
+    except Exception: return False
+    if "design-mockups" not in src: return False
+    return any(w in src for w in ("screenshot(path", ".write_text(", ".write_bytes("))
+
+if os.environ.get("SMP_WRITE_MOCKUPS") != "1" and _is_generator(target):
+    print(os.path.basename(target) + ": not run — this is a mockup generator "
+          "and it writes into design-mockups/,\n  where a signed-off picture "
+          "lives (Principle II). Re-make it deliberately with\n  "
+          "SMP_WRITE_MOCKUPS=1, or run it directly: python3 " + target)
+    raise SystemExit(0)
+
 sys.argv = [target] + sys.argv[2:]
 runpy.run_path(target, run_name="__main__")

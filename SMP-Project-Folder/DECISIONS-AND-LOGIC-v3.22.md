@@ -6475,6 +6475,27 @@ has ever been in front of a client — which is what this sweep is for.
   an index (§215) where a supporting function has owned its projects directly
   since stage 1.
 
+- **§330.14 · Thirteen, not two — and the sweep is what is refused.** §329
+  found that two mockup GENERATORS live in `checks/` and rewrite signed-off
+  pictures on every full sweep, named them, and left it; §330.12 gave those two
+  a guard each. **Running the whole suite found ELEVEN more** — thirteen files
+  that drive the product and write PNGs and documents into `design-mockups/`,
+  which is where the record of what Islam AGREED lives. Three of them were only
+  harmless because they were stale and failed early (§268 moved the pen they
+  press), which is the same accident §330.12 records: *it had been harmless
+  only because it was broken.* So the answer moves to `qa-run.py`, ONE place
+  (§53.5), where the two per-file guards are DELETED (§24) — **and what is
+  refused is the SWEEP, never the file**: every one of these says in its own
+  docstring how to run it, and somebody typing `python3 checks/x.py` is
+  re-making that mockup on purpose and still can. The set is READ from the
+  source (does it name `design-mockups` AND write?) rather than listed by name,
+  or the list is the fourteenth thing to remember (§104.7). **Both ends
+  proved** (§94.2): the sweep declines and `design-mockups/` is untouched, an
+  ordinary check still runs, `SMP_WRITE_MOCKUPS=1` lifts it, and the document
+  it then re-makes comes out **byte-identical** — so the shots behind it are
+  still the signed-off ones. It also takes three permanent false reds out of
+  every future sweep.
+
 ### What the checks found, and what had to be rewritten rather than loosened
 
 `checks/capability-entry.py` is new and 43/0 — the demo's one capability, the

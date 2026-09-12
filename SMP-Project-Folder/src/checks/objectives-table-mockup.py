@@ -42,19 +42,6 @@ ROOT = pathlib.Path(__file__).resolve().parents[3]
 FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 OUT = ROOT / "design-mockups/objectives-table/shots"
 
-# A SWEEP MAY NOT REWRITE THE RECORD OF A SIGN-OFF (§330.12, closing §329's
-# own recorded not-done). This file is a mockup GENERATOR living in `checks/`,
-# so `qa-run.py checks/*.py` ran it and it replaced §278.3's signed-off shots
-# with today's build — silently, and Principle II says a mockup is the record
-# of what was AGREED, not of what was built. It refuses to write unless it is
-# asked to by name. It was unreachable while it would not parse (§330.12), so
-# fixing that is what re-armed it and this had to cross with the fix.
-WRITE = os.environ.get("SMP_WRITE_MOCKUPS") == "1"
-if not WRITE:
-    print("objectives-table-mockup: not writing — this rewrites signed-off "
-          "shots in design-mockups/objectives-table/shots/.\n"
-          "  Re-make them deliberately with SMP_WRITE_MOCKUPS=1.")
-    raise SystemExit(0)
 OUT.mkdir(parents=True, exist_ok=True)
 CHROME = "/opt/pw-browsers/chromium"
 # The two close-ups are read pixel by pixel, so they are shot at a scale where

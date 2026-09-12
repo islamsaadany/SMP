@@ -8844,11 +8844,18 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;324: three checks that had stopped
-checking.** Running the WHOLE suite after the merge rather than the files that
-were edited (&sect;214) turned up three reds, none of them this branch's &mdash;
-all three reproduced on a build made from `origin/main`'s own sources first
-(&sect;303). **THE TOUR POINTED AT A CONTROL THAT HAD MOVED** (15 red, one step,
+*Last Updated: 2026-09-12 &mdash; **&sect;324: ten checks that had stopped
+checking.** Running the NEIGHBOURS after the merge rather than only the files
+that were edited (&sect;214) turned up two reds and seven harnesses that cannot
+run at all; running **all 152** turned up eight more checks and one file that
+is not a check. **Not one of the ten was a fault in the product**, and none was
+this branch's &mdash; each reproduced on a build made from `origin/main`'s own
+sources first (&sect;303). **THE COMMON SHAPE IS WORTH MORE THAN ANY OF THEM**:
+a check goes red honestly when the product breaks, and these went red &mdash; or
+worse, stayed green &mdash; because the world moved and nothing told them. Three
+were failing in the safe-looking direction and one was passing for the wrong
+reason, which is why a sweep of EVERYTHING found what a sweep of the neighbours
+could not. **THE TOUR POINTED AT A CONTROL THAT HAD MOVED** (15 red, one step,
 five viewer-and-place pairs): &sect;275 took the Performance page's controls out
 of the page body and hung them on the TAB ROW, and the step still named
 `.pageact` and `.bands-act` inside `#panel` &mdash; so it lit nothing, shade with

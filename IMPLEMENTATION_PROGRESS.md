@@ -54,12 +54,15 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§324 — three checks that had stopped checking — built on
+**Latest version:** **§324 — ten checks that had stopped checking — built on
 the branch, not merged.**
 
-Running the whole suite after the merge, rather than the files that were edited,
-turned up three reds. None of them was this branch's: all three reproduce on a
-build made from `origin/main`'s own sources.
+Running the neighbours after the merge turned up two reds and seven harnesses
+that cannot run at all; running all 152 turned up eight more checks and one file
+that is not a check. **Not one of the ten was a fault in the product**, and none
+was this branch's — each reproduces on a build made from `origin/main`'s own
+sources. A check goes red honestly when the product breaks; these went red, or
+worse stayed green, because the world moved and nothing told them.
 
 **The tour pointed at a control that had moved** (15 red). §275 took the
 Performance page's controls out of the page body and onto the tab row, and the
@@ -85,8 +88,31 @@ What ships is the record and a line in the command list, so the next person is
 told before they run it rather than by a stack trace. Nothing in the product is
 implicated.
 
-**Verified.** `tour` 15 → 0 · `history-page` 10 → 0 · `table-scroll` green ·
-`qa.py` ERRORS none.
+**Then running all 152 found eight more checks in the same shape.** The CSP
+check had been measuring a 404 page, so it had never once tested the thing it is
+named after. Two stubs served the service worker as a web page, and the browser's
+complaint about that landed in the check's own error listener and read as the
+product throwing. One stub still expected the old answer from the chat endpoint,
+which §293 changed when it made replies collect for ten minutes. One asserted
+the demo banner's wording, which cannot be wrong because the whole demo mode was
+deleted. One asked six Setup tables for a pen on the row, found none on the
+first because §261 moved three of them into a menu, and then died rather than
+reporting the other five. And two more only needed a Python package installing.
+Beside them, one file in `checks/` turns out not to be a check at all — it is a
+camera for taking before-and-after pictures, and a runner walking the folder
+hangs on it.
+
+**One more finding, diagnosed and not fixed:** 22 of the 152 checks print their
+failures and then exit as if they had passed, so any runner reading the exit code
+reports them as green whatever they say. Every one of the 22 is genuinely green
+today — measured, not assumed — so this is a hazard for whoever automates the
+suite rather than a failure hiding behind a tick. Fixing it is 22 files and a
+round of its own.
+
+**Verified.** `tour` 15 → 0 · `history-page` 10 → 0 · the eight re-run after
+repair green by exit code · `test-authorize.js` 608/0 · `test-graph-diff.js` 136/0 ·
+round trip and `functional-projects` green on virgin databases · `qa.py` ERRORS
+none.
 
 ---
 

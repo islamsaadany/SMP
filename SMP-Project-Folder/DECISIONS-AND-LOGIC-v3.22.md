@@ -5692,13 +5692,29 @@ Screen only: no `api/`, `lib/` or `db/` file touched, read off the diff; nothing
 stored, nothing migrated, no rule moved. `qa.py` ERRORS none; `no-jump`,
 `plan-edit-head`, `plan-edit-line`, `table-fit` and `setup-sticky` green.
 
-## 324 · Three checks that had stopped checking
+## 324 · Ten checks that had stopped checking
 
-Running the whole suite after the merge rather than the files that were edited
-(§214's rule) turned up three reds, and none of them was this branch's — all
-three were reproduced on a build made from `origin/main`'s own sources first
-(§303). Two are fixed here. The third is diagnosed and deliberately not, and
-the reason is the section.
+Running the **neighbours** after the merge rather than only the files that were
+edited (§214's rule) turned up two reds and seven harnesses that cannot run at
+all; then running **all 152** turned up eight more checks and one file that is
+not a check. **Not one of the ten was a fault in the product**, and not one was
+this branch's — each was reproduced on a build made from `origin/main`'s own
+sources before anything here was blamed (§303).
+
+**THE COMMON SHAPE IS WORTH MORE THAN ANY OF THEM.** A check goes red honestly
+when the product breaks; these went red — or worse, stayed green — because the
+world moved and nothing told them: a control moved to another row, a date
+became the past, an endpoint changed its answer, a feature was deleted whole, a
+request started naming a client. **Three were failing in the safe-looking
+direction and one was passing for the wrong reason**, which is why a sweep of
+everything found what a sweep of the neighbours could not.
+
+**Eight are repaired here** (§324.1, .2, .5, .7 twice, .9, .10, .11) and **two
+needed only a package installing** (§324.6). Beside them: one file that is a
+camera rather than a check (§324.12), and **two findings diagnosed and
+deliberately NOT fixed, each with its reason** — seven server harnesses that
+have not been runnable since §313 (§324.3), and twenty-two checks that can
+never tell a runner they failed (§324.8).
 
 ### 324.1 · The tour pointed at a control that had moved
 

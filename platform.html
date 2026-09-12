@@ -1512,10 +1512,20 @@
         mr.appendChild(msp);
         mods.appendChild(mr);
       });
+      /* WHAT IT SAYS IS WHAT IT DOES. This first read "turning one on adds
+         its group to this client's Setup page" — which spec 046 §4.5 says it
+         WILL, and the build does not: Setup's five sections are the frozen
+         shell's and know nothing about modules. A sentence describing where
+         the product is going, in the present tense, is §104.8 exactly — a
+         recorded intention nothing compares with the code — and it shipped
+         because the mockup carried it and the mockup was drawing the
+         destination. The Setup group is deferred (Islam, 2026-09-12: "for the
+         setup no need now"), so the words say today's truth and the promise
+         goes back to the spec, where nobody reads it as a fact. */
       mods.appendChild(el("p", "note",
-        "Turning one on adds its group to this client's Setup page; turning it off takes the " +
-        "group away rather than leaving pages with nothing behind them. Nothing is deleted " +
-        "either way."));
+        "Turning one on gives this client the module: it appears on their card, in the " +
+        "switcher inside the platform, and at its own address. Turning it off takes it away " +
+        "and deletes nothing."));
       page.appendChild(mods);
 
       var grid = el("div", "cfg");

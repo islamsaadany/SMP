@@ -81,6 +81,95 @@
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
+  /* ── THE MODULE SWITCHER (spec 046, E1 — signed off 2026-09-11) ──────
+     The four-square mark at the far left of the top bar, opening the list of
+     modules this client has with the one you are in marked.
+
+     IT IS BUILT HERE AND NOT IN THE FROZEN SHELL, for the reason that decides
+     whether it is drawn at all: a module list only exists where there is a
+     server to say which ones a client has. The offline copy (§306) is the
+     built file with one tenant's graph baked in and no server behind it, so a
+     switcher in the frozen shell would be a control that could never open
+     anything (§61). Its SHAPE is in arrange.css beside the family it belongs
+     to (`details.dlmenu`), because a stylesheet is inert either way.
+
+     DRAWN ONLY WHERE THERE IS A CHOICE. `data-modules` is written by the
+     server only for a client holding more than one (lib/shell.ts), so a menu
+     of one is never built — that is a door behind a door (§32) — and the
+     ABSENT attribute is what says so, rather than a flag beside it (§50.6).
+
+     THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
+     one answer to what the switcher lists, read by this and by the trial
+     module's own bar (§53.5): a label worked out here by capitalising a key
+     is how two screens come to spell one module differently.
+
+     IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
+     inside, and that drawing's `.brand` was a flex ROW while the product's is
+     a COLUMN — copying the markup would have stranded the mark on a line of
+     its own above the product's name. `.top-in` is already a row and
+     `.brand` carries `margin-right:auto`, so first-in-the-row is the top left
+     (§296.1: measure the paint, never the cascade).
+
+     NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
+     BELOW this one and nothing rewrites `.top-in`, so the markup is built and
+     wired exactly once, at load — no second handler on a repaint (§24, §47.2).
+     A press navigates, so the menu never has to be closed afterwards. */
+  (function modules() {
+    var raw = document.documentElement.getAttribute("data-modules");
+    if (!raw) return;                               /* one module: no choice to offer */
+    var list;
+    try { list = JSON.parse(raw); } catch (e) { return; }
+    if (!Array.isArray(list) || list.length < 2) return;
+    var bar = document.querySelector(".top .top-in");
+    if (!bar || bar.querySelector(".topmark")) return;
+
+    var d = document.createElement("details");
+    d.className = "dlmenu topmark";
+    var here = list.filter(function (m) { return m && m.key === MODULE; })[0];
+    var sum = document.createElement("summary");
+    sum.setAttribute("title", here ? "Modules — you are in " + here.label : "Modules");
+    sum.setAttribute("aria-label", sum.getAttribute("title"));
+    /* DRAWN, NEVER A FONT CHARACTER (§52): a glyph the subset does not carry
+       ships as a blank box, and this mark has no word beside it to recover
+       from that. */
+    sum.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+      '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
+      '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
+      '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
+      "</g></svg>";
+    d.appendChild(sum);
+
+    var menu = document.createElement("div");
+    menu.className = "menu";
+    menu.setAttribute("role", "menu");
+    list.forEach(function (m) {
+      if (!m || !m.key) return;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("role", "menuitem");
+      b.dataset.module = m.key;
+      if (m.key === MODULE) b.setAttribute("aria-current", "true");
+      b.appendChild(document.createTextNode(m.label || m.key));
+      if (m.note) {
+        var sub = document.createElement("span");
+        sub.className = "dlsub";
+        sub.appendChild(document.createTextNode(m.note));
+        b.appendChild(sub);
+      }
+      menu.appendChild(b);
+    });
+    /* ONE LISTENER ON THE MENU, not one per item — and the module you are
+       ALREADY in does nothing rather than reloading the page under somebody
+       (§61's other half: a control that appears to act and does not). */
+    menu.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-module]") : null;
+      if (!b || b.dataset.module === MODULE) return;
+      location.assign("/" + SLUG + "/" + b.dataset.module);
+    });
+    d.appendChild(menu);
+    bar.insertBefore(d, bar.firstChild);
+  })();
+
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
   try {

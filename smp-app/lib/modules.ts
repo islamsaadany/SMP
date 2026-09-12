@@ -139,6 +139,16 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
   return "/" + slug + (module ? "/" + module : "") + (tail ? "/" + tail : "");
 }
 
+/* WHAT THE SWITCHER LISTS (spec 046, E1). One answer for both places that
+   draw it — the shell's top bar (shell/route.js, through the document's
+   `data-modules`) and the trial module's own bar (lib/trial.ts) — because a
+   label invented at a call site is how two screens come to spell one module
+   differently (§53.5). */
+export type ModuleMenuItem = { key: ModuleKey; label: string; note: string };
+export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
+  return have.map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));
+}
+
 /* The one line a module says about a client on its card (spec 046 §4.6a).
    Strategy's is what the card already reads; a module with nothing to say
    draws its name alone, which is `""` and never a placeholder. `have` is the

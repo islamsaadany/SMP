@@ -35,7 +35,7 @@
    <details> and not a handler — which is what E1 draws anyway. */
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
-import { clientHref, MODULE_DEF, type ModuleKey } from "./modules.ts";
+import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "./modules.ts";
 
 const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -93,12 +93,11 @@ function peopleOf(g: Graph | null): number {
    yet — that is E1 in the frozen file and its own slice — so today the road
    runs one way and this is the return. */
 function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
-  const items = have.map((k) =>
-    k === here
-      ? '<span class="mi on" aria-current="true">' + esc(MODULE_DEF[k].label) +
-        '<i>' + esc(MODULE_DEF[k].note) + '</i></span>'
-      : '<a class="mi" href="' + esc(clientHref(slug, k, "")) + '">' + esc(MODULE_DEF[k].label) +
-        '<i>' + esc(MODULE_DEF[k].note) + '</i></a>').join("");
+  const items = moduleMenu(have).map((m) =>
+    m.key === here
+      ? '<span class="mi on" aria-current="true">' + esc(m.label) + '<i>' + esc(m.note) + '</i></span>'
+      : '<a class="mi" href="' + esc(clientHref(slug, m.key, "")) + '">' + esc(m.label) +
+        '<i>' + esc(m.note) + '</i></a>').join("");
   return '<details class="msw"><summary title="Modules" aria-label="Modules">' +
     '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
     '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +

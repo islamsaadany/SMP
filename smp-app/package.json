@@ -35,7 +35,7 @@
     "check:deploy": "node checks/deploy-context.mjs",
     "check:deploy:red": "for b in ignore-app unanchored ignore-scripts; do node checks/deploy-context.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:modules": "node checks/modules.mjs",
-    "check:modules:red": "for b in any-module open-address static-hello; do SMP_BREAK=$b node checks/modules.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:modules:red": "for b in any-module open-address static-hello switch-always; do SMP_BREAK=$b node checks/modules.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:demo": "node checks/demo-seed.mjs",
     "check:demo:red": "for b in raw-names keep-marks; do node checks/demo-seed.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:memory": "node checks/memory-split.mjs && node checks/memory-boundary.mjs && node checks/memory-api.mjs && node checks/memory-page.mjs && node --experimental-strip-types checks/memory-ask.mjs",

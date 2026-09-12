@@ -43235,3 +43235,86 @@ than the day somebody looks.
 Strategy there is no way to the trial module except the console; the landing
 shows no module row; and a module's Setup group is described by this control and
 not yet built, because Setup's groups are the frozen shell's.
+
+## §320.6 — THE SWITCHER IN THE TOP BAR, AND A SENTENCE THAT WAS AHEAD OF THE BUILD (2026-09-12, spec 046)
+
+Islam, with a screenshot of his own Strategy page: ***"where are the box of 4 in
+the top left that we build together? that already navigates the modules?"***
+&mdash; then, told it was never there, ***"yes the square switcher in the top
+bar. and for the setup no need now."***
+
+**THE HONEST ANSWER CAME FIRST AND IT WAS NOT A DEFECT**: the mark appears
+**nought** times in the platform and **six** in the trial module's page. E1 was
+designed and signed off on 11 September and built on ONE surface &mdash; the
+page that needed a way out of itself (&sect;61) &mdash; and never in the shell.
+His screenshot is a picture of the gap &sect;320.5 recorded, which is the answer
+to *where is it* rather than a fault to go hunting for.
+
+**THE MOCKUP COULD NOT BE COPIED, AND RENDERING IT IS WHAT SAID SO.** E1's
+markup puts the `<details>` INSIDE `.brand` &mdash; and that drawing's `.brand`
+was a flex ROW while the product's is a flex COLUMN (`_shared.css`), so copying
+it would have stranded the mark on a line of its own above the product's name.
+Measured by shooting the mockup's own frame (mark at y=176, title at y=186, one
+row) rather than read off the markup. `.top-in` is already a row and `.brand`
+carries `margin-right:auto`, so **first in the row IS the top left** and no
+existing rule moves (&sect;296.1: a mockup made from another build's stylesheet
+is a picture of what the product could look like, not of what it does).
+
+**IT IS BUILT IN THE NEW STACK'S OWN BROWSER FILE, NOT IN THE FROZEN SHELL, and
+the reason decides whether it may be drawn at all**: a module list only exists
+where there is a server to say which ones a client has, and the offline
+contingency copy (&sect;306) is the built file with one tenant's graph baked in
+and nothing behind it &mdash; a switcher there would be a control that could
+never open anything (&sect;61). So the markup and the behaviour live in
+`smp-app/shell/route.js`, which already owns everything the browser knows about
+modules, and only the SHAPE goes in `arrange.css`, beside the `details.dlmenu`
+family it belongs to, because a stylesheet is inert either way.
+
+**DRAWN ONLY WHERE THERE IS A CHOICE.** `data-modules` is written by the server
+for a client holding more than one, and for nobody else &mdash; so a menu of
+one is never built, which is a door behind a door (&sect;32), and **the ABSENT
+attribute is what says so** rather than a flag beside it (&sect;50.6). Asserted
+at both ends, or a build that always drew it passes everything else.
+
+**THE NAMES COME FROM THE SERVER AND THERE IS ONE ANSWER TO WHAT THE SWITCHER
+LISTS.** `moduleMenu()` is read by the shell's bar and by the trial module's own
+&mdash; a label worked out in the browser by capitalising a key is exactly how
+two screens come to spell one module differently (&sect;53.5). The summary's
+mark is DRAWN and not a font character (&sect;52): it has no word beside it to
+recover from a blank box.
+
+**ONE LISTENER, BUILT ONCE.** `paintUnits()` replaces the row BELOW this one and
+nothing rewrites `.top-in`, so the markup is made and wired at load and never on
+a paint (&sect;24, &sect;47.2); a press navigates, so the menu never has to be
+closed afterwards; **and the module you are already in does nothing** rather
+than reloading the page under somebody.
+
+**&sect;320.6a &mdash; AND THE SENTENCE I SHIPPED WAS AHEAD OF THE BUILD.**
+&sect;320.5's band promised *"turning one on adds its group to this client's
+Setup page"*. Spec 046 &sect;4.5 says it will; the build does not, and cannot
+&mdash; Setup's five sections are the frozen shell's and know nothing about
+modules. **&sect;104.8 exactly**, a recorded intention nothing compares with the
+code, and it shipped because the MOCKUP carried it and the mockup was drawing
+the destination rather than the state. With Setup deferred on Islam's word the
+words now say today's truth and the promise goes back to the spec, where nobody
+reads it as a fact. *A mockup describes where a thing is going; a shipped
+screen may only describe where it is.*
+
+**&sect;320.6b &mdash; AND THE SWEEP EXITED 0 WITHOUT LAUNCHING A BROWSER.**
+`qa.py` run directly printed Playwright's *"run playwright install"* banner,
+found no headless shell, and **returned success** &mdash; &sect;279.3 and
+&sect;301.2's fault, third time in this file: *a check that cannot launch
+reports no failures*, and reading the exit code would have called a whole
+platform sweep clean. It needs `qa-run.py`, which points Playwright at the
+Chromium this image actually holds.
+
+**PROVED ABLE TO FAIL FOUR WAYS** (`checks/modules.mjs`, now 62 assertions,
+&sect;7 driving a real browser against the shell's own body and stylesheet
+&mdash; because whether a control is DRAWN is not a question the source can
+answer, &sect;96): `any-module` 2 red, `open-address` 3, `static-hello` 2,
+`switch-always` 1. **The check's stub honours the same break as the server**,
+or the falsification would break the product and leave the check measuring an
+unbroken stub (&sect;100.3). And it **fails rather than skips** when there is no
+browser, because a check that quietly does not run is a green tick over nothing
+(&sect;54.5) &mdash; which is the same lesson &sect;320.6b had just taught from
+the other side.

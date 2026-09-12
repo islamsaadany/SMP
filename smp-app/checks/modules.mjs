@@ -17,11 +17,21 @@
        console's markup and in the route, because driving those needs a
        database and a browser and they are checked where those exist.
 
+   AND §7 DRIVES THE SWITCHER IN A REAL BROWSER, against the shell's own body
+   and its own stylesheet — because whether a control is DRAWN is not a
+   question the source can answer (§96: a control that renders and does
+   nothing, or does not render at all, reads identically in the code). It
+   needs a browser; if there is none it FAILS rather than skips, because a
+   check that quietly does not run is a green tick over nothing (§54.5).
+
      node checks/modules.mjs
      SMP_BREAK=any-module    node checks/modules.mjs   # must go red
      SMP_BREAK=open-address  node checks/modules.mjs   # must go red
-     SMP_BREAK=static-hello  node checks/modules.mjs   # must go red            */
+     SMP_BREAK=static-hello  node checks/modules.mjs   # must go red
+     SMP_BREAK=switch-always node checks/modules.mjs   # must go red            */
 import { readFileSync } from "node:fs";
+import { createServer } from "node:http";
+import { chromium } from "playwright-core";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, isModule } from "../lib/modules.ts";
@@ -31,6 +41,11 @@ const here = dirname(fileURLToPath(import.meta.url));
 const APP = join(here, "..");
 const ROOT = join(APP, "..");
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
+
+/* The product reads its breaks from the environment (lib/modules.ts,
+   lib/trial.ts, lib/shell.ts), so this reads the same one — §7 serves the
+   shell itself and has to break with it. */
+const BREAK = process.env.SMP_BREAK || "";
 
 let ok = 0;
 const bad = [];
@@ -177,6 +192,89 @@ const route = read("smp-app/app/(platform)/[slug]/[...rest]/route.ts");
 check("the address is gated on the client's own list", /whereOf\(rest \|\| \[\], have\)/.test(route));
 check("and the trial module serves itself rather than the Strategy shell",
   /w\.module === "trial"[\s\S]{0,200}trialDocument/.test(route));
+
+console.log("\n7 · the switcher in the platform's top bar (driven)");
+/* THE SHELL'S OWN BODY AND STYLESHEET, served over HTTP — `route.js` returns
+   at once unless the address looks like /<client>/…, so a file:// page would
+   pass every assertion here by never running the code (§94.11). The 3.4MB
+   shell.js is deliberately NOT loaded: this asserts the switcher, not the
+   platform, and route.js builds it whether or not the app has hydrated. */
+const BODY = readFileSync(join(APP, "shell", "body.html"), "utf8");
+const ROUTE = readFileSync(join(APP, "shell", "route.js"), "utf8");
+const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
+const MENU = [{ key: "strategy", label: "Strategy", note: "Plans, measures, reporting and the review" },
+              { key: "trial", label: "Trial", note: "Says hello and names the client." }];
+const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+const doc = (menu) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
+  (menu ? " data-modules='" + attr(JSON.stringify(menu)) + "'" : "") +
+  "><head><meta charset='utf-8'><link rel='stylesheet' href='/platform.css'></head><body class='ready'>" +
+  BODY + "<script src='/route.js'></script></body></html>";
+const srv = createServer((req, res) => {
+  const p = String(req.url).split("?")[0];
+  if (p === "/platform.css") { res.writeHead(200, { "Content-Type": "text/css" }); return res.end(CSS); }
+  if (p === "/route.js") { res.writeHead(200, { "Content-Type": "application/javascript" }); return res.end(ROUTE); }
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  /* THE STUB HONOURS THE SAME BREAK AS THE SERVER (lib/shell.ts): this
+     section serves the shell's body itself rather than going through
+     shellDocument(), so without this the falsification would break the
+     product and leave the check measuring an unbroken stub (§100.3). */
+  res.end(doc(p.startsWith("/one/") && BREAK !== "switch-always" ? null : MENU));
+});
+await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+const base = "http://127.0.0.1:" + srv.address().port;
+let browser = null;
+try {
+  browser = await chromium.launch({ executablePath: process.env.SMP_CHROME || undefined });
+} catch (e) {
+  check("a browser to drive the switcher in", false, e.message.split("\n")[0] + " — set SMP_CHROME");
+}
+if (browser) {
+  const page = await browser.newPage({ viewport: { width: 1400, height: 500 } });
+  const errs = [];
+  page.on("pageerror", (e) => errs.push(String(e)));
+  await page.goto(base + "/raya-trade/strategy/mobile/plan");
+  await page.waitForTimeout(250);
+  check("the switcher is drawn in the top bar", (await page.locator(".topmark").count()) === 1);
+  /* FIRST IN THE ROW IS THE TOP LEFT (the mockup put it inside `.brand`, which
+     is a COLUMN in the product — copied, it would have stranded the mark on a
+     line of its own above the name). */
+  check("it is the first thing in the row, not inside the brand block",
+    (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("topmark"));
+  const geo = await page.evaluate(`(() => { const a = document.querySelector('.topmark').getBoundingClientRect(),
+      b = document.querySelector('.brand h1').getBoundingClientRect();
+      return { w: Math.round(a.width), h: Math.round(a.height), left: Math.round(a.left), titleLeft: Math.round(b.left),
+               sameRow: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 10 }; })()`);
+  check("on the same line as the product's name, and before it", geo.sameRow && geo.left < geo.titleLeft, JSON.stringify(geo));
+  check("and it is a square", geo.w === geo.h, geo.w + "x" + geo.h);
+  /* MEASURED AS PAINT, never as a class (§94.8): a mark styled by nothing
+     renders as a bare button and satisfies every assertion about its markup. */
+  check("its shape is painted, not merely marked up",
+    await page.evaluate("(() => { const s = getComputedStyle(document.querySelector('.topmark > summary')); return s.borderTopWidth === '1px' && s.borderTopStyle === 'solid'; })()"));
+  check("the mark is DRAWN and not a font character (§52)", (await page.locator(".topmark > summary svg rect").count()) === 4);
+  await page.locator(".topmark > summary").click();
+  await page.waitForTimeout(200);
+  const items = await page.locator(".topmark .menu button").allInnerTexts();
+  check("the menu lists every module this client has", items.length === 2 && items[0].startsWith("Strategy") && items[1].startsWith("Trial"),
+    items.map((t) => t.split("\n")[0]).join(", "));
+  check("each carries the line the server gave it, never one worked out from the key",
+    items[0].includes("Plans, measures, reporting and the review"));
+  check("the module you are IN is marked", (await page.locator('.topmark .menu button[aria-current="true"]').innerText()).startsWith("Strategy"));
+  /* THE MENU IS OPEN AND ON SCREEN — a panel positioned off its own edge
+     renders perfectly and cannot be read (§90: a control below the fold is a
+     control that does nothing). */
+  const box = await page.locator(".topmark .menu").boundingBox();
+  check("and the open menu is on the page", box && box.x >= 0 && box.y >= 0 && box.width > 200, JSON.stringify(box));
+  /* BOTH ENDS (§94.2, §32): a client with one module is offered no menu at
+     all — a build that always drew it would pass everything above. */
+  const one = await browser.newPage({ viewport: { width: 1400, height: 400 } });
+  await one.goto(base + "/one/strategy/mobile");
+  await one.waitForTimeout(250);
+  check("a client with ONE module gets no switcher — a menu of one is a door behind a door",
+    (await one.locator(".topmark").count()) === 0);
+  check("no page error from any of it", errs.length === 0, errs.join(" | "));
+  await browser.close();
+}
+srv.close();
 
 console.log("\n%d ok, %d failed", ok, bad.length);
 if (bad.length) { console.log("FAILED: " + bad.join("; ")); process.exit(1); }

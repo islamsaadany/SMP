@@ -583,6 +583,40 @@
      `.units button` cannot reach a <summary>. Same font, same padding, same
      3px underline reserved transparent so lighting it cannot move the row
      (§41's rule, and the reason the row does not jump when you switch). */
+  /* ══ THE MODULE SWITCHER (spec 046, E1 — signed off 2026-09-11) ══════
+     The four-square mark at the far left of the top bar, opening the list of
+     modules THIS CLIENT has with the one you are in marked.
+
+     IT SITS BEFORE `.brand`, NOT INSIDE IT, and the mockup is why this had to
+     be looked at rather than copied: the approved drawing put it inside, and
+     that drawing's `.brand` was a ROW while today's is a COLUMN (_shared.css)
+     — so copying the markup would have stranded the mark on a line of its own
+     above the product's name. `.top-in` is already a row with `.brand`
+     carrying `margin-right:auto`, so first-in-the-row IS the top left, and no
+     existing rule moves (§296.1: measure the paint, never the cascade).
+
+     THE SUMMARY IS `.infobtn`'s SHAPE, square: same border, same quiet ink,
+     same hover and the same focus ring, because it is the same kind of thing
+     one row along (§53.5). The MENU is `details.dlmenu > .menu`'s, unchanged
+     — this adds no item styling at all.
+
+     The markup and the behaviour are NOT here: they are the new stack's own
+     (smp-app/shell/route.js), because a module list only exists where there
+     is a server to say which ones a client has. The offline copy (§306) has
+     no modules, so a switcher baked into the frozen shell would be a control
+     that could never open anything (§61). */
+  details.dlmenu.topmark { align-self:center; margin-right:2px; }
+  details.dlmenu.topmark > summary { list-style:none; display:grid; place-items:center;
+             width:28px; height:28px; border:1px solid var(--line); border-radius:8px;
+             color:var(--ink-3); background:none; cursor:pointer; }
+  details.dlmenu.topmark > summary::-webkit-details-marker { display:none; }
+  details.dlmenu.topmark > summary:hover { border-color:var(--stone-soft); color:var(--ink); }
+  details.dlmenu.topmark > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  details.dlmenu.topmark[open] > summary { border-color:var(--stone-soft); color:var(--ink); }
+  details.dlmenu.topmark > summary svg { width:17px; height:17px; display:block; }
+  details.dlmenu.topmark > .menu { min-width:290px; top:calc(100% + 6px); left:0; }
+  details.dlmenu.topmark > .menu button[aria-current="true"] { font-weight:700; }
+
   details.dlmenu.topsel { position:relative; display:flex; }
   details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
       align-items:center; gap:7px; cursor:pointer; white-space:nowrap;

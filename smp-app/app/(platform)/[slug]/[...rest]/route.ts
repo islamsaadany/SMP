@@ -2,7 +2,7 @@ import { doorPool } from "../../../../lib/auth.ts";
 import { resolveTenant } from "../../../../lib/door.ts";
 import { requestUser, SLUG } from "../../../../lib/session.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
-import { whereOf, clientHref, modulesFor, DEFAULT_MODULE } from "../../../../lib/modules.ts";
+import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { trialDocument } from "../../../../lib/trial.ts";
 
 export const dynamic = "force-dynamic";
@@ -56,5 +56,5 @@ export async function GET(req: Request, { params }: P) {
     return new Response(await trialDocument(slug, ans.tenant.id, ans.tenant.name, have), { status: 200, headers: shellHeaders() });
   if (w.module === "trial")
     return Response.redirect(new URL(clientHref(slug, "trial", ""), req.url), 302);
-  return new Response(shellDocument(ans.tenant.name, w.module || DEFAULT_MODULE), { status: 200, headers: shellHeaders() });
+  return new Response(shellDocument(ans.tenant.name, w.module || DEFAULT_MODULE, moduleMenu(have)), { status: 200, headers: shellHeaders() });
 }

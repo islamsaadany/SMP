@@ -54,10 +54,10 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§321 — a function's projects are its own — built on the
-branch, not merged (spec 045, stage 1).**
+**Latest version:** **§322 — a function's projects are its own — built on the
+branch, not merged (spec 046, stage 1).**
 
-Islam, correcting §320.9's proposal outright: *"capability is something
+Islam, correcting §321.9's proposal outright: *"capability is something
 Strategic ... the problem with having the capability hidden in the functional
 plans is confusing for the whole structure aligned with me what you're
 understanding to fix this once and for old."*
@@ -66,7 +66,7 @@ understanding to fix this once and for old."*
 screen — it is that the only container the platform owned for a supporting
 function's projects was called a capability, so every function that plans in
 projects looked as though it held a strategic capability whether it did or not,
-and a real capability had nowhere of its own to live. §320.9's mockup is
+and a real capability had nowhere of its own to live. §321.9's mockup is
 recorded as withdrawn, not overwritten; its measurement is still the evidence.
 
 **Measured before anything was written:** six of the seven projects-format
@@ -79,7 +79,7 @@ function CARRIES. The band is gone from a function's own work; its Overview is
 the one a pillars function already draws (§213's decision finally true of both
 sides); the deck stops calling it a capability review; the workbook still
 addresses the function by name. Removing a box offers **the function itself**
-as a destination — Islam's *"and vice versa"*, one more entry in a list §320's
+as a destination — Islam's *"and vice versa"*, one more entry in a list §321's
 dialog already had — and the held state he photographed cannot occur any more,
 so its branch is deleted. A one-off moves every stored tenant onto the model
 through **the same rule the dialog presses**.
@@ -96,12 +96,12 @@ databases · `capability-remove.py` 0 failures with five assertions rewritten,
 never loosened · eleven neighbouring checks green · full `qa.py` ERRORS none.
 
 **Waiting on Islam:** whether the worked example should dissolve its eight
-containers or keep one real capability so §320's feature renders something;
+containers or keep one real capability so §321's feature renders something;
 and stage 2 — a capability as a strategic entry beside the business units.
 
 ---
 
-**Before it:** **§320 — removing a capability: the box, or the box and
+**Before it:** **§321 — removing a capability: the box, or the box and
 its work — built on `claude/inspiring-lamport-pm0ki2`.** Islam, with the
 browser's own dialog open in front of him: *"when I try to remove the
 capability it will remove the projects with it."* **It did** — a project lives
@@ -150,7 +150,7 @@ either direction (this builds the hard half); the screen half of "the box goes";
 and whether a capability can be built on the pillars or the projects method —
 Islam's own question, which belongs with *Objectives & actions*.
 
-**And before that:** **§319 — a pillar says which kind of thing it is — built
+**And before that:** **§320 — a pillar says which kind of thing it is — built
 on `claude/inspiring-lamport-pm0ki2`.** Islam, of a client whose supporting
 functions plan the way a business unit does: *"the capability is a strategic
 concept and we need to differentiate between having a capbility as a strategic

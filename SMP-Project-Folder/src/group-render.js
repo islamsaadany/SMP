@@ -1352,13 +1352,13 @@ function capsTable(){
    means the direction of travel - whether higher is better - and has nothing
    to do with this. Same word, different thing. */
 
-/* ── AND "LATER" IS NOW (§319) ──────────────────────────────────────────
+/* ── AND "LATER" IS NOW (§320) ──────────────────────────────────────────
    Islam, of a client whose supporting functions plan the way a unit does:
    *"a capability might have targets and tactics like the pillar but it's
    mostly an internal thing as well"*, and of three of his own functions,
    *"they are planning somehow in a capability format"*.
 
-   THAT IS THIS MARK, and the whole of §319's first piece is the one line
+   THAT IS THIS MARK, and the whole of §320's first piece is the one line
    below going true. §29 wrote the flag rather than deleting five call sites
    precisely so the distinction could come back without being reconstructed
    from a git log, and it has. Recorded as a reversal rather than overwritten
@@ -5294,7 +5294,7 @@ function capHead(c){
    and that band is what says which one a section belongs to. */
 
 function capBand(c){
-  /* §321: NOT DRAWN OVER A FUNCTION'S OWN WORK. Islam: *"that will keep my
+  /* §322: NOT DRAWN OVER A FUNCTION'S OWN WORK. Islam: *"that will keep my
      projects under a capability while there is not capability there ... these
      are more of fucntional projects."* This band's own reason, written above,
      is that "a function may carry several, and that band is what says which
@@ -5407,7 +5407,7 @@ function railPick(c){
    which is §301.4's own gate and the same `railMine()` test the rail asks, so
    the page and the rail cannot disagree about whose it is (§53.5). */
 function capsShown(fk) {
-  /* §321: what the function's pages draw — its OWN projects first, then any
+  /* §322: what the function's pages draw — its OWN projects first, then any
      capability it carries. One door for Performance, Projects and Reporting,
      which is why a function's own work reaches all three from one edit and
      the three cannot disagree about what is on the function (§53.5). */
@@ -6849,7 +6849,7 @@ function unitRailFor(u, sel){
            the right - two numbers, one of them unlabelled, and nothing saying
            which was which. The bare number went with the footer that tried to
            explain it (§29.6). */
-        /* §319: the kind leads, as it does on the performance rail one
+        /* §320: the kind leads, as it does on the performance rail one
            function along — the two rails are onto the same list and a mark on
            one of them only is how a unit comes to be fine differently on two
            of its own pages (§53.5). Guarded on the VALUE: a pillar nobody has
@@ -7060,7 +7060,7 @@ function ownStateChip(target, list, word){
     ' · ' + n + ' of ' + mine.length + ' done</span>';
 }
 
-/* ── AND THE BAND SAYS WHICH KIND OF PILLAR IT IS (§319) ────────────────
+/* ── AND THE BAND SAYS WHICH KIND OF PILLAR IT IS (§320) ────────────────
    `kind` is an OPTIONAL fourth argument because three of this function's six
    callers draw a PROJECT, which has no kind and never will — passing the
    pillar object instead would put a field on the signature that half the
@@ -7435,10 +7435,10 @@ function unitPlanBody(it, u, railed){
        component: a project's Owner row and a pillar's are the same fact in
        the same place on the same kind of pane, and drawing them two ways is
        how a unit and a function come to be fine differently (§53.5). */
-    /* ── AND THE KIND, SETTABLE AT LAST (§319) ───────────────────────────
+    /* ── AND THE KIND, SETTABLE AT LAST (§320) ───────────────────────────
        The mark has been stored on every pillar since the model existed, has
        ridden in the upload template's Pillars sheet the whole time, and was
-       WRITABLE ON NO SCREEN AT ALL — so bringing it back into view (§319's
+       WRITABLE ON NO SCREEN AT ALL — so bringing it back into view (§320's
        first half) without this would have been §61's trap exactly: a word a
        reader meets on every surface a pillar is read on and can change nowhere
        but by re-uploading the subject's whole plan.
@@ -7649,9 +7649,9 @@ function renderUnitPlan(u){
 
    The third column is WEIGHT rather than a three-year target: a capability's
    objectives carry the optional weighting and have never had a horizon. */
-/* ── A SUPPORTING FUNCTION'S OWN OVERVIEW (§213, renamed §321) ───
+/* ── A SUPPORTING FUNCTION'S OWN OVERVIEW (§213, renamed §322) ───
    It was `fnPillarsOverview` while only one of the two formats could reach
-   it. Since §321 a function that plans in PROJECTS draws it too — its
+   it. Since §322 a function that plans in PROJECTS draws it too — its
    projects are its own, so there is no capability left to be described
    instead — which is §213's own decision finally true of both sides: the two
    formats draw ONE page, and nothing about this builder had to change for it.
@@ -7673,7 +7673,7 @@ function fnOwnOverview(fk){
      SHARED frozen empty where `keyObjectives` does not exist, so a first
      objective added against the reading view would be pushed onto an empty
      every function shares. */
-  /* §321: BOTH FORMATS REACH THIS PAGE NOW, and `unitLike("fn:…")` answers
+  /* §322: BOTH FORMATS REACH THIS PAGE NOW, and `unitLike("fn:…")` answers
      only for the pillars one — it returns null for a function that plans in
      projects, so asking it here would throw on the page this rename exists to
      share. The holder answers for both, and its writing half mints the
@@ -7692,7 +7692,7 @@ function fnOwnOverview(fk){
       ((ed || fl)
         ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
         : koReadBlock(list,
-            /* §321: and the sentence names what this function IS judged by,
+            /* §322: and the sentence names what this function IS judged by,
                which is its pillars on one format and its projects on the
                other — one page, two true sentences, never one that is wrong
                on half of it (§104.8). */
@@ -7747,7 +7747,7 @@ function fnOwnOverview(fk){
 }
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  /* §321: A FUNCTION'S OWN OVERVIEW IS THE OVERVIEW §213 ALREADY BUILT. That
+  /* §322: A FUNCTION'S OWN OVERVIEW IS THE OVERVIEW §213 ALREADY BUILT. That
      section decided the two formats draw ONE page — *What it is* (Function ·
      Led by · Definition) beside its key objectives — and only the projects
      side kept a capability's wording over it. With the box gone there is
@@ -8084,7 +8084,7 @@ function unitPerfRail(u){
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
-      /* §319: guarded on the VALUE and not only on the flag. A pillar added
+      /* §320: guarded on the VALUE and not only on the flag. A pillar added
          on the platform has no kind until somebody picks one, and the bare
          flag test printed " &middot; execution 45%" — a separator pointing at
          nothing, which is the fault `pillarMeta` was already written to avoid

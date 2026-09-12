@@ -1100,7 +1100,7 @@ function readmePickFn(){ return ""; }
    reader that writes what it reads is §42's phantom change. Rows added since
    the cycle closed simply carry nothing, which is the truth about them. */
 function impPlanWorkbookFor(v){
-  /* §321: a holder — a capability, or a supporting function holding its own
+  /* §322: a holder — a capability, or a supporting function holding its own
      projects. `capPlanWorkbook` reads `{name, id, keyObjectives, projects}`
      and a function's holder is exactly that shape, so the projects template is
      built for both from one builder (§53.5). */
@@ -1174,8 +1174,8 @@ function archiveWorkbook(a){
   return planWorkbook(snap);
 }
 
-/* WHO A PROJECTS WORKBOOK CAN BE FOR (§321). Every capability, and every
-   supporting function that holds its own projects — because since §321 a
+/* WHO A PROJECTS WORKBOOK CAN BE FOR (§322). Every capability, and every
+   supporting function that holds its own projects — because since §322 a
    function's plan IS the projects template's subject, and a dropdown that
    still listed only capabilities would offer a tenant that has none nothing
    at all: a plan that downloads and cannot come back (§22, §61).

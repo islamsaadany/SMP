@@ -7831,7 +7831,7 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
 python3 checks/functional-projects.py # a function's projects are its own
-                                # (§321, spec 045 stage 1). Islam: "the problem
+                                # (§322, spec 046 stage 1). Islam: "the problem
                                 # with having the capability hidden in the
                                 # functional plans is confusing for the whole
                                 # structure." BOTH ENDS of every claim (§94.2):
@@ -7858,7 +7858,7 @@ python3 checks/functional-projects.py # a function's projects are its own
                                 # 3 / 4 / 2 / 6 red. SMP_BUILT points it at
                                 # another build
 python3 checks/capability-remove.py # removing a capability: two answers,
-                                # not one (§320). Islam: "when I try to remove
+                                # not one (§321). Islam: "when I try to remove
                                 # the capability it will remove the projects
                                 # with it" — it did, behind the BROWSER's own
                                 # dialog and with no archive, while a pillar
@@ -7886,7 +7886,7 @@ python3 checks/capability-remove.py # removing a capability: two answers,
                                 # 21 / 1 / 2 / 4 / 2. SMP_BUILT points it at
                                 # another build
 python3 checks/pillar-kind.py     # a pillar says which kind of thing it is
-                                # (§319): the mark DRAWN on the Plan rail and
+                                # (§320): the mark DRAWN on the Plan rail and
                                 # band, the Performance pane, the Reporting band
                                 # and both sides of the navigation switch — and
                                 # SETTABLE, read back off the stored plan rather
@@ -8650,7 +8650,7 @@ unexercised):
 `DATABASE_URL=… node scripts/test-video-endpoint.js` (§261.5 — the file that found
 the truthy `"none"`)
 
-A project changing hands survives a save (§320) — the half the browser check
+A project changing hands survives a save (§321) — the half the browser check
 cannot see, because `projects.cap_id` is NOT NULL and CASCADEs, so a move that
 did not land lets the database delete three projects while the save reports
 success. The move is READ OUT of `config-data.js` rather than copied (§283),
@@ -8658,7 +8658,7 @@ and both ends are asserted: a removal WITHOUT the move still takes its
 projects. Needs a throwaway Postgres; 12/12, proved able to fail twice (5 red
 with the move a no-op, 1 red with the append):
 `DATABASE_URL=… A function's projects need no column, and the one-off moves a tenant onto the
-model (§321) — the half the browser cannot see, and the half where being wrong
+model (§322) — the half the browser cannot see, and the half where being wrong
 is expensive: `projects.cap_id` is NOT NULL and CASCADEs. It asserts the round
 trip through `functions.extra` with NO schema change (§118, §213 — claimed
 wrongly once before in this file, §172), then every box dissolved with every
@@ -8794,8 +8794,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;321: a function's projects are its
-own (spec 045, stage 1).** Islam, correcting &sect;320.9's proposal outright:
+*Last Updated: 2026-09-12 &mdash; **&sect;322: a function's projects are its
+own (spec 046, stage 1).** Islam, correcting &sect;321.9's proposal outright:
 *"capability is something Strategic ... the problem with having the capability
 hidden in the functional plans is confusing for the whole structure aligned
 with me what you're understanding to fix this once and for old."* **HIDING THE
@@ -8803,7 +8803,7 @@ BOX WAS TREATING THE SYMPTOM**, and that is the finding: the fault is not that
 the word is on the screen, it is that **the only container the platform owned
 for a supporting function's projects was called a capability** &mdash; so every
 function planning in projects appeared to hold a strategic capability whether
-it did or not, and a real one had nowhere of its own to live. &sect;320.9 is
+it did or not, and a real one had nowhere of its own to live. &sect;321.9 is
 recorded as withdrawn rather than overwritten (Principle II); its measurement
 is still the evidence. **MEASURED FIRST**: six of the seven projects-format
 functions carry exactly one box, the navy band is drawn on all four of that
@@ -8811,7 +8811,7 @@ function's pages, the Overview says it TWICE, and **no project code mentions it
 at all** &mdash; `FIN01`, `FIN02`, `FIN03` are the function's own letters
 (&sect;310), so the projects were already the function's everywhere the
 arithmetic touches them. **TWO PIECES ALREADY EXISTED**, which is what made it
-tractable: &sect;319 shipped a pillar's *kind* of Direction | Capability one day
+tractable: &sect;320 shipped a pillar's *kind* of Direction | Capability one day
 earlier &mdash; Islam's first form, live &mdash; and &sect;213 had already given
 a supporting function its own definition and key objectives, so a dissolved box
 has a home for everything it holds without inventing a field. **NO SCHEMA
@@ -8831,7 +8831,7 @@ array, never a copy**. `fnHolders(fk)` is the ONE list the four pages, the deck,
 the gap walk, the reporting walk and the codes read, where each had its own
 `capsOfFunction` call &mdash; which is how the two sides of the switch drifted
 twice already (&sect;211, &sect;213). **AND THE MOVE MUTATES IN PLACE**:
-&sect;320's `moveCapProjects` reassigned `to.projects`, which lands on a WRAPPER
+&sect;321's `moveCapProjects` reassigned `to.projects`, which lands on a WRAPPER
 and is thrown away one line later &mdash; `fnAsUnit`'s own recorded trap wearing
 a different hat. **THE BAND IS NOT DRAWN OVER A FUNCTION'S OWN WORK**, on
 `capBand`'s own stated reason (*"a function may carry several, and that band is
@@ -8845,7 +8845,7 @@ cover (&sect;87's twins, on a projector); the workbook still addresses the
 function by name, or a plan downloads and cannot come back (&sect;22, &sect;61).
 **AND THE DISSOLVE IS ONE ACT** &mdash; Islam: *"the ability to turn functional
 projects to a capability and vice versa"* &mdash; which was **one more entry in
-a list &sect;320's dialog already had**: the function itself is a destination,
+a list &sect;321's dialog already had**: the function itself is a destination,
 and the one always there, so the held state he photographed on 11 September
 (*"There is nowhere for them to go"*) **cannot occur and its branch is deleted**
 (&sect;24). `SMPRules.dissolvePlan` is in the shared module and is pressed by
@@ -8880,10 +8880,10 @@ the held-state block INVERTED rather than deleted, because the case it guarded
 is exactly the case this has to get right &middot; eleven neighbouring checks
 green &middot; full `qa.py` ERRORS none. **RECORDED, NOT DONE**: the worked
 example still ships its eight containers, so which the demo should show is
-Islam's (spec 045 §10.4); making projects a capability is stage 2; and a
+Islam's (spec 046 §10.4); making projects a capability is stage 2; and a
 promoted project's code changing is his to accept (§10.5).*
 
-*Earlier: 2026-09-11 &mdash; **&sect;320: removing a capability &mdash;
+*Earlier: 2026-09-11 &mdash; **&sect;321: removing a capability &mdash;
 the box, or the box and its work.** Islam, with the browser's own dialog open
 in front of him: *"when I try to remove the capability it will remove the
 projects with it."* **IT DID, AND THE DATABASE AGREED**: a project lives INSIDE
@@ -8968,7 +8968,7 @@ a capability can be built on the pillars method or the projects method, which
 is Islam's own question and belongs with **Objectives & actions**, the round
 where "how does this plan?" stops having one answer per function.*
 
-*Earlier the same day: **&sect;319: a pillar says which kind of
+*Earlier the same day: **&sect;320: a pillar says which kind of
 thing it is.** Islam, of a client whose supporting functions plan the way a
 business unit does: *"the capability is a strategic concept and we need to
 differentiate between having a capbility as a strategic element to focus on or

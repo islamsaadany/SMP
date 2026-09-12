@@ -1,4 +1,4 @@
-"""REMOVING A CAPABILITY: two answers, not one (§320).
+"""REMOVING A CAPABILITY: two answers, not one (§321).
 
 Islam, trying to take a wrapper off one of his own functions: "when I try to
 remove the capability it will remove the projects with it." It did — a splice
@@ -116,13 +116,13 @@ with sync_playwright() as p:
        dlg.get("safe") == 1, dlg)
     # REWRITTEN, NOT LOOSENED (§218). This asserted that ONE sibling is NAMED
     # rather than offered in a picker — true while a sibling was the only place
-    # projects could go. §321 makes the FUNCTION ITSELF a destination and the
+    # projects could go. §322 makes the FUNCTION ITSELF a destination and the
     # one that is always there, so a capability with one sibling now has two
     # places to go and a picker is correct. What is asserted instead is the
     # claim that survives: whatever the shape, the function is offered, and it
     # is offered FIRST — a function's own work is where a dissolved box's
     # projects belong; a sibling is the narrower answer.
-    ck("...the destination offers the FUNCTION ITSELF, first (§321)",
+    ck("...the destination offers the FUNCTION ITSELF, first (§322)",
        dlg.get("sel") is True and (dlg.get("dests") or [""])[0].endswith(" itself"), dlg)
     ck("...and the sibling capability beside it",
        "Product Mindset" in (dlg.get("dests") or []), dlg)
@@ -148,7 +148,7 @@ with sync_playwright() as p:
     moved_ids = before.get("ids") or []
     try:
         pg.click('[data-caprm="cap4"]', timeout=3000); pg.wait_for_timeout(350)
-        # §321: THE DESTINATION IS CHOSEN, not taken as the default. The
+        # §322: THE DESTINATION IS CHOSEN, not taken as the default. The
         # function is first now, so a fixture that just presses Keep measures
         # the dissolve while claiming to measure the move — and §3's whole
         # subject is the move to a SIBLING.
@@ -206,14 +206,14 @@ with sync_playwright() as p:
     # REVERSED AND REWRITTEN, NEVER DELETED (§218). This section asserted the
     # HELD state: a capability that is the only one its function has had
     # nowhere to move its projects, so Keep was drawn, greyed, and said so.
-    # §321 gives the projects somewhere to go — the function itself — so that
+    # §322 gives the projects somewhere to go — the function itself — so that
     # state CANNOT OCCUR, and the branch that drew it is deleted (§24). The
     # assertion is inverted rather than removed, because the case it guarded is
-    # exactly the case §321 has to get right: what used to be a dead end is now
+    # exactly the case §322 has to get right: what used to be a dead end is now
     # the ordinary answer, and a build that brought the held state back would
     # pass a file with these lines simply taken out.
     ck("the row is DRAWN rather than hidden", lone.get("drawn") is True, lone)
-    ck("...and is LIVE now: the function is somewhere for them to go (§321)",
+    ck("...and is LIVE now: the function is somewhere for them to go (§322)",
        lone.get("held") is None and lone.get("hard") is False, lone)
     ck("...it names the function as the destination",
        "Finance itself" in (lone.get("why") or ""), lone)
@@ -274,7 +274,7 @@ with sync_playwright() as p:
       arch: ARCHIVES.length })""")
     ck("the capability is gone", gone.get("cap") is False, gone)
     ck("...and its projects with it", gone.get("pr") == 0, gone)
-    ck("...not quietly given to the function instead (§321's other answer)",
+    ck("...not quietly given to the function instead (§322's other answer)",
        gone.get("own") == 0, gone)
     ck("...archived first, so it can be restored",
        (gone.get("arch") or 0) > (before2.get("arch") or 0), gone)

@@ -714,7 +714,7 @@ function deckPillarHead(u, p, pi, which){
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
 function deckSlidesFn(fk){
-  /* §321: the function's OWN work first, then any capability it carries — the
+  /* §322: the function's OWN work first, then any capability it carries — the
      same list its four pages draw, so the projector cannot show a deck the
      screen does not (§53.5). */
   var f = FUNCTIONS[fk], caps = fnHolders(fk);
@@ -727,7 +727,7 @@ function deckSlidesFn(fk){
         ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
-    /* §321: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
+    /* §322: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
        are its own is not presenting a capability review, and saying so on the
        first slide in front of a room is Islam's complaint at its loudest. The
        capability wording survives for a function that really carries one. */
@@ -745,7 +745,7 @@ function deckSlidesFn(fk){
     /* §236.3's anchors, mirrored on the function's deck (§53.5): keyed on the
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
-    /* §321: NO SECOND COVER FOR THE FUNCTION'S OWN WORK. The deck has just
+    /* §322: NO SECOND COVER FOR THE FUNCTION'S OWN WORK. The deck has just
        opened on the function's own name; a slide headed "Capability · Finance"
        over the word "Finance" names a thing that does not exist and says the
        name twice (§87's twins, on a projector). A capability it CARRIES still

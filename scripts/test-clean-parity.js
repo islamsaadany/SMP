@@ -150,7 +150,7 @@ function shapeOf(g) {
   } else {
     console.log("CLEAN PARITY: PASS — Clear Project is what migration 004 leaves");
     console.log("  " + a.unitCount + " units, " + a.fnCount + " functions, " +
-                /* §321: `norm` DROPS AN EMPTY ARRAY, so once a day-one client
+                /* §322: `norm` DROPS AN EMPTY ARRAY, so once a day-one client
                    holds no capabilities `a.caps` is undefined and this line —
                    the SUMMARY, printed after the comparison has already
                    passed — threw. A check that dies on its own report reads

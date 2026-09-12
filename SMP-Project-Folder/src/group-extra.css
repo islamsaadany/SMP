@@ -422,7 +422,7 @@
     border-radius:8px; padding:9px 12px; font-size:13px; margin:0 0 10px; }
   .rmconfirm .archline { font-size:12.5px; color:var(--ink-3); margin:0 0 16px; }
   .rmconfirm .mrow { display:flex; justify-content:flex-end; gap:10px; }
-  /* SCOPED TO THE DIALOG RATHER THAN TO ITS BUTTON ROW (§320): the capability's
+  /* SCOPED TO THE DIALOG RATHER THAN TO ITS BUTTON ROW (§321): the capability's
      dialog answers in two rows and the pillar's in one, and a button has to
      look like a button in both. Nothing else inside .rmconfirm is a button. */
   .rmconfirm button { font:600 13px/1 var(--sans); border-radius:8px;
@@ -436,7 +436,7 @@
     color:var(--surface); }
   .rmconfirm .danger:hover { filter:brightness(1.08); }
 
-  /* ── TWO ANSWERS, EACH SAYING WHAT IT DOES (§320) ──────────────────────
+  /* ── TWO ANSWERS, EACH SAYING WHAT IT DOES (§321) ──────────────────────
      Keeping the projects and destroying them are not two flavours of one act,
      so they are two rows rather than two buttons on one line \u2014 a pair at the
      same weight is how the destructive one gets pressed for the tidy one.

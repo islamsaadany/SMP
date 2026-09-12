@@ -4289,7 +4289,7 @@
     document.querySelectorAll("[data-caprm]").forEach(function(b){
       b.addEventListener("click", function(){
         if (grant("c_caps") !== "edit") return;
-        /* §320: the button carries the capability's ID, never its position —
+        /* §321: the button carries the capability's ID, never its position —
            the row being removed and the row the button was drawn for are a
            dialog apart (§48, §48.2). */
         capRemoveOpen(b.dataset.caprm);
@@ -4376,7 +4376,7 @@
            `measures.length` on an object that has not carried `measures` since
            §15, so it threw before it could confirm anything and the removal
            never ran (§51.11). */
-        /* §320: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
+        /* §321: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
            second door onto it — the Temple's own table. Reaching only the
            Setup page would leave a way to destroy three projects with a
            browser dialog and no archive, which is §272.7's fault exactly:
@@ -7313,7 +7313,7 @@
           if (what === "measure") addMeasure(it); else addTactic(it);
         }
         else if (what === "project") {
-          /* §321: holderByIdWritable, not capById — a project may be added to
+          /* §322: holderByIdWritable, not capById — a project may be added to
              a CAPABILITY or straight to the function, and the writing half is
              what mints the container. A reader hands out a shared frozen
              empty, so the first project on a function would have been accepted
@@ -8088,7 +8088,7 @@
                  functions, rather than resolved by whichever came first in the
                  array. That was the silent wrong-plan §51.2 feared, and it is
                  now caught at the one moment somebody can still act on it. */
-              /* §321: A SUPPORTING FUNCTION THAT HOLDS ITS OWN PROJECTS IS A
+              /* §322: A SUPPORTING FUNCTION THAT HOLDS ITS OWN PROJECTS IS A
                  SUBJECT, listed in the file's own dropdown by projectSubjectNames()
                  — so the upload has to resolve the name it just offered, the same
                  rule §61 already wrote for a pillars function one branch up. It is
@@ -8190,7 +8190,7 @@
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;
         if (impIsCap()) {
-          /* §321: WRITABLE, for the reason the unit branch below already
+          /* §322: WRITABLE, for the reason the unit branch below already
              states — a plan applied to a reading view is reported as written
              and is not (§61). */
           var cc = impCapWritable();
@@ -9015,7 +9015,7 @@
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
   }
-  /* ── REMOVING A CAPABILITY: two answers, not one (§320) ───────────────
+  /* ── REMOVING A CAPABILITY: two answers, not one (§321) ───────────────
      The mockup Islam signed off (design-mockups/capability-remove/) draws the
      two acts as two rows, each saying what it does, rather than as two
      buttons on one line — because they are not two flavours of one act. One
@@ -9035,7 +9035,7 @@
     var c = capById(id);
     if (!c) return;
     var f = functionOf(c.fn), fname = f ? f.name : "the function";
-    /* §321: THE FUNCTION ITSELF IS A DESTINATION, and it is the one that is
+    /* §322: THE FUNCTION ITSELF IS A DESTINATION, and it is the one that is
        always there. Islam: *"one more thing is the ability to turn functional
        projects to a capability and vice versa"* — this is the vice versa, and
        it is one more entry in a list the dialog already had rather than a
@@ -9062,7 +9062,7 @@
           dests.map(function(x){
             return '<option value="' + esc(x.id) + '">' + esc(x.label) + '</option>';
           }).join("") + '</select>';
-    /* §321: WHERE THE OBJECTIVES END UP DEPENDS ON WHERE THE PROJECTS GO, so
+    /* §322: WHERE THE OBJECTIVES END UP DEPENDS ON WHERE THE PROJECTS GO, so
        the note says which rather than one sentence that is false on half the
        destinations (§104.8). They come across to the FUNCTION and only where
        it has none of its own; a sibling capability takes the projects alone,

@@ -4953,7 +4953,7 @@ and never sees the set-up door on its Overview.
 ---
 
 
-## 319 · A pillar says which kind of thing it is
+## 320 · A pillar says which kind of thing it is
 
 Islam, of a client whose supporting functions plan the way a business unit
 does: *"the capability is a strategic concept and we need to differentiate
@@ -4966,7 +4966,7 @@ That is one of five things the round found, and it is the smallest of them —
 which is why it was built first and on its own (rule 2b). The other four are
 recorded at the end of this section, three of them not built.
 
-### 319.1 · The mark was already there, and Islam himself had put it away
+### 320.1 · The mark was already there, and Islam himself had put it away
 
 **NOTHING IS INVENTED HERE.** A pillar has carried `kind` since the model was
 written, the upload template's Pillars sheet has had a validated column for it
@@ -4981,7 +4981,7 @@ was right for the eighteen versions in between — nobody was using the
 distinction and a pill saying *Direction* on every row is furniture — and what
 changed is not the argument but the client.
 
-### 319.2 · Turning the flag on restored almost nothing, and that is the finding
+### 320.2 · Turning the flag on restored almost nothing, and that is the finding
 
 The one-character change was expected to be the whole piece. It was not.
 **Measured on a build with the flag flipped and nothing else changed**, the
@@ -5006,7 +5006,7 @@ had that guard from the day it was written and the other two (`kindPill` and the
 Performance rail) did not: **§15.1, and the fault was latent in the flag rather
 than introduced by turning it on.**
 
-### 319.3 · The half that makes showing it safe
+### 320.3 · The half that makes showing it safe
 
 **THE FIELD WAS WRITABLE ON NO SCREEN AT ALL.** It is stored, it rides in the
 workbook, every surface a pillar is read on now says it — and until today the
@@ -5047,7 +5047,7 @@ component nobody needed.
   moves both ends together.
 - **The office's, and asserted as such** — see 319.5.
 
-### 319.4 · The band takes an argument, not an object
+### 320.4 · The band takes an argument, not an object
 
 `pillarBand(code, name, right, kind)`: an **optional fourth argument**, because
 three of that function's six callers draw a **project**, which has no kind and
@@ -5065,7 +5065,7 @@ assumed** (§158): the table lives inside the objectives-breakdown dialog and
 comes out at **888px in an 890px box at 1920, 1440, 1280 and 1100, and 877 in
 879 at 1000** — nothing over, at any width.
 
-### 319.5 · The server needed nothing, and it is asserted anyway
+### 320.5 · The server needed nothing, and it is asserted anyway
 
 `kind` rides inside `items`, which the classifier compares with
 `omit(a, ["measures", "tactics"])` — so a pillar's kind has always been the
@@ -5084,7 +5084,7 @@ field that lives on the plan (§16.7). **3 red** with `kind` added to the omit
 list — and the three are the REFUSALS, which is the dangerous direction: a
 custodian silently re-labelling somebody else's pillar. 595/0.
 
-### 319.6 · The check, and its own two faults
+### 320.6 · The check, and its own two faults
 
 `checks/pillar-kind.py`, **0 failures**, proved able to fail **five ways** from
 the SOURCES (§276, because §238's hashed policy silences an edited built file):
@@ -5109,7 +5109,7 @@ back and went green on exactly the build it exists to catch. The value written
 is derived from what is stored, and the fixture asserts the two differ before
 the pick is made.
 
-### 319.7 · Verified
+### 320.7 · Verified
 
 - `checks/pillar-kind.py` **0 failures** (five sections, 18 assertions),
   falsified five ways from the sources: **6 / 3 / 3 / 1 / 1 red**.
@@ -5145,7 +5145,7 @@ the pick is made.
   working as designed: the `SHELL` name lives in the CACHING half, and that
   half is the one the generator drops. `tsc --noEmit` clean.
 
-### 319.8 · Recorded, not done
+### 320.8 · Recorded, not done
 
 The round settled five things and this builds one. The other four, with their
 decisions as Islam gave them:
@@ -5167,7 +5167,7 @@ decisions as Islam gave them:
 
 ---
 
-## 320 · Removing a capability: the box, or the box and its work
+## 321 · Removing a capability: the box, or the box and its work
 
 Islam, trying to take a wrapper off one of his own functions, with the
 browser's dialog open in front of him:
@@ -5176,7 +5176,7 @@ browser's dialog open in front of him:
 
 It did.
 
-### 320.1 · The press destroyed three projects and nothing said so
+### 321.1 · The press destroyed three projects and nothing said so
 
 `Remove` on Setup › Capabilities spliced the capability out of the list —
 whole. A project is not a row pointed at by a capability; it lives INSIDE one,
@@ -5198,7 +5198,7 @@ still behind a **browser** `confirm()`, which §95 argued against for exactly
 this class and §273.3 removed from the cycle panel. *The most destructive of
 the three ended up the least guarded.*
 
-### 320.2 · One word was doing two jobs
+### 321.2 · One word was doing two jobs
 
 - *"This box is in my way"* — a **move**.
 - *"This work is finished"* — a **delete**.
@@ -5206,7 +5206,7 @@ the three ended up the least guarded.*
 The button only ever did the second. Separating them is the whole change, and
 it is why the answer is two rows rather than a better sentence on one button.
 
-### 320.3 · The box stops being drawn; it is not taken out of the data
+### 321.3 · The box stops being drawn; it is not taken out of the data
 
 Two ways to make a project belong to the function were put to Islam with the
 cost of each, and he took **A**:
@@ -5233,7 +5233,7 @@ Giving a named grouping back later is re-drawing a strip, not a migration.
 What is genuinely lost is the specific box removed — its name, and which
 projects sat together under it — and that is what the archive is for.
 
-### 320.4 · The codes must not move, and the first build moved them
+### 321.4 · The codes must not move, and the first build moved them
 
 A project's code is its **position across the whole function** (§310), and
 `capsOfFunction()` hands them over in `GROUP.capabilities` order — so
@@ -5253,7 +5253,7 @@ and cycle snapshot is keyed on. A moved project keeps `cap1-P1` inside `cap2`,
 and no collision is possible because `mintRowId` mints from the list's own
 prefix.
 
-### 320.5 · Two answers, and the row that cannot be taken
+### 321.5 · Two answers, and the row that cannot be taken
 
 The mockup was signed off first (`design-mockups/capability-remove/`), drawn
 in the platform's own dialog, and Islam picked **B** of two treatments: the
@@ -5273,7 +5273,7 @@ weight is how the destructive one gets pressed for the tidy one.
 - **The destination is read BEFORE the dialog closes**, since `closeModal()`
   empties the overlay's body (§116.6).
 
-### 320.6 · The second door
+### 321.6 · The second door
 
 `data-trm="cap|<i>"` on the Temple's own table removes a capability too, with
 the same browser dialog and the same splice. **Reaching only the Setup page
@@ -5287,7 +5287,7 @@ and the button are a dialog apart (§48, §48.2).
 `capabilityHolds()` lost its last caller and is **deleted by name, never by
 line range** (§24, §214).
 
-### 320.7 · Verified
+### 321.7 · Verified
 
 - `checks/capability-remove.py` **0 failures over 30 assertions**, proved able
   to fail **five ways from the SOURCES** (§276): **21** with the old behaviour
@@ -5308,7 +5308,7 @@ line range** (§24, §214).
   green, including `pillar-project-remove`, whose dialog shares the styling
   this broadened.
 
-### 320.8 · Recorded, not done
+### 321.8 · Recorded, not done
 
 - **Moving a project INTO a capability** has no control, in either direction —
   a project is born inside one and removed from it. The machinery this builds
@@ -5324,7 +5324,7 @@ line range** (§24, §214).
 
 ---
 
-## 321 · A function's projects are its own
+## 322 · A function's projects are its own
 
 **Islam, 2026-09-12**, correcting a proposal of mine that would have hidden the
 problem rather than fixed it:
@@ -5340,16 +5340,16 @@ problem rather than fixed it:
 Spec 045 §8, **stage 1**. Stage 2 — a capability as a strategic entry beside
 the business units — is not built here.
 
-### 321.1 · The fault, and why hiding the box was the wrong answer
+### 322.1 · The fault, and why hiding the box was the wrong answer
 
-**§320.9 PROPOSED NOT DRAWING THE BAND where a function carries one box, and
+**§321.9 PROPOSED NOT DRAWING THE BAND where a function carries one box, and
 that is treating the symptom.** Islam's correction is the whole of this
 section: the problem is not that the word is on the screen, it is that **the
 only container the platform owned for a supporting function's projects was
 called a capability** — so every function that plans in projects appeared to
 hold a strategic capability whether it held one or not, and a real capability
 had nowhere of its own to live. Recorded as withdrawn rather than overwritten
-(Principle II); the measurement in §320.9 is still the evidence for this.
+(Principle II); the measurement in §321.9 is still the evidence for this.
 
 **MEASURED ON THE DEMO BEFORE ANYTHING WAS WRITTEN**: of the seven functions
 that plan in projects, **six carry exactly one capability** (only Marketing
@@ -5361,9 +5361,9 @@ Finance*; and **no project code mentions it at all** — they already read
 were already the function's everywhere the arithmetic touches them; the box was
 a layer of vocabulary over them.*
 
-### 321.2 · Two pieces already existed, which is what made it tractable
+### 322.2 · Two pieces already existed, which is what made it tractable
 
-- **A capability planned as a pillar is already there.** §319 shipped a
+- **A capability planned as a pillar is already there.** §320 shipped a
   pillar's `kind` — *Direction* or *Capability* — drawn and settable, one day
   earlier. That is Islam's first form, live.
 - **A function already holds everything a container holds.** §213 gave a
@@ -5371,7 +5371,7 @@ a layer of vocabulary over them.*
   resolved to the function's own key objectives. So a dissolved box has a home
   for its definition and its objectives without inventing a field.
 
-### 321.3 · No schema change, and no migration in SQL
+### 322.3 · No schema change, and no migration in SQL
 
 `functions` maps six columns in `lib/state-io.js` and files every other key
 into `extra`, so **`projects` on a function travels the road `items`,
@@ -5387,7 +5387,7 @@ of a function head and a project owner reporting in the same minutes (§147.7,
 §301). `treeFor("functions")` gains `projects`, **the same subtree a
 capability's projects are walked with** and never a second copy (§53.5).
 
-### 321.4 · The shape: a holder, in two halves
+### 322.4 · The shape: a holder, in two halves
 
 `fnOwnHolder(fk)` / `fnOwnHolderWritable(fk)` are `fnAsUnit` / `fnWritable` one
 format over, and follow them exactly — **the reading half hands out a shared
@@ -5402,13 +5402,13 @@ reporting walk and the codes all read — where each had its own
 twice already (§211, §213). And `eachHolder` is the one walk the snapshot, the
 restore, the new cycle and the id scanner share.
 
-**THE MOVE MUTATES IN PLACE AND NEVER REASSIGNS.** §320's `moveCapProjects`
+**THE MOVE MUTATES IN PLACE AND NEVER REASSIGNS.** §321's `moveCapProjects`
 wrote `to.projects = …`, which lands on a holder WRAPPER and is thrown away one
 line later — `fnAsUnit`'s own recorded trap wearing a different hat. Splicing
-writes through either destination and keeps §320's ordering rule, which is what
+writes through either destination and keeps §321's ordering rule, which is what
 keeps the codes stable.
 
-### 321.5 · The screens
+### 322.5 · The screens
 
 - **The band is not drawn over a function's own work.** `capBand`'s own comment
   states the rule it was failing: *"a function may carry several, and that band
@@ -5428,11 +5428,11 @@ keeps the codes stable.
   offers a function by name in the Read me's dropdown, the upload resolves the
   name it just offered, and the apply takes the **writing** holder.
 
-### 321.6 · The dissolve is one act, and the migration presses it
+### 322.6 · The dissolve is one act, and the migration presses it
 
 Islam: *"one more thing is the ability to turn functional projects to a
 capability and vice versa."* **This is the vice versa, and it was one more
-entry in a list §320's dialog already had** — the function itself is a
+entry in a list §321's dialog already had** — the function itself is a
 destination, and the one that is always there.
 
 **SO THE HELD STATE IS GONE.** The dialog Islam photographed on 11 September
@@ -5460,7 +5460,7 @@ every one of them — a brand-new client would have opened on eight archives of
 containers it never had. `archiveCapPlan` already refuses an empty plan on the
 other side, so the heal follows it (§53.5) rather than deciding it again.
 
-### 321.7 · Two things the checks found, both mine
+### 322.7 · Two things the checks found, both mine
 
 - **THE CLEAN SLATE AND THE DEMO'S "CLEAR PROJECT" MUST STILL AGREE (§67).**
   `clearedGraph()` emptied the eight boxes and kept their names — right while a
@@ -5473,7 +5473,7 @@ other side, so the heal follows it (§53.5) rather than deciding it again.
   assertion that reads the deck's cover. §266.9's rule — *a command that prints
   something is not a command that did the thing* — in a different tool.
 
-### 321.8 · Verified
+### 322.8 · Verified
 
 `checks/functional-projects.py` **34/0**, both ends of every claim, proved able
 to fail **four ways from the SOURCES** (§276): **3 / 4 / 2 / 6 red**. Its
@@ -5502,17 +5502,17 @@ INVERTED rather than deleted, because the case it guarded is exactly the case
 this has to get right · eleven neighbouring checks green · full `qa.py` ERRORS
 none.
 
-### 321.9 · Recorded, not done
+### 322.9 · Recorded, not done
 
 - **The worked example still ships its eight containers**, so the offline
   `file://` build draws them and a deployment does not. That is the
   transitional state this stage describes, and which the demo should show —
-  containers dissolved, or one real capability kept so §320's feature renders
-  something (§45.2) — is **Islam's**, and is spec 045 §10.4.
+  containers dissolved, or one real capability kept so §321's feature renders
+  something (§45.2) — is **Islam's**, and is spec 046 §10.4.
 - **Making projects a capability** is stage 2: it needs somewhere to promote
   into.
 - **A project's code changes when it is promoted**, which is the honest answer
-  and is recorded in spec 045 §10.5 as his to accept.
+  and is recorded in spec 046 §10.5 as his to accept.
 
 ## 36 · Multi-tenant — what to do when the time comes
 

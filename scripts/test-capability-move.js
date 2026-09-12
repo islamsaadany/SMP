@@ -1,4 +1,4 @@
-/* A PROJECT CHANGING HANDS SURVIVES A SAVE (§320).
+/* A PROJECT CHANGING HANDS SURVIVES A SAVE (§321).
 
    Removing a capability can now keep its projects: they move to another
    capability of the same function and the wrapper goes. The browser half is

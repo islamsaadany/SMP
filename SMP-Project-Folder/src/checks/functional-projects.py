@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""§321 · A FUNCTION'S PROJECTS ARE ITS OWN (spec 045, stage 1)
+"""§322 · A FUNCTION'S PROJECTS ARE ITS OWN (spec 046, stage 1)
 
 Islam: *"capability is something Strategic ... the problem with having the
 capability hidden in the functional plans is confusing for the whole

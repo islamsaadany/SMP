@@ -1,8 +1,8 @@
-/* ── §321 · A FUNCTION'S PROJECTS ARE ITS OWN, AT THE STORAGE LAYER ────────
+/* ── §322 · A FUNCTION'S PROJECTS ARE ITS OWN, AT THE STORAGE LAYER ────────
    The half the browser cannot see, and the half where being wrong is
    expensive: `projects.cap_id` is NOT NULL and CASCADEs, so a dissolve that
    does not land lets Postgres delete every project under the box while the
-   save reports success (§320's own proof, one model on).
+   save reports success (§321's own proof, one model on).
 
    THREE CLAIMS, each asserted at BOTH ENDS (§94.2):
 

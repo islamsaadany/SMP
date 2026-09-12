@@ -1,4 +1,4 @@
-"""A PILLAR SAYS WHETHER IT IS A DIRECTION OR A CAPABILITY (§319).
+"""A PILLAR SAYS WHETHER IT IS A DIRECTION OR A CAPABILITY (§320).
 
 Islam, of a client whose supporting functions plan the way a unit does: *"a
 capability might have targets and tactics like the pillar but it's mostly an

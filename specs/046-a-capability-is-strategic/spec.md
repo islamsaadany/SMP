@@ -1,6 +1,6 @@
-# 045 · A capability is a strategic entry, and a function's projects are its own
+# 046 · A capability is a strategic entry, and a function's projects are its own
 
-**Version:** v3.22 · **Decisions:** §321 · **Status:** model agreed with Islam; **stage 1 BUILT**, stage 2 not started
+**Version:** v3.22 · **Decisions:** §322 · **Renumbered:** built as spec 045 · §319–§321 and moved at the merge — `main` had taken both while this was in flight (§287, §301, §310, §318 and main’s own §319.1 all set the precedent: a gap is harmless where a collision is not). The heal keeps its `045-` registry name, because that name is a key and not a label (§30.2, §65). · **Status:** model agreed with Islam; **stage 1 BUILT**, stage 2 not started
 
 Islam, 2026-09-12, correcting a proposal of mine that would have hidden the
 problem rather than fixed it:
@@ -67,7 +67,7 @@ touches them. The box is a layer of vocabulary sitting on top.
 **And two pieces of the answer already exist**, which is what makes this
 tractable rather than a rewrite:
 
-- **A pillar can already say it is a capability.** §319 shipped `kind` with the
+- **A pillar can already say it is a capability.** §320 shipped `kind` with the
   values *Direction* and *Capability*, drawn and settable, on a unit's pillar
   and on a pillars function's. That is Islam's first form, live today.
 - **A function already holds everything a container holds.** §213 gave a
@@ -94,7 +94,7 @@ answers the other by force.**
 
 | | pillars | overview + projects | objectives & actions |
 |---|---|---|---|
-| **A capability** | yes (§319's `kind`, live) | yes (today's shape) | — |
+| **A capability** | yes (§320's `kind`, live) | yes (today's shape) | — |
 | **A business unit's own plan** | yes (today) | — | — |
 | **A supporting function's own plan** | yes (today) | **yes — new** | later (§318 §5) |
 
@@ -147,7 +147,7 @@ deliberately:
 back is Setup › Import & storage, exactly as it is for a removed pillar or
 project.
 
-**Proved against a real database, never claimed** (§172, §320's own lesson):
+**Proved against a real database, never claimed** (§172, §321's own lesson):
 `projects.cap_id` is `NOT NULL … ON DELETE CASCADE`, so a dissolve that does
 not land loses the projects while the save reports success.
 
@@ -168,7 +168,7 @@ re-upload.
 
 ### Giving the projects back — and it is stage 1's migration, not a second one
 
-**This already exists.** §320's Remove dialog offers *Keep the projects* and
+**This already exists.** §321's Remove dialog offers *Keep the projects* and
 picks a destination from the capability's siblings. Once a function can own
 projects, **the function itself is one more destination in that list** — and it
 is then the destination that is always there, so the held state disappears:
@@ -215,13 +215,13 @@ project's code is its position in the thing that holds it (§310), so `FIN02`
 becomes the capability's own code the moment it stops being Finance's second
 project. It is a derived label, not a stored identifier — nothing keys on it —
 but it is on every screen, in the deck and in the workbook, so **the control
-says so before the press**, the way §320's dialog names its cost.
+says so before the press**, the way §321's dialog names its cost.
 
 ### The edges
 
 - **Promoting nothing** is refused — a capability with no projects and no
   pillars has nothing to be.
-- **Demoting everything** empties the capability, which is §320's Remove: one
+- **Demoting everything** empties the capability, which is §321's Remove: one
   act, not two, and the same dialog.
 - **Both directions archive first** (§49.2, §232 — a fifth caller), so the way
   back is Setup › Import & storage.
@@ -244,8 +244,8 @@ says so before the press**, the way §320's dialog names its cost.
 Islam has **no real capabilities today**, so the two halves are not equally
 urgent and they do not depend on each other:
 
-**Stage 1 — a function's projects are its own.** *BUILT, §321.* The dissolve,
-the band gone, the Overview converged, the migration **through §320's own
+**Stage 1 — a function's projects are its own.** *BUILT, §322.* The dissolve,
+the band gone, the Overview converged, the migration **through §321's own
 dialog** (§6), the workbook and the deck following. No schema change and no
 SQL migration: a function's plan already rides in `functions.extra` (§118,
 §213), proved on a real Postgres rather than claimed (§172).
@@ -268,7 +268,7 @@ Each is its own decisions section, its own checks, its own merge.
 - The archive written **once**, by the dissolve itself, and restorable.
 - A pillars function's Overview and a projects function's asserted to
   **agree**, never as two literals (§53.5, §94.8).
-- **The other end of the cascade** (§320's own proof): a dissolve that fails to
+- **The other end of the cascade** (§321's own proof): a dissolve that fails to
   move the projects must go red, not green — the database deletes them and the
   save reports success.
 - The workbook a **fixed point** (§22, §294): downloaded, uploaded untouched,

@@ -5208,7 +5208,7 @@ function renderUnitNaming(u){
    arrive the way a unit's plan does — same page, same three steps, same
    review — with their own sheets, because the thing being planned is a
    project with deliverables, outcomes and milestones. */
-/* §321: A SUPPORTING FUNCTION'S OWN PLAN HAS THE CAPABILITY SHAPE — key
+/* §322: A SUPPORTING FUNCTION'S OWN PLAN HAS THE CAPABILITY SHAPE — key
    objectives and projects — so it goes down the same half of the import, and
    the subject that names it is `fn:<key>`. "isCap" is now "is a holder of
    projects", which is what every caller actually asks; the name is left alone

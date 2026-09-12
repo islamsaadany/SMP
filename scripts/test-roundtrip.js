@@ -121,7 +121,7 @@ const CLIENT_ARG = (function () {
   const seeded = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
     /* REWRITTEN, NOT LOOSENED (§218). This read `capabilities === 8`: the
        clean slate kept the SHELLS and cleared their content, which was right
-       while a capability was where a function's projects had to live. §321
+       while a capability was where a function's projects had to live. §322
        makes the box a thing a function CARRIES, and the eight the worked
        example ships are containers — Islam: "they caapbilities in raya trade
        are not capabilities they are just projecst under functions" — so a

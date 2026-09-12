@@ -41,7 +41,7 @@
     --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
     --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
-    --bad:#B23025; --bad-bg:#FBEDEB;
+    --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
     --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
   }
   @media (prefers-color-scheme: dark){
@@ -52,7 +52,7 @@
       --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
       --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
       --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
-      --bad:#E8776B; --bad-bg:#33211F;
+      --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
       --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
     }
   }
@@ -69,7 +69,7 @@
     --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
     --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
-    --bad:#E8776B; --bad-bg:#33211F;
+    --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
   }
   *{ box-sizing:border-box }
@@ -170,6 +170,37 @@
   .tag.none{ color:var(--warn); background:var(--warn-bg); border-color:var(--warn) }
   .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
   .tag.seat{ color:var(--ff); border-color:var(--ff) }
+
+  /* ── AN ARCHIVED CLIENT'S CARD (§321) ──────────────────────────────
+     The card it always was, quieter, and with no door. A dashed edge says
+     "set aside" the way the Add card's dashed edge already says "not yet a
+     client", so the page keeps one vocabulary rather than gaining a second
+     (§53.5). It is never `disabled` in the markup for the LOOK — it is
+     disabled because there is genuinely nothing behind it: their address is
+     closed, and a card that still opened would promise something that does
+     not work (§61, §96). */
+  .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
+  .ccard.arch:hover{ border-color:var(--line) }
+  /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
+     (§88's own answer, on a card rather than a table row): one line, clipped
+     where it does not fit, the whole of it one hover away. Measured — 
+     `islam.saadany@forefront.consulting` runs 4px past a 232px card, and this
+     is a `ui-monospace` string with no space in it, so it cannot wrap its way
+     out (§158: fit, never "and it overflows"). */
+  .tag.arch{ color:var(--ink-3); border-color:var(--line); background:var(--surface);
+    max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  /* BRING BACK TAKES THE CORNER SETTINGS HOLDS on a live card, because on an
+     archived client it is what Settings was: the one thing you came to the
+     card to do. */
+  .cback{ font:600 10px/1.6 ui-monospace, SFMono-Regular, monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-2); background:var(--surface);
+    border:1px solid var(--line); border-radius:7px; padding:2px 8px; cursor:pointer }
+  .cback:hover, .cback:focus-visible{ border-color:var(--amber-tx); outline:none }
+  /* TWO CONTROLS, SO THEY NEED A ROW: `.ccfg` is absolute and a second
+     absolute chip would sit on top of it. The wrapper is what is positioned
+     and the chips sit in it, so a third one later costs no arithmetic. */
+  .cacts{ position:absolute; top:11px; right:11px; display:flex; gap:5px; align-items:center }
+  .cacts .ccfg{ position:static; top:auto; right:auto }
   :root[data-theme="dark"] .tag.seat, :root:not([data-theme="light"]) .tag.seat{ color:var(--ff-quiet) }
 
   /* ── tables ───────────────────────────────────────────────── */
@@ -285,6 +316,46 @@
   .wzchoice .cwhy{ display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px }
   .wzlaterline{ margin-top:12px; font-size:13px; color:var(--ink-3);
     border-left:2px solid var(--line); padding-left:11px }
+
+  /* ── ENDING A CLIENT (§321) ─────────────────────────────────────────
+     §273.4's shape, which Islam chose for the reporting cycle: the
+     destructive act in its own block, behind a rule, under a heading, so
+     nobody arrives at it by tabbing down the form. Settings is already the
+     door — a door is only a guard if the dangerous thing is behind it. */
+  .wzend{ margin-top:26px; padding-top:16px; border-top:1px solid var(--line); max-width:560px }
+  .wzendkey{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px }
+  .wzendwhy{ margin:0 0 12px; font-size:13px; color:var(--ink-3); max-width:62ch }
+  .wzendrow{ display:flex; align-items:center; gap:9px; flex-wrap:wrap }
+
+  /* THE WORD IS RED AND THE BUTTON IS NOT (§41's budget): --bad as a fill
+     would be the loudest thing on a page whose one accent is the amber. The
+     FILL is kept for the confirmation, where the volume belongs — and a fill
+     and a word are TWO tokens, declared together (§38.4, §94.8's
+     --cta/--cta-ink), because the first build of this wrote `color:#fff` and
+     measured 2.90:1. 6.28 light, 6.35 dark. */
+  .btn.risk{ color:var(--bad); border-color:var(--bad) }
+  .btn.risk:hover:not(:disabled){ background:var(--bad-bg); border-color:var(--bad) }
+  .btn.risksolid{ background:var(--bad); border-color:var(--bad); color:var(--bad-ink) }
+
+  /* The question is asked IN the block rather than over the page: there is no
+     dialog anywhere on this page, and one act does not earn the first (§2b). */
+  .wzask{ border:1px solid var(--bad); background:var(--bad-bg); border-radius:9px;
+    padding:13px 14px }
+  .wzask p{ margin:0 0 11px; font-size:13.5px; color:var(--ink) }
+  .wzask .goes{ margin:0 0 11px; font:400 12.5px/1.7 ui-monospace, SFMono-Regular, monospace;
+    color:var(--ink-2) }
+  .wzask label{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px }
+  .wzask .fld{ background:var(--surface) }
+  .wzask .row{ display:flex; align-items:center; gap:9px; margin-top:12px; flex-wrap:wrap }
+
+  /* An archived client's flow says so BEFORE anything else: the fields below
+     are read-only, and a page that did not say why would read as broken
+     (§45.2). */
+  .wzarched{ border:1px solid var(--line); background:var(--surface-2); border-radius:9px;
+    padding:11px 13px; margin-bottom:18px; font-size:13.5px; color:var(--ink-2) }
+  .wzarched b{ color:var(--ink) }
 
   /* the searchable standard list */
   .wzpick{ position:relative }

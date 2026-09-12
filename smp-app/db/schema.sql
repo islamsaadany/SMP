@@ -29,6 +29,10 @@ CREATE TABLE tenants (
   size        text NOT NULL DEFAULT '',       -- a band, never a headcount (§320)
   notes       text NOT NULL DEFAULT '',
   made_here   boolean NOT NULL DEFAULT false,  -- §313.31
+  -- §321: read beside status='retired', which is what "archived" is stored as.
+  -- NULL on a live client, and cleared again when one is brought back.
+  archived_at timestamptz,
+  archived_by text,                            -- the account's email, printed
   created_at  timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT tenants_kind   CHECK (kind IN ('client','demo')),
   CONSTRAINT tenants_status CHECK (status IN ('active','retired'))

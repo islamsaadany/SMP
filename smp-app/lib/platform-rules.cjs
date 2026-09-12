@@ -200,10 +200,55 @@
     return isAdmin(account) && !!target && target.email !== account.email;
   }
 
-  /* WHAT THE CARDS DRAW is what the endpoints will open — asked once, here. */
+  /* WHAT THE CARDS DRAW is what the endpoints will open — asked once, here.
+     A retired client is out of this list by design; §321's band draws those,
+     and only for whoever can do something about them. */
   function visibleClients(world, account, clients) {
     return (clients || NO_LIST).filter(function (c) {
       return c && c.status !== "retired" && mayListClient(world, account, c);
+    });
+  }
+
+  /* ── ARCHIVING A CLIENT, AND DELETING ONE (§321) ────────────────────
+     Islam: "we need an option to remove the client" — "both, demo client is
+     not removable, and the name is Archive not put aside".
+
+     ONE RIGHT, BOTH DIRECTIONS. Whoever may put a client away may take it
+     out again: two rules would mean a platform where somebody can archive a
+     client and then not reach the control that undoes it (§61), which is the
+     worst shape a reversible act can have.
+
+     THE ADMIN'S ALONE, and that is a narrowing of `mayCreateClient` rather
+     than a copy of it: adding a client can be handed to a consultant through
+     the access table, and removing one cannot. §89's rule — destruction is
+     the super user's — read at the platform's own level.
+
+     AND THE WORKED EXAMPLE IS NEITHER ARCHIVED NOR DELETED (Islam's, asked
+     and answered before anything was built): it is the practice ground, it
+     is reseeded rather than removed, and `kind` is what says so — never its
+     key, which is a client's key like any other (§317). */
+  function mayArchiveClient(world, account, client) {
+    if (!isActive(account) || isClientPerson(account)) return false;
+    if (!client || client.kind === "demo") return false;
+    return isAdmin(account);
+  }
+
+  /* DELETING NEEDS THE CLIENT TO BE ARCHIVED ALREADY, and that is the guard
+     rather than a second confirmation: archiving closes the door, so nobody
+     is working inside a client while it is being deleted, and the two presses
+     are separated by a state somebody had to choose. Asked of the STORED row
+     on the server as well as here, or it is a rule the screen keeps and the
+     save does not (§42). */
+  function mayDeleteClient(world, account, client) {
+    return mayArchiveClient(world, account, client) && !!client && client.status === "retired";
+  }
+
+  /* The band under the grid, and who sees it. NOT everybody `visibleClients`
+     would list: a consultant shown a row of clients they can neither open nor
+     bring back has been given furniture (§94.15). */
+  function archivedClients(world, account, clients) {
+    return (clients || NO_LIST).filter(function (c) {
+      return c && c.status === "retired" && mayArchiveClient(world, account, c);
     });
   }
 
@@ -219,6 +264,8 @@
     mayReadConsultants: mayReadConsultants, mayManageConsultants: mayManageConsultants,
     mayCreateClient: mayCreateClient, mayEditAccess: mayEditAccess,
     mayIssuePasswordTo: mayIssuePasswordTo, maySetAdmin: maySetAdmin,
-    visibleClients: visibleClients
+    visibleClients: visibleClients,
+    mayArchiveClient: mayArchiveClient, mayDeleteClient: mayDeleteClient,
+    archivedClients: archivedClients
   };
 });

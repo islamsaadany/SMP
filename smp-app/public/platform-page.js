@@ -45,6 +45,15 @@
     page.appendChild(h);
     return h;
   }
+  /* A COUNT AND ITS NOUN (§321). The client platform has a `plural` helper
+     and this page does not — and it is not borrowed, because that one is
+     wired to the tenant's own labels and this page has none. Irregular
+     plurals are passed in rather than guessed at: "persons" and
+     "capabilitys" are what a rule that appends an "s" produces (§107.8's
+     trap, on the other side of the switch). */
+  function nOf(n, one, many) {
+    return n + " " + (n === 1 ? one : (many || one + "s"));
+  }
   function initials(name) {
     var w = String(name || "?").trim().split(/\s+/);
     return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : w[0].slice(0, 2)).toUpperCase();
@@ -208,6 +217,31 @@
         apart.appendChild(dgrid);
         page.appendChild(apart);
       }
+
+      /* ── ARCHIVED CLIENTS (§321) ────────────────────────────────────
+         The page's OWN band — the one the worked example sits in — rather
+         than a second answer to "a row under the grid" (§53.5).
+
+         A CLIENT THAT SIMPLY VANISHED COULD NEVER COME BACK: the only route
+         would be through a card that is no longer drawn (§61). That is the
+         whole reason this band exists, and it is also where Delete becomes
+         reachable, so being archived is a real step rather than a hidden
+         state.
+
+         Drawn only when there is one, like the band above it: a heading over
+         an empty band is furniture, and a platform with nothing archived has
+         nothing to say. The server has already decided WHO sees this — it
+         sends the list only to somebody who can bring one back, so there is
+         no second answer here (§42). */
+      if (j.archived && j.archived.length) {
+        var arch = el("div", "apart");
+        arch.appendChild(el("span", "akey", "Archived"));
+        var agrid = el("div", "cards");
+        agrid.dataset.grid = "archived";
+        j.archived.forEach(function (c) { agrid.appendChild(archCardFor(c)); });
+        arch.appendChild(agrid);
+        page.appendChild(arch);
+      }
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);
@@ -253,6 +287,108 @@
       b.appendChild(cog);
     }
     return b;
+  }
+
+  /* ── AN ARCHIVED CLIENT'S CARD (§321) ──────────────────────────────
+     Everything the live card says about a client is about a client somebody
+     is working in — a seat, a cycle, a count of units — and none of it is
+     true of one that has been set aside, so this says the two things that
+     ARE: when it was archived and who did it. A card that carried the live
+     tags would read as a client you could still open.
+
+     IT HAS NO DOOR. Their address is already closed, so a press that
+     navigated there would land on "that client is not available" — §61 from
+     the other side: a control that leads somewhere refusing is worse than no
+     control. `disabled` because there is nothing behind it, not for the look.
+
+     AND THE DATE IS THE READER'S, never the database's spelling: an ISO
+     timestamp is a fact about storage. An unreadable or missing one says
+     nothing at all rather than printing "Invalid Date" (§35, §15.1). */
+  function archDate(v) {
+    if (!v) return "";
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return "";
+    try {
+      return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+    } catch (e) { return ""; }
+  }
+
+  function archCardFor(c) {
+    var b = el("button", "ccard arch");
+    b.type = "button";
+    b.disabled = true;
+    b.dataset.client = c.key;
+    b.dataset.arch = "1";
+    if (c.mark) {
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+    } else {
+      b.appendChild(el("div", "cmark", initials(c.name)));
+    }
+    b.appendChild(el("h2", null, c.name));
+    if (c.industry) b.appendChild(el("p", "ind", c.industry));
+    var foot = el("div", "foot");
+    var when = archDate(c.at);
+    foot.appendChild(el("span", "tag arch", when ? "Archived " + when : "Archived"));
+    if (c.by) {
+      var who = el("span", "tag arch", c.by);
+      who.title = "Archived by " + c.by;   /* clipped above, so the whole of it is here */
+      foot.appendChild(who);
+    }
+    b.appendChild(foot);
+
+    /* TWO CONTROLS, AND THE SECOND IS WHY THE FIRST IS NOT ENOUGH.
+       Bring back is the ordinary thing to want from this band, so it is here
+       rather than three presses away. Settings is the ONLY route to Deleting
+       — that block lives on an archived client and nowhere else — so a card
+       carrying Bring back alone would put the one irreversible act behind a
+       screen with no door to it (§61). The check for this file found that by
+       going red on it.
+
+       Bring back is ONE function shared with the block inside (§53.5), never
+       a second copy of the request. */
+    if (c.canConfig) {
+      var acts = el("div", "cacts");
+      var back = el("span", "cback", "Bring back");
+      back.setAttribute("role", "button"); back.tabIndex = 0;
+      var go = function (e) { e.stopPropagation(); e.preventDefault(); bringBack(c.key, c.name); };
+      back.addEventListener("click", go);
+      back.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") go(e); });
+      acts.appendChild(back);
+
+      var cog = el("span", "ccfg", "Settings");
+      cog.setAttribute("role", "button"); cog.tabIndex = 0;
+      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawSetup(c.key); };
+      cog.addEventListener("click", open);
+      cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+      acts.appendChild(cog);
+      b.appendChild(acts);
+    }
+    return b;
+  }
+
+  /* ONE REQUEST, BOTH DIRECTIONS AND BOTH SURFACES (§53.5): the band's Bring
+     back and the block's Bring back are this, and the block's Archive is this
+     with `on` true. A refusal is SAID — a control that silently does nothing
+     is the shape this project keeps recording (§32, §171). */
+  function setArchived(key, on) {
+    return post({ action: "archiveClient", key: key, on: !!on });
+  }
+  function bringBack(key, name) {
+    setArchived(key, false).then(function (j) {
+      if (!j.ok) { say(j.error || "Could not bring " + name + " back.", true); return; }
+      /* `go("clients")`, NEVER `drawClients()` — the first build called the
+         renderer directly and `drawClients` does not CLEAR the page, so it
+         appended a whole second copy underneath the first and the Archived
+         band the press had just emptied was still sitting there, above a grid
+         that now held the client twice. §100.2's family: whoever redraws a
+         page is the one that clears it, and on this page that is `go`. Found
+         by the check going red on "the band is gone" while every assertion
+         about the grid passed. */
+      go("clients");
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      say("Could not reach the server.", true);
+    });
   }
 
   function addCard() {
@@ -345,19 +481,30 @@
       S = { key:null, at:0, seen:[], canEdit:true, dirty:false, shapeDirty:false,
             client:{ name:"", industry:"", size:"", notes:"", mark:null },
             shape:{ companies:[], units:[], functions:[], words:{} },
-            team:[], office:[], register:[], seats:null, holds:null };
+            team:[], office:[], register:[], seats:null, holds:null,
+            archived:false, archivedAt:null, archivedBy:null,
+            canArchive:false, canDelete:false, goes:null };
       paintSetup();
       return Promise.resolve();
     }
     lead(false, "Reading…");
     return post({ action:"client", key:key }).then(function (j) {
       if (!j.ok) { clear(); say(j.error || "Could not open that client.", true); return; }
-      S = { key:key, at:0, seen:[], canEdit:!!j.canEdit, dirty:false, shapeDirty:false,
+      /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§321). `canEdit` is the
+         grant AND the standing: their door is closed, so a form that took
+         changes would be collecting them for a client nobody can open. The
+         SERVER refuses the same two saves, or this is a rule the screen
+         keeps and the save does not (§42). */
+      var arch = j.client.status === "retired";
+      S = { key:key, at:0, seen:[], canEdit:!!j.canEdit && !arch, dirty:false, shapeDirty:false,
             client:{ name:j.client.name, industry:j.client.industry || "",
                      size:j.client.size || "", notes:j.client.notes || "", mark:j.client.mark || null },
             shape:j.shape || { companies:[], units:[], functions:[], words:{} },
             team:j.team || [], office:j.office || [], register:j.register || [],
-            seats:j.seats, holds:j.holds, made_here:j.client.made_here };
+            seats:j.seats, holds:j.holds, made_here:j.client.made_here,
+            archived:arch, archivedAt:j.client.archived_at || null,
+            archivedBy:j.client.archived_by || null,
+            canArchive:!!j.canArchive, canDelete:!!j.canDelete, goes:j.goes || null };
       S.shape.companies = S.shape.companies || [];
       S.shape.units = S.shape.units || [];
       S.shape.functions = S.shape.functions || [];
@@ -453,6 +600,23 @@
       rail.appendChild(b);
     });
     page.appendChild(rail);
+
+    /* ── AN ARCHIVED CLIENT SAYS SO FIRST (§321) ────────────────────
+       Before the fields, because they are read-only from here down and a
+       form that refuses every keystroke with nothing saying why reads as
+       broken (§45.2). Drawn on every step, not only the first: whichever
+       step somebody lands on has to explain itself. */
+    if (S.archived) {
+      var ab = el("div", "wzarched");
+      ab.appendChild(document.createTextNode("This client is "));
+      ab.appendChild(el("b", null, "archived"));
+      var when = archDate(S.archivedAt);
+      ab.appendChild(document.createTextNode(
+        ". " + (when ? "Archived " + when : "Archived") +
+        (S.archivedBy ? " by " + S.archivedBy : "") +
+        ". Their link is closed, and nothing here can be changed until they are brought back."));
+      page.appendChild(ab);
+    }
 
     var grid = el("div", "wzgrid");
     var col = el("div");
@@ -644,6 +808,14 @@
     SIZES.forEach(function (z) {
       var b = el("button", null, z[1]);
       b.type = "button";
+      /* DISABLED, NOT MERELY INERT (§220, §61). The handler has always opened
+         `if (!S.canEdit) return;` and nothing had ever made `canEdit` false —
+         `mayConfigureClient` is `mayReadConfig`, so anybody who could open
+         this flow could write in it — so the read-only path had never once
+         been drawn. §321 makes it real for an archived client, and a band
+         that lights under the pointer and stores nothing is §96 with a
+         cursor on it. */
+      b.disabled = !S.canEdit;
       b.setAttribute("aria-pressed", S.client.size === z[0] ? "true" : "false");
       b.appendChild(el("span", "ppl", z[2] + " people"));
       b.addEventListener("click", function () {
@@ -680,7 +852,259 @@
 
     rs.appendChild(markBlock());
     box.appendChild(rs);
+    box.appendChild(endBlocks());
     return box;
+  }
+
+  /* ── ENDING A CLIENT (§321, spec 045) ───────────────────────────────
+     Islam: "we need an option to remove the client" — "both, demo client is
+     not removable, and the name is Archive not put aside".
+
+     WHY IT LIVES HERE. Settings is already the door onto everything about a
+     client, and §273.4 settled this shape for the reporting cycle at Islam's
+     own direction: the destructive act in its own block, behind a rule, under
+     a heading, at the foot of the form. A door is only a guard if the
+     dangerous thing is behind it — and a control that sat on the card would
+     be one press from the grid.
+
+     NOT DRAWN RATHER THAN DISABLED. The worked example can be neither
+     archived nor deleted and neither can anybody but the platform's admin, so
+     for them there is no block at all (§61): a greyed control invites a press
+     and then explains itself, where an absent one asks nothing.
+
+     THE ASK IS IN THE BLOCK. There is no dialog anywhere on this page, and
+     one act does not earn the first (§2b) — and a question asked where the
+     button was is a question about that button.
+
+     AND THE BLOCK REWRITES ITSELF, NEVER `paintSetup()` (§71.2): a repaint
+     under a typing hand would throw away the name half typed into the
+     confirmation, which is the one field on this page somebody is asked to
+     copy out by eye. */
+  function endBlocks(){
+    var wrap = el("div");
+    if (!S.key || !S.canArchive) return wrap;
+
+    function block(keyword){
+      var b = el("div", "wzend");
+      b.appendChild(el("span", "wzendkey", keyword));
+      return b;
+    }
+    function rebuild(){ wrap.textContent = ""; draw(); }
+
+    function trouble(box, msg){
+      var p2 = el("p", "wzendwhy", msg);
+      p2.style.color = "var(--bad)";
+      box.appendChild(p2);
+    }
+
+    function draw(){
+      if (!S.archived) {
+        /* ── ARCHIVING ─────────────────────────────────────────────── */
+        var a = block("Archiving");
+        a.appendChild(el("p", "wzendwhy",
+          "Archiving takes " + S.client.name + " off the clients page and closes their link — " +
+          "anybody who goes to it is turned away exactly as if this client had never existed. " +
+          "Nothing is lost, and you can bring them back."));
+        var row = el("div", "wzendrow");
+        var go = el("button", "btn risk", "Archive this client");
+        go.type = "button";
+        go.dataset.archive = "ask";
+        go.addEventListener("click", function () { askArchive(a); });
+        row.appendChild(go);
+        a.appendChild(row);
+        wrap.appendChild(a);
+        return;
+      }
+
+      /* ── THE WAY BACK ──────────────────────────────────────────────
+         First, and on its own, because it is the ordinary thing to want
+         from this screen and the one below it is not. */
+      var r = block("Bringing them back");
+      r.appendChild(el("p", "wzendwhy",
+        "Their link starts working again and the card returns to the clients page, exactly as it was."));
+      var rrow = el("div", "wzendrow");
+      var rb = el("button", "btn", "Bring " + S.client.name + " back");
+      rb.type = "button";
+      rb.dataset.unarchive = "1";
+      rb.addEventListener("click", function () {
+        rb.disabled = true; rb.textContent = "Bringing them back…";
+        setArchived(S.key, false).then(function (j) {
+          if (!j.ok) { rb.disabled = false; rb.textContent = "Bring " + S.client.name + " back";
+                       trouble(r, j.error || "Not brought back."); return; }
+          drawSetup(S.key);
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          rb.disabled = false; rb.textContent = "Bring " + S.client.name + " back";
+          trouble(r, "Could not reach the server.");
+        });
+      });
+      rrow.appendChild(rb);
+      r.appendChild(rrow);
+      wrap.appendChild(r);
+
+      if (!S.canDelete) return;
+
+      /* ── AND THE WAY OUT ───────────────────────────────────────────
+         Reachable from an archived client and nowhere else. The server
+         asks the same thing again (§42), so this is where the rule is
+         SHOWN rather than where it is kept. */
+      var d = block("Deleting");
+      d.appendChild(el("p", "wzendwhy",
+        "Deleting removes everything this client has — their plan, their figures, their people " +
+        "and their conversations. It cannot be undone and there is nothing to restore from."));
+      var drow = el("div", "wzendrow");
+      var db = el("button", "btn risk", "Delete permanently\u2026");
+      db.type = "button";
+      db.dataset.delete = "ask";
+      db.addEventListener("click", function () { askDelete(d); });
+      drow.appendChild(db);
+      d.appendChild(drow);
+      wrap.appendChild(d);
+    }
+
+    /* ── THE ARCHIVE QUESTION ─────────────────────────────────────────
+       It NAMES the client, because the way this goes wrong is pressing it
+       on the wrong card — and by the time somebody is here they have been
+       reading a form with this client's name at the top of it. */
+    function askArchive(box){
+      box.textContent = "";
+      box.appendChild(el("span", "wzendkey", "Archiving"));
+      var q = el("div", "wzask");
+      q.dataset.ask = "archive";
+      var p1 = el("p");
+      p1.appendChild(document.createTextNode("Archive "));
+      p1.appendChild(el("b", null, S.client.name));
+      p1.appendChild(document.createTextNode("?"));
+      q.appendChild(p1);
+      var goes = el("p", "goes");
+      goes.appendChild(document.createTextNode("Their link stops working at once."));
+      goes.appendChild(el("br"));
+      goes.appendChild(document.createTextNode("The card leaves the clients page."));
+      goes.appendChild(el("br"));
+      goes.appendChild(document.createTextNode("Everything they have is kept."));
+      q.appendChild(goes);
+      q.appendChild(el("p", null, "You can bring them back from the Archived band at any time."));
+      var row = el("div", "row");
+      var yes = el("button", "btn risksolid", "Archive " + S.client.name);
+      yes.type = "button"; yes.dataset.archive = "do";
+      var no2 = el("button", "btn", "Cancel");
+      no2.type = "button"; no2.dataset.archive = "cancel";
+      no2.addEventListener("click", rebuild);
+      yes.addEventListener("click", function () {
+        yes.disabled = true; no2.disabled = true; yes.textContent = "Archiving…";
+        setArchived(S.key, true).then(function (j) {
+          if (!j.ok) { yes.disabled = false; no2.disabled = false;
+                       yes.textContent = "Archive " + S.client.name;
+                       trouble(q, j.error || "Not archived."); return; }
+          /* Back to the clients page, where the Archived band now holds it —
+             landing on the record of what happened rather than on a form for
+             a client that has just been set aside (§144's rule). */
+          go("clients");
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          yes.disabled = false; no2.disabled = false;
+          yes.textContent = "Archive " + S.client.name;
+          trouble(q, "Could not reach the server.");
+        });
+      });
+      row.appendChild(yes); row.appendChild(no2);
+      q.appendChild(row);
+      box.appendChild(q);
+    }
+
+    /* ── THE DELETE QUESTION ──────────────────────────────────────────
+       It counts what goes from the client's OWN rows, read at the moment
+       the card was opened, so the sentence in front of the one irreversible
+       press names what is actually there rather than what somebody wrote
+       into a template. A count that could not be read says so — printing a
+       nought there would read as "there is nothing to lose" (§93). */
+    function askDelete(box){
+      box.textContent = "";
+      box.appendChild(el("span", "wzendkey", "Deleting"));
+      var q = el("div", "wzask");
+      q.dataset.ask = "delete";
+      var p1 = el("p");
+      p1.appendChild(document.createTextNode("Delete "));
+      p1.appendChild(el("b", null, S.client.name));
+      p1.appendChild(document.createTextNode(" and everything in it?"));
+      q.appendChild(p1);
+
+      var goes = el("p", "goes");
+      goes.dataset.goes = "1";
+      var g = S.goes;
+      if (!g) {
+        goes.appendChild(document.createTextNode(
+          "What is in this client could not be read, so it cannot be listed here."));
+      } else {
+        var lines = [];
+        var shape = [];
+        if (g.units != null) shape.push(nOf(g.units, "business unit"));
+        if (g.functions != null) shape.push(nOf(g.functions, "supporting function"));
+        if (shape.length) lines.push(shape.join(" \u00b7 "));
+        if (g.people != null) lines.push(nOf(g.people, "person", "people") + " on the register");
+        var rest = [];
+        if (g.plans != null) rest.push(nOf(g.plans, "line") + " of plan");
+        if (g.capabilities != null && g.capabilities) rest.push(nOf(g.capabilities, "capability", "capabilities"));
+        if (g.conversations != null) rest.push(nOf(g.conversations, "conversation"));
+        if (rest.length) lines.push(rest.join(" \u00b7 "));
+        lines.forEach(function (t, i) {
+          if (i) goes.appendChild(el("br"));
+          goes.appendChild(document.createTextNode(t));
+        });
+      }
+      q.appendChild(goes);
+      q.appendChild(el("p", null,
+        "This cannot be undone, and there is no backup to restore from. " +
+        "If anybody needs their plans, download them first."));
+
+      var lab = el("label", null, "Type the client's name to confirm");
+      lab.setAttribute("for", "wz-confirm");
+      q.appendChild(lab);
+      var typed = el("input", "fld");
+      typed.id = "wz-confirm";
+      typed.setAttribute("autocomplete", "off");
+      typed.dataset.confirm = "1";
+      q.appendChild(typed);
+
+      var row = el("div", "row");
+      var yes = el("button", "btn risksolid", "Delete " + S.client.name + " for ever");
+      yes.type = "button"; yes.dataset.delete = "do"; yes.disabled = true;
+      var no2 = el("button", "btn", "Cancel");
+      no2.type = "button"; no2.dataset.delete = "cancel";
+      no2.addEventListener("click", rebuild);
+      /* THE MATCH IS EXACT, trimmed at the ends and nothing looser — and the
+         SERVER asks it again, so this only decides when the button opens. */
+      typed.addEventListener("input", function () {
+        yes.disabled = typed.value.trim() !== String(S.client.name).trim();
+      });
+      yes.addEventListener("click", function () {
+        yes.disabled = true; no2.disabled = true; typed.readOnly = true;
+        yes.textContent = "Deleting…";
+        post({ action:"deleteClient", key:S.key, confirm:typed.value })
+          .then(function (j) {
+            if (!j.ok) {
+              no2.disabled = false; typed.readOnly = false;
+              yes.textContent = "Delete " + S.client.name + " for ever";
+              yes.disabled = typed.value.trim() !== String(S.client.name).trim();
+              trouble(q, j.error || "Not deleted.");
+              return;
+            }
+            go("clients");
+          }).catch(function (e) {
+            if (String(e.message) === "sign in") return;
+            no2.disabled = false; typed.readOnly = false;
+            yes.textContent = "Delete " + S.client.name + " for ever";
+            yes.disabled = false;
+            trouble(q, "Could not reach the server.");
+          });
+      });
+      row.appendChild(yes); row.appendChild(no2);
+      q.appendChild(row);
+      box.appendChild(q);
+    }
+
+    draw();
+    return wrap;
   }
 
   /* ── THE MARK ON THE CLIENT'S DOOR (§313.36) ───────────────────────
@@ -808,6 +1232,7 @@
       .forEach(function (c) {
         var b = el("button", "wzchoice");
         b.type = "button";
+        b.disabled = !S.canEdit;            /* as the size band, and for the same reason */
         b.setAttribute("aria-pressed", c[0] === has ? "true" : "false");
         b.appendChild(el("span", "cname", c[1]));
         b.appendChild(el("span", "cwhy", c[2]));
@@ -1034,13 +1459,21 @@
     box.appendChild(summ);
     box.appendChild(el("div", "lab", "Where to now"));
     var doors = el("div", "wzdoors");
-    var d1 = el("button", "wzdoor go");
-    d1.type = "button";
-    d1.appendChild(el("span", "dn", "Open the platform"));
-    d1.appendChild(el("span", "dw", "Go into " + (S.client.name || "the client") + " and start the plans."));
-    d1.addEventListener("click", function () {
-      commitSetup().then(function (good) { if (good && S.key) location.assign("/" + S.key); });
-    });
+    /* AND AN ARCHIVED CLIENT HAS NO DOOR TO OFFER (§321, §61). Archiving is
+       what closes their address, so this button would have landed on "that
+       client is not available" — a control that leads somewhere refusing is
+       worse than no control, and the way back is two blocks up the same page.
+       Drawn for a live client exactly as it was. */
+    var d1 = null;
+    if (!S.archived) {
+      d1 = el("button", "wzdoor go");
+      d1.type = "button";
+      d1.appendChild(el("span", "dn", "Open the platform"));
+      d1.appendChild(el("span", "dw", "Go into " + (S.client.name || "the client") + " and start the plans."));
+      d1.addEventListener("click", function () {
+        commitSetup().then(function (good) { if (good && S.key) location.assign("/" + S.key); });
+      });
+    }
     var d2 = el("button", "wzdoor");
     d2.type = "button";
     d2.appendChild(el("span", "dn", "Back to clients"));
@@ -1048,7 +1481,8 @@
     d2.addEventListener("click", function () {
       commitSetup().then(function (good) { if (good) go("clients"); });
     });
-    doors.appendChild(d1); doors.appendChild(d2);
+    if (d1) doors.appendChild(d1);
+    doors.appendChild(d2);
     box.appendChild(doors);
     return box;
   }

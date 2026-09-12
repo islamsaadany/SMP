@@ -8695,7 +8695,56 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-11 &mdash; **&sect;318: setting a client up &mdash; the
+*Last Updated: 2026-09-12 &mdash; **&sect;321: a client is archived, and only
+then deleted (spec 045).** Islam: *"we need an option to remove the client"*,
+then *"both, demo client is not removable, and the name is Archive not put
+aside."* **MOST OF IT WAS BUILT AND HAD NO BUTTON** &mdash; `tenants.status`
+has read `'active' | 'retired'` since the table was written, `visibleClients()`
+already keeps a retired client off the cards and `door.ts` already turns its
+address away *identically* to a client that never existed, and **nothing had
+ever set it**; `lib/tenant-delete.ts` has had no caller outside its spike.
+&sect;61's trap twice over. **DELETE IS REACHABLE FROM AN ARCHIVED CLIENT AND
+NOWHERE ELSE**, which is the guard rather than a second confirmation: archiving
+closes the door, so nobody is working inside a client while it is deleted.
+**THE STORED WORD STAYS `retired` AND THE LABEL IS "Archived"** (&sect;30.2,
+&sect;65). **THE BLOCK IS &sect;273.4's SHAPE**, which Islam chose once already
+for the cycle &mdash; the destructive act in its own block, behind a rule, under
+a heading, at the foot of Settings, because a door is only a guard if the
+dangerous thing is behind it. **THE BAND IS THE PAGE'S OWN** (&sect;317's
+`.apart`, &sect;53.5) and exists because a client that simply vanished could
+never come back, drawn only for somebody who can bring one back (decided on the
+server &mdash; a row of clients a consultant can do nothing with is furniture,
+&sect;94.15). **THE NAME IS TYPED BACK AND THE SERVER ASKS AGAIN** (&sect;42):
+the admin's right, the client already archived, and an exact match, all three
+on the server. **IT RUNS ON THE OWNER POOL AND THAT IS NOT A PREFERENCE**
+&mdash; `deleteTenant` proves itself by counting every tenant-owned table back
+to zero and those tables are RLS-FORCED, so as `smp_app` every count reads
+nought *whatever survived* (&sect;113.8). **THE MOCKUP CAUGHT ONE FAULT AND THE
+CHECK CAUGHT THREE MORE**: the confirming button was `#fff` on `--bad` at
+**2.90:1** with its dark override written outside its media query so it applied
+in LIGHT (&sect;38.4 &mdash; `--bad` gains the ink twin it has never had, three
+complete palette blocks, 6.28/6.35); an archived card had **no route to
+Settings**, so Delete was unreachable (&sect;61, found by the check going red);
+`bringBack` called `drawClients()`, which does not CLEAR, so it painted a second
+page under the first and the emptied band was still sitting there (&sect;100.2);
+and **`canEdit` had never once been false in this product** (`mayConfigureClient`
+IS `mayReadConfig`), so archiving drew the read-only path for the first time and
+left the size band lighting under the pointer and storing nothing, plus a door
+into a client whose address is shut. **AND THE TWO RULE FILES HAD DRIFTED** for
+an hour &mdash; `lib/platform-rules.js` and `smp-app/lib/platform-rules.cjs` are
+byte-identical by design and **nothing compared them**, so
+`test-platform-rules.js` &sect;12 now asserts it. `checks/client-archive.py`
+0 failures on both stacks' copies, falsified **11 / 3 / 3 red**;
+`test-platform-rules.js` 60/0 falsified 1 / 2 / 1; `platform-cards` 19/0 and
+`client-setup-outside` 0 on both copies; 588/0, 136/0, `tsc` clean; the built
+client platform **byte-identical** &mdash; nothing in `src/` is touched.
+**NOT PROVED AND SAID**: the server half has never spoken to a database in this
+session. **RECORDED, NOT DONE**: the card carries no reason, the client's own
+people are told nothing, and the frozen `api/platform.js` learns neither action
+&mdash; it has been unreachable since the cutover (&sect;317.8, &sect;320's
+precedent).*
+
+*Earlier: 2026-09-11 &mdash; **&sect;318: setting a client up &mdash; the
 wizard (spec 044).** Islam: *"any Consultant who gets into the platform and adds
 a new client to set up this client he needs to go through a series of
 questions."* A guided flow through Setup: the client's name, its year, its

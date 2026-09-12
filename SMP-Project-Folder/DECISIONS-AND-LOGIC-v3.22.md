@@ -42569,3 +42569,260 @@ merge every time.
 
 
 ---
+
+## §319 — THE HORIZON ARRIVES WITH THE PLAN, AND NOT BEFORE IT (2026-09-11, spec 044)
+
+Islam, of the set-up flow: ***"why is the horizon is in the setup? time is not
+relevant in the setup. the plan we upload will need this not the setup."***
+
+**HE IS RIGHT, AND MEASURING WHY FOUND SOMETHING SHARPER THAN THE ASK.** My
+first answer to him was that the risk was a second unit's upload moving the
+year — and driving it says the fault is a step earlier and much worse:
+`planFromWorkbook` **assigned `GROUP.horizon` while READING**, and that reader
+runs the moment a file is CHOSEN. So opening a plan to look at it moved the
+planning horizon for the whole client, before any Apply; **Discard did not put
+it back**; and nothing on the screen said so. *A reader that writes is a fault
+this project has recorded before (§42, §50.6); what makes this one bite is that
+the write happened during a PREVIEW, which is the one moment a person believes
+nothing has happened yet.*
+
+**THE VALUE IS LIFTED OFF THE ROWS AT THE ONE CALL SITE.** `planFromWorkbook`
+returns the rows and rides the horizon beside them (`out.horizon`), and
+`shell.html` — the only caller — takes it into `IMP.horizon` and no further. It
+is written by the APPLY press, with the change **named in the outcome** and
+**warned about in the preview before the press**, because there is one horizon
+for the whole client and this is the one value in a unit's workbook that
+reaches outside that unit.
+
+**AND IT SAYS SO ONLY WHEN IT MOVES** (§41's budget): a file carrying the year
+already stored is the normal round trip — download, change a target, upload —
+and a warning on every one of those is a warning nobody reads. `horizonInFile`
+and `horizonMoves` are the two tests, named once in `config-data.js`.
+
+**`null` IS "THE FILE DID NOT SAY" AND `""` IS "THE FILE SAID NOTHING", AND
+BOTH LEAVE THE STORED YEAR** — the rule the import always had, kept rather than
+re-derived. `IMP.horizon` is cleared at all five places `IMP` is reset, or a
+value read from one file would be applied by the next press.
+
+`checks/plan-horizon.py` drives the REAL file input with the platform's own
+workbook doctored in one cell: **0 failures, 5 red** on the build before.
+**And its own first run reported a correct build broken four times** — the
+fixture guessed a workbook was a map keyed by sheet name where it is an ARRAY
+of `{name, widths, head, rows}` (§100.3), so it doctored nothing; it refuses a
+fixture it failed to doctor now, rather than shipping a lie.
+
+---
+
+## §320 — SETTING A CLIENT UP HAPPENS ON THE OUTSIDE, AND A CLIENT IS BORN EMPTY (2026-09-11, spec 044 revision 2)
+
+Islam, after creating ElAbd Foods and finding four things wrong with the card
+that made it: ***"the setup should happen on the external creatoin not inside
+.. because the default create it's own units and functions that's wrong there
+is not default. it should open blank if they want bu the wizard should start on
+the outside window so the people after the setup can get intop the platform
+ready."***
+
+**THAT SENTENCE RETIRES A FEATURE RATHER THAN MOVING ONE.** §318's wizard lived
+in the client's own Setup rail — right while a client arrived already shaped,
+and wrong the moment he said there is no default shape. `src/wizard.js`,
+`wizard.css` and their rail entry are **DELETED** (§24), and the flow is
+Forefront's own page: create the client, and the flow starts on the next
+screen — the client's details, its business units, its companies, its
+supporting functions and how each plans, the words it uses, and who runs its
+office.
+
+**A CLIENT IS BORN EMPTY.** It used to be minted from §67's *cleared* graph,
+which keeps the unit and function NAMES and empties their content: right for
+migration 004, which clears a deployment that is already this client's, and
+wrong for one that has never existed — so every new client arrived wearing Raya
+Trade's units. `frozen.bare()` is that same clear with the four shape lists
+emptied too.
+
+**EVERY ROW IS MINTED BY THE PLATFORM'S OWN MINTER.** `frozen.shape()` runs
+`addCompany`, `addBusinessUnit` and `addFunction` — the frozen sources, in a
+`vm` — so a unit created out here is byte for byte a unit created on Setup's own
+page, and there is no second answer to what a unit is shaped like (§53.5).
+
+**THE ANSWERS ARE THE LIST**, so the flow REPLACES the shapes rather than adding
+to them — a unit taken off the list has to disappear, or walking the flow twice
+leaves rows nobody can see. **And it refuses a client that has already been
+planned** (409, naming what is in it), asked of the STORED graph (§42), because
+that is the one state where replacing loses real work.
+
+**NO DRAFT, AND PROGRESS IS DERIVED** (§129's rule): the data IS the progress,
+so pausing costs nothing and there is no second copy of Setup that can disagree
+with Setup.
+
+**FOUR THINGS HE REPORTED, AND ONE OF THEM WAS A `var`.** The PNG button opened
+nothing because `var pick` was declared twice in one function and `var` is
+function-scoped, so *Choose a PNG* called `.click()` on a dropdown (§56.7); the
+notice piled up rather than being replaced; two screens asked for the name and
+industry twice; and pressing Save said *saved* and went nowhere.
+
+**AND TWO ANSWERS ARE HIS, NOT MINE.** The industry is Strategy Formulation's
+own 45-entry GICS list rather than a free text box, with a size BAND beside it
+(migration 004) — *"for the client we will need data like the number of
+employees"*. And the parts the platform cannot do yet are **drawn, dulled and
+INERT** — *"keep the mockup as is but kepe the non existing parts dull for
+now"* — as plain `<div>`s rather than disabled buttons, so they are inert by
+construction rather than by a rule somebody could relax. **Two of the check's
+assertions passed vacuously** until they were guarded, because `every([])` is
+true and a build that deleted the dulled choice satisfied both (§113.8).
+
+**MULTI-TENANCY IS DELIBERATELY NOT IN IT** — his reversal of his own earlier
+answer, recorded as one: *"this is a fix I will do in the tenant management
+platform."*
+
+`checks/client-setup-outside.py` **0 failures on both stacks' copies**, proved
+able to fail **1 red** (the PNG button unwired) and **4 red** (the shape never
+posted). Its own probe **died rather than reporting twice** (§215) and **called
+a correct build broken once**, asking for a stored `"projects"` the platform
+keeps as an ABSENCE (§50.6).
+
+---
+
+## §321 — A CLIENT IS ARCHIVED, AND ONLY THEN DELETED (2026-09-12, spec 045)
+
+Islam: ***"we need an option to remove the client"*** — then, of the two acts
+drawn for him, ***"both, demo client is not removable, and the name is Archive
+not put aside."***
+
+**MOST OF IT WAS ALREADY BUILT AND HAD NO BUTTON, WHICH IS THE FIRST THING TO
+SAY.** `tenants.status` has read `'active' | 'retired'` since the table was
+written and everything downstream already honours it — `visibleClients()` keeps
+a retired client off the cards, and `door.ts` turns its address away
+*identically* to a client that never existed. **Nothing in the product has ever
+SET it.** And `lib/tenant-delete.ts` — one statement that cascades through every
+tenant-owned table and then counts them all back to zero — has existed since the
+rebuild's spike and has never had a caller outside it. §61's trap twice over:
+the machinery built, the door not drawn. **So this section is the door, and the
+question was which of the two acts it opens.**
+
+**THE TWO ARE GENUINELY DIFFERENT AND THE DIFFERENCE IS THE DESIGN.** Archiving
+closes the link and keeps everything; deleting keeps nothing and there is no
+backup to restore from. Islam took both, and the shape that makes both safe is
+that **Delete is reachable from a client that is ALREADY archived and nowhere
+else** — that is the guard rather than a second confirmation, because archiving
+closes the door, so nobody is working inside a client while it is being deleted,
+and the two presses are separated by a state somebody had to choose.
+
+**THE STORED WORD STAYS `retired` AND THE LABEL IS "Archived"** (§30.2, §65's
+own rule: the register's column was renamed on the page and its key was not).
+Three files compare against that string and a CHECK constraint names it;
+renaming a stored value for a word nobody reads is a migration with no reader on
+the other end of it.
+
+**WHERE IT LIVES IS §273.4's SHAPE, WHICH ISLAM ALREADY CHOSE ONCE** — for the
+reporting cycle's pen: the destructive act in its own block, behind a rule,
+under a heading, at the foot of the form. Settings is already the door onto
+everything about a client, and *a door is only a guard if the dangerous thing is
+behind it*. A control on the card would be one press from the grid.
+
+**THE ARCHIVED BAND IS THE PAGE'S OWN DEVICE** — §317's `.apart`, the one the
+worked example already sits in (§53.5) — and it exists because **a client that
+simply vanished could never come back**: the only route would be through a card
+that is no longer drawn (§61). It is also where Delete becomes reachable, so
+being archived is a real step rather than a hidden state. **Drawn only for
+somebody who can bring one back**, decided on the SERVER: a consultant shown a
+row of clients they can neither open nor restore has been given furniture
+(§94.15).
+
+**AND THE CHECK FOUND A HOLE IN MY OWN DESIGN BEFORE THE PAGE DID.** The mockup
+gave an archived card *Bring back* and nothing else, and said Settings held the
+Delete block — without saying how anybody reaches Settings on a card that no
+longer has a cog. **Delete would have been unreachable.** The card carries both
+controls now, in a row, and the assertion that found it stayed.
+
+**MEASURING THE CONFIRMATION CAUGHT A SECOND FAULT, IN THE MOCKUP** (§38.4, the
+eighth time): the confirming button read `color:#fff` on `--bad` — **2.90:1,
+measured** — with a dark-mode override written OUTSIDE its media query, so
+`:root:not([data-theme="light"])` matched in LIGHT and the word was #231010 on
+#B23025. Two faults in one line: a fill asked to carry type, and a theme rule
+with no theme around it. **`--bad` gains the ink twin it has never had**,
+declared in all three palette blocks the way this file's own palette is
+(complete blocks, never a base plus overrides) — 6.28:1 light, 6.35:1 dark.
+
+**AND `canEdit` HAD NEVER ONCE BEEN FALSE IN THIS PRODUCT.**
+`mayConfigureClient` **is** `mayReadConfig`, so anybody who could open the set-up
+flow could write in it — which means the read-only path had never been drawn,
+and archiving is what makes it real. Probed step by step, it left **the size
+band and the companies choice lighting under the pointer and storing nothing**
+(§96 with a cursor on it) and **a door into a client whose address is shut**,
+which would have landed on *"that client is not available"* (§61). All three
+fixed, and asserted, or they come back.
+
+**THE NAME IS TYPED BACK, AND THE SERVER ASKS AGAIN.** Three things stand in
+front of the delete and all three are asked on the SERVER as well as on the
+screen (§42): the admin's right, the client being archived already, and the name
+matching exactly — trimmed at the ends and nothing looser, because a match that
+ignored case or spacing would be a smaller gate than the one the screen
+promises.
+
+**IT RUNS ON THE OWNER POOL, AND THAT IS NOT A PREFERENCE.** `deleteTenant`
+proves the delete by counting every tenant-owned table back to zero, and those
+tables are RLS-FORCED: as `smp_app`, with no tenant set, every one of those
+counts reads nought *whatever survived* — the assertion would pass because it
+could see nothing, which is the one way this particular check must never fail
+(§113.8).
+
+**WHAT A DELETE TAKES IS COUNTED FROM THE CLIENT'S OWN ROWS** at the moment the
+card is opened, and only for a client that is already archived — reading five
+counts for every card's Settings would be paying for a screen almost nobody
+opens. **A count that cannot be read says so** rather than printing a nought,
+which there would read as *there is nothing to lose* (§93).
+
+**THE WORKED EXAMPLE IS NEITHER ARCHIVED NOR DELETED** (Islam's, asked and
+answered before anything was built): it is the practice ground and it is
+reseeded rather than removed, and `kind` is what says so — never its key, which
+is a client's key like any other (§317).
+
+**AND THE TWO RULE FILES HAD DRIFTED FOR AN HOUR.** `lib/platform-rules.js` and
+`smp-app/lib/platform-rules.cjs` were byte-identical and the new stack's own
+header says so — and **nothing compared them**, so adding a rule to one and not
+the other is silent, and the screen and the server then answer differently
+(§53.5, §42). `test-platform-rules.js` §12 asserts the two files are identical;
+it is what would have said so, and it goes red when they are not.
+
+**A COUNT AND ITS NOUN ARE THIS PAGE'S OWN** (`nOf`): the client platform has a
+`plural` helper wired to the tenant's labels and this page has none, so it is
+not borrowed — and irregular plurals are passed in rather than guessed at,
+because *"persons"* and *"capabilitys"* are what appending an "s" produces
+(§107.8's trap, on the other side of the switch).
+
+**AND ONE REAL BUG THE CHECK FOUND BY GOING RED.** `bringBack` called
+`drawClients()` directly, and `drawClients` does not CLEAR the page — so it
+appended a second copy of the whole page under the first, and the Archived band
+the press had just emptied was still sitting there above a grid that now held
+the client twice. *Whoever redraws a page is the one that clears it, and on this
+page that is `go()`* (§100.2's family). Every assertion about the grid passed;
+the one that caught it was *"the band is gone"*.
+
+**TWO ASSERTIONS OF MINE WERE THE CHECK, NOT THE PRODUCT**: `inner_text` is the
+RENDERED text and `.tag` is uppercased by CSS, so a case-sensitive compare
+asserts the stylesheet rather than the sentence (§301.6, walked into while the
+rule was on the page). And the archived card's *who* is an EMAIL, which runs 4px
+past a 232px card in a monospace string with no space in it to wrap at — clipped
+with the whole of it on the hover, which is §88's own answer, measured to fit at
+six widths from 1440 down to 420.
+
+**Proved:** `checks/client-archive.py` **0 failures on both stacks' copies**, 52
+assertions, falsified three ways from the SOURCES — **11 red** with the band
+never drawn, **3 red** with Delete offered on a live client, **3 red** with the
+button not gated on the typed name. `test-platform-rules.js` **60/0**, falsified
+three ways (**1 / 2 / 1 red**). The two neighbouring checks on this page
+(`platform-cards` 19/0, `client-setup-outside` 0 failures) green on both copies.
+588/0 authoriser, 136/0 differ, `check:deploy` 5/0, `tsc` clean, and the built
+client platform **byte-identical** — nothing in `src/` is touched by any of this.
+
+**NOT PROVED, AND SAID RATHER THAN LEFT AS AN ABSENCE:** the server half has
+never spoken to a database in this session — there is none here. The page, the
+requests it sends and the rules behind them are proved; one real round trip
+through Postgres, and one real cascade, are not.
+
+**RECORDED, NOT DONE:** the archived card says when and by whom and carries no
+reason; an archived client's own people are not told anything, because nothing
+in this platform reaches out to them; and the frozen `api/platform.js` does not
+learn either action — it has been unreachable since the cutover put Next in
+front of it (§317.8), which is §320's own precedent.
+
+---

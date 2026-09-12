@@ -19,6 +19,8 @@ import type { Tenant } from "./door.ts";
 import { withTenant } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
+import { deleteTenant } from "./tenant-delete.ts";
+import { ownerPool } from "./db.ts";
 
 const require = createRequire(import.meta.url);
 /* the worked example the product generates (scripts/extract-state.js), at the
@@ -40,9 +42,10 @@ const NO_CLIENT = "That client is not available.";
 
 type Account = { id: string; email: string; name: string; is_admin: boolean; kind: string; status: string };
 type World = { mine: { client_key: string; person_key: string; seat: string; tenant_id: string }[]; access: Record<string, Record<string, string>> };
-type ClientRow = Tenant & { industry: string; notes: string; size: string };
+type ClientRow = Tenant & { industry: string; notes: string; size: string;
+  archived_at: string | null; archived_by: string | null };
 
-const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here";
+const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here, archived_at, archived_by";
 async function clientByKey(c: Q, key: unknown): Promise<ClientRow | null> {
   if (!key) return null;
   const r = await c.query("SELECT " + CLIENT_COLS + " FROM tenants WHERE key = $1", [String(key)]);
@@ -106,7 +109,21 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
         canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable });
     }
-    return ok({ cards, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+    /* ── THE ARCHIVED BAND (§321) ────────────────────────────────────
+       Its own list, not a flag on the grid's: `visibleClients` keeps a
+       retired client off the cards and every other caller depends on that,
+       so widening it would change what "visible" means for all of them.
+       Drawn only for somebody who can bring one back (FF.archivedClients),
+       and carrying NO facts — an archived client's rows are not read, both
+       because nothing on the card says anything about them and because
+       reading every archived tenant's graph on every visit to this page is a
+       cost nobody asked for. */
+    const archived = FF.archivedClients(world, account, all).map((row: ClientRow) => ({
+      key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark,
+      at: row.archived_at, by: row.archived_by,
+      canConfig: FF.mayReadConfig(world, account, row)
+    }));
+    return ok({ cards, archived, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
   }
 
   /* ── Forefront's own people ── */
@@ -198,9 +215,33 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
           o[e.key] = e.bu; return o; }, {})
       };
     } catch (e) { console.error("reading " + row.key + "'s shape:", (e as Error).message); }
+    /* ── WHAT A DELETE WOULD TAKE (§321) ──────────────────────────────
+       Counted from the client's own rows at the moment of asking, never
+       written from memory, so the sentence in front of the one irreversible
+       press names what is actually there. Read ONLY for a client that is
+       already archived — that is the only place Delete exists, and reading
+       five counts for every card's Settings would be paying for a screen
+       almost nobody opens. A count that cannot be read is NULL and the page
+       says so rather than printing a nought (§93: an error is not an
+       absence, and here it would read as "there is nothing to lose"). */
+    let goes: unknown = null;
+    if (row.status === "retired" && FF.mayDeleteClient(world, account, row)) {
+      try {
+        goes = await withTenant(row.id, async (c) => {
+          const n = async (tbl: string) => Number((await c.query("SELECT count(*)::int AS n FROM " + tbl)).rows[0].n);
+          const h = holds as { plans: number; capabilities: number; units: number; functions: number } | null;
+          return {
+            units: h ? h.units : null, functions: h ? h.functions : null,
+            plans: h ? h.plans : null, capabilities: h ? h.capabilities : null,
+            people: await n("people"), conversations: await n("chat_threads")
+          };
+        });
+      } catch (e) { console.error("counting " + row.key + "'s rows:", (e as Error).message); }
+    }
     const { id: _id, ...client } = row;
     return ok({ client, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
-      shape, holds,
+      shape, holds, goes,
+      canArchive: FF.mayArchiveClient(world, account, row), canDelete: FF.mayDeleteClient(world, account, row),
       office: (await pool.query("SELECT email, name, is_admin FROM users WHERE kind = 'office' AND status = 'active' ORDER BY name")).rows });
   }
 
@@ -208,6 +249,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const row = await clientByKey(pool, body.key);
     if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
     if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's configuration is not yours to change.");
+    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§321, §42). The flow draws its
+       fields read-only; without this the promise is the screen's alone and a
+       console walks past it. Refused BY NAME, so the answer names the state
+       rather than the permission — they are not the same errand. */
+    if (row.status === "retired") return no(409, row.name + " is archived. Bring them back before changing anything.");
     let mark: string | null = null;
     if (typeof body.mark === "string") {
       if (body.mark === "") mark = "";
@@ -245,6 +291,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const row = await clientByKey(pool, body.key);
     if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
     if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's set-up is not yours to change.");
+    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§321, §42). The flow draws its
+       fields read-only; without this the promise is the screen's alone and a
+       console walks past it. Refused BY NAME, so the answer names the state
+       rather than the permission — they are not the same errand. */
+    if (row.status === "retired") return no(409, row.name + " is archived. Bring them back before changing anything.");
     const a = (body.shape || {}) as Record<string, unknown>;
     const list = (k: string) => Array.isArray(a[k]) ? (a[k] as unknown[]).slice(0, 200) : [];
     const answers = {
@@ -268,6 +319,81 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         "losing that. Change them on the client's own Setup pages instead.");
     }
     return ok({});
+  }
+
+  /* ── ARCHIVING A CLIENT, AND BRINGING ONE BACK (§321) ────────────────
+     Islam: "we need an option to remove the client" — "both, demo client is
+     not removable, and the name is Archive not put aside".
+
+     ONE ACTION, BOTH DIRECTIONS, because it is one right and one row: `on`
+     says which way. Two endpoints would be two places to forget the demo
+     client in.
+
+     THE STATE IS `status`, WHICH EVERYTHING DOWNSTREAM ALREADY READS —
+     door.ts turns an archived client's address away exactly as it turns away
+     one that never existed, and visibleClients keeps it off the cards. This
+     writes the one column and nothing else follows it around. The stored word
+     is `retired` and the label is "Archived" (§30.2, §65).
+
+     AND THE TWO FACTS ARE CLEARED ON THE WAY BACK, never left standing: they
+     describe the state the row is IN, so a live client carrying "archived 12
+     Sep by Islam" is a value nobody chose (§50.6). */
+  if (action === "archiveClient") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayArchiveClient(world, account, row)) {
+      return no(403, row.kind === "demo"
+        ? "The worked example is not archived — it is reseeded."
+        : "Archiving a client is the platform admin's.");
+    }
+    const on = body.on !== false;
+    if (on) {
+      await pool.query("UPDATE tenants SET status = 'retired', archived_at = now(), archived_by = $2 WHERE id = $1",
+        [row.id, account.email]);
+    } else {
+      await pool.query("UPDATE tenants SET status = 'active', archived_at = NULL, archived_by = NULL WHERE id = $1", [row.id]);
+    }
+    return ok({ status: on ? "retired" : "active" });
+  }
+
+  /* ── DELETING ONE ────────────────────────────────────────────────────
+     THREE THINGS STAND IN FRONT OF THIS, and all three are asked HERE rather
+     than on the screen (§42): the admin's right, the client being archived
+     ALREADY, and the name typed back. A rule the page keeps and the endpoint
+     does not is a rule anybody with a console can walk past.
+
+     THE NAME IS COMPARED AS IT IS STORED, trimmed at both ends and nothing
+     looser: a match that ignored case or spacing would be a smaller gate than
+     the one the screen promises, and this is the press it exists for.
+
+     IT RUNS ON THE OWNER POOL, AND THAT IS NOT A PREFERENCE. deleteTenant
+     proves the delete by counting every tenant-owned table back to zero, and
+     those tables are RLS-FORCED: as `smp_app`, with no tenant set, every one
+     of those counts reads nought whatever survived — the assertion would pass
+     because it could see nothing, which is the one way this check must never
+     fail (§113.8). The owner bypasses the policy, so the count is real.
+
+     EXPORTING FIRST IS THE CALLER'S STEP AND IT IS A PERSON'S, said on the
+     screen rather than done here: there is nowhere to put a copy that this
+     delete would not also reach. */
+  if (action === "deleteClient") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayArchiveClient(world, account, row)) {
+      return no(403, row.kind === "demo"
+        ? "The worked example is not deleted — it is reseeded."
+        : "Deleting a client is the platform admin's.");
+    }
+    if (!FF.mayDeleteClient(world, account, row)) {
+      return no(409, "Archive " + row.name + " first. Deleting is only offered on a client that is already archived.");
+    }
+    if (String(body.confirm || "").trim() !== String(row.name).trim()) {
+      return no(400, "Type the client's name exactly as it is written to confirm.");
+    }
+    const { counts } = await deleteTenant(ownerPool(), row.id);
+    console.log("[platform] " + account.email + " deleted " + row.key + " (" + row.name + ") — " +
+      Object.keys(counts).length + " tenant tables at zero");
+    return ok({ deleted: row.key });
   }
 
   if (action === "createClient") {

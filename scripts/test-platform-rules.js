@@ -125,5 +125,44 @@ eq("a consultant sees their seats and whatever the table lists", seen.join(","),
 eq("hidden takes the rest away",
   F.visibleClients(wHidden, lead, ALL).map(c => c.key).join(","), "raya-trade,rhi,demo");
 
+console.log("── 11 · archiving a client, and deleting one (§321) ──────");
+/* BOTH ENDS EVERY TIME (§94.2). Asserting only who MAY passes on a build
+   that lets everybody; asserting only who may not passes on one that lets
+   nobody, and this control has to exist for exactly one person. */
+check("the admin may archive a client", F.mayArchiveClient(wAdmin, admin, RAYA));
+check("…a consultant with a seat on it may not", !F.mayArchiveClient(wLead, lead, RAYA));
+check("…nor one with none", !F.mayArchiveClient(wLead, lead, RHI));
+check("…nor a client's own person", !F.mayArchiveClient(wAdmin, rayaCEO, RAYA));
+check("…nor a retired account", !F.mayArchiveClient(wAdmin, Object.assign({}, admin, { status: "retired" }), RAYA));
+check("the worked example is not archived", !F.mayArchiveClient(wAdmin, admin, DEMO),
+  "Islam: the demo client is not removable");
+check("…and bringing one back is the SAME right", F.mayArchiveClient(wAdmin, admin, GONE),
+  "two rules would mean archiving something nobody can undo (§61)");
+
+check("deleting needs the client archived already", !F.mayDeleteClient(wAdmin, admin, RAYA));
+check("…and then the admin may", F.mayDeleteClient(wAdmin, admin, GONE));
+check("…a consultant still may not", !F.mayDeleteClient(wLead, lead, GONE));
+check("…and the worked example never, archived or not",
+  !F.mayDeleteClient(wAdmin, admin, Object.assign({}, DEMO, { status: "retired" })));
+
+const band = F.archivedClients(wAdmin, admin, ALL).map(c => c.key);
+eq("the band is the retired clients", band.join(","), "old");
+eq("…and is empty for anybody who cannot bring one back",
+  F.archivedClients(wLead, lead, ALL).map(c => c.key).join(","), "");
+check("nobody is in both lists at once",
+  F.visibleClients(wAdmin, admin, ALL).every(c => band.indexOf(c.key) < 0), band.join(","));
+
+console.log("── 12 · one module, two files ────────────────────────────");
+/* THE NEW STACK RUNS ITS OWN COPY of this file and its header says it is
+   "the frozen module byte for byte" — which nothing compared, so a rule added
+   to one and not the other drifts in silence and the screen and the server
+   answer differently (§53.5, §42). §321 made them differ for an hour, and
+   this is what would have said so. */
+const fs = require("fs"), path = require("path");
+const here = fs.readFileSync(path.join(__dirname, "..", "lib", "platform-rules.js"), "utf8");
+const there = fs.readFileSync(path.join(__dirname, "..", "smp-app", "lib", "platform-rules.cjs"), "utf8");
+check("lib/platform-rules.js and smp-app/lib/platform-rules.cjs are identical",
+  here === there, here.length + " bytes against " + there.length);
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

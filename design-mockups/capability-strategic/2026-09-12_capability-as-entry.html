@@ -1,0 +1,349 @@
+<title>A capability is a strategic entry</title>
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --bad:#B04434; --bad-tx:#8C3327;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --bad:#D97066; --bad-tx:#E79A93;
+      --warn-bg:#33241A; --warn-tx:#E1935F;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --bad:#D97066; --bad-tx:#E79A93;
+    --warn-bg:#33241A; --warn-tx:#E1935F;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+        -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1060px; margin:0 auto; padding-block:36px; padding-left:20px; padding-right:20px; }
+  h1{ font-size:27px; margin:0 0 8px; letter-spacing:-.3px; text-wrap:balance; }
+  .lede{ font-size:15px; color:var(--ink-2); margin:0; max-width:66ch; line-height:1.6; }
+  .lede + .lede{ margin-top:10px; }
+  .said{ border-left:3px solid var(--gold); padding:2px 0 2px 14px; margin:20px 0 0;
+         font-size:15px; color:var(--ink); max-width:66ch; line-height:1.6; }
+  .said i{ display:block; font-style:normal; font-size:11px; color:var(--ink-3);
+           text-transform:uppercase; letter-spacing:.1em; margin-top:7px; }
+
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:38px 0 12px; display:block; }
+  h2{ font-size:19px; margin:0 0 8px; letter-spacing:-.2px; }
+  .note{ font-size:13.5px; color:var(--ink-3); margin:10px 0 0; max-width:70ch; line-height:1.55; }
+  .note b{ color:var(--ink-2); font-weight:600; }
+
+  .shot{ margin:0; }
+  .shot img{ display:block; width:100%; height:auto; border:1px solid var(--line);
+             border-radius:4px; background:var(--surface); }
+  .shot figcaption{ font:600 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+                    margin:0 0 7px; display:flex; align-items:baseline; gap:9px; }
+  .now figcaption{ color:var(--ink-3); }
+  .then figcaption{ color:var(--good-tx); }
+  figcaption em{ font:400 12px/1.3 var(--sans); letter-spacing:0; text-transform:none;
+                 color:var(--ink-3); }
+  .pair{ display:grid; gap:22px; }
+
+  .facts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1px;
+          background:var(--line); border:1px solid var(--line); border-radius:4px;
+          overflow:hidden; margin-top:16px; }
+  .facts div{ background:var(--surface); padding:14px 16px; }
+  .facts b{ display:block; font:700 24px/1.1 var(--sans); font-variant-numeric:tabular-nums;
+            letter-spacing:-.5px; }
+  .facts span{ display:block; font-size:12.5px; color:var(--ink-3); margin-top:5px; line-height:1.45; }
+
+  .ask{ border:1px solid var(--line); border-radius:4px; background:var(--surface);
+        padding:18px 20px; margin-top:16px; }
+  .ask + .ask{ margin-top:12px; }
+  .ask h3{ font-size:15.5px; margin:0 0 4px; }
+  .ask p{ margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.6; max-width:70ch; }
+  .opts{ display:grid; gap:10px; margin-top:14px; }
+  .opt{ border:1px solid var(--line); border-radius:3px; padding:12px 14px;
+        background:var(--ground); }
+  .opt.pick{ border-color:var(--good); background:var(--good-bg); }
+  .opt .t{ font-weight:700; font-size:13.5px; display:flex; align-items:center; gap:8px; }
+  .opt .d{ font-size:13px; color:var(--ink-2); margin-top:4px; line-height:1.55; }
+  .opt.pick .d{ color:var(--good-tx); }
+  .tag{ font:700 9.5px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+        color:var(--good-tx); background:var(--surface); border:1px solid var(--good);
+        border-radius:99px; padding:4px 7px; }
+
+  .caveat{ background:var(--warn-bg); color:var(--warn-tx); border-radius:3px;
+           padding:13px 15px; font-size:13.5px; line-height:1.6; margin-top:16px; max-width:70ch; }
+  .caveat b{ font-weight:700; }
+
+  ul.plain{ margin:12px 0 0; padding-left:19px; font-size:13.5px; color:var(--ink-2);
+            line-height:1.65; max-width:70ch; }
+  ul.plain li + li{ margin-top:6px; }
+  code{ font-family:var(--mono); font-size:12.5px; background:var(--surface-2);
+        border-radius:2px; padding:1px 5px; }
+  footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--line);
+          font-size:12.5px; color:var(--ink-3); line-height:1.6; }
+  @media (max-width:640px){ h1{ font-size:23px; } }
+</style>
+
+<style>
+  /* Stage 2 additions, in the same vocabulary as the round before it. */
+  .switchrow{ display:grid; gap:14px; margin-top:16px; }
+  @media (min-width:760px){ .switchrow{ grid-template-columns:1fr 1fr; } }
+  .step{ border:1px solid var(--line); border-radius:4px; background:var(--surface);
+         padding:0; overflow:hidden; margin-top:16px; }
+  .step > .h{ background:var(--surface-2); border-bottom:1px solid var(--line);
+              padding:10px 16px; font:700 10.5px/1 var(--sans); letter-spacing:.14em;
+              text-transform:uppercase; color:var(--gold-deep); }
+  .step > .b{ padding:16px 18px; }
+  .step p{ margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.6; max-width:70ch; }
+  .step p + p{ margin-top:9px; }
+  .panel{ border:1px solid var(--line); border-radius:5px; background:var(--surface);
+          max-width:560px; overflow:hidden; }
+  .panel .t{ background:var(--panel); color:#fff; padding:11px 16px; font-weight:700;
+             font-size:14px; }
+  .panel .r{ padding:13px 16px; border-top:1px solid var(--line-soft); font-size:13.5px;
+             display:flex; gap:12px; align-items:flex-start; }
+  .panel .r:first-of-type{ border-top:0; }
+  .panel .r .tick{ width:15px; height:15px; border:1.5px solid var(--stone); border-radius:3px;
+                   flex:none; margin-top:2px; }
+  .panel .r .tick.on{ background:var(--stone); }
+  .panel .r b{ display:block; font-size:13.5px; }
+  .panel .r span{ display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px;
+                  line-height:1.5; }
+  .panel .foot{ padding:13px 16px; border-top:1px solid var(--line); background:var(--ground);
+                display:flex; gap:9px; justify-content:flex-end; align-items:center; }
+  .btn{ font:700 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase;
+        padding:9px 13px; border-radius:3px; border:1px solid var(--line);
+        background:var(--surface); color:var(--ink-2); }
+  .btn.go{ background:var(--stone); border-color:var(--stone); color:#fff; }
+  .warnline{ background:var(--warn-bg); color:var(--warn-tx); padding:11px 16px;
+             font-size:12.5px; line-height:1.55; border-top:1px solid var(--line-soft); }
+  .warnline code{ background:rgba(0,0,0,.06); color:inherit; }
+  .num{ counter-reset:q; list-style:none; padding:0; margin:16px 0 0; }
+  .num > li{ counter-increment:q; position:relative; padding-left:38px; margin-top:18px; }
+  .num > li::before{ content:counter(q); position:absolute; left:0; top:1px;
+                     width:25px; height:25px; border-radius:50%; background:var(--stone);
+                     color:#fff; font:700 12px/25px var(--sans); text-align:center; }
+  .num h3{ font-size:15.5px; margin:0 0 5px; }
+  .num p{ margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.6; max-width:70ch; }
+  .rec{ margin-top:9px; border-left:3px solid var(--good); background:var(--good-bg);
+        color:var(--good-tx); padding:9px 0 9px 13px; font-size:13px; line-height:1.6;
+        max-width:70ch; border-radius:0 3px 3px 0; }
+  .rec b{ font-weight:700; }
+</style>
+
+<div class="wrap">
+
+  <h1>A capability is a strategic entry</h1>
+  <p class="lede">A supporting function’s projects are now the function’s own, and the worked
+     example carries no capability at all. That is the truth of Raya’s tenant — and it leaves
+     the word <b>capability</b> with nothing behind it. This is the round that gives it
+     somewhere to live.</p>
+
+  <p class="said">“capability is something Strategic and the capability is either planned in the
+     form of a pillar or in the form of an overview and projects &hellip; the problem with having
+     the capability hidden in the functional plans is confusing for the whole structure”
+     <i>Islam, 12 September</i></p>
+
+  <p class="said">“one more thing is the ability to turn functional projects to a capability and
+     vice versa.” <i>Islam, 12 September</i></p>
+
+  <span class="key">Where the last round got to</span>
+  <div class="facts">
+    <div><b>0</b><span>capabilities in the worked example. Every one of the eight was a set of a function’s own projects wearing a container’s name.</span></div>
+    <div><b>7</b><span>functions now own their projects outright — Finance, HR, Treasury, Marketing, IT, Care and the SMO.</span></div>
+    <div><b>0</b><span>ids or codes moved. FIN01, FIN02, FIN03 still read the same, so every figure still points at the row it was entered on.</span></div>
+    <div><b>1</b><span>sentence had nowhere to go, and it is the strongest candidate for the first real capability.</span></div>
+  </div>
+  <p class="note">Until this morning the last round was <b>invisible</b>: the demo still shipped
+     its eight boxes, so Finance’s Projects page still drew a navy <b>CAPABILITY</b> band over
+     three projects already coded FIN01–FIN03. That is fixed and on the branch.</p>
+
+  <span class="key">Finance &middot; Projects</span>
+  <div class="pair">
+    <figure class="shot now">
+      <figcaption>Before <em>— a band naming a capability Finance does not have</em></figcaption>
+      <img src="today-fn-page.png" alt="Finance's Projects page with a navy CAPABILITY Financial Infrastructure band above the projects rail.">
+    </figure>
+    <figure class="shot then">
+      <figcaption>Now <em>— the projects are the function’s, and nothing says otherwise</em></figcaption>
+      <img src="after-fn-page.png" alt="Finance's Projects page with no band: the rail reads PROJECTS 3 and the projects are FIN01, FIN02, FIN03.">
+    </figure>
+  </div>
+
+  <span class="key">Where a capability lives</span>
+  <p class="lede" style="margin-top:8px">A capability is <b>strategic</b> — the group decides it
+     is worth building — so it belongs on the strategic side of the navigation, beside the
+     business units. It is held by a function head, and it has pages of its own.</p>
+
+  <div class="switchrow">
+    <figure class="shot now">
+      <figcaption>Today <em>— two sides: units, or functions</em></figcaption>
+      <img src="today-nav-units.png" alt="The navigation row today: a two-part switch reading Units and Functions, with the ten business units listed beside it.">
+    </figure>
+    <figure class="shot then">
+      <figcaption>Proposed <em>— a third side, drawn only when there is one</em></figcaption>
+      <img src="proposed-nav.png" alt="The navigation row proposed: a three-part switch reading Units, Capabilities and Functions, with Capabilities selected and Product Mindset listed beside it.">
+    </figure>
+  </div>
+
+  <p class="note"><b>Why a third side rather than putting capabilities in with the units.</b>
+     Measured on this tenant at a 1500px window: the row is 1485px wide and the ten units
+     already use 1424 of it — <b>61px left</b>. Adding capabilities to that list overflows on an
+     ordinary laptop the day a second one is created. A side of its own shows one list at a
+     time, so the row stays the length of whichever list you are in. And it says what the three
+     things are: a unit, a capability and a function are not the same kind of thing, which is
+     the whole of what this round is about.</p>
+
+  <p class="note"><b>A side with nothing behind it is not drawn.</b> A tenant with no
+     capabilities — which is every tenant today — sees the two-part switch it has now. The third
+     appears when the first capability is created, and goes if the last one is removed.</p>
+
+  <span class="key">What a capability’s pages are</span>
+  <p class="lede" style="margin-top:8px">The same pages a supporting function has, because a
+     capability is planned the same two ways: <b>pillars</b>, or <b>an overview and projects</b>.
+     Nothing new is drawn — what changes is that the word is true where it appears.</p>
+
+  <figure class="shot then" style="margin-top:16px">
+    <figcaption>Proposed <em>— Product Mindset, held by Marketing, in the platform’s own pixels</em></figcaption>
+    <img src="proposed-cap-overview.png" alt="A capability's Overview: the navigation reads Capabilities, Product Mindset; the What it is card reads Capability: Product Mindset, Held by: Rana Fouad — Marketing, and a Definition; a Key Objectives card sits beside it.">
+  </figure>
+
+  <ul class="plain">
+    <li><b>Strategy</b> — Overview (Capability &middot; Held by &middot; Definition, with its key
+        objectives) and its plan: projects, or pillars.</li>
+    <li><b>Performance</b> — its own score, read the way a function’s is.</li>
+    <li><b>Reporting</b> — it becomes a subject that reports, with its own submission.</li>
+  </ul>
+
+  <div class="caveat"><b>One line needs new words.</b> With no objectives yet, that card reads
+     “None. This function is judged by its projects.” On a capability it has to say the same
+     thing about a capability. Small, and it is the kind of line that survives for years if
+     nobody points at it.</div>
+
+  <span class="key">Making projects a capability</span>
+  <p class="lede" style="margin-top:8px">A function starts three projects; a year later two of
+     them turn out to be one strategic thing. That should cost a press, not a re-upload. The
+     control sits on the function’s own Projects page, where the projects are.</p>
+
+  <div class="step">
+    <div class="h">Step 1 &middot; pick the projects</div>
+    <div class="b">
+      <p>Not all of them, or a function whose five projects contain one capability cannot say
+         so. The ones left behind stay the function’s.</p>
+      <div class="panel" style="margin-top:14px">
+        <div class="t">Make these projects a capability</div>
+        <div class="r"><span class="tick on"></span><div><b>MKT01 &middot; Portfolio review cadence</b><span>3 deliverables &middot; 1 outcome &middot; 4 milestones</span></div></div>
+        <div class="r"><span class="tick on"></span><div><b>MKT02 &middot; Range architecture</b><span>2 deliverables &middot; 2 outcomes &middot; 3 milestones</span></div></div>
+        <div class="r"><span class="tick"></span><div><b>MKT03 &middot; Trade communication programme</b><span>stays with Marketing</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="h">Step 2 &middot; name it, and say what it costs</div>
+    <div class="b">
+      <p>The capability is a strategic entry from that moment: its own place beside the business
+         units, its own definition and key objectives written on it afterwards. It is created in
+         the <b>overview and projects</b> form — projects cannot become a capability planned as
+         pillars, because a pillar is not a project.</p>
+      <div class="panel" style="margin-top:14px">
+        <div class="t">Name the capability</div>
+        <div class="r"><div style="flex:1"><b>Product Mindset</b><span>Held by Marketing &middot; Rana Fouad</span></div></div>
+        <div class="warnline"><b>Two projects move, and their codes change.</b>
+           <code>MKT01</code> and <code>MKT02</code> become this capability’s
+           <code>PM01</code> and <code>PM02</code>; Marketing’s remaining project becomes
+           <code>MKT01</code>. A code says where a project lives, so it follows the project.
+           Every figure, every milestone and every reported number stays exactly where it is —
+           nothing is renumbered underneath.</div>
+        <div class="foot"><span class="btn">Cancel</span><span class="btn go">Make it a capability</span></div>
+      </div>
+      <p style="margin-top:14px">An archive is filed first, so the way back is Setup &rsaquo;
+         Import &amp; storage — the same place a removed pillar or project goes.</p>
+    </div>
+  </div>
+
+  <span class="key">And giving them back</span>
+  <p class="lede" style="margin-top:8px">This half is <b>already built</b>. Removing a capability
+     offers to keep its projects, and since the last round the function itself is one of the
+     places they can go — so the dialog you photographed on the 11th, the one that said
+     <em>“there is nowhere for them to go”</em>, can no longer happen.</p>
+  <p class="note">Demoting everything is the same act as removing the capability: one dialog,
+     not two. The codes move back, and the ids never move at all.</p>
+
+  <span class="key">Four things to settle before this is built</span>
+  <p class="lede" style="margin-top:8px">Each has a recommendation. Say yes to all four and I
+     build it; change any of them and I build that instead.</p>
+
+  <ol class="num">
+    <li>
+      <h3>Who may create a capability, and who holds it</h3>
+      <p>Creating a strategic entry and destroying one are the same kind of act as writing a
+         plan, which is the office’s. Holding one is a different question — your own earlier
+         words were that capabilities are “held by function heads”.</p>
+      <div class="rec"><b>Recommended:</b> the office creates, renames and removes; a function
+         head <b>holds</b> it and runs it, exactly as they run their function’s own plan.</div>
+    </li>
+    <li>
+      <h3>Where a capability is created from</h3>
+      <p>Three doors already exist: Setup, the guided plan builder, and step 5 of the
+         client set-up flow, which already draws a greyed-out “capability” choice marked
+         <em>Later</em>.</p>
+      <div class="rec"><b>Recommended:</b> <b>Setup &rsaquo; Capabilities</b> is the home — that
+         page exists and is where a capability is named, held and removed. The set-up flow’s
+         greyed choice comes alive and sends you there. The promote control on a function’s
+         Projects page is the second door, because that is where somebody realises it.</div>
+    </li>
+    <li>
+      <h3>Does a capability report on its own?</h3>
+      <p>The cycle board’s rule is that every subject that reports has a row. If a capability
+         has its own score and its own submission, it is a subject.</p>
+      <div class="rec"><b>Recommended:</b> yes — its own row on the board, in a group of its own
+         beside the units and the functions, so you can see at a glance whether the strategic
+         work has reported.</div>
+    </li>
+    <li>
+      <h3>The demo’s one real capability</h3>
+      <p>Marketing was the only function carrying two boxes, so when they dissolved, one
+         sentence had nowhere to go: <em>“Treat what we sell as a portfolio to be shaped, not a
+         catalogue to be carried.”</em> That is an intention about shaping a portfolio, not a
+         description of what Marketing does day to day.</p>
+      <div class="rec"><b>Recommended:</b> <b>Product Mindset</b>, held by Marketing, planned as
+         an overview and projects — one project to start, which is what it already had. The data
+         chose it rather than taste.</div>
+    </li>
+  </ol>
+
+  <span class="key">Not in this round</span>
+  <ul class="plain">
+    <li><b>Objectives and actions</b>, the third way a function can plan. It has its own model
+        already written down and it is a form of its own, not a variation of this one.</li>
+    <li><b>A business unit holding a capability.</b> The model allows it from day one so nothing
+        has to be reshaped later; the control that does it waits for a client who needs one.</li>
+    <li><b>Renaming anything.</b> Capability stays the word. What changes is where it is true.</li>
+  </ul>
+
+  <footer>
+    Drawn out of the running platform, 12 September 2026 — the navigation, the capability page
+    and both Finance screens are the real product with the proposal injected into it; the two
+    panels are drawn in the platform’s own tokens. Nothing in <code>src/</code> has moved for
+    stage 2.
+  </footer>
+
+</div>

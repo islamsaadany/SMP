@@ -325,3 +325,41 @@ want"*, and **"ok with the promirting mockup"**). What each now says:
    the code telling the truth rather than a cost to hide.
 
 **AND HIS OWN TENANT NEEDS NOTHING** — *"for my still mines are all done"*.
+
+## 11 · What the whole-suite sweep found afterwards (§330.16–.18)
+
+Stage 2 was accepted on its own checks; running all 167 afterwards found
+**six more product faults, and every one is the same sentence** — *walk the
+capabilities* — written before stage 1 moved a supporting function's projects
+onto the function. Recorded here because it is the spec's own risk showing
+itself: **stage 1 changed where a project lives and stage 2 changed what a
+capability IS, and both left copies of the old question behind.**
+
+The four in the product: `capItemById()` (a supporting function's whole
+Reporting page wrote nothing — drawn, pressed, discarded), `capsOfFn()` in the
+shared rules (§147.8's Contributor floor dead for every function since stage
+1), `ctxOfFn()` in the authoriser (the project owner refused every figure with
+their role plainly derived), and `eachHolder()`'s own membership test. Beside
+them: a capability's Submit was held by nothing at all (§221 inert on the
+destination stage 2 created), and the plan builder minted a capability box that
+stayed empty and left a brand-new function's own Projects page with nowhere to
+put a first project (§61).
+
+**What this says about the next stage**: the walk is now in `eachProject`,
+`eachHolder`, `fnHolders`, `holderById`, `holderItemById`, `holdersOfFn` and
+`capsShown` — seven named answers, each with exactly one job. A change to what
+a holder IS should be a change to those and nothing else. **Grep for
+`GROUP.capabilities` and `w.capabilities` before calling any such stage done**;
+that is what would have found all six in an afternoon.
+
+### Left for Islam, deliberately (both stated in the decisions log)
+
+- **Should the builder offer to make a capability?** It no longer mints one
+  silently, and the guided build does not ask. Whether it should belongs with
+  **Objectives & actions** rather than inside a repair.
+- **Should being named on a CAPABILITY's project grant at the capability
+  rather than at the function?** `capsOfFn()` was WIDENED rather than
+  narrowed, on purpose: narrowing takes a role away from somebody who holds it
+  today. Since a capability is a destination now the case can be made — and it
+  means teaching `roleWheres`, the areas and the register's own vocabulary a
+  `cap:` place.

@@ -6023,6 +6023,87 @@ frozen name reaches no client's browser. §319.1 said the bump is hygiene
 rather than a fix; this is the measurement behind that sentence. It is kept,
 because the frozen file is still what an offline handover runs on.
 
+## 326 · The demo's name scan was looking in the room the tables had left
+
+`checks/demo-seed.mjs` is the one file standing between a real client's names
+and a demo shown to other clients. Running the app's own suite after building it
+found it **2 red** — and whose it was came first: the file is **byte-identical
+to main's**, and the cause, §317.4 moving the shared schema out of `public`, is
+on main (§303).
+
+**§317.4 DID UPDATE THIS FILE**, which is what makes it worth a section. Line 20
+imports `SCHEMA` with a comment saying the shared schema is not `public`, and
+line 37 opens the pool with that `search_path`. What it missed is the one query
+that asks the **catalogue BY NAME** — `pg_namespace.nspname` — which is
+precisely the kind of query a `search_path` cannot help. So the pool opened in
+the right room and the scan looked in the empty one.
+
+**AND THE MEASUREMENT IS THE SECTION.** With a real client name deliberately
+leaked into the demo (`--break=raw-names`), the broken check printed:
+
+> `ok    no real name survives anywhere in the demo's own rows`
+
+The assertion the whole file exists for **passed on a demo that was leaking**.
+It found nought tables, scanned nothing, and a scan of nothing finds no
+forbidden name. It went red only because of the two CONTROLS beside it —
+§113.8's rule (*a scan that finds nothing is vacuous, so scan Raya the same way
+as the control*) earning its keep in the wild, on the check that was written
+with it in mind. **Without those controls this would have been green and
+blind**, which is the whole argument for writing a control beside an absence.
+
+One line — `n.nspname = $1, [SCHEMA]`, the shape `schema-room.mjs` already uses.
+7/7 green, and RED both ways (`--break=raw-names`, `--break=keep-marks`), so the
+scan is genuinely looking rather than passing for a newer wrong reason.
+
+## 327 · Which tables are the platform's own was written three times
+
+Found by running the nine spike proofs after building the app: **S5 and S4 both
+red, and neither this branch's** — it touches no schema, no spike and no `lib`
+file (read off the diff), and both files are byte-identical to main's (§303).
+
+**THE FACT IS WRITTEN THREE TIMES AND CANNOT BE SHARED**, because one of the
+three runs inside Postgres:
+
+1. **`db/schema.sql`'s RLS loop**, which gives every table the `tenant_rows`
+   policy BY EXCLUSION — correct, and `memory-boundary.mjs` asserts it;
+2. **`lib/schema-check.ts`'s `PLATFORM_TABLES`** — stale;
+3. **`spike/_harness.mjs`'s own `PLATFORM_TABLES`** — stale, and a literal
+   sitting directly under a comment promising *"from the catalogue and never a
+   literal"*.
+
+`memory_entries` was added to the first and to neither of the others.
+
+**WHAT IT COST.** S5 reported a **correct** schema as broken, because its rule 1
+asks every tenant table for a `tenant_id` and this one deliberately carries
+`about_tenant_id` with `ON DELETE RESTRICT` — *the memory outlives the
+engagement* (spec 045), which `tenant-delete.ts` explains in its own comment
+while the loop beneath it walks the very list that contradicts it. S4 never ran
+at all: its fixture tried to SEED a platform table, found no `users` row to
+point at, and died before it could measure anything. And `deleteTenant` would
+have asked `memory_entries` for a column it does not have — **unreachable
+today**, since no screen calls it and the spike is its only caller, which is
+stated rather than left as a worry.
+
+**CORROBORATION RATHER THAN ARGUMENT**: with the list right, S4 walks **42**
+tenant tables, and spec 043's `data-model.md` says 42. The broken list said 43.
+
+**THE FIX IS ONE LIST WHERE THERE CAN BE ONE, AND AN ASSERTION WHERE THERE
+CANNOT.** The harness's copy is DELETED and imported from `lib/schema-check.ts`
+(§24 — nothing imported it). The SQL cannot import anything, so
+`memory-boundary.mjs`, which already reads `schema.sql` to assert the exclusion,
+now also asserts the two lists name **the same SET** — as a set and never a
+count, because two lists of ten can differ by two names (§94.8). Proved able to
+fail: with `memory_entries` taken back out it reads *"only in the SQL:
+[memory_entries]"*.
+
+**AND THE DOCSTRING CLAIMS A CALLER IT DOES NOT HAVE**, recorded and not
+changed: `lib/schema-check.ts` opens *"read from the catalogue at every deploy
+and in the spike"*, and grepping finds exactly two callers — the spike, and
+`deleteTenant`, whose only caller is also the spike. `scripts/deploy.mjs` does
+not call it. So the promise that a table added next month is *"named the day it
+is added"* is true of a spike run and not of a deploy. Whether the deploy should
+call it is a decision about what a deploy may refuse, which is main's to take.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

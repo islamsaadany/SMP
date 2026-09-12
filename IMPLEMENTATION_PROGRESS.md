@@ -54,7 +54,40 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§325 — the served copies are in step with the frozen
+**Latest version:** **§326 / §327 — two checks and one list, found by running
+the app's own suite — built on the branch, not merged.**
+
+Everything before this was proved on the frozen build. But **production is the
+new stack now**, so the app's own fifteen checks and nine database proofs were
+built and run against a real Postgres. That found three reds, and none of them
+was this branch's — the files are identical to the ones on `main`, and the causes
+are two earlier pieces of work, also on `main`.
+
+**The demo's name check was looking in the wrong place.** It is the one file
+standing between a real client's names and a demo shown to other clients. When
+the database was reorganised, that change updated most of this file and missed
+the one query that names the place directly — so the check looked in an empty
+room, found no tables, and scanned nothing. Put to the test with a real name
+deliberately left in the demo, it printed *"no real name survives"* and passed.
+It only went red at all because it had been written with two control assertions
+beside it, which is exactly what they are for. One line to fix; it now catches a
+leak both ways round.
+
+**And "which tables belong to a client" was written down in three places**, two
+of them out of date. One is SQL that runs inside the database and cannot import
+anything, which is why there is more than one copy at all. The result was that a
+correct database was reported as broken, and one of the nine proofs died setting
+itself up. The two copies that could be merged now are; the one that cannot is
+guarded by a check that the two agree. A number confirms it rather than an
+argument: the corrected list walks 42 client tables, which is exactly what the
+plan's own data model says.
+
+**Verified.** Nine database proofs green · five of their falsifications still
+red · the app's fifteen checks green · typecheck clean.
+
+---
+
+**Before it:** **§325 — the served copies are in step with the frozen
 sources — built on the branch, not merged.**
 
 `smp-app/public/` is not written by hand. Four scripts read the frozen product

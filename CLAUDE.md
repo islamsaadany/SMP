@@ -8746,6 +8746,19 @@ DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-l
                                 # Forefront's own two pages: contrast in both themes
                                 # and no sideways scroll at four widths — neither of
                                 # the two product sweeps ever reaches them (§313.11)
+node smp-app/checks/memory-boundary.mjs
+                                # …and since §327 it also asserts that the two
+                                # copies of WHICH TABLES ARE THE PLATFORM'S OWN
+                                # agree: `db/schema.sql`'s RLS exclusion loop
+                                # and `lib/schema-check.ts`'s PLATFORM_TABLES.
+                                # They cannot share a constant (one runs inside
+                                # Postgres), and there were THREE copies with
+                                # two of them stale — so S5 called a correct
+                                # schema broken and S4 died seeding a platform
+                                # table. Asserted as the SET, never a count
+                                # (§94.8: two lists of ten can differ by two
+                                # names). The spike harness's third copy is
+                                # DELETED and imported (§24)
 node smp-app/checks/generated-in-step.mjs
                                 # the served copies are in step with the frozen
                                 # sources (§325): `smp-app/public/` is generated
@@ -8863,7 +8876,45 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;325: the served copies are in step
+*Last Updated: 2026-09-12 &mdash; **&sect;326 / &sect;327: two checks and one
+list, found by running the app's OWN suite.** Everything above was proved on the
+frozen build; **production is the new stack**, so the app's fifteen checks and
+nine spike proofs were built and run against a real Postgres &mdash; and that
+found three reds, none of them this branch's (&sect;303: the files are
+byte-identical to `main`'s and the causes are &sect;317.4 and spec 045, both on
+main). **&sect;326 &mdash; THE DEMO'S NAME SCAN WAS LOOKING IN THE ROOM THE
+TABLES HAD LEFT.** `checks/demo-seed.mjs` is the one file standing between a real
+client's names and a demo shown to other clients. &sect;317.4 moved the shared
+schema out of `public` and DID update this file &mdash; the import, the comment,
+the pool's `search_path` &mdash; and missed the one query that asks the
+**catalogue BY NAME**, which is precisely the kind a `search_path` cannot help.
+**AND THE MEASUREMENT IS THE FINDING**: with a real name deliberately leaked in,
+the broken check printed *"ok &mdash; no real name survives anywhere in the
+demo's own rows"*. It found nought tables, scanned nothing, and **a scan of
+nothing finds no forbidden name**. It went red only because of the two CONTROLS
+beside it &mdash; &sect;113.8 earning its keep in the wild, on the check written
+with it in mind; without them this was green and blind. One line; 7/7 and RED
+both ways. **&sect;327 &mdash; WHICH TABLES ARE THE PLATFORM'S OWN WAS WRITTEN
+THREE TIMES**, and two of the three had not been told about `memory_entries`:
+`db/schema.sql`'s RLS loop (correct), `lib/schema-check.ts` (stale) and
+`spike/_harness.mjs` (stale, **a literal directly under a comment promising
+"never a literal"**). So S5 called a CORRECT schema broken &mdash; the consulting
+memory carries `about_tenant_id` with `ON DELETE RESTRICT` on purpose, which
+`tenant-delete.ts` explains in its own comment while the loop beneath it walks
+the list that contradicts it &mdash; and S4 died in its own fixture trying to
+SEED a platform table. **Corroboration rather than argument**: with the list
+right S4 walks **42** tenant tables, and spec 043's `data-model.md` says 42; the
+broken list said 43. **One list where there can be one** (the harness's copy
+DELETED and imported, &sect;24) **and an assertion where there cannot** &mdash;
+the SQL cannot import, so `memory-boundary.mjs` asserts the two name the same
+SET, as a set and never a count (&sect;94.8), proved able to fail. Nine spikes
+green, five spike falsifications still red, `tsc` clean. **Recorded, not
+changed**: `schema-check.ts` promises it runs *"at every deploy"* and
+`scripts/deploy.mjs` does not call it, so *"a table added next month is named the
+day it is added"* is true of a spike run and not of a deploy &mdash; whether a
+deploy may refuse is main's decision.*
+
+*Earlier the same day &mdash; **&sect;325: the served copies are in step
 with the frozen sources.** **&sect;319 WROTE THIS TRAP DOWN IN ITS OWN WORDS AND
 &sect;324 FELL INTO IT ONE SECTION LATER**: `smp-app/public/` is generated from
 the frozen product by four scripts and every output is TRACKED, so a source

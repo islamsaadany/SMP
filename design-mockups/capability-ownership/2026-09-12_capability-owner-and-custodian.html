@@ -92,6 +92,7 @@
   table.facts code{ font:12.5px/1.5 var(--mono); color:var(--ink-2); }
   .yes{ color:var(--good-tx); font-weight:650; }
   .chg{ color:var(--gold-deep); font-weight:650; }
+  .bad{ color:var(--bad-tx); font-weight:650; }
   .tblbox{ overflow-x:auto; }
 
   .num{ display:flex; flex-wrap:wrap; gap:12px; margin:18px 0 0; padding:0; list-style:none; }
@@ -130,208 +131,175 @@
 <header class="top">
   <div class="wrap">
     <div>
-      <div class="eyebrow">Design proposal &middot; for sign-off</div>
-      <h1>A capability is owned like a unit</h1>
-      <p>An owner and a strategy custodian on the capability itself, and the plan
-         builder able to build one. Drawn out of the running platform.</p>
+      <div class="eyebrow">Design proposal &middot; revised after your correction</div>
+      <h1>The function owns the capability</h1>
+      <p>You were right, and it turns out this is mostly already built. What is left
+         is one setting, one small fault, and the plan builder.</p>
     </div>
-    <div class="stamp">12 Sep 2026<br>branch: inspiring-lamport<br>nothing built yet</div>
+    <div class="stamp">12 Sep 2026 &middot; v2<br>branch: inspiring-lamport<br>nothing built yet</div>
   </div>
 </header>
 
 <div class="wrap">
 
   <section>
-    <h2><span class="n">01</span>What you asked for</h2>
+    <h2><span class="n">01</span>Your correction</h2>
     <div class="quote prose">
       <div class="who">Islam</div>
-      <p>“yes plan builder should be able to build a capability”</p>
-      <p>“a capability has it's ownership structure and if someone is set on a
-         capability with the new concept of it the person shall see the capability”</p>
-      <p>“The capability is owned like a unit it has an owner and custodian.”</p>
+      <p>“the capability is normally owned by a function and the function can have an
+         owner and a custoidna. and the function owner and custodian can handle the
+         capability and ofcourse can handle the function plans as well. would that be
+         easier to build?”</p>
     </div>
-    <p class="prose">A business unit has two named people: an owner and a strategy
-       custodian. A capability has neither — it borrows whoever runs the function
-       that holds it. This gives a capability its own two, and lets somebody build
-       one from scratch.</p>
+    <p class="prose"><b>Yes — far easier. Most of it is already there.</b> A function
+       already has two named people, and both already reach its capabilities. I checked
+       rather than assumed, and the measurements are below.</p>
+    <div class="call ask">
+      <div class="h">What this replaces</div>
+      <p>The first version of this page put an owner and a custodian on the capability
+         itself — two new columns, a new thing to store, and a new rule about who
+         answers first. All of that goes. Nothing is stored, no column is added, and
+         nobody’s rights move.</p>
+    </div>
   </section>
 
   <hr class="rule">
 
   <section>
-    <h2><span class="n">02</span>Most of it is already there</h2>
-    <p class="lede prose">This is small, and it is worth showing why before showing
-       the pictures. Almost every piece exists and is pointed the right way.</p>
+    <h2><span class="n">02</span>The two people already exist</h2>
+    <p class="lede prose">Setup &rsaquo; Functions carries a <b>Head</b> and a
+       <b>Custodian</b> for every function, both settable, today. Marketing — the one
+       function holding a capability — has both filled in.</p>
+    <div class="fig">
+      <div class="figlab"><span class="k today">Today, unchanged</span>
+        <span class="note">Setup &rsaquo; Functions</span></div>
+      <div class="shot scroll"><img src="fns-today.png" alt="The Functions table, with a Head and a Custodian column"></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">03</span>And they already reach the capability</h2>
+    <p class="lede prose">One person, measured before and after being given each seat,
+       so the difference is the seat and nothing else. No changes to the product.</p>
     <div class="tblbox">
       <table class="facts">
-        <thead><tr><th>The piece</th><th>Today</th><th>What changes</th></tr></thead>
+        <thead><tr><th>The same person</th><th>The function’s pages</th>
+                   <th>Its capability, in their list</th><th>The capability’s pages</th></tr></thead>
         <tbody>
-          <tr><td>The picker that names somebody</td>
-              <td>One picker serves units and functions</td>
-              <td class="yes">Nothing — it already takes a capability’s address</td></tr>
-          <tr><td>Naming the place on screen</td>
-              <td>A capability already has a name everywhere</td>
-              <td class="yes">Nothing</td></tr>
-          <tr><td>Which column on Roles &amp; access judges it</td>
-              <td>The supporting-function column</td>
-              <td class="yes">Nothing — no new column, nobody’s rights move</td></tr>
-          <tr><td>Where the two names are kept</td>
-              <td>A unit keeps its pair; a capability keeps none</td>
-              <td class="chg">The capability row keeps its own pair — no database change</td></tr>
-          <tr><td>Working out what somebody holds</td>
-              <td>Reads the units and the functions</td>
-              <td class="chg">Reads the capabilities too</td></tr>
-          <tr><td>What a person may open</td>
-              <td>A capability hands the question to its function</td>
-              <td class="chg">Its own two people answer first, the function still answers after</td></tr>
-          <tr><td>The Capabilities page</td>
-              <td>Shows the function’s head, read only</td>
-              <td class="chg">Shows the capability’s own owner and custodian, settable</td></tr>
-          <tr><td>The plan builder</td>
-              <td>Business units and supporting functions</td>
-              <td class="chg">Capabilities as a third kind</td></tr>
+          <tr><td>Holding nothing</td><td>can’t open</td><td class="bad">not there</td><td>can’t open</td></tr>
+          <tr><td>Made the function’s <b>Head</b></td><td class="yes">can open</td>
+              <td class="yes">appears</td><td class="yes">can open</td></tr>
+          <tr><td>Made the function’s <b>Custodian</b></td><td class="yes">can open</td>
+              <td class="yes">appears</td><td class="yes">can open</td></tr>
         </tbody>
       </table>
     </div>
+    <p class="prose" style="margin-top:16px">So “the function owner and custodian can
+       handle the capability” is how the platform already behaves. Nothing had to be
+       built for it.</p>
   </section>
 
   <hr class="rule">
 
   <section>
-    <h2><span class="n">03</span>Setup &rsaquo; Capabilities</h2>
-    <p class="lede prose">The <b>Head</b> column today is borrowed — it prints whoever
-       runs the function, and there is no way to change it here. It becomes the
-       capability’s own <b>Owner</b>, with a <b>Custodian</b> beside it. Both are the
-       same two words a business unit uses, set with the same control.</p>
-
-    <div class="fig">
-      <div class="figlab"><span class="k today">Today</span>
-        <span class="note">Head is the function’s, and read only</span></div>
-      <div class="shot scroll"><img src="caps-today.png" alt="The Capabilities table today"></div>
+    <h2><span class="n">04</span>“Handle” is one setting, not a build</h2>
+    <p class="lede prose">Out of the box those two people can <b>see</b> a function and
+       its capability. Letting them <b>change</b> the plans is one cell on Roles &amp;
+       access — the row for the function’s head, the own-supporting-function column.</p>
+    <div class="tblbox">
+      <table class="facts">
+        <thead><tr><th>The function’s head</th><th>The function’s plans</th><th>Its capability’s plans</th></tr></thead>
+        <tbody>
+          <tr><td>As the platform ships</td><td>can read</td><td>can read</td></tr>
+          <tr><td>With that one cell opened</td><td class="yes">can change</td><td class="yes">can change</td></tr>
+        </tbody>
+      </table>
     </div>
+    <p class="prose" style="margin-top:16px">The capability follows the function
+       automatically. You never set anything twice.</p>
+  </section>
 
-    <div class="fig">
-      <div class="figlab"><span class="k prop">Proposed</span>
-        <span class="note">Owner and Custodian, the capability’s own</span></div>
-      <div class="shot scroll"><img src="caps-proposed.png" alt="The Capabilities table with an owner and a custodian"></div>
-    </div>
+  <hr class="rule">
 
-    <div class="fig">
-      <div class="figlab"><span class="k prop">Proposed, with a row open</span>
-        <span class="note">Both open the platform’s own people picker</span></div>
-      <div class="shot scroll"><img src="caps-proposed-open.png" alt="A capability row open, showing the two people pickers"></div>
+  <section>
+    <h2><span class="n">05</span>What checking it found</h2>
+    <p class="lede prose">One real fault, in exactly this area, on the platform as it
+       stands on this branch — found by measuring every person against the demo’s own
+       capability, with nothing made up.</p>
+    <div class="call warn">
+      <div class="h">The head of a function cannot report on their own capability</div>
+      <p><b>Yara Kamal</b> runs Marketing, which holds Product Mindset. The rule says
+         she may enter figures there. The screen does not let her — and it still offers
+         her the <b>Submit</b> button, so she is asked to send a report she was never
+         allowed to fill in.</p>
+      <p>The cause is one line: when the page asks “may this person report here?”, a
+         capability is sent to the <b>business unit</b> column instead of the supporting
+         function one. She has nothing in the unit column, so the answer is no. On the
+         function itself she can report perfectly.</p>
+      <p><b>One line to fix</b>, and it is squarely inside what you have just asked for.</p>
     </div>
   </section>
 
   <hr class="rule">
 
   <section>
-    <h2><span class="n">04</span>Building a plan</h2>
-    <p class="lede prose">The builder asks whose plan this is and offers two kinds.
-       A capability now has its own pages, so it is a third kind — and it says who
-       holds it and how it plans, the way a function already says how it plans.</p>
+    <h2><span class="n">06</span>One word to settle</h2>
+    <p class="prose">You said <b>owner</b> and <b>custodian</b>. The platform says
+       <b>Head</b> and <b>Custodian</b> for a function; a business unit says <b>BU head</b>
+       and <b>Strategy custodian</b>. So the two people are there — the first one is
+       called Head rather than Owner.</p>
+    <div class="call ask">
+      <div class="h">Your call</div>
+      <p>Leave it as <b>Head</b>, or rename the label to <b>Owner</b> so a function reads
+         the way a unit does. It is a label only — nothing behind it moves, and nobody
+         loses anything either way. Say which and I will do it with the rest.</p>
+    </div>
+  </section>
 
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">07</span>The platform’s own note agrees with you</h2>
+    <p class="prose">Under the Capabilities table, and in the knowledge base, the
+       platform says a custodian is named after the function and <b>never after a
+       capability</b> — because a function may hold several, so naming somebody after
+       one breaks the moment a second arrives.</p>
+    <p class="prose">In the first version of this page I had that sentence down as
+       something to correct. With your direction it is <b>right, and it stays</b>. Worth
+       saying plainly: the product had already reasoned its way to the answer you just
+       gave.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2><span class="n">08</span>So what is actually left to build</h2>
+    <p class="lede prose">Only your first ask, plus the fault above.</p>
     <div class="fig">
       <div class="figlab"><span class="k today">Today</span>
-        <span class="note">Two kinds; a capability cannot be built</span></div>
-      <div class="shot"><img src="builder-today.png" alt="The plan builder today, offering business units and supporting functions"></div>
+        <span class="note">The builder offers two kinds; a capability cannot be built</span></div>
+      <div class="shot"><img src="builder-today.png" alt="The plan builder today"></div>
     </div>
-
     <div class="fig">
       <div class="figlab"><span class="k prop">Proposed</span>
-        <span class="note">A third kind, in the same shape</span></div>
+        <span class="note">A third kind, in the same shape, saying who holds it</span></div>
       <div class="shot"><img src="builder-proposed.png" alt="The plan builder with capabilities as a third kind"></div>
     </div>
-  </section>
 
-  <hr class="rule">
-
-  <section>
-    <h2><span class="n">05</span>What it costs, measured</h2>
-    <p class="lede prose">A new column usually costs the others their width. Here it
-       costs nothing, and the reason is a small fault on that page that this pays
-       for on the way past.</p>
-
-    <ul class="num">
-      <li><div class="v">1165<small> / 1165px</small></div>
-          <div class="l">The table still fits its pane exactly. Nothing scrolls sideways.</div></li>
-      <li><div class="v">136<small>px</small></div>
-          <div class="l">Every content column, before and after. None of them narrows.</div></li>
-      <li><div class="v">175 &rarr; 38<small>px</small></div>
-          <div class="l">The <code>#</code> column, which holds one digit. That is what pays for the new column.</div></li>
-      <li><div class="v">0</div>
-          <div class="l">Database changes. The two names ride a column the table already has.</div></li>
-    </ul>
-
-    <div class="call warn">
-      <div class="h">Two things found by looking, not by measuring</div>
-      <p>The <code>#</code> column is 175px wide on this page and 38px on the
-         Functions page next door, which already pins it. Nobody had noticed,
-         because until now there was nothing competing for the room.</p>
-      <p>Narrowing it alone paints the name column on top of its neighbour — the
-         second column is frozen at an offset written as the old width. Two lines,
-         not one. Both are in the picture above; neither was in the first drawing.</p>
-    </div>
-  </section>
-
-  <hr class="rule">
-
-  <section>
-    <h2><span class="n">06</span>The one thing I need you to confirm</h2>
-    <p class="prose">Naming an owner on a capability must <b>add</b> to who can reach
-       it, never replace. A unit’s owner does not lock the group out of their unit,
-       and “owned like a unit” reads the same way here: the function’s head and
-       custodian keep everything they have today, and the capability’s own two are
-       added beside them.</p>
-    <div class="call ask">
-      <div class="h">If you meant the other way</div>
-      <p>Say so and I will build it instead — but the cost is real: the moment one
-         capability is given an owner, the person running the function is locked out
-         of it, and nothing on the screen would say why.</p>
-    </div>
-  </section>
-
-  <hr class="rule">
-
-  <section>
-    <h2><span class="n">07</span>The platform currently says the opposite</h2>
-    <p class="prose">Two places — the note under this very table, and the knowledge
-       base — say a custodian is named after the function and
-       <b>never after a capability</b>, and give the reason: a function may hold
-       several, so naming somebody after one breaks when a second arrives.</p>
-    <p class="prose">That was true when a capability had no identity of its own. It
-       has one now — its own pages, its own row on the cycle board — so a function
-       with two capabilities gets two custodians, which is finer rather than broken.
-       Both sentences get corrected in the same change, or the product goes on
-       telling people the opposite of what it does.</p>
-  </section>
-
-  <hr class="rule">
-
-  <section>
-    <h2><span class="n">08</span>What I would build, in order</h2>
-    <ol class="steps">
-      <li><b>The two names on the capability</b>
-          <span>Kept on the capability’s own row, the way a unit keeps its pair.
-                Proved on a real database before anything says “no migration”.</span></li>
-      <li><b>Who holds what</b>
-          <span>The one place that works out a person’s roles learns to read the
-                capabilities, so both screens and the server answer together.</span></li>
-      <li><b>What they can reach</b>
-          <span>Their own capability first, the holding function still answering
-                after. Both directions tested: allowed and refused.</span></li>
-      <li><b>The Capabilities page</b>
-          <span>The two columns above, the <code>#</code> column pinned, the frozen column’s
-                offset moved with it.</span></li>
+    <ol class="steps" style="margin-top:26px">
+      <li><b>The reporting fault</b>
+          <span>One line, so a function’s head and custodian can enter figures on their
+                capability — and a check that goes red on today’s build first.</span></li>
       <li><b>The builder’s third kind</b>
           <span>Capabilities in the chooser, and a new one can be made there.</span></li>
-      <li><b>The two sentences corrected</b>
-          <span>The page note and the knowledge base, in the same change.</span></li>
-      <li><b>A check that fails first</b>
-          <span>Run against today’s build to watch it go red before it is trusted.</span></li>
+      <li><b>The word, if you want it</b>
+          <span>Head becomes Owner on a function, label only.</span></li>
     </ol>
-    <p class="foot" style="margin-top:22px">Nothing above is built. Every picture is
-       the real platform with the proposal drawn into it — same build, both sides.</p>
+    <p class="foot" style="margin-top:22px">Nothing above is built. Every picture is the
+       real platform, same build on both sides, and every table on this page is a
+       measurement rather than a claim.</p>
   </section>
 
 </div>

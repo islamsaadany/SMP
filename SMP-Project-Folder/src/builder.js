@@ -256,17 +256,6 @@ function builderStartFresh(target){
   else if (route === "fnprojects") clearFunction(String(target).slice(3), "plan", why);
 }
 
-/* Entering a projects function that has no capability yet mints its first,
-   named after the function — a projects plan has to hang off something, and
-   the Temple's addCapability() is the one place that mints one (§51.11). */
-function builderEnsureCapability(target){
-  if (builderRoute(target) !== "fnprojects") return;
-  var fk = String(target).slice(3);
-  if (capsOfFunction(fk).length) return;
-  var c = addCapability(fk);
-  c.name = FUNCTIONS[fk].name;
-}
-
 /* ── The row forms ────────────────────────────────────────────────────
    One definition per row kind: the fields IN THE ORDER THE OUTCOME READS
    THEM, which is the whole point (Islam: "the template should protect the
@@ -485,7 +474,10 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "capko") {
-    var c = capById(ctx.capId); if (!c) return false;
+    /* §330.18: A HOLDER, which since §322 is a capability OR a supporting
+       function's own work — `capById` answered null for the second and the
+       form quietly wrote nothing. */
+    var c = holderByIdWritable(ctx.capId); if (!c) return false;
     /* §316: A ROW WITH NO ID IS NOBODY'S TO CHANGE (§191). This branch pushed
        a bare object, so the row rendered perfectly, scored, reported — and
        could not be WRITTEN: §241's row-addressed writer refuses the whole save
@@ -513,7 +505,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "project") {
-    var cc = capById(ctx.capId); if (!cc) return false;
+    var cc = holderByIdWritable(ctx.capId); if (!cc) return false;   /* §330.18 */
     var pr = addProject(cc); if (!pr) return false;
     pr.name = v("name"); pr.owner = v("owner"); pr.start = v("start"); pr.end = v("end"); pr.brief = v("brief");
     if (typeof RAIL !== "undefined" && typeof railKeyFor === "function") RAIL[railKeyFor(cc)] = pr.id;

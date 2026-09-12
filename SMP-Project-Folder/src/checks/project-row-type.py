@@ -86,10 +86,14 @@ def open_pane(pg, edit=True):
 # The project the rail is standing on, read off the stored graph — never off
 # the screen, because a screen that draws nothing answers every question about
 # what it drew (§96).
+# §330.18: WALKED THROUGH THE PRODUCT'S OWN `eachProject`, which §322 built
+# so that nobody would keep a private copy of "walk the capabilities" — and
+# this was one, so on the page it drives (a function's own projects) it found
+# nothing and the section died on a null rather than reporting (§215).
 PROJ = """()=>{
   var p = null;
-  (GROUP.capabilities||[]).forEach(function(c){ (c.projects||[]).forEach(function(x){
-    if (!p && document.querySelector('[data-rowadd*="'+x.id+'"]')) p = x; }); });
+  eachProject(function(x){
+    if (!p && document.querySelector('[data-rowadd*="'+x.id+'"]')) p = x; });
   if (!p) return null;
   return { id:p.id,
            d:(p.deliverables||[]).map(function(x){ return {id:x.id,name:x.name,hide:x.hide===true,status:x.status||""}; }),
@@ -183,8 +187,9 @@ with sync_playwright() as pw:
        bool(picks) and all(p == ["Deliverable", "Outcome"] for p in picks), picks[:2])
 
     # the row just added is the LAST deliverable — name it, then convert it
-    ev(pg, """()=>{var p=null;(GROUP.capabilities||[]).forEach(function(c){(c.projects||[]).forEach(function(x){
-        if(!p && document.querySelector('[data-rowadd*="'+x.id+'"]')) p=x;});});
+    ev(pg, """()=>{var p=null;
+        eachProject(function(x){
+          if(!p && document.querySelector('[data-rowadd*="'+x.id+'"]')) p=x;});
         var d=p.deliverables[p.deliverables.length-1]; d.name='SWITCH ME'; d.hide=true; paint();}""")
     pg.wait_for_timeout(300)
     st = ev(pg, PROJ)

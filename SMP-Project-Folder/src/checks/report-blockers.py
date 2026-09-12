@@ -296,23 +296,53 @@ with sync_playwright() as p:
     js(pg, "(a)=>{UNITS[a.u].items[0].measures[0].target=a.t; return true;}",
        {"u": UNIT, "t": "2,200"})
 
-    # 8 ── A SUPPORTING FUNCTION GETS THE SAME BAR (it had NONE)
-    print("\n8 · a capability function is told too — it never had a banner at all")
-    fk = js(pg, "()=>Object.keys(FUNCTIONS).filter(k=>!fnPlansInPillars(FUNCTIONS[k]) "
-                "&& capsOfFunction(k).length)[0]||null")
-    ck("there is such a function to measure", isinstance(fk, str) and fk, fk)
-    if isinstance(fk, str) and fk:
-        open_report(pg, "super", "fn:" + fk)
-        fb = js(pg, "(k)=>{const b=submitBlockers('fn:'+k);"
-                    "return {notes:b.notes.length,pending:b.pending.length,owed:b.owed,gaps:b.gaps};}", fk)
+    # 8 ── A PROJECTS SUBJECT GETS THE SAME BAR (it had NONE)
+    #
+    # §330.18: AND THERE ARE TWO OF THEM NOW. This asked for a function
+    # CARRYING a capability, which was how §279 said "a function that plans in
+    # projects" before §322 moved those projects onto the function and §330
+    # gave a capability pages of its own. On the demo that picks Marketing and
+    # then measures Marketing's OWN work, which is not what the section is
+    # about — and the guard below said so honestly, three times, rather than
+    # passing (§113.8). Both subjects are walked now: a function's own work and
+    # a capability, which had no assertion about its bar at all.
+    #
+    # AND THE STATE IS MADE, NEVER HOPED FOR (§94.2). What holds Submit here is
+    # a real row of these pages' own kind — a milestone that says In progress
+    # and never says how far (§104.10) — rather than whatever the seed happens
+    # to leave outstanding, which is what let this section prove nothing the
+    # day its subject moved.
+    print("\n8 · a projects subject is told too — it never had a banner at all")
+    HOLD = """(t)=>{const h=(t.indexOf('cap:')===0?[capOfTarget(t)]:fnHolders(t.slice(3)))
+        .filter(Boolean)[0];
+      if(!h) return null;
+      const p=(h.projects||[]).filter(x=>(x.milestones||[]).length)[0];
+      if(!p) return null;
+      const m=p.milestones[0]; m.status='wip'; m.pct=null; m.note='';
+      paint(); return {holder:h.id, project:p.id, row:m.id};}"""
+    subjects = js(pg, """()=>{
+      const fk = FUNCTION_KEYS.filter(k=>fnOwnProjects(k).length)[0];
+      const c  = (GROUP.capabilities||[])[0];
+      return [fk?('fn:'+fk):null, c?('cap:'+c.id):null].filter(Boolean);}""")
+    ck("there are both kinds of projects subject to measure",
+       isinstance(subjects, list) and len(subjects) == 2, subjects)
+    for t in (subjects if isinstance(subjects, list) else []):
+        made = js(pg, HOLD, t)
+        ck("%s: a row of its own is left unanswered" % t, isinstance(made, dict), made)
+        if not isinstance(made, dict):
+            continue
+        open_report(pg, "super", t)
+        fb = js(pg, "(t)=>{const b=submitBlockers(t);"
+                    "return {notes:b.notes.length,pending:b.pending.length,"
+                    "owed:b.owed,gaps:b.gaps};}", t)
         held = isinstance(fb, dict) and (fb.get("notes") or fb.get("owed") or
                                          fb.get("pending") or fb.get("gaps"))
         r4 = js(pg, BAR)
-        ck("its Submit is held by something (or this section proves nothing)", bool(held), fb)
-        ck("...and the page says so, where it used to say nothing",
+        ck("%s: its Submit is held by something" % t, bool(held), fb)
+        ck("%s: ...and the page says so, where it used to say nothing" % t,
            bool(held) and isinstance(r4, dict) and not r4.get("none"), r4)
-        fplaces = lst(js(pg, "(k)=>reportPlaces('fn:'+k).filter(e=>e.count>0).map(e=>e.key)", fk))
-        ck("...with a chip per place, agreeing with the map",
+        fplaces = lst(js(pg, "(t)=>reportPlaces(t).filter(e=>e.count>0).map(e=>e.key)", t))
+        ck("%s: ...with a chip per place, agreeing with the map" % t,
            isinstance(r4, dict) and bool(fplaces) and
            [c["key"] for c in r4.get("chips", [])] == fplaces, (r4, fplaces))
 

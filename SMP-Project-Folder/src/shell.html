@@ -7740,8 +7740,17 @@
         if (!h || !h.list) return;
         var t = h.target;
         if (!mayAuthor("k_found", t)) return;
-        if (BUILDER && BUILDER.target === t && h.cap) {
-          openBuilderForm("capko", { capId:h.cap.id }); return; }
+        /* §330.18: THE BUILDER'S FORM OPENS FOR A HOLDER, NOT ONLY FOR A
+           CAPABILITY. This asked for `h.cap`, and since §322 the Overview's
+           Add on a projects function carries the FUNCTION's own id — so in
+           the builder the press fell through to the plain path below and
+           pushed a NAMELESS row, where §129's whole rule is that a row is
+           added WHOLE through a titled form. Measured: press Add on a
+           function the builder had just created and one blank objective
+           appeared with no form ever drawn. The id on the button already
+           names the holder either way, so it is handed over as it is. */
+        if (BUILDER && BUILDER.target === t) {
+          openBuilderForm("capko", { capId:b.dataset.capkoadd }); return; }
         /* §242: IT MINTS AN ID, AS EVERY OTHER ADD IN THE PRODUCT DOES.
            Islam: *"the input there wasn't saved."* This pushed a row with no
            id, so the reporting page drew its box carrying the string
@@ -8977,7 +8986,16 @@
      with its pen on. leaveModes() first — it clears EDIT_PAGE, so the pen is
      switched on AFTER it, never before. */
   function builderStart(target){
-    builderEnsureCapability(target);
+    /* §330.18: NO CAPABILITY IS MINTED ANY MORE. §322 gave a supporting
+       function projects of its own and this went on creating a box to hang
+       them off — which after stage 2 is worse than pointless: every add in
+       this route now writes to the function's own holder, so the box stayed
+       EMPTY, and `fnOwnsProjects()` answers false while a function carries
+       one, so the function's own Projects page drew nowhere to put the first
+       project at all. A brand-new function was readable and unstartable on
+       its own page, which is §61's trap and the thing §129's audit found five
+       times. `builderEnsureCapability` is DELETED rather than left uncalled
+       (§24). */
     BUILDER = { target: target };
     builderDialogClose();
     var first = builderSections(target)[0];

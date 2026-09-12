@@ -5254,17 +5254,31 @@ function boundedReporter(target){
    A pillars function is never ALSO asked for capabilities: the format cannot
    be switched while the other side holds anything (§59), so the two lists are
    exclusive by construction rather than by a rule here. */
+/* §330.18: A SUBJECT DRAWN AS A HOLDER — a supporting function or, since
+   §330, a CAPABILITY. These two turned the target into a FUNCTION KEY before
+   asking, so `cap:<id>` fell straight through to the empty answer: a
+   capability's Submit was held by nothing at all, however much of its report
+   was unanswered, which is §221's whole rule inert on the destination §330
+   had just created. Everything below them already spoke the target vocabulary
+   — `fnReportItems` walks `capsShown(subject)`, which resolves `cap:` — so
+   what was wrong was one translation on the way in (§172's lesson: a layer
+   that has never been offered the new value is the layer that has not been
+   asked). */
+function drawnAsHolder(target){
+  var t = String(target || "");
+  if (isCapTarget(t)) return !!capOfTarget(t);
+  var fk = fnKeyOfTarget(t);
+  return !!(fk && FUNCTIONS[fk]);
+}
 function subjectAsked(target){
   var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
   if (u) return askedItems(u);
-  var fk = fnKeyOfTarget(t);
-  return fk && FUNCTIONS[fk] ? fnAskedItems(fk) : [];
+  return drawnAsHolder(t) ? fnAskedItems(t) : [];
 }
 function subjectReported(target){
   var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
   if (u) return reportedCount(u);
-  var fk = fnKeyOfTarget(t);
-  return fk && FUNCTIONS[fk] ? fnReportedCount(fk) : { done:0, total:0 };
+  return drawnAsHolder(t) ? fnReportedCount(t) : { done:0, total:0 };
 }
 function submitBlockers(target){
   var t = String(target || "");

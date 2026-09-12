@@ -10523,17 +10523,31 @@ function boundedReporter(target){
    A pillars function is never ALSO asked for capabilities: the format cannot
    be switched while the other side holds anything (§59), so the two lists are
    exclusive by construction rather than by a rule here. */
+/* §330.18: A SUBJECT DRAWN AS A HOLDER — a supporting function or, since
+   §330, a CAPABILITY. These two turned the target into a FUNCTION KEY before
+   asking, so `cap:<id>` fell straight through to the empty answer: a
+   capability's Submit was held by nothing at all, however much of its report
+   was unanswered, which is §221's whole rule inert on the destination §330
+   had just created. Everything below them already spoke the target vocabulary
+   — `fnReportItems` walks `capsShown(subject)`, which resolves `cap:` — so
+   what was wrong was one translation on the way in (§172's lesson: a layer
+   that has never been offered the new value is the layer that has not been
+   asked). */
+function drawnAsHolder(target){
+  var t = String(target || "");
+  if (isCapTarget(t)) return !!capOfTarget(t);
+  var fk = fnKeyOfTarget(t);
+  return !!(fk && FUNCTIONS[fk]);
+}
 function subjectAsked(target){
   var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
   if (u) return askedItems(u);
-  var fk = fnKeyOfTarget(t);
-  return fk && FUNCTIONS[fk] ? fnAskedItems(fk) : [];
+  return drawnAsHolder(t) ? fnAskedItems(t) : [];
 }
 function subjectReported(target){
   var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
   if (u) return reportedCount(u);
-  var fk = fnKeyOfTarget(t);
-  return fk && FUNCTIONS[fk] ? fnReportedCount(fk) : { done:0, total:0 };
+  return drawnAsHolder(t) ? fnReportedCount(t) : { done:0, total:0 };
 }
 function submitBlockers(target){
   var t = String(target || "");
@@ -37475,17 +37489,6 @@ function builderStartFresh(target){
   else if (route === "fnprojects") clearFunction(String(target).slice(3), "plan", why);
 }
 
-/* Entering a projects function that has no capability yet mints its first,
-   named after the function — a projects plan has to hang off something, and
-   the Temple's addCapability() is the one place that mints one (§51.11). */
-function builderEnsureCapability(target){
-  if (builderRoute(target) !== "fnprojects") return;
-  var fk = String(target).slice(3);
-  if (capsOfFunction(fk).length) return;
-  var c = addCapability(fk);
-  c.name = FUNCTIONS[fk].name;
-}
-
 /* ── The row forms ────────────────────────────────────────────────────
    One definition per row kind: the fields IN THE ORDER THE OUTCOME READS
    THEM, which is the whole point (Islam: "the template should protect the
@@ -37704,7 +37707,10 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "capko") {
-    var c = capById(ctx.capId); if (!c) return false;
+    /* §330.18: A HOLDER, which since §322 is a capability OR a supporting
+       function's own work — `capById` answered null for the second and the
+       form quietly wrote nothing. */
+    var c = holderByIdWritable(ctx.capId); if (!c) return false;
     /* §316: A ROW WITH NO ID IS NOBODY'S TO CHANGE (§191). This branch pushed
        a bare object, so the row rendered perfectly, scored, reported — and
        could not be WRITTEN: §241's row-addressed writer refuses the whole save
@@ -37732,7 +37738,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "project") {
-    var cc = capById(ctx.capId); if (!cc) return false;
+    var cc = holderByIdWritable(ctx.capId); if (!cc) return false;   /* §330.18 */
     var pr = addProject(cc); if (!pr) return false;
     pr.name = v("name"); pr.owner = v("owner"); pr.start = v("start"); pr.end = v("end"); pr.brief = v("brief");
     if (typeof RAIL !== "undefined" && typeof railKeyFor === "function") RAIL[railKeyFor(cc)] = pr.id;
@@ -57675,8 +57681,17 @@ var SYNC = (function () {
         if (!h || !h.list) return;
         var t = h.target;
         if (!mayAuthor("k_found", t)) return;
-        if (BUILDER && BUILDER.target === t && h.cap) {
-          openBuilderForm("capko", { capId:h.cap.id }); return; }
+        /* §330.18: THE BUILDER'S FORM OPENS FOR A HOLDER, NOT ONLY FOR A
+           CAPABILITY. This asked for `h.cap`, and since §322 the Overview's
+           Add on a projects function carries the FUNCTION's own id — so in
+           the builder the press fell through to the plain path below and
+           pushed a NAMELESS row, where §129's whole rule is that a row is
+           added WHOLE through a titled form. Measured: press Add on a
+           function the builder had just created and one blank objective
+           appeared with no form ever drawn. The id on the button already
+           names the holder either way, so it is handed over as it is. */
+        if (BUILDER && BUILDER.target === t) {
+          openBuilderForm("capko", { capId:b.dataset.capkoadd }); return; }
         /* §242: IT MINTS AN ID, AS EVERY OTHER ADD IN THE PRODUCT DOES.
            Islam: *"the input there wasn't saved."* This pushed a row with no
            id, so the reporting page drew its box carrying the string
@@ -58912,7 +58927,16 @@ var SYNC = (function () {
      with its pen on. leaveModes() first — it clears EDIT_PAGE, so the pen is
      switched on AFTER it, never before. */
   function builderStart(target){
-    builderEnsureCapability(target);
+    /* §330.18: NO CAPABILITY IS MINTED ANY MORE. §322 gave a supporting
+       function projects of its own and this went on creating a box to hang
+       them off — which after stage 2 is worse than pointless: every add in
+       this route now writes to the function's own holder, so the box stayed
+       EMPTY, and `fnOwnsProjects()` answers false while a function carries
+       one, so the function's own Projects page drew nowhere to put the first
+       project at all. A brand-new function was readable and unstartable on
+       its own page, which is §61's trap and the thing §129's audit found five
+       times. `builderEnsureCapability` is DELETED rather than left uncalled
+       (§24). */
     BUILDER = { target: target };
     builderDialogClose();
     var first = builderSections(target)[0];

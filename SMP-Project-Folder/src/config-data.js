@@ -7555,12 +7555,19 @@ function eachProject(fn){ eachHolder(function(h){
    rows that exist, and `fnOwnsProjects` answers the different question of
    whether the PAGE draws a place to add the first one (§61). */
 function eachHolder(fn){
-  FUNCTION_KEYS.forEach(function(k){
-    var f = FUNCTIONS[k];
-    if (!f || fnPlansInPillars(f)) return;
-    if (!Array.isArray(f.projects) || !f.projects.length) return;
-    fn(fnOwnHolder(k));
-  });
+  /* §330.18: WHICH HOLDERS EXIST IS ONE QUESTION, AND `fnHolders` IS ITS
+     ANSWER. This kept a membership test of its own — a function counted only
+     while `projects` held a row — and the PAGES ask `fnHolders`, which also
+     draws a function whose projects are still to come (§61: a function with
+     nothing at all and no box is readable and unstartable). So a function
+     carrying key objectives and no project yet was drawn, reported into, and
+     addressed by nothing: line 7593's own comment promises exactly that its
+     objectives are findable by id, and this walk was where that promise was
+     being broken. Two answers to one question is how the halves drift
+     (§53.5), and the demo cannot show it — every projects function in the
+     worked example holds projects, so the two walks agree there row for
+     row. */
+  FUNCTION_KEYS.forEach(function(k){ fnHolders(k).forEach(fn); });
   (GROUP.capabilities || []).forEach(function(c){ fn(c); });
 }
 function projById(id){
@@ -8916,14 +8923,29 @@ function reportSectionState(){
 }
 var CURRENT_REPORT_KEY = null;
 
-function capItemById(id){
+/* WHICH ROW A REPORTING BOX IS ABOUT (§330.18, correcting §322).
+   IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,
+   found one section after §330 named `holderOfProjectId` as the fifth and said
+   in its own comment that a copy nobody carried across is what `eachProject`
+   exists to stop. All four of a supporting function's reporting handlers open
+   `var hit = …; if (!hit) return;`, so on the page where most of the tenant's
+   projects now live EVERY figure, note, status and per-cent was written into
+   nothing: the box held the value until the next repaint and then gave it
+   back. No console error, nothing on the screen — §96's family, and §219's
+   symptom exactly, one page over.
+
+   Renamed with the walk, because all four call sites mean *the holder* and a
+   function is not a capability; the `holder` it hands back is read by none of
+   them, and leaving a field called `cap` holding a function is the drift this
+   corrects. */
+function holderItemById(id){
   var hit = null;
-  GROUP.capabilities.forEach(function(c){
-    (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"ko", obj:m, cap:c }; });
+  eachHolder(function(c){
+    (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"ko", obj:m, holder:c }; });
     (c.projects || []).forEach(function(p){
-      (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"deliverable", obj:d, cap:c, proj:p }; });
-      (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"outcome", obj:o, cap:c, proj:p }; });
-      (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, cap:c, proj:p }; });
+      (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"deliverable", obj:d, holder:c, proj:p }; });
+      (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"outcome", obj:o, holder:c, proj:p }; });
+      (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, holder:c, proj:p }; });
     });
   });
   return hit;

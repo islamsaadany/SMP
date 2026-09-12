@@ -3050,8 +3050,29 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      what "a custodian per project" means. Capability projects only: a pillars
      function's plan is classified with the units and has no per-project
      owner; its floor is deliberately not derived here (flagged in §147.5). */
+  /* §330.18: AND THE FUNCTION'S OWN WORK IS ONE OF THEM. This read the
+     capabilities alone, and §322 had just moved most of a tenant's projects
+     onto the functions themselves — so both callers answered about an empty
+     list: nobody named on a function's own project derived the Contributor
+     floor (a milestone's owner, a stakeholder, a collaborator — §147.8's
+     whole feature, dead since §322), and `capProjectOf` could not say which
+     project a reporting row belonged to, which is what `boundedReach` asks
+     before letting a bounded role write it. The derivation forty lines above
+     was carried across at §330 and this was not; it is the same sentence, so
+     it carries the same correction.
+
+     WIDENED, NEVER NARROWED. A capability is its own destination since §330,
+     so a case could be made that being named on one should grant at `cap:<id>`
+     rather than at the function — that would TAKE a role away from somebody
+     who holds it today, and whose call that is is Islam's, not a repair's. */
   function capsOfFn(w, fnKey) {
-    return (w.capabilities || []).filter(function (c) { return c && c.fn === fnKey; });
+    var own = ((w || {}).functions || {})[fnKey] || {};
+    var mine = (String(own.format) !== "pillars" && Array.isArray(own.projects))
+      ? [{ id: "fn:" + fnKey, fn: fnKey, own: true, projects: own.projects,
+           keyObjectives: own.keyObjectives || [] }]
+      : [];
+    return mine.concat(
+      (w.capabilities || []).filter(function (c) { return c && c.fn === fnKey; }));
   }
   function namedInFn(w, p, fnKey) {
     if (!p || !fnKey) return false;
@@ -3350,6 +3371,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     gapEmptyFields: gapEmptyFields,
     namedOn: namedOn, namedInUnit: namedInUnit,
     namedInFn: namedInFn, capProjectOf: capProjectOf,
+    /* §330.18: WHICH HOLDERS A SUBJECT DRAWS, exported because the authoriser
+       was keeping a third copy of the same walk (`ctxOfFn`) and it had the
+       same gap — a function's own projects were in none of them. */
+    holdersOfFn: capsOfFn,
     NAME_PARTICLES: NAME_PARTICLES, KNOWN_NAME_WORDS: KNOWN_NAME_WORDS,
     nameWords: nameWords, knownGuess: knownGuess, nameRuns: nameRuns,
     firstName: firstName,
@@ -12799,12 +12824,19 @@ function eachProject(fn){ eachHolder(function(h){
    rows that exist, and `fnOwnsProjects` answers the different question of
    whether the PAGE draws a place to add the first one (§61). */
 function eachHolder(fn){
-  FUNCTION_KEYS.forEach(function(k){
-    var f = FUNCTIONS[k];
-    if (!f || fnPlansInPillars(f)) return;
-    if (!Array.isArray(f.projects) || !f.projects.length) return;
-    fn(fnOwnHolder(k));
-  });
+  /* §330.18: WHICH HOLDERS EXIST IS ONE QUESTION, AND `fnHolders` IS ITS
+     ANSWER. This kept a membership test of its own — a function counted only
+     while `projects` held a row — and the PAGES ask `fnHolders`, which also
+     draws a function whose projects are still to come (§61: a function with
+     nothing at all and no box is readable and unstartable). So a function
+     carrying key objectives and no project yet was drawn, reported into, and
+     addressed by nothing: line 7593's own comment promises exactly that its
+     objectives are findable by id, and this walk was where that promise was
+     being broken. Two answers to one question is how the halves drift
+     (§53.5), and the demo cannot show it — every projects function in the
+     worked example holds projects, so the two walks agree there row for
+     row. */
+  FUNCTION_KEYS.forEach(function(k){ fnHolders(k).forEach(fn); });
   (GROUP.capabilities || []).forEach(function(c){ fn(c); });
 }
 function projById(id){
@@ -14160,14 +14192,29 @@ function reportSectionState(){
 }
 var CURRENT_REPORT_KEY = null;
 
-function capItemById(id){
+/* WHICH ROW A REPORTING BOX IS ABOUT (§330.18, correcting §322).
+   IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,
+   found one section after §330 named `holderOfProjectId` as the fifth and said
+   in its own comment that a copy nobody carried across is what `eachProject`
+   exists to stop. All four of a supporting function's reporting handlers open
+   `var hit = …; if (!hit) return;`, so on the page where most of the tenant's
+   projects now live EVERY figure, note, status and per-cent was written into
+   nothing: the box held the value until the next repaint and then gave it
+   back. No console error, nothing on the screen — §96's family, and §219's
+   symptom exactly, one page over.
+
+   Renamed with the walk, because all four call sites mean *the holder* and a
+   function is not a capability; the `holder` it hands back is read by none of
+   them, and leaving a field called `cap` holding a function is the drift this
+   corrects. */
+function holderItemById(id){
   var hit = null;
-  GROUP.capabilities.forEach(function(c){
-    (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"ko", obj:m, cap:c }; });
+  eachHolder(function(c){
+    (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"ko", obj:m, holder:c }; });
     (c.projects || []).forEach(function(p){
-      (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"deliverable", obj:d, cap:c, proj:p }; });
-      (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"outcome", obj:o, cap:c, proj:p }; });
-      (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, cap:c, proj:p }; });
+      (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"deliverable", obj:d, holder:c, proj:p }; });
+      (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"outcome", obj:o, holder:c, proj:p }; });
+      (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, holder:c, proj:p }; });
     });
   });
   return hit;
@@ -16683,7 +16730,7 @@ var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target"
 
 /* Address any row inside ONE capability — the import must never write into a
    neighbour, which is what scoping the finder (rather than reusing the global
-   capItemById) guarantees. */
+   holderItemById) guarantees. */
 function capFindById(c, id){
   if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
   var hit = null;
@@ -53524,7 +53571,7 @@ var SYNC = (function () {
        typed and lost on the next repaint. */
     document.querySelectorAll("[data-crep]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.crep);
+        var hit = holderItemById(el.dataset.crep);
         if (!hit) return;
         var v = el.value.trim();
         /* §300: the yes/no pair writes one field between them, exactly as it
@@ -53557,7 +53604,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-cnote]").forEach(function(el){
       growBox(el);   /* §271, as on the unit's side */
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.cnote);
+        var hit = holderItemById(el.dataset.cnote);
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
@@ -53569,7 +53616,7 @@ var SYNC = (function () {
        progress again, which is the kind of surprise a report cannot afford. */
     document.querySelectorAll("[data-cpick]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.cpick);
+        var hit = holderItemById(el.dataset.cpick);
         if (!hit) return;
         /* §303: ASKED OF `setRowStatus`, which the workbook reader now asks
            too. These two lines and the file's were two answers to one
@@ -53584,7 +53631,7 @@ var SYNC = (function () {
        number. */
     document.querySelectorAll("[data-cpct]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.cpct);
+        var hit = holderItemById(el.dataset.cpct);
         if (!hit) return;
         setRowPct(hit.obj, el.value);
         paint();

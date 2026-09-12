@@ -3782,6 +3782,131 @@ console.log("\n37b · a function's own project owner is a Project owner (§330)"
   check("§330: and somebody the plan does not name does not",
         rolesOf("probe330not").indexOf("powner@fn:" + FK) === -1,
         rolesOf("probe330not").join(", "));
+  /* §330.18: AND THE DERIVATION IS NOT THE FEATURE — THE SAVE IS. This
+     section proved the role and stopped, and the row index the authoriser
+     builds (`ctxOfFn`) walked the capabilities alone, so every figure this
+     owner entered was refused with their role plainly derived. A role that
+     reaches nothing is the same to the person holding it as no role at all,
+     so the post is asserted beside it, both ends (§94.2, §172). */
+  const stored = clone(w);
+  stored.access = Object.assign({}, stored.access);
+  stored.access.powner = Object.assign({}, stored.access.powner || {},
+                                       { a_fn_own: "edit" });
+  const first = (stored.functions[FK].projects || [])[0] || {};
+  const ms = (first.milestones || [])[0];
+  check("§330.18: the fixture's project has a milestone to report",
+        !!(ms && ms.id), JSON.stringify({ ms: !!ms }));
+  if (ms && ms.id) {
+    const want = ms.status === "done" ? "wip" : "done";
+    const send = function (key) {
+      const inc = clone(stored);
+      const m = ((inc.functions[FK].projects || [])[0].milestones || [])[0];
+      m.status = want; m.pct = want === "wip" ? 20 : null;
+      return A.authorize(stored, inc, personOf(stored, key));
+    };
+    check("§330.18: the owner of a function's own project reports it",
+          send("probe330own").ok, (send("probe330own").refusals || []).join(" / "));
+    check("§330.18 REFUSED: and somebody the plan does not name does not",
+          !send("probe330not").ok, "was ALLOWED");
+  }
+})();
+
+/* ── 37c · THE CONTRIBUTOR FLOOR ON A FUNCTION'S OWN PROJECT (§330.18) ──
+   §330 carried the OWNER derivation across to a function's own projects and
+   left the floor behind: `capsOfFn()` read the capabilities alone, so nobody
+   named on a function's own project — a milestone's owner, a stakeholder, a
+   collaborator — derived anything at all, and `capProjectOf()` could not say
+   which project a reporting row belonged to, which is what `boundedReach()`
+   asks before letting a bounded role write it. §147.8's whole feature, dead
+   for every supporting function since §322.
+
+   AND THE SUITE STAYED GREEN OVER IT, which is the finding worth keeping:
+   §17 is written against the capability shape and this file WRAPS every
+   function's projects into one at load, so the case that broke was never put
+   to the rule. A fixture that normalises the world is also a fixture that can
+   normalise away the thing under test (§94.5), which is why this section
+   undoes the wrap through the product's own dissolve exactly as §37b does.
+
+   BOTH ENDS (§94.2): the row that names them is allowed AND the row beside it
+   is refused, or a build that opened the whole function passes the half that
+   matters least. */
+console.log("\n37c · the contributor floor on a function's own project (§330.18)");
+(function () {
+  const R = require("../lib/rules.js");
+  const FK = Object.keys(SEED.functions || {}).filter(function (k) {
+    return String((SEED.functions[k] || {}).format) !== "pillars" &&
+      (SEED.group.capabilities || []).some(function (c) {
+        return c && c.fn === k && (c.projects || []).length; });
+  })[0];
+  if (!FK) { check("§330.18: the seed holds a projects function", false, FK); return; }
+  const stored = clone(SEED);
+  const f = stored.functions[FK];
+  f.projects = []; f.keyObjectives = f.keyObjectives || [];
+  (stored.group.capabilities || []).filter(function (c) { return c.fn === FK; })
+    .forEach(function (c) {
+      const mv = R.dissolvePlan(c, f);
+      if (mv.def != null) f.def = mv.def;
+      if (mv.keyObjectives) f.keyObjectives = mv.keyObjectives;
+      f.projects.push.apply(f.projects, mv.projects);
+    });
+  stored.group.capabilities = (stored.group.capabilities || [])
+    .filter(function (c) { return c.fn !== FK; });
+  /* The fixture needs a milestone to own and a deliverable beside it that
+     names nobody — if either is missing the assertions below would pass for
+     the wrong reason (§113.8), so it is asserted rather than assumed. */
+  const P0 = f.projects[0] || {};
+  const mile = (P0.milestones || [])[0];
+  const deliv = (P0.deliverables || [])[0];
+  check("§330.18: the fixture has a milestone and a deliverable to tell apart",
+        !!(mile && mile.id && deliv && deliv.id),
+        JSON.stringify({ ms: !!mile, d: !!deliv }));
+  if (!(mile && deliv)) return;
+  const NAME = "Probe Milestone Owner 330";
+  mile.owner = NAME;
+  stored.people = (stored.people || []).concat([
+    { key: "probe330mile", name: NAME, active: true, fn: FK }]);
+  /* THE CONTRIBUTOR ROW OPENED, Islam's condition 1 — it ships at view, so
+     without this the refusals below would be true of a build with no rule at
+     all (§94.5). */
+  stored.access = Object.assign({}, stored.access);
+  stored.access.contrib = Object.assign({}, stored.access.contrib || {},
+                                        { a_fn_own: "edit" });
+  const world = A.worldOf ? A.worldOf(stored) : stored;
+  const who = (stored.people || []).filter(function (x) {
+    return x.key === "probe330mile"; })[0];
+  const roles = R.personRoles(world, who).map(function (r) {
+    return r.role + "@" + r.at; });
+  check("§330.18: a milestone's owner on a function's own project derives "
+        + "CONTRIBUTOR at the function",
+        roles.indexOf("contrib@fn:" + FK) > -1, roles.join(", "));
+  check("§330.18: the rule reads them as bounded",
+        R.onlyOwnLines(world, who, "fn", "fn:" + FK) === true);
+  /* AND THE REACH IS PER ROW (§147.7), asked END TO END through the
+     authoriser the endpoint calls rather than of `boundedReach` directly —
+     that one takes a context the authoriser BUILDS from the stored graph, and
+     a check that assembles its own would be asserting its own assembly. */
+  const post = function (mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, "probe330mile"));
+  };
+  const at = function (st) {
+    const pr = (st.functions[FK].projects || [])[0];
+    return { m: (pr.milestones || [])[0], d: (pr.deliverables || [])[0] };
+  };
+  /* EVERY MUTATION MUST ACTUALLY CHANGE SOMETHING (§94.5, this suite's own
+     recorded fault): a status set to the one it already holds is no change at
+     all, and an empty change list is ALLOWED however the rule behaves. */
+  const notNow = function (row) { return row.status === "done" ? "wip" : "done"; };
+  const msWant = notNow(mile), dWant = notNow(deliv);
+  check("§330.18: the fixture's two mutations are real changes",
+        msWant !== mile.status && dWant !== deliv.status,
+        JSON.stringify({ ms: mile.status, d: deliv.status }));
+  const rMine = post(function (st) {
+    const m = at(st).m; m.status = msWant; m.pct = msWant === "wip" ? 10 : null; });
+  check("§330.18: they report their own milestone",
+        rMine.ok, (rMine.refusals || []).join(" / "));
+  check("§330.18 REFUSED: and not the deliverable beside it",
+        !post(function (st) { at(st).d.status = dWant; }).ok, "was ALLOWED");
 })();
 
 /* ── 38 · A CAPABILITY IS A SUBJECT OF ITS OWN (§330, spec 046 stage 2) ──

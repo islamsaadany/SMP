@@ -46,11 +46,16 @@ def goto_reporting(pg):
     # A viewer who reaches one function has no Units | Functions switch at
     # all (navFolds), and their entry already stands on the function (§94.6)
     # — so both steps are taken only where the control exists.
-    for _ in range(3):
-        if not pg.query_selector("#units .navswitch"): break
-        on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
-        if on and on[0] == "Functions": break
-        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    # PRESS THE SIDE YOU WANT, NEVER "the other one" (§330.17). The switch is
+    # two sides on a tenant with no capability and THREE once there is one, and
+    # with three it is a row of buttons — so clicking the wrapper lands on
+    # whichever one sits under its centre, which is Capabilities. `[data-fold]`
+    # names the side and is absent exactly when that side is already lit, which
+    # is why the press is guarded rather than asserted, and it is right on both
+    # shapes.
+    sw = pg.query_selector('#units [data-fold="fns"]')
+    if sw:
+        sw.click(); pg.wait_for_timeout(200)
     dest = pg.query_selector('#units button[data-u="%s"]' % DEST)
     if dest: dest.click(); pg.wait_for_timeout(300)
     pg.evaluate("""()=>{const b=[...document.querySelectorAll('#subtabs button')]
@@ -64,7 +69,7 @@ def goto_reporting(pg):
 # never as one loose total, or a Submit lost and a picker gained cancel out.
 READ = """([own, other]) => {
   const body = document.querySelector('.capbody');
-  const inKO = new Set((capsOfFunction('%s')[0].keyObjectives || []).map(k => k.id));
+  const inKO = new Set((fnOwnHolder('%s').keyObjectives || []).map(k => k.id));
   const crep = [...document.querySelectorAll('.capbody [data-crep]')].map(e => e.dataset.crep);
   return {
     koBoxes:  crep.filter(id => inKO.has(id)).length,
@@ -78,8 +83,8 @@ READ = """([own, other]) => {
               ? document.querySelector('.capbody .ritem.on').dataset.rail : null,
     // both ends: the shared rule, asked exactly as the server asks it (§42)
     ownLines: SMPRules.onlyOwnLines(world(), viewer(), 'fn', 'fn:%s'),
-    mayOwn:  canReportFnProject('%s', capsOfFunction('%s')[0].projects.find(p => p.id === own)),
-    mayOther: canReportFnProject('%s', capsOfFunction('%s')[0].projects.find(p => p.id === other)),
+    mayOwn:  canReportFnProject('%s', fnOwnHolder('%s').projects.find(p => p.id === own)),
+    mayOther: canReportFnProject('%s', fnOwnHolder('%s').projects.find(p => p.id === other)),
     pending: reportPending('fn:%s')
   };
 }""" % (FN, FN, FN, FN, FN, FN, FN)
@@ -94,6 +99,11 @@ with sync_playwright() as pw:
     pg.goto(URL); pg.wait_for_timeout(1300)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
 
+    # §330: THE HOLDER IS THE FUNCTION'S OWN. This asked
+    # `capsOfFunction(fk)[0]`, which since §322 is not where a function's
+    # own projects live and since §329 answers with nothing at all on the
+    # worked example — so the fixture threw before it had made anything.
+    # `fnOwnHolder(fk)` is the product's own reader for it (§53.5).
     # THE AHMED SHAPE (§147.7): named as a project's Owner, the Project
     # owner row opened — and deliberately NOT attached to the function on
     # the register, because Islam's two conditions do not include it.
@@ -103,7 +113,7 @@ with sync_playwright() as pw:
                     active:true });
       PEOPLE.push({ key:"t130m", name:"Milestone Owner 130", title:"Engineer",
                     active:true });
-      var cap = capsOfFunction("%s")[0];
+      var cap = fnOwnHolder("%s");
       cap.projects[0].owner = "Project Owner 130";
       cap.projects[0].milestones[0].owner = "Milestone Owner 130";
       paint();
@@ -139,7 +149,7 @@ with sync_playwright() as pw:
     # PRESSING IT CHANGES THE DATA (§96): a drawn picker proves rendering,
     # not writing — flip the first deliverable's status and read it back.
     wrote = pg.evaluate("""(own) => {
-      var cap = capsOfFunction("%s")[0];
+      var cap = fnOwnHolder("%s");
       var p = cap.projects.find(x => x.id === own), d0 = p.deliverables[0];
       var before = d0.status;
       var sel = document.querySelector('.capbody [data-cpick="' + d0.id + '"]');

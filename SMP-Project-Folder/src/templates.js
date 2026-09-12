@@ -860,7 +860,7 @@ var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target"
 
 /* Address any row inside ONE capability — the import must never write into a
    neighbour, which is what scoping the finder (rather than reusing the global
-   capItemById) guarantees. */
+   holderItemById) guarantees. */
 function capFindById(c, id){
   if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
   var hit = null;

@@ -3636,7 +3636,7 @@
        typed and lost on the next repaint. */
     document.querySelectorAll("[data-crep]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.crep);
+        var hit = holderItemById(el.dataset.crep);
         if (!hit) return;
         var v = el.value.trim();
         /* §300: the yes/no pair writes one field between them, exactly as it
@@ -3669,7 +3669,7 @@
     document.querySelectorAll("[data-cnote]").forEach(function(el){
       growBox(el);   /* §271, as on the unit's side */
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.cnote);
+        var hit = holderItemById(el.dataset.cnote);
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
@@ -3681,7 +3681,7 @@
        progress again, which is the kind of surprise a report cannot afford. */
     document.querySelectorAll("[data-cpick]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.cpick);
+        var hit = holderItemById(el.dataset.cpick);
         if (!hit) return;
         /* §303: ASKED OF `setRowStatus`, which the workbook reader now asks
            too. These two lines and the file's were two answers to one
@@ -3696,7 +3696,7 @@
        number. */
     document.querySelectorAll("[data-cpct]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.cpct);
+        var hit = holderItemById(el.dataset.cpct);
         if (!hit) return;
         setRowPct(hit.obj, el.value);
         paint();

@@ -12007,6 +12007,35 @@ function gapMap(target, all, fillable){
             { sec: w.sec, page: "plan", rail: unitRailKey(u), code: p.code });
     });
   };
+  /* ONE HOLDER'S GAPS, WHOEVER HOLDS IT (§330.13). A function's own work and
+     a capability's are the same shape — a definition, key objectives, and
+     projects with their outcomes and milestones — so they are counted by one
+     body over a list, and the code and the rail are asked of the holder
+     (§310, §53.5) rather than of whichever subject the caller came from. */
+  var holderHalf = function(list){
+    var ov = 0;
+    list.forEach(function(c){
+      ov += G("k_found", {}, "cap", c);           /* §214: its definition */
+      (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
+    });
+    entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
+    list.forEach(function(c){
+      (c.projects || []).forEach(function(p){
+        /* The projects rail is per HOLDER (railKeyFor), and it selects by
+           project id — the same pair the rail's own rows write. */
+        /* §177: a project's front matter, its outcomes' targets and its
+           milestones' owners and due dates are one place — the project — so
+           they are one count and one chip, and the walk lands on the pane
+           that holds all three. */
+        var pctx = function(row){ return { project: p, row: row }; };
+        var n = G("k_proj", { project: p }, "project", p);
+        (p.outcomes   || []).forEach(function(o){ n += G("k_proj", pctx(o), "outcome", o); });
+        (p.milestones || []).forEach(function(m){ n += G("k_proj", pctx(m), "milestone", m); });
+        entry("pr:" + p.id, projCode(holderCodeOwner(c), p), n,
+              { sec: "proj", page: "plan", rail: railKeyFor(c), code: p.id });
+      });
+    });
+  };
   if (t.indexOf("fn:") === 0) {
     var fk = t.slice(3), fo = functionOf(fk);
     if (fo && String(fo.format) === "pillars") {
@@ -12020,28 +12049,21 @@ function gapMap(target, all, fillable){
         fov += G("k_found", {}, "capko", m); });
       entry("ov", "Overview", fov, { sec: "found", page: "capfoundation" });
       unitHalf(unitLike(t), FN_WORDS); return out; }
-    var caps = fnHolders(fk), ov = 0;
-    caps.forEach(function(c){
-      ov += G("k_found", {}, "cap", c);           /* §214: its definition */
-      (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
-    });
-    entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
-    caps.forEach(function(c){
-      (c.projects || []).forEach(function(p){
-        /* The projects rail is per CAPABILITY (railKeyFor), and it selects
-           by project id — the same pair the rail's own rows write. */
-        /* §177: a project's front matter, its outcomes' targets and its
-           milestones' owners and due dates are one place — the project — so
-           they are one count and one chip, and the walk lands on the pane
-           that holds all three. */
-        var pctx = function(row){ return { project: p, row: row }; };
-        var n = G("k_proj", { project: p }, "project", p);
-        (p.outcomes   || []).forEach(function(o){ n += G("k_proj", pctx(o), "outcome", o); });
-        (p.milestones || []).forEach(function(m){ n += G("k_proj", pctx(m), "milestone", m); });
-        entry("pr:" + p.id, projCode(fk, p), n,
-              { sec: "proj", page: "plan", rail: "cap:" + c.id, code: p.id });
-      });
-    });
+    holderHalf(fnHolders(fk));
+  } else if (t.indexOf("cap:") === 0) {
+    /* §330.13: A CAPABILITY COUNTS ITS OWN GAPS. Stage 2 gave it a page, a
+       band and a rail of its own, and this had a `fn:` branch and a unit
+       branch and nothing else — so `cap:<id>` fell through to `UNITS[t]`,
+       which is undefined, and the count came back 0 while the page beside it
+       printed the red word. §211's fault one subject over, and the same
+       shape: the counted total is what draws the missing bar, the chips, the
+       rail marks and the Next-gap walk (§145.14, §192.4) and what Submit's
+       refusal reads (§221), so a custodian was shown three Missings on a
+       capability with no way to open one (§223, §61).
+       It is the SAME body the function runs, over a list of one — never a
+       second answer to "what does this subject owe" (§53.5). */
+    var cc = capOfTarget(t);
+    if (cc) holderHalf([cc]);
   } else {
     unitHalf(UNITS[t]);
   }

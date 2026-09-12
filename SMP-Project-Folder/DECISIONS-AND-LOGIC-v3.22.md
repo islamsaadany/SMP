@@ -6438,6 +6438,43 @@ has ever been in front of a client — which is what this sweep is for.
   shots it assembles are still the signed-off ones and a guard that had quietly
   deleted the generator would have been caught.
 
+- **§330.13 · A capability counted none of its own gaps, and twenty-one checks
+  could not be pointed anywhere else.** The fifth product fault of the round,
+  and it was reachable only because the check that finds it was reachable
+  again. `gapMap()` had a `fn:` branch and a unit branch and nothing between
+  them, so `cap:<id>` fell through to `UNITS[t]` — undefined — and the count
+  came back **0 while the page beside it printed the red word**: measured,
+  `gapTotal("cap:cap6")` 0 against one drawn *Missing*. §211's fault one
+  subject over, and the same chain: that total is what draws the missing bar,
+  the per-place chips, the rail marks and the Next-gap walk (§145.14, §192.4)
+  and what Submit's refusal reads (§221) — **so a custodian or a project owner
+  on a capability was shown red words with no control to open** (§223, §61).
+  The `fn:` branch's body is EXTRACTED and both call it over a list (§53.5),
+  with the code and the rail asked of the HOLDER (§310) rather than of
+  whichever subject the caller came from. **3 red** falsified from the SOURCES
+  (§276), the third naming the consequence in words — *the fill door is drawn
+  — no `[data-fillcta]`*.
+  **AND THE WAY IT WAS FOUND IS THE LARGER FINDING.** `milestone-fill.py` had
+  declined in words — *"no capability with two projects … cannot run"* — and
+  `gap-walk.py` was 5 red, and **both were recorded here as established NOT
+  this branch's, on a baseline run that was measuring this branch's own
+  build**: twenty-one checks spell their subject as the ABSOLUTE path
+  `file:///home/user/SMP/…`, so pointing one at `origin/main`'s build is
+  impossible and a §303 comparison silently confirms whatever you already
+  think (§105.6 — the wrong bytes look exactly like a fix that does not work,
+  here wearing the reassuring face). Re-measured properly, gap-walk is **green
+  on main** and milestone-fill **green on main**, so both were this round's.
+  All twenty-one read their own build and honour `SMP_BUILT` now, which is the
+  spelling every other check uses and what makes §276 and §303 possible for
+  them at all. **Three fixtures were then rewritten, never loosened** (§218):
+  `gap-walk` made its gaps inside a capability and asked the FUNCTION to count
+  them; `milestone-fill` wanted a capability with two projects, which the
+  finished demo does not ship, and conflated the PAGE (`cap:<id>`) with the
+  role's PLACE (`fn:<key>`, where `personRoles` derives `powner` either way);
+  and `project-done` read `group.capabilities` for one held by IT and died on
+  an index (§215) where a supporting function has owned its projects directly
+  since stage 1.
+
 ### What the checks found, and what had to be rewritten rather than loosened
 
 `checks/capability-entry.py` is new and 43/0 — the demo's one capability, the

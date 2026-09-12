@@ -31,7 +31,16 @@ project.
 import sys
 from playwright.sync_api import sync_playwright
 
-URL = "file:///home/user/SMP/SMP-Project-Folder/src/strategy-management-platform.html"
+import os as _os
+# THE BUILD, BY ITS OWN PATH (§330.13). This read
+# `file:///home/user/SMP/…` — an ABSOLUTE path — so it could not be pointed
+# at any other build: a falsification made from the sources (§276) and a
+# baseline run against `origin/main` (§303) both went on measuring the
+# branch, silently and in the reassuring direction. Twenty-one checks shared
+# the spelling. `SMP_BUILT` is how every neighbour is pointed elsewhere.
+URL = "file://" + _os.path.abspath(_os.environ.get("SMP_BUILT") or
+  _os.path.join(_os.path.dirname(__file__), "..",
+                "strategy-management-platform.html"))
 errs = []
 bad = 0
 
@@ -55,14 +64,23 @@ UNIT_STATE = """(g) => {
            filler: UNIT_ROLES[uk].custodian };
 }"""
 FN_STATE = """(g) => {
+  /* A FUNCTION'S OWN WORK, NOT ITS CAPABILITY'S (§330). This made its gaps
+     inside `capsOfFunction(fk)` and then asked the FUNCTION's band to count
+     them — right while a capability was drawn on the function's own pages, and
+     wrong the moment stage 2 gave it a page, a band and a gap count of its
+     own: the check was measuring a subject it had never touched, and
+     `gapTotal("fn:marketing")` answered 0 (§214.3, ninth time). It blanks
+     milestone dates in the function's OWN projects, which is what its own band
+     counts (§322). A capability's walk is its own subject and is asserted in
+     `capability-entry.py`. */
   const fk = FUNCTION_KEYS.filter(k => (FUNCTIONS[k]||{}).custodian &&
-                                       capsOfFunction(k).length)[0];
-  capsOfFunction(fk).forEach(c => (c.projects||[]).forEach(p => {
+                                       fnOwnProjects(k).length)[0];
+  fnOwnProjects(fk).forEach(p => {
     if (!p.start) p.start = "Q1 2026";
     if (!p.end) p.end = "Q4 2026";
     if (!p.owner) p.owner = "Noran Adel";
     (p.milestones||[]).slice(0,2).forEach(m => { m.finish = ""; });
-  }));
+  });
   ACCESS.custodian = Object.assign({}, ACCESS.custodian, { a_fn_own_strat: g });
   return { target: "fn:" + fk, tab: "fnstrat", sec: "proj",
            filler: FUNCTIONS[fk].custodian };

@@ -46,7 +46,16 @@ button, and the fill grant reaches every project in the function.
 import sys
 from playwright.sync_api import sync_playwright
 
-URL = "file:///home/user/SMP/SMP-Project-Folder/src/strategy-management-platform.html"
+import os as _os
+# THE BUILD, BY ITS OWN PATH (§330.13). This read
+# `file:///home/user/SMP/…` — an ABSOLUTE path — so it could not be pointed
+# at any other build: a falsification made from the sources (§276) and a
+# baseline run against `origin/main` (§303) both went on measuring the
+# branch, silently and in the reassuring direction. Twenty-one checks shared
+# the spelling. `SMP_BUILT` is how every neighbour is pointed elsewhere.
+URL = "file://" + _os.path.abspath(_os.environ.get("SMP_BUILT") or
+  _os.path.join(_os.path.dirname(__file__), "..",
+                "strategy-management-platform.html"))
 errs = []
 bad = 0
 
@@ -56,6 +65,21 @@ def ck(w, ok, x=""):
     if not ok:
         bad += 1
     print(("  ok      " if ok else "  FAIL    ") + w + (("  — " + str(x)) if not ok and x else ""))
+
+
+def open_fill(pg, why):
+    """§215: THE DOOR IS PART OF WHAT IS UNDER TEST, so its absence is reported
+       rather than fatal. Without a counted gap the red button is not drawn at
+       all (§223's chain: the count draws the door), so a build that stopped
+       counting a subject's gaps made this file DIE at its first press and
+       report two failures where there are many — the count and the door are
+       one claim and only one of them was ever said out loud."""
+    try:
+        pg.click("[data-fillcta]", timeout=5000)
+        return True
+    except Exception:
+        ck("the fill door is drawn — " + why, False, "no [data-fillcta]")
+        return False
 
 
 with sync_playwright() as p:
@@ -74,9 +98,29 @@ with sync_playwright() as p:
     # NOTHING else — so every answer below is the bounded role's, not a
     # custodian's wearing its clothes.
     setup = pg.evaluate("""() => {
+      /* THE PAIR IS MADE, NOT WAITED FOR (§255). The worked example shipped
+         eight capabilities until the demo was finished and now holds ONE, with
+         a single project in it — so this declined outright, in words, on a
+         build behaving exactly as decided (§214.3). It lends the capability
+         one of its own function's projects, which is `promotePlan`'s act by
+         hand and leaves every id where it was (§232). */
+      (GROUP.capabilities || []).forEach(c => {
+        if (!c || !c.fn || (c.projects || []).length >= 2) return;
+        const own = fnOwnProjects(c.fn);
+        while ((c.projects || []).length < 2 && own.length) {
+          const pr = own.shift();
+          pr.capId = c.id;
+          c.projects.push(pr);
+        }
+      });
       const cap = (GROUP.capabilities || []).filter(c => c.fn && (c.projects||[]).length >= 2)[0];
       if (!cap) return null;
-      const fk = cap.fn, target = "fn:" + fk;
+      /* TWO STRINGS WHERE THERE WAS ONE (§330). The PAGE is the capability's
+         own destination now, and the role's PLACE is still the function that
+         holds it — `personRoles` derives `powner` at `fn:<key>` either way,
+         because that is where a capability's access comes from. Collapsing
+         them made this file open a page the product no longer draws. */
+      const fk = cap.fn, target = "cap:" + cap.id, place = "fn:" + fk;
       const w = world();
       const free = PEOPLE.filter(p =>
         personActive(p) && SMPRules.personRoles(w, p).length === 0)[0]
@@ -112,7 +156,7 @@ with sync_playwright() as p:
       ACCESS.powner = ACCESS.powner || {};
       ACCESS.powner.a_fn_own_strat = "fill";
       ACCESS.powner.a_fn_own = "edit";
-      return { fk: fk, target: target, cap: cap.id, who: free.key, name: free.name,
+      return { fk: fk, target: target, place: place, cap: cap.id, who: free.key, name: free.name,
                mine: mine.id, theirs: theirs.id,
                outcomes: (mine.outcomes || []).length,
                deliverables: (mine.deliverables || []).length };
@@ -136,7 +180,8 @@ with sync_playwright() as p:
     print("\n1 · the role is derived from the plan, and it is the only one")
     be(setup["who"], setup["mine"])
     roles = pg.evaluate("() => personRoles(viewer()).map(r => r.role + '@' + r.at)")
-    ck("he holds exactly one role, project owner", roles == ["powner@" + setup["target"]], roles)
+    ck("he holds exactly one role, project owner, at the function that holds it",
+       roles == ["powner@" + setup["place"]], roles)
     ck("the grant on the Strategy half is fill",
        pg.evaluate("() => SMPRules.grantAtPage(world(), viewer(), 'k_proj', TARGET)") == "fill")
 
@@ -151,7 +196,7 @@ with sync_playwright() as p:
 
     # ── 3 · WHAT IS FILLABLE, AND WHAT IS DELIBERATELY NOT ───────────────
     print("\n3 · the fields that open, and the ones that must not")
-    pg.click("[data-fillcta]")
+    if not open_fill(pg, "the fields that open"): pg.close(); sys.exit(1 if bad else 0)
     pg.wait_for_timeout(600)
     fields = pg.evaluate("""() => ({
       months: document.querySelectorAll('#panel [data-month]').length,
@@ -265,7 +310,8 @@ with sync_playwright() as p:
     ck("he is counted only what he can close",
        reach["map"] == ["pr:" + setup["mine"]], reach["map"])
     # on THEIR project, in fill mode, nothing opens
-    pg.click("[data-fillcta]"); pg.wait_for_timeout(600)
+    if not open_fill(pg, "the walk"): pg.close(); sys.exit(1 if bad else 0)
+    pg.wait_for_timeout(600)
     pg.evaluate("""(a) => { RAIL["cap:" + a.cap] = a.theirs; paint(); }""", setup)
     pg.wait_for_timeout(450)
     theirs = pg.evaluate("""() => ({
@@ -387,7 +433,7 @@ with sync_playwright() as p:
 
     counted = pg.evaluate("() => gapTotal(TARGET)")
     ck("the bad date is COUNTED as owed", counted >= 1, counted)
-    pg.click("[data-fillcta]")
+    if not open_fill(pg, "an unreadable date"): pg.close(); sys.exit(1 if bad else 0)
     pg.wait_for_timeout(600)
     bad_row = pg.evaluate("""(a) => {
       const btns = Array.from(document.querySelectorAll('#panel [data-month]'));

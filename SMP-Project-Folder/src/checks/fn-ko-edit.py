@@ -40,7 +40,16 @@
 import sys
 from playwright.sync_api import sync_playwright
 
-URL = "file:///home/user/SMP/SMP-Project-Folder/src/strategy-management-platform.html"
+import os as _os
+# THE BUILD, BY ITS OWN PATH (§330.13). This read
+# `file:///home/user/SMP/…` — an ABSOLUTE path — so it could not be pointed
+# at any other build: a falsification made from the sources (§276) and a
+# baseline run against `origin/main` (§303) both went on measuring the
+# branch, silently and in the reassuring direction. Twenty-one checks shared
+# the spelling. `SMP_BUILT` is how every neighbour is pointed elsewhere.
+URL = "file://" + _os.path.abspath(_os.environ.get("SMP_BUILT") or
+  _os.path.join(_os.path.dirname(__file__), "..",
+                "strategy-management-platform.html"))
 errs = []
 bad = 0
 

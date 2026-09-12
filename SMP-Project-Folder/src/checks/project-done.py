@@ -89,8 +89,19 @@ BASE["people"] += [
     {"key": "t287l", "name": "Pillar Owner 287", "active": True},
     {"key": "t287r", "name": "Plain Reader 287", "active": True, "unit": UNIT},
 ]
-_cap = [c for c in BASE["group"]["capabilities"] if c.get("fn") == FN][0]
-_cap["projects"][0]["owner"] = "Project Owner 287"
+# THE FUNCTION'S OWN PROJECT (§322, §330). Every `capsOfFunction(FN)[0]`
+# below is `fnOwnHolder(FN)` for the same reason: it is the holder of the work
+# this file is about, and it is the one a projects function has had since
+# stage 1 (§53.5 — one reader, not a second answer to *whose project is this*). This reached into
+# `group.capabilities` for one held by IT — true of the worked example until
+# the demo was finished, and the seed now holds ONE capability, Marketing's, so
+# the file died on an index rather than reporting (§214.3, §215). A supporting
+# function owns its projects directly since stage 1, and that is the ordinary
+# case this check is about; a capability's own owner is asserted in
+# `capability-entry.py` and `milestone-fill.py`.
+_own = (BASE["functions"][FN].get("projects") or [])
+assert _own, "the seed's %s owns no project — this check needs one" % FN
+_own[0]["owner"] = "Project Owner 287"
 BASE["units"][UNIT]["items"][0]["owner"] = "Pillar Owner 287"
 
 
@@ -239,7 +250,7 @@ with sync_playwright() as pw:
     # where there is no server to rebase from. So the state is made in the
     # SEED the stub serves, and survives every switch.
     ids = pg.evaluate("""() => {
-      var cap = capsOfFunction("%s")[0];
+      var cap = fnOwnHolder("%s");
       var u = UNITS["%s"];
       return { own: cap.projects[0].id, other: cap.projects[1].id,
                ownCode: projCode("%s", cap.projects[0]),
@@ -375,9 +386,9 @@ with sync_playwright() as pw:
     else:
       both = pg.evaluate("""(o)=>({
         mineRule: SMPRules.mayMarkDone(world(), viewer(), 'fn', '%s',
-                    capsOfFunction('%s')[0].projects.find(p=>p.id===o.own).owner),
+                    fnOwnHolder('%s').projects.find(p=>p.id===o.own).owner),
         otherRule: SMPRules.mayMarkDone(world(), viewer(), 'fn', '%s',
-                    capsOfFunction('%s')[0].projects.find(p=>p.id===o.other).owner),
+                    fnOwnHolder('%s').projects.find(p=>p.id===o.other).owner),
         bounded: boundedHere('%s'), reports: boundedReporter('%s')
       })""" % (FDEST, FN, FDEST, FN, FDEST, FDEST), ids)
       ck("both ends: the rule says theirs yes, the other no",
@@ -492,7 +503,7 @@ with sync_playwright() as pw:
       redOnPage: document.querySelectorAll('#panel .missing').length,
       bar: !!document.querySelector('.missbar'),
       cta: (document.querySelector('.fillcta')||{}).textContent || null,
-      blanks: (capsOfFunction('%s')[0].projects[0].milestones||[])
+      blanks: (fnOwnHolder('%s').projects[0].milestones||[])
                 .filter(m => SMPRules.gapEmpty('collaborators', m)).length
     })""" % (FDEST, FN)
     d1 = pg.evaluate(DOOR)
@@ -502,7 +513,7 @@ with sync_playwright() as pw:
     ck("...so there is no bar and no button asking him to fill anything",
        not d1["bar"] and d1["cta"] is None, d1)
     # AND THE OTHER END: a real gap, and the door comes back.
-    pg.evaluate("""()=>{ var m = capsOfFunction('%s')[0].projects[0].milestones[0];
+    pg.evaluate("""()=>{ var m = fnOwnHolder('%s').projects[0].milestones[0];
         delete m.finish; paint(); }""" % FN)
     pg.wait_for_timeout(350)
     d2 = pg.evaluate(DOOR)
@@ -518,7 +529,7 @@ with sync_playwright() as pw:
     # the assertion proves nothing (§113.8).
     print("-- landing: the project that opens")
     second = pg.evaluate("""()=>{
-      var cap = capsOfFunction("%s")[0];
+      var cap = fnOwnHolder("%s");
       cap.projects[0].owner = "Somebody Else";        /* first is NOT his */
       cap.projects[1].owner = "Project Owner 287";    /* his is second */
       REVIEW.submitted = {};

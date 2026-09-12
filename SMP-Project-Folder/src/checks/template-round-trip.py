@@ -116,9 +116,26 @@ async () => {
 
   /* ── A CAPABILITY'S PLAN ───────────────────────────────────────────── */
   R.cap = await guard("cap", async () => {
-    const c = GROUP.capabilities.filter(x => (x.keyObjectives || []).length
-      && (x.projects || []).length && (x.projects[0].deliverables || []).length
-      && (x.projects[0].outcomes || []).length && (x.projects[0].milestones || []).length)[0];
+    /* MAKE THE STATE (§255). The worked example shipped eight capabilities
+       until the demo was finished and now holds ONE, whose key objectives went
+       to its function with the dissolve (§329) — so this found nothing to
+       measure and said so honestly while proving nothing (§214.3). It mints
+       the two rows it needs on a capability that already has a full project:
+       the second is this section's own CONTROL, the row the file does not
+       mark and which must come back untouched (§94.2). */
+    const full = x => (x.projects || []).length && (x.projects[0].deliverables || []).length
+      && (x.projects[0].outcomes || []).length && (x.projects[0].milestones || []).length;
+    const c = GROUP.capabilities.filter(x => full(x) && (x.keyObjectives || []).length >= 2)[0]
+      || (() => {
+        const h = GROUP.capabilities.filter(full)[0];
+        if (!h) return null;
+        h.keyObjectives = h.keyObjectives || [];
+        while (h.keyObjectives.length < 2)
+          h.keyObjectives.push({ id: h.id + "-KO" + (h.keyObjectives.length + 1),
+            name: "MADE KO " + (h.keyObjectives.length + 1), dir: "≥",
+            target: "9 M EGP", compile: "Sum", weight: 50 });
+        return h;
+      })();
     if (!c) return { skipped: true };
     const ko = c.keyObjectives[0], pr = c.projects[0];
     const d = pr.deliverables[0], o = pr.outcomes[0], ms = pr.milestones[0];

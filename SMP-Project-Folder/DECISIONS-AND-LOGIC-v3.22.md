@@ -6351,6 +6351,34 @@ has ever been in front of a client — which is what this sweep is for.
   byte-identical, and a capability keeps §266.9's two-letter fallback for its
   own divider.
 
+- **§330.8 · A function could be deleted out from under its own projects.**
+  §322 gave a function projects of its own and `fnDeleteBlockers()` went on
+  listing only what a CAPABILITY holds, so a function carrying three projects
+  and no capability answered *nothing is in the way* — and `functions` is
+  keyed, so the row went and the plan went with it, silently and with no
+  archive. It is the same shape as the blocker beside it and it NAMES each
+  project (§62: the refusal is the feature, and a refusal that does not say
+  what is in the way sends somebody to look at everything).
+
+- **§330.9 · A generator's size is the artefact's, never the string's.** The
+  four generators had not been re-run since §330 moved the frozen sources, so
+  `smp-app/public/` — which is what production SERVES (§325) — was a build
+  behind; that section's own guard caught it, which is the whole of why it was
+  written. **AND RUNNING IT FOUND THE GENERATORS MIS-REPORTING THEIR OWN
+  OUTPUT**: five *"bytes"* figures across three scripts were `String.length`,
+  which is UTF-16 code units, and none of them counted the generated header the
+  script itself prepends — so `platform.css` announced **621947** for a file of
+  **641249** (the stylesheets are full of §, em dashes and arrows, at two and
+  three bytes each), while `shell.js` over-reported by 2,880 the other way.
+  **It was harmless for as long as nothing else measured the same thing**, and
+  stopped being harmless the day `checks/generated-in-step.mjs` began reporting
+  that quantity honestly: two numbers for one file, on two lines of one
+  terminal, with nothing on either line saying which is wrong (§124 — a status
+  that claims more than the thing measuring it can see; §298.3 — the artefact
+  is the verdict, the script's own line is not). It cost this session ten
+  minutes and nearly put the wrong figure into this record. Measured off the
+  file that was just written, so it cannot drift from it again.
+
 ### What the checks found, and what had to be rewritten rather than loosened
 
 `checks/capability-entry.py` is new and 43/0 — the demo's one capability, the

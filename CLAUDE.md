@@ -8988,8 +8988,22 @@ of its two forms, so the pillars form is exercised by the checks alone;
 `SMPRules.unitLikeOf()` is the one resolver a `cap:` target is still invisible
 to, and its only caller reads a ROLE's place, which can never be a capability
 &mdash; unreachable today, and stated rather than guessed at later; and
-`gap-walk.py` is **5 red on `origin/main`** with its function side finding no
-gaps to walk.*
+`multi-client.py` needs the three-step rehearsal database &sect;313.37
+describes, so it is unrun rather than failing. **&sect;330.13** &mdash; and the
+fifth product fault, found only because the check that finds it could be run
+again: `gapMap()` had an `fn:` branch and a unit branch and nothing between, so
+`cap:<id>` fell through to `UNITS[t]` and **the count answered 0 while the page
+printed the red word** &mdash; the total that draws the missing bar, the chips,
+the rail marks and the walk, and that Submit's refusal reads, so a custodian on
+a capability saw red words with no control to open (&sect;223, &sect;61). One
+body over a list now, the code and the rail asked of the HOLDER; **3 red**
+falsified, the third naming the consequence. **AND THE WAY IT WAS FOUND IS THE
+LARGER FINDING**: twenty-one checks spell their subject as the ABSOLUTE path
+`file:///home/user/SMP/…`, so a &sect;303 baseline run against `origin/main`
+silently measures the branch &mdash; two reds recorded earlier the same day as
+*"not this branch's"* were measured that way and were wrong (&sect;105.6 wearing
+the reassuring face). All twenty-one honour `SMP_BUILT` now, and three stale
+fixtures are REWRITTEN, never loosened (&sect;218).*
 
 *Earlier the same day &mdash; **&sect;329: the worked example holds no
 capabilities.** Islam: *"finish the demo data yes."* **STAGE 1 WAS LIVE AND

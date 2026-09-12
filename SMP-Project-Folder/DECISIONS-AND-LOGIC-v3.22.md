@@ -6549,14 +6549,13 @@ Its 620/0 had been measured against a seed that could not exercise it.
   name with `SMP_WRITE_MOCKUPS=1`, which is the smaller of the two remedies
   that section named. Moving them out of `checks/` altogether is still the
   tidier answer and is still not done.
-- **`gap-walk.py` is 5 red and it is not this branch's.** Its function side
-  finds nothing to walk — established by reproducing the identical five on
-  `origin/main`'s OWN build and on §329's (§303), so it arrived before this
-  round and belongs with the stale-neighbour sweep §324 was, rather than riding
-  a section about capabilities (§2b). `milestone-fill.py` declines the same way
-  on main, honestly and in words (§54.5), and `multi-client.py` needs the
-  three-step rehearsal database §313.37 describes, which this session did not
-  stand up.
+- **`multi-client.py` needs the three-step rehearsal database §313.37
+  describes** — seed a tenant in `public`, run `migrate-to-multi-client.js`,
+  then `fixture-platform.js` — which this session did not stand up, so it is
+  unrun rather than failing. (`gap-walk.py` and `milestone-fill.py` were
+  recorded here as pre-existing and were not: see §330.13 — the baseline they
+  were measured against was this branch's own build, and both are green on
+  main. Both are fixed.)
 - **`SMPRules.unitLikeOf()` does not know a capability, and today nothing asks
   it to.** It is the one resolver in the shared rules §330 did not teach —
   measured, `unitLikeOf(w, "cap:cap6")` answers null — and its only caller is

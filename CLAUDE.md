@@ -9023,7 +9023,47 @@ ends were built and the list between them was not (&sect;96, &sect;61). One
 clause; asserted as the AGREEMENT between what the page offers and what the
 builder can make. **And the first falsification of it went GREEN**, because
 that check did not honour `SMP_BUILT` and ran against the build it was
-falsifying &mdash; &sect;330.13's own lesson inside the hour (&sect;54.5).*
+falsifying &mdash; &sect;330.13's own lesson inside the hour (&sect;54.5).
+**&sect;330.16&ndash;.18 &mdash; AND RUNNING THE WHOLE SUITE FOUND SIX MORE
+PRODUCT FAULTS, EVERY ONE THE SAME SENTENCE**: *walk the capabilities*,
+written before &sect;322 moved a supporting function's projects onto the
+function. &sect;330 corrected two copies of it and said in its own comment
+that `eachProject` exists so nobody keeps a private one; there were four more
+in the product and one in each of two other layers. **&sect;330.17** &mdash;
+the navigation switch is TWO segments with no capability and THREE with one,
+so `.nsw:not(.on)` stopped meaning *the way across* and started meaning
+*whichever unlit side comes first*: **nine checks used that idiom and the
+function each was about was never drawn**. `[data-fold="<side>"]` names the
+side and is absent exactly when it is lit, so the press is guarded rather than
+asserted and is right on both shapes. **&sect;330.18** &mdash; found by
+running the check that was red: on a supporting function's Reporting page a
+project owner's picker was DRAWN, PRESSED and **wrote nothing**, because
+`capItemById()` backed all four handlers and each opens `if (!hit) return;`
+&mdash; every figure, note, status and per-cent typed there went into nothing,
+the box holding the value until the next repaint (&sect;96's family,
+&sect;219's symptom one page over). Beside it, **`capsOfFn()` in the SHARED
+rules** killed &sect;147.8's Contributor floor for every function since
+&sect;322, **`ctxOfFn()` in the authoriser** refused the project owner every
+figure they entered with their role plainly derived, **`eachHolder()` kept a
+membership test of its own** where the pages ask `fnHolders`, **a capability's
+Submit was held by nothing at all** (&sect;221 inert on the destination
+&sect;330 had just made), and **the builder's titled form did not open** while
+`builderEnsureCapability` minted a box that stayed empty and made the
+function's own Projects page draw nowhere to put a first project (&sect;61,
+&sect;129's audit five times over). **AND THE TOUR WALKED SOMEBODY ELSE'S
+PAGE** &mdash; a folded destination has no button, so `start()`'s *a place
+nothing can press* fallback fired and Marketing's own strategy custodian was
+toured round the GROUP; it presses the fold now and reads which side from
+`navSides()` (37 red). **THE SERVER SUITE STAYED GREEN OVER ALL OF IT AND
+THAT IS THE FINDING**: `test-authorize.js` WRAPS every function's projects
+back into a capability at load so six hundred assertions read the shape they
+were written for &mdash; *a fixture that normalises the world is also a
+fixture that can normalise away the thing under test* (&sect;94.5).
+&sect;37b proved the role and stopped at the derivation; &sect;37c is new and
+asks the floor AND the save, both ends, through the authoriser rather than of
+a context a check assembled itself. **633 passed**, falsified 1 / 2 / 3 red on
+the server and 2 / 4 / 4 on the browser side, all from the SOURCES
+(&sect;276).*
 
 *Earlier the same day &mdash; **&sect;329: the worked example holds no
 capabilities.** Islam: *"finish the demo data yes."* **STAGE 1 WAS LIVE AND

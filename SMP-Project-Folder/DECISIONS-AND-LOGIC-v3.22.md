@@ -6591,6 +6591,140 @@ the cause, the restore blind **1 red** printing `ok: False`, the area reverted
 carried one, and `test-authorize.js` §38 short-circuits on a seed with none.
 Its 620/0 had been measured against a seed that could not exercise it.
 
+### §330.16–.18 — running the whole suite, and the six faults under it
+
+The sweep that follows a round is not a formality here: **six more product
+faults came out of it, and every one of them is the same sentence — *walk the
+capabilities* — written before §322 moved a supporting function's projects
+onto the function itself.** §330 had already corrected two copies of it
+(`holderOfProjectId`, the `powner` derivation) and said in its own comment
+that `eachProject` exists so that nobody keeps a private one. There were four
+more in the product and one in each of two other layers.
+
+- **§330.16 · The workbook round trip declined its own subject.**
+  `template-round-trip.py` printed a sentence saying it had no capability to
+  measure, which was honest and left §22's contract — an upload AUTHORS, so a
+  column the file does not carry is a column the plan loses — unexercised on
+  the one kind of subject §330 had just created. It MINTS the two objectives
+  it needs on a capability that already holds a full project; the second row
+  is that section's own control (§113.8).
+
+- **§330.17 · Press the side you want, never "the other one".** The navigation
+  switch is TWO segments on a tenant with no capability and THREE once there
+  is one, and with three it is a row of buttons rather than one wrapping
+  control — so `.nsw:not(.on)` stopped meaning *the way across* and started
+  meaning *whichever unlit side comes first*, which is Capabilities. **Nine
+  checks used that idiom and the function they were each about was simply
+  never drawn.** `[data-fold="<side>"]` names the side and is absent exactly
+  when that side is already lit, which is why the press is guarded rather than
+  asserted and why it is right on BOTH shapes. Three fixtures were rewritten
+  with it — `owner-picker` read `GROUP.capabilities` on a page that draws the
+  function's own projects, `rail-standard` expected two capability PANES where
+  a holder now has a PAGE each, and `plan-edit-line` reached its *one control,
+  not one per pane* case through a pane count the product no longer draws —
+  and `project-dates` would not parse at all, the second nested-quote error of
+  the round.
+
+- **§330.18 · Three copies of one walk, and a function's own projects were in
+  none of them.** Found by running the check that was red rather than by
+  reading: on a supporting function's Reporting page a project owner's picker
+  was DRAWN, PRESSED, and wrote nothing.
+
+  - **`capItemById()`** backed all four of that page's reporting handlers, and
+    each opens `if (!hit) return;` — so **every figure, note, status and
+    per-cent typed on a supporting function's Reporting page was written into
+    nothing**. The box held the value until the next repaint and then gave it
+    back: no console error, nothing on the screen (§96's family, and §219's
+    symptom one page over). Renamed `holderItemById` with the walk, because
+    all four call sites mean *the holder* and a field called `cap` holding a
+    function is the drift itself.
+  - **`capsOfFn()`** in the SHARED rules backed `namedInFn()` and
+    `capProjectOf()` — so nobody named on a function's own project derived the
+    Contributor floor (a milestone's owner, a stakeholder, a collaborator:
+    §147.8's whole feature, dead since §322), and the rule could not say which
+    project a reporting row belonged to. **WIDENED, NEVER NARROWED**: a case
+    could be made that being named on a capability should now grant at
+    `cap:<id>` rather than at the function, and that TAKES a role away from
+    somebody who holds it today, which is Islam's call and not a repair's.
+  - **`ctxOfFn()`** in the authoriser kept a third copy, and every id missing
+    from the index it builds is refused whoever the person is — so **the owner
+    of a function's own project, whose role §330 had just carried across, was
+    refused every figure they entered.** It asks the shared rule now, exported
+    as `holdersOfFn`.
+  - **`eachHolder()` kept a membership test of its own**, where the PAGES ask
+    `fnHolders` — a function counted only while `projects` held a row, so one
+    carrying key objectives and no project yet was drawn, reported into, and
+    addressed by nothing. The id scanner's own comment promises exactly that
+    its objectives are findable; this walk was where the promise broke. The
+    demo cannot show it, every projects function there holding projects.
+  - **A capability's Submit was held by nothing at all.** `subjectAsked` and
+    `subjectReported` turned the target into a FUNCTION KEY before asking, so
+    `cap:<id>` fell through to the empty answer and §221's rule — a report
+    with an unanswered row is not ready to send — was inert on the destination
+    §330 had just created. Everything below them already spoke the target
+    vocabulary (`fnReportItems` walks `capsShown(subject)`, which resolves
+    `cap:`); what was wrong was one translation on the way in, which is §172's
+    lesson: *the layer that has never been offered the new value is the layer
+    that has not been asked.*
+  - **The builder's titled form did not open, and the box it minted was worse
+    than pointless.** §129's rule is that a row is added WHOLE through a form
+    that asks its fields in the outcome's order, and the branch that opens it
+    required `h.cap`, which since §322 the Overview's Add on a projects
+    function does not carry: press Add and one NAMELESS objective appears with
+    no form ever drawn. Beneath it, `builderEnsureCapability` created a
+    capability for every new projects function so the plan had somewhere to
+    hang — and after stage 2 every add in that route writes to the function's
+    own holder, so the box stayed EMPTY, while `fnOwnsProjects()` answers
+    false for a function carrying one, so **the function's own Projects page
+    drew nowhere to put the first project.** A brand-new function was readable
+    and unstartable on its own page: §61's trap, and what §129's audit found
+    five times. Deleted rather than left uncalled (§24).
+
+  **AND THE TOUR WALKED SOMEBODY ELSE'S PAGE.** A step says `{dest,tab,sec}`
+  and `start()` falls back to the first destination when the person's own is
+  *not on the row* — its own comment explains that as *a place nothing can
+  press*. §330 gave the navigation a third side, so a viewer who reaches a
+  capability AND their own function now meets a SWITCH where they used to meet
+  a plain row, and a folded destination has no button: measured, **Marketing's
+  own strategy custodian was toured round the GROUP**. It presses the fold
+  now, which is what a person does, and reads which side from `navSides()`
+  rather than guessing from the key's prefix (§53.5). **37 red** with the
+  fallback line put back.
+
+**AND THE SERVER SUITE STAYED GREEN OVER ALL OF IT, WHICH IS THE FINDING WORTH
+KEEPING.** `test-authorize.js` §17 is written against the capability shape and
+that file **wraps every function's projects back into one at load** so six
+hundred assertions read the shape they were written for — a deliberate,
+documented fixture choice, and *a fixture that normalises the world is also a
+fixture that can normalise away the thing under test* (§94.5). §37b proved the
+role and stopped at the derivation; **§37c is new** and asks the floor and the
+save, both ends, through the authoriser rather than of a context a check
+assembled itself — `boundedReach` takes a context the authoriser BUILDS, so a
+check that builds its own is asserting its own assembly. §37b gained the post
+beside its derivation for the same reason: *a role that reaches nothing is the
+same to the person holding it as no role at all.* **633 passed, 0 failed**,
+falsified **1 / 2 / 3 red** on the server and **2 / 4 / 4 red** on the browser
+side, every one from the SOURCES (§276).
+
+Seven more checks asked the world for a shape it stopped having, and each is
+an old rule in a new place: `yn-in-progress` and `unit-before-number` asked a
+function for a CAPABILITY — one function in eight has one — and reported their
+own subject missing rather than measuring it (§54.5); `report-note-wrap` held
+the old spelling of `holderItemById` (§51.11 from the check's side);
+`setup-header` held the literal pair `["fns","units"]` and `setup-overview`
+added the board's halves up by name, both of which §330 gave a capabilities
+side — Islam's *"yes for all"* — and both REWRITTEN as agreements with the
+product's own lists (§218, §94.8), `setup-overview`'s for the THIRD time that
+line has carried a stale copy of the board's membership; `refusal-keeps-work`
+died on an empty capability list before it had made anything (§215) **and its
+removal probe REASSIGNED `holder.projects`**, which on a function's holder
+writes to a fresh wrapper and is thrown away — so the removal never happened
+and the save the section exists to watch refused was ACCEPTED (`fnOwnHolder`'s
+own comment names that trap; the product's Remove splices, so the probe does
+too); and `project-row-type` kept two inline copies of the walk, one of which
+made *it leaves the deliverables* pass for the wrong reason, because a row the
+fixture never named is absent from every list (§113.8).
+
 ### Recorded, not done
 
 - **The demo shows a capability in ONE of its two forms.** Product Mindset is
@@ -6609,6 +6743,22 @@ Its 620/0 had been measured against a seed that could not exercise it.
   recorded here as pre-existing and were not: see §330.13 — the baseline they
   were measured against was this branch's own build, and both are green on
   main. Both are fixed.)
+- **The builder no longer mints a capability, and nothing offers to make one
+  there.** §330.18 deleted `builderEnsureCapability` because the box it made
+  stayed empty and stopped the function's own Projects page drawing anywhere to
+  put a first project. A capability is created from the Temple, which is where
+  it was created before the builder existed, and the guided build does not
+  offer one — said here rather than discovered: whether the builder should ask
+  *is any of this a capability?* is a question about what the flow is for, and
+  it belongs with **Objectives & actions** (§320's own recorded round) rather
+  than inside a repair.
+- **Being named on a CAPABILITY's project still grants the Contributor floor
+  at the FUNCTION.** §330.18 widened `capsOfFn()` rather than narrowing it, on
+  purpose: narrowing would take a role away from somebody who holds it today.
+  Since §330 a capability is a destination of its own, so the case can be made
+  that the grant belongs at `cap:<id>` — and that is Islam's to decide, with
+  the cost being that a `cap:` place has to be taught to `roleWheres`, the
+  areas and the register's own vocabulary.
 - **`SMPRules.unitLikeOf()` does not know a capability, and today nothing asks
   it to.** It is the one resolver in the shared rules §330 did not teach —
   measured, `unitLikeOf(w, "cap:cap6")` answers null — and its only caller is

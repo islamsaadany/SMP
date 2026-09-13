@@ -9045,7 +9045,18 @@ formats, so the *no project rail* assertion passed on the very build it exists
 to catch** (&sect;113.8); and the workbook fixed point was asked over a nameless
 row, which `child()` has dropped since the reader was written &mdash; it is a
 fixed point over the rows the file can address now, with the nameless action
-asserted to be dropped exactly as a nameless milestone is. **RECORDED, NOT
+asserted to be dropped exactly as a nameless milestone is.
+**AND THE SWEEP'S COUNT WAS ACCOUNTED FOR RATHER THAN QUOTED** (&sect;332's
+habit, a second time): `qa.py` reads **33 viewers, 241 destinations, ERRORS
+none** where &sect;332 recorded 228 on the same deterministic subject, so it was
+owed a baseline rather than an explanation (&sect;303) &mdash; built from
+`origin/main`'s own sources in a worktree and swept identically, **main 241,
+this branch 241, viewer for viewer**, main's head being &sect;336.2 and the
+branch ahead of it by &sect;336.3, &sect;337 and &sect;338 alone. &sect;338 adds
+no destination; the thirteen are &sect;334 making a capability one of its own.
+The one real difference is the workbook's inline validation lists, **34
+&rarr; 36** &mdash; the two Actions sheets' own, longest 121 of 255, so
+&sect;67.5's cap is nowhere near. **RECORDED, NOT
 DONE**: requirements (&sect;318 &sect;5's third object) are not built, and a
 business unit cannot plan this way.*
 

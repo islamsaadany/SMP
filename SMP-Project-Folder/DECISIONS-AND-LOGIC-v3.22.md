@@ -45923,6 +45923,24 @@ file — so it is a fixed point **over the rows the file carries**, with the
 nameless action asserted to be dropped exactly as a nameless milestone is, or
 an action quietly acquiring a rule of its own would read as a pass.
 
+**AND THE SWEEP'S COUNT WAS ACCOUNTED FOR RATHER THAN QUOTED**, which is
+§332's habit paying a second time. `qa.py` over `file://` reads **33 viewers,
+241 destinations, ERRORS none**, where §332 recorded **228** on the same
+deterministic subject — and a figure that differs from the record is owed a
+baseline rather than an explanation (§303). Built from `origin/main`'s own
+sources in a worktree and swept identically: **main 241, this branch 241,
+viewer for viewer**, with main's head at §336.2 and the branch ahead of it by
+§336.3, §337 and §338 alone. So §338 adds no destination, and §332's 228 is
+honest about its own build — §334 made a capability a destination of its own
+in between, which is where the thirteen came from.
+
+**The one real difference between the two runs is the workbook**, and it is
+this section's: inline validation lists **34 → 36**, the two Actions sheets'
+own — `Hidden` on the plan sheet and `New status` on the progress sheet — at a
+longest list of **121 of 255**, so §67.5's cap is nowhere near, and both are
+inline deliberately, being fixed vocabularies rather than lists that grow with
+the tenant.
+
 ### Recorded, not done
 
 - **Requirements** — the third object in §318 §5's model — are not built; an

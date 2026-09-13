@@ -433,6 +433,21 @@ with sync_playwright() as pw:
     fns(pg)
     if dest(pg, "fn:merchandising"):
         tab(pg, "fnstrat"); sec(pg, "found")
+        # §340: THE GAP IS MADE HERE NOW. The door into fill mode is drawn from
+        # what the subject OWES (§223, §301.3), and this leaned on Merchandising
+        # owing ten — which was true until the demo's plan was completed, and
+        # then this section went red on a build whose map is exactly right
+        # (§214.3). REWRITTEN, NEVER LOOSENED (§218): what is asserted is word
+        # for word what it was — that the button names the page this Overview
+        # ACTUALLY reads — and the one thing it needs is now created rather
+        # than borrowed. Taking a tactic's outcome away is the smallest thing
+        # that owes something (§249), and it is put back below.
+        pg.evaluate("""() => {
+          const t = FUNCTIONS["merchandising"].items[0].tactics[0];
+          t.__kept = { o: t.outcome, g: t.outTarget };
+          delete t.outcome; delete t.outTarget; paint();
+        }""")
+        pg.wait_for_timeout(400)
         a = pg.evaluate(STATE)
         ck("the row's fill button names capfoundation, not foundation",
            a["fill"] == "capfoundation", a["fill"])
@@ -443,6 +458,13 @@ with sync_playwright() as pw:
             ck("...and pressing it opens fields rather than a flag nobody reads",
                r["flds"] > 0 and "capfoundation" in r["edit"], r)
             press(pg)
+        # put the row back, so section 4 measures the plan as it stands (§94.2)
+        pg.evaluate("""() => {
+          const t = FUNCTIONS["merchandising"].items[0].tactics[0];
+          if (t.__kept) { t.outcome = t.__kept.o; t.outTarget = t.__kept.g;
+                          delete t.__kept; paint(); }
+        }""")
+        pg.wait_for_timeout(300)
 
     # ── 4 · BOTH ENDS ────────────────────────────────────────────────
     print("\n4 · drawn for an author, and for nobody else")

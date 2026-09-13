@@ -9013,14 +9013,48 @@ ASSUMPTION**: walking back to the nearest `{` lands inside
 the figure set rather than onto the row** &mdash; valid syntax, clean build,
 perfect render, and found only by the measurement that asks what the PLATFORM
 says rather than what the file contains (seven rows still owed a note after 115
-were written). **TWO CHECKS WERE RED AND BOTH WERE &sect;214.3**, each holding a
-literal this deliberate change moves, each **REWRITTEN, NEVER LOOSENED**
-(&sect;218) to MAKE the state it needs rather than borrow the demo's:
-`submit-gate` &sect;2 asserted Submit is held with a reason, which was true only
-because Mobile owed notes &mdash; and the file's own docstring already promised
-every state in it is made (&sect;104.8); `empty-not-missing` &sect;0 asserted the
-shipped plan owes something, which is the control that proves the missing
-register still exists (&sect;113.8) and now proves it over a gap it creates.
+were written). **SEVEN CHECKS WERE RED AND EVERY ONE WAS &sect;214.3** (the
+sixth time), each holding a literal this deliberate change moves, each
+**REWRITTEN, NEVER LOOSENED** (&sect;218) to MAKE the state it needs rather than
+borrow the demo's &mdash; **and each established as this work's by running it
+against a build made from `origin/main`'s own sources first** (&sect;303), which
+is also what separated them from `tactic-outcome.py`, whose four failures
+reproduce identically on main and are left as main's. **They share one shape:
+they borrowed a state the demo no longer holds.** `submit-gate` &sect;2 asked
+for a unit still owing a figure &mdash; and that file's own docstring already
+promised every state in it is made (&sect;104.8); `empty-not-missing` &sect;0
+and `plan-edit-line` &sect;3 each asked for a subject still owing a gap, which
+is the control that proves the missing register still exists (&sect;113.8) and
+now proves it over a gap they create; **`report-chrome` asked for a HELD
+Submit, which is the very assertion &sect;280.1 rewrote in the OPPOSITE
+direction eleven sections ago**, when it was the open state that had to be made
+because every demo unit was blocked &mdash; *which end has to be made has
+flipped, and the file records both flips rather than replacing one with the
+other* &mdash; made from the DATA and put back (&sect;94.2), never by stubbing
+the gate, so the real rule is what both ends are measured through.
+**&sect;340.7 &mdash; `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
+"NOTHING IS REINTERPRETED"**: it asked that NO row reads as yes/no, right while
+nothing authored one and false the moment four outcomes are genuinely
+done-or-not; &sect;257's rule is opt-in per row, so what must hold is that a
+target carrying a NUMBER never reads as yes/no and one spelling `Y/N` always
+does &mdash; asserted as that agreement, **with the demo asserted to hold an
+example of each**, or a build that stopped reading the unit passes over an empty
+list (&sect;113.8). Two more in that file were the same class: `== "Y/N"` was
+true only of a row holding no value, where &sect;257.2 writes Y/N BESIDE the
+value; and the tally trial picked a Y/N tactic naming quarters this cycle is not
+standing in, so **answering it moved nothing because it was never asked**
+&mdash; 41/41/41 on a correct build, measuring the calendar rather than the
+count. **&sect;340.8 &mdash; AND THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING
+AN EVENT THE PRODUCT NEVER RECEIVES**: `report-note-wrap` fired `change` by hand
+on the note box **one line after asserting the cursor was still in it**, and a
+bound field writes on `change`, which for a textarea means when focus LEAVES
+(&sect;35) &mdash; so the commit's repaint replaced the focused node
+mid-`innerHTML` and Chromium raised *"moved in a 'blur' event handler"*. On a
+real blur focus has already gone, which is &sect;219's own rule; driven that way
+it is green with all 27 behavioural assertions unchanged, so **the product
+cannot produce that error on any path a person can take**. Not claimed: it was
+green on main with the same synthetic event, so the repaint's scope depends on
+the data, and which difference widened it is not established.
 **VERIFIED**: full `qa.py` sweep **ERRORS none**; authoriser 633/0; differ
 140/0; platform rules 69/0; session-state and db-url-choice clear; round trip,
 clean parity, two tabs 21/0, incremental write byte-identical, cx-refusal,
@@ -9034,7 +9068,7 @@ file's bytes changed (&sect;91) &mdash; the served worker is unaffected, since
 served shell and the shipped build all regenerated and `generated-in-step`
 clear. **Nothing about how a gap is counted, how an outcome is scored or who
 may report anything has moved**: the diff is the two demo data files, one line
-in `seedPartialReporting`, and the two rewritten checks.*
+in `seedPartialReporting`, and the seven rewritten checks.*
 
 *Earlier the same day: **&sect;339: the setting that could not open,
 and the creator who was nowhere in the data.** The two things &sect;337 and

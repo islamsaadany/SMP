@@ -139,27 +139,39 @@ with sync_playwright() as p:
     # is unreachable on the shipped data.
     #
     # Both ends, or a build that lost the fill entirely still passes the half
-    # it can reach (§94.2, §113.8). The state is MADE, because the demo has no
-    # complete report to borrow.
-    held = s.get("submitHeld")
-    ck("Submit is HELD while the report is incomplete (§221)", held is True, s)
+    # it can reach (§94.2, §113.8). WHICH of the two states has to be MADE has
+    # now flipped, and that is §340: §280.1 made the OPEN state, because every
+    # demo unit was blocked by something; the demo owes nothing now, so it is
+    # the HELD state that has no unit to borrow. Made from the DATA — one
+    # figure taken back out — never by stubbing `submitBlockers`, so the real
+    # gate is what both halves are measured through, and put back afterwards
+    # (§94.2). §214.3 for the fifth time; REWRITTEN, never loosened (§218).
+    held_state = pg.evaluate("""() => {
+      const m = (UNITS[current].items[0].measures || [])[0];
+      m.__kept = {a: m.actual, p: m.progress};
+      m.actual = ""; m.progress = null;
+      paint();
+      return true;
+    }""")
+    pg.wait_for_timeout(300)
+    h = box_state(pg)
+    ck("Submit is HELD while the report is incomplete (§221)",
+       h.get("submitHeld") is True, h)
     ck("...and it says why, on the platform's own bubble",
-       len(s.get("submitWhy") or "") > 0, s.get("submitWhy"))
+       len(h.get("submitWhy") or "") > 0, h.get("submitWhy"))
     ck("...and a held Submit is deliberately NOT filled",
-       "rgba(0, 0, 0, 0)" in sub.get("bg", ""), sub)
+       "rgba(0, 0, 0, 0)" in ((h.get("submit") or {}).get("bg", "")),
+       h.get("submit"))
 
     open_gate = pg.evaluate("""() => {
-      window.__realBlockers = window.submitBlockers;
-      window.submitBlockers = () => ({notes: [], pending: [], owed: 0, gaps: 0});
+      const m = (UNITS[current].items[0].measures || [])[0];
+      if (m.__kept) { m.actual = m.__kept.a; m.progress = m.__kept.p;
+                      delete m.__kept; }
       paint();
       var sb = document.querySelector('.rc-submit');
       var c = sb ? getComputedStyle(sb) : null;
-      var out = sb ? {held: sb.getAttribute('aria-disabled') === 'true',
-                      bg: c.backgroundColor, colour: c.color} : null;
-      window.submitBlockers = window.__realBlockers;
-      delete window.__realBlockers;
-      paint();
-      return out;
+      return sb ? {held: sb.getAttribute('aria-disabled') === 'true',
+                   bg: c.backgroundColor, colour: c.color} : null;
     }""")
     pg.wait_for_timeout(300)
     og = open_gate or {}

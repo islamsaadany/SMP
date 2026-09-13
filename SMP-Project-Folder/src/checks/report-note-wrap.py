@@ -210,8 +210,25 @@ with sync_playwright() as pw:
            after and after["h"] > hook["h"], [hook, after])
         ck("%s: and the cursor stays in it" % label, after and after["focused"], after)
         # ...and the two lines reach the STORED row, through this page's own hook.
+        #
+        # BLUR, NEVER A SYNTHESISED `change` (§219, §100.3). This fired the
+        # event by hand while the assertion one line above had just proved the
+        # cursor was still IN the box — a state the product never sees, because
+        # a bound field writes on `change`, which for a textarea means when
+        # focus LEAVES it (§35). So the commit's repaint replaced the focused
+        # node mid-`innerHTML`, Chromium raised "the node to be removed is no
+        # longer a child of this node… moved in a 'blur' event handler", and
+        # the run went red on a page error the product cannot produce on any
+        # path a person can take: on a real blur focus has already gone before
+        # `change` fires, which is the browser's own ordering and why §219
+        # rules that way. It survived until §340 only because the repaint's
+        # scope depended on the data (green on main, red once the demo owed
+        # nothing) — WHICH difference widened it is not established here, and
+        # does not need to be: `blur()` is what the browser does, and every
+        # "both lines reach the row" assertion below passes identically, so
+        # this is REWRITTEN and not loosened (§218).
         pg.evaluate("""(sel)=>{const el=document.querySelector('#panel ['+sel+']');
-            el.dispatchEvent(new Event('change',{bubbles:true}));}""", hook["hook"])
+            el.blur();}""", hook["hook"])
         pg.wait_for_timeout(700)
         stored = pg.evaluate("""(id)=>{
           const subj = unitLike(current);

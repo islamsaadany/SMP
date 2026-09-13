@@ -46165,3 +46165,54 @@ diff is the two demo data files plus the one line in `seedPartialReporting` that
 &sect;340.1 required. Nothing about how a gap is counted, how an outcome is
 scored or who may report anything has moved.
 
+
+**§340.6 — SEVEN CHECKS HELD A LITERAL THIS CHANGE MOVES, AND EVERY ONE WAS
+REWRITTEN RATHER THAN LOOSENED (&sect;214.3 for the sixth time, &sect;218).**
+The regression sweep put 95 checks through the new build and turned up seven
+reds. **Each was established as this work's by running it against a build made
+from `origin/main`'s own sources first** (&sect;303) — which is also what
+separated the seven from `tactic-outcome.py`, whose four failures reproduce
+identically on main and are therefore left as main's (&sect;300 already records
+that file as red there). The seven share one shape: **they borrowed a state
+from the demo, and the demo no longer holds it.** `submit-gate.py` asked for a
+unit that still owed a figure; `empty-not-missing.py` and `plan-edit-line.py`
+each asked for a subject that still owed a gap; `report-chrome.py` asked for a
+HELD Submit — and that one is the same assertion &sect;280.1 rewrote in the
+opposite direction eleven sections ago, when it was the OPEN state that had to
+be made because every demo unit was blocked. *Which of the two ends has to be
+made has now flipped, and the file records both flips rather than replacing
+one with the other.* All four MAKE the state and put it back (&sect;94.2),
+from the DATA rather than by stubbing the gate, so the real rule is what both
+ends are measured through.
+
+**§340.7 — AND `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
+"NOTHING IS REINTERPRETED".** Its &sect;6 asked that **no** row in the worked
+example reads as yes/no — the right shape while nothing authored one, and false
+the moment four tactic outcomes are genuinely done-or-not (&sect;300's own three
+answers). Nought was never the property: &sect;257's rule is that the feature is
+opt-in per row, so what must hold is that a target carrying a NUMBER never reads
+as yes/no and a target spelling `Y/N` always does. It asserts that agreement now,
+**with the demo asserted to hold an example of each** — or a build that stopped
+reading the unit at all would satisfy every "nothing moved" assertion over an
+empty list (&sect;113.8). Two more in the same file were the same class:
+`== "Y/N"` was true only of a row holding no value, where &sect;257.2 is explicit
+that Y/N is written BESIDE the value (`100 B EGP → 100 Y/N → 100 B EGP` round
+trips), so it asserts the RULE and keeps the figure; and the tally trial picked a
+Y/N tactic naming quarters this cycle is not standing in, so **answering it moved
+nothing because it was never asked** — 41/41/41 on a correct build, the trial
+measuring the calendar rather than the count.
+
+**§340.8 — THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING AN EVENT THE PRODUCT
+NEVER RECEIVES.** `report-note-wrap` went red on a DOMException — *"the node to
+be removed is no longer a child of this node&hellip; moved in a 'blur' event
+handler"* — with all 27 of its behavioural assertions passing. It fired
+`change` by hand on the note box **one line after asserting the cursor was still
+in it**, and a bound field writes on `change`, which for a textarea means when
+focus LEAVES (&sect;35); so the commit's repaint replaced the focused node
+mid-`innerHTML`. On a real blur focus has already gone before `change` fires —
+the browser's own ordering, and exactly why &sect;219 rules *blur, never a
+synthesised change*. Driven that way it is green and every "both lines reach the
+row" assertion is unchanged, so the product cannot produce that error on any
+path a person can take. **What is NOT claimed**: it was green on main with the
+same synthetic event, so the repaint's scope depends on the data — which
+difference widened it is not established, and does not need to be.

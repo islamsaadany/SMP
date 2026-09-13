@@ -1,4 +1,4 @@
-"""A CLOCK ON THE REVIEW (§337).
+"""A CLOCK ON THE REVIEW (§340).
 
 Islam: *"in the presentation module I need to set as an SMO the time of each
 presentation so the timer appears for the presenter"*, then *"it needs to be

@@ -1098,7 +1098,7 @@ function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
-  /* §337: the subjects this deck is of, kept because one subject's deck has
+  /* §340: the subjects this deck is of, kept because one subject's deck has
      stops that name SECTIONS rather than subjects, so there is nothing else
      to ask which unit is presenting. Mounted after the innerHTML that would
      otherwise destroy it, and before the fit pass, which only ever inserts
@@ -1318,7 +1318,7 @@ function masterWrite(list){
    overlay for no reason (§90.4). */
 function masterMark(){ if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint(); }
 
-/* ── HOW LONG EACH SUBJECT HAS (§337) ─────────────────────────────────
+/* ── HOW LONG EACH SUBJECT HAS (§340) ─────────────────────────────────
    Islam: *"I need to set as an SMO the time of each presentation so the timer
    appears for the presenter"*, and *"it needs to be per unit and it can be set
    in the master presentation sectoin with the flow."*
@@ -1486,7 +1486,7 @@ function masterPaint(){
   /* In the flow: the number IS the handle, and the × is the SAME `data-mftick`
      the left column uses, because it is the same act — one handler, so the two
      columns cannot answer differently (§53.5). */
-  /* §337: THREE BUTTONS, which is Islam's own choice over a list and over a
+  /* §340: THREE BUTTONS, which is Islam's own choice over a list and over a
      typed box, taken with the cost of each stated — that nineteen rows is
      fifty-seven controls, and that three fixed numbers cannot express a slot
      that is not one of them. Recorded as his.
@@ -1638,7 +1638,7 @@ function masterWire(){
     MFLOW.q = this.value.trim();
     masterFilter();
   });
-  /* ── THE MINUTES, WRITTEN WITHOUT A REPAINT (§337) ─────────────────
+  /* ── THE MINUTES, WRITTEN WITHOUT A REPAINT (§340) ─────────────────
      DELEGATED ON THE TBODY, not wired per button: the cell's three buttons are
      rewritten in place on every press, so a listener on each one would die
      with the node that carried it — and the tbody is replaced whole by
@@ -1655,7 +1655,7 @@ function masterWire(){
     if (!b || !flow.contains(b)) return;
     var t = b.dataset.minsfor, v = +b.dataset.mins;
     /* PRESSED AGAIN, IT CLEARS — the only way back to no time once the
-       dropdown's blank entry became three buttons (§337). */
+       dropdown's blank entry became three buttons (§340). */
     minsWrite(t, v === slotMins(t) ? 0 : v);
     var set = b.closest(".minset"), name = placeLabel(t), cur = slotMins(t);
     if (set) [].forEach.call(set.querySelectorAll("[data-mins]"), function(o){
@@ -1767,7 +1767,7 @@ function closeDeck(){
   var toEditor = DECK.from === "editor" &&
                  document.getElementById("slideroot").classList.contains("on");
   DECK.from = "page";
-  /* §337: the clock's own interval, stopped with the deck it was drawing. An
+  /* §340: the clock's own interval, stopped with the deck it was drawing. An
      interval left running is the leak §24 is about — it would go on writing
      into a node that has been replaced, twice a second, for the life of the
      tab. */
@@ -1959,7 +1959,7 @@ function deckStopAt(i){
   stops.forEach(function(st, j){ if (st.at <= i) k = j; });
   return k;
 }
-/* ══ THE CLOCK ON THE REVIEW (§337) ═══════════════════════════════════
+/* ══ THE CLOCK ON THE REVIEW (§340) ═══════════════════════════════════
    Islam: *"in the presentation module I need to set as an SMO the time of each
    presentation so the timer appears for the presenter."*
 
@@ -2014,7 +2014,7 @@ function clockSubject(){
   }
   return DECK.targets && DECK.targets.length === 1 ? DECK.targets[0] : null;
 }
-/* NO MINUTES, NO CLOCK (§337, agreed): a subject the office left blank draws
+/* NO MINUTES, NO CLOCK (§340, agreed): a subject the office left blank draws
    nothing at all, rather than a clock counting down from a number nobody
    chose (§35). */
 function clockStart(t){
@@ -2046,7 +2046,7 @@ function clockToggle(){
   else c.from = Date.now();
   clockPaint();
 }
-/* THE BAR'S ALONE, deliberately (§337): pause is reversible and a stray press
+/* THE BAR'S ALONE, deliberately (§340): pause is reversible and a stray press
    costs one press back, where reset throws the elapsed time away and cannot
    be undone — so it is not on the key and not on the clock, which are the two
    surfaces a hand can brush past in fullscreen. */
@@ -2057,7 +2057,7 @@ function clockReset(){
   clockPaint();
 }
 /* Counting DOWN, and it keeps counting when it runs out: "+2:30", because a
-   timer that stops has stopped being useful (§337, agreed). */
+   timer that stops has stopped being useful (§340, agreed). */
 function clockWords(ms){
   var over = ms < 0, s = Math.floor((over ? -ms : ms) / 1000);
   return (over ? "+" : "") + Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2);
@@ -2149,7 +2149,7 @@ function deckShow(n){
       " &middot; " + esc(REVIEW.name);
   }
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
-  /* §337: a flow crossing into the next unit starts their time by itself. */
+  /* §340: a flow crossing into the next unit starts their time by itself. */
   clockFollow();
 }
 /* §265 DELETED `deckPeek()` AND ITS TIMER FROM HERE, reversing the second half
@@ -2225,7 +2225,7 @@ function wireDeck(){
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
   root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);
-  /* §337. Both are in the bar, which in fullscreen is not on the screen — so
+  /* §340. Both are in the bar, which in fullscreen is not on the screen — so
      pause has two more ways in (the `P` key and the clock itself) and reset
      deliberately has none, because it cannot be undone. */
   root.querySelector("[data-dpause]").addEventListener("click", clockToggle);
@@ -2383,7 +2383,7 @@ function wireDeck(){
       if (document.fullscreenElement === root) document.exitFullscreen();
       else closeDeck();
     }
-    /* §337: `P` pauses. A letter is this deck's existing idiom rather than a
+    /* §340: `P` pauses. A letter is this deck's existing idiom rather than a
        new one — `f` and `w` below have answered since §69.7 — and `p` was
        free, checked rather than assumed. It reaches FULLSCREEN, which is the
        whole point: the bar's own button does not. Typing into the cycle note

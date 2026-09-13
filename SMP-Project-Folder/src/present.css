@@ -238,7 +238,7 @@
   .dslide.tight .aimbottom { margin-top:24px; }
   .dslide.tight .dnotebox { font-size:28px; padding:26px 30px; }
 
-  /* ── THE CLOCK ON THE REVIEW (§337) ───────────────────────────────
+  /* ── THE CLOCK ON THE REVIEW (§340) ───────────────────────────────
      A CHILD OF `.deck`, so it scales with the slide and holds the corner it
      was drawn in — and bottom-RIGHT, because the footer mark is bottom-left
      on every slide (§52) and a pillar's two headline figures are top-right,
@@ -990,7 +990,7 @@
   /* 40px, not 36: the cell's own padding is 16 and the button is 22, so a
      narrower column overflowed the list by exactly 2px at every width —
      measured, and §158's rule is fit, never "and it scrolls". */
-  /* ── HOW LONG EACH SUBJECT HAS (§337) ────────────────────────────
+  /* ── HOW LONG EACH SUBJECT HAS (§340) ────────────────────────────
      112px, measured rather than guessed (§122.5): three buttons at the size
      Islam signed off come to 96 and the cell's own padding is 16. The name
      column still clears the longest name on the list — `Strategy Management
@@ -1162,7 +1162,7 @@
      rather than as printed. */
   @media print {
     @page { size: 1600px 900px; margin: 0; }
-    /* §337: a clock on a printed slide is a number from a moment that has
+    /* §340: a clock on a printed slide is a number from a moment that has
        passed. The contingency pack is a record, not a rehearsal (§305). */
     #dclock { display:none !important; }
     html, body { background:#fff; }

@@ -994,7 +994,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **A CLOCK ON THE REVIEW (§337):** Islam — *"in the presentation module I need
+- **A CLOCK ON THE REVIEW (§340):** Islam — *"in the presentation module I need
   to set as an SMO the time of each presentation so the timer appears for the
   presenter"*, then *"it needs to be per unit and it can be set in the master
   presentation sectoin with the flow"*. **THE OBSTACLE DECIDED THE SHAPE AND IT
@@ -1052,7 +1052,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   print** (§305: a clock on a printed slide is a figure from a moment that has
   passed). **The unit sees its slot and cannot set it** — one read-only line in
   Manage slides, which is §256's own shape on that same bar.
-  **§337.1 — AND THE FINDING OF THE ROUND IS §56.7 FOR THE FOURTH TIME**:
+  **§340.1 — AND THE FINDING OF THE ROUND IS §56.7 FOR THE FOURTH TIME**:
   `clockSubject()` was written as `deckSubject()` and `present.js` **already
   declares `deckSubject(target)` 250 lines above** — the stored subject a target
   names, which `deckHidePass()` and the whole of Manage slides ask — so the
@@ -1067,7 +1067,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   regression was mine. **The scan that missed it compared two FILES and never a
   file against itself**; it runs over build.py's own concatenation now, and the
   tree's only duplicates are the six §281.1 deliberately leaves.
-  **§337.2 — three of the check's own first failures were the CHECK**: a press
+  **§340.2 — three of the check's own first failures were the CHECK**: a press
   measured against the EMPTY waiting column (§100.3), a fresh clock asserted as
   `"10:0x"` when that is true for one second of a ten-minute slot, and a reset
   guard comparing the face's string by PREFIX, so `"10:00"` against `"9:59"`
@@ -7825,7 +7825,7 @@ python3 checks/review-pptx.py   # the review deck as a PowerPoint (§311):
                                 # and the PLAN download is asserted untouched
                                 # (§94.2 — it shares every primitive changed).
                                 # 5 falsifications from the SOURCES, 1/3/4/3/2 red
-python3 checks/presentation-timer.py # a clock on the review (§337): the minutes
+python3 checks/presentation-timer.py # a clock on the review (§340): the minutes
                                 # set in the flow and read back off the STORED graph
                                 # (§96); the lit button pressed again CLEARING, and the
                                 # last one leaving deleting the map (§50.6); the total on
@@ -9044,7 +9044,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;337: a clock on the review.** Islam:
+*Last Updated: 2026-09-13 &mdash; **&sect;340: a clock on the review.** Islam:
 *"in the presentation module I need to set as an SMO the time of each
 presentation so the timer appears for the presenter"*, then per unit, set with
 the flow, and &mdash; of the mockup drawn before anything was built &mdash; the
@@ -9065,7 +9065,7 @@ everybody. **THE MOCKUP'S OWN COLOURS WOULD HAVE SHIPPED UNREADABLE** &mdash; it
 was drawn over a light screenshot and the on-screen deck follows the viewer's
 theme &mdash; so every pair is measured in both palettes, and the ink on the red
 is `--surface`, the obvious `--ink` measuring 3.06 and 2.75.
-**&sect;337.1 &mdash; AND THE FINDING OF THE ROUND IS A NAME**: `clockSubject()`
+**&sect;340.1 &mdash; AND THE FINDING OF THE ROUND IS A NAME**: `clockSubject()`
 was written as `deckSubject()`, which `present.js` already declares 250 lines
 above, so the later won by hoisting and **hiding a slide silently stopped
 working across the product** &mdash; nothing thrown, nothing logged, `node
@@ -9076,7 +9076,7 @@ pre-existing (&sect;334.13's trap, walked into within the hour of quoting
 &sect;303). Run from the baseline worktree they are green and it was mine. The
 duplicate scan that missed it compared two FILES and never a file against
 itself; it runs over build.py's own concatenation now.
-**&sect;337.2 &mdash; three of the check's own first failures were the CHECK**,
+**&sect;340.2 &mdash; three of the check's own first failures were the CHECK**,
 and its falsification DIED rather than reporting (&sect;215, in the file whose
 docstring promises it does not). Proved able to fail **seven ways from the
 SOURCES**. **VERIFIED**: presentation-timer 55/0, authoriser 642/0, differ

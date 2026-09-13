@@ -659,7 +659,7 @@ function slidesOpen(kind, key){
   SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
   var root = document.getElementById("slideroot");
   root.querySelector(".sl-title").textContent = "Manage slides";
-  /* §337: HOW LONG THIS SUBJECT HAS, where the person building the deck can
+  /* §340: HOW LONG THIS SUBJECT HAS, where the person building the deck can
      see it. Islam's own reason for asking: somebody who knows they have
      fifteen minutes builds a shorter deck.
 

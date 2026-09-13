@@ -7052,7 +7052,7 @@ end their output with a blank line, so a `tail -1` reported nothing where the
 verdict is one line up — §298.3's rule (*the tail is the verdict*) failing on
 the harness that quotes it. Each was re-run and read: ALL CLEAR, all green.
 
-## §337 — A CLOCK ON THE REVIEW (2026-09-13)
+## §340 — A CLOCK ON THE REVIEW (2026-09-13)
 
 Islam: *"in the presentation module I need to set as an SMO the time of each
 presentation so the timer appears for the presenter think with me how can we do
@@ -7170,7 +7170,7 @@ shape on that same bar — the custodian SEES what the office decided and gets n
 pen. **Neutral wording**, because the office opens that screen too, and nothing
 at all when no time is set.
 
-### §337.1 — Two declarations of one name, and hiding a slide stopped working
+### §340.1 — Two declarations of one name, and hiding a slide stopped working
 
 **THE FINDING OF THE ROUND, and it is §56.7 for the fourth time this project has
 recorded it.** `clockSubject()` was written as `deckSubject()` — and `present.js`
@@ -7199,7 +7199,7 @@ ITSELF, which is where both declarations were. The scan is now over build.py's
 own concatenation and reports the tree's only duplicates as the six
 §281.1 already records and deliberately leaves.
 
-### §337.2 — What the check's own first runs got wrong
+### §340.2 — What the check's own first runs got wrong
 
 **THREE OF THE FIRST RUN'S FAILURES WERE THE CHECK**, and none was the product.
 A press was measured against `document.querySelector('.mflow .mflist')`, which is
@@ -7228,7 +7228,7 @@ mounted **22 red**, a `<div>` in place of the `<button>` **1**, reset put on the
 key **6**, the same-subject guard removed **1**, the mockup's literal colours
 **1**, no minutes column **7**, the interval left running **1**.
 
-### §337.3 — Recorded, not done
+### §340.3 — Recorded, not done
 
 - **A check that does not honour `SMP_BUILT` cannot be given a baseline from
   outside its own directory.** Three were met here (`hide-slide`,

@@ -182,7 +182,7 @@ with sync_playwright() as p:
       };
     }""", None, {})
     check("two tables, one per column", get(shape, "tables") == 2, shape)
-    # REWRITTEN, NEVER LOOSENED (§218). §337 gives the FLOW a Minutes column and
+    # REWRITTEN, NEVER LOOSENED (§218). §340 gives the FLOW a Minutes column and
     # deliberately does not give it to the waiting table: a subject nobody has
     # put in the review has no slot, and offering one there would invite
     # setting a time for somebody who is not presenting. So the two tables
@@ -194,7 +194,7 @@ with sync_playwright() as p:
           len(heads) == 2 and heads[0] == ["Name", "Kind", "Slides"] and
           [c for c in heads[1] if c in ("Name", "Kind", "Slides")] == ["Name", "Kind", "Slides"],
           heads)
-    check("and the flow's own extra column is the one §337 adds",
+    check("and the flow's own extra column is the one §340 adds",
           len(heads) == 2 and
           [c for c in heads[1] if c not in ("Name", "Kind", "Slides")] == ["Minutes"], heads)
     check("one search box, on the waiting column", get(shape, "find") == 1, shape)

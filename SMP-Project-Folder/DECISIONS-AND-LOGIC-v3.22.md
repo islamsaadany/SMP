@@ -6941,9 +6941,14 @@ is written rather than slipped into a round about ownership.
 - **The plan builder still mints no capability**, at his word — *"pause the plan
   builder for now"* — so a capability is created on Setup › Capabilities and
   from the promote control, and nowhere in the guided set-up.
-- **A function's `head` is still called Head and not Owner**, also his — *"no
-  function head is fine for now"* — so the screen says Head where his sentence
-  says owner, and the two mean the same seat.
+- ~~**A function's `head` is still called Head and not Owner**~~ — **SETTLED
+  2026-09-13, and it is no longer a deferral**: Islam, asked nothing and
+  volunteering it — *"keep the function head as function head."* So the word
+  stands as the product's own, and the two vocabularies are reconciled by the
+  seat rather than by the label: a function's **Head** is what §336 measures as
+  reaching that function's capabilities, exactly as its **Custodian** does. The
+  earlier *"no function head is fine for now"* is kept above rather than
+  overwritten (Principle II), because it was a pause and this is an answer.
 - **Three decisions are deferred at his own instruction** (*"for the need
   decision from me wait for this"*) and are written into spec 044 §6 with his
   three answers beside them.

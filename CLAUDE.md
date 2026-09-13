@@ -8971,8 +8971,10 @@ target* has one answer, and `mayMarkDoneOn` was taught to ask it while
 `canReport` was not. **NOT FIXED HERE, AND THAT IS RULE 1b**: it changes who may
 report, so it is put to Islam before it is written. **RECORDED, NOT DONE, ALL
 THREE HIS**: the plan builder still mints no capability (*"pause the plan
-builder for now"*), a function's seat is still called Head rather than Owner
-(*"no function head is fine for now"*), and three decisions are deferred
+builder for now"*), a function's seat is called Head rather than Owner &mdash;
+**settled 2026-09-13**, *"keep the function head as function head"*, so what was
+*"no function head is fine for now"* is an answer rather than a pause &mdash;
+and three decisions are deferred
 (*"for the need decision from me wait for this"*), written into spec 044 &sect;6
 with his three answers beside them &mdash; along with his ruling that the extras
 drawn for objectives and actions (the targets broken down by category, the

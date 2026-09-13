@@ -5009,13 +5009,13 @@ function renderReport(u){
   /* ── Key Objectives, in their own section \u2014 they are the unit's headline
      and should not be a block among blocks. */
   var objs = reportItems(u).filter(function(x){ return x.kind === "objective"; });
-  var objTable = miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "Reported", "Note"],
+  var objTable = miniTable(["#", L("keyobj","bu"), "Dir.", REP_TGT_HEAD, "Reported", "Note"],
     objs.map(function(x, i){
       return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
         '<td class="idx">' + (i+1) + '</td>' +
         '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
         '<td class="num">' + esc(x.obj.dir) + '</td>' +
-        '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+        '<td class="num">' + repTargetCell(x.obj) + '</td>' +
         '<td class="cc">' + entry(x) + '</td>' +
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
@@ -5069,13 +5069,13 @@ function renderReport(u){
 
     var mTable = ms.length
       ? '<h4 class="mini">' + L("measure","bu") + '</h4>' +
-        miniTable(["#", "Measure", "Dir.", "Target", "Reported", "Note"],
+        miniTable(["#", "Measure", "Dir.", REP_TGT_HEAD, "Reported", "Note"],
           ms.map(function(x, i){
             return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
               '<td class="idx">' + (i+1) + '</td>' +
               '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
               '<td class="num">' + esc(x.obj.dir) + '</td>' +
-              '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+              '<td class="num">' + repTargetCell(x.obj) + '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
@@ -5088,7 +5088,7 @@ function renderReport(u){
            the page. It is a PLAN fact, so a row outside this cycle still shows
            its outcome — the cycle decides what is asked for, not what the plan
            says. */
-        miniTable(["#", "Tactic", "Outcome", "Owner", "Quarters", "YTD Target", "Reported", "Note"],
+        miniTable(["#", "Tactic", "Outcome", "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
           ts.map(function(x, i){
             var nameCell = '<td><b class="tacname">' + esc(x.obj.name) + '</b>' +
               (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
@@ -6746,14 +6746,14 @@ function capReportBody(c){
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
-      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num">' + repTargetCell(m) + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
   var sel = railPick(c);
   var koBlock = c.keyObjectives.length
     ? '<h4 class="mini">Key objectives</h4>' +
-      miniTable(["#","Objective","Dir.","Target","Reported","Note"], kRows)
+      miniTable(["#","Objective","Dir.",REP_TGT_HEAD,"Reported","Note"], kRows)
     : '';
   if (!sel) return koBlock + '<div class="note">No projects to report on.</div>';
   /* §279: the same mark the unit's rail carries, off the same map — this
@@ -7958,6 +7958,73 @@ function unitTight(v){
 function tgtShown(v){
   return SMPRules.isYesNo(v) ? "Yes / No" : esc(unitTight(v));
 }
+
+/* ── WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§340) ──
+   Islam: *"when I set a target like a % for the annual view and I build it on
+   monthly level and set it to latest if I go to the reporting the target
+   required should read from the latest month we are measured against."*
+
+   IT DID, EVERYWHERE EXCEPT HERE. Measured on his own case — a 30% annual
+   target, twelve months typed in, `Latest`, reported as of Jun 2026 —
+   `measureDue` answers 29 and Performance draws `31% / 29%`, while the
+   Reporting column headed *Target* drew `30%`, the year. Nothing new is
+   computed here: this is the number `measureDueLabel` has answered since
+   §239 and the deck has printed since §254, in the one place a reporter
+   actually needs it — the column beside the box they are filling in.
+
+   AND IT IS OLDER THAN THE MONTHLY PLAN, established on a SHIPPED row before
+   anything was blamed on §278 (§303): Accessory revenue, 300M EGP, `Sum`, no
+   monthly plan at all — this column drew 300M while the platform measured it
+   against 150M. Every prorating row has read this way since §239 made the
+   score derived and put the benchmark on Performance and the deck alone.
+   §278's own *"(c) reporting is unchanged"* was about MONTHLY ACTUALS, which
+   Islam turned down; it was never a decision about what this column prints.
+
+   THE TREATMENT IS THE TACTICS TABLE'S OWN, class for class — the benchmark
+   with what it is a part of under it in `.subhd` — because that table is on
+   this same screen, three inches down, and has been headed *YTD Target* and
+   drawn exactly this since §248. So the page stops contradicting itself and
+   the product gains no new vocabulary (§53.5); there is no new CSS.
+
+   A ROW WHOSE BENCHMARK **IS** ITS ANNUAL TARGET IS BYTE-IDENTICAL TO WHAT IT
+   WAS, and the test is the VALUE and never the string: `measureDueLabel`
+   rebuilds the number through `joinTarget`, which drops a thousands separator
+   — so comparing the two as text drew `4500` over `of 4,500` on a row that
+   does not prorate at all, a second line saying nothing above a figure
+   re-spelt on the way (§254.1's family, caught in the mockup before it
+   reached the sources).
+
+   §276: A COUNT WITH NOTHING OWED YET IS NOT A ROW OWING NOUGHT — it has not
+   been asked. Under a heading that now says YTD, printing its annual figure
+   would claim the whole year falls due today, so the benchmark half is the
+   em-dash this column already draws for a row it cannot measure and the
+   annual stays underneath. That case is a CONSEQUENCE of the rename rather
+   than scope: nothing in the worked example carries `Count`, so the check
+   makes one (§255).
+
+   PERFORMANCE IS NOT TOUCHED, and neither is the Temple: `capKOTable` and the
+   capability card's own table carry a *Target* column too and belong to
+   `renderFnPerformance`, where the benchmark already rides beside the figure
+   (§239.2). Three sites share this expression and only the Reporting one is
+   this decision's — checked rather than swept (§2b). */
+function repTargetCell(m){
+  if (!m || !m.target) return '<span class="missing">Missing</span>';
+  var whole = tgtShown(m.target);
+  if (nothingDueYet(m))
+    return '<span class="nobody">&mdash;</span><span class="subhd">of ' + whole + '</span>';
+  var bench = measureDueLabel(m), due = measureDue(m);
+  var num = parseFloat(String(splitTarget(String(m.target)).value).replace(/,/g, ""));
+  /* Nothing to say that the target does not already say: a yes/no row, a
+     target holding only its unit (§251), and every compile rule that does not
+     prorate all land here and are drawn exactly as they were. */
+  if (bench == null || due == null || !isFinite(num) || Math.abs(due - num) < 1e-9)
+    return whole;
+  return esc(bench) + '<span class="subhd">of ' + whole + '</span>';
+}
+/* ONE NAME FOR THE COLUMN, read by all four tables that carry it — a literal
+   typed at four call sites is how two of them come to say different things
+   about one number (§53.5). The tactics table already said this. */
+var REP_TGT_HEAD = "YTD Target";
 
 /* ── WHAT A FIGURE IS MEASURED AGAINST, BESIDE IT (§254) ───────────────
    Islam, of the deck's key measures: *"the actual should show the proration

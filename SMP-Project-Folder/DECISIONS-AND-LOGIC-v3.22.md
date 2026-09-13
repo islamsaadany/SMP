@@ -45734,3 +45734,137 @@ learn either action — it has been unreachable since the cutover put Next in
 front of it (§317.8), which is §322's own precedent.
 
 ---
+## §340 — WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (2026-09-13)
+
+Islam: *"when I set a target like a % for the annual view and I build it on
+monthly level and set it to latest if I go to the reporting the target required
+should read from the latest month we are measured against. verify this."*
+
+**VERIFIED, AND IT SPLIT IN TWO: THE ARITHMETIC WAS RIGHT AND THE SCREEN HE WAS
+LOOKING AT DID NOT SHOW IT.** His case was made on a real row and measured
+before anything was proposed (§3a) — Samsung market share, a 30% annual target,
+twelve months typed in, compile `Latest`, cycle reported as of Jun 2026 — with
+the monthly plan shaped so the three candidate answers are told apart by their
+value: **the latest month is 29, the year is 30, a flat half is 15.**
+`SMPRules.monthlyDue` answers 29, `measureDue` answers 29, `measureDueLabel`
+answers `29%`, and Performance draws `31% / 29%` with *by month* under the
+annual target. **The Reporting page's column headed *Target* drew `30%`.**
+Nothing about §278 was broken; nothing about the monthly plan needed fixing.
+
+**AND IT IS OLDER THAN THE MONTHLY PLAN, AND NOT ONLY ABOUT `Latest`** —
+established on a SHIPPED row before anything was blamed on the newest feature
+(§303): **Accessory revenue, 300M EGP, `Sum`, no monthly plan at all** reads
+`300M EGP` in that column while the platform measures it against `150M EGP`. So
+every prorating row has read this way since **§239** made the score derived and
+put the benchmark on Performance and the deck — and nowhere else. §278 did not
+cause it; it made it conspicuous, because a seasonal benchmark differs from the
+annual by an arbitrary amount rather than by half.
+
+**§278'S OWN "(c) REPORTING IS UNCHANGED" WAS ABOUT SOMETHING ELSE, AND READING
+IT RATHER THAN QUOTING IT IS WHAT MADE THIS BUILDABLE.** That line reads *"One
+YTD figure per cycle, compared against a benchmark that is finally accurate.
+Monthly actuals were offered and refused."* It is Islam declining to collect a
+figure **per month**. It was never a decision that this column should print the
+year, and the second half of his own sentence — *compared against a benchmark
+that is finally accurate* — is what this section finally does.
+
+**THE PAGE WAS ALREADY CONTRADICTING ITSELF, WHICH IS WHY THE TREATMENT IS A
+COPY AND NOT A DESIGN DECISION.** Three tables sit on one Reporting screen and
+the third has been right since §248: a tactic's row is headed **YTD Target** and
+draws the benchmark with what it is a part of under it in `.subhd`. So the two
+tables above it are brought to the one below: same heading, same markup, same
+class — **no new CSS, no new vocabulary** (§53.5). A reporter who scrolls that
+page now reads one kind of number in one kind of column.
+
+**ONE BUILDER, FOUR CALL SITES.** `repTargetCell(m)` and `REP_TGT_HEAD`, read by
+a unit's key objectives, a pillar's key measures (which a **pillars function**
+also draws, §59), a capability's key objectives, and the tactics table whose
+literal heading it replaces — a word typed at four call sites is how two of them
+come to say different things about one number.
+
+**A ROW WHOSE BENCHMARK *IS* ITS ANNUAL TARGET IS BYTE-IDENTICAL TO WHAT IT
+WAS**, so the yes/no rows (§257), the targets holding only a unit (§251), the
+`Latest` and `Average` rules and every row with no target are untouched: six
+rows change on the demo's own pillar and seven do not.
+
+**AND THE TEST IS THE VALUE, NEVER THE STRING — CAUGHT IN THE MOCKUP.**
+`measureDueLabel` rebuilds its number through `joinTarget`, which drops a
+thousands separator, so comparing benchmark with target as TEXT drew
+**`4500` over `of 4,500`** on a row that does not prorate at all: a second line
+saying nothing, above a figure re-spelt on the way (§254.1's family). It was
+found by MEASURING the mockup's own rows rather than by looking at the picture.
+
+**§276: A COUNT WITH NOTHING OWED YET IS NOT A ROW OWING NOUGHT.** This is a
+CONSEQUENCE of the rename rather than scope: under a heading that now says YTD,
+printing a `Count` row's annual figure would claim the whole year falls due
+today. The benchmark half is the em-dash this column already draws for a row it
+cannot measure, and the annual stays underneath. Nothing in the worked example
+carries `Count`, so the check makes one — **and one that IS owed some beside
+it**, or the em-dash could be drawn for every `Count` row and the check would
+applaud it (§113.8).
+
+**PERFORMANCE AND THE TEMPLE ARE NOT TOUCHED, AND THAT WAS CHECKED RATHER THAN
+SWEPT.** Three sites in `group-render.js` share the expression this replaces and
+only one is Reporting's: the other two are `capKOTable` and the capability
+card's own table, both `renderFnPerformance`, where the benchmark already rides
+beside the figure (§239.2). The patch asserted the match count before writing
+and refused when it found three — **the assertion is what stopped a one-line
+change reaching two pages nobody asked about** (§2b).
+
+**THE SERVER NEEDED NOTHING AND IT IS ASSERTED RATHER THAN CLAIMED** (§172):
+this is a renderer, no stored field moves, nothing is migrated — 633/0 on the
+authoriser and 140/0 on the differ, unchanged.
+
+**MEASURED, NOT ASSERTED** (§158): the tallest row 55 → 56.5px, the Target
+column 154 → 180px out of the slack the name column had, and the table fits its
+pane with no sideways scroll at 1600 / 1440 / 1280 / 1100 / 1000.
+
+**SIGNED OFF FROM A MOCKUP MADE OF THE REAL REPORTING PANE** (rule 1c, §41.9),
+which also **made the awkward rows on purpose** (§245, §273.3) — a row that
+prorates flat, a row built by month, a row that does not prorate, a yes/no row
+and a row with no target — because four of the five must come out of this
+unchanged and a picture that only shows the case being fixed hides what it costs
+everything else. `design-mockups/reporting-ytd-target/`.
+
+**PROVED ABLE TO FAIL FOUR WAYS FROM THE SOURCES** (§276 — an edited built file
+is silenced by §238's hashed CSP): **6 red** with the old behaviour put back,
+**5 red** with the heading left as *Target*, **1 red** with the nothing-due-yet
+branch removed, **1 red** with the guard comparing strings, that last one
+printing `4500 of 4,500` verbatim.
+
+### §340.1 — AND TWO FALSIFICATIONS DID NOT FALSIFY, WHICH IS THE SAME FAULT TWICE
+
+Two of the four breaks **never applied** — a shell quoting slip — and each
+reported **0 red**, which is indistinguishable from a guard that works
+(§54.5). Redone properly they are 5 and 1. *A falsification that did not
+falsify is a green tick over nothing*, and the only thing separating the two is
+asserting that the break MATCHED before writing it, which the redone pair does.
+
+**AND THREE NEIGHBOURS REPORTED "0 red" HAVING NEVER LAUNCHED A BROWSER.**
+`qa-run.py` patches `BrowserType.launch` with **`kw.setdefault("executable_path",
+CHROME)`**, and **nineteen of the 172 checks launch with
+`executable_path=os.environ.get("SMP_CHROME")`** — which with the variable
+unset passes an explicit `None`. The key is PRESENT, so `setdefault` leaves it
+alone, Playwright falls back to its own bundled build number, and the check dies
+at launch printing a stack trace and **no failures at all**. §320.6b's fault by
+a third road: *a check that cannot launch reports no failures*, and in a sweep
+of neighbours it reads as a pass until the tails are read one at a time (§298.3
+— the tail is the verdict, never the count). One line: a falsy `executable_path`
+is treated as absent, so the wrapper now holds whether or not the variable is
+exported. All three are green once they actually run.
+
+### §340.2 — RECORDED, NOT DONE
+
+- **A "needs a note" row is unreadable in DARK.** `arrange.css` paints
+  `tbody tr.wantnote:nth-child(even) > td` a hardcoded **`#FBF1EF`** with no
+  dark twin, so light text (`#E9ECF1`) lands on a light band at about
+  **1.05:1** — §25's own fault, the zebra stripe's, in a rule written later
+  that nobody re-measured. Three of four such rows on one pillar. **Reproduced
+  on the UNTOUCHED build with nothing made and nothing rewritten** (§303), so
+  it is not this section's; it is one line of CSS reaching every table that
+  marks a row, which makes it a decision of its own rather than something to
+  ride along here (rule 1b). Put to Islam in the mockup, with the measurement.
+- **Performance still prints the annual target with no benchmark on a row that
+  has not been reported.** That column is headed *Annual target* and is honest;
+  whether it should also carry the benchmark there is a question about what
+  Performance shows, not a tidy-up.

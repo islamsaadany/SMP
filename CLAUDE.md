@@ -1555,6 +1555,79 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   (§214.3; the third time on `fn-pillars`' one line) and were **REWRITTEN, never
   loosened** (§218) — one to the property §65 actually guarantees, the other to
   the two sheets' DIFFERENCE rather than two literals agreeing by accident.
+- **WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§340):**
+  Islam — *"when I set a target like a % for the annual view and I build it on
+  monthly level and set it to latest if I go to the reporting the target
+  required should read from the latest month we are measured against. verify
+  this."* **VERIFIED, AND IT SPLIT IN TWO**: the arithmetic was right and the
+  screen he was looking at did not show it. His case MADE on a real row and
+  measured first (§3a) — 30% for the year, twelve months typed in, `Latest`,
+  reported as of Jun 2026, with the plan shaped so the three candidate answers
+  differ (**latest month 29, year 30, flat half 15**): `monthlyDue`,
+  `measureDue` and `measureDueLabel` all answer **29**, Performance draws
+  `31% / 29%`, and the Reporting column headed *Target* drew **30%**.
+  **AND IT IS OLDER THAN THE MONTHLY PLAN AND NOT ONLY ABOUT `Latest`**,
+  established on a SHIPPED row before the newest feature was blamed (§303):
+  Accessory revenue, 300M EGP, `Sum`, no monthly plan **reads 300M against a
+  platform measuring it at 150M** — every prorating row has read this way since
+  §239 put the benchmark on Performance and the deck and nowhere else.
+  **§278's own *"(c) reporting is unchanged"* was about MONTHLY ACTUALS**, which
+  Islam declined; reading it rather than quoting it is what made this buildable,
+  and its other half — *compared against a benchmark that is finally accurate* —
+  is what this does. **THE PAGE WAS ALREADY CONTRADICTING ITSELF**, which is why
+  the treatment is a copy and not a design decision: three tables on one screen
+  and the tactics one has been headed **YTD Target** with the benchmark over
+  `.subhd`'s *of …* since §248, so the two above it are brought to the one below
+  — **no new CSS, no new vocabulary** (§53.5). **ONE BUILDER, FOUR CALL SITES**
+  (`repTargetCell`, `REP_TGT_HEAD`): a unit's key objectives, a pillar's key
+  measures (a **pillars function** draws the same, §59), a capability's, and the
+  tactics heading whose literal it replaces. **A ROW WHOSE BENCHMARK IS ITS
+  ANNUAL TARGET IS BYTE-IDENTICAL** — yes/no (§257), a target holding only its
+  unit (§251), `Latest`, `Average` and a blank target all untouched; six rows
+  change on the demo's own pillar and seven do not. **AND THE TEST IS THE VALUE,
+  NEVER THE STRING, CAUGHT IN THE MOCKUP**: `measureDueLabel` rebuilds its number
+  through `joinTarget`, which drops a thousands separator, so a text compare drew
+  **`4500` over `of 4,500`** on a row that does not prorate at all — a second
+  line saying nothing above a figure re-spelt on the way (§254.1).
+  **§276: A COUNT WITH NOTHING OWED YET IS NOT A ROW OWING NOUGHT** — a
+  CONSEQUENCE of the rename rather than scope, since the annual under a YTD
+  heading claims the year falls due today; the em-dash this column already draws
+  for a row it cannot measure, with the annual underneath, and the check makes a
+  `Count` row owing nought **and one owing some beside it** (§113.8).
+  **PERFORMANCE AND THE TEMPLE ARE NOT TOUCHED AND IT WAS CHECKED RATHER THAN
+  SWEPT**: three sites share the expression this replaces and the other two are
+  `renderFnPerformance`'s, where the benchmark already rides beside the figure —
+  **the patch asserted its match count and refused when it found three**, which
+  is what stopped a one-line change reaching two pages nobody asked about (§2b).
+  **The server needed nothing and it is asserted** (§172): 633/0, 140/0, nothing
+  stored, nothing migrated. **Measured** (§158): tallest row 55 → 56.5px, the
+  column 154 → 180px out of the name column's slack, fitting its pane at
+  1600/1440/1280/1100/1000. Signed off from a mockup made of the REAL pane which
+  **made the awkward rows on purpose** (§245, §273.3). **Proved able to fail four
+  ways from the SOURCES** (§276): **6 / 5 / 1 / 1 red**, the last printing
+  `4500 of 4,500` verbatim.
+  **§340.1 — AND TWO FALSIFICATIONS DID NOT FALSIFY**: a shell quoting slip meant
+  two breaks never applied and each reported **0 red**, which is
+  indistinguishable from a guard that works (§54.5) — redone they are 5 and 1,
+  and what separates the two is asserting the break MATCHED before writing it.
+  **AND THREE NEIGHBOURS REPORTED "0 red" HAVING NEVER LAUNCHED A BROWSER**:
+  `qa-run.py` patched the launch with `kw.setdefault("executable_path", CHROME)`
+  and **nineteen of 172 checks pass
+  `executable_path=os.environ.get("SMP_CHROME")`**, which unset is an explicit
+  `None` — the key is PRESENT, so setdefault left it, Playwright fell back to its
+  own build number, and the check died at launch printing a stack trace and **no
+  failures**. §320.6b by a third road, and in a batch it reads as a pass until
+  the tails are read one at a time (§298.3). One line: a falsy `executable_path`
+  is treated as absent, so the wrapper holds whether or not the variable is
+  exported. **§340.2 — RECORDED, NOT DONE**: a *needs a note* row is unreadable
+  in DARK — `tr.wantnote:nth-child(even) > td` is a hardcoded `#FBF1EF` with no
+  dark twin under `#E9ECF1` text, about **1.05:1**, three of four such rows on
+  one pillar (§25's own fault, the zebra stripe's) — **reproduced on the
+  UNTOUCHED build with nothing made and nothing rewritten** (§303), so it is one
+  line of CSS reaching every table that marks a row and is a decision of its own
+  rather than something to ride along here (rule 1b); and Performance still
+  prints the annual with no benchmark on an unreported row, which is a question
+  about what that page shows.
 - **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
@@ -8062,6 +8135,26 @@ python3 checks/measure-score-spread.py # a summary is made of the number it summ
                                 # reward on it. 11 red on the build before — and its own
                                 # first red run printed five and reached no cell at all,
                                 # having leaned on the new reader to measure with (§215)
+python3 checks/reporting-ytd-target.py # what a row is measured against, in the
+                                # column beside the box it is typed into (§340): the
+                                # benchmark asserted as AGREEMENT with measureDueLabel and
+                                # never as a literal, because the review point is the one
+                                # thing about this that moves; BOTH ENDS every time, since
+                                # four of the five row shapes must come out of it COMPLETELY
+                                # unchanged (a row that does not prorate, a yes/no row, a
+                                # target holding only its unit, a row with no target) and a
+                                # file that only looked at the case being fixed would pass
+                                # on a build that rewrote every cell in the product; a row
+                                # whose target carries a thousands separator, which is the
+                                # whole reason the guard is on the VALUE (§254.1) and
+                                # without which the string-compare build passes everything
+                                # else; a `Count` owing nought AND one owing some (§113.8);
+                                # all THREE sides of the navigation switch (§334) with the
+                                # capability's own destination and its key objectives MADE,
+                                # because §333 left the demo one capability holding none;
+                                # and PERFORMANCE asserted untouched. It MAKES every row it
+                                # measures (§255). Proved able to fail four ways from the
+                                # SOURCES (§276): 6 / 5 / 1 / 1 red
 python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
                                 # PASSED (§239): the review point is a month and the
                                 # office picks it; Sum prorates and Latest must not; the
@@ -8934,7 +9027,50 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;336: a capability is owned like a
+*Last Updated: 2026-09-13 &mdash; **&sect;340: what a row is measured against,
+beside the box it is typed into.** Islam &mdash; *"when I set a target like a %
+for the annual view and I build it on monthly level and set it to latest if I go
+to the reporting the target required should read from the latest month we are
+measured against. verify this."* **VERIFIED, AND IT SPLIT IN TWO**: the
+arithmetic was right and the screen he was looking at did not show it. Made on a
+real row and measured before anything was proposed (&sect;3a), with the monthly
+plan shaped so the three candidate answers differ &mdash; **latest month 29, year
+30, flat half 15**: `monthlyDue`, `measureDue` and `measureDueLabel` all answer
+29, Performance draws `31% / 29%`, and the Reporting column headed *Target* drew
+**30%**. **AND IT IS OLDER THAN THE MONTHLY PLAN**, established on a SHIPPED row
+before the newest feature was blamed (&sect;303): Accessory revenue, 300M EGP,
+`Sum`, no monthly plan reads 300M against a platform measuring it at 150M
+&mdash; every prorating row since &sect;239. **&sect;278's own *"(c) reporting is
+unchanged"* was about MONTHLY ACTUALS**, which Islam declined; its other half
+&mdash; *compared against a benchmark that is finally accurate* &mdash; is what
+this does. **THE PAGE WAS ALREADY CONTRADICTING ITSELF**, so the treatment is a
+copy rather than a design decision: the tactics table three inches down the same
+screen has been headed **YTD Target** with `.subhd`'s *of &hellip;* since
+&sect;248 &mdash; **no new CSS, no new vocabulary** (&sect;53.5). **ONE BUILDER,
+FOUR CALL SITES**; a row whose benchmark IS its annual target is
+**byte-identical**, so yes/no, a unit-only target, `Latest`, `Average` and a
+blank target are untouched (six rows change on the demo's own pillar, seven do
+not). **THE TEST IS THE VALUE, NEVER THE STRING, CAUGHT IN THE MOCKUP**: a text
+compare drew `4500` over `of 4,500` on a row that does not prorate at all
+(&sect;254.1). **&sect;276's count owing nought** gets the em-dash rather than a
+claim that the year falls due today. **Performance and the Temple are untouched
+and it was CHECKED rather than swept** &mdash; the patch asserted its match count
+and refused when three sites shared the expression (&sect;2b). Server asserted
+rather than claimed (&sect;172): 633/0, 140/0. Signed off from a mockup made of
+the REAL pane that **made the awkward rows on purpose** (&sect;245); proved able
+to fail four ways from the SOURCES (&sect;276) &mdash; **6 / 5 / 1 / 1 red**.
+**&sect;340.1 &mdash; TWO FALSIFICATIONS DID NOT FALSIFY** (a quoting slip; each
+reported 0 red, indistinguishable from a guard that works &mdash; &sect;54.5),
+**and three neighbours reported "0 red" having never launched a browser**:
+`qa-run.py`'s `setdefault` cannot override the explicit `None` that nineteen of
+172 checks pass as `executable_path`, so they died at launch printing no failures
+(&sect;320.6b by a third road) &mdash; one line, a falsy path is treated as
+absent. **&sect;340.2 &mdash; RECORDED, NOT DONE**: a *needs a note* row is
+unreadable in DARK (`#FBF1EF` with no dark twin under `#E9ECF1`, about 1.05:1),
+**reproduced on the UNTOUCHED build** (&sect;303), so it is a decision of its own
+rather than something to ride along here (rule 1b).*
+
+*Earlier: 2026-09-13 &mdash; **&sect;336: a capability is owned like a
 unit &mdash; and it already is.** Islam, of what &sect;334 built: *"The
 capability is owned like a unit it has an owner and custodian."* Drawn first
 (rule 1c) as seats on the capability's own row with two new Setup columns

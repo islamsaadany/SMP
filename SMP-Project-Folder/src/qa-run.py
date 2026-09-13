@@ -18,7 +18,15 @@ CHROME = os.environ.get("SMP_CHROME", "/opt/pw-browsers/chromium")
 _launch = BrowserType.launch
 
 def launch(self, **kw):
-    kw.setdefault("executable_path", CHROME)
+    # NOT `setdefault` — §340.1. A dozen checks launch with
+    # `executable_path=os.environ.get("SMP_CHROME")`, which with the variable
+    # unset passes an explicit None: the key is PRESENT, so setdefault left it
+    # alone, Playwright fell back to its own bundled build number and the check
+    # died at launch. Run through this wrapper they then printed a stack trace
+    # and NO failures — §320.6b's fault by a third road, and it read as "0 red"
+    # in a sweep of neighbours until the tails were read one at a time.
+    if not kw.get("executable_path"):
+        kw["executable_path"] = CHROME
     kw["args"] = list(kw.get("args") or []) + ["--no-sandbox", "--disable-dev-shm-usage"]
     return _launch(self, **kw)
 

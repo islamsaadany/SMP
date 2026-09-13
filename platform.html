@@ -3060,6 +3060,11 @@
     } else {
       nameTd.textContent = p.name || "—";
     }
+    /* A RETIRED ROW SAYS SO (§35, §124, §338). Nothing else on this line
+       differs — same name, same address, same seats — so without this the
+       one state that stops somebody signing in is invisible, and Delete
+       appears beside rows that look exactly like the ones it does not. */
+    if (p.status === "retired") nameTd.appendChild(el("span", "tag", "Retired"));
     tr.appendChild(nameTd);
 
     var mailTd = el("td", "mono");
@@ -3150,6 +3155,61 @@
         });
       });
       act.appendChild(b);
+    }
+    /* TAKING SOMEBODY OFF THE LIST (§338). Islam: "allow me to delete a
+       consultants from a user" — two accounts one letter apart and the list
+       was ADD-ONLY, with retiring half built and never drawn (§61).
+
+       RETIRE IS DRAWN FIRST AND DELETE ONLY ON A RETIRED ROW, which is
+       §323's shape for a client and its reason: the two presses are
+       separated by a state somebody chose, so nobody is deleted while they
+       can still sign in. Both are asked of the SERVER (canRetire /
+       canDelete), never re-derived here, or the row offers what the next
+       request refuses (§42, §337's own fault). */
+    if (p.canRetire) {
+      var back = p.status === "retired";
+      var rb = el("button", "btn", back ? "Bring back" : "Retire");
+      rb.type = "button";
+      rb.title = back ? "Let them sign in again."
+        : "Ends their sessions and stops them signing in. Their seats stay on the record.";
+      rb.addEventListener("click", function () {
+        rb.disabled = true;
+        post({ action: "saveConsultant", email: p.email, status: back ? "active" : "retired" })
+          .then(function (r) {
+            if (!r.ok) { rb.disabled = false; say(r.error || "Not changed.", true); return; }
+            drawConsultants(true);
+          });
+      });
+      act.appendChild(rb);
+    }
+    if (p.canDelete) {
+      var db = el("button", "btn risk", "Delete");
+      db.type = "button";
+      db.title = "Removes the account for good. Offered only once they are retired and on no client.";
+      db.addEventListener("click", function () {
+        /* ASKED IN PLACE, AND THE ASK NAMES WHO (§89, §95, §186). Never the
+           browser's own dialog — §273.3 took the last one of those out of
+           the product — and never a modal either: this is one row of a
+           table, so the question belongs in the row it is about. The
+           failure mode is landing on the wrong line, which is exactly what
+           a confirmation naming nobody catches none of. */
+        act.textContent = "";
+        act.appendChild(el("span", "muted", "Delete " + (p.name || p.email) + "?"));
+        var yes = el("button", "btn risksolid", "Delete for ever");
+        yes.type = "button";
+        var no = el("button", "btn", "Cancel");
+        no.type = "button";
+        no.addEventListener("click", function () { drawConsultants(true); });
+        yes.addEventListener("click", function () {
+          yes.disabled = true; no.disabled = true; yes.textContent = "Deleting…";
+          post({ action: "deleteConsultant", email: p.email }).then(function (r) {
+            if (!r.ok) { say(r.error || "Not deleted.", true); drawConsultants(true); return; }
+            drawConsultants(true);
+          });
+        });
+        act.appendChild(yes); act.appendChild(no);
+      });
+      act.appendChild(db);
     }
     tr.appendChild(act);
     return tr;

@@ -45734,3 +45734,94 @@ learn either action — it has been unreachable since the cutover put Next in
 front of it (§317.8), which is §322's own precedent.
 
 ---
+## §337 — THE DEMO'S DOOR ASKED A QUESTION UNDER A RETIRED NAME (2026-09-13)
+
+Islam: *"let the whole consulting team access the demo with super user
+access"*, then, a minute later, ***"the team opened the demo it showed not
+found"***.
+
+**THE SECOND MESSAGE CHANGED THE JOB AND THE FIRST HALF NEEDED NO CODE AT
+ALL.** The team was not short of a permission: the demo's door was refusing
+them, and the access it would have taken is a seat somebody grants on the
+client's own team page. So what shipped is the defect and nothing beside it —
+*"just fix the door I will add the access from the demo settings"*.
+
+**TWO PARTS OF THE PLATFORM ANSWERED ONE QUESTION AND DISAGREED.** The cards
+are drawn from `FF.mayOpenClient`, which said **open**; the door asked its own
+copy of that rule, which said **hidden**, and answered 404 *"That client is not
+available."* — §42's drift in the one place a shared rules module exists to
+make impossible, reintroduced by `door.ts` keeping a second copy of it
+(§53.5).
+
+**TWO FAULTS IN ONE LINE, EITHER ENOUGH ON ITS OWN.** It asked the office's
+matrix under the role key **`consultant`** — one of the four platform roles
+**§313.4 retired** into the single `everyone` row — and platform-migration
+`001-seats` DELETES every row whose key is not `everyone`, so the lookup could
+never match anything; then `|| "none"` read that miss as a **refusal**, where
+§30.2's rule is that an absent row means *nobody has answered yet* and falls to
+the shipped default (`edit`).
+
+**SO NO SETTING OPENED IT, WHICH IS WHY IT COULD NOT BE WORKED AROUND.**
+Measured on the real functions, for a consultant holding no seat:
+
+| stored | the cards | the door (before) | the door (after) |
+|---|---|---|---|
+| nothing | open | **hidden → 404** | open |
+| `demo = edit` | open | **hidden → 404** | open |
+| `demo = view` | open | **hidden → 404** | open |
+| `demo = none` | hidden | hidden | hidden |
+
+**IT IS LIVE, NOT THIS BRANCH'S** — `origin/main`'s own copy read byte for
+byte before anything here was blamed (§303) — and **the frozen stack was right
+all along**: `lib/auth.js` asks `FFRules`, so only the ported door is wrong,
+which is why this reads as something that recently broke when it is the
+cutover's own age.
+
+**ONE READER, NEVER A SECOND SPELLING**: `demoGrant()` takes the key and the
+default from `platform-rules.cjs` itself, so neither can drift again. `view`
+and `edit` both open, exactly as the frozen rule has always had it — the SEAT
+is a different question, answered on the client's team page, which is where
+Islam is granting it.
+
+**AND `other_clients` IS DELIBERATELY LEFT BROKEN THE SAME WAY.** It reads the
+same retired key, so it answers `none` whatever the office set — which
+REFUSES, and correcting it would OPEN clients somebody holds no seat on the
+moment that column is set to `open`. A widening on a client-data boundary is
+Islam's word, not a tidy-up ridden in beside a defect fix (rule 1b). Flagged
+before it was touched, and **RECORDED, NOT DONE**.
+
+**§337.1 — AND THE CHECK THAT GUARDED THIS WROTE THE SAME RETIRED KEY.**
+`door-landing.mjs` set `role_key = 'consultant'` to model a refusal — an
+UPDATE matching no row, because the migration deletes exactly those — and the
+assertion passed anyway, because the door read the same absent key as `none`.
+**Both sides wrong in the same way is a green run** (§100.3, §113.8), and no
+check anywhere had ever opened the demo as an ordinary consultant.
+
+**THE NEW SECTION ASSERTS AGREEMENT, NEVER A LITERAL** (§94.8, §53.5): the
+door's answer against `platform-rules.cjs`'s, in all four states — two
+independent implementations of one question, which is the property that broke,
+and a build that dropped the demo column entirely cannot satisfy it because
+the frozen side still answers `open`. **BOTH ENDS** (§94.2): `none` must still
+refuse, or a door flung open for everybody passes every assertion about the
+demo being reachable and takes the office's off switch with it. **8 green,
+6 red** under `--break=demo-role-key`, the red detail printing the drift
+verbatim — `door=false cards=true`.
+
+**AND IT IS DELIBERATELY NOT A PAGE-LEVEL PROBE** (§113.8): a demo tenant
+INSERTed by a check holds no graph, and a tenant with no graph answers 404 at
+the state API for a reason of its own (§316.9) — so a browser assertion would
+have gone green on the broken build **for the wrong reason**.
+
+**§337.2 — AND THE FIRST DRAFT OF THE CHECK CALLED A CORRECT BUILD BROKEN.**
+It searched `door.ts` for the retired key, and `--break=demo-role-key` spells
+that very call in order to restore the fault — so the assertion could not tell
+the defect from the switch that reproduces it (§100.3, §296.1). Deleted; the
+behaviour is the assertion and the break is what proves it can fail.
+
+**RECORDED, NOT DONE**: a new Forefront consultant cannot be added to a client
+that brought its own register — `made_here = false`, so the platform refuses
+to invent a person there (§313.30/31) and the only way through is to add them
+to that client's own register first. The demo is `made_here = true` and is not
+affected.
+
+---

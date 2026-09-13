@@ -17,6 +17,7 @@
      DATABASE_URL_UNPOOLED=postgres://…/smp_dev node checks/door-landing.mjs
      … --break=no-rows        (RED: the landing draws no rows)
      … --break=first-person   (RED: the landing is somebody else's — viewer() falls to PEOPLE[0])
+     … --break=demo-role-key  (RED: the door reads §313.4's retired key — the demo 404s for the team, §337)
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
    Needs `next build` first and the chromium this image carries. */
@@ -269,6 +270,52 @@ await section("5 · the office", async () => {
   check(s1 === 404 && s1 === s2 && t1 === t2 && t1 === "That client is not available.", "refused and non-existent answer identically (§313)", s1 + " " + t1 + " / " + s2 + " " + t2);
   await owner.query("UPDATE users SET is_admin = true WHERE email = 'office@forefront.example'");
   await owner.query("DELETE FROM tenants WHERE key = 'other-co'");
+});
+await section("5b · the demo opens for a consultant who holds no seat (§337)", async () => {
+  /* THE FAULT THIS EXISTS FOR: the door asked the office's matrix under a
+     role key §313.4 retired (`consultant`) and read the miss as a refusal, so
+     `/demo` answered 404 *"That client is not available."* for every
+     consultant holding no seat — in EVERY state of the table, `edit`
+     included, so no setting opened it. The cards are drawn from the frozen
+     rules, which said `open`: the screen offered what the door refused.
+
+     ASSERTED AS AGREEMENT WITH lib/platform-rules.cjs, NEVER AS A LITERAL
+     (§94.8, §53.5). Two independent implementations of one question have to
+     give one answer — which is the property that broke — and a build that
+     dropped the demo column entirely cannot satisfy it, because the frozen
+     side still answers `open`.
+
+     BOTH ENDS (§94.2): `none` must still REFUSE, or a door flung open for
+     everybody passes every assertion about the demo being reachable and
+     takes the office's off switch with it.
+
+     NO BROWSER AND NO TENANT ROW HERE, deliberately (§113.8): a demo tenant
+     INSERTed for a check holds no graph, and a tenant with no graph answers
+     404 at the state API for a reason of its own (§316.9) — so a page-level
+     probe would go green on the broken build for the wrong reason. */
+  const { clientState, mayOpen } = await import("../lib/door.ts");
+  const FF = (await import("node:module")).createRequire(import.meta.url)("../lib/platform-rules.cjs");
+  const demo = { id: "t-demo", key: "demo", name: "Demo", kind: "demo", status: "active", made_here: true, mark: null };
+  const consultant = { id: "u-x", kind: "office", isAdmin: false, mustChange: false };
+  const account = { email: "c@forefront.example", is_admin: false, kind: "office", status: "active" };
+  const states = [
+    ["nothing stored — the shipped default answers (§30.2)", {}, true],
+    ["the office saved demo = edit", { [FF.EVERYONE]: { demo: "edit" } }, true],
+    ["the office saved demo = view", { [FF.EVERYONE]: { demo: "view" } }, true],
+    ["the office saved demo = none", { [FF.EVERYONE]: { demo: "none" } }, false],
+  ];
+  for (const [what, access, want] of states) {
+    const door = mayOpen(consultant, [], access, demo);
+    const cards = FF.mayOpenClient({ mine: [], access }, account, demo);
+    check(door === want, "the door: " + what + " → " + (want ? "opens" : "refused"), "door=" + door);
+    check(door === cards, "…and the cards say the same thing (§42)", "door=" + door + " cards=" + cards);
+  }
+  /* NO SOURCE-TEXT ASSERTION HERE, and the first draft's is why: it searched
+     door.ts for the retired key and went RED on the fixed build, because
+     `--break=demo-role-key` spells that very call to restore the fault. A
+     check that cannot tell the defect from the switch that reproduces it
+     reports a correct build broken (§100.3, §296.1). The behaviour above is
+     the assertion; the break is what proves it can fail. */
 });
 await section("6 · a client made here, opened by rule", async () => {
   /* THE LANDING ASKS THE REGISTER, NOT THE MEMBERSHIP. A Forefront admin

@@ -14,8 +14,17 @@
       clients one slug at a time);
    5. only then is app.tenant_id set, from the row's id — the slug text never
       reaches SQL, and there is no default tenant. */
+import { createRequire } from "node:module";
 import type { Pool, PoolClient } from "pg";
 import type { SessionUser } from "./auth.ts";
+
+const require = createRequire(import.meta.url);
+/* the platform's own rules, the frozen module byte for byte — the key and the
+   shipped defaults are read from it rather than spelt again here (§53.5) */
+const FF = require("./platform-rules.cjs") as {
+  EVERYONE: string;
+  ACCESS_DEFAULTS: Record<string, Record<string, string>>;
+};
 
 type Q = Pool | PoolClient;
 
@@ -39,13 +48,51 @@ function atLeast(state: string, want: string): boolean { return (RANK[state] ?? 
 function grantIn(access: Record<string, Record<string, string>>, roleKey: string, area: string): string {
   return (access[roleKey] && access[roleKey][area]) || "none";
 }
+
+/* THE DEMO'S OWN COLUMN, ASKED THE WAY THE REST OF THE PLATFORM ASKS IT
+   (§337). This branch read a role key §313.4 RETIRED — `consultant`, one of
+   the four platform roles that section reversed into the single `everyone`
+   row — and platform-migration 001-seats DELETES every row whose key is not
+   `everyone`, so the lookup could never match anything. Then `|| "none"`
+   read that miss as a REFUSAL, where §30.2's rule is that an absent row means
+   *nobody has answered yet* and falls to the shipped default.
+
+   EITHER FAULT ALONE CLOSED THE DEMO, and together they closed it in EVERY
+   state of the table — `edit` included, which is the default — so **there was
+   no setting anybody could choose that opened it**, which is why this could
+   not be worked around from the console. Meanwhile the cards are drawn from
+   FF.mayOpenClient, which answers `open`: the screen offered a client the
+   next request refused with 404 *"That client is not available."* — the drift
+   a shared rules module exists to make impossible (§42), reintroduced by
+   keeping a second copy of it here (§53.5).
+
+   Measured on origin/main's own copy before anything here was blamed
+   (§303): byte-identical, so this is live rather than a branch's.
+
+   ONE READER, so the key and the defaults cannot drift again: the state is
+   FF's own, never a literal. `view` and `edit` both open — the seat is a
+   separate question, answered on the client's own team page.
+
+   AND `other_clients` BELOW IS DELIBERATELY LEFT EXACTLY AS IT WAS. It reads
+   the same retired key, so today it answers `none` whatever the office set —
+   which REFUSES, and correcting it would OPEN clients somebody holds no seat
+   on the moment that column is set to `open`. A widening on a client-data
+   boundary is Islam's word, not a tidy-up ridden in beside a defect fix
+   (rule 1b). RECORDED, NOT DONE. */
+function demoGrant(access: Record<string, Record<string, string>>): string {
+  if (process.env.SMP_BREAK === "demo-role-key") return grantIn(access, "consultant", "demo");
+  const stored = access[FF.EVERYONE];
+  return stored && Object.prototype.hasOwnProperty.call(stored, "demo")
+    ? stored.demo
+    : FF.ACCESS_DEFAULTS[FF.EVERYONE].demo;
+}
 export function clientState(user: SessionUser, mine: Membership[], access: Record<string, Record<string, string>>, tenant: Tenant | null): string {
   if (!tenant) return "hidden";
   if (user.kind === "client") return mine.some((m) => m.tenant_id === tenant.id) ? "open" : "hidden";
   if (user.isAdmin) return "open";
   if (mine.some((m) => m.tenant_id === tenant.id)) return "open";
-  if (tenant.kind === "demo") return grantIn(access, "consultant", "demo") === "none" ? "hidden" : "open";
-  return grantIn(access, "consultant", "other_clients");
+  if (tenant.kind === "demo") return demoGrant(access) === "none" ? "hidden" : "open";
+  return grantIn(access, "consultant", "other_clients");   /* untouched — see demoGrant's note */
 }
 export function mayOpen(user: SessionUser, mine: Membership[], access: Record<string, Record<string, string>>, tenant: Tenant | null): boolean {
   return atLeast(clientState(user, mine, access, tenant), "open");

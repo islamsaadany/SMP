@@ -46981,3 +46981,17 @@ exported. All three are green once they actually run.
   has not been reported.** That column is headed *Annual target* and is honest;
   whether it should also carry the benchmark there is a question about what
   Performance shows, not a tidy-up.
+- **AND THE MERGE LEAVES A FIFTH REPORTING TABLE BEHIND, WHICH IS §274's OWN
+  SHAPE.** `fnObjReportBody` is main's §342 — the Reporting page for a function
+  planning in objectives and actions — written the same day against the world
+  before this rename, and its Target cell is the expression this section
+  replaced at the other three sites, byte for byte. Neither branch was
+  inconsistent alone: main drew the annual target on all four reporting tables,
+  this branch drew the benchmark on all four it knew about. **Merged and
+  untouched, the product draws both**, which is the fault §344 exists to close.
+  **MEASURED BEFORE IT WAS WEIGHED (§303): it is on no screen today** — no
+  function in the demo carries the `objact` format, so the table draws for
+  nobody and the contradiction is latent rather than live. So it is one line,
+  and it is not written here: it changes a section Islam has not seen, inside a
+  merge commit, which is what rule 1b forbids and what §316 costs. Named in the
+  merge's what-to-check, with the measurement.

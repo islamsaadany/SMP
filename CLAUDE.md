@@ -9299,7 +9299,14 @@ reported 0 red, indistinguishable from a guard that works &mdash; &sect;54.5),
 absent. **&sect;344.2 &mdash; RECORDED, NOT DONE**: a *needs a note* row is
 unreadable in DARK (`#FBF1EF` with no dark twin under `#E9ECF1`, about 1.05:1),
 **reproduced on the UNTOUCHED build** (&sect;303), so it is a decision of its own
-rather than something to ride along here (rule 1b).*
+rather than something to ride along here (rule 1b); **and the MERGE leaves a
+fifth reporting table behind** &mdash; `fnObjReportBody`, main's &sect;342,
+written the same day against the world before this rename and carrying the
+expression this replaced byte for byte, so neither branch was inconsistent alone
+and the merged product draws both (&sect;274's own shape). **Measured, it is on
+no screen today**: no function in the demo carries that format. One line,
+deliberately not written inside a merge commit, and named in the
+what-to-check.*
 
 *Earlier: 2026-09-13 &mdash; **&sect;343: a breakdown of a pillar's
 targets (spec 050).** Islam, of one of his own pillars: *"Maximizing Current

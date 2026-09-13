@@ -1,8 +1,10 @@
 # 049 · Insights — the library, published by Forefront
 
 **Status:** every decision taken 2026-09-13 (two on the name and the publisher,
-then the four of §7). **Nothing is built** — the two screens want a mockup
-before a line of them is written (rule 1c).
+then the four of §7); both screens drawn and signed off that day
+(`design-mockups/insights/2026-09-13_library-and-publishing-room.html`, rule
+1c); **the data layer, the client's library and the console's actions are
+built and proved — see §8 for what is left.**
 
 **Decisions section:** to be taken on the build. Not claimed here, because a
 number claimed in advance is one another session takes while this is in flight

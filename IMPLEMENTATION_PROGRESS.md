@@ -54,8 +54,58 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§334 — a capability is a strategic entry of its own.
-Built on the branch, not merged.**
+**Latest version:** **§336 — the capability's owner, and the merge.**
+
+**You were right, and it turned out to be already built.** You asked for a
+capability to have an owner and a custodian like a unit, then corrected it: the
+function owns the capability, and the function's owner and custodian handle
+both. That second version needed nothing new. I tested it by taking one person
+and giving them one seat at a time: with no seat the capability is not even in
+their list; made the function's head, it is; made its custodian instead, it is
+— and giving that role editing rights on its own function opens the function's
+plan and its capabilities' plans together.
+
+**So nothing was built for it, and that is the answer.** Two new columns on the
+Capabilities page would have been a second place to say who owns a capability,
+which is how two screens end up disagreeing. The Head column already shown
+there, and the line saying a custodian is named after the function and never
+after a capability, are both simply true.
+
+**One real fault came out of the testing, and I have not fixed it.** A
+capability's reporting page asks the wrong permission column — it looks for the
+business unit's instead of the function's. On the worked example, Yara Kamal
+heads Marketing, which holds Product Mindset: the rule says she may report, the
+page says she may not, and she is still offered the *Submit to the SMO* button
+on a report she cannot fill in. It is one line. It changes who may report, so I
+am asking before I write it rather than slipping it into this round.
+
+**And a tidy-up before the merge:** one function was written out twice in the
+sources with two different bodies, which is the same shape that once left every
+capability unreachable for everybody. The product was running the right one —
+measured, not assumed — and the spare is gone.
+
+**The merge is done.** `main` had moved four rounds under this work (the four
+modules, the consulting memory, setting a client up from the outside, archiving
+a client), so this branch's section numbers moved up by four first, then the
+merge, then the built file was made again from the merged sources rather than
+merged. Two of the checks needed attention: one of `main`'s own was asking a
+new client to arrive with ten business units, which `main` itself stopped doing
+when the set-up flow landed — rewritten to what `main` decided, a client born
+empty. The other is `main`'s and stays `main`'s: it looks for a function name
+that is not in the file, fails the same way on `main`, and repairing it means
+deciding a layout question on a screen I did not design.
+
+**What is waiting on you:** the reporting fault above, the three decisions you
+asked me to hold, and — still paused at your word — the plan builder's
+capability step and renaming a function's Head to Owner.
+
+**Checked:** every page as every one of the 33 people, no errors; 633 permission
+tests; the change list; the round trip, the clean slate and two tabs on fresh
+databases; the new platform's own suite, with its shell check now at 72 of 72.
+
+---
+
+### Earlier: **§334 — a capability is a strategic entry of its own.**
 
 You answered the four questions on the mockup and said *"shall we proceed?"*,
 so this is stage 2 built to those answers.
@@ -110,7 +160,6 @@ check fail.
 **What is not done:** the demo shows a capability in one of its two shapes, so
 the pillars shape is exercised only by the checks. A second demo capability
 would show it, and nobody asked for one.
-
 ---
 
 ### Earlier, from the module sessions: **§321, §322 and §323 — merged to `main` 2026-09-12 on

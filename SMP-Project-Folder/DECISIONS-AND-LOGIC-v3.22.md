@@ -6870,6 +6870,153 @@ the rule means declaring those four edits as a transform, which is its own
 piece of work.
 
 
+**§335.4 — AND `capsReachable` WAS DECLARED TWICE, WITH TWO DIFFERENT BODIES.**
+Found by rehearsing the merge and scanning the merged result for duplicate
+top-level declarations (§56.7, §147.4) — and **the scan alone does not say whose
+it is**, so it was run three times and compared: `origin/main` has six
+duplicates (§281.1's recorded 26-line block, deliberately left), this branch has
+those six **plus one**. So it is the branch's own, and it is cleaned BEFORE the
+merge rather than carried into it. **TWO BODIES, AND THE PRODUCT WAS RIGHT —
+MEASURED, NOT REASONED**: the earlier asks whether the HOLDING FUNCTION is
+reachable, §334's, eight thousand lines further down, asks the rule so a
+capability answers for itself, and `String(capsReachable)` on the built file
+names §334's. **WHICH IS PRECISELY §281's FAULT, ON THE SAME FUNCTION** — a dead
+body wearing a live name, where one reorder or one deletion of the "wrong" copy
+makes every capability unreachable for every viewer, in silence. Deleted by NAME
+and MATCHED TEXT, never by line range (§214's own lesson, where slicing between
+two anchors took a live function with it); `reachesCap` goes with it because
+this was its only caller, **checked rather than assumed**.
+
+## 336 · A capability is owned like a unit — and it already is
+
+Islam, of what §334 built: **"The capability is owned like a unit it has an
+owner and custodian."** Drawn first (rule 1c) as seats on the capability's own
+row with two new columns on Setup › Capabilities — and then his correction,
+which withdrew the whole proposal:
+
+> let met fix something small. the capability is normally owned by a function
+> and the function can have an owner and a custoidna. and the function owner
+> and custodian can handle the capability and ofcourse can handle the function
+> plans as well. would that be easier to build?
+
+**IT IS EASIER TO BUILD BECAUSE IT IS ALREADY BUILT, AND MEASURING IS WHAT SAID
+SO.** One person, one seat moved at a time, the rule asked before and after each
+move: holding nothing, the capability is not in their list at all; made the
+function's **Head**, it is; made its **Custodian** instead, it is. Both its pages
+read at view, and opening that role's own-function Strategy cell to `edit` takes
+the function's plan **and its capabilities' plans** together. That is §334's one
+line working exactly as it was written — `capHolderTarget()` maps `cap:<id>` to
+`fn:<key>` at the top of `roleOwns`, so a capability is judged in the FUNCTION
+area and the seats that reach a function reach what it holds.
+
+**SO NOTHING IS BUILT HERE, AND SAYING THAT FIRST IS THE ANSWER.** Two new
+columns would have been a second place to say who owns a capability, which is
+exactly the drift §33 settled by putting a responsibility role on the THING
+(`FUNCTIONS[k].head` / `.custodian`) rather than on the person — one fact, one
+door, and two surfaces that cannot disagree because only one copy exists. The
+read-only Head column the Capabilities page already borrows from the function,
+and the page note and knowledge-base answer that say a custodian is *"named
+after the function and never after a capability"*, both become plainly true
+rather than an apology.
+
+### The one thing the measuring found that IS a fault
+
+**A CAPABILITY'S REPORTING PAGE ASKS THE BUSINESS-UNIT COLUMN.** `canReport()`
+chooses its access key by looking for the `fn:` prefix and falling back to the
+unit's — and a `cap:` target is neither, so it asks `u_report`. Measured on the
+worked example: Yara Kamal, head of Marketing, which holds Product Mindset — the
+rule says **edit**, the screen says **false**, and `canSpeakFor` says **true**,
+so she is offered *Submit to the SMO* on a report whose boxes she cannot fill
+in (§104.8's family, and §94.3's screen-says-no / server-says-yes with the sign
+reversed). **§330.5 NAMED THIS EXACT QUESTION AND REACHED ONE OF ITS TWO
+CALLERS**: `areaOfTarget()` was written there so *which column judges this
+target* has one answer, and `mayMarkDoneOn` was taught to ask it while
+`canReport` was not — the seventh copy of one walk, one function short.
+**NOT FIXED HERE, AND THAT IS RULE 1b**: it is a one-line change to who may
+report, which is a change to somebody's rights, so it is put to Islam before it
+is written rather than slipped into a round about ownership.
+
+### Recorded, not done
+
+- **The plan builder still mints no capability**, at his word — *"pause the plan
+  builder for now"* — so a capability is created on Setup › Capabilities and
+  from the promote control, and nowhere in the guided set-up.
+- **A function's `head` is still called Head and not Owner**, also his — *"no
+  function head is fine for now"* — so the screen says Head where his sentence
+  says owner, and the two mean the same seat.
+- **Three decisions are deferred at his own instruction** (*"for the need
+  decision from me wait for this"*) and are written into spec 044 §6 with his
+  three answers beside them.
+
+### And the merge that carried it
+
+`origin/main` moved under this branch by four rounds — the four modules, the
+consulting memory, setting a client up on the outside, and archiving a client —
+so §320–§331 and spec 046 were **renumbered to §324–§335 and spec 048 BEFORE the
+merge** (§264.3: a renumber is provably scoped to the branch's own lines only
+while the branch's lines are the only ones there). The built file was REBUILT
+from the merged sources rather than merged (§91), `smp-app/public/` regenerated
+by its four generators with `checks/generated-in-step.mjs` green after (§329),
+and `node --check sw.js` run on the spliced worker (§146.2).
+
+**AND ONE OF MAIN'S OWN CHECKS WAS STALE, REWRITTEN NOT LOOSENED (§218,
+§214.3).** `smp-app/checks/shell.mjs` asserted that a client created from the
+cards opens with **ten** units — §67's cleared graph, Raya's own names emptied —
+and main's own `createClient` stopped handing that out when the set-up flow
+landed: it calls `frozen.bare()`, which clears and then empties the shapes,
+because a client born holding somebody else's ten unit names has nothing to set
+up. Its own comment quotes Islam on it. So the check was asserting ten against
+the change that removed them, and read `RHI,0,1`. **What it is FOR is that a new
+client opens as ITSELF**, and that is what it asserts now: its own name, its own
+single person, and no units, functions or capabilities to inherit — the name and
+the register standing beside the three absences as the control (§113.8), because
+a build serving no graph, or the wrong client's, fails them before a count is
+ever read. Proved able to fail from the SOURCES (§276): with `__smpBare`'s four
+lines removed the one assertion goes red printing `RHI,10,8,0,1`, the old
+behaviour verbatim, and nothing else moves.
+
+**AND ONE RED IS MAIN'S AND IS LEFT AS MAIN'S**, established by reproducing it
+on `origin/main`'s own build before anything here was blamed (§303):
+`checks/modules.mjs` slices the platform page from `function drawClient(` and
+asks whether `page.appendChild(mods)` comes before `page.appendChild(grid)` —
+and **neither string is in the file**, which holds `drawClients(` and appends
+the band inside `modulesBlock()` under the set-up flow's client step. The two
+assertions above it pass, so the band is drawn; what has gone is the check's
+SUBJECT. Repairing it means deciding what *placement B* now means on a screen
+this branch did not design, and a fix that reaches further than the fault is a
+second fault with a green check over it (§316) — so it is named here rather than
+guessed at.
+
+
+### §336.1 — A renumber that knows one spelling of a citation
+
+The renumber ran across 114 files and moved every `§NNN` it found. **It found
+none of the `&sect;NNN` ones**, and `CLAUDE.md` is written in HTML entities
+throughout — so **83 citations across two files went on pointing at the old
+numbers**, and then the merge brought in a `main` that has real sections at
+§320–§323. *A citation that survives a renumber is not a stale reference; after
+a merge it is a reference to somebody else's section*, which reads perfectly and
+sends the next person to the wrong page (§264.3's fault by the opposite road —
+that one took lines it did not own, this one took none of the lines it did).
+
+**SEPARATED BY MATCHED TEXT, NEVER BY NUMBER** (§264.3's method, and the only
+one available once both sets of numbers are in one file): every line of the
+branch's own pre-merge `CLAUDE.md` and `README.md` carrying such a citation is a
+line the branch wrote, so those exact lines are bumped by four and everything
+else is left alone. 73 lines and 80 citations in `CLAUDE.md`, 3 and 3 in
+`README.md`; the 17 that did not match are `main`'s own (§320.4, §320.5,
+§320.6, §322, §322.1, §323 — the modules, the set-up flow, the archive) plus
+this round's own new text, checked one by one rather than counted.
+
+**AND THE BASELINE HAS TO BE THE COMMIT AFTER THE RENUMBER, NOT BEFORE IT.**
+Matching against the pre-renumber text missed exactly one line — the renumber
+had already edited its *spec 046* to *spec 048*, so the line no longer matched
+itself. A second pass against the post-renumber commit found it and nothing
+else: **`&sect;321.9` → `&sect;325.9`**, which by then named `main`'s horizon
+section instead of this branch's own mockup. One line, and it would have been
+invisible for ever.
+
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

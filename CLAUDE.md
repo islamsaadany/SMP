@@ -8934,7 +8934,100 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-12 &mdash; **&sect;331: the rules the new stack runs
+*Last Updated: 2026-09-13 &mdash; **&sect;336: a capability is owned like a
+unit &mdash; and it already is.** Islam, of what &sect;334 built: *"The
+capability is owned like a unit it has an owner and custodian."* Drawn first
+(rule 1c) as seats on the capability's own row with two new Setup columns
+&mdash; and then his correction, which withdrew the whole proposal: *"the
+capability is normally owned by a function and the function can have an owner
+and a custoidna. and the function owner and custodian can handle the capability
+and ofcourse can handle the function plans as well. would that be easier to
+build?"* **IT IS EASIER BECAUSE IT IS ALREADY BUILT, AND MEASURING IS WHAT SAID
+SO**: one person, one seat moved at a time, the rule asked before and after each
+move &mdash; holding nothing, the capability is not in their list at all; made
+the function's **Head**, it is; made its **Custodian** instead, it is; and
+opening that role's own-function Strategy cell to `edit` takes the function's
+plan **and its capabilities' plans** together. That is &sect;334's one line
+working exactly as written &mdash; `capHolderTarget()` maps `cap:<id>` to
+`fn:<key>` at the top of `roleOwns`, so a capability is judged in the FUNCTION
+area and the seats that reach a function reach what it holds. **SO NOTHING IS
+BUILT HERE, AND SAYING THAT FIRST IS THE ANSWER**: two new columns would have
+been a second place to say who owns a capability, which is the drift &sect;33
+settled by putting a responsibility role on the THING (`FUNCTIONS[k].head` /
+`.custodian`) rather than on the person &mdash; one fact, one door, two surfaces
+that cannot disagree because only one copy exists. The read-only Head column the
+Capabilities page already borrows, and the page note and knowledge-base answer
+saying a custodian is *"named after the function and never after a capability"*,
+all become plainly true rather than an apology. **AND THE MEASURING FOUND ONE
+REAL FAULT**: `canReport()` picks its access key by looking for the `fn:` prefix
+and falling back to the unit's, and **a `cap:` target is neither, so it asks the
+BUSINESS-UNIT column** &mdash; measured on the worked example, Yara Kamal (head
+of Marketing, which holds Product Mindset) has the rule saying **edit**, the
+screen saying **false** and `canSpeakFor` saying **true**, so she is offered
+*Submit to the SMO* on a report whose boxes she cannot fill in (&sect;104.8's
+family). **&sect;330.5 NAMED THIS EXACT QUESTION AND REACHED ONE OF ITS TWO
+CALLERS** &mdash; `areaOfTarget()` was written there so *which column judges this
+target* has one answer, and `mayMarkDoneOn` was taught to ask it while
+`canReport` was not. **NOT FIXED HERE, AND THAT IS RULE 1b**: it changes who may
+report, so it is put to Islam before it is written. **RECORDED, NOT DONE, ALL
+THREE HIS**: the plan builder still mints no capability (*"pause the plan
+builder for now"*), a function's seat is still called Head rather than Owner
+(*"no function head is fine for now"*), and three decisions are deferred
+(*"for the need decision from me wait for this"*), written into spec 044 &sect;6
+with his three answers beside them &mdash; along with his ruling that the extras
+drawn for objectives and actions (the targets broken down by category, the
+pillar description, the committee and the next-cycle focus box) are **optional**.
+**&sect;335.4 &mdash; AND `capsReachable` WAS DECLARED TWICE, WITH TWO DIFFERENT
+BODIES**, found by scanning the merged result for duplicate top-level
+declarations (&sect;56.7, &sect;147.4) &mdash; and **the scan alone does not say
+whose it is**, so it was run three times and compared: `origin/main` has six
+(&sect;281.1's recorded block, deliberately left), this branch had those six
+plus one, so it is the branch's own and is cleaned BEFORE the merge rather than
+carried into it. **THE PRODUCT WAS RIGHT, MEASURED NOT REASONED** (the later
+body wins by hoisting and `String(capsReachable)` on the built file names
+&sect;334's), **which is precisely &sect;281's fault on the same function**
+&mdash; a dead body wearing a live name, where one reorder makes every
+capability unreachable for every viewer in silence. Deleted by NAME and MATCHED
+TEXT, never by line range (&sect;214), with `reachesCap` going too because this
+was its only caller, checked rather than assumed. **AND THE MERGE**: `main`
+moved four rounds under this branch &mdash; the four modules, the consulting
+memory, setting a client up on the outside, archiving a client &mdash; so
+&sect;320&ndash;&sect;331 and spec 046 were **renumbered to
+&sect;324&ndash;&sect;335 and spec 048 BEFORE the merge** (&sect;264.3: a
+renumber is provably scoped to the branch's own lines only while they are the
+only ones there); the built file was REBUILT from the merged sources rather than
+merged (&sect;91), `smp-app/public/` regenerated with `generated-in-step` green
+after (&sect;329), and `node --check sw.js` run on the spliced worker
+(&sect;146.2). **ONE OF MAIN'S OWN CHECKS WAS STALE AND IS REWRITTEN, NEVER
+LOOSENED** (&sect;218, &sect;214.3): `smp-app/checks/shell.mjs` asserted a new
+client opens with **ten** units &mdash; &sect;67's cleared graph &mdash; and
+main's own `createClient` stopped handing that out when the set-up flow landed,
+calling `frozen.bare()`, which clears and then EMPTIES the shapes because a
+client born holding somebody else's ten unit names has nothing to set up (its
+own comment quotes Islam on it). It asserts what main decided now: **a new
+client opens as ITSELF** &mdash; its own name, its own single person, and no
+units, functions or capabilities to inherit &mdash; with the name and the
+register standing beside the three absences as the control (&sect;113.8), or a
+build serving no graph would pass. Falsified from the SOURCES (&sect;276): with
+`__smpBare`'s four lines removed the one assertion goes red printing
+`RHI,10,8,0,1`, the old behaviour verbatim. **AND ONE RED IS MAIN'S AND IS LEFT
+AS MAIN'S**, established by reproducing it on `origin/main`'s own build first
+(&sect;303): `checks/modules.mjs` slices the platform page from `function
+drawClient(` and compares two `page.appendChild` calls, and **none of those
+three strings is in the file** &mdash; it holds `drawClients(` and appends the
+band inside `modulesBlock()` under the set-up flow's client step; the two
+assertions above it pass, so the band is drawn and what has gone is the check's
+SUBJECT. Repairing it means deciding what *placement B* now means on a screen
+this branch did not design, and a fix that reaches further than the fault is a
+second fault with a green check over it. **&sect;336.1 &mdash; AND THE RENUMBER KNEW ONE SPELLING OF A CITATION.** It ran across 114 files and moved every `&sect;NNN` written as `§NNN`, and **none written as an HTML entity** &mdash; which `CLAUDE.md` uses throughout &mdash; so **83 citations across two files went on naming the old numbers**, and the merge then gave those numbers to `main`'s own sections. *A citation that survives a renumber is not a stale reference; after a merge it is a reference to somebody else's section*, which reads perfectly and sends the next person to the wrong page (&sect;264.3's fault by the opposite road &mdash; that one took lines it did not own, this one took none of the lines it did). **Separated by MATCHED TEXT, never by number**: every line of the branch's own pre-merge file carrying one is a line the branch wrote, so those exact lines are bumped and the 17 that do not match are checked one by one as `main`'s. **And the baseline has to be the commit AFTER the renumber** &mdash; matching the pre-renumber text missed exactly one line, whose *spec 046* the renumber had already made *spec 048*, so it no longer matched itself: `&sect;321.9` &rarr; `&sect;325.9`, by then naming `main`'s horizon section instead of this branch's own mockup. **VERIFIED**: full `qa.py` **33 viewers,
+229 destinations, ERRORS none**; authoriser 633/0; differ 140/0; round trip,
+clean parity, two tabs, functional projects 18/0, capability move and the
+incremental writer all green on virgin databases; state 91/0, door 50/0, shell
+**72/0**, blob 23/23, comms 47/47, upload 9/9, demo 7/7, room 10/0, deploy 5/0,
+`generated-in-step` all clear, `tsc` clean; the shipped file byte-identical to
+`build.py`'s output.*
+
+*Earlier: 2026-09-12 &mdash; **&sect;335: the rules the new stack runs
 are a COPY, and nobody was comparing them.** Islam, with Next's own error page
 &mdash; *"on checking the branch I got this message when I tried to open a
 client &hellip; on another branch called sharp pesture I was adjsuting the
@@ -8947,41 +9040,41 @@ selects that same column, so a missing column would have emptied the cards he
 was clicking rather than letting him click one. **The fault is this branch's.**
 **RUN, NEVER READ**: `frozen.landing()` asked for all 33 people of the worked
 example threw **33 times**, `SMPRules.dissolvePlan is not a function` &mdash;
-his page exactly, for every person in every client. &sect;322 put that function
-in the SHARED rules and &sect;330 put `capHolderTarget` beside it, and the new
+his page exactly, for every person in every client. &sect;326 put that function
+in the SHARED rules and &sect;334 put `capHolderTarget` beside it, and the new
 stack does not run `lib/rules.js`: it runs **`smp-app/lib/rules.cjs`, a CARRIED
-COPY**, 151 lines behind. **&sect;325'S TRAP ONE DIRECTORY OVER, AND THAT IS THE
+COPY**, 151 lines behind. **&sect;329'S TRAP ONE DIRECTORY OVER, AND THAT IS THE
 FINDING** &mdash; that section built a check because `smp-app/public/` is
 generated and TRACKED and production serves it; `smp-app/lib/*.cjs` are the same
 relationship **with no generator at all**, while `frozen.cjs` runs the four
 frozen SOURCE files straight out of `SMP-Project-Folder/src`, so those are always
-fresh. *That asymmetry is how it hid*: every &sect;330 check walks the frozen
+fresh. *That asymmetry is how it hid*: every &sect;334 check walks the frozen
 product and is green, because the frozen product is right. **THREE WERE STALE
 AND ALL THREE MATTER**: `rules.cjs` (the landing, and every authorisation the
-new stack makes), `authorize.cjs` (&sect;330.18's `ctxOfFn`, so a function's
+new stack makes), `authorize.cjs` (&sect;334.18's `ctxOfFn`, so a function's
 project owner would have been refused every figure), and `graph-diff.cjs`,
-missing &sect;322's one line teaching `treeFor("functions")` about `projects`
+missing &sect;326's one line teaching `treeFor("functions")` about `projects`
 &mdash; **&sect;216's fault reborn, predicted by name in that line's own
 comment**. **THE CARRY IS MECHANICAL AND IS ASSERTED AS ONE**: diffed against
 their twins the only deliberate difference in any file is a `require("./x.js")`
 between two carried siblings becoming `./x.cjs`, so the check applies THAT RULE
 rather than holding a list (&sect;104.7), with `assistant.cjs` and `push.cjs`
 NAMED as genuinely rewritten (&sect;316.7), printed every run and asserted to be
-the only ones (&sect;113.8). Red both ways. **&sect;331.1 &mdash; THREE OF THE
+the only ones (&sect;113.8). Red both ways. **&sect;335.1 &mdash; THREE OF THE
 FOUR FIRST FAILURES WERE A STALE BUILD**: `checks/state-api.mjs` runs `next
 start` against `.next` and `next build` bundles the `.cjs`, so the first run
 after the re-carry measured the copies just replaced and reported a 400 that
-looked like a real gap between &sect;322's differ and &sect;314.2's writer
+looked like a real gap between &sect;326's differ and &sect;314.2's writer
 &mdash; **&sect;105.6 exactly**, the tell being that the same change list
-applied cleanly in a bare `node -e`. Rebuilt: 4 red &rarr; 1. **&sect;331.2
+applied cleanly in a bare `node -e`. Rebuilt: 4 red &rarr; 1. **&sect;335.2
 &mdash; AND THE ONE THAT SURVIVED WAS THE CHECK**: &sect;216's *"her change list
 names her function and no other"* tested `/"care"/` against the stringified
-list, and &sect;322 moved her report to the FUNCTION, where the address reads
+list, and &sect;326 moved her report to the FUNCTION, where the address reads
 `functions.care` &mdash; **so the quote before the word is not there and it
 could never match on any build**. REWRITTEN, never loosened (&sect;218,
 &sect;94.8): it asks the ADDRESSES now, and no whole-part `set` or `del` at all,
 which is what &sect;216 is about &mdash; separated against all four shapes
-including the whole-part send that IS &sect;216. **&sect;331.3 &mdash; and one
+including the whole-part send that IS &sect;216. **&sect;335.3 &mdash; and one
 red was the environment**, `memory-boundary.mjs` building its second pool from
 `u.hostname`/`u.port` so a socket-in-the-query-string URL resolved to port 5432;
 given a TCP one it is 14/0. **VERIFIED on a virgin Postgres 16**: state 91/0,
@@ -9124,7 +9217,7 @@ Strategy shell carries no switcher, so the road runs one way and the return is o
 trial page.*
 
 
-*Earlier the same day: **&sect;330: a capability is a strategic
+*Earlier the same day: **&sect;334: a capability is a strategic
 entry of its own (spec 048, stage 2).** Islam, on the mockup drawn for it, four
 answers and a go-ahead: *"yes for all"* (the office creates it, a function head
 HOLDS it; Setup &rsaquo; Capabilities is its home with the promote control on
@@ -9143,32 +9236,32 @@ SKIPPING the dissolve rather than promoting it back, so its name, its
 definition, its project and every id stay the seed's (&sect;232).
 **FOUR THINGS WERE LIVE AND SILENT, ALL FOUND BY DRIVING IT AND NONE BY
 READING IT** &mdash; every one rendered perfectly and reached no console
-(&sect;96's family), and `origin/main` carries neither &sect;322 nor &sect;330,
-so none has been in front of a client. **&sect;330.4** &mdash;
+(&sect;96's family), and `origin/main` carries neither &sect;326 nor &sect;334,
+so none has been in front of a client. **&sect;334.4** &mdash;
 `capOfProjectId` walked the capabilities alone and both its callers open
 `if (!it) return;`, so on Finance's three projects the rail moved nothing and
 *Remove this project* opened no dialog at all; `eachProject` hands the holder
-over, which is the walk &sect;322 built for exactly this and the fifth copy
+over, which is the walk &sect;326 built for exactly this and the fifth copy
 nobody carried across (&sect;53.5). **And the way back was shut with it**: a
 projects function's archive is `kind:"cap"` keyed `fn:<key>` and the restore
 resolved it with `capById`, so every archive such a function ever took answered
 *cannot be restored* &mdash; &sect;232's own fault on the other branch, with
 `renumberCapability` never run on a function holder, because a restore that
-re-addresses every row is the one thing it may not do. **&sect;330.5** &mdash;
+re-addresses every row is the one thing it may not do. **&sect;334.5** &mdash;
 `boundedHere` knew a capability is judged in the FUNCTION column and
 `mayMarkDoneOn` one function above it still said `"unit"`, so `railMine`
 answered false for a capability whose project names them and &sect;310's whole
 promise was dead on the one page it is about; `areaOfTarget()` names the answer
 once and both ask it. **And `personRoles` derived NOTHING** for the owner of a
 project a FUNCTION holds, so they reached nothing and the server refused them,
-because it is the shared rule both sides ask (&sect;42). **&sect;330.6** &mdash;
+because it is the shared rule both sides ask (&sect;42). **&sect;334.6** &mdash;
 `reportPending` answered *not a real subject* for a capability, so its tab never
 said *not submitted yet* while the cycle board counted it; **and the Submit
 button carried `fn:cap:cap6`**, a key nothing else reads, so the report would
 have been sent with the tab still asking (&sect;48). Driven end to end after
 the fix, and **the server needed nothing and it is asserted** (&sect;172): the
 office and the head allowed, somebody else refused **by the capability's
-name**. **&sect;330.7** &mdash; &sect;322 stopped drawing the holder's cover for
+name**. **&sect;334.7** &mdash; &sect;326 stopped drawing the holder's cover for
 a function's own work (rightly: *Capability &middot; Finance* over the word
 Finance says the name twice, &sect;87) and the section stamp rode on that slide,
 so a thirteen-slide deck had a navigation strip reading **COVER &middot; END**;
@@ -9179,7 +9272,7 @@ byte-identical. **CHECKS**: `capability-entry.py` NEW at 43/0, and **its own
 summary lied** (`"%d passed, %d failed" % (0, bad) if bad else …` binds the
 ternary looser than the `%`, so a clean run printed *0 passed, 1 failed* over
 forty-one lines saying ok &mdash; &sect;298.3). Four neighbours REWRITTEN, never
-loosened (&sect;218), because &sect;330 moves what they are ABOUT rather than
+loosened (&sect;218), because &sect;334 moves what they are ABOUT rather than
 what they assert: `capability-first.py` (&sect;310's sort is dead code; the
 answer lives in `entryDest` &mdash; **and it passed for the wrong reason until
 the landing was made fresh**, because `current` survives a viewer switch,
@@ -9187,19 +9280,19 @@ the landing was made fresh**, because `current` survives a viewer switch,
 function's own work still drawn, asserted on the PAGE), `cycle-board.py`
 (&sect;245's rule is about the two FORMATS of a function and survives whole
 beside a band for a different KIND of subject) and `deck-strip.py`. Three more
-had fixtures asking the worked example for a capability &sect;329 removed and
+had fixtures asking the worked example for a capability &sect;333 removed and
 now MAKE their state (&sect;255). **Falsified from the SOURCES** (&sect;276):
 5 / 1 / 9 / 2 red on the screen and 1 red on the server, one per decision.
-**AND THE SEED WAS STALE FOR THE THIRD TIME** (&sect;259, &sect;325 one artefact
-over): `db/seed-state.json` is GENERATED and TRACKED, and &sect;329 regenerated
-it before &sect;330's keep-one line existed, so `test-authorize.js` &sect;38's
+**AND THE SEED WAS STALE FOR THE THIRD TIME** (&sect;259, &sect;329 one artefact
+over): `db/seed-state.json` is GENERATED and TRACKED, and &sect;333 regenerated
+it before &sect;334's keep-one line existed, so `test-authorize.js` &sect;38's
 620/0 had been measured against a seed that could not exercise it. 624/0 after.
 **AND RUNNING THE WHOLE SUITE AND THE DEPLOYMENT FOUND FOUR MORE, NONE OF THEM
 IN THE PRODUCT** &mdash; which is the argument for running the whole thing
-rather than the files that were edited (&sect;214). **&sect;330.9** &mdash;
+rather than the files that were edited (&sect;214). **&sect;334.9** &mdash;
 `smp-app/public/` is GENERATED and TRACKED and is what production SERVES, and
-the four generators had not been re-run since &sect;330 moved the frozen
-sources; &sect;325's guard caught it, which is the whole of why that section
+the four generators had not been re-run since &sect;334 moved the frozen
+sources; &sect;329's guard caught it, which is the whole of why that section
 exists. **And it found the generators mis-reporting their own artefacts**: five
 *"bytes"* figures across three scripts were `String.length` &mdash; UTF-16 code
 units &mdash; and none counted the header the script itself prepends, so
@@ -9207,24 +9300,24 @@ units &mdash; and none counted the header the script itself prepends, so
 over-reported by 2,880 the other way. Harmless until the neighbouring check
 began reporting that quantity honestly: two numbers for one file on two lines of
 one terminal (&sect;124, &sect;298.3). Measured off the file just written now.
-**&sect;330.10** &mdash; `deck-dividers.py` and `slide-move.py` named the
+**&sect;334.10** &mdash; `deck-dividers.py` and `slide-move.py` named the
 SHIPPED versioned file where all 165 of their neighbours read the BUILD, and the
 shipped copy is what the merge copies over &mdash; so for the whole of a round
 they measure the previous release: **55,020 bytes behind here**, with a
 different CSP hash. Both read the build now, and the shipped copy is brought up
-to it on the BRANCH. **&sect;330.11** &mdash; `capability-remove.py` went red on
+to it on the BRANCH. **&sect;334.11** &mdash; `capability-remove.py` went red on
 a probe answering `{}`: its fixture drew from `FUNCTIONS[fk].projects`, which
-stopped being the whole of what a function holds when &sect;330 took
+stopped being the whole of what a function holds when &sect;334 took
 capabilities off `fnHolders()`, and **both sides of its central assertion read
 `fnProjects()`**, which answers an empty map for a capability's rows &mdash; so
 *"every code is what it was"* compared `{}` with `{}` and passed for the wrong
-reason (&sect;113.8), on the one claim &sect;330 deliberately REVERSES. Rewritten,
+reason (&sect;113.8), on the one claim &sect;334 deliberately REVERSES. Rewritten,
 never loosened (&sect;218), into the pair that is true: the destination's codes
 are its own run, and a moved project reads a NEW code with its id unmoved; **2
-red** with the pre-&sect;330 rule put back. **&sect;330.12** &mdash;
-`objectives-table-mockup.py` would not PARSE (a &sect;330 edit put
+red** with the pre-&sect;334 rule put back. **&sect;334.12** &mdash;
+`objectives-table-mockup.py` would not PARSE (a &sect;334 edit put
 `[data-fold="fns"]` inside a double-quoted Python string), so it never ran at
-all &mdash; and fixing that re-armed &sect;329's own recorded not-done, because
+all &mdash; and fixing that re-armed &sect;333's own recorded not-done, because
 it is a mockup GENERATOR in `checks/` that a sweep runs and that replaces
 signed-off shots with today's build. It had been harmless only because it was
 broken. Both generators refuse to write unless asked by name now, **proved at
@@ -9237,7 +9330,7 @@ of its two forms, so the pillars form is exercised by the checks alone;
 to, and its only caller reads a ROLE's place, which can never be a capability
 &mdash; unreachable today, and stated rather than guessed at later; and
 `multi-client.py` needs the three-step rehearsal database &sect;313.37
-describes, so it is unrun rather than failing. **&sect;330.13** &mdash; and the
+describes, so it is unrun rather than failing. **&sect;334.13** &mdash; and the
 fifth product fault, found only because the check that finds it could be run
 again: `gapMap()` had an `fn:` branch and a unit branch and nothing between, so
 `cap:<id>` fell through to `UNITS[t]` and **the count answered 0 while the page
@@ -9251,39 +9344,39 @@ LARGER FINDING**: twenty-one checks spell their subject as the ABSOLUTE path
 silently measures the branch &mdash; two reds recorded earlier the same day as
 *"not this branch's"* were measured that way and were wrong (&sect;105.6 wearing
 the reassuring face). All twenty-one honour `SMP_BUILT` now, and three stale
-fixtures are REWRITTEN, never loosened (&sect;218). **&sect;330.14** &mdash;
-&sect;329 found that two mockup GENERATORS live in `checks/` and rewrite
+fixtures are REWRITTEN, never loosened (&sect;218). **&sect;334.14** &mdash;
+&sect;333 found that two mockup GENERATORS live in `checks/` and rewrite
 signed-off pictures on every sweep, named them and left it; the full suite
 found **thirteen**, three of them harmless only because they were stale and
 failed early. The refusal goes in `qa-run.py`, ONE place, and **what is refused
 is the SWEEP, never the file** &mdash; a direct run is a deliberate re-make and
 still works; the set is READ from the source rather than listed by name, and
 `SMP_WRITE_MOCKUPS=1` lifts it, re-making the document byte-identical.
-**&sect;330.15** &mdash; the sixth product fault and the oldest, &sect;322's
+**&sect;334.15** &mdash; the sixth product fault and the oldest, &sect;326's
 inherited: **seven supporting functions own eighteen projects between them and
 not one could download its own plan**, because Import &amp; storage's Download
 list offered the PILLARS functions and the capabilities alone &mdash; the whole
 truth while a projects function's work lived inside a capability, and untrue
 since stage 1. A plan that cannot leave cannot come back (&sect;22), and **the
 builder was there the whole time**: `impHolderFor()` has resolved `fn:<key>`
-since &sect;322 and the upload already offers that function by name, so the two
+since &sect;326 and the upload already offers that function by name, so the two
 ends were built and the list between them was not (&sect;96, &sect;61). One
 clause; asserted as the AGREEMENT between what the page offers and what the
 builder can make. **And the first falsification of it went GREEN**, because
 that check did not honour `SMP_BUILT` and ran against the build it was
-falsifying &mdash; &sect;330.13's own lesson inside the hour (&sect;54.5).
-**&sect;330.16&ndash;.18 &mdash; AND RUNNING THE WHOLE SUITE FOUND SIX MORE
+falsifying &mdash; &sect;334.13's own lesson inside the hour (&sect;54.5).
+**&sect;334.16&ndash;.18 &mdash; AND RUNNING THE WHOLE SUITE FOUND SIX MORE
 PRODUCT FAULTS, EVERY ONE THE SAME SENTENCE**: *walk the capabilities*,
-written before &sect;322 moved a supporting function's projects onto the
-function. &sect;330 corrected two copies of it and said in its own comment
+written before &sect;326 moved a supporting function's projects onto the
+function. &sect;334 corrected two copies of it and said in its own comment
 that `eachProject` exists so nobody keeps a private one; there were four more
-in the product and one in each of two other layers. **&sect;330.17** &mdash;
+in the product and one in each of two other layers. **&sect;334.17** &mdash;
 the navigation switch is TWO segments with no capability and THREE with one,
 so `.nsw:not(.on)` stopped meaning *the way across* and started meaning
 *whichever unlit side comes first*: **nine checks used that idiom and the
 function each was about was never drawn**. `[data-fold="<side>"]` names the
 side and is absent exactly when it is lit, so the press is guarded rather than
-asserted and is right on both shapes. **&sect;330.18** &mdash; found by
+asserted and is right on both shapes. **&sect;334.18** &mdash; found by
 running the check that was red: on a supporting function's Reporting page a
 project owner's picker was DRAWN, PRESSED and **wrote nothing**, because
 `capItemById()` backed all four handlers and each opens `if (!hit) return;`
@@ -9291,11 +9384,11 @@ project owner's picker was DRAWN, PRESSED and **wrote nothing**, because
 the box holding the value until the next repaint (&sect;96's family,
 &sect;219's symptom one page over). Beside it, **`capsOfFn()` in the SHARED
 rules** killed &sect;147.8's Contributor floor for every function since
-&sect;322, **`ctxOfFn()` in the authoriser** refused the project owner every
+&sect;326, **`ctxOfFn()` in the authoriser** refused the project owner every
 figure they entered with their role plainly derived, **`eachHolder()` kept a
 membership test of its own** where the pages ask `fnHolders`, **a capability's
 Submit was held by nothing at all** (&sect;221 inert on the destination
-&sect;330 had just made), and **the builder's titled form did not open** while
+&sect;334 had just made), and **the builder's titled form did not open** while
 `builderEnsureCapability` minted a box that stayed empty and made the
 function's own Projects page draw nowhere to put a first project (&sect;61,
 &sect;129's audit five times over). **AND THE TOUR WALKED SOMEBODY ELSE'S
@@ -9313,9 +9406,9 @@ a context a check assembled itself. **633 passed**, falsified 1 / 2 / 3 red on
 the server and 2 / 4 / 4 on the browser side, all from the SOURCES
 (&sect;276).*
 
-*Earlier the same day &mdash; **&sect;329: the worked example holds no
+*Earlier the same day &mdash; **&sect;333: the worked example holds no
 capabilities.** Islam: *"finish the demo data yes."* **STAGE 1 WAS LIVE AND
-INVISIBLE, WHICH IS THE FINDING RATHER THAN THE TIDY-UP** &mdash; &sect;322 gave
+INVISIBLE, WHICH IS THE FINDING RATHER THAN THE TIDY-UP** &mdash; &sect;326 gave
 a supporting function its own projects and left the demo shipping its eight
 containers, so on the build that shipped it Finance's Projects page still drew a
 navy **CAPABILITY &middot; Financial Infrastructure** band over three projects
@@ -9344,7 +9437,7 @@ two of them THREW rather than reporting (&sect;215) &mdash; and every one MAKES
 its boxes now (&sect;255), the exact inverse of the dissolve; `functional-
 projects` became a **round trip** as a result and is stronger for it (34 &rarr;
 **37/0**). **TWO THINGS WERE NOT FIXTURES.** The one-line heal (&sect;260) had
-**stopped reaching a function's projects** the day &sect;322 moved them &mdash;
+**stopped reaching a function's projects** the day &sect;326 moved them &mdash;
 silent, because the value renders on one line everywhere except the pen &mdash;
 **6 red** with the fix removed; and `test-roundtrip.js`'s pending-marks round
 trip was printing **SKIPPED**, which is a green run that measured nothing
@@ -9361,8 +9454,8 @@ green on virgin databases. **RECORDED, NOT DONE**: the demo's one real
 capability waits for stage 2, so the product holds none today &mdash; which is
 the spec's own *"the truth of his tenant"*.*
 
-*Earlier the same day &mdash; **&sect;328: the walk was run on the stack that
-actually serves it.** Every section before &sect;326 was verified on the frozen
+*Earlier the same day &mdash; **&sect;332: the walk was run on the stack that
+actually serves it.** Every section before &sect;330 was verified on the frozen
 build over `file://`, which is the right subject for the frozen product and is no
 longer the whole of it &mdash; reading `/sw.js` off the live site returns
 `build-sw.mjs`'s GENERATED worker, byte-identical to `smp-app/public/sw.js`, so
@@ -9380,13 +9473,13 @@ The branch adds no destination; the extra one is the fixture. *A number that
 differs from the record is worth ten minutes before it is worth a sentence, and
 the cheap deterministic comparison is usually the one that settles it.*
 
-*Earlier the same day &mdash; **&sect;326 / &sect;327: two checks and one
+*Earlier the same day &mdash; **&sect;330 / &sect;331: two checks and one
 list, found by running the app's OWN suite.** Everything above was proved on the
 frozen build; **production is the new stack**, so the app's fifteen checks and
 nine spike proofs were built and run against a real Postgres &mdash; and that
 found three reds, none of them this branch's (&sect;303: the files are
 byte-identical to `main`'s and the causes are &sect;317.4 and spec 045, both on
-main). **&sect;326 &mdash; THE DEMO'S NAME SCAN WAS LOOKING IN THE ROOM THE
+main). **&sect;330 &mdash; THE DEMO'S NAME SCAN WAS LOOKING IN THE ROOM THE
 TABLES HAD LEFT.** `checks/demo-seed.mjs` is the one file standing between a real
 client's names and a demo shown to other clients. &sect;317.4 moved the shared
 schema out of `public` and DID update this file &mdash; the import, the comment,
@@ -9398,7 +9491,7 @@ demo's own rows"*. It found nought tables, scanned nothing, and **a scan of
 nothing finds no forbidden name**. It went red only because of the two CONTROLS
 beside it &mdash; &sect;113.8 earning its keep in the wild, on the check written
 with it in mind; without them this was green and blind. One line; 7/7 and RED
-both ways. **&sect;327 &mdash; WHICH TABLES ARE THE PLATFORM'S OWN WAS WRITTEN
+both ways. **&sect;331 &mdash; WHICH TABLES ARE THE PLATFORM'S OWN WAS WRITTEN
 THREE TIMES**, and two of the three had not been told about `memory_entries`:
 `db/schema.sql`'s RLS loop (correct), `lib/schema-check.ts` (stale) and
 `spike/_harness.mjs` (stale, **a literal directly under a comment promising
@@ -9418,12 +9511,12 @@ changed**: `schema-check.ts` promises it runs *"at every deploy"* and
 day it is added"* is true of a spike run and not of a deploy &mdash; whether a
 deploy may refuse is main's decision.*
 
-*Earlier the same day &mdash; **&sect;325: the served copies are in step
+*Earlier the same day &mdash; **&sect;329: the served copies are in step
 with the frozen sources.** **&sect;319 WROTE THIS TRAP DOWN IN ITS OWN WORDS AND
-&sect;324 FELL INTO IT ONE SECTION LATER**: `smp-app/public/` is generated from
+&sect;328 FELL INTO IT ONE SECTION LATER**: `smp-app/public/` is generated from
 the frozen product by four scripts and every output is TRACKED, so a source
 edited without re-running one leaves the Next app serving the old bytes, and it
-is silent because nothing on either stack compared the two. &sect;324.1 deleted
+is silent because nothing on either stack compared the two. &sect;328.1 deleted
 the dead `.bands-act` rules from `arrange.css` and left `platform.css` carrying
 them. **Behaviour-neutral this time, and saying so is the point** &mdash; nothing
 had worn that class since &sect;275, which is why it was deleted &mdash; and it
@@ -9440,7 +9533,7 @@ generator gains a file, and could not notice one that STOPPED being generated),
 **puts the tree back in a `finally`** (&sect;94.2: a check that finds a stale copy
 and rewrites it has fixed the tree and told nobody), keeps *stale* and *you have
 edits in flight* as two different answers with two different sentences
-(&sect;123), and **exits non-zero**, since joining &sect;324.8's twenty-two would
+(&sect;123), and **exits non-zero**, since joining &sect;328.8's twenty-two would
 be a poor answer to a section complaining about them. **Proved able to fail
 twice, one per generator family** (&sect;276). **AND MEASURING IT SETTLED WHAT
 &sect;91'S BUMP IS NOW WORTH**: `build-sw.mjs` drops the whole caching half, so
@@ -9448,7 +9541,7 @@ the served worker holds the string `SHELL` **nought** times and bumping the
 frozen name reaches no client &mdash; kept, because the frozen file is what an
 offline handover runs on.*
 
-*Earlier the same day &mdash; **&sect;324: ten checks that had stopped
+*Earlier the same day &mdash; **&sect;328: ten checks that had stopped
 checking.** Running the NEIGHBOURS after the merge rather than only the files
 that were edited (&sect;214) turned up two reds and seven harnesses that cannot
 run at all; running **all 152** turned up eight more checks and one file that
@@ -9496,12 +9589,12 @@ the boundary working. `tour` 15 &rarr; 0, `history-page` 10 &rarr; 0,
 `table-scroll` green over `file://` (its 4px is a SERVED deployment's own
 control, &sect;316.5); `qa.py` ERRORS none.*
 
-*Earlier the same day: **&sect;323: at its offset is not pinned.**
+*Earlier the same day: **&sect;327: at its offset is not pinned.**
 Found by running the suite after the merge, and live for as long as the fill has
 existed: `checks/band-corner.py` is **six red on `origin/main`'s own build**,
 reproduced in a worktree before anything here was blamed (&sect;303), and
 &sect;316.5 recorded it during the rebuild's Phase E and left it because the
-frozen file was taking no new work then &mdash; a freeze &sect;318&ndash;&sect;322
+frozen file was taking no new work then &mdash; a freeze &sect;318&ndash;&sect;326
 have since reversed in practice, so the reason to leave it has expired.
 **MEASURED FIRST, AND THE ARITHMETIC IS NOT WRONG**: on a unit's Plan at
 1440&times;900, `--chrome-h` 168 + `--rail-gap` 22 puts the pane's border box at
@@ -9545,8 +9638,8 @@ off the diff &mdash; nothing stored, nothing migrated, no rule moved. `qa.py`
 ERRORS none; `no-jump`, `plan-edit-head`, `plan-edit-line`, `table-fit` and
 `setup-sticky` green.*
 
-*Earlier the same day: **&sect;322: a function's projects are its
-own (spec 048, stage 1).** Islam, correcting &sect;321.9's proposal outright:
+*Earlier the same day: **&sect;326: a function's projects are its
+own (spec 048, stage 1).** Islam, correcting &sect;325.9's proposal outright:
 *"capability is something Strategic ... the problem with having the capability
 hidden in the functional plans is confusing for the whole structure aligned
 with me what you're understanding to fix this once and for old."* **HIDING THE
@@ -9554,7 +9647,7 @@ BOX WAS TREATING THE SYMPTOM**, and that is the finding: the fault is not that
 the word is on the screen, it is that **the only container the platform owned
 for a supporting function's projects was called a capability** &mdash; so every
 function planning in projects appeared to hold a strategic capability whether
-it did or not, and a real one had nowhere of its own to live. &sect;321.9 is
+it did or not, and a real one had nowhere of its own to live. &sect;325.9 is
 recorded as withdrawn rather than overwritten (Principle II); its measurement
 is still the evidence. **MEASURED FIRST**: six of the seven projects-format
 functions carry exactly one box, the navy band is drawn on all four of that
@@ -9562,7 +9655,7 @@ function's pages, the Overview says it TWICE, and **no project code mentions it
 at all** &mdash; `FIN01`, `FIN02`, `FIN03` are the function's own letters
 (&sect;310), so the projects were already the function's everywhere the
 arithmetic touches them. **TWO PIECES ALREADY EXISTED**, which is what made it
-tractable: &sect;320 shipped a pillar's *kind* of Direction | Capability one day
+tractable: &sect;324 shipped a pillar's *kind* of Direction | Capability one day
 earlier &mdash; Islam's first form, live &mdash; and &sect;213 had already given
 a supporting function its own definition and key objectives, so a dissolved box
 has a home for everything it holds without inventing a field. **NO SCHEMA
@@ -9582,7 +9675,7 @@ array, never a copy**. `fnHolders(fk)` is the ONE list the four pages, the deck,
 the gap walk, the reporting walk and the codes read, where each had its own
 `capsOfFunction` call &mdash; which is how the two sides of the switch drifted
 twice already (&sect;211, &sect;213). **AND THE MOVE MUTATES IN PLACE**:
-&sect;321's `moveCapProjects` reassigned `to.projects`, which lands on a WRAPPER
+&sect;325's `moveCapProjects` reassigned `to.projects`, which lands on a WRAPPER
 and is thrown away one line later &mdash; `fnAsUnit`'s own recorded trap wearing
 a different hat. **THE BAND IS NOT DRAWN OVER A FUNCTION'S OWN WORK**, on
 `capBand`'s own stated reason (*"a function may carry several, and that band is
@@ -9596,7 +9689,7 @@ cover (&sect;87's twins, on a projector); the workbook still addresses the
 function by name, or a plan downloads and cannot come back (&sect;22, &sect;61).
 **AND THE DISSOLVE IS ONE ACT** &mdash; Islam: *"the ability to turn functional
 projects to a capability and vice versa"* &mdash; which was **one more entry in
-a list &sect;321's dialog already had**: the function itself is a destination,
+a list &sect;325's dialog already had**: the function itself is a destination,
 and the one always there, so the held state he photographed on 11 September
 (*"There is nowhere for them to go"*) **cannot occur and its branch is deleted**
 (&sect;24). `SMPRules.dissolvePlan` is in the shared module and is pressed by
@@ -9630,7 +9723,7 @@ failures with five assertions REWRITTEN, never loosened** (&sect;218) &mdash;
 the held-state block INVERTED rather than deleted, because the case it guarded
 is exactly the case this has to get right &middot; eleven neighbouring checks
 green. **AND THE SWEEP LINE THAT FIRST STOOD HERE WAS MEASURED ON THE WRONG
-BYTES** (&sect;322.10): it read *"full `qa.py` ERRORS none"*, which was true of
+BYTES** (&sect;326.10): it read *"full `qa.py` ERRORS none"*, which was true of
 the build the sweep ran against and not of the build this shipped &mdash; the
 sweep went first and `clearedGraph()` was corrected after it. &sect;105.6, with
 the sign reversed: *a fix tested against the wrong bytes looks exactly like a
@@ -9645,7 +9738,7 @@ the control and NAMED as one (&sect;113.8), with `fnOwn` added as the successor
 that is not trivially nought. Falsified on a build made from `origin/main`'s
 own sources. **AND THE MERGE**: `main` took &sect;319 and spec 045 for the
 consulting memory while this was in flight, so this branch's three sections
-shift by one (&sect;319&ndash;&sect;321 &rarr; &sect;320&ndash;&sect;322, spec
+shift by one (&sect;319&ndash;&sect;325 &rarr; &sect;324&ndash;&sect;326, spec
 045 &rarr; 046) &mdash; the renumber run BEFORE the merge, which is what makes
 it provably scoped to this branch's own lines (&sect;264.3). The heal keeps its
 `045-` registry name, because that is a key and not a label (&sect;30.2). Main
@@ -9653,16 +9746,16 @@ changed **nothing** in the frozen product, measured rather than assumed, so
 &sect;56.7 had nowhere to happen; the built file, `shell.js`, `sw.js`,
 `platform.css` and the static carry were regenerated rather than trusted
 (&sect;91) &mdash; and that was not ceremony, since main's committed
-`platform.css` predated &sect;321's dialog rules and merged cleanly while
+`platform.css` predated &sect;325's dialog rules and merged cleanly while
 stale. **RECORDED, NOT DONE**: the worked
 example still ships its eight containers, so which the demo should show is
 Islam's (spec 048 §10.4); making projects a capability is stage 2; a
 promoted project's code changing is his to accept (§10.5). **`band-corner` was
 6 red and was NOT this branch's** &mdash; reproduced identically on a build from
-`origin/main`'s own sources (&sect;303) &mdash; and is FIXED as &sect;323
+`origin/main`'s own sources (&sect;303) &mdash; and is FIXED as &sect;327
 below.*
 
-*Earlier: 2026-09-11 &mdash; **&sect;321: removing a capability &mdash;
+*Earlier: 2026-09-11 &mdash; **&sect;325: removing a capability &mdash;
 the box, or the box and its work.** Islam, with the browser's own dialog open
 in front of him: *"when I try to remove the capability it will remove the
 projects with it."* **IT DID, AND THE DATABASE AGREED**: a project lives INSIDE
@@ -9747,7 +9840,7 @@ a capability can be built on the pillars method or the projects method, which
 is Islam's own question and belongs with **Objectives & actions**, the round
 where "how does this plan?" stops having one answer per function.*
 
-*Earlier the same day: **&sect;320: a pillar says which kind of
+*Earlier the same day: **&sect;324: a pillar says which kind of
 thing it is.** Islam, of a client whose supporting functions plan the way a
 business unit does: *"the capability is a strategic concept and we need to
 differentiate between having a capbility as a strategic element to focus on or
@@ -9818,7 +9911,7 @@ build it exists to catch (&sect;94.5, its own recorded example). **`band-corner`
 is 6 red and it is NOT this work's** &mdash; established by reproducing the
 identical six on a baseline built from HEAD before anything here was blamed
 (&sect;303), and it is the failure &sect;316.5 already records (FIXED at
-&sect;323). **AND THE NEW STACK'S GENERATED SHELL IS REBUILT WITH IT**:
+&sect;327). **AND THE NEW STACK'S GENERATED SHELL IS REBUILT WITH IT**:
 `smp-app/public/shell.js` is TRACKED and is `build-shell.mjs`'s assembly of
 build.py's own script list, so a change to a frozen source that stops there
 leaves the Next app serving the old shell &mdash; &sect;91's failure by a

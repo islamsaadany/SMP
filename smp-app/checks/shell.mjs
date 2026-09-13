@@ -224,7 +224,19 @@ await section("4 · Forefront's own pages", async () => {
   j = await post({ action: "client", key: "rhi" });
   check(j.team.length === 1 && j.team[0].seat === "smoteam" && j.register.length === 1 && j.register[0].role === "smoteam" && j.register[0].ff === "true", "…and the team IS the register on a client made here (§313.31)", JSON.stringify(j.register));
   await open("/rhi/mobile/strategy");
-  check(await page.evaluate(() => GROUP.org === "RHI" && UNIT_KEYS.length === 10 && UNITS.mobile.items.length === 0 && PEOPLE.length === 1), "the new client opens: its own name, §67's cleared graph, one person", await page.evaluate(() => [GROUP.org, UNIT_KEYS.length, PEOPLE.length]));
+  /* REWRITTEN, NOT LOOSENED (§218, §214.3): this asked for TEN units, which is
+     §67's cleared graph — Raya's own names with their content emptied — and
+     `createClient` stopped handing that out when the set-up flow landed: it
+     calls `frozen.bare()`, which clears and THEN empties the shapes, because
+     a client born holding somebody else's ten unit names had nothing to set
+     up (its own comment quotes Islam on it). So the check was asserting ten
+     against the change that removed them, and read `RHI,0,1`.
+     WHAT IT IS FOR IS THAT A NEW CLIENT OPENS AS ITSELF, and that is what is
+     asserted: its own name, its own single person, and no shapes at all.
+     The name and the register are the control beside the three absences
+     (§113.8) — a build serving no graph, or the wrong client's, fails them
+     before the counts are ever read. */
+  check(await page.evaluate(() => GROUP.org === "RHI" && UNIT_KEYS.length === 0 && FUNCTION_KEYS.length === 0 && (GROUP.capabilities || []).length === 0 && PEOPLE.length === 1), "the new client opens as itself: its own name, one person, and no shapes to inherit", await page.evaluate(() => [GROUP.org, UNIT_KEYS.length, FUNCTION_KEYS.length, (GROUP.capabilities || []).length, PEOPLE.length].join(",")));
   await ctx.close(); await fresh(); await signIn("mobhead@raya.example");
   j = await post({ action: "cards" }); check(j.ok === false && !j.cards, "a client's own person is refused the outer platform (403)", JSON.stringify(j));
   const r = await fetch(BASE + "/rhi/mobile/strategy", { headers: { cookie: (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ") }, redirect: "manual" });

@@ -44,17 +44,59 @@ export const SPINE_SEGMENTS = ["setup", "tour"] as const;
    reserved and isModule() must go on knowing them, or a business unit keyed
    `portfolio` would quietly claim the address the day the module lands — and
    nobody is offered them until there is something to open. */
-export type ModuleDef = { label: string; note: string; built: boolean };
+/* ── A MODULE'S OWN AREAS (spec 046 §4.2, §4.4; spec 049 §4.5) ─────────
+   The contract's second line — *its own roles and areas* — answered HERE
+   rather than in a file of its own, because this is already where a module
+   says what it is called and whether it is built: a second place would be
+   the fourth thing to edit the day a module is added, which is how two
+   screens come to spell one module differently (§53.5).
+
+   AND IT MUST NOT BE AN EDIT TO THE CLIENT'S MATRIX, for a reason that is
+   mechanical rather than tidy: `lib/rules.cjs` is a CARRIED copy of the
+   frozen `lib/rules.js` and `checks/generated-in-step.mjs` asserts the two
+   are identical after one declared transform (§335). Adding a module's area
+   to the carried copy alone turns that check red; adding it to both puts a
+   module's area into the frozen Strategy product, where it does not belong.
+
+   `states` IS TWO AND NOT THREE where nobody in the client's app writes: an
+   `edit` there would be a grant with nothing behind it (§94.15).
+
+   STRATEGY DECLARES NONE, AND THAT IS AN ANSWER RATHER THAN A GAP: its areas
+   ARE the frozen matrix's, which is the one place they may live (above), and
+   listing them again here would be that second copy. A module with nothing
+   for a client to be granted separately declares none too.
+
+   WHAT READS THIS TODAY IS `checks/modules.mjs` AND NOTHING ELSE, said here
+   rather than left to be discovered (§54.5, §24). The tab that would SET a
+   narrowing is spec 046 §4.4's Access page — one page, a Client tab and a tab
+   per module — which is not built; until it is, every role holds the default
+   below, which for Insights is `view`, so the module opens for everybody in
+   the client exactly as decided (spec 049 §4.5, §7.2). Declaring it now is
+   what stops the answer being invented a second time when that page lands
+   (§42's drift, from in front). */
+export type ModuleArea = { key: string; label: string; note: string; states: string[]; shipped: string };
+export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[] };
 export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
-  strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true  },
-  portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: false },
-  insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: true  },
-  processes: { label: "Processes", note: "How things are done here",                         built: false },
+  strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true,  areas: [] },
+  portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: false, areas: [] },
+  insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: true,
+    /* ONE AREA, because there is one thing to be granted: opening the
+       library. Per-item visibility is spec 046 decision #15's deferral —
+       *whole module, for now* — and a second area for it now would be a
+       column nobody could fill (§61). The shipped state is a DEFAULT and not
+       a floor: a library Forefront chose to publish to a client is for that
+       client, and their Super user narrows it on the table the day there is
+       one; an absent key falls back here, because absent means *not answered
+       yet* and never *no* (§30.2). */
+    areas: [{ key: "a_insights", label: "Insights",
+              note: "Open the library and download what is in it",
+              states: ["view", "none"], shipped: "view" }] },
+  processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [] },
   /* DELIBERATELY NOT A PRODUCT NAME (Islam, 2026-09-12: "something even for
      the trial"). It exists to prove a module can be turned on for one client
      and opened, and it says so in its own line, so nobody can mistake it for
      something the client bought. */
-  trial:     { label: "Trial",     note: "Says hello and names the client. Proves a module can be turned on.", built: true },
+  trial:     { label: "Trial",     note: "Says hello and names the client. Proves a module can be turned on.", built: true, areas: [] },
 };
 
 export function isModule(s: unknown): s is ModuleKey {

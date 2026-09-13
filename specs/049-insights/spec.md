@@ -380,10 +380,29 @@ is not, so the spans copied from one did not stack in the other; every other
 `.teamrow` in the console builds blocks, which is what this does now (§311,
 §267.1). Found by looking at a render, not by an assertion, and asserted since.
 
-**Left: 5, the module's roles file** — Insights' own tab on Roles & access, in
-a file the module owns, never in the carried `rules.cjs` (which
-`generated-in-step` asserts is byte-identical to its frozen twin). **And
-Islam's own: the blob package and `BLOB_READ_WRITE_TOKEN` on the deployment.**
+**5 IS ANSWERED AND HALF-BUILT, AND THE HALF THAT IS NOT SAYS WHY.** Insights'
+one area — `a_insights`, *view* or *none*, shipping at *view* — is declared on
+`MODULE_DEF` in `lib/modules.ts`, where the contract's other answers already
+live, rather than in a file of its own that would be the fourth thing to edit
+when a module is added (§53.5). `checks/modules.mjs` turns the contract's second
+line into a contract: a module cannot be marked `built` without answering it,
+an area must be well formed, its shipped state must be one it offers, no two
+modules may claim one key, and **it must not be in the carried matrix** — which
+is asserted here rather than left for `generated-in-step` to discover, in the
+file somebody would be editing. Red 1 / 1 / 1 under three breaks.
+
+**What is NOT built is the TAB, and that is a deferral rather than an
+omission**: the page that would SET a narrowing is spec 046 §4.4's Access page
+— one page, a Client tab and a tab per module — which does not exist. Until it
+does every role holds the shipped default, so Insights opens for everybody in
+the client exactly as §4.5 decided and no behaviour is waiting on it. Building
+a server-side gate now would cost a query per page load to answer *yes* for
+everybody, with no control able to make it answer anything else (§24, §61);
+declaring the area now is what stops the answer being invented a second time
+when that page lands (§42's drift, from in front).
+
+**And Islam's own: the blob package and `BLOB_READ_WRITE_TOKEN` on the
+deployment.**
 Until they are there, an upload is proved against a stub that records what
 arrived and against the endpoint's own refusals, and not end to end — which is
 stated rather than left to be discovered (§54.5).
@@ -397,7 +416,8 @@ stated rather than left to be discovered (§54.5).
 3. The publishing room (the larger half).
 4. The client's library, and the route's third branch — which is where the
    per-module table replaces the two `if`s (§3).
-5. The module's own roles file and its tab.
+5. The module's own roles and areas, and its tab. *(Areas declared and
+   asserted; the tab waits on spec 046 §4.4's Access page — see above.)*
 6. Processes, if §7.3 says now.
 
 ---

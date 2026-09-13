@@ -98,6 +98,44 @@ check("every module says a name and a line, so no surface has to invent one",
 check("the default is offered, so the drawer can say it is always on rather than leave a gap",
   offerable().includes(DEFAULT_MODULE));
 
+/* ── THE CONTRACT'S SECOND LINE (spec 046 §4.2, §4.4) ─────────────────
+   *Its own roles and areas.* This is what makes that line a contract rather
+   than a paragraph: a module cannot be marked `built` without having answered
+   it, and the answer may be NONE — Strategy's areas are the frozen matrix's
+   and a module with nothing to grant separately has none — so what is
+   asserted is that every area declared is WELL FORMED and that its shipped
+   state is one it offers.
+
+   BOTH ENDS (§94.2): a build that declared no areas anywhere would satisfy
+   every assertion about their shape, so one module is asserted to declare
+   one — found at runtime rather than named, or this file becomes the second
+   place Insights' area is written down (§53.5). */
+const WITH_AREAS = MODULES.filter((k) => MODULE_DEF[k].areas.length);
+check("every module answers the contract's areas line, even if the answer is none",
+  MODULES.every((k) => Array.isArray(MODULE_DEF[k].areas)));
+check("...and at least one module declares one, or the shape above proves nothing",
+  WITH_AREAS.length > 0, MODULES.map((k) => k + ":" + MODULE_DEF[k].areas.length).join(" "));
+check("an area says its key, its label, the line under it and what it offers",
+  MODULES.every((k) => MODULE_DEF[k].areas.every((a) =>
+    a.key && a.label && a.note && Array.isArray(a.states) && a.states.length >= 2)),
+  JSON.stringify(MODULE_DEF.insights.areas));
+check("...and the state it SHIPS at is one it offers — a default outside the list is a cell nobody can read",
+  MODULES.every((k) => MODULE_DEF[k].areas.every((a) => a.states.includes(a.shipped))),
+  MODULES.flatMap((k) => MODULE_DEF[k].areas.map((a) => a.key + "=" + a.shipped)).join(" "));
+check("an area key is a key and not a sentence, so it can be a column",
+  MODULES.every((k) => MODULE_DEF[k].areas.every((a) => /^[a-z][a-z0-9_]*$/.test(a.key))));
+check("no two modules claim the same area key",
+  new Set(MODULES.flatMap((k) => MODULE_DEF[k].areas.map((a) => a.key))).size
+    === MODULES.flatMap((k) => MODULE_DEF[k].areas).length);
+/* THE CARRIED MATRIX IS NOT WHERE THESE LIVE (§335, spec 049 §4.5), and it is
+   asserted rather than trusted: `lib/rules.cjs` is byte-identical to its
+   frozen twin, so a module's area added there turns generated-in-step red —
+   and this says WHY before that happens, in the file somebody would be
+   editing. */
+check("a module's area is NOT in the client's carried matrix",
+  !read("smp-app/lib/rules.cjs").includes("a_insights")
+  && !read("lib/rules.js").includes("a_insights"));
+
 console.log("\n3 · the address");
 const HAVE_BOTH = ["strategy", "trial"], HAVE_ONE = ["strategy"];
 check("a module the client HAS is read as that module",

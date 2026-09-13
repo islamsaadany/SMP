@@ -1033,7 +1033,16 @@
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
         if (m.state) r.appendChild(el("i", null, m.state));
-        r.addEventListener("click", function () { location.assign("/" + c.key + "/" + m.key); });
+        /* A LIBRARY'S ROW OPENS THE ROOM WE PUBLISH FROM, not the client's
+           own page (spec 049; the flag is the server's, lib/modules.ts). The
+           client's read-only library is one press further in, from there —
+           this is the one module whose work is on our side, and landing a
+           consultant on the page where they can do nothing would be §61 with
+           the sign reversed. */
+        r.addEventListener("click", function () {
+          if (m.room) return drawLibrary(c.key, m.key, c.name, m.label);
+          location.assign("/" + c.key + "/" + m.key);
+        });
         mods.appendChild(r);
       });
       b.appendChild(mods);
@@ -1238,6 +1247,534 @@
   var S = null;
 
   function drawNewClient(){ drawSetup(null); }
+
+  /* ════ THE DOCUMENT ROOM (spec 049) ══════════════════════════════════
+     Where a client's library is published from. Forefront's side of Insights
+     and Processes — the client's own page reads, and this is the only place
+     anything is written (spec 046 decision #9).
+
+     ONE SCREEN AND ONE CARD, which is what the mockup Islam signed off draws
+     (design-mockups/insights/2026-09-13_…): a list you search, and one report
+     open. There is no third view, because the only things you do to a report
+     are edit it, publish it and take it back.
+
+     EVERY RULE IS THE SERVER'S. The buttons drawn here are what somebody may
+     press; whether a press lands is asked again when it does (§42, §48.2), so
+     a stale page can be wrong about what is offered and never about what
+     happens. */
+  var LIB = { key: "", kind: "insights", client: "", label: "", items: null, cats: [],
+              one: null, q: "", cat: "", state: "", busy: false };
+
+  function drawLibrary(key, kind, client, label) {
+    LIB.key = key; LIB.kind = kind; LIB.client = client; LIB.label = label || "Library";
+    LIB.one = null; LIB.q = ""; LIB.cat = ""; LIB.state = "";
+    return loadLibrary(false);
+  }
+
+  function loadLibrary(quiet) {
+    lead(quiet, "Reading…");
+    return post({ action: "library", key: LIB.key, kind: LIB.kind,
+                  q: LIB.q, category: LIB.cat, state: LIB.state }).then(function (j) {
+      if (!j || !j.ok) { clear(); return say((j && j.error) || "That library could not be read.", true); }
+      LIB.items = j.items || [];
+      LIB.cats = j.categories || [];
+      /* Reading one keeps it open across a refresh, so publishing a report
+         does not throw you back to the list you were working in (§71.2). */
+      if (LIB.one) {
+        var still = LIB.items.filter(function (x) { return x.id === LIB.one.id; })[0];
+        LIB.one = still || null;
+      }
+      settle(LIB.one ? paintOneReport : paintLibrary);
+    });
+  }
+
+  /* The fact line, one place, so the list and the card cannot say a report's
+     size one way and its date another. */
+  function factsOf(it) {
+    var bits = [];
+    if (it.categories && it.categories.length) bits.push(it.categories.join(" · "));
+    if (it.reportDate) bits.push(it.reportDate);
+    bits.push("v" + it.version);
+    if (it.sizeLabel) bits.push(it.sizeLabel);
+    bits.push(it.state === "published"
+      ? it.downloads + (it.downloads === 1 ? " download" : " downloads")
+      : "not published");
+    return bits.join(" · ");
+  }
+
+  function libraryHead(where) {
+    var t = el("div", "ptitle");
+    var back = el("button", "btn", "‹ Clients");
+    back.type = "button";
+    back.addEventListener("click", function () { go("clients"); });
+    t.appendChild(back);
+    t.appendChild(el("h1", null, LIB.label));
+    t.appendChild(el("span", "tag", LIB.client));
+    var right = el("span", "right");
+    if (where === "list") {
+      var add = el("button", "btn solid", "Publish a report");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        LIB.one = { id: "", title: "", summary: "", categories: [], reportDate: "",
+                    state: "draft", version: 1, fileName: "", sizeLabel: "", downloads: 0, hasFile: false };
+        settle(paintOneReport);
+      });
+      right.appendChild(add);
+    }
+    t.appendChild(right);
+    return t;
+  }
+
+  function paintLibrary() {
+    page.appendChild(libraryHead("list"));
+
+    var f = el("div", "filters");
+    var q = el("input", "fld search"); q.type = "search"; q.placeholder = "Search reports…"; q.value = LIB.q;
+    /* Typing does not refetch on every keystroke; Enter and the blur do
+       (§35 — a list that rebuilds under a typing hand is the fault §71.2
+       names, and this one costs a round trip as well). */
+    var run = function () { if (q.value !== LIB.q) { LIB.q = q.value; loadLibrary(true); } };
+    q.addEventListener("change", run);
+    q.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); run(); } });
+    f.appendChild(q);
+
+    var cat = el("select", "fld");
+    [["", "Every category"]].concat(LIB.cats.map(function (c) { return [c, c]; })).forEach(function (o) {
+      var op = el("option", null, o[1]); op.value = o[0]; if (LIB.cat === o[0]) op.selected = true; cat.appendChild(op);
+    });
+    cat.addEventListener("change", function () { LIB.cat = cat.value; loadLibrary(true); });
+    f.appendChild(cat);
+
+    var st = el("select", "fld");
+    [["", "Published and drafts"], ["published", "Published"], ["draft", "Drafts"]].forEach(function (o) {
+      var op = el("option", null, o[1]); op.value = o[0]; if (LIB.state === o[0]) op.selected = true; st.appendChild(op);
+    });
+    st.addEventListener("change", function () { LIB.state = st.value; loadLibrary(true); });
+    f.appendChild(st);
+
+    f.appendChild(el("span", "count", LIB.items.length + (LIB.items.length === 1 ? " report" : " reports")));
+    page.appendChild(f);
+
+    if (!LIB.items.length) {
+      /* THREE EMPTY STATES AND NOT ONE (§105's rule): an empty state
+         describes THIS filter, never the whole library. */
+      var why = (LIB.q || LIB.cat || LIB.state)
+        ? "No reports match. Try clearing the search, or a different category."
+        : "Nothing has been published to " + LIB.client + " yet. Press “Publish a report” to put the first one up.";
+      page.appendChild(el("p", "muted", why));
+      return;
+    }
+
+    var list = el("div", "elist");
+    LIB.items.forEach(function (it) {
+      var r = el("button", "erow"); r.type = "button";
+      var body = el("span", "body");
+      body.appendChild(el("h3", null, it.title));
+      if (it.summary) body.appendChild(el("p", "snip", it.summary));
+      body.appendChild(el("span", "facts", factsOf(it)));
+      r.appendChild(body);
+      /* ONLY A DRAFT CARRIES A TAG. Published is the normal case, and marking
+         it would spend the page's accent on the state that needs no attention
+         (§41's budget, and the mockup's own note). */
+      if (it.state !== "published") r.appendChild(el("span", "tag none", "Draft"));
+      r.addEventListener("click", function () { LIB.one = it; settle(paintOneReport); });
+      list.appendChild(r);
+    });
+    page.appendChild(list);
+  }
+
+  /* ── ONE REPORT ───────────────────────────────────────────────────────
+     The card the mockup's frame 02 draws: what it says, what it is filed
+     under, which file it is, and — in a block of its own behind a rule — the
+     two acts that cannot be undone (§273.4's shape, chosen once for closing a
+     cycle and again for archiving a client).
+
+     NOTHING HERE IS A SECOND COPY OF A RULE. Every button is drawn from what
+     the SERVER said about this report — `hasFile`, `state`, `version` — and
+     every press asks again when it lands (§42, §48.2), so a page left open
+     while somebody else publishes is wrong about what is offered and never
+     about what happens.
+
+     AND IT DOES NOT REPAINT UNDER A TYPING HAND (§71.2, §194): the fields are
+     read at the moment of the press rather than written back on every
+     keystroke, and only an act that CHANGES the report redraws the card. */
+  function paintOneReport() {
+    var it = LIB.one;
+    var isNew = !it.id;
+    page.appendChild(libraryHead("one"));
+
+    var card = el("div", "ecard");
+
+    /* The two marks, and only what is true: a published report says nothing
+       about being published, because that is the ordinary state and marking
+       it would spend the page's accent on the half that needs no attention
+       (§41's budget). The version is always drawn, because it is the one
+       number on this card that means something on its own. */
+    var tags = el("div", "etags");
+    if (it.state !== "published") tags.appendChild(el("span", "tag none", "Draft"));
+    tags.appendChild(el("span", "tag", "v" + (it.version || 1)));
+    card.appendChild(tags);
+    card.appendChild(el("h2", null, it.title || "A new report"));
+
+    var set = el("div", "rowset");
+    set.style.marginTop = "18px";
+
+    var tb = el("div");
+    tb.appendChild(labFor("lib-title", "Title"));
+    var title = el("input", "fld"); title.id = "lib-title"; title.value = it.title || "";
+    tb.appendChild(title); set.appendChild(tb);
+
+    var sb = el("div");
+    sb.appendChild(labFor("lib-sum", "Summary"));
+    var sum = el("textarea", "fld"); sum.id = "lib-sum"; sum.rows = 2; sum.value = it.summary || "";
+    sb.appendChild(sum); set.appendChild(sb);
+
+    /* THE CATEGORIES ARE THE ONE LIST THE SERVER SENT (spec 049 §4.4: one
+       list for every client, for now), so a category invented here would be
+       refused on save — which is why they are chips off that list and not a
+       box somebody types into. `aria-pressed` is what a toggle already
+       means, so the lit state needs no second attribute. */
+    var picked = (it.categories || []).slice();
+    var cb = el("div");
+    cb.appendChild(el("span", "lab", "Categories"));
+    var crow = el("div", "catrow");
+    LIB.cats.forEach(function (c) {
+      var chip = el("button", "catpick", c);
+      chip.type = "button";
+      chip.setAttribute("aria-pressed", picked.indexOf(c) >= 0 ? "true" : "false");
+      chip.addEventListener("click", function () {
+        var at = picked.indexOf(c);
+        if (at >= 0) picked.splice(at, 1); else picked.push(c);
+        chip.setAttribute("aria-pressed", at >= 0 ? "false" : "true");
+      });
+      crow.appendChild(chip);
+    });
+    cb.appendChild(crow); set.appendChild(cb);
+
+    var pair = el("div", "wpair");
+    var db = el("div");
+    db.appendChild(labFor("lib-date", "Report date"));
+    var date = el("input", "fld"); date.id = "lib-date"; date.type = "date"; date.value = it.reportDate || "";
+    db.appendChild(date); pair.appendChild(db);
+
+    /* THE FILE STRIP. A report with no file yet says so rather than drawing
+       an empty box: there is one act here and its word says which it is
+       (§124). A report that has never been saved has no id for a piece to be
+       written against, so the control says what has to happen first rather
+       than failing at the press (§61, §221). */
+    var fb = el("div");
+    fb.appendChild(el("span", "lab", "The file"));
+    var drop = el("div", "filestrip");
+    drop.appendChild(el("span", "fname", it.hasFile
+      ? it.fileName + (it.sizeLabel ? " · " + it.sizeLabel : "")
+      : (isNew ? "Save it first, then add the file." : "No file yet.")));
+    var fsp = el("span", "sp");
+    var pick = el("input"); pick.type = "file"; pick.accept = "application/pdf,.pdf";
+    pick.style.display = "none";
+    var fbtn = el("button", "btn", it.hasFile ? "Replace" : "Add the file");
+    fbtn.type = "button";
+    if (isNew) fbtn.disabled = true;
+    fbtn.addEventListener("click", function () { pick.click(); });
+    pick.addEventListener("change", function () {
+      var f = pick.files && pick.files[0];
+      if (f) sendFile(f, drop, fbtn);
+    });
+    fsp.appendChild(fbtn); fsp.appendChild(pick);
+    drop.appendChild(fsp);
+    fb.appendChild(drop); pair.appendChild(fb);
+    set.appendChild(pair);
+
+    set.appendChild(el("p", "note",
+      "Replacing the file keeps the same link and the same download count, and moves it to the next version. " +
+      "What the old file said is not kept."));
+    card.appendChild(set);
+
+    /* ── WHAT IS TRUE, THEN WHAT YOU MAY DO (§144's shape) ─────────── */
+    var by = el("div", "byline");
+    var who = el("span", "who");
+    who.appendChild(el("span", "nm", it.state === "published"
+      ? "Published to " + LIB.client
+      : (isNew ? "Not saved yet" : "Not published yet")));
+    /* A stamp that is not there SAYS nothing rather than printing a nought
+       or an empty date (§35). */
+    var stamp = "";
+    if (it.publishedAt) stamp = "published " + stampDay(it.publishedAt) + (it.publishedBy ? " by " + it.publishedBy : "");
+    else if (!isNew && it.hasFile) stamp = it.downloads + (it.downloads === 1 ? " download" : " downloads") + " so far";
+    if (stamp) who.appendChild(el("span", "em", stamp));
+    by.appendChild(who);
+
+    var sp = el("span", "sp");
+    var save = el("button", "btn", isNew ? "Save the draft" : "Save");
+    save.type = "button";
+    save.addEventListener("click", function () { saveReport(false); });
+    sp.appendChild(save);
+
+    if (it.state === "published") {
+      var back = el("button", "btn", "Back to the list");
+      back.type = "button";
+      back.addEventListener("click", function () { LIB.one = null; settle(paintLibrary); });
+      sp.appendChild(back);
+    } else {
+      /* PUBLISH IS THE LOUD ONE and it is HELD rather than absent while
+         there is nothing to publish — `aria-disabled`, so the reason under it
+         can still be reached (§221, §163). A report with no file would go
+         into the client's library as a row with no way to open it (§61). */
+      var pub = el("button", "btn amber", "Publish to " + LIB.client);
+      pub.type = "button";
+      if (isNew || !it.hasFile) {
+        pub.setAttribute("aria-disabled", "true");
+        pub.title = isNew ? "Save it first." : "Add the file first — a report with nothing to open is not a report.";
+      }
+      pub.addEventListener("click", function () {
+        if (pub.getAttribute("aria-disabled") === "true") { say(pub.title, true); return; }
+        saveReport(true);
+      });
+      sp.appendChild(pub);
+    }
+    by.appendChild(sp);
+    card.appendChild(by);
+
+    if (!isNew) card.appendChild(endOfReport(it));
+    page.appendChild(card);
+
+    /* Read at the moment of the press, never written back on every keystroke
+       (§35: a field commits on blur, and this card has no other writer). */
+    function draft() {
+      return { title: title.value, summary: sum.value,
+               categories: picked.slice(), reportDate: date.value };
+    }
+
+    function saveReport(thenPublish) {
+      var d = draft();
+      if (!d.title.trim()) { say("A report needs a title.", true); return; }
+      if (LIB.busy) return;
+      LIB.busy = true;
+      save.disabled = true;
+      var body = { action: "librarySave", key: LIB.key, kind: LIB.kind,
+                   title: d.title, summary: d.summary, categories: d.categories, reportDate: d.reportDate };
+      if (it.id) body.id = it.id;
+      post(body).then(function (j) {
+        if (!j || !j.ok) { LIB.busy = false; save.disabled = false; say((j && j.error) || "It could not be saved.", true); return; }
+        LIB.one = j.item;
+        if (!thenPublish) { LIB.busy = false; return loadLibrary(true); }
+        return post({ action: "libraryState", key: LIB.key, kind: LIB.kind, id: j.item.id, state: "published" })
+          .then(function (p) {
+            LIB.busy = false;
+            if (!p || !p.ok) { save.disabled = false; settle(paintOneReport); say((p && p.error) || "It was saved and not published.", true); return; }
+            LIB.one = p.item;
+            return loadLibrary(true);
+          });
+      }).catch(function (e) {
+        LIB.busy = false; save.disabled = false;
+        if (String(e.message) === "sign in") return;
+        say("Could not reach the server. Nothing was saved.", true);
+      });
+    }
+
+    /* ── THE FILE, IN PIECES (spec 049 §4.3) ────────────────────────
+       Begin, one request per piece, finish — every one of them authorised on
+       the server, which is why the browser holds no address of its own
+       (§261's rule, carried). The word on the button IS the progress: a bar
+       would be a second thing to keep in step with a count that already
+       says it. */
+    function sendFile(f, strip, btn) {
+      if (LIB.busy) return;
+      var was = btn.textContent;
+      var nameCell = strip.querySelector(".fname");
+      LIB.busy = true; btn.disabled = true; btn.textContent = "Reading…";
+
+      var fail = function (msg) {
+        LIB.busy = false; btn.disabled = false; btn.textContent = was;
+        nameCell.textContent = it.hasFile ? it.fileName + (it.sizeLabel ? " · " + it.sizeLabel : "") : "No file yet.";
+        say(msg, true);
+      };
+
+      post({ action: "libraryUploadBegin", key: LIB.key, kind: LIB.kind,
+             id: it.id, name: f.name, bytes: f.size }).then(function (b) {
+        if (!b || !b.ok) { fail((b && b.error) || "The upload could not be started."); return; }
+        var piece = b.piece || (3 * 1024 * 1024);
+        var total = Math.max(1, Math.ceil(f.size / piece));
+        var parts = [];
+        var q = "/api/platform/file?client=" + encodeURIComponent(LIB.key) +
+                "&kind=" + encodeURIComponent(LIB.kind) +
+                "&id=" + encodeURIComponent(it.id) +
+                "&name=" + encodeURIComponent(f.name) +
+                "&path=" + encodeURIComponent(b.path) +
+                "&storeKey=" + encodeURIComponent(b.storeKey) +
+                "&uploadId=" + encodeURIComponent(b.uploadId);
+
+        /* One piece at a time, in order. Several at once would be faster and
+           would mean a failure halfway leaves pieces written for an upload
+           nobody is going to finish; the store keeps nothing until finish is
+           called either way, and this is the version that can say which
+           piece it was on. */
+        var step = function (n) {
+          if (n > total) {
+            btn.textContent = "Finishing…";
+            return post({ action: "libraryUploadFinish", key: LIB.key, kind: LIB.kind,
+                          id: it.id, name: f.name, bytes: f.size,
+                          path: b.path, parts: parts,
+                          uploadId: b.uploadId, storeKey: b.storeKey })
+              .then(function (d) {
+                LIB.busy = false; btn.disabled = false; btn.textContent = was;
+                if (!d || !d.ok) { fail((d && d.error) || "The file could not be finished."); return; }
+                LIB.one = d.item;
+                return loadLibrary(true);
+              });
+          }
+          btn.textContent = total > 1 ? "Sending " + n + " of " + total + "…" : "Sending…";
+          var slice = f.slice((n - 1) * piece, Math.min(f.size, n * piece));
+          return fetch(q + "&n=" + n, { method: "POST", cache: "no-store",
+                                        headers: { "Content-Type": "application/octet-stream" },
+                                        body: slice })
+            .then(function (r) { return r.json(); })
+            .then(function (r) {
+              if (!r || !r.ok) { fail((r && r.error) || "That piece was refused."); return; }
+              parts.push({ partNumber: r.partNumber, etag: r.etag });
+              return step(n + 1);
+            });
+        };
+        return step(1);
+      }).catch(function (e) {
+        if (String(e.message) === "sign in") return;
+        fail("Could not reach the server. The file was not uploaded.");
+      });
+    }
+  }
+
+  /* A stamp read the way every other date on this platform reads (§239.3's
+     own lesson about two-digit years, one screen over): the browser's own
+     month names, three letters, never a locale's "Sept". */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function stampDay(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return d.getUTCDate() + " " + MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear();
+  }
+
+  /* ── TAKING ONE BACK (spec 049 §4.8) ─────────────────────────────────
+     §323's block, because the decision is the same one: the two acts with no
+     way back live under a rule, at the foot, each saying in its own line what
+     it does — rather than a dead control somebody presses to find out.
+
+     WITHDRAW IS NOT A DELETE AND DELETE IS REFUSED UNTIL IT HAS HAPPENED,
+     which is the guard rather than a second confirmation: nobody deletes a
+     report a client is still reading, and the SERVER refuses it in the same
+     words (§42). */
+  function endOfReport(it) {
+    var apart = el("div", "apart");
+    apart.appendChild(el("span", "akey lab", "Taking it back"));
+
+    var pub = it.state === "published";
+
+    /* `div`, NOT `span`, and it was found by looking (§311's own fault: a name
+       running into its own sub-line). `.byline .who` is a flex column, so
+       spans stack inside it; `.teamrow .who` is not, and every other row that
+       uses it builds blocks. Following what the neighbours already do rather
+       than giving the shared rule a column it has never needed — which would
+       be a restyle of screens nobody asked about (§267.1, rule 1b). */
+    var w = el("div", "teamrow");
+    var ww = el("div", "who");
+    ww.appendChild(el("div", "nm", "Withdraw"));
+    ww.appendChild(el("div", "em", pub
+      ? "Leaves " + LIB.client + "'s library. Its address answers not found, so nobody is told it ever existed. Nothing is lost and it can go back out."
+      : "Nothing to withdraw — this report is a draft, so it is not in " + LIB.client + "'s library."));
+    w.appendChild(ww);
+    var wsp = el("div", "sp");
+    var wb = el("button", "btn", "Withdraw");
+    wb.type = "button";
+    wb.disabled = !pub;
+    wb.addEventListener("click", function () {
+      if (LIB.busy) return;
+      LIB.busy = true; wb.disabled = true; wb.textContent = "Withdrawing…";
+      post({ action: "libraryState", key: LIB.key, kind: LIB.kind, id: it.id, state: "draft" })
+        .then(function (j) {
+          LIB.busy = false;
+          if (!j || !j.ok) { wb.disabled = false; wb.textContent = "Withdraw"; say((j && j.error) || "It was not withdrawn.", true); return; }
+          LIB.one = j.item;
+          return loadLibrary(true);
+        }).catch(function (e) {
+          LIB.busy = false; wb.disabled = false; wb.textContent = "Withdraw";
+          if (String(e.message) === "sign in") return;
+          say("Could not reach the server.", true);
+        });
+    });
+    wsp.appendChild(wb); w.appendChild(wsp);
+    apart.appendChild(w);
+
+    var d = el("div", "teamrow");
+    var dw = el("div", "who");
+    dw.appendChild(el("div", "nm", "Delete"));
+    dw.appendChild(el("div", "em", pub
+      ? "Withdraw first — nobody may delete a report a client is still reading."
+      : "Ends it. The file goes with it, and there is nothing to restore from."));
+    d.appendChild(dw);
+    var dsp = el("div", "sp");
+    var dbtn = el("button", "btn risk", "Delete…");
+    dbtn.type = "button";
+    dbtn.disabled = pub;
+    /* THE ASK IS WHERE THE BUTTON WAS (§323): no dialog anywhere on this
+       page, and one act does not earn the first. It NAMES the report,
+       because the way this goes wrong is pressing it on the wrong row. */
+    dbtn.addEventListener("click", function () { askDeleteReport(apart, d, it); });
+    dsp.appendChild(dbtn); d.appendChild(dsp);
+    apart.appendChild(d);
+
+    return apart;
+  }
+
+  function askDeleteReport(apart, row, it) {
+    row.textContent = "";
+    var q = el("div", "wzask");
+    var p = el("p");
+    p.appendChild(document.createTextNode("Delete "));
+    p.appendChild(el("b", null, it.title));
+    p.appendChild(document.createTextNode("?"));
+    q.appendChild(p);
+    var goes = el("p", "goes");
+    goes.appendChild(document.createTextNode("The report goes."));
+    goes.appendChild(el("br"));
+    goes.appendChild(document.createTextNode(it.hasFile ? "The file goes with it." : "There is no file on it."));
+    goes.appendChild(el("br"));
+    goes.appendChild(document.createTextNode("There is nothing to restore from."));
+    q.appendChild(goes);
+    var acts = el("div", "row");
+    var yes = el("button", "btn risksolid", "Delete it");
+    yes.type = "button";
+    var no2 = el("button", "btn", "Cancel");
+    no2.type = "button";
+    no2.addEventListener("click", function () { settle(paintOneReport); });
+    yes.addEventListener("click", function () {
+      yes.disabled = true; no2.disabled = true; yes.textContent = "Deleting…";
+      post({ action: "libraryDelete", key: LIB.key, kind: LIB.kind, id: it.id }).then(function (j) {
+        if (!j || !j.ok) {
+          yes.disabled = false; no2.disabled = false; yes.textContent = "Delete it";
+          var bad = el("p", "wzendwhy", (j && j.error) || "It was not deleted.");
+          bad.style.color = "var(--bad)";
+          q.appendChild(bad);
+          return;
+        }
+        /* Landing on the list, which is the record of what is there now
+           rather than a card for a report that has just gone (§144). And the
+           store's own answer is worth saying: a row removed while its file
+           stayed is not a failure of this press, and it is not silence
+           either (§171). */
+        LIB.one = null;
+        return loadLibrary(true).then(function () {
+          if (j.fileRemoved === false) say("The report is gone. The file store would not remove its file — nothing is reachable through the platform.", true);
+        });
+      }).catch(function (e) {
+        yes.disabled = false; no2.disabled = false; yes.textContent = "Delete it";
+        if (String(e.message) === "sign in") return;
+        var bad2 = el("p", "wzendwhy", "Could not reach the server.");
+        bad2.style.color = "var(--bad)";
+        q.appendChild(bad2);
+      });
+    });
+    acts.appendChild(yes); acts.appendChild(no2);
+    q.appendChild(acts);
+    row.appendChild(q);
+  }
 
   function drawSetup(key){
     if (!key) {

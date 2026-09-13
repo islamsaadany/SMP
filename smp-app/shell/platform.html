@@ -507,6 +507,40 @@
   .byline .who .em{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
   .byline .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
 
+  /* ── THE DOCUMENT ROOM (spec 049) ────────────────────────────────
+     THREE RULES, and that is the whole of what this page gains: the list is
+     .filters + .count + .elist + .erow, the editor is .ecard + .lab + .fld,
+     the dangerous pair is .apart + .teamrow, and every button is .btn — all
+     of them declared above for the consulting memory and the set-up flow
+     (§53.5). What is new is a category that can be pressed, a strip for the
+     file, and the row that holds them. */
+  .catpick{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:3px 8px;
+    color:var(--ink-2); background:var(--surface-2); cursor:pointer }
+  .catpick[aria-pressed="true"]{ color:var(--amber-tx); border-color:var(--amber);
+    background:var(--surface) }
+  /* A chip must answer the pointer in BOTH states, or the lit one reads as
+     something that has stopped being a control (§41.4 recorded exactly this:
+     a new pressed style with no hover beside it goes silent under the mouse).
+     The edge moves and the ground does not, so a pressed chip does not lose
+     the one thing saying it is pressed. */
+  .catpick:hover, .catpick:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .catrow{ display:flex; gap:7px; flex-wrap:wrap }
+  /* A bordered strip and not a card: the file is one field among the others,
+     and a card would rank it above the title. Dashed, because until something
+     is dropped on it there is nothing there — the same thing the Add card's
+     dashed edge says one page over. */
+  /* `.filestrip` AND NOT `.drop`: the debrief's own Drop button is a
+     `.btn drop` (§65.9 — a class name is one global namespace), so a bare
+     `.drop` here would have put a dashed box and 14px of padding round a
+     small remove control one page over, where nothing would have looked at
+     it. Found by grepping the name before trusting it. */
+  .filestrip{ display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    border:1px dashed var(--line); border-radius:9px; padding:12px 14px; background:var(--surface) }
+  .filestrip .fname{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2);
+    min-width:0; overflow-wrap:anywhere }
+  .filestrip .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+
   .wiz{ max-width:720px }
   .wq{ margin-bottom:17px }
   .wq textarea.fld{ min-height:74px; resize:vertical; font-size:14px }

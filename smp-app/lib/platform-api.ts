@@ -20,7 +20,7 @@ import { withTenant } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
 import * as LIB from "./library.ts";
-import { dropBlob } from "./blob-api.ts";
+import { dropBlob, ready as storeReady, beginUpload, putPart, finishUpload } from "./blob-api.ts";
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
 import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
@@ -573,6 +573,55 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        still in the client's library: withdrawing is what closes the door, so
        nobody deletes something a client is reading (spec 049 §4.8 — the guard
        rather than a second confirmation, which is §323's own shape). */
+    /* ── THE FILE, IN PIECES (spec 049 §4.3) ─────────────────────────
+       Three steps, because a serverless function refuses a body over about
+       4.5MB and a report is bigger than that: begin, then one request per
+       piece (app/api/platform/file), then finish. EVERY PIECE IS AUTHORISED
+       rather than one address minted and then trusted (§261's rule, carried).
+
+       THE PATH IS BUILT HERE AND NEVER SENT. A browser that could name the
+       path could write over another client's file however good the guards
+       above were, so it is derived from the tenant and the item's id — both
+       of which are things the SERVER resolved. */
+    if (action === "libraryUploadBegin") {
+      if (!storeReady()) return no(503, "There is no file store set up yet, so a report cannot be uploaded. Everything else about the library works.");
+      const item = await withTenant(row.id, (c) => LIB.oneItem(c, kind, String(body.id || ""), false));
+      if (!item) return no(404, "That report is not there any more.");
+      const size = Number(body.bytes || 0);
+      if (!(size > 0)) return no(400, "That file is empty.");
+      if (size > LIB.MAX_FILE_BYTES)
+        return no(400, "That file is " + LIB.sizeLabel(size) + " — bigger than the " + LIB.sizeLabel(LIB.MAX_FILE_BYTES) + " a report may be.");
+      const path = LIB.filePath(kind, row.id, item.id, String(body.name || ""));
+      const up = await beginUpload(path, "application/pdf");
+      if (!up) return no(503, "The file store would not take it. Nothing was changed.");
+      return ok({ path, storeKey: up.key, uploadId: up.uploadId, piece: LIB.UPLOAD_PIECE_BYTES });
+    }
+
+    /* THE ROW IS WRITTEN ONLY ONCE THE STORE HAS THE WHOLE FILE, so a report
+       never points at half an upload: if finishing fails the row still names
+       the file it had, and the client's library is unchanged (§171 — and the
+       old file is deliberately NOT removed here, because the row may still be
+       pointing at it). */
+    if (action === "libraryUploadFinish") {
+      if (!storeReady()) return no(503, "There is no file store set up yet.");
+      const id = String(body.id || ""), path = String(body.path || "");
+      const item = await withTenant(row.id, (c) => LIB.oneItem(c, kind, id, false));
+      if (!item) return no(404, "That report is not there any more.");
+      if (path !== LIB.filePath(kind, row.id, item.id, String(body.name || "")))
+        return no(400, "That file does not belong to this report.");
+      /* `storeKey` AND NEVER `key`: `body.key` is the CLIENT's key, read at
+         the top of this block, so a store key sent under that name would have
+         been the client's slug handed to the store — a complete that could
+         never succeed, and one nothing without a store could ever have found
+         (§261.10's shape, §87's twins in a request body). The piece route has
+         always spelt the two apart, which is why only this call was wrong. */
+      const done = await finishUpload(path, String(body.storeKey || ""), String(body.uploadId || ""), body.parts || []);
+      if (!done) return no(503, "The file store would not finish it. Nothing was changed.");
+      const saved = await withTenant(row.id, (c) => LIB.setFile(c, id, path, String(body.name || ""), Number(body.bytes || 0)));
+      if (!saved) return no(404, "That report is not there any more.");
+      return ok({ item: LIB.shape(saved, false) });
+    }
+
     if (action === "libraryDelete") {
       const id = String(body.id || "");
       const item = await withTenant(row.id, (c) => LIB.oneItem(c, kind, id, false));
@@ -736,4 +785,50 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return ok({});
   }
   return no(400, "unknown action");
+}
+
+/* ── ONE PIECE OF A REPORT (spec 049) ────────────────────────────────────
+   Its own export rather than an `action`, because the body is RAW BYTES and
+   every other call to this endpoint is JSON — the same split §261 made for
+   the same reason, and the query is where the naming rides.
+
+   IT ASKS THE SAME QUESTIONS THE OTHER LIBRARY ACTIONS ASK, in the same
+   order, because a piece that skipped them would be the way past all of them:
+   a piece is the only part of an upload that carries the file's actual
+   contents. The path is REBUILT from the tenant and the item here too and
+   compared with the one sent — a browser that could name its own path could
+   write over another client's file. */
+export async function libraryPart(pool: Q, me: SessionUser, q: URLSearchParams, bytes: Buffer): Promise<Answer> {
+  if (me.kind === "client") return no(403, "That is not something this account opens.");
+  const account: Account = { id: me.id, email: me.email, name: me.name, is_admin: me.isAdmin, kind: me.kind, status: "active" };
+  const world = await worldFor(pool, me.id);
+  const row = await clientByKey(pool, q.get("client"));
+  if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+  if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's library is not yours to publish to.");
+  if (row.status === "retired") return no(409, row.name + " is archived.");
+  if (!storeReady()) return no(503, "There is no file store set up yet.");
+
+  const kind = LIB.isKind(q.get("kind")) ? (q.get("kind") as LIB.Kind) : "insights";
+  const id = String(q.get("id") || ""), path = String(q.get("path") || "");
+  const key = String(q.get("storeKey") || ""), uploadId = String(q.get("uploadId") || "");
+  const n = Number(q.get("n") || 0);
+  if (!id || !path || !key || !uploadId || !(n > 0)) return no(400, "That piece names nothing.");
+  if (!bytes || !bytes.length) return no(400, "That piece is empty.");
+  if (bytes.length > LIB.UPLOAD_PIECE_BYTES + 1024) return no(413, "That piece is too big.");
+
+  const item = await withTenant(row.id, (c) => LIB.oneItem(c, kind, id, false));
+  if (!item) return no(404, "That report is not there any more.");
+  if (path !== LIB.filePath(kind, row.id, item.id, String(q.get("name") || "")))
+    return no(400, "That file does not belong to this report.");
+
+  /* THE FIRST PIECE IS WHAT SAYS IT IS A PDF, checked by its own first bytes
+     and never by the name it arrived under (spec 049 §5). A later piece
+     cannot be checked — it is the middle of a file — which is exactly why the
+     first one is. */
+  if (n === 1 && !LIB.looksLikePdf(bytes))
+    return no(400, "That is not a PDF. A report has to be one, whatever the file is called.");
+
+  const etag = await putPart(path, key, uploadId, n, bytes);
+  if (!etag) return no(503, "The file store would not take that piece.");
+  return ok({ partNumber: n, etag });
 }

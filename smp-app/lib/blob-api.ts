@@ -112,6 +112,36 @@ async function signedRead(path: string): Promise<string> {
                both "you cannot watch this now" */ return ""; }
 }
 
+/* ── THE THREE STEPS OF AN UPLOAD, for a caller that has done its own
+   authorising (spec 049) ──────────────────────────────────────────────────
+   §261's clips authorise every piece against a REVIEW TARGET, which is the
+   right question there and the wrong one for a library: a report is published
+   by a consultant in the console and has no target at all. So what is shared
+   is the STORE — the loader, the token, the words for "no store here" — and
+   what is not shared is the rule, which each caller asks for itself.
+
+   THE PATH IS STILL THE PERMISSION either way. These take one already built
+   by the caller (lib/library.ts filePath puts the tenant in it), and they
+   never derive one from anything a browser sent. */
+export async function beginUpload(path: string, contentType: string): Promise<{ key: string; uploadId: string } | null> {
+  const b = blob();
+  if (!b || !token() || !path) return null;
+  const up = await b.createMultipartUpload(path, { access: "private", contentType: contentType || "application/pdf", token: token() });
+  return { key: up.key, uploadId: up.uploadId };
+}
+export async function putPart(path: string, key: string, uploadId: string, n: number, bytes: Buffer): Promise<string> {
+  const b = blob();
+  if (!b || !token()) return "";
+  const part = await b.uploadPart(path, bytes, { access: "private", key, uploadId, partNumber: n, token: token() });
+  return String(part.etag || "");
+}
+export async function finishUpload(path: string, key: string, uploadId: string, parts: unknown[]): Promise<boolean> {
+  const b = blob();
+  if (!b || !token()) return false;
+  await b.completeMultipartUpload(path, parts || [], { access: "private", key, uploadId, token: token() });
+  return true;
+}
+
 /* ── A SHORT-LIVED READ ADDRESS (spec 049, reusing §261.10's two steps) ──
    A private blob has no fetchable address of its own: the store issues a
    delegation scoped to ONE pathname and ONE operation, and that signs a

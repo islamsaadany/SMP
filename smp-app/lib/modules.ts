@@ -153,11 +153,27 @@ export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
    Strategy's is what the card already reads; a module with nothing to say
    draws its name alone, which is `""` and never a placeholder. `have` is the
    client's own list, so the card cannot offer a door the address refuses. */
-export type ModuleRow = { key: ModuleKey; label: string; state: string };
+/* ── WHICH MODULES FOREFRONT WORKS ON RATHER THAN WALKS INTO (spec 049) ──
+   A library is published BY US and read by the client (spec 046 §4.9), so a
+   consultant pressing its row on a client's card belongs in the publishing
+   room in this console — not in the client's own read-only page, which is the
+   one place they can do nothing at all. Strategy's row goes the other way,
+   into the client's platform, because that IS where the work is.
+
+   NAMED HERE for the reason every other module fact is: the card, the address
+   and Setup ask one place what a module is (§53.5). The card reads the flag
+   off the row the server sent it and decides nothing itself. */
+export const LIBRARY_MODULES: readonly ModuleKey[] = ["insights", "processes"];
+export function isLibrary(k: unknown): boolean {
+  return typeof k === "string" && (LIBRARY_MODULES as readonly string[]).includes(k);
+}
+
+export type ModuleRow = { key: ModuleKey; label: string; state: string; room: boolean };
 export function moduleRows(have: ModuleKey[], facts: { unreadable?: boolean; cycleOpen?: boolean | null; planned?: boolean | null }): ModuleRow[] {
   return have.map((k) => ({
     key: k,
     label: MODULE_DEF[k].label,
+    room: isLibrary(k),
     state: k !== "strategy" ? ""
       : facts.unreadable ? "not answering"
       : facts.cycleOpen ? "cycle open"

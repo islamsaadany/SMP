@@ -357,15 +357,36 @@ is Islam's: the key is set in Vercel's own settings and never pasted here.*
 
 ## 8 · The order of the work
 
-**Where it stands, 2026-09-13:** 1 and 2 are done and 4 is done bar the
-console's own screen. `library_items` and migration 008 are applied and proved
-on both apply paths; `lib/library.ts` holds the rules and the reads and writes;
-`lib/insights.ts` is the client's screen and `lib/library-file.ts` the one
-address its Download points at; the console's actions are in
-`lib/platform-api.ts`; Insights is `built: true`, so it can be switched on.
-`checks/insights.mjs` is 93/0, red 9 / 5 / 3. **Left: the publishing room's own
-markup on the client's card, the upload's multipart plumbing (which wants
-`videos/…` generalised rather than copied), and 5, the module's roles file.**
+**Where it stands, 2026-09-13:** 1, 2, 3 and 4 are done. `library_items` and
+migration 008 are applied and proved on both apply paths; `lib/library.ts`
+holds the rules and the reads and writes; `lib/insights.ts` is the client's
+screen and `lib/library-file.ts` the one address its Download points at; the
+console's actions are in `lib/platform-api.ts` with the publishing room itself
+on the client's card in `platform.html`, and the file goes up in pieces through
+`app/api/platform/file`. Insights is `built: true`, so it can be switched on.
+`checks/insights.mjs` 93/0, red 9 / 5 / 3; `checks/publishing-room.py` 40/0 on
+both copies of the console page, red 1 / 1 / 1.
+
+**AND THE ROOM'S OWN CHECK FOUND TWO THINGS, ONE OF THEM IN THE SERVER.**
+`libraryUploadFinish` read the store's multipart key out of `body.key` — and
+`body.key` is the CLIENT's key, read at the top of that same block — so the
+complete would have handed the store a client slug and could never have
+succeeded. It is `storeKey` in both places now, and the piece route, which had
+always spelt the two apart, is why only the one call was wrong (§87's twins, in
+a request body; §261.10's shape, and like that one it needed a store to be
+found any other way). And the card's Withdraw and Delete rows ran their name
+into their own sentence — `.byline .who` is a flex column and `.teamrow .who`
+is not, so the spans copied from one did not stack in the other; every other
+`.teamrow` in the console builds blocks, which is what this does now (§311,
+§267.1). Found by looking at a render, not by an assertion, and asserted since.
+
+**Left: 5, the module's roles file** — Insights' own tab on Roles & access, in
+a file the module owns, never in the carried `rules.cjs` (which
+`generated-in-step` asserts is byte-identical to its frozen twin). **And
+Islam's own: the blob package and `BLOB_READ_WRITE_TOKEN` on the deployment.**
+Until they are there, an upload is proved against a stub that records what
+arrived and against the endpoint's own refusals, and not end to end — which is
+stated rather than left to be discovered (§54.5).
 
 
 1. **Two mockups, signed off before a source moves** (rule 1c, non-negotiable):

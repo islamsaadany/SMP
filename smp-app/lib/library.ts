@@ -28,6 +28,19 @@ type Q = Pool | PoolClient;
    a report filed under Other is a report nobody finds, and a category meaning
    "not one of the others" is where everything lands once somebody is in a
    hurry. */
+/* ── HOW BIG A REPORT MAY BE ────────────────────────────────────────────
+   THE PIECE SIZE IS THE ONE THAT IS NOT A PREFERENCE. A serverless function
+   refuses a request body over about 4.5MB, so every piece has to sit under
+   that with room for the rest of the request — 3MB, the same order §261 slices
+   a clip into.
+
+   THE CEILING IS 20MB AND IT IS UNPROVEN, said plainly rather than shipped as
+   a fact: it is the attached file's number, and that file records never having
+   reached it. Ours will be measured the first time a real report goes up
+   through a real store, and this constant is where the measurement lands. */
+export const UPLOAD_PIECE_BYTES = 3 * 1024 * 1024;
+export const MAX_FILE_BYTES = 20 * 1024 * 1024;
+
 export const CATEGORIES = ["Analysis", "Macro", "Market", "Sector", "Governance"] as const;
 export type Category = (typeof CATEGORIES)[number];
 

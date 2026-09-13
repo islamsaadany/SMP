@@ -1,0 +1,499 @@
+#!/usr/bin/env python3
+"""The room we publish a client's library from (spec 049).
+
+Publishing is Forefront's, so this screen is the module's ONLY authoring
+surface — the client's own page reads and cannot write at all, which
+checks/insights.mjs §11 asserts from the other end. If a control here is
+drawn and wired to nothing, nobody finds out from the client's side: their
+page renders perfectly and the report simply never appears.
+
+WHICH IS §96 EXACTLY, and why this file PRESSES rather than looking. That
+section found twenty input fields and four buttons on a plan's objectives
+table, every one of them decoration — typing was accepted and discarded on
+the next repaint — and nothing caught it, because a bound field and an unbound
+one differ by one absent attribute. So every assertion below reads what the
+page SENT, never what it drew.
+
+AND BOTH ENDS EVERY TIME (§94.2). A build that removed Publish would satisfy
+"Publish is held while there is no file" perfectly, so each refusal is
+asserted beside the press that must land.
+
+IT NEEDS NO DATABASE. platform.html is served as it is by both stacks and
+every rule it obeys is the server's, so a stub answers /api/platform and
+records what arrived — which is also the only way to MAKE the states that
+matter: a report with no file, a published one, a store that is not there
+(§94.11, §255).
+
+Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/publishing-room.py
+      SMP_PAGE=smp-app/shell/platform.html …     # the new stack's own copy
+      … --break=publish-anyway    # a Publish with no report saved behind it
+      … --break=delete-published  # Delete offered on a published report
+      … --break=mark-published    # every row marked, not only the drafts
+
+THE ONE THING WITH NO BREAK BEHIND IT, said rather than left as a gap (§54.5):
+the piece loop. A break here is a DOM edit after the page has drawn, and
+`sendFile` is inside the card's own closure where nothing outside can reach
+it — so "the file goes in three pieces" is asserted against the three requests
+that arrived and has no synthetic way to fail. A build that sent the whole
+file in one request would produce `[1]` and go red; a build that ignored the
+server's piece size would trip the size assertion beside it. Both are real
+regressions and neither can be staged from here.
+"""
+import http.server, json, os, socketserver, sys, threading
+from playwright.sync_api import sync_playwright
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+REPO = os.path.abspath(os.path.join(ROOT, ".."))
+PORT = int(os.environ.get("SMP_CHECK_PORT", "3989"))
+BASE = "http://127.0.0.1:%d" % PORT
+BREAK = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--break=")), "")
+PAGE = os.environ.get("SMP_PAGE") or os.path.join(REPO, "platform.html")
+SHOT = os.environ.get("SMP_SHOT")
+
+fails, passes = [], []
+def check(what, ok, detail=""):
+    if ok:
+        passes.append(what); print("  ok   " + what)
+    else:
+        print("  FAIL " + what + ("  — " + str(detail) if detail else "")); fails.append(what)
+
+CATS = ["Analysis", "Macro", "Market", "Sector", "Governance"]
+PIECE = 3 * 1024 * 1024
+
+def item(**kw):
+    d = {"id": "i1", "kind": "insights", "title": "A report", "summary": "",
+         "categories": [], "reportDate": "", "version": 1, "fileName": "", "fileSize": 0,
+         "sizeLabel": "", "hasFile": False, "state": "draft", "downloads": 0,
+         "publishedAt": "", "publishedBy": "", "filePath": ""}
+    d.update(kw); return d
+
+# The scene the stub is standing in, and the record of what reached it.
+SCENE = {"items": [], "sent": [], "pieces": [], "store": True}
+
+CARD = {"key": "raya-trade", "name": "Raya Trade", "industry": "Trade & distribution",
+        "kind": "client", "mark": None, "mine": True, "seat": "super", "state": "open",
+        "canOpen": True, "canConfig": True, "units": 10, "planned": True, "cycleOpen": True,
+        "unreadable": False,
+        "modules": [{"key": "strategy", "label": "Strategy", "state": "cycle open", "room": False},
+                    {"key": "insights", "label": "Insights", "state": "", "room": True}]}
+
+class Stub(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *a): pass
+    def _send(self, body, ctype, code=200):
+        b = body.encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(b)))
+        self.end_headers()
+        self.wfile.write(b)
+    def do_GET(self):
+        p = self.path.split("?")[0]
+        if p in ("/platform", "/"):
+            with open(PAGE, encoding="utf-8") as f: self._send(f.read(), "text/html; charset=utf-8")
+            return
+        # Both stacks serve this page from one source (§53.5): the new stack's
+        # copy is generated with the script moved out, so SMP_PAGE points the
+        # run at it and the script is served from beside it.
+        if p == "/platform-page.js":
+            with open(os.path.join(REPO, "smp-app", "public", "platform-page.js"), encoding="utf-8") as f:
+                self._send(f.read(), "application/javascript; charset=utf-8")
+            return
+        self.send_response(404); self.end_headers()
+
+    def do_POST(self):
+        n = int(self.headers.get("Content-Length", "0"))
+        raw = self.rfile.read(n) or b"{}"
+        p = self.path.split("?")[0]
+
+        # ── a piece of a file: raw bytes, named in the query ─────────────
+        if p == "/api/platform/file":
+            from urllib.parse import parse_qs, urlparse
+            q = {k: v[0] for k, v in parse_qs(urlparse(self.path).query).items()}
+            SCENE["pieces"].append({"q": q, "bytes": len(raw), "head": raw[:5].decode("latin-1")})
+            self._send(json.dumps({"ok": True, "partNumber": int(q.get("n", "0")),
+                                   "etag": "e" + q.get("n", "0")}), "application/json")
+            return
+
+        body = json.loads(raw)
+        act = body.get("action")
+        if act != "me": SCENE["sent"].append(body)
+
+        if act == "me":
+            self._send(json.dumps({"ok": True, "account": {
+                "email": "islam.saadany@forefront.consulting", "name": "Islam Saadany",
+                "isAdmin": True}}), "application/json"); return
+        if act == "cards":
+            self._send(json.dumps({"ok": True, "cards": [CARD], "canAdd": True,
+                                   "canConsultants": True, "canAccess": True}), "application/json"); return
+        if act == "library":
+            rows = SCENE["items"]
+            q = (body.get("q") or "").lower()
+            if q: rows = [r for r in rows if q in r["title"].lower()]
+            if body.get("category"): rows = [r for r in rows if body["category"] in r["categories"]]
+            if body.get("state"): rows = [r for r in rows if r["state"] == body["state"]]
+            self._send(json.dumps({"ok": True, "items": rows, "categories": CATS,
+                                   "kind": body.get("kind")}), "application/json"); return
+        if act == "librarySave":
+            it = item(id=body.get("id") or "new-1", title=body.get("title", ""),
+                      summary=body.get("summary", ""), categories=body.get("categories") or [],
+                      reportDate=body.get("reportDate") or "")
+            was = [r for r in SCENE["items"] if r["id"] == it["id"]]
+            if was: it.update({k: was[0][k] for k in ("hasFile", "fileName", "sizeLabel", "version", "state", "downloads")})
+            SCENE["items"] = [r for r in SCENE["items"] if r["id"] != it["id"]] + [it]
+            self._send(json.dumps({"ok": True, "item": it}), "application/json"); return
+        if act == "libraryState":
+            for r in SCENE["items"]:
+                if r["id"] == body.get("id"):
+                    r["state"] = body.get("state")
+                    r["publishedAt"] = "2026-09-04T00:00:00.000Z" if r["state"] == "published" else ""
+                    r["publishedBy"] = "islam.saadany@forefront.consulting" if r["state"] == "published" else ""
+                    self._send(json.dumps({"ok": True, "item": r}), "application/json"); return
+            self._send(json.dumps({"ok": False, "error": "gone"}), "application/json", 404); return
+        if act == "libraryUploadBegin":
+            if not SCENE["store"]:
+                self._send(json.dumps({"ok": False, "error":
+                    "There is no file store set up yet, so a report cannot be uploaded. "
+                    "Everything else about the library works."}), "application/json", 503); return
+            self._send(json.dumps({"ok": True, "path": "insights/t/i/f.pdf", "storeKey": "K",
+                                   "uploadId": "U", "piece": PIECE}), "application/json"); return
+        if act == "libraryUploadFinish":
+            for r in SCENE["items"]:
+                if r["id"] == body.get("id"):
+                    r.update({"hasFile": True, "fileName": body.get("name"),
+                              "fileSize": body.get("bytes"), "sizeLabel": "6.0 MB",
+                              "version": r["version"] + (1 if r["hasFile"] else 0)})
+                    self._send(json.dumps({"ok": True, "item": r}), "application/json"); return
+            self._send(json.dumps({"ok": False, "error": "gone"}), "application/json", 404); return
+        if act == "libraryDelete":
+            SCENE["items"] = [r for r in SCENE["items"] if r["id"] != body.get("id")]
+            self._send(json.dumps({"ok": True, "removed": True, "fileRemoved": True}), "application/json"); return
+        self._send(json.dumps({"ok": True}), "application/json")
+
+def serve():
+    socketserver.TCPServer.allow_reuse_address = True
+    srv = socketserver.TCPServer(("127.0.0.1", PORT), Stub)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv
+
+# ── the falsifications ───────────────────────────────────────────────────
+# Applied to the PAGE, because platform.html is hand-written and served as it
+# is: there is no build step to make a broken copy through (§276 needs one).
+BREAKS = {
+  # A Publish that does not ask whether there is anything to open.
+  "publish-anyway": """() => {
+    const b = Array.from(document.querySelectorAll('.byline .btn'))
+      .find(x => /^Publish/.test(x.textContent));
+    if (!b) return false;
+    b.removeAttribute('aria-disabled');
+    return true;
+  }""",
+  # Delete offered while the client is still reading it.
+  "delete-published": """() => {
+    const b = Array.from(document.querySelectorAll('.apart .btn'))
+      .find(x => /^Delete/.test(x.textContent));
+    if (!b) return false;
+    b.disabled = false;
+    return true;
+  }""",
+  # Every row marked, which is the accent spent on the state that needs none.
+  "mark-published": """() => {
+    const rows = Array.from(document.querySelectorAll('.erow'));
+    if (!rows.length) return false;
+    rows.forEach(r => {
+      if (r.querySelector('.tag')) return;
+      const t = document.createElement('span');
+      t.className = 'tag none'; t.textContent = 'Published';
+      r.appendChild(t);
+    });
+    return true;
+  }""",
+}
+
+def press(pg, sel_text, root=""):
+    pg.evaluate("""([t, r]) => {
+      const scope = r ? document.querySelector(r) : document;
+      const b = Array.from(scope.querySelectorAll('button')).find(x => x.textContent.trim() === t);
+      if (!b) throw new Error('no button: ' + t);
+      b.click();
+    }""", [sel_text, root])
+
+def run():
+    serve()
+    exe = os.environ.get("SMP_CHROME")
+    with sync_playwright() as p:
+        b = p.chromium.launch(executable_path=exe) if exe else p.chromium.launch()
+        pg = b.new_page(viewport={"width": 1440, "height": 1000})
+        errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+
+        # EVERY WAIT DEGRADES (§215, in a file that presses thirty controls):
+        # on a build with no room at all, Playwright waits thirty seconds and
+        # then throws a stack trace with nothing reported — which reads as a
+        # broken check rather than a missing feature.
+        def open_room():
+            pg.goto(BASE + "/platform")
+            pg.wait_for_selector(".ccard", timeout=9000)
+            got = pg.evaluate("""() => {
+              const r = document.querySelector('.mrow[data-module="insights"]');
+              if (!r) return false;
+              r.click(); return true;
+            }""")
+            if not got:
+                check("the client's card carries a row for Insights", False,
+                      "no .mrow[data-module=insights] — is this a build before spec 049?")
+                raise SystemExit(1)
+            try:
+                pg.wait_for_selector(".ptitle h1", timeout=9000)
+            except Exception:
+                check("pressing it opens the publishing room", False,
+                      "the row was pressed and no room was drawn")
+                raise SystemExit(1)
+
+        # ══ 1 · the way in, and an empty library ════════════════════════
+        print("\n1 · the room, and a client with nothing published")
+        SCENE["items"] = []; SCENE["sent"] = []
+        open_room()
+        shape = pg.evaluate("""() => ({
+          title: document.querySelector('.ptitle h1').textContent,
+          client: (document.querySelector('.ptitle .tag') || {}).textContent,
+          empty: (document.querySelector('.muted') || {}).textContent || '',
+          add: !!Array.from(document.querySelectorAll('.ptitle button'))
+                 .find(x => /Publish a report/.test(x.textContent)),
+          rows: document.querySelectorAll('.erow').length,
+          href: location.pathname
+        })""")
+        check("the module's row opens the room rather than the client's page",
+              shape["href"] == "/platform" and shape["title"] == "Insights", shape)
+        check("...and it says which client it is publishing to", shape["client"] == "Raya Trade", shape)
+        check("an empty library SAYS so rather than drawing an empty list (§45.2)",
+              "Nothing has been published" in shape["empty"] and "Raya Trade" in shape["empty"], shape)
+        check("...and the way to put the first one up is on it (§61)", shape["add"], shape)
+        asked = [s for s in SCENE["sent"] if s.get("action") == "library"]
+        check("the list is the SERVER's answer, asked for this client and this kind",
+              len(asked) == 1 and asked[0]["key"] == "raya-trade" and asked[0]["kind"] == "insights", asked)
+
+        # ══ 2 · writing one, and what the page SENDS ════════════════════
+        print("\n2 · a new report — what is typed is what is posted (§96)")
+        SCENE["sent"] = []
+        press(pg, "Publish a report", ".ptitle")
+        pg.wait_for_selector(".ecard", timeout=9000)
+        pg.fill("#lib-title", "Governance Review: Board Reporting Practice")
+        pg.fill("#lib-sum", "How the quarterly pack is assembled today.")
+        pg.fill("#lib-date", "2026-09-04")
+        pg.evaluate("""() => Array.from(document.querySelectorAll('.catpick'))
+          .filter(c => ['Macro','Governance'].includes(c.textContent))
+          .forEach(c => c.click())""")
+        lit = pg.evaluate("""() => Array.from(document.querySelectorAll('.catpick'))
+          .filter(c => c.getAttribute('aria-pressed') === 'true').map(c => c.textContent)""")
+        check("a category chip lights when pressed", lit == ["Macro", "Governance"], lit)
+        if BREAK in BREAKS: pg.evaluate(BREAKS[BREAK])
+        held = pg.evaluate("""() => {
+          const b = Array.from(document.querySelectorAll('.byline .btn'))
+            .find(x => /^Publish/.test(x.textContent));
+          const f = Array.from(document.querySelectorAll('.filestrip .btn'))[0];
+          return { pubHeld: b.getAttribute('aria-disabled'), pubWhy: b.title,
+                   fileOff: f.disabled, fileWhy: (document.querySelector('.filestrip .fname')||{}).textContent };
+        }""")
+        check("Publish is HELD on a report that has never been saved, and says why",
+              held["pubHeld"] == "true" and held["pubWhy"], held)
+        check("...and the file control says what has to happen first (§61, §221)",
+              held["fileOff"] and "Save it first" in (held["fileWhy"] or ""), held)
+        press(pg, "Save the draft", ".byline")
+        pg.wait_for_function("""() => document.querySelectorAll('.erow').length === 1 ||
+          (document.querySelector('.ecard h2')||{}).textContent === 'Governance Review: Board Reporting Practice'""", timeout=9000)
+        saved = [s for s in SCENE["sent"] if s.get("action") == "librarySave"]
+        check("the press POSTS the report, and posts what was typed into it",
+              len(saved) == 1 and saved[0]["title"] == "Governance Review: Board Reporting Practice"
+              and saved[0]["summary"].startswith("How the quarterly")
+              and saved[0]["reportDate"] == "2026-09-04", saved)
+        check("...including the categories, which are the one list the server sent",
+              len(saved) == 1 and saved[0]["categories"] == ["Macro", "Governance"], saved)
+        check("...and no state, because saving a draft is not publishing it",
+              not [s for s in SCENE["sent"] if s.get("action") == "libraryState"], SCENE["sent"])
+
+        # ══ 3 · the file, in pieces ═════════════════════════════════════
+        print("\n3 · the file — in pieces, every one of them named")
+        SCENE["sent"] = []; SCENE["pieces"] = []
+        pg.evaluate("""() => {
+          const r = document.querySelector('.erow'); if (r) r.click();
+        }""")
+        pg.wait_for_selector(".ecard", timeout=9000)
+        # 6.5MB of PDF: three pieces at 3MB, so the loop is exercised rather
+        # than asserted (a one-piece file passes on a build that ignores the
+        # size entirely).
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "raya-governance-review-sep26.pdf",
+            "mimeType": "application/pdf",
+            "buffer": b"%PDF-1.7\n" + b"x" * (6 * 1024 * 1024 + 512 * 1024)})
+        pg.wait_for_function("""() => !!document.querySelector('.filestrip .fname') &&
+          /raya-governance/.test(document.querySelector('.filestrip .fname').textContent)""", timeout=20000)
+        began = [s for s in SCENE["sent"] if s.get("action") == "libraryUploadBegin"]
+        fin = [s for s in SCENE["sent"] if s.get("action") == "libraryUploadFinish"]
+        ns = [int(x["q"]["n"]) for x in SCENE["pieces"]]
+        check("the upload begins on the server, naming the file's own size",
+              len(began) == 1 and began[0]["bytes"] > 6 * 1024 * 1024, began)
+        check("the file goes in PIECES, in order, from one (§261: a function refuses a big body)",
+              ns == [1, 2, 3], ns)
+        check("...and no piece is bigger than the size the server named",
+              all(x["bytes"] <= PIECE for x in SCENE["pieces"]),
+              [x["bytes"] for x in SCENE["pieces"]])
+        check("every piece carries the client, the report and the upload it belongs to",
+              all(x["q"].get("client") == "raya-trade" and x["q"].get("id")
+                  and x["q"].get("storeKey") == "K" and x["q"].get("uploadId") == "U"
+                  for x in SCENE["pieces"]), SCENE["pieces"][:1])
+        check("...and the store's key is NOT sent as `key`, which is the client's (§87's twins)",
+              all("key" not in x["q"] for x in SCENE["pieces"]), SCENE["pieces"][:1])
+        check("the first piece is the file's own first bytes, so the server can tell it is a PDF",
+              SCENE["pieces"][0]["head"] == "%PDF-", SCENE["pieces"][0]["head"])
+        check("finishing hands back every part, and the store key under its own name",
+              len(fin) == 1 and [p["partNumber"] for p in fin[0]["parts"]] == [1, 2, 3]
+              and fin[0].get("storeKey") == "K" and fin[0].get("uploadId") == "U", fin)
+        strip = pg.evaluate("""() => (document.querySelector('.filestrip .fname')||{}).textContent""")
+        check("...and the strip then says which file it is", "raya-governance" in strip, strip)
+
+        # ══ 4 · publishing, and what it opens ═══════════════════════════
+        print("\n4 · publishing it, and taking it back")
+        SCENE["sent"] = []
+        free = pg.evaluate("""() => {
+          const b = Array.from(document.querySelectorAll('.byline .btn'))
+            .find(x => /^Publish/.test(x.textContent));
+          return { held: b.getAttribute('aria-disabled'), word: b.textContent };
+        }""")
+        check("with a file on it, Publish is free — and names the client it goes to",
+              free["held"] is None and "Raya Trade" in free["word"], free)
+        press(pg, "Publish to Raya Trade", ".byline")
+        pg.wait_for_function("""() => !!Array.from(document.querySelectorAll('.byline .nm'))
+          .find(x => /^Published to/.test(x.textContent))""", timeout=9000)
+        st = [s for s in SCENE["sent"] if s.get("action") == "libraryState"]
+        check("publishing POSTS the state, named rather than implied",
+              len(st) == 1 and st[0]["state"] == "published" and st[0]["key"] == "raya-trade", st)
+        after = pg.evaluate("""() => ({
+          nm: (document.querySelector('.byline .nm')||{}).textContent,
+          tags: Array.from(document.querySelectorAll('.etags .tag')).map(t => t.textContent),
+          withdraw: !Array.from(document.querySelectorAll('.apart .btn'))
+            .find(x => x.textContent === 'Withdraw').disabled,
+          del: !Array.from(document.querySelectorAll('.apart .btn'))
+            .find(x => /^Delete/.test(x.textContent)).disabled,
+          delWhy: Array.from(document.querySelectorAll('.apart .em')).map(e => e.textContent)
+        })""")
+        check("a published report says so, and drops the Draft mark (§41's budget)",
+              after["nm"].startswith("Published to") and "Draft" not in after["tags"], after)
+        check("Withdraw is what is offered on it", after["withdraw"], after)
+        # A NAME AND ITS SENTENCE ARE TWO LINES, measured as PAINT rather than
+        # as markup. The first build of this card wrote them as spans, copying
+        # `.byline`'s shape into `.teamrow`, which is not a flex column — so
+        # the row read "WithdrawLeaves Raya Trade's library" and every
+        # assertion above was green (§311, §96: a run-together line renders
+        # perfectly). Found by looking at it.
+        lines = pg.evaluate("""() => Array.from(document.querySelectorAll('.apart .teamrow')).map(r => {
+          const n = r.querySelector('.nm'), e = r.querySelector('.em');
+          if (!n || !e) return null;
+          const a = n.getBoundingClientRect(), b = e.getBoundingClientRect();
+          return { same: Math.abs(a.top - b.top) < 2, nm: n.textContent };
+        })""")
+        check("a row's name sits above its sentence rather than running into it (§311)",
+              lines and all(l and not l["same"] for l in lines), lines)
+        if BREAK in BREAKS: pg.evaluate(BREAKS[BREAK])
+        blocked = pg.evaluate("""() => !Array.from(document.querySelectorAll('.apart .btn'))
+          .find(x => /^Delete/.test(x.textContent)).disabled""")
+        check("Delete is REFUSED while the client is still reading it — and says why",
+              not blocked and any("Withdraw first" in e for e in after["delWhy"]), after)
+        if SHOT: pg.screenshot(path=SHOT, full_page=True)
+
+        # ══ 5 · the way back, and deleting ══════════════════════════════
+        print("\n5 · withdrawing, then deleting")
+        SCENE["sent"] = []
+        press(pg, "Withdraw", ".apart")
+        pg.wait_for_function("""() => Array.from(document.querySelectorAll('.etags .tag'))
+          .some(t => t.textContent === 'Draft')""", timeout=9000)
+        back = [s for s in SCENE["sent"] if s.get("action") == "libraryState"]
+        check("withdrawing POSTS the draft state, and the card says Draft again",
+              len(back) == 1 and back[0]["state"] == "draft", back)
+        ready = pg.evaluate("""() => !Array.from(document.querySelectorAll('.apart .btn'))
+          .find(x => /^Delete/.test(x.textContent)).disabled""")
+        check("...and Delete is only then free, which is the guard rather than a second question (§323)",
+              ready, ready)
+        SCENE["sent"] = []
+        press(pg, "Delete…", ".apart")
+        pg.wait_for_selector(".apart .wzask", timeout=9000)
+        asks = pg.evaluate("""() => ({
+          names: (document.querySelector('.apart .wzask b')||{}).textContent,
+          goes: (document.querySelector('.apart .wzask .goes')||{}).textContent,
+          sentYet: true
+        })""")
+        check("the question is asked where the button was, and it NAMES the report (§323)",
+              "Governance Review" in (asks["names"] or ""), asks)
+        check("...and says what goes with it", "file goes with it" in (asks["goes"] or ""), asks)
+        check("...and nothing has been posted yet", not SCENE["sent"], SCENE["sent"])
+        press(pg, "Delete it", ".apart")
+        pg.wait_for_function("""() => document.querySelectorAll('.erow').length === 0 &&
+          !document.querySelector('.ecard')""", timeout=9000)
+        gone = [s for s in SCENE["sent"] if s.get("action") == "libraryDelete"]
+        check("deleting POSTS it, and lands back on the list (§144)",
+              len(gone) == 1 and gone[0]["id"], gone)
+
+        # ══ 6 · the list, and its three empty states ════════════════════
+        print("\n6 · the list — a filter's empty state is not the library's (§105)")
+        SCENE["items"] = [item(id="a", title="FX and Import Cost Exposure", categories=["Macro"],
+                               state="published", hasFile=True, sizeLabel="1.2 MB", downloads=4),
+                          item(id="b", title="Modern Trade Channel Share", categories=["Market"],
+                               state="draft", hasFile=True, sizeLabel="3.8 MB")]
+        SCENE["sent"] = []
+        open_room()
+        if BREAK in BREAKS: pg.evaluate(BREAKS[BREAK])
+        rows = pg.evaluate("""() => Array.from(document.querySelectorAll('.erow')).map(r => ({
+          title: (r.querySelector('h3')||{}).textContent,
+          tag: (r.querySelector('.tag')||{}).textContent || '',
+          facts: (r.querySelector('.facts')||{}).textContent || ''
+        }))""")
+        check("both reports are on the list", len(rows) == 2, rows)
+        check("only the DRAFT wears a mark — published is the ordinary state (§41)",
+              [r["tag"] for r in rows] == ["", "Draft"], rows)
+        check("a published row says how it has done; a draft says it has not gone out",
+              "4 downloads" in rows[0]["facts"] and "not published" in rows[1]["facts"], rows)
+        pg.fill(".filters input[type=search]", "nothing at all")
+        pg.evaluate("""() => document.querySelector('.filters input[type=search]').dispatchEvent(new Event('change'))""")
+        pg.wait_for_function("""() => !!document.querySelector('.muted')""", timeout=9000)
+        said = pg.evaluate("""() => document.querySelector('.muted').textContent""")
+        check("a search that matches nothing describes THE SEARCH, not the library (§105)",
+              "No reports match" in said and "Nothing has been published" not in said, said)
+
+        # ══ 7 · no file store ═══════════════════════════════════════════
+        print("\n7 · with no file store, the rest of the library still works")
+        SCENE["store"] = False
+        SCENE["items"] = [item(id="c", title="A report with no file yet")]
+        # BOTH records are cleared, and the second one had to be learnt: the
+        # first run of this section read §3's three pieces and reported a
+        # correct build broken (§100.3 — a probe measuring its own earlier
+        # state). An assertion that nothing was sent is only an assertion if
+        # nothing could have been sent before it.
+        SCENE["sent"] = []; SCENE["pieces"] = []
+        open_room()
+        pg.evaluate("""() => document.querySelector('.erow').click()""")
+        pg.wait_for_selector(".ecard", timeout=9000)
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "x.pdf", "mimeType": "application/pdf", "buffer": b"%PDF-1.7\nx"})
+        pg.wait_for_selector(".err", timeout=9000)
+        told = pg.evaluate("""() => ({
+          err: document.querySelector('.err').textContent,
+          btn: Array.from(document.querySelectorAll('.filestrip .btn'))[0].textContent,
+          pieces: 0
+        })""")
+        check("a store that is not there is said in words, not swallowed (§171)",
+              "no file store" in told["err"], told)
+        check("...and it says the rest of the library still works", "Everything else" in told["err"], told)
+        check("...and the control goes back to what it was, rather than staying on 'Sending…'",
+              told["btn"] in ("Add the file", "Replace"), told)
+        check("...and not one piece was sent", not SCENE["pieces"], SCENE["pieces"])
+        SCENE["store"] = True
+
+        check("no page error anywhere in the room", not errs, errs[:3])
+        b.close()
+
+    print("\n%d passed, %d failed" % (len(passes), len(fails)))
+    if fails:
+        print("\nWhat failed:")
+        for f in fails: print("  · " + f)
+    sys.exit(1 if fails else 0)
+
+run()

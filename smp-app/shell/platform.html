@@ -600,6 +600,19 @@
   .fwsec p{ margin:0; font-size:14px; color:var(--ink-2); white-space:pre-line }
   .fwgrid{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
   @media (max-width:820px){ .fwgrid{ grid-template-columns:1fr } }
+  /* THE DRAFT SAYS IT IS ONE, in the amber this page already uses for a thing
+     that is not settled yet — and it is the whole of decision 3 made visible:
+     what is on screen is not in the library. */
+  .fwdraft{ background:var(--amber-wash); border:1px solid var(--amber); border-radius:10px;
+    padding:11px 13px; font-size:13.5px; color:var(--amber-tx); font-weight:600; margin-bottom:15px }
+  .fwfields{ display:grid; gap:13px }
+  .fwfields .fld{ width:100% }
+  .fwfields textarea.fld{ resize:vertical; min-height:62px }
+  /* A DECLINE IS NOT AN ERROR (§168, §190): nothing has gone wrong, the
+     assistant has answered honestly, and the next thing to do is on the
+     screen — so it wears the warning ground rather than the alarm one. */
+  .fwdecl{ background:var(--warn-bg); border:1px solid var(--warn); border-radius:10px;
+    padding:13px; font-size:14px; color:var(--warn) }
 </style>
 </head>
 <body>

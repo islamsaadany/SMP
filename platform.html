@@ -599,6 +599,19 @@
   .fwsec p{ margin:0; font-size:14px; color:var(--ink-2); white-space:pre-line }
   .fwgrid{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
   @media (max-width:820px){ .fwgrid{ grid-template-columns:1fr } }
+  /* THE DRAFT SAYS IT IS ONE, in the amber this page already uses for a thing
+     that is not settled yet — and it is the whole of decision 3 made visible:
+     what is on screen is not in the library. */
+  .fwdraft{ background:var(--amber-wash); border:1px solid var(--amber); border-radius:10px;
+    padding:11px 13px; font-size:13.5px; color:var(--amber-tx); font-weight:600; margin-bottom:15px }
+  .fwfields{ display:grid; gap:13px }
+  .fwfields .fld{ width:100% }
+  .fwfields textarea.fld{ resize:vertical; min-height:62px }
+  /* A DECLINE IS NOT AN ERROR (§168, §190): nothing has gone wrong, the
+     assistant has answered honestly, and the next thing to do is on the
+     screen — so it wears the warning ground rather than the alarm one. */
+  .fwdecl{ background:var(--warn-bg); border:1px solid var(--warn); border-radius:10px;
+    padding:13px; font-size:14px; color:var(--warn) }
 </style>
 </head>
 <body>
@@ -3322,9 +3335,18 @@
      table on this platform that names no client at all: a framework is about
      nobody.
 
-     PHASE A IS READ-ONLY. There is no Ask and no Add here yet, and neither is
-     drawn as a control that does nothing (§61). */
-  var FW = { view: "list", one: null, q: "", section: "", rows: null, sections: null };
+     ASKING IT IS PHASE C and is not drawn as a control that does nothing
+     (§61). ADDING one is here, and it is an admin's: `canAdd` comes from the
+     server with the list and is never worked out on this page (§42). */
+  var FW = { view: "list", one: null, q: "", section: "", rows: null, sections: null,
+             canAdd: false, add: null, said: "" };
+
+  /* THE DRAFT'S OWN STATE, minted fresh on every press of Add rather than
+     kept between visits: a half-typed name from last week reappearing under
+     an empty draft is the shape nobody can tell from a bug. */
+  function fwAddState() {
+    return { how: "name", name: "", source: "", draft: null, why: "", busy: false };
+  }
 
   /* The nine, named ONCE, in the order the detail page reads them — the
      reading view walks this list, so a tenth field is one edit (§104.7). */
@@ -3346,6 +3368,7 @@
 
   function drawFrameworks() {
     if (FW.view === "one") return drawFwOne();
+    if (FW.view === "add") return drawFwAdd();
     return drawFwList();
   }
 
@@ -3360,6 +3383,7 @@
       if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the library.", true); return; }
       FW.rows = j.frameworks || [];
       FW.sections = j.sections || [];
+      FW.canAdd = !!j.canAdd;
       settle(function () { fwPaint(); });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
@@ -3368,7 +3392,19 @@
   }
 
   function fwPaint() {
-    title("Frameworks");
+    /* DRAWN FOR AN ADMIN AND FOR NOBODY ELSE — never drawn disabled, because
+       a control that refuses everybody who can see it is furniture (§94.15),
+       and the sentence explaining it would be on a page the reader can do
+       nothing about. */
+    var right = null;
+    if (FW.canAdd) {
+      right = el("span");
+      var add = el("button", "btn amber", "+ Add a framework");
+      add.type = "button";
+      add.addEventListener("click", function () { fwGo("add", { add: fwAddState() }); });
+      right.appendChild(add);
+    }
+    title("Frameworks", right);
 
     var box = el("div", "fwbox");
     var search = el("input", "fld");
@@ -3463,6 +3499,10 @@
       if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read that framework.", true); return; }
       var f = j.framework;
       settle(function () {
+        /* TAKEN ONCE AND CLEARED, or it reappears every time this framework
+           is opened, long after it was added (§313.32's own rule, one page
+           over). */
+        if (FW.said) { say(FW.said); FW.said = ""; }
         var back = el("div");
         var b = el("button", "cback", "← ALL FRAMEWORKS");
         b.type = "button";
@@ -3515,6 +3555,253 @@
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
     });
+  }
+
+  /* ── Adding one ────────────────────────────────────────────────────
+     TWO WAYS IN AND ONE SCREEN. By name, for a framework the model genuinely
+     knows; by pasted source, for everything else — including Forefront's own,
+     which no model has ever read. The mockup drew both panels at once because
+     a still cannot show a switch flipping; what is built is the switch, which
+     is the control the drawing itself carries.
+
+     NOTHING HERE WRITES UNTIL THE PRESS. `draft` touches no table and `save`
+     is a separate action, which is decision 3 and the whole reason the extra
+     step exists: a plausible invention sitting among eighty real frameworks
+     is quoted to a client under Forefront's name. */
+  function drawFwAdd() {
+    var A = FW.add || (FW.add = fwAddState());
+    /* BUILT DETACHED AND SWAPPED, which keeps the scroll: the draft panel is
+       eleven fields tall, and every press redraws it — a jump to the top on
+       pressing Save loses the place at the one moment it matters. */
+    settle(function () { fwAddBody(A); });
+  }
+
+  function fwAddBody(A) {
+    var back = el("div");
+    var b = el("button", "cback", "← ALL FRAMEWORKS");
+    b.type = "button";
+    b.addEventListener("click", function () { fwGo("list", { add: null }); });
+    back.appendChild(b);
+    back.style.marginBottom = "13px";
+    page.appendChild(back);
+    title("Add a framework");
+
+    if (A.draft) return fwDraftPanel(A);
+
+    var band = el("div", "band");
+
+    /* The page's own segmented pair, never a second one (§53.5). Switching
+       KEEPS what is in the other box: somebody who typed a name, was declined
+       and reached for the source has not thrown the name away. */
+    var cell = el("div", "cell");
+    [["name", "By name"], ["source", "Paste the source"]].forEach(function (w) {
+      var t = el("button", A.how === w[0] ? "on" : null, w[1]);
+      t.type = "button";
+      t.setAttribute("aria-pressed", A.how === w[0] ? "true" : "false");
+      t.addEventListener("click", function () {
+        if (A.how === w[0]) return;
+        A.how = w[0];
+        /* A DECLINE BELONGS TO THE ASK THAT PRODUCED IT. Carrying it across
+           the switch would leave "I do not know that one" standing over a
+           box holding the source that answers it (§45.2, reversed). */
+        A.why = "";
+        drawFwAdd();
+      });
+      cell.appendChild(t);
+    });
+    band.appendChild(cell);
+
+    var wrap = el("div");
+    wrap.style.marginTop = "15px";
+    var fld;
+    if (A.how === "name") {
+      wrap.appendChild(el("label", "lab", "The framework's name"));
+      fld = el("input", "fld");
+      fld.type = "text";
+      fld.value = A.name;
+      fld.placeholder = "Blue Ocean Strategy (Kim and Mauborgne)";
+      fld.addEventListener("change", function () { A.name = fld.value; });
+    } else {
+      wrap.appendChild(el("label", "lab", "Paste a chapter, a page, or your own notes"));
+      fld = el("textarea", "fld");
+      fld.rows = 7;
+      fld.value = A.source;
+      fld.addEventListener("change", function () { A.source = fld.value; });
+    }
+    fld.style.width = "100%";
+    wrap.appendChild(fld);
+    band.appendChild(wrap);
+
+    band.appendChild(el("p", "note", A.how === "name"
+      ? "It will draft the eleven fields from what it knows, and you read them before "
+        + "anything is saved. If it does not know the framework well enough it will say so "
+        + "rather than invent one — paste the source instead."
+      : "It will turn what you paste into the eleven fields and add nothing the material "
+        + "does not say. Works for anything, including a framework of ours that no model "
+        + "has read."));
+
+    /* THE DECLINE, IN THE ASSISTANT'S OWN WORDS and with the other door on
+       it: which framework it does not know is exactly what tells the admin
+       whether to paste the source or check the spelling (§125's rule with
+       the sign reversed — here the decline IS the useful answer). */
+    if (A.why) {
+      var d = el("div", "fwdecl", A.why);
+      d.style.marginTop = "15px";
+      band.appendChild(d);
+      if (A.how === "name") {
+        var go = el("button", "btn solid", "Paste the source instead →");
+        go.type = "button";
+        go.addEventListener("click", function () { A.how = "source"; A.why = ""; drawFwAdd(); });
+        var r2 = el("div", "row");
+        r2.style.marginTop = "15px";
+        r2.appendChild(go);
+        band.appendChild(r2);
+      }
+    }
+
+    var row = el("div", "row");
+    row.style.marginTop = "15px";
+    var go2 = el("button", "btn solid", A.busy ? "Drafting…" : "Draft it");
+    go2.type = "button";
+    if (A.busy) go2.disabled = true;
+    go2.addEventListener("click", function () {
+      /* THE FIELD IS COMMITTED BEFORE THE PRESS (§219): these write on
+         `change`, which is on BLUR, and a mouse reaching for the button
+         usually blurs on the way — usually is what makes it a bug. */
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      var name = String(A.name || "").trim(), source = String(A.source || "").trim();
+      if (A.how === "name" ? !name : !source) {
+        say(A.how === "name" ? "Give it a name first." : "Paste something first.", true);
+        return;
+      }
+      A.busy = true; A.why = ""; drawFwAdd();
+      fpost({ action: "draft", name: name, source: A.how === "source" ? source : "" })
+        .then(function (j) {
+          A.busy = false;
+          if (!j || !j.ok) { drawFwAdd(); say((j && j.error) || "Could not draft it.", true); return; }
+          if (!j.drafted) { A.why = j.why || "It could not draft that one."; drawFwAdd(); return; }
+          A.draft = j.draft || {};
+          if (!A.draft.name && name) A.draft.name = name;
+          drawFwAdd();
+        })
+        .catch(function (e) {
+          A.busy = false;
+          if (String(e.message) === "sign in") return;
+          drawFwAdd(); say("Could not reach the server.", true);
+        });
+    });
+    row.appendChild(go2);
+    var cancel = el("button", "btn", "Cancel");
+    cancel.type = "button";
+    cancel.addEventListener("click", function () { fwGo("list", { add: null }); });
+    row.appendChild(cancel);
+    band.appendChild(row);
+
+    page.appendChild(band);
+  }
+
+  /* The draft, every field editable and nothing repainting under a working
+     hand (§71.2) — the console's own idiom, and the memory's draft card
+     one page up does exactly this. */
+  function fwDraftPanel(A) {
+    page.appendChild(el("div", "fwdraft",
+      "This is a draft. Read it before you save it — nothing is in the library yet."));
+
+    var band = el("div", "band");
+    var fields = el("div", "fwfields");
+
+    var nm = el("div");
+    nm.appendChild(el("label", "lab", "Name"));
+    var nmf = el("input", "fld");
+    nmf.type = "text";
+    nmf.value = A.draft.name || "";
+    nmf.addEventListener("change", function () { A.draft.name = nmf.value; });
+    nm.appendChild(nmf);
+    fields.appendChild(nm);
+
+    /* A PICKER OVER WHAT EXISTS, which is decision 1 on the screen: the eight
+       are fixed, so there is nothing here that makes a ninth. An empty one is
+       a real option, because the draft drops a section the model invented and
+       the admin is the one who then says which. */
+    var sc = el("div");
+    sc.appendChild(el("label", "lab", "Section"));
+    var ssel = el("select", "fld");
+    var none = el("option", null, "— which section?");
+    none.value = "";
+    ssel.appendChild(none);
+    (FW.sections || []).forEach(function (s2) {
+      var op = el("option", null, s2.section);
+      op.value = s2.section;
+      if (s2.section === A.draft.section) op.selected = true;
+      ssel.appendChild(op);
+    });
+    ssel.addEventListener("change", function () { A.draft.section = ssel.value; });
+    sc.appendChild(ssel);
+    fields.appendChild(sc);
+
+    /* The nine, in the reading view's own order and pairing (§53.5): what is
+       corrected here reads back in the same shape it will be read in. */
+    var done = {};
+    FWFIELDS.forEach(function (pair) {
+      var key = pair[0];
+      if (done[key]) return;
+      var mate = FWPAIRS[key];
+      var host = mate ? el("div", "fwgrid") : el("div");
+      [[key, pair[1]]].concat(mate ? [[mate, fwLabel(mate)]] : []).forEach(function (side) {
+        var box = mate ? el("div") : host;
+        box.appendChild(el("label", "lab", side[1]));
+        var ta = el("textarea", "fld");
+        ta.rows = 2;
+        ta.value = A.draft[side[0]] || "";
+        (function (k) { ta.addEventListener("change", function () { A.draft[k] = ta.value; }); })(side[0]);
+        box.appendChild(ta);
+        if (mate) host.appendChild(box);
+        done[side[0]] = true;
+      });
+      fields.appendChild(host);
+    });
+    band.appendChild(fields);
+
+    var row = el("div", "row");
+    row.style.marginTop = "18px";
+    var save = el("button", "btn amber", A.busy ? "Saving…" : "Save to the library");
+    save.type = "button";
+    if (A.busy) save.disabled = true;
+    save.addEventListener("click", function () {
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      A.busy = true; drawFwAdd();
+      fpost({ action: "save", draft: A.draft }).then(function (j) {
+        A.busy = false;
+        if (!j || !j.ok) { drawFwAdd(); say((j && j.error) || "Not saved.", true); return; }
+        /* IT LANDS ON THE THING IT JUST MADE, which is this page's own answer
+           to "did that work" — a sentence saying saved over the form that
+           still holds the draft is one press from saving it twice (§136).
+           The word travels on FW rather than being said here, because
+           `drawFwOne` clears and rebuilds: a `say()` appended now is appended
+           to a frame about to be replaced (§63). */
+        fwGo("one", { one: j.id, add: null, said: "Added to the library." });
+      }).catch(function (e) {
+        A.busy = false;
+        if (String(e.message) === "sign in") return;
+        drawFwAdd(); say("Could not reach the server.", true);
+      });
+    });
+    row.appendChild(save);
+    var drop = el("button", "btn", "Discard");
+    drop.type = "button";
+    drop.addEventListener("click", function () {
+      /* NOTHING WAS WRITTEN, so there is nothing to take back and no
+         confirmation to ask for — saying "are you sure" over an unsaved
+         draft teaches people to press through the ones that matter. */
+      A.draft = null; A.why = ""; drawFwAdd();
+    });
+    row.appendChild(drop);
+    var note = el("span", "muted", "Saved as added by you, today.");
+    note.style.fontSize = "12.5px";
+    row.appendChild(note);
+    band.appendChild(row);
+
+    page.appendChild(band);
   }
 
   function fwLabel(key) {

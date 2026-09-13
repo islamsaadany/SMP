@@ -1,5 +1,5 @@
 /* The Frameworks tab, driven in a real browser against the built app
- * (spec 050, phase A).
+ * (spec 050, phases A and B).
  *
  * WHAT IT IS FOR, beyond "the page renders": a page wired to nothing looks
  * identical to one that works (§96). And the fault this file found on its
@@ -15,18 +15,29 @@
  *
  *   DATABASE_URL_UNPOOLED=postgres://…/smp_dev node checks/frameworks-page.mjs
  *   … --break=no-hidden-rule (RED: the served page loses `.fwrow[hidden]`, which IS the fault above)
+ *   … --break=no-admin-gate  (RED: the server says everybody may add, so the door draws for a consultant)
+ *
+ * THE MODEL IS STOOD IN FRONT OF (§100.3): the app is started with
+ * GEMINI_ENDPOINT pointed at a stub in this process, so the drafting screens
+ * can be driven without a provider and each one's answer is chosen here.
  *
  * Needs `next build` first and the chromium this image carries. */
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 import { readFileSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
 import { chromium } from "playwright-core";
+import pg from "pg";
 import { devTenant, DEV_PASSWORD } from "../scripts/dev-tenant.mjs";
+import { SCHEMA } from "../db/schema-name.mjs";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
 const CHROME = process.env.SMP_CHROME || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const PORT = 3984, BASE = "http://localhost:" + PORT;
 const brk = (process.argv.find((a) => a.startsWith("--break=")) || "").slice(8);
+/* A break that is the SERVER's travels to it; `no-hidden-rule` is the page's
+   and is made from the served artefact below. */
+if (brk && brk !== "no-hidden-rule") process.env.SMP_BREAK = brk;
 let oks = 0, fails = 0;
 const ok = (l) => { oks++; console.log("ok    " + l); };
 const fail = (l, m) => { fails++; console.log("FAIL  " + l + (m === undefined ? "" : " — " + String(m).slice(0, 220))); };
@@ -66,9 +77,36 @@ if (brk === "no-hidden-rule") {
 }
 const putItBack = () => { if (original != null) { try { writeFileSync(DOC, original); } catch {} } };
 
+/* ── The stub in front of the model, and what it answers ───────────── */
+let reply = null;
+const answers = (o) => { reply = o; };
+const stub = createServer((req, res) => {
+  let b = ""; req.on("data", (d) => { b += d; });
+  req.on("end", () => {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(reply) }] } }] }));
+  });
+});
+await new Promise((r) => stub.listen(0, r));
+const STUB = "http://localhost:" + stub.address().port + "/";
+
+/* A CONSULTANT WHO IS NOT AN ADMIN, which the dev tenant has none of: every
+   other account it makes is either the admin or a client's own person, and
+   the assertion that matters most here is that a plain consultant reads the
+   whole library and is offered no door to add (§94.2). Made here, removed in
+   the `finally`. */
+const PLAIN = "check.plain@forefront.example";
+const db = new pg.Pool({ connectionString: URL_, max: 1, options: "-c search_path=" + SCHEMA });
+const { hashPassword } = await import("../lib/auth.ts");
+await db.query("DELETE FROM users WHERE email = $1", [PLAIN]);
+await db.query(
+  "INSERT INTO users (email, name, kind, is_admin, must_change, password_hash) " +
+  "VALUES ($1, 'A Plain Consultant', 'office', false, false, $2)", [PLAIN, hashPassword(DEV_PASSWORD)]);
+
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
   cwd: join(import.meta.dirname, ".."),
-  env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, DATABASE_URL: URL_ },
+  env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, DATABASE_URL: URL_,
+         GEMINI_ENDPOINT: STUB, GEMINI_API_KEY: "AIzaStubStubStubStubStubStubStubStubStu" },
   stdio: ["ignore", "pipe", "pipe"], detached: true,
 });
 server.stdout.on("data", () => {}); server.stderr.on("data", () => {});
@@ -162,6 +200,132 @@ try {
     check(await visible() === 80, "the way back returns to all eighty");
   });
 
+  /* ── Phase B: adding one ───────────────────────────────────────── */
+
+  await section("the door to adding, both ends", async () => {
+    check(!!(await page.$(".ptitle .right button")),
+      "an admin is offered + Add a framework on the list");
+    check((await page.innerText(".ptitle .right button")).indexOf("Add a framework") >= 0,
+      "and it says what it does", await page.innerText(".ptitle .right button"));
+
+    /* THE END THAT MATTERS (§94.2): a build that drew the door for everybody
+       passes every other assertion in this file. A second context, because a
+       second person is a second session. */
+    const p2 = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    try {
+      await p2.goto(BASE + "/", { waitUntil: "networkidle" });
+      await p2.fill("#user", PLAIN);
+      await p2.fill("#password", DEV_PASSWORD);
+      await p2.click("button[type=submit]");
+      await p2.waitForSelector("body.ready", { timeout: 20000 });
+      await p2.click('.nav button[data-tab="frameworks"]');
+      await p2.waitForSelector(".fwlist .fwrow", { timeout: 20000 });
+      check((await p2.$$(".fwlist .fwrow")).length === 80,
+        "a consultant who is not an admin reads the whole library — decision 1");
+      check(!(await p2.$(".ptitle .right button")),
+        "and is offered no door to add one — never one drawn and refusing (§94.15)");
+    } finally { await p2.close().catch(() => {}); }
+  });
+
+  await section("adding by name", async () => {
+    /* COUNTED AS A DIFFERENCE, never as 81 (§94.8): a run that left a row
+       behind would otherwise redden an assertion about something else. */
+    const was = await visible();
+    answers({ known: true, why: "",
+      name: "The Endurance Lens (Forefront)", section: "Knowing Your Business",
+      purpose: "To read how long a business can hold its position.",
+      keyQuestions: "What would have to stay true for five years?",
+      whenToUse: "When a plan assumes durability nobody has tested.",
+      whenNotToUse: "Not for a decision due this quarter.",
+      inputsRequired: "Three years of margin and share.",
+      outputs: "A statement of what must hold.",
+      executiveExample: "A board uses it to test an assumption.",
+      consultantUseCase: "A consultant uses it before a strategy review.",
+      facilitationTips: "Run it after the numbers are agreed." });
+
+    await page.click(".ptitle .right button");
+    await page.waitForSelector(".cell button", { timeout: 20000 });
+    check((await page.innerText(".ptitle h1")).trim() === "Add a framework",
+      "the door opens the add screen", await page.innerText(".ptitle h1"));
+    const ways = await page.$$eval(".cell button", (bs) => bs.map((b) => b.textContent.trim()));
+    check(ways.join(" | ") === "By name | Paste the source", "with the two ways in", ways.join(" | "));
+    check(!!(await page.$(".band input.fld")), "by name is the one it opens on");
+
+    await page.fill(".band input.fld", "The Endurance Lens");
+    await page.click(".row button.solid");
+    await page.waitForSelector(".fwdraft", { timeout: 20000 });
+    /* THE AMBER BAND IS THE WHOLE OF DECISION 3 MADE VISIBLE. */
+    check((await page.innerText(".fwdraft")).indexOf("nothing is in the library yet") >= 0,
+      "the draft says it is one, and that nothing is saved", await page.innerText(".fwdraft"));
+    const labs = await page.$$eval(".fwfields .lab", (ls) => ls.map((l) => l.textContent.trim()));
+    check(labs.length === 11, "eleven fields, every one of them editable", labs.length);
+    check((await page.inputValue(".fwfields input.fld")) === "The Endurance Lens (Forefront)",
+      "carrying what came back", await page.inputValue(".fwfields input.fld"));
+    check((await page.$eval(".fwfields select.fld", (e) => e.value)) === "Knowing Your Business",
+      "with the section as a picker over the eight that exist — never a box that makes a ninth",
+      await page.$eval(".fwfields select.fld", (e) => e.value));
+
+    /* AN EDIT IN THE DRAFT IS WHAT IS SAVED, which is the point of the step
+       existing at all — a build that posted what the model said would pass
+       every assertion above. */
+    const tas = await page.$$(".fwfields textarea.fld");
+    await tas[0].fill("Corrected by the person reading it.");
+    await page.click(".row button.amber");
+    await page.waitForSelector(".band .fwsec", { timeout: 20000 });
+    check((await page.innerText(".ptitle h1")).indexOf("Endurance Lens") >= 0,
+      "saving lands on the framework it just made", await page.innerText(".ptitle h1"));
+    check((await page.innerText(".band")).indexOf("Corrected by the person reading it.") >= 0,
+      "holding the correction rather than what the model sent");
+    check((await page.innerText(".band .apart")).indexOf("Added by") >= 0,
+      "and saying who added it", await page.innerText(".band .apart"));
+    check((await page.innerText(".said")).indexOf("Added to the library") >= 0,
+      "with the word said on the page it landed on (§63)", await page.innerText(".said").catch(() => "none"));
+
+    await page.click(".cback");
+    await page.waitForSelector(".fwlist .fwrow", { timeout: 20000 });
+    check(await visible() === was + 1, "and the library is one longer", was + " → " + await visible());
+  });
+
+  await section("when it will not draft one", async () => {
+    answers({ known: false, why: "I do not know that one well enough to write it up.",
+      name: "", section: "", purpose: "", keyQuestions: "", whenToUse: "", whenNotToUse: "",
+      inputsRequired: "", outputs: "", executiveExample: "", consultantUseCase: "", facilitationTips: "" });
+    await page.click(".ptitle .right button");
+    await page.waitForSelector(".band input.fld", { timeout: 20000 });
+    await page.fill(".band input.fld", "The Forefront Endurance Lens");
+    await page.click(".row button.solid");
+    await page.waitForSelector(".fwdecl", { timeout: 20000 });
+    check((await page.innerText(".fwdecl")).indexOf("well enough") >= 0,
+      "it says so in its own words", await page.innerText(".fwdecl"));
+    check(!(await page.$(".fwdraft")), "and no draft is offered — a decline is not a half-answer");
+    /* DECISION 3's OTHER HALF, drawn: the decline carries the door that
+       answers it rather than being a dead end (§61). */
+    const other = await page.$$eval(".row button.solid", (bs) => bs.map((b) => b.textContent.trim()));
+    check(other.some((t) => t.indexOf("Paste the source instead") >= 0),
+      "the way past it is on the screen", other.join(" | "));
+    await page.click('.row button.solid:has-text("Paste the source")');
+    await page.waitForSelector(".band textarea.fld", { timeout: 20000 });
+    check(!!(await page.$(".band textarea.fld")), "pressing it opens the paste box");
+    check(!(await page.$(".fwdecl")),
+      "and the decline goes with the ask that produced it, rather than standing over its own answer");
+  });
+
+  await section("discard writes nothing", async () => {
+    answers({ known: true, why: "", name: "A Discarded One", section: "Knowing Your Business",
+      purpose: "x", keyQuestions: "x", whenToUse: "x", whenNotToUse: "x", inputsRequired: "x",
+      outputs: "x", executiveExample: "x", consultantUseCase: "x", facilitationTips: "x" });
+    await page.click('.cell button:has-text("By name")');
+    await page.waitForSelector(".band input.fld", { timeout: 20000 });
+    await page.fill(".band input.fld", "A Discarded One");
+    await page.click(".row button.solid");
+    await page.waitForSelector(".fwdraft", { timeout: 20000 });
+    await page.click('.row button:not(.amber):has-text("Discard")');
+    await page.waitForSelector(".band input.fld", { timeout: 20000 });
+    check(!(await page.$(".fwdraft")), "Discard puts the draft away with no question asked — nothing was written");
+    const n = (await db.query("SELECT count(*)::int AS n FROM frameworks WHERE name = 'A Discarded One'")).rows[0].n;
+    check(n === 0, "and the library never held it", n);
+  });
+
   await section("nothing threw", async () => {
     check(errs.length === 0, "no console error anywhere in that", errs.slice(0, 2).join(" | "));
   });
@@ -169,6 +333,10 @@ try {
   await browser.close().catch(() => {});
   await stopServer(server);
   putItBack();
+  stub.close();
+  await db.query("DELETE FROM frameworks WHERE added_by IS NOT NULL").catch(() => {});
+  await db.query("DELETE FROM users WHERE email = $1", [PLAIN]).catch(() => {});
+  await db.end().catch(() => {});
 }
 
 console.log("\n" + oks + " passed, " + fails + " failed");

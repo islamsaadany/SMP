@@ -12,12 +12,15 @@
  * matters, and it is the door in front of this file: a client's own staff
  * never reach it.
  *
- * PHASE A IS READ-ONLY. `draft` and `save` are phase B and are deliberately
- * not stubbed here — an action that exists and refuses everything is a control
- * with nothing behind it (§61), and the page has no button for them yet.
+ * READING IS EVERY CONSULTANT'S AND ADDING IS AN ADMIN'S, which is decision 2
+ * and the only division this endpoint makes among the people it lets in. It is
+ * asked HERE rather than inferred from the page: platform.html loads no rules
+ * module in the browser and reads a flag the server computed, so the flag is
+ * what draws the button and this is what decides (§42, §48.2).
  */
 import type { Pool, PoolClient } from "pg";
 import type { SessionUser } from "./auth.ts";
+import { DRAFT_FIELDS, draftFramework } from "./frameworks-ask.ts";
 
 type Q = Pool | PoolClient;
 export type Answer = { code: number; body: Record<string, unknown> };
@@ -30,6 +33,37 @@ const no = (code: number, error: string): Answer => ({ code, body: { ok: false, 
 const NOT_YOURS = "That is not something this account opens.";
 
 const str = (v: unknown): string => (v == null ? "" : String(v));
+const oneLine = (v: unknown): string => str(v).replace(/\s*\n\s*/g, " ").trim();
+
+/* WHO MAY ADD ONE, ANSWERED ONCE (decision 2). An admin, and the same test
+   decides whether `draft` may be asked for at all — a draft nobody can save is
+   a model call spent on a dead end (§61), and it is the expensive half. */
+const mayAdd = (me: SessionUser): boolean =>
+  process.env.SMP_BREAK === "no-admin-gate" ? true   /* RED: anybody writes the firm's library */
+    : me.isAdmin;
+
+const NOT_ADMIN = "Adding to the library is a Forefront admin's.";
+
+/* THE SLUG IS THE NAME, and it is the dataset's own rule rather than a second
+   one: lower case, anything that is not a letter or a digit becomes a hyphen,
+   runs collapse, ends trimmed — which is exactly what the eighty carry
+   (`the-80-20-principle-pareto`). Minted here and UNIQUE in the database, so
+   two admins racing on one name is refused by Postgres rather than by whoever
+   looked first. */
+export function slugFor(name: string): string {
+  return String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+/* The eleven the draft carries, paired with the columns they land in. Named
+   once beside DRAFT_FIELDS rather than spelled again in an INSERT, so a
+   twelfth field is one edit in each of two files and neither can silently
+   drop it (§104.7). */
+const COL: Record<string, string> = {
+  name: "name", section: "section", purpose: "purpose", keyQuestions: "key_questions",
+  whenToUse: "when_to_use", whenNotToUse: "when_not_to_use", inputsRequired: "inputs_required",
+  outputs: "outputs", executiveExample: "executive_example",
+  consultantUseCase: "consultant_use_case", facilitationTips: "facilitation_tips",
+};
 
 /* THE FIVE THAT DECIDE WHETHER THIS IS THE RIGHT TOOL, and the whole reason
    the list carries them: the search runs in the browser (the library is 80
@@ -84,7 +118,11 @@ export async function frameworksAction(pool: Q, me: SessionUser, body: any): Pro
     const order = process.env.SMP_BREAK === "alphabetical" ? "section" : "min(idx)";
     const sections = (await pool.query(
       "SELECT section, count(*)::int AS n FROM frameworks GROUP BY section ORDER BY " + order)).rows;
-    return ok({ frameworks: rows.map(shape), sections, total: rows.length });
+    /* WHO MAY ADD IS THE SERVER'S ANSWER, sent with the list and never worked
+       out in the browser: platform.html loads no rules module, and a page that
+       decided this for itself would be a second answer to drift from this one
+       (§42). It draws the button; `save` asks again at press time (§48.2). */
+    return ok({ frameworks: rows.map(shape), sections, total: rows.length, canAdd: mayAdd(me) });
   }
 
   if (action === "one") {
@@ -101,6 +139,83 @@ export async function frameworksAction(pool: Q, me: SessionUser, body: any): Pro
       [str(body.id)]);
     if (!r.rowCount) return no(404, "That framework is no longer here.");
     return ok({ framework: shapeOne(r.rows[0]) });
+  }
+
+  /* DRAFTING ONE. It writes NOTHING — the whole point of decision 3 is that a
+     person reads it before the library gains a row — so this action touches
+     no table but the one it reads the sections out of, and the check counts
+     the rows before and after to say so (§94.2). */
+  if (action === "draft") {
+    if (!mayAdd(me)) return no(403, NOT_ADMIN);
+    const r = await draftFramework(pool, { name: body?.name, source: body?.source });
+    if (!r.ok) return ok({ drafted: false, why: r.why });
+    if (!r.known) return ok({ drafted: false, declined: true, why: r.why });
+    return ok({ drafted: true, draft: r.draft });
+  }
+
+  if (action === "save") {
+    /* ASKED AGAIN AT PRESS TIME (§48.2). The flag that drew the button was
+       computed when the page was drawn, and a seat can move in between —
+       so the answer that matters is this one, taken now. */
+    if (!mayAdd(me)) return no(403, NOT_ADMIN);
+
+    const d: Record<string, string> = {};
+    for (const f of DRAFT_FIELDS) d[f] = str(body?.draft?.[f]).trim();
+    d.name = oneLine(d.name);
+    d.section = oneLine(d.section);
+
+    /* THE DATABASE'S OWN CHECK, SAID EARLY AND BY NAME (§184): a constraint
+       error names a constraint, and the person needs to be told which box. */
+    if (!d.name) return no(400, "Give it a name before saving.");
+
+    /* THE SECTION IS ONE OF THE EIGHT, and that is decision 1 held on the
+       SERVER rather than by the picker: the screen offers what exists, and a
+       ninth arriving through the endpoint would fragment the list the picker
+       is built from — with nothing in the product able to merge two. Refused
+       by name, so the answer says what is wrong rather than that something is. */
+    const sections: string[] = (await pool.query(
+      "SELECT section FROM frameworks GROUP BY section ORDER BY min(idx)")).rows.map((r) => r.section);
+    if (!d.section) return no(400, "Say which section it belongs in.");
+    if (!sections.includes(d.section)) return no(400, "There is no section called " + d.section + ".");
+
+    const slug = slugFor(d.name);
+    /* A NAME OF NOTHING BUT PUNCTUATION slugs to an empty string, which the
+       database would take once and refuse for ever after. Refused here, where
+       it can be explained. */
+    if (!slug) return no(400, "That name gives no address — give it some letters.");
+
+    /* THE COLLISION IS REFUSED BY NAME (§87). Two frameworks can genuinely
+       want one address — the same tool under a second author's name — and the
+       person needs to know WHICH row is in the way, not that one is. Asked
+       here so the sentence is the product's; the UNIQUE index behind it is
+       what makes two admins racing on one name safe rather than last-wins. */
+    const clash = await pool.query("SELECT name FROM frameworks WHERE slug = $1", [slug]);
+    if (clash.rowCount) return no(409, "The library already holds " + clash.rows[0].name + ".");
+
+    const cols = DRAFT_FIELDS.map((f) => COL[f]);
+    const marks = DRAFT_FIELDS.map((_, i) => "$" + (i + 3));
+    let r;
+    try {
+      r = await pool.query(
+        "INSERT INTO frameworks (slug, added_by, " + cols.join(", ") + ", idx) " +
+        "VALUES ($1, $2, " + marks.join(", ") + ", " +
+        /* THE END OF THE BOOK, WORKED OUT IN THE INSERT rather than read and
+           then written: two admins saving in the same second would otherwise
+           both read the same maximum and land on one number, which is not a
+           collision Postgres can catch — `idx` is an order, not a key. */
+        "(SELECT coalesce(max(idx), 0) + 1 FROM frameworks)) RETURNING id",
+        [slug, me.id, ...DRAFT_FIELDS.map((f) => d[f])]);
+    } catch (e: any) {
+      /* The index is the authority, and this is the race the sentence above
+         cannot win: both admins looked, neither saw the other, one INSERT
+         lands. Same words, so which of the two paths refused is invisible. */
+      if (e && e.code === "23505") {
+        const c2 = await pool.query("SELECT name FROM frameworks WHERE slug = $1", [slug]);
+        return no(409, "The library already holds " + (c2.rows[0]?.name || d.name) + ".");
+      }
+      throw e;
+    }
+    return ok({ id: r.rows[0].id, slug });
   }
 
   return no(400, "Unknown action.");

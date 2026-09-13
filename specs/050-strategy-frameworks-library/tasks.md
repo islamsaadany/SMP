@@ -1,6 +1,6 @@
 # 050 — Tasks
 
-Written 2026-09-13 from `plan.md`. **Phase A is built, 2026-09-13** — Islam: *"BUILD IT"*. B and C are not. Paths are from the
+Written 2026-09-13 from `plan.md`. **Phases A and B are built, 2026-09-13** — Islam: *"BUILD IT"*, then *"keep going until you need something from me"*. C is not. Paths are from the
 repository root.
 
 **Every check is written red first** — run it against the build before the
@@ -45,8 +45,10 @@ Useful on its own: eighty frameworks, searchable, for the whole firm. Ends at
 - [x] **A7 · The doc.** `smp-app/db/README.md` — its list of platform tables, or
   it drifts the day this lands.
 - [x] **A8 · `smp-app/lib/frameworks-api.ts`** — `list` and `one`. Session
-  required, no gate. `canAdd` computed **on the server** per request and never
-  re-derived in the browser.
+  required, no gate. **`canAdd` was claimed on this line and was not built**
+  until B6 needed it to draw the door — §104.8's own fault, in my own tasks
+  file: a recorded intention nothing carries out. It is there now, computed on
+  the server per request and never re-derived in the browser.
 - [x] **A9 · `smp-app/app/api/frameworks/route.ts`** — one route, the action off
   the body, the shape `app/api/memory/route.ts` already uses.
 - [x] **A10 · The tab.** `platform.html` (root) `drawNav()`:
@@ -78,30 +80,44 @@ Useful on its own: eighty frameworks, searchable, for the whole firm. Ends at
 
 ## Phase B — adding
 
-- [ ] **B1 · `smp-app/lib/assistant.cjs` gains three named options** — `schema`,
+- [x] **B1 · `smp-app/lib/assistant.cjs` gains three named options** — `schema`,
   `needsCorpus`, `think` — each defaulting to exactly what it does today.
   **Never a second caller.** The header comment says why drafting is the one
   call in this platform that is not retrieval.
-- [ ] **B2 · Every existing caller asserted byte-identical** with the three
+- [x] **B2 · Every existing caller asserted byte-identical** with the three
   absent: the chat, the knowledge base, the memory. This is the task that makes
   B1 safe, and it is red first by breaking a default.
-- [ ] **B3 · `smp-app/lib/frameworks-ask.ts`, the draft half** — by name (no
+- [x] **B3 · `smp-app/lib/frameworks-ask.ts`, the draft half** — by name (no
   corpus, thinking allowed, a bigger output budget) and by pasted source (the
   source is the corpus, the thinking cap stays). Either may decline.
-- [ ] **B4 · `draft` and `save` as two actions.** `draft` writes nothing;
+- [x] **B4 · `draft` and `save` as two actions.** `draft` writes nothing;
   `save` writes one row and **re-asks the admin test at press time** (§48.2).
-- [ ] **B5 · The slug**, minted from the name, UNIQUE in the database, and a
+- [x] **B5 · The slug**, minted from the name, UNIQUE in the database, and a
   collision refused **by name** (§87).
-- [ ] **B6 · The screens** — the two ways in, the draft with every field
+- [x] **B6 · The screens** — the two ways in, the draft with every field
   editable, the amber *this is a draft* band, Save and Discard, and the decline
   offering the other door.
-- [ ] **B7 · Regenerate** `public/`, and `generated-in-step` clear.
-- [ ] **B8 · The checks.** A non-admin refused **and an admin allowed** (§94.2);
-  a draft writing nothing, counted before and after; a collision refused.
-  Switches: `no-admin-gate`, `draft-writes`, `think-capped`.
+- [x] **B7 · Regenerate** `public/`, and `generated-in-step` clear.
+- [x] **B8 · The checks.** `checks/frameworks.mjs` 44 → **69 assertions**, and
+  `checks/frameworks-page.mjs` 21 → **44**, both green and both proved able to
+  fail. The model is **stood in front of** rather than branched around
+  (§100.3): a stub answers on `GEMINI_ENDPOINT` in both files, so what
+  drafting SENDS is asserted off the wire — no thinking cap and 4096 by name,
+  the cap back on from a pasted source — and what it gets back is chosen per
+  section. Switches: `no-admin-gate` (server, **11 red** in one and **1** in
+  the other, which is the both-ends assertion), `think-capped` (1 red),
+  `no-hidden-rule` (3 red), and phase A's three still red.
+  **`draft-writes` is NOT shipped and that is the decision**: the other
+  switches flip one token of a real decision, and this one would have meant
+  adding a write path to `draft` that the product otherwise has not got —
+  a fake in the product to serve a check. It is falsified from the SOURCE
+  instead (§276): an INSERT put into `draft`, run, **1 red** printing
+  `81 → 82`, reverted, green.
 
 > **Stop point 2 — Islam adds one by name, one by pasted source, and sees a
-> decline.**
+> decline.** *Built 2026-09-13. Not run against a real provider from here —
+> every drafting assertion is made against a stub, which is what makes the
+> wire readable and is also what this stop point exists to cover (§113.8).*
 
 ---
 

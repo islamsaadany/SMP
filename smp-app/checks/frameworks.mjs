@@ -16,6 +16,13 @@
  *   … --break=client-reads    (RED: a client's own staff read Forefront's library)
  *   … --break=alphabetical    (RED: the sections come back in name order, not the book's)
  *   … --break=short-library   (RED: one framework is missing)
+ *   … --break=no-admin-gate   (RED: anybody adds to the firm's library)
+ *   … --break=think-capped    (RED: the by-name draft is capped like a lookup)
+ *
+ * THE MODEL IS STOOD IN FRONT OF, never branched around (§100.3, §142.6): a
+ * local stub answers on GEMINI_ENDPOINT, which is the environment variable
+ * that exists for exactly this, and what it KEEPS is the request — so what
+ * drafting sends can be asserted rather than reasoned about.
  *
  * The eighty are compared against their own INVARIANTS rather than against the
  * upstream dataset, and that is deliberate: once migration 009 has run, this
@@ -25,8 +32,10 @@
  * load, which is what could actually go wrong.
  */
 import pg from "pg";
+import { createServer } from "node:http";
 import { SCHEMA } from "../db/schema-name.mjs";
-import { frameworksAction } from "../lib/frameworks-api.ts";
+import { frameworksAction, slugFor } from "../lib/frameworks-api.ts";
+import { DRAFT_FIELDS } from "../lib/frameworks-ask.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
 const brk = (process.argv.find((a) => a.startsWith("--break=")) || "").slice(8);
@@ -48,12 +57,58 @@ const CONSULTANT = { id: "00000000-0000-0000-0000-000000000001", email: "c@foref
 const ADMIN = { ...CONSULTANT, id: "00000000-0000-0000-0000-000000000002", name: "An Admin", isAdmin: true };
 const CLIENT = { ...CONSULTANT, id: "00000000-0000-0000-0000-000000000003", name: "A Client's Own Person", kind: "client" };
 
+/* ── The stub in front of the model ────────────────────────────────
+   It keeps the request and answers whatever `reply` is set to, so each
+   section says what the model would have said and then asserts what came
+   back through it. */
+let seen = null, reply = null;
+function answers(o) { reply = o; seen = null; }
+const server = createServer((req, res) => {
+  let b = "";
+  req.on("data", (d) => { b += d; });
+  req.on("end", () => {
+    try { seen = JSON.parse(b); } catch { seen = null; }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(reply) }] } }] }));
+  });
+});
+await new Promise((r) => server.listen(0, r));
+process.env.GEMINI_ENDPOINT = "http://localhost:" + server.address().port + "/";
+process.env.GEMINI_API_KEY = "AIzaStubStubStubStubStubStubStubStubStu";
+
+/* A whole draft, as the model would send one back. */
+function drafted(over) {
+  const d = { known: true, why: "" };
+  for (const f of DRAFT_FIELDS) d[f] = f + " text";
+  d.name = "The Endurance Lens (Forefront)";
+  return Object.assign(d, over || {});
+}
+const prompt = () => {
+  const parts = (seen && seen.contents && seen.contents[0] && seen.contents[0].parts) || [];
+  return parts.map((p) => p.text || "").join("\n") + "\n" +
+    (((seen && seen.systemInstruction && seen.systemInstruction.parts) || []).map((p) => p.text || "").join("\n"));
+};
+const cfg = () => (seen && seen.generationConfig) || {};
+
 const pool = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
 const c = await pool.connect();
 await c.query("BEGIN");
 
 try {
   if (brk === "short-library") await c.query("DELETE FROM frameworks WHERE idx = (SELECT max(idx) FROM frameworks)");
+
+  /* `added_by` carries a foreign key, so the admin who saves has to be a real
+     row — made inside the transaction that rolls back, like everything else
+     here. Its id replaces the made-up one on ADMIN. */
+  ADMIN.id = (await c.query(
+    "INSERT INTO users (email, name, password_hash, kind, is_admin) " +
+    "VALUES ('check.admin@forefront.example', 'An Admin', 'x', 'office', true) RETURNING id")).rows[0].id;
+  /* AND SO IS THE CONSULTANT, whose save is refused — because a BREAK that
+     lets it through would otherwise die on that foreign key rather than
+     reporting the widening it exists to catch (§215). */
+  CONSULTANT.id = (await c.query(
+    "INSERT INTO users (email, name, password_hash, kind) " +
+    "VALUES ('check.consultant@forefront.example', 'A Consultant', 'x', 'office') RETURNING id")).rows[0].id;
 
   await section("the table is the platform's own", async () => {
     const col = await c.query(
@@ -157,10 +212,177 @@ try {
     const adm = await frameworksAction(c, ADMIN, { action: "list" });
     check(adm.code === 200, "and so does an admin", adm.code);
   });
+  await section("drafting one — who may ask, both ends", async () => {
+    answers(drafted());
+    const con = await frameworksAction(c, CONSULTANT, { action: "draft", name: "Anything" });
+    check(con.code === 403, "an ordinary consultant cannot draft one", con.code);
+    check(con.body.error === "Adding to the library is a Forefront admin's.",
+      "and is told which door it is, rather than that something went wrong", con.body.error);
+    /* BOTH ENDS (§94.2): a build that refused everybody would satisfy the two
+       above perfectly and be a library nobody can add to. */
+    const adm = await frameworksAction(c, ADMIN, { action: "draft", name: "Anything" });
+    check(adm.code === 200 && adm.body.drafted === true, "an admin gets a draft", adm.code + " " + JSON.stringify(adm.body).slice(0, 90));
+    const cl = await frameworksAction(c, CLIENT, { action: "draft", name: "Anything" });
+    check(cl.body.error === "That is not something this account opens.",
+      "and a client's own person meets the outer gate, in its own words", cl.body.error);
+  });
+
+  await section("drafting writes nothing", async () => {
+    answers(drafted());
+    const before = (await c.query("SELECT count(*)::int AS n FROM frameworks")).rows[0].n;
+    const a = await frameworksAction(c, ADMIN, { action: "draft", name: "The Endurance Lens" });
+    const after = (await c.query("SELECT count(*)::int AS n FROM frameworks")).rows[0].n;
+    check(a.body.drafted === true, "it came back", JSON.stringify(a.body).slice(0, 90));
+    /* THE WHOLE OF DECISION 3, COUNTED. A draft that wrote would look
+       identical from the screen — the fields are on it either way. */
+    check(before === after, "and the library gained nothing by asking", before + " → " + after);
+    const d = a.body.draft || {};
+    check(DRAFT_FIELDS.every((f) => typeof d[f] === "string"), "all eleven fields come back",
+      DRAFT_FIELDS.filter((f) => typeof d[f] !== "string").join(", "));
+  });
+
+  await section("what drafting sends the model", async () => {
+    answers(drafted());
+    await frameworksAction(c, ADMIN, { action: "draft", name: "Blue Ocean Strategy" });
+    /* THE THREE OPTIONS spec 050 added, read off the wire. Each fails
+       silently if it is ever lost: a capped lookup cannot compose, 2048
+       truncates eleven fields, and the shipped schema is three fields wide. */
+    check(!cfg().thinkingConfig,
+      "by name, the thinking cap is OFF — this is the one call in the platform that is not a lookup",
+      JSON.stringify(cfg().thinkingConfig));
+    check(cfg().maxOutputTokens === 4096, "with room for eleven fields, not a lookup's 2048", cfg().maxOutputTokens);
+    const req = (cfg().responseSchema || {}).required || [];
+    check(req.length === 13 && req.indexOf("known") >= 0,
+      "and its own schema, which REQUIRES the I-do-not-know flag", req.length + " required");
+    const inst = prompt();
+    check(inst.indexOf("Bridging the Gap") >= 0 || inst.indexOf("Knowing Your Business") >= 0,
+      "the sections it must choose from are in the prompt, read from the library itself");
+
+    answers(drafted());
+    await frameworksAction(c, ADMIN, { action: "draft", name: "", source: "A pasted chapter about endurance." });
+    /* PASTED SOURCE IS RETRIEVAL AGAIN, and keeps both defaults — which is
+       the distinction this whole file rests on. */
+    check(cfg().thinkingConfig && cfg().thinkingConfig.thinkingBudget === 0,
+      "from a pasted source the cap is back ON — the material is in the prompt and the job is to shape it",
+      JSON.stringify(cfg().thinkingConfig));
+    check(prompt().indexOf("A pasted chapter about endurance.") >= 0,
+      "and what was pasted is what it is answering from");
+  });
+
+  await section("it may say it does not know", async () => {
+    answers({ known: false, why: "I do not know that one well enough to write it up.", ...Object.fromEntries(DRAFT_FIELDS.map((f) => [f, ""])) });
+    const before = (await c.query("SELECT count(*)::int AS n FROM frameworks")).rows[0].n;
+    const a = await frameworksAction(c, ADMIN, { action: "draft", name: "The Forefront Endurance Lens" });
+    check(a.code === 200, "a decline is an answer rather than an error", a.code);
+    check(a.body.drafted === false && a.body.declined === true,
+      "it comes back marked declined, which is what draws the other door rather than an alarm",
+      JSON.stringify(a.body).slice(0, 90));
+    check(String(a.body.why || "").indexOf("well enough") >= 0,
+      "in the assistant's own words — which framework it does not know is the useful part (§125, reversed)",
+      a.body.why);
+    check(before === (await c.query("SELECT count(*)::int AS n FROM frameworks")).rows[0].n,
+      "and nothing was written, as with any other draft");
+  });
+
+  await section("a section it invented is dropped", async () => {
+    answers(drafted({ section: "Frameworks I Have Just Made Up" }));
+    const a = await frameworksAction(c, ADMIN, { action: "draft", name: "X" });
+    check(a.body.draft.section === "",
+      "a ninth section never reaches the draft — the eight are fixed (decision 1), and the admin picks",
+      a.body.draft.section);
+    /* BOTH ENDS: a build that emptied the section always would pass the one
+       above and make every draft ask for a section nobody offered. */
+    const real = (await c.query("SELECT section FROM frameworks ORDER BY idx LIMIT 1")).rows[0].section;
+    answers(drafted({ section: real }));
+    const b = await frameworksAction(c, ADMIN, { action: "draft", name: "X" });
+    check(b.body.draft.section === real, "and a real one survives untouched", b.body.draft.section);
+    /* THE NAME FALLS BACK TO WHAT WAS TYPED: a draft with no name cannot be
+       saved at all, and the person has already said what it is called. */
+    answers(drafted({ name: "" }));
+    const d = await frameworksAction(c, ADMIN, { action: "draft", name: "The Typed Name" });
+    check(d.body.draft.name === "The Typed Name", "a nameless draft takes the name that was typed", d.body.draft.name);
+  });
+
+  await section("saving one", async () => {
+    const sec = (await c.query("SELECT section FROM frameworks ORDER BY idx LIMIT 1")).rows[0].section;
+    const good = {};
+    for (const f of DRAFT_FIELDS) good[f] = f + " text";
+    good.name = "The Endurance Lens (Forefront)";
+    good.section = sec;
+
+    const n = async () => (await c.query("SELECT count(*)::int AS n FROM frameworks")).rows[0].n;
+    const top = async () => (await c.query("SELECT max(idx)::int AS n FROM frameworks")).rows[0].n;
+    const was = await n(), wasTop = await top();
+
+    const con = await frameworksAction(c, CONSULTANT, { action: "save", draft: good });
+    check(con.code === 403, "an ordinary consultant cannot save one", con.code);
+    check(await n() === was, "and the refusal wrote nothing", was + " → " + await n());
+
+    const a = await frameworksAction(c, ADMIN, { action: "save", draft: good });
+    check(a.code === 200 && a.body.ok, "an admin saves it", a.code + " " + JSON.stringify(a.body).slice(0, 80));
+    /* EVERY READ AFTER THE SAVE DEGRADES (§215). Under `no-admin-gate` the
+       consultant's save has already taken the slug, so this one 409s and
+       there is no id — and a query on `undefined` dies on uuid syntax,
+       taking the ten assertions after it with it. */
+    const r = a.body.id
+      ? (await c.query("SELECT * FROM frameworks WHERE id = $1", [a.body.id])).rows[0]
+      : null;
+    check(!!r, "the row is there");
+    check(r && r.slug === slugFor(good.name) && r.slug === "the-endurance-lens-forefront",
+      "with the slug minted from the name, the dataset's own rule", r && r.slug);
+    check(r && r.idx === wasTop + 1, "at the end of the book, moving no section (§101's units.idx)", r && r.idx);
+    check(r && r.added_by === ADMIN.id, "carrying who added it", r && r.added_by);
+    check(r && r.facilitation_tips === "facilitationTips text",
+      "and every one of the eleven landed in its own column", r && r.facilitation_tips);
+    /* IT READS BACK THROUGH THE PRODUCT, not only out of the table: the
+       author is the whole reason `one` LEFT JOINs, and this is the first row
+       in the library that has one. */
+    const one = a.body.id
+      ? await frameworksAction(c, CONSULTANT, { action: "one", id: a.body.id })
+      : { body: {} };
+    check(one.body.framework && one.body.framework.addedBy === "An Admin",
+      "and an ordinary consultant reads it with its author's name on it", one.body.framework && one.body.framework.addedBy);
+
+    /* THE COLLISION, REFUSED BY NAME (§87): the same tool under a second
+       author's name genuinely wants the same address, and the person needs to
+       know WHICH row is in the way. */
+    const clash = await frameworksAction(c, ADMIN, { action: "save", draft: good });
+    check(clash.code === 409, "saving the same name again is refused", clash.code);
+    check(String(clash.body.error).indexOf("The Endurance Lens (Forefront)") >= 0,
+      "and the refusal NAMES the framework already holding that address", clash.body.error);
+    check(await n() === was + 1, "with nothing written by the refusal", await n());
+  });
+
+  await section("what saving refuses, each by name", async () => {
+    const sec = (await c.query("SELECT section FROM frameworks ORDER BY idx LIMIT 1")).rows[0].section;
+    const n = async () => (await c.query("SELECT count(*)::int AS n FROM frameworks")).rows[0].n;
+    const was = await n();
+    const base = {};
+    for (const f of DRAFT_FIELDS) base[f] = "x";
+    const bad = async (over, why) => {
+      const a = await frameworksAction(c, ADMIN, { action: "save", draft: { ...base, section: sec, name: "A Name", ...over } });
+      check(a.code === 400, why + " — refused", a.code);
+      return a.body.error;
+    };
+    /* THE DATABASE'S OWN CHECK, SAID EARLY (§184): a constraint error names a
+       constraint, and the person needs to be told which box. */
+    check(String(await bad({ name: "   " }, "no name")).indexOf("name") >= 0, "…and the sentence says it is the name");
+    check(String(await bad({ section: "" }, "no section")).indexOf("section") >= 0, "…and that one says it is the section");
+    const inv = await bad({ section: "Nowhere At All" }, "a section that does not exist");
+    check(String(inv).indexOf("Nowhere At All") >= 0,
+      "…and names the section nobody has, rather than saying something is wrong", inv);
+    /* A NAME OF PUNCTUATION slugs to nothing, which the database would take
+       once and refuse for ever after. */
+    const pun = await bad({ name: "——" }, "a name that gives no address");
+    check(String(pun).indexOf("letters") >= 0, "…and says what is missing", pun);
+    check(await n() === was, "and not one of the four wrote anything", was + " → " + await n());
+  });
+
 } finally {
   await c.query("ROLLBACK").catch(() => {});
   c.release();
   await pool.end();
+  server.close();
 }
 
 console.log("\n" + oks + " passed, " + fails + " failed");

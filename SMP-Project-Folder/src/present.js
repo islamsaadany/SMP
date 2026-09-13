@@ -7,7 +7,8 @@
    disappears, and Exit returns the presenter to exactly where they were.
    ──────────────────────────────────────────────────────────────────────── */
 
-var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"", from:"page" };
+var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"", from:"page",
+             targets:null, clock:null };
 /* `from` is WHERE THIS DECK WAS OPENED FROM — "page" or "editor" (§295). It is
    read by `closeDeck()` alone, to decide where Escape and Exit put you, and it
    is written on EVERY open rather than only the editor's: a value left standing
@@ -533,6 +534,53 @@ function deckSlides(u){
       '<th class="num">Annual target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
+    /* ── §343: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
+       After that pillar's targets, because the columns ARE two of the numbers
+       the heading above already averages — a room reading "Key measures 95%"
+       needs the five rows that make it, not three of them.
+
+       DRAWN ONLY WHERE THERE IS ONE, exactly as it is on the three screens: a
+       pillar with no breakdown mints no slide and no anchor (§253 — a table
+       with no rows is not a slide).
+
+       A COLUMN'S HEAD CARRIES ITS DIRECTION and a scored figure wears its
+       band, which is what says which columns count with no total row under
+       the table. The INDICATOR is drawn plain — deliberately the same rule as
+       the page, or the projector says something the screen does not (§53.5).
+
+       ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
+       `m` and the tactics slide's bare code, both of which stored picture
+       slides already name (§236.2, §50.3). */
+    var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
+    var bdRows = !bdShow ? "" :
+      SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
+        return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
+          bdCols.map(function(c){
+            var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
+            if (!String(a).trim())
+              return '<td class="num">' + (String(t).trim()
+                ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
+                : '<span class="dmuted">&mdash;</span>') + '</td>';
+            var sc = bdCellScore(r, c);
+            return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
+              esc(a) + (String(t).trim()
+                ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+          }).join("") +
+          (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
+                  : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+    if (bdRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'B"' +
+      anch("p" + pillarCode(u, pi) + "b",
+           "After " + pillarCode(u, pi) + " — " + SMPRules.bdName(p)) + '>' +
+      deckPillarHead(u, p, pi, SMPRules.bdName(p)) +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
+      '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
+      bdCols.map(function(c){
+        return '<th class="num">' + esc(bdColWord(p, c)) +
+          (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+      }).join("") +
+      '<th>Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
+
     /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
        Islam: *"presentations doesn't change when the plan performance is
        done."* Measured on Mobile before a line was written: a tactic reported
@@ -734,6 +782,12 @@ function deckSlidesFn(subject){
   var f = isCap ? cap : FUNCTIONS[fk];
   var caps = capsShown(target);
   var realCaps = isCap ? [] : capsOfFunction(fk);
+  /* §342: a function that plans in objectives and actions. The deck is the
+     same deck — one builder, because a second one is what §296 and §305 each
+     measured the cost of and refused — and what changes is the ONE slide that
+     lists the work: Actions where a projects holder lists Projects, with no
+     per-project sections behind it because there are none. */
+  var objMode = plansInObjectives(target);
   var S = [];
 
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
@@ -750,8 +804,14 @@ function deckSlidesFn(subject){
       ? 'Capability review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
-        plural(caps.reduce(function(n, c){
-          return n + ((c.projects || []).length); }, 0), "project")) + '</p></section>');
+        (objMode
+          /* §342: the cover says what the deck holds, which is the whole of
+             §326's argument one format along — "0 projects" over a plan made
+             of objectives and actions names a thing that does not exist. */
+          ? plural(SMPRules.shown(caps.reduce(function(a2, c){
+              return a2.concat(c.actions || []); }, [])).length, "action")
+          : plural(caps.reduce(function(n, c){
+              return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -798,6 +858,34 @@ function deckSlidesFn(subject){
         '<th class="num">Weight</th><th class="num">Annual target</th>' +
         '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
         '<tbody>' + kRows + '</tbody></table></section>');
+    }
+
+    if (objMode) {
+      var acts = SMPRules.shown(c.actions);
+      var aRows = acts.map(function(a3, i){
+        var v = msReads(a3);
+        return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+          '<b>' + esc(a3.name) + '</b>' +
+          (a3.owner ? '<span class="dsub">' + esc(a3.owner) + '</span>' : '') + '</td>' +
+          '<td class="num">' + esc(a3.due || "\u2014") + '</td>' +
+          '<td class="num">' + esc(msStatusWord(a3.status) || "\u2014") + '</td>' +
+          '<td class="num final ' + dBand(v) + '">' +
+            (statusPending(a3) ? '<span class="missing">Needs a %</span>' : dPct(v)) +
+          '</td>' +
+          (a3.note ? '<td class="dnote">' + esc(a3.note) + '</td>'
+                   : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      var tal = fnActionsTally(c.fn);
+      S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 actions") +
+        '><h2>Actions<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Action</th>' +
+        '<th class="num">Due</th><th class="num">Status</th>' +
+        '<th class="num">Progress</th><th>Note</th></tr></thead>' +
+        '<tbody>' + (aRows || '<tr><td colspan="6">No actions yet.</td></tr>') + '</tbody></table>' +
+        '<p class="headfoot">' + tal.done + ' of ' + tal.total + ' done' +
+          (tal.pending ? ' &middot; ' + tal.pending + ' said In progress with no per-cent' : '') +
+          '. Actions are counted, never scored into the objectives.</p></section>');
+      return;
     }
 
     var pRows = c.projects.map(function(p, i){
@@ -1097,6 +1185,14 @@ function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* §340: the subjects this deck is of, kept because one subject's deck has
+     stops that name SECTIONS rather than subjects, so there is nothing else
+     to ask which unit is presenting. Mounted after the innerHTML that would
+     otherwise destroy it, and before the fit pass, which only ever inserts
+     `.dslide` siblings and leaves it alone. */
+  DECK.targets = list.slice();
+  DECK.clock = null;
+  clockMount(root);
   /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
      BOTH BRANCHES, EVERY OPEN. Stamping only the editor's case would leave the
      word standing on the next deck opened from a page — a button reading "Back
@@ -1309,6 +1405,63 @@ function masterWrite(list){
    overlay for no reason (§90.4). */
 function masterMark(){ if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint(); }
 
+/* ── HOW LONG EACH SUBJECT HAS (§340) ─────────────────────────────────
+   Islam: *"I need to set as an SMO the time of each presentation so the timer
+   appears for the presenter"*, and *"it needs to be per unit and it can be set
+   in the master presentation sectoin with the flow."*
+
+   THE READER IS THE SHARED RULE and never a second copy, because the server
+   judges the same field (§42) — and the WRITER reaches into `GROUP` directly
+   rather than through `presentMinsMap()`, which hands back a FROZEN empty when
+   nothing is stored: a reader that created what it looked for would put a
+   phantom change into every save (§42's own scar). */
+function slotMins(t){ return SMPRules.presentMins(GROUP, t); }
+/* Stored as an ABSENCE (§50.6), at both levels: a subject put back to no time
+   loses its key, and the last key leaving takes the map with it — so never set
+   and set-then-cleared are the same bytes rather than two states nothing
+   distinguishes. */
+function minsWrite(t, n){
+  var map = GROUP[SMPRules.PRESENT_MINS];
+  if (n > 0) {
+    if (!map || typeof map !== "object" || Array.isArray(map))
+      map = GROUP[SMPRules.PRESENT_MINS] = {};
+    map[t] = n;
+  } else if (map && typeof map === "object") {
+    delete map[t];
+    if (!Object.keys(map).length) delete GROUP[SMPRules.PRESENT_MINS];
+  }
+  masterMark();
+}
+/* 225 minutes is "3h 45m" and 45 is "45m" — never "0h 45m", which reads as a
+   figure somebody typed. ONE writer of this string, because the dialog's line
+   is rewritten in place as well as painted and the two must not disagree. */
+function minsWords(n){
+  var h = Math.floor(n / 60), m = n % 60;
+  return h ? (h + "h" + (m ? " " + m + "m" : "")) : (m + "m");
+}
+/* The line above the running order. THE TOTAL IS THE WHOLE ARGUMENT for
+   setting the minutes here rather than on nineteen separate unit screens: it
+   is an afternoon somebody is dividing, and nowhere else can add it up. It
+   sits on the line that already counts the slides, because "how long is this
+   review" and "how big is it" are the same question asked twice. */
+function masterSumLine(slides){
+  if (!MFLOW.pick.length) return "";
+  var mins = 0, none = 0;
+  MFLOW.pick.forEach(function(t){ var n = slotMins(t); if (n) mins += n; else none++; });
+  var out = "about " + plural(slides, "slide");
+  if (mins) out += ' &middot; <b class="mftime">' + minsWords(mins) + "</b>";
+  /* Named rather than counted silently: a review whose total looks short
+     because four subjects have no time is a total that lies by omission.
+
+     ONLY ONCE SOMETHING IS SET, THOUGH. On a tenant that has never used this
+     the line would open "19 with no time", which reads as a fault on a
+     perfectly healthy review — nagging about a feature nobody has started is
+     §45.2's empty state wearing an alarm's clothes. Measured on the worked
+     example, which is exactly that tenant. */
+  if (mins && none) out += ' &middot; <span class="mfnone">' + none + " with no time</span>";
+  return out;
+}
+
 var MFLOW = null;
 
 function masterOpen(){
@@ -1420,6 +1573,28 @@ function masterPaint(){
   /* In the flow: the number IS the handle, and the × is the SAME `data-mftick`
      the left column uses, because it is the same act — one handler, so the two
      columns cannot answer differently (§53.5). */
+  /* §340: THREE BUTTONS, which is Islam's own choice over a list and over a
+     typed box, taken with the cost of each stated — that nineteen rows is
+     fifty-seven controls, and that three fixed numbers cannot express a slot
+     that is not one of them. Recorded as his.
+
+     PRESSING THE LIT ONE CLEARS IT. A dropdown had a blank entry and three
+     buttons have nowhere to put one, so the way back to no time is the same
+     control pressed twice — which is what `aria-pressed` already means, so
+     the keyboard and a screen reader get it for nothing. */
+  var minsCell = function(t, name){
+    var cur = slotMins(t);
+    return '<td class="c-m"><div class="minset" role="group" aria-label="' +
+      esc("How long " + name + " has") + '">' +
+      SMPRules.PRESENT_MIN_CHOICES.map(function(v){
+        var lit = v === cur;
+        return '<button type="button" class="minbtn' + (lit ? ' on' : '') +
+          '" data-mins="' + v + '" data-minsfor="' + esc(t) + '"' +
+          ' aria-pressed="' + (lit ? "true" : "false") + '" title="' +
+          esc(lit ? "Press again to leave " + name + " with no time"
+                  : name + " gets " + v + " minutes") + '">' + v + '</button>';
+      }).join("") + '</div></td>';
+  };
   var on = function(t, i){
     var name = placeLabel(t);
     return '<tr data-oi="' + i + '">' +
@@ -1427,6 +1602,7 @@ function masterPaint(){
         handle("Drag to reorder " + name) + '</td>' +
       '<td class="c-nm"><b>' + esc(name) + '</b></td>' +
       '<td class="c-k">' + masterKind(t) + '</td>' +
+      minsCell(t, name) +
       '<td class="c-n">' + masterCount(t) + '</td>' +
       '<td class="c-x"><button class="mfx" data-mftick="' + esc(t) + '" title="Take out"' +
         ' aria-label="Take ' + esc(name) + ' out of the flow">×</button></td></tr>';
@@ -1445,10 +1621,10 @@ function masterPaint(){
       '<p class="mfempty" data-mfrestempty' + (rest.length ? ' hidden' : '') + '>' +
         'Everybody is in the flow.</p></div></div>' +
     '<div class="mfcol"><div class="mfhead"><h4>The flow</h4>' +
-      '<span class="mfcount">' +
-        (MFLOW.pick.length ? 'about ' + plural(total, "slide") : '') + '</span></div>' +
+      '<span class="mfcount" data-mfsum>' + masterSumLine(total) + '</span></div>' +
       '<div class="mflist"><table class="mftbl"><thead><tr>' +
         '<th class="c-h"></th><th>Name</th><th class="c-k">Kind</th>' +
+        '<th class="c-m">Minutes</th>' +
         '<th class="c-n">Slides</th><th class="c-x"></th></tr></thead>' +
         '<tbody data-mfflow>' + MFLOW.pick.map(on).join("") + '</tbody></table>' +
       '<p class="mfempty"' + (MFLOW.pick.length ? ' hidden' : '') + '>' +
@@ -1549,6 +1725,37 @@ function masterWire(){
     MFLOW.q = this.value.trim();
     masterFilter();
   });
+  /* ── THE MINUTES, WRITTEN WITHOUT A REPAINT (§340) ─────────────────
+     DELEGATED ON THE TBODY, not wired per button: the cell's three buttons are
+     rewritten in place on every press, so a listener on each one would die
+     with the node that carried it — and the tbody is replaced whole by
+     `masterPaint()`, so nothing accumulates either (§24, §47.2).
+
+     AND IT MUST NOT REPAINT. §71.2's rule, with a reason this dialog makes
+     sharp: `.mflist` is a scrolling box holding nineteen rows, so a repaint
+     would throw somebody setting the fifteenth subject's time back to the top
+     of the list on every press. Three buttons and one line are rewritten
+     instead. */
+  var flow = box.querySelector("[data-mfflow]");
+  if (flow) flow.addEventListener("click", function(ev){
+    var b = ev.target.closest && ev.target.closest("[data-mins]");
+    if (!b || !flow.contains(b)) return;
+    var t = b.dataset.minsfor, v = +b.dataset.mins;
+    /* PRESSED AGAIN, IT CLEARS — the only way back to no time once the
+       dropdown's blank entry became three buttons (§340). */
+    minsWrite(t, v === slotMins(t) ? 0 : v);
+    var set = b.closest(".minset"), name = placeLabel(t), cur = slotMins(t);
+    if (set) [].forEach.call(set.querySelectorAll("[data-mins]"), function(o){
+      var lit = +o.dataset.mins === cur;
+      o.classList.toggle("on", lit);
+      o.setAttribute("aria-pressed", lit ? "true" : "false");
+      o.title = lit ? "Press again to leave " + name + " with no time"
+                    : name + " gets " + o.dataset.mins + " minutes";
+    });
+    var sum = box.querySelector("[data-mfsum]");
+    if (sum) sum.innerHTML = masterSumLine(
+      MFLOW.pick.reduce(function(a, k){ return a + masterCount(k); }, 0));
+  });
   /* THE PLATFORM'S OWN SORTABLE (§101, arrange.js), never a second one: it
      renumbers `.idx-n`, moves a row from the keyboard, and refuses a commit
      that is not a permutation of the list it is applied to (§118). */
@@ -1647,6 +1854,12 @@ function closeDeck(){
   var toEditor = DECK.from === "editor" &&
                  document.getElementById("slideroot").classList.contains("on");
   DECK.from = "page";
+  /* §340: the clock's own interval, stopped with the deck it was drawing. An
+     interval left running is the leak §24 is about — it would go on writing
+     into a node that has been replaced, twice a second, for the life of the
+     tab. */
+  if (CLOCKTICK) { clearInterval(CLOCKTICK); CLOCKTICK = null; }
+  DECK.clock = null;
   root.classList.remove("on");
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
@@ -1833,6 +2046,164 @@ function deckStopAt(i){
   stops.forEach(function(st, j){ if (st.at <= i) k = j; });
   return k;
 }
+/* ══ THE CLOCK ON THE REVIEW (§340) ═══════════════════════════════════
+   Islam: *"in the presentation module I need to set as an SMO the time of each
+   presentation so the timer appears for the presenter."*
+
+   IT IS ON THE SLIDE, AND THAT IS NOT A PREFERENCE. The obvious home is the
+   bar beside the counter — and §265 takes the bar off the screen in
+   fullscreen, at his own report that it flashed on every click, so a clock
+   there is invisible in exactly the state a review is presented in. So it
+   sits in the corner of the stage, which means the ROOM reads it too: stated
+   before he chose, and chosen.
+
+   INSIDE `.deck`, NEVER IN `.deckstage`. The deck is a fixed 1600x900 box
+   that `deckScale()` transforms into whatever room there is, so a child of it
+   scales with the slide and holds the corner it was drawn in. A sibling in
+   the stage would keep its own size and, in a letterboxed window, float
+   outside the slide's edge entirely.
+
+   BOTTOM-RIGHT, measured against what the slides already carry: the footer
+   mark is bottom-LEFT on every slide (§52) and a pillar's own two headline
+   figures are top-right, so that corner is the one that is empty on every
+   slide kind rather than on the one that was looked at. */
+
+/* Under two minutes it turns; the amber is a warning and the red is a fact. */
+var CLOCK_NEAR_MS = 2 * 60000;
+var CLOCKTICK = null;
+
+/* Which subject is being presented RIGHT NOW. In a flow the stops ARE the
+   subjects, so it is the stop the current slide falls in — and on one
+   subject's deck the stops are that deck's own SECTIONS (§266.12), which name
+   no subject at all, so it is the one target the deck was opened with. Asked
+   of `DECK.flow`, which is the same question §266.12 had to teach the title
+   bar for the same reason.
+
+   NAMED `clockSubject`, AND THE NAME IS THE WHOLE POINT. It was written as
+   `deckSubject()` and this file ALREADY declares `deckSubject(target)` 250
+   lines above — the stored subject a target names, which `deckHidePass()` and
+   the whole of Manage slides ask. Two declarations of one name, the later
+   winning by hoisting (§56.7, §281, §147.4 — the fourth time this project has
+   recorded it), so every caller got this one, which ignores the argument: the
+   office pressed the eye, `slidesSetHidden` read `!subj` and returned, and
+   HIDING A SLIDE SILENTLY STOPPED WORKING across the product.
+
+   It threw nothing and logged nothing, and `node --check` passes on it —
+   §56.7's own signature. What found it was `checks/hide-slide.py` going 20
+   red, and what made that finding trustworthy was running the check from the
+   BASELINE WORKTREE: these neighbours do not honour `SMP_BUILT`, so a
+   §303 baseline run from this directory measures this build and says the
+   failure is not yours (§334.13, walked into an hour before this comment). */
+function clockSubject(){
+  if (DECK.flow && DECK.stops) {
+    var k = deckStopAt(DECK.i);
+    return k >= 0 ? DECK.stops[k].t : null;
+  }
+  return DECK.targets && DECK.targets.length === 1 ? DECK.targets[0] : null;
+}
+/* NO MINUTES, NO CLOCK (§340, agreed): a subject the office left blank draws
+   nothing at all, rather than a clock counting down from a number nobody
+   chose (§35). */
+function clockStart(t){
+  var mins = t ? slotMins(t) : 0;
+  DECK.clock = mins ? { t:t, mins:mins, ran:0, from:Date.now() } : null;
+  clockPaint();
+}
+/* Called from `deckShow()`, so on EVERY arrow press — and it must only act
+   when the subject changes, which is the whole value of it: a flow moving on
+   to the next unit starts their time with nobody pressing anything, and
+   walking back a slide inside one unit does not restart it. */
+function clockFollow(){
+  var t = clockSubject();
+  if (DECK.clock ? DECK.clock.t === t : !t) return;
+  clockStart(t);
+}
+/* `from` is when the current run began and null means held, so the elapsed
+   time is what has already run plus what is running — one field doing both
+   jobs, and no interval that has to be stopped and started to pause. */
+function clockLeft(){
+  var c = DECK.clock;
+  if (!c) return 0;
+  return c.mins * 60000 - (c.ran + (c.from ? Date.now() - c.from : 0));
+}
+function clockToggle(){
+  var c = DECK.clock;
+  if (!c) return;
+  if (c.from) { c.ran += Date.now() - c.from; c.from = null; }
+  else c.from = Date.now();
+  clockPaint();
+}
+/* THE BAR'S ALONE, deliberately (§340): pause is reversible and a stray press
+   costs one press back, where reset throws the elapsed time away and cannot
+   be undone — so it is not on the key and not on the clock, which are the two
+   surfaces a hand can brush past in fullscreen. */
+function clockReset(){
+  if (!DECK.clock) return;
+  DECK.clock.ran = 0;
+  DECK.clock.from = Date.now();
+  clockPaint();
+}
+/* Counting DOWN, and it keeps counting when it runs out: "+2:30", because a
+   timer that stops has stopped being useful (§340, agreed). */
+function clockWords(ms){
+  var over = ms < 0, s = Math.floor((over ? -ms : ms) / 1000);
+  return (over ? "+" : "") + Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2);
+}
+/* WRITTEN INTO THE NODES, NEVER PAINTED (§63, §71.2): this runs twice a
+   second for the length of a review, and a `paint()` here would rebuild the
+   platform underneath the deck every time. The parts are toggled rather than
+   the element rewritten, so nothing churns under the presenter. */
+function clockPaint(){
+  var root = document.getElementById("deckroot");
+  if (!root) return;
+  var c = DECK.clock, el = root.querySelector("#dclock");
+  /* A CONTROL WITH NOTHING TO ACT ON IS NOT A CONTROL (§61): with no time set
+     for this subject the two bar buttons are not drawn either. */
+  [].forEach.call(root.querySelectorAll("[data-dpause], [data-dreset]"), function(b){
+    b.hidden = !c;
+  });
+  if (!el) return;
+  if (!c) { el.hidden = true; return; }
+  el.hidden = false;
+  var left = clockLeft(), held = !c.from, over = left < 0;
+  /* THE COLOUR ALWAYS SAYS WHERE YOU ARE AND THE MARK SAYS IT IS HELD — two
+     facts, two devices. Paused takes its own quiet grey only where there is
+     nothing louder to say; a clock paused while OVER stays red, or holding it
+     would hide the one thing the room needs to know. */
+  el.classList.toggle("near", !over && left <= CLOCK_NEAR_MS);
+  el.classList.toggle("over", over);
+  el.classList.toggle("paused", held);
+  el.querySelector(".dctime").textContent = clockWords(left);
+  el.querySelector(".pausemark").hidden = !held;
+  el.querySelector(".dcw").hidden = !held;
+  el.title = (held ? "Held at " : "") + clockWords(left) +
+    (over ? " over" : " left") + " of " + c.mins + " minutes \u2014 press to " +
+    (held ? "start it again" : "pause");
+}
+/* THE CLOCK IS A `<button>`, which is the whole of how a tap on it reaches
+   pause without also advancing the slide: `deckOwnControl()` already exempts
+   one from the stage's click and from the swipe (§297, §280), so a tablet —
+   which has no `P` key and is what §280 exists for — gets the only pause it
+   can reach, for no new rule at all.
+
+   BUILT HERE rather than in the shell, because `.deck`'s innerHTML is
+   replaced on every open and anything the shell put inside it would be
+   destroyed by the first deck. */
+function clockMount(root){
+  var el = document.createElement("button");
+  el.type = "button"; el.id = "dclock"; el.className = "dclock"; el.hidden = true;
+  el.innerHTML = '<span class="pausemark" hidden></span>' +
+                 '<span class="dctime"></span>' +
+                 '<span class="dcw" hidden>Paused</span>';
+  el.addEventListener("click", clockToggle);
+  root.querySelector(".deck").appendChild(el);
+  /* TWICE A SECOND, not once: at one second the shown figure can be a whole
+     second stale, which reads as a clock that skips. Cleared in `closeDeck()`
+     — an interval left running outlives the deck it was drawing (§24). */
+  if (CLOCKTICK) clearInterval(CLOCKTICK);
+  CLOCKTICK = setInterval(clockPaint, 500);
+}
+
 function deckShow(n){
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
@@ -1865,6 +2236,8 @@ function deckShow(n){
       " &middot; " + esc(REVIEW.name);
   }
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
+  /* §340: a flow crossing into the next unit starts their time by itself. */
+  clockFollow();
 }
 /* §265 DELETED `deckPeek()` AND ITS TIMER FROM HERE, reversing the second half
    of §69.7. It brought the bar back for 2.2 seconds whenever the pointer moved,
@@ -1939,6 +2312,11 @@ function wireDeck(){
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
   root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);
+  /* §340. Both are in the bar, which in fullscreen is not on the screen — so
+     pause has two more ways in (the `P` key and the clock itself) and reset
+     deliberately has none, because it cannot be undone. */
+  root.querySelector("[data-dpause]").addEventListener("click", clockToggle);
+  root.querySelector("[data-dreset]").addEventListener("click", clockReset);
   root.querySelector("[data-dfit]").addEventListener("click", function(){
     root.classList.toggle("fitwin");
     this.textContent = root.classList.contains("fitwin") ? "16:9" : "Fit";
@@ -2092,6 +2470,13 @@ function wireDeck(){
       if (document.fullscreenElement === root) document.exitFullscreen();
       else closeDeck();
     }
+    /* §340: `P` pauses. A letter is this deck's existing idiom rather than a
+       new one — `f` and `w` below have answered since §69.7 — and `p` was
+       free, checked rather than assumed. It reaches FULLSCREEN, which is the
+       whole point: the bar's own button does not. Typing into the cycle note
+       never gets here, because the contenteditable branch above returns
+       first. */
+    if (ev.key === "p" || ev.key === "P") { ev.preventDefault(); clockToggle(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });

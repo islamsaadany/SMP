@@ -994,6 +994,93 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A CLOCK ON THE REVIEW (§340):** Islam — *"in the presentation module I need
+  to set as an SMO the time of each presentation so the timer appears for the
+  presenter"*, then *"it needs to be per unit and it can be set in the master
+  presentation sectoin with the flow"*. **THE OBSTACLE DECIDED THE SHAPE AND IT
+  IS §265's**: the obvious home is the bar beside the slide counter, and that
+  bar is translated off the screen in fullscreen at his own report that it
+  flashed on every click — so a clock there is invisible in exactly the state a
+  review is presented in. It goes ON THE SLIDE, which means the room reads it
+  too: stated before he chose, drawn three ways, chosen. **A CHILD OF `.deck`,
+  never of `.deckstage`**, so it scales with the slide rather than floating
+  outside its edge in a letterboxed window; bottom-right, because the mark is
+  bottom-left on every slide (§52) and a pillar's two figures are top-right.
+  **THE MINUTES ARE A MAP ON THE GROUP, REVERSING THE NEARER PRECEDENT**
+  (`hideSlides` rides `units[k].extra`, §256): a CAPABILITY is a subject too, so
+  a per-subject home needs a resolver per kind and a storage answer for the one
+  kind that is not a table of its own; the TOTAL is the whole reason it is set
+  here and is one read of one map rather than a walk of three collections; and a
+  refusal must name the Presentation menu rather than Setup (§16.7). **Per unit
+  is unchanged by that** — the key is the subject, so a unit presenting ALONE
+  reads the same number and leaving the flow does not throw its minutes away.
+  `org.extra`, no migration, stored as an ABSENCE at both levels (§50.6).
+  **THE SERVER'S TWO EDITS GO TOGETHER** (§259.2), falsified separately:
+  swept-but-unclassified is INVISIBLE and therefore **allowed to everybody**
+  (5 red), classified-but-unswept adds a second entry (1 red), the gate opened
+  7 red; 642/0. **THREE BUTTONS ARE HIS, AGAINST THE RECOMMENDATION** —
+  fifty-seven controls on one dialog (§37's own fault) and three numbers that
+  cannot express a slot which is not one of them, both stated before he chose —
+  and **pressing the lit one clears it**, the only way back to none once a
+  dropdown's blank entry became three buttons, which is what `aria-pressed`
+  already means. **THE PRESS DOES NOT REPAINT** (§71.2: a nineteen-row scrolling
+  box would jump to the top on every press), through a listener DELEGATED on the
+  tbody, because the cell's buttons are rewritten in place. **The line says
+  nothing about missing times until something IS set**, or an untouched tenant
+  opens on *"19 with no time"*, which reads as a fault on a healthy review
+  (§45.2). **PAUSE HAS THREE WAYS IN AND RESET HAS ONE**: the bar, the `P` key,
+  and the clock TAPPED — not a nicety, because a tablet has no `P` key and §280
+  exists because he presents from one; it cost no new rule, since
+  `deckOwnControl()` already exempts a `button` from advancing the slide and
+  from the swipe (§297), which is why the clock IS one. **Reset is the bar's
+  alone**: pause is reversible and a stray press costs one press back, where
+  reset throws the elapsed time away. `P` is this deck's own idiom (`f` and `w`
+  have answered since §69.7) and was checked FREE rather than assumed. **The
+  mark is two DRAWN boxes** (§52, §120.2 — a glyph a font maps and cannot draw
+  ships as a blank rectangle, and this one would do it on a projector), and
+  **the colour says where you are while the mark says it is held**, so a clock
+  paused while OVER stays red rather than going quiet about the one thing the
+  room needs to know. **THE MOCKUP'S OWN COLOURS WOULD HAVE SHIPPED
+  UNREADABLE**: it was drawn over a LIGHT screenshot and `.dslide` paints
+  `var(--surface)`, so the on-screen deck follows the viewer's theme — every
+  pair measured in both palettes (calm 4.73/5.33, near 5.48/7.22, over
+  5.64/5.03, held 7.97/7.63), and **the ink on the red is `--surface` and never
+  `--ink`**, which measures 3.06 light and 2.75 dark (§38.4's direction that
+  bites, §145.14's own pairing). **A transition was written and REMOVED on
+  looking at it**: turning amber is information a presenter is meant to catch,
+  and easing it in is the one thing that makes it easier to miss. **It does not
+  print** (§305: a clock on a printed slide is a figure from a moment that has
+  passed). **The unit sees its slot and cannot set it** — one read-only line in
+  Manage slides, which is §256's own shape on that same bar.
+  **§340.1 — AND THE FINDING OF THE ROUND IS §56.7 FOR THE FOURTH TIME**:
+  `clockSubject()` was written as `deckSubject()` and `present.js` **already
+  declares `deckSubject(target)` 250 lines above** — the stored subject a target
+  names, which `deckHidePass()` and the whole of Manage slides ask — so the
+  later won by hoisting, every caller got the argument-ignoring one, and
+  **hiding a slide silently stopped working across the product**: nothing
+  thrown, nothing logged, `node --check` clean. Found by `hide-slide` going
+  **20 red**. **AND THE FIRST ATTEMPT TO CLEAR IT BLAMED SOMEBODY ELSE** —
+  `hide-slide`, `master-presentation` and `master-picker` do not honour
+  `SMP_BUILT`, so a §303 baseline run measured THIS build and reported the
+  failures as pre-existing (§334.13's recorded trap, walked into within the hour
+  of quoting §303); run from the baseline WORKTREE all three are green and the
+  regression was mine. **The scan that missed it compared two FILES and never a
+  file against itself**; it runs over build.py's own concatenation now, and the
+  tree's only duplicates are the six §281.1 deliberately leaves.
+  **§340.2 — three of the check's own first failures were the CHECK**: a press
+  measured against the EMPTY waiting column (§100.3), a fresh clock asserted as
+  `"10:0x"` when that is true for one second of a ten-minute slot, and a reset
+  guard comparing the face's string by PREFIX, so `"10:00"` against `"9:59"`
+  reports a working guard broken at every minute boundary (§122.4's family).
+  **And the falsification DIED rather than reporting** (§215, in the file whose
+  docstring promises it does not), so every probe goes through the degrading
+  wrapper — the ones that only PRESS included. **An empty `SMP_BUILT` is a SET
+  variable**, so the `get` default never fires and a good build reported 43
+  failures (§54.5). Proved able to fail **seven ways from the SOURCES** (§276):
+  22 / 1 / 6 / 1 / 1 / 7 / 1. **RECORDED, NOT DONE**: the three checks that
+  ignore `SMP_BUILT` are a sweep of their own (§334.13 records twenty-one more),
+  `masterFix()` now measures a 36px row where it measured 32, and nothing on the
+  dialog says the times are saved.
 - **THE KEYBOARD BELONGS TO THE PRESENTATION (§297):** Islam, presenting with a
   clip on a slide — *"the right and elft arrows are editing the video forward and
   backward &hellip; we lose the functionality ot the forward and backrward
@@ -7738,6 +7825,29 @@ python3 checks/review-pptx.py   # the review deck as a PowerPoint (§311):
                                 # and the PLAN download is asserted untouched
                                 # (§94.2 — it shares every primitive changed).
                                 # 5 falsifications from the SOURCES, 1/3/4/3/2 red
+python3 checks/presentation-timer.py # a clock on the review (§340): the minutes
+                                # set in the flow and read back off the STORED graph
+                                # (§96); the lit button pressed again CLEARING, and the
+                                # last one leaving deleting the map (§50.6); the total on
+                                # the slide-count line, silent about missing times until
+                                # one IS set (§45.2); the press proved not to repaint by
+                                # SCROLLING first (§71.2); BOTH ENDS of no-minutes-no-
+                                # clock — the clock absent AND the bar's two buttons
+                                # absent, then all three present (§94.2, §61); the clock
+                                # INSIDE the deck so it scales, and a BUTTON, which is
+                                # what lets a tap pause without advancing the slide
+                                # (§297); walking slides not restarting it and a FLOW
+                                # crossing into the next unit starting theirs; pause on
+                                # the key, the tap AND the bar, with reset asserted NOT
+                                # on the first two, because it cannot be undone; every
+                                # colour measured in BOTH palettes with the sweep's own
+                                # arithmetic (§95, §38.4 — the deck follows the theme, so
+                                # the mockup's literals would have been unreadable in
+                                # dark); held-while-over asserted still red; not printed
+                                # (§305); and the unit's read-only line in Manage slides
+                                # at both ends. 55/0, proved able to fail SEVEN ways from
+                                # the SOURCES (§276); every probe degrades (§215).
+                                # SMP_BUILT points it at another build
 python3 checks/contingency.py   # the contingency files (§297): the card, the
                                 # banner and the list drawn for the office and ABSENT for
                                 # somebody the shared rule refuses — switched TO, never a
@@ -7885,6 +7995,97 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/objectives-actions.py # the third way a function plans
+                                # (§342, spec 049): the format is a THIRD value
+                                # read back off the stored function and never off
+                                # the select (§96, §219); the switch ARCHIVES what
+                                # stood and starts the new form empty, both ends
+                                # (§318 §6.2, reversing §59 for this transition);
+                                # the three pages draw the new work beside a
+                                # PROJECTS function measured unchanged, or a build
+                                # drawing actions everywhere passes every presence
+                                # assertion (§113.8); the Overview asserted as an
+                                # AGREEMENT key for key with the one a projects
+                                # function draws (§213, §94.8); every press read
+                                # back off the STORED graph (§96); the two numbers
+                                # as AGREEMENT with fnObjScore and fnActionsTally,
+                                # with the mockup's own decision asserted as an
+                                # absence — moving an action must not move the
+                                # objectives figure; an action owing its owner and
+                                # its date COUNTED and said (§223); and the
+                                # workbook a FIXED POINT over the rows the file can
+                                # address, with a nameless action asserted to be
+                                # dropped exactly as a nameless milestone is. It
+                                # a capability REFUSED with the sentence saying so
+                                # and the select left live (§62, §221, §163); and the
+                                # progress workbook driven end to end — the file out,
+                                # a figure typed in, and back through the real reader,
+                                # differ and apply (§294.4).
+                                # It MAKES its state (§255). 47/0, red eight ways from
+                                # the SOURCES (§276): 16 / 1 / 6 / 15 / 1 / 1 / 1 / 1
+                                # — and four of
+                                # its own first failures were the CHECK (§301.6's
+                                # rendered case, §215's unlanded press, a `.rrow`
+                                # that is nought on both formats, and a fixed point
+                                # asked over a row no file can carry)
+python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
+                                # (&sect;343, spec 050): the state is MADE and PUT
+                                # BACK (&sect;255, &sect;94.2) — no pillar in the
+                                # worked example carries one, so every assertion
+                                # here would pass on a build that lost the feature.
+                                # A pillar without one draws nothing on any pane,
+                                # with the pillar beside it asserted to draw one in
+                                # the same run (&sect;113.8); every pen control
+                                # PRESSED and the stored plan read back (&sect;96),
+                                # including that removing a column takes its cells
+                                # with it (&sect;53.4); the column scores asserted
+                                # as AGREEMENT with the platform's own scorer and
+                                # the pillar's headline as their average with its
+                                # measures, with the card's own count and
+                                # Highest/Lowest following (&sect;264); the
+                                # INDICATOR asserted to score nothing, join no
+                                # average and never ask for a note at any value —
+                                # with the column asserted FOUND first, or a build
+                                # that scores every column passes all three
+                                # (&sect;94.5, and falsification B did); Submit
+                                # owed exactly one more per blank cell; the
+                                # Reporting pane's box per cell, target behind it
+                                # and ONE note per row, with a typed figure read
+                                # back off the stored cell; and one deck slide with
+                                # the direction on the scored columns only.
+                                # AND SINCE &sect;343.10 IT ALSO FITS: with the
+                                # pen open at 1600/1280/1100 the table's own box
+                                # must not scroll (&sect;158), the direction
+                                # picker must be at the product's own `--tw`
+                                # rather than filling its cell, and the last
+                                # column's &times; must be inside the VISIBLE
+                                # edge &mdash; never the scroll box's own right
+                                # edge, which contains everything by definition
+                                # and passes on the build Islam photographed
+                                # (&sect;113.8). The file had no width assertion
+                                # at all, which is why the overrun shipped. 42/0,
+                                # red four ways from the SOURCES (&sect;276):
+                                # 1 / 7 / 2 / 9. AND SINCE &sect;343.11 ITS
+                                # CONTROLS MUST BE READ: the `+` that adds a
+                                # column was `--stone` on `--panel`, the SAME
+                                # navy &mdash; **1.00:1**, invisible &mdash; so
+                                # the table could take no second column at all
+                                # (&sect;61 by way of &sect;38.4, eighth time).
+                                # Section 2c measures BOTH palettes, since dark
+                                # already read 7.37 and a one-theme check calls
+                                # this build clean, and both ends (&sect;94.2):
+                                # `Add a row`, on its own pale ground, must NOT
+                                # move, or a build that swept every `.linkbu`
+                                # to the panel's gold passes half. 48/0, red
+                                # 2 more
+python3 checks/capability-report-column.py # a capability's reporting page asks
+                                # the column that judges it (§341): measured on the
+                                # SHIPPED demo with no cell tightened — the rule,
+                                # the screen and canSpeakFor asked of one person,
+                                # the boxes counted, and the Submit bar read. Both
+                                # ends (§94.2): the same person on the function
+                                # itself, and somebody the column refuses. 16/0,
+                                # red 5 / 3 / 1 — one falsification per line
 python3 checks/functional-projects.py # a function's projects are its own
                                 # (§326, spec 048 stage 1). Islam: "the problem
                                 # with having the capability hidden in the
@@ -8964,14 +9165,75 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;340: what the set-up flow never
+*Last Updated: 2026-09-13 &mdash; **&sect;345: a capability is a step, and
+the middle option takes the platform's own word.** Islam, of &sect;344's
+mockup: *"ok for the capability"* &mdash; then the question that dated half the
+same finding: *"but the functions plan in 3 ways, pillars, projects and
+objectives did you find this on main?"* **THE ANSWER WAS NO WHEN I GAVE IT AND
+YES AN HOUR LATER**: &sect;342 built the third way while this was being
+written, so the wizard's dulled option went live under me and my written answer
+was stale before he read it. **What the question was pointing at survives the
+correction** &mdash; the Functions step was two builds behind the platform, and
+the half that stayed behind is the WORD.
+**&sect;345.1 &mdash; THE CAPABILITIES STEP WRITES ONE**: it was dulled and
+said the thing it asks for does not exist, which spec 049 built (&sect;341,
+&sect;343). **Three questions per row and they are SETUP'S OWN THREE** &mdash;
+a name, which function carries it, how it is planned &mdash; because
+`renderCaps()` asks exactly those and offers every function as a holder with no
+filter, so this is one answer in a second place rather than a second answer
+(&sect;53.5). **The holder travels as a NAME**, the flow's rows carrying no
+keys, resolved by the minter exactly as a unit's company is; a name matching
+nobody is UNASSIGNED, a state the Setup page already draws rather than an error
+to invent (&sect;35). **And a capability has TWO forms, not the function's
+three** &mdash; `capFormat()` reads anything that is not "pillars" as projects,
+so offering the third would be a control whose answer the graph silently turns
+into something else (&sect;61, &sect;96.2), narrowed on the screen AND
+validated by the minter or the rule is the page's alone (&sect;42).
+**&sect;345.2 &mdash; AND `holds` HAD TO STOP COUNTING THE BOX**: it counted
+capabilities AT ALL, which was right while nothing out here could make one
+&mdash; one existing meant somebody had made it inside the platform. The moment
+this step can, adding one refuses the very next press and locks the consultant
+out of their own set-up (&sect;61). It counts one that HOLDS something &mdash;
+objectives, projects or pillars, **all three, because counting only projects is
+the same fault one field along** &mdash; asserted at both ends with the worked
+example's own capability still counting.
+**&sect;345.3** the middle option becomes *Projects*: a function holds its own
+directly since &sect;343, so the old label named the arrangement that was
+replaced and was a THIRD spelling of a word `planFormatCell` and
+`capFormatCell` both already write (&sect;53.5). Only the word changes.
+**&sect;345.4 &mdash; AND `client-setup-outside.py` WAS RED ON `main`'s OWN
+BUILD**, established as not this branch's before anything was blamed
+(&sect;303): &sect;342 made all three formats live and left the check asserting
+*"two are live and the third is INERT"*, and this branch never touched
+`FORMATS`, measured off its own diff (&sect;51.11 from the other side).
+**REWRITTEN, NEVER LOOSENED** (&sect;218), and both rewrites move to the claim
+that SURVIVES the decision: &sect;6 asserts the WORDS as a set, so a fourth way
+reddens it until the wizard offers it; and **&sect;8d asserted a landing by
+name** &mdash; Back reaching Companies past the dulled step &mdash; which with
+that step open would pass over nothing (&sect;113.8), so it walks the whole
+rail forward with Next and back with Back and asserts the two orders are each
+other reversed. That would have caught &sect;344.6 and holds whether or not
+anything is ever dulled again; `stepFrom()`'s loop is KEPT for the same reason,
+since removing it puts &sect;344.6 back the day a step is dulled.
+`setup-shape.mjs` is 33/0 RED six ways; `client-setup-outside.py` gains
+&sect;6b, asserting what the step POSTS and never what it draws (&sect;96), at
+both ends. **AND &sect;6b's FIRST RUN DIED RATHER THAN REPORTING**
+(&sect;215, the third time in that file) &mdash; `.wzrow .fld` reaches the two
+SELECTS as well as the name box &mdash; **and it found a real nit doing it**:
+the Add handler focused *the last `.fld`*, a pattern copied from `listStep`,
+whose rows end in one control where a capability's end in three, so the cursor
+landed on the plans-in picker. **The mockup is NOT updated to match the build**
+&mdash; it is the record of what was signed off, not of what was built
+(Principle II).*
+
+*Earlier: 2026-09-13 &mdash; **&sect;344: what the set-up flow never
 asked about is not the flow's to reset.** Islam: *"can you check the current
 main and see what we should enhance in the wizard?"* &mdash; an assessment
 first, then his word on each of seven findings one at a time. **TWO OF MY OWN
 ESTIMATES IN THAT WRITE-UP WERE WRONG AND BOTH ARE CORRECTED RATHER THAN
 QUIETLY WIDENED**: item 3 was called *"one line"* and is a label sweep, item 1
 was called *"who runs what"* and is five kinds of data on one line.
-**&sect;340.1 &mdash; A SECOND PASS THROUGH THE FLOW PUT BACK AN EMPTY ROW**:
+**&sect;344.1 &mdash; A SECOND PASS THROUGH THE FLOW PUT BACK AN EMPTY ROW**:
 `__smpShape` empties four lists and re-mints every row, so fixing a spelling or
 changing one word returned a unit with no head, no custodian, no weight, no
 mark, no aspiration and no Who we are answers, and a function with no head and
@@ -8989,7 +9251,7 @@ and nothing is written**: the flow's rows carry no id, so out here a rename is
 indistinguishable from a removal, and the act somebody wants is a rename, which
 keeps the row on the client's own Setup page (&sect;16.7). A company is matched
 by NAME, because `addCompany` mints positionally.
-**&sect;340.2 &mdash; THE STEP THAT DESCRIBES A PLATFORM TWO BUILDS AGO** is
+**&sect;344.2 &mdash; THE STEP THAT DESCRIBES A PLATFORM TWO BUILDS AGO** is
 DRAWN, not built (rule 1c): the Capabilities step is dulled and says the thing
 it asks for does not exist, which spec 048 built (&sect;326, &sect;334, live in
 the sources), and *"Capabilities &amp; projects"* on the Functions step is a
@@ -8998,7 +9260,7 @@ mockup is in the console's own stylesheet lifted verbatim (&sect;41.9) and
 carries the one decision that is Islam's: `holds` counts a capability AT ALL,
 right while nothing out here could make one and a lock-out the moment this step
 can.
-**&sect;340.3 &mdash; THE FIRST WORD THE FLOW ASKS FOR WAS WRITTEN NOWHERE**:
+**&sect;344.3 &mdash; THE FIRST WORD THE FLOW ASKS FOR WAS WRITTEN NOWHERE**:
 `unitword` is not a key in the label registry, so the minter dropped it &mdash;
 accepted, saved, and the platform went on saying its own word (&sect;294.2's
 write-only column). **And adding it to the source reaches a NEW client and
@@ -9015,16 +9277,16 @@ knowledge base, every `plural()`, the workbook's headers (&sect;22, &sect;65)
 and the role-key map left alone and SAID. **And the rail's own entry resolves at
 render time, not in `SUBS`**, which is evaluated before the tenant's graph
 arrives (&sect;64).
-**&sect;340.4** a row left unnamed is refused rather than dropped, asked of the
+**&sect;344.4** a row left unnamed is refused rather than dropped, asked of the
 SHAPE and in `commitSetup()` as well as `goStep()` (three doors do not go
-through the latter). **&sect;340.5** a client with a plan in it says so and its
+through the latter). **&sect;344.5** a client with a plan in it says so and its
 four shape steps are read-only &mdash; its own flag, never `canEdit`, because
 the name, the mark, the modules and the team are still the consultant's; the
-archived band's own shape and never drawn beside it (&sect;87). **&sect;340.6**
+archived band's own shape and never drawn beside it (&sect;87). **&sect;344.6**
 Back walked into the dulled step and returned, an enabled button that did
 nothing (&sect;96); `stepFrom()` is one answer in both directions and walks past
 a RUN of them.
-**&sect;340.7 &mdash; AND THE CHECKS THAT WOULD HAVE SEEN ANY OF IT**: the
+**&sect;344.7 &mdash; AND THE CHECKS THAT WOULD HAVE SEEN ANY OF IT**: the
 flow's own file had no section for the words step, the companies step, the
 office step or a SECOND pass, which is why four of these were invisible.
 `smp-app/checks/setup-shape.mjs` needs no database and no browser, because
@@ -9039,10 +9301,317 @@ assertions after it down. `check:modules` 61/1 reproduces **identically with
 this work stashed** (&sect;303) &mdash; it is &sect;336.2's. **The built file
 changes**, so a merge owes the `sw.js` SHELL bump confirmed against
 `origin/main` immediately before the push (&sect;91, &sect;94.16). **RECORDED,
-NOT DONE**: the knowledge base keeps the platform's own word, and &sect;340.2 is
+NOT DONE**: the knowledge base keeps the platform's own word, and &sect;344.2 is
 drawn and awaiting Islam.*
 
-*Earlier: 2026-09-13 &mdash; **&sect;339: the setting that could not open,
+
+*Earlier: 2026-09-13 &mdash; **&sect;343: a breakdown of a pillar's
+targets (spec 050).** Islam, of one of his own pillars: *"Maximizing Current
+Stores has its targets broken down by category"* &mdash; five categories, each
+with a growth target, a contribution-margin target and a share of the mix, and
+**fifteen numbers with nowhere to go**. Then, of the four extras &sect;324.8
+left standing, *"let's start with what's drawn and signed off."* **ONLY ONE OF
+THE FOUR WAS EVER DRAWN AND SAYING SO CAME FIRST** &mdash; I had told him four
+were; the other three were NAMED in a list that day and never drawn, so each
+still wants a picture (rule 1c), and the correction is what decided which piece
+this round is. **MEASURED FIRST**: written as measures the fifteen stop being a
+breakdown (the pillar reads as though it had nineteen headline targets rather
+than three and a table), and written as ONE measure it is the row nobody could
+fill that the worked example already shows. **A COLUMN IS A KEY MEASURE WITH
+SEVERAL VALUES INSTEAD OF ONE**, and that sentence is the whole model: `Growth`
+is a single score &mdash; every category's figure against its own target,
+averaged &mdash; joining the pillar's own measures at the same weight, every
+category counting equally (his). **NOTHING HERE KNOWS HOW TO SCORE ANYTHING**:
+a cell is shaped into the object `measureScore` already takes, so the 150 cap,
+`&le;`'s inversion and &sect;239.4's nought rule hold with no arithmetic
+written twice (&sect;53.5) &mdash; 4 against 7 scores **57**, the mockup's own
+number. **AND NO COMPILE RULE**, which is a decision: a blank compile compares
+against the WHOLE target (&sect;276), which is what a category's annual share
+already is. **THE SPREAD AND THE CARD'S COUNT FOLLOW THE HEADLINE OR &sect;264
+COMES STRAIGHT BACK** &mdash; that section's whole finding is that the extremes
+must be of exactly the list the number above them averaged. **THE COLUMN WITH
+NO DIRECTION IS THE INDICATOR**: `Mix` is reported and never scored, because
+the five shares add up to the revenue mix and one beating its share forces
+another to miss; there is **no second switch**, the absence IS the signal
+(&sect;110's pair), it is drawn plain while the scored columns wear their band,
+and **a figure in it can never be at risk** &mdash; `rowReads` answers null, so
+&sect;105's note rule cannot reach it whatever number is typed. **A CELL IS TWO
+FLAT FIELDS, NEVER AN OBJECT**, and that is the one shape everything rests on:
+a breakdown holds the PLAN and the REPORT on one row, the authoriser tells them
+apart by FIELD NAME, and `same()` is stringify-based while jsonb hands an
+object's keys back in its own order (&sect;145, &sect;249.3) &mdash; one object
+of actuals would read as a change nobody made and refuse the save carrying it.
+**The reported field list is DERIVED from the stored columns**, so a column
+added tomorrow is classified that day and one that has GONE falls to the plan
+(&sect;42 fails closed). **NO SCHEMA CHANGE, MEASURED RATHER THAN CLAIMED**
+(&sect;172, wrongly claimed here before): it rides `pillars.extra`, written to a
+real Postgres 16 and read back with the table asserted to have **gained no
+column**, and the key DELETED on removal (&sect;50.6) &mdash; **stored exactly
+when it is shown**, which is one predicate rather than a second rule that could
+disagree. **SUBMIT WAITS FOR EVERY FIGURE AND THAT NEEDED HIS WORD**: the
+mockup says so and a day later he ruled the extras *optional*, which &sect;336
+recorded as reversing exactly that half &mdash; both cannot be true, so the two
+readings were put to him with their costs and he chose **A** (optional to HAVE,
+owed once a pillar has one). **The ask list counts CELLS, not rows** (his own
+*3 measures &middot; 15 category figures &middot; 2 tactics*, tally 20/20),
+**a cell is asked for only where it has a target** (&sect;35, &sect;214.4: a
+red word over a count of nought is worse than silence), **the note is the
+ROW's** so one line clears every cell in it, and **the walk is told where that
+note lives** or a row at risk is counted by the bar and reachable by nothing
+(&sect;16.7). **ONE CONTROL IS NEW TO THE PLATFORM** &mdash; naming a table's
+columns &mdash; which is what keeps this from being about categories: another
+client types Region, or Channel, or Brand. **THE WORKBOOK IS LONG FORM** (a
+line per CELL naming its pillar, its column and its category), because a table
+of variable width in a sheet of fixed shape is the SWOT sheet's own answer;
+the plan file's reader takes the FIRST spelling of a column it meets and the
+order it meets them in, an empty direction is the indicator, and the progress
+sheet's ID is `<row>|<column>` because that pair is what addresses a figure
+(&sect;48) &mdash; both routes driven end to end rather than read.
+`checks/pillar-breakdown.py` **33/0** with the state MADE and put back
+(&sect;255, &sect;94.2), red three ways from the SOURCES (&sect;276): **1 / 7 /
+2**. **AND THE SECOND FALSIFICATION FOUND A WEAKNESS IN THE CHECK ITSELF**
+(&sect;113.8, &sect;94.5) &mdash; its &sect;4 reached for *the column with no
+direction*, which on a build that scores every column is `undefined`, so
+`bdCellScore(r, undefined)` answers null and all three assertions went green on
+exactly the build they exist to catch; the column is asserted FOUND first and
+that falsification goes **2 red &rarr; 7**. 641/0 authoriser with &sect;39 new
+(both ends, red 2 / 1), 140/0 differ, round trip and template round trip green,
+`qa.py` ERRORS none with inline validation lists 36 &rarr; 38 at a longest of
+121 of 255 (&sect;67.5 nowhere near). **&sect;343.9 &mdash; AND A FALSIFICATION
+UNDONE WITH `git checkout` THREW THE WORK AWAY**: three sources were restored
+from a scratch copy and `lib/rules.js` with `git checkout`, **which took the
+whole &sect;343 block with it** because the file was not committed &mdash; the
+break undone and the feature with it. **Caught by the BUILD and not by a
+check**: rebuilding produced a file differing from the good one by exactly one
+CSP hash (&sect;238 hashes each script block), and every check had already
+passed before the damage. *Undo a falsification with the copy you saved, and
+compare the rebuilt file with the build you falsified from.*
+**&sect;343.10 &mdash; AND THE HEAD HELD THREE CONTROLS IN ONE CELL**: Islam,
+with the pen open on it &mdash; *"the table is messed up not fitting in the
+box."* **Measured first**: the table wanted **1851px in a 1285px box** at 1600,
+its column head cell **660px holding 1286px of controls**, so the `&ge;` and the
+`+` in his picture were **CLIPPED rather than drawn small**. The cause is a line
+that is right where it was written &mdash; `.fld { width:100% }` is
+&sect;110.8's own fix, and it assumes ONE control in a cell; three of them each
+take the whole cell and the cell takes the sum (&sect;158's floor from the other
+side) &mdash; **worst with ONE column**, which reads backwards until that is the
+cause: a single head gets the whole free width, so the same table is **566px
+over at one column and 264 at three**, and the check's fixture builds three, so
+its falsification prints the smaller of the two. The cell becomes a flex row: only the name box grows, the picker takes
+**`--tw`** (the product's own 96px, what a select needs to show *Average*), the
+&times; is its natural size, and the add-column cell is sized to its own button.
+**1285/1285, 965/965, 997/997** after. **AND TWO OF THE THREE ASSERTIONS I
+FIRST WROTE COULD NOT FAIL** (&sect;113.8, &sect;94.5): *"not a sliver"* passes
+on the broken build because `width:100%` **stretches** the picker to 293px, and
+*"the &times; is inside the box"* measured the SCROLL box's right edge, which
+contains everything by definition. Both REWRITTEN, never loosened (&sect;218),
+and the falsification goes **3 red &rarr; 9**. **&sect;343.11 &mdash; AND THE CONTROL THAT
+ADDS A COLUMN COULD NOT BE SEEN**: Islam, of the same table one message later
+&mdash; *"I don't undertsna how this table would satisfy the columns that we
+need."* **HE COULD NOT, AND IT IS NOT A MISUNDERSTANDING**: the `+` is
+`.linkbu`, which takes `--stone`, and in the house light palette that is
+**`#16325C` &mdash; byte-identical to `--panel`**, the navy the column head is
+painted in. **1.00:1.** The one control that gives that table a second column
+was drawn in its own ground's colour, so from the screen he sent there is one
+column and no way to ask for another &mdash; **&sect;61's trap arriving as a
+colour** &mdash; with the &times; beside it at **2.41**. **IT IS &sect;259'S
+OWN CASE AND THAT SECTION MEASURED THE SAME 1.00** (*Opportunities* drawn in
+`--panel` on `--panel`), so the answer is that section's and invents nothing
+(&sect;25): the control that ACTS takes `--panel-accent`, the one that REMOVES
+takes `--panel-quiet` &mdash; **7.66 and 7.24**. **SCOPED TO THE BAND**, or the
+fix reaches the wrong control: the body's own *Add a row* is the same
+`.linkbu` on a PALE ground, where `--stone` reads **12.77** and is right where
+it is, so the check asserts BOTH ENDS (&sect;94.2) and a build that swept every
+`.linkbu` to gold would satisfy one half while breaking the other. **AND DARK
+WAS ALREADY CLEAR** (7.37 / 6.44), which is half of why nothing saw it; the
+other half is that **no pillar in the worked example carries a breakdown**
+(&sect;255), so no sweep has ever walked this band &mdash; and &sect;343.10's
+own new section asserts the table's width and the picker's size and **never
+asserted that anything on it can be read**. *A check written against the fault
+you were shown is not a check against the next one.* Answered by DRAWING it
+first (rule 1c, published as an artifact and signed off before a source moved):
+**2 red** from the SOURCES, printing `1.0` and `2.41` verbatim with nothing
+else moving, and the rebuild after restoring byte-identical to the build it was
+falsified from. **RECORDED, NOT
+DONE**: a breakdown travels as one field on one pillar row, so two people
+entering different categories of the SAME pillar in the same seconds resolve
+last-write-wins; a category row cannot be hidden from the presentation; fill
+mode does not reach it; the plan builder does not offer one; and the three
+other extras are still not drawn.*
+
+*Earlier the same day: **&sect;342: objectives and actions, the
+third way a function plans (spec 049).** Islam: *"we need to build the
+objectives and actions"* &mdash; the third panel of the mockup he signed off,
+and of the model, *"each function has objectives like the measures we have and
+actions like tactics they work on that has due dates."* **ALMOST NOTHING HERE IS
+A NEW KIND OF ROW, AND SAYING SO FIRST IS WHAT KEPT IT SMALL**: an objective is
+the function's own key objective, the list a supporting function has held since
+&sect;213 and scored by the reader every other subject is scored by; an action
+is **a milestone with a DATE where a tactic has quarters**, with the three words
+the product has used since &sect;300 and the date PICKED rather than typed
+(&sect;177). What is new is a function holding them DIRECTLY, with no pillar and
+no project in between. **IT IS NOT A SECOND LIST OF OBJECTIVES** (&sect;87's
+twins), so the Overview is untouched and asserted to be the SAME page a projects
+function draws, key for key (&sect;213, &sect;94.8). **NO SCHEMA CHANGE,
+MEASURED RATHER THAN CLAIMED** (&sect;172, wrongly claimed here before):
+`actions` rides `functions.extra`, the road `projects`, `items`, `swot`, `def`
+and `format` already travel &mdash; written to a real Postgres 16, read back,
+and the table asserted to have **gained no column**, with both keys DELETED on
+leaving the form (&sect;50.6); the seed holds no such function, so nothing else
+in that file proves any of it. **AND THE FIRST RUN OF THAT ASSERTION CALLED A
+PERFECT ROUND TRIP A DIFFERENCE** &mdash; jsonb reorders keys, so the compare is
+canonical (&sect;145, &sect;249.3, walked into while citing it). **THE FORMAT IS
+A THIRD VALUE AND `projects` IS THE FALLBACK**, so no stored function moves and
+an unknown value is kept rather than guessed at (&sect;96.2, &sect;30.2). **THE
+THREE PAGES ARE THREE ONE-LINE BRANCHES** over the holder walk &sect;334.18
+exists to keep single. **THE SWITCH ARCHIVES WHAT STOOD**, his own answer
+(*"archvied when type changes and create the new apprach"*), **REVERSING
+&sect;59's refusal for this one transition** and taking the path the import's
+replace and Clear plan already take (&sect;49.2, &sect;22) &mdash; **a
+capability is the one thing it refuses to carry** (&sect;334), and the select is
+put back on Cancel or the same choice cannot be made twice (&sect;110).
+**&sect;342.1 &mdash; AND THE DIALOG THE SWITCH IS MADE IN HAD TO GO WITH IT**:
+`rowEditOpen` takes a deep copy of the whole row so Cancel can undo a field
+edit, and **`leaveModes()` runs that same undo on every destination change** —
+so with the dialog left standing, walking to the function **PUT THE OLD PLAN
+BACK on top of an archive already filed**, deleted the new form's rows with it,
+and did it silently with nothing pressed. Harmless before today, because
+&sect;59 refused the switch whenever there was anything to lose; it is a real
+act now, so the snapshot must not outlive it. **CLOSED, NEVER CANCELLED** —
+`rowEditClose()` drops the snapshot and keeps every field already written, which
+is what Save does (&sect;35); re-snapshotting would have kept the dialog open
+and made Cancel quietly stop undoing a name typed before the switch, a smaller
+lie and still a lie. Cost stated: you come back to the page rather than staying
+in the dialog. **FOUND BY THE CHECK'S FIXTURE FALLING OVER AND NOT BY READING**,
+and the first reading was that the check was wrong &mdash; bisecting the
+navigation (set the format directly and the click is harmless; set it through
+the dialog and the same click reverts it) is what named `leaveModes`. *A fixture
+that will not hold is a measurement, and the first question is whose fault it
+is.* **&sect;342.2 &mdash; AND THE ONE THING THE SWITCH REFUSES SAYS WHAT IT DOES**:
+a capability cannot be carried across (&sect;334), and the first build refused it
+SILENTLY with a fact beside the control reading *"holds 1 capability"* &mdash;
+&sect;62's rule with its second half missing. It names what it stops now, said
+before the press (&sect;221), with the select left LIVE rather than disabled so
+the reason stays reachable (&sect;163); measured rather than judged, one line in
+an 810px cell at 1500/1280/1100 and the row the same 73px (&sect;158).
+**AND THE PROGRESS ROUTE IS DRIVEN END TO END RATHER THAN READ**, because
+&sect;294.4 is that shape one row kind along &mdash; a capability's progress
+upload read two removed fields, so a deliverable reported by file said *Not
+started* on every screen while the upload looked accepted:
+`checks/objectives-actions.py` **47/0**, red eight ways from the SOURCES
+(&sect;276): **16 / 1 / 6 / 15 / 1 / 1 / 1 / 1**, the fourth printing the
+reported symptom.
+**FOUR OF ITS OWN FIRST FAILURES WERE THE CHECK**: `innerText` is the RENDERED
+text and the band is uppercased by CSS (&sect;301.6); a section press made from
+the wrong tab left every later assertion measuring the page before (&sect;215,
+&sect;50.6); `.rrow` is the UNIT rail's spelling and is **nought on both
+formats, so the *no project rail* assertion passed on the very build it exists
+to catch** (&sect;113.8); and the workbook fixed point was asked over a nameless
+row, which `child()` has dropped since the reader was written &mdash; it is a
+fixed point over the rows the file can address now, with the nameless action
+asserted to be dropped exactly as a nameless milestone is.
+**AND THE SWEEP'S COUNT WAS ACCOUNTED FOR RATHER THAN QUOTED** (&sect;332's
+habit, a second time): `qa.py` reads **33 viewers, 241 destinations, ERRORS
+none** where &sect;332 recorded 228 on the same deterministic subject, so it was
+owed a baseline rather than an explanation (&sect;303) &mdash; built from
+`origin/main`'s own sources in a worktree and swept identically, **main 241,
+this branch 241, viewer for viewer**, main's head being &sect;336.2 and the
+branch ahead of it by &sect;336.3, &sect;341 and &sect;342 alone. &sect;342 adds
+no destination; the thirteen are &sect;334 making a capability one of its own.
+The one real difference is the workbook's inline validation lists, **34
+&rarr; 36** &mdash; the two Actions sheets' own, longest 121 of 255, so
+&sect;67.5's cap is nowhere near. **RECORDED, NOT
+DONE**: requirements (&sect;318 &sect;5's third object) are not built, and a
+business unit cannot plan this way.*
+
+*Earlier the same day: **&sect;341: a capability's reporting page asks the
+column that judges it.** Islam, of the fault &sect;336 measured and deliberately
+left: *"yes we need to fix that."* **MEASURED ON THE SHIPPED WORKED EXAMPLE WITH
+NO CELL TIGHTENED**: `canReport()` picked its access key by looking for the
+`fn:` prefix and falling back to the unit's, and **a `cap:` target is neither**
+&mdash; so Yara Kamal, head of Marketing, which holds Product Mindset, read
+`u_report` **none** against `k_report` **edit**, **1** enabled control against
+**17**, and a live *Submit to the SMO* over a report whose boxes she cannot fill
+in (&sect;104.8's family). **&sect;330.5 NAMED THIS EXACT QUESTION AND REACHED
+ONE OF ITS TWO CALLERS** &mdash; `areaOfTarget()` was written there so *which
+column judges this target* has ONE answer, and `mayMarkDoneOn` was taught to ask
+it while `canReport` was not: the seventh copy of one walk, one function short
+(&sect;53.5). **THE ANSWER IS THE SHARED READER, NOT A THIRD BRANCH**:
+`SMPRules.reportPageOf()` has answered `cap:` correctly since it was written and
+had exactly one caller. Nothing new is decided and no cell moves &mdash; what
+changes is that the browser asks the question the server has been asking all
+along (&sect;42). Three lines, each falsified separately from the SOURCES
+(&sect;276): **5 / 3 / 1 red**; `checks/capability-report-column.py` 16/0
+&mdash; **and two of its own assertions passed on the broken build**
+(&sect;113.8), tightened until the falsification went 3 red &rarr; 5.*
+
+*Earlier the same day, from another session: 2026-09-13 &mdash; **&sect;340: a clock on the review.** Islam:
+*"in the presentation module I need to set as an SMO the time of each
+presentation so the timer appears for the presenter"*, then per unit, set with
+the flow, and &mdash; of the mockup drawn before anything was built &mdash; the
+three buttons, the always-there corner clock, and pause in the bar.
+**THE OBSTACLE DECIDED THE SHAPE AND IT WAS HIS OWN INSTRUCTION**: &sect;265
+takes the deck's bar off the screen in fullscreen, so the obvious home for a
+clock is invisible in exactly the state a review is presented in &mdash; it
+goes on the SLIDE, and the room reads it too, stated before he chose. The same
+wall met his pause button, so pause has three ways in (the bar, the `P` key,
+and the clock TAPPED, which is the only one a tablet can reach) and **reset has
+one, deliberately**, because it cannot be undone. **The minutes are a map on the
+group** rather than on each unit, reversing the nearer precedent for three
+measured reasons &mdash; a capability is a subject too, the TOTAL is the whole
+argument for setting them there, and a refusal must name the Presentation menu
+rather than Setup. No migration; the server's two edits falsified separately,
+because a field swept and not classified is INVISIBLE and therefore allowed to
+everybody. **THE MOCKUP'S OWN COLOURS WOULD HAVE SHIPPED UNREADABLE** &mdash; it
+was drawn over a light screenshot and the on-screen deck follows the viewer's
+theme &mdash; so every pair is measured in both palettes, and the ink on the red
+is `--surface`, the obvious `--ink` measuring 3.06 and 2.75.
+**&sect;340.1 &mdash; AND THE FINDING OF THE ROUND IS A NAME**: `clockSubject()`
+was written as `deckSubject()`, which `present.js` already declares 250 lines
+above, so the later won by hoisting and **hiding a slide silently stopped
+working across the product** &mdash; nothing thrown, nothing logged, `node
+--check` clean, found by `hide-slide` going 20 red. **And the first attempt to
+clear it blamed somebody else**: those neighbours do not honour `SMP_BUILT`, so
+a &sect;303 baseline run measured this build and called the failures
+pre-existing (&sect;334.13's trap, walked into within the hour of quoting
+&sect;303). Run from the baseline worktree they are green and it was mine. The
+duplicate scan that missed it compared two FILES and never a file against
+itself; it runs over build.py's own concatenation now.
+**&sect;340.2 &mdash; three of the check's own first failures were the CHECK**,
+and its falsification DIED rather than reporting (&sect;215, in the file whose
+docstring promises it does not). Proved able to fail **seven ways from the
+SOURCES**. **VERIFIED**: presentation-timer 55/0, authoriser 642/0, differ
+140/0, `hide-slide` 42/0 and `master-presentation` 44/0 back to the baseline's
+own numbers, `master-picker` 58/0 with two assertions REWRITTEN never loosened
+(&sect;218) and five position-keyed cell reads de-positioned, full `qa.py`
+sweep **ERRORS none**.
+**&sect;340.4 &mdash; AND THE MERGE IS PART OF THE RECORD**: `main` took
+&sect;337&ndash;&sect;339 while this was in flight, so it is renumbered
+&sect;337 &rarr; &sect;340 **before** the merge, which is what makes the
+renumber provably scoped (&sect;264.3) &mdash; and it took **three spellings**,
+the third being `test-authorize.js`'s JS escape holding **ten** citations a
+two-spelling sweep would have left naming somebody else's section
+(&sect;336.1). **AND &sect;329'S CHECK CAUGHT WHAT IT WAS BUILT FOR, ONE ROUND
+AFTER IT WAS WRITTEN**: this work changes four frozen sources and the two
+SHARED rule modules, and **production serves the new stack** &mdash; so
+`generated-in-step` went **3 FAILED** here and **all clear** on `origin/main`'s
+own worktree (&sect;303). The served `shell.js`, `platform.css` and `body.html`
+were the old bytes, so the clock would have reached the offline handover and
+**nothing a client's browser receives**; and `rules.cjs`/`authorize.cjs` are
+CARRIED copies with no generator (&sect;335), so the served authoriser would
+have run without `PRESENT_MINS` in `gExtra` &mdash; swept-but-unclassified,
+which is **invisible and therefore allowed to everybody** (&sect;259.2): the
+very failure this section falsified on the frozen side and would have shipped
+on the served one. Re-carried by the RULE, the four generators re-run, all
+clear after. **The `sw.js` bump reaches nobody and it is said rather than left
+as a habit** &mdash; the built file's bytes changed, which is &sect;91's
+trigger, and the served worker holds `SHELL` nought times (&sect;329), so it is
+kept for the offline copy alone. **Two `smp-app` checks are recorded UNRUN
+rather than passing** (&sect;54.5): `modules` and `memory-boundary` need
+`node_modules` this session does not hold, and neither is touched here.*
+
+*Earlier the same day: **&sect;339: the setting that could not open,
+
 and the creator who was nowhere in the data.** The two things &sect;337 and
 &sect;338 wrote down and deliberately left, both put to Islam in plain words
 with their costs and both answered in one message: *"1. no need a client they
@@ -9244,8 +9813,10 @@ target* has one answer, and `mayMarkDoneOn` was taught to ask it while
 `canReport` was not. **NOT FIXED HERE, AND THAT IS RULE 1b**: it changes who may
 report, so it is put to Islam before it is written. **RECORDED, NOT DONE, ALL
 THREE HIS**: the plan builder still mints no capability (*"pause the plan
-builder for now"*), a function's seat is still called Head rather than Owner
-(*"no function head is fine for now"*), and three decisions are deferred
+builder for now"*), a function's seat is called Head rather than Owner &mdash;
+**settled 2026-09-13**, *"keep the function head as function head"*, so what was
+*"no function head is fine for now"* is an answer rather than a pause &mdash;
+and three decisions are deferred
 (*"for the need decision from me wait for this"*), written into spec 044 &sect;6
 with his three answers beside them &mdash; along with his ruling that the extras
 drawn for objectives and actions (the targets broken down by category, the

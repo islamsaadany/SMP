@@ -6623,33 +6623,53 @@ function planCell(fk, f, editable){
   return '<div class="plancell">' + planFormatCell(fk, f, editable) +
     (under ? '<span class="planunder">under ' + under + '</span>' : '') + '</div>';
 }
+function planFormatWord(f){
+  var fmt = fnFormat(f);
+  return fmt === "pillars" ? L("pillar","bu")
+       : fmt === "objectives" ? "Objectives & actions" : "Projects";
+}
 function planFormatCell(fk, f, editable){
-  var pillars = fnPlansInPillars(f);
-  var word = pillars ? L("pillar","bu") : "Projects";
-  if (!editable) return '<span class="pill kind">' + esc(word) + '</span>';
-  /* What is in the way, if anything. A function holding capabilities cannot
-     become a pillars one and a function holding pillars cannot go back —
-     switching would not delete the work, it would stop DRAWING it, which is
-     worse: the plan is still in the save and nothing shows it. */
-  var caps = capsOfFunction(fk).length, items = fnItems(f).length;
-  /* "its plan" rather than a count on the pillars side: L("pillar") is the
-     tenant's own word and is already a PLURAL noun, so plural() made it
-     "3 pillarss" — and a function with exactly one would have read
-     "1 pillars". The count is only worth showing where it is grammatical. */
-  var blocked = pillars
-    ? (items ? "its plan" : "")
-    : (caps ? caps + (caps === 1 ? " capability" : " capabilities") : "");
-  /* SHOWN AND DISABLED, never hidden. Every function in a live tenant holds
-     something, so a control that disappeared while it did would be a control
-     nobody ever saw — §45.2's "a feature that renders nothing looks like a
-     feature that was not built". Disabled with the reason beside it says the
-     true thing: this is settable, once the row is cleared. */
+  var fmt = fnFormat(f);
+  if (!editable) return '<span class="pill kind">' + esc(planFormatWord(f)) + '</span>';
+  /* ── §342, REPLACING §59's REFUSAL FOR THIS ONE TRANSITION ─────────────
+     Islam: *"archvied when type changes and create the new apprach."*
+
+     §59 refused the switch outright while the other side held content, and
+     the reason it gave was right at the time — *switching would not delete
+     the work, it would stop DRAWING it, which is worse: the plan is still in
+     the save and nothing shows it.* What changed is that there is now
+     somewhere for that content to go: the archive, restorable from Setup ›
+     Import & storage, on the path the import's replace and Clear plan already
+     take (§49.2, §22 — *nothing the platform does here is a deletion*).
+
+     So the control is never disabled and never silent: the press opens the
+     platform's own confirmation, which names what stands and where the way
+     back is. Recorded as a reversal rather than written over (Principle II):
+     the refusal was the right answer for as long as the archive was not.
+
+     A CAPABILITY KEEPS THE TWO-VALUED CONTROL BESIDE THIS ONE, because
+     Islam's word was about a FUNCTION and a capability planned as a pillar
+     already holds measures and tactics directly — offering it a third value
+     nothing renders would be a control with nothing behind it (§61). */
+  var caps = capsOfFunction(fk).length;
   return '<select class="fld" data-fnformat="' + esc(fk) + '"' +
-      (blocked ? ' disabled title="Clear the plan on this row first"' : '') + '>' +
-    '<option value="projects"' + (pillars ? "" : " selected") + '>Projects</option>' +
-    '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
+      ' aria-label="How ' + esc(f.name || fk) + ' plans">' +
+    '<option value="projects"' + (fmt === "projects" ? " selected" : "") + '>Projects</option>' +
+    '<option value="pillars"' + (fmt === "pillars" ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
+    '<option value="objectives"' + (fmt === "objectives" ? " selected" : "") + '>Objectives &amp; actions</option>' +
     '</select>' +
-    (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
+    /* A CAPABILITY IS THE ONE THING THE SWITCH CANNOT CARRY, and it says so
+       rather than archiving somebody else's strategic entry as a side effect
+       of a dropdown (§334: a capability is a destination of its own). */
+    /* AND IT SAYS WHAT IT DOES, not only what is there. A fact beside a
+       control that silently reverts is §62's refusal with its second half
+       missing: the press has to be explained BEFORE it is made (§221), and
+       the select stays LIVE rather than disabled so the reason is reachable
+       from the control it is about (§163, §221). Measured rather than judged:
+       one line in an 810px cell at 1500, 1280 and 1100, nothing over. */
+    (caps ? '<span class="why">holds ' +
+       esc(caps + (caps === 1 ? " capability" : " capabilities")) +
+       ' \u2014 the form cannot change while it does</span>' : '');
 }
 /* ── AND A CAPABILITY CARRIES ITS OWN FORM (§334, spec 048 §3) ─────────────
    Islam: *"yes the capability can be built in pillars."* So the form belongs

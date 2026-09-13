@@ -441,5 +441,8 @@ round about ownership.
 - **"pause the plan builder for now"** — the guided build still mints no
   capability, so one is created on Setup › Capabilities or through the promote
   control, and nowhere else.
-- **"no function head is fine for now"** — a function's seat is still called
-  **Head** where his sentence says owner, and the two mean the same seat.
+- ~~**"no function head is fine for now"**~~ — **ANSWERED 2026-09-13**:
+  *"keep the function head as function head."* A function's seat is **Head**,
+  and that is now a decision rather than a pause; the reconciliation with his
+  word *owner* is the seat itself — a function's Head reaches that function's
+  capabilities, exactly as its Custodian does (§336).

@@ -1,4 +1,4 @@
-/* WHAT THE SET-UP FLOW WRITES, AND WHAT IT MUST NOT TOUCH (§340)
+/* WHAT THE SET-UP FLOW WRITES, AND WHAT IT MUST NOT TOUCH (§344)
 
    Four faults in one line of frozen.cjs, and none of them was visible to any
    check that existed: the flow's own file asserts the way in, the client, the
@@ -26,7 +26,9 @@
      node checks/setup-shape.mjs --break=no-carry      # must go red
      node checks/setup-shape.mjs --break=no-dropped    # must go red
      node checks/setup-shape.mjs --break=keep-weights  # must go red
-     node checks/setup-shape.mjs --break=extra-word    # must go red          */
+     node checks/setup-shape.mjs --break=extra-word    # must go red
+     node checks/setup-shape.mjs --break=no-caps       # must go red
+     node checks/setup-shape.mjs --break=count-any-cap # must go red          */
 import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, dirname } from "node:path";
@@ -65,6 +67,10 @@ if (!BREAK || BREAK === "extra-word") {
     src = src.replace(/return \{ state: state, dropped: dropped \};/, "return { state: state, dropped: [] };");
   } else if (BREAK === "keep-weights") {
     src = src.replace(/if \(state\.group && state\.group\.weighting\) state\.group\.weighting\.units = \[\];/, "void 0;");
+  } else if (BREAK === "no-caps") {
+    src = src.replace(/var made = addCapability\(holder\);/, "var made = { }; return;");
+  } else if (BREAK === "count-any-cap") {
+    src = src.replace(/if \(n\) caps\+\+;/, "caps++;");
   } else { console.log("unknown break: " + BREAK); process.exit(2); }
   const dir = mkdtempSync(join(tmpdir(), "smp-frozen-"));
   const p = join(dir, "frozen.cjs");
@@ -198,6 +204,80 @@ console.log("\n6 · a row with no name");
   check("the minter still drops it, which is why the screen refuses to move on",
     r.state.unitKeys.length === 1 && r.state.companyKeys.length === 0,
     JSON.stringify({ units: r.state.unitKeys, cos: r.state.companyKeys }));
+}
+
+/* ── 7 · the capabilities the flow makes ────────────────────────────────── */
+console.log("\n7 · capabilities");
+{
+  const A = { companies: [], units: [{ name: "Bakery" }],
+              functions: [{ name: "Finance", format: "projects" },
+                          { name: "Supply Chain", format: "pillars" }],
+              capabilities: [{ name: "Cold chain", fn: "Supply Chain", format: "pillars" },
+                             { name: "Food safety", fn: "Nobody here", format: "projects" }],
+              words: {} };
+  const g = frozen.shape(clone(bare), A).state;
+  const caps = (g.group || {}).capabilities || [];
+  const by = (n) => caps.find((c) => c.name === n) || {};
+  check("the flow's capabilities are minted", caps.length === 2, caps.map((c) => c.name));
+  /* THE HOLDER IS RESOLVED FROM A NAME to the function's KEY, because the
+     flow's rows carry no keys and addCapability takes one. */
+  check("…each carried by the function it names",
+    by("Cold chain").fn && g.functions[by("Cold chain").fn]
+      && g.functions[by("Cold chain").fn].name === "Supply Chain", by("Cold chain").fn);
+  /* THE OTHER END (§94.2): a name that matches nothing is UNASSIGNED, which
+     is a state the Setup page already draws, not an error to invent (§35). */
+  check("…and one whose holder names nobody is unassigned rather than refused",
+    by("Food safety").fn === null, by("Food safety").fn);
+  check("each carries its own form", by("Cold chain").format === "pillars"
+    && by("Food safety").format === "projects",
+    caps.map((c) => c.name + ":" + c.format));
+  check("…and every one has an id the platform minted",
+    caps.every((c) => !!c.id), caps.map((c) => c.id));
+  /* A CAPABILITY HAS TWO FORMS, NOT THE FUNCTION'S THREE (§342): capFormat()
+     reads anything that is not "pillars" as projects, so an unknown word
+     accepted here would be stored meaning something nobody chose (§96.2). */
+  const odd = frozen.shape(clone(bare), Object.assign({}, A, {
+    capabilities: [{ name: "Cold chain", fn: "", format: "objectives" }] })).state;
+  check("a form the platform does not have for a capability reads as projects",
+    (odd.group.capabilities[0] || {}).format === "projects",
+    (odd.group.capabilities[0] || {}).format);
+  /* A SECOND PASS keeps what the flow never asked about — matched by NAME,
+     because the id is minted fresh and the flow's rows carry none. */
+  const planted = clone(g);
+  planted.group.capabilities[0].def = "Keep it cold, end to end.";
+  const again = frozen.shape(clone(planted), A).state;
+  check("a definition typed inside the platform survives a second pass",
+    (again.group.capabilities.find((c) => c.name === "Cold chain") || {}).def
+      === "Keep it cold, end to end.",
+    (again.group.capabilities[0] || {}).def);
+  check("…and the list does not grow", (again.group.capabilities || []).length === 2,
+    (again.group.capabilities || []).length);
+  const cut = frozen.shape(clone(planted), Object.assign({}, A, {
+    capabilities: [{ name: "Cold chain", fn: "Supply Chain", format: "pillars" }] })).state;
+  check("one taken off the answers is gone (§322: the answers ARE the list)",
+    (cut.group.capabilities || []).length === 1, (cut.group.capabilities || []).map((c) => c.name));
+}
+
+/* ── 8 · what counts as work a re-shape must not overwrite ──────────────── */
+console.log("\n8 · an empty capability is not authored work");
+{
+  const withCap = (extra) => {
+    const g = clone(bare);
+    g.group.capabilities = [Object.assign(
+      { id: "cap1", name: "Cold chain", def: "", fn: null, keyObjectives: [], projects: [] }, extra)];
+    return frozen.holds(g).capabilities;
+  };
+  /* THE REASON THIS MOVED: the flow can make a capability now, so counting the
+     BOX rather than what is in it means adding one refuses the very next pass
+     and locks the consultant out of their own set-up (§61). */
+  check("a capability the flow just made does not block a re-shape", withCap({}) === 0, withCap({}));
+  /* BOTH ENDS (§94.2), and all three of the things a capability can hold —
+     counting only one of them is the same fault one field along. */
+  check("…one holding a project does", withCap({ projects: [{ name: "x" }] }) === 1);
+  check("…one holding an objective does", withCap({ keyObjectives: [{ name: "x" }] }) === 1);
+  check("…and one planned in pillars does", withCap({ items: [{ name: "x" }] }) === 1);
+  check("and the worked example's own capability still counts",
+    frozen.holds(clone(seed)).capabilities === 1, frozen.holds(clone(seed)).capabilities);
 }
 
 console.log("\n" + ok + " ok, " + bad.length + " failed");

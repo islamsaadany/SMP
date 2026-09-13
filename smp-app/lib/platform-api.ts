@@ -275,7 +275,21 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
           company: g.units[k].company && g.companies[g.units[k].company]
             ? g.companies[g.units[k].company].name : "" })),
         functions: (g.functionKeys || []).map((k: string) => ({
-          name: g.functions[k].name, format: g.functions[k].format === "pillars" ? "pillars" : "projects" })),
+          /* §342: and the third form, or a client shaped that way reads back
+             as a projects function and the next save writes that answer over
+             the one somebody chose. */
+          name: g.functions[k].name,
+          format: g.functions[k].format === "pillars" ? "pillars"
+                : g.functions[k].format === "objectives" ? "objectives" : "projects" })),
+        /* §345: and the capabilities, each with the NAME of the function that
+           carries it rather than its key — the flow's rows carry no keys, and
+           its holder dropdown is a list of the names one step away. An
+           unassigned one answers "", which is what the Setup page draws too. */
+        capabilities: ((g.group && g.group.capabilities) || []).map(
+          (c: { name: string; fn: string | null; format?: string }) => ({
+            name: c.name,
+            fn: c.fn && g.functions[c.fn] ? g.functions[c.fn].name : "",
+            format: c.format === "pillars" ? "pillars" : "projects" })),
         words: (g.labels || []).reduce((o: Record<string, string>, e: { key: string; bu: string }) => {
           o[e.key] = e.bu; return o; }, {})
       };
@@ -373,9 +387,10 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const list = (k: string) => Array.isArray(a[k]) ? (a[k] as unknown[]).slice(0, 200) : [];
     const answers = {
       companies: list("companies"), units: list("units"), functions: list("functions"),
+      capabilities: list("capabilities"),
       words: (a.words && typeof a.words === "object") ? a.words : {}
     };
-    /* AND IT REFUSES A REWRITE THAT WOULD LOSE WHOEVER IS IN CHARGE (§340).
+    /* AND IT REFUSES A REWRITE THAT WOULD LOSE WHOEVER IS IN CHARGE (§344).
        `holds` counts authored plan lines, and a client can hold a full
        register with a head on every unit and not one pillar — so that guard
        never fired for the state this one is about. A row whose key survives
@@ -407,7 +422,8 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       return no(409, "This client already has a plan in it — " +
         (h.plans ? h.plans + " authored " + (h.plans === 1 ? "line" : "lines") : "") +
         (h.plans && h.capabilities ? " and " : "") +
-        (h.capabilities ? h.capabilities + " " + (h.capabilities === 1 ? "capability" : "capabilities") : "") +
+        (h.capabilities ? h.capabilities + " " +
+          (h.capabilities === 1 ? "capability with work in it" : "capabilities with work in them") : "") +
         ". Set-up rewrites the units and functions, so it stops here rather than " +
         "losing that. Change them on the client's own Setup pages instead.");
     }

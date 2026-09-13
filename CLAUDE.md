@@ -7942,9 +7942,20 @@ python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
                                 # Reporting pane's box per cell, target behind it
                                 # and ONE note per row, with a typed figure read
                                 # back off the stored cell; and one deck slide with
-                                # the direction on the scored columns only. 33/0,
-                                # red three ways from the SOURCES (&sect;276):
-                                # 1 / 7 / 2
+                                # the direction on the scored columns only.
+                                # AND SINCE &sect;339.10 IT ALSO FITS: with the
+                                # pen open at 1600/1280/1100 the table's own box
+                                # must not scroll (&sect;158), the direction
+                                # picker must be at the product's own `--tw`
+                                # rather than filling its cell, and the last
+                                # column's &times; must be inside the VISIBLE
+                                # edge &mdash; never the scroll box's own right
+                                # edge, which contains everything by definition
+                                # and passes on the build Islam photographed
+                                # (&sect;113.8). The file had no width assertion
+                                # at all, which is why the overrun shipped. 42/0,
+                                # red four ways from the SOURCES (&sect;276):
+                                # 1 / 7 / 2 / 9
 python3 checks/capability-report-column.py # a capability's reporting page asks
                                 # the column that judges it (§337): measured on the
                                 # SHIPPED demo with no cell tightened — the rule,
@@ -9082,7 +9093,27 @@ break undone and the feature with it. **Caught by the BUILD and not by a
 check**: rebuilding produced a file differing from the good one by exactly one
 CSP hash (&sect;238 hashes each script block), and every check had already
 passed before the damage. *Undo a falsification with the copy you saved, and
-compare the rebuilt file with the build you falsified from.* **RECORDED, NOT
+compare the rebuilt file with the build you falsified from.*
+**&sect;339.10 &mdash; AND THE HEAD HELD THREE CONTROLS IN ONE CELL**: Islam,
+with the pen open on it &mdash; *"the table is messed up not fitting in the
+box."* **Measured first**: the table wanted **1851px in a 1285px box** at 1600,
+its column head cell **660px holding 1286px of controls**, so the `&ge;` and the
+`+` in his picture were **CLIPPED rather than drawn small**. The cause is a line
+that is right where it was written &mdash; `.fld { width:100% }` is
+&sect;110.8's own fix, and it assumes ONE control in a cell; three of them each
+take the whole cell and the cell takes the sum (&sect;158's floor from the other
+side) &mdash; **worst with ONE column**, which reads backwards until that is the
+cause: a single head gets the whole free width, so the same table is **566px
+over at one column and 264 at three**, and the check's fixture builds three, so
+its falsification prints the smaller of the two. The cell becomes a flex row: only the name box grows, the picker takes
+**`--tw`** (the product's own 96px, what a select needs to show *Average*), the
+&times; is its natural size, and the add-column cell is sized to its own button.
+**1285/1285, 965/965, 997/997** after. **AND TWO OF THE THREE ASSERTIONS I
+FIRST WROTE COULD NOT FAIL** (&sect;113.8, &sect;94.5): *"not a sliver"* passes
+on the broken build because `width:100%` **stretches** the picker to 293px, and
+*"the &times; is inside the box"* measured the SCROLL box's right edge, which
+contains everything by definition. Both REWRITTEN, never loosened (&sect;218),
+and the falsification goes **3 red &rarr; 9**. **RECORDED, NOT
 DONE**: a breakdown travels as one field on one pillar row, so two people
 entering different categories of the SAME pillar in the same seconds resolve
 last-write-wins; a category row cannot be hidden from the presentation; fill

@@ -173,6 +173,47 @@ Beside it: `test-authorize.js` §39 (8 assertions, both ends, red 2 ways),
 
 ---
 
+## 7b · And the head held three controls in one cell (§339.10)
+
+Islam, with the pen open on it: *"the table is messed up not fitting in the
+box."*
+
+Measured before anything changed, at 1600: the table wanted **1851px in a
+1285px box**, and the column head's cell was **660px holding 1286px of
+controls**. So the `≥` and the `+` in his screenshot were **clipped rather
+than drawn small** — a different fault from the one it looks like.
+
+The cause is `.fld { width:100% }`, which is §110.8's own fix and is right
+where it was written: a definite width is what stops an open register row
+growing its table. It assumes ONE control in a cell. Three of them each take
+the whole cell and the cell takes the sum.
+
+It is **worst with one column**, which reads backwards until the cause is the
+one above: a single head gets the whole free width, so both boxes claim 633px
+each, where three columns share it and each pair claims 293 — the same table
+is 566px over at one column and 264 at three. The check's fixture builds
+three, so its falsification prints the smaller number.
+
+The cell becomes a flex row (`.bdhead`): only the name box grows, the
+direction picker takes **`--tw`** — the product's own 96px, what a select
+needs to show *Average* — and the × is its natural size; the add-column cell
+is sized to its own button. Measured after: **1285/1285, 965/965, 997/997**
+at 1600/1280/1100.
+
+**Two of the three assertions first written could not fail** (§113.8, §94.5).
+*"The picker is not a sliver"* passes on the broken build, because
+`width:100%` **stretches** it to 293px. And *"the × is inside the box"*
+measured the scroll box's own right edge, which contains everything by
+definition. Both rewritten, never loosened (§218) — at `--tw` read off the
+page, and against the **visible** edge — and the falsification goes **3 red →
+9**.
+
+`checks/pillar-breakdown.py` had no width assertion at all, which is why the
+overrun shipped: 33 assertions about what the table says, none about whether
+it fits. 42 now.
+
+---
+
 ## 8 · Recorded, not done
 
 - **A breakdown travels as ONE field on ONE pillar row** in the change list.

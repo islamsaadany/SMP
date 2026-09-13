@@ -21,6 +21,11 @@ one changed.
       (§96) — an editor wired to nothing renders identically and discards
       every keystroke.
 
+  2b· AND IT FITS THE PANE, with the pen open, at three widths (§158). The
+      head holds three controls in one cell, so `.fld { width:100% }` — the
+      one line that stops an open register row growing its table (§110.8) —
+      is what asked for 1286px inside a 660px cell and clipped two of them.
+
   3 · A COLUMN IS A KEY MEASURE WITH SEVERAL VALUES. Asserted as AGREEMENT
       with the platform's own scorer (§94.8) rather than against typed
       numbers, and the pillar's headline asserted to be the average of its
@@ -146,6 +151,55 @@ with sync_playwright() as pw:
        pg.evaluate("()=>UNITS['mobile'].items[1].breakdown.rows[0]"))
     pg.evaluate("()=>{UNITS['mobile'].items[1].breakdown.rows[0]['t_"+COLS[0]+"']='7%'; paint();}")
     pg.wait_for_timeout(300)
+
+    # 2b · IT FITS THE PANE, AT EVERY WIDTH THE PAGE FITS AT (§158: fit,
+    # never "and it scrolls"). With the pen OPEN, because that is the state
+    # that carries controls — read mode is prose and shrinks with the window,
+    # and this table's head holds three controls in one cell (§267's shape).
+    # Islam reported it as *"the table is messed up not fitting in the box"*:
+    # at 1600 a one-column table wanted 1851px in a 1285px box, so the
+    # direction picker and the + were CLIPPED rather than drawn small. It is
+    # WORST with one column, because a single head gets the whole free width
+    # and both its boxes claim 633px each — this fixture builds THREE, which
+    # share it, so a falsification here prints 264 over rather than 566.
+    print("\n2b · the table fits its pane (§158)")
+    FIT = """() => {
+      const t = [...document.querySelectorAll('#panel table')]
+        .filter(x => x.innerText.indexOf('Add a row') > -1 &&
+                     x.querySelector('input.bdcol'))[0];
+      if (!t) return null;
+      const bx = t.closest('.tblscroll') || t.parentElement;
+      const sel = t.querySelector('select.bddirsel');
+      const xs = [...t.querySelectorAll('[data-bdcoloff]')];
+      const x = xs[xs.length - 1];
+      /* The VISIBLE right edge, never the scroll box's own right edge: a box
+         that scrolls contains everything by definition, so measuring against
+         `bx.getBoundingClientRect().right` passes on the very build this
+         section exists to catch (§113.8). */
+      const seen = bx.getBoundingClientRect().left + bx.clientWidth;
+      return { over: Math.round(bx.scrollWidth - bx.clientWidth),
+               box: Math.round(bx.clientWidth),
+               sel: sel ? Math.round(sel.getBoundingClientRect().width) : 0,
+               tw: Math.round(parseFloat(getComputedStyle(t)
+                     .getPropertyValue('--tw')) || 0),
+               xIn: !!(x && x.getBoundingClientRect().right <= seen + 1) };
+    }"""
+    for w in (1600, 1280, 1100):
+        pg.set_viewport_size({"width": w, "height": 900}); pg.wait_for_timeout(400)
+        m = pg.evaluate(FIT)
+        ok("at %dpx the breakdown table fits its pane" % w,
+           m is not None and m["over"] <= 0, m)
+        # AT ITS OWN WIDTH, never "wide enough" — on the build before the fix
+        # the picker was 293px, STRETCHED by `.fld { width:100% }` rather than
+        # squeezed, so a minimum would have passed on it (§94.5). The number
+        # is the product's own `--tw`, so a later change to that token stays
+        # green and a picker that goes back to filling its cell does not.
+        ok("...the direction picker is drawn at its own width, not its cell's",
+           m is not None and m["tw"] > 0 and abs(m["sel"] - m["tw"]) <= 1, m)
+        ok("...and the × of the last column is on screen, not off the end",
+           m is not None and m["xIn"], m)
+    pg.set_viewport_size({"width": 1600, "height": 900}); pg.wait_for_timeout(400)
+
     click(pg, '#secrow-in .secpen[data-page="plan"]', 600)   # close the pen
 
     print("\n3 · a column is a key measure with several values")

@@ -46173,6 +46173,56 @@ damage.
 file the work is not committed to — and compare the rebuilt file with the
 build you falsified from, because it is the one thing that notices.*
 
+### 339.10 · And the head held three controls in one cell
+
+Islam, with a screenshot of the pen open on it: *"the table is messed up not
+fitting in the box."*
+
+**MEASURED BEFORE ANYTHING WAS CHANGED**, at 1600: the table wanted
+**1851px in a 1285px box**, and the column head's cell was **660px holding
+1286px of controls** — a name box at 633, a direction picker at 633 and a
+20px ×. So the `≥` and the `+` in his picture were **CLIPPED rather than
+drawn small**, which is a different fault from the one it looks like.
+
+**THE CAUSE IS A LINE THAT IS RIGHT WHERE IT WAS WRITTEN.** `.fld {
+width:100% }` is §110.8's own fix — a definite width is what stops an open
+register row contributing its fields' intrinsic size to the column and
+growing the table 188px the moment a pen is pressed. It assumes ONE control
+in a cell. Three of them each take the whole cell and the cell takes the sum,
+so the same declaration that holds one table still blows the next one open
+(§158's floor from the other side: *a good default in both directions still
+has two edges*).
+
+**AND IT IS WORST WITH ONE COLUMN**, which reads backwards until the cause is
+the one above: a single head gets the whole free width, so both boxes claim
+633px each, where three columns share it and each pair claims 293 — the same
+table is **566px over at one column and 264 at three**. The check's fixture
+builds three, so its falsification prints the smaller number; the screenshot
+was the larger one.
+
+**THE CELL BECOMES A ROW, AND ONLY THE PROSE GROWS.** `.bdhead` is a flex
+row: the name box is the one flexible thing, the picker takes **`--tw`** —
+the product's own 96px, what a select needs to show *Average* (§248) and
+never a number chosen here — and the × is its natural size. The add-column
+cell is sized to its own button rather than taking a share of the table.
+Measured after: **1285 / 1285, 965 / 965, 997 / 997** at 1600 / 1280 / 1100.
+
+**AND TWO OF THE THREE ASSERTIONS I FIRST WROTE COULD NOT FAIL** (§113.8,
+§94.5). *"The picker is not a sliver"* passes on the broken build, because
+`width:100%` **stretches** it — 293px, not 40 — so the minimum was measuring
+the opposite fault; it asserts the picker is at its own `--tw` now, read off
+the page rather than typed, so a later change to that token stays green. And
+*"the × is inside the box"* measured against the scroll box's own right edge,
+which **contains everything by definition** — it measures against the
+**visible** edge (`left + clientWidth`) now, and reads `xIn: false` on the
+build Islam photographed. With both rewritten (§218, never loosened) the
+falsification goes **3 red → 9**, printing the overrun at each width.
+
+`checks/pillar-breakdown.py` had **no width assertion at all**, which is why
+this shipped: every one of its 33 assertions is about what the table says,
+and none about whether it fits. 42 now, falsified from the SOURCES (§276)
+with the fix reverted whole.
+
 ### Recorded, not done
 
 - **A breakdown travels as one field on one pillar row.** Finer would need

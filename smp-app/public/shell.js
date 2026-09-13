@@ -22357,16 +22357,21 @@ function bdPlanSection(it, u, pi, ed){
     { h: inputOr("plan", SMPRules.bdName(it), "bdname",
         function(v){ b.name = v; }), cls:"" }]
     .concat(cols.map(function(c){
-      return { cls:"cc", h:
+      /* §339.10: THE THREE SHARE THE CELL, or each claims all of it —
+         `.fld` is width:100% and the table then sizes itself to the sum
+         (measured: 1286px of controls in a 660px cell, 566px past the
+         table's edge). The wrapper is what lays them out. */
+      return { cls:"cc", h: '<span class="bdhead">' +
         inputOr("plan", c.name || "", "bdcol", function(v){ c.name = v; }) +
         selectOr("plan", SMPRules.bdScored(c) ? c.dir : SMPRules.BD_IND,
           ["≥", "≤", SMPRules.BD_IND], "bddirsel",
           function(v){ c.dir = (v === SMPRules.BD_IND ? "" : v); paint(); }) +
         '<button class="xbtn" data-bdcoloff="' + at + '|' + esc(c.id) +
-          '" title="Remove this column" aria-label="Remove this column">&times;</button>' };
+          '" title="Remove this column" aria-label="Remove this column">&times;</button>' +
+        '</span>' };
     }))
-    .concat([{ cls:"cc", h:'<button class="linkbu" data-rowadd="bdcol|' + at +
-      '" title="Add a column">+</button>' }]);
+    .concat([{ cls:"bdadd", h:'<button class="linkbu" data-rowadd="bdcol|' + at +
+      '" title="Add a column" aria-label="Add a column">+</button>' }]);
   var rows = SMPRules.bdRows(it).map(function(r, i){
     return '<tr>' +
       '<td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +

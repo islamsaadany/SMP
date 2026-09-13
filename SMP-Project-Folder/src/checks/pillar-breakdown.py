@@ -26,6 +26,11 @@ one changed.
       one line that stops an open register row growing its table (§110.8) —
       is what asked for 1286px inside a 660px cell and clipped two of them.
 
+  2c· AND ITS CONTROLS CAN BE READ. The `+` that adds a column was
+      `--stone` on `--panel` — the same navy — so it was invisible, and the
+      only way to get a second column with it. Both palettes, and both ends:
+      `Add a row`, on its own pale ground, must not move (§94.2).
+
   3 · A COLUMN IS A KEY MEASURE WITH SEVERAL VALUES. Asserted as AGREEMENT
       with the platform's own scorer (§94.8) rather than against typed
       numbers, and the pillar's headline asserted to be the average of its
@@ -199,6 +204,51 @@ with sync_playwright() as pw:
         ok("...and the × of the last column is on screen, not off the end",
            m is not None and m["xIn"], m)
     pg.set_viewport_size({"width": 1600, "height": 900}); pg.wait_for_timeout(400)
+
+    # 2c · AND THE BAND'S OWN CONTROLS CAN BE READ (§38.4, §38.5). Islam:
+    # *"I don't undertsna how this table would satisfy the columns that we
+    # need"* — and he could not, because the ONE control that adds a column
+    # was `--stone` on `--panel`, which in the house light palette are the
+    # SAME NAVY: 1.00:1, invisible, with the × beside it at 2.41. §61 by way
+    # of a colour. Measured in BOTH palettes, because dark already read at
+    # 7.37 and 6.44 and a check run in one theme calls this build clean.
+    # BOTH ENDS (§94.2): the body's own `Add a row` sits on a pale ground and
+    # must NOT move — a build that swept every `.linkbu` to the panel's gold
+    # would satisfy the half above and make that one unreadable instead.
+    print("\n2c \u00b7 the band's controls can be read (\u00a738.5)")
+    INKS = """() => {
+      const f = el => { let g = 'rgba(0, 0, 0, 0)', e = el;
+        while (e && e !== document.body) {
+          const bg = getComputedStyle(e).backgroundColor;
+          if (bg && !/rgba\\(0, 0, 0, 0\\)/.test(bg)) { g = bg; break; }
+          e = e.parentElement; }
+        return { ink: getComputedStyle(el).color, ground: g }; };
+      const add  = document.querySelector('.bdadd > .linkbu');
+      const off  = document.querySelector('.bdhead > .xbtn');
+      const rows = [...document.querySelectorAll('[data-rowadd^="bdrow|"]')];
+      return { add: add && f(add), off: off && f(off),
+               row: rows.length ? f(rows[0]) : null };
+    }"""
+    def lum(c):
+        n = [int(x) / 255 for x in c[c.find("(") + 1:c.find(")")].split(",")[:3]]
+        n = [(v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4) for v in n]
+        return 0.2126 * n[0] + 0.7152 * n[1] + 0.0722 * n[2]
+    def ratio(m):
+        if not m: return 0.0
+        a, b = lum(m["ink"]), lum(m["ground"])
+        return round((max(a, b) + 0.05) / (min(a, b) + 0.05), 2)
+    for theme in ("light", "dark"):
+        pg.evaluate("t=>{document.documentElement.setAttribute('data-theme',t);}", theme)
+        pg.wait_for_timeout(250)
+        ink = pg.evaluate(INKS)
+        ok("in %s, the + that adds a column can be read" % theme,
+           ratio(ink["add"]) >= 4.5, [ink["add"], ratio(ink["add"])])
+        ok("...and so can the \u00d7 that removes one",
+           ratio(ink["off"]) >= 4.5, [ink["off"], ratio(ink["off"])])
+        ok("...while `Add a row`, on its own pale ground, is untouched",
+           ratio(ink["row"]) >= 4.5, [ink["row"], ratio(ink["row"])])
+    pg.evaluate("()=>{document.documentElement.removeAttribute('data-theme');}")
+    pg.wait_for_timeout(250)
 
     click(pg, '#secrow-in .secpen[data-page="plan"]', 600)   # close the pen
 

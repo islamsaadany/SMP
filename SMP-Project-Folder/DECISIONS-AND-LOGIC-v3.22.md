@@ -46223,6 +46223,57 @@ this shipped: every one of its 33 assertions is about what the table says,
 and none about whether it fits. 42 now, falsified from the SOURCES (§276)
 with the fix reverted whole.
 
+**Verified.** 42/0, and red `1 / 7 / 2 / 9` from the sources. The neighbours
+green — `table-fit`, `table-standard`, `plan-tail-fold`, `plan-fields`,
+`plan-edit-line`, `objectives-table`, `monthly-plan`, `yn-in-progress`,
+`pillar-kind`, `submit-gate`, `gap-fill`, `deck-figures`, `deck-strip` 32/0,
+`measure-score-spread`, `count-compile`, `ytd-proration`, `report-blockers`
+— and the full `qa.py` sweep **ERRORS: none**, with the workbook's inline
+validation lists at 38, longest 121 of 255 (§67.5 nowhere near).
+
+### 339.11 · And the control that adds a column could not be seen
+
+Islam, of the same table one message later: ***"I don't undertsna how this
+table would satisfy the columns that we need."*** **HE COULD NOT, AND THAT IS
+NOT A MISUNDERSTANDING** — measured before a word was written back to him:
+the `+` that adds a column is `.linkbu`, which takes `--stone`, and in the
+house light palette `--stone` is **`#16325C`** — **byte-identical to
+`--panel`, the navy the column head is painted in**. **1.00:1.** The one
+control that can give that table a second column was drawn in its own
+ground's colour, so from the screen he sent there is a single column and no
+way to ask for another: **§61's trap arriving as a colour**. The `×` beside
+it read **2.41**.
+
+**IT IS §259'S OWN CASE, AND THAT SECTION MEASURED THE SAME 1.00** — its
+*Opportunities* slide drawn in `--panel` on `--panel` — so the answer is that
+section's too and invents nothing (§25): the three inks for this ground
+already exist, and the control that ACTS takes `--panel-accent` while the one
+that REMOVES takes `--panel-quiet`. **7.66 and 7.24**, against 1.00 and 2.41.
+§38.4 for the eighth time.
+
+**SCOPED TO THE BAND, OR THE FIX REACHES THE WRONG CONTROL**: the body's own
+*Add a row* is the same `.linkbu` on a PALE ground, where `--stone` reads
+**12.77** and is right where it is — so the check asserts **both ends**
+(§94.2), and a build that swept every `.linkbu` to the panel's gold would
+satisfy the half above while making that one unreadable instead.
+
+**AND DARK WAS ALREADY CLEAR** (7.37 / 6.44), which is half of why nothing
+saw it — a check run in one palette calls this build clean. The other half is
+&sect;255: **no pillar in the worked example carries a breakdown**, so no
+sweep has ever walked this band, and &sect;339.10's own new section asserts
+the table's width and the picker's size and **never asserted that anything on
+it can be read**. *A check written against the fault you were shown is not a
+check against the next one.*
+
+**ANSWERED BY DRAWING IT** (rule 1c): today, the proposal and the finished
+five-category table published as one artifact and signed off before a source
+moved &mdash; `design-mockups/breakdown-add-column/`. Section 2c, six
+assertions over both palettes, **2 red** from the SOURCES with the two rules
+removed, printing `1.0` and `2.41` verbatim and nothing else moving; the
+rebuild after restoring is byte-identical to the build it was falsified from.
+Screen only &mdash; no `api/`, `lib/` or `db/` file touched, read off the diff
+&mdash; nothing stored, nothing migrated, no rule moved.
+
 ### Recorded, not done
 
 - **A breakdown travels as one field on one pillar row.** Finer would need

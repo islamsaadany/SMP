@@ -7955,7 +7955,19 @@ python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
                                 # (&sect;113.8). The file had no width assertion
                                 # at all, which is why the overrun shipped. 42/0,
                                 # red four ways from the SOURCES (&sect;276):
-                                # 1 / 7 / 2 / 9
+                                # 1 / 7 / 2 / 9. AND SINCE &sect;339.11 ITS
+                                # CONTROLS MUST BE READ: the `+` that adds a
+                                # column was `--stone` on `--panel`, the SAME
+                                # navy &mdash; **1.00:1**, invisible &mdash; so
+                                # the table could take no second column at all
+                                # (&sect;61 by way of &sect;38.4, eighth time).
+                                # Section 2c measures BOTH palettes, since dark
+                                # already read 7.37 and a one-theme check calls
+                                # this build clean, and both ends (&sect;94.2):
+                                # `Add a row`, on its own pale ground, must NOT
+                                # move, or a build that swept every `.linkbu`
+                                # to the panel's gold passes half. 48/0, red
+                                # 2 more
 python3 checks/capability-report-column.py # a capability's reporting page asks
                                 # the column that judges it (§337): measured on the
                                 # SHIPPED demo with no cell tightened — the rule,
@@ -9113,7 +9125,34 @@ FIRST WROTE COULD NOT FAIL** (&sect;113.8, &sect;94.5): *"not a sliver"* passes
 on the broken build because `width:100%` **stretches** the picker to 293px, and
 *"the &times; is inside the box"* measured the SCROLL box's right edge, which
 contains everything by definition. Both REWRITTEN, never loosened (&sect;218),
-and the falsification goes **3 red &rarr; 9**. **RECORDED, NOT
+and the falsification goes **3 red &rarr; 9**. **&sect;339.11 &mdash; AND THE CONTROL THAT
+ADDS A COLUMN COULD NOT BE SEEN**: Islam, of the same table one message later
+&mdash; *"I don't undertsna how this table would satisfy the columns that we
+need."* **HE COULD NOT, AND IT IS NOT A MISUNDERSTANDING**: the `+` is
+`.linkbu`, which takes `--stone`, and in the house light palette that is
+**`#16325C` &mdash; byte-identical to `--panel`**, the navy the column head is
+painted in. **1.00:1.** The one control that gives that table a second column
+was drawn in its own ground's colour, so from the screen he sent there is one
+column and no way to ask for another &mdash; **&sect;61's trap arriving as a
+colour** &mdash; with the &times; beside it at **2.41**. **IT IS &sect;259'S
+OWN CASE AND THAT SECTION MEASURED THE SAME 1.00** (*Opportunities* drawn in
+`--panel` on `--panel`), so the answer is that section's and invents nothing
+(&sect;25): the control that ACTS takes `--panel-accent`, the one that REMOVES
+takes `--panel-quiet` &mdash; **7.66 and 7.24**. **SCOPED TO THE BAND**, or the
+fix reaches the wrong control: the body's own *Add a row* is the same
+`.linkbu` on a PALE ground, where `--stone` reads **12.77** and is right where
+it is, so the check asserts BOTH ENDS (&sect;94.2) and a build that swept every
+`.linkbu` to gold would satisfy one half while breaking the other. **AND DARK
+WAS ALREADY CLEAR** (7.37 / 6.44), which is half of why nothing saw it; the
+other half is that **no pillar in the worked example carries a breakdown**
+(&sect;255), so no sweep has ever walked this band &mdash; and &sect;339.10's
+own new section asserts the table's width and the picker's size and **never
+asserted that anything on it can be read**. *A check written against the fault
+you were shown is not a check against the next one.* Answered by DRAWING it
+first (rule 1c, published as an artifact and signed off before a source moved):
+**2 red** from the SOURCES, printing `1.0` and `2.41` verbatim with nothing
+else moving, and the rebuild after restoring byte-identical to the build it was
+falsified from. **RECORDED, NOT
 DONE**: a breakdown travels as one field on one pillar row, so two people
 entering different categories of the SAME pillar in the same seconds resolve
 last-write-wins; a category row cannot be hidden from the presentation; fill

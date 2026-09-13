@@ -214,6 +214,42 @@ it fits. 42 now.
 
 ---
 
+## 7c · And the control that adds a column could not be seen (§339.11)
+
+Islam, of the same table one message later: ***"I don't undertsna how this
+table would satisfy the columns that we need."***
+
+**He could not, and it is not a misunderstanding.** The `+` that adds a column
+is `.linkbu`, which takes `--stone` — and in the house light palette `--stone`
+is **`#16325C`**, byte-identical to `--panel`, the navy the column head is
+painted in. **1.00:1.** The one control that gives the table a second column
+was drawn in its own ground's colour, so from that screen there is a single
+column and no way to ask for another: **§61's trap arriving as a colour.** The
+`×` beside it read **2.41**.
+
+**The inks already existed** and are §259's, which measured this same 1.00 on
+its own *Opportunities* slide: the control that **acts** takes
+`--panel-accent`, the one that **removes** takes `--panel-quiet` — **7.66 and
+7.24** light. No new colour (§25).
+
+**Scoped to the band**, or the fix reaches the wrong control: the body's own
+*Add a row* is the same `.linkbu` on a **pale** ground, where `--stone` reads
+**12.77** and is right where it is. The check asserts **both ends** (§94.2).
+
+**Why nothing saw it.** Dark already read 7.37 and 6.44, so a check run in one
+palette calls this build clean; and no pillar in the worked example carries a
+breakdown (§255), so no sweep has ever walked this band. §7b's own new section
+asserts the table's width and the picker's size and **never asserted that
+anything on it can be read** — *a check written against the fault you were
+shown is not a check against the next one.*
+
+Drawn first and signed off (rule 1c):
+`design-mockups/breakdown-add-column/2026-09-13_add-column-visible.html`.
+Section 2c, six assertions over both palettes; **2 red** from the sources with
+the two rules removed, printing `1.0` and `2.41` verbatim.
+
+---
+
 ## 8 · Recorded, not done
 
 - **A breakdown travels as ONE field on ONE pillar row** in the change list.

@@ -7214,7 +7214,7 @@ th .subhd { font-weight:400; }
 .bdhead > * { min-width:0; }
 .bdhead > input.fld { flex:1 1 auto; }
 .bdhead > select.fld { flex:0 0 auto; width:var(--tw); }
-.bdhead > .xbtn { flex:0 0 auto; }
+.bdhead > .xbtn { flex:0 0 auto; color:var(--panel-quiet); }  /* ink: §339.11 below */
 /* The table's own name, in the head of the column it belongs to — it grows
    with the cell rather than claiming it, for the same reason. */
 .bdname { width:100%; min-width:0; }
@@ -7222,6 +7222,26 @@ th .subhd { font-weight:400; }
    rather than a share of the table (§37: a fixed-layout table reads every
    width off its first row, and an auto one reads it off the widest cell). */
 .bdadd { width:1%; white-space:nowrap; text-align:center; }
+/* §339.11: A CONTROL ON THE BAND TAKES THE BAND'S OWN INK, and this one did
+   not. `.linkbu` is `--stone`, which in the house light palette is `#16325C`
+   — BYTE-IDENTICAL to `--panel`, the navy this head is painted in — so the
+   ONE control that adds a column was drawn at 1.00:1 against its own ground
+   and could not be seen at all, with the × beside it at 2.41. §61's trap by
+   way of §38.4 (eighth time), and §259's own case exactly: that section
+   measured *Opportunities* drawn in `--panel` on `--panel` and recorded the
+   same 1.00.
+
+   NO NEW COLOUR (§25). The three inks for this ground already exist and are
+   §259's: `--panel-accent` for the control that ACTS, `--panel-quiet` for the
+   one that removes — 7.66 and 7.24 measured light, against 1.00 and 2.41.
+
+   SCOPED TO THE BAND, or it reaches the wrong thing: the body's own
+   `Add a row` sits on a PALE ground where `--stone` reads 12.77 and is right
+   where it is. And dark was already clear (7.37 / 6.44), which is half of why
+   nothing saw this — the other half being that no pillar in the worked example
+   carries a breakdown, so no sweep has ever walked this band (§255). */
+.bdadd > .linkbu { color:var(--panel-accent); font-weight:700; }
+.bdadd > .linkbu:hover, .bdhead > .xbtn:hover { color:var(--panel-ink); }
 
 .tacfold { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 16px;
            margin-top:10px; }

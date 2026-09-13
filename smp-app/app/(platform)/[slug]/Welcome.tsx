@@ -2,7 +2,7 @@
    markup class for class, drawn from lib/landing.ts's answer. Every door is
    an address (doorHref), so the whole screen is server-rendered HTML and
    needs no script of its own. */
-import { doorHref, type Landing, type Act } from "../../../lib/landing.ts";
+import { doorHref, tourHref, type Landing, type Act } from "../../../lib/landing.ts";
 import type { SessionUser } from "../../../lib/auth.ts";
 import type { Tenant } from "../../../lib/door.ts";
 
@@ -95,7 +95,7 @@ export default function Welcome({ slug, tenant, user, data }: { slug: string; te
                 <summary className="wtoggle"><h3>Take an intro round</h3><span className="wtcar" aria-hidden="true">›</span></summary>
                 <div className="wtourbody">
                   <p>A short walk of the platform on your own plan — about two minutes.</p>
-                  <div className="wtourbtns"><a className="wtbtn" href={"/" + slug + "/tour"}>Start the round</a></div>
+                  <div className="wtourbtns"><a className="wtbtn" href={tourHref(slug)}>Start the round</a></div>
                 </div>
               </details>
             )}

@@ -203,7 +203,6 @@
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
 <script src="BUILDER"></script>
-<script src="WIZARD"></script>
 <script src="PRESENT"></script>
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
@@ -424,8 +423,6 @@
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
-      { k:"wizard", ac:"c_units",  grp:"run", label:"Set-up", glyph:"◲", find:"wizard set up setup new client onboarding shape units functions terminology start first time",
-        when: function(){ return inOffice(); },                          render:renderWizard },
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
@@ -7804,80 +7801,17 @@
         fieldSaved(); paint();
       });
     });
-    /* ── THE CLIENT SET-UP WIZARD (§318, spec 044) ─────────────────
-       Every write here goes through a minter or a field the platform already
-       wires: `data-uname`, `data-coname`, `data-fname` and `data-fnformat`
-       are picked up by wireSetupFields(document) a few hundred lines above,
-       and the words step's cells are `input.lbl`, wired with the Terminology
-       page's own handler. What is left is navigation and the four adds. */
-    document.querySelectorAll("[data-wgo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!WIZ) WIZ = { at:0, seen:[] };
-        /* THE STEP YOU ARE LEAVING IS THE ONE YOU HAVE SEEN. Marked on the way
-           OUT rather than on the way in, so a step opened and abandoned by
-           pressing Back does not tick — and `seen` is the only thing an
-           optional step has to read, there being nothing in the graph to say
-           "this client has no companies" (spec 044 §3). */
-        if (WIZ.seen.indexOf(WIZ.at) < 0) WIZ.seen.push(WIZ.at);
-        WIZ.at = Math.max(0, Math.min(WIZ_LAST, +b.dataset.wgo));
-        paint(); window.scrollTo(0,0);
-      });
-    });
-    document.querySelectorAll("[data-wdone]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* CLOSING IS LEAVING THE PAGE, never a stored "finished" flag: the
-           wizard is derived from the data, so there is nothing to finish. */
-        WIZ = null;
-        currentSub = "overview";
-        leaveModes(); paint(); window.scrollTo(0,0);
-      });
-    });
-    document.querySelectorAll("input[data-worg]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* THE ONE FIELD THE PLATFORM HAD NO CONTROL FOR. `org` is stored
-           (state-io maps it to `org_name`) and read by the chrome, the deck
-           and every email, and nothing in the product could write it — it
-           arrived with the seed. The server classifies it as `group`, which
-           is the office's, so the screen and the save agree (§42, §172). */
-        GROUP.org = inp.value.trim() || GROUP.org;
-        paint();
-      });
-    });
-    document.querySelectorAll("input[data-wyear]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* Trimmed, and an emptied box CLEARS it rather than storing a space:
-           horizonSet() tests for a non-blank string, so " " would read as set
-           and print a dangling "by" (§50.6's shape, one field over). */
-        GROUP.horizon = inp.value.trim();
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        wizAdd(b.dataset.wadd, b.dataset.wfn || null);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wnoco]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* IT WRITES NOTHING, AND THAT IS THE ANSWER. "No companies" is the
-           absence of companies; the press records only that the question was
-           reached, so the step can tick (spec 044 §3). It is refused while a
-           company exists rather than deleting one behind the SMO's back. */
-        if (activeCompanyKeys().length) return;
-        if (!WIZ) WIZ = { at:0, seen:[] };
-        if (WIZ.seen.indexOf(WIZ.at) < 0) WIZ.seen.push(WIZ.at);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wdoor]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* ONE OPENER FOR THE PLAN BUILDER (§53.5, §253.3's lesson): the
-           wizard's door calls the chooser the Import page's door calls. */
-        if (b.dataset.wdoor === "plan") openBuilderChooser();
-      });
-    });
-
+    /* ── THE SET-UP FLOW LEFT (§322) ────────────────────────────────
+       §318 put it here, inside a client's Setup. Islam moved it out:
+       "the setup should happen on the external creatoin not inside ..
+       the wizard should start on the outside window so the people after
+       the setup can get intop the platform ready." It lives on Forefront's
+       own platform page now, so a client is shaped before anybody from it
+       has ever signed in — and the same flow in two places would be two
+       things to keep in step (§53.5). The rail entry, the Overview's door,
+       these handlers and wizard.js/.css are all deleted rather than left
+       unreachable (§24). Adding a unit afterwards is still Setup's own
+       Business units page. */
     /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
     /* ── THE DOOR KNOWS ITS SUBJECT (§304.2) ─────────────────────────
        It used to be one amber band on a page about files, so the first thing
@@ -8008,13 +7942,14 @@
   }
   function impFail(msg){
     IMP.check = { problems:[{ at:"the whole file", msg:msg }], notices:[] };
-    IMP.summary = null; IMP.diff = null; IMP.read = "";
+    IMP.summary = null; IMP.diff = null; IMP.read = ""; IMP.horizon = null;
     paint();
   }
 
   function loadCSV(text){
     IMP.done = null;
     IMP.text = text;
+    IMP.horizon = null;                       /* a CSV carries no Aspiration sheet */
     /* A plan arrives as a workbook, because a workbook has a Read me sheet and
        a plan file has to say which unit it is for. A flat CSV cannot say it,
        and guessing would write one unit's plan into another \u2014 the worst
@@ -8228,7 +8163,7 @@
     if (f) f.addEventListener("change", function(){
       if (grant("c_import") !== "edit") return;
       var file = f.files && f.files[0]; if (!file) return;
-      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null;
+      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null; IMP.horizon = null;
       if (/\.xlsx$/i.test(file.name)) {
         var rx = new FileReader();
         rx.onload = function(){
@@ -8331,6 +8266,11 @@
               } else {
                 var pu = impUnit();
                 var pRows = planFromWorkbook(pu, sheets);
+                /* READ HERE AND NOWHERE ELSE (§321): the reader attaches it to
+                   the array it returns, and it is lifted off immediately —
+                   an array property is a fragile channel and this is the only
+                   line that has to carry it. */
+                IMP.horizon = pRows.horizon;
                 readPlanRows(pRows, pu.name + " \u00b7 " + pRows.length + " rows");
               }
               return;
@@ -8354,7 +8294,7 @@
             paint();
           }).catch(function(e){
             IMP.check = { problems:[{ at:file.name, msg:"could not be read as a workbook \u2014 " + e.message }], notices:[] };
-            IMP.diff = null; IMP.summary = null; IMP.read = "";
+            IMP.diff = null; IMP.summary = null; IMP.read = ""; IMP.horizon = null;
             paint();
           });
         };
@@ -8413,6 +8353,17 @@
           what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
                  plural(inc.measures, "measure") + ", " +
                  plural(inc.tactics, "tactic") + " written.";
+          /* THE HORIZON IS APPLIED WITH THE PLAN AND NAMED WHEN IT MOVES
+             (§321). It is one year for the whole client, so a file that
+             changes it changes every other unit's "by <year>" — which is
+             exactly why it is said out loud rather than done quietly. A blank
+             or absent value leaves the stored one alone. */
+          if (horizonMoves(IMP.horizon)) {
+            var hWas = String(GROUP.horizon == null ? "" : GROUP.horizon).trim();
+            GROUP.horizon = String(IMP.horizon).trim();
+            what += " Horizon " + (hWas ? esc(hWas) + " \u2192 " : "set to ") +
+                    esc(GROUP.horizon) + ", across the whole client.";
+          }
           IMP.done = { unit:uu.name, key:uu.ukey, what:what, archived:arch };
         }
       } else {
@@ -8429,6 +8380,7 @@
         }
       }
       IMP.diff = null; IMP.summary = null; IMP.text = ""; IMP.check = null; IMP.read = "";
+      IMP.horizon = null;
       paint();
     });
 

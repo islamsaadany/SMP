@@ -1,6 +1,30 @@
 # 044 · Setting a client up, and a function that plans in objectives
 
-**Version:** v4.88 · **Decisions:** §318 · **Status:** answered; built; merged with `main`'s rebuild
+**Version:** v4.90 · **Decisions:** §318, §321, §322 · **Status:** answered; built; revised twice by Islam and merged
+
+> **REVISION 2 (2026-09-11) — WHAT THIS SPEC NO LONGER DESCRIBES.** Two of
+> Islam's corrections landed after the first build and neither is a detail:
+>
+> **The horizon left set-up** (§321) — *"why is the horizon is in the setup?
+> time is not relevant in the setup. the plan we upload will need this not the
+> setup."* So a plan's horizon arrives with the plan; §5's step list below
+> still names it and is stale on that one point.
+>
+> **Set-up happens on the OUTSIDE** (§322) — *"the setup should happen on the
+> external creatoin not inside … the wizard should start on the outside window
+> so the people after the setup can get intop the platform ready."* The flow
+> is Forefront's own page, reached from a client's card, and it REPLACED the
+> client settings page rather than sitting beside it. Wherever this spec says
+> Setup's first entry, read Forefront's platform page.
+>
+> **And a client is born empty** (§322): it used to be minted from §67's
+> *cleared* graph, which keeps the unit and function NAMES and empties their
+> content — right for a deployment that is already this client's, wrong for
+> one that has never existed, so every new client arrived wearing Raya Trade's
+> units.
+>
+> Recorded as revisions rather than rewritten into the body, so what was
+> signed off first is still readable beside what replaced it (Principle II).
 
 Islam: *"any Consultant who gets into the platform and adds a new client to set
 up this client he needs to go through a series of questions … is the company a

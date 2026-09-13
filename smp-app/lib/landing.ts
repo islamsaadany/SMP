@@ -7,6 +7,7 @@ import { createRequire } from "node:module";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { registerKeyFor } from "./state-api.ts";
+import { clientHref, DEFAULT_MODULE } from "./modules.ts";
 
 const frozen = createRequire(import.meta.url)("./frozen.cjs") as {
   landing: (graph: unknown, personKey: string) => Landing;
@@ -51,17 +52,28 @@ export async function landingFor(tenantId: string, personKey: string | null, ema
   return out;
 }
 
-/* A door's address inside this client: `/<slug>/<target>/<tab>`, a function
-   spelt `fn/<key>` because a colon in a path segment is nobody's friend.
-   Every page behind a door is the NEXT screen group's; the address is
-   already the one it will answer at. */
+/* A door's address inside this client: `/<slug>/<module>/<target>/<tab>`, a
+   function spelt `fn/<key>` because a colon in a path segment is nobody's
+   friend. Every door on the landing opens a STRATEGY page today, which is
+   why the module is the default one rather than a parameter — when a second
+   module puts a row on this screen, that row brings its own (spec 046 §7).
+
+   SETUP CARRIES NO MODULE: it is one page for the whole client, a Client
+   group and a group per module (spec 046 §4.5). */
 export function doorHref(slug: string, go: Door): string {
-  if (go.setup) return "/" + slug + "/setup/" + go.setup;
+  if (go.setup) return clientHref(slug, null, "setup/" + go.setup);
   const t = String(go.target || "group");
   const seg = t.startsWith("fn:") ? "fn/" + t.slice(3) : t;
-  return "/" + slug + "/" + seg + (go.tab ? "/" + go.tab : "") + (go.report ? "/reporting" : "");
+  return clientHref(slug, DEFAULT_MODULE, seg + (go.tab ? "/" + go.tab : "") + (go.report ? "/reporting" : ""));
 }
-/* The reverse, for the page that answers such an address. */
+/* The intro round, offered by the landing and therefore reached from the
+   spine (lib/modules.ts). */
+export function tourHref(slug: string): string { return clientHref(slug, null, "tour"); }
+/* The reverse, for a page that answers such an address. CALLERLESS since
+   Phase B replaced the holder pages with the shell's own route — recorded
+   rather than deleted here, because removing it is a tidy-up and not this
+   change (§24 against §2b). If it is given a caller it must be handed the
+   rest INSIDE the module (lib/modules.ts whereOf), never the raw path. */
 export function targetOf(rest: string[]): string {
   if (rest[0] === "fn" && rest[1]) return "fn:" + rest[1];
   return rest[0] || "group";

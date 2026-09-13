@@ -113,6 +113,42 @@ would show it, and nobody asked for one.
 
 ---
 
+### Earlier, from the module sessions: **§321, §322 and §323 — merged to `main` 2026-09-12 on
+Islam's word**, from `claude/multitenant-onboarding-wizard-kvyfcc`. Three
+decisions on the set-up flow §318 built: **the horizon leaves set-up** (§321 —
+Islam: *"why is the horizon is in the setup? time is not relevant in the setup.
+the plan we upload will need this not the setup"*, so it arrives with the plan);
+**set-up happens on the outside and a client is born empty** (§322 — the flow
+moved to Forefront's own page, every row still minted by the platform's own
+minter, and a new client no longer arrives wearing Raya Trade's units, because
+§67's *cleared* graph keeps the names and empties the content — right for a
+deployment that is already this client's and wrong for one that never existed);
+and **a client is archived, and only then deleted** (§323 — *"we need an option
+to remove the client"*, then *"both, demo client is not removable, and the name
+is Archive not put aside"*). **Most of §323 was built and had no button**:
+`tenants.status` has read `'active' | 'retired'` since the table was written,
+`visibleClients()` already keeps a retired client off the cards and `door.ts`
+already turns its address away identically to a client that never existed — and
+nothing had ever set it, while `lib/tenant-delete.ts` had no caller outside its
+spike. §61's trap twice over. Delete is reachable from an archived client and
+nowhere else, which is the guard rather than a second confirmation. **Four
+faults were found by measuring**: the confirming button at 2.90:1 with its
+dark-mode override written outside its media query (§38.4, the mockup caught
+it); an archived card with no route to Settings, so Delete was unreachable
+(§61); a second page painted under the first on the way back, because
+`drawClients()` does not clear; and `canEdit` false for the first time in this
+product's life, which drew the read-only path and found a size band that lit
+under the pointer and stored nothing. **Not proved and said**: the server half
+has never spoken to a database in this session, so one real round trip and one
+real cascade are still owed. Checks: `client-archive` 52/0 and
+`client-setup-outside` 0 failures on **both** copies of the page,
+`client-card-modules` 15/0, `platform-cards` 19/0, `test-platform-rules` 60/0,
+`plan-horizon` 0 failures, the frozen sweep clean, the built file byte-identical
+to its sources.
+
+
+---
+
 ### Earlier: §333 — the demo no longer shows a capability that is not one
 
 Islam: *"finish the demo data yes."*

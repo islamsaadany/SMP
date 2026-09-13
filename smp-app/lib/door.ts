@@ -22,7 +22,7 @@ type Q = Pool | PoolClient;
 export const NO_SUCH_TENANT = "That client is not available.";
 export const NO_SUCH_STATUS = 404;
 
-export type Tenant = { id: string; key: string; name: string; kind: "client" | "demo"; status: string; made_here: boolean; mark: string | null };
+export type Tenant = { id: string; key: string; name: string; kind: "client" | "demo"; status: string; made_here: boolean; mark: string | null; modules?: unknown };
 export type Membership = { tenant_id: string; person_key: string; seat: "super" | "smoteam" | "none" };
 export type DoorAnswer =
   | { ok: true; tenant: Tenant; seat: Membership["seat"] | null; personKey: string | null }
@@ -59,7 +59,7 @@ async function platformAccess(c: Q): Promise<Record<string, Record<string, strin
   return rows.reduce((m, r) => { (m[r.role_key] ||= {})[r.area_key] = r.grant_; return m; }, {} as Record<string, Record<string, string>>);
 }
 export async function tenantByKey(c: Q, slug: string): Promise<Tenant | null> {
-  const r = await c.query("SELECT id, key, name, kind, status, made_here, mark FROM tenants WHERE key = $1 AND status = 'active'", [String(slug || "")]);
+  const r = await c.query("SELECT id, key, name, kind, status, made_here, mark, modules FROM tenants WHERE key = $1 AND status = 'active'", [String(slug || "")]);
   return r.rowCount ? r.rows[0] : null;
 }
 

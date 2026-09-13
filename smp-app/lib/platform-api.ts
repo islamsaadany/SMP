@@ -17,15 +17,23 @@ import type { SessionUser } from "./auth.ts";
 import { hashPassword } from "./auth.ts";
 import type { Tenant } from "./door.ts";
 import { withTenant } from "./tenant.ts";
-import { loadGraph } from "./state-io.ts";
+import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
+import { deleteTenant } from "./tenant-delete.ts";
+import { ownerPool } from "./db.ts";
+import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
 
 const require = createRequire(import.meta.url);
 /* the worked example the product generates (scripts/extract-state.js), at the
    repository's root beside the frozen sources it is made from */
 const SEED = join(process.cwd(), "..", "db", "seed-state.json");
 const FF = require("./platform-rules.cjs");
-const frozen = require("./frozen.cjs") as { cleared: (g: unknown) => unknown };
+const frozen = require("./frozen.cjs") as {
+  cleared: (g: unknown) => unknown;
+  bare: (g: unknown) => any;
+  shape: (g: unknown, a: unknown) => any;
+  holds: (g: unknown) => { plans: number; capabilities: number; units: number; functions: number };
+};
 
 type Q = Pool | PoolClient;
 export type Answer = { code: number; body: Record<string, unknown> };
@@ -35,9 +43,10 @@ const NO_CLIENT = "That client is not available.";
 
 type Account = { id: string; email: string; name: string; is_admin: boolean; kind: string; status: string };
 type World = { mine: { client_key: string; person_key: string; seat: string; tenant_id: string }[]; access: Record<string, Record<string, string>> };
-type ClientRow = Tenant & { industry: string; notes: string };
+type ClientRow = Tenant & { industry: string; notes: string; size: string;
+  archived_at: string | null; archived_by: string | null; modules?: unknown };
 
-const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, made_here";
+const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here, archived_at, archived_by, modules";
 async function clientByKey(c: Q, key: unknown): Promise<ClientRow | null> {
   if (!key) return null;
   const r = await c.query("SELECT " + CLIENT_COLS + " FROM tenants WHERE key = $1", [String(key)]);
@@ -99,9 +108,28 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       const facts = await factsFor(row);
       cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, mine: FF.isMine(world, row.key),
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
-        canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable });
+        canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable,
+        /* THE CARD'S DOORS (spec 046 §4.6a): one row per module this client
+           has, each with the one line that module says about it. Worked out
+           HERE and never on the page, so the console cannot spell a module
+           differently from the switch or from Setup (§53.5). */
+        modules: moduleRows(modulesFor(row.modules), facts) });
     }
-    return ok({ cards, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+    /* ── THE ARCHIVED BAND (§323) ────────────────────────────────────
+       Its own list, not a flag on the grid's: `visibleClients` keeps a
+       retired client off the cards and every other caller depends on that,
+       so widening it would change what "visible" means for all of them.
+       Drawn only for somebody who can bring one back (FF.archivedClients),
+       and carrying NO facts — an archived client's rows are not read, both
+       because nothing on the card says anything about them and because
+       reading every archived tenant's graph on every visit to this page is a
+       cost nobody asked for. */
+    const archived = FF.archivedClients(world, account, all).map((row: ClientRow) => ({
+      key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark,
+      at: row.archived_at, by: row.archived_by,
+      canConfig: FF.mayReadConfig(world, account, row)
+    }));
+    return ok({ cards, archived, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
   }
 
   /* ── Forefront's own people ── */
@@ -171,8 +199,63 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       register = await withTenant(row.id, async (c) => (await c.query(
         "SELECT key, name, role, extra->>'email' AS email, extra->>'forefront' AS ff FROM people WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows);
     } catch (e) { console.error("reading " + row.key + "'s register:", (e as Error).message); }
+    /* ── THE SHAPE THE SET-UP FLOW OPENS WITH (§322) ──────────────────
+       Read from the stored graph, so opening a client afterwards shows the
+       answers that are actually in it rather than what somebody typed last
+       time — there is no draft, and the data IS the progress (§129). Read
+       beside the register in the same transaction, and allowed to fail the
+       same way: a client whose graph cannot be read still opens its card. */
+    let shape: unknown = null, holds: unknown = null;
+    try {
+      const g = await withTenant(row.id, (c) => readState(c));
+      holds = frozen.holds(g);
+      shape = {
+        companies: (g.companyKeys || []).map((k: string) => ({ name: g.companies[k].name })),
+        units: (g.unitKeys || []).map((k: string) => ({
+          name: g.units[k].name,
+          company: g.units[k].company && g.companies[g.units[k].company]
+            ? g.companies[g.units[k].company].name : "" })),
+        functions: (g.functionKeys || []).map((k: string) => ({
+          name: g.functions[k].name, format: g.functions[k].format === "pillars" ? "pillars" : "projects" })),
+        words: (g.labels || []).reduce((o: Record<string, string>, e: { key: string; bu: string }) => {
+          o[e.key] = e.bu; return o; }, {})
+      };
+    } catch (e) { console.error("reading " + row.key + "'s shape:", (e as Error).message); }
+    /* ── WHAT A DELETE WOULD TAKE (§323) ──────────────────────────────
+       Counted from the client's own rows at the moment of asking, never
+       written from memory, so the sentence in front of the one irreversible
+       press names what is actually there. Read ONLY for a client that is
+       already archived — that is the only place Delete exists, and reading
+       five counts for every card's Settings would be paying for a screen
+       almost nobody opens. A count that cannot be read is NULL and the page
+       says so rather than printing a nought (§93: an error is not an
+       absence, and here it would read as "there is nothing to lose"). */
+    let goes: unknown = null;
+    if (row.status === "retired" && FF.mayDeleteClient(world, account, row)) {
+      try {
+        goes = await withTenant(row.id, async (c) => {
+          const n = async (tbl: string) => Number((await c.query("SELECT count(*)::int AS n FROM " + tbl)).rows[0].n);
+          const h = holds as { plans: number; capabilities: number; units: number; functions: number } | null;
+          return {
+            units: h ? h.units : null, functions: h ? h.functions : null,
+            plans: h ? h.plans : null, capabilities: h ? h.capabilities : null,
+            people: await n("people"), conversations: await n("chat_threads")
+          };
+        });
+      } catch (e) { console.error("counting " + row.key + "'s rows:", (e as Error).message); }
+    }
     const { id: _id, ...client } = row;
+    /* WHAT THIS CLIENT HAS, AND WHAT IT COULD BE GIVEN (spec 046 §4.5) —
+       both worked out on the server from lib/modules.ts, so the drawer draws
+       the list rather than holding one: a module added to MODULE_DEF appears
+       in this list the day it is built, and one that is not built is not
+       offered at all, because a switch for a module with nothing behind it
+       opens the Strategy platform wearing another name (§61). */
     return ok({ client, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
+      shape, holds, goes,
+      canArchive: FF.mayArchiveClient(world, account, row), canDelete: FF.mayDeleteClient(world, account, row),
+      modules: modulesFor(row.modules),
+      offer: offerable().map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note, always: k === DEFAULT_MODULE })),
       office: (await pool.query("SELECT email, name, is_admin FROM users WHERE kind = 'office' AND status = 'active' ORDER BY name")).rows });
   }
 
@@ -180,6 +263,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const row = await clientByKey(pool, body.key);
     if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
     if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's configuration is not yours to change.");
+    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§323, §42). The flow draws its
+       fields read-only; without this the promise is the screen's alone and a
+       console walks past it. Refused BY NAME, so the answer names the state
+       rather than the permission — they are not the same errand. */
+    if (row.status === "retired") return no(409, row.name + " is archived. Bring them back before changing anything.");
     let mark: string | null = null;
     if (typeof body.mark === "string") {
       if (body.mark === "") mark = "";
@@ -188,9 +276,176 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     }
     await pool.query(
       "UPDATE tenants SET name = COALESCE($2,name), industry = COALESCE($3,industry), notes = COALESCE($4,notes), " +
+      "size = COALESCE($6,size), " +
       "mark = CASE WHEN $5::text IS NULL THEN mark WHEN $5 = '' THEN NULL ELSE $5 END WHERE id = $1",
-      [row.id, body.name || null, body.industry == null ? null : String(body.industry), body.notes == null ? null : String(body.notes), mark]);
+      [row.id, body.name || null, body.industry == null ? null : String(body.industry), body.notes == null ? null : String(body.notes), mark,
+       body.size == null ? null : String(body.size)]);
     return ok({});
+  }
+
+  /* ── SETTING A CLIENT UP, FROM THE OUTSIDE (§322) ────────────────────
+     Islam: "the setup should happen on the external creatoin not inside ...
+     the wizard should start on the outside window so the people after the
+     setup can get intop the platform ready." So the shape a client has —
+     its companies, its business units, its supporting functions and how
+     each plans, and the words it uses — is written from Forefront's own
+     page, before anybody from the client has signed in.
+
+     EVERY ROW IS MINTED BY THE PLATFORM'S OWN MINTER (frozen.shape, running
+     addCompany · addBusinessUnit · addFunction in the frozen sources): a
+     unit created out here is byte for byte a unit created on Setup's own
+     page, and there is no second answer to what a unit is shaped like
+     (§53.5).
+
+     AND IT REFUSES A CLIENT THAT HAS ALREADY BEEN PLANNED. The answers ARE
+     the list, so this replaces the shapes — safe while a client is being
+     set up, and a way to lose real work once anybody has authored a pillar.
+     Asked of the STORED graph (§42), never of what the browser believes. */
+  if (action === "shapeClient") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's set-up is not yours to change.");
+    /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§323, §42). The flow draws its
+       fields read-only; without this the promise is the screen's alone and a
+       console walks past it. Refused BY NAME, so the answer names the state
+       rather than the permission — they are not the same errand. */
+    if (row.status === "retired") return no(409, row.name + " is archived. Bring them back before changing anything.");
+    const a = (body.shape || {}) as Record<string, unknown>;
+    const list = (k: string) => Array.isArray(a[k]) ? (a[k] as unknown[]).slice(0, 200) : [];
+    const answers = {
+      companies: list("companies"), units: list("units"), functions: list("functions"),
+      words: (a.words && typeof a.words === "object") ? a.words : {}
+    };
+    let held: { plans: number; capabilities: number } | null = null;
+    await withTenant(row.id, async (c) => {
+      const g = await readState(c);
+      held = frozen.holds(g);
+      if (held.plans || held.capabilities) return;
+      await loadGraph(c, frozen.shape(g, answers));
+    });
+    const h = held as { plans: number; capabilities: number } | null;
+    if (h && (h.plans || h.capabilities)) {
+      return no(409, "This client already has a plan in it — " +
+        (h.plans ? h.plans + " authored " + (h.plans === 1 ? "line" : "lines") : "") +
+        (h.plans && h.capabilities ? " and " : "") +
+        (h.capabilities ? h.capabilities + " " + (h.capabilities === 1 ? "capability" : "capabilities") : "") +
+        ". Set-up rewrites the units and functions, so it stops here rather than " +
+        "losing that. Change them on the client's own Setup pages instead.");
+    }
+    return ok({});
+  }
+
+  /* ── ARCHIVING A CLIENT, AND BRINGING ONE BACK (§323) ────────────────
+     Islam: "we need an option to remove the client" — "both, demo client is
+     not removable, and the name is Archive not put aside".
+
+     ONE ACTION, BOTH DIRECTIONS, because it is one right and one row: `on`
+     says which way. Two endpoints would be two places to forget the demo
+     client in.
+
+     THE STATE IS `status`, WHICH EVERYTHING DOWNSTREAM ALREADY READS —
+     door.ts turns an archived client's address away exactly as it turns away
+     one that never existed, and visibleClients keeps it off the cards. This
+     writes the one column and nothing else follows it around. The stored word
+     is `retired` and the label is "Archived" (§30.2, §65).
+
+     AND THE TWO FACTS ARE CLEARED ON THE WAY BACK, never left standing: they
+     describe the state the row is IN, so a live client carrying "archived 12
+     Sep by Islam" is a value nobody chose (§50.6). */
+  if (action === "archiveClient") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayArchiveClient(world, account, row)) {
+      return no(403, row.kind === "demo"
+        ? "The worked example is not archived — it is reseeded."
+        : "Archiving a client is the platform admin's.");
+    }
+    const on = body.on !== false;
+    if (on) {
+      await pool.query("UPDATE tenants SET status = 'retired', archived_at = now(), archived_by = $2 WHERE id = $1",
+        [row.id, account.email]);
+    } else {
+      await pool.query("UPDATE tenants SET status = 'active', archived_at = NULL, archived_by = NULL WHERE id = $1", [row.id]);
+    }
+    return ok({ status: on ? "retired" : "active" });
+  }
+
+  /* ── DELETING ONE ────────────────────────────────────────────────────
+     THREE THINGS STAND IN FRONT OF THIS, and all three are asked HERE rather
+     than on the screen (§42): the admin's right, the client being archived
+     ALREADY, and the name typed back. A rule the page keeps and the endpoint
+     does not is a rule anybody with a console can walk past.
+
+     THE NAME IS COMPARED AS IT IS STORED, trimmed at both ends and nothing
+     looser: a match that ignored case or spacing would be a smaller gate than
+     the one the screen promises, and this is the press it exists for.
+
+     IT RUNS ON THE OWNER POOL, AND THAT IS NOT A PREFERENCE. deleteTenant
+     proves the delete by counting every tenant-owned table back to zero, and
+     those tables are RLS-FORCED: as `smp_app`, with no tenant set, every one
+     of those counts reads nought whatever survived — the assertion would pass
+     because it could see nothing, which is the one way this check must never
+     fail (§113.8). The owner bypasses the policy, so the count is real.
+
+     EXPORTING FIRST IS THE CALLER'S STEP AND IT IS A PERSON'S, said on the
+     screen rather than done here: there is nowhere to put a copy that this
+     delete would not also reach. */
+  if (action === "deleteClient") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayArchiveClient(world, account, row)) {
+      return no(403, row.kind === "demo"
+        ? "The worked example is not deleted — it is reseeded."
+        : "Deleting a client is the platform admin's.");
+    }
+    if (!FF.mayDeleteClient(world, account, row)) {
+      return no(409, "Archive " + row.name + " first. Deleting is only offered on a client that is already archived.");
+    }
+    if (String(body.confirm || "").trim() !== String(row.name).trim()) {
+      return no(400, "Type the client's name exactly as it is written to confirm.");
+    }
+    const { counts } = await deleteTenant(ownerPool(), row.id);
+    console.log("[platform] " + account.email + " deleted " + row.key + " (" + row.name + ") — " +
+      Object.keys(counts).length + " tenant tables at zero");
+    return ok({ deleted: row.key });
+  }
+
+  /* ── TURNING A MODULE ON OR OFF FOR ONE CLIENT (spec 046 §4.5) ──────
+     Its own action rather than a field on saveClient, because it is a switch
+     and not a box: it takes effect on the press, the way adding somebody to
+     the team does, and there is nothing half-typed for a Save to rescue.
+
+     OFF HIDES AND FORGETS NOTHING (§44, three times in this project now: a
+     switch that destroys data is a delete with a friendly label). All this
+     writes is the list; whatever the module held is still there when it comes
+     back, and what leaves with it is the module's Setup group, which is the
+     point — a group whose pages have nothing behind them is worse than no
+     group (§61).
+
+     THE REFUSALS ARE THE RULE, NOT THE SCREEN'S: the default module cannot be
+     switched off, because it is where an address naming no module lands and a
+     client without it could not be opened at its own front door; and a module
+     that is not built cannot be switched on however the request is spelt. The
+     drawer draws neither control, and the server refuses both anyway — a
+     guard that only hides a control is decoration (§42, §44). */
+  if (action === "setModules") {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's configuration is not yours to change.");
+    /* AND AN ARCHIVED CLIENT IS READ, NOT EDITED (§323), here as well as on
+       saveClient and shapeClient — a rule kept at two of three doors is the
+       drift this project keeps recording (§53.5), and the third door is the
+       one somebody reaches with a console rather than with the drawer. */
+    if (row.status === "retired") return no(409, row.name + " is archived. Bring them back before changing anything.");
+    const key = String(body.module || "");
+    if (!isModule(key)) return no(400, "There is no such module.");
+    const on = body.on === true;
+    if (key === DEFAULT_MODULE) return no(400, MODULE_DEF[DEFAULT_MODULE].label + " is where a client lands, so it cannot be switched off.");
+    if (on && !MODULE_DEF[key].built) return no(400, MODULE_DEF[key].label + " is not built yet, so there is nothing to open.");
+    const have = modulesFor(row.modules).filter((k) => k !== key);
+    const next = on ? modulesFor([...have, key]) : have;
+    await pool.query("UPDATE tenants SET modules = $2::jsonb WHERE id = $1", [row.id, JSON.stringify(next)]);
+    return ok({ modules: next });
   }
 
   if (action === "createClient") {
@@ -200,13 +455,18 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const key = slugFor(body.key || name);
     if (!key) return no(400, "That name does not make an address.");
     if (await clientByKey(pool, key)) return no(400, "There is already a client at /" + key + ".");
-    /* THE ROW, THEN THE GRAPH IT STARTS WITH: a client's day one is §67's
-       cleared graph — the product's own clearedGraph() over the seed, loaded
-       into the new tenant by the loader (never the save). MADE HERE, so its
+    /* THE ROW, THEN THE GRAPH IT STARTS WITH — AND IT IS EMPTY (§322).
+       It used to be §67's cleared graph, which keeps the unit and function
+       NAMES and empties their content: right for migration 004, which clears
+       a deployment that is already this client's, and wrong for one that has
+       never existed. Islam: "the default create it's own units and functions
+       that's wrong there is not default. it should open blank if they want."
+       So `frozen.bare()` — the same clear with the shapes emptied too — and
+       the set-up flow writes what the client actually has. MADE HERE, so its
        register is the platform's to write into (§313.31). */
     const seed = JSON.parse(readFileSync(SEED, "utf8"));
-    const t = (await pool.query("INSERT INTO tenants (key, name, industry, notes, made_here) VALUES ($1,$2,$3,$4,true) RETURNING id",
-      [key, name, String(body.industry || ""), String(body.notes || "")])).rows[0];
+    const t = (await pool.query("INSERT INTO tenants (key, name, industry, notes, size, made_here) VALUES ($1,$2,$3,$4,$5,true) RETURNING id",
+      [key, name, String(body.industry || ""), String(body.notes || ""), String(body.size || "")])).rows[0];
     /* THE CLIENT'S OWN NAME, AND NOBODY ON ITS REGISTER. §67's cleared
        graph keeps the bootstrap SMO because a deployment with no way in is
        not a deployment (§21); on the shared schema the platform's admin
@@ -214,7 +474,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        card (setTeam) — so the register starts EMPTY, and the org is the
        client's. The unit and function names stay, as §67 left them, for
        Setup to rename. */
-    const g: any = frozen.cleared(seed);
+    const g: any = frozen.bare(seed);
     g.group.org = name;
     g.people = [];
     for (const k of g.functionKeys || []) if (g.functions[k]) g.functions[k].head = null;

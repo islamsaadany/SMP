@@ -25,9 +25,20 @@ CREATE TABLE tenants (
   status      text NOT NULL DEFAULT 'active',
   mark        text,                            -- PNG data URI only (§52)
   colors      jsonb NOT NULL DEFAULT '{}'::jsonb,
-  industry    text NOT NULL DEFAULT '',
+  industry    text NOT NULL DEFAULT '',       -- the standard GICS list (§322)
+  size        text NOT NULL DEFAULT '',       -- a band, never a headcount (§322)
   notes       text NOT NULL DEFAULT '',
   made_here   boolean NOT NULL DEFAULT false,  -- §313.31
+  -- §323: read beside status='retired', which is what "archived" is stored as.
+  -- NULL on a live client, and cleared again when one is brought back.
+  archived_at timestamptz,
+  archived_by text,                            -- the account's email, printed
+  -- WHICH MODULES THIS CLIENT HAS (spec 046 §4.5). The whole list, in the
+  -- client's own words, read back through lib/modules.ts modulesFor() —
+  -- which drops a word the code no longer knows and always returns the
+  -- default, so a list written months ago can never make a client
+  -- unopenable. Everybody starts on Strategy alone.
+  modules     jsonb NOT NULL DEFAULT '["strategy"]'::jsonb,
   created_at  timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT tenants_kind   CHECK (kind IN ('client','demo')),
   CONSTRAINT tenants_status CHECK (status IN ('active','retired'))

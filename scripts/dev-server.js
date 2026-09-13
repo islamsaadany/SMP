@@ -68,6 +68,21 @@ const CLIENT_RE = (function () {
 /* A CLIENT'S OWN DOOR (§313.36): /<client>/sign-in is the gate, dressed
    with that client's mark. Read from vercel.json like the client paths, so
    the local server and the deployment agree about where a door is. */
+/* A MODULE'S PATH (§320.2, spec 046 §7): /<client>/<module>/… is where every
+   page inside a client lives on the new stack. Read from vercel.json like the
+   client path and the door, so the local server and the deployment agree —
+   and derived from the SECOND platform rewrite, because CLIENT_RE above takes
+   the first and parses `/:name(pattern)` alone. On this stack it serves the
+   same file the bare client path does: the frozen platform has one module and
+   reads its client off the FIRST segment (sync.js clientSlug), so the extra
+   segment costs it nothing. */
+const MODULE_RE = (function () {
+  const r = (VERCEL.rewrites || [])
+    .filter(function (x) { return x.destination && /strategy-management-platform/.test(x.destination); })[1];
+  if (!r) return null;
+  const m = /^\/:[A-Za-z0-9_]+\((.*?)\)\/:[A-Za-z0-9_]+\((.*)\)$/.exec(r.source);
+  return m ? new RegExp("^/" + m[1] + "/(?:" + m[2] + ")$") : null;
+})();
 const DOOR_RE = (function () {
   const r = (VERCEL.rewrites || [])
     .filter(function (x) { return x.destination === "/index.html"; })[0];
@@ -102,6 +117,9 @@ http.createServer(function (req, res) {
   if (CLIENT_RE && url.pathname !== "/platform" && CLIENT_RE.test(url.pathname)) {
     p = path.join(ROOT, PLATFORM_FILE);
   }
+  if (MODULE_RE && MODULE_RE.test(url.pathname)) {
+    p = path.join(ROOT, PLATFORM_FILE);
+  }
   /* Forefront's own platform, at the clean path vercel.json rewrites — the
      same rule the client paths follow: what is tested here is what ships. */
   if (url.pathname === "/platform") p = path.join(ROOT, "platform.html");
@@ -114,4 +132,5 @@ http.createServer(function (req, res) {
   console.log("dev server on http://localhost:" + PORT);
   console.log("client paths: " + (CLIENT_RE ? CLIENT_RE.source : "(none in vercel.json)"));
   console.log("client doors: " + (DOOR_RE ? DOOR_RE.source : "(none in vercel.json)"));
+  console.log("module paths: " + (MODULE_RE ? MODULE_RE.source : "(none in vercel.json)"));
 });

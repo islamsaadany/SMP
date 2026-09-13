@@ -9806,8 +9806,19 @@ function functionCapCount(fnKey){ return capsOfFunction(fnKey).length; }
 function activeFunctionKeys(){
   return FUNCTION_KEYS.filter(function(k){ return FUNCTIONS[k].active !== false; });
 }
-function reachesCap(cap){ return !!cap.fn && reachesFn(cap.fn); }
-function capsReachable(){ return GROUP.capabilities.filter(reachesCap); }
+/* §335.4 · `capsReachable` WAS DECLARED TWICE, WITH TWO DIFFERENT BODIES.
+   This one asked whether the HOLDING FUNCTION is reachable; §334's, eight
+   thousand lines down, asks the rule (`grantAt("k_perf", "cap:<id>")`) so a
+   capability answers for itself. The later declaration wins by hoisting, so
+   the product was right — measured, `String(capsReachable)` on the built file
+   names the §334 body — and that is exactly §281's fault: a dead body wearing
+   a live name, where one reorder, or deleting the "wrong" copy, makes every
+   capability unreachable for every viewer in silence.
+
+   DELETED BY NAME AND MATCHED TEXT, NEVER BY LINE RANGE (§214), and
+   `reachesCap` goes with it because this was its only caller — checked, not
+   assumed. Not on `main`: this pair is the branch's own, so it is cleaned
+   before the merge rather than carried into it. */
 function unitsReachable(){
   return activeKeys().filter(reaches);
 }
@@ -13291,6 +13302,18 @@ function plural(n, word, many){
    leans on it has to read as though it were not there, rather than trailing a
    dangling "by". */
 function horizonSet(){ return !!String(GROUP.horizon == null ? "" : GROUP.horizon).trim(); }
+/* ── WHAT AN UPLOADED FILE SAYS ABOUT THE HORIZON (§321) ───────────────
+   Three answers, not two: the file did not carry the row (null), it carried
+   it empty (""), or it carried a year. The first two both mean LEAVE THE
+   STORED ONE ALONE, which is the rule the import has always had — what is
+   new is that the third one is applied with the plan and said out loud
+   rather than written the instant a file is opened. Asked by the preview
+   and by the Apply press, so the sentence and the write cannot disagree. */
+function horizonInFile(v){ return !!String(v == null ? "" : v).trim(); }
+function horizonMoves(v){
+  return horizonInFile(v) &&
+    String(v).trim() !== String(GROUP.horizon == null ? "" : GROUP.horizon).trim();
+}
 function horizonBy(){ return horizonSet() ? " by " + esc(GROUP.horizon) : ""; }
 function horizonLabel(){ return horizonSet() ? esc(GROUP.horizon) : "not set"; }
 
@@ -18205,8 +18228,18 @@ function yes(v){ return /^(y|yes|1|true|x|\u2713)$/i.test(String(v || "").trim()
    minted code is looked up by that name — and because a file holds exactly one
    unit, every pillar in the file is one of that unit's, so there is nothing to
    get wrong. */
+/* ── THE HORIZON IS READ HERE AND WRITTEN NOWHERE (§321) ───────────────
+   It used to be assigned straight to GROUP.horizon inside this function, and
+   this function runs the moment a FILE IS PICKED — before the preview is
+   read and before Apply is pressed. So opening a plan file to look at it
+   already moved the year, cancelling did not put it back, and nothing on any
+   screen said so; and there is ONE horizon for the whole client, so one
+   unit's file changed what every other unit's "by <year>" reads from.
+   It travels on the returned rows now (a property, read at the one call site
+   into IMP.horizon) and is written by the Apply press with everything else.
+   A blank still means "leave it alone", which is the rule it always had. */
 function planFromWorkbook(u, sheets){
-  var rows = [], pillarId = {}, n = 0;
+  var rows = [], pillarId = {}, n = 0, horizon = null;
   var mint = function(suffix){ return u.ukey + "-" + suffix; };
 
   sheetObjects(sheets["Pillars"]).forEach(function(r){
@@ -18229,7 +18262,7 @@ function planFromWorkbook(u, sheets){
 
   var aN = 0;
   sheetObjects(sheets["Aspiration"]).forEach(function(r){
-    if (/horizon/i.test(r["Field"] || "")) { GROUP.horizon = r["Text"] || GROUP.horizon; return; }
+    if (/horizon/i.test(r["Field"] || "")) { horizon = r["Text"] || ""; return; }
     if (!r["Text"]) return;
     rows.push({ id:mint("ASP" + (++aN)), type:"ASPIRATION",
                 name:r["Field"], description:r["Text"] });
@@ -18291,12 +18324,19 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
-  return rows.map(function(r){
+  var out = rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
      "theme","kind","notes","group","hidden","monthly"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
+  /* NOT A ROW: every row here is a plan line the builder creates, and the
+     horizon is a fact about the whole client. It rides beside them and is
+     read at the one call site (shell.html) into IMP.horizon — never further,
+     so no later filter or copy can silently drop it. `null` is "the file did
+     not say"; "" is "the file said nothing"; both leave the stored one. */
+  out.horizon = horizon;
+  return out;
 }
 
 function progressFromWorkbook(u, sheets){
@@ -34401,6 +34441,21 @@ function renderImportUpload(){
         '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
         '<tr><td>Recorded now</td><td>' + (hasPlan ? had : "nothing yet") + '</td></tr>' +
       '</tbody></table></div>' +
+      /* ── THE ONE THING IN THE FILE THAT IS NOT THIS UNIT'S (§321) ─────
+         Said before Apply, in the warning ground, because it is the only
+         value in a plan workbook that reaches OUTSIDE the unit the file is
+         for: one horizon, group-wide, so this file moves what every other
+         unit's "by <year>" reads from. Drawn only when it actually moves —
+         a file carrying the year already stored says nothing, which is the
+         normal round trip and must not nag (§41). */
+      (horizonMoves(IMP.horizon)
+        ? '<div class="note attn-note"><b>This file also moves the horizon &mdash; ' +
+          (horizonSet() ? esc(String(GROUP.horizon)) + ' &rarr; ' : 'to ') +
+          esc(String(IMP.horizon).trim()) + '.</b> ' +
+          'There is one horizon for the whole client, so every &ldquo;by &lt;year&gt;&rdquo; ' +
+          'on every other ' + esc(L("pillar", "bu").toLowerCase()) + ' page moves with it. ' +
+          'Leave the Horizon cell on the Aspiration sheet empty and the stored year is kept.</div>'
+        : '') +
       (hasPlan
         ? '<div class="note"><b>' + esc(u.name) + '’s current plan' +
           (cur.reported
@@ -34662,24 +34717,14 @@ function renderOverview(){
      empty state says it in words one line down (§108.10). */
   var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
 
-  /* ── THE DOOR ON THE LANDING PAGE (§318, spec 044) ────────────────────
-     Islam's placement, with the rail entry: a loud door here as well, and
-     ONLY while nothing has been shaped yet. Once the client has units the
-     rail entry is the way in, and a second shouting door on the page the gear
-     lands on would be a control competing with the queue it sits above
-     (§94.15). It is the plan builder's own `.bdoor`, because it is the same
-     kind of thing in the same kind of place (§53.5) — a guided flow offered
-     beside the page's ordinary work. */
-  var setupdoor = wizTenantBare()
-    ? '<div class="bdoor wzdoorbig"><b>Set this client up</b>' +
-        '<span class="bwhy">Nothing has been shaped yet. A guided flow through the ' +
-        'client&rsquo;s name, its year, its business units, its supporting functions and ' +
-        'the words it uses &mdash; then straight into the plans.</span>' +
-        '<button class="bprim" data-setupgo="wizard">Start set-up</button></div>'
-    : "";
-
+  /* ── AND THE DOOR WENT WITH IT (§322) ──────────────────────────────
+     §318 put a "Set this client up" door here, drawn only while the client
+     was bare. The flow it opened lives on Forefront's own platform page now
+     (Islam: "the wizard should start on the outside window"), where a client
+     is shaped BEFORE anybody from it signs in — so by the time somebody is
+     reading this Overview there is nothing left for that door to offer, and
+     a door to a page that no longer exists is worse than none (§61). */
   return cfgHead("Overview", [], null, false, null, null, "") +
-    setupdoor +
     '<div class="ovcols">' +
       '<div class="ovmain">' +
         '<div class="ovh">Waiting on the office' +
@@ -37856,478 +37901,6 @@ function builderReviewHtml(target){
       'Gaps stay findable on the pages' + (gaps.length ? '' : ' — and there are none') + '.</p>' +
     '<div class="bfacts"><button class="bprim" data-bdone="1">Finish building</button>' +
     '<button class="blink" data-brvback="1">Keep building</button></div>';
-}
-
-/* ── wizard.js ── */
-/* ══ SETTING A CLIENT UP (§318, spec 044) ═══════════════════════════════
-
-   Islam: *"any Consultant who gets into the platform and adds a new client to
-   set up this client he needs to go through a series of questions … there
-   needs to be a buildup of some sort of wizard that builds with the Consultant
-   showing him some sort of visuals so he can see what this means and what this
-   looks like."* Drawn first and signed off from
-   `design-mockups/onboarding-wizard/2026-09-07_set-up-a-client.html`.
-
-   FOUR DECISIONS SHAPE EVERYTHING HERE, all his:
-
-   · A MARCH FOR THE SHAPE, A MAP AFTER. The steps run in an order because
-     they cascade — you cannot name a function's capabilities before the
-     function exists — but every one is openable from the rail at any time.
-     Once the shape is set the CONTENT is the plan builder (§129), which is a
-     map; this wizard deliberately stops at its door.
-
-   · IT BUILDS UP RATHER THAN INTERROGATES: *"the wizard should be dynamic in a
-     way that accepts a build up of these different setups, allocation, naming
-     type of plans for each."* Units, functions and a function's capabilities
-     are lists you add to, and every function carries its own plan type — so
-     one client runs both plan types at once.
-
-   · LIVE IMMEDIATELY, NOTHING STORED. Every answer writes to the graph as it
-     is given, exactly as a pen edit does. `WIZ` holds which step is open and
-     nothing else: it is a screen mode, never state-graph content (§25, §47.1),
-     and progress is DERIVED from the data — so pausing costs nothing, there is
-     no draft flag for anybody to forget to clear, and the shape drawn on the
-     right cannot fall out of step with the answers, because there is no second
-     copy of them (§129's rule, applied one level up).
-
-   · WHAT THE PLATFORM CANNOT DO YET IS DRAWN AND DULLED. Islam: *"keep the
-     mockup as is but kepe the non existing parts dull for now"*, and *"don't
-     build things that doesn't exist now in the platform … i will take it to
-     another discussion to build what's missing."* So the capabilities step and
-     the third plan type are DRAWN, inert, and each says *Later*. This is a
-     deliberate exception to §61/§94.15 — a control with nothing behind it is
-     normally furniture — taken on his instruction, and its cost is stated: the
-     consultant meets two greyed choices. Every one of them names itself, which
-     is the one thing a greyed control must do or it reads as broken.
-
-   AND NOTHING HERE WRITES THROUGH A SECOND DOOR (§53.5). Units, companies,
-   functions and capabilities are minted by `addBusinessUnit`, `addCompany`,
-   `addFunction` and `addCapability` — the same minters Setup and the plan
-   builder use — and every FIELD carries the attribute the platform's own
-   Setup wiring already looks for (`data-uname`, `data-ucomp`, `data-fname`,
-   `data-fnformat`, `input.lbl`), so the writer is the platform's rather than
-   a copy of it. The wizard is a guided way through Setup, not a second store.
-
-   WHAT THIS FILE IS AND IS NOT. It holds the wizard's state, its HTML and its
-   data logic. It never calls paint(), never touches `current`, the modal or
-   any other shell-closure state: the shell owns navigation and wires the
-   `data-w*` attributes this file's HTML carries, exactly as it does the
-   builder's `data-b*`. */
-
-var WIZ = null;          /* { at, seen:[] } while the wizard is open */
-
-var WIZ_STEPS = [
-  { k:"client", key:"The organisation", label:"The client",     q:"Which client are you setting up?" },
-  { k:"year",   key:"The organisation", label:"The year",       q:"Which year is this plan for?" },
-  { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
-  { k:"cos",    key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?", optional:1 },
-  { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?", later:1 },
-  { k:"fns",    key:"Strategy",         label:"Functions",      q:"What supporting functions are there?", optional:1 },
-  { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?", optional:1 },
-  { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?", optional:1 },
-  { k:"done",   key:"Done",             label:"Summary",        q:"" }
-];
-var WIZ_LAST = WIZ_STEPS.length - 1;
-
-/* THE TWO PLAN TYPES THE PLATFORM ACTUALLY HAS, and the one it does not.
-   Read from `fnFormat`'s own two values (config-data.js) rather than written
-   out again; the third carries `later:0` and is drawn disabled. */
-var WIZ_FORMATS = [
-  { v:"pillars",    label:"Pillars",
-    why:"The same shape a business unit has &mdash; pillars, key measures and tactics. Its plan sits on the function itself.",
-    live:1 },
-  { v:"projects",   label:"Capabilities &amp; projects",
-    why:"The function holds capabilities; each capability holds projects, with deliverables, outcomes and milestones.",
-    live:1 },
-  { v:"objectives", label:"Objectives &amp; actions",
-    why:"Objectives measured like a key measure, actions under them with a due date, and requirements raised on other functions.",
-    live:0 }
-];
-var WIZ_LATER = "Not built yet — a separate discussion.";
-
-/* ── Where the wizard is, and whether it is here ──────────────────────── */
-function wizOpen(){ return !!WIZ; }
-function wizAt(){ return WIZ ? WIZ.at : 0; }
-function wizStep(){ return WIZ_STEPS[wizAt()] || WIZ_STEPS[0]; }
-function wizSeen(i){ return !!(WIZ && WIZ.seen.indexOf(i) > -1); }
-
-/* A TENANT NOBODY HAS SHAPED YET. The Overview's loud door is drawn only
-   while this is true — once there are units, the rail entry is the way in and
-   a second shouting door on the landing page would be furniture (§94.15). */
-function wizTenantBare(){ return !UNIT_KEYS.length && !FUNCTION_KEYS.length; }
-
-/* ── PROGRESS IS DERIVED, NEVER STORED (§129) ─────────────────────────
-   A step is answered when the DATA says so. The optional steps — a client may
-   legitimately have no companies and no functions — fall back to "you have
-   been here", because there is nothing to read and an eternally unticked step
-   reads as unfinished work that does not exist. */
-function wizAnswered(i){
-  var s = WIZ_STEPS[i];
-  if (!s || s.later) return false;
-  if (s.k === "client") return !!String(GROUP.org || "").trim();
-  if (s.k === "year")   return horizonSet();
-  if (s.k === "units")  return UNIT_KEYS.length > 0;
-  if (s.k === "done")   return false;
-  return wizSeen(i);
-}
-
-/* ── The rail ─────────────────────────────────────────────────────────── */
-function wizRailHtml(){
-  return '<nav class="wzrail" aria-label="Set-up steps">' + WIZ_STEPS.map(function(s, i){
-    var here = i === wizAt(), done = !here && wizAnswered(i);
-    return '<button type="button" class="wzstep' + (done ? " done" : "") +
-      (s.later ? " wzlater" : "") + '" data-wgo="' + i + '"' +
-      (here ? ' aria-current="step"' : "") + '>' +
-      '<span class="wzn">' + (done ? "&#10003;" : (i + 1)) + '</span>' + esc(s.label) +
-      '</button>';
-  }).join("") + '</nav>';
-}
-
-/* ── A choice, with its own small drawing ─────────────────────────────── */
-var WIZ_PIC = {
-  pillars: '<span class="wzm navy"></span><span class="wzm row"><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="wzm thin"></span><span class="wzm thin"></span>',
-  projects:'<span class="wzm navy"></span><span class="wzm gold"></span><span class="wzm row"><i></i><i></i></span><span class="wzm row"><i></i><i></i><i></i></span>',
-  objs:    '<span class="wzm navy"></span><span class="wzm row"><i class="on"></i><i class="on"></i></span><span class="wzm thin"></span><span class="wzm row"><i></i><i></i><i></i></span>',
-  many:    '<span class="wzm navy"></span><span class="wzm row"><i class="on"></i><i class="on"></i><i class="on"></i></span>',
-  co:      '<span class="wzm gold"></span><span class="wzm row"><i class="on"></i><i class="on"></i></span><span class="wzm row"><i></i><i></i><i></i></span>'
-};
-function wizChoice(on, name, why, pic, attr){
-  return '<button type="button" class="wzchoice" aria-pressed="' + (on ? "true" : "false") + '"' +
-    (attr || "") + '><span class="wzpic">' + pic + '</span>' +
-    '<span><span class="wzcname">' + name + '<span class="wztick">&#10003;</span></span>' +
-    '<span class="wzcwhy">' + why + '</span></span></button>';
-}
-/* ITS OWN BUILDER, NEVER A FLAG ON wizChoice (§61): a dulled option is inert
-   by construction — a `<div>` with no handler to reach — rather than a button
-   that stays pressable the day somebody forgets to check the flag. */
-function wizChoiceLater(name, why, pic){
-  return '<div class="wzchoice wzlater" aria-disabled="true"><span class="wzpic">' + pic + '</span>' +
-    '<span><span class="wzcname">' + name + '<span class="wztag">Later</span></span>' +
-    '<span class="wzcwhy">' + why + '</span></span></div>';
-}
-
-/* THE PLAN-TYPE CONTROL IS THE FUNCTIONS PAGE'S OWN, NOT A SECOND ONE.
-   The first build wrote its own select here and dropped two things
-   `planFormatCell` carries: the tenant's own word for a pillar (L("pillar"))
-   and — the one that matters — the GUARD. A function that already holds
-   capabilities cannot become a pillars one and a function holding pillars
-   cannot go back, because switching would not delete the work, it would stop
-   DRAWING it, which is worse. That control shows the reason and disables
-   itself; mine would have offered the switch and let the page silently stop
-   rendering somebody's plan. §53.5 caught in the act: two controls for one
-   decision, and the newer one forgot why the older one was careful.
-
-   The third plan type is therefore NOT on this select — it is not a real
-   answer, and §61 says an option that cannot be taken does not belong on the
-   control that takes them. It is drawn, dulled and named in the choice cards
-   below, which is where the explanation lives. */
-
-/* ── Each step's body ─────────────────────────────────────────────────── */
-function wizBodyHtml(){
-  var k = wizStep().k;
-
-  if (k === "client")
-    return '<div class="wzfields"><div class="wzfield">' +
-      '<label for="wz-org">The client&rsquo;s name</label>' +
-      '<input id="wz-org" type="text" class="fld" data-worg="1" value="' + esc(GROUP.org || "") + '">' +
-      '<span class="wzhint">What the platform is named after, everywhere &mdash; the chrome, ' +
-      'the review deck and every email that leaves.</span></div></div>';
-
-  if (k === "year")
-    return '<div class="wzfields"><div class="wzfield">' +
-      '<label for="wz-yr">The plan runs to</label>' +
-      '<input id="wz-yr" type="text" class="fld mono yr" data-wyear="1" value="' +
-        esc(GROUP.horizon == null ? "" : GROUP.horizon) + '">' +
-      '<span class="wzhint">The horizon every 3-year target is measured against. ' +
-      'Left blank, the platform reads as though there were none rather than trailing a dangling ' +
-      '&ldquo;by&rdquo;.</span></div></div>';
-
-  if (k === "units")
-    return (UNIT_KEYS.length
-      ? '<div class="wzrows">' + UNIT_KEYS.map(function(u){
-          return '<div class="wzrow"><span class="wznm">' +
-            '<input type="text" class="fld" data-uname="' + esc(u) + '" value="' + esc(UNITS[u].name) + '">' +
-            '</span><span class="wzrt"><span class="wzcode">' + esc(UNITS[u].codePrefix) + '</span>' +
-            '</span></div>'; }).join("") + '</div>'
-      : '<p class="wzempty">No business units yet.</p>') +
-      '<button class="wzadd" type="button" data-wadd="unit">+ Add a business unit</button>' +
-      '<p class="wzwhy">A unit plans in pillars, with key measures and tactics under each. ' +
-      'The code is minted from the name and prefixes every pillar on it.</p>';
-
-  if (k === "cos"){
-    var cos = activeCompanyKeys();
-    return '<div class="wzchoices">' +
-      wizChoice(!cos.length, "No &mdash; the units sit directly under " + esc(GROUP.org || "the group"),
-        "One less layer to explain. Companies can be added later without touching a single plan.",
-        WIZ_PIC.many, ' data-wnoco="1"') +
-      wizChoice(cos.length > 0, "Yes &mdash; group them into companies",
-        "A company holds several units and decides who can see across them. It carries no plan and no score of its own.",
-        WIZ_PIC.co, ' data-wadd="co"') +
-      '</div>' +
-      (cos.length
-        ? '<div class="wzrows" style="margin-top:14px">' + cos.map(function(c){
-            return '<div class="wzrow"><span class="wznm">' +
-              '<input type="text" class="fld" data-coname="' + esc(c) + '" value="' + esc(COMPANIES[c].name) + '">' +
-              '</span><span class="wzrt"><span class="wzcode">' +
-              plural(unitsOfCompany(c).length, "unit") + '</span></span></div>'; }).join("") +
-          '</div>' +
-          '<div class="wzwhy" style="margin-top:12px">Which company each unit belongs to is set beside ' +
-          'the unit on Setup &rsaquo; Business units &mdash; one field, one place (§130.6).</div>'
-        : "");
-  }
-
-  if (k === "caps")
-    return '<p class="wzwhy" style="margin-top:0">A capability is strategic work that sits beside the ' +
-      'business units, planned in pillars, and owned by a function head.</p>' +
-      '<div class="wzlaterline"><b>' + WIZ_LATER + '</b> The platform has capabilities today only ' +
-      'underneath a function that plans in capabilities and projects &mdash; not as their own entry on the ' +
-      'strategic side. Drawn here so the whole shape reads; it does nothing yet.</div>' +
-      '<div class="wzrows wzlater" style="margin-top:12px">' +
-      '<div class="wzrow"><span class="wznm">A capability beside the units</span>' +
-      '<span class="wzrt"><span class="wztag">Later</span></span></div></div>';
-
-  if (k === "fns")
-    return (FUNCTION_KEYS.length
-      ? FUNCTION_KEYS.map(function(fk){
-          var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
-          var h = '<div class="wzrow"><span class="wznm">' +
-            '<input type="text" class="fld" data-fname="' + esc(fk) + '" value="' + esc(f.name) + '">' +
-            '</span><span class="wzrt"><span class="wzkey">plans in</span>' +
-            planFormatCell(fk, f, true) + '</span></div>';
-          if (fnFormat(f) === "projects")
-            h += '<div class="wznest">' +
-              (caps.length
-                ? caps.map(function(c){
-                    return '<div class="wznestrow"><span class="wzdot"></span>' + esc(c.name) + '</div>'; }).join("")
-                : '<div class="wznestrow wzquiet">No capabilities yet</div>') +
-              '<button class="wzadd wznestadd" type="button" data-wadd="cap" data-wfn="' + esc(fk) + '">' +
-              '+ Add a capability to ' + esc(f.name) + '</button></div>';
-          return h;
-        }).join("")
-      : '<p class="wzempty">No supporting functions yet. A client can have none.</p>') +
-      '<button class="wzadd" type="button" data-wadd="fn">+ Add a supporting function</button>' +
-      '<div class="wzkey" style="margin-top:20px">What each plan type means</div>' +
-      '<div class="wzchoices" style="margin-top:8px">' +
-      WIZ_FORMATS.map(function(f){
-        return f.live
-          ? wizChoice(false, f.label, f.why, f.v === "pillars" ? WIZ_PIC.pillars : WIZ_PIC.projects)
-          : wizChoiceLater(f.label, f.why + " <b>Not built yet.</b>", WIZ_PIC.objs);
-      }).join("") + '</div>';
-
-  if (k === "words") return wizWordsHtml();
-
-  if (k === "office"){
-    var office = PEOPLE.filter(function(p){
-      return p.active !== false && personRoleKeys(p).some(SMPRules.isOfficeRole);
-    });
-    return (office.length
-      ? '<div class="wzrows">' + office.map(function(p){
-          return '<div class="wzrow"><span class="wznm">' + esc(p.name) + '</span>' +
-            '<span class="wzrt"><span class="wzkey">' +
-            personRoleKeys(p).filter(SMPRules.isOfficeRole).map(roleName).join(" &middot; ") +
-            '</span></span></div>'; }).join("") + '</div>'
-      : '<p class="wzempty">Nobody holds an office seat yet.</p>') +
-      '<button class="wzadd" type="button" data-setupgo="people">' +
-      'Open the People register &rsaquo;</button>' +
-      '<p class="wzwhy">Seats are given on the register, which is the one door onto a person ' +
-      '(§87: who a row IS is asked in one place, and a second adder here would be a second ' +
-      'answer to it). Unit heads, custodians and function heads are given their roles there too.</p>';
-  }
-
-  return wizSummaryHtml();
-}
-
-/* ── THE WORDS, GENERATED FROM THE SHAPE (Islam: "this needs to be dynamic
-   as each client has it's own naming") ─────────────────────────────────
-   The platform's own eight label entries, each with the reason it is being
-   asked about THIS client — and the rows a client's shape does not use are
-   not drawn at all. The cells carry `class="lbl" data-lbl data-scope`, which
-   is what the Terminology page's own writer looks for, so the wizard changes
-   where the question is asked and nothing about how the answer is stored. */
-function wizWordsHtml(){
-  var anyProj = FUNCTION_KEYS.some(function(fk){ return fnFormat(FUNCTIONS[fk]) === "projects"; });
-  var why = {
-    theme:      "The group's standing columns",
-    pillar:     UNIT_KEYS.length ? "Every business unit plans in these" : "Used once a unit exists",
-    keyobj:     "A unit's own scorecard",
-    aspiration: "On the group and on every unit",
-    purpose:    "The group holds this alone",
-    values:     "The group holds this alone",
-    measure:    "Under a pillar",
-    tactic:     "Under a pillar"
-  };
-  var rows = LABELS.entries.map(function(e, i){
-    return { e:e, i:i, why:why[e.key] || "" };
-  });
-  var cell = function(e, i, which){
-    if (e[which] === "—") return '<td><span class="pill none">Not held</span></td>';
-    return '<td><input class="lbl fld" data-lbl="' + i + '" data-scope="' + which +
-      '" value="' + esc(e[which]) + '" aria-label="' + esc(e.internal) + ' at ' + which + '"></td>';
-  };
-  return '<div class="wztbl"><table><thead><tr>' +
-      '<th style="width:24%">What it is</th><th style="width:23%">At the group</th>' +
-      '<th style="width:23%">At a unit</th><th style="width:30%">Where it is used here</th>' +
-    '</tr></thead><tbody>' +
-    rows.map(function(r){
-      return '<tr><td><b>' + esc(r.e.internal) + '</b></td>' +
-        cell(r.e, r.i, "group") + cell(r.e, r.i, "bu") +
-        '<td class="wzours">' + esc(r.why) + '</td></tr>';
-    }).join("") +
-    (anyProj
-      ? '<tr class="wzlater"><td><b>Capability</b> <span class="wztag">Later</span></td>' +
-        '<td colspan="2"><span class="wzours">Named on Setup &rsaquo; Capabilities</span></td>' +
-        '<td class="wzours">A function plans in capabilities</td></tr>'
-      : "") +
-    '</tbody></table></div>' +
-    '<p class="wzwhy">Two words for each thing, because the group and a unit often call it ' +
-    'differently. This is the Terminology page&rsquo;s own table, asked once here with the reason ' +
-    'beside it &mdash; every word stays editable there afterwards.</p>';
-}
-
-/* ── The summary, and the two doors ───────────────────────────────────── */
-function wizSummaryHtml(){
-  var cos = activeCompanyKeys();
-  var lines = [
-    ["The client",     String(GROUP.org || "").trim() || "Not named yet", 0],
-    ["The year",       horizonSet() ? String(GROUP.horizon) : "Not set", 1],
-    ["Business units", UNIT_KEYS.length
-        ? UNIT_KEYS.map(function(k){ return UNITS[k].name; }).join(" · ") : "None yet", 2],
-    ["Companies",      cos.length
-        ? cos.map(function(c){ return COMPANIES[c].name; }).join(" · ")
-        : "None — units sit under " + (GROUP.org || "the group"), 3],
-    ["Functions",      FUNCTION_KEYS.length
-        ? FUNCTION_KEYS.map(function(fk){
-            return FUNCTIONS[fk].name + " (" + fnFormat(FUNCTIONS[fk]) + ")"; }).join(" · ")
-        : "None", 5],
-    ["The words",      plural(LABELS.entries.length, "word") + " set", 6],
-    ["The office",     (function(){
-        var o = PEOPLE.filter(function(p){
-          return p.active !== false && personRoleKeys(p).some(SMPRules.isOfficeRole); });
-        return o.length ? o.map(function(p){ return p.name; }).join(" · ") : "Nobody yet";
-      })(), 7]
-  ];
-  return '<div class="wzsumm">' + lines.map(function(l){
-      return '<div class="wzsline"><span class="wzsk">' + esc(l[0]) + '</span>' +
-        '<span class="wzsv">' + esc(l[1]) + '</span>' +
-        '<button type="button" class="wzed" data-wgo="' + l[2] + '">Change</button></div>';
-    }).join("") + '</div>' +
-    '<div class="wzkey">Where to now</div>' +
-    '<div class="wzdoors">' +
-      '<button class="wzdoor" type="button" data-wdoor="plan">' +
-        '<span class="wzdn">Start the plans</span>' +
-        '<span class="wzdw">Open the plan builder and author the first pillar.</span></button>' +
-      /* THE PLATFORM'S OWN NAVIGATION, not a second one (§53.5): `data-setupgo`
-         is what every other jump into a Setup page uses, and it clears the
-         rail's filter and leaves open modes on the way (§108.13). */
-      '<button class="wzdoor" type="button" data-setupgo="people">' +
-        '<span class="wzdn">Bring the people in</span>' +
-        '<span class="wzdw">Open the register, add the heads and custodians, and issue their ' +
-        'passwords.</span></button>' +
-    '</div>';
-}
-
-/* ── THE SHAPE, DRAWN FROM THE SAME DATA THE STEPS WRITE ──────────────
-   Never from a copy of the answers: the chips cannot disagree with the graph
-   because there is nothing else for them to read. It uses the product's own
-   navigation switch so it reads as the thing being built. */
-function wizShapeHtml(){
-  var at = wizAt();
-  var h = '<div class="wzorg"><span class="wzonm">' +
-    esc(String(GROUP.org || "").trim() || "The client") + '</span>' +
-    (horizonSet() ? '<span class="wzoyr">to ' + esc(GROUP.horizon) + '</span>' : "") + '</div>';
-
-  if (!UNIT_KEYS.length && !FUNCTION_KEYS.length)
-    return h + '<div class="wzstem"></div><div class="wzquiet">Its units come next.</div>';
-
-  h += '<div class="wzstem"></div><div class="wzswitch"><span class="on">Strategic</span>' +
-       '<span>Functions</span></div>';
-
-  h += '<div class="wzside"><div class="wzsidekey">Business units ' +
-    '<span class="wzct">' + UNIT_KEYS.length + '</span></div>' +
-    (UNIT_KEYS.length
-      ? '<div class="wzchips">' + UNIT_KEYS.map(function(k){
-          return '<span class="wzchip unit">' + esc(UNITS[k].name) +
-            '<span class="wzfmt">pillars</span></span>'; }).join("") + '</div>'
-      : '<div class="wzquiet">None yet</div>') + '</div>';
-
-  if (activeCompanyKeys().length)
-    h += '<div class="wzside"><div class="wzsidekey">Companies ' +
-      '<span class="wzct">' + activeCompanyKeys().length + '</span></div>' +
-      '<div class="wzchips">' + activeCompanyKeys().map(function(c){
-        return '<span class="wzchip co">' + esc(COMPANIES[c].name) + '</span>'; }).join("") +
-      '</div></div>';
-
-  if (at >= 5)
-    h += '<div class="wzside"><div class="wzsidekey">Supporting functions ' +
-      '<span class="wzct">' + FUNCTION_KEYS.length + '</span></div>' +
-      (FUNCTION_KEYS.length
-        ? '<div class="wzchips">' + FUNCTION_KEYS.map(function(fk){
-            var f = FUNCTIONS[fk], n = capsOfFunction(fk).length;
-            return '<span class="wzchip fn">' + esc(f.name) +
-              '<span class="wzfmt">' + fnFormat(f) + '</span>' +
-              (fnFormat(f) === "projects" && n
-                ? '<span class="wzown">' + plural(n, "cap") + '</span>' : "") +
-              '</span>'; }).join("") + '</div>'
-        : '<div class="wzquiet">None</div>') + '</div>' +
-      '<div class="wzbeneath">' +
-        '<div class="wzbrow"><span class="wzb" style="background:var(--panel)"></span>' +
-          'A unit holds pillars, key measures and tactics</div>' +
-        '<div class="wzbrow"><span class="wzb" style="background:var(--good)"></span>' +
-          'A function plans in pillars, or holds capabilities and projects</div>' +
-      '</div>';
-
-  return h;
-}
-
-/* ── The page ─────────────────────────────────────────────────────────── */
-function renderWizard(){
-  if (!WIZ) WIZ = { at:0, seen:[] };
-  var s = wizStep(), at = wizAt();
-  var why = "";
-  if (s.k === "fns")  why = "Each function plans its own way, and it stays changeable until that " +
-                            "function has a plan in it.";
-  if (s.k === "caps") why = "";
-  if (s.k === "done") why = "Everything below stays editable in Setup. Nothing here is locked.";
-
-  return cfgHead("Set-up", null, null, false) +
-    '<div class="wzhead">' +
-      '<span class="wzprog">' + (at === WIZ_LAST ? "Finished" : ("Step " + (at + 1) + " of " + WIZ_LAST)) + '</span>' +
-    '</div>' +
-    wizRailHtml() +
-    '<div class="wzgrid"><section class="wzcol">' +
-      '<div class="wzkey">' + esc(s.key) + '</div>' +
-      '<h3 class="wzq">' + esc(s.k === "done"
-        ? (String(GROUP.org || "").trim() || "The client") + " is set up." : s.q) + '</h3>' +
-      (why ? '<p class="wzwhy wztop">' + esc(why) + '</p>' : "") +
-      '<div class="wzbody">' + wizBodyHtml() + '</div>' +
-      '<div class="wzfoot">' +
-        (at > 0 ? '<button class="editbtn" type="button" data-wgo="' + (at - 1) + '">Back</button>' : "") +
-        (at < WIZ_LAST
-          ? '<button class="bprim" type="button" data-wgo="' + (at + 1) + '">Next</button>'
-          : '<button class="bprim" type="button" data-wdone="1">Close set-up</button>') +
-        '<span class="wznote">Nothing is final &mdash; every answer stays editable in Setup ' +
-        'afterwards.</span>' +
-      '</div>' +
-    '</section>' +
-    '<aside class="wzshape" aria-label="What you are building">' +
-      '<h4>What you are building</h4>' +
-      '<p class="wzcap">' + (UNIT_KEYS.length || FUNCTION_KEYS.length
-        ? esc(String(GROUP.org || "The client").trim()) + ", as answered so far."
-        : "It fills in as you answer.") + '</p>' +
-      wizShapeHtml() +
-    '</aside></div>';
-}
-
-/* ── The writes ───────────────────────────────────────────────────────
-   Each one goes through the platform's own minter. `wizAdd` is the ONE place
-   a row is created here, so a fifth kind cannot be added by a route that
-   forgets the minter (§104.7). */
-function wizAdd(kind, fnKey){
-  if (kind === "unit") return addBusinessUnit("", "", null);
-  if (kind === "co")   return addCompany();
-  if (kind === "fn")   return addFunction("New function " + (FUNCTION_KEYS.length + 1), "pillars");
-  if (kind === "cap")  return fnKey ? addCapability(fnKey) : null;
-  return null;
 }
 
 /* ── present.js ── */
@@ -50410,8 +49983,6 @@ var SYNC = (function () {
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
-      { k:"wizard", ac:"c_units",  grp:"run", label:"Set-up", glyph:"◲", find:"wizard set up setup new client onboarding shape units functions terminology start first time",
-        when: function(){ return inOffice(); },                          render:renderWizard },
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
@@ -57790,80 +57361,17 @@ var SYNC = (function () {
         fieldSaved(); paint();
       });
     });
-    /* ── THE CLIENT SET-UP WIZARD (§318, spec 044) ─────────────────
-       Every write here goes through a minter or a field the platform already
-       wires: `data-uname`, `data-coname`, `data-fname` and `data-fnformat`
-       are picked up by wireSetupFields(document) a few hundred lines above,
-       and the words step's cells are `input.lbl`, wired with the Terminology
-       page's own handler. What is left is navigation and the four adds. */
-    document.querySelectorAll("[data-wgo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!WIZ) WIZ = { at:0, seen:[] };
-        /* THE STEP YOU ARE LEAVING IS THE ONE YOU HAVE SEEN. Marked on the way
-           OUT rather than on the way in, so a step opened and abandoned by
-           pressing Back does not tick — and `seen` is the only thing an
-           optional step has to read, there being nothing in the graph to say
-           "this client has no companies" (spec 044 §3). */
-        if (WIZ.seen.indexOf(WIZ.at) < 0) WIZ.seen.push(WIZ.at);
-        WIZ.at = Math.max(0, Math.min(WIZ_LAST, +b.dataset.wgo));
-        paint(); window.scrollTo(0,0);
-      });
-    });
-    document.querySelectorAll("[data-wdone]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* CLOSING IS LEAVING THE PAGE, never a stored "finished" flag: the
-           wizard is derived from the data, so there is nothing to finish. */
-        WIZ = null;
-        currentSub = "overview";
-        leaveModes(); paint(); window.scrollTo(0,0);
-      });
-    });
-    document.querySelectorAll("input[data-worg]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* THE ONE FIELD THE PLATFORM HAD NO CONTROL FOR. `org` is stored
-           (state-io maps it to `org_name`) and read by the chrome, the deck
-           and every email, and nothing in the product could write it — it
-           arrived with the seed. The server classifies it as `group`, which
-           is the office's, so the screen and the save agree (§42, §172). */
-        GROUP.org = inp.value.trim() || GROUP.org;
-        paint();
-      });
-    });
-    document.querySelectorAll("input[data-wyear]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* Trimmed, and an emptied box CLEARS it rather than storing a space:
-           horizonSet() tests for a non-blank string, so " " would read as set
-           and print a dangling "by" (§50.6's shape, one field over). */
-        GROUP.horizon = inp.value.trim();
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        wizAdd(b.dataset.wadd, b.dataset.wfn || null);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wnoco]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* IT WRITES NOTHING, AND THAT IS THE ANSWER. "No companies" is the
-           absence of companies; the press records only that the question was
-           reached, so the step can tick (spec 044 §3). It is refused while a
-           company exists rather than deleting one behind the SMO's back. */
-        if (activeCompanyKeys().length) return;
-        if (!WIZ) WIZ = { at:0, seen:[] };
-        if (WIZ.seen.indexOf(WIZ.at) < 0) WIZ.seen.push(WIZ.at);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-wdoor]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* ONE OPENER FOR THE PLAN BUILDER (§53.5, §253.3's lesson): the
-           wizard's door calls the chooser the Import page's door calls. */
-        if (b.dataset.wdoor === "plan") openBuilderChooser();
-      });
-    });
-
+    /* ── THE SET-UP FLOW LEFT (§322) ────────────────────────────────
+       §318 put it here, inside a client's Setup. Islam moved it out:
+       "the setup should happen on the external creatoin not inside ..
+       the wizard should start on the outside window so the people after
+       the setup can get intop the platform ready." It lives on Forefront's
+       own platform page now, so a client is shaped before anybody from it
+       has ever signed in — and the same flow in two places would be two
+       things to keep in step (§53.5). The rail entry, the Overview's door,
+       these handlers and wizard.js/.css are all deleted rather than left
+       unreachable (§24). Adding a unit afterwards is still Setup's own
+       Business units page. */
     /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
     /* ── THE DOOR KNOWS ITS SUBJECT (§304.2) ─────────────────────────
        It used to be one amber band on a page about files, so the first thing
@@ -57994,13 +57502,14 @@ var SYNC = (function () {
   }
   function impFail(msg){
     IMP.check = { problems:[{ at:"the whole file", msg:msg }], notices:[] };
-    IMP.summary = null; IMP.diff = null; IMP.read = "";
+    IMP.summary = null; IMP.diff = null; IMP.read = ""; IMP.horizon = null;
     paint();
   }
 
   function loadCSV(text){
     IMP.done = null;
     IMP.text = text;
+    IMP.horizon = null;                       /* a CSV carries no Aspiration sheet */
     /* A plan arrives as a workbook, because a workbook has a Read me sheet and
        a plan file has to say which unit it is for. A flat CSV cannot say it,
        and guessing would write one unit's plan into another \u2014 the worst
@@ -58214,7 +57723,7 @@ var SYNC = (function () {
     if (f) f.addEventListener("change", function(){
       if (grant("c_import") !== "edit") return;
       var file = f.files && f.files[0]; if (!file) return;
-      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null;
+      IMP.kind = kind; IMP.diff = null; IMP.summary = null; IMP.done = null; IMP.horizon = null;
       if (/\.xlsx$/i.test(file.name)) {
         var rx = new FileReader();
         rx.onload = function(){
@@ -58317,6 +57826,11 @@ var SYNC = (function () {
               } else {
                 var pu = impUnit();
                 var pRows = planFromWorkbook(pu, sheets);
+                /* READ HERE AND NOWHERE ELSE (§321): the reader attaches it to
+                   the array it returns, and it is lifted off immediately —
+                   an array property is a fragile channel and this is the only
+                   line that has to carry it. */
+                IMP.horizon = pRows.horizon;
                 readPlanRows(pRows, pu.name + " \u00b7 " + pRows.length + " rows");
               }
               return;
@@ -58340,7 +57854,7 @@ var SYNC = (function () {
             paint();
           }).catch(function(e){
             IMP.check = { problems:[{ at:file.name, msg:"could not be read as a workbook \u2014 " + e.message }], notices:[] };
-            IMP.diff = null; IMP.summary = null; IMP.read = "";
+            IMP.diff = null; IMP.summary = null; IMP.read = ""; IMP.horizon = null;
             paint();
           });
         };
@@ -58399,6 +57913,17 @@ var SYNC = (function () {
           what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
                  plural(inc.measures, "measure") + ", " +
                  plural(inc.tactics, "tactic") + " written.";
+          /* THE HORIZON IS APPLIED WITH THE PLAN AND NAMED WHEN IT MOVES
+             (§321). It is one year for the whole client, so a file that
+             changes it changes every other unit's "by <year>" — which is
+             exactly why it is said out loud rather than done quietly. A blank
+             or absent value leaves the stored one alone. */
+          if (horizonMoves(IMP.horizon)) {
+            var hWas = String(GROUP.horizon == null ? "" : GROUP.horizon).trim();
+            GROUP.horizon = String(IMP.horizon).trim();
+            what += " Horizon " + (hWas ? esc(hWas) + " \u2192 " : "set to ") +
+                    esc(GROUP.horizon) + ", across the whole client.";
+          }
           IMP.done = { unit:uu.name, key:uu.ukey, what:what, archived:arch };
         }
       } else {
@@ -58415,6 +57940,7 @@ var SYNC = (function () {
         }
       }
       IMP.diff = null; IMP.summary = null; IMP.text = ""; IMP.check = null; IMP.read = "";
+      IMP.horizon = null;
       paint();
     });
 
@@ -59817,9 +59343,17 @@ var SYNC = (function () {
    The frozen shell has no addresses: it opens where the person works
    (§94.6) and remembers where they were across a refresh in sessionStorage
    (§173's `smp.where`, a destination · a tab · a section). On the new stack a
-   page IS an address — /<client>/<target>/<tab>[/<section>] — because the
-   landing's doors point at one (§315) and a link somebody sends has to open
-   the page it names.
+   page IS an address — /<client>/<module>/<target>/<tab>[/<section>] —
+   because the landing's doors point at one (§315) and a link somebody sends
+   has to open the page it names.
+
+   THE MODULE IS NOT A LIST HELD HERE (spec 046 §7). The document is stamped
+   `data-module` by the server, which owns the list (lib/modules.ts), and this
+   writes that word back into every address it pushes — so a module added
+   tomorrow needs no edit in the browser. What IS this file's own vocabulary
+   is which destinations belong to the SPINE and carry no module: `setup`,
+   one page for the whole client (spec 046 §4.5), and the intro round, both
+   of which kindOf() and placeOf() already had to name.
 
    So this does two things and nothing else:
      · on arrival, the address becomes §173's remembered place, so the
@@ -59843,6 +59377,7 @@ var SYNC = (function () {
   if (!m) return;
   if (document.documentElement.getAttribute("data-break") === "no-route") return;   /* the check's break */
   var SLUG = m[1];
+  var MODULE = document.documentElement.getAttribute("data-module") || "";
   /* tab words in the address ↔ tab keys in SUBS; a function's Strategy and
      Performance keys are its own (fnstrat, fnperf), the group's and a
      company's are `performance` and their own pages */
@@ -59850,8 +59385,13 @@ var SYNC = (function () {
                  reporting: { unit: "report", fn: "report" } };
   var TAB_OUT = { strategy: "strategy", fnstrat: "strategy", performance: "performance", fnperf: "performance", report: "reporting" };
   function kindOf(d) { return d === "group" ? "group" : d === "setup" ? "setup" : /^fn:/.test(d) ? "fn" : /^co:/.test(d) ? "co" : "unit"; }
+  /* The path after the client's slug, whichever address this is asked of. */
+  function restOf(path) { return String(path || "").replace(/^\/[^/]+\/?/, ""); }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
+    /* the module leads every address but the spine's; `setup` and `tour` are
+       the spine's own words and are read where they stand */
+    if (MODULE && seg[0] === MODULE) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
@@ -59872,13 +59412,104 @@ var SYNC = (function () {
   function addressOf(d, s, c) {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
-    var out = "/" + SLUG + "/" + seg;
+    /* Setup is the client's, not a module's (spec 046 §4.5), so it is the one
+       destination whose address carries no module word. */
+    var out = "/" + SLUG + (MODULE && kind !== "setup" ? "/" + MODULE : "") + "/" + seg;
     if (s) out += "/" + (kind === "setup" || kind === "group" ? s : (TAB_OUT[s] || s));
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
+  /* ── THE MODULE SWITCHER (spec 046, E1 — signed off 2026-09-11) ──────
+     The four-square mark at the far left of the top bar, opening the list of
+     modules this client has with the one you are in marked.
+
+     IT IS BUILT HERE AND NOT IN THE FROZEN SHELL, for the reason that decides
+     whether it is drawn at all: a module list only exists where there is a
+     server to say which ones a client has. The offline copy (§306) is the
+     built file with one tenant's graph baked in and no server behind it, so a
+     switcher in the frozen shell would be a control that could never open
+     anything (§61). Its SHAPE is in arrange.css beside the family it belongs
+     to (`details.dlmenu`), because a stylesheet is inert either way.
+
+     DRAWN ONLY WHERE THERE IS A CHOICE. `data-modules` is written by the
+     server only for a client holding more than one (lib/shell.ts), so a menu
+     of one is never built — that is a door behind a door (§32) — and the
+     ABSENT attribute is what says so, rather than a flag beside it (§50.6).
+
+     THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
+     one answer to what the switcher lists, read by this and by the trial
+     module's own bar (§53.5): a label worked out here by capitalising a key
+     is how two screens come to spell one module differently.
+
+     IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
+     inside, and that drawing's `.brand` was a flex ROW while the product's is
+     a COLUMN — copying the markup would have stranded the mark on a line of
+     its own above the product's name. `.top-in` is already a row and
+     `.brand` carries `margin-right:auto`, so first-in-the-row is the top left
+     (§296.1: measure the paint, never the cascade).
+
+     NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
+     BELOW this one and nothing rewrites `.top-in`, so the markup is built and
+     wired exactly once, at load — no second handler on a repaint (§24, §47.2).
+     A press navigates, so the menu never has to be closed afterwards. */
+  (function modules() {
+    var raw = document.documentElement.getAttribute("data-modules");
+    if (!raw) return;                               /* one module: no choice to offer */
+    var list;
+    try { list = JSON.parse(raw); } catch (e) { return; }
+    if (!Array.isArray(list) || list.length < 2) return;
+    var bar = document.querySelector(".top .top-in");
+    if (!bar || bar.querySelector(".topmark")) return;
+
+    var d = document.createElement("details");
+    d.className = "dlmenu topmark";
+    var here = list.filter(function (m) { return m && m.key === MODULE; })[0];
+    var sum = document.createElement("summary");
+    sum.setAttribute("title", here ? "Modules — you are in " + here.label : "Modules");
+    sum.setAttribute("aria-label", sum.getAttribute("title"));
+    /* DRAWN, NEVER A FONT CHARACTER (§52): a glyph the subset does not carry
+       ships as a blank box, and this mark has no word beside it to recover
+       from that. */
+    sum.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+      '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
+      '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
+      '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
+      "</g></svg>";
+    d.appendChild(sum);
+
+    var menu = document.createElement("div");
+    menu.className = "menu";
+    menu.setAttribute("role", "menu");
+    list.forEach(function (m) {
+      if (!m || !m.key) return;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("role", "menuitem");
+      b.dataset.module = m.key;
+      if (m.key === MODULE) b.setAttribute("aria-current", "true");
+      b.appendChild(document.createTextNode(m.label || m.key));
+      if (m.note) {
+        var sub = document.createElement("span");
+        sub.className = "dlsub";
+        sub.appendChild(document.createTextNode(m.note));
+        b.appendChild(sub);
+      }
+      menu.appendChild(b);
+    });
+    /* ONE LISTENER ON THE MENU, not one per item — and the module you are
+       ALREADY in does nothing rather than reloading the page under somebody
+       (§61's other half: a control that appears to act and does not). */
+    menu.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-module]") : null;
+      if (!b || b.dataset.module === MODULE) return;
+      location.assign("/" + SLUG + "/" + b.dataset.module);
+    });
+    d.appendChild(menu);
+    bar.insertBefore(d, bar.firstChild);
+  })();
+
   /* ── on arrival: the address is the place ── */
-  var here = placeOf(m[2]);
+  var here = placeOf(m[2] || "");
   try {
     sessionStorage.setItem("smp.welcome.done", "1");
     if (here && !here.tour && here.d) {
@@ -59917,7 +59548,7 @@ var SYNC = (function () {
     paint = function () { var r = painted.apply(this, arguments); try { sync(true); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
-    var st = ev.state || placeOf(String(location.pathname).replace(/^\/[^/]+\/?/, ""));
+    var st = ev.state || placeOf(restOf(location.pathname));
     if (!st || !st.d || typeof current === "undefined") return;
     last = location.pathname;
     current = st.d; currentSub = st.s || null;
